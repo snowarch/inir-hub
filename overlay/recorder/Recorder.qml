@@ -72,7 +72,7 @@ StyledOverlayWidget {
                     name: Translation.tr("Screenshot region")
                     onClicked: {
                         GlobalStates.overlayOpen = false;
-                        Quickshell.execDetached(["qs", "-p", Quickshell.shellPath(""), "ipc", "call", "region", "screenshot"]);
+                        Quickshell.execDetached(["qs", "-c", "ii", "ipc", "call", "region", "screenshot"]);
                     }
                 }
 
@@ -95,7 +95,7 @@ StyledOverlayWidget {
                             Quickshell.execDetached([Directories.recordScriptPath]);
                         } else {
                             GlobalStates.overlayOpen = false;
-                            Quickshell.execDetached(["qs", "-p", Quickshell.shellPath(""), "ipc", "call", "region", "recordWithSound"]);
+                            Quickshell.execDetached(["qs", "-c", "ii", "ipc", "call", "region", "recordWithSound"]);
                         }
                     }
                     property bool isFullscreenRecording: false

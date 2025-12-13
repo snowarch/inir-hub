@@ -69,22 +69,13 @@ Rectangle {
             StyledSlider {
                 id: slider
                 Layout.fillWidth: true
+                configuration: StyledSlider.Configuration.S
                 value: root.node?.audio.volume ?? 0
                 onMoved: {
                     if (root.node === Audio.sink) {
                         Audio.setSinkVolume(value)
                     } else if (root.node?.audio) {
                         root.node.audio.volume = value
-                    }
-                }
-                configuration: StyledSlider.Configuration.S
-                // Sync when volume changes externally
-                Connections {
-                    target: root.node?.audio ?? null
-                    function onVolumeChanged() {
-                        if (!slider.pressed) {
-                            slider.value = root.node?.audio.volume ?? 0
-                        }
                     }
                 }
             }
