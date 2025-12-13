@@ -64,7 +64,8 @@ FooterRectangle {
                     TimerService.resetPomodoro();
                 } else {
                     TimerService.togglePomodoro();
-                    Quickshell.execDetached(["qs", "-p", Quickshell.shellPath(""), "ipc", "call", "sidebarRight", "toggle"]);
+                    // Close notification center instead of toggling sidebar
+                    GlobalStates.waffleNotificationCenterOpen = false;
                 }
             }
         }

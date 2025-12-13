@@ -36,18 +36,7 @@ ColumnLayout {
             value: root.brightnessMonitor?.brightness ?? 0
             scrollable: true
             tooltipContent: `${Math.round(value * 100)}%`
-            onMoved: {
-                root.brightnessMonitor?.setBrightness(value)
-            }
-            // Sync when brightness changes externally (keybinds)
-            Connections {
-                target: root.brightnessMonitor ?? null
-                function onBrightnessChanged() {
-                    if (!brightnessSlider.pressed) {
-                        brightnessSlider.value = root.brightnessMonitor?.brightness ?? 0
-                    }
-                }
-            }
+            onMoved: root.brightnessMonitor?.setBrightness(value)
         }
 
         WPanelIconButton {
@@ -68,18 +57,7 @@ ColumnLayout {
             Layout.fillWidth: true
             value: Audio.sink?.audio?.volume ?? 0
             scrollable: true
-            onMoved: {
-                Audio.setSinkVolume(value)
-            }
-            // Sync when volume changes externally (keybinds, other apps)
-            Connections {
-                target: Audio.sink?.audio ?? null
-                function onVolumeChanged() {
-                    if (!volumeSlider.pressed) {
-                        volumeSlider.value = Audio.sink?.audio?.volume ?? 0
-                    }
-                }
-            }
+            onMoved: Audio.setSinkVolume(value)
         }
 
         WPanelIconButton {

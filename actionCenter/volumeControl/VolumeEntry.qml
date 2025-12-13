@@ -65,17 +65,8 @@ RowLayout {
         onMoved: {
             if (root.node === Audio.sink) {
                 Audio.setSinkVolume(value)
-            } else {
+            } else if (root.node?.audio) {
                 root.node.audio.volume = value
-            }
-        }
-        // Sync when volume changes externally
-        Connections {
-            target: root.node?.audio ?? null
-            function onVolumeChanged() {
-                if (!volumeSlider.pressed) {
-                    volumeSlider.value = root.node?.audio.volume ?? 0
-                }
             }
         }
     }
