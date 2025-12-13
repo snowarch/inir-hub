@@ -18,8 +18,8 @@ BarIconButton {
     required property SystemTrayItem item
     property var trayParent: null  // Reference to Tray for closing other menus
     property alias menuOpen: menu.visible
-    readonly property bool barAtBottom: Config.options.waffles.bar.bottom
-    readonly property bool tintIcons: Config.options.waffles.bar.tintTrayIcons
+    readonly property bool barAtBottom: Config.options?.waffles?.bar?.bottom ?? false
+    readonly property bool tintIcons: Config.options?.waffles?.bar?.tintTrayIcons ?? false
 
     iconScale: 0
     Component.onCompleted: {

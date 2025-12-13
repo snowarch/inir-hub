@@ -32,7 +32,7 @@ WBarAttachedPanelContent {
         }
     }
 
-    readonly property bool barAtBottom: Config.options.waffles.bar.bottom
+    readonly property bool barAtBottom: Config.options?.waffles?.bar?.bottom ?? false
 
     contentItem: ColumnLayout {
         anchors {

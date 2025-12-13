@@ -14,7 +14,7 @@ Loader {
 
     required property var contentItem
     property real padding: Looks.radius.large - Looks.radius.medium
-    property bool noSmoothClosing: !Config.options.waffles.tweaks.smootherMenuAnimations
+    property bool noSmoothClosing: !(Config.options?.waffles?.tweaks?.smootherMenuAnimations ?? true)
     property bool closeOnFocusLost: true
     property bool closeOnHoverLost: true  // Close when mouse leaves both popup and anchor
     property bool anchorHovered: false  // Set by parent to indicate if anchor button is hovered
@@ -22,7 +22,7 @@ Loader {
     
     property Item anchorItem: parent
     property real visualMargin: 12
-    readonly property bool barAtBottom: Config.options.waffles.bar.bottom
+    readonly property bool barAtBottom: Config.options?.waffles?.bar?.bottom ?? false
     property bool popupBelow: false  // Force popup to appear below anchor
     property real ambientShadowWidth: 1
 
