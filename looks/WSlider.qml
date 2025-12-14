@@ -12,50 +12,44 @@ Slider {
     property real trackWidth: 4
     property string tooltipContent: `${Math.round(value * 100)}`
     property bool scrollable: false
+    property bool _userInteracting: false
     stepSize: 0.02
     leftPadding: 0
     rightPadding: 0
 
+    Timer {
+        id: _userInteractingReset
+        interval: 180
+        repeat: false
+        onTriggered: root._userInteracting = false
+    }
+
     implicitHeight: handle.implicitHeight
 
-    // Track if user is interacting to prevent binding from overwriting
-    property bool _userInteracting: false
-
-    Behavior on value {
-        enabled: !root._userInteracting // Disable animation during user interaction
+    Behavior on value { // This makes the adjusted value (like volume) shift smoothly
         SmoothedAnimation {
             velocity: Looks.transition.velocity
         }
     }
 
-    // Emit moved() for both drag AND click-to-seek
-    onPressedChanged: {
-        if (pressed) {
-            root._userInteracting = true
-        } else {
-            // User released - emit moved with final value
-            root._userInteracting = false
-            root.moved()
-        }
-    }
-
-    background: Item {
+    background: MouseArea {
         id: background
         anchors.fill: parent
 
-        WheelHandler {
-            id: wheelHandler
-            target: background
-            enabled: root.scrollable
-            acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
-            onWheel: (event) => {
-                root._userInteracting = true
-                if (event.angleDelta.y > 0) {
-                    root.value = Math.min(root.value + root.stepSize, 1)
-                } else if (event.angleDelta.y < 0) {
-                    root.value = Math.max(root.value - root.stepSize, 0)
-                }
-                root._userInteracting = false
+        onWheel: (event) => {
+            if (!root.scrollable) {
+                event.accepted = false;
+                return;
+            }
+            root._userInteracting = true
+            _userInteractingReset.restart()
+
+            const step = root.stepSize > 0 ? root.stepSize : 0.02
+            if (event.angleDelta.y > 0) {
+                root.value = Math.min(root.value + step, root.to)
+                root.moved()
+            } else {
+                root.value = Math.max(root.value - step, root.from)
                 root.moved()
             }
         }
