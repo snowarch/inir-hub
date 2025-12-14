@@ -69,8 +69,17 @@ Rectangle {
             StyledSlider {
                 id: slider
                 Layout.fillWidth: true
-                configuration: StyledSlider.Configuration.S
                 value: root.node?.audio.volume ?? 0
+                configuration: StyledSlider.Configuration.S
+                property real modelValue: root.node?.audio.volume ?? 0
+                to: (root.node === Audio.sink) ? Audio.uiMaxSinkVolume : 1
+
+                Binding {
+                    target: slider
+                    property: "value"
+                    value: slider.modelValue
+                    when: !slider.pressed && !slider._userInteracting
+                }
                 onMoved: {
                     if (root.node === Audio.sink) {
                         Audio.setSinkVolume(value)
