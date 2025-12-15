@@ -18,7 +18,21 @@ WBarAttachedPanelContent {
     revealFromSides: true
     revealFromLeft: true
 
-    readonly property bool barAtBottom: Config.options.waffles.bar.bottom
+    Component.onCompleted: {
+        if (GlobalStates.waffleWidgetsOpen)
+            ResourceUsage.ensureRunning()
+    }
+
+    Connections {
+        target: GlobalStates
+        function onWaffleWidgetsOpenChanged() {
+            if (GlobalStates.waffleWidgetsOpen) {
+                ResourceUsage.ensureRunning()
+            }
+        }
+    }
+
+    readonly property bool barAtBottom: Config.options?.waffles?.bar?.bottom ?? false
 
     contentItem: ColumnLayout {
         anchors {
@@ -576,7 +590,8 @@ WBarAttachedPanelContent {
                             iconName: "terminal"
                             label: Translation.tr("Terminal")
                             onClicked: {
-                                Quickshell.execDetached([Config.options.apps?.terminal ?? "foot"])
+                                const cmd = Config.options?.apps?.terminal ?? "foot"
+                                Quickshell.execDetached(["/usr/bin/fish", "-c", cmd])
                                 GlobalStates.waffleWidgetsOpen = false
                             }
                         }

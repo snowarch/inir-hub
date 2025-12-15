@@ -10,7 +10,7 @@ Item {
     required property string iconName
     property bool separateLightDark: false
     property bool tryCustomIcon: true
-    property bool monochrome: Config.options.waffles.bar.monochromeIcons
+    property bool monochrome: Config.options?.waffles?.bar?.monochromeIcons ?? false
     
     property real implicitSize: 26
     implicitWidth: implicitSize

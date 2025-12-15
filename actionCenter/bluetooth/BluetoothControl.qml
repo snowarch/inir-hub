@@ -86,6 +86,7 @@ Item {
 
                     model: ScriptModel {
                         values: [...(Bluetooth.defaultAdapter?.devices.values ?? [])].sort((a, b) => {
+                            // Connected -> paired -> others
                             const conn = (b.connected - a.connected) || (b.paired - a.paired);
                             if (conn !== 0) return conn;
                             return a.name.localeCompare(b.name);

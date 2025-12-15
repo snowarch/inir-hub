@@ -11,7 +11,7 @@ import qs.modules.waffle.looks
 AppButton {
     id: root
 
-    leftInset: Config.options.waffles.bar.leftAlignApps ? 12 : 0
+    leftInset: (Config.options?.waffles?.bar?.leftAlignApps ?? false) ? 12 : 0
     iconName: down ? "start-here-pressed" : "start-here"
 
     checked: GlobalStates.searchOpen && LauncherSearch.query === ""
@@ -36,13 +36,15 @@ AppButton {
             {
                 text: Translation.tr("Terminal"),
                 action: () => {
-                    Quickshell.execDetached(["bash", "-c", Config.options.apps.terminal]);
+                    const cmd = Config.options?.apps?.terminal ?? "foot"
+                    Quickshell.execDetached(["/usr/bin/fish", "-c", cmd])
                 }
             },
             {
                 text: Translation.tr("Task Manager"),
                 action: () => {
-                    Quickshell.execDetached(["bash", "-c", Config.options.apps.taskManager]);
+                    const cmd = Config.options?.apps?.taskManager ?? "missioncenter"
+                    Quickshell.execDetached(["/usr/bin/fish", "-c", cmd])
                 }
             },
             {
@@ -60,7 +62,7 @@ AppButton {
             {
                 text: Translation.tr("Search"),
                 action: () => {
-                    Quickshell.execDetached(["qs", "-p", Quickshell.shellPath(""), "ipc", "call", "overview", "toggle"]);
+                    Quickshell.execDetached(["qs", "-c", "ii", "ipc", "call", "overview", "toggle"]);
                 }
             },
         ]
