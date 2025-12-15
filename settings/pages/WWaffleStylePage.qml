@@ -132,7 +132,7 @@ WSettingsPage {
             label: Translation.tr("View mode")
             icon: "options"
             description: Translation.tr("Carousel shows all desktops equally. Centered focus highlights the selected desktop while others appear smaller.")
-            currentValue: Config.options?.waffles?.taskView?.mode ?? "carousel"
+            currentValue: Config.options?.waffles?.taskView?.mode ?? "centered"
             options: [
                 { value: "carousel", displayName: Translation.tr("Carousel") },
                 { value: "centered", displayName: Translation.tr("Centered focus") }
