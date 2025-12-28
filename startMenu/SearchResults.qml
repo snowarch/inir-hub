@@ -14,6 +14,7 @@ RowLayout {
     id: root
 
     property int maxResultsPerCategory: 4
+    property int resultLimit: 20
     property StartMenuContext context
     property int currentIndex: context.currentIndex
     
@@ -88,6 +89,8 @@ RowLayout {
             const categorizedResults = [];
             
             for (let i = 0; i < allResults.length; i++) {
+                if (categorizedResults.length >= root.resultLimit) break;
+                
                 const entry = allResults[i];
                 const type = entry.type;
                 const count = categoryCount.get(type) ?? 0;
