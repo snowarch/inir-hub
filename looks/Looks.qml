@@ -27,8 +27,9 @@ Singleton {
     // Font scale - reactive property
     readonly property real fontScale: Config.options?.waffles?.theming?.font?.scale ?? 1.0
 
-    property real backgroundTransparency: root.auroraEverywhere ? (Appearance.backgroundTransparency ?? 0) : 0.13
-    property real panelBackgroundTransparency: root.auroraEverywhere ? (Appearance.backgroundTransparency ?? 0) : 0.12
+    readonly property bool transparencyEnabled: Config.options?.appearance?.transparency?.enable ?? false
+    property real backgroundTransparency: root.auroraEverywhere ? (Appearance.backgroundTransparency ?? 0) : (transparencyEnabled ? 0.13 : 0)
+    property real panelBackgroundTransparency: root.auroraEverywhere ? (Appearance.backgroundTransparency ?? 0) : (transparencyEnabled ? 0.12 : 0)
     property real panelLayerTransparency: root.auroraEverywhere ? (Appearance.aurora.popupSurfaceTransparentize ?? 0.5) : (root.dark ? 0.6 : 0.5)
     property real contentTransparency: root.auroraEverywhere ? (Appearance.contentTransparency ?? 0) : (root.dark ? 0.87 : 0.5)
     function applyBackgroundTransparency(col) {
