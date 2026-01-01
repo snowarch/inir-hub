@@ -108,10 +108,8 @@ StyledOverlayWidget {
                 downloaded = false;
                 return;
             }
-            coverArtDownloader.targetFile = artUrl;
-            coverArtDownloader.artFilePath = artFilePath;
-            downloaded = false;
-            coverArtDownloader.running = true;
+            // Check if file already exists before resetting downloaded flag
+            artExistsChecker.running = true;
         }
 
         Timer {
@@ -119,6 +117,21 @@ StyledOverlayWidget {
             interval: Config.options?.resources?.updateInterval ?? 3000
             repeat: true
             onTriggered: activePlayer?.positionChanged()
+        }
+
+        Process { // Check if cover art exists
+            id: artExistsChecker
+            command: ["/usr/bin/test", "-f", musicContent.artFilePath]
+            onExited: (exitCode, exitStatus) => {
+                if (exitCode === 0) {
+                    musicContent.downloaded = true;
+                } else {
+                    musicContent.downloaded = false;
+                    coverArtDownloader.targetFile = musicContent.artUrl ?? "";
+                    coverArtDownloader.artFilePath = musicContent.artFilePath ?? "";
+                    coverArtDownloader.running = true;
+                }
+            }
         }
 
         Process { // Descarga ligera de carátula a caché

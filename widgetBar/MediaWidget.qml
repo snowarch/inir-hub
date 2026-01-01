@@ -32,10 +32,23 @@ Rectangle {
             downloaded = false
             return
         }
-        coverArtDownloader.targetFile = player.trackArtUrl
-        coverArtDownloader.artFilePath = artFilePath
-        downloaded = false
-        coverArtDownloader.running = true
+        // Check if file already exists before resetting downloaded flag
+        artExistsChecker.running = true
+    }
+    
+    Process {
+        id: artExistsChecker
+        command: ["/usr/bin/test", "-f", root.artFilePath]
+        onExited: (exitCode, exitStatus) => {
+            if (exitCode === 0) {
+                root.downloaded = true
+            } else {
+                root.downloaded = false
+                coverArtDownloader.targetFile = root.player?.trackArtUrl ?? ""
+                coverArtDownloader.artFilePath = root.artFilePath
+                coverArtDownloader.running = true
+            }
+        }
     }
     
     Process {
