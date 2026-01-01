@@ -20,20 +20,55 @@ Rectangle {
     property string artFileName: player?.trackArtUrl ? Qt.md5(player.trackArtUrl) : ""
     property string artFilePath: artFileName ? `${artDownloadLocation}/${artFileName}` : ""
     property bool downloaded: false
-    property string displayedArtFilePath: downloaded ? Qt.resolvedUrl(artFilePath) : ""
+    property int _artCacheBuster: 0
+    property int _downloadRetryCount: 0
+    readonly property int _maxRetries: 3
+    property string displayedArtFilePath: downloaded ? Qt.resolvedUrl(artFilePath) + "?v=" + _artCacheBuster : ""
     
     color: "transparent"
     implicitHeight: hasPlayer ? contentColumn.implicitHeight : placeholderHeight
     property real placeholderHeight: 80
+
+    function checkAndDownloadArt() {
+        if (!player?.trackArtUrl) {
+            downloaded = false
+            _downloadRetryCount = 0
+            return
+        }
+        artExistsChecker.running = true
+    }
+
+    function retryDownload() {
+        if (_downloadRetryCount < _maxRetries && player?.trackArtUrl) {
+            _downloadRetryCount++
+            retryTimer.start()
+        }
+    }
+
+    Timer {
+        id: retryTimer
+        interval: 1000 * root._downloadRetryCount
+        repeat: false
+        onTriggered: {
+            if (root.player?.trackArtUrl && !root.downloaded) {
+                coverArtDownloader.targetFile = root.player.trackArtUrl
+                coverArtDownloader.artFilePath = root.artFilePath
+                coverArtDownloader.running = true
+            }
+        }
+    }
     
     // Download cover art
     onArtFilePathChanged: {
-        if (!player?.trackArtUrl) {
-            downloaded = false
-            return
+        _downloadRetryCount = 0
+        checkAndDownloadArt()
+    }
+
+    // Re-check cover art when becoming visible
+    onVisibleChanged: {
+        if (visible && hasPlayer && artFilePath) {
+            checkAndDownloadArt()
         }
-        // Check if file already exists before resetting downloaded flag
-        artExistsChecker.running = true
     }
     
     Process {
@@ -42,6 +77,8 @@ Rectangle {
         onExited: (exitCode, exitStatus) => {
             if (exitCode === 0) {
                 root.downloaded = true
+                root._artCacheBuster++
+                root._downloadRetryCount = 0
             } else {
                 root.downloaded = false
                 coverArtDownloader.targetFile = root.player?.trackArtUrl ?? ""
@@ -57,10 +94,21 @@ Rectangle {
         property string artFilePath
         command: ["/usr/bin/bash", "-c", `
             if [ -f '${artFilePath}' ]; then exit 0; fi
+            mkdir -p '${root.artDownloadLocation}'
             tmp='${artFilePath}.tmp'
-            /usr/bin/curl -sSL '${targetFile}' -o "$tmp" && /usr/bin/mv -f "$tmp" '${artFilePath}'
+            /usr/bin/curl -sSL --connect-timeout 10 --max-time 30 '${targetFile}' -o "$tmp" && \
+            [ -s "$tmp" ] && /usr/bin/mv -f "$tmp" '${artFilePath}' || { rm -f "$tmp"; exit 1; }
         `]
-        onExited: (exitCode) => { root.downloaded = (exitCode === 0) }
+        onExited: (exitCode) => {
+            if (exitCode === 0) {
+                root.downloaded = true
+                root._artCacheBuster++
+                root._downloadRetryCount = 0
+            } else {
+                root.downloaded = false
+                root.retryDownload()
+            }
+        }
     }
     
     ColorQuantizer {

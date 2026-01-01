@@ -101,15 +101,49 @@ StyledOverlayWidget {
         property string artFileName: artUrl ? Qt.md5(artUrl) : ""
         property string artFilePath: artUrl && artUrl.length > 0 ? (artDownloadLocation + "/" + artFileName) : ""
         property bool downloaded: false
-        property string displayedArtFilePath: downloaded && artFilePath.length > 0 ? Qt.resolvedUrl(artFilePath) : ""
+        property int _artCacheBuster: 0
+        property int _downloadRetryCount: 0
+        readonly property int _maxRetries: 3
+        property string displayedArtFilePath: downloaded && artFilePath.length > 0 ? Qt.resolvedUrl(artFilePath) + "?v=" + _artCacheBuster : ""
+
+        function checkAndDownloadArt() {
+            if (!artUrl || artUrl.length === 0) {
+                downloaded = false
+                _downloadRetryCount = 0
+                return
+            }
+            artExistsChecker.running = true
+        }
+
+        function retryDownload() {
+            if (_downloadRetryCount < _maxRetries && artUrl) {
+                _downloadRetryCount++
+                retryTimer.start()
+            }
+        }
+
+        Timer {
+            id: retryTimer
+            interval: 1000 * musicContent._downloadRetryCount
+            repeat: false
+            onTriggered: {
+                if (musicContent.artUrl && !musicContent.downloaded) {
+                    coverArtDownloader.targetFile = musicContent.artUrl
+                    coverArtDownloader.artFilePath = musicContent.artFilePath
+                    coverArtDownloader.running = true
+                }
+            }
+        }
 
         onArtFilePathChanged: {
-            if (!artUrl || artUrl.length === 0) {
-                downloaded = false;
-                return;
+            _downloadRetryCount = 0
+            checkAndDownloadArt()
+        }
+
+        onVisibleChanged: {
+            if (visible && artFilePath) {
+                checkAndDownloadArt()
             }
-            // Check if file already exists before resetting downloaded flag
-            artExistsChecker.running = true;
         }
 
         Timer {
@@ -124,12 +158,14 @@ StyledOverlayWidget {
             command: ["/usr/bin/test", "-f", musicContent.artFilePath]
             onExited: (exitCode, exitStatus) => {
                 if (exitCode === 0) {
-                    musicContent.downloaded = true;
+                    musicContent.downloaded = true
+                    musicContent._artCacheBuster++
+                    musicContent._downloadRetryCount = 0
                 } else {
-                    musicContent.downloaded = false;
-                    coverArtDownloader.targetFile = musicContent.artUrl ?? "";
-                    coverArtDownloader.artFilePath = musicContent.artFilePath ?? "";
-                    coverArtDownloader.running = true;
+                    musicContent.downloaded = false
+                    coverArtDownloader.targetFile = musicContent.artUrl ?? ""
+                    coverArtDownloader.artFilePath = musicContent.artFilePath ?? ""
+                    coverArtDownloader.running = true
                 }
             }
         }
@@ -141,10 +177,21 @@ StyledOverlayWidget {
             command: [
                 "/usr/bin/bash",
                 "-c",
-                "[ -f '" + artFilePath + "' ] || /usr/bin/curl -sSL '" + targetFile + "' -o '" + artFilePath + "'"
+                `if [ -f '${artFilePath}' ]; then exit 0; fi
+                mkdir -p '${musicContent.artDownloadLocation}'
+                tmp='${artFilePath}.tmp'
+                /usr/bin/curl -sSL --connect-timeout 10 --max-time 30 '${targetFile}' -o "$tmp" && \
+                [ -s "$tmp" ] && /usr/bin/mv -f "$tmp" '${artFilePath}' || { rm -f "$tmp"; exit 1; }`
             ]
             onExited: (exitCode, exitStatus) => {
-                downloaded = (exitCode === 0) && artFilePath.length > 0;
+                if (exitCode === 0) {
+                    musicContent.downloaded = true
+                    musicContent._artCacheBuster++
+                    musicContent._downloadRetryCount = 0
+                } else {
+                    musicContent.downloaded = false
+                    musicContent.retryDownload()
+                }
             }
         }
 
