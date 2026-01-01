@@ -103,17 +103,17 @@ Rectangle {
             Layout.fillWidth: true
             height: 1
             color: Appearance.colors.colOutlineVariant
-            visible: Weather.forecast.length > 0
+            visible: (Weather.forecast?.length ?? 0) > 0
         }
         
         // Forecast
         RowLayout {
             Layout.fillWidth: true
             spacing: 4
-            visible: Weather.forecast.length > 0
+            visible: (Weather.forecast?.length ?? 0) > 0
             
             Repeater {
-                model: Weather.forecast
+                model: Weather.forecast ?? []
                 
                 Rectangle {
                     Layout.fillWidth: true
