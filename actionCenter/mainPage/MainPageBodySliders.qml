@@ -63,7 +63,7 @@ ColumnLayout {
             id: volumeSlider
             Layout.fillWidth: true
             property real modelValue: Audio.sink?.audio?.volume ?? 0
-            to: Audio.uiMaxSinkVolume
+            to: 1.5
 
             Binding {
                 target: volumeSlider
@@ -72,7 +72,7 @@ ColumnLayout {
                 when: !volumeSlider.pressed && !volumeSlider._userInteracting
             }
             scrollable: true
-            onMoved: Audio.setSinkVolume(value)
+            onMoved: Audio.sink.audio.volume = value
         }
 
         WPanelIconButton {
