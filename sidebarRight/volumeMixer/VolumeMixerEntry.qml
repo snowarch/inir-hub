@@ -73,7 +73,7 @@ Rectangle {
                 value: root.node?.audio.volume ?? 0
                 configuration: StyledSlider.Configuration.S
                 property real modelValue: root.node?.audio.volume ?? 0
-                to: (root.node === Audio.sink) ? Audio.uiMaxSinkVolume : 1
+                to: (root.node === Audio.sink) ? 1.5 : 1
 
                 Binding {
                     target: slider
@@ -83,7 +83,7 @@ Rectangle {
                 }
                 onMoved: {
                     if (root.node === Audio.sink) {
-                        Audio.setSinkVolume(value)
+                        Audio.sink.audio.volume = value
                     } else if (root.node?.audio) {
                         root.node.audio.volume = value
                     }
