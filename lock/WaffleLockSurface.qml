@@ -499,6 +499,11 @@ MouseArea {
                         source: `file://${Directories.userAvatarPathRicersAndWeirdSystems}`
                         fillMode: Image.PreserveAspectCrop
                         asynchronous: true
+                        cache: true
+                        smooth: true
+                        mipmap: true
+                        sourceSize.width: avatarCircle.width * 2
+                        sourceSize.height: avatarCircle.height * 2
                         visible: status === Image.Ready || avatarImageFallback.status === Image.Ready
                         
                         layer.enabled: root.effectsSafe
@@ -520,6 +525,11 @@ MouseArea {
                             : ""
                         fillMode: Image.PreserveAspectCrop
                         asynchronous: true
+                        cache: true
+                        smooth: true
+                        mipmap: true
+                        sourceSize.width: avatarCircle.width * 2
+                        sourceSize.height: avatarCircle.height * 2
                         visible: status === Image.Ready && avatarImage.status !== Image.Ready
                         
                         layer.enabled: root.effectsSafe
