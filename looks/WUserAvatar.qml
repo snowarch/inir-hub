@@ -23,10 +23,13 @@ Item {
     StyledImage {
         id: avatar
         anchors.fill: parent
-        sourceSize: root.sourceSize
+        sourceSize: Qt.size(root.sourceSize.width * 2, root.sourceSize.height * 2)
         fillMode: Image.PreserveAspectCrop
         source: Directories.userAvatarPathAccountsService
         fallbacks: [Directories.userAvatarPathRicersAndWeirdSystems, Directories.userAvatarPathRicersAndWeirdSystems2]
+        cache: true
+        smooth: true
+        mipmap: true
 
         layer.enabled: true
         layer.effect: OpacityMask {
