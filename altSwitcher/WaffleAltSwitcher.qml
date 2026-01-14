@@ -125,7 +125,7 @@ Scope {
     Timer {
         id: warmUpTimer
         interval: 2000
-        running: !root._warmedUp && NiriService.windows.length > 0
+        running: !root._warmedUp && (NiriService.windows?.length ?? 0) > 0
         onTriggered: {
             root.rebuildSnapshot()
             Qt.callLater(function() {

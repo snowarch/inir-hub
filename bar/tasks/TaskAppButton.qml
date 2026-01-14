@@ -68,7 +68,7 @@ AppButton {
     // Helper to find Niri windows for this app
     function findAppWindows() {
         const appId = root.appEntry.appId.toLowerCase();
-        return NiriService.windows.filter(w => {
+        return (NiriService.windows ?? []).filter(w => {
             const wAppId = (w.app_id ?? "").toLowerCase();
             return wAppId === appId || wAppId.includes(appId) || appId.includes(wAppId);
         });
@@ -255,7 +255,7 @@ AppButton {
                     action: () => {
                         // Find Niri windows matching this app
                         const appId = root.appEntry.appId.toLowerCase();
-                        const niriWindows = NiriService.windows.filter(w => {
+                        const niriWindows = (NiriService.windows ?? []).filter(w => {
                             const wAppId = (w.app_id ?? "").toLowerCase();
                             return wAppId === appId || wAppId.includes(appId) || appId.includes(wAppId);
                         });
