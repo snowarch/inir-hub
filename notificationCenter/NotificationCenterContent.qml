@@ -3,7 +3,6 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import Quickshell
-import Qt.labs.synchronizer
 import qs
 import qs.services
 import qs.modules.common
@@ -49,9 +48,8 @@ WBarAttachedPanelContent {
                 id: calendarColumnLayout
                 DateHeader {
                     Layout.fillWidth: true
-                    Synchronizer on collapsed {
-                        property alias source: root.collapsed
-                    }
+                    collapsed: root.collapsed
+                    onCollapsedChanged: if (collapsed !== root.collapsed) root.collapsed = collapsed
                 }
 
                 WPanelSeparator {
@@ -60,9 +58,8 @@ WBarAttachedPanelContent {
 
                 CalendarWidget {
                     Layout.fillWidth: true
-                    Synchronizer on collapsed {
-                        property alias source: root.collapsed
-                    }
+                    collapsed: root.collapsed
+                    onCollapsedChanged: if (collapsed !== root.collapsed) root.collapsed = collapsed
                 }
 
                 WPanelSeparator {}

@@ -1,7 +1,6 @@
 pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Layouts
-import Qt.labs.synchronizer
 import Quickshell
 import qs.services
 import qs.modules.common
@@ -41,9 +40,8 @@ RowLayout {
         TrayOverflowMenu {
             id: trayOverflowLayout
             trayParent: root
-            Synchronizer on active {
-                property alias source: root.overflowOpen
-            }
+            active: root.overflowOpen
+            onActiveChanged: if (active !== root.overflowOpen) root.overflowOpen = active
         }
 
         BarToolTip {

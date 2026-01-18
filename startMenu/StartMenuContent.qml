@@ -1,5 +1,4 @@
 pragma ComponentBehavior: Bound
-import Qt.labs.synchronizer
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
@@ -68,7 +67,8 @@ WBarAttachedPanelContent {
                 Layout.fillWidth: true
                 implicitWidth: 600
                 horizontalPadding: root.searching ? 16 : 24
-                Synchronizer on searching { property alias target: root.searching }
+                // searching is read-only in SearchBar (bound to text length), so we only listen to changes
+                onSearchingChanged: if (searching !== root.searching) root.searching = searching
                 focus: true
                 text: root.searchText
                 onTextChanged: LauncherSearch.query = text
