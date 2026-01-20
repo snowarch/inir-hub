@@ -8,7 +8,6 @@ import qs.modules.common.functions
 import qs.modules.waffle.looks
 import qs.modules.waffle.bar
 import Quickshell
-import Quickshell.Wayland
 
 Button {
     id: root
@@ -19,8 +18,15 @@ Button {
     padding: 5
     Layout.fillHeight: true
 
+    // Get Niri window ID from toplevel for WindowPreviewService
+    readonly property int niriWindowId: {
+        if (!root.toplevel) return -1
+        const match = NiriService.findNiriWindow(root.toplevel)
+        return match?.niriWindow?.id ?? -1
+    }
+
     onClicked: {
-        root.toplevel.activate(); // TODO: make this work with those who disable focus on activate because telegram is abusive
+        root.toplevel.activate();
     }
 
     background: Rectangle {
@@ -55,7 +61,7 @@ Button {
                 id: appTitleContainer
                 Layout.fillWidth: true
                 Layout.fillHeight: true
-                implicitHeight: closeButton.implicitHeight // Enforce height, because closeButton doesn't contribute when it's invisible
+                implicitHeight: closeButton.implicitHeight
                 WText {
                     id: appTitleText
                     anchors.fill: parent
@@ -73,31 +79,79 @@ Button {
         }
 
         Item {
+            id: previewContainer
             Layout.fillWidth: true
             Layout.fillHeight: true
             Layout.margins: Looks.radius.large - root.padding
             Layout.topMargin: 0
-            implicitWidth: Math.max(screencopyView.implicitWidth, 80)
-            implicitHeight: Math.max(screencopyView.implicitHeight, 60)
+            implicitWidth: root.previewWidthConstraint
+            implicitHeight: root.previewHeightConstraint
 
-            // Fallback icon when screencopy not available
+            // Fallback icon when preview not available
             WAppIcon {
                 anchors.centerIn: parent
-                visible: !screencopyView.valid
+                visible: !previewImage.hasPreview
                 iconName: root.toplevel ? AppSearch.guessIcon(root.toplevel.appId) : ""
                 implicitSize: 64
                 opacity: 0.5
             }
 
-            ScreencopyView {
-                id: screencopyView
-                anchors.centerIn: parent
-                captureSource: root.toplevel
-                // Pause live capture during recording to avoid lag
-                live: root.toplevel !== null && root.toplevel !== undefined && !RecorderStatus.isRecording
-                paintCursor: true
-                constraintSize: Qt.size(root.previewWidthConstraint, root.previewHeightConstraint)
-                visible: screencopyView.valid
+            // Window preview using WindowPreviewService (works with Niri)
+            Image {
+                id: previewImage
+                anchors.fill: parent
+                property string previewUrl: ""
+                property bool hasPreview: status === Image.Ready
+                
+                source: previewUrl
+                asynchronous: true
+                fillMode: Image.PreserveAspectFit
+                smooth: true
+                mipmap: true
+                visible: hasPreview
+                opacity: hasPreview ? 1 : 0
+
+                Behavior on opacity {
+                    NumberAnimation { duration: 150; easing.type: Easing.OutQuad }
+                }
+
+                // Listen for preview updates from WindowPreviewService
+                Connections {
+                    target: WindowPreviewService
+                    function onPreviewUpdated(updatedId: int): void {
+                        if (updatedId === root.niriWindowId) {
+                            previewImage.previewUrl = WindowPreviewService.getPreviewUrl(updatedId)
+                        }
+                    }
+                    function onCaptureComplete(): void {
+                        if (root.niriWindowId > 0) {
+                            const url = WindowPreviewService.getPreviewUrl(root.niriWindowId)
+                            if (url) previewImage.previewUrl = url
+                        }
+                    }
+                }
+                
+                Component.onCompleted: {
+                    // Initialize WindowPreviewService if needed
+                    WindowPreviewService.initialize()
+                    // Try to get existing preview
+                    if (root.niriWindowId > 0) {
+                        Qt.callLater(() => {
+                            const url = WindowPreviewService.getPreviewUrl(root.niriWindowId)
+                            if (url) previewImage.previewUrl = url
+                        })
+                    }
+                }
+            }
+
+            // Rounded corners mask
+            layer.enabled: previewImage.hasPreview
+            layer.effect: OpacityMask {
+                maskSource: Rectangle {
+                    width: previewContainer.width
+                    height: previewContainer.height
+                    radius: Looks.radius.medium
+                }
             }
         }
     }

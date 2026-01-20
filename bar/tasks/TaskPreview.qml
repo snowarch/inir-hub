@@ -24,6 +24,8 @@ PopupWindow {
     function open() {
         marginBehavior.enabled = true;
         root.visible = true;
+        // Capture previews for windows in this app entry
+        captureAppPreviews();
     }
 
     function show(appEntry: var, button: Item) {
@@ -31,6 +33,25 @@ PopupWindow {
         root.anchorItem = button;
         root.anchor.updateAnchor();
         root.open();
+    }
+
+    // Capture previews for windows in the current app entry
+    function captureAppPreviews(): void {
+        if (!root.appEntry?.toplevels) return;
+        
+        const windowIds = [];
+        for (const tl of root.appEntry.toplevels) {
+            const match = NiriService.findNiriWindow(tl);
+            if (match?.niriWindow?.id) {
+                windowIds.push(match.niriWindow.id);
+            }
+        }
+        
+        if (windowIds.length > 0) {
+            WindowPreviewService.initialize();
+            // captureForTaskView will capture windows that need it
+            WindowPreviewService.captureForTaskView();
+        }
     }
 
     ///////////////////// Internals /////////////////////
