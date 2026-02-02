@@ -212,7 +212,7 @@ StyledOverlayWidget {
 
                     StyledImage {
                         anchors.fill: parent
-                        visible: musicContent.displayedArtFilePath !== ""
+                        visible: musicContent.displayedArtFilePath !== "" && status !== Image.Error
                         source: musicContent.displayedArtFilePath
                         fillMode: Image.PreserveAspectCrop
                         cache: false
