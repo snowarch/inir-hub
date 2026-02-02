@@ -6,6 +6,7 @@ import qs.modules.common
 import qs.modules.common.functions as CF
 import QtQuick
 import QtQuick.Effects
+import QtMultimedia
 import Quickshell
 import Quickshell.Io
 import Quickshell.Wayland
@@ -33,6 +34,15 @@ Variants {
             if (!path) return "";
             if (path.startsWith("file://")) return path;
             return "file://" + path;
+        }
+        
+        readonly property bool wallpaperIsVideo: {
+            const lowerPath = wallpaperSource.toLowerCase();
+            return lowerPath.endsWith(".mp4") || lowerPath.endsWith(".webm") || lowerPath.endsWith(".mkv") || lowerPath.endsWith(".avi") || lowerPath.endsWith(".mov");
+        }
+        
+        readonly property bool wallpaperIsGif: {
+            return wallpaperSource.toLowerCase().endsWith(".gif");
         }
 
         screen: modelData
@@ -91,22 +101,71 @@ Variants {
             anchors.fill: parent
             clip: true
 
+            // Static Image (for non-animated, non-video wallpapers)
             Image {
                 id: wallpaper
                 anchors.fill: parent
                 fillMode: Image.PreserveAspectCrop
-                source: panelRoot.wallpaperUrl
+                source: panelRoot.wallpaperUrl && !panelRoot.wallpaperIsGif && !panelRoot.wallpaperIsVideo
+                    ? panelRoot.wallpaperUrl
+                    : ""
                 asynchronous: true
                 cache: true
-                visible: status === Image.Ready && !blurEffect.visible
+                visible: !panelRoot.wallpaperIsGif && !panelRoot.wallpaperIsVideo && status === Image.Ready && !blurEffect.visible
+            }
+            
+            // Animated GIF support
+            AnimatedImage {
+                id: gifWallpaper
+                anchors.fill: parent
+                fillMode: Image.PreserveAspectCrop
+                source: panelRoot.wallpaperIsGif ? panelRoot.wallpaperUrl : ""
+                asynchronous: true
+                cache: true
+                visible: panelRoot.wallpaperIsGif && !blurEffect.visible
+                playing: visible
             }
 
-            // Blur effect
+            // Video wallpaper (Qt Multimedia - native)
+            Video {
+                id: videoWallpaper
+                anchors.fill: parent
+                visible: panelRoot.wallpaperIsVideo && !blurEffect.visible
+                source: {
+                    if (!panelRoot.wallpaperIsVideo) return "";
+                    const url = panelRoot.wallpaperUrl;
+                    if (!url) return "";
+                    // Qt Multimedia needs file:// URL format
+                    return url.startsWith("file://") ? url : ("file://" + url);
+                }
+                fillMode: VideoOutput.PreserveAspectCrop
+                loops: MediaPlayer.Infinite
+                muted: true
+                autoPlay: true
+                
+                onPlaybackStateChanged: {
+                    if (playbackState === MediaPlayer.StoppedState && visible && panelRoot.wallpaperIsVideo) {
+                        play()
+                    }
+                }
+                
+                onVisibleChanged: {
+                    if (visible && panelRoot.wallpaperIsVideo) {
+                        play()
+                    } else {
+                        pause()
+                    }
+                }
+            }
+
+            // Blur effect - disabled for videos and GIFs (performance)
             MultiEffect {
                 id: blurEffect
                 anchors.fill: parent
                 source: wallpaper
-                visible: Appearance.effectsEnabled && panelRoot.blurProgress > 0 && wallpaper.status === Image.Ready
+                visible: Appearance.effectsEnabled && panelRoot.blurProgress > 0 && 
+                         !panelRoot.wallpaperIsGif && !panelRoot.wallpaperIsVideo &&
+                         wallpaper.status === Image.Ready
                 blurEnabled: visible
                 blur: panelRoot.blurProgress * ((panelRoot.wEffects.blurRadius ?? 32) / 100.0)
                 blurMax: 64

@@ -57,19 +57,48 @@ MouseArea {
     }
 
     // Resolve wallpaper path: waffle-specific if configured, otherwise main
-    readonly property string _wallpaperPath: {
+    readonly property string _wallpaperSource: {
         const wBg = Config.options?.waffles?.background
         if (wBg?.useMainWallpaper ?? true) return Config.options?.background?.wallpaperPath ?? ""
         return wBg?.wallpaperPath ?? Config.options?.background?.wallpaperPath ?? ""
     }
+    
+    // Detect if it's a video or gif and use thumbnail
+    readonly property string _wallpaperPath: {
+        const path = _wallpaperSource;
+        if (!path) return "";
+        
+        const lowerPath = path.toLowerCase();
+        const isVideo = lowerPath.endsWith(".mp4") || lowerPath.endsWith(".webm") || lowerPath.endsWith(".mkv") || lowerPath.endsWith(".avi") || lowerPath.endsWith(".mov");
+        const isGif = lowerPath.endsWith(".gif");
+        
+        if (isVideo || isGif) {
+            // Use waffle's own thumbnail if available, otherwise fall back to main thumbnail
+            const waffleThumbnail = Config.options?.waffles?.background?.thumbnailPath ?? "";
+            const mainThumbnail = Config.options?.background?.thumbnailPath ?? "";
+            return waffleThumbnail || mainThumbnail || path;
+        }
+        return path;
+    }
+    
+    readonly property bool wallpaperIsVideo: {
+        const lowerPath = _wallpaperPath.toLowerCase();
+        return lowerPath.endsWith(".mp4") || lowerPath.endsWith(".webm") || lowerPath.endsWith(".mkv") || lowerPath.endsWith(".avi") || lowerPath.endsWith(".mov");
+    }
+    
+    readonly property bool wallpaperIsGif: {
+        return _wallpaperPath.toLowerCase().endsWith(".gif");
+    }
 
     // Background wallpaper with Acrylic blur effect
+    // Static Image (for non-animated wallpapers)
     Image {
         id: backgroundWallpaper
         anchors.fill: parent
-        source: root._wallpaperPath
+        source: root._wallpaperPath && !root.wallpaperIsGif ? root._wallpaperPath : ""
         fillMode: Image.PreserveAspectCrop
         asynchronous: true
+        visible: !root.wallpaperIsGif
         
         layer.enabled: root.blurEnabled && root.effectsSafe
         layer.effect: FastBlur {
@@ -80,6 +109,30 @@ MouseArea {
         transform: Scale {
             origin.x: backgroundWallpaper.width / 2
             origin.y: backgroundWallpaper.height / 2
+            xScale: root.blurEnabled ? 1.1 : 1
+            yScale: root.blurEnabled ? 1.1 : 1
+        }
+    }
+    
+    // Animated GIF support
+    AnimatedImage {
+        id: gifBackgroundWallpaper
+        anchors.fill: parent
+        source: root.wallpaperIsGif ? root._wallpaperPath : ""
+        fillMode: Image.PreserveAspectCrop
+        asynchronous: true
+        visible: root.wallpaperIsGif
+        playing: visible
+        
+        layer.enabled: root.blurEnabled && root.effectsSafe
+        layer.effect: FastBlur {
+            radius: root.blurRadius
+        }
+        
+        // Slight zoom to hide blur edges
+        transform: Scale {
+            origin.x: gifBackgroundWallpaper.width / 2
+            origin.y: gifBackgroundWallpaper.height / 2
             xScale: root.blurEnabled ? 1.1 : 1
             yScale: root.blurEnabled ? 1.1 : 1
         }

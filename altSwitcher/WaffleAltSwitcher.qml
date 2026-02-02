@@ -19,9 +19,12 @@ Scope {
     property bool overviewOpenedByAltSwitcher: false
     property int currentIndex: 0
     property bool quickSwitchDone: false  // Track if quick switch already happened this session
+    property var noUiSnapshot: []
+    property int noUiIndex: 0
 
     // Config getters
     function cfg() { return Config.options?.waffles?.altSwitcher ?? {} }
+    function getNoVisualUi() { return cfg().noVisualUi ?? false }
     function getScrimOpacity() { return cfg().scrimOpacity ?? 0.4 }
     function getAutoHide() { return cfg().autoHide ?? true }
     function getCloseOnFocus() { return cfg().closeOnFocus ?? true }
@@ -121,6 +124,25 @@ Scope {
         _warmedUp = true
     }
 
+    function rebuildNoUiSnapshot() {
+        root.noUiSnapshot = buildItemsFrom(
+            NiriService.windows || [],
+            NiriService.workspaces || {},
+            NiriService.mruWindowIds || []
+        )
+        root.noUiIndex = 0
+    }
+
+    function focusNoUiIndex() {
+        const len = root.noUiSnapshot?.length ?? 0
+        if (len <= 0)
+            return
+        const idx = Math.max(0, Math.min(len - 1, root.noUiIndex))
+        const id = root.noUiSnapshot[idx]?.id
+        if (id !== undefined)
+            NiriService.focusWindow(id)
+    }
+
     // Pre-warm al inicio
     Timer {
         id: warmUpTimer
@@ -213,6 +235,8 @@ Scope {
         onTriggered: {
             if (!GlobalStates.waffleAltSwitcherOpen) {
                 root.quickSwitchDone = false
+                root.noUiSnapshot = []
+                root.noUiIndex = 0
             }
         }
     }
@@ -365,6 +389,31 @@ Scope {
         }
 
         function next(): void {
+            if (root.getNoVisualUi()) {
+                autoHideTimer.stop()
+                root.closeSwitcher()
+
+                const len = root.noUiSnapshot?.length ?? 0
+                if (!root.quickSwitchDone || len === 0) {
+                    root.rebuildNoUiSnapshot()
+                }
+
+                const newLen = root.noUiSnapshot?.length ?? 0
+                if (newLen === 0)
+                    return
+
+                if (!root.quickSwitchDone) {
+                    root.quickSwitchDone = true
+                    root.noUiIndex = newLen > 1 ? 1 : 0
+                } else {
+                    root.noUiIndex = (root.noUiIndex + 1) % newLen
+                }
+
+                root.focusNoUiIndex()
+                quickSwitchResetTimer.restart()
+                return
+            }
+
             if (!GlobalStates.waffleAltSwitcherOpen) {
                 root.rebuildSnapshot()
                 if (root.itemSnapshot.length === 0) return
@@ -386,6 +435,31 @@ Scope {
         }
 
         function previous(): void {
+            if (root.getNoVisualUi()) {
+                autoHideTimer.stop()
+                root.closeSwitcher()
+
+                const len = root.noUiSnapshot?.length ?? 0
+                if (!root.quickSwitchDone || len === 0) {
+                    root.rebuildNoUiSnapshot()
+                }
+
+                const newLen = root.noUiSnapshot?.length ?? 0
+                if (newLen === 0)
+                    return
+
+                if (!root.quickSwitchDone) {
+                    root.quickSwitchDone = true
+                    root.noUiIndex = newLen > 1 ? (newLen - 1) : 0
+                } else {
+                    root.noUiIndex = (root.noUiIndex - 1 + newLen) % newLen
+                }
+
+                root.focusNoUiIndex()
+                quickSwitchResetTimer.restart()
+                return
+            }
+
             if (!GlobalStates.waffleAltSwitcherOpen) {
                 root.openSwitcher()
             }

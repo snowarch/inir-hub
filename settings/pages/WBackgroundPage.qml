@@ -101,6 +101,15 @@ WSettingsPage {
         
         WSettingsSwitch {
             visible: root.wBackdrop.enable ?? true
+            label: Translation.tr("Enable animated wallpapers (videos/GIFs)")
+            icon: "play_circle"
+            description: Translation.tr("Play videos and GIFs in backdrop (may impact performance)")
+            checked: root.wBackdrop.enableAnimation ?? false
+            onCheckedChanged: Config.setNestedValue("waffles.background.backdrop.enableAnimation", checked)
+        }
+        
+        WSettingsSwitch {
+            visible: root.wBackdrop.enable ?? true
             label: Translation.tr("Use separate wallpaper")
             icon: "image"
             description: Translation.tr("Use a different wallpaper for backdrop")

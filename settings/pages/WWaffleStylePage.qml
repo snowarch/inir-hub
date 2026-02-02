@@ -94,6 +94,14 @@ WSettingsPage {
             checked: Config.options?.waffles?.altSwitcher?.quickSwitch ?? false
             onCheckedChanged: Config.setNestedValue("waffles.altSwitcher.quickSwitch", checked)
         }
+
+        WSettingsSwitch {
+            label: Translation.tr("No visual UI")
+            icon: "eye-off"
+            description: Translation.tr("Switch windows without showing the switcher overlay")
+            checked: Config.options?.waffles?.altSwitcher?.noVisualUi ?? false
+            onCheckedChanged: Config.setNestedValue("waffles.altSwitcher.noVisualUi", checked)
+        }
         
         WSettingsSwitch {
             label: Translation.tr("Most recent first")
