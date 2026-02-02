@@ -20,13 +20,13 @@ Variants {
         required property var modelData
 
         // Waffle background config
-        readonly property var wBg: Config.options.waffles?.background ?? {}
+        readonly property var wBg: Config.options?.waffles?.background ?? {}
         readonly property var wEffects: wBg.effects ?? {}
 
         // Wallpaper source
         readonly property string wallpaperSource: {
-            if (wBg.useMainWallpaper ?? true) return Config.options.background.wallpaperPath;
-            return wBg.wallpaperPath || Config.options.background.wallpaperPath;
+            if (wBg.useMainWallpaper ?? true) return Config.options?.background?.wallpaperPath ?? "";
+            return wBg.wallpaperPath || Config.options?.background?.wallpaperPath || "";
         }
 
         readonly property string wallpaperUrl: {
