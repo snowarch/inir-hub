@@ -56,6 +56,30 @@ WSettingsPage {
         }
     }
 
+    WSettingsCard {
+        title: Translation.tr("Default Terminal")
+        icon: "window-terminal"
+
+        WSettingsDropdown {
+            label: Translation.tr("Terminal emulator")
+            icon: "window-terminal"
+            description: Translation.tr("Used by shell actions, keybinds, and update commands")
+            currentValue: Config.options?.apps?.terminal ?? "kitty"
+            options: [
+                { value: "foot", displayName: "Foot" },
+                { value: "kitty", displayName: "Kitty" },
+                { value: "ghostty", displayName: "Ghostty" },
+                { value: "alacritty", displayName: "Alacritty" },
+                { value: "wezterm", displayName: "WezTerm" },
+                { value: "konsole", displayName: "Konsole" }
+            ]
+            onSelected: newValue => {
+                Config.setNestedValue("apps.terminal", newValue)
+                Config.setNestedValue("apps.update", newValue + " -e sudo pacman -Syu")
+            }
+        }
+    }
+
     // Waffle modules
     WSettingsCard {
         visible: root.isWaffleActive
