@@ -590,8 +590,7 @@ WBarAttachedPanelContent {
                             iconName: "terminal"
                             label: Translation.tr("Terminal")
                             onClicked: {
-                                const cmd = Config.options?.apps?.terminal ?? "kitty"
-                                ShellExec.execCmd(cmd)
+                                Quickshell.execDetached([Quickshell.shellPath("scripts/launch-terminal.sh")])
                                 GlobalStates.waffleWidgetsOpen = false
                             }
                         }

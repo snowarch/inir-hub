@@ -37,8 +37,7 @@ AppButton {
             {
                 text: Translation.tr("Terminal"),
                 action: () => {
-                    const cmd = Config.options?.apps?.terminal ?? "kitty"
-                    ShellExec.execCmd(cmd)
+                    Quickshell.execDetached([Quickshell.shellPath("scripts/launch-terminal.sh")])
                 }
             },
             {
