@@ -16,10 +16,24 @@ Scope {
     property Component regionComponent: Component {
         Region {}
     }
+
+    // Capture target screen when opening (don't follow focus while open)
+    property var targetScreen: null
+
+    Connections {
+        target: GlobalStates
+        function onOverlayOpenChanged() {
+            if (GlobalStates.overlayOpen) {
+                // Set target screen when opening for use by Component.onCompleted
+                const outputName = NiriService.currentOutput
+                root.targetScreen = Quickshell.screens.find(s => s.name === outputName) ?? Quickshell.screens[0] ?? null
+            }
+        }
+    }
     
     Loader {
         id: overlayLoader
-        active: true  // Always keep loaded for instant opening
+        active: GlobalStates.overlayOpen
         sourceComponent: PanelWindow {
             id: overlayWindow
             exclusionMode: ExclusionMode.Ignore
@@ -31,7 +45,6 @@ Scope {
                 : (OverlayContext.clickableWidgets.length > 0 && !GameMode.active 
                     ? WlrKeyboardFocus.OnDemand 
                     : WlrKeyboardFocus.None)
-            visible: true
             color: "transparent"
 
             mask: Region {
@@ -60,7 +73,7 @@ Scope {
             Connections {
                 target: GlobalStates
                 function onOverlayOpenChanged() {
-                    delayedGrabTimer.restart();
+                    delayedGrabTimer.restart()
                 }
             }
 
