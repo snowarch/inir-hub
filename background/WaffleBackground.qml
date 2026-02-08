@@ -28,13 +28,15 @@ Variants {
             if (wBg.useMainWallpaper ?? true) return Config.options?.background?.wallpaperPath ?? "";
             return wBg.wallpaperPath || Config.options?.background?.wallpaperPath || "";
         }
-        
+
         readonly property string wallpaperThumbnail: {
             if (wBg.useMainWallpaper ?? true) return Config.options?.background?.thumbnailPath ?? "";
             return wBg.thumbnailPath || Config.options?.background?.thumbnailPath || "";
         }
-        
+
         readonly property bool enableAnimation: wBg.enableAnimation ?? Config.options?.background?.enableAnimation ?? true
+        readonly property bool enableAnimatedBlur: wEffects.enableAnimatedBlur ?? false
+        readonly property int thumbnailBlurStrength: wEffects.thumbnailBlurStrength ?? Config.options?.background?.effects?.thumbnailBlurStrength ?? 70
         
         readonly property bool wallpaperIsVideo: {
             const lowerPath = wallpaperSourceRaw.toLowerCase();
@@ -139,6 +141,13 @@ Variants {
                 cache: true
                 visible: panelRoot.wallpaperIsGif && panelRoot.enableAnimation && !blurEffect.visible
                 playing: visible
+
+                layer.enabled: Appearance.effectsEnabled && panelRoot.enableAnimatedBlur && (panelRoot.wEffects.blurRadius ?? 0) > 0
+                layer.effect: MultiEffect {
+                    blurEnabled: true
+                    blur: ((panelRoot.wEffects.blurRadius ?? 32) * Math.max(0, Math.min(1, panelRoot.thumbnailBlurStrength / 100))) / 100.0
+                    blurMax: 64
+                }
             }
 
             // Video wallpaper (Qt Multimedia - only when animation enabled)
@@ -157,19 +166,26 @@ Variants {
                 loops: MediaPlayer.Infinite
                 muted: true
                 autoPlay: true
-                
+
                 onPlaybackStateChanged: {
                     if (playbackState === MediaPlayer.StoppedState && visible && panelRoot.wallpaperIsVideo && panelRoot.enableAnimation) {
                         play()
                     }
                 }
-                
+
                 onVisibleChanged: {
                     if (visible && panelRoot.wallpaperIsVideo && panelRoot.enableAnimation) {
                         play()
                     } else {
                         pause()
                     }
+                }
+
+                layer.enabled: Appearance.effectsEnabled && panelRoot.enableAnimatedBlur && (panelRoot.wEffects.blurRadius ?? 0) > 0
+                layer.effect: MultiEffect {
+                    blurEnabled: true
+                    blur: ((panelRoot.wEffects.blurRadius ?? 32) * Math.max(0, Math.min(1, panelRoot.thumbnailBlurStrength / 100))) / 100.0
+                    blurMax: 64
                 }
             }
 

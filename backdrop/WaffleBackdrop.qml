@@ -33,8 +33,10 @@ Variants {
 
         // Waffle backdrop config
         readonly property var wBackdrop: Config.options?.waffles?.background?.backdrop ?? {}
-        
+
         readonly property int backdropBlurRadius: wBackdrop.blurRadius ?? 32
+        readonly property int thumbnailBlurStrength: Config.options?.background?.effects?.thumbnailBlurStrength ?? 50
+        readonly property bool enableAnimatedBlur: wBackdrop.enableAnimatedBlur ?? false
         readonly property int backdropDim: wBackdrop.dim ?? 35
         readonly property real backdropSaturation: (wBackdrop.saturation ?? 0) / 100.0
         readonly property real backdropContrast: (wBackdrop.contrast ?? 0) / 100.0
@@ -128,6 +130,15 @@ Variants {
                 cache: true
                 visible: backdropWindow.enableAnimation && backdropWindow.wallpaperIsGif
                 playing: visible
+
+                layer.enabled: Appearance.effectsEnabled && backdropWindow.enableAnimatedBlur && backdropWindow.backdropBlurRadius > 0
+                layer.effect: MultiEffect {
+                    blurEnabled: true
+                    blur: (backdropWindow.backdropBlurRadius * Math.max(0, Math.min(1, backdropWindow.thumbnailBlurStrength / 100))) / 100.0
+                    blurMax: 64
+                    saturation: backdropWindow.backdropSaturation
+                    contrast: backdropWindow.backdropContrast
+                }
             }
 
             // Video wallpaper support (when enableAnimation is true)
@@ -145,19 +156,28 @@ Variants {
                 loops: MediaPlayer.Infinite
                 muted: true
                 autoPlay: true
-                
+
                 onPlaybackStateChanged: {
                     if (playbackState === MediaPlayer.StoppedState && visible && backdropWindow.enableAnimation && backdropWindow.wallpaperIsVideo) {
                         play()
                     }
                 }
-                
+
                 onVisibleChanged: {
                     if (visible && backdropWindow.enableAnimation && backdropWindow.wallpaperIsVideo) {
                         play()
                     } else {
                         pause()
                     }
+                }
+
+                layer.enabled: Appearance.effectsEnabled && backdropWindow.enableAnimatedBlur && backdropWindow.backdropBlurRadius > 0
+                layer.effect: MultiEffect {
+                    blurEnabled: true
+                    blur: (backdropWindow.backdropBlurRadius * Math.max(0, Math.min(1, backdropWindow.thumbnailBlurStrength / 100))) / 100.0
+                    blurMax: 64
+                    saturation: backdropWindow.backdropSaturation
+                    contrast: backdropWindow.backdropContrast
                 }
             }
 

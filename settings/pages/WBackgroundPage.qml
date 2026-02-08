@@ -47,7 +47,15 @@ WSettingsPage {
     WSettingsCard {
         title: Translation.tr("Wallpaper Effects")
         icon: "image"
-        
+
+        WSettingsSwitch {
+            label: Translation.tr("Enable animated wallpapers (videos/GIFs)")
+            icon: "play_circle"
+            description: Translation.tr("Play videos and GIFs as wallpaper. When disabled, shows thumbnail instead")
+            checked: root.wBg.enableAnimation ?? true
+            onCheckedChanged: Config.setNestedValue("waffles.background.enableAnimation", checked)
+        }
+
         WSettingsSwitch {
             label: Translation.tr("Enable blur")
             icon: "options"
@@ -55,7 +63,16 @@ WSettingsPage {
             checked: root.wEffects.enableBlur ?? false
             onCheckedChanged: Config.setNestedValue("waffles.background.effects.enableBlur", checked)
         }
-        
+
+        WSettingsSwitch {
+            visible: root.wBg.enableAnimation ?? true
+            label: Translation.tr("Blur animated wallpapers (videos/GIFs)")
+            icon: "blur_circular"
+            description: Translation.tr("Apply blur to animated wallpapers. Independent from window blur. May significantly impact performance.")
+            checked: root.wEffects.enableAnimatedBlur ?? false
+            onCheckedChanged: Config.setNestedValue("waffles.background.effects.enableAnimatedBlur", checked)
+        }
+
         WSettingsSpinBox {
             visible: root.wEffects.enableBlur ?? false
             label: Translation.tr("Blur radius")
@@ -64,6 +81,17 @@ WSettingsPage {
             from: 0; to: 100; stepSize: 5
             value: root.wEffects.blurRadius ?? 32
             onValueChanged: Config.setNestedValue("waffles.background.effects.blurRadius", value)
+        }
+
+        WSettingsSpinBox {
+            visible: root.wEffects.enableAnimatedBlur ?? false
+            label: Translation.tr("Animated blur strength")
+            icon: "blur_circular"
+            description: Translation.tr("Blur intensity for animated wallpapers (0-100%)")
+            suffix: "%"
+            from: 0; to: 100; stepSize: 5
+            value: root.wEffects.thumbnailBlurStrength ?? 70
+            onValueChanged: Config.setNestedValue("waffles.background.effects.thumbnailBlurStrength", value)
         }
         
         WSettingsSpinBox {
@@ -107,7 +135,16 @@ WSettingsPage {
             checked: root.wBackdrop.enableAnimation ?? false
             onCheckedChanged: Config.setNestedValue("waffles.background.backdrop.enableAnimation", checked)
         }
-        
+
+        WSettingsSwitch {
+            visible: (root.wBackdrop.enable ?? true) && (root.wBackdrop.enableAnimation ?? false)
+            label: Translation.tr("Blur animated wallpapers (videos/GIFs)")
+            icon: "blur_circular"
+            description: Translation.tr("Apply blur to animated wallpapers in backdrop. May significantly impact performance.")
+            checked: root.wBackdrop.enableAnimatedBlur ?? false
+            onCheckedChanged: Config.setNestedValue("waffles.background.backdrop.enableAnimatedBlur", checked)
+        }
+
         WSettingsSwitch {
             visible: root.wBackdrop.enable ?? true
             label: Translation.tr("Use separate wallpaper")

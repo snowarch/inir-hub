@@ -2,6 +2,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import QtMultimedia
 import Qt5Compat.GraphicalEffects
 import Quickshell
 import Quickshell.Io
@@ -28,30 +29,103 @@ WSettingsPage {
             Layout.fillWidth: true
             Layout.preferredHeight: 180
             Layout.bottomMargin: 12
-            
+
             Rectangle {
                 anchors.fill: parent
                 radius: Looks.radius.large
                 color: Looks.colors.bg2
                 clip: true
-                
+
+                readonly property string wallpaperPath: {
+                    const useMain = Config.options?.waffles?.background?.useMainWallpaper ?? true
+                    if (useMain) return Config.options?.background?.wallpaperPath ?? ""
+                    return Config.options?.waffles?.background?.wallpaperPath ?? Config.options?.background?.wallpaperPath ?? ""
+                }
+
+                readonly property bool wallpaperIsVideo: {
+                    const lowerPath = wallpaperPath.toLowerCase();
+                    return lowerPath.endsWith(".mp4") || lowerPath.endsWith(".webm") || lowerPath.endsWith(".mkv") || lowerPath.endsWith(".avi") || lowerPath.endsWith(".mov");
+                }
+
+                readonly property bool wallpaperIsGif: wallpaperPath.toLowerCase().endsWith(".gif")
+
+                readonly property string wallpaperUrl: {
+                    if (!wallpaperPath) return "";
+                    if (wallpaperPath.startsWith("file://")) return wallpaperPath;
+                    return "file://" + wallpaperPath;
+                }
+
+                // Static image
                 Image {
                     id: wallpaperPreview
                     anchors.fill: parent
                     fillMode: Image.PreserveAspectCrop
-                    source: {
-                        const useMain = Config.options?.waffles?.background?.useMainWallpaper ?? true
-                        if (useMain) return Config.options?.background?.wallpaperPath ?? ""
-                        return Config.options?.waffles?.background?.wallpaperPath ?? Config.options?.background?.wallpaperPath ?? ""
-                    }
+                    source: parent.wallpaperUrl && !parent.wallpaperIsGif && !parent.wallpaperIsVideo ? parent.wallpaperUrl : ""
                     asynchronous: true
                     cache: false
-                    
+                    visible: !parent.wallpaperIsGif && !parent.wallpaperIsVideo
+
                     layer.enabled: true
                     layer.effect: OpacityMask {
                         maskSource: Rectangle {
                             width: wallpaperPreview.width
                             height: wallpaperPreview.height
+                            radius: Looks.radius.large
+                        }
+                    }
+                }
+
+                // Animated GIF
+                AnimatedImage {
+                    id: gifPreview
+                    anchors.fill: parent
+                    fillMode: Image.PreserveAspectCrop
+                    source: parent.wallpaperIsGif ? parent.wallpaperUrl : ""
+                    asynchronous: true
+                    cache: false
+                    visible: parent.wallpaperIsGif
+                    playing: visible
+
+                    layer.enabled: true
+                    layer.effect: OpacityMask {
+                        maskSource: Rectangle {
+                            width: gifPreview.width
+                            height: gifPreview.height
+                            radius: Looks.radius.large
+                        }
+                    }
+                }
+
+                // Video
+                Video {
+                    id: videoPreview
+                    anchors.fill: parent
+                    source: parent.wallpaperIsVideo ? parent.wallpaperUrl : ""
+                    fillMode: VideoOutput.PreserveAspectCrop
+                    visible: parent.wallpaperIsVideo
+                    loops: MediaPlayer.Infinite
+                    muted: true
+                    autoPlay: true
+
+                    onPlaybackStateChanged: {
+                        if (playbackState === MediaPlayer.StoppedState && visible) {
+                            play()
+                        }
+                    }
+
+                    onVisibleChanged: {
+                        if (visible) {
+                            play()
+                        } else {
+                            pause()
+                        }
+                    }
+
+                    layer.enabled: true
+                    layer.effect: OpacityMask {
+                        maskSource: Rectangle {
+                            width: videoPreview.width
+                            height: videoPreview.height
                             radius: Looks.radius.large
                         }
                     }
