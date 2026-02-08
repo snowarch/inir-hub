@@ -276,7 +276,9 @@ WBarAttachedPanelContent {
                             Rectangle {
                                 width: parent.width * Math.min(1, ResourceUsage.cpuUsage); height: parent.height; radius: 2
                                 color: ResourceUsage.cpuUsage > 0.8 ? Looks.colors.danger : Looks.colors.accent
-                                Behavior on width { NumberAnimation { duration: 300 } }
+                                Behavior on width {
+                                    animation: Looks.transition.resize.createObject(this)
+                                }
                             }
                         }
                     }
@@ -302,7 +304,9 @@ WBarAttachedPanelContent {
                             Rectangle {
                                 width: parent.width * Math.min(1, ResourceUsage.memoryUsedPercentage); height: parent.height; radius: 2
                                 color: ResourceUsage.memoryUsedPercentage > 0.9 ? Looks.colors.danger : Looks.colors.accent
-                                Behavior on width { NumberAnimation { duration: 300 } }
+                                Behavior on width {
+                                    animation: Looks.transition.resize.createObject(this)
+                                }
                             }
                         }
                     }
@@ -329,7 +333,9 @@ WBarAttachedPanelContent {
                             Rectangle {
                                 width: parent.width * Math.min(1, ResourceUsage.swapUsedPercentage); height: parent.height; radius: 2
                                 color: ResourceUsage.swapUsedPercentage > 0.8 ? Looks.colors.danger : Looks.colors.accent
-                                Behavior on width { NumberAnimation { duration: 300 } }
+                                Behavior on width {
+                                    animation: Looks.transition.resize.createObject(this)
+                                }
                             }
                         }
                     }
@@ -398,7 +404,7 @@ WBarAttachedPanelContent {
                             MprisController.activePlayer.volume = Math.min(1, MprisController.activePlayer.volume + step)
                         else if (wheel.angleDelta.y < 0)
                             MprisController.activePlayer.volume = Math.max(0, MprisController.activePlayer.volume - step)
-                        
+
                         // Show volume feedback
                         mediaVolumeOverlay.opacity = 1
                         mediaVolumeHideTimer.restart()
@@ -486,7 +492,7 @@ WBarAttachedPanelContent {
                                     source: {
                                         const de = MprisController.activePlayer?.desktopEntry ?? "";
                                         const identity = (MprisController.activePlayer?.identity ?? "").toLowerCase();
-                                        
+
                                         // Special cases for common players
                                         if (identity.includes("spotify")) return Quickshell.iconPath("spotify", "");
                                         if (identity.includes("firefox")) return Quickshell.iconPath("firefox", "");
@@ -495,14 +501,14 @@ WBarAttachedPanelContent {
                                         if (identity.includes("vlc")) return Quickshell.iconPath("vlc", "");
                                         if (identity.includes("mpv")) return Quickshell.iconPath("mpv", "");
                                         if (identity.includes("youtube")) return Quickshell.iconPath("youtube", "");
-                                        
+
                                         // Try desktop entry icon
                                         const entry = DesktopEntries.byId(de) ?? DesktopEntries.heuristicLookup(de);
                                         if (entry?.icon) return Quickshell.iconPath(entry.icon, "");
-                                        
+
                                         // Fallback to identity as icon name
                                         if (identity) return Quickshell.iconPath(identity, "");
-                                        
+
                                         return "";
                                     }
                                     // Only show if loaded successfully
