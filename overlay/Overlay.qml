@@ -17,6 +17,10 @@ Scope {
         Region {}
     }
 
+    // Keep PanelWindow alive after first open for instant subsequent toggles.
+    // The Loader stays active once created; visibility is driven by GlobalStates.overlayOpen.
+    property bool _everOpened: false
+
     // Capture target screen when opening (don't follow focus while open)
     property var targetScreen: null
 
@@ -24,26 +28,34 @@ Scope {
         target: GlobalStates
         function onOverlayOpenChanged() {
             if (GlobalStates.overlayOpen) {
-                // Set target screen when opening for use by Component.onCompleted
+                // Mark as opened so the Loader stays active forever
+                root._everOpened = true
+                // Set target screen when opening
                 const outputName = NiriService.currentOutput
                 root.targetScreen = Quickshell.screens.find(s => s.name === outputName) ?? Quickshell.screens[0] ?? null
             }
         }
     }
-    
+
     Loader {
         id: overlayLoader
-        active: GlobalStates.overlayOpen
+        // Once opened, keep alive — no more destroy/recreate on every toggle
+        active: root._everOpened
         sourceComponent: PanelWindow {
             id: overlayWindow
+            // Visible only when overlay is open — this is the fast path
+            visible: GlobalStates.overlayOpen
+            // Follow the user to the correct monitor on each open
+            screen: root.targetScreen ?? Quickshell.screens[0]
             exclusionMode: ExclusionMode.Ignore
             WlrLayershell.namespace: "quickshell:overlay"
             WlrLayershell.layer: WlrLayer.Overlay
-            // Use OnDemand for pinned widgets, but disable during GameMode to avoid input capture
-            WlrLayershell.keyboardFocus: GlobalStates.overlayOpen 
-                ? WlrKeyboardFocus.Exclusive 
-                : (OverlayContext.clickableWidgets.length > 0 && !GameMode.active 
-                    ? WlrKeyboardFocus.OnDemand 
+            // Exclusive focus when open; OnDemand for pinned clickable widgets when closed;
+            // None otherwise (avoids input capture during GameMode)
+            WlrLayershell.keyboardFocus: GlobalStates.overlayOpen
+                ? WlrKeyboardFocus.Exclusive
+                : (OverlayContext.clickableWidgets.length > 0 && !GameMode.active
+                    ? WlrKeyboardFocus.OnDemand
                     : WlrKeyboardFocus.None)
             color: "transparent"
 
