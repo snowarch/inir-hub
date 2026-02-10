@@ -24,15 +24,25 @@ Scope {
     // Capture target screen when opening (don't follow focus while open)
     property var targetScreen: null
 
+    // Ready flag to ensure screen is set before window becomes visible
+    property bool _readyToShow: false
+
     Connections {
         target: GlobalStates
         function onOverlayOpenChanged() {
             if (GlobalStates.overlayOpen) {
+                // Hide first to ensure screen updates before showing
+                root._readyToShow = false
                 // Mark as opened so the Loader stays active forever
                 root._everOpened = true
                 // Set target screen when opening
                 const outputName = NiriService.currentOutput
                 root.targetScreen = Quickshell.screens.find(s => s.name === outputName) ?? Quickshell.screens[0] ?? null
+                console.log("[Overlay] Opening on output:", outputName, "targetScreen:", root.targetScreen?.name)
+                // Now ready to show on correct screen
+                root._readyToShow = true
+            } else {
+                root._readyToShow = false
             }
         }
     }
@@ -43,10 +53,8 @@ Scope {
         active: root._everOpened
         sourceComponent: PanelWindow {
             id: overlayWindow
-            // Visible only when overlay is open — this is the fast path
+            // Visible only when overlay is open
             visible: GlobalStates.overlayOpen
-            // Follow the user to the correct monitor on each open
-            screen: root.targetScreen ?? Quickshell.screens[0]
             exclusionMode: ExclusionMode.Ignore
             WlrLayershell.namespace: "quickshell:overlay"
             WlrLayershell.layer: WlrLayer.Overlay
