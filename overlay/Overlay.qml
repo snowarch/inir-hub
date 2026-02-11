@@ -21,6 +21,18 @@ Scope {
     // The Loader stays active once created; visibility is driven by GlobalStates.overlayOpen.
     property bool _everOpened: false
 
+    // Check persistent state directly to bootstrap the Loader before widgets register
+    readonly property bool _hasPersistentPins: {
+        const overlay = Persistent.states.overlay;
+        const openWidgets = overlay.open;
+        if (!openWidgets || openWidgets.length === 0) return false;
+        for (let i = 0; i < openWidgets.length; i++) {
+            const entry = overlay[openWidgets[i]];
+            if (entry && entry.pinned) return true;
+        }
+        return false;
+    }
+
     // Capture target screen when opening (don't follow focus while open)
     property var targetScreen: null
 
@@ -50,11 +62,12 @@ Scope {
     Loader {
         id: overlayLoader
         // Once opened, keep alive — no more destroy/recreate on every toggle
-        active: root._everOpened
+        // Also activate if persistent state has pinned widgets (bootstraps before widgets register)
+        active: root._everOpened || root._hasPersistentPins
         sourceComponent: PanelWindow {
             id: overlayWindow
-            // Visible only when overlay is open
-            visible: GlobalStates.overlayOpen
+            // Visible when overlay is open OR when there are pinned widgets to show
+            visible: GlobalStates.overlayOpen || OverlayContext.hasPinnedWidgets
             exclusionMode: ExclusionMode.Ignore
             WlrLayershell.namespace: "quickshell:overlay"
             WlrLayershell.layer: WlrLayer.Overlay
