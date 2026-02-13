@@ -2,7 +2,6 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-import QtMultimedia
 import Qt5Compat.GraphicalEffects
 import Quickshell
 import Quickshell.Io
@@ -57,12 +56,14 @@ WSettingsPage {
                     return "file://" + wallpaperPath;
                 }
 
+                onWallpaperPathChanged: if (wallpaperIsVideo) Wallpapers.ensureVideoFirstFrame(wallpaperPath)
+
                 // Static image
                 Image {
                     id: wallpaperPreview
                     anchors.fill: parent
                     fillMode: Image.PreserveAspectCrop
-                    source: parent.wallpaperUrl && !parent.wallpaperIsGif && !parent.wallpaperIsVideo ? parent.wallpaperUrl : ""
+                    source: (!parent.wallpaperIsGif && !parent.wallpaperIsVideo) ? parent.wallpaperUrl : ""
                     asynchronous: true
                     cache: false
                     visible: !parent.wallpaperIsGif && !parent.wallpaperIsVideo
@@ -77,7 +78,7 @@ WSettingsPage {
                     }
                 }
 
-                // Animated GIF
+                // GIF (frozen first frame)
                 AnimatedImage {
                     id: gifPreview
                     anchors.fill: parent
@@ -86,7 +87,7 @@ WSettingsPage {
                     asynchronous: true
                     cache: false
                     visible: parent.wallpaperIsGif
-                    playing: visible
+                    playing: false
 
                     layer.enabled: true
                     layer.effect: OpacityMask {
@@ -98,30 +99,19 @@ WSettingsPage {
                     }
                 }
 
-                // Video
-                Video {
+                // Video first-frame (frozen)
+                Image {
                     id: videoPreview
                     anchors.fill: parent
-                    source: parent.wallpaperIsVideo ? parent.wallpaperUrl : ""
-                    fillMode: VideoOutput.PreserveAspectCrop
+                    fillMode: Image.PreserveAspectCrop
                     visible: parent.wallpaperIsVideo
-                    loops: MediaPlayer.Infinite
-                    muted: true
-                    autoPlay: true
-
-                    onPlaybackStateChanged: {
-                        if (playbackState === MediaPlayer.StoppedState && visible) {
-                            play()
-                        }
+                    source: {
+                        const ff = Wallpapers.videoFirstFrames[parent.wallpaperPath]
+                        return ff ? (ff.startsWith("file://") ? ff : "file://" + ff) : ""
                     }
-
-                    onVisibleChanged: {
-                        if (visible) {
-                            play()
-                        } else {
-                            pause()
-                        }
-                    }
+                    asynchronous: true
+                    cache: false
+                    Component.onCompleted: Wallpapers.ensureVideoFirstFrame(parent.wallpaperPath)
 
                     layer.enabled: true
                     layer.effect: OpacityMask {
