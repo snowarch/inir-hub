@@ -2,6 +2,7 @@ pragma ComponentBehavior: Bound
 
 import qs
 import qs.modules.common
+import qs.services
 import QtQuick
 import QtQuick.Effects
 import QtMultimedia
@@ -31,11 +32,21 @@ Variants {
 
         color: "transparent"
 
+        // Multi-monitor wallpaper support
+        readonly property string _perMonitorMainPath: {
+            if (WallpaperListener.multiMonitorEnabled) {
+                const monName = WallpaperListener.getMonitorName(backdropWindow.modelData)
+                const data = WallpaperListener.effectivePerMonitor[monName]
+                if (data && data.path) return data.path
+            }
+            return Config.options?.background?.wallpaperPath ?? ""
+        }
+
         // Waffle backdrop config
         readonly property var wBackdrop: Config.options?.waffles?.background?.backdrop ?? {}
 
         readonly property int backdropBlurRadius: wBackdrop.blurRadius ?? 32
-        readonly property int thumbnailBlurStrength: Config.options?.background?.effects?.thumbnailBlurStrength ?? 50
+        readonly property int thumbnailBlurStrength: Config.options?.waffles?.background?.effects?.thumbnailBlurStrength ?? (Config.options?.background?.effects?.thumbnailBlurStrength ?? 50)
         readonly property bool enableAnimatedBlur: wBackdrop.enableAnimatedBlur ?? false
         readonly property int backdropDim: wBackdrop.dim ?? 35
         readonly property real backdropSaturation: (wBackdrop.saturation ?? 0) / 100.0
@@ -45,17 +56,30 @@ Variants {
         readonly property real vignetteRadius: wBackdrop.vignetteRadius ?? 0.7
         readonly property bool enableAnimation: wBackdrop.enableAnimation ?? false
 
+        // Per-monitor backdrop path (if multi-monitor enabled and monitor has custom backdrop)
+        readonly property string _perMonitorBackdropPath: {
+            if (WallpaperListener.multiMonitorEnabled) {
+                const monName = WallpaperListener.getMonitorName(backdropWindow.modelData)
+                const data = WallpaperListener.effectivePerMonitor[monName]
+                if (data && data.backdropPath) return data.backdropPath
+            }
+            return ""
+        }
+
         // Raw wallpaper path (before thumbnail substitution)
         readonly property string wallpaperPathRaw: {
             const useBackdropOwn = !(wBackdrop.useMainWallpaper ?? true);
-            if (useBackdropOwn && wBackdrop.wallpaperPath) {
-                return wBackdrop.wallpaperPath;
+            if (useBackdropOwn) {
+                // Per-monitor backdrop takes priority, then global backdrop
+                const perMonBd = _perMonitorBackdropPath
+                if (perMonBd) return perMonBd
+                if (wBackdrop.wallpaperPath) return wBackdrop.wallpaperPath
             }
             const wBg = Config.options?.waffles?.background ?? {};
             if (wBg.useMainWallpaper ?? true) {
-                return Config.options?.background?.wallpaperPath ?? "";
+                return _perMonitorMainPath;
             }
-            return wBg.wallpaperPath ?? "";
+            return wBg.wallpaperPath || _perMonitorMainPath;
         }
         
         readonly property bool wallpaperIsVideo: {
@@ -67,34 +91,7 @@ Variants {
             return wallpaperPathRaw.toLowerCase().endsWith(".gif");
         }
 
-        // Effective path: returns thumbnail if animation is disabled, otherwise raw path
-        readonly property string effectiveWallpaperPath: {
-            const selectedPath = wallpaperPathRaw;
-            
-            // If animation is enabled, use raw path for videos/GIFs
-            if (backdropWindow.enableAnimation && (backdropWindow.wallpaperIsVideo || backdropWindow.wallpaperIsGif)) {
-                return selectedPath;
-            }
-            
-            // If animation is disabled, use thumbnail for videos/GIFs
-            if (backdropWindow.wallpaperIsVideo || backdropWindow.wallpaperIsGif) {
-                // Priority: material ii thumbnail (actual frame) > backdrop thumbnail > waffle background thumbnail > fallback to video
-                const mainThumbnail = Config.options?.background?.thumbnailPath ?? "";
-                if (mainThumbnail) return mainThumbnail;
-                
-                const backdropThumbnail = wBackdrop.thumbnailPath ?? "";
-                if (backdropThumbnail) return backdropThumbnail;
-                
-                const wBg = Config.options?.waffles?.background ?? {};
-                const waffleThumbnail = wBg.thumbnailPath ?? "";
-                if (waffleThumbnail) return waffleThumbnail;
-                
-                // Fallback: return video path (will show as broken/icon)
-                return selectedPath;
-            }
-            
-            return selectedPath;
-        }
+        readonly property string effectiveWallpaperPath: wallpaperPathRaw
 
         // Build proper file:// URL
         readonly property string wallpaperUrl: {
@@ -107,29 +104,34 @@ Variants {
         Item {
             anchors.fill: parent
 
-            // Static Image (for non-animated wallpapers)
+            // Static Image (non-GIF, non-video images only)
             Image {
                 id: wallpaper
                 anchors.fill: parent
                 fillMode: Image.PreserveAspectCrop
-                source: backdropWindow.wallpaperUrl && !backdropWindow.wallpaperIsGif && !(backdropWindow.enableAnimation && backdropWindow.wallpaperIsVideo)
+                source: backdropWindow.wallpaperUrl && !backdropWindow.wallpaperIsGif && !backdropWindow.wallpaperIsVideo
                     ? backdropWindow.wallpaperUrl
                     : ""
                 asynchronous: true
                 cache: true
-                visible: !backdropWindow.wallpaperIsGif && !(backdropWindow.enableAnimation && backdropWindow.wallpaperIsVideo)
+                visible: !backdropWindow.wallpaperIsGif && !backdropWindow.wallpaperIsVideo
             }
             
-            // Animated GIF support (when enableAnimation is true)
+            // Animated GIF wallpaper
+            // Always loaded for GIFs: plays when animation enabled, frozen (first frame) when disabled
             AnimatedImage {
                 id: gifWallpaper
                 anchors.fill: parent
                 fillMode: Image.PreserveAspectCrop
-                source: backdropWindow.enableAnimation && backdropWindow.wallpaperIsGif ? backdropWindow.wallpaperUrl : ""
+                source: backdropWindow.wallpaperIsGif
+                    ? (backdropWindow.wallpaperPathRaw.startsWith("file://")
+                        ? backdropWindow.wallpaperPathRaw
+                        : "file://" + backdropWindow.wallpaperPathRaw)
+                    : ""
                 asynchronous: true
                 cache: true
-                visible: backdropWindow.enableAnimation && backdropWindow.wallpaperIsGif
-                playing: visible
+                visible: backdropWindow.wallpaperIsGif
+                playing: visible && backdropWindow.enableAnimation
 
                 layer.enabled: Appearance.effectsEnabled && backdropWindow.enableAnimatedBlur && backdropWindow.backdropBlurRadius > 0
                 layer.effect: MultiEffect {
@@ -141,31 +143,45 @@ Variants {
                 }
             }
 
-            // Video wallpaper support (when enableAnimation is true)
+            // Video wallpaper
+            // Always loaded for videos: plays when animation enabled, frozen (paused) when disabled
             Video {
                 id: videoWallpaper
                 anchors.fill: parent
-                visible: backdropWindow.enableAnimation && backdropWindow.wallpaperIsVideo
+                visible: backdropWindow.wallpaperIsVideo
                 source: {
-                    if (!backdropWindow.enableAnimation || !backdropWindow.wallpaperIsVideo) return "";
-                    const url = backdropWindow.wallpaperUrl;
-                    if (!url) return "";
-                    return url.startsWith("file://") ? url : ("file://" + url);
+                    if (!backdropWindow.wallpaperIsVideo) return "";
+                    const path = backdropWindow.wallpaperPathRaw;
+                    if (!path) return "";
+                    return path.startsWith("file://") ? path : ("file://" + path);
                 }
                 fillMode: VideoOutput.PreserveAspectCrop
                 loops: MediaPlayer.Infinite
                 muted: true
                 autoPlay: true
 
+                readonly property bool shouldPlay: backdropWindow.enableAnimation
+
                 onPlaybackStateChanged: {
-                    if (playbackState === MediaPlayer.StoppedState && visible && backdropWindow.enableAnimation && backdropWindow.wallpaperIsVideo) {
+                    if (playbackState === MediaPlayer.PlayingState && !shouldPlay) {
+                        pause()
+                    }
+                    if (playbackState === MediaPlayer.StoppedState && visible && shouldPlay) {
                         play()
                     }
                 }
 
+                onShouldPlayChanged: {
+                    if (visible && backdropWindow.wallpaperIsVideo) {
+                        if (shouldPlay) play()
+                        else pause()
+                    }
+                }
+
                 onVisibleChanged: {
-                    if (visible && backdropWindow.enableAnimation && backdropWindow.wallpaperIsVideo) {
-                        play()
+                    if (visible && backdropWindow.wallpaperIsVideo) {
+                        if (shouldPlay) play()
+                        else pause()
                     } else {
                         pause()
                     }
@@ -181,11 +197,11 @@ Variants {
                 }
             }
 
-            // Blur effect (disabled for videos and GIFs for performance)
+            // Blur effect (only for static images)
             MultiEffect {
                 anchors.fill: parent
                 source: wallpaper
-                visible: wallpaper.status === Image.Ready && !backdropWindow.wallpaperIsGif && !(backdropWindow.enableAnimation && backdropWindow.wallpaperIsVideo)
+                visible: wallpaper.status === Image.Ready && !backdropWindow.wallpaperIsGif && !backdropWindow.wallpaperIsVideo
                 blurEnabled: backdropWindow.backdropBlurRadius > 0
                 blur: backdropWindow.backdropBlurRadius / 100.0
                 blurMax: 64

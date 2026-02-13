@@ -24,8 +24,16 @@ Variants {
         readonly property var wBg: Config.options?.waffles?.background ?? {}
         readonly property var wEffects: wBg.effects ?? {}
 
-        // Wallpaper source
+        // Multi-monitor wallpaper support
+        readonly property bool _multiMonEnabled: WallpaperListener.multiMonitorEnabled
+        readonly property string _monitorName: WallpaperListener.getMonitorName(panelRoot.modelData)
+        readonly property var _perMonitorData: _multiMonEnabled
+            ? (WallpaperListener.effectivePerMonitor[_monitorName] ?? { path: "" })
+            : ({ path: "" })
+
+        // Wallpaper source — per-monitor when multi-monitor enabled, otherwise config
         readonly property string wallpaperSourceRaw: {
+            if (_multiMonEnabled && _perMonitorData.path) return _perMonitorData.path;
             if (wBg.useMainWallpaper ?? true) return Config.options?.background?.wallpaperPath ?? "";
             return wBg.wallpaperPath || Config.options?.background?.wallpaperPath || "";
         }
@@ -101,7 +109,7 @@ Variants {
         property bool focusWindowsPresent: !GlobalStates.screenLocked && hasWindowsOnCurrentWorkspace
         property real focusPresenceProgress: focusWindowsPresent ? 1 : 0
         Behavior on focusPresenceProgress {
-            NumberAnimation { duration: 220; easing.type: Easing.OutCubic }
+            animation: Looks.transition.opacity.createObject(this)
         }
 
         // Blur progress
@@ -119,29 +127,34 @@ Variants {
             anchors.fill: parent
             clip: true
 
-            // Static Image (for non-animated wallpapers OR thumbnails when animation disabled)
+            // Static Image (non-GIF, non-video images only)
             Image {
                 id: wallpaper
                 anchors.fill: parent
                 fillMode: Image.PreserveAspectCrop
-                source: panelRoot.wallpaperUrl && ((!panelRoot.wallpaperIsGif && !panelRoot.wallpaperIsVideo) || !panelRoot.enableAnimation)
+                source: panelRoot.wallpaperUrl && !panelRoot.wallpaperIsGif && !panelRoot.wallpaperIsVideo
                     ? panelRoot.wallpaperUrl
                     : ""
                 asynchronous: true
                 cache: true
-                visible: ((!panelRoot.wallpaperIsGif && !panelRoot.wallpaperIsVideo) || !panelRoot.enableAnimation) && status === Image.Ready && !blurEffect.visible
+                visible: !panelRoot.wallpaperIsGif && !panelRoot.wallpaperIsVideo && status === Image.Ready && !blurEffect.visible
             }
 
-            // Animated GIF support (only when animation enabled)
+            // Animated GIF wallpaper
+            // Always loaded for GIFs: plays when animation enabled, frozen (first frame) when disabled
             AnimatedImage {
                 id: gifWallpaper
                 anchors.fill: parent
                 fillMode: Image.PreserveAspectCrop
-                source: (panelRoot.wallpaperIsGif && panelRoot.enableAnimation) ? panelRoot.wallpaperUrl : ""
+                source: panelRoot.wallpaperIsGif
+                    ? (panelRoot.wallpaperSourceRaw.startsWith("file://")
+                        ? panelRoot.wallpaperSourceRaw
+                        : "file://" + panelRoot.wallpaperSourceRaw)
+                    : ""
                 asynchronous: true
                 cache: true
-                visible: panelRoot.wallpaperIsGif && panelRoot.enableAnimation && !blurEffect.visible
-                playing: visible
+                visible: panelRoot.wallpaperIsGif && !blurEffect.visible
+                playing: visible && panelRoot.enableAnimation
 
                 layer.enabled: Appearance.effectsEnabled && panelRoot.enableAnimatedBlur && (panelRoot.wEffects.blurRadius ?? 0) > 0
                 layer.effect: MultiEffect {
@@ -151,32 +164,45 @@ Variants {
                 }
             }
 
-            // Video wallpaper (Qt Multimedia - only when animation enabled)
+            // Video wallpaper (Qt Multimedia)
+            // Always loaded for videos: plays when animation enabled, frozen (paused) when disabled
             Video {
                 id: videoWallpaper
                 anchors.fill: parent
-                visible: panelRoot.wallpaperIsVideo && panelRoot.enableAnimation && !blurEffect.visible
+                visible: panelRoot.wallpaperIsVideo && !blurEffect.visible
                 source: {
-                    if (!panelRoot.wallpaperIsVideo || !panelRoot.enableAnimation) return "";
-                    const url = panelRoot.wallpaperUrl;
-                    if (!url) return "";
-                    // Qt Multimedia needs file:// URL format
-                    return url.startsWith("file://") ? url : ("file://" + url);
+                    if (!panelRoot.wallpaperIsVideo) return "";
+                    const path = panelRoot.wallpaperSourceRaw;
+                    if (!path) return "";
+                    return path.startsWith("file://") ? path : ("file://" + path);
                 }
                 fillMode: VideoOutput.PreserveAspectCrop
                 loops: MediaPlayer.Infinite
                 muted: true
                 autoPlay: true
 
+                readonly property bool shouldPlay: panelRoot.enableAnimation
+
                 onPlaybackStateChanged: {
-                    if (playbackState === MediaPlayer.StoppedState && visible && panelRoot.wallpaperIsVideo && panelRoot.enableAnimation) {
+                    if (playbackState === MediaPlayer.PlayingState && !shouldPlay) {
+                        pause()
+                    }
+                    if (playbackState === MediaPlayer.StoppedState && visible && shouldPlay) {
                         play()
                     }
                 }
 
+                onShouldPlayChanged: {
+                    if (visible && panelRoot.wallpaperIsVideo) {
+                        if (shouldPlay) play()
+                        else pause()
+                    }
+                }
+
                 onVisibleChanged: {
-                    if (visible && panelRoot.wallpaperIsVideo && panelRoot.enableAnimation) {
-                        play()
+                    if (visible && panelRoot.wallpaperIsVideo) {
+                        if (shouldPlay) play()
+                        else pause()
                     } else {
                         pause()
                     }
@@ -190,7 +216,7 @@ Variants {
                 }
             }
 
-            // Blur effect - disabled for videos and GIFs (performance)
+            // Blur effect - only for static images (performance)
             MultiEffect {
                 id: blurEffect
                 anchors.fill: parent
