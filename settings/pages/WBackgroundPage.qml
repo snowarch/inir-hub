@@ -2,6 +2,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import Qt5Compat.GraphicalEffects
 import Quickshell
 import qs.services
 import qs.modules.common
@@ -42,6 +43,512 @@ WSettingsPage {
                 Quickshell.execDetached(["/usr/bin/qs", "-c", "ii", "ipc", "call", "wallpaperSelector", "toggle"])
             }
         }
+
+        WSettingsSwitch {
+            label: Translation.tr("Per-monitor wallpapers")
+            icon: "monitor"
+            description: Translation.tr("Set different wallpapers for each monitor")
+            checked: Config.options?.background?.multiMonitor?.enable ?? false
+            onCheckedChanged: {
+                Config.setNestedValue("background.multiMonitor.enable", checked)
+                if (!checked) {
+                    const globalPath = Config.options?.background?.wallpaperPath ?? ""
+                    if (globalPath) {
+                        Wallpapers.apply(globalPath, Appearance.m3colors.darkmode)
+                    }
+                }
+            }
+        }
+    }
+
+    // Multi-monitor management card
+    WSettingsCard {
+        id: multiMonCard
+        visible: Config.options?.background?.multiMonitor?.enable ?? false
+        title: Translation.tr("Monitor Wallpapers")
+        icon: "desktop"
+
+        property string selectedMonitor: {
+            const screens = Quickshell.screens
+            if (!screens || screens.length === 0) return ""
+            return WallpaperListener.getMonitorName(screens[0]) ?? ""
+        }
+
+        readonly property var selMonData: WallpaperListener.effectivePerMonitor[selectedMonitor] ?? { path: "", isVideo: false, isGif: false, isAnimated: false, hasCustomWallpaper: false }
+        readonly property string selMonPath: selMonData.path || (Config.options?.background?.wallpaperPath ?? "")
+
+        // Visual monitor layout
+        Item {
+            Layout.fillWidth: true
+            Layout.leftMargin: Looks.spacing.normal
+            Layout.rightMargin: Looks.spacing.normal
+            Layout.bottomMargin: Looks.spacing.small
+            implicitHeight: 140
+
+            Rectangle {
+                anchors.fill: parent
+                radius: Looks.radius.small
+                color: Looks.colors.bg1
+                border.width: 1
+                border.color: Looks.colors.bg2Border
+
+                Row {
+                    anchors.centerIn: parent
+                    spacing: Looks.spacing.small
+                    height: parent.height - Looks.spacing.normal
+
+                    Repeater {
+                        model: Quickshell.screens
+
+                        Rectangle {
+                            id: wMonitorCard
+                            required property var modelData
+                            required property int index
+
+                            readonly property string monName: WallpaperListener.getMonitorName(modelData) ?? ""
+                            readonly property var wpData: WallpaperListener.effectivePerMonitor[monName] ?? { path: "" }
+                            readonly property string wpPath: wpData.path || (Config.options?.background?.wallpaperPath ?? "")
+                            readonly property bool isSelected: monName === multiMonCard.selectedMonitor
+                            readonly property real aspectRatio: modelData.width / Math.max(1, modelData.height)
+
+                            onWpPathChanged: if (WallpaperListener.isVideoPath(wpPath)) Wallpapers.ensureVideoFirstFrame(wpPath)
+
+                            width: (parent.height) * aspectRatio
+                            height: parent.height
+                            radius: Looks.radius.small
+                            color: "transparent"
+                            border.width: isSelected ? 2 : 1
+                            border.color: isSelected ? Looks.colors.accent : Looks.colors.bg2Border
+                            clip: true
+
+                            scale: isSelected ? 1.0 : (wMonCardMa.containsMouse ? 0.97 : 0.93)
+                            opacity: isSelected ? 1.0 : (wMonCardMa.containsMouse ? 0.95 : 0.8)
+                            Behavior on scale {
+                                animation: Looks.transition.number.createObject(this)
+                            }
+                            Behavior on opacity {
+                                animation: Looks.transition.number.createObject(this)
+                            }
+                            Behavior on border.color {
+                                animation: Looks.transition.color.createObject(this)
+                            }
+
+                            MouseArea {
+                                id: wMonCardMa
+                                anchors.fill: parent
+                                cursorShape: Qt.PointingHandCursor
+                                hoverEnabled: true
+                                onClicked: multiMonCard.selectedMonitor = wMonitorCard.monName
+                            }
+
+                            Image {
+                                visible: !WallpaperListener.isVideoPath(wMonitorCard.wpPath) && !WallpaperListener.isGifPath(wMonitorCard.wpPath)
+                                anchors.fill: parent
+                                anchors.margins: wMonitorCard.border.width
+                                fillMode: Image.PreserveAspectCrop
+                                source: (!WallpaperListener.isVideoPath(wMonitorCard.wpPath) && !WallpaperListener.isGifPath(wMonitorCard.wpPath)) ? (wMonitorCard.wpPath || "") : ""
+                                sourceSize.width: 200
+                                sourceSize.height: 200
+                                cache: true
+                                asynchronous: true
+                                layer.enabled: true
+                                layer.effect: OpacityMask {
+                                    maskSource: Rectangle {
+                                        width: wMonitorCard.width - wMonitorCard.border.width * 2
+                                        height: wMonitorCard.height - wMonitorCard.border.width * 2
+                                        radius: Math.max(0, Looks.radius.small - wMonitorCard.border.width)
+                                    }
+                                }
+                            }
+                            AnimatedImage {
+                                visible: WallpaperListener.isGifPath(wMonitorCard.wpPath)
+                                anchors.fill: parent
+                                anchors.margins: wMonitorCard.border.width
+                                fillMode: Image.PreserveAspectCrop
+                                source: {
+                                    if (!WallpaperListener.isGifPath(wMonitorCard.wpPath)) return ""
+                                    const p = wMonitorCard.wpPath
+                                    return p.startsWith("file://") ? p : "file://" + p
+                                }
+                                asynchronous: true
+                                cache: true
+                                playing: false
+                            }
+                            Image {
+                                visible: WallpaperListener.isVideoPath(wMonitorCard.wpPath)
+                                anchors.fill: parent
+                                anchors.margins: wMonitorCard.border.width
+                                fillMode: Image.PreserveAspectCrop
+                                source: {
+                                    const ff = Wallpapers.videoFirstFrames[wMonitorCard.wpPath]
+                                    return ff ? (ff.startsWith("file://") ? ff : "file://" + ff) : ""
+                                }
+                                cache: true
+                                asynchronous: true
+                                Component.onCompleted: Wallpapers.ensureVideoFirstFrame(wMonitorCard.wpPath)
+                            }
+
+                            // Media type badge (video/gif)
+                            Rectangle {
+                                visible: WallpaperListener.isAnimatedPath(wMonitorCard.wpPath)
+                                anchors.top: parent.top
+                                anchors.left: parent.left
+                                anchors.margins: Looks.spacing.small
+                                width: wMediaBadgeRow.implicitWidth + Looks.spacing.small * 2
+                                height: wMediaBadgeRow.implicitHeight + 4
+                                radius: height / 2
+                                color: Qt.rgba(0, 0, 0, 0.65)
+                                Row {
+                                    id: wMediaBadgeRow
+                                    anchors.centerIn: parent
+                                    spacing: 3
+                                    FluentIcon {
+                                        icon: WallpaperListener.isVideoPath(wMonitorCard.wpPath) ? "video" : "gif"
+                                        implicitSize: Looks.font.pixelSize.small - 2
+                                        color: "white"
+                                        anchors.verticalCenter: parent.verticalCenter
+                                    }
+                                    WText {
+                                        text: WallpaperListener.mediaTypeLabel(wMonitorCard.wpPath)
+                                        font.pixelSize: Looks.font.pixelSize.small
+                                        color: "white"
+                                        anchors.verticalCenter: parent.verticalCenter
+                                    }
+                                }
+                            }
+
+                            // Bottom label gradient overlay
+                            Rectangle {
+                                anchors.bottom: parent.bottom
+                                anchors.left: parent.left
+                                anchors.right: parent.right
+                                height: Math.max(wMonLabelCol.implicitHeight + 12, parent.height * 0.45)
+                                gradient: Gradient {
+                                    GradientStop { position: 0.0; color: "transparent" }
+                                    GradientStop { position: 0.55; color: Qt.rgba(0, 0, 0, 0.35) }
+                                    GradientStop { position: 1.0; color: Qt.rgba(0, 0, 0, 0.8) }
+                                }
+                                ColumnLayout {
+                                    id: wMonLabelCol
+                                    anchors.bottom: parent.bottom
+                                    anchors.horizontalCenter: parent.horizontalCenter
+                                    anchors.bottomMargin: Looks.spacing.small
+                                    spacing: 0
+                                    WText {
+                                        Layout.alignment: Qt.AlignHCenter
+                                        text: wMonitorCard.monName || ("Monitor " + (wMonitorCard.index + 1))
+                                        font.pixelSize: Looks.font.pixelSize.small
+                                        font.weight: Font.Medium
+                                        color: "white"
+                                    }
+                                    WText {
+                                        Layout.alignment: Qt.AlignHCenter
+                                        text: wMonitorCard.modelData.width + "×" + wMonitorCard.modelData.height
+                                        font.pixelSize: Looks.font.pixelSize.small
+                                        color: Qt.rgba(1, 1, 1, 0.6)
+                                    }
+                                }
+                            }
+
+                            // Selected check badge
+                            Rectangle {
+                                visible: wMonitorCard.isSelected
+                                anchors.top: parent.top
+                                anchors.right: parent.right
+                                anchors.margins: 4
+                                width: 16; height: 16
+                                radius: 8
+                                color: Looks.colors.accent
+                                FluentIcon {
+                                    anchors.centerIn: parent
+                                    icon: "checkmark"
+                                    implicitSize: 10
+                                    color: Looks.colors.accentFg
+                                }
+                            }
+
+                            // Custom wallpaper indicator dot
+                            Rectangle {
+                                visible: (wMonitorCard.wpData.hasCustomWallpaper ?? false) && !wMonitorCard.isSelected
+                                anchors.top: parent.top
+                                anchors.right: parent.right
+                                anchors.margins: 6
+                                width: 7; height: 7
+                                radius: 4
+                                color: Looks.colors.accent
+                                opacity: 0.8
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // Unified preview + controls card
+        Item {
+            Layout.fillWidth: true
+            Layout.leftMargin: 16
+            Layout.rightMargin: 16
+            Layout.bottomMargin: 4
+            implicitHeight: wMonPreviewCard.implicitHeight
+
+            Rectangle {
+                id: wMonPreviewCard
+                anchors.fill: parent
+                implicitHeight: wMonPreviewCol.implicitHeight
+                radius: Looks.radius.large
+                color: Looks.colors.bg2Base
+                border.width: 1
+                border.color: Looks.colors.bg2Border
+                clip: true
+
+                readonly property string wpUrl: {
+                    const path = multiMonCard.selMonPath
+                    if (!path) return ""
+                    return path.startsWith("file://") ? path : "file://" + path
+                }
+                readonly property bool isVideo: WallpaperListener.isVideoPath(multiMonCard.selMonPath)
+                readonly property bool isGif: WallpaperListener.isGifPath(multiMonCard.selMonPath)
+
+                Connections {
+                    target: multiMonCard
+                    function onSelMonPathChanged() {
+                        if (wMonPreviewCard.isVideo) Wallpapers.ensureVideoFirstFrame(multiMonCard.selMonPath)
+                    }
+                }
+
+                ColumnLayout {
+                    id: wMonPreviewCol
+                    anchors { left: parent.left; right: parent.right }
+                    spacing: 0
+
+                    // Hero preview area — frozen first frame for videos/GIFs to save resources
+                    Item {
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: 140
+                        clip: true
+
+                        Image {
+                            id: wMonPreviewImage
+                            visible: !wMonPreviewCard.isGif && !wMonPreviewCard.isVideo
+                            anchors.fill: parent
+                            fillMode: Image.PreserveAspectCrop
+                            source: visible ? wMonPreviewCard.wpUrl : ""
+                            asynchronous: true
+                            cache: false
+                        }
+
+                        AnimatedImage {
+                            id: wMonPreviewGif
+                            visible: wMonPreviewCard.isGif
+                            anchors.fill: parent
+                            fillMode: Image.PreserveAspectCrop
+                            source: visible ? wMonPreviewCard.wpUrl : ""
+                            asynchronous: true
+                            cache: false
+                            playing: false
+                        }
+
+                        Image {
+                            id: wMonPreviewVideo
+                            visible: wMonPreviewCard.isVideo
+                            anchors.fill: parent
+                            fillMode: Image.PreserveAspectCrop
+                            source: {
+                                const ff = Wallpapers.videoFirstFrames[multiMonCard.selMonPath]
+                                return ff ? (ff.startsWith("file://") ? ff : "file://" + ff) : ""
+                            }
+                            asynchronous: true
+                            cache: false
+                            Component.onCompleted: Wallpapers.ensureVideoFirstFrame(multiMonCard.selMonPath)
+                        }
+
+                        // Bottom gradient overlay with monitor info
+                        Rectangle {
+                            anchors.bottom: parent.bottom
+                            anchors.left: parent.left
+                            anchors.right: parent.right
+                            height: parent.height * 0.55
+                            gradient: Gradient {
+                                GradientStop { position: 0.0; color: "transparent" }
+                                GradientStop { position: 0.5; color: Qt.rgba(0, 0, 0, 0.4) }
+                                GradientStop { position: 1.0; color: Qt.rgba(0, 0, 0, 0.8) }
+                            }
+
+                            RowLayout {
+                                anchors {
+                                    bottom: parent.bottom; left: parent.left; right: parent.right
+                                    margins: 10; bottomMargin: 8
+                                }
+                                spacing: 6
+
+                                ColumnLayout {
+                                    Layout.fillWidth: true
+                                    spacing: 1
+                                    WText {
+                                        text: multiMonCard.selectedMonitor || Translation.tr("No monitor selected")
+                                        font.pixelSize: Looks.font.pixelSize.large
+                                        font.weight: Font.DemiBold
+                                        color: "#ffffff"
+                                    }
+                                    WText {
+                                        text: {
+                                            const custom = multiMonCard.selMonData.hasCustomWallpaper ?? false
+                                            const animated = multiMonCard.selMonData.isAnimated ?? false
+                                            let label = custom ? Translation.tr("Custom wallpaper") : Translation.tr("Global wallpaper")
+                                            if (animated) label += " · " + WallpaperListener.mediaTypeLabel(multiMonCard.selMonPath)
+                                            return label
+                                        }
+                                        font.pixelSize: Looks.font.pixelSize.small - 1
+                                        color: Qt.rgba(1, 1, 1, 0.7)
+                                    }
+                                }
+
+                                // Media type badge
+                                Rectangle {
+                                    visible: wMonPreviewCard.isVideo || wMonPreviewCard.isGif
+                                    width: wPreviewBadgeRow.implicitWidth + 8
+                                    height: 18
+                                    radius: 9
+                                    color: Qt.rgba(1, 1, 1, 0.15)
+                                    Row {
+                                        id: wPreviewBadgeRow
+                                        anchors.centerIn: parent
+                                        spacing: 3
+                                        FluentIcon {
+                                            icon: WallpaperListener.isVideoPath(multiMonCard.selMonPath) ? "video" : "gif"
+                                            implicitSize: 8
+                                            color: "#ffffff"
+                                            anchors.verticalCenter: parent.verticalCenter
+                                        }
+                                        WText {
+                                            text: WallpaperListener.mediaTypeLabel(multiMonCard.selMonPath)
+                                            font.pixelSize: Looks.font.pixelSize.small - 2
+                                            color: "#ffffff"
+                                            anchors.verticalCenter: parent.verticalCenter
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    // Separator
+                    Rectangle {
+                        Layout.fillWidth: true
+                        implicitHeight: 1
+                        color: Looks.colors.bg2Border
+                        opacity: 0.5
+                    }
+
+                    // Controls section
+                    ColumnLayout {
+                        Layout.fillWidth: true
+                        Layout.margins: 12
+                        Layout.topMargin: 10
+                        Layout.bottomMargin: 12
+                        spacing: 8
+
+                        // Wallpaper path
+                        WText {
+                            Layout.fillWidth: true
+                            elide: Text.ElideMiddle
+                            font.pixelSize: Looks.font.pixelSize.small
+                            color: Looks.colors.subfg
+                            opacity: 0.7
+                            text: multiMonCard.selMonPath ? String(multiMonCard.selMonPath).replace(/^file:\/\//, "") : Translation.tr("No wallpaper set")
+                        }
+
+                        // Primary actions: Change + Random
+                        RowLayout {
+                            Layout.fillWidth: true
+                            spacing: 6
+                            WButton {
+                                Layout.fillWidth: true
+                                text: Translation.tr("Change")
+                                icon.name: "image"
+                                colBackground: Looks.colors.accent
+                                colBackgroundHover: Looks.colors.accentHover
+                                colBackgroundActive: Looks.colors.accentActive
+                                colForeground: Looks.colors.accentFg
+                                onClicked: {
+                                    const mon = multiMonCard.selectedMonitor
+                                    if (mon) {
+                                        Config.setNestedValue("wallpaperSelector.selectionTarget", "main")
+                                        Config.setNestedValue("wallpaperSelector.targetMonitor", mon)
+                                        Quickshell.execDetached(["/usr/bin/qs", "-c", "ii", "ipc", "call", "wallpaperSelector", "toggle"])
+                                    }
+                                }
+                            }
+                            WButton {
+                                Layout.fillWidth: true
+                                text: Translation.tr("Random")
+                                icon.name: "arrow-shuffle"
+                                colBackground: Looks.colors.bg2
+                                colBackgroundHover: Looks.colors.bg2Hover
+                                colBackgroundActive: Looks.colors.bg2Active
+                                colForeground: Looks.colors.fg
+                                onClicked: {
+                                    const mon = multiMonCard.selectedMonitor
+                                    if (mon) {
+                                        Wallpapers.randomFromCurrentFolder(Appearance.m3colors.darkmode, mon)
+                                    }
+                                }
+                            }
+                        }
+
+                        // Secondary actions: Reset + Apply all
+                        RowLayout {
+                            Layout.fillWidth: true
+                            spacing: 6
+                            WButton {
+                                Layout.fillWidth: true
+                                text: Translation.tr("Reset to global")
+                                icon.name: "arrow-reset"
+                                colBackground: Looks.colors.bg2
+                                colBackgroundHover: Looks.colors.bg2Hover
+                                colBackgroundActive: Looks.colors.bg2Active
+                                colForeground: Looks.colors.fg
+                                onClicked: {
+                                    const mon = multiMonCard.selectedMonitor
+                                    if (!mon) return
+                                    const globalPath = Config.options?.background?.wallpaperPath ?? ""
+                                    if (globalPath) {
+                                        Wallpapers.select(globalPath, Appearance.m3colors.darkmode, mon)
+                                    }
+                                }
+                            }
+                            WButton {
+                                Layout.fillWidth: true
+                                text: Translation.tr("Apply to all")
+                                icon.name: "select-all-on"
+                                colBackground: Looks.colors.bg2
+                                colBackgroundHover: Looks.colors.bg2Hover
+                                colBackgroundActive: Looks.colors.bg2Active
+                                colForeground: Looks.colors.fg
+                                onClicked: {
+                                    const globalPath = Config.options?.background?.wallpaperPath ?? ""
+                                    if (globalPath) {
+                                        Wallpapers.apply(globalPath, Appearance.m3colors.darkmode)
+                                    }
+                                }
+                            }
+                        }
+
+                        // Info bar
+                        WText {
+                            Layout.fillWidth: true
+                            Layout.topMargin: 2
+                            font.pixelSize: Looks.font.pixelSize.small - 2
+                            color: Looks.colors.subfg
+                            opacity: 0.6
+                            text: Translation.tr("%1 monitors detected").arg(WallpaperListener.screenCount) + "  ·  " + Translation.tr("Ctrl+Alt+T targets focused output")
+                            wrapMode: Text.WordWrap
+                        }
+                    }
+                }
+            }
+        }
     }
     
     WSettingsCard {
@@ -51,7 +558,7 @@ WSettingsPage {
         WSettingsSwitch {
             label: Translation.tr("Enable animated wallpapers (videos/GIFs)")
             icon: "play"
-            description: Translation.tr("Play videos and GIFs as wallpaper. When disabled, shows thumbnail instead")
+            description: Translation.tr("Play videos and GIFs as wallpaper. When disabled, shows a frozen frame")
             checked: root.wBg.enableAnimation ?? true
             onCheckedChanged: Config.setNestedValue("waffles.background.enableAnimation", checked)
         }
@@ -162,6 +669,20 @@ WSettingsPage {
             onButtonClicked: {
                 Config.setNestedValue("wallpaperSelector.selectionTarget", "waffle-backdrop")
                 Quickshell.execDetached(["/usr/bin/qs", "-c", "ii", "ipc", "call", "wallpaperSelector", "toggle"])
+            }
+        }
+
+        WSettingsSwitch {
+            visible: root.wBackdrop.enable ?? true
+            label: Translation.tr("Derive theme colors from backdrop")
+            icon: "color"
+            description: Translation.tr("Generate theme colors from the backdrop wallpaper instead of the main wallpaper")
+            checked: Config.options?.appearance?.wallpaperTheming?.useBackdropForColors ?? false
+            onCheckedChanged: {
+                Config.setNestedValue("appearance.wallpaperTheming.useBackdropForColors", checked)
+                if (checked && !(root.wBackdrop.useMainWallpaper ?? true)) {
+                    Quickshell.execDetached([Directories.wallpaperSwitchScriptPath, "--noswitch"])
+                }
             }
         }
         
