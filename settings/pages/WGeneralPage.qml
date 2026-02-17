@@ -134,7 +134,7 @@ WSettingsPage {
         WSettingsSwitch {
             label: Translation.tr("Notification sounds")
             icon: "alert-filled"
-            checked: Config.options?.sounds?.notifications ?? false
+            checked: Config.options?.sounds?.notifications ?? true
             onCheckedChanged: Config.setNestedValue("sounds.notifications", checked)
         }
     }
