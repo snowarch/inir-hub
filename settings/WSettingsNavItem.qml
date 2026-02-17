@@ -13,7 +13,7 @@ Button {
     property bool selected: false
     property bool expanded: true
     
-    implicitHeight: 36
+    implicitHeight: 40
     implicitWidth: expanded ? 220 : 48
     
     background: Rectangle {
@@ -48,18 +48,18 @@ Button {
     }
     
     contentItem: RowLayout {
-        spacing: 10
+        spacing: 12
         
         Item {
             implicitWidth: 20
             implicitHeight: 20
-            Layout.leftMargin: root.expanded ? 12 : 14
+            Layout.leftMargin: root.expanded ? 14 : 14
             
             FluentIcon {
                 anchors.centerIn: parent
                 icon: root.navIcon
-                implicitSize: 16
-                color: root.selected ? Looks.colors.accent : Looks.colors.subfg
+                implicitSize: 18
+                color: root.selected ? Looks.colors.fg : Looks.colors.subfg
                 
                 Behavior on color {
                     animation: Looks.transition.color.createObject(this)
@@ -71,7 +71,7 @@ Button {
             visible: root.expanded
             Layout.fillWidth: true
             text: root.text
-            font.pixelSize: Looks.font.pixelSize.normal
+            font.pixelSize: Looks.font.pixelSize.large
             font.weight: root.selected ? Looks.font.weight.regular : Looks.font.weight.thin
             color: root.selected ? Looks.colors.fg : Looks.colors.subfg
             elide: Text.ElideRight

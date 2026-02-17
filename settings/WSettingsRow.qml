@@ -137,6 +137,13 @@ Item {
         color: Looks.colors.accent
         opacity: 0
     }
+
+    SequentialAnimation {
+        id: highlightAnim
+        NumberAnimation { target: highlightOverlay; property: "opacity"; to: 0.18; duration: 200; easing.type: Easing.OutCubic }
+        PauseAnimation { duration: 600 }
+        NumberAnimation { target: highlightOverlay; property: "opacity"; to: 0; duration: 400; easing.type: Easing.InCubic }
+    }
     
     MouseArea {
         id: mouseArea

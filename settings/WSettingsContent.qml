@@ -301,17 +301,17 @@ Item {
                 // Header with app name (expanded)
                 RowLayout {
                     Layout.fillWidth: true
-                    Layout.bottomMargin: 4
+                    Layout.bottomMargin: 8
                     spacing: 10
                     visible: root.navExpanded
                     
                     WText {
                         Layout.fillWidth: true
-                        Layout.leftMargin: 4
+                        Layout.leftMargin: 6
                         text: Translation.tr("Settings")
-                        font.pixelSize: Looks.font.pixelSize.normal
-                        font.weight: Looks.font.weight.regular
-                        color: Looks.colors.subfg
+                        font.pixelSize: Looks.font.pixelSize.larger
+                        font.weight: Looks.font.weight.strong
+                        color: Looks.colors.fg
                     }
                     
                     WBorderlessButton {
@@ -636,7 +636,7 @@ Item {
                     ColumnLayout {
                         id: navColumn
                         width: parent.width
-                        spacing: 2
+                        spacing: 4
                         
                         Repeater {
                             model: root.pages

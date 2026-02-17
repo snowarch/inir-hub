@@ -32,7 +32,8 @@ WBarAttachedPanelContent {
         spacing: 12
 
         WPane {
-            opacity: (MprisController.activePlayer != null && MprisController.isRealPlayer(MprisController.activePlayer)) ? 1 : 0
+            readonly property bool hasActivePlayer: MprisController.activePlayer != null && MprisController.isRealPlayer(MprisController.activePlayer)
+            visible: hasActivePlayer
             Layout.fillWidth: true
             contentItem: MediaPaneContent {}
         }

@@ -30,7 +30,315 @@ WSettingsPage {
         return WallpaperListener.getMonitorName(screens[0]) ?? ""
     }
 
-    // Wallpaper section
+    // Current wallpaper path helper
+    readonly property string currentWallpaperPath: {
+        if (multiMonitorEnabled && targetMonitor) {
+            const data = WallpaperListener.effectivePerMonitor[targetMonitor] ?? {}
+            return data.path || (Config.options?.background?.wallpaperPath ?? "")
+        }
+        const useMain = Config.options?.waffles?.background?.useMainWallpaper ?? true
+        if (useMain) return Config.options?.background?.wallpaperPath ?? ""
+        return Config.options?.waffles?.background?.wallpaperPath ?? Config.options?.background?.wallpaperPath ?? ""
+    }
+    readonly property string currentWpUrl: {
+        if (!currentWallpaperPath) return ""
+        return currentWallpaperPath.startsWith("file://") ? currentWallpaperPath : "file://" + currentWallpaperPath
+    }
+    readonly property bool wpIsVideo: WallpaperListener.isVideoPath(currentWallpaperPath)
+    readonly property bool wpIsGif: WallpaperListener.isGifPath(currentWallpaperPath)
+
+    // ─── Hero section: wallpaper preview + thumbnail grid (Win11 style) ───
+    Item {
+        Layout.fillWidth: true
+        implicitHeight: heroRow.implicitHeight
+
+        RowLayout {
+            id: heroRow
+            anchors { left: parent.left; right: parent.right }
+            spacing: 16
+
+            // LEFT: Current wallpaper preview in monitor frame
+            Rectangle {
+                id: monitorFrame
+                Layout.preferredWidth: Math.min(280, (heroRow.width - 16) * 0.42)
+                Layout.preferredHeight: Layout.preferredWidth * 0.64
+                radius: Looks.radius.large
+                color: Looks.colors.bg0
+                border.width: 6
+                border.color: Looks.colors.bg2Base
+                clip: true
+
+                // Shadow beneath the frame
+                WRectangularShadow {
+                    target: monitorFrame
+                    opacity: 0.5
+                }
+
+                // Wallpaper image
+                Image {
+                    id: heroImg
+                    visible: !root.wpIsGif && !root.wpIsVideo
+                    anchors.fill: parent
+                    anchors.margins: parent.border.width
+                    fillMode: Image.PreserveAspectCrop
+                    source: visible ? root.currentWpUrl : ""
+                    asynchronous: true
+                    cache: false
+                    sourceSize.width: 400
+                    sourceSize.height: 260
+                }
+                AnimatedImage {
+                    visible: root.wpIsGif
+                    anchors.fill: parent
+                    anchors.margins: parent.border.width
+                    fillMode: Image.PreserveAspectCrop
+                    source: visible ? root.currentWpUrl : ""
+                    asynchronous: true
+                    cache: false
+                    playing: visible
+                }
+                Image {
+                    visible: root.wpIsVideo
+                    anchors.fill: parent
+                    anchors.margins: parent.border.width
+                    fillMode: Image.PreserveAspectCrop
+                    source: {
+                        const ff = Wallpapers.videoFirstFrames[root.currentWallpaperPath]
+                        return ff ? (ff.startsWith("file://") ? ff : "file://" + ff) : ""
+                    }
+                    asynchronous: true
+                    cache: false
+                    Component.onCompleted: Wallpapers.ensureVideoFirstFrame(root.currentWallpaperPath)
+                }
+
+                // Monitor stand
+                Rectangle {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    anchors.top: parent.bottom
+                    anchors.topMargin: -1
+                    width: 30
+                    height: 8
+                    color: Looks.colors.bg2Base
+                }
+                Rectangle {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    anchors.top: parent.bottom
+                    anchors.topMargin: 6
+                    width: 50
+                    height: 4
+                    radius: 2
+                    color: Looks.colors.bg2Base
+                }
+
+                // Action overlay buttons (bottom-right)
+                Row {
+                    anchors { bottom: parent.bottom; right: parent.right; margins: 10 }
+                    spacing: 6
+
+                    Rectangle {
+                        width: 28; height: 28; radius: 14
+                        color: heroRandomMa.containsMouse ? Qt.rgba(0, 0, 0, 0.7) : Qt.rgba(0, 0, 0, 0.5)
+                        FluentIcon {
+                            anchors.centerIn: parent
+                            icon: "arrow-shuffle"
+                            implicitSize: 14
+                            color: "white"
+                        }
+                        MouseArea {
+                            id: heroRandomMa
+                            anchors.fill: parent
+                            cursorShape: Qt.PointingHandCursor
+                            hoverEnabled: true
+                            onClicked: {
+                                const mon = root.multiMonitorEnabled ? root.targetMonitor : ""
+                                Wallpapers.randomFromCurrentFolder(Appearance.m3colors.darkmode, mon)
+                            }
+                        }
+                        WToolTip { visible: heroRandomMa.containsMouse; text: Translation.tr("Random") }
+                    }
+
+                    Rectangle {
+                        width: 28; height: 28; radius: 14
+                        color: heroDarkMa.containsMouse ? Qt.rgba(0, 0, 0, 0.7) : Qt.rgba(0, 0, 0, 0.5)
+                        FluentIcon {
+                            anchors.centerIn: parent
+                            icon: Appearance.m3colors.darkmode ? "weather-moon" : "weather-sunny"
+                            implicitSize: 14
+                            color: "white"
+                        }
+                        MouseArea {
+                            id: heroDarkMa
+                            anchors.fill: parent
+                            cursorShape: Qt.PointingHandCursor
+                            hoverEnabled: true
+                            onClicked: {
+                                const dark = !Appearance.m3colors.darkmode
+                                ShellExec.execCmd(`${Directories.wallpaperSwitchScriptPath} --mode ${dark ? "dark" : "light"} --noswitch`)
+                            }
+                        }
+                        WToolTip { visible: heroDarkMa.containsMouse; text: Appearance.m3colors.darkmode ? Translation.tr("Light mode") : Translation.tr("Dark mode") }
+                    }
+                }
+            }
+
+            // RIGHT: Wallpaper thumbnail grid
+            ColumnLayout {
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                spacing: 6
+
+                WText {
+                    text: Translation.tr("Select a wallpaper")
+                    font.pixelSize: Looks.font.pixelSize.normal
+                    font.weight: Looks.font.weight.regular
+                    color: Looks.colors.subfg
+                }
+
+                // Thumbnail grid
+                GridView {
+                    id: wpGrid
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+                    Layout.minimumHeight: cellHeight * 2 + 6
+                    Layout.maximumHeight: cellHeight * 2 + 6
+                    cellWidth: Math.floor(width / Math.max(1, Math.floor(width / 100)))
+                    cellHeight: 68
+                    clip: true
+                    boundsBehavior: Flickable.StopAtBounds
+                    model: Wallpapers.folderModel
+
+                    delegate: Item {
+                        id: gridThumb
+                        required property int index
+                        required property string filePath
+                        required property string fileName
+                        required property bool fileIsDir
+                        required property url fileUrl
+
+                        readonly property bool isCurrent: filePath === root.currentWallpaperPath
+                        readonly property string thumbSource: {
+                            if (fileIsDir) return ""
+                            const thumb = Wallpapers.getExpectedThumbnailPath(filePath, "large")
+                            if (thumb) return thumb.startsWith("file://") ? thumb : "file://" + thumb
+                            return filePath.startsWith("file://") ? filePath : "file://" + filePath
+                        }
+
+                        width: wpGrid.cellWidth
+                        height: wpGrid.cellHeight
+
+                        Rectangle {
+                            id: thumbRect
+                            anchors.fill: parent
+                            anchors.margins: 3
+                            radius: Looks.radius.medium
+                            color: gridThumb.fileIsDir ? Looks.colors.bg2Base : Looks.colors.bg1
+                            border.width: gridThumb.isCurrent ? 2 : (gridMa.containsMouse ? 1 : 0)
+                            border.color: gridThumb.isCurrent ? Looks.colors.accent : Looks.colors.bg2Border
+                            clip: true
+
+                            scale: gridMa.containsMouse ? 0.95 : 1.0
+                            Behavior on scale { animation: Looks.transition.hover.createObject(this) }
+
+                            // Folder
+                            ColumnLayout {
+                                visible: gridThumb.fileIsDir
+                                anchors.centerIn: parent
+                                spacing: 2
+                                FluentIcon { Layout.alignment: Qt.AlignHCenter; icon: "folder"; implicitSize: 20; color: Looks.colors.subfg }
+                                WText {
+                                    Layout.alignment: Qt.AlignHCenter
+                                    text: gridThumb.fileName
+                                    font.pixelSize: Looks.font.pixelSize.tiny
+                                    color: Looks.colors.subfg
+                                    Layout.maximumWidth: thumbRect.width - 8
+                                    elide: Text.ElideRight
+                                }
+                            }
+
+                            // Image thumb
+                            Image {
+                                visible: !gridThumb.fileIsDir && !WallpaperListener.isVideoPath(gridThumb.filePath)
+                                anchors.fill: parent
+                                anchors.margins: thumbRect.border.width
+                                fillMode: Image.PreserveAspectCrop
+                                source: visible ? gridThumb.thumbSource : ""
+                                sourceSize.width: 160
+                                sourceSize.height: 110
+                                cache: true
+                                asynchronous: true
+                            }
+                            Image {
+                                visible: !gridThumb.fileIsDir && WallpaperListener.isVideoPath(gridThumb.filePath)
+                                anchors.fill: parent
+                                anchors.margins: thumbRect.border.width
+                                fillMode: Image.PreserveAspectCrop
+                                source: {
+                                    if (!visible) return ""
+                                    const ff = Wallpapers.videoFirstFrames[gridThumb.filePath]
+                                    return ff ? (ff.startsWith("file://") ? ff : "file://" + ff) : ""
+                                }
+                                cache: true
+                                asynchronous: true
+                                Component.onCompleted: {
+                                    if (WallpaperListener.isVideoPath(gridThumb.filePath))
+                                        Wallpapers.ensureVideoFirstFrame(gridThumb.filePath)
+                                }
+                            }
+
+                            // Check badge
+                            Rectangle {
+                                visible: gridThumb.isCurrent && !gridThumb.fileIsDir
+                                anchors { bottom: parent.bottom; right: parent.right; margins: 4 }
+                                width: 16; height: 16; radius: 8
+                                color: Looks.colors.accent
+                                FluentIcon { anchors.centerIn: parent; icon: "checkmark"; implicitSize: 9; color: Looks.colors.accentFg }
+                            }
+
+                            MouseArea {
+                                id: gridMa
+                                anchors.fill: parent
+                                cursorShape: Qt.PointingHandCursor
+                                hoverEnabled: true
+                                onClicked: {
+                                    if (gridThumb.fileIsDir) {
+                                        Wallpapers.setDirectory(gridThumb.filePath)
+                                        return
+                                    }
+                                    const mon = root.multiMonitorEnabled ? root.targetMonitor : ""
+                                    Wallpapers.select(gridThumb.filePath, Appearance.m3colors.darkmode, mon)
+                                }
+                            }
+
+                            WToolTip { visible: gridMa.containsMouse; text: gridThumb.fileName }
+                        }
+                    }
+                }
+
+                // Open full selector link
+                WButton {
+                    Layout.fillWidth: true
+                    text: Translation.tr("Browse all wallpapers")
+                    icon.name: "image"
+                    colBackground: Looks.colors.accent
+                    colBackgroundHover: Looks.colors.accentHover
+                    colBackgroundActive: Looks.colors.accentActive
+                    colForeground: Looks.colors.accentFg
+                    onClicked: {
+                        const useMain = Config.options?.waffles?.background?.useMainWallpaper ?? true
+                        if (root.multiMonitorEnabled && root.targetMonitor) {
+                            Config.setNestedValue("wallpaperSelector.selectionTarget", "main")
+                            Config.setNestedValue("wallpaperSelector.targetMonitor", root.targetMonitor)
+                        } else {
+                            Config.setNestedValue("wallpaperSelector.selectionTarget", useMain ? "main" : "waffle")
+                        }
+                        Quickshell.execDetached(["/usr/bin/qs", "-c", "ii", "ipc", "call", "wallpaperSelector", "toggle"])
+                    }
+                }
+            }
+        }
+    }
+
+    // ─── Settings cards below the hero ───
     WSettingsCard {
         title: Translation.tr("Wallpaper & Colors")
         icon: "image-filled"
@@ -50,374 +358,57 @@ WSettingsPage {
             }
         }
 
-        // Monitor selector strip (visible when per-monitor is ON)
+        // Monitor selector (visible when per-monitor ON)
         Item {
             visible: root.multiMonitorEnabled
             Layout.fillWidth: true
-            Layout.leftMargin: 4
-            Layout.rightMargin: 4
-            Layout.bottomMargin: 4
-            implicitHeight: 78
+            Layout.leftMargin: 16
+            Layout.rightMargin: 16
+            Layout.bottomMargin: 6
+            implicitHeight: 50
 
-            Rectangle {
-                anchors.fill: parent
-                radius: Looks.radius.large
-                color: Looks.colors.bg1
-                border.width: 1
-                border.color: Looks.colors.bg2Border
+            Row {
+                anchors.centerIn: parent
+                spacing: 8
+                height: parent.height
 
-                Row {
-                    anchors.centerIn: parent
-                    spacing: 6
-                    height: parent.height - 10
+                Repeater {
+                    model: Quickshell.screens
 
-                    Repeater {
-                        model: Quickshell.screens
-
-                        Rectangle {
-                            id: qkMonCard
-                            required property var modelData
-                            required property int index
-
-                            readonly property string monName: WallpaperListener.getMonitorName(modelData) ?? ""
-                            readonly property var wpData: WallpaperListener.effectivePerMonitor[monName] ?? { path: "" }
-                            readonly property string wpPath: wpData.path || (Config.options?.background?.wallpaperPath ?? "")
-                            readonly property bool isSelected: monName === root.targetMonitor
-                            readonly property real aspectRatio: modelData.width / Math.max(1, modelData.height)
-                            readonly property string wpUrl: {
-                                if (!wpPath) return ""
-                                return wpPath.startsWith("file://") ? wpPath : "file://" + wpPath
-                            }
-
-                            onWpPathChanged: if (WallpaperListener.isVideoPath(wpPath)) Wallpapers.ensureVideoFirstFrame(wpPath)
-
-                            width: parent.height * aspectRatio
-                            height: parent.height
-                            radius: Looks.radius.medium
-                            color: "transparent"
-                            border.width: isSelected ? 2 : 1
-                            border.color: isSelected ? Looks.colors.accent : Looks.colors.bg2Border
-                            clip: true
-
-                            scale: isSelected ? 1.0 : (qkMonMa.containsMouse ? 0.97 : 0.93)
-                            opacity: isSelected ? 1.0 : (qkMonMa.containsMouse ? 0.95 : 0.8)
-                            Behavior on scale { animation: Looks.transition.hover.createObject(this) }
-                            Behavior on opacity { animation: Looks.transition.hover.createObject(this) }
-                            Behavior on border.color { animation: Looks.transition.color.createObject(this) }
-
-                            MouseArea {
-                                id: qkMonMa
-                                anchors.fill: parent
-                                cursorShape: Qt.PointingHandCursor
-                                hoverEnabled: true
-                                onClicked: root.targetMonitor = qkMonCard.monName
-                            }
-
-                            // Wallpaper thumbnail
-                            Image {
-                                visible: !WallpaperListener.isVideoPath(qkMonCard.wpPath) && !WallpaperListener.isGifPath(qkMonCard.wpPath)
-                                anchors.fill: parent
-                                anchors.margins: qkMonCard.border.width
-                                fillMode: Image.PreserveAspectCrop
-                                source: visible ? qkMonCard.wpUrl : ""
-                                sourceSize.width: 160
-                                sourceSize.height: 160
-                                cache: true
-                                asynchronous: true
-                            }
-                            Image {
-                                visible: WallpaperListener.isVideoPath(qkMonCard.wpPath)
-                                anchors.fill: parent
-                                anchors.margins: qkMonCard.border.width
-                                fillMode: Image.PreserveAspectCrop
-                                source: {
-                                    const ff = Wallpapers.videoFirstFrames[qkMonCard.wpPath]
-                                    return ff ? (ff.startsWith("file://") ? ff : "file://" + ff) : ""
-                                }
-                                cache: true
-                                asynchronous: true
-                                Component.onCompleted: Wallpapers.ensureVideoFirstFrame(qkMonCard.wpPath)
-                            }
-                            AnimatedImage {
-                                visible: WallpaperListener.isGifPath(qkMonCard.wpPath)
-                                anchors.fill: parent
-                                anchors.margins: qkMonCard.border.width
-                                fillMode: Image.PreserveAspectCrop
-                                source: visible ? qkMonCard.wpUrl : ""
-                                asynchronous: true
-                                cache: true
-                                playing: false
-                            }
-
-                            // Label overlay
-                            Rectangle {
-                                anchors { bottom: parent.bottom; left: parent.left; right: parent.right }
-                                height: qkMonLabel.implicitHeight + 6
-                                gradient: Gradient {
-                                    GradientStop { position: 0.0; color: "transparent" }
-                                    GradientStop { position: 0.4; color: Qt.rgba(0, 0, 0, 0.7) }
-                                }
-                                WText {
-                                    id: qkMonLabel
-                                    anchors { bottom: parent.bottom; horizontalCenter: parent.horizontalCenter; bottomMargin: 2 }
-                                    text: qkMonCard.monName || ("Monitor " + (qkMonCard.index + 1))
-                                    font.pixelSize: Looks.font.pixelSize.tiny
-                                    font.weight: Font.Medium
-                                    color: "white"
-                                }
-                            }
-
-                            // Selected check badge
-                            Rectangle {
-                                visible: qkMonCard.isSelected
-                                anchors { top: parent.top; right: parent.right; margins: 3 }
-                                width: 14; height: 14; radius: 7
-                                color: Looks.colors.accent
-                                FluentIcon {
-                                    anchors.centerIn: parent
-                                    icon: "checkmark"
-                                    implicitSize: 8
-                                    color: Looks.colors.accentFg
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        // Inline wallpaper browser strip
-        ColumnLayout {
-            Layout.fillWidth: true
-            Layout.leftMargin: 4
-            Layout.rightMargin: 4
-            Layout.bottomMargin: 4
-            spacing: 4
-
-            // Folder label
-            RowLayout {
-                Layout.fillWidth: true
-                spacing: 4
-                FluentIcon {
-                    icon: "folder"
-                    implicitSize: 12
-                    color: Looks.colors.subfg
-                    opacity: 0.6
-                }
-                WText {
-                    Layout.fillWidth: true
-                    text: {
-                        const dir = Wallpapers.effectiveDirectory
-                        if (!dir) return Translation.tr("Wallpapers")
-                        const parts = dir.split("/")
-                        return parts[parts.length - 1] || parts[parts.length - 2] || Translation.tr("Wallpapers")
-                    }
-                    font.pixelSize: Looks.font.pixelSize.tiny
-                    color: Looks.colors.subfg
-                    opacity: 0.6
-                    elide: Text.ElideMiddle
-                }
-                WText {
-                    text: Wallpapers.folderModel.count + " " + Translation.tr("items")
-                    font.pixelSize: Looks.font.pixelSize.tiny
-                    color: Looks.colors.subfg
-                    opacity: 0.5
-                }
-            }
-
-            // Thumbnail strip
-            ListView {
-                id: qkWpStrip
-                Layout.fillWidth: true
-                Layout.preferredHeight: 80
-                orientation: ListView.Horizontal
-                spacing: 4
-                clip: true
-                boundsBehavior: Flickable.StopAtBounds
-                model: Wallpapers.folderModel
-
-                delegate: Rectangle {
-                    id: qkWpThumb
-                    required property int index
-                    required property string filePath
-                    required property string fileName
-                    required property bool fileIsDir
-                    required property url fileUrl
-
-                    readonly property string currentWp: {
-                        if (root.multiMonitorEnabled && root.targetMonitor) {
-                            const data = WallpaperListener.effectivePerMonitor[root.targetMonitor] ?? {}
-                            return data.path || (Config.options?.background?.wallpaperPath ?? "")
-                        }
-                        return Config.options?.background?.wallpaperPath ?? ""
-                    }
-                    readonly property bool isCurrent: filePath === currentWp
-                    readonly property string thumbSource: {
-                        if (fileIsDir) return ""
-                        const thumb = Wallpapers.getExpectedThumbnailPath(filePath, "large")
-                        if (thumb) return thumb.startsWith("file://") ? thumb : "file://" + thumb
-                        return filePath.startsWith("file://") ? filePath : "file://" + filePath
-                    }
-
-                    width: fileIsDir ? 64 : 80
-                    height: qkWpStrip.height
-                    radius: Looks.radius.medium
-                    color: fileIsDir ? Looks.colors.bg2Base : "transparent"
-                    border.width: isCurrent ? 2 : 0
-                    border.color: isCurrent ? Looks.colors.accent : "transparent"
-                    clip: true
-
-                    scale: qkThumbMa.containsMouse ? 0.95 : 1.0
-                    Behavior on scale { animation: Looks.transition.hover.createObject(this) }
-
-                    // Folder icon
-                    FluentIcon {
-                        visible: qkWpThumb.fileIsDir
-                        anchors.centerIn: parent
-                        icon: "folder"
-                        implicitSize: 24
-                        color: Looks.colors.subfg
-                    }
-                    WText {
-                        visible: qkWpThumb.fileIsDir
-                        anchors { bottom: parent.bottom; horizontalCenter: parent.horizontalCenter; bottomMargin: 4 }
-                        text: qkWpThumb.fileName
-                        font.pixelSize: Looks.font.pixelSize.tiny
-                        color: Looks.colors.subfg
-                        width: parent.width - 6
-                        elide: Text.ElideRight
-                        horizontalAlignment: Text.AlignHCenter
-                    }
-
-                    // Image thumbnail
-                    Image {
-                        visible: !qkWpThumb.fileIsDir && !WallpaperListener.isVideoPath(qkWpThumb.filePath)
-                        anchors.fill: parent
-                        anchors.margins: qkWpThumb.border.width
-                        fillMode: Image.PreserveAspectCrop
-                        source: visible ? qkWpThumb.thumbSource : ""
-                        sourceSize.width: 160
-                        sourceSize.height: 160
-                        cache: true
-                        asynchronous: true
-                    }
-                    // Video first frame
-                    Image {
-                        visible: !qkWpThumb.fileIsDir && WallpaperListener.isVideoPath(qkWpThumb.filePath)
-                        anchors.fill: parent
-                        anchors.margins: qkWpThumb.border.width
-                        fillMode: Image.PreserveAspectCrop
-                        source: {
-                            if (!visible) return ""
-                            const ff = Wallpapers.videoFirstFrames[qkWpThumb.filePath]
-                            return ff ? (ff.startsWith("file://") ? ff : "file://" + ff) : ""
-                        }
-                        cache: true
-                        asynchronous: true
-                        Component.onCompleted: {
-                            if (WallpaperListener.isVideoPath(qkWpThumb.filePath))
-                                Wallpapers.ensureVideoFirstFrame(qkWpThumb.filePath)
-                        }
-                    }
-
-                    // Current indicator
                     Rectangle {
-                        visible: qkWpThumb.isCurrent && !qkWpThumb.fileIsDir
-                        anchors { top: parent.top; right: parent.right; margins: 3 }
-                        width: 12; height: 12; radius: 6
-                        color: Looks.colors.accent
-                        FluentIcon {
+                        id: qkMonCard
+                        required property var modelData
+                        required property int index
+
+                        readonly property string monName: WallpaperListener.getMonitorName(modelData) ?? ""
+                        readonly property bool isSelected: monName === root.targetMonitor
+                        readonly property real aspectRatio: modelData.width / Math.max(1, modelData.height)
+
+                        width: parent.height * aspectRatio
+                        height: parent.height
+                        radius: Looks.radius.medium
+                        color: isSelected ? Looks.colors.accent : (qkMonMa.containsMouse ? Looks.colors.bg2Hover : Looks.colors.bg2Base)
+                        border.width: 1
+                        border.color: isSelected ? Looks.colors.accent : Looks.colors.bg2Border
+
+                        Behavior on color { animation: Looks.transition.color.createObject(this) }
+
+                        WText {
                             anchors.centerIn: parent
-                            icon: "checkmark"
-                            implicitSize: 7
-                            color: Looks.colors.accentFg
+                            text: qkMonCard.monName || ("Monitor " + (qkMonCard.index + 1))
+                            font.pixelSize: Looks.font.pixelSize.tiny
+                            font.weight: Font.Medium
+                            color: qkMonCard.isSelected ? Looks.colors.accentFg : Looks.colors.fg
+                        }
+
+                        MouseArea {
+                            id: qkMonMa
+                            anchors.fill: parent
+                            cursorShape: Qt.PointingHandCursor
+                            hoverEnabled: true
+                            onClicked: root.targetMonitor = qkMonCard.monName
                         }
                     }
-
-                    MouseArea {
-                        id: qkThumbMa
-                        anchors.fill: parent
-                        cursorShape: Qt.PointingHandCursor
-                        hoverEnabled: true
-                        onClicked: {
-                            if (qkWpThumb.fileIsDir) {
-                                Wallpapers.setDirectory(qkWpThumb.filePath)
-                                return
-                            }
-                            const mon = root.multiMonitorEnabled ? root.targetMonitor : ""
-                            Wallpapers.select(qkWpThumb.filePath, Appearance.m3colors.darkmode, mon)
-                        }
-                    }
-
-                    WToolTip {
-                        visible: qkThumbMa.containsMouse
-                        text: qkWpThumb.fileName
-                    }
-                }
-            }
-        }
-
-        // Action row
-        RowLayout {
-            Layout.fillWidth: true
-            Layout.leftMargin: 4
-            Layout.rightMargin: 4
-            Layout.bottomMargin: 8
-            spacing: 6
-
-            WButton {
-                Layout.fillWidth: true
-                text: Translation.tr("Open selector")
-                icon.name: "image"
-                colBackground: Looks.colors.accent
-                colBackgroundHover: Looks.colors.accentHover
-                colBackgroundActive: Looks.colors.accentActive
-                colForeground: Looks.colors.accentFg
-                onClicked: {
-                    const useMain = Config.options?.waffles?.background?.useMainWallpaper ?? true
-                    if (root.multiMonitorEnabled && root.targetMonitor) {
-                        Config.setNestedValue("wallpaperSelector.selectionTarget", "main")
-                        Config.setNestedValue("wallpaperSelector.targetMonitor", root.targetMonitor)
-                    } else {
-                        Config.setNestedValue("wallpaperSelector.selectionTarget", useMain ? "main" : "waffle")
-                    }
-                    Quickshell.execDetached(["/usr/bin/qs", "-c", "ii", "ipc", "call", "wallpaperSelector", "toggle"])
-                }
-            }
-            WButton {
-                text: Translation.tr("Random")
-                icon.name: "arrow-shuffle"
-                onClicked: {
-                    const mon = root.multiMonitorEnabled ? root.targetMonitor : ""
-                    Wallpapers.randomFromCurrentFolder(Appearance.m3colors.darkmode, mon)
-                }
-            }
-            WBorderlessButton {
-                implicitWidth: 36
-                implicitHeight: 36
-
-                Rectangle {
-                    anchors.fill: parent
-                    radius: Looks.radius.medium
-                    color: Appearance.m3colors.darkmode ? Looks.colors.bg2 : Looks.colors.bg1
-                    opacity: 0.9
-                }
-
-                contentItem: FluentIcon {
-                    anchors.centerIn: parent
-                    icon: Appearance.m3colors.darkmode ? "weather-moon" : "weather-sunny"
-                    implicitSize: 18
-                    color: Looks.colors.fg
-                }
-
-                onClicked: {
-                    const dark = !Appearance.m3colors.darkmode
-                    ShellExec.execCmd(`${Directories.wallpaperSwitchScriptPath} --mode ${dark ? "dark" : "light"} --noswitch`)
-                }
-
-                WToolTip {
-                    visible: parent.hovered
-                    text: Appearance.m3colors.darkmode ? Translation.tr("Switch to light mode") : Translation.tr("Switch to dark mode")
                 }
             }
         }
