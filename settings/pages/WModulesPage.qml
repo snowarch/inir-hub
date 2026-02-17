@@ -32,7 +32,7 @@ WSettingsPage {
             panels.splice(idx, 1)
         }
 
-        Config.options.enabledPanels = panels
+        Config.setNestedValue("enabledPanels", panels)
     }
 
     WSettingsCard {

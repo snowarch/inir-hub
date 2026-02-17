@@ -17,7 +17,7 @@ WBarAttachedPanelContent {
     property Timer timer: Timer {
         id: autoCloseTimer
         running: true
-        interval: Config.options.osd.timeout
+        interval: Config.options?.osd?.timeout ?? 3000
         repeat: false
         onTriggered: {
             root.close();
