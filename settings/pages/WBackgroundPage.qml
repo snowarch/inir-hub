@@ -87,9 +87,9 @@ WSettingsPage {
         // Visual monitor layout
         Item {
             Layout.fillWidth: true
-            Layout.leftMargin: Looks.spacing.normal
-            Layout.rightMargin: Looks.spacing.normal
-            Layout.bottomMargin: Looks.spacing.small
+            Layout.leftMargin: 12
+            Layout.rightMargin: 12
+            Layout.bottomMargin: 4
             implicitHeight: 140
 
             Rectangle {
@@ -101,8 +101,8 @@ WSettingsPage {
 
                 Row {
                     anchors.centerIn: parent
-                    spacing: Looks.spacing.small
-                    height: parent.height - Looks.spacing.normal
+                    spacing: 4
+                    height: parent.height - 12
 
                     Repeater {
                         model: Quickshell.screens
@@ -131,10 +131,10 @@ WSettingsPage {
                             scale: isSelected ? 1.0 : (wMonCardMa.containsMouse ? 0.97 : 0.93)
                             opacity: isSelected ? 1.0 : (wMonCardMa.containsMouse ? 0.95 : 0.8)
                             Behavior on scale {
-                                animation: Looks.transition.number.createObject(this)
+                                animation: Looks.transition.hover.createObject(this)
                             }
                             Behavior on opacity {
-                                animation: Looks.transition.number.createObject(this)
+                                animation: Looks.transition.hover.createObject(this)
                             }
                             Behavior on border.color {
                                 animation: Looks.transition.color.createObject(this)
@@ -200,8 +200,8 @@ WSettingsPage {
                                 visible: WallpaperListener.isAnimatedPath(wMonitorCard.wpPath)
                                 anchors.top: parent.top
                                 anchors.left: parent.left
-                                anchors.margins: Looks.spacing.small
-                                width: wMediaBadgeRow.implicitWidth + Looks.spacing.small * 2
+                                anchors.margins: 4
+                                width: wMediaBadgeRow.implicitWidth + 8
                                 height: wMediaBadgeRow.implicitHeight + 4
                                 radius: height / 2
                                 color: Qt.rgba(0, 0, 0, 0.65)
@@ -239,7 +239,7 @@ WSettingsPage {
                                     id: wMonLabelCol
                                     anchors.bottom: parent.bottom
                                     anchors.horizontalCenter: parent.horizontalCenter
-                                    anchors.bottomMargin: Looks.spacing.small
+                                    anchors.bottomMargin: 4
                                     spacing: 0
                                     WText {
                                         Layout.alignment: Qt.AlignHCenter
@@ -609,6 +609,165 @@ WSettingsPage {
                                 Config.setNestedValue("appearance.wallpaperTheming.useBackdropForColors", checked)
                                 if (!(root.wBackdrop.useMainWallpaper ?? true)) {
                                     Quickshell.execDetached([Directories.wallpaperSwitchScriptPath, "--noswitch"])
+                                }
+                            }
+                        }
+
+                        // Inline wallpaper browser
+                        ColumnLayout {
+                            Layout.fillWidth: true
+                            Layout.topMargin: 4
+                            spacing: 3
+
+                            RowLayout {
+                                Layout.fillWidth: true
+                                spacing: 4
+                                FluentIcon {
+                                    icon: "folder"
+                                    implicitSize: 11
+                                    color: Looks.colors.subfg
+                                    opacity: 0.6
+                                }
+                                WText {
+                                    Layout.fillWidth: true
+                                    text: {
+                                        const dir = Wallpapers.effectiveDirectory
+                                        if (!dir) return Translation.tr("Wallpapers")
+                                        const parts = dir.split("/")
+                                        return parts[parts.length - 1] || parts[parts.length - 2] || Translation.tr("Wallpapers")
+                                    }
+                                    font.pixelSize: Looks.font.pixelSize.tiny
+                                    color: Looks.colors.subfg
+                                    opacity: 0.6
+                                    elide: Text.ElideMiddle
+                                }
+                                WText {
+                                    text: Wallpapers.folderModel.count + " " + Translation.tr("items")
+                                    font.pixelSize: Looks.font.pixelSize.tiny
+                                    color: Looks.colors.subfg
+                                    opacity: 0.5
+                                }
+                            }
+
+                            ListView {
+                                id: bgWpStrip
+                                Layout.fillWidth: true
+                                Layout.preferredHeight: 70
+                                orientation: ListView.Horizontal
+                                spacing: 3
+                                clip: true
+                                boundsBehavior: Flickable.StopAtBounds
+                                model: Wallpapers.folderModel
+
+                                delegate: Rectangle {
+                                    id: bgWpThumb
+                                    required property int index
+                                    required property string filePath
+                                    required property string fileName
+                                    required property bool fileIsDir
+                                    required property url fileUrl
+
+                                    readonly property bool isCurrent: filePath === multiMonCard.selMonPath
+                                    readonly property string thumbSource: {
+                                        if (fileIsDir) return ""
+                                        const thumb = Wallpapers.getExpectedThumbnailPath(filePath, "large")
+                                        if (thumb) return thumb.startsWith("file://") ? thumb : "file://" + thumb
+                                        return filePath.startsWith("file://") ? filePath : "file://" + filePath
+                                    }
+
+                                    width: fileIsDir ? 56 : 70
+                                    height: bgWpStrip.height
+                                    radius: Looks.radius.medium
+                                    color: fileIsDir ? Looks.colors.bg1 : "transparent"
+                                    border.width: isCurrent ? 2 : 0
+                                    border.color: isCurrent ? Looks.colors.accent : "transparent"
+                                    clip: true
+
+                                    scale: bgThumbMa.containsMouse ? 0.95 : 1.0
+                                    Behavior on scale { animation: Looks.transition.hover.createObject(this) }
+
+                                    FluentIcon {
+                                        visible: bgWpThumb.fileIsDir
+                                        anchors.centerIn: parent
+                                        icon: "folder"
+                                        implicitSize: 20
+                                        color: Looks.colors.subfg
+                                    }
+                                    WText {
+                                        visible: bgWpThumb.fileIsDir
+                                        anchors { bottom: parent.bottom; horizontalCenter: parent.horizontalCenter; bottomMargin: 3 }
+                                        text: bgWpThumb.fileName
+                                        font.pixelSize: Looks.font.pixelSize.tiny
+                                        color: Looks.colors.subfg
+                                        width: parent.width - 4
+                                        elide: Text.ElideRight
+                                        horizontalAlignment: Text.AlignHCenter
+                                    }
+
+                                    Image {
+                                        visible: !bgWpThumb.fileIsDir && !WallpaperListener.isVideoPath(bgWpThumb.filePath)
+                                        anchors.fill: parent
+                                        anchors.margins: bgWpThumb.border.width
+                                        fillMode: Image.PreserveAspectCrop
+                                        source: visible ? bgWpThumb.thumbSource : ""
+                                        sourceSize.width: 140
+                                        sourceSize.height: 140
+                                        cache: true
+                                        asynchronous: true
+                                    }
+                                    Image {
+                                        visible: !bgWpThumb.fileIsDir && WallpaperListener.isVideoPath(bgWpThumb.filePath)
+                                        anchors.fill: parent
+                                        anchors.margins: bgWpThumb.border.width
+                                        fillMode: Image.PreserveAspectCrop
+                                        source: {
+                                            if (!visible) return ""
+                                            const ff = Wallpapers.videoFirstFrames[bgWpThumb.filePath]
+                                            return ff ? (ff.startsWith("file://") ? ff : "file://" + ff) : ""
+                                        }
+                                        cache: true
+                                        asynchronous: true
+                                        Component.onCompleted: {
+                                            if (WallpaperListener.isVideoPath(bgWpThumb.filePath))
+                                                Wallpapers.ensureVideoFirstFrame(bgWpThumb.filePath)
+                                        }
+                                    }
+
+                                    Rectangle {
+                                        visible: bgWpThumb.isCurrent && !bgWpThumb.fileIsDir
+                                        anchors { top: parent.top; right: parent.right; margins: 2 }
+                                        width: 11; height: 11; radius: 6
+                                        color: Looks.colors.accent
+                                        FluentIcon {
+                                            anchors.centerIn: parent
+                                            icon: "checkmark"
+                                            implicitSize: 6
+                                            color: Looks.colors.accentFg
+                                        }
+                                    }
+
+                                    MouseArea {
+                                        id: bgThumbMa
+                                        anchors.fill: parent
+                                        cursorShape: Qt.PointingHandCursor
+                                        hoverEnabled: true
+                                        onClicked: {
+                                            if (bgWpThumb.fileIsDir) {
+                                                Wallpapers.setDirectory(bgWpThumb.filePath)
+                                                return
+                                            }
+                                            if (multiMonCard.showBackdropView) {
+                                                Wallpapers.updatePerMonitorBackdropConfig(bgWpThumb.filePath, multiMonCard.selectedMonitor)
+                                            } else {
+                                                Wallpapers.select(bgWpThumb.filePath, Appearance.m3colors.darkmode, multiMonCard.selectedMonitor)
+                                            }
+                                        }
+                                    }
+
+                                    WToolTip {
+                                        visible: bgThumbMa.containsMouse
+                                        text: bgWpThumb.fileName
+                                    }
                                 }
                             }
                         }
