@@ -61,8 +61,13 @@ RowLayout {
     WSlider {
         id: volumeSlider
         Layout.fillWidth: true
+        scrollable: true
         property real modelValue: root.node?.audio.volume ?? 0
         to: (root.node === Audio.sink) ? 1.5 : 1
+
+        Component.onCompleted: {
+            value = modelValue
+        }
 
         Binding {
             target: volumeSlider
