@@ -76,6 +76,13 @@ WSettingsPage {
 
         readonly property var selMonData: WallpaperListener.effectivePerMonitor[selectedMonitor] ?? { path: "", isVideo: false, isGif: false, isAnimated: false, hasCustomWallpaper: false }
         readonly property string selMonPath: selMonData.path || (Config.options?.background?.wallpaperPath ?? "")
+        property bool showBackdropView: false
+
+        readonly property string backdropPath: {
+            const bd = Config.options?.waffles?.background?.backdrop ?? {}
+            if (!(bd.useMainWallpaper ?? true) && bd.wallpaperPath) return bd.wallpaperPath
+            return selMonPath
+        }
 
         // Visual monitor layout
         Item {
@@ -302,18 +309,22 @@ WSettingsPage {
                 border.color: Looks.colors.bg2Border
                 clip: true
 
+                readonly property string displayPath: multiMonCard.showBackdropView ? multiMonCard.backdropPath : multiMonCard.selMonPath
                 readonly property string wpUrl: {
-                    const path = multiMonCard.selMonPath
+                    const path = displayPath
                     if (!path) return ""
                     return path.startsWith("file://") ? path : "file://" + path
                 }
-                readonly property bool isVideo: WallpaperListener.isVideoPath(multiMonCard.selMonPath)
-                readonly property bool isGif: WallpaperListener.isGifPath(multiMonCard.selMonPath)
+                readonly property bool isVideo: WallpaperListener.isVideoPath(displayPath)
+                readonly property bool isGif: WallpaperListener.isGifPath(displayPath)
 
                 Connections {
                     target: multiMonCard
                     function onSelMonPathChanged() {
-                        if (wMonPreviewCard.isVideo) Wallpapers.ensureVideoFirstFrame(multiMonCard.selMonPath)
+                        if (wMonPreviewCard.isVideo) Wallpapers.ensureVideoFirstFrame(wMonPreviewCard.displayPath)
+                    }
+                    function onBackdropPathChanged() {
+                        if (WallpaperListener.isVideoPath(multiMonCard.backdropPath)) Wallpapers.ensureVideoFirstFrame(multiMonCard.backdropPath)
                     }
                 }
 
@@ -355,12 +366,12 @@ WSettingsPage {
                             anchors.fill: parent
                             fillMode: Image.PreserveAspectCrop
                             source: {
-                                const ff = Wallpapers.videoFirstFrames[multiMonCard.selMonPath]
+                                const ff = Wallpapers.videoFirstFrames[wMonPreviewCard.displayPath]
                                 return ff ? (ff.startsWith("file://") ? ff : "file://" + ff) : ""
                             }
                             asynchronous: true
                             cache: false
-                            Component.onCompleted: Wallpapers.ensureVideoFirstFrame(multiMonCard.selMonPath)
+                            Component.onCompleted: Wallpapers.ensureVideoFirstFrame(wMonPreviewCard.displayPath)
                         }
 
                         // Bottom gradient overlay with monitor info
@@ -393,6 +404,7 @@ WSettingsPage {
                                     }
                                     WText {
                                         text: {
+                                            if (multiMonCard.showBackdropView) return Translation.tr("Backdrop")
                                             const custom = multiMonCard.selMonData.hasCustomWallpaper ?? false
                                             const animated = multiMonCard.selMonData.isAnimated ?? false
                                             let label = custom ? Translation.tr("Custom wallpaper") : Translation.tr("Global wallpaper")
@@ -416,13 +428,13 @@ WSettingsPage {
                                         anchors.centerIn: parent
                                         spacing: 3
                                         FluentIcon {
-                                            icon: WallpaperListener.isVideoPath(multiMonCard.selMonPath) ? "video" : "gif"
+                                            icon: WallpaperListener.isVideoPath(wMonPreviewCard.displayPath) ? "video" : "gif"
                                             implicitSize: 8
                                             color: "#ffffff"
                                             anchors.verticalCenter: parent.verticalCenter
                                         }
                                         WText {
-                                            text: WallpaperListener.mediaTypeLabel(multiMonCard.selMonPath)
+                                            text: WallpaperListener.mediaTypeLabel(wMonPreviewCard.displayPath)
                                             font.pixelSize: Looks.font.pixelSize.small - 2
                                             color: "#ffffff"
                                             anchors.verticalCenter: parent.verticalCenter
@@ -456,11 +468,15 @@ WSettingsPage {
                             font.pixelSize: Looks.font.pixelSize.small
                             color: Looks.colors.subfg
                             opacity: 0.7
-                            text: multiMonCard.selMonPath ? String(multiMonCard.selMonPath).replace(/^file:\/\//, "") : Translation.tr("No wallpaper set")
+                            text: {
+                                const path = multiMonCard.showBackdropView ? multiMonCard.backdropPath : multiMonCard.selMonPath
+                                return path ? String(path).replace(/^file:\/\//, "") : Translation.tr("No wallpaper set")
+                            }
                         }
 
-                        // Primary actions: Change + Random
+                        // Primary actions: Change + Random (wallpaper mode)
                         RowLayout {
+                            visible: !multiMonCard.showBackdropView
                             Layout.fillWidth: true
                             spacing: 6
                             WButton {
@@ -497,8 +513,39 @@ WSettingsPage {
                             }
                         }
 
-                        // Secondary actions: Reset + Apply all
+                        // Primary actions: Change backdrop + Back (backdrop mode)
                         RowLayout {
+                            visible: multiMonCard.showBackdropView
+                            Layout.fillWidth: true
+                            spacing: 6
+                            WButton {
+                                Layout.fillWidth: true
+                                text: Translation.tr("Change backdrop")
+                                icon.name: "image"
+                                colBackground: Looks.colors.accent
+                                colBackgroundHover: Looks.colors.accentHover
+                                colBackgroundActive: Looks.colors.accentActive
+                                colForeground: Looks.colors.accentFg
+                                onClicked: {
+                                    Config.setNestedValue("wallpaperSelector.selectionTarget", "waffle-backdrop")
+                                    Quickshell.execDetached(["/usr/bin/qs", "-c", "ii", "ipc", "call", "wallpaperSelector", "toggle"])
+                                }
+                            }
+                            WButton {
+                                Layout.fillWidth: true
+                                text: Translation.tr("Back to wallpaper")
+                                icon.name: "arrow-left"
+                                colBackground: Looks.colors.bg2
+                                colBackgroundHover: Looks.colors.bg2Hover
+                                colBackgroundActive: Looks.colors.bg2Active
+                                colForeground: Looks.colors.fg
+                                onClicked: multiMonCard.showBackdropView = false
+                            }
+                        }
+
+                        // Secondary actions: Reset + Apply all (wallpaper mode only)
+                        RowLayout {
+                            visible: !multiMonCard.showBackdropView
                             Layout.fillWidth: true
                             spacing: 6
                             WButton {
@@ -531,6 +578,37 @@ WSettingsPage {
                                     if (globalPath) {
                                         Wallpapers.apply(globalPath, Appearance.m3colors.darkmode)
                                     }
+                                }
+                            }
+                        }
+
+                        // View backdrop shortcut (wallpaper mode only)
+                        WButton {
+                            visible: !multiMonCard.showBackdropView && (root.wBackdrop.enable ?? true)
+                            Layout.fillWidth: true
+                            text: Translation.tr("View backdrop")
+                            icon.name: "eye"
+                            colBackground: Looks.colors.bg2
+                            colBackgroundHover: Looks.colors.bg2Hover
+                            colBackgroundActive: Looks.colors.bg2Active
+                            colForeground: Looks.colors.fg
+                            onClicked: multiMonCard.showBackdropView = true
+                            WToolTip {
+                                visible: parent.hovered
+                                text: Translation.tr("Change the backdrop wallpaper (used for overview/blur)")
+                            }
+                        }
+
+                        // Derive theme colors from backdrop
+                        WSettingsSwitch {
+                            visible: root.wBackdrop.enable ?? true
+                            label: Translation.tr("Derive theme colors from backdrop")
+                            icon: "color"
+                            checked: Config.options?.appearance?.wallpaperTheming?.useBackdropForColors ?? false
+                            onCheckedChanged: {
+                                Config.setNestedValue("appearance.wallpaperTheming.useBackdropForColors", checked)
+                                if (!(root.wBackdrop.useMainWallpaper ?? true)) {
+                                    Quickshell.execDetached([Directories.wallpaperSwitchScriptPath, "--noswitch"])
                                 }
                             }
                         }

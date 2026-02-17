@@ -19,13 +19,17 @@ WSettingsPage {
     pageIcon: "flash-on"
     pageDescription: Translation.tr("Frequently used settings and quick actions")
     
+    // Multi-monitor state
+    readonly property bool multiMonitorEnabled: Config.options?.background?.multiMonitor?.enable ?? false
+
     // Wallpaper section
     WSettingsCard {
         title: Translation.tr("Wallpaper & Colors")
         icon: "image-filled"
         
-        // Wallpaper preview
+        // Single wallpaper preview (visible when multi-monitor is OFF)
         Item {
+            visible: !root.multiMonitorEnabled
             Layout.fillWidth: true
             Layout.preferredHeight: 180
             Layout.leftMargin: 4
@@ -183,6 +187,508 @@ WSettingsPage {
                             visible: parent.hovered
                             text: Appearance.m3colors.darkmode ? Translation.tr("Switch to light mode") : Translation.tr("Switch to dark mode")
                         }
+                    }
+                }
+            }
+        }
+
+        // Per-monitor toggle
+        WSettingsSwitch {
+            label: Translation.tr("Per-monitor wallpapers")
+            icon: "monitor"
+            description: Translation.tr("Set different wallpapers for each monitor")
+            checked: root.multiMonitorEnabled
+            onCheckedChanged: {
+                Config.setNestedValue("background.multiMonitor.enable", checked)
+                if (!checked) {
+                    const globalPath = Config.options?.background?.wallpaperPath ?? ""
+                    if (globalPath) {
+                        Wallpapers.apply(globalPath, Appearance.m3colors.darkmode)
+                    }
+                }
+            }
+        }
+
+        // Multi-monitor management panel (visible when per-monitor is ON)
+        ColumnLayout {
+            id: qkMultiMonPanel
+            visible: root.multiMonitorEnabled
+            Layout.fillWidth: true
+            Layout.leftMargin: 4
+            Layout.rightMargin: 4
+            Layout.bottomMargin: 8
+            spacing: Looks.spacing.small
+
+            property string selectedMonitor: {
+                const screens = Quickshell.screens
+                if (!screens || screens.length === 0) return ""
+                return WallpaperListener.getMonitorName(screens[0]) ?? ""
+            }
+
+            readonly property var selMonData: WallpaperListener.effectivePerMonitor[selectedMonitor] ?? { path: "", isVideo: false, isGif: false, isAnimated: false, hasCustomWallpaper: false }
+            readonly property string selMonPath: selMonData.path || (Config.options?.background?.wallpaperPath ?? "")
+
+            // Visual monitor layout
+            Item {
+                Layout.fillWidth: true
+                implicitHeight: 130
+
+                Rectangle {
+                    anchors.fill: parent
+                    radius: Looks.radius.large
+                    color: Looks.colors.bg1
+                    border.width: 1
+                    border.color: Looks.colors.bg2Border
+
+                    Row {
+                        anchors.centerIn: parent
+                        spacing: Looks.spacing.small
+                        height: parent.height - Looks.spacing.normal
+
+                        Repeater {
+                            model: Quickshell.screens
+
+                            Rectangle {
+                                id: qkMonCard
+                                required property var modelData
+                                required property int index
+
+                                readonly property string monName: WallpaperListener.getMonitorName(modelData) ?? ""
+                                readonly property var wpData: WallpaperListener.effectivePerMonitor[monName] ?? { path: "" }
+                                readonly property string wpPath: wpData.path || (Config.options?.background?.wallpaperPath ?? "")
+                                readonly property bool isSelected: monName === qkMultiMonPanel.selectedMonitor
+                                readonly property real aspectRatio: modelData.width / Math.max(1, modelData.height)
+
+                                onWpPathChanged: if (WallpaperListener.isVideoPath(wpPath)) Wallpapers.ensureVideoFirstFrame(wpPath)
+
+                                width: (parent.height) * aspectRatio
+                                height: parent.height
+                                radius: Looks.radius.small
+                                color: "transparent"
+                                border.width: isSelected ? 2 : 1
+                                border.color: isSelected ? Looks.colors.accent : Looks.colors.bg2Border
+                                clip: true
+
+                                scale: isSelected ? 1.0 : (qkMonMa.containsMouse ? 0.97 : 0.93)
+                                opacity: isSelected ? 1.0 : (qkMonMa.containsMouse ? 0.95 : 0.8)
+                                Behavior on scale {
+                                    animation: Looks.transition.number.createObject(this)
+                                }
+                                Behavior on opacity {
+                                    animation: Looks.transition.number.createObject(this)
+                                }
+                                Behavior on border.color {
+                                    animation: Looks.transition.color.createObject(this)
+                                }
+
+                                MouseArea {
+                                    id: qkMonMa
+                                    anchors.fill: parent
+                                    cursorShape: Qt.PointingHandCursor
+                                    hoverEnabled: true
+                                    onClicked: qkMultiMonPanel.selectedMonitor = qkMonCard.monName
+                                }
+
+                                Image {
+                                    visible: !WallpaperListener.isVideoPath(qkMonCard.wpPath) && !WallpaperListener.isGifPath(qkMonCard.wpPath)
+                                    anchors.fill: parent
+                                    anchors.margins: qkMonCard.border.width
+                                    fillMode: Image.PreserveAspectCrop
+                                    source: (!WallpaperListener.isVideoPath(qkMonCard.wpPath) && !WallpaperListener.isGifPath(qkMonCard.wpPath)) ? (qkMonCard.wpPath || "") : ""
+                                    sourceSize.width: 200
+                                    sourceSize.height: 200
+                                    cache: true
+                                    asynchronous: true
+                                    layer.enabled: true
+                                    layer.effect: OpacityMask {
+                                        maskSource: Rectangle {
+                                            width: qkMonCard.width - qkMonCard.border.width * 2
+                                            height: qkMonCard.height - qkMonCard.border.width * 2
+                                            radius: Math.max(0, Looks.radius.small - qkMonCard.border.width)
+                                        }
+                                    }
+                                }
+                                AnimatedImage {
+                                    visible: WallpaperListener.isGifPath(qkMonCard.wpPath)
+                                    anchors.fill: parent
+                                    anchors.margins: qkMonCard.border.width
+                                    fillMode: Image.PreserveAspectCrop
+                                    source: {
+                                        if (!WallpaperListener.isGifPath(qkMonCard.wpPath)) return ""
+                                        const p = qkMonCard.wpPath
+                                        return p.startsWith("file://") ? p : "file://" + p
+                                    }
+                                    asynchronous: true
+                                    cache: true
+                                    playing: false
+                                }
+                                Image {
+                                    visible: WallpaperListener.isVideoPath(qkMonCard.wpPath)
+                                    anchors.fill: parent
+                                    anchors.margins: qkMonCard.border.width
+                                    fillMode: Image.PreserveAspectCrop
+                                    source: {
+                                        const ff = Wallpapers.videoFirstFrames[qkMonCard.wpPath]
+                                        return ff ? (ff.startsWith("file://") ? ff : "file://" + ff) : ""
+                                    }
+                                    cache: true
+                                    asynchronous: true
+                                    Component.onCompleted: Wallpapers.ensureVideoFirstFrame(qkMonCard.wpPath)
+                                }
+
+                                // Media type badge
+                                Rectangle {
+                                    visible: WallpaperListener.isAnimatedPath(qkMonCard.wpPath)
+                                    anchors.top: parent.top
+                                    anchors.left: parent.left
+                                    anchors.margins: Looks.spacing.small
+                                    width: qkBadgeRow.implicitWidth + Looks.spacing.small * 2
+                                    height: qkBadgeRow.implicitHeight + 4
+                                    radius: height / 2
+                                    color: Qt.rgba(0, 0, 0, 0.65)
+                                    Row {
+                                        id: qkBadgeRow
+                                        anchors.centerIn: parent
+                                        spacing: 3
+                                        FluentIcon {
+                                            icon: WallpaperListener.isVideoPath(qkMonCard.wpPath) ? "video" : "gif"
+                                            implicitSize: Looks.font.pixelSize.small - 2
+                                            color: "white"
+                                            anchors.verticalCenter: parent.verticalCenter
+                                        }
+                                        WText {
+                                            text: WallpaperListener.mediaTypeLabel(qkMonCard.wpPath)
+                                            font.pixelSize: Looks.font.pixelSize.small
+                                            color: "white"
+                                            anchors.verticalCenter: parent.verticalCenter
+                                        }
+                                    }
+                                }
+
+                                // Bottom label gradient
+                                Rectangle {
+                                    anchors.bottom: parent.bottom
+                                    anchors.left: parent.left
+                                    anchors.right: parent.right
+                                    height: Math.max(qkMonLabelCol.implicitHeight + 10, parent.height * 0.4)
+                                    gradient: Gradient {
+                                        GradientStop { position: 0.0; color: "transparent" }
+                                        GradientStop { position: 0.55; color: Qt.rgba(0, 0, 0, 0.35) }
+                                        GradientStop { position: 1.0; color: Qt.rgba(0, 0, 0, 0.8) }
+                                    }
+                                    ColumnLayout {
+                                        id: qkMonLabelCol
+                                        anchors.bottom: parent.bottom
+                                        anchors.horizontalCenter: parent.horizontalCenter
+                                        anchors.bottomMargin: Looks.spacing.small
+                                        spacing: 0
+                                        WText {
+                                            Layout.alignment: Qt.AlignHCenter
+                                            text: qkMonCard.monName || ("Monitor " + (qkMonCard.index + 1))
+                                            font.pixelSize: Looks.font.pixelSize.small
+                                            font.weight: Font.Medium
+                                            color: "white"
+                                        }
+                                        WText {
+                                            Layout.alignment: Qt.AlignHCenter
+                                            text: qkMonCard.modelData.width + "×" + qkMonCard.modelData.height
+                                            font.pixelSize: Looks.font.pixelSize.small
+                                            color: Qt.rgba(1, 1, 1, 0.6)
+                                        }
+                                    }
+                                }
+
+                                // Selected check badge
+                                Rectangle {
+                                    visible: qkMonCard.isSelected
+                                    anchors.top: parent.top
+                                    anchors.right: parent.right
+                                    anchors.margins: 4
+                                    width: 16; height: 16
+                                    radius: 8
+                                    color: Looks.colors.accent
+                                    FluentIcon {
+                                        anchors.centerIn: parent
+                                        icon: "checkmark"
+                                        implicitSize: 10
+                                        color: Looks.colors.accentFg
+                                    }
+                                }
+
+                                // Custom wallpaper indicator dot
+                                Rectangle {
+                                    visible: (qkMonCard.wpData.hasCustomWallpaper ?? false) && !qkMonCard.isSelected
+                                    anchors.top: parent.top
+                                    anchors.right: parent.right
+                                    anchors.margins: 6
+                                    width: 7; height: 7
+                                    radius: 4
+                                    color: Looks.colors.accent
+                                    opacity: 0.8
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Hero preview + controls card
+            Item {
+                Layout.fillWidth: true
+                implicitHeight: qkPreviewCard.implicitHeight
+
+                Rectangle {
+                    id: qkPreviewCard
+                    anchors.fill: parent
+                    implicitHeight: qkPreviewCol.implicitHeight
+                    radius: Looks.radius.large
+                    color: Looks.colors.bg2Base
+                    border.width: 1
+                    border.color: Looks.colors.bg2Border
+                    clip: true
+
+                    readonly property string wpUrl: {
+                        const path = qkMultiMonPanel.selMonPath
+                        if (!path) return ""
+                        return path.startsWith("file://") ? path : "file://" + path
+                    }
+                    readonly property bool isVideo: WallpaperListener.isVideoPath(qkMultiMonPanel.selMonPath)
+                    readonly property bool isGif: WallpaperListener.isGifPath(qkMultiMonPanel.selMonPath)
+
+                    Connections {
+                        target: qkMultiMonPanel
+                        function onSelMonPathChanged() {
+                            if (qkPreviewCard.isVideo) Wallpapers.ensureVideoFirstFrame(qkMultiMonPanel.selMonPath)
+                        }
+                    }
+
+                    ColumnLayout {
+                        id: qkPreviewCol
+                        anchors { left: parent.left; right: parent.right }
+                        spacing: 0
+
+                        // Hero preview
+                        Item {
+                            Layout.fillWidth: true
+                            Layout.preferredHeight: 130
+                            clip: true
+
+                            Image {
+                                visible: !qkPreviewCard.isGif && !qkPreviewCard.isVideo
+                                anchors.fill: parent
+                                fillMode: Image.PreserveAspectCrop
+                                source: visible ? qkPreviewCard.wpUrl : ""
+                                asynchronous: true
+                                cache: false
+                            }
+                            AnimatedImage {
+                                visible: qkPreviewCard.isGif
+                                anchors.fill: parent
+                                fillMode: Image.PreserveAspectCrop
+                                source: visible ? qkPreviewCard.wpUrl : ""
+                                asynchronous: true
+                                cache: false
+                                playing: false
+                            }
+                            Image {
+                                visible: qkPreviewCard.isVideo
+                                anchors.fill: parent
+                                fillMode: Image.PreserveAspectCrop
+                                source: {
+                                    const ff = Wallpapers.videoFirstFrames[qkMultiMonPanel.selMonPath]
+                                    return ff ? (ff.startsWith("file://") ? ff : "file://" + ff) : ""
+                                }
+                                asynchronous: true
+                                cache: false
+                                Component.onCompleted: Wallpapers.ensureVideoFirstFrame(qkMultiMonPanel.selMonPath)
+                            }
+
+                            // Gradient overlay with monitor info
+                            Rectangle {
+                                anchors.bottom: parent.bottom
+                                anchors.left: parent.left
+                                anchors.right: parent.right
+                                height: parent.height * 0.55
+                                gradient: Gradient {
+                                    GradientStop { position: 0.0; color: "transparent" }
+                                    GradientStop { position: 0.5; color: Qt.rgba(0, 0, 0, 0.4) }
+                                    GradientStop { position: 1.0; color: Qt.rgba(0, 0, 0, 0.8) }
+                                }
+
+                                RowLayout {
+                                    anchors {
+                                        bottom: parent.bottom; left: parent.left; right: parent.right
+                                        margins: 10; bottomMargin: 8
+                                    }
+                                    spacing: 6
+
+                                    ColumnLayout {
+                                        Layout.fillWidth: true
+                                        spacing: 1
+                                        WText {
+                                            text: qkMultiMonPanel.selectedMonitor || Translation.tr("No monitor")
+                                            font.pixelSize: Looks.font.pixelSize.larger
+                                            font.weight: Font.DemiBold
+                                            color: "#ffffff"
+                                        }
+                                        WText {
+                                            text: {
+                                                const custom = qkMultiMonPanel.selMonData.hasCustomWallpaper ?? false
+                                                const animated = qkMultiMonPanel.selMonData.isAnimated ?? false
+                                                let label = custom ? Translation.tr("Custom wallpaper") : Translation.tr("Global wallpaper")
+                                                if (animated) label += " · " + WallpaperListener.mediaTypeLabel(qkMultiMonPanel.selMonPath)
+                                                return label
+                                            }
+                                            font.pixelSize: Looks.font.pixelSize.small - 1
+                                            color: Qt.rgba(1, 1, 1, 0.7)
+                                        }
+                                    }
+
+                                    // Media type badge
+                                    Rectangle {
+                                        visible: qkPreviewCard.isVideo || qkPreviewCard.isGif
+                                        width: qkPreviewBadge.implicitWidth + 8
+                                        height: 18
+                                        radius: 9
+                                        color: Qt.rgba(1, 1, 1, 0.15)
+                                        Row {
+                                            id: qkPreviewBadge
+                                            anchors.centerIn: parent
+                                            spacing: 3
+                                            FluentIcon {
+                                                icon: qkPreviewCard.isVideo ? "video" : "gif"
+                                                implicitSize: 8
+                                                color: "#ffffff"
+                                                anchors.verticalCenter: parent.verticalCenter
+                                            }
+                                            WText {
+                                                text: WallpaperListener.mediaTypeLabel(qkMultiMonPanel.selMonPath)
+                                                font.pixelSize: Looks.font.pixelSize.small - 2
+                                                color: "#ffffff"
+                                                anchors.verticalCenter: parent.verticalCenter
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        // Separator
+                        Rectangle {
+                            Layout.fillWidth: true
+                            implicitHeight: 1
+                            color: Looks.colors.bg2Border
+                            opacity: 0.5
+                        }
+
+                        // Controls section
+                        ColumnLayout {
+                            Layout.fillWidth: true
+                            Layout.margins: 12
+                            Layout.topMargin: 10
+                            Layout.bottomMargin: 12
+                            spacing: 8
+
+                            // Wallpaper path
+                            WText {
+                                Layout.fillWidth: true
+                                elide: Text.ElideMiddle
+                                font.pixelSize: Looks.font.pixelSize.small
+                                color: Looks.colors.subfg
+                                opacity: 0.7
+                                text: qkMultiMonPanel.selMonPath ? String(qkMultiMonPanel.selMonPath).replace(/^file:\/\//, "") : Translation.tr("No wallpaper set")
+                            }
+
+                            // Primary actions: Change + Random
+                            RowLayout {
+                                Layout.fillWidth: true
+                                spacing: 6
+                                WButton {
+                                    Layout.fillWidth: true
+                                    text: Translation.tr("Change")
+                                    icon.name: "image"
+                                    colBackground: Looks.colors.accent
+                                    colBackgroundHover: Looks.colors.accentHover
+                                    colBackgroundActive: Looks.colors.accentActive
+                                    colForeground: Looks.colors.accentFg
+                                    onClicked: {
+                                        const mon = qkMultiMonPanel.selectedMonitor
+                                        if (mon) {
+                                            Config.setNestedValue("wallpaperSelector.selectionTarget", "main")
+                                            Config.setNestedValue("wallpaperSelector.targetMonitor", mon)
+                                            Quickshell.execDetached(["/usr/bin/qs", "-c", "ii", "ipc", "call", "wallpaperSelector", "toggle"])
+                                        }
+                                    }
+                                }
+                                WButton {
+                                    Layout.fillWidth: true
+                                    text: Translation.tr("Random")
+                                    icon.name: "arrow-shuffle"
+                                    onClicked: {
+                                        const mon = qkMultiMonPanel.selectedMonitor
+                                        if (mon) {
+                                            Wallpapers.randomFromCurrentFolder(Appearance.m3colors.darkmode, mon)
+                                        }
+                                    }
+                                }
+                            }
+
+                            // Secondary actions: Reset + Apply all
+                            RowLayout {
+                                Layout.fillWidth: true
+                                spacing: 6
+                                WButton {
+                                    Layout.fillWidth: true
+                                    text: Translation.tr("Reset to global")
+                                    icon.name: "arrow-reset"
+                                    onClicked: {
+                                        const mon = qkMultiMonPanel.selectedMonitor
+                                        if (!mon) return
+                                        const globalPath = Config.options?.background?.wallpaperPath ?? ""
+                                        if (globalPath) {
+                                            Wallpapers.select(globalPath, Appearance.m3colors.darkmode, mon)
+                                        }
+                                    }
+                                }
+                                WButton {
+                                    Layout.fillWidth: true
+                                    text: Translation.tr("Apply to all")
+                                    icon.name: "select-all-on"
+                                    onClicked: {
+                                        const globalPath = Config.options?.background?.wallpaperPath ?? ""
+                                        if (globalPath) {
+                                            Wallpapers.apply(globalPath, Appearance.m3colors.darkmode)
+                                        }
+                                    }
+                                }
+                            }
+
+                            // Info bar
+                            WText {
+                                Layout.fillWidth: true
+                                Layout.topMargin: 2
+                                font.pixelSize: Looks.font.pixelSize.small - 2
+                                color: Looks.colors.subfg
+                                opacity: 0.6
+                                text: Translation.tr("%1 monitors detected").arg(WallpaperListener.screenCount) + "  ·  " + Translation.tr("Ctrl+Alt+T targets focused output")
+                                wrapMode: Text.WordWrap
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Dark mode toggle (keep accessible in multi-monitor mode)
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: 6
+                WButton {
+                    Layout.fillWidth: true
+                    text: Appearance.m3colors.darkmode ? Translation.tr("Switch to light") : Translation.tr("Switch to dark")
+                    icon.name: Appearance.m3colors.darkmode ? "weather-moon" : "weather-sunny"
+                    onClicked: {
+                        const dark = !Appearance.m3colors.darkmode
+                        ShellExec.execCmd(`${Directories.wallpaperSwitchScriptPath} --mode ${dark ? "dark" : "light"} --noswitch`)
                     }
                 }
             }
