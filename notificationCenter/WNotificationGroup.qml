@@ -95,27 +95,27 @@ Item {
             interactive: false
             spacing: 4
 
-            // Windows 11 style — expand up from below, dismiss right
+            // Smooth transitions
             add: Transition {
                 ParallelAnimation {
-                    NumberAnimation { property: "opacity"; from: 0; to: 1; duration: 180; easing.type: Easing.BezierSpline; easing.bezierCurve: [0.0, 0.0, 0.0, 1.0, 1, 1] }
-                    NumberAnimation { property: "y"; from: 10; to: 0; duration: 220; easing.type: Easing.BezierSpline; easing.bezierCurve: [0.0, 0.0, 0.0, 1.0, 1, 1] }
+                    NumberAnimation { property: "opacity"; from: 0; to: 1; duration: 200; easing.type: Easing.OutCubic }
+                    NumberAnimation { property: "scale"; from: 0.95; to: 1; duration: 200; easing.type: Easing.OutCubic }
                 }
             }
-
+            
             remove: Transition {
                 ParallelAnimation {
-                    NumberAnimation { property: "opacity"; to: 0; duration: 130; easing.type: Easing.BezierSpline; easing.bezierCurve: [0.7, 0.0, 1.0, 0.5, 1, 1] }
-                    NumberAnimation { property: "x"; to: 60; duration: 130; easing.type: Easing.BezierSpline; easing.bezierCurve: [0.7, 0.0, 1.0, 0.5, 1, 1] }
+                    NumberAnimation { property: "opacity"; to: 0; duration: 150; easing.type: Easing.InCubic }
+                    NumberAnimation { property: "x"; to: 50; duration: 150; easing.type: Easing.InCubic }
                 }
             }
-
+            
             displaced: Transition {
-                NumberAnimation { properties: "y"; duration: 200; easing.type: Easing.BezierSpline; easing.bezierCurve: [0.4, 0.0, 0.2, 1.0, 1, 1] }
+                NumberAnimation { properties: "x,y"; duration: 200; easing.type: Easing.OutCubic }
             }
 
             Behavior on implicitHeight {
-                animation: Looks.transition.resize.createObject(this)
+                NumberAnimation { duration: 200; easing.type: Easing.OutCubic }
             }
 
             model: ScriptModel {

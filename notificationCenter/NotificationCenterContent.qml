@@ -24,16 +24,12 @@ WBarAttachedPanelContent {
         id: contentLayout
         spacing: 12
 
-        // Notification area — grows upward as groups expand
+        // Notification area
         Item {
             id: notificationArea
             Layout.fillWidth: true
-            Layout.preferredHeight: Math.min(480, notificationPane.implicitHeight)
+            Layout.preferredHeight: Math.min(300, notificationPane.implicitHeight)
             implicitWidth: notificationPane.implicitWidth
-
-            Behavior on Layout.preferredHeight {
-                animation: Looks.transition.enter.createObject(this)
-            }
 
             WPane {
                 id: notificationPane
