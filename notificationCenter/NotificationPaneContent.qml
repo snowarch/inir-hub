@@ -112,11 +112,13 @@ BodyRectangle {
             }
         }
 
-        // Notification list
+        // Notification list — height drives panel growth (expand upward)
         ListView {
             id: notificationListView
             Layout.fillWidth: true
-            Layout.preferredHeight: root.hasNotifications ? Math.min(480, contentHeight) : 130
+            Layout.preferredHeight: root.hasNotifications
+                ? Math.min(400, contentHeight)
+                : 130
             clip: true
             spacing: 4
             cacheBuffer: 200
