@@ -10,7 +10,7 @@ import qs.modules.waffle.looks
 BodyRectangle {
     id: root
     anchors.fill: parent
-    implicitHeight: 230
+    implicitHeight: contentLayout.implicitHeight + 8
 
     readonly property int notificationCount: Notifications.list.length
     readonly property bool hasNotifications: notificationCount > 0
@@ -112,32 +112,36 @@ BodyRectangle {
             }
         }
 
-        // Notification list
+        // Notification list — height drives panel growth (expand upward)
         ListView {
             id: notificationListView
             Layout.fillWidth: true
-            Layout.fillHeight: true
+            // Grow with content so the panel expands upward from the taskbar;
+            // min 130px keeps the empty state visible, max 480px caps runaway growth.
+            Layout.preferredHeight: root.hasNotifications
+                ? Math.min(480, contentHeight)
+                : 130
             clip: true
             spacing: 4
             cacheBuffer: 200
 
-            // Smooth transitions
+            // Windows 11 style transitions — items grow up from below, dismiss right
             add: Transition {
                 ParallelAnimation {
-                    NumberAnimation { property: "opacity"; from: 0; to: 1; duration: 200; easing.type: Easing.OutCubic }
-                    NumberAnimation { property: "x"; from: 30; to: 0; duration: 200; easing.type: Easing.OutCubic }
+                    NumberAnimation { property: "opacity"; from: 0; to: 1; duration: 180; easing.type: Easing.BezierSpline; easing.bezierCurve: [0.0, 0.0, 0.0, 1.0, 1, 1] }
+                    NumberAnimation { property: "y"; from: 12; to: 0; duration: 220; easing.type: Easing.BezierSpline; easing.bezierCurve: [0.0, 0.0, 0.0, 1.0, 1, 1] }
                 }
             }
             
             remove: Transition {
                 ParallelAnimation {
-                    NumberAnimation { property: "opacity"; to: 0; duration: 150; easing.type: Easing.InCubic }
-                    NumberAnimation { property: "x"; to: 50; duration: 150; easing.type: Easing.InCubic }
+                    NumberAnimation { property: "opacity"; to: 0; duration: 130; easing.type: Easing.BezierSpline; easing.bezierCurve: [0.7, 0.0, 1.0, 0.5, 1, 1] }
+                    NumberAnimation { property: "x"; to: 60; duration: 130; easing.type: Easing.BezierSpline; easing.bezierCurve: [0.7, 0.0, 1.0, 0.5, 1, 1] }
                 }
             }
             
             displaced: Transition {
-                NumberAnimation { properties: "x,y"; duration: 200; easing.type: Easing.OutCubic }
+                NumberAnimation { properties: "y"; duration: 200; easing.type: Easing.BezierSpline; easing.bezierCurve: [0.4, 0.0, 0.2, 1.0, 1, 1] }
             }
 
             model: Notifications.appNameList
