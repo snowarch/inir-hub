@@ -46,7 +46,8 @@ FooterRectangle {
                     icon: "chevron-down"
                     rotation: root.collapsed ? 180 : 0
                     Behavior on rotation {
-                        animation: Looks.transition.rotate.createObject(this)
+                        enabled: false
+                        NumberAnimation { duration: 0 }
                     }
                 }
             }

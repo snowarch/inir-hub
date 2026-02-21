@@ -28,56 +28,70 @@ BodyRectangle {
         return cleaned ? Qt.locale(cleaned) : Qt.locale();
     }
 
-    implicitHeight: collapsed ? 0 : contentColumn.implicitHeight
-    implicitWidth: contentColumn.implicitWidth
-
-    Behavior on implicitHeight {
-        animation: Looks.transition.enter.createObject(this)
-    }
+    implicitHeight: collapsed ? 0 : calendarContent.implicitHeight
+    implicitWidth: calendarContent.implicitWidth
 
     clip: true
-    ColumnLayout {
-        id: contentColumn
-        spacing: 12
-        CalendarHeader {
-            Layout.topMargin: 10
-            Layout.fillWidth: true
-        }
+
+    Item {
+        id: viewport
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.top: parent.top
+        height: root.implicitHeight
+        clip: true
+
         ColumnLayout {
-            Layout.fillWidth: true
-            Layout.leftMargin: 5
-            Layout.rightMargin: 5
-            spacing: 1
-            DayOfWeekRow {
+            id: calendarContent
+            width: parent.width
+            spacing: 12
+            opacity: 1
+            scale: 1
+
+            CalendarHeader {
+                Layout.topMargin: 10
                 Layout.fillWidth: true
-                locale: root.locale
-                spacing: calendarView.buttonSpacing
-                implicitHeight: calendarView.buttonSize
-                delegate: Item {
-                    id: dayOfWeekItem
-                    required property var model
+            }
+
+            ColumnLayout {
+                Layout.fillWidth: true
+                Layout.leftMargin: 5
+                Layout.rightMargin: 5
+                spacing: 1
+
+                DayOfWeekRow {
+                    Layout.fillWidth: true
+                    locale: root.locale
+                    spacing: calendarView.buttonSpacing
                     implicitHeight: calendarView.buttonSize
-                    implicitWidth: calendarView.buttonSize
-                    WText {
-                        anchors.centerIn: parent
-                        text: {
-                            var result = dayOfWeekItem.model.shortName;
-                            if (Config.options?.waffles?.calendar?.force2CharDayOfWeek ?? false) result = result.substring(0,2);
-                            return result;
+                    delegate: Item {
+                        id: dayOfWeekItem
+                        required property var model
+                        implicitHeight: calendarView.buttonSize
+                        implicitWidth: calendarView.buttonSize
+
+                        WText {
+                            anchors.centerIn: parent
+                            text: {
+                                var result = dayOfWeekItem.model.shortName;
+                                if (Config.options?.waffles?.calendar?.force2CharDayOfWeek ?? false) result = result.substring(0,2);
+                                return result;
+                            }
+                            color: Looks.colors.fg
+                            font.pixelSize: Looks.font.pixelSize.large
                         }
-                        color: Looks.colors.fg
-                        font.pixelSize: Looks.font.pixelSize.large
                     }
                 }
-            }
-            CalendarView {
-                id: calendarView
-                locale: root.locale
-                verticalPadding: 2
-                buttonSize: 41 // ???
-                buttonSpacing: 1
-                Layout.fillWidth: true
-                delegate: DayButton {}
+
+                CalendarView {
+                    id: calendarView
+                    locale: root.locale
+                    verticalPadding: 2
+                    buttonSize: 41
+                    buttonSpacing: 1
+                    Layout.fillWidth: true
+                    delegate: DayButton {}
+                }
             }
         }
     }
