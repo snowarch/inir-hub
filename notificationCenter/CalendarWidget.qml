@@ -32,7 +32,7 @@ BodyRectangle {
     implicitWidth: contentColumn.implicitWidth
 
     Behavior on implicitHeight {
-        animation: Looks.transition.resize.createObject(this)
+        animation: Looks.transition.enter.createObject(this)
     }
 
     clip: true
