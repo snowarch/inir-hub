@@ -162,9 +162,14 @@ Variants {
 
                 readonly property bool shouldPlay: backdropWindow.enableAnimation
 
+                function pauseAndShowFirstFrame() {
+                    pause()
+                    seek(0)
+                }
+
                 onPlaybackStateChanged: {
                     if (playbackState === MediaPlayer.PlayingState && !shouldPlay) {
-                        pause()
+                        pauseAndShowFirstFrame()
                     }
                     if (playbackState === MediaPlayer.StoppedState && visible && shouldPlay) {
                         play()
@@ -174,14 +179,14 @@ Variants {
                 onShouldPlayChanged: {
                     if (visible && backdropWindow.wallpaperIsVideo) {
                         if (shouldPlay) play()
-                        else pause()
+                        else pauseAndShowFirstFrame()
                     }
                 }
 
                 onVisibleChanged: {
                     if (visible && backdropWindow.wallpaperIsVideo) {
                         if (shouldPlay) play()
-                        else pause()
+                        else pauseAndShowFirstFrame()
                     } else {
                         pause()
                     }
