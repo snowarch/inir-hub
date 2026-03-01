@@ -72,7 +72,7 @@ ColumnLayout {
                 when: !volumeSlider.pressed && !volumeSlider._userInteracting
             }
             scrollable: true
-            onMoved: Audio.sink.audio.volume = value
+            onMoved: Audio.setSinkVolume(value)
         }
 
         WPanelIconButton {
