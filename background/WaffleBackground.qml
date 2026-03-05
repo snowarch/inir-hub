@@ -4,6 +4,7 @@ import qs
 import qs.services
 import qs.modules.common
 import qs.modules.common.functions as CF
+import qs.modules.common.widgets
 import qs.modules.waffle.looks
 import QtQuick
 import QtQuick.Effects
@@ -127,17 +128,15 @@ Variants {
             anchors.fill: parent
             clip: true
 
-            // Static Image (non-GIF, non-video images only)
-            Image {
+            // Static Image with crossfade transitions (non-GIF, non-video images only)
+            WallpaperCrossfader {
                 id: wallpaper
                 anchors.fill: parent
                 fillMode: Image.PreserveAspectCrop
                 source: panelRoot.wallpaperUrl && !panelRoot.wallpaperIsGif && !panelRoot.wallpaperIsVideo
                     ? panelRoot.wallpaperUrl
                     : ""
-                asynchronous: true
-                cache: true
-                visible: !panelRoot.wallpaperIsGif && !panelRoot.wallpaperIsVideo && status === Image.Ready && !blurEffect.visible
+                visible: !panelRoot.wallpaperIsGif && !panelRoot.wallpaperIsVideo && ready && !blurEffect.visible
             }
 
             // Animated GIF wallpaper
@@ -228,7 +227,7 @@ Variants {
                 source: wallpaper
                 visible: Appearance.effectsEnabled && panelRoot.blurProgress > 0 &&
                          !panelRoot.wallpaperIsGif && !panelRoot.wallpaperIsVideo &&
-                         wallpaper.status === Image.Ready
+                         wallpaper.ready
                 blurEnabled: visible
                 blur: panelRoot.blurProgress * ((panelRoot.wEffects.blurRadius ?? 32) / 100.0)
                 blurMax: 64
