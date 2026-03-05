@@ -25,7 +25,7 @@ StyledOverlayWidget {
             "detailString": Translation.tr("Temp: %1°C").arg(ResourceUsage.cpuTemp)
         },
         {
-            "icon": "videocam",
+            "icon": "memory_alt",
             "name": Translation.tr("GPU"),
             "history": ResourceUsage.gpuUsageHistory,
             "maxAvailableString": ResourceUsage.maxAvailableGpuString,
