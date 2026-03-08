@@ -73,6 +73,10 @@ Item {
         }
         Cliphist.wipe()
         showClearConfirmation = false
+        // Reset model and count immediately so the UI reflects the wipe
+        // (the async refresh would miss because the panel closes below)
+        filteredClipboardModel.clear()
+        totalCount = 0
         GlobalStates.waffleClipboardOpen = false
     }
 
