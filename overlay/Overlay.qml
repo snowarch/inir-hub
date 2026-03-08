@@ -49,7 +49,7 @@ Scope {
                 root._everOpened = true
                 // Set target screen when opening
                 const outputName = NiriService.currentOutput
-                root.targetScreen = Quickshell.screens.find(s => s.name === outputName) ?? Quickshell.screens[0] ?? null
+                root.targetScreen = Quickshell.screens.find(s => s.name === outputName) ?? GlobalStates.primaryScreen ?? null
                 console.log("[Overlay] Opening on output:", outputName, "targetScreen:", root.targetScreen?.name)
                 // Now ready to show on correct screen
                 root._readyToShow = true
