@@ -7,8 +7,8 @@ import qs.modules.waffle.looks
 OSDValue {
     id: root
     property var focusedScreen: CompositorService.isNiri 
-        ? (Quickshell.screens.find(s => s.name === NiriService.currentOutput) ?? Quickshell.screens[0])
-        : (Quickshell.screens.find(s => s.name === Hyprland.focusedMonitor?.name) ?? Quickshell.screens[0])
+        ? (Quickshell.screens.find(s => s.name === NiriService.currentOutput) ?? GlobalStates.primaryScreen)
+        : (Quickshell.screens.find(s => s.name === Hyprland.focusedMonitor?.name) ?? GlobalStates.primaryScreen)
     property var brightnessMonitor: Brightness.getMonitorForScreen(focusedScreen)
     iconName: "weather-sunny"
     value: brightnessMonitor?.brightness ?? 0
