@@ -47,6 +47,9 @@ Variants {
         readonly property bool enableAnimation: wBg.enableAnimation ?? Config.options?.background?.enableAnimation ?? true
         readonly property bool enableAnimatedBlur: wEffects.enableAnimatedBlur ?? false
         readonly property int thumbnailBlurStrength: wEffects.thumbnailBlurStrength ?? Config.options?.background?.effects?.thumbnailBlurStrength ?? 70
+        readonly property bool externalMainWallpaperActive: (wBg.useMainWallpaper ?? true)
+            && AwwwBackend.supportsVisibleMainWallpaper(wallpaperSourceRaw, Config.options?.background?.fillMode ?? "fill", false, enableAnimatedBlur)
+        readonly property bool showInternalStaticWallpaper: !externalMainWallpaperActive || (Appearance.effectsEnabled && blurProgress > 0)
 
         readonly property bool wallpaperIsVideo: {
             const lowerPath = wallpaperSourceRaw.toLowerCase();
@@ -79,7 +82,54 @@ Variants {
         anchors { top: true; bottom: true; left: true; right: true }
         color: "transparent"
 
-        // Hide when fullscreen
+        // Wallpaper scaling — decode at correct resolution for quality parity with ii/material.
+        // Uses magick identify to detect actual image size, same approach as Background.qml.
+        readonly property real _preferredScale: (wBg.parallax?.workspaceZoom ?? 1.05)
+        property real _effectiveWallpaperScale: _preferredScale
+        property int _wallpaperWidth: panelRoot.screen.width
+        property int _wallpaperHeight: panelRoot.screen.height
+
+        onWallpaperSourceChanged: _wallpaperSizeDebounce.restart()
+
+        Timer {
+            id: _wallpaperSizeDebounce
+            interval: 80
+            repeat: false
+            onTriggered: {
+                const path = panelRoot.wallpaperSourceRaw
+                if (!path || path.length === 0) return
+                if (panelRoot.wallpaperIsVideo) return
+                _getWallpaperSizeProc.path = path
+                _getWallpaperSizeProc.running = true
+            }
+        }
+
+        Process {
+            id: _getWallpaperSizeProc
+            property string path: panelRoot.wallpaperSourceRaw
+            command: ["/usr/bin/magick", "identify", "-format", "%w %h", path]
+            stdout: StdioCollector {
+                id: _sizeOutput
+                onStreamFinished: {
+                    const output = (_sizeOutput.text ?? "").trim()
+                    const parts = output.split(/\s+/).filter(Boolean)
+                    const w = Number(parts[0])
+                    const h = Number(parts[1])
+                    const sw = panelRoot.screen?.width ?? 0
+                    const sh = panelRoot.screen?.height ?? 0
+                    if (!Number.isFinite(w) || !Number.isFinite(h) || w <= 0 || h <= 0 || sw <= 0 || sh <= 0)
+                        return
+                    panelRoot._wallpaperWidth = Math.round(w)
+                    panelRoot._wallpaperHeight = Math.round(h)
+                    if (w <= sw || h <= sh) {
+                        panelRoot._effectiveWallpaperScale = Math.max(sw / w, sh / h)
+                    } else {
+                        panelRoot._effectiveWallpaperScale = Math.min(panelRoot._preferredScale, w / sw, h / sh)
+                    }
+                }
+            }
+        }
+
         property bool hasFullscreenWindow: {
             if (CompositorService.isNiri && NiriService.windows) {
                 return NiriService.windows.some(w => w.is_focused && w.is_fullscreen)
@@ -136,7 +186,11 @@ Variants {
                 source: panelRoot.wallpaperUrl && !panelRoot.wallpaperIsGif && !panelRoot.wallpaperIsVideo
                     ? panelRoot.wallpaperUrl
                     : ""
-                visible: !panelRoot.wallpaperIsGif && !panelRoot.wallpaperIsVideo && ready && !blurEffect.visible
+                visible: panelRoot.showInternalStaticWallpaper && !panelRoot.wallpaperIsGif && !panelRoot.wallpaperIsVideo && ready && !blurEffect.visible
+                sourceSize {
+                    width: Math.round(panelRoot.screen.width * panelRoot._effectiveWallpaperScale)
+                    height: Math.round(panelRoot.screen.height * panelRoot._effectiveWallpaperScale)
+                }
             }
 
             // Animated GIF wallpaper
@@ -152,7 +206,7 @@ Variants {
                     : ""
                 asynchronous: true
                 cache: true
-                visible: panelRoot.wallpaperIsGif && !blurEffect.visible
+                visible: panelRoot.wallpaperIsGif && !blurEffect.visible && !panelRoot.externalMainWallpaperActive
                 playing: visible && panelRoot.enableAnimation
 
                 layer.enabled: Appearance.effectsEnabled && panelRoot.enableAnimatedBlur && (panelRoot.wEffects.blurRadius ?? 0) > 0

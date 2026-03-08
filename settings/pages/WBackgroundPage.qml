@@ -6,6 +6,7 @@ import Qt5Compat.GraphicalEffects
 import Quickshell
 import qs.services
 import qs.modules.common
+import qs.modules.common.functions as CF
 import qs.modules.waffle.looks
 import qs.modules.waffle.settings
 
@@ -55,6 +56,191 @@ WSettingsPage {
                     const globalPath = Config.options?.background?.wallpaperPath ?? ""
                     if (globalPath) {
                         Wallpapers.apply(globalPath, Appearance.m3colors.darkmode)
+                    }
+                }
+            }
+        }
+
+        // ─── Wallpaper folder browser ───
+        ColumnLayout {
+            Layout.fillWidth: true
+            Layout.topMargin: 4
+            spacing: 3
+
+            // Resolve the current effective wallpaper path for folder detection
+            readonly property string _effectivePath: {
+                const useMain = root.wBg.useMainWallpaper ?? true
+                if (useMain) return Config.options?.background?.wallpaperPath ?? ""
+                return root.wBg.wallpaperPath || Config.options?.background?.wallpaperPath || ""
+            }
+
+            Component.onCompleted: {
+                // Sync folder model to the current wallpaper's directory
+                if (_effectivePath && _effectivePath.length > 0) {
+                    const clean = CF.FileUtils.trimFileProtocol(String(_effectivePath))
+                    const dir = CF.FileUtils.parentDirectory(clean)
+                    if (dir && dir.length > 0)
+                        Wallpapers.setDirectory(dir)
+                }
+            }
+
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: 4
+                FluentIcon {
+                    icon: "folder"
+                    implicitSize: 11
+                    color: Looks.colors.subfg
+                    opacity: 0.6
+                }
+                WText {
+                    Layout.fillWidth: true
+                    text: {
+                        const dir = Wallpapers.effectiveDirectory
+                        if (!dir) return Translation.tr("Wallpapers")
+                        const parts = dir.split("/")
+                        return parts[parts.length - 1] || parts[parts.length - 2] || Translation.tr("Wallpapers")
+                    }
+                    font.pixelSize: Looks.font.pixelSize.tiny
+                    color: Looks.colors.subfg
+                    opacity: 0.6
+                    elide: Text.ElideMiddle
+                }
+                WText {
+                    text: Wallpapers.folderModel.count + " " + Translation.tr("items")
+                    font.pixelSize: Looks.font.pixelSize.tiny
+                    color: Looks.colors.subfg
+                    opacity: 0.5
+                }
+            }
+
+            ListView {
+                id: mainWpStrip
+                Layout.fillWidth: true
+                Layout.preferredHeight: 74
+                orientation: ListView.Horizontal
+                spacing: 4
+                clip: true
+                boundsBehavior: Flickable.StopAtBounds
+                model: Wallpapers.folderModel
+
+                delegate: Rectangle {
+                    id: mainWpThumb
+                    required property int index
+                    required property string filePath
+                    required property string fileName
+                    required property bool fileIsDir
+                    required property url fileUrl
+
+                    readonly property string _currentWp: {
+                        const useMain = root.wBg.useMainWallpaper ?? true
+                        if (useMain) return Config.options?.background?.wallpaperPath ?? ""
+                        return root.wBg.wallpaperPath || Config.options?.background?.wallpaperPath || ""
+                    }
+                    readonly property bool isCurrent: filePath === _currentWp
+                    readonly property string thumbSource: {
+                        if (fileIsDir) return ""
+                        const thumb = Wallpapers.getExpectedThumbnailPath(filePath, "large")
+                        if (thumb) return thumb.startsWith("file://") ? thumb : "file://" + thumb
+                        return filePath.startsWith("file://") ? filePath : "file://" + filePath
+                    }
+
+                    width: fileIsDir ? 58 : 74
+                    height: mainWpStrip.height
+                    radius: Looks.radius.medium
+                    color: fileIsDir ? Looks.colors.bg1 : "transparent"
+                    border.width: isCurrent ? 2 : 0
+                    border.color: isCurrent ? Looks.colors.accent : "transparent"
+                    clip: true
+
+                    scale: mainThumbMa.containsMouse ? 0.95 : 1.0
+                    Behavior on scale { animation: Looks.transition.hover.createObject(this) }
+
+                    FluentIcon {
+                        visible: mainWpThumb.fileIsDir
+                        anchors.centerIn: parent
+                        icon: "folder"
+                        implicitSize: 20
+                        color: Looks.colors.subfg
+                    }
+                    WText {
+                        visible: mainWpThumb.fileIsDir
+                        anchors { bottom: parent.bottom; horizontalCenter: parent.horizontalCenter; bottomMargin: 3 }
+                        text: mainWpThumb.fileName
+                        font.pixelSize: Looks.font.pixelSize.tiny
+                        color: Looks.colors.subfg
+                        width: parent.width - 4
+                        elide: Text.ElideRight
+                        horizontalAlignment: Text.AlignHCenter
+                    }
+
+                    Image {
+                        visible: !mainWpThumb.fileIsDir && !WallpaperListener.isVideoPath(mainWpThumb.filePath)
+                        anchors.fill: parent
+                        anchors.margins: mainWpThumb.border.width
+                        fillMode: Image.PreserveAspectCrop
+                        source: visible ? mainWpThumb.thumbSource : ""
+                        sourceSize.width: 140
+                        sourceSize.height: 140
+                        cache: true
+                        asynchronous: true
+                    }
+                    Image {
+                        visible: !mainWpThumb.fileIsDir && WallpaperListener.isVideoPath(mainWpThumb.filePath)
+                        anchors.fill: parent
+                        anchors.margins: mainWpThumb.border.width
+                        fillMode: Image.PreserveAspectCrop
+                        source: {
+                            if (!visible) return ""
+                            const ff = Wallpapers.videoFirstFrames[mainWpThumb.filePath]
+                            return ff ? (ff.startsWith("file://") ? ff : "file://" + ff) : ""
+                        }
+                        cache: true
+                        asynchronous: true
+                        Component.onCompleted: {
+                            if (WallpaperListener.isVideoPath(mainWpThumb.filePath))
+                                Wallpapers.ensureVideoFirstFrame(mainWpThumb.filePath)
+                        }
+                    }
+
+                    Rectangle {
+                        visible: mainWpThumb.isCurrent && !mainWpThumb.fileIsDir
+                        anchors { top: parent.top; right: parent.right; margins: 2 }
+                        width: 11; height: 11; radius: 6
+                        color: Looks.colors.accent
+                        FluentIcon {
+                            anchors.centerIn: parent
+                            icon: "checkmark"
+                            implicitSize: 6
+                            color: Looks.colors.accentFg
+                        }
+                    }
+
+                    MouseArea {
+                        id: mainThumbMa
+                        anchors.fill: parent
+                        cursorShape: Qt.PointingHandCursor
+                        hoverEnabled: true
+                        onClicked: {
+                            if (mainWpThumb.fileIsDir) {
+                                Wallpapers.setDirectory(mainWpThumb.filePath)
+                                return
+                            }
+                            // Apply to the correct target based on useMainWallpaper
+                            const useMain = root.wBg.useMainWallpaper ?? true
+                            if (useMain) {
+                                Wallpapers.select(mainWpThumb.filePath, Appearance.m3colors.darkmode, "")
+                            } else {
+                                Config.setNestedValue("waffles.background.useMainWallpaper", false)
+                                Config.setNestedValue("waffles.background.wallpaperPath", CF.FileUtils.trimFileProtocol(mainWpThumb.filePath))
+                                Wallpapers.apply(mainWpThumb.filePath, Appearance.m3colors.darkmode)
+                            }
+                        }
+                    }
+
+                    WToolTip {
+                        visible: mainThumbMa.containsMouse
+                        text: mainWpThumb.fileName
                     }
                 }
             }
