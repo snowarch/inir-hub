@@ -94,7 +94,7 @@ AbstractOverlayWidget {
              ? panelBaseOpacity
              : panelBaseOpacity * (Config.options?.overlay?.clickthroughOpacity ?? 0.8)
     Behavior on opacity {
-        animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(this)
+        animation: NumberAnimation { duration: Appearance.animation.elementMoveFast.duration; easing.type: Appearance.animation.elementMoveFast.type; easing.bezierCurve: Appearance.animation.elementMoveFast.bezierCurve }
     }
 
     // Guarded states & registration funcs
@@ -227,8 +227,10 @@ AbstractOverlayWidget {
             source: Wallpapers.effectiveWallpaperUrl
             fillMode: Image.PreserveAspectCrop
             cache: true
+            sourceSize.width: Math.ceil((Quickshell.screens[0]?.width ?? 1920) / 4)
+            sourceSize.height: Math.ceil((Quickshell.screens[0]?.height ?? 1080) / 4)
             asynchronous: true
-            layer.enabled: Appearance.effectsEnabled
+            layer.enabled: Appearance.effectsEnabled && Appearance.angelEverywhere
             layer.effect: MultiEffect {
                 source: widgetBlurWallpaper
                 anchors.fill: source
@@ -280,7 +282,7 @@ AbstractOverlayWidget {
                 // border.color: Appearance.colors.colOutlineVariant
                 // border.width: 1
                 Behavior on opacity {
-                    animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(this)
+                    animation: NumberAnimation { duration: Appearance.animation.elementMoveFast.duration; easing.type: Appearance.animation.elementMoveFast.type; easing.bezierCurve: Appearance.animation.elementMoveFast.bezierCurve }
                 }
                 
                 RowLayout {
