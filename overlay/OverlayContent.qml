@@ -41,9 +41,11 @@ Item {
                  ? (Config.options.overlay.scrimDim / 100)
                  : 0
         Behavior on opacity {
-            animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(this, {
-                "duration": Config.options.overlay.scrimAnimationDurationMs ?? Appearance.animation.elementMoveFast.duration
-            })
+            animation: NumberAnimation {
+                duration: Config.options.overlay.scrimAnimationDurationMs ?? Appearance.animation.elementMoveFast.duration
+                easing.type: Appearance.animation.elementMoveFast.type
+                easing.bezierCurve: Appearance.animation.elementMoveFast.bezierCurve
+            }
         }
     }
 
