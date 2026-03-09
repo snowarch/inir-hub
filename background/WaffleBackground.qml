@@ -205,7 +205,7 @@ Variants {
                         : "file://" + panelRoot.wallpaperSourceRaw)
                     : ""
                 asynchronous: true
-                cache: true
+                cache: false
                 sourceSize.width: 1920
                 sourceSize.height: 1080
                 visible: panelRoot.wallpaperIsGif && !blurEffect.visible && !panelRoot.externalMainWallpaperActive

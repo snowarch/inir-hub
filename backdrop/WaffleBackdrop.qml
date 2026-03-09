@@ -113,7 +113,7 @@ Variants {
                     ? backdropWindow.wallpaperUrl
                     : ""
                 asynchronous: true
-                cache: true
+                cache: false
                 sourceSize.width: backdropWindow.screen?.width ?? 1920
                 sourceSize.height: backdropWindow.screen?.height ?? 1080
                 visible: !backdropWindow.wallpaperIsGif && !backdropWindow.wallpaperIsVideo
@@ -131,7 +131,7 @@ Variants {
                         : "file://" + backdropWindow.wallpaperPathRaw)
                     : ""
                 asynchronous: true
-                cache: true
+                cache: false
                 sourceSize.width: 480
                 sourceSize.height: 270
                 visible: backdropWindow.wallpaperIsGif
