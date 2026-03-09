@@ -114,9 +114,11 @@ Variants {
                     : ""
                 asynchronous: true
                 cache: true
+                sourceSize.width: backdropWindow.screen?.width ?? 1920
+                sourceSize.height: backdropWindow.screen?.height ?? 1080
                 visible: !backdropWindow.wallpaperIsGif && !backdropWindow.wallpaperIsVideo
             }
-            
+
             // Animated GIF wallpaper
             // Always loaded for GIFs: plays when animation enabled, frozen (first frame) when disabled
             AnimatedImage {
@@ -130,6 +132,8 @@ Variants {
                     : ""
                 asynchronous: true
                 cache: true
+                sourceSize.width: 480
+                sourceSize.height: 270
                 visible: backdropWindow.wallpaperIsGif
                 playing: visible && backdropWindow.enableAnimation
 

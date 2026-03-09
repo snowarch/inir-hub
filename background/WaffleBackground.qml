@@ -206,6 +206,8 @@ Variants {
                     : ""
                 asynchronous: true
                 cache: true
+                sourceSize.width: 1920
+                sourceSize.height: 1080
                 visible: panelRoot.wallpaperIsGif && !blurEffect.visible && !panelRoot.externalMainWallpaperActive
                 playing: visible && panelRoot.enableAnimation && !GlobalStates.screenLocked && !Appearance._gameModeActive
 
