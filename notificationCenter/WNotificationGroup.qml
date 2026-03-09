@@ -79,7 +79,7 @@ Item {
 
         Behavior on x {
             enabled: !dragManager.dragging
-            animation: Looks.transition.move.createObject(this)
+            animation: NumberAnimation { duration: Looks.transition.enabled ? Looks.transition.duration.medium : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.standard }
         }
 
         GroupHeader {
@@ -222,7 +222,7 @@ Item {
                 }
 
                 Behavior on opacity {
-                    animation: Looks.transition.opacity.createObject(this)
+                    animation: NumberAnimation { duration: Looks.transition.enabled ? Looks.transition.duration.normal : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.standard }
                 }
             }
         }

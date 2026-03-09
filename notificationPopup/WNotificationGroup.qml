@@ -219,7 +219,7 @@ Item {
                         rotation: root.expanded ? 180 : 0
 
                         Behavior on rotation {
-                            animation: Looks.transition.rotate.createObject(this)
+                            animation: NumberAnimation { duration: Looks.transition.enabled ? Looks.transition.duration.medium : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.standard }
                         }
                     }
                 }
@@ -232,7 +232,7 @@ Item {
                     color: closeMA.containsMouse ? Looks.colors.bg1Hover : "transparent"
 
                     Behavior on color {
-                        animation: Looks.transition.color.createObject(this)
+                        animation: ColorAnimation { duration: Looks.transition.enabled ? 70 : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.standard }
                     }
 
                     MouseArea {

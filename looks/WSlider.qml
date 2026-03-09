@@ -70,7 +70,7 @@ Slider {
                 }
             }
             Behavior on color {
-                animation: Looks.transition.color.createObject(this)
+                animation: ColorAnimation { duration: Looks.transition.enabled ? 70 : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.standard }
             }
         }
 
@@ -115,7 +115,7 @@ Slider {
             color: Looks.colors.accent
 
             Behavior on diameter {
-                animation: Looks.transition.enter.createObject(this)
+                animation: NumberAnimation { duration: Looks.transition.enabled ? Looks.transition.duration.panel : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.decelerate }
             }
         }
 

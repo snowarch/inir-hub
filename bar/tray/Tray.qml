@@ -30,7 +30,7 @@ RowLayout {
         iconMonochrome: true
         iconRotation: ((Config.options?.waffles?.bar?.bottom ?? false) ? 180 : 0) + (root.overflowOpen ? 180 : 0)
         Behavior on iconRotation {
-            animation: Looks.transition.rotate.createObject(this)
+            animation: NumberAnimation { duration: Looks.transition.enabled ? Looks.transition.duration.medium : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.standard }
         }
 
         onClicked: {

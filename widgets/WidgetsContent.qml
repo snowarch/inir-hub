@@ -278,7 +278,7 @@ WBarAttachedPanelContent {
                                 width: parent.width * Math.min(1, ResourceUsage.cpuUsage); height: parent.height; radius: 3
                                 color: ResourceUsage.cpuUsage > 0.8 ? Looks.colors.danger : Looks.colors.accent
                                 Behavior on width {
-                                    animation: Looks.transition.resize.createObject(this)
+                                    animation: NumberAnimation { duration: Looks.transition.enabled ? Looks.transition.duration.medium : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.standard }
                                 }
                             }
                         }
@@ -306,7 +306,7 @@ WBarAttachedPanelContent {
                                 width: parent.width * Math.min(1, ResourceUsage.memoryUsedPercentage); height: parent.height; radius: 3
                                 color: ResourceUsage.memoryUsedPercentage > 0.9 ? Looks.colors.danger : Looks.colors.accent
                                 Behavior on width {
-                                    animation: Looks.transition.resize.createObject(this)
+                                    animation: NumberAnimation { duration: Looks.transition.enabled ? Looks.transition.duration.medium : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.standard }
                                 }
                             }
                         }
@@ -335,7 +335,7 @@ WBarAttachedPanelContent {
                                 width: parent.width * Math.min(1, ResourceUsage.swapUsedPercentage); height: parent.height; radius: 3
                                 color: ResourceUsage.swapUsedPercentage > 0.8 ? Looks.colors.danger : Looks.colors.accent
                                 Behavior on width {
-                                    animation: Looks.transition.resize.createObject(this)
+                                    animation: NumberAnimation { duration: Looks.transition.enabled ? Looks.transition.duration.medium : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.standard }
                                 }
                             }
                         }
@@ -665,7 +665,7 @@ WBarAttachedPanelContent {
         border.width: actionMa.containsMouse ? 1 : 0
         border.color: Looks.colors.bg2Border
 
-        Behavior on color { animation: Looks.transition.color.createObject(this) }
+        Behavior on color { animation: ColorAnimation { duration: Looks.transition.enabled ? 70 : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.standard } }
 
         MouseArea {
             id: actionMa
@@ -683,7 +683,7 @@ WBarAttachedPanelContent {
                 icon: actionBtn.iconName
                 implicitSize: 22
                 color: actionMa.containsMouse ? Looks.colors.accent : Looks.colors.fg
-                Behavior on color { animation: Looks.transition.color.createObject(this) }
+                Behavior on color { animation: ColorAnimation { duration: Looks.transition.enabled ? 70 : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.standard } }
             }
             WText {
                 Layout.alignment: Qt.AlignHCenter

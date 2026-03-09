@@ -34,7 +34,7 @@ Button {
         radius: Looks.radius.medium
         color: root.down ? Looks.colors.bg2Active : (root.hovered ? Looks.colors.bg2Hover : ColorUtils.transparentize(Looks.colors.bg2))
         Behavior on color {
-            animation: Looks.transition.color.createObject(this)
+            animation: ColorAnimation { duration: Looks.transition.enabled ? 70 : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.standard }
         }
     }
 

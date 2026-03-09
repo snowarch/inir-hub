@@ -36,10 +36,10 @@ Item {
         opacity: root.selected ? 1 : 0
 
         Behavior on opacity {
-            animation: Looks.transition.opacity.createObject(this)
+            animation: NumberAnimation { duration: Looks.transition.enabled ? Looks.transition.duration.normal : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.standard }
         }
         Behavior on border.width {
-            animation: Looks.transition.resize.createObject(this)
+            animation: NumberAnimation { duration: Looks.transition.enabled ? Looks.transition.duration.medium : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.standard }
         }
     }
 
@@ -74,7 +74,7 @@ Item {
             opacity: thumbnailContainer.isHovered && !root.selected ? 0.5 : 0
 
             Behavior on opacity {
-                animation: Looks.transition.opacity.createObject(this)
+                animation: NumberAnimation { duration: Looks.transition.enabled ? Looks.transition.duration.normal : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.standard }
             }
         }
 

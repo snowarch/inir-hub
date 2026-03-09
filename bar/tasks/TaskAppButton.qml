@@ -187,10 +187,10 @@ AppButton {
                 color: isFocused ? Looks.colors.accent : Looks.colors.accentUnfocused
 
                 Behavior on implicitWidth {
-                    animation: Looks.transition.enter.createObject(this)
+                    animation: NumberAnimation { duration: Looks.transition.enabled ? Looks.transition.duration.panel : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.decelerate }
                 }
                 Behavior on color {
-                    animation: Looks.transition.color.createObject(this)
+                    animation: ColorAnimation { duration: Looks.transition.enabled ? 70 : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.standard }
                 }
             }
         }
@@ -208,7 +208,7 @@ AppButton {
         }
 
         Behavior on opacity {
-            animation: Looks.transition.opacity.createObject(this)
+            animation: NumberAnimation { duration: Looks.transition.enabled ? Looks.transition.duration.normal : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.standard }
         }
     }
 

@@ -160,7 +160,7 @@ Variants {
         property bool focusWindowsPresent: !GlobalStates.screenLocked && hasWindowsOnCurrentWorkspace
         property real focusPresenceProgress: focusWindowsPresent ? 1 : 0
         Behavior on focusPresenceProgress {
-            animation: Looks.transition.opacity.createObject(this)
+            animation: NumberAnimation { duration: Looks.transition.enabled ? Looks.transition.duration.normal : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.standard }
         }
 
         // Blur progress
@@ -300,7 +300,7 @@ Variants {
                     return Qt.rgba(0, 0, 0, total / 100);
                 }
                 Behavior on color {
-                    animation: Looks.transition.color.createObject(this)
+                    animation: ColorAnimation { duration: Looks.transition.enabled ? 70 : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.standard }
                 }
             }
         }

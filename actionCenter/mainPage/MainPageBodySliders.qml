@@ -26,7 +26,7 @@ ColumnLayout {
             iconName: "weather-sunny"
 
             Behavior on animationValue {
-                animation: Looks.transition.longMovement.createObject(this)
+                animation: NumberAnimation { duration: Looks.transition.enabled ? 800 : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.emphasize }
             }
         }
         
