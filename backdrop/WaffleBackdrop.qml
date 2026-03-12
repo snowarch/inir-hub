@@ -105,7 +105,7 @@ Variants {
         Item {
             anchors.fill: parent
 
-            // Static wallpaper with crossfader transitions
+            // Static wallpaper with crossfade transitions (shares waffle workspace transition settings)
             WallpaperCrossfader {
                 id: wallpaper
                 anchors.fill: parent
@@ -113,11 +113,13 @@ Variants {
                 source: backdropWindow.wallpaperUrl && !backdropWindow.wallpaperIsGif && !backdropWindow.wallpaperIsVideo
                     ? backdropWindow.wallpaperUrl
                     : ""
-                asynchronous: true
-                cache: false
-                sourceSize.width: backdropWindow.screen?.width ?? 1920
-                sourceSize.height: backdropWindow.screen?.height ?? 1080
+                sourceSize: Qt.size(backdropWindow.screen?.width ?? 1920, backdropWindow.screen?.height ?? 1080)
                 visible: !backdropWindow.wallpaperIsGif && !backdropWindow.wallpaperIsVideo
+                // Use waffle transition settings
+                transitionBaseDuration: Config.options?.waffles?.background?.transition?.duration ?? 800
+                transitionType: Config.options?.waffles?.background?.transition?.type ?? "crossfade"
+                transitionDirection: Config.options?.waffles?.background?.transition?.direction ?? "right"
+                enableTransitions: Config.options?.waffles?.background?.transition?.enable ?? true
             }
 
             // Animated GIF wallpaper
