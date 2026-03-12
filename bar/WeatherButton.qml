@@ -12,6 +12,13 @@ BarButton {
     leftInset: 8
     rightInset: 8
     implicitWidth: contentRow.implicitWidth + leftInset + rightInset + 8
+    readonly property string locationText: {
+        const city = String(Weather.data?.city ?? "")
+        if (city.length > 0 && city.toLowerCase() !== "unknown")
+            return city
+        return ""
+    }
+    readonly property string secondaryText: locationText || root.weatherDescription
 
     onClicked: {
         Weather.getData()
@@ -31,20 +38,25 @@ BarButton {
         }
 
         Column {
+            width: 92
             spacing: 0
             Layout.alignment: Qt.AlignVCenter
 
             WText {
+                width: parent.width
                 text: Weather.data?.temp ?? "--°"
                 font.pixelSize: Looks.font.pixelSize.normal
                 font.weight: Font.Medium
                 color: Looks.colors.fg
+                elide: Text.ElideRight
             }
 
             WText {
-                text: root.weatherDescription
+                width: parent.width
+                text: root.secondaryText
                 font.pixelSize: Looks.font.pixelSize.tiny
                 color: Looks.colors.subfg
+                elide: Text.ElideRight
             }
         }
     }

@@ -15,29 +15,60 @@ Item {
     id: root
     property size sourceSize: Qt.size(32, 32)
     
+    width: sourceSize.width
+    height: sourceSize.height
     implicitWidth: sourceSize.width
     implicitHeight: sourceSize.height
     Layout.preferredWidth: sourceSize.width
     Layout.preferredHeight: sourceSize.height
 
-    StyledImage {
-        id: avatar
+    Rectangle {
+        anchors.fill: parent
+        radius: Math.min(width, height) / 2
+        color: Looks.colors.bg2Base
+        visible: avatarImage.status !== Image.Ready
+    }
+
+    MaterialSymbol {
+        anchors.centerIn: parent
+        text: "person"
+        iconSize: Math.round(root.sourceSize.width * 0.55)
+        color: Looks.colors.subfg
+        visible: avatarImage.status !== Image.Ready
+    }
+
+    Rectangle {
+        id: avatarMask
+        anchors.fill: parent
+        radius: Math.min(width, height) / 2
+        visible: false
+    }
+
+    Image {
+        id: avatarImage
         anchors.fill: parent
         sourceSize: Qt.size(root.sourceSize.width * 2, root.sourceSize.height * 2)
         fillMode: Image.PreserveAspectCrop
-        source: Directories.userAvatarPathAccountsService
-        fallbacks: [Directories.userAvatarPathRicersAndWeirdSystems, Directories.userAvatarPathRicersAndWeirdSystems2]
+        source: `file://${Directories.userAvatarPathRicersAndWeirdSystems}`
         cache: true
         smooth: true
         mipmap: true
-
-        layer.enabled: Appearance.effectsEnabled
-        layer.effect: OpacityMask {
-            maskSource: Rectangle {
-                width: root.width
-                height: root.height
-                radius: Math.min(width, height) / 2
+        asynchronous: true
+        visible: false
+        onStatusChanged: {
+            if (status === Image.Error) {
+                if (String(source).indexOf(Directories.userAvatarPathAccountsService) >= 0)
+                    source = `file://${Directories.userAvatarPathRicersAndWeirdSystems2}`
+                else
+                    source = `file://${Directories.userAvatarPathAccountsService}`
             }
         }
+    }
+
+    OpacityMask {
+        anchors.fill: parent
+        source: avatarImage
+        maskSource: avatarMask
+        visible: avatarImage.status === Image.Ready
     }
 }

@@ -267,12 +267,12 @@ WPanelPageColumn {
             WUserAvatar { sourceSize: Qt.size(32, 32) }
             WText {
                 Layout.alignment: Qt.AlignVCenter
-                text: SystemInfo.username
+                text: SystemInfo.displayName || SystemInfo.username
             }
         }
 
         onClicked: userMenu.open()
-        WToolTip { text: SystemInfo.username }
+        WToolTip { text: SystemInfo.displayName || SystemInfo.username }
 
         Popup {
             id: userMenu
@@ -342,7 +342,7 @@ WPanelPageColumn {
                                 Layout.alignment: Qt.AlignVCenter
                                 spacing: 2
                                 WText {
-                                    text: SystemInfo.username
+                                    text: SystemInfo.displayName || SystemInfo.username
                                     font.pixelSize: Looks.font.pixelSize.larger
                                     font.weight: Looks.font.weight.strong
                                 }
