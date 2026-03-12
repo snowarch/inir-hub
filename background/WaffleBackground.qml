@@ -93,7 +93,12 @@ Variants {
         property int _wallpaperWidth: panelRoot.screen.width
         property int _wallpaperHeight: panelRoot.screen.height
 
-        onWallpaperSourceChanged: _wallpaperSizeDebounce.restart()
+        onWallpaperSourceChanged: {
+            _wallpaperSizeDebounce.restart()
+            // Suppress blur during transition so the wallpaper change is visible
+            if (panelRoot.blurProgress > 0)
+                _blurTransitionAnimation.restart()
+        }
 
         Timer {
             id: _wallpaperSizeDebounce
@@ -167,15 +172,30 @@ Variants {
             animation: NumberAnimation { duration: Looks.transition.enabled ? Looks.transition.duration.normal : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.standard }
         }
 
-        // Blur progress
+        // Blur suppression during wallpaper transitions — briefly fades blur out
+        // so awww/crossfader transitions are visible, then fades back in.
+        property real _blurTransitionFactor: 1
+        SequentialAnimation {
+            id: _blurTransitionAnimation
+            NumberAnimation {
+                target: panelRoot; property: "_blurTransitionFactor"
+                to: 0; duration: Looks.transition.enabled ? 200 : 0; easing.type: Easing.OutQuad
+            }
+            PauseAnimation {
+                duration: AwwwBackend.transitionDurationMs + 200
+            }
+            NumberAnimation {
+                target: panelRoot; property: "_blurTransitionFactor"
+                to: 1; duration: Looks.transition.enabled ? 400 : 0; easing.type: Easing.InOutQuad
+            }
+        }
+
+        // Blur progress — blur activates only when windows are present on the current workspace
         property real blurProgress: {
             const blurEnabled = wEffects.enableBlur ?? false;
             const blurRadius = wEffects.blurRadius ?? 0;
             if (!blurEnabled || blurRadius <= 0) return 0;
-
-            const blurStatic = Math.max(0, Math.min(100, Number(wEffects.blurStatic) || 0));
-            const dynamicPart = (100 - blurStatic) * focusPresenceProgress;
-            return (blurStatic + dynamicPart) / 100;
+            return focusPresenceProgress * _blurTransitionFactor;
         }
 
         Item {
@@ -299,14 +319,13 @@ Variants {
                 }
             }
 
-            // Blur effect - only for static images when QML owns the wallpaper (performance)
+            // Blur effect for static images — reads from crossfader texture (works with both QML and awww rendering)
             MultiEffect {
                 id: blurEffect
                 anchors.fill: parent
                 source: wallpaper
                 visible: Appearance.effectsEnabled && panelRoot.blurProgress > 0 &&
                          !panelRoot.wallpaperIsGif && !panelRoot.wallpaperIsVideo &&
-                         !panelRoot.externalMainWallpaperActive &&
                          wallpaper.ready
                 blurEnabled: visible
                 blur: panelRoot.blurProgress * ((panelRoot.wEffects.blurRadius ?? 32) / 100.0)

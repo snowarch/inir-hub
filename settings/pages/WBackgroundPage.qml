@@ -1194,10 +1194,13 @@ WSettingsPage {
             onCheckedChanged: Config.setNestedValue("waffles.background.enableAnimation", checked)
         }
 
+        // NOTE: Blur activates only when windows are present on the workspace.
+        // During wallpaper transitions, blur temporarily fades out so the
+        // transition animation is visible, then fades back in.
         WSettingsSwitch {
             label: Translation.tr("Enable blur")
             icon: "eye"
-            description: Translation.tr("Blur wallpaper when windows are open")
+            description: Translation.tr("Blur wallpaper when windows are open. Temporarily hides during wallpaper transitions.")
             checked: root.wEffects.enableBlur ?? false
             onCheckedChanged: Config.setNestedValue("waffles.background.effects.enableBlur", checked)
         }
@@ -1367,6 +1370,37 @@ WSettingsPage {
             from: -100; to: 100; stepSize: 10
             value: root.wBackdrop.contrast ?? 0
             onValueChanged: Config.setNestedValue("waffles.background.backdrop.contrast", value)
+        }
+
+        WSettingsSwitch {
+            visible: root.wBackdrop.enable ?? true
+            label: Translation.tr("Enable vignette")
+            icon: "border-outside"
+            description: Translation.tr("Add a dark gradient around the edges of the backdrop")
+            checked: root.wBackdrop.vignetteEnabled ?? false
+            onCheckedChanged: Config.setNestedValue("waffles.background.backdrop.vignetteEnabled", checked)
+        }
+
+        WSettingsSpinBox {
+            visible: (root.wBackdrop.enable ?? true) && (root.wBackdrop.vignetteEnabled ?? false)
+            label: Translation.tr("Vignette intensity")
+            icon: "border-outside"
+            description: Translation.tr("How dark the vignette effect should be")
+            suffix: "%"
+            from: 0; to: 100; stepSize: 5
+            value: Math.round((root.wBackdrop.vignetteIntensity ?? 0.5) * 100)
+            onValueChanged: Config.setNestedValue("waffles.background.backdrop.vignetteIntensity", value / 100.0)
+        }
+
+        WSettingsSpinBox {
+            visible: (root.wBackdrop.enable ?? true) && (root.wBackdrop.vignetteEnabled ?? false)
+            label: Translation.tr("Vignette radius")
+            icon: "border-outside"
+            description: Translation.tr("How far the vignette extends from the edges")
+            suffix: "%"
+            from: 10; to: 100; stepSize: 5
+            value: Math.round((root.wBackdrop.vignetteRadius ?? 0.7) * 100)
+            onValueChanged: Config.setNestedValue("waffles.background.backdrop.vignetteRadius", value / 100.0)
         }
     }
 }
