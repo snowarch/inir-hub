@@ -47,9 +47,13 @@ Variants {
         readonly property bool enableAnimation: wBg.enableAnimation ?? Config.options?.background?.enableAnimation ?? true
         readonly property bool enableAnimatedBlur: wEffects.enableAnimatedBlur ?? false
         readonly property int thumbnailBlurStrength: wEffects.thumbnailBlurStrength ?? Config.options?.background?.effects?.thumbnailBlurStrength ?? 70
-        readonly property bool externalMainWallpaperActive: (wBg.useMainWallpaper ?? true)
-            && AwwwBackend.supportsVisibleMainWallpaper(wallpaperSourceRaw, Config.options?.background?.fillMode ?? "fill", false, enableAnimatedBlur)
-        readonly property bool showInternalStaticWallpaper: !externalMainWallpaperActive || (Appearance.effectsEnabled && blurProgress > 0)
+        readonly property bool externalMainWallpaperActive: AwwwBackend.supportsVisibleMainWallpaper(
+                wallpaperSourceRaw,
+                Config.options?.background?.fillMode ?? "fill",
+                false,
+                enableAnimatedBlur
+            )
+        readonly property bool showInternalStaticWallpaper: !externalMainWallpaperActive
 
         readonly property bool wallpaperIsVideo: {
             const lowerPath = wallpaperSourceRaw.toLowerCase();
@@ -178,18 +182,37 @@ Variants {
             anchors.fill: parent
             clip: true
 
-            // Static Image with crossfade transitions (non-GIF, non-video images only)
+            // Static wallpaper — when awww manages the visible wallpaper,
+            // crossfader is a hidden texture for blur. Otherwise it handles
+            // transitions with the user's configured settings.
             WallpaperCrossfader {
                 id: wallpaper
                 anchors.fill: parent
                 fillMode: Image.PreserveAspectCrop
+                // NEVER use crossfader transitions when awww is active — awww handles all transitions.
+                enableTransitions: !AwwwBackend.active
+                    && ((wBg.useMainWallpaper ?? true)
+                        ? (Config.options?.background?.transition?.enable ?? true)
+                        : (wBg.transition?.enable ?? true))
+                transitionType: (wBg.useMainWallpaper ?? true)
+                    ? (Config.options?.background?.transition?.type ?? "crossfade")
+                    : (wBg.transition?.type ?? "crossfade")
+                transitionDirection: (wBg.useMainWallpaper ?? true)
+                    ? (Config.options?.background?.transition?.direction ?? "right")
+                    : (wBg.transition?.direction ?? "right")
+                transitionBaseDuration: (wBg.useMainWallpaper ?? true)
+                    ? (Config.options?.background?.transition?.duration ?? 800)
+                    : (wBg.transition?.duration ?? 800)
                 source: panelRoot.wallpaperUrl && !panelRoot.wallpaperIsGif && !panelRoot.wallpaperIsVideo
                     ? panelRoot.wallpaperUrl
                     : ""
-                visible: panelRoot.showInternalStaticWallpaper && !panelRoot.wallpaperIsGif && !panelRoot.wallpaperIsVideo && ready && !blurEffect.visible
+                visible: !panelRoot.wallpaperIsGif && !panelRoot.wallpaperIsVideo && ready
+                    && (panelRoot.showInternalStaticWallpaper ? !blurEffect.visible : true)
+                opacity: panelRoot.showInternalStaticWallpaper ? 1 : 0
+                layer.enabled: !panelRoot.showInternalStaticWallpaper
                 sourceSize {
-                    width: Math.round(panelRoot.screen.width * panelRoot._effectiveWallpaperScale)
-                    height: Math.round(panelRoot.screen.height * panelRoot._effectiveWallpaperScale)
+                    width: Math.round(panelRoot.screen.width * (panelRoot.externalMainWallpaperActive ? 1 : panelRoot._effectiveWallpaperScale))
+                    height: Math.round(panelRoot.screen.height * (panelRoot.externalMainWallpaperActive ? 1 : panelRoot._effectiveWallpaperScale))
                 }
             }
 
@@ -274,13 +297,14 @@ Variants {
                 }
             }
 
-            // Blur effect - only for static images (performance)
+            // Blur effect - only for static images when QML owns the wallpaper (performance)
             MultiEffect {
                 id: blurEffect
                 anchors.fill: parent
                 source: wallpaper
                 visible: Appearance.effectsEnabled && panelRoot.blurProgress > 0 &&
                          !panelRoot.wallpaperIsGif && !panelRoot.wallpaperIsVideo &&
+                         !panelRoot.externalMainWallpaperActive &&
                          wallpaper.ready
                 blurEnabled: visible
                 blur: panelRoot.blurProgress * ((panelRoot.wEffects.blurRadius ?? 32) / 100.0)

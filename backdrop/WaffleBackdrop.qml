@@ -2,6 +2,7 @@ pragma ComponentBehavior: Bound
 
 import qs
 import qs.modules.common
+import qs.modules.common.widgets
 import qs.services
 import QtQuick
 import QtQuick.Effects
@@ -104,16 +105,22 @@ Variants {
         Item {
             anchors.fill: parent
 
-            // Static Image (non-GIF, non-video images only)
-            Image {
+            // Static wallpaper with crossfader transitions
+            WallpaperCrossfader {
                 id: wallpaper
                 anchors.fill: parent
                 fillMode: Image.PreserveAspectCrop
                 source: backdropWindow.wallpaperUrl && !backdropWindow.wallpaperIsGif && !backdropWindow.wallpaperIsVideo
                     ? backdropWindow.wallpaperUrl
                     : ""
-                asynchronous: true
-                cache: true
+                enableTransitions: (Config.options?.waffles?.background?.transition?.enable
+                    ?? Config.options?.background?.transition?.enable ?? true)
+                transitionType: (Config.options?.waffles?.background?.transition?.type
+                    ?? Config.options?.background?.transition?.type ?? "crossfade")
+                transitionDirection: (Config.options?.waffles?.background?.transition?.direction
+                    ?? Config.options?.background?.transition?.direction ?? "right")
+                transitionBaseDuration: (Config.options?.waffles?.background?.transition?.duration
+                    ?? Config.options?.background?.transition?.duration ?? 800)
                 visible: !backdropWindow.wallpaperIsGif && !backdropWindow.wallpaperIsVideo
             }
             
@@ -206,7 +213,7 @@ Variants {
             MultiEffect {
                 anchors.fill: parent
                 source: wallpaper
-                visible: wallpaper.status === Image.Ready && !backdropWindow.wallpaperIsGif && !backdropWindow.wallpaperIsVideo
+                visible: wallpaper.ready && !backdropWindow.wallpaperIsGif && !backdropWindow.wallpaperIsVideo
                 blurEnabled: backdropWindow.backdropBlurRadius > 0
                 blur: backdropWindow.backdropBlurRadius / 100.0
                 blurMax: 64

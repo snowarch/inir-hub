@@ -1,4 +1,5 @@
 pragma ComponentBehavior: Bound
+import qs
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
@@ -21,6 +22,21 @@ WSettingsPage {
     readonly property var wBg: Config.options?.waffles?.background ?? {}
     readonly property var wEffects: wBg.effects ?? {}
     readonly property var wBackdrop: wBg.backdrop ?? {}
+    readonly property var wTransition: wBg.transition ?? {}
+    readonly property bool useSharedWallpaperTransition: root.wBg.useMainWallpaper ?? true
+    readonly property bool waffleTransitionsEnabled: root.wTransition.enable ?? true
+    readonly property string waffleTransitionType: root.wTransition.type ?? "crossfade"
+    readonly property string waffleTransitionDirection: root.wTransition.direction ?? "right"
+    readonly property int waffleTransitionDuration: root.wTransition.duration ?? 800
+    readonly property var directionalTransitionTypes: ["wipe", "wave"]
+    
+    function setWaffleTransitionType(newValue: string): void {
+        Config.setNestedValue("waffles.background.transition.type", newValue)
+    }
+    
+    function setWaffleTransitionDirection(newValue: string): void {
+        Config.setNestedValue("waffles.background.transition.direction", newValue)
+    }
     
     WSettingsCard {
         title: Translation.tr("Wallpaper")
@@ -57,6 +73,38 @@ WSettingsPage {
                     if (globalPath) {
                         Wallpapers.apply(globalPath, Appearance.m3colors.darkmode)
                     }
+                }
+            }
+        }
+
+        WSettingsRow {
+            label: Translation.tr("Wallpaper scaling")
+            icon: "aspect_ratio"
+            description: Translation.tr("Only Fill, Fit and Center are available because awww is the active wallpaper backend.")
+        }
+        Grid {
+            Layout.fillWidth: true
+            Layout.leftMargin: 12
+            Layout.rightMargin: 12
+            Layout.bottomMargin: 8
+            columns: 3
+            columnSpacing: 6
+            rowSpacing: 6
+
+            Repeater {
+                model: [
+                    { label: Translation.tr("Fill"), value: "fill" },
+                    { label: Translation.tr("Fit"), value: "fit" },
+                    { label: Translation.tr("Center"), value: "center" }
+                ]
+
+                delegate: WChoiceButton {
+                    required property var modelData
+                    Layout.fillWidth: false
+                    width: (parent.width - 12) / 3
+                    text: modelData.label
+                    checked: (Config.options?.background?.fillMode ?? "fill") === modelData.value
+                    onClicked: Config.setNestedValue("background.fillMode", modelData.value)
                 }
             }
         }
@@ -123,6 +171,7 @@ WSettingsPage {
                 clip: true
                 boundsBehavior: Flickable.StopAtBounds
                 model: Wallpapers.folderModel
+                Component.onCompleted: Wallpapers.generateThumbnail("large")
 
                 delegate: Rectangle {
                     id: mainWpThumb
@@ -175,6 +224,7 @@ WSettingsPage {
                     }
 
                     Image {
+                        id: mainThumbImg
                         visible: !mainWpThumb.fileIsDir && !WallpaperListener.isVideoPath(mainWpThumb.filePath)
                         anchors.fill: parent
                         anchors.margins: mainWpThumb.border.width
@@ -184,6 +234,19 @@ WSettingsPage {
                         sourceSize.height: 140
                         cache: true
                         asynchronous: true
+                        onStatusChanged: {
+                            if (status === Image.Error && mainWpThumb.filePath)
+                                source = mainWpThumb.filePath.startsWith("file://") ? mainWpThumb.filePath : "file://" + mainWpThumb.filePath
+                        }
+                        Connections {
+                            target: Wallpapers
+                            function onThumbnailGenerated(directory) {
+                                if (mainThumbImg.status !== Image.Ready && mainWpThumb.filePath) {
+                                    mainThumbImg.source = ""
+                                    mainThumbImg.source = mainWpThumb.thumbSource
+                                }
+                            }
+                        }
                     }
                     Image {
                         visible: !mainWpThumb.fileIsDir && WallpaperListener.isVideoPath(mainWpThumb.filePath)
@@ -231,9 +294,7 @@ WSettingsPage {
                             if (useMain) {
                                 Wallpapers.select(mainWpThumb.filePath, Appearance.m3colors.darkmode, "")
                             } else {
-                                Config.setNestedValue("waffles.background.useMainWallpaper", false)
-                                Config.setNestedValue("waffles.background.wallpaperPath", CF.FileUtils.trimFileProtocol(mainWpThumb.filePath))
-                                Wallpapers.apply(mainWpThumb.filePath, Appearance.m3colors.darkmode)
+                                Wallpapers.applySelectionTarget(mainWpThumb.filePath, "waffle", Appearance.m3colors.darkmode, "")
                             }
                         }
                     }
@@ -247,6 +308,134 @@ WSettingsPage {
         }
     }
 
+    WSettingsCard {
+        title: Translation.tr("Wallpaper Transitions")
+        icon: "arrow-sync"
+        
+        WSettingsRow {
+            visible: root.useSharedWallpaperTransition
+            label: Translation.tr("Shared with Material ii")
+            icon: "link"
+            description: Translation.tr("When 'Use Material ii wallpaper' is enabled, Waffle inherits ii's wallpaper transition backend and timing. Disable the shared wallpaper to configure Waffle-specific transitions without overlapping families.")
+            enableSettingsSearch: false
+        }
+        
+        WSettingsSwitch {
+            visible: !root.useSharedWallpaperTransition
+            label: Translation.tr("Enable wallpaper transitions")
+            icon: "flash-on"
+            description: Translation.tr("Animate wallpaper swaps only for Waffle's own wallpaper")
+            checked: root.waffleTransitionsEnabled
+            onCheckedChanged: Config.setNestedValue("waffles.background.transition.enable", checked)
+        }
+        
+        WSettingsRow {
+            id: transitionStyleRow
+            visible: !root.useSharedWallpaperTransition && root.waffleTransitionsEnabled
+            label: Translation.tr("Transition style")
+            icon: "wand"
+        }
+        Grid {
+            visible: transitionStyleRow.visible
+            Layout.fillWidth: true
+            Layout.leftMargin: 16
+            Layout.rightMargin: 16
+            Layout.bottomMargin: 8
+            columns: 4
+            columnSpacing: 6
+            rowSpacing: 6
+
+            Repeater {
+                model: [
+                    { label: Translation.tr("None"), value: "none" },
+                    { label: Translation.tr("Simple"), value: "simple" },
+                    { label: Translation.tr("Fade"), value: "fade" },
+                    { label: Translation.tr("Left"), value: "left" },
+                    { label: Translation.tr("Right"), value: "right" },
+                    { label: Translation.tr("Top"), value: "top" },
+                    { label: Translation.tr("Bottom"), value: "bottom" },
+                    { label: Translation.tr("Wipe"), value: "wipe" },
+                    { label: Translation.tr("Wave"), value: "wave" },
+                    { label: Translation.tr("Grow"), value: "grow" },
+                    { label: Translation.tr("Center"), value: "center" },
+                    { label: Translation.tr("Any"), value: "any" },
+                    { label: Translation.tr("Outer"), value: "outer" },
+                    { label: Translation.tr("Random"), value: "random" }
+                ]
+
+                delegate: WChoiceButton {
+                    required property var modelData
+                    Layout.fillWidth: false
+                    width: (transitionStyleRow.width - 16 * 2 - 6 * 3) / 4
+                    text: modelData.label
+                    checked: root.waffleTransitionType === modelData.value
+                    onClicked: root.setWaffleTransitionType(modelData.value)
+                }
+            }
+        }
+        
+        WSettingsRow {
+            id: transitionDirectionRow
+            visible: {
+                if (root.useSharedWallpaperTransition || !root.waffleTransitionsEnabled)
+                    return false
+                const t = AwwwBackend.normalizedAwwwTransitionType(root.waffleTransitionType, root.waffleTransitionDirection)
+                return ["wipe", "wave"].indexOf(t) >= 0
+            }
+            label: Translation.tr("Transition direction")
+            icon: "arrow-move"
+        }
+        Grid {
+            visible: transitionDirectionRow.visible
+            Layout.fillWidth: true
+            Layout.leftMargin: 16
+            Layout.rightMargin: 16
+            Layout.bottomMargin: 8
+            columns: 4
+            columnSpacing: 6
+            rowSpacing: 6
+
+            Repeater {
+                model: [
+                    { label: Translation.tr("Left"), value: "left" },
+                    { label: Translation.tr("Right"), value: "right" },
+                    { label: Translation.tr("Top"), value: "top" },
+                    { label: Translation.tr("Bottom"), value: "bottom" }
+                ]
+
+                delegate: WChoiceButton {
+                    required property var modelData
+                    Layout.fillWidth: false
+                    width: (transitionDirectionRow.width - 16 * 2 - 6 * 3) / 4
+                    text: modelData.label
+                    checked: root.waffleTransitionDirection === modelData.value
+                    onClicked: root.setWaffleTransitionDirection(modelData.value)
+                }
+            }
+        }
+        
+        WSettingsSpinBox {
+            visible: {
+                if (root.useSharedWallpaperTransition || !root.waffleTransitionsEnabled)
+                    return false
+                const t = AwwwBackend.normalizedAwwwTransitionType(
+                    root.waffleTransitionType,
+                    root.waffleTransitionDirection
+                )
+                return t !== "simple" && t !== "none"
+            }
+            label: Translation.tr("Transition duration")
+            icon: "timer"
+            description: Translation.tr("How long Waffle's dedicated wallpaper transition should take.")
+            suffix: "ms"
+            value: root.waffleTransitionDuration
+            from: 200
+            to: 3000
+            stepSize: 100
+            onValueChanged: Config.setNestedValue("waffles.background.transition.duration", value)
+        }
+    }
+    
     // Multi-monitor management card
     WSettingsCard {
         id: multiMonCard
@@ -255,6 +444,11 @@ WSettingsPage {
         icon: "desktop"
 
         property string selectedMonitor: {
+            const primary = GlobalStates.primaryScreen
+            const primaryName = primary ? (WallpaperListener.getMonitorName(primary) ?? "") : ""
+            if (primaryName) return primaryName
+            const focused = WallpaperListener.getFocusedMonitor()
+            if (focused) return focused
             const screens = Quickshell.screens
             if (!screens || screens.length === 0) return ""
             return WallpaperListener.getMonitorName(screens[0]) ?? ""
@@ -891,6 +1085,7 @@ WSettingsPage {
                                     }
 
                                     Image {
+                                        id: bgThumbImg
                                         visible: !bgWpThumb.fileIsDir && !WallpaperListener.isVideoPath(bgWpThumb.filePath)
                                         anchors.fill: parent
                                         anchors.margins: bgWpThumb.border.width
@@ -900,6 +1095,19 @@ WSettingsPage {
                                         sourceSize.height: 140
                                         cache: true
                                         asynchronous: true
+                                        onStatusChanged: {
+                                            if (status === Image.Error && bgWpThumb.filePath)
+                                                source = bgWpThumb.filePath.startsWith("file://") ? bgWpThumb.filePath : "file://" + bgWpThumb.filePath
+                                        }
+                                        Connections {
+                                            target: Wallpapers
+                                            function onThumbnailGenerated(directory) {
+                                                if (bgThumbImg.status !== Image.Ready && bgWpThumb.filePath) {
+                                                    bgThumbImg.source = ""
+                                                    bgThumbImg.source = bgWpThumb.thumbSource
+                                                }
+                                            }
+                                        }
                                     }
                                     Image {
                                         visible: !bgWpThumb.fileIsDir && WallpaperListener.isVideoPath(bgWpThumb.filePath)
