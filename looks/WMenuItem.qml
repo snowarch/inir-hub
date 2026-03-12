@@ -63,7 +63,7 @@ MenuItem {
         radius: Looks.radius.medium
         color: root.color
         Behavior on color {
-            animation: Looks.transition.color.createObject(this)
+            animation: ColorAnimation { duration: Looks.transition.enabled ? 70 : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.standard }
         }
     }
 

@@ -31,11 +31,11 @@ Item {
     // Highlight animation for search focus
     Behavior on opacity {
         enabled: Looks.transition?.opacity !== undefined
-        animation: Looks.transition.opacity.createObject(this)
+        animation: NumberAnimation { duration: Looks.transition.enabled ? Looks.transition.duration.normal : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.standard }
     }
     Behavior on scale {
         enabled: Looks.transition?.resize !== undefined
-        animation: Looks.transition.resize.createObject(this)
+        animation: NumberAnimation { duration: Looks.transition.enabled ? Looks.transition.duration.medium : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.standard }
     }
     
     function _findSettingsContext(): var {
@@ -125,7 +125,7 @@ Item {
             : "transparent"
         
         Behavior on color {
-            animation: Looks.transition.color.createObject(this)
+            animation: ColorAnimation { duration: Looks.transition.enabled ? 70 : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.standard }
         }
     }
     

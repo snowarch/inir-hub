@@ -14,7 +14,7 @@ Rectangle {
     readonly property int hoverDelay: Config.options?.waffles?.bar?.desktopPeek?.hoverDelay ?? 500
     property bool isPeeking: false
 
-    Behavior on color { animation: Looks.transition.color.createObject(this) }
+    Behavior on color { animation: ColorAnimation { duration: Looks.transition.enabled ? 70 : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.standard } }
 
     Timer {
         id: peekTimer

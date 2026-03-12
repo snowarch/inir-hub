@@ -38,12 +38,12 @@ Button {
             color: Looks.colors.accent
             
             Behavior on height {
-                animation: Looks.transition.press.createObject(this)
+                animation: NumberAnimation { duration: Looks.transition.enabled ? Looks.transition.duration.fast : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.standard }
             }
         }
-        
+
         Behavior on color {
-            animation: Looks.transition.color.createObject(this)
+            animation: ColorAnimation { duration: Looks.transition.enabled ? 70 : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.standard }
         }
     }
     
@@ -64,7 +64,7 @@ Button {
                 color: root.selected ? Looks.colors.fg : Looks.colors.subfg
                 
                 Behavior on color {
-                    animation: Looks.transition.color.createObject(this)
+                    animation: ColorAnimation { duration: Looks.transition.enabled ? 70 : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.standard }
                 }
             }
         }
@@ -79,7 +79,7 @@ Button {
             elide: Text.ElideRight
             
             Behavior on color {
-                animation: Looks.transition.color.createObject(this)
+                animation: ColorAnimation { duration: Looks.transition.enabled ? 70 : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.standard }
             }
         }
     }

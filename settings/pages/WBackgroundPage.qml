@@ -203,7 +203,7 @@ WSettingsPage {
                     clip: true
 
                     scale: mainThumbMa.containsMouse ? 0.95 : 1.0
-                    Behavior on scale { animation: Looks.transition.hover.createObject(this) }
+                    Behavior on scale { animation: NumberAnimation { duration: Looks.transition.enabled ? Looks.transition.duration.normal : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.standard } }
 
                     FluentIcon {
                         visible: mainWpThumb.fileIsDir
@@ -511,13 +511,13 @@ WSettingsPage {
                             scale: isSelected ? 1.0 : (wMonCardMa.containsMouse ? 0.97 : 0.93)
                             opacity: isSelected ? 1.0 : (wMonCardMa.containsMouse ? 0.95 : 0.8)
                             Behavior on scale {
-                                animation: Looks.transition.hover.createObject(this)
+                                animation: NumberAnimation { duration: Looks.transition.enabled ? Looks.transition.duration.normal : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.standard }
                             }
                             Behavior on opacity {
-                                animation: Looks.transition.hover.createObject(this)
+                                animation: NumberAnimation { duration: Looks.transition.enabled ? Looks.transition.duration.normal : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.standard }
                             }
                             Behavior on border.color {
-                                animation: Looks.transition.color.createObject(this)
+                                animation: ColorAnimation { duration: Looks.transition.enabled ? 70 : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.standard }
                             }
 
                             MouseArea {
@@ -1064,7 +1064,7 @@ WSettingsPage {
                                     clip: true
 
                                     scale: bgThumbMa.containsMouse ? 0.95 : 1.0
-                                    Behavior on scale { animation: Looks.transition.hover.createObject(this) }
+                                    Behavior on scale { animation: NumberAnimation { duration: Looks.transition.enabled ? Looks.transition.duration.normal : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.standard } }
 
                                     FluentIcon {
                                         visible: bgWpThumb.fileIsDir

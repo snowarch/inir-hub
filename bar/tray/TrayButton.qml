@@ -26,7 +26,7 @@ BarIconButton {
         root.iconScale = 1
     }
     Behavior on iconScale {
-        animation: Looks.transition.enter.createObject(this)
+        animation: NumberAnimation { duration: Looks.transition.enabled ? Looks.transition.duration.panel : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.decelerate }
     }
 
     onClicked: {

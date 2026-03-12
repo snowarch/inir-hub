@@ -244,7 +244,7 @@ WSettingsPage {
                             clip: true
 
                             scale: gridMa.containsMouse ? 0.95 : 1.0
-                            Behavior on scale { animation: Looks.transition.hover.createObject(this) }
+                            Behavior on scale { animation: NumberAnimation { duration: Looks.transition.enabled ? Looks.transition.duration.normal : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.standard } }
 
                             // Folder
                             ColumnLayout {
@@ -412,7 +412,7 @@ WSettingsPage {
                         border.width: 1
                         border.color: isSelected ? Looks.colors.accent : Looks.colors.bg2Border
 
-                        Behavior on color { animation: Looks.transition.color.createObject(this) }
+                        Behavior on color { animation: ColorAnimation { duration: Looks.transition.enabled ? 70 : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.standard } }
 
                         WText {
                             anchors.centerIn: parent

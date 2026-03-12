@@ -16,7 +16,7 @@ FooterRectangle {
     property bool collapsed
     color: ColorUtils.transparentize(Looks.colors.bgPanelBody, collapsed ? 0 : 1)
     Behavior on color {
-        animation: Looks.transition.color.createObject(this)
+        animation: ColorAnimation { duration: Looks.transition.enabled ? 70 : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.standard }
     }
 
     RowLayout {

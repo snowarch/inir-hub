@@ -88,7 +88,7 @@ MouseArea {
         color: ColorUtils.transparentize(Looks.colors.bg0Opaque, 0.65)
         opacity: root.showLoginView ? 0.75 : 0.25
         Behavior on opacity {
-            animation: Looks.transition.opacity.createObject(this)
+            animation: NumberAnimation { duration: Looks.transition.enabled ? Looks.transition.duration.normal : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.standard }
         }
     }
 
@@ -98,7 +98,7 @@ MouseArea {
         color: root.smokeColor
         opacity: root.showLoginView ? 1 : 0
         Behavior on opacity {
-            animation: Looks.transition.enter.createObject(this)
+            animation: NumberAnimation { duration: Looks.transition.enabled ? Looks.transition.duration.panel : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.decelerate }
         }
     }
 
@@ -111,7 +111,7 @@ MouseArea {
         scale: root.showLoginView ? 0.95 : 1
 
         Behavior on opacity {
-            animation: Looks.transition.enter.createObject(this)
+            animation: NumberAnimation { duration: Looks.transition.enabled ? Looks.transition.duration.panel : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.decelerate }
         }
         Behavior on scale {
             NumberAnimation {
@@ -351,7 +351,7 @@ MouseArea {
             }
 
             Behavior on hintOpacity {
-                animation: Looks.transition.opacity.createObject(this)
+                animation: NumberAnimation { duration: Looks.transition.enabled ? Looks.transition.duration.normal : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.standard }
             }
         }
     }
@@ -365,7 +365,7 @@ MouseArea {
         scale: root.showLoginView ? 1 : 1.05
 
         Behavior on opacity {
-            animation: Looks.transition.enter.createObject(this)
+            animation: NumberAnimation { duration: Looks.transition.enabled ? Looks.transition.duration.panel : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.decelerate }
         }
         Behavior on scale {
             NumberAnimation {
@@ -498,8 +498,8 @@ MouseArea {
                 border.color: passwordField.activeFocus ? Looks.colors.accent : Looks.colors.accentUnfocused
                 border.width: passwordField.activeFocus ? 2 : 1
 
-                Behavior on border.color { animation: Looks.transition.color.createObject(this) }
-                Behavior on border.width { animation: Looks.transition.resize.createObject(this) }
+                Behavior on border.color { animation: ColorAnimation { duration: Looks.transition.enabled ? 70 : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.standard } }
+                Behavior on border.width { animation: NumberAnimation { duration: Looks.transition.enabled ? Looks.transition.duration.medium : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.standard } }
 
                 RowLayout {
                     anchors.fill: parent
@@ -574,7 +574,7 @@ MouseArea {
                                 ? Looks.colors.accentHover
                                 : Looks.colors.accent
 
-                        Behavior on color { animation: Looks.transition.color.createObject(this) }
+                        Behavior on color { animation: ColorAnimation { duration: Looks.transition.enabled ? 70 : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.standard } }
 
                         FluentIcon {
                             anchors.centerIn: parent
@@ -900,8 +900,8 @@ MouseArea {
         border.color: Looks.colors.bg1Border
         border.width: 1
 
-        Behavior on color { animation: Looks.transition.color.createObject(this) }
-        Behavior on border.color { animation: Looks.transition.color.createObject(this) }
+        Behavior on color { animation: ColorAnimation { duration: Looks.transition.enabled ? 70 : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.standard } }
+        Behavior on border.color { animation: ColorAnimation { duration: Looks.transition.enabled ? 70 : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.standard } }
 
         FluentIcon {
             anchors.centerIn: parent
@@ -943,7 +943,7 @@ MouseArea {
             return Looks.colors.bg2Base
         }
 
-        Behavior on color { animation: Looks.transition.color.createObject(this) }
+        Behavior on color { animation: ColorAnimation { duration: Looks.transition.enabled ? 70 : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.standard } }
 
         FluentIcon {
             anchors.centerIn: parent

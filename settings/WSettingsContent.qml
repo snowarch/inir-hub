@@ -288,7 +288,7 @@ Item {
             color: Looks.colors.bgPanelFooterBase
             
             Behavior on Layout.preferredWidth {
-                animation: Looks.transition.resize.createObject(this)
+                animation: NumberAnimation { duration: Looks.transition.enabled ? Looks.transition.duration.medium : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.standard }
             }
             
             ColumnLayout {
@@ -398,7 +398,7 @@ Item {
                     border.color: searchInput.activeFocus ? Looks.colors.accent : Looks.colors.bg2Border
                     
                       Behavior on border.color {
-                          animation: Looks.transition.color.createObject(this)
+                          animation: ColorAnimation { duration: Looks.transition.enabled ? 70 : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.standard }
                       }
                     
                     RowLayout {
@@ -563,7 +563,7 @@ Item {
                             }
                             
                               Behavior on color {
-                                  animation: Looks.transition.color.createObject(this)
+                                  animation: ColorAnimation { duration: Looks.transition.enabled ? 70 : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.standard }
                               }
                             
                             MouseArea {
@@ -635,7 +635,7 @@ Item {
                                     opacity: resultMouse.containsMouse || resultDelegate.ListView.isCurrentItem ? 1 : 0
                                     
                                       Behavior on opacity {
-                                          animation: Looks.transition.opacity.createObject(this)
+                                          animation: NumberAnimation { duration: Looks.transition.enabled ? Looks.transition.duration.normal : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.standard }
                                       }
                                 }
                             }
@@ -808,7 +808,7 @@ Item {
                         opacity: visible ? 1 : 0
                         
                           Behavior on opacity {
-                              animation: Looks.transition.opacity.createObject(this)
+                              animation: NumberAnimation { duration: Looks.transition.enabled ? Looks.transition.duration.normal : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.standard }
                           }
                     }
                 }

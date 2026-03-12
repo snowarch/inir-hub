@@ -113,17 +113,13 @@ Variants {
                 source: backdropWindow.wallpaperUrl && !backdropWindow.wallpaperIsGif && !backdropWindow.wallpaperIsVideo
                     ? backdropWindow.wallpaperUrl
                     : ""
-                enableTransitions: (Config.options?.waffles?.background?.transition?.enable
-                    ?? Config.options?.background?.transition?.enable ?? true)
-                transitionType: (Config.options?.waffles?.background?.transition?.type
-                    ?? Config.options?.background?.transition?.type ?? "crossfade")
-                transitionDirection: (Config.options?.waffles?.background?.transition?.direction
-                    ?? Config.options?.background?.transition?.direction ?? "right")
-                transitionBaseDuration: (Config.options?.waffles?.background?.transition?.duration
-                    ?? Config.options?.background?.transition?.duration ?? 800)
+                asynchronous: true
+                cache: false
+                sourceSize.width: backdropWindow.screen?.width ?? 1920
+                sourceSize.height: backdropWindow.screen?.height ?? 1080
                 visible: !backdropWindow.wallpaperIsGif && !backdropWindow.wallpaperIsVideo
             }
-            
+
             // Animated GIF wallpaper
             // Always loaded for GIFs: plays when animation enabled, frozen (first frame) when disabled
             AnimatedImage {
@@ -136,7 +132,9 @@ Variants {
                         : "file://" + backdropWindow.wallpaperPathRaw)
                     : ""
                 asynchronous: true
-                cache: true
+                cache: false
+                sourceSize.width: 480
+                sourceSize.height: 270
                 visible: backdropWindow.wallpaperIsGif
                 playing: visible && backdropWindow.enableAnimation
 
