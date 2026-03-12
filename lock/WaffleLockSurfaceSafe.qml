@@ -414,6 +414,11 @@ MouseArea {
                         sourceSize.width: avatarCircle.width * 2
                         sourceSize.height: avatarCircle.height * 2
                         visible: false
+                        onStatusChanged: {
+                            if (status === Image.Error) {
+                                source = `file://${Directories.userAvatarPathRicersAndWeirdSystems2}`
+                            }
+                        }
                     }
 
                     Image {
@@ -461,7 +466,7 @@ MouseArea {
 
                     Text {
                         anchors.centerIn: parent
-                        text: SystemInfo.username.charAt(0).toUpperCase()
+                        text: (SystemInfo.displayName || SystemInfo.username || "?").charAt(0).toUpperCase()
                         font.pixelSize: 48 * Looks.fontScale
                         font.weight: Looks.font.weight.regular
                         font.family: Looks.font.family.ui

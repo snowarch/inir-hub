@@ -584,6 +584,11 @@ MouseArea {
                         sourceSize.width: avatarCircle.width * 2
                         sourceSize.height: avatarCircle.height * 2
                         visible: status === Image.Ready && avatarImage.status !== Image.Ready
+                        onStatusChanged: {
+                            if (status === Image.Error) {
+                                source = `file://${Directories.userAvatarPathRicersAndWeirdSystems2}`
+                            }
+                        }
                         
                         layer.enabled: root.effectsSafe
                         layer.effect: OpacityMask {
@@ -598,7 +603,7 @@ MouseArea {
                     // Fallback: initial letter
                     Text {
                         anchors.centerIn: parent
-                        text: SystemInfo.username.charAt(0).toUpperCase()
+                        text: (SystemInfo.displayName || SystemInfo.username || "?").charAt(0).toUpperCase()
                         font.pixelSize: 48 * Looks.fontScale
                         font.weight: Looks.font.weight.regular
                         font.family: Looks.font.family.ui
