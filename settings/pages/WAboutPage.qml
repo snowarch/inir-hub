@@ -14,7 +14,7 @@ WSettingsPage {
     settingsPageIndex: 9
     pageTitle: Translation.tr("About")
     pageIcon: "info"
-    pageDescription: Translation.tr("Information about iNiR")
+    pageDescription: Translation.tr("Project information and links")
     
     WSettingsCard {
         // Logo and title
@@ -42,7 +42,7 @@ WSettingsPage {
                 spacing: 4
                 
                 WText {
-                    text: "illogical-impulse"
+                    text: "iNiR"
                     font.pixelSize: Looks.font.pixelSize.larger + 2
                     font.weight: Looks.font.weight.strong
                 }
@@ -87,6 +87,13 @@ WSettingsPage {
             buttonText: Translation.tr("Open")
             onButtonClicked: Qt.openUrlExternally("https://github.com/snowarch/inir")
         }
+
+        WSettingsButton {
+            label: Translation.tr("Documentation")
+            icon: "open"
+            buttonText: Translation.tr("Open")
+            onButtonClicked: Qt.openUrlExternally("https://snowarch.github.io/iNiR/docs/")
+        }
         
         WSettingsButton {
             label: Translation.tr("Original Project (end-4)")
@@ -109,7 +116,7 @@ WSettingsPage {
         
         WText {
             Layout.fillWidth: true
-            text: Translation.tr("Based on illogical-impulse by end-4, adapted for Niri compositor.")
+            text: Translation.tr("Based on illogical-impulse by end-4, adapted for the Niri compositor.")
             wrapMode: Text.WordWrap
             color: Looks.colors.subfg
         }
