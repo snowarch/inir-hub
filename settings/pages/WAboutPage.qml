@@ -141,7 +141,7 @@ WSettingsPage {
         
         WSettingsRow {
             label: Translation.tr("Shell path")
-            description: FileUtils.trimFileProtocol(`${Directories.config}/quickshell/ii/`)
+            description: FileUtils.trimFileProtocol(`${Directories.config}/quickshell/inir/`)
         }
         
         WSettingsRow {

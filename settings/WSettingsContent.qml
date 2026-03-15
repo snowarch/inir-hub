@@ -345,7 +345,7 @@ Item {
                     WBorderlessButton {
                         implicitWidth: 28
                         implicitHeight: 28
-                        onClicked: Quickshell.execDetached(["/usr/bin/qs", "-c", "ii", "ipc", "call", "lock", "activate"])
+                        onClicked: Quickshell.execDetached(["/usr/bin/qs", "-p", Quickshell.shellPath("shell.qml"), "ipc", "call", "lock", "activate"])
 
                         contentItem: FluentIcon {
                             anchors.centerIn: parent

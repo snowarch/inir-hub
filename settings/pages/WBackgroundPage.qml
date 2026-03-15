@@ -57,7 +57,7 @@ WSettingsPage {
             buttonText: Translation.tr("Change")
             onButtonClicked: {
                 Config.setNestedValue("wallpaperSelector.selectionTarget", "waffle")
-                Quickshell.execDetached(["/usr/bin/qs", "-c", "ii", "ipc", "call", "wallpaperSelector", "toggle"])
+                Quickshell.execDetached(["/usr/bin/qs", "-p", Quickshell.shellPath("shell.qml"), "ipc", "call", "wallpaperSelector", "toggle"])
             }
         }
 
@@ -872,7 +872,7 @@ WSettingsPage {
                                     if (mon) {
                                         Config.setNestedValue("wallpaperSelector.selectionTarget", "main")
                                         Config.setNestedValue("wallpaperSelector.targetMonitor", mon)
-                                        Quickshell.execDetached(["/usr/bin/qs", "-c", "ii", "ipc", "call", "wallpaperSelector", "toggle"])
+                                        Quickshell.execDetached(["/usr/bin/qs", "-p", Quickshell.shellPath("shell.qml"), "ipc", "call", "wallpaperSelector", "toggle"])
                                     }
                                 }
                             }
@@ -908,7 +908,7 @@ WSettingsPage {
                                 colForeground: Looks.colors.accentFg
                                 onClicked: {
                                     Config.setNestedValue("wallpaperSelector.selectionTarget", "waffle-backdrop")
-                                    Quickshell.execDetached(["/usr/bin/qs", "-c", "ii", "ipc", "call", "wallpaperSelector", "toggle"])
+                                    Quickshell.execDetached(["/usr/bin/qs", "-p", Quickshell.shellPath("shell.qml"), "ipc", "call", "wallpaperSelector", "toggle"])
                                 }
                             }
                             WButton {
@@ -1302,7 +1302,7 @@ WSettingsPage {
             buttonText: Translation.tr("Change")
             onButtonClicked: {
                 Config.setNestedValue("wallpaperSelector.selectionTarget", "waffle-backdrop")
-                Quickshell.execDetached(["/usr/bin/qs", "-c", "ii", "ipc", "call", "wallpaperSelector", "toggle"])
+                Quickshell.execDetached(["/usr/bin/qs", "-p", Quickshell.shellPath("shell.qml"), "ipc", "call", "wallpaperSelector", "toggle"])
             }
         }
 

@@ -24,7 +24,11 @@ Scope {
 
     // Config getters
     function cfg() { return Config.options?.waffles?.altSwitcher ?? {} }
-    function getNoVisualUi() { return cfg().noVisualUi ?? false }
+    function getPreset() { return cfg().preset ?? "thumbnails" }
+    function getNoVisualUi() {
+        const preset = getPreset()
+        return preset === "none" || ((cfg().noVisualUi ?? false) && preset !== "skew")
+    }
     function getScrimOpacity() { return cfg().scrimOpacity ?? 0.4 }
     function getAutoHide() { return cfg().autoHide ?? true }
     function getCloseOnFocus() { return cfg().closeOnFocus ?? true }
@@ -182,6 +186,9 @@ Scope {
         if (itemSnapshot.length === 0) return
         GlobalStates.waffleAltSwitcherOpen = true
         maybeOpenOverview()
+        if (CompositorService.isNiri && root.getPreset() === "skew") {
+            Qt.callLater(() => WindowPreviewService.captureForTaskView())
+        }
         if (root.getAutoHide()) autoHideTimer.restart()
     }
 
@@ -365,10 +372,9 @@ Scope {
         }
     }
 
-    // IPC handler - only active when waffle family is selected
+    // IPC handler reached via the global altSwitcher router in AltSwitcher.qml
     IpcHandler {
-        target: "altSwitcher"
-        enabled: Config.options?.panelFamily === "waffle"
+        target: "waffleAltSwitcher"
 
         function open(): void {
             if (!GlobalStates.waffleAltSwitcherOpen) {
