@@ -14,7 +14,7 @@ Item {
     property bool monochrome: Config.options?.waffles?.bar?.monochromeIcons ?? false
     readonly property var currentScreen: root.QsWindow?.window?.screen ?? null
     
-    property real implicitSize: Looks.scaledBar(26, currentScreen)
+    property real implicitSize: Looks.scaledBar(Config.options?.waffles?.bar?.iconSize ?? 26, currentScreen)
     implicitWidth: implicitSize
     implicitHeight: implicitSize
 

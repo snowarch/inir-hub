@@ -82,6 +82,24 @@ WSettingsPage {
             checked: Config.options?.waffles?.bar?.tintTrayIcons ?? false
             onCheckedChanged: Config.setNestedValue("waffles.bar.tintTrayIcons", checked)
         }
+
+        WSettingsSpinBox {
+            label: Translation.tr("Taskbar icon size")
+            icon: "aspect_ratio"
+            suffix: "px"
+            from: 20; to: 40; stepSize: 1
+            value: Config.options?.waffles?.bar?.iconSize ?? 26
+            onValueChanged: Config.setNestedValue("waffles.bar.iconSize", value)
+        }
+
+        WSettingsSpinBox {
+            label: Translation.tr("Search app icon size")
+            icon: "search"
+            suffix: "px"
+            from: 16; to: 40; stepSize: 1
+            value: Config.options?.waffles?.bar?.searchIconSize ?? 24
+            onValueChanged: Config.setNestedValue("waffles.bar.searchIconSize", value)
+        }
     }
     
     WSettingsCard {

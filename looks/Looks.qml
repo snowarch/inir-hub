@@ -313,6 +313,11 @@ Singleton {
             readonly property int panel: 250         // Slightly faster panels
             readonly property int overlay: 300
             readonly property int page: 350          // Page transitions
+            readonly property int chromeHover: 90
+            readonly property int chromePress: 120
+            readonly property int chromeRelease: 170
+            readonly property int chromeMove: 170
+            readonly property int chromePanel: 220
         }
 
         // === Basic transitions (improved) ===

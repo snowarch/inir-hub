@@ -53,6 +53,38 @@ WSettingsPage {
     readonly property bool wpIsVideo: WallpaperListener.isVideoPath(currentWallpaperPath)
     readonly property bool wpIsGif: WallpaperListener.isGifPath(currentWallpaperPath)
     readonly property bool colorsOnlyMode: Config.options?.appearance?.wallpaperTheming?.colorsOnlyMode ?? false
+    readonly property string previewWallpaperPath: Config.options?.appearance?.wallpaperTheming?.previewSourcePath ?? ""
+    readonly property string selectedWallpaperPath: (root.colorsOnlyMode && root.previewWallpaperPath.length > 0)
+        ? root.previewWallpaperPath
+        : root.currentWallpaperPath
+
+    function quickApplyTarget(): string {
+        if (root.multiMonitorEnabled && root.targetMonitor.length > 0) return "main"
+        return (Config.options?.waffles?.background?.useMainWallpaper ?? true) ? "main" : "waffle"
+    }
+
+    function applyQuickWallpaper(path: string): void {
+        if (!path || path.length === 0) return
+        if (root.colorsOnlyMode) {
+            Wallpapers.applyColorsOnly(path, Appearance.m3colors.darkmode)
+            return
+        }
+        const mon = root.multiMonitorEnabled ? root.targetMonitor : ""
+        Wallpapers.applySelectionTarget(path, root.quickApplyTarget(), Appearance.m3colors.darkmode, mon)
+    }
+
+    function applyRandomQuickWallpaper(): void {
+        const model = Wallpapers.folderModel
+        const candidates = []
+        const count = model?.count ?? 0
+        for (let i = 0; i < count; i++) {
+            if (model.get(i, "fileIsDir")) continue
+            const filePath = model.get(i, "filePath")
+            if (filePath && filePath.length > 0) candidates.push(filePath)
+        }
+        if (candidates.length === 0) return
+        root.applyQuickWallpaper(candidates[Math.floor(Math.random() * candidates.length)])
+    }
 
     // ─── Wallpaper preview (clean full-width design, like Material ii) ───
     Rectangle {
@@ -127,10 +159,7 @@ WSettingsPage {
                     anchors.fill: parent
                     cursorShape: Qt.PointingHandCursor
                     hoverEnabled: true
-                    onClicked: {
-                        const mon = root.multiMonitorEnabled ? root.targetMonitor : ""
-                        Wallpapers.randomFromCurrentFolder(Appearance.m3colors.darkmode, mon)
-                    }
+                    onClicked: root.applyRandomQuickWallpaper()
                 }
                 WToolTip { visible: heroRandomMa.containsMouse; text: Translation.tr("Random") }
             }
@@ -169,7 +198,7 @@ WSettingsPage {
             WText {
                 id: colorsOnlyLabel
                 anchors.centerIn: parent
-                text: Translation.tr("Colors only")
+                text: root.previewWallpaperPath.length > 0 ? Translation.tr("Theme source") : Translation.tr("Colors only")
                 font.pixelSize: Looks.font.pixelSize.tiny
                 color: "white"
                 font.weight: Font.Medium
@@ -204,7 +233,7 @@ WSettingsPage {
             required property string fileName
             required property bool fileIsDir
 
-            readonly property bool isCurrent: filePath === root.currentWallpaperPath
+            readonly property bool isCurrent: filePath === root.selectedWallpaperPath
             readonly property string thumbSource: {
                 if (fileIsDir) return ""
                 const thumb = Wallpapers.getExpectedThumbnailPath(filePath, "large")
@@ -226,7 +255,7 @@ WSettingsPage {
                 clip: true
 
                 scale: gridMa.containsMouse ? 0.95 : 1.0
-                Behavior on scale { animation: NumberAnimation { duration: Looks.transition.enabled ? Looks.transition.duration.normal : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.standard } }
+                Behavior on scale { animation: NumberAnimation { duration: Looks.transition.enabled ? Looks.transition.duration.chromeHover : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.smooth } }
 
                 // Folder
                 ColumnLayout {
@@ -307,12 +336,7 @@ WSettingsPage {
                             Wallpapers.setDirectory(gridThumb.filePath)
                             return
                         }
-                        if (root.colorsOnlyMode) {
-                            Wallpapers.applyColorsOnly(gridThumb.filePath, Appearance.m3colors.darkmode)
-                        } else {
-                            const mon = root.multiMonitorEnabled ? root.targetMonitor : ""
-                            Wallpapers.select(gridThumb.filePath, Appearance.m3colors.darkmode, mon)
-                        }
+                        root.applyQuickWallpaper(gridThumb.filePath)
                     }
                 }
 
@@ -475,6 +499,24 @@ WSettingsPage {
             description: Translation.tr("Apply accent color to taskbar icons")
             checked: Config.options?.waffles?.bar?.monochromeIcons ?? false
             onCheckedChanged: Config.setNestedValue("waffles.bar.monochromeIcons", checked)
+        }
+
+        WSettingsSpinBox {
+            label: Translation.tr("Taskbar icon size")
+            icon: "aspect_ratio"
+            suffix: "px"
+            from: 20; to: 40; stepSize: 1
+            value: Config.options?.waffles?.bar?.iconSize ?? 26
+            onValueChanged: Config.setNestedValue("waffles.bar.iconSize", value)
+        }
+
+        WSettingsSpinBox {
+            label: Translation.tr("Search app icon size")
+            icon: "search"
+            suffix: "px"
+            from: 16; to: 40; stepSize: 1
+            value: Config.options?.waffles?.bar?.searchIconSize ?? 24
+            onValueChanged: Config.setNestedValue("waffles.bar.searchIconSize", value)
         }
         
         WSettingsDropdown {
