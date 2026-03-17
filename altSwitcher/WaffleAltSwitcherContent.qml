@@ -28,13 +28,13 @@ Item {
     readonly property int _effectiveAvailableHeight: availableHeight > 0 ? availableHeight : (parent ? parent.height : 0)
 
     // Slice geometry constants (scaled for better fit)
-    readonly property int skewSliceWidth: 120
-    readonly property int skewExpandedWidth: 800
-    readonly property int skewSliceHeight: 380
-    readonly property int skewOffset: 30
-    readonly property int skewSliceSpacing: -20
+    readonly property int skewSliceWidth: 135
+    readonly property int skewExpandedWidth: 924
+    readonly property int skewSliceHeight: 520
+    readonly property int skewOffset: 35
+    readonly property int skewSliceSpacing: -22
     readonly property int skewVisibleCount: 12
-    readonly property int skewCardWidth: 1100
+    readonly property int skewCardWidth: 1600
     readonly property int skewCardHeight: root.skewSliceHeight + 40
 
     // Config getters for live updates
@@ -316,7 +316,7 @@ Item {
                 flickDeceleration: 1500
                 maximumFlickVelocity: 3000
                 boundsBehavior: Flickable.StopAtBounds
-                cacheBuffer: root.skewExpandedWidth * 4
+                cacheBuffer: root.skewExpandedWidth * 2
                 highlightFollowsCurrentItem: true
                 highlightMoveDuration: 350
                 highlight: Item {}
@@ -519,26 +519,30 @@ Item {
                             }
                         }
 
-                        Rectangle {
-                            anchors.top: parent.top
-                            anchors.left: parent.left
-                            anchors.topMargin: 14
-                            anchors.leftMargin: root.skewOffset + 10
-                            width: 42
-                            height: 42
-                            radius: Looks.radius.large
-                            color: ColorUtils.transparentize(Looks.colors.bg0Opaque, 0.18)
-                            border.width: 1
-                            border.color: Looks.colors.bg2Border
+                        Text {
+                            id: bigIconFallback
+                            anchors.centerIn: parent
+                            anchors.verticalCenterOffset: -20
+                            text: "?"
+                            property int iconSize: ListView.isCurrentItem ? 96 : 48
+                            font.pixelSize: iconSize
+                            font.family: Looks.font.family.ui
+                            opacity: previewImage.visible ? 0.7 : 1.0
+                            color: ListView.isCurrentItem
+                                ? Looks.colors.accent
+                                : Qt.rgba(Looks.colors.accent.r, Looks.colors.accent.g, Looks.colors.accent.b, 0.5)
+                            visible: !(skewSlice.modelData?.icon ?? "")
 
-                            Image {
-                                anchors.centerIn: parent
-                                width: 24
-                                height: 24
-                                source: skewSlice.modelData?.icon ?? ""
-                                sourceSize: Qt.size(24, 24)
-                                fillMode: Image.PreserveAspectFit
-                                smooth: true
+                            Behavior on iconSize {
+                                NumberAnimation { duration: Looks.transition.enabled ? 200 : 0; easing.type: Easing.OutQuad }
+                            }
+
+                            Behavior on opacity {
+                                NumberAnimation { duration: Looks.transition.enabled ? 200 : 0 }
+                            }
+
+                            Behavior on color {
+                                ColorAnimation { duration: Looks.transition.enabled ? 200 : 0 }
                             }
                         }
 
@@ -552,6 +556,7 @@ Item {
                             fillMode: Image.PreserveAspectFit
                             opacity: previewImage.visible ? 0.7 : 1.0
                             smooth: true
+                            visible: !!(skewSlice.modelData?.icon ?? "")
 
                             Behavior on width {
                                 NumberAnimation { duration: Looks.transition.enabled ? 200 : 0; easing.type: Easing.OutQuad }
@@ -665,6 +670,7 @@ Item {
                             fillColor: "transparent"
                             strokeColor: ListView.isCurrentItem ? Looks.colors.accent : Qt.rgba(0, 0, 0, 0.6)
                             strokeWidth: ListView.isCurrentItem ? 3 : 1
+                            Behavior on strokeColor { ColorAnimation { duration: Looks.transition.enabled ? 200 : 0 } }
                             startX: root.skewOffset
                             startY: 0
                             PathLine { x: skewSlice.width; y: 0 }

@@ -47,14 +47,18 @@ WBarAttachedPanelContent {
 
         WPane {
             Layout.fillWidth: true
+            screenX: root.panelScreenX + root.visualMargin * 2
+            screenY: root.panelScreenY + root.visualMargin * 2
+            screenWidth: root._screenW
+            screenHeight: root._screenH
             contentItem: WidgetsPaneContent {}
         }
     }
 
     component WidgetsPaneContent: Rectangle {
         id: paneContent
-        implicitWidth: 360
-        implicitHeight: contentColumn.implicitHeight
+        implicitWidth: 380
+        implicitHeight: Math.max(contentColumn.implicitHeight, 80)
         color: Looks.colors.bgPanelBody
 
         ColumnLayout {
@@ -65,7 +69,7 @@ WBarAttachedPanelContent {
             // Header
             BodyRectangle {
                 Layout.fillWidth: true
-                implicitHeight: 48
+                implicitHeight: 56
 
                 RowLayout {
                     anchors.fill: parent
@@ -96,25 +100,25 @@ WBarAttachedPanelContent {
                 }
             }
 
-            WPanelSeparator { visible: Config.options.waffles?.widgetsPanel?.showDateTime }
+            WPanelSeparator { visible: Config.options?.waffles?.widgetsPanel?.showDateTime ?? true }
 
             // Date & Time widget
             BodyRectangle {
                 Layout.fillWidth: true
-                implicitHeight: dateTimeContent.implicitHeight + 32
-                visible: Config.options.waffles?.widgetsPanel?.showDateTime
+                implicitHeight: dateTimeContent.implicitHeight + 36
+                visible: Config.options?.waffles?.widgetsPanel?.showDateTime ?? true
 
                 RowLayout {
                     id: dateTimeContent
                     anchors.fill: parent
-                    anchors.margins: 16
+                    anchors.margins: 18
                     spacing: 16
 
                     ColumnLayout {
                         spacing: 4
                         WText {
                             text: DateTime.time
-                            font.pixelSize: 42
+                            font.pixelSize: 46
                             font.weight: Font.DemiBold
                         }
                         WText {
@@ -128,27 +132,29 @@ WBarAttachedPanelContent {
 
                     ColumnLayout {
                         Layout.alignment: Qt.AlignVCenter
-                        spacing: 4
+                        spacing: 6
                         WText {
                             text: Translation.tr("Uptime")
                             font.pixelSize: Looks.font.pixelSize.tiny
-                            color: Looks.colors.fg1
+                            color: Looks.colors.subfg
+                            font.weight: Font.Medium
                         }
                         WText {
                             text: DateTime.uptime || "--"
-                            font.pixelSize: Looks.font.pixelSize.normal
+                            font.pixelSize: Looks.font.pixelSize.large
+                            font.weight: Font.DemiBold
                         }
                     }
                 }
             }
 
-            WPanelSeparator { visible: Config.options.waffles?.widgetsPanel?.showWeather && Weather.data.temp !== undefined && Weather.data.temp !== "" }
+            WPanelSeparator { visible: (Config.options?.waffles?.widgetsPanel?.showWeather ?? true) && Weather.data.temp !== undefined && Weather.data.temp !== "" }
 
             // Weather widget
             BodyRectangle {
                 Layout.fillWidth: true
                 implicitHeight: weatherContent.implicitHeight + 32
-                visible: Config.options.waffles?.widgetsPanel?.showWeather && Weather.data.temp !== undefined && Weather.data.temp !== ""
+                visible: (Config.options?.waffles?.widgetsPanel?.showWeather ?? true) && Weather.data.temp !== undefined && Weather.data.temp !== ""
 
                 ColumnLayout {
                     id: weatherContent
@@ -225,19 +231,19 @@ WBarAttachedPanelContent {
                 }
             }
 
-            WPanelSeparator { visible: Config.options.waffles?.widgetsPanel?.showSystem }
+            WPanelSeparator { visible: Config.options?.waffles?.widgetsPanel?.showSystem ?? true }
 
             // System Resources widget
             BodyRectangle {
                 Layout.fillWidth: true
-                implicitHeight: sysContent.implicitHeight + 32
-                visible: Config.options.waffles?.widgetsPanel?.showSystem
+                implicitHeight: sysContent.implicitHeight + 36
+                visible: Config.options?.waffles?.widgetsPanel?.showSystem ?? true
 
                 ColumnLayout {
                     id: sysContent
                     anchors.fill: parent
-                    anchors.margins: 16
-                    spacing: 10
+                    anchors.margins: 18
+                    spacing: 14
 
                     RowLayout {
                         Layout.fillWidth: true
@@ -250,7 +256,7 @@ WBarAttachedPanelContent {
                         WBorderlessButton {
                             implicitWidth: 28
                             implicitHeight: 28
-                            contentItem: FluentIcon { anchors.centerIn: parent; icon: "apps"; implicitSize: 14 }
+                            contentItem: FluentIcon { anchors.centerIn: parent; icon: "open"; implicitSize: 14 }
                             onClicked: {
                                 Quickshell.execDetached(["missioncenter"])
                                 GlobalStates.waffleWidgetsOpen = false
@@ -261,21 +267,22 @@ WBarAttachedPanelContent {
                     // CPU
                     ColumnLayout {
                         Layout.fillWidth: true
-                        spacing: 4
+                        spacing: 6
                         RowLayout {
                             Layout.fillWidth: true
-                            WText { text: Translation.tr("CPU"); font.pixelSize: Looks.font.pixelSize.small }
+                            WText { text: Translation.tr("CPU"); font.pixelSize: Looks.font.pixelSize.small; font.weight: Font.Medium }
                             Item { Layout.fillWidth: true }
                             WText {
                                 text: Math.round(ResourceUsage.cpuUsage * 100) + "%"
                                 font.pixelSize: Looks.font.pixelSize.small
+                                font.weight: Font.DemiBold
                                 color: ResourceUsage.cpuUsage > 0.8 ? Looks.colors.danger : Looks.colors.fg1
                             }
                         }
                         Rectangle {
-                            Layout.fillWidth: true; height: 6; radius: 3; color: Looks.colors.bg1Base
+                            Layout.fillWidth: true; height: 8; radius: 4; color: Looks.colors.bg1Base
                             Rectangle {
-                                width: parent.width * Math.min(1, ResourceUsage.cpuUsage); height: parent.height; radius: 3
+                                width: parent.width * Math.min(1, ResourceUsage.cpuUsage); height: parent.height; radius: 4
                                 color: ResourceUsage.cpuUsage > 0.8 ? Looks.colors.danger : Looks.colors.accent
                                 Behavior on width {
                                     animation: NumberAnimation { duration: Looks.transition.enabled ? Looks.transition.duration.medium : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.standard }
@@ -287,23 +294,24 @@ WBarAttachedPanelContent {
                     // Memory
                     ColumnLayout {
                         Layout.fillWidth: true
-                        spacing: 4
+                        spacing: 6
                         RowLayout {
                             Layout.fillWidth: true
-                            WText { text: Translation.tr("RAM"); font.pixelSize: Looks.font.pixelSize.small }
+                            WText { text: Translation.tr("RAM"); font.pixelSize: Looks.font.pixelSize.small; font.weight: Font.Medium }
                             Item { Layout.fillWidth: true }
                             WText {
                                 readonly property string used: (ResourceUsage.memoryUsed / (1024 * 1024)).toFixed(1)
                                 readonly property string total: ResourceUsage.maxAvailableMemoryString
                                 text: used + " / " + total
                                 font.pixelSize: Looks.font.pixelSize.small
+                                font.weight: Font.DemiBold
                                 color: ResourceUsage.memoryUsedPercentage > 0.9 ? Looks.colors.danger : Looks.colors.fg1
                             }
                         }
                         Rectangle {
-                            Layout.fillWidth: true; height: 6; radius: 3; color: Looks.colors.bg1Base
+                            Layout.fillWidth: true; height: 8; radius: 4; color: Looks.colors.bg1Base
                             Rectangle {
-                                width: parent.width * Math.min(1, ResourceUsage.memoryUsedPercentage); height: parent.height; radius: 3
+                                width: parent.width * Math.min(1, ResourceUsage.memoryUsedPercentage); height: parent.height; radius: 4
                                 color: ResourceUsage.memoryUsedPercentage > 0.9 ? Looks.colors.danger : Looks.colors.accent
                                 Behavior on width {
                                     animation: NumberAnimation { duration: Looks.transition.enabled ? Looks.transition.duration.medium : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.standard }
@@ -315,24 +323,25 @@ WBarAttachedPanelContent {
                     // Swap (if available)
                     ColumnLayout {
                         Layout.fillWidth: true
-                        spacing: 4
+                        spacing: 6
                         visible: ResourceUsage.swapTotal > 1
                         RowLayout {
                             Layout.fillWidth: true
-                            WText { text: Translation.tr("Swap"); font.pixelSize: Looks.font.pixelSize.small }
+                            WText { text: Translation.tr("Swap"); font.pixelSize: Looks.font.pixelSize.small; font.weight: Font.Medium }
                             Item { Layout.fillWidth: true }
                             WText {
                                 readonly property string used: (ResourceUsage.swapUsed / (1024 * 1024)).toFixed(1)
                                 readonly property string total: ResourceUsage.maxAvailableSwapString
                                 text: used + " / " + total
                                 font.pixelSize: Looks.font.pixelSize.small
+                                font.weight: Font.DemiBold
                                 color: ResourceUsage.swapUsedPercentage > 0.8 ? Looks.colors.danger : Looks.colors.fg1
                             }
                         }
                         Rectangle {
-                            Layout.fillWidth: true; height: 6; radius: 3; color: Looks.colors.bg1Base
+                            Layout.fillWidth: true; height: 8; radius: 4; color: Looks.colors.bg1Base
                             Rectangle {
-                                width: parent.width * Math.min(1, ResourceUsage.swapUsedPercentage); height: parent.height; radius: 3
+                                width: parent.width * Math.min(1, ResourceUsage.swapUsedPercentage); height: parent.height; radius: 4
                                 color: ResourceUsage.swapUsedPercentage > 0.8 ? Looks.colors.danger : Looks.colors.accent
                                 Behavior on width {
                                     animation: NumberAnimation { duration: Looks.transition.enabled ? Looks.transition.duration.medium : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.standard }
@@ -343,14 +352,14 @@ WBarAttachedPanelContent {
                 }
             }
 
-            WPanelSeparator { visible: Config.options.waffles?.widgetsPanel?.showMedia && MprisController.activePlayer !== null }
+            WPanelSeparator { visible: (Config.options?.waffles?.widgetsPanel?.showMedia ?? true) && MprisController.activePlayer !== null }
 
             // Media widget (if playing)
             BodyRectangle {
                 id: mediaWidget
                 Layout.fillWidth: true
                 implicitHeight: mediaContent.implicitHeight
-                visible: Config.options.waffles?.widgetsPanel?.showMedia && MprisController.activePlayer !== null
+                visible: (Config.options?.waffles?.widgetsPanel?.showMedia ?? true) && MprisController.activePlayer !== null
                 color: "transparent"
 
                 // Volume feedback overlay
@@ -435,7 +444,7 @@ WBarAttachedPanelContent {
                     }
                     Rectangle {
                         anchors.fill: parent
-                        color: Looks.colors.bgPanelBody
+                        color: Looks.colors.bgPanelFooterBase
                         opacity: 0.75
                     }
 
@@ -446,9 +455,9 @@ WBarAttachedPanelContent {
 
                         // Album art
                         Rectangle {
-                            Layout.preferredWidth: 100
-                            Layout.preferredHeight: 100
-                            radius: 8
+                            Layout.preferredWidth: 108
+                            Layout.preferredHeight: 108
+                            radius: Looks.radius.xLarge
                             color: Looks.colors.bg1Base
                             clip: true
 
@@ -560,19 +569,19 @@ WBarAttachedPanelContent {
                 }
             }
 
-            WPanelSeparator { visible: Config.options.waffles?.widgetsPanel?.showQuickActions }
+            WPanelSeparator { visible: Config.options?.waffles?.widgetsPanel?.showQuickActions ?? true }
 
             // Quick actions
             BodyRectangle {
                 Layout.fillWidth: true
-                implicitHeight: actionsContent.implicitHeight + 32
-                visible: Config.options.waffles?.widgetsPanel?.showQuickActions
+                implicitHeight: actionsContent.implicitHeight + 36
+                visible: Config.options?.waffles?.widgetsPanel?.showQuickActions ?? true
 
                 ColumnLayout {
                     id: actionsContent
                     anchors.fill: parent
-                    anchors.margins: 16
-                    spacing: 12
+                    anchors.margins: 18
+                    spacing: 14
 
                     WText {
                         text: Translation.tr("Quick Actions")
@@ -583,7 +592,7 @@ WBarAttachedPanelContent {
                     Grid {
                         Layout.fillWidth: true
                         columns: 3
-                        spacing: 8
+                        spacing: 10
 
                         QuickActionButton {
                             width: (parent.width - 16) / 3
@@ -659,12 +668,14 @@ WBarAttachedPanelContent {
         required property string label
         signal clicked()
 
-        implicitHeight: 64
-        radius: Looks.radius.medium
+        implicitHeight: 72
+        radius: Looks.radius.large
         color: actionMa.containsMouse ? Looks.colors.bg2Hover : Looks.colors.bg1Base
-        border.width: actionMa.containsMouse ? 1 : 0
-        border.color: Looks.colors.bg2Border
+        border.width: 1
+        border.color: actionMa.containsMouse ? Looks.colors.bg2Border : "transparent"
 
+        scale: actionMa.pressed ? 0.96 : 1.0
+        Behavior on scale { animation: NumberAnimation { duration: Looks.transition.enabled ? 70 : 0; easing.type: Easing.OutQuad } }
         Behavior on color { animation: ColorAnimation { duration: Looks.transition.enabled ? 70 : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.standard } }
 
         MouseArea {
@@ -677,18 +688,21 @@ WBarAttachedPanelContent {
 
         ColumnLayout {
             anchors.centerIn: parent
-            spacing: 6
+            spacing: 8
+
             FluentIcon {
                 Layout.alignment: Qt.AlignHCenter
                 icon: actionBtn.iconName
-                implicitSize: 22
+                implicitSize: 20
                 color: actionMa.containsMouse ? Looks.colors.accent : Looks.colors.fg
                 Behavior on color { animation: ColorAnimation { duration: Looks.transition.enabled ? 70 : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.standard } }
             }
+
             WText {
                 Layout.alignment: Qt.AlignHCenter
                 text: actionBtn.label
                 font.pixelSize: Looks.font.pixelSize.small
+                font.weight: actionMa.containsMouse ? Font.Medium : Font.Normal
                 color: actionMa.containsMouse ? Looks.colors.fg : Looks.colors.fg1
             }
         }

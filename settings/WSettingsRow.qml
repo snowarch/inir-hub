@@ -26,7 +26,7 @@ Item {
     Layout.fillWidth: true
     Layout.leftMargin: 16
     Layout.rightMargin: 16
-    implicitHeight: Math.max(48, contentRow.implicitHeight + 14)
+    implicitHeight: Math.max(54, contentRow.implicitHeight + 20)
     
     // Highlight animation for search focus
     Behavior on opacity {
@@ -119,10 +119,14 @@ Item {
     Rectangle {
         id: background
         anchors.fill: parent
-        radius: Looks.radius.medium
-        color: root.clickable && mouseArea.containsMouse 
-            ? Looks.colors.bg2Hover 
-            : "transparent"
+        anchors.leftMargin: 4
+        anchors.rightMargin: 4
+        radius: Looks.radius.large
+        color: {
+            if (root.clickable && mouseArea.pressed) return Looks.colors.bg2Active
+            if (mouseArea.containsMouse) return Looks.colors.bg2Hover
+            return "transparent"
+        }
         
         Behavior on color {
             animation: ColorAnimation { duration: Looks.transition.enabled ? 70 : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.standard }
@@ -148,10 +152,10 @@ Item {
     MouseArea {
         id: mouseArea
         anchors.fill: parent
-        enabled: root.clickable
+        enabled: true
         hoverEnabled: true
         cursorShape: root.clickable ? Qt.PointingHandCursor : Qt.ArrowCursor
-        onClicked: root.clicked()
+        onClicked: if (root.clickable) root.clicked()
     }
     
     // Bottom separator
@@ -160,20 +164,20 @@ Item {
             bottom: parent.bottom
             left: parent.left
             right: parent.right
-            leftMargin: root.icon !== "" ? 40 : 12
-            rightMargin: 12
+            leftMargin: root.icon !== "" ? 40 : 16
+            rightMargin: 16
         }
         height: 1
         color: Looks.colors.bg2Border
-        opacity: 0.35
+        opacity: 0.2
     }
     
     RowLayout {
         id: contentRow
         anchors {
             fill: parent
-            leftMargin: 12
-            rightMargin: 12
+            leftMargin: 14
+            rightMargin: 14
         }
         spacing: 12
         
@@ -202,6 +206,7 @@ Item {
                 font.pixelSize: Looks.font.pixelSize.small
                 color: Looks.colors.subfg
                 wrapMode: Text.WordWrap
+                lineHeight: 1.2
             }
         }
         
@@ -213,8 +218,9 @@ Item {
         FluentIcon {
             visible: root.showChevron
             icon: "chevron-right"
-            implicitSize: 16
+            implicitSize: 14
             color: Looks.colors.subfg
+            opacity: 0.7
         }
     }
 }

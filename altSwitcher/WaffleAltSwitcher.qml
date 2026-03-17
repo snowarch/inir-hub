@@ -382,19 +382,19 @@ Scope {
                         event.accepted = true
                         break
                     case Qt.Key_Tab:
+                        if (event.modifiers & Qt.ShiftModifier)
+                            root.previousItem()
+                        else
+                            root.nextItem()
+                        event.accepted = true
+                        break
                     case Qt.Key_Right:
-                        root.nextItem()
-                        event.accepted = true
-                        break
-                    case Qt.Key_Left:
-                        root.previousItem()
-                        event.accepted = true
-                        break
                     case Qt.Key_Down:
                     case Qt.Key_J:
                         root.nextItem()
                         event.accepted = true
                         break
+                    case Qt.Key_Left:
                     case Qt.Key_Up:
                     case Qt.Key_K:
                         root.previousItem()

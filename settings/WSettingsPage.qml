@@ -19,7 +19,7 @@ Flickable {
     property string settingsPageName: pageTitle
     
     clip: true
-    contentHeight: contentColumn.implicitHeight + 40
+    contentHeight: contentColumn.implicitHeight + 56
     boundsBehavior: Flickable.StopAtBounds
     
     ScrollBar.vertical: WScrollBar {}
@@ -31,22 +31,50 @@ Flickable {
             left: parent.left
             right: parent.right
             topMargin: 32
-            leftMargin: 32
-            rightMargin: 32
-            bottomMargin: 24
+            leftMargin: 36
+            rightMargin: 36
+            bottomMargin: 28
         }
-        spacing: 12
-        
+        spacing: 16
+
+        opacity: 0
+        Component.onCompleted: {
+            if (Looks.transition.enabled) {
+                contentFadeIn.start()
+            } else {
+                contentColumn.opacity = 1
+            }
+        }
+        NumberAnimation {
+            id: contentFadeIn
+            target: contentColumn
+            property: "opacity"
+            from: 0; to: 1
+            duration: Looks.transition.duration.medium
+            easing.type: Easing.OutCubic
+        }
+
         // Page header
         ColumnLayout {
             Layout.fillWidth: true
             Layout.bottomMargin: 12
-            spacing: 6
-            
-            WText {
-                text: root.pageTitle
-                font.pixelSize: Looks.font.pixelSize.xlarger + 4
-                font.weight: Looks.font.weight.strong
+            spacing: 8
+
+            RowLayout {
+                spacing: 12
+
+                FluentIcon {
+                    visible: root.pageIcon !== ""
+                    icon: root.pageIcon
+                    implicitSize: 24
+                    color: Looks.colors.accent
+                }
+
+                WText {
+                    text: root.pageTitle
+                    font.pixelSize: Looks.font.pixelSize.xlarger * 1.6
+                    font.weight: Looks.font.weight.strong
+                }
             }
             
             WText {
@@ -56,6 +84,7 @@ Flickable {
                 font.pixelSize: Looks.font.pixelSize.normal
                 color: Looks.colors.subfg
                 wrapMode: Text.WordWrap
+                lineHeight: 1.3
             }
         }
     }

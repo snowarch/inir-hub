@@ -47,11 +47,11 @@ BarButton {
 
                     FluentIcon {
                         anchors.fill: parent
-                        icon: (Audio.source?.audio?.muted ?? false) ? "mic-off" : "mic-on"
+                        icon: Audio.micMuted ? "mic-off" : "mic-on"
                     }
 
                     Rectangle {
-                        visible: !(Audio.source?.audio?.muted ?? true)
+                        visible: !Audio.micMuted
                         width: 4
                         height: 4
                         radius: 2
@@ -59,7 +59,7 @@ BarButton {
                         anchors { top: parent.top; right: parent.right; topMargin: -1; rightMargin: -1 }
 
                         SequentialAnimation on opacity {
-                            running: micHoverArea.micInUse && !(Audio.source?.audio?.muted ?? true)
+                            running: micHoverArea.micInUse && !Audio.micMuted
                             loops: Animation.Infinite
                             NumberAnimation { to: 0.5; duration: 1200 }
                             NumberAnimation { to: 1.0; duration: 1200 }
@@ -126,7 +126,7 @@ BarButton {
 
     BarToolTip {
         extraVisibleCondition: root.shouldShowTooltip && micHoverArea.containsMouse
-        text: Translation.tr("Microphone: %1").arg((Audio.source?.audio?.muted ?? false) ? Translation.tr("Muted") : Translation.tr("In use"))
+        text: Translation.tr("Microphone: %1").arg(Audio.micMuted ? Translation.tr("Muted") : Translation.tr("In use"))
     }
     BarToolTip {
         extraVisibleCondition: root.shouldShowTooltip && screenShareHoverArea.containsMouse

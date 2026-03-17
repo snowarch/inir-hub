@@ -16,8 +16,13 @@ Singleton {
     property QtObject transition
     property string iconsPath: `${Directories.assetsPath}/icons/fluent`
     property bool dark: Appearance.m3colors.darkmode
-    property bool auroraEverywhere: (Config.options?.appearance?.globalStyle ?? "material") === "aurora"
+    property bool auroraEverywhere: {
+        const style = Config.options?.appearance?.globalStyle ?? "material"
+        return style === "aurora" || style === "angel"
+    }
     property bool useMaterial: (Config.options?.waffles?.theming?.useMaterialColors ?? false) || root.auroraEverywhere
+    // Glass mode: aurora/angel active (not iNiR which has its own aesthetic)
+    readonly property bool glassActive: root.auroraEverywhere && !Appearance.inirEverywhere
     
     // Font family - reactive property at root level for proper binding updates
     readonly property string fontFamily: {
@@ -32,6 +37,34 @@ Singleton {
     property real panelBackgroundTransparency: root.auroraEverywhere ? (Appearance.backgroundTransparency ?? 0) : (transparencyEnabled ? 0.12 : 0)
     property real panelLayerTransparency: root.auroraEverywhere ? (Appearance.aurora.popupSurfaceTransparentize ?? 0.5) : (root.dark ? 0.6 : 0.5)
     property real contentTransparency: root.auroraEverywhere ? (Appearance.contentTransparency ?? 0) : (root.dark ? 0.87 : 0.5)
+    function clamp(value, minimum, maximum) {
+        return Math.max(minimum, Math.min(maximum, value))
+    }
+    function screenScale(screen, minimum, maximum) {
+        minimum = minimum ?? 0.92
+        maximum = maximum ?? 1.08
+        const width = screen?.width ?? 1920
+        const height = screen?.height ?? 1080
+        const shortSide = Math.min(width, height)
+        return root.clamp(shortSide / 1080, minimum, maximum)
+    }
+    function barScale(screen, minimum, maximum) {
+        minimum = minimum ?? 0.9
+        maximum = maximum ?? 1.18
+        const width = screen?.width ?? 1920
+        const height = screen?.height ?? 1080
+        return root.clamp(Math.min(width / 1920, height / 1080), minimum, maximum)
+    }
+    function scaled(value, screen, minimum, maximum) {
+        minimum = minimum ?? 0.92
+        maximum = maximum ?? 1.08
+        return Math.round(value * root.screenScale(screen, minimum, maximum))
+    }
+    function scaledBar(value, screen, minimum, maximum) {
+        minimum = minimum ?? 0.9
+        maximum = maximum ?? 1.18
+        return Math.round(value * root.barScale(screen, minimum, maximum))
+    }
     function applyBackgroundTransparency(col) {
         return ColorUtils.applyAlpha(col, 1 - root.backgroundTransparency)
     }
@@ -102,22 +135,26 @@ Singleton {
         property color ambientShadow: ColorUtils.transparentize("#000000", 0.75)
         
         // Material-aware colors - use Appearance colors when useMaterial is true
-        property color bgPanelFooterBase: root.useMaterial 
-            ? Appearance.colors.colLayer0 
+        property color bgPanelFooterBase: root.useMaterial
+            ? Appearance.colors.colLayer0
             : ColorUtils.transparentize(root.dark ? root.darkColors.bgPanelFooter : root.lightColors.bgPanelFooter, root.panelBackgroundTransparency)
-        property color bgPanelFooter: root.useMaterial 
-            ? Appearance.colors.colLayer1 
+        property color bgPanelFooter: root.useMaterial
+            ? Appearance.colors.colLayer1
             : ColorUtils.transparentize(root.dark ? root.darkColors.bgPanelFooter : root.lightColors.bgPanelFooter, root.panelLayerTransparency)
-        property color bgPanelBody: root.useMaterial 
-            ? Appearance.colors.colLayer2 
-            : ColorUtils.transparentize(root.dark ? root.darkColors.bgPanelBody : root.lightColors.bgPanelBody, root.panelLayerTransparency)
-        property color bgPanelSeparator: root.useMaterial 
-            ? Appearance.colors.colOutlineVariant 
+        // bgPanelBody is only used inside WPane-backed panels (BodyRectangle),
+        // so making it transparent when glass is active lets GlassBackground show through
+        property color bgPanelBody: root.glassActive
+            ? "transparent"
+            : root.useMaterial
+                ? Appearance.colors.colLayer2
+                : ColorUtils.transparentize(root.dark ? root.darkColors.bgPanelBody : root.lightColors.bgPanelBody, root.panelLayerTransparency)
+        property color bgPanelSeparator: root.useMaterial
+            ? Appearance.colors.colOutlineVariant
             : ColorUtils.transparentize(root.dark ? root.darkColors.bgPanelSeparator : root.lightColors.bgPanelSeparator, root.backgroundTransparency)
-        property color bg0Opaque: root.useMaterial 
-            ? Appearance.m3colors.m3background 
+        property color bg0Opaque: root.useMaterial
+            ? Appearance.m3colors.m3background
             : (root.dark ? root.darkColors.bg0 : root.lightColors.bg0)
-        property color bg0: root.useMaterial 
+        property color bg0: root.useMaterial
             ? Appearance.colors.colLayer0 
             : ColorUtils.transparentize(bg0Opaque, root.backgroundTransparency)
         property color bg0Border: root.useMaterial 

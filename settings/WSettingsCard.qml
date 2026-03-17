@@ -18,15 +18,14 @@ Rectangle {
     
     Layout.fillWidth: true
     implicitHeight: mainColumn.implicitHeight
-    radius: Looks.radius.large
+    radius: Looks.radius.xLarge
     color: Looks.colors.bgPanelFooter
     border.width: 1
     border.color: Looks.colors.bg2Border
     
-    // Subtle shadow for card elevation
+    // Card elevation shadow
     WRectangularShadow {
         target: root
-        opacity: 0.4
     }
     
     ColumnLayout {
@@ -41,7 +40,7 @@ Rectangle {
         Item {
             visible: root.title !== ""
             Layout.fillWidth: true
-            implicitHeight: 44
+            implicitHeight: 52
             
             MouseArea {
                 anchors.fill: parent
@@ -65,19 +64,16 @@ Rectangle {
                 FluentIcon {
                     visible: root.icon !== ""
                     icon: root.icon
-                    implicitSize: 14
+                    implicitSize: 16
                     color: Looks.colors.accent
-                    opacity: 0.85
                 }
                 
                 WText {
                     Layout.fillWidth: true
                     text: root.title
-                    font.pixelSize: Looks.font.pixelSize.small
+                    font.pixelSize: Looks.font.pixelSize.large
                     font.weight: Looks.font.weight.regular
-                    color: Looks.colors.subfg
-                    font.capitalization: Font.AllUppercase
-                    font.letterSpacing: 0.5
+                    color: Looks.colors.fg
                 }
                 
                 FluentIcon {
@@ -93,7 +89,7 @@ Rectangle {
                 }
             }
         }
-        
+
         // Content
         ColumnLayout {
             id: contentColumn
@@ -101,9 +97,13 @@ Rectangle {
             Layout.fillWidth: true
             Layout.leftMargin: 0
             Layout.rightMargin: 0
-            Layout.topMargin: root.title !== "" ? 0 : 4
-            Layout.bottomMargin: 6
+            Layout.topMargin: root.title !== "" ? 4 : 6
+            Layout.bottomMargin: 10
             spacing: 0
+
+            Behavior on Layout.topMargin {
+                animation: NumberAnimation { duration: Looks.transition.enabled ? Looks.transition.duration.fast : 0 }
+            }
         }
     }
 }

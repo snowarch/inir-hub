@@ -123,8 +123,12 @@ RowLayout {
         property var entry
 
         Layout.fillHeight: true
-        color: Looks.colors.bg1
+        color: Looks.glassActive ? Looks.colors.bgPanelBody : Looks.colors.bg1
         radius: Looks.radius.medium
+        border.width: Looks.glassActive ? 1 : 0
+        border.color: Looks.glassActive
+            ? (Appearance.angelEverywhere ? Appearance.angel.colPanelBorder : Appearance.aurora.colTooltipBorder)
+            : "transparent"
 
         ColumnLayout {
             anchors.fill: parent

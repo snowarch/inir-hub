@@ -219,6 +219,22 @@ WSettingsPage {
         }
 
         WSettingsSwitch {
+            label: Translation.tr("Disable Discover overlay")
+            icon: "eye-off"
+            description: Translation.tr("Stop discover-overlay while game mode is active")
+            checked: Config.options?.gameMode?.disableDiscoverOverlay ?? true
+            onCheckedChanged: Config.setNestedValue("gameMode.disableDiscoverOverlay", checked)
+        }
+
+        WSettingsSwitch {
+            label: Translation.tr("Minimal mode")
+            icon: "sparkles"
+            description: Translation.tr("Make shell surfaces lighter while game mode is active")
+            checked: Config.options?.gameMode?.minimalMode ?? true
+            onCheckedChanged: Config.setNestedValue("gameMode.minimalMode", checked)
+        }
+
+        WSettingsSwitch {
             label: Translation.tr("Hide reload toasts")
             icon: "alert-off"
             description: Translation.tr("Suppress reload notifications when Game Mode is active")

@@ -294,14 +294,14 @@ Item {
             ColumnLayout {
                 anchors {
                     fill: parent
-                    margins: 12
+                    margins: 14
                 }
                 spacing: 4
                 
                 // Header with app name (expanded)
                 RowLayout {
                     Layout.fillWidth: true
-                    Layout.bottomMargin: 8
+                    Layout.bottomMargin: 10
                     spacing: 10
                     visible: root.navExpanded
 
@@ -391,8 +391,8 @@ Item {
                     id: searchBarContainer
                     visible: root.navExpanded
                     Layout.fillWidth: true
-                    Layout.preferredHeight: 36
-                    radius: Looks.radius.medium
+                    Layout.preferredHeight: 38
+                    radius: Looks.radius.medium + 1
                     color: Looks.colors.inputBg
                     border.width: searchInput.activeFocus ? 2 : 1
                     border.color: searchInput.activeFocus ? Looks.colors.accent : Looks.colors.bg2Border
@@ -682,7 +682,7 @@ Item {
                     ColumnLayout {
                         id: navColumn
                         width: parent.width
-                        spacing: 4
+                        spacing: 3
                         
                         Repeater {
                             model: root.pages
@@ -743,6 +743,7 @@ Item {
             Layout.fillHeight: true
             width: 1
             color: Looks.colors.bg2Border
+            opacity: 0.6
         }
         
         // Content area

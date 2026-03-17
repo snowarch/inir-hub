@@ -34,6 +34,10 @@ WBarAttachedPanelContent {
             WPane {
                 id: notificationPane
                 anchors.fill: parent
+                screenX: root.panelScreenX + root.visualMargin
+                screenY: root.panelScreenY + root.visualMargin
+                screenWidth: root._screenW
+                screenHeight: root._screenH
                 contentItem: NotificationPaneContent {
                     implicitWidth: calendarColumnLayout.implicitWidth
                 }
@@ -44,6 +48,10 @@ WBarAttachedPanelContent {
         WPane {
             id: calendarPane
             Layout.fillWidth: true
+            screenX: root.panelScreenX + root.visualMargin
+            screenY: root.panelScreenY + root.visualMargin + notificationArea.height + 12
+            screenWidth: root._screenW
+            screenHeight: root._screenH
             contentItem: WPanelPageColumn {
                 id: calendarColumnLayout
                 DateHeader {

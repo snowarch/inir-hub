@@ -31,6 +31,24 @@ Item {
 
     readonly property bool barAtBottom: Config.options?.waffles?.bar?.bottom ?? false
 
+    // Screen position for GlassBackground blur alignment in child WPanes
+    readonly property var _screen: Quickshell.screens[0]
+    readonly property real _screenW: _screen?.width ?? 1920
+    readonly property real _screenH: _screen?.height ?? 1080
+    readonly property real panelScreenX: {
+        if (revealFromSides && !revealFromLeft) {
+            // Right-side panel
+            return _screenW - root.implicitWidth
+        }
+        return 0  // Left-side or vertical panel
+    }
+    readonly property real panelScreenY: {
+        if (barAtBottom) {
+            return _screenH - root.implicitHeight
+        }
+        return 0  // Top-anchored
+    }
+
     implicitHeight: contentItem.implicitHeight + visualMargin * 2
     implicitWidth: contentItem.implicitWidth + visualMargin * 2
 
