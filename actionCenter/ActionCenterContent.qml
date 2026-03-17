@@ -33,7 +33,7 @@ WBarAttachedPanelContent {
 
         WPane {
             id: mediaPane
-            readonly property bool hasActivePlayer: MprisController.activePlayer != null && MprisController.isRealPlayer(MprisController.activePlayer)
+            readonly property bool hasActivePlayer: MprisController.activePlayer != null
             visible: hasActivePlayer
             Layout.fillWidth: true
             screenX: root.panelScreenX + root.visualMargin * 2

@@ -46,12 +46,15 @@ WSettingsPage {
         if (useMain) return Config.options?.background?.wallpaperPath ?? ""
         return Config.options?.waffles?.background?.wallpaperPath ?? Config.options?.background?.wallpaperPath ?? ""
     }
+    readonly property string displayWallpaperPath: root.selectedWallpaperPath.length > 0
+        ? root.selectedWallpaperPath
+        : root.currentWallpaperPath
     readonly property string currentWpUrl: {
-        if (!currentWallpaperPath) return ""
-        return currentWallpaperPath.startsWith("file://") ? currentWallpaperPath : "file://" + currentWallpaperPath
+        if (!displayWallpaperPath) return ""
+        return displayWallpaperPath.startsWith("file://") ? displayWallpaperPath : "file://" + displayWallpaperPath
     }
-    readonly property bool wpIsVideo: WallpaperListener.isVideoPath(currentWallpaperPath)
-    readonly property bool wpIsGif: WallpaperListener.isGifPath(currentWallpaperPath)
+    readonly property bool wpIsVideo: WallpaperListener.isVideoPath(displayWallpaperPath)
+    readonly property bool wpIsGif: WallpaperListener.isGifPath(displayWallpaperPath)
     readonly property bool colorsOnlyMode: Config.options?.appearance?.wallpaperTheming?.colorsOnlyMode ?? false
     readonly property string previewWallpaperPath: Config.options?.appearance?.wallpaperTheming?.previewSourcePath ?? ""
     readonly property string selectedWallpaperPath: (root.colorsOnlyMode && root.previewWallpaperPath.length > 0)
@@ -121,12 +124,12 @@ WSettingsPage {
             anchors.fill: parent
             fillMode: Image.PreserveAspectCrop
             source: {
-                const ff = Wallpapers.videoFirstFrames[root.currentWallpaperPath]
+                const ff = Wallpapers.videoFirstFrames[root.displayWallpaperPath]
                 return ff ? (ff.startsWith("file://") ? ff : "file://" + ff) : ""
             }
             asynchronous: true
             cache: false
-            Component.onCompleted: Wallpapers.ensureVideoFirstFrame(root.currentWallpaperPath)
+            Component.onCompleted: Wallpapers.ensureVideoFirstFrame(root.displayWallpaperPath)
         }
 
         // Bottom gradient for overlay buttons
@@ -446,7 +449,11 @@ WSettingsPage {
             icon: "color"
             description: Translation.tr("Click thumbnails to apply only colors, without changing wallpaper")
             checked: root.colorsOnlyMode
-            onCheckedChanged: Config.setNestedValue("appearance.wallpaperTheming.colorsOnlyMode", checked)
+            onCheckedChanged: {
+                Config.setNestedValue("appearance.wallpaperTheming.colorsOnlyMode", checked)
+                if (!checked)
+                    Config.setNestedValue("appearance.wallpaperTheming.previewSourcePath", "")
+            }
         }
 
         WSettingsDropdown {
