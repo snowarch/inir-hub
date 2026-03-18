@@ -12,15 +12,7 @@ BarButton {
     leftInset: 8
     rightInset: 8
     implicitWidth: contentRow.implicitWidth + leftInset + rightInset + 8
-    readonly property bool hideLocation: Config.options?.waffles?.widgetsPanel?.weatherHideLocation ?? false
-    readonly property string locationText: {
-        if (root.hideLocation)
-            return ""
-        const city = String(Weather.data?.city ?? "")
-        if (city.length > 0 && city.toLowerCase() !== "unknown")
-            return city
-        return ""
-    }
+    readonly property string locationText: Weather.visibleCity
     readonly property string secondaryText: locationText || root.weatherDescription
 
     onClicked: {
@@ -69,6 +61,6 @@ BarButton {
 
     BarToolTip {
         extraVisibleCondition: root.shouldShowTooltip
-        text: root.hideLocation ? root.weatherDescription : (Weather.data?.city ?? Translation.tr("Unknown location"))
+        text: Weather.showVisibleCity ? Weather.visibleCity : root.weatherDescription
     }
 }

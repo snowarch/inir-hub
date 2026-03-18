@@ -180,7 +180,7 @@ WBarAttachedPanelContent {
                                 font.weight: Font.DemiBold
                             }
                             WText {
-                                text: Config.options.waffles?.widgetsPanel?.weatherHideLocation ? Translation.tr("Weather") : (Weather.data.city || "")
+                                text: Weather.showVisibleCity ? Weather.visibleCity : Translation.tr("Weather")
                                 color: Looks.colors.fg1
                             }
                         }
