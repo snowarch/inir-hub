@@ -4,6 +4,7 @@ import QtQuick.Controls
 import QtQuick.Layouts
 import Qt5Compat.GraphicalEffects
 import Quickshell
+import Quickshell.Io
 import qs
 import qs.services
 import qs.modules.common
@@ -14,13 +15,25 @@ import qs.modules.waffle.looks
 Item {
     id: root
     property size sourceSize: Qt.size(32, 32)
-    
+    readonly property list<string> avatarCandidates: [
+        Directories.userAvatarPathRicersAndWeirdSystems,
+        Directories.userAvatarPathAccountsService,
+        Directories.userAvatarPathRicersAndWeirdSystems2
+    ]
+
     width: sourceSize.width
     height: sourceSize.height
     implicitWidth: sourceSize.width
     implicitHeight: sourceSize.height
     Layout.preferredWidth: sourceSize.width
     Layout.preferredHeight: sourceSize.height
+
+    function reloadAvatarSource(): void {
+        avatarSourceProbe.running = false
+        avatarSourceProbe.running = true
+    }
+
+    Component.onCompleted: reloadAvatarSource()
 
     Rectangle {
         anchors.fill: parent
@@ -44,24 +57,45 @@ Item {
         visible: false
     }
 
+    Process {
+        id: avatarSourceProbe
+        running: false
+        command: [
+            "/usr/bin/bash",
+            "-lc",
+            "for p in \"$@\"; do if [ -f \"$p\" ]; then printf '%s' \"$p\"; exit 0; fi; done; exit 1",
+            "avatar-source-probe",
+            ...root.avatarCandidates
+        ]
+        stdout: StdioCollector {
+            id: avatarSourceProbeOutput
+            onStreamFinished: {
+                const resolved = avatarSourceProbeOutput.text.trim()
+                avatarImage.source = resolved.length > 0
+                    ? (resolved.startsWith("file://") ? resolved : `file://${resolved}`)
+                    : ""
+            }
+        }
+        onExited: (exitCode, exitStatus) => {
+            if (exitCode !== 0)
+                avatarImage.source = ""
+        }
+    }
+
     Image {
         id: avatarImage
         anchors.fill: parent
         sourceSize: Qt.size(root.sourceSize.width * 2, root.sourceSize.height * 2)
         fillMode: Image.PreserveAspectCrop
-        source: `file://${Directories.userAvatarPathRicersAndWeirdSystems}`
+        source: ""
         cache: true
         smooth: true
         mipmap: true
         asynchronous: true
         visible: false
         onStatusChanged: {
-            if (status === Image.Error) {
-                if (String(source).indexOf(Directories.userAvatarPathAccountsService) >= 0)
-                    source = `file://${Directories.userAvatarPathRicersAndWeirdSystems2}`
-                else
-                    source = `file://${Directories.userAvatarPathAccountsService}`
-            }
+            if (status === Image.Error)
+                root.reloadAvatarSource()
         }
     }
 

@@ -153,7 +153,7 @@ WSettingsPage {
                 Behavior on color { animation: ColorAnimation { duration: 100 } }
                 FluentIcon {
                     anchors.centerIn: parent
-                    icon: "arrow-shuffle"
+                    icon: "arrow-sync"
                     implicitSize: 16
                     color: "white"
                 }
@@ -377,7 +377,7 @@ WSettingsPage {
         // Per-monitor toggle
         WSettingsSwitch {
             label: Translation.tr("Per-monitor wallpapers")
-            icon: "monitor"
+            icon: "desktop"
             description: Translation.tr("Set different wallpapers for each monitor")
             checked: root.multiMonitorEnabled
             onCheckedChanged: {
@@ -446,7 +446,7 @@ WSettingsPage {
 
         WSettingsSwitch {
             label: Translation.tr("Colors only mode")
-            icon: "color"
+            icon: "eyedropper"
             description: Translation.tr("Click thumbnails to apply only colors, without changing wallpaper")
             checked: root.colorsOnlyMode
             onCheckedChanged: {
@@ -510,7 +510,7 @@ WSettingsPage {
 
         WSettingsSpinBox {
             label: Translation.tr("Taskbar icon size")
-            icon: "aspect_ratio"
+            icon: "desktop"
             suffix: "px"
             from: 20; to: 40; stepSize: 1
             value: Config.options?.waffles?.bar?.iconSize ?? 26

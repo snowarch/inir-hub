@@ -158,7 +158,7 @@ WSettingsPage {
 
         WSettingsSwitch {
             label: Translation.tr("OSD")
-            icon: "speaker-2"
+            icon: "speaker-2-filled"
             checked: root.isPanelEnabled("wOnScreenDisplay")
             onCheckedChanged: root.setPanelEnabled("wOnScreenDisplay", checked)
         }

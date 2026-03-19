@@ -228,7 +228,7 @@ WSettingsPage {
 
         WSettingsSwitch {
             label: Translation.tr("Minimal mode")
-            icon: "sparkles"
+            icon: "auto"
             description: Translation.tr("Make shell surfaces lighter while game mode is active")
             checked: Config.options?.gameMode?.minimalMode ?? true
             onCheckedChanged: Config.setNestedValue("gameMode.minimalMode", checked)

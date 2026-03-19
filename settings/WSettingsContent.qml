@@ -65,17 +65,45 @@ Item {
         // === Background (3) ===
         { pageIndex: 3, pageName: "Background", section: "Wallpaper", label: "Use Material ii wallpaper", targetLabel: "Use Material ii wallpaper", keywords: ["wallpaper", "background", "material", "share", "image"] },
         { pageIndex: 3, pageName: "Background", section: "Wallpaper", label: "Waffle wallpaper", targetLabel: "Waffle wallpaper", keywords: ["wallpaper", "background", "waffle", "change", "image"] },
+        { pageIndex: 3, pageName: "Background", section: "Wallpaper", label: "Per-monitor wallpapers", targetLabel: "Per-monitor wallpapers", keywords: ["wallpaper", "background", "monitor", "display", "multi-monitor", "per-monitor"] },
+        { pageIndex: 3, pageName: "Background", section: "Wallpaper", label: "Hide when fullscreen", targetLabel: "Hide when fullscreen", keywords: ["wallpaper", "background", "fullscreen", "hide"] },
+        { pageIndex: 3, pageName: "Background", section: "Wallpaper", label: "Wallpaper scaling", targetLabel: "Wallpaper scaling", keywords: ["wallpaper", "background", "scaling", "fill", "fit", "center"] },
         { pageIndex: 3, pageName: "Background", section: "Wallpaper Effects", label: "Enable blur", targetLabel: "Enable blur", keywords: ["blur", "wallpaper", "background", "effect"] },
         { pageIndex: 3, pageName: "Background", section: "Wallpaper Effects", label: "Blur radius", targetLabel: "Blur radius", keywords: ["blur", "radius", "intensity"] },
         { pageIndex: 3, pageName: "Background", section: "Wallpaper Effects", label: "Dim overlay", targetLabel: "Dim overlay", keywords: ["dim", "dark", "darken", "overlay", "wallpaper"] },
         { pageIndex: 3, pageName: "Background", section: "Wallpaper Effects", label: "Extra dim with windows", targetLabel: "Extra dim with windows", keywords: ["dim", "dynamic", "windows", "wallpaper"] },
+        { pageIndex: 3, pageName: "Background", section: "Wallpaper Transitions", label: "Enable wallpaper transitions", targetLabel: "Enable wallpaper transitions", keywords: ["wallpaper", "background", "transition", "animation"] },
+        { pageIndex: 3, pageName: "Background", section: "Wallpaper Transitions", label: "Transition style", targetLabel: "Transition style", keywords: ["wallpaper", "background", "transition", "style", "fade", "wipe", "wave"] },
+        { pageIndex: 3, pageName: "Background", section: "Wallpaper Transitions", label: "Transition direction", targetLabel: "Transition direction", keywords: ["wallpaper", "background", "transition", "direction", "left", "right", "top", "bottom"] },
+        { pageIndex: 3, pageName: "Background", section: "Wallpaper Transitions", label: "Transition duration", targetLabel: "Transition duration", keywords: ["wallpaper", "background", "transition", "duration", "speed"] },
+        { pageIndex: 3, pageName: "Background", section: "Desktop Clock", label: "Enable clock", targetLabel: "Enable clock", keywords: ["background", "desktop", "clock", "wallpaper", "widget"] },
+        { pageIndex: 3, pageName: "Background", section: "Desktop Clock", label: "Placement", targetLabel: "Placement", keywords: ["background", "desktop", "clock", "placement", "least busy", "most busy", "draggable"] },
+        { pageIndex: 3, pageName: "Background", section: "Desktop Clock", label: "Reset free position", targetLabel: "Reset free position", keywords: ["background", "desktop", "clock", "position", "reset", "center", "draggable"] },
+        { pageIndex: 3, pageName: "Background", section: "Desktop Clock", label: "Clock style", targetLabel: "Clock style", keywords: ["background", "desktop", "clock", "style", "hero", "balanced", "minimal"] },
+        { pageIndex: 3, pageName: "Background", section: "Desktop Clock", label: "Time format", targetLabel: "Time format", keywords: ["background", "desktop", "clock", "time", "format", "12-hour", "24-hour"] },
+        { pageIndex: 3, pageName: "Background", section: "Desktop Clock", label: "Show seconds", targetLabel: "Show seconds", keywords: ["background", "desktop", "clock", "seconds", "precision"] },
+        { pageIndex: 3, pageName: "Background", section: "Desktop Clock", label: "Show date", targetLabel: "Show date", keywords: ["background", "desktop", "clock", "date", "calendar"] },
+        { pageIndex: 3, pageName: "Background", section: "Desktop Clock", label: "Date style", targetLabel: "Date style", keywords: ["background", "desktop", "clock", "date", "weekday", "numeric", "minimal"] },
+        { pageIndex: 3, pageName: "Background", section: "Desktop Clock", label: "Color tone", targetLabel: "Color tone", keywords: ["background", "desktop", "clock", "color", "tone", "adaptive", "accent", "plain"] },
+        { pageIndex: 3, pageName: "Background", section: "Desktop Clock", label: "Animate time change", targetLabel: "Animate time change", keywords: ["background", "desktop", "clock", "animate", "time"] },
+        { pageIndex: 3, pageName: "Background", section: "Desktop Clock", label: "Clock dim", targetLabel: "Clock dim", keywords: ["background", "desktop", "clock", "dim", "opacity"] },
+        { pageIndex: 3, pageName: "Background", section: "Desktop Clock", label: "Time scale", targetLabel: "Time scale", keywords: ["background", "desktop", "clock", "time", "scale", "size"] },
+        { pageIndex: 3, pageName: "Background", section: "Desktop Clock", label: "Date scale", targetLabel: "Date scale", keywords: ["background", "desktop", "clock", "date", "scale", "size"] },
+        { pageIndex: 3, pageName: "Background", section: "Desktop Clock", label: "Show shadow", targetLabel: "Show shadow", keywords: ["background", "desktop", "clock", "shadow", "contrast"] },
+        { pageIndex: 3, pageName: "Background", section: "Desktop Clock", label: "Show lock status", targetLabel: "Show lock status", keywords: ["background", "desktop", "clock", "lock", "status", "locked"] },
+        { pageIndex: 3, pageName: "Background", section: "Desktop Clock", label: "Clock font", targetLabel: "Clock font", keywords: ["background", "desktop", "clock", "font", "segoe", "inter", "roboto"] },
         { pageIndex: 3, pageName: "Background", section: "Backdrop (Overview)", label: "Enable backdrop", targetLabel: "Enable backdrop", keywords: ["backdrop", "overview", "background"] },
         { pageIndex: 3, pageName: "Background", section: "Backdrop (Overview)", label: "Use separate wallpaper", targetLabel: "Use separate wallpaper", keywords: ["backdrop", "wallpaper", "separate", "different"] },
+        { pageIndex: 3, pageName: "Background", section: "Backdrop (Overview)", label: "Backdrop wallpaper", targetLabel: "Backdrop wallpaper", keywords: ["backdrop", "wallpaper", "change", "overview"] },
+        { pageIndex: 3, pageName: "Background", section: "Backdrop (Overview)", label: "Derive theme colors from backdrop", targetLabel: "Derive theme colors from backdrop", keywords: ["backdrop", "theme", "colors", "wallpaper", "matugen"] },
         { pageIndex: 3, pageName: "Background", section: "Backdrop (Overview)", label: "Hide main wallpaper", targetLabel: "Hide main wallpaper", keywords: ["backdrop", "wallpaper", "hide", "main"] },
         { pageIndex: 3, pageName: "Background", section: "Backdrop (Overview)", label: "Backdrop blur", targetLabel: "Backdrop blur", keywords: ["backdrop", "blur", "radius"] },
         { pageIndex: 3, pageName: "Background", section: "Backdrop (Overview)", label: "Backdrop dim", targetLabel: "Backdrop dim", keywords: ["backdrop", "dim", "dark"] },
         { pageIndex: 3, pageName: "Background", section: "Backdrop (Overview)", label: "Backdrop saturation", targetLabel: "Backdrop saturation", keywords: ["backdrop", "saturation", "color", "vibrant"] },
         { pageIndex: 3, pageName: "Background", section: "Backdrop (Overview)", label: "Backdrop contrast", targetLabel: "Backdrop contrast", keywords: ["backdrop", "contrast"] },
+        { pageIndex: 3, pageName: "Background", section: "Backdrop (Overview)", label: "Enable vignette", targetLabel: "Enable vignette", keywords: ["backdrop", "vignette", "edges", "gradient"] },
+        { pageIndex: 3, pageName: "Background", section: "Backdrop (Overview)", label: "Vignette intensity", targetLabel: "Vignette intensity", keywords: ["backdrop", "vignette", "intensity", "dark"] },
+        { pageIndex: 3, pageName: "Background", section: "Backdrop (Overview)", label: "Vignette radius", targetLabel: "Vignette radius", keywords: ["backdrop", "vignette", "radius", "edges"] },
         
         // === Themes (4) ===
         { pageIndex: 4, pageName: "Themes", section: "Color Theme", label: "Color Theme", targetLabel: "Color Theme", keywords: ["theme", "color", "preset", "gruvbox", "catppuccin", "nord", "dracula", "monokai", "tokyo"] },
@@ -768,25 +796,25 @@ Item {
                         pageStack.visitedPagesChanged()
                     }
                 }
-                
+
                 Component.onCompleted: {
                     visitedPages[root.currentPage] = true
+                    visitedPagesChanged()
                 }
-                
-                // Timer to pre-load pages one by one
+
                 Timer {
                     id: preloadTimer
                     interval: 100
                     repeat: true
-                    property int nextPage: 1  // Start from 1, page 0 is already loaded
-                    
+                    property int nextPage: 1
+
                     onTriggered: {
                         if (nextPage >= root.pages.length) {
                             pageStack.allPagesLoaded = true
                             stop()
                             return
                         }
-                        
+
                         if (!pageStack.visitedPages[nextPage]) {
                             pageStack.visitedPages[nextPage] = true
                             pageStack.visitedPagesChanged()
@@ -796,6 +824,7 @@ Item {
                 }
                 
                 Repeater {
+                    id: pageRepeater
                     model: root.pages.length
                     
                     Loader {
@@ -807,7 +836,7 @@ Item {
                         source: root.pages[index].component
                         visible: index === root.currentPage && status === Loader.Ready
                         opacity: visible ? 1 : 0
-                        
+
                           Behavior on opacity {
                               animation: NumberAnimation { duration: Looks.transition.enabled ? Looks.transition.duration.normal : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.standard }
                           }

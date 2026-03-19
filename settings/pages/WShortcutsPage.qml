@@ -35,7 +35,7 @@ WSettingsPage {
             spacing: 12
             
             FluentIcon {
-                icon: NiriKeybinds.loaded ? "checkmark-circle" : "info"
+                icon: NiriKeybinds.loaded ? "checkmark" : "info"
                 implicitSize: 20
                 color: NiriKeybinds.loaded ? Looks.colors.accent : Looks.colors.subfg
             }
@@ -134,15 +134,15 @@ WSettingsPage {
         const icons = {
             "System": "power",
             "ii Shell": "wand",
-            "Window Switcher": "arrow-swap",
+            "Window Switcher": "arrow-sync",
             "Screenshots": "screenshot",
             "Applications": "apps",
-            "Window Management": "window",
-            "Focus": "target",
-            "Move Windows": "arrow-move",
-            "Workspaces": "grid",
+            "Window Management": "desktop",
+            "Focus": "arrow-enter-left",
+            "Move Windows": "arrow-right",
+            "Workspaces": "apps",
             "Media": "speaker-2-filled",
-            "Brightness": "brightness-high",
+            "Brightness": "weather-sunny",
             "Other": "options"
         }
         return icons[name] ?? "keyboard"

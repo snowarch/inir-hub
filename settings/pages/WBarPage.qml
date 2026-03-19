@@ -85,7 +85,7 @@ WSettingsPage {
 
         WSettingsSpinBox {
             label: Translation.tr("Taskbar icon size")
-            icon: "aspect_ratio"
+            icon: "desktop"
             suffix: "px"
             from: 20; to: 40; stepSize: 1
             value: Config.options?.waffles?.bar?.iconSize ?? 26
