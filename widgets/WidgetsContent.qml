@@ -33,23 +33,16 @@ WBarAttachedPanelContent {
     }
 
     readonly property bool barAtBottom: Config.options?.waffles?.bar?.bottom ?? false
-    readonly property list<string> defaultQuickActionIds: ["files", "terminal", "settings", "wallpaper", "screenshot", "screenRecord", "session"]
     readonly property var quickActionDefinitions: [
-        { id: "files", icon: "folder", label: Translation.tr("Files") },
-        { id: "terminal", icon: "terminal", label: Translation.tr("Terminal") },
-        { id: "settings", icon: "settings", label: Translation.tr("Settings") },
-        { id: "wallpaper", icon: "image", label: Translation.tr("Wallpaper") },
-        { id: "screenshot", icon: "screenshot", label: Translation.tr("Screenshot") },
-        { id: "screenRecord", icon: "record", label: RecorderStatus.isRecording ? Translation.tr("Stop") : Translation.tr("Record") },
-        { id: "session", icon: "power", label: Translation.tr("Session") }
+        { id: "files", icon: "folder", label: Translation.tr("Files"), show: Config.options?.waffles?.widgetsPanel?.showFiles ?? true },
+        { id: "terminal", icon: "terminal", label: Translation.tr("Terminal"), show: Config.options?.waffles?.widgetsPanel?.showTerminal ?? true },
+        { id: "settings", icon: "settings", label: Translation.tr("Settings"), show: Config.options?.waffles?.widgetsPanel?.showSettings ?? true },
+        { id: "wallpaper", icon: "image", label: Translation.tr("Wallpaper"), show: Config.options?.waffles?.widgetsPanel?.showWallpaper ?? true },
+        { id: "screenshot", icon: "screenshot", label: Translation.tr("Screenshot"), show: Config.options?.waffles?.widgetsPanel?.showScreenshot ?? true },
+        { id: "screenRecord", icon: "record", label: RecorderStatus.isRecording ? Translation.tr("Stop") : Translation.tr("Record"), show: Config.options?.waffles?.widgetsPanel?.showScreenRecord ?? true },
+        { id: "session", icon: "power", label: Translation.tr("Session"), show: Config.options?.waffles?.widgetsPanel?.showSession ?? true }
     ]
-    readonly property var configuredQuickActionIds: {
-        const configured = Config.options?.waffles?.widgetsPanel?.quickActions
-        return Array.isArray(configured) ? configured : defaultQuickActionIds
-    }
-    readonly property var enabledQuickActions: configuredQuickActionIds
-        .map(actionId => quickActionDefinitions.find(action => action.id === actionId))
-        .filter(action => !!action)
+    readonly property var enabledQuickActions: quickActionDefinitions.filter(action => action.show)
 
     function runQuickAction(actionId: string): void {
         switch (actionId) {
@@ -621,38 +614,41 @@ WBarAttachedPanelContent {
 
             WPanelSeparator { visible: Config.options?.waffles?.widgetsPanel?.showQuickActions ?? true }
 
-            // Quick actions
-            BodyRectangle {
+            // Quick actions — use Loader to fully unload when disabled
+            Loader {
                 Layout.fillWidth: true
-                implicitHeight: actionsContent.implicitHeight + 36
-                visible: Config.options?.waffles?.widgetsPanel?.showQuickActions ?? true
+                active: Config.options?.waffles?.widgetsPanel?.showQuickActions ?? true
+                visible: active
+                sourceComponent: BodyRectangle {
+                    implicitHeight: actionsContent.implicitHeight + 36
 
-                ColumnLayout {
-                    id: actionsContent
-                    anchors.fill: parent
-                    anchors.margins: 18
-                    spacing: 14
+                    ColumnLayout {
+                        id: actionsContent
+                        anchors.fill: parent
+                        anchors.margins: 18
+                        spacing: 14
 
-                    WText {
-                        text: Translation.tr("Quick Actions")
-                        font.pixelSize: Looks.font.pixelSize.large
-                        font.weight: Font.DemiBold
-                    }
+                        WText {
+                            text: Translation.tr("Quick Actions")
+                            font.pixelSize: Looks.font.pixelSize.large
+                            font.weight: Font.DemiBold
+                        }
 
-                    Grid {
-                        Layout.fillWidth: true
-                        columns: 3
-                        spacing: 10
+                        Grid {
+                            Layout.fillWidth: true
+                            columns: 3
+                            spacing: 10
 
-                        Repeater {
-                            model: root.enabledQuickActions
+                            Repeater {
+                                model: root.enabledQuickActions
 
-                            delegate: QuickActionButton {
-                                required property var modelData
-                                width: (parent.width - 16) / 3
-                                iconName: modelData.icon
-                                label: modelData.label
-                                onClicked: root.runQuickAction(modelData.id)
+                                delegate: QuickActionButton {
+                                    required property var modelData
+                                    width: (parent.width - 16) / 3
+                                    iconName: modelData.icon
+                                    label: modelData.label
+                                    onClicked: root.runQuickAction(modelData.id)
+                                }
                             }
                         }
                     }

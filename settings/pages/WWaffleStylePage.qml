@@ -16,21 +16,6 @@ WSettingsPage {
     pageDescription: Translation.tr("Windows 11 style customization")
     
     property bool isWaffleActive: Config.options?.panelFamily === "waffle"
-    readonly property list<string> defaultQuickActionIds: ["files", "terminal", "settings", "wallpaper", "screenshot", "screenRecord", "session"]
-    readonly property var quickActionOptions: [
-        { value: "files", icon: "folder", label: Translation.tr("Files") },
-        { value: "terminal", icon: "terminal", label: Translation.tr("Terminal") },
-        { value: "settings", icon: "settings", label: Translation.tr("Settings") },
-        { value: "wallpaper", icon: "image", label: Translation.tr("Wallpaper") },
-        { value: "screenshot", icon: "screenshot", label: Translation.tr("Screenshot") },
-        { value: "screenRecord", icon: "record", label: Translation.tr("Screen Record") },
-        { value: "session", icon: "power", label: Translation.tr("Session") }
-    ]
-    readonly property list<string> quickActionIds: {
-        const configured = Config.options?.waffles?.widgetsPanel?.quickActions
-        return Array.isArray(configured) ? configured : defaultQuickActionIds
-    }
-
     // Helper to check if a module is enabled
     function isPanelEnabled(panelId: string): bool {
         return (Config.options?.enabledPanels ?? []).includes(panelId)
@@ -38,17 +23,6 @@ WSettingsPage {
 
     function disabledModuleDescription(moduleName: string): string {
         return moduleName + " " + Translation.tr("is currently disabled in Modules. These settings will apply when you enable it.")
-    }
-
-    function toggleQuickAction(actionId: string): void {
-        const current = Array.isArray(Config.options?.waffles?.widgetsPanel?.quickActions)
-            ? [...(Config.options?.waffles?.widgetsPanel?.quickActions ?? [])]
-            : [...defaultQuickActionIds]
-        const enabled = current.includes(actionId)
-        const next = enabled
-            ? current.filter(id => id !== actionId)
-            : current.concat([actionId])
-        Config.setNestedValue("waffles.widgetsPanel.quickActions", next)
     }
     
     // Warning when not active
@@ -325,7 +299,7 @@ WSettingsPage {
         
         WSettingsSwitch {
             label: Translation.tr("Show date & time")
-            icon: "pulse"
+            icon: "schedule"
             description: Translation.tr("Display date and time widget")
             checked: Config.options?.waffles?.widgetsPanel?.showDateTime ?? true
             onCheckedChanged: Config.setNestedValue("waffles.widgetsPanel.showDateTime", checked)
@@ -371,35 +345,60 @@ WSettingsPage {
             onCheckedChanged: Config.setNestedValue("waffles.widgetsPanel.showQuickActions", checked)
         }
 
-        WSettingsRow {
+        WSettingsSwitch {
             visible: Config.options?.waffles?.widgetsPanel?.showQuickActions ?? true
-            label: Translation.tr("Quick action shortcuts")
-            icon: "flash-on"
-            description: Translation.tr("Choose which shortcuts appear in the Widgets quick actions grid")
+            label: Translation.tr("Files shortcut")
+            icon: "folder"
+            checked: Config.options?.waffles?.widgetsPanel?.showFiles ?? true
+            onCheckedChanged: Config.setNestedValue("waffles.widgetsPanel.showFiles", checked)
         }
 
-        Grid {
+        WSettingsSwitch {
             visible: Config.options?.waffles?.widgetsPanel?.showQuickActions ?? true
-            Layout.fillWidth: true
-            Layout.leftMargin: 16
-            Layout.rightMargin: 16
-            Layout.bottomMargin: 8
-            columns: 2
-            columnSpacing: 6
-            rowSpacing: 6
+            label: Translation.tr("Terminal shortcut")
+            icon: "terminal"
+            checked: Config.options?.waffles?.widgetsPanel?.showTerminal ?? true
+            onCheckedChanged: Config.setNestedValue("waffles.widgetsPanel.showTerminal", checked)
+        }
 
-            Repeater {
-                model: root.quickActionOptions
+        WSettingsSwitch {
+            visible: Config.options?.waffles?.widgetsPanel?.showQuickActions ?? true
+            label: Translation.tr("Settings shortcut")
+            icon: "settings"
+            checked: Config.options?.waffles?.widgetsPanel?.showSettings ?? true
+            onCheckedChanged: Config.setNestedValue("waffles.widgetsPanel.showSettings", checked)
+        }
 
-                delegate: WChoiceButton {
-                    required property var modelData
-                    Layout.fillWidth: false
-                    width: (parent.width - 16 * 2 - 6) / 2
-                    text: modelData.label
-                    checked: root.quickActionIds.includes(modelData.value)
-                    onClicked: root.toggleQuickAction(modelData.value)
-                }
-            }
+        WSettingsSwitch {
+            visible: Config.options?.waffles?.widgetsPanel?.showQuickActions ?? true
+            label: Translation.tr("Wallpaper shortcut")
+            icon: "image"
+            checked: Config.options?.waffles?.widgetsPanel?.showWallpaper ?? true
+            onCheckedChanged: Config.setNestedValue("waffles.widgetsPanel.showWallpaper", checked)
+        }
+
+        WSettingsSwitch {
+            visible: Config.options?.waffles?.widgetsPanel?.showQuickActions ?? true
+            label: Translation.tr("Screenshot shortcut")
+            icon: "screenshot"
+            checked: Config.options?.waffles?.widgetsPanel?.showScreenshot ?? true
+            onCheckedChanged: Config.setNestedValue("waffles.widgetsPanel.showScreenshot", checked)
+        }
+
+        WSettingsSwitch {
+            visible: Config.options?.waffles?.widgetsPanel?.showQuickActions ?? true
+            label: Translation.tr("Screen Record shortcut")
+            icon: "record"
+            checked: Config.options?.waffles?.widgetsPanel?.showScreenRecord ?? true
+            onCheckedChanged: Config.setNestedValue("waffles.widgetsPanel.showScreenRecord", checked)
+        }
+
+        WSettingsSwitch {
+            visible: Config.options?.waffles?.widgetsPanel?.showQuickActions ?? true
+            label: Translation.tr("Session shortcut")
+            icon: "power"
+            checked: Config.options?.waffles?.widgetsPanel?.showSession ?? true
+            onCheckedChanged: Config.setNestedValue("waffles.widgetsPanel.showSession", checked)
         }
     }
     
