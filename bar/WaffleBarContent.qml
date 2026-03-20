@@ -49,7 +49,7 @@ Rectangle {
 
         model: [
             {
-                iconName: "pulse",
+                iconName: "monitoring",
                 text: Translation.tr("Task Manager"),
                 action: () => {
                     Quickshell.execDetached(["/usr/bin/missioncenter"])
