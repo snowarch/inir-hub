@@ -190,6 +190,30 @@ Singleton {
         property color bg2Border: root.useMaterial 
             ? Appearance.colors.colOutlineVariant 
             : ColorUtils.transparentize(root.dark ? root.darkColors.bg2Border : root.lightColors.bg2Border, root.contentTransparency)
+        property color interactiveSurface: root.glassActive
+            ? (Appearance.angelEverywhere ? Appearance.angel.colGlassCard : Appearance.aurora.colSubSurface)
+            : bg1
+        property color interactiveSurfaceHover: root.glassActive
+            ? (Appearance.angelEverywhere ? Appearance.angel.colGlassCardHover : Appearance.aurora.colSubSurfaceHover)
+            : bg2Hover
+        property color interactiveSurfaceActive: root.glassActive
+            ? (Appearance.angelEverywhere ? Appearance.angel.colGlassCardActive : Appearance.aurora.colSubSurfaceActive)
+            : bg2Active
+        property color popupSurface: root.glassActive
+            ? (Appearance.angelEverywhere ? Appearance.angel.colGlassPopup : Appearance.aurora.colPopupSurface)
+            : bg2
+        property color popupSurfaceHover: root.glassActive
+            ? (Appearance.angelEverywhere ? Appearance.angel.colGlassPopupHover : Appearance.aurora.colPopupSurfaceHover)
+            : bg2Hover
+        property color popupSurfaceActive: root.glassActive
+            ? (Appearance.angelEverywhere ? Appearance.angel.colGlassPopupActive : Appearance.aurora.colPopupSurfaceActive)
+            : bg2Active
+        property color tooltipSurface: root.glassActive
+            ? (Appearance.angelEverywhere ? Appearance.angel.colGlassTooltip : Appearance.aurora.colTooltipSurface)
+            : bg2
+        property color tooltipBorder: root.glassActive
+            ? (Appearance.angelEverywhere ? Appearance.angel.colBorderSubtle : Appearance.aurora.colTooltipBorder)
+            : bg2Border
         property color subfg: root.useMaterial 
             ? Appearance.colors.colSubtext 
             : (root.dark ? root.darkColors.subfg : root.lightColors.subfg)
