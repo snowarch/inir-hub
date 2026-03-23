@@ -183,16 +183,32 @@ Item {
         var terms = q.split(/\s+/).filter(t => t.length > 0);
         var results = [];
         
-        // Runtime gate checks — items inside inactive Loaders are excluded from results
+        // Runtime gate checks — items inside conditionally-visible sections
         var clockEnabled = Config.options?.waffles?.background?.widgets?.clock?.enable ?? false
+        var blurEnabled = Config.options?.waffles?.background?.effects?.enableBlur ?? false
+        var backdropEnabled = Config.options?.waffles?.background?.backdrop?.enable ?? true
+        var vignetteEnabled = Config.options?.waffles?.background?.backdrop?.vignetteEnabled ?? false
         
         for (var i = 0; i < searchIndex.length; i++) {
             var entry = searchIndex[i];
             
             // Skip Desktop Clock sub-options when the clock is disabled.
-            // These live inside Loader { active: wClock.enable } in WBackgroundPage,
-            // so the spotlight can't find them when the Loader is inactive.
             if (entry.section === "Desktop Clock" && entry.label !== "Enable clock" && !clockEnabled) {
+                continue;
+            }
+            
+            // Skip "Blur radius" when blur is disabled (it's hidden by visible: in the card).
+            if (entry.section === "Wallpaper Effects" && entry.label === "Blur radius" && !blurEnabled) {
+                continue;
+            }
+            
+            // Skip Backdrop sub-options (anything except "Enable backdrop") when backdrop is disabled.
+            if (entry.section === "Backdrop (Overview)" && entry.label !== "Enable backdrop" && !backdropEnabled) {
+                continue;
+            }
+            
+            // Skip vignette sub-options when vignette is disabled.
+            if (entry.section === "Backdrop (Overview)" && (entry.label === "Vignette intensity" || entry.label === "Vignette radius") && !vignetteEnabled) {
                 continue;
             }
             

@@ -733,6 +733,7 @@ WSettingsPage {
 
         WSettingsCard {
             id: multiMonCard
+            width: parent?.width ?? 0
             title: Translation.tr("Monitor Wallpapers")
             icon: "desktop"
 
@@ -1691,22 +1692,8 @@ WSettingsPage {
         }
     }
 
-    Loader {
-        active: root.deferredDetailCardsReady
-        asynchronous: true
-        Layout.fillWidth: true
-        sourceComponent: deferredDetailCardsComponent
-    }
-
-    Component {
-        id: deferredDetailCardsComponent
-
-        ColumnLayout {
-            Layout.fillWidth: true
-            spacing: 16
-
-            WSettingsCard {
-                title: Translation.tr("Wallpaper Effects")
+    WSettingsCard {
+        title: Translation.tr("Wallpaper Effects")
                 icon: "image"
 
                 WSettingsSwitch {
@@ -1925,6 +1912,4 @@ WSettingsPage {
                     onValueChanged: root.setNestedValueWhenReady("waffles.background.backdrop.vignetteRadius", value / 100.0)
                 }
             }
-        }
-    }
 }
