@@ -116,6 +116,7 @@ BarButton {
                 iconItem: FluentIcon {
                     anchors.verticalCenter: parent.verticalCenter
                     icon: WIcons.internetIcon
+                    filled: true
                 }
             }
 
@@ -132,9 +133,19 @@ BarButton {
             IconHoverArea {
                 id: batteryHoverArea
                 visible: Battery?.available ?? false
-                iconItem: FluentIcon {
+                iconItem: Row {
                     anchors.verticalCenter: parent.verticalCenter
-                    icon: WIcons.batteryIcon
+                    spacing: 2
+                    FluentIcon {
+                        anchors.verticalCenter: parent.verticalCenter
+                        icon: WIcons.batteryIcon
+                    }
+                    WText {
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: `${Math.round((Battery?.percentage ?? 0) * 100)}%`
+                        font.pixelSize: Looks.font.pixelSize.small
+                        color: Looks.colors.fg
+                    }
                 }
             }
         }

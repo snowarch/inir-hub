@@ -244,9 +244,9 @@ Singleton {
         property color link: root.useMaterial 
             ? Appearance.colors.colPrimary 
             : (root.dark ? root.darkColors.link : root.lightColors.link)
-        property color danger: "#C42B1C"
-        property color dangerActive: "#B62D1F"
-        property color warning: "#FF9900"
+        property color danger: Appearance.m3colors.m3error ?? "#C42B1C"
+        property color dangerActive: Qt.darker(danger, 1.1)
+        property color warning: Appearance.m3colors.m3tertiary ?? "#FF9900"
         property color accent: Appearance.colors.colPrimary
         property color accentHover: Appearance.colors.colPrimaryHover
         property color accentActive: Appearance.colors.colPrimaryActive
