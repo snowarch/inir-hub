@@ -78,6 +78,28 @@ WSettingsPage {
             checked: Config.options?.battery?.notifyFull ?? true
             onCheckedChanged: Config.setNestedValue("battery.notifyFull", checked)
         }
+
+        WSettingsSwitch {
+            label: Translation.tr("Charge limit")
+            icon: "battery-saver"
+            description: Battery.chargeLimitSupported
+                ? Translation.tr("Limit maximum charge to preserve battery health")
+                : Translation.tr("Not supported on this device")
+            enabled: Battery.chargeLimitSupported
+            checked: Config.options?.battery?.chargeLimit?.enable ?? false
+            onCheckedChanged: Config.setNestedValue("battery.chargeLimit.enable", checked)
+        }
+
+        WSettingsSpinBox {
+            visible: Battery.chargeLimitSupported
+            enabled: Config.options?.battery?.chargeLimit?.enable ?? false
+            label: Translation.tr("Charge limit threshold")
+            icon: "battery-saver"
+            suffix: "%"
+            from: 20; to: 100; stepSize: 5
+            value: Config.options?.battery?.chargeLimit?.threshold ?? 80
+            onValueChanged: Config.setNestedValue("battery.chargeLimit.threshold", value)
+        }
     }
     
     WSettingsCard {
