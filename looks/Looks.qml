@@ -29,8 +29,11 @@ Singleton {
         const f = Config.options?.waffles?.theming?.font?.family;
         return (f && f.length > 0) ? f : "Noto Sans";
     }
-    // Font scale - reactive property
-    readonly property real fontScale: Config.options?.waffles?.theming?.font?.scale ?? 1.0
+    // Font scale - reactive property.
+    // Combines the waffle-specific font fine-tuner (waffles.theming.font.scale)
+    // with the global UI scale (appearance.typography.sizeScale) so the
+    // "Display scaling" slider in Interface settings also affects waffle fonts.
+    readonly property real fontScale: (Config.options?.waffles?.theming?.font?.scale ?? 1.0) * Appearance.fontSizeScale
 
     readonly property bool transparencyEnabled: Config.options?.appearance?.transparency?.enable ?? false
     property real backgroundTransparency: root.auroraEverywhere ? (Appearance.backgroundTransparency ?? 0) : (transparencyEnabled ? 0.13 : 0)
@@ -58,12 +61,12 @@ Singleton {
     function scaled(value, screen, minimum, maximum) {
         minimum = minimum ?? 0.92
         maximum = maximum ?? 1.08
-        return Math.round(value * root.screenScale(screen, minimum, maximum))
+        return Math.round(value * root.screenScale(screen, minimum, maximum) * Appearance.fontSizeScale)
     }
     function scaledBar(value, screen, minimum, maximum) {
         minimum = minimum ?? 0.9
         maximum = maximum ?? 1.18
-        return Math.round(value * root.barScale(screen, minimum, maximum))
+        return Math.round(value * root.barScale(screen, minimum, maximum) * Appearance.fontSizeScale)
     }
     function applyBackgroundTransparency(col) {
         return ColorUtils.applyAlpha(col, 1 - root.backgroundTransparency)

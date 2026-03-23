@@ -223,6 +223,31 @@ WSettingsPage {
     }
     
     WSettingsCard {
+        title: Translation.tr("Display scaling")
+        icon: "aspect-ratio"
+
+        WSettingsSpinBox {
+            label: Translation.tr("UI scale")
+            icon: "zoom-in"
+            description: Translation.tr("Takes effect immediately")
+            suffix: "%"
+            from: 50; to: 200; stepSize: 5
+            value: Math.round((Config.options?.appearance?.typography?.sizeScale ?? 1.0) * 100)
+            onValueChanged: Config.setNestedValue("appearance.typography.sizeScale", value / 100)
+        }
+
+        WSettingsButton {
+            visible: Math.abs((Config.options?.appearance?.typography?.sizeScale ?? 1.0) - 1.0) > 0.01
+            label: Translation.tr("Reset to 100%")
+            icon: "zoom-out"
+            buttonText: Translation.tr("Reset")
+            onButtonClicked: {
+                Config.setNestedValue("appearance.typography.sizeScale", 1.0)
+            }
+        }
+    }
+
+    WSettingsCard {
         title: Translation.tr("Notifications")
         icon: "alert"
         
