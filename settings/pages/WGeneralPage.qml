@@ -82,16 +82,18 @@ WSettingsPage {
         WSettingsSwitch {
             label: Translation.tr("Charge limit")
             icon: "battery-saver"
-            description: Battery.chargeLimitSupported
-                ? Translation.tr("Limit maximum charge to preserve battery health")
-                : Translation.tr("Not supported on this device")
+            description: !Battery.chargeLimitSupported
+                ? Translation.tr("Not supported on this device")
+                : Battery.chargeLimitAdjustable
+                    ? Translation.tr("Limit maximum charge to preserve battery health")
+                    : Translation.tr("Use your device's built-in battery conservation mode (requires polkit)")
             enabled: Battery.chargeLimitSupported
             checked: Config.options?.battery?.chargeLimit?.enable ?? false
             onCheckedChanged: Config.setNestedValue("battery.chargeLimit.enable", checked)
         }
 
         WSettingsSpinBox {
-            visible: Battery.chargeLimitSupported
+            visible: Battery.chargeLimitAdjustable
             enabled: Config.options?.battery?.chargeLimit?.enable ?? false
             label: Translation.tr("Charge limit threshold")
             icon: "battery-saver"
