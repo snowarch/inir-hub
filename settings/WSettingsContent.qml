@@ -183,8 +183,19 @@ Item {
         var terms = q.split(/\s+/).filter(t => t.length > 0);
         var results = [];
         
+        // Runtime gate checks — items inside inactive Loaders are excluded from results
+        var clockEnabled = Config.options?.waffles?.background?.widgets?.clock?.enable ?? false
+        
         for (var i = 0; i < searchIndex.length; i++) {
             var entry = searchIndex[i];
+            
+            // Skip Desktop Clock sub-options when the clock is disabled.
+            // These live inside Loader { active: wClock.enable } in WBackgroundPage,
+            // so the spotlight can't find them when the Loader is inactive.
+            if (entry.section === "Desktop Clock" && entry.label !== "Enable clock" && !clockEnabled) {
+                continue;
+            }
+            
             var label = (entry.label || "").toLowerCase();
             var section = (entry.section || "").toLowerCase();
             var page = (entry.pageName || "").toLowerCase();

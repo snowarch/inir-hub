@@ -1476,15 +1476,10 @@ WSettingsPage {
             onCheckedChanged: root.setNestedValueWhenReady("waffles.background.widgets.clock.enable", checked)
         }
 
-        Loader {
-            active: root.wClock.enable ?? false
-            asynchronous: true
+        ColumnLayout {
+            visible: root.wClock.enable ?? false
             Layout.fillWidth: true
-
-            sourceComponent: Component {
-                ColumnLayout {
-                    Layout.fillWidth: true
-                    spacing: 0
+            spacing: 0
 
                     WSettingsRow {
                         label: Translation.tr("Placement")
@@ -1693,8 +1688,6 @@ WSettingsPage {
                             }
                         }
                     }
-                }
-            }
         }
     }
 
