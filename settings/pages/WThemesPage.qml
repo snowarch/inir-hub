@@ -537,7 +537,13 @@ WSettingsPage {
             ]
             onSelected: newValue => {
                 Config.setNestedValue("appearance.palette.type", newValue)
-                ShellExec.execCmd(`${Directories.wallpaperSwitchScriptPath} --noswitch --type ${newValue}`)
+                if (ThemeService.isAutoTheme) {
+                    ShellExec.execCmd(`${Directories.wallpaperSwitchScriptPath} --noswitch --type ${newValue}`)
+                } else {
+                    const primary = Appearance.m3colors.m3primary
+                    const hex = "#" + ((1 << 24) | (Math.round(primary.r * 255) << 16) | (Math.round(primary.g * 255) << 8) | Math.round(primary.b * 255)).toString(16).slice(1)
+                    MaterialThemeLoader.applySchemeVariant(hex, newValue)
+                }
             }
         }
     }
