@@ -275,6 +275,7 @@ Singleton {
         property QtObject family: QtObject {
             // Delegates to root.fontFamily for reactive updates
             readonly property string ui: root.fontFamily
+            readonly property string monospace: "JetBrainsMono Nerd Font"
         }
         property QtObject variableAxes: QtObject {
             property var ui: ({
