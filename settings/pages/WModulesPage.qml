@@ -85,19 +85,12 @@ WSettingsPage {
         WSettingsDropdown {
             label: Translation.tr("Terminal emulator")
             icon: "terminal"
-            description: Translation.tr("Used by shell actions, keybinds, and update commands")
-            currentValue: Config.options?.apps?.terminal ?? "kitty"
-            options: [
-                { value: "foot", displayName: "Foot" },
-                { value: "kitty", displayName: "Kitty" },
-                { value: "ghostty", displayName: "Ghostty" },
-                { value: "alacritty", displayName: "Alacritty" },
-                { value: "wezterm", displayName: "WezTerm" },
-                { value: "konsole", displayName: "Konsole" }
-            ]
+            description: Translation.tr("Used by shell actions, keybinds, and package commands")
+            currentValue: AppLauncher.presetIdFor("terminal")
+            options: AppLauncher.presetOptions("terminal")
             onSelected: newValue => {
-                Config.setNestedValue("apps.terminal", newValue)
-                Config.setNestedValue("apps.update", newValue + " -e sudo pacman -Syu")
+                if (newValue !== "__custom__")
+                    AppLauncher.applyPreset("terminal", newValue)
             }
         }
     }

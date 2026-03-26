@@ -43,8 +43,7 @@ AppButton {
             {
                 text: Translation.tr("Task Manager"),
                 action: () => {
-                    const cmd = Config.options?.apps?.taskManager ?? "missioncenter"
-                    ShellExec.execCmd(cmd)
+                    AppLauncher.launch("taskManager")
                 }
             },
             {
