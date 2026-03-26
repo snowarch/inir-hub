@@ -32,7 +32,7 @@ Item {
     Image {
         id: avatarImg
         anchors.fill: parent
-        source: `file://${Directories.userAvatarPathRicersAndWeirdSystems}`
+        source: Directories.userAvatarSourcePrimary
         fillMode: Image.PreserveAspectCrop
         asynchronous: true
         cache: true
@@ -44,10 +44,9 @@ Item {
         
         onStatusChanged: {
             if (status === Image.Error) {
-                if (String(source).indexOf(Directories.userAvatarPathAccountsService) >= 0)
-                    source = `file://${Directories.userAvatarPathRicersAndWeirdSystems2}`
-                else
-                    source = `file://${Directories.userAvatarPathAccountsService}`
+                const nextSource = Directories.nextAvatarSource(source)
+                if (nextSource.length > 0 && nextSource !== source)
+                    source = nextSource
             }
         }
     }
