@@ -292,7 +292,7 @@ Item {
         searchInput.text = "";
     }
     
-    // Timer to wait for page to load before spotlight
+    // Timer to wait for page load before focusing target
     Timer {
         id: spotlightTimer
         interval: 100
@@ -303,18 +303,15 @@ Item {
         
         onTriggered: {
             if (!targetLabel || typeof SettingsSearchRegistry === "undefined") {
-                console.log("[Spotlight] No targetLabel or registry")
                 stop();
                 return;
             }
             
             // Find entry by label in registry
             var entries = SettingsSearchRegistry.entries;
-            console.log("[Spotlight] Looking for:", targetLabel, "in page", root.currentPage, "- entries:", entries.length, "retry:", retries)
             
             for (var i = 0; i < entries.length; i++) {
                 if (entries[i].label === targetLabel && entries[i].pageIndex === root.currentPage) {
-                    console.log("[Spotlight] Found! Focusing option", entries[i].id)
                     SettingsSearchRegistry.focusOption(entries[i].id);
                     retries = 0;
                     stop();
@@ -325,7 +322,6 @@ Item {
             // Retry until found or max retries
             retries++;
             if (retries >= maxRetries) {
-                console.log("[Spotlight] Max retries reached, giving up")
                 retries = 0;
                 stop();
             }
