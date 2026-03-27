@@ -227,6 +227,7 @@ WSettingsPage {
         icon: "aspect-ratio"
 
         WSettingsSpinBox {
+            id: scaleSpinBox
             label: Translation.tr("UI scale")
             icon: "zoom-in"
             description: Translation.tr("Takes effect immediately")
@@ -243,6 +244,7 @@ WSettingsPage {
             buttonText: Translation.tr("Reset")
             onButtonClicked: {
                 Config.setNestedValue("appearance.typography.sizeScale", 1.0)
+                scaleSpinBox.value = 100
             }
         }
     }

@@ -101,12 +101,19 @@ WBarAttachedPanelContent {
     component WidgetsPaneContent: Rectangle {
         id: paneContent
         implicitWidth: 380
-        implicitHeight: Math.max(contentColumn.implicitHeight, 80)
+        implicitHeight: Math.min(Math.max(contentColumn.implicitHeight, 80), root._screenH - 80)
         color: Looks.colors.bgPanelBody
+        clip: true
+
+        Flickable {
+            anchors.fill: parent
+            contentHeight: contentColumn.implicitHeight
+            clip: true
+            boundsBehavior: Flickable.StopAtBounds
 
         ColumnLayout {
             id: contentColumn
-            anchors.fill: parent
+            width: parent.width
             spacing: 0
 
             // Header
@@ -301,7 +308,7 @@ WBarAttachedPanelContent {
                             implicitHeight: 28
                             contentItem: FluentIcon { anchors.centerIn: parent; icon: "open"; implicitSize: 14 }
                             onClicked: {
-                                Quickshell.execDetached(["missioncenter"])
+                                Session.launchTaskManager()
                                 GlobalStates.waffleWidgetsOpen = false
                             }
                         }
@@ -655,12 +662,12 @@ WBarAttachedPanelContent {
                 }
             }
 
-            WPanelSeparator { visible: Config.options?.waffles?.widgetsPanel?.showWallpaper ?? true }
+            WPanelSeparator { visible: Config.options?.waffles?.widgetsPanel?.showColorScheme ?? true }
 
-            // Scheme variant selector — visible when wallpaper quick action is enabled
+            // Scheme variant selector
             Loader {
                 Layout.fillWidth: true
-                active: Config.options?.waffles?.widgetsPanel?.showWallpaper ?? true
+                active: Config.options?.waffles?.widgetsPanel?.showColorScheme ?? true
                 visible: active
                 sourceComponent: BodyRectangle {
                     implicitHeight: schemeContent.implicitHeight + 36
@@ -709,6 +716,7 @@ WBarAttachedPanelContent {
             // Bottom padding
             Item { Layout.fillWidth: true; implicitHeight: 8 }
         }
+        } // Flickable
     }
 
     component QuickActionButton: Rectangle {

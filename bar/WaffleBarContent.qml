@@ -52,7 +52,7 @@ Rectangle {
                 iconName: "monitoring",
                 text: Translation.tr("Task Manager"),
                 action: () => {
-                    Quickshell.execDetached(["/usr/bin/missioncenter"])
+                    Session.launchTaskManager()
                 }
             },
             { type: "separator" },

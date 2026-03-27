@@ -400,6 +400,13 @@ WSettingsPage {
             checked: Config.options?.waffles?.widgetsPanel?.showSession ?? true
             onCheckedChanged: Config.setNestedValue("waffles.widgetsPanel.showSession", checked)
         }
+
+        WSettingsSwitch {
+            label: Translation.tr("Color Scheme selector")
+            icon: "color"
+            checked: Config.options?.waffles?.widgetsPanel?.showColorScheme ?? true
+            onCheckedChanged: Config.setNestedValue("waffles.widgetsPanel.showColorScheme", checked)
+        }
     }
     
     // Weather configuration - shared with ii family
