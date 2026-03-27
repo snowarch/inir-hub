@@ -29,7 +29,7 @@ WBarAttachedPanelContent {
             margins: root.visualMargin
             bottomMargin: 0
         }
-        spacing: 12
+        spacing: Looks.dp(12)
 
         WPane {
             id: mediaPane
@@ -45,7 +45,7 @@ WBarAttachedPanelContent {
         WPane {
             Layout.fillWidth: true
             screenX: root.panelScreenX + root.visualMargin * 2
-            screenY: root.panelScreenY + root.visualMargin * 2 + (mediaPane.visible ? mediaPane.height + 12 : 0)
+            screenY: root.panelScreenY + root.visualMargin * 2 + (mediaPane.visible ? mediaPane.height + Looks.dp(12) : 0)
             screenWidth: root._screenW
             screenHeight: root._screenH
             contentItem: WStackView {

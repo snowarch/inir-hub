@@ -22,13 +22,13 @@ WBarAttachedPanelContent {
 
     contentItem: ColumnLayout {
         id: contentLayout
-        spacing: 12
+        spacing: Looks.dp(12)
 
         // Notification area
         Item {
             id: notificationArea
             Layout.fillWidth: true
-            Layout.preferredHeight: Math.min(560, notificationPane.implicitHeight)
+            Layout.preferredHeight: Math.min(Looks.dp(560), notificationPane.implicitHeight)
             implicitWidth: notificationPane.implicitWidth
 
             WPane {
@@ -49,7 +49,7 @@ WBarAttachedPanelContent {
             id: calendarPane
             Layout.fillWidth: true
             screenX: root.panelScreenX + root.visualMargin
-            screenY: root.panelScreenY + root.visualMargin + notificationArea.height + 12
+            screenY: root.panelScreenY + root.visualMargin + notificationArea.height + Looks.dp(12)
             screenWidth: root._screenW
             screenHeight: root._screenH
             contentItem: WPanelPageColumn {

@@ -14,7 +14,7 @@ Item {
     signal closed
 
     required property Item contentItem
-    property real visualMargin: 12
+    property real visualMargin: Looks.dp(12)
     property int closeAnimDuration: 180
     property bool revealFromSides: false
     property bool revealFromLeft: true
@@ -23,7 +23,7 @@ Item {
     property real openScale: 0.94
     property real closeScale: 0.97
     property int openDuration: Looks.transition.duration.panel
-    property int slideOffset: 20  // Reduced slide distance for subtlety
+    property int slideOffset: Looks.dp(20)  // Reduced slide distance for subtlety
 
     function close() {
         closeAnim.start();

@@ -15,10 +15,10 @@ FooterRectangle {
         visible: Battery.available
         anchors.verticalCenter: parent.verticalCenter
         anchors.left: parent.left
-        anchors.leftMargin: 12
+        anchors.leftMargin: Looks.dp(12)
 
         contentItem: Row {
-            spacing: 4
+            spacing: Looks.dp(4)
 
             FluentIcon {
                 anchors.verticalCenter: parent.verticalCenter
@@ -39,7 +39,7 @@ FooterRectangle {
     WBorderlessButton {
         anchors.verticalCenter: parent.verticalCenter
         anchors.right: parent.right
-        anchors.rightMargin: 12
+        anchors.rightMargin: Looks.dp(12)
 
         onClicked: {
             GlobalStates.waffleActionCenterOpen = false;

@@ -68,6 +68,12 @@ Singleton {
         maximum = maximum ?? 1.18
         return Math.round(value * root.barScale(screen, minimum, maximum) * Appearance.fontSizeScale)
     }
+    // Scale a raw pixel value by the global UI display scale factor.
+    // Use for layout dimensions (margins, spacing, sizes) that should
+    // respond to the user's "UI scale" setting. Reactive in bindings.
+    function dp(value) {
+        return Math.round(value * Appearance.fontSizeScale)
+    }
     function applyBackgroundTransparency(col) {
         return ColorUtils.applyAlpha(col, 1 - root.backgroundTransparency)
     }
@@ -264,10 +270,10 @@ Singleton {
     radius: QtObject {
         id: radius
         property int none: 0
-        property int small: 2
-        property int medium: 4
-        property int large: 8
-        property int xLarge: 12
+        property int small: root.dp(2)
+        property int medium: root.dp(4)
+        property int large: root.dp(8)
+        property int xLarge: root.dp(12)
     }
 
     font: QtObject {
