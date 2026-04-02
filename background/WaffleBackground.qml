@@ -137,7 +137,7 @@ Variants {
             && dynamicParallaxRequested
             && !wallpaperIsGif
             && !wallpaperIsVideo
-            && !(wBg.backdrop?.hideWallpaper ?? false)
+            && !((wBg.backdrop?.enable ?? false) && (wBg.backdrop?.hideWallpaper ?? false))
         readonly property int _wallpaperTransitionDurationMs: {
             const qmlTransitionDuration = (wBg.useMainWallpaper ?? true)
                 ? ((Config.options?.background?.transition?.enable ?? true) ? (Config.options?.background?.transition?.duration ?? 800) : 0)
@@ -342,7 +342,7 @@ Variants {
         }
 
         // Hide wallpaper (show only backdrop for overview)
-        readonly property bool backdropOnly: wBg.backdrop?.hideWallpaper ?? false
+        readonly property bool backdropOnly: (wBg.backdrop?.enable ?? false) && (wBg.backdrop?.hideWallpaper ?? false)
 
         visible: !backdropOnly && (GlobalStates.screenLocked || !hasFullscreenWindow || !(wBg.hideWhenFullscreen ?? true))
 
