@@ -20,8 +20,11 @@ Scope {
                 required property var modelData
                 screen: modelData
                 exclusionMode: ExclusionMode.Ignore
-                exclusiveZone: implicitHeight
+                exclusiveZone: GameMode.active ? 0 : implicitHeight
                 WlrLayershell.namespace: "quickshell:bar"
+                mask: Region {
+                    item: GameMode.active ? null : content
+                }
 
                 anchors {
                     left: true
