@@ -82,7 +82,7 @@ Scope {
 
             mask: Region {
                 item: GlobalStates.overlayOpen ? overlayContent : null
-                regions: OverlayContext.clickableWidgets.map((widget) => regionComponent.createObject(this, {
+                regions: GameMode.active ? [] : OverlayContext.clickableWidgets.map((widget) => regionComponent.createObject(this, {
                     item: widget
                 }));
             }
