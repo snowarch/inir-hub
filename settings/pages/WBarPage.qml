@@ -146,6 +146,14 @@ WSettingsPage {
             checked: Config.options?.waffles?.bar?.notifications?.showUnreadCount ?? true
             onCheckedChanged: Config.setNestedValue("waffles.bar.notifications.showUnreadCount", checked)
         }
+
+        WSettingsSwitch {
+            label: Translation.tr("Activation watermark")
+            icon: "key"
+            description: Translation.tr("Show a fake activation message on the taskbar")
+            checked: Config.options?.waffles?.bar?.activationWatermark?.enable ?? false
+            onCheckedChanged: Config.setNestedValue("waffles.bar.activationWatermark.enable", checked)
+        }
     }
     
     WSettingsCard {

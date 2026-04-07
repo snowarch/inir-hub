@@ -538,6 +538,14 @@ WSettingsPage {
             onCheckedChanged: Config.setNestedValue("waffles.bar.monochromeIcons", checked)
         }
 
+        WSettingsSwitch {
+            label: Translation.tr("Activation watermark")
+            icon: "key"
+            description: Translation.tr("Show a fake activation message on the taskbar")
+            checked: Config.options?.waffles?.bar?.activationWatermark?.enable ?? false
+            onCheckedChanged: Config.setNestedValue("waffles.bar.activationWatermark.enable", checked)
+        }
+
         WSettingsSpinBox {
             label: Translation.tr("Taskbar icon size")
             icon: "desktop"

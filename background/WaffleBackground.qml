@@ -28,6 +28,11 @@ Variants {
         readonly property var wEffects: wBg.effects ?? {}
         readonly property var wClock: wBg.widgets?.clock ?? {}
         readonly property var wParallax: wBg.parallax ?? {}
+        readonly property bool activationWatermarkEnabled: Config.options?.waffles?.bar?.activationWatermark?.enable ?? false
+        readonly property bool barAtBottom: Config.options?.waffles?.bar?.bottom ?? true
+        readonly property real activationWatermarkBottomMargin: panelRoot.barAtBottom
+            ? (Looks.scaledBar(48, panelRoot.screen) + Looks.dp(8))
+            : Looks.dp(14)
 
         // Multi-monitor wallpaper support
         readonly property bool _multiMonEnabled: WallpaperListener.multiMonitorEnabled
@@ -113,13 +118,26 @@ Variants {
 
         // Wallpaper scaling — decode at correct resolution for quality parity with ii/material.
         // Uses magick identify to detect actual image size, same approach as Background.qml.
-        readonly property real _preferredScale: ParallaxMath.resolveZoom(wParallax, 1.05)
-        property real _effectiveWallpaperScale: _preferredScale
+        readonly property real _preferredScale: ParallaxMath.resolveZoom(wParallax, 1.0)
+        property real _manualWallpaperScaleOverride: 0
         property int _wallpaperWidth: panelRoot.screen.width
         property int _wallpaperHeight: panelRoot.screen.height
-        readonly property real wallpaperToScreenRatio: Math.min(_wallpaperWidth / screen.width, _wallpaperHeight / screen.height)
-        readonly property real movableXSpace: ((_wallpaperWidth / wallpaperToScreenRatio * _effectiveWallpaperScale) - screen.width) / 2
-        readonly property real movableYSpace: ((_wallpaperHeight / wallpaperToScreenRatio * _effectiveWallpaperScale) - screen.height) / 2
+        readonly property real _baseWallpaperScale: ParallaxMath.effectiveScale(
+            _wallpaperWidth,
+            _wallpaperHeight,
+            screen.width,
+            screen.height,
+            _preferredScale
+        )
+        readonly property real _effectiveWallpaperScale: {
+            const overrideScale = Number(panelRoot._manualWallpaperScaleOverride)
+            const baseScale = Number.isFinite(overrideScale) && overrideScale > 0 ? overrideScale : panelRoot._baseWallpaperScale
+            return panelRoot.effectiveHasPan ? baseScale * panelRoot.panZoom : baseScale
+        }
+        readonly property real _scaledWallpaperWidth: panelRoot._wallpaperWidth * panelRoot._effectiveWallpaperScale
+        readonly property real _scaledWallpaperHeight: panelRoot._wallpaperHeight * panelRoot._effectiveWallpaperScale
+        readonly property real _parallaxTotalX: ParallaxMath.parallaxTotalPixels(panelRoot._scaledWallpaperWidth, panelRoot.screen.width)
+        readonly property real _parallaxTotalY: ParallaxMath.parallaxTotalPixels(panelRoot._scaledWallpaperHeight, panelRoot.screen.height)
         readonly property var _panOptions: Config.options?.background?.pan ?? {}
         readonly property real panX: _panOptions.x ?? 0.0
         readonly property real panY: _panOptions.y ?? 0.0
@@ -139,23 +157,72 @@ Variants {
             && !wallpaperIsVideo
             && !((wBg.backdrop?.enable ?? false) && (wBg.backdrop?.hideWallpaper ?? false))
         readonly property int _wallpaperTransitionDurationMs: {
+            const sharedTransitionBaseDuration = Config.options?.background?.transition?.duration ?? 800
+            const sharedTransitionDuration = Appearance.calcEffectiveDuration(sharedTransitionBaseDuration)
+            const waffleTransitionBaseDuration = wBg.transition?.duration ?? 800
+            const waffleTransitionDuration = Looks.transition.enabled ? waffleTransitionBaseDuration : 0
             const qmlTransitionDuration = (wBg.useMainWallpaper ?? true)
-                ? ((Config.options?.background?.transition?.enable ?? true) ? (Config.options?.background?.transition?.duration ?? 800) : 0)
-                : ((wBg.transition?.enable ?? true) ? (wBg.transition?.duration ?? 800) : 0)
+                ? ((Config.options?.background?.transition?.enable ?? true) ? sharedTransitionDuration : 0)
+                : ((wBg.transition?.enable ?? true) ? waffleTransitionDuration : 0)
             const awwwTransitionDuration = AwwwBackend.active ? AwwwBackend.transitionDurationMs : 0
             return Math.max(qmlTransitionDuration, awwwTransitionDuration)
         }
         property bool parallaxTransitionActive: false
         property real parallaxResumeProgress: 1
+        property real parallaxFreezeValueX: 0.5
+        property real parallaxFreezeValueY: 0.5
+        property bool _parallaxWaitingCrossfader: false
+        property string _parallaxTransitionReason: ""
         property string _pendingWallpaperMetricsPath: ""
         property string _activeWallpaperMetricsPath: ""
+
+        function beginParallaxTransition(waitForCrossfader: bool, reason: string): void {
+            if (!dynamicParallaxRequested || !pauseParallaxDuringTransitions)
+                return
+
+            if (waitForCrossfader && parallaxTransitionActive && _parallaxWaitingCrossfader)
+                return
+
+            const currentX = Number(wallpaperContainer ? wallpaperContainer.activeValueX : 0.5)
+            const currentY = Number(wallpaperContainer ? wallpaperContainer.activeValueY : 0.5)
+            parallaxFreezeValueX = Number.isFinite(currentX) ? currentX : 0.5
+            parallaxFreezeValueY = Number.isFinite(currentY) ? currentY : 0.5
+            parallaxTransitionActive = true
+            parallaxResumeProgress = 0
+            _parallaxWaitingCrossfader = waitForCrossfader
+            _parallaxTransitionReason = String(reason ?? "")
+            parallaxResumeAnimation.stop()
+            parallaxTransitionPauseTimer.stop()
+
+            if (!waitForCrossfader) {
+                parallaxTransitionPauseTimer.interval = panelRoot._wallpaperTransitionDurationMs + panelRoot.parallaxTransitionSettleMs
+                parallaxTransitionPauseTimer.restart()
+            }
+        }
+
+        function settleParallaxAfterTransition(): void {
+            if (!parallaxTransitionActive)
+                return
+            _parallaxWaitingCrossfader = false
+            parallaxTransitionPauseTimer.interval = panelRoot.parallaxTransitionSettleMs
+            parallaxTransitionPauseTimer.restart()
+        }
 
         function pauseParallaxForWallpaperTransition(): void {
             if (!dynamicParallaxRequested || !pauseParallaxDuringTransitions)
                 return
-            parallaxTransitionActive = true
-            parallaxResumeProgress = 0
-            parallaxTransitionPauseTimer.restart()
+            if (panelRoot.wallpaperIsGif || panelRoot.wallpaperIsVideo)
+                return
+
+            const crossfaderTransitionsEnabled = !AwwwBackend.active
+                && ((wBg.useMainWallpaper ?? true)
+                    ? (Config.options?.background?.transition?.enable ?? true)
+                    : (wBg.transition?.enable ?? true))
+
+            if (!crossfaderTransitionsEnabled && panelRoot._wallpaperTransitionDurationMs <= 0)
+                return
+
+            panelRoot.beginParallaxTransition(crossfaderTransitionsEnabled, "wallpaper")
         }
 
         function queueWallpaperMetricsUpdate(path: string): void {
@@ -201,7 +268,7 @@ Variants {
             if (panelRoot._awwwParallaxRevealNeeded) {
                 panelRoot._awwwRevealOpacity = 0
                 _awwwRevealAnimation.restart()
-                panelRoot._effectiveWallpaperScale = panelRoot._preferredScale
+                panelRoot._manualWallpaperScaleOverride = panelRoot._baseWallpaperScale
             }
             // Suppress blur during transition so the wallpaper change is visible
             if (panelRoot.blurProgress > 0)
@@ -210,7 +277,7 @@ Variants {
 
         on_PreferredScaleChanged: {
             if (panelRoot._awwwParallaxRevealNeeded)
-                panelRoot._effectiveWallpaperScale = panelRoot._preferredScale
+                panelRoot._manualWallpaperScaleOverride = panelRoot._baseWallpaperScale
         }
 
         onPanZoomChanged: {
@@ -242,8 +309,26 @@ Variants {
             interval: panelRoot._wallpaperTransitionDurationMs + panelRoot.parallaxTransitionSettleMs
             repeat: false
             onTriggered: {
+                panelRoot._parallaxWaitingCrossfader = false
+                panelRoot._parallaxTransitionReason = ""
                 panelRoot.parallaxTransitionActive = false
                 parallaxResumeAnimation.restart()
+            }
+        }
+
+        Connections {
+            target: GlobalStates
+            function onFamilyTransitionActiveChanged() {
+                if (!panelRoot.dynamicParallaxRequested || !panelRoot.pauseParallaxDuringTransitions)
+                    return
+
+                if (GlobalStates.familyTransitionActive) {
+                    panelRoot.beginParallaxTransition(true, "family")
+                    return
+                }
+
+                if (panelRoot._parallaxWaitingCrossfader && panelRoot._parallaxTransitionReason === "family")
+                    panelRoot.settleParallaxAfterTransition()
             }
         }
 
@@ -311,6 +396,7 @@ Variants {
                     const sw = panelRoot.screen?.width ?? 0
                     const sh = panelRoot.screen?.height ?? 0
                     if (!Number.isFinite(w) || !Number.isFinite(h) || w <= 0 || h <= 0 || sw <= 0 || sh <= 0) {
+                        panelRoot._manualWallpaperScaleOverride = 0
                         panelRoot.finishWallpaperMetricsRequest()
                         return
                     }
@@ -320,15 +406,7 @@ Variants {
                     }
                     panelRoot._wallpaperWidth = Math.round(w)
                     panelRoot._wallpaperHeight = Math.round(h)
-                    if (panelRoot._awwwParallaxRevealNeeded) {
-                        panelRoot._effectiveWallpaperScale = panelRoot._preferredScale
-                    } else if (w <= sw || h <= sh) {
-                        const baseScale = Math.max(sw / w, sh / h)
-                        panelRoot._effectiveWallpaperScale = panelRoot.effectiveHasPan ? baseScale * panelRoot.panZoom : baseScale
-                    } else {
-                        const baseScale = Math.min(panelRoot._preferredScale, w / sw, h / sh)
-                        panelRoot._effectiveWallpaperScale = panelRoot.effectiveHasPan ? baseScale * panelRoot.panZoom : baseScale
-                    }
+                    panelRoot._manualWallpaperScaleOverride = 0
                     panelRoot.finishWallpaperMetricsRequest()
                 }
             }
@@ -395,7 +473,6 @@ Variants {
 
         Item {
             anchors.fill: parent
-            clip: true
 
             Item {
                 id: wallpaperContainer
@@ -428,44 +505,62 @@ Variants {
                 readonly property real effectiveValueX: Math.max(0, Math.min(1, valueX))
                 readonly property real effectiveValueY: Math.max(0, Math.min(1, valueY))
                 readonly property real activeValueX: panelRoot.parallaxTransitionActive
-                    ? 0.5
-                    : (0.5 + ((effectiveValueX - 0.5) * panelRoot.parallaxResumeProgress))
+                    ? panelRoot.parallaxFreezeValueX
+                    : (panelRoot.parallaxFreezeValueX + ((effectiveValueX - panelRoot.parallaxFreezeValueX) * panelRoot.parallaxResumeProgress))
                 readonly property real activeValueY: panelRoot.parallaxTransitionActive
-                    ? 0.5
-                    : (0.5 + ((effectiveValueY - 0.5) * panelRoot.parallaxResumeProgress))
+                    ? panelRoot.parallaxFreezeValueY
+                    : (panelRoot.parallaxFreezeValueY + ((effectiveValueY - panelRoot.parallaxFreezeValueY) * panelRoot.parallaxResumeProgress))
                 readonly property bool useParallax: panelRoot.fillMode === "fill"
                     && !panelRoot.wallpaperIsGif
                     && !panelRoot.wallpaperIsVideo
                     && !panelRoot.externalMainWallpaperActive
-                readonly property real panOffsetX: panelRoot.effectiveHasPan ? (panelRoot.panX * Math.max(0, panelRoot.movableXSpace)) : 0
-                readonly property real panOffsetY: panelRoot.effectiveHasPan ? (panelRoot.panY * Math.max(0, panelRoot.movableYSpace)) : 0
+                readonly property real panOffsetX: panelRoot.effectiveHasPan ? (panelRoot.panX * (panelRoot._parallaxTotalX / 2)) : 0
+                readonly property real panOffsetY: panelRoot.effectiveHasPan ? (panelRoot.panY * (panelRoot._parallaxTotalY / 2)) : 0
                 readonly property real targetX: useParallax
-                    ? (-(panelRoot.movableXSpace) - (activeValueX - 0.5) * 2 * panelRoot.movableXSpace + panOffsetX)
+                    ? (panelRoot._parallaxTotalX > 0
+                        ? (ParallaxMath.parallaxPosition(panelRoot._parallaxTotalX, activeValueX) + panOffsetX)
+                        : ParallaxMath.centerOffset(panelRoot._scaledWallpaperWidth, panelRoot.screen.width))
                     : panOffsetX
                 readonly property real targetY: useParallax
-                    ? (-(panelRoot.movableYSpace) - (activeValueY - 0.5) * 2 * panelRoot.movableYSpace + panOffsetY)
+                    ? (panelRoot._parallaxTotalY > 0
+                        ? (ParallaxMath.parallaxPosition(panelRoot._parallaxTotalY, activeValueY) + panOffsetY)
+                        : ParallaxMath.centerOffset(panelRoot._scaledWallpaperHeight, panelRoot.screen.height))
                     : panOffsetY
-                readonly property real targetWidth: (useParallax || panelRoot.effectiveHasPan) ? (panelRoot._wallpaperWidth / panelRoot.wallpaperToScreenRatio * panelRoot._effectiveWallpaperScale) : panelRoot.screen.width
-                readonly property real targetHeight: (useParallax || panelRoot.effectiveHasPan) ? (panelRoot._wallpaperHeight / panelRoot.wallpaperToScreenRatio * panelRoot._effectiveWallpaperScale) : panelRoot.screen.height
+                readonly property real targetWidth: (useParallax || panelRoot.effectiveHasPan) ? panelRoot._scaledWallpaperWidth : panelRoot.screen.width
+                readonly property real targetHeight: (useParallax || panelRoot.effectiveHasPan) ? panelRoot._scaledWallpaperHeight : panelRoot.screen.height
                 x: targetX
                 y: targetY
                 width: targetWidth
                 height: targetHeight
 
                 Behavior on x {
-                    enabled: Looks.transition.enabled && (wallpaperContainer.useParallax || panelRoot.effectiveHasPan) && !panelRoot.parallaxTransitionActive && panelRoot.parallaxResumeProgress >= 1
+                    enabled: Looks.transition.enabled
+                        && (wallpaperContainer.useParallax || panelRoot.effectiveHasPan)
+                        && ((!panelRoot.parallaxTransitionActive && panelRoot.parallaxResumeProgress >= 1)
+                            || panelRoot._parallaxWaitingCrossfader)
                     animation: NumberAnimation { duration: panelRoot._wallpaperTransitionDurationMs; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.standard }
                 }
                 Behavior on y {
-                    enabled: Looks.transition.enabled && (wallpaperContainer.useParallax || panelRoot.effectiveHasPan) && !panelRoot.parallaxTransitionActive && panelRoot.parallaxResumeProgress >= 1
+                    enabled: Looks.transition.enabled
+                        && (wallpaperContainer.useParallax || panelRoot.effectiveHasPan)
+                        && ((!panelRoot.parallaxTransitionActive && panelRoot.parallaxResumeProgress >= 1)
+                            || panelRoot._parallaxWaitingCrossfader)
                     animation: NumberAnimation { duration: panelRoot._wallpaperTransitionDurationMs; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.standard }
                 }
                 Behavior on width {
-                    enabled: Looks.transition.enabled && (wallpaperContainer.useParallax || panelRoot.effectiveHasPan) && panelRoot._awwwRevealOpacity >= 1 && !panelRoot.parallaxTransitionActive && panelRoot.parallaxResumeProgress >= 1
+                    enabled: Looks.transition.enabled
+                        && (wallpaperContainer.useParallax || panelRoot.effectiveHasPan)
+                        && panelRoot._awwwRevealOpacity >= 1
+                        && ((!panelRoot.parallaxTransitionActive && panelRoot.parallaxResumeProgress >= 1)
+                            || panelRoot._parallaxWaitingCrossfader)
                     animation: NumberAnimation { duration: panelRoot._wallpaperTransitionDurationMs; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.standard }
                 }
                 Behavior on height {
-                    enabled: Looks.transition.enabled && (wallpaperContainer.useParallax || panelRoot.effectiveHasPan) && panelRoot._awwwRevealOpacity >= 1 && !panelRoot.parallaxTransitionActive && panelRoot.parallaxResumeProgress >= 1
+                    enabled: Looks.transition.enabled
+                        && (wallpaperContainer.useParallax || panelRoot.effectiveHasPan)
+                        && panelRoot._awwwRevealOpacity >= 1
+                        && ((!panelRoot.parallaxTransitionActive && panelRoot.parallaxResumeProgress >= 1)
+                            || panelRoot._parallaxWaitingCrossfader)
                     animation: NumberAnimation { duration: panelRoot._wallpaperTransitionDurationMs; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.standard }
                 }
 
@@ -494,8 +589,19 @@ Variants {
                     opacity: panelRoot.showInternalStaticWallpaper ? panelRoot._awwwRevealOpacity : 0
                     layer.enabled: !panelRoot.showInternalStaticWallpaper
                     sourceSize {
-                        width: Math.round(panelRoot.screen.width * ((wallpaperContainer.useParallax || panelRoot.effectiveHasPan) ? panelRoot._effectiveWallpaperScale : 1))
-                        height: Math.round(panelRoot.screen.height * ((wallpaperContainer.useParallax || panelRoot.effectiveHasPan) ? panelRoot._effectiveWallpaperScale : 1))
+                        width: Math.round((wallpaperContainer.useParallax || panelRoot.effectiveHasPan) ? panelRoot._scaledWallpaperWidth : panelRoot.screen.width)
+                        height: Math.round((wallpaperContainer.useParallax || panelRoot.effectiveHasPan) ? panelRoot._scaledWallpaperHeight : panelRoot.screen.height)
+                    }
+
+                    onTransitionStarted: {
+                        if (!panelRoot.dynamicParallaxRequested || !panelRoot.pauseParallaxDuringTransitions || AwwwBackend.active)
+                            return
+                        panelRoot.beginParallaxTransition(true, "wallpaper")
+                    }
+
+                    onTransitionFinished: {
+                        if (panelRoot._parallaxWaitingCrossfader && panelRoot._parallaxTransitionReason === "wallpaper")
+                            panelRoot.settleParallaxAfterTransition()
                     }
                 }
 
@@ -615,14 +721,18 @@ Variants {
                     top: useParallax ? wallpaperContainer.top : parent.top
                     bottom: useParallax ? wallpaperContainer.bottom : parent.bottom
                     readonly property real parallaxFactor: panelRoot.parallaxWidgetDepth
-                    leftMargin: useParallax ? (panelRoot.movableXSpace - (wallpaperContainer.activeValueX * 2 * panelRoot.movableXSpace) * (parallaxFactor - 1)) : 0
-                    topMargin: useParallax ? (panelRoot.movableYSpace - (wallpaperContainer.activeValueY * 2 * panelRoot.movableYSpace) * (parallaxFactor - 1)) : 0
+                    leftMargin: useParallax ? (panelRoot._parallaxTotalX * wallpaperContainer.activeValueX * (1 - parallaxFactor)) : 0
+                    topMargin: useParallax ? (panelRoot._parallaxTotalY * wallpaperContainer.activeValueY * (1 - parallaxFactor)) : 0
                     Behavior on leftMargin {
-                        enabled: Looks.transition.enabled && !panelRoot.parallaxTransitionActive && panelRoot.parallaxResumeProgress >= 1
+                        enabled: Looks.transition.enabled
+                            && ((!panelRoot.parallaxTransitionActive && panelRoot.parallaxResumeProgress >= 1)
+                                || panelRoot._parallaxWaitingCrossfader)
                         animation: NumberAnimation { duration: Looks.transition.enabled ? Looks.transition.duration.normal : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.standard }
                     }
                     Behavior on topMargin {
-                        enabled: Looks.transition.enabled && !panelRoot.parallaxTransitionActive && panelRoot.parallaxResumeProgress >= 1
+                        enabled: Looks.transition.enabled
+                            && ((!panelRoot.parallaxTransitionActive && panelRoot.parallaxResumeProgress >= 1)
+                                || panelRoot._parallaxWaitingCrossfader)
                         animation: NumberAnimation { duration: Looks.transition.enabled ? Looks.transition.duration.normal : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.standard }
                     }
                 }
@@ -631,14 +741,47 @@ Variants {
                 enabled: !GlobalStates.overviewOpen
 
                 WaffleBackgroundClock {
+                    id: backgroundClockWidget
                     screenWidth: panelRoot.screen.width
                     screenHeight: panelRoot.screen.height
-                    scaledScreenWidth: panelRoot.screen.width / panelRoot._effectiveWallpaperScale
-                    scaledScreenHeight: panelRoot.screen.height / panelRoot._effectiveWallpaperScale
-                    wallpaperScale: panelRoot._effectiveWallpaperScale
+                    scaledScreenWidth: panelRoot.screen.width
+                    scaledScreenHeight: panelRoot.screen.height
+                    wallpaperScale: 1
                     wallpaperPath: panelRoot.wallpaperIsVideo
                         ? (panelRoot.wallpaperThumbnail || panelRoot.wallpaperSourceRaw)
                         : panelRoot.wallpaperSourceRaw
+                }
+            }
+
+            // Windows-style activation watermark
+            Column {
+                id: activationWatermark
+                visible: panelRoot.activationWatermarkEnabled && !GlobalStates.screenLocked && !GlobalStates.overviewOpen
+                z: 20
+                spacing: 0
+                anchors {
+                    right: parent.right
+                    bottom: parent.bottom
+                    rightMargin: Looks.dp(16)
+                    bottomMargin: panelRoot.activationWatermarkBottomMargin
+                }
+
+                Text {
+                    text: "Activate Waffle"
+                    font.pixelSize: Math.round(22 * Looks.fontScale)
+                    font.family: "Segoe UI"
+                    font.weight: Font.Light
+                    color: Qt.rgba(1, 1, 1, 0.6)
+                    anchors.right: parent.right
+                }
+
+                Text {
+                    text: "Go to Settings to activate Waffle."
+                    font.pixelSize: Math.round(14 * Looks.fontScale)
+                    font.family: "Segoe UI"
+                    font.weight: Font.Light
+                    color: Qt.rgba(1, 1, 1, 0.5)
+                    anchors.right: parent.right
                 }
             }
         }

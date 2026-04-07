@@ -61,6 +61,7 @@ Item {
         { pageIndex: 2, pageName: "Taskbar", section: "Desktop Peek", label: "Hover delay", targetLabel: "Hover delay", keywords: ["desktop", "peek", "delay", "timeout"] },
         { pageIndex: 2, pageName: "Taskbar", section: "Clock & Notifications", label: "Show seconds", targetLabel: "Show seconds", keywords: ["clock", "seconds", "time", "taskbar"] },
         { pageIndex: 2, pageName: "Taskbar", section: "Clock & Notifications", label: "Show unread count", targetLabel: "Show unread count", keywords: ["notification", "badge", "count", "unread", "clock"] },
+        { pageIndex: 2, pageName: "Taskbar", section: "Clock & Notifications", label: "Activation watermark", targetLabel: "Activation watermark", keywords: ["taskbar", "activation", "watermark", "activate", "windows"] },
         
         // === Background (3) ===
         { pageIndex: 3, pageName: "Background", section: "Wallpaper", label: "Use Material ii wallpaper", targetLabel: "Use Material ii wallpaper", keywords: ["wallpaper", "background", "material", "share", "image"] },
