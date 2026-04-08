@@ -19,6 +19,9 @@ Variants {
     id: root
     model: Quickshell.screens
 
+    // Shared cache for magick identify results across all monitor instances.
+    property var _wallpaperSizeCache: ({})
+
     PanelWindow {
         id: panelRoot
         required property var modelData
@@ -420,6 +423,16 @@ Variants {
                 const path = panelRoot.wallpaperSourceRaw
                 if (!path || path.length === 0) return
                 if (panelRoot.wallpaperIsVideo) return
+
+                // Check shared cache before spawning a subprocess
+                const cached = root._wallpaperSizeCache[path]
+                if (cached) {
+                    panelRoot._wallpaperWidth = cached.width
+                    panelRoot._wallpaperHeight = cached.height
+                    panelRoot._manualWallpaperScaleOverride = 0
+                    return
+                }
+
                 panelRoot.queueWallpaperMetricsUpdate(path)
             }
         }
@@ -450,6 +463,12 @@ Variants {
                     panelRoot._wallpaperWidth = Math.round(w)
                     panelRoot._wallpaperHeight = Math.round(h)
                     panelRoot._manualWallpaperScaleOverride = 0
+
+                    // Cache the result so subsequent switches skip magick identify
+                    const cache = Object.assign({}, root._wallpaperSizeCache)
+                    cache[requestPath] = { width: Math.round(w), height: Math.round(h) }
+                    root._wallpaperSizeCache = cache
+
                     panelRoot.finishWallpaperMetricsRequest()
                 }
             }
@@ -465,7 +484,7 @@ Variants {
         // Hide wallpaper (show only backdrop for overview)
         readonly property bool backdropOnly: (wBg.backdrop?.enable ?? false) && (wBg.backdrop?.hideWallpaper ?? false)
 
-        visible: !backdropOnly && (GlobalStates.screenLocked || !hasFullscreenWindow || !(wBg.hideWhenFullscreen ?? true))
+        visible: !GameMode.shouldHidePanels && !backdropOnly && (GlobalStates.screenLocked || !hasFullscreenWindow || !(wBg.hideWhenFullscreen ?? true))
 
         // Dynamic focus based on windows
         property bool hasWindowsOnCurrentWorkspace: {
@@ -593,29 +612,32 @@ Variants {
                         && (wallpaperContainer.useParallax || panelRoot.effectiveHasPan)
                         && ((!panelRoot.parallaxTransitionActive && panelRoot.parallaxResumeProgress >= 1)
                             || panelRoot._parallaxWaitingCrossfader)
-                    animation: NumberAnimation { duration: panelRoot._wallpaperTransitionDurationMs; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.standard }
+                    animation: NumberAnimation { duration: Looks.transition.enabled ? Looks.transition.duration.normal : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.standard }
                 }
                 Behavior on y {
                     enabled: Looks.transition.enabled
                         && (wallpaperContainer.useParallax || panelRoot.effectiveHasPan)
                         && ((!panelRoot.parallaxTransitionActive && panelRoot.parallaxResumeProgress >= 1)
                             || panelRoot._parallaxWaitingCrossfader)
-                    animation: NumberAnimation { duration: panelRoot._wallpaperTransitionDurationMs; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.standard }
+                    animation: NumberAnimation { duration: Looks.transition.enabled ? Looks.transition.duration.normal : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.standard }
                 }
+                // Container resize is NOT animated during crossfader transitions.
+                // The crossfader handles its own transition visually; animating the
+                // container size simultaneously causes double-image artifacts.
                 Behavior on width {
                     enabled: Looks.transition.enabled
                         && (wallpaperContainer.useParallax || panelRoot.effectiveHasPan)
                         && panelRoot._awwwRevealOpacity >= 1
-                        && ((!panelRoot.parallaxTransitionActive && panelRoot.parallaxResumeProgress >= 1)
-                            || panelRoot._parallaxWaitingCrossfader)
+                        && !panelRoot.parallaxTransitionActive
+                        && panelRoot.parallaxResumeProgress >= 1
                     animation: NumberAnimation { duration: panelRoot._wallpaperTransitionDurationMs; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.standard }
                 }
                 Behavior on height {
                     enabled: Looks.transition.enabled
                         && (wallpaperContainer.useParallax || panelRoot.effectiveHasPan)
                         && panelRoot._awwwRevealOpacity >= 1
-                        && ((!panelRoot.parallaxTransitionActive && panelRoot.parallaxResumeProgress >= 1)
-                            || panelRoot._parallaxWaitingCrossfader)
+                        && !panelRoot.parallaxTransitionActive
+                        && panelRoot.parallaxResumeProgress >= 1
                     animation: NumberAnimation { duration: panelRoot._wallpaperTransitionDurationMs; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.standard }
                 }
 
