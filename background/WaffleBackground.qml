@@ -117,7 +117,19 @@ Variants {
         WlrLayershell.layer: WlrLayer.Bottom
         WlrLayershell.namespace: "quickshell:wBackground"
         anchors { top: true; bottom: true; left: true; right: true }
-        color: "transparent"
+        // When QML renders internally with a fillMode that doesn't cover the full
+        // surface (fit/center/tile), use a solid black backing so awww's wallpaper
+        // at the Background layer below doesn't bleed through transparent areas
+        // (letterbox bars with PreserveAspectFit, empty space with Pad/center, etc.).
+        // "fill" (PreserveAspectCrop) always covers the entire surface, so we stay
+        // transparent to allow awww parallax reveal to show through during transitions.
+        color: {
+            if (!panelRoot.showInternalStaticWallpaper)
+                return "transparent"
+            if (panelRoot.fillMode === "fill")
+                return "transparent"
+            return "black"
+        }
 
         // Wallpaper scaling — decode at correct resolution for quality parity with ii/material.
         // Uses magick identify to detect actual image size, same approach as Background.qml.
@@ -644,7 +656,10 @@ Variants {
                 WallpaperCrossfader {
                     id: wallpaper
                     anchors.fill: parent
-                    fillMode: Image.PreserveAspectCrop
+                    fillMode: panelRoot.fillMode === "fit" ? Image.PreserveAspectFit
+                            : panelRoot.fillMode === "tile" ? Image.Tile
+                            : panelRoot.fillMode === "center" ? Image.Pad
+                            : Image.PreserveAspectCrop
                     enableTransitions: !AwwwBackend.active
                         && ((wBg.useMainWallpaper ?? true)
                             ? (Config.options?.background?.transition?.enable ?? true)
@@ -685,7 +700,10 @@ Variants {
                 AnimatedImage {
                     id: gifWallpaper
                     anchors.fill: parent
-                    fillMode: Image.PreserveAspectCrop
+                    fillMode: panelRoot.fillMode === "fit" ? Image.PreserveAspectFit
+                            : panelRoot.fillMode === "tile" ? Image.Tile
+                            : panelRoot.fillMode === "center" ? Image.Pad
+                            : Image.PreserveAspectCrop
                     source: panelRoot.wallpaperIsGif
                         ? (panelRoot.wallpaperSourceRaw.startsWith("file://")
                             ? panelRoot.wallpaperSourceRaw
@@ -716,7 +734,9 @@ Variants {
                         if (!path) return "";
                         return path.startsWith("file://") ? path : ("file://" + path);
                     }
-                    fillMode: VideoOutput.PreserveAspectCrop
+                    fillMode: panelRoot.fillMode === "fit" ? VideoOutput.PreserveAspectFit
+                            : panelRoot.fillMode === "center" ? VideoOutput.PreserveAspectFit
+                            : VideoOutput.PreserveAspectCrop
                     loops: MediaPlayer.Infinite
                     muted: true
                     autoPlay: true
