@@ -11,7 +11,7 @@ import qs.modules.waffle.settings
 
 WSettingsPage {
     id: root
-    settingsPageIndex: 5
+    settingsPageIndex: 6
     pageTitle: Translation.tr("Interface")
     pageIcon: "apps"
     pageDescription: Translation.tr("Notifications, OSD, and other UI elements")
@@ -224,12 +224,12 @@ WSettingsPage {
     
     WSettingsCard {
         title: Translation.tr("Display scaling")
-        icon: "aspect-ratio"
+        icon: "desktop"
 
         WSettingsSpinBox {
             id: scaleSpinBox
             label: Translation.tr("UI scale")
-            icon: "zoom-in"
+            icon: "add"
             description: Translation.tr("Takes effect immediately")
             suffix: "%"
             from: 50; to: 200; stepSize: 5
@@ -240,7 +240,7 @@ WSettingsPage {
         WSettingsButton {
             visible: Math.abs((Config.options?.appearance?.typography?.sizeScale ?? 1.0) - 1.0) > 0.01
             label: Translation.tr("Reset to 100%")
-            icon: "zoom-out"
+            icon: "arrow-counterclockwise"
             buttonText: Translation.tr("Reset")
             onButtonClicked: {
                 Config.setNestedValue("appearance.typography.sizeScale", 1.0)
