@@ -75,8 +75,12 @@ Variants {
         readonly property int parallaxTransitionSettleMs: ParallaxMath.resolveTransitionSettle(wParallax, 220)
         readonly property string fillMode: Config.options?.background?.fillMode ?? "fill"
         property string _panReadyWallpaperPath: panelRoot.wallpaperSourceRaw
+        // Only delegate to awww for "fill" — fit/center look wrong via awww
+        // (bad crop, shifted image).  QML internal rendering with black
+        // letterbox backing gives a clean result for non-fill modes.
         readonly property bool externalMainWallpaperEligible:
-            AwwwBackend.supportsVisibleMainWallpaper(
+            panelRoot.fillMode === "fill"
+            && AwwwBackend.supportsVisibleMainWallpaper(
                 wallpaperSourceRaw,
                 fillMode,
                 dynamicParallaxRequested,
