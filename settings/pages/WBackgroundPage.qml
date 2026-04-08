@@ -10,7 +10,7 @@ import qs.modules.common
 import qs.modules.common.functions as CF
 import qs.modules.waffle.looks
 import qs.modules.waffle.settings
-import "root:modules/common/functions/parallax.js" as ParallaxMath
+
 
 WSettingsPage {
     id: root
@@ -24,20 +24,8 @@ WSettingsPage {
     readonly property var wEffects: wBg.effects ?? {}
     readonly property var wClock: wBg.widgets?.clock ?? {}
     readonly property var wBackdrop: wBg.backdrop ?? {}
-    readonly property var wTransition: wBg.transition ?? {}
-    readonly property var wParallax: wBg.parallax ?? {}
-    readonly property bool useSharedWallpaperTransition: root.wBg.useMainWallpaper ?? true
-    readonly property bool waffleTransitionsEnabled: root.wTransition.enable ?? true
-    readonly property string waffleTransitionType: root.wTransition.type ?? "crossfade"
-    readonly property string waffleTransitionDirection: root.wTransition.direction ?? "right"
-    readonly property int waffleTransitionDuration: root.wTransition.duration ?? 800
-    readonly property var directionalTransitionTypes: ["wipe", "wave"]
-    readonly property string waffleParallaxPreset: ParallaxMath.detectPreset(
-        root.wParallax.zoom ?? root.wParallax.workspaceZoom ?? 1.0,
-        root.wParallax.workspaceShift ?? 1,
-        root.wParallax.panelShift ?? root.wParallax.sidebarShift ?? 0.12,
-        root.wParallax.widgetDepth ?? root.wParallax.widgetsFactor ?? 1.0
-    )
+    readonly property bool waffleUseMainWallpaper: wBg.useMainWallpaper ?? true
+
     property bool backgroundBrowserPrimed: false
     property bool heavySectionsReady: false
     property string pendingBackgroundBrowserPath: ""
@@ -51,30 +39,6 @@ WSettingsPage {
         Config.setNestedValue(nestedKey, value)
     }
     
-    function setWaffleTransitionType(newValue: string): void {
-        Config.setNestedValue("waffles.background.transition.type", newValue)
-    }
-    
-    function setWaffleTransitionDirection(newValue: string): void {
-        Config.setNestedValue("waffles.background.transition.direction", newValue)
-    }
-
-    function setWaffleParallaxAxis(newValue: string): void {
-        Config.setNestedValue("waffles.background.parallax.axis", newValue)
-        Config.setNestedValue("waffles.background.parallax.autoVertical", newValue === "auto")
-        Config.setNestedValue("waffles.background.parallax.vertical", newValue === "vertical")
-    }
-
-    function applyWaffleParallaxPreset(presetId: string): void {
-        const preset = ParallaxMath.preset(presetId)
-        Config.setNestedValue("waffles.background.parallax.enable", true)
-        Config.setNestedValue("waffles.background.parallax.zoom", preset.zoom)
-        Config.setNestedValue("waffles.background.parallax.workspaceZoom", preset.zoom)
-        Config.setNestedValue("waffles.background.parallax.workspaceShift", preset.workspaceShift)
-        Config.setNestedValue("waffles.background.parallax.panelShift", preset.panelShift)
-        Config.setNestedValue("waffles.background.parallax.widgetDepth", preset.widgetDepth)
-        Config.setNestedValue("waffles.background.parallax.widgetsFactor", preset.widgetDepth)
-    }
 
     function ensureHeavySectionsReady(effectivePath: string): void {
         if (heavySectionsReady)
@@ -128,22 +92,11 @@ WSettingsPage {
         icon: "image"
         
         WSettingsSwitch {
-            label: Translation.tr("Use Material ii wallpaper")
-            icon: "image"
-            description: Translation.tr("Share wallpaper with Material ii family")
-            checked: root.wBg.useMainWallpaper ?? true
+            label: Translation.tr("Use Material wallpaper")
+            icon: "link"
+            description: Translation.tr("Adopt the same wallpaper used by Material ii")
+            checked: root.waffleUseMainWallpaper
             onCheckedChanged: root.setNestedValueWhenReady("waffles.background.useMainWallpaper", checked)
-        }
-        
-        WSettingsButton {
-            visible: !(root.wBg.useMainWallpaper ?? true)
-            label: Translation.tr("Waffle wallpaper")
-            icon: "image"
-            buttonText: Translation.tr("Change")
-            onButtonClicked: {
-                Config.setNestedValue("wallpaperSelector.selectionTarget", "waffle")
-                Quickshell.execDetached([Quickshell.shellPath("scripts/inir"), "wallpaperSelector", "toggle"])
-            }
         }
 
         WSettingsSwitch {
@@ -172,24 +125,6 @@ WSettingsPage {
             onCheckedChanged: root.setNestedValueWhenReady("waffles.background.hideWhenFullscreen", checked)
         }
 
-        WSettingsRow {
-            label: Translation.tr("Wallpaper scaling")
-            icon: "image"
-            description: Translation.tr("Only Fill, Fit and Center are available because awww is the active wallpaper backend.")
-        }
-        WSettingsChoiceGroup {
-            Layout.leftMargin: 12
-            Layout.rightMargin: 12
-            Layout.bottomMargin: 8
-            columns: 3
-            options: [
-                { label: Translation.tr("Fill"), value: "fill" },
-                { label: Translation.tr("Fit"), value: "fit" },
-                { label: Translation.tr("Center"), value: "center" }
-            ]
-            currentValue: Config.options?.background?.fillMode ?? "fill"
-            onSelected: newValue => Config.setNestedValue("background.fillMode", newValue)
-        }
 
         // ─── Wallpaper folder browser ───
         ColumnLayout {
@@ -197,12 +132,7 @@ WSettingsPage {
             Layout.topMargin: 4
             spacing: 3
 
-            // Resolve the current effective wallpaper path for folder detection
-            readonly property string _effectivePath: {
-                const useMain = root.wBg.useMainWallpaper ?? true
-                if (useMain) return Config.options?.background?.wallpaperPath ?? ""
-                return root.wBg.wallpaperPath || Config.options?.background?.wallpaperPath || ""
-            }
+            readonly property string _effectivePath: Wallpapers.currentWallpaperPathForTarget("waffle", "")
 
             Component.onCompleted: {
                 root.pendingBackgroundBrowserPath = _effectivePath
@@ -267,11 +197,7 @@ WSettingsPage {
                     required property bool fileIsDir
                     required property url fileUrl
 
-                    readonly property string _currentWp: {
-                        const useMain = root.wBg.useMainWallpaper ?? true
-                        if (useMain) return Config.options?.background?.wallpaperPath ?? ""
-                        return root.wBg.wallpaperPath || Config.options?.background?.wallpaperPath || ""
-                    }
+                    readonly property string _currentWp: Wallpapers.currentWallpaperPathForTarget("waffle", "")
                     readonly property bool isCurrent: filePath === _currentWp
                     readonly property string thumbSource: {
                         if (fileIsDir) return ""
@@ -375,13 +301,7 @@ WSettingsPage {
                                 Wallpapers.setDirectory(mainWpThumb.filePath)
                                 return
                             }
-                            // Apply to the correct target based on useMainWallpaper
-                            const useMain = root.wBg.useMainWallpaper ?? true
-                            if (useMain) {
-                                Wallpapers.select(mainWpThumb.filePath, Appearance.m3colors.darkmode, "")
-                            } else {
-                                Wallpapers.applySelectionTarget(mainWpThumb.filePath, "waffle", Appearance.m3colors.darkmode, "")
-                            }
+                            Wallpapers.select(mainWpThumb.filePath, Appearance.m3colors.darkmode, "", "waffle")
                         }
                     }
 
@@ -394,268 +314,6 @@ WSettingsPage {
         }
     }
 
-    WSettingsCard {
-        title: Translation.tr("Wallpaper Transitions")
-        icon: "arrow-sync"
-        
-        WSettingsRow {
-            visible: root.useSharedWallpaperTransition
-            label: Translation.tr("Shared with Material ii")
-            icon: "desktop"
-            description: Translation.tr("When 'Use Material ii wallpaper' is enabled, Waffle inherits ii's wallpaper transition backend and timing. Disable the shared wallpaper to configure Waffle-specific transitions without overlapping families.")
-            enableSettingsSearch: false
-        }
-        
-        WSettingsSwitch {
-            visible: !root.useSharedWallpaperTransition
-            label: Translation.tr("Enable wallpaper transitions")
-            icon: "flash-on"
-            description: Translation.tr("Animate wallpaper swaps only for Waffle's own wallpaper")
-            checked: root.waffleTransitionsEnabled
-            onCheckedChanged: root.setNestedValueWhenReady("waffles.background.transition.enable", checked)
-        }
-        
-        WSettingsRow {
-            id: transitionStyleRow
-            visible: !root.useSharedWallpaperTransition && root.waffleTransitionsEnabled
-            label: Translation.tr("Transition style")
-            icon: "wand"
-        }
-        WSettingsChoiceGroup {
-            visible: transitionStyleRow.visible
-            Layout.leftMargin: 16
-            Layout.rightMargin: 16
-            Layout.bottomMargin: 8
-            columns: 4
-            options: [
-                { label: Translation.tr("None"), value: "none" },
-                { label: Translation.tr("Simple"), value: "simple" },
-                { label: Translation.tr("Fade"), value: "fade" },
-                { label: Translation.tr("Left"), value: "left" },
-                { label: Translation.tr("Right"), value: "right" },
-                { label: Translation.tr("Top"), value: "top" },
-                { label: Translation.tr("Bottom"), value: "bottom" },
-                { label: Translation.tr("Wipe"), value: "wipe" },
-                { label: Translation.tr("Wave"), value: "wave" },
-                { label: Translation.tr("Grow"), value: "grow" },
-                { label: Translation.tr("Center"), value: "center" },
-                { label: Translation.tr("Any"), value: "any" },
-                { label: Translation.tr("Outer"), value: "outer" },
-                { label: Translation.tr("Random"), value: "random" }
-            ]
-            currentValue: root.waffleTransitionType
-            onSelected: newValue => root.setWaffleTransitionType(newValue)
-        }
-        
-        WSettingsRow {
-            id: transitionDirectionRow
-            visible: {
-                if (root.useSharedWallpaperTransition || !root.waffleTransitionsEnabled)
-                    return false
-                const t = AwwwBackend.normalizedAwwwTransitionType(root.waffleTransitionType, root.waffleTransitionDirection)
-                return ["wipe", "wave"].indexOf(t) >= 0
-            }
-            label: Translation.tr("Transition direction")
-            icon: "arrow-right"
-        }
-        WSettingsChoiceGroup {
-            visible: transitionDirectionRow.visible
-            Layout.leftMargin: 16
-            Layout.rightMargin: 16
-            Layout.bottomMargin: 8
-            columns: 4
-            options: [
-                { label: Translation.tr("Left"), value: "left" },
-                { label: Translation.tr("Right"), value: "right" },
-                { label: Translation.tr("Top"), value: "top" },
-                { label: Translation.tr("Bottom"), value: "bottom" }
-            ]
-            currentValue: root.waffleTransitionDirection
-            onSelected: newValue => root.setWaffleTransitionDirection(newValue)
-        }
-        
-        WSettingsSpinBox {
-            visible: {
-                if (root.useSharedWallpaperTransition || !root.waffleTransitionsEnabled)
-                    return false
-                const t = AwwwBackend.normalizedAwwwTransitionType(
-                    root.waffleTransitionType,
-                    root.waffleTransitionDirection
-                )
-                return t !== "simple" && t !== "none"
-            }
-            label: Translation.tr("Transition duration")
-            icon: "arrow-clockwise"
-            description: Translation.tr("How long Waffle's dedicated wallpaper transition should take.")
-            suffix: "ms"
-            value: root.waffleTransitionDuration
-            from: 200
-            to: 3000
-            stepSize: 100
-            onValueChanged: root.setNestedValueWhenReady("waffles.background.transition.duration", value)
-        }
-    }
-
-    WSettingsCard {
-        title: Translation.tr("Parallax")
-        icon: "image"
-
-        WSettingsSwitch {
-            label: Translation.tr("Enable parallax")
-            icon: "image"
-            description: Translation.tr("Move the Waffle wallpaper and background widgets with workspaces and open panels")
-            checked: root.wParallax.enable ?? ((root.wParallax.enableWorkspace ?? false) || (root.wParallax.enableSidebar ?? false))
-            onCheckedChanged: root.setNestedValueWhenReady("waffles.background.parallax.enable", checked)
-        }
-
-        WSettingsRow {
-            label: Translation.tr("Background rendering")
-            icon: "desktop"
-            description: Translation.tr("When parallax is active, Waffle renders the wallpaper internally so panel motion and transitions stay visually stable.")
-            enableSettingsSearch: false
-        }
-
-        WSettingsRow {
-            id: waffleParallaxProfileRow
-            label: Translation.tr("Motion profile")
-            icon: "wand"
-            description: Translation.tr("Apply a tuned set of zoom, workspace travel, panel travel and widget depth values.")
-        }
-        WSettingsChoiceGroup {
-            Layout.leftMargin: 16
-            Layout.rightMargin: 16
-            Layout.bottomMargin: 8
-            columns: 3
-            options: [
-                { label: Translation.tr("Subtle"), value: "subtle" },
-                { label: Translation.tr("Balanced"), value: "balanced" },
-                { label: Translation.tr("Immersive"), value: "immersive" }
-            ]
-            currentValue: root.waffleParallaxPreset
-            onSelected: newValue => root.applyWaffleParallaxPreset(newValue)
-        }
-
-        WSettingsRow {
-            id: waffleParallaxAxisRow
-            label: Translation.tr("Axis")
-            icon: "arrow-right"
-        }
-        WSettingsChoiceGroup {
-            Layout.leftMargin: 16
-            Layout.rightMargin: 16
-            Layout.bottomMargin: 8
-            columns: 3
-            options: [
-                { label: Translation.tr("Horizontal"), value: "horizontal" },
-                { label: Translation.tr("Vertical"), value: "vertical" },
-                { label: Translation.tr("Auto"), value: "auto" }
-            ]
-            currentValue: root.wParallax.axis
-                ?? ((root.wParallax.autoVertical ?? true) ? "auto" : ((root.wParallax.vertical ?? false) ? "vertical" : "horizontal"))
-            onSelected: newValue => root.setWaffleParallaxAxis(newValue)
-        }
-
-        WSettingsSwitch {
-            label: Translation.tr("Follow workspace")
-            icon: "desktop"
-            description: Translation.tr("Shift the wallpaper with the current workspace range")
-            checked: root.wParallax.enableWorkspace ?? false
-            enabled: root.wParallax.enable ?? ((root.wParallax.enableWorkspace ?? false) || (root.wParallax.enableSidebar ?? false))
-            onCheckedChanged: root.setNestedValueWhenReady("waffles.background.parallax.enableWorkspace", checked)
-        }
-
-        WSettingsSwitch {
-            label: Translation.tr("Follow panels")
-            icon: "apps"
-            description: Translation.tr("Add lateral motion when Start, widgets, clipboard, Action Center or notifications open")
-            checked: root.wParallax.enableSidebar ?? false
-            enabled: root.wParallax.enable ?? ((root.wParallax.enableWorkspace ?? false) || (root.wParallax.enableSidebar ?? false))
-            onCheckedChanged: root.setNestedValueWhenReady("waffles.background.parallax.enableSidebar", checked)
-        }
-
-        WSettingsSpinBox {
-            label: Translation.tr("Wallpaper zoom")
-            icon: "search"
-            description: Translation.tr("Extra wallpaper zoom after fit-to-cover. 100% keeps the default parallax headroom; lower values zoom out, higher values zoom in")
-            suffix: "%"
-            value: Math.round((root.wParallax.zoom ?? root.wParallax.workspaceZoom ?? 1.0) * 100)
-            from: 10
-            to: 200
-            stepSize: 1
-            onValueChanged: {
-                if (!root.settingsHandlersReady)
-                    return
-                Config.setNestedValue("waffles.background.parallax.zoom", value / 100)
-                Config.setNestedValue("waffles.background.parallax.workspaceZoom", value / 100)
-            }
-        }
-
-        WSettingsSpinBox {
-            label: Translation.tr("Workspace travel")
-            icon: "arrow-right"
-            description: Translation.tr("How far Waffle should travel across the workspace range")
-            suffix: "%"
-            value: Math.round((root.wParallax.workspaceShift ?? 1) * 100)
-            from: 0
-            to: 150
-            stepSize: 5
-            enabled: (root.wParallax.enable ?? ((root.wParallax.enableWorkspace ?? false) || (root.wParallax.enableSidebar ?? false))) && (root.wParallax.enableWorkspace ?? false)
-            onValueChanged: root.setNestedValueWhenReady("waffles.background.parallax.workspaceShift", value / 100)
-        }
-
-        WSettingsSpinBox {
-            label: Translation.tr("Panel travel")
-            icon: "apps"
-            description: Translation.tr("How much lateral offset to add for Waffle panels")
-            suffix: "%"
-            value: Math.round((root.wParallax.panelShift ?? root.wParallax.sidebarShift ?? 0.12) * 100)
-            from: 0
-            to: 30
-            stepSize: 1
-            enabled: (root.wParallax.enable ?? ((root.wParallax.enableWorkspace ?? false) || (root.wParallax.enableSidebar ?? false))) && (root.wParallax.enableSidebar ?? false)
-            onValueChanged: root.setNestedValueWhenReady("waffles.background.parallax.panelShift", value / 100)
-        }
-
-        WSettingsSpinBox {
-            label: Translation.tr("Widget depth")
-            icon: "apps"
-            description: Translation.tr("Keep Waffle background widgets slightly ahead of the wallpaper motion")
-            suffix: "%"
-            value: Math.round((root.wParallax.widgetDepth ?? root.wParallax.widgetsFactor ?? 1.0) * 100)
-            from: 50
-            to: 180
-            stepSize: 5
-            enabled: root.wParallax.enable ?? ((root.wParallax.enableWorkspace ?? false) || (root.wParallax.enableSidebar ?? false))
-            onValueChanged: {
-                if (!root.settingsHandlersReady)
-                    return
-                Config.setNestedValue("waffles.background.parallax.widgetDepth", value / 100)
-                Config.setNestedValue("waffles.background.parallax.widgetsFactor", value / 100)
-            }
-        }
-
-        WSettingsSwitch {
-            label: Translation.tr("Pause during wallpaper transitions")
-            icon: "flash-on"
-            description: Translation.tr("Freeze parallax briefly while wallpaper transitions settle")
-            checked: root.wParallax.pauseDuringTransitions ?? true
-            enabled: root.wParallax.enable ?? ((root.wParallax.enableWorkspace ?? false) || (root.wParallax.enableSidebar ?? false))
-            onCheckedChanged: root.setNestedValueWhenReady("waffles.background.parallax.pauseDuringTransitions", checked)
-        }
-
-        WSettingsSpinBox {
-            label: Translation.tr("Transition settle")
-            icon: "arrow-clockwise"
-            description: Translation.tr("Extra pause after a wallpaper change before parallax resumes")
-            suffix: "ms"
-            value: root.wParallax.transitionSettleMs ?? 220
-            from: 0
-            to: 1200
-            stepSize: 20
-            enabled: (root.wParallax.enable ?? ((root.wParallax.enableWorkspace ?? false) || (root.wParallax.enableSidebar ?? false))) && (root.wParallax.pauseDuringTransitions ?? true)
-            onValueChanged: root.setNestedValueWhenReady("waffles.background.parallax.transitionSettleMs", value)
-        }
-    }
     Loader {
         active: Config.options?.background?.multiMonitor?.enable ?? false
         asynchronous: true
@@ -684,7 +342,7 @@ WSettingsPage {
             }
             property bool showBackdropView: false
             readonly property var selMonData: WallpaperListener.effectivePerMonitor[selectedMonitor] ?? ({})
-            readonly property string selMonPath: selMonData.path || (Config.options?.background?.wallpaperPath ?? "")
+            readonly property string selMonPath: Wallpapers.currentWallpaperPathForTarget("waffle", selectedMonitor)
             readonly property string backdropPath: selMonData.backdropPath ?? ""
             Layout.bottomMargin: 4
             implicitHeight: 140
@@ -711,7 +369,7 @@ WSettingsPage {
 
                             readonly property string monName: WallpaperListener.getMonitorName(modelData) ?? ""
                             readonly property var wpData: WallpaperListener.effectivePerMonitor[monName] ?? { path: "" }
-                            readonly property string wpPath: wpData.path || (Config.options?.background?.wallpaperPath ?? "")
+                            readonly property string wpPath: Wallpapers.currentWallpaperPathForTarget("waffle", monName)
                             readonly property bool isSelected: monName === multiMonCard.selectedMonitor
                             readonly property real aspectRatio: modelData.width / Math.max(1, modelData.height)
 
@@ -1158,9 +816,9 @@ WSettingsPage {
                                 onClicked: {
                                     const mon = multiMonCard.selectedMonitor
                                     if (!mon) return
-                                    const globalPath = Config.options?.background?.wallpaperPath ?? ""
+                                    const globalPath = Wallpapers.currentWallpaperPathForTarget("waffle", "")
                                     if (globalPath) {
-                                        Wallpapers.select(globalPath, Appearance.m3colors.darkmode, mon)
+                                        Wallpapers.select(globalPath, Appearance.m3colors.darkmode, mon, "main")
                                     }
                                 }
                             }
@@ -1173,7 +831,7 @@ WSettingsPage {
                                 colBackgroundActive: Looks.colors.bg2Active
                                 colForeground: Looks.colors.fg
                                 onClicked: {
-                                    const globalPath = Config.options?.background?.wallpaperPath ?? ""
+                                    const globalPath = Wallpapers.currentWallpaperPathForTarget("waffle", multiMonCard.selectedMonitor)
                                     if (globalPath) {
                                         Wallpapers.apply(globalPath, Appearance.m3colors.darkmode)
                                     }
@@ -1377,7 +1035,7 @@ WSettingsPage {
                                             if (multiMonCard.showBackdropView) {
                                                 Wallpapers.updatePerMonitorBackdropConfig(bgWpThumb.filePath, multiMonCard.selectedMonitor)
                                             } else {
-                                                Wallpapers.select(bgWpThumb.filePath, Appearance.m3colors.darkmode, multiMonCard.selectedMonitor)
+                                                Wallpapers.select(bgWpThumb.filePath, Appearance.m3colors.darkmode, multiMonCard.selectedMonitor, "main")
                                             }
                                         }
                                     }

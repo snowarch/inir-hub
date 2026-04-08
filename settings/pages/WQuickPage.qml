@@ -38,13 +38,7 @@ WSettingsPage {
 
     // Current wallpaper path helper
     readonly property string currentWallpaperPath: {
-        if (multiMonitorEnabled && targetMonitor) {
-            const data = WallpaperListener.effectivePerMonitor[targetMonitor] ?? {}
-            return data.path || (Config.options?.background?.wallpaperPath ?? "")
-        }
-        const useMain = Config.options?.waffles?.background?.useMainWallpaper ?? true
-        if (useMain) return Config.options?.background?.wallpaperPath ?? ""
-        return Config.options?.waffles?.background?.wallpaperPath ?? Config.options?.background?.wallpaperPath ?? ""
+        return Wallpapers.currentWallpaperPathForTarget("waffle", multiMonitorEnabled ? targetMonitor : "")
     }
     readonly property string displayWallpaperPath: root.selectedWallpaperPath.length > 0
         ? root.selectedWallpaperPath
