@@ -11,7 +11,7 @@ import qs.modules.waffle.settings
 
 WSettingsPage {
     id: root
-    settingsPageIndex: 8
+    settingsPageIndex: 9
     pageTitle: Translation.tr("Shortcuts")
     pageIcon: "keyboard"
     pageDescription: Translation.tr("Keyboard shortcuts from Niri config")

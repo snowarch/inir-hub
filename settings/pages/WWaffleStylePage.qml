@@ -10,7 +10,7 @@ import qs.modules.waffle.settings
 
 WSettingsPage {
     id: root
-    settingsPageIndex: 7
+    settingsPageIndex: 8
     pageTitle: Translation.tr("Waffle Style")
     pageIcon: "desktop"
     pageDescription: Translation.tr("Windows 11 style customization")

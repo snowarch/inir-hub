@@ -74,9 +74,9 @@ Rectangle {
         FluentIcon {
             icon: {
                 switch (root.severity) {
-                    case WSettingsInfoBar.Severity.Warning: return "warning"
-                    case WSettingsInfoBar.Severity.Error: return "error-circle"
-                    case WSettingsInfoBar.Severity.Success: return "checkmark-circle"
+                    case WSettingsInfoBar.Severity.Warning: return "alert"
+                    case WSettingsInfoBar.Severity.Error: return "alert"
+                    case WSettingsInfoBar.Severity.Success: return "checkmark"
                     default: return "info"
                 }
             }

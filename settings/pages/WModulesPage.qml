@@ -10,7 +10,7 @@ import qs.modules.waffle.settings
 
 WSettingsPage {
     id: root
-    settingsPageIndex: 6
+    settingsPageIndex: 7
     pageTitle: Translation.tr("Modules")
     pageIcon: "settings-cog-multiple"
     pageDescription: Translation.tr("Panel style and modules")
