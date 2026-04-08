@@ -337,7 +337,7 @@ Item {
         Rectangle {
             Layout.fillHeight: true
             Layout.preferredWidth: root.navExpanded ? 240 : 56
-            color: Looks.colors.bgPanelFooterBase
+            color: Looks.colors.bg1Base
             
             Behavior on Layout.preferredWidth {
                 animation: NumberAnimation { duration: Looks.transition.enabled ? Looks.transition.duration.medium : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.standard }
@@ -346,7 +346,10 @@ Item {
             ColumnLayout {
                 anchors {
                     fill: parent
-                    margins: 14
+                    topMargin: 10
+                    bottomMargin: 10
+                    leftMargin: 12
+                    rightMargin: 12
                 }
                 spacing: 4
                 
@@ -414,23 +417,22 @@ Item {
                     Layout.bottomMargin: 6
                     height: 1
                     color: Looks.colors.bg2Border
-                    opacity: 0.3
+                    opacity: 0.15
                 }
                 
-                // Header icon (collapsed) — larger, with accent tint
+                // Header icon (collapsed)
                 Item {
                     visible: !root.navExpanded
                     Layout.preferredWidth: 32
                     Layout.preferredHeight: 32
                     Layout.alignment: Qt.AlignHCenter
-                    Layout.bottomMargin: 8
+                    Layout.bottomMargin: 6
                     
                     FluentIcon {
                         anchors.centerIn: parent
                         icon: "settings"
-                        implicitSize: 22
-                        color: Looks.colors.accent
-                        opacity: 0.8
+                        implicitSize: 20
+                        color: Looks.colors.subfg
                     }
                 }
                 
@@ -439,8 +441,8 @@ Item {
                     id: searchBarContainer
                     visible: root.navExpanded
                     Layout.fillWidth: true
-                    Layout.preferredHeight: 38
-                    radius: Looks.radius.medium + 1
+                    Layout.preferredHeight: 34
+                    radius: Looks.radius.medium
                     color: Looks.colors.inputBg
                     border.width: searchInput.activeFocus ? 2 : 1
                     border.color: searchInput.activeFocus ? Looks.colors.accent : Looks.colors.bg2Border
@@ -452,14 +454,14 @@ Item {
                     RowLayout {
                         anchors {
                             fill: parent
-                            leftMargin: 10
-                            rightMargin: 10
+                            leftMargin: 9
+                            rightMargin: 9
                         }
-                        spacing: 8
+                        spacing: 7
                         
                         FluentIcon {
                             icon: "search"
-                            implicitSize: 16
+                            implicitSize: 14
                             color: Looks.colors.subfg
                         }
                         
@@ -510,7 +512,8 @@ Item {
                                 color: Looks.colors.subfg
                                 font.family: Looks.font.family.ui
                                 font.pixelSize: Looks.font.pixelSize.normal
-                                visible: !searchInput.text && !searchInput.activeFocus
+                                visible: !searchInput.text
+                                opacity: 0.6
                             }
                         }
                         
@@ -554,15 +557,15 @@ Item {
                     Layout.fillWidth: true
                     Layout.preferredHeight: Math.min((searchResultsList.contentHeight || 0) + 8, 300)
                     radius: Looks.radius.large
-                    color: Looks.colors.bg1Base
+                    color: Looks.colors.bg2Base
                     border.width: 1
                     border.color: Looks.colors.bg2Border
                     
                     layer.enabled: Appearance.effectsEnabled
                     layer.effect: DropShadow {
                         color: Looks.colors.shadow
-                        radius: 8
-                        samples: 9
+                        radius: 6
+                        samples: 7
                         verticalOffset: 2
                     }
                     
@@ -697,7 +700,7 @@ Item {
                     Layout.fillWidth: true
                     Layout.preferredHeight: 36
                     radius: Looks.radius.medium
-                    color: Looks.colors.bg1Base
+                    color: Looks.colors.bg2Base
                     
                     RowLayout {
                         anchors.centerIn: parent
@@ -717,7 +720,7 @@ Item {
                     }
                 }
 
-                Item { height: 8 }
+                Item { height: 4 }
                 
                 // Navigation items
                 Flickable {
@@ -730,7 +733,7 @@ Item {
                     ColumnLayout {
                         id: navColumn
                         width: parent.width
-                        spacing: 3
+                        spacing: 2
                         
                         Repeater {
                             model: root.pages
@@ -751,10 +754,19 @@ Item {
                     }
                 }
                 
+                // Separator above collapse button
+                Rectangle {
+                    Layout.fillWidth: true
+                    Layout.topMargin: 4
+                    height: 1
+                    color: Looks.colors.bg2Border
+                    opacity: 0.15
+                }
+                
                 // Expand/collapse button
                 WBorderlessButton {
                     Layout.fillWidth: true
-                    Layout.preferredHeight: 36
+                    Layout.preferredHeight: 32
                     
                     contentItem: RowLayout {
                         spacing: 10
@@ -762,7 +774,9 @@ Item {
                         Item {
                             implicitWidth: 20
                             implicitHeight: 20
-                            Layout.leftMargin: root.navExpanded ? 12 : 14
+                            Layout.leftMargin: root.navExpanded ? 12 : 0
+                            Layout.fillWidth: !root.navExpanded
+                            Layout.alignment: root.navExpanded ? Qt.AlignVCenter : Qt.AlignCenter
                             
                             FluentIcon {
                                 anchors.centerIn: parent
@@ -786,12 +800,12 @@ Item {
             }
         }
         
-        // Separator — subtle gradient-like line
+        // Separator — subtle divider
         Rectangle {
             Layout.fillHeight: true
             width: 1
             color: Looks.colors.bg2Border
-            opacity: 0.4
+            opacity: 0.2
         }
         
         // Content area

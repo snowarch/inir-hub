@@ -177,31 +177,18 @@ WSettingsPage {
             icon: "image"
             description: Translation.tr("Only Fill, Fit and Center are available because awww is the active wallpaper backend.")
         }
-        Grid {
-            Layout.fillWidth: true
+        WSettingsChoiceGroup {
             Layout.leftMargin: 12
             Layout.rightMargin: 12
             Layout.bottomMargin: 8
             columns: 3
-            columnSpacing: 6
-            rowSpacing: 6
-
-            Repeater {
-                model: [
-                    { label: Translation.tr("Fill"), value: "fill" },
-                    { label: Translation.tr("Fit"), value: "fit" },
-                    { label: Translation.tr("Center"), value: "center" }
-                ]
-
-                delegate: WChoiceButton {
-                    required property var modelData
-                    Layout.fillWidth: false
-                    width: (parent.width - 12) / 3
-                    text: modelData.label
-                    checked: (Config.options?.background?.fillMode ?? "fill") === modelData.value
-                    onClicked: Config.setNestedValue("background.fillMode", modelData.value)
-                }
-            }
+            options: [
+                { label: Translation.tr("Fill"), value: "fill" },
+                { label: Translation.tr("Fit"), value: "fit" },
+                { label: Translation.tr("Center"), value: "center" }
+            ]
+            currentValue: Config.options?.background?.fillMode ?? "fill"
+            onSelected: newValue => Config.setNestedValue("background.fillMode", newValue)
         }
 
         // ─── Wallpaper folder browser ───
@@ -434,43 +421,30 @@ WSettingsPage {
             label: Translation.tr("Transition style")
             icon: "wand"
         }
-        Grid {
+        WSettingsChoiceGroup {
             visible: transitionStyleRow.visible
-            Layout.fillWidth: true
             Layout.leftMargin: 16
             Layout.rightMargin: 16
             Layout.bottomMargin: 8
             columns: 4
-            columnSpacing: 6
-            rowSpacing: 6
-
-            Repeater {
-                model: [
-                    { label: Translation.tr("None"), value: "none" },
-                    { label: Translation.tr("Simple"), value: "simple" },
-                    { label: Translation.tr("Fade"), value: "fade" },
-                    { label: Translation.tr("Left"), value: "left" },
-                    { label: Translation.tr("Right"), value: "right" },
-                    { label: Translation.tr("Top"), value: "top" },
-                    { label: Translation.tr("Bottom"), value: "bottom" },
-                    { label: Translation.tr("Wipe"), value: "wipe" },
-                    { label: Translation.tr("Wave"), value: "wave" },
-                    { label: Translation.tr("Grow"), value: "grow" },
-                    { label: Translation.tr("Center"), value: "center" },
-                    { label: Translation.tr("Any"), value: "any" },
-                    { label: Translation.tr("Outer"), value: "outer" },
-                    { label: Translation.tr("Random"), value: "random" }
-                ]
-
-                delegate: WChoiceButton {
-                    required property var modelData
-                    Layout.fillWidth: false
-                    width: (transitionStyleRow.width - 16 * 2 - 6 * 3) / 4
-                    text: modelData.label
-                    checked: root.waffleTransitionType === modelData.value
-                    onClicked: root.setWaffleTransitionType(modelData.value)
-                }
-            }
+            options: [
+                { label: Translation.tr("None"), value: "none" },
+                { label: Translation.tr("Simple"), value: "simple" },
+                { label: Translation.tr("Fade"), value: "fade" },
+                { label: Translation.tr("Left"), value: "left" },
+                { label: Translation.tr("Right"), value: "right" },
+                { label: Translation.tr("Top"), value: "top" },
+                { label: Translation.tr("Bottom"), value: "bottom" },
+                { label: Translation.tr("Wipe"), value: "wipe" },
+                { label: Translation.tr("Wave"), value: "wave" },
+                { label: Translation.tr("Grow"), value: "grow" },
+                { label: Translation.tr("Center"), value: "center" },
+                { label: Translation.tr("Any"), value: "any" },
+                { label: Translation.tr("Outer"), value: "outer" },
+                { label: Translation.tr("Random"), value: "random" }
+            ]
+            currentValue: root.waffleTransitionType
+            onSelected: newValue => root.setWaffleTransitionType(newValue)
         }
         
         WSettingsRow {
@@ -484,33 +458,20 @@ WSettingsPage {
             label: Translation.tr("Transition direction")
             icon: "arrow-right"
         }
-        Grid {
+        WSettingsChoiceGroup {
             visible: transitionDirectionRow.visible
-            Layout.fillWidth: true
             Layout.leftMargin: 16
             Layout.rightMargin: 16
             Layout.bottomMargin: 8
             columns: 4
-            columnSpacing: 6
-            rowSpacing: 6
-
-            Repeater {
-                model: [
-                    { label: Translation.tr("Left"), value: "left" },
-                    { label: Translation.tr("Right"), value: "right" },
-                    { label: Translation.tr("Top"), value: "top" },
-                    { label: Translation.tr("Bottom"), value: "bottom" }
-                ]
-
-                delegate: WChoiceButton {
-                    required property var modelData
-                    Layout.fillWidth: false
-                    width: (transitionDirectionRow.width - 16 * 2 - 6 * 3) / 4
-                    text: modelData.label
-                    checked: root.waffleTransitionDirection === modelData.value
-                    onClicked: root.setWaffleTransitionDirection(modelData.value)
-                }
-            }
+            options: [
+                { label: Translation.tr("Left"), value: "left" },
+                { label: Translation.tr("Right"), value: "right" },
+                { label: Translation.tr("Top"), value: "top" },
+                { label: Translation.tr("Bottom"), value: "bottom" }
+            ]
+            currentValue: root.waffleTransitionDirection
+            onSelected: newValue => root.setWaffleTransitionDirection(newValue)
         }
         
         WSettingsSpinBox {
@@ -560,31 +521,18 @@ WSettingsPage {
             icon: "wand"
             description: Translation.tr("Apply a tuned set of zoom, workspace travel, panel travel and widget depth values.")
         }
-        Grid {
-            Layout.fillWidth: true
+        WSettingsChoiceGroup {
             Layout.leftMargin: 16
             Layout.rightMargin: 16
             Layout.bottomMargin: 8
             columns: 3
-            columnSpacing: 6
-            rowSpacing: 6
-
-            Repeater {
-                model: [
-                    { label: Translation.tr("Subtle"), value: "subtle" },
-                    { label: Translation.tr("Balanced"), value: "balanced" },
-                    { label: Translation.tr("Immersive"), value: "immersive" }
-                ]
-
-                delegate: WChoiceButton {
-                    required property var modelData
-                    Layout.fillWidth: false
-                    width: (waffleParallaxProfileRow.width - 16 * 2 - 6 * 2) / 3
-                    text: modelData.label
-                    checked: root.waffleParallaxPreset === modelData.value
-                    onClicked: root.applyWaffleParallaxPreset(modelData.value)
-                }
-            }
+            options: [
+                { label: Translation.tr("Subtle"), value: "subtle" },
+                { label: Translation.tr("Balanced"), value: "balanced" },
+                { label: Translation.tr("Immersive"), value: "immersive" }
+            ]
+            currentValue: root.waffleParallaxPreset
+            onSelected: newValue => root.applyWaffleParallaxPreset(newValue)
         }
 
         WSettingsRow {
@@ -592,32 +540,19 @@ WSettingsPage {
             label: Translation.tr("Axis")
             icon: "arrow-right"
         }
-        Grid {
-            Layout.fillWidth: true
+        WSettingsChoiceGroup {
             Layout.leftMargin: 16
             Layout.rightMargin: 16
             Layout.bottomMargin: 8
             columns: 3
-            columnSpacing: 6
-            rowSpacing: 6
-
-            Repeater {
-                model: [
-                    { label: Translation.tr("Horizontal"), value: "horizontal" },
-                    { label: Translation.tr("Vertical"), value: "vertical" },
-                    { label: Translation.tr("Auto"), value: "auto" }
-                ]
-
-                delegate: WChoiceButton {
-                    required property var modelData
-                    Layout.fillWidth: false
-                    width: (waffleParallaxAxisRow.width - 16 * 2 - 6 * 2) / 3
-                    text: modelData.label
-                    checked: (root.wParallax.axis
-                        ?? ((root.wParallax.autoVertical ?? true) ? "auto" : ((root.wParallax.vertical ?? false) ? "vertical" : "horizontal"))) === modelData.value
-                    onClicked: root.setWaffleParallaxAxis(modelData.value)
-                }
-            }
+            options: [
+                { label: Translation.tr("Horizontal"), value: "horizontal" },
+                { label: Translation.tr("Vertical"), value: "vertical" },
+                { label: Translation.tr("Auto"), value: "auto" }
+            ]
+            currentValue: root.wParallax.axis
+                ?? ((root.wParallax.autoVertical ?? true) ? "auto" : ((root.wParallax.vertical ?? false) ? "vertical" : "horizontal"))
+            onSelected: newValue => root.setWaffleParallaxAxis(newValue)
         }
 
         WSettingsSwitch {
@@ -747,6 +682,10 @@ WSettingsPage {
                 if (!screens || screens.length === 0) return ""
                 return WallpaperListener.getMonitorName(screens[0]) ?? ""
             }
+            property bool showBackdropView: false
+            readonly property var selMonData: WallpaperListener.effectivePerMonitor[selectedMonitor] ?? ({})
+            readonly property string selMonPath: selMonData.path || (Config.options?.background?.wallpaperPath ?? "")
+            readonly property string backdropPath: selMonData.backdropPath ?? ""
             Layout.bottomMargin: 4
             implicitHeight: 140
 
@@ -1488,32 +1427,18 @@ WSettingsPage {
                         description: Translation.tr("Use Draggable to place it manually, or let Waffle choose the least busy region")
                     }
 
-                    Grid {
-                        id: clockPlacementGrid
-                        Layout.fillWidth: true
+                    WSettingsChoiceGroup {
                         Layout.leftMargin: 16
                         Layout.rightMargin: 16
                         Layout.bottomMargin: 8
                         columns: 3
-                        columnSpacing: 6
-                        rowSpacing: 6
-
-                        Repeater {
-                            model: [
-                                { label: Translation.tr("Draggable"), value: "free" },
-                                { label: Translation.tr("Least busy"), value: "leastBusy" },
-                                { label: Translation.tr("Most busy"), value: "mostBusy" }
-                            ]
-
-                            delegate: WChoiceButton {
-                                required property var modelData
-                                Layout.fillWidth: false
-                                width: Math.max(0, (clockPlacementGrid.width - 12) / 3)
-                                text: modelData.label
-                                checked: (root.wClock.placementStrategy ?? "leastBusy") === modelData.value
-                                onClicked: Config.setNestedValue("waffles.background.widgets.clock.placementStrategy", modelData.value)
-                            }
-                        }
+                        options: [
+                            { label: Translation.tr("Draggable"), value: "free" },
+                            { label: Translation.tr("Least busy"), value: "leastBusy" },
+                            { label: Translation.tr("Most busy"), value: "mostBusy" }
+                        ]
+                        currentValue: root.wClock.placementStrategy ?? "leastBusy"
+                        onSelected: newValue => Config.setNestedValue("waffles.background.widgets.clock.placementStrategy", newValue)
                     }
 
                     WSettingsButton {
@@ -1660,34 +1585,20 @@ WSettingsPage {
                         description: Translation.tr("Choose a more Windows-like font for the Waffle desktop clock")
                     }
 
-                    Grid {
-                        id: clockFontGrid
-                        Layout.fillWidth: true
+                    WSettingsChoiceGroup {
                         Layout.leftMargin: 16
                         Layout.rightMargin: 16
                         Layout.bottomMargin: 8
                         columns: 2
-                        columnSpacing: 6
-                        rowSpacing: 6
-
-                        Repeater {
-                            model: [
-                                { label: Translation.tr("Waffle UI"), value: Looks.font.family.ui },
-                                { label: "Segoe UI Variable Display", value: "Segoe UI Variable Display" },
-                                { label: "Segoe UI Variable Text", value: "Segoe UI Variable Text" },
-                                { label: "Inter", value: "Inter" },
-                                { label: "Roboto Flex", value: "Roboto Flex" }
-                            ]
-
-                            delegate: WChoiceButton {
-                                required property var modelData
-                                Layout.fillWidth: false
-                                width: Math.max(0, (clockFontGrid.width - 16 * 2 - 6) / 2)
-                                text: modelData.label
-                                checked: (root.wClock.fontFamily ?? "Segoe UI Variable Display") === modelData.value
-                                onClicked: Config.setNestedValue("waffles.background.widgets.clock.fontFamily", modelData.value)
-                            }
-                        }
+                        options: [
+                            { label: Translation.tr("Waffle UI"), value: Looks.font.family.ui },
+                            { label: "Segoe UI Variable Display", value: "Segoe UI Variable Display" },
+                            { label: "Segoe UI Variable Text", value: "Segoe UI Variable Text" },
+                            { label: "Inter", value: "Inter" },
+                            { label: "Roboto Flex", value: "Roboto Flex" }
+                        ]
+                        currentValue: root.wClock.fontFamily ?? "Segoe UI Variable Display"
+                        onSelected: newValue => Config.setNestedValue("waffles.background.widgets.clock.fontFamily", newValue)
                     }
         }
     }

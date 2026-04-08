@@ -150,7 +150,7 @@ WSettingsPage {
             Rectangle {
                 width: 32; height: 32; radius: 16
                 color: heroRandomMa.containsMouse ? Qt.rgba(1, 1, 1, 0.25) : Qt.rgba(1, 1, 1, 0.12)
-                Behavior on color { animation: ColorAnimation { duration: 100 } }
+                Behavior on color { animation: ColorAnimation { duration: 70 } }
                 FluentIcon {
                     anchors.centerIn: parent
                     icon: "arrow-sync"
@@ -170,7 +170,7 @@ WSettingsPage {
             Rectangle {
                 width: 32; height: 32; radius: 16
                 color: heroDarkMa.containsMouse ? Qt.rgba(1, 1, 1, 0.25) : Qt.rgba(1, 1, 1, 0.12)
-                Behavior on color { animation: ColorAnimation { duration: 100 } }
+                Behavior on color { animation: ColorAnimation { duration: 70 } }
                 FluentIcon {
                     anchors.centerIn: parent
                     icon: Appearance.m3colors.darkmode ? "weather-moon" : "weather-sunny"
