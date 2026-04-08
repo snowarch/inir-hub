@@ -22,6 +22,7 @@ Scope {
                 id: barRoot
                 required property var modelData
                 screen: modelData
+                visible: !GameMode.shouldHidePanels
                 exclusionMode: ExclusionMode.Ignore
                 exclusiveZone: GameMode.shouldHidePanels ? 0 : implicitHeight
                 WlrLayershell.namespace: "quickshell:bar"
