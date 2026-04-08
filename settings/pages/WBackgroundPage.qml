@@ -33,7 +33,7 @@ WSettingsPage {
     readonly property int waffleTransitionDuration: root.wTransition.duration ?? 800
     readonly property var directionalTransitionTypes: ["wipe", "wave"]
     readonly property string waffleParallaxPreset: ParallaxMath.detectPreset(
-        root.wParallax.zoom ?? root.wParallax.workspaceZoom ?? 1.05,
+        root.wParallax.zoom ?? root.wParallax.workspaceZoom ?? 1.0,
         root.wParallax.workspaceShift ?? 1,
         root.wParallax.panelShift ?? root.wParallax.sidebarShift ?? 0.12,
         root.wParallax.widgetDepth ?? root.wParallax.widgetsFactor ?? 1.0
@@ -641,11 +641,11 @@ WSettingsPage {
         WSettingsSpinBox {
             label: Translation.tr("Wallpaper zoom")
             icon: "search"
-            description: Translation.tr("Extra wallpaper scale reserved for parallax movement")
+            description: Translation.tr("Extra wallpaper zoom after fit-to-cover. 100% keeps the default parallax headroom; lower values zoom out, higher values zoom in")
             suffix: "%"
-            value: Math.round((root.wParallax.zoom ?? root.wParallax.workspaceZoom ?? 1.05) * 100)
-            from: 100
-            to: 140
+            value: Math.round((root.wParallax.zoom ?? root.wParallax.workspaceZoom ?? 1.0) * 100)
+            from: 10
+            to: 200
             stepSize: 1
             onValueChanged: {
                 if (!root.settingsHandlersReady)

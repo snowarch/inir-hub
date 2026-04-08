@@ -252,6 +252,10 @@ Variants {
             panelRoot._activeWallpaperMetricsPath = ""
             if (panelRoot._pendingWallpaperMetricsPath.length > 0)
                 panelRoot.startNextWallpaperMetricsRequest()
+
+            // Invariant: never keep manual override after reveal/metrics settle.
+            if (panelRoot._pendingWallpaperMetricsPath.length === 0 && panelRoot._awwwRevealOpacity >= 1)
+                panelRoot._manualWallpaperScaleOverride = 0
         }
 
         onWallpaperSourceChanged: {
@@ -266,17 +270,38 @@ Variants {
             pauseParallaxForWallpaperTransition()
             _wallpaperSizeDebounce.restart()
             if (panelRoot._awwwParallaxRevealNeeded) {
+                _awwwRevealAnimation.stop()
                 panelRoot._awwwRevealOpacity = 0
-                _awwwRevealAnimation.restart()
                 panelRoot._manualWallpaperScaleOverride = panelRoot._baseWallpaperScale
+                _awwwRevealAnimation.restart()
+                _awwwRevealSafetyTimer.interval = panelRoot._wallpaperTransitionDurationMs + (Looks.transition.enabled ? Looks.transition.duration.page : 900)
+                _awwwRevealSafetyTimer.restart()
+            } else {
+                _awwwRevealAnimation.stop()
+                _awwwRevealSafetyTimer.stop()
+                panelRoot._awwwRevealOpacity = 1
+                panelRoot._manualWallpaperScaleOverride = 0
             }
             // Suppress blur during transition so the wallpaper change is visible
-            if (panelRoot.blurProgress > 0)
+            if (panelRoot.blurProgress > 0) {
+                _blurTransitionAnimation.stop()
+                panelRoot._blurTransitionFactor = 1
                 _blurTransitionAnimation.restart()
+                _blurTransitionSafetyTimer.interval = panelRoot._wallpaperTransitionDurationMs + (Looks.transition.enabled ? Looks.transition.duration.slow + 800 : 1200)
+                _blurTransitionSafetyTimer.restart()
+            } else {
+                _blurTransitionAnimation.stop()
+                _blurTransitionSafetyTimer.stop()
+                panelRoot._blurTransitionFactor = 1
+            }
         }
 
         on_PreferredScaleChanged: {
-            if (panelRoot._awwwParallaxRevealNeeded)
+            if (!panelRoot._awwwParallaxRevealNeeded) {
+                panelRoot._manualWallpaperScaleOverride = 0
+                return
+            }
+            if (_awwwRevealAnimation.running || panelRoot._awwwRevealOpacity < 1)
                 panelRoot._manualWallpaperScaleOverride = panelRoot._baseWallpaperScale
         }
 
@@ -367,6 +392,24 @@ Variants {
                 duration: Looks.transition.enabled ? Looks.transition.duration.normal : 0
                 easing.type: Easing.OutQuad
             }
+            onFinished: {
+                panelRoot._awwwRevealOpacity = 1
+                panelRoot._manualWallpaperScaleOverride = 0
+                _awwwRevealSafetyTimer.stop()
+            }
+            onStopped: {
+                if (!_awwwRevealAnimation.running && panelRoot._awwwRevealOpacity >= 1)
+                    panelRoot._manualWallpaperScaleOverride = 0
+            }
+        }
+        Timer {
+            id: _awwwRevealSafetyTimer
+            interval: panelRoot._wallpaperTransitionDurationMs + (Looks.transition.enabled ? Looks.transition.duration.page : 900)
+            repeat: false
+            onTriggered: {
+                panelRoot._awwwRevealOpacity = 1
+                panelRoot._manualWallpaperScaleOverride = 0
+            }
         }
 
         Timer {
@@ -445,6 +488,12 @@ Variants {
             animation: NumberAnimation { duration: Looks.transition.enabled ? Looks.transition.duration.normal : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.standard }
         }
 
+        // Runtime invariant:
+        // - _manualWallpaperScaleOverride is temporary and must return to 0 after reveal/metrics settle.
+        // - _awwwRevealOpacity must return to 1 after each wallpaper transition.
+        // - _blurTransitionFactor must return to 1 even if transitions overlap.
+        // This avoids stale zoom/overlay artifacts during rapid wallpaper changes.
+
         // Blur suppression during wallpaper transitions — briefly fades blur out
         // so awww/crossfader transitions are visible, then fades back in.
         property real _blurTransitionFactor: 1
@@ -461,6 +510,12 @@ Variants {
                 target: panelRoot; property: "_blurTransitionFactor"
                 to: 1; duration: Looks.transition.enabled ? 400 : 0; easing.type: Easing.InOutQuad
             }
+        }
+        Timer {
+            id: _blurTransitionSafetyTimer
+            interval: panelRoot._wallpaperTransitionDurationMs + (Looks.transition.enabled ? Looks.transition.duration.slow + 800 : 1200)
+            repeat: false
+            onTriggered: panelRoot._blurTransitionFactor = 1
         }
 
         // Blur progress — blur activates only when windows are present on the current workspace
