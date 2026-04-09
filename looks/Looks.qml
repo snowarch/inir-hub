@@ -82,7 +82,7 @@ Singleton {
     }
     function ensureMinOpacity(col, minAlpha) {
         const c = Qt.color(col)
-        if (!c.valid)
+        if (!c || c.valid === false)
             return col
         return Qt.rgba(c.r, c.g, c.b, Math.max(c.a, minAlpha))
     }
