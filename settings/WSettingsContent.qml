@@ -24,6 +24,15 @@ Item {
     
     // Complete search index with all individual options + targetLabel for spotlight
     property var searchIndex: [
+        // === Quick (0) ===
+        { pageIndex: 0, pageName: "Quick", section: "Wallpaper & Colors", label: "Dark mode", targetLabel: "Dark mode", keywords: ["quick", "dark", "light", "mode", "theme", "scheme"] },
+        { pageIndex: 0, pageName: "Quick", section: "Wallpaper & Colors", label: "Per-monitor wallpapers", targetLabel: "Per-monitor wallpapers", keywords: ["quick", "wallpaper", "monitor", "display", "multi-monitor", "per-monitor"] },
+        { pageIndex: 0, pageName: "Quick", section: "Wallpaper & Colors", label: "Colors only mode", targetLabel: "Colors only mode", keywords: ["quick", "wallpaper", "colors", "theme source", "preview", "palette"] },
+        { pageIndex: 0, pageName: "Quick", section: "Wallpaper & Colors", label: "Color scheme", targetLabel: "Color scheme", keywords: ["quick", "colors", "scheme", "palette", "material", "theme"] },
+        { pageIndex: 0, pageName: "Quick", section: "Wallpaper & Colors", label: "Color strength", targetLabel: "Color strength", keywords: ["quick", "wallpaper", "color", "strength", "vivid", "accent"] },
+        { pageIndex: 0, pageName: "Quick", section: "Wallpaper & Colors", label: "Transparency", targetLabel: "Transparency", keywords: ["quick", "transparency", "glass", "blur", "appearance"] },
+        { pageIndex: 0, pageName: "Quick", section: "Quick actions", label: "Show reload notifications", targetLabel: "Show reload notifications", keywords: ["quick", "reload", "notifications", "toast", "quickshell", "niri"] },
+
         // === General (1) ===
         // Audio
         { pageIndex: 1, pageName: "General", section: "Audio", label: "Volume protection", targetLabel: "Volume protection", keywords: ["volume", "sound", "audio", "protection", "limit", "hearing", "damage", "loud"] },
@@ -871,15 +880,15 @@ Item {
                     }
                 }
                 
-                Repeater {
-                    id: pageRepeater
-                    model: root.pages.length
+                 Repeater {
+                     id: pageRepeater
+                     model: root.pages.length
                     
-                    Loader {
-                        id: pageLoader
-                        required property int index
-                        anchors.fill: parent
-                        active: Config.ready && (pageStack.visitedPages[index] === true)
+                     Loader {
+                         id: pageLoader
+                         required property int index
+                         anchors.fill: parent
+                         active: Config.ready && (pageStack.visitedPages[index] === true)
                         asynchronous: index !== root.currentPage
                         source: root.pages[index].component
                         visible: index === root.currentPage && status === Loader.Ready
@@ -887,14 +896,26 @@ Item {
                         // Disabled pages must not intercept mouse events even at opacity 0
                         enabled: visible
 
-                        Behavior on opacity {
-                            animation: NumberAnimation { duration: Looks.transition.enabled ? Looks.transition.duration.normal : 0; easing.type: Easing.OutCubic }
-                        }
-                    }
-                }
-            }
-        }
-    }
+                         Behavior on opacity {
+                             animation: NumberAnimation { duration: Looks.transition.enabled ? Looks.transition.duration.normal : 0; easing.type: Easing.OutCubic }
+                         }
+
+                         Connections {
+                             target: pageLoader.item
+                             ignoreUnknownSignals: true
+
+                             function onNavigateRequested(pageIndex) {
+                                 if (pageIndex < 0 || pageIndex >= root.pages.length)
+                                     return
+
+                                 root.currentPage = pageIndex
+                             }
+                         }
+                     }
+                 }
+             }
+         }
+     }
     
     // Keyboard shortcut for search
     Shortcut {

@@ -13,6 +13,7 @@ Flickable {
     property string pageIcon: ""
     property string pageDescription: ""
     default property alias content: contentColumn.data
+    signal navigateRequested(int pageIndex)
     
     // Settings search context
     property int settingsPageIndex: -1

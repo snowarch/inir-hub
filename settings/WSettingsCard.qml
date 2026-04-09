@@ -21,7 +21,7 @@ Rectangle {
     radius: Looks.radius.large
     color: Looks.colors.bg1Base
     border.width: 1
-    border.color: Qt.rgba(Looks.colors.bg1Border.r, Looks.colors.bg1Border.g, Looks.colors.bg1Border.b, 0.5)
+    border.color: Looks.colors.bg1Border
     
     ColumnLayout {
         id: mainColumn
