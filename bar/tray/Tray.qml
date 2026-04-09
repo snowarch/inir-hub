@@ -76,7 +76,7 @@ RowLayout {
     }
 
     Repeater {
-        model: GameMode.shouldHidePanels ? null : trayModel
+        model: trayModel
         delegate: TrayButton {
             id: trayButton
             required property var modelData
