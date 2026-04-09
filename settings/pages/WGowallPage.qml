@@ -877,7 +877,7 @@ WSettingsPage {
                     hoverEnabled: true
                     cursorShape: !GowallService.busy && GowallService.previewUrl.length > 0 ? Qt.PointingHandCursor : Qt.ArrowCursor
                     enabled: !GowallService.busy && GowallService.previewUrl.length > 0
-                    onClicked: GowallService.applyPreview("waffle")
+                    onClicked: GowallService.applyPreview()
                 }
             }
         }
