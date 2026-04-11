@@ -1063,205 +1063,6 @@ WSettingsPage {
     }
 
     WSettingsCard {
-        title: Translation.tr("Desktop Clock")
-        icon: "schedule"
-
-        WSettingsSwitch {
-            label: Translation.tr("Enable clock")
-            icon: "schedule"
-            description: Translation.tr("Show a desktop clock on the Waffle wallpaper layer")
-            checked: root.wClock.enable ?? false
-            onCheckedChanged: root.setNestedValueWhenReady("waffles.background.widgets.clock.enable", checked)
-        }
-
-        ColumnLayout {
-            visible: root.wClock.enable ?? false
-            Layout.fillWidth: true
-            spacing: 0
-
-                    WSettingsRow {
-                        label: Translation.tr("Placement")
-                        icon: "drag_pan"
-                        description: Translation.tr("Use Draggable to place it manually, or let Waffle choose the least busy region")
-                    }
-
-                    WSettingsChoiceGroup {
-                        Layout.leftMargin: 16
-                        Layout.rightMargin: 16
-                        Layout.bottomMargin: 8
-                        columns: 3
-                        options: [
-                            { label: Translation.tr("Draggable"), value: "free" },
-                            { label: Translation.tr("Least busy"), value: "leastBusy" },
-                            { label: Translation.tr("Most busy"), value: "mostBusy" }
-                        ]
-                        currentValue: root.wClock.placementStrategy ?? "leastBusy"
-                        onSelected: newValue => Config.setNestedValue("waffles.background.widgets.clock.placementStrategy", newValue)
-                    }
-
-                    WSettingsButton {
-                        visible: (root.wClock.placementStrategy ?? "leastBusy") === "free"
-                        label: Translation.tr("Reset free position")
-                        icon: "arrow-counterclockwise"
-                        description: Translation.tr("Move the draggable clock back to its default position")
-                        buttonText: Translation.tr("Center")
-                        buttonIcon: "arrow-counterclockwise"
-                        onButtonClicked: {
-                            Config.setNestedValue("waffles.background.widgets.clock.x", 100)
-                            Config.setNestedValue("waffles.background.widgets.clock.y", 100)
-                        }
-                    }
-
-                    WSettingsDropdown {
-                        label: Translation.tr("Clock style")
-                        icon: "desktop"
-                        description: Translation.tr("Choose how prominent the wallpaper clock feels")
-                        currentValue: root.wClock.style ?? "hero"
-                        options: [
-                            { value: "hero", displayName: Translation.tr("Hero") },
-                            { value: "balanced", displayName: Translation.tr("Balanced") },
-                            { value: "minimal", displayName: Translation.tr("Minimal") }
-                        ]
-                        onSelected: newValue => Config.setNestedValue("waffles.background.widgets.clock.style", newValue)
-                    }
-
-                    WSettingsDropdown {
-                        label: Translation.tr("Time format")
-                        icon: "schedule"
-                        description: Translation.tr("Follow the global clock format or override it for the wallpaper clock")
-                        currentValue: root.wClock.timeFormat ?? "system"
-                        options: [
-                            { value: "system", displayName: Translation.tr("Follow system") },
-                            { value: "24h", displayName: Translation.tr("24-hour") },
-                            { value: "12h", displayName: Translation.tr("12-hour") }
-                        ]
-                        onSelected: newValue => Config.setNestedValue("waffles.background.widgets.clock.timeFormat", newValue)
-                    }
-
-                    WSettingsSwitch {
-                        label: Translation.tr("Show seconds")
-                        icon: "timer"
-                        description: Translation.tr("Update the wallpaper clock every second")
-                        checked: root.wClock.showSeconds ?? false
-                        onCheckedChanged: root.setNestedValueWhenReady("waffles.background.widgets.clock.showSeconds", checked)
-                    }
-
-                    WSettingsSwitch {
-                        label: Translation.tr("Show date")
-                        icon: "desktop"
-                        description: Translation.tr("Display a second line with the current date")
-                        checked: root.wClock.showDate ?? true
-                        onCheckedChanged: root.setNestedValueWhenReady("waffles.background.widgets.clock.showDate", checked)
-                    }
-
-                    WSettingsDropdown {
-                        visible: root.wClock.showDate ?? true
-                        label: Translation.tr("Date style")
-                        icon: "desktop"
-                        description: Translation.tr("Control how much date information is shown")
-                        currentValue: root.wClock.dateStyle ?? "long"
-                        options: [
-                            { value: "long", displayName: Translation.tr("Long") },
-                            { value: "minimal", displayName: Translation.tr("Minimal") },
-                            { value: "weekday", displayName: Translation.tr("Weekday only") },
-                            { value: "numeric", displayName: Translation.tr("Numeric") }
-                        ]
-                        onSelected: newValue => Config.setNestedValue("waffles.background.widgets.clock.dateStyle", newValue)
-                    }
-
-                    WSettingsDropdown {
-                        label: Translation.tr("Color tone")
-                        icon: "eyedropper"
-                        description: Translation.tr("Blend with wallpaper colors or keep the text neutral")
-                        currentValue: root.wClock.colorMode ?? "adaptive"
-                        options: [
-                            { value: "adaptive", displayName: Translation.tr("Adaptive") },
-                            { value: "accent", displayName: Translation.tr("Accent") },
-                            { value: "plain", displayName: Translation.tr("Plain") }
-                        ]
-                        onSelected: newValue => Config.setNestedValue("waffles.background.widgets.clock.colorMode", newValue)
-                    }
-
-                    WSettingsSwitch {
-                        label: Translation.tr("Animate time change")
-                        icon: "arrow-clockwise"
-                        description: Translation.tr("Smoothly animate the clock text when time changes")
-                        checked: root.wClock.digital?.animateChange ?? true
-                        onCheckedChanged: root.setNestedValueWhenReady("waffles.background.widgets.clock.digital.animateChange", checked)
-                    }
-
-                    WSettingsSpinBox {
-                        label: Translation.tr("Clock dim")
-                        icon: "dark-theme"
-                        description: Translation.tr("Darken the clock text without affecting the wallpaper")
-                        suffix: "%"
-                        from: 0; to: 100; stepSize: 5
-                        value: root.wClock.dim ?? 55
-                        onValueChanged: root.setNestedValueWhenReady("waffles.background.widgets.clock.dim", value)
-                    }
-
-                    WSettingsSpinBox {
-                        label: Translation.tr("Time scale")
-                        icon: "auto"
-                        description: Translation.tr("Scale the main time line independently")
-                        suffix: "%"
-                        from: 65; to: 160; stepSize: 5
-                        value: root.wClock.timeScale ?? 100
-                        onValueChanged: root.setNestedValueWhenReady("waffles.background.widgets.clock.timeScale", value)
-                    }
-
-                    WSettingsSpinBox {
-                        visible: root.wClock.showDate ?? true
-                        label: Translation.tr("Date scale")
-                        icon: "auto"
-                        description: Translation.tr("Scale the date line independently")
-                        suffix: "%"
-                        from: 65; to: 160; stepSize: 5
-                        value: root.wClock.dateScale ?? 100
-                        onValueChanged: root.setNestedValueWhenReady("waffles.background.widgets.clock.dateScale", value)
-                    }
-
-                    WSettingsSwitch {
-                        label: Translation.tr("Show shadow")
-                        icon: "dark-theme"
-                        description: Translation.tr("Use a shadow behind the text for better contrast")
-                        checked: root.wClock.showShadow ?? true
-                        onCheckedChanged: root.setNestedValueWhenReady("waffles.background.widgets.clock.showShadow", checked)
-                    }
-
-                    WSettingsSwitch {
-                        label: Translation.tr("Show lock status")
-                        icon: "desktop"
-                        description: Translation.tr("Show the locked status row when the screen is locked")
-                        checked: root.wClock.showLockStatus ?? true
-                        onCheckedChanged: root.setNestedValueWhenReady("waffles.background.widgets.clock.showLockStatus", checked)
-                    }
-
-                    WSettingsRow {
-                        label: Translation.tr("Clock font")
-                        icon: "keyboard"
-                        description: Translation.tr("Choose a more Windows-like font for the Waffle desktop clock")
-                    }
-
-                    WSettingsChoiceGroup {
-                        Layout.leftMargin: 16
-                        Layout.rightMargin: 16
-                        Layout.bottomMargin: 8
-                        columns: 2
-                        options: [
-                            { label: Translation.tr("Waffle UI"), value: Looks.font.family.ui },
-                            { label: "Segoe UI Variable Display", value: "Segoe UI Variable Display" },
-                            { label: "Segoe UI Variable Text", value: "Segoe UI Variable Text" },
-                            { label: "Inter", value: "Inter" },
-                            { label: "Roboto Flex", value: "Roboto Flex" }
-                        ]
-                        currentValue: root.wClock.fontFamily ?? "Segoe UI Variable Display"
-                        onSelected: newValue => Config.setNestedValue("waffles.background.widgets.clock.fontFamily", newValue)
-                    }
-        }
-    }
-
-    WSettingsCard {
         title: Translation.tr("Wallpaper Effects")
                 icon: "image"
 
@@ -1481,4 +1282,197 @@ WSettingsPage {
                     onValueChanged: root.setNestedValueWhenReady("waffles.background.backdrop.vignetteRadius", value / 100.0)
                 }
             }
+
+    WSettingsCard {
+        title: Translation.tr("Desktop Clock")
+        icon: "schedule"
+
+        WSettingsSwitch {
+            label: Translation.tr("Enable clock")
+            icon: "schedule"
+            description: Translation.tr("Show a desktop clock on the Waffle wallpaper layer")
+            checked: root.wClock.enable ?? false
+            onCheckedChanged: root.setNestedValueWhenReady("waffles.background.widgets.clock.enable", checked)
+        }
+
+        ColumnLayout {
+            visible: root.wClock.enable ?? false
+            Layout.fillWidth: true
+            spacing: 0
+
+                    WSettingsRow {
+                        label: Translation.tr("Placement")
+                        icon: "drag_pan"
+                        description: Translation.tr("Use Draggable to place it manually, or let Waffle choose the least busy region")
+                    }
+
+                    WSettingsChoiceGroup {
+                        Layout.leftMargin: 16
+                        Layout.rightMargin: 16
+                        Layout.bottomMargin: 8
+                        columns: 3
+                        options: [
+                            { label: Translation.tr("Draggable"), value: "free" },
+                            { label: Translation.tr("Least busy"), value: "leastBusy" },
+                            { label: Translation.tr("Most busy"), value: "mostBusy" }
+                        ]
+                        currentValue: root.wClock.placementStrategy ?? "leastBusy"
+                        onSelected: newValue => Config.setNestedValue("waffles.background.widgets.clock.placementStrategy", newValue)
+                    }
+
+                    WSettingsButton {
+                        visible: (root.wClock.placementStrategy ?? "leastBusy") === "free"
+                        label: Translation.tr("Reset free position")
+                        icon: "arrow-counterclockwise"
+                        description: Translation.tr("Move the draggable clock back to its default position")
+                        buttonText: Translation.tr("Center")
+                        buttonIcon: "arrow-counterclockwise"
+                        onButtonClicked: {
+                            Config.setNestedValue("waffles.background.widgets.clock.x", 100)
+                            Config.setNestedValue("waffles.background.widgets.clock.y", 100)
+                        }
+                    }
+
+                    WSettingsDropdown {
+                        label: Translation.tr("Clock style")
+                        icon: "desktop"
+                        description: Translation.tr("Choose how prominent the wallpaper clock feels")
+                        currentValue: root.wClock.style ?? "hero"
+                        options: [
+                            { value: "hero", displayName: Translation.tr("Hero") },
+                            { value: "balanced", displayName: Translation.tr("Balanced") },
+                            { value: "minimal", displayName: Translation.tr("Minimal") }
+                        ]
+                        onSelected: newValue => Config.setNestedValue("waffles.background.widgets.clock.style", newValue)
+                    }
+
+                    WSettingsDropdown {
+                        label: Translation.tr("Time format")
+                        icon: "schedule"
+                        description: Translation.tr("Follow the global clock format or override it for the wallpaper clock")
+                        currentValue: root.wClock.timeFormat ?? "system"
+                        options: [
+                            { value: "system", displayName: Translation.tr("Follow system") },
+                            { value: "24h", displayName: Translation.tr("24-hour") },
+                            { value: "12h", displayName: Translation.tr("12-hour") }
+                        ]
+                        onSelected: newValue => Config.setNestedValue("waffles.background.widgets.clock.timeFormat", newValue)
+                    }
+
+                    WSettingsSwitch {
+                        label: Translation.tr("Show seconds")
+                        icon: "timer"
+                        description: Translation.tr("Update the wallpaper clock every second")
+                        checked: root.wClock.showSeconds ?? false
+                        onCheckedChanged: root.setNestedValueWhenReady("waffles.background.widgets.clock.showSeconds", checked)
+                    }
+
+                    WSettingsSwitch {
+                        label: Translation.tr("Show date")
+                        icon: "desktop"
+                        description: Translation.tr("Display a second line with the current date")
+                        checked: root.wClock.showDate ?? true
+                        onCheckedChanged: root.setNestedValueWhenReady("waffles.background.widgets.clock.showDate", checked)
+                    }
+
+                    WSettingsDropdown {
+                        visible: root.wClock.showDate ?? true
+                        label: Translation.tr("Date style")
+                        icon: "desktop"
+                        description: Translation.tr("Control how much date information is shown")
+                        currentValue: root.wClock.dateStyle ?? "long"
+                        options: [
+                            { value: "long", displayName: Translation.tr("Long") },
+                            { value: "minimal", displayName: Translation.tr("Minimal") },
+                            { value: "weekday", displayName: Translation.tr("Weekday only") },
+                            { value: "numeric", displayName: Translation.tr("Numeric") }
+                        ]
+                        onSelected: newValue => Config.setNestedValue("waffles.background.widgets.clock.dateStyle", newValue)
+                    }
+
+                    WSettingsDropdown {
+                        label: Translation.tr("Color tone")
+                        icon: "eyedropper"
+                        description: Translation.tr("Blend with wallpaper colors or keep the text neutral")
+                        currentValue: root.wClock.colorMode ?? "adaptive"
+                        options: [
+                            { value: "adaptive", displayName: Translation.tr("Adaptive") },
+                            { value: "accent", displayName: Translation.tr("Accent") },
+                            { value: "plain", displayName: Translation.tr("Plain") }
+                        ]
+                        onSelected: newValue => Config.setNestedValue("waffles.background.widgets.clock.colorMode", newValue)
+                    }
+
+                    WSettingsSwitch {
+                        label: Translation.tr("Animate time change")
+                        icon: "arrow-clockwise"
+                        description: Translation.tr("Smoothly animate the clock text when time changes")
+                        checked: root.wClock.digital?.animateChange ?? true
+                        onCheckedChanged: root.setNestedValueWhenReady("waffles.background.widgets.clock.digital.animateChange", checked)
+                    }
+
+                    WSettingsSpinBox {
+                        label: Translation.tr("Clock dim")
+                        icon: "dark-theme"
+                        description: Translation.tr("Darken the clock text without affecting the wallpaper")
+                        suffix: "%"
+                        from: 0; to: 100; stepSize: 5
+                        value: root.wClock.dim ?? 55
+                        onValueChanged: root.setNestedValueWhenReady("waffles.background.widgets.clock.dim", value)
+                    }
+
+                    WSettingsSpinBox {
+                        label: Translation.tr("Time scale")
+                        icon: "auto"
+                        description: Translation.tr("Scale the main time line independently")
+                        suffix: "%"
+                        from: 65; to: 160; stepSize: 5
+                        value: root.wClock.timeScale ?? 100
+                        onValueChanged: root.setNestedValueWhenReady("waffles.background.widgets.clock.timeScale", value)
+                    }
+
+                    WSettingsSpinBox {
+                        visible: root.wClock.showDate ?? true
+                        label: Translation.tr("Date scale")
+                        icon: "auto"
+                        description: Translation.tr("Scale the date line independently")
+                        suffix: "%"
+                        from: 65; to: 160; stepSize: 5
+                        value: root.wClock.dateScale ?? 100
+                        onValueChanged: root.setNestedValueWhenReady("waffles.background.widgets.clock.dateScale", value)
+                    }
+
+                    WSettingsSwitch {
+                        label: Translation.tr("Show shadow")
+                        icon: "dark-theme"
+                        description: Translation.tr("Use a shadow behind the text for better contrast")
+                        checked: root.wClock.showShadow ?? true
+                        onCheckedChanged: root.setNestedValueWhenReady("waffles.background.widgets.clock.showShadow", checked)
+                    }
+
+                    WSettingsSwitch {
+                        label: Translation.tr("Show lock status")
+                        icon: "desktop"
+                        description: Translation.tr("Show the locked status row when the screen is locked")
+                        checked: root.wClock.showLockStatus ?? true
+                        onCheckedChanged: root.setNestedValueWhenReady("waffles.background.widgets.clock.showLockStatus", checked)
+                    }
+
+                    WSettingsFontSelector {
+                        label: Translation.tr("Clock font")
+                        icon: "keyboard"
+                        description: Translation.tr("Choose a font for the Waffle desktop clock")
+                        currentFont: root.wClock.fontFamily ?? "Roboto Flex"
+                        featuredFonts: [
+                            Looks.font.family.ui,
+                            "Space Grotesk",
+                            "Roboto Flex",
+                            "Segoe UI Variable Display",
+                            "Segoe UI Variable Text",
+                            "Inter"
+                        ]
+                        onSelected: fontFamily => Config.setNestedValue("waffles.background.widgets.clock.fontFamily", fontFamily)
+                    }
+        }
+    }
 }
