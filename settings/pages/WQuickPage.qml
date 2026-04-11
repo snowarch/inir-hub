@@ -344,7 +344,7 @@ WSettingsPage {
                         anchors.fill: parent
                         hoverEnabled: true
                         cursorShape: Qt.PointingHandCursor
-                        onClicked: ShellExec.execCmd(`${Directories.wallpaperSwitchScriptPath} --mode ${modeBtn.modelData.dark ? "dark" : "light"} --noswitch`)
+                        onClicked: MaterialThemeLoader.setDarkMode(modeBtn.modelData.dark)
                     }
                 }
             }
@@ -860,16 +860,13 @@ WSettingsPage {
                     onClicked: {
                         const val = schemeChip.modelData.value
                         Config.setNestedValue("appearance.palette.type", val)
-                        if (ThemeService.isAutoTheme) {
-                            ShellExec.execCmd(`${Directories.wallpaperSwitchScriptPath} --noswitch --type ${val}`)
-                        } else {
-                            const primary = Appearance.m3colors.m3primary
-                            const hex = "#" + ((1 << 24)
-                                | (Math.round(primary.r * 255) << 16)
-                                | (Math.round(primary.g * 255) << 8)
-                                | Math.round(primary.b * 255)).toString(16).slice(1)
+                        if (!ThemeService.isAutoTheme) {
+                            // Manual preset: apply variant immediately
+                            const hex = MaterialThemeLoader.colorToHex(Appearance.m3colors.m3primary)
                             MaterialThemeLoader.applySchemeVariant(hex, val)
                         }
+                        // Auto theme: ThemeService detects palette type change in
+                        // liveRegenSignature and regenerates automatically.
                     }
                 }
             }

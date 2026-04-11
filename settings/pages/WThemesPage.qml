@@ -541,8 +541,7 @@ WSettingsPage {
                 { value: "dark", displayName: Translation.tr("Dark") }
             ]
             onSelected: newValue => {
-                const dark = newValue === "dark"
-                ShellExec.execCmd(`${Directories.wallpaperSwitchScriptPath} --mode ${dark ? "dark" : "light"} --noswitch`)
+                MaterialThemeLoader.setDarkMode(newValue === "dark")
             }
         }
 
@@ -564,12 +563,13 @@ WSettingsPage {
             ]
             onSelected: newValue => {
                 Config.setNestedValue("appearance.palette.type", newValue)
-                if (ThemeService.isAutoTheme) {
-                    ShellExec.execCmd(`${Directories.wallpaperSwitchScriptPath} --noswitch --type ${newValue}`)
-                } else {
+                if (!ThemeService.isAutoTheme) {
+                    // Manual preset: apply variant immediately via MaterialThemeLoader
                     const hex = MaterialThemeLoader.colorToHex(Appearance.m3colors.m3primary)
                     MaterialThemeLoader.applySchemeVariant(hex, newValue)
                 }
+                // Auto theme: ThemeService detects palette type change in
+                // liveRegenSignature and runs regenerateAutoTheme automatically.
             }
         }
     }
@@ -585,6 +585,42 @@ WSettingsPage {
             description: Translation.tr("Apply Material color scheme instead of Windows 11 grey")
             checked: Config.options?.waffles?.theming?.useMaterialColors ?? false
             onCheckedChanged: Config.setNestedValue("waffles.theming.useMaterialColors", checked)
+        }
+
+        WSettingsSlider {
+            label: Translation.tr("Color strength")
+            icon: "eyedropper"
+            description: Translation.tr("Controls how vivid wallpaper-derived accent colors are")
+            from: 60; to: 180; stepSize: 5
+            suffix: "%"
+            value: Math.round((Config.options?.appearance?.wallpaperTheming?.colorStrength ?? 1.0) * 100)
+            property bool _ready: false
+            Component.onCompleted: _ready = true
+            onMoved: {
+                if (!_ready) return
+                Config.setNestedValue("appearance.wallpaperTheming.colorStrength", value / 100)
+                colorStrengthRegenTimer.restart()
+            }
+        }
+
+        Timer {
+            id: colorStrengthRegenTimer
+            interval: 300
+            onTriggered: {
+                if (ThemeService.isAutoTheme)
+                    ThemeService.regenerateAutoTheme()
+            }
+        }
+
+        WSettingsSwitch {
+            label: Translation.tr("Soften colors")
+            icon: "paint-bucket"
+            description: Translation.tr("Subtly soften theme colors for a more natural look")
+            checked: Config.options?.appearance?.softenColors ?? true
+            onCheckedChanged: {
+                Config.setNestedValue("appearance.softenColors", checked)
+                ThemeService.regenerateAutoTheme()
+            }
         }
 
         WSettingsSwitch {
@@ -617,6 +653,106 @@ WSettingsPage {
             description: Translation.tr("Enable transparent UI elements")
             checked: Config.options?.appearance?.transparency?.enable ?? false
             onCheckedChanged: Config.setNestedValue("appearance.transparency.enable", checked)
+        }
+    }
+
+    // Terminal color adjustment
+    WSettingsCard {
+        title: Translation.tr("Terminal Colors")
+        icon: "window-console"
+
+        // Debounce timer for terminal color regeneration
+        Timer {
+            id: terminalColorDebounce
+            interval: 300
+            onTriggered: ThemeService.regenerateAutoTheme()
+        }
+
+        WSettingsSlider {
+            id: termSaturationSlider
+            label: Translation.tr("Color saturation")
+            icon: "dark-theme"
+            description: Translation.tr("How vivid semantic terminal colors are")
+            from: 10; to: 80; stepSize: 5
+            suffix: "%"
+            value: Math.round((Config.options?.appearance?.wallpaperTheming?.terminalColorAdjustments?.saturation ?? 0.65) * 100)
+            property bool _ready: false
+            Component.onCompleted: _ready = true
+            onMoved: {
+                if (!_ready) return
+                Config.setNestedValue("appearance.wallpaperTheming.terminalColorAdjustments.saturation", value / 100)
+                terminalColorDebounce.restart()
+            }
+        }
+
+        WSettingsSlider {
+            id: termBrightnessSlider
+            label: Translation.tr("Color brightness")
+            icon: "brightness-high"
+            description: Translation.tr("Lightness of terminal foreground colors")
+            from: 35; to: 75; stepSize: 5
+            suffix: "%"
+            value: Math.round((Config.options?.appearance?.wallpaperTheming?.terminalColorAdjustments?.brightness ?? 0.60) * 100)
+            property bool _ready: false
+            Component.onCompleted: _ready = true
+            onMoved: {
+                if (!_ready) return
+                Config.setNestedValue("appearance.wallpaperTheming.terminalColorAdjustments.brightness", value / 100)
+                terminalColorDebounce.restart()
+            }
+        }
+
+        WSettingsSlider {
+            id: termHarmonySlider
+            label: Translation.tr("Theme harmony")
+            icon: "color"
+            description: Translation.tr("Shifts terminal hues towards the theme's primary color")
+            from: 0; to: 100; stepSize: 5
+            suffix: "%"
+            value: Math.round((Config.options?.appearance?.wallpaperTheming?.terminalColorAdjustments?.harmony ?? 0.40) * 100)
+            property bool _ready: false
+            Component.onCompleted: _ready = true
+            onMoved: {
+                if (!_ready) return
+                Config.setNestedValue("appearance.wallpaperTheming.terminalColorAdjustments.harmony", value / 100)
+                terminalColorDebounce.restart()
+            }
+        }
+
+        WSettingsSlider {
+            id: termBgBrightnessSlider
+            label: Translation.tr("Background brightness")
+            icon: "border-none"
+            description: Translation.tr("Terminal background darkness — lower is darker, 50% matches shell surfaces")
+            from: 10; to: 90; stepSize: 5
+            suffix: "%"
+            value: Math.round((Config.options?.appearance?.wallpaperTheming?.terminalColorAdjustments?.backgroundBrightness ?? 0.50) * 100)
+            property bool _ready: false
+            Component.onCompleted: _ready = true
+            onMoved: {
+                if (!_ready) return
+                Config.setNestedValue("appearance.wallpaperTheming.terminalColorAdjustments.backgroundBrightness", value / 100)
+                terminalColorDebounce.restart()
+            }
+        }
+
+        WSettingsButton {
+            label: Translation.tr("Reset to defaults")
+            icon: "arrow-reset"
+            description: Translation.tr("Restore all terminal color settings to defaults")
+            buttonText: Translation.tr("Reset")
+            buttonIcon: "arrow-reset"
+            onButtonClicked: {
+                termSaturationSlider.value = 65
+                termBrightnessSlider.value = 60
+                termHarmonySlider.value = 40
+                termBgBrightnessSlider.value = 50
+                Config.setNestedValue("appearance.wallpaperTheming.terminalColorAdjustments.saturation", 0.65)
+                Config.setNestedValue("appearance.wallpaperTheming.terminalColorAdjustments.brightness", 0.60)
+                Config.setNestedValue("appearance.wallpaperTheming.terminalColorAdjustments.harmony", 0.40)
+                Config.setNestedValue("appearance.wallpaperTheming.terminalColorAdjustments.backgroundBrightness", 0.50)
+                terminalColorDebounce.restart()
+            }
         }
     }
 
