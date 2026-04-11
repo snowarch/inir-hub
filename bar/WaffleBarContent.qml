@@ -51,7 +51,7 @@ Rectangle {
 
         model: [
             {
-                iconName: "monitoring",
+                iconName: "pulse",
                 text: Translation.tr("Task Manager"),
                 action: () => {
                     Session.launchTaskManager()
