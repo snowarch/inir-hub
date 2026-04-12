@@ -37,16 +37,16 @@ Singleton {
 
     readonly property bool transparencyEnabled: Config.options?.appearance?.transparency?.enable ?? false
     // When glass mode is active, ensure surfaces have enough transparency
-    // so the glass/blur effect is visible beneath Win11 colors
+    // so the glass/blur effect is visible beneath the dark base colors
     property real backgroundTransparency: root.auroraEverywhere
-        ? Math.max(Appearance.backgroundTransparency ?? 0, root.glassActive ? 0.22 : 0)
+        ? Math.max(Appearance.backgroundTransparency ?? 0, root.glassActive ? 0.12 : 0)
         : (transparencyEnabled ? 0.13 : 0)
     property real panelBackgroundTransparency: root.auroraEverywhere
-        ? Math.max(Appearance.backgroundTransparency ?? 0, root.glassActive ? 0.18 : 0)
+        ? Math.max(Appearance.backgroundTransparency ?? 0, root.glassActive ? 0.10 : 0)
         : (transparencyEnabled ? 0.12 : 0)
     property real panelLayerTransparency: root.auroraEverywhere ? (Appearance.aurora.popupSurfaceTransparentize ?? 0.5) : (root.dark ? 0.6 : 0.5)
     property real contentTransparency: root.auroraEverywhere
-        ? Math.max(Appearance.contentTransparency ?? 0, root.glassActive ? 0.25 : 0)
+        ? Math.max(Appearance.contentTransparency ?? 0, root.glassActive ? 0.15 : 0)
         : (root.dark ? 0.87 : 0.5)
     function clamp(value, minimum, maximum) {
         return Math.max(minimum, Math.min(maximum, value))
@@ -160,9 +160,10 @@ Singleton {
         // Material-aware colors - 3 paths:
         // 1. useMaterial=true → Material-derived from Appearance.colors.*
         //    (when glassActive, glass-aware surfaces from angel/aurora palette)
-        // 2. glassActive && !useMaterial → Win11 colors with elevated transparency (glass visible)
-        //    (glass-aware surfaces fall back to Win11 palette — no material clash)
-        // 3. !glassActive && !useMaterial → flat Win11 colors (original behavior)
+        // 2. !useMaterial + glassActive + dark → Win11 *Base colors (dark greys: #2C2C2C, #313131)
+        //    with backgroundTransparency. The overlay colors (#a8a8a8, #8a8a8a) are Win11 Mica
+        //    tints designed for 13% opacity — at glass opacity levels they look blindingly bright.
+        // 3. !useMaterial + (!glass || !dark) → original Win11 colors at intended transparency
         property color bgPanelFooterBase: root.useMaterial
             ? Appearance.colors.colLayer0
             : ColorUtils.transparentize(root.dark ? root.darkColors.bgPanelFooter : root.lightColors.bgPanelFooter, root.panelBackgroundTransparency)
@@ -175,12 +176,16 @@ Singleton {
             ? "transparent"
             : root.useMaterial
                 ? Appearance.colors.colLayer2
-                : ColorUtils.transparentize(root.dark ? root.darkColors.bgPanelBody : root.lightColors.bgPanelBody, root.panelLayerTransparency)
+                : ColorUtils.transparentize(
+                    root.glassActive && root.dark ? root.darkColors.bg2Base : (root.dark ? root.darkColors.bgPanelBody : root.lightColors.bgPanelBody),
+                    root.panelLayerTransparency)
         property color bgPanelSeparator: root.glassActive && root.useMaterial
             ? (Appearance.angelEverywhere ? Appearance.angel.colBorderSubtle ?? "transparent" : Appearance.colors.colBorderSubtle ?? "transparent")
             : root.useMaterial
                 ? Appearance.colors.colOutlineVariant
-                : ColorUtils.transparentize(root.dark ? root.darkColors.bgPanelSeparator : root.lightColors.bgPanelSeparator, root.backgroundTransparency)
+                : ColorUtils.transparentize(
+                    root.glassActive && root.dark ? root.darkColors.bg0Border : (root.dark ? root.darkColors.bgPanelSeparator : root.lightColors.bgPanelSeparator),
+                    root.backgroundTransparency)
         property color bg0Opaque: root.useMaterial
             ? Appearance.m3colors.m3background
             : (root.dark ? root.darkColors.bg0 : root.lightColors.bg0)
@@ -197,35 +202,51 @@ Singleton {
             : ColorUtils.transparentize(root.dark ? root.darkColors.bg1Base : root.lightColors.bg1Base, root.backgroundTransparency)
         property color bg1: root.useMaterial 
             ? Appearance.colors.colLayer1 
-            : ColorUtils.transparentize(root.dark ? root.darkColors.bg1 : root.lightColors.bg1, root.contentTransparency)
+            : ColorUtils.transparentize(
+                root.glassActive && root.dark ? root.darkColors.bg1Base : (root.dark ? root.darkColors.bg1 : root.lightColors.bg1),
+                root.glassActive ? root.backgroundTransparency : root.contentTransparency)
         property color bg1Hover: root.useMaterial 
             ? Appearance.colors.colLayer1Hover 
-            : ColorUtils.transparentize(root.dark ? root.darkColors.bg1Hover : root.lightColors.bg1Hover, root.contentTransparency)
+            : ColorUtils.transparentize(
+                root.glassActive && root.dark ? Qt.lighter(root.darkColors.bg1Base, 1.3) : (root.dark ? root.darkColors.bg1Hover : root.lightColors.bg1Hover),
+                root.glassActive ? root.backgroundTransparency : root.contentTransparency)
         property color bg1Active: root.useMaterial 
             ? Appearance.colors.colLayer1Active 
-            : ColorUtils.transparentize(root.dark ? root.darkColors.bg1Active : root.lightColors.bg1Active, root.contentTransparency)
+            : ColorUtils.transparentize(
+                root.glassActive && root.dark ? Qt.darker(root.darkColors.bg1Base, 1.15) : (root.dark ? root.darkColors.bg1Active : root.lightColors.bg1Active),
+                root.glassActive ? root.backgroundTransparency : root.contentTransparency)
         property color bg1Border: root.glassActive && root.useMaterial
             ? (Appearance.angelEverywhere ? Appearance.angel.colBorderSubtle ?? "transparent" : Appearance.colors.colBorderSubtle ?? "transparent")
             : root.useMaterial 
                 ? Appearance.colors.colOutlineVariant 
-                : ColorUtils.transparentize(root.dark ? root.darkColors.bg1Border : root.lightColors.bg1Border, root.contentTransparency)
+                : ColorUtils.transparentize(
+                    root.glassActive && root.dark ? root.darkColors.bg0Border : (root.dark ? root.darkColors.bg1Border : root.lightColors.bg1Border),
+                    root.glassActive ? root.backgroundTransparency : root.contentTransparency)
         property color bg2Base: root.useMaterial 
             ? Appearance.colors.colLayer2 
             : ColorUtils.transparentize(root.dark ? root.darkColors.bg2Base : root.lightColors.bg2Base, root.backgroundTransparency)
         property color bg2: root.useMaterial 
             ? Appearance.colors.colLayer2 
-            : ColorUtils.transparentize(root.dark ? root.darkColors.bg2 : root.lightColors.bg2, root.contentTransparency)
+            : ColorUtils.transparentize(
+                root.glassActive && root.dark ? root.darkColors.bg2Base : (root.dark ? root.darkColors.bg2 : root.lightColors.bg2),
+                root.glassActive ? root.backgroundTransparency : root.contentTransparency)
         property color bg2Hover: root.useMaterial 
             ? Appearance.colors.colLayer2Hover 
-            : ColorUtils.transparentize(root.dark ? root.darkColors.bg2Hover : root.lightColors.bg2Hover, root.contentTransparency)
+            : ColorUtils.transparentize(
+                root.glassActive && root.dark ? Qt.lighter(root.darkColors.bg2Base, 1.3) : (root.dark ? root.darkColors.bg2Hover : root.lightColors.bg2Hover),
+                root.glassActive ? root.backgroundTransparency : root.contentTransparency)
         property color bg2Active: root.useMaterial 
             ? Appearance.colors.colLayer2Active 
-            : ColorUtils.transparentize(root.dark ? root.darkColors.bg2Active : root.lightColors.bg2Active, root.contentTransparency)
+            : ColorUtils.transparentize(
+                root.glassActive && root.dark ? Qt.darker(root.darkColors.bg2Base, 1.15) : (root.dark ? root.darkColors.bg2Active : root.lightColors.bg2Active),
+                root.glassActive ? root.backgroundTransparency : root.contentTransparency)
         property color bg2Border: root.glassActive && root.useMaterial
             ? (Appearance.angelEverywhere ? Appearance.angel.colBorderSubtle ?? "transparent" : Appearance.colors.colBorderSubtle ?? "transparent")
             : root.useMaterial 
                 ? Appearance.colors.colOutlineVariant 
-                : ColorUtils.transparentize(root.dark ? root.darkColors.bg2Border : root.lightColors.bg2Border, root.contentTransparency)
+                : ColorUtils.transparentize(
+                    root.glassActive && root.dark ? root.darkColors.bg0Border : (root.dark ? root.darkColors.bg2Border : root.lightColors.bg2Border),
+                    root.glassActive ? root.backgroundTransparency : root.contentTransparency)
         property color interactiveSurface: root.glassActive && root.useMaterial
             ? root.ensureMinOpacity(Appearance.angelEverywhere ? Appearance.angel.colGlassCard : Appearance.aurora.colSubSurface, 0.72)
             : bg1

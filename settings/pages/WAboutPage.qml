@@ -187,7 +187,7 @@ WSettingsPage {
     // System Info
     WSettingsCard {
         title: Translation.tr("System Info")
-        icon: "desktop"
+        icon: "info"
         
         WSettingsRow {
             label: Translation.tr("Config path")
@@ -204,7 +204,7 @@ WSettingsPage {
         WSettingsRow {
             label: Translation.tr("Panel family")
             description: Config.options?.panelFamily === "waffle" ? "Waffle (Windows 11)" : "ii (Material)"
-            icon: "desktop"
+            icon: "app-generic"
         }
     }
 }

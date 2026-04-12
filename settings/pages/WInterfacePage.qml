@@ -224,12 +224,12 @@ WSettingsPage {
     
     WSettingsCard {
         title: Translation.tr("Display scaling")
-        icon: "desktop"
+        icon: "screenshot"
 
         WSettingsSpinBox {
             id: scaleSpinBox
             label: Translation.tr("UI scale")
-            icon: "add"
+            icon: "screenshot"
             description: Translation.tr("Takes effect immediately")
             suffix: "%"
             from: 50; to: 200; stepSize: 5
@@ -251,11 +251,11 @@ WSettingsPage {
 
     WSettingsCard {
         title: Translation.tr("Display")
-        icon: "desktop"
+        icon: "screenshot"
         
         WSettingsDropdown {
             label: Translation.tr("Fake rounded corners")
-            icon: "desktop"
+            icon: "screenshot"
             description: Translation.tr("Add rounded corners to flat screens")
             currentValue: Config.options?.appearance?.fakeScreenRounding ?? 0
             options: [
@@ -269,6 +269,7 @@ WSettingsPage {
 
     WSettingsSection {
         title: Translation.tr("Notifications & Alerts")
+        icon: "alert"
     }
 
     WSettingsCard {
@@ -277,7 +278,7 @@ WSettingsPage {
         
         WSettingsSpinBox {
             label: Translation.tr("Normal timeout")
-            icon: "alert"
+            icon: "arrow-clockwise"
             description: Translation.tr("How long normal notifications stay visible")
             suffix: "ms"
             from: 1000; to: 30000; stepSize: 1000
@@ -296,7 +297,7 @@ WSettingsPage {
         
         WSettingsSpinBox {
             label: Translation.tr("Critical timeout")
-            icon: "alert"
+            icon: "alert-filled"
             description: Translation.tr("0 = never auto-dismiss")
             suffix: "ms"
             from: 0; to: 30000; stepSize: 1000
@@ -314,7 +315,7 @@ WSettingsPage {
         
         WSettingsDropdown {
             label: Translation.tr("Popup position")
-            icon: "desktop"
+            icon: "panel-left-expand"
             currentValue: Config.options?.notifications?.position ?? "bottomRight"
             options: [
                 { value: "topLeft", displayName: Translation.tr("Top Left") },
@@ -327,7 +328,7 @@ WSettingsPage {
         
         WSettingsSwitch {
             label: Translation.tr("Do Not Disturb")
-            icon: "alert-off"
+            icon: "weather-moon"
             description: Translation.tr("Silence all notifications")
             checked: Config.options?.notifications?.silent ?? false
             onCheckedChanged: Config.setNestedValue("notifications.silent", checked)
@@ -336,11 +337,11 @@ WSettingsPage {
     
     WSettingsCard {
         title: Translation.tr("On-Screen Display")
-        icon: "speaker-2-filled"
+        icon: "pulse"
         
         WSettingsSpinBox {
             label: Translation.tr("OSD timeout")
-            icon: "speaker-2-filled"
+            icon: "arrow-clockwise"
             description: Translation.tr("How long volume/brightness OSD stays visible")
             suffix: "ms"
             from: 500; to: 5000; stepSize: 250
@@ -351,6 +352,7 @@ WSettingsPage {
     
     WSettingsSection {
         title: Translation.tr("Lock Screen")
+        icon: "lock-closed"
     }
 
     WSettingsCard {
@@ -368,7 +370,7 @@ WSettingsPage {
         WSettingsSpinBox {
             visible: Config.options?.lock?.blur?.enable ?? true
             label: Translation.tr("Blur radius")
-            icon: "eye"
+            icon: "eyedropper"
             from: 0; to: 200; stepSize: 10
             value: Config.options?.lock?.blur?.radius ?? 100
             onValueChanged: Config.setNestedValue("lock.blur.radius", value)
@@ -376,7 +378,7 @@ WSettingsPage {
         
         WSettingsSwitch {
             label: Translation.tr("Center clock")
-            icon: "arrow-clockwise"
+            icon: "panel-left-contract"
             checked: Config.options?.lock?.centerClock ?? true
             onCheckedChanged: Config.setNestedValue("lock.centerClock", checked)
         }
@@ -391,6 +393,7 @@ WSettingsPage {
 
     WSettingsSection {
         title: Translation.tr("Screen Recording")
+        icon: "record"
     }
 
     WSettingsCard {
@@ -421,7 +424,7 @@ WSettingsPage {
 
         WSettingsDropdown {
             label: Translation.tr("Quality preset")
-            icon: "settings"
+            icon: "options"
             description: Translation.tr("Trade off file size and output quality")
             currentValue: Config.options?.screenRecord?.qualityPreset ?? "balanced"
             options: root.recordingQualityPresetOptions
@@ -480,7 +483,7 @@ WSettingsPage {
         WSettingsDropdown {
             visible: root.customRecordingPreset
             label: Translation.tr("Video bitrate")
-            icon: "record"
+            icon: "pulse"
             currentValue: Config.options?.screenRecord?.videoBitrateKbps ?? 12000
             options: root.recordingVideoBitrateOptions
             onSelected: newValue => root.setRecordingConfig("screenRecord.videoBitrateKbps", newValue)
@@ -489,7 +492,7 @@ WSettingsPage {
         WSettingsDropdown {
             visible: root.customRecordingPreset
             label: Translation.tr("Audio codec")
-            icon: "speaker-2-filled"
+            icon: "mic"
             currentValue: Config.options?.screenRecord?.audioCodec ?? "aac"
             options: root.availableAudioCodecOptions()
             onSelected: newValue => root.setRecordingConfig("screenRecord.audioCodec", newValue)
@@ -498,7 +501,7 @@ WSettingsPage {
         WSettingsDropdown {
             visible: root.customRecordingPreset
             label: Translation.tr("Audio bitrate")
-            icon: "speaker-2-filled"
+            icon: "mic"
             currentValue: Config.options?.screenRecord?.audioBitrateKbps ?? 192
             options: root.recordingAudioBitrateOptions
             onSelected: newValue => root.setRecordingConfig("screenRecord.audioBitrateKbps", newValue)
@@ -507,7 +510,7 @@ WSettingsPage {
         WSettingsDropdown {
             visible: root.customRecordingPreset
             label: Translation.tr("Audio source")
-            icon: "speaker-2-filled"
+            icon: "speaker"
             description: Translation.tr("Default output monitor captures desktop audio")
             currentValue: Config.options?.screenRecord?.audioSource ?? ""
             options: root.availableAudioSourceOptions()
@@ -517,7 +520,7 @@ WSettingsPage {
         WSettingsDropdown {
             visible: root.customRecordingPreset
             label: Translation.tr("Audio backend")
-            icon: "speaker-2-filled"
+            icon: "speaker-settings"
             currentValue: Config.options?.screenRecord?.audioBackend ?? ""
             options: root.recordingAudioBackendOptions
             onSelected: newValue => root.setRecordingConfig("screenRecord.audioBackend", newValue)
@@ -526,7 +529,7 @@ WSettingsPage {
         WSettingsDropdown {
             visible: root.customRecordingPreset && root.gpuRecordingAvailable
             label: Translation.tr("Render device")
-            icon: "desktop"
+            icon: "device-eq"
             currentValue: Config.options?.screenRecord?.hardwareDevice ?? "/dev/dri/renderD128"
             options: root.availableHardwareDeviceOptions()
             onSelected: newValue => root.setRecordingConfig("screenRecord.hardwareDevice", newValue)

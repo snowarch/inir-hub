@@ -71,11 +71,20 @@ Rectangle {
                 }
                 spacing: 10
                 
-                FluentIcon {
+                Rectangle {
                     visible: root.icon !== ""
-                    icon: root.icon
-                    implicitSize: 16
-                    color: Looks.colors.subfg
+                    implicitWidth: 26
+                    implicitHeight: 26
+                    radius: Looks.radius.small
+                    color: Qt.alpha(Looks.colors.accent, 0.12)
+                    Layout.alignment: Qt.AlignVCenter
+
+                    FluentIcon {
+                        anchors.centerIn: parent
+                        icon: root.icon
+                        implicitSize: 14
+                        color: Looks.colors.accent
+                    }
                 }
                 
                 WText {
@@ -83,7 +92,7 @@ Rectangle {
                     text: root.title
                     font.pixelSize: Looks.font.pixelSize.normal
                     font.weight: Looks.font.weight.strong
-                    color: Looks.colors.subfg
+                    color: Looks.colors.fg
                 }
                 
                 FluentIcon {

@@ -188,15 +188,27 @@ Item {
         }
         spacing: 10
         
-        FluentIcon {
+        Rectangle {
             visible: root.icon !== ""
-            icon: root.icon
-            implicitSize: 16
+            implicitWidth: 30
+            implicitHeight: 30
+            radius: Looks.radius.small
+            color: mouseArea.containsMouse ? Qt.alpha(Looks.colors.accent, 0.1) : Looks.colors.bg2Base
             Layout.alignment: Qt.AlignVCenter
-            color: mouseArea.containsMouse ? Looks.colors.accent : Looks.colors.subfg
             
             Behavior on color {
-                animation: ColorAnimation { duration: Looks.transition.enabled ? 70 : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.standard }
+                animation: ColorAnimation { duration: Looks.transition.enabled ? 120 : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.standard }
+            }
+
+            FluentIcon {
+                anchors.centerIn: parent
+                icon: root.icon
+                implicitSize: 16
+                color: mouseArea.containsMouse ? Looks.colors.accent : Looks.colors.subfg
+                
+                Behavior on color {
+                    animation: ColorAnimation { duration: Looks.transition.enabled ? 70 : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.standard }
+                }
             }
         }
         

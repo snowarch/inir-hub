@@ -34,6 +34,7 @@ WSettingsPage {
     WSettingsSection {
         visible: root.isWaffleActive
         title: Translation.tr("Window Management")
+        icon: "apps"
     }
 
     WSettingsCard {
@@ -152,7 +153,7 @@ WSettingsPage {
 
         WSettingsSwitch {
             label: Translation.tr("Show Niri overview while switching")
-            icon: "desktop"
+            icon: "open"
             description: Translation.tr("Open compositor overview alongside the switcher")
             checked: Config.options?.waffles?.altSwitcher?.showOverviewWhileSwitching ?? false
             onCheckedChanged: Config.setNestedValue("waffles.altSwitcher.showOverviewWhileSwitching", checked)
@@ -195,6 +196,7 @@ WSettingsPage {
     WSettingsSection {
         visible: root.isWaffleActive
         title: Translation.tr("Behavior")
+        icon: "settings"
     }
 
     WSettingsCard {
@@ -204,7 +206,7 @@ WSettingsPage {
         
         WSettingsSwitch {
             label: Translation.tr("Allow multiple panels open")
-            icon: "desktop"
+            icon: "panel-left-expand"
             description: Translation.tr("Keep start menu open when opening action center")
             checked: Config.options?.waffles?.behavior?.allowMultiplePanels ?? false
             onCheckedChanged: Config.setNestedValue("waffles.behavior.allowMultiplePanels", checked)
@@ -230,6 +232,7 @@ WSettingsPage {
     WSettingsSection {
         visible: root.isWaffleActive
         title: Translation.tr("Panels")
+        icon: "panel-left-expand"
     }
 
     WSettingsCard {
@@ -246,7 +249,7 @@ WSettingsPage {
 
         WSettingsDropdown {
             label: Translation.tr("Size preset")
-            icon: "desktop"
+            icon: "options"
             description: Translation.tr("Choose the start menu size")
             currentValue: Config.options?.waffles?.startMenu?.sizePreset ?? "normal"
             options: [
@@ -321,7 +324,7 @@ WSettingsPage {
         
         WSettingsSwitch {
             label: Translation.tr("Show system info")
-            icon: "desktop"
+            icon: "pulse"
             description: Translation.tr("Display CPU, RAM, and disk usage")
             checked: Config.options?.waffles?.widgetsPanel?.showSystem ?? true
             onCheckedChanged: Config.setNestedValue("waffles.widgetsPanel.showSystem", checked)
@@ -409,6 +412,7 @@ WSettingsPage {
 
     WSettingsSection {
         title: Translation.tr("Weather")
+        icon: "weather-sunny"
     }
     
     // Weather configuration - shared with ii family

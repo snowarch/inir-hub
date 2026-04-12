@@ -43,11 +43,11 @@ WSettingsPage {
 
     WSettingsCard {
         title: Translation.tr("Panel Style")
-        icon: "desktop"
+        icon: "options"
 
         WSettingsDropdown {
             label: Translation.tr("Panel family")
-            icon: "desktop"
+            icon: "panel-left-expand"
             description: Translation.tr("Changing this will reload the shell")
             currentValue: Config.options?.panelFamily ?? "waffle"
             options: [
@@ -82,7 +82,7 @@ WSettingsPage {
     // Waffle modules
     WSettingsCard {
         title: Translation.tr("Panels")
-        icon: "desktop"
+        icon: "apps"
 
         WSettingsRow {
             visible: !root.isWaffleActive
@@ -93,7 +93,7 @@ WSettingsPage {
 
         WSettingsSwitch {
             label: Translation.tr("Taskbar")
-            icon: "desktop"
+            icon: "panel-left-expand"
             checked: root.isPanelEnabled("wBar")
             onCheckedChanged: root.setPanelEnabled("wBar", checked)
         }
@@ -107,21 +107,21 @@ WSettingsPage {
 
         WSettingsSwitch {
             label: Translation.tr("Start Menu")
-            icon: "apps"
+            icon: "start-here"
             checked: root.isPanelEnabled("wStartMenu")
             onCheckedChanged: root.setPanelEnabled("wStartMenu", checked)
         }
 
         WSettingsSwitch {
             label: Translation.tr("Action Center")
-            icon: "settings"
+            icon: "options"
             checked: root.isPanelEnabled("wActionCenter")
             onCheckedChanged: root.setPanelEnabled("wActionCenter", checked)
         }
 
         WSettingsSwitch {
             label: Translation.tr("Notification Center")
-            icon: "alert"
+            icon: "alert-filled"
             checked: root.isPanelEnabled("wNotificationCenter")
             onCheckedChanged: root.setPanelEnabled("wNotificationCenter", checked)
         }
@@ -135,21 +135,21 @@ WSettingsPage {
 
         WSettingsSwitch {
             label: Translation.tr("OSD")
-            icon: "speaker-2-filled"
+            icon: "pulse"
             checked: root.isPanelEnabled("wOnScreenDisplay")
             onCheckedChanged: root.setPanelEnabled("wOnScreenDisplay", checked)
         }
 
         WSettingsSwitch {
             label: Translation.tr("Widgets Panel")
-            icon: "apps"
+            icon: "widgets"
             checked: root.isPanelEnabled("wWidgets")
             onCheckedChanged: root.setPanelEnabled("wWidgets", checked)
         }
 
         WSettingsSwitch {
             label: Translation.tr("Task View")
-            icon: "desktop"
+            icon: "library"
             description: Translation.tr("Overview of all workspaces and windows. Supports carousel and centered focus modes.")
             checked: root.isPanelEnabled("wTaskView")
             onCheckedChanged: root.setPanelEnabled("wTaskView", checked)

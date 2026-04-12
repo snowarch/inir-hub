@@ -881,7 +881,7 @@ WSettingsPage {
         // Per-monitor wallpapers
         WSettingsSwitch {
             label: Translation.tr("Per-monitor wallpapers")
-            icon: "desktop"
+            icon: "settings-cog-multiple"
             description: Translation.tr("Set different wallpapers for each monitor")
             checked: root.multiMonitorEnabled
 
@@ -1004,6 +1004,7 @@ WSettingsPage {
     // ── Related settings ───────────────────────────────────────────────
     WSettingsSection {
         title: Translation.tr("Related settings")
+        icon: "open"
     }
 
     WSettingsCard {
@@ -1027,7 +1028,7 @@ WSettingsPage {
 
         WSettingsRow {
             label: Translation.tr("Taskbar")
-            icon: "desktop"
+            icon: "panel-left-expand"
             description: Translation.tr("Layout, tray, clock, and peek options")
             clickable: true
             showChevron: true
@@ -1047,6 +1048,7 @@ WSettingsPage {
     // ── Quick actions ──────────────────────────────────────────────────
     WSettingsSection {
         title: Translation.tr("Quick actions")
+        icon: "flash-on"
     }
 
     // Action buttons row — compact, horizontal, icon-heavy

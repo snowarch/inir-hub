@@ -101,7 +101,7 @@ WSettingsPage {
 
         WSettingsSwitch {
             label: Translation.tr("Per-monitor wallpapers")
-            icon: "desktop"
+            icon: "settings-cog-multiple"
             description: Translation.tr("Set different wallpapers for each monitor")
             checked: Config.options?.background?.multiMonitor?.enable ?? false
             onCheckedChanged: {
@@ -119,7 +119,7 @@ WSettingsPage {
 
         WSettingsSwitch {
             label: Translation.tr("Hide when fullscreen")
-            icon: "desktop"
+            icon: "eye-off"
             description: Translation.tr("Hide the Waffle wallpaper layer while a fullscreen window is active")
             checked: root.wBg.hideWhenFullscreen ?? true
             onCheckedChanged: root.setNestedValueWhenReady("waffles.background.hideWhenFullscreen", checked)
@@ -328,7 +328,7 @@ WSettingsPage {
             id: multiMonCard
             width: parent?.width ?? 0
             title: Translation.tr("Monitor Wallpapers")
-            icon: "desktop"
+            icon: "settings-cog-multiple"
 
             property string selectedMonitor: {
                 const primary = GlobalStates.primaryScreen
@@ -1064,7 +1064,7 @@ WSettingsPage {
 
     WSettingsCard {
         title: Translation.tr("Wallpaper Effects")
-                icon: "image"
+                icon: "wand"
 
                 WSettingsSwitch {
                     label: Translation.tr("Enable animated wallpapers (videos/GIFs)")
@@ -1085,7 +1085,7 @@ WSettingsPage {
                 WSettingsSwitch {
                     visible: root.wBg.enableAnimation ?? true
                     label: Translation.tr("Blur animated wallpapers (videos/GIFs)")
-                    icon: "eye"
+                    icon: "pulse"
                     description: Translation.tr("Apply blur to animated wallpapers. Independent from window blur. May significantly impact performance.")
                     checked: root.wEffects.enableAnimatedBlur ?? false
                     onCheckedChanged: root.setNestedValueWhenReady("waffles.background.effects.enableAnimatedBlur", checked)
@@ -1094,7 +1094,7 @@ WSettingsPage {
                 WSettingsSpinBox {
                     visible: root.wEffects.enableBlur ?? false
                     label: Translation.tr("Blur radius")
-                    icon: "eye"
+                    icon: "settings"
                     description: Translation.tr("Amount of blur applied to wallpaper")
                     from: 0; to: 100; stepSize: 5
                     value: root.wEffects.blurRadius ?? 32
@@ -1104,7 +1104,7 @@ WSettingsPage {
                 WSettingsSpinBox {
                     visible: root.wEffects.enableAnimatedBlur ?? false
                     label: Translation.tr("Animated blur strength")
-                    icon: "eye"
+                    icon: "options"
                     description: Translation.tr("Blur intensity for animated wallpapers (0-100%)")
                     suffix: "%"
                     from: 0; to: 100; stepSize: 5
@@ -1124,7 +1124,7 @@ WSettingsPage {
 
                 WSettingsSpinBox {
                     label: Translation.tr("Extra dim with windows")
-                    icon: "dark-theme"
+                    icon: "weather-moon"
                     description: Translation.tr("Additional dim when windows are present")
                     suffix: "%"
                     from: 0; to: 100; stepSize: 5
@@ -1135,11 +1135,11 @@ WSettingsPage {
 
             WSettingsCard {
                 title: Translation.tr("Backdrop (Overview)")
-                icon: "desktop"
+                icon: "library"
 
                 WSettingsSwitch {
                     label: Translation.tr("Enable backdrop")
-                    icon: "desktop"
+                    icon: "eye"
                     description: Translation.tr("Show backdrop layer for overview")
                     checked: root.wBackdrop.enable ?? true
                     onCheckedChanged: root.setNestedValueWhenReady("waffles.background.backdrop.enable", checked)
@@ -1157,7 +1157,7 @@ WSettingsPage {
                 WSettingsSwitch {
                     visible: (root.wBackdrop.enable ?? true) && (root.wBackdrop.enableAnimation ?? false)
                     label: Translation.tr("Blur animated wallpapers (videos/GIFs)")
-                    icon: "eye"
+                    icon: "pulse"
                     description: Translation.tr("Apply blur to animated wallpapers in backdrop. May significantly impact performance.")
                     checked: root.wBackdrop.enableAnimatedBlur ?? false
                     onCheckedChanged: root.setNestedValueWhenReady("waffles.background.backdrop.enableAnimatedBlur", checked)
@@ -1175,7 +1175,7 @@ WSettingsPage {
                 WSettingsButton {
                     visible: (root.wBackdrop.enable ?? true) && !(root.wBackdrop.useMainWallpaper ?? true)
                     label: Translation.tr("Backdrop wallpaper")
-                    icon: "image"
+                    icon: "image-copy"
                     buttonText: Translation.tr("Change")
                     onButtonClicked: {
                         Config.setNestedValue("wallpaperSelector.selectionTarget", "waffle-backdrop")
@@ -1211,7 +1211,7 @@ WSettingsPage {
                 WSettingsSpinBox {
                     visible: root.wBackdrop.enable ?? true
                     label: Translation.tr("Backdrop blur")
-                    icon: "eye"
+                    icon: "auto"
                     description: Translation.tr("Amount of blur for backdrop layer")
                     from: 0; to: 100; stepSize: 5
                     value: root.wBackdrop.blurRadius ?? 64
@@ -1232,7 +1232,7 @@ WSettingsPage {
                 WSettingsSpinBox {
                     visible: root.wBackdrop.enable ?? true
                     label: Translation.tr("Backdrop saturation")
-                    icon: "eyedropper"
+                    icon: "weather-sunny"
                     description: Translation.tr("Increase color intensity")
                     suffix: "%"
                     from: -100; to: 100; stepSize: 10
@@ -1243,7 +1243,7 @@ WSettingsPage {
                 WSettingsSpinBox {
                     visible: root.wBackdrop.enable ?? true
                     label: Translation.tr("Backdrop contrast")
-                    icon: "auto"
+                    icon: "flash-on"
                     description: Translation.tr("Increase light/dark difference")
                     suffix: "%"
                     from: -100; to: 100; stepSize: 10
@@ -1335,7 +1335,7 @@ WSettingsPage {
 
                     WSettingsDropdown {
                         label: Translation.tr("Clock style")
-                        icon: "desktop"
+                        icon: "options"
                         description: Translation.tr("Choose how prominent the wallpaper clock feels")
                         currentValue: root.wClock.style ?? "hero"
                         options: [
@@ -1369,7 +1369,7 @@ WSettingsPage {
 
                     WSettingsSwitch {
                         label: Translation.tr("Show date")
-                        icon: "desktop"
+                        icon: "news"
                         description: Translation.tr("Display a second line with the current date")
                         checked: root.wClock.showDate ?? true
                         onCheckedChanged: root.setNestedValueWhenReady("waffles.background.widgets.clock.showDate", checked)
@@ -1378,7 +1378,7 @@ WSettingsPage {
                     WSettingsDropdown {
                         visible: root.wClock.showDate ?? true
                         label: Translation.tr("Date style")
-                        icon: "desktop"
+                        icon: "list"
                         description: Translation.tr("Control how much date information is shown")
                         currentValue: root.wClock.dateStyle ?? "long"
                         options: [
@@ -1452,7 +1452,7 @@ WSettingsPage {
 
                     WSettingsSwitch {
                         label: Translation.tr("Show lock status")
-                        icon: "desktop"
+                        icon: "lock-closed"
                         description: Translation.tr("Show the locked status row when the screen is locked")
                         checked: root.wClock.showLockStatus ?? true
                         onCheckedChanged: root.setNestedValueWhenReady("waffles.background.widgets.clock.showLockStatus", checked)
@@ -1460,7 +1460,7 @@ WSettingsPage {
 
                     WSettingsFontSelector {
                         label: Translation.tr("Clock font")
-                        icon: "keyboard"
+                        icon: "text-font"
                         description: Translation.tr("Choose a font for the Waffle desktop clock")
                         currentFont: root.wClock.fontFamily ?? "Roboto Flex"
                         featuredFonts: [
