@@ -694,7 +694,8 @@ WBarAttachedPanelContent {
                                     Quickshell.execDetached(["/usr/bin/bash", "-c", `${Directories.wallpaperSwitchScriptPath} --noswitch --type ${newValue}`]);
                                 } else {
                                     const hex = MaterialThemeLoader.colorToHex(Appearance.m3colors.m3primary)
-                                    MaterialThemeLoader.applySchemeVariant(hex, newValue)
+                                    const mode = Appearance.m3colors.darkmode ? "dark" : "light"
+                                    MaterialThemeLoader.applySchemeVariant(hex, newValue, mode)
                                 }
                             }
                             options: [

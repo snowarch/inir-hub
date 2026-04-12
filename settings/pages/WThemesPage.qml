@@ -566,7 +566,8 @@ WSettingsPage {
                 if (!ThemeService.isAutoTheme) {
                     // Manual preset: apply variant immediately via MaterialThemeLoader
                     const hex = MaterialThemeLoader.colorToHex(Appearance.m3colors.m3primary)
-                    MaterialThemeLoader.applySchemeVariant(hex, newValue)
+                    const mode = Appearance.m3colors.darkmode ? "dark" : "light"
+                    MaterialThemeLoader.applySchemeVariant(hex, newValue, mode)
                 }
                 // Auto theme: ThemeService detects palette type change in
                 // liveRegenSignature and runs regenerateAutoTheme automatically.
