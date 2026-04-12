@@ -30,7 +30,7 @@ Item {
 
     WRectangularShadow {
         target: borderRect
-        visible: !root.glassActive
+        visible: !root.glassActive || !Looks.useMaterial
     }
 
     Rectangle {
@@ -38,16 +38,12 @@ Item {
         z: 1
 
         color: "transparent"
-        radius: root.glassActive
-            ? (Appearance.angelEverywhere ? Appearance.angel.roundingLarge : Appearance.rounding.screenRounding)
-            : root.radius
-        border.color: root.glassActive
-            ? (Appearance.angelEverywhere ? Appearance.angel.colPanelBorder
-                : Appearance.aurora.colTooltipBorder)
-            : Looks.colors.bg2Border
-        border.width: root.glassActive
-            ? (Appearance.angelEverywhere ? Appearance.angel.panelBorderWidth : 1)
-            : 1
+        // Always keep Waffle's own radius — don't import ii-family rounding
+        // (Angel roundingLarge=0 → sharp corners, Aurora screenRounding→18px — both wrong for waffle)
+        radius: root.radius
+        // Use Looks' glass-aware subtle border instead of raw Angel/Aurora primary borders
+        border.color: root.glassActive ? Looks.colors.tooltipBorder : Looks.colors.bg2Border
+        border.width: 1
         implicitWidth: contentItem.implicitWidth + border.width * 2
         implicitHeight: contentItem.implicitHeight + border.width * 2
         anchors.fill: contentRect
@@ -59,7 +55,7 @@ Item {
         anchors.centerIn: parent
         z: 0
 
-        color: root.glassActive ? "transparent" : Looks.colors.bgPanelFooterBase
+        color: root.glassActive && Looks.useMaterial ? "transparent" : Looks.colors.bgPanelFooterBase
         implicitWidth: contentItem.implicitWidth
         implicitHeight: contentItem.implicitHeight
         layer.enabled: Appearance.effectsEnabled
@@ -72,11 +68,11 @@ Item {
             }
         }
 
-        // Glass background for aurora/angel styles
+        // Glass background for aurora/angel styles (only when using material colors)
         GlassBackground {
             id: glassBackground
             anchors.fill: parent
-            visible: root.glassActive
+            visible: root.glassActive && Looks.useMaterial
             radius: borderRect.radius - borderRect.border.width
             fallbackColor: Appearance.colors.colLayer0
             auroraTransparency: Appearance.angelEverywhere
