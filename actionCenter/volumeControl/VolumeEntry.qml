@@ -78,6 +78,8 @@ RowLayout {
         onMoved: {
             if (root.node === Audio.sink) {
                 Audio.setSinkVolume(value)
+            } else if (root.node === Audio.source) {
+                Audio.setSourceVolume(value)
             } else if (root.node?.audio) {
                 root.node.audio.volume = value
             }
