@@ -33,6 +33,11 @@ Scope {
             sourceUrl: "MediaOSD.qml",
             globalStateValue: "osdMediaOpen"
         },
+        {
+            id: "keyboardLayout",
+            sourceUrl: "KeyboardLayoutOSD.qml",
+            globalStateValue: "osdKeyboardLayoutOpen"
+        },
     ]
 
     // Suppress OSD during startup and gamemode niri-reload transitions
@@ -56,6 +61,11 @@ Scope {
     function triggerMediaOSD() {
         root.currentIndicator = "media";
         GlobalStates.osdMediaOpen = true;
+    }
+
+    function triggerKeyboardLayoutOSD() {
+        root.currentIndicator = "keyboardLayout";
+        GlobalStates.osdKeyboardLayoutOpen = true;
     }
 
     // Listen to brightness changes
@@ -82,6 +92,15 @@ Scope {
     // Media OSD is triggered via IPC only (not on every track change)
     // See services/MprisController.qml IpcHandler
 
+    // Listen to keyboard layout changes (Niri only)
+    Connections {
+        target: NiriService
+        enabled: CompositorService.isNiri && root.initialized
+        function onCurrentKeyboardLayoutIndexChanged() {
+            root.triggerKeyboardLayoutOSD();
+        }
+    }
+
     // Open when global state changes
     Connections {
         target: GlobalStates
@@ -97,6 +116,12 @@ Scope {
         function onOsdMediaOpenChanged() {
             if (GlobalStates.osdMediaOpen) {
                 root.currentIndicator = "media";
+                panelLoader.active = true;
+            }
+        }
+        function onOsdKeyboardLayoutOpenChanged() {
+            if (GlobalStates.osdKeyboardLayoutOpen) {
+                root.currentIndicator = "keyboardLayout";
                 panelLoader.active = true;
             }
         }
