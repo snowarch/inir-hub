@@ -124,7 +124,7 @@ Item {
         scale: thumbnailContainer.isPressed ? 0.96 : 1.0
         Behavior on scale {
             NumberAnimation {
-                duration: 100
+                duration: Looks.transition.enabled ? Looks.transition.duration.fast : 0
                 easing.type: Easing.OutCubic
             }
         }

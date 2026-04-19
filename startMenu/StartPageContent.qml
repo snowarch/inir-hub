@@ -161,8 +161,8 @@ WPanelPageColumn {
             id: entryAnim
             PauseAnimation { duration: Looks.transition.staggerDelay(appBtn.animIndex, 25) }
             ParallelAnimation {
-                NumberAnimation { target: appBtn; property: "opacity"; to: 1; duration: 180; easing.type: Easing.OutQuad }
-                NumberAnimation { target: appBtn; property: "scale"; to: 1; duration: 200; easing.type: Easing.OutBack; easing.overshoot: 0.2 }
+                NumberAnimation { target: appBtn; property: "opacity"; to: 1; duration: Looks.transition.enabled ? Looks.transition.duration.normal : 0; easing.type: Easing.OutQuad }
+                NumberAnimation { target: appBtn; property: "scale"; to: 1; duration: Looks.transition.enabled ? Looks.transition.duration.medium : 0; easing.type: Easing.OutBack; easing.overshoot: 0.2 }
             }
         }
         
@@ -213,8 +213,8 @@ WPanelPageColumn {
             id: recEntryAnim
             PauseAnimation { duration: 300 + Looks.transition.staggerDelay(recBtn.animIndex, 40) }
             ParallelAnimation {
-                NumberAnimation { target: recBtn; property: "opacity"; to: 1; duration: 180; easing.type: Easing.OutQuad }
-                NumberAnimation { target: recTranslate; property: "x"; to: 0; duration: 220; easing.type: Easing.OutCubic }
+                NumberAnimation { target: recBtn; property: "opacity"; to: 1; duration: Looks.transition.enabled ? Looks.transition.duration.normal : 0; easing.type: Easing.OutQuad }
+                NumberAnimation { target: recTranslate; property: "x"; to: 0; duration: Looks.transition.enabled ? Looks.transition.duration.medium : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.decelerate }
             }
         }
         

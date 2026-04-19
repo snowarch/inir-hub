@@ -49,7 +49,7 @@ Rectangle {
         }
 
         Behavior on opacity {
-            NumberAnimation { duration: 150 }
+            animation: Looks.transition.opacity
         }
 
         Timer {

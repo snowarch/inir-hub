@@ -161,7 +161,7 @@ Item {
         opacity: root.isFocused || root.hovered ? 1.0 : 0.7
 
         Behavior on opacity {
-            NumberAnimation { duration: 150 }
+            NumberAnimation { duration: Looks.transition.enabled ? Looks.transition.duration.normal : 0 }
         }
 
         WRectangularShadow {

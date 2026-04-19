@@ -246,8 +246,8 @@ WPanelPageColumn {
                                                 id: btnEntryAnim
                                                 PauseAnimation { duration: Looks.transition.staggerDelay(appBtn.index, 25) }
                                                 ParallelAnimation {
-                                                    NumberAnimation { target: appBtn; property: "opacity"; to: 1; duration: 180; easing.type: Easing.OutQuad }
-                                                    NumberAnimation { target: appBtn; property: "scale"; to: 1; duration: 200; easing.type: Easing.OutBack; easing.overshoot: 0.2 }
+                                                    NumberAnimation { target: appBtn; property: "opacity"; to: 1; duration: Looks.transition.enabled ? Looks.transition.duration.normal : 0; easing.type: Easing.OutQuad }
+                                                    NumberAnimation { target: appBtn; property: "scale"; to: 1; duration: Looks.transition.enabled ? Looks.transition.duration.medium : 0; easing.type: Easing.OutBack; easing.overshoot: 0.2 }
                                                 }
                                             }
 
@@ -315,7 +315,7 @@ WPanelPageColumn {
                                 radius: Looks.radius.small
                                 color: letterMouse.containsMouse ? Looks.colors.bg1Hover : "transparent"
 
-                                Behavior on color { ColorAnimation { duration: 70 } }
+                                Behavior on color { animation: Looks.transition.color }
                             }
 
                             WText {
@@ -326,8 +326,8 @@ WPanelPageColumn {
                                 color: letterItem.isActive ? Looks.colors.accent : Looks.colors.fg1
                                 opacity: letterItem.isActive ? 1.0 : 0.6
 
-                                Behavior on color { ColorAnimation { duration: 70 } }
-                                Behavior on opacity { NumberAnimation { duration: 70 } }
+                                Behavior on color { animation: Looks.transition.color }
+                                Behavior on opacity { animation: Looks.transition.color }
                             }
 
                             MouseArea {

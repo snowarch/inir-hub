@@ -105,15 +105,15 @@ Item {
 
     ParallelAnimation {
         id: openAnim
-        NumberAnimation { target: root; property: "contentOpacity"; from: 0; to: 1; duration: 200; easing.type: Easing.OutCubic }
-        NumberAnimation { target: root; property: "contentScale"; from: 0.95; to: 1; duration: 200; easing.type: Easing.OutCubic }
+        NumberAnimation { target: root; property: "contentOpacity"; from: 0; to: 1; duration: Looks.transition.enabled ? Looks.transition.duration.medium : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.decelerate }
+        NumberAnimation { target: root; property: "contentScale"; from: 0.95; to: 1; duration: Looks.transition.enabled ? Looks.transition.duration.medium : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.decelerate }
     }
 
     SequentialAnimation {
         id: closeAnim
         ParallelAnimation {
-            NumberAnimation { target: root; property: "contentOpacity"; to: 0; duration: 150; easing.type: Easing.InCubic }
-            NumberAnimation { target: root; property: "contentScale"; to: 0.95; duration: 150; easing.type: Easing.InCubic }
+            NumberAnimation { target: root; property: "contentOpacity"; to: 0; duration: Looks.transition.enabled ? Looks.transition.duration.normal : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.accelerate }
+            NumberAnimation { target: root; property: "contentScale"; to: 0.95; duration: Looks.transition.enabled ? Looks.transition.duration.normal : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.accelerate }
         }
         ScriptAction { script: root.closed() }
     }
@@ -283,7 +283,7 @@ Item {
                 target: skewPresetItem
                 property: "opacity"
                 from: 0; to: 1
-                duration: 400
+                duration: Looks.transition.enabled ? Looks.transition.duration.page : 0
                 easing.type: Easing.OutCubic
             }
 
@@ -493,7 +493,7 @@ Item {
                             color: Qt.rgba(0, 0, 0, ListView.isCurrentItem ? 0.0 : 0.4)
 
                             Behavior on color {
-                                ColorAnimation { duration: 200 }
+                                ColorAnimation { duration: Looks.transition.enabled ? Looks.transition.duration.medium : 0 }
                             }
                         }
 
@@ -582,7 +582,7 @@ Item {
                             opacity: ListView.isCurrentItem ? 1 : 0
 
                             Behavior on opacity {
-                                NumberAnimation { duration: 200 }
+                                NumberAnimation { duration: Looks.transition.enabled ? Looks.transition.duration.medium : 0 }
                             }
 
                             Column {
@@ -739,7 +739,7 @@ Item {
                             scale: cardMouse.pressed ? 0.95 : (cardMouse.containsMouse ? 1.02 : 1.0)
                             
                             Behavior on scale {
-                                NumberAnimation { duration: 150; easing.type: Easing.OutCubic }
+                                NumberAnimation { duration: Looks.transition.enabled ? Looks.transition.duration.normal : 0; easing.type: Easing.OutCubic }
                             }
                             Behavior on color {
                                 animation: ColorAnimation { duration: Looks.transition.enabled ? 70 : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.standard }

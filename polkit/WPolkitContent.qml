@@ -10,7 +10,7 @@ import qs.modules.waffle.looks
 Rectangle {
     id: root
 
-    color: "#000000"
+    color: "black"  // fallback behind wallpaper
     readonly property bool usePasswordChars: !(PolkitService.flow?.responseVisible ?? false)
 
     Keys.onPressed: event => {
@@ -26,7 +26,7 @@ Rectangle {
 
         Rectangle {
             anchors.fill: parent
-            color: ColorUtils.transparentize("#000000", 0.31)
+            color: ColorUtils.transparentize("black", 0.31)  // dark scrim over wallpaper
 
             PolkitDialog {
                 id: dialog

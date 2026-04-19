@@ -218,7 +218,7 @@ MouseArea {
         spacing: 6
         
         Behavior on opacity {
-            NumberAnimation { duration: 150; easing.type: Easing.OutCubic }
+            NumberAnimation { duration: Looks.transition.enabled ? Looks.transition.duration.normal : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.decelerate }
         }
 
         Repeater {

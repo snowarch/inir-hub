@@ -32,8 +32,9 @@ Item {
     Behavior on implicitHeight {
         enabled: false
         NumberAnimation {
-            duration: 200
-            easing.type: Easing.OutCubic
+            duration: Looks.transition.enabled ? Looks.transition.duration.medium : 0
+            easing.type: Easing.BezierSpline
+            easing.bezierCurve: Looks.transition.easing.bezierCurve.standard
         }
     }
 
@@ -126,24 +127,27 @@ Item {
         Behavior on x {
             enabled: false
             NumberAnimation {
-                duration: 200
-                easing.type: Easing.OutCubic
+                duration: Looks.transition.enabled ? Looks.transition.duration.medium : 0
+                easing.type: Easing.BezierSpline
+                easing.bezierCurve: Looks.transition.easing.bezierCurve.standard
             }
         }
 
         Behavior on height {
             enabled: false
             NumberAnimation {
-                duration: 250
-                easing.type: Easing.OutCubic
+                duration: Looks.transition.enabled ? Looks.transition.duration.panel : 0
+                easing.type: Easing.BezierSpline
+                easing.bezierCurve: Looks.transition.easing.bezierCurve.standard
             }
         }
         
         Behavior on color {
             enabled: false
             ColorAnimation {
-                duration: 150
-                easing.type: Easing.OutCubic
+                duration: Looks.transition.enabled ? Looks.transition.duration.normal : 0
+                easing.type: Easing.BezierSpline
+                easing.bezierCurve: Looks.transition.easing.bezierCurve.standard
             }
         }
 
@@ -273,7 +277,7 @@ Item {
                 wrapMode: Text.Wrap
                 
                 Behavior on opacity {
-                    NumberAnimation { duration: 150; easing.type: Easing.OutCubic }
+                    NumberAnimation { duration: Looks.transition.enabled ? Looks.transition.duration.normal : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.standard }
                 }
             }
 
@@ -285,7 +289,7 @@ Item {
                 spacing: 2
                 
                 Behavior on opacity {
-                    NumberAnimation { duration: 150; easing.type: Easing.OutCubic }
+                    NumberAnimation { duration: Looks.transition.enabled ? Looks.transition.duration.normal : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.standard }
                 }
 
                 Repeater {
@@ -313,8 +317,9 @@ Item {
 
                 Behavior on opacity {
                     NumberAnimation {
-                        duration: 200
-                        easing.type: Easing.OutCubic
+                        duration: Looks.transition.enabled ? Looks.transition.duration.medium : 0
+                        easing.type: Easing.BezierSpline
+                        easing.bezierCurve: Looks.transition.easing.bezierCurve.decelerate
                     }
                 }
 
@@ -350,15 +355,17 @@ Item {
                                 target: notifItem
                                 property: "opacity"
                                 to: 1
-                                duration: 200
-                                easing.type: Easing.OutCubic
+                                duration: Looks.transition.enabled ? Looks.transition.duration.medium : 0
+                                easing.type: Easing.BezierSpline
+                                easing.bezierCurve: Looks.transition.easing.bezierCurve.decelerate
                             }
                             NumberAnimation {
                                 target: itemTranslate
                                 property: "y"
                                 to: 0
-                                duration: 250
-                                easing.type: Easing.OutCubic
+                                duration: Looks.transition.enabled ? Looks.transition.duration.panel : 0
+                                easing.type: Easing.BezierSpline
+                                easing.bezierCurve: Looks.transition.easing.bezierCurve.decelerate
                             }
                         }
                     }

@@ -214,8 +214,9 @@ MouseArea {
         }
         Behavior on scale {
             NumberAnimation {
-                duration: 200
-                easing.type: Easing.OutCubic
+                duration: Looks.transition.enabled ? Looks.transition.duration.medium : 0
+                easing.type: Easing.BezierSpline
+                easing.bezierCurve: Looks.transition.easing.bezierCurve.decelerate
             }
         }
         
@@ -548,8 +549,9 @@ MouseArea {
         }
         Behavior on scale {
             NumberAnimation {
-                duration: 200
-                easing.type: Easing.OutCubic
+                duration: Looks.transition.enabled ? Looks.transition.duration.medium : 0
+                easing.type: Easing.BezierSpline
+                easing.bezierCurve: Looks.transition.easing.bezierCurve.decelerate
             }
         }
 
