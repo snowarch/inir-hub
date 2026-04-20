@@ -361,7 +361,7 @@ MouseArea {
             }
         }
 
-        // Lock screen notifications - read-only compact list
+        // Lock screen notifications - grouped by app, read-only
         Loader {
             id: safeLockNotificationsLoader
             readonly property bool lockNotifEnabled: Config.options?.lock?.notifications?.enable ?? false
@@ -382,102 +382,160 @@ MouseArea {
 
                 Repeater {
                     model: {
-                        const all = Notifications.list
+                        const apps = Notifications.appNameList
                         const max = safeLockNotificationsLoader.lockNotifMaxCount
-                        return all.length > max ? all.slice(0, max) : all
+                        return apps.length > max ? apps.slice(0, max) : apps
                     }
 
-                    delegate: Rectangle {
-                        id: safeNotifDelegate
+                    delegate: Item {
+                        id: safeGroupDelegate
                         required property var modelData
+                        readonly property var group: Notifications.groupsByAppName[modelData] ?? null
+                        readonly property var latestNotif: group?.notifications?.[0] ?? null
+                        readonly property int groupCount: group?.notifications?.length ?? 0
+
                         width: parent.width
-                        height: safeNotifContent.implicitHeight + 14
-                        radius: Looks.radius.large
-                        color: ColorUtils.transparentize(Looks.colors.bg1Base, 0.15)
-                        border.color: ColorUtils.transparentize(Looks.colors.bg1Border, 0.5)
-                        border.width: 1
+                        height: safeGroupCard.height + (groupCount > 1 ? 3 : 0)
+                        visible: latestNotif !== null
 
-                        RowLayout {
-                            id: safeNotifContent
+                        // Stacked card hint
+                        Rectangle {
+                            visible: safeGroupDelegate.groupCount > 1
                             anchors {
-                                left: parent.left; right: parent.right
-                                verticalCenter: parent.verticalCenter
-                                margins: 10
+                                horizontalCenter: parent.horizontalCenter
+                                bottom: parent.bottom
                             }
-                            spacing: 10
+                            width: parent.width - 10
+                            height: safeGroupCard.height - 3
+                            radius: Looks.radius.large
+                            color: ColorUtils.transparentize(Looks.colors.bg1Base, 0.35)
+                            border.color: ColorUtils.transparentize(Looks.colors.bg1Border, 0.6)
+                            border.width: 1
+                        }
 
-                            Rectangle {
-                                Layout.alignment: Qt.AlignTop
-                                Layout.preferredWidth: 24
-                                Layout.preferredHeight: 24
-                                radius: Looks.radius.small
-                                color: ColorUtils.transparentize(Looks.colors.accent, 0.7)
-                                clip: true
+                        // Main card
+                        Rectangle {
+                            id: safeGroupCard
+                            width: parent.width
+                            height: safeGroupContent.implicitHeight + 14
+                            radius: Looks.radius.large
+                            color: ColorUtils.transparentize(Looks.colors.bg1Base, 0.15)
+                            border.color: ColorUtils.transparentize(Looks.colors.bg1Border, 0.5)
+                            border.width: 1
 
-                                Image {
-                                    id: safeNotifImg
-                                    anchors.fill: parent
-                                    source: safeNotifDelegate.modelData?.image || safeNotifDelegate.modelData?.appIcon || ""
-                                    fillMode: Image.PreserveAspectCrop
-                                    asynchronous: true
-                                    visible: status === Image.Ready
+                            RowLayout {
+                                id: safeGroupContent
+                                anchors {
+                                    left: parent.left; right: parent.right
+                                    verticalCenter: parent.verticalCenter
+                                    margins: 10
+                                }
+                                spacing: 10
+
+                                // App icon with count badge
+                                Item {
+                                    Layout.alignment: Qt.AlignTop
+                                    Layout.preferredWidth: 28
+                                    Layout.preferredHeight: 28
+
+                                    Rectangle {
+                                        anchors.fill: parent
+                                        radius: Looks.radius.small
+                                        color: ColorUtils.transparentize(Looks.colors.accent, 0.7)
+                                        clip: true
+
+                                        Image {
+                                            id: safeGroupNotifImg
+                                            anchors.fill: parent
+                                            source: safeGroupDelegate.latestNotif?.image || safeGroupDelegate.latestNotif?.appIcon || ""
+                                            fillMode: Image.PreserveAspectCrop
+                                            asynchronous: true
+                                            visible: status === Image.Ready
+                                        }
+
+                                        FluentIcon {
+                                            anchors.centerIn: parent
+                                            icon: "alert"
+                                            implicitSize: 16
+                                            color: Looks.colors.accentFg
+                                            visible: safeGroupNotifImg.status !== Image.Ready
+                                        }
+                                    }
+
+                                    // Count badge
+                                    Rectangle {
+                                        visible: safeGroupDelegate.groupCount > 1
+                                        anchors {
+                                            right: parent.right
+                                            top: parent.top
+                                            rightMargin: -3
+                                            topMargin: -3
+                                        }
+                                        width: Math.max(14, safeBadgeText.implicitWidth + 6)
+                                        height: 14
+                                        radius: 7
+                                        color: Looks.colors.accent
+
+                                        Text {
+                                            id: safeBadgeText
+                                            anchors.centerIn: parent
+                                            text: safeGroupDelegate.groupCount
+                                            font.pixelSize: 8
+                                            font.weight: Font.Bold
+                                            font.family: Looks.font.family.ui
+                                            color: Looks.colors.accentFg
+                                        }
+                                    }
                                 }
 
-                                FluentIcon {
-                                    anchors.centerIn: parent
-                                    icon: "alert"
-                                    implicitSize: 14
-                                    color: Looks.colors.accentFg
-                                    visible: safeNotifImg.status !== Image.Ready
-                                }
-                            }
-
-                            ColumnLayout {
-                                Layout.fillWidth: true
-                                spacing: 1
-
-                                Text {
+                                ColumnLayout {
                                     Layout.fillWidth: true
-                                    text: safeNotifDelegate.modelData?.appName ?? ""
-                                    font.pixelSize: Looks.font.pixelSize.tiny
-                                    font.weight: Looks.font.weight.regular
-                                    font.family: Looks.font.family.ui
-                                    color: Looks.colors.subfg
-                                    elide: Text.ElideRight
-                                    visible: text.length > 0
-                                }
+                                    spacing: 1
 
-                                Text {
-                                    Layout.fillWidth: true
-                                    text: safeNotifDelegate.modelData?.summary ?? ""
-                                    font.pixelSize: Looks.font.pixelSize.small
-                                    font.weight: Looks.font.weight.regular
-                                    font.family: Looks.font.family.ui
-                                    color: root.textColor
-                                    elide: Text.ElideRight
-                                    maximumLineCount: 1
-                                }
+                                    Text {
+                                        Layout.fillWidth: true
+                                        text: safeGroupDelegate.modelData ?? ""
+                                        font.pixelSize: Looks.font.pixelSize.tiny
+                                        font.weight: Looks.font.weight.regular
+                                        font.family: Looks.font.family.ui
+                                        color: Looks.colors.subfg
+                                        elide: Text.ElideRight
+                                        visible: text.length > 0
+                                    }
 
-                                Text {
-                                    Layout.fillWidth: true
-                                    visible: safeLockNotificationsLoader.lockNotifShowBody && text.length > 0
-                                    text: safeNotifDelegate.modelData?.body ?? ""
-                                    font.pixelSize: Looks.font.pixelSize.tiny
-                                    font.family: Looks.font.family.ui
-                                    color: Looks.colors.subfg
-                                    elide: Text.ElideRight
-                                    maximumLineCount: 2
-                                    wrapMode: Text.WordWrap
+                                    Text {
+                                        Layout.fillWidth: true
+                                        text: safeGroupDelegate.latestNotif?.summary ?? ""
+                                        font.pixelSize: Looks.font.pixelSize.small
+                                        font.weight: Looks.font.weight.regular
+                                        font.family: Looks.font.family.ui
+                                        color: root.textColor
+                                        elide: Text.ElideRight
+                                        maximumLineCount: 1
+                                    }
+
+                                    Text {
+                                        Layout.fillWidth: true
+                                        visible: safeLockNotificationsLoader.lockNotifShowBody && text.length > 0
+                                        text: safeGroupDelegate.latestNotif?.body ?? ""
+                                        font.pixelSize: Looks.font.pixelSize.tiny
+                                        font.family: Looks.font.family.ui
+                                        color: Looks.colors.subfg
+                                        elide: Text.ElideRight
+                                        maximumLineCount: 2
+                                        wrapMode: Text.WordWrap
+                                    }
                                 }
                             }
                         }
                     }
                 }
 
+                // Overflow indicator for remaining app groups
                 Text {
-                    visible: Notifications.list.length > safeLockNotificationsLoader.lockNotifMaxCount
+                    visible: Notifications.appNameList.length > safeLockNotificationsLoader.lockNotifMaxCount
                     anchors.horizontalCenter: parent.horizontalCenter
-                    text: "+" + (Notifications.list.length - safeLockNotificationsLoader.lockNotifMaxCount) + " " + Translation.tr("more")
+                    text: "+" + (Notifications.appNameList.length - safeLockNotificationsLoader.lockNotifMaxCount) + " " + Translation.tr("more")
                     font.pixelSize: Looks.font.pixelSize.tiny
                     font.family: Looks.font.family.ui
                     color: Looks.colors.subfg
