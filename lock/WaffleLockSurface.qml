@@ -464,7 +464,6 @@ MouseArea {
                             
                             WaffleLockMediaButton {
                                 icon: mediaWidget.player?.isPlaying ? "pause" : "play"
-                                filled: true
                                 size: 40
                                 onClicked: mediaWidget.player?.togglePlaying()
                             }
@@ -1213,8 +1212,8 @@ MouseArea {
         width: Math.min(parent.width * 0.6, 640)
 
         // Waffle theme overrides
-        themeBgColor: Looks.colors.bg0Base
-        themeKeySurfaceColor: Looks.colors.bg1Base
+        themeBgColor: ColorUtils.transparentize(Looks.colors.bg1Base, 0.15)
+        themeKeySurfaceColor: ColorUtils.transparentize(Looks.colors.bg2Base, 0.3)
         themeTextColor: root.textColor
         themeSubtextColor: ColorUtils.transparentize(root.textColor, 0.4)
         themeAccentColor: Looks.colors.accent
