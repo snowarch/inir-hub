@@ -25,6 +25,7 @@ MouseArea {
     
     // Track if we've attempted unlock at least once (to prevent shake on load)
     property bool hasAttemptedUnlock: false
+    property bool oskVisible: false
     
     // Windows 11 Lock Screen Design Tokens (from Looks.qml)
     readonly property color textColor: Looks.colors.fg
@@ -282,6 +283,7 @@ MouseArea {
         
         // Bottom left widgets row (Weather + Media)
         RowLayout {
+            id: bottomWidgetsRow
             anchors.bottom: parent.bottom
             anchors.left: parent.left
             anchors.bottomMargin: 48
@@ -472,6 +474,153 @@ MouseArea {
                                 onClicked: mediaWidget.player?.next()
                             }
                         }
+                    }
+                }
+            }
+        }
+
+        // Lock screen notifications - read-only compact list
+        Loader {
+            id: waffleLockNotificationsLoader
+            readonly property bool lockNotifEnabled: Config.options?.lock?.notifications?.enable ?? false
+            readonly property int lockNotifMaxCount: Config.options?.lock?.notifications?.maxCount ?? 3
+            readonly property bool lockNotifShowBody: Config.options?.lock?.notifications?.showBody ?? true
+            active: lockNotifEnabled && Notifications.list.length > 0
+            anchors {
+                right: parent.right
+                bottom: parent.bottom
+                rightMargin: 48
+                bottomMargin: 100
+            }
+            width: Math.min(340, parent.width * 0.3)
+
+            sourceComponent: Column {
+                spacing: 6
+                clip: true
+
+                Repeater {
+                    model: {
+                        const all = Notifications.list
+                        const max = waffleLockNotificationsLoader.lockNotifMaxCount
+                        return all.length > max ? all.slice(0, max) : all
+                    }
+
+                    delegate: Rectangle {
+                        id: wNotifDelegate
+                        required property var modelData
+                        width: parent.width
+                        height: wNotifContent.implicitHeight + 14
+                        radius: Looks.radius.large
+                        color: ColorUtils.transparentize(Looks.colors.bg1Base, 0.15)
+                        border.color: ColorUtils.transparentize(Looks.colors.bg1Border, 0.5)
+                        border.width: 1
+
+                        layer.enabled: root.effectsSafe
+                        layer.effect: DropShadow {
+                            horizontalOffset: 0
+                            verticalOffset: 2
+                            radius: 8
+                            samples: 17
+                            color: Looks.colors.shadow
+                        }
+
+                        RowLayout {
+                            id: wNotifContent
+                            anchors {
+                                left: parent.left; right: parent.right
+                                verticalCenter: parent.verticalCenter
+                                margins: 10
+                            }
+                            spacing: 10
+
+                            // Notification image or app icon
+                            Rectangle {
+                                Layout.alignment: Qt.AlignTop
+                                Layout.preferredWidth: 24
+                                Layout.preferredHeight: 24
+                                radius: Looks.radius.small
+                                color: ColorUtils.transparentize(Looks.colors.accent, 0.7)
+                                clip: true
+
+                                Image {
+                                    id: wNotifImg
+                                    anchors.fill: parent
+                                    source: wNotifDelegate.modelData?.image || wNotifDelegate.modelData?.appIcon || ""
+                                    fillMode: Image.PreserveAspectCrop
+                                    asynchronous: true
+                                    visible: status === Image.Ready
+                                }
+
+                                FluentIcon {
+                                    anchors.centerIn: parent
+                                    icon: "alert"
+                                    implicitSize: 14
+                                    color: Looks.colors.accentFg
+                                    visible: wNotifImg.status !== Image.Ready
+                                }
+                            }
+
+                            ColumnLayout {
+                                Layout.fillWidth: true
+                                spacing: 1
+
+                                // App name
+                                Text {
+                                    Layout.fillWidth: true
+                                    text: wNotifDelegate.modelData?.appName ?? ""
+                                    font.pixelSize: Looks.font.pixelSize.tiny
+                                    font.weight: Looks.font.weight.regular
+                                    font.family: Looks.font.family.ui
+                                    color: Looks.colors.subfg
+                                    elide: Text.ElideRight
+                                    visible: text.length > 0
+                                }
+
+                                // Summary
+                                Text {
+                                    Layout.fillWidth: true
+                                    text: wNotifDelegate.modelData?.summary ?? ""
+                                    font.pixelSize: Looks.font.pixelSize.small
+                                    font.weight: Looks.font.weight.regular
+                                    font.family: Looks.font.family.ui
+                                    color: root.textColor
+                                    elide: Text.ElideRight
+                                    maximumLineCount: 1
+                                }
+
+                                // Body (optional, controlled by config)
+                                Text {
+                                    Layout.fillWidth: true
+                                    visible: waffleLockNotificationsLoader.lockNotifShowBody && text.length > 0
+                                    text: wNotifDelegate.modelData?.body ?? ""
+                                    font.pixelSize: Looks.font.pixelSize.tiny
+                                    font.family: Looks.font.family.ui
+                                    color: Looks.colors.subfg
+                                    elide: Text.ElideRight
+                                    maximumLineCount: 2
+                                    wrapMode: Text.WordWrap
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // Overflow indicator
+                Text {
+                    visible: Notifications.list.length > waffleLockNotificationsLoader.lockNotifMaxCount
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    text: "+" + (Notifications.list.length - waffleLockNotificationsLoader.lockNotifMaxCount) + " " + Translation.tr("more")
+                    font.pixelSize: Looks.font.pixelSize.tiny
+                    font.family: Looks.font.family.ui
+                    color: Looks.colors.subfg
+
+                    layer.enabled: root.effectsSafe
+                    layer.effect: DropShadow {
+                        horizontalOffset: 0
+                        verticalOffset: 1
+                        radius: 4
+                        samples: 9
+                        color: Looks.colors.shadow
                     }
                 }
             }
@@ -1042,7 +1191,60 @@ MouseArea {
                     }
                 }
             }
+            
+            // On-screen keyboard toggle
+            WaffleLockButton {
+                icon: "keyboard"
+                tooltip: Translation.tr("Virtual keyboard")
+                toggled: root.oskVisible
+                anchors.verticalCenter: parent.verticalCenter
+                onClicked: root.oskVisible = !root.oskVisible
+            }
         }
+    }
+
+    // On-screen keyboard
+    LockKeyboard {
+        id: lockKeyboard
+        visible: root.oskVisible
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: 80
+        anchors.horizontalCenter: parent.horizontalCenter
+        width: Math.min(parent.width * 0.6, 640)
+
+        // Waffle theme overrides
+        themeBgColor: Looks.colors.bg0Base
+        themeKeySurfaceColor: Looks.colors.bg1Base
+        themeTextColor: root.textColor
+        themeSubtextColor: ColorUtils.transparentize(root.textColor, 0.4)
+        themeAccentColor: Looks.colors.accent
+        themeAccentActiveColor: Qt.darker(Looks.colors.accent, 1.15)
+        themeAccentTextColor: Looks.colors.accentFg
+        themeRounding: Looks.radius.large
+        themeKeyRounding: Looks.radius.medium
+        themeAnimDuration: Looks.transition.enabled ? 70 : 0
+        themeFontSize: Looks.font.pixelSize.normal
+        themeFontSizeLarge: Looks.font.pixelSize.large
+        themeFontSizeSmall: Looks.font.pixelSize.small
+        themeFontFamily: Looks.font.family.ui
+
+        onKeyClicked: key => {
+            passwordField.text += key
+            passwordField.forceActiveFocus()
+        }
+        onBackspaceClicked: {
+            if (passwordField.text.length > 0) {
+                passwordField.text = passwordField.text.slice(0, -1)
+            }
+            passwordField.forceActiveFocus()
+        }
+        onEnterClicked: {
+            if (root.context.currentText.length > 0) {
+                root.hasAttemptedUnlock = true
+                root.context.tryUnlock(root.ctrlHeld)
+            }
+        }
+        onCloseRequested: root.oskVisible = false
     }
 
     // ===== INPUT HANDLING =====

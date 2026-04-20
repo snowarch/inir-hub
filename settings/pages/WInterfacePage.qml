@@ -389,6 +389,32 @@ WSettingsPage {
             checked: Config.options?.lock?.showLockedText ?? true
             onCheckedChanged: Config.setNestedValue("lock.showLockedText", checked)
         }
+
+        WSettingsSwitch {
+            label: Translation.tr("Show notifications")
+            icon: "alert"
+            description: Translation.tr("Display recent notifications on the lock screen")
+            checked: Config.options?.lock?.notifications?.enable ?? false
+            onCheckedChanged: Config.setNestedValue("lock.notifications.enable", checked)
+        }
+
+        WSettingsSwitch {
+            visible: Config.options?.lock?.notifications?.enable ?? false
+            label: Translation.tr("Show notification body")
+            icon: "eye"
+            description: Translation.tr("Display message content. Disable for privacy.")
+            checked: Config.options?.lock?.notifications?.showBody ?? true
+            onCheckedChanged: Config.setNestedValue("lock.notifications.showBody", checked)
+        }
+
+        WSettingsSpinBox {
+            visible: Config.options?.lock?.notifications?.enable ?? false
+            label: Translation.tr("Max notifications shown")
+            icon: "list"
+            from: 1; to: 10; stepSize: 1
+            value: Config.options?.lock?.notifications?.maxCount ?? 3
+            onValueChanged: Config.setNestedValue("lock.notifications.maxCount", value)
+        }
     }
 
     WSettingsSection {

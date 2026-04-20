@@ -24,6 +24,7 @@ MouseArea {
     readonly property bool requirePasswordToPower: Config.options?.lock?.security?.requirePasswordToPower ?? true
 
     property bool hasAttemptedUnlock: false
+    property bool oskVisible: false
 
     readonly property color textColor: Looks.colors.fg
     readonly property color textShadowColor: Looks.colors.shadow
@@ -357,6 +358,130 @@ MouseArea {
                     running: true
                     repeat: true
                     onTriggered: dateText.text = Qt.formatDate(new Date(), "dddd, MMMM d")
+                }
+            }
+        }
+
+        // Lock screen notifications - read-only compact list
+        Loader {
+            id: safeLockNotificationsLoader
+            readonly property bool lockNotifEnabled: Config.options?.lock?.notifications?.enable ?? false
+            readonly property int lockNotifMaxCount: Config.options?.lock?.notifications?.maxCount ?? 3
+            readonly property bool lockNotifShowBody: Config.options?.lock?.notifications?.showBody ?? true
+            active: lockNotifEnabled && Notifications.list.length > 0
+            anchors {
+                right: parent.right
+                bottom: parent.bottom
+                rightMargin: 48
+                bottomMargin: 100
+            }
+            width: Math.min(340, parent.width * 0.3)
+
+            sourceComponent: Column {
+                spacing: 6
+                clip: true
+
+                Repeater {
+                    model: {
+                        const all = Notifications.list
+                        const max = safeLockNotificationsLoader.lockNotifMaxCount
+                        return all.length > max ? all.slice(0, max) : all
+                    }
+
+                    delegate: Rectangle {
+                        id: safeNotifDelegate
+                        required property var modelData
+                        width: parent.width
+                        height: safeNotifContent.implicitHeight + 14
+                        radius: Looks.radius.large
+                        color: ColorUtils.transparentize(Looks.colors.bg1Base, 0.15)
+                        border.color: ColorUtils.transparentize(Looks.colors.bg1Border, 0.5)
+                        border.width: 1
+
+                        RowLayout {
+                            id: safeNotifContent
+                            anchors {
+                                left: parent.left; right: parent.right
+                                verticalCenter: parent.verticalCenter
+                                margins: 10
+                            }
+                            spacing: 10
+
+                            Rectangle {
+                                Layout.alignment: Qt.AlignTop
+                                Layout.preferredWidth: 24
+                                Layout.preferredHeight: 24
+                                radius: Looks.radius.small
+                                color: ColorUtils.transparentize(Looks.colors.accent, 0.7)
+                                clip: true
+
+                                Image {
+                                    id: safeNotifImg
+                                    anchors.fill: parent
+                                    source: safeNotifDelegate.modelData?.image || safeNotifDelegate.modelData?.appIcon || ""
+                                    fillMode: Image.PreserveAspectCrop
+                                    asynchronous: true
+                                    visible: status === Image.Ready
+                                }
+
+                                FluentIcon {
+                                    anchors.centerIn: parent
+                                    icon: "alert"
+                                    implicitSize: 14
+                                    color: Looks.colors.accentFg
+                                    visible: safeNotifImg.status !== Image.Ready
+                                }
+                            }
+
+                            ColumnLayout {
+                                Layout.fillWidth: true
+                                spacing: 1
+
+                                Text {
+                                    Layout.fillWidth: true
+                                    text: safeNotifDelegate.modelData?.appName ?? ""
+                                    font.pixelSize: Looks.font.pixelSize.tiny
+                                    font.weight: Looks.font.weight.regular
+                                    font.family: Looks.font.family.ui
+                                    color: Looks.colors.subfg
+                                    elide: Text.ElideRight
+                                    visible: text.length > 0
+                                }
+
+                                Text {
+                                    Layout.fillWidth: true
+                                    text: safeNotifDelegate.modelData?.summary ?? ""
+                                    font.pixelSize: Looks.font.pixelSize.small
+                                    font.weight: Looks.font.weight.regular
+                                    font.family: Looks.font.family.ui
+                                    color: root.textColor
+                                    elide: Text.ElideRight
+                                    maximumLineCount: 1
+                                }
+
+                                Text {
+                                    Layout.fillWidth: true
+                                    visible: safeLockNotificationsLoader.lockNotifShowBody && text.length > 0
+                                    text: safeNotifDelegate.modelData?.body ?? ""
+                                    font.pixelSize: Looks.font.pixelSize.tiny
+                                    font.family: Looks.font.family.ui
+                                    color: Looks.colors.subfg
+                                    elide: Text.ElideRight
+                                    maximumLineCount: 2
+                                    wrapMode: Text.WordWrap
+                                }
+                            }
+                        }
+                    }
+                }
+
+                Text {
+                    visible: Notifications.list.length > safeLockNotificationsLoader.lockNotifMaxCount
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    text: "+" + (Notifications.list.length - safeLockNotificationsLoader.lockNotifMaxCount) + " " + Translation.tr("more")
+                    font.pixelSize: Looks.font.pixelSize.tiny
+                    font.family: Looks.font.family.ui
+                    color: Looks.colors.subfg
                 }
             }
         }
@@ -779,7 +904,60 @@ MouseArea {
                     }
                 }
             }
+            
+            // On-screen keyboard toggle
+            WaffleLockButton {
+                icon: "keyboard"
+                tooltip: Translation.tr("Virtual keyboard")
+                toggled: root.oskVisible
+                anchors.verticalCenter: parent.verticalCenter
+                onClicked: root.oskVisible = !root.oskVisible
+            }
         }
+    }
+
+    // On-screen keyboard
+    LockKeyboard {
+        id: lockKeyboard
+        visible: root.oskVisible
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: 80
+        anchors.horizontalCenter: parent.horizontalCenter
+        width: Math.min(parent.width * 0.6, 640)
+
+        // Waffle theme overrides
+        themeBgColor: Looks.colors.bg0Base
+        themeKeySurfaceColor: Looks.colors.bg1Base
+        themeTextColor: root.textColor
+        themeSubtextColor: ColorUtils.transparentize(root.textColor, 0.4)
+        themeAccentColor: Looks.colors.accent
+        themeAccentActiveColor: Qt.darker(Looks.colors.accent, 1.15)
+        themeAccentTextColor: Looks.colors.accentFg
+        themeRounding: Looks.radius.large
+        themeKeyRounding: Looks.radius.medium
+        themeAnimDuration: Looks.transition.enabled ? 70 : 0
+        themeFontSize: Looks.font.pixelSize.normal
+        themeFontSizeLarge: Looks.font.pixelSize.large
+        themeFontSizeSmall: Looks.font.pixelSize.small
+        themeFontFamily: Looks.font.family.ui
+
+        onKeyClicked: key => {
+            passwordField.text += key
+            passwordField.forceActiveFocus()
+        }
+        onBackspaceClicked: {
+            if (passwordField.text.length > 0) {
+                passwordField.text = passwordField.text.slice(0, -1)
+            }
+            passwordField.forceActiveFocus()
+        }
+        onEnterClicked: {
+            if (root.context.currentText.length > 0) {
+                root.hasAttemptedUnlock = true
+                root.context.tryUnlock(root.ctrlHeld)
+            }
+        }
+        onCloseRequested: root.oskVisible = false
     }
 
     // ===== INPUT HANDLING =====
