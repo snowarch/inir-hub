@@ -428,7 +428,7 @@ MouseArea {
                 Text {
                     id: clockText
                     Layout.alignment: lockView.clockPosition === "center" ? Qt.AlignHCenter : Qt.AlignLeft
-                    text: Qt.formatTime(new Date(), "hh:mm")
+                    text: DateTime.time
                     font.pixelSize: lockView.clockStyle === "minimal" ? Math.round(72 * Looks.fontScale) : root.clockFontSize
                     font.weight: Looks.font.weight.thin
                     font.family: Looks.font.family.ui
@@ -441,13 +441,6 @@ MouseArea {
                         radius: 8
                         samples: 17
                         color: root.textShadowColor
-                    }
-
-                    Timer {
-                        interval: 1000
-                        running: true
-                        repeat: true
-                        onTriggered: clockText.text = Qt.formatTime(new Date(), "hh:mm")
                     }
                 }
 
