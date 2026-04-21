@@ -12,7 +12,9 @@ import qs.modules.common.widgets
 import qs.modules.common.functions
 import qs.modules.lock
 import qs.modules.waffle.looks
+import qs.modules.background.widgets.clock as BackgroundClock
 import Quickshell
+import Quickshell.Widgets
 
 MouseArea {
     id: root
@@ -202,6 +204,18 @@ MouseArea {
         }
     }
 
+    // Wallpaper dim overlay
+    Rectangle {
+        anchors.fill: parent
+        color: "#000000"
+        opacity: (Config.options?.lock?.dim?.enable ?? false) ? (Config.options?.lock?.dim?.opacity ?? 0.3) : 0
+        z: 0
+
+        Behavior on opacity {
+            NumberAnimation { duration: Looks.transition.enabled ? Looks.transition.duration.normal : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.decelerate }
+        }
+    }
+
     // ===== LOCK VIEW (Clock) =====
     Item {
         id: lockView
@@ -221,62 +235,288 @@ MouseArea {
             }
         }
         
-        // Clock - Windows 11 style (centered, large)
-        ColumnLayout {
-            anchors.centerIn: parent
-            anchors.verticalCenterOffset: -60
-            spacing: 4
-            
-            // Time - Windows 11 uses Segoe UI Variable Display with Light weight
-            Text {
-                id: clockText
-                Layout.alignment: Qt.AlignHCenter
-                text: Qt.formatTime(new Date(), "hh:mm")
-                font.pixelSize: root.clockFontSize
-                font.weight: Looks.font.weight.thin  // Light weight like Windows 11
-                font.family: Looks.font.family.ui
-                color: root.textColor
-                // Drop shadow for readability on any wallpaper
-                layer.enabled: root.effectsSafe
-                layer.effect: DropShadow {
-                    horizontalOffset: 0
-                    verticalOffset: 2
-                    radius: 8
-                    samples: 17
-                    color: root.textShadowColor
+        // Config-driven clock properties
+        readonly property string clockStyle: Config.options?.lock?.clock?.style ?? "default"
+        readonly property string clockPosition: Config.options?.lock?.clock?.position ?? "center"
+        readonly property bool statusEnabled: Config.options?.lock?.status?.enable ?? true
+
+        // Status row - compact indicators at top
+        Loader {
+            active: lockView.statusEnabled
+            anchors {
+                top: parent.top
+                topMargin: 24
+                horizontalCenter: parent.horizontalCenter
+            }
+
+            sourceComponent: Row {
+                spacing: 16
+
+                // WiFi
+                Row {
+                    spacing: 4
+                    visible: Network.wifiEnabled
+
+                    MaterialSymbol {
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: Network.materialSymbol ?? "signal_wifi_off"
+                        iconSize: 16
+                        color: root.textColor
+
+                        layer.enabled: root.effectsSafe
+                        layer.effect: DropShadow {
+                            horizontalOffset: 0; verticalOffset: 1; radius: 4; samples: 9
+                            color: root.textShadowColor
+                        }
+                    }
+
+                    Text {
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: Network.networkName ?? ""
+                        visible: text.length > 0 && text.length < 16
+                        font.pixelSize: Looks.font.pixelSize.small
+                        font.family: Looks.font.family.ui
+                        color: root.textColor
+
+                        layer.enabled: root.effectsSafe
+                        layer.effect: DropShadow {
+                            horizontalOffset: 0; verticalOffset: 1; radius: 4; samples: 9
+                            color: root.textShadowColor
+                        }
+                    }
                 }
-                
-                Timer {
-                    interval: 1000
-                    running: true
-                    repeat: true
-                    onTriggered: clockText.text = Qt.formatTime(new Date(), "hh:mm")
+
+                // Bluetooth
+                MaterialSymbol {
+                    visible: BluetoothStatus.enabled
+                    anchors.verticalCenter: parent.verticalCenter
+                    text: BluetoothStatus.connected ? "bluetooth_connected" : "bluetooth"
+                    iconSize: 16
+                    color: root.textColor
+
+                    layer.enabled: root.effectsSafe
+                    layer.effect: DropShadow {
+                        horizontalOffset: 0; verticalOffset: 1; radius: 4; samples: 9
+                        color: root.textShadowColor
+                    }
+                }
+
+                // Volume
+                Row {
+                    spacing: 4
+
+                    MaterialSymbol {
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: Audio.value <= 0 ? "volume_off"
+                            : Audio.value < 0.33 ? "volume_mute"
+                            : Audio.value < 0.66 ? "volume_down"
+                            : "volume_up"
+                        iconSize: 16
+                        color: root.textColor
+
+                        layer.enabled: root.effectsSafe
+                        layer.effect: DropShadow {
+                            horizontalOffset: 0; verticalOffset: 1; radius: 4; samples: 9
+                            color: root.textShadowColor
+                        }
+                    }
+
+                    Text {
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: Math.round(Audio.value * 100) + "%"
+                        font.pixelSize: Looks.font.pixelSize.small
+                        font.family: Looks.font.family.ui
+                        color: root.textColor
+
+                        layer.enabled: root.effectsSafe
+                        layer.effect: DropShadow {
+                            horizontalOffset: 0; verticalOffset: 1; radius: 4; samples: 9
+                            color: root.textShadowColor
+                        }
+                    }
+                }
+
+                // Battery
+                Row {
+                    spacing: 4
+                    visible: UPower.displayDevice?.isPresent ?? false
+
+                    MaterialSymbol {
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: {
+                            const pct = UPower.displayDevice?.percentage ?? 0
+                            const charging = UPower.displayDevice?.state === UPowerDeviceState.Charging
+                            if (charging) return "battery_charging_full"
+                            if (pct <= 10) return "battery_alert"
+                            if (pct <= 30) return "battery_2_bar"
+                            if (pct <= 60) return "battery_4_bar"
+                            if (pct <= 80) return "battery_5_bar"
+                            return "battery_full"
+                        }
+                        iconSize: 16
+                        color: {
+                            const pct = UPower.displayDevice?.percentage ?? 0
+                            return pct <= 15 ? Looks.colors.danger : root.textColor
+                        }
+
+                        layer.enabled: root.effectsSafe
+                        layer.effect: DropShadow {
+                            horizontalOffset: 0; verticalOffset: 1; radius: 4; samples: 9
+                            color: root.textShadowColor
+                        }
+                    }
+
+                    Text {
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: Math.round(UPower.displayDevice?.percentage ?? 0) + "%"
+                        font.pixelSize: Looks.font.pixelSize.small
+                        font.family: Looks.font.family.ui
+                        color: root.textColor
+
+                        layer.enabled: root.effectsSafe
+                        layer.effect: DropShadow {
+                            horizontalOffset: 0; verticalOffset: 1; radius: 4; samples: 9
+                            color: root.textShadowColor
+                        }
+                    }
                 }
             }
-            
-            // Date - Windows 11 format: "Tuesday, October 5"
-            Text {
-                id: dateText
-                Layout.alignment: Qt.AlignHCenter
-                text: Qt.formatDate(new Date(), "dddd, MMMM d")
-                font.pixelSize: root.dateFontSize
-                font.weight: Looks.font.weight.regular
-                font.family: Looks.font.family.ui
-                color: root.textColor
-                layer.enabled: root.effectsSafe
-                layer.effect: DropShadow {
-                    horizontalOffset: 0
-                    verticalOffset: 1
-                    radius: 4
-                    samples: 9
-                    color: root.textShadowColor
+        }
+
+        // Clock container - position-aware
+        Item {
+            id: wClockContainer
+            width: wClockContent.implicitWidth
+            height: wClockContent.implicitHeight
+
+            states: [
+                State {
+                    name: "center"; when: lockView.clockPosition === "center"
+                    AnchorChanges {
+                        target: wClockContainer
+                        anchors.horizontalCenter: lockView.horizontalCenter
+                        anchors.verticalCenter: lockView.verticalCenter
+                    }
+                    PropertyChanges { target: wClockContainer; anchors.verticalCenterOffset: -60 }
+                },
+                State {
+                    name: "topLeft"; when: lockView.clockPosition === "topLeft"
+                    AnchorChanges {
+                        target: wClockContainer
+                        anchors.left: lockView.left
+                        anchors.top: lockView.top
+                    }
+                    PropertyChanges { target: wClockContainer; anchors.leftMargin: 48; anchors.topMargin: 80 }
+                },
+                State {
+                    name: "bottomLeft"; when: lockView.clockPosition === "bottomLeft"
+                    AnchorChanges {
+                        target: wClockContainer
+                        anchors.left: lockView.left
+                        anchors.bottom: lockView.bottom
+                    }
+                    PropertyChanges { target: wClockContainer; anchors.leftMargin: 48; anchors.bottomMargin: 140 }
                 }
-                
-                Timer {
-                    interval: 60000  // Update every minute
-                    running: true
-                    repeat: true
-                    onTriggered: dateText.text = Qt.formatDate(new Date(), "dddd, MMMM d")
+            ]
+
+            // Default digital clock
+            ColumnLayout {
+                id: wClockContent
+                visible: lockView.clockStyle !== "analog"
+                spacing: 4
+
+                Text {
+                    id: clockText
+                    Layout.alignment: lockView.clockPosition === "center" ? Qt.AlignHCenter : Qt.AlignLeft
+                    text: Qt.formatTime(new Date(), "hh:mm")
+                    font.pixelSize: lockView.clockStyle === "minimal" ? Math.round(72 * Looks.fontScale) : root.clockFontSize
+                    font.weight: Looks.font.weight.thin
+                    font.family: Looks.font.family.ui
+                    color: root.textColor
+
+                    layer.enabled: root.effectsSafe
+                    layer.effect: DropShadow {
+                        horizontalOffset: 0
+                        verticalOffset: 2
+                        radius: 8
+                        samples: 17
+                        color: root.textShadowColor
+                    }
+
+                    Timer {
+                        interval: 1000
+                        running: true
+                        repeat: true
+                        onTriggered: clockText.text = Qt.formatTime(new Date(), "hh:mm")
+                    }
+                }
+
+                Text {
+                    id: dateText
+                    Layout.alignment: lockView.clockPosition === "center" ? Qt.AlignHCenter : Qt.AlignLeft
+                    text: Qt.formatDate(new Date(), "dddd, MMMM d")
+                    font.pixelSize: lockView.clockStyle === "minimal" ? Math.round(14 * Looks.fontScale) : root.dateFontSize
+                    font.weight: Looks.font.weight.regular
+                    font.family: Looks.font.family.ui
+                    color: root.textColor
+                    layer.enabled: root.effectsSafe
+                    layer.effect: DropShadow {
+                        horizontalOffset: 0
+                        verticalOffset: 1
+                        radius: 4
+                        samples: 9
+                        color: root.textShadowColor
+                    }
+
+                    Timer {
+                        interval: 60000
+                        running: true
+                        repeat: true
+                        onTriggered: dateText.text = Qt.formatDate(new Date(), "dddd, MMMM d")
+                    }
+                }
+            }
+
+            // Analog clock - CookieClock from background widgets
+            Loader {
+                active: lockView.clockStyle === "analog"
+                anchors.centerIn: parent
+
+                sourceComponent: Item {
+                    id: wAnalogRoot
+                    width: wCookieClock.implicitSize + wDateAnalog.implicitHeight + 20
+                    height: width
+
+                    BackgroundClock.CookieClock {
+                        id: wCookieClock
+                        implicitSize: Math.round(230 * Looks.fontScale)
+                        anchors.horizontalCenter: parent.horizontalCenter
+                    }
+
+                    Text {
+                        id: wDateAnalog
+                        anchors {
+                            horizontalCenter: parent.horizontalCenter
+                            top: wCookieClock.bottom
+                            topMargin: 16
+                        }
+                        text: Qt.formatDate(new Date(), "dddd, MMMM d")
+                        font.pixelSize: Math.round(14 * Looks.fontScale)
+                        font.weight: Looks.font.weight.regular
+                        font.family: Looks.font.family.ui
+                        color: root.textColor
+
+                        layer.enabled: root.effectsSafe
+                        layer.effect: DropShadow {
+                            horizontalOffset: 0; verticalOffset: 1; radius: 4; samples: 9
+                            color: root.textShadowColor
+                        }
+
+                        Timer {
+                            interval: 60000; running: true; repeat: true
+                            onTriggered: wDateAnalog.text = Qt.formatDate(new Date(), "dddd, MMMM d")
+                        }
+                    }
                 }
             }
         }
@@ -484,14 +724,43 @@ MouseArea {
             readonly property bool lockNotifEnabled: Config.options?.lock?.notifications?.enable ?? false
             readonly property int lockNotifMaxCount: Config.options?.lock?.notifications?.maxCount ?? 3
             readonly property bool lockNotifShowBody: Config.options?.lock?.notifications?.showBody ?? true
+            readonly property string lockNotifPosition: {
+                const pos = Config.options?.lock?.notifications?.position ?? "auto"
+                return pos === "auto" ? "right" : pos
+            }
             active: lockNotifEnabled && Notifications.list.length > 0
+
             anchors {
-                right: parent.right
                 bottom: parent.bottom
-                rightMargin: 48
                 bottomMargin: 100
             }
             width: Math.min(340, parent.width * 0.3)
+
+            states: [
+                State {
+                    name: "center"; when: waffleLockNotificationsLoader.lockNotifPosition === "center"
+                    AnchorChanges {
+                        target: waffleLockNotificationsLoader
+                        anchors.horizontalCenter: lockView.horizontalCenter
+                    }
+                },
+                State {
+                    name: "left"; when: waffleLockNotificationsLoader.lockNotifPosition === "left"
+                    AnchorChanges {
+                        target: waffleLockNotificationsLoader
+                        anchors.left: lockView.left
+                    }
+                    PropertyChanges { target: waffleLockNotificationsLoader; anchors.leftMargin: 48 }
+                },
+                State {
+                    name: "right"; when: waffleLockNotificationsLoader.lockNotifPosition === "right"
+                    AnchorChanges {
+                        target: waffleLockNotificationsLoader
+                        anchors.right: lockView.right
+                    }
+                    PropertyChanges { target: waffleLockNotificationsLoader; anchors.rightMargin: 48 }
+                }
+            ]
 
             sourceComponent: Column {
                 spacing: 6
@@ -510,149 +779,254 @@ MouseArea {
                         readonly property var group: Notifications.groupsByAppName[modelData] ?? null
                         readonly property var latestNotif: group?.notifications?.[0] ?? null
                         readonly property int groupCount: group?.notifications?.length ?? 0
+                        property bool expanded: false
 
                         width: parent.width
-                        height: wGroupCard.height + (groupCount > 1 ? 3 : 0)
+                        height: wGroupCol.implicitHeight
                         visible: latestNotif !== null
 
-                        // Stacked card hint
-                        Rectangle {
-                            visible: wGroupDelegate.groupCount > 1
-                            anchors {
-                                horizontalCenter: parent.horizontalCenter
-                                bottom: parent.bottom
-                            }
-                            width: parent.width - 10
-                            height: wGroupCard.height - 3
-                            radius: Looks.radius.large
-                            color: ColorUtils.transparentize(Looks.colors.bg1Base, 0.35)
-                            border.color: ColorUtils.transparentize(Looks.colors.bg1Border, 0.6)
-                            border.width: 1
-                        }
-
-                        // Main card
-                        Rectangle {
-                            id: wGroupCard
+                        Column {
+                            id: wGroupCol
                             width: parent.width
-                            height: wGroupContent.implicitHeight + 14
-                            radius: Looks.radius.large
-                            color: ColorUtils.transparentize(Looks.colors.bg1Base, 0.15)
-                            border.color: ColorUtils.transparentize(Looks.colors.bg1Border, 0.5)
-                            border.width: 1
+                            spacing: 3
 
-                            layer.enabled: root.effectsSafe
-                            layer.effect: DropShadow {
-                                horizontalOffset: 0
-                                verticalOffset: 2
-                                radius: 8
-                                samples: 17
-                                color: Looks.colors.shadow
+                            // Main card — clickable to expand
+                            Rectangle {
+                                id: wGroupCard
+                                width: parent.width
+                                height: wGroupContent.implicitHeight + 14
+                                radius: Looks.radius.large
+                                color: wGroupMouse.containsMouse
+                                    ? ColorUtils.transparentize(Looks.colors.bg1Hover, 0.06)
+                                    : ColorUtils.transparentize(Looks.colors.bg1Base, 0.06)
+                                border.color: ColorUtils.transparentize(Looks.colors.bg1Border, 0.5)
+                                border.width: 1
+
+                                Behavior on color {
+                                    ColorAnimation {
+                                        duration: Looks.transition.enabled ? Looks.transition.duration.chromeHover : 0
+                                        easing.type: Easing.BezierSpline
+                                        easing.bezierCurve: Looks.transition.easing.bezierCurve.standard
+                                    }
+                                }
+
+                                layer.enabled: root.effectsSafe
+                                layer.effect: DropShadow {
+                                    horizontalOffset: 0
+                                    verticalOffset: 2
+                                    radius: 8
+                                    samples: 17
+                                    color: Looks.colors.shadow
+                                }
+
+                                MouseArea {
+                                    id: wGroupMouse
+                                    anchors.fill: parent
+                                    hoverEnabled: true
+                                    cursorShape: wGroupDelegate.groupCount > 1 ? Qt.PointingHandCursor : Qt.ArrowCursor
+                                    onClicked: {
+                                        if (wGroupDelegate.groupCount > 1) wGroupDelegate.expanded = !wGroupDelegate.expanded
+                                    }
+                                }
+
+                                RowLayout {
+                                    id: wGroupContent
+                                    anchors {
+                                        left: parent.left; right: parent.right
+                                        verticalCenter: parent.verticalCenter
+                                        margins: 10
+                                    }
+                                    spacing: 10
+
+                                    // App icon
+                                    Item {
+                                        Layout.alignment: Qt.AlignTop
+                                        Layout.preferredWidth: 28
+                                        Layout.preferredHeight: 28
+
+                                        Rectangle {
+                                            anchors.fill: parent
+                                            radius: Looks.radius.medium
+                                            color: "transparent"
+                                            clip: true
+
+                                            IconImage {
+                                                id: wGroupAppIcon
+                                                anchors.fill: parent
+                                                implicitSize: 28
+                                                asynchronous: true
+                                                source: {
+                                                    const img = wGroupDelegate.latestNotif?.image ?? ""
+                                                    const icon = wGroupDelegate.latestNotif?.appIcon ?? ""
+                                                    if (img && img !== "") return img
+                                                    if (icon && icon !== "") return Quickshell.iconPath(icon, "image-missing")
+                                                    return Quickshell.iconPath("preferences-desktop-notification", "image-missing")
+                                                }
+                                            }
+
+                                            FluentIcon {
+                                                anchors.centerIn: parent
+                                                icon: "alert"
+                                                implicitSize: 16
+                                                color: Looks.colors.accentFg
+                                                visible: wGroupAppIcon.status === Image.Error || wGroupAppIcon.status === Image.Null
+                                            }
+                                        }
+
+                                        // Count badge
+                                        Rectangle {
+                                            visible: wGroupDelegate.groupCount > 1
+                                            anchors {
+                                                right: parent.right
+                                                top: parent.top
+                                                rightMargin: -3
+                                                topMargin: -3
+                                            }
+                                            width: Math.max(14, wBadgeText.implicitWidth + 6)
+                                            height: 14
+                                            radius: 7
+                                            color: Looks.colors.accent
+                                            z: 1
+
+                                            Text {
+                                                id: wBadgeText
+                                                anchors.centerIn: parent
+                                                text: wGroupDelegate.groupCount
+                                                font.pixelSize: 8
+                                                font.weight: Font.Bold
+                                                font.family: Looks.font.family.ui
+                                                color: Looks.colors.accentFg
+                                            }
+                                        }
+                                    }
+
+                                    ColumnLayout {
+                                        Layout.fillWidth: true
+                                        spacing: 1
+
+                                        RowLayout {
+                                            Layout.fillWidth: true
+
+                                            // App name
+                                            Text {
+                                                Layout.fillWidth: true
+                                                text: wGroupDelegate.modelData ?? ""
+                                                font.pixelSize: Looks.font.pixelSize.tiny
+                                                font.weight: Looks.font.weight.regular
+                                                font.family: Looks.font.family.ui
+                                                color: Looks.colors.subfg
+                                                elide: Text.ElideRight
+                                                visible: text.length > 0
+                                            }
+
+                                            // Expand indicator
+                                            FluentIcon {
+                                                visible: wGroupDelegate.groupCount > 1
+                                                icon: wGroupDelegate.expanded ? "chevron-up" : "chevron-down"
+                                                implicitSize: 12
+                                                color: Looks.colors.subfg
+                                            }
+                                        }
+
+                                        // Latest notification summary
+                                        Text {
+                                            Layout.fillWidth: true
+                                            text: wGroupDelegate.latestNotif?.summary ?? ""
+                                            font.pixelSize: Looks.font.pixelSize.small
+                                            font.weight: Looks.font.weight.regular
+                                            font.family: Looks.font.family.ui
+                                            color: root.textColor
+                                            elide: Text.ElideRight
+                                            maximumLineCount: 1
+                                        }
+
+                                        // Body (optional)
+                                        Text {
+                                            Layout.fillWidth: true
+                                            visible: waffleLockNotificationsLoader.lockNotifShowBody && text.length > 0
+                                            text: wGroupDelegate.latestNotif?.body ?? ""
+                                            font.pixelSize: Looks.font.pixelSize.tiny
+                                            font.family: Looks.font.family.ui
+                                            color: Looks.colors.subfg
+                                            elide: Text.ElideRight
+                                            maximumLineCount: 2
+                                            wrapMode: Text.WordWrap
+                                        }
+                                    }
+                                }
                             }
 
-                            RowLayout {
-                                id: wGroupContent
-                                anchors {
-                                    left: parent.left; right: parent.right
-                                    verticalCenter: parent.verticalCenter
-                                    margins: 10
-                                }
-                                spacing: 10
+                            // Expanded notifications
+                            Column {
+                                width: parent.width - 12
+                                anchors.horizontalCenter: parent.horizontalCenter
+                                spacing: 2
+                                visible: wGroupDelegate.expanded
+                                clip: true
 
-                                // App icon with count badge
-                                Item {
-                                    Layout.alignment: Qt.AlignTop
-                                    Layout.preferredWidth: 28
-                                    Layout.preferredHeight: 28
+                                Repeater {
+                                    model: wGroupDelegate.expanded ? (wGroupDelegate.group?.notifications?.slice(1) ?? []) : []
 
-                                    Rectangle {
-                                        anchors.fill: parent
-                                        radius: Looks.radius.small
-                                        color: ColorUtils.transparentize(Looks.colors.accent, 0.7)
-                                        clip: true
+                                    delegate: Rectangle {
+                                        id: wExpandedCard
+                                        required property var modelData
+                                        width: parent.width
+                                        height: wExpandedContent.implicitHeight + 10
+                                        radius: Looks.radius.medium
+                                        color: ColorUtils.transparentize(Looks.colors.bg1Base, 0.1)
+                                        border.color: ColorUtils.transparentize(Looks.colors.bg1Border, 0.6)
+                                        border.width: 1
 
-                                        Image {
-                                            id: wGroupNotifImg
-                                            anchors.fill: parent
-                                            source: wGroupDelegate.latestNotif?.image || wGroupDelegate.latestNotif?.appIcon || ""
-                                            fillMode: Image.PreserveAspectCrop
-                                            asynchronous: true
-                                            visible: status === Image.Ready
+                                        RowLayout {
+                                            id: wExpandedContent
+                                            anchors {
+                                                left: parent.left; right: parent.right
+                                                verticalCenter: parent.verticalCenter
+                                                margins: 8
+                                            }
+                                            spacing: 8
+
+                                            IconImage {
+                                                Layout.alignment: Qt.AlignTop
+                                                Layout.preferredWidth: 20
+                                                Layout.preferredHeight: 20
+                                                implicitSize: 20
+                                                asynchronous: true
+                                                source: {
+                                                    const icon = wExpandedCard.modelData?.appIcon ?? ""
+                                                    if (icon && icon !== "") return Quickshell.iconPath(icon, "image-missing")
+                                                    return Quickshell.iconPath("preferences-desktop-notification", "image-missing")
+                                                }
+                                            }
+
+                                            ColumnLayout {
+                                                Layout.fillWidth: true
+                                                spacing: 1
+
+                                                Text {
+                                                    Layout.fillWidth: true
+                                                    text: wExpandedCard.modelData?.summary ?? ""
+                                                    font.pixelSize: Looks.font.pixelSize.tiny
+                                                    font.weight: Looks.font.weight.regular
+                                                    font.family: Looks.font.family.ui
+                                                    color: root.textColor
+                                                    elide: Text.ElideRight
+                                                    maximumLineCount: 1
+                                                }
+
+                                                Text {
+                                                    Layout.fillWidth: true
+                                                    visible: waffleLockNotificationsLoader.lockNotifShowBody && text.length > 0
+                                                    text: wExpandedCard.modelData?.body ?? ""
+                                                    font.pixelSize: Looks.font.pixelSize.tiny
+                                                    font.family: Looks.font.family.ui
+                                                    color: Looks.colors.subfg
+                                                    elide: Text.ElideRight
+                                                    maximumLineCount: 2
+                                                    wrapMode: Text.WordWrap
+                                                }
+                                            }
                                         }
-
-                                        FluentIcon {
-                                            anchors.centerIn: parent
-                                            icon: "alert"
-                                            implicitSize: 16
-                                            color: Looks.colors.accentFg
-                                            visible: wGroupNotifImg.status !== Image.Ready
-                                        }
-                                    }
-
-                                    // Count badge
-                                    Rectangle {
-                                        visible: wGroupDelegate.groupCount > 1
-                                        anchors {
-                                            right: parent.right
-                                            top: parent.top
-                                            rightMargin: -3
-                                            topMargin: -3
-                                        }
-                                        width: Math.max(14, wBadgeText.implicitWidth + 6)
-                                        height: 14
-                                        radius: 7
-                                        color: Looks.colors.accent
-
-                                        Text {
-                                            id: wBadgeText
-                                            anchors.centerIn: parent
-                                            text: wGroupDelegate.groupCount
-                                            font.pixelSize: 8
-                                            font.weight: Font.Bold
-                                            font.family: Looks.font.family.ui
-                                            color: Looks.colors.accentFg
-                                        }
-                                    }
-                                }
-
-                                ColumnLayout {
-                                    Layout.fillWidth: true
-                                    spacing: 1
-
-                                    // App name
-                                    Text {
-                                        Layout.fillWidth: true
-                                        text: wGroupDelegate.modelData ?? ""
-                                        font.pixelSize: Looks.font.pixelSize.tiny
-                                        font.weight: Looks.font.weight.regular
-                                        font.family: Looks.font.family.ui
-                                        color: Looks.colors.subfg
-                                        elide: Text.ElideRight
-                                        visible: text.length > 0
-                                    }
-
-                                    // Latest notification summary
-                                    Text {
-                                        Layout.fillWidth: true
-                                        text: wGroupDelegate.latestNotif?.summary ?? ""
-                                        font.pixelSize: Looks.font.pixelSize.small
-                                        font.weight: Looks.font.weight.regular
-                                        font.family: Looks.font.family.ui
-                                        color: root.textColor
-                                        elide: Text.ElideRight
-                                        maximumLineCount: 1
-                                    }
-
-                                    // Body (optional)
-                                    Text {
-                                        Layout.fillWidth: true
-                                        visible: waffleLockNotificationsLoader.lockNotifShowBody && text.length > 0
-                                        text: wGroupDelegate.latestNotif?.body ?? ""
-                                        font.pixelSize: Looks.font.pixelSize.tiny
-                                        font.family: Looks.font.family.ui
-                                        color: Looks.colors.subfg
-                                        elide: Text.ElideRight
-                                        maximumLineCount: 2
-                                        wrapMode: Text.WordWrap
                                     }
                                 }
                             }

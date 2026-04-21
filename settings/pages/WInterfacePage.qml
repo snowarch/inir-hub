@@ -415,6 +415,76 @@ WSettingsPage {
             value: Config.options?.lock?.notifications?.maxCount ?? 3
             onValueChanged: Config.setNestedValue("lock.notifications.maxCount", value)
         }
+
+        WSettingsDropdown {
+            visible: Config.options?.lock?.notifications?.enable ?? false
+            label: Translation.tr("Notification position")
+            icon: "panel-left-expand"
+            description: Translation.tr("Where notifications appear on the lock screen")
+            currentValue: Config.options?.lock?.notifications?.position ?? "auto"
+            options: [
+                { value: "auto", displayName: Translation.tr("Auto") },
+                { value: "center", displayName: Translation.tr("Center") },
+                { value: "left", displayName: Translation.tr("Left") },
+                { value: "right", displayName: Translation.tr("Right") }
+            ]
+            onSelected: newValue => Config.setNestedValue("lock.notifications.position", newValue)
+        }
+
+        WSettingsDropdown {
+            label: Translation.tr("Clock style")
+            icon: "arrow-clockwise"
+            description: Translation.tr("Visual style for the lock screen clock")
+            currentValue: Config.options?.lock?.clock?.style ?? "default"
+            options: [
+                { value: "default", displayName: Translation.tr("Default") },
+                { value: "minimal", displayName: Translation.tr("Minimal") },
+                { value: "analog", displayName: Translation.tr("Analog") }
+            ]
+            onSelected: newValue => Config.setNestedValue("lock.clock.style", newValue)
+        }
+
+        WSettingsDropdown {
+            label: Translation.tr("Clock position")
+            icon: "pin"
+            description: Translation.tr("Where the clock appears on the lock screen")
+            currentValue: Config.options?.lock?.clock?.position ?? "center"
+            options: [
+                { value: "center", displayName: Translation.tr("Center") },
+                { value: "topLeft", displayName: Translation.tr("Top Left") },
+                { value: "bottomLeft", displayName: Translation.tr("Bottom Left") }
+            ]
+            onSelected: newValue => Config.setNestedValue("lock.clock.position", newValue)
+        }
+
+        WSettingsSwitch {
+            label: Translation.tr("Show status indicators")
+            icon: "info"
+            description: Translation.tr("Show WiFi, Bluetooth, volume and battery on the lock screen")
+            checked: Config.options?.lock?.status?.enable ?? true
+            onCheckedChanged: Config.setNestedValue("lock.status.enable", checked)
+        }
+
+        WSettingsSwitch {
+            label: Translation.tr("Dim wallpaper")
+            icon: "weather-sunny-low"
+            description: Translation.tr("Apply a dark overlay to the wallpaper for better contrast")
+            checked: Config.options?.lock?.dim?.enable ?? false
+            onCheckedChanged: Config.setNestedValue("lock.dim.enable", checked)
+        }
+
+        WSettingsSlider {
+            visible: Config.options?.lock?.dim?.enable ?? false
+            label: Translation.tr("Dim amount")
+            icon: "brightness-high"
+            description: Translation.tr("How much to dim the wallpaper")
+            from: 10
+            to: 80
+            stepSize: 5
+            value: Math.round((Config.options?.lock?.dim?.opacity ?? 0.3) * 100)
+            onMoved: Config.setNestedValue("lock.dim.opacity", value / 100)
+            suffix: "%"
+        }
     }
 
     WSettingsSection {
