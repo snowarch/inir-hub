@@ -303,4 +303,48 @@ WSettingsPage {
             onCheckedChanged: Config.setNestedValue("hotspot.band", checked ? "a" : "bg")
         }
     }
+
+    WSettingsCard {
+        title: Translation.tr("Calendar")
+        icon: "schedule"
+
+        WSettingsSwitch {
+            label: Translation.tr("External calendar sync")
+            icon: "arrow-sync"
+            description: Translation.tr("Sync events from external ICS/iCal URLs (Google Calendar, Outlook, etc.)")
+            checked: Config.options?.calendar?.externalSync?.enable ?? false
+            onCheckedChanged: Config.setNestedValue("calendar.externalSync.enable", checked)
+        }
+
+        WSettingsSpinBox {
+            label: Translation.tr("Refresh interval")
+            icon: "arrow-clockwise"
+            description: Translation.tr("Minutes between calendar fetches")
+            value: Config.options?.calendar?.externalSync?.refreshMinutes ?? 15
+            from: 5
+            to: 120
+            stepSize: 5
+            onValueChanged: Config.setNestedValue("calendar.externalSync.refreshMinutes", value)
+            enabled: Config.options?.calendar?.externalSync?.enable ?? false
+        }
+
+        WSettingsSwitch {
+            label: Translation.tr("Show upcoming events")
+            icon: "list"
+            description: Translation.tr("Display upcoming events below the calendar")
+            checked: Config.options?.calendar?.showUpcoming ?? true
+            onCheckedChanged: Config.setNestedValue("calendar.showUpcoming", checked)
+        }
+
+        WSettingsSpinBox {
+            label: Translation.tr("Upcoming days")
+            icon: "timer"
+            description: Translation.tr("How many days ahead to show")
+            value: Config.options?.calendar?.upcomingDays ?? 3
+            from: 1
+            to: 14
+            stepSize: 1
+            onValueChanged: Config.setNestedValue("calendar.upcomingDays", value)
+        }
+    }
 }
