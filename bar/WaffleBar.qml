@@ -42,6 +42,10 @@ Scope {
                 implicitHeight: content.implicitHeight
                 implicitWidth: content.implicitWidth
 
+                BackgroundEffect.blurRegion: Region {
+                    item: (Appearance.effectsEnabled && (Config.options?.performance?.compositorBlur ?? true)) ? content : null
+                }
+
                 WaffleBarContent {
                     id: content
                     anchors {
