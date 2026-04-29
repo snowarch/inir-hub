@@ -51,10 +51,6 @@ Scope {
             WlrLayershell.keyboardFocus: WlrKeyboardFocus.Exclusive
             color: "transparent"
 
-            BackgroundEffect.blurRegion: Region {
-                item: (Appearance.effectsEnabled && (Config.options?.performance?.compositorBlur ?? true)) ? content : null
-            }
-
             // Adaptive minimum size based on preset
             property string preset: Config.options.waffles?.startMenu?.sizePreset ?? "normal"
             property int minW: preset === "mini" ? 200 : preset === "compact" ? 280 : 360
