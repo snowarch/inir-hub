@@ -257,6 +257,18 @@ MouseArea {
                     border.width: 1
 
                     readonly property MprisPlayer player: root.activePlayer
+                    readonly property string effectiveArtUrl: MprisController.isYtMusicActive ? YtMusic.currentThumbnail : (player?.trackArtUrl ?? "")
+                    readonly property string effectiveTitle: MprisController.isYtMusicActive ? YtMusic.currentTitle : (player?.trackTitle ?? "")
+                    readonly property string effectiveArtist: MprisController.isYtMusicActive ? YtMusic.currentArtist : (player?.trackArtist ?? "")
+
+                    MediaArtworkResolver {
+                        id: artworkResolver
+                        sourceUrl: mediaWidget.effectiveArtUrl
+                        title: mediaWidget.effectiveTitle
+                        artist: mediaWidget.effectiveArtist
+                        album: mediaWidget.player?.trackAlbum ?? ""
+                        cacheDirectory: Directories.coverArt
+                    }
 
                     RowLayout {
                         id: mediaRow
@@ -273,11 +285,13 @@ MouseArea {
                             clip: true
 
                             Image {
+                                id: mediaArtImage
                                 anchors.fill: parent
-                                source: mediaWidget.player?.trackArtUrl ?? ""
+                                source: artworkResolver.displaySource
                                 fillMode: Image.PreserveAspectCrop
                                 asynchronous: true
-                                visible: status === Image.Ready
+                                cache: false
+                                visible: artworkResolver.ready && status === Image.Ready
                             }
 
                             FluentIcon {
@@ -285,7 +299,7 @@ MouseArea {
                                 icon: "music-note-2"
                                 implicitSize: 24
                                 color: Looks.colors.subfg
-                                visible: !(mediaWidget.player?.trackArtUrl?.length > 0)
+                                visible: !artworkResolver.ready || mediaArtImage.status !== Image.Ready
                             }
                         }
 
