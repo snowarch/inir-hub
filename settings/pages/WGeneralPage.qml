@@ -186,7 +186,7 @@ WSettingsPage {
             label: Translation.tr("Num Lock popup")
             icon: "keyboard-dock"
             description: Translation.tr("Show a popup when Num Lock changes")
-            checked: Config.options?.keyboardIndicators?.popup?.num ?? true
+            checked: Config.options?.keyboardIndicators?.popup?.num ?? false
             onCheckedChanged: Config.setNestedValue("keyboardIndicators.popup.num", checked)
         }
 
@@ -218,7 +218,7 @@ WSettingsPage {
             label: Translation.tr("Num Lock indicator")
             icon: "keyboard-dock"
             description: Translation.tr("Show Num Lock in the taskbar")
-            checked: Config.options?.keyboardIndicators?.panel?.num ?? true
+            checked: Config.options?.keyboardIndicators?.panel?.num ?? false
             onCheckedChanged: Config.setNestedValue("keyboardIndicators.panel.num", checked)
         }
     }
