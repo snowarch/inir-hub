@@ -152,6 +152,7 @@ WBarAttachedPanelContent {
                         WBorderlessButton {
                             implicitWidth: 28
                             implicitHeight: 28
+                            enabled: MprisController.canGoPrevious
                             contentItem: FluentIcon {
                                 anchors.centerIn: parent
                                 icon: "previous"
@@ -184,6 +185,7 @@ WBarAttachedPanelContent {
                         WBorderlessButton {
                             implicitWidth: 28
                             implicitHeight: 28
+                            enabled: MprisController.canGoNext
                             contentItem: FluentIcon {
                                 anchors.centerIn: parent
                                 icon: "next"

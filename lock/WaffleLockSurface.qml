@@ -711,18 +711,20 @@ MouseArea {
                             
                             WaffleLockMediaButton {
                                 icon: "previous"
-                                onClicked: mediaWidget.player?.previous()
+                                enabled: MprisController.canGoPrevious
+                                onClicked: MprisController.previous()
                             }
                             
                             WaffleLockMediaButton {
                                 icon: mediaWidget.player?.isPlaying ? "pause" : "play"
                                 size: 40
-                                onClicked: mediaWidget.player?.togglePlaying()
+                                onClicked: MprisController.togglePlaying()
                             }
                             
                             WaffleLockMediaButton {
                                 icon: "next"
-                                onClicked: mediaWidget.player?.next()
+                                enabled: MprisController.canGoNext
+                                onClicked: MprisController.next()
                             }
                         }
                     }

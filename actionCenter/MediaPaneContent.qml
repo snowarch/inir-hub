@@ -192,17 +192,19 @@ Rectangle {
 
                 MediaBtn {
                     iconName: "previous"
-                    onClicked: root.activePlayer?.previous()
+                    enabled: MprisController.canGoPrevious
+                    onClicked: MprisController.previous()
                 }
                 MediaBtn {
                     iconName: root.activePlayer?.isPlaying ? "pause" : "play"
                     size: 36
                     iconSize: 18
-                    onClicked: root.activePlayer?.togglePlaying()
+                    onClicked: MprisController.togglePlaying()
                 }
                 MediaBtn {
                     iconName: "next"
-                    onClicked: root.activePlayer?.next()
+                    enabled: MprisController.canGoNext
+                    onClicked: MprisController.next()
                 }
             }
         }

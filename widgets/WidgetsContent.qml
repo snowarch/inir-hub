@@ -614,8 +614,9 @@ WBarAttachedPanelContent {
                                 WBorderlessButton {
                                     implicitWidth: Looks.dp(40)
                                     implicitHeight: Looks.dp(40)
+                                    enabled: MprisController.canGoPrevious
                                     contentItem: FluentIcon { anchors.centerIn: parent; icon: "previous"; implicitSize: Looks.dp(18) }
-                                    onClicked: MprisController.activePlayer?.previous()
+                                    onClicked: MprisController.previous()
                                 }
                                 WBorderlessButton {
                                     implicitWidth: Looks.dp(48)
@@ -625,13 +626,14 @@ WBarAttachedPanelContent {
                                         icon: MprisController.activePlayer?.isPlaying ? "pause" : "play"
                                         implicitSize: Looks.dp(24)
                                     }
-                                    onClicked: MprisController.activePlayer?.togglePlaying()
+                                    onClicked: MprisController.togglePlaying()
                                 }
                                 WBorderlessButton {
                                     implicitWidth: Looks.dp(40)
                                     implicitHeight: Looks.dp(40)
+                                    enabled: MprisController.canGoNext
                                     contentItem: FluentIcon { anchors.centerIn: parent; icon: "next"; implicitSize: Looks.dp(18) }
-                                    onClicked: MprisController.activePlayer?.next()
+                                    onClicked: MprisController.next()
                                 }
                             }
                         }
