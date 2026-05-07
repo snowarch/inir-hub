@@ -616,15 +616,6 @@ MouseArea {
                     readonly property string effectiveTitle: MprisController.isYtMusicActive ? YtMusic.currentTitle : (player?.trackTitle ?? "")
                     readonly property string effectiveArtist: MprisController.isYtMusicActive ? YtMusic.currentArtist : (player?.trackArtist ?? "")
 
-                    MediaArtworkResolver {
-                        id: artworkResolver
-                        sourceUrl: mediaWidget.effectiveArtUrl
-                        title: mediaWidget.effectiveTitle
-                        artist: mediaWidget.effectiveArtist
-                        album: mediaWidget.player?.trackAlbum ?? ""
-                        cacheDirectory: Directories.coverArt
-                    }
-                    
                     layer.enabled: root.effectsSafe
                     layer.effect: DropShadow {
                         horizontalOffset: 0
@@ -661,11 +652,11 @@ MouseArea {
                             Image {
                                 id: mediaArtImage
                                 anchors.fill: parent
-                                source: artworkResolver.displaySource
+                                source: MediaArtwork.displaySource
                                 fillMode: Image.PreserveAspectCrop
                                 asynchronous: true
                                 cache: false
-                                visible: artworkResolver.ready && status === Image.Ready
+                                visible: MediaArtwork.ready && status === Image.Ready
                             }
                             
                             FluentIcon {
@@ -673,7 +664,7 @@ MouseArea {
                                 icon: "music-note-2"
                                 implicitSize: 24
                                 color: Looks.colors.subfg
-                                visible: !artworkResolver.ready || mediaArtImage.status !== Image.Ready
+                                visible: !MediaArtwork.ready || mediaArtImage.status !== Image.Ready
                             }
                         }
                         
