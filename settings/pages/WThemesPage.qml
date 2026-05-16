@@ -812,41 +812,6 @@ WSettingsPage {
         title: Translation.tr("Cava Options")
         icon: "music-note-2"
 
-        Timer {
-            id: cavaDebounce
-            interval: 500
-            onTriggered: Quickshell.execDetached([Directories.wallpaperSwitchScriptPath, "--noswitch"])
-        }
-
-        WSettingsDropdown {
-            label: Translation.tr("Color source")
-            icon: "eyedropper"
-            description: Translation.tr("Where to pull gradient colors from")
-            currentValue: Config.options?.appearance?.cava?.colorSource ?? "theme"
-            options: [
-                { value: "theme", displayName: Translation.tr("Theme palette") },
-                { value: "vibrant", displayName: Translation.tr("Vibrant (saturated)") },
-                { value: "cover", displayName: Translation.tr("Album cover") }
-            ]
-            onSelected: newValue => {
-                Config.setNestedValue("appearance.cava.colorSource", newValue);
-                cavaDebounce.restart();
-            }
-        }
-
-        WSettingsSpinBox {
-            label: Translation.tr("Gradient colors")
-            icon: "color"
-            description: Translation.tr("Number of gradient stops (2-8)")
-            from: 2
-            to: 8
-            value: Config.options?.appearance?.cava?.gradientCount ?? 8
-            onValueChanged: {
-                Config.setNestedValue("appearance.cava.gradientCount", value);
-                cavaDebounce.restart();
-            }
-        }
-
         WSettingsSlider {
             label: Translation.tr("Sensitivity")
             icon: "sound-high"
@@ -866,7 +831,7 @@ WSettingsPage {
         WSettingsSpinBox {
             label: Translation.tr("Bars")
             icon: "chart-bar"
-            description: Translation.tr("Number of bars (0 = auto)")
+            description: Translation.tr("Number of frequency data points (0 = auto)")
             from: 0
             to: 200
             stepSize: 8
@@ -885,26 +850,6 @@ WSettingsPage {
             onValueChanged: Config.setNestedValue("appearance.cava.framerate", value)
         }
 
-        WSettingsSpinBox {
-            label: Translation.tr("Bar width")
-            icon: "layout-columns"
-            description: Translation.tr("Width of each bar")
-            from: 1
-            to: 20
-            value: Config.options?.appearance?.cava?.barWidth ?? 2
-            onValueChanged: Config.setNestedValue("appearance.cava.barWidth", value)
-        }
-
-        WSettingsSpinBox {
-            label: Translation.tr("Bar spacing")
-            icon: "separator-horizontal"
-            description: Translation.tr("Gap between bars")
-            from: 0
-            to: 10
-            value: Config.options?.appearance?.cava?.barSpacing ?? 1
-            onValueChanged: Config.setNestedValue("appearance.cava.barSpacing", value)
-        }
-
         WSettingsSwitch {
             label: Translation.tr("Stereo")
             icon: "headphones"
@@ -920,17 +865,10 @@ WSettingsPage {
             buttonText: Translation.tr("Reset")
             buttonIcon: "arrow-reset"
             onButtonClicked: {
-                Config.setNestedValue("appearance.cava.colorSource", "theme");
-                Config.setNestedValue("appearance.cava.gradientCount", 8);
-                Config.setNestedValue("appearance.cava.foreground", "");
-                Config.setNestedValue("appearance.cava.background", "");
                 Config.setNestedValue("appearance.cava.sensitivity", 100);
                 Config.setNestedValue("appearance.cava.bars", 0);
                 Config.setNestedValue("appearance.cava.framerate", 60);
-                Config.setNestedValue("appearance.cava.barWidth", 2);
-                Config.setNestedValue("appearance.cava.barSpacing", 1);
                 Config.setNestedValue("appearance.cava.stereo", true);
-                cavaDebounce.restart();
             }
         }
     }
