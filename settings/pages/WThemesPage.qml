@@ -912,6 +912,27 @@ WSettingsPage {
             checked: Config.options?.appearance?.cava?.stereo ?? true
             onCheckedChanged: Config.setNestedValue("appearance.cava.stereo", checked)
         }
+
+        WSettingsButton {
+            label: Translation.tr("Reset to defaults")
+            icon: "arrow-reset"
+            description: Translation.tr("Restore all cava settings to defaults")
+            buttonText: Translation.tr("Reset")
+            buttonIcon: "arrow-reset"
+            onButtonClicked: {
+                Config.setNestedValue("appearance.cava.colorSource", "theme");
+                Config.setNestedValue("appearance.cava.gradientCount", 8);
+                Config.setNestedValue("appearance.cava.foreground", "");
+                Config.setNestedValue("appearance.cava.background", "");
+                Config.setNestedValue("appearance.cava.sensitivity", 100);
+                Config.setNestedValue("appearance.cava.bars", 0);
+                Config.setNestedValue("appearance.cava.framerate", 60);
+                Config.setNestedValue("appearance.cava.barWidth", 2);
+                Config.setNestedValue("appearance.cava.barSpacing", 1);
+                Config.setNestedValue("appearance.cava.stereo", true);
+                cavaDebounce.restart();
+            }
+        }
     }
 
     // Terminal color adjustment
