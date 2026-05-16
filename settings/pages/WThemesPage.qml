@@ -789,6 +789,14 @@ WSettingsPage {
         }
 
         WSettingsSwitch {
+            label: Translation.tr("Cava")
+            icon: "music-note-2"
+            description: Translation.tr("Apply Material You gradient colors to cava audio visualizer config")
+            checked: Config.options?.appearance?.wallpaperTheming?.enableCava ?? false
+            onCheckedChanged: Config.setNestedValue("appearance.wallpaperTheming.enableCava", checked)
+        }
+
+        WSettingsSwitch {
             label: Translation.tr("Transparency")
             icon: "eye"
             description: Translation.tr("Enable transparent UI elements")
