@@ -812,6 +812,36 @@ WSettingsPage {
         title: Translation.tr("Cava Options")
         icon: "music-note-2"
 
+        WSettingsDropdown {
+            label: Translation.tr("Color source")
+            icon: "palette"
+            description: Translation.tr("Gradient colors for standalone cava config")
+            options: [
+                { displayName: Translation.tr("Theme palette"), value: "theme" },
+                { displayName: Translation.tr("Vibrant (saturated)"), value: "vibrant" },
+                { displayName: Translation.tr("Album cover"), value: "cover" },
+            ]
+            currentValue: Config.options?.appearance?.cava?.colorSource ?? "theme"
+            onSelected: value => {
+                Config.setNestedValue("appearance.cava.colorSource", value)
+                Quickshell.execDetached([Directories.wallpaperSwitchScriptPath, "--noswitch"])
+            }
+        }
+
+        WSettingsSpinBox {
+            label: Translation.tr("Gradient colors")
+            icon: "gradient"
+            description: Translation.tr("Number of gradient stops (2-8)")
+            from: 2
+            to: 8
+            stepSize: 1
+            value: Config.options?.appearance?.cava?.gradientCount ?? 8
+            onValueChanged: {
+                Config.setNestedValue("appearance.cava.gradientCount", value)
+                Quickshell.execDetached([Directories.wallpaperSwitchScriptPath, "--noswitch"])
+            }
+        }
+
         WSettingsSlider {
             label: Translation.tr("Sensitivity")
             icon: "sound-high"
@@ -865,6 +895,8 @@ WSettingsPage {
             buttonText: Translation.tr("Reset")
             buttonIcon: "arrow-reset"
             onButtonClicked: {
+                Config.setNestedValue("appearance.cava.colorSource", "theme");
+                Config.setNestedValue("appearance.cava.gradientCount", 8);
                 Config.setNestedValue("appearance.cava.sensitivity", 100);
                 Config.setNestedValue("appearance.cava.bars", 0);
                 Config.setNestedValue("appearance.cava.framerate", 60);
