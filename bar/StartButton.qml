@@ -37,7 +37,7 @@ AppButton {
             {
                 text: Translation.tr("Terminal"),
                 action: () => {
-                    Quickshell.execDetached([Quickshell.shellPath("scripts/inir"), "terminal"])
+                    AppLauncher.launch("terminal")
                 }
             },
             {
@@ -49,7 +49,7 @@ AppButton {
             {
                 text: Translation.tr("Settings"),
                 action: () => {
-                    Quickshell.execDetached([Quickshell.shellPath("scripts/inir"), "settings"]);
+                    ShellExec.execDetachedArgs([Quickshell.shellPath("scripts/inir"), "settings"], "Open iNiR settings");
                 }
             },
             {
