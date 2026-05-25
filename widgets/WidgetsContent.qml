@@ -48,13 +48,13 @@ WBarAttachedPanelContent {
     function runQuickAction(actionId: string): void {
         switch (actionId) {
         case "files":
-            Quickshell.execDetached(["/usr/bin/nautilus"])
+            ShellExec.execDetachedArgs(["/usr/bin/nautilus"], "Launch Files")
             break
         case "terminal":
-            Quickshell.execDetached([Quickshell.shellPath("scripts/inir"), "terminal"])
+            AppLauncher.launch("terminal")
             break
         case "settings":
-            Quickshell.execDetached([Quickshell.shellPath("scripts/inir"), "settings"])
+            ShellExec.execDetachedArgs([Quickshell.shellPath("scripts/inir"), "settings"], "Open iNiR settings")
             break
         case "wallpaper": {
             const useMain = Config.options?.waffles?.background?.useMainWallpaper ?? true
