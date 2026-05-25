@@ -31,7 +31,7 @@ BarButton {
                 anchors.verticalCenter: parent.verticalCenter
                 WText {
                     anchors.right: parent.right
-                    text: DateTime.time
+                    text: DateTime.timeDisplay
                 }
                 WText {
                     anchors.right: parent.right
