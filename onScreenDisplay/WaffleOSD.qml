@@ -16,6 +16,7 @@ Scope {
     property var focusedScreen: CompositorService.isNiri 
         ? (Quickshell.screens.find(s => s.name === NiriService.currentOutput) ?? GlobalStates.primaryScreen)
         : (Quickshell.screens.find(s => s.name === Hyprland.focusedMonitor?.name) ?? GlobalStates.primaryScreen)
+    property var targetScreen: screenFromList(Config.options?.osd?.screenList ?? [], focusedScreen)
     property string currentIndicator: "volume"
     property var indicators: [
         {
@@ -39,6 +40,14 @@ Scope {
             globalStateValue: "osdKeyboardLayoutOpen"
         },
     ]
+
+    function screenFromList(list, preferred) {
+        if (!list || list.length === 0)
+            return preferred ?? GlobalStates.primaryScreen
+        if (preferred && list.includes(preferred.name ?? ""))
+            return preferred
+        return Quickshell.screens.find(s => list.includes(s?.name ?? "")) ?? GlobalStates.primaryScreen ?? preferred
+    }
 
     // Suppress OSD during startup and gamemode niri-reload transitions
     Timer {
@@ -148,13 +157,13 @@ Scope {
 
             Connections {
                 target: root
-                function onFocusedScreenChanged() {
-                    panelWindow.screen = root.focusedScreen;
+                function onTargetScreenChanged() {
+                    panelWindow.screen = root.targetScreen;
                 }
             }
 
             color: "transparent"
-            screen: root.focusedScreen
+            screen: root.targetScreen
             exclusiveZone: 0
             WlrLayershell.namespace: "quickshell:wOnScreenDisplay"
             WlrLayershell.layer: WlrLayer.Overlay

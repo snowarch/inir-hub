@@ -332,7 +332,12 @@ Variants {
 
             WidgetCanvas {
                 anchors.fill: parent
-                enabled: !GlobalStates.overviewOpen
+                visible: {
+                    const list = Config.options?.background?.widgets?.screenList ?? [];
+                    if (!list || list.length === 0) return true;
+                    return list.includes(panelRoot.modelData?.name ?? "");
+                }
+                enabled: visible && !GlobalStates.overviewOpen
 
                 WaffleBackgroundClock {
                     id: backgroundClockWidget

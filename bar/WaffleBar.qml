@@ -17,7 +17,20 @@ Scope {
         id: barLoader
         active: GlobalStates.barOpen
         component: Variants {
-            model: Quickshell.screens
+            // Match the ii Bar.qml screen filter so multi-monitor users can
+            // restrict the taskbar to specific outputs (ref #154).
+            model: {
+                const screens = Quickshell.screens;
+                const list = Config.options?.waffles?.bar?.screenList ?? [];
+                if (!list || list.length === 0)
+                    return screens;
+                const matched = screens.filter(screen => {
+                    const screenName = screen?.name ?? "";
+                    return screenName.length > 0 && list.includes(screenName);
+                });
+                // Fallback safety: stale monitor names should never hide the bar everywhere.
+                return matched.length > 0 ? matched : screens;
+            }
             delegate: PanelWindow { // Bar window
                 id: barRoot
                 required property var modelData

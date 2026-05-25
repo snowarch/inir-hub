@@ -196,7 +196,14 @@ Item {
         { pageIndex: 9, pageName: "Shortcuts", section: "", label: "Keyboard Shortcuts", targetLabel: "", keywords: ["shortcuts", "keybinds", "hotkeys", "keyboard", "niri", "super", "mod"] },
         
         // === About (10) ===
-        { pageIndex: 10, pageName: "About", section: "", label: "About ii", targetLabel: "", keywords: ["about", "version", "credits", "github", "info"] }
+        { pageIndex: 10, pageName: "About", section: "", label: "About ii", targetLabel: "", keywords: ["about", "version", "credits", "github", "info"] },
+
+        // === Monitors (11) ===
+        { pageIndex: 11, pageName: "Monitors", section: "Shell visibility", label: "Primary monitor", targetLabel: "Primary monitor", keywords: ["monitor", "screen", "display", "primary", "output", "fallback"] },
+        { pageIndex: 11, pageName: "Monitors", section: "Waffle shell surfaces", label: "Taskbar", targetLabel: "Taskbar", keywords: ["monitor", "screen", "display", "bar", "taskbar", "visibility"] },
+        { pageIndex: 11, pageName: "Monitors", section: "Shared popups and widgets", label: "Notification popups", targetLabel: "Notification popups", keywords: ["monitor", "screen", "display", "notifications", "popups", "visibility"] },
+        { pageIndex: 11, pageName: "Monitors", section: "Shared popups and widgets", label: "Desktop widgets", targetLabel: "Desktop widgets", keywords: ["monitor", "screen", "display", "desktop", "widgets", "visibility"] },
+        { pageIndex: 11, pageName: "Monitors", section: "Shared popups and widgets", label: "OSD indicators", targetLabel: "OSD indicators", keywords: ["monitor", "screen", "display", "media", "osd", "volume", "brightness", "visibility"] }
     ]
     
     function highlightTerms(text: string, terms: list<string>): string {
