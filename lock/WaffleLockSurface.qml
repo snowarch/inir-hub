@@ -106,6 +106,7 @@ MouseArea {
         source: root._wallpaperPath && !root.wallpaperIsGif ? root._wallpaperPath : ""
         fillMode: Image.PreserveAspectCrop
         asynchronous: true
+        cache: false // Don't retain in QPixmapCache after lock surface destroys (#163)
         visible: !root.wallpaperIsGif
         
         layer.enabled: root.blurEnabled && root.effectsSafe
@@ -129,6 +130,7 @@ MouseArea {
         source: root.wallpaperIsGif ? root._wallpaperSource : ""
         fillMode: Image.PreserveAspectCrop
         asynchronous: true
+        cache: false // Don't retain in QPixmapCache after lock surface destroys (#163)
         visible: root.wallpaperIsGif
         playing: visible && root.enableAnimation
         

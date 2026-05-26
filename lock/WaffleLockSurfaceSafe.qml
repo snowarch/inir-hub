@@ -79,6 +79,7 @@ MouseArea {
          source: (!root.wallpaperIsGif && !root.wallpaperIsVideo) ? root._wallpaperPath : ""
          fillMode: Image.PreserveAspectCrop
          asynchronous: true
+         cache: false // Don't retain in QPixmapCache after lock surface destroys (#163)
          visible: false
          z: -2
      }
