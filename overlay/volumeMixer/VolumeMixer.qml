@@ -138,19 +138,29 @@ StyledOverlayWidget {
 
                     StyledImage {
                         anchors.fill: parent
-                        visible: musicContent.displayedArtFilePath !== "" && status !== Image.Error
+                        opacity: musicContent.displayedArtFilePath !== "" && status !== Image.Error ? 1 : 0
+                        visible: opacity > 0
                         source: musicContent.displayedArtFilePath
                         fillMode: Image.PreserveAspectCrop
                         cache: false
                         antialiasing: true
+                        Behavior on opacity {
+                            enabled: Appearance.animationsEnabled
+                            NumberAnimation { duration: Appearance.animation.elementMoveFast.duration; easing.type: Appearance.animation.elementMoveFast.type; easing.bezierCurve: Appearance.animation.elementMoveFast.bezierCurve }
+                        }
                     }
 
                     MaterialSymbol {
                         anchors.centerIn: parent
-                        visible: musicContent.displayedArtFilePath === ""
+                        opacity: musicContent.displayedArtFilePath === "" ? 1 : 0
+                        visible: opacity > 0
                         text: "music_note"
                         iconSize: Appearance.font.pixelSize.huge
                         color: Appearance.colors.colOnLayer2
+                        Behavior on opacity {
+                            enabled: Appearance.animationsEnabled
+                            NumberAnimation { duration: Appearance.animation.elementMoveFast.duration; easing.type: Appearance.animation.elementMoveFast.type; easing.bezierCurve: Appearance.animation.elementMoveFast.bezierCurve }
+                        }
                     }
                 }
 

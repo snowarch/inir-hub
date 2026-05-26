@@ -145,10 +145,15 @@ ColumnLayout {
         // Empty state
         StyledText {
             anchors.centerIn: parent
-            visible: root.appPwNodes.length === 0
+            opacity: root.appPwNodes.length === 0 ? 1 : 0
+            visible: opacity > 0
             text: root.isSink ? Translation.tr("No apps playing audio") : Translation.tr("No apps using microphone")
             color: Appearance.colors.colSubtext
             font.pixelSize: Appearance.font.pixelSize.small
+            Behavior on opacity {
+                enabled: Appearance.animationsEnabled
+                NumberAnimation { duration: Appearance.animation.elementMoveFast.duration; easing.type: Appearance.animation.elementMoveFast.type; easing.bezierCurve: Appearance.animation.elementMoveFast.bezierCurve }
+            }
         }
     }
 }

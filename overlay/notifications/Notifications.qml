@@ -71,19 +71,25 @@ StyledOverlayWidget {
 
                         Rectangle {
                             id: notifBadge
-                            visible: !Notifications.silent && Notifications.unread > 0
+                            scale: !Notifications.silent && Notifications.unread > 0 ? 1 : 0
+                            visible: scale > 0
                             anchors {
                                 right: bellIcon.right
                                 top: bellIcon.top
                                 rightMargin: 0
                                 topMargin: 0
                             }
-                            radius: Appearance.rounding.full
+                            radius: Math.min(width, height) / 2
                             color: Appearance.colors.colOnLayer0
                             z: 1
 
                             implicitHeight: 16
                             implicitWidth: implicitHeight
+
+                            Behavior on scale {
+                                enabled: Appearance.animationsEnabled
+                                NumberAnimation { duration: Appearance.animation.elementMoveFast.duration; easing.type: Appearance.animation.elementMoveFast.type; easing.bezierCurve: Appearance.animation.elementMoveFast.bezierCurve }
+                            }
 
                             StyledText {
                                 anchors.centerIn: parent

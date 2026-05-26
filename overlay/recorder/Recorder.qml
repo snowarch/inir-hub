@@ -85,10 +85,21 @@ StyledOverlayWidget {
                 Layout.fillWidth: true
                 Layout.leftMargin: 4
                 Layout.rightMargin: 4
-                visible: RecorderStatus.isRecording
-                height: 28
-                radius: height / 2
+                opacity: RecorderStatus.isRecording ? 1 : 0
+                visible: opacity > 0
+                implicitHeight: RecorderStatus.isRecording ? 28 : 0
+                Layout.preferredHeight: implicitHeight
+                radius: Math.min(width, height) / 2
                 color: Appearance.colors.colErrorContainer
+
+                Behavior on opacity {
+                    enabled: Appearance.animationsEnabled
+                    NumberAnimation { duration: Appearance.animation.elementMoveFast.duration; easing.type: Appearance.animation.elementMoveFast.type; easing.bezierCurve: Appearance.animation.elementMoveFast.bezierCurve }
+                }
+                Behavior on implicitHeight {
+                    enabled: Appearance.animationsEnabled
+                    NumberAnimation { duration: Appearance.animation.elementResize.duration; easing.type: Appearance.animation.elementResize.type; easing.bezierCurve: Appearance.animation.elementResize.bezierCurve }
+                }
 
                 RowLayout {
                     anchors.centerIn: parent
@@ -148,40 +159,44 @@ StyledOverlayWidget {
 
                 BigRecorderButton {
                     id: recordButton
-                    materialSymbol: RecorderStatus.isRecording ? "stop_circle" : "screen_record"
-                    name: RecorderStatus.isRecording
-                        ? Translation.tr("Stop recording") : Translation.tr("Record region")
-                    isRecording: RecorderStatus.isRecording
-                    visible: !RecorderStatus.isRecording
+                    materialSymbol: "screen_record"
+                    name: Translation.tr("Record region")
+                    opacity: !RecorderStatus.isRecording ? 1 : 0
+                    visible: opacity > 0
+                    scale: !RecorderStatus.isRecording ? 1 : 0.8
+                    Behavior on opacity { enabled: Appearance.animationsEnabled; NumberAnimation { duration: Appearance.animation.elementMoveFast.duration; easing.type: Appearance.animation.elementMoveFast.type; easing.bezierCurve: Appearance.animation.elementMoveFast.bezierCurve } }
+                    Behavior on scale { enabled: Appearance.animationsEnabled; NumberAnimation { duration: Appearance.animation.elementMoveFast.duration; easing.type: Appearance.animation.elementMoveFast.type; easing.bezierCurve: Appearance.animation.elementMoveFast.bezierCurve } }
                     onClicked: {
-                        if (!RecorderStatus.isRecording) {
-                            GlobalStates.overlayOpen = false;
-                            Quickshell.execDetached([Quickshell.shellPath("scripts/inir"), "region", "recordWithSound"]);
-                        }
+                        GlobalStates.overlayOpen = false;
+                        Quickshell.execDetached([Quickshell.shellPath("scripts/inir"), "region", "recordWithSound"]);
                     }
                 }
 
                 BigRecorderButton {
                     id: fullscreenRecordButton
-                    materialSymbol: RecorderStatus.isRecording ? "stop_circle" : "capture"
-                    name: RecorderStatus.isRecording
-                        ? Translation.tr("Stop recording") : Translation.tr("Record screen")
-                    isRecording: RecorderStatus.isRecording
-                    visible: !RecorderStatus.isRecording
+                    materialSymbol: "capture"
+                    name: Translation.tr("Record screen")
+                    opacity: !RecorderStatus.isRecording ? 1 : 0
+                    visible: opacity > 0
+                    scale: !RecorderStatus.isRecording ? 1 : 0.8
+                    Behavior on opacity { enabled: Appearance.animationsEnabled; NumberAnimation { duration: Appearance.animation.elementMoveFast.duration; easing.type: Appearance.animation.elementMoveFast.type; easing.bezierCurve: Appearance.animation.elementMoveFast.bezierCurve } }
+                    Behavior on scale { enabled: Appearance.animationsEnabled; NumberAnimation { duration: Appearance.animation.elementMoveFast.duration; easing.type: Appearance.animation.elementMoveFast.type; easing.bezierCurve: Appearance.animation.elementMoveFast.bezierCurve } }
                     onClicked: {
-                        if (!RecorderStatus.isRecording) {
-                            GlobalStates.overlayOpen = false;
-                            Quickshell.execDetached([Directories.recordScriptPath, "--fullscreen", "--sound"]);
-                        }
+                        GlobalStates.overlayOpen = false;
+                        Quickshell.execDetached([Directories.recordScriptPath, "--fullscreen", "--sound"]);
                     }
                 }
 
-                // Dedicated STOP button — only visible when recording
+                // Dedicated STOP button — morphs in when recording
                 BigRecorderButton {
                     materialSymbol: "stop_circle"
                     name: Translation.tr("Stop recording")
                     isRecording: true
-                    visible: RecorderStatus.isRecording
+                    opacity: RecorderStatus.isRecording ? 1 : 0
+                    visible: opacity > 0
+                    scale: RecorderStatus.isRecording ? 1 : 0.8
+                    Behavior on opacity { enabled: Appearance.animationsEnabled; NumberAnimation { duration: Appearance.animation.elementMoveFast.duration; easing.type: Appearance.animation.elementMoveFast.type; easing.bezierCurve: Appearance.animation.elementMoveFast.bezierCurve } }
+                    Behavior on scale { enabled: Appearance.animationsEnabled; NumberAnimation { duration: Appearance.animation.elementMoveFast.duration; easing.type: Appearance.animation.elementMoveFast.type; easing.bezierCurve: Appearance.animation.elementMoveFast.bezierCurve } }
                     onClicked: {
                         Quickshell.execDetached([Directories.recordScriptPath]);
                     }
@@ -449,37 +464,47 @@ StyledOverlayWidget {
         }
 
         // Collapsible content
-        ColumnLayout {
+        Item {
             Layout.fillWidth: true
-            Layout.leftMargin: 8
-            Layout.rightMargin: 8
-            spacing: 2
-            visible: gameModeSection._expanded
+            Layout.preferredHeight: gameModeSection._expanded ? gameModeContent.implicitHeight : 0
+            clip: true
+            opacity: gameModeSection._expanded ? 1 : 0
 
-            Behavior on visible {
-                NumberAnimation {
-                    duration: Appearance.animation.elementMoveFast.duration
-                    easing.type: Appearance.animation.elementMoveFast.type
-                    easing.bezierCurve: Appearance.animation.elementMoveFast.bezierCurve
+            Behavior on Layout.preferredHeight {
+                enabled: Appearance.animationsEnabled
+                NumberAnimation { duration: Appearance.animation.elementResize.duration; easing.type: Appearance.animation.elementResize.type; easing.bezierCurve: Appearance.animation.elementResize.bezierCurve }
+            }
+            Behavior on opacity {
+                enabled: Appearance.animationsEnabled
+                NumberAnimation { duration: Appearance.animation.elementMoveFast.duration; easing.type: Appearance.animation.elementMoveFast.type; easing.bezierCurve: Appearance.animation.elementMoveFast.bezierCurve }
+            }
+
+            ColumnLayout {
+                id: gameModeContent
+                width: parent.width
+                anchors.left: parent.left
+                anchors.leftMargin: 8
+                anchors.right: parent.right
+                anchors.rightMargin: 8
+                spacing: 2
+
+                GameModeToggle {
+                    text: Translation.tr("Auto-hide OSD during fullscreen")
+                    configKey: "overlay.recorder.autoHideOnFullscreen"
+                    defaultVal: true
                 }
-            }
 
-            GameModeToggle {
-                text: Translation.tr("Auto-hide OSD during fullscreen")
-                configKey: "overlay.recorder.autoHideOnFullscreen"
-                defaultVal: true
-            }
+                GameModeToggle {
+                    text: Translation.tr("Suppress notifications")
+                    configKey: "overlay.recorder.suppressToasts"
+                    defaultVal: true
+                }
 
-            GameModeToggle {
-                text: Translation.tr("Suppress notifications")
-                configKey: "overlay.recorder.suppressToasts"
-                defaultVal: true
-            }
-
-            GameModeToggle {
-                text: Translation.tr("Disable Niri animations")
-                configKey: "overlay.recorder.disableNiriAnims"
-                defaultVal: false
+                GameModeToggle {
+                    text: Translation.tr("Disable Niri animations")
+                    configKey: "overlay.recorder.disableNiriAnims"
+                    defaultVal: false
+                }
             }
         }
     }
@@ -521,8 +546,13 @@ StyledOverlayWidget {
                 anchors.centerIn: parent
                 text: "check"
                 iconSize: 12
-                visible: checkBox.toggled
+                scale: checkBox.toggled ? 1 : 0
+                visible: scale > 0
                 color: Appearance.colors.colOnPrimary
+                Behavior on scale {
+                    enabled: Appearance.animationsEnabled
+                    NumberAnimation { duration: Appearance.animation.elementMoveFast.duration; easing.type: Appearance.animation.elementMoveFast.type; easing.bezierCurve: Appearance.animation.elementMoveFast.bezierCurve }
+                }
             }
 
             onClicked: {

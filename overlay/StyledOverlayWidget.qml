@@ -387,6 +387,7 @@ AbstractOverlayWidget {
                 iconSize: 20
                 text: titlebarButton.materialSymbol
                 fill: titlebarButton.toggled
+                animateFill: true
                 color: titlebarButton.toggled
                     ? (Appearance.angelEverywhere ? Appearance.angel.colPrimary : Appearance.colors.colOnSecondaryContainer)
                     : (Appearance.angelEverywhere ? Appearance.angel.colText : Appearance.colors.colOnSurface)
