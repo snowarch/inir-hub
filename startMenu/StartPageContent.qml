@@ -86,7 +86,9 @@ WPanelPageColumn {
                 Layout.fillWidth: true
                 Layout.minimumHeight: recHeader.implicitHeight + 8 + Math.min(recGrid.implicitHeight, 2 * 44 + 1 * 4)
                 Layout.maximumHeight: recHeader.implicitHeight + 8 + recGrid.implicitHeight
-                visible: (root.recentApps?.length ?? 0) > 0
+                opacity: (root.recentApps?.length ?? 0) > 0 ? 1 : 0
+                visible: opacity > 0
+                Behavior on opacity { enabled: Appearance.animationsEnabled; NumberAnimation { duration: Appearance.animation.elementMoveFast.duration; easing.type: Easing.OutCubic } }
                 spacing: 8
 
                 WText {

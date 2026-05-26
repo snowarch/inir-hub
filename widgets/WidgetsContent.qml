@@ -403,14 +403,20 @@ WBarAttachedPanelContent {
                 }
             }
 
-            WPanelSeparator { visible: (Config.options?.waffles?.widgetsPanel?.showMedia ?? true) && MprisController.activePlayer !== null }
+            WPanelSeparator {
+                opacity: ((Config.options?.waffles?.widgetsPanel?.showMedia ?? true) && MprisController.activePlayer !== null) ? 1 : 0
+                visible: opacity > 0
+                Behavior on opacity { enabled: Appearance.animationsEnabled; NumberAnimation { duration: Appearance.animation.elementMoveFast.duration; easing.type: Easing.OutCubic } }
+            }
 
             // Media widget (if playing)
             BodyRectangle {
                 id: mediaWidget
                 Layout.fillWidth: true
-                implicitHeight: mediaContent.implicitHeight
-                visible: (Config.options?.waffles?.widgetsPanel?.showMedia ?? true) && MprisController.activePlayer !== null
+                implicitHeight: ((Config.options?.waffles?.widgetsPanel?.showMedia ?? true) && MprisController.activePlayer !== null) ? mediaContent.implicitHeight : 0
+                visible: implicitHeight > 0
+                Behavior on implicitHeight { enabled: Appearance.animationsEnabled; NumberAnimation { duration: Appearance.animation.elementMoveEnter.duration; easing.type: Appearance.animation.elementMoveEnter.type; easing.bezierCurve: Appearance.animation.elementMoveEnter.bezierCurve } }
+                clip: true
                 color: "transparent"
 
                 // Volume feedback overlay

@@ -400,11 +400,15 @@ Item {
                 spacing: 4
                 
                 // Header with app name (expanded)
-                RowLayout {
+                Revealer {
+                    vertical: true
+                    reveal: root.navExpanded
                     Layout.fillWidth: true
+                RowLayout {
+                    anchors.left: parent.left
+                    anchors.right: parent.right
                     Layout.bottomMargin: 6
                     spacing: 10
-                    visible: root.navExpanded
 
                     WUserAvatar {
                         sourceSize: Qt.size(32, 32)
@@ -455,20 +459,27 @@ Item {
                         }
                     }
                 }
+                }
                 
                 // Subtle separator under header
-                Rectangle {
-                    visible: root.navExpanded
+                Revealer {
+                    vertical: true
+                    reveal: root.navExpanded
                     Layout.fillWidth: true
-                    Layout.bottomMargin: 6
-                    height: 1
-                    color: Looks.colors.bg2Border
-                    opacity: 0.15
+                    Rectangle {
+                        implicitWidth: parent.width
+                        implicitHeight: 1
+                        color: Looks.colors.bg2Border
+                        opacity: 0.15
+                    }
                 }
                 
                 // Header icon (collapsed)
+                Revealer {
+                    vertical: true
+                    reveal: !root.navExpanded
+                    Layout.fillWidth: true
                 Item {
-                    visible: !root.navExpanded
                     Layout.preferredWidth: 32
                     Layout.preferredHeight: 32
                     Layout.alignment: Qt.AlignHCenter
@@ -481,11 +492,15 @@ Item {
                         color: Looks.colors.subfg
                     }
                 }
+                }
                 
                 // Search bar (only when expanded)
+                Revealer {
+                    vertical: true
+                    reveal: root.navExpanded
+                    Layout.fillWidth: true
                 Rectangle {
                     id: searchBarContainer
-                    visible: root.navExpanded
                     Layout.fillWidth: true
                     Layout.preferredHeight: 34
                     radius: Looks.radius.medium
@@ -595,11 +610,15 @@ Item {
                         }
                     }
                 }
+                }
                 
                 // Search results dropdown
+                Revealer {
+                    vertical: true
+                    reveal: root.searchText.length > 0 && root.searchResults.length > 0
+                    Layout.fillWidth: true
                 Rectangle {
                     id: searchResultsDropdown
-                    visible: root.searchText.length > 0 && root.searchResults.length > 0
                     Layout.fillWidth: true
                     Layout.preferredHeight: Math.min((searchResultsList.contentHeight || 0) + 8, 300)
                     radius: Looks.radius.large
@@ -739,12 +758,16 @@ Item {
                         }
                     }
                 }
+                }
                 
                 // No results indicator
-                Rectangle {
-                    visible: root.searchText.length > 0 && root.searchResults.length === 0
+                Revealer {
+                    vertical: true
+                    reveal: root.searchText.length > 0 && root.searchResults.length === 0
                     Layout.fillWidth: true
-                    Layout.preferredHeight: 36
+                Rectangle {
+                    implicitWidth: parent.width
+                    implicitHeight: 36
                     radius: Looks.radius.medium
                     color: Looks.colors.bg2Base
                     
@@ -764,6 +787,7 @@ Item {
                             color: Looks.colors.subfg
                         }
                     }
+                }
                 }
 
                 Item { height: 4 }

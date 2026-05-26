@@ -53,7 +53,7 @@ WButton {
             anchors.left: parent.left
             anchors.verticalCenter: parent.verticalCenter
             implicitWidth: 3
-            radius: width / 2
+            radius: Math.min(width, height) / 2
             color: Looks.colors.accent
             opacity: root.checked ? 1 : 0
             height: root.checked ? Math.max(16, root.background.height - 18 * 2) : 0

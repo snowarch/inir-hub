@@ -85,7 +85,9 @@ BarButton {
 
             // Silent mode indicator
             FluentIcon {
-                visible: Notifications.silent
+                opacity: Notifications.silent ? 1 : 0
+                visible: opacity > 0
+                Behavior on opacity { NumberAnimation { duration: 150; easing.type: Easing.OutCubic } }
                 anchors.verticalCenter: parent.verticalCenter
                 icon: "alert-snooze"
                 implicitSize: Looks.scaledBar(16, root.panelScreen)
