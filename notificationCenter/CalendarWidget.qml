@@ -354,7 +354,7 @@ BodyRectangle {
 
         Rectangle {
             anchors.fill: parent
-            radius: Looks.rounding.medium
+            radius: Looks.radius.medium
             color: rowMA.containsMouse ? Looks.colors.bg1Hover : "transparent"
 
             Behavior on color {
