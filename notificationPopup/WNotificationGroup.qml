@@ -73,7 +73,6 @@ Item {
     MouseArea {
         anchors.fill: parent
         hoverEnabled: true
-        propagateComposedEvents: true
         acceptedButtons: Qt.NoButton
         
         onContainsMouseChanged: {
