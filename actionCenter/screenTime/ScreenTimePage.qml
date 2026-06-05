@@ -24,10 +24,37 @@ Item {
     property var _displayData: null
     property var _appList: []
 
+    // Hour drill-down: -1 = none selected
+    property int _selectedHour: -1
+    property var _hourApps: []
+
+    function _selectHour(hour) {
+        if (root._selectedHour === hour) {
+            root._selectedHour = -1
+            root._hourApps = []
+        } else {
+            root._selectedHour = hour
+            root._hourApps = ScreenTime.getHourBreakdown(hour, root.currentDays)
+        }
+    }
+
+    function _clearHour() {
+        root._selectedHour = -1
+        root._hourApps = []
+    }
+
     readonly property real maxAppSeconds: {
         let m = 0
         for (let i = 0; i < _appList.length; i++) {
             if (_appList[i].seconds > m) m = _appList[i].seconds
+        }
+        return m > 0 ? m : 1
+    }
+
+    readonly property real maxHourAppSeconds: {
+        let m = 0
+        for (let i = 0; i < _hourApps.length; i++) {
+            if (_hourApps[i].seconds > m) m = _hourApps[i].seconds
         }
         return m > 0 ? m : 1
     }
@@ -51,10 +78,12 @@ Item {
             }
         }
         root._appList = ScreenTime.getAppList(root.currentDays)
+        if (root._selectedHour >= 0)
+            root._hourApps = ScreenTime.getHourBreakdown(root._selectedHour, root.currentDays)
     }
 
     Component.onCompleted: root._refreshData()
-    onSelectedRangeChanged: root._refreshData()
+    onSelectedRangeChanged: { root._clearHour(); root._refreshData() }
 
     WPanelPageColumn {
         anchors.fill: parent
@@ -179,9 +208,13 @@ Item {
                                     Repeater {
                                         model: 24
                                         delegate: Item {
+                                            id: waffleBar
                                             required property int index
                                             width: (parent.width - 46) / 24
                                             height: parent.height
+
+                                            readonly property bool selected: root._selectedHour === index
+                                            readonly property bool dimmed: root._selectedHour >= 0 && !selected
 
                                             property real value: {
                                                 if (!root._displayData || !root._displayData.hourly) return 0
@@ -205,7 +238,11 @@ Item {
                                                 height: barH
                                                 radius: Math.min(width, height) / 2
                                                 color: value > 0 ? Looks.colors.accent : Looks.colors.subfg
-                                                opacity: value > 0 ? (0.35 + (value / maxVal) * 0.65) : 0.15
+                                                opacity: {
+                                                    if (value <= 0) return 0.15
+                                                    if (waffleBar.dimmed) return 0.22
+                                                    return 0.35 + (value / waffleBar.maxVal) * 0.65
+                                                }
 
                                                 Behavior on height {
                                                     enabled: Looks.transition.enabled
@@ -215,6 +252,21 @@ Item {
                                                         easing.bezierCurve: Looks.transition.easing.bezierCurve.standard
                                                     }
                                                 }
+                                                Behavior on opacity {
+                                                    enabled: Looks.transition.enabled
+                                                    animation: NumberAnimation {
+                                                        duration: Looks.transition.duration.normal
+                                                        easing.type: Easing.BezierSpline
+                                                        easing.bezierCurve: Looks.transition.easing.bezierCurve.standard
+                                                    }
+                                                }
+                                            }
+
+                                            MouseArea {
+                                                anchors.fill: parent
+                                                hoverEnabled: true
+                                                cursorShape: waffleBar.value > 0 ? Qt.PointingHandCursor : Qt.ArrowCursor
+                                                onClicked: if (waffleBar.value > 0) root._selectHour(waffleBar.index)
                                             }
                                         }
                                     }
@@ -241,13 +293,145 @@ Item {
                             }
                         }
 
+                        // Hour breakdown panel — shown when an hourly bar is selected
+                        ColumnLayout {
+                            Layout.fillWidth: true
+                            Layout.leftMargin: Looks.dp(12)
+                            Layout.rightMargin: Looks.dp(12)
+                            spacing: Looks.dp(4)
+                            visible: root._selectedHour >= 0
+
+                            WPanelSeparator { color: Looks.colors.bg2Hover }
+
+                            RowLayout {
+                                Layout.fillWidth: true
+                                Layout.leftMargin: Looks.dp(4)
+                                Layout.rightMargin: Looks.dp(4)
+                                spacing: Looks.dp(8)
+
+                                WText {
+                                    Layout.fillWidth: true
+                                    text: root._selectedHour >= 0
+                                        ? (root._selectedHour + ":00 – " + (root._selectedHour + 1) + ":00")
+                                        : ""
+                                    font.weight: Font.DemiBold
+                                    color: Looks.colors.fg
+                                }
+
+                                WText {
+                                    text: {
+                                        if (root._selectedHour < 0 || !root._displayData || !root._displayData.hourly) return ""
+                                        return ScreenTime.formatDuration(root._displayData.hourly[root._selectedHour] || 0)
+                                    }
+                                    font.family: Looks.font.family.monospace
+                                    color: Looks.colors.subfg
+                                }
+
+                                Rectangle {
+                                    implicitWidth: Looks.dp(22)
+                                    implicitHeight: Looks.dp(22)
+                                    radius: Looks.radius.small
+                                    color: closeHover.containsMouse ? Looks.colors.bg2Hover : "transparent"
+
+                                    Behavior on color {
+                                        enabled: Looks.transition.enabled
+                                        animation: ColorAnimation {
+                                            duration: Looks.transition.duration.normal
+                                            easing.type: Easing.BezierSpline
+                                            easing.bezierCurve: Looks.transition.easing.bezierCurve.standard
+                                        }
+                                    }
+
+                                    FluentIcon {
+                                        anchors.centerIn: parent
+                                        icon: "dismiss"
+                                        implicitSize: Looks.dp(13)
+                                        color: Looks.colors.subfg
+                                    }
+
+                                    MouseArea {
+                                        id: closeHover
+                                        anchors.fill: parent
+                                        hoverEnabled: true
+                                        cursorShape: Qt.PointingHandCursor
+                                        onClicked: root._clearHour()
+                                    }
+                                }
+                            }
+
+                            Repeater {
+                                model: root._hourApps
+                                delegate: ColumnLayout {
+                                    required property int index
+                                    required property var modelData
+                                    Layout.fillWidth: true
+                                    Layout.leftMargin: Looks.dp(4)
+                                    Layout.rightMargin: Looks.dp(4)
+                                    spacing: Looks.dp(2)
+
+                                    RowLayout {
+                                        Layout.fillWidth: true
+                                        spacing: Looks.dp(10)
+
+                                        Rectangle {
+                                            implicitWidth: Looks.dp(6)
+                                            implicitHeight: Looks.dp(6)
+                                            radius: Looks.dp(3)
+                                            color: Looks.colors.accent
+                                            opacity: 1 - (index * 0.08)
+                                        }
+
+                                        WText {
+                                            Layout.fillWidth: true
+                                            text: modelData.name || modelData.id
+                                            elide: Text.ElideRight
+                                        }
+
+                                        WText {
+                                            text: ScreenTime.formatDuration(modelData.seconds)
+                                            font.family: Looks.font.family.monospace
+                                            color: Looks.colors.subfg
+                                        }
+                                    }
+
+                                    Rectangle {
+                                        Layout.fillWidth: true
+                                        implicitHeight: Looks.dp(2)
+                                        radius: Looks.dp(1)
+                                        color: Looks.colors.accent
+                                        opacity: 0.12
+                                        width: parent.width * (modelData.seconds / root.maxHourAppSeconds)
+
+                                        Behavior on width {
+                                            enabled: Looks.transition.enabled
+                                            animation: NumberAnimation {
+                                                duration: Looks.transition.duration.medium
+                                                easing.type: Easing.BezierSpline
+                                                easing.bezierCurve: Looks.transition.easing.bezierCurve.standard
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
+                            WText {
+                                visible: root._hourApps.length === 0
+                                Layout.fillWidth: true
+                                Layout.leftMargin: Looks.dp(4)
+                                Layout.rightMargin: Looks.dp(4)
+                                text: Translation.tr("Per-app detail isn't available for this period")
+                                color: Looks.colors.subfg
+                                wrapMode: Text.WordWrap
+                            }
+                        }
+
                         // App list
                         ColumnLayout {
                             Layout.fillWidth: true
                             Layout.leftMargin: Looks.dp(12)
                             Layout.rightMargin: Looks.dp(12)
                             spacing: Looks.dp(4)
-                            visible: root._appList.length > 0
+                            visible: root._appList.length > 0 && root._selectedHour < 0
 
                             WPanelSeparator { color: Looks.colors.bg2Hover }
 
