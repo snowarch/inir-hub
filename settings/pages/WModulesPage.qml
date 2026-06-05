@@ -194,6 +194,14 @@ WSettingsPage {
             checked: root.isPanelEnabled("wTaskView")
             onCheckedChanged: root.setPanelEnabled("wTaskView", checked)
         }
+
+        WSettingsSwitch {
+            label: Translation.tr("Screen Time")
+            icon: "schedule"
+            description: Translation.tr("Track time spent in each application. Shows in the Action Center.")
+            checked: Config.options?.sidebar?.screenTime?.enable ?? false
+            onCheckedChanged: Config.setNestedValue("sidebar.screenTime.enable", checked)
+        }
     }
 
     WSettingsSection {
