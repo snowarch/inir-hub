@@ -253,30 +253,131 @@ WBarAttachedPanelContent {
                         }
                     }
 
-                    // Extra weather info row
+                    // Detail stat grid
+                    GridLayout {
+                        Layout.fillWidth: true
+                        columns: 4
+                        rowSpacing: Looks.dp(12)
+                        columnSpacing: Looks.dp(12)
+
+                        WeatherStat { statLabel: Translation.tr("Wind"); statValue: (Weather.data.wind + " " + Weather.data.windDir).trim() }
+                        WeatherStat { statLabel: Translation.tr("UV"); statValue: String(Weather.data.uv); visible: String(Weather.data.uv) !== "0" && String(Weather.data.uv) !== "" }
+                        WeatherStat { statLabel: Translation.tr("Pressure"); statValue: Weather.data.press }
+                        WeatherStat { statLabel: Translation.tr("Visibility"); statValue: Weather.data.visib }
+                        WeatherStat { statLabel: Translation.tr("Precip"); statValue: Weather.data.precip }
+                        WeatherStat { statLabel: Translation.tr("Sunrise"); statValue: Weather.data.sunrise }
+                        WeatherStat { statLabel: Translation.tr("Sunset"); statValue: Weather.data.sunset }
+                        WeatherStat { statLabel: Translation.tr("Refreshed"); statValue: Weather.data.lastRefresh }
+                    }
+
+                    // Daily forecast with temperature-range bars
+                    ColumnLayout {
+                        id: waffleForecast
+                        Layout.fillWidth: true
+                        visible: (Weather.data.forecast ?? []).length > 1
+                        spacing: Looks.dp(3)
+                        readonly property var fc: Weather.data.forecast ?? []
+                        readonly property real wMin: { let m = Infinity; for (const d of fc) if (!isNaN(d.loVal) && d.loVal < m) m = d.loVal; return m === Infinity ? 0 : m }
+                        readonly property real wMax: { let m = -Infinity; for (const d of fc) if (!isNaN(d.hiVal) && d.hiVal > m) m = d.hiVal; return m === -Infinity ? 1 : m }
+
+                        Rectangle { Layout.fillWidth: true; implicitHeight: 1; color: Looks.colors.bg2Border; Layout.bottomMargin: Looks.dp(4) }
+
+                        Repeater {
+                            model: waffleForecast.fc
+                            delegate: RowLayout {
+                                required property var modelData
+                                required property int index
+                                Layout.fillWidth: true
+                                spacing: Looks.dp(10)
+                                WText {
+                                    Layout.preferredWidth: Looks.dp(38)
+                                    text: modelData.dayName
+                                    font.pixelSize: Looks.font.pixelSize.small
+                                    color: index === 0 ? Looks.colors.fg : Looks.colors.fg1
+                                }
+                                WText {
+                                    Layout.preferredWidth: Looks.dp(34)
+                                    horizontalAlignment: Text.AlignRight
+                                    text: modelData.lo
+                                    font.pixelSize: Looks.font.pixelSize.small
+                                    color: Looks.colors.fg1
+                                }
+                                Rectangle {
+                                    Layout.fillWidth: true
+                                    Layout.alignment: Qt.AlignVCenter
+                                    implicitHeight: Looks.dp(4); radius: Looks.dp(2)
+                                    color: Looks.colors.bg1Base
+                                    readonly property real span: Math.max(1, waffleForecast.wMax - waffleForecast.wMin)
+                                    readonly property real x0: isNaN(modelData.loVal) ? 0 : (modelData.loVal - waffleForecast.wMin) / span
+                                    readonly property real x1: isNaN(modelData.hiVal) ? 1 : (modelData.hiVal - waffleForecast.wMin) / span
+                                    Rectangle {
+                                        x: parent.width * parent.x0
+                                        width: Math.max(parent.height, parent.width * (parent.x1 - parent.x0))
+                                        height: parent.height; radius: parent.radius
+                                        color: Looks.colors.accent
+                                    }
+                                }
+                                WText {
+                                    Layout.preferredWidth: Looks.dp(34)
+                                    text: modelData.hi
+                                    font.pixelSize: Looks.font.pixelSize.small
+                                    font.weight: Font.Medium
+                                }
+                            }
+                        }
+                    }
+
+                    // Moon phase
                     RowLayout {
                         Layout.fillWidth: true
-                        spacing: Looks.dp(16)
+                        spacing: Looks.dp(10)
+                        FluentIcon {
+                            icon: "weather-moon"
+                            implicitSize: Looks.dp(18)
+                            color: Looks.colors.accent
+                        }
+                        WText {
+                            text: Weather.moonPhaseName
+                            font.pixelSize: Looks.font.pixelSize.small
+                            font.weight: Font.Medium
+                        }
+                        Item { Layout.fillWidth: true }
+                        WText {
+                            text: Translation.tr("%1% lit").arg(Math.round(Weather.moonIllumination * 100))
+                            font.pixelSize: Looks.font.pixelSize.small
+                            color: Looks.colors.fg1
+                        }
+                    }
 
-                        ColumnLayout {
-                            spacing: Looks.dp(2)
-                            WText { text: Translation.tr("Wind"); font.pixelSize: Looks.font.pixelSize.tiny; color: Looks.colors.fg1 }
-                            WText { text: Weather.data.wind + " " + Weather.data.windDir; font.pixelSize: Looks.font.pixelSize.small }
+                    // Air quality (only when available)
+                    ColumnLayout {
+                        Layout.fillWidth: true
+                        spacing: Looks.dp(8)
+                        visible: Weather.airQuality.available
+
+                        Rectangle { Layout.fillWidth: true; implicitHeight: 1; color: Looks.colors.bg2Border }
+
+                        RowLayout {
+                            Layout.fillWidth: true
+                            WText {
+                                text: Translation.tr("Air Quality")
+                                font.pixelSize: Looks.font.pixelSize.small
+                                font.weight: Font.Medium
+                            }
+                            Item { Layout.fillWidth: true }
+                            WText {
+                                text: Weather.airQuality.aqi + " " + Weather.airQuality.scale + " · " + Weather.airQuality.label
+                                font.pixelSize: Looks.font.pixelSize.small
+                                color: Looks.colors.accent
+                                font.weight: Font.Medium
+                            }
                         }
-                        ColumnLayout {
-                            spacing: Looks.dp(2)
-                            WText { text: Translation.tr("UV"); font.pixelSize: Looks.font.pixelSize.tiny; color: Looks.colors.fg1 }
-                            WText { text: String(Weather.data.uv); font.pixelSize: Looks.font.pixelSize.small }
-                        }
-                        ColumnLayout {
-                            spacing: Looks.dp(2)
-                            WText { text: "☀"; font.pixelSize: Looks.font.pixelSize.tiny; color: Looks.colors.fg1 }
-                            WText { text: Weather.data.sunrise; font.pixelSize: Looks.font.pixelSize.small }
-                        }
-                        ColumnLayout {
-                            spacing: Looks.dp(2)
-                            WText { text: "☾"; font.pixelSize: Looks.font.pixelSize.tiny; color: Looks.colors.fg1 }
-                            WText { text: Weather.data.sunset; font.pixelSize: Looks.font.pixelSize.small }
+                        RowLayout {
+                            Layout.fillWidth: true
+                            spacing: Looks.dp(12)
+                            WeatherStat { statLabel: "PM2.5"; statValue: Weather.airQuality.pm25 }
+                            WeatherStat { statLabel: "PM10"; statValue: Weather.airQuality.pm10 }
+                            WeatherStat { statLabel: Translation.tr("Ozone"); statValue: Weather.airQuality.ozone }
                         }
                     }
                 }
@@ -736,6 +837,27 @@ WBarAttachedPanelContent {
             Item { Layout.fillWidth: true; implicitHeight: Looks.dp(8) }
         }
         } // Flickable
+    }
+
+    component WeatherStat: ColumnLayout {
+        id: stat
+        property string statLabel
+        property string statValue
+        spacing: Looks.dp(2)
+        WText {
+            text: stat.statLabel
+            font.pixelSize: Looks.font.pixelSize.tiny
+            color: Looks.colors.fg1
+            elide: Text.ElideRight
+            Layout.fillWidth: true
+        }
+        WText {
+            text: stat.statValue
+            font.pixelSize: Looks.font.pixelSize.small
+            font.weight: Font.Medium
+            elide: Text.ElideRight
+            Layout.fillWidth: true
+        }
     }
 
     component QuickActionButton: Rectangle {
