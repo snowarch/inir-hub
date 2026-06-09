@@ -723,6 +723,17 @@ WSettingsPage {
         }
 
         WSettingsSwitch {
+            label: Translation.tr("Auto light/dark from wallpaper")
+            icon: "contrast"
+            description: Translation.tr("Pick the light or dark scheme from each wallpaper's brightness so text stays readable")
+            checked: Config.options?.appearance?.wallpaperTheming?.autoDarkLightMode ?? false
+            onCheckedChanged: {
+                Config.setNestedValue("appearance.wallpaperTheming.autoDarkLightMode", checked);
+                ThemeService.regenerateAutoTheme();
+            }
+        }
+
+        WSettingsSwitch {
             label: Translation.tr("Vesktop/Discord theming")
             icon: "people"
             description: Translation.tr("Generate Discord theme from wallpaper colors")
