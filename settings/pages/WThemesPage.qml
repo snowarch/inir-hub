@@ -517,35 +517,42 @@ WSettingsPage {
         readonly property string derivedStyle: cardsEverywhere ? "cards" : "material"
         readonly property string currentStyle: (Config.options?.appearance?.globalStyle ?? "").length > 0 ? Config.options?.appearance?.globalStyle ?? "material" : derivedStyle
 
-        function _applyGlobalStyle(styleId) {
+        function _globalStyleValues(styleId) {
             if (styleId === "cards") {
-                Config.setNestedValue("dock.cardStyle", true);
-                Config.setNestedValue("sidebar.cardStyle", true);
-                Config.setNestedValue("bar.cornerStyle", 3);
-                return;
+                return {
+                    "dock.cardStyle": true,
+                    "sidebar.cardStyle": true,
+                    "bar.cornerStyle": 3,
+                };
             }
 
+            const values = {
+                "dock.cardStyle": false,
+                "sidebar.cardStyle": false,
+            };
+
             if (styleId === "aurora") {
-                Config.setNestedValue("dock.cardStyle", false);
-                Config.setNestedValue("sidebar.cardStyle", false);
                 if ((Config.options?.bar?.cornerStyle ?? 1) === 3)
-                    Config.setNestedValue("bar.cornerStyle", 1);
-                return;
+                    values["bar.cornerStyle"] = 1;
+                return values;
             }
 
             if (styleId === "angel") {
-                Config.setNestedValue("dock.cardStyle", false);
-                Config.setNestedValue("sidebar.cardStyle", false);
                 if ((Config.options?.bar?.cornerStyle ?? 1) === 3)
-                    Config.setNestedValue("bar.cornerStyle", 1);
-                return;
+                    values["bar.cornerStyle"] = 1;
+                return values;
             }
 
             // material
-            Config.setNestedValue("dock.cardStyle", false);
-            Config.setNestedValue("sidebar.cardStyle", false);
             if ((Config.options?.bar?.cornerStyle ?? 1) === 3)
-                Config.setNestedValue("bar.cornerStyle", 1);
+                values["bar.cornerStyle"] = 1;
+            return values;
+        }
+
+        function _applyGlobalStyle(styleId) {
+            let values = globalStyleCard._globalStyleValues(styleId);
+            values["appearance.globalStyle"] = styleId;
+            Config.setNestedValues(values);
         }
 
         WSettingsDropdown {
@@ -576,7 +583,6 @@ WSettingsPage {
                 }
             ]
             onSelected: newValue => {
-                Config.setNestedValue("appearance.globalStyle", newValue);
                 globalStyleCard._applyGlobalStyle(newValue);
             }
         }
