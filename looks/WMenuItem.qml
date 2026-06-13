@@ -85,6 +85,12 @@ MenuItem {
             visible: root.icon.name !== "";
             icon: root.icon.name
         }
+        // Keeps labels aligned in menus where sibling items have icons
+        Item {
+            implicitWidth: buttonIcon.implicitSize
+            implicitHeight: 1
+            visible: root.icon.name === "" && (root.menu?.hasIcons ?? false)
+        }
         WText {
             id: buttonText
             Layout.fillWidth: true
