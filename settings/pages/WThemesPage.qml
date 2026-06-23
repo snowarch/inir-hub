@@ -543,6 +543,12 @@ WSettingsPage {
                 return values;
             }
 
+            if (styleId === "zzz") {
+                if ((Config.options?.bar?.cornerStyle ?? 1) === 3)
+                    values["bar.cornerStyle"] = 0;
+                return values;
+            }
+
             // material
             if ((Config.options?.bar?.cornerStyle ?? 1) === 3)
                 values["bar.cornerStyle"] = 1;
@@ -580,6 +586,10 @@ WSettingsPage {
                 {
                     value: "angel",
                     displayName: Translation.tr("Angel")
+                },
+                {
+                    value: "zzz",
+                    displayName: Translation.tr("ZZZ")
                 }
             ]
             onSelected: newValue => {
