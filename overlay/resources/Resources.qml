@@ -130,7 +130,9 @@ StyledOverlayWidget {
             Layout.fillWidth: true
             Layout.fillHeight: true
             radius: Appearance.rounding.small
-            color: Appearance.colors.colSecondaryContainer
+            // ZZZ: a recessed carbon plate for the graph; the bright signal is for
+            // the plotted line, not the track behind it.
+            color: Appearance.zzzEverywhere ? Appearance.zzz.bg3 : Appearance.colors.colSecondaryContainer
             layer.enabled: true
             layer.effect: OpacityMask {
                 maskSource: Rectangle {
