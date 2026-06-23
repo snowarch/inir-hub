@@ -21,7 +21,7 @@ Rectangle {
     implicitHeight: contentRow.implicitHeight + (padding * 2)
     color: Appearance.angelEverywhere ? "transparent"
         : Appearance.inirEverywhere ? Appearance.inir.colLayer1
-        : Appearance.m3colors.m3surfaceContainer
+        : Appearance.colors.colSurfaceContainer
     radius: Appearance.angelEverywhere ? Appearance.angel.roundingNormal
         : Appearance.inirEverywhere ? Appearance.inir.roundingNormal
         : Appearance.rounding.large
