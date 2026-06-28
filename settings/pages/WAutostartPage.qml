@@ -15,7 +15,7 @@ WSettingsPage {
     id: root
     settingsPageIndex: 12
     pageTitle: Translation.tr("Autostart")
-    pageIcon: "rocket-launch"
+    pageIcon: "power"
     pageDescription: Translation.tr("Apps that start with iNiR")
 
     // ── Helpers (same logic as ii page) ──────────────────────────────────
@@ -110,11 +110,11 @@ WSettingsPage {
 
     WSettingsCard {
         title: Translation.tr("General")
-        icon: "rocket-launch"
+        icon: "power"
 
         WSettingsSwitch {
             label: Translation.tr("Start apps on launch")
-            icon: "rocket-launch"
+            icon: "power"
             checked: Config.options?.autostart?.enable ?? false
             onCheckedChanged: Config.setNestedValue("autostart.enable", checked)
         }
