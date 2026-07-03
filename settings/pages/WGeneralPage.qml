@@ -228,6 +228,7 @@ WSettingsPage {
         icon: "app-generic"
         
         WSettingsSwitch {
+            visible: CompositorService.isNiri
             label: Translation.tr("Confirm before closing")
             icon: "shield"
             description: Translation.tr("Show dialog when closing windows with Super+Q")

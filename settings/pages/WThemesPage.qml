@@ -678,6 +678,14 @@ WSettingsPage {
             // liveRegenSignature and runs regenerateAutoTheme automatically.
             }
         }
+
+        WSettingsSwitch {
+            label: Translation.tr("Invert colors (complementary)")
+            icon: "invert_colors"
+            description: Translation.tr("Rotate every color 180° on the color wheel. Shell-only: external apps keep their original colors.")
+            checked: Config.options?.appearance?.colorInvert ?? false
+            onCheckedChanged: Config.setNestedValue("appearance.colorInvert", checked)
+        }
     }
 
     // Theming options
