@@ -85,11 +85,33 @@ Scope {
             // Critical: this is a full-screen overlay surface — a stale null mask
             // would capture ALL input on the entire screen during gamemode.
             Item { id: emptyMask; width: 0; height: 0 }
-            mask: Region {
-                item: GlobalStates.overlayOpen ? overlayContent : emptyMask
-                regions: GameMode.shouldHidePanels ? [] : OverlayContext.clickableWidgets.map((widget) => regionComponent.createObject(this, {
+
+            // Tracks the region objects the mask below created, so the previous batch can be
+            // destroyed instead of leaked on every pin/clickthrough toggle. Rebuilt imperatively
+            // (not via a `regions:` binding) because reading+writing the same tracking property
+            // inside that binding's own evaluation is a binding loop.
+            property var _activeClickableRegions: []
+            function _rebuildClickableRegions() {
+                for (const region of overlayWindow._activeClickableRegions) region.destroy();
+                overlayWindow._activeClickableRegions = GameMode.shouldHidePanels ? [] : OverlayContext.clickableWidgets.map((widget) => regionComponent.createObject(overlayWindow, {
                     item: widget
                 }));
+                clickableRegionMask.regions = overlayWindow._activeClickableRegions;
+            }
+            Component.onCompleted: overlayWindow._rebuildClickableRegions()
+            Connections {
+                target: OverlayContext
+                function onClickableWidgetsChanged() { overlayWindow._rebuildClickableRegions(); }
+            }
+            Connections {
+                target: GameMode
+                function onShouldHidePanelsChanged() { overlayWindow._rebuildClickableRegions(); }
+            }
+
+            mask: Region {
+                id: clickableRegionMask
+                item: GlobalStates.overlayOpen ? overlayContent : emptyMask
+                regions: []
             }
 
             anchors {
