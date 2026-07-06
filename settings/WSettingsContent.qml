@@ -30,6 +30,17 @@ Item {
         { pageIndex: 0, pageName: "Quick", section: "Wallpaper & Colors", label: "Colors only mode", targetLabel: "Colors only mode", keywords: ["quick", "wallpaper", "colors", "theme source", "preview", "palette"] },
         { pageIndex: 0, pageName: "Quick", section: "Wallpaper & Colors", label: "Color scheme", targetLabel: "Color scheme", keywords: ["quick", "colors", "scheme", "palette", "material", "theme"] },
         { pageIndex: 0, pageName: "Quick", section: "Wallpaper & Colors", label: "Color strength", targetLabel: "Color strength", keywords: ["quick", "wallpaper", "color", "strength", "vivid", "accent"] },
+        { pageIndex: 14, pageName: "Mascot", section: "Mascot", label: "Show mascot illustration", targetLabel: "Show mascot illustration", keywords: ["mascot", "cat", "girl", "branding", "illustration", "waifu"] },
+        { pageIndex: 14, pageName: "Mascot", section: "Mascot", label: "Playful companion", targetLabel: "Playful companion", keywords: ["mascot", "companion", "peek", "interactive", "playful", "edge"] },
+        { pageIndex: 14, pageName: "Mascot", section: "Mascot", label: "Companion visit interval", targetLabel: "Companion visit interval", keywords: ["mascot", "companion", "interval", "frequency", "minutes"] },
+        { pageIndex: 14, pageName: "Mascot", section: "Mascot", label: "Visit length", targetLabel: "Visit length", keywords: ["mascot", "companion", "duration", "visible", "seconds", "stay"] },
+        { pageIndex: 14, pageName: "Mascot", section: "Mascot", label: "Slide animation", targetLabel: "Slide animation", keywords: ["mascot", "companion", "animation", "speed", "slide", "appear"] },
+        { pageIndex: 14, pageName: "Mascot", section: "Mascot", label: "Event reactions", targetLabel: "React to music", keywords: ["mascot", "companion", "reactions", "events", "music", "battery", "notifications", "wallpaper", "screenshot", "gaming", "unlock", "react", "snoop"] },
+        { pageIndex: 14, pageName: "Mascot", section: "Mascot", label: "Pose for this event", targetLabel: "Pose for this event", keywords: ["mascot", "pose", "image", "override", "custom", "picker"] },
+        { pageIndex: 14, pageName: "Mascot", section: "Mascot", label: "Only react to real music", targetLabel: "Only react to real music", keywords: ["mascot", "music", "artist", "video", "browser", "detection", "mpris"] },
+        { pageIndex: 14, pageName: "Mascot", section: "Mascot", label: "Peek now", targetLabel: "Peek now", keywords: ["mascot", "test", "preview", "peek", "try"] },
+        { pageIndex: 14, pageName: "Mascot", section: "Mascot surfaces", label: "Mascot surfaces", targetLabel: "Mascot surfaces", keywords: ["mascot", "surfaces", "where", "empty states", "about", "dashboard", "customize"] },
+        { pageIndex: 14, pageName: "Mascot", section: "Mascot surfaces", label: "Dialogs", targetLabel: "Dialogs", keywords: ["mascot", "dialogs", "close", "confirmation", "warning"] },
         { pageIndex: 0, pageName: "Quick", section: "Wallpaper & Colors", label: "Transparency", targetLabel: "Transparency", keywords: ["quick", "transparency", "glass", "blur", "appearance"] },
         { pageIndex: 0, pageName: "Quick", section: "Quick actions", label: "Show reload notifications", targetLabel: "Show reload notifications", keywords: ["quick", "reload", "notifications", "toast", "quickshell", "niri"] },
 
@@ -767,24 +778,38 @@ Item {
                     Layout.fillWidth: true
                 Rectangle {
                     implicitWidth: parent.width
-                    implicitHeight: 36
+                    implicitHeight: noResultsCol.implicitHeight + 16
                     radius: Looks.radius.medium
                     color: Looks.colors.bg2Base
-                    
-                    RowLayout {
+
+                    ColumnLayout {
+                        id: noResultsCol
                         anchors.centerIn: parent
-                        spacing: 8
-                        
-                        FluentIcon {
-                            icon: "search"
-                            implicitSize: 14
-                            color: Looks.colors.subfg
+                        spacing: 6
+
+                        MascotImage {
+                            Layout.alignment: Qt.AlignHCenter
+                            Layout.preferredWidth: 88
+                            Layout.preferredHeight: 88
+                            pose: "settings-judging"
+                            surface: "emptyStates"
                         }
-                        
-                        WText {
-                            text: Translation.tr("No results")
-                            font.pixelSize: Looks.font.pixelSize.small
-                            color: Looks.colors.subfg
+
+                        RowLayout {
+                            Layout.alignment: Qt.AlignHCenter
+                            spacing: 8
+
+                            FluentIcon {
+                                icon: "search"
+                                implicitSize: 14
+                                color: Looks.colors.subfg
+                            }
+
+                            WText {
+                                text: Translation.tr("No results")
+                                font.pixelSize: Looks.font.pixelSize.small
+                                color: Looks.colors.subfg
+                            }
                         }
                     }
                 }
