@@ -332,13 +332,26 @@ Item {
                     }
 
                     // Empty state
-                    WText {
+                    ColumnLayout {
                         anchors.centerIn: parent
                         visible: clipboardList.count === 0
-                        text: root.searchText.length > 0 
-                            ? Translation.tr("No results found")
-                            : Translation.tr("Clipboard is empty")
-                        color: Looks.colors.subfg
+                        spacing: 8
+
+                        MascotImage {
+                            Layout.alignment: Qt.AlignHCenter
+                            Layout.preferredWidth: 96
+                            Layout.preferredHeight: 96
+                            surface: "emptyStates"
+                            pose: root.searchText.length > 0 ? "fisheye-inspect" : "box-hideout"
+                        }
+
+                        WText {
+                            Layout.alignment: Qt.AlignHCenter
+                            text: root.searchText.length > 0
+                                ? Translation.tr("No results found")
+                                : Translation.tr("Clipboard is empty")
+                            color: Looks.colors.subfg
+                        }
                     }
                 }
             }

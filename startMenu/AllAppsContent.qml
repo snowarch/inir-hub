@@ -6,6 +6,7 @@ import Quickshell
 import qs
 import qs.services
 import qs.modules.common
+import qs.modules.common.widgets
 import qs.modules.waffle.looks
 
 WPanelPageColumn {
@@ -289,11 +290,24 @@ WPanelPageColumn {
                     }
 
                     // Empty state
-                    WText {
+                    ColumnLayout {
                         anchors.centerIn: parent
                         visible: root.groupedApps.length === 0
-                        text: Translation.tr("No apps found")
-                        color: Looks.colors.fg1
+                        spacing: 8
+
+                        MascotImage {
+                            Layout.alignment: Qt.AlignHCenter
+                            Layout.preferredWidth: 96
+                            Layout.preferredHeight: 96
+                            surface: "emptyStates"
+                            pose: "fisheye-inspect"
+                        }
+
+                        WText {
+                            Layout.alignment: Qt.AlignHCenter
+                            text: Translation.tr("No apps found")
+                            color: Looks.colors.fg1
+                        }
                     }
                 }
 

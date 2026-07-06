@@ -157,11 +157,20 @@ BodyRectangle {
                     anchors.centerIn: parent
                     spacing: 12
 
+                    MascotImage {
+                        id: emptyMascot
+                        Layout.alignment: Qt.AlignHCenter
+                        Layout.preferredWidth: 128
+                        Layout.preferredHeight: 128
+                        surface: "emptyStates"
+                        pose: "notifications-clear"
+                    }
+
                     FluentIcon {
                         Layout.alignment: Qt.AlignHCenter
+                        visible: !emptyMascot.active
                         icon: "alert"
                         implicitSize: 48
-                        color: Looks.colors.inactiveIcon
                     }
 
                     WText {
