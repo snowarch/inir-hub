@@ -38,6 +38,7 @@ Item {
         { pageIndex: 14, pageName: "Mascot", section: "Mascot", label: "Event reactions", targetLabel: "React to music", keywords: ["mascot", "companion", "reactions", "events", "music", "battery", "notifications", "wallpaper", "screenshot", "gaming", "unlock", "react", "snoop"] },
         { pageIndex: 14, pageName: "Mascot", section: "Mascot", label: "Pose for this event", targetLabel: "Pose for this event", keywords: ["mascot", "pose", "image", "override", "custom", "picker"] },
         { pageIndex: 14, pageName: "Mascot", section: "Mascot", label: "Only react to real music", targetLabel: "Only react to real music", keywords: ["mascot", "music", "artist", "video", "browser", "detection", "mpris"] },
+        { pageIndex: 14, pageName: "Mascot", section: "Mascot", label: "Chaos mode", targetLabel: "Chaos mode", keywords: ["mascot", "chaos", "romp", "kick", "bonk", "widgets", "rearrange", "tidy", "physics"] },
         { pageIndex: 14, pageName: "Mascot", section: "Mascot", label: "Peek now", targetLabel: "Peek now", keywords: ["mascot", "test", "preview", "peek", "try"] },
         { pageIndex: 14, pageName: "Mascot", section: "Mascot surfaces", label: "Mascot surfaces", targetLabel: "Mascot surfaces", keywords: ["mascot", "surfaces", "where", "empty states", "about", "dashboard", "customize"] },
         { pageIndex: 14, pageName: "Mascot", section: "Mascot surfaces", label: "Dialogs", targetLabel: "Dialogs", keywords: ["mascot", "dialogs", "close", "confirmation", "warning"] },

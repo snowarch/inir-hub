@@ -179,6 +179,38 @@ WSettingsPage {
         }
 
         WSettingsSwitch {
+            label: Translation.tr("Chaos mode")
+            icon: "flash-on"
+            description: Translation.tr("Rarely she runs across the desktop, bonks widgets around and rattles the taskbar")
+            checked: Config.options?.mascot?.chaos?.enable ?? false
+            enabled: Config.options?.mascot?.companion?.enable ?? true
+            onCheckedChanged: Config.setNestedValue("mascot.chaos.enable", checked)
+        }
+
+        WSettingsSwitch {
+            label: Translation.tr("Let her rearrange widgets")
+            icon: "drag_pan"
+            description: Translation.tr("Displaced widgets keep their new position; otherwise everything bounces back")
+            checked: Config.options?.mascot?.chaos?.allowRearrange ?? false
+            enabled: Config.options?.mascot?.chaos?.enable ?? false
+            onCheckedChanged: Config.setNestedValue("mascot.chaos.allowRearrange", checked)
+        }
+
+        WSettingsButton {
+            label: Translation.tr("Unleash chaos")
+            icon: "flash-on"
+            enabled: Config.options?.mascot?.chaos?.enable ?? false
+            onClicked: Quickshell.execDetached([Quickshell.shellPath("scripts/inir"), "mascot", "romp"])
+        }
+
+        WSettingsButton {
+            label: Translation.tr("Tidy up")
+            description: Translation.tr("Every displaced widget returns home")
+            icon: "delete"
+            onClicked: Quickshell.execDetached([Quickshell.shellPath("scripts/inir"), "mascot", "tidy"])
+        }
+
+        WSettingsSwitch {
             label: Translation.tr("Only react to real music")
             icon: "music-note-2"
             description: Translation.tr("Skips browser videos and players without artist metadata")
