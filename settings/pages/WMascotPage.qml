@@ -159,6 +159,15 @@ WSettingsPage {
         }
 
         WSettingsSwitch {
+            label: Translation.tr("Personal commentary")
+            icon: "people"
+            description: Translation.tr("Observations about YOUR habits (3AM sessions, uptime, marathons); off = generic small talk only")
+            checked: Config.options?.mascot?.personality?.commentary ?? true
+            enabled: Config.options?.mascot?.companion?.enable ?? true
+            onCheckedChanged: Config.setNestedValue("mascot.personality.commentary", checked)
+        }
+
+        WSettingsSwitch {
             label: Translation.tr("Mood personality")
             icon: "brain"
             description: Translation.tr("Her lines change with session mood (sleepy/hyper/snarky/contemplative)")
@@ -314,6 +323,28 @@ WSettingsPage {
 
     WSettingsCard {
         title: Translation.tr("Mascot surfaces")
+
+        // Per-surface pose overrides (Auto = curated default per spot)
+        Repeater {
+            model: [
+                { key: "emptyStates", label: Translation.tr("Empty states pose") },
+                { key: "about", label: Translation.tr("About pose") },
+                { key: "session", label: Translation.tr("Session screen pose") },
+                { key: "aiChat", label: Translation.tr("AI chat pose") },
+                { key: "dashboard", label: Translation.tr("Dashboard pose") },
+                { key: "cheatsheet", label: Translation.tr("Cheatsheet pose") },
+                { key: "updates", label: Translation.tr("Update overlay pose") },
+                { key: "dialogs", label: Translation.tr("Dialogs pose") }
+            ]
+            delegate: MascotPoseGallery {
+                required property var modelData
+                Layout.fillWidth: true
+                label: modelData.label
+                options: mascotCard.poseOptions
+                currentValue: Config.options?.mascot?.surfacePoses?.[modelData.key] ?? ""
+                onSelected: value => Config.setNestedValue("mascot.surfacePoses." + modelData.key, value)
+            }
+        }
         icon: "image"
 
         WSettingsSwitch {
