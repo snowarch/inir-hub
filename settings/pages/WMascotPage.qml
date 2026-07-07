@@ -188,6 +188,15 @@ WSettingsPage {
         }
 
         WSettingsSwitch {
+            label: Translation.tr("Impact sounds")
+            icon: "speaker-0"
+            description: Translation.tr("Little thuds and bells from the system sound theme when she hits things")
+            checked: Config.options?.mascot?.chaos?.sfx ?? true
+            enabled: Config.options?.mascot?.chaos?.enable ?? false
+            onCheckedChanged: Config.setNestedValue("mascot.chaos.sfx", checked)
+        }
+
+        WSettingsSwitch {
             label: Translation.tr("Let her rearrange widgets")
             icon: "drag_pan"
             description: Translation.tr("Displaced widgets keep their new position; otherwise everything bounces back")
