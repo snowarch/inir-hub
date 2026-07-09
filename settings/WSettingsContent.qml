@@ -72,7 +72,9 @@ Item {
         { pageIndex: 1, pageName: "General", section: "Window Management", label: "Confirm before closing", targetLabel: "Confirm before closing", keywords: ["close", "confirm", "window", "dialog", "super+q"] },
         // Sounds
         { pageIndex: 1, pageName: "General", section: "Sounds", label: "Battery sounds", targetLabel: "Battery sounds", keywords: ["sound", "audio", "battery", "beep"] },
+        { pageIndex: 1, pageName: "General", section: "Sounds", label: "Sound volume", targetLabel: "Sound volume", keywords: ["sound", "volume", "audio", "loudness"] },
         { pageIndex: 1, pageName: "General", section: "Sounds", label: "Notification sounds", targetLabel: "Notification sounds", keywords: ["sound", "audio", "notification", "alert"] },
+        { pageIndex: 1, pageName: "General", section: "Event sounds", label: "Event sounds", targetLabel: "Event sounds", keywords: ["sound", "audio", "event", "custom", "theme", "notification", "battery", "timer", "pomodoro"] },
         // Idle & Sleep
         { pageIndex: 1, pageName: "General", section: "Idle & Sleep", label: "Screen off timeout", targetLabel: "Screen off timeout", keywords: ["screen", "off", "timeout", "idle", "dpms", "monitor"] },
         { pageIndex: 1, pageName: "General", section: "Idle & Sleep", label: "Lock timeout", targetLabel: "Lock timeout", keywords: ["lock", "timeout", "idle", "security"] },

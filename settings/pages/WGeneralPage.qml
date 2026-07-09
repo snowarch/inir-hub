@@ -249,6 +249,44 @@ WSettingsPage {
             checked: Config.options?.sounds?.notifications ?? true
             onCheckedChanged: Config.setNestedValue("sounds.notifications", checked)
         }
+
+        WSettingsSpinBox {
+            label: Translation.tr("Sound volume")
+            icon: "speaker-1"
+            suffix: "%"
+            from: 0; to: 100; stepSize: 5
+            value: Math.round((Config.options?.sounds?.volume ?? 0.5) * 100)
+            onValueChanged: Config.setNestedValue("sounds.volume", value / 100)
+        }
+    }
+
+    WSettingsCard {
+        id: eventSoundsCard
+        title: Translation.tr("Event sounds")
+        icon: "music-note-2"
+
+        // One row per shell sound event (keys match Audio.soundEvents)
+        readonly property var soundEventRows: [
+            { key: "notification", label: Translation.tr("Notification") },
+            { key: "notificationCritical", label: Translation.tr("Critical notification") },
+            { key: "batteryLow", label: Translation.tr("Battery low") },
+            { key: "batteryCritical", label: Translation.tr("Battery critical") },
+            { key: "batteryFull", label: Translation.tr("Battery full") },
+            { key: "powerPlug", label: Translation.tr("Power plugged in") },
+            { key: "powerUnplug", label: Translation.tr("Power unplugged") },
+            { key: "pomodoroDone", label: Translation.tr("Pomodoro ends") },
+            { key: "timerDone", label: Translation.tr("Timer ends") }
+        ]
+
+        Repeater {
+            model: eventSoundsCard.soundEventRows
+            delegate: SoundPicker {
+                required property var modelData
+                Layout.fillWidth: true
+                label: modelData.label
+                eventId: modelData.key
+            }
+        }
     }
     
     WSettingsCard {
