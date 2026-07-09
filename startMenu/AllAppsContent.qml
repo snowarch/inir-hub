@@ -299,7 +299,8 @@ WPanelPageColumn {
                             Layout.alignment: Qt.AlignHCenter
                             Layout.preferredWidth: 96
                             Layout.preferredHeight: 96
-                            surface: "emptyStates"
+                            surface: "startMenu"
+                            fallbackSurface: "emptyStates"
                             pose: "fisheye-inspect"
                         }
 

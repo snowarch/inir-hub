@@ -214,6 +214,15 @@ WSettingsPage {
             onCheckedChanged: Config.setNestedValue("mascot.chaos.allowRearrange", checked)
         }
 
+        WSettingsSwitch {
+            label: Translation.tr("React to system events")
+            icon: "flash-on"
+            description: Translation.tr("Rare, reason-flavored romps for low battery, a notification pileup, or very late hours")
+            checked: Config.options?.mascot?.chaos?.systemEvents ?? true
+            enabled: Config.options?.mascot?.chaos?.enable ?? false
+            onCheckedChanged: Config.setNestedValue("mascot.chaos.systemEvents", checked)
+        }
+
         WSettingsButton {
             label: Translation.tr("Unleash chaos")
             icon: "flash-on"
@@ -327,7 +336,16 @@ WSettingsPage {
         // Per-surface pose overrides (Auto = curated default per spot)
         Repeater {
             model: [
-                { key: "emptyStates", label: Translation.tr("Empty states pose") },
+                { key: "notifications", label: Translation.tr("Notifications pose") },
+                { key: "clipboard", label: Translation.tr("Clipboard pose") },
+                { key: "mediaControls", label: Translation.tr("Media controls pose") },
+                { key: "todo", label: Translation.tr("Todo list pose") },
+                { key: "calendar", label: Translation.tr("Calendar pose") },
+                { key: "wifi", label: Translation.tr("Wi-Fi dialog pose") },
+                { key: "startMenu", label: Translation.tr("Start menu pose") },
+                { key: "wallpaperSelector", label: Translation.tr("Wallpaper selector pose") },
+                { key: "bootGreeting", label: Translation.tr("Boot greeting pose") },
+                { key: "emptyStates", label: Translation.tr("Other empty states pose") },
                 { key: "about", label: Translation.tr("About pose") },
                 { key: "session", label: Translation.tr("Session screen pose") },
                 { key: "aiChat", label: Translation.tr("AI chat pose") },
