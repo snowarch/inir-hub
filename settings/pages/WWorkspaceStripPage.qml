@@ -59,6 +59,24 @@ WSettingsPage {
             }
         }
 
+        WSettingsRow {
+            label: Translation.tr("Look")
+            icon: "image"
+
+            control: Component {
+                WSettingsChoiceGroup {
+                    columns: 3
+                    currentValue: Config.options?.workspaceStrip?.style ?? "auto"
+                    onSelected: newValue => Config.setNestedValue("workspaceStrip.style", newValue)
+                    options: [
+                        { value: "auto", label: Translation.tr("Follow bar") },
+                        { value: "island", label: Translation.tr("Island") },
+                        { value: "stock", label: Translation.tr("Stock") }
+                    ]
+                }
+            }
+        }
+
         WSettingsSpinBox {
             label: Translation.tr("Panel width")
             icon: "desktop"
