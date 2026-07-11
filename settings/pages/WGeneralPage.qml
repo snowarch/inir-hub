@@ -330,6 +330,49 @@ WSettingsPage {
             checked: Config.options?.idle?.lockBeforeSleep ?? true
             onCheckedChanged: Config.setNestedValue("idle.lockBeforeSleep", checked)
         }
+
+        // Battery profile is meaningless without a battery.
+        WSettingsSwitch {
+            visible: Battery.available
+            label: Translation.tr("Separate timeouts on battery")
+            icon: "battery-5"
+            description: Translation.tr("Use shorter idle timeouts while unplugged")
+            checked: Config.options?.idle?.onBattery?.enable ?? false
+            onCheckedChanged: Config.setNestedValue("idle.onBattery.enable", checked)
+        }
+
+        WSettingsSpinBox {
+            visible: Battery.available
+            enabled: Config.options?.idle?.onBattery?.enable ?? false
+            label: Translation.tr("Battery: screen off")
+            icon: "battery-5"
+            suffix: "s"
+            from: 0; to: 3600; stepSize: 30
+            value: Config.options?.idle?.onBattery?.screenOffTimeout ?? 120
+            onValueChanged: Config.setNestedValue("idle.onBattery.screenOffTimeout", value)
+        }
+
+        WSettingsSpinBox {
+            visible: Battery.available
+            enabled: Config.options?.idle?.onBattery?.enable ?? false
+            label: Translation.tr("Battery: lock")
+            icon: "lock-closed"
+            suffix: "s"
+            from: 0; to: 7200; stepSize: 30
+            value: Config.options?.idle?.onBattery?.lockTimeout ?? 300
+            onValueChanged: Config.setNestedValue("idle.onBattery.lockTimeout", value)
+        }
+
+        WSettingsSpinBox {
+            visible: Battery.available
+            enabled: Config.options?.idle?.onBattery?.enable ?? false
+            label: Translation.tr("Battery: suspend")
+            icon: "weather-moon"
+            suffix: "s"
+            from: 0; to: 7200; stepSize: 60
+            value: Config.options?.idle?.onBattery?.suspendTimeout ?? 600
+            onValueChanged: Config.setNestedValue("idle.onBattery.suspendTimeout", value)
+        }
     }
     
     WSettingsCard {
