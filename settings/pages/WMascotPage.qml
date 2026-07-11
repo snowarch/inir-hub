@@ -24,8 +24,8 @@ import qs.modules.waffle.settings
  * - Rows use the waffle kit only (WSettingsCard/WSettingsSwitch/
  *   WSettingsSpinBox/WSettingsButton, Looks tokens); the pose picker is
  *   the shared MascotPoseGallery from qs.modules.common.widgets.
- * - poseOptions live on the card (mascotCard) and are built by a FileView
- *   over assets/images/mascot/manifest.json; the event Repeater emits a
+ * - poseOptions live on the card (mascotCard) and are built from the
+ *   manifest's curated full-body pickerPoses; the event Repeater emits a
  *   WSettingsSwitch + MascotPoseGallery pair per eventDescriptors entry.
  */
 WSettingsPage {
@@ -45,18 +45,14 @@ WSettingsPage {
 
         FileView {
             path: Quickshell.shellPath("assets/images/mascot/manifest.json")
+            watchChanges: true
             onLoadedChanged: {
                 if (!loaded) return
                 try {
                     const m = JSON.parse(text())
-                    const set = new Set()
-                    Object.keys(m.linesByPose ?? {}).forEach(p => set.add(p))
-                    ;(m.idlePicks ?? []).forEach(p => set.add(p[0]))
-                    Object.values(m.reactions ?? {}).forEach(r => (r.poses ?? []).forEach(p => set.add(p)))
-                    ;(m.animatedPoses ?? []).forEach(p => set.add(p))
                     const anim = m.animatedPoses ?? []
                     mascotCard.poseOptions = [{ displayName: Translation.tr("Auto (rotate pool)"), value: "", image: "" }]
-                        .concat(Array.from(set).sort().map(p => ({
+                        .concat((m.pickerPoses ?? []).map(p => ({
                             displayName: p,
                             value: p,
                             image: Quickshell.shellPath(`assets/images/mascot/inir-mascot-${p}.${anim.includes(p) ? "gif" : "png"}`)
@@ -420,6 +416,23 @@ WSettingsPage {
             description: Translation.tr("Close confirmation and similar dialogs")
             checked: Config.options?.mascot?.surfaces?.dialogs ?? true
             onCheckedChanged: Config.setNestedValue("mascot.surfaces.dialogs", checked)
+        }
+    }
+
+    WSettingsCard {
+        title: Translation.tr("Kira collection")
+        icon: "image"
+
+        WText {
+            Layout.fillWidth: true
+            text: Translation.tr("Every shipped illustration has a role here. Full-body poses power the live companion; portraits, chibis and key art stay available as a curated character archive.")
+            font.pixelSize: Looks.font.pixelSize.small
+            color: Looks.colors.fg1
+            wrapMode: Text.Wrap
+        }
+
+        MascotCollection {
+            Layout.fillWidth: true
         }
     }
 

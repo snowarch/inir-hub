@@ -42,6 +42,7 @@ Item {
         { pageIndex: 14, pageName: "Mascot", section: "Mascot", label: "Peek now", targetLabel: "Peek now", keywords: ["mascot", "test", "preview", "peek", "try"] },
         { pageIndex: 14, pageName: "Mascot", section: "Mascot surfaces", label: "Mascot surfaces", targetLabel: "Mascot surfaces", keywords: ["mascot", "surfaces", "where", "empty states", "about", "dashboard", "customize"] },
         { pageIndex: 14, pageName: "Mascot", section: "Mascot surfaces", label: "Dialogs", targetLabel: "Dialogs", keywords: ["mascot", "dialogs", "close", "confirmation", "warning"] },
+        { pageIndex: 14, pageName: "Mascot", section: "Kira collection", label: "Kira collection", targetLabel: "Kira collection", keywords: ["mascot", "kira", "collection", "gallery", "archive", "pose", "full body", "animated", "portrait", "chibi", "editorial"] },
         { pageIndex: 0, pageName: "Quick", section: "Wallpaper & Colors", label: "Transparency", targetLabel: "Transparency", keywords: ["quick", "transparency", "glass", "blur", "appearance"] },
         { pageIndex: 0, pageName: "Quick", section: "Quick actions", label: "Show reload notifications", targetLabel: "Show reload notifications", keywords: ["quick", "reload", "notifications", "toast", "quickshell", "niri"] },
 
