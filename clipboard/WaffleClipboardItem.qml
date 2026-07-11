@@ -15,18 +15,22 @@ WBorderlessButton {
     id: root
 
     required property string entry
+    property bool isPin: false
+    property string pinnedText: ""
     property bool isSelected: false
     property bool isCopied: false
     property string searchQuery: ""
 
     signal deleteRequested()
+    signal pinToggleRequested()
 
     implicitHeight: contentLayout.implicitHeight + 16
 
     checked: isSelected
 
-    property bool isImage: Cliphist.entryIsImage(entry)
+    property bool isImage: !isPin && Cliphist.entryIsImage(entry)
     property string displayText: {
+        if (root.isPin) return Cliphist.pinPreview(root.pinnedText)
         let cleaned = StringUtils.cleanCliphistEntry(entry)
         if (isImage) {
             cleaned = cleaned.replace(/^\s*\[\[.*?\]\]\s*/, "")
@@ -35,6 +39,7 @@ WBorderlessButton {
     }
 
     property string entryType: {
+        if (root.isPin) return Translation.tr("Pinned")
         const raw = entry
         return `#${raw.match(/^[\s]*(\S+)/)?.[1] || ""}`
     }
@@ -99,10 +104,32 @@ WBorderlessButton {
 
         // Action text on hover
         WText {
-            visible: root.hovered && !deleteButton.hovered
+            visible: root.hovered && !deleteButton.hovered && !pinButton.hovered
             text: Translation.tr("Copy")
             color: Looks.colors.accent
             font.pixelSize: Looks.font.pixelSize.normal
+        }
+
+        // Pin button
+        WBorderlessButton {
+            id: pinButton
+            visible: (root.hovered || root.isSelected) && (root.isPin || Cliphist.isPinnable(root.entry))
+            implicitWidth: 28
+            implicitHeight: 28
+            radius: Looks.radius.medium
+
+            onClicked: root.pinToggleRequested()
+
+            contentItem: FluentIcon {
+                anchors.centerIn: parent
+                icon: root.isPin ? "pin-off" : "pin"
+                implicitSize: 16
+                color: pinButton.hovered ? Looks.colors.accent : Looks.colors.fg
+            }
+
+            WToolTip {
+                text: root.isPin ? Translation.tr("Unpin") : Translation.tr("Pin")
+            }
         }
 
         // Delete button
@@ -113,7 +140,7 @@ WBorderlessButton {
             implicitHeight: 28
             radius: Looks.radius.medium
 
-            onClicked: root.deleteRequested()
+            onClicked: root.isPin ? root.pinToggleRequested() : root.deleteRequested()
 
             contentItem: FluentIcon {
                 anchors.centerIn: parent
@@ -123,7 +150,7 @@ WBorderlessButton {
             }
 
             WToolTip {
-                text: Translation.tr("Delete")
+                text: root.isPin ? Translation.tr("Unpin") : Translation.tr("Delete")
             }
         }
     }
@@ -131,6 +158,6 @@ WBorderlessButton {
     MouseArea {
         anchors.fill: parent
         acceptedButtons: Qt.RightButton
-        onClicked: root.deleteRequested()
+        onClicked: root.isPin ? root.pinToggleRequested() : root.deleteRequested()
     }
 }

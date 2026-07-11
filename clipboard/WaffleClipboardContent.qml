@@ -39,14 +39,23 @@ Item {
         filteredClipboardModel.clear()
         const trimmedSearch = searchText.trim().toLowerCase()
 
+        // Pinned entries always lead the list.
+        const pins = Cliphist.pinned
+        for (let i = 0; i < pins.length; i++) {
+            if (trimmedSearch.length === 0
+                || Cliphist.pinPreview(pins[i]).toLowerCase().includes(trimmedSearch)) {
+                filteredClipboardModel.append({ "rawEntry": "", "pinText": pins[i], "isPinRow": true })
+            }
+        }
+
         for (let i = 0; i < Cliphist.entries.length; i++) {
             const entry = Cliphist.entries[i]
             if (trimmedSearch.length === 0) {
-                filteredClipboardModel.append({ "rawEntry": entry })
+                filteredClipboardModel.append({ "rawEntry": entry, "pinText": "", "isPinRow": false })
             } else {
                 const content = formatCliphistName(entry).toLowerCase()
                 if (content.includes(trimmedSearch)) {
-                    filteredClipboardModel.append({ "rawEntry": entry })
+                    filteredClipboardModel.append({ "rawEntry": entry, "pinText": "", "isPinRow": false })
                 }
             }
         }
@@ -61,6 +70,16 @@ Item {
         lastCopiedEntry = entry
         Cliphist.copy(entry)
         GlobalStates.waffleClipboardOpen = false
+    }
+
+    function copyPinnedText(text: string) {
+        Quickshell.clipboardText = text
+        GlobalStates.waffleClipboardOpen = false
+    }
+
+    function activateRow(row) {
+        if (row.isPin) root.copyPinnedText(row.pinText)
+        else root.copyEntry(row.rawEntry)
     }
 
     function deleteEntry(entry: string) {
@@ -102,6 +121,9 @@ Item {
                 root.updateFilteredModel()
                 Qt.callLater(() => searchInput.forceActiveFocus())
             }
+        }
+        function onPinnedChanged() {
+            if (GlobalStates.waffleClipboardOpen) root.updateFilteredModel()
         }
     }
 
@@ -262,7 +284,7 @@ Item {
                             }
                             Keys.onReturnPressed: event => {
                                 if (clipboardList.currentIndex >= 0 && clipboardList.currentIndex < filteredClipboardModel.count) {
-                                    root.copyEntry(filteredClipboardModel.get(clipboardList.currentIndex).rawEntry)
+                                    root.activateRow(filteredClipboardModel.get(clipboardList.currentIndex))
                                 }
                                 event.accepted = true
                             }
@@ -315,16 +337,23 @@ Item {
                     delegate: WaffleClipboardItem {
                         id: itemDelegate
                         required property string rawEntry
+                        required property string pinText
+                        required property bool isPinRow
                         required property int index
 
                         width: clipboardList.width
                         entry: rawEntry
+                        isPin: itemDelegate.isPinRow
+                        pinnedText: itemDelegate.pinText
                         isSelected: clipboardList.currentIndex === index
-                        isCopied: rawEntry === root.lastCopiedEntry
+                        isCopied: !itemDelegate.isPinRow && rawEntry === root.lastCopiedEntry
                         searchQuery: root.searchText
 
-                        onClicked: root.copyEntry(rawEntry)
+                        onClicked: itemDelegate.isPinRow ? root.copyPinnedText(itemDelegate.pinText) : root.copyEntry(rawEntry)
                         onDeleteRequested: root.deleteEntry(rawEntry)
+                        onPinToggleRequested: itemDelegate.isPinRow
+                            ? Cliphist.unpin(itemDelegate.pinText)
+                            : Cliphist.pinEntry(rawEntry)
 
                         onHoveredChanged: {
                             if (hovered) clipboardList.currentIndex = index
@@ -398,7 +427,16 @@ Item {
     Keys.onPressed: event => {
         if (event.key === Qt.Key_Delete) {
             if (clipboardList.currentIndex >= 0 && clipboardList.currentIndex < filteredClipboardModel.count) {
-                root.deleteEntry(filteredClipboardModel.get(clipboardList.currentIndex).rawEntry)
+                const row = filteredClipboardModel.get(clipboardList.currentIndex)
+                if (row.isPinRow) Cliphist.unpin(row.pinText)
+                else root.deleteEntry(row.rawEntry)
+            }
+            event.accepted = true
+        } else if (event.key === Qt.Key_P && (event.modifiers & Qt.ControlModifier)) {
+            if (clipboardList.currentIndex >= 0 && clipboardList.currentIndex < filteredClipboardModel.count) {
+                const row = filteredClipboardModel.get(clipboardList.currentIndex)
+                if (row.isPinRow) Cliphist.unpin(row.pinText)
+                else if (Cliphist.isPinnable(row.rawEntry)) Cliphist.pinEntry(row.rawEntry)
             }
             event.accepted = true
         }
