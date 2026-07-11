@@ -312,6 +312,50 @@ WSettingsPage {
             value: Config.options?.notifications?.timeoutCritical ?? 0
             onValueChanged: Config.setNestedValue("notifications.timeoutCritical", value)
         }
+
+        WSettingsSwitch {
+            label: Translation.tr("Quiet hours")
+            icon: "weather-moon"
+            description: Translation.tr("Hold back popups during a daily window. Notifications still reach the history.")
+            checked: Config.options?.notifications?.quietHours?.enable ?? false
+            onCheckedChanged: Config.setNestedValue("notifications.quietHours.enable", checked)
+        }
+
+        RowLayout {
+            Layout.fillWidth: true
+            spacing: 8
+            enabled: Config.options?.notifications?.quietHours?.enable ?? false
+            opacity: enabled ? 1 : 0.5
+
+            WText {
+                text: Translation.tr("From")
+                color: Looks.colors.subfg
+            }
+            WSettingsTextField {
+                Layout.preferredWidth: 100
+                placeholderText: "22:00"
+                text: Config.options?.notifications?.quietHours?.start ?? "22:00"
+                // textEdited fires per keystroke; only persist a complete HH:MM.
+                onTextEdited: newText => {
+                    if (/^([01]?\d|2[0-3]):[0-5]\d$/.test(newText))
+                        Config.setNestedValue("notifications.quietHours.start", newText)
+                }
+            }
+            WText {
+                text: Translation.tr("to")
+                color: Looks.colors.subfg
+            }
+            WSettingsTextField {
+                Layout.preferredWidth: 100
+                placeholderText: "08:00"
+                text: Config.options?.notifications?.quietHours?.end ?? "08:00"
+                onTextEdited: newText => {
+                    if (/^([01]?\d|2[0-3]):[0-5]\d$/.test(newText))
+                        Config.setNestedValue("notifications.quietHours.end", newText)
+                }
+            }
+            Item { Layout.fillWidth: true }
+        }
         
         WSettingsSwitch {
             label: Translation.tr("Ignore app timeout")
