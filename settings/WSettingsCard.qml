@@ -3,6 +3,7 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import qs.modules.common
+import qs.modules.common.widgets
 import qs.modules.waffle.looks
 
 // Card component for grouping settings - Windows 11 style
@@ -19,12 +20,22 @@ Rectangle {
     Layout.fillWidth: true
     implicitHeight: mainColumn.implicitHeight
     radius: Looks.radius.large
-    color: Looks.colors.bg1Base
-    border.width: 1
+    color: Looks.cookieEverywhere ? "transparent" : Looks.colors.bg1Base
+    border.width: Looks.cookieEverywhere ? 0 : 1
     border.color: Looks.colors.bg1Border
+
+    Loader {
+        anchors.fill: parent
+        active: Looks.cookieEverywhere && root.visible
+        sourceComponent: CookieFace {
+            role: "card"
+            color: Looks.colors.bg1Base
+        }
+    }
     
     ColumnLayout {
         id: mainColumn
+        z: 1
         anchors {
             left: parent.left
             right: parent.right
@@ -76,14 +87,24 @@ Rectangle {
                     implicitWidth: 26
                     implicitHeight: 26
                     radius: Looks.radius.small
-                    color: Qt.alpha(Looks.colors.accent, 0.12)
+                    color: Looks.cookieEverywhere ? "transparent" : Qt.alpha(Looks.colors.accent, 0.12)
                     Layout.alignment: Qt.AlignVCenter
+
+                    CookieFace {
+                        anchors.fill: parent
+                        visible: Looks.cookieEverywhere
+                        role: "badge"
+                        selected: root.expanded
+                        color: root.expanded ? Looks.colors.accent : Looks.colors.bg2
+                    }
 
                     FluentIcon {
                         anchors.centerIn: parent
                         icon: root.icon
                         implicitSize: 14
-                        color: Looks.colors.accent
+                        color: Looks.cookieEverywhere
+                            ? (root.expanded ? Looks.colors.accentFg : Looks.colors.fg)
+                            : Looks.colors.accent
                     }
                 }
                 

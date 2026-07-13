@@ -564,7 +564,7 @@ WSettingsPage {
         WSettingsDropdown {
             label: Translation.tr("Style")
             icon: "eyedropper"
-            description: Translation.tr("Choose between Material, Cards, Aurora, Inir, and Angel global styling")
+            description: Translation.tr("Choose the visual language used across the shell")
             currentValue: globalStyleCard.currentStyle
             options: [
                 {
@@ -590,6 +590,10 @@ WSettingsPage {
                 {
                     value: "zzz",
                     displayName: Translation.tr("ZZZ")
+                },
+                {
+                    value: "cookie",
+                    displayName: Translation.tr("Cookie Shapes")
                 }
             ]
             onSelected: newValue => {

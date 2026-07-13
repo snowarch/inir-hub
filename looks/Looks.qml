@@ -20,6 +20,7 @@ Singleton {
         const style = Config.options?.appearance?.globalStyle ?? "material"
         return style === "aurora" || style === "angel"
     }
+    readonly property bool cookieEverywhere: Appearance.cookieEverywhere
     property bool useMaterial: Config.options?.waffles?.theming?.useMaterialColors ?? false
     // Glass mode: aurora/angel active (not iNiR which has its own aesthetic)
     readonly property bool glassActive: root.auroraEverywhere && !Appearance.inirEverywhere
