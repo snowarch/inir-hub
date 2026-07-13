@@ -131,7 +131,7 @@ WSettingsPage {
 
         WSettingsSwitch {
             label: Translation.tr("Panel-sitter mode")
-            icon: "align-vertical"
+            icon: "pin"
             description: Translation.tr("She sits on the bar/dock instead of floating off-screen edges")
             checked: Config.options?.mascot?.companion?.placement === "panel-sitter"
             enabled: Config.options?.mascot?.companion?.enable ?? true
@@ -140,7 +140,7 @@ WSettingsPage {
 
         WSettingsSwitch {
             label: Translation.tr("Contextual placement")
-            icon: "crosshairs"
+            icon: "drag_pan"
             description: Translation.tr("Event reactions appear near the triggering widget instead of a random edge")
             checked: Config.options?.mascot?.companion?.contextualPlacement ?? false
             enabled: Config.options?.mascot?.companion?.enable ?? true
@@ -167,7 +167,7 @@ WSettingsPage {
 
         WSettingsSwitch {
             label: Translation.tr("Mood personality")
-            icon: "brain"
+            icon: "pulse"
             description: Translation.tr("Her lines change with session mood (sleepy/hyper/snarky/contemplative)")
             checked: Config.options?.mascot?.personality?.enabled ?? true
             enabled: Config.options?.mascot?.companion?.enable ?? true
@@ -414,7 +414,7 @@ WSettingsPage {
         }
         WSettingsSwitch {
             label: Translation.tr("Dialogs")
-            icon: "warning"
+            icon: "alert"
             description: Translation.tr("Close confirmation and similar dialogs")
             checked: Config.options?.mascot?.surfaces?.dialogs ?? true
             onCheckedChanged: Config.setNestedValue("mascot.surfaces.dialogs", checked)

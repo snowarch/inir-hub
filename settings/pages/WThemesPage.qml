@@ -681,7 +681,7 @@ WSettingsPage {
 
         WSettingsSwitch {
             label: Translation.tr("Invert colors (complementary)")
-            icon: "invert_colors"
+            icon: "dark-theme"
             description: Translation.tr("Rotate every color 180° on the color wheel. Shell-only: external apps keep their original colors.")
             checked: Config.options?.appearance?.colorInvert ?? false
             onCheckedChanged: Config.setNestedValue("appearance.colorInvert", checked)
@@ -742,7 +742,7 @@ WSettingsPage {
 
         WSettingsSwitch {
             label: Translation.tr("Auto light/dark from wallpaper")
-            icon: "contrast"
+            icon: "auto"
             description: Translation.tr("Pick the light or dark scheme from each wallpaper's brightness so text stays readable")
             checked: Config.options?.appearance?.wallpaperTheming?.autoDarkLightMode ?? false
             onCheckedChanged: {
@@ -785,7 +785,7 @@ WSettingsPage {
 
         WSettingsSwitch {
             label: Translation.tr("Zed editor")
-            icon: "code-block"
+            icon: "terminal"
             description: Translation.tr("Generate Zed editor theme from wallpaper colors")
             checked: Config.options?.appearance?.wallpaperTheming?.enableZed ?? true
             onCheckedChanged: Config.setNestedValue("appearance.wallpaperTheming.enableZed", checked)
@@ -793,7 +793,7 @@ WSettingsPage {
 
         WSettingsSwitch {
             label: Translation.tr("VSCode editors")
-            icon: "code-block"
+            icon: "terminal"
             description: Translation.tr("Generate theme for VSCode and its forks from wallpaper colors")
             checked: Config.options?.appearance?.wallpaperTheming?.enableVSCode ?? true
             onCheckedChanged: Config.setNestedValue("appearance.wallpaperTheming.enableVSCode", checked)
@@ -801,7 +801,7 @@ WSettingsPage {
 
         WSettingsSwitch {
             label: Translation.tr("Chrome / Chromium")
-            icon: "globe"
+            icon: "globe-search"
             description: Translation.tr("Apply wallpaper-derived colors to Chrome and Chromium browser")
             checked: Config.options?.appearance?.wallpaperTheming?.enableChrome ?? true
             onCheckedChanged: Config.setNestedValue("appearance.wallpaperTheming.enableChrome", checked)
@@ -809,7 +809,7 @@ WSettingsPage {
 
         WSettingsSwitch {
             label: Translation.tr("OpenCode")
-            icon: "code-block"
+            icon: "terminal"
             description: Translation.tr("Apply wallpaper-derived theme to OpenCode AI editor")
             checked: Config.options?.appearance?.wallpaperTheming?.enableOpenCode ?? false
             onCheckedChanged: Config.setNestedValue("appearance.wallpaperTheming.enableOpenCode", checked)
@@ -817,7 +817,7 @@ WSettingsPage {
 
         WSettingsSwitch {
             label: Translation.tr("Neovim / LazyVim")
-            icon: "code-block"
+            icon: "terminal"
             description: Translation.tr("Generate aether.nvim theme plugin for Neovim/LazyVim from wallpaper colors (writes to ~/.config/nvim/lua/plugins/neovim.lua)")
             checked: Config.options?.appearance?.wallpaperTheming?.enableNeovim ?? false
             onCheckedChanged: Config.setNestedValue("appearance.wallpaperTheming.enableNeovim", checked)
@@ -849,7 +849,7 @@ WSettingsPage {
 
         WSettingsDropdown {
             label: Translation.tr("Color source")
-            icon: "palette"
+            icon: "color"
             description: Translation.tr("Gradient colors for standalone cava config")
             options: [
                 { displayName: Translation.tr("Theme palette"), value: "theme" },
@@ -865,7 +865,7 @@ WSettingsPage {
 
         WSettingsSpinBox {
             label: Translation.tr("Gradient colors")
-            icon: "gradient"
+            icon: "paint-bucket"
             description: Translation.tr("Number of gradient stops (2-8)")
             from: 2
             to: 8
@@ -879,7 +879,7 @@ WSettingsPage {
 
         WSettingsSlider {
             label: Translation.tr("Sensitivity")
-            icon: "sound-high"
+            icon: "speaker"
             description: Translation.tr("Audio sensitivity (higher = more reactive)")
             from: 10
             to: 500
@@ -895,7 +895,7 @@ WSettingsPage {
 
         WSettingsSpinBox {
             label: Translation.tr("Bars")
-            icon: "chart-bar"
+            icon: "device-eq"
             description: Translation.tr("Number of frequency data points (0 = auto)")
             from: 0
             to: 200

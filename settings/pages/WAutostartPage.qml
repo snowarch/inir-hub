@@ -56,7 +56,7 @@ WSettingsPage {
 
     WSettingsCard {
         title: Translation.tr("Autostart needs niri")
-        icon: "block"
+        icon: "alert"
         visible: !Autostart.isNiri
 
         WText {
@@ -70,7 +70,7 @@ WSettingsPage {
 
     WSettingsCard {
         title: Translation.tr("Startup file not found")
-        icon: "file_off"
+        icon: "dismiss"
         visible: Autostart.isNiri && Autostart.status === "missing"
 
         WText {
@@ -117,13 +117,13 @@ WSettingsPage {
                     Layout.fillWidth: true
                     elide: Text.ElideMiddle
                     text: Autostart.startupFilePath
-                    font.pixelSize: Looks.font.pixelSize.smaller
+                    font.pixelSize: Looks.font.pixelSize.small
                     color: Looks.colors.subfg
                 }
 
                 WSettingsButton {
                     buttonText: Translation.tr("Reload")
-                    buttonIcon: "refresh"
+                    buttonIcon: "arrow-clockwise"
                     onButtonClicked: Autostart.reload()
                 }
             }
@@ -289,7 +289,7 @@ WSettingsPage {
                 Layout.fillWidth: true
                 wrapMode: Text.Wrap
                 text: Translation.tr("Shell commands run through niri's spawn-sh-at-startup, so pipes, env vars, and && work.")
-                font.pixelSize: Looks.font.pixelSize.smaller
+                font.pixelSize: Looks.font.pixelSize.small
                 color: Looks.colors.subfg
             }
 

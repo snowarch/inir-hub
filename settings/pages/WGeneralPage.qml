@@ -5,6 +5,7 @@ import QtQuick.Layouts
 import Quickshell
 import qs.services
 import qs.modules.common
+import qs.modules.common.widgets
 import qs.modules.waffle.looks
 import qs.modules.waffle.settings
 
@@ -118,7 +119,7 @@ WSettingsPage {
 
         WSettingsTextField {
             label: Translation.tr("Long date format")
-            icon: "calendar"
+            icon: "schedule"
             description: Translation.tr("Used by clocks and full date labels. Example: dddd, MMMM dd")
             placeholderText: Translation.tr("e.g. dddd, MMMM dd")
             text: Config.options?.time?.dateFormat ?? "ddd, dd/MM"
@@ -127,7 +128,7 @@ WSettingsPage {
 
         WSettingsTextField {
             label: Translation.tr("Short date format")
-            icon: "calendar-month"
+            icon: "schedule"
             description: Translation.tr("Used by compact date surfaces. Example: dd/MM")
             placeholderText: Translation.tr("e.g. dd/MM")
             text: Config.options?.time?.shortDateFormat ?? "dd/MM"
@@ -168,7 +169,7 @@ WSettingsPage {
 
         WSettingsSwitch {
             label: Translation.tr("Layout popup")
-            icon: "globe"
+            icon: "keyboard"
             description: Translation.tr("Show a popup when the keyboard layout changes")
             checked: Config.options?.keyboardIndicators?.popup?.layout ?? true
             onCheckedChanged: Config.setNestedValue("keyboardIndicators.popup.layout", checked)
@@ -200,7 +201,7 @@ WSettingsPage {
 
         WSettingsSwitch {
             label: Translation.tr("Layout indicator")
-            icon: "globe"
+            icon: "keyboard"
             description: Translation.tr("Show the current keyboard layout in the taskbar")
             checked: Config.options?.keyboardIndicators?.panel?.layout ?? true
             onCheckedChanged: Config.setNestedValue("keyboardIndicators.panel.layout", checked)

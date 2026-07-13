@@ -527,7 +527,7 @@ WSettingsPage {
 
         WSettingsSwitch {
             label: Translation.tr("Dim wallpaper")
-            icon: "weather-sunny-low"
+            icon: "dark-theme"
             description: Translation.tr("Apply a dark overlay to the wallpaper for better contrast")
             checked: Config.options?.lock?.dim?.enable ?? false
             onCheckedChanged: Config.setNestedValue("lock.dim.enable", checked)
@@ -612,7 +612,7 @@ WSettingsPage {
 
         WSettingsTextField {
             label: Translation.tr("Filename format")
-            icon: "rename"
+            icon: "text-font"
             description: Translation.tr("date(1) tokens for recording filenames (without extension)")
             placeholderText: "recording_%Y-%m-%d_%H.%M.%S"
             text: Config.options?.screenRecord?.recordingNameFormat ?? "recording_%Y-%m-%d_%H.%M.%S"

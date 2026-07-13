@@ -44,7 +44,7 @@ WSettingsPage {
 
         WSettingsRow {
             label: Translation.tr("Edge")
-            icon: "arrow-swap"
+            icon: "border-outside"
 
             control: Component {
                 WSettingsChoiceGroup {
@@ -97,7 +97,7 @@ WSettingsPage {
 
         WSettingsSpinBox {
             label: Translation.tr("Trigger width")
-            icon: "arrow-swap"
+            icon: "panel-left-expand"
             suffix: "px"
             from: 1; to: 16; stepSize: 1
             value: Config.options?.workspaceStrip?.triggerWidth ?? 6
