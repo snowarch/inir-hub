@@ -17,6 +17,11 @@ WBorderlessButton {
     required property string entry
     property bool isPin: false
     property string pinnedText: ""
+    // A history entry can itself already be pinned. Without this it showed the
+    // "pin" icon like any other row and pinning it again was the only thing the
+    // button could do.
+    readonly property string pinnedAs: root.isPin ? root.pinnedText : Cliphist.pinnedTextFor(root.entry)
+    readonly property bool isPinned: root.pinnedAs.length > 0
     property bool isSelected: false
     property bool isCopied: false
     property string searchQuery: ""
@@ -113,7 +118,7 @@ WBorderlessButton {
         // Pin button
         WBorderlessButton {
             id: pinButton
-            visible: (root.hovered || root.isSelected) && (root.isPin || Cliphist.isPinnable(root.entry))
+            visible: (root.hovered || root.isSelected) && (root.isPinned || Cliphist.isPinnable(root.entry))
             implicitWidth: 28
             implicitHeight: 28
             radius: Looks.radius.medium
@@ -122,13 +127,13 @@ WBorderlessButton {
 
             contentItem: FluentIcon {
                 anchors.centerIn: parent
-                icon: root.isPin ? "pin-off" : "pin"
+                icon: root.isPinned ? "pin-off" : "pin"
                 implicitSize: 16
                 color: pinButton.hovered ? Looks.colors.accent : Looks.colors.fg
             }
 
             WToolTip {
-                text: root.isPin ? Translation.tr("Unpin") : Translation.tr("Pin")
+                text: root.isPinned ? Translation.tr("Unpin") : Translation.tr("Pin")
             }
         }
 

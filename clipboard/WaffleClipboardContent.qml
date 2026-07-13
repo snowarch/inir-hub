@@ -66,6 +66,17 @@ Item {
         }
     }
 
+    // Assigning currentIndex only moves the view once it has laid out, which it
+    // has not while the model is still being rebuilt. positionViewAtBeginning()
+    // forces that layout, so it is the only thing that reliably puts contentY
+    // back at the top after a rebuild.
+    property bool pendingViewReset: false
+
+    function resetViewPosition(): void {
+        clipboardList.currentIndex = filteredClipboardModel.count > 0 ? 0 : -1
+        clipboardList.positionViewAtBeginning()
+    }
+
     function copyEntry(entry: string) {
         lastCopiedEntry = entry
         Cliphist.copy(entry)
@@ -109,17 +120,31 @@ Item {
     }
 
     Component.onCompleted: {
-        // El servicio Cliphist es compartido, solo actualizar el modelo filtrado
+        // This is the open path. The panel is created by a Loader that activates
+        // on waffleClipboardOpenChanged, so this component does not exist yet
+        // when that signal is delivered and its own handler for it never fires
+        // on open — only on close, right before the Loader tears it down.
+        //
+        // Cliphist is a shared singleton whose entries went stale while the panel
+        // was gone, so refresh here or the list opens showing the order it had
+        // last time, with anything copied since missing entirely.
+        root.pendingViewReset = true
         updateFilteredModel()
+        Cliphist.refresh()
     }
 
     Connections {
         target: Cliphist
         function onEntriesChanged() {
             // Only update model if clipboard panel is open to avoid lag
-            if (GlobalStates.waffleClipboardOpen) {
-                root.updateFilteredModel()
-                Qt.callLater(() => searchInput.forceActiveFocus())
+            if (!GlobalStates.waffleClipboardOpen) return
+            root.updateFilteredModel()
+            Qt.callLater(() => searchInput.forceActiveFocus())
+            // The refresh started on open is asynchronous: these entries land
+            // once the panel is already on screen and rebuild the model under it.
+            if (root.pendingViewReset) {
+                root.pendingViewReset = false
+                Qt.callLater(root.resetViewPosition)
             }
         }
         function onPinnedChanged() {
@@ -133,9 +158,13 @@ Item {
             if (GlobalStates.waffleClipboardOpen) {
                 root.searchText = ""
                 root.showClearConfirmation = false
+                root.pendingViewReset = true
                 root.updateFilteredModel()  // Update immediately with current entries
+                root.resetViewPosition()
                 // Refrescar el servicio Cliphist para obtener datos actualizados
                 Cliphist.refresh()
+            } else {
+                root.pendingViewReset = false
             }
         }
     }
@@ -351,9 +380,16 @@ Item {
 
                         onClicked: itemDelegate.isPinRow ? root.copyPinnedText(itemDelegate.pinText) : root.copyEntry(rawEntry)
                         onDeleteRequested: root.deleteEntry(rawEntry)
-                        onPinToggleRequested: itemDelegate.isPinRow
-                            ? Cliphist.unpin(itemDelegate.pinText)
-                            : Cliphist.pinEntry(rawEntry)
+                        // Toggle, not "pin again": an entry that is already pinned
+                        // must unpin, whether it is the pinned row or the history
+                        // row that backs it.
+                        onPinToggleRequested: {
+                            const pinnedAs = itemDelegate.isPinRow
+                                ? itemDelegate.pinText
+                                : Cliphist.pinnedTextFor(rawEntry)
+                            if (pinnedAs.length > 0) Cliphist.unpin(pinnedAs)
+                            else Cliphist.pinEntry(rawEntry)
+                        }
 
                         onHoveredChanged: {
                             if (hovered) clipboardList.currentIndex = index
@@ -435,7 +471,9 @@ Item {
         } else if (event.key === Qt.Key_P && (event.modifiers & Qt.ControlModifier)) {
             if (clipboardList.currentIndex >= 0 && clipboardList.currentIndex < filteredClipboardModel.count) {
                 const row = filteredClipboardModel.get(clipboardList.currentIndex)
-                if (row.isPinRow) Cliphist.unpin(row.pinText)
+                const pinnedAs = row.isPinRow ? row.pinText : Cliphist.pinnedTextFor(row.rawEntry)
+                // Ctrl+P is a toggle: on an already-pinned entry it used to pin again.
+                if (pinnedAs.length > 0) Cliphist.unpin(pinnedAs)
                 else if (Cliphist.isPinnable(row.rawEntry)) Cliphist.pinEntry(row.rawEntry)
             }
             event.accepted = true
