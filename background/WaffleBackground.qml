@@ -122,8 +122,8 @@ Variants {
         }
 
         property bool hasFullscreenWindow: {
-            if (CompositorService.isNiri && NiriService.windows) {
-                return NiriService.windows.some(w => w.is_focused && w.is_fullscreen)
+            if (CompositorService.isNiri) {
+                return GameMode.hasFullscreenOnOutput(modelData?.name ?? "")
             }
             return false
         }

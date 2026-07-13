@@ -566,10 +566,6 @@ Item {
                                 
                                 onTextChanged: {
                                     root.searchText = text;
-                                    if (text.length > 0 && !pageStack.preloadRequested) {
-                                        pageStack.preloadRequested = true
-                                        preloadTimer.start()
-                                    }
                                     root.recomputeSearchResults();
                                 }
                                 
@@ -926,53 +922,21 @@ Item {
                 id: pageStack
                 anchors.fill: parent
                 
-                property var visitedPages: ({})
-                property bool allPagesLoaded: false
-                property bool preloadRequested: false
-                
-                Connections {
-                    target: root
-                    function onCurrentPageChanged() {
-                        pageStack.visitedPages[root.currentPage] = true
-                        pageStack.visitedPagesChanged()
-                    }
-                }
+                // Bounded retention: only the current page and its immediate
+                // neighbours stay instantiated. Search never forces pages alive —
+                // static index entries navigate to an unloaded page and the
+                // targetLabel focus retry waits for it to register its controls.
+                property int keepRadius: 1
 
-                Component.onCompleted: {
-                    visitedPages[root.currentPage] = true
-                    visitedPagesChanged()
-                }
-
-                Timer {
-                    id: preloadTimer
-                    interval: 100
-                    repeat: true
-                    property int nextPage: 1
-
-                    onTriggered: {
-                        if (nextPage >= root.pages.length) {
-                            pageStack.allPagesLoaded = true
-                            stop()
-                            return
-                        }
-
-                        if (!pageStack.visitedPages[nextPage]) {
-                            pageStack.visitedPages[nextPage] = true
-                            pageStack.visitedPagesChanged()
-                        }
-                        nextPage++
-                    }
-                }
-                
                  Repeater {
                      id: pageRepeater
                      model: root.pages.length
-                    
+
                      Loader {
                          id: pageLoader
                          required property int index
                          anchors.fill: parent
-                         active: Config.ready && (pageStack.visitedPages[index] === true)
+                         active: Config.ready && Math.abs(index - root.currentPage) <= pageStack.keepRadius
                         asynchronous: index !== root.currentPage
                         source: root.pages[index].component
                         visible: index === root.currentPage && status === Loader.Ready
@@ -1006,10 +970,6 @@ Item {
         sequences: [StandardKey.Find]
         onActivated: {
             if (!root.navExpanded) root.navExpanded = true;
-            if (!pageStack.preloadRequested) {
-                pageStack.preloadRequested = true
-                preloadTimer.start()
-            }
             searchInput.forceActiveFocus();
         }
     }
