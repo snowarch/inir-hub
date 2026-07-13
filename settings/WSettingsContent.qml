@@ -43,6 +43,14 @@ Item {
         { pageIndex: 14, pageName: "Mascot", section: "Mascot surfaces", label: "Mascot surfaces", targetLabel: "Mascot surfaces", keywords: ["mascot", "surfaces", "where", "empty states", "about", "dashboard", "customize"] },
         { pageIndex: 14, pageName: "Mascot", section: "Mascot surfaces", label: "Dialogs", targetLabel: "Dialogs", keywords: ["mascot", "dialogs", "close", "confirmation", "warning"] },
         { pageIndex: 14, pageName: "Mascot", section: "Kira collection", label: "Kira collection", targetLabel: "Kira collection", keywords: ["mascot", "kira", "collection", "gallery", "archive", "pose", "full body", "animated", "portrait", "chibi", "editorial"] },
+
+        // === AI (15) ===
+        { pageIndex: 15, pageName: "AI", section: "Providers & models", label: "AI providers", targetLabel: "Add AI provider", keywords: ["ai", "provider", "model", "api", "key", "endpoint", "ollama", "openrouter", "gemini", "groq", "anthropic", "local", "add", "llm"] },
+        { pageIndex: 15, pageName: "AI", section: "Assistant behavior", label: "AI system prompt", targetLabel: "AI system prompt", keywords: ["ai", "prompt", "system", "instructions", "custom", "assistant", "personality"] },
+        { pageIndex: 15, pageName: "AI", section: "Assistant behavior", label: "AI tools", targetLabel: "AI tools", keywords: ["ai", "tool", "functions", "search", "temperature", "creativity"] },
+        { pageIndex: 15, pageName: "AI", section: "Privacy & policy", label: "Allow AI features", targetLabel: "Allow AI features", keywords: ["ai", "privacy", "policy", "local", "allow", "disable"] },
+        { pageIndex: 15, pageName: "AI", section: "Voice input", label: "Voice input", targetLabel: "Voice input", keywords: ["voice", "mic", "microphone", "dictate", "speech", "transcribe", "recording"] },
+
         { pageIndex: 0, pageName: "Quick", section: "Wallpaper & Colors", label: "Transparency", targetLabel: "Transparency", keywords: ["quick", "transparency", "glass", "blur", "appearance"] },
         { pageIndex: 0, pageName: "Quick", section: "Quick actions", label: "Show reload notifications", targetLabel: "Show reload notifications", keywords: ["quick", "reload", "notifications", "toast", "quickshell", "niri"] },
 
