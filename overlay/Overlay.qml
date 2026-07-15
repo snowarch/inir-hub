@@ -39,6 +39,15 @@ Scope {
     // Ready flag to ensure screen is set before window becomes visible
     property bool _readyToShow: false
 
+    Component.onCompleted: {
+        if (GlobalStates.overlayOpen) {
+            root._everOpened = true
+            const outputName = NiriService.currentOutput
+            root.targetScreen = Quickshell.screens.find(s => s.name === outputName) ?? GlobalStates.primaryScreen ?? null
+            root._readyToShow = true
+        }
+    }
+
     Connections {
         target: GlobalStates
         function onOverlayOpenChanged() {
@@ -153,25 +162,4 @@ Scope {
         }
     }
 
-    IpcHandler {
-        target: "overlay"
-
-        function toggle(): void {
-            GlobalStates.overlayOpen = !GlobalStates.overlayOpen;
-        }
-    }
-
-    Loader {
-        active: CompositorService.isHyprland
-        sourceComponent: Item {
-            GlobalShortcut {
-                name: "overlayToggle"
-                description: "Toggles overlay on press"
-
-                onPressed: {
-                    GlobalStates.overlayOpen = !GlobalStates.overlayOpen;
-                }
-            }
-        }
-    }
 }
