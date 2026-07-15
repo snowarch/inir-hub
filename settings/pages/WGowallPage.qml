@@ -21,18 +21,24 @@ WSettingsPage {
 
     // --- State ---
     property string sourcePath: ""
-    property string selectedFormat: "png"
+    property string selectedFormat: Persistent.states?.settings?.gowallFormat ?? "png"
+    onSelectedFormatChanged: if (Persistent.ready && Persistent.states?.settings)
+        Persistent.states.settings.gowallFormat = selectedFormat
     property string operationMode: "convert"
 
     // Convert state
-    property string selectedTheme: ""
+    property string selectedTheme: Persistent.states?.settings?.gowallTheme ?? ""
+    onSelectedThemeChanged: if (Persistent.ready && Persistent.states?.settings)
+        Persistent.states.settings.gowallTheme = selectedTheme
     property string convertSource: "builtin"
     property string customThemeName: "custom"
     property var customColors: ["#89B4FA", "#CBA6F7", "#F38BA8", "#A6E3A1", "#F9E2AF", "#11111B"]
     property int editingColorIndex: -1
 
     // Effects state
-    property string selectedEffect: "grayscale"
+    property string selectedEffect: Persistent.states?.settings?.gowallEffect ?? "grayscale"
+    onSelectedEffectChanged: if (Persistent.ready && Persistent.states?.settings)
+        Persistent.states.settings.gowallEffect = selectedEffect
     property real brightnessFactor: 1.1
 
     // Pixelate state

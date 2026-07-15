@@ -88,8 +88,12 @@ WSettingsPage {
         icon: "dark-theme"
 
         property string searchQuery: ""
-        property int selectedTab: 0  // 0=All, 1=Dark, 2=Light
-        property string selectedTag: ""
+        property int selectedTab: Persistent.states?.settings?.themeTab ?? 0  // 0=All, 1=Dark, 2=Light
+        onSelectedTabChanged: if (Persistent.ready && Persistent.states?.settings)
+            Persistent.states.settings.themeTab = selectedTab
+        property string selectedTag: Persistent.states?.settings?.themeTag ?? ""
+        onSelectedTagChanged: if (Persistent.ready && Persistent.states?.settings)
+            Persistent.states.settings.themeTag = selectedTag
 
         function isDarkTheme(preset) {
             if (preset.id === "auto" || preset.id === "custom")

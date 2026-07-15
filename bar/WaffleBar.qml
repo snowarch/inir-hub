@@ -52,11 +52,18 @@ Scope {
                 }
 
                 color: "transparent"
+
                 implicitHeight: content.implicitHeight
                 implicitWidth: content.implicitWidth
 
+                BackgroundEffect.blurRegion: Region {
+                    item: content.nativeBlurActive ? content : null
+                }
+
                 WaffleBarContent {
                     id: content
+
+                    nativeBlurAllowed: !GameMode.shouldHidePanels
 
                     // Mascot chaos: her ground slam rattles the taskbar; a kick more so
                     property real _quakeY: 0

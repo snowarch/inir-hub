@@ -80,12 +80,4 @@ Scope {
         }
     }
 
-    function toggleOpen() {
-        GlobalStates.waffleNotificationCenterOpen = !GlobalStates.waffleNotificationCenterOpen
-    }
-
-    IpcHandler {
-        target: "wnotificationCenter"
-        function toggle(): void { root.toggleOpen() }
-    }
 }

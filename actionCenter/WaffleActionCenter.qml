@@ -33,6 +33,7 @@ Scope {
             WlrLayershell.namespace: "quickshell:wActionCenterBg"
             WlrLayershell.layer: WlrLayer.Top
             color: "transparent"
+
             MouseArea {
                 anchors.fill: parent
                 onClicked: GlobalStates.waffleActionCenterOpen = false
@@ -78,12 +79,4 @@ Scope {
         }
     }
 
-    function toggleOpen() {
-        GlobalStates.waffleActionCenterOpen = !GlobalStates.waffleActionCenterOpen
-    }
-
-    IpcHandler {
-        target: "wactionCenter"
-        function toggle(): void { root.toggleOpen() }
-    }
 }

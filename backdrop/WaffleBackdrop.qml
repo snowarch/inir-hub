@@ -48,6 +48,13 @@ Variants {
         readonly property var wBackdrop: Config.options?.waffles?.background?.backdrop ?? {}
 
         readonly property int backdropBlurRadius: wBackdrop.blurRadius ?? 32
+        // A blurred fullscreen source carries no useful pixel-level detail. Decode
+        // it at half resolution, matching ii's backdrop ownership, while retaining
+        // native resolution for the sharp (blur 0) mode.
+        readonly property real backdropSourceScale: backdropBlurRadius > 0 ? 0.5 : 1.0
+        readonly property size backdropSourceSize: Qt.size(
+            Math.round((screen?.width ?? 1920) * backdropSourceScale),
+            Math.round((screen?.height ?? 1080) * backdropSourceScale))
         readonly property int thumbnailBlurStrength: Config.options?.waffles?.background?.effects?.thumbnailBlurStrength ?? (Config.options?.background?.effects?.thumbnailBlurStrength ?? 50)
         readonly property bool enableAnimatedBlur: wBackdrop.enableAnimatedBlur ?? false
         readonly property int backdropDim: wBackdrop.dim ?? 35
@@ -122,7 +129,7 @@ Variants {
                 source: backdropWindow.wallpaperUrl && !backdropWindow.wallpaperIsGif && !backdropWindow.wallpaperIsVideo
                     ? backdropWindow.wallpaperUrl
                     : ""
-                sourceSize: Qt.size(backdropWindow.screen?.width ?? 1920, backdropWindow.screen?.height ?? 1080)
+                sourceSize: backdropWindow.backdropSourceSize
                 visible: !backdropWindow.wallpaperIsGif && !backdropWindow.wallpaperIsVideo
                 // Use waffle transition settings
                 transitionBaseDuration: Config.options?.waffles?.background?.transition?.duration ?? 800

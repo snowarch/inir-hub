@@ -18,9 +18,15 @@ Item {
     
     property var pages: []
     property int currentPage: 0
+    // Parent/child currentPage is bidirectional. Delay child writeback until
+    // construction finishes so a persisted or command-line page is not reset
+    // by this component's initial default value.
+    property bool navigationReady: false
     property string searchText: ""
     property var searchResults: []
     property bool navExpanded: width > 760
+
+    Component.onCompleted: Qt.callLater(() => root.navigationReady = true)
     
     // Complete search index with all individual options + targetLabel for spotlight
     property var searchIndex: [
@@ -96,6 +102,12 @@ Item {
         { pageIndex: 1, pageName: "General", section: "Game Mode", label: "Disable Niri animations", targetLabel: "Disable Niri animations", keywords: ["game", "gaming", "niri", "compositor", "animations"] },
         { pageIndex: 1, pageName: "General", section: "Game Mode", label: "Disable Discover overlay", targetLabel: "Disable Discover overlay", keywords: ["game", "gaming", "discover", "overlay", "discord", "performance"] },
         { pageIndex: 1, pageName: "General", section: "Game Mode", label: "Minimal mode", targetLabel: "Minimal mode", keywords: ["game", "gaming", "minimal", "lightweight", "performance", "shell"] },
+        { pageIndex: 16, pageName: "Effects", section: "Blur and glass", label: "Default blur backend", targetLabel: "Default blur backend", keywords: ["effects", "blur", "backend", "wallpaper", "compositor", "style", "glass"] },
+        { pageIndex: 16, pageName: "Effects", section: "Blur and glass", label: "Allow compositor blur", targetLabel: "Allow compositor blur", keywords: ["performance", "native", "blur", "niri", "gpu", "compositor", "glass"] },
+        { pageIndex: 16, pageName: "Effects", section: "Per-area overrides", label: "Bars", targetLabel: "Bars", keywords: ["effects", "bar", "area", "blur"] },
+        { pageIndex: 16, pageName: "Effects", section: "Per-area overrides", label: "Dock", targetLabel: "Dock", keywords: ["effects", "dock", "area", "blur"] },
+        { pageIndex: 16, pageName: "Effects", section: "Per-area overrides", label: "Islands and Ricelin", targetLabel: "Islands and Ricelin", keywords: ["effects", "islands", "ricelin", "pill", "blur"] },
+        { pageIndex: 16, pageName: "Effects", section: "Motion and power", label: "Reduce animations", targetLabel: "Reduce animations", keywords: ["motion", "animation", "reduce", "accessibility", "performance"] },
         { pageIndex: 1, pageName: "General", section: "Game Mode", label: "Suppress notifications", targetLabel: "Suppress notifications", keywords: ["game", "gaming", "notifications", "suppress", "hide", "popup", "silent"] },
         { pageIndex: 1, pageName: "General", section: "Game Mode", label: "Hide reload toasts", targetLabel: "Hide reload toasts", keywords: ["game", "gaming", "reload", "toast", "notifications", "suppress"] },
         

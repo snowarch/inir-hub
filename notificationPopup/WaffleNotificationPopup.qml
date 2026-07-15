@@ -20,7 +20,30 @@ Scope {
     readonly property bool isTop: position.startsWith("top")
     readonly property bool isLeft: position.endsWith("Left")
 
-    PanelWindow {
+    Loader {
+        id: popupLoader
+        property bool resident: Notifications.popupList.length > 0
+        active: resident
+
+        Connections {
+            target: Notifications
+            function onPopupListChanged() {
+                if (Notifications.popupList.length > 0) {
+                    popupCloseGrace.stop()
+                    popupLoader.resident = true
+                } else {
+                    popupCloseGrace.restart()
+                }
+            }
+        }
+
+        Timer {
+            id: popupCloseGrace
+            interval: 450
+            onTriggered: popupLoader.resident = Notifications.popupList.length > 0
+        }
+
+        sourceComponent: PanelWindow {
         id: panelWindow
         // Hide during GameMode to avoid input interference
         visible: (Notifications.popupList.length > 0) && !GlobalStates.screenLocked && !GlobalStates.waffleNotificationCenterOpen && !(GameMode.active && GameMode.suppressNotifications)
@@ -54,6 +77,7 @@ Scope {
         }
 
         color: "transparent"
+
         implicitWidth: 380
         implicitHeight: Math.min(listview.contentHeight + 16, (screen?.height ?? 800) * 0.7)
 
@@ -63,6 +87,7 @@ Scope {
                 fill: parent
                 margins: 8
             }
+        }
         }
     }
 }
