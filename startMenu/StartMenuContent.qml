@@ -17,6 +17,22 @@ WBarAttachedPanelContent {
     property string searchText: LauncherSearch.query
     property bool showAllApps: false
 
+    function applyDevDestination(): void {
+        const view = DevNavigation.requestedWaffleStartView
+        showAllApps = view === "all-apps"
+        if (view === "search" && LauncherSearch.query.length === 0)
+            LauncherSearch.query = "a"
+        else if (view !== "search")
+            LauncherSearch.query = ""
+    }
+
+    Component.onCompleted: applyDevDestination()
+
+    Connections {
+        target: DevNavigation
+        function onRequestedWaffleStartViewChanged() { root.applyDevDestination() }
+    }
+
     StartMenuContext { id: context }
 
     Keys.onPressed: event => {

@@ -340,7 +340,9 @@ WPanelPageColumn {
                                 radius: Looks.radius.small
                                 color: letterMouse.containsMouse ? Looks.colors.bg1Hover : "transparent"
 
-                                Behavior on color { animation: Looks.transition.color }
+                                Behavior on color {
+                                    ColorAnimation { duration: Looks.transition.enabled ? 70 : 0 }
+                                }
                             }
 
                             WText {
@@ -351,8 +353,12 @@ WPanelPageColumn {
                                 color: letterItem.isActive ? Looks.colors.accent : Looks.colors.fg1
                                 opacity: letterItem.isActive ? 1.0 : 0.6
 
-                                Behavior on color { animation: Looks.transition.color }
-                                Behavior on opacity { animation: Looks.transition.color }
+                                Behavior on color {
+                                    ColorAnimation { duration: Looks.transition.enabled ? 70 : 0 }
+                                }
+                                Behavior on opacity {
+                                    NumberAnimation { duration: Looks.transition.enabled ? Looks.transition.duration.normal : 0 }
+                                }
                             }
 
                             MouseArea {

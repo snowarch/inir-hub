@@ -12,6 +12,8 @@ Item {
     property bool separateLightDark: false
     property bool tryCustomIcon: true
     property bool monochrome: Config.options?.waffles?.bar?.monochromeIcons ?? false
+    readonly property bool hasBundledOverride: root.tryCustomIcon
+        && !["discord", "discord-canary", "discord-ptb"].includes(root.iconName.toLowerCase())
     readonly property var currentScreen: root.QsWindow?.window?.screen ?? null
     
     property real implicitSize: Looks.scaledBar(Config.options?.waffles?.bar?.iconSize ?? 26, currentScreen)
@@ -24,7 +26,7 @@ Item {
         animated: true
         roundToIconSize: true
         fallback: root.iconName
-        source: root.tryCustomIcon ? `${Looks.iconsPath}/${root.iconName}${!root.separateLightDark ? "" : Looks.dark ? "-dark" : "-light"}.svg` : fallback
+        source: root.hasBundledOverride ? `${Looks.iconsPath}/${root.iconName}${!root.separateLightDark ? "" : Looks.dark ? "-dark" : "-light"}.svg` : fallback
     }
 
     Loader {
