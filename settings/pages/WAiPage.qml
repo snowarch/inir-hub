@@ -5,6 +5,7 @@ import QtQuick.Layouts
 import Quickshell
 import qs.services
 import qs.services.deferred
+import qs.services.ai
 import qs.modules.common
 import qs.modules.common.widgets
 import qs.modules.common.functions
@@ -33,7 +34,8 @@ WSettingsPage {
     Component.onCompleted: Ai.ensureInitialized()
 
     readonly property bool hasModel: (Ai.getModel() ?? null) !== null
-    readonly property bool hasLocalModel: Ai.modelList.some(m => (Ai.models[m]?.endpoint ?? "").includes("localhost"))
+    readonly property bool hasLocalModel: AiProviderCatalog.localModelCount > 0
+        || Ai.modelList.some(m => Ai.models[m]?.local === true)
 
     // ── Get started ──────────────────────────────────────────────────────
     WSettingsCard {
@@ -44,31 +46,44 @@ WSettingsPage {
             severity: root.hasModel ? WSettingsInfoBar.Severity.Success : WSettingsInfoBar.Severity.Warning
             message: root.hasModel
                 ? Translation.tr("Active model: %1").arg(Ai.getModel().name)
-                : Translation.tr("No model selected. Pick one from the model selector in the chat sidebar, or add a provider below.")
+                : Translation.tr("No model selected. Connect a provider below and iNiR will discover compatible models automatically.")
         }
 
         WSettingsInfoBar {
             severity: Ai.currentModelHasApiKey ? WSettingsInfoBar.Severity.Success : WSettingsInfoBar.Severity.Warning
             message: Ai.currentModelHasApiKey
-                ? Translation.tr("API key ready for the active model")
-                : Translation.tr("The active model needs an API key. Type /key YOUR_KEY in the chat, or re-add the provider below with its key.")
+                ? Translation.tr("API key stored for the active model")
+                : Translation.tr("The active model needs an API key. Connect the provider below; keys stay in the system keyring.")
         }
 
         WSettingsInfoBar {
             severity: root.hasLocalModel ? WSettingsInfoBar.Severity.Success : WSettingsInfoBar.Severity.Info
             message: root.hasLocalModel
-                ? Translation.tr("Local models detected (Ollama)")
-                : Translation.tr("No local models. Install Ollama and pull a model to chat without any account or key.")
+                ? Translation.tr("%1 local model(s) detected").arg(AiProviderCatalog.localModelCount)
+                : Translation.tr("No local models. Start Ollama or LM Studio to chat privately without an account or key.")
         }
 
-        WText {
-            Layout.fillWidth: true
-            Layout.leftMargin: 16
-            Layout.rightMargin: 16
-            wrapMode: Text.Wrap
-            text: Translation.tr("Two ways to use the assistant: run models locally with Ollama (private, free, no key), or connect an online provider below — several have free tiers.")
-            font.pixelSize: Looks.font.pixelSize.small
-            color: Looks.colors.subfg
+        WSettingsInfoBar {
+            severity: AiProviderCatalog.availableModelCount > 0
+                ? WSettingsInfoBar.Severity.Success : WSettingsInfoBar.Severity.Info
+            message: AiProviderCatalog.refreshing
+                ? Translation.tr("Refreshing live model catalogs…")
+                : Translation.tr("%1 live model(s): %2 free · %3 local · %4 key-enabled · %5 browseable")
+                    .arg(AiProviderCatalog.availableModelCount)
+                    .arg(AiProviderCatalog.freeModelCount)
+                    .arg(AiProviderCatalog.localModelCount)
+                    .arg(AiProviderCatalog.healthyProviderCount)
+                    .arg(AiProviderCatalog.browseableProviderCount)
+        }
+
+        WSettingsButton {
+            label: Translation.tr("Live model catalogs")
+            description: Translation.tr("Refresh provider availability, model IDs, context and capabilities")
+            icon: "arrow-sync"
+            buttonText: Translation.tr("Refresh")
+            buttonIcon: "arrow-sync"
+            enabled: !AiProviderCatalog.refreshing
+            onButtonClicked: AiProviderCatalog.refreshAll()
         }
     }
 
@@ -87,12 +102,18 @@ WSettingsPage {
             "openai-response": "Responses"
         })
 
-        function openForm(preset, editIndex) {
+        function openForm(entry, editIndex) {
             providerForm.editingIndex = editIndex ?? -1
-            providerNameInput.text = preset?.name ?? ""
-            providerEndpointInput.text = preset?.endpoint ?? ""
-            providerModelInput.text = preset?.model ?? ""
-            providerForm.selectedFormat = preset?.api_format ?? "openai"
+            providerForm.presetId = editIndex >= 0 ? (entry?.provider_id ?? "") : (entry?.id ?? "")
+            const resolvedPreset = AiProviderPresets.byId(providerForm.presetId)
+            providerForm.presetKeyId = resolvedPreset?.keyId ?? entry?.key_id ?? entry?.keyId ?? ""
+            const liveModels = providerForm.presetId.length > 0
+                ? AiProviderCatalog.modelsFor(providerForm.presetId) : []
+            providerNameInput.text = resolvedPreset?.name ?? entry?.name ?? ""
+            providerEndpointInput.text = resolvedPreset?.endpoint ?? entry?.endpoint ?? ""
+            providerModelInput.text = liveModels[0]?.remoteId
+                ?? resolvedPreset?.model ?? entry?.model ?? ""
+            providerForm.selectedFormat = resolvedPreset?.api_format ?? entry?.api_format ?? "openai"
             providerApiKeyInput.text = ""
             providerForm.expanded = true
         }
@@ -105,6 +126,8 @@ WSettingsPage {
             providerModelInput.text = ""
             providerApiKeyInput.text = ""
             providerForm.selectedFormat = "openai"
+            providerForm.presetId = ""
+            providerForm.presetKeyId = ""
         }
 
         WText {
@@ -112,66 +135,42 @@ WSettingsPage {
             Layout.leftMargin: 16
             Layout.rightMargin: 16
             wrapMode: Text.Wrap
-            text: Translation.tr("Quick add — popular providers (free tiers available)")
+            text: Translation.tr("Choose a provider. iNiR discovers its current models and API protocol automatically.")
             font.pixelSize: Looks.font.pixelSize.small
             color: Looks.colors.subfg
         }
 
-        Flow {
-            Layout.fillWidth: true
-            Layout.leftMargin: 16
-            Layout.rightMargin: 16
-            spacing: 6
+        Repeater {
+            model: AiProviderPresets.presets
 
-            Repeater {
-                model: AiProviderPresets.presets
-
-                delegate: WButton {
-                    id: presetChip
-                    required property var modelData
-                    readonly property var preset: presetChip.modelData
-                    readonly property bool alreadyAdded: providersCard.extraModels.some(m => (m?.endpoint ?? "") === preset.endpoint)
-
-                    implicitWidth: presetChipRow.implicitWidth + 20
-                    implicitHeight: 32
-                    colBackground: preset.local
-                        ? ColorUtils.transparentize(Looks.colors.accent, 0.88)
-                        : Looks.colors.bg1
-                    onClicked: providersCard.openForm(presetChip.preset, -1)
-
-                    contentItem: RowLayout {
-                        id: presetChipRow
-                        anchors.centerIn: parent
-                        spacing: 6
-
-                        CustomIcon {
-                            width: Looks.font.pixelSize.large
-                            height: Looks.font.pixelSize.large
-                            source: presetChip.preset.icon
-                            colorize: true
-                            color: presetChip.preset.local ? Looks.colors.accent : Looks.colors.fg
-                        }
-                        WText {
-                            text: presetChip.preset.name
-                            font.pixelSize: Looks.font.pixelSize.small
-                            color: presetChip.preset.local ? Looks.colors.accent : Looks.colors.fg
-                        }
-                        FluentIcon {
-                            visible: presetChip.alreadyAdded
-                            icon: "checkmark"
-                            implicitSize: Looks.font.pixelSize.normal
-                            color: Looks.colors.accent
-                        }
-                    }
-
-                    WToolTip {
-                        visible: presetChip.hovered
-                        text: presetChip.preset.description
-                            + (presetChip.preset.requiresKey
-                                ? "\n\n" + Translation.tr("Get a key: ") + presetChip.preset.keyGetLink
-                                : "")
-                    }
+            delegate: WSettingsButton {
+                id: providerChoice
+                required property var modelData
+                readonly property var preset: providerChoice.modelData
+                readonly property var providerState: AiProviderCatalog.stateFor(preset.id)
+                readonly property bool connected: providerState.status === "ready"
+                readonly property string providerStatus: {
+                    if (providerState.status === "loading") return Translation.tr("Refreshing catalog…")
+                    if (providerState.status === "ready")
+                        return Translation.tr("Key stored · %1 models").arg(providerState.modelCount)
+                    if (providerState.status === "catalog-ready")
+                        return Translation.tr("%1 models visible · connect to use").arg(providerState.modelCount)
+                    if (providerState.status === "needs-key") return Translation.tr("API key required")
+                    if (providerState.status === "unavailable")
+                        return preset.local ? Translation.tr("Service not running") : Translation.tr("Provider unavailable")
+                    return preset.local ? Translation.tr("Detect local service") : Translation.tr("Connect provider")
                 }
+
+                label: preset.name
+                description: providerStatus
+                icon: preset.local ? "desktop"
+                    : connected ? "checkmark"
+                    : providerState.status === "catalog-ready" ? "lock-closed" : "key"
+                buttonText: connected ? Translation.tr("Update")
+                    : preset.local ? Translation.tr("Detect") : Translation.tr("Connect")
+                buttonIcon: connected ? "settings" : "arrow-right"
+                accent: connected
+                onButtonClicked: providersCard.openForm(providerChoice.preset, -1)
             }
         }
 
@@ -183,6 +182,10 @@ WSettingsPage {
                 id: providerRow
                 required property var modelData
                 required property int index
+                readonly property string providerId: modelData?.provider_id ?? "custom"
+                readonly property var preset: AiProviderPresets.byId(providerId)
+                readonly property var providerState: AiProviderCatalog.stateFor(providerId)
+                readonly property bool guided: preset !== null
                 Layout.fillWidth: true
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
@@ -194,15 +197,24 @@ WSettingsPage {
 
                     WText {
                         Layout.fillWidth: true
-                        text: providerRow.modelData?.name ?? providerRow.modelData?.model ?? Translation.tr("Unnamed")
+                        text: providerRow.preset?.name
+                            ?? providerRow.modelData?.name
+                            ?? providerRow.modelData?.model
+                            ?? Translation.tr("Unnamed")
                         font.pixelSize: Looks.font.pixelSize.normal
                         color: Looks.colors.fg
                         elide: Text.ElideRight
                     }
                     WText {
                         Layout.fillWidth: true
-                        text: (providersCard.formatLabels[providerRow.modelData?.api_format] ?? "OpenAI")
-                            + " · " + (providerRow.modelData?.model ?? "")
+                        text: providerRow.guided
+                            ? (providerRow.providerState.status === "ready"
+                                ? Translation.tr("Key stored · %1 live models").arg(providerRow.providerState.modelCount)
+                                : providerRow.providerState.status === "catalog-ready"
+                                    ? Translation.tr("Catalog available · API key required")
+                                    : Translation.tr("Connection needs attention"))
+                            : (providersCard.formatLabels[providerRow.modelData?.api_format] ?? "OpenAI")
+                                + " · " + (providerRow.modelData?.model ?? "")
                         font.pixelSize: Looks.font.pixelSize.small
                         color: Looks.colors.subfg
                         elide: Text.ElideMiddle
@@ -256,7 +268,7 @@ WSettingsPage {
             visible: providersCard.extraModels.length === 0
             horizontalAlignment: Text.AlignHCenter
             wrapMode: Text.Wrap
-            text: Translation.tr("No providers yet. Add one to use the chat sidebar — local models via Ollama and free OpenRouter models are loaded automatically.")
+            text: Translation.tr("No custom providers. Curated providers are managed above; add a custom endpoint only when it is not already supported.")
             font.pixelSize: Looks.font.pixelSize.small
             color: Looks.colors.subfg
         }
@@ -264,8 +276,8 @@ WSettingsPage {
         // ── Add / edit form ──────────────────────────────────────────────
         WSettingsButton {
             visible: !providerForm.expanded
-            label: Translation.tr("Add AI provider")
-            description: Translation.tr("Any OpenAI, Gemini or Anthropic compatible endpoint")
+            label: Translation.tr("Add custom endpoint")
+            description: Translation.tr("For providers that are not already supported above")
             icon: "add"
             buttonText: Translation.tr("Add")
             buttonIcon: "add"
@@ -281,10 +293,27 @@ WSettingsPage {
             property bool expanded: false
             property int editingIndex: -1
             property string selectedFormat: "openai"
+            property string presetId: ""
+            property string presetKeyId: ""
+            readonly property var preset: AiProviderPresets.byId(presetId)
+            readonly property bool guidedPreset: preset !== null
+            readonly property bool hasStoredKey: preset?.keyId
+                ? ((KeyringStorage.keyringData?.apiKeys?.[preset.keyId]?.length ?? 0) > 0)
+                : false
 
             visible: expanded
 
+            WSettingsInfoBar {
+                visible: providerForm.guidedPreset
+                severity: WSettingsInfoBar.Severity.Info
+                message: providerForm.preset
+                    ? Translation.tr(providerForm.preset.description)
+                        + "\n" + Translation.tr("iNiR will discover model IDs and capabilities automatically.")
+                    : ""
+            }
+
             WSettingsTextField {
+                visible: !providerForm.guidedPreset
                 id: providerNameInput
                 label: Translation.tr("Provider name")
                 icon: "info"
@@ -294,6 +323,7 @@ WSettingsPage {
 
             WSettingsTextField {
                 id: providerEndpointInput
+                visible: !providerForm.guidedPreset
                 label: Translation.tr("API endpoint URL")
                 icon: "globe-search"
                 placeholderText: "https://api.openai.com/v1/chat/completions"
@@ -313,6 +343,7 @@ WSettingsPage {
 
             WSettingsTextField {
                 id: providerModelInput
+                visible: !providerForm.guidedPreset
                 label: Translation.tr("Model code")
                 icon: "apps"
                 placeholderText: "gpt-4.1"
@@ -321,14 +352,18 @@ WSettingsPage {
 
             WSettingsTextField {
                 id: providerApiKeyInput
-                label: Translation.tr("API key (optional)")
+                label: providerForm.preset?.requiresKey
+                    ? Translation.tr("API key") : Translation.tr("API key (optional)")
                 icon: "key"
                 description: Translation.tr("Stored in the system keyring, never in config.json")
-                placeholderText: "sk-..."
+                placeholderText: providerForm.hasStoredKey
+                    ? Translation.tr("A key is already stored — leave blank to keep it")
+                    : "sk-..."
                 onTextEdited: newText => providerApiKeyInput.text = newText
             }
 
             WSettingsChoiceGroup {
+                visible: !providerForm.guidedPreset
                 Layout.leftMargin: 16
                 Layout.rightMargin: 16
                 columns: 4
@@ -368,39 +403,57 @@ WSettingsPage {
                     implicitHeight: 32
                     colBackground: Looks.colors.accent
                     colBackgroundHover: Looks.colors.accentHover
-                    enabled: providerEndpointInput.text.trim() !== "" && providerModelInput.text.trim() !== ""
+                    enabled: providerEndpointInput.text.trim() !== ""
+                        && providerModelInput.text.trim() !== ""
+                        && (!(providerForm.preset?.requiresKey ?? false)
+                            || providerApiKeyInput.text.trim().length > 0
+                            || providerForm.hasStoredKey)
                     onClicked: {
                         const modelCode = providerModelInput.text.trim()
                         const apiKey = providerApiKeyInput.text.trim()
-                        const keyId = modelCode.toLowerCase().replace(/[:\/ ]/g, "-")
+                        const preset = providerForm.preset
+                        const keyId = providerForm.presetKeyId
+                            || modelCode.toLowerCase().replace(/[:\/ ]/g, "-")
 
                         const entry = {
                             name: providerNameInput.text.trim() || modelCode,
                             endpoint: providerEndpointInput.text.trim(),
                             model: modelCode,
                             api_format: providerForm.selectedFormat,
-                            requires_key: apiKey.length > 0,
+                            requires_key: preset ? !!preset.requiresKey : apiKey.length > 0,
                             key_id: keyId,
+                            provider_id: providerForm.presetId || "custom",
+                            auth_scheme: preset?.authScheme ?? "strategy",
+                            description: preset ? Translation.tr(preset.description) : "",
+                            icon: preset?.icon ?? "neurology",
+                            key_get_link: preset?.keyGetLink ?? "",
                         }
 
                         let models = [...providersCard.extraModels]
-                        if (providerForm.editingIndex >= 0) {
-                            // Keep any field the form doesn't own (the ii page does
-                            // the same) so editing never silently drops config.
-                            const orig = models[providerForm.editingIndex]
-                            if (orig) {
-                                for (let k in orig) {
-                                    if (!(k in entry) && k !== "index") entry[k] = orig[k]
-                                }
-                            }
-                            models[providerForm.editingIndex] = entry
+                        if (preset) {
+                            const filtered = models.filter(model =>
+                                (model?.provider_id ?? "") !== preset.id)
+                            if (filtered.length !== models.length)
+                                Config.setNestedValue("ai.extraModels", filtered)
                         } else {
-                            models.push(entry)
+                            if (providerForm.editingIndex >= 0) {
+                                const orig = models[providerForm.editingIndex]
+                                if (orig) {
+                                    for (let k in orig) {
+                                        if (!(k in entry) && k !== "index") entry[k] = orig[k]
+                                    }
+                                }
+                                models[providerForm.editingIndex] = entry
+                            } else {
+                                models.push(entry)
+                            }
+                            Config.setNestedValue("ai.extraModels", models)
                         }
-                        Config.setNestedValue("ai.extraModels", models)
 
                         if (apiKey.length > 0)
                             KeyringStorage.setNestedField(["apiKeys", keyId], apiKey)
+                        if (providerForm.presetId.length > 0)
+                            Qt.callLater(() => AiProviderCatalog.refreshProvider(providerForm.presetId))
 
                         providersCard.closeForm()
                     }
@@ -436,18 +489,19 @@ WSettingsPage {
         WSettingsRow {
             label: Translation.tr("AI tools")
             icon: "settings-cog-multiple"
-            description: Translation.tr("What the assistant can do. Search is only available on Gemini models; Functions lets it read and edit the shell config")
+            description: Translation.tr("Shell tools use typed actions and configuration previews. Raw commands are isolated in Advanced mode.")
         }
 
         WSettingsChoiceGroup {
             Layout.leftMargin: 16
             Layout.rightMargin: 16
-            columns: 3
+            columns: 4
             currentValue: Config.options?.ai?.tool ?? "search"
             onSelected: newValue => Config.setNestedValue("ai.tool", newValue)
             options: [
-                { label: Translation.tr("Functions"), value: "functions" },
+                { label: Translation.tr("Shell tools"), value: "functions" },
                 { label: Translation.tr("Search"), value: "search" },
+                { label: Translation.tr("Advanced"), value: "advanced" },
                 { label: Translation.tr("None"), value: "none" }
             ]
         }
@@ -476,7 +530,7 @@ WSettingsPage {
         WSettingsRow {
             label: Translation.tr("Allow AI features")
             icon: "shield"
-            description: Translation.tr("Local only restricts the assistant to models running on this machine (Ollama)")
+            description: Translation.tr("Local only restricts the assistant to models running on this machine, such as Ollama or LM Studio")
         }
 
         WSettingsChoiceGroup {
@@ -497,6 +551,69 @@ WSettingsPage {
     WSettingsCard {
         title: Translation.tr("Voice input")
         icon: "mic"
+
+        WSettingsRow {
+            label: Translation.tr("Transcription backend")
+            icon: "mic"
+            description: Translation.tr("Auto prefers local Whisper, then connected online speech providers")
+        }
+
+        WSettingsChoiceGroup {
+            Layout.leftMargin: 16
+            Layout.rightMargin: 16
+            columns: 5
+            currentValue: Config.options?.voiceSearch?.provider ?? "auto"
+            onSelected: newValue => Config.setNestedValue("voiceSearch.provider", newValue)
+            options: [
+                { label: Translation.tr("Auto"), value: "auto" },
+                { label: Translation.tr("Local"), value: "local" },
+                { label: "Groq", value: "groq" },
+                { label: "Gemini", value: "gemini" },
+                { label: "OpenAI", value: "openai" }
+            ]
+        }
+
+        WSettingsInfoBar {
+            severity: VoiceSearch.hasBackend
+                ? WSettingsInfoBar.Severity.Success : WSettingsInfoBar.Severity.Warning
+            message: VoiceSearch.hasBackend
+                ? Translation.tr("Active backend: %1").arg(VoiceSearch.backendLabel)
+                : Translation.tr("No backend is ready. Connect a speech provider or install whisper.cpp locally.")
+        }
+
+        WSettingsButton {
+            label: VoiceSearch.localAvailable
+                ? Translation.tr("Local Whisper detected")
+                : Translation.tr("Local Whisper not detected")
+            description: VoiceSearch.detectedLocalModel
+            icon: "desktop"
+            buttonText: Translation.tr("Refresh")
+            buttonIcon: "arrow-sync"
+            onButtonClicked: VoiceSearch.refreshBackends()
+        }
+
+        WSettingsRow {
+            label: Translation.tr("Language")
+            icon: "globe-search"
+            description: Translation.tr("Auto detect is recommended for multilingual dictation")
+        }
+
+        WSettingsChoiceGroup {
+            Layout.leftMargin: 16
+            Layout.rightMargin: 16
+            columns: 4
+            currentValue: Config.options?.voiceSearch?.language ?? "auto"
+            onSelected: newValue => Config.setNestedValue("voiceSearch.language", newValue)
+            options: [
+                { label: Translation.tr("Auto"), value: "auto" },
+                { label: Translation.tr("Spanish"), value: "es" },
+                { label: Translation.tr("English"), value: "en" },
+                { label: Translation.tr("Portuguese"), value: "pt" },
+                { label: Translation.tr("French"), value: "fr" },
+                { label: Translation.tr("German"), value: "de" },
+                { label: Translation.tr("Japanese"), value: "ja" }
+            ]
+        }
 
         WSettingsSpinBox {
             id: voiceDurationSpin
@@ -524,7 +641,7 @@ WSettingsPage {
             Layout.leftMargin: 16
             Layout.rightMargin: 16
             wrapMode: Text.Wrap
-            text: Translation.tr("Transcription uses Gemini, so a Gemini API key must be set — add the Gemini provider above with its key, or type /key in the chat with a Gemini model selected.")
+            text: Translation.tr("The same backend is used for chat dictation and voice web search. Keys are passed through the process environment and never written to commands or config files.")
             font.pixelSize: Looks.font.pixelSize.small
             color: Looks.colors.subfg
         }
