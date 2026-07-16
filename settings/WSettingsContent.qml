@@ -203,6 +203,10 @@ Item {
         
         // === Modules (7) ===
         { pageIndex: 7, pageName: "Modules", section: "Panel Style", label: "Panel family", targetLabel: "Panel family", keywords: ["panel", "family", "style", "material", "waffle", "windows"] },
+        { pageIndex: 7, pageName: "Modules", section: "Sidebars", label: "Arrange sidebar sections", targetLabel: "Sidebars", keywords: ["sidebar", "right", "arrange", "order", "sections", "resize", "notifications", "widgets"] },
+        { pageIndex: 7, pageName: "Modules", section: "Sidebars", label: "Arrange sidebar tabs", targetLabel: "Sidebars", keywords: ["sidebar", "left", "arrange", "order", "tabs", "drag", "ai"] },
+        { pageIndex: 7, pageName: "Modules", section: "Sidebars", label: "Collapse notifications when empty", targetLabel: "Sidebars", keywords: ["sidebar", "right", "notifications", "collapse", "empty", "fit", "height"] },
+        { pageIndex: 7, pageName: "Modules", section: "Sidebars", label: "Fit left sidebar to widgets", targetLabel: "Sidebars", keywords: ["sidebar", "left", "widgets", "fit", "collapse", "height"] },
         { pageIndex: 7, pageName: "Modules", section: "Material Modules in Waffle", label: "Left Sidebar", targetLabel: "Left Sidebar", keywords: ["sidebar", "left", "ai", "chat", "translator"] },
         { pageIndex: 7, pageName: "Modules", section: "Material Modules in Waffle", label: "Right Sidebar", targetLabel: "Right Sidebar", keywords: ["sidebar", "right", "quick", "settings", "calendar"] },
         { pageIndex: 7, pageName: "Modules", section: "Material Modules in Waffle", label: "Dock", targetLabel: "Dock", keywords: ["dock", "macos", "pinned", "apps"] },
