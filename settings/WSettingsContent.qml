@@ -108,6 +108,7 @@ Item {
         { pageIndex: 16, pageName: "Effects", section: "Per-area overrides", label: "Dock", targetLabel: "Dock", keywords: ["effects", "dock", "area", "blur"] },
         { pageIndex: 16, pageName: "Effects", section: "Per-area overrides", label: "Islands and Ricelin", targetLabel: "Islands and Ricelin", keywords: ["effects", "islands", "ricelin", "pill", "blur"] },
         { pageIndex: 16, pageName: "Effects", section: "Motion and power", label: "Reduce animations", targetLabel: "Reduce animations", keywords: ["motion", "animation", "reduce", "accessibility", "performance"] },
+        { pageIndex: 16, pageName: "Effects", section: "Motion and power", label: "Notify when a restart would free memory", targetLabel: "Notify when a restart would free memory", keywords: ["performance", "memory", "leak", "notification", "warning", "restart", "watchdog"] },
         { pageIndex: 1, pageName: "General", section: "Game Mode", label: "Suppress notifications", targetLabel: "Suppress notifications", keywords: ["game", "gaming", "notifications", "suppress", "hide", "popup", "silent"] },
         { pageIndex: 1, pageName: "General", section: "Game Mode", label: "Hide reload toasts", targetLabel: "Hide reload toasts", keywords: ["game", "gaming", "reload", "toast", "notifications", "suppress"] },
         

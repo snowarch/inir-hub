@@ -75,5 +75,11 @@ WSettingsPage {
             checked: Config.options?.performance?.lowPower ?? false
             onCheckedChanged: Config.setNestedValue("performance.lowPower", checked)
         }
+        WSettingsSwitch {
+            label: Translation.tr("Notify when a restart would free memory")
+            icon: "alert"
+            checked: Config.options?.performance?.memoryWarningNotification ?? false
+            onCheckedChanged: Config.setNestedValue("performance.memoryWarningNotification", checked)
+        }
     }
 }
