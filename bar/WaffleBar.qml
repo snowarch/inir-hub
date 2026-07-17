@@ -13,28 +13,33 @@ Scope {
     
     readonly property bool isBottom: Config.options?.waffles?.bar?.bottom ?? false
     
-    LazyLoader {
-        id: barLoader
-        active: GlobalStates.barOpen
-        component: Variants {
-            // Match the ii Bar.qml screen filter so multi-monitor users can
-            // restrict the taskbar to specific outputs (ref #154).
-            model: {
-                const screens = Quickshell.screens;
-                const list = Config.options?.waffles?.bar?.screenList ?? [];
-                if (!list || list.length === 0)
-                    return screens;
-                const matched = screens.filter(screen => {
-                    const screenName = screen?.name ?? "";
-                    return screenName.length > 0 && list.includes(screenName);
-                });
-                // Fallback safety: stale monitor names should never hide the bar everywhere.
-                return matched.length > 0 ? matched : screens;
-            }
-            delegate: PanelWindow { // Bar window
+    // Variants cannot incubate asynchronously in Quickshell 0.3. Keep the
+    // cheap per-screen loader delegates synchronous and incubate each heavy
+    // PanelWindow independently so opening the bar never forces the complete
+    // multi-output tree onto the UI thread.
+    Variants {
+        // Match the ii Bar.qml screen filter so multi-monitor users can
+        // restrict the taskbar to specific outputs (ref #154).
+        model: {
+            const screens = Quickshell.screens;
+            const list = Config.options?.waffles?.bar?.screenList ?? [];
+            if (!list || list.length === 0)
+                return screens;
+            const matched = screens.filter(screen => {
+                const screenName = screen?.name ?? "";
+                return screenName.length > 0 && list.includes(screenName);
+            });
+            // Fallback safety: stale monitor names should never hide the bar everywhere.
+            return matched.length > 0 ? matched : screens;
+        }
+        delegate: LazyLoader {
+            id: barWindowLoader
+            required property var modelData
+            activeAsync: GlobalStates.barOpen
+
+            component: PanelWindow { // Bar window
                 id: barRoot
-                required property var modelData
-                screen: modelData
+                screen: barWindowLoader.modelData
                 visible: !GameMode.shouldHidePanels
                 exclusionMode: ExclusionMode.Ignore
                 exclusiveZone: GameMode.shouldHidePanels ? 0 : implicitHeight
@@ -108,6 +113,32 @@ Scope {
                             easing.bezierCurve: Looks.transition.easing.bezierCurve.decelerate
                         }
                     }
+                }
+
+                ShellEditSurfaceFrame {
+                    anchors.fill: content
+                    surfaceId: "waffleBar"
+                    label: Translation.tr("Taskbar")
+                    active: ShellEditSession.blocksNormalActions(surfaceId)
+                    selected: ShellEditSession.selectedSurfaceId === surfaceId
+                    lifted: ShellEditSession.liftedSurfaceId === surfaceId
+                    slotHint: root.isBottom ? "bottom" : "top"
+                    screenWidth: barRoot.screen?.width ?? 0
+                    screenHeight: barRoot.screen?.height ?? 0
+                    onDragStarted: surface => ShellEditSession.beginDrag(surface)
+                    onDragMoved: (surface, screenX, screenY) =>
+                        ShellEditSession.updateDrag(screenX, screenY)
+                    onDragEnded: () => ShellEditSession.endDrag()
+                    onDragCanceled: () => ShellEditSession.cancelDrag()
+                    accentColor: Looks.colors.accent
+                    surfaceColor: Looks.colors.bg1Base
+                    textColor: Looks.colors.fg
+                    frameRadius: Looks.radius.medium
+                    fontFamily: Looks.font.family.ui
+                    fontPixelSize: Looks.font.pixelSize.normal
+                    animationDuration: Looks.transition.enabled
+                        ? Looks.transition.duration.fast : 0
+                    onActivated: selectedId => ShellEditSession.selectSurface(selectedId)
                 }
             }
         }

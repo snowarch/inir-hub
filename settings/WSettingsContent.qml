@@ -30,6 +30,8 @@ Item {
     
     // Complete search index with all individual options + targetLabel for spotlight
     property var searchIndex: [
+        { pageIndex: 17, pageName: "Shell Layout", section: "Live shell layout", label: "Edit live", targetLabel: "Edit live", keywords: ["layout", "move", "position", "taskbar", "output", "edit", "live"] },
+        { pageIndex: 17, pageName: "Shell Layout", section: "Taskbar placement", label: "Current position", targetLabel: "Current position", keywords: ["layout", "taskbar", "top", "bottom", "position", "reset"] },
         // === Quick (0) ===
         { pageIndex: 0, pageName: "Quick", section: "Wallpaper & Colors", label: "Dark mode", targetLabel: "Dark mode", keywords: ["quick", "dark", "light", "mode", "theme", "scheme"] },
         { pageIndex: 0, pageName: "Quick", section: "Wallpaper & Colors", label: "Per-monitor wallpapers", targetLabel: "Per-monitor wallpapers", keywords: ["quick", "wallpaper", "monitor", "display", "multi-monitor", "per-monitor"] },

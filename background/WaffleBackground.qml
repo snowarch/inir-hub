@@ -139,8 +139,9 @@ Variants {
                 if (CompositorService.isNiri && typeof NiriService !== "undefined" && NiriService.windows && NiriService.workspaces) {
                     const allWs = Object.values(NiriService.workspaces);
                     if (!allWs || allWs.length === 0) return false;
-                    const currentNumber = NiriService.getCurrentWorkspaceNumber();
-                    const currentWs = allWs.find(ws => ws.idx === currentNumber);
+                    const outputName = panelRoot.modelData?.name ?? "";
+                    const currentWs = allWs.find(ws => ws.output === outputName
+                        && ws.is_active);
                     if (!currentWs) return false;
                     return NiriService.windows.some(w => w.workspace_id === currentWs.id);
                 }
