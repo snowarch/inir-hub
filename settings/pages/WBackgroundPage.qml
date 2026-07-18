@@ -1075,6 +1075,15 @@ WSettingsPage {
                 }
 
                 WSettingsSwitch {
+                    visible: root.wBg.enableAnimation ?? true
+                    label: Translation.tr("Pause animated wallpapers on battery")
+                    icon: "battery-saver"
+                    description: Translation.tr("Freeze videos and GIFs while on battery power to save energy")
+                    checked: Config.options?.background?.pauseAnimationOnBattery ?? true
+                    onCheckedChanged: root.setNestedValueWhenReady("background.pauseAnimationOnBattery", checked)
+                }
+
+                WSettingsSwitch {
                     label: Translation.tr("Enable blur")
                     icon: "eye"
                     description: Translation.tr("Blur wallpaper when windows are open. Temporarily hides during wallpaper transitions.")

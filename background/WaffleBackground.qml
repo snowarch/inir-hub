@@ -237,7 +237,7 @@ Variants {
                     sourceSize.width: 1920
                     sourceSize.height: 1080
                     visible: panelRoot.wallpaperIsGif && !blurEffect.visible && !panelRoot.externalMainWallpaperActive
-                    playing: visible && panelRoot.enableAnimation && !GlobalStates.screenLocked && !Appearance._gameModeActive
+                    playing: visible && panelRoot.enableAnimation && !GlobalStates.screenLocked && !Appearance._gameModeActive && !Wallpapers.batteryPauseActive
 
                     layer.enabled: Appearance.effectsEnabled && panelRoot.enableAnimatedBlur && (panelRoot.wEffects.blurRadius ?? 0) > 0
                     layer.effect: MultiEffect {
@@ -262,7 +262,7 @@ Variants {
                     muted: true
                     autoPlay: true
 
-                    readonly property bool shouldPlay: panelRoot.enableAnimation && !GlobalStates.screenLocked && !Appearance._gameModeActive
+                    readonly property bool shouldPlay: panelRoot.enableAnimation && !GlobalStates.screenLocked && !Appearance._gameModeActive && !Wallpapers.batteryPauseActive
 
                     function pauseAndShowFirstFrame() {
                         pause()
