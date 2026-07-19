@@ -165,6 +165,21 @@ WSettingsPage {
             onCheckedChanged: Config.setNestedValue("mascot.personality.commentary", checked)
         }
 
+        WSettingsDropdown {
+            label: Translation.tr("Voice")
+            icon: "chat"
+            description: Translation.tr("Adaptive follows her mood; fixed modes keep one conversational register")
+            currentValue: Config.options?.mascot?.personality?.voiceMode ?? "adaptive"
+            options: [
+                { displayName: Translation.tr("Adaptive"), value: "adaptive" },
+                { displayName: Translation.tr("Casual"), value: "casual" },
+                { displayName: Translation.tr("Dry"), value: "dry" },
+                { displayName: Translation.tr("Composed"), value: "composed" },
+                { displayName: Translation.tr("Chaotic"), value: "chaotic" }
+            ]
+            onSelected: newValue => Config.setNestedValue("mascot.personality.voiceMode", newValue)
+        }
+
         WSettingsSwitch {
             label: Translation.tr("Mood personality")
             icon: "pulse"
