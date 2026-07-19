@@ -125,6 +125,19 @@ WSettingsPage {
             onCheckedChanged: root.setNestedValueWhenReady("waffles.background.hideWhenFullscreen", checked)
         }
 
+        WSettingsDropdown {
+            label: Translation.tr("Wallpaper selector")
+            icon: "image"
+            description: Translation.tr("Choose how the wallpaper library opens")
+            currentValue: Config.options?.wallpaperSelector?.style ?? "grid"
+            options: [
+                { value: "grid", displayName: Translation.tr("Grid") },
+                { value: "coverflow", displayName: Translation.tr("Coverflow") },
+                { value: "launcher", displayName: Translation.tr("Launcher") }
+            ]
+            onSelected: value => Config.setNestedValue("wallpaperSelector.style", value)
+        }
+
 
         // ─── Wallpaper folder browser ───
         ColumnLayout {

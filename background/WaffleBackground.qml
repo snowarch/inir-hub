@@ -40,9 +40,14 @@ Variants {
 
         // Wallpaper source — per-monitor when multi-monitor enabled, otherwise waffle/main per setting
         readonly property string wallpaperSourceRaw: {
-            if (_multiMonEnabled && _perMonitorData.path) return _perMonitorData.path;
-            if (wBg.useMainWallpaper ?? true) return Config.options?.background?.wallpaperPath ?? "";
-            return wBg.wallpaperPath ?? (Config.options?.background?.wallpaperPath ?? "");
+            let configuredPath = ""
+            if (_multiMonEnabled && _perMonitorData.path)
+                configuredPath = _perMonitorData.path
+            else if (wBg.useMainWallpaper ?? true)
+                configuredPath = Config.options?.background?.wallpaperPath ?? ""
+            else
+                configuredPath = wBg.wallpaperPath ?? (Config.options?.background?.wallpaperPath ?? "")
+            return Wallpapers.previewPathForMonitor(_monitorName, configuredPath)
         }
 
         readonly property string wallpaperThumbnail: {
@@ -54,7 +59,8 @@ Variants {
         readonly property int thumbnailBlurStrength: wEffects.thumbnailBlurStrength ?? Config.options?.background?.effects?.thumbnailBlurStrength ?? 70
 
         readonly property bool externalMainWallpaperEligible:
-            AwwwBackend.supportsVisibleMainWallpaper(
+            !Wallpapers.previewActiveForMonitor(_monitorName)
+            && AwwwBackend.supportsVisibleMainWallpaper(
                 wallpaperSourceRaw,
                 "fill",
                 false,
@@ -206,11 +212,17 @@ Variants {
                     id: wallpaper
                     anchors.fill: parent
                     fillMode: Image.PreserveAspectCrop
-                    enableTransitions: !AwwwBackend.active
+                    readonly property bool launcherPreviewActive:
+                        Wallpapers.previewActiveForMonitor(panelRoot._monitorName)
+                    gentleTransition: launcherPreviewActive
+                    enableTransitions: (!AwwwBackend.active || launcherPreviewActive)
                         && (Config.options?.background?.transition?.enable ?? true)
-                    transitionType: Config.options?.background?.transition?.type ?? "crossfade"
+                    transitionType: launcherPreviewActive ? "crossfade"
+                        : (Config.options?.background?.transition?.type ?? "crossfade")
                     transitionDirection: Config.options?.background?.transition?.direction ?? "right"
-                    transitionBaseDuration: Config.options?.background?.transition?.duration ?? 800
+                    transitionBaseDuration: launcherPreviewActive
+                        ? Appearance.animationCurves.expressiveSlowSpatialDuration
+                        : (Config.options?.background?.transition?.duration ?? 800)
                     source: panelRoot.wallpaperUrl && !panelRoot.wallpaperIsGif && !panelRoot.wallpaperIsVideo
                         ? panelRoot.wallpaperUrl
                         : ""
