@@ -101,6 +101,18 @@ Variants {
         }
 
         readonly property string effectiveWallpaperPath: wallpaperPathRaw
+        readonly property string frozenVideoFramePath: {
+            const _dep = Wallpapers.videoFirstFrames
+            if (!wallpaperIsVideo || enableAnimation)
+                return ""
+            const frame = Wallpapers.getVideoFirstFramePath(wallpaperPathRaw)
+            if (!frame) {
+                Wallpapers.ensureVideoFirstFrame(wallpaperPathRaw)
+                return ""
+            }
+            return frame.startsWith("file://") ? frame : ("file://" + frame)
+        }
+        readonly property bool useFrozenVideoFrame: frozenVideoFramePath.length > 0
 
         // Build proper file:// URL
         readonly property string wallpaperUrl: {
@@ -166,13 +178,37 @@ Variants {
                 }
             }
 
-            // Video wallpaper
-            // Always loaded for videos: plays when animation enabled, frozen (paused) when disabled
+            // When backdrop animation is disabled, a cached representative frame
+            // is equivalent to a paused video and lets Qt release the decoder.
+            Image {
+                id: frozenVideoWallpaper
+                anchors.fill: parent
+                anchors.margins: -parent.blurOverflow
+                visible: backdropWindow.useFrozenVideoFrame
+                source: visible ? backdropWindow.frozenVideoFramePath : ""
+                fillMode: Image.PreserveAspectCrop
+                asynchronous: true
+                cache: false
+                smooth: true
+                sourceSize: backdropWindow.backdropSourceSize
+
+                layer.enabled: Appearance.effectsEnabled && backdropWindow.enableAnimatedBlur && backdropWindow.backdropBlurRadius > 0
+                layer.effect: MultiEffect {
+                    blurEnabled: true
+                    blur: (backdropWindow.backdropBlurRadius * Math.max(0, Math.min(1, backdropWindow.thumbnailBlurStrength / 100))) / 100.0
+                    blurMax: 64
+                    saturation: backdropWindow.backdropSaturation
+                    contrast: backdropWindow.backdropContrast
+                }
+            }
+
+            // Keep a live decoder only while animation is enabled, or briefly
+            // until the first-frame cache becomes available.
             Video {
                 id: videoWallpaper
                 anchors.fill: parent
                 anchors.margins: -parent.blurOverflow
-                visible: backdropWindow.wallpaperIsVideo
+                visible: backdropWindow.wallpaperIsVideo && !backdropWindow.useFrozenVideoFrame
                 source: {
                     if (!backdropWindow.wallpaperIsVideo) return "";
                     const path = backdropWindow.wallpaperPathRaw;
