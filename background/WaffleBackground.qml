@@ -40,14 +40,16 @@ Variants {
 
         // Wallpaper source — per-monitor when multi-monitor enabled, otherwise waffle/main per setting
         readonly property string wallpaperSourceRaw: {
-            let configuredPath = ""
+            let configuredPath = "";
             if (_multiMonEnabled && _perMonitorData.path)
-                configuredPath = _perMonitorData.path
+                configuredPath = _perMonitorData.path;
             else if (wBg.useMainWallpaper ?? true)
-                configuredPath = Config.options?.background?.wallpaperPath ?? ""
+                configuredPath = Config.options?.background?.wallpaperPath ?? "";
             else
-                configuredPath = wBg.wallpaperPath ?? (Config.options?.background?.wallpaperPath ?? "")
-            return Wallpapers.previewPathForMonitor(_monitorName, configuredPath)
+                configuredPath = wBg.wallpaperPath ?? (Config.options?.background?.wallpaperPath ?? "");
+            // Supplies the preview path only. awww eligibility is untouched, so
+            // whichever engine already owns this wallpaper keeps owning it.
+            return Wallpapers.internalPreviewFor(_monitorName, configuredPath);
         }
 
         readonly property string wallpaperThumbnail: {
@@ -59,8 +61,7 @@ Variants {
         readonly property int thumbnailBlurStrength: wEffects.thumbnailBlurStrength ?? Config.options?.background?.effects?.thumbnailBlurStrength ?? 70
 
         readonly property bool externalMainWallpaperEligible:
-            !Wallpapers.previewActiveForMonitor(_monitorName)
-            && AwwwBackend.supportsVisibleMainWallpaper(
+            AwwwBackend.supportsVisibleMainWallpaper(
                 wallpaperSourceRaw,
                 "fill",
                 false,
@@ -212,17 +213,11 @@ Variants {
                     id: wallpaper
                     anchors.fill: parent
                     fillMode: Image.PreserveAspectCrop
-                    readonly property bool launcherPreviewActive:
-                        Wallpapers.previewActiveForMonitor(panelRoot._monitorName)
-                    gentleTransition: launcherPreviewActive
-                    enableTransitions: (!AwwwBackend.active || launcherPreviewActive)
+                    enableTransitions: !AwwwBackend.active
                         && (Config.options?.background?.transition?.enable ?? true)
-                    transitionType: launcherPreviewActive ? "crossfade"
-                        : (Config.options?.background?.transition?.type ?? "crossfade")
+                    transitionType: Config.options?.background?.transition?.type ?? "crossfade"
                     transitionDirection: Config.options?.background?.transition?.direction ?? "right"
-                    transitionBaseDuration: launcherPreviewActive
-                        ? Appearance.animationCurves.expressiveSlowSpatialDuration
-                        : (Config.options?.background?.transition?.duration ?? 800)
+                    transitionBaseDuration: Config.options?.background?.transition?.duration ?? 800
                     source: panelRoot.wallpaperUrl && !panelRoot.wallpaperIsGif && !panelRoot.wallpaperIsVideo
                         ? panelRoot.wallpaperUrl
                         : ""
@@ -259,52 +254,19 @@ Variants {
                     }
                 }
 
-                Video {
+                // Two-slot crossfader — see modules/common/widgets/VideoCrossfader.qml.
+                // A single Video went black between clips while the new file loaded.
+                VideoCrossfader {
                     id: videoWallpaper
                     anchors.fill: parent
                     visible: panelRoot.wallpaperIsVideo && !blurEffect.visible
-                    source: {
-                        if (!panelRoot.wallpaperIsVideo) return "";
-                        const path = panelRoot.wallpaperSourceRaw;
-                        if (!path) return "";
-                        return path.startsWith("file://") ? path : ("file://" + path);
-                    }
+                    source: panelRoot.wallpaperIsVideo ? panelRoot.wallpaperSourceRaw : ""
                     fillMode: VideoOutput.PreserveAspectCrop
-                    loops: MediaPlayer.Infinite
-                    muted: true
-                    autoPlay: true
-
-                    readonly property bool shouldPlay: panelRoot.enableAnimation && !GlobalStates.screenLocked && !Appearance._gameModeActive && !Wallpapers.batteryPauseActive
-
-                    function pauseAndShowFirstFrame() {
-                        pause()
-                        seek(0)
-                    }
-
-                    onPlaybackStateChanged: {
-                        if (playbackState === MediaPlayer.PlayingState && !shouldPlay) {
-                            pauseAndShowFirstFrame()
-                        }
-                        if (playbackState === MediaPlayer.StoppedState && visible && shouldPlay) {
-                            play()
-                        }
-                    }
-
-                    onShouldPlayChanged: {
-                        if (visible && panelRoot.wallpaperIsVideo) {
-                            if (shouldPlay) play()
-                            else pauseAndShowFirstFrame()
-                        }
-                    }
-
-                    onVisibleChanged: {
-                        if (visible && panelRoot.wallpaperIsVideo) {
-                            if (shouldPlay) play()
-                            else pauseAndShowFirstFrame()
-                        } else {
-                            pause()
-                        }
-                    }
+                    enableTransitions: Config.options?.background?.transition?.enable ?? true
+                    transitionBaseDuration: Config.options?.background?.transition?.duration ?? 800
+                    shouldPlay: panelRoot.enableAnimation && !GlobalStates.screenLocked
+                        && !Appearance._gameModeActive && !Wallpapers.batteryPauseActive
+                        && visible
 
                     layer.enabled: Appearance.effectsEnabled && panelRoot.enableAnimatedBlur && (panelRoot.wEffects.blurRadius ?? 0) > 0
                     layer.effect: MultiEffect {
