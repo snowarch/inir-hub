@@ -28,9 +28,14 @@ BarButton {
         implicitWidth: column.implicitWidth
         Row {
             id: column
+            // Centred, not stretched. The parent Item takes its implicit size
+            // from this Row, so anchoring the Row's top AND bottom to that same
+            // Item made the positioner feed the size that was sizing it back:
+            // Qt logged "Row called polish() inside updatePolish() of Row" and
+            // then span the GUI thread in an endless layout loop, which is what
+            // froze the whole shell on the material -> waffle transition.
             anchors {
-                top: parent.top
-                bottom: parent.bottom
+                verticalCenter: parent.verticalCenter
                 horizontalCenter: parent.horizontalCenter
             }
             spacing: 4
