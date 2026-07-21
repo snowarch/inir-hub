@@ -30,6 +30,11 @@ WSettingsPage {
         Config.setNestedValue("enabledPanels", panels)
     }
 
+    WSettingsInfoBar {
+        severity: WSettingsInfoBar.Severity.Info
+        message: Translation.tr("Optional edge navigator, disabled on fresh installs. Hover the configured edge to open it, hover a workspace to inspect it, click cards or windows to focus them, drag windows between cards, and hold × to close. Window snapshots are available on Niri.")
+    }
+
     WSettingsCard {
         title: Translation.tr("Edge behavior")
         icon: "desktop"
