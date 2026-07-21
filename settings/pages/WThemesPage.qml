@@ -521,50 +521,6 @@ WSettingsPage {
         readonly property string derivedStyle: cardsEverywhere ? "cards" : "material"
         readonly property string currentStyle: (Config.options?.appearance?.globalStyle ?? "").length > 0 ? Config.options?.appearance?.globalStyle ?? "material" : derivedStyle
 
-        function _globalStyleValues(styleId) {
-            if (styleId === "cards") {
-                return {
-                    "dock.cardStyle": true,
-                    "sidebar.cardStyle": true,
-                    "bar.cornerStyle": 3,
-                };
-            }
-
-            const values = {
-                "dock.cardStyle": false,
-                "sidebar.cardStyle": false,
-            };
-
-            if (styleId === "aurora") {
-                if ((Config.options?.bar?.cornerStyle ?? 1) === 3)
-                    values["bar.cornerStyle"] = 1;
-                return values;
-            }
-
-            if (styleId === "angel") {
-                if ((Config.options?.bar?.cornerStyle ?? 1) === 3)
-                    values["bar.cornerStyle"] = 1;
-                return values;
-            }
-
-            if (styleId === "zzz") {
-                if ((Config.options?.bar?.cornerStyle ?? 1) === 3)
-                    values["bar.cornerStyle"] = 0;
-                return values;
-            }
-
-            // material
-            if ((Config.options?.bar?.cornerStyle ?? 1) === 3)
-                values["bar.cornerStyle"] = 1;
-            return values;
-        }
-
-        function _applyGlobalStyle(styleId) {
-            let values = globalStyleCard._globalStyleValues(styleId);
-            values["appearance.globalStyle"] = styleId;
-            Config.setNestedValues(values);
-        }
-
         WSettingsDropdown {
             label: Translation.tr("Style")
             icon: "eyedropper"
@@ -601,7 +557,7 @@ WSettingsPage {
                 }
             ]
             onSelected: newValue => {
-                globalStyleCard._applyGlobalStyle(newValue);
+                ThemeService.setGlobalStyle(newValue);
             }
         }
     }
