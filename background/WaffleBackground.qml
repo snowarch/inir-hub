@@ -70,6 +70,9 @@ Variants {
         readonly property bool externalMainWallpaperActive: panelRoot.externalMainWallpaperEligible
         readonly property bool showInternalStaticWallpaper: !externalMainWallpaperActive
 
+        // Mirror of Background.qml: the family LazyLoader can retain this tree
+        // after a switch, and without this both families kept a video decoding.
+        readonly property bool _familyOwnsScreen: (Config.options?.panelFamily ?? "ii") === "waffle"
         readonly property bool wallpaperIsVideo: {
             const lowerPath = wallpaperSourceRaw.toLowerCase();
             return lowerPath.endsWith(".mp4") || lowerPath.endsWith(".webm") || lowerPath.endsWith(".mkv") || lowerPath.endsWith(".avi") || lowerPath.endsWith(".mov");
@@ -260,12 +263,14 @@ Variants {
                     id: videoWallpaper
                     anchors.fill: parent
                     visible: panelRoot.wallpaperIsVideo && !blurEffect.visible
-                    source: panelRoot.wallpaperIsVideo ? panelRoot.wallpaperSourceRaw : ""
+                    source: (panelRoot.wallpaperIsVideo && panelRoot._familyOwnsScreen)
+                        ? panelRoot.wallpaperSourceRaw : ""
                     fillMode: VideoOutput.PreserveAspectCrop
                     enableTransitions: Config.options?.background?.transition?.enable ?? true
                     transitionBaseDuration: Config.options?.background?.transition?.duration ?? 800
                     shouldPlay: panelRoot.enableAnimation && !GlobalStates.screenLocked
                         && !Appearance._gameModeActive && !Wallpapers.batteryPauseActive
+                        && panelRoot._familyOwnsScreen
                         && visible
 
                     layer.enabled: Appearance.effectsEnabled && panelRoot.enableAnimatedBlur && (panelRoot.wEffects.blurRadius ?? 0) > 0
