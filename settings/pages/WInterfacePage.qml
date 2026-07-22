@@ -22,14 +22,23 @@ WSettingsPage {
     property var detectedAudioSources: []
     property var detectedHardwareDevices: []
     property string detectedDefaultSink: ""
+    property string detectedDefaultSource: ""
+    property bool audioMixAvailable: false
     property string preferredVideoCodec: "libx264"
     property bool nvidiaDetected: false
     property bool vaapiAvailable: false
     property bool nvencAvailable: false
 
+    readonly property string recordingAudioMode: RecorderStatus.configuredAudioMode
     readonly property string detectedDefaultAudioSource: detectedDefaultSink.length > 0 ? `${detectedDefaultSink}.monitor` : ""
     readonly property bool gpuRecordingAvailable: vaapiAvailable || nvencAvailable
     readonly property bool customRecordingPreset: (Config.options?.screenRecord?.qualityPreset ?? "balanced") === "custom"
+    readonly property var recordingAudioModeOptions: [
+        { value: "none", displayName: Translation.tr("No audio") },
+        { value: "system", displayName: Translation.tr("System audio") },
+        { value: "microphone", displayName: Translation.tr("Microphone") },
+        { value: "both", displayName: Translation.tr("System + microphone") }
+    ]
     readonly property var recordingQualityPresetOptions: [
         { value: "compact", displayName: Translation.tr("Compact") },
         { value: "balanced", displayName: Translation.tr("Balanced") },
@@ -109,15 +118,23 @@ WSettingsPage {
         }
     }
 
-    function audioSourceDisplayName(source) {
+    function systemAudioSourceDisplayName(source) {
         if (source === "")
             return detectedDefaultAudioSource.length > 0
                 ? `${Translation.tr("Default output monitor")} (${detectedDefaultAudioSource})`
                 : Translation.tr("Default output monitor")
         if (source === detectedDefaultAudioSource)
             return `${Translation.tr("Default output monitor")} (${source})`
-        if (String(source).indexOf(".monitor") !== -1)
-            return `${Translation.tr("Output monitor")} (${source})`
+        return `${Translation.tr("Output monitor")} (${source})`
+    }
+
+    function microphoneSourceDisplayName(source) {
+        if (source === "")
+            return detectedDefaultSource.length > 0
+                ? `${Translation.tr("Default microphone")} (${detectedDefaultSource})`
+                : Translation.tr("Default microphone")
+        if (source === detectedDefaultSource)
+            return `${Translation.tr("Default microphone")} (${source})`
         return source
     }
 
@@ -135,6 +152,8 @@ WSettingsPage {
             detectedAudioSources = payload.audioSources ?? []
             detectedHardwareDevices = payload.hardwareDevices ?? []
             detectedDefaultSink = payload.defaultSink ?? ""
+            detectedDefaultSource = payload.defaultSource ?? ""
+            audioMixAvailable = payload.audioMixAvailable ?? false
             preferredVideoCodec = payload.preferredCodec ?? "libx264"
             nvidiaDetected = payload.nvidia ?? false
             vaapiAvailable = payload.vaapiAvailable ?? false
@@ -145,6 +164,8 @@ WSettingsPage {
             detectedAudioSources = []
             detectedHardwareDevices = []
             detectedDefaultSink = ""
+            detectedDefaultSource = ""
+            audioMixAvailable = false
             preferredVideoCodec = "libx264"
             nvidiaDetected = false
             vaapiAvailable = false
@@ -165,10 +186,23 @@ WSettingsPage {
         return options
     }
 
-    function availableAudioSourceOptions() {
-        let options = [{ value: "", displayName: audioSourceDisplayName("") }]
-        options = options.concat(detectedAudioSources.map(source => ({ value: source, displayName: audioSourceDisplayName(source) })))
-        options = ensureOption(options, Config.options?.screenRecord?.audioSource ?? "", `${Translation.tr("Configured source")}: ${Config.options?.screenRecord?.audioSource ?? ""}`)
+    function availableSystemAudioSourceOptions() {
+        let options = [{ value: "", displayName: systemAudioSourceDisplayName("") }]
+        options = options.concat(detectedAudioSources
+            .filter(source => String(source).endsWith(".monitor"))
+            .map(source => ({ value: source, displayName: systemAudioSourceDisplayName(source) })))
+        const configured = RecorderStatus.configuredSystemAudioSource
+        options = ensureOption(options, configured, `${Translation.tr("Configured source")}: ${configured}`)
+        return options
+    }
+
+    function availableMicrophoneSourceOptions() {
+        let options = [{ value: "", displayName: microphoneSourceDisplayName("") }]
+        options = options.concat(detectedAudioSources
+            .filter(source => !String(source).endsWith(".monitor"))
+            .map(source => ({ value: source, displayName: microphoneSourceDisplayName(source) })))
+        const configured = RecorderStatus.configuredMicrophoneSource
+        options = ensureOption(options, configured, `${Translation.tr("Configured source")}: ${configured}`)
         return options
     }
 
@@ -601,6 +635,44 @@ WSettingsPage {
             onSelected: newValue => root.setRecordingConfig("screenRecord.accelerationMode", newValue)
         }
 
+        WSettingsDropdown {
+            label: Translation.tr("Recording audio")
+            icon: "speaker"
+            description: Translation.tr("Choose whether recordings include system audio, microphone, both, or no audio")
+            currentValue: root.recordingAudioMode
+            options: root.recordingAudioModeOptions
+            onSelected: newValue => RecorderStatus.setConfiguredAudioMode(newValue)
+        }
+
+        WSettingsRow {
+            visible: root.recordingAudioMode === "both"
+            label: Translation.tr("System + microphone")
+            icon: root.audioMixAvailable ? "speaker-settings" : "info"
+            description: root.audioMixAvailable
+                ? Translation.tr("iNiR combines system audio and microphone automatically. The temporary audio route is removed when recording ends")
+                : Translation.tr("System and microphone audio cannot be combined on this setup. Recording will continue with whichever source is available")
+        }
+
+        WSettingsDropdown {
+            visible: root.recordingAudioMode === "system" || root.recordingAudioMode === "both"
+            label: Translation.tr("System audio source")
+            icon: "speaker"
+            description: Translation.tr("Auto follows the current default output device")
+            currentValue: RecorderStatus.configuredSystemAudioSource
+            options: root.availableSystemAudioSourceOptions()
+            onSelected: newValue => RecorderStatus.setConfiguredSystemAudioSource(newValue)
+        }
+
+        WSettingsDropdown {
+            visible: root.recordingAudioMode === "microphone" || root.recordingAudioMode === "both"
+            label: Translation.tr("Microphone source")
+            icon: "mic"
+            description: Translation.tr("Auto follows the current default microphone")
+            currentValue: RecorderStatus.configuredMicrophoneSource
+            options: root.availableMicrophoneSourceOptions()
+            onSelected: newValue => RecorderStatus.setConfiguredMicrophoneSource(newValue)
+        }
+
         WSettingsTextField {
             label: Translation.tr("Save path")
             icon: "folder"
@@ -737,16 +809,6 @@ WSettingsPage {
 
         WSettingsDropdown {
             visible: root.customRecordingPreset
-            label: Translation.tr("Audio source")
-            icon: "speaker"
-            description: Translation.tr("Default output monitor captures desktop audio")
-            currentValue: Config.options?.screenRecord?.audioSource ?? ""
-            options: root.availableAudioSourceOptions()
-            onSelected: newValue => root.setRecordingConfig("screenRecord.audioSource", newValue)
-        }
-
-        WSettingsDropdown {
-            visible: root.customRecordingPreset
             label: Translation.tr("Audio backend")
             icon: "speaker-settings"
             currentValue: Config.options?.screenRecord?.audioBackend ?? ""
@@ -755,7 +817,7 @@ WSettingsPage {
         }
 
         WSettingsDropdown {
-            visible: root.customRecordingPreset && root.gpuRecordingAvailable
+            visible: root.customRecordingPreset && root.vaapiAvailable
             label: Translation.tr("Render device")
             icon: "device-eq"
             currentValue: Config.options?.screenRecord?.hardwareDevice ?? "/dev/dri/renderD128"

@@ -198,6 +198,7 @@ Item {
         { pageIndex: 6, pageName: "Interface", section: "Notifications", label: "Do Not Disturb", targetLabel: "Do Not Disturb", keywords: ["notification", "dnd", "silent", "mute", "disturb", "quiet"] },
         { pageIndex: 6, pageName: "Interface", section: "On-Screen Display", label: "Media OSD", targetLabel: "Media OSD", keywords: ["osd", "media", "music", "player", "shortcuts"] },
         { pageIndex: 6, pageName: "Interface", section: "On-Screen Display", label: "OSD timeout", targetLabel: "OSD timeout", keywords: ["osd", "volume", "brightness", "media", "timeout", "duration"] },
+        { pageIndex: 6, pageName: "Interface", section: "Screen Recording", label: "Recording audio", targetLabel: "Recording audio", keywords: ["screen", "record", "recording", "video", "capture", "wf-recorder", "audio", "system sound", "desktop audio", "microphone", "mic", "mix", "pipewire"] },
         { pageIndex: 6, pageName: "Interface", section: "Lock Screen", label: "Enable blur", targetLabel: "Enable blur", keywords: ["lock", "screen", "blur", "background"] },
         { pageIndex: 6, pageName: "Interface", section: "Lock Screen", label: "Blur radius", targetLabel: "Blur radius", keywords: ["lock", "screen", "blur", "radius"] },
         { pageIndex: 6, pageName: "Interface", section: "Lock Screen", label: "Center clock", targetLabel: "Center clock", keywords: ["lock", "screen", "clock", "center", "position"] },
