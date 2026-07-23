@@ -212,6 +212,18 @@ Variants {
                 id: wallpaperContainer
                 anchors.fill: parent
 
+                readonly property bool localBlurNeedsStaticTexture:
+                    panelRoot.visible
+                    && Appearance.effectsEnabled
+                    && panelRoot.blurProgress > 0
+                    && !panelRoot.wallpaperIsGif
+                    && !panelRoot.wallpaperIsVideo
+                readonly property bool needsStaticTexture:
+                    !panelRoot.wallpaperIsGif
+                    && !panelRoot.wallpaperIsVideo
+                    && (panelRoot.showInternalStaticWallpaper
+                        || wallpaperContainer.localBlurNeedsStaticTexture)
+
                 WallpaperCrossfader {
                     id: wallpaper
                     anchors.fill: parent
@@ -221,12 +233,12 @@ Variants {
                     transitionType: Config.options?.background?.transition?.type ?? "crossfade"
                     transitionDirection: Config.options?.background?.transition?.direction ?? "right"
                     transitionBaseDuration: Config.options?.background?.transition?.duration ?? 800
-                    source: panelRoot.wallpaperUrl && !panelRoot.wallpaperIsGif && !panelRoot.wallpaperIsVideo
-                        ? panelRoot.wallpaperUrl
-                        : ""
+                    source: wallpaperContainer.needsStaticTexture
+                        ? panelRoot.wallpaperUrl : ""
                     visible: !panelRoot.wallpaperIsGif && !panelRoot.wallpaperIsVideo && ready
                     opacity: panelRoot.showInternalStaticWallpaper ? 1 : 0
-                    layer.enabled: !panelRoot.showInternalStaticWallpaper
+                    layer.enabled: wallpaperContainer.needsStaticTexture
+                        && !panelRoot.showInternalStaticWallpaper
                     sourceSize {
                         width: panelRoot.screen.width
                         height: panelRoot.screen.height
@@ -249,7 +261,9 @@ Variants {
                     visible: panelRoot.wallpaperIsGif && !blurEffect.visible && !panelRoot.externalMainWallpaperActive
                     playing: visible && panelRoot.enableAnimation && !GlobalStates.screenLocked && !Appearance._gameModeActive && !Wallpapers.batteryPauseActive
 
-                    layer.enabled: Appearance.effectsEnabled && panelRoot.enableAnimatedBlur && (panelRoot.wEffects.blurRadius ?? 0) > 0
+                    layer.enabled: visible && Appearance.effectsEnabled
+                        && panelRoot.enableAnimatedBlur
+                        && (panelRoot.wEffects.blurRadius ?? 0) > 0
                     layer.effect: MultiEffect {
                         blurEnabled: true
                         blur: ((panelRoot.wEffects.blurRadius ?? 32) * Math.max(0, Math.min(1, panelRoot.thumbnailBlurStrength / 100))) / 100.0
@@ -273,7 +287,9 @@ Variants {
                         && panelRoot._familyOwnsScreen
                         && visible
 
-                    layer.enabled: Appearance.effectsEnabled && panelRoot.enableAnimatedBlur && (panelRoot.wEffects.blurRadius ?? 0) > 0
+                    layer.enabled: visible && Appearance.effectsEnabled
+                        && panelRoot.enableAnimatedBlur
+                        && (panelRoot.wEffects.blurRadius ?? 0) > 0
                     layer.effect: MultiEffect {
                         blurEnabled: true
                         blur: ((panelRoot.wEffects.blurRadius ?? 32) * Math.max(0, Math.min(1, panelRoot.thumbnailBlurStrength / 100))) / 100.0
