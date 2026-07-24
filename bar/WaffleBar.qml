@@ -40,13 +40,15 @@ Scope {
             component: PanelWindow { // Bar window
                 id: barRoot
                 screen: barWindowLoader.modelData
-                visible: !GameMode.shouldHidePanels
+                readonly property bool performanceSuspended: GameMode.shouldSuspendOutput(
+                    barWindowLoader.modelData?.name ?? "")
+                visible: !performanceSuspended
                 exclusionMode: ExclusionMode.Ignore
-                exclusiveZone: GameMode.shouldHidePanels ? 0 : implicitHeight
+                exclusiveZone: performanceSuspended ? 0 : implicitHeight
                 WlrLayershell.namespace: "quickshell:bar"
                 Item { id: emptyMask; width: 0; height: 0 }
                 mask: Region {
-                    item: GameMode.shouldHidePanels ? emptyMask : content
+                    item: barRoot.performanceSuspended ? emptyMask : content
                 }
 
                 anchors {
@@ -68,7 +70,7 @@ Scope {
                 WaffleBarContent {
                     id: content
 
-                    nativeBlurAllowed: !GameMode.shouldHidePanels
+                    nativeBlurAllowed: !barRoot.performanceSuspended
 
                     // Mascot chaos: her ground slam rattles the taskbar; a kick more so
                     property real _quakeY: 0
@@ -96,8 +98,8 @@ Scope {
                         top: !root.isBottom ? parent.top : undefined
                         bottom: root.isBottom ? parent.bottom : undefined
                     }
-                    anchors.topMargin: !root.isBottom && GameMode.shouldHidePanels ? -implicitHeight : 0
-                    anchors.bottomMargin: root.isBottom && GameMode.shouldHidePanels ? -implicitHeight : 0
+                    anchors.topMargin: !root.isBottom && barRoot.performanceSuspended ? -implicitHeight : 0
+                    anchors.bottomMargin: root.isBottom && barRoot.performanceSuspended ? -implicitHeight : 0
 
                     Behavior on anchors.topMargin {
                         animation: NumberAnimation {
