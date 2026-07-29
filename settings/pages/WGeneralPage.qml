@@ -236,6 +236,15 @@ WSettingsPage {
             checked: Config.options?.closeConfirm?.enabled ?? false
             onCheckedChanged: Config.setNestedValue("closeConfirm.enabled", checked)
         }
+
+        WSettingsSwitch {
+            visible: CompositorService.isNiri
+            label: Translation.tr("Auto-expand a single tiling window")
+            icon: "auto"
+            description: Translation.tr("Automatically maximizes a single tiling window to fill the screen. When a second window appears, the first is restored to its normal width.")
+            checked: Config.options?.compositor?.autoExpandSingleTilingWindow ?? false
+            onCheckedChanged: Config.setNestedValue("compositor.autoExpandSingleTilingWindow", checked)
+        }
         
         WSettingsSwitch {
             label: Translation.tr("Battery sounds")
