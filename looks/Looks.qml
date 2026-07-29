@@ -27,6 +27,7 @@ Singleton {
     readonly property bool glassActive: root.auroraEverywhere && !Appearance.inirEverywhere
 
     readonly property bool effectsEnabled: Appearance.effectsEnabled
+    readonly property bool gameModeActive: Appearance._gameModeActive
     readonly property bool gameModeMinimal: Appearance.gameModeMinimal
 
     // Font family - reactive property at root level for proper binding updates
@@ -83,6 +84,9 @@ Singleton {
     }
     function dp(value) {
         return Math.round(value * root.fontScale)
+    }
+    function effectiveDuration(value) {
+        return Appearance.calcEffectiveDuration(value)
     }
     function applyBackgroundTransparency(col) {
         return ColorUtils.applyAlpha(col, 1 - root.backgroundTransparency)

@@ -107,7 +107,7 @@ Variants {
         readonly property int _wallpaperTransitionDurationMs: {
             const transitionBaseDuration = Config.options?.background?.transition?.duration ?? 800
             const qmlTransitionDuration = (Config.options?.background?.transition?.enable ?? true)
-                ? Appearance.calcEffectiveDuration(transitionBaseDuration)
+                ? Looks.effectiveDuration(transitionBaseDuration)
                 : 0
             const awwwTransitionDuration = AwwwBackend.active ? AwwwBackend.transitionDurationMs : 0
             return Math.max(qmlTransitionDuration, awwwTransitionDuration)
@@ -215,7 +215,7 @@ Variants {
 
                 readonly property bool localBlurNeedsStaticTexture:
                     panelRoot.visible
-                    && Appearance.effectsEnabled
+                    && Looks.effectsEnabled
                     && panelRoot.blurProgress > 0
                     && !panelRoot.wallpaperIsGif
                     && !panelRoot.wallpaperIsVideo
@@ -260,9 +260,11 @@ Variants {
                     sourceSize.width: 1920
                     sourceSize.height: 1080
                     visible: panelRoot.wallpaperIsGif && !blurEffect.visible && !panelRoot.externalMainWallpaperActive
-                    playing: visible && panelRoot.enableAnimation && !GlobalStates.screenLocked && !Appearance._gameModeActive && !Wallpapers.batteryPauseActive
+                    playing: visible && panelRoot.enableAnimation
+                        && !GlobalStates.screenLocked && !Looks.gameModeActive
+                        && !Wallpapers.batteryPauseActive
 
-                    layer.enabled: visible && Appearance.effectsEnabled
+                    layer.enabled: visible && Looks.effectsEnabled
                         && panelRoot.enableAnimatedBlur
                         && (panelRoot.wEffects.blurRadius ?? 0) > 0
                     layer.effect: MultiEffect {
@@ -284,11 +286,11 @@ Variants {
                     enableTransitions: Config.options?.background?.transition?.enable ?? true
                     transitionBaseDuration: Config.options?.background?.transition?.duration ?? 800
                     shouldPlay: panelRoot.enableAnimation && !GlobalStates.screenLocked
-                        && !Appearance._gameModeActive && !Wallpapers.batteryPauseActive
+                        && !Looks.gameModeActive && !Wallpapers.batteryPauseActive
                         && panelRoot._familyOwnsScreen
                         && visible
 
-                    layer.enabled: visible && Appearance.effectsEnabled
+                    layer.enabled: visible && Looks.effectsEnabled
                         && panelRoot.enableAnimatedBlur
                         && (panelRoot.wEffects.blurRadius ?? 0) > 0
                     layer.effect: MultiEffect {
@@ -304,7 +306,7 @@ Variants {
                 id: blurEffect
                 anchors.fill: parent
                 source: wallpaper
-                visible: Appearance.effectsEnabled && panelRoot.blurProgress > 0 &&
+                visible: Looks.effectsEnabled && panelRoot.blurProgress > 0 &&
                          !panelRoot.wallpaperIsGif && !panelRoot.wallpaperIsVideo &&
                          wallpaper.ready
                 blurEnabled: visible
@@ -377,7 +379,7 @@ Variants {
                 }
 
                 Text {
-                    text: "Activate Waffle"
+                    text: Translation.tr("Activate Waffle")
                     font.pixelSize: Math.round(22 * Looks.fontScale)
                     font.family: "Segoe UI"
                     font.weight: Font.Light
@@ -386,7 +388,7 @@ Variants {
                 }
 
                 Text {
-                    text: "Go to Settings to activate Waffle."
+                    text: Translation.tr("Go to Settings to activate Waffle.")
                     font.pixelSize: Math.round(14 * Looks.fontScale)
                     font.family: "Segoe UI"
                     font.weight: Font.Light
