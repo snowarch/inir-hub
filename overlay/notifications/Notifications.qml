@@ -247,7 +247,7 @@ StyledOverlayWidget {
                 compact: true
                 shown: Notifications.list.length === 0
                 icon: "notifications_active"
-                text: Notifications.silent ? Translation.tr("Muted") : Translation.tr("Clear")
+                text: Notifications.silent ? Translation.tr("Muted") : Translation.tr("All caught up")
                 shape: MaterialShape.Shape.Ghostish
             }
 
