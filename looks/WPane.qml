@@ -30,7 +30,8 @@ Item {
 
     WRectangularShadow {
         target: borderRect
-        visible: root.visible && (!root.glassActive || !Looks.useMaterial)
+        visible: root.visible && Looks.effectsEnabled
+            && (!root.glassActive || !Looks.useMaterial)
     }
 
     Rectangle {
@@ -58,7 +59,7 @@ Item {
         color: root.glassActive && Looks.useMaterial ? "transparent" : Looks.colors.bgPanelFooterBase
         implicitWidth: contentItem.implicitWidth
         implicitHeight: contentItem.implicitHeight
-        layer.enabled: root.visible && Appearance.effectsEnabled
+        layer.enabled: root.visible && Looks.effectsEnabled
         layer.effect: OpacityMask {
             maskSource: Rectangle {
                 id: contentAreaMask
