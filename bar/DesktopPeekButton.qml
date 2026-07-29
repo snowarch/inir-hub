@@ -70,7 +70,7 @@ Rectangle {
     }
 
     BarToolTip {
-        extraVisibleCondition: hoverArea.containsMouse
+        barExtraVisibleCondition: hoverArea.containsMouse
         text: Translation.tr("Show desktop")
     }
 }
