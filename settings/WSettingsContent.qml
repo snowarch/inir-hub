@@ -24,7 +24,7 @@ Item {
     property bool navigationReady: false
     property string searchText: ""
     property var searchResults: []
-    property bool navExpanded: width > 760
+    property bool navExpanded: width > Looks.dp(760)
 
     Component.onCompleted: Qt.callLater(() => root.navigationReady = true)
     
@@ -87,6 +87,7 @@ Item {
         { pageIndex: 1, pageName: "General", section: "Keyboard indicators", label: "Num Lock indicator", targetLabel: "Num Lock indicator", keywords: ["keyboard", "num", "numlock", "lock", "indicator", "bar", "taskbar", "show", "hide"] },
         // Window Management
         { pageIndex: 1, pageName: "General", section: "Window Management", label: "Confirm before closing", targetLabel: "Confirm before closing", keywords: ["close", "confirm", "window", "dialog", "super+q"] },
+        { pageIndex: 1, pageName: "General", section: "Window Management", label: "Auto-expand a single tiling window", targetLabel: "Auto-expand a single tiling window", keywords: ["niri", "window", "tiling", "maximize", "expand", "single", "column"] },
         // Sounds
         { pageIndex: 1, pageName: "General", section: "Sounds", label: "Battery sounds", targetLabel: "Battery sounds", keywords: ["sound", "audio", "battery", "beep"] },
         { pageIndex: 1, pageName: "General", section: "Sounds", label: "Sound volume", targetLabel: "Sound volume", keywords: ["sound", "volume", "audio", "loudness"] },
@@ -425,7 +426,7 @@ Item {
         // Navigation sidebar
         Rectangle {
             Layout.fillHeight: true
-            Layout.preferredWidth: root.navExpanded ? 240 : 56
+            Layout.preferredWidth: root.navExpanded ? Looks.dp(240) : Looks.dp(56)
             color: Looks.colors.bg1Base
             
             Behavior on Layout.preferredWidth {
@@ -435,12 +436,12 @@ Item {
             ColumnLayout {
                 anchors {
                     fill: parent
-                    topMargin: 10
-                    bottomMargin: 10
-                    leftMargin: 12
-                    rightMargin: 12
+                    topMargin: Looks.dp(10)
+                    bottomMargin: Looks.dp(10)
+                    leftMargin: Looks.dp(12)
+                    rightMargin: Looks.dp(12)
                 }
-                spacing: 4
+                spacing: Looks.dp(4)
                 
                 // Header with app name (expanded)
                 Revealer {
@@ -450,11 +451,11 @@ Item {
                 RowLayout {
                     anchors.left: parent.left
                     anchors.right: parent.right
-                    Layout.bottomMargin: 6
-                    spacing: 10
+                    Layout.bottomMargin: Looks.dp(6)
+                    spacing: Looks.dp(10)
 
                     WUserAvatar {
-                        sourceSize: Qt.size(32, 32)
+                        sourceSize: Qt.size(Looks.dp(32), Looks.dp(32))
                     }
 
                     ColumnLayout {
@@ -512,7 +513,7 @@ Item {
                     Rectangle {
                         implicitWidth: parent.width
                         implicitHeight: 1
-                        color: Looks.colors.bg2Border
+                        color: Looks.settings.stroke
                         opacity: 0.15
                     }
                 }
@@ -523,11 +524,9 @@ Item {
                     reveal: !root.navExpanded
                     Layout.fillWidth: true
                 Item {
-                    Layout.preferredWidth: 32
-                    Layout.preferredHeight: 32
-                    Layout.alignment: Qt.AlignHCenter
-                    Layout.bottomMargin: 6
-                    
+                    implicitWidth: parent.width
+                    implicitHeight: Looks.dp(38)
+
                     FluentIcon {
                         anchors.centerIn: parent
                         icon: "settings"
@@ -544,12 +543,15 @@ Item {
                     Layout.fillWidth: true
                 Rectangle {
                     id: searchBarContainer
-                    Layout.fillWidth: true
-                    Layout.preferredHeight: 34
-                    radius: Looks.radius.medium
-                    color: Looks.colors.inputBg
+                    // Revealer sizes itself from its child's implicit size.
+                    implicitWidth: parent.width
+                    implicitHeight: Looks.dp(36)
+                    radius: Looks.settings.radiusLarge
+                    color: searchInput.activeFocus
+                        ? Looks.settings.tileHover : Looks.settings.tile
                     border.width: searchInput.activeFocus ? 2 : 1
-                    border.color: searchInput.activeFocus ? Looks.colors.accent : Looks.colors.bg2Border
+                    border.color: searchInput.activeFocus
+                        ? Looks.colors.accent : Looks.settings.stroke
                     
                       Behavior on border.color {
                           animation: ColorAnimation { duration: Looks.transition.enabled ? 70 : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.standard }
@@ -626,7 +628,8 @@ Item {
                             Rectangle {
                                 anchors.fill: parent
                                 radius: 10  // pill shape
-                                color: clearMouse.containsMouse ? Looks.colors.bg2Hover : "transparent"
+                                color: clearMouse.containsMouse
+                                    ? Looks.settings.tileHover : "transparent"
                                 
                                 FluentIcon {
                                     anchors.centerIn: parent
@@ -658,14 +661,17 @@ Item {
                     Layout.fillWidth: true
                 Rectangle {
                     id: searchResultsDropdown
-                    Layout.fillWidth: true
-                    Layout.preferredHeight: Math.min((searchResultsList.contentHeight || 0) + 8, 300)
-                    radius: Looks.radius.large
-                    color: Looks.colors.bg2Base
+                    // Revealer sizes itself from its child's implicit size.
+                    implicitWidth: parent.width
+                    implicitHeight: Math.min(
+                        (searchResultsList.contentHeight || 0) + Looks.dp(8),
+                        Looks.dp(300))
+                    radius: Looks.settings.radiusLarge
+                    color: Looks.settings.tile
                     border.width: 1
-                    border.color: Looks.colors.bg2Border
+                    border.color: Looks.settings.strokeStrong
                     
-                    layer.enabled: Appearance.effectsEnabled
+                    layer.enabled: Looks.effectsEnabled && searchResultsDropdown.visible
                     layer.effect: DropShadow {
                         color: Looks.colors.shadow
                         radius: 6
@@ -713,7 +719,7 @@ Item {
                             radius: Looks.radius.medium
                             color: {
                                 if (ListView.isCurrentItem) return Looks.colors.accent;
-                                if (resultMouse.containsMouse) return Looks.colors.bg2Hover;
+                                if (resultMouse.containsMouse) return Looks.settings.tileHover;
                                 return "transparent";
                             }
                             
@@ -808,7 +814,7 @@ Item {
                     implicitWidth: parent.width
                     implicitHeight: noResultsCol.implicitHeight + 16
                     radius: Looks.radius.medium
-                    color: Looks.colors.bg2Base
+                    color: Looks.settings.tile
 
                     ColumnLayout {
                         id: noResultsCol
@@ -843,7 +849,7 @@ Item {
                 }
                 }
 
-                Item { height: 4 }
+                Item { height: Looks.dp(4) }
                 
                 // Navigation items
                 Flickable {
@@ -856,7 +862,7 @@ Item {
                     ColumnLayout {
                         id: navColumn
                         width: parent.width
-                        spacing: 2
+                        spacing: Looks.dp(2)
                         
                         Repeater {
                             model: root.pages
@@ -880,31 +886,31 @@ Item {
                 // Separator above collapse button
                 Rectangle {
                     Layout.fillWidth: true
-                    Layout.topMargin: 4
+                    Layout.topMargin: Looks.dp(4)
                     height: 1
-                    color: Looks.colors.bg2Border
+                    color: Looks.settings.stroke
                     opacity: 0.15
                 }
                 
                 // Expand/collapse button
                 WBorderlessButton {
                     Layout.fillWidth: true
-                    Layout.preferredHeight: 32
+                    Layout.preferredHeight: Looks.dp(32)
                     
                     contentItem: RowLayout {
-                        spacing: 10
+                        spacing: Looks.dp(10)
                         
                         Item {
-                            implicitWidth: 20
-                            implicitHeight: 20
-                            Layout.leftMargin: root.navExpanded ? 12 : 0
+                            implicitWidth: Looks.dp(20)
+                            implicitHeight: Looks.dp(20)
+                            Layout.leftMargin: root.navExpanded ? Looks.dp(12) : 0
                             Layout.fillWidth: !root.navExpanded
                             Layout.alignment: root.navExpanded ? Qt.AlignVCenter : Qt.AlignCenter
                             
                             FluentIcon {
                                 anchors.centerIn: parent
                                 icon: root.navExpanded ? "panel-left-contract" : "panel-left-expand"
-                                implicitSize: 16
+                                implicitSize: Looks.dp(16)
                                 color: Looks.colors.subfg
                             }
                         }
@@ -927,7 +933,7 @@ Item {
         Rectangle {
             Layout.fillHeight: true
             width: 1
-            color: Looks.colors.bg2Border
+            color: Looks.settings.stroke
             opacity: 0.2
         }
         
