@@ -565,8 +565,8 @@ WSettingsPage {
         Rectangle {
             id: wMonPreviewCard
             Layout.fillWidth: true
-            Layout.leftMargin: 16
-            Layout.rightMargin: 16
+            Layout.leftMargin: 0
+            Layout.rightMargin: 0
             Layout.bottomMargin: 4
             implicitHeight: wMonPreviewCol.implicitHeight
             radius: Looks.radius.large
@@ -1329,8 +1329,8 @@ WSettingsPage {
                     }
 
                     WSettingsChoiceGroup {
-                        Layout.leftMargin: 16
-                        Layout.rightMargin: 16
+                        Layout.leftMargin: 0
+                        Layout.rightMargin: 0
                         Layout.bottomMargin: 8
                         columns: 3
                         options: [

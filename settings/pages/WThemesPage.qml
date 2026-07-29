@@ -139,8 +139,8 @@ WSettingsPage {
         // Search + filter row
         RowLayout {
             Layout.fillWidth: true
-            Layout.leftMargin: 14
-            Layout.rightMargin: 14
+            Layout.leftMargin: 0
+            Layout.rightMargin: 0
             spacing: 8
 
             // Search field
@@ -262,22 +262,31 @@ WSettingsPage {
         // Tag filters
         Flow {
             Layout.fillWidth: true
-            Layout.leftMargin: 14
-            Layout.rightMargin: 14
-            spacing: 4
+            Layout.leftMargin: 0
+            Layout.rightMargin: 0
+            spacing: Looks.dp(6)
 
             Repeater {
                 model: ThemePresets.availableTags.filter(t => t.id !== "dark" && t.id !== "light")
 
                 Rectangle {
+                    id: tagChip
                     required property var modelData
 
                     readonly property bool isActive: colorThemeCard.selectedTag === modelData.id
 
-                    width: tagRowLayout.implicitWidth + 16
-                    height: 24
-                    radius: Looks.radius.medium
-                    color: isActive ? Qt.alpha(Looks.colors.accent, 0.15) : tagFilterMouse.containsMouse ? Looks.colors.bg2Hover : Looks.colors.bg1
+                    width: tagRowLayout.implicitWidth + Looks.dp(24)
+                    height: Looks.dp(28)
+                    radius: height / 2
+                    color: {
+                        if (tagChip.isActive)
+                            return Looks.colors.accent
+                        if (tagFilterMouse.containsMouse)
+                            return Looks.settings.tileHover
+                        return Looks.settings.tile
+                    }
+                    border.width: tagChip.isActive ? 0 : 1
+                    border.color: Looks.settings.stroke
 
                     Behavior on color {
                         animation: ColorAnimation {
@@ -290,12 +299,13 @@ WSettingsPage {
                     RowLayout {
                         id: tagRowLayout
                         anchors.centerIn: parent
-                        spacing: 4
+                        spacing: Looks.dp(4)
 
                         WText {
-                            text: modelData.name
-                            font.pixelSize: Looks.font.pixelSize.tiny
-                            color: parent.parent.isActive ? Looks.colors.accent : Looks.colors.fg
+                            text: tagChip.modelData.name
+                            font.pixelSize: Looks.font.pixelSize.small
+                            font.weight: tagChip.isActive ? Looks.font.weight.strong : Looks.font.weight.regular
+                            color: tagChip.isActive ? Looks.colors.accentFg : Looks.colors.fg
                         }
                     }
 
@@ -312,10 +322,13 @@ WSettingsPage {
             // Clear tag button
             Rectangle {
                 visible: colorThemeCard.selectedTag.length > 0
-                width: 24
-                height: 24
-                radius: Looks.radius.medium
-                color: clearTagMouse.containsMouse ? Looks.colors.bg2Hover : Looks.colors.bg1
+                width: Looks.dp(28)
+                height: Looks.dp(28)
+                radius: height / 2
+                color: clearTagMouse.containsMouse
+                    ? Looks.settings.tileHover : Looks.settings.tile
+                border.width: 1
+                border.color: Looks.settings.stroke
 
                 Behavior on color {
                     animation: ColorAnimation {
@@ -345,8 +358,8 @@ WSettingsPage {
         // Theme grid — 3 columns
         Item {
             Layout.fillWidth: true
-            Layout.leftMargin: 14
-            Layout.rightMargin: 14
+            Layout.leftMargin: 0
+            Layout.rightMargin: 0
             Layout.bottomMargin: 4
             implicitHeight: Math.min(300, themeGridContent.implicitHeight + 12)
 
@@ -1023,8 +1036,8 @@ WSettingsPage {
 
         WText {
             Layout.fillWidth: true
-            Layout.leftMargin: 14
-            Layout.rightMargin: 14
+            Layout.leftMargin: 0
+            Layout.rightMargin: 0
             text: Translation.tr("These settings only affect the Windows 11 (Waffle) style panels.")
             font.pixelSize: Looks.font.pixelSize.small
             color: Looks.colors.subfg
