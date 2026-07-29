@@ -141,10 +141,8 @@ Variants {
         // Hide wallpaper (show only backdrop for overview)
         readonly property bool backdropOnly: (wBg.backdrop?.enable ?? false) && (wBg.backdrop?.hideWallpaper ?? false)
 
-        readonly property bool performanceSuspended: GameMode.shouldSuspendOutput(
-            modelData?.name ?? "")
-        visible: !backdropOnly && (GlobalStates.screenLocked || (!performanceSuspended
-            && (!hasFullscreenWindow || !(wBg.hideWhenFullscreen ?? true))))
+        visible: !backdropOnly && (GlobalStates.screenLocked
+            || !hasFullscreenWindow || !(wBg.hideWhenFullscreen ?? true))
 
         // Dynamic focus based on windows
         property bool hasWindowsOnCurrentWorkspace: {

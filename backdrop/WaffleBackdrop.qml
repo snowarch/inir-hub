@@ -32,9 +32,7 @@ Variants {
         anchors.right: true
 
         color: "transparent"
-        readonly property bool performanceSuspended: GameMode.shouldSuspendOutput(
-            modelData?.name ?? "")
-        visible: GlobalStates.screenLocked || !performanceSuspended
+        visible: true
 
         // Multi-monitor wallpaper support
         readonly property string _perMonitorMainPath: {
