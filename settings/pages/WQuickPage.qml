@@ -678,7 +678,7 @@ WSettingsPage {
             anchors.rightMargin: 6
             anchors.bottomMargin: 6
             anchors.topMargin: root.isInSubfolder ? 2 : 6
-            model: Wallpapers.folderModel
+            model: Wallpapers.folderModelReady ? Wallpapers.folderModel : null
             Component.onCompleted: root.refreshGridThumbnails()
 
             property int minCellWidth: 140

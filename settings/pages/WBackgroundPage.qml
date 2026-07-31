@@ -200,7 +200,7 @@ WSettingsPage {
                 spacing: 4
                 clip: true
                 boundsBehavior: Flickable.StopAtBounds
-                model: root.heavySectionsReady ? Wallpapers.folderModel : null
+                model: root.heavySectionsReady && Wallpapers.folderModelReady ? Wallpapers.folderModel : null
 
                 delegate: Rectangle {
                     id: mainWpThumb
@@ -932,7 +932,7 @@ WSettingsPage {
                                 spacing: 3
                                 clip: true
                                 boundsBehavior: Flickable.StopAtBounds
-                                model: root.heavySectionsReady ? Wallpapers.folderModel : null
+                                model: root.heavySectionsReady && Wallpapers.folderModelReady ? Wallpapers.folderModel : null
 
                                 delegate: Rectangle {
                                     id: bgWpThumb
