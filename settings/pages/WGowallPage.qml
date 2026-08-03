@@ -9,6 +9,7 @@ import qs.services
 import qs.services.deferred
 import qs.modules.common
 import qs.modules.common.functions
+import qs.modules.settings
 import qs.modules.waffle.looks
 import qs.modules.waffle.settings
 
@@ -1127,5 +1128,15 @@ WSettingsPage {
                 root.customColors = next
             }
         }
+    }
+
+    SettingsNativeDialogGuard {
+        dialog: imageDialog
+        dialogKey: "waffle-gowall-source-image"
+    }
+
+    SettingsNativeDialogGuard {
+        dialog: colorDialog
+        dialogKey: "waffle-gowall-palette-color"
     }
 }
