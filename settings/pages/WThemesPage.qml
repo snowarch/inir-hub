@@ -16,6 +16,40 @@ WSettingsPage {
     pageIcon: "dark-theme"
     pageDescription: Translation.tr("Color themes and typography")
 
+    property bool cavaControlsReady: false
+    Component.onCompleted: Qt.callLater(() => root.cavaControlsReady = true)
+
+    Timer {
+        id: cavaConfigDebounce
+        interval: 500
+        repeat: false
+        onTriggered: Quickshell.execDetached([
+            Directories.wallpaperSwitchScriptPath, "--noswitch"])
+    }
+
+    function setCavaValue(path, value, regenerateStandalone): void {
+        if (!root.cavaControlsReady)
+            return
+        Config.setNestedValue(path, value)
+        if (regenerateStandalone)
+            cavaConfigDebounce.restart()
+    }
+
+    function resetCavaDefaults(): void {
+        if (!root.cavaControlsReady)
+            return
+        Config.setNestedValues({
+            "appearance.cava.colorSource": "theme",
+            "appearance.cava.gradientCount": 8,
+            "appearance.cava.sensitivity": 100,
+            "appearance.cava.bars": 0,
+            "appearance.cava.framerate": 60,
+            "appearance.cava.stereo": true,
+            "appearance.cava.waveOpacity": 30,
+        })
+        cavaConfigDebounce.restart()
+    }
+
     // Active theme preview
     Rectangle {
         Layout.fillWidth: true
@@ -802,11 +836,12 @@ WSettingsPage {
 
         WSettingsSwitch {
             id: waffleCavaSwitch
-            label: Translation.tr("Cava")
+            label: Translation.tr("Theme standalone Cava")
             icon: "music-note-2"
-            description: Translation.tr("Apply Material You gradient colors to cava audio visualizer config")
+            description: Translation.tr("Manage ~/.config/cava/config; internal visualizers always use the options below")
             checked: Config.options?.appearance?.wallpaperTheming?.enableCava ?? false
-            onCheckedChanged: Config.setNestedValue("appearance.wallpaperTheming.enableCava", checked)
+            onCheckedChanged: root.setCavaValue(
+                "appearance.wallpaperTheming.enableCava", checked, true)
         }
 
         WSettingsSwitch {
@@ -820,38 +855,50 @@ WSettingsPage {
 
     // Cava visualizer options
     WSettingsCard {
-        visible: waffleCavaSwitch.checked
         title: Translation.tr("Cava Options")
         icon: "music-note-2"
 
         WSettingsDropdown {
             label: Translation.tr("Color source")
             icon: "color"
-            description: Translation.tr("Gradient colors for standalone cava config")
+            description: Translation.tr("Live palette for internal visualizers and standalone cava")
             options: [
                 { displayName: Translation.tr("Theme palette"), value: "theme" },
                 { displayName: Translation.tr("Vibrant (saturated)"), value: "vibrant" },
                 { displayName: Translation.tr("Album cover"), value: "cover" },
             ]
             currentValue: Config.options?.appearance?.cava?.colorSource ?? "theme"
-            onSelected: value => {
-                Config.setNestedValue("appearance.cava.colorSource", value)
-                Quickshell.execDetached([Directories.wallpaperSwitchScriptPath, "--noswitch"])
+            onSelected: value => root.setCavaValue(
+                "appearance.cava.colorSource", value, true)
+        }
+
+        RowLayout {
+            Layout.fillWidth: true
+            spacing: Looks.dp(4)
+
+            Repeater {
+                model: CavaTheme.visualizerColors
+
+                Rectangle {
+                    required property var modelData
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: Looks.dp(8)
+                    radius: Looks.radius.small
+                    color: modelData
+                }
             }
         }
 
         WSettingsSpinBox {
             label: Translation.tr("Gradient colors")
             icon: "paint-bucket"
-            description: Translation.tr("Number of gradient stops (2-8)")
-            from: 2
+            description: Translation.tr("One solid color or up to eight gradient stops")
+            from: 1
             to: 8
             stepSize: 1
             value: Config.options?.appearance?.cava?.gradientCount ?? 8
-            onValueChanged: {
-                Config.setNestedValue("appearance.cava.gradientCount", value)
-                Quickshell.execDetached([Directories.wallpaperSwitchScriptPath, "--noswitch"])
-            }
+            onValueChanged: root.setCavaValue(
+                "appearance.cava.gradientCount", value, true)
         }
 
         WSettingsSlider {
@@ -866,7 +913,7 @@ WSettingsPage {
             Component.onCompleted: _ready = true
             onMoved: {
                 if (!_ready) return;
-                Config.setNestedValue("appearance.cava.sensitivity", value);
+                root.setCavaValue("appearance.cava.sensitivity", value, true)
             }
         }
 
@@ -878,7 +925,8 @@ WSettingsPage {
             to: 200
             stepSize: 8
             value: Config.options?.appearance?.cava?.bars ?? 0
-            onValueChanged: Config.setNestedValue("appearance.cava.bars", value)
+            onValueChanged: root.setCavaValue(
+                "appearance.cava.bars", value, true)
         }
 
         WSettingsSpinBox {
@@ -889,15 +937,29 @@ WSettingsPage {
             to: 165
             stepSize: 5
             value: Config.options?.appearance?.cava?.framerate ?? 60
-            onValueChanged: Config.setNestedValue("appearance.cava.framerate", value)
+            onValueChanged: root.setCavaValue(
+                "appearance.cava.framerate", value, true)
         }
 
         WSettingsSwitch {
-            label: Translation.tr("Stereo")
+            label: Translation.tr("Standalone stereo")
             icon: "headphones"
-            description: Translation.tr("Split visualizer into left/right channels")
+            description: Translation.tr("Only affects terminal Cava. The internal bar spectrum stays mono so it always fills the whole surface.")
             checked: Config.options?.appearance?.cava?.stereo ?? true
-            onCheckedChanged: Config.setNestedValue("appearance.cava.stereo", checked)
+            onCheckedChanged: root.setCavaValue(
+                "appearance.cava.stereo", checked, true)
+        }
+
+        WSettingsSpinBox {
+            label: Translation.tr("Wave opacity")
+            icon: "eye"
+            description: Translation.tr("Fill opacity for shared wave visualizers")
+            from: 5
+            to: 100
+            stepSize: 5
+            value: Config.options?.appearance?.cava?.waveOpacity ?? 30
+            onValueChanged: root.setCavaValue(
+                "appearance.cava.waveOpacity", value, false)
         }
 
         WSettingsButton {
@@ -906,14 +968,7 @@ WSettingsPage {
             description: Translation.tr("Restore all cava settings to defaults")
             buttonText: Translation.tr("Reset")
             buttonIcon: "arrow-reset"
-            onButtonClicked: {
-                Config.setNestedValue("appearance.cava.colorSource", "theme");
-                Config.setNestedValue("appearance.cava.gradientCount", 8);
-                Config.setNestedValue("appearance.cava.sensitivity", 100);
-                Config.setNestedValue("appearance.cava.bars", 0);
-                Config.setNestedValue("appearance.cava.framerate", 60);
-                Config.setNestedValue("appearance.cava.stereo", true);
-            }
+            onButtonClicked: root.resetCavaDefaults()
         }
     }
 

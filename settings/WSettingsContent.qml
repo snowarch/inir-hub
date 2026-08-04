@@ -173,6 +173,7 @@ Item {
         { pageIndex: 4, pageName: "Themes", section: "Color Theme", label: "Color Theme", targetLabel: "Color Theme", keywords: ["theme", "color", "preset", "gruvbox", "catppuccin", "nord", "dracula", "monokai", "tokyo"] },
         { pageIndex: 4, pageName: "Themes", section: "Dark Mode", label: "Appearance", targetLabel: "Appearance", keywords: ["dark", "light", "mode", "theme", "appearance"] },
         { pageIndex: 4, pageName: "Themes", section: "Color Scheme", label: "Palette type", targetLabel: "Palette type", keywords: ["palette", "scheme", "material you", "material", "colors", "expressive", "fidelity"] },
+        { pageIndex: 4, pageName: "Themes", section: "Cava Options", label: "Cava palette and response", targetLabel: "Color source", keywords: ["cava", "visualizer", "spectrum", "audio", "palette", "vibrant", "album", "cover", "sensitivity", "bars", "framerate", "stereo", "wave", "opacity", "reset"] },
         { pageIndex: 4, pageName: "Themes", section: "Waffle Typography", label: "Font family", targetLabel: "Font family", keywords: ["font", "family", "typography", "segoe", "inter", "roboto", "noto"] },
         { pageIndex: 4, pageName: "Themes", section: "Waffle Typography", label: "Font scale", targetLabel: "Font scale", keywords: ["font", "size", "scale", "typography", "bigger", "smaller"] },
         
