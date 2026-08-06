@@ -624,29 +624,6 @@ WSettingsPage {
     }
 
     WSettingsCard {
-        title: Translation.tr("Desktop widgets")
-        icon: "widgets"
-
-        InfoBanner {
-            iconName: "desktop"
-            message: Translation.tr("Desktop Clock")
-        }
-
-        SurfaceVisibilityBlock {
-            surface: root.desktopWidgetSurface
-        }
-
-        Repeater {
-            model: root.desktopWidgetOutputNames()
-
-            DesktopWidgetOutputBlock {
-                required property var modelData
-                outputName: String(modelData ?? "")
-            }
-        }
-    }
-
-    WSettingsCard {
         title: Translation.tr("Waffle shell surfaces")
         icon: "desktop"
 
@@ -664,6 +641,31 @@ WSettingsPage {
             SurfaceVisibilityBlock {
                 required property var modelData
                 surface: modelData
+            }
+        }
+    }
+
+    WSettingsCard {
+        title: Translation.tr("Desktop widgets")
+        icon: "widgets"
+        collapsible: true
+        expanded: false
+
+        InfoBanner {
+            iconName: "desktop"
+            message: Translation.tr("Desktop Clock")
+        }
+
+        SurfaceVisibilityBlock {
+            surface: root.desktopWidgetSurface
+        }
+
+        Repeater {
+            model: root.desktopWidgetOutputNames()
+
+            DesktopWidgetOutputBlock {
+                required property var modelData
+                outputName: String(modelData ?? "")
             }
         }
     }
