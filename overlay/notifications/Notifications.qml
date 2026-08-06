@@ -178,7 +178,7 @@ StyledOverlayWidget {
                             colRipple: "transparent"
 
                             onClicked: {
-                                GlobalStates.sidebarRightOpen = true;
+                                GlobalStates.openSidebarRight("");
                                 GlobalStates.overlayOpen = false;
                             }
 
