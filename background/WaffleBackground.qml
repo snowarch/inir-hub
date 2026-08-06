@@ -345,15 +345,13 @@ Variants {
 
             WidgetCanvas {
                 anchors.fill: parent
-                visible: {
-                    const list = Config.options?.background?.widgets?.screenList ?? [];
-                    if (!list || list.length === 0) return true;
-                    return list.includes(panelRoot.modelData?.name ?? "");
-                }
+                visible: DesktopWidgetLayout.outputAllowed(
+                    panelRoot.modelData?.name ?? "")
                 enabled: visible && !GlobalStates.overviewOpen
 
                 WaffleBackgroundClock {
                     id: backgroundClockWidget
+                    outputName: panelRoot.modelData?.name ?? ""
                     screenWidth: panelRoot.screen.width
                     screenHeight: panelRoot.screen.height
                     scaledScreenWidth: panelRoot.screen.width

@@ -200,6 +200,7 @@ Item {
         { pageIndex: 6, pageName: "Interface", section: "Notifications", label: "Do Not Disturb", targetLabel: "Do Not Disturb", keywords: ["notification", "dnd", "silent", "mute", "disturb", "quiet"] },
         { pageIndex: 6, pageName: "Interface", section: "On-Screen Display", label: "Media OSD", targetLabel: "Media OSD", keywords: ["osd", "media", "music", "player", "shortcuts"] },
         { pageIndex: 6, pageName: "Interface", section: "On-Screen Display", label: "OSD timeout", targetLabel: "OSD timeout", keywords: ["osd", "volume", "brightness", "media", "timeout", "duration"] },
+        { pageIndex: 6, pageName: "Interface", section: "Floating tools (Super+G)", label: "Floating tools (Super+G)", targetLabel: "Floating tools (Super+G)", keywords: ["super+g", "super g", "overlay", "floating", "tools", "widgets", "desktop", "notes", "image", "crosshair", "mixer", "resources", "fps", "recorder"] },
         { pageIndex: 6, pageName: "Interface", section: "Screen Recording", label: "Recording audio", targetLabel: "Recording audio", keywords: ["screen", "record", "recording", "video", "capture", "wf-recorder", "audio", "system sound", "desktop audio", "microphone", "mic", "mix", "pipewire"] },
         { pageIndex: 6, pageName: "Interface", section: "Lock Screen", label: "Enable blur", targetLabel: "Enable blur", keywords: ["lock", "screen", "blur", "background"] },
         { pageIndex: 6, pageName: "Interface", section: "Lock Screen", label: "Blur radius", targetLabel: "Blur radius", keywords: ["lock", "screen", "blur", "radius"] },
@@ -245,10 +246,11 @@ Item {
 
         // === Monitors (11) ===
         { pageIndex: 11, pageName: "Monitors", section: "Shell visibility", label: "Primary monitor", targetLabel: "Primary monitor", keywords: ["monitor", "screen", "display", "primary", "output", "fallback"] },
+        { pageIndex: 11, pageName: "Monitors", section: "Overview placement", label: "Active screen only", targetLabel: "Active screen only", keywords: ["overview", "monitor", "screen", "focused", "active", "output"] },
         { pageIndex: 11, pageName: "Monitors", section: "Waffle shell surfaces", label: "Taskbar", targetLabel: "Taskbar", keywords: ["monitor", "screen", "display", "bar", "taskbar", "visibility"] },
-        { pageIndex: 11, pageName: "Monitors", section: "Shared popups and widgets", label: "Notification popups", targetLabel: "Notification popups", keywords: ["monitor", "screen", "display", "notifications", "popups", "visibility"] },
-        { pageIndex: 11, pageName: "Monitors", section: "Shared popups and widgets", label: "Desktop widgets", targetLabel: "Desktop widgets", keywords: ["monitor", "screen", "display", "desktop", "widgets", "visibility"] },
-        { pageIndex: 11, pageName: "Monitors", section: "Shared popups and widgets", label: "OSD indicators", targetLabel: "OSD indicators", keywords: ["monitor", "screen", "display", "media", "osd", "volume", "brightness", "visibility"] }
+        { pageIndex: 11, pageName: "Monitors", section: "Popups", label: "Notification popups", targetLabel: "Notification popups", keywords: ["monitor", "screen", "display", "notifications", "popups", "visibility"] },
+        { pageIndex: 11, pageName: "Monitors", section: "Desktop widgets", label: "Desktop widgets", targetLabel: "Desktop widgets", keywords: ["monitor", "screen", "display", "desktop", "widgets", "layout", "visibility"] },
+        { pageIndex: 11, pageName: "Monitors", section: "Popups", label: "OSD indicators", targetLabel: "OSD indicators", keywords: ["monitor", "screen", "display", "media", "osd", "volume", "brightness", "visibility"] }
     ]
     
     function highlightTerms(text: string, terms: list<string>): string {
