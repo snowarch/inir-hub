@@ -942,9 +942,9 @@ WSettingsPage {
         }
 
         WSettingsSwitch {
-            label: Translation.tr("Standalone stereo")
+            label: Translation.tr("Stereo")
             icon: "headphones"
-            description: Translation.tr("Only affects terminal Cava. The internal bar spectrum stays mono so it always fills the whole surface.")
+            description: Translation.tr("Split visualizer into left/right channels")
             checked: Config.options?.appearance?.cava?.stereo ?? true
             onCheckedChanged: root.setCavaValue(
                 "appearance.cava.stereo", checked, true)
