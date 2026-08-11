@@ -143,13 +143,13 @@ AppButton {
         
         // Case 4: App not running -> launch it
         if (root.desktopEntry) {
-            root.desktopEntry.execute()
+            AppSearch.launchEntry(root.desktopEntry)
         }
     }
 
     middleClickAction: () => {
         if (root.desktopEntry) {
-            desktopEntry.execute()
+            AppSearch.launchEntry(root.desktopEntry)
         }
     }
 
@@ -242,7 +242,7 @@ AppButton {
                 iconName: root.fluentIconForDesktopAction(action.icon, action.name),
                 text: action.name,
                 action: () => {
-                    action.execute()
+                    AppSearch.launchDesktopAction(root.desktopEntry, action)
                 }
             })).concat({ type: "separator" }) : []),
             {
@@ -251,7 +251,7 @@ AppButton {
                 monochromeIcon: false,
                 action: () => {
                     if (root.desktopEntry) {
-                        root.desktopEntry.execute()
+                        AppSearch.launchEntry(root.desktopEntry)
                     }
                 }
             },
