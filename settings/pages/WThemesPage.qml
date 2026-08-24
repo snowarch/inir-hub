@@ -595,6 +595,10 @@ WSettingsPage {
                     displayName: Translation.tr("Angel")
                 },
                 {
+                    value: "regalia",
+                    displayName: Translation.tr("Regalia")
+                },
+                {
                     value: "zzz",
                     displayName: Translation.tr("ZZZ")
                 },
