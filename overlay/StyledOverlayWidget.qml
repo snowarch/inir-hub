@@ -34,7 +34,8 @@ AbstractOverlayWidget {
     readonly property string materialSymbol: modelData.materialSymbol ?? "widgets"
     property string title: identifier.replace(/([A-Z])/g, " $1").replace(/^./, function(str){ return str.toUpperCase(); })
     property var persistentStateEntry: Persistent.states.overlay[identifier]
-    property real radius: Appearance.rounding.windowRounding
+    property real radius: Appearance.regaliaEverywhere
+        ? Appearance.regalia.roundLarge : Appearance.rounding.windowRounding
     property real minimumWidth: contentItem.implicitWidth
     property real minimumHeight: contentItem.implicitHeight
     property real resizeMargin: 8
@@ -202,19 +203,31 @@ AbstractOverlayWidget {
             margins: root.resizeMargin
         }
         color: {
-            if (Appearance.angelEverywhere) {
-                return (root.fancyBorders && GlobalStates.overlayOpen) ? "transparent" : "transparent"
-            }
+            if (Appearance.angelEverywhere || Appearance.regaliaEverywhere)
+                return "transparent"
             const baseColor = Appearance.inirEverywhere ? Appearance.inir.colLayer1
                             : Appearance.auroraEverywhere ? Appearance.colors.colLayer1Base
                             : Appearance.colors.colLayer1
             return ColorUtils.transparentize(baseColor, (root.fancyBorders && GlobalStates.overlayOpen) ? 0 : 1)
         }
-        radius: Appearance.angelEverywhere ? Appearance.angel.roundingNormal : root.radius
-        border.color: Appearance.angelEverywhere ? Appearance.angel.colBorder
+        radius: Appearance.regaliaEverywhere ? Appearance.regalia.roundLarge
+            : Appearance.angelEverywhere ? Appearance.angel.roundingNormal : root.radius
+        border.color: Appearance.regaliaEverywhere ? "transparent"
+            : Appearance.angelEverywhere ? Appearance.angel.colBorder
             : ColorUtils.transparentize(Appearance.colors.colOutlineVariant, GlobalStates.overlayOpen ? 0 : 1)
-        border.width: Appearance.angelEverywhere ? Appearance.angel.cardBorderWidth : 1
+        border.width: Appearance.regaliaEverywhere ? 0
+            : Appearance.angelEverywhere ? Appearance.angel.cardBorderWidth : 1
         clip: true
+
+        RegaliaPlate {
+            anchors.fill: parent
+            visible: Appearance.regaliaEverywhere && GlobalStates.overlayOpen
+            fillColor: Appearance.regalia.bg1
+            radius: border.radius
+            inset: Appearance.regalia.panelInset
+            deepFrame: true
+            glassEnabled: true
+        }
 
         // Wallpaper blur for angel style — same technique as GlassBackground
         Image {
@@ -274,7 +287,7 @@ AbstractOverlayWidget {
                 Layout.fillWidth: true
                 implicitWidth: titleBarRow.implicitWidth + root.padding * 2
                 implicitHeight: titleBarRow.implicitHeight + root.padding * 2
-                color: root.fancyBorders ? "transparent" 
+                color: root.fancyBorders || Appearance.regaliaEverywhere ? "transparent"
                      : Appearance.angelEverywhere ? Appearance.angel.colGlassCard
                      : Appearance.inirEverywhere ? Appearance.inir.colLayer1
                      : Appearance.auroraEverywhere ? Appearance.colors.colLayer1Base
