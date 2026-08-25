@@ -37,13 +37,7 @@ Rectangle {
                 anchors.centerIn: parent
                 sourceSize.width: 24
                 sourceSize.height: 24
-                source: {
-                    let icon = AppSearch.guessIcon(root.node?.properties["application.icon-name"] ?? "");
-                    if (AppSearch.iconExists(icon))
-                        return Quickshell.iconPath(icon, "image-missing");
-                    icon = AppSearch.guessIcon(root.node?.properties["node.name"] ?? "");
-                    return Quickshell.iconPath(icon, "image-missing");
-                }
+                source: root.node ? Quickshell.iconPath(MprisController.streamIconName(root.node), "image-missing") : ""
             }
         }
 
@@ -58,7 +52,7 @@ Rectangle {
                     Layout.fillWidth: true
                     font.pixelSize: Appearance.font.pixelSize.small
                     elide: Text.ElideRight
-                    text: Audio.appNodeDisplayName(root.node)
+                    text: MprisController.streamDisplayName(root.node)
                 }
                 
                 StyledText {
