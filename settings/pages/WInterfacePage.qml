@@ -527,7 +527,7 @@ WSettingsPage {
         WSettingsSwitch {
             label: Translation.tr("Media OSD")
             icon: "music-note-2"
-            description: Translation.tr("Show now playing feedback when media shortcuts are pressed")
+            description: Translation.tr("Show feedback for explicit media controls. Pill also announces automatic track changes outside games.")
             checked: Config.options?.osd?.mediaEnabled ?? true
             onCheckedChanged: Config.setNestedValue("osd.mediaEnabled", checked)
         }
