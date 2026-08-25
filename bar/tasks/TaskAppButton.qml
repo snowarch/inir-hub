@@ -158,7 +158,7 @@ AppButton {
         root.hoverTimer.stop()
         // Close other context menus first
         if (tasksParent) tasksParent.closeAllContextMenus()
-        contextMenu.requestOpen();
+        contextMenu.active = true;
     }
     
     Connections {

@@ -395,7 +395,7 @@ Item {
                             GlobalStates.activeTaskViewMenu.active = false
                         }
                         GlobalStates.activeTaskViewMenu = contextMenu
-                        contextMenu.requestOpen()
+                        contextMenu.active = true
                         mouse.accepted = true
                         return
                     }
