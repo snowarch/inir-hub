@@ -32,7 +32,7 @@ AppButton {
     }
 
     altAction: () => {
-        contextMenu.active = true;
+        contextMenu.requestOpen();
     }
 
     BarMenu {
