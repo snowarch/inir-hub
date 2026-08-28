@@ -9,6 +9,22 @@ import Quickshell.Services.Pipewire
 Rectangle {
     id: root
     required property PwNode node
+
+    function setVolume(value: real): void {
+        const clamped = Math.max(0, Math.min(slider.to, value))
+        if (root.node === Audio.sink) {
+            Audio.setSinkVolume(clamped)
+        } else if (root.node === Audio.source) {
+            Audio.setSourceVolume(clamped)
+        } else if (root.node?.audio) {
+            root.node.audio.volume = clamped
+        }
+    }
+
+    function stepVolume(delta: real): void {
+        root.setVolume((root.node?.audio?.volume ?? 0) + delta)
+    }
+
     PwObjectTracker {
         objects: [root.node]
     }
@@ -76,15 +92,7 @@ Rectangle {
                     value: slider.modelValue
                     when: !slider.pressed && !slider._userInteracting
                 }
-                onMoved: {
-                    if (root.node === Audio.sink) {
-                        Audio.setSinkVolume(value)
-                    } else if (root.node === Audio.source) {
-                        Audio.setSourceVolume(value)
-                    } else if (root.node?.audio) {
-                        root.node.audio.volume = value
-                    }
-                }
+                onMoved: root.setVolume(value)
             }
         }
 
@@ -103,6 +111,20 @@ Rectangle {
                 iconSize: Appearance.font.pixelSize.normal
                 color: root.node?.audio.muted ? Appearance.colors.colOnErrorContainer : Appearance.colors.colOnLayer2
             }
+        }
+    }
+
+    MouseArea {
+        anchors.fill: parent
+        acceptedButtons: Qt.NoButton
+        onWheel: event => {
+            if (!root.node?.audio)
+                return
+            const verticalDelta = event.angleDelta.y !== 0 ? event.angleDelta.y : event.pixelDelta.y
+            if (verticalDelta === 0)
+                return
+            root.stepVolume(verticalDelta > 0 ? 0.05 : -0.05)
+            event.accepted = true
         }
     }
 }

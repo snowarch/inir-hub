@@ -106,6 +106,12 @@ StyledOverlayWidget {
             MediaArtwork.refresh()
         }
 
+        function stepVolume(delta: real): void {
+            if (!MprisController.canChangeVolume)
+                return
+            MprisController.setVolume(MprisController.getVolume() + delta)
+        }
+
         onVisibleChanged: {
             if (visible && artUrl) {
                 checkAndDownloadArt()
@@ -264,6 +270,20 @@ StyledOverlayWidget {
                         iconSize: 22
                     }
                 }
+            }
+        }
+
+        MouseArea {
+            anchors.fill: parent
+            acceptedButtons: Qt.NoButton
+            onWheel: event => {
+                if (!MprisController.canChangeVolume)
+                    return
+                const verticalDelta = event.angleDelta.y !== 0 ? event.angleDelta.y : event.pixelDelta.y
+                if (verticalDelta === 0)
+                    return
+                musicContent.stepVolume(verticalDelta > 0 ? 0.05 : -0.05)
+                event.accepted = true
             }
         }
     }
