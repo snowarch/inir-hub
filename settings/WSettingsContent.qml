@@ -62,6 +62,8 @@ Item {
 
         { pageIndex: 0, pageName: "Quick", section: "Wallpaper & Colors", label: "Transparency", targetLabel: "Transparency", keywords: ["quick", "transparency", "glass", "blur", "appearance"] },
         { pageIndex: 0, pageName: "Quick", section: "Quick actions", label: "Show reload notifications", targetLabel: "Show reload notifications", keywords: ["quick", "reload", "notifications", "toast", "quickshell", "niri"] },
+        { pageIndex: 0, pageName: "Quick", section: "Capture locations", label: "Recordings folder", targetLabel: "Recordings folder", keywords: ["quick", "capture", "record", "recording", "video", "save", "folder", "path"] },
+        { pageIndex: 0, pageName: "Quick", section: "Capture locations", label: "Screenshots folder", targetLabel: "Screenshots folder", keywords: ["quick", "capture", "screenshot", "snip", "save", "folder", "path"] },
 
         // === General (1) ===
         // Audio
@@ -203,6 +205,8 @@ Item {
         { pageIndex: 6, pageName: "Interface", section: "On-Screen Display", label: "OSD timeout", targetLabel: "OSD timeout", keywords: ["osd", "volume", "brightness", "media", "timeout", "duration"] },
         { pageIndex: 6, pageName: "Interface", section: "Floating tools (Super+G)", label: "Floating tools (Super+G)", targetLabel: "Floating tools (Super+G)", keywords: ["super+g", "super g", "overlay", "floating", "tools", "widgets", "desktop", "notes", "image", "crosshair", "mixer", "resources", "fps", "recorder"] },
         { pageIndex: 6, pageName: "Interface", section: "Screen Recording", label: "Recording audio", targetLabel: "Recording audio", keywords: ["screen", "record", "recording", "video", "capture", "wf-recorder", "audio", "system sound", "desktop audio", "microphone", "mic", "mix", "pipewire"] },
+        { pageIndex: 6, pageName: "Interface", section: "Screen Recording", label: "Recordings folder", targetLabel: "Recordings folder", keywords: ["screen", "record", "recording", "video", "save", "folder", "path", "destination"] },
+        { pageIndex: 6, pageName: "Interface", section: "Screen Recording", label: "Screenshots folder", targetLabel: "Screenshots folder", keywords: ["screenshot", "snip", "capture", "save", "folder", "path", "destination"] },
         { pageIndex: 6, pageName: "Interface", section: "Lock Screen", label: "Enable blur", targetLabel: "Enable blur", keywords: ["lock", "screen", "blur", "background"] },
         { pageIndex: 6, pageName: "Interface", section: "Lock Screen", label: "Blur radius", targetLabel: "Blur radius", keywords: ["lock", "screen", "blur", "radius"] },
         { pageIndex: 6, pageName: "Interface", section: "Lock Screen", label: "Center clock", targetLabel: "Center clock", keywords: ["lock", "screen", "clock", "center", "position"] },
