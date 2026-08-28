@@ -18,6 +18,7 @@ Item {
     
     property var pages: []
     property int currentPage: 0
+    property bool loadEnabled: true
     // Parent/child currentPage is bidirectional. Delay child writeback until
     // construction finishes so a persisted or command-line page is not reset
     // by this component's initial default value.
@@ -951,11 +952,10 @@ Item {
                 id: pageStack
                 anchors.fill: parent
                 
-                // Bounded retention: only the current page and its immediate
-                // neighbours stay instantiated. Search never forces pages alive —
-                // static index entries navigate to an unloaded page and the
-                // targetLabel focus retry waits for it to register its controls.
-                property int keepRadius: 1
+                // Keep only the active page alive. Search navigates to an
+                // unloaded page and the targetLabel focus retry waits for it to
+                // register its controls.
+                property int keepRadius: 0
 
                  Repeater {
                      id: pageRepeater
@@ -965,7 +965,7 @@ Item {
                          id: pageLoader
                          required property int index
                          anchors.fill: parent
-                         active: Config.ready && Math.abs(index - root.currentPage) <= pageStack.keepRadius
+                         active: root.loadEnabled && Math.abs(index - root.currentPage) <= pageStack.keepRadius
                         asynchronous: index !== root.currentPage
                         source: root.pages[index].component
                         visible: index === root.currentPage && status === Loader.Ready
