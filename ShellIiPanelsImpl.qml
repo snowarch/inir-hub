@@ -170,7 +170,7 @@ Item {
     OnDemandPanelLoader { identifier: "iiOnScreenKeyboard"; open: GlobalStates.oskOpen; component: OnScreenKeyboard {} }
     OnDemandPanelLoader {
         identifier: "iiOverlay"
-        open: GlobalStates.overlayOpen || OverlayContext.hasPinnedWidgets
+        open: GlobalStates.overlayOpen || OverlayContext.hasPinnedWidgets || OverlayContext.nativeDialogOpen
         component: Overlay {}
     }
     OnDemandPanelLoader { identifier: "iiOverview"; open: GlobalStates.overviewOpen; retainAfterUse: true; closeGraceMs: 300; source: "../overview/Overview.qml" }

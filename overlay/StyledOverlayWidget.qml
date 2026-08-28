@@ -92,8 +92,8 @@ AbstractOverlayWidget {
     // - clickthroughOpacity sigue aplicándose como factor extra cuando el widget está anclado y en modo atraversable
     readonly property real panelBaseOpacity: Config.options?.overlay?.backgroundOpacity ?? 1.0
     opacity: (GlobalStates.overlayOpen || !clickthrough)
-             ? panelBaseOpacity
-             : panelBaseOpacity * (Config.options?.overlay?.clickthroughOpacity ?? 0.8)
+             ? 1
+             : (Config.options?.overlay?.clickthroughOpacity ?? 0.8)
     Behavior on opacity {
         animation: NumberAnimation { duration: Appearance.animation.elementMoveFast.duration; easing.type: Appearance.animation.elementMoveFast.type; easing.bezierCurve: Appearance.animation.elementMoveFast.bezierCurve }
     }
@@ -208,7 +208,9 @@ AbstractOverlayWidget {
             const baseColor = Appearance.inirEverywhere ? Appearance.inir.colLayer1
                             : Appearance.auroraEverywhere ? Appearance.colors.colLayer1Base
                             : Appearance.colors.colLayer1
-            return ColorUtils.transparentize(baseColor, (root.fancyBorders && GlobalStates.overlayOpen) ? 0 : 1)
+            return root.fancyBorders && GlobalStates.overlayOpen
+                ? ColorUtils.applyAlpha(baseColor, root.panelBaseOpacity)
+                : "transparent"
         }
         radius: Appearance.regaliaEverywhere ? Appearance.regalia.roundLarge
             : Appearance.angelEverywhere ? Appearance.angel.roundingNormal : root.radius
@@ -221,7 +223,8 @@ AbstractOverlayWidget {
 
         RegaliaPlate {
             anchors.fill: parent
-            visible: Appearance.regaliaEverywhere && GlobalStates.overlayOpen
+            visible: root.fancyBorders && Appearance.regaliaEverywhere && GlobalStates.overlayOpen
+            opacity: root.panelBaseOpacity
             fillColor: Appearance.regalia.bg1
             radius: border.radius
             inset: Appearance.regalia.panelInset
@@ -236,7 +239,8 @@ AbstractOverlayWidget {
             y: -(root.y + root.resizeMargin)
             width: Quickshell.screens[0]?.width ?? 1920
             height: Quickshell.screens[0]?.height ?? 1080
-            visible: Appearance.angelEverywhere && GlobalStates.overlayOpen
+            visible: root.fancyBorders && Appearance.angelEverywhere && GlobalStates.overlayOpen
+            opacity: root.panelBaseOpacity
             source: visible ? Wallpapers.effectiveWallpaperUrl : ""
             fillMode: Image.PreserveAspectCrop
             cache: true
@@ -255,17 +259,19 @@ AbstractOverlayWidget {
         }
         Rectangle {
             anchors.fill: parent
-            visible: Appearance.angelEverywhere && GlobalStates.overlayOpen
-            color: ColorUtils.transparentize(Appearance.colors.colLayer0Base, Appearance.angel.overlayOpacity)
+            visible: root.fancyBorders && Appearance.angelEverywhere && GlobalStates.overlayOpen
+            color: ColorUtils.applyAlpha(
+                ColorUtils.transparentize(Appearance.colors.colLayer0Base, Appearance.angel.overlayOpacity),
+                root.panelBaseOpacity)
         }
 
         AngelPartialBorder {
             targetRadius: border.radius
-            visible: Appearance.angelEverywhere && GlobalStates.overlayOpen
+            visible: root.fancyBorders && Appearance.angelEverywhere && GlobalStates.overlayOpen
             coverage: 0.5
         }
 
-        layer.enabled: GlobalStates.overlayOpen
+        layer.enabled: GlobalStates.overlayOpen && root.fancyBorders
         layer.effect: GE.OpacityMask {
             maskSource: Rectangle {
                 width: border.width
