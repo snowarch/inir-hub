@@ -68,7 +68,14 @@ ExpandableChoiceButton {
                 id: statusText
                 Layout.fillWidth: true
                 elide: Text.ElideRight
-                text: root.wifiNetwork?.active ? Translation.tr("Connected") : root.wifiNetwork?.isSecure ? Translation.tr("Secured") : Translation.tr("Not secured")
+                text: {
+                    if (!root.wifiNetwork?.active)
+                        return root.wifiNetwork?.isSecure ? Translation.tr("Secured") : Translation.tr("Not secured");
+                    const details = Network.accessPointDetails(root.wifiNetwork);
+                    return details.length > 0
+                        ? `${Translation.tr("Connected")} · ${details}`
+                        : Translation.tr("Connected");
+                }
                 font.pixelSize: Looks.font.pixelSize.large
                 color: Looks.colors.subfg
                 visible: root.wifiNetwork?.active || root.expanded
