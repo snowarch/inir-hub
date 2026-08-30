@@ -23,7 +23,7 @@ StyledOverlayWidget {
 
     // Get the effective save path (config or default XDG Videos)
     readonly property string effectiveSavePath: {
-        const configPath = Config.options?.screenRecord?.savePath ?? "";
+        const configPath = String(Config.getNestedValue("screenRecord.savePath", ""));
         if (configPath && configPath.length > 0) return configPath;
         const videosDir = FileUtils.trimFileProtocol(Directories.videos);
         return videosDir || `${FileUtils.trimFileProtocol(Directories.home)}/Videos`;
