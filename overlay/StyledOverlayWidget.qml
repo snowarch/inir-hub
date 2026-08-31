@@ -271,7 +271,7 @@ AbstractOverlayWidget {
             coverage: 0.5
         }
 
-        layer.enabled: GlobalStates.overlayOpen && root.fancyBorders
+        layer.enabled: GlobalStates.overlayOpen
         layer.effect: GE.OpacityMask {
             maskSource: Rectangle {
                 width: border.width
