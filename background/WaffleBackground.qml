@@ -67,8 +67,6 @@ Variants {
                 false,
                 enableAnimatedBlur
             )
-        readonly property bool externalMainWallpaperActive: panelRoot.externalMainWallpaperEligible
-        readonly property bool showInternalStaticWallpaper: !externalMainWallpaperActive
         readonly property bool internalShaderTransitionRequested:
             (Config.options?.background?.transition?.enable ?? true)
             && Looks.transition.enabled
@@ -76,6 +74,12 @@ Variants {
                 Config.options?.background?.transition?.type ?? "crossfade")
             && !panelRoot.wallpaperIsGif
             && !panelRoot.wallpaperIsVideo
+        readonly property bool externalMainWallpaperActive: panelRoot.externalMainWallpaperEligible
+        readonly property bool showInternalStaticWallpaper: !externalMainWallpaperActive
+        readonly property bool internalShaderPreviewActive: panelRoot.internalShaderTransitionRequested
+            && Wallpapers.internalPreviewActive
+            && (!Wallpapers.internalPreviewMonitor
+                || Wallpapers.internalPreviewMonitor === panelRoot._monitorName)
 
         // Mirror of Background.qml: the family LazyLoader can retain this tree
         // after a switch, and without this both families kept a video decoding.
@@ -235,6 +239,10 @@ Variants {
 
                 WallpaperCrossfader {
                     id: wallpaper
+                    readonly property bool shaderOverlayHeld: panelRoot.internalShaderTransitionRequested
+                        && (wallpaper.shaderTransitionBusy
+                            || panelRoot.internalShaderPreviewActive
+                            || AwwwBackend.shaderHandoffPending)
                     anchors.fill: parent
                     fillMode: Image.PreserveAspectCrop
                     enableTransitions: (!AwwwBackend.active
@@ -247,14 +255,10 @@ Variants {
                         ? panelRoot.wallpaperUrl : ""
                     visible: !panelRoot.wallpaperIsGif && !panelRoot.wallpaperIsVideo && ready
                     opacity: panelRoot.showInternalStaticWallpaper
-                        || wallpaper.shaderTransitionBusy ? 1 : 0
+                        || wallpaper.shaderOverlayHeld ? 1 : 0
                     layer.enabled: wallpaperContainer.needsStaticTexture
                         && !panelRoot.showInternalStaticWallpaper
-                        && !wallpaper.shaderTransitionBusy
-                    sourceSize {
-                        width: panelRoot.screen.width
-                        height: panelRoot.screen.height
-                    }
+                        && !wallpaper.shaderOverlayHeld
                 }
 
                 AnimatedImage {
