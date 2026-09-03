@@ -74,7 +74,12 @@ Variants {
                 Config.options?.background?.transition?.type ?? "crossfade")
             && !panelRoot.wallpaperIsGif
             && !panelRoot.wallpaperIsVideo
+        // Shader transitions are owned by the in-shell crossfader. Keep QML as
+        // the visible static-wallpaper owner while that mode is selected so the
+        // compositor never has to hand the desktop between AWWW and QML during
+        // a transition.
         readonly property bool externalMainWallpaperActive: panelRoot.externalMainWallpaperEligible
+            && !panelRoot.internalShaderTransitionRequested
         readonly property bool showInternalStaticWallpaper: !externalMainWallpaperActive
         readonly property bool internalShaderPreviewActive: panelRoot.internalShaderTransitionRequested
             && Wallpapers.internalPreviewActive
