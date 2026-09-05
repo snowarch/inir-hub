@@ -1001,6 +1001,7 @@ WSettingsPage {
                     return true
                 })
                 Config.setNestedValue("appearance.cava.allowedApps", apps)
+                Config.flushWrites()
             }
         }
 

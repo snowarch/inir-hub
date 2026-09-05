@@ -455,6 +455,7 @@ WSettingsPage {
                     return true
                 })
                 Config.setNestedValue("notifications.blockedApps", apps)
+                Config.flushWrites()
             }
         }
     }
