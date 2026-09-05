@@ -46,7 +46,7 @@ WSettingsPage {
             "appearance.cava.framerate": 60,
             "appearance.cava.stereo": true,
             "appearance.cava.waveOpacity": 30,
-            "appearance.cava.allowedApps": [],
+            "appearance.cava.blockedApps": [],
         })
         cavaConfigDebounce.restart()
     }
@@ -987,11 +987,11 @@ WSettingsPage {
         }
 
         WSettingsTextField {
-            label: Translation.tr("Visualizer apps")
+            label: Translation.tr("Blocked visualizer apps")
             icon: "music-note-2"
-            description: Translation.tr("Comma-separated playback apps. Empty keeps automatic active-player selection.")
+            description: Translation.tr("Comma-separated playback apps to exclude from visualizers. Empty keeps automatic active-player selection.")
             placeholderText: Translation.tr("Spotify, ncspot, ytmusic")
-            text: (Config.options?.appearance?.cava?.allowedApps ?? []).join(", ")
+            text: (Config.options?.appearance?.cava?.blockedApps ?? []).join(", ")
             onEditingFinished: newText => {
                 const seen = ({})
                 const apps = newText.split(",").map(value => value.trim()).filter(value => {
@@ -1000,7 +1000,7 @@ WSettingsPage {
                     seen[key] = true
                     return true
                 })
-                Config.setNestedValue("appearance.cava.allowedApps", apps)
+                Config.setNestedValue("appearance.cava.blockedApps", apps)
                 Config.flushWrites()
             }
         }
