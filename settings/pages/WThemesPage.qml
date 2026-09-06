@@ -606,6 +606,10 @@ WSettingsPage {
                 {
                     value: "cookie",
                     displayName: Translation.tr("Cookie Shapes")
+                },
+                {
+                    value: "editorial",
+                    displayName: Translation.tr("Editorial")
                 }
             ]
             onSelected: newValue => {
