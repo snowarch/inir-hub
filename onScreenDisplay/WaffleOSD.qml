@@ -162,7 +162,9 @@ Scope {
                 color: "transparent"
             exclusiveZone: 0
             WlrLayershell.namespace: "quickshell:wOnScreenDisplay"
-            WlrLayershell.layer: WlrLayer.Overlay
+            WlrLayershell.layer: root.currentIndicator === "keyboardLayout"
+                ? WlrLayer.Top
+                : WlrLayer.Overlay
             anchors {
                 top: root.currentIndicator === "keyboardLayout" ? true : !(Config.options?.waffles?.bar?.bottom ?? false)
                 bottom: root.currentIndicator === "keyboardLayout" ? false : Config.options?.waffles?.bar?.bottom ?? false
