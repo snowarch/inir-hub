@@ -1,0 +1,5 @@
+module qs.modules.iris.bar
+IrisBar 1.0 IrisBar.qml
+IrisBarContent 1.0 IrisBarContent.qml
+IrisBarModule 1.0 IrisBarModule.qml
+IrisIsland 1.0 IrisIsland.qml

@@ -1,0 +1,35 @@
+pragma ComponentBehavior: Bound
+
+import QtQuick
+import qs.modules.common
+import qs.modules.common.widgets
+import qs.modules.iris.style
+
+PanelSurface {
+    id: root
+
+    property bool raised: false
+    property bool quiet: false
+    property real radius: IrisStyle.radius
+
+    // Stable family material. iRiS must not visually mutate when Material II's
+    // Global Style changes underneath it.
+    surfaceDialect: "inir"
+    elevation: root.raised ? 2 : 1
+    opaqueSurface: true
+    radiusOverride: root.radius
+    cardStyle: false
+    borderless: root.quiet || IrisStyle.island
+    outlined: !root.quiet && !IrisStyle.island
+    borderWidthOverride: 1
+    clipContent: false
+
+    Rectangle {
+        anchors.fill: parent
+        z: -1
+        visible: IrisStyle.island && !root.quiet
+        radius: root.radius
+        color: IrisStyle.surface
+        antialiasing: true
+    }
+}

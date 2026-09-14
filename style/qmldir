@@ -1,0 +1,2 @@
+module qs.modules.iris.style
+singleton IrisStyle 1.0 IrisStyle.qml

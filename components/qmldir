@@ -1,0 +1,11 @@
+module qs.modules.iris.components
+IrisText 1.0 IrisText.qml
+IrisSurface 1.0 IrisSurface.qml
+IrisButton 1.0 IrisButton.qml
+IrisIconButton 1.0 IrisIconButton.qml
+IrisMark 1.0 IrisMark.qml
+IrisSlider 1.0 IrisSlider.qml
+IrisField 1.0 IrisField.qml
+IrisSectionHeader 1.0 IrisSectionHeader.qml
+IrisKey 1.0 IrisKey.qml
+IrisActionTile 1.0 IrisActionTile.qml
