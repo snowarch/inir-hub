@@ -93,7 +93,8 @@ WSettingsPage {
             currentValue: Config.options?.panelFamily ?? "waffle"
             options: [
                 { value: "ii", displayName: Translation.tr("Material (ii)") },
-                { value: "waffle", displayName: Translation.tr("Windows 11 (Waffle)") }
+                { value: "waffle", displayName: Translation.tr("Windows 11 (Waffle)") },
+                { value: "iris", displayName: "iRiS" }
             ]
             onSelected: newValue => {
                 if (newValue !== Config.options?.panelFamily) {
