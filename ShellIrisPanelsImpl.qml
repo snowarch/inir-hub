@@ -13,6 +13,7 @@ import qs.modules.iris.session
 import qs.modules.iris.polkit
 import qs.modules.iris.style
 import qs.modules.iris.dock
+import qs.modules.iris.settings
 import qs.modules.background
 import qs.modules.lock
 
@@ -45,7 +46,7 @@ Item {
         required property bool open
         property bool extraCondition: true
         property bool requireEnabledPanel: true
-        property int closeGraceMs: 140
+        property int closeGraceMs: IrisStyle.revealDuration + 30
         property bool resident: open
         property Timer closeGrace: Timer {
             interval: loader.closeGraceMs
@@ -75,10 +76,27 @@ Item {
         component: IrisNotificationPopup {}
     }
 
+    OnDemandPanelLoader {
+        identifier: "irisSettings"
+        requireEnabledPanel: false
+        open: GlobalStates.settingsOverlayOpen || GlobalStates.irisSettingsWarm
+        closeGraceMs: Math.round(IrisStyle.morphDuration * 1.35) + 120
+        component: IrisSettings {}
+    }
+
     LazyLoader {
         activeAsync: Config.ready && GlobalStates.deferredPanelsReady
             && (Config.options?.iris?.dock?.enable ?? true)
         component: IrisDock {}
+    }
+
+    // Niri overview backdrop: the shared iNiR backdrop surface and its
+    // `background.backdrop` settings (exposed in iRiS Settings › Desktop).
+    LazyLoader {
+        activeAsync: Config.ready && GlobalStates.deferredPanelsReady
+            && CompositorService.isNiri
+            && (Config.options?.background?.backdrop?.enable ?? false)
+        source: "../background/Backdrop.qml"
     }
 
     LazyLoader {
@@ -101,13 +119,15 @@ Item {
     OnDemandPanelLoader {
         identifier: "irisPalette"
         open: GlobalStates.searchOpen
+        closeGraceMs: Math.round(IrisStyle.morphDuration * 1.35) + 120
         extraCondition: Config.options?.iris?.modules?.palette ?? true
         component: IrisPalette {}
     }
 
     OnDemandPanelLoader {
         identifier: "irisControlCenter"
-        open: GlobalStates.controlPanelOpen
+        open: GlobalStates.controlPanelOpen || GlobalStates.irisControlsWarm
+        closeGraceMs: Math.round(IrisStyle.morphDuration * 1.35) + 120
         extraCondition: Config.options?.iris?.modules?.controlCenter ?? true
         component: IrisControlCenter {}
     }
@@ -177,6 +197,9 @@ Item {
         identifier: "irisRecordingOsd"
         open: RecorderStatus.isRecording
         requireEnabledPanel: false
+        // The Dynamic Island owns recording as a live activity while it is shown.
+        extraCondition: !(IrisStyle.island && GlobalStates.barOpen
+            && (Config.options?.enabledPanels ?? []).includes("irisBar"))
         source: "../recordingOsd/RecordingOsd.qml"
     }
 

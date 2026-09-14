@@ -16,12 +16,13 @@ RippleButton {
     readonly property color foreground: root.danger && root.emphasized ? IrisStyle.onDanger
         : root.emphasized ? IrisStyle.onAccent
         : root.danger ? IrisStyle.danger
-        : root.selected ? IrisStyle.onSelection : IrisStyle.text
+        : root.selected ? IrisStyle.selectionText : IrisStyle.text
 
     implicitWidth: Math.max(34 * IrisStyle.density,
         root.text.length > 0 ? label.implicitWidth + 22 * IrisStyle.density : 34 * IrisStyle.density)
     implicitHeight: Math.max(34 * IrisStyle.density,
         root.text.length > 0 ? label.implicitHeight + 12 * IrisStyle.density : 34 * IrisStyle.density)
+
 
     toggled: root.selected
     buttonRadius: IrisStyle.radiusSmall

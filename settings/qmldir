@@ -1,0 +1,3 @@
+module qs.modules.iris.settings
+IrisSettings 1.0 IrisSettings.qml
+IrisSetting 1.0 IrisSetting.qml

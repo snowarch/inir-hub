@@ -55,8 +55,9 @@ Item {
             spacing: IrisStyle.spaceMedium
 
             Item {
+                visible: !IrisStyle.island
                 Layout.fillWidth: true
-                Layout.preferredHeight: IrisStyle.headerHeight
+                Layout.preferredHeight: visible ? IrisStyle.headerHeight : 0
 
                 IrisSectionHeader {
                     id: authHeader
@@ -67,6 +68,28 @@ Item {
                     subtitle: PolkitService.actionLabel !== Translation.tr("Authentication")
                         ? PolkitService.actionLabel : Translation.tr("Privileged action")
                     indexText: "AUTH"
+                }
+            }
+
+            ColumnLayout {
+                visible: IrisStyle.island
+                Layout.fillWidth: true
+                spacing: 2 * IrisStyle.density
+
+                IrisText {
+                    Layout.fillWidth: true
+                    text: Translation.tr("Authentication")
+                    font.family: IrisStyle.fontTitle
+                    font.pixelSize: 18 * IrisStyle.typeScale
+                    font.weight: Font.DemiBold
+                }
+                IrisText {
+                    Layout.fillWidth: true
+                    text: PolkitService.actionLabel !== Translation.tr("Authentication")
+                        ? PolkitService.actionLabel : Translation.tr("Privileged action")
+                    role: IrisText.Meta
+                    color: IrisStyle.subtext
+                    elide: Text.ElideRight
                 }
             }
 
@@ -82,6 +105,7 @@ Item {
                 spacing: 8 * IrisStyle.density
 
                 Rectangle {
+                    visible: !IrisStyle.island
                     Layout.preferredWidth: 3 * IrisStyle.density
                     Layout.preferredHeight: 34 * IrisStyle.density
                     radius: width / 2
@@ -104,7 +128,7 @@ Item {
                 Layout.fillWidth: true
                 spacing: IrisStyle.spaceSmall
                 Item { Layout.fillWidth: true }
-                IrisKey { key: "ESC" }
+                IrisKey { visible: !IrisStyle.island; key: "ESC" }
                 IrisButton {
                     text: Translation.tr("Cancel")
                     quiet: true

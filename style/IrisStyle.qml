@@ -11,6 +11,7 @@ QtObject {
     readonly property var appearance: root.options?.appearance ?? ({})
 
     readonly property bool island: String(root.appearance?.design ?? "island") !== "classic"
+    readonly property bool cluster: root.island && (root.options?.bar?.composition ?? "unified") === "cluster"
 
     readonly property real density: Math.max(0.8, Math.min(1.35, Number(root.appearance?.density ?? 1.0)))
     // Density owns geometry; the shell-wide typography scale owns type. Do not
@@ -20,7 +21,7 @@ QtObject {
     // iRiS is deliberately tighter than the expressive Material families.
     // Keep the user radius preference, but resolve it through a compact chassis
     // so panels read as authored shell chrome instead of generic cards.
-    readonly property int radius: Math.round((root.island ? 28 : Math.max(6, Number(root.appearance?.radius ?? 12))) * root.density)
+    readonly property int radius: Math.round((root.island ? Math.max(16, Math.min(40, Number(root.appearance?.expandedRadius ?? 28))) : Math.max(6, Number(root.appearance?.radius ?? 12))) * root.density)
     readonly property int radiusSmall: Math.max(4, Math.round(root.radius * 0.58))
     readonly property int radiusTiny: Math.max(3, Math.round(root.radius * 0.36))
     readonly property int gap: Math.max(4, Math.round(8 * root.density))
@@ -64,7 +65,7 @@ QtObject {
     readonly property color hairlineStrong: root.island ? "#48484a" : Appearance.inir.colBorder
     readonly property color selection: root.island ? "#303034" : Appearance.inir.colSelection
     readonly property color selectionHover: root.island ? "#404044" : Appearance.inir.colSelectionHover
-    readonly property color onSelection: root.island ? "#ffffff" : Appearance.inir.colOnSelection
+    readonly property color selectionText: root.island ? "#ffffff" : Appearance.inir.colOnSelection
     readonly property color scrim: Appearance.colors.colScrim
 
     readonly property real panelPadding: Math.round((root.island ? 24 : 18) * root.density)
@@ -79,4 +80,12 @@ QtObject {
     function duration(ms: int): int {
         return root.motionEnabled ? Appearance.calcEffectiveDuration(ms) : 0
     }
+
+    // Liquid morph: front-loaded ease with a long, visible settle tail
+    // (cubic-bezier(0.16, 1, 0.3, 1)). Owned by iRiS so the island morphs as one
+    // object without importing another family's motion singleton.
+    readonly property int morphDuration: duration(Math.max(100, Math.min(400, Number(root.appearance?.motionDuration ?? 220))))
+    readonly property int revealDuration: duration(140)
+    readonly property int feedbackDuration: duration(100)
+    readonly property var morphCurve: [0.16, 1, 0.3, 1, 1, 1]
 }

@@ -18,45 +18,72 @@ PanelWindow {
     readonly property var barOptions: Config.options?.iris?.bar ?? ({})
     readonly property bool barBottom: String(root.barOptions?.position ?? "top") === "bottom"
     readonly property var brightnessMonitor: Brightness.getMonitorForScreen(root.screen)
+    readonly property bool morphOpen: GlobalStates.controlPanelOpen
 
-    visible: GlobalStates.controlPanelOpen
+    visible: root.morphOpen || panel.progress > 0
     screen: GlobalStates.focusedScreen
     color: "transparent"
     exclusionMode: ExclusionMode.Ignore
     WlrLayershell.layer: WlrLayer.Overlay
     WlrLayershell.namespace: "quickshell:iris-controls"
     anchors { left: true; right: true; top: true; bottom: true }
-    WlrLayershell.keyboardFocus: visible ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
+    WlrLayershell.keyboardFocus: GlobalStates.controlPanelOpen ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
     readonly property real edgeGap: (Number(root.barOptions?.height ?? 42)
-        + Number(root.barOptions?.margin ?? 8) * 2) * IrisStyle.density + 8
+        + ((root.barOptions?.notch ?? false) ? 0 : Number(root.barOptions?.margin ?? 8) * 2)) * IrisStyle.density + 8 * IrisStyle.density
+    // Island surfaces hang under the part that opened them; Classic keeps its
+    // right-aligned drawer.
+    readonly property var origin: GlobalStates.irisMorphOrigin
+    readonly property real panelWidth: Math.min(root.width - 16, IrisStyle.island
+        ? Math.max(360, Number(root.options?.width ?? 380)) * IrisStyle.density
+        : Math.max(300, Number(root.options?.width ?? 360) * IrisStyle.density))
+    readonly property real contentPadding: (IrisStyle.island ? 16 * IrisStyle.density : IrisStyle.panelPadding)
 
     MouseArea { anchors.fill: parent; onClicked: GlobalStates.controlPanelOpen = false }
     Shortcut { sequence: "Escape"; onActivated: GlobalStates.controlPanelOpen = false }
 
-    IrisSurface {
+    IrisMorphSurface {
         id: panel
-        anchors.right: IrisStyle.island ? undefined : parent.right
-        anchors.horizontalCenter: IrisStyle.island ? parent.horizontalCenter : undefined
-        anchors.rightMargin: 8
-        anchors.top: root.barBottom ? undefined : parent.top
-        anchors.bottom: root.barBottom ? parent.bottom : undefined
-        anchors.topMargin: root.barBottom ? 0 : root.edgeGap
-        anchors.bottomMargin: root.barBottom ? root.edgeGap : 0
-        width: Math.min(parent.width - 16, Math.max(300, Number(root.options?.width ?? 360) * IrisStyle.density))
-        implicitHeight: controls.implicitHeight + IrisStyle.panelPadding * 2
-        raised: true
+        open: root.morphOpen
+        contentReady: contents.contentHeight > 0
+        radius: IrisStyle.island ? Math.round(30 * IrisStyle.density) : IrisStyle.radius
+        x: IrisStyle.island && root.origin
+            ? Math.max(8, Math.min(root.width - width - 8, root.origin.x + root.origin.width / 2 - width / 2))
+            : IrisStyle.island ? (root.width - width) / 2 : root.width - width - 12 * IrisStyle.density
+        y: root.barBottom ? root.height - height - root.edgeGap : root.edgeGap
+        width: root.panelWidth
+        height: Math.min(root.height - root.edgeGap - 12, contents.contentHeight + root.contentPadding * 2)
 
-        ColumnLayout {
-            id: controls
+        MouseArea { anchors.fill: parent }
+
+        Flickable {
+            id: contents
+            anchors.fill: parent
+            anchors.margins: root.contentPadding
+            contentHeight: IrisStyle.island ? (alternate.item?.implicitHeight ?? 0) : controls.implicitHeight
+            boundsBehavior: Flickable.StopAtBounds
+            clip: true
+
+        Loader {
+            id: alternate
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.top: parent.top
-            anchors.margins: IrisStyle.panelPadding
+            active: IrisStyle.island
+            sourceComponent: IrisQuickPanel { targetScreen: root.screen }
+        }
+
+        ColumnLayout {
+            id: controls
+            visible: !IrisStyle.island
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.top: parent.top
             spacing: 14 * IrisStyle.density
 
             Item {
+                visible: !IrisStyle.island
                 Layout.fillWidth: true
-                Layout.preferredHeight: IrisStyle.headerHeight
+                Layout.preferredHeight: visible ? IrisStyle.headerHeight : 0
 
                 IrisSectionHeader {
                     id: controlHeader
@@ -69,6 +96,25 @@ PanelWindow {
                 }
             }
 
+            RowLayout {
+                visible: IrisStyle.island
+                Layout.fillWidth: true
+                spacing: 8 * IrisStyle.density
+
+                IrisText {
+                    Layout.fillWidth: true
+                    text: Translation.tr("Control Center")
+                    font.family: IrisStyle.fontTitle
+                    font.pixelSize: 17 * IrisStyle.typeScale
+                    font.weight: Font.DemiBold
+                }
+                IrisText {
+                    text: DateTime.timeDisplay
+                    role: IrisText.Meta
+                    color: IrisStyle.subtext
+                }
+            }
+
             ColumnLayout {
                 Layout.fillWidth: true
                 spacing: 8 * IrisStyle.density
@@ -76,7 +122,11 @@ PanelWindow {
                 RowLayout {
                     Layout.fillWidth: true
                     spacing: 8 * IrisStyle.density
-                    IrisText { text: "AUDIO"; role: IrisText.Eyebrow }
+                    IrisText {
+                        text: IrisStyle.island ? Translation.tr("Sound") : "AUDIO"
+                        role: IrisStyle.island ? IrisText.Meta : IrisText.Eyebrow
+                        font.weight: IrisStyle.island ? Font.DemiBold : Font.Bold
+                    }
                     Item { Layout.fillWidth: true }
                     IrisText {
                         text: Math.round((Audio.value ?? 0) * 100) + "%"
@@ -113,7 +163,11 @@ PanelWindow {
 
                 RowLayout {
                     Layout.fillWidth: true
-                    IrisText { text: "DISPLAY"; role: IrisText.Eyebrow }
+                    IrisText {
+                        text: IrisStyle.island ? Translation.tr("Display") : "DISPLAY"
+                        role: IrisStyle.island ? IrisText.Meta : IrisText.Eyebrow
+                        font.weight: IrisStyle.island ? Font.DemiBold : Font.Bold
+                    }
                     Item { Layout.fillWidth: true }
                     IrisText {
                         text: Math.round((root.brightnessMonitor?.brightness ?? 0) * 100) + "%"
@@ -139,7 +193,11 @@ PanelWindow {
 
             RowLayout {
                 Layout.fillWidth: true
-                IrisText { text: "SYSTEM"; role: IrisText.Eyebrow }
+                IrisText {
+                    text: IrisStyle.island ? Translation.tr("Controls") : "SYSTEM"
+                    role: IrisStyle.island ? IrisText.Meta : IrisText.Eyebrow
+                    font.weight: IrisStyle.island ? Font.DemiBold : Font.Bold
+                }
                 Item { Layout.fillWidth: true }
                 IrisText {
                     text: Appearance.m3colors.darkmode ? Translation.tr("Dark") : Translation.tr("Light")
@@ -219,6 +277,7 @@ PanelWindow {
                     }
                 }
             }
+        }
         }
     }
 }

@@ -11,13 +11,27 @@ MaterialTextField {
 
     enableSettingsSearch: false
     color: IrisStyle.text
-    placeholderTextColor: IrisStyle.subtext
+    placeholderTextColor: IrisStyle.island ? "transparent" : IrisStyle.subtext
     selectionColor: IrisStyle.accentContainer
     selectedTextColor: IrisStyle.onAccentContainer
     font.family: IrisStyle.fontTitle
     font.pixelSize: 15 * IrisStyle.typeScale
     leftPadding: 14 * IrisStyle.density
     rightPadding: 14 * IrisStyle.density
+
+    IrisText {
+        anchors.left: parent.left
+        anchors.leftMargin: root.leftPadding
+        anchors.right: parent.right
+        anchors.rightMargin: root.rightPadding
+        anchors.verticalCenter: parent.verticalCenter
+        visible: IrisStyle.island && root.text.length === 0 && root.placeholderText.length > 0
+        text: root.placeholderText
+        font.family: root.font.family
+        font.pixelSize: root.font.pixelSize
+        color: IrisStyle.subtext
+        elide: Text.ElideRight
+    }
 
     background: PanelSurface {
         surfaceDialect: "inir"

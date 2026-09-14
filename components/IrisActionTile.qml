@@ -33,14 +33,20 @@ IrisButton {
                 : root.selected ? IrisStyle.accent : IrisStyle.hairline
         }
 
-        MaterialSymbol {
-            text: root.materialIcon
-            iconSize: Math.round((root.compact ? 18 : 20) * IrisStyle.density)
-            fill: root.selected ? 1 : 0
-            animateFill: true
-            font.weight: root.selected || root.hovered ? Font.DemiBold : Font.Normal
-            color: root.danger ? IrisStyle.danger
-                : root.selected ? IrisStyle.accent : IrisStyle.subtext
+        Rectangle {
+            Layout.preferredWidth: (IrisStyle.island ? 32 : 20) * IrisStyle.density
+            Layout.preferredHeight: Layout.preferredWidth
+            radius: width / 2
+            color: IrisStyle.island ? (root.selected ? IrisStyle.accent : IrisStyle.surfaceHighest) : "transparent"
+            MaterialSymbol {
+                anchors.centerIn: parent
+                text: root.materialIcon
+                iconSize: Math.round((root.compact ? 17 : 19) * IrisStyle.density)
+                fill: root.selected ? 1 : 0
+                animateFill: true
+                color: root.danger ? IrisStyle.danger
+                    : root.selected ? (IrisStyle.island ? IrisStyle.onAccent : IrisStyle.accent) : IrisStyle.subtext
+            }
         }
 
         ColumnLayout {

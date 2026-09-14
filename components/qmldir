@@ -9,3 +9,9 @@ IrisField 1.0 IrisField.qml
 IrisSectionHeader 1.0 IrisSectionHeader.qml
 IrisKey 1.0 IrisKey.qml
 IrisActionTile 1.0 IrisActionTile.qml
+IrisArtwork 1.0 IrisArtwork.qml
+IrisMediaCard 1.0 IrisMediaCard.qml
+IrisScrubber 1.0 IrisScrubber.qml
+IrisMorphSurface 1.0 IrisMorphSurface.qml
+IrisCapsuleSlider 1.0 IrisCapsuleSlider.qml
+IrisMediaBackdrop 1.0 IrisMediaBackdrop.qml

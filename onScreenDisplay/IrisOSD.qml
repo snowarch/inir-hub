@@ -15,17 +15,32 @@ Scope {
     id: root
     property string kind: "volume"
     property bool open: false
+    property bool presentationVisible: false
+    property bool presentationShown: false
     readonly property var screen: GlobalStates.focusedScreen
     readonly property var brightnessMonitor: Brightness.getMonitorForScreen(root.screen)
+    readonly property var dockOptions: Config.options?.iris?.dock ?? ({})
+    readonly property bool staticDockVisible: (root.dockOptions?.enable ?? true)
+        && !(root.dockOptions?.autoHide ?? true)
+    readonly property real dockHeight: (Math.max(28, Math.min(64,
+        Number(root.dockOptions?.iconSize ?? 40))) + 24) * IrisStyle.density
+    readonly property real surfaceBottomMargin: root.staticDockVisible
+        ? root.dockHeight + 20 * IrisStyle.density
+        : 18 * IrisStyle.density
 
     function show(nextKind: string): void {
         root.kind = nextKind
         root.open = true
+        closePresentation.stop()
+        root.presentationVisible = true
+        Qt.callLater(() => root.presentationShown = true)
         hideTimer.restart()
     }
 
     function hide(): void {
         root.open = false
+        root.presentationShown = false
+        closePresentation.restart()
         GlobalStates.osdVolumeOpen = false
         GlobalStates.osdBrightnessOpen = false
         GlobalStates.osdMicOpen = false
@@ -41,6 +56,11 @@ Scope {
         : (Audio.sink?.audio?.muted ? "volume_off" : "volume_up")
 
     Timer { id: hideTimer; interval: 1500; onTriggered: root.hide() }
+    Timer {
+        id: closePresentation
+        interval: IrisStyle.duration(90)
+        onTriggered: root.presentationVisible = false
+    }
 
     Connections {
         target: Brightness
@@ -64,23 +84,31 @@ Scope {
     }
 
     PanelWindow {
-        visible: root.open
+        visible: root.presentationVisible
         screen: root.screen
         color: "transparent"
         exclusionMode: ExclusionMode.Ignore
         WlrLayershell.layer: WlrLayer.Overlay
         WlrLayershell.namespace: "quickshell:iris-osd"
         anchors { bottom: true; left: true; right: true }
-        implicitHeight: 94 * IrisStyle.density
+        implicitHeight: root.surfaceBottomMargin + 76 * IrisStyle.density
 
         IrisSurface {
+            id: osdSurface
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.bottom: parent.bottom
-            anchors.bottomMargin: 18 * IrisStyle.density
+            anchors.bottomMargin: root.surfaceBottomMargin
             width: Math.max(240, Math.min(parent.width - 24,
-                Math.max(280, Number(Config.options?.iris?.osd?.width ?? 320) * IrisStyle.density)))
-            height: 64 * IrisStyle.density
+                Math.max(IrisStyle.island ? 250 : 280, Number(Config.options?.iris?.osd?.width ?? 320) * IrisStyle.density)))
+            height: (IrisStyle.island ? 52 : 64) * IrisStyle.density
             raised: true
+            radius: IrisStyle.island ? height / 2 : IrisStyle.radius
+            opacity: root.presentationShown ? 1 : 0
+            transform: Translate {
+                y: root.presentationShown ? 0 : 5 * IrisStyle.density
+                Behavior on y { NumberAnimation { duration: IrisStyle.duration(90); easing.type: Easing.OutCubic } }
+            }
+            Behavior on opacity { NumberAnimation { duration: IrisStyle.duration(80); easing.type: Easing.OutCubic } }
 
             RowLayout {
                 anchors.fill: parent
@@ -89,6 +117,7 @@ Scope {
                 spacing: 11 * IrisStyle.density
 
                 Rectangle {
+                    visible: !IrisStyle.island
                     Layout.preferredWidth: 3 * IrisStyle.density
                     Layout.preferredHeight: 36 * IrisStyle.density
                     radius: width / 2
@@ -106,6 +135,7 @@ Scope {
                     spacing: 1 * IrisStyle.density
 
                     RowLayout {
+                        visible: !IrisStyle.island
                         Layout.fillWidth: true
                         IrisText {
                             Layout.fillWidth: true
@@ -128,13 +158,15 @@ Scope {
                 }
 
                 IrisText {
-                    text: Math.round(root.value * 100).toString().padStart(2, "0")
-                    role: IrisText.Metric
-                    font.pixelSize: 26 * IrisStyle.typeScale
+                    text: Math.round(root.value * 100).toString().padStart(2, "0") + (IrisStyle.island ? "%" : "")
+                    role: IrisStyle.island ? IrisText.Body : IrisText.Metric
+                    font.pixelSize: (IrisStyle.island ? 15 : 26) * IrisStyle.typeScale
+                    font.weight: Font.DemiBold
                     color: root.kind === "mic" && Audio.micMuted ? IrisStyle.danger : IrisStyle.text
                 }
 
                 IrisText {
+                    visible: !IrisStyle.island
                     text: "%"
                     role: IrisText.Meta
                     color: IrisStyle.muted

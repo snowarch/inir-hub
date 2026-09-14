@@ -11,6 +11,8 @@ PanelSurface {
     property bool raised: false
     property bool quiet: false
     property real radius: IrisStyle.radius
+    property bool notchTop: false
+    property bool notchBottom: false
 
     // Stable family material. iRiS must not visually mutate when Material II's
     // Global Style changes underneath it.
@@ -29,6 +31,10 @@ PanelSurface {
         z: -1
         visible: IrisStyle.island && !root.quiet
         radius: root.radius
+        topLeftRadius: root.notchTop ? 0 : radius
+        topRightRadius: root.notchTop ? 0 : radius
+        bottomLeftRadius: root.notchBottom ? 0 : radius
+        bottomRightRadius: root.notchBottom ? 0 : radius
         color: IrisStyle.surface
         antialiasing: true
     }
