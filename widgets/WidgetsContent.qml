@@ -2,7 +2,6 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-import Qt5Compat.GraphicalEffects
 import Quickshell
 import Quickshell.Widgets
 import Quickshell.Services.Mpris
@@ -528,13 +527,13 @@ WBarAttachedPanelContent {
 
                         FluentIcon {
                             Layout.alignment: Qt.AlignHCenter
-                            icon: MprisController.volume > 0 ? "speaker" : "speaker-mute"
+                            icon: (MprisController.activePlayer?.volume ?? 0) > 0 ? "speaker" : "speaker-mute"
                             implicitSize: Looks.dp(24)
                         }
 
                         WText {
                             Layout.alignment: Qt.AlignHCenter
-                            text: Math.round(MprisController.volume * 100) + "%"
+                            text: Math.round((MprisController.activePlayer?.volume ?? 0) * 100) + "%"
                             font.pixelSize: Looks.font.pixelSize.normal
                             font.weight: Font.DemiBold
                         }
@@ -582,21 +581,6 @@ WBarAttachedPanelContent {
                     readonly property string effectiveTitle: MprisController.isYtMusicActive ? YtMusic.currentTitle : (activePlayer?.trackTitle ?? "")
                     readonly property string effectiveArtist: MprisController.isYtMusicActive ? YtMusic.currentArtist : (activePlayer?.trackArtist ?? "")
 
-                    // Blurred album art background
-                    Image {
-                        id: bgArt
-                        anchors.fill: parent
-                        source: MediaArtwork.displaySource
-                        fillMode: Image.PreserveAspectCrop
-                        cache: false
-                        visible: false
-                    }
-                    FastBlur {
-                        anchors.fill: parent
-                        source: bgArt
-                        radius: 64
-                        visible: bgArt.source != ""
-                    }
                     Rectangle {
                         anchors.fill: parent
                         color: Looks.colors.bgPanelFooterBase
