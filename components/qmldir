@@ -14,4 +14,5 @@ IrisCapsuleSlider 1.0 IrisCapsuleSlider.qml
 IrisMediaBackdrop 1.0 IrisMediaBackdrop.qml
 IrisNotificationIcon 1.0 IrisNotificationIcon.qml
 IrisClock 1.0 IrisClock.qml
+IrisNumber 1.0 IrisNumber.qml
 IrisDesktopMenu 1.0 IrisDesktopMenu.qml

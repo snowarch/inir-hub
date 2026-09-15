@@ -55,7 +55,16 @@ Row {
         renderType: Text.NativeRendering
     }
 
-    Figure { id: hoursText; text: root.parts.hours }
+    component Count: IrisNumber {
+        family: root.family
+        pixelSize: root.pixelSize
+        weight: root.weight
+        letterSpacing: -root.pixelSize * 0.02
+        color: root.color
+    }
+
+    // Hours, minutes and seconds count; the separator and period stay put.
+    Count { id: hoursText; text: root.parts.hours }
     Figure {
         text: ":"
         visible: root.parts.minutes.length > 0
@@ -66,12 +75,22 @@ Row {
         leftPadding: root.pixelSize * 0.03
         rightPadding: root.pixelSize * 0.03
     }
-    Figure { text: root.parts.minutes; anchors.baseline: hoursText.baseline }
-    Minor {
+    Count { text: root.parts.minutes; anchors.baseline: hoursText.baseline }
+    Item {
         visible: root.parts.seconds.length > 0
-        text: root.parts.seconds
-        leftPadding: root.pixelSize * 0.12
+        implicitWidth: secondsText.implicitWidth + root.pixelSize * 0.12
+        implicitHeight: secondsText.implicitHeight
+        baselineOffset: secondsText.baselineOffset
         anchors.baseline: hoursText.baseline
+        IrisNumber {
+            id: secondsText
+            anchors.right: parent.right
+            text: root.parts.seconds
+            family: root.family
+            pixelSize: Math.round(root.pixelSize * root.minorScale)
+            weight: Font.DemiBold
+            color: ColorUtils.applyAlpha(root.color, 0.55)
+        }
     }
     Minor {
         visible: root.parts.period.length > 0
