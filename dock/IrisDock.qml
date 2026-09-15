@@ -4,6 +4,7 @@ import QtQuick
 import QtQuick.Layouts
 import Quickshell
 import Quickshell.Wayland
+import Quickshell.Widgets
 import qs
 import qs.services
 import qs.modules.common
@@ -209,6 +210,9 @@ Scope {
             id: window
             readonly property var modelData: screenScope.modelData
             property var menuApp: null
+            // "menu" (right click) or "windows" (an app with several windows: its
+            // windows as live previews growing out of the icon).
+            property string menuMode: "menu"
             // Icon centre and edge-side top at the moment the menu opened;
             // magnification is frozen, so this stays true while it is open.
             property point menuAnchor: Qt.point(0, 0)
@@ -522,6 +526,16 @@ Scope {
                                     Accessible.name: appSlot.appName
                                     onHoveredChanged: nameLabel.present(hovered ? appSlot : null, appSlot.appName, entry.app.toplevels?.length ?? 0)
                                     onClicked: {
+                                        // Several windows: show them instead of guessing which one.
+                                        if ((entry.app.toplevels?.length ?? 0) > 1 && MinimizedWindows.countMinimizedForApp(entry.app.appId) === 0) {
+                                            if (window.menuOpen && window.menuApp === entry.app) { window.menuApp = null; return }
+                                            window.frozenSlotX = window.pointerSlotX
+                                            window.captureMenuAnchor(appIcon)
+                                            window.menuMode = "windows"
+                                            window.menuApp = entry.app
+                                            nameLabel.present(null, "")
+                                            return
+                                        }
                                         GlobalStates.irisDockShown = false
                                         if (root.activate(entry.app) && IrisStyle.motionEnabled) launchBounce.restart()
                                     }
@@ -533,6 +547,7 @@ Scope {
                                     altAction: () => {
                                         window.frozenSlotX = window.pointerSlotX
                                         window.captureMenuAnchor(appIcon)
+                                        window.menuMode = "menu"
                                         window.menuApp = entry.app
                                         nameLabel.present(null, "")
                                     }
@@ -610,12 +625,19 @@ Scope {
                                         font.weight: Font.Bold
                                     }
                                 }
-                                // State under the icon, in one vocabulary: the focused app is a
-                                // capsule, each other open window a dot (up to three), windows
-                                // that are all minimised a hollow ring, attention in orange.
+                                // State under the icon, in one vocabulary: a dot per open window
+                                // (up to three) in the app's window order, the focused window's dot
+                                // stretched into a capsule, windows that are all minimised a hollow
+                                // ring, attention in orange. Neutral like the icon, not the accent.
                                 Row {
                                     id: indicators
                                     readonly property int windows: Math.min(3, entry.app.toplevels?.length ?? 0)
+                                    readonly property int focusedIndex: {
+                                        if (!appSlot.focused) return -1
+                                        const id = NiriService.activeWindow?.id ?? -1
+                                        const index = (entry.app.toplevels ?? []).findIndex(t => CompositorService.isNiri ? t.niriWindowId === id : t.activated)
+                                        return Math.min(indicators.windows - 1, Math.max(0, index))
+                                    }
                                     readonly property bool minimizedOnly: appSlot.running
                                         && MinimizedWindows.countMinimizedForApp(entry.modelData.appId) >= (entry.app.toplevels?.length ?? 0)
                                     readonly property bool urgent: root.appUrgent(entry.app)
@@ -631,13 +653,13 @@ Scope {
                                         Rectangle {
                                             id: indicator
                                             required property int index
-                                            readonly property bool lead: indicator.index === 0
+                                            readonly property bool lead: indicator.index === indicators.focusedIndex
                                             height: Math.round(5 * root.d)
-                                            width: appSlot.focused && indicator.lead ? Math.round(14 * root.d) : height
+                                            width: indicator.lead ? Math.round(14 * root.d) : height
                                             radius: height / 2
                                             color: indicators.minimizedOnly ? "transparent"
                                                 : indicators.urgent ? IrisStyle.secondaryAccent
-                                                : appSlot.focused ? IrisStyle.accent : ColorUtils.applyAlpha(IrisStyle.text, 0.42)
+                                                : indicator.lead ? IrisStyle.text : ColorUtils.applyAlpha(IrisStyle.text, appSlot.focused ? 0.55 : 0.42)
                                             border.width: indicators.minimizedOnly ? Math.max(1, Math.round(1.2 * root.d)) : 0
                                             border.color: ColorUtils.applyAlpha(IrisStyle.text, 0.55)
                                             Behavior on width { NumberAnimation { duration: IrisStyle.morphDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: IrisStyle.morphCurve } }
@@ -730,15 +752,18 @@ Scope {
                 id: menu
                 open: window.menuOpen
                 origin: window.menuOriginRect
-                contentReady: menuContent.implicitHeight > 0
-                radius: Math.round(14 * root.d)
+                readonly property Item activeContent: menu.mode === "windows" ? windowsContent : menuContent
+                contentReady: menu.activeContent.implicitHeight > 0
+                radius: Math.round((menu.mode === "windows" ? 20 : 14) * root.d)
                 color: IrisStyle.surface
                 contentScaleFrom: 1
                 contentFadeStart: 0.08
                 contentFadeSpan: 0.34
                 animationDuration: IrisStyle.morphDuration
-                width: Math.round(Math.min(Math.max(200 * root.d, menuContent.implicitWidth + 12 * root.d), 260 * root.d))
-                height: Math.round(menuContent.implicitHeight + 12 * root.d)
+                width: menu.mode === "windows"
+                    ? Math.round(Math.min(window.width - 24, windowsContent.implicitWidth + 20 * root.d))
+                    : Math.round(Math.min(Math.max(200 * root.d, menuContent.implicitWidth + 12 * root.d), 260 * root.d))
+                height: Math.round(menu.activeContent.implicitHeight + (menu.mode === "windows" ? 20 : 12) * root.d)
                 // Snap the whole surface to device pixels; fractional layer-surface
                 // translation softens every glyph even when the text itself is crisp.
                 x: Math.round(Math.max(12, Math.min(window.width - width - 12, window.menuAnchor.x - width / 2)))
@@ -755,17 +780,204 @@ Scope {
                 // Keep the last app while collapsing so the content does not blank.
                 property var app: null
                 property var windows: []
+                property string mode: "menu"
                 Connections {
                     target: window
                     function onMenuAppChanged(): void {
                         if (!window.menuApp) return
                         menu.app = window.menuApp
+                        menu.mode = window.menuMode
                         menu.windows = (window.menuApp.toplevels ?? []).slice()
                     }
                 }
                 MouseArea { anchors.fill: parent }
+
+                // Windows: one live preview per window of the app, the focused one
+                // ringed, each with its title and a close button on hover.
+                ColumnLayout {
+                    id: windowsContent
+                    visible: menu.mode === "windows"
+                    anchors.left: parent.left
+                    anchors.top: parent.top
+                    anchors.margins: 10 * root.d
+                    spacing: 8 * root.d
+                    readonly property real cardWidth: Math.round(208 * root.d)
+                    readonly property real cardHeight: Math.round(130 * root.d)
+                    readonly property int columns: Math.max(1, Math.min(4, menu.windows.length))
+
+                    RowLayout {
+                        Layout.fillWidth: true
+                        Layout.leftMargin: 6 * root.d
+                        Layout.rightMargin: 2 * root.d
+                        spacing: 8 * root.d
+                        SmartAppIcon {
+                            icon: AppSearch.lookupDesktopEntry(menu.app?.appId ?? "")?.icon ?? (menu.app?.appId ?? "")
+                            fallback: "application-x-executable"
+                            iconSize: Math.round(18 * root.d)
+                        }
+                        IrisText {
+                            Layout.fillWidth: true
+                            text: AppSearch.lookupDesktopEntry(menu.app?.appId ?? "")?.name ?? (menu.app?.appId ?? "")
+                            elide: Text.ElideRight
+                            font.pixelSize: 13 * IrisStyle.typeScale
+                            font.weight: Font.DemiBold
+                        }
+                        IrisText {
+                            text: Translation.tr("%1 windows").arg(menu.windows.length)
+                            color: IrisStyle.muted
+                            font.pixelSize: 11.5 * IrisStyle.typeScale
+                        }
+                        IrisIconButton {
+                            materialIcon: "add"
+                            Accessible.name: Translation.tr("New window")
+                            onClicked: {
+                                const e = AppSearch.lookupDesktopEntry(menu.app?.appId ?? "")
+                                if (e) AppSearch.launchEntry(e)
+                                window.menuApp = null
+                            }
+                        }
+                    }
+
+                    Grid {
+                        columns: windowsContent.columns
+                        spacing: 8 * root.d
+                        Repeater {
+                            model: menu.windows
+                            MouseArea {
+                                id: card
+                                required property var modelData
+                                readonly property bool focusedWindow: CompositorService.isNiri
+                                    ? card.modelData?.niriWindowId !== undefined && card.modelData.niriWindowId === (NiriService.activeWindow?.id ?? -1)
+                                    : (card.modelData?.activated ?? false)
+                                width: windowsContent.cardWidth
+                                height: windowsContent.cardHeight + titleText.implicitHeight + 6 * root.d
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+                                Accessible.role: Accessible.Button
+                                Accessible.name: String(card.modelData?.title ?? "")
+                                onClicked: {
+                                    if (CompositorService.isNiri && card.modelData?.niriWindowId !== undefined) NiriService.focusWindow(card.modelData.niriWindowId)
+                                    else card.modelData?.activate()
+                                    GlobalStates.irisDockShown = false
+                                    window.menuApp = null
+                                }
+
+                                // Concentric ring on the focused window.
+                                Rectangle {
+                                    width: windowsContent.cardWidth
+                                    height: windowsContent.cardHeight
+                                    radius: Math.round(12 * root.d)
+                                    color: "transparent"
+                                    border.width: Math.max(2, Math.round(2 * root.d))
+                                    border.color: ColorUtils.applyAlpha(IrisStyle.text, card.focusedWindow ? 0.9 : card.containsMouse ? 0.35 : 0)
+                                    Behavior on border.color { ColorAnimation { duration: IrisStyle.duration(120) } }
+                                }
+                                ClippingRectangle {
+                                    id: previewPlate
+                                    x: Math.round(4 * root.d)
+                                    y: Math.round(4 * root.d)
+                                    width: windowsContent.cardWidth - Math.round(8 * root.d)
+                                    height: windowsContent.cardHeight - Math.round(8 * root.d)
+                                    radius: Math.round(8 * root.d)
+                                    color: IrisStyle.surfaceHigh
+                                    scale: card.pressed ? 0.97 : 1
+                                    Behavior on scale { NumberAnimation { duration: IrisStyle.duration(110); easing.type: Easing.OutCubic } }
+                                    // Niri exposes no per-window capture, so there a window is its
+                                    // app, where it lives and a glimpse of its state; compositors that
+                                    // can capture a toplevel show it live instead.
+                                    Loader {
+                                        anchors.fill: parent
+                                        active: !CompositorService.isNiri && window.menuOpen && menu.mode === "windows" && !GameMode.active
+                                        sourceComponent: ScreencopyView {
+                                            captureSource: card.modelData
+                                            live: !RecorderStatus.isRecording
+                                        }
+                                    }
+                                    Rectangle {
+                                        anchors.fill: parent
+                                        visible: CompositorService.isNiri
+                                        gradient: Gradient {
+                                            GradientStop { position: 0; color: ColorUtils.applyAlpha(IrisStyle.text, card.focusedWindow ? 0.14 : 0.09) }
+                                            GradientStop { position: 1; color: ColorUtils.applyAlpha(IrisStyle.text, 0.03) }
+                                        }
+                                        SmartAppIcon {
+                                            anchors.centerIn: parent
+                                            anchors.verticalCenterOffset: -8 * root.d
+                                            icon: AppSearch.lookupDesktopEntry(menu.app?.appId ?? "")?.icon ?? (menu.app?.appId ?? "")
+                                            fallback: "application-x-executable"
+                                            iconSize: Math.round(46 * root.d)
+                                            opacity: card.focusedWindow || card.containsMouse ? 1 : 0.82
+                                        }
+                                        // Where the window lives, quiet in the plate's lower edge.
+                                        Rectangle {
+                                            anchors.horizontalCenter: parent.horizontalCenter
+                                            anchors.bottom: parent.bottom
+                                            anchors.bottomMargin: 8 * root.d
+                                            readonly property var workspace: (NiriService.allWorkspaces ?? []).find(ws => ws.id === card.modelData?.niriWorkspaceId) ?? null
+                                            visible: workspace !== null
+                                            implicitHeight: Math.round(20 * root.d)
+                                            implicitWidth: workspaceLabel.implicitWidth + Math.round(16 * root.d)
+                                            radius: height / 2
+                                            color: ColorUtils.applyAlpha(IrisStyle.surface, 0.55)
+                                            IrisText {
+                                                id: workspaceLabel
+                                                anchors.centerIn: parent
+                                                text: parent.workspace ? (parent.workspace.name || Translation.tr("Workspace %1").arg(parent.workspace.idx)) : ""
+                                                color: IrisStyle.subtext
+                                                font.pixelSize: 10.5 * IrisStyle.typeScale
+                                                font.weight: Font.Medium
+                                            }
+                                        }
+                                    }
+                                }
+                                IrisText {
+                                    id: titleText
+                                    anchors.left: parent.left
+                                    anchors.right: parent.right
+                                    anchors.bottom: parent.bottom
+                                    anchors.leftMargin: 4 * root.d
+                                    anchors.rightMargin: 4 * root.d
+                                    text: String(card.modelData?.title ?? "")
+                                    elide: Text.ElideRight
+                                    horizontalAlignment: Text.AlignHCenter
+                                    color: card.focusedWindow ? IrisStyle.text : IrisStyle.subtext
+                                    font.pixelSize: 11.5 * IrisStyle.typeScale
+                                    font.weight: card.focusedWindow ? Font.DemiBold : Font.Medium
+                                }
+                                // Close, on the preview's corner while hovered.
+                                Rectangle {
+                                    x: previewPlate.x + previewPlate.width - width - 6 * root.d
+                                    y: previewPlate.y + 6 * root.d
+                                    width: Math.round(22 * root.d)
+                                    height: width
+                                    radius: width / 2
+                                    color: closeHover.hovered ? IrisStyle.danger : ColorUtils.applyAlpha(IrisStyle.surface, 0.72)
+                                    opacity: card.containsMouse && CompositorService.isNiri ? 1 : 0
+                                    visible: opacity > 0
+                                    Behavior on opacity { NumberAnimation { duration: IrisStyle.duration(120) } }
+                                    MaterialSymbol {
+                                        anchors.centerIn: parent
+                                        text: "close"
+                                        iconSize: Math.round(13 * root.d)
+                                        color: IrisStyle.text
+                                    }
+                                    HoverHandler { id: closeHover; cursorShape: Qt.PointingHandCursor }
+                                    TapHandler {
+                                        onTapped: {
+                                            if (card.modelData?.niriWindowId !== undefined) NiriService.closeWindow(card.modelData.niriWindowId)
+                                            menu.windows = menu.windows.filter(t => t !== card.modelData)
+                                            if (menu.windows.length === 0) window.menuApp = null
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
                 ColumnLayout {
                     id: menuContent
+                    visible: menu.mode === "menu"
                     anchors.left: parent.left
                     anchors.right: parent.right
                     anchors.top: parent.top
