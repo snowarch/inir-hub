@@ -1152,7 +1152,7 @@ Loader {
                     Image {
                         Layout.preferredWidth: Math.round(26 * root.d)
                         Layout.preferredHeight: Layout.preferredWidth
-                        sourceSize: Qt.size(width * 2, height * 2)
+                        sourceSize: Qt.size(Math.round(52 * root.d), Math.round(52 * root.d))
                         source: Quickshell.iconPath(MprisController.streamIconName(stream.modelData), "audio-x-generic")
                         opacity: stream.muted ? 0.45 : 1
                     }
