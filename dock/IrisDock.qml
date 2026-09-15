@@ -45,9 +45,11 @@ Scope {
     }
     // Unread notifications per sender, normalised like the notification service.
     // Counted from the whole list, not just live banners, so a badge outlives the
-    // banner; it clears once the notifications are seen: the app gets focus, or
-    // a surface that lists them (Today, Control Center) opens. Seen is transient
-    // and never dismisses anything from the list.
+    // banner; it clears once the notifications are seen, without dismissing
+    // anything: the app in focus shows none (what arrives while you are in it is
+    // seen), leaving it marks everything up to then as seen, and so does opening
+    // a surface that lists them (Today, Control Center). What was already in the
+    // list when the shell started counts as seen, so restarts never pile badges up.
     readonly property var notificationTimes: {
         const times = {}
         if (!root.badges) return times
@@ -58,22 +60,23 @@ Scope {
         return times
     }
     property var seenAt: ({})
-    property real seenAllAt: 0
+    property real seenAllAt: Date.now()
     function identifiersFor(app): var {
         const entry = app?.appId ? AppSearch.lookupDesktopEntry(app.appId) : null
         return [app?.appId ?? "", entry?.name ?? "", String(entry?.id ?? "").replace(/\.desktop$/, "")]
     }
+    function keysFor(identifiers): var {
+        return identifiers.map(id => Notifications._normalizeAppKey(id)).filter(key => key.length > 0)
+    }
     function markSeen(identifiers): void {
         const next = Object.assign({}, root.seenAt)
         const now = Date.now()
-        for (const id of identifiers) {
-            const key = Notifications._normalizeAppKey(id)
-            if (key.length > 0) next[key] = now
-        }
+        for (const key of root.keysFor(identifiers)) next[key] = now
         root.seenAt = next
     }
     function badgeCount(identifiers): int {
-        const keys = identifiers.map(id => Notifications._normalizeAppKey(id)).filter(key => key.length > 0)
+        const keys = root.keysFor(identifiers)
+        if (keys.some(key => root.focusedKeys.includes(key))) return 0
         const seen = Math.max(root.seenAllAt, ...keys.map(key => root.seenAt[key] ?? 0))
         for (const key of keys) {
             const count = (root.notificationTimes[key] ?? []).filter(time => time > seen).length
@@ -81,13 +84,20 @@ Scope {
         }
         return 0
     }
-    // Focusing an app, from the Dock or anywhere else, is reading its notifications.
+    // The app in focus, from the Dock or anywhere else, and every name its
+    // notifications may use (app id, desktop entry name and id).
     readonly property string focusedAppId: String(NiriService.activeWindow?.app_id ?? "")
-    onFocusedAppIdChanged: {
-        if (root.focusedAppId.length === 0) return
+    readonly property var focusedKeys: {
+        if (root.focusedAppId.length === 0) return []
         const app = root.entries.find(entry => entry.appId === root.focusedAppId
             || Notifications._normalizeAppKey(entry.appId) === Notifications._normalizeAppKey(root.focusedAppId))
-        root.markSeen(app ? root.identifiersFor(app) : [root.focusedAppId])
+        return root.keysFor(app ? root.identifiersFor(app) : [root.focusedAppId])
+    }
+    // Leaving an app: what arrived while it had focus has been seen.
+    property var previousFocusedKeys: []
+    onFocusedKeysChanged: {
+        if (root.previousFocusedKeys.length > 0) root.markSeen(root.previousFocusedKeys)
+        root.previousFocusedKeys = root.focusedKeys
     }
     Connections {
         target: GlobalStates
