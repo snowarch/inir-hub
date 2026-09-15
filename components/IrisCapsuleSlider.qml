@@ -38,9 +38,9 @@ Item {
 
         Item {
             id: fillClip
-            // Never shorter than the glyph pocket so an empty level still
-            // reads as a capsule with its icon, not a bare dot.
-            property real length: Math.max(root.thickness, root.span * root.shownValue)
+            // The fill is the level all the way down to empty; the glyph turns
+            // light once the fill no longer sits under it.
+            property real length: root.span * root.shownValue
             Behavior on length {
                 enabled: root.dragValue < 0
                 NumberAnimation { duration: IrisStyle.duration(110); easing.type: Easing.OutCubic }
@@ -65,7 +65,9 @@ Item {
             text: root.icon
             fill: 1
             iconSize: Math.round((root.vertical ? 19 : 20) * IrisStyle.density)
-            color: root.muted ? IrisStyle.text : IrisStyle.surface
+            readonly property bool overFill: !root.muted && fillClip.length >= root.thickness * 0.72
+            color: overFill ? IrisStyle.surface : IrisStyle.text
+            Behavior on color { ColorAnimation { duration: IrisStyle.duration(110) } }
         }
     }
 

@@ -93,6 +93,9 @@ PanelWindow {
             anchors.margins: root.contentPadding
             contentHeight: quickPanel.item?.implicitHeight ?? 0
             boundsBehavior: Flickable.StopAtBounds
+            // Only scrolls when the panel is capped: otherwise a vertical drag on
+            // a level capsule is taken as a flick and the level stops following.
+            interactive: contents.contentHeight > contents.height + 1
             clip: true
 
             Loader {

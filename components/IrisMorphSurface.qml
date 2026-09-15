@@ -114,12 +114,18 @@ Item {
 
     function lerp(a: real, b: real): real { return a + (b - a) * root.presentation }
 
+    // The clipping chassis draws its content through a texture: at a
+    // fractional scene position or size that texture is resampled and text,
+    // glyphs and edges go soft. Snap it (and the resting content) to whole pixels.
+    readonly property real snapX: Math.round(root.x) - root.x
+    readonly property real snapY: Math.round(root.y) - root.y
+
     ClippingRectangle {
         id: chassis
-        x: root.lerp(root.from.x, 0)
-        y: root.lerp(root.from.y, 0)
-        width: root.lerp(root.from.width, root.width)
-        height: root.lerp(root.from.height, root.height)
+        x: Math.round(root.x + root.lerp(root.from.x, 0)) - root.x
+        y: Math.round(root.y + root.lerp(root.from.y, 0)) - root.y
+        width: Math.round(root.lerp(root.from.width, root.width))
+        height: Math.round(root.lerp(root.from.height, root.height))
         radius: Math.min(width / 2, height / 2, root.lerp(root.fromRadius, root.radius))
         color: root.color
         // Visible from the open request, not the first animated frame: an
@@ -130,14 +136,14 @@ Item {
 
         Item {
             id: contentHost
-            x: root.contentTravels ? 0 : -chassis.x
-            y: root.contentTravels ? 0 : -chassis.y
+            x: root.contentTravels ? 0 : root.snapX - chassis.x
+            y: root.contentTravels ? 0 : root.snapY - chassis.y
             width: root.width
             height: root.height
             // Content arrives once the shape has mostly formed and leaves first.
             opacity: Math.max(0, Math.min(1, (root.presentation - root.contentFadeStart) / Math.max(0.01, root.contentFadeSpan)))
             // Settles from slightly smaller, so content rides the chassis growth.
-            scale: root.contentScaleFrom + (1 - root.contentScaleFrom) * root.presentation
+            scale: root.presentation >= 1 ? 1 : root.contentScaleFrom + (1 - root.contentScaleFrom) * root.presentation
             enabled: root.open
         }
     }
