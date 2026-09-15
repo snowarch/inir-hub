@@ -790,6 +790,15 @@ Scope {
                         menu.windows = (window.menuApp.toplevels ?? []).slice()
                     }
                 }
+                // While open, the windows follow the app live (a window closed from here
+                // or elsewhere leaves, a new one joins); the last list stays while
+                // collapsing so the content never blanks.
+                readonly property var liveWindows: window.menuOpen && menu.app ? (root.liveApps[menu.app.appId]?.toplevels ?? []) : null
+                onLiveWindowsChanged: {
+                    if (menu.liveWindows === null) return
+                    menu.windows = menu.liveWindows.slice()
+                    if (menu.mode === "windows" && menu.windows.length === 0) window.menuApp = null
+                }
                 MouseArea { anchors.fill: parent }
 
                 // Windows: one live preview per window of the app, the focused one
@@ -804,6 +813,8 @@ Scope {
                     readonly property real cardWidth: Math.round(208 * root.d)
                     readonly property real cardHeight: Math.round(130 * root.d)
                     readonly property int columns: Math.max(1, Math.min(4, menu.windows.length))
+                    // Glimpses stay neutral on the black surface; the icon carries the app's colour.
+                    readonly property color tint: IrisStyle.text
 
                     RowLayout {
                         Layout.fillWidth: true
@@ -823,7 +834,7 @@ Scope {
                             font.weight: Font.DemiBold
                         }
                         IrisText {
-                            text: Translation.tr("%1 windows").arg(menu.windows.length)
+                            text: menu.windows.length === 1 ? Translation.tr("1 window") : Translation.tr("%1 windows").arg(menu.windows.length)
                             color: IrisStyle.muted
                             font.pixelSize: 11.5 * IrisStyle.typeScale
                         }
@@ -882,51 +893,123 @@ Scope {
                                     color: IrisStyle.surfaceHigh
                                     scale: card.pressed ? 0.97 : 1
                                     Behavior on scale { NumberAnimation { duration: IrisStyle.duration(110); easing.type: Easing.OutCubic } }
-                                    // Niri exposes no per-window capture, so there a window is its
-                                    // app, where it lives and a glimpse of its state; compositors that
-                                    // can capture a toplevel show it live instead.
-                                    Loader {
-                                        anchors.fill: parent
-                                        active: !CompositorService.isNiri && window.menuOpen && menu.mode === "windows" && !GameMode.active
-                                        sourceComponent: ScreencopyView {
-                                            captureSource: card.modelData
-                                            live: !RecorderStatus.isRecording
-                                        }
+                                    // A glimpse, not a capture: the window's own shape (its real
+                                    // aspect) in its app's colour, a title strip, and skeleton lines
+                                    // patterned from its title, so each window reads apart at a
+                                    // glance without screenshots; floating and attention marked.
+                                    readonly property var niriWindow: (NiriService.windows ?? []).find(w => w.id === card.modelData?.niriWindowId) ?? null
+                                    readonly property real aspect: {
+                                        const size = previewPlate.niriWindow?.layout?.window_size ?? [16, 10]
+                                        return Math.max(0.45, Math.min(2.6, Number(size[0]) / Math.max(1, Number(size[1]))))
+                                    }
+                                    readonly property int seed: {
+                                        const title = String(card.modelData?.title ?? "")
+                                        let hash = 7
+                                        for (let i = 0; i < title.length; i++) hash = (hash * 31 + title.charCodeAt(i)) % 100003
+                                        return hash
                                     }
                                     Rectangle {
                                         anchors.fill: parent
-                                        visible: CompositorService.isNiri
                                         gradient: Gradient {
-                                            GradientStop { position: 0; color: ColorUtils.applyAlpha(IrisStyle.text, card.focusedWindow ? 0.14 : 0.09) }
+                                            GradientStop { position: 0; color: ColorUtils.applyAlpha(windowsContent.tint, card.focusedWindow ? 0.2 : 0.12) }
                                             GradientStop { position: 1; color: ColorUtils.applyAlpha(IrisStyle.text, 0.03) }
+                                        }
+                                    }
+                                    Rectangle {
+                                        id: silhouette
+                                        readonly property real room: 14 * root.d
+                                        // Leaves the plate's lower band to the workspace chip.
+                                        readonly property real chipBand: 20 * root.d
+                                        readonly property real fitWidth: Math.min(parent.width - silhouette.room * 2, (parent.height - silhouette.room - silhouette.chipBand - 6 * root.d) * previewPlate.aspect)
+                                        anchors.horizontalCenter: parent.horizontalCenter
+                                        y: Math.round(silhouette.room + (parent.height - silhouette.room - silhouette.chipBand - 6 * root.d - height) / 2)
+                                        width: Math.round(silhouette.fitWidth)
+                                        height: Math.round(silhouette.fitWidth / previewPlate.aspect)
+                                        radius: Math.round(6 * root.d)
+                                        clip: true
+                                        color: ColorUtils.applyAlpha(IrisStyle.surface, 0.62)
+                                        border.width: 1
+                                        border.color: ColorUtils.applyAlpha(windowsContent.tint, card.focusedWindow ? 0.55 : 0.28)
+                                        scale: card.containsMouse ? 1.03 : 1
+                                        Behavior on scale { NumberAnimation { duration: IrisStyle.duration(140); easing.type: Easing.OutCubic } }
+                                        // Title strip.
+                                        Rectangle {
+                                            anchors.left: parent.left
+                                            anchors.right: parent.right
+                                            anchors.top: parent.top
+                                            anchors.margins: 1
+                                            height: Math.round(9 * root.d)
+                                            radius: Math.round(5 * root.d)
+                                            color: ColorUtils.applyAlpha(windowsContent.tint, 0.22)
+                                        }
+                                        // Skeleton content patterned by the title.
+                                        Column {
+                                            anchors.left: parent.left
+                                            anchors.right: parent.right
+                                            anchors.top: parent.top
+                                            anchors.topMargin: Math.round(15 * root.d)
+                                            anchors.leftMargin: Math.round(7 * root.d)
+                                            anchors.rightMargin: Math.round(7 * root.d)
+                                            spacing: Math.round(4 * root.d)
+                                            Repeater {
+                                                model: Math.max(2, Math.floor((silhouette.height - 20 * root.d) / (7 * root.d)))
+                                                Rectangle {
+                                                    required property int index
+                                                    readonly property real share: 0.35 + ((previewPlate.seed * (index + 3) * 7919) % 60) / 100
+                                                    width: Math.round(parent.width * share)
+                                                    height: Math.max(2, Math.round(3 * root.d))
+                                                    radius: height / 2
+                                                    color: ColorUtils.applyAlpha(index % 3 === 0 ? windowsContent.tint : IrisStyle.text, index % 3 === 0 ? 0.32 : 0.12)
+                                                }
+                                            }
                                         }
                                         SmartAppIcon {
                                             anchors.centerIn: parent
-                                            anchors.verticalCenterOffset: -8 * root.d
+                                            anchors.verticalCenterOffset: 3 * root.d
                                             icon: AppSearch.lookupDesktopEntry(menu.app?.appId ?? "")?.icon ?? (menu.app?.appId ?? "")
                                             fallback: "application-x-executable"
-                                            iconSize: Math.round(46 * root.d)
-                                            opacity: card.focusedWindow || card.containsMouse ? 1 : 0.82
+                                            iconSize: Math.round(Math.min(34 * root.d, silhouette.height * 0.5))
                                         }
-                                        // Where the window lives, quiet in the plate's lower edge.
+                                    }
+                                    // Floating windows and windows asking for attention.
+                                    Row {
+                                        anchors.top: parent.top
+                                        anchors.left: parent.left
+                                        anchors.margins: 7 * root.d
+                                        spacing: 4 * root.d
+                                        MaterialSymbol {
+                                            visible: previewPlate.niriWindow?.is_floating ?? false
+                                            text: "picture_in_picture"
+                                            iconSize: Math.round(13 * root.d)
+                                            color: IrisStyle.subtext
+                                        }
                                         Rectangle {
-                                            anchors.horizontalCenter: parent.horizontalCenter
-                                            anchors.bottom: parent.bottom
-                                            anchors.bottomMargin: 8 * root.d
-                                            readonly property var workspace: (NiriService.allWorkspaces ?? []).find(ws => ws.id === card.modelData?.niriWorkspaceId) ?? null
-                                            visible: workspace !== null
-                                            implicitHeight: Math.round(20 * root.d)
-                                            implicitWidth: workspaceLabel.implicitWidth + Math.round(16 * root.d)
-                                            radius: height / 2
-                                            color: ColorUtils.applyAlpha(IrisStyle.surface, 0.55)
-                                            IrisText {
-                                                id: workspaceLabel
-                                                anchors.centerIn: parent
-                                                text: parent.workspace ? (parent.workspace.name || Translation.tr("Workspace %1").arg(parent.workspace.idx)) : ""
-                                                color: IrisStyle.subtext
-                                                font.pixelSize: 10.5 * IrisStyle.typeScale
-                                                font.weight: Font.Medium
-                                            }
+                                            visible: previewPlate.niriWindow?.is_urgent ?? false
+                                            anchors.verticalCenter: parent.verticalCenter
+                                            width: Math.round(7 * root.d)
+                                            height: width
+                                            radius: width / 2
+                                            color: IrisStyle.secondaryAccent
+                                        }
+                                    }
+                                    // Where the window lives, quiet in the plate's lower edge.
+                                    Rectangle {
+                                        anchors.horizontalCenter: parent.horizontalCenter
+                                        anchors.bottom: parent.bottom
+                                        anchors.bottomMargin: 5 * root.d
+                                        readonly property var workspace: (NiriService.allWorkspaces ?? []).find(ws => ws.id === card.modelData?.niriWorkspaceId) ?? null
+                                        visible: workspace !== null
+                                        implicitHeight: Math.round(18 * root.d)
+                                        implicitWidth: workspaceLabel.implicitWidth + Math.round(14 * root.d)
+                                        radius: height / 2
+                                        color: ColorUtils.applyAlpha(IrisStyle.surface, 0.7)
+                                        IrisText {
+                                            id: workspaceLabel
+                                            anchors.centerIn: parent
+                                            text: parent.workspace ? (parent.workspace.name || Translation.tr("Workspace %1").arg(parent.workspace.idx)) : ""
+                                            color: IrisStyle.subtext
+                                            font.pixelSize: 10 * IrisStyle.typeScale
+                                            font.weight: Font.Medium
                                         }
                                     }
                                 }
@@ -964,9 +1047,8 @@ Scope {
                                     HoverHandler { id: closeHover; cursorShape: Qt.PointingHandCursor }
                                     TapHandler {
                                         onTapped: {
+                                            // The list follows the app live, so the card leaves once Niri closes it.
                                             if (card.modelData?.niriWindowId !== undefined) NiriService.closeWindow(card.modelData.niriWindowId)
-                                            menu.windows = menu.windows.filter(t => t !== card.modelData)
-                                            if (menu.windows.length === 0) window.menuApp = null
                                         }
                                     }
                                 }
