@@ -48,6 +48,84 @@ Item {
             root.context.tryUnlock()
     }
 
+    function clockText(total: real): string {
+        const s = Math.max(0, Math.floor(total))
+        const h = Math.floor(s / 3600)
+        const m = Math.floor((s % 3600) / 60)
+        const sec = String(s % 60).padStart(2, "0")
+        return h > 0 ? h + ":" + String(m).padStart(2, "0") + ":" + sec : m + ":" + sec
+    }
+
+    // One live activity on the lock screen: glyph disc, what it is, and its
+    // figure in the activity colour, with a hairline of progress when it has one.
+    component ActivityPlate: Item {
+        id: plate
+        property bool shown: false
+        property string glyph: ""
+        property color tint: IrisStyle.text
+        property string label: ""
+        property string figure: ""
+        property bool countDown: false
+        property real progress: -1
+        Layout.alignment: Qt.AlignHCenter
+        Layout.topMargin: plate.shown ? 10 * root.d : 0
+        visible: plate.shown
+        implicitWidth: Math.round(380 * root.d)
+        implicitHeight: plate.shown ? Math.round(64 * root.d) : 0
+
+        Rectangle {
+            anchors.fill: parent
+            radius: Math.round(22 * root.d)
+            color: Qt.rgba(0, 0, 0, 0.34)
+        }
+        RowLayout {
+            anchors.fill: parent
+            anchors.leftMargin: 12 * root.d
+            anchors.rightMargin: 20 * root.d
+            spacing: 12 * root.d
+            Rectangle {
+                Layout.preferredWidth: Math.round(40 * root.d)
+                Layout.preferredHeight: Layout.preferredWidth
+                radius: width / 2
+                color: ColorUtils.applyAlpha(plate.tint, 0.2)
+                MaterialSymbol {
+                    anchors.centerIn: parent
+                    text: plate.glyph
+                    fill: 1
+                    iconSize: 20 * root.d
+                    color: plate.tint
+                }
+            }
+            IrisText {
+                Layout.fillWidth: true
+                text: plate.label
+                color: "#ffffff"
+                font.pixelSize: Math.round(15 * IrisStyle.typeScale)
+                font.weight: Font.DemiBold
+                elide: Text.ElideRight
+            }
+            IrisNumber {
+                text: plate.figure
+                countDown: plate.countDown
+                color: plate.tint
+                pixelSize: Math.round(26 * IrisStyle.typeScale)
+                weight: Font.Bold
+                letterSpacing: -0.5
+            }
+        }
+        Rectangle {
+            visible: plate.progress >= 0
+            anchors.left: parent.left
+            anchors.bottom: parent.bottom
+            anchors.leftMargin: 22 * root.d
+            anchors.bottomMargin: 7 * root.d
+            width: (parent.width - 44 * root.d) * Math.max(0, Math.min(1, plate.progress))
+            height: Math.max(2, 2 * root.d)
+            radius: height / 2
+            color: plate.tint
+        }
+    }
+
     Component.onCompleted: root.focusPassword()
     Connections {
         target: root.context
@@ -166,6 +244,34 @@ Item {
                         active: parent.active
                         showBackground: false
                     }
+                }
+
+                // Live activities keep reading on the lock screen: the same
+                // identity as in the Island (red recording, highlight timer).
+                ActivityPlate {
+                    shown: RecorderStatus.isRecording
+                    glyph: "radio_button_checked"
+                    tint: IrisStyle.danger
+                    label: Translation.tr("Recording")
+                    figure: root.clockText(RecorderStatus.elapsedSeconds)
+                }
+                ActivityPlate {
+                    readonly property string kind: TimerService.pomodoroRunning ? "pomodoro"
+                        : TimerService.countdownRunning ? "countdown"
+                        : TimerService.stopwatchRunning ? "stopwatch" : ""
+                    readonly property bool paused: kind === "pomodoro" ? TimerService.pomodoroPaused
+                        : kind === "countdown" ? TimerService.countdownPaused : TimerService.stopwatchPaused
+                    shown: kind.length > 0
+                    glyph: paused ? "pause" : kind === "stopwatch" ? "timer" : kind === "pomodoro" && TimerService.pomodoroBreak ? "coffee" : "hourglass_top"
+                    tint: paused ? ColorUtils.applyAlpha("#ffffff", 0.7) : IrisStyle.secondaryAccent
+                    label: kind === "pomodoro" ? (TimerService.pomodoroBreak ? Translation.tr("Break") : Translation.tr("Focus"))
+                        : kind === "countdown" ? Translation.tr("Timer") : Translation.tr("Stopwatch")
+                    countDown: kind !== "stopwatch"
+                    figure: root.clockText(kind === "pomodoro" ? TimerService.pomodoroSecondsLeft
+                        : kind === "countdown" ? TimerService.countdownSecondsLeft
+                        : Math.floor(TimerService.stopwatchTime / 100))
+                    progress: kind === "pomodoro" ? 1 - TimerService.pomodoroSecondsLeft / Math.max(1, TimerService.pomodoroLapDuration)
+                        : kind === "countdown" ? 1 - TimerService.countdownSecondsLeft / Math.max(1, TimerService.countdownDuration) : -1
                 }
             }
 
