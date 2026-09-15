@@ -15,8 +15,11 @@ import qs.modules.iris.style
 import qs.modules.iris.components
 
 // iRiS wallpaper picker. Grows out of the Island and hangs under it as a
-// compact strip: two rows of wallpapers that scroll sideways, the source
-// (this computer or Wallhaven) and search above, one line of selection below.
+// compact strip: two rows of wallpapers that scroll sideways, a Finder-like
+// path (back, forward, breadcrumbs) and the folder's subfolders as chips above
+// them, the source (this computer or Wallhaven) and search, and one line of
+// selection below. The highlighted wallpaper can show on the desktop while
+// browsing; closing without applying restores the applied one.
 // Presentation only: local browsing, thumbnails and applying stay with the
 // shared Wallpapers service (same apply semantics as the shared selector);
 // online results come from the shared Wallhaven service and are downloaded
@@ -40,11 +43,68 @@ PanelWindow {
     readonly property bool online: root.source === "online" && root.onlineEnabled
     property int selectedIndex: 0
 
-    // Library selection.
-    readonly property int libraryCount: Wallpapers.folderModelReady ? (Wallpapers.folderModel?.count ?? 0) : 0
-    readonly property string libraryPath: !root.online && root.selectedIndex >= 0 && root.selectedIndex < root.libraryCount
-        ? Wallpapers.folderModel.get(root.selectedIndex, "filePath") : ""
-    readonly property bool selectedFolder: root.libraryPath.length > 0 && Wallpapers.folderModel.get(root.selectedIndex, "fileIsDir")
+    // Library: the folder's subfolders (chips) and its wallpapers (gallery),
+    // read out of the shared folder model whenever it settles.
+    property var libraryFolders: []
+    property var libraryFiles: []
+    function readFolder(): void {
+        const model = Wallpapers.folderModel
+        const folders = []
+        const files = []
+        if (Wallpapers.folderModelReady && model) {
+            for (let i = 0; i < model.count; i++) {
+                const entry = { path: String(model.get(i, "filePath") ?? ""), name: String(model.get(i, "fileName") ?? "") }
+                if (entry.path.length === 0) continue
+                if (model.get(i, "fileIsDir")) folders.push(entry)
+                else files.push(entry)
+            }
+        }
+        folders.sort((a, b) => a.name.localeCompare(b.name))
+        root.libraryFolders = folders
+        root.libraryFiles = files
+        if (root.selectedIndex >= files.length) root.selectedIndex = Math.max(0, files.length - 1)
+    }
+    Connections {
+        target: Wallpapers.folderModel
+        function onCountChanged(): void { folderRead.restart() }
+        function onStatusChanged(): void { folderRead.restart() }
+    }
+    Connections {
+        target: Wallpapers
+        function onFolderModelReadyChanged(): void { folderRead.restart() }
+    }
+    // One read per settle, not one per row the model reports.
+    Timer { id: folderRead; interval: 40; onTriggered: root.readFolder() }
+    readonly property int libraryCount: root.libraryFiles.length
+    readonly property string libraryPath: !root.online ? String(root.libraryFiles[root.selectedIndex]?.path ?? "") : ""
+
+    // Where we are: the folder, its place under home, and the way back and forward.
+    readonly property string folderPath: Wallpapers.effectiveDirectory.replace(/\/+$/, "") || "/"
+    readonly property string homePath: String(Quickshell.env("HOME") ?? "").replace(/\/+$/, "")
+    readonly property string wallpapersHome: FileUtils.trimFileProtocol(String(Wallpapers.defaultFolder ?? "")).replace(/\/+$/, "")
+    readonly property var crumbs: {
+        const path = root.folderPath
+        const underHome = root.homePath.length > 0 && (path === root.homePath || path.startsWith(root.homePath + "/"))
+        const base = underHome ? root.homePath : ""
+        const rest = path.slice(base.length).split("/").filter(part => part.length > 0)
+        const list = [{ label: underHome ? Translation.tr("Home") : "/", path: underHome ? root.homePath : "/", home: true }]
+        let walked = base
+        for (const part of rest) {
+            walked += "/" + part
+            list.push({ label: part, path: walked, home: false })
+        }
+        // Long paths keep the root and the last three places.
+        return list.length > 5 ? [list[0], { label: "…", path: list[list.length - 4].path, home: false }].concat(list.slice(-3)) : list
+    }
+    readonly property bool canGoBack: (Wallpapers.folderModel?.currentFolderHistoryIndex ?? 0) > 0
+    readonly property bool canGoForward: (Wallpapers.folderModel?.currentFolderHistoryIndex ?? 0) < (Wallpapers.folderModel?.folderHistory?.length ?? 0) - 1
+    readonly property bool atWallpapersHome: root.folderPath === root.wallpapersHome
+    function openFolder(path: string): void {
+        if (!path || path === root.folderPath) return
+        root.selectedIndex = 0
+        grid.contentX = 0
+        Wallpapers.setDirectory(path)
+    }
 
     // Online results, newest page last.
     readonly property var onlineImages: (Wallhaven.responses ?? [])
@@ -75,7 +135,7 @@ PanelWindow {
     readonly property int count: root.online ? root.onlineImages.length : root.libraryCount
     readonly property string selectedName: root.online
         ? (root.selectedImage ? "wallhaven-" + root.selectedImage.id : "")
-        : root.libraryPath.length > 0 ? Wallpapers.folderModel.get(root.selectedIndex, "fileName") : ""
+        : String(root.libraryFiles[root.selectedIndex]?.name ?? "")
 
     visible: root.morphOpen || surface.progress > 0
     screen: {
@@ -102,15 +162,27 @@ PanelWindow {
         if (dir && dir.length > 0) Wallpapers.setDirectory(dir)
         Wallpapers.generateThumbnail("large")
         root.selectedIndex = 0
+        root.previewArmed = false
+        root.readFolder()
+        root.selectCurrent()
         Qt.callLater(() => search.forceActiveFocus())
     }
+    // Opens on the applied wallpaper when it lives in this folder.
+    function selectCurrent(): void {
+        const current = FileUtils.trimFileProtocol(String(root.currentPath ?? ""))
+        const index = root.libraryFiles.findIndex(entry => entry.path === current)
+        if (index >= 0) {
+            root.selectedIndex = index
+            Qt.callLater(() => grid.positionViewAtIndex(index, GridView.Contain))
+        }
+    }
     Component.onCompleted: if (root.morphOpen) root.prepare()
-    onMorphOpenChanged: if (root.morphOpen) root.prepare()
     Connections {
         target: Wallpapers
         function onDirectoryChanged(): void {
             Wallpapers.generateThumbnail("large")
-            if (!root.online) root.selectedIndex = 0
+            if (!root.online) { root.selectedIndex = 0; grid.contentX = 0 }
+            folderRead.restart()
         }
     }
 
@@ -136,11 +208,46 @@ PanelWindow {
 
     function apply(filePath: string, isDir: bool): void {
         if (!filePath || filePath.length === 0) return
-        if (isDir) { Wallpapers.setDirectory(filePath); return }
-        Wallpapers.applySelectionTarget(FileUtils.trimFileProtocol(filePath), root.selectionTarget,
+        if (isDir) { root.openFolder(filePath); return }
+        const target = root.selectionTarget
+        root.committing = true
+        Wallpapers.applySelectionTarget(FileUtils.trimFileProtocol(filePath), target,
             Appearance.m3colors.darkmode, root.targetMonitor)
+        // Visible targets adopt the preview in place; a backdrop previewed against
+        // the desktop restores it (same rules as the shared launcher).
+        if (target === "backdrop" || target === "waffle-backdrop") Wallpapers.cancelWallpaperPreview()
+        else Wallpapers.clearWallpaperPreview()
         root.finishSelection()
+        Qt.callLater(() => root.committing = false)
     }
+
+    // Live preview: the highlighted library wallpaper shows on the desktop once
+    // the user has moved the selection; opening never repaints by itself.
+    readonly property bool livePreview: Config.options?.iris?.wallpaper?.livePreview ?? true
+    property bool previewArmed: false
+    property bool committing: false
+    onSelectedIndexChanged: if (root.morphOpen && !root.online) previewDelay.restart()
+    Timer {
+        id: previewDelay
+        interval: 180
+        onTriggered: {
+            if (!root.morphOpen || root.online || !root.livePreview || !root.previewArmed) return
+            const path = root.libraryPath
+            if (!path || path === FileUtils.trimFileProtocol(String(root.currentPath ?? ""))) Wallpapers.cancelWallpaperPreview()
+            else Wallpapers.previewWallpaper(path, root.targetMonitor)
+        }
+    }
+    function select(index: int): void {
+        root.previewArmed = true
+        root.selectedIndex = index
+    }
+    onMorphOpenChanged: {
+        if (root.morphOpen) root.prepare()
+        else if (!root.committing) Wallpapers.cancelWallpaperPreview()
+    }
+    onLivePreviewChanged: if (!root.livePreview) Wallpapers.cancelWallpaperPreview()
+    onOnlineChanged: if (root.online) Wallpapers.cancelWallpaperPreview()
+    Component.onDestruction: if (!root.committing) Wallpapers.cancelWallpaperPreview()
     function finishSelection(): void {
         Config.setNestedValue("wallpaperSelector.selectionTarget", "main")
         Config.setNestedValue("wallpaperSelector.targetMonitor", "")
@@ -167,13 +274,11 @@ PanelWindow {
     }
     function applySelected(): void {
         if (root.online) { root.applyOnline(root.selectedImage); return }
-        const model = Wallpapers.folderModel
-        if (!model || model.count === 0) return
-        root.apply(model.get(root.selectedIndex, "filePath"), model.get(root.selectedIndex, "fileIsDir"))
+        if (root.libraryPath.length > 0) root.apply(root.libraryPath, false)
     }
     function move(step: int): void {
         if (root.count === 0) return
-        root.selectedIndex = Math.max(0, Math.min(root.count - 1, root.selectedIndex + step))
+        root.select(Math.max(0, Math.min(root.count - 1, root.selectedIndex + step)))
         grid.positionViewAtIndex(root.selectedIndex, GridView.Contain)
     }
 
@@ -186,6 +291,9 @@ PanelWindow {
             else GlobalStates.wallpaperSelectorOpen = false
         }
     }
+    Shortcut { sequence: "Alt+Left"; enabled: root.morphOpen && !root.online && root.canGoBack; onActivated: Wallpapers.navigateBack() }
+    Shortcut { sequence: "Alt+Right"; enabled: root.morphOpen && !root.online && root.canGoForward; onActivated: Wallpapers.navigateForward() }
+    Shortcut { sequence: "Alt+Up"; enabled: root.morphOpen && !root.online; onActivated: Wallpapers.navigateUp() }
 
     component GlyphButton: IrisButton {
         id: glyphButton
@@ -202,7 +310,7 @@ PanelWindow {
             text: glyphButton.glyph
             fill: 1
             iconSize: Math.round(17 * root.d)
-            color: glyphButton.enabled ? IrisStyle.text : IrisStyle.muted
+            color: !glyphButton.enabled ? IrisStyle.muted : glyphButton.selected ? IrisStyle.accent : IrisStyle.text
         }
     }
 
@@ -230,7 +338,6 @@ PanelWindow {
         property bool selected: false
         property bool current: false
         property bool busy: false
-        property bool folder: false
         property string label: ""
         default property alias art: tile.data
         signal activated()
@@ -241,7 +348,7 @@ PanelWindow {
         cursorShape: Qt.PointingHandCursor
         Accessible.role: Accessible.Button
         Accessible.name: cell.label
-        onClicked: { root.selectedIndex = cell.index; cell.activated() }
+        onClicked: { root.select(cell.index); cell.activated() }
         onDoubleClicked: cell.committed()
 
         Item {
@@ -268,7 +375,6 @@ PanelWindow {
             }
             // Name over a melt to black while hovered or selected.
             Rectangle {
-                visible: !cell.folder
                 x: tile.x
                 width: tile.width
                 y: tile.y + tile.height - height
@@ -333,11 +439,124 @@ PanelWindow {
             anchors.margins: Math.round(16 * root.d)
             spacing: Math.round(10 * root.d)
 
-            // Header: where the wallpapers come from, search, and the actions of
-            // that source.
+            // Where: back and forward, the path as breadcrumbs (every place is a
+            // way back), and the source switch on the far side.
             RowLayout {
                 Layout.fillWidth: true
-                spacing: Math.round(8 * root.d)
+                spacing: Math.round(6 * root.d)
+
+                GlyphButton {
+                    visible: !root.online
+                    glyph: "chevron_left"
+                    enabled: root.canGoBack
+                    Accessible.name: Translation.tr("Back")
+                    onClicked: Wallpapers.navigateBack()
+                }
+                GlyphButton {
+                    visible: !root.online
+                    glyph: "chevron_right"
+                    enabled: root.canGoForward
+                    Accessible.name: Translation.tr("Forward")
+                    onClicked: Wallpapers.navigateForward()
+                }
+
+                // Breadcrumbs: quiet places leading to the folder you are in,
+                // which carries the weight and the wallpaper count.
+                Flickable {
+                    id: crumbFlick
+                    visible: !root.online
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: Math.round(34 * root.d)
+                    contentWidth: crumbRow.implicitWidth
+                    contentX: Math.max(0, crumbRow.implicitWidth - width)
+                    boundsBehavior: Flickable.StopAtBounds
+                    interactive: crumbRow.implicitWidth > width
+                    clip: true
+                    Row {
+                        id: crumbRow
+                        height: parent.height
+                        spacing: Math.round(2 * root.d)
+                        Repeater {
+                            model: root.crumbs
+                            Row {
+                                id: crumb
+                                required property var modelData
+                                required property int index
+                                readonly property bool last: crumb.index === root.crumbs.length - 1
+                                height: crumbRow.height
+                                spacing: Math.round(2 * root.d)
+                                MaterialSymbol {
+                                    visible: crumb.index > 0
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    text: "chevron_right"
+                                    iconSize: Math.round(15 * root.d)
+                                    color: IrisStyle.muted
+                                }
+                                MouseArea {
+                                    id: crumbArea
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    width: crumbContent.implicitWidth + Math.round(18 * root.d)
+                                    height: Math.round(28 * root.d)
+                                    hoverEnabled: true
+                                    cursorShape: crumb.last ? Qt.ArrowCursor : Qt.PointingHandCursor
+                                    Accessible.role: Accessible.Button
+                                    Accessible.name: crumb.modelData.label
+                                    onClicked: root.openFolder(crumb.modelData.path)
+                                    Rectangle {
+                                        anchors.fill: parent
+                                        radius: height / 2
+                                        color: ColorUtils.applyAlpha(IrisStyle.text, crumb.last ? 0.1 : crumbArea.containsMouse ? 0.08 : 0)
+                                        Behavior on color { ColorAnimation { duration: IrisStyle.duration(110) } }
+                                    }
+                                    Row {
+                                        id: crumbContent
+                                        anchors.centerIn: parent
+                                        spacing: Math.round(5 * root.d)
+                                        MaterialSymbol {
+                                            visible: crumb.modelData.home || (crumb.last && root.atWallpapersHome)
+                                            anchors.verticalCenter: parent.verticalCenter
+                                            text: crumb.modelData.home ? "home" : "wallpaper"
+                                            fill: 1
+                                            iconSize: Math.round(15 * root.d)
+                                            color: crumb.last ? IrisStyle.accent : IrisStyle.subtext
+                                        }
+                                        IrisText {
+                                            anchors.verticalCenter: parent.verticalCenter
+                                            text: crumb.modelData.label
+                                            color: crumb.last ? IrisStyle.text : IrisStyle.subtext
+                                            font.pixelSize: (crumb.last ? 13.5 : 12.5) * IrisStyle.typeScale
+                                            font.weight: crumb.last ? Font.DemiBold : Font.Medium
+                                        }
+                                        IrisText {
+                                            visible: crumb.last
+                                            anchors.verticalCenter: parent.verticalCenter
+                                            text: String(root.libraryCount)
+                                            color: IrisStyle.secondaryAccent
+                                            font.family: IrisStyle.fontNumbers
+                                            font.features: ({ "tnum": 1 })
+                                            font.pixelSize: 12 * IrisStyle.typeScale
+                                            font.weight: Font.Bold
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                IrisText {
+                    visible: root.online
+                    Layout.fillWidth: true
+                    Layout.leftMargin: Math.round(4 * root.d)
+                    text: Translation.tr("Discover on Wallhaven")
+                    font.pixelSize: 13.5 * IrisStyle.typeScale
+                    font.weight: Font.DemiBold
+                }
+                GlyphButton {
+                    visible: !root.online && !root.atWallpapersHome
+                    glyph: "wallpaper"
+                    Accessible.name: Translation.tr("Wallpapers folder")
+                    onClicked: root.openFolder(root.wallpapersHome)
+                }
 
                 // Source switch: one sliding selection.
                 Rectangle {
@@ -396,6 +615,12 @@ PanelWindow {
                         }
                     }
                 }
+            }
+
+            // Search, and the actions of the source.
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: Math.round(8 * root.d)
 
                 Rectangle {
                     Layout.fillWidth: true
@@ -437,6 +662,7 @@ PanelWindow {
                                 root.setSource(root.online ? "library" : "online")
                                 search.forceActiveFocus()
                             }
+                            else if (event.modifiers & Qt.AltModifier) return
                             else if (event.key === Qt.Key_Right && search.text.length === 0) root.move(rows)
                             else if (event.key === Qt.Key_Left && search.text.length === 0) root.move(-rows)
                             else if (event.key === Qt.Key_Down) root.move(1)
@@ -449,7 +675,8 @@ PanelWindow {
                         IrisText {
                             anchors.verticalCenter: parent.verticalCenter
                             visible: search.text.length === 0
-                            text: root.online ? Translation.tr("Search Wallhaven") : Translation.tr("Search your wallpapers")
+                            text: root.online ? Translation.tr("Search Wallhaven")
+                                : Translation.tr("Search in %1").arg(root.crumbs[root.crumbs.length - 1]?.label ?? "")
                             color: IrisStyle.muted
                             font.pixelSize: search.font.pixelSize
                         }
@@ -459,6 +686,7 @@ PanelWindow {
                         anchors.right: parent.right
                         anchors.rightMargin: Math.round(14 * root.d)
                         anchors.verticalCenter: parent.verticalCenter
+                        visible: root.online || search.text.length > 0
                         text: Wallhaven.runningRequests > 0 && root.online ? Translation.tr("Loading…") : String(root.count)
                         color: IrisStyle.secondaryAccent
                         font.family: IrisStyle.fontNumbers
@@ -469,9 +697,10 @@ PanelWindow {
 
                 GlyphButton {
                     visible: !root.online
-                    glyph: "drive_folder_upload"
-                    Accessible.name: Translation.tr("Parent folder")
-                    onClicked: Wallpapers.navigateUp()
+                    glyph: root.livePreview ? "visibility" : "visibility_off"
+                    selected: root.livePreview
+                    Accessible.name: Translation.tr("Preview on the desktop")
+                    onClicked: Config.setNestedValue("iris.wallpaper.livePreview", !root.livePreview)
                 }
                 GlyphButton {
                     visible: !root.online
@@ -479,8 +708,8 @@ PanelWindow {
                     enabled: root.libraryCount > 0
                     Accessible.name: Translation.tr("Random wallpaper")
                     onClicked: {
-                        Wallpapers.randomFromCurrentFolder(Appearance.m3colors.darkmode, root.targetMonitor, root.selectionTarget)
-                        root.finishSelection()
+                        const pick = root.libraryFiles[Math.floor(Math.random() * root.libraryFiles.length)]
+                        if (pick) root.apply(pick.path, false)
                     }
                 }
                 GlyphButton {
@@ -488,6 +717,68 @@ PanelWindow {
                     glyph: "refresh"
                     Accessible.name: Translation.tr("Refresh")
                     onClicked: root.searchOnline(1, true)
+                }
+            }
+
+            // Subfolders: one row of folder chips, apart from the wallpapers.
+            Flickable {
+                id: folderStrip
+                Layout.fillWidth: true
+                visible: !root.online && search.text.length === 0 && root.libraryFolders.length > 0
+                implicitHeight: Math.round(32 * root.d)
+                contentWidth: folderRow.implicitWidth
+                boundsBehavior: Flickable.StopAtBounds
+                clip: true
+                WheelHandler {
+                    acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
+                    onWheel: event => {
+                        const delta = event.pixelDelta.x || event.pixelDelta.y || (event.angleDelta.y || event.angleDelta.x) / 2
+                        folderStrip.contentX = Math.max(0, Math.min(Math.max(0, folderStrip.contentWidth - folderStrip.width), folderStrip.contentX - delta))
+                    }
+                }
+                Row {
+                    id: folderRow
+                    spacing: Math.round(6 * root.d)
+                    Repeater {
+                        model: root.libraryFolders
+                        MouseArea {
+                            id: folderChip
+                            required property var modelData
+                            width: chipContent.implicitWidth + Math.round(24 * root.d)
+                            height: folderStrip.height
+                            hoverEnabled: true
+                            cursorShape: Qt.PointingHandCursor
+                            Accessible.role: Accessible.Button
+                            Accessible.name: folderChip.modelData.name
+                            onClicked: root.openFolder(folderChip.modelData.path)
+                            Rectangle {
+                                anchors.fill: parent
+                                radius: height / 2
+                                color: ColorUtils.applyAlpha(IrisStyle.text, folderChip.pressed ? 0.18 : folderChip.containsMouse ? 0.13 : 0.07)
+                                scale: folderChip.pressed ? 0.96 : 1
+                                Behavior on color { ColorAnimation { duration: IrisStyle.duration(110) } }
+                                Behavior on scale { NumberAnimation { duration: IrisStyle.duration(110); easing.type: Easing.OutCubic } }
+                            }
+                            Row {
+                                id: chipContent
+                                anchors.centerIn: parent
+                                spacing: Math.round(6 * root.d)
+                                MaterialSymbol {
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    text: "folder"
+                                    fill: 1
+                                    iconSize: Math.round(16 * root.d)
+                                    color: IrisStyle.accent
+                                }
+                                IrisText {
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    text: folderChip.modelData.name
+                                    font.pixelSize: 12.5 * IrisStyle.typeScale
+                                    font.weight: Font.Medium
+                                }
+                            }
+                        }
+                    }
                 }
             }
 
@@ -530,6 +821,12 @@ PanelWindow {
                 objectProp: "id"
                 values: root.onlineImages
             }
+            // Wallpapers keyed by path: a refreshed folder keeps unchanged tiles.
+            ScriptModel {
+                id: libraryModel
+                objectProp: "path"
+                values: root.libraryFiles
+            }
             GridView {
                 id: grid
                 Layout.fillWidth: true
@@ -543,7 +840,7 @@ PanelWindow {
                 boundsBehavior: Flickable.StopAtBounds
                 flickableDirection: Flickable.HorizontalFlick
                 cacheBuffer: Math.round(cellWidth * 4)
-                model: root.online ? onlineResultsModel : (Wallpapers.folderModelReady ? Wallpapers.folderModel : null)
+                model: root.online ? onlineResultsModel : libraryModel
                 currentIndex: root.selectedIndex
                 // Near the end of the online results, fetch the next page.
                 onContentXChanged: if (root.online && Wallhaven.runningRequests === 0 && root.onlinePage > 0
@@ -566,12 +863,9 @@ PanelWindow {
                 delegate: Loader {
                     id: slot
                     required property int index
-                    readonly property string filePath: !root.online && Wallpapers.folderModelReady
-                        ? String(Wallpapers.folderModel.get(slot.index, "filePath") ?? "") : ""
-                    readonly property string fileName: !root.online && Wallpapers.folderModelReady
-                        ? String(Wallpapers.folderModel.get(slot.index, "fileName") ?? "") : ""
-                    readonly property bool fileIsDir: !root.online && Wallpapers.folderModelReady
-                        ? Boolean(Wallpapers.folderModel.get(slot.index, "fileIsDir") ?? false) : false
+                    required property var modelData
+                    readonly property string filePath: !root.online ? String(slot.modelData?.path ?? "") : ""
+                    readonly property string fileName: !root.online ? String(slot.modelData?.name ?? "") : ""
                     width: grid.cellWidth
                     height: grid.cellHeight
                     sourceComponent: root.online ? onlineTile : libraryTile
@@ -581,34 +875,17 @@ PanelWindow {
                         Tile {
                             index: slot.index
                             selected: root.selectedIndex === slot.index
-                            folder: slot.fileIsDir
-                            current: !slot.fileIsDir && Wallpapers.isCurrentWallpaperPath(slot.filePath, root.selectionTarget, root.targetMonitor)
+                            current: Wallpapers.isCurrentWallpaperPath(slot.filePath, root.selectionTarget, root.targetMonitor)
                             label: slot.fileName.replace(/\.[^.]+$/, "")
-                            onActivated: if (slot.fileIsDir) root.apply(slot.filePath, true)
-                            onCommitted: if (!slot.fileIsDir) root.apply(slot.filePath, false)
+                            onCommitted: root.apply(slot.filePath, false)
                             ThumbnailImage {
                                 anchors.fill: parent
-                                visible: !slot.fileIsDir
                                 generateThumbnail: true
-                                sourcePath: slot.fileIsDir ? "" : slot.filePath
+                                sourcePath: slot.filePath
                                 thumbnailSizeName: "large"
                                 fillMode: Image.PreserveAspectCrop
                                 sourceSize.width: Math.round(width * 1.25)
                                 sourceSize.height: Math.round(height * 1.25)
-                            }
-                            ColumnLayout {
-                                anchors.centerIn: parent
-                                visible: slot.fileIsDir
-                                spacing: Math.round(3 * root.d)
-                                MaterialSymbol { Layout.alignment: Qt.AlignHCenter; text: "folder"; fill: 1; iconSize: Math.round(28 * root.d); color: IrisStyle.accent }
-                                IrisText {
-                                    Layout.alignment: Qt.AlignHCenter
-                                    Layout.maximumWidth: grid.cellWidth - 30 * root.d
-                                    text: slot.fileName
-                                    font.pixelSize: 11.5 * IrisStyle.typeScale
-                                    font.weight: Font.DemiBold
-                                    elide: Text.ElideRight
-                                }
                             }
                         }
                     }
@@ -635,54 +912,92 @@ PanelWindow {
                     }
                 }
 
-                IrisText {
+                // Empty: say why, and where to go when only folders are here.
+                ColumnLayout {
                     anchors.centerIn: parent
                     visible: root.count === 0
                     width: parent.width - 40 * root.d
-                    horizontalAlignment: Text.AlignHCenter
-                    wrapMode: Text.WordWrap
-                    text: root.online
-                        ? (Wallhaven.runningRequests > 0 ? Translation.tr("Looking for wallpapers…") : (root.onlineMessage || Translation.tr("Nothing found")))
-                        : search.text.length > 0 ? Translation.tr("No matches") : Translation.tr("No wallpapers in this folder")
-                    color: IrisStyle.muted
+                    spacing: Math.round(6 * root.d)
+                    MaterialSymbol {
+                        Layout.alignment: Qt.AlignHCenter
+                        text: root.online ? "travel_explore"
+                            : search.text.length > 0 ? "search_off"
+                            : root.libraryFolders.length > 0 ? "folder_open" : "hide_image"
+                        fill: 1
+                        iconSize: Math.round(30 * root.d)
+                        color: IrisStyle.muted
+                    }
+                    IrisText {
+                        Layout.fillWidth: true
+                        horizontalAlignment: Text.AlignHCenter
+                        wrapMode: Text.WordWrap
+                        text: root.online
+                            ? (Wallhaven.runningRequests > 0 ? Translation.tr("Looking for wallpapers…") : (root.onlineMessage || Translation.tr("Nothing found")))
+                            : search.text.length > 0 ? Translation.tr("No matches")
+                            : root.libraryFolders.length > 0 ? Translation.tr("Wallpapers live in the folders above")
+                            : Translation.tr("No wallpapers in this folder")
+                        color: IrisStyle.muted
+                    }
                 }
             }
 
-            // Selection: one line — what Apply does, where it lands, the keys.
+            // Selection: what is highlighted and where it lands, then the one action.
             RowLayout {
                 Layout.fillWidth: true
                 spacing: 10 * root.d
-                IrisText {
+                ColumnLayout {
                     Layout.fillWidth: true
-                    text: root.downloadingId.length > 0 ? Translation.tr("Downloading…")
-                        : root.selectedName.replace(/\.[^.]+$/, "") || Translation.tr("Choose a wallpaper")
-                    elide: Text.ElideMiddle
-                    font.pixelSize: 13 * IrisStyle.typeScale
-                    font.weight: Font.DemiBold
+                    spacing: 0
+                    IrisText {
+                        Layout.fillWidth: true
+                        text: root.downloadingId.length > 0 ? Translation.tr("Downloading…")
+                            : root.selectedName.replace(/\.[^.]+$/, "") || Translation.tr("Choose a wallpaper")
+                        elide: Text.ElideMiddle
+                        font.pixelSize: 13 * IrisStyle.typeScale
+                        font.weight: Font.DemiBold
+                    }
+                    IrisText {
+                        Layout.fillWidth: true
+                        text: root.online ? (root.selectedImage ? root.selectedImage.width + " × " + root.selectedImage.height + " · " + Translation.tr("saved to your wallpapers") : "")
+                            : Wallpapers.thumbnailGenerationRunning ? Translation.tr("Preparing previews…")
+                            : root.livePreview && root.previewArmed ? Translation.tr("Previewing on the desktop")
+                            : Translation.tr("Double-click or press Enter to apply")
+                        color: IrisStyle.muted
+                        font.pixelSize: 11 * IrisStyle.typeScale
+                        elide: Text.ElideRight
+                    }
                 }
-                MaterialSymbol {
-                    text: root.targetMonitor ? "desktop_windows" : "select_window"
-                    iconSize: 14 * root.d
-                    color: IrisStyle.muted
+                // Where it lands, as a quiet chip.
+                Rectangle {
+                    implicitHeight: Math.round(28 * root.d)
+                    implicitWidth: targetRow.implicitWidth + Math.round(20 * root.d)
+                    radius: height / 2
+                    color: ColorUtils.applyAlpha(IrisStyle.text, 0.07)
+                    Row {
+                        id: targetRow
+                        anchors.centerIn: parent
+                        spacing: Math.round(6 * root.d)
+                        MaterialSymbol {
+                            anchors.verticalCenter: parent.verticalCenter
+                            text: root.targetMonitor ? "desktop_windows" : "select_window"
+                            iconSize: Math.round(14 * root.d)
+                            color: IrisStyle.subtext
+                        }
+                        IrisText {
+                            anchors.verticalCenter: parent.verticalCenter
+                            text: root.targetMonitor || Translation.tr("All displays")
+                            color: IrisStyle.subtext
+                            font.pixelSize: 11.5 * IrisStyle.typeScale
+                        }
+                    }
                 }
-                IrisText {
-                    text: root.online ? Translation.tr("Saved to your wallpapers")
-                        : Wallpapers.thumbnailGenerationRunning ? Translation.tr("Preparing previews…")
-                        : (root.targetMonitor || Translation.tr("All displays"))
-                    color: IrisStyle.muted
-                    font.pixelSize: 11.5 * IrisStyle.typeScale
-                }
-                KeyCap { label: "↵"; Layout.leftMargin: 6 * root.d }
-                IrisText { text: root.selectedFolder ? Translation.tr("Open") : Translation.tr("Apply"); color: IrisStyle.muted; font.pixelSize: 11.5 * IrisStyle.typeScale }
-                KeyCap { label: "Esc"; Layout.leftMargin: 4 * root.d }
-                IrisText { text: Translation.tr("Close"); color: IrisStyle.muted; font.pixelSize: 11.5 * IrisStyle.typeScale }
+                KeyCap { label: "Esc"; Layout.leftMargin: 2 * root.d }
                 IrisButton {
-                    Layout.leftMargin: 6 * root.d
                     implicitHeight: Math.round(32 * root.d)
                     buttonRadius: height / 2
                     buttonRadiusPressed: height / 2
-                    emphasized: !root.selectedFolder
-                    text: root.selectedFolder ? Translation.tr("Open") : Translation.tr("Apply")
+                    emphasized: true
+                    text: Translation.tr("Apply")
                     enabled: (root.online ? root.selectedImage !== null : root.libraryPath.length > 0) && root.downloadingId.length === 0
                     onClicked: root.applySelected()
                 }

@@ -116,6 +116,7 @@ PanelWindow {
         { section: "surfaces", group: "Tray", label: "Columns", path: "iris.tray.columns", kind: "range", fallback:4,min:2,max:6 },
         { section: "desktop", group: "Wallpaper gallery", label: "Gallery width", path: "iris.wallpaper.width", kind: "range", fallback:960,min:640,max:1400,step:40,unit:" px" },
         { section: "desktop", group: "Wallpaper gallery", label: "Preview size", path: "iris.wallpaper.thumbnailSize", kind: "range", fallback:228,min:160,max:320,step:8,unit:" px" },
+        { section: "desktop", group: "Wallpaper gallery", label: "Preview on the desktop", description: "The highlighted wallpaper shows behind the gallery; closing without applying restores yours.", path: "iris.wallpaper.livePreview", kind: "switch", fallback: true },
         { section: "surfaces", group: "Feedback", label: "Notifications", path: "iris.modules.notificationPopup", kind: "switch", fallback:true },
         { section: "surfaces", group: "Feedback", label: "Banner duration", description: "How long a notification stays when the app does not choose. Hovering keeps it.", path: "iris.notifications.duration", kind: "range", fallback:4000,min:2000,max:12000,step:500,unit:" ms" },
         { section: "surfaces", group: "Feedback", label: "Volume and brightness feedback", path: "iris.modules.osd", kind: "switch", fallback:true },
