@@ -24,7 +24,11 @@ PanelWindow {
         ? (Number(root.barOptions?.height ?? 42) + ((root.barOptions?.notch ?? false) ? 0 : Number(root.barOptions?.margin ?? 8) * 2) + 10) * root.d
         : 10 * root.d
 
-    visible: root.popups.length > 0
+    // A banner that leaves still animates after it has left the list: the
+    // surface stays mapped until the last exit has played.
+    visible: root.popups.length > 0 || exitLinger.running
+    onPopupsChanged: if (root.popups.length === 0) exitLinger.restart()
+    Timer { id: exitLinger; interval: IrisStyle.settleDuration * 2 + 80 }
     screen: GlobalStates.focusedScreen
     color: "transparent"
     exclusionMode: ExclusionMode.Ignore
@@ -38,9 +42,14 @@ PanelWindow {
     readonly property real popupWidth: Math.min(Math.max(260, (root.screen?.width ?? 1920) - 16),
         Math.max(340, Number(root.options?.width ?? 380) * root.d) + 16)
     implicitWidth: root.screen?.width ?? root.popupWidth
-    implicitHeight: root.topOffset + popupColumn.implicitHeight + 24 * root.d
-    // Only the banners take input; the transparent strip beside them passes through.
+    // A stable canvas tall enough for three expanded banners: the layer surface
+    // never resizes as banners arrive, grow on hover or leave; input is the mask.
+    implicitHeight: Math.min((root.screen?.height ?? 1080) * 0.8, root.topOffset + 3 * 250 * root.d)
     mask: Region { item: popupColumn }
+    // Where a banner melts back into: the resting Island on this output, when it
+    // hangs from the top edge above the banners.
+    readonly property var island: GlobalStates.irisIslandGeometry?.[root.screen?.name ?? ""] ?? null
+    readonly property real bubbleSize: Math.round(44 * root.d)
 
     // Relative times ("now", "2m") refresh while banners are visible.
     property real now: Date.now()
@@ -62,17 +71,34 @@ PanelWindow {
         Notifications.timeoutNotification(notification.notificationId)
     }
 
-    ColumnLayout {
+    // Banners keyed by notification: a new one never recreates the others, and a
+    // leaving one keeps its delegate for the exit transition.
+    ListView {
         id: popupColumn
         anchors.top: parent.top
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.topMargin: root.topOffset
         width: Math.min(root.popupWidth - 16, parent.width - 16)
+        height: Math.max(1, popupColumn.contentHeight)
         spacing: 8 * root.d
-
-        Repeater {
-            model: root.popups
-            delegate: bannerComponent
+        interactive: false
+        model: ScriptModel {
+            objectProp: "notificationId"
+            values: root.popups
+        }
+        delegate: bannerComponent
+        // Leaving: the banner folds back into its bubble, which melts into the Island.
+        remove: Transition {
+            NumberAnimation {
+                property: "leave"
+                from: 0
+                to: 1
+                duration: IrisStyle.settleDuration * 1.6
+                easing.type: Easing.Linear
+            }
+        }
+        displaced: Transition {
+            NumberAnimation { property: "y"; duration: IrisStyle.morphDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: IrisStyle.morphCurve }
         }
     }
 
@@ -87,17 +113,35 @@ PanelWindow {
             readonly property var actions: (banner.notification?.actions ?? []).filter(action => action.identifier !== "default")
             readonly property bool critical: String(banner.notification?.urgency ?? "") === "critical"
             readonly property bool hovered: bannerHover.hovered
-            Layout.fillWidth: true
-            implicitHeight: plate.height
+            width: popupColumn.width
+            height: plate.height
 
             // Hovering keeps a banner around; it then waits to be dismissed.
             onHoveredChanged: if (banner.hovered) Notifications.cancelTimeout(banner.notification.notificationId)
             HoverHandler { id: bannerHover }
 
-            // Drops out of the Island: short travel, slight scale, fast fade.
+            // A bubble out of the Island: the sender's icon arrives as a disc under
+            // it and blooms into the banner — width, height and radius on one
+            // progress — with the text arriving once the shape has formed.
             property real appear: 0
             Component.onCompleted: banner.appear = 1
-            Behavior on appear { NumberAnimation { duration: IrisStyle.morphDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: IrisStyle.morphCurve } }
+            Behavior on appear { NumberAnimation { duration: IrisStyle.settleDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: IrisStyle.morphCurve } }
+            readonly property real bloomIn: Math.min(1, banner.appear * 1.25)
+            // Leaving (driven by the list's remove transition, 0 → 1): fold back into
+            // the bubble over the first half, then rise into the Island and melt.
+            property real leave: 0
+            readonly property bool swiped: Math.abs(banner.swipe) > 1
+            readonly property real fold: banner.swiped ? 0 : Math.min(1, banner.leave * 2)
+            readonly property real rise: {
+                if (banner.swiped) return 0
+                const t = Math.max(0, banner.leave * 2 - 1)
+                return t * t * (3 - 2 * t)
+            }
+            // The same front-loaded curve both ways: blooming settles into the banner,
+            // folding settles into the bubble.
+            readonly property real bloom: Math.min(banner.bloomIn, 1 - (1 - Math.pow(1 - banner.fold, 3)))
+            readonly property bool meltsIntoIsland: root.barTop && root.island !== null
+            readonly property real fullHeight: content.implicitHeight + 24 * root.d
 
             // Horizontal swipe dismisses.
             property real swipe: 0
@@ -108,18 +152,25 @@ PanelWindow {
 
             Rectangle {
                 id: plate
-                width: parent.width
-                height: content.implicitHeight + 24 * root.d
-                x: banner.swipe
-                y: (1 - banner.appear) * (root.barTop ? -18 : 18) * root.d
-                scale: 0.94 + 0.06 * banner.appear
-                transformOrigin: root.barTop ? Item.Top : Item.Bottom
-                opacity: Math.min(banner.appear * 1.4, 1) * (1 - Math.min(1, Math.abs(banner.swipe) / (banner.width * 0.6)))
-                radius: Math.round(22 * root.d)
+                width: Math.round(root.bubbleSize + (banner.width - root.bubbleSize) * banner.bloom)
+                height: Math.round(root.bubbleSize + (banner.fullHeight - root.bubbleSize) * banner.bloom)
+                clip: true
+                // Centred while it is a bubble; the swipe carries the whole plate.
+                x: Math.round((banner.width - width) / 2 + banner.swipe)
+                // Rises from just under the Island on arrival, and back into it on leaving.
+                readonly property real islandLift: banner.meltsIntoIsland
+                    ? (root.island.y + root.island.bubble / 2) - (popupColumn.y + banner.y + root.bubbleSize / 2) : -18 * root.d
+                y: Math.round(banner.meltsIntoIsland
+                    ? plate.islandLift * Math.max(1 - Math.min(1, banner.appear * 2.2), banner.rise)
+                    : (1 - banner.appear) * -18 * root.d)
+                scale: 1 - 0.45 * banner.rise
+                // Melts as it reaches the Island, not on the way there.
+                opacity: Math.min(1, banner.appear * 3) * (1 - Math.max(0, banner.rise - 0.6) / 0.4)
+                    * (1 - Math.min(1, Math.abs(banner.swipe) / (banner.width * 0.6)))
+                radius: Math.min(height / 2, root.bubbleSize / 2 + (Math.round(22 * root.d) - root.bubbleSize / 2) * banner.bloom)
                 color: IrisStyle.surface
                 border.width: banner.critical ? 1 : 0
                 border.color: ColorUtils.applyAlpha(IrisStyle.danger, 0.7)
-                Behavior on height { NumberAnimation { duration: IrisStyle.duration(160); easing.type: Easing.OutCubic } }
 
                 DragHandler {
                     id: swipeDrag
@@ -146,20 +197,25 @@ PanelWindow {
                     onTapped: root.activate(banner.notification)
                 }
 
+                // Laid out at the banner's full width, so text never reflows while the
+                // plate blooms; the plate clips it and it fades in once formed.
                 RowLayout {
                     id: content
-                    anchors.left: parent.left
-                    anchors.right: parent.right
-                    anchors.top: parent.top
-                    anchors.margins: 12 * root.d
-                    anchors.leftMargin: 14 * root.d
+                    x: 14 * root.d
+                    y: 12 * root.d
+                    width: banner.width - 26 * root.d
                     spacing: 12 * root.d
 
                     // Sender artwork: image with the app as a badge, the app icon,
-                    // or an iRiS tile for senders that publish nothing usable.
+                    // or an iRiS tile for senders that publish nothing usable. It is
+                    // the bubble: centred in the disc, sliding to its place as it blooms.
                     IrisNotificationIcon {
                         Layout.alignment: Qt.AlignTop
                         Layout.topMargin: 2 * root.d
+                        transform: Translate {
+                            x: ((root.bubbleSize - 38 * root.d) / 2 - 14 * root.d) * (1 - banner.bloom)
+                            y: ((root.bubbleSize - 38 * root.d) / 2 - 14 * root.d) * (1 - banner.bloom)
+                        }
                         size: Math.round(38 * root.d)
                         appName: String(banner.notification?.appName ?? "")
                         appIcon: String(banner.notification?.appIcon ?? "")
@@ -171,6 +227,7 @@ PanelWindow {
                     ColumnLayout {
                         Layout.fillWidth: true
                         spacing: 1
+                        opacity: Math.max(0, Math.min(1, (banner.bloom - 0.55) / 0.45))
 
                         RowLayout {
                             Layout.fillWidth: true

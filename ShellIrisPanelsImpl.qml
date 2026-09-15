@@ -95,6 +95,8 @@ Item {
     OnDemandPanelLoader {
         identifier: "irisNotificationPopup"
         open: (Notifications.popupList?.length ?? 0) > 0
+        // The last banner folds back into the Island after it leaves the list.
+        closeGraceMs: IrisStyle.settleDuration * 2 + 160
         extraCondition: Config.options?.iris?.modules?.notificationPopup ?? true
         component: IrisNotificationPopup {}
     }
