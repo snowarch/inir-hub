@@ -31,6 +31,43 @@ Scope {
             if (GlobalStates.irisIslandExpanded) root.islandRequested(false, "")
             else { GlobalStates.barOpen = true; root.islandRequested(true, "") }
         }
+        function card(action: string): void {
+            if (action === "pin") {
+                Config.setNestedValue("iris.player.cardPinned", !(Config.options?.iris?.player?.cardPinned ?? false))
+                return
+            }
+            GlobalStates.irisMediaCardOpen = action === "open" ? true : action === "close" ? false : !GlobalStates.irisMediaCardOpen
+        }
+        // Open iRiS Settings on a section (bar, player, bubbles, dock, appearance,
+        // desktop, sidebars, surfaces, system).
+        function settings(section: string): void { GlobalStates.openSettingsPage(28, section) }
+        // Place a bubble: an Island slot (`left`, `right`, `utility`) or an extra
+        // bubble (`weather`, `notifications`, `controls`, `sound`, `mic`, `tools`,
+        // `media`, `tray`) at `island` (slots) / `off` (extras), a zone (`top-left`,
+        // `top-right`, `left`, `right`, `bottom-left`, `bottom-right`) or `x,y`
+        // as fractions of the output.
+        function bubble(slot: string, place: string): string {
+            const extras = ["weather", "notifications", "controls", "sound", "mic", "tools", "media", "tray"]
+            const extra = extras.includes(slot)
+            if (!extra && !["left", "right", "utility"].includes(slot)) return "Unknown bubble"
+            const zones = ["top-left", "top-right", "left", "right", "bottom-left", "bottom-right"]
+            const path = extra ? "iris.bubbles.extras." + slot : "iris.bubbles." + slot
+            const updates = {}
+            if ((extra && place === "off") || (!extra && place === "island")) {
+                updates[path + (extra ? ".enable" : ".place")] = extra ? false : "island"
+            } else if (zones.includes(place)) {
+                updates[path + ".place"] = place
+            } else {
+                const m = String(place).match(/^(\d*\.?\d+),(\d*\.?\d+)$/)
+                if (!m) return "Unknown place: a zone, x,y fractions, or island/off"
+                updates[path + ".fx"] = Math.min(1, Number(m[1]))
+                updates[path + ".fy"] = Math.min(1, Number(m[2]))
+                updates[path + ".place"] = "free"
+            }
+            if (extra && place !== "off") updates[path + ".enable"] = true
+            Config.setNestedValues(updates)
+            return place
+        }
         function dock(action: string): void {
             GlobalStates.irisDockShown = action === "reveal" ? true : action === "hide" ? false : !GlobalStates.irisDockShown
         }

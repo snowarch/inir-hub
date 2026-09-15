@@ -14,6 +14,10 @@ Item {
     property bool compact: false
     property bool active: visible
     property bool showBackground: true
+    // Room kept free at the end of the title row for a host's own buttons.
+    property real headerReserve: 0
+    // The activity's own colour for progress (the artwork tint where a host has one).
+    property color tint: IrisStyle.text
     readonly property bool hasPlayer: root.player !== null && root.player !== undefined
     implicitHeight: (root.compact ? compactBody.implicitHeight : body.implicitHeight) + 28 * IrisStyle.density
     implicitWidth: 360 * IrisStyle.density
@@ -41,6 +45,7 @@ Item {
         spacing: 12 * IrisStyle.density
         RowLayout {
             Layout.fillWidth: true
+            Layout.rightMargin: root.headerReserve
             spacing: 14 * IrisStyle.density
             IrisArtwork {
                 source: media.displayedArtFilePath
@@ -59,8 +64,8 @@ Item {
             Layout.fillWidth: true
             visible: media.effectiveLength > 0
             seekable: media.effectiveCanSeek
-            fillColor: IrisStyle.text
-            trackColor: ColorUtils.applyAlpha(IrisStyle.text, 0.22)
+            fillColor: root.tint
+            trackColor: ColorUtils.applyAlpha(root.tint, 0.22)
             value: media.effectiveLength > 0 ? media.effectivePosition / media.effectiveLength : 0
             onSeekRequested: next => media.seek(next * media.effectiveLength)
         }

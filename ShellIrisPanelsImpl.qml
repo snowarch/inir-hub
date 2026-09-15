@@ -16,6 +16,7 @@ import qs.modules.iris.dock
 import qs.modules.iris.settings
 import qs.modules.iris.sidebar
 import qs.modules.iris.wallpaper
+import qs.modules.iris.bubbles
 import qs.modules.background
 import qs.modules.lock
 
@@ -155,6 +156,31 @@ Item {
         closeGraceMs: IrisStyle.settleDuration + 120
         extraCondition: Config.options?.iris?.modules?.controlCenter ?? true
         component: IrisControlCenter {}
+    }
+
+    // Bubbles carried off the Island, one layer per output: mapped only while
+    // something floats or a bubble is being carried.
+    Variants {
+        model: Quickshell.screens
+        delegate: LazyLoader {
+            id: bubbleLayerLoader
+            required property var modelData
+            activeAsync: Config.ready && GlobalStates.deferredPanelsReady
+                && (["left", "right", "utility"].some(slot => String(Config.options?.iris?.bubbles?.[slot]?.place ?? "island") !== "island")
+                    || ["weather", "notifications", "controls", "sound", "mic", "tools", "media", "tray"]
+                        .some(kind => Config.options?.iris?.bubbles?.extras?.[kind]?.enable ?? false)
+                    || GlobalStates.irisBubbleDrag !== null)
+            component: IrisBubbleLayer { modelData: bubbleLayerLoader.modelData }
+        }
+    }
+
+    // The media bubble's floating card: resident while opened or pinned.
+    OnDemandPanelLoader {
+        identifier: "irisMediaCard"
+        requireEnabledPanel: false
+        open: GlobalStates.irisMediaCardOpen || (Config.options?.iris?.player?.cardPinned ?? false)
+        closeGraceMs: IrisStyle.settleDuration + 120
+        component: IrisMediaBubbleCard {}
     }
 
     OnDemandPanelLoader {

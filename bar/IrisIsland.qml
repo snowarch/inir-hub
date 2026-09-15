@@ -263,6 +263,37 @@ Item {
                 Notifications.silent ? Translation.tr("On") : Translation.tr("Off"), -1)
         }
     }
+    // An activity that ends takes the resting shape for a moment instead of
+    // vanishing: the Island says what finished before the clock returns.
+    Connections {
+        target: root.eventsEnabled ? TimerService : null
+        function onCountdownRunningChanged(): void {
+            // Reset/stop restores the full duration; only a real finish reaches zero.
+            if (!TimerService.countdownRunning && TimerService.countdownSecondsLeft <= 0)
+                root.showEvent("alarm", IrisStyle.secondaryAccent, Translation.tr("Time's up"),
+                    Translation.tr("%1 timer").arg(root.durationText(TimerService.countdownDuration)), -1)
+        }
+        function onPomodoroBreakChanged(): void {
+            if (!TimerService.pomodoroRunning) return
+            root.showEvent(TimerService.pomodoroBreak ? "coffee" : "self_improvement", IrisStyle.secondaryAccent,
+                TimerService.pomodoroBreak ? (TimerService.pomodoroLongBreak ? Translation.tr("Long break") : Translation.tr("Break"))
+                    : Translation.tr("Focus"),
+                root.durationText(TimerService.pomodoroLapDuration), -1)
+        }
+    }
+    // The recorder clears its elapsed time as it stops, so the length is kept.
+    property int lastRecordingSeconds: 0
+    onRecordingChanged: {
+        if (root.recording) root.lastRecordingSeconds = 0
+        else if (root.eventsEnabled && root.lastRecordingSeconds > 0)
+            root.showEvent("stop_circle", IrisStyle.danger, Translation.tr("Recording saved"), root.clockText(root.lastRecordingSeconds), -1)
+    }
+    Connections {
+        target: root.recording ? RecorderStatus : null
+        function onElapsedSecondsChanged(): void {
+            if (RecorderStatus.elapsedSeconds > 0) root.lastRecordingSeconds = RecorderStatus.elapsedSeconds
+        }
+    }
     // Only referenced while events are on, so the keyboard state daemon is not
     // started for iRiS otherwise.
     Connections {
@@ -339,15 +370,19 @@ Item {
     readonly property string trailing: String(root.options?.trailing ?? "controls")
     readonly property string trailingKind: root.trailing === "notifications" && (Notifications.list?.length ?? 0) === 0 ? "none" : root.trailing
     readonly property bool leftSatelliteShown: IrisStyle.cluster && !root.visualExpanded && !root.feedback && !root.eventShown
+        && !root.floatingSlots.includes("left")
         && root.primary !== "idle"
     readonly property bool rightSatelliteShown: !root.visualExpanded && !root.feedback && !root.eventShown
+        && !root.floatingSlots.includes("right")
         && (IrisStyle.cluster ? root.trailingKind !== "none" : root.secondary.length > 0)
 
     readonly property var trayItems: SystemTray.items.values.filter(item => item && item.id
         && (!(Config.options?.iris?.tray?.hidePassive ?? false) || item.status !== Status.Passive))
     readonly property string auxiliary: String(root.options?.auxiliary ?? "tray")
-    readonly property int auxiliarySlot: (IrisStyle.cluster ? root.trailingKind !== "none" : root.secondary.length > 0) ? 2 : 1
+    readonly property int auxiliarySlot: (IrisStyle.cluster ? root.trailingKind !== "none" : root.secondary.length > 0)
+        && !root.floatingSlots.includes("right") ? 2 : 1
     readonly property bool auxiliaryShown: !root.visualExpanded && !root.feedback && !root.eventShown && root.auxiliary !== "none"
+        && !root.floatingSlots.includes("utility")
         && (root.auxiliary !== "tray" || root.trayItems.length > 0)
     readonly property real sideReserveTarget: root.auxiliaryShown
         ? root.auxiliarySlot * (root.bubble + root.satelliteGap)
@@ -389,7 +424,9 @@ Item {
     // Hidden by opacity only (input is already masked off while suppressed).
     // Cycling visible on every fullscreen or hand-off left the clipping chassis
     // and the notch path unpainted when it came back, while satellites drew.
-    // Hand-off hides on the same frame and returns with a short fade.
+    // Hand-off hides on the same frame and returns with a short fade. It fades
+    // the whole Island, never the chassis itself: an animated opacity on the
+    // ClippingRectangle left it (and the notch) unpainted after hand-offs.
     Behavior on opacity {
         enabled: !root.handingOff
         NumberAnimation { duration: IrisStyle.duration(160); easing.type: Easing.OutCubic }
@@ -491,6 +528,8 @@ Item {
 
     onExpandedChanged: {
         if (!root.expanded) root.pinned = false
+        // A transient media card gives way to the Island it came from.
+        else if (root.focusedOutput) GlobalStates.irisMediaCardOpen = false
     }
     // True once an expansion has settled: later size changes are hops between
     // open shapes. Cleared the moment the Island starts to close.
@@ -499,8 +538,46 @@ Item {
         root.hopping = false
         if (root.visualExpanded) hopSettle.restart()
         else hopSettle.stop()
+        root.flyParts()
     }
+    // The Desktop page's wallpaper hero, kept decoded while the Island lives so
+    // the page (recreated on every open) paints it on its first frame.
+    readonly property real heroDecodeWidth: Math.round(Math.min(root.availableWidth - 2 * (root.bubble + root.satelliteGap), 440 * root.d) * 1.5)
+    Image {
+        id: heroPreload
+        visible: false
+        source: String(root.options?.desktopBanner ?? "wallpaper") === "wallpaper"
+            ? WallpaperListener.wallpaperUrlForScreen(root.targetScreen) : ""
+        asynchronous: true
+        cache: true
+        sourceSize.width: root.heroDecodeWidth
+    }
+    // Parts registered by the expanded pages (they live inside the loader).
+    property Item pageCover: null
+    property Item heroClock: null
+    // The compact counterpart of the cover and clock in the resting shape.
+    readonly property Item restingCover: IrisStyle.cluster
+        ? (root.primary === "media" ? leftSatellite.artwork : null)
+        : (root.compactMode === "media" ? compactCover : null)
+    readonly property Item restingClock: root.compactMode === "clock" ? clusterClock
+        : root.compactMode === "idle" ? idleClock : null
+    function flyParts(): void {
+        const opening = root.visualExpanded
+        const cover = root.effectivePage === "media" ? root.pageCover : null
+        const clock = root.effectivePage === "desktop" ? root.heroClock : null
+        if (cover && root.restingCover) coverFlight.launch(opening ? root.restingCover : cover, opening ? cover : root.restingCover)
+        else coverFlight.stop()
+        if (clock && root.restingClock) clockFlight.launch(opening ? root.restingClock : clock, opening ? clock : root.restingClock)
+        else clockFlight.stop()
+    }
+    // Page switches are content replaces, not journeys. A closing Island
+    // drops its page once faded; that is not a switch.
+    onEffectivePageChanged: if (root.visualExpanded) { coverFlight.stop(); clockFlight.stop() }
     Timer { id: hopSettle; interval: Math.max(1, IrisStyle.settleDuration); onTriggered: root.hopping = root.visualExpanded }
+    // How long compact content and satellites wait while a closing chassis is
+    // still wider than its resting shape, so they never draw over or beside
+    // the expanded silhouette.
+    readonly property int collapseHold: Math.round(IrisStyle.settleDuration * 0.3)
     Binding {
         target: GlobalStates
         property: "irisIslandExpanded"
@@ -774,19 +851,103 @@ Item {
         }
     }
 
+    // Shared element: while the Island opens or closes, a live copy of one part
+    // (cover, clock) travels from its compact place to the place it takes in
+    // the other shape on the chassis curve, so the part itself grows instead
+    // of fading out and reappearing. Both real parts hide while it flies; the
+    // destination is followed every frame because it rides the morph too.
+    component Flight: Item {
+        id: flight
+        property Item from: null
+        property Item to: null
+        property real t: 1
+        property rect fromRect: Qt.rect(0, 0, 0, 0)
+        property rect toRect: Qt.rect(0, 0, 0, 0)
+        // Read at launch: a closing page is unloaded before the copy lands.
+        property real fromRadius: 0
+        property real fromPixelSize: 0
+        property bool active: false
+        readonly property bool flying: flight.active && flight.t < 1
+        z: 10
+        visible: flight.flying
+        x: flight.fromRect.x + (flight.toRect.x - flight.fromRect.x) * flight.t
+        y: flight.fromRect.y + (flight.toRect.y - flight.fromRect.y) * flight.t
+        width: flight.fromRect.width + (flight.toRect.width - flight.fromRect.width) * flight.t
+        height: flight.fromRect.height + (flight.toRect.height - flight.fromRect.height) * flight.t
+
+        function rectOf(item: Item): rect {
+            if (!item) return Qt.rect(0, 0, 0, 0)
+            const a = item.mapToItem(root, 0, 0)
+            const b = item.mapToItem(root, item.width, item.height)
+            return Qt.rect(a.x, a.y, b.x - a.x, b.y - a.y)
+        }
+        function hides(item: Item): bool {
+            return flight.flying && (item === flight.from || item === flight.to)
+        }
+        function launch(source: Item, target: Item): void {
+            if (!source || !target || IrisStyle.duration(240) <= 0) { flight.stop(); return }
+            // Reversing mid-flight starts from where the copy is, not from the part.
+            const midway = flight.flying
+            const mix = (a, b) => a + (b - a) * flight.t
+            flight.fromRect = midway ? Qt.rect(flight.x, flight.y, flight.width, flight.height) : flight.rectOf(source)
+            flight.fromRadius = midway ? mix(flight.fromRadius, flight.to?.radius ?? flight.fromRadius) : (source.radius ?? 0)
+            flight.fromPixelSize = midway ? mix(flight.fromPixelSize, flight.to?.pixelSize ?? flight.fromPixelSize) : (source.pixelSize ?? 0)
+            flight.from = source
+            flight.active = true
+            flight.to = target
+            flight.toRect = flight.rectOf(target)
+            travel.restart()
+        }
+        function stop(): void {
+            travel.stop()
+            flight.t = 1
+            flight.active = false
+            flight.from = null
+            flight.to = null
+        }
+
+        NumberAnimation {
+            id: travel
+            target: flight
+            property: "t"
+            from: 0
+            to: 1
+            // Lands as the page finishes arriving (70 ms hold + 170 ms fade), not on
+            // the chassis' liquid tail: a copy still growing over a visible page
+            // reads as the Island moving twice.
+            duration: IrisStyle.duration(240)
+            easing.type: Easing.BezierSpline
+            easing.bezierCurve: IrisStyle.morphCurve
+            onStopped: if (flight.t >= 1) { flight.active = false; flight.from = null; flight.to = null }
+        }
+        FrameAnimation {
+            running: flight.flying
+            onTriggered: if (flight.to) flight.toRect = flight.rectOf(flight.to)
+        }
+    }
+
     // Detached minimal presentation. Emerges from behind the chassis edge so
     // splitting and merging read as the same material separating.
     component Satellite: Item {
         id: satellite
         property string kind: ""
+        // Which bubble this is ("left", "right", "utility"): what dragging moves.
+        property string slot: ""
         property bool shown: false
         property bool leftSide: false
-        property int slot: 1
+        property int slotIndex: 1
         readonly property alias hovered: satelliteHover.hovered
+        readonly property alias artwork: face.artwork
         signal activated()
 
         property real emerge: satellite.shown ? 1 : 0
-        Behavior on emerge { NumberAnimation { duration: IrisStyle.morphDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: IrisStyle.morphCurve } }
+        Behavior on emerge {
+            id: emergeMotion
+            SequentialAnimation {
+                PauseAnimation { duration: emergeMotion.targetValue > 0 && chassis.bodyHeight > root.compactHeight + 1 ? root.collapseHold : 0 }
+                NumberAnimation { duration: IrisStyle.morphDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: IrisStyle.morphCurve }
+            }
+        }
 
         // A notch chassis hangs from the edge; its satellite floats free of it.
         width: root.notch ? root.bubble - Math.round(8 * root.d) : root.bubble
@@ -795,122 +956,28 @@ Item {
         y: root.bottomEdge ? root.height - (root.bubble + height) / 2 : (root.bubble - height) / 2
         x: satellite.leftSide
             ? chassis.x + (-root.satelliteGap - width) * satellite.emerge
-            : chassis.x + chassis.width - width + (root.satelliteGap + width) * satellite.slot * satellite.emerge
+            : chassis.x + chassis.width - width + (root.satelliteGap + width) * satellite.slotIndex * satellite.emerge
         visible: satellite.emerge > 0.01
-        opacity: root.handingOff && root.handoffPart === satellite ? 0 : Math.min(1, satellite.emerge * 1.6)
+        // The media bubble is the card while the card is on screen; a lifted
+        // bubble is drawn by the bubble layer under the pointer.
+        readonly property bool becameCard: satellite.kind === "media" && GlobalStates.irisMediaCardShown && root.focusedOutput
+            && !(GlobalStates.irisMediaBubble?.floating ?? false)
+        readonly property bool lifted: root.draggedSlot === satellite.slot
+        opacity: (root.handingOff && root.handoffPart === satellite) || satellite.becameCard || satellite.lifted
+            ? 0 : Math.min(1, satellite.emerge * 1.6)
         scale: 0.72 + 0.28 * satellite.emerge
 
-        Rectangle {
+        IrisBubbleFace {
+            id: face
             anchors.fill: parent
-            radius: width / 2
-            color: IrisStyle.surface
-        }
-        Item {
-            anchors.fill: parent
-            scale: satelliteTap.pressed ? 0.88 : satelliteHover.hovered ? 1.06 : 1
-            Behavior on scale { NumberAnimation { duration: IrisStyle.duration(120); easing.type: Easing.OutCubic } }
-
-            IrisArtwork {
-                visible: satellite.kind === "media"
-                anchors.centerIn: parent
-                width: parent.width - 12 * root.d
-                height: width
-                source: MediaArtwork.displaySource
-                circular: true
-            }
-            ProgressRing {
-                visible: satellite.kind === "media" || (satellite.kind === "timer" && root.timerKind !== "stopwatch")
-                anchors.fill: parent
-                anchors.margins: 2 * root.d
-                tint: satellite.kind === "media" ? root.artTint : IrisStyle.secondaryAccent
-                progress: satellite.kind === "media" ? root.trackProgress : root.timerProgress
-            }
-            Glyph {
-                visible: satellite.kind === "timer"
-                anchors.centerIn: parent
-                text: root.timerPaused ? "pause" : root.timerGlyph
-                iconSize: 16 * root.d
-                color: IrisStyle.secondaryAccent
-            }
-            RecordDot {
-                visible: satellite.kind === "record"
-                anchors.centerIn: parent
-                width: 12 * root.d
-                height: width
-            }
-            Glyph {
-                visible: satellite.kind === "controls"
-                anchors.centerIn: parent
-                text: Network.wifiEnabled ? "wifi" : "tune"
-                fill: 0
-                iconSize: 19 * root.d
-            }
-            Glyph {
-                visible: satellite.kind === "tools"
-                anchors.centerIn: parent
-                text: "timer"
-                iconSize: 19 * root.d
-                color: IrisStyle.secondaryAccent
-            }
-            Tabular {
-                visible: satellite.kind === "tray"
-                anchors.centerIn: parent
-                text: root.trayItems.length
-                font.pixelSize: 16 * IrisStyle.typeScale
-                font.weight: Font.Bold
-                color: IrisStyle.accent
-            }
-            // Level bubbles: the ring is the level, the glyph its state; muted
-            // reads quiet for sound and red for a microphone.
-            ProgressRing {
-                visible: satellite.kind === "sound" || satellite.kind === "mic"
-                anchors.fill: parent
-                anchors.margins: 3 * root.d
-                readonly property bool muted: satellite.kind === "mic" ? Audio.micMuted : (Audio.sink?.audio?.muted ?? false)
-                tint: muted ? (satellite.kind === "mic" ? IrisStyle.danger : IrisStyle.muted) : IrisStyle.text
-                progress: muted ? 0 : Math.min(1, satellite.kind === "mic" ? (Audio.micVolume ?? 0) : (Audio.value ?? 0))
-                Behavior on progress { NumberAnimation { duration: IrisStyle.duration(110); easing.type: Easing.OutCubic } }
-            }
-            Glyph {
-                visible: satellite.kind === "sound" || satellite.kind === "mic"
-                anchors.centerIn: parent
-                text: satellite.kind === "mic" ? (Audio.micMuted ? "mic_off" : "mic")
-                    : (Audio.sink?.audio?.muted ?? false) ? "volume_off" : "volume_up"
-                iconSize: 15 * root.d
-                color: satellite.kind === "mic" && Audio.micMuted ? IrisStyle.danger : IrisStyle.text
-            }
-            Glyph {
-                visible: satellite.kind === "weather"
-                anchors.centerIn: parent
-                text: Icons.getWeatherIcon(Weather.data?.wCode, Weather.isNightNow()) ?? "cloud"
-                iconSize: 19 * root.d
-            }
-            Glyph {
-                visible: satellite.kind === "notifications"
-                anchors.centerIn: parent
-                text: "notifications"
-                iconSize: 18 * root.d
-            }
-            Rectangle {
-                visible: satellite.kind === "notifications"
-                readonly property int count: Notifications.list?.length ?? 0
-                x: parent.width - width * 0.9
-                y: -height * 0.1
-                height: Math.round(15 * root.d)
-                width: Math.max(height, notificationCount.implicitWidth + 7 * root.d)
-                radius: height / 2
-                color: IrisStyle.danger
-                border.width: Math.max(1, Math.round(1.5 * root.d))
-                border.color: IrisStyle.surface
-                Tabular {
-                    id: notificationCount
-                    anchors.centerIn: parent
-                    text: parent.count > 9 ? "9+" : parent.count
-                    color: "#ffffff"
-                    font.pixelSize: 9.5 * IrisStyle.typeScale
-                    font.weight: Font.Bold
-                }
-            }
+            kind: satellite.kind
+            tint: root.artTint
+            playing: root.playing
+            mediaProgress: root.trackProgress
+            trayCount: root.trayItems.length
+            coverHidden: coverFlight.hides(face.artwork)
+            pressed: bubblePointer.pressed && !bubblePointer.lifting
+            hovered: satelliteHover.hovered
         }
         HoverHandler {
             id: satelliteHover
@@ -924,29 +991,107 @@ Item {
             acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
             onWheel: event => root.applyWheel(event, satellite.kind === "sound" || satellite.kind === "mic" ? satellite.kind : "")
         }
-        TapHandler { id: satelliteTap; onTapped: satellite.activated() }
+        // A click activates; holding lifts the bubble so it can be carried
+        // somewhere else (see IrisBubbleLayer), and releasing drops it there.
+        IrisBubbleGrip {
+            id: bubblePointer
+            anchors.fill: parent
+            slot: satellite.slot
+            kind: satellite.kind
+            screenName: root.targetScreen?.name ?? ""
+            screenOffsetY: root.screenOffsetY
+            onTapped: satellite.activated()
+        }
         Accessible.role: Accessible.Button
-        Accessible.name: satellite.kind === "controls" ? Translation.tr("Quick controls")
-            : satellite.kind === "notifications" ? Translation.tr("Notifications")
-            : satellite.kind === "tray" ? Translation.tr("Tray")
-            : satellite.kind === "tools" ? Translation.tr("Timers")
-            : satellite.kind === "weather" ? Translation.tr("Weather")
-            : satellite.kind === "media" ? Translation.tr("Now playing")
-            : satellite.kind === "sound" ? Translation.tr("Sound")
-            : satellite.kind === "mic" ? Translation.tr("Microphone")
-            : satellite.kind === "record" ? Translation.tr("Screen recording") : root.timerLabel
+        Accessible.name: face.Accessible.name
     }
 
     // ── Satellites ───────────────────────────────────────────────────────
     Satellite {
         id: leftSatellite
+        slot: "left"
         leftSide: true
         kind: root.primary
         shown: root.leftSatelliteShown
-        onActivated: root.openPage(root.pageFor(root.primary), true)
+        // The media bubble floats out as a card when that is how it opens.
+        onActivated: {
+            if (root.mediaBubbleCard) GlobalStates.irisMediaCardOpen = !GlobalStates.irisMediaCardOpen
+            else root.openPage(root.pageFor(root.primary), true)
+        }
     }
+    readonly property bool mediaBubbleCard: IrisStyle.cluster && root.primary === "media"
+        && String(Config.options?.iris?.player?.bubbleOpens ?? "card") === "card"
+    readonly property bool focusedOutput: root.targetScreen?.name === GlobalStates.focusedScreen?.name
+    // The bubble's screen-local rect, for the card to grow out of and rest beside.
+    // Published only while the bubble has fully emerged, so a card keeps its
+    // place while the Island expands and the bubble tucks away.
+    Binding {
+        target: GlobalStates
+        property: "irisMediaBubble"
+        when: root.focusedOutput && root.mediaBubbleCard && leftSatellite.emerge >= 1 && !root.suppressed
+            && !root.floatingSlots.includes("left")
+        value: {
+            // The Island is centred by its loader: its position is part of the rect.
+            void (root.x + root.y + (root.parent?.x ?? 0) + (root.parent?.y ?? 0) + root.width + chassis.x + leftSatellite.x + leftSatellite.width)
+            const p = leftSatellite.mapToItem(null, 0, 0)
+            return {
+                x: p.x, y: p.y + root.screenOffsetY,
+                width: leftSatellite.width, height: leftSatellite.height,
+                radius: leftSatellite.width / 2, screen: root.targetScreen?.name ?? ""
+            }
+        }
+        restoreMode: Binding.RestoreNone
+    }
+    Connections {
+        target: GlobalStates
+        function onIrisIslandPageRequestChanged(): void {
+            const page = GlobalStates.irisIslandPageRequest
+            if (page.length === 0 || !root.focusedOutput) return
+            GlobalStates.irisIslandPageRequest = ""
+            root.openPage(page, true)
+        }
+    }
+    // What each bubble slot shows on this output and where the Island rests, for
+    // the bubble layer: floating bubbles take their kind from here, and a bubble
+    // carried back re-attaches where its slot emerges.
+    readonly property var bubbleKinds: ({
+        left: IrisStyle.cluster && root.primary !== "idle" ? root.primary : "",
+        right: IrisStyle.cluster ? (root.trailingKind !== "none" ? root.trailingKind : "") : root.secondary,
+        utility: root.auxiliary !== "none" && (root.auxiliary !== "tray" || root.trayItems.length > 0) ? root.auxiliary : ""
+    })
+    readonly property var islandGeometry: {
+        void (root.x + (root.parent?.x ?? 0) + (root.parent?.y ?? 0) + chassis.x + chassis.width + chassis.bodyHeight)
+        const p = chassis.mapToItem(null, 0, chassis.topInset)
+        return {
+            x: p.x, y: p.y + root.screenOffsetY, width: chassis.width, height: chassis.bodyHeight,
+            bubble: leftSatellite.width, gap: root.satelliteGap, bottomEdge: root.bottomEdge,
+            auxiliarySlot: root.auxiliarySlot, resting: !root.expanded
+        }
+    }
+    function publishBubbleState(): void {
+        const name = root.targetScreen?.name ?? ""
+        if (name.length === 0) return
+        const kinds = Object.assign({}, GlobalStates.irisBubbleKinds ?? {})
+        kinds[name] = root.bubbleKinds
+        GlobalStates.irisBubbleKinds = kinds
+        // Geometry is only meaningful at rest: a re-attach aims at the resting shape.
+        if (root.expanded) return
+        const geometry = Object.assign({}, GlobalStates.irisIslandGeometry ?? {})
+        geometry[name] = root.islandGeometry
+        GlobalStates.irisIslandGeometry = geometry
+    }
+    onBubbleKindsChanged: root.publishBubbleState()
+    onIslandGeometryChanged: root.publishBubbleState()
+    Component.onCompleted: root.publishBubbleState()
+    // Bubbles carried off the Island live in the bubble layer; the Island keeps
+    // their room free of them and hides the one being carried right now.
+    readonly property var floatingSlots: ["left", "right", "utility"]
+        .filter(slot => String(Config.options?.iris?.bubbles?.[slot]?.place ?? "island") !== "island")
+    readonly property string draggedSlot: GlobalStates.irisBubbleDrag && GlobalStates.irisBubbleDrag.screen === (root.targetScreen?.name ?? "")
+        ? String(GlobalStates.irisBubbleDrag.slot) : ""
     Satellite {
         id: rightSatellite
+        slot: "right"
         kind: IrisStyle.cluster ? root.trailingKind : root.secondary
         shown: root.rightSatelliteShown
         onActivated: {
@@ -957,10 +1102,29 @@ Item {
 
     Satellite {
         id: auxiliarySatellite
+        slot: "utility"
         kind: root.auxiliary
-        slot: root.auxiliarySlot
+        slotIndex: root.auxiliarySlot
         shown: root.auxiliaryShown
         onActivated: root.activateBubble(root.auxiliary, auxiliarySatellite)
+    }
+
+    Flight {
+        id: coverFlight
+        IrisArtwork {
+            anchors.fill: parent
+            source: MediaArtwork.displaySource
+            // The page cover's own decode size, so the copy it becomes is the same image.
+            decodeSize: Math.ceil(68 * root.d * 2)
+            circular: false
+            radius: coverFlight.fromRadius + ((coverFlight.to?.radius ?? coverFlight.fromRadius) - coverFlight.fromRadius) * coverFlight.t
+        }
+    }
+    Flight {
+        id: clockFlight
+        IrisClock {
+            pixelSize: Math.max(1, clockFlight.fromPixelSize + ((clockFlight.to?.pixelSize ?? clockFlight.fromPixelSize) - clockFlight.fromPixelSize) * clockFlight.t)
+        }
     }
 
     Item {
@@ -1066,7 +1230,9 @@ Item {
         property real bodyHeight: chassis.bodyHeightTarget
         readonly property real topInset: root.notch && !root.bottomEdge ? chassis.radius : 0
         readonly property real bottomInset: root.notch && root.bottomEdge ? chassis.radius : 0
-        x: (root.width - width) / 2
+        // Whole pixels: the clipping chassis draws through a texture that goes
+        // soft when resampled at a half-pixel offset.
+        x: Math.round((root.width - width) / 2)
         y: -chassis.topInset
         width: root.chassisTargetWidth
         height: chassis.bodyHeight + chassis.topInset + chassis.bottomInset
@@ -1140,10 +1306,16 @@ Item {
             scale: compactPress.pressed ? 0.93 : 1
             Behavior on scale { NumberAnimation { duration: IrisStyle.duration(compactPress.pressed ? 80 : 200); easing.type: Easing.OutCubic } }
             visible: opacity > 0
+            // Out before the page arrives; back only once the chassis has
+            // nearly reached its resting shape. The two layers never overlap.
             Behavior on opacity {
-                NumberAnimation {
-                    duration: IrisStyle.duration(root.visualExpanded ? 80 : 200)
-                    easing.type: root.visualExpanded ? Easing.OutQuad : Easing.InCubic
+                id: compactFade
+                SequentialAnimation {
+                    PauseAnimation { duration: compactFade.targetValue > 0 ? root.collapseHold : 0 }
+                    NumberAnimation {
+                        duration: IrisStyle.duration(compactFade.targetValue > 0 ? 150 : 70)
+                        easing.type: compactFade.targetValue > 0 ? Easing.OutCubic : Easing.OutQuad
+                    }
                 }
             }
 
@@ -1180,14 +1352,18 @@ Item {
                 }
                 Item { Layout.fillWidth: true }
                 IrisClock {
+                    id: idleClock
                     Layout.alignment: Qt.AlignVCenter
                     pixelSize: 15 * IrisStyle.typeScale
+                    opacity: clockFlight.hides(idleClock) ? 0 : 1
                 }
             }
 
             CompactRow {
                 mode: "media"
                 IrisArtwork {
+                    id: compactCover
+                    opacity: coverFlight.hides(compactCover) ? 0 : 1
                     Layout.preferredWidth: 24 * root.d
                     Layout.preferredHeight: 24 * root.d
                     source: MediaArtwork.displaySource
@@ -1241,11 +1417,11 @@ Item {
                     font.weight: Font.DemiBold
                     elide: Text.ElideRight
                 }
-                Tabular {
+                IrisNumber {
                     text: root.clockText(RecorderStatus.elapsedSeconds)
                     color: IrisStyle.danger
-                    font.pixelSize: 13 * IrisStyle.typeScale
-                    font.weight: Font.DemiBold
+                    pixelSize: 13 * IrisStyle.typeScale
+                    weight: Font.DemiBold
                 }
             }
 
@@ -1263,11 +1439,12 @@ Item {
                     font.weight: Font.DemiBold
                     elide: Text.ElideRight
                 }
-                Tabular {
+                IrisNumber {
                     text: root.clockText(root.timerSeconds)
+                    countDown: root.timerKind !== "stopwatch"
                     color: root.timerPaused ? IrisStyle.subtext : IrisStyle.secondaryAccent
-                    font.pixelSize: 13 * IrisStyle.typeScale
-                    font.weight: Font.DemiBold
+                    pixelSize: 13 * IrisStyle.typeScale
+                    weight: Font.DemiBold
                 }
             }
 
@@ -1293,8 +1470,10 @@ Item {
                     font.weight: Font.Medium
                 }
                 IrisClock {
+                    id: clusterClock
                     Layout.alignment: Qt.AlignVCenter
                     pixelSize: 15 * IrisStyle.typeScale
+                    opacity: clockFlight.hides(clusterClock) ? 0 : 1
                 }
                 Item { Layout.fillWidth: true }
             }
@@ -1442,10 +1621,44 @@ Item {
                 enabled: !root.visualExpanded
                 acceptedButtons: Qt.LeftButton | Qt.MiddleButton
                 hoverEnabled: root.compactMode === "edit"
-                cursorShape: Qt.PointingHandCursor
+                cursorShape: islandGrip.carrying ? Qt.ClosedHandCursor : Qt.PointingHandCursor
+                preventStealing: true
                 Accessible.role: Accessible.Button
                 Accessible.name: root.expanded ? Translation.tr("Collapse island") : Translation.tr("Expand island")
+                // Holding the resting Island lifts it: carried to the other half of
+                // the screen it moves the Island (and its Dock) to that edge.
+                pressAndHoldInterval: 380
+                QtObject {
+                    id: islandGrip
+                    property bool carrying: false
+                    function publish(mouse, released: bool): void {
+                        const p = compactPress.mapToItem(null, mouse.x, mouse.y)
+                        GlobalStates.irisBubbleDrag = {
+                            slot: "island", kind: "island", screen: root.targetScreen?.name ?? "",
+                            x: p.x, y: p.y + root.screenOffsetY,
+                            size: root.compactHeight, width: chassis.width, released: released
+                        }
+                    }
+                }
+                onPressAndHold: mouse => {
+                    if (mouse.button !== Qt.LeftButton || root.compactMode === "edit") return
+                    islandGrip.carrying = true
+                    islandGrip.publish(mouse, false)
+                }
+                onPositionChanged: mouse => { if (islandGrip.carrying) islandGrip.publish(mouse, false) }
+                onReleased: mouse => {
+                    if (!islandGrip.carrying) return
+                    islandGrip.publish(mouse, true)
+                    Qt.callLater(() => islandGrip.carrying = false)
+                }
+                onCanceled: {
+                    if (islandGrip.carrying && GlobalStates.irisBubbleDrag) {
+                        GlobalStates.irisBubbleDrag = Object.assign({}, GlobalStates.irisBubbleDrag, { released: true })
+                    }
+                    islandGrip.carrying = false
+                }
                 onClicked: mouse => {
+                    if (islandGrip.carrying) return
                     if (mouse.button === Qt.MiddleButton) {
                         if (root.hasMedia) MprisController.togglePlaying()
                         return
@@ -1469,17 +1682,27 @@ Item {
             // closing never swaps pages (and heights) mid-collapse.
             onActiveChanged: if (!active) root.page = ""
             opacity: root.visualExpanded ? 1 : 0
-            scale: root.visualExpanded ? 1 : 0.94
+            // Opening, the page appears where it rests and the chassis grows around
+            // it: scaling it in as well moved every part again after it had
+            // arrived, a second travel on the settle tail. Closing may shrink it.
+            scale: root.visualExpanded ? 1 : 0.96
             transformOrigin: root.bottomEdge ? Item.Bottom : Item.Top
             visible: opacity > 0
             enabled: root.expanded
             Behavior on opacity {
-                NumberAnimation {
-                    duration: IrisStyle.duration(root.visualExpanded ? 200 : 90)
-                    easing.type: root.visualExpanded ? Easing.InOutQuad : Easing.OutQuad
+                id: detailsFade
+                SequentialAnimation {
+                    PauseAnimation { duration: detailsFade.targetValue > 0 ? IrisStyle.duration(70) : 0 }
+                    NumberAnimation {
+                        duration: IrisStyle.duration(detailsFade.targetValue > 0 ? 170 : 90)
+                        easing.type: detailsFade.targetValue > 0 ? Easing.OutCubic : Easing.OutQuad
+                    }
                 }
             }
-            Behavior on scale { NumberAnimation { duration: IrisStyle.morphDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: IrisStyle.morphCurve } }
+            Behavior on scale {
+                enabled: !root.visualExpanded
+                NumberAnimation { duration: IrisStyle.morphDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: IrisStyle.morphCurve }
+            }
 
             // Navigation sits on the attached edge: pages grow and shrink away
             // from it, so switching pages never slides the row (and the next
@@ -1576,20 +1799,26 @@ Item {
                             Layout.fillWidth: true
                             spacing: 14 * root.d
                             IrisArtwork {
-                                Layout.preferredWidth: 58 * root.d
-                                Layout.preferredHeight: 58 * root.d
+                                id: pageCover
+                                opacity: coverFlight.hides(pageCover) ? 0 : 1
+                                Component.onCompleted: root.pageCover = pageCover
+                                Layout.preferredWidth: 68 * root.d
+                                Layout.preferredHeight: 68 * root.d
                                 source: MediaArtwork.displaySource
                                 circular: Config.options?.iris?.player?.roundCover ?? true
-                                radius: circular ? width / 2 : 14 * root.d
+                                radius: circular ? width / 2 : 16 * root.d
                             }
                             ColumnLayout {
                                 Layout.fillWidth: true
                                 spacing: 2 * root.d
+                                // Long titles take a second line before they elide.
                                 IrisText {
                                     Layout.fillWidth: true
                                     text: media.effectiveTitle
                                     font.pixelSize: 15 * IrisStyle.typeScale
                                     font.weight: Font.DemiBold
+                                    wrapMode: Text.Wrap
+                                    maximumLineCount: 2
                                     elide: Text.ElideRight
                                 }
                                 IrisText {
@@ -1673,6 +1902,113 @@ Item {
                             }
                             Item { Layout.fillWidth: true }
                         }
+
+                        // Everything else that makes sound: other players (paused ones
+                        // included) to take over the page, and each app's own level.
+                        readonly property var otherPlayers: (MprisController.displayPlayers ?? []).filter(p => p && p !== root.player)
+                        // One row per app: a browser with several tabs playing is one level.
+                        readonly property var streams: {
+                            const groups = []
+                            for (const node of (Audio.outputAppNodes ?? [])) {
+                                if (!node?.audio) continue
+                                const name = Audio.appNodeDisplayName(node)
+                                const group = groups.find(g => g.name === name)
+                                if (group) group.nodes.push(node)
+                                else groups.push({ name: name, nodes: [node] })
+                            }
+                            return groups
+                        }
+                        Rectangle {
+                            visible: mediaPage.otherPlayers.length > 0 || mediaPage.streams.length > 0
+                            Layout.fillWidth: true
+                            implicitHeight: 1
+                            color: IrisStyle.hairline
+                        }
+                        Flow {
+                            visible: mediaPage.otherPlayers.length > 0
+                            Layout.fillWidth: true
+                            spacing: 6 * root.d
+                            Repeater {
+                                model: mediaPage.otherPlayers
+                                IrisButton {
+                                    id: playerChip
+                                    required property var modelData
+                                    implicitHeight: Math.round(32 * root.d)
+                                    implicitWidth: chipRow.implicitWidth + Math.round(20 * root.d)
+                                    buttonRadius: height / 2
+                                    buttonRadiusPressed: height / 2
+                                    colBackground: ColorUtils.applyAlpha(IrisStyle.text, 0.08)
+                                    colBackgroundHover: ColorUtils.applyAlpha(IrisStyle.text, 0.16)
+                                    Accessible.name: Translation.tr("Control %1").arg(playerChip.modelData?.identity ?? "")
+                                    onClicked: MprisController.setActivePlayer(playerChip.modelData)
+                                    RowLayout {
+                                        id: chipRow
+                                        anchors.centerIn: parent
+                                        spacing: 6 * root.d
+                                        IrisArtwork {
+                                            Layout.preferredWidth: Math.round(20 * root.d)
+                                            Layout.preferredHeight: Layout.preferredWidth
+                                            source: String(playerChip.modelData?.trackArtUrl ?? "")
+                                        }
+                                        IrisText {
+                                            text: String(playerChip.modelData?.trackTitle || playerChip.modelData?.identity || "")
+                                            font.pixelSize: 11.5 * IrisStyle.typeScale
+                                            font.weight: Font.Medium
+                                            elide: Text.ElideRight
+                                            Layout.maximumWidth: Math.round(150 * root.d)
+                                        }
+                                        Glyph {
+                                            text: playerChip.modelData?.isPlaying ? "graphic_eq" : "pause"
+                                            iconSize: 14 * root.d
+                                            color: playerChip.modelData?.isPlaying ? root.artTint : IrisStyle.muted
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        Repeater {
+                            model: mediaPage.streams.slice(0, 4)
+                            RowLayout {
+                                id: appLevel
+                                required property var modelData
+                                readonly property var nodes: appLevel.modelData.nodes
+                                readonly property bool muted: appLevel.nodes.every(node => node?.audio?.muted)
+                                Layout.fillWidth: true
+                                spacing: 10 * root.d
+                                Image {
+                                    Layout.preferredWidth: Math.round(22 * root.d)
+                                    Layout.preferredHeight: Layout.preferredWidth
+                                    sourceSize: Qt.size(Math.round(44 * root.d), Math.round(44 * root.d))
+                                    source: Quickshell.iconPath(MprisController.streamIconName(appLevel.nodes[0]), "audio-x-generic")
+                                    opacity: appLevel.muted ? 0.45 : 1
+                                }
+                                IrisText {
+                                    Layout.preferredWidth: Math.round(110 * root.d)
+                                    text: appLevel.nodes.length > 1 ? appLevel.modelData.name + " · " + appLevel.nodes.length : appLevel.modelData.name
+                                    color: ColorUtils.applyAlpha(IrisStyle.text, appLevel.muted ? 0.45 : 0.8)
+                                    font.pixelSize: 12 * IrisStyle.typeScale
+                                    font.weight: Font.Medium
+                                    elide: Text.ElideRight
+                                }
+                                IrisScrubber {
+                                    Layout.fillWidth: true
+                                    fillColor: appLevel.muted ? IrisStyle.muted : IrisStyle.text
+                                    value: Math.min(1, Math.max(...appLevel.nodes.map(node => node?.audio?.volume ?? 0)))
+                                    onMoved: next => appLevel.nodes.forEach(node => { if (node?.audio) node.audio.volume = next })
+                                }
+                                GlyphButton {
+                                    glyph: appLevel.muted ? "volume_off" : "volume_up"
+                                    glyphSize: 17 * root.d
+                                    implicitWidth: Math.round(30 * root.d)
+                                    glyphColor: appLevel.muted ? IrisStyle.danger : IrisStyle.text
+                                    Accessible.name: appLevel.muted ? Translation.tr("Unmute") : Translation.tr("Mute")
+                                    onClicked: {
+                                        const mute = !appLevel.muted
+                                        appLevel.nodes.forEach(node => { if (node?.audio) node.audio.muted = mute })
+                                    }
+                                }
+                            }
+                        }
                     }
 
                     // Live activities
@@ -1711,12 +2047,12 @@ Item {
                                     role: IrisText.Meta
                                 }
                             }
-                            Tabular {
+                            IrisNumber {
                                 text: root.clockText(RecorderStatus.elapsedSeconds)
                                 color: IrisStyle.danger
-                                font.pixelSize: 28 * IrisStyle.typeScale
-                                font.weight: Font.Bold
-                                font.letterSpacing: -0.6
+                                pixelSize: 28 * IrisStyle.typeScale
+                                weight: Font.Bold
+                                letterSpacing: -0.6
                             }
                             GlyphButton {
                                 glyph: "stop"
@@ -1774,12 +2110,13 @@ Item {
                                     role: IrisText.Meta
                                 }
                             }
-                            Tabular {
+                            IrisNumber {
                                 text: root.clockText(root.timerSeconds)
+                                countDown: root.timerKind !== "stopwatch"
                                 color: root.timerPaused ? IrisStyle.subtext : IrisStyle.secondaryAccent
-                                font.pixelSize: 28 * IrisStyle.typeScale
-                                font.weight: Font.Bold
-                                font.letterSpacing: -0.6
+                                pixelSize: 28 * IrisStyle.typeScale
+                                weight: Font.Bold
+                                letterSpacing: -0.6
                             }
                             GlyphButton {
                                 glyph: root.timerPaused ? "play_arrow" : "pause"
@@ -1860,6 +2197,9 @@ Item {
                                 // Fades as one picture: faded separately, the image shows
                                 // through the black scrim and the band reads as a vignette.
                                 layer.enabled: desktopPage.opacity > 0 && desktopPage.opacity < 1
+                                // Image and scrim arrive together: the vignette never shows
+                                // over an empty chassis while the picture loads.
+                                opacity: heroImage.status === Image.Ready ? 1 : 0
                                 x: -root.padding
                                 y: -heroBleed.topBleed
                                 width: hero.width + root.padding * 2
@@ -1870,12 +2210,13 @@ Item {
                                     anchors.fill: parent
                                     source: desktopPage.showBanner ? desktopPage.bannerSource : ""
                                     fillMode: Image.PreserveAspectCrop
-                                    asynchronous: true
+                                    // Decoded ahead by heroPreload (same source and size), so
+                                    // this reads the cache on the page's first frame instead of
+                                    // showing the scrim alone while it decodes.
+                                    asynchronous: heroPreload.status !== Image.Ready
                                     cache: true
                                     smooth: true
-                                    sourceSize.width: Math.round(heroBleed.width * 1.5)
-                                    opacity: heroImage.status === Image.Ready ? 1 : 0
-                                    Behavior on opacity { NumberAnimation { duration: IrisStyle.duration(180); easing.type: Easing.OutCubic } }
+                                    sourceSize.width: root.heroDecodeWidth
                                 }
                                 // A notch hangs from the screen edge: the image starts in black
                                 // so the concave fillets beside it stay continuous.
@@ -1937,7 +2278,10 @@ Item {
                                         font.weight: Font.Medium
                                     }
                                     IrisClock {
+                                        id: heroClock
                                         pixelSize: 46 * IrisStyle.typeScale
+                                        opacity: clockFlight.hides(heroClock) ? 0 : 1
+                                        Component.onCompleted: root.heroClock = heroClock
                                     }
                                 }
                                 ColumnLayout {

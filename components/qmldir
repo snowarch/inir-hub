@@ -15,4 +15,6 @@ IrisMediaBackdrop 1.0 IrisMediaBackdrop.qml
 IrisNotificationIcon 1.0 IrisNotificationIcon.qml
 IrisClock 1.0 IrisClock.qml
 IrisNumber 1.0 IrisNumber.qml
+IrisBubbleFace 1.0 IrisBubbleFace.qml
+IrisBubbleGrip 1.0 IrisBubbleGrip.qml
 IrisDesktopMenu 1.0 IrisDesktopMenu.qml
