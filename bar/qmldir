@@ -1,5 +1,6 @@
 module qs.modules.iris.bar
 IrisBar 1.0 IrisBar.qml
-IrisBarContent 1.0 IrisBarContent.qml
-IrisBarModule 1.0 IrisBarModule.qml
+IrisCustomModule 1.0 IrisCustomModule.qml
 IrisIsland 1.0 IrisIsland.qml
+IrisTray 1.0 IrisTray.qml
+IrisTools 1.0 IrisTools.qml

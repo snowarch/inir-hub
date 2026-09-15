@@ -63,7 +63,7 @@ Variants {
 
         Timer {
             id: closePresentation
-            interval: IrisStyle.duration(IrisStyle.island ? 160 : 100)
+            interval: IrisStyle.duration(160)
             onTriggered: window.presentationVisible = false
         }
 
@@ -79,7 +79,7 @@ Variants {
         Loader {
             id: sessionLoader
             anchors.fill: parent
-            sourceComponent: IrisStyle.island ? islandComponent : classicComponent
+            sourceComponent: islandComponent
         }
 
         // ── Island: one row of system actions over the dimmed desktop ────
@@ -162,7 +162,7 @@ Variants {
                     IrisText {
                         Layout.alignment: Qt.AlignHCenter
                         text: DateTime.timeDisplay
-                        font.family: IrisStyle.fontTitle
+                        font.family: IrisStyle.fontNumbers
                         font.features: ({ "tnum": 1 })
                         font.pixelSize: Math.round(64 * IrisStyle.typeScale)
                         font.weight: Font.DemiBold
@@ -211,7 +211,7 @@ Variants {
                                         radius: width / 2
                                         color: "transparent"
                                         border.width: 2
-                                        border.color: ColorUtils.applyAlpha(IrisStyle.text, 0.85)
+                                        border.color: action.armed ? IrisStyle.danger : IrisStyle.accent
                                         visible: action.focused
                                     }
 
@@ -256,126 +256,6 @@ Variants {
                             : Translation.tr("Up %1").arg(DateTime.uptime)
                         color: stage.pendingAction ? ColorUtils.applyAlpha(IrisStyle.text, 0.85) : ColorUtils.applyAlpha(IrisStyle.text, 0.5)
                         font.pixelSize: Math.round(12.5 * IrisStyle.typeScale)
-                    }
-                }
-            }
-        }
-
-        // ── Classic: action list card ─────────────────────────────────────
-        Component {
-            id: classicComponent
-
-            Item {
-                Rectangle {
-                    anchors.fill: parent
-                    color: IrisStyle.scrim
-                    opacity: window.presentationShown ? 1 : 0
-                    Behavior on opacity { NumberAnimation { duration: IrisStyle.duration(90); easing.type: Easing.OutCubic } }
-                }
-
-                IrisSurface {
-                    anchors.centerIn: parent
-                    width: Math.min(parent.width - 32, 720 * IrisStyle.density)
-                    height: sessionContent.implicitHeight + IrisStyle.panelPadding * 2
-                    raised: true
-                    opacity: window.presentationShown ? 1 : 0
-                    scale: window.presentationShown ? 1 : 0.985
-                    Behavior on opacity { NumberAnimation { duration: IrisStyle.duration(90); easing.type: Easing.OutCubic } }
-                    Behavior on scale { NumberAnimation { duration: IrisStyle.duration(100); easing.type: Easing.OutCubic } }
-
-                    GridLayout {
-                        id: sessionContent
-                        anchors.left: parent.left
-                        anchors.right: parent.right
-                        anchors.verticalCenter: parent.verticalCenter
-                        anchors.leftMargin: IrisStyle.panelPadding
-                        anchors.rightMargin: IrisStyle.panelPadding
-                        columns: width >= 620 * IrisStyle.density ? 2 : 1
-                        columnSpacing: 28 * IrisStyle.density
-                        rowSpacing: 18 * IrisStyle.density
-
-                        ColumnLayout {
-                            Layout.fillWidth: true
-                            Layout.alignment: Qt.AlignTop
-                            Layout.preferredWidth: sessionContent.columns > 1
-                                ? 0.36 * sessionContent.width : sessionContent.width
-                            spacing: 8 * IrisStyle.density
-
-                            RowLayout {
-                                Layout.fillWidth: true
-                                spacing: 8 * IrisStyle.density
-                                IrisMark { implicitSize: 28 * IrisStyle.density }
-                                IrisText { text: "IRIS / SESSION"; role: IrisText.Eyebrow }
-                            }
-
-                            IrisText {
-                                text: DateTime.timeDisplay
-                                role: IrisText.Display
-                                font.family: IrisStyle.fontNumbers
-                                font.pixelSize: 44 * IrisStyle.typeScale
-                            }
-                            IrisText {
-                                text: DateTime.date
-                                role: IrisText.Meta
-                                font.pixelSize: 13 * IrisStyle.typeScale
-                            }
-
-                            Rectangle {
-                                Layout.topMargin: 6 * IrisStyle.density
-                                Layout.preferredWidth: IrisStyle.accentRuleWidth * 1.8
-                                Layout.preferredHeight: IrisStyle.accentRuleHeight
-                                radius: height / 2
-                                color: IrisStyle.secondaryAccent
-                            }
-
-                            IrisText {
-                                Layout.fillWidth: true
-                                Layout.topMargin: 4 * IrisStyle.density
-                                text: Translation.tr("Choose what the system should do. Escape returns to the desktop.")
-                                role: IrisText.Meta
-                                wrapMode: Text.WordWrap
-                            }
-                        }
-
-                        ColumnLayout {
-                            Layout.fillWidth: true
-                            Layout.alignment: Qt.AlignTop
-                            Layout.preferredWidth: sessionContent.columns > 1
-                                ? 0.64 * sessionContent.width : sessionContent.width
-                            spacing: 4 * IrisStyle.density
-
-                            IrisText {
-                                text: Translation.tr("Actions").toUpperCase()
-                                role: IrisText.Eyebrow
-                                Layout.bottomMargin: 3 * IrisStyle.density
-                            }
-
-                            Repeater {
-                                model: [
-                                    { icon: "lock", label: Translation.tr("Lock"), action: "lock" },
-                                    { icon: "bedtime", label: Translation.tr("Suspend"), action: "suspend" },
-                                    { icon: "logout", label: Translation.tr("Log out"), action: "logout" },
-                                    { icon: "restart_alt", label: Translation.tr("Restart"), action: "reboot" },
-                                    { icon: "power_settings_new", label: Translation.tr("Power off"), action: "poweroff" }
-                                ]
-                                IrisActionTile {
-                                    required property var modelData
-                                    required property int index
-                                    Layout.fillWidth: true
-                                    compact: true
-                                    materialIcon: modelData.icon
-                                    title: modelData.label
-                                    subtitle: modelData.action === "lock" ? Translation.tr("Keep the session running")
-                                        : modelData.action === "suspend" ? Translation.tr("Sleep and resume later")
-                                        : modelData.action === "logout" ? Translation.tr("End this user session")
-                                        : modelData.action === "reboot" ? Translation.tr("Restart the computer")
-                                        : Translation.tr("Shut down the computer")
-                                    danger: modelData.action === "reboot" || modelData.action === "poweroff"
-                                    trailingText: String(index + 1).padStart(2, "0")
-                                    onClicked: window.runAction(modelData.action)
-                                }
-                            }
-                        }
                     }
                 }
             }

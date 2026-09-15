@@ -17,13 +17,13 @@ Item {
         enabled: root.enabled
         enableSettingsSearch: false
         configuration: StyledSlider.Configuration.XS
-        trackWidth: IrisStyle.island ? 4 : configuration
-        trackRadius: IrisStyle.island ? 2 : 6
-        handleHeight: IrisStyle.island ? 12 : 33
-        handleDefaultWidth: IrisStyle.island ? 12 : 4
-        handlePressedWidth: IrisStyle.island ? 14 : 2
-        handleMargins: IrisStyle.island ? 0 : 4
-        stopIndicatorValues: IrisStyle.island ? [] : [0, 1]
+        trackWidth: 4
+        trackRadius: 2
+        handleHeight: 12
+        handleDefaultWidth: 12
+        handlePressedWidth: 14
+        handleMargins: 0
+        stopIndicatorValues: []
         highlightColor: IrisStyle.accent
         handleColor: IrisStyle.accent
         trackColor: IrisStyle.accentContainer

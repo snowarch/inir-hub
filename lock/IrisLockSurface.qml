@@ -38,7 +38,7 @@ Item {
 
     function focusPassword(): void {
         Qt.callLater(() => {
-            const input = IrisStyle.island ? islandLoader.item?.input : classicLoader.item?.input
+            const input = islandLoader.item?.input
             input?.forceActiveFocus()
         })
     }
@@ -67,7 +67,7 @@ Item {
 
     Rectangle {
         anchors.fill: parent
-        color: IrisStyle.island ? "#000000" : IrisStyle.canvas
+        color: "#000000"
     }
 
     MouseArea {
@@ -81,14 +81,7 @@ Item {
     Loader {
         id: islandLoader
         anchors.fill: parent
-        active: IrisStyle.island
         sourceComponent: islandComponent
-    }
-    Loader {
-        id: classicLoader
-        anchors.fill: parent
-        active: !IrisStyle.island
-        sourceComponent: classicComponent
     }
 
     // ── Island: wallpaper, large clock, identity and a password capsule ──
@@ -146,7 +139,7 @@ Item {
                     Layout.topMargin: -6 * root.d
                     text: DateTime.timeDisplay
                     color: "#ffffff"
-                    font.family: IrisStyle.fontTitle
+                    font.family: IrisStyle.fontNumbers
                     font.features: ({ "tnum": 1 })
                     font.pixelSize: Math.round(112 * IrisStyle.typeScale)
                     font.weight: Font.Bold
@@ -324,122 +317,4 @@ Item {
         }
     }
 
-    // ── Classic: centred card ────────────────────────────────────────────
-    Component {
-        id: classicComponent
-
-        Item {
-            property alias input: classicInput
-
-            Image {
-                anchors.fill: parent
-                visible: root.wallpaperSource.length > 0
-                source: root.wallpaperSource
-                fillMode: Image.PreserveAspectCrop
-                asynchronous: true
-                cache: true
-            }
-
-            Rectangle {
-                anchors.fill: parent
-                color: Appearance.m3colors.m3scrim
-                opacity: 0.34
-            }
-
-            IrisSurface {
-                anchors.centerIn: parent
-                width: Math.min(parent.width - 32, 460 * IrisStyle.density)
-                height: lockContent.implicitHeight + IrisStyle.panelPadding * 2
-                raised: true
-                radius: IrisStyle.radius
-
-                ColumnLayout {
-                    id: lockContent
-                    anchors.left: parent.left
-                    anchors.right: parent.right
-                    anchors.verticalCenter: parent.verticalCenter
-                    anchors.leftMargin: IrisStyle.panelPadding
-                    anchors.rightMargin: IrisStyle.panelPadding
-                    spacing: 12 * IrisStyle.density
-
-                    Item {
-                        Layout.fillWidth: true
-                        Layout.preferredHeight: IrisStyle.headerHeight
-
-                        IrisSectionHeader {
-                            anchors.fill: parent
-                            icon: "lock"
-                            eyebrow: "IRIS / LOCK"
-                            title: Translation.tr("Welcome back")
-                            subtitle: DateTime.date
-                            indexText: root.context.fingerprintsConfigured ? "BIO" : "PASS"
-                        }
-                    }
-
-                    IrisText {
-                        Layout.fillWidth: true
-                        Layout.topMargin: 2 * IrisStyle.density
-                        text: DateTime.timeDisplay
-                        font.family: IrisStyle.fontNumbers
-                        font.pixelSize: 46 * IrisStyle.typeScale
-                        font.weight: Font.Bold
-                    }
-
-                    RowLayout {
-                        Layout.fillWidth: true
-                        spacing: 8 * IrisStyle.density
-
-                        Rectangle {
-                            Layout.preferredWidth: 3 * IrisStyle.density
-                            Layout.preferredHeight: 34 * IrisStyle.density
-                            radius: width / 2
-                            color: root.context.showFailure ? IrisStyle.danger : IrisStyle.accent
-                        }
-
-                        IrisField {
-                            id: classicInput
-                            Layout.fillWidth: true
-                            Layout.preferredHeight: 48 * IrisStyle.density
-                            echoMode: TextInput.Password
-                            placeholderText: root.context.fingerprintsConfigured
-                                ? Translation.tr("Password or use fingerprint")
-                                : Translation.tr("Enter password")
-                            enabled: !root.context.unlockInProgress
-                            text: root.context.currentText
-                            onTextChanged: {
-                                if (root.context.currentText !== text)
-                                    root.context.currentText = text
-                            }
-                            onAccepted: root.submit()
-                        }
-                    }
-
-                    RowLayout {
-                        Layout.fillWidth: true
-                        spacing: 8
-                        IrisText {
-                            Layout.fillWidth: true
-                            text: root.context.unlockInProgress
-                                ? Translation.tr("Unlocking…")
-                                : root.context.showFailure
-                                    ? Translation.tr("Try again")
-                                    : root.context.fingerprintsConfigured
-                                        ? Translation.tr("Password or fingerprint")
-                                        : Translation.tr("Enter password")
-                            color: root.context.showFailure ? IrisStyle.danger : IrisStyle.subtext
-                            role: IrisText.Meta
-                        }
-                        IrisKey { key: "ENTER" }
-                        IrisButton {
-                            implicitWidth: 94 * IrisStyle.density
-                            implicitHeight: 36 * IrisStyle.density
-                            emphasized: true
-                            onClicked: root.submit()
-                            text: Translation.tr("Unlock")
-                        }
-                    }
-                }
-            }
-        }
-    }
 }

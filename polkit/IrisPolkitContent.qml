@@ -4,6 +4,8 @@ import QtQuick
 import QtQuick.Layouts
 import qs.services
 import qs.modules.common
+import qs.modules.common.functions
+import qs.modules.common.widgets
 import qs.modules.iris.style
 import qs.modules.iris.components
 
@@ -12,6 +14,7 @@ Item {
     focus: true
 
     readonly property bool usePasswordChars: !(PolkitService.flow?.responseVisible ?? false)
+    readonly property real d: IrisStyle.density
 
     function submit(): void {
         if (!PolkitService.interactionAvailable)
@@ -41,103 +44,104 @@ Item {
         color: IrisStyle.scrim
     }
 
+    // A centred alert, like Close Confirm: what asks, why, the secret, two
+    // equal answers. The accent marks the one thing that grants access.
     IrisSurface {
         id: card
         anchors.centerIn: parent
-        width: Math.min(440, parent.width - 40)
-        implicitHeight: body.implicitHeight + IrisStyle.spaceLarge * 2
+        width: Math.min(320 * root.d, parent.width - 40)
+        implicitHeight: body.implicitHeight + 40 * root.d
+        radius: Math.round(22 * root.d)
         raised: true
 
         ColumnLayout {
             id: body
-            anchors.fill: parent
-            anchors.margins: IrisStyle.spaceLarge
-            spacing: IrisStyle.spaceMedium
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.leftMargin: 20 * root.d
+            anchors.rightMargin: 20 * root.d
+            spacing: 0
 
-            Item {
-                visible: !IrisStyle.island
-                Layout.fillWidth: true
-                Layout.preferredHeight: visible ? IrisStyle.headerHeight : 0
-
-                IrisSectionHeader {
-                    id: authHeader
-                    anchors.fill: parent
-                    icon: "admin_panel_settings"
-                    eyebrow: "IRIS / AUTH"
-                    title: Translation.tr("Authentication")
-                    subtitle: PolkitService.actionLabel !== Translation.tr("Authentication")
-                        ? PolkitService.actionLabel : Translation.tr("Privileged action")
-                    indexText: "AUTH"
-                }
-            }
-
-            ColumnLayout {
-                visible: IrisStyle.island
-                Layout.fillWidth: true
-                spacing: 2 * IrisStyle.density
-
-                IrisText {
-                    Layout.fillWidth: true
-                    text: Translation.tr("Authentication")
-                    font.family: IrisStyle.fontTitle
-                    font.pixelSize: 18 * IrisStyle.typeScale
-                    font.weight: Font.DemiBold
-                }
-                IrisText {
-                    Layout.fillWidth: true
-                    text: PolkitService.actionLabel !== Translation.tr("Authentication")
-                        ? PolkitService.actionLabel : Translation.tr("Privileged action")
-                    role: IrisText.Meta
-                    color: IrisStyle.subtext
-                    elide: Text.ElideRight
-                }
-            }
-
-            IrisText {
-                Layout.fillWidth: true
-                text: PolkitService.cleanMessage
-                role: IrisText.Body
-                wrapMode: Text.WordWrap
-            }
-
-            RowLayout {
-                Layout.fillWidth: true
-                spacing: 8 * IrisStyle.density
-
-                Rectangle {
-                    visible: !IrisStyle.island
-                    Layout.preferredWidth: 3 * IrisStyle.density
-                    Layout.preferredHeight: 34 * IrisStyle.density
-                    radius: width / 2
+            Rectangle {
+                Layout.alignment: Qt.AlignHCenter
+                implicitWidth: Math.round(52 * root.d)
+                implicitHeight: implicitWidth
+                radius: width / 2
+                color: ColorUtils.applyAlpha(IrisStyle.accent, 0.18)
+                MaterialSymbol {
+                    anchors.centerIn: parent
+                    text: PolkitService.batteryChargeLimitRequest ? "battery_charging_full" : "lock"
+                    fill: 1
+                    iconSize: Math.round(26 * root.d)
                     color: IrisStyle.accent
                 }
+            }
+            IrisText {
+                Layout.fillWidth: true
+                Layout.topMargin: 14 * root.d
+                horizontalAlignment: Text.AlignHCenter
+                text: PolkitService.actionLabel !== Translation.tr("Authentication")
+                    ? PolkitService.actionLabel : Translation.tr("Authentication required")
+                font.pixelSize: 15 * IrisStyle.typeScale
+                font.weight: Font.DemiBold
+                wrapMode: Text.Wrap
+            }
+            IrisText {
+                Layout.fillWidth: true
+                Layout.topMargin: 6 * root.d
+                visible: text.length > 0
+                horizontalAlignment: Text.AlignHCenter
+                text: PolkitService.cleanMessage
+                color: IrisStyle.subtext
+                font.pixelSize: 12 * IrisStyle.typeScale
+                wrapMode: Text.Wrap
+                maximumLineCount: 4
+                elide: Text.ElideRight
+            }
 
-                IrisField {
-                    id: input
-                    Layout.fillWidth: true
-                    implicitHeight: 48 * IrisStyle.density
-                    focus: true
-                    enabled: PolkitService.interactionAvailable
-                    echoMode: root.usePasswordChars ? TextInput.Password : TextInput.Normal
-                    placeholderText: PolkitService.cleanPrompt
-                    onAccepted: root.submit()
+            IrisField {
+                id: input
+                Layout.fillWidth: true
+                Layout.topMargin: 16 * root.d
+                implicitHeight: Math.round(40 * root.d)
+                focus: true
+                enabled: PolkitService.interactionAvailable
+                echoMode: root.usePasswordChars ? TextInput.Password : TextInput.Normal
+                placeholderText: PolkitService.cleanPrompt
+                font.pixelSize: 14 * IrisStyle.typeScale
+                onAccepted: root.submit()
+                background: Rectangle {
+                    radius: height / 2
+                    color: ColorUtils.applyAlpha(IrisStyle.text, input.activeFocus ? 0.12 : 0.08)
+                    border.width: input.activeFocus ? Math.max(1, Math.round(1.5 * root.d)) : 0
+                    border.color: ColorUtils.applyAlpha(IrisStyle.accent, 0.8)
+                    Behavior on color { ColorAnimation { duration: IrisStyle.duration(120) } }
                 }
             }
 
             RowLayout {
                 Layout.fillWidth: true
-                spacing: IrisStyle.spaceSmall
-                Item { Layout.fillWidth: true }
-                IrisKey { visible: !IrisStyle.island; key: "ESC" }
+                Layout.topMargin: 14 * root.d
+                spacing: 8 * root.d
                 IrisButton {
+                    Layout.fillWidth: true
+                    implicitHeight: Math.round(34 * root.d)
+                    buttonRadius: height / 2
+                    buttonRadiusPressed: height / 2
+                    colBackground: ColorUtils.applyAlpha(IrisStyle.text, 0.12)
+                    colBackgroundHover: ColorUtils.applyAlpha(IrisStyle.text, 0.2)
                     text: Translation.tr("Cancel")
-                    quiet: true
                     onClicked: PolkitService.cancel()
                 }
                 IrisButton {
-                    text: Translation.tr("Authenticate")
+                    Layout.fillWidth: true
+                    implicitHeight: Math.round(34 * root.d)
+                    buttonRadius: height / 2
+                    buttonRadiusPressed: height / 2
                     emphasized: true
                     enabled: PolkitService.interactionAvailable
+                    text: Translation.tr("Authenticate")
                     onClicked: root.submit()
                 }
             }

@@ -21,15 +21,15 @@ PanelSurface {
     opaqueSurface: true
     radiusOverride: root.radius
     cardStyle: false
-    borderless: root.quiet || IrisStyle.island
-    outlined: !root.quiet && !IrisStyle.island
+    borderless: true
+    outlined: false
     borderWidthOverride: 1
     clipContent: false
 
     Rectangle {
         anchors.fill: parent
         z: -1
-        visible: IrisStyle.island && !root.quiet
+        visible: !root.quiet
         radius: root.radius
         topLeftRadius: root.notchTop ? 0 : radius
         topRightRadius: root.notchTop ? 0 : radius

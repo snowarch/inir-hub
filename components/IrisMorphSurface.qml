@@ -25,6 +25,13 @@ Item {
     property real originItemRadius: 0
     property real radius: IrisStyle.radius
     property color color: IrisStyle.surface
+    property real contentScaleFrom: 0.965
+    property real contentFadeStart: 0.35
+    property real contentFadeSpan: 0.5
+    property int animationDuration: IrisStyle.settleDuration
+    // Content normally rests in place while the chassis grows around it. A
+    // surface that travels (an origin of its own size) carries its content.
+    property bool contentTravels: false
     default property alias content: contentHost.data
     readonly property real progress: root.presentation
     readonly property bool settled: root.presentation >= 1
@@ -35,7 +42,11 @@ Item {
     // the open request lands, so converting eagerly would bake in a stale offset.
     property var originScene: null
     property real fromRadius: root.radius
-    readonly property rect from: root.originItem ? root.itemRect() : root.originScene
+    // A consumer-owned origin is followed live: it is usually derived from the
+    // window's own size, which a fresh layer surface does not know yet.
+    readonly property rect from: root.originItem ? root.itemRect()
+        : root.origin ? Qt.rect(root.origin.x - root.x, root.origin.y - root.y, root.origin.width, root.origin.height)
+        : root.originScene
         ? Qt.rect(root.originScene.x - root.x, root.originScene.y - root.y, root.originScene.width, root.originScene.height)
         : Qt.rect(root.width * 0.04, root.height * 0.04, root.width * 0.92, root.height * 0.92)
     function itemRect(): rect {
@@ -49,7 +60,7 @@ Item {
     property real presentation: root.armed ? 1 : 0
     Behavior on presentation {
         NumberAnimation {
-            duration: Math.round(IrisStyle.morphDuration * 1.35)
+            duration: root.animationDuration
             easing.type: Easing.BezierSpline
             easing.bezierCurve: IrisStyle.morphCurve
         }
@@ -71,6 +82,7 @@ Item {
     // so x/y are scene coordinates.
     function captureOrigin(): void {
         if (root.originItem) { root.fromRadius = root.originItemRadius; return }
+        if (root.origin) { root.fromRadius = root.origin.radius ?? root.radius; return }
         const origin = root.origin ?? GlobalStates.irisMorphOrigin
         const screenName = root.origin ? "" : (GlobalStates.focusedScreen?.name ?? "")
         if (origin && origin.width > 0 && (!origin.screen || origin.screen === screenName)) {
@@ -118,14 +130,14 @@ Item {
 
         Item {
             id: contentHost
-            x: -chassis.x
-            y: -chassis.y
+            x: root.contentTravels ? 0 : -chassis.x
+            y: root.contentTravels ? 0 : -chassis.y
             width: root.width
             height: root.height
             // Content arrives once the shape has mostly formed and leaves first.
-            opacity: Math.max(0, Math.min(1, (root.presentation - 0.35) / 0.5))
+            opacity: Math.max(0, Math.min(1, (root.presentation - root.contentFadeStart) / Math.max(0.01, root.contentFadeSpan)))
             // Settles from slightly smaller, so content rides the chassis growth.
-            scale: 0.965 + 0.035 * root.presentation
+            scale: root.contentScaleFrom + (1 - root.contentScaleFrom) * root.presentation
             enabled: root.open
         }
     }

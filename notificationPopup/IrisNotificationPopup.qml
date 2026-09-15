@@ -32,12 +32,12 @@ PanelWindow {
     WlrLayershell.namespace: "quickshell:iris-notifications"
     anchors {
         top: true
-        left: IrisStyle.island
+        left: true
         right: true
     }
     readonly property real popupWidth: Math.min(Math.max(260, (root.screen?.width ?? 1920) - 16),
         Math.max(340, Number(root.options?.width ?? 380) * root.d) + 16)
-    implicitWidth: IrisStyle.island ? (root.screen?.width ?? root.popupWidth) : root.popupWidth
+    implicitWidth: root.screen?.width ?? root.popupWidth
     implicitHeight: root.topOffset + popupColumn.implicitHeight + 24 * root.d
     // Only the banners take input; the transparent strip beside them passes through.
     mask: Region { item: popupColumn }
@@ -65,16 +65,14 @@ PanelWindow {
     ColumnLayout {
         id: popupColumn
         anchors.top: parent.top
-        anchors.horizontalCenter: IrisStyle.island ? parent.horizontalCenter : undefined
-        anchors.right: IrisStyle.island ? undefined : parent.right
+        anchors.horizontalCenter: parent.horizontalCenter
         anchors.topMargin: root.topOffset
-        anchors.rightMargin: 8
-        width: IrisStyle.island ? Math.min(root.popupWidth - 16, parent.width - 16) : parent.width - 16
+        width: Math.min(root.popupWidth - 16, parent.width - 16)
         spacing: 8 * root.d
 
         Repeater {
             model: root.popups
-            delegate: IrisStyle.island ? bannerComponent : cardComponent
+            delegate: bannerComponent
         }
     }
 
@@ -86,12 +84,6 @@ PanelWindow {
             id: banner
             required property var modelData
             readonly property var notification: banner.modelData
-            readonly property bool hasImage: String(banner.notification?.image ?? "").length > 0
-            // Only real icon names/paths that resolve; app names often do not.
-            readonly property bool hasAppIcon: {
-                const icon = String(banner.notification?.appIcon ?? "")
-                return icon.length > 0 && (icon.startsWith("/") || icon.startsWith("file:") || AppSearch.iconExists(icon))
-            }
             readonly property var actions: (banner.notification?.actions ?? []).filter(action => action.identifier !== "default")
             readonly property bool critical: String(banner.notification?.urgency ?? "") === "critical"
             readonly property bool hovered: bannerHover.hovered
@@ -163,50 +155,17 @@ PanelWindow {
                     anchors.leftMargin: 14 * root.d
                     spacing: 12 * root.d
 
-                    // Sender artwork: the notification image with the app icon as a
-                    // corner badge, or the app icon alone.
-                    Item {
+                    // Sender artwork: image with the app as a badge, the app icon,
+                    // or an iRiS tile for senders that publish nothing usable.
+                    IrisNotificationIcon {
                         Layout.alignment: Qt.AlignTop
                         Layout.topMargin: 2 * root.d
-                        implicitWidth: Math.round(38 * root.d)
-                        implicitHeight: implicitWidth
-                        ClippingRectangle {
-                            anchors.fill: parent
-                            visible: banner.hasImage
-                            radius: Math.round(10 * root.d)
-                            color: IrisStyle.surfaceHigh
-                            Image {
-                                anchors.fill: parent
-                                source: banner.hasImage ? banner.notification.image : ""
-                                fillMode: Image.PreserveAspectCrop
-                                asynchronous: true
-                                sourceSize: Qt.size(parent.width * 2, parent.height * 2)
-                            }
-                        }
-                        SmartAppIcon {
-                            readonly property real size: banner.hasImage ? Math.round(18 * root.d) : parent.width
-                            visible: banner.hasAppIcon
-                            x: banner.hasImage ? parent.width - size + 4 * root.d : 0
-                            y: banner.hasImage ? parent.height - size + 4 * root.d : 0
-                            icon: banner.notification?.appIcon ?? ""
-                            fallback: "dialog-information"
-                            iconSize: size
-                        }
-                        // Senders without an icon get a quiet system glyph, never
-                        // the missing-icon texture.
-                        Rectangle {
-                            anchors.fill: parent
-                            visible: !banner.hasImage && !banner.hasAppIcon
-                            radius: width / 2
-                            color: IrisStyle.surfaceHighest
-                            MaterialSymbol {
-                                anchors.centerIn: parent
-                                text: banner.critical ? "priority_high" : "notifications"
-                                fill: 1
-                                iconSize: Math.round(parent.width * 0.5)
-                                color: banner.critical ? IrisStyle.danger : IrisStyle.text
-                            }
-                        }
+                        size: Math.round(38 * root.d)
+                        appName: String(banner.notification?.appName ?? "")
+                        appIcon: String(banner.notification?.appIcon ?? "")
+                        image: String(banner.notification?.image ?? "")
+                        summary: String(banner.notification?.summary ?? "")
+                        critical: banner.critical
                     }
 
                     ColumnLayout {
@@ -320,73 +279,4 @@ PanelWindow {
         }
     }
 
-    // ── Classic: compact cards ────────────────────────────────────────────
-    Component {
-        id: cardComponent
-
-        IrisSurface {
-            id: notificationCard
-            required property var modelData
-            Layout.fillWidth: true
-            implicitHeight: cardContent.implicitHeight + 20 * IrisStyle.density
-            raised: true
-
-            RowLayout {
-                id: cardContent
-                anchors.left: parent.left
-                anchors.right: parent.right
-                anchors.verticalCenter: parent.verticalCenter
-                anchors.leftMargin: 10 * IrisStyle.density
-                anchors.rightMargin: 8 * IrisStyle.density
-                spacing: 9 * IrisStyle.density
-
-                Rectangle {
-                    Layout.preferredWidth: 3 * IrisStyle.density
-                    Layout.preferredHeight: Math.max(34 * IrisStyle.density, cardContent.implicitHeight - 4)
-                    radius: width / 2
-                    color: IrisStyle.accent
-                }
-
-                SmartAppIcon {
-                    icon: notificationCard.modelData?.appIcon || "dialog-information"
-                    fallback: "dialog-information"
-                    iconSize: Math.round(25 * IrisStyle.density)
-                }
-                ColumnLayout {
-                    Layout.fillWidth: true
-                    spacing: 0
-                    IrisText {
-                        Layout.fillWidth: true
-                        text: String(notificationCard.modelData?.appName ?? "").toUpperCase()
-                        visible: text.length > 0
-                        role: IrisText.Eyebrow
-                        font.weight: Font.Bold
-                        elide: Text.ElideRight
-                    }
-                    IrisText {
-                        Layout.fillWidth: true
-                        text: notificationCard.modelData?.summary ?? notificationCard.modelData?.appName ?? ""
-                        font.family: IrisStyle.fontTitle
-                        font.pixelSize: 14 * IrisStyle.typeScale
-                        font.weight: Font.DemiBold
-                        elide: Text.ElideRight
-                    }
-                    IrisText {
-                        Layout.fillWidth: true
-                        visible: text.length > 0
-                        text: notificationCard.modelData?.body ?? ""
-                        font.pixelSize: 11 * IrisStyle.typeScale
-                        color: IrisStyle.subtext
-                        wrapMode: Text.WordWrap
-                        maximumLineCount: 3
-                        elide: Text.ElideRight
-                    }
-                }
-                IrisIconButton {
-                    materialIcon: "close"
-                    onClicked: Notifications.timeoutNotification(notificationCard.modelData.notificationId)
-                }
-            }
-        }
-    }
 }

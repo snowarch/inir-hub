@@ -92,6 +92,8 @@ Scope {
         WlrLayershell.namespace: "quickshell:iris-osd"
         anchors { bottom: true; left: true; right: true }
         implicitHeight: root.surfaceBottomMargin + 76 * IrisStyle.density
+        // Feedback never takes input from the windows beneath its strip.
+        mask: Region { item: osdSurface }
 
         IrisSurface {
             id: osdSurface
@@ -99,10 +101,10 @@ Scope {
             anchors.bottom: parent.bottom
             anchors.bottomMargin: root.surfaceBottomMargin
             width: Math.max(240, Math.min(parent.width - 24,
-                Math.max(IrisStyle.island ? 250 : 280, Number(Config.options?.iris?.osd?.width ?? 320) * IrisStyle.density)))
-            height: (IrisStyle.island ? 52 : 64) * IrisStyle.density
+                Math.max(250, Number(Config.options?.iris?.osd?.width ?? 320) * IrisStyle.density)))
+            height: 52 * IrisStyle.density
             raised: true
-            radius: IrisStyle.island ? height / 2 : IrisStyle.radius
+            radius: height / 2
             opacity: root.presentationShown ? 1 : 0
             transform: Translate {
                 y: root.presentationShown ? 0 : 5 * IrisStyle.density
@@ -116,14 +118,6 @@ Scope {
                 anchors.rightMargin: 14 * IrisStyle.density
                 spacing: 11 * IrisStyle.density
 
-                Rectangle {
-                    visible: !IrisStyle.island
-                    Layout.preferredWidth: 3 * IrisStyle.density
-                    Layout.preferredHeight: 36 * IrisStyle.density
-                    radius: width / 2
-                    color: root.kind === "mic" && Audio.micMuted ? IrisStyle.danger : IrisStyle.accent
-                }
-
                 MaterialSymbol {
                     text: root.icon
                     iconSize: 22 * IrisStyle.density
@@ -134,22 +128,6 @@ Scope {
                     Layout.fillWidth: true
                     spacing: 1 * IrisStyle.density
 
-                    RowLayout {
-                        visible: !IrisStyle.island
-                        Layout.fillWidth: true
-                        IrisText {
-                            Layout.fillWidth: true
-                            text: root.kind === "brightness" ? "DISPLAY"
-                                : root.kind === "mic" ? "INPUT" : "AUDIO"
-                            role: IrisText.Eyebrow
-                        }
-                        IrisText {
-                            text: root.kind === "brightness" ? Translation.tr("Brightness")
-                                : root.kind === "mic" ? Translation.tr("Microphone") : Translation.tr("Volume")
-                            role: IrisText.Meta
-                        }
-                    }
-
                     IrisSlider {
                         Layout.fillWidth: true
                         enabled: false
@@ -158,21 +136,13 @@ Scope {
                 }
 
                 IrisText {
-                    text: Math.round(root.value * 100).toString().padStart(2, "0") + (IrisStyle.island ? "%" : "")
-                    role: IrisStyle.island ? IrisText.Body : IrisText.Metric
-                    font.pixelSize: (IrisStyle.island ? 15 : 26) * IrisStyle.typeScale
+                    text: Math.round(root.value * 100).toString().padStart(2, "0") + "%"
+                    role: IrisText.Body
+                    font.pixelSize: 15 * IrisStyle.typeScale
                     font.weight: Font.DemiBold
                     color: root.kind === "mic" && Audio.micMuted ? IrisStyle.danger : IrisStyle.text
                 }
 
-                IrisText {
-                    visible: !IrisStyle.island
-                    text: "%"
-                    role: IrisText.Meta
-                    color: IrisStyle.muted
-                    Layout.alignment: Qt.AlignBottom
-                    Layout.bottomMargin: 9 * IrisStyle.density
-                }
             }
         }
     }

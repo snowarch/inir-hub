@@ -41,7 +41,6 @@ Item {
 
     // Island: a centred alert — app icon, question, context, two equal buttons.
     IrisSurface {
-        visible: IrisStyle.island
         anchors.centerIn: parent
         width: Math.min(300 * IrisStyle.density, parent.width - 40)
         implicitHeight: alert.implicitHeight + 40 * IrisStyle.density
@@ -112,107 +111,4 @@ Item {
         }
     }
 
-    IrisSurface {
-        visible: !IrisStyle.island
-        anchors.centerIn: parent
-        width: Math.min(420, parent.width - 40)
-        implicitHeight: content.implicitHeight + IrisStyle.spaceLarge * 2
-        raised: true
-
-        ColumnLayout {
-            id: content
-            anchors.fill: parent
-            anchors.margins: IrisStyle.spaceLarge
-            spacing: IrisStyle.spaceMedium
-
-            Item {
-                visible: !IrisStyle.island
-                Layout.fillWidth: true
-                Layout.preferredHeight: visible ? IrisStyle.headerHeight : 0
-
-                IrisSectionHeader {
-                    id: closeHeader
-                    anchors.fill: parent
-                    icon: "close"
-                    eyebrow: "IRIS / WINDOW"
-                    title: Translation.tr("Close this window?")
-                    subtitle: root.titleText.length > 0 ? root.titleText : root.appId
-                    indexText: "ESC"
-                }
-            }
-
-            ColumnLayout {
-                visible: IrisStyle.island
-                Layout.fillWidth: true
-                spacing: 2 * IrisStyle.density
-
-                IrisText {
-                    Layout.fillWidth: true
-                    text: Translation.tr("Close this window?")
-                    font.family: IrisStyle.fontTitle
-                    font.pixelSize: 18 * IrisStyle.typeScale
-                    font.weight: Font.DemiBold
-                }
-                IrisText {
-                    Layout.fillWidth: true
-                    visible: text.length > 0
-                    text: root.titleText.length > 0 ? root.titleText : root.appId
-                    role: IrisText.Meta
-                    color: IrisStyle.subtext
-                    elide: Text.ElideRight
-                }
-            }
-
-            RowLayout {
-                Layout.fillWidth: true
-                spacing: 10 * IrisStyle.density
-
-                Rectangle {
-                    visible: !IrisStyle.island
-                    Layout.preferredWidth: 3 * IrisStyle.density
-                    Layout.preferredHeight: 32 * IrisStyle.density
-                    radius: width / 2
-                    color: IrisStyle.danger
-                }
-
-                SmartAppIcon {
-                    icon: root.desktopEntry?.icon ?? root.appId
-                    fallback: "application-x-executable"
-                    iconSize: 28 * IrisStyle.density
-                }
-                ColumnLayout {
-                    Layout.fillWidth: true
-                    spacing: 1
-                    IrisText {
-                        Layout.fillWidth: true
-                        text: root.appId.length > 0
-                            ? (IrisStyle.island ? root.appId : root.appId.toUpperCase())
-                            : Translation.tr("Application")
-                        role: IrisStyle.island ? IrisText.Body : IrisText.Eyebrow
-                        font.weight: Font.DemiBold
-                        elide: Text.ElideRight
-                    }
-                    IrisText {
-                        Layout.fillWidth: true
-                        text: Translation.tr("Unsaved changes may be lost.")
-                        role: IrisText.Meta
-                    }
-                }
-            }
-
-            RowLayout {
-                Layout.fillWidth: true
-                spacing: IrisStyle.spaceSmall
-                Item { Layout.fillWidth: true }
-                IrisKey { visible: !IrisStyle.island; key: "ESC" }
-                IrisButton { text: Translation.tr("Cancel"); quiet: true; onClicked: root.cancel() }
-                IrisButton {
-                    text: Translation.tr("Close")
-                    emphasized: true
-                    danger: true
-                    onClicked: root.confirm()
-                }
-            }
-        }
-    }
 }

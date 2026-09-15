@@ -14,6 +14,8 @@ import qs.modules.iris.polkit
 import qs.modules.iris.style
 import qs.modules.iris.dock
 import qs.modules.iris.settings
+import qs.modules.iris.sidebar
+import qs.modules.iris.wallpaper
 import qs.modules.background
 import qs.modules.lock
 
@@ -69,6 +71,27 @@ Item {
         activeAsync: enabledPanel && GlobalStates.deferredPanelsReady && resident
     }
 
+    IrisSidebarEdge { side: "left" }
+    IrisSidebarEdge { side: "right" }
+
+    OnDemandPanelLoader {
+        identifier: "irisSidebarLeft"
+        requireEnabledPanel: false
+        open: GlobalStates.sidebarLeftOpen
+        extraCondition: Config.options?.iris?.sidebars?.left?.enable ?? true
+        closeGraceMs: IrisStyle.settleDuration + 80
+        component: IrisSidebar { side: "left" }
+    }
+
+    OnDemandPanelLoader {
+        identifier: "irisSidebarRight"
+        requireEnabledPanel: false
+        open: GlobalStates.sidebarRightOpen
+        extraCondition: Config.options?.iris?.sidebars?.right?.enable ?? true
+        closeGraceMs: IrisStyle.settleDuration + 80
+        component: IrisSidebar { side: "right" }
+    }
+
     OnDemandPanelLoader {
         identifier: "irisNotificationPopup"
         open: (Notifications.popupList?.length ?? 0) > 0
@@ -80,7 +103,7 @@ Item {
         identifier: "irisSettings"
         requireEnabledPanel: false
         open: GlobalStates.settingsOverlayOpen || GlobalStates.irisSettingsWarm
-        closeGraceMs: Math.round(IrisStyle.morphDuration * 1.35) + 120
+        closeGraceMs: IrisStyle.settleDuration + 120
         component: IrisSettings {}
     }
 
@@ -109,7 +132,7 @@ Item {
     PanelLoader {
         identifier: "irisOnScreenDisplay"
         extraCondition: (Config.options?.iris?.modules?.osd ?? true)
-            && (!IrisStyle.island || !GlobalStates.barOpen
+            && (!GlobalStates.barOpen
                 || !(Config.options?.enabledPanels ?? []).includes("irisBar")
                 || ((Config.options?.iris?.bar?.screenList ?? []).length > 0
                     && !(Config.options.iris.bar.screenList).includes(GlobalStates.focusedScreen?.name ?? "")))
@@ -119,7 +142,7 @@ Item {
     OnDemandPanelLoader {
         identifier: "irisPalette"
         open: GlobalStates.searchOpen
-        closeGraceMs: Math.round(IrisStyle.morphDuration * 1.35) + 120
+        closeGraceMs: IrisStyle.settleDuration + 120
         extraCondition: Config.options?.iris?.modules?.palette ?? true
         component: IrisPalette {}
     }
@@ -127,7 +150,7 @@ Item {
     OnDemandPanelLoader {
         identifier: "irisControlCenter"
         open: GlobalStates.controlPanelOpen || GlobalStates.irisControlsWarm
-        closeGraceMs: Math.round(IrisStyle.morphDuration * 1.35) + 120
+        closeGraceMs: IrisStyle.settleDuration + 120
         extraCondition: Config.options?.iris?.modules?.controlCenter ?? true
         component: IrisControlCenter {}
     }
@@ -172,11 +195,14 @@ Item {
         source: "../regionSelector/RegionSelector.qml"
     }
 
+    // iRiS owns the grid picker's presentation; the carousel launcher and
+    // coverflow stay shared.
     OnDemandPanelLoader {
         identifier: "irisWallpaperSelector"
         open: GlobalStates.wallpaperSelectorOpen
         requireEnabledPanel: false
-        source: "../wallpaperSelector/WallpaperSelector.qml"
+        closeGraceMs: IrisStyle.settleDuration + 120
+        component: IrisWallpaperPicker {}
     }
 
     OnDemandPanelLoader {
@@ -198,7 +224,7 @@ Item {
         open: RecorderStatus.isRecording
         requireEnabledPanel: false
         // The Dynamic Island owns recording as a live activity while it is shown.
-        extraCondition: !(IrisStyle.island && GlobalStates.barOpen
+        extraCondition: !(GlobalStates.barOpen
             && (Config.options?.enabledPanels ?? []).includes("irisBar"))
         source: "../recordingOsd/RecordingOsd.qml"
     }

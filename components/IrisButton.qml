@@ -16,7 +16,7 @@ RippleButton {
     readonly property color foreground: root.danger && root.emphasized ? IrisStyle.onDanger
         : root.emphasized ? IrisStyle.onAccent
         : root.danger ? IrisStyle.danger
-        : root.selected ? IrisStyle.selectionText : IrisStyle.text
+        : root.selected ? IrisStyle.accent : IrisStyle.text
 
     implicitWidth: Math.max(34 * IrisStyle.density,
         root.text.length > 0 ? label.implicitWidth + 22 * IrisStyle.density : 34 * IrisStyle.density)
@@ -27,7 +27,7 @@ RippleButton {
     toggled: root.selected
     buttonRadius: IrisStyle.radiusSmall
     buttonRadiusPressed: Math.max(3, IrisStyle.radiusSmall - 2)
-    rippleEnabled: !IrisStyle.island
+    rippleEnabled: false
     rippleDuration: IrisStyle.duration(420)
     stateTransitionsEnabled: IrisStyle.motionEnabled
     pressScaleEnabled: true
@@ -46,8 +46,9 @@ RippleButton {
             : root.quiet
                 ? ColorUtils.applyAlpha(IrisStyle.selection, 0.58)
             : IrisStyle.surfaceHighestOpaque
-    colBackgroundToggled: IrisStyle.selection
-    colBackgroundToggledHover: IrisStyle.selectionHover
+    // Selection and on-state wear the system accent as a tint on black.
+    colBackgroundToggled: ColorUtils.applyAlpha(IrisStyle.accent, 0.2)
+    colBackgroundToggledHover: ColorUtils.applyAlpha(IrisStyle.accent, 0.28)
     colRipple: ColorUtils.applyAlpha(root.danger ? IrisStyle.danger : IrisStyle.accent, 0.16)
     colRippleToggled: ColorUtils.applyAlpha(IrisStyle.accent, 0.20)
 

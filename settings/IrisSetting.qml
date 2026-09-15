@@ -63,6 +63,7 @@ Item {
                 visible: root.spec.kind === "range"
                 text: Math.round(Number(root.value)) + (root.spec.unit ?? "")
                 color: IrisStyle.subtext
+                font.family: IrisStyle.fontNumbers
                 font.features: ({ "tnum": 1 })
                 font.pixelSize: 12.5 * IrisStyle.typeScale
             }
@@ -80,6 +81,11 @@ Item {
                 Accessible.role: Accessible.CheckBox
                 Accessible.name: Translation.tr(root.spec.label)
                 Accessible.checked: toggle.on
+                activeFocusOnTab: visible
+                border.width: activeFocus ? 2 : 0
+                border.color: IrisStyle.text
+                Keys.onSpacePressed: Config.setNestedValue(root.spec.path, !toggle.on)
+                Keys.onReturnPressed: Config.setNestedValue(root.spec.path, !toggle.on)
                 Rectangle {
                     y: 2 * root.d
                     x: toggle.on ? toggle.width - width - 2 * root.d : 2 * root.d
@@ -113,6 +119,8 @@ Item {
             Layout.preferredHeight: Math.round(22 * root.d)
             visible: root.spec.kind === "range"
             knob: true
+            Accessible.name: Translation.tr(root.spec.label)
+            stepSize: (root.spec.step ?? 1) / Math.max(1, root.spec.max - root.spec.min)
             fillColor: IrisStyle.accent
             trackColor: ColorUtils.applyAlpha(IrisStyle.text, 0.14)
             value: root.spec.kind === "range" ? (Number(root.value) - root.spec.min) / (root.spec.max - root.spec.min) : 0
@@ -177,13 +185,38 @@ Item {
                         Accessible.role: Accessible.RadioButton
                         Accessible.name: Translation.tr(root.spec.label) + ": " + Translation.tr(segment.modelData.label)
                         Accessible.checked: segmented.selectedIndex === segment.index
+                        activeFocusOnTab: true
+                        Keys.onSpacePressed: Config.setNestedValue(root.spec.path, segment.modelData.value)
+                        Keys.onReturnPressed: Config.setNestedValue(root.spec.path, segment.modelData.value)
                         onClicked: Config.setNestedValue(root.spec.path, segment.modelData.value)
-                        IrisText {
+                        Rectangle {
+                            anchors.fill: parent
+                            radius: height / 2
+                            color: "transparent"
+                            border.width: segment.activeFocus ? 1 : 0
+                            border.color: IrisStyle.accent
+                        }
+                        Row {
                             anchors.centerIn: parent
-                            text: Translation.tr(segment.modelData.label)
-                            font.pixelSize: 12 * IrisStyle.typeScale
-                            font.weight: segmented.selectedIndex === segment.index ? Font.DemiBold : Font.Normal
-                            color: segmented.selectedIndex === segment.index ? IrisStyle.text : IrisStyle.subtext
+                            spacing: 6 * IrisStyle.density
+                            // Colour choices carry a swatch of the colour they name.
+                            Rectangle {
+                                visible: String(segment.modelData.swatch ?? "").length > 0
+                                anchors.verticalCenter: parent.verticalCenter
+                                width: Math.round(10 * IrisStyle.density)
+                                height: width
+                                radius: width / 2
+                                color: segment.modelData.swatch ?? "transparent"
+                            }
+                            IrisText {
+                                anchors.verticalCenter: parent.verticalCenter
+                                text: Translation.tr(segment.modelData.label)
+                                // Typeface choices are set in the face they name.
+                                font.family: root.spec.previewFont ? segment.modelData.label : IrisStyle.fontMain
+                                font.pixelSize: 12 * IrisStyle.typeScale
+                                font.weight: segmented.selectedIndex === segment.index ? Font.DemiBold : Font.Normal
+                                color: segmented.selectedIndex === segment.index ? IrisStyle.text : IrisStyle.subtext
+                            }
                         }
                     }
                 }

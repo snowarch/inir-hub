@@ -4,6 +4,7 @@ import QtQuick.Controls
 import QtQuick.Layouts
 import Quickshell
 import Quickshell.Wayland
+import Quickshell.Widgets
 import qs
 import qs.services
 import qs.modules.common
@@ -12,6 +13,7 @@ import qs.modules.common.widgets
 import qs.modules.settings
 import qs.modules.iris.components
 import qs.modules.iris.style
+import qs.modules.iris.sidebar
 
 PanelWindow {
     id: root
@@ -23,25 +25,32 @@ PanelWindow {
     // Section badges follow the grouped-settings convention: one quiet tint per
     // category so the sidebar scans by colour as well as by label.
     readonly property var sections: [
-        { id: "bar", title: "Island", subtitle: "Composition, size and how the Island responds", icon: "pill", tint: "#0a84ff" },
-        { id: "player", title: "Now Playing", subtitle: "Music in the Island and on the lock screen", icon: "music_note", tint: "#ff375f" },
-        { id: "dock", title: "Dock", subtitle: "Visibility, material and app icons", icon: "dock_to_bottom", tint: "#5e5ce6" },
-        { id: "appearance", title: "Appearance", subtitle: "Shape and motion of every iRiS surface", icon: "palette", tint: "#bf5af2" },
-        { id: "desktop", title: "Desktop", subtitle: "Widgets on the wallpaper and the overview backdrop", icon: "widgets", tint: "#30b0c7" },
-        { id: "surfaces", title: "Spotlight & Panels", subtitle: "Search, Control Center and system feedback", icon: "space_dashboard", tint: "#ff9f0a" },
-        { id: "system", title: "All Settings", subtitle: "Every iNiR page", icon: "settings", tint: "#8e8e93" }
+        { id: "bar", title: "Island", subtitle: "Composition, size and how the Island responds", icon: "pill", tint: "#0a84ff", tip: "Rest on the Island to peek, click to keep it, scroll for volume." },
+        { id: "player", title: "Now Playing", subtitle: "Music in the Island and on the lock screen", icon: "music_note", tint: "#ff375f", tip: "Middle-click the Island to play or pause." },
+        { id: "dock", title: "Dock", subtitle: "Visibility, material and app icons", icon: "dock_to_bottom", tint: "#5e5ce6", tip: "Right-click an icon for its windows; middle-click opens a new one." },
+        { id: "appearance", title: "Appearance", subtitle: "Shape and motion of every iRiS surface", icon: "palette", tint: "#bf5af2", tip: "Shorter morphs feel snappier; the settle stays liquid." },
+        { id: "desktop", title: "Desktop", subtitle: "Widgets on the wallpaper and the overview backdrop", icon: "widgets", tint: "#30b0c7", tip: "Right-click the desktop to edit widgets." },
+        { id: "sidebars", title: "Side Panels", subtitle: "Focus and Today, arranged around your workflow", icon: "dock_to_right", tint: "#34c759", tip: "Ctrl+E customizes a panel; Keep open makes room beside windows." },
+        { id: "surfaces", title: "Spotlight & Panels", subtitle: "Search, Control Center and system feedback", icon: "space_dashboard", tint: "#ff9f0a", tip: "Spotlight prefixes: ; clipboard, = calculator, / actions." },
+        { id: "system", title: "All Settings", subtitle: "Every iNiR page", icon: "settings", tint: "#8e8e93", tip: "Search finds iRiS options across every section." }
     ]
     readonly property var specifications: [
-        { section: "bar", group: "Layout", label: "Design", path: "iris.appearance.design", kind: "choice", fallback: "island", choices: [{label:"Island",value:"island"},{label:"Classic",value:"classic"}] },
         { section: "bar", group: "Layout", label: "Composition", description: "Cluster splits media and controls into bubbles beside the clock.", path: "iris.bar.composition", kind: "choice", fallback: "unified", choices: [{label:"Unified",value:"unified"},{label:"Cluster",value:"cluster"}] },
         { section: "bar", group: "Layout", label: "Screen edge", path: "iris.bar.position", kind: "choice", fallback: "top", choices: [{label:"Top",value:"top"},{label:"Bottom",value:"bottom"}] },
         { section: "bar", group: "Layout", label: "Attach as a notch", description: "Melts the Island into the screen edge.", path: "iris.bar.notch", kind: "switch", fallback: false },
         { section: "bar", group: "Size", label: "Height", path: "iris.bar.height", kind: "range", fallback:42,min:32,max:64,unit:" px" },
         { section: "bar", group: "Size", label: "Gap from the edge", path: "iris.bar.margin", kind: "range", fallback:8,min:0,max:24,unit:" px" },
         { section: "bar", group: "Size", label: "Reserve space for windows", path: "iris.bar.reserveSpace", kind: "switch", fallback:true },
+        { section: "bar", group: "Interaction", label: "System events", description: "Charger, Bluetooth devices, Do Not Disturb and Caps Lock appear in the Island for a moment.", path: "iris.bar.events", kind: "switch", fallback: true },
         { section: "bar", group: "Interaction", label: "Expand on hover", description: "The pointer has to rest on the Island; passing over it does nothing.", path: "iris.bar.hoverExpand", kind: "switch", fallback:true },
         { section: "bar", group: "Interaction", label: "Hover delay", path: "iris.bar.hoverDelay", kind: "range", fallback:160,min:60,max:400,step:10,unit:" ms" },
-        { section: "bar", group: "Interaction", label: "Scroll on the Island", description: "Hold Shift to adjust the other one.", path: "iris.bar.scrollAction", kind: "choice", fallback: "volume", choices: [{label:"Volume",value:"volume"},{label:"Brightness",value:"brightness"},{label:"Off",value:"none"}] },
+        { section: "bar", group: "Interaction", label: "Scroll on the Island", description: "Shift swaps volume and brightness; Ctrl adjusts the microphone.", path: "iris.bar.scrollAction", kind: "choice", fallback: "volume", choices: [{label:"Volume",value:"volume"},{label:"Brightness",value:"brightness"},{label:"Off",value:"none"}] },
+        { section: "bar", group: "Interaction", label: "Scroll on bubbles", description: "Also adjust over the media, controls and tray bubbles. Sound and Microphone bubbles always adjust their level.", path: "iris.bar.scrollBubbles", kind: "switch", fallback: true },
+        { section: "bar", group: "Resting Island", label: "Clock", description: "What the resting Island shows beside the time.", path: "iris.bar.clockStyle", kind: "choice", fallback: "dateTime", choices: [{label:"Time",value:"time"},{label:"Date",value:"dateTime"},{label:"Weather",value:"weather"}] },
+        { section: "bar", group: "Resting Island", label: "Utility island", description: "Emerges beside the Island; the tray hides when no apps are present.", path: "iris.bar.auxiliary", kind: "choice", fallback: "tray", choices: [{label:"Tray",value:"tray"},{label:"Timers",value:"tools"},{label:"Sound",value:"sound"},{label:"Microphone",value:"mic"},{label:"None",value:"none"}] },
+        { section: "bar", group: "Resting Island", label: "Trailing bubble", description: "Cluster only. Sound and Microphone show their level: scroll to adjust, click to mute.", path: "iris.bar.trailing", kind: "choice", fallback: "controls", choices: [{label:"Controls",value:"controls"},{label:"Notifications",value:"notifications"},{label:"Weather",value:"weather"},{label:"Sound",value:"sound"},{label:"Microphone",value:"mic"},{label:"None",value:"none"}] },
+        { section: "bar", group: "Desktop page", label: "Header", description: "What sits behind the time when the Island shows your desktop.", path: "iris.bar.desktopBanner", kind: "choice", fallback: "wallpaper", choices: [{label:"Wallpaper",value:"wallpaper"},{label:"None",value:"none"}] },
+        { section: "bar", group: "Desktop page", label: "Profile", description: "Your picture and account. Click the picture to change it.", path: "iris.bar.desktopProfile", kind: "switch", fallback: true },
         { section: "player", group: "Artwork", label: "Round album cover", path: "iris.player.roundCover", kind: "switch", fallback:true },
         { section: "player", group: "Artwork", label: "Blurred album background", description: "Tints the expanded Island and media cards with the cover.", path: "iris.player.artworkBackground", kind: "switch", fallback:true },
         { section: "dock", group: "Visibility", label: "Show dock", path: "iris.dock.enable", kind: "switch", fallback:true },
@@ -51,14 +60,26 @@ PanelWindow {
         { section: "dock", group: "Look", label: "Compositor blur", description: "Translucent material when the compositor provides blur.", path: "iris.dock.blur", kind: "switch", fallback:false },
         { section: "dock", group: "Icons", label: "Icon size", path: "iris.dock.iconSize", kind: "range", fallback:40,min:28,max:64,unit:" px" },
         { section: "dock", group: "Icons", label: "Magnify on hover", path: "iris.dock.magnification", kind: "switch", fallback:true },
+        { section: "dock", group: "Icons", label: "Applications button", description: "Opens Spotlight from the start of the Dock.", path: "iris.dock.launcher", kind: "switch", fallback:true },
         { section: "dock", group: "Icons", label: "Notification badges", path: "iris.dock.badges", kind: "switch", fallback:true },
+        { section: "appearance", group: "Colour", label: "System accent", description: "Selection and controls across iRiS. Activity colours keep their identity.", path: "iris.appearance.accent", kind: "choice", fallback: "blue", choices: [{label:"Blue",value:"blue",swatch:"#a8c7fa"},{label:"Mint",value:"mint",swatch:"#8de0bd"},{label:"Rose",value:"rose",swatch:"#ffb2c4"},{label:"Lilac",value:"lilac",swatch:"#d2baff"},{label:"Wallpaper",value:"wallpaper"}] },
+        { section: "appearance", group: "Colour", label: "Highlight", description: "The glanced detail: clock separator, day number, timers.", path: "iris.appearance.highlight", kind: "choice", fallback: "orange", choices: [{label:"Orange",value:"orange",swatch:"#ff9f0a"},{label:"Yellow",value:"yellow",swatch:"#ffd60a"},{label:"Red",value:"red",swatch:"#ff6961"},{label:"Pink",value:"pink",swatch:"#ff6482"},{label:"Green",value:"green",swatch:"#30d158"},{label:"Accent",value:"accent"}] },
+        { section: "appearance", group: "Typography", label: "Text", path: "iris.appearance.fontFamily", kind: "choice", previewFont: true, fallback: "", choices: [{label:"Noto Sans",value:""},{label:"Rubik",value:"Rubik"},{label:"Readex Pro",value:"Readex Pro"},{label:"Roboto Flex",value:"Roboto Flex"}] },
+        { section: "appearance", group: "Typography", label: "Titles", path: "iris.appearance.titleFontFamily", kind: "choice", previewFont: true, fallback: "", choices: [{label:"Readex Pro",value:""},{label:"Noto Sans",value:"Noto Sans"},{label:"Gabarito",value:"Gabarito"},{label:"Space Grotesk",value:"Space Grotesk"}] },
+        { section: "appearance", group: "Typography", label: "Figures", description: "Clocks, timers and levels.", path: "iris.appearance.numbersFontFamily", kind: "choice", previewFont: true, fallback: "", choices: [{label:"Rubik",value:""},{label:"Readex Pro",value:"Readex Pro"},{label:"Noto Sans",value:"Noto Sans"},{label:"Space Grotesk",value:"Space Grotesk"}] },
+        { section: "appearance", group: "Typography", label: "Figure weight", path: "iris.appearance.figureWeight", kind: "choice", fallback: "bold", choices: [{label:"Light",value:"light"},{label:"Regular",value:"regular"},{label:"Bold",value:"bold"}] },
         { section: "appearance", group: "Shape", label: "Expanded corners", path: "iris.appearance.expandedRadius", kind: "range", fallback:28,min:16,max:40,unit:" px" },
         { section: "appearance", group: "Motion", label: "Animations", path: "iris.appearance.motion", kind: "switch", fallback:true },
         { section: "appearance", group: "Motion", label: "Morph duration", description: "How long surfaces take to grow out of the Island.", path: "iris.appearance.motionDuration", kind: "range", fallback:220,min:100,max:400,step:10,unit:" ms" },
         { section: "desktop", group: "Widgets", label: "Desktop widgets", description: "Turning this off also unloads their data providers.", path: "iris.modules.desktopWidgets", kind: "switch", fallback:true },
-        { section: "desktop", group: "Overview backdrop", label: "Wallpaper behind the overview", description: "Shown around workspaces when Niri's overview is open.", path: "background.backdrop.enable", kind: "switch", fallback:false },
-        { section: "desktop", group: "Overview backdrop", label: "Blur", path: "background.backdrop.blurRadius", kind: "range", fallback:32,min:0,max:100,unit:" px" },
-        { section: "desktop", group: "Overview backdrop", label: "Dim", path: "background.backdrop.dim", kind: "range", fallback:35,min:0,max:100,unit:" %" },
+        { section: "desktop", group: "Widgets", label: "Widget corners", description: "Individual widget overrides take priority.", path: "iris.widgets.radius", kind: "range", fallback:22,min:0,max:40,unit:" px" },
+        { section: "desktop", group: "Widgets", label: "Colour", description: "Wallpaper lifts its hues so they read on black; iRiS follows your system accent.", path: "iris.widgets.tint", kind: "choice", fallback: "wallpaper", choices: [{label:"Wallpaper",value:"wallpaper"},{label:"iRiS",value:"system"}] },
+        { section: "desktop", group: "Widgets", label: "Plate", description: "Tinted adds a trace of the chosen widget accent to the black material.", path: "iris.widgets.material", kind: "choice", fallback: "solid", choices: [{label:"Solid",value:"solid"},{label:"Tinted",value:"tinted"}] },
+        { section: "desktop", group: "Widgets", label: "Titles and figures", path: "iris.widgets.weight", kind: "choice", fallback: "regular", choices: [{label:"Light",value:"light"},{label:"Regular",value:"regular"},{label:"Bold",value:"bold"}] },
+        { section: "desktop", group: "Widgets", label: "Surface opacity", path: "iris.widgets.opacity", kind: "range", fallback:100,min:20,max:100,step:5,unit:" %" },
+        { section: "desktop", group: "Overview backdrop", label: "Wallpaper behind the overview", description: "Shown around workspaces when Niri's overview is open.", path: "background.backdrop.enable", kind: "switch", fallback:true },
+        { section: "desktop", group: "Overview backdrop", label: "Blur", path: "background.backdrop.blurRadius", kind: "range", fallback:40,min:0,max:100,unit:" px" },
+        { section: "desktop", group: "Overview backdrop", label: "Dim", path: "background.backdrop.dim", kind: "range", fallback:40,min:0,max:100,unit:" %" },
         { section: "desktop", group: "Overview backdrop", label: "Vignette", path: "background.backdrop.vignetteEnabled", kind: "switch", fallback:false },
         { section: "surfaces", group: "Spotlight", label: "Spotlight", path: "iris.modules.palette", kind: "switch", fallback:true },
         { section: "surfaces", group: "Spotlight", label: "Width", path: "iris.palette.width", kind: "range", fallback:640,min:420,max:900,step:10,unit:" px" },
@@ -66,10 +87,24 @@ PanelWindow {
         { section: "surfaces", group: "Spotlight", label: "Search mode shortcuts", description: "Clipboard, calculator, actions and more under the suggestions.", path: "iris.palette.showHints", kind: "switch", fallback:true },
         { section: "surfaces", group: "Control Center", label: "Control Center", path: "iris.modules.controlCenter", kind: "switch", fallback:true },
         { section: "surfaces", group: "Control Center", label: "Width", path: "iris.controlCenter.width", kind: "range", fallback:360,min:320,max:540,step:10,unit:" px" },
+        { section: "surfaces", group: "Tray", label: "App names", path: "iris.tray.labels", kind: "switch", fallback:true },
+        { section: "surfaces", group: "Tray", label: "Hide passive apps", path: "iris.tray.hidePassive", kind: "switch", fallback:false },
+        { section: "surfaces", group: "Tray", label: "Columns", path: "iris.tray.columns", kind: "range", fallback:4,min:2,max:6 },
+        { section: "desktop", group: "Wallpaper gallery", label: "Gallery width", path: "iris.wallpaper.width", kind: "range", fallback:960,min:640,max:1400,step:40,unit:" px" },
+        { section: "desktop", group: "Wallpaper gallery", label: "Preview size", path: "iris.wallpaper.thumbnailSize", kind: "range", fallback:228,min:160,max:320,step:8,unit:" px" },
         { section: "surfaces", group: "Feedback", label: "Notifications", path: "iris.modules.notificationPopup", kind: "switch", fallback:true },
+        { section: "surfaces", group: "Feedback", label: "Banner duration", description: "How long a notification stays when the app does not choose. Hovering keeps it.", path: "iris.notifications.duration", kind: "range", fallback:4000,min:2000,max:12000,step:500,unit:" ms" },
         { section: "surfaces", group: "Feedback", label: "Volume and brightness feedback", path: "iris.modules.osd", kind: "switch", fallback:true },
         { section: "surfaces", group: "Windows", label: "Confirm before closing windows", description: "Asks before the close-window shortcut closes an app.", path: "closeConfirm.enabled", kind: "switch", fallback:false }
-    ]
+    ].concat(...["left", "right"].map(side => [
+        { section: "sidebars", group: side === "left" ? "Focus · left" : "Today · right", label: "Enable panel", path: "iris.sidebars." + side + ".enable", kind: "switch", fallback:true },
+        { section: "sidebars", group: side === "left" ? "Focus · left" : "Today · right", label: "Width", path: "iris.sidebars." + side + ".width", kind: "range", fallback:380,min:300,max:600,step:10,unit:" px" },
+        { section: "sidebars", group: side === "left" ? "Focus · left" : "Today · right", label: "Maximum height", description: "Panels hug their sections and grow up to this.", path: "iris.sidebars." + side + ".height", kind: "range", fallback:88,min:45,max:100,unit:" %" },
+        { section: "sidebars", group: side === "left" ? "Focus · left" : "Today · right", label: "Alignment", path: "iris.sidebars." + side + ".alignment", kind: "choice", fallback:"center", choices:[{label:"Top",value:"top"},{label:"Center",value:"center"},{label:"Bottom",value:"bottom"}] },
+        { section: "sidebars", group: side === "left" ? "Focus · left" : "Today · right", label: "Attach to the screen edge", description: "Melts the panel into its edge, like a notch.", path: "iris.sidebars." + side + ".notch", kind: "switch", fallback:false },
+        { section: "sidebars", group: side === "left" ? "Focus · left" : "Today · right", label: "Reveal on hover", description: side === "left" ? "Rest the pointer at the left edge to peek; click inside to keep it." : "Rest the pointer at the right edge to peek; click inside to keep it.", path: "iris.sidebars." + side + ".hoverReveal", kind: "switch", fallback:false },
+        { section: "sidebars", group: side === "left" ? "Focus · left" : "Today · right", label: "Keep open", description: "Stay visible while working in other windows.", path: "iris.sidebars." + side + ".pinned", kind: "switch", fallback:false }
+    ]))
     readonly property var currentSection: root.sections.find(s => s.id === root.section) ?? root.sections[0]
     readonly property var entries: specifications.filter(spec => query.length > 0
         ? (Translation.tr(spec.label) + " " + Translation.tr(spec.group)).toLowerCase().includes(query.toLowerCase())
@@ -95,6 +130,8 @@ PanelWindow {
         if (page >= 0) {
             root.advancedPage = page === 28 ? -1 : page
             root.section = page === 28 ? "bar" : "system"
+            if (page === 28 && root.sections.some(s => s.id === root.requestedSection))
+                root.section = root.requestedSection
             GlobalStates.settingsOverlayCurrentPage = page
             GlobalStates.settingsOverlayRequestedPage = -1
         }
@@ -124,6 +161,10 @@ PanelWindow {
     WlrLayershell.namespace: "quickshell:iris-settings"
     WlrLayershell.layer: GlobalStates.settingsNativeDialogOpen ? WlrLayer.Bottom : WlrLayer.Overlay
     WlrLayershell.keyboardFocus: GlobalStates.settingsNativeDialogOpen ? WlrKeyboardFocus.None : WlrKeyboardFocus.Exclusive
+    // Outside clicks are caught only while the window is really presented;
+    // while it loads or collapses, input outside the frame passes through.
+    mask: GlobalStates.settingsOverlayOpen && frame.armed ? null : frameRegion
+    Region { id: frameRegion; item: frame }
     // Escape steps back: search, then an advanced page, then closes.
     Shortcut {
         sequence: "Escape"
@@ -141,6 +182,7 @@ PanelWindow {
         id: frame
         open: GlobalStates.settingsOverlayOpen
         radius: Math.round(30 * root.d)
+        onClosed: GlobalStates.irisMorphOwner = ""
         x: (parent.width - width) / 2
         y: (parent.height - height) / 2
         width: Math.min(parent.width - 32, 980 * root.d)
@@ -264,7 +306,7 @@ PanelWindow {
                             spacing: 0
                             IrisText { text: "iRiS"; font.pixelSize: 13 * IrisStyle.typeScale; font.weight: Font.DemiBold }
                             IrisText {
-                                text: IrisStyle.island ? Translation.tr("Island design") : Translation.tr("Classic design")
+                                text: Translation.tr("Island family")
                                 color: IrisStyle.muted
                                 font.pixelSize: 11 * IrisStyle.typeScale
                             }
@@ -314,6 +356,21 @@ PanelWindow {
                             elide: Text.ElideRight
                         }
                     }
+                    // Every row carries its iRiS default; this puts the section back
+                    // on them. Shared iNiR preferences shown here are left alone.
+                    IrisButton {
+                        readonly property var resettable: root.specifications
+                            .filter(spec => spec.section === root.section && String(spec.path).startsWith("iris."))
+                        readonly property bool modified: {
+                            Config.revision
+                            return resettable.some(spec => JSON.stringify(Config.getNestedValue(spec.path, spec.fallback)) !== JSON.stringify(spec.fallback))
+                        }
+                        visible: root.query.length === 0 && root.advancedPage < 0 && modified
+                        quiet: true
+                        text: Translation.tr("Restore defaults")
+                        buttonRadius: height / 2
+                        onClicked: resettable.forEach(spec => Config.setNestedValue(spec.path, spec.fallback))
+                    }
                     IrisIconButton {
                         materialIcon: "close"
                         onClicked: GlobalStates.settingsOverlayOpen = false
@@ -341,6 +398,7 @@ PanelWindow {
                         contentHeight: settingsRows.implicitHeight + 28 * root.d
                         boundsBehavior: Flickable.StopAtBounds
                         ScrollBar.vertical: ScrollBar { policy: ScrollBar.AsNeeded }
+                        NumberAnimation on contentY { id: scrollTo; running: false; duration: IrisStyle.morphDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: IrisStyle.morphCurve }
 
                         ColumnLayout {
                             id: settingsRows
@@ -348,6 +406,98 @@ PanelWindow {
                             y: 8 * root.d
                             width: settingsFlick.width - 56 * root.d
                             spacing: 20 * root.d
+
+                            // Guide: the section's badge beside a jump list of its groups,
+                            // and one thing worth knowing. The title and subtitle above
+                            // already say what the section is; the guide never repeats it.
+                            Rectangle {
+                                id: guide
+                                Layout.fillWidth: true
+                                visible: root.query.length === 0 && root.advancedPage < 0
+                                implicitHeight: guideContent.implicitHeight + 24 * root.d
+                                radius: Math.round(18 * root.d)
+                                gradient: Gradient {
+                                    orientation: Gradient.Horizontal
+                                    GradientStop { position: 0; color: ColorUtils.mix(IrisStyle.surfaceHigh, root.currentSection.tint, 0.84) }
+                                    GradientStop { position: 0.6; color: IrisStyle.surfaceHigh }
+                                }
+                                ColumnLayout {
+                                    id: guideContent
+                                    anchors.left: parent.left
+                                    anchors.right: parent.right
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    anchors.leftMargin: 12 * root.d
+                                    anchors.rightMargin: 14 * root.d
+                                    spacing: 8 * root.d
+                                    RowLayout {
+                                        Layout.fillWidth: true
+                                        spacing: 12 * root.d
+                                        Rectangle {
+                                            Layout.alignment: Qt.AlignTop
+                                            implicitWidth: Math.round(34 * root.d)
+                                            implicitHeight: implicitWidth
+                                            radius: Math.round(width * 0.26)
+                                            gradient: Gradient {
+                                                GradientStop { position: 0; color: Qt.lighter(root.currentSection.tint, 1.2) }
+                                                GradientStop { position: 1; color: root.currentSection.tint }
+                                            }
+                                            MaterialSymbol { anchors.centerIn: parent; text: root.currentSection.icon; fill: 1; iconSize: Math.round(20 * root.d); color: "#ffffff" }
+                                        }
+                                        Flow {
+                                            Layout.fillWidth: true
+                                            Layout.alignment: Qt.AlignVCenter
+                                            spacing: 6 * root.d
+                                            Repeater {
+                                                model: root.query.length === 0 && root.groups.length > 1 ? root.groups : []
+                                                MouseArea {
+                                                    id: jump
+                                                    required property var modelData
+                                                    required property int index
+                                                    implicitWidth: jumpLabel.implicitWidth + 24 * root.d
+                                                    implicitHeight: Math.round(28 * root.d)
+                                                    hoverEnabled: true
+                                                    cursorShape: Qt.PointingHandCursor
+                                                    Accessible.role: Accessible.Button
+                                                    Accessible.name: jump.modelData.title
+                                                    onClicked: {
+                                                        const target = groupRepeater.itemAt(jump.index)
+                                                        if (!target) return
+                                                        scrollTo.to = Math.max(0, Math.min(settingsFlick.contentHeight - settingsFlick.height, target.y + settingsRows.y - 8 * root.d))
+                                                        scrollTo.restart()
+                                                    }
+                                                    Rectangle {
+                                                        anchors.fill: parent
+                                                        radius: height / 2
+                                                        color: ColorUtils.applyAlpha(IrisStyle.text, jump.containsMouse ? 0.16 : 0.08)
+                                                        Behavior on color { ColorAnimation { duration: IrisStyle.duration(110) } }
+                                                    }
+                                                    IrisText {
+                                                        id: jumpLabel
+                                                        anchors.centerIn: parent
+                                                        text: jump.modelData.title
+                                                        font.pixelSize: 12 * IrisStyle.typeScale
+                                                        font.weight: Font.Medium
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                    RowLayout {
+                                        Layout.fillWidth: true
+                                        Layout.leftMargin: 46 * root.d
+                                        visible: String(root.currentSection.tip ?? "").length > 0
+                                        spacing: 6 * root.d
+                                        MaterialSymbol { text: "lightbulb"; fill: 1; iconSize: Math.round(14 * root.d); color: IrisStyle.secondaryAccent }
+                                        IrisText {
+                                            Layout.fillWidth: true
+                                            text: Translation.tr(root.currentSection.tip ?? "")
+                                            elide: Text.ElideRight
+                                            color: IrisStyle.subtext
+                                            font.pixelSize: 12 * IrisStyle.typeScale
+                                        }
+                                    }
+                                }
+                            }
 
                             Loader {
                                 Layout.fillWidth: true
@@ -365,6 +515,7 @@ PanelWindow {
                             }
 
                             Repeater {
+                                id: groupRepeater
                                 model: root.groups
                                 ColumnLayout {
                                     id: group
@@ -400,6 +551,26 @@ PanelWindow {
                                             }
                                         }
                                     }
+                                }
+                            }
+
+                            LinkCard {
+                                visible: root.section === "sidebars" && root.query.length === 0
+                                links: [
+                                    { label: Translation.tr("Open Focus"), icon: "dock_to_left", action: () => { GlobalStates.settingsOverlayOpen = false; GlobalStates.openSidebarLeft("") } },
+                                    { label: Translation.tr("Open Today"), icon: "dock_to_right", action: () => { GlobalStates.settingsOverlayOpen = false; GlobalStates.openSidebarRight("") } }
+                                ]
+                            }
+
+                            Repeater {
+                                model: root.section === "sidebars" && root.query.length === 0 ? ["left", "right"] : []
+                                ColumnLayout {
+                                    id: panelEditor
+                                    required property string modelData
+                                    Layout.fillWidth: true
+                                    spacing: 8 * root.d
+                                    IrisText { text: panelEditor.modelData === "left" ? Translation.tr("Focus sections") : Translation.tr("Today sections"); color: IrisStyle.muted }
+                                    IrisSidebarEditor { Layout.fillWidth: true; side: panelEditor.modelData }
                                 }
                             }
 
@@ -515,10 +686,9 @@ PanelWindow {
 
     // Live miniature of the Island on a wallpaper strip; follows the options
     // above it with the same morph curve.
-    component IslandPreview: Rectangle {
+    component IslandPreview: ClippingRectangle {
         id: preview
         readonly property var bar: Config.options?.iris?.bar ?? ({})
-        readonly property bool island: IrisStyle.island
         readonly property bool cluster: String(preview.bar?.composition ?? "unified") === "cluster"
         readonly property bool atBottom: String(preview.bar?.position ?? "top") === "bottom"
         readonly property bool notch: preview.bar?.notch ?? false
@@ -527,27 +697,23 @@ PanelWindow {
         readonly property real gap: preview.notch ? 0 : Number(preview.bar?.margin ?? 8) * preview.unit
         implicitHeight: Math.round(132 * root.d)
         radius: Math.round(14 * root.d)
-        clip: true
-        gradient: Gradient {
-            orientation: Gradient.Horizontal
-            GradientStop { position: 0; color: "#2b2f4a" }
-            GradientStop { position: 0.55; color: "#5a3f5c" }
-            GradientStop { position: 1; color: "#b0655a" }
+        color: IrisStyle.surfaceHigh
+        // The strip is this output's own wallpaper, dimmed so the black shapes
+        // read the way they do on the desktop.
+        Image {
+            anchors.fill: parent
+            source: WallpaperListener.wallpaperUrlForScreen(root.screen)
+            fillMode: Image.PreserveAspectCrop
+            asynchronous: true
+            sourceSize.width: Math.round(parent.width * 1.5)
+            opacity: status === Image.Ready ? 1 : 0
+            Behavior on opacity { NumberAnimation { duration: IrisStyle.duration(180); easing.type: Easing.OutCubic } }
         }
+        Rectangle { anchors.fill: parent; color: ColorUtils.applyAlpha(IrisStyle.surface, 0.22) }
 
-        // Classic: a full-width bar.
-        Rectangle {
-            visible: !preview.island
-            x: preview.gap + 10; width: preview.width - 2 * (preview.gap + 10)
-            y: preview.atBottom ? preview.height - height - preview.gap - 6 : preview.gap + 6
-            height: preview.pillHeight
-            radius: 6
-            color: "#000000"
-        }
         // Island chassis.
         Rectangle {
             id: chassis
-            visible: preview.island
             width: preview.cluster ? 54 : 118
             height: preview.pillHeight + (preview.notch ? radius : 0)
             radius: preview.pillHeight / 2
@@ -566,20 +732,28 @@ PanelWindow {
             }
         }
         Repeater {
-            model: 2
+            model: 3
             Rectangle {
                 required property int index
-                visible: preview.island
+                readonly property bool auxiliary: index === 2
+                readonly property bool shown: auxiliary ? (preview.bar?.auxiliary ?? "tray") !== "none" : preview.cluster
                 width: preview.pillHeight - (preview.notch ? 3 : 0)
                 height: width
                 radius: width / 2
                 color: "#000000"
                 y: preview.atBottom ? preview.height - preview.pillHeight - preview.gap - (preview.notch ? 0 : 6) + (preview.pillHeight - height) / 2
                     : (preview.notch ? 0 : preview.gap + 6) + (preview.pillHeight - height) / 2
-                x: preview.cluster
-                    ? (index === 0 ? chassis.x - width - 3 : chassis.x + chassis.width + 3)
+                x: shown
+                    ? (index === 0 ? chassis.x - width - 3 : chassis.x + chassis.width + 3 + (auxiliary && preview.cluster ? width + 3 : 0))
                     : chassis.x + (chassis.width - width) / 2
-                opacity: preview.cluster ? 1 : 0
+                opacity: shown ? 1 : 0
+                IrisText {
+                    anchors.centerIn: parent
+                    visible: parent.auxiliary
+                    text: (preview.bar?.auxiliary ?? "tray") === "tray" ? "3" : "•"
+                    color: IrisStyle.accent
+                    font.pixelSize: 9
+                }
                 Behavior on x { Morph {} }
                 Behavior on opacity { NumberAnimation { duration: IrisStyle.duration(120) } }
             }
