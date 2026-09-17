@@ -3,10 +3,6 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import qs.modules.iris.style
 
-// A figure that counts: when the text changes, only the characters that
-// changed roll, the old one leaving and the new one arriving in the counting
-// direction (up for values that grow, down for countdowns). Sizes and
-// baseline like a Text so it drops into rows that align on baselines.
 Item {
     id: root
 
@@ -17,10 +13,10 @@ Item {
     property real letterSpacing: 0
     property color color: IrisStyle.text
     property int renderType: Text.NativeRendering
-    // Countdowns roll the other way.
     property bool countDown: false
 
-    implicitWidth: row.implicitWidth
+    readonly property real inkPad: Math.ceil(root.pixelSize * 0.14)
+    implicitWidth: Math.max(0, row.implicitWidth - root.inkPad * 2)
     implicitHeight: probe.implicitHeight
     baselineOffset: probe.baselineOffset
 
@@ -46,20 +42,19 @@ Item {
 
     Row {
         id: row
+        x: -root.inkPad
+        spacing: -root.inkPad * 2
         Repeater {
             model: root.text.length
             Item {
                 id: slot
                 required property int index
                 readonly property string character: root.text.charAt(slot.index)
-                // Rolls run 0 → 1; the old character leaves as the new one lands.
                 property real roll: 1
                 property string previous: ""
-                width: Math.max(current.implicitWidth, slot.roll < 1 ? leaving.implicitWidth : 0)
+                width: Math.max(current.implicitWidth, slot.roll < 1 ? leaving.implicitWidth : 0) + root.inkPad * 2
                 height: probe.implicitHeight
-                // Structure never changes while rolling (clip always on, glyphs only
-                // fade): these figures live inside clipping chassis, which stop
-                // painting when their scene changes shape live.
+                // Static structure: clipping chassis stop painting when their scene changes shape live.
                 clip: true
 
                 onCharacterChanged: {
@@ -77,6 +72,7 @@ Item {
                 Glyph {
                     id: leaving
                     text: slot.previous
+                    x: root.inkPad
                     y: -slot.travel * slot.roll
                     opacity: 1 - slot.roll
                 }
@@ -85,6 +81,7 @@ Item {
                     property string shown: ""
                     Component.onCompleted: current.shown = slot.character
                     text: slot.character
+                    x: root.inkPad
                     y: slot.travel * (1 - slot.roll)
                     opacity: slot.roll
                 }

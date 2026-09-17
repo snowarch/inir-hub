@@ -5,12 +5,9 @@ import Quickshell
 import Quickshell.Wayland
 import qs
 import qs.modules.common
+import qs.modules.iris.components
 import qs.modules.iris.style
 
-// Resident edge pieces of a side panel. A one-pixel strip reveals the panel by intent:
-// the pointer has to rest against the edge, so crossing it on the way to a
-// window's own controls does nothing. Panels load on demand; these pieces stay
-// resident, each mapped only while its preference and state need it.
 Scope {
     id: root
     required property string side
@@ -19,12 +16,17 @@ Scope {
     readonly property bool enabled: (root.options.enable ?? true) && (root.options.hoverReveal ?? false)
     readonly property bool panelOpen: root.left ? GlobalStates.sidebarLeftOpen : GlobalStates.sidebarRightOpen
 
-    // A kept-open panel sits beside the windows instead of over them: while it is
-    // pinned and open, an empty strip on its edge reserves the panel's width.
     PanelWindow {
+        id: reserve
         readonly property string outputName: root.left ? GlobalStates.sidebarLeftTargetOutput : GlobalStates.sidebarRightTargetOutput
         readonly property real d: IrisStyle.density
-        screen: Quickshell.screens.find(s => s.name === outputName) ?? GlobalStates.focusedScreen
+        // Holds its output while mapped: moving it resizes tiled windows on both outputs.
+        IrisOutputHold {
+            id: reserveHold
+            wanted: Quickshell.screens.find(s => s.name === reserve.outputName) ?? GlobalStates.focusedScreen
+            live: reserve.visible
+        }
+        screen: reserveHold.output
         visible: (root.options.enable ?? true) && (root.options.pinned ?? false) && root.panelOpen && !GlobalStates.screenLocked
         color: "transparent"
         exclusionMode: ExclusionMode.Normal

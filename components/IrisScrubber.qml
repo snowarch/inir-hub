@@ -4,19 +4,14 @@ import QtQuick
 import qs.modules.common.functions
 import qs.modules.iris.style
 
-// Continuous media timeline: one uninterrupted capsule that thickens under the
-// pointer (and while focused), instead of Material's split active/inactive
-// track with a gap. No outline: focus reads from the thicker track and knob.
 Item {
     id: root
 
     property real value: 0
     property bool seekable: true
-    property color fillColor: IrisStyle.text
-    property color trackColor: ColorUtils.applyAlpha(IrisStyle.text, 0.2)
+    property color fillColor: IrisStyle.fillStrong
+    property color trackColor: IrisStyle.fill
     signal seekRequested(real value)
-    // Emitted continuously while dragging (settings levels); media seeks only
-    // commit on release through seekRequested.
     signal moved(real value)
     property bool knob: false
     property real stepSize: 0.05
@@ -49,8 +44,8 @@ Item {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.verticalCenter: parent.verticalCenter
-        height: Math.round((root.engaged ? 8 : 5) * IrisStyle.density)
-        Behavior on height { NumberAnimation { duration: IrisStyle.duration(120); easing.type: Easing.OutCubic } }
+        height: Math.round((root.engaged ? 9 : 4) * IrisStyle.density)
+        Behavior on height { NumberAnimation { duration: IrisStyle.duration(120); easing.type: IrisStyle.feedbackEasing } }
 
         Rectangle {
             anchors.fill: parent
@@ -77,10 +72,10 @@ Item {
         radius: width / 2
         x: Math.max(0, Math.min(root.width - width, root.width * root.shownValue - width / 2))
         anchors.verticalCenter: parent.verticalCenter
-        color: "#ffffff"
+        color: IrisStyle.onTint
         border.width: 1
-        border.color: ColorUtils.applyAlpha("#000000", 0.12)
-        Behavior on width { NumberAnimation { duration: IrisStyle.duration(120); easing.type: Easing.OutCubic } }
+        border.color: IrisStyle.veilLight
+        Behavior on width { NumberAnimation { duration: IrisStyle.duration(120); easing.type: IrisStyle.feedbackEasing } }
     }
 
     MouseArea {
@@ -99,11 +94,7 @@ Item {
             root.dragValue = -1
         }
         onCanceled: root.dragValue = -1
-        // A drag that wanders vertically stays on the slider instead of
-        // scrolling the page it sits in.
         preventStealing: true
-        // The wheel steps the value (and is not passed on to scroll the page).
-        // Touchpad pixel deltas accumulate into the same steps.
         property real wheelAccumulator: 0
         onWheel: wheel => {
             const delta = (wheel.angleDelta.y || wheel.angleDelta.x) || (wheel.pixelDelta.y || wheel.pixelDelta.x) * 4

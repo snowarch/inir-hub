@@ -1,6 +1,6 @@
 pragma ComponentBehavior: Bound
 import QtQuick
-import Qt5Compat.GraphicalEffects
+import QtQuick.Effects
 import qs.modules.common.widgets
 import qs.modules.iris.style
 
@@ -9,8 +9,6 @@ Item {
     property string source: ""
     property bool circular: true
     property real radius: circular ? width / 2 : 12 * IrisStyle.density
-    // A fixed decode size for artwork whose size animates, so it is decoded
-    // once instead of reloading (and flashing the placeholder) every frame.
     property real decodeSize: 0
     implicitWidth: 64 * IrisStyle.density
     implicitHeight: implicitWidth
@@ -24,10 +22,24 @@ Item {
         fillMode: Image.PreserveAspectCrop
         visible: false
     }
-    OpacityMask {
+    Item {
+        id: roundMask
+        anchors.fill: parent
+        visible: false
+        layer.enabled: true
+        Rectangle {
+            anchors.fill: parent
+            radius: root.radius
+        }
+    }
+    MultiEffect {
         anchors.fill: parent
         source: cover
-        maskSource: Rectangle { width: root.width; height: root.height; radius: root.radius; color: "white" }
+        autoPaddingEnabled: false
+        maskEnabled: true
+        maskSource: roundMask
+        maskThresholdMin: 0.5
+        maskSpreadAtMin: 1
         visible: cover.status === Image.Ready
     }
     MaterialSymbol {

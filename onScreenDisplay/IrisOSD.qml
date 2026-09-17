@@ -8,6 +8,7 @@ import qs
 import qs.services
 import qs.modules.common
 import qs.modules.common.widgets
+import qs.modules.iris.frame
 import qs.modules.iris.style
 import qs.modules.iris.components
 
@@ -17,7 +18,12 @@ Scope {
     property bool open: false
     property bool presentationVisible: false
     property bool presentationShown: false
-    readonly property var screen: GlobalStates.focusedScreen
+    readonly property var screen: outputHold.output
+    IrisOutputHold {
+        id: outputHold
+        wanted: GlobalStates.focusedScreen
+        live: root.presentationVisible
+    }
     readonly property var brightnessMonitor: Brightness.getMonitorForScreen(root.screen)
     readonly property var dockOptions: Config.options?.iris?.dock ?? ({})
     readonly property bool staticDockVisible: (root.dockOptions?.enable ?? true)
@@ -91,8 +97,12 @@ Scope {
         WlrLayershell.layer: WlrLayer.Overlay
         WlrLayershell.namespace: "quickshell:iris-osd"
         anchors { bottom: true; left: true; right: true }
+        margins {
+            left: IrisFrame.band
+            right: IrisFrame.band
+            bottom: IrisFrame.band
+        }
         implicitHeight: root.surfaceBottomMargin + 76 * IrisStyle.density
-        // Feedback never takes input from the windows beneath its strip.
         mask: Region { item: osdSurface }
 
         IrisSurface {
@@ -108,9 +118,9 @@ Scope {
             opacity: root.presentationShown ? 1 : 0
             transform: Translate {
                 y: root.presentationShown ? 0 : 5 * IrisStyle.density
-                Behavior on y { NumberAnimation { duration: IrisStyle.duration(90); easing.type: Easing.OutCubic } }
+                Behavior on y { NumberAnimation { duration: IrisStyle.duration(90); easing.type: IrisStyle.feedbackEasing } }
             }
-            Behavior on opacity { NumberAnimation { duration: IrisStyle.duration(80); easing.type: Easing.OutCubic } }
+            Behavior on opacity { NumberAnimation { duration: IrisStyle.duration(80); easing.type: IrisStyle.feedbackEasing } }
 
             RowLayout {
                 anchors.fill: parent

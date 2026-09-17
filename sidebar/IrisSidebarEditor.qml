@@ -22,9 +22,6 @@ ColumnLayout {
         { id: "mixer", label: "Sound mixer", icon: "graphic_eq" },
         { id: "system", label: "System", icon: "monitor_heart" }
     ]
-    // Rows keep their place while customizing: switching a section off must not
-    // slide another row under the pointer. Enabled sections are this order
-    // filtered; it is rebuilt only when the sections change from elsewhere.
     property var order: []
     function syncOrder(): void {
         const kept = root.order.filter(id => root.sections.includes(id))
@@ -45,7 +42,6 @@ ColumnLayout {
         Config.setNestedValue("iris.sidebars." + root.side + ".sections",
             root.order.filter(s => s === id ? !on : root.sections.includes(s)))
     }
-    // Swaps with the neighbouring enabled section; switched-off rows stay put.
     function move(id: string, delta: int): void {
         const enabled = root.order.filter(s => root.sections.includes(s))
         const index = enabled.indexOf(id)

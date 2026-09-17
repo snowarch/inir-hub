@@ -1,6 +1,7 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
+import QtQuick.Effects
 import QtQuick.Layouts
 import Quickshell
 import Quickshell.Wayland
@@ -11,6 +12,7 @@ import qs.modules.common
 import qs.modules.common.functions
 import qs.modules.common.models
 import qs.modules.common.widgets
+import qs.modules.iris.frame
 import qs.modules.iris.style
 import qs.modules.iris.components
 
@@ -23,16 +25,12 @@ PanelWindow {
         Math.max(180, ((root.screen?.height ?? 1080) * 0.72) - (120 * IrisStyle.density))
         / Math.max(42, 50 * IrisStyle.density)))
     readonly property int resultLimit: Math.min(root.configuredResultLimit, root.heightResultLimit)
-    // Math is computed asynchronously; an empty answer is not a result.
-    // Spotlight also drops the calculator fallback unless the query is maths.
     readonly property bool mathQuery: /[0-9]/.test(LauncherSearch.query)
     readonly property var searchResults: (LauncherSearch.results ?? [])
         .filter(entry => String(entry?.name ?? "").length > 0
             && (root.mathQuery || entry?.type !== Translation.tr("Math")))
         .slice(0, root.resultLimit)
 
-    // Island design: with nothing typed, Spotlight offers the Dock's apps
-    // (pinned first, then running) instead of an empty field.
     readonly property bool browsing: LauncherSearch.query.length === 0
     readonly property var suggestions: {
         return (TaskbarApps.apps ?? []).filter(app => app.appId !== "SEPARATOR").slice(0, 8).map(app => {
@@ -56,8 +54,6 @@ PanelWindow {
         })
     }
     readonly property var visibleResults: root.browsing ? root.suggestions : root.searchResults
-    // Clipboard history (Super+V opens Spotlight on the clipboard prefix):
-    // image entries render thumbnails, Delete removes the selected entry.
     readonly property string clipboardPrefix: Config.options?.search?.prefix?.clipboard ?? ";"
     readonly property bool clipboardMode: LauncherSearch.query.startsWith(root.clipboardPrefix)
     onClipboardModeChanged: if (root.clipboardMode) Cliphist.refresh()
@@ -85,23 +81,46 @@ PanelWindow {
     }
 
     visible: GlobalStates.searchOpen || (content.item?.progress ?? 0) > 0
-    screen: GlobalStates.focusedScreen
+    IrisOutputHold {
+        id: outputHold
+        wanted: GlobalStates.focusedScreen
+        live: root.visible
+    }
+    screen: outputHold.output
     color: "transparent"
     exclusionMode: ExclusionMode.Ignore
     WlrLayershell.layer: WlrLayer.Overlay
     WlrLayershell.namespace: "quickshell:iris-palette"
     WlrLayershell.keyboardFocus: GlobalStates.searchOpen ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
     anchors { top: true; bottom: true; left: true; right: true }
-    // Spotlight catches outside clicks only while the capsule is presented;
-    // loading and collapsing yield everything but the capsule itself.
-    mask: GlobalStates.searchOpen && (content.item?.armed ?? false) ? null : capsuleRegion
+    margins {
+        left: IrisFrame.band
+        right: IrisFrame.band
+        top: IrisFrame.band
+        bottom: IrisFrame.band
+    }
+    mask: GlobalStates.searchOpen && (content.item?.armed ?? false)
+        ? (GlobalStates.irisStudioRect ? studioMask : null) : capsuleRegion
+    IrisStudioMask {
+        id: studioMask
+        canvasWidth: root.width
+        canvasHeight: root.height
+        originX: IrisFrame.band
+        originY: IrisFrame.band
+        screenName: root.screen?.name ?? ""
+    }
     Region { id: capsuleRegion; item: content.item?.surfaceItem ?? null }
 
     function focusInput(): void {
         Qt.callLater(() => content.item?.focusInput())
     }
 
-    Component.onCompleted: if (GlobalStates.searchOpen) root.focusInput()
+    function takeRequestedQuery(): void {
+        if (GlobalStates.irisSpotlightQuery.length === 0) return
+        LauncherSearch.query = GlobalStates.irisSpotlightQuery
+        GlobalStates.irisSpotlightQuery = ""
+    }
+    Component.onCompleted: if (GlobalStates.searchOpen) { root.takeRequestedQuery(); root.focusInput() }
 
     Connections {
         target: GlobalStates
@@ -109,6 +128,7 @@ PanelWindow {
             if (!GlobalStates.searchOpen) return
             root.selectedIndex = 0
             root.disarmPointerSelection(true)
+            root.takeRequestedQuery()
             root.focusInput()
         }
     }
@@ -160,8 +180,6 @@ PanelWindow {
         event.accepted = true
     }
 
-    // Window-level, so Escape works whichever child holds focus: the first
-    // press clears a query, the next closes.
     Shortcut {
         sequence: "Escape"
         enabled: GlobalStates.searchOpen
@@ -179,12 +197,10 @@ PanelWindow {
     Loader {
         id: content
         anchors.fill: parent
-        // Loader is a focus scope: without focus its field never gets active focus.
         focus: true
         sourceComponent: spotlightComponent
     }
 
-    // ── Island: Spotlight ─────────────────────────────────────────────────
     Component {
         id: spotlightComponent
 
@@ -196,15 +212,13 @@ PanelWindow {
             readonly property real d: IrisStyle.density
             function focusInput(): void { input.forceActiveFocus() }
 
-            // Apple-style match emphasis: the part of the name the query matched
-            // stays full ink and weight, the remainder steps back.
             function escapeHtml(value: string): string {
                 return value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
             }
             function emphasised(name: string): string {
                 const query = LauncherSearch.query.trim()
                 const at = query.length > 0 ? name.toLowerCase().indexOf(query.toLowerCase()) : -1
-                const dim = ColorUtils.applyAlpha(IrisStyle.text, 0.6)
+                const dim = IrisStyle.textSecondary
                 if (at < 0) return stage.escapeHtml(name)
                 return "<font color='" + dim + "'>" + stage.escapeHtml(name.slice(0, at)) + "</font>"
                     + "<b>" + stage.escapeHtml(name.slice(at, at + query.length)) + "</b>"
@@ -225,20 +239,42 @@ PanelWindow {
                 return index === 0 ? Translation.tr("Top hit") : stage.sectionOf(root.visibleResults[index])
             }
 
-            // Grows out of the Island (published on open) and settles as a
-            // floating search capsule; results extend it downwards.
+            RectangularShadow {
+                x: surface.x + surface.lerp(surface.from.x, 0)
+                y: surface.y + surface.lerp(surface.from.y, 0) + 8 * stage.d * surface.progress
+                width: surface.lerp(surface.from.width, surface.width)
+                height: surface.lerp(surface.from.height, surface.height)
+                radius: Math.min(width / 2, height / 2, surface.lerp(surface.fromRadius, surface.radius))
+                blur: 32 * stage.d
+                spread: -6 * stage.d
+                color: IrisStyle.shadow
+                opacity: Math.pow(Math.max(0, surface.progress), 3)
+            }
             IrisMorphSurface {
                 id: surface
                 open: GlobalStates.searchOpen
-                radius: Math.round(26 * stage.d)
+                motionSurface: "spotlight"
+                light: IrisStyle.surfaceLight("spotlight", IrisStyle.wallpaperLight)
+                lightFrom: (Config.options?.iris?.bar?.position ?? "top") === "bottom" ? "bottom" : "top"
+                radius: IrisStyle.surfaceRadius("spotlight", IrisStyle.radiusPanel)
+                contentScaleFrom: 1
+                contentFadeStart: 0.5
+                contentFadeSpan: 0.4
                 width: Math.max(320, Math.min(root.width - 32, Math.max(480, Number(root.options?.width ?? 640) * stage.d)))
                 x: (root.width - width) / 2
                 y: Math.max(72, Math.round(root.height * 0.2))
                 height: body.implicitHeight
                 onClosed: LauncherSearch.query = ""
-                // The layer surface may not be active when the open request
-                // lands; settle is the last point to claim the field.
                 onSettledChanged: if (surface.settled && surface.open) stage.focusInput()
+                Rectangle {
+                    z: 100
+                    opacity: Math.max(0, (surface.progress - 0.85) / 0.15)
+                    anchors.fill: parent
+                    radius: surface.radius
+                    color: "transparent"
+                    border.width: 1
+                    border.color: IrisStyle.border
+                }
                 Behavior on height {
                     enabled: surface.settled
                     NumberAnimation { duration: IrisStyle.duration(150); easing.type: Easing.BezierSpline; easing.bezierCurve: IrisStyle.morphCurve }
@@ -253,23 +289,20 @@ PanelWindow {
                     anchors.top: parent.top
                     spacing: 0
 
-                    // Search field: no box inside the box.
                     Item {
                         Layout.fillWidth: true
-                        implicitHeight: Math.round(58 * stage.d)
+                        implicitHeight: Math.round(68 * stage.d)
 
                         MaterialSymbol {
                             id: searchGlyph
                             anchors.left: parent.left
-                            anchors.leftMargin: 20 * stage.d
+                            anchors.leftMargin: 24 * stage.d
                             anchors.verticalCenter: parent.verticalCenter
                             text: "search"
                             iconSize: Math.round(22 * stage.d)
                             color: input.text.length > 0 ? IrisStyle.accent : IrisStyle.subtext
                             Behavior on color { ColorAnimation { duration: IrisStyle.duration(120) } }
                         }
-                        // Active search mode as a token at the end of the field, so a bare
-                        // prefix character reads as the mode it switched to.
                         Rectangle {
                             id: modeToken
                             readonly property var modes: {
@@ -291,7 +324,7 @@ PanelWindow {
                             height: Math.round(26 * stage.d)
                             width: modeRow.implicitWidth + Math.round(20 * stage.d)
                             radius: height / 2
-                            color: ColorUtils.applyAlpha(IrisStyle.accent, 0.18)
+                            color: IrisStyle.tintFill(IrisStyle.accent)
                             Row {
                                 id: modeRow
                                 anchors.centerIn: parent
@@ -343,12 +376,13 @@ PanelWindow {
 
                     Rectangle {
                         Layout.fillWidth: true
+                        Layout.leftMargin: 24 * stage.d
+                        Layout.rightMargin: 24 * stage.d
                         implicitHeight: 1
                         visible: results.visible || browse.visible
                         color: IrisStyle.hairline
                     }
 
-                    // ── Suggestions ──────────────────────────────────────
                     ColumnLayout {
                         id: browse
                         Layout.fillWidth: true
@@ -357,8 +391,8 @@ PanelWindow {
 
                         IrisText {
                             visible: root.suggestions.length > 0
-                            Layout.leftMargin: 20 * stage.d
-                            Layout.topMargin: 12 * stage.d
+                            Layout.leftMargin: 24 * stage.d
+                            Layout.topMargin: 16 * stage.d
                             text: Translation.tr("Suggestions")
                             color: IrisStyle.muted
                             font.pixelSize: 11.5 * IrisStyle.typeScale
@@ -369,31 +403,27 @@ PanelWindow {
                             id: tiles
                             visible: root.suggestions.length > 0
                             Layout.fillWidth: true
-                            Layout.leftMargin: 10 * stage.d
-                            Layout.rightMargin: 10 * stage.d
+                            Layout.leftMargin: 16 * stage.d
+                            Layout.rightMargin: 16 * stage.d
                             Layout.topMargin: 6 * stage.d
                             readonly property real tileWidth: width / 8
-                            implicitHeight: Math.round(84 * stage.d)
+                            implicitHeight: Math.round(92 * stage.d)
 
                             Rectangle {
-                                // Placed by index: itemAt() is not reactive and was still null
-                                // when Spotlight opened, so the first selection never showed.
                                 visible: root.suggestions.length > 0
-                                x: Math.min(root.selectedIndex, root.suggestions.length - 1) * tiles.tileWidth
-                                width: tiles.tileWidth
+                                x: Math.min(root.selectedIndex, root.suggestions.length - 1) * tiles.tileWidth + 2 * stage.d
+                                width: tiles.tileWidth - 4 * stage.d
                                 height: tiles.height
-                                radius: Math.round(16 * stage.d)
-                                // Same selection language as the result list.
-                                color: ColorUtils.applyAlpha(IrisStyle.accent, 0.18)
-                                Behavior on x { NumberAnimation { duration: IrisStyle.duration(120); easing.type: Easing.OutCubic } }
+                                radius: IrisStyle.radiusTile
+                                color: IrisStyle.tintFill(IrisStyle.accent)
+                                Behavior on x { NumberAnimation { duration: IrisStyle.duration(120); easing.type: IrisStyle.feedbackEasing } }
                             }
 
                             Row {
                                 anchors.fill: parent
                                 Repeater {
                                     id: tileRepeater
-                                    // Keyed by app: suggestions are rebuilt on every window
-                                    // event (titles, focus), which must not recreate tiles.
+                                    // Keyed by app: suggestions rebuild on every window event.
                                     model: ScriptModel {
                                         objectProp: "appId"
                                         values: root.browsing ? root.suggestions : []
@@ -422,11 +452,11 @@ PanelWindow {
                                         SmartAppIcon {
                                             id: tileIcon
                                             anchors.horizontalCenter: parent.horizontalCenter
-                                            y: 10 * stage.d
+                                            y: 12 * stage.d
                                             icon: tile.modelData.iconName
                                             fallback: "application-x-executable"
-                                            iconSize: Math.round(42 * stage.d)
-                                            scale: tile.pressed ? 0.92 : 1
+                                            iconSize: Math.round(46 * stage.d)
+                                            scale: tile.pressed ? IrisStyle.pressScale(0.92) : 1
                                             Behavior on scale { NumberAnimation { duration: IrisStyle.feedbackDuration } }
                                         }
                                         Rectangle {
@@ -437,7 +467,7 @@ PanelWindow {
                                             width: 4 * stage.d
                                             height: width
                                             radius: width / 2
-                                            color: ColorUtils.applyAlpha(IrisStyle.text, 0.5)
+                                            color: IrisStyle.textTertiary
                                         }
                                         IrisText {
                                             anchors.left: parent.left
@@ -457,17 +487,27 @@ PanelWindow {
                             }
                         }
 
-                        // Search modes the shared launcher understands, as
-                        // quiet tokens that type their prefix.
-                        Flow {
+                        Rectangle {
+                            visible: hints.visible
+                            Layout.fillWidth: true
+                            Layout.leftMargin: 24 * stage.d
+                            Layout.rightMargin: 24 * stage.d
+                            Layout.topMargin: 12 * stage.d
+                            implicitHeight: 1
+                            color: IrisStyle.hairline
+                        }
+
+                        GridLayout {
                             id: hints
+                            columns: 3
+                            columnSpacing: 8 * stage.d
+                            rowSpacing: 4 * stage.d
                             visible: root.options?.showHints ?? true
                             Layout.fillWidth: true
                             Layout.leftMargin: 16 * stage.d
                             Layout.rightMargin: 16 * stage.d
-                            Layout.topMargin: 10 * stage.d
-                            Layout.bottomMargin: 14 * stage.d
-                            spacing: 6 * stage.d
+                            Layout.topMargin: 12 * stage.d
+                            Layout.bottomMargin: 20 * stage.d
                             Repeater {
                                 model: {
                                     const prefix = Config.options?.search?.prefix ?? ({})
@@ -483,38 +523,42 @@ PanelWindow {
                                 IrisButton {
                                     id: hint
                                     required property var modelData
-                                    implicitHeight: Math.round(28 * stage.d)
-                                    implicitWidth: hintRow.implicitWidth + 16 * stage.d
-                                    buttonRadius: height / 2
-                                    buttonRadiusPressed: height / 2
-                                    colBackground: ColorUtils.applyAlpha(IrisStyle.text, 0.07)
-                                    colBackgroundHover: ColorUtils.applyAlpha(IrisStyle.text, 0.13)
+                                    Layout.fillWidth: true
+                                    Layout.preferredWidth: 1
+                                    implicitHeight: Math.round(34 * stage.d)
+                                    buttonRadius: IrisStyle.radiusRow
+                                    buttonRadiusPressed: IrisStyle.radiusRow
+                                    colBackground: "transparent"
+                                    colBackgroundHover: IrisStyle.fillHover
                                     Accessible.name: hint.modelData.label
                                     onClicked: { LauncherSearch.query = hint.modelData.key; stage.focusInput() }
-                                    Row {
+                                    RowLayout {
                                         id: hintRow
-                                        anchors.centerIn: parent
-                                        anchors.horizontalCenterOffset: -2 * stage.d
-                                        spacing: 7 * stage.d
+                                        anchors.fill: parent
+                                        anchors.leftMargin: 10 * stage.d
+                                        anchors.rightMargin: 10 * stage.d
+                                        spacing: 8 * stage.d
                                         Rectangle {
-                                            anchors.verticalCenter: parent.verticalCenter
-                                            width: Math.max(height, keyText.implicitWidth + 8 * stage.d)
-                                            height: Math.round(18 * stage.d)
-                                            radius: height / 2
-                                            color: ColorUtils.applyAlpha(IrisStyle.accent, hint.buttonHovered ? 0.3 : 0.18)
+                                            Layout.alignment: Qt.AlignVCenter
+                                            Layout.preferredWidth: Math.max(20 * stage.d, keyText.implicitWidth + 8 * stage.d)
+                                            Layout.preferredHeight: Math.round(20 * stage.d)
+                                            radius: IrisStyle.radiusMicro
+                                            color: hint.buttonHovered ? IrisStyle.tintFillHover(IrisStyle.accent) : IrisStyle.fill
                                             Behavior on color { ColorAnimation { duration: IrisStyle.duration(110) } }
                                             IrisText {
                                                 id: keyText
                                                 anchors.centerIn: parent
                                                 text: hint.modelData.key
-                                                color: IrisStyle.accent
+                                                color: hint.buttonHovered ? IrisStyle.accent : IrisStyle.subtext
                                                 font.family: Appearance.font.family.monospace
                                                 font.pixelSize: 11.5 * IrisStyle.typeScale
                                                 font.weight: Font.Bold
                                             }
                                         }
                                         IrisText {
-                                            anchors.verticalCenter: parent.verticalCenter
+                                            Layout.alignment: Qt.AlignVCenter
+                                            Layout.fillWidth: true
+                                            elide: Text.ElideRight
                                             text: hint.modelData.label
                                             color: hint.buttonHovered ? IrisStyle.text : IrisStyle.subtext
                                             font.pixelSize: 12 * IrisStyle.typeScale
@@ -526,7 +570,6 @@ PanelWindow {
                         }
                     }
 
-                    // ── Results ──────────────────────────────────────────
                     Item {
                         id: results
                         Layout.fillWidth: true
@@ -541,10 +584,10 @@ PanelWindow {
                             width: parent.width - 16 * stage.d
                             y: resultColumn.y + (target ? target.y + target.rowY : 0)
                             height: target?.rowHeight ?? 0
-                            radius: Math.round(14 * stage.d)
-                            color: ColorUtils.applyAlpha(IrisStyle.accent, 0.2)
-                            Behavior on y { NumberAnimation { duration: IrisStyle.duration(110); easing.type: Easing.OutCubic } }
-                            Behavior on height { NumberAnimation { duration: IrisStyle.duration(110); easing.type: Easing.OutCubic } }
+                            radius: IrisStyle.radiusTile
+                            color: IrisStyle.tintFill(IrisStyle.accent)
+                            Behavior on y { NumberAnimation { duration: IrisStyle.duration(110); easing.type: IrisStyle.feedbackEasing } }
+                            Behavior on height { NumberAnimation { duration: IrisStyle.duration(110); easing.type: IrisStyle.feedbackEasing } }
                         }
 
                         Column {
@@ -629,8 +672,8 @@ PanelWindow {
                                                     entry: String(result.modelData?.rawValue ?? "")
                                                     maxWidth: Math.round(220 * stage.d)
                                                     maxHeight: Math.round(120 * stage.d)
-                                                    color: ColorUtils.applyAlpha(IrisStyle.text, 0.08)
-                                                    radius: Math.round(10 * stage.d)
+                                                    color: IrisStyle.fillQuiet
+                                                    radius: IrisStyle.radiusRow
                                                 }
                                             }
                                             Item {
@@ -655,14 +698,12 @@ PanelWindow {
                                                         font.pixelSize: Math.round((result.topHit ? 30 : 19) * IrisStyle.typeScale)
                                                     }
                                                 }
-                                                // Material glyphs sit in a quiet round well so actions,
-                                                // math and commands read as system items next to app art.
                                                 Rectangle {
                                                     anchors.fill: parent
                                                     visible: result.modelData?.iconType !== LauncherSearchResult.IconType.System
                                                         && result.modelData?.iconType !== LauncherSearchResult.IconType.Text
                                                     radius: width / 2
-                                                    color: ColorUtils.applyAlpha(IrisStyle.text, 0.1)
+                                                    color: IrisStyle.fill
                                                     MaterialSymbol {
                                                         anchors.centerIn: parent
                                                         text: result.modelData?.iconName || "search"
@@ -717,8 +758,8 @@ PanelWindow {
                                                 visible: result.selected
                                                 Layout.preferredWidth: Math.round(24 * stage.d)
                                                 Layout.preferredHeight: Math.round(20 * stage.d)
-                                                radius: Math.round(6 * stage.d)
-                                                color: ColorUtils.applyAlpha(IrisStyle.text, 0.12)
+                                                radius: IrisStyle.radiusChip
+                                                color: IrisStyle.fill
                                                 MaterialSymbol {
                                                     anchors.centerIn: parent
                                                     text: "keyboard_return"

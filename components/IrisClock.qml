@@ -5,10 +5,6 @@ import qs.services
 import qs.modules.common.functions
 import qs.modules.iris.style
 
-// The iRiS time figure: heavy tabular hours and minutes, a separator tinted
-// with the family accent, and seconds / AM-PM set smaller and quieter so the
-// glance lands on the hour. Splits the shell's own formatted time, so the
-// user's 12/24 h and seconds preferences stay authoritative.
 Row {
     id: root
 
@@ -18,7 +14,6 @@ Row {
     property color color: IrisStyle.text
     property color separatorColor: IrisStyle.secondaryAccent
     property string family: IrisStyle.fontNumbers
-    // Size of seconds and the day-period suffix relative to the figure.
     property real minorScale: 0.58
 
     readonly property var parts: {
@@ -51,7 +46,7 @@ Row {
         font.pixelSize: Math.round(root.pixelSize * root.minorScale)
         font.weight: Font.DemiBold
         font.features: ({ "tnum": 1 })
-        color: ColorUtils.applyAlpha(root.color, 0.55)
+        color: IrisStyle.secondaryOf(root.color)
         renderType: Text.NativeRendering
     }
 
@@ -63,14 +58,12 @@ Row {
         color: root.color
     }
 
-    // Hours, minutes and seconds count; the separator and period stay put.
     Count { id: hoursText; text: root.parts.hours }
     Figure {
         text: ":"
         visible: root.parts.minutes.length > 0
         color: root.separatorColor
         anchors.baseline: hoursText.baseline
-        // Optical centring: a colon sits low in most faces.
         anchors.baselineOffset: -root.pixelSize * 0.06
         leftPadding: root.pixelSize * 0.03
         rightPadding: root.pixelSize * 0.03
@@ -89,7 +82,7 @@ Row {
             family: root.family
             pixelSize: Math.round(root.pixelSize * root.minorScale)
             weight: Font.DemiBold
-            color: ColorUtils.applyAlpha(root.color, 0.55)
+            color: IrisStyle.secondaryOf(root.color)
         }
     }
     Minor {

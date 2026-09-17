@@ -2,6 +2,7 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Layouts
+import QtQuick.Effects
 import Quickshell
 import Quickshell.Io
 import Quickshell.Widgets
@@ -11,19 +12,10 @@ import qs.services
 import qs.modules.common
 import qs.modules.common.functions
 import qs.modules.common.widgets
+import qs.modules.iris.frame
 import qs.modules.iris.style
 import qs.modules.iris.components
 
-// iRiS wallpaper picker. Grows out of the Island and hangs under it as a
-// compact strip: two rows of wallpapers that scroll sideways, a Finder-like
-// path (back, forward, breadcrumbs) and the folder's subfolders as chips above
-// them, the source (this computer or Wallhaven) and search, and one line of
-// selection below. The highlighted wallpaper can show on the desktop while
-// browsing; closing without applying restores the applied one.
-// Presentation only: local browsing, thumbnails and applying stay with the
-// shared Wallpapers service (same apply semantics as the shared selector);
-// online results come from the shared Wallhaven service and are downloaded
-// into the wallpapers folder before they are applied the same way.
 PanelWindow {
     id: root
 
@@ -33,18 +25,14 @@ PanelWindow {
     readonly property bool onlineEnabled: Config.options?.sidebar?.wallhaven?.enable ?? true
     readonly property var barOptions: Config.options?.iris?.bar ?? ({})
     readonly property bool barBottom: String(root.barOptions?.position ?? "top") === "bottom"
-    // Captured once per open: focus may already belong to this overlay later.
     property string targetMonitor: ""
     readonly property string selectionTarget: Wallpapers.currentSelectionTarget()
     readonly property string currentPath: Wallpapers.currentWallpaperPathForTarget(root.selectionTarget, root.targetMonitor)
 
-    // "library" or "online".
     property string source: "library"
     readonly property bool online: root.source === "online" && root.onlineEnabled
     property int selectedIndex: 0
 
-    // Library: the folder's subfolders (chips) and its wallpapers (gallery),
-    // read out of the shared folder model whenever it settles.
     property var libraryFolders: []
     property var libraryFiles: []
     function readFolder(): void {
@@ -73,12 +61,10 @@ PanelWindow {
         target: Wallpapers
         function onFolderModelReadyChanged(): void { folderRead.restart() }
     }
-    // One read per settle, not one per row the model reports.
     Timer { id: folderRead; interval: 40; onTriggered: root.readFolder() }
     readonly property int libraryCount: root.libraryFiles.length
     readonly property string libraryPath: !root.online ? String(root.libraryFiles[root.selectedIndex]?.path ?? "") : ""
 
-    // Where we are: the folder, its place under home, and the way back and forward.
     readonly property string folderPath: Wallpapers.effectiveDirectory.replace(/\/+$/, "") || "/"
     readonly property string homePath: String(Quickshell.env("HOME") ?? "").replace(/\/+$/, "")
     readonly property string wallpapersHome: FileUtils.trimFileProtocol(String(Wallpapers.defaultFolder ?? "")).replace(/\/+$/, "")
@@ -93,7 +79,6 @@ PanelWindow {
             walked += "/" + part
             list.push({ label: part, path: walked, home: false })
         }
-        // Long paths keep the root and the last three places.
         return list.length > 5 ? [list[0], { label: "…", path: list[list.length - 4].path, home: false }].concat(list.slice(-3)) : list
     }
     readonly property bool canGoBack: (Wallpapers.folderModel?.currentFolderHistoryIndex ?? 0) > 0
@@ -106,7 +91,6 @@ PanelWindow {
         Wallpapers.setDirectory(path)
     }
 
-    // Online results, newest page last.
     readonly property var onlineImages: (Wallhaven.responses ?? [])
         .filter(response => response && response.provider === "wallhaven")
         .reduce((all, response) => all.concat(response.images ?? []), [])
@@ -138,16 +122,27 @@ PanelWindow {
         : String(root.libraryFiles[root.selectedIndex]?.name ?? "")
 
     visible: root.morphOpen || surface.progress > 0
-    screen: {
-        const name = GlobalStates.wallpaperSelectorTargetMonitor
-        return (name ? Quickshell.screens.find(s => s.name === name) : null) ?? GlobalStates.focusedScreen
+    IrisOutputHold {
+        id: outputHold
+        wanted: {
+            const name = GlobalStates.wallpaperSelectorTargetMonitor
+            return (name ? Quickshell.screens.find(s => s.name === name) : null) ?? GlobalStates.focusedScreen
+        }
+        live: root.visible
     }
+    screen: outputHold.output
     color: "transparent"
     exclusionMode: ExclusionMode.Ignore
     WlrLayershell.layer: WlrLayer.Overlay
     WlrLayershell.namespace: "quickshell:iris-wallpaper"
     WlrLayershell.keyboardFocus: root.morphOpen ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
     anchors { left: true; right: true; top: true; bottom: true }
+    margins {
+        left: IrisFrame.band
+        right: IrisFrame.band
+        top: IrisFrame.band
+        bottom: IrisFrame.band
+    }
     mask: root.morphOpen && surface.armed ? null : surfaceRegion
     Region { id: surfaceRegion; item: surface }
 
@@ -167,7 +162,6 @@ PanelWindow {
         root.selectCurrent()
         Qt.callLater(() => search.forceActiveFocus())
     }
-    // Opens on the applied wallpaper when it lives in this folder.
     function selectCurrent(): void {
         const current = FileUtils.trimFileProtocol(String(root.currentPath ?? ""))
         const index = root.libraryFiles.findIndex(entry => entry.path === current)
@@ -213,16 +207,12 @@ PanelWindow {
         root.committing = true
         Wallpapers.applySelectionTarget(FileUtils.trimFileProtocol(filePath), target,
             Appearance.m3colors.darkmode, root.targetMonitor)
-        // Visible targets adopt the preview in place; a backdrop previewed against
-        // the desktop restores it (same rules as the shared launcher).
         if (target === "backdrop" || target === "waffle-backdrop") Wallpapers.cancelWallpaperPreview()
         else Wallpapers.clearWallpaperPreview()
         root.finishSelection()
         Qt.callLater(() => root.committing = false)
     }
 
-    // Live preview: the highlighted library wallpaper shows on the desktop once
-    // the user has moved the selection; opening never repaints by itself.
     readonly property bool livePreview: Config.options?.iris?.wallpaper?.livePreview ?? true
     property bool previewArmed: false
     property bool committing: false
@@ -303,8 +293,8 @@ PanelWindow {
         implicitHeight: implicitWidth
         buttonRadius: height / 2
         buttonRadiusPressed: height / 2
-        colBackground: ColorUtils.applyAlpha(IrisStyle.text, 0.08)
-        colBackgroundHover: ColorUtils.applyAlpha(IrisStyle.text, 0.16)
+        colBackground: IrisStyle.fillQuiet
+        colBackgroundHover: IrisStyle.fillHover
         MaterialSymbol {
             anchors.centerIn: parent
             text: glyphButton.glyph
@@ -318,8 +308,8 @@ PanelWindow {
         property string label: ""
         implicitWidth: Math.max(implicitHeight, capText.implicitWidth + 10 * root.d)
         implicitHeight: Math.round(18 * root.d)
-        radius: Math.round(5 * root.d)
-        color: ColorUtils.applyAlpha(IrisStyle.text, 0.1)
+        radius: IrisStyle.radiusChip
+        color: IrisStyle.fill
         IrisText {
             id: capText
             anchors.centerIn: parent
@@ -330,8 +320,6 @@ PanelWindow {
         }
     }
 
-    // A thumbnail cell shared by both sources: concentric selection ring,
-    // hover lift, name melting in, and badges for the applied or downloading one.
     component Tile: MouseArea {
         id: cell
         required property int index
@@ -354,12 +342,12 @@ PanelWindow {
         Item {
             anchors.fill: parent
             anchors.margins: Math.round(4 * root.d)
-            scale: cell.pressed ? 0.96 : cell.selected ? 1 : cell.containsMouse ? 0.99 : 0.97
+            scale: cell.pressed ? IrisStyle.pressScale(0.97) : 1
             Behavior on scale { NumberAnimation { duration: IrisStyle.morphDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: IrisStyle.morphCurve } }
 
             Rectangle {
                 anchors.fill: parent
-                radius: Math.round(16 * root.d)
+                radius: IrisStyle.radiusCard
                 color: "transparent"
                 border.width: Math.max(2, Math.round(2.5 * root.d))
                 border.color: IrisStyle.accent
@@ -369,22 +357,21 @@ PanelWindow {
             ClippingRectangle {
                 id: tile
                 anchors.fill: parent
-                anchors.margins: Math.round(5 * root.d)
-                radius: Math.round(11 * root.d)
+                anchors.margins: Math.round(4 * root.d)
+                radius: IrisStyle.radiusTile
                 color: IrisStyle.surfaceHigh
             }
-            // Name over a melt to black while hovered or selected.
             Rectangle {
                 x: tile.x
                 width: tile.width
                 y: tile.y + tile.height - height
-                height: Math.round(30 * root.d)
+                height: Math.round(44 * root.d)
                 radius: tile.radius
                 opacity: cell.selected || cell.containsMouse ? 1 : 0
                 Behavior on opacity { NumberAnimation { duration: IrisStyle.duration(120) } }
                 gradient: Gradient {
                     GradientStop { position: 0; color: ColorUtils.applyAlpha(IrisStyle.surface, 0) }
-                    GradientStop { position: 1; color: ColorUtils.applyAlpha(IrisStyle.surface, 0.8) }
+                    GradientStop { position: 1; color: IrisStyle.veilHeavy }
                 }
                 IrisText {
                     anchors.left: parent.left
@@ -392,7 +379,8 @@ PanelWindow {
                     anchors.bottom: parent.bottom
                     anchors.margins: Math.round(7 * root.d)
                     text: cell.label
-                    font.pixelSize: 11 * IrisStyle.typeScale
+                    font.pixelSize: 12 * IrisStyle.typeScale
+                    color: IrisStyle.onMedia
                     font.weight: Font.Medium
                     elide: Text.ElideRight
                 }
@@ -415,19 +403,46 @@ PanelWindow {
         }
     }
 
+    RectangularShadow {
+        x: surface.x + surface.lerp(surface.from.x, 0)
+        y: surface.y + surface.lerp(surface.from.y, 0) + 8 * root.d * surface.progress
+        width: surface.lerp(surface.from.width, surface.width)
+        height: surface.lerp(surface.from.height, surface.height)
+        radius: Math.min(width / 2, height / 2, surface.lerp(surface.fromRadius, surface.radius))
+        blur: 32 * root.d
+        spread: -6 * root.d
+        color: IrisStyle.shadow
+        opacity: Math.pow(Math.max(0, surface.progress), 3)
+    }
+
     IrisMorphSurface {
+        motionSurface: "gallery"
         id: surface
         open: root.morphOpen
-        radius: Math.round(28 * root.d)
+        radius: IrisStyle.surfaceRadius("gallery", IrisStyle.radiusPanel)
+        light: IrisStyle.surfaceLight("gallery", IrisStyle.wallpaperLight)
+        lightFrom: (Config.options?.iris?.bar?.position ?? "top") === "bottom" ? "bottom" : "top"
+        contentScaleFrom: 1
+        contentFadeStart: 0.5
+        contentFadeSpan: 0.4
         readonly property real edgeGap: (Number(root.barOptions?.height ?? 42)
             + ((root.barOptions?.notch ?? false) ? 0 : Number(root.barOptions?.margin ?? 8) * 2)) * root.d + 10 * root.d
         width: Math.min(root.width - 48, Math.round(Math.max(640, Math.min(1400, Config.options?.iris?.wallpaper?.width ?? 960)) * root.d))
-        height: layout.implicitHeight + Math.round(32 * root.d)
+        height: layout.implicitHeight + Math.round(40 * root.d)
         x: Math.round((root.width - width) / 2)
-        // Hangs under the Island (or over it when the Island sits at the bottom).
         y: root.barBottom ? root.height - height - edgeGap : edgeGap
         onClosed: { Wallpapers.searchQuery = ""; search.text = "" }
         onSettledChanged: if (surface.settled && surface.open) search.forceActiveFocus()
+
+        Rectangle {
+            z: 100
+            opacity: Math.max(0, (surface.progress - 0.85) / 0.15)
+            anchors.fill: parent
+            radius: surface.radius
+            color: "transparent"
+            border.width: 1
+            border.color: IrisStyle.border
+        }
 
         MouseArea { anchors.fill: parent }
 
@@ -436,11 +451,9 @@ PanelWindow {
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.top: parent.top
-            anchors.margins: Math.round(16 * root.d)
-            spacing: Math.round(10 * root.d)
+            anchors.margins: Math.round(20 * root.d)
+            spacing: Math.round(12 * root.d)
 
-            // Where: back and forward, the path as breadcrumbs (every place is a
-            // way back), and the source switch on the far side.
             RowLayout {
                 Layout.fillWidth: true
                 spacing: Math.round(6 * root.d)
@@ -460,8 +473,6 @@ PanelWindow {
                     onClicked: Wallpapers.navigateForward()
                 }
 
-                // Breadcrumbs: quiet places leading to the folder you are in,
-                // which carries the weight and the wallpaper count.
                 Flickable {
                     id: crumbFlick
                     visible: !root.online
@@ -505,7 +516,7 @@ PanelWindow {
                                     Rectangle {
                                         anchors.fill: parent
                                         radius: height / 2
-                                        color: ColorUtils.applyAlpha(IrisStyle.text, crumb.last ? 0.1 : crumbArea.containsMouse ? 0.08 : 0)
+                                        color: (crumb.last ? IrisStyle.fill : crumbArea.containsMouse ? IrisStyle.fillQuiet : ColorUtils.applyAlpha(IrisStyle.text, 0))
                                         Behavior on color { ColorAnimation { duration: IrisStyle.duration(110) } }
                                     }
                                     Row {
@@ -558,21 +569,20 @@ PanelWindow {
                     onClicked: root.openFolder(root.wallpapersHome)
                 }
 
-                // Source switch: one sliding selection.
                 Rectangle {
                     id: sourceSwitch
                     visible: root.onlineEnabled
                     Layout.preferredWidth: Math.round(208 * root.d)
                     Layout.preferredHeight: Math.round(34 * root.d)
                     radius: height / 2
-                    color: ColorUtils.applyAlpha(IrisStyle.text, 0.08)
+                    color: IrisStyle.fillQuiet
                     Rectangle {
                         x: 3 + (root.online ? (parent.width - 6) / 2 : 0)
                         y: 3
                         width: (parent.width - 6) / 2
                         height: parent.height - 6
                         radius: height / 2
-                        color: ColorUtils.applyAlpha(IrisStyle.text, 0.16)
+                        color: IrisStyle.fillHover
                         Behavior on x { NumberAnimation { duration: IrisStyle.morphDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: IrisStyle.morphCurve } }
                     }
                     Row {
@@ -617,7 +627,6 @@ PanelWindow {
                 }
             }
 
-            // Search, and the actions of the source.
             RowLayout {
                 Layout.fillWidth: true
                 spacing: Math.round(8 * root.d)
@@ -626,7 +635,7 @@ PanelWindow {
                     Layout.fillWidth: true
                     Layout.preferredHeight: Math.round(34 * root.d)
                     radius: height / 2
-                    color: ColorUtils.applyAlpha(IrisStyle.text, search.activeFocus ? 0.12 : 0.08)
+                    color: (search.activeFocus ? IrisStyle.fill : IrisStyle.fillQuiet)
                     Behavior on color { ColorAnimation { duration: IrisStyle.duration(120) } }
                     MaterialSymbol {
                         id: searchGlyph
@@ -720,7 +729,6 @@ PanelWindow {
                 }
             }
 
-            // Subfolders: one row of folder chips, apart from the wallpapers.
             Flickable {
                 id: folderStrip
                 Layout.fillWidth: true
@@ -754,10 +762,10 @@ PanelWindow {
                             Rectangle {
                                 anchors.fill: parent
                                 radius: height / 2
-                                color: ColorUtils.applyAlpha(IrisStyle.text, folderChip.pressed ? 0.18 : folderChip.containsMouse ? 0.13 : 0.07)
-                                scale: folderChip.pressed ? 0.96 : 1
+                                color: (folderChip.pressed ? IrisStyle.fillActive : folderChip.containsMouse ? IrisStyle.fillHover : IrisStyle.fillQuiet)
+                                scale: folderChip.pressed ? IrisStyle.pressScale(0.96) : 1
                                 Behavior on color { ColorAnimation { duration: IrisStyle.duration(110) } }
-                                Behavior on scale { NumberAnimation { duration: IrisStyle.duration(110); easing.type: Easing.OutCubic } }
+                                Behavior on scale { NumberAnimation { duration: IrisStyle.duration(110); easing.type: IrisStyle.feedbackEasing } }
                             }
                             Row {
                                 id: chipContent
@@ -782,7 +790,6 @@ PanelWindow {
                 }
             }
 
-            // Online: what to discover, as one scrolling row of chips.
             Flickable {
                 Layout.fillWidth: true
                 visible: root.online
@@ -815,13 +822,11 @@ PanelWindow {
                 }
             }
 
-            // Gallery: two rows that scroll sideways (the wheel scrolls them too).
             ScriptModel {
                 id: onlineResultsModel
                 objectProp: "id"
                 values: root.onlineImages
             }
-            // Wallpapers keyed by path: a refreshed folder keeps unchanged tiles.
             ScriptModel {
                 id: libraryModel
                 objectProp: "path"
@@ -831,7 +836,7 @@ PanelWindow {
                 id: grid
                 Layout.fillWidth: true
                 readonly property int rows: 2
-                readonly property real thumbWidth: Math.round(Math.max(150, Math.min(300, (Config.options?.iris?.wallpaper?.thumbnailSize ?? 228) * 0.82)) * root.d)
+                readonly property real thumbWidth: Math.round(Math.max(150, Math.min(300, (Config.options?.iris?.wallpaper?.thumbnailSize ?? 228))) * root.d)
                 Layout.preferredHeight: cellHeight * rows
                 flow: GridView.FlowTopToBottom
                 cellWidth: thumbWidth
@@ -842,12 +847,11 @@ PanelWindow {
                 cacheBuffer: Math.round(cellWidth * 4)
                 model: root.online ? onlineResultsModel : libraryModel
                 currentIndex: root.selectedIndex
-                // Near the end of the online results, fetch the next page.
                 onContentXChanged: if (root.online && Wallhaven.runningRequests === 0 && root.onlinePage > 0
                     && contentX + width > contentWidth - cellWidth * 2) root.searchOnline(root.onlinePage + 1, false)
                 Behavior on contentX {
                     enabled: wheelScroll.animating
-                    NumberAnimation { duration: IrisStyle.duration(180); easing.type: Easing.OutCubic }
+                    NumberAnimation { duration: IrisStyle.duration(180); easing.type: IrisStyle.feedbackEasing }
                 }
                 WheelHandler {
                     id: wheelScroll
@@ -912,7 +916,6 @@ PanelWindow {
                     }
                 }
 
-                // Empty: say why, and where to go when only folders are here.
                 ColumnLayout {
                     anchors.centerIn: parent
                     visible: root.count === 0
@@ -941,7 +944,12 @@ PanelWindow {
                 }
             }
 
-            // Selection: what is highlighted and where it lands, then the one action.
+            Rectangle {
+                Layout.fillWidth: true
+                implicitHeight: 1
+                color: IrisStyle.hairline
+            }
+
             RowLayout {
                 Layout.fillWidth: true
                 spacing: 10 * root.d
@@ -953,7 +961,7 @@ PanelWindow {
                         text: root.downloadingId.length > 0 ? Translation.tr("Downloading…")
                             : root.selectedName.replace(/\.[^.]+$/, "") || Translation.tr("Choose a wallpaper")
                         elide: Text.ElideMiddle
-                        font.pixelSize: 13 * IrisStyle.typeScale
+                        font.pixelSize: 15 * IrisStyle.typeScale
                         font.weight: Font.DemiBold
                     }
                     IrisText {
@@ -967,12 +975,11 @@ PanelWindow {
                         elide: Text.ElideRight
                     }
                 }
-                // Where it lands, as a quiet chip.
                 Rectangle {
                     implicitHeight: Math.round(28 * root.d)
                     implicitWidth: targetRow.implicitWidth + Math.round(20 * root.d)
                     radius: height / 2
-                    color: ColorUtils.applyAlpha(IrisStyle.text, 0.07)
+                    color: "transparent"
                     Row {
                         id: targetRow
                         anchors.centerIn: parent
@@ -993,7 +1000,8 @@ PanelWindow {
                 }
                 KeyCap { label: "Esc"; Layout.leftMargin: 2 * root.d }
                 IrisButton {
-                    implicitHeight: Math.round(32 * root.d)
+                    implicitHeight: Math.round(36 * root.d)
+                    implicitWidth: Math.round(88 * root.d)
                     buttonRadius: height / 2
                     buttonRadiusPressed: height / 2
                     emphasized: true

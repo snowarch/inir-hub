@@ -10,12 +10,13 @@ import qs.services
 import qs.modules.common
 import qs.modules.common.functions
 import qs.modules.common.widgets
+import qs.modules.iris.frame
 import qs.modules.iris.style
 import qs.modules.iris.components
+import qs.modules.iris.pieces
 
 Scope {
     id: root
-    // The Applications button can be left out entirely.
     readonly property bool showLauncher: Config.options?.iris?.dock?.launcher ?? true
     readonly property var options: Config.options?.iris?.dock ?? ({})
     readonly property real d: IrisStyle.density
@@ -27,30 +28,19 @@ Scope {
     readonly property bool badges: root.options?.badges ?? true
     readonly property bool revealOnEmpty: root.options?.revealOnEmpty ?? true
     readonly property var apps: TaskbarApps.apps
-    // Drop a leading/trailing separator: it only means "pinned vs running"
-    // when both groups are present.
     readonly property var entries: {
         const list = root.apps.slice()
         while (list.length > 0 && list[0].appId === "SEPARATOR") list.shift()
         while (list.length > 0 && list[list.length - 1].appId === "SEPARATOR") list.pop()
+        if (root.showLauncher && list.length > 0) list.unshift({ appId: "SEPARATOR" })
         return list
     }
-    // TaskbarApps rebuilds every entry object on any window event (focus,
-    // title). Delegates are keyed by appId so they survive those rebuilds —
-    // recreating them flashed every icon and dropped clicks mid-press — and
-    // read live window state from this map instead of their first snapshot.
+    // Keyed by appId: TaskbarApps rebuilds entries on every window event.
     readonly property var liveApps: {
         const map = {}
         for (const app of root.entries) map[app.appId] = app
         return map
     }
-    // Unread notifications per sender, normalised like the notification service.
-    // Counted from the whole list, not just live banners, so a badge outlives the
-    // banner; it clears once the notifications are seen, without dismissing
-    // anything: the app in focus shows none (what arrives while you are in it is
-    // seen), leaving it marks everything up to then as seen, and so does opening
-    // a surface that lists them (Today, Control Center). What was already in the
-    // list when the shell started counts as seen, so restarts never pile badges up.
     readonly property var notificationTimes: {
         const times = {}
         if (!root.badges) return times
@@ -85,8 +75,6 @@ Scope {
         }
         return 0
     }
-    // The app in focus, from the Dock or anywhere else, and every name its
-    // notifications may use (app id, desktop entry name and id).
     readonly property string focusedAppId: String(NiriService.activeWindow?.app_id ?? "")
     readonly property var focusedKeys: {
         if (root.focusedAppId.length === 0) return []
@@ -94,7 +82,6 @@ Scope {
             || Notifications._normalizeAppKey(entry.appId) === Notifications._normalizeAppKey(root.focusedAppId))
         return root.keysFor(app ? root.identifiersFor(app) : [root.focusedAppId])
     }
-    // Leaving an app: what arrived while it had focus has been seen.
     property var previousFocusedKeys: []
     onFocusedKeysChanged: {
         if (root.previousFocusedKeys.length > 0) root.markSeen(root.previousFocusedKeys)
@@ -109,13 +96,10 @@ Scope {
     readonly property real separatorWidth: 13 * root.d
     readonly property real slotSpacing: 2 * root.d
     readonly property real magnifyGain: 0.5
-    // Icons rasterise once at their magnified size and scale down at rest;
-    // resizing a theme icon per frame re-renders (and briefly blanks) it.
     readonly property real iconOversample: root.magnify ? 1 + root.magnifyGain : 1
     Component.onCompleted: CompositorService.setSortingConsumer("irisDock", true)
     Component.onDestruction: CompositorService.setSortingConsumer("irisDock", false)
 
-    // Niri marks windows that ask for attention; the Dock shows it on the app.
     readonly property var urgentWindowIds: (NiriService.windows ?? []).filter(w => w.is_urgent).map(w => w.id)
     function appUrgent(app): bool {
         return (app?.toplevels ?? []).some(t => t.niriWindowId !== undefined && root.urgentWindowIds.includes(t.niriWindowId))
@@ -151,9 +135,6 @@ Scope {
             Component.onCompleted: dockLoader.loadedTop = root.top
             readonly property bool requestedTop: root.top
             active: true
-            // Anchors never flip on a live surface: tear the dock down and map it
-            // again on the new edge. (A Timer declared here would be taken as the
-            // loader's component and never exist.)
             onRequestedTopChanged: {
                 dockLoader.active = false
                 Qt.callLater(() => {
@@ -166,36 +147,33 @@ Scope {
         readonly property var modelData: dockLoader.modelData
         readonly property bool atTop: dockLoader.loadedTop
 
-        // Catches outside clicks while a context menu is open. Mapped before the
-        // dock and kept mapped (input masked off when idle) so it always stacks
-        // below it; switching the dock's layer instead would recreate its
-        // surface and flash the menu.
         PanelWindow {
             id: dismissWindow
             screen: screenScope.modelData
-            visible: !GlobalStates.screenLocked
+            visible: !GlobalStates.screenLocked && window.menuOpen
             color: "transparent"
             exclusionMode: ExclusionMode.Ignore
             WlrLayershell.namespace: "quickshell:iris-dock-dismiss"
             WlrLayershell.layer: WlrLayer.Top
             anchors { left: true; right: true; top: true; bottom: true }
-            Item { id: dismissNoneItem; width: 0; height: 0 }
-            mask: window.menuOpen ? dismissAll : dismissNone
-            Region { id: dismissNone; item: dismissNoneItem }
-            // Stacking by mapping order is not guaranteed: the dock and its menu
-            // are cut out of the catch-all so they always receive the pointer.
-            readonly property real dockOffsetY: screenScope.atTop ? 0 : dismissWindow.height - window.height
+            mask: dismissAll
+            readonly property real surfaceHeight: dismissWindow.height > 0 ? dismissWindow.height : (screenScope.modelData?.height ?? 0)
+            readonly property real dockOriginX: window.frameInset
+            readonly property real dockOriginY: screenScope.atTop ? window.frameInset
+                : dismissWindow.surfaceHeight - window.height - window.frameInset
             Region {
                 id: dismissAll
                 Region { width: 100000; height: 100000 }
                 Region {
                     intersection: Intersection.Subtract
-                    x: hitArea.x; y: hitArea.y + dismissWindow.dockOffsetY
+                    x: hitArea.x + dismissWindow.dockOriginX
+                    y: hitArea.y + dismissWindow.dockOriginY
                     width: hitArea.width; height: hitArea.height
                 }
                 Region {
                     intersection: Intersection.Subtract
-                    x: menu.x; y: menu.y + dismissWindow.dockOffsetY
+                    x: menu.x + dismissWindow.dockOriginX
+                    y: menu.y + dismissWindow.dockOriginY
                     width: menu.width; height: menu.height
                 }
             }
@@ -210,16 +188,10 @@ Scope {
             id: window
             readonly property var modelData: screenScope.modelData
             property var menuApp: null
-            // "menu" (right click) or "windows" (an app with several windows: its
-            // windows as live previews growing out of the icon).
             property string menuMode: "menu"
-            // Icon centre and edge-side top at the moment the menu opened;
-            // magnification is frozen, so this stays true while it is open.
             property point menuAnchor: Qt.point(0, 0)
             property var menuOriginRect: null
             function captureMenuAnchor(icon: Item): void {
-                // Both corners are mapped: icons are scaled, so width/height are
-                // their raster size, not what is on screen.
                 const topLeft = icon.mapToItem(window.contentItem, 0, 0)
                 const bottomRight = icon.mapToItem(window.contentItem, icon.width, icon.height)
                 const center = icon.mapToItem(window.contentItem, icon.width / 2, screenScope.atTop ? icon.height : 0)
@@ -239,15 +211,9 @@ Scope {
             readonly property bool nativeBlurActive: blurRequested && Appearance.compositorBlurActive
             readonly property real reservedZone: root.autoHide ? 0 : window.dockHeight + window.edgeGap * 2
 
-            // Reveal by intent: the edge must be held briefly, so crossing it on
-            // the way to a window's own controls does not throw the dock up.
             property bool edgeIntent: false
-            // Icons accept hover and block handlers on sibling items, so the
-            // pointer is tracked once on the window content (their ancestor);
-            // the input mask decides where that counts.
             readonly property bool pointerOnDock: windowHover.hovered
             HoverHandler { id: windowHover }
-            // Auto-hide has nothing to make room for on an empty workspace.
             readonly property bool workspaceEmpty: {
                 if (!root.revealOnEmpty || !CompositorService.isNiri) return false
                 const active = (NiriService.allWorkspaces ?? []).find(ws => ws.output === window.modelData?.name && ws.is_active)
@@ -278,11 +244,17 @@ Scope {
             exclusiveZone: window.reservedZone
             WlrLayershell.namespace: "quickshell:iris-dock"
             WlrLayershell.keyboardFocus: window.menuOpen ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
-            // Anchors never change: a surface anchored to opposite edges loses
-            // its exclusive zone and tiled windows would slide under the dock.
+            // Fixed anchors: opposite-edge anchors lose the exclusive zone.
             anchors { left: true; right: true; top: screenScope.atTop; bottom: !screenScope.atTop }
-            // Stable canvas: dock, magnified icons, name label and the context
-            // menu all fit, so nothing resizes the layer surface.
+            readonly property real frameInset: root.autoHide ? IrisFrame.band : 0
+            readonly property real screenOffsetY: screenScope.atTop ? window.frameInset
+                : (window.screen?.height ?? window.height) - window.height - window.frameInset
+            margins {
+                left: window.frameInset
+                right: window.frameInset
+                top: window.frameInset
+                bottom: window.frameInset
+            }
             readonly property real menuReserve: Math.round(Math.min((window.screen?.height ?? 1080) * 0.55, 460 * root.d))
             implicitHeight: window.dockHeight + window.edgeGap + window.headroom + window.menuReserve
             mask: window.menuOpen ? menuRegion : hitRegion
@@ -299,36 +271,33 @@ Scope {
             }
 
             Shortcut { sequence: "Escape"; enabled: window.menuOpen; onActivated: window.menuApp = null }
+            Connections {
+                target: GlobalStates
+                function onIrisDockMenuRequestChanged(): void {
+                    if (GlobalStates.irisDockMenuRequest?.mode !== "close") return
+                    GlobalStates.irisDockMenuRequest = null
+                    window.menuApp = null
+                }
+            }
 
-            // Offset of the dock from its edge; negative hides it past the edge.
-            // Anchored, so a window resize (menu) never replays the reveal.
             property real edgeOffset: window.revealed ? window.edgeGap : -(window.dockHeight + 6 * root.d)
             Behavior on edgeOffset { NumberAnimation { duration: IrisStyle.morphDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: IrisStyle.morphCurve } }
 
-            // Input region: the dock plus the gap down to the screen edge while
-            // shown (no dead band between edge and dock), a thin strip when hidden.
             Item {
                 id: hitArea
                 anchors.horizontalCenter: parent.horizontalCenter
                 anchors.top: screenScope.atTop ? parent.top : undefined
                 anchors.bottom: screenScope.atTop ? undefined : parent.bottom
                 width: dock.width + (window.revealed ? 0 : 40 * root.d)
-                // While hovered, magnified icons rise above the dock; they stay
-                // inside the input region so the pointer never falls off them.
                 height: !window.revealed ? 2
                     : Math.max(2, window.dockHeight + window.edgeOffset
                         + (root.magnify && window.pointerOnDock && !window.menuOpen ? root.iconSize * root.magnifyGain + 4 * root.d : 0))
             }
 
-            // Pointer x in the dock's unmagnified layout, or null.
-            // Magnification freezes where it was when a menu opens, so the icon the
-            // menu grew out of (and the menu itself) stays put.
             property var frozenSlotX: null
             readonly property var pointerSlotX: {
                 if (window.menuOpen) return window.frozenSlotX
                 if (!root.magnify || !window.pointerOnDock || !window.revealed) return null
-                // Measured against the resting (centred) layout only, so the
-                // magnified width never feeds back into what it is computed from.
                 const x = windowHover.point.position.x - (window.width - dock.baseWidth) / 2
                 if (x < -root.slotWidth || x > dock.baseWidth + root.slotWidth) return null
                 return x - dock.padding
@@ -379,18 +348,16 @@ Scope {
                     topRightRadius: dock.notchTop ? 0 : radius
                     bottomLeftRadius: dock.notchBottom ? 0 : radius
                     bottomRightRadius: dock.notchBottom ? 0 : radius
-                    color: ColorUtils.applyAlpha(IrisStyle.surfaceHigh, 0.68)
+                    color: IrisStyle.material
                 }
 
-                // A hairline just inside the edge gives the black plate a defined
-                // silhouette over dark wallpapers; the attached edge stays open.
                 Rectangle {
                     anchors.fill: parent
                     visible: !root.notch && !window.nativeBlurActive
                     radius: dock.radius
                     color: "transparent"
                     border.width: 1
-                    border.color: ColorUtils.applyAlpha(IrisStyle.text, 0.13)
+                    border.color: IrisStyle.border
                 }
 
                 Row {
@@ -409,7 +376,7 @@ Scope {
                         required property int slotIndex
                         readonly property real mag: window.magnification(slot.slotIndex)
                         property real grow: slot.mag
-                        Behavior on grow { NumberAnimation { duration: IrisStyle.duration(70); easing.type: Easing.OutQuad } }
+                        Behavior on grow { NumberAnimation { duration: IrisStyle.duration(70); easing.type: IrisStyle.feedbackEasing } }
                         readonly property real iconScale: 1 + root.magnifyGain * slot.grow
                         width: root.slotWidth + root.iconSize * root.magnifyGain * slot.grow
                         height: appRow.height
@@ -430,9 +397,6 @@ Scope {
                             Accessible.name: Translation.tr("Applications")
                             onClicked: GlobalStates.searchOpen = !GlobalStates.searchOpen
                             onContainsMouseChanged: nameLabel.present(containsMouse ? launcherSlot : null, Translation.tr("Applications"))
-                            // Same footprint, anchoring and magnification as an app icon, but
-                            // no tile: a quiet grid of dots on the Dock's own black, which
-                            // closes into a cross while Spotlight is open.
                             Item {
                                 id: launcherGlyph
                                 anchors.horizontalCenter: parent.horizontalCenter
@@ -440,7 +404,7 @@ Scope {
                                 anchors.top: screenScope.atTop ? parent.top : undefined
                                 anchors.bottomMargin: 7 * root.d
                                 anchors.topMargin: 7 * root.d
-                                width: Math.round(root.iconSize * 0.9 * launcherSlot.iconScale * (launcherArea.pressed ? 0.92 : 1))
+                                width: Math.round(root.iconSize * 0.9 * launcherSlot.iconScale * (launcherArea.pressed ? IrisStyle.pressScale(0.92) : 1))
                                 height: width
                                 Grid {
                                     id: launcherDots
@@ -455,7 +419,7 @@ Scope {
                                             width: launcherDots.dot
                                             height: width
                                             radius: width / 2
-                                            color: ColorUtils.applyAlpha(IrisStyle.text, launcherArea.containsMouse ? 1 : 0.82)
+                                            color: (launcherArea.containsMouse ? IrisStyle.text : IrisStyle.textStrong)
                                             Behavior on color { ColorAnimation { duration: IrisStyle.duration(120) } }
                                         }
                                     }
@@ -485,12 +449,28 @@ Scope {
                             width: entry.separator ? root.separatorWidth : appSlot.width
                             height: appRow.height
 
+                            Connections {
+                                target: GlobalStates
+                                enabled: !entry.separator
+                                function onIrisDockMenuRequestChanged(): void {
+                                    const request = GlobalStates.irisDockMenuRequest
+                                    if (!request || request.appId !== entry.modelData.appId
+                                        || screenScope.modelData?.name !== GlobalStates.focusedScreen?.name) return
+                                    GlobalStates.irisDockMenuRequest = null
+                                    GlobalStates.irisDockShown = true
+                                    window.captureMenuAnchor(appIcon)
+                                    window.menuMode = request.mode === "menu" ? "menu" : "windows"
+                                    window.menuApp = entry.app
+                                }
+                            }
+
                             Rectangle {
                                 visible: entry.separator
                                 anchors.centerIn: parent
-                                width: 1
-                                height: root.iconSize * 0.7
-                                color: ColorUtils.applyAlpha(IrisStyle.text, 0.18)
+                                width: Math.max(1, Math.round(IrisStyle.density))
+                                height: Math.round(root.iconSize * 0.56)
+                                radius: width / 2
+                                color: IrisStyle.borderStrong
                             }
 
                             Slot {
@@ -500,24 +480,36 @@ Scope {
                                 readonly property var desktopEntry: entry.separator ? null : AppSearch.lookupDesktopEntry(entry.modelData.appId)
                                 readonly property string appName: appSlot.desktopEntry?.name ?? entry.modelData.appId
                                 readonly property bool running: (entry.app.toplevels?.length ?? 0) > 0
-                                // Niri's focused window is authoritative; the Wayland handle's
-                                // activated flag lagged behind (no capsule on the focused app).
                                 readonly property bool focused: (entry.app.toplevels ?? []).some(t => CompositorService.isNiri
                                     ? t.niriWindowId !== undefined && t.niriWindowId === (NiriService.activeWindow?.id ?? -1)
                                     : t.activated)
                                 property real lift: 0
+                                readonly property string pieceId: IrisPieces.appPieceId(entry.modelData.appId)
+                                readonly property bool carried: GlobalStates.irisBubbleDrag?.slot === appSlot.pieceId
+                                function primary(): void {
+                                    if ((entry.app.toplevels?.length ?? 0) > 1 && MinimizedWindows.countMinimizedForApp(entry.app.appId) === 0) {
+                                        if (window.menuOpen && window.menuApp === entry.app) { window.menuApp = null; return }
+                                        window.frozenSlotX = window.pointerSlotX
+                                        window.captureMenuAnchor(appIcon)
+                                        window.menuMode = "windows"
+                                        window.menuApp = entry.app
+                                        nameLabel.present(null, "")
+                                        return
+                                    }
+                                    GlobalStates.irisDockShown = false
+                                    if (root.activate(entry.app) && IrisStyle.motionEnabled) launchBounce.restart()
+                                }
 
                                 SequentialAnimation {
                                     id: launchBounce
                                     loops: 2
-                                    NumberAnimation { target: appSlot; property: "lift"; to: 14 * root.d; duration: 220; easing.type: Easing.OutQuad }
+                                    NumberAnimation { target: appSlot; property: "lift"; to: 14 * root.d; duration: 220; easing.type: IrisStyle.feedbackEasing }
                                     NumberAnimation { target: appSlot; property: "lift"; to: 0; duration: 260; easing.type: Easing.OutBounce }
                                 }
 
                                 IrisButton {
                                     id: appButton
                                     anchors.fill: parent
-                                    // The magnified icon rises past the slot; so does its hit area.
                                     anchors.topMargin: screenScope.atTop ? 0 : -root.iconSize * root.magnifyGain * appSlot.grow
                                     anchors.bottomMargin: screenScope.atTop ? -root.iconSize * root.magnifyGain * appSlot.grow : 0
                                     pressScaleEnabled: false
@@ -525,20 +517,7 @@ Scope {
                                     colBackgroundHover: "transparent"
                                     Accessible.name: appSlot.appName
                                     onHoveredChanged: nameLabel.present(hovered ? appSlot : null, appSlot.appName, entry.app.toplevels?.length ?? 0)
-                                    onClicked: {
-                                        // Several windows: show them instead of guessing which one.
-                                        if ((entry.app.toplevels?.length ?? 0) > 1 && MinimizedWindows.countMinimizedForApp(entry.app.appId) === 0) {
-                                            if (window.menuOpen && window.menuApp === entry.app) { window.menuApp = null; return }
-                                            window.frozenSlotX = window.pointerSlotX
-                                            window.captureMenuAnchor(appIcon)
-                                            window.menuMode = "windows"
-                                            window.menuApp = entry.app
-                                            nameLabel.present(null, "")
-                                            return
-                                        }
-                                        GlobalStates.irisDockShown = false
-                                        if (root.activate(entry.app) && IrisStyle.motionEnabled) launchBounce.restart()
-                                    }
+                                    onClicked: appSlot.primary()
                                     middleClickAction: () => {
                                         const e = AppSearch.lookupDesktopEntry(entry.modelData.appId)
                                         if (e) AppSearch.launchEntry(e)
@@ -568,16 +547,14 @@ Scope {
                                             }
                                         }
                                     }
-                                    // Without magnification, hover is a quiet platter and a
-                                    // small lift, so the pointer still lands somewhere.
                                     Rectangle {
                                         visible: !root.magnify
                                         anchors.horizontalCenter: parent.horizontalCenter
                                         anchors.verticalCenter: appIcon.verticalCenter
                                         width: root.iconSize + 8 * root.d
                                         height: width
-                                        radius: Math.round(width * 0.28)
-                                        color: ColorUtils.applyAlpha(IrisStyle.text, appButton.hovered || appButton.down ? 0.1 : 0)
+                                        radius: IrisStyle.iconRadius(width)
+                                        color: (appButton.hovered || appButton.down ? IrisStyle.fill : ColorUtils.applyAlpha(IrisStyle.text, 0))
                                         Behavior on color { ColorAnimation { duration: IrisStyle.duration(120) } }
                                     }
                                     SmartAppIcon {
@@ -586,49 +563,46 @@ Scope {
                                         anchors.bottom: screenScope.atTop ? undefined : parent.bottom
                                         anchors.top: screenScope.atTop ? parent.top : undefined
                                         property real hoverLift: !root.magnify && appButton.hovered ? 2 * root.d : 0
-                                        Behavior on hoverLift { NumberAnimation { duration: IrisStyle.duration(120); easing.type: Easing.OutCubic } }
+                                        Behavior on hoverLift { NumberAnimation { duration: IrisStyle.duration(120); easing.type: IrisStyle.feedbackEasing } }
                                         anchors.bottomMargin: 7 * root.d + appSlot.lift + hoverLift
                                         anchors.topMargin: 7 * root.d + appSlot.lift + hoverLift
                                         transformOrigin: screenScope.atTop ? Item.Top : Item.Bottom
                                         icon: entry.separator ? "" : (appSlot.desktopEntry?.icon ?? entry.modelData.appId)
                                         fallback: "application-x-executable"
-                                        // Fixed raster at the largest size; magnification and press
-                                        // only scale it, mipmapped so the resting size stays crisp.
                                         iconSize: Math.round(root.iconSize * root.iconOversample)
-                                        scale: appSlot.iconScale * (appButton.down ? 0.92 : 1) / root.iconOversample
+                                        scale: appSlot.iconScale * (appButton.down || appGrip.pressed ? IrisStyle.pressScale(0.92) : 1) / root.iconOversample
                                         layer.enabled: root.magnify
                                         layer.smooth: true
                                         layer.mipmap: true
+                                        opacity: appSlot.carried ? 0 : 1
+                                        Behavior on opacity { NumberAnimation { duration: IrisStyle.duration(120); easing.type: IrisStyle.feedbackEasing } }
+                                    }
+                                    IrisBubbleGrip {
+                                        id: appGrip
+                                        anchors.horizontalCenter: parent.horizontalCenter
+                                        anchors.verticalCenter: appIcon.verticalCenter
+                                        width: root.iconSize + 8 * root.d
+                                        height: width
+                                        slot: appSlot.pieceId
+                                        kind: "app"
+                                        screenName: screenScope.modelData?.name ?? ""
+                                        screenOffsetY: window.screenOffsetY
+                                        holdLifts: false
+                                        pullDirection: screenScope.atTop ? 1 : -1
+                                        pullDistance: root.iconSize * 0.7
+                                        enabled: !entry.separator && !window.menuOpen
+                                            && !IrisPieces.appFloating(entry.modelData.appId)
+                                        onTapped: appSlot.primary()
                                     }
                                 }
-                                // Unread notifications, pinned to the icon's top-right corner.
-                                Rectangle {
-                                    readonly property int count: root.badgeCount([entry.modelData.appId, appSlot.appName,
+                                IrisBadge {
+                                    count: root.badgeCount([entry.modelData.appId, appSlot.appName,
                                         String(appSlot.desktopEntry?.id ?? "").replace(/\.desktop$/, "")])
-                                    visible: count > 0
                                     parent: appIcon
                                     x: appIcon.width - width * 0.7
                                     y: -height * 0.3
-                                    // Lives inside the oversampled icon, so sizes are oversampled too.
-                                    height: Math.round(18 * root.d * root.iconOversample)
-                                    width: Math.max(height, badgeText.implicitWidth + 10 * root.d * root.iconOversample)
-                                    radius: height / 2
-                                    color: IrisStyle.danger
-                                    border.width: Math.max(1, Math.round(1.5 * root.d * root.iconOversample))
-                                    border.color: IrisStyle.surface
-                                    IrisText {
-                                        id: badgeText
-                                        anchors.centerIn: parent
-                                        text: parent.count > 99 ? "99+" : parent.count
-                                        color: "#ffffff"
-                                        font.pixelSize: 10.5 * IrisStyle.typeScale * root.iconOversample
-                                        font.weight: Font.Bold
-                                    }
+                                    size: Math.round(18 * root.d * root.iconOversample)
                                 }
-                                // State under the icon, in one vocabulary: a dot per open window
-                                // (up to three) in the app's window order, the focused window's dot
-                                // stretched into a capsule, windows that are all minimised a hollow
-                                // ring, attention in orange. Neutral like the icon, not the accent.
                                 Row {
                                     id: indicators
                                     readonly property int windows: Math.min(3, entry.app.toplevels?.length ?? 0)
@@ -659,9 +633,9 @@ Scope {
                                             radius: height / 2
                                             color: indicators.minimizedOnly ? "transparent"
                                                 : indicators.urgent ? IrisStyle.secondaryAccent
-                                                : indicator.lead ? IrisStyle.text : ColorUtils.applyAlpha(IrisStyle.text, appSlot.focused ? 0.55 : 0.42)
+                                                : indicator.lead ? IrisStyle.text : (appSlot.focused ? IrisStyle.textSecondary : IrisStyle.textTertiary)
                                             border.width: indicators.minimizedOnly ? Math.max(1, Math.round(1.2 * root.d)) : 0
-                                            border.color: ColorUtils.applyAlpha(IrisStyle.text, 0.55)
+                                            border.color: IrisStyle.textSecondary
                                             Behavior on width { NumberAnimation { duration: IrisStyle.morphDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: IrisStyle.morphCurve } }
                                             Behavior on color { ColorAnimation { duration: IrisStyle.duration(140) } }
                                             SequentialAnimation on opacity {
@@ -680,14 +654,13 @@ Scope {
                 }
             }
 
-            // Concave fillets melt a notch-mode dock into its screen edge.
             Repeater {
                 model: root.notch ? 2 : 0
                 RoundCorner {
                     required property int index
                     readonly property real size: Math.round(12 * root.d)
                     implicitSize: size
-                    color: window.nativeBlurActive ? ColorUtils.applyAlpha(IrisStyle.surfaceHigh, 0.68) : IrisStyle.surface
+                    color: window.nativeBlurActive ? IrisStyle.material : IrisStyle.bodySurface
                     visible: window.edgeOffset >= -0.5
                     x: index === 0 ? dock.x - size : dock.x + dock.width
                     y: screenScope.atTop ? 0 : window.height - size
@@ -697,7 +670,6 @@ Scope {
                 }
             }
 
-            // App name bubble over the hovered icon, shown after a short dwell.
             IrisSurface {
                 id: nameLabel
                 property Item target: null
@@ -713,12 +685,11 @@ Scope {
                     : Qt.point(0, 0)
                 visible: opacity > 0.01
                 opacity: nameLabel.shown && !window.menuOpen && window.revealed ? 1 : 0
-                Behavior on opacity { NumberAnimation { duration: IrisStyle.duration(120); easing.type: Easing.OutCubic } }
+                Behavior on opacity { NumberAnimation { duration: IrisStyle.duration(120); easing.type: IrisStyle.feedbackEasing } }
                 width: labelText.implicitWidth + 22 * root.d
                 height: Math.round(28 * root.d)
                 radius: height / 2
                 x: Math.max(8, Math.min(window.width - width - 8, nameLabel.anchorPoint.x - width / 2))
-                // Rides just above the hovered icon, including its magnification.
                 readonly property real targetLift: root.iconSize * root.magnifyGain * (nameLabel.target?.grow ?? 0)
                 y: screenScope.atTop
                     ? dock.y + dock.height + 8 * root.d + nameLabel.targetLift
@@ -747,15 +718,17 @@ Scope {
                 }
             }
 
-            // Context menu grows out of the icon that was right-clicked.
             IrisMorphSurface {
                 id: menu
                 open: window.menuOpen
+                motionSurface: "menus"
                 origin: window.menuOriginRect
+                light: IrisStyle.surfaceLight("menus", IrisStyle.wallpaperLight)
+                lightFrom: root.top ? "top" : "bottom"
                 readonly property Item activeContent: menu.mode === "windows" ? windowsContent : menuContent
                 contentReady: menu.activeContent.implicitHeight > 0
-                radius: Math.round((menu.mode === "windows" ? 20 : 14) * root.d)
-                color: IrisStyle.surface
+                radius: IrisStyle.surfaceRadius("menus", Math.round((menu.mode === "windows" ? 20 : 14) * root.d))
+                color: IrisStyle.bodySurface
                 contentScaleFrom: 1
                 contentFadeStart: 0.08
                 contentFadeSpan: 0.34
@@ -764,8 +737,6 @@ Scope {
                     ? Math.round(Math.min(window.width - 24, windowsContent.implicitWidth + 20 * root.d))
                     : Math.round(Math.min(Math.max(200 * root.d, menuContent.implicitWidth + 12 * root.d), 260 * root.d))
                 height: Math.round(menu.activeContent.implicitHeight + (menu.mode === "windows" ? 20 : 12) * root.d)
-                // Snap the whole surface to device pixels; fractional layer-surface
-                // translation softens every glyph even when the text itself is crisp.
                 x: Math.round(Math.max(12, Math.min(window.width - width - 12, window.menuAnchor.x - width / 2)))
                 y: Math.round(screenScope.atTop ? window.menuAnchor.y + 8 * root.d : window.menuAnchor.y - height - 8 * root.d)
                 visible: progress > 0
@@ -777,22 +748,19 @@ Scope {
                         window.frozenSlotX = null
                     }
                 }
-                // Keep the last app while collapsing so the content does not blank.
                 property var app: null
                 property var windows: []
                 property string mode: "menu"
                 Connections {
                     target: window
                     function onMenuAppChanged(): void {
-                        if (!window.menuApp) return
-                        menu.app = window.menuApp
+                        const app = window.menuApp
+                        if (!app) return
                         menu.mode = window.menuMode
-                        menu.windows = (window.menuApp.toplevels ?? []).slice()
+                        menu.windows = (app.toplevels ?? []).slice()
+                        menu.app = app
                     }
                 }
-                // While open, the windows follow the app live (a window closed from here
-                // or elsewhere leaves, a new one joins); the last list stays while
-                // collapsing so the content never blanks.
                 readonly property var liveWindows: window.menuOpen && menu.app ? (root.liveApps[menu.app.appId]?.toplevels ?? []) : null
                 onLiveWindowsChanged: {
                     if (menu.liveWindows === null) return
@@ -801,8 +769,6 @@ Scope {
                 }
                 MouseArea { anchors.fill: parent }
 
-                // Windows: one live preview per window of the app, the focused one
-                // ringed, each with its title and a close button on hover.
                 ColumnLayout {
                     id: windowsContent
                     visible: menu.mode === "windows"
@@ -813,7 +779,6 @@ Scope {
                     readonly property real cardWidth: Math.round(208 * root.d)
                     readonly property real cardHeight: Math.round(130 * root.d)
                     readonly property int columns: Math.max(1, Math.min(4, menu.windows.length))
-                    // Glimpses stay neutral on the black surface; the icon carries the app's colour.
                     readonly property color tint: IrisStyle.text
 
                     RowLayout {
@@ -873,14 +838,13 @@ Scope {
                                     window.menuApp = null
                                 }
 
-                                // Concentric ring on the focused window.
                                 Rectangle {
                                     width: windowsContent.cardWidth
                                     height: windowsContent.cardHeight
-                                    radius: Math.round(12 * root.d)
+                                    radius: IrisStyle.radiusRow
                                     color: "transparent"
                                     border.width: Math.max(2, Math.round(2 * root.d))
-                                    border.color: ColorUtils.applyAlpha(IrisStyle.text, card.focusedWindow ? 0.9 : card.containsMouse ? 0.35 : 0)
+                                    border.color: (card.focusedWindow ? IrisStyle.textStrong : card.containsMouse ? IrisStyle.textTertiary : ColorUtils.applyAlpha(IrisStyle.text, 0))
                                     Behavior on border.color { ColorAnimation { duration: IrisStyle.duration(120) } }
                                 }
                                 ClippingRectangle {
@@ -889,14 +853,10 @@ Scope {
                                     y: Math.round(4 * root.d)
                                     width: windowsContent.cardWidth - Math.round(8 * root.d)
                                     height: windowsContent.cardHeight - Math.round(8 * root.d)
-                                    radius: Math.round(8 * root.d)
+                                    radius: IrisStyle.radiusChip
                                     color: IrisStyle.surfaceHigh
-                                    scale: card.pressed ? 0.97 : 1
-                                    Behavior on scale { NumberAnimation { duration: IrisStyle.duration(110); easing.type: Easing.OutCubic } }
-                                    // A glimpse, not a capture: the window's own shape (its real
-                                    // aspect) in its app's colour, a title strip, and skeleton lines
-                                    // patterned from its title, so each window reads apart at a
-                                    // glance without screenshots; floating and attention marked.
+                                    scale: card.pressed ? IrisStyle.pressScale(0.97) : 1
+                                    Behavior on scale { NumberAnimation { duration: IrisStyle.duration(110); easing.type: IrisStyle.feedbackEasing } }
                                     readonly property var niriWindow: (NiriService.windows ?? []).find(w => w.id === card.modelData?.niriWindowId) ?? null
                                     readonly property real aspect: {
                                         const size = previewPlate.niriWindow?.layout?.window_size ?? [16, 10]
@@ -911,39 +871,37 @@ Scope {
                                     Rectangle {
                                         anchors.fill: parent
                                         gradient: Gradient {
-                                            GradientStop { position: 0; color: ColorUtils.applyAlpha(windowsContent.tint, card.focusedWindow ? 0.2 : 0.12) }
-                                            GradientStop { position: 1; color: ColorUtils.applyAlpha(IrisStyle.text, 0.03) }
+                                            GradientStop { position: 0; color: (card.focusedWindow ? IrisStyle.tintFillHover(windowsContent.tint) : IrisStyle.tintFill(windowsContent.tint)) }
+                                            GradientStop { position: 1; color: ColorUtils.applyAlpha(IrisStyle.text, 0.03) } // iris-literal: faint glimpse sheen
                                         }
                                     }
                                     Rectangle {
                                         id: silhouette
                                         readonly property real room: 14 * root.d
-                                        // Leaves the plate's lower band to the workspace chip.
                                         readonly property real chipBand: 20 * root.d
                                         readonly property real fitWidth: Math.min(parent.width - silhouette.room * 2, (parent.height - silhouette.room - silhouette.chipBand - 6 * root.d) * previewPlate.aspect)
                                         anchors.horizontalCenter: parent.horizontalCenter
                                         y: Math.round(silhouette.room + (parent.height - silhouette.room - silhouette.chipBand - 6 * root.d - height) / 2)
                                         width: Math.round(silhouette.fitWidth)
                                         height: Math.round(silhouette.fitWidth / previewPlate.aspect)
-                                        radius: Math.round(6 * root.d)
+                                        radius: IrisStyle.radiusChip
                                         clip: true
-                                        color: ColorUtils.applyAlpha(IrisStyle.surface, 0.62)
+                                        color: IrisStyle.veilStrong
                                         border.width: 1
-                                        border.color: ColorUtils.applyAlpha(windowsContent.tint, card.focusedWindow ? 0.55 : 0.28)
+                                        border.color: (card.focusedWindow ? IrisStyle.tintBorder(windowsContent.tint) : IrisStyle.tertiaryOf(windowsContent.tint))
                                         scale: card.containsMouse ? 1.03 : 1
-                                        Behavior on scale { NumberAnimation { duration: IrisStyle.duration(140); easing.type: Easing.OutCubic } }
-                                        // Title strip.
+                                        Behavior on scale { NumberAnimation { duration: IrisStyle.duration(140); easing.type: IrisStyle.feedbackEasing } }
                                         Rectangle {
                                             anchors.left: parent.left
                                             anchors.right: parent.right
                                             anchors.top: parent.top
                                             anchors.margins: 1
                                             height: Math.round(9 * root.d)
-                                            radius: Math.round(5 * root.d)
-                                            color: ColorUtils.applyAlpha(windowsContent.tint, 0.22)
+                                            radius: IrisStyle.radiusChip
+                                            color: IrisStyle.tintFill(windowsContent.tint)
                                         }
-                                        // Skeleton content patterned by the title.
                                         Column {
+                                            id: skeletonLines
                                             anchors.left: parent.left
                                             anchors.right: parent.right
                                             anchors.top: parent.top
@@ -956,10 +914,10 @@ Scope {
                                                 Rectangle {
                                                     required property int index
                                                     readonly property real share: 0.35 + ((previewPlate.seed * (index + 3) * 7919) % 60) / 100
-                                                    width: Math.round(parent.width * share)
+                                                    width: Math.round(skeletonLines.width * share)
                                                     height: Math.max(2, Math.round(3 * root.d))
                                                     radius: height / 2
-                                                    color: ColorUtils.applyAlpha(index % 3 === 0 ? windowsContent.tint : IrisStyle.text, index % 3 === 0 ? 0.32 : 0.12)
+                                                    color: (index % 3 === 0 ? IrisStyle.tintFillHover(windowsContent.tint) : IrisStyle.fill)
                                                 }
                                             }
                                         }
@@ -971,7 +929,6 @@ Scope {
                                             iconSize: Math.round(Math.min(34 * root.d, silhouette.height * 0.5))
                                         }
                                     }
-                                    // Floating windows and windows asking for attention.
                                     Row {
                                         anchors.top: parent.top
                                         anchors.left: parent.left
@@ -992,7 +949,6 @@ Scope {
                                             color: IrisStyle.secondaryAccent
                                         }
                                     }
-                                    // Where the window lives, quiet in the plate's lower edge.
                                     Rectangle {
                                         anchors.horizontalCenter: parent.horizontalCenter
                                         anchors.bottom: parent.bottom
@@ -1002,7 +958,7 @@ Scope {
                                         implicitHeight: Math.round(18 * root.d)
                                         implicitWidth: workspaceLabel.implicitWidth + Math.round(14 * root.d)
                                         radius: height / 2
-                                        color: ColorUtils.applyAlpha(IrisStyle.surface, 0.7)
+                                        color: IrisStyle.veilHeavy
                                         IrisText {
                                             id: workspaceLabel
                                             anchors.centerIn: parent
@@ -1027,14 +983,13 @@ Scope {
                                     font.pixelSize: 11.5 * IrisStyle.typeScale
                                     font.weight: card.focusedWindow ? Font.DemiBold : Font.Medium
                                 }
-                                // Close, on the preview's corner while hovered.
                                 Rectangle {
                                     x: previewPlate.x + previewPlate.width - width - 6 * root.d
                                     y: previewPlate.y + 6 * root.d
                                     width: Math.round(22 * root.d)
                                     height: width
                                     radius: width / 2
-                                    color: closeHover.hovered ? IrisStyle.danger : ColorUtils.applyAlpha(IrisStyle.surface, 0.72)
+                                    color: closeHover.hovered ? IrisStyle.danger : IrisStyle.veilHeavy
                                     opacity: card.containsMouse && CompositorService.isNiri ? 1 : 0
                                     visible: opacity > 0
                                     Behavior on opacity { NumberAnimation { duration: IrisStyle.duration(120) } }
@@ -1047,7 +1002,6 @@ Scope {
                                     HoverHandler { id: closeHover; cursorShape: Qt.PointingHandCursor }
                                     TapHandler {
                                         onTapped: {
-                                            // The list follows the app live, so the card leaves once Niri closes it.
                                             if (card.modelData?.niriWindowId !== undefined) NiriService.closeWindow(card.modelData.niriWindowId)
                                         }
                                     }
@@ -1074,9 +1028,9 @@ Scope {
                         quiet: true
                         implicitHeight: Math.round(30 * root.d)
                         implicitWidth: menuRowLabel.implicitWidth + 52 * root.d
-                        buttonRadius: Math.round(8 * root.d)
+                        buttonRadius: IrisStyle.radiusChip
                         pressScaleEnabled: false
-                        colBackgroundHover: ColorUtils.applyAlpha(IrisStyle.accent, 0.22)
+                        colBackgroundHover: IrisStyle.tintFill(IrisStyle.accent)
                         Accessible.name: menuRow.label
                         RowLayout {
                             anchors.fill: parent
@@ -1099,7 +1053,6 @@ Scope {
                         }
                     }
 
-                    // Header: app name, window count on the right.
                     RowLayout {
                         Layout.fillWidth: true
                         Layout.leftMargin: 10 * root.d
@@ -1148,6 +1101,17 @@ Scope {
                         glyph: menu.app?.pinned ? "keep_off" : "keep"
                         label: menu.app?.pinned ? Translation.tr("Unpin from dock") : Translation.tr("Keep in dock")
                         onClicked: { TaskbarApps.togglePin(menu.app.appId); window.menuApp = null }
+                    }
+                    MenuRow {
+                        readonly property bool floating: IrisPieces.appFloating(menu.app?.appId ?? "")
+                        glyph: floating ? "dock_to_bottom" : "bubble_chart"
+                        label: floating ? Translation.tr("Return to the Dock") : Translation.tr("Float as a bubble")
+                        onClicked: {
+                            const appId = menu.app?.appId ?? ""
+                            if (floating) IrisPieces.removeApp(appId)
+                            else IrisPieces.placeApp(appId, IrisPieces.defaultPlace, 0.5, 0.5)
+                            window.menuApp = null
+                        }
                     }
                     MenuRow {
                         visible: CompositorService.isNiri && (menu.windows?.length ?? 0) > 0

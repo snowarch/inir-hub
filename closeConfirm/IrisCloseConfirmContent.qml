@@ -39,12 +39,11 @@ Item {
 
     readonly property string appName: root.desktopEntry?.name ?? (root.appId.length > 0 ? root.appId : Translation.tr("this app"))
 
-    // Island: a centred alert — app icon, question, context, two equal buttons.
     IrisSurface {
         anchors.centerIn: parent
         width: Math.min(300 * IrisStyle.density, parent.width - 40)
         implicitHeight: alert.implicitHeight + 40 * IrisStyle.density
-        radius: Math.round(22 * IrisStyle.density)
+        radius: IrisStyle.radiusPlate
         raised: true
         MouseArea { anchors.fill: parent }
 
@@ -92,16 +91,16 @@ Item {
                 IrisButton {
                     Layout.fillWidth: true
                     implicitHeight: Math.round(32 * IrisStyle.density)
-                    buttonRadius: Math.round(10 * IrisStyle.density)
-                    colBackground: ColorUtils.applyAlpha(IrisStyle.text, 0.12)
-                    colBackgroundHover: ColorUtils.applyAlpha(IrisStyle.text, 0.2)
+                    buttonRadius: IrisStyle.radiusRow
+                    colBackground: IrisStyle.fill
+                    colBackgroundHover: IrisStyle.fillHover
                     text: Translation.tr("Cancel")
                     onClicked: root.cancel()
                 }
                 IrisButton {
                     Layout.fillWidth: true
                     implicitHeight: Math.round(32 * IrisStyle.density)
-                    buttonRadius: Math.round(10 * IrisStyle.density)
+                    buttonRadius: IrisStyle.radiusRow
                     emphasized: true
                     danger: true
                     text: Translation.tr("Close")

@@ -5,9 +5,6 @@ import qs.modules.common.functions
 import qs.modules.common.widgets
 import qs.modules.iris.style
 
-// Control Center level: a thick capsule whose light fill is the value, with the
-// glyph living inside it (dark over the fill, light over the track). Vertical
-// capsules fill from the bottom with the glyph at their foot.
 Item {
     id: root
 
@@ -15,7 +12,7 @@ Item {
     property string icon: "volume_up"
     property bool muted: false
     property bool vertical: false
-    property color fillColor: IrisStyle.text
+    property color fillColor: IrisStyle.fillStrong
     signal moved(real value)
     signal iconClicked()
 
@@ -32,18 +29,16 @@ Item {
         id: track
         anchors.fill: parent
         radius: root.thickness / 2
-        color: ColorUtils.applyAlpha(IrisStyle.text, 0.1)
+        color: IrisStyle.fill
         scale: pointer.pressed ? 1.015 : 1
-        Behavior on scale { NumberAnimation { duration: IrisStyle.duration(120); easing.type: Easing.OutCubic } }
+        Behavior on scale { NumberAnimation { duration: IrisStyle.duration(120); easing.type: IrisStyle.feedbackEasing } }
 
         Item {
             id: fillClip
-            // The fill is the level all the way down to empty; the glyph turns
-            // light once the fill no longer sits under it.
             property real length: root.span * root.shownValue
             Behavior on length {
                 enabled: root.dragValue < 0
-                NumberAnimation { duration: IrisStyle.duration(110); easing.type: Easing.OutCubic }
+                NumberAnimation { duration: IrisStyle.duration(110); easing.type: IrisStyle.feedbackEasing }
             }
             y: root.vertical ? track.height - fillClip.length : 0
             width: root.vertical ? track.width : fillClip.length
@@ -54,7 +49,7 @@ Item {
                 width: track.width
                 height: track.height
                 radius: root.thickness / 2
-                color: root.muted ? ColorUtils.applyAlpha(IrisStyle.text, 0.35) : root.fillColor
+                color: root.muted ? IrisStyle.textTertiary : root.fillColor
             }
         }
 
@@ -75,7 +70,6 @@ Item {
         id: pointer
         anchors.fill: parent
         cursorShape: Qt.PointingHandCursor
-        // A drag that wanders stays on the level instead of scrolling the page.
         preventStealing: true
         function valueAt(mouse): real {
             return Math.max(0, Math.min(1, root.vertical ? 1 - mouse.y / Math.max(1, height) : mouse.x / Math.max(1, width)))
@@ -98,7 +92,6 @@ Item {
             root.dragValue = -1
         }
         onCanceled: root.dragValue = -1
-        // Wheel notches step 5 %; touchpad pixel deltas accumulate into steps.
         property real wheelAccumulator: 0
         onWheel: wheel => {
             const delta = (wheel.angleDelta.y || wheel.angleDelta.x) || (wheel.pixelDelta.y || wheel.pixelDelta.x) * 4

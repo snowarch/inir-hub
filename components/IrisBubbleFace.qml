@@ -9,28 +9,21 @@ import qs.modules.common.functions
 import qs.modules.common.widgets
 import qs.modules.iris.style
 
-// What a bubble shows, wherever it lives: beside the Island or floating on its
-// own. One black disc and the minimal presentation of its kind — a cover with
-// its progress ring, a timer, the recording dot, a level ring, a count. State is
-// read from the shared services; the Island passes the values it already owns
-// (artwork tint, YT Music aware playback) so both places read the same.
 Item {
     id: root
 
     property string kind: ""
+    property string appId: ""
     readonly property real d: IrisStyle.density
 
-    // Media
     readonly property var player: MprisController.activePlayer
     property bool playing: root.player?.isPlaying ?? false
     property real mediaProgress: (root.player?.length ?? 0) > 0
         ? Math.max(0, Math.min(1, (root.player?.position ?? 0) / root.player.length)) : 0
     property color tint: IrisStyle.text
-    // A shared-element copy of the cover is flying: the cover and its ring step aside.
     property bool coverHidden: false
     readonly property alias artwork: cover
 
-    // Timers
     readonly property string timerKind: TimerService.pomodoroRunning ? "pomodoro"
         : TimerService.countdownRunning ? "countdown"
         : TimerService.stopwatchRunning ? "stopwatch" : ""
@@ -46,9 +39,12 @@ Item {
     property int trayCount: SystemTray.items.values.filter(item => item && item.id
         && (!(Config.options?.iris?.tray?.hidePassive ?? false) || item.status !== Status.Passive)).length
 
-    // Press and hover feedback belong to the face, never to a clipping host.
     property bool pressed: false
     property bool hovered: false
+    property bool plated: false
+    property bool bodyless: false
+    property real absorb: root.plated ? 1 : 0
+    readonly property real platedInset: 3 * root.d * root.absorb
 
     component Glyph: MaterialSymbol {
         fill: 1
@@ -61,7 +57,7 @@ Item {
         property real stroke: Math.max(2, 2.5 * root.d)
         preferredRendererType: Shape.CurveRenderer
         ShapePath {
-            strokeColor: ColorUtils.applyAlpha(ring.tint, 0.22)
+            strokeColor: IrisStyle.tintFill(ring.tint)
             strokeWidth: ring.stroke
             fillColor: "transparent"
             PathAngleArc {
@@ -85,34 +81,45 @@ Item {
     }
 
     Rectangle {
+        visible: root.plated || root.bodyless
         anchors.fill: parent
         radius: width / 2
-        color: IrisStyle.surface
+        color: root.pressed ? IrisStyle.fillActive
+            : root.hovered ? IrisStyle.fillHover
+            : ColorUtils.applyAlpha(IrisStyle.text, 0)
+        Behavior on color { ColorAnimation { duration: IrisStyle.duration(120) } }
+    }
+    Rectangle {
+        anchors.fill: parent
+        radius: width / 2
+        color: IrisStyle.bodySurface
+        opacity: root.bodyless ? 0 : 1 - root.absorb
+        visible: opacity > 0
+        Behavior on opacity { NumberAnimation { duration: IrisStyle.duration(120); easing.type: IrisStyle.feedbackEasing } }
     }
 
     Item {
         anchors.fill: parent
-        scale: root.pressed ? 0.88 : root.hovered ? 1.06 : 1
-        Behavior on scale { NumberAnimation { duration: IrisStyle.duration(120); easing.type: Easing.OutCubic } }
+        scale: root.pressed ? IrisStyle.pressScale(0.88) : root.hovered ? 1.06 : 1
+        Behavior on scale { NumberAnimation { duration: IrisStyle.duration(120); easing.type: IrisStyle.feedbackEasing } }
 
         IrisArtwork {
             id: cover
             visible: root.kind === "media"
             opacity: root.coverHidden ? 0 : 1
             anchors.centerIn: parent
-            width: parent.width - 12 * root.d
+            width: parent.width - 12 * root.d - 2 * root.platedInset
             height: width
             source: MediaArtwork.displaySource
             circular: true
         }
-        // Minimal keeps conveying state: a paused cover dims under a pause glyph.
         Rectangle {
             visible: root.kind === "media" && opacity > 0
             anchors.fill: cover
             radius: width / 2
-            color: ColorUtils.applyAlpha(IrisStyle.surface, 0.55)
+            color: IrisStyle.veilStrong
             opacity: !root.playing && !root.coverHidden ? 1 : 0
-            Behavior on opacity { NumberAnimation { duration: IrisStyle.duration(140); easing.type: Easing.OutCubic } }
+            Behavior on opacity { NumberAnimation { duration: IrisStyle.duration(140); easing.type: IrisStyle.feedbackEasing } }
             Glyph {
                 anchors.centerIn: parent
                 text: "pause"
@@ -122,10 +129,9 @@ Item {
         Ring {
             visible: root.kind === "media" || (root.kind === "timer" && root.timerKind !== "stopwatch")
             anchors.fill: parent
-            anchors.margins: 2 * root.d
-            // The ring belongs to the cover: it leaves with it and returns once it lands.
+            anchors.margins: 2 * root.d + root.platedInset
             opacity: root.coverHidden ? 0 : 1
-            Behavior on opacity { NumberAnimation { duration: IrisStyle.duration(120); easing.type: Easing.OutCubic } }
+            Behavior on opacity { NumberAnimation { duration: IrisStyle.duration(120); easing.type: IrisStyle.feedbackEasing } }
             tint: root.kind === "media" ? root.tint : IrisStyle.secondaryAccent
             progress: root.kind === "media" ? root.mediaProgress : root.timerProgress
         }
@@ -152,6 +158,13 @@ Item {
                 onRunningChanged: if (!running) recordDot.opacity = 1
             }
         }
+        SmartAppIcon {
+            visible: root.kind === "app"
+            anchors.centerIn: parent
+            icon: AppSearch.lookupDesktopEntry(root.appId)?.icon ?? root.appId
+            fallback: "application-x-executable"
+            iconSize: Math.round(parent.width - (12 + 4 * root.absorb) * root.d)
+        }
         Glyph {
             visible: root.kind === "controls"
             anchors.centerIn: parent
@@ -159,11 +172,30 @@ Item {
             fill: 0
             iconSize: 19 * root.d
         }
+        readonly property int toolsMinutesLeft: root.timerKind === "pomodoro" ? Math.ceil(TimerService.pomodoroSecondsLeft / 60)
+            : root.timerKind === "countdown" ? Math.ceil(TimerService.countdownSecondsLeft / 60) : -1
+        Ring {
+            visible: root.kind === "tools" && parent.toolsMinutesLeft >= 0
+            anchors.fill: parent
+            anchors.margins: 3 * root.d + root.platedInset
+            tint: IrisStyle.secondaryAccent
+            progress: root.timerProgress
+        }
         Glyph {
-            visible: root.kind === "tools"
+            visible: root.kind === "tools" && parent.toolsMinutesLeft < 0
             anchors.centerIn: parent
             text: "timer"
             iconSize: 19 * root.d
+            color: IrisStyle.secondaryAccent
+        }
+        IrisText {
+            visible: root.kind === "tools" && parent.toolsMinutesLeft >= 0
+            anchors.centerIn: parent
+            text: parent.toolsMinutesLeft
+            font.family: IrisStyle.fontNumbers
+            font.features: ({ "tnum": 1 })
+            font.pixelSize: 13 * IrisStyle.typeScale
+            font.weight: Font.Bold
             color: IrisStyle.secondaryAccent
         }
         IrisText {
@@ -176,16 +208,14 @@ Item {
             font.weight: Font.Bold
             color: IrisStyle.accent
         }
-        // Level bubbles: the ring is the level, the glyph its state; muted
-        // reads quiet for sound and red for a microphone.
         Ring {
             visible: root.kind === "sound" || root.kind === "mic"
             anchors.fill: parent
-            anchors.margins: 3 * root.d
+            anchors.margins: 3 * root.d + root.platedInset
             readonly property bool muted: root.kind === "mic" ? Audio.micMuted : (Audio.sink?.audio?.muted ?? false)
             tint: muted ? (root.kind === "mic" ? IrisStyle.danger : IrisStyle.muted) : IrisStyle.text
             progress: muted ? 0 : Math.min(1, root.kind === "mic" ? (Audio.micVolume ?? 0) : (Audio.value ?? 0))
-            Behavior on progress { NumberAnimation { duration: IrisStyle.duration(110); easing.type: Easing.OutCubic } }
+            Behavior on progress { NumberAnimation { duration: IrisStyle.duration(110); easing.type: IrisStyle.feedbackEasing } }
         }
         Glyph {
             visible: root.kind === "sound" || root.kind === "mic"
@@ -195,36 +225,53 @@ Item {
             iconSize: 15 * root.d
             color: root.kind === "mic" && Audio.micMuted ? IrisStyle.danger : IrisStyle.text
         }
-        Glyph {
+        Column {
+            id: weatherFace
+            readonly property string raw: String(Weather.data?.temp ?? "")
+            readonly property bool ready: !weatherFace.raw.startsWith("--") && weatherFace.raw.length > 0
+            readonly property string degrees: {
+                const value = parseFloat(weatherFace.raw)
+                return isNaN(value) ? "" : Math.round(value) + "°"
+            }
             visible: root.kind === "weather"
             anchors.centerIn: parent
-            text: Icons.getWeatherIcon(Weather.data?.wCode, Weather.isNightNow()) ?? "cloud"
-            iconSize: 19 * root.d
+            anchors.verticalCenterOffset: weatherFace.ready ? root.d : 0
+            spacing: -Math.round(2 * root.d)
+            Glyph {
+                anchors.horizontalCenter: parent.horizontalCenter
+                text: Icons.getWeatherIcon(Weather.data?.wCode, Weather.isNightNow()) ?? "cloud"
+                iconSize: (weatherFace.ready ? 13 : 19) * root.d
+            }
+            IrisText {
+                visible: weatherFace.ready
+                anchors.horizontalCenter: parent.horizontalCenter
+                text: weatherFace.degrees
+                font.family: IrisStyle.fontNumbers
+                font.features: ({ "tnum": 1 })
+                font.pixelSize: 11.5 * IrisStyle.typeScale
+                font.weight: Font.Bold
+            }
         }
-        Glyph {
+        Column {
+            id: notificationFace
+            readonly property int count: Notifications.list?.length ?? 0
             visible: root.kind === "notifications"
             anchors.centerIn: parent
-            text: "notifications"
-            iconSize: 18 * root.d
-        }
-        Rectangle {
-            visible: root.kind === "notifications"
-            readonly property int count: Notifications.list?.length ?? 0
-            x: parent.width - width * 0.9
-            y: -height * 0.1
-            height: Math.round(15 * root.d)
-            width: Math.max(height, notificationCount.implicitWidth + 7 * root.d)
-            radius: height / 2
-            color: IrisStyle.danger
-            border.width: Math.max(1, Math.round(1.5 * root.d))
-            border.color: IrisStyle.surface
+            anchors.verticalCenterOffset: notificationFace.count > 0 ? root.d : 0
+            spacing: -Math.round(2 * root.d)
+            Glyph {
+                anchors.horizontalCenter: parent.horizontalCenter
+                text: notificationFace.count > 0 ? "notifications_active" : "notifications"
+                iconSize: (notificationFace.count > 0 ? 13 : 18) * root.d
+            }
             IrisText {
-                id: notificationCount
-                anchors.centerIn: parent
-                text: parent.count > 9 ? "9+" : parent.count
-                color: "#ffffff"
+                visible: notificationFace.count > 0
+                anchors.horizontalCenter: parent.horizontalCenter
+                text: notificationFace.count > 99 ? "99+" : notificationFace.count
+                color: IrisStyle.badgeInk
                 font.family: IrisStyle.fontNumbers
-                font.pixelSize: 9.5 * IrisStyle.typeScale
+                font.features: ({ "tnum": 1 })
+                font.pixelSize: 11.5 * IrisStyle.typeScale
                 font.weight: Font.Bold
             }
         }

@@ -1,6 +1,7 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
+import QtQuick.Effects
 import QtQuick.Layouts
 import QtQuick.Controls
 import Quickshell
@@ -82,7 +83,6 @@ Variants {
             sourceComponent: islandComponent
         }
 
-        // ── Island: one row of system actions over the dimmed desktop ────
         Component {
             id: islandComponent
 
@@ -98,8 +98,6 @@ Variants {
                 ]
                 property int focusIndex: 0
                 property bool keyboardNavigation: false
-                // Restart, Shut Down and Log Out ask for a second press on the
-                // same action; anything else cancels the request.
                 property string pending: ""
                 readonly property var pendingAction: stage.actions.find(action => action.id === stage.pending) ?? null
 
@@ -137,11 +135,36 @@ Variants {
                     event.accepted = true
                 }
 
-                Rectangle {
+                Image {
+                    id: backdropImage
                     anchors.fill: parent
-                    color: "#000000"
-                    opacity: window.presentationShown ? 0.58 : 0
-                    Behavior on opacity { NumberAnimation { duration: IrisStyle.duration(160); easing.type: Easing.OutCubic } }
+                    anchors.margins: -Math.round(64 * stage.d)
+                    visible: false
+                    source: WallpaperListener.wallpaperUrlForScreen(window.modelData)
+                    sourceSize: Qt.size(Math.max(1, Math.round(stage.width / 4)), Math.max(1, Math.round(stage.height / 4)))
+                    fillMode: Image.PreserveAspectCrop
+                    asynchronous: true
+                    cache: true
+                }
+                Item {
+                    anchors.fill: parent
+                    opacity: window.presentationShown ? 1 : 0
+                    Behavior on opacity { NumberAnimation { duration: IrisStyle.duration(220); easing.type: IrisStyle.feedbackEasing } }
+                    Rectangle { anchors.fill: parent; color: IrisStyle.surfaceOpaque }
+                    MultiEffect {
+                        anchors.fill: parent
+                        anchors.margins: -Math.round(64 * stage.d)
+                        visible: backdropImage.status === Image.Ready
+                        source: backdropImage
+                        blurEnabled: true
+                        blur: 1
+                        blurMax: 48
+                        saturation: 0.1
+                    }
+                    Rectangle {
+                        anchors.fill: parent
+                        color: backdropImage.status === Image.Ready ? IrisStyle.veil : IrisStyle.veilHeavy
+                    }
                 }
                 MouseArea {
                     anchors.fill: parent
@@ -156,21 +179,17 @@ Variants {
                     spacing: 0
                     opacity: window.presentationShown ? 1 : 0
                     scale: window.presentationShown ? 1 : 0.96
-                    Behavior on opacity { NumberAnimation { duration: IrisStyle.duration(160); easing.type: Easing.OutCubic } }
+                    Behavior on opacity { NumberAnimation { duration: IrisStyle.duration(160); easing.type: IrisStyle.feedbackEasing } }
                     Behavior on scale { NumberAnimation { duration: IrisStyle.morphDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: IrisStyle.morphCurve } }
 
-                    IrisText {
+                    IrisClock {
                         Layout.alignment: Qt.AlignHCenter
-                        text: DateTime.timeDisplay
-                        font.family: IrisStyle.fontNumbers
-                        font.features: ({ "tnum": 1 })
-                        font.pixelSize: Math.round(64 * IrisStyle.typeScale)
-                        font.weight: Font.DemiBold
+                        pixelSize: Math.round(64 * IrisStyle.typeScale)
                     }
                     IrisText {
                         Layout.alignment: Qt.AlignHCenter
                         text: Qt.locale().toString(DateTime.clock.date, "dddd, d MMMM")
-                        color: ColorUtils.applyAlpha(IrisStyle.text, 0.72)
+                        color: IrisStyle.textSecondary
                         font.pixelSize: Math.round(15 * IrisStyle.typeScale)
                     }
 
@@ -197,13 +216,12 @@ Variants {
                                     height: width
                                     radius: width / 2
                                     color: action.armed ? IrisStyle.danger
-                                        : pointer.containsMouse || action.focused ? ColorUtils.applyAlpha(IrisStyle.text, 0.26)
-                                        : ColorUtils.applyAlpha(IrisStyle.text, 0.14)
-                                    scale: pointer.pressed ? 0.93 : 1
+                                        : pointer.containsMouse || action.focused ? IrisStyle.fillActive
+                                        : IrisStyle.fill
+                                    scale: pointer.pressed ? IrisStyle.pressScale(0.93) : 1
                                     Behavior on color { ColorAnimation { duration: IrisStyle.duration(120) } }
-                                    Behavior on scale { NumberAnimation { duration: IrisStyle.feedbackDuration; easing.type: Easing.OutCubic } }
+                                    Behavior on scale { NumberAnimation { duration: IrisStyle.feedbackDuration; easing.type: IrisStyle.feedbackEasing } }
 
-                                    // Keyboard focus ring, outside the disc.
                                     Rectangle {
                                         anchors.centerIn: parent
                                         width: parent.width + 8 * stage.d
@@ -220,7 +238,7 @@ Variants {
                                         text: action.modelData.icon
                                         iconSize: Math.round(30 * stage.d)
                                         fill: 1
-                                        color: action.armed ? "#ffffff" : IrisStyle.text
+                                        color: action.armed ? IrisStyle.onMedia : IrisStyle.text
                                     }
                                 }
                                 IrisText {
@@ -247,14 +265,13 @@ Variants {
                         }
                     }
 
-                    // The hint line holds its height so arming never shifts the row.
                     IrisText {
                         Layout.alignment: Qt.AlignHCenter
                         Layout.topMargin: 22 * stage.d
                         text: stage.pendingAction
                             ? Translation.tr("Press %1 again to continue").arg(stage.pendingAction.label)
                             : Translation.tr("Up %1").arg(DateTime.uptime)
-                        color: stage.pendingAction ? ColorUtils.applyAlpha(IrisStyle.text, 0.85) : ColorUtils.applyAlpha(IrisStyle.text, 0.5)
+                        color: stage.pendingAction ? IrisStyle.text : IrisStyle.textTertiary
                         font.pixelSize: Math.round(12.5 * IrisStyle.typeScale)
                     }
                 }

@@ -14,8 +14,6 @@ PanelSurface {
     property bool notchTop: false
     property bool notchBottom: false
 
-    // Stable family material. iRiS must not visually mutate when Material II's
-    // Global Style changes underneath it.
     surfaceDialect: "inir"
     elevation: root.raised ? 2 : 1
     opaqueSurface: true

@@ -23,9 +23,6 @@ Variants {
             || lowerPath.endsWith(".webm") || lowerPath.endsWith(".mkv")
             || lowerPath.endsWith(".avi") || lowerPath.endsWith(".mov")
         readonly property string fallbackThumbnail: Config.options?.background?.thumbnailPath ?? ""
-        // iRiS never owns animated wallpaper decoding. If the shared wallpaper
-        // pipeline has no static thumbnail, leave the internal layer empty and
-        // let the external owner remain visible instead of waking a decoder.
         readonly property string effectivePath: panel.animated
             ? panel.fallbackThumbnail : panel.previewPath
         readonly property bool externalWallpaper: AwwwBackend.supportsVisibleMainWallpaper(
@@ -42,9 +39,10 @@ Variants {
         Image {
             anchors.fill: parent
             visible: !panel.externalWallpaper && panel.effectivePath.length > 0
+            sourceSize: Qt.size(panel.width * (panel.screen?.devicePixelRatio ?? 1), panel.height * (panel.screen?.devicePixelRatio ?? 1))
             source: {
                 const path = panel.effectivePath
-                if (!path) return ""
+                if (!path || panel.externalWallpaper) return ""
                 return path.startsWith("file://") ? path : "file://" + FileUtils.trimFileProtocol(path)
             }
             fillMode: Image.PreserveAspectCrop

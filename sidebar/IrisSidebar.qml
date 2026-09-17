@@ -12,6 +12,7 @@ import qs.modules.common
 import qs.modules.common.functions
 import qs.modules.common.widgets
 import qs.modules.iris.components
+import qs.modules.iris.frame
 import qs.modules.iris.style
 
 PanelWindow {
@@ -24,18 +25,11 @@ PanelWindow {
     readonly property real d: IrisStyle.density
     readonly property string outputName: root.left ? GlobalStates.sidebarLeftTargetOutput : GlobalStates.sidebarRightTargetOutput
     readonly property bool notch: root.options.notch ?? false
-    // Revealed by resting at the edge: a peek yields input outside the panel and
-    // closes once the pointer leaves, until a press inside commits it.
     readonly property bool peek: root.open && !root.pinned && GlobalStates.irisSidebarPeek === root.side
     property bool editing: false
-    // The panel incubates in pieces; sliding it in before its sections exist
-    // would show them popping in and reflowing mid-motion. Hold the slide until
-    // the content height has stopped changing for a few frames.
     property bool contentSettled: false
     Timer { id: settle; interval: 80; onTriggered: root.contentSettled = true }
 
-    // Settings opened from this panel grows out of the button that asked for it
-    // and collapses back into it; the Island does not take that morph over.
     property Item settingsOrigin: null
     function publishSettingsOrigin(): void {
         const item = root.settingsOrigin
@@ -45,15 +39,12 @@ PanelWindow {
             radius: item.height / 2, screen: root.screen?.name ?? "" }
         GlobalStates.irisMorphOwner = root.side
     }
-    // Sections rest compact until opened; which ones are open is remembered.
     readonly property var expandedSections: root.options.expanded ?? []
     function toggleSection(kind: string): void {
         const next = root.expandedSections.includes(kind)
             ? root.expandedSections.filter(k => k !== kind) : [...root.expandedSections, kind]
         Config.setNestedValue("iris.sidebars." + root.side + ".expanded", next)
     }
-    // Sections morphing their own height; the panel follows them directly
-    // instead of chasing that height with a second animation.
     property int sectionMorphs: 0
     function close(): void {
         if (root.left) GlobalStates.closeSidebarLeft()
@@ -77,11 +68,8 @@ PanelWindow {
     Component.onCompleted: root.opened()
     Connections {
         target: GlobalStates
-        // Settings opens above the panel, so the panel stays where it is (and a
-        // peek becomes a real open: the pointer is about to be over Settings).
         function onSettingsOverlayOpenChanged(): void {
             if (GlobalStates.settingsOverlayOpen && root.peek) GlobalStates.irisSidebarPeek = ""
-            // Collapse back into the button that opened it, wherever it is now.
             if (!GlobalStates.settingsOverlayOpen && GlobalStates.irisMorphOwner === root.side) root.publishSettingsOrigin()
         }
         function onControlPanelOpenChanged(): void { if (GlobalStates.controlPanelOpen && !root.pinned) root.close() }
@@ -89,7 +77,12 @@ PanelWindow {
         function onScreenLockedChanged(): void { if (GlobalStates.screenLocked) root.close() }
     }
 
-    screen: Quickshell.screens.find(s => s.name === root.outputName) ?? GlobalStates.focusedScreen
+    IrisOutputHold {
+        id: outputHold
+        wanted: Quickshell.screens.find(s => s.name === root.outputName) ?? GlobalStates.focusedScreen
+        live: root.visible
+    }
+    screen: outputHold.output
     visible: root.open || frame.progress > 0
     color: "transparent"
     anchors { left: true; right: true; top: true; bottom: true }
@@ -98,20 +91,16 @@ PanelWindow {
     WlrLayershell.layer: WlrLayer.Overlay
     WlrLayershell.keyboardFocus: !root.open ? WlrKeyboardFocus.None
         : root.pinned || root.peek ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.Exclusive
-    // Outside clicks count only while the panel is presented; while it loads or
-    // collapses the rest of the screen stays usable.
-    mask: Region { item: !root.open || !frame.armed ? frame : root.pinned || root.peek ? peekZone : dismiss }
+    mask: root.open && frame.armed && !root.pinned && !root.peek && GlobalStates.irisStudioRect ? studioMask : ownMask
+    Region { id: ownMask; item: !root.open || !frame.armed ? frame : root.pinned || root.peek ? peekZone : dismiss }
+    IrisStudioMask {
+        id: studioMask
+        canvasWidth: root.width
+        canvasHeight: root.height
+        screenName: root.screen?.name ?? ""
+    }
     MouseArea { id: dismiss; anchors.fill: parent; enabled: !root.pinned && !root.peek; onClicked: root.close() }
 
-    // Peeking and kept-open panels take input only here. The peek counts the
-    // strip between the screen edge and the panel as part of it, so the pointer
-    // that revealed it is already "inside". Tracked on the
-    // window content: panel controls accept hover and would block a handler on
-    // a sibling; the input mask limits it to this zone.
-    // The panel resizes while it is used (customizing, sections growing, bottom
-    // alignment moving its top edge). What it covered under a still pointer
-    // stays part of the zone until the pointer really moves, so a resize away
-    // from the pointer never reads as leaving.
     Item {
         id: peekZone
         readonly property rect live: Qt.rect(root.left ? 0 : frame.x, frame.y,
@@ -145,18 +134,8 @@ PanelWindow {
             }
         }
     }
-    // A panel in use keeps its top edge — the header whose controls reshape it —
-    // under the pointer: customizing or a section changing height grows or
-    // shrinks the bottom instead of sliding the header (and the next click)
-    // away. Once used it stays where it is until it closes, and it closes from
-    // there; the next open lays it out at its alignment again.
     property bool engaged: false
-    // Follows the laid-out position until the hold starts, so a pointer that was
-    // already on the panel while it loaded holds where it settled, not the
-    // placeholder position of its first frames.
     property real heldTop: 0
-    // Closing leaves from exactly where the panel is; realigning on the way out
-    // made it jump sideways into its edge.
     readonly property bool holding: !root.open || (root.engaged && frame.settled)
     readonly property real alignedY: Math.round(root.topInset + (root.availableHeight - frame.height)
         * (root.options.alignment === "top" ? 0 : root.options.alignment === "bottom" ? 1 : 0.5))
@@ -172,30 +151,26 @@ PanelWindow {
     }
     Shortcut { sequence: "Ctrl+E"; enabled: root.open; onActivated: root.editing = !root.editing }
 
-    readonly property real edgeGap: root.notch ? 0 : 12 * root.d
+    readonly property real edgeGap: (root.notch ? 0 : 12 * root.d) + IrisFrame.band
     readonly property real verticalGap: 12 * root.d
-    // Attached panels overflow their edge by the radius, like the notch Island,
-    // so the edge side reads flat without per-corner radii.
     readonly property real notchOverflow: root.notch ? frame.radius : 0
-    readonly property real barInset: ((Config.options?.iris?.bar?.height ?? 42)
-        + ((Config.options?.iris?.bar?.notch ?? false) ? 0 : (Config.options?.iris?.bar?.margin ?? 8) * 2)) * root.d
-    readonly property bool barBottom: (Config.options?.iris?.bar?.position ?? "top") === "bottom"
-    readonly property real topInset: root.verticalGap + (root.barBottom ? 0 : root.barInset)
-    readonly property real bottomInset: root.verticalGap + (root.barBottom ? root.barInset : 0)
+    readonly property real topInset: root.verticalGap + IrisFrame.inset("top")
+    readonly property real bottomInset: root.verticalGap + IrisFrame.inset("bottom")
     readonly property real availableHeight: Math.max(1, root.height - root.topInset - root.bottomInset)
 
     IrisMorphSurface {
+        motionSurface: "panels"
         id: frame
         open: root.open
-        animationDuration: IrisStyle.settleDuration
+        light: IrisStyle.surfaceLight("panels", IrisStyle.wallpaperLight)
+        lightFrom: root.left ? "left" : "right"
         contentScaleFrom: 1
         contentFadeStart: 0
         contentFadeSpan: 0.12
         contentTravels: true
         contentReady: root.contentSettled
-        radius: IrisStyle.radius
+        radius: IrisStyle.surfaceRadius("panels", IrisStyle.radius)
         width: Math.round(Math.min(root.width - root.edgeGap * 2, Math.max(300, Math.min(600, root.options.width ?? 380)) * root.d)) + root.notchOverflow
-        // Hugs its content like a widget stack; the configured height is a ceiling.
         height: Math.round(Math.min(root.availableHeight * Math.max(0.45, Math.min(1, (root.options.height ?? 88) / 100)),
             panelLayout.implicitHeight + 36 * root.d))
         x: root.left ? root.edgeGap - root.notchOverflow : root.width - width - root.edgeGap + root.notchOverflow
@@ -203,7 +178,6 @@ PanelWindow {
             ? Math.round(Math.max(root.topInset, Math.min(root.heldTop, root.topInset + root.availableHeight - height)))
             : root.alignedY
         onYChanged: if (!root.holding) root.heldTop = frame.y
-        // Once presented, size and alignment changes glide on the morph curve.
         Behavior on y {
             enabled: frame.settled
             NumberAnimation { duration: IrisStyle.morphDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: IrisStyle.morphCurve }
@@ -212,13 +186,10 @@ PanelWindow {
             enabled: frame.settled && root.sectionMorphs === 0
             NumberAnimation { duration: IrisStyle.morphDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: IrisStyle.morphCurve }
         }
-        // Side panels slide out of their own screen edge, whole: the resting
-        // shape parked just past that edge, so the output clips it as it enters.
         origin: ({ x: root.left ? -frame.width - root.edgeGap : root.width + root.edgeGap, y: frame.y,
             width: frame.width, height: frame.height, radius: frame.radius })
         MouseArea { anchors.fill: parent }
         HoverHandler { id: frameHover; onHoveredChanged: if (hovered) root.engaged = true }
-        // A press inside a peeking panel keeps it.
         PointHandler { onActiveChanged: if (active && root.peek) GlobalStates.irisSidebarPeek = "" }
 
         ColumnLayout {
@@ -231,12 +202,10 @@ PanelWindow {
             RowLayout {
                 Layout.fillWidth: true
                 spacing: 4 * root.d
-                // Hero: Today leads with the date the way a calendar icon does;
-                // Focus greets whoever is signed in. Customizing replaces both.
                 Text {
                     visible: !root.left && !root.editing
                     text: String(DateTime.clock.date.getDate())
-                    color: "#ff453a"
+                    color: IrisStyle.identity.red
                     font.family: IrisStyle.fontNumbers
                     font.pixelSize: 40 * IrisStyle.typeScale
                     font.weight: Font.Light
@@ -252,7 +221,7 @@ PanelWindow {
                     Layout.preferredHeight: Layout.preferredWidth
                     Layout.rightMargin: 8 * root.d
                     radius: width / 2
-                    color: ColorUtils.applyAlpha(IrisStyle.text, 0.12)
+                    color: IrisStyle.fill
                     Image {
                         id: headerAvatarImage
                         anchors.fill: parent
@@ -375,7 +344,6 @@ PanelWindow {
         }
     }
 
-    // Concave fillets melt an attached panel into its edge above and below.
     Repeater {
         model: root.notch ? 2 : 0
         RoundCorner {

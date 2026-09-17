@@ -44,14 +44,12 @@ Item {
         color: IrisStyle.scrim
     }
 
-    // A centred alert, like Close Confirm: what asks, why, the secret, two
-    // equal answers. The accent marks the one thing that grants access.
     IrisSurface {
         id: card
         anchors.centerIn: parent
         width: Math.min(320 * root.d, parent.width - 40)
         implicitHeight: body.implicitHeight + 40 * root.d
-        radius: Math.round(22 * root.d)
+        radius: IrisStyle.radiusPlate
         raised: true
 
         ColumnLayout {
@@ -68,7 +66,7 @@ Item {
                 implicitWidth: Math.round(52 * root.d)
                 implicitHeight: implicitWidth
                 radius: width / 2
-                color: ColorUtils.applyAlpha(IrisStyle.accent, 0.18)
+                color: IrisStyle.tintFill(IrisStyle.accent)
                 MaterialSymbol {
                     anchors.centerIn: parent
                     text: PolkitService.batteryChargeLimitRequest ? "battery_charging_full" : "lock"
@@ -113,9 +111,9 @@ Item {
                 onAccepted: root.submit()
                 background: Rectangle {
                     radius: height / 2
-                    color: ColorUtils.applyAlpha(IrisStyle.text, input.activeFocus ? 0.12 : 0.08)
+                    color: (input.activeFocus ? IrisStyle.fill : IrisStyle.fillQuiet)
                     border.width: input.activeFocus ? Math.max(1, Math.round(1.5 * root.d)) : 0
-                    border.color: ColorUtils.applyAlpha(IrisStyle.accent, 0.8)
+                    border.color: IrisStyle.tintBorder(IrisStyle.accent)
                     Behavior on color { ColorAnimation { duration: IrisStyle.duration(120) } }
                 }
             }
@@ -129,8 +127,8 @@ Item {
                     implicitHeight: Math.round(34 * root.d)
                     buttonRadius: height / 2
                     buttonRadiusPressed: height / 2
-                    colBackground: ColorUtils.applyAlpha(IrisStyle.text, 0.12)
-                    colBackgroundHover: ColorUtils.applyAlpha(IrisStyle.text, 0.2)
+                    colBackground: IrisStyle.fill
+                    colBackgroundHover: IrisStyle.fillHover
                     text: Translation.tr("Cancel")
                     onClicked: PolkitService.cancel()
                 }

@@ -13,17 +13,12 @@ import qs.modules.common.widgets
 import qs.modules.iris.components
 import qs.modules.iris.style
 
-// One section of a side panel. Sections rest compact — the glance of what they
-// hold — and morph open in place when their header is clicked, like an
-// activity blooming: one height on the morph curve, the summary clearing as the
-// full content arrives. The panel owns which sections are open.
 Loader {
     id: root
     required property string kind
     property bool contentActive: true
     property bool expanded: false
-    // True while this section's height is morphing; the panel stops chasing its
-    // own height with a second animation meanwhile.
+    property bool bare: false
     property bool morphing: false
     readonly property real d: IrisStyle.density
     signal navigate()
@@ -50,8 +45,6 @@ Loader {
         font.pixelSize: 12 * IrisStyle.typeScale
     }
 
-    // Card chrome: a header that opens and closes the card, a summary shown
-    // while compact and the full content (default children) while open.
     component Section: Rectangle {
         id: section
         property string title
@@ -60,7 +53,7 @@ Loader {
         property color tint: IrisStyle.accent
         property color ink: IrisStyle.text
         property bool expandable: true
-        readonly property bool open: !section.expandable || root.expanded
+        readonly property bool open: !section.expandable || root.expanded || root.bare
         default property alias content: body.data
         property alias summary: summaryColumn.data
         property alias actions: actionRow.data
@@ -76,8 +69,8 @@ Loader {
         }
         Binding { target: root; property: "morphing"; value: morph.running }
         implicitHeight: section.shownHeight
-        radius: Math.round(18 * root.d)
-        color: IrisStyle.surfaceHigh
+        radius: root.bare ? 0 : IrisStyle.radiusCard
+        color: root.bare ? "transparent" : IrisStyle.surfaceHigh
         clip: true
 
         MouseArea {
@@ -86,8 +79,8 @@ Loader {
             y: section.pad
             width: section.width - section.pad * 2
             height: Math.round(26 * root.d)
-            enabled: section.expandable
-            cursorShape: section.expandable ? Qt.PointingHandCursor : Qt.ArrowCursor
+            enabled: section.expandable && !root.bare
+            cursorShape: section.expandable && !root.bare ? Qt.PointingHandCursor : Qt.ArrowCursor
             Accessible.role: Accessible.Button
             Accessible.name: section.title
             onClicked: root.toggleRequested()
@@ -98,12 +91,12 @@ Loader {
                     visible: section.glyph.length > 0
                     implicitWidth: Math.round(24 * root.d)
                     implicitHeight: implicitWidth
-                    radius: Math.round(width * 0.28)
+                    radius: IrisStyle.iconRadius(width)
                     gradient: Gradient {
                         GradientStop { position: 0; color: Qt.lighter(section.tint, 1.2) }
                         GradientStop { position: 1; color: section.tint }
                     }
-                    MaterialSymbol { anchors.centerIn: parent; text: section.glyph; fill: 1; iconSize: Math.round(15 * root.d); color: "#ffffff" }
+                    MaterialSymbol { anchors.centerIn: parent; text: section.glyph; fill: 1; iconSize: Math.round(15 * root.d); color: IrisStyle.onTint }
                 }
                 IrisText {
                     Layout.fillWidth: true
@@ -117,7 +110,7 @@ Loader {
                 IrisText {
                     visible: text.length > 0
                     text: section.detail
-                    color: ColorUtils.applyAlpha(section.ink, 0.6)
+                    color: IrisStyle.secondaryOf(section.ink)
                     font.family: IrisStyle.fontNumbers
                     font.pixelSize: 12 * IrisStyle.typeScale
                 }
@@ -127,10 +120,10 @@ Loader {
                     visible: section.open
                 }
                 MaterialSymbol {
-                    visible: section.expandable
+                    visible: section.expandable && !root.bare
                     text: "keyboard_arrow_down"
                     iconSize: Math.round(18 * root.d)
-                    color: ColorUtils.applyAlpha(section.ink, 0.55)
+                    color: IrisStyle.secondaryOf(section.ink)
                     rotation: section.open ? 180 : 0
                     Behavior on rotation { NumberAnimation { duration: IrisStyle.morphDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: IrisStyle.morphCurve } }
                 }
@@ -144,7 +137,7 @@ Loader {
             spacing: 6 * root.d
             opacity: section.open ? 0 : 1
             visible: opacity > 0
-            Behavior on opacity { NumberAnimation { duration: IrisStyle.duration(section.open ? 90 : 180); easing.type: Easing.OutCubic } }
+            Behavior on opacity { NumberAnimation { duration: IrisStyle.duration(section.open ? 90 : 180); easing.type: IrisStyle.feedbackEasing } }
         }
         ColumnLayout {
             id: body
@@ -155,43 +148,7 @@ Loader {
             opacity: section.open ? 1 : 0
             visible: opacity > 0
             enabled: section.open
-            Behavior on opacity { NumberAnimation { duration: IrisStyle.duration(section.open ? 200 : 90); easing.type: Easing.OutCubic } }
-        }
-    }
-
-    // A wheel of two-digit values: drag, flick or scroll; the centre row is the
-    // value and the rows around it fade.
-    component TimeWheel: Tumbler {
-        id: wheel
-        property int step: 1
-        visibleItemCount: 3
-        wrap: true
-        implicitWidth: Math.round(56 * root.d)
-        implicitHeight: Math.round(96 * root.d)
-        background: null
-        delegate: IrisText {
-            id: wheelItem
-            required property int index
-            readonly property real distance: Math.abs(wheelItem.Tumbler.displacement)
-            text: String(wheelItem.index * wheel.step).padStart(2, "0")
-            horizontalAlignment: Text.AlignHCenter
-            verticalAlignment: Text.AlignVCenter
-            opacity: Math.max(0.18, 1 - wheelItem.distance * 0.7)
-            scale: 1 - Math.min(0.25, wheelItem.distance * 0.18)
-            font.family: IrisStyle.fontNumbers
-            font.pixelSize: 22 * IrisStyle.typeScale
-            font.weight: wheelItem.distance < 0.5 ? Font.Bold : Font.Medium
-        }
-        WheelHandler {
-            acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
-            property real accumulator: 0
-            onWheel: event => {
-                accumulator += event.angleDelta.y !== 0 ? event.angleDelta.y : event.pixelDelta.y * 4
-                const steps = Math.trunc(accumulator / 120)
-                if (steps === 0) return
-                accumulator -= steps * 120
-                wheel.currentIndex = ((wheel.currentIndex - steps) % wheel.count + wheel.count) % wheel.count
-            }
+            Behavior on opacity { NumberAnimation { duration: IrisStyle.duration(section.open ? 200 : 90); easing.type: IrisStyle.feedbackEasing } }
         }
     }
 
@@ -203,7 +160,7 @@ Loader {
         property real start: -90
         preferredRendererType: Shape.CurveRenderer
         ShapePath {
-            strokeColor: ColorUtils.applyAlpha(gaugeRing.tint, 0.18)
+            strokeColor: IrisStyle.tintFill(gaugeRing.tint)
             strokeWidth: gaugeRing.stroke
             fillColor: "transparent"
             PathAngleArc { centerX: gaugeRing.width / 2; centerY: gaugeRing.height / 2; radiusX: gaugeRing.width / 2 - gaugeRing.stroke / 2; radiusY: radiusX; startAngle: 0; sweepAngle: 360 }
@@ -217,8 +174,6 @@ Loader {
         }
     }
 
-    // ── Media ────────────────────────────────────────────────────────────
-    // The player is its own card: a compact row, or cover + timeline when open.
     Component {
         id: mediaComponent
         Item {
@@ -239,8 +194,6 @@ Loader {
                 showBackground: true
                 compact: !root.expanded
             }
-            // Compact: the cover and titles open the full player (transport keeps
-            // its own clicks). Open: a collapse control in the free top corner.
             MouseArea {
                 visible: !root.expanded
                 anchors.left: parent.left
@@ -265,7 +218,6 @@ Loader {
         }
     }
 
-    // ── Tasks ────────────────────────────────────────────────────────────
     Component {
         id: tasksComponent
         Section {
@@ -276,7 +228,7 @@ Loader {
                 .filter(entry => tasks.showCompleted || !entry.task.done)
             title: Translation.tr("Tasks")
             glyph: "checklist"
-            tint: "#ff9f0a"
+            tint: IrisStyle.identity.orange
             detail: tasks.pending.length > 0 ? String(tasks.pending.length) : ""
             actions: IrisIconButton {
                 materialIcon: "done_all"
@@ -299,7 +251,7 @@ Loader {
                             radius: width / 2
                             color: "transparent"
                             border.width: Math.max(1, Math.round(1.5 * root.d))
-                            border.color: "#ff9f0a"
+                            border.color: IrisStyle.identity.orange
                         }
                         IrisText { Layout.fillWidth: true; text: pendingRow.modelData.task.content; textFormat: Text.PlainText; elide: Text.ElideRight; font.pixelSize: 13 * IrisStyle.typeScale }
                     }
@@ -356,7 +308,6 @@ Loader {
         }
     }
 
-    // ── Notes ────────────────────────────────────────────────────────────
     Component {
         id: notesComponent
         Section {
@@ -376,7 +327,7 @@ Loader {
             }
             title: Translation.tr("Notes")
             glyph: "sticky_note_2"
-            tint: "#e0a800"
+            tint: IrisStyle.identity.yellow
             detail: Notepad.tabs.length > 1 ? String(Notepad.tabs.length) : ""
             actions: IrisIconButton {
                 materialIcon: "add"
@@ -425,12 +376,10 @@ Loader {
                     }
                 }
             }
-            // One sheet: the title is the note's first line, the body follows
-            // under a hairline — no field inside a field.
             Rectangle {
                 Layout.fillWidth: true
                 implicitHeight: noteSheet.implicitHeight
-                radius: 12 * root.d
+                radius: IrisStyle.radiusRow
                 color: IrisStyle.field
                 border.width: noteTitle.activeFocus || noteEditor.activeFocus ? 1 : 0
                 border.color: IrisStyle.hairlineStrong
@@ -496,7 +445,6 @@ Loader {
         }
     }
 
-    // ── Calendar ─────────────────────────────────────────────────────────
     Component {
         id: calendarComponent
         Section {
@@ -524,7 +472,7 @@ Loader {
 
             title: Qt.locale().toString(calendar.open ? calendar.month : DateTime.clock.date, "MMMM yyyy")
             glyph: "calendar_month"
-            tint: "#ff3b30"
+            tint: IrisStyle.identity.red
             detail: !calendar.open && calendar.todayEntries.length > 0 ? String(calendar.todayEntries.length) : ""
             actions: [
                 IrisIconButton { materialIcon: "chevron_left"; Accessible.name: Translation.tr("Previous month"); onClicked: calendar.moveMonth(-1) },
@@ -532,7 +480,6 @@ Loader {
                 IrisIconButton { materialIcon: "chevron_right"; Accessible.name: Translation.tr("Next month"); onClicked: calendar.moveMonth(1) }
             ]
 
-            // Compact: this week as a strip, then what today holds.
             summary: [
                 Row {
                     id: weekStrip
@@ -554,7 +501,7 @@ Loader {
                             IrisText {
                                 anchors.horizontalCenter: parent.horizontalCenter
                                 text: Qt.locale().dayName(stripDay.date.getDay(), Locale.ShortFormat).slice(0, 2)
-                                color: stripDay.today ? "#ff453a" : IrisStyle.muted
+                                color: stripDay.today ? IrisStyle.identity.red : IrisStyle.muted
                                 font.pixelSize: 10.5 * IrisStyle.typeScale
                                 font.weight: stripDay.today ? Font.DemiBold : Font.Normal
                             }
@@ -563,11 +510,11 @@ Loader {
                                 width: Math.round(28 * root.d)
                                 height: width
                                 radius: width / 2
-                                color: stripDay.today ? "#ff453a" : "transparent"
+                                color: stripDay.today ? IrisStyle.identity.red : "transparent"
                                 IrisText {
                                     anchors.centerIn: parent
                                     text: String(stripDay.date.getDate())
-                                    color: stripDay.today ? "#ffffff" : IrisStyle.text
+                                    color: stripDay.today ? IrisStyle.onTint : IrisStyle.text
                                     font.family: IrisStyle.fontNumbers
                                     font.pixelSize: 13 * IrisStyle.typeScale
                                     font.weight: stripDay.today ? Font.Bold : Font.Medium
@@ -593,8 +540,6 @@ Loader {
                 }
             ]
 
-            // Month grid: seven equal columns (weekday names included, so a long
-            // name never widens its column); days are round, like the strip.
             GridLayout {
                 id: monthGrid
                 Layout.fillWidth: true
@@ -641,16 +586,15 @@ Loader {
                             width: Math.round(30 * root.d)
                             height: width
                             radius: width / 2
-                            // Today is the solid red disc; another chosen day an accent tint.
-                            color: day.today ? "#ff453a"
-                                : day.chosen ? ColorUtils.applyAlpha(IrisStyle.accent, 0.26)
-                                : day.containsMouse ? ColorUtils.applyAlpha(IrisStyle.text, 0.08) : "transparent"
+                            color: day.today ? IrisStyle.identity.red
+                                : day.chosen ? IrisStyle.tintFillHover(IrisStyle.accent)
+                                : day.containsMouse ? IrisStyle.fillHover : "transparent"
                             Behavior on color { ColorAnimation { duration: IrisStyle.duration(110) } }
                         }
                         IrisText {
                             anchors.centerIn: parent
                             text: String(day.date.getDate())
-                            color: day.today ? "#ffffff" : day.chosen ? IrisStyle.accent : IrisStyle.text
+                            color: day.today ? IrisStyle.onTint : day.chosen ? IrisStyle.accent : IrisStyle.text
                             opacity: day.inMonth ? 1 : 0.32
                             font.family: IrisStyle.fontNumbers
                             font.pixelSize: 13 * IrisStyle.typeScale
@@ -696,8 +640,6 @@ Loader {
                 RowLayout {
                     id: entryRow
                     required property var modelData
-                    // Events kept by iNiR (with reminders) can be removed here; synced
-                    // calendars are read-only.
                     readonly property bool local: entryRow.modelData.dateTime !== undefined && entryRow.modelData.id !== undefined
                     Layout.fillWidth: true
                     spacing: 10 * root.d
@@ -721,8 +663,6 @@ Loader {
                 }
             }
 
-            // New event sheet: a centred name, the time on two wheels (scroll or
-            // drag them) and when to be reminded. It unfolds in the card itself.
             ColumnLayout {
                 id: eventSheet
                 Layout.fillWidth: true
@@ -735,14 +675,13 @@ Loader {
                     { label: "1 h", minutes: 60 }
                 ]
                 property int reminder: 15
-                // A new sheet starts empty, at the next full hour.
                 Connections {
                     target: calendar
                     function onComposingChanged(): void {
                         if (!calendar.composing) return
                         eventTitle.clear()
-                        hourWheel.currentIndex = (DateTime.clock.date.getHours() + 1) % 24
-                        minuteWheel.currentIndex = 0
+                        timePicker.hour = (DateTime.clock.date.getHours() + 1) % 24
+                        timePicker.minuteIndex = 0
                         eventSheet.reminder = 15
                     }
                 }
@@ -750,7 +689,7 @@ Loader {
                     const title = eventTitle.text.trim()
                     if (!title) return
                     const dayDate = calendar.selectedDate
-                    const when = new Date(dayDate.getFullYear(), dayDate.getMonth(), dayDate.getDate(), hourWheel.currentIndex, minuteWheel.currentIndex * 5)
+                    const when = new Date(dayDate.getFullYear(), dayDate.getMonth(), dayDate.getDate(), timePicker.hour, timePicker.minuteIndex * 5)
                     Events.addEvent(title, "", when.toISOString(), "general", "normal", eventSheet.reminder, "none")
                     calendar.composing = false
                 }
@@ -772,31 +711,14 @@ Loader {
                     }
                 }
 
-                Item {
-                    Layout.fillWidth: true
-                    implicitHeight: Math.round(96 * root.d)
-                    // Selection band behind the centre row of both wheels.
-                    Rectangle {
-                        anchors.centerIn: parent
-                        width: Math.round(150 * root.d)
-                        height: Math.round(34 * root.d)
-                        radius: height / 2
-                        color: ColorUtils.applyAlpha(IrisStyle.text, 0.08)
-                    }
-                    Row {
-                        anchors.centerIn: parent
-                        spacing: 4 * root.d
-                        TimeWheel { id: hourWheel; model: 24 }
-                        IrisText {
-                            anchors.verticalCenter: parent.verticalCenter
-                            text: ":"
-                            color: IrisStyle.secondaryAccent
-                            font.family: IrisStyle.fontNumbers
-                            font.pixelSize: 22 * IrisStyle.typeScale
-                            font.weight: Font.Bold
-                        }
-                        TimeWheel { id: minuteWheel; model: 12; step: 5 }
-                    }
+                IrisWheelPicker {
+                    id: timePicker
+                    Layout.alignment: Qt.AlignHCenter
+                    columns: [{ count: 24 }, { count: 12, step: 5 }]
+                    property int hour: 0
+                    property int minuteIndex: 0
+                    values: [timePicker.hour, timePicker.minuteIndex]
+                    onMoved: (column, index) => column === 0 ? timePicker.hour = index : timePicker.minuteIndex = index
                 }
 
                 Row {
@@ -843,27 +765,18 @@ Loader {
         }
     }
 
-    // ── Weather ──────────────────────────────────────────────────────────
     Component {
         id: weatherComponent
         Section {
             id: weather
             readonly property bool hasData: Weather.data.temp !== "--°C" && Weather.data.temp !== "--°F"
-            // A weather card wears the sky: day blue, night indigo, grey when
-            // overcast or wet. Text stays white on every variant.
             readonly property bool night: Weather.isNightNow()
-            readonly property bool overcast: /cloud|overcast|rain|drizzle|snow|fog|mist|storm|thunder/i.test(String(Weather.data.description ?? ""))
-            readonly property color skyTop: !weather.hasData ? IrisStyle.surfaceHigh
-                : weather.night ? "#1f2a55" : weather.overcast ? "#5b6b80" : "#3c8ce7"
-            readonly property color skyBottom: !weather.hasData ? IrisStyle.surfaceHigh
-                : weather.night ? "#0b1128" : weather.overcast ? "#2f3947" : "#1b4fa8"
-            gradient: Gradient {
-                GradientStop { position: 0; color: weather.skyTop }
-                GradientStop { position: 1; color: weather.skyBottom }
-            }
-            glyph: weather.night ? "bedtime" : "partly_cloudy_day"
-            tint: weather.hasData ? ColorUtils.applyAlpha("#ffffff", 0.22) : "#0a84ff"
-            ink: weather.hasData ? "#ffffff" : IrisStyle.text
+            readonly property string condition: weather.hasData
+                ? (Icons.getWeatherIcon(Weather.data.wCode, weather.night) ?? "") : ""
+            glyph: weather.condition.length > 0 ? weather.condition : weather.night ? "bedtime" : "partly_cloudy_day"
+            tint: weather.condition.length > 0 ? IrisStyle.skyLight(weather.condition)
+                : weather.night ? IrisStyle.identity.indigo : IrisStyle.identity.blue
+            ink: IrisStyle.text
             title: Weather.showVisibleCity && Weather.visibleCity ? Weather.visibleCity : Translation.tr("Weather")
             detail: !weather.open && weather.hasData ? Weather.data.temp : ""
             actions: IrisIconButton {
@@ -877,7 +790,7 @@ Loader {
                 text: !Weather.enabled ? Translation.tr("Weather is off")
                     : weather.hasData ? Weather.data.description + "  ·  " + Translation.tr("Feels like %1").arg(Weather.data.tempFeelsLike)
                     : Translation.tr("Fetching your forecast…")
-                color: ColorUtils.applyAlpha(weather.ink, 0.8)
+                color: IrisStyle.strongOf(weather.ink)
                 font.pixelSize: 12.5 * IrisStyle.typeScale
                 elide: Text.ElideRight
             }
@@ -887,18 +800,18 @@ Loader {
                 ColumnLayout {
                     Layout.fillWidth: true
                     spacing: 0
-                    IrisText { text: Weather.data.temp; color: "#ffffff"; font.family: IrisStyle.fontNumbers; font.pixelSize: 44 * IrisStyle.typeScale; font.weight: Font.Light }
-                    IrisText { Layout.fillWidth: true; text: Weather.data.description; color: ColorUtils.applyAlpha("#ffffff", 0.82); font.pixelSize: 13 * IrisStyle.typeScale; wrapMode: Text.WordWrap }
+                    IrisText { text: Weather.data.temp; color: IrisStyle.text; font.family: IrisStyle.fontNumbers; font.pixelSize: 44 * IrisStyle.typeScale; font.weight: Font.Light }
+                    IrisText { Layout.fillWidth: true; text: Weather.data.description; color: IrisStyle.textSecondary; font.pixelSize: 13 * IrisStyle.typeScale; wrapMode: Text.WordWrap }
                 }
-                MaterialSymbol { text: Icons.getWeatherIcon(Weather.data.wCode, Weather.isNightNow()) ?? "cloud"; fill: 1; iconSize: 46 * root.d; color: "#ffffff" }
+                MaterialSymbol { text: Icons.getWeatherIcon(Weather.data.wCode, Weather.isNightNow()) ?? "cloud"; fill: 1; iconSize: 46 * root.d; color: weather.night ? IrisStyle.identity.lavender : IrisStyle.secondaryAccent }
             }
             RowLayout {
                 visible: Weather.enabled && weather.hasData
                 Layout.fillWidth: true
-                IrisText { text: Translation.tr("Feels like %1").arg(Weather.data.tempFeelsLike); color: ColorUtils.applyAlpha("#ffffff", 0.72); font.pixelSize: 12 * IrisStyle.typeScale }
+                IrisText { text: Translation.tr("Feels like %1").arg(Weather.data.tempFeelsLike); color: IrisStyle.textSecondary; font.pixelSize: 12 * IrisStyle.typeScale }
                 Item { Layout.fillWidth: true }
-                MaterialSymbol { text: "humidity_percentage"; fill: 1; iconSize: 14 * root.d; color: ColorUtils.applyAlpha("#ffffff", 0.72) }
-                IrisText { text: Weather.data.humidity; color: ColorUtils.applyAlpha("#ffffff", 0.72); font.pixelSize: 12 * IrisStyle.typeScale }
+                MaterialSymbol { text: "humidity_percentage"; fill: 1; iconSize: 14 * root.d; color: IrisStyle.textTertiary }
+                IrisText { text: Weather.data.humidity; color: IrisStyle.textSecondary; font.pixelSize: 12 * IrisStyle.typeScale }
             }
             EmptyLabel { visible: !Weather.enabled; text: Translation.tr("Enable weather in Settings to see your forecast.") }
             EmptyLabel {
@@ -908,7 +821,6 @@ Loader {
         }
     }
 
-    // ── Notifications ────────────────────────────────────────────────────
     Component {
         id: notificationsComponent
         Section {
@@ -916,7 +828,7 @@ Loader {
             readonly property var latest: Notifications.list.length > 0 ? Notifications.list[Notifications.list.length - 1] : null
             title: Translation.tr("Notifications")
             glyph: "notifications"
-            tint: "#ff375f"
+            tint: IrisStyle.identity.pink
             detail: Notifications.list.length > 0 ? String(Notifications.list.length) : ""
             actions: [
                 IrisIconButton {
@@ -963,7 +875,7 @@ Loader {
                     required property var modelData
                     Layout.fillWidth: true
                     implicitHeight: noticeBody.implicitHeight + 20 * root.d
-                    radius: 12 * root.d
+                    radius: IrisStyle.radiusRow
                     color: IrisStyle.surfaceHighest
                     ColumnLayout {
                         id: noticeBody
@@ -1012,7 +924,6 @@ Loader {
         }
     }
 
-    // ── Focus timer (the shared Pomodoro) ────────────────────────────────
     Component {
         id: focusComponent
         Section {
@@ -1026,7 +937,7 @@ Loader {
             readonly property color phaseTint: TimerService.pomodoroBreak ? IrisStyle.success : IrisStyle.secondaryAccent
             title: Translation.tr("Focus timer")
             glyph: "timer"
-            tint: "#ff9f0a"
+            tint: IrisStyle.identity.orange
             detail: TimerService.pomodoroRunning && !focusTimer.open ? focusTimer.clock : ""
             summary: RowLayout {
                 Layout.fillWidth: true
@@ -1085,7 +996,7 @@ Loader {
                         width: Math.round(6 * root.d)
                         height: width
                         radius: width / 2
-                        color: index < TimerService.pomodoroCycle % TimerService.cyclesBeforeLongBreak ? IrisStyle.secondaryAccent : ColorUtils.applyAlpha(IrisStyle.text, 0.18)
+                        color: index < TimerService.pomodoroCycle % TimerService.cyclesBeforeLongBreak ? IrisStyle.secondaryAccent : IrisStyle.fillHover
                     }
                 }
             }
@@ -1113,7 +1024,6 @@ Loader {
         }
     }
 
-    // ── Sound mixer (per-app volume) ─────────────────────────────────────
     Component {
         id: mixerComponent
         Section {
@@ -1121,7 +1031,7 @@ Loader {
             readonly property var streams: Audio.outputAppNodes.filter(node => node?.audio)
             title: Translation.tr("Sound mixer")
             glyph: "graphic_eq"
-            tint: "#5e5ce6"
+            tint: IrisStyle.identity.indigo
             detail: mixer.streams.length > 0 ? String(mixer.streams.length) : ""
             summary: [
                 EmptyLabel { visible: mixer.streams.length === 0; text: Translation.tr("No app is playing sound.") },
@@ -1184,8 +1094,6 @@ Loader {
         }
     }
 
-    // ── System ───────────────────────────────────────────────────────────
-    // Already compact: four gauges, no second state. Sensors run while shown.
     Component {
         id: systemComponent
         Section {
@@ -1193,7 +1101,7 @@ Loader {
             expandable: false
             title: Translation.tr("System")
             glyph: "monitor_heart"
-            tint: "#30b0c7"
+            tint: IrisStyle.identity.teal
             readonly property bool polling: root.contentActive
             property bool holding: false
             function syncPolling(): void {
