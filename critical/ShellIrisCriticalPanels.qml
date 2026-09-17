@@ -5,6 +5,7 @@ import Quickshell
 import qs.modules.common
 import qs.modules.iris.background
 import qs.modules.iris.bar
+import qs.modules.iris.frame
 
 Item {
     id: root
@@ -21,6 +22,11 @@ Item {
         identifier: "irisBackground"
         extraCondition: !(Config.options?.iris?.modules?.desktopWidgets ?? true)
         component: IrisBackground {}
+    }
+
+    LazyLoader {
+        active: Config.ready
+        component: IrisReservations {}
     }
 
     CriticalPanelLoader {

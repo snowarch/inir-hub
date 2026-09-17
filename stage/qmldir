@@ -1,0 +1,3 @@
+module qs.modules.iris.stage
+IrisStage 1.0 IrisStage.qml
+IrisCardContent 1.0 IrisCardContent.qml
