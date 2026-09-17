@@ -77,7 +77,11 @@ Rectangle {
         }
 
         Behavior on opacity {
-            animation: Looks.transition.opacity
+            NumberAnimation {
+                duration: Looks.transition.enabled ? Looks.transition.duration.normal : 0
+                easing.type: Easing.BezierSpline
+                easing.bezierCurve: Looks.transition.easing.bezierCurve.standard
+            }
         }
 
         Timer {

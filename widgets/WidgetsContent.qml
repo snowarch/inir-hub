@@ -521,6 +521,14 @@ WBarAttachedPanelContent {
                     visible: opacity > 0
                     z: 100
 
+                    Behavior on opacity {
+                        NumberAnimation {
+                            duration: Looks.transition.enabled ? Looks.transition.duration.normal : 0
+                            easing.type: Easing.BezierSpline
+                            easing.bezierCurve: Looks.transition.easing.bezierCurve.standard
+                        }
+                    }
+
                     ColumnLayout {
                         anchors.centerIn: parent
                         spacing: Looks.dp(4)
@@ -537,10 +545,6 @@ WBarAttachedPanelContent {
                             font.pixelSize: Looks.font.pixelSize.normal
                             font.weight: Font.DemiBold
                         }
-                    }
-
-                    Behavior on opacity {
-                        animation: Looks.transition.opacity
                     }
 
                     Timer {
