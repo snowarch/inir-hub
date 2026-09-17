@@ -17,7 +17,6 @@ ColumnLayout {
     signal activityRequested()
     spacing: 12 * root.d
 
-    // Working copy of the persisted minutes; written back once an adjustment ends.
     property var presets: {
         const saved = Persistent.states?.timer?.countdown?.presets ?? []
         return [0, 1, 2].map(i => Math.max(1, Math.min(180, Number(saved[i] ?? [5, 15, 30][i]))))
@@ -36,18 +35,13 @@ ColumnLayout {
         if (Persistent.states?.timer?.countdown) Persistent.states.timer.countdown.presets = root.presets.slice()
     }
 
-    // One dial per way of keeping time: a round face whose orange arc is the
-    // share of an hour it holds (5, 15, 30 min), Focus and Stopwatch as glyphs.
-    // A running kind closes its ring and fills with the timer colour.
     component Dial: Item {
         id: dial
         property string figure: ""
         property string glyph: ""
         property string caption: ""
         property bool running: false
-        // Share of the face the arc covers; 0 leaves only the track.
         property real share: 0
-        // Presets take the wheel and a vertical drag to change their minutes.
         property bool adjustable: false
         signal clicked()
         signal adjusted(int steps)
@@ -66,11 +60,11 @@ ColumnLayout {
             height: width
             buttonRadius: width / 2
             buttonRadiusPressed: width / 2
-            colBackground: dial.running ? ColorUtils.applyAlpha(IrisStyle.secondaryAccent, 0.2) : ColorUtils.applyAlpha(IrisStyle.text, 0.07)
-            colBackgroundHover: dial.running ? ColorUtils.applyAlpha(IrisStyle.secondaryAccent, 0.28) : ColorUtils.applyAlpha(IrisStyle.text, 0.13)
+            colBackground: dial.running ? IrisStyle.tintFill(IrisStyle.secondaryAccent) : IrisStyle.fillQuiet
+            colBackgroundHover: dial.running ? IrisStyle.tintFillHover(IrisStyle.secondaryAccent) : IrisStyle.fillHover
             onClicked: dial.clicked()
-            scale: presetPointer.pressed && !presetPointer.dragging ? 0.94 : 1
-            Behavior on scale { NumberAnimation { duration: IrisStyle.duration(110); easing.type: Easing.OutCubic } }
+            scale: presetPointer.pressed && !presetPointer.dragging ? IrisStyle.pressScale(0.94) : 1
+            Behavior on scale { NumberAnimation { duration: IrisStyle.duration(110); easing.type: IrisStyle.feedbackEasing } }
 
             Shape {
                 id: arc
@@ -79,7 +73,7 @@ ColumnLayout {
                 preferredRendererType: Shape.CurveRenderer
                 readonly property real stroke: Math.max(2, 2.5 * root.d)
                 ShapePath {
-                    strokeColor: ColorUtils.applyAlpha(IrisStyle.secondaryAccent, 0.18)
+                    strokeColor: IrisStyle.tintFill(IrisStyle.secondaryAccent)
                     strokeWidth: arc.stroke
                     fillColor: "transparent"
                     PathAngleArc {
@@ -120,8 +114,6 @@ ColumnLayout {
                 color: IrisStyle.secondaryAccent
             }
         }
-        // Presets own the pointer: a press that stays put starts the timer,
-        // a vertical drag (or the wheel) changes its minutes instead.
         MouseArea {
             id: presetPointer
             anchors.fill: face
@@ -162,7 +154,7 @@ ColumnLayout {
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.bottom: parent.bottom
             text: dial.caption
-            color: ColorUtils.applyAlpha(IrisStyle.text, 0.62)
+            color: IrisStyle.textSecondary
             font.pixelSize: 11 * IrisStyle.typeScale
             font.weight: Font.Medium
         }
@@ -181,7 +173,6 @@ ColumnLayout {
                 caption: Translation.tr("min")
                 share: Math.min(1, preset.minutes / 60)
                 adjustable: true
-                // A running countdown is never overwritten by a preset.
                 enabled: !TimerService.countdownRunning
                 onAdjusted: steps => root.adjustPreset(preset.index, steps)
                 onAdjustFinished: root.savePresets()
@@ -208,6 +199,70 @@ ColumnLayout {
             onClicked: {
                 if (!TimerService.stopwatchRunning) TimerService.toggleStopwatch()
                 root.activityRequested()
+            }
+        }
+    }
+
+    ColumnLayout {
+        id: custom
+        property bool open: false
+        property int hours: 0
+        property int minutes: 5
+        property int seconds: 0
+        readonly property int total: custom.hours * 3600 + custom.minutes * 60 + custom.seconds * 5
+        Layout.fillWidth: true
+        spacing: 10 * root.d
+        onOpenChanged: {
+            if (!custom.open) return
+            const duration = TimerService.countdownDuration
+            custom.hours = Math.floor(duration / 3600) % 24
+            custom.minutes = Math.floor(duration / 60) % 60
+            custom.seconds = Math.floor((duration % 60) / 5)
+        }
+
+        RowLayout {
+            Layout.alignment: Qt.AlignHCenter
+            spacing: 8 * root.d
+            IrisButton {
+                quiet: !custom.open
+                enabled: !TimerService.countdownRunning
+                text: custom.open ? Translation.tr("Cancel") : Translation.tr("Set a time")
+                implicitHeight: Math.round(30 * root.d)
+                buttonRadius: height / 2
+                buttonRadiusPressed: height / 2
+                onClicked: custom.open = !custom.open
+            }
+            IrisButton {
+                visible: custom.open
+                emphasized: true
+                enabled: custom.total >= 5
+                text: Translation.tr("Start")
+                implicitHeight: Math.round(30 * root.d)
+                buttonRadius: height / 2
+                buttonRadiusPressed: height / 2
+                onClicked: {
+                    TimerService.setCountdownDuration(custom.total)
+                    TimerService.toggleCountdown()
+                    custom.open = false
+                    root.activityRequested()
+                }
+            }
+        }
+
+        Item {
+            Layout.fillWidth: true
+            implicitHeight: custom.open ? picker.implicitHeight : 0
+            clip: true
+            opacity: custom.open ? 1 : 0
+            Behavior on implicitHeight { NumberAnimation { duration: IrisStyle.morphDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: IrisStyle.morphCurve } }
+            Behavior on opacity { NumberAnimation { duration: IrisStyle.duration(140) } }
+            IrisWheelPicker {
+                id: picker
+                anchors.horizontalCenter: parent.horizontalCenter
+                separator: ""
+                columns: [{ count: 24, unit: Translation.tr("h") }, { count: 60, unit: Translation.tr("min") }, { count: 12, step: 5, unit: Translation.tr("s") }]
+                values: [custom.hours, custom.minutes, custom.seconds]
+                onMoved: (column, index) => column === 0 ? custom.hours = index : column === 1 ? custom.minutes = index : custom.seconds = index
             }
         }
     }

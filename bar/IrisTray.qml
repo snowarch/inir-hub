@@ -17,9 +17,11 @@ ColumnLayout {
     property bool bottomEdge: false
     readonly property real d: IrisStyle.density
     property var items: []
+    property bool showHeader: true
     spacing: 12 * root.d
 
     RowLayout {
+        visible: root.showHeader
         Layout.fillWidth: true
         IrisText { text: Translation.tr("Tray"); font.pixelSize: 21 * IrisStyle.typeScale; font.weight: Font.Bold }
         IrisText { text: root.items.length; color: IrisStyle.secondaryAccent; font.weight: Font.Bold }
@@ -75,10 +77,10 @@ ColumnLayout {
                     }
                     Rectangle {
                         anchors.fill: parent
-                        radius: width * 0.26
+                        radius: IrisStyle.iconRadius(width)
                         border.width: button.activeFocus ? 2 : 0
                         border.color: IrisStyle.accent
-                        color: ColorUtils.applyAlpha(IrisStyle.text, button.containsMouse ? 0.16 : 0.07)
+                        color: (button.containsMouse ? IrisStyle.fillHover : IrisStyle.fillQuiet)
                         Behavior on color { ColorAnimation { duration: IrisStyle.duration(110) } }
                     }
                     IconImage {
