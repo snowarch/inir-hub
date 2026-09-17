@@ -18,3 +18,10 @@ IrisNumber 1.0 IrisNumber.qml
 IrisBubbleFace 1.0 IrisBubbleFace.qml
 IrisBubbleGrip 1.0 IrisBubbleGrip.qml
 IrisDesktopMenu 1.0 IrisDesktopMenu.qml
+IrisDeviceList 1.0 IrisDeviceList.qml
+IrisPlacePicker 1.0 IrisPlacePicker.qml
+IrisOutputHold 1.0 IrisOutputHold.qml
+IrisBadge 1.0 IrisBadge.qml
+IrisStudioMask 1.0 IrisStudioMask.qml
+IrisWheelPicker 1.0 IrisWheelPicker.qml
+IrisSpring 1.0 IrisSpring.qml
