@@ -18,6 +18,6 @@ IrisButton {
         fill: root.selected ? 1 : 0
         animateFill: true
         font.weight: root.selected || root.hovered ? Font.DemiBold : Font.Normal
-        color: root.selected ? IrisStyle.accent : IrisStyle.text
+        color: root.foreground
     }
 }
