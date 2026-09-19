@@ -1,3 +1,4 @@
 module qs.modules.iris.settings
 IrisSettings 1.0 IrisSettings.qml
 IrisSetting 1.0 IrisSetting.qml
+singleton IrisOptions 1.0 IrisOptions.qml

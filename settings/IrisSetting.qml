@@ -18,9 +18,11 @@ Item {
         return Config.getNestedValue(root.spec.path, root.spec.fallback)
     }
     readonly property var choices: root.spec.choices ?? []
+    readonly property bool resettable: root.spec.fallback !== undefined && String(root.spec.path ?? "").startsWith("iris.")
+    readonly property bool modified: root.resettable && !IrisOptions.same(root.value, root.spec.fallback)
     readonly property bool pictured: root.choices.some(choice => String(choice.glyph ?? "").length > 0)
     readonly property bool swatched: root.spec.kind === "choice" && root.choices.length > 0
-        && root.choices.every(choice => choice.swatch !== undefined || ["wallpaper", "accent", "custom"].includes(choice.value))
+        && root.choices.every(choice => choice.swatch !== undefined || ["wallpaper", "accent", "custom", "theme"].includes(choice.value))
         && root.choices.some(choice => choice.swatch !== undefined)
     readonly property bool inlineChoice: root.spec.kind === "choice" && root.choices.length <= 3 && !root.pictured && !root.swatched
         && root.choices.every(choice => String(choice.label).length <= 11)
@@ -43,12 +45,52 @@ Item {
             ColumnLayout {
                 Layout.fillWidth: true
                 spacing: 2 * root.d
-                IrisText {
+                Item {
                     Layout.fillWidth: true
-                    text: Translation.tr(root.spec.label)
-                    font.pixelSize: 13.5 * IrisStyle.typeScale
-                    font.weight: Font.Normal
-                    wrapMode: Text.WordWrap
+                    implicitHeight: label.implicitHeight
+                    IrisText {
+                        id: label
+                        width: Math.min(implicitWidth, parent.width - resetMark.width - Math.round(6 * root.d))
+                        text: Translation.tr(root.spec.label)
+                        font.pixelSize: 13.5 * IrisStyle.typeScale
+                        font.weight: Font.Normal
+                        wrapMode: Text.WordWrap
+                    }
+                    Item {
+                        id: resetMark
+                        x: label.x + Math.min(label.contentWidth, label.width) + Math.round(6 * root.d)
+                        y: Math.round((label.font.pixelSize * 1.4 - height) / 2)
+                        width: Math.round(18 * root.d)
+                        height: width
+                        opacity: root.modified ? 1 : 0
+                        visible: opacity > 0
+                        Behavior on opacity { NumberAnimation { duration: IrisStyle.duration(140); easing.type: IrisStyle.feedbackEasing } }
+                        Rectangle {
+                            anchors.centerIn: parent
+                            width: resetArea.containsMouse ? resetMark.width : Math.round(7 * root.d)
+                            height: width
+                            radius: width / 2
+                            color: resetArea.containsMouse ? IrisStyle.tintFill(IrisStyle.accent) : IrisStyle.accent
+                            Behavior on width { NumberAnimation { duration: IrisStyle.duration(140); easing.type: IrisStyle.feedbackEasing } }
+                            MaterialSymbol {
+                                anchors.centerIn: parent
+                                text: "undo"
+                                iconSize: Math.round(12 * root.d)
+                                color: IrisStyle.accent
+                                opacity: resetArea.containsMouse ? 1 : 0
+                            }
+                        }
+                        MouseArea {
+                            id: resetArea
+                            anchors.fill: parent
+                            enabled: root.modified
+                            hoverEnabled: true
+                            cursorShape: Qt.PointingHandCursor
+                            Accessible.role: Accessible.Button
+                            Accessible.name: Translation.tr("Reset %1").arg(Translation.tr(root.spec.label))
+                            onClicked: Config.setNestedValue(root.spec.path, root.spec.fallback)
+                        }
+                    }
                 }
                 IrisText {
                     id: description
@@ -159,7 +201,7 @@ Item {
             Layout.fillWidth: true
             active: root.spec.kind === "choice" && !root.inlineChoice && !root.swatched
             visible: active
-            sourceComponent: segmentedComponent
+            sourceComponent: !root.pictured && labelMeasure.implicitWidth > layout.width ? chipsComponent : segmentedComponent
         }
 
         Loader {
@@ -497,6 +539,64 @@ Item {
                 }
                 onPressed: mouse => hueArea.pick(mouse.x)
                 onPositionChanged: mouse => { if (hueArea.pressed) hueArea.pick(mouse.x) }
+            }
+        }
+    }
+
+    Row {
+        id: labelMeasure
+        visible: false
+        spacing: Math.round(22 * root.d)
+        Repeater {
+            model: root.spec.kind === "choice" ? root.choices : []
+            IrisText {
+                required property var modelData
+                text: Translation.tr(modelData.label)
+                font.pixelSize: 12 * IrisStyle.typeScale
+                font.weight: Font.DemiBold
+            }
+        }
+    }
+
+    Component {
+        id: chipsComponent
+
+        Flow {
+            spacing: Math.round(6 * root.d)
+            Repeater {
+                model: root.choices
+                MouseArea {
+                    id: chip
+                    required property var modelData
+                    readonly property bool selected: chip.modelData.value === root.value
+                    width: chipLabel.implicitWidth + Math.round(24 * root.d)
+                    height: Math.round(28 * root.d)
+                    cursorShape: Qt.PointingHandCursor
+                    hoverEnabled: true
+                    activeFocusOnTab: true
+                    Accessible.role: Accessible.RadioButton
+                    Accessible.name: Translation.tr(root.spec.label) + ": " + Translation.tr(chip.modelData.label)
+                    Accessible.checked: chip.selected
+                    Keys.onSpacePressed: Config.setNestedValue(root.spec.path, chip.modelData.value)
+                    Keys.onReturnPressed: Config.setNestedValue(root.spec.path, chip.modelData.value)
+                    onClicked: Config.setNestedValue(root.spec.path, chip.modelData.value)
+                    Rectangle {
+                        anchors.fill: parent
+                        radius: height / 2
+                        color: chip.selected ? IrisStyle.fillActive : chip.containsMouse ? IrisStyle.fillHover : IrisStyle.fillQuiet
+                        border.width: chip.activeFocus ? 1 : 0
+                        border.color: IrisStyle.accent
+                        Behavior on color { ColorAnimation { duration: IrisStyle.duration(120); easing.type: IrisStyle.feedbackEasing } }
+                    }
+                    IrisText {
+                        id: chipLabel
+                        anchors.centerIn: parent
+                        text: Translation.tr(chip.modelData.label)
+                        font.pixelSize: 12 * IrisStyle.typeScale
+                        font.weight: chip.selected ? Font.DemiBold : Font.Normal
+                        color: chip.selected ? IrisStyle.text : IrisStyle.subtext
+                    }
+                }
             }
         }
     }
