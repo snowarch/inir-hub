@@ -229,7 +229,16 @@ Item {
         root.event = { icon: icon, tint: tint, title: title, detail: detail, value: value }
         eventTimer.restart()
     }
-    Timer { id: eventTimer; interval: 2600 }
+    Timer { id: eventTimer; interval: 2600; onTriggered: root.clearOsdRequests() }
+    // The Island answers these requests, so it owns clearing them: a flag left
+    // set is never seen again by the OSD fallback on another output.
+    function clearOsdRequests(): void {
+        GlobalStates.osdVolumeOpen = false
+        GlobalStates.osdBrightnessOpen = false
+        GlobalStates.osdMicOpen = false
+        GlobalStates.osdMediaOpen = false
+        GlobalStates.osdKeyboardLayoutOpen = false
+    }
     property var badge: ({ icon: "", tint: IrisStyle.text, text: "" })
     function showBadge(icon: string, tint: color, text: string): void {
         if (!root.eventsEnabled || !eventsWarm.ready || root.fullscreenCovered
@@ -237,7 +246,7 @@ Item {
         root.badge = { icon: icon, tint: tint, text: text }
         badgeTimer.restart()
     }
-    Timer { id: badgeTimer; interval: 1600 }
+    Timer { id: badgeTimer; interval: 1600; onTriggered: root.clearOsdRequests() }
     Timer { id: eventsWarm; property bool ready: false; interval: 4000; running: true; onTriggered: ready = true }
     Connections {
         target: root.eventsEnabled && Battery.available ? Battery : null
@@ -301,15 +310,33 @@ Item {
         }
     }
     Connections {
-        target: root.eventsEnabled && (Config.options?.keyboardIndicators?.showPopup ?? true) ? KeyboardIndicators : null
-        function onCapsLockChanged(): void {
-            if (!KeyboardIndicators.ready || !KeyboardIndicators.showCapsPopup) return
-            root.showBadge("keyboard_capslock", KeyboardIndicators.capsLock ? IrisStyle.secondaryAccent : IrisStyle.subtext,
-                KeyboardIndicators.capsLock ? Translation.tr("Caps Lock") : Translation.tr("Caps Lock off"))
+        target: root.eventsEnabled ? Audio : null
+        function onSinkProtectionTriggered(reason: string): void {
+            root.showEvent("volume_off", IrisStyle.danger, Translation.tr("Volume held back"), reason, -1)
         }
-        function onCurrentLayoutNameChanged(): void {
-            if (!KeyboardIndicators.showLayoutPopup || !KeyboardIndicators.hasMultipleLayouts) return
-            root.showBadge("keyboard", IrisStyle.accent, KeyboardIndicators.currentLayoutCodeInline || KeyboardIndicators.currentLayoutName)
+    }
+    Connections {
+        target: root.eventsEnabled ? GlobalStates : null
+        function onOsdMediaActionTriggered(action: string): void {
+            if (!root.hasMedia || root.primary === "media") return
+            const title = StringUtils.cleanMusicTitle(root.title)
+            root.showEvent(action === "next" ? "skip_next" : action === "previous" ? "skip_previous"
+                : action === "pause" ? "pause" : "play_arrow", IrisStyle.accent,
+                title.length > 0 ? title : Translation.tr("Now playing"),
+                root.ytMusic ? YtMusic.currentArtist : String(root.player?.trackArtist ?? ""), -1)
+        }
+    }
+    Connections {
+        target: root.eventsEnabled ? KeyboardIndicators : null
+        function onPopupSequenceChanged(): void {
+            if (!KeyboardIndicators.ready) return
+            const kind = KeyboardIndicators.popupKind
+            const active = KeyboardIndicators.popupActive
+            root.showBadge(KeyboardIndicators.popupMaterialIcon,
+                kind === "layout" ? IrisStyle.accent : active ? IrisStyle.secondaryAccent : IrisStyle.subtext,
+                kind === "layout"
+                    ? (KeyboardIndicators.currentLayoutCodeInline || KeyboardIndicators.popupText)
+                    : KeyboardIndicators.popupText)
         }
     }
     function durationText(seconds: real): string {
@@ -653,11 +680,7 @@ Item {
     Timer {
         id: feedbackTimer
         interval: 1800
-        onTriggered: {
-            GlobalStates.osdVolumeOpen = false
-            GlobalStates.osdBrightnessOpen = false
-            GlobalStates.osdMicOpen = false
-        }
+        onTriggered: root.clearOsdRequests()
     }
     Timer {
         interval: 1000
@@ -690,6 +713,11 @@ Item {
         function onOsdVolumeOpenChanged(): void { if (GlobalStates.osdVolumeOpen) root.showFeedback("volume") }
         function onOsdBrightnessOpenChanged(): void { if (GlobalStates.osdBrightnessOpen) root.showFeedback("brightness") }
         function onOsdMicOpenChanged(): void { if (GlobalStates.osdMicOpen) root.showFeedback("mic") }
+        function onOsdKeyboardLayoutOpenChanged(): void {
+            if (!GlobalStates.osdKeyboardLayoutOpen) return
+            root.showBadge("language", IrisStyle.accent,
+                KeyboardIndicators.currentLayoutCodeInline || KeyboardIndicators.currentLayoutName)
+        }
         function onWallpaperSelectorOpenChanged(): void {
             root.publishOrigin(chassis)
             if (GlobalStates.wallpaperSelectorOpen) root.expanded = false
