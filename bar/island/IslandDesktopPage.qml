@@ -24,6 +24,7 @@ ColumnLayout {
     id: page
     required property Item island
     readonly property bool current: page.island.effectivePage === "desktop"
+    readonly property bool grouped: String(page.island.options?.blockStyle ?? "plain") === "grouped"
     property real navOffset: 0
     spacing: 14 * IrisStyle.density
 
@@ -75,10 +76,13 @@ ColumnLayout {
             Behavior on scale { NumberAnimation { duration: IrisStyle.duration(140); easing.type: IrisStyle.feedbackEasing } }
             Behavior on color { ColorAnimation { duration: IrisStyle.duration(120) } }
         }
+        property real inset: page.island.studio ? Math.round(10 * IrisStyle.density) : 0
+        Behavior on inset { NumberAnimation { duration: IrisStyle.moveDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: IrisStyle.moveCurve } }
         Item {
             id: blockContent
             anchors.fill: parent
             visible: !block.placeholder
+            transform: Translate { x: block.inset }
         }
         RowLayout {
             visible: block.placeholder
@@ -486,12 +490,19 @@ ColumnLayout {
             readonly property var entry: AppSearch.lookupDesktopEntry(page.focusedWindow?.app_id ?? "")
 
             Item {
-                visible: page.focusedWindow !== null
                 Layout.preferredWidth: Math.round(40 * IrisStyle.density)
                 Layout.preferredHeight: Math.round(30 * IrisStyle.density)
-                SmartAppIcon {
+                Glyph {
+                    visible: page.focusedWindow === null
                     anchors.centerIn: parent
-                    icon: contextRow.entry?.icon ?? (page.focusedWindow?.app_id ?? "")
+                    text: "desktop_windows"
+                    iconSize: 22 * IrisStyle.density
+                    color: IrisStyle.textTertiary
+                }
+                SmartAppIcon {
+                    visible: page.focusedWindow !== null
+                    anchors.centerIn: parent
+                    icon: IrisPieces.appIcon(page.focusedWindow?.app_id ?? "")
                     fallback: "application-x-executable"
                     iconSize: Math.round(28 * IrisStyle.density)
                 }
@@ -562,13 +573,13 @@ ColumnLayout {
             anchors.right: parent.right
             anchors.rightMargin: page.island.studio ? page.island.studioHandlesWidth : 0
             enabled: !page.island.studio
-            implicitHeight: Math.round(74 * IrisStyle.density)
+            implicitHeight: Math.round((page.grouped ? 74 : 58) * IrisStyle.density)
             radius: IrisStyle.radiusTile
-            color: IrisStyle.fillQuiet
+            color: page.grouped ? IrisStyle.fillQuiet : "transparent"
             RowLayout {
                 anchors.fill: parent
-                anchors.leftMargin: Math.round(8 * IrisStyle.density)
-                anchors.rightMargin: Math.round(8 * IrisStyle.density)
+                anchors.leftMargin: page.grouped ? Math.round(8 * IrisStyle.density) : 0
+                anchors.rightMargin: page.grouped ? Math.round(8 * IrisStyle.density) : 0
                 spacing: 0
                 IrisText {
                     visible: page.hours.length === 0
@@ -587,6 +598,7 @@ ColumnLayout {
                         readonly property string glyph: Icons.getWeatherIcon(hour.modelData.code, hour.modelData.isNight) ?? "cloud"
                         Layout.fillWidth: true
                         Layout.preferredWidth: 1
+                        Layout.maximumWidth: Number.POSITIVE_INFINITY
                         spacing: Math.round(3 * IrisStyle.density)
                         Accessible.name: hour.modelData.label + ", " + hour.modelData.temp
                         IrisText {
@@ -737,9 +749,9 @@ ColumnLayout {
             anchors.right: parent.right
             anchors.rightMargin: page.island.studio ? page.island.studioHandlesWidth : 0
             enabled: !page.island.studio
-            implicitHeight: Math.round(44 * IrisStyle.density)
+            implicitHeight: Math.round((page.grouped ? 44 : 34) * IrisStyle.density)
             radius: IrisStyle.radiusTile
-            color: IrisStyle.fillQuiet
+            color: page.grouped ? IrisStyle.fillQuiet : "transparent"
             readonly property bool polling: page.current && page.island.visualExpanded
             property bool holdingSensors: false
             onPollingChanged: {
@@ -750,8 +762,8 @@ ColumnLayout {
 
             RowLayout {
                 anchors.fill: parent
-                anchors.leftMargin: Math.round(10 * IrisStyle.density)
-                anchors.rightMargin: Math.round(10 * IrisStyle.density)
+                anchors.leftMargin: page.grouped ? Math.round(10 * IrisStyle.density) : 0
+                anchors.rightMargin: page.grouped ? Math.round(10 * IrisStyle.density) : 0
                 spacing: 6 * IrisStyle.density
                 Repeater {
                     model: [
@@ -769,6 +781,7 @@ ColumnLayout {
                         Layout.preferredWidth: 1
                         spacing: 6 * IrisStyle.density
                         Accessible.name: vital.modelData.label + ", " + vital.modelData.value + vital.modelData.unit
+                        Item { Layout.fillWidth: true }
                         Item {
                             Layout.preferredWidth: Math.round(26 * IrisStyle.density)
                             Layout.preferredHeight: Layout.preferredWidth
@@ -787,7 +800,9 @@ ColumnLayout {
                             }
                         }
                         ColumnLayout {
+                            id: vitalText
                             Layout.fillWidth: true
+                            Layout.maximumWidth: vitalText.implicitWidth
                             spacing: -2 * IrisStyle.density
                             IrisText {
                                 Layout.fillWidth: true
@@ -804,6 +819,7 @@ ColumnLayout {
                                 weight: Font.Bold
                             }
                         }
+                        Item { Layout.fillWidth: true }
                     }
                 }
             }

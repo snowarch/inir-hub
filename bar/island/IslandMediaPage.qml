@@ -247,7 +247,7 @@ GridLayout {
             RowLayout {
                 id: appLevel
                 required property var modelData
-                readonly property var nodes: appLevel.modelData.nodes
+                readonly property var nodes: Array.from(appLevel.modelData?.nodes ?? [])
                 readonly property bool muted: appLevel.nodes.every(node => node?.audio?.muted)
                 Layout.fillWidth: true
                 spacing: 10 * IrisStyle.density
@@ -255,7 +255,7 @@ GridLayout {
                     Layout.preferredWidth: Math.round(22 * IrisStyle.density)
                     Layout.preferredHeight: Layout.preferredWidth
                     sourceSize: Qt.size(Math.round(44 * IrisStyle.density), Math.round(44 * IrisStyle.density))
-                    source: Quickshell.iconPath(MprisController.streamIconName(appLevel.nodes[0]), "audio-x-generic")
+                    source: appLevel.nodes.length > 0 ? Quickshell.iconPath(MprisController.streamIconName(appLevel.nodes[0]) ?? "", "audio-x-generic") ?? "" : ""
                     opacity: appLevel.muted ? 0.45 : 1
                 }
                 IrisText {
@@ -269,7 +269,7 @@ GridLayout {
                 IrisScrubber {
                     Layout.fillWidth: true
                     fillColor: appLevel.muted ? IrisStyle.muted : IrisStyle.text
-                    value: Math.min(1, Math.max(...appLevel.nodes.map(node => node?.audio?.volume ?? 0)))
+                    value: Math.min(1, Math.max(0, ...appLevel.nodes.map(node => node?.audio?.volume ?? 0)))
                     onMoved: next => appLevel.nodes.forEach(node => { if (node?.audio) node.audio.volume = next })
                 }
                 GlyphButton {

@@ -78,7 +78,7 @@ ColumnLayout {
                     fillColor: "transparent"
                     PathAngleArc {
                         centerX: arc.width / 2; centerY: arc.height / 2
-                        radiusX: arc.width / 2 - arc.stroke / 2; radiusY: radiusX
+                        radiusX: arc.width / 2 - arc.stroke / 2; radiusY: arc.width / 2 - arc.stroke / 2
                         startAngle: 0; sweepAngle: 360
                     }
                 }
@@ -89,7 +89,7 @@ ColumnLayout {
                     capStyle: ShapePath.RoundCap
                     PathAngleArc {
                         centerX: arc.width / 2; centerY: arc.height / 2
-                        radiusX: arc.width / 2 - arc.stroke / 2; radiusY: radiusX
+                        radiusX: arc.width / 2 - arc.stroke / 2; radiusY: arc.width / 2 - arc.stroke / 2
                         startAngle: -90
                         sweepAngle: 360 * (dial.running ? 1 : dial.share)
                     }
@@ -120,10 +120,12 @@ ColumnLayout {
             enabled: dial.adjustable && dial.enabled
             cursorShape: Qt.PointingHandCursor
             preventStealing: true
+            hoverEnabled: true
             property real anchorY: 0
             property bool dragging: false
             onPressed: mouse => { anchorY = mouse.y; dragging = false }
             onPositionChanged: mouse => {
+                wheelIntent.track(mouse.x, mouse.y)
                 if (!pressed) return
                 const step = 8 * root.d
                 if (!dragging && Math.abs(anchorY - mouse.y) < step) return
@@ -140,7 +142,9 @@ ColumnLayout {
             }
             onCanceled: { if (dragging) dial.adjustFinished(); dragging = false }
             property real wheelAccumulator: 0
+            IrisWheelIntent { id: wheelIntent; hovered: presetPointer.containsMouse }
             onWheel: wheel => {
+                if (!wheelIntent.take(wheel)) return
                 wheelAccumulator += wheel.angleDelta.y || wheel.pixelDelta.y * 4
                 const steps = Math.trunc(wheelAccumulator / 120)
                 if (steps === 0) return

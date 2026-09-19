@@ -22,7 +22,7 @@ Shape {
             centerX: ring.width / 2
             centerY: ring.height / 2
             radiusX: ring.width / 2 - ring.stroke / 2
-            radiusY: radiusX
+            radiusY: ring.width / 2 - ring.stroke / 2
             startAngle: 0
             sweepAngle: 360
         }
@@ -36,7 +36,7 @@ Shape {
             centerX: ring.width / 2
             centerY: ring.height / 2
             radiusX: ring.width / 2 - ring.stroke / 2
-            radiusY: radiusX
+            radiusY: ring.width / 2 - ring.stroke / 2
             startAngle: -90
             sweepAngle: 360 * Math.max(0, Math.min(1, ring.progress))
         }

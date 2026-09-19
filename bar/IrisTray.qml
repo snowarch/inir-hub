@@ -40,6 +40,7 @@ ColumnLayout {
                 required property var modelData
                 Layout.fillWidth: true
                 Layout.preferredWidth: 1
+                Layout.maximumWidth: Number.POSITIVE_INFINITY
                 spacing: 5 * root.d
                 MouseArea {
                     id: button

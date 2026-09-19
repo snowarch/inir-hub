@@ -150,4 +150,84 @@ ColumnLayout {
             }
         }
     }
+
+    Repeater {
+        model: LiveActivities.active
+        ColumnLayout {
+            id: taskEntry
+            required property var modelData
+            required property int index
+            readonly property color tint: IrisStyle.identityColor(String(taskEntry.modelData.tint ?? "lavender"))
+            readonly property real progress: Number(taskEntry.modelData.progress ?? -1)
+            Layout.fillWidth: true
+            spacing: 12 * IrisStyle.density
+            Rectangle {
+                Layout.fillWidth: true
+                visible: taskEntry.index > 0 || page.island.recording || page.island.timerKind.length > 0
+                implicitHeight: 1
+                color: IrisStyle.fill
+            }
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: 12 * IrisStyle.density
+                Item {
+                    Layout.preferredWidth: 40 * IrisStyle.density
+                    Layout.preferredHeight: 40 * IrisStyle.density
+                    Rectangle {
+                        anchors.fill: parent
+                        radius: width / 2
+                        color: IrisStyle.tintFill(taskEntry.tint)
+                        visible: taskEntry.progress < 0
+                    }
+                    ProgressRing {
+                        anchors.fill: parent
+                        visible: taskEntry.progress >= 0
+                        tint: taskEntry.tint
+                        stroke: 3 * IrisStyle.density
+                        progress: Math.max(0, taskEntry.progress)
+                    }
+                    Glyph {
+                        anchors.centerIn: parent
+                        text: String(taskEntry.modelData.glyph ?? "bolt")
+                        iconSize: 18 * IrisStyle.density
+                        color: taskEntry.tint
+                    }
+                }
+                ColumnLayout {
+                    Layout.fillWidth: true
+                    spacing: 1
+                    IrisText {
+                        Layout.fillWidth: true
+                        text: String(taskEntry.modelData.title ?? "")
+                        font.pixelSize: 14 * IrisStyle.typeScale
+                        font.weight: Font.DemiBold
+                        elide: Text.ElideRight
+                    }
+                    IrisText {
+                        Layout.fillWidth: true
+                        text: String(taskEntry.modelData.detail ?? "").length > 0 ? String(taskEntry.modelData.detail)
+                            : taskEntry.progress < 0 ? Translation.tr("Working") : Translation.tr("In progress")
+                        role: IrisText.Meta
+                        elide: Text.ElideRight
+                    }
+                }
+                IrisNumber {
+                    visible: taskEntry.progress >= 0
+                    text: Math.round(taskEntry.progress * 100) + "%"
+                    color: taskEntry.tint
+                    pixelSize: 28 * IrisStyle.typeScale
+                    weight: Font.Bold
+                    letterSpacing: -0.6
+                }
+                GlyphButton {
+                    glyph: "close"
+                    colBackground: IrisStyle.fill
+                    colBackgroundHover: IrisStyle.fillHover
+                    glyphSize: 18 * IrisStyle.density
+                    Accessible.name: Translation.tr("Dismiss")
+                    onClicked: LiveActivities.dismiss(String(taskEntry.modelData.id))
+                }
+            }
+        }
+    }
 }
