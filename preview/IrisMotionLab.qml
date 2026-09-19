@@ -2,6 +2,7 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import qs.services
+import qs.modules.common
 import qs.modules.common.widgets
 import qs.modules.iris.style
 import qs.modules.iris.frame
@@ -20,10 +21,8 @@ Item {
     implicitHeight: Math.round(196 * root.d)
     clip: true
 
-    Rectangle {
+    IrisPreviewStage {
         anchors.fill: parent
-        radius: IrisStyle.radiusCard
-        color: IrisStyle.fillQuiet
     }
 
     Timer {
@@ -34,10 +33,15 @@ Item {
         onTriggered: root.open = !root.open
     }
 
-    readonly property real pieceSize: Math.round(30 * root.d)
+    readonly property real pieceSize: Math.round((root.height > 320 * root.d ? 38 : 30) * root.d)
+    readonly property real cardWidth: Math.min(Math.round((root.height > 320 * root.d ? 280 : 200) * root.d),
+        root.width - 2 * root.pad - root.pieceSize - 2 * root.plateGap - IrisFrame.bodyAir)
+    readonly property real cardHeight: Math.round((root.height > 320 * root.d ? 180 : 132) * root.d)
+    readonly property real sceneLeft: Math.max(root.pad, Math.round((root.width - root.cardWidth - IrisFrame.bodyAir
+        - root.pieceSize - 2 * root.plateGap) / 2))
     readonly property real plateGap: Math.round(6 * root.d)
     readonly property var plate: ({
-        x: root.width - root.pad - root.pieceSize - 2 * root.plateGap,
+        x: root.sceneLeft + root.cardWidth + IrisFrame.bodyAir,
         y: root.height / 2 - root.pieceSize - 1.5 * root.plateGap,
         width: root.pieceSize + 2 * root.plateGap,
         height: 2 * root.pieceSize + 3 * root.plateGap
@@ -51,6 +55,8 @@ Item {
         obstacle: root.plate
     })
     readonly property var placement: ({ sideways: true, towardsLeft: true, towardsUp: false })
+    readonly property real cardAir: (Config.options?.iris?.appearance?.surfaces?.cards?.joinOrigin ?? true)
+        ? -IrisStyle.weld : IrisFrame.bodyAir
 
     IrisSpring {
         id: islandSpring
@@ -60,6 +66,7 @@ Item {
     }
     readonly property real p: islandSpring.value
     readonly property real band: Math.round(10 * root.d)
+    readonly property bool atBottom: IrisFrame.islandEdge === "bottom"
     readonly property real restW: Math.round(116 * root.d)
     readonly property real restH: Math.round(30 * root.d)
     readonly property real openW: Math.min(root.width - 2 * root.pad, Math.round(236 * root.d))
@@ -68,7 +75,8 @@ Item {
         const w = root.restW + (root.openW - root.restW) * root.p
         const h = root.restH + (root.openH - root.restH) * root.p
         const r = root.restH / 2 + (Math.min(IrisStyle.radius, root.openH / 2) - root.restH / 2) * Math.min(1, root.p)
-        return { x: Math.round((root.width - w) / 2), y: root.band + (IrisFrame.notch ? 0 : Math.round(6 * root.d)),
+        const gap = root.band + (IrisFrame.notch ? 0 : Math.round(6 * root.d))
+        return { x: Math.round((root.width - w) / 2), y: root.atBottom ? Math.round(root.height - gap - h) : gap,
             width: Math.round(w), height: Math.round(h), radius: r }
     }
     IrisSpring {
@@ -85,7 +93,7 @@ Item {
         shapes: {
             void (card.x + card.y + card.width + card.height + card.progress)
             if (root.mode === "island") {
-                const out = [{ x: -40, y: -40, width: root.width + 80, height: root.band + 40, radius: 0, id: "edge" }]
+                const out = [{ x: -40, y: root.atBottom ? root.height - root.band : -40, width: root.width + 80, height: root.band + 40, radius: 0, id: "edge" }]
                 const i = root.island
                 out.push({ x: i.x, y: i.y, width: i.width, height: i.height, radius: i.radius, id: "island",
                     fuse: IrisFrame.notch ? IrisStyle.fuseEdge : IrisStyle.fuse, joins: IrisFrame.notch ? "edge" : "" })
@@ -93,7 +101,7 @@ Item {
                 if (s > 1) {
                     const size = root.restH - Math.round(6 * root.d)
                     out.push({ x: i.x + i.width - size + (root.satelliteOffset + size) * satelliteSpring.value,
-                        y: i.y + (root.restH - size) / 2, width: size, height: size, radius: size / 2,
+                        y: (root.atBottom ? i.y + i.height - root.restH : i.y) + (root.restH - size) / 2, width: size, height: size, radius: size / 2,
                         id: "satellite", fuse: IrisStyle.fuse, joins: "island" })
                 }
                 return out
@@ -102,11 +110,11 @@ Item {
                 radius: root.plate.width / 2, id: "plate" }]
             const body = card.bodyRect
             if (card.progress > 0 && body.width > 1) {
+                const joinOrigin = Config.options?.iris?.appearance?.surfaces?.cards?.joinOrigin ?? true
+                const joinRise = joinOrigin ? IrisStyle.ramp(card.progress, 0.08, 0.3) : 0
                 out.push({ x: body.x, y: body.y, width: body.width, height: body.height, radius: body.radius,
-                    paints: true, fuse: IrisStyle.fuseDeep, id: "card" })
-                const neck = IrisFrame.neck(root.piece, root.placement, body, card.progress)
-                if (neck) out.push({ x: neck.x, y: neck.y, width: neck.width, height: neck.height, radius: 0,
-                    fuse: IrisFrame.neckFuse, joins: ["plate", "card"] })
+                    paints: true, fuse: Math.round(IrisStyle.fuseDeep * joinRise), id: "card",
+                    joins: joinRise > 0 ? "plate" : "" })
             }
             return out
         }
@@ -132,12 +140,12 @@ Item {
         origin: root.piece
         color: IrisStyle.bodySurface
         radius: IrisStyle.surfaceRadius("cards", IrisStyle.radiusSheet)
-        width: Math.min(root.plate.x - root.pad - IrisFrame.bodyAir, Math.round(200 * root.d))
-        height: Math.round(132 * root.d)
-        x: root.plate.x - width - IrisFrame.bodyAir
+        width: root.cardWidth
+        height: root.cardHeight
+        x: root.plate.x - width - root.cardAir
         y: {
             const cy = root.piece.y + root.pieceSize / 2
-            const straight = root.pieceSize * IrisFrame.neckShare / 2 + radius
+            const straight = root.pieceSize / 2 + radius
             const wanted = Math.max(root.pad / 2, Math.min(root.height - height - root.pad / 2, cy - height / 2))
             return Math.max(cy + straight - height, Math.min(cy - straight, wanted))
         }
@@ -167,7 +175,7 @@ Item {
         height: root.island.height
         IrisText {
             anchors.centerIn: parent
-            anchors.verticalCenterOffset: -(parent.height - root.restH) / 2
+            anchors.verticalCenterOffset: (root.atBottom ? 1 : -1) * (parent.height - root.restH) / 2
             opacity: 1 - IrisStyle.ramp(root.p, 0, IrisStyle.contentFall)
             text: "22:43"
             font.family: IrisStyle.fontNumbers
@@ -175,8 +183,9 @@ Item {
             font.pixelSize: Math.round(13 * root.d)
         }
         Column {
-            anchors.fill: parent
-            anchors.margins: Math.round(14 * root.d)
+            x: Math.round(14 * root.d)
+            y: root.atBottom ? Math.round(14 * root.d) : parent.height - Math.round(14 * root.d) - root.openH + 2 * Math.round(14 * root.d)
+            width: parent.width - 2 * Math.round(14 * root.d)
             spacing: Math.round(9 * root.d)
             opacity: IrisStyle.contentAt(root.p)
             IrisText { text: "22:43"; font.family: IrisStyle.fontNumbers; font.weight: Font.Bold; font.pixelSize: Math.round(26 * root.d) }

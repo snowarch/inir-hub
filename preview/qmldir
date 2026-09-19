@@ -1,0 +1,6 @@
+module qs.modules.iris.preview
+IrisMotionLab 1.0 IrisMotionLab.qml
+IrisTargetPreview 1.0 IrisTargetPreview.qml
+IrisPreviewStage 1.0 IrisPreviewStage.qml
+IrisScreenPreview 1.0 IrisScreenPreview.qml
+IrisGroupPreview 1.0 IrisGroupPreview.qml
