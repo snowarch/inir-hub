@@ -136,6 +136,7 @@ Item {
         identifier: "irisOnScreenDisplay"
         extraCondition: (Config.options?.iris?.modules?.osd ?? true)
             && (!GlobalStates.barOpen
+                || (CompositorService.isNiri && GameMode.hasFullscreenOnOutput(GlobalStates.focusedScreen?.name ?? "") && !NiriService.inOverview)
                 || !(Config.options?.enabledPanels ?? []).includes("irisBar")
                 || ((Config.options?.iris?.bar?.screenList ?? []).length > 0
                     && !(Config.options.iris.bar.screenList).includes(GlobalStates.focusedScreen?.name ?? "")))

@@ -32,14 +32,10 @@ Scope {
         live: root.presentationVisible
     }
     readonly property var brightnessMonitor: Brightness.getMonitorForScreen(root.screen)
-    readonly property var dockOptions: Config.options?.iris?.dock ?? ({})
-    readonly property bool staticDockVisible: (root.dockOptions?.enable ?? true)
-        && !(root.dockOptions?.autoHide ?? true)
-    readonly property real dockHeight: (Math.max(28, Math.min(64,
-        Number(root.dockOptions?.iconSize ?? 40))) + 24) * IrisStyle.density
-    readonly property real surfaceBottomMargin: root.staticDockVisible
-        ? root.dockHeight + 20 * IrisStyle.density
-        : 18 * IrisStyle.density
+    readonly property bool fullscreen: CompositorService.isNiri
+        && GameMode.hasFullscreenOnOutput(root.screen?.name ?? "") && !NiriService.inOverview
+    readonly property real surfaceBottomMargin: 18 * IrisStyle.density
+        + (root.fullscreen ? 0 : IrisFrame.clear("bottom"))
 
     readonly property bool level: root.kind === "volume" || root.kind === "brightness" || root.kind === "mic"
     readonly property var rows: ({ volume: levelRow, brightness: levelRow, mic: levelRow,
@@ -114,6 +110,12 @@ Scope {
         else if (GlobalStates.osdBrightnessOpen) root.show("brightness", 1500)
         else if (GlobalStates.osdMicOpen) root.show("mic", 1500)
         else if (GlobalStates.osdMediaOpen) root.show("media", 2600)
+        else if (GlobalStates.osdKeyboardLayoutOpen) {
+            root.keyboardIcon = "language"
+            root.keyboardActive = true
+            root.keyboardText = KeyboardIndicators.currentLayoutCodeInline || KeyboardIndicators.currentLayoutName
+            root.show("keyboard", 1600)
+        }
     }
 
     Connections {
@@ -178,15 +180,16 @@ Scope {
         color: "transparent"
         exclusionMode: ExclusionMode.Ignore
         WlrLayershell.layer: WlrLayer.Overlay
+        WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
         WlrLayershell.namespace: "quickshell:iris-osd"
         anchors { bottom: true; left: true; right: true }
         margins {
-            left: IrisFrame.band
-            right: IrisFrame.band
-            bottom: IrisFrame.band
+            left: root.fullscreen ? 0 : IrisFrame.clear("left")
+            right: root.fullscreen ? 0 : IrisFrame.clear("right")
+            bottom: 0
         }
         implicitHeight: root.surfaceBottomMargin + 96 * IrisStyle.density
-        mask: Region { item: osdSurface }
+        mask: Region {}
 
         IrisSurface {
             id: osdSurface
@@ -202,7 +205,7 @@ Scope {
                     osdSurface.activeRow.implicitWidth + 26 * osdSurface.d))))
             height: Math.round((root.kind === "media" ? 64 : 52) * osdSurface.d)
             raised: true
-            radius: height / 2
+            radius: IrisStyle.pieceRadius(height)
             opacity: root.presentationShown ? 1 : 0
             Behavior on width { NumberAnimation { duration: IrisStyle.moveDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: IrisStyle.moveCurve } }
             Behavior on height { NumberAnimation { duration: IrisStyle.moveDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: IrisStyle.moveCurve } }

@@ -308,7 +308,7 @@ Item {
 
     property string feedbackKind: "volume"
     property bool wheelHold: false
-    readonly property bool feedback: (feedbackTimer.running || root.wheelHold) && !root.expanded
+    readonly property bool feedback: (feedbackTimer.running || root.wheelHold) && !root.expanded && !root.fullscreenCovered
     readonly property var brightnessMonitor: Brightness.getMonitorForScreen(root.targetScreen)
     readonly property real feedbackValue: root.feedbackKind === "brightness"
         ? (root.brightnessMonitor?.brightness ?? 0)
@@ -323,7 +323,7 @@ Item {
 
     function showFeedback(kind: string): void {
         if (Date.now() < GlobalStates.irisLevelQuietUntil) return
-        if (!(Config.options?.iris?.modules?.osd ?? true) || root.expanded
+        if (!(Config.options?.iris?.modules?.osd ?? true) || root.expanded || root.fullscreenCovered
             || root.targetScreen?.name !== GlobalStates.focusedScreen?.name) return
         root.feedbackKind = kind
         feedbackTimer.restart()
