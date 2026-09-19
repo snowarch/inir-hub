@@ -14,6 +14,8 @@ Item {
     property real rimWidth: Math.max(1, Math.round(IrisStyle.density))
     property real smoothing: IrisStyle.fuse
     property bool framed: IrisFrame.framed
+    property real band: IrisFrame.band
+    property real cornerRadius: IrisFrame.cornerRadius
     readonly property int capacity: 20
     readonly property int shadowSlots: root.capacity
     readonly property real reach: root.smoothing + 2
@@ -121,7 +123,7 @@ Item {
             Math.max(1, pass.width), Math.max(1, pass.height))
         readonly property vector2d screen: Qt.vector2d(Math.max(1, root.width), Math.max(1, root.height))
         readonly property vector4d field: Qt.vector4d(root.smoothing, root.framed ? 1 : 0,
-            IrisFrame.band, IrisFrame.cornerRadius)
+            root.band, root.cornerRadius)
         readonly property color tint: root.tint
         readonly property color rim: root.rim
         readonly property vector4d edge: Qt.vector4d(root.rimWidth, root.rim.a > 0 ? 1 : 0, 0, 0)

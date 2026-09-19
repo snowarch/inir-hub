@@ -6,11 +6,14 @@ import Quickshell.Io
 import Quickshell.Services.SystemTray
 import Quickshell.Wayland
 import qs
+import qs.services
 import qs.modules.common
+import qs.modules.settings
 import qs.modules.iris.control
 import qs.modules.iris.field
 import qs.modules.iris.frame
 import qs.modules.iris.stage
+import qs.modules.iris.edit
 import qs.modules.iris.notificationPopup
 import qs.modules.iris.style
 import qs.modules.iris.components as IrisParts
@@ -22,14 +25,15 @@ Scope {
     readonly property var options: Config.options?.iris?.bar ?? ({})
     readonly property bool bottom: String(root.options?.position ?? "top") === "bottom"
     readonly property int barHeight: Math.max(32, Math.round(Number(root.options?.height ?? 42) * IrisStyle.density))
-    readonly property int outerMargin: (root.options?.notch ?? false) ? 0 : Math.max(0, Math.round(Number(root.options?.margin ?? 8) * IrisStyle.density))
+    readonly property int restMargin: Math.max(0, Math.round(Number(root.options?.margin ?? 8) * IrisStyle.density))
+    readonly property int outerMargin: (root.options?.notch ?? false) ? 0 : root.restMargin
     signal islandRequested(bool expanded, string page)
 
     IpcHandler {
         target: "iris"
         function open(): void { GlobalStates.barOpen = true; root.islandRequested(true, "") }
         function page(name: string): void {
-            if (name !== "media" && name !== "activity" && name !== "desktop" && name !== "tray" && name !== "tools") return
+            if (!["media", "activity", "desktop", "tray", "tools", "next", "prev"].includes(name)) return
             GlobalStates.barOpen = true
             root.islandRequested(true, name)
         }
@@ -49,7 +53,11 @@ Scope {
             GlobalStates.irisBubbleCardRequest = ""
             GlobalStates.irisBubbleCardRequest = "media"
         }
-        function settings(section: string): void { GlobalStates.openSettingsPage(28, section) }
+        function settings(section: string): void {
+            const page = SettingsPageRegistry.pages.findIndex(entry => entry.key === "iris")
+            if (page >= 0) GlobalStates.openSettingsPage(page, section)
+            else GlobalStates.openSettings()
+        }
         function bubble(slot: string, place: string): string {
             const extra = IrisPieces.extraIds.includes(slot)
             if (!extra && !IrisPieces.slotIds.includes(slot)) return "Unknown bubble"
@@ -116,6 +124,25 @@ Scope {
             GlobalStates.irisArrange = wanted
             return wanted ? "on" : "off"
         }
+        function edit(action: string): string {
+            if (action.startsWith("tab:")) {
+                const tab = action.slice(4)
+                if (!["pieces", "look", "motion", "layout"].includes(tab)) return "Unknown tab"
+                GlobalStates.irisEditTab = tab
+                GlobalStates.irisEdit = true
+                return action
+            }
+            if (!["on", "off", "toggle", ""].includes(action)) {
+                GlobalStates.irisEdit = true
+                if (IrisPieces.extraIds.includes(action)) GlobalStates.irisEditSelection = "extra:" + action
+                else if (IrisPieces.slotIds.includes(action) || IrisPieces.isApp(action)) GlobalStates.irisEditSelection = action
+                else GlobalStates.irisEditTarget = action
+                return action
+            }
+            const wanted = action === "on" ? true : action === "off" ? false : !GlobalStates.irisEdit
+            GlobalStates.irisEdit = wanted
+            return wanted ? "on" : "off"
+        }
         function studio(action: string): string {
             if (!["on", "off", "toggle"].includes(action)) {
                 GlobalStates.irisStudioTarget = action
@@ -165,6 +192,39 @@ Scope {
             Config.setNestedValue("iris.appearance.morph", name)
             return name
         }
+        function activity(action: string, id: string, value: string): string {
+            let result = null
+            switch (action) {
+            case "start": result = LiveActivities.start(id, value); break
+            case "title": result = LiveActivities.setTitle(id, value); break
+            case "progress": result = LiveActivities.setProgress(id, value); break
+            case "detail": result = LiveActivities.setDetail(id, value); break
+            case "glyph": result = LiveActivities.setGlyph(id, value); break
+            case "tint": result = LiveActivities.setTint(id, value); break
+            case "end": result = LiveActivities.end(id, value); break
+            case "dismiss": LiveActivities.dismiss(id); return "dismissed"
+            case "clear": LiveActivities.clear(); return "cleared"
+            default: return "Unknown action: start, title, progress, detail, glyph, tint, end, dismiss, clear"
+            }
+            return result ? JSON.stringify(result) : "No activity " + id
+        }
+        function activities(): string {
+            return JSON.stringify(LiveActivities.active)
+        }
+        function set(path: string, value: string): string {
+            if (!path.startsWith("iris.")) return "Only iris.* options"
+            let parsed = value
+            try { parsed = JSON.parse(value) } catch (error) {}
+            Config.setNestedValue(path, parsed)
+            return JSON.stringify(Config.getNestedValue(path, null))
+        }
+        function adaptive(amount: string): string {
+            const value = Math.round(Number(amount))
+            if (isNaN(value)) return JSON.stringify({ strength: IrisMood.strength, luminance: IrisMood.luminance,
+                contrast: IrisMood.contrast, colorfulness: IrisMood.colorfulness, colors: IrisMood.colors.length })
+            Config.setNestedValue("iris.appearance.adaptive", Math.max(0, Math.min(100, value)))
+            return String(Math.max(0, Math.min(100, value)))
+        }
         function preset(name: string): string {
             if (!Object.keys(IrisStyle.presets).includes(name)) return "Unknown preset"
             Config.setNestedValue("iris.appearance.preset", name)
@@ -178,6 +238,7 @@ Scope {
         function status(): string {
             return JSON.stringify({
                 islandExpanded: GlobalStates.irisIslandExpanded,
+                islandPage: GlobalStates.irisIslandPage,
                 accent: Config.options?.iris?.appearance?.accent ?? "blue",
                 preset: IrisStyle.presetName,
                 bubbleCard: GlobalStates.irisBubbleCard?.kind ?? "",
@@ -212,8 +273,6 @@ Scope {
             onRequestedBottomChanged: windowLoader.recycle()
             // Rebuilt on shape changes: a ClippingRectangle does not re-mask when its corner structure changes.
             readonly property string shapeKey: String(Config.options?.iris?.surround?.enable ?? false)
-                + "|" + String(Config.options?.iris?.bar?.notch ?? false)
-                + "|" + String(Config.options?.iris?.bar?.layout ?? "island")
             onShapeKeyChanged: windowLoader.recycle()
             function recycle(): void {
                 windowLoader.recycling = true
@@ -235,18 +294,27 @@ Scope {
                 exclusionMode: ExclusionMode.Ignore
                 exclusiveZone: 0
                 WlrLayershell.namespace: "quickshell:iris-chassis"
-                readonly property bool presenting: !barWindow.suppressed
-                    && (barWindow.pinned || stage.cardPresent || (controlCentreLoader.item?.present ?? false))
-                WlrLayershell.layer: (islandLoader.item?.fullscreenCovered ?? false)
-                    && (barWindow.presenting || !(islandLoader.item?.suppressed ?? true))
-                    ? WlrLayer.Overlay : WlrLayer.Top
+                readonly property bool presenting: barWindow.pinned || stage.cardPresent
+                    || (controlCentreLoader.item?.present ?? false) || GlobalStates.irisEdit
+                // Niri keeps a fullscreen window above the Top layer, so the overview
+                // over a game would show every other surface but this one.
+                readonly property bool overviewOverFullscreen: CompositorService.isNiri && NiriService.inOverview
+                    && GameMode.hasFullscreenOnOutput(barWindow.screen?.name ?? "")
+                readonly property bool canvasSuppressed: barWindow.suppressed && !barWindow.presenting
+                readonly property bool overlaid: ((islandLoader.item?.fullscreenCovered ?? false) && !barWindow.canvasSuppressed)
+                    || barWindow.overviewOverFullscreen
+                // Switching layers recreates the surface above the Dock's window, whose icons it would cover.
+                onOverlaidChanged: if (!barWindow.overlaid) GlobalStates.irisChassisEpoch++
+                WlrLayershell.layer: barWindow.overlaid ? WlrLayer.Overlay : WlrLayer.Top
                 WlrLayershell.keyboardFocus: barWindow.pinned || stage.cardOpen || (controlCentreLoader.item?.morphOpen ?? false)
+                    || GlobalStates.irisEdit
                     ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
                 anchors { left: true; right: true; top: true; bottom: true }
                 readonly property bool suppressed: islandLoader.active
                     ? (islandLoader.item?.suppressed ?? false) : false
-                mask: barWindow.suppressed ? emptyRegion
+                mask: barWindow.canvasSuppressed ? emptyRegion
                     : barWindow.pinned || stage.cardArmed || (controlCentreLoader.item?.armed ?? false)
+                        || (islandLoader.item?.morphing ?? false)
                         ? (GlobalStates.irisStudioRect ? chassisStudioMask : null) : chassisRegion
                 Region { id: emptyRegion }
                 IrisParts.IrisStudioMask {
@@ -273,6 +341,20 @@ Scope {
                     id: chassisRegion
                     item: islandInput
                     Region { item: extensionInput }
+                    Region {
+                        readonly property var rect: editLoader.item?.hitRect ?? null
+                        x: rect?.x ?? 0
+                        y: rect?.y ?? 0
+                        width: rect?.width ?? 0
+                        height: rect?.height ?? 0
+                    }
+                    Region {
+                        readonly property var rect: editLoader.item?.inspectorRect ?? null
+                        x: rect?.x ?? 0
+                        y: rect?.y ?? 0
+                        width: rect?.width ?? 0
+                        height: rect?.height ?? 0
+                    }
                     Region {
                         readonly property var panel: (controlCentreLoader.item?.present ?? false)
                             ? controlCentreLoader.item.body : null
@@ -356,9 +438,23 @@ Scope {
                     onActivated: islandLoader.item.expanded = false
                 }
 
+                Shortcut {
+                    sequence: "Escape"
+                    enabled: GlobalStates.irisEdit
+                    onActivated: GlobalStates.irisEdit = false
+                }
+
+                // Never coalesced: the field is the outline of what the items paint,
+                // so a table that lands a turn later draws the rim and the shadow of
+                // the shape the chassis had on the previous frame. Measured at 3 ms
+                // per open/close for the whole chain — cheaper than one frame of lag.
                 readonly property var fieldShapes: {
+                    const dockBody = (islandLoader.item?.fullscreenCovered ?? false) ? null
+                        : GlobalStates.irisDockBody?.[barWindow.screen?.name ?? ""] ?? null
                     const hung = (controlCentreLoader.item?.fieldShapes ?? [])
                         .concat(stage.fieldShapes)
+                        .concat(editLoader.item?.fieldShapes ?? [])
+                        .concat(Array.isArray(dockBody) ? dockBody : [])
                     const bodies = hung.filter(shape => shape.joins === "island")
                     const island = (islandLoader.item?.fieldShapes ?? []).map(shape => {
                         if (!shape.satellite) return shape
@@ -378,9 +474,16 @@ Scope {
                     id: chassisField
                     anchors.fill: parent
                     shapes: barWindow.fieldShapes
-                    opacity: (islandLoader.item?.fullscreenCovered ?? false) ? 0 : 1
+                    opacity: barWindow.canvasSuppressed ? 0 : 1
                     visible: opacity > 0
                     Behavior on opacity { NumberAnimation { duration: IrisStyle.duration(160); easing.type: IrisStyle.feedbackEasing } }
+                }
+
+                IrisParts.IrisSpring {
+                    id: islandPlacement
+                    surface: "island"
+                    intent: "move"
+                    to: islandLoader.layout === "left" ? 0 : islandLoader.layout === "right" ? 1 : 0.5
                 }
 
                 Loader {
@@ -388,13 +491,12 @@ Scope {
                     z: 3
                     active: GlobalStates.barOpen && root.islandAllowed(barWindow.screen)
                     readonly property string layout: String(root.options?.layout ?? "island")
-                    anchors.horizontalCenter: islandLoader.layout === "left" || islandLoader.layout === "right"
-                        ? undefined : parent.horizontalCenter
-                    anchors.left: islandLoader.layout === "left" ? parent.left : undefined
-                    anchors.right: islandLoader.layout === "right" ? parent.right : undefined
+                    readonly property real inset: IrisFrame.band + root.outerMargin
+                    x: Math.round(islandLoader.inset + islandPlacement.value * (parent.width - 2 * islandLoader.inset - islandLoader.width))
                     anchors.top: windowLoader.loadedBottom ? undefined : parent.top
                     anchors.bottom: windowLoader.loadedBottom ? parent.bottom : undefined
-                    anchors.margins: IrisFrame.band + root.outerMargin
+                    anchors.margins: IrisFrame.band + (islandLoader.item
+                        ? Math.round(root.restMargin * (1 - Math.min(1, islandLoader.item.notchness))) : root.outerMargin)
                     width: item?.implicitWidth ?? 240
                     height: item?.implicitHeight ?? root.barHeight
                     sourceComponent: IrisIsland {
@@ -409,6 +511,10 @@ Scope {
                             target: root
                             function onIslandRequested(open: bool, page: string): void {
                                 if (!open || barWindow.screen?.name === GlobalStates.focusedScreen?.name) {
+                                    if (open && (page === "next" || page === "prev")) {
+                                        island.stepPage(page === "next" ? 1 : -1)
+                                        return
+                                    }
                                     if (open) island.page = page
                                     island.pinned = open
                                     island.expanded = open
@@ -430,7 +536,26 @@ Scope {
                     z: 2
                     anchors.fill: parent
                     modelData: barWindow.screen
-                    suppressed: barWindow.suppressed
+                    suppressed: barWindow.canvasSuppressed
+                }
+
+                Loader {
+                    id: editLoader
+                    z: 4
+                    anchors.fill: parent
+                    // Kept for the recede, on a grace timer: reading the item's own
+                    // state back into `active` is a binding loop.
+                    property bool grace: false
+                    Timer { id: editGrace; interval: 700; onTriggered: editLoader.grace = false }
+                    Connections {
+                        target: GlobalStates
+                        function onIrisEditChanged(): void {
+                            if (GlobalStates.irisEdit) { editGrace.stop(); editLoader.grace = false }
+                            else { editLoader.grace = true; editGrace.restart() }
+                        }
+                    }
+                    active: GlobalStates.irisEdit || editLoader.grace
+                    sourceComponent: IrisEditBar { screenData: barWindow.screen }
                 }
 
                 Loader {
