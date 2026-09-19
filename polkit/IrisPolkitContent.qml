@@ -39,14 +39,21 @@ Item {
         }
     }
 
+    property real shown: 0
+    Component.onCompleted: root.shown = 1
+    Behavior on shown { NumberAnimation { duration: IrisStyle.emergeDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: IrisStyle.emergeCurve } }
+
     Rectangle {
         anchors.fill: parent
+        opacity: Math.min(1, root.shown)
         color: IrisStyle.scrim
     }
 
     IrisSurface {
         id: card
         anchors.centerIn: parent
+        opacity: Math.min(1, root.shown * 1.6)
+        scale: 1.08 - 0.08 * root.shown
         width: Math.min(320 * root.d, parent.width - 40)
         implicitHeight: body.implicitHeight + 40 * root.d
         radius: IrisStyle.radiusPlate

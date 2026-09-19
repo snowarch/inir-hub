@@ -15,6 +15,8 @@ import qs.modules.common.widgets
 import qs.modules.iris.frame
 import qs.modules.iris.style
 import qs.modules.iris.components
+import qs.modules.iris.pieces
+import qs.modules.iris.field as Field
 
 PanelWindow {
     id: root
@@ -31,6 +33,12 @@ PanelWindow {
             && (root.mathQuery || entry?.type !== Translation.tr("Math")))
         .slice(0, root.resultLimit)
 
+    readonly property var island: GlobalStates.irisIslandGeometry?.[root.screen?.name ?? ""] ?? null
+    readonly property bool fromIsland: String(root.options?.opens ?? "floating") === "island"
+        && root.island !== null && root.island.width > 0
+    readonly property bool islandBottom: root.island?.bottomEdge ?? false
+    readonly property bool joinsEdge: root.fromIsland && IrisFrame.notch
+
     readonly property bool browsing: LauncherSearch.query.length === 0
     readonly property var suggestions: {
         return (TaskbarApps.apps ?? []).filter(app => app.appId !== "SEPARATOR").slice(0, 8).map(app => {
@@ -39,7 +47,7 @@ PanelWindow {
             return {
                 appId: app.appId,
                 name: entry?.name ?? app.appId,
-                iconName: entry?.icon ?? app.appId,
+                iconName: IrisPieces.appIcon(app.appId),
                 iconType: LauncherSearchResult.IconType.System,
                 running: windows.length > 0,
                 verb: windows.length > 0 ? Translation.tr("Switch to") : Translation.tr("Open"),
@@ -248,26 +256,52 @@ PanelWindow {
                 blur: 32 * stage.d
                 spread: -6 * stage.d
                 color: IrisStyle.shadow
-                opacity: Math.pow(Math.max(0, surface.progress), 3)
+                visible: !root.fromIsland
+                opacity: IrisStyle.shadowAt(surface.progress)
+            }
+            Field.IrisField {
+                anchors.fill: parent
+                visible: root.joinsEdge
+                framed: false
+                opacity: surface.dissolve
+                shapes: {
+                    if (!root.joinsEdge || surface.progress <= 0) return []
+                    const b = surface.bodyRect
+                    const deep = Math.max(8, IrisStyle.fuseEdge)
+                    return [
+                        { x: -IrisStyle.fuseEdge, y: root.islandBottom ? stage.height + 1 : -deep - 1,
+                            width: stage.width + 2 * IrisStyle.fuseEdge, height: deep, radius: 0, paints: true, fuse: 0, id: "edge" },
+                        { x: b.x, y: root.islandBottom ? b.y : b.y - b.radius, width: b.width, height: b.height + b.radius,
+                            radius: b.radius, paints: true, fuse: IrisStyle.fuseEdge, id: "spotlight", joins: "edge" }
+                    ]
+                }
             }
             IrisMorphSurface {
                 id: surface
                 open: GlobalStates.searchOpen
                 motionSurface: "spotlight"
-                light: IrisStyle.surfaceLight("spotlight", IrisStyle.wallpaperLight)
+                windowOffset: Qt.point(IrisFrame.band, IrisFrame.band)
+                readonly property real dissolve: root.fromIsland ? IrisStyle.ramp(surface.progress, 0, 0.14) : 1
+                origin: root.fromIsland ? ({ x: root.island.x - IrisFrame.band, y: root.island.y - IrisFrame.band,
+                    width: root.island.width, height: root.island.height, radius: root.island.height / 2 }) : null
+                originShare: root.fromIsland ? 1 : IrisStyle.absorbShare
+                color: root.fromIsland ? ColorUtils.applyAlpha(IrisStyle.bodySurface, surface.dissolve) : IrisStyle.surface
+                light: root.fromIsland ? "transparent" : IrisStyle.surfaceLight("spotlight", IrisStyle.wallpaperLight)
                 lightFrom: (Config.options?.iris?.bar?.position ?? "top") === "bottom" ? "bottom" : "top"
                 radius: IrisStyle.surfaceRadius("spotlight", IrisStyle.radiusPanel)
-                contentScaleFrom: 1
-                contentFadeStart: 0.5
-                contentFadeSpan: 0.4
                 width: Math.max(320, Math.min(root.width - 32, Math.max(480, Number(root.options?.width ?? 640) * stage.d)))
-                x: (root.width - width) / 2
-                y: Math.max(72, Math.round(root.height * 0.2))
+                x: root.fromIsland
+                    ? Math.round(Math.max(8, Math.min(root.width - width - 8, root.island.x - IrisFrame.band + root.island.width / 2 - width / 2)))
+                    : (root.width - width) / 2
+                y: !root.fromIsland ? Math.max(72, Math.round(root.height * 0.2))
+                    : root.islandBottom ? Math.round(root.island.y - IrisFrame.band + root.island.height - height)
+                    : Math.round(root.island.y - IrisFrame.band)
                 height: body.implicitHeight
                 onClosed: LauncherSearch.query = ""
                 onSettledChanged: if (surface.settled && surface.open) stage.focusInput()
                 Rectangle {
                     z: 100
+                    visible: !root.joinsEdge
                     opacity: Math.max(0, (surface.progress - 0.85) / 0.15)
                     anchors.fill: parent
                     radius: surface.radius
@@ -282,14 +316,18 @@ PanelWindow {
 
                 MouseArea { anchors.fill: parent }
 
-                ColumnLayout {
+                GridLayout {
                     id: body
+                    readonly property bool fieldLast: root.fromIsland && root.islandBottom
                     anchors.left: parent.left
                     anchors.right: parent.right
                     anchors.top: parent.top
-                    spacing: 0
+                    columns: 1
+                    rowSpacing: 0
+                    columnSpacing: 0
 
                     Item {
+                        Layout.row: body.fieldLast ? 3 : 0
                         Layout.fillWidth: true
                         implicitHeight: Math.round(68 * stage.d)
 
@@ -375,6 +413,7 @@ PanelWindow {
                     }
 
                     Rectangle {
+                        Layout.row: body.fieldLast ? 2 : 1
                         Layout.fillWidth: true
                         Layout.leftMargin: 24 * stage.d
                         Layout.rightMargin: 24 * stage.d
@@ -385,6 +424,7 @@ PanelWindow {
 
                     ColumnLayout {
                         id: browse
+                        Layout.row: body.fieldLast ? 1 : 2
                         Layout.fillWidth: true
                         visible: root.browsing && (root.suggestions.length > 0 || hints.visible)
                         spacing: 0
@@ -572,6 +612,7 @@ PanelWindow {
 
                     Item {
                         id: results
+                        Layout.row: body.fieldLast ? 0 : 3
                         Layout.fillWidth: true
                         visible: !root.browsing && LauncherSearch.query.length > 0
                         implicitHeight: resultColumn.implicitHeight + 16 * stage.d

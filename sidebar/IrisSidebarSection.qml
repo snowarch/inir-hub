@@ -163,14 +163,14 @@ Loader {
             strokeColor: IrisStyle.tintFill(gaugeRing.tint)
             strokeWidth: gaugeRing.stroke
             fillColor: "transparent"
-            PathAngleArc { centerX: gaugeRing.width / 2; centerY: gaugeRing.height / 2; radiusX: gaugeRing.width / 2 - gaugeRing.stroke / 2; radiusY: radiusX; startAngle: 0; sweepAngle: 360 }
+            PathAngleArc { centerX: gaugeRing.width / 2; centerY: gaugeRing.height / 2; radiusX: gaugeRing.width / 2 - gaugeRing.stroke / 2; radiusY: gaugeRing.width / 2 - gaugeRing.stroke / 2; startAngle: 0; sweepAngle: 360 }
         }
         ShapePath {
             strokeColor: gaugeRing.tint
             strokeWidth: gaugeRing.stroke
             fillColor: "transparent"
             capStyle: ShapePath.RoundCap
-            PathAngleArc { centerX: gaugeRing.width / 2; centerY: gaugeRing.height / 2; radiusX: gaugeRing.width / 2 - gaugeRing.stroke / 2; radiusY: radiusX; startAngle: gaugeRing.start; sweepAngle: 360 * Math.max(0, Math.min(1, gaugeRing.progress)) }
+            PathAngleArc { centerX: gaugeRing.width / 2; centerY: gaugeRing.height / 2; radiusX: gaugeRing.width / 2 - gaugeRing.stroke / 2; radiusY: gaugeRing.width / 2 - gaugeRing.stroke / 2; startAngle: gaugeRing.start; sweepAngle: 360 * Math.max(0, Math.min(1, gaugeRing.progress)) }
         }
     }
 

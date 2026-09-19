@@ -48,8 +48,9 @@ PanelWindow {
             }
         }
         folders.sort((a, b) => a.name.localeCompare(b.name))
-        root.libraryFolders = folders
-        root.libraryFiles = files
+        const same = (a, b) => a.length === b.length && a.every((entry, i) => entry.path === b[i].path)
+        if (!same(folders, root.libraryFolders)) root.libraryFolders = folders
+        if (!same(files, root.libraryFiles)) root.libraryFiles = files
         if (root.selectedIndex >= files.length) root.selectedIndex = Math.max(0, files.length - 1)
     }
     Connections {
@@ -412,19 +413,17 @@ PanelWindow {
         blur: 32 * root.d
         spread: -6 * root.d
         color: IrisStyle.shadow
-        opacity: Math.pow(Math.max(0, surface.progress), 3)
+        opacity: IrisStyle.shadowAt(surface.progress)
     }
 
     IrisMorphSurface {
         motionSurface: "gallery"
+        windowOffset: Qt.point(IrisFrame.band, IrisFrame.band)
         id: surface
         open: root.morphOpen
         radius: IrisStyle.surfaceRadius("gallery", IrisStyle.radiusPanel)
         light: IrisStyle.surfaceLight("gallery", IrisStyle.wallpaperLight)
         lightFrom: (Config.options?.iris?.bar?.position ?? "top") === "bottom" ? "bottom" : "top"
-        contentScaleFrom: 1
-        contentFadeStart: 0.5
-        contentFadeSpan: 0.4
         readonly property real edgeGap: (Number(root.barOptions?.height ?? 42)
             + ((root.barOptions?.notch ?? false) ? 0 : Number(root.barOptions?.margin ?? 8) * 2)) * root.d + 10 * root.d
         width: Math.min(root.width - 48, Math.round(Math.max(640, Math.min(1400, Config.options?.iris?.wallpaper?.width ?? 960)) * root.d))

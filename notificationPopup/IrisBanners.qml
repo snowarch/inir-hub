@@ -28,9 +28,8 @@ Item {
     readonly property bool barTop: String(root.barOptions?.position ?? "top") === "top"
     readonly property var popups: (Notifications.popupList ?? []).slice(-3).reverse()
     readonly property real d: IrisStyle.density
-    readonly property real topOffset: root.barTop
-        ? (Number(root.barOptions?.height ?? 42) + ((root.barOptions?.notch ?? false) ? 0 : Number(root.barOptions?.margin ?? 8) * 2) + 10) * root.d
-        : 10 * root.d
+    readonly property real edgeOffset: (Number(root.barOptions?.height ?? 42)
+        + ((root.barOptions?.notch ?? false) ? 0 : Number(root.barOptions?.margin ?? 8) * 2) + 10) * root.d
 
     visible: root.present
     onPopupsChanged: if (root.popups.length === 0) exitLinger.restart()
@@ -60,9 +59,12 @@ Item {
 
     ListView {
         id: popupColumn
-        anchors.top: parent.top
+        anchors.top: root.barTop ? parent.top : undefined
+        anchors.bottom: root.barTop ? undefined : parent.bottom
         anchors.horizontalCenter: parent.horizontalCenter
-        anchors.topMargin: root.topOffset + IrisFrame.band
+        anchors.topMargin: root.edgeOffset + IrisFrame.band
+        anchors.bottomMargin: root.edgeOffset + IrisFrame.band
+        verticalLayoutDirection: root.barTop ? ListView.TopToBottom : ListView.BottomToTop
         width: Math.min(root.popupWidth - 16, parent.width - 16)
         height: Math.max(1, popupColumn.contentHeight)
         spacing: 8 * root.d
@@ -77,8 +79,9 @@ Item {
                 property: "leave"
                 from: 0
                 to: 1
-                duration: IrisStyle.settleDuration * 1.6
-                easing.type: Easing.Linear
+                duration: IrisStyle.recedeDuration
+                easing.type: Easing.BezierSpline
+                easing.bezierCurve: IrisStyle.recedeCurve
             }
         }
         displaced: Transition {
@@ -105,17 +108,10 @@ Item {
             property real appear: 0
             Component.onCompleted: banner.appear = 1
             Behavior on appear { NumberAnimation { duration: IrisStyle.emergeDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: IrisStyle.emergeCurve } }
-            readonly property real bloomIn: Math.min(1, banner.appear * 1.25)
             property real leave: 0
             readonly property bool swiped: Math.abs(banner.swipe) > 1
-            readonly property real fold: banner.swiped ? 0 : Math.min(1, banner.leave * 2)
-            readonly property real rise: {
-                if (banner.swiped) return 0
-                const t = Math.max(0, banner.leave * 2 - 1)
-                return t * t * (3 - 2 * t)
-            }
-            readonly property real bloom: Math.min(banner.bloomIn, 1 - (1 - Math.pow(1 - banner.fold, 3)))
-            readonly property bool meltsIntoIsland: root.barTop && root.island !== null
+            readonly property real bloom: Math.min(banner.appear, banner.swiped ? 1 : 1 - banner.leave)
+            readonly property bool meltsIntoIsland: root.island !== null
             readonly property real fullHeight: content.implicitHeight + 24 * root.d
 
             property real swipe: 0
@@ -133,8 +129,7 @@ Item {
                 blur: 18 * root.d
                 spread: -3 * root.d
                 color: IrisStyle.shadow
-                opacity: plate.opacity * Math.pow(banner.bloom, 3) * (1 - banner.rise)
-                scale: plate.scale
+                opacity: plate.opacity * IrisStyle.shadowAt(banner.bloom)
             }
             Rectangle {
                 id: plate
@@ -142,19 +137,20 @@ Item {
                 height: Math.round(root.bubbleSize + (banner.fullHeight - root.bubbleSize) * banner.bloom)
                 clip: true
                 x: Math.round((banner.width - width) / 2 + banner.swipe)
-                readonly property real islandLift: banner.meltsIntoIsland
-                    ? (root.island.y + root.island.bubble / 2) - (popupColumn.y + banner.y + root.bubbleSize / 2) : -18 * root.d
-                y: Math.round(banner.meltsIntoIsland
-                    ? plate.islandLift * Math.max(1 - Math.min(1, banner.appear * 2.2), banner.rise)
-                    : (1 - banner.appear) * -18 * root.d)
-                scale: 1 - 0.45 * banner.rise
-                opacity: Math.min(1, banner.appear * 3) * (1 - Math.max(0, banner.rise - 0.6) / 0.4)
+                readonly property real islandLift: {
+                    void (banner.y + popupColumn.y + popupColumn.contentY + popupColumn.height)
+                    if (!banner.meltsIntoIsland) return root.barTop ? -18 * root.d : 18 * root.d
+                    const at = banner.mapToItem(root, 0, 0)
+                    return (root.island.y + root.island.height / 2) - (at.y + root.bubbleSize / 2)
+                }
+                y: Math.round(plate.islandLift * (1 - banner.bloom))
+                opacity: Math.min(1, banner.bloom * 3)
                     * (1 - Math.min(1, Math.abs(banner.swipe) / (banner.width * 0.6)))
                 radius: Math.min(height / 2, root.bubbleSize / 2 + (Math.round(22 * root.d) - root.bubbleSize / 2) * banner.bloom)
                 color: IrisStyle.bodySurface
                 border.width: 1
                 border.color: banner.critical ? IrisStyle.tintBorder(IrisStyle.danger)
-                    : ColorUtils.applyAlpha(IrisStyle.border, IrisStyle.border.a * banner.bloom * (1 - banner.rise))
+                    : ColorUtils.applyAlpha(IrisStyle.border, IrisStyle.border.a * banner.bloom)
 
                 DragHandler {
                     id: swipeDrag
@@ -206,7 +202,7 @@ Item {
                     ColumnLayout {
                         Layout.fillWidth: true
                         spacing: 1
-                        opacity: Math.max(0, Math.min(1, (banner.bloom - 0.55) / 0.45))
+                        opacity: IrisStyle.contentAt(banner.bloom)
 
                         RowLayout {
                             Layout.fillWidth: true
