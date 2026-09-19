@@ -11,6 +11,7 @@ MouseArea {
     property string screenName: ""
     property real screenOffsetY: 0
     property bool holdLifts: true
+    property int holdDelay: 320
     property int pullDirection: 0
     property real pullDistance: 0
     readonly property bool lifting: root.lifted
@@ -46,7 +47,7 @@ MouseArea {
         root.publish(false)
     }
 
-    Timer { id: hold; interval: 320; running: false; onTriggered: root.lift() }
+    Timer { id: hold; interval: root.holdDelay; running: false; onTriggered: root.lift() }
     readonly property real liftDistance: root.pullDistance > 0 ? root.pullDistance : 10 * (root.width / 40)
 
     onPressed: mouse => {

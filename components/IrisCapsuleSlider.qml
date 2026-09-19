@@ -1,6 +1,7 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
+import qs
 import qs.modules.common.functions
 import qs.modules.common.widgets
 import qs.modules.iris.style
@@ -66,11 +67,15 @@ Item {
         }
     }
 
+    onMoved: GlobalStates.quietIrisLevels()
+    onIconClicked: GlobalStates.quietIrisLevels()
+
     MouseArea {
         id: pointer
         anchors.fill: parent
         cursorShape: Qt.PointingHandCursor
         preventStealing: true
+        hoverEnabled: true
         function valueAt(mouse): real {
             return Math.max(0, Math.min(1, root.vertical ? 1 - mouse.y / Math.max(1, height) : mouse.x / Math.max(1, width)))
         }
@@ -83,6 +88,7 @@ Item {
             root.moved(root.dragValue)
         }
         onPositionChanged: mouse => {
+            wheelIntent.track(mouse.x, mouse.y)
             if (!pressed || root.dragValue < 0) return
             root.dragValue = valueAt(mouse)
             root.moved(root.dragValue)
@@ -93,7 +99,9 @@ Item {
         }
         onCanceled: root.dragValue = -1
         property real wheelAccumulator: 0
+        IrisWheelIntent { id: wheelIntent; hovered: pointer.containsMouse }
         onWheel: wheel => {
+            if (!wheelIntent.take(wheel)) return
             const delta = (wheel.angleDelta.y || wheel.angleDelta.x) || (wheel.pixelDelta.y || wheel.pixelDelta.x) * 4
             pointer.wheelAccumulator += delta
             const steps = Math.trunc(pointer.wheelAccumulator / 120)

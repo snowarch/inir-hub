@@ -88,7 +88,7 @@ Item {
         cursorShape: root.seekable ? Qt.PointingHandCursor : Qt.ArrowCursor
         function valueAt(px: real): real { return Math.max(0, Math.min(1, px / Math.max(1, width))) }
         onPressed: mouse => { root.forceActiveFocus(); root.dragValue = valueAt(mouse.x); root.moved(root.dragValue) }
-        onPositionChanged: mouse => { if (pressed) { root.dragValue = valueAt(mouse.x); root.moved(root.dragValue) } }
+        onPositionChanged: mouse => { wheelIntent.track(mouse.x, mouse.y); if (pressed) { root.dragValue = valueAt(mouse.x); root.moved(root.dragValue) } }
         onReleased: {
             if (root.dragValue >= 0) root.seekRequested(root.dragValue)
             root.dragValue = -1
@@ -96,7 +96,9 @@ Item {
         onCanceled: root.dragValue = -1
         preventStealing: true
         property real wheelAccumulator: 0
+        IrisWheelIntent { id: wheelIntent; hovered: pointer.containsMouse }
         onWheel: wheel => {
+            if (!wheelIntent.take(wheel)) return
             const delta = (wheel.angleDelta.y || wheel.angleDelta.x) || (wheel.pixelDelta.y || wheel.pixelDelta.x) * 4
             pointer.wheelAccumulator += delta
             const steps = Math.trunc(pointer.wheelAccumulator / 120)

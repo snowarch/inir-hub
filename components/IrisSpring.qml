@@ -21,11 +21,11 @@ Item {
     property bool running: false
     readonly property bool moving: root.running
 
-    property real from: 0
-    property real elapsed: 0
+    property real target: 0
+    property var segments: []
+    property real lastTime: 0
 
     property real clock: 0
-    property real lastClock: 0
     NumberAnimation on clock {
         running: root.running
         from: 0
@@ -33,48 +33,82 @@ Item {
         duration: 1000
         loops: Animation.Infinite
     }
-    onRunningChanged: root.lastClock = root.clock
 
-    function params(): var {
-        const intent = root.intent !== "auto" ? root.intent : root.to >= root.value ? "emerge" : "recede"
-        return IrisStyle.springFor(intent, root.surface)
+    function params(intent: string): var {
+        const resolved = root.intent !== "auto" ? root.intent : intent
+        return IrisStyle.springFor(resolved, root.surface)
     }
     function jump(): void {
         root.running = false
+        root.segments = []
         root.velocity = 0
+        root.target = root.to
         root.value = root.to
     }
+    // Primed on the first tick, never at the kick: between a retarget and the
+    // frame that follows it the main thread may spend tens of milliseconds
+    // (laying a page out, reloading Config, swapping a composition), and that
+    // wait was charged to the motion. On an expo-out curve a single 34 ms step
+    // is half the distance, so every morph that started on a busy frame jumped
+    // to its middle and crawled from there — the motion never seen leaving.
+    function start(): void {
+        if (root.running) return
+        root.lastTime = 0
+        root.running = true
+    }
     function kick(): void {
-        if (!root.animate || root.params().response <= 0) { root.jump(); return }
+        const p = root.params(root.to >= root.value ? "emerge" : "recede")
+        if (!root.animate || p.response <= 0) { root.jump(); return }
         if (Math.abs(root.value - root.to) < root.epsilon && Math.abs(root.velocity) < root.epsilon * 12) {
             root.jump()
             return
         }
-        root.from = root.value
-        root.elapsed = 0
-        root.running = true
+        if (p.curve) {
+            const delta = root.to - (root.segments.length > 0 ? root.target : root.value)
+            root.target = root.to
+            if (Math.abs(delta) >= root.epsilon)
+                root.segments = root.segments.concat([{ delta: delta, age: 0, response: p.response, curve: p.curve }])
+        } else {
+            root.segments = []
+            root.target = root.to
+        }
+        root.start()
     }
     onToChanged: root.kick()
     onAnimateChanged: if (!root.animate) root.jump()
-    Component.onCompleted: root.value = root.to
+    Component.onCompleted: { root.target = root.to; root.value = root.to }
 
     onClockChanged: {
         if (!root.running) return
-        let frame = root.clock - root.lastClock
-        if (frame < 0) frame += 1
-        root.lastClock = root.clock
-        if (frame <= 0) return
-        const p = root.params()
+        const now = Date.now()
+        if (root.lastTime <= 0) { root.lastTime = now; return }
+        const dt = Math.min(0.034, Math.max(0, (now - root.lastTime) / 1000))
+        root.lastTime = now
+        if (dt <= 0) return
+        const p = root.params(root.to >= root.value ? "emerge" : "recede")
         if (p.response <= 0) { root.jump(); return }
-        const dt = Math.min(frame, 0.05)
-        if (p.curve) {
-            root.elapsed += dt * 1000
-            if (root.elapsed >= p.response) { root.jump(); return }
-            const next = root.from + (root.to - root.from) * IrisStyle.cubicBezier(p.curve, root.elapsed / p.response)
-            root.velocity = (next - root.value) / dt
-            root.value = Math.max(root.minimum, next)
-            return
+
+        if (root.segments.length > 0 || p.curve) {
+            let offset = 0
+            const alive = []
+            for (const segment of root.segments) {
+                segment.age += dt * 1000
+                if (segment.age >= segment.response) continue
+                offset += segment.delta * (1 - IrisStyle.cubicBezier(segment.curve, segment.age / segment.response))
+                alive.push(segment)
+            }
+            root.segments = alive
+            if (alive.length === 0 && !p.curve) {
+                root.value = root.to - offset
+            } else {
+                if (alive.length === 0) { root.jump(); return }
+                const next = Math.max(root.minimum, root.to - offset)
+                root.velocity = (next - root.value) / dt
+                root.value = next
+                return
+            }
         }
+
         const w = 2 * Math.PI / (p.response / 1000)
         const zeta = 1 - p.bounce
         const x0 = root.value - root.to

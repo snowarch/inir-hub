@@ -66,6 +66,8 @@ Item {
                         if (wheel.currentIndex !== wanted) wheel.currentIndex = wanted
                     }
                     Component.onCompleted: wheel.follow()
+                    IrisWheelIntent { id: wheelIntent; target: wheel; hovered: wheelHover.hovered }
+                    HoverHandler { id: wheelHover; onPointChanged: wheelIntent.track(point.position.x, point.position.y) }
                     Connections {
                         target: root
                         function onValuesChanged(): void { wheel.follow() }
@@ -91,6 +93,7 @@ Item {
                         font.weight: figure.distance < 0.5 ? Font.Bold : Font.Medium
                     }
                     WheelHandler {
+                        enabled: wheelIntent.armed
                         acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
                         property real accumulator: 0
                         onWheel: event => {

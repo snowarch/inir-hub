@@ -3,6 +3,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Layouts
 import Quickshell
+import Quickshell.Widgets
 import qs
 import qs.services
 import qs.modules.common
@@ -114,9 +115,6 @@ Loader {
             open: true
             origin: ({ x: popup.margin, y: popup.margin, width: Math.round(28 * root.d), height: Math.round(28 * root.d), radius: IrisStyle.radiusTile })
             contentReady: column.implicitHeight > 0
-            contentScaleFrom: 1
-            contentFadeStart: 0.12
-            contentFadeSpan: 0.4
             radius: IrisStyle.surfaceRadius("menus", IrisStyle.radiusCard)
             x: popup.margin
             y: popup.margin
@@ -172,11 +170,11 @@ Loader {
                         Component {
                             id: separatorComponent
                             Item {
-                                implicitHeight: Math.round(9 * root.d)
+                                implicitHeight: Math.round(13 * root.d)
                                 Rectangle {
                                     anchors.verticalCenter: parent.verticalCenter
-                                    x: Math.round(10 * root.d)
-                                    width: parent.width - Math.round(20 * root.d)
+                                    x: Math.round(12 * root.d)
+                                    width: parent.width - Math.round(24 * root.d)
                                     height: 1
                                     color: IrisStyle.hairlineStrong
                                 }
@@ -195,6 +193,7 @@ Loader {
                                         required property int index
                                         readonly property bool accent: tile.modelData.accent === true
                                         readonly property bool lit: popup.isStop(row.index, tile.index)
+                                        readonly property string image: String(tile.modelData.image ?? "")
                                         Layout.fillWidth: true
                                         implicitWidth: Math.round(70 * root.d)
                                         implicitHeight: Math.round(62 * root.d)
@@ -204,7 +203,7 @@ Loader {
                                         Accessible.name: tile.modelData.text ?? ""
                                         onContainsMouseChanged: if (containsMouse) popup.focusStop(row.index, tile.index)
                                         onClicked: popup.run(tile.modelData.action)
-                                        Rectangle {
+                                        ClippingRectangle {
                                             anchors.fill: parent
                                             radius: IrisStyle.radiusTile
                                             scale: tile.pressed ? IrisStyle.pressScale(0.95) : 1
@@ -213,6 +212,20 @@ Loader {
                                                 : (tile.lit ? IrisStyle.fillHover : IrisStyle.fillQuiet)
                                             Behavior on color { ColorAnimation { duration: IrisStyle.duration(110) } }
                                             Behavior on scale { NumberAnimation { duration: IrisStyle.feedbackDuration } }
+                                            Image {
+                                                anchors.fill: parent
+                                                visible: tile.image.length > 0 && status === Image.Ready
+                                                source: tile.image.length > 0 ? "file://" + tile.image.replace(/^file:\/\//, "") : ""
+                                                sourceSize.width: Math.round(parent.width * 2)
+                                                fillMode: Image.PreserveAspectCrop
+                                                asynchronous: true
+                                                cache: false
+                                            }
+                                            Rectangle {
+                                                anchors.fill: parent
+                                                visible: tile.image.length > 0
+                                                color: IrisStyle.mediaScrim
+                                            }
                                         }
                                         ColumnLayout {
                                             anchors.centerIn: parent
@@ -223,13 +236,13 @@ Loader {
                                                 text: tile.modelData.iconName ?? ""
                                                 fill: 1
                                                 iconSize: Math.round(20 * root.d)
-                                                color: tile.accent ? IrisStyle.onAccent : IrisStyle.text
+                                                color: tile.accent ? IrisStyle.onAccent : tile.image.length > 0 ? IrisStyle.onMedia : IrisStyle.text
                                             }
                                             IrisText {
                                                 Layout.fillWidth: true
                                                 horizontalAlignment: Text.AlignHCenter
                                                 text: tile.modelData.text ?? ""
-                                                color: tile.accent ? IrisStyle.onAccent : IrisStyle.text
+                                                color: tile.accent ? IrisStyle.onAccent : tile.image.length > 0 ? IrisStyle.onMedia : IrisStyle.text
                                                 font.pixelSize: 11 * IrisStyle.typeScale
                                                 font.weight: Font.DemiBold
                                                 elide: Text.ElideRight
@@ -248,7 +261,7 @@ Loader {
                                 readonly property bool lit: menuItem.usable && popup.isStop(row.index, -1)
                                 readonly property bool danger: row.modelData?.danger === true
                                 implicitWidth: itemRow.implicitWidth + Math.round(24 * root.d)
-                                implicitHeight: Math.round(32 * root.d)
+                                implicitHeight: Math.round(34 * root.d)
                                 enabled: menuItem.usable
                                 opacity: menuItem.usable ? 1 : 0.4
                                 hoverEnabled: true
@@ -272,7 +285,8 @@ Loader {
                                     anchors.rightMargin: Math.round(12 * root.d)
                                     spacing: Math.round(10 * root.d)
                                     MaterialSymbol {
-                                        visible: String(row.modelData?.iconName ?? "").length > 0
+                                        Layout.preferredWidth: Math.round(20 * root.d)
+                                        horizontalAlignment: Text.AlignHCenter
                                         text: row.modelData?.iconName ?? ""
                                         iconSize: Math.round(17 * root.d)
                                         color: menuItem.danger ? IrisStyle.danger : menuItem.lit ? IrisStyle.text : IrisStyle.subtext
