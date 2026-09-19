@@ -9,6 +9,7 @@ import qs.services
 import qs.modules.common
 import qs.modules.common.functions
 import qs.modules.common.widgets
+import qs.modules.iris.components
 
 Variants {
     id: root
@@ -30,11 +31,18 @@ Variants {
         readonly property bool externalWallpaper: AwwwBackend.supportsVisibleMainWallpaper(
             panel.configuredPath, "fill", false, false)
             && !Wallpapers.internalPreviewActive
+        readonly property bool desktopMenuOpen: desktopMenu.active
 
         screen: modelData
         exclusionMode: ExclusionMode.Ignore
         WlrLayershell.layer: WlrLayer.Bottom
         WlrLayershell.namespace: "quickshell:iris-background"
+        // The lightweight background is used specifically when desktop widgets
+        // are disabled. Bare-desktop actions are shell actions, not widget
+        // actions, so keep the surface pointer-capable and only request keyboard
+        // focus while its menu is actually open.
+        WlrLayershell.keyboardFocus: panel.desktopMenuOpen
+            ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
         anchors { top: true; bottom: true; left: true; right: true }
         color: "transparent"
 
@@ -78,6 +86,74 @@ Variants {
             anchors.fill: parent
             visible: !panel.externalWallpaper && panel.effectivePath.length === 0
             color: Appearance.m3colors.m3background
+        }
+
+        MouseArea {
+            anchors.fill: parent
+            z: 20
+            acceptedButtons: Qt.RightButton | Qt.LeftButton
+            onClicked: function(mouse) {
+                if (mouse.button === Qt.LeftButton) {
+                    if (desktopMenu.active) desktopMenu.close()
+                    return
+                }
+                desktopMenuAnchor.x = mouse.x
+                desktopMenuAnchor.y = mouse.y
+                desktopMenu.requestOpen()
+            }
+        }
+
+        Item {
+            id: desktopMenuAnchor
+            z: 21
+            width: 1
+            height: 1
+        }
+
+        // Keep the normal iRiS desktop menu available even when the heavy
+        // desktop-widget canvas is intentionally unloaded. The Widgets tile
+        // enables that module before entering edit mode instead of opening an
+        // editor with no canvas behind it.
+        IrisDesktopMenu {
+            id: desktopMenu
+            z: 22
+            anchorItem: desktopMenuAnchor
+            model: [
+                { type: "quick", items: [
+                    { text: Translation.tr("Wallpaper"), iconName: "wallpaper",
+                        image: panel.video || panel.gif
+                            ? (Config.options?.background?.thumbnailPath ?? "") : panel.previewPath,
+                        action: () => {
+                            GlobalStates.wallpaperSelectorTargetMonitor = panel.monitorName
+                            GlobalActions.runLauncher(["wallpaperSelector", "toggle"])
+                        } },
+                    { text: Translation.tr("Widgets"), iconName: "widgets",
+                        action: () => {
+                            Config.setNestedValue("iris.modules.desktopWidgets", true)
+                            GlobalStates.setWidgetEditMode(true)
+                        } },
+                    { text: Translation.tr("Studio"), iconName: "palette",
+                        action: () => { GlobalStates.irisStudioOpen = true } },
+                    { text: Translation.tr("Search"), iconName: "search",
+                        action: () => { GlobalStates.searchOpen = true } }
+                ] },
+                { type: "separator" },
+                { text: Translation.tr("Edit iRiS"), iconName: "edit",
+                    action: () => { GlobalStates.irisEdit = true } },
+                { text: Translation.tr("Quick controls"), iconName: "tune",
+                    action: () => { GlobalStates.controlPanelOpen = true } },
+                { text: Translation.tr("Settings"), iconName: "settings",
+                    action: () => {
+                        Quickshell.execDetached([Quickshell.shellPath("scripts/inir"),
+                            "iris", "settings", ""])
+                    } },
+                { type: "separator" },
+                { text: Translation.tr("Reload shell"), iconName: "refresh",
+                    action: () => {
+                        Quickshell.execDetached(["/usr/bin/bash",
+                            Quickshell.shellPath("scripts/restart-shell.sh")])
+                    } }
+            ]
         }
     }
 }
