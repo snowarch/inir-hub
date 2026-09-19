@@ -19,7 +19,9 @@ Item {
     readonly property string screenName: root.screenData?.name ?? ""
     readonly property var options: Config.options?.iris?.controlCenter ?? ({})
     readonly property var barOptions: Config.options?.iris?.bar ?? ({})
-    readonly property bool barBottom: String(root.barOptions?.position ?? "top") === "bottom"
+    readonly property string islandEdge: IrisFrame.islandEdge
+    readonly property bool barBottom: root.islandEdge === "bottom"
+    readonly property bool islandSide: root.islandEdge === "left" || root.islandEdge === "right"
     readonly property bool morphOpen: GlobalStates.controlPanelOpen
         && root.screenName === (GlobalStates.focusedScreen?.name ?? "")
         && (String(Config.options?.iris?.controlCenter?.opens ?? "island") !== "island" || GlobalStates.irisMorphOwner === "stage")
@@ -77,7 +79,7 @@ Item {
         ? IrisFrame.place(root.placementOrigin, panel.width, panel.height, root.width, root.height, panel.radius,
             root.avoidRects, (Config.options?.iris?.appearance?.surfaces?.cards?.joinOrigin ?? true) ? -IrisStyle.weld : IrisFrame.bodyAir) : null
     readonly property real panelWidth: Math.min(root.width - 16, Math.max(320, Number(root.options?.width ?? 360)) * IrisStyle.density)
-    readonly property real contentPadding: 16 * IrisStyle.density
+    readonly property real contentPadding: IrisStyle.concentricPad(IrisStyle.surfaceRadius("controlCenter", IrisStyle.radiusPanel), 16 * IrisStyle.density)
     readonly property real edge: Math.round(8 * IrisStyle.density) + IrisFrame.band
     readonly property real edgeLeft: Math.round(8 * IrisStyle.density) + IrisFrame.clear("left")
     readonly property real edgeRight: Math.round(8 * IrisStyle.density) + IrisFrame.clear("right")
@@ -105,27 +107,40 @@ Item {
         open: root.morphOpen
         motionSurface: "controlCenter"
         color: IrisStyle.bodySurface
+        fieldBacked: true
         contentReady: contents.contentHeight > 0
         radius: IrisStyle.surfaceRadius("controlCenter", IrisStyle.radiusPanel)
         origin: root.fromPiece ? root.origin : null
         onClosed: if (GlobalStates.irisMorphOwner === "stage" && !GlobalStates.settingsOverlayOpen) GlobalStates.irisMorphOwner = ""
         light: IrisStyle.surfaceLight("controlCenter", IrisStyle.wallpaperLight)
         lightFrom: root.placement ? (root.placement.sideways ? (root.placement.towardsLeft ? "right" : "left") : (root.placement.towardsUp ? "bottom" : "top"))
-            : root.barBottom ? "bottom" : "top"
+            : root.islandSide ? root.islandEdge : root.barBottom ? "bottom" : "top"
         x: root.placement ? root.placement.x
+            : root.islandSide && root.islandBody ? (root.islandEdge === "left"
+                ? root.islandBody.x + root.islandBody.width - IrisStyle.weld
+                : root.islandBody.x - width + IrisStyle.weld)
             : root.origin
             ? Math.max(root.edgeLeft, Math.min(root.width - width - root.edgeRight,
                 root.origin.x + root.origin.width / 2 - width / 2))
             : (root.width - width) / 2
         y: root.placement ? root.placement.y
             : root.holding ? Math.max(12, Math.min(root.heldTop, root.height - height - root.edgeGap))
+            : root.islandSide ? Math.round(Math.max(IrisFrame.inset("top") + root.edge, Math.min(root.height - height - IrisFrame.inset("bottom") - root.edge,
+                (root.origin ? root.origin.y + root.origin.height / 2 : (root.islandBody ? root.islandBody.y + root.islandBody.height / 2 : root.height / 2)) - height / 2)))
             : root.barBottom ? (root.islandBody ? root.islandBody.y - height + IrisStyle.weld
                 : root.height - height - root.edgeGap - IrisFrame.band)
             : (root.islandBody ? root.islandBody.y + root.islandBody.height - IrisStyle.weld
                 : root.edgeGap + IrisFrame.band)
         onYChanged: if (!root.holding) root.heldTop = panel.y
         width: root.panelWidth
-        height: Math.min(root.height - root.edgeGap - 12, contents.contentHeight + root.contentPadding * 2)
+        readonly property real room: {
+            const top = IrisFrame.clear("top") + Math.round(8 * IrisStyle.density)
+            const bottom = IrisFrame.clear("bottom") + Math.round(8 * IrisStyle.density)
+            const body = root.islandBody
+            if (root.placement || root.islandSide || !body) return root.height - top - bottom
+            return root.barBottom ? body.y - top : root.height - (body.y + body.height) - bottom
+        }
+        height: Math.min(panel.room, contents.contentHeight + root.contentPadding * 2)
         Behavior on y {
             enabled: panel.settled
             NumberAnimation { duration: IrisStyle.morphDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: IrisStyle.morphCurve }

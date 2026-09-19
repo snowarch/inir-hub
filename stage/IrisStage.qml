@@ -4,6 +4,7 @@ import QtQuick
 import QtQuick.Effects
 import Quickshell
 import Quickshell.Wayland
+import Quickshell.Widgets
 import qs
 import qs.services
 import qs.modules.common
@@ -38,6 +39,9 @@ Item {
         return IrisPieces.configPath(root.isExtra(slot) ? slot.slice(6) : slot)
     }
     function placeName(slot: string): string {
+        return root.absorption.bySlot[slot] ? "island" : root.configuredPlace(slot)
+    }
+    function configuredPlace(slot: string): string {
         const o = root.optionsFor(slot)
         if (root.isApp(slot)) return String(o?.place ?? IrisPieces.defaultPlace)
         if (root.isExtra(slot)) return (o?.enable ?? false) ? String(o?.place ?? IrisPieces.defaultPlace) : "island"
@@ -109,26 +113,37 @@ Item {
         const edge = (root.attached ? IrisFrame.pieceInset : root.margin) + half
         const g = root.island
         const clearance = root.size / 2 + Math.round(10 * root.d)
-        const top = g && !g.bottomEdge
+        const side = g?.edge ?? (g?.bottomEdge ? "bottom" : "top")
+        const top = g && side === "top"
             ? Math.max(edge, g.fullWidth ? g.y + g.height + clearance : g.y + g.bubble / 2) : edge
-        const bottom = g && g.bottomEdge
+        const bottom = g && side === "bottom"
             ? Math.min(root.height - edge, g.fullWidth ? g.y - clearance : g.y + g.height - g.bubble / 2)
             : root.height - edge
+        const left = g && side === "left"
+            ? Math.max(edge, g.fullWidth ? g.x + g.width + clearance : g.x + g.width / 2) : edge
+        const right = g && side === "right"
+            ? Math.min(root.width - edge, g.fullWidth ? g.x - clearance : g.x + g.width / 2) : root.width - edge
         const at = {
-            "top-left": { x: edge, y: top },
-            "top-right": { x: root.width - edge, y: top },
-            "left": { x: edge, y: root.height / 2 },
-            "right": { x: root.width - edge, y: root.height / 2 },
-            "bottom-left": { x: edge, y: bottom },
-            "bottom-right": { x: root.width - edge, y: bottom }
+            "top-left": { x: left, y: top },
+            "top-right": { x: right, y: top },
+            "left": { x: left, y: root.height / 2 },
+            "right": { x: right, y: root.height / 2 },
+            "bottom-left": { x: left, y: bottom },
+            "bottom-right": { x: right, y: bottom }
         }
         return IrisPieces.zones.map(zone => ({ zone: zone, x: at[zone].x, y: at[zone].y }))
     }
     function slotCentre(slot: string): point {
         const g = root.island
         if (!g) return Qt.point(root.width / 2, root.margin + root.size / 2)
-        const cy = g.bottomEdge ? g.y + g.height - g.bubble / 2 : g.y + g.bubble / 2
         const step = g.bubble + g.gap
+        if (g.vertical) {
+            const cx = g.x + g.width / 2
+            if (slot === "left") return Qt.point(cx, g.y - g.gap - g.bubble / 2)
+            if (slot === "utility") return Qt.point(cx, g.y + g.height + (g.auxiliarySlot - 1) * step + g.gap + g.bubble / 2)
+            return Qt.point(cx, g.y + g.height + g.gap + g.bubble / 2)
+        }
+        const cy = g.bottomEdge ? g.y + g.height - g.bubble / 2 : g.y + g.bubble / 2
         if (slot === "left") return Qt.point(g.x - g.gap - g.bubble / 2, cy)
         if (slot === "utility") return Qt.point(g.x + g.width + (g.auxiliarySlot - 1) * step + g.gap + g.bubble / 2, cy)
         return Qt.point(g.x + g.width + g.gap + g.bubble / 2, cy)
@@ -141,14 +156,117 @@ Item {
         return root.allSlots.filter(slot => root.placeName(slot) === zone && root.kindOf(slot).length > 0)
     }
     function stacks(zone: string): bool { return zone === "left" || zone === "right" }
-    function placeOf(slot: string): point {
-        const zone = root.placeName(slot)
+    readonly property real edgeLine: (root.attached ? IrisFrame.pieceInset : root.margin) + root.size / 2
+    function edgePoint(side: string, fx: real, fy: real): point {
+        const lo = root.edgeLine + Math.max(IrisFrame.cornerRadius, root.size / 2)
+        const along = (value, span) => Math.max(lo, Math.min(span - lo, value * span))
+        if (side === "top") return Qt.point(along(fx, root.width), root.edgeLine)
+        if (side === "bottom") return Qt.point(along(fx, root.width), root.height - root.edgeLine)
+        if (side === "left") return Qt.point(root.edgeLine, along(fy, root.height))
+        return Qt.point(root.width - root.edgeLine, along(fy, root.height))
+    }
+
+    readonly property var dockBodyNow: {
+        const shapes = GlobalStates.irisDockBody?.[root.screenName] ?? []
+        return (Array.isArray(shapes) ? shapes : []).find(shape => shape?.id === "dock") ?? null
+    }
+    property var dockHeld: null
+    onDockBodyNowChanged: {
+        const b = root.dockBodyNow
+        if (!b) return
+        const vertical = IrisFrame.vertical(IrisFrame.dockEdge)
+        const lo = vertical ? b.y : b.x
+        const length = vertical ? b.height : b.width
+        const held = root.dockHeld
+        if (held && held.edge === IrisFrame.dockEdge && Math.abs(held.lo - lo) < 1 && Math.abs(held.length - length) < 1) return
+        root.dockHeld = { edge: IrisFrame.dockEdge, lo: lo, length: length }
+    }
+    readonly property bool dockOn: Config.options?.iris?.dock?.enable ?? true
+    readonly property string islandSideName: root.island ? String(root.island.edge ?? (root.island.bottomEdge ? "bottom" : "top")) : ""
+    function ownerSpan(owner: string, side: string): var {
+        const vertical = IrisFrame.vertical(side)
+        if (owner === "island") {
+            const g = root.island
+            if (g.fullWidth) return { lo: -Infinity, hi: Infinity }
+            const lo = vertical ? g.y : g.x
+            const step = (g.bubble ?? root.size) + (g.gap ?? 0)
+            return { lo: lo - step, hi: lo + (vertical ? g.height : g.width) + Math.max(1, g.auxiliarySlot ?? 1) * step }
+        }
+        const held = root.dockHeld
+        if (held && held.edge === side) return { lo: held.lo, hi: held.lo + held.length }
+        const span = vertical ? root.height : root.width
+        const guess = ((TaskbarApps.apps ?? []).length + 2) * (IrisFrame.dockIcon + 12 * root.d)
+        return { lo: (span - guess) / 2, hi: (span + guess) / 2 }
+    }
+    function ownerOf(side: string): string {
+        if (side.length === 0) return ""
+        if (root.island && root.islandSideName === side) return "island"
+        if (root.dockOn && IrisFrame.dockEdge === side) return "dock"
+        return ""
+    }
+    readonly property var absorption: {
+        const bySlot = {}
+        const island = []
+        const islandSlots = []
+        const dock = []
+        const gap = Math.round(12 * root.d + (IrisFrame.piecesMelt ? (IrisStyle.fuseEdge + root.edgeFuse) / 4 : 0))
+        const half = root.size / 2
+        for (const slot of root.allSlots) {
+            const place = root.configuredPlace(slot)
+            if (place === "island" || place === "free" || root.kindOf(slot).length === 0) continue
+            const side = IrisFrame.edgeOf(place)
+            const owner = root.ownerOf(side)
+            if (owner.length === 0) continue
+            const vertical = IrisFrame.vertical(side)
+            const members = place.startsWith("edge:") ? [slot]
+                : root.allSlots.filter(other => root.configuredPlace(other) === place && root.kindOf(other).length > 0)
+            let lo = Infinity
+            let hi = -Infinity
+            for (const member of members) {
+                const p = root.linePoint(member, place, members)
+                lo = Math.min(lo, (vertical ? p.y : p.x) - half)
+                hi = Math.max(hi, (vertical ? p.y : p.x) + half)
+            }
+            const block = root.ownerSpan(owner, side)
+            if (hi + gap <= block.lo || lo - gap >= block.hi) continue
+            bySlot[slot] = owner
+            if (root.isApp(slot)) continue
+            if (owner === "island") {
+                if (root.isExtra(slot)) island.push(slot.slice(6))
+                else islandSlots.push(slot)
+            } else {
+                dock.push({ slot: slot, kind: root.isExtra(slot) ? slot.slice(6) : root.kindOf(slot) })
+            }
+        }
+        return { bySlot: bySlot, island: island, islandSlots: islandSlots, dock: dock }
+    }
+    onAbsorptionChanged: root.publishAbsorbed()
+    Component.onDestruction: {
+        if (root.screenName.length === 0) return
+        const next = Object.assign({}, GlobalStates.irisAbsorbed ?? {})
+        delete next[root.screenName]
+        GlobalStates.irisAbsorbed = next
+    }
+    function publishAbsorbed(): void {
+        if (root.screenName.length === 0) return
+        const value = { island: root.absorption.island, islandSlots: root.absorption.islandSlots, dock: root.absorption.dock }
+        const current = GlobalStates.irisAbsorbed?.[root.screenName]
+        if (JSON.stringify(current ?? null) === JSON.stringify(value)) return
+        const next = Object.assign({}, GlobalStates.irisAbsorbed ?? {})
+        next[root.screenName] = value
+        GlobalStates.irisAbsorbed = next
+    }
+    function placeOf(slot: string): point { return root.rawPlaceOf(slot) }
+    function linePoint(slot: string, zone: string, line: var): point {
+        if (zone.startsWith("edge:")) {
+            const o = root.optionsFor(slot)
+            return root.edgePoint(zone.slice(5), Number(o?.fx ?? 0.5), Number(o?.fy ?? 0.5))
+        }
         const found = root.zones.find(z => z.zone === zone)
         if (!found) {
             const o = root.optionsFor(slot)
             return root.clampPoint(Number(o?.fx ?? 0.5) * root.width, Number(o?.fy ?? 0.5) * root.height)
         }
-        const line = root.lineOf(zone)
         const index = Math.max(0, line.indexOf(slot))
         const bar = root.barred && line.length > 1
         const step = root.size + (bar ? root.barGap : root.looseGap)
@@ -158,6 +276,10 @@ Item {
             : zone.startsWith("bottom") ? found.y - inset : found.y
         if (root.stacks(zone)) return Qt.point(x, y + (index - (line.length - 1) / 2) * step)
         return Qt.point(x + (zone.endsWith("left") ? index : -index) * step, y)
+    }
+    function rawPlaceOf(slot: string): point {
+        const zone = root.placeName(slot)
+        return root.linePoint(slot, zone, zone.startsWith("edge:") ? [slot] : root.lineOf(zone))
     }
     readonly property var rects: {
         const out = []
@@ -229,24 +351,47 @@ Item {
             height: Math.round((span.stacks ? hi : span.cross) + half) - y
         }
     }
+    readonly property real edgeFuse: IrisFrame.pieceJoin === "notch"
+        ? IrisStyle.edgeFuseFor(root.size, Number(root.options?.notchCurve ?? 100)) : IrisStyle.fuse
+    function meltInto(shape: var, side: string, sides: var): var {
+        if (!root.attached || side.length === 0) return Object.assign(shape, { fuse: IrisStyle.fuse, joins: "" })
+        if (!IrisFrame.piecesMelt) return Object.assign(shape, { fuse: IrisStyle.fuse, joins: IrisFrame.framed ? "frame" : "" })
+        const reach = Math.min(shape.width, shape.height) / 2 + 1
+        const grown = Object.assign({}, shape, { fuse: root.edgeFuse, paints: true,
+            joins: IrisFrame.framed ? "frame" : "pieceEdge:" + side })
+        if (side === "top") { grown.y -= reach; grown.height += reach }
+        else if (side === "bottom") grown.height += reach
+        else if (side === "left") { grown.x -= reach; grown.width += reach }
+        else if (side === "right") grown.width += reach
+        if (!IrisFrame.framed && !sides.includes(side)) sides.push(side)
+        return grown
+    }
+    function edgeBody(side: string): var {
+        const deep = Math.max(8, root.edgeFuse)
+        const k = root.edgeFuse
+        if (side === "top") return { x: -2 * k, y: -deep - 1, width: root.width + 4 * k, height: deep, radius: 0, paints: true, fuse: 0, id: "pieceEdge:top" }
+        if (side === "bottom") return { x: -2 * k, y: root.height + 1, width: root.width + 4 * k, height: deep, radius: 0, paints: true, fuse: 0, id: "pieceEdge:bottom" }
+        if (side === "left") return { x: -deep - 1, y: -2 * k, width: deep, height: root.height + 4 * k, radius: 0, paints: true, fuse: 0, id: "pieceEdge:left" }
+        return { x: root.width + 1, y: -2 * k, width: deep, height: root.height + 4 * k, radius: 0, paints: true, fuse: 0, id: "pieceEdge:right" }
+    }
     readonly property var fieldShapes: {
         void (card.x + card.y + card.width + card.height + card.progress)
         const out = []
-        const edge = root.attached ? "frame" : ""
-        const edgeFuse = IrisStyle.fuse
+        const sides = []
         for (const plate of root.plates) {
-            out.push({ x: plate.x, y: plate.y, width: plate.width, height: plate.height,
-                radius: IrisStyle.pieceRadius(Math.min(plate.width, plate.height)), fuse: edgeFuse, id: "plate:" + plate.zone, joins: edge })
+            out.push(root.meltInto({ x: plate.x, y: plate.y, width: plate.width, height: plate.height,
+                radius: IrisStyle.pieceRadius(Math.min(plate.width, plate.height)), id: "plate:" + plate.zone },
+                IrisFrame.edgeOf(plate.zone), sides))
         }
         for (let i = 0; i < root.allSlots.length; i++) {
             const slot = root.allSlots[i]
             const rect = root.rects[i]
             if (!rect || root.plateAt(root.placeName(slot))) continue
             if (root.drag?.slot === slot || (landing.running && landing.slot === slot)) continue
-            out.push({ x: rect.x, y: rect.y, width: rect.size, height: rect.size, radius: IrisStyle.pieceRadius(rect.size),
-                fuse: root.placeName(slot) === "free" ? IrisStyle.fuse : edgeFuse,
-                id: "piece:" + slot, joins: root.placeName(slot) === "free" ? "" : edge })
+            out.push(root.meltInto({ x: rect.x, y: rect.y, width: rect.size, height: rect.size, radius: IrisStyle.pieceRadius(rect.size),
+                id: "piece:" + slot }, IrisFrame.edgeOf(root.placeName(slot)), sides))
         }
+        for (const side of sides) out.unshift(root.edgeBody(side))
         if (carried.shown && !root.carryingIsland) {
             const size = root.size * carried.scale
             out.push({ x: carried.px - size / 2, y: carried.py - size / 2,
@@ -278,17 +423,38 @@ Item {
 
     function resolve(x: real, y: real): var {
         if (!root.drag) return null
-        if (root.carryingIsland) return { zone: y > root.height / 2 ? "bottom" : "top" }
+        if (root.carryingIsland) {
+            const sides = [{ zone: "top", d: y }, { zone: "bottom", d: root.height - y },
+                { zone: "left", d: x }, { zone: "right", d: root.width - x }].sort((a, b) => a.d - b.d)
+            return { zone: sides[0].zone }
+        }
         if (!root.isExtra(root.drag.slot)) {
             const slot = root.slotCentre(root.drag.slot)
             if (Math.hypot(x - slot.x, y - slot.y) < root.attachDistance) return { zone: "island", x: slot.x, y: slot.y }
         }
+        const snapping = root.options?.snap ?? true
         let best = null
-        for (const z of (root.options?.snap ?? true) ? root.zones : []) {
+        for (const z of snapping ? root.zones : []) {
             const distance = Math.hypot(x - z.x, y - z.y)
             if (distance < root.snapDistance && (!best || distance < best.distance)) best = { zone: z.zone, x: z.x, y: z.y, distance: distance }
         }
         if (best) return best
+        if (snapping) {
+            const reach = root.snapDistance * 0.6
+            const sides = [
+                { side: "top", distance: Math.abs(y - root.edgeLine) },
+                { side: "bottom", distance: Math.abs(root.height - root.edgeLine - y) },
+                { side: "left", distance: Math.abs(x - root.edgeLine) },
+                { side: "right", distance: Math.abs(root.width - root.edgeLine - x) }
+            ].sort((a, b) => a.distance - b.distance)
+            const g = root.island
+            const clear = at => !g || at.x + root.size / 2 + root.looseGap < g.x || at.x - root.size / 2 - root.looseGap > g.x + g.width
+                || at.y + root.size / 2 + root.looseGap < g.y || at.y - root.size / 2 - root.looseGap > g.y + g.height
+            if (sides[0].distance < reach) {
+                const at = root.edgePoint(sides[0].side, x / Math.max(1, root.width), y / Math.max(1, root.height))
+                if (clear(at)) return { zone: "edge:" + sides[0].side, x: at.x, y: at.y }
+            }
+        }
         const free = root.clampPoint(x, y)
         return { zone: "free", x: free.x, y: free.y }
     }
@@ -306,14 +472,14 @@ Item {
         const path = root.configPath(slot)
         const updates = {}
         updates[path + ".place"] = place.zone
-        if (place.zone === "free") {
+        if (place.zone === "free" || place.zone.startsWith("edge:")) {
             updates[path + ".fx"] = Math.round(place.x / Math.max(1, root.width) * 10000) / 10000
             updates[path + ".fy"] = Math.round(place.y / Math.max(1, root.height) * 10000) / 10000
         }
         Config.setNestedValues(updates)
     }
 
-    Component.onCompleted: root.land()
+    Component.onCompleted: { root.land(); root.publishAbsorbed() }
     Connections {
         target: GlobalStates
         function onIrisBubbleDragChanged(): void { root.land() }
@@ -323,10 +489,8 @@ Item {
         if (!drag || !drag.released || landing.running) return
         const place = root.resolve(drag.x, drag.y)
         if (root.carryingIsland) {
-            const bottom = place.zone === "bottom"
-            const current = String(Config.options?.iris?.bar?.position ?? "top") === "bottom"
             GlobalStates.irisBubbleDrag = null
-            if (bottom !== current) Config.setNestedValue("iris.bar.position", bottom ? "bottom" : "top")
+            if (place.zone !== IrisFrame.islandEdge) Config.setNestedValue("iris.bar.position", place.zone)
             return
         }
         landing.slot = drag.slot
@@ -409,7 +573,10 @@ Item {
         y: bubble.floating ? bubble.rect.y : 0
         visible: bubble.floating
         property bool placed: false
-        onFloatingChanged: {
+        Component.onDestruction: if (root.controlIntentSlot === bubble.slot) root.controlIntentSlot = ""
+        Component.onCompleted: bubble.settle()
+        onFloatingChanged: bubble.settle()
+        function settle(): void {
             bubble.report()
             if (!bubble.floating) { bubble.placed = false; return }
             Qt.callLater(() => bubble.placed = bubble.floating)
@@ -438,7 +605,15 @@ Item {
             hovered: bubbleHover.hovered
         }
         property real wheelAccumulator: 0
-        HoverHandler { id: bubbleHover; cursorShape: Qt.PointingHandCursor }
+        HoverHandler {
+            id: bubbleHover
+            cursorShape: Qt.PointingHandCursor
+            onHoveredChanged: {
+                if (bubble.kind !== "controls" && bubble.kind !== "battery") return
+                if (bubbleHover.hovered) root.controlIntentSlot = bubble.slot
+                else if (root.controlIntentSlot === bubble.slot) root.controlIntentSlot = ""
+            }
+        }
         WheelHandler {
             enabled: bubble.kind === "sound" || bubble.kind === "mic"
             acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
@@ -534,17 +709,22 @@ Item {
     }
     Repeater {
         model: root.allSlots
-        FloatingBubble {
+        Loader {
+            id: bubbleSlot
             required property int index
             required property string modelData
-            slot: modelData
-            pieceIndex: index
+            z: 2
+            active: (root.rects[bubbleSlot.index] ?? null) !== null
+            sourceComponent: FloatingBubble {
+                slot: bubbleSlot.modelData
+                pieceIndex: bubbleSlot.index
+            }
         }
     }
 
     readonly property bool opensCards: String(root.options?.opens ?? "card") === "card"
     function toggleCard(slot: string, kind: string, rect: var): void {
-        const source = "float-" + slot
+        const source = rect?.source ?? "float-" + slot
         if (GlobalStates.irisBubbleCard?.source === source) { GlobalStates.irisBubbleCard = null; return }
         if (!rect) return
         GlobalStates.irisBubbleCard = { kind: kind, source: source, screen: root.screenName,
@@ -563,6 +743,8 @@ Item {
     }
 
     property string controlSlot: ""
+    property string controlIntentSlot: ""
+    readonly property bool controlIntent: root.controlIntentSlot.length > 0
     function toggleControls(slot: string, rect: var): void {
         if (GlobalStates.controlPanelOpen && GlobalStates.irisMorphOwner === "stage" && root.controlSlot === slot) {
             GlobalStates.controlPanelOpen = false
@@ -586,11 +768,12 @@ Item {
     }
     function publishOrigin(slot: string, rect: var): void {
         const zone = root.placeName(slot)
-        const plate = root.plateAt(zone)
+        const plate = root.absorption.bySlot[slot] ? null : root.plateAt(zone)
+        const inDock = String(rect?.source ?? "").startsWith("dock-")
         GlobalStates.irisMorphOwner = "stage"
         GlobalStates.irisMorphOrigin = { x: rect.x, y: rect.y, width: rect.size, height: rect.size,
             radius: IrisStyle.pieceRadius(rect.size), screen: root.screenName, owner: "stage",
-            fieldId: plate ? "plate:" + zone : "piece:" + slot,
+            fieldId: inDock ? "dock" : plate ? "plate:" + zone : "piece:" + slot,
             obstacle: plate ? { x: plate.x, y: plate.y, width: plate.width, height: plate.height } : null }
     }
     function activate(slot: string, kind: string, rect: var): void {
@@ -722,17 +905,35 @@ Item {
             Behavior on opacity { NumberAnimation { duration: IrisStyle.duration(120) } }
         }
     }
+    Rectangle {
+        readonly property bool shown: String(root.target?.zone ?? "").startsWith("edge:") && !(root.drag?.released ?? true)
+        width: root.size + 10 * root.d
+        height: width
+        x: Math.round((root.target?.x ?? 0) - width / 2)
+        y: Math.round((root.target?.y ?? 0) - height / 2)
+        radius: IrisStyle.pieceRadius(width)
+        visible: opacity > 0
+        opacity: shown ? 1 : 0
+        color: IrisStyle.tintFill(IrisStyle.accent)
+        border.width: Math.max(1, Math.round(1.5 * root.d))
+        border.color: IrisStyle.accent
+        Behavior on opacity { NumberAnimation { duration: IrisStyle.duration(120) } }
+    }
     Repeater {
-        model: root.carryingIsland ? ["top", "bottom"] : []
+        model: root.carryingIsland ? ["top", "bottom", "left", "right"] : []
         delegate: Rectangle {
             id: edgeHint
             required property string modelData
             readonly property bool active: root.target?.zone === edgeHint.modelData
-            width: Math.round(root.drag?.width ?? 160 * root.d)
-            height: Math.round(root.size)
-            x: Math.round((root.width - width) / 2)
-            y: edgeHint.modelData === "top" ? root.margin : root.height - height - root.margin
-            radius: height / 2
+            readonly property bool side: edgeHint.modelData === "left" || edgeHint.modelData === "right"
+            readonly property real long: Math.round(Math.max(root.drag?.width ?? 0, 160 * root.d))
+            width: edgeHint.side ? Math.round(root.size) : edgeHint.long
+            height: edgeHint.side ? edgeHint.long : Math.round(root.size)
+            x: edgeHint.modelData === "left" ? root.margin : edgeHint.modelData === "right" ? root.width - width - root.margin
+                : Math.round((root.width - width) / 2)
+            y: edgeHint.modelData === "top" ? root.margin : edgeHint.modelData === "bottom" ? root.height - height - root.margin
+                : Math.round((root.height - height) / 2)
+            radius: Math.min(width, height) / 2
             color: edgeHint.active ? IrisStyle.tintFill(IrisStyle.accent) : IrisStyle.veilLight
             border.width: Math.max(1, Math.round(1.5 * root.d))
             border.color: edgeHint.active ? IrisStyle.accent : IrisStyle.borderStrong
@@ -814,7 +1015,9 @@ Item {
 
     readonly property real cardPad: Math.round(16 * root.d)
     readonly property bool cardFloats: root.cardSource.startsWith("float-")
-    readonly property bool barBottom: String(Config.options?.iris?.bar?.position ?? "top") === "bottom"
+    readonly property string islandEdge: IrisFrame.islandEdge
+    readonly property bool barBottom: root.islandEdge === "bottom"
+    readonly property bool islandSide: root.islandEdge === "left" || root.islandEdge === "right"
     readonly property real cardAnchorCX: (root.cardAnchor?.x ?? 0) + (root.cardAnchor?.width ?? 0) / 2
     readonly property real cardAnchorCY: (root.cardAnchor?.y ?? 0) + (root.cardAnchor?.height ?? 0) / 2
     function clampX(x: real): real {
@@ -829,7 +1032,9 @@ Item {
     readonly property var cardOrigin: {
         const a = root.cardAnchor
         if (a && root.cardFromIslandPiece && a.bandY !== undefined)
-            return Object.assign({}, a, { obstacle: { x: a.x, y: a.bandY, width: a.width, height: a.bandHeight } })
+            return Object.assign({}, a, { obstacle: root.islandSide
+                ? { x: a.bandX ?? a.x, y: a.y, width: a.bandWidth ?? a.width, height: a.height }
+                : { x: a.x, y: a.bandY, width: a.width, height: a.bandHeight } })
         const g = root.island
         if (a && root.cardFromSatellite && g && g.width > 0) {
             const x = Math.min(a.x, g.x)
@@ -877,6 +1082,7 @@ Item {
     readonly property string cardOriginId: {
         if (root.cardHangs || root.cardFromIslandPiece) return "island"
         if (root.cardSource.startsWith("island-")) return "satellite:" + root.cardSource.slice(7)
+        if (root.cardSource.startsWith("dock-")) return "dock"
         const slot = root.cardFloats ? root.cardSource.slice(6) : ""
         if (slot.length === 0) return ""
         return root.plateAt(root.placeName(slot)) ? "plate:" + root.placeName(slot) : "piece:" + slot
@@ -908,21 +1114,26 @@ Item {
         open: root.cardOpen
         motionSurface: "cards"
         color: IrisStyle.bodySurface
+        fieldBacked: true
         contentReady: cardContent.contentHeight > 0
         radius: IrisStyle.surfaceRadius("cards", IrisStyle.radiusSheet)
         origin: root.cardAnchor
         light: IrisStyle.surfaceLight("cards", cardContent.light)
         lightFrom: !root.cardAnchor ? "top"
-            : root.cardHangs ? (root.barBottom ? "bottom" : "top")
+            : root.cardHangs ? root.islandEdge
             : root.cardPlacement?.sideways ? (root.cardPlacement.towardsLeft ? "right" : "left")
             : root.cardPlacement?.towardsUp ? "bottom" : "top"
         width: Math.min(root.width - 16, IrisStyle.surfaceWidth("cards", Math.round(360 * root.d)))
         height: Math.round(Math.min(root.height * 0.72, cardContent.contentHeight + (cardContent.bleeds ? 0 : root.cardPad * 2)))
         x: !root.cardAnchor ? (root.width - width) / 2
+            : root.cardHangs && root.islandSide ? (root.islandEdge === "left"
+                ? (root.cardAnchor?.bandX ?? 0) + (root.cardAnchor?.bandWidth ?? 0) - IrisStyle.weld
+                : (root.cardAnchor?.bandX ?? root.width) - width + IrisStyle.weld)
             : root.cardHangs ? root.clampX(root.cardAnchorCX - width / 2)
             : root.cardPlacement?.x ?? 0
         y: !root.cardAnchor ? root.cardEdge
             : !root.cardHangs ? root.cardPlacement?.y ?? 0
+            : root.islandSide ? Math.max(root.edgeClear("top"), Math.min(root.height - height - root.edgeClear("bottom"), root.cardAnchorCY - height / 2))
             : root.barBottom ? Math.max(root.edgeClear("top"), root.cardBandTop - height + IrisStyle.weld)
             : Math.min(root.height - height - root.edgeClear("bottom"), root.cardBandTop + root.cardBandHeight - IrisStyle.weld)
         Behavior on height {
@@ -939,9 +1150,8 @@ Item {
             readonly property bool fromLeft: card.x + card.width / 2 > root.width / 2
             width: Math.round(14 * root.d)
             height: Math.round(48 * root.d)
-            anchors.verticalCenter: parent.verticalCenter
-            anchors.left: cardResize.fromLeft ? parent.left : undefined
-            anchors.right: cardResize.fromLeft ? undefined : parent.right
+            x: cardResize.fromLeft ? 0 : parent.width - width
+            y: Math.round((parent.height - height) / 2)
             Rectangle {
                 anchors.centerIn: parent
                 width: Math.max(2, Math.round(3 * root.d))
@@ -970,22 +1180,57 @@ Item {
             }
         }
 
-        Flickable {
-            id: cardScroller
+        ClippingRectangle {
             anchors.fill: parent
-            anchors.margins: cardContent.bleeds ? 0 : root.cardPad
-            contentHeight: cardContent.contentHeight
-            boundsBehavior: Flickable.StopAtBounds
-            interactive: cardScroller.contentHeight > cardScroller.height + 1
-            clip: true
+            radius: card.radius
+            color: "transparent"
 
-            IrisCardContent {
-                id: cardContent
-                width: cardScroller.width
-                kind: root.cardKind
-                screenName: root.screenName
-                contentActive: root.cardPresent
-                onNavigate: root.closeCard()
+            Flickable {
+                id: cardScroller
+                readonly property bool moreAbove: cardScroller.contentY > 1
+                readonly property bool moreBelow: cardScroller.contentY + cardScroller.height < cardScroller.contentHeight - 1
+                anchors.fill: parent
+                anchors.margins: cardContent.bleeds ? 0 : root.cardPad
+                contentHeight: cardContent.contentHeight
+                boundsBehavior: Flickable.StopAtBounds
+                interactive: cardScroller.contentHeight > cardScroller.height + 1
+                clip: !cardContent.bleeds
+
+                IrisCardContent {
+                    id: cardContent
+                    width: cardScroller.width
+                    kind: root.cardKind
+                    screenName: root.screenName
+                    contentActive: root.cardPresent
+                    onNavigate: root.closeCard()
+                }
+            }
+
+            Rectangle {
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.top: parent.top
+                height: Math.round(22 * root.d)
+                opacity: cardContent.bleeds && cardScroller.moreAbove ? 1 : 0
+                visible: opacity > 0
+                gradient: Gradient {
+                    GradientStop { position: 0; color: IrisStyle.bodyScrim }
+                    GradientStop { position: 1; color: ColorUtils.applyAlpha(IrisStyle.bodyScrim, 0) }
+                }
+                Behavior on opacity { NumberAnimation { duration: IrisStyle.feedbackDuration; easing.type: IrisStyle.feedbackEasing } }
+            }
+            Rectangle {
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.bottom: parent.bottom
+                height: Math.round(34 * root.d)
+                opacity: cardContent.bleeds && cardScroller.moreBelow ? 1 : 0
+                visible: opacity > 0
+                gradient: Gradient {
+                    GradientStop { position: 0; color: ColorUtils.applyAlpha(IrisStyle.bodyScrim, 0) }
+                    GradientStop { position: 1; color: IrisStyle.bodyScrim }
+                }
+                Behavior on opacity { NumberAnimation { duration: IrisStyle.feedbackDuration; easing.type: IrisStyle.feedbackEasing } }
             }
         }
 

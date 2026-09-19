@@ -28,3 +28,5 @@ IrisSpring 1.0 IrisSpring.qml
 IrisWheelIntent 1.0 IrisWheelIntent.qml
 IrisNetworkList 1.0 IrisNetworkList.qml
 IrisBluetoothList 1.0 IrisBluetoothList.qml
+IrisGlassPane 1.0 IrisGlassPane.qml
+IrisLightWash 1.0 IrisLightWash.qml

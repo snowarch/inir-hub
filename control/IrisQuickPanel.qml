@@ -456,7 +456,10 @@ GridLayout {
                     id: groupRow
                     required property string modelData
                     readonly property var group: Notifications.groupsByAppName[modelData]
-                    readonly property var latest: groupRow.group?.notifications?.[groupRow.group.notifications.length - 1]
+                    readonly property var latest: {
+                        const n = groupRow.group?.notifications?.[groupRow.group.notifications.length - 1]
+                        return n ? { summary: String(n.summary ?? ""), body: String(n.body ?? ""), urgency: String(n.urgency ?? "") } : null
+                    }
                     Layout.fillWidth: true
                     spacing: 10 * root.d
                     IrisNotificationIcon {

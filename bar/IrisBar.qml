@@ -13,21 +13,30 @@ import qs.modules.iris.control
 import qs.modules.iris.field
 import qs.modules.iris.frame
 import qs.modules.iris.stage
+import qs.modules.iris.dock
 import qs.modules.iris.edit
 import qs.modules.iris.notificationPopup
 import qs.modules.iris.style
 import qs.modules.iris.components as IrisParts
 import qs.modules.iris.pieces
+import qs.modules.iris.settings
 
 Scope {
     id: root
 
     readonly property var options: Config.options?.iris?.bar ?? ({})
-    readonly property bool bottom: String(root.options?.position ?? "top") === "bottom"
+    readonly property string edge: IrisFrame.islandEdge
     readonly property int barHeight: Math.max(32, Math.round(Number(root.options?.height ?? 42) * IrisStyle.density))
     readonly property int restMargin: Math.max(0, Math.round(Number(root.options?.margin ?? 8) * IrisStyle.density))
     readonly property int outerMargin: (root.options?.notch ?? false) ? 0 : root.restMargin
     signal islandRequested(bool expanded, string page)
+    property string editScreen: ""
+    Connections {
+        target: GlobalStates
+        function onIrisEditChanged(): void {
+            if (GlobalStates.irisEdit) root.editScreen = GlobalStates.focusedScreen?.name ?? ""
+        }
+    }
 
     IpcHandler {
         target: "iris"
@@ -53,6 +62,35 @@ Scope {
             GlobalStates.irisBubbleCardRequest = ""
             GlobalStates.irisBubbleCardRequest = "media"
         }
+        function theme(action: string): string {
+            const verb = String(action).split(":")[0]
+            const arg = String(action).slice(verb.length + 1)
+            switch (verb) {
+            case "list":
+                return IrisThemes.all.map(entry => `${entry.id}\t${entry.name}${entry.id === IrisThemes.activeId ? (IrisThemes.modified ? "  (active, changed)" : "  (active)") : ""}`).join("\n")
+            case "apply": {
+                const found = IrisThemes.find(arg)
+                if (!found) return "Unknown theme: see `inir iris theme list`"
+                IrisThemes.apply(found)
+                return found.name
+            }
+            case "save":
+                return IrisThemes.save(arg, "")
+            case "import":
+                if (arg.length === 0) return "import:<path to a theme .json>"
+                IrisThemes.importFile(arg)
+                return "Importing into " + IrisThemes.folder
+            case "export": {
+                const found = arg.length > 0 ? IrisThemes.find(arg)
+                    : { id: IrisThemes.activeId, name: IrisThemes.active?.name ?? "My theme", values: IrisThemes.differences(IrisThemes.current()) }
+                return found ? IrisThemes.exportText(found) : "Unknown theme"
+            }
+            case "folder":
+                return IrisThemes.folder
+            default:
+                return "list | apply:<id> | save:<name> | import:<path> | export[:<id>] | folder"
+            }
+        }
         function settings(section: string): void {
             const page = SettingsPageRegistry.pages.findIndex(entry => entry.key === "iris")
             if (page >= 0) GlobalStates.openSettingsPage(page, section)
@@ -68,6 +106,11 @@ Scope {
                 updates[path + (extra ? ".enable" : ".place")] = extra ? false : "island"
             } else if (zones.includes(place)) {
                 updates[path + ".place"] = place
+            } else if (/^edge:(top|bottom|left|right)(:\d*\.?\d+)?$/.test(place)) {
+                const parts = place.split(":")
+                updates[path + ".place"] = "edge:" + parts[1]
+                const along = Math.min(1, Number(parts[2] ?? 0.5))
+                updates[path + (parts[1] === "top" || parts[1] === "bottom" ? ".fx" : ".fy")] = along
             } else {
                 const m = String(place).match(/^(\d*\.?\d+),(\d*\.?\d+)$/)
                 if (!m) return "Unknown place: a zone, x,y fractions, or island/off"
@@ -106,6 +149,23 @@ Scope {
             if (!["island", "left", "right", "full"].includes(name)) return "Unknown layout: island, left, right or full"
             Config.setNestedValue("iris.bar.layout", name)
             return name
+        }
+        function edge(name: string): string {
+            if (!IrisFrame.edges.includes(name)) return "Unknown edge: top, bottom, left or right"
+            Config.setNestedValue("iris.bar.position", name)
+            return name
+        }
+        function dockEdge(name: string): string {
+            if (name !== "auto" && !IrisFrame.edges.includes(name)) return "Unknown edge: auto, top, bottom, left or right"
+            Config.setNestedValue("iris.dock.position", name)
+            return IrisFrame.dockEdge
+        }
+        function zone(name: string, kinds: string): string {
+            const path = ({ start: "iris.bar.fullStart", center: "iris.bar.fullCenter", end: "iris.bar.fullEnd" })[name]
+            if (!path) return "Unknown zone: start, center or end"
+            const list = String(kinds).split(/[+\s]+/).filter(kind => kind.length > 0 && kind !== "none")
+            Config.setNestedValue(path, list)
+            return JSON.stringify(list)
         }
         function barPiece(kind: string, action: string): string {
             if (!IrisPieces.extraIds.includes(kind)) return "Unknown piece"
@@ -221,7 +281,8 @@ Scope {
         function adaptive(amount: string): string {
             const value = Math.round(Number(amount))
             if (isNaN(value)) return JSON.stringify({ strength: IrisMood.strength, luminance: IrisMood.luminance,
-                contrast: IrisMood.contrast, colorfulness: IrisMood.colorfulness, colors: IrisMood.colors.length })
+                contrast: IrisMood.contrast, colorfulness: IrisMood.colorfulness, colors: IrisMood.colors.length,
+                sampled: IrisMood.sampled, glassTint: IrisStyle.glassTint })
             Config.setNestedValue("iris.appearance.adaptive", Math.max(0, Math.min(100, value)))
             return String(Math.max(0, Math.min(100, value)))
         }
@@ -266,18 +327,20 @@ Scope {
         delegate: LazyLoader {
             id: windowLoader
             required property var modelData
-            property bool loadedBottom: false
-            Component.onCompleted: windowLoader.loadedBottom = root.bottom
+            property string loadedEdge: "top"
+            readonly property bool loadedBottom: windowLoader.loadedEdge === "bottom"
+            readonly property bool loadedVertical: windowLoader.loadedEdge === "left" || windowLoader.loadedEdge === "right"
+            Component.onCompleted: windowLoader.loadedEdge = root.edge
             property bool recycling: false
-            readonly property bool requestedBottom: root.bottom
-            onRequestedBottomChanged: windowLoader.recycle()
+            readonly property string requestedEdge: root.edge
+            onRequestedEdgeChanged: windowLoader.recycle()
             // Rebuilt on shape changes: a ClippingRectangle does not re-mask when its corner structure changes.
             readonly property string shapeKey: String(Config.options?.iris?.surround?.enable ?? false)
             onShapeKeyChanged: windowLoader.recycle()
             function recycle(): void {
                 windowLoader.recycling = true
                 Qt.callLater(() => {
-                    windowLoader.loadedBottom = windowLoader.requestedBottom
+                    windowLoader.loadedEdge = windowLoader.requestedEdge
                     windowLoader.recycling = false
                 })
             }
@@ -294,8 +357,11 @@ Scope {
                 exclusionMode: ExclusionMode.Ignore
                 exclusiveZone: 0
                 WlrLayershell.namespace: "quickshell:iris-chassis"
+                readonly property bool editHere: GlobalStates.irisEdit
+                    && (root.editScreen.length === 0 || barWindow.screen?.name === root.editScreen)
                 readonly property bool presenting: barWindow.pinned || stage.cardPresent
-                    || (controlCentreLoader.item?.present ?? false) || GlobalStates.irisEdit
+                    || (controlCentreLoader.item?.present ?? false) || barWindow.editHere
+                    || (dockLoader.item?.overFullscreen ?? false) || (dockLoader.item?.menuOpen ?? false)
                 // Niri keeps a fullscreen window above the Top layer, so the overview
                 // over a game would show every other surface but this one.
                 readonly property bool overviewOverFullscreen: CompositorService.isNiri && NiriService.inOverview
@@ -307,13 +373,14 @@ Scope {
                 onOverlaidChanged: if (!barWindow.overlaid) GlobalStates.irisChassisEpoch++
                 WlrLayershell.layer: barWindow.overlaid ? WlrLayer.Overlay : WlrLayer.Top
                 WlrLayershell.keyboardFocus: barWindow.pinned || stage.cardOpen || (controlCentreLoader.item?.morphOpen ?? false)
-                    || GlobalStates.irisEdit
+                    || barWindow.editHere || (dockLoader.item?.menuOpen ?? false)
                     ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
                 anchors { left: true; right: true; top: true; bottom: true }
                 readonly property bool suppressed: islandLoader.active
                     ? (islandLoader.item?.suppressed ?? false) : false
                 mask: barWindow.canvasSuppressed ? emptyRegion
                     : barWindow.pinned || stage.cardArmed || (controlCentreLoader.item?.armed ?? false)
+                        || (dockLoader.item?.menuOpen ?? false)
                         || (islandLoader.item?.morphing ?? false)
                         ? (GlobalStates.irisStudioRect ? chassisStudioMask : null) : chassisRegion
                 Region { id: emptyRegion }
@@ -333,6 +400,12 @@ Scope {
                 }
                 MouseArea {
                     anchors.fill: parent
+                    enabled: dockLoader.item?.menuOpen ?? false
+                    acceptedButtons: Qt.AllButtons
+                    onPressed: dockLoader.item.closeMenu()
+                }
+                MouseArea {
+                    anchors.fill: parent
                     enabled: barWindow.pinned
                     acceptedButtons: Qt.AllButtons
                     onPressed: islandLoader.item.expanded = false
@@ -341,6 +414,7 @@ Scope {
                     id: chassisRegion
                     item: islandInput
                     Region { item: extensionInput }
+                    Region { item: dockLoader.item && !dockLoader.item.inputOff ? dockLoader.item.hitItem : null }
                     Region {
                         readonly property var rect: editLoader.item?.hitRect ?? null
                         x: rect?.x ?? 0
@@ -394,6 +468,54 @@ Scope {
                     PieceRegion { index: 22 }
                     PieceRegion { index: 23 }
                 }
+                readonly property var blurShapes: barWindow.canvasSuppressed ? []
+                    : (barWindow.fieldShapes ?? []).filter(shape => chassisField.glassOf(shape) === 2)
+                readonly property bool frameBlurred: !barWindow.canvasSuppressed && IrisFrame.framed && chassisField.frameGlass === 2
+                BackgroundEffect.blurRegion: glassBlurRegion
+                component BlurSlot: Region {
+                    required property int index
+                    readonly property var shape: barWindow.blurShapes[index] ?? null
+                    x: shape ? shape.x : 0
+                    y: shape ? shape.y : 0
+                    width: shape ? shape.width : 0
+                    height: shape ? shape.height : 0
+                    radius: shape ? Number(shape.radius ?? 0) : 0
+                }
+                Region {
+                    id: glassBlurRegion
+                    Region {
+                        width: barWindow.frameBlurred ? barWindow.width : 0
+                        height: barWindow.frameBlurred ? barWindow.height : 0
+                        Region {
+                            intersection: Intersection.Subtract
+                            x: IrisFrame.band
+                            y: IrisFrame.band
+                            width: Math.max(0, barWindow.width - 2 * IrisFrame.band)
+                            height: Math.max(0, barWindow.height - 2 * IrisFrame.band)
+                            radius: IrisFrame.cornerRadius
+                        }
+                    }
+                    BlurSlot { index: 0 }
+                    BlurSlot { index: 1 }
+                    BlurSlot { index: 2 }
+                    BlurSlot { index: 3 }
+                    BlurSlot { index: 4 }
+                    BlurSlot { index: 5 }
+                    BlurSlot { index: 6 }
+                    BlurSlot { index: 7 }
+                    BlurSlot { index: 8 }
+                    BlurSlot { index: 9 }
+                    BlurSlot { index: 10 }
+                    BlurSlot { index: 11 }
+                    BlurSlot { index: 12 }
+                    BlurSlot { index: 13 }
+                    BlurSlot { index: 14 }
+                    BlurSlot { index: 15 }
+                    BlurSlot { index: 16 }
+                    BlurSlot { index: 17 }
+                    BlurSlot { index: 18 }
+                    BlurSlot { index: 19 }
+                }
                 // Keep the area under a still pointer: Wayland sends no re-enter after a resize.
                 Item {
                     id: islandInput
@@ -408,8 +530,10 @@ Scope {
                     onLiveHeightChanged: heldHeight = canvasHover.hovered ? Math.max(heldHeight, liveHeight) : liveHeight
                     width: Math.max(liveWidth, heldWidth)
                     height: Math.max(liveHeight, heldHeight)
-                    x: islandLoader.x + (islandLoader.width - width) / 2
-                    y: windowLoader.loadedBottom ? islandLoader.y + islandLoader.height - height : islandLoader.y
+                    x: !windowLoader.loadedVertical ? islandLoader.x + (islandLoader.width - width) / 2
+                        : windowLoader.loadedEdge === "right" ? islandLoader.x + islandLoader.width - width : islandLoader.x
+                    y: windowLoader.loadedVertical ? islandLoader.y + (islandLoader.height - height) / 2
+                        : windowLoader.loadedBottom ? islandLoader.y + islandLoader.height - height : islandLoader.y
                 }
                 Item {
                     id: extensionInput
@@ -440,7 +564,7 @@ Scope {
 
                 Shortcut {
                     sequence: "Escape"
-                    enabled: GlobalStates.irisEdit
+                    enabled: barWindow.editHere
                     onActivated: GlobalStates.irisEdit = false
                 }
 
@@ -449,8 +573,7 @@ Scope {
                 // the shape the chassis had on the previous frame. Measured at 3 ms
                 // per open/close for the whole chain — cheaper than one frame of lag.
                 readonly property var fieldShapes: {
-                    const dockBody = (islandLoader.item?.fullscreenCovered ?? false) ? null
-                        : GlobalStates.irisDockBody?.[barWindow.screen?.name ?? ""] ?? null
+                    const dockBody = dockLoader.item?.bodyShape ?? null
                     const hung = (controlCentreLoader.item?.fieldShapes ?? [])
                         .concat(stage.fieldShapes)
                         .concat(editLoader.item?.fieldShapes ?? [])
@@ -473,10 +596,20 @@ Scope {
                 IrisField {
                     id: chassisField
                     anchors.fill: parent
+                    compositorAllowed: true
+                    edgeWave: framePulse.amplitudes
+                    waveClock: framePulse.phase
                     shapes: barWindow.fieldShapes
                     opacity: barWindow.canvasSuppressed ? 0 : 1
                     visible: opacity > 0
                     Behavior on opacity { NumberAnimation { duration: IrisStyle.duration(160); easing.type: IrisStyle.feedbackEasing } }
+                }
+
+                IrisFramePulse {
+                    id: framePulse
+                    active: IrisFrame.framed && !barWindow.canvasSuppressed
+                        && (Config.options?.background?.edgeWidgets?.organic?.enable ?? false)
+                        && String(Config.options?.iris?.surround?.music ?? "widget") === "frame"
                 }
 
                 IrisParts.IrisSpring {
@@ -492,20 +625,24 @@ Scope {
                     active: GlobalStates.barOpen && root.islandAllowed(barWindow.screen)
                     readonly property string layout: String(root.options?.layout ?? "island")
                     readonly property real inset: IrisFrame.band + root.outerMargin
-                    x: Math.round(islandLoader.inset + islandPlacement.value * (parent.width - 2 * islandLoader.inset - islandLoader.width))
-                    anchors.top: windowLoader.loadedBottom ? undefined : parent.top
-                    anchors.bottom: windowLoader.loadedBottom ? parent.bottom : undefined
-                    anchors.margins: IrisFrame.band + (islandLoader.item
+                    readonly property real edgeMargin: IrisFrame.band + (islandLoader.item
                         ? Math.round(root.restMargin * (1 - Math.min(1, islandLoader.item.notchness))) : root.outerMargin)
-                    width: item?.implicitWidth ?? 240
-                    height: item?.implicitHeight ?? root.barHeight
+                    readonly property real along: islandPlacement.value
+                        * ((windowLoader.loadedVertical ? parent.height - islandLoader.height : parent.width - islandLoader.width) - 2 * islandLoader.inset)
+                    x: Math.round(!windowLoader.loadedVertical ? islandLoader.inset + islandLoader.along
+                        : windowLoader.loadedEdge === "right" ? parent.width - islandLoader.width - islandLoader.edgeMargin : islandLoader.edgeMargin)
+                    y: Math.round(windowLoader.loadedVertical ? islandLoader.inset + islandLoader.along
+                        : windowLoader.loadedBottom ? parent.height - islandLoader.height - islandLoader.edgeMargin : islandLoader.edgeMargin)
+                    width: item?.implicitWidth ?? (windowLoader.loadedVertical ? root.barHeight : 240)
+                    height: item?.implicitHeight ?? (windowLoader.loadedVertical ? 240 : root.barHeight)
                     sourceComponent: IrisIsland {
                         id: island
                         targetScreen: barWindow.screen
                         pointerHeld: islandInput.holding
-                        availableWidth: barWindow.width - (IrisFrame.band + root.outerMargin) * 2
+                        availableWidth: (windowLoader.loadedVertical ? barWindow.height : barWindow.width) - (IrisFrame.band + root.outerMargin) * 2
+                        availableAcross: barWindow.width - 2 * (IrisFrame.band + root.outerMargin) - root.barHeight - Math.round(24 * IrisStyle.density)
                         compactHeight: root.barHeight
-                        bottomEdge: windowLoader.loadedBottom
+                        edge: windowLoader.loadedEdge
                         screenOffsetY: 0
                         Connections {
                             target: root
@@ -531,6 +668,22 @@ Scope {
                     screenData: barWindow.screen
                 }
 
+                Loader {
+                    id: dockLoader
+                    z: 2
+                    anchors.fill: parent
+                    active: (Config.options?.iris?.dock?.enable ?? true) && GlobalStates.deferredPanelsReady
+                    asynchronous: true
+                    sourceComponent: IrisDock {
+                        screen: barWindow.screen
+                        onPieceActivated: (slot, kind, rect) => stage.activate(slot, kind, rect)
+                        onPieceMenuRequested: (slot, kind, rect, menu) => {
+                            menu.model = stage.pieceMenu(slot, kind, rect)
+                            menu.requestOpen()
+                        }
+                    }
+                }
+
                 IrisStage {
                     id: stage
                     z: 2
@@ -551,10 +704,10 @@ Scope {
                         target: GlobalStates
                         function onIrisEditChanged(): void {
                             if (GlobalStates.irisEdit) { editGrace.stop(); editLoader.grace = false }
-                            else { editLoader.grace = true; editGrace.restart() }
+                            else if (editLoader.active) { editLoader.grace = true; editGrace.restart() }
                         }
                     }
-                    active: GlobalStates.irisEdit || editLoader.grace
+                    active: barWindow.editHere || editLoader.grace
                     sourceComponent: IrisEditBar { screenData: barWindow.screen }
                 }
 
@@ -562,12 +715,27 @@ Scope {
                     id: controlCentreLoader
                     z: 1
                     anchors.fill: parent
-                    property bool wanted: GlobalStates.controlPanelOpen || GlobalStates.irisControlsWarm
-                    // Latched: an `active` that reads its own `status` is a binding loop.
-                    property bool kept: false
-                    onWantedChanged: if (controlCentreLoader.wanted) controlCentreLoader.kept = true
-                    Component.onCompleted: if (controlCentreLoader.wanted) controlCentreLoader.kept = true
-                    active: (Config.options?.iris?.modules?.controlCenter ?? true) && controlCentreLoader.kept
+                    readonly property bool panelMode: String(Config.options?.iris?.controlCenter?.opens ?? "island") !== "island"
+                    readonly property bool externalOpen: GlobalStates.controlPanelOpen
+                        && (controlCentreLoader.panelMode || GlobalStates.irisMorphOwner === "stage")
+                    readonly property bool wanted: controlCentreLoader.externalOpen
+                        || (controlCentreLoader.panelMode && GlobalStates.irisControlsWarm)
+                        || stage.controlIntent
+                    property bool resident: false
+                    property Timer releaseTimer: Timer {
+                        interval: Math.max(IrisStyle.recedeDuration, IrisStyle.settleDuration) + 120
+                        onTriggered: if (!controlCentreLoader.wanted) controlCentreLoader.resident = false
+                    }
+                    onWantedChanged: {
+                        if (controlCentreLoader.wanted) {
+                            controlCentreLoader.releaseTimer.stop()
+                            controlCentreLoader.resident = true
+                        } else if (controlCentreLoader.resident) {
+                            controlCentreLoader.releaseTimer.restart()
+                        }
+                    }
+                    Component.onCompleted: if (controlCentreLoader.wanted) controlCentreLoader.resident = true
+                    active: (Config.options?.iris?.modules?.controlCenter ?? true) && controlCentreLoader.resident
                     asynchronous: true
                     sourceComponent: IrisControlCenter { screenData: barWindow.screen }
                 }

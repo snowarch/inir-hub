@@ -152,6 +152,154 @@ Loader {
         }
     }
 
+    component NoticeCard: Rectangle {
+        id: notice
+        required property var notification
+        property int hidden: 0
+        signal unfold()
+        implicitHeight: noticeBody.implicitHeight + 20 * root.d
+        radius: IrisStyle.radiusRow
+        color: IrisStyle.surfaceHighest
+
+        TapHandler {
+            enabled: notice.hidden > 0
+            onTapped: notice.unfold()
+        }
+        HoverHandler {
+            enabled: notice.hidden > 0
+            cursorShape: Qt.PointingHandCursor
+        }
+
+        ColumnLayout {
+            id: noticeBody
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.top: parent.top
+            anchors.margins: 10 * root.d
+            spacing: 3 * root.d
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: 8 * root.d
+                IrisNotificationIcon {
+                    size: Math.round(22 * root.d)
+                    showImage: false
+                    appName: String(notice.notification.appName ?? "")
+                    appIcon: String(notice.notification.appIcon ?? "")
+                    summary: String(notice.notification.summary ?? "")
+                    critical: String(notice.notification.urgency ?? "") === "critical"
+                }
+                IrisText { Layout.fillWidth: true; text: notice.notification.appName; role: IrisText.Meta; elide: Text.ElideRight }
+                Rectangle {
+                    visible: notice.hidden > 0
+                    implicitHeight: Math.round(20 * root.d)
+                    implicitWidth: Math.max(implicitHeight, moreLabel.implicitWidth + Math.round(12 * root.d))
+                    radius: height / 2
+                    color: IrisStyle.fillHover
+                    IrisText {
+                        id: moreLabel
+                        anchors.centerIn: parent
+                        text: "+" + notice.hidden
+                        font.family: IrisStyle.fontNumbers
+                        font.pixelSize: 11.5 * IrisStyle.typeScale
+                        font.weight: Font.DemiBold
+                    }
+                }
+                IrisIconButton {
+                    materialIcon: "close"
+                    iconSize: Math.round(15 * root.d)
+                    Accessible.name: Translation.tr("Dismiss notification")
+                    onClicked: Notifications.discardNotification(notice.notification.notificationId)
+                }
+            }
+            IrisText { Layout.fillWidth: true; text: notice.notification.summary; textFormat: Text.PlainText; wrapMode: Text.Wrap; maximumLineCount: 2; elide: Text.ElideRight; font.weight: Font.DemiBold }
+            IrisText { Layout.fillWidth: true; visible: text.length > 0; text: notice.notification.body ?? ""; textFormat: Text.PlainText; wrapMode: Text.Wrap; maximumLineCount: 4; elide: Text.ElideRight; role: IrisText.Meta }
+            Flow {
+                Layout.fillWidth: true
+                visible: (notice.notification.actions ?? []).length > 0
+                spacing: 4 * root.d
+                Repeater {
+                    model: notice.notification.actions ?? []
+                    IrisButton {
+                        required property var modelData
+                        text: modelData.identifier === "default" ? Translation.tr("Open") : modelData.text
+                        implicitHeight: 30 * root.d
+                        onClicked: { Notifications.attemptInvokeAction(notice.notification.notificationId, modelData.identifier); root.navigate() }
+                    }
+                }
+            }
+        }
+    }
+
+    component NoticeStack: ColumnLayout {
+        id: stack
+        required property string appName
+        property bool unfolded: false
+        signal toggle()
+        readonly property var items: (Notifications.groupsByAppName[stack.appName]?.notifications ?? []).slice().reverse()
+        readonly property int count: stack.items.length
+        readonly property bool folded: stack.count > 1 && !stack.unfolded
+        spacing: 6 * root.d
+
+        RowLayout {
+            visible: stack.count > 1 && stack.unfolded
+            Layout.fillWidth: true
+            Layout.leftMargin: 4 * root.d
+            spacing: 4 * root.d
+            IrisText { Layout.fillWidth: true; text: stack.appName; font.weight: Font.DemiBold; font.pixelSize: 13 * IrisStyle.typeScale; elide: Text.ElideRight }
+            IrisButton {
+                text: Translation.tr("Show less")
+                quiet: true
+                implicitHeight: 26 * root.d
+                onClicked: stack.toggle()
+            }
+            IrisIconButton {
+                materialIcon: "clear_all"
+                iconSize: Math.round(16 * root.d)
+                Accessible.name: Translation.tr("Clear %1").arg(stack.appName)
+                onClicked: Notifications.discardNotificationsForApp(stack.appName)
+            }
+        }
+
+        Repeater {
+            model: stack.folded ? stack.items.slice(0, 1) : stack.items
+            NoticeCard {
+                required property var modelData
+                Layout.fillWidth: true
+                notification: modelData
+                hidden: stack.folded ? stack.count - 1 : 0
+                onUnfold: stack.toggle()
+            }
+        }
+
+        Item {
+            visible: stack.folded
+            z: -1
+            Layout.fillWidth: true
+            Layout.topMargin: -Math.round(6 * root.d) - IrisStyle.radiusRow
+            implicitHeight: IrisStyle.radiusRow + Math.round((stack.count > 2 ? 12 : 6) * root.d)
+            Rectangle {
+                visible: stack.count > 2
+                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.bottom: parent.bottom
+                width: parent.width - Math.round(28 * root.d)
+                height: IrisStyle.radiusRow * 2
+                radius: IrisStyle.radiusRow
+                color: ColorUtils.mix(IrisStyle.surfaceHighest, IrisStyle.surfaceHigh, 0.7)
+            }
+            Rectangle {
+                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.bottom: parent.bottom
+                anchors.bottomMargin: stack.count > 2 ? Math.round(6 * root.d) : 0
+                width: parent.width - Math.round(14 * root.d)
+                height: IrisStyle.radiusRow * 2
+                radius: IrisStyle.radiusRow
+                color: ColorUtils.mix(IrisStyle.surfaceHighest, IrisStyle.surfaceHigh, 0.4)
+            }
+            TapHandler { onTapped: stack.toggle() }
+            HoverHandler { cursorShape: Qt.PointingHandCursor }
+        }
+    }
+
     component GaugeRing: Shape {
         id: gaugeRing
         property real progress: 0
@@ -826,6 +974,7 @@ Loader {
         Section {
             id: notifications
             readonly property var latest: Notifications.list.length > 0 ? Notifications.list[Notifications.list.length - 1] : null
+            property var unfoldedApps: ({})
             title: Translation.tr("Notifications")
             glyph: "notifications"
             tint: IrisStyle.identity.pink
@@ -869,55 +1018,16 @@ Loader {
             ]
             EmptyLabel { visible: Notifications.list.length === 0; text: Translation.tr("You're all caught up.") }
             Repeater {
-                model: Notifications.list.slice().reverse()
-                Rectangle {
-                    id: notice
-                    required property var modelData
+                model: Notifications.appNameList
+                NoticeStack {
+                    required property string modelData
                     Layout.fillWidth: true
-                    implicitHeight: noticeBody.implicitHeight + 20 * root.d
-                    radius: IrisStyle.radiusRow
-                    color: IrisStyle.surfaceHighest
-                    ColumnLayout {
-                        id: noticeBody
-                        anchors.left: parent.left
-                        anchors.right: parent.right
-                        anchors.top: parent.top
-                        anchors.margins: 10 * root.d
-                        spacing: 3 * root.d
-                        RowLayout {
-                            Layout.fillWidth: true
-                            spacing: 8 * root.d
-                            IrisNotificationIcon {
-                                size: Math.round(22 * root.d)
-                                showImage: false
-                                appName: String(notice.modelData.appName ?? "")
-                                appIcon: String(notice.modelData.appIcon ?? "")
-                                summary: String(notice.modelData.summary ?? "")
-                                critical: String(notice.modelData.urgency ?? "") === "critical"
-                            }
-                            IrisText { Layout.fillWidth: true; text: notice.modelData.appName; role: IrisText.Meta; elide: Text.ElideRight }
-                            IrisIconButton {
-                                materialIcon: "close"
-                                iconSize: Math.round(15 * root.d)
-                                Accessible.name: Translation.tr("Dismiss notification")
-                                onClicked: Notifications.discardNotification(notice.modelData.notificationId)
-                            }
-                        }
-                        IrisText { Layout.fillWidth: true; text: notice.modelData.summary; textFormat: Text.PlainText; wrapMode: Text.Wrap; font.weight: Font.DemiBold }
-                        IrisText { Layout.fillWidth: true; visible: text.length > 0; text: notice.modelData.body ?? ""; textFormat: Text.PlainText; wrapMode: Text.Wrap; maximumLineCount: 4; elide: Text.ElideRight; role: IrisText.Meta }
-                        Flow {
-                            Layout.fillWidth: true
-                            spacing: 4 * root.d
-                            Repeater {
-                                model: notice.modelData.actions ?? []
-                                IrisButton {
-                                    required property var modelData
-                                    text: modelData.identifier === "default" ? Translation.tr("Open") : modelData.text
-                                    implicitHeight: 30 * root.d
-                                    onClicked: { Notifications.attemptInvokeAction(notice.modelData.notificationId, modelData.identifier); root.navigate() }
-                                }
-                            }
-                        }
+                    appName: modelData
+                    unfolded: notifications.unfoldedApps[modelData] === true
+                    onToggle: {
+                        const next = Object.assign({}, notifications.unfoldedApps)
+                        next[modelData] = !next[modelData]
+                        notifications.unfoldedApps = next
                     }
                 }
             }

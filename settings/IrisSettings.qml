@@ -27,6 +27,7 @@ PanelWindow {
     readonly property bool browsing: root.query.length === 0 && root.group.length === 0 && root.advancedPage < 0
     property string requestedSection: ""
     readonly property real d: IrisStyle.density
+    readonly property bool previews: Config.options?.iris?.appearance?.previews ?? true
     readonly property var sections: [
         { id: "bar", title: "Island", subtitle: "Composition, size and how the Island responds", icon: "pill", tint: IrisStyle.identity.blue, tip: "Rest on the Island to peek, click to keep it, scroll for volume." },
         { id: "player", title: "Now Playing", subtitle: "Music in the Island and on the lock screen", icon: "music_note", tint: IrisStyle.identity.pink, tip: "Middle-click the Island to play or pause." },
@@ -99,7 +100,7 @@ PanelWindow {
         "Layout": "view_quilt", "Light": "light_mode", "Look": "visibility", "Material": "layers", "Menus": "menu",
         "Motion": "animation", "Notifications": "notifications", "On the contour": "border_outer",
         "Opening bodies": "open_in_full", "Overview backdrop": "grid_view", "Pages": "view_carousel",
-        "Per surface": "tune", "Placement": "location_on", "Player": "music_note", "Player page": "album",
+        "Per surface": "tune", "Placement": "location_on", "Player": "music_note", "Previews": "preview", "Player page": "album",
         "Resting Island": "pill", "Settings": "settings", "Shape": "rounded_corner", "Side panels": "dock_to_right",
         "Size": "straighten", "Spotlight": "search", "Text": "text_fields", "Timing": "timer", "Touch": "touch_app",
         "Tray": "inventory_2", "Visibility": "visibility", "Wallpaper": "wallpaper", "Wallpaper gallery": "photo_library",
@@ -233,20 +234,31 @@ PanelWindow {
             spacing: 0
 
             Rectangle {
+                id: sidebar
+                readonly property int pad: IrisStyle.concentricPad(frame.radius, 12 * root.d)
                 Layout.fillHeight: true
                 Layout.preferredWidth: Math.min(236 * root.d, frame.width * 0.3)
-                color: IrisStyle.surfaceHigh
+                topLeftRadius: frame.radius
+                bottomLeftRadius: frame.radius
+                color: IrisStyle.glassy ? ColorUtils.applyAlpha(IrisStyle.surfaceOpaque, IrisStyle.wallpaperVeil) : IrisStyle.surfaceHigh
+                Rectangle {
+                    anchors.right: parent.right
+                    anchors.top: parent.top
+                    anchors.bottom: parent.bottom
+                    width: 1
+                    color: IrisStyle.hairline
+                }
                 ColumnLayout {
                     anchors.fill: parent
-                    anchors.margins: 12 * root.d
-                    anchors.topMargin: 16 * root.d
+                    anchors.margins: sidebar.pad
+                    anchors.topMargin: sidebar.pad + 4 * root.d
                     spacing: 2 * root.d
 
                     Rectangle {
                         Layout.fillWidth: true
                         Layout.bottomMargin: 10 * root.d
                         implicitHeight: Math.round(32 * root.d)
-                        radius: height / 2
+                        radius: Math.min(height / 2, Math.max(IrisStyle.radiusRow, frame.radius - sidebar.pad))
                         color: (searchField.activeFocus ? IrisStyle.fill : IrisStyle.fillQuiet)
                         border.width: searchField.activeFocus ? 1 : 0
                         border.color: IrisStyle.tintBorder(IrisStyle.accent)
@@ -374,8 +386,8 @@ PanelWindow {
                 RowLayout {
                     Layout.fillWidth: true
                     Layout.leftMargin: 28 * root.d
-                    Layout.rightMargin: 14 * root.d
-                    Layout.topMargin: 14 * root.d
+                    Layout.rightMargin: IrisStyle.concentricPad(frame.radius, 14 * root.d)
+                    Layout.topMargin: IrisStyle.concentricPad(frame.radius, 14 * root.d)
                     Layout.preferredHeight: Math.round(56 * root.d)
                     spacing: 8 * root.d
                     IrisIconButton {
@@ -534,20 +546,24 @@ PanelWindow {
                                 playing: visible && GlobalStates.settingsOverlayOpen
                             }
 
-                            IrisTargetPreview {
+                            Loader {
+                                id: sectionPreview
                                 readonly property string mapped: ({ player: "bodies", bubbles: "pieces", dock: "dock", appearance: "material",
                                     desktop: "desktop", sidebars: "places", surfaces: "transients" })[root.section] ?? ""
                                 Layout.fillWidth: true
-                                Layout.preferredHeight: mapped === "material" ? Math.max(Math.round(380 * root.d), specimenHeight) : Math.round(220 * root.d)
-                                visible: root.query.length === 0 && root.advancedPage < 0 && mapped.length > 0 && !groupPreview.available
-                                target: mapped
-                                playing: visible && GlobalStates.settingsOverlayOpen
+                                Layout.preferredHeight: mapped === "material" ? Math.max(Math.round(380 * root.d), Number(sectionPreview.item?.specimenHeight ?? 0)) : Math.round(220 * root.d)
+                                active: root.previews && root.query.length === 0 && root.advancedPage < 0 && mapped.length > 0 && !groupPreview.available
+                                visible: active
+                                sourceComponent: IrisTargetPreview {
+                                    target: sectionPreview.mapped
+                                    playing: sectionPreview.visible && GlobalStates.settingsOverlayOpen
+                                }
                             }
 
                             Loader {
                                 Layout.fillWidth: true
-                                Layout.preferredHeight: Math.round(168 * root.d)
-                                active: root.section === "bar" && root.query.length === 0 && root.advancedPage < 0 && !groupPreview.available
+                                Layout.preferredHeight: Math.round((IrisFrame.islandEdge === "left" || IrisFrame.islandEdge === "right" ? 320 : 168) * root.d)
+                                active: root.previews && root.section === "bar" && root.query.length === 0 && root.advancedPage < 0 && !groupPreview.available
                                 visible: active
                                 sourceComponent: IrisScreenPreview {
                                     id: islandPreview
@@ -690,7 +706,8 @@ PanelWindow {
             visible: root.query.length > 0
             Layout.leftMargin: 16 * root.d
             text: group.modelData.title
-            color: IrisStyle.muted
+            color: IrisStyle.label
+            font.family: IrisStyle.fontTitle
             font.pixelSize: 12 * IrisStyle.typeScale
             font.weight: Font.DemiBold
         }
@@ -737,8 +754,6 @@ PanelWindow {
             anchors.fill: parent
             radius: IrisStyle.radiusCard
             color: card.containsMouse ? IrisStyle.surfaceHighest : IrisStyle.surfaceHigh
-            border.width: 1
-            border.color: card.containsMouse ? IrisStyle.borderStrong : IrisStyle.rim
             scale: card.pressed ? IrisStyle.pressScale(0.97) : 1
             Behavior on color { ColorAnimation { duration: IrisStyle.duration(120) } }
             Behavior on scale { NumberAnimation { duration: IrisStyle.feedbackDuration } }

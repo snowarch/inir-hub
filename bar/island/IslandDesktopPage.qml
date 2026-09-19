@@ -2,6 +2,7 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Dialogs
+import QtQuick.Effects
 import QtQuick.Layouts
 import QtQuick.Shapes
 import Quickshell
@@ -221,6 +222,12 @@ ColumnLayout {
             readonly property real topBleed: page.island.padding + page.island.chassisItem.topInset + heroBleed.navBand
             // Always layered: toggling layers inside the chassis stops it painting.
             layer.enabled: true
+            layer.effect: MultiEffect {
+                maskEnabled: true
+                maskSource: heroFade
+                maskThresholdMin: 0.5
+                maskSpreadAtMin: 1
+            }
             opacity: heroImage.status === Image.Ready ? 1 : 0
             x: -page.island.padding
             y: -heroBleed.topBleed
@@ -246,11 +253,32 @@ ColumnLayout {
                 readonly property real edge: hangs ? solidTop / Math.max(1, height) : 0
                 readonly property real topFade: hangs ? (solidTop + 30 * IrisStyle.density + heroBleed.navBand * 0.5) / Math.max(1, height) : 0.001
                 gradient: Gradient {
-                    GradientStop { position: 0; color: ColorUtils.applyAlpha(IrisStyle.bodySurface, heroScrim.hangs ? 1 : 0.12) } // iris-literal: hero fade ramp
-                    GradientStop { position: heroScrim.edge; color: ColorUtils.applyAlpha(IrisStyle.bodySurface, heroScrim.hangs ? 1 : 0.12) } // iris-literal: hero fade ramp
-                    GradientStop { position: heroScrim.topFade; color: ColorUtils.applyAlpha(IrisStyle.bodySurface, 0.12) } // iris-literal: hero fade ramp
-                    GradientStop { position: 0.42; color: IrisStyle.veilLight } // hero fade ramp
-                    GradientStop { position: 1; color: IrisStyle.bodySurface }
+                    GradientStop { position: 0; color: ColorUtils.applyAlpha(IrisStyle.bodyScrim, heroScrim.hangs && !IrisStyle.glassy ? 1 : 0.12) } // iris-literal: hero fade ramp
+                    GradientStop { position: heroScrim.edge; color: ColorUtils.applyAlpha(IrisStyle.bodyScrim, heroScrim.hangs && !IrisStyle.glassy ? 1 : 0.12) } // iris-literal: hero fade ramp
+                    GradientStop { position: heroScrim.topFade; color: ColorUtils.applyAlpha(IrisStyle.bodyScrim, 0.12) } // iris-literal: hero fade ramp
+                    GradientStop { position: 0.42; color: ColorUtils.applyAlpha(IrisStyle.surfaceOpaque, IrisStyle.wallpaperVeil) }
+                    GradientStop { position: 1; color: IrisStyle.bodyScrim }
+                }
+            }
+        }
+
+        Item {
+            id: heroFade
+            x: heroBleed.x
+            y: heroBleed.y
+            width: heroBleed.width
+            height: heroBleed.height
+            visible: false
+            layer.enabled: true
+            readonly property real solidEnd: heroScrim.hangs ? heroScrim.edge : 0
+            Rectangle {
+                anchors.fill: parent
+                gradient: Gradient {
+                    GradientStop { position: 0; color: IrisStyle.glassy ? "transparent" : "white" }
+                    GradientStop { position: heroFade.solidEnd; color: IrisStyle.glassy ? "transparent" : "white" }
+                    GradientStop { position: Math.min(0.99, heroScrim.topFade + 0.08); color: "white" }
+                    GradientStop { position: 0.6; color: "white" }
+                    GradientStop { position: 1; color: IrisStyle.glassy ? "transparent" : "white" }
                 }
             }
         }
@@ -301,7 +329,7 @@ ColumnLayout {
                 spacing: -2 * IrisStyle.density
                 IrisText {
                     textFormat: Text.StyledText
-                    text: "<font color='" + IrisStyle.secondaryAccent + "'><b>"
+                    text: "<font color='" + (page.showBanner ? IrisStyle.textStrong : IrisStyle.secondaryAccent) + "'><b>"
                         + Qt.locale().toString(DateTime.clock.date, "dddd") + "</b></font> "
                         + Qt.locale().toString(DateTime.clock.date, "d MMMM")
                     color: (page.showBanner ? IrisStyle.textStrong : IrisStyle.textSecondary)

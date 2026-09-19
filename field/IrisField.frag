@@ -68,7 +68,18 @@ layout(std140, binding = 0) uniform buf {
     // A second body it belongs to, same encoding: a satellite grows out of the
     // Island and rests on the edge, and melts into both.
     vec4 alsoA; vec4 alsoB; vec4 alsoC; vec4 alsoD; vec4 alsoE;
+    // Each body's material: 0 solid, 1 glass over the blurred wallpaper, 2 glass
+    // the compositor blurs from behind.
+    vec4 glassA; vec4 glassB; vec4 glassC; vec4 glassD; vec4 glassE;
+    // x: 1 once the blurred wallpaper is ready. y: the frame's material, same
+    // encoding. z: how much of the tint stays over glass. w: the glass edge light.
+    vec4 glass;
+    // How far the band's inner line swells on each side (left, top, right,
+    // bottom) with the music, and x: the travelling phase of that swell.
+    vec4 edgeWave;
+    vec4 waveClock;
 } u;
+layout(binding = 1) uniform sampler2D backdrop;
 
 const float FAR = 1e8;
 
@@ -115,11 +126,22 @@ void main() {
     float frameDistance = FAR * 10.0;
     if (u.field.y > 0.5) {
         vec2 size = max(u.screen, vec2(1.0));
-        vec2 halfSize = max(size * 0.5 - vec2(u.field.z), vec2(0.0));
-        frameDistance = -roundedBox(p, size * 0.5, halfSize, u.field.w);
+        float t = u.waveClock.x;
+        float alongY = 0.5 + 0.3 * sin(p.y * 0.011 + t) + 0.2 * sin(p.y * 0.027 - t * 1.4);
+        float alongX = 0.5 + 0.3 * sin(p.x * 0.009 - t) + 0.2 * sin(p.x * 0.023 + t * 1.2);
+        vec2 lo = vec2(u.field.z + u.edgeWave.x * alongY, u.field.z + u.edgeWave.y * alongX);
+        vec2 hi = size - vec2(u.field.z + u.edgeWave.z * alongY, u.field.z + u.edgeWave.w * alongX);
+        frameDistance = -roundedBox(p, (lo + hi) * 0.5, max((hi - lo) * 0.5, vec2(0.0)), u.field.w);
         united = frameDistance;
     }
 
+    // Material is blended by a soft minimum of distances, so where a solid body
+    // melts into glass the fillet shades from one to the other instead of cutting.
+    vec3 weights = vec3(0.0);
+    if (u.field.y > 0.5) {
+        float w = exp(-clamp(frameDistance, -40.0, 40.0) / 2.0);
+        weights += w * vec3(u.glass.y < 0.5 ? 1.0 : 0.0, u.glass.y > 0.5 && u.glass.y < 1.5 ? 1.0 : 0.0, u.glass.y > 1.5 ? 1.0 : 0.0);
+    }
     float bodies[20];
     for (int i = 0; i < 20; ++i) {
         vec4 s = shapeAt(i);
@@ -131,6 +153,9 @@ void main() {
         float radius = blockValue(block, slot, u.radiiA, u.radiiB, u.radiiC, u.radiiD, u.radiiE);
         bodies[i] = roundedBox(p, s.xy, s.zw, radius);
         united = min(united, bodies[i]);
+        float m = blockValue(block, slot, u.glassA, u.glassB, u.glassC, u.glassD, u.glassE);
+        float w = exp(-clamp(bodies[i], -40.0, 40.0) / 2.0);
+        weights += w * vec3(m < 0.5 ? 1.0 : 0.0, m > 0.5 && m < 1.5 ? 1.0 : 0.0, m > 1.5 ? 1.0 : 0.0);
     }
     // The joins, each only between a body and the one it belongs to. A smooth
     // union is never above the plain one, so taking the minimum adds the fillet
@@ -164,6 +189,18 @@ void main() {
     float fillAlpha = coverage * u.tint.a * u.qt_Opacity;
     vec3 colour = u.tint.rgb * fillAlpha;
     float alpha = fillAlpha;
+    vec3 share = weights / max(1e-4, weights.x + weights.y + weights.z);
+    if (u.glass.x < 0.5) { share.x += share.y; share.y = 0.0; }
+    if (share.x < 0.999) {
+        float a = coverage * u.qt_Opacity;
+        vec3 behind = share.y > 0.0 ? texture(backdrop, clamp(p / max(u.screen, vec2(1.0)), 0.0, 1.0)).rgb : vec3(0.0);
+        vec4 solid = vec4(u.tint.rgb, 1.0) * u.tint.a;
+        vec4 glassy = vec4(mix(behind, u.tint.rgb, u.glass.z), 1.0);
+        vec4 blurred = vec4(u.tint.rgb * u.glass.z, u.glass.z);
+        vec4 mixed = (solid * share.x + glassy * share.y + blurred * share.z) * a;
+        colour = mixed.rgb;
+        alpha = mixed.a;
+    }
     if (u.edge.y > 0.5) {
         // A band just inside the silhouette, so it lands on the body's own edge
         // rather than half outside it.

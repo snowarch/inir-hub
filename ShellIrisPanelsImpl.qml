@@ -11,7 +11,6 @@ import qs.modules.iris.onScreenDisplay
 import qs.modules.iris.session
 import qs.modules.iris.polkit
 import qs.modules.iris.style
-import qs.modules.iris.dock
 import qs.modules.iris.pieces
 import qs.modules.iris.settings
 import qs.modules.iris.sidebar
@@ -117,12 +116,6 @@ Item {
         open: GlobalStates.settingsOverlayOpen || GlobalStates.irisSettingsWarm
         closeGraceMs: IrisStyle.settleDuration + 120
         component: IrisSettings {}
-    }
-
-    LazyLoader {
-        activeAsync: Config.ready && GlobalStates.deferredPanelsReady
-            && (Config.options?.iris?.dock?.enable ?? true)
-        component: IrisDock {}
     }
 
     LazyLoader {

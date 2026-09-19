@@ -13,6 +13,7 @@ MouseArea {
     property bool holdLifts: true
     property int holdDelay: 320
     property int pullDirection: 0
+    property bool pullAcross: false
     property real pullDistance: 0
     readonly property bool lifting: root.lifted
     signal tapped()
@@ -64,7 +65,7 @@ MouseArea {
         if (!root.lifted) {
             const dx = root.lastScene.x - root.pressScene.x
             const dy = root.lastScene.y - root.pressScene.y
-            const pulled = root.pullDirection === 0 ? Math.hypot(dx, dy) : root.pullDirection * dy
+            const pulled = root.pullDirection === 0 ? Math.hypot(dx, dy) : root.pullDirection * (root.pullAcross ? dx : dy)
             if (pulled > root.liftDistance) root.lift()
             return
         }

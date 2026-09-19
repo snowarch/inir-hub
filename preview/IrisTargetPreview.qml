@@ -41,15 +41,10 @@ Item {
         radius: IrisStyle.radiusSheet
         border.width: IrisStyle.rim.a > 0 ? 1 : 0
         border.color: IrisStyle.rim
-        Rectangle {
+        IrisLightWash {
             anchors.fill: parent
-            anchors.margins: IrisStyle.lightContour
-            radius: Math.max(0, parent.radius - IrisStyle.lightContour)
-            visible: IrisStyle.auraStrength > 0
-            gradient: Gradient {
-                GradientStop { position: 0; color: ColorUtils.applyAlpha(IrisStyle.wallpaperLight, 0.22 * IrisStyle.auraStrength) } // iris-literal: preview wash strength
-                GradientStop { position: Math.min(1, IrisStyle.lightReach / Math.max(1, parent.height)); color: ColorUtils.applyAlpha(IrisStyle.wallpaperLight, 0) }
-            }
+            radius: parent.radius
+            light: IrisStyle.wallpaperLight
         }
     }
 

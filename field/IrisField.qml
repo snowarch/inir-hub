@@ -2,6 +2,9 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Effects
+import Quickshell
+import qs.services
+import qs.modules.common
 import qs.modules.iris.style
 import qs.modules.iris.frame
 
@@ -11,7 +14,7 @@ Item {
     property var shapes: []
     property color tint: IrisStyle.bodySurface
     property color rim: IrisStyle.rim
-    property real rimWidth: Math.max(1, Math.round(IrisStyle.density))
+    property real rimWidth: IrisStyle.rimWidth
     property real smoothing: IrisStyle.fuse
     property bool framed: IrisFrame.framed
     property real band: IrisFrame.band
@@ -19,6 +22,46 @@ Item {
     readonly property int capacity: 20
     readonly property int shadowSlots: root.capacity
     readonly property real reach: root.smoothing + 2
+    property bool compositorAllowed: false
+    readonly property int glassCode: IrisStyle.glassCompositor ? (root.compositorAllowed ? 2 : 1) : IrisStyle.glassWallpaper ? 1 : 0
+    property int frameGlass: root.glassCode
+    property vector4d edgeWave: Qt.vector4d(0, 0, 0, 0)
+    property real waveClock: 0
+    readonly property var restingIds: ["island", "dock", "dockEdge", "edge", "plate:", "piece:", "satellite:", "pieceEdge:"]
+    function rests(shape: var): bool {
+        const id = String(shape?.id ?? "")
+        return id.length > 0 && root.restingIds.some(prefix => prefix.endsWith(":") ? id.startsWith(prefix) : id === prefix)
+    }
+    function glassOf(shape: var): int {
+        const code = root.rawGlassOf(shape)
+        return code === 2 && !root.rests(shape) ? 1 : code
+    }
+    function rawGlassOf(shape: var): int {
+        if (!shape) return 0
+        const g = shape.glass
+        if (g === undefined || g === null || g === "inherit") return root.glassCode
+        if (g === "compositor") return Appearance.compositorBlurActive && root.compositorAllowed ? 2 : 1
+        if (g === "wallpaper" || g === true) return 1
+        return 0
+    }
+    readonly property bool wantsBackdrop: root.frameGlass === 1 || (root.shapes ?? []).some(shape => root.glassOf(shape) === 1)
+
+    Loader {
+        id: backdropLoader
+        active: root.wantsBackdrop
+        sourceComponent: IrisGlassSource {
+            width: root.width
+            height: root.height
+            screen: root.QsWindow.window?.screen ?? null
+        }
+    }
+    Item {
+        id: noBackdrop
+        visible: false
+        width: 1
+        height: 1
+        layer.enabled: true
+    }
 
     readonly property rect bounds: {
         if (root.framed) return Qt.rect(0, 0, root.width, root.height)
@@ -172,5 +215,20 @@ Item {
         readonly property vector4d paintsC: pass.paintsBlock(2)
         readonly property vector4d paintsD: pass.paintsBlock(3)
         readonly property vector4d paintsE: pass.paintsBlock(4)
+        function glassBlock(block: int): var {
+            const g = i => root.glassOf(root.shapes[block * 4 + i])
+            return Qt.vector4d(g(0), g(1), g(2), g(3))
+        }
+        readonly property vector4d glassA: pass.glassBlock(0)
+        readonly property vector4d glassB: pass.glassBlock(1)
+        readonly property vector4d glassC: pass.glassBlock(2)
+        readonly property vector4d glassD: pass.glassBlock(3)
+        readonly property vector4d glassE: pass.glassBlock(4)
+        readonly property bool backdropReady: backdropLoader.item?.ready ?? false
+        readonly property vector4d glass: Qt.vector4d(pass.backdropReady ? 1 : 0, root.framed ? root.frameGlass : 0,
+            IrisStyle.glassTint, IrisStyle.glassLip)
+        readonly property vector4d edgeWave: root.edgeWave
+        readonly property vector4d waveClock: Qt.vector4d(root.waveClock, 0, 0, 0)
+        readonly property Item backdrop: pass.backdropReady ? backdropLoader.item.texture : noBackdrop
     }
 }

@@ -25,7 +25,8 @@ PanelWindow {
     readonly property bool pinned: root.options.pinned ?? false
     readonly property real d: IrisStyle.density
     readonly property string outputName: root.left ? GlobalStates.sidebarLeftTargetOutput : GlobalStates.sidebarRightTargetOutput
-    readonly property bool notch: root.options.notch ?? false
+    readonly property real edgeHeld: IrisFrame.clear(root.left ? "left" : "right") - IrisFrame.band
+    readonly property bool notch: (root.options.notch ?? false) && root.edgeHeld <= 0
     readonly property bool peek: root.open && !root.pinned && GlobalStates.irisSidebarPeek === root.side
     property bool editing: false
     property bool contentSettled: false
@@ -152,7 +153,7 @@ PanelWindow {
     }
     Shortcut { sequence: "Ctrl+E"; enabled: root.open; onActivated: root.editing = !root.editing }
 
-    readonly property real edgeGap: (root.notch ? 0 : 12 * root.d) + IrisFrame.band
+    readonly property real edgeGap: (root.notch ? 0 : 12 * root.d) + IrisFrame.band + root.edgeHeld
     readonly property real verticalGap: 12 * root.d
     readonly property real notchOverflow: root.notch ? frame.radius : 0
     readonly property real topInset: root.verticalGap + IrisFrame.inset("top")

@@ -3,6 +3,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Effects
 import QtQuick.Layouts
+import QtMultimedia
 import Quickshell.Widgets
 import qs
 import qs.services
@@ -20,14 +21,10 @@ Item {
     readonly property real d: IrisStyle.density
     readonly property string wallpaperPath: Config.options?.background?.wallpaperPath ?? ""
     readonly property string wallpaperLower: root.wallpaperPath.toLowerCase()
-    readonly property bool animatedWallpaper: wallpaperLower.endsWith(".gif")
-        || wallpaperLower.endsWith(".mp4") || wallpaperLower.endsWith(".webm")
-        || wallpaperLower.endsWith(".mkv") || wallpaperLower.endsWith(".avi")
-        || wallpaperLower.endsWith(".mov")
-    readonly property string lockWallpaperPath: root.animatedWallpaper
-        ? (Config.options?.background?.thumbnailPath ?? "") : root.wallpaperPath
-    readonly property string wallpaperSource: root.lockWallpaperPath.length === 0 ? ""
-        : root.lockWallpaperPath.startsWith("file://") ? root.lockWallpaperPath : "file://" + root.lockWallpaperPath
+    readonly property bool videoWallpaper: Wallpapers.isVideoFile(root.wallpaperLower)
+    readonly property string wallpaperSource: Wallpapers.stillUrlFor(root.wallpaperPath)
+    readonly property bool playsVideo: root.videoWallpaper && !root.blurEnabled
+        && (Config.options?.lock?.enableAnimation ?? false)
     readonly property bool blurEnabled: Config.options?.lock?.blur?.enable ?? true
 
     function wakeIfNeeded(): bool {
@@ -176,6 +173,17 @@ Item {
                 asynchronous: true
                 cache: false
                 visible: !root.blurEnabled
+            }
+            Loader {
+                anchors.fill: parent
+                active: root.playsVideo
+                sourceComponent: Video {
+                    source: "file://" + root.wallpaperPath
+                    fillMode: VideoOutput.PreserveAspectCrop
+                    loops: MediaPlayer.Infinite
+                    muted: true
+                    autoPlay: true
+                }
             }
             MultiEffect {
                 anchors.fill: parent

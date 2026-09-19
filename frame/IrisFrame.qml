@@ -18,8 +18,36 @@ QtObject {
     readonly property real cornerRadius: root.framed
         ? Math.max(0, Math.round(Number(root.surround?.radius ?? 22) * root.d)) : 0
 
-    readonly property string islandEdge: String(root.bar?.position ?? "top") === "bottom" ? "bottom" : "top"
-    readonly property string dockEdge: root.islandEdge === "top" ? "bottom" : "top"
+    readonly property var edges: ["top", "bottom", "left", "right"]
+    function opposite(edge: string): string {
+        return ({ top: "bottom", bottom: "top", left: "right", right: "left" })[edge] ?? "bottom"
+    }
+    function vertical(edge: string): bool { return edge === "left" || edge === "right" }
+    readonly property string islandEdge: root.edges.includes(String(root.bar?.position ?? "top")) ? String(root.bar.position) : "top"
+    readonly property string dockEdge: {
+        const wanted = String(root.dock?.position ?? "auto")
+        return root.edges.includes(wanted) && wanted !== root.islandEdge ? wanted : root.opposite(root.islandEdge)
+    }
+    readonly property string wantedIsland: String(root.bar?.position ?? "top")
+    readonly property string wantedDock: String(root.dock?.position ?? "auto")
+    property string settledIsland: ""
+    property string settledDock: ""
+    Component.onCompleted: { root.settledIsland = root.islandEdge; root.settledDock = root.dockEdge }
+    onWantedIslandChanged: {
+        if (root.edges.includes(root.wantedIsland) && root.wantedIsland === root.wantedDock
+                && root.settledIsland.length > 0 && root.settledIsland !== root.wantedIsland)
+            Config.setNestedValue("iris.dock.position", root.settledIsland)
+        root.settle()
+    }
+    onWantedDockChanged: {
+        if (root.edges.includes(root.wantedDock) && root.wantedDock === root.islandEdge
+                && root.settledDock.length > 0 && root.settledDock !== root.wantedDock)
+            Config.setNestedValue("iris.bar.position", root.settledDock)
+        root.settle()
+    }
+    function settle(): void {
+        Qt.callLater(() => { root.settledIsland = root.islandEdge; root.settledDock = root.dockEdge })
+    }
     readonly property bool notch: Boolean(root.bar?.notch ?? false)
     readonly property real islandBand: Math.max(32, Math.round(Number(root.bar?.height ?? 42) * root.d))
     readonly property real islandMargin: root.notch ? 0 : Math.max(0, Math.round(Number(root.bar?.margin ?? 8) * root.d))
@@ -38,11 +66,15 @@ QtObject {
     readonly property var bubbles: Config.options?.iris?.bubbles ?? ({})
     readonly property bool piecesAttached: root.bubbles?.attach ?? true
     readonly property bool piecesReserve: root.piecesAttached && (root.bubbles?.reserve ?? true)
-    readonly property real pieceInset: root.band + root.islandMargin
+    readonly property string pieceJoin: root.piecesAttached ? String(root.bubbles?.join ?? "notch") : "float"
+    readonly property bool piecesMelt: root.pieceJoin === "notch" || root.pieceJoin === "weld"
+    readonly property real pieceGap: root.pieceJoin === "gap" ? Math.max(root.islandMargin, Math.round(8 * root.d)) : 0
+    readonly property real pieceInset: root.band + root.pieceGap
     readonly property real pieceScale: Math.max(0.6, Math.min(1.4, Number(root.bubbles?.scale ?? 100) / 100))
     readonly property real pieceBand: Math.round(root.islandBand * root.pieceScale)
-    readonly property real pieceDepth: root.islandMargin + root.pieceBand
+    readonly property real pieceDepth: root.pieceGap + root.pieceBand
     function edgeOf(place: string): string {
+        if (place.startsWith("edge:")) return ["top", "bottom", "left", "right"].includes(place.slice(5)) ? place.slice(5) : ""
         if (place === "top-left" || place === "top-right") return "top"
         if (place === "bottom-left" || place === "bottom-right") return "bottom"
         if (place === "left" || place === "right") return place
@@ -77,6 +109,7 @@ QtObject {
     readonly property string placementMode: String(root.theme?.placement ?? "auto")
 
     function place(origin: var, width: real, height: real, screenWidth: real, screenHeight: real, radius: real, avoid: var, air: real): var {
+        if (!origin) return { sideways: false, towardsLeft: false, towardsUp: false, x: (screenWidth - width) / 2, y: (screenHeight - height) / 2 }
         const ob = origin.obstacle ?? origin
         const cx = origin.x + origin.width / 2
         const cy = origin.y + origin.height / 2

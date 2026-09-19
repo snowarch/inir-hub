@@ -437,6 +437,7 @@ Item {
         open: root.inspecting
         motionSurface: "panels"
         color: IrisStyle.bodySurface
+        fieldBacked: true
         radius: IrisStyle.radiusPlate
         light: IrisStyle.wallpaperLight
         lightFrom: root.bottomEdge ? "bottom" : "top"

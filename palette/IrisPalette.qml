@@ -27,6 +27,12 @@ PanelWindow {
         Math.max(180, ((root.screen?.height ?? 1080) * 0.72) - (120 * IrisStyle.density))
         / Math.max(42, 50 * IrisStyle.density)))
     readonly property int resultLimit: Math.min(root.configuredResultLimit, root.heightResultLimit)
+    function edgeClear(edge: string): real {
+        let held = IrisFrame.inset(edge)
+        if ((Config.options?.iris?.dock?.enable ?? true) && IrisFrame.dockEdge === edge)
+            held = Math.max(held, IrisFrame.band + IrisFrame.dockBand + IrisFrame.dockMargin)
+        return held - IrisFrame.band + Math.round(12 * IrisStyle.density)
+    }
     readonly property bool mathQuery: /[0-9]/.test(LauncherSearch.query)
     readonly property var searchResults: (LauncherSearch.results ?? [])
         .filter(entry => String(entry?.name ?? "").length > 0
@@ -37,6 +43,7 @@ PanelWindow {
     readonly property bool fromIsland: String(root.options?.opens ?? "floating") === "island"
         && root.island !== null && root.island.width > 0
     readonly property bool islandBottom: root.island?.bottomEdge ?? false
+    readonly property string islandSide: root.island?.vertical ? String(root.island.edge) : ""
     readonly property bool joinsEdge: root.fromIsland && IrisFrame.notch
 
     readonly property bool browsing: LauncherSearch.query.length === 0
@@ -283,20 +290,31 @@ PanelWindow {
                 windowOffset: Qt.point(IrisFrame.band, IrisFrame.band)
                 readonly property real dissolve: root.fromIsland ? IrisStyle.ramp(surface.progress, 0, 0.14) : 1
                 origin: root.fromIsland ? ({ x: root.island.x - IrisFrame.band, y: root.island.y - IrisFrame.band,
-                    width: root.island.width, height: root.island.height, radius: root.island.height / 2 }) : null
+                    width: root.island.width, height: root.island.height, radius: Math.min(root.island.width, root.island.height) / 2 }) : null
                 originShare: root.fromIsland ? 1 : IrisStyle.absorbShare
                 color: root.fromIsland ? ColorUtils.applyAlpha(IrisStyle.bodySurface, surface.dissolve) : IrisStyle.surface
                 light: root.fromIsland ? "transparent" : IrisStyle.surfaceLight("spotlight", IrisStyle.wallpaperLight)
-                lightFrom: (Config.options?.iris?.bar?.position ?? "top") === "bottom" ? "bottom" : "top"
+                lightFrom: IrisFrame.islandEdge
                 radius: IrisStyle.surfaceRadius("spotlight", IrisStyle.radiusPanel)
                 width: Math.max(320, Math.min(root.width - 32, Math.max(480, Number(root.options?.width ?? 640) * stage.d)))
-                x: root.fromIsland
-                    ? Math.round(Math.max(8, Math.min(root.width - width - 8, root.island.x - IrisFrame.band + root.island.width / 2 - width / 2)))
-                    : (root.width - width) / 2
+                x: !root.fromIsland ? (root.width - width) / 2
+                    : root.islandSide === "left" ? Math.round(root.island.x - IrisFrame.band)
+                    : root.islandSide === "right" ? Math.round(root.island.x - IrisFrame.band + root.island.width - width)
+                    : Math.round(Math.max(8, Math.min(root.width - width - 8, root.island.x - IrisFrame.band + root.island.width / 2 - width / 2)))
                 y: !root.fromIsland ? Math.max(72, Math.round(root.height * 0.2))
+                    : root.islandSide.length > 0 ? Math.round(Math.max(8, Math.min(root.height - height - 8,
+                        root.island.y - IrisFrame.band + root.island.height / 2 - height / 2)))
                     : root.islandBottom ? Math.round(root.island.y - IrisFrame.band + root.island.height - height)
                     : Math.round(root.island.y - IrisFrame.band)
-                height: body.implicitHeight
+                readonly property real room: {
+                    const top = root.edgeClear("top")
+                    const bottom = root.edgeClear("bottom")
+                    if (root.fromIsland && root.islandSide.length > 0) return root.height - top - bottom
+                    if (root.fromIsland && root.islandBottom) return root.island.y - IrisFrame.band + root.island.height - top
+                    const y = root.fromIsland ? root.island.y - IrisFrame.band : Math.max(72, Math.round(root.height * 0.2))
+                    return root.height - y - bottom
+                }
+                height: Math.min(body.implicitHeight, Math.max(Math.round(160 * stage.d), surface.room))
                 onClosed: LauncherSearch.query = ""
                 onSettledChanged: if (surface.settled && surface.open) stage.focusInput()
                 Rectangle {
@@ -322,6 +340,7 @@ PanelWindow {
                     anchors.left: parent.left
                     anchors.right: parent.right
                     anchors.top: parent.top
+                    height: surface.height
                     columns: 1
                     rowSpacing: 0
                     columnSpacing: 0
@@ -616,196 +635,225 @@ PanelWindow {
                         Layout.fillWidth: true
                         visible: !root.browsing && LauncherSearch.query.length > 0
                         implicitHeight: resultColumn.implicitHeight + 16 * stage.d
-
-                        Rectangle {
-                            id: highlight
-                            readonly property Item target: resultRepeater.count > 0 ? resultRepeater.itemAt(root.selectedIndex) : null
-                            visible: target !== null
-                            x: 8 * stage.d
-                            width: parent.width - 16 * stage.d
-                            y: resultColumn.y + (target ? target.y + target.rowY : 0)
-                            height: target?.rowHeight ?? 0
-                            radius: IrisStyle.radiusTile
-                            color: IrisStyle.tintFill(IrisStyle.accent)
-                            Behavior on y { NumberAnimation { duration: IrisStyle.duration(110); easing.type: IrisStyle.feedbackEasing } }
-                            Behavior on height { NumberAnimation { duration: IrisStyle.duration(110); easing.type: IrisStyle.feedbackEasing } }
+                        Layout.fillHeight: true
+                        Layout.minimumHeight: Math.min(results.implicitHeight, Math.round(96 * stage.d))
+                        function reveal(index: int): void {
+                            const target = resultRepeater.count > 0 ? resultRepeater.itemAt(index) : null
+                            if (!target) return
+                            const top = resultColumn.y + target.y + (index === 0 ? 0 : target.rowY)
+                            const bottom = resultColumn.y + target.y + target.rowY + target.rowHeight
+                            if (top < resultsFlick.contentY) resultsFlick.contentY = Math.max(0, top - 8 * stage.d)
+                            else if (bottom > resultsFlick.contentY + resultsFlick.height)
+                                resultsFlick.contentY = Math.min(resultsFlick.contentHeight - resultsFlick.height, bottom - resultsFlick.height + 8 * stage.d)
+                        }
+                        Connections {
+                            target: root
+                            function onSelectedIndexChanged(): void { results.reveal(root.selectedIndex) }
+                        }
+                        Connections {
+                            target: LauncherSearch
+                            function onQueryChanged(): void { resultsFlick.contentY = 0 }
                         }
 
-                        Column {
-                            id: resultColumn
-                            y: 8 * stage.d
-                            width: parent.width
+                        Flickable {
+                            id: resultsFlick
+                            anchors.fill: parent
+                            contentWidth: width
+                            contentHeight: results.implicitHeight
+                            clip: true
+                            interactive: contentHeight > height + 1
+                            boundsBehavior: Flickable.StopAtBounds
 
-                            Item {
-                                width: parent.width
-                                height: 44 * stage.d
-                                visible: root.visibleResults.length === 0
-                                IrisText {
-                                    anchors.centerIn: parent
-                                    text: Translation.tr("No results")
-                                    color: IrisStyle.muted
-                                }
+                            Rectangle {
+                                id: highlight
+                                readonly property Item target: resultRepeater.count > 0 ? resultRepeater.itemAt(root.selectedIndex) : null
+                                visible: target !== null
+                                x: 8 * stage.d
+                                width: parent.width - 16 * stage.d
+                                y: resultColumn.y + (target ? target.y + target.rowY : 0)
+                                height: target?.rowHeight ?? 0
+                                radius: IrisStyle.radiusTile
+                                color: IrisStyle.tintFill(IrisStyle.accent)
+                                Behavior on y { NumberAnimation { duration: IrisStyle.duration(110); easing.type: IrisStyle.feedbackEasing } }
+                                Behavior on height { NumberAnimation { duration: IrisStyle.duration(110); easing.type: IrisStyle.feedbackEasing } }
                             }
 
-                            Repeater {
-                                id: resultRepeater
-                                model: root.browsing ? [] : root.visibleResults
-                                Column {
-                                    id: result
-                                    required property var modelData
-                                    required property int index
-                                    readonly property bool topHit: result.index === 0 && !root.clipboardMode
-                                    readonly property bool mathHit: result.topHit && result.modelData?.type === Translation.tr("Math")
-                                    readonly property bool clipImage: root.clipboardMode
-                                        && Cliphist.entryIsImage(String(result.modelData?.rawValue ?? ""))
-                                    readonly property bool selected: root.selectedIndex === result.index
-                                    readonly property bool showHeader: result.index === 0
-                                        || stage.sectionAt(result.index) !== stage.sectionAt(result.index - 1)
-                                    readonly property real rowY: row.y
-                                    readonly property real rowHeight: row.height
-                                    width: resultColumn.width
+                            Column {
+                                id: resultColumn
+                                y: 8 * stage.d
+                                width: parent.width
 
+                                Item {
+                                    width: parent.width
+                                    height: 44 * stage.d
+                                    visible: root.visibleResults.length === 0
                                     IrisText {
-                                        visible: result.showHeader
-                                        x: 20 * stage.d
-                                        height: Math.round((result.index === 0 ? 24 : 30) * stage.d)
-                                        verticalAlignment: Text.AlignBottom
-                                        bottomPadding: 5 * stage.d
-                                        text: stage.sectionAt(result.index)
+                                        anchors.centerIn: parent
+                                        text: Translation.tr("No results")
                                         color: IrisStyle.muted
-                                        font.pixelSize: 11.5 * IrisStyle.typeScale
-                                        font.weight: Font.DemiBold
                                     }
+                                }
 
-                                    MouseArea {
-                                        id: row
-                                        x: 8 * stage.d
-                                        width: parent.width - 16 * stage.d
-                                        height: result.clipImage ? Math.max(40 * stage.d, thumbLoader.height + 14 * stage.d)
-                                            : Math.round((result.mathHit ? 66 : result.topHit ? 58 : 40) * stage.d)
-                                        hoverEnabled: true
-                                        cursorShape: root.pointerSelectionArmed ? Qt.PointingHandCursor : Qt.BlankCursor
-                                        Accessible.role: Accessible.Button
-                                        Accessible.name: String(result.modelData?.name ?? "")
-                                        onPositionChanged: event => {
-                                            if (root.armPointerSelection(row, event) && !result.selected)
-                                                root.selectedIndex = result.index
+                                Repeater {
+                                    id: resultRepeater
+                                    model: root.browsing ? [] : root.visibleResults
+                                    Column {
+                                        id: result
+                                        required property var modelData
+                                        required property int index
+                                        readonly property bool topHit: result.index === 0 && !root.clipboardMode
+                                        readonly property bool mathHit: result.topHit && result.modelData?.type === Translation.tr("Math")
+                                        readonly property bool clipImage: root.clipboardMode
+                                            && Cliphist.entryIsImage(String(result.modelData?.rawValue ?? ""))
+                                        readonly property bool selected: root.selectedIndex === result.index
+                                        readonly property bool showHeader: result.index === 0
+                                            || stage.sectionAt(result.index) !== stage.sectionAt(result.index - 1)
+                                        readonly property real rowY: row.y
+                                        readonly property real rowHeight: row.height
+                                        width: resultColumn.width
+
+                                        IrisText {
+                                            visible: result.showHeader
+                                            x: 20 * stage.d
+                                            height: Math.round((result.index === 0 ? 24 : 30) * stage.d)
+                                            verticalAlignment: Text.AlignBottom
+                                            bottomPadding: 5 * stage.d
+                                            text: stage.sectionAt(result.index)
+                                            color: IrisStyle.muted
+                                            font.pixelSize: 11.5 * IrisStyle.typeScale
+                                            font.weight: Font.DemiBold
                                         }
-                                        onClicked: {
-                                            root.pointerSelectionArmed = true
-                                            root.selectedIndex = result.index
-                                            root.executeSelected()
-                                        }
 
-                                        RowLayout {
-                                            anchors.fill: parent
-                                            anchors.leftMargin: 12 * stage.d
-                                            anchors.rightMargin: 14 * stage.d
-                                            spacing: 12 * stage.d
-
-                                            Loader {
-                                                id: thumbLoader
-                                                active: result.clipImage
-                                                visible: active
-                                                Layout.preferredWidth: item?.implicitWidth ?? 0
-                                                Layout.preferredHeight: item?.implicitHeight ?? 0
-                                                sourceComponent: CliphistImage {
-                                                    entry: String(result.modelData?.rawValue ?? "")
-                                                    maxWidth: Math.round(220 * stage.d)
-                                                    maxHeight: Math.round(120 * stage.d)
-                                                    color: IrisStyle.fillQuiet
-                                                    radius: IrisStyle.radiusRow
-                                                }
+                                        MouseArea {
+                                            id: row
+                                            x: 8 * stage.d
+                                            width: parent.width - 16 * stage.d
+                                            height: result.clipImage ? Math.max(40 * stage.d, thumbLoader.height + 14 * stage.d)
+                                                : Math.round((result.mathHit ? 66 : result.topHit ? 58 : 40) * stage.d)
+                                            hoverEnabled: true
+                                            cursorShape: root.pointerSelectionArmed ? Qt.PointingHandCursor : Qt.BlankCursor
+                                            Accessible.role: Accessible.Button
+                                            Accessible.name: String(result.modelData?.name ?? "")
+                                            onPositionChanged: event => {
+                                                if (root.armPointerSelection(row, event) && !result.selected)
+                                                    root.selectedIndex = result.index
                                             }
-                                            Item {
-                                                visible: !result.clipImage
-                                                readonly property real size: Math.round((result.topHit ? 38 : 24) * stage.d)
-                                                Layout.preferredWidth: size
-                                                Layout.preferredHeight: size
+                                            onClicked: {
+                                                root.pointerSelectionArmed = true
+                                                root.selectedIndex = result.index
+                                                root.executeSelected()
+                                            }
+
+                                            RowLayout {
+                                                anchors.fill: parent
+                                                anchors.leftMargin: 12 * stage.d
+                                                anchors.rightMargin: 14 * stage.d
+                                                spacing: 12 * stage.d
+
                                                 Loader {
-                                                    anchors.fill: parent
-                                                    active: result.modelData?.iconType === LauncherSearchResult.IconType.System
-                                                    sourceComponent: SmartAppIcon {
-                                                        icon: result.modelData?.iconName ?? "application-x-executable"
-                                                        fallback: "application-x-executable"
-                                                        iconSize: parent?.width ?? 24
+                                                    id: thumbLoader
+                                                    active: result.clipImage
+                                                    visible: active
+                                                    Layout.preferredWidth: item?.implicitWidth ?? 0
+                                                    Layout.preferredHeight: item?.implicitHeight ?? 0
+                                                    sourceComponent: CliphistImage {
+                                                        entry: String(result.modelData?.rawValue ?? "")
+                                                        maxWidth: Math.round(220 * stage.d)
+                                                        maxHeight: Math.round(120 * stage.d)
+                                                        color: IrisStyle.fillQuiet
+                                                        radius: IrisStyle.radiusRow
                                                     }
                                                 }
-                                                Loader {
-                                                    anchors.centerIn: parent
-                                                    active: result.modelData?.iconType === LauncherSearchResult.IconType.Text
-                                                    sourceComponent: IrisText {
-                                                        text: result.modelData?.iconName ?? ""
-                                                        font.pixelSize: Math.round((result.topHit ? 30 : 19) * IrisStyle.typeScale)
+                                                Item {
+                                                    visible: !result.clipImage
+                                                    readonly property real size: Math.round((result.topHit ? 38 : 24) * stage.d)
+                                                    Layout.preferredWidth: size
+                                                    Layout.preferredHeight: size
+                                                    Loader {
+                                                        anchors.fill: parent
+                                                        active: result.modelData?.iconType === LauncherSearchResult.IconType.System
+                                                        sourceComponent: SmartAppIcon {
+                                                            icon: result.modelData?.iconName ?? "application-x-executable"
+                                                            fallback: "application-x-executable"
+                                                            iconSize: parent?.width ?? 24
+                                                        }
                                                     }
+                                                    Loader {
+                                                        anchors.centerIn: parent
+                                                        active: result.modelData?.iconType === LauncherSearchResult.IconType.Text
+                                                        sourceComponent: IrisText {
+                                                            text: result.modelData?.iconName ?? ""
+                                                            font.pixelSize: Math.round((result.topHit ? 30 : 19) * IrisStyle.typeScale)
+                                                        }
+                                                    }
+                                                    Rectangle {
+                                                        anchors.fill: parent
+                                                        visible: result.modelData?.iconType !== LauncherSearchResult.IconType.System
+                                                            && result.modelData?.iconType !== LauncherSearchResult.IconType.Text
+                                                        radius: width / 2
+                                                        color: IrisStyle.fill
+                                                        MaterialSymbol {
+                                                            anchors.centerIn: parent
+                                                            text: result.modelData?.iconName || "search"
+                                                            iconSize: Math.round(parent.width * 0.56)
+                                                            color: IrisStyle.text
+                                                        }
+                                                    }
+                                                }
+
+                                                ColumnLayout {
+                                                    Layout.fillWidth: true
+                                                    spacing: 1
+                                                    IrisText {
+                                                        Layout.fillWidth: true
+                                                        readonly property bool emphasise: !root.clipboardMode && !result.mathHit
+                                                            && result.modelData?.fontType !== LauncherSearchResult.FontType.Monospace
+                                                        textFormat: emphasise || result.mathHit || result.clipImage ? Text.StyledText : Text.PlainText
+                                                        text: result.clipImage
+                                                            ? "<b>" + Translation.tr("Image") + "</b>" + (thumbLoader.item
+                                                                ? "  <font color='" + IrisStyle.muted + "'>" + thumbLoader.item.imageWidth + " × " + thumbLoader.item.imageHeight + "</font>" : "")
+                                                            : result.mathHit
+                                                                ? "<font color='" + IrisStyle.secondaryAccent + "'>=</font> " + stage.escapeHtml(String(result.modelData?.name ?? ""))
+                                                            : emphasise ? stage.emphasised(String(result.modelData?.name ?? ""))
+                                                            : String(result.modelData?.name ?? "")
+                                                        font.family: result.mathHit ? IrisStyle.fontMain
+                                                            : result.modelData?.fontType === LauncherSearchResult.FontType.Monospace
+                                                            ? Appearance.font.family.monospace : IrisStyle.fontMain
+                                                        font.features: result.mathHit ? ({ "tnum": 1 }) : ({})
+                                                        font.pixelSize: Math.round((result.mathHit ? 28 : result.topHit ? 16 : 13.5) * IrisStyle.typeScale)
+                                                        font.weight: result.mathHit ? Font.Bold : result.topHit ? Font.DemiBold : Font.Normal
+                                                        font.letterSpacing: result.mathHit ? -0.5 : 0
+                                                        elide: Text.ElideRight
+                                                    }
+                                                    IrisText {
+                                                        Layout.fillWidth: true
+                                                        visible: result.topHit && text.length > 0
+                                                        text: result.mathHit ? LauncherSearch.query
+                                                            : result.modelData?.comment || result.modelData?.genericName || result.modelData?.type || ""
+                                                        color: IrisStyle.subtext
+                                                        font.pixelSize: 12 * IrisStyle.typeScale
+                                                        elide: Text.ElideRight
+                                                    }
+                                                }
+
+                                                IrisText {
+                                                    visible: result.selected && text.length > 0
+                                                    text: String(result.modelData?.verb ?? "")
+                                                    color: IrisStyle.subtext
+                                                    font.pixelSize: 12 * IrisStyle.typeScale
                                                 }
                                                 Rectangle {
-                                                    anchors.fill: parent
-                                                    visible: result.modelData?.iconType !== LauncherSearchResult.IconType.System
-                                                        && result.modelData?.iconType !== LauncherSearchResult.IconType.Text
-                                                    radius: width / 2
+                                                    visible: result.selected
+                                                    Layout.preferredWidth: Math.round(24 * stage.d)
+                                                    Layout.preferredHeight: Math.round(20 * stage.d)
+                                                    radius: IrisStyle.radiusChip
                                                     color: IrisStyle.fill
                                                     MaterialSymbol {
                                                         anchors.centerIn: parent
-                                                        text: result.modelData?.iconName || "search"
-                                                        iconSize: Math.round(parent.width * 0.56)
+                                                        text: "keyboard_return"
+                                                        iconSize: Math.round(14 * stage.d)
                                                         color: IrisStyle.text
                                                     }
-                                                }
-                                            }
-
-                                            ColumnLayout {
-                                                Layout.fillWidth: true
-                                                spacing: 1
-                                                IrisText {
-                                                    Layout.fillWidth: true
-                                                    readonly property bool emphasise: !root.clipboardMode && !result.mathHit
-                                                        && result.modelData?.fontType !== LauncherSearchResult.FontType.Monospace
-                                                    textFormat: emphasise || result.mathHit || result.clipImage ? Text.StyledText : Text.PlainText
-                                                    text: result.clipImage
-                                                        ? "<b>" + Translation.tr("Image") + "</b>" + (thumbLoader.item
-                                                            ? "  <font color='" + IrisStyle.muted + "'>" + thumbLoader.item.imageWidth + " × " + thumbLoader.item.imageHeight + "</font>" : "")
-                                                        : result.mathHit
-                                                            ? "<font color='" + IrisStyle.secondaryAccent + "'>=</font> " + stage.escapeHtml(String(result.modelData?.name ?? ""))
-                                                        : emphasise ? stage.emphasised(String(result.modelData?.name ?? ""))
-                                                        : String(result.modelData?.name ?? "")
-                                                    font.family: result.mathHit ? IrisStyle.fontMain
-                                                        : result.modelData?.fontType === LauncherSearchResult.FontType.Monospace
-                                                        ? Appearance.font.family.monospace : IrisStyle.fontMain
-                                                    font.features: result.mathHit ? ({ "tnum": 1 }) : ({})
-                                                    font.pixelSize: Math.round((result.mathHit ? 28 : result.topHit ? 16 : 13.5) * IrisStyle.typeScale)
-                                                    font.weight: result.mathHit ? Font.Bold : result.topHit ? Font.DemiBold : Font.Normal
-                                                    font.letterSpacing: result.mathHit ? -0.5 : 0
-                                                    elide: Text.ElideRight
-                                                }
-                                                IrisText {
-                                                    Layout.fillWidth: true
-                                                    visible: result.topHit && text.length > 0
-                                                    text: result.mathHit ? LauncherSearch.query
-                                                        : result.modelData?.comment || result.modelData?.genericName || result.modelData?.type || ""
-                                                    color: IrisStyle.subtext
-                                                    font.pixelSize: 12 * IrisStyle.typeScale
-                                                    elide: Text.ElideRight
-                                                }
-                                            }
-
-                                            IrisText {
-                                                visible: result.selected && text.length > 0
-                                                text: String(result.modelData?.verb ?? "")
-                                                color: IrisStyle.subtext
-                                                font.pixelSize: 12 * IrisStyle.typeScale
-                                            }
-                                            Rectangle {
-                                                visible: result.selected
-                                                Layout.preferredWidth: Math.round(24 * stage.d)
-                                                Layout.preferredHeight: Math.round(20 * stage.d)
-                                                radius: IrisStyle.radiusChip
-                                                color: IrisStyle.fill
-                                                MaterialSymbol {
-                                                    anchors.centerIn: parent
-                                                    text: "keyboard_return"
-                                                    iconSize: Math.round(14 * stage.d)
-                                                    color: IrisStyle.text
                                                 }
                                             }
                                         }

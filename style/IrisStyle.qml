@@ -22,7 +22,7 @@ QtObject {
     // the others. Geometry still springs across the swap: the silhouette is
     // continuous, its contents are replaced (DESIGN §0.4).
     readonly property var structuralPaths: ["bar.composition", "bar.clockStyle", "bar.trailing",
-        "bar.auxiliary", "bar.pieces", "bar.navItems", "bar.desktopBlocks", "bar.mediaBlocks",
+        "bar.auxiliary", "bar.pieces", "bar.fullStart", "bar.fullCenter", "bar.fullEnd", "bar.navItems", "bar.desktopBlocks", "bar.mediaBlocks",
         "controlCenter.sections", "controlCenter.controls"]
     function readPath(path: string): var {
         let node = root.options
@@ -150,8 +150,12 @@ QtObject {
     }
     readonly property color surfaceOpaque: root.materialSwatch(root.theme?.surface ?? "black")
     readonly property bool plainBlack: (root.theme?.surface ?? "black") === "black"
-    readonly property color surfaceHighOpaque: root.plainBlack ? "#1c1c1e" : ColorUtils.mix(root.text, root.surfaceOpaque, 0.1)
-    readonly property color surfaceHighestOpaque: root.plainBlack ? "#2c2c2e" : ColorUtils.mix(root.text, root.surfaceOpaque, 0.17)
+    function raise(base: color, amount: real): color {
+        if (base.hslHue < 0 || base.hslSaturation < 0.05) return ColorUtils.mix(root.text, base, amount)
+        return Qt.hsla(base.hslHue, Math.min(1, base.hslSaturation * 0.9), Math.min(1, base.hslLightness + amount * 0.62), 1)
+    }
+    readonly property color surfaceHighOpaque: root.plainBlack ? "#1c1c1e" : root.raise(root.surfaceOpaque, 0.1)
+    readonly property color surfaceHighestOpaque: root.plainBlack ? "#2c2c2e" : root.raise(root.surfaceOpaque, 0.17)
     readonly property real tintAmount: Math.max(0, Math.min(1, Number(root.appearance?.tint ?? 0) / 100))
     readonly property color tintSeed: root.legibleAccent(Appearance.wallpaperDominantColor, root.accent)
     function tinted(base: color, strength: real): color {
@@ -159,12 +163,39 @@ QtObject {
     }
     readonly property color surface: root.surfaceOpaque
     readonly property color bodySurface: root.surfaceOpaque
-    readonly property color surfaceHigh: root.tinted(root.surfaceHighOpaque, 0.16)
-    readonly property color surfaceHighest: root.tinted(root.surfaceHighestOpaque, 0.2)
+
+    readonly property var glassOptions: root.appearance?.glass ?? ({})
+    readonly property string glassRequested: ["wallpaper", "compositor"].includes(String(root.glassOptions?.mode ?? ""))
+        ? root.glassOptions.mode : "off"
+    readonly property bool glassy: root.glassRequested !== "off" && Appearance.effectsEnabled
+    readonly property bool glassCompositor: root.glassy && root.glassRequested === "compositor" && Appearance.compositorBlurActive
+    readonly property bool glassWallpaper: root.glassy && !root.glassCompositor
+    readonly property real glassBlurAmount: Math.max(0, Math.min(1, Number(root.glassOptions?.blur ?? 100) / 100))
+    readonly property real glassTint: {
+        const chosen = Math.max(0.12, Math.min(0.96, Number(root.glassOptions?.tint ?? 58) / 100))
+        const needed = IrisMood.sampled ? root.legibleVeil("glass", IrisMood.luminance, IrisMood.contrast * 0.5, 1) : 0
+        return Math.max(chosen, Math.min(0.9, needed))
+    }
+    readonly property color bodyTint: root.glassy ? ColorUtils.applyAlpha(root.surfaceOpaque, root.glassTint) : root.bodySurface
+    readonly property color bodyFill: root.glassy ? Qt.color("transparent") : root.bodySurface
+    readonly property color bodyScrim: root.bodyTint
+    // iris-literal: a clipping chassis stops painting its children when fully transparent
+    readonly property color bodyClip: root.glassy ? Qt.rgba(0, 0, 0, 0.004) : root.bodySurface
+    readonly property color placeSurface: root.glassy ? ColorUtils.applyAlpha(root.surfaceOpaque, root.glassTint) : root.surface
+    readonly property real glassLip: 0
+    readonly property real wallpaperVeil: IrisMood.sampled
+        ? Math.max(0.22, Math.min(0.72, root.legibleVeil("glass", IrisMood.luminance, IrisMood.contrast * 0.5, 0.6))) : 0.22
+    readonly property color surfaceHigh: root.glassy ? ColorUtils.applyAlpha(root.fillInk, root.fillAlpha(0.07))
+        : root.tinted(root.surfaceHighOpaque, 0.16)
+    readonly property color surfaceHighest: root.glassy ? ColorUtils.applyAlpha(root.fillInk, root.fillAlpha(0.12))
+        : root.tinted(root.surfaceHighestOpaque, 0.2)
     readonly property color field: root.surfaceHighestOpaque
     readonly property color text: "#f5f5f7"
-    readonly property color subtext: root.preset.subtext
-    readonly property color muted: root.preset.muted
+    // Secondary ink carries a whisper of the accent, so quiet text belongs to the theme instead of a stock grey.
+    readonly property color quietInk: ColorUtils.mix(root.accent, root.text, 0.14)
+    readonly property color subtext: ColorUtils.applyAlpha(root.quietInk, root.inkLevel(Math.max(0.78, root.preset.textStrong - 0.02), 0.9))
+    readonly property color muted: ColorUtils.applyAlpha(root.quietInk, root.inkLevel(Math.max(0.64, root.preset.textSecondary + 0.04), 0.8))
+    readonly property color label: ColorUtils.mix(root.accent, root.text, 0.62)
     function legibleAccent(seed, fallback): color {
         const c = Qt.color(seed)
         if (!c.valid || c.hslHue < 0 || c.hslSaturation < 0.12) return fallback
@@ -209,7 +240,7 @@ QtObject {
         return width > 0 ? Math.round(width * root.density) : fallback
     }
     readonly property int lightContour: Math.max(4, Math.round(6 * root.density))
-    readonly property int lightJoinContour: root.lightContour + Math.round(root.fuseDeep / 3)
+    readonly property int lightJoinContour: root.lightContour + Math.round(Math.min(root.fuseDeep, 30 * root.density) / 3)
     readonly property int lightReach: Math.round(92 * root.density * root.tweak("lightReach", 0.5, 3))
     function aura(light: color): color { return ColorUtils.applyAlpha(light, root.auraStrength * light.a) }
     function auraFading(light: color): color { return ColorUtils.applyAlpha(light, root.auraStrength * light.a * 0.35) }
@@ -242,8 +273,14 @@ QtObject {
         const t = root.tweak("lines", 0, 2)
         return t <= 1 ? ColorUtils.mix(base, root.surfaceOpaque, t) : ColorUtils.mix(root.text, base, (t - 1) * 0.35)
     }
-    readonly property color hairline: root.line(root.preset.hairline)
-    readonly property color hairlineStrong: root.line(root.preset.hairlineStrong)
+    function ruleOf(reference: color): color {
+        const k = Math.max(0, Math.min(1, (reference.r + reference.g + reference.b) / 3 / 0.96))
+        return ColorUtils.mix(root.text, root.surfaceOpaque, k)
+    }
+    readonly property color hairline: root.glassy ? ColorUtils.applyAlpha(root.text, Math.min(0.3, 0.07 * root.tweak("lines", 0, 2)))
+        : root.line(root.ruleOf(Qt.color(root.preset.hairline)))
+    readonly property color hairlineStrong: root.glassy ? ColorUtils.applyAlpha(root.text, Math.min(0.45, 0.14 * root.tweak("lines", 0, 2)))
+        : root.line(root.ruleOf(Qt.color(root.preset.hairlineStrong)))
     readonly property color selection: "#303034"
     readonly property color selectionHover: "#404044"
     readonly property color selectionText: "#ffffff"
@@ -261,15 +298,22 @@ QtObject {
     function tintBorder(tint: color): color { return ColorUtils.applyAlpha(tint, 0.7) }
 
     function textLevel(level: real): real { return Math.min(1, level * root.tweak("contrast", 0.6, 1.5)) }
+    function inkLevel(level: real, glassFloor: real): real { return Math.max(root.textLevel(level), root.glassy ? glassFloor : 0) }
     readonly property color textStrong: ColorUtils.applyAlpha(root.text, root.textLevel(root.preset.textStrong))
-    readonly property color textSecondary: ColorUtils.applyAlpha(root.text, root.textLevel(root.preset.textSecondary))
-    readonly property color textTertiary: ColorUtils.applyAlpha(root.text, root.textLevel(root.preset.textTertiary))
+    readonly property color textSecondary: ColorUtils.applyAlpha(root.quietInk, root.inkLevel(Math.max(0.66, root.preset.textSecondary), 0.8))
+    readonly property color textTertiary: ColorUtils.applyAlpha(root.quietInk, root.inkLevel(Math.max(0.5, root.preset.textTertiary), 0.6))
     function strongOf(ink: color): color { return ColorUtils.applyAlpha(ink, root.textLevel(root.preset.textStrong)) }
-    function secondaryOf(ink: color): color { return ColorUtils.applyAlpha(ink, root.textLevel(root.preset.textSecondary)) }
-    function tertiaryOf(ink: color): color { return ColorUtils.applyAlpha(ink, root.textLevel(root.preset.textTertiary)) }
+    function secondaryOf(ink: color): color { return ColorUtils.applyAlpha(ink, root.inkLevel(Math.max(0.66, root.preset.textSecondary), 0.8)) }
+    function tertiaryOf(ink: color): color { return ColorUtils.applyAlpha(ink, root.inkLevel(Math.max(0.5, root.preset.textTertiary), 0.6)) }
     readonly property color border: ColorUtils.applyAlpha(root.text, Math.min(0.5, 0.12 * root.preset.fill * root.tweak("lines", 0, 2)))
     readonly property color borderStrong: ColorUtils.applyAlpha(root.text, Math.min(0.6, 0.28 * root.preset.fill * root.tweak("lines", 0, 2)))
-    readonly property color rim: (root.theme?.rim ?? true) ? root.border : Qt.color("transparent")
+    readonly property string rimTint: String(root.theme?.rimTint ?? "neutral")
+    readonly property color rim: !(root.theme?.rim ?? true) ? Qt.color("transparent")
+        : root.rimTint === "accent" ? ColorUtils.applyAlpha(root.accent, Math.min(0.9, 0.3 + 0.3 * root.tweak("lines", 0, 2)))
+        : root.rimTint === "highlight" ? ColorUtils.applyAlpha(root.secondaryAccent, Math.min(0.9, 0.3 + 0.3 * root.tweak("lines", 0, 2)))
+        : root.border
+    readonly property int rimWidth: Math.max(1, Math.round(Math.max(1, Math.min(3, Number(root.theme?.rimWidth ?? 1))) * root.density))
+    readonly property real glow: Math.max(0, Math.min(1, Number(root.theme?.glow ?? 0) / 100))
     readonly property color onTint: "#ffffff"
     function onTintFor(tint: color): color { return tint.hslLightness > 0.6 ? root.onAccent : root.onTint }
 
@@ -277,16 +321,41 @@ QtObject {
     readonly property color veil: ColorUtils.applyAlpha(root.surface, 0.42)
     readonly property color veilStrong: ColorUtils.applyAlpha(root.surface, 0.62)
     readonly property color veilHeavy: ColorUtils.applyAlpha(root.surface, 0.76)
-    readonly property color shadow: Qt.rgba(0, 0, 0, Math.min(0.9, 0.55 * root.tweak("shadow", 0, 1.6)))
+    function glowing(alpha: real): color {
+        const ink = ColorUtils.mix(root.accent, Qt.color("black"), root.glow)
+        return ColorUtils.applyAlpha(ink, Math.min(0.9, alpha * (1 + 0.4 * root.glow)))
+    }
+    readonly property real shadowThrough: root.glassy ? 0.4 : 1
+    readonly property color shadow: root.glowing(Math.min(0.9, 0.55 * root.tweak("shadow", 0, 1.6)) * root.shadowThrough)
     readonly property color material: ColorUtils.applyAlpha(root.surfaceHigh, 0.68)
     readonly property color onMedia: "#ffffff"
     readonly property color onMediaSecondary: ColorUtils.applyAlpha(root.onMedia, 0.72)
     readonly property color onMediaFill: ColorUtils.applyAlpha(root.onMedia, 0.2)
     readonly property color onMediaFillHover: ColorUtils.applyAlpha(root.onMedia, 0.3)
     readonly property color mediaScrim: Qt.rgba(0, 0, 0, 0.34)
-    readonly property color plateShadow: Qt.rgba(0, 0, 0, Math.min(0.9, 0.36 * root.tweak("shadow", 0, 1.6)))
+    readonly property color plateShadow: root.glowing(Math.min(0.9, 0.36 * root.tweak("shadow", 0, 1.6)))
     function skyWash(light: color): color { return ColorUtils.applyAlpha(light, 0.46) }
     function skyWashFade(light: color): color { return ColorUtils.applyAlpha(light, 0.05) }
+    readonly property color glassShadow: Qt.rgba(0, 0, 0, Math.min(0.6, 0.22 * root.tweak("shadow", 0, 1.6)))
+    readonly property real glassBlur: 1
+    readonly property real glassWash: 0.55
+    readonly property color clearRim: ColorUtils.applyAlpha(root.text, 0.07)
+    readonly property int glassBlurMax: 48
+    readonly property real glassSaturation: 0.3
+    readonly property var materialVeil: ({ glass: 0.3, clear: 0.04 })
+    readonly property var materialContrast: ({ glass: 4.5, clear: 3 })
+    readonly property var materialSpread: ({ glass: 1.0, clear: 1.2 })
+    function legibleVeil(material: string, level: real, spread: real, strength: real): real {
+        const floor = (root.materialVeil[material] ?? 0.3) * strength
+        if (level < 0)
+            return Math.max(floor, 0.42)
+        const worst = Math.min(1, level + spread * (root.materialSpread[material] ?? 1))
+        const region = Math.pow(worst, 2.2)
+        const base = ColorUtils.relativeLuminance(root.surfaceOpaque)
+        const allowed = (ColorUtils.relativeLuminance(root.text) + 0.05) / (root.materialContrast[material] ?? 4.5) - 0.05
+        const needed = region > allowed ? (region - allowed) / Math.max(0.001, region - base) : 0
+        return Math.max(floor, Math.min(0.86, needed))
+    }
 
     readonly property QtObject identity: QtObject {
         readonly property color blue: "#0a84ff"
@@ -306,7 +375,14 @@ QtObject {
     function identityColor(name: string): color { return root.identity[name] ?? root.identity.lavender }
 
     readonly property real shapeScale: root.preset.shape * root.tweak("shape", 0.3, 1.6)
-    function corner(px: real): int { return Math.max(2, Math.round(px * root.shapeScale * root.density)) }
+    // Large containers stop growing well before a pill, so content keeps a concentric margin.
+    function corner(px: real): int {
+        const cap = px >= 18 ? 1.3 : px >= 10 ? 1.4 : 1.6
+        return Math.max(2, Math.round(px * Math.min(root.shapeScale, cap) * root.density))
+    }
+    function concentricPad(outerRadius: real, floor: real): int {
+        return Math.max(Math.round(floor), Math.round(outerRadius * 0.3 + 7 * root.density))
+    }
     readonly property int radiusPanel: root.corner(30)   // Control Center, Settings frame
     readonly property int radiusSheet: root.corner(26)   // Spotlight, media card, wallpaper picker
     readonly property int radiusPlate: root.corner(22)   // widget and lock plates, dialogs, blocks
@@ -315,12 +391,20 @@ QtObject {
     readonly property int radiusRow: root.corner(10)     // list rows, menu items, small buttons
     readonly property int radiusChip: root.corner(7)     // chips, thumbnails, small marks
     readonly property int radiusMicro: root.corner(4)    // bars inside skeletons, swatches
-    readonly property int fuse: Math.max(2, Math.round(8 * root.density * root.tweak("melt", 0, 2)))
-    readonly property int fuseDeep: Math.max(4, Math.round(30 * root.density * root.tweak("melt", 0, 2)))
+    readonly property real meltDepth: {
+        const t = root.tweak("melt", 0, 2)
+        return t <= 1 ? t : 1 + (t - 1) * 0.5
+    }
+    readonly property int fuse: Math.max(2, Math.round(8 * root.density * root.meltDepth))
+    readonly property int fuseDeep: Math.max(4, Math.round(30 * root.density * root.meltDepth))
     readonly property real islandBandScale: Math.max(32, Math.min(64, Number(root.options?.bar?.height ?? 42))) / 42
     readonly property int fuseEdge: Math.max(8, Math.round(56 * root.density * root.islandBandScale
         * Math.max(0.2, Math.min(2, Number(root.options?.bar?.notchCurve ?? 100) / 100))))
     readonly property int weld: Math.max(2, Math.round(3 * root.density))
+    function edgeFuseFor(size: real, curve: real): int {
+        const scale = Math.max(32, Math.min(64, size / root.density)) / 42
+        return Math.max(8, Math.round(56 * root.density * scale * Math.max(0.2, Math.min(2, curve / 100))))
+    }
     readonly property string pieceShape: String(root.theme?.pieceShape ?? "circle")
     function pieceRadius(size: real): real {
         const half = size / 2

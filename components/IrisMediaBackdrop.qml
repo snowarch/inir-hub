@@ -60,9 +60,9 @@ Item {
             anchors.top: parent.top
             height: root.edgeTop
             gradient: Gradient {
-                GradientStop { position: 0; color: IrisStyle.bodySurface }
-                GradientStop { position: 0.45; color: IrisStyle.bodySurface }
-                GradientStop { position: 1; color: ColorUtils.applyAlpha(IrisStyle.bodySurface, 0) }
+                GradientStop { position: 0; color: IrisStyle.bodyScrim }
+                GradientStop { position: 0.45; color: IrisStyle.bodyScrim }
+                GradientStop { position: 1; color: ColorUtils.applyAlpha(IrisStyle.bodyScrim, 0) }
             }
         }
         Rectangle {
@@ -72,9 +72,9 @@ Item {
             anchors.bottom: parent.bottom
             height: root.edgeBottom
             gradient: Gradient {
-                GradientStop { position: 0; color: ColorUtils.applyAlpha(IrisStyle.bodySurface, 0) }
-                GradientStop { position: 0.55; color: IrisStyle.bodySurface }
-                GradientStop { position: 1; color: IrisStyle.bodySurface }
+                GradientStop { position: 0; color: ColorUtils.applyAlpha(IrisStyle.bodyScrim, 0) }
+                GradientStop { position: 0.55; color: IrisStyle.bodyScrim }
+                GradientStop { position: 1; color: IrisStyle.bodyScrim }
             }
         }
     }

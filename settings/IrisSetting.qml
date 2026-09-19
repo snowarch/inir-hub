@@ -7,6 +7,7 @@ import qs.modules.common.functions
 import qs.modules.common.widgets
 import qs.modules.iris.components
 import qs.modules.iris.style
+import qs.modules.iris.widgets
 
 Item {
     id: root
@@ -230,6 +231,13 @@ Item {
             active: root.spec.kind === "pieces"
             visible: active
             sourceComponent: piecesComponent
+        }
+
+        Loader {
+            Layout.fillWidth: true
+            active: root.spec.kind === "widgets"
+            visible: active
+            sourceComponent: IrisWidgetGallery {}
         }
     }
 

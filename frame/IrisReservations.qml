@@ -34,8 +34,9 @@ Variants {
                     || !(options?.pinned ?? false) || !(options?.reserveSpace ?? true)
                     || output !== screenScope.outputName) return 0
             const width = Math.max(300, Math.min(600, Number(options?.width ?? 380))) * IrisFrame.d
-            const air = (options?.notch ?? false) ? 0 : 12 * IrisFrame.d
-            return Math.round(IrisFrame.band + width + air)
+            const held = IrisFrame.clear(edge) - IrisFrame.band
+            const air = (options?.notch ?? false) && held <= 0 ? 0 : 12 * IrisFrame.d
+            return Math.round(IrisFrame.band + held + width + air)
         }
 
         component Reservation: PanelWindow {

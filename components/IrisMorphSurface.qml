@@ -3,6 +3,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import Quickshell.Widgets
 import qs
+import qs.modules.common.functions
 import qs.modules.iris.style
 
 Item {
@@ -24,6 +25,11 @@ Item {
     property int animationDuration: 0
     property bool contentTravels: false
     property real originShare: IrisStyle.absorbShare
+    property bool fieldBacked: false
+    property bool compositorBlurred: false
+    readonly property string material: !IrisStyle.glassy ? "solid"
+        : root.fieldBacked ? "field"
+        : IrisStyle.glassCompositor && root.compositorBlurred ? "compositor" : "wallpaper"
     default property alias content: contentHost.data
     readonly property real progress: root.presentation
     readonly property var bodyRect: {
@@ -167,31 +173,30 @@ Item {
         radius: Math.min(width / 2, height / 2, root.absorbs
             ? root.lerp(Math.min(Math.min(root.start.width, root.start.height) / 2, root.fromRadius * root.originShare), root.radius)
             : root.lerp(root.fromRadius, root.radius))
-        color: root.color
+        color: root.material === "field" ? IrisStyle.bodyClip
+            : root.material === "compositor" ? IrisStyle.placeSurface : root.color
         // Visible from the request: forceActiveFocus() is ignored on invisible subtrees.
         visible: root.open || root.presentation > 0
         opacity: root.armed || root.presentation > 0 ? 1 : 0
 
-        Rectangle {
-            id: lightWash
-            readonly property real reach: Math.min(IrisStyle.lightReach, (lightWash.across ? parent.width : parent.height) * 0.6)
-            x: root.lightFrom === "left" ? IrisStyle.lightJoinContour
-                : root.lightFrom === "right" ? parent.width - IrisStyle.lightJoinContour - width : IrisStyle.lightContour
-            y: root.lightFrom === "top" ? IrisStyle.lightJoinContour
-                : root.lightFrom === "bottom" ? parent.height - IrisStyle.lightJoinContour - height : IrisStyle.lightContour
-            width: lightWash.across ? lightWash.reach : Math.max(0, parent.width - 2 * IrisStyle.lightContour)
-            height: lightWash.across ? Math.max(0, parent.height - 2 * IrisStyle.lightContour) : lightWash.reach
-            radius: Math.max(0, chassis.radius - IrisStyle.lightContour)
-            visible: IrisStyle.auraStrength > 0 && root.light.a > 0
-            readonly property bool across: root.lightFrom === "left" || root.lightFrom === "right"
-            readonly property bool reversed: root.lightFrom === "bottom" || root.lightFrom === "right"
-            opacity: Math.max(0, Math.min(1, root.presentation))
-            gradient: Gradient {
-                orientation: lightWash.across ? Gradient.Horizontal : Gradient.Vertical
-                GradientStop { position: 0; color: lightWash.reversed ? "transparent" : IrisStyle.aura(root.light) }
-                GradientStop { position: 0.5; color: IrisStyle.auraFading(root.light) }
-                GradientStop { position: 1; color: lightWash.reversed ? IrisStyle.aura(root.light) : "transparent" }
+        Loader {
+            anchors.fill: parent
+            active: root.material === "wallpaper"
+            sourceComponent: IrisGlassPane {
+                sceneOffset: {
+                    void (root.x + root.y + chassis.x + chassis.y + (root.parent?.x ?? 0) + (root.parent?.y ?? 0))
+                    return chassis.mapToItem(null, 0, 0)
+                }
+                windowOffset: root.windowOffset
             }
+        }
+
+        IrisLightWash {
+            anchors.fill: parent
+            radius: chassis.radius
+            light: root.light
+            from: root.lightFrom
+            presence: Math.max(0, Math.min(1, root.presentation))
         }
 
         Item {

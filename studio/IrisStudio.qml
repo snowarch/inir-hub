@@ -4,6 +4,7 @@ import QtQuick.Controls
 import QtQuick.Layouts
 import Quickshell
 import Quickshell.Wayland
+import Quickshell.Widgets
 import qs
 import qs.services
 import qs.modules.common
@@ -55,104 +56,38 @@ PanelWindow {
         return out
     }
 
-    readonly property var themeTargets: ["material", "colour", "type", "motion"]
-    readonly property var themePaths: ["iris.appearance.preset"].concat(root.specifications
-        .filter(spec => String(spec.path).startsWith("iris.")
-            && (root.themeTargets.includes(spec.target) || String(spec.path).startsWith("iris.appearance.surfaces.")))
-        .map(spec => spec.path))
     function fallbackOf(path: string): var {
-        if (path === "iris.appearance.preset") return "iris"
+        const owned = IrisThemes.paths.find(entry => entry.path === path)
+        if (owned) return owned.fallback
         return root.specifications.find(spec => spec.path === path)?.fallback
     }
-    function currentValues(): var {
-        const values = {}
-        for (const path of root.themePaths) values[path] = IrisOptions.plain(Config.getNestedValue(path, root.fallbackOf(path)))
-        return values
-    }
-    function applyValues(values: var): void {
-        const updates = {}
-        for (const path of root.themePaths) {
-            updates[path] = Object.prototype.hasOwnProperty.call(values ?? {}, path) ? values[path] : root.fallbackOf(path)
-        }
-        Config.setNestedValues(updates)
-    }
-    readonly property var looks: [
-        { name: "iRiS", description: "Black, direct, lit by what things are.", material: "black", accent: IrisStyle.accents.blue, values: {} },
-        { name: "Obsidian", description: "Sharper, quieter, no light.", material: "black", accent: IrisStyle.accents.lilac,
-            values: { "iris.appearance.preset": "crisp", "iris.appearance.theme.lines": 60, "iris.appearance.theme.shadow": 140,
-                "iris.appearance.aura": "off", "iris.appearance.accent": "lilac" } },
-        { name: "Aurora", description: "The wallpaper's own colour and vivid, far-reaching light.", material: "wallpaper", accent: IrisStyle.wallpaperLight,
-            values: { "iris.appearance.theme.surface": "wallpaper", "iris.appearance.aura": "vivid", "iris.appearance.theme.lightReach": 200,
-                "iris.appearance.accent": "wallpaper",
-                "iris.appearance.highlight": "wallpaper", "iris.appearance.tint": 40 } },
-        { name: "Paper", description: "Soft and round, no lines, barely a shadow.", material: "graphite", accent: IrisStyle.accents.mint,
-            values: { "iris.appearance.preset": "soft", "iris.appearance.theme.surface": "graphite", "iris.appearance.theme.lines": 0,
-                "iris.appearance.theme.shadow": 40, "iris.appearance.theme.shape": 130, "iris.appearance.theme.fill": 80,
-                "iris.appearance.accent": "mint" } },
-        { name: "Midnight", description: "Deep blue material, violet highlight.", material: "midnight", accent: Qt.hsla(0.64, 0.7, 0.78, 1), // iris-literal: look swatch
-            values: { "iris.appearance.theme.surface": "midnight", "iris.appearance.accent": "custom", "iris.appearance.theme.accentHue": 230,
-                "iris.appearance.highlight": "custom", "iris.appearance.theme.highlightHue": 280, "iris.appearance.theme.contrast": 110 } },
-        { name: "Signal", description: "High contrast, larger text, crisp joins.", material: "black", accent: IrisStyle.highlights.yellow,
-            values: { "iris.appearance.preset": "contrast", "iris.appearance.theme.fill": 130, "iris.appearance.theme.text": 108,
-                "iris.appearance.aura": "off",
-                "iris.appearance.highlight": "yellow", "iris.appearance.accent": "custom", "iris.appearance.theme.accentHue": 52 } },
-        { name: "iNiR Theme", description: "Follows the global iNiR theme: its preset or the wallpaper's Material You colours.", material: "theme", accent: IrisStyle.themeAccent,
-            values: { "iris.appearance.theme.surface": "theme", "iris.appearance.accent": "theme", "iris.appearance.highlight": "theme" } },
-        { name: "Adaptive", description: "Shaped by the wallpaper: its colour, brightness and calm or busy mood.", material: "wallpaper", accent: IrisStyle.wallpaperLight,
-            values: { "iris.appearance.adaptive": 80, "iris.appearance.theme.surface": "wallpaper", "iris.appearance.accent": "wallpaper",
-                "iris.appearance.highlight": "wallpaper", "iris.appearance.aura": "subtle", "iris.appearance.tint": 25 } },
-        { name: "Sakura", description: "Soft graphite, petal pink and generous curves.", material: "graphite", accent: Qt.hsla(0.92, 0.75, 0.8, 1), // iris-literal: look swatch
-            values: { "iris.appearance.preset": "soft", "iris.appearance.theme.surface": "graphite", "iris.appearance.accent": "custom",
-                "iris.appearance.theme.accentHue": 330, "iris.appearance.highlight": "pink", "iris.appearance.aura": "vivid",
-                "iris.appearance.theme.shape": 125, "iris.appearance.theme.lines": 50 } },
-        { name: "Neo Tokyo", description: "Midnight glass lit in cyan and magenta.", material: "midnight", accent: Qt.hsla(0.51, 0.9, 0.62, 1), // iris-literal: look swatch
-            values: { "iris.appearance.preset": "crisp", "iris.appearance.theme.surface": "midnight", "iris.appearance.accent": "custom",
-                "iris.appearance.theme.accentHue": 185, "iris.appearance.highlight": "custom", "iris.appearance.theme.highlightHue": 300,
-                "iris.appearance.aura": "vivid", "iris.appearance.theme.lightReach": 180, "iris.appearance.theme.shadow": 130 } },
-        { name: "Ghibli", description: "Paper-soft, meadow green and a warm sun.", material: "graphite", accent: IrisStyle.accents.mint,
-            values: { "iris.appearance.preset": "soft", "iris.appearance.theme.surface": "graphite", "iris.appearance.accent": "mint",
-                "iris.appearance.highlight": "custom", "iris.appearance.theme.highlightHue": 40, "iris.appearance.theme.lines": 40,
-                "iris.appearance.theme.shape": 135, "iris.appearance.theme.contrast": 95 } },
-        { name: "Evangelion", description: "Deep violet, warning green, hard contrast.", material: "midnight", accent: Qt.hsla(0.76, 0.7, 0.7, 1), // iris-literal: look swatch
-            values: { "iris.appearance.preset": "contrast", "iris.appearance.theme.surface": "midnight", "iris.appearance.accent": "custom",
-                "iris.appearance.theme.accentHue": 275, "iris.appearance.highlight": "custom", "iris.appearance.theme.highlightHue": 95,
-                "iris.appearance.theme.shadow": 140 } }
-    ]
-    readonly property var saved: Array.from(Config.options?.iris?.appearance?.saved ?? [])
     property string notice: ""
     Timer { id: noticeTimer; interval: 2400; onTriggered: root.notice = "" }
     function say(text: string): void { root.notice = text; noticeTimer.restart() }
-    function saveCurrent(name: string): void {
-        const clean = name.trim().length > 0 ? name.trim() : Translation.tr("My look %1").arg(root.saved.length + 1)
-        const next = root.saved.filter(entry => entry.name !== clean)
-        next.push({ name: clean, values: root.currentValues() })
-        Config.setNestedValue("iris.appearance.saved", next)
-        root.say(Translation.tr("Saved “%1”").arg(clean))
+    function applyTheme(theme: var): void {
+        IrisThemes.apply(theme)
+        root.say(Translation.tr("Applied %1").arg(theme.name))
     }
-    function removeSaved(name: string): void {
-        Config.setNestedValue("iris.appearance.saved", root.saved.filter(entry => entry.name !== name))
+    function saveTheme(name: string): void {
+        IrisThemes.save(name, "")
+        root.say(Translation.tr("Saved as a theme"))
     }
-    function exportLook(entry: var): void {
-        Quickshell.clipboardText = JSON.stringify({ iris: "look", name: entry.name, values: entry.values }, null, 2)
-        root.say(Translation.tr("Copied “%1” — paste it anywhere to share it").arg(entry.name))
+    function shareTheme(theme: var): void {
+        Quickshell.clipboardText = IrisThemes.exportText(theme)
+        root.say(Translation.tr("Copied “%1” — paste it anywhere to share it").arg(theme.name))
     }
-    function importLook(): void {
-        try {
-            const data = JSON.parse(String(Quickshell.clipboardText ?? ""))
-            if (data?.iris !== "look" || typeof data.values !== "object") throw new Error()
-            const values = {}
-            for (const path of root.themePaths) if (Object.prototype.hasOwnProperty.call(data.values, path)) values[path] = data.values[path]
-            const name = String(data.name ?? Translation.tr("Imported look"))
-            const next = root.saved.filter(entry => entry.name !== name)
-            next.push({ name: name, values: values })
-            Config.setNestedValue("iris.appearance.saved", next)
-            root.say(Translation.tr("Imported “%1”").arg(name))
-        } catch (error) {
-            root.say(Translation.tr("The clipboard does not hold an iRiS look"))
-        }
+    function shareCurrent(): void {
+        const theme = { id: IrisThemes.slug(IrisThemes.active?.name ?? "my-theme"), name: IrisThemes.active?.name ?? Translation.tr("My theme"),
+            author: Quickshell.env("USER") ?? "", description: "", values: IrisThemes.differences(IrisThemes.current()) }
+        root.shareTheme(theme)
+    }
+    function pasteTheme(): void {
+        const theme = IrisThemes.importText(String(Quickshell.clipboardText ?? ""))
+        root.say(theme ? Translation.tr("Imported “%1”").arg(theme.name) : Translation.tr("The clipboard does not hold an iRiS theme"))
     }
 
-    readonly property bool showPreview: Config.options?.iris?.appearance?.studioPreview ?? true
+    readonly property bool previewsOn: Config.options?.iris?.appearance?.previews ?? true
+    readonly property bool showPreview: root.previewsOn && (Config.options?.iris?.appearance?.studioPreview ?? true)
     property bool desktopPreview: false
     onDesktopPreviewChanged: root.preview(root.target, root.desktopPreview)
     function preview(id: string, on: bool): void {
@@ -216,7 +151,7 @@ PanelWindow {
         transients: "Notifications and level feedback.",
         dock: "The Dock's shape and its icons.",
         desktop: "Widgets on the desktop.",
-        themes: "Curated looks, and the ones you save and share."
+        themes: "Whole redesigns of iRiS, and the ones you save and share."
     })
     readonly property var railSections: [["material", "colour", "type", "motion"],
         ["island", "pieces", "bodies", "places", "transients", "dock", "desktop"], ["themes"]]
@@ -251,6 +186,8 @@ PanelWindow {
     readonly property var trackedPaths: {
         const set = {}
         set["iris.appearance.preset"] = true
+        set["iris.appearance.themeId"] = true
+        for (const entry of IrisThemes.paths) set[entry.path] = true
         for (const spec of root.specifications) if (String(spec.path).startsWith("iris.")) set[spec.path] = true
         return Object.keys(set)
     }
@@ -329,7 +266,7 @@ PanelWindow {
     screen: outputHold.output
     color: "transparent"
     anchors { left: true; top: true; bottom: true }
-    implicitWidth: frame.width + Math.round(24 * root.d) + IrisFrame.band
+    implicitWidth: frame.width + Math.round(24 * root.d) + IrisFrame.clear("left")
     exclusionMode: ExclusionMode.Ignore
     WlrLayershell.namespace: "quickshell:iris-studio"
     WlrLayershell.layer: WlrLayer.Overlay
@@ -354,7 +291,7 @@ PanelWindow {
         motionSurface: "settings"
         radius: IrisStyle.surfaceRadius("settings", IrisStyle.radiusPanel)
         light: IrisStyle.surfaceLight("settings", IrisStyle.wallpaperLight)
-        x: Math.round(12 * root.d) + IrisFrame.band
+        x: Math.round(12 * root.d) + IrisFrame.clear("left")
         y: (parent.height - height) / 2
         width: Math.min((root.screen?.width ?? 1920) - Math.round(48 * root.d) - IrisFrame.band * 2, Math.round(540 * root.d))
         height: Math.min(parent.height - Math.round(24 * root.d) - IrisFrame.band * 2, Math.round(960 * root.d))
@@ -362,7 +299,7 @@ PanelWindow {
 
         ColumnLayout {
             anchors.fill: parent
-            anchors.margins: Math.round(16 * root.d)
+            anchors.margins: IrisStyle.concentricPad(frame.radius, 16 * root.d)
             spacing: Math.round(12 * root.d)
 
             RowLayout {
@@ -550,8 +487,8 @@ PanelWindow {
                             visible: root.target === "themes"
                             quiet: true
                             buttonRadius: height / 2
-                            text: Translation.tr("Paste a look")
-                            onClicked: root.importLook()
+                            text: Translation.tr("Paste a theme")
+                            onClicked: root.pasteTheme()
                         }
                     }
 
@@ -583,6 +520,7 @@ PanelWindow {
                         visible: root.query.length === 0 && root.target !== "themes"
                         spacing: Math.round(6 * root.d)
                         ActionChip {
+                            visible: root.previewsOn
                             glyph: root.showPreview ? "visibility" : "visibility_off"
                             label: root.showPreview ? Translation.tr("Preview") : Translation.tr("Preview hidden")
                             on: root.showPreview
@@ -711,87 +649,11 @@ PanelWindow {
                                 }
                             }
 
-                            GroupCard {
+                            Loader {
                                 Layout.fillWidth: true
-                                visible: root.query.length === 0 && root.target === "themes"
-                                title: Translation.tr("Looks")
-                                plain: true
-                                GridLayout {
-                                    Layout.fillWidth: true
-                                    columns: 2
-                                    rowSpacing: Math.round(8 * root.d)
-                                    columnSpacing: Math.round(8 * root.d)
-                                    Repeater {
-                                        model: root.target === "themes" ? root.looks : []
-                                        LookTile {
-                                            required property var modelData
-                                            Layout.fillWidth: true
-                                            look: modelData
-                                        }
-                                    }
-                                }
-                            }
-                            GroupCard {
-                                Layout.fillWidth: true
-                                visible: root.query.length === 0 && root.target === "themes"
-                                title: Translation.tr("Yours")
-                                RowLayout {
-                                    Layout.fillWidth: true
-                                    Layout.margins: Math.round(12 * root.d)
-                                    spacing: Math.round(8 * root.d)
-                                    Rectangle {
-                                        Layout.fillWidth: true
-                                        implicitHeight: Math.round(32 * root.d)
-                                        radius: height / 2
-                                        color: nameField.activeFocus ? IrisStyle.fill : IrisStyle.fillQuiet
-                                        TextInput {
-                                            id: nameField
-                                            anchors.fill: parent
-                                            anchors.leftMargin: Math.round(14 * root.d)
-                                            anchors.rightMargin: Math.round(14 * root.d)
-                                            verticalAlignment: TextInput.AlignVCenter
-                                            color: IrisStyle.text
-                                            selectionColor: IrisStyle.accentContainer
-                                            font.family: IrisStyle.fontMain
-                                            font.pixelSize: 13 * IrisStyle.typeScale
-                                            clip: true
-                                            onAccepted: { root.saveCurrent(text); text = "" }
-                                            IrisText {
-                                                anchors.verticalCenter: parent.verticalCenter
-                                                visible: nameField.text.length === 0
-                                                text: Translation.tr("Name this look")
-                                                color: IrisStyle.muted
-                                                font.pixelSize: nameField.font.pixelSize
-                                            }
-                                        }
-                                    }
-                                    IrisButton {
-                                        emphasized: true
-                                        text: Translation.tr("Save")
-                                        buttonRadius: height / 2
-                                        onClicked: { root.saveCurrent(nameField.text); nameField.text = "" }
-                                    }
-                                }
-                                Repeater {
-                                    model: root.target === "themes" ? root.saved : []
-                                    SavedRow {
-                                        required property var modelData
-                                        required property int index
-                                        Layout.fillWidth: true
-                                        entry: modelData
-                                    }
-                                }
-                                IrisText {
-                                    Layout.fillWidth: true
-                                    Layout.leftMargin: Math.round(14 * root.d)
-                                    Layout.rightMargin: Math.round(14 * root.d)
-                                    Layout.bottomMargin: Math.round(12 * root.d)
-                                    visible: root.saved.length === 0
-                                    text: Translation.tr("Saved looks keep every value you set here, and can be shared as text.")
-                                    color: IrisStyle.muted
-                                    font.pixelSize: 11.5 * IrisStyle.typeScale
-                                    wrapMode: Text.WordWrap
-                                }
+                                active: root.query.length === 0 && root.target === "themes"
+                                visible: active
+                                sourceComponent: themesPage
                             }
                         }
                     }
@@ -903,7 +765,8 @@ PanelWindow {
         IrisText {
             Layout.leftMargin: Math.round(14 * root.d)
             text: Translation.tr(card.title)
-            color: IrisStyle.muted
+            color: IrisStyle.label
+            font.family: IrisStyle.fontTitle
             font.pixelSize: 12 * IrisStyle.typeScale
             font.weight: Font.DemiBold
         }
@@ -972,74 +835,388 @@ PanelWindow {
         }
     }
 
-    component LookTile: MouseArea {
-        id: lookTile
-        required property var look
-        implicitHeight: Math.round(92 * root.d)
-        hoverEnabled: true
-        cursorShape: Qt.PointingHandCursor
-        Accessible.role: Accessible.Button
-        Accessible.name: lookTile.look.name
-        onClicked: { root.applyValues(lookTile.look.values); root.say(Translation.tr("Applied %1").arg(lookTile.look.name)) }
-        Rectangle {
-            anchors.fill: parent
-            radius: IrisStyle.radiusTile
-            color: IrisStyle.materialSwatch(lookTile.look.material)
-            border.width: 1
-            border.color: lookTile.containsMouse ? IrisStyle.borderStrong : IrisStyle.border
-            Behavior on border.color { ColorAnimation { duration: IrisStyle.duration(110) } }
-            ColumnLayout {
-                anchors.fill: parent
-                anchors.margins: Math.round(10 * root.d)
-                spacing: Math.round(3 * root.d)
+    Component {
+        id: themesPage
+        ColumnLayout {
+            spacing: Math.round(14 * root.d)
+
+            Rectangle {
+                Layout.fillWidth: true
+                implicitHeight: currentRow.implicitHeight + Math.round(20 * root.d)
+                radius: IrisStyle.radiusTile
+                color: IrisStyle.surfaceHigh
                 RowLayout {
+                    id: currentRow
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    anchors.verticalCenter: parent.verticalCenter
+                    anchors.leftMargin: Math.round(14 * root.d)
+                    anchors.rightMargin: Math.round(8 * root.d)
                     spacing: Math.round(6 * root.d)
-                    Rectangle { implicitWidth: Math.round(10 * root.d); implicitHeight: implicitWidth; radius: width / 2; color: lookTile.look.accent }
-                    IrisText { text: lookTile.look.name; font.weight: Font.DemiBold; font.pixelSize: 13 * IrisStyle.typeScale }
+                    ColumnLayout {
+                        Layout.fillWidth: true
+                        spacing: Math.round(1 * root.d)
+                        IrisText {
+                            Layout.fillWidth: true
+                            text: IrisThemes.active ? IrisThemes.active.name : Translation.tr("Your own mix")
+                            font.pixelSize: 14 * IrisStyle.typeScale
+                            font.weight: Font.DemiBold
+                            elide: Text.ElideRight
+                        }
+                        IrisText {
+                            Layout.fillWidth: true
+                            text: IrisThemes.modified ? Translation.tr("Changed since it was applied — save it to keep it")
+                                : Translation.tr("Applied as it comes")
+                            color: IrisThemes.modified ? IrisStyle.secondaryAccent : IrisStyle.muted
+                            font.pixelSize: 11.5 * IrisStyle.typeScale
+                            elide: Text.ElideRight
+                        }
+                    }
+                    IrisIconButton { materialIcon: "ios_share"; Accessible.name: Translation.tr("Copy what you see now, to share it"); onClicked: root.shareCurrent() }
+                    IrisIconButton {
+                        visible: IrisThemes.modified && IrisThemes.active !== null
+                        materialIcon: "restart_alt"
+                        Accessible.name: Translation.tr("Back to the theme as it comes")
+                        onClicked: root.applyTheme(IrisThemes.active)
+                    }
+                }
+            }
+
+            ThemeGrid {
+                Layout.fillWidth: true
+                title: Translation.tr("Themes")
+                themes: IrisThemes.curated
+            }
+
+            ThemeGrid {
+                Layout.fillWidth: true
+                title: Translation.tr("Yours")
+                themes: IrisThemes.user
+                visible: IrisThemes.user.length > 0
+            }
+
+            GroupCard {
+                Layout.fillWidth: true
+                title: IrisThemes.user.length > 0 ? "" : Translation.tr("Yours")
+                RowLayout {
+                    Layout.fillWidth: true
+                    Layout.margins: Math.round(12 * root.d)
+                    spacing: Math.round(8 * root.d)
+                    Rectangle {
+                        Layout.fillWidth: true
+                        implicitHeight: Math.round(32 * root.d)
+                        radius: height / 2
+                        color: nameField.activeFocus ? IrisStyle.fill : IrisStyle.fillQuiet
+                        TextInput {
+                            id: nameField
+                            anchors.fill: parent
+                            anchors.leftMargin: Math.round(14 * root.d)
+                            anchors.rightMargin: Math.round(14 * root.d)
+                            verticalAlignment: TextInput.AlignVCenter
+                            color: IrisStyle.text
+                            selectionColor: IrisStyle.accentContainer
+                            font.family: IrisStyle.fontMain
+                            font.pixelSize: 13 * IrisStyle.typeScale
+                            clip: true
+                            onAccepted: { root.saveTheme(text); text = "" }
+                            IrisText {
+                                anchors.verticalCenter: parent.verticalCenter
+                                visible: nameField.text.length === 0
+                                text: Translation.tr("Name what you see now")
+                                color: IrisStyle.muted
+                                font.pixelSize: nameField.font.pixelSize
+                            }
+                        }
+                    }
+                    IrisButton {
+                        emphasized: true
+                        text: Translation.tr("Save as theme")
+                        buttonRadius: height / 2
+                        onClicked: { root.saveTheme(nameField.text); nameField.text = "" }
+                    }
+                }
+                RowLayout {
+                    Layout.fillWidth: true
+                    Layout.leftMargin: Math.round(12 * root.d)
+                    Layout.rightMargin: Math.round(12 * root.d)
+                    spacing: Math.round(8 * root.d)
+                    IrisButton {
+                        quiet: true
+                        text: Translation.tr("Paste a theme")
+                        buttonRadius: height / 2
+                        onClicked: root.pasteTheme()
+                    }
+                    IrisButton {
+                        quiet: true
+                        text: Translation.tr("Open the themes folder")
+                        buttonRadius: height / 2
+                        onClicked: IrisThemes.reveal()
+                    }
+                    Item { Layout.fillWidth: true }
                 }
                 IrisText {
                     Layout.fillWidth: true
-                    text: Translation.tr(lookTile.look.description)
-                    color: IrisStyle.textSecondary
-                    font.pixelSize: 11 * IrisStyle.typeScale
+                    Layout.margins: Math.round(14 * root.d)
+                    text: Translation.tr("A theme is one small file. Share it by sending the .json from the themes folder, or copy it and paste it anywhere; whoever gets it pastes it here or drops the file into their own folder.")
+                    color: IrisStyle.muted
+                    font.pixelSize: 11.5 * IrisStyle.typeScale
                     wrapMode: Text.WordWrap
-                    maximumLineCount: 3
-                    elide: Text.ElideRight
                 }
             }
         }
     }
 
-    component SavedRow: Item {
-        id: savedRow
-        required property var entry
-        implicitHeight: Math.round(46 * root.d)
-        Rectangle {
+    component ThemeGrid: ColumnLayout {
+        id: grid
+        property string title: ""
+        property var themes: []
+        spacing: Math.round(6 * root.d)
+        IrisText {
+            Layout.leftMargin: Math.round(14 * root.d)
+            text: grid.title
+            color: IrisStyle.label
+            font.family: IrisStyle.fontTitle
+            font.pixelSize: 12 * IrisStyle.typeScale
+            font.weight: Font.DemiBold
+        }
+        GridLayout {
+            id: cells
+            Layout.fillWidth: true
+            columns: 2
+            rowSpacing: Math.round(10 * root.d)
+            columnSpacing: Math.round(10 * root.d)
+            Repeater {
+                model: grid.themes
+                ThemeCard {
+                    required property var modelData
+                    Layout.fillWidth: true
+                    Layout.preferredWidth: (cells.width - cells.columnSpacing) / 2
+                    theme: modelData
+                }
+            }
+        }
+    }
+
+    component ThemeCard: MouseArea {
+        id: card
+        required property var theme
+        readonly property var look: IrisThemes.swatch(card.theme)
+        readonly property bool current: IrisThemes.activeId === card.theme.id
+        readonly property bool mine: Boolean(card.theme.user)
+        readonly property color body: card.look.glass ? Qt.alpha(card.look.surface, Math.max(0.42, card.look.tint)) : card.look.surface
+        readonly property color line: Qt.alpha(IrisStyle.text, Math.min(0.4, 0.14 * card.look.lines))
+        readonly property real s: card.look.shape
+        readonly property string islandEdge: IrisFrame.islandEdge
+        readonly property string dockEdge: IrisFrame.edges.includes(card.look.dockPosition) && card.look.dockPosition !== card.islandEdge
+            ? card.look.dockPosition : IrisFrame.opposite(card.islandEdge)
+        function sideways(edge: string): bool { return edge === "left" || edge === "right" }
+        function piece(size: real): real {
+            const scale = Math.max(0.6, card.s)
+            return Math.min(size / 2, card.look.pieceShape === "square" ? size * 0.22 * scale
+                : card.look.pieceShape === "squircle" ? size * 0.34 * scale : size / 2)
+        }
+        implicitHeight: scene.height + caption.implicitHeight + Math.round(12 * root.d)
+        hoverEnabled: true
+        cursorShape: Qt.PointingHandCursor
+        Accessible.role: Accessible.Button
+        Accessible.name: card.theme.name
+        onClicked: root.applyTheme(card.theme)
+
+        ClippingRectangle {
+            id: scene
+            width: parent.width
+            height: Math.round(width * 0.58)
+            radius: IrisStyle.radiusTile
+            color: IrisStyle.surfaceOpaque
+            border.width: card.current ? 2 : 1
+            border.color: card.current ? IrisStyle.accent : card.containsMouse ? IrisStyle.borderStrong : IrisStyle.border
+
+            Image {
+                anchors.fill: parent
+                source: WallpaperListener.wallpaperUrlForScreen(root.screen)
+                fillMode: Image.PreserveAspectCrop
+                sourceSize.width: 240
+                sourceSize.height: 136
+                asynchronous: true
+                cache: true
+                opacity: 0.85
+            }
+
+            readonly property real band: card.look.framed ? Math.round(4 * root.d) : 0
+            Rectangle {
+                anchors.fill: parent
+                visible: card.look.framed
+                color: "transparent"
+                border.width: scene.band
+                border.color: card.body
+                radius: IrisStyle.radiusTile
+            }
+
+            Rectangle {
+                id: island
+                readonly property bool full: card.look.layout === "full"
+                readonly property bool vertical: card.sideways(card.islandEdge)
+                readonly property real thick: Math.round(13 * root.d)
+                readonly property real span: island.vertical ? parent.height : parent.width
+                readonly property real length: island.full ? island.span - 2 * scene.band : Math.round(island.span * (island.vertical ? 0.5 : 0.36))
+                readonly property real along: card.look.layout === "left" ? scene.band + Math.round(8 * root.d)
+                    : card.look.layout === "right" ? island.span - island.length - scene.band - Math.round(8 * root.d)
+                    : island.full ? scene.band : (island.span - island.length) / 2
+                readonly property real inset: card.look.notch ? scene.band : scene.band + Math.round(4 * root.d)
+                readonly property real across: card.islandEdge === "bottom" ? parent.height - island.thick - island.inset
+                    : card.islandEdge === "right" ? parent.width - island.thick - island.inset : island.inset
+                readonly property bool flat: island.full || card.look.notch
+                width: island.vertical ? island.thick : island.length
+                height: island.vertical ? island.length : island.thick
+                x: island.vertical ? island.across : island.along
+                y: island.vertical ? island.along : island.across
+                radius: island.full ? 0 : card.look.notch ? island.thick / 2 : card.piece(island.thick)
+                topLeftRadius: island.flat && (card.islandEdge === "top" || card.islandEdge === "left") ? 0 : radius
+                topRightRadius: island.flat && (card.islandEdge === "top" || card.islandEdge === "right") ? 0 : radius
+                bottomLeftRadius: island.flat && (card.islandEdge === "bottom" || card.islandEdge === "left") ? 0 : radius
+                bottomRightRadius: island.flat && (card.islandEdge === "bottom" || card.islandEdge === "right") ? 0 : radius
+                color: card.body
+                border.width: card.look.rim && !card.look.notch ? 1 : 0
+                border.color: card.line
+                Grid {
+                    anchors.centerIn: parent
+                    columns: island.vertical ? 1 : 3
+                    horizontalItemAlignment: Grid.AlignHCenter
+                    Text { text: "07"; color: IrisStyle.text; font.family: card.look.numbersFont; font.weight: card.look.figureWeight; font.pixelSize: Math.round(8 * root.d) }
+                    Text {
+                        text: island.vertical ? "··" : ":"
+                        lineHeight: island.vertical ? 0.5 : 1
+                        color: card.look.clockAccent === "plain" ? IrisStyle.text : card.look.clockAccent === "accent" ? card.look.accent : card.look.highlight
+                        font.family: card.look.numbersFont; font.weight: card.look.figureWeight; font.pixelSize: Math.round(8 * root.d)
+                    }
+                    Text { text: "08"; color: IrisStyle.text; font.family: card.look.numbersFont; font.weight: card.look.figureWeight; font.pixelSize: Math.round(8 * root.d) }
+                }
+            }
+            Rectangle {
+                visible: !island.full
+                width: island.thick
+                height: island.thick
+                x: island.vertical ? island.x : island.x + island.width + Math.round(4 * root.d)
+                y: island.vertical ? island.y + island.height + Math.round(4 * root.d) : island.y
+                radius: card.piece(width)
+                color: card.body
+                Rectangle { anchors.centerIn: parent; width: Math.round(5 * root.d); height: width; radius: card.piece(width); color: card.look.accent }
+            }
+
+            Rectangle {
+                id: sheet
+                width: Math.round(parent.width * 0.44)
+                height: Math.round(parent.height * 0.42)
+                x: card.islandEdge === "right" || card.dockEdge === "right" ? scene.band + Math.round(22 * root.d)
+                    : parent.width - width - scene.band - Math.round(8 * root.d)
+                y: card.islandEdge === "top" ? island.y + island.height + Math.round(6 * root.d)
+                    : card.islandEdge === "bottom" ? island.y - height - Math.round(6 * root.d)
+                    : Math.round(parent.height * 0.18)
+                radius: Math.round(9 * Math.min(1.3, card.s) * root.d)
+                color: card.body
+                border.width: card.look.rim ? 1 : 0
+                border.color: card.line
+                Column {
+                    anchors.fill: parent
+                    anchors.margins: Math.round(7 * root.d)
+                    spacing: Math.round(4 * root.d)
+                    Text {
+                        text: "Aa"
+                        color: IrisStyle.text
+                        font.family: card.look.titleFont
+                        font.weight: Font.DemiBold
+                        font.pixelSize: Math.round(11 * root.d)
+                    }
+                    Rectangle { width: parent.width * 0.8; height: Math.round(4 * root.d); radius: height / 2; color: Qt.alpha(IrisStyle.text, 0.3) }
+                    Row {
+                        spacing: Math.round(4 * root.d)
+                        Rectangle { width: Math.round(18 * root.d); height: Math.round(8 * root.d); radius: card.piece(height); color: card.look.accent }
+                        Rectangle { width: Math.round(8 * root.d); height: Math.round(8 * root.d); radius: card.piece(height); color: card.look.highlight }
+                    }
+                }
+            }
+
+            Rectangle {
+                id: dockMini
+                readonly property bool vertical: card.sideways(card.dockEdge)
+                readonly property real thick: Math.round(11 * root.d)
+                readonly property real length: Math.round((dockMini.vertical ? parent.height * 0.6 : parent.width * 0.34))
+                readonly property real inset: scene.band + (card.look.dockNotch ? 0 : Math.round(4 * root.d))
+                width: dockMini.vertical ? dockMini.thick : dockMini.length
+                height: dockMini.vertical ? dockMini.length : dockMini.thick
+                x: card.dockEdge === "left" ? dockMini.inset : card.dockEdge === "right" ? parent.width - width - dockMini.inset : (parent.width - width) / 2
+                y: card.dockEdge === "top" ? dockMini.inset : card.dockEdge === "bottom" ? parent.height - height - dockMini.inset : (parent.height - height) / 2
+                radius: card.look.dockNotch ? dockMini.thick / 2 : card.piece(dockMini.thick)
+                topLeftRadius: card.look.dockNotch && (card.dockEdge === "top" || card.dockEdge === "left") ? 0 : radius
+                topRightRadius: card.look.dockNotch && (card.dockEdge === "top" || card.dockEdge === "right") ? 0 : radius
+                bottomLeftRadius: card.look.dockNotch && (card.dockEdge === "bottom" || card.dockEdge === "left") ? 0 : radius
+                bottomRightRadius: card.look.dockNotch && (card.dockEdge === "bottom" || card.dockEdge === "right") ? 0 : radius
+                color: card.body
+                Grid {
+                    anchors.centerIn: parent
+                    columns: dockMini.vertical ? 1 : 5
+                    spacing: Math.round(3 * root.d)
+                    Repeater {
+                        model: 5
+                        Rectangle {
+                            required property int index
+                            width: Math.round(6 * root.d); height: width
+                            radius: Math.round(width * 0.26 * Math.min(1.2, card.s))
+                            color: index === 1 ? card.look.accent : index === 3 ? card.look.highlight : Qt.alpha(IrisStyle.text, 0.45)
+                        }
+                    }
+                }
+            }
+
+            Rectangle {
+                visible: card.current
+                anchors.left: parent.left
+                anchors.bottom: parent.bottom
+                anchors.margins: Math.round(7 * root.d) + scene.band
+                width: Math.round(18 * root.d)
+                height: width
+                radius: width / 2
+                color: IrisStyle.accent
+                MaterialSymbol { anchors.centerIn: parent; text: "check"; iconSize: Math.round(13 * root.d); color: IrisStyle.onAccent }
+            }
+
+            Row {
+                anchors.left: parent.left
+                anchors.top: parent.top
+                anchors.margins: Math.round(5 * root.d) + scene.band
+                spacing: Math.round(2 * root.d)
+                visible: card.containsMouse
+                IrisIconButton { materialIcon: "ios_share"; Accessible.name: Translation.tr("Copy to share"); onClicked: root.shareTheme(card.theme) }
+                IrisIconButton { visible: card.mine; materialIcon: "delete"; Accessible.name: Translation.tr("Delete"); onClicked: IrisThemes.remove(card.theme.id) }
+            }
+        }
+
+        ColumnLayout {
+            id: caption
+            anchors.top: scene.bottom
+            anchors.topMargin: Math.round(6 * root.d)
             anchors.left: parent.left
             anchors.right: parent.right
-            anchors.top: parent.top
-            anchors.leftMargin: Math.round(16 * root.d)
-            height: 1
-            color: IrisStyle.hairline
-        }
-        RowLayout {
-            anchors.fill: parent
-            anchors.leftMargin: Math.round(16 * root.d)
-            anchors.rightMargin: Math.round(8 * root.d)
-            spacing: Math.round(4 * root.d)
+            anchors.leftMargin: Math.round(2 * root.d)
+            spacing: Math.round(1 * root.d)
             IrisText {
                 Layout.fillWidth: true
-                text: String(savedRow.entry?.name ?? "")
-                font.pixelSize: 13.5 * IrisStyle.typeScale
+                text: card.theme.name
+                font.family: card.look.titleFont
+                font.pixelSize: 13 * IrisStyle.typeScale
+                font.weight: Font.DemiBold
                 elide: Text.ElideRight
             }
-            IrisButton {
-                text: Translation.tr("Apply")
-                buttonRadius: height / 2
-                onClicked: { root.applyValues(savedRow.entry.values); root.say(Translation.tr("Applied %1").arg(savedRow.entry.name)) }
+            IrisText {
+                Layout.fillWidth: true
+                text: card.mine ? (card.theme.description || (card.theme.author ? Translation.tr("by %1").arg(card.theme.author) : ""))
+                    : Translation.tr(card.theme.description)
+                color: IrisStyle.textSecondary
+                font.pixelSize: 11 * IrisStyle.typeScale
+                wrapMode: Text.WordWrap
+                maximumLineCount: 3
+                elide: Text.ElideRight
             }
-            IrisIconButton { materialIcon: "ios_share"; Accessible.name: Translation.tr("Copy to share"); onClicked: root.exportLook(savedRow.entry) }
-            IrisIconButton { materialIcon: "delete"; Accessible.name: Translation.tr("Delete"); onClicked: root.removeSaved(savedRow.entry.name) }
         }
     }
 }

@@ -16,6 +16,7 @@ import qs.modules.iris.frame
 import qs.modules.iris.components
 import qs.modules.iris.pieces
 import qs.modules.iris.field as Field
+import qs.modules.iris.bar.island as IslandParts
 
 ClippingRectangle {
     id: root
@@ -26,20 +27,22 @@ ClippingRectangle {
     readonly property real d: IrisStyle.density
     readonly property int rev: Config.revision
     readonly property string scene: root.sceneFor(root.section, root.group)
-    readonly property bool available: root.scene.length > 0
+    readonly property bool available: (Config.options?.iris?.appearance?.previews ?? true) && root.scene.length > 0
     readonly property real wantedHeight: Math.round(Math.min(420 * root.d, Math.max(260 * root.d, Number(sceneLoader.item?.naturalHeight ?? 0))))
     readonly property string wallpaper: WallpaperListener.wallpaperUrlForScreen(GlobalStates.focusedScreen)
 
     function sceneFor(section: string, group: string): string {
         if (group.length === 0)
-            return ({ dock: "dock", player: "player", desktop: "backdrop", sidebars: "panels", surfaces: "controlCenter", bubbles: "bubbles" })[section] ?? ""
+            return ({ dock: "dock", player: "player", desktop: "widgets", sidebars: "panels", surfaces: "controlCenter", bubbles: "bubbles" })[section] ?? ""
         const key = section + "/" + group
         return ({
             "bar/Size": "islandReserve", "bar/Interaction": "islandInteraction",
+            "bar/Shape": "islandEdge", "bar/Layout": "islandEdge", "bar/Bar": "barZones",
+            "appearance/Light": "light", "appearance/Shape": "fusion", "appearance/Glass": "glass",
             "bar/Desktop page": "islandPage", "bar/Pages": "islandPage", "bar/Player page": "islandPage",
             "bubbles/Behaviour": "bubbles", "bubbles/Floating": "bubbles", "bubbles/On the contour": "bubbles", "bubbles/Size": "bubbles",
             "dock/Visibility": "dock", "dock/Icons": "dock", "dock/Look": "dock",
-            "desktop/Overview backdrop": "backdrop", "desktop/Wallpaper gallery": "gallery",
+            "desktop/Widgets": "widgets", "desktop/Overview backdrop": "backdrop", "desktop/Wallpaper gallery": "gallery",
             "surfaces/Spotlight": "spotlight", "surfaces/Control Center": "controlCenter",
             "surfaces/Cards": "cards", "surfaces/Card contents": "cards", "surfaces/Menus": "menus",
             "surfaces/Settings": "settings", "surfaces/Side panels": "panels", "surfaces/Joining": "joining",
@@ -58,7 +61,7 @@ ClippingRectangle {
     Image {
         id: wallpaperImage
         anchors.fill: parent
-        source: root.wallpaper
+        source: root.available ? root.wallpaper : ""
         fillMode: Image.PreserveAspectCrop
         asynchronous: true
         cache: true
@@ -85,10 +88,11 @@ ClippingRectangle {
             anchors.fill: parent
             active: root.available
             sourceComponent: ({
-                dock: dockScene, backdrop: backdropScene, gallery: galleryScene,
+                dock: dockScene, widgets: widgetsScene, backdrop: backdropScene, gallery: galleryScene,
                 spotlight: spotlightScene, controlCenter: controlScene, cards: cardsScene, menus: menusScene,
                 settings: settingsScene, panels: panelsScene, joining: joiningScene, feedback: feedbackScene,
-                tray: trayScene, player: playerScene, islandReserve: reserveScene, islandInteraction: interactionScene, islandPage: islandPageScene, bubbles: bubblesScene
+                tray: trayScene, player: playerScene, islandReserve: reserveScene, islandEdge: edgeScene, barZones: zonesScene,
+                light: lightScene, fusion: fusionScene, glass: glassScene, islandInteraction: interactionScene, islandPage: islandPageScene, bubbles: bubblesScene
             })[root.scene] ?? null
         }
     }
@@ -111,15 +115,10 @@ ClippingRectangle {
         color: IrisStyle.bodySurface
         border.width: IrisStyle.rim.a > 0 ? 1 : 0
         border.color: IrisStyle.rim
-        Rectangle {
+        IrisLightWash {
             anchors.fill: parent
-            anchors.margins: IrisStyle.lightContour
-            radius: Math.max(0, plate.radius - IrisStyle.lightContour)
-            visible: plate.light.a > 0 && IrisStyle.auraStrength > 0
-            gradient: Gradient {
-                GradientStop { position: 0; color: IrisStyle.aura(plate.light) }
-                GradientStop { position: Math.min(1, IrisStyle.lightReach / Math.max(1, plate.height)); color: ColorUtils.applyAlpha(plate.light, 0) }
-            }
+            radius: plate.radius
+            light: plate.light
         }
     }
 
@@ -164,16 +163,25 @@ ClippingRectangle {
     }
 
     component IslandPill: Rectangle {
-        width: Math.round(150 * root.d)
-        height: Math.round(IrisFrame.islandBand)
-        radius: height / 2
+        id: pill
+        property bool vertical: false
+        width: pill.vertical ? Math.round(IrisFrame.islandBand) : Math.round(150 * root.d)
+        height: pill.vertical ? Math.round(150 * root.d) : Math.round(IrisFrame.islandBand)
+        radius: Math.min(width, height) / 2
         color: IrisStyle.bodySurface
         border.width: IrisStyle.rim.a > 0 ? 1 : 0
         border.color: IrisStyle.rim
         IrisClock {
+            visible: !pill.vertical
             anchors.centerIn: parent
             pixelSize: 15 * IrisStyle.typeScale
             separatorColor: IrisStyle.secondaryAccent
+        }
+        IslandParts.IslandStackedClock {
+            visible: pill.vertical
+            anchors.centerIn: parent
+            pixelSize: 15 * IrisStyle.typeScale
+            accent: IrisStyle.secondaryAccent
         }
     }
 
@@ -266,34 +274,55 @@ ClippingRectangle {
         id: dockScene
         Item {
             id: dockRoot
-            readonly property real naturalWidth: Math.round(760 * root.d)
-            readonly property real naturalHeight: Math.round(300 * root.d)
+            readonly property string edge: IrisFrame.dockEdge
+            readonly property bool vertical: dockRoot.edge === "left" || dockRoot.edge === "right"
+            readonly property real naturalWidth: Math.round((dockRoot.vertical ? 620 : 760) * root.d)
+            readonly property real naturalHeight: dockRoot.vertical ? Math.max(Math.round(300 * root.d), Math.round(dockRoot.length + 64 * root.d)) : Math.round(300 * root.d)
             readonly property bool enabledDock: root.opt("iris.dock.enable", true)
             readonly property bool autoHide: root.opt("iris.dock.autoHide", true)
             readonly property bool reserve: !dockRoot.autoHide && root.opt("iris.dock.reserveSpace", true)
             readonly property bool revealOnEmpty: root.opt("iris.dock.revealOnEmpty", true)
             readonly property bool notch: root.opt("iris.dock.notch", true)
-            readonly property bool blur: root.opt("iris.dock.blur", false)
+            readonly property string material: String(root.opt("iris.dock.material", "inherit"))
+            readonly property bool blur: dockRoot.material === "glass" || dockRoot.material === "blur"
+                || (dockRoot.material === "inherit" && (root.opt("iris.dock.blur", false) || IrisStyle.glassy))
             readonly property bool badges: root.opt("iris.dock.badges", true)
             readonly property bool launcher: root.opt("iris.dock.launcher", true)
             readonly property bool magnify: root.opt("iris.dock.magnification", false)
             readonly property real icon: Math.max(28, Math.min(64, Number(root.opt("iris.dock.iconSize", 40)))) * root.d
             readonly property var apps: (TaskbarApps.apps ?? []).filter(app => app && !app.separator && String(app.appId ?? "").length > 0 && app.appId !== "SEPARATOR").slice(0, 6)
             readonly property int count: dockRoot.apps.length + (dockRoot.launcher ? 1 : 0)
-            readonly property real plateW: dockRoot.count * (dockRoot.icon + 10 * root.d) + 16 * root.d
-            readonly property real plateH: dockRoot.icon + 18 * root.d
+            readonly property real length: dockRoot.count * (dockRoot.icon + 10 * root.d) + 16 * root.d
+            readonly property real thick: dockRoot.icon + 18 * root.d
+            readonly property real span: dockRoot.vertical ? height : width
+            readonly property real depth: dockRoot.vertical ? width : height
+            readonly property real restInset: IrisFrame.band + (dockRoot.notch ? 0 : Math.round(10 * root.d))
             property bool hidden: false
             property int hover: -1
-            readonly property real restY: height - IrisFrame.band - (dockRoot.notch ? 0 : Math.round(10 * root.d)) - dockRoot.plateH
-            property real plateY: dockRoot.hidden ? height + 4 : dockRoot.restY
-            readonly property real plateX: Math.round((width - dockRoot.plateW) / 2)
-            Behavior on plateY { NumberAnimation { duration: IrisStyle.moveDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: IrisStyle.moveCurve } }
+            property real slide: dockRoot.hidden ? -dockRoot.thick - 4 : dockRoot.restInset
+            Behavior on slide { NumberAnimation { duration: IrisStyle.moveDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: IrisStyle.moveCurve } }
+            readonly property real alongStart: Math.round((dockRoot.span - dockRoot.length) / 2)
+            readonly property real acrossAt: dockRoot.edge === "bottom" ? height - dockRoot.slide - dockRoot.thick
+                : dockRoot.edge === "right" ? width - dockRoot.slide - dockRoot.thick : dockRoot.slide
+            readonly property real plateX: dockRoot.vertical ? dockRoot.acrossAt : dockRoot.alongStart
+            readonly property real plateY: dockRoot.vertical ? dockRoot.alongStart : dockRoot.acrossAt
+            readonly property real plateW: dockRoot.vertical ? dockRoot.thick : dockRoot.length
+            readonly property real plateH: dockRoot.vertical ? dockRoot.length : dockRoot.thick
+            readonly property real reach: dockRoot.reserve ? dockRoot.restInset + dockRoot.thick + Math.round(10 * root.d) : IrisFrame.band
 
             property int step: 0
             readonly property int steps: dockRoot.count + 3
             readonly property bool gliding: dockRoot.step >= 2 && dockRoot.step < dockRoot.steps - 1
-            function iconCentre(index: int): real {
-                return dockRoot.plateX + 8 * root.d + index * (dockRoot.icon + 10 * root.d) + dockRoot.icon / 2
+            function iconAlong(index: int): real {
+                return dockRoot.alongStart + 8 * root.d + index * (dockRoot.icon + 10 * root.d) + dockRoot.icon / 2
+            }
+            function spot(along: real, inset: real): point {
+                const across = dockRoot.edge === "bottom" ? height - inset : dockRoot.edge === "right" ? width - inset : inset
+                return dockRoot.vertical ? Qt.point(across, along) : Qt.point(along, across)
+            }
+            function inset(side: string): real {
+                if (side === dockRoot.edge) return dockRoot.reach
+                return Math.round((side === "top" || side === "bottom" ? 28 : 40) * root.d)
             }
             Timer {
                 running: root.playing && dockRoot.enabledDock
@@ -306,26 +335,27 @@ ClippingRectangle {
             Binding { dockRoot.hidden: dockRoot.autoHide && dockRoot.enabledDock && (dockRoot.step === 0 || dockRoot.step === dockRoot.steps - 1) }
             Binding { dockRoot.hover: dockRoot.magnify && dockRoot.gliding ? dockRoot.step - 2 : -1 }
             Pointer {
+                readonly property point aim: dockRoot.step === 0 ? Qt.point(dockRoot.width * 0.62, dockRoot.height * 0.36)
+                    : dockRoot.step === dockRoot.steps - 1 ? Qt.point(dockRoot.width * 0.34, dockRoot.height * 0.3)
+                    : dockRoot.step === 1 ? dockRoot.spot(dockRoot.span / 2, IrisFrame.band)
+                    : dockRoot.spot(dockRoot.iconAlong(dockRoot.step - 2), dockRoot.restInset + dockRoot.thick * 0.65)
                 visible: dockRoot.enabledDock && root.playing
-                x: dockRoot.step === 0 ? dockRoot.width * 0.62
-                    : dockRoot.step === dockRoot.steps - 1 ? dockRoot.width * 0.34
-                    : dockRoot.step === 1 ? dockRoot.width / 2 - width / 2
-                    : dockRoot.iconCentre(dockRoot.step - 2) - width / 3
-                y: dockRoot.step === 0 ? dockRoot.height * 0.36
-                    : dockRoot.step === dockRoot.steps - 1 ? dockRoot.height * 0.3
-                    : dockRoot.step === 1 ? dockRoot.height - IrisFrame.band - height / 2
-                    : dockRoot.restY + dockRoot.plateH * 0.35
+                x: aim.x - width / 3
+                y: aim.y - height / 3
             }
 
             Rectangle {
-                x: Math.round(40 * root.d)
-                y: Math.round(28 * root.d)
-                width: parent.width - 2 * x
-                height: (dockRoot.reserve ? dockRoot.restY - Math.round(10 * root.d) : parent.height - IrisFrame.band) - y
+                x: dockRoot.inset("left")
+                y: dockRoot.inset("top")
+                width: parent.width - x - dockRoot.inset("right")
+                height: parent.height - y - dockRoot.inset("bottom")
                 radius: IrisStyle.radiusTile
                 color: IrisStyle.surfaceHigh
                 border.width: 1
                 border.color: IrisStyle.border
+                Behavior on x { NumberAnimation { duration: IrisStyle.moveDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: IrisStyle.moveCurve } }
+                Behavior on y { NumberAnimation { duration: IrisStyle.moveDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: IrisStyle.moveCurve } }
+                Behavior on width { NumberAnimation { duration: IrisStyle.moveDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: IrisStyle.moveCurve } }
                 Behavior on height { NumberAnimation { duration: IrisStyle.moveDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: IrisStyle.moveCurve } }
                 Row {
                     x: Math.round(12 * root.d); y: Math.round(11 * root.d)
@@ -335,10 +365,12 @@ ClippingRectangle {
                 Rectangle { x: Math.round(12 * root.d); y: Math.round(38 * root.d); width: parent.width * 0.4; height: Math.round(9 * root.d); radius: height / 2; color: IrisStyle.fill }
                 Rectangle { x: Math.round(12 * root.d); y: Math.round(56 * root.d); width: parent.width * 0.62; height: Math.round(9 * root.d); radius: height / 2; color: IrisStyle.fillQuiet }
                 Rectangle {
-                    anchors.left: parent.left; anchors.right: parent.right; anchors.bottom: parent.bottom
-                    height: 1
-                    color: IrisStyle.accent
                     visible: dockRoot.reserve
+                    x: dockRoot.edge === "right" ? parent.width - 1 : 0
+                    y: dockRoot.edge === "bottom" ? parent.height - 1 : 0
+                    width: dockRoot.vertical ? 1 : parent.width
+                    height: dockRoot.vertical ? parent.height : 1
+                    color: IrisStyle.accent
                 }
             }
 
@@ -346,7 +378,7 @@ ClippingRectangle {
                 visible: dockRoot.blur && dockRoot.enabledDock
                 x: dockRoot.plateX; y: dockRoot.plateY
                 width: dockRoot.plateW; height: dockRoot.plateH
-                radius: dockRoot.notch ? Math.round(16 * root.d) : height / 2
+                radius: dockRoot.notch ? Math.round(16 * root.d) : dockRoot.thick / 2
                 color: "transparent"
                 Image {
                     id: dockBlurSource
@@ -368,19 +400,25 @@ ClippingRectangle {
                 shapes: {
                     const out = []
                     const deep = Math.max(8, IrisStyle.fuseDeep * 2)
-                    out.push({ x: -2 * IrisStyle.fuseDeep, y: dockRoot.height - IrisFrame.band, width: dockRoot.width + 4 * IrisStyle.fuseDeep,
-                        height: IrisFrame.band + deep, radius: 0, fuse: IrisStyle.fuseDeep, id: "edge", paints: true })
+                    const f = IrisStyle.fuseDeep
+                    const W = dockRoot.width, H = dockRoot.height, band = IrisFrame.band
+                    out.push(dockRoot.edge === "top" ? { x: -2 * f, y: -deep, width: W + 4 * f, height: band + deep }
+                        : dockRoot.edge === "left" ? { x: -deep, y: -2 * f, width: band + deep, height: H + 4 * f }
+                        : dockRoot.edge === "right" ? { x: W - band, y: -2 * f, width: band + deep, height: H + 4 * f }
+                        : { x: -2 * f, y: H - band, width: W + 4 * f, height: band + deep })
+                    Object.assign(out[0], { radius: 0, fuse: f, id: "edge", paints: true })
                     out.push({ x: dockRoot.plateX, y: dockRoot.plateY, width: dockRoot.plateW, height: dockRoot.plateH,
-                        radius: dockRoot.notch ? Math.round(16 * root.d) : dockRoot.plateH / 2,
+                        radius: dockRoot.notch ? Math.round(16 * root.d) : dockRoot.thick / 2,
                         fuse: dockRoot.notch ? IrisStyle.fuseEdge : IrisStyle.fuse, id: "dock", joins: dockRoot.notch ? "edge" : "", paints: true })
                     return out
                 }
             }
 
-            Row {
+            Grid {
                 visible: dockRoot.enabledDock
-                x: dockRoot.plateX + 8 * root.d
-                y: dockRoot.plateY + (dockRoot.plateH - dockRoot.icon) / 2
+                columns: dockRoot.vertical ? 1 : Math.max(1, dockRoot.count)
+                x: dockRoot.vertical ? dockRoot.plateX + (dockRoot.thick - dockRoot.icon) / 2 : dockRoot.plateX + 8 * root.d
+                y: dockRoot.vertical ? dockRoot.plateY + 8 * root.d : dockRoot.plateY + (dockRoot.thick - dockRoot.icon) / 2
                 spacing: Math.round(10 * root.d)
                 Repeater {
                     model: (dockRoot.launcher ? [{ launcher: true }] : []).concat(dockRoot.apps)
@@ -392,7 +430,7 @@ ClippingRectangle {
                         width: dockRoot.icon
                         height: width
                         scale: dockIcon.distance === 0 ? 1.45 : dockIcon.distance === 1 ? 1.18 : 1
-                        transformOrigin: Item.Bottom
+                        transformOrigin: ({ top: Item.Top, left: Item.Left, right: Item.Right })[dockRoot.edge] ?? Item.Bottom
                         z: 3 - Math.min(3, dockIcon.distance)
                         Behavior on scale { NumberAnimation { duration: IrisStyle.duration(160); easing.type: IrisStyle.feedbackEasing } }
                         Rectangle {
@@ -424,10 +462,533 @@ ClippingRectangle {
 
             OffState { visible: !dockRoot.enabledDock; text: Translation.tr("Dock off") }
             Caption {
-                glyph: dockRoot.autoHide ? "unfold_less" : dockRoot.reserve ? "vertical_align_bottom" : "layers"
+                anchors.leftMargin: dockRoot.edge === "left" ? dockRoot.restInset + dockRoot.thick + Math.round(14 * root.d) : Math.round(14 * root.d)
+                glyph: dockRoot.autoHide ? "unfold_less" : !dockRoot.reserve ? "layers"
+                    : ({ top: "vertical_align_top", left: "align_horizontal_left", right: "align_horizontal_right" })[dockRoot.edge] ?? "vertical_align_bottom"
                 text: !dockRoot.enabledDock ? ""
                     : dockRoot.autoHide ? (dockRoot.revealOnEmpty ? Translation.tr("Hides over windows · stays on empty workspaces") : Translation.tr("Hides until the pointer reaches the edge"))
-                    : dockRoot.reserve ? Translation.tr("Windows stop above the Dock") : Translation.tr("Windows run under the Dock")
+                    : !dockRoot.reserve ? Translation.tr("Windows run under the Dock")
+                    : dockRoot.vertical ? Translation.tr("Windows stop beside the Dock")
+                    : dockRoot.edge === "top" ? Translation.tr("Windows start below the Dock") : Translation.tr("Windows stop above the Dock")
+            }
+        }
+    }
+
+    component Loop: SequentialAnimation {
+        id: loop
+        property real rest: 1400
+        loops: Animation.Infinite
+        NumberAnimation { to: 1; duration: IrisStyle.duration(IrisStyle.settleDuration * 2); easing.type: Easing.BezierSpline; easing.bezierCurve: IrisStyle.emergeCurve }
+        PauseAnimation { duration: loop.rest }
+        NumberAnimation { to: 0; duration: IrisStyle.duration(IrisStyle.recedeDuration * 2); easing.type: Easing.BezierSpline; easing.bezierCurve: IrisStyle.recedeCurve }
+        PauseAnimation { duration: loop.rest / 3 }
+    }
+
+    component LitPlate: Rectangle {
+        id: lit
+        property color light: IrisStyle.wallpaperLight
+        color: IrisStyle.bodySurface
+        border.width: IrisStyle.rim.a > 0 ? 1 : 0
+        border.color: IrisStyle.rim
+        IrisLightWash {
+            anchors.fill: parent
+            radius: lit.radius
+            light: lit.light
+        }
+    }
+
+    component LitBody: Item {
+        id: body
+        property color light
+        property real restWidth: 0
+        property real restHeight: 0
+        property real progress: 1
+        default property alias content: bodyContent.data
+        RectangularShadow {
+            anchors.fill: bodyPlate
+            radius: bodyPlate.radius
+            offset.y: 3 * IrisStyle.density
+            blur: 16 * IrisStyle.density
+            color: IrisStyle.shadow
+        }
+        LitPlate {
+            id: bodyPlate
+            anchors.fill: parent
+            radius: Math.min(IrisStyle.radiusSheet, height / 2)
+            light: body.light
+        }
+        Item {
+            id: bodyContent
+            readonly property real pad: IrisStyle.concentricPad(IrisStyle.radiusSheet, 14 * root.d)
+            x: bodyContent.pad
+            y: bodyContent.pad
+            width: body.restWidth - 2 * bodyContent.pad
+            height: body.restHeight - 2 * bodyContent.pad
+            opacity: IrisStyle.ramp(body.progress, 0.55, 0.45)
+            visible: opacity > 0
+        }
+    }
+
+    Component {
+        id: edgeScene
+        Item {
+            id: edgeRoot
+            readonly property real naturalWidth: Math.round(640 * root.d)
+            readonly property real naturalHeight: Math.round(320 * root.d)
+            readonly property string edge: IrisFrame.islandEdge
+            readonly property bool vertical: edgeRoot.edge === "left" || edgeRoot.edge === "right"
+            readonly property bool notch: root.opt("iris.bar.notch", false)
+            readonly property string layout: String(root.opt("iris.bar.layout", "island"))
+            readonly property real thick: IrisFrame.islandBand
+            readonly property real span: edgeRoot.vertical ? height : width
+            readonly property real length: edgeRoot.layout === "full" ? edgeRoot.span - 2 * IrisFrame.band
+                : Math.round(edgeRoot.thick * (edgeRoot.vertical ? 3.2 : 3.6))
+            readonly property real along: edgeRoot.layout === "full" ? IrisFrame.band
+                : edgeRoot.layout === "left" ? IrisFrame.band + Math.round(20 * root.d)
+                : edgeRoot.layout === "right" ? edgeRoot.span - edgeRoot.length - IrisFrame.band - Math.round(20 * root.d)
+                : Math.round((edgeRoot.span - edgeRoot.length) / 2)
+            readonly property real inset: IrisFrame.band + IrisFrame.islandMargin
+            property real t: 0
+            Loop on t { running: root.playing }
+            readonly property real depth: -edgeRoot.thick - 4 + (edgeRoot.inset + edgeRoot.thick + 4) * edgeRoot.t
+            function place(along: real, length: real, depth: real, thick: real): var {
+                const across = edgeRoot.edge === "bottom" ? height - depth - thick : edgeRoot.edge === "right" ? width - depth - thick : depth
+                return edgeRoot.vertical ? { x: across, y: along, width: thick, height: length } : { x: along, y: across, width: length, height: thick }
+            }
+            readonly property var island: edgeRoot.place(edgeRoot.along, edgeRoot.length, edgeRoot.depth, edgeRoot.thick)
+            readonly property real bubble: Math.round(edgeRoot.thick * 0.86)
+            readonly property var satellites: edgeRoot.layout === "full" ? [] : [
+                edgeRoot.place(edgeRoot.along - Math.round(6 * root.d) - edgeRoot.bubble, edgeRoot.bubble, edgeRoot.depth + (edgeRoot.thick - edgeRoot.bubble) / 2, edgeRoot.bubble),
+                edgeRoot.place(edgeRoot.along + edgeRoot.length + Math.round(6 * root.d), edgeRoot.bubble, edgeRoot.depth + (edgeRoot.thick - edgeRoot.bubble) / 2, edgeRoot.bubble)
+            ]
+            function edgeBody(): var {
+                const deep = Math.max(8, IrisStyle.fuseDeep * 2), f = IrisStyle.fuseDeep
+                switch (edgeRoot.edge) {
+                case "bottom": return { x: -2 * f, y: height, width: width + 4 * f, height: deep }
+                case "left": return { x: -deep, y: -2 * f, width: deep, height: height + 4 * f }
+                case "right": return { x: width, y: -2 * f, width: deep, height: height + 4 * f }
+                default: return { x: -2 * f, y: -deep, width: width + 4 * f, height: deep }
+                }
+            }
+            Field.IrisField {
+                anchors.fill: parent
+                framed: false
+                shapes: {
+                    const out = []
+                    if (edgeRoot.notch) out.push(Object.assign({ radius: 0, fuse: IrisStyle.fuseDeep, id: "edge", paints: true }, edgeRoot.edgeBody()))
+                    out.push(Object.assign({ radius: edgeRoot.layout === "full" ? 0 : edgeRoot.thick / 2, fuse: edgeRoot.notch ? IrisStyle.fuseEdge : IrisStyle.fuse,
+                        id: "island", joins: edgeRoot.notch ? "edge" : "", paints: true }, edgeRoot.island))
+                    edgeRoot.satellites.forEach((sat, i) => out.push(Object.assign({ radius: IrisStyle.pieceRadius(edgeRoot.bubble), fuse: IrisStyle.fuse,
+                        id: "satellite" + i, joins: "island", paints: true }, sat)))
+                    return out
+                }
+            }
+            IrisClock {
+                visible: !edgeRoot.vertical
+                opacity: edgeRoot.t
+                x: edgeRoot.island.x + (edgeRoot.island.width - width) / 2
+                y: edgeRoot.island.y + (edgeRoot.island.height - height) / 2
+                pixelSize: 15 * IrisStyle.typeScale
+                separatorColor: IrisStyle.secondaryAccent
+            }
+            IslandParts.IslandStackedClock {
+                visible: edgeRoot.vertical
+                opacity: edgeRoot.t
+                x: edgeRoot.island.x + (edgeRoot.island.width - width) / 2
+                y: edgeRoot.island.y + (edgeRoot.island.height - height) / 2
+                pixelSize: 15 * IrisStyle.typeScale
+                accent: IrisStyle.secondaryAccent
+            }
+            Caption {
+                anchors.leftMargin: edgeRoot.edge === "left" ? edgeRoot.inset + edgeRoot.thick + Math.round(14 * root.d) : Math.round(14 * root.d)
+                glyph: ({ top: "vertical_align_top", bottom: "vertical_align_bottom", left: "align_horizontal_left", right: "align_horizontal_right" })[edgeRoot.edge] ?? "pill"
+                text: Translation.tr(({ top: "Top edge", bottom: "Bottom edge", left: "Left edge", right: "Right edge" })[edgeRoot.edge] ?? "")
+                    + " · " + (edgeRoot.layout === "full" ? Translation.tr("a bar across it") : edgeRoot.notch ? Translation.tr("melts into it") : Translation.tr("floats off it"))
+            }
+        }
+    }
+
+    Component {
+        id: zonesScene
+        Item {
+            id: zonesRoot
+            readonly property real naturalWidth: Math.round(680 * root.d)
+            readonly property real naturalHeight: Math.round(220 * root.d)
+            readonly property var names: ({ island: "Island", workspaces: "Workspaces", window: "Window", time: "Time", tray: "Tray",
+                notifications: "Notifications", sound: "Sound", controls: "Controls", mic: "Mic", weather: "Weather", tools: "Tools", media: "Media" })
+            function listOf(path: string, fallback: var): var { return Array.from(root.opt(path, fallback) ?? []).map(kind => String(kind)) }
+            readonly property var zones: [
+                zonesRoot.listOf("iris.bar.fullStart", ["workspaces", "window"]),
+                zonesRoot.listOf("iris.bar.fullCenter", ["island"]),
+                zonesRoot.listOf("iris.bar.fullEnd", ["tray", "notifications", "sound", "controls"])
+            ]
+            readonly property real thick: IrisFrame.islandBand
+            property real t: 0
+            NumberAnimation on t { running: root.playing; from: 0; to: 3; duration: IrisStyle.duration(5400); loops: Animation.Infinite }
+            readonly property int lit: Math.min(2, Math.floor(zonesRoot.t))
+            Rectangle {
+                id: bar
+                x: Math.round(16 * root.d)
+                y: Math.round(28 * root.d)
+                width: parent.width - 2 * x
+                height: zonesRoot.thick
+                radius: IrisStyle.radiusChip
+                color: IrisStyle.bodySurface
+                border.width: IrisStyle.rim.a > 0 ? 1 : 0
+                border.color: IrisStyle.rim
+                Repeater {
+                    model: 3
+                    Row {
+                        id: zone
+                        required property int index
+                        readonly property var kinds: zonesRoot.zones[zone.index]
+                        spacing: Math.round(6 * root.d)
+                        anchors.verticalCenter: parent.verticalCenter
+                        x: zone.index === 0 ? Math.round(8 * root.d) : zone.index === 1 ? Math.round((bar.width - width) / 2) : bar.width - width - Math.round(8 * root.d)
+                        Repeater {
+                            model: zone.kinds
+                            Rectangle {
+                                required property string modelData
+                                readonly property bool current: zonesRoot.lit === zone.index
+                                implicitWidth: chipLabel.implicitWidth + Math.round(16 * root.d)
+                                implicitHeight: zonesRoot.thick - Math.round(10 * root.d)
+                                radius: height / 2
+                                color: current ? IrisStyle.tintFill(IrisStyle.accent) : IrisStyle.fill
+                                Behavior on color { ColorAnimation { duration: IrisStyle.duration(160) } }
+                                IrisText {
+                                    id: chipLabel
+                                    anchors.centerIn: parent
+                                    text: modelData === "time" ? Qt.formatTime(new Date(), "hh:mm") : Translation.tr(zonesRoot.names[modelData] ?? modelData)
+                                    font.pixelSize: 11.5 * IrisStyle.typeScale
+                                    color: parent.current ? IrisStyle.text : IrisStyle.subtext
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            Caption {
+                glyph: ["align_horizontal_left", "align_horizontal_center", "align_horizontal_right"][zonesRoot.lit]
+                text: [Translation.tr("Start"), Translation.tr("Centre"), Translation.tr("End")][zonesRoot.lit] + ": "
+                    + (zonesRoot.zones[zonesRoot.lit].length > 0 ? zonesRoot.zones[zonesRoot.lit].map(kind => Translation.tr(zonesRoot.names[kind] ?? kind)).join(", ") : Translation.tr("empty"))
+            }
+        }
+    }
+
+    Component {
+        id: lightScene
+        Item {
+            id: lightRoot
+            readonly property real naturalWidth: Math.round(620 * root.d)
+            readonly property real naturalHeight: Math.round(290 * root.d)
+            readonly property string aura: String(root.opt("iris.appearance.aura", "subtle"))
+            readonly property real reach: Number(root.opt("iris.appearance.theme.lightReach", 100))
+            readonly property real glow: Number(root.opt("iris.appearance.theme.glow", 0))
+            readonly property real bodyWidth: Math.round(236 * root.d)
+            readonly property real bodyHeight: Math.round(176 * root.d)
+            readonly property real gutter: Math.round((lightRoot.width - 2 * lightRoot.bodyWidth) / 3)
+            property real t: 0
+            Loop on t { running: root.playing }
+            readonly property real grown: IrisFrame.islandBand + (lightRoot.bodyHeight - IrisFrame.islandBand) * lightRoot.t
+            readonly property real wide: IrisFrame.islandBand * 2 + (lightRoot.bodyWidth - IrisFrame.islandBand * 2) * lightRoot.t
+
+            LitBody {
+                x: lightRoot.gutter + (lightRoot.bodyWidth - width) / 2
+                y: Math.round(26 * root.d)
+                width: lightRoot.wide
+                height: lightRoot.grown
+                restWidth: lightRoot.bodyWidth
+                restHeight: lightRoot.bodyHeight
+                progress: lightRoot.t
+                light: IrisStyle.identity.sky
+                ColumnLayout {
+                    anchors.fill: parent
+                    spacing: Math.round(2 * root.d)
+                    RowLayout {
+                        spacing: Math.round(6 * root.d)
+                        MaterialSymbol { text: "partly_cloudy_day"; fill: 1; iconSize: Math.round(18 * root.d); color: IrisStyle.identity.sky }
+                        IrisText { text: Translation.tr("Weather"); font.weight: Font.DemiBold }
+                    }
+                    IrisText {
+                        text: "18°"
+                        font.family: IrisStyle.fontNumbers
+                        font.weight: IrisStyle.figureWeight
+                        font.pixelSize: 40 * IrisStyle.typeScale
+                    }
+                    IrisText { text: Translation.tr("Partly cloudy"); color: IrisStyle.muted; font.pixelSize: 12 * IrisStyle.typeScale }
+                    Item { Layout.fillHeight: true }
+                }
+            }
+            LitBody {
+                x: 2 * lightRoot.gutter + lightRoot.bodyWidth + (lightRoot.bodyWidth - width) / 2
+                y: Math.round(26 * root.d)
+                width: lightRoot.wide
+                height: lightRoot.grown
+                restWidth: lightRoot.bodyWidth
+                restHeight: lightRoot.bodyHeight
+                progress: lightRoot.t
+                light: IrisStyle.wallpaperLight
+                ColumnLayout {
+                    anchors.fill: parent
+                    spacing: Math.round(10 * root.d)
+                    RowLayout {
+                        spacing: Math.round(6 * root.d)
+                        MaterialSymbol { text: "tune"; iconSize: Math.round(18 * root.d); color: IrisStyle.text }
+                        IrisText { text: Translation.tr("Control Center"); font.weight: Font.DemiBold }
+                    }
+                    RowLayout {
+                        spacing: Math.round(8 * root.d)
+                        Repeater {
+                            model: ["wifi", "bluetooth", "dark_mode"]
+                            Rectangle {
+                                required property string modelData
+                                required property int index
+                                implicitWidth: Math.round(38 * root.d)
+                                implicitHeight: implicitWidth
+                                radius: IrisStyle.pieceRadius(implicitWidth)
+                                color: index === 0 ? IrisStyle.accent : IrisStyle.fill
+                                MaterialSymbol { anchors.centerIn: parent; text: parent.modelData; fill: 1; iconSize: Math.round(18 * root.d); color: parent.index === 0 ? IrisStyle.onAccent : IrisStyle.text }
+                            }
+                        }
+                    }
+                    Rectangle {
+                        Layout.fillWidth: true
+                        implicitHeight: Math.round(26 * root.d)
+                        radius: height / 2
+                        color: IrisStyle.fill
+                        Rectangle { width: parent.width * 0.62; height: parent.height; radius: height / 2; color: IrisStyle.fillActive }
+                    }
+                    Item { Layout.fillHeight: true }
+                }
+            }
+            Caption {
+                glyph: lightRoot.aura === "off" ? "light_off" : "light_mode"
+                text: (lightRoot.aura === "off" ? Translation.tr("Light off")
+                    : (lightRoot.aura === "vivid" ? Translation.tr("Vivid") : Translation.tr("Subtle")) + " · " + Translation.tr("reach %1%").arg(Math.round(lightRoot.reach)))
+                    + " · " + (lightRoot.glow > 0 ? Translation.tr("shadows glow %1%").arg(Math.round(lightRoot.glow)) : Translation.tr("dark shadows"))
+            }
+        }
+    }
+
+    Component {
+        id: fusionScene
+        Item {
+            id: fuseRoot
+            readonly property real naturalWidth: Math.round(620 * root.d)
+            readonly property real naturalHeight: Math.round(300 * root.d)
+            readonly property real melt: Number(root.opt("iris.appearance.theme.melt", 0))
+            readonly property real corners: Number(root.opt("iris.appearance.theme.shape", 100))
+            readonly property real bubble: IrisFrame.islandBand
+            property real t: 0
+            Loop on t { running: root.playing; rest: 900 }
+            readonly property var island: ({ x: Math.round(width / 2 - 90 * root.d), y: Math.round(24 * root.d), width: Math.round(180 * root.d), height: fuseRoot.bubble })
+            readonly property var satellite: ({ x: fuseRoot.island.x + fuseRoot.island.width + Math.round(6 * root.d), y: fuseRoot.island.y, width: fuseRoot.bubble, height: fuseRoot.bubble })
+            readonly property real cardTop: fuseRoot.island.y + fuseRoot.island.height + Math.round(40 * root.d) * (1 - fuseRoot.t) - IrisStyle.weld * fuseRoot.t
+            readonly property var card: ({ x: Math.round(width / 2 - 130 * root.d), y: fuseRoot.cardTop, width: Math.round(260 * root.d), height: Math.round(150 * root.d) })
+            Field.IrisField {
+                anchors.fill: parent
+                framed: false
+                shapes: [
+                    Object.assign({ radius: fuseRoot.bubble / 2, fuse: IrisStyle.fuse, id: "island", paints: true }, fuseRoot.island),
+                    Object.assign({ radius: IrisStyle.pieceRadius(fuseRoot.bubble), fuse: IrisStyle.fuse, id: "satellite", joins: "island", paints: true }, fuseRoot.satellite),
+                    Object.assign({ radius: IrisStyle.radiusSheet, fuse: IrisStyle.fuseDeep, id: "card", joins: "island", paints: true }, fuseRoot.card)
+                ]
+            }
+            IrisClock {
+                x: fuseRoot.island.x + (fuseRoot.island.width - width) / 2
+                y: fuseRoot.island.y + (fuseRoot.island.height - height) / 2
+                pixelSize: 15 * IrisStyle.typeScale
+                separatorColor: IrisStyle.secondaryAccent
+            }
+            Column {
+                x: fuseRoot.card.x + IrisStyle.concentricPad(IrisStyle.radiusSheet, 14 * root.d)
+                y: fuseRoot.card.y + IrisStyle.concentricPad(IrisStyle.radiusSheet, 14 * root.d)
+                spacing: Math.round(8 * root.d)
+                Rectangle { width: Math.round(120 * root.d); height: Math.round(10 * root.d); radius: IrisStyle.radiusMicro; color: IrisStyle.fillHover }
+                Rectangle { width: Math.round(170 * root.d); height: Math.round(10 * root.d); radius: IrisStyle.radiusMicro; color: IrisStyle.fill }
+                Row {
+                    spacing: Math.round(8 * root.d)
+                    Repeater { model: 3; Rectangle { required property int index; width: Math.round(46 * root.d); height: Math.round(34 * root.d); radius: IrisStyle.radiusTile; color: IrisStyle.fillQuiet } }
+                }
+            }
+            Caption {
+                glyph: "join_inner"
+                text: (fuseRoot.melt > 0 ? Translation.tr("Fusion %1%").arg(Math.round(fuseRoot.melt)) : Translation.tr("Crisp joins"))
+                    + " · " + Translation.tr("corners %1%").arg(Math.round(fuseRoot.corners))
+            }
+        }
+    }
+
+    Component {
+        id: glassScene
+        Item {
+            id: glassRoot
+            readonly property real naturalWidth: Math.round(620 * root.d)
+            readonly property real naturalHeight: Math.round(280 * root.d)
+            readonly property string mode: String(root.opt("iris.appearance.glass.mode", "off"))
+            property real t: 0
+            Loop on t { running: root.playing; rest: 600 }
+            ClippingRectangle {
+                id: pane
+                width: Math.round(300 * root.d)
+                height: Math.round(170 * root.d)
+                x: Math.round(24 * root.d + (glassRoot.width - width - 48 * root.d) * glassRoot.t)
+                y: Math.round(28 * root.d)
+                radius: IrisStyle.radiusSheet
+                color: IrisStyle.glassy ? "transparent" : IrisStyle.bodySurface
+                Image {
+                    id: paneSource
+                    x: -pane.x; y: -pane.y
+                    width: glassRoot.width; height: glassRoot.height
+                    source: IrisStyle.glassy ? root.wallpaper : ""
+                    fillMode: Image.PreserveAspectCrop
+                    sourceSize.width: 400
+                    visible: false
+                }
+                MultiEffect {
+                    anchors.fill: paneSource
+                    visible: IrisStyle.glassy
+                    source: paneSource
+                    blurEnabled: true
+                    blur: IrisStyle.glassBlurAmount
+                    blurMax: IrisStyle.glassBlurMax
+                    saturation: IrisStyle.glassSaturation
+                }
+                Rectangle { anchors.fill: parent; visible: IrisStyle.glassy; color: IrisStyle.bodyTint }
+                Column {
+                    x: IrisStyle.concentricPad(pane.radius, 14 * root.d)
+                    y: x
+                    width: pane.width - 2 * x
+                    spacing: Math.round(4 * root.d)
+                    IrisText { text: Translation.tr("Now playing"); font.weight: Font.DemiBold; font.pixelSize: 14 * IrisStyle.typeScale }
+                    IrisText { width: parent.width; text: Translation.tr("Secondary text stays readable over the wallpaper"); color: IrisStyle.muted; wrapMode: Text.WordWrap; font.pixelSize: 12 * IrisStyle.typeScale }
+                    IrisText { text: Translation.tr("Tertiary detail"); color: IrisStyle.textTertiary; font.pixelSize: 11.5 * IrisStyle.typeScale }
+                }
+            }
+            Caption {
+                glyph: glassRoot.mode === "off" ? "crop_square" : "blur_on"
+                text: glassRoot.mode === "off" ? Translation.tr("Off: solid material")
+                    : Translation.tr("Tint %1% · frost %2%").arg(Math.round(IrisStyle.glassTint * 100)).arg(Math.round(IrisStyle.glassBlurAmount * 100))
+                        + (glassRoot.mode === "compositor" ? " · " + Translation.tr("Blur previews as Glass") : "")
+            }
+        }
+    }
+
+    Component {
+        id: widgetsScene
+        Item {
+            id: widgetsRoot
+            readonly property real naturalWidth: Math.round(620 * root.d)
+            readonly property real naturalHeight: Math.round(260 * root.d)
+            readonly property bool on: root.opt("iris.modules.desktopWidgets", true)
+            readonly property string material: String(root.opt("iris.widgets.material", "glass"))
+            readonly property bool glass: widgetsRoot.material === "glass"
+            readonly property bool clear: widgetsRoot.material === "clear"
+            readonly property color ink: String(root.opt("iris.widgets.tint", "wallpaper")) === "wallpaper" ? IrisStyle.wallpaperLight : IrisStyle.accent
+            readonly property int weight: ({ light: Font.Light, regular: Font.Medium, bold: Font.Bold })[String(root.opt("iris.widgets.weight", "regular"))] ?? Font.Medium
+            readonly property real strength: Math.max(0.2, Math.min(1, Number(root.opt("iris.widgets.opacity", 100)) / 100))
+            readonly property real plateRadius: Math.round(Math.max(0, Math.min(40, Number(root.opt("iris.widgets.radius", 22)))) * root.d)
+            readonly property real unit: Math.round(170 * root.d)
+            readonly property real wide: Math.round(250 * root.d)
+            readonly property real gap: Math.round(16 * root.d)
+            readonly property real plateX: Math.round((widgetsRoot.width - widgetsRoot.wide - widgetsRoot.gap - widgetsRoot.unit) / 2)
+            readonly property real plateY: Math.round((widgetsRoot.height - widgetsRoot.unit) / 2)
+            readonly property color plateColor: widgetsRoot.glass || widgetsRoot.clear
+                ? ColorUtils.applyAlpha(IrisStyle.surface, IrisStyle.legibleVeil(widgetsRoot.material, 0, 0, widgetsRoot.strength))
+                : ColorUtils.applyAlpha(widgetsRoot.material === "tinted"
+                    ? ColorUtils.mix(IrisStyle.surface, Appearance.colors.colPrimary, 0.82) : IrisStyle.surface, widgetsRoot.strength)
+
+            Image {
+                id: widgetsWall
+                anchors.fill: parent
+                visible: false
+                source: widgetsRoot.glass ? root.wallpaper : ""
+                fillMode: Image.PreserveAspectCrop
+                sourceSize.width: 700
+                asynchronous: true
+            }
+            Repeater {
+                model: widgetsRoot.on && widgetsRoot.glass ? [
+                    Qt.rect(widgetsRoot.plateX, widgetsRoot.plateY, widgetsRoot.wide, widgetsRoot.unit),
+                    Qt.rect(widgetsRoot.plateX + widgetsRoot.wide + widgetsRoot.gap, widgetsRoot.plateY, widgetsRoot.unit, widgetsRoot.unit)
+                ] : []
+                ClippingRectangle {
+                    id: frost
+                    required property rect modelData
+                    x: frost.modelData.x
+                    y: frost.modelData.y
+                    width: frost.modelData.width
+                    height: frost.modelData.height
+                    radius: widgetsRoot.plateRadius
+                    color: "transparent"
+                    MultiEffect {
+                        x: -frost.x
+                        y: -frost.y
+                        width: widgetsRoot.width
+                        height: widgetsRoot.height
+                        source: widgetsWall
+                        autoPaddingEnabled: false
+                        blurEnabled: true
+                        blur: IrisStyle.glassBlur
+                        blurMax: IrisStyle.glassBlurMax
+                        saturation: IrisStyle.glassSaturation
+                    }
+                }
+            }
+
+            Rectangle {
+                visible: widgetsRoot.on
+                x: widgetsRoot.plateX
+                y: widgetsRoot.plateY
+                width: widgetsRoot.wide
+                height: widgetsRoot.unit
+                radius: widgetsRoot.plateRadius
+                color: widgetsRoot.plateColor
+                border.width: widgetsRoot.clear ? 0 : 1
+                border.color: IrisStyle.rim
+                ColumnLayout {
+                    anchors.left: parent.left; anchors.bottom: parent.bottom
+                    anchors.margins: Math.round(18 * root.d)
+                    spacing: 0
+                    IrisText { text: Qt.locale().toString(DateTime.clock.date, "dddd"); color: widgetsRoot.ink; font.weight: widgetsRoot.weight; font.pixelSize: 15 * IrisStyle.typeScale }
+                    IrisText {
+                        text: Qt.locale().toString(DateTime.clock.date, "hh:mm")
+                        font.family: IrisStyle.fontNumbers
+                        font.weight: widgetsRoot.weight
+                        font.pixelSize: 52 * IrisStyle.typeScale
+                        style: widgetsRoot.clear ? Text.Raised : Text.Normal
+                        styleColor: IrisStyle.plateShadow
+                    }
+                }
+            }
+            Rectangle {
+                visible: widgetsRoot.on
+                x: widgetsRoot.plateX + widgetsRoot.wide + widgetsRoot.gap
+                y: widgetsRoot.plateY
+                width: widgetsRoot.unit
+                height: widgetsRoot.unit
+                radius: widgetsRoot.plateRadius
+                color: widgetsRoot.plateColor
+                border.width: widgetsRoot.clear ? 0 : 1
+                border.color: IrisStyle.rim
+                ColumnLayout {
+                    anchors.fill: parent
+                    anchors.margins: Math.round(18 * root.d)
+                    spacing: Math.round(2 * root.d)
+                    MaterialSymbol { text: Icons.getWeatherIcon(Weather.data?.wCode, Weather.isNightNow()) ?? "cloud"; fill: 1; iconSize: Math.round(30 * root.d); color: widgetsRoot.ink }
+                    Item { Layout.fillHeight: true }
+                    IrisText { text: String(Weather.data?.temp ?? "18°"); font.family: IrisStyle.fontNumbers; font.weight: widgetsRoot.weight; font.pixelSize: 34 * IrisStyle.typeScale }
+                    IrisText { text: Weather.data?.city ?? Translation.tr("Weather"); color: IrisStyle.subtext; elide: Text.ElideRight; Layout.fillWidth: true }
+                }
+            }
+            OffState { visible: !widgetsRoot.on; text: Translation.tr("Desktop widgets off") }
+            Caption {
+                glyph: widgetsRoot.glass ? "blur_on" : widgetsRoot.clear ? "select" : "square"
+                text: !widgetsRoot.on ? ""
+                    : widgetsRoot.glass ? Translation.tr("Frosted wallpaper · darker only where the wallpaper is bright")
+                    : widgetsRoot.clear ? Translation.tr("Bare wallpaper · a veil only where text needs it")
+                    : widgetsRoot.material === "tinted" ? Translation.tr("Black material with a trace of the wallpaper hue")
+                    : Translation.tr("The Island's black material")
             }
         }
     }
@@ -1763,13 +2324,21 @@ ClippingRectangle {
             readonly property real naturalWidth: Math.round(640 * root.d)
             readonly property real naturalHeight: Math.round(280 * root.d)
             readonly property bool reserve: root.opt("iris.bar.reserveSpace", true)
-            readonly property bool bottomEdge: IrisFrame.islandEdge === "bottom"
+            readonly property string edge: IrisFrame.islandEdge
+            readonly property bool bottomEdge: reserveRoot.edge === "bottom"
+            readonly property bool vertical: reserveRoot.edge === "left" || reserveRoot.edge === "right"
             readonly property real islandSpan: IrisFrame.band + IrisFrame.islandMargin + IrisFrame.islandBand
+            function inset(side: string): real {
+                if (side === reserveRoot.edge) return reserveRoot.reserve ? reserveRoot.islandSpan + Math.round(8 * root.d) : IrisFrame.band
+                return Math.round((side === "top" || side === "bottom" ? 24 : 40) * root.d)
+            }
             Rectangle {
-                x: Math.round(40 * root.d)
-                width: parent.width - 2 * x
-                y: reserveRoot.bottomEdge ? Math.round(24 * root.d) : (reserveRoot.reserve ? reserveRoot.islandSpan + Math.round(8 * root.d) : IrisFrame.band)
-                height: parent.height - y - (reserveRoot.bottomEdge ? (reserveRoot.reserve ? reserveRoot.islandSpan + Math.round(8 * root.d) : IrisFrame.band) : Math.round(24 * root.d))
+                x: reserveRoot.inset("left")
+                width: parent.width - x - reserveRoot.inset("right")
+                y: reserveRoot.inset("top")
+                height: parent.height - y - reserveRoot.inset("bottom")
+                Behavior on x { NumberAnimation { duration: IrisStyle.moveDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: IrisStyle.moveCurve } }
+                Behavior on width { NumberAnimation { duration: IrisStyle.moveDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: IrisStyle.moveCurve } }
                 radius: IrisStyle.radiusTile
                 color: IrisStyle.surfaceHigh
                 border.width: 1
@@ -1785,14 +2354,19 @@ ClippingRectangle {
                 Rectangle { x: Math.round(12 * root.d); y: Math.round(56 * root.d); width: parent.width * 0.6; height: Math.round(9 * root.d); radius: height / 2; color: IrisStyle.fillQuiet }
             }
             IslandPill {
-                anchors.horizontalCenter: parent.horizontalCenter
-                y: reserveRoot.bottomEdge ? parent.height - IrisFrame.band - IrisFrame.islandMargin - height : IrisFrame.band + IrisFrame.islandMargin
+                readonly property real inset: IrisFrame.band + IrisFrame.islandMargin
+                vertical: reserveRoot.vertical
+                x: reserveRoot.edge === "left" ? inset : reserveRoot.edge === "right" ? parent.width - inset - width : Math.round((parent.width - width) / 2)
+                y: reserveRoot.edge === "top" ? inset : reserveRoot.bottomEdge ? parent.height - inset - height : Math.round((parent.height - height) / 2)
             }
             Caption {
                 anchors.bottom: reserveRoot.bottomEdge ? undefined : parent.bottom
                 anchors.top: reserveRoot.bottomEdge ? parent.top : undefined
-                glyph: reserveRoot.reserve ? "vertical_align_top" : "layers"
-                text: reserveRoot.reserve ? Translation.tr("Windows start below the Island") : Translation.tr("Windows run under the Island")
+                glyph: !reserveRoot.reserve ? "layers" : reserveRoot.edge === "left" ? "align_horizontal_left"
+                    : reserveRoot.edge === "right" ? "align_horizontal_right" : reserveRoot.bottomEdge ? "vertical_align_bottom" : "vertical_align_top"
+                text: !reserveRoot.reserve ? Translation.tr("Windows run under the Island")
+                    : reserveRoot.vertical ? Translation.tr("Windows start beside the Island")
+                    : reserveRoot.bottomEdge ? Translation.tr("Windows end above the Island") : Translation.tr("Windows start below the Island")
             }
         }
     }

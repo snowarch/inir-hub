@@ -11,13 +11,14 @@ Singleton {
 
     readonly property real strength: Math.max(0, Math.min(1, Number(Config.options?.iris?.appearance?.adaptive ?? 0) / 100))
     readonly property bool active: root.strength > 0 && root.colors.length > 0
+    readonly property bool wanted: Config.options?.panelFamily === "iris"
+    readonly property bool sampled: root.wanted && root.colors.length > 0
 
     readonly property string path: String(Wallpapers.effectiveWallpaperPath ?? "")
-    readonly property bool video: /\.(mp4|webm|mkv|avi|mov)$/i.test(root.path)
 
     ColorQuantizer {
         id: quantizer
-        source: root.strength > 0 && root.path.length > 0 && !root.video ? Qt.resolvedUrl(root.path) : ""
+        source: root.wanted ? Wallpapers.stillUrlFor(root.path) : ""
         depth: 3
         rescaleSize: 32
     }

@@ -25,7 +25,10 @@ Item {
         ? { x: popupColumn.x, y: popupColumn.y, width: popupColumn.width, height: popupColumn.height } : null
     readonly property var options: Config.options?.iris?.notifications ?? ({})
     readonly property var barOptions: Config.options?.iris?.bar ?? ({})
-    readonly property bool barTop: String(root.barOptions?.position ?? "top") === "top"
+    readonly property string islandEdge: IrisFrame.islandEdge
+    readonly property bool barTop: root.islandEdge !== "bottom"
+    readonly property bool islandSide: root.islandEdge === "left" || root.islandEdge === "right"
+    readonly property real sideGap: IrisFrame.clear(root.islandEdge) + Math.round(12 * root.d)
     readonly property var popups: (Notifications.popupList ?? []).slice(-3).reverse()
     readonly property real d: IrisStyle.density
     readonly property real edgeOffset: (Number(root.barOptions?.height ?? 42)
@@ -59,11 +62,11 @@ Item {
 
     ListView {
         id: popupColumn
-        anchors.top: root.barTop ? parent.top : undefined
-        anchors.bottom: root.barTop ? undefined : parent.bottom
-        anchors.horizontalCenter: parent.horizontalCenter
-        anchors.topMargin: root.edgeOffset + IrisFrame.band
-        anchors.bottomMargin: root.edgeOffset + IrisFrame.band
+        x: Math.round(root.islandEdge === "left" ? root.sideGap
+            : root.islandEdge === "right" ? parent.width - width - root.sideGap : (parent.width - width) / 2)
+        y: Math.round(root.islandSide ? IrisFrame.inset("top") + Math.round(12 * root.d)
+            : root.barTop ? root.edgeOffset + IrisFrame.band
+            : parent.height - height - root.edgeOffset - IrisFrame.band)
         verticalLayoutDirection: root.barTop ? ListView.TopToBottom : ListView.BottomToTop
         width: Math.min(root.popupWidth - 16, parent.width - 16)
         height: Math.max(1, popupColumn.contentHeight)
@@ -111,7 +114,7 @@ Item {
             property real leave: 0
             readonly property bool swiped: Math.abs(banner.swipe) > 1
             readonly property real bloom: Math.min(banner.appear, banner.swiped ? 1 : 1 - banner.leave)
-            readonly property bool meltsIntoIsland: root.island !== null
+            readonly property bool meltsIntoIsland: root.island !== null && !root.islandSide
             readonly property real fullHeight: content.implicitHeight + 24 * root.d
 
             property real swipe: 0
