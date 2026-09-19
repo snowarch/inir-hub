@@ -487,8 +487,12 @@ Scope {
                                 readonly property string pieceId: IrisPieces.appPieceId(entry.modelData.appId)
                                 readonly property bool carried: GlobalStates.irisBubbleDrag?.slot === appSlot.pieceId
                                 function primary(): void {
-                                    if ((entry.app.toplevels?.length ?? 0) > 1 && MinimizedWindows.countMinimizedForApp(entry.app.appId) === 0) {
-                                        if (window.menuOpen && window.menuApp === entry.app) { window.menuApp = null; return }
+                                    if ((entry.app.toplevels?.length ?? 0) > 1) {
+                                        if (window.menuOpen && window.menuMode === "windows"
+                                            && window.menuApp?.appId === entry.modelData.appId) {
+                                            window.menuApp = null
+                                            return
+                                        }
                                         window.frozenSlotX = window.pointerSlotX
                                         window.captureMenuAnchor(appIcon)
                                         window.menuMode = "windows"
@@ -832,8 +836,11 @@ Scope {
                                 Accessible.role: Accessible.Button
                                 Accessible.name: String(card.modelData?.title ?? "")
                                 onClicked: {
-                                    if (CompositorService.isNiri && card.modelData?.niriWindowId !== undefined) NiriService.focusWindow(card.modelData.niriWindowId)
-                                    else card.modelData?.activate()
+                                    const id = card.modelData?.niriWindowId
+                                    if (CompositorService.isNiri && id !== undefined) {
+                                        if (MinimizedWindows.isMinimized(id)) MinimizedWindows.restore(id)
+                                        else NiriService.focusWindow(id)
+                                    } else card.modelData?.activate()
                                     GlobalStates.irisDockShown = false
                                     window.menuApp = null
                                 }
