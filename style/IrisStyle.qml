@@ -11,7 +11,63 @@ QtObject {
     readonly property var appearance: root.options?.appearance ?? ({})
 
     readonly property bool island: true
-    readonly property bool cluster: (root.options?.bar?.composition ?? "unified") === "cluster"
+
+    // --- Recompose: one clock for structural change -------------------------
+    // An option that changes what a surface is *made of* (the Island's
+    // composition, its clock, its bubbles, a panel's sections) is never applied
+    // while the shapes are visible: every such value is published here, latched,
+    // and swapped at the bottom of one shared dip. Consumers read the latched
+    // value and multiply their content by `recompose`, so a recomposition is one
+    // transition for the whole family instead of one animation per part racing
+    // the others. Geometry still springs across the swap: the silhouette is
+    // continuous, its contents are replaced (DESIGN §0.4).
+    readonly property var structuralPaths: ["bar.composition", "bar.clockStyle", "bar.trailing",
+        "bar.auxiliary", "bar.pieces", "bar.navItems", "bar.desktopBlocks", "bar.mediaBlocks",
+        "controlCenter.sections", "controlCenter.controls"]
+    function readPath(path: string): var {
+        let node = root.options
+        for (const part of path.split(".")) {
+            if (node === undefined || node === null) return undefined
+            node = node[part]
+        }
+        return node
+    }
+    readonly property var structuralSource: {
+        const out = {}
+        for (const path of root.structuralPaths) {
+            const value = root.readPath(path)
+            out[path] = value === undefined ? null : (Array.isArray(value) ? Array.from(value) : value)
+        }
+        return out
+    }
+    readonly property string structuralKey: JSON.stringify(root.structuralSource)
+    property var structure: root.structuralSource
+    property real recomposeValue: 1
+    readonly property real recompose: root.recomposeValue
+    readonly property bool recomposing: root.recomposeValue < 0.999
+    function structuralValue(path: string, fallback: var): var {
+        const value = root.structure?.[path]
+        return value === undefined || value === null ? fallback : value
+    }
+    onStructuralKeyChanged: {
+        if (!root.motionEnabled) { root.structure = root.structuralSource; return }
+        root.recomposeIn.stop()
+        root.recomposeOut.restart()
+    }
+    readonly property NumberAnimation recomposeOut: NumberAnimation {
+        target: root; property: "recomposeValue"; to: 0
+        duration: root.duration(80); easing.type: Easing.OutQuad
+        onFinished: {
+            root.structure = root.structuralSource
+            root.recomposeIn.restart()
+        }
+    }
+    readonly property NumberAnimation recomposeIn: NumberAnimation {
+        target: root; property: "recomposeValue"; to: 1
+        duration: root.duration(200); easing.type: Easing.BezierSpline; easing.bezierCurve: root.emergeCurve
+    }
+
+    readonly property bool cluster: String(root.structuralValue("bar.composition", "unified")) === "cluster"
 
     readonly property real density: Math.max(0.8, Math.min(1.35, Number(root.appearance?.density ?? 1.0)))
     // Density scales geometry only; type has its own scale.
@@ -24,7 +80,7 @@ QtObject {
     }
     function tweak(name: string, low: real, high: real): real {
         const value = Number(root.theme?.[name] ?? 100)
-        return Math.max(low, Math.min(high, (isNaN(value) ? 100 : value) / 100))
+        return Math.max(low, Math.min(high, (isNaN(value) ? 100 : value) / 100 * IrisMood.factor(name)))
     }
     function surfaceRadius(id: string, fallback: int): int {
         const radius = Number(root.appearance?.surfaces?.[id]?.radius ?? 0)
@@ -50,6 +106,10 @@ QtObject {
             subtext: "#a1a1a6", muted: "#838388", hairline: "#1f1f21", hairlineStrong: "#3a3a3c" },
         crisp: { fill: 1.12, shape: 0.7, textStrong: 0.86, textSecondary: 0.66, textTertiary: 0.42,
             subtext: "#b4b4b9", muted: "#929297", hairline: "#2c2c2e", hairlineStrong: "#545456" },
+        round: { fill: 0.9, shape: 1.5, textStrong: 0.8, textSecondary: 0.6, textTertiary: 0.38,
+            subtext: "#a8a8ad", muted: "#8a8a8f", hairline: "#222224", hairlineStrong: "#404042" },
+        angular: { fill: 1.08, shape: 0.42, textStrong: 0.86, textSecondary: 0.64, textTertiary: 0.42,
+            subtext: "#b0b0b5", muted: "#909095", hairline: "#2a2a2c", hairlineStrong: "#505052" },
         contrast: { fill: 1.6, shape: 1.0, textStrong: 0.94, textSecondary: 0.8, textTertiary: 0.6,
             subtext: "#d1d1d6", muted: "#aeaeb2", hairline: "#3a3a3c", hairlineStrong: "#6c6c70" }
     })
@@ -79,7 +139,13 @@ QtObject {
     }
     readonly property color wallpaperMaterial: root.materialOf(Appearance.wallpaperDominantColor,
         root.materialOf(Appearance.colors.colPrimary, root.materials.graphite))
+    readonly property color themeMaterial: {
+        const background = Qt.color(Appearance.m3colors.m3background)
+        return background.hslLightness <= 0.2 ? Qt.rgba(background.r, background.g, background.b, 1)
+            : root.materialOf(Appearance.colors.colPrimary, root.materials.graphite)
+    }
     function materialSwatch(name: string): color {
+        if (name === "theme") return root.themeMaterial
         return name === "wallpaper" ? root.wallpaperMaterial : (root.materials[name] ?? root.materials.black)
     }
     readonly property color surfaceOpaque: root.materialSwatch(root.theme?.surface ?? "black")
@@ -105,11 +171,13 @@ QtObject {
         return Qt.hsla(c.hslHue, Math.max(0.42, Math.min(0.8, c.hslSaturation)),
             Math.max(0.72, Math.min(0.82, c.hslLightness)), 1)
     }
+    readonly property color themeAccent: root.legibleAccent(Appearance.colors.colPrimary, "#a8c7fa")
     readonly property var accents: ({ blue: "#a8c7fa", mint: "#8de0bd", rose: "#ffb2c4", lilac: "#d2baff" })
     readonly property var highlights: ({ orange: "#ff9f0a", yellow: "#ffd60a", red: "#ff6961", pink: "#ff6482", green: "#30d158" })
     readonly property color accent: {
         const choice = root.appearance?.accent ?? "blue"
-        if (choice === "wallpaper") return root.legibleAccent(Appearance.colors.colPrimary, root.accents.blue)
+        if (choice === "theme") return root.themeAccent
+        if (choice === "wallpaper") return root.legibleAccent(Appearance.wallpaperDominantColor, root.themeAccent)
         if (choice === "custom") return Qt.hsla(root.hueOf("accentHue", 212), 0.7, 0.78, 1)
         return root.accents[choice] ?? root.accents.blue
     }
@@ -125,6 +193,7 @@ QtObject {
     readonly property color secondaryAccent: {
         const choice = root.appearance?.highlight ?? "orange"
         if (choice === "accent") return root.accent
+        if (choice === "theme") return root.vividHighlight(Appearance.colors.colTertiary, root.highlights.orange)
         if (choice === "custom") return Qt.hsla(root.hueOf("highlightHue", 32), 0.92, 0.58, 1)
         if (choice === "wallpaper") return root.vividHighlight(Appearance.colors.colSecondary,
             root.vividHighlight(Appearance.wallpaperDominantColor, root.highlights.orange))
@@ -215,6 +284,9 @@ QtObject {
     readonly property color onMediaFill: ColorUtils.applyAlpha(root.onMedia, 0.2)
     readonly property color onMediaFillHover: ColorUtils.applyAlpha(root.onMedia, 0.3)
     readonly property color mediaScrim: Qt.rgba(0, 0, 0, 0.34)
+    readonly property color plateShadow: Qt.rgba(0, 0, 0, Math.min(0.9, 0.36 * root.tweak("shadow", 0, 1.6)))
+    function skyWash(light: color): color { return ColorUtils.applyAlpha(light, 0.46) }
+    function skyWashFade(light: color): color { return ColorUtils.applyAlpha(light, 0.05) }
 
     readonly property QtObject identity: QtObject {
         readonly property color blue: "#0a84ff"
@@ -231,6 +303,8 @@ QtObject {
         readonly property color gray: "#8e8e93"
     }
 
+    function identityColor(name: string): color { return root.identity[name] ?? root.identity.lavender }
+
     readonly property real shapeScale: root.preset.shape * root.tweak("shape", 0.3, 1.6)
     function corner(px: real): int { return Math.max(2, Math.round(px * root.shapeScale * root.density)) }
     readonly property int radiusPanel: root.corner(30)   // Control Center, Settings frame
@@ -243,9 +317,17 @@ QtObject {
     readonly property int radiusMicro: root.corner(4)    // bars inside skeletons, swatches
     readonly property int fuse: Math.max(2, Math.round(8 * root.density * root.tweak("melt", 0, 2)))
     readonly property int fuseDeep: Math.max(4, Math.round(30 * root.density * root.tweak("melt", 0, 2)))
-    readonly property int fuseEdge: Math.max(8, Math.round(56 * root.density
+    readonly property real islandBandScale: Math.max(32, Math.min(64, Number(root.options?.bar?.height ?? 42))) / 42
+    readonly property int fuseEdge: Math.max(8, Math.round(56 * root.density * root.islandBandScale
         * Math.max(0.2, Math.min(2, Number(root.options?.bar?.notchCurve ?? 100) / 100))))
     readonly property int weld: Math.max(2, Math.round(3 * root.density))
+    readonly property string pieceShape: String(root.theme?.pieceShape ?? "circle")
+    function pieceRadius(size: real): real {
+        const half = size / 2
+        if (root.pieceShape === "squircle") return Math.min(half, size * 0.34 * Math.max(0.6, root.shapeScale))
+        if (root.pieceShape === "square") return Math.min(half, size * 0.22 * Math.max(0.6, root.shapeScale))
+        return half
+    }
     function iconRadius(size: real): int { return Math.round(size * 0.26 * Math.min(1.2, root.shapeScale)) }
 
     readonly property real panelPadding: Math.round(24 * root.density)
@@ -262,7 +344,7 @@ QtObject {
         return root.motionEnabled ? Appearance.calcEffectiveDuration(ms) : 0
     }
 
-    readonly property var curves: ({ expressive: [0.16, 1, 0.3, 1], standard: [0.2, 0, 0, 1], gentle: [0.4, 0, 0.2, 1], swift: [0.3, 0.9, 0.2, 1] })
+    readonly property var curves: ({ expressive: [0.16, 1, 0.3, 1], standard: [0.2, 0, 0, 1], gentle: [0.4, 0, 0.2, 1], swift: [0.3, 0.9, 0.2, 1], fold: [0.3, 0, 0.2, 1] })
     readonly property var directCurve: {
         const name = String(root.theme?.curve ?? "expressive")
         if (name !== "custom") return root.curves[name] ?? root.curves.expressive
@@ -271,23 +353,28 @@ QtObject {
         return [at(0, 0, 1, 0.16), at(1, -0.5, 1.5, 1), at(2, 0, 1, 0.3), at(3, -0.5, 1.5, 1)]
     }
     readonly property var morphStyles: ({
-        direct: { curve: true, emerge: { response: 1.8 }, recede: { response: 1.8 }, move: { response: 1 },
-            rise: 0.55, span: 0.35, exitRise: 0.5, exitSpan: 0.35, fall: 0.12, reveal: "curtain" },
+        direct: { curve: true, emerge: { response: 1.8 }, recede: { response: 1.2, curve: "fold" }, move: { response: 1 },
+            rise: 0.3, span: 0.35, fall: 0.12, reveal: "drop" },
         liquid: { emerge: { response: 1.9, bounce: 0.22 }, recede: { response: 1.3, bounce: 0 }, move: { response: 1.15, bounce: 0.08 },
-            rise: 0.34, span: 0.42, exitRise: 0.22, exitSpan: 0.4, fall: 0.24, reveal: "curtain" },
+            rise: 0.34, span: 0.42, fall: 0.24, reveal: "drop" },
         glide: { emerge: { response: 2.1, bounce: 0 }, recede: { response: 1.5, bounce: 0 }, move: { response: 1.35, bounce: 0 },
-            rise: 0.3, span: 0.5, exitRise: 0.2, exitSpan: 0.44, fall: 0.28, reveal: "curtain" },
+            rise: 0.3, span: 0.5, fall: 0.28, reveal: "drop" },
         snap: { emerge: { response: 1.25, bounce: 0.06 }, recede: { response: 0.95, bounce: 0 }, move: { response: 0.85, bounce: 0 },
-            rise: 0.18, span: 0.34, exitRise: 0.14, exitSpan: 0.3, fall: 0.2, reveal: "fade" },
+            rise: 0.18, span: 0.34, fall: 0.2, reveal: "fade" },
         elastic: { emerge: { response: 2.2, bounce: 0.34 }, recede: { response: 1.4, bounce: 0 }, move: { response: 1.5, bounce: 0.24 },
-            rise: 0.36, span: 0.4, exitRise: 0.24, exitSpan: 0.42, fall: 0.28, reveal: "inflate" },
+            rise: 0.36, span: 0.4, fall: 0.28, reveal: "inflate" },
         instant: { emerge: { response: 1, bounce: 0 }, recede: { response: 1, bounce: 0 }, move: { response: 1, bounce: 0 },
-            rise: 0.01, span: 0.01, exitRise: 0.01, exitSpan: 0.01, fall: 0.01, reveal: "fade" }
+            rise: 0.01, span: 0.01, fall: 0.01, reveal: "fade" }
     })
     readonly property string morphName: root.morphStyles[root.appearance?.morph ?? ""] ? root.appearance.morph : "direct"
     readonly property var morph: root.morphStyles[root.morphName]
 
     readonly property string revealName: String(root.morph?.reveal ?? "curtain")
+    readonly property real absorbShare: 0.55
+    readonly property real pullLag: 1.8
+    readonly property real dropRise: Math.max(0, Math.min(0.7, 0.06 + 0.4 * (root.tweak("contentTiming", 0.3, 1.7) - 1)))
+    readonly property real dropSpan: 0.3
+    readonly property bool revealDrops: root.revealName === "drop" && root.motionEnabled
     readonly property bool revealInflates: root.revealName === "inflate" && root.motionEnabled
     readonly property bool revealFades: root.revealName === "fade" || !root.motionEnabled
 
@@ -295,7 +382,7 @@ QtObject {
     function resolveSpring(entry: var, fallbackResponse: real, timeTweak: string): var {
         const response = Math.round(root.baseDuration * Math.max(0.2, Number(entry?.response ?? fallbackResponse)) * root.tweak(timeTweak, 0.4, 2.5))
         const bounce = Number(entry?.bounce ?? 0) * root.tweak("bounce", 0, 2)
-        const curve = root.morph?.curve ? root.directCurve : null
+        const curve = !root.morph?.curve ? null : entry?.curve ? root.curves[entry.curve] : root.directCurve
         return { response: root.duration(response), bounce: curve ? 0 : Math.max(0, Math.min(0.6, bounce)), curve: curve }
     }
     readonly property var emergeSpring: root.resolveSpring(root.morph?.emerge, 1.9, "openTime")
@@ -374,13 +461,12 @@ QtObject {
     readonly property real contentRise: Math.min(0.95, Number(root.morph?.rise ?? 0.34) * root.tweak("contentTiming", 0.3, 1.7))
     readonly property real contentSpan: Math.max(0.01, Number(root.morph?.span ?? 0.42))
     readonly property real contentFall: Math.max(0.02, Number(root.morph?.fall ?? 0.24))
-    readonly property real contentExitRise: Math.min(0.95, Number(root.morph?.exitRise ?? 0.22) * root.tweak("contentTiming", 0.3, 1.7))
-    readonly property real contentExitSpan: Math.max(0.01, Number(root.morph?.exitSpan ?? 0.4))
     function ramp(t: real, rise: real, span: real): real {
         return Math.max(0, Math.min(1, (t - rise) / Math.max(0.01, span)))
     }
     function contentAt(t: real): real { return root.ramp(t, root.contentRise, root.contentSpan) }
-    function contentLeaving(t: real): real { return root.ramp(t, root.contentExitRise, root.contentExitSpan) }
+    // A floating body's shadow arrives with its settle, never under a shape that is still growing.
+    function shadowAt(t: real): real { return Math.pow(Math.max(0, Math.min(1, t)), 4) }
 
     readonly property int morphDuration: root.moveDuration
     readonly property int settleDuration: root.emergeDuration
