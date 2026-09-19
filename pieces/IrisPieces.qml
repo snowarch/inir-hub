@@ -31,7 +31,16 @@ QtObject {
         { id: "mic", label: "Microphone", description: "Input level as a ring; scroll to change it. Its card holds the inputs.", card: true },
         { id: "tools", label: "Timers", description: "Countdown presets, Focus and the stopwatch.", card: true },
         { id: "media", label: "Now playing", description: "The cover while something plays; opens its card.", card: true },
-        { id: "tray", label: "Tray", description: "How many tray apps are running, and the apps themselves.", card: true }
+        { id: "tray", label: "Tray", description: "How many tray apps are running, and the apps themselves.", card: true },
+        { id: "calendar", label: "Calendar", description: "Today's weekday over the date; its card holds the month and what is coming up.", card: true },
+        { id: "clock", label: "Clock", description: "An analog face; opens the Desktop page.", card: false },
+        { id: "battery", label: "Battery", description: "Charge as a ring that turns orange and red as it runs low; a bolt while charging.", card: false },
+        { id: "focus", label: "Do Not Disturb", description: "A moon that silences notifications with a tap.", card: false },
+        { id: "network", label: "Network", description: "The link you are on as a signal arc; its card holds the networks.", card: true },
+        { id: "bluetooth", label: "Bluetooth", description: "What is connected; its card holds the devices.", card: true },
+        { id: "vitals", label: "Vitals", description: "The load as a ring; its card holds processor, memory, heat and disk.", card: true },
+        { id: "workspaces", label: "Workspaces", description: "This output's workspaces; tap for Overview or a workspace card.", card: true },
+        { id: "updates", label: "Updates", description: "How many packages are waiting; its card checks and opens them.", card: true }
     ]
     readonly property var slotIds: root.slots.map(piece => piece.id)
     readonly property var extraIds: root.extras.map(piece => piece.id)
@@ -46,6 +55,9 @@ QtObject {
     function available(id: string): bool {
         if (id === "media") return root.hasPlayer
         if (id === "tray") return root.trayCount > 0
+        if (id === "battery") return Battery.available
+        if (id === "bluetooth") return BluetoothStatus.available
+        if (id === "updates") return Updates.available
         return root.extraIds.includes(id)
     }
 
@@ -55,6 +67,12 @@ QtObject {
     function isApp(id: string): bool { return id.startsWith(root.appPrefix) }
     function appIdOf(id: string): string { return id.slice(root.appPrefix.length) }
     function appPieceId(appId: string): string { return root.appPrefix + appId }
+    function appIcon(appId: string): string {
+        const id = String(appId ?? "")
+        const entry = AppSearch.lookupDesktopEntry(id)
+        const icon = entry?.icon || AppSearch.guessIcon(id)
+        return IconThemeService.smartIconName(icon, id)
+    }
     function appEntry(appId: string): var { return root.apps.find(entry => entry && entry.appId === appId) ?? null }
     function appPieceIds(): var {
         return root.apps.filter(entry => entry && String(entry.appId ?? "").length > 0)

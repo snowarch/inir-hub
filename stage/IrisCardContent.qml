@@ -4,6 +4,7 @@ import QtQuick
 import QtQuick.Layouts
 import Quickshell
 import Quickshell.Services.SystemTray
+import Quickshell.Bluetooth
 import Quickshell.Widgets
 import qs
 import qs.services
@@ -12,17 +13,20 @@ import qs.modules.common.functions
 import qs.modules.common.widgets
 import qs.modules.iris.style
 import qs.modules.iris.components
+import qs.modules.iris.pieces
 import qs.modules.iris.bar
+import qs.modules.iris.bar.island
 import qs.modules.iris.sidebar
 
 Item {
     id: root
 
     property string kind: ""
+    property string screenName: ""
     property bool contentActive: true
     readonly property real d: IrisStyle.density
     readonly property bool bleeds: root.kind === "weather" || root.kind === "notifications"
-        || root.kind === "media"
+        || root.kind === "media" || root.kind === "calendar"
     readonly property real contentHeight: body.item?.implicitHeight ?? 0
     readonly property color light: {
         switch (root.kind) {
@@ -31,7 +35,13 @@ Item {
         case "mic": return IrisStyle.identity.orange
         case "tools": return IrisStyle.secondaryAccent
         case "tray": return IrisStyle.identity.teal
+        case "calendar": return IrisStyle.identity.red
         case "media": return "transparent"
+        case "network": return IrisStyle.identity.blue
+        case "bluetooth": return IrisStyle.identity.sky
+        case "vitals": return IrisStyle.identity.teal
+        case "workspaces": return IrisStyle.identity.purple
+        case "updates": return IrisStyle.secondaryAccent
         default: return IrisStyle.wallpaperLight
         }
     }
@@ -48,11 +58,17 @@ Item {
             switch (root.kind) {
             case "weather": return weatherCard
             case "notifications": return notificationsCard
+            case "calendar": return calendarCard
             case "sound": return soundCard
             case "mic": return micCard
             case "tools": return toolsCard
             case "tray": return trayCard
             case "media": return mediaCard
+            case "network": return networkCard
+            case "bluetooth": return bluetoothCard
+            case "vitals": return vitalsCard
+            case "workspaces": return workspacesCard
+            case "updates": return updatesCard
             default: return null
             }
         }
@@ -106,6 +122,135 @@ Item {
     }
 
     readonly property var cardOptions: Config.options?.iris?.appearance?.surfaces?.cards ?? ({})
+    component ColumnStrip: Item {
+        id: strip
+        property int workspaceId: -1
+        property var windows: []
+        property bool active: false
+        readonly property real outputWidth: Math.max(1, Number(NiriService.outputs?.[root.screenName]?.logical?.width ?? 1920))
+        readonly property real unit: strip.width / strip.outputWidth
+        readonly property real gap: Math.round(4 * root.d)
+        readonly property var floating: strip.windows.filter(window => window.workspace_id === strip.workspaceId && window.is_floating)
+        readonly property var columns: {
+            const grouped = {}
+            for (const window of strip.windows) {
+                if (window.workspace_id !== strip.workspaceId || window.is_floating) continue
+                const pos = window.layout?.pos_in_scrolling_layout
+                const column = Array.isArray(pos) ? Number(pos[0]) : 1
+                if (!grouped[column]) grouped[column] = { index: column, width: 0, tiles: [] }
+                const size = window.layout?.tile_size
+                grouped[column].width = Math.max(grouped[column].width, Array.isArray(size) ? Number(size[0]) : strip.outputWidth / 2)
+                grouped[column].tiles.push({ window: window, row: Array.isArray(pos) ? Number(pos[1]) : 1 })
+            }
+            const list = Object.values(grouped).sort((a, b) => a.index - b.index)
+            let x = 0
+            for (const column of list) {
+                column.tiles.sort((a, b) => a.row - b.row)
+                column.focused = column.tiles.some(tile => tile.window.is_focused)
+                column.x = x
+                column.w = Math.max(Math.round(30 * root.d), column.width * strip.unit - strip.gap)
+                x += column.w + strip.gap
+            }
+            return list
+        }
+        readonly property real total: strip.columns.length > 0
+            ? strip.columns[strip.columns.length - 1].x + strip.columns[strip.columns.length - 1].w : 0
+        readonly property real offset: {
+            if (strip.total <= strip.width) return 0
+            const focus = strip.columns.find(column => column.focused) ?? strip.columns[strip.columns.length - 1]
+            return Math.max(0, Math.min(strip.total - strip.width, focus.x + focus.w - strip.width))
+        }
+        clip: true
+
+        Rectangle {
+            anchors.fill: parent
+            radius: IrisStyle.radiusRow
+            color: IrisStyle.fillQuiet
+            visible: strip.columns.length === 0
+            IrisText {
+                anchors.centerIn: parent
+                text: Translation.tr("Empty")
+                role: IrisText.Meta
+            }
+        }
+        Repeater {
+            model: strip.columns
+            Item {
+                id: columnItem
+                required property var modelData
+                x: columnItem.modelData.x - strip.offset
+                width: columnItem.modelData.w
+                height: strip.height
+                Behavior on x { NumberAnimation { duration: IrisStyle.moveDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: IrisStyle.moveCurve } }
+                Repeater {
+                    model: columnItem.modelData.tiles
+                    MouseArea {
+                        id: tileTap
+                        required property var modelData
+                        required property int index
+                        readonly property int count: columnItem.modelData.tiles.length
+                        readonly property bool focused: tileTap.modelData.window.is_focused ?? false
+                        x: 0
+                        y: tileTap.index * (strip.height + strip.gap) / tileTap.count
+                        width: columnItem.width
+                        height: (strip.height + strip.gap) / tileTap.count - strip.gap
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        Accessible.role: Accessible.Button
+                        Accessible.name: String(tileTap.modelData.window.title ?? tileTap.modelData.window.app_id ?? "")
+                        onClicked: { root.close(); NiriService.focusWindow(tileTap.modelData.window.id) }
+                        Rectangle {
+                            anchors.fill: parent
+                            radius: Math.min(IrisStyle.radiusRow, height / 2)
+                            color: tileTap.focused ? IrisStyle.tintFill(IrisStyle.accent)
+                                : tileTap.containsMouse ? IrisStyle.fillHover : IrisStyle.fill
+                            border.width: tileTap.focused ? 1 : 0
+                            border.color: IrisStyle.accent
+                            Behavior on color { ColorAnimation { duration: IrisStyle.duration(110); easing.type: IrisStyle.feedbackEasing } }
+                            Row {
+                                anchors.centerIn: parent
+                                spacing: Math.round(6 * root.d)
+                                SmartAppIcon {
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    icon: IrisPieces.appIcon(String(tileTap.modelData.window.app_id ?? ""))
+                                    fallback: "application-x-executable"
+                                    iconSize: Math.max(10, Math.min(Math.round(22 * root.d), tileTap.height - Math.round(8 * root.d), tileTap.width - Math.round(8 * root.d)))
+                                }
+                                IrisText {
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    visible: tileTap.width > Math.round(96 * root.d)
+                                    width: Math.min(implicitWidth, tileTap.width - Math.round(44 * root.d))
+                                    text: AppSearch.lookupDesktopEntry(String(tileTap.modelData.window.app_id ?? ""))?.name
+                                        ?? String(tileTap.modelData.window.app_id ?? "")
+                                    font.pixelSize: 11 * IrisStyle.typeScale
+                                    color: tileTap.focused ? IrisStyle.text : IrisStyle.subtext
+                                    elide: Text.ElideRight
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        Rectangle {
+            visible: strip.floating.length > 0
+            anchors.right: parent.right
+            anchors.top: parent.top
+            anchors.margins: Math.round(3 * root.d)
+            implicitWidth: floatingLabel.implicitWidth + Math.round(12 * root.d)
+            implicitHeight: Math.round(18 * root.d)
+            radius: height / 2
+            color: IrisStyle.surfaceHighOpaque
+            IrisText {
+                id: floatingLabel
+                anchors.centerIn: parent
+                text: Translation.tr("%1 floating").arg(strip.floating.length)
+                font.pixelSize: 10 * IrisStyle.typeScale
+                color: IrisStyle.subtext
+            }
+        }
+    }
+
     component LevelCard: ColumnLayout {
         id: level
         property bool input: false
@@ -153,6 +298,10 @@ Item {
     Component {
         id: notificationsCard
         SectionCard { kind: "notifications" }
+    }
+    Component {
+        id: calendarCard
+        SectionCard { kind: "calendar" }
     }
     Component {
         id: soundCard
@@ -207,6 +356,224 @@ Item {
     }
 
     Component {
+        id: networkCard
+        ColumnLayout {
+            spacing: 10 * root.d
+            CardHeader {
+                glyph: Network.ethernet ? "lan" : Network.wifiEnabled ? "wifi" : "wifi_off"
+                tint: IrisStyle.identity.blue
+                title: Translation.tr("Network")
+                detail: Network.ethernet ? Translation.tr("Ethernet")
+                    : !Network.wifiEnabled ? Translation.tr("Wi-Fi off")
+                    : Network.networkName.length > 0 ? Network.networkName : Translation.tr("Not connected")
+                IrisIconButton {
+                    materialIcon: "refresh"
+                    enabled: Network.wifiEnabled
+                    Accessible.name: Translation.tr("Scan for networks")
+                    onClicked: Network.rescanWifi()
+                }
+                IrisIconButton {
+                    materialIcon: Network.wifiEnabled ? "wifi" : "wifi_off"
+                    selected: Network.wifiEnabled
+                    Accessible.name: Translation.tr("Wi-Fi")
+                    onClicked: Network.toggleWifi()
+                }
+            }
+            IrisNetworkList {
+                Layout.fillWidth: true
+                Layout.leftMargin: -6 * root.d
+                Layout.rightMargin: -6 * root.d
+            }
+        }
+    }
+    Component {
+        id: bluetoothCard
+        ColumnLayout {
+            spacing: 10 * root.d
+            CardHeader {
+                glyph: BluetoothStatus.enabled ? "bluetooth" : "bluetooth_disabled"
+                tint: IrisStyle.identity.sky
+                title: Translation.tr("Bluetooth")
+                detail: BluetoothStatus.activeDeviceSummary() || (BluetoothStatus.enabled
+                    ? Translation.tr("Nothing connected") : Translation.tr("Off"))
+                IrisIconButton {
+                    materialIcon: BluetoothStatus.enabled ? "bluetooth" : "bluetooth_disabled"
+                    selected: BluetoothStatus.enabled
+                    enabled: BluetoothStatus.available
+                    Accessible.name: Translation.tr("Bluetooth")
+                    onClicked: if (Bluetooth.defaultAdapter) Bluetooth.defaultAdapter.enabled = !Bluetooth.defaultAdapter.enabled
+                }
+            }
+            IrisBluetoothList {
+                Layout.fillWidth: true
+                Layout.leftMargin: -6 * root.d
+                Layout.rightMargin: -6 * root.d
+            }
+        }
+    }
+    Component {
+        id: vitalsCard
+        ColumnLayout {
+            id: vitalsBody
+            spacing: 10 * root.d
+            ResourceUsageMonitor { target: vitalsBody; active: root.contentActive }
+            CardHeader {
+                glyph: "monitoring"
+                tint: IrisStyle.identity.teal
+                title: Translation.tr("Vitals")
+                detail: Translation.tr("What this machine is doing")
+            }
+            Repeater {
+                model: [
+                    { label: Translation.tr("Processor"), glyph: "memory", level: ResourceUsage.cpuUsage, value: Math.round(ResourceUsage.cpuUsage * 100), unit: "%", warn: 0.85 },
+                    { label: Translation.tr("Memory"), glyph: "memory_alt", level: ResourceUsage.memoryUsedPercentage, value: Math.round(ResourceUsage.memoryUsedPercentage * 100), unit: "%", warn: 0.85 },
+                    { label: Translation.tr("Heat"), glyph: "device_thermostat", level: ResourceUsage.tempPercentage, value: ResourceUsage.maxTemp, unit: "°", warn: ResourceUsage.tempWarningThreshold / 100 },
+                    { label: Translation.tr("Disk"), glyph: "hard_drive", level: ResourceUsage.diskUsedPercentage, value: Math.round(ResourceUsage.diskUsedPercentage * 100), unit: "%", warn: 0.9 }
+                ]
+                RowLayout {
+                    id: vital
+                    required property var modelData
+                    readonly property real level: Math.max(0, Math.min(1, Number(vital.modelData.level) || 0))
+                    readonly property color tint: vital.level >= vital.modelData.warn ? IrisStyle.danger : IrisStyle.accent
+                    Layout.fillWidth: true
+                    spacing: 10 * root.d
+                    Accessible.name: vital.modelData.label + ", " + vital.modelData.value + vital.modelData.unit
+                    Item {
+                        Layout.preferredWidth: Math.round(30 * root.d)
+                        Layout.preferredHeight: Layout.preferredWidth
+                        ProgressRing {
+                            anchors.fill: parent
+                            stroke: Math.max(2, 2.4 * root.d)
+                            tint: vital.tint
+                            progress: vital.level
+                            Behavior on progress { NumberAnimation { duration: IrisStyle.morphDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: IrisStyle.moveCurve } }
+                        }
+                        MaterialSymbol {
+                            anchors.centerIn: parent
+                            text: vital.modelData.glyph
+                            fill: 1
+                            iconSize: Math.round(13 * root.d)
+                            color: vital.tint
+                        }
+                    }
+                    IrisText {
+                        Layout.fillWidth: true
+                        text: vital.modelData.label
+                        elide: Text.ElideRight
+                    }
+                    Metric {
+                        value: vital.modelData.value
+                        unit: vital.modelData.unit
+                        pixelSize: 15 * IrisStyle.typeScale
+                        weight: Font.Bold
+                        color: vital.tint
+                    }
+                }
+            }
+        }
+    }
+    Component {
+        id: workspacesCard
+        ColumnLayout {
+            id: workspaceBody
+            readonly property var workspaces: (NiriService.allWorkspaces ?? [])
+                .filter(ws => ws.output === root.screenName)
+                .slice().sort((a, b) => Number(a.idx ?? 0) - Number(b.idx ?? 0))
+            readonly property var windows: (NiriService.windows ?? [])
+                .filter(window => workspaceBody.workspaces.some(ws => ws.id === window.workspace_id))
+            spacing: 10 * root.d
+            CardHeader {
+                glyph: "grid_view"
+                tint: IrisStyle.identity.purple
+                title: Translation.tr("Workspaces")
+                detail: Translation.tr("%1 workspaces · %2 windows").arg(workspaceBody.workspaces.length).arg(workspaceBody.windows.length)
+                IrisIconButton {
+                    materialIcon: "space_dashboard"
+                    Accessible.name: Translation.tr("Open overview")
+                    onClicked: { root.close(); NiriService.toggleOverview() }
+                }
+            }
+            Repeater {
+                model: workspaceBody.workspaces
+                RowLayout {
+                    id: workspaceRow
+                    required property var modelData
+                    Layout.fillWidth: true
+                    spacing: 8 * root.d
+                    Rectangle {
+                        Layout.preferredWidth: Math.round(44 * root.d)
+                        Layout.preferredHeight: Layout.preferredWidth
+                        radius: IrisStyle.iconRadius(width)
+                        color: workspaceRow.modelData.is_active ? IrisStyle.tintFill(IrisStyle.accent) : IrisStyle.fillQuiet
+                        border.width: workspaceRow.modelData.is_active ? 0 : 1
+                        border.color: IrisStyle.border
+                        IrisText {
+                            anchors.centerIn: parent
+                            text: workspaceRow.modelData.idx ?? "–"
+                            color: workspaceRow.modelData.is_active ? IrisStyle.accent : IrisStyle.text
+                            font.family: IrisStyle.fontNumbers
+                            font.features: ({ "tnum": 1 })
+                            font.pixelSize: 14 * IrisStyle.typeScale
+                            font.weight: Font.Bold
+                        }
+                        MouseArea {
+                            anchors.fill: parent
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: {
+                                root.close()
+                                NiriService.switchToWorkspaceById(workspaceRow.modelData.id)
+                            }
+                        }
+                    }
+                    ColumnStrip {
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: Math.round(44 * root.d)
+                        workspaceId: workspaceRow.modelData.id
+                        windows: workspaceBody.windows
+                        active: workspaceRow.modelData.is_active ?? false
+                    }
+                }
+            }
+        }
+    }
+    Component {
+        id: updatesCard
+        ColumnLayout {
+            spacing: 10 * root.d
+            CardHeader {
+                glyph: Updates.count > 0 ? "deployed_code_update" : "task_alt"
+                tint: Updates.count > 0 ? IrisStyle.secondaryAccent : IrisStyle.identity.green
+                title: Translation.tr("Updates")
+                detail: Updates.count > 0
+                    ? Translation.tr("%1 packages waiting").arg(Updates.count)
+                    : Translation.tr("Everything is up to date")
+                IrisIconButton {
+                    materialIcon: "refresh"
+                    Accessible.name: Translation.tr("Check again")
+                    onClicked: Updates.refresh()
+                }
+            }
+            IrisNumber {
+                Layout.alignment: Qt.AlignHCenter
+                text: Updates.count
+                pixelSize: 44 * IrisStyle.typeScale
+                weight: Font.Bold
+                color: Updates.count > 0 ? IrisStyle.secondaryAccent : IrisStyle.identity.green
+            }
+            IrisButton {
+                Layout.fillWidth: true
+                visible: Updates.count > 0
+                text: Translation.tr("Update now")
+                buttonRadius: IrisStyle.radiusTile
+                implicitHeight: Math.round(38 * root.d)
+                onClicked: {
+                    root.close()
+                    ShellExec.execCmd(Config.options?.apps?.update ?? "kitty -e sudo pacman -Syu")
+                }
+            }
+        }
+    }
+    Component {
         id: mediaCard
         Item {
             id: player
@@ -229,7 +596,8 @@ Item {
                 return Qt.hsla(best.hslHue, Math.max(0.5, best.hslSaturation),
                     Math.max(0.64, Math.min(0.76, best.hslLightness + 0.22)), 1)
             }
-            implicitHeight: card.implicitHeight
+            readonly property real frameInset: IrisStyle.radiusSheet - IrisStyle.radiusCard
+            implicitHeight: card.implicitHeight + player.frameInset * 2
             Loader {
                 anchors.fill: parent
                 active: (Config.options?.iris?.player?.artworkBackground ?? true)
@@ -246,11 +614,18 @@ Item {
                     }
                 }
             }
+            Rectangle {
+                id: playerFrame
+                anchors.fill: parent
+                anchors.margins: player.frameInset
+                radius: IrisStyle.radiusCard
+                color: IrisStyle.fillQuiet
+            }
             IrisMediaCard {
                 id: card
-                anchors.left: parent.left
-                anchors.right: parent.right
-                anchors.top: parent.top
+                anchors.left: playerFrame.left
+                anchors.right: playerFrame.right
+                anchors.top: playerFrame.top
                 showBackground: false
                 active: root.contentActive
                 tint: player.tint

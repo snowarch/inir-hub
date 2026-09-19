@@ -8,10 +8,12 @@ import qs
 import qs.services
 import qs.modules.common
 import qs.modules.common.functions
+import qs.modules.common.widgets
 import qs.modules.iris.style
 import qs.modules.iris.components
 import qs.modules.iris.frame
 import qs.modules.iris.pieces
+import qs.modules.settings
 
 Item {
     id: root
@@ -231,36 +233,34 @@ Item {
         void (card.x + card.y + card.width + card.height + card.progress)
         const out = []
         const edge = root.attached ? "frame" : ""
-        const edgeFuse = root.attached && IrisFrame.islandMargin === 0 ? IrisStyle.fuseEdge : IrisStyle.fuse
+        const edgeFuse = IrisStyle.fuse
         for (const plate of root.plates) {
             out.push({ x: plate.x, y: plate.y, width: plate.width, height: plate.height,
-                radius: Math.min(plate.width, plate.height) / 2, fuse: edgeFuse, id: "plate:" + plate.zone, joins: edge })
+                radius: IrisStyle.pieceRadius(Math.min(plate.width, plate.height)), fuse: edgeFuse, id: "plate:" + plate.zone, joins: edge })
         }
         for (let i = 0; i < root.allSlots.length; i++) {
             const slot = root.allSlots[i]
             const rect = root.rects[i]
             if (!rect || root.plateAt(root.placeName(slot))) continue
             if (root.drag?.slot === slot || (landing.running && landing.slot === slot)) continue
-            out.push({ x: rect.x, y: rect.y, width: rect.size, height: rect.size, radius: rect.size / 2,
+            out.push({ x: rect.x, y: rect.y, width: rect.size, height: rect.size, radius: IrisStyle.pieceRadius(rect.size),
                 fuse: root.placeName(slot) === "free" ? IrisStyle.fuse : edgeFuse,
                 id: "piece:" + slot, joins: root.placeName(slot) === "free" ? "" : edge })
         }
         if (carried.shown && !root.carryingIsland) {
             const size = root.size * carried.scale
             out.push({ x: carried.px - size / 2, y: carried.py - size / 2,
-                width: size, height: size, radius: size / 2 })
+                width: size, height: size, radius: IrisStyle.pieceRadius(size) })
         }
         if (root.cardPresent && card.width > 1) {
             const body = card.bodyRect
             if (body.width > 1 && body.height > 1) {
+                const joinOrigin = Config.options?.iris?.appearance?.surfaces?.cards?.joinOrigin ?? true
+                const joinRise = joinOrigin && root.cardOriginId.length > 0
+                    ? IrisStyle.ramp(card.progress, 0.08, 0.3) : 0
                 out.push({ x: body.x, y: body.y, width: body.width, height: body.height,
-                    radius: body.radius, paints: true, fuse: IrisStyle.fuseDeep, id: "card",
-                    joins: root.cardHangs ? "island" : "" })
-                const neck = root.cardHangs || root.cardOriginId.length === 0 || !root.cardPlacement ? null
-                    : IrisFrame.neck(root.cardOrigin, root.cardPlacement, body, card.progress)
-                if (neck && neck.width > 0 && neck.height > 0)
-                    out.push({ x: neck.x, y: neck.y, width: neck.width, height: neck.height, radius: 0,
-                        fuse: IrisFrame.neckFuse, id: "neck", joins: [root.cardOriginId, "card"] })
+                    radius: body.radius, paints: true, fuse: Math.round(IrisStyle.fuseDeep * joinRise), id: "card",
+                    joins: joinRise > 0 ? root.cardOriginId : "" })
             }
         }
         return out
@@ -429,6 +429,7 @@ Item {
         IrisBubbleFace {
             bodyless: true
             anchors.fill: parent
+            screenName: root.screenName
             kind: bubble.kind
             appId: bubble.kind === "app" ? IrisPieces.appIdOf(bubble.slot) : ""
             plated: bubble.plated
@@ -436,14 +437,19 @@ Item {
             pressed: grip.pressed && !grip.lifting
             hovered: bubbleHover.hovered
         }
+        property real wheelAccumulator: 0
         HoverHandler { id: bubbleHover; cursorShape: Qt.PointingHandCursor }
         WheelHandler {
             enabled: bubble.kind === "sound" || bubble.kind === "mic"
             acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
             onWheel: event => {
-                const step = (event.angleDelta.y || event.pixelDelta.y * 4) > 0 ? 0.05 : -0.05
-                if (bubble.kind === "mic") Audio.setSourceVolume((Audio.micVolume ?? 0) + step)
-                else Audio.setSinkVolume((Audio.value ?? 0) + step)
+                bubble.wheelAccumulator += event.angleDelta.y || event.pixelDelta.y * 4
+                const steps = Math.trunc(bubble.wheelAccumulator / 120)
+                if (steps === 0) return
+                bubble.wheelAccumulator -= steps * 120
+                GlobalStates.quietIrisLevels()
+                if (bubble.kind === "mic") Audio.setSourceVolume(Math.max(0, Math.min(1, (Audio.micVolume ?? 0) + steps * 0.05)))
+                else Audio.setSinkVolume(Math.max(0, Math.min(1, (Audio.value ?? 0) + steps * 0.05)))
             }
         }
         IrisBubbleGrip {
@@ -452,7 +458,54 @@ Item {
             slot: bubble.slot
             kind: bubble.kind
             screenName: root.screenName
-            onTapped: root.activate(bubble.slot, bubble.kind, bubble.rect)
+            holdLifts: !GlobalStates.irisEdit
+            pullDistance: GlobalStates.irisEdit ? 6 * root.d : 0
+            onTapped: {
+                if (GlobalStates.irisEdit) {
+                    GlobalStates.irisEditSelection = GlobalStates.irisEditSelection === bubble.slot ? "" : bubble.slot
+                    return
+                }
+                root.activate(bubble.slot, bubble.kind, bubble.rect)
+            }
+        }
+        Rectangle {
+            visible: GlobalStates.irisEdit && bubble.floating
+            anchors.fill: parent
+            anchors.margins: -Math.round(3 * root.d)
+            radius: IrisStyle.pieceRadius(width)
+            color: "transparent"
+            border.width: Math.max(1, Math.round(2 * root.d))
+            border.color: GlobalStates.irisEditSelection === bubble.slot ? IrisStyle.accent : IrisStyle.border
+            Behavior on border.color { ColorAnimation { duration: IrisStyle.duration(120) } }
+        }
+        Rectangle {
+            id: editBadge
+            visible: GlobalStates.irisEdit && bubble.floating && !bubble.carried
+            anchors.horizontalCenter: parent.left
+            anchors.verticalCenter: parent.top
+            width: Math.round(16 * root.d)
+            height: width
+            radius: width / 2
+            color: IrisStyle.danger
+            border.width: Math.max(1, Math.round(root.d))
+            border.color: IrisStyle.bodySurface
+            scale: GlobalStates.irisEdit ? 1 : 0
+            Behavior on scale { NumberAnimation { duration: IrisStyle.duration(140); easing.type: IrisStyle.feedbackEasing } }
+            MaterialSymbol {
+                anchors.centerIn: parent
+                text: "remove"
+                fill: 1
+                iconSize: Math.round(12 * root.d)
+                color: IrisStyle.onTint
+            }
+            MouseArea {
+                anchors.fill: parent
+                anchors.margins: -Math.round(4 * root.d)
+                cursorShape: Qt.PointingHandCursor
+                Accessible.role: Accessible.Button
+                Accessible.name: root.homeText(bubble.slot)
+                onClicked: root.sendHome(bubble.slot)
+            }
         }
         MouseArea {
             anchors.fill: parent
@@ -478,15 +531,6 @@ Item {
                 pieceMenu.requestOpen()
             }
         }
-        Binding {
-            target: GlobalStates
-            property: "irisMediaBubble"
-            when: bubble.floating && bubble.kind === "media" && !bubble.carried
-                && root.screenName === (GlobalStates.focusedScreen?.name ?? "")
-            value: ({ x: bubble.x, y: bubble.y, width: bubble.width, height: bubble.height, radius: bubble.width / 2,
-                screen: root.screenName, floating: true })
-            restoreMode: Binding.RestoreNone
-        }
     }
     Repeater {
         model: root.allSlots
@@ -504,7 +548,7 @@ Item {
         if (GlobalStates.irisBubbleCard?.source === source) { GlobalStates.irisBubbleCard = null; return }
         if (!rect) return
         GlobalStates.irisBubbleCard = { kind: kind, source: source, screen: root.screenName,
-            x: rect.x, y: rect.y, width: rect.size, height: rect.size, radius: rect.size / 2 }
+            x: rect.x, y: rect.y, width: rect.size, height: rect.size, radius: IrisStyle.pieceRadius(rect.size) }
     }
     Connections {
         target: GlobalStates
@@ -518,17 +562,41 @@ Item {
         }
     }
 
+    property string controlSlot: ""
+    function toggleControls(slot: string, rect: var): void {
+        if (GlobalStates.controlPanelOpen && GlobalStates.irisMorphOwner === "stage" && root.controlSlot === slot) {
+            GlobalStates.controlPanelOpen = false
+            return
+        }
+        if (GlobalStates.controlPanelOpen) GlobalStates.controlPanelOpen = false
+        GlobalStates.irisBubbleCard = null
+        root.controlSlot = slot
+        root.publishOrigin(slot, rect)
+        Qt.callLater(() => GlobalStates.controlPanelOpen = true)
+    }
+    Connections {
+        target: GlobalStates
+        function onIrisBubbleCardChanged(): void {
+            if (GlobalStates.irisBubbleCard && GlobalStates.controlPanelOpen) GlobalStates.controlPanelOpen = false
+        }
+        function onControlPanelOpenChanged(): void {
+            if (GlobalStates.controlPanelOpen && GlobalStates.irisBubbleCard) GlobalStates.irisBubbleCard = null
+            if (!GlobalStates.controlPanelOpen) root.controlSlot = ""
+        }
+    }
     function publishOrigin(slot: string, rect: var): void {
         const zone = root.placeName(slot)
         const plate = root.plateAt(zone)
         GlobalStates.irisMorphOwner = "stage"
         GlobalStates.irisMorphOrigin = { x: rect.x, y: rect.y, width: rect.size, height: rect.size,
-            radius: rect.size / 2, screen: root.screenName, owner: "stage",
+            radius: IrisStyle.pieceRadius(rect.size), screen: root.screenName, owner: "stage",
             fieldId: plate ? "plate:" + zone : "piece:" + slot,
             obstacle: plate ? { x: plate.x, y: plate.y, width: plate.width, height: plate.height } : null }
     }
     function activate(slot: string, kind: string, rect: var): void {
-        if (root.opensCards && IrisPieces.cardIds.includes(kind)
+        const workspaceCard = kind === "workspaces"
+            && String(root.optionsFor(slot)?.opens ?? "card") === "card"
+        if ((workspaceCard || (kind !== "workspaces" && root.opensCards && IrisPieces.cardIds.includes(kind)))
                 && (kind !== "media" || String(Config.options?.iris?.player?.bubbleOpens ?? "card") === "card")) {
             root.toggleCard(slot, kind, rect)
         } else if (kind === "media") {
@@ -536,11 +604,14 @@ Item {
         } else if (kind === "timer" || kind === "record") {
             GlobalStates.irisIslandPageRequest = "activity"
         } else if (kind === "controls") {
-            root.publishOrigin(slot, rect)
-            GlobalStates.controlPanelOpen = true
-        } else if (kind === "notifications") {
+            root.toggleControls(slot, rect)
+        } else if (kind === "notifications" || kind === "calendar") {
             GlobalStates.openSidebarRight(root.screenName)
-        } else if (kind === "weather") {
+        } else if (kind === "focus") {
+            Notifications.silent = !Notifications.silent
+        } else if (kind === "battery") {
+            root.toggleControls(slot, rect)
+        } else if (kind === "weather" || kind === "clock") {
             GlobalStates.irisIslandPageRequest = "desktop"
         } else if (kind === "tray" || kind === "tools") {
             GlobalStates.irisIslandPageRequest = kind
@@ -561,6 +632,8 @@ Item {
                 const entry = AppSearch.lookupDesktopEntry(appId)
                 if (entry) AppSearch.launchEntry(entry)
             }
+        } else if (kind === "workspaces") {
+            NiriService.toggleOverview()
         } else if (kind === "sound") {
             Audio.toggleMute()
         } else if (kind === "mic") {
@@ -577,11 +650,15 @@ Item {
     }
     readonly property var openGlyphs: ({ weather: "wb_sunny", notifications: "notifications", controls: "tune",
         sound: "volume_up", mic: "mic", tools: "timer", media: "play_circle", tray: "widgets",
-        timer: "hourglass_top", record: "fiber_manual_record", app: "open_in_new" })
-    function openText(kind: string): string {
+        timer: "hourglass_top", record: "fiber_manual_record", app: "open_in_new",
+        network: "wifi", bluetooth: "bluetooth", vitals: "monitoring", workspaces: "grid_view",
+        updates: "deployed_code_update" })
+    function openText(kind: string, slot: string): string {
         if (kind === "controls") return Translation.tr("Open Control Center")
         if (kind === "notifications") return Translation.tr("Open notifications")
         if (kind === "media") return Translation.tr("Open the player")
+        if (kind === "workspaces") return String(root.optionsFor(slot)?.opens ?? "card") === "card"
+            ? Translation.tr("Open workspace card") : Translation.tr("Open the overview")
         if (kind === "app") return Translation.tr("Open")
         return IrisPieces.cardIds.includes(kind) ? Translation.tr("Open its card") : Translation.tr("Open")
     }
@@ -601,7 +678,7 @@ Item {
     function pieceMenu(slot: string, kind: string, rect: var): var {
         const options = root.optionsFor(slot)
         return [
-            { text: root.openText(kind), iconName: root.openGlyphs[kind] ?? "open_in_full",
+            { text: root.openText(kind, slot), iconName: root.openGlyphs[kind] ?? "open_in_full",
                 action: () => root.activate(slot, kind, rect) },
             { type: "separator" },
             { type: "place", place: root.placeName(slot), hasIsland: !root.isExtra(slot) && !root.isApp(slot),
@@ -613,7 +690,12 @@ Item {
             { text: root.homeText(slot), iconName: root.isApp(slot) ? "dock_to_bottom" : "keyboard_return",
                 action: () => root.sendHome(slot) },
             { text: Translation.tr("Bubble settings…"), iconName: "tune",
-                action: () => { root.publishOrigin(slot, rect); GlobalStates.openSettingsPage(28, "bubbles") } }
+                action: () => {
+                    root.publishOrigin(slot, rect)
+                    const page = SettingsPageRegistry.pages.findIndex(entry => entry.key === "iris")
+                    if (page >= 0) GlobalStates.openSettingsPage(page, "bubbles")
+                    else GlobalStates.openSettings()
+                } }
         ]
     }
 
@@ -629,7 +711,7 @@ Item {
             height: width
             x: Math.round(hint.modelData.x - width / 2)
             y: Math.round(hint.modelData.y - height / 2)
-            radius: width / 2
+            radius: IrisStyle.pieceRadius(width)
             color: hint.active ? IrisStyle.tintFill(IrisStyle.accent) : IrisStyle.veilLight
             border.width: Math.max(1, Math.round(1.5 * root.d))
             border.color: hint.active ? IrisStyle.accent : IrisStyle.borderStrong
@@ -685,6 +767,7 @@ Item {
         IrisBubbleFace {
             anchors.fill: parent
             bodyless: true
+            screenName: root.screenName
             absorb: carried.absorb
             kind: landing.running ? landing.kind : String(root.drag?.kind ?? "")
             appId: IrisPieces.isApp(carried.slot) ? IrisPieces.appIdOf(carried.slot) : ""
@@ -737,20 +820,62 @@ Item {
     function clampX(x: real): real {
         return Math.max(root.edgeClear("left"), Math.min(root.width - card.width - root.edgeClear("right"), x))
     }
-    readonly property bool cardHangs: root.cardSource === "island-chassis" || root.cardSource.startsWith("island-piece-")
+    readonly property bool cardHangs: root.cardSource === "island-chassis"
+    readonly property bool cardFromIslandPiece: root.cardSource.startsWith("island-piece-")
     readonly property real cardBandTop: root.cardAnchor?.bandY ?? root.cardAnchor?.y ?? 0
     readonly property real cardBandHeight: root.cardAnchor?.bandHeight ?? root.cardAnchor?.height ?? 0
     readonly property real cardEdge: Math.round(8 * root.d) + IrisFrame.band
+    readonly property bool cardFromSatellite: root.cardSource.startsWith("island-") && !root.cardHangs && !root.cardFromIslandPiece
     readonly property var cardOrigin: {
         const a = root.cardAnchor
-        if (!a || !root.cardFloats) return a
-        const plate = root.plateAt(root.placeName(root.cardSource.slice(6)))
-        return plate ? Object.assign({}, a, { obstacle: { x: plate.x, y: plate.y, width: plate.width, height: plate.height } }) : a
+        if (a && root.cardFromIslandPiece && a.bandY !== undefined)
+            return Object.assign({}, a, { obstacle: { x: a.x, y: a.bandY, width: a.width, height: a.bandHeight } })
+        const g = root.island
+        if (a && root.cardFromSatellite && g && g.width > 0) {
+            const x = Math.min(a.x, g.x)
+            const y = Math.min(a.y, g.y)
+            return Object.assign({}, a, { obstacle: { x: x, y: y,
+                width: Math.max(a.x + a.width, g.x + g.width) - x, height: Math.max(a.y + a.height, g.y + g.height) - y } })
+        }
+        return a
+    }
+    readonly property var cardAvoidRects: {
+        const out = []
+        const openerSlot = root.cardFloats ? root.cardSource.slice(6) : ""
+        const openerZone = openerSlot.length > 0 ? root.placeName(openerSlot) : ""
+        for (const plate of root.plates)
+            if (plate.zone !== openerZone) out.push({ x: plate.x, y: plate.y, width: plate.width, height: plate.height })
+        for (let i = 0; i < root.allSlots.length; i++) {
+            const rect = root.rects[i]
+            if (rect && root.allSlots[i] !== openerSlot)
+                out.push({ x: rect.x, y: rect.y, width: rect.size, height: rect.size })
+        }
+        const island = root.island
+        if (island && island.width > 0 && island.height > 0)
+            out.push({ x: island.x, y: island.y, width: island.width, height: island.height })
+        const dock = GlobalStates.irisDockBody?.[root.screenName] ?? []
+        for (const shape of (Array.isArray(dock) ? dock : []))
+            if (shape?.id === "dock") out.push({ x: shape.x, y: shape.y, width: shape.width, height: shape.height })
+        const sidebars = Config.options?.iris?.sidebars ?? ({})
+        if (GlobalStates.sidebarLeftOpen && GlobalStates.sidebarLeftPresentationOutput === root.screenName) {
+            const o = sidebars?.left ?? ({})
+            const width = Math.max(300, Math.min(600, Number(o?.width ?? 380))) * root.d
+            out.push({ x: 0, y: 0, width: IrisFrame.band + width + ((o?.notch ?? false) ? 0 : 12 * root.d), height: root.height })
+        }
+        if (GlobalStates.sidebarRightOpen && GlobalStates.sidebarRightPresentationOutput === root.screenName) {
+            const o = sidebars?.right ?? ({})
+            const width = Math.max(300, Math.min(600, Number(o?.width ?? 380))) * root.d
+            const depth = IrisFrame.band + width + ((o?.notch ?? false) ? 0 : 12 * root.d)
+            out.push({ x: root.width - depth, y: 0, width: depth, height: root.height })
+        }
+        return out
     }
     readonly property var cardPlacement: root.cardAnchor && !root.cardHangs
-        ? IrisFrame.place(root.cardOrigin, card.width, card.height, root.width, root.height, card.radius) : null
+        ? IrisFrame.place(root.cardOrigin, card.width, card.height, root.width, root.height, card.radius,
+            root.cardAvoidRects, !root.cardFromSatellite && (Config.options?.iris?.appearance?.surfaces?.cards?.joinOrigin ?? true)
+                ? -IrisStyle.weld : IrisFrame.bodyAir) : null
     readonly property string cardOriginId: {
-        if (root.cardHangs) return "island"
+        if (root.cardHangs || root.cardFromIslandPiece) return "island"
         if (root.cardSource.startsWith("island-")) return "satellite:" + root.cardSource.slice(7)
         const slot = root.cardFloats ? root.cardSource.slice(6) : ""
         if (slot.length === 0) return ""
@@ -766,15 +891,16 @@ Item {
     Shortcut { sequence: "Escape"; enabled: root.cardOpen; onActivated: root.closeCard() }
 
     RectangularShadow {
-        x: card.x
-        y: card.y + 6 * root.d
-        width: card.width
-        height: card.height
-        radius: card.radius
+        readonly property var body: card.bodyRect
+        x: body?.x ?? 0
+        y: (body?.y ?? 0) + 6 * root.d
+        width: body?.width ?? 0
+        height: body?.height ?? 0
+        radius: body?.radius ?? card.radius
         blur: 28 * root.d
         spread: -4 * root.d
         color: IrisStyle.shadow
-        opacity: Math.pow(Math.max(0, card.progress), 3)
+        opacity: IrisStyle.shadowAt(card.progress)
     }
 
     IrisMorphSurface {
@@ -788,25 +914,61 @@ Item {
         light: IrisStyle.surfaceLight("cards", cardContent.light)
         lightFrom: !root.cardAnchor ? "top"
             : root.cardHangs ? (root.barBottom ? "bottom" : "top")
-            : root.cardPlacement.sideways ? (root.cardPlacement.towardsLeft ? "right" : "left")
-            : root.cardPlacement.towardsUp ? "bottom" : "top"
+            : root.cardPlacement?.sideways ? (root.cardPlacement.towardsLeft ? "right" : "left")
+            : root.cardPlacement?.towardsUp ? "bottom" : "top"
         width: Math.min(root.width - 16, IrisStyle.surfaceWidth("cards", Math.round(360 * root.d)))
         height: Math.round(Math.min(root.height * 0.72, cardContent.contentHeight + (cardContent.bleeds ? 0 : root.cardPad * 2)))
         x: !root.cardAnchor ? (root.width - width) / 2
             : root.cardHangs ? root.clampX(root.cardAnchorCX - width / 2)
-            : root.cardPlacement.x
+            : root.cardPlacement?.x ?? 0
         y: !root.cardAnchor ? root.cardEdge
-            : !root.cardHangs ? root.cardPlacement.y
+            : !root.cardHangs ? root.cardPlacement?.y ?? 0
             : root.barBottom ? Math.max(root.edgeClear("top"), root.cardBandTop - height + IrisStyle.weld)
             : Math.min(root.height - height - root.edgeClear("bottom"), root.cardBandTop + root.cardBandHeight - IrisStyle.weld)
-        contentFadeStart: cardContent.bleeds ? 0.04 : 0.35
-        contentFadeSpan: cardContent.bleeds ? 0.36 : 0.5
         Behavior on height {
             enabled: card.settled
             NumberAnimation { duration: IrisStyle.morphDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: IrisStyle.morphCurve }
         }
 
         MouseArea { anchors.fill: parent }
+
+        Item {
+            id: cardResize
+            z: 30
+            visible: GlobalStates.irisEdit && root.cardOpen
+            readonly property bool fromLeft: card.x + card.width / 2 > root.width / 2
+            width: Math.round(14 * root.d)
+            height: Math.round(48 * root.d)
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.left: cardResize.fromLeft ? parent.left : undefined
+            anchors.right: cardResize.fromLeft ? undefined : parent.right
+            Rectangle {
+                anchors.centerIn: parent
+                width: Math.max(2, Math.round(3 * root.d))
+                height: Math.round(26 * root.d)
+                radius: width / 2
+                color: cardResizeHover.hovered || cardResizeDrag.active ? IrisStyle.accent : IrisStyle.textTertiary
+            }
+            HoverHandler { id: cardResizeHover; cursorShape: Qt.SizeHorCursor }
+            DragHandler {
+                id: cardResizeDrag
+                target: null
+                yAxis.enabled: false
+                property real startWidth: 360
+                onActiveChanged: {
+                    if (!active) return
+                    const configured = Number(Config.options?.iris?.appearance?.surfaces?.cards?.width ?? 0)
+                    cardResizeDrag.startWidth = configured > 0 ? configured : card.width / Math.max(0.01, root.d)
+                }
+                onTranslationChanged: {
+                    if (!active) return
+                    const direction = cardResize.fromLeft ? -1 : 1
+                    const raw = cardResizeDrag.startWidth + direction * translation.x / Math.max(0.01, root.d)
+                    const width = Math.round(Math.max(280, Math.min(560, raw)) / 10) * 10
+                    Config.setNestedValue("iris.appearance.surfaces.cards.width", width)
+                }
+            }
+        }
 
         Flickable {
             id: cardScroller
@@ -821,6 +983,7 @@ Item {
                 id: cardContent
                 width: cardScroller.width
                 kind: root.cardKind
+                screenName: root.screenName
                 contentActive: root.cardPresent
                 onNavigate: root.closeCard()
             }
