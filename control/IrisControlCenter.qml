@@ -22,6 +22,7 @@ Item {
     readonly property bool barBottom: String(root.barOptions?.position ?? "top") === "bottom"
     readonly property bool morphOpen: GlobalStates.controlPanelOpen
         && root.screenName === (GlobalStates.focusedScreen?.name ?? "")
+        && (String(Config.options?.iris?.controlCenter?.opens ?? "island") !== "island" || GlobalStates.irisMorphOwner === "stage")
     readonly property bool armed: root.morphOpen && panel.armed
     readonly property bool present: root.morphOpen || panel.progress > 0
     readonly property alias body: panel
@@ -30,23 +31,51 @@ Item {
         if (!root.present || panel.width < 1) return []
         const rect = panel.bodyRect
         if (rect.width <= 1 || rect.height <= 1) return []
+        const joinOrigin = Config.options?.iris?.appearance?.surfaces?.cards?.joinOrigin ?? true
+        const joinRise = root.fromPiece && joinOrigin && String(root.origin?.fieldId ?? "").length > 0
+            ? IrisStyle.ramp(panel.progress, 0.08, 0.3) : 0
         const shapes = [{ x: rect.x, y: rect.y, width: rect.width, height: rect.height,
-            radius: rect.radius, paints: true, fuse: IrisStyle.fuseDeep, id: "control-center",
-            joins: root.fromPiece ? "" : root.islandBody ? "island" : "" }]
-        const neck = root.fromPiece ? IrisFrame.neck(root.origin, root.placement, rect, panel.progress) : null
-        if (neck) shapes.push({ x: neck.x, y: neck.y, width: neck.width, height: neck.height, radius: 0,
-            fuse: IrisFrame.neckFuse, id: "control-center-neck", joins: [root.origin.fieldId, "control-center"] })
+            radius: rect.radius, paints: true,
+            fuse: root.fromPiece ? Math.round(IrisStyle.fuseDeep * joinRise) : IrisStyle.fuseDeep,
+            id: "control-center",
+            joins: root.fromPiece ? (joinRise > 0 ? String(root.origin?.fieldId ?? "") : "")
+                : root.islandBody ? "island" : "" }]
         return shapes
     }
     readonly property var islandBody: GlobalStates.irisIslandGeometry?.[root.screenName] ?? null
 
     visible: root.present
-    readonly property real edgeGap: (Number(root.barOptions?.height ?? 42)
-        + ((root.barOptions?.notch ?? false) ? 0 : Number(root.barOptions?.margin ?? 8) * 2)) * IrisStyle.density + 8 * IrisStyle.density
-    readonly property var origin: GlobalStates.irisMorphOrigin
+    readonly property real edgeGap: IrisFrame.islandVisualDepth + 8 * IrisStyle.density
+    property var origin: GlobalStates.irisMorphOrigin
+    onMorphOpenChanged: if (root.morphOpen) root.origin = Qt.binding(() => GlobalStates.irisMorphOrigin)
+        else root.origin = root.origin
     readonly property bool fromPiece: root.origin?.owner === "stage" && String(root.origin?.fieldId ?? "").length > 0
+    readonly property var placementOrigin: root.fromPiece && root.origin
+        ? Object.assign({}, root.origin, { obstacle: null }) : root.origin
+    readonly property var avoidRects: {
+        const out = []
+        if (root.islandBody && root.islandBody.width > 0 && root.islandBody.height > 0)
+            out.push({ x: root.islandBody.x, y: root.islandBody.y, width: root.islandBody.width, height: root.islandBody.height })
+        const dock = GlobalStates.irisDockBody?.[root.screenName] ?? []
+        for (const shape of (Array.isArray(dock) ? dock : []))
+            if (shape?.id === "dock") out.push({ x: shape.x, y: shape.y, width: shape.width, height: shape.height })
+        const sidebars = Config.options?.iris?.sidebars ?? ({})
+        if (GlobalStates.sidebarLeftOpen && GlobalStates.sidebarLeftPresentationOutput === root.screenName) {
+            const o = sidebars?.left ?? ({})
+            const width = Math.max(300, Math.min(600, Number(o?.width ?? 380))) * IrisStyle.density
+            out.push({ x: 0, y: 0, width: IrisFrame.band + width + ((o?.notch ?? false) ? 0 : 12 * IrisStyle.density), height: root.height })
+        }
+        if (GlobalStates.sidebarRightOpen && GlobalStates.sidebarRightPresentationOutput === root.screenName) {
+            const o = sidebars?.right ?? ({})
+            const width = Math.max(300, Math.min(600, Number(o?.width ?? 380))) * IrisStyle.density
+            const depth = IrisFrame.band + width + ((o?.notch ?? false) ? 0 : 12 * IrisStyle.density)
+            out.push({ x: root.width - depth, y: 0, width: depth, height: root.height })
+        }
+        return out
+    }
     readonly property var placement: root.fromPiece
-        ? IrisFrame.place(root.origin, panel.width, panel.height, root.width, root.height, panel.radius) : null
+        ? IrisFrame.place(root.placementOrigin, panel.width, panel.height, root.width, root.height, panel.radius,
+            root.avoidRects, (Config.options?.iris?.appearance?.surfaces?.cards?.joinOrigin ?? true) ? -IrisStyle.weld : IrisFrame.bodyAir) : null
     readonly property real panelWidth: Math.min(root.width - 16, Math.max(320, Number(root.options?.width ?? 360)) * IrisStyle.density)
     readonly property real contentPadding: 16 * IrisStyle.density
     readonly property real edge: Math.round(8 * IrisStyle.density) + IrisFrame.band
@@ -78,16 +107,17 @@ Item {
         color: IrisStyle.bodySurface
         contentReady: contents.contentHeight > 0
         radius: IrisStyle.surfaceRadius("controlCenter", IrisStyle.radiusPanel)
+        origin: root.fromPiece ? root.origin : null
         onClosed: if (GlobalStates.irisMorphOwner === "stage" && !GlobalStates.settingsOverlayOpen) GlobalStates.irisMorphOwner = ""
         light: IrisStyle.surfaceLight("controlCenter", IrisStyle.wallpaperLight)
-        lightFrom: root.fromPiece ? (root.placement.sideways ? (root.placement.towardsLeft ? "right" : "left") : (root.placement.towardsUp ? "bottom" : "top"))
+        lightFrom: root.placement ? (root.placement.sideways ? (root.placement.towardsLeft ? "right" : "left") : (root.placement.towardsUp ? "bottom" : "top"))
             : root.barBottom ? "bottom" : "top"
-        x: root.fromPiece ? root.placement.x
+        x: root.placement ? root.placement.x
             : root.origin
             ? Math.max(root.edgeLeft, Math.min(root.width - width - root.edgeRight,
                 root.origin.x + root.origin.width / 2 - width / 2))
             : (root.width - width) / 2
-        y: root.fromPiece ? root.placement.y
+        y: root.placement ? root.placement.y
             : root.holding ? Math.max(12, Math.min(root.heldTop, root.height - height - root.edgeGap))
             : root.barBottom ? (root.islandBody ? root.islandBody.y - height + IrisStyle.weld
                 : root.height - height - root.edgeGap - IrisFrame.band)

@@ -25,9 +25,12 @@ GridLayout {
     columns: 1
     columnSpacing: 0
     rowSpacing: 10 * root.d
+    opacity: IrisStyle.recompose
 
     readonly property var sectionKinds: ["connectivity", "media", "shortcuts", "levels", "notifications"]
-    readonly property var sections: Array.from(Config.options?.iris?.controlCenter?.sections ?? root.sectionKinds)
+    // Through the shared recompose clock: the panel is rebuilt at the bottom of
+    // one dip instead of every section animating into its new place.
+    readonly property var sections: Array.from(IrisStyle.structuralValue("controlCenter.sections", root.sectionKinds))
         .filter(kind => root.sectionKinds.includes(kind))
     function has(kind: string): bool { return root.sections.includes(kind) }
     function rowOf(kinds: var): int {
@@ -195,11 +198,11 @@ GridLayout {
                     onToggled: Notifications.toggleSilent()
                 }
                 RoundToggle {
-                    glyph: Audio.micMuted ? "mic_off" : "mic"
-                    label: Audio.micMuted ? Translation.tr("Muted") : Translation.tr("Mic")
-                    checked: !Audio.micMuted
-                    tint: IrisStyle.secondaryAccent
-                    onToggled: Audio.toggleMicMute()
+                    glyph: "sports_esports"
+                    label: GameMode.autoActivated ? Translation.tr("Game · auto") : Translation.tr("Game mode")
+                    checked: GameMode.active
+                    tint: IrisStyle.identity.green
+                    onToggled: GameMode.toggle()
                 }
             }
         }
@@ -302,7 +305,7 @@ GridLayout {
             rowSpacing: root.roundControls ? 10 * root.d : 8 * root.d
             columnSpacing: root.roundControls ? 12 * root.d : 8 * root.d
             ShortcutTile {
-                glyph: "dark_mode"
+                glyph: "contrast"
                 label: Translation.tr("Dark")
                 lit: Appearance.m3colors.darkmode
                 onClicked: Appearance.toggleDarkMode()
