@@ -120,6 +120,7 @@ AbstractWidget {
     width: implicitWidth
     height: implicitHeight
     draggable: placementStrategy === "free" && !GlobalStates.screenLocked && !GlobalStates.overviewOpen
+    grabCursor: GlobalStates.widgetEditMode
     visible: opacity > 0
     opacity: clockEnabled ? 1 : 0
     enabled: clockEnabled && !GlobalStates.screenLocked && !GlobalStates.overviewOpen
