@@ -243,8 +243,8 @@ StyledOverlayWidget {
                         font.pixelSize: Appearance.font.pixelSize.smaller
                         color: OverlayLook.colSubtext
                         elide: Text.ElideRight
-                        text: (activePlayer && activePlayer.length > 0)
-                              ? `${StringUtils.friendlyTimeForSeconds(activePlayer.position)} / ${StringUtils.friendlyTimeForSeconds(activePlayer.length)}`
+                        text: MprisController.lengthOf(activePlayer) > 0
+                              ? `${StringUtils.friendlyTimeForSeconds(MprisController.positionOf(activePlayer))} / ${StringUtils.friendlyTimeForSeconds(MprisController.lengthOf(activePlayer))}`
                               : ""
                     }
 
@@ -253,8 +253,8 @@ StyledOverlayWidget {
                         wavy: activePlayer?.isPlaying ?? false
                         highlightColor: OverlayLook.colPrimary
                         trackColor: OverlayLook.colSecondaryContainer
-                        value: (activePlayer && activePlayer.length > 0)
-                               ? (activePlayer.position / activePlayer.length)
+                        value: MprisController.lengthOf(activePlayer) > 0
+                               ? (MprisController.positionOf(activePlayer) / MprisController.lengthOf(activePlayer))
                                : 0
                     }
                 }
