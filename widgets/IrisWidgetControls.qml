@@ -78,8 +78,8 @@ ColumnLayout {
     component Caption: IrisText {
         Layout.fillWidth: true
         color: IrisStyle.textSecondary
-        font.pixelSize: 12 * IrisStyle.typeScale
-        font.weight: Font.DemiBold
+        font.pixelSize: IrisStyle.typeMeta
+        font.weight: IrisStyle.weight(Font.DemiBold)
     }
 
     component ActionRow: Rectangle {
@@ -114,7 +114,7 @@ ColumnLayout {
             anchors.verticalCenter: parent.verticalCenter
             text: action.label
             color: action.ink
-            font.pixelSize: 13 * IrisStyle.typeScale
+            font.pixelSize: IrisStyle.typeLabel
             elide: Text.ElideRight
         }
         HoverHandler { id: actionHover; cursorShape: Qt.PointingHandCursor }
@@ -131,8 +131,8 @@ ColumnLayout {
             Layout.fillWidth: true
             text: Translation.tr(root.title)
             font.family: IrisStyle.fontTitle
-            font.pixelSize: 16 * IrisStyle.typeScale
-            font.weight: Font.DemiBold
+            font.pixelSize: IrisStyle.typeTitle
+            font.weight: IrisStyle.weight(Font.DemiBold)
             elide: Text.ElideRight
         }
         IrisIconButton {
@@ -180,7 +180,7 @@ ColumnLayout {
                     IrisText {
                         anchors.centerIn: parent
                         text: tab.modelData.label
-                        font.pixelSize: 12.5 * IrisStyle.typeScale
+                        font.pixelSize: IrisStyle.typeLabel
                         font.weight: tabs.selectedIndex === tab.index ? Font.DemiBold : Font.Normal
                         color: tabs.selectedIndex === tab.index ? IrisStyle.text : IrisStyle.subtext
                     }
@@ -238,7 +238,7 @@ ColumnLayout {
                             anchors.bottomMargin: Math.round(9 * root.d)
                             text: root.widget.irisSizeLabels[sizeTile.modelData] ?? sizeTile.modelData
                             color: sizeTile.chosen ? IrisStyle.text : IrisStyle.textSecondary
-                            font.pixelSize: 12 * IrisStyle.typeScale
+                            font.pixelSize: IrisStyle.typeMeta
                             font.weight: sizeTile.chosen ? Font.DemiBold : Font.Medium
                         }
                         HoverHandler { id: tileHover; cursorShape: Qt.PointingHandCursor }
@@ -266,7 +266,8 @@ ColumnLayout {
                     else
                         root.widget.setIrisOption(option.modelData.key, value)
                 }
-                readonly property bool choice: Array.isArray(option.modelData.choices)
+                readonly property var picks: option.modelData.choices ?? []
+                readonly property bool choice: option.picks.length > 0
                 Layout.fillWidth: true
                 spacing: Math.round(6 * root.d)
 
@@ -279,7 +280,7 @@ ColumnLayout {
                     Layout.fillWidth: true
                     spacing: Math.round(4 * root.d)
                     Repeater {
-                        model: option.choice ? option.modelData.choices : []
+                        model: option.picks
                         FaceChoice {
                             required property var modelData
                             Layout.fillWidth: true
@@ -290,13 +291,50 @@ ColumnLayout {
                         }
                     }
                 }
-                FaceChoice {
+                Rectangle {
                     visible: !option.choice
                     Layout.fillWidth: true
-                    icon: option.modelData.icon ?? ""
-                    label: option.modelData.label
-                    selected: Boolean(option.value)
-                    onClicked: option.store(!Boolean(option.value))
+                    implicitHeight: Math.round(40 * root.d)
+                    radius: IrisStyle.radiusRow
+                    color: optionHover.hovered ? IrisStyle.fillHover : IrisStyle.fillQuiet
+                    Behavior on color { ColorAnimation { duration: IrisStyle.feedbackDuration; easing.type: IrisStyle.feedbackEasing } }
+
+                    MaterialSymbol {
+                        id: optionGlyph
+                        anchors.left: parent.left
+                        anchors.leftMargin: Math.round(12 * root.d)
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: option.modelData.icon ?? ""
+                        iconSize: Math.round(18 * root.d)
+                        color: Boolean(option.value) ? IrisStyle.text : IrisStyle.textSecondary
+                    }
+                    IrisText {
+                        anchors.left: optionGlyph.right
+                        anchors.leftMargin: Math.round(10 * root.d)
+                        anchors.right: optionSwitch.left
+                        anchors.rightMargin: Math.round(10 * root.d)
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: option.modelData.label
+                        font.pixelSize: IrisStyle.typeLabel
+                        elide: Text.ElideRight
+                    }
+                    Item {
+                        anchors.left: parent.left
+                        anchors.right: optionSwitch.left
+                        anchors.top: parent.top
+                        anchors.bottom: parent.bottom
+                        HoverHandler { id: optionHover; cursorShape: Qt.PointingHandCursor }
+                        TapHandler { onTapped: option.store(!Boolean(option.value)) }
+                    }
+                    IrisSwitch {
+                        id: optionSwitch
+                        anchors.right: parent.right
+                        anchors.rightMargin: Math.round(10 * root.d)
+                        anchors.verticalCenter: parent.verticalCenter
+                        on: Boolean(option.value)
+                        name: option.modelData.label
+                        onToggled: option.store(!Boolean(option.value))
+                    }
                 }
             }
         }
@@ -318,7 +356,7 @@ ColumnLayout {
                     visible: !root.designs.some(entry => entry.value === root.ownDesign)
                     text: (root.designs.find(entry => entry.value === root.sharedDesign)?.label ?? "") + " · " + Translation.tr("from Settings")
                     color: IrisStyle.textTertiary
-                    font.pixelSize: 11.5 * IrisStyle.typeScale
+                    font.pixelSize: IrisStyle.typeMeta
                 }
             }
 
@@ -351,7 +389,7 @@ ColumnLayout {
                     visible: root.ownMaterial === "auto" || !root.materials.some(entry => entry.value === root.ownMaterial)
                     text: (root.materials.find(entry => entry.value === root.sharedMaterial)?.label ?? "") + " · " + Translation.tr("from Settings")
                     color: IrisStyle.textTertiary
-                    font.pixelSize: 11.5 * IrisStyle.typeScale
+                    font.pixelSize: IrisStyle.typeMeta
                 }
             }
 
@@ -390,13 +428,9 @@ ColumnLayout {
                                 radius: IrisStyle.radiusTile - Math.round(3 * root.d)
                                 color: IrisStyle.fillQuiet
 
-                                Image {
+                                IrisImage {
                                     anchors.fill: parent
                                     source: root.wallpaperUrl
-                                    fillMode: Image.PreserveAspectCrop
-                                    sourceSize.width: Math.round(120 * root.d)
-                                    asynchronous: true
-                                    cache: true
                                     layer.enabled: swatch.shown === "glass"
                                     layer.effect: MultiEffect {
                                         blurEnabled: true
@@ -416,8 +450,8 @@ ColumnLayout {
                                         anchors.centerIn: parent
                                         text: "Aa"
                                         font.family: IrisStyle.fontTitle
-                                        font.pixelSize: 15 * IrisStyle.typeScale
-                                        font.weight: Font.DemiBold
+                                        font.pixelSize: IrisStyle.typeHeadline
+                                        font.weight: IrisStyle.weight(Font.DemiBold)
                                         style: swatch.shown === "clear" ? Text.Raised : Text.Normal
                                         styleColor: IrisStyle.plateShadow
                                     }
@@ -434,7 +468,7 @@ ColumnLayout {
                             horizontalAlignment: Text.AlignHCenter
                             text: swatch.modelData.label
                             color: swatch.chosen ? IrisStyle.text : IrisStyle.textSecondary
-                            font.pixelSize: 11.5 * IrisStyle.typeScale
+                            font.pixelSize: IrisStyle.typeMeta
                             font.weight: swatch.chosen ? Font.DemiBold : Font.Normal
                             fontSizeMode: Text.HorizontalFit
                             minimumPixelSize: Math.round(9 * IrisStyle.typeScale)
@@ -459,7 +493,7 @@ ColumnLayout {
                     color: IrisStyle.textSecondary
                     font.family: IrisStyle.fontNumbers
                     font.features: ({ "tnum": 1 })
-                    font.pixelSize: 12 * IrisStyle.typeScale
+                    font.pixelSize: IrisStyle.typeMeta
                 }
             }
             IrisScrubber {
@@ -483,11 +517,11 @@ ColumnLayout {
                 Caption { text: Translation.tr("Surface opacity") }
                 IrisText {
                     text: (opacityScrubber.dragValue >= 0
-                        ? root.opacityFrom(opacityScrubber.dragValue) : root.opacityValue) + " %"
+                        ? root.opacityFrom(opacityScrubber.dragValue) : root.opacityValue) + "%"
                     color: IrisStyle.textSecondary
                     font.family: IrisStyle.fontNumbers
                     font.features: ({ "tnum": 1 })
-                    font.pixelSize: 12 * IrisStyle.typeScale
+                    font.pixelSize: IrisStyle.typeMeta
                 }
             }
             IrisScrubber {
@@ -512,11 +546,11 @@ ColumnLayout {
                 IrisText {
                     text: (scaleScrubber.dragValue >= 0
                         ? Math.round(root.scaleMin + scaleScrubber.dragValue * (root.scaleMax - root.scaleMin))
-                        : root.scaleValue) + " %"
+                        : root.scaleValue) + "%"
                     color: IrisStyle.textSecondary
                     font.family: IrisStyle.fontNumbers
                     font.features: ({ "tnum": 1 })
-                    font.pixelSize: 12 * IrisStyle.typeScale
+                    font.pixelSize: IrisStyle.typeMeta
                 }
             }
             IrisScrubber {

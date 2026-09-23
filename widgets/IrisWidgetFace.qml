@@ -69,7 +69,13 @@ Item {
         active: root.glass
         sourceComponent: ClippingRectangle {
             id: glassPane
-            visible: wallpaper.status === Image.Ready
+            // The desktop's own wallpaper layer: live, parallax included, no second decoder.
+            readonly property Item desktopLayer: root.QsWindow?.window?.wallpaperLayer ?? null
+            readonly property point at: {
+                void (root.widget.x + root.widget.y + (root.widget.parent?.x ?? 0) + (root.widget.parent?.y ?? 0))
+                return glassPane.desktopLayer ? root.mapToItem(glassPane.desktopLayer, 0, 0) : Qt.point(root.widget.x, root.widget.y)
+            }
+            visible: glassPane.desktopLayer !== null || wallpaper.status === Image.Ready
             radius: root.radius
             color: "transparent"
             readonly property real margin: root.dp(24)
@@ -79,7 +85,7 @@ Item {
                 visible: false
                 width: root.widget.screenWidth
                 height: root.widget.screenHeight
-                source: WallpaperListener.wallpaperUrlForScreen(root.QsWindow?.window?.screen ?? null)
+                source: glassPane.desktopLayer ? "" : WallpaperListener.wallpaperUrlForScreen(root.QsWindow?.window?.screen ?? null)
                 fillMode: Image.PreserveAspectCrop
                 asynchronous: true
                 cache: true
@@ -93,8 +99,8 @@ Item {
                 y: -glassPane.margin
                 width: root.width + glassPane.margin * 2
                 height: root.height + glassPane.margin * 2
-                sourceItem: wallpaper
-                sourceRect: Qt.rect(root.widget.x - glassPane.margin, root.widget.y - glassPane.margin, crop.width, crop.height)
+                sourceItem: glassPane.desktopLayer ?? wallpaper
+                sourceRect: Qt.rect(glassPane.at.x - glassPane.margin, glassPane.at.y - glassPane.margin, crop.width, crop.height)
                 textureSize: Qt.size(Math.max(1, Math.round(crop.width / 2)), Math.max(1, Math.round(crop.height / 2)))
                 smooth: true
                 layer.enabled: true
@@ -130,16 +136,33 @@ Item {
         }
     }
 
+    ShaderEffectSource {
+        id: bodyCopy
+        anchors.fill: body
+        sourceItem: root.clear ? body : null
+        hideSource: false
+        visible: false
+    }
+    // The shadow comes from a copy behind the body: a layered body would resample its text.
+    MultiEffect {
+        x: body.x
+        y: body.y + 1
+        width: body.width
+        height: body.height
+        visible: root.clear
+        source: bodyCopy
+        brightness: -1
+        colorization: IrisStyle.glow > 0 ? 1 : 0
+        colorizationColor: Qt.rgba(IrisStyle.plateShadow.r, IrisStyle.plateShadow.g, IrisStyle.plateShadow.b, 1)
+        blurEnabled: true
+        blur: 0.5
+        autoPaddingEnabled: true
+        opacity: IrisStyle.plateShadow.a
+    }
+
     Item {
         id: body
         anchors.fill: parent
         anchors.margins: root.padding
-        layer.enabled: root.clear
-        layer.effect: MultiEffect {
-            shadowEnabled: true
-            shadowColor: IrisStyle.plateShadow
-            shadowBlur: 0.5
-            shadowVerticalOffset: 1
-        }
     }
 }
