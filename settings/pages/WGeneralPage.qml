@@ -230,6 +230,20 @@ WSettingsPage {
     }
     
     WSettingsCard {
+        visible: CompositorService.isNiri
+        title: Translation.tr("Window animations")
+        icon: "wand"
+
+        WSettingsRow {
+            icon: "play"
+            label: Translation.tr("Animation style")
+            description: Translation.tr("How windows open, close and slide between columns")
+        }
+
+        WNiriAnimationPresets {}
+    }
+
+    WSettingsCard {
         title: Translation.tr("Windows & Sounds")
         icon: "app-generic"
         

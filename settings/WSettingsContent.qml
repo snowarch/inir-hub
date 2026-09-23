@@ -100,6 +100,7 @@ Item {
         { pageIndex: 1, pageName: "General", section: "Keyboard indicators", label: "Num Lock indicator", targetLabel: "Num Lock indicator", keywords: ["keyboard", "num", "numlock", "lock", "indicator", "bar", "taskbar", "show", "hide"] },
         // Window Management
         { pageIndex: 1, pageName: "General", section: "Window Management", label: "Confirm before closing", targetLabel: "Confirm before closing", keywords: ["close", "confirm", "window", "dialog", "super+q"] },
+        { pageIndex: 1, pageName: "General", section: "Window animations", label: "Animation style", targetLabel: "Animation style", keywords: ["niri", "animations", "preset", "motion", "bounce", "bouncy", "snappy", "fast", "slow", "smooth", "material", "open", "close", "window", "effects"] },
         { pageIndex: 1, pageName: "General", section: "Window Management", label: "Auto-expand a single tiling window", targetLabel: "Auto-expand a single tiling window", keywords: ["niri", "window", "tiling", "maximize", "expand", "single", "column"] },
         // Sounds
         { pageIndex: 1, pageName: "General", section: "Sounds", label: "Battery sounds", targetLabel: "Battery sounds", keywords: ["sound", "audio", "battery", "beep"] },
