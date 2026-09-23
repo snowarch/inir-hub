@@ -78,6 +78,17 @@ layout(std140, binding = 0) uniform buf {
     // bottom) with the music, and x: the travelling phase of that swell.
     vec4 edgeWave;
     vec4 waveClock;
+    // x: appearance (0 sculpted, 1 etched, 2 satin); y: music level;
+    // z: light opacity; w: treatment width in screen pixels.
+    vec4 frameLight;
+    vec4 frameInk;
+    // Where this field's window sits on its output (x, y) and the output's size (z, w), so a
+    // field in a small window (a menu) samples the wallpaper glass at the right place.
+    vec4 scene;
+    // x: 1 when another window paints the band, so this field draws only the bodies and their joins.
+    vec4 options;
+    // Left, top, right, bottom of an inner rectangle nothing reaches: its pixels skip the whole pass.
+    vec4 quiet;
 } u;
 layout(binding = 1) uniform sampler2D backdrop;
 
@@ -117,6 +128,10 @@ float blockValue(int block, int slot, vec4 a, vec4 b, vec4 c, vec4 d, vec4 e) {
 
 void main() {
     vec2 p = u.viewport.xy + qt_TexCoord0 * max(u.viewport.zw, vec2(1.0));
+    if (p.x > u.quiet.x && p.y > u.quiet.y && p.x < u.quiet.z && p.y < u.quiet.w) {
+        fragColor = vec4(0.0);
+        return;
+    }
     float united = FAR * 10.0;
 
     // The frame is the complement of the screen's inner rounded rectangle: every
@@ -125,15 +140,19 @@ void main() {
     // edge fuses with it instead of sitting on it.
     float frameDistance = FAR * 10.0;
     if (u.field.y > 0.5) {
-        vec2 size = max(u.screen, vec2(1.0));
+        // Places can render their own field in a window inset by the band.
+        // Sample the frame in output coordinates so their joins stay aligned.
+        vec2 frameP = p + u.scene.xy;
+        vec2 size = max(u.scene.zw, vec2(1.0));
         float t = u.waveClock.x;
-        float alongY = 0.5 + 0.3 * sin(p.y * 0.011 + t) + 0.2 * sin(p.y * 0.027 - t * 1.4);
-        float alongX = 0.5 + 0.3 * sin(p.x * 0.009 - t) + 0.2 * sin(p.x * 0.023 + t * 1.2);
+        float alongY = 0.60 + 0.24 * sin(frameP.y * 0.011 + t) + 0.16 * sin(frameP.y * 0.027 - t * 1.4);
+        float alongX = 0.60 + 0.24 * sin(frameP.x * 0.009 - t) + 0.16 * sin(frameP.x * 0.023 + t * 1.2);
         vec2 lo = vec2(u.field.z + u.edgeWave.x * alongY, u.field.z + u.edgeWave.y * alongX);
         vec2 hi = size - vec2(u.field.z + u.edgeWave.z * alongY, u.field.z + u.edgeWave.w * alongX);
-        frameDistance = -roundedBox(p, (lo + hi) * 0.5, max((hi - lo) * 0.5, vec2(0.0)), u.field.w);
+        frameDistance = -roundedBox(frameP, (lo + hi) * 0.5, max((hi - lo) * 0.5, vec2(0.0)), u.field.w);
         united = frameDistance;
     }
+    float frameClusterDistance = frameDistance;
 
     // Material is blended by a soft minimum of distances, so where a solid body
     // melts into glass the fillet shades from one to the other instead of cutting.
@@ -170,13 +189,19 @@ void main() {
         float also = blockValue(block, slot, u.alsoA, u.alsoB, u.alsoC, u.alsoD, u.alsoE);
         if (join < -0.5 || join > 0.5) {
             float other = join < 0.0 ? frameDistance : bodies[int(join + 0.5) - 1];
-            if (other < FAR)
+            if (other < FAR) {
                 united = min(united, smoothUnion(other, bodies[i], k));
+                if (join < 0.0)
+                    frameClusterDistance = min(frameClusterDistance, smoothUnion(frameDistance, bodies[i], k));
+            }
         }
         if (also < -0.5 || also > 0.5) {
             float other = also < 0.0 ? frameDistance : bodies[int(also + 0.5) - 1];
-            if (other < FAR)
+            if (other < FAR) {
                 united = min(united, smoothUnion(other, bodies[i], k));
+                if (also < 0.0)
+                    frameClusterDistance = min(frameClusterDistance, smoothUnion(frameDistance, bodies[i], k));
+            }
         }
     }
 
@@ -186,6 +211,8 @@ void main() {
     }
     // One pixel of coverage, so the contour stays crisp at any scale.
     float coverage = 1.0 - smoothstep(-0.7, 0.7, united);
+    if (u.options.x > 0.5 && u.field.y > 0.5)
+        coverage *= smoothstep(-0.7, 0.7, frameDistance);
     float fillAlpha = coverage * u.tint.a * u.qt_Opacity;
     vec3 colour = u.tint.rgb * fillAlpha;
     float alpha = fillAlpha;
@@ -193,7 +220,7 @@ void main() {
     if (u.glass.x < 0.5) { share.x += share.y; share.y = 0.0; }
     if (share.x < 0.999) {
         float a = coverage * u.qt_Opacity;
-        vec3 behind = share.y > 0.0 ? texture(backdrop, clamp(p / max(u.screen, vec2(1.0)), 0.0, 1.0)).rgb : vec3(0.0);
+        vec3 behind = share.y > 0.0 ? texture(backdrop, clamp((p + u.scene.xy) / max(u.scene.zw, vec2(1.0)), 0.0, 1.0)).rgb : vec3(0.0);
         vec4 solid = vec4(u.tint.rgb, 1.0) * u.tint.a;
         vec4 glassy = vec4(mix(behind, u.tint.rgb, u.glass.z), 1.0);
         vec4 blurred = vec4(u.tint.rgb * u.glass.z, u.glass.z);
@@ -208,6 +235,19 @@ void main() {
         float rimAlpha = max(0.0, coverage - inner) * u.rim.a * u.qt_Opacity;
         colour = u.rim.rgb * rimAlpha + colour * (1.0 - rimAlpha);
         alpha = rimAlpha + alpha * (1.0 - rimAlpha);
+    }
+    // The light follows the frame and the bodies actually joined to it. A
+    // floating body has no frame join and keeps its own material and contour.
+    if (u.field.y > 0.5 && u.frameLight.x > 0.5 && u.frameLight.y > 0.001) {
+        float inside = max(0.0, -frameClusterDistance);
+        float wall = 1.0 - smoothstep(-0.7, 0.7, frameClusterDistance);
+        float width = max(1.0, u.frameLight.w);
+        float etched = 1.0 - smoothstep(0.0, width, abs(inside - 1.25));
+        float satin = exp(-inside / (width * 2.4));
+        float treatment = u.frameLight.x < 1.5 ? etched : satin;
+        float lightAlpha = coverage * wall * treatment * u.frameLight.y * u.frameLight.z * u.qt_Opacity;
+        colour = u.frameInk.rgb * lightAlpha + colour * (1.0 - lightAlpha);
+        alpha = lightAlpha + alpha * (1.0 - lightAlpha);
     }
     fragColor = vec4(colour, alpha);
 }

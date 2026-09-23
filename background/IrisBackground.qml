@@ -110,50 +110,21 @@ Variants {
             height: 1
         }
 
-        // Keep the normal iRiS desktop menu available even when the heavy
-        // desktop-widget canvas is intentionally unloaded. The Widgets tile
-        // enables that module before entering edit mode instead of opening an
-        // editor with no canvas behind it.
+        Connections {
+            target: GlobalStates
+            function onIrisDesktopMenuRequested(outputName: string, x: real, y: real): void {
+                if (outputName !== (panel.modelData?.name ?? "")) return
+                desktopMenuAnchor.x = x
+                desktopMenuAnchor.y = y
+                desktopMenu.requestOpen()
+            }
+        }
+
         IrisDesktopMenu {
             id: desktopMenu
             z: 22
             anchorItem: desktopMenuAnchor
-            model: [
-                { type: "quick", items: [
-                    { text: Translation.tr("Wallpaper"), iconName: "wallpaper",
-                        image: panel.video || panel.gif
-                            ? (Config.options?.background?.thumbnailPath ?? "") : panel.previewPath,
-                        action: () => {
-                            GlobalStates.wallpaperSelectorTargetMonitor = panel.monitorName
-                            GlobalActions.runLauncher(["wallpaperSelector", "toggle"])
-                        } },
-                    { text: Translation.tr("Widgets"), iconName: "widgets",
-                        action: () => {
-                            Config.setNestedValue("iris.modules.desktopWidgets", true)
-                            GlobalStates.setWidgetEditMode(true)
-                        } },
-                    { text: Translation.tr("Studio"), iconName: "palette",
-                        action: () => { GlobalStates.irisStudioOpen = true } },
-                    { text: Translation.tr("Search"), iconName: "search",
-                        action: () => { GlobalStates.searchOpen = true } }
-                ] },
-                { type: "separator" },
-                { text: Translation.tr("Edit iRiS"), iconName: "edit",
-                    action: () => { GlobalStates.irisEdit = true } },
-                { text: Translation.tr("Quick controls"), iconName: "tune",
-                    action: () => { GlobalStates.controlPanelOpen = true } },
-                { text: Translation.tr("Settings"), iconName: "settings",
-                    action: () => {
-                        Quickshell.execDetached([Quickshell.shellPath("scripts/inir"),
-                            "iris", "settings", ""])
-                    } },
-                { type: "separator" },
-                { text: Translation.tr("Reload shell"), iconName: "refresh",
-                    action: () => {
-                        Quickshell.execDetached(["/usr/bin/bash",
-                            Quickshell.shellPath("scripts/restart-shell.sh")])
-                    } }
-            ]
+            model: IrisDesktopActions.menu(panel.monitorName, panel.configuredPath, panel.previewPath)
         }
     }
 }

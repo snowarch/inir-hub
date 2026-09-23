@@ -425,13 +425,17 @@ Item {
                         xAxis.enabled: root.vertical
                         yAxis.enabled: !root.vertical
                         property real startSize: 40
-                        onActiveChanged: if (active) dockResizeDrag.startSize = Number(Config.options?.iris?.dock?.iconSize ?? 40)
+                        property IrisConfigDrag write: IrisConfigDrag { path: "iris.dock.iconSize" }
+                        onActiveChanged: {
+                            if (active) dockResizeDrag.startSize = Number(Config.options?.iris?.dock?.iconSize ?? 40)
+                            else dockResizeDrag.write.flush()
+                        }
                         onTranslationChanged: {
                             if (!active) return
                             const outward = root.vertical ? (root.atLeft ? translation.x : -translation.x)
                                 : (root.atTop ? translation.y : -translation.y)
                             const delta = outward / Math.max(0.01, root.d)
-                            Config.setNestedValue("iris.dock.iconSize", Math.round(Math.max(28, Math.min(64, dockResizeDrag.startSize + delta))))
+                            dockResizeDrag.write.push(Math.round(Math.max(28, Math.min(64, dockResizeDrag.startSize + delta))))
                         }
                     }
                 }
@@ -502,7 +506,7 @@ Item {
                                             height: width
                                             radius: width / 2
                                             color: (launcherArea.containsMouse ? IrisStyle.text : IrisStyle.textStrong)
-                                            Behavior on color { ColorAnimation { duration: IrisStyle.duration(120) } }
+                                            Behavior on color { ColorAnimation { duration: IrisStyle.duration(120); easing.type: IrisStyle.feedbackEasing } }
                                         }
                                     }
                                 }
@@ -595,8 +599,9 @@ Item {
                                 SequentialAnimation {
                                     id: launchBounce
                                     loops: 2
-                                    NumberAnimation { target: appSlot; property: "lift"; to: 14 * root.d; duration: 220; easing.type: IrisStyle.feedbackEasing }
-                                    NumberAnimation { target: appSlot; property: "lift"; to: 0; duration: 260; easing.type: Easing.OutBounce }
+                                    // A hop under gravity: slowing up, speeding down, and no ball-bounce on landing.
+                                    NumberAnimation { target: appSlot; property: "lift"; to: 14 * root.d; duration: IrisStyle.duration(240); easing.type: Easing.OutQuad }
+                                    NumberAnimation { target: appSlot; property: "lift"; to: 0; duration: IrisStyle.duration(240); easing.type: Easing.InQuad }
                                 }
 
                                 IrisButton {
@@ -660,7 +665,7 @@ Item {
                                         height: width
                                         radius: IrisStyle.iconRadius(width)
                                         color: (appButton.hovered || appButton.down ? IrisStyle.fill : ColorUtils.applyAlpha(IrisStyle.text, 0))
-                                        Behavior on color { ColorAnimation { duration: IrisStyle.duration(120) } }
+                                        Behavior on color { ColorAnimation { duration: IrisStyle.duration(120); easing.type: IrisStyle.feedbackEasing } }
                                     }
                                     SmartAppIcon {
                                         id: appIcon
@@ -747,7 +752,7 @@ Item {
                                         : appButton.iconCentreInSlot.x - width / 2)
                                     y: Math.round(root.atTop ? 0 : root.atBottom ? appSlot.height - height
                                         : appButton.iconCentreInSlot.y - height / 2)
-                                    spacing: 2 * Math.max(1, Math.round(2 * root.d))
+                                    spacing: Math.max(1, Math.round(2.5 * root.d))
                                     visible: windows > 0
                                     Repeater {
                                         model: indicators.windows
@@ -755,8 +760,8 @@ Item {
                                             id: indicator
                                             required property int index
                                             readonly property bool lead: indicator.index === indicators.focusedIndex
-                                            readonly property real dot: 2 * Math.max(2, Math.round(3 * root.d))
-                                            property real long: indicator.lead ? 2 * Math.round(8 * root.d) : indicator.dot
+                                            readonly property real dot: 2 * Math.max(1, Math.round(2 * root.d))
+                                            property real long: indicator.lead ? 2 * Math.round(6 * root.d) : indicator.dot
                                             height: root.vertical ? Math.round(indicator.long) : indicator.dot
                                             width: root.vertical ? indicator.dot : Math.round(indicator.long)
                                             antialiasing: true
@@ -767,7 +772,7 @@ Item {
                                             border.width: indicators.minimizedOnly ? Math.max(1, Math.round(1.2 * root.d)) : 0
                                             border.color: IrisStyle.textSecondary
                                             Behavior on long { NumberAnimation { duration: IrisStyle.morphDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: IrisStyle.morphCurve } }
-                                            Behavior on color { ColorAnimation { duration: IrisStyle.duration(140) } }
+                                            Behavior on color { ColorAnimation { duration: IrisStyle.duration(140); easing.type: IrisStyle.feedbackEasing } }
                                             SequentialAnimation on opacity {
                                                 running: indicators.urgent && IrisStyle.motionEnabled && indicator.visible
                                                 loops: Animation.Infinite
@@ -815,7 +820,7 @@ Item {
                                 height: width
                                 radius: width / 2
                                 color: pieceHover.hovered || pieceTap.pressed ? IrisStyle.fill : ColorUtils.applyAlpha(IrisStyle.text, 0)
-                                Behavior on color { ColorAnimation { duration: IrisStyle.duration(120) } }
+                                Behavior on color { ColorAnimation { duration: IrisStyle.duration(120); easing.type: IrisStyle.feedbackEasing } }
                             }
                             IrisBubbleFace {
                                 id: pieceFace
@@ -869,7 +874,7 @@ Item {
                                     accumulated -= steps * 120
                                     GlobalStates.quietIrisLevels()
                                     if (pieceSlot.modelData.kind === "mic") Audio.setSourceVolume(Math.max(0, Math.min(1, (Audio.micVolume ?? 0) + steps * 0.05)))
-                                    else Audio.setSinkVolume(Math.max(0, Math.min(1, (Audio.value ?? 0) + steps * 0.05)))
+                                    else Audio.setSinkVolume(Math.max(0, Math.min(Math.max(1, Audio.ceiling), (Audio.value ?? 0) + steps * 0.05)))
                                 }
                             }
                             IrisDesktopMenu {
@@ -918,16 +923,18 @@ Item {
                     IrisText {
                         anchors.verticalCenter: parent.verticalCenter
                         text: nameLabel.label
-                        font.pixelSize: 12.5 * IrisStyle.typeScale
-                        font.weight: Font.DemiBold
+                        width: Math.min(implicitWidth, Math.round(260 * root.d))
+                        elide: Text.ElideRight
+                        font.pixelSize: IrisStyle.typeLabel
+                        font.weight: IrisStyle.weight(Font.DemiBold)
                     }
                     IrisText {
                         anchors.verticalCenter: parent.verticalCenter
                         visible: nameLabel.windowCount > 1
                         text: nameLabel.windowCount
                         color: IrisStyle.secondaryAccent
-                        font.pixelSize: 11.5 * IrisStyle.typeScale
-                        font.weight: Font.Bold
+                        font.pixelSize: IrisStyle.typeMeta
+                        font.weight: IrisStyle.weight(Font.Bold)
                         font.family: IrisStyle.fontNumbers
                         font.features: ({ "tnum": 1 })
                     }
@@ -952,8 +959,8 @@ Item {
                     ? Math.round(Math.min(window.width - 24, windowsContent.implicitWidth + 20 * root.d))
                     : Math.round(Math.min(Math.max(200 * root.d, menuContent.implicitWidth + 12 * root.d), 260 * root.d))
                 height: Math.round(menu.activeContent.implicitHeight + (menu.mode === "windows" ? 20 : 12) * root.d)
-                readonly property real topClear: IrisFrame.inset("top") + 8 * root.d
-                readonly property real bottomClear: IrisFrame.inset("bottom") + 8 * root.d
+                readonly property real topClear: IrisFrame.safeInset("top") + 8 * root.d
+                readonly property real bottomClear: IrisFrame.safeInset("bottom") + 8 * root.d
                 x: Math.round(root.atLeft ? dock.x + dock.width + 8 * root.d
                     : root.atRight ? dock.x - width - 8 * root.d
                     : Math.max(window.menuLeftClear, Math.min(window.width - width - window.menuRightClear, window.menuAnchor.x - width / 2)))
@@ -1021,13 +1028,13 @@ Item {
                             Layout.fillWidth: true
                             text: AppSearch.lookupDesktopEntry(menu.app?.appId ?? "")?.name ?? (menu.app?.appId ?? "")
                             elide: Text.ElideRight
-                            font.pixelSize: 13 * IrisStyle.typeScale
-                            font.weight: Font.DemiBold
+                            font.pixelSize: IrisStyle.typeLabel
+                            font.weight: IrisStyle.weight(Font.DemiBold)
                         }
                         IrisText {
                             text: menu.windows.length === 1 ? Translation.tr("1 window") : Translation.tr("%1 windows").arg(menu.windows.length)
                             color: IrisStyle.muted
-                            font.pixelSize: 11.5 * IrisStyle.typeScale
+                            font.pixelSize: IrisStyle.typeMeta
                         }
                         IrisIconButton {
                             materialIcon: "add"
@@ -1080,7 +1087,7 @@ Item {
                                     border.width: card.focusedWindow ? Math.max(2, Math.round(2 * root.d)) : 0
                                     border.color: IrisStyle.accent
                                     scale: card.pressed ? IrisStyle.pressScale(0.97) : 1
-                                    Behavior on color { ColorAnimation { duration: IrisStyle.duration(120) } }
+                                    Behavior on color { ColorAnimation { duration: IrisStyle.duration(120); easing.type: IrisStyle.feedbackEasing } }
                                     Behavior on scale { NumberAnimation { duration: IrisStyle.duration(110); easing.type: IrisStyle.feedbackEasing } }
 
                                     readonly property real aspect: {
@@ -1185,7 +1192,7 @@ Item {
                                         color: closeHover.hovered ? IrisStyle.danger : IrisStyle.veilHeavy
                                         opacity: card.containsMouse && CompositorService.isNiri ? 1 : 0
                                         visible: opacity > 0
-                                        Behavior on opacity { NumberAnimation { duration: IrisStyle.duration(120) } }
+                                        Behavior on opacity { NumberAnimation { duration: IrisStyle.duration(120); easing.type: IrisStyle.feedbackEasing } }
                                         MaterialSymbol {
                                             anchors.centerIn: parent
                                             text: "close"
@@ -1214,7 +1221,7 @@ Item {
                                         elide: Text.ElideRight
                                         horizontalAlignment: Text.AlignHCenter
                                         color: card.focusedWindow ? IrisStyle.text : IrisStyle.subtext
-                                        font.pixelSize: 11.5 * IrisStyle.typeScale
+                                        font.pixelSize: IrisStyle.typeMeta
                                         font.weight: card.focusedWindow ? Font.DemiBold : Font.Medium
                                     }
                                     IrisText {
@@ -1225,7 +1232,7 @@ Item {
                                         elide: Text.ElideRight
                                         horizontalAlignment: Text.AlignHCenter
                                         color: IrisStyle.muted
-                                        font.pixelSize: 10.5 * IrisStyle.typeScale
+                                        font.pixelSize: IrisStyle.typeFootnote
                                     }
                                 }
                             }
@@ -1270,7 +1277,7 @@ Item {
                                 text: menuRow.label
                                 elide: Text.ElideRight
                                 color: menuRow.danger ? IrisStyle.danger : IrisStyle.text
-                                font.pixelSize: 12.5 * IrisStyle.typeScale
+                                font.pixelSize: IrisStyle.typeLabel
                             }
                         }
                     }
@@ -1286,14 +1293,14 @@ Item {
                             Layout.fillWidth: true
                             text: AppSearch.lookupDesktopEntry(menu.app?.appId ?? "")?.name ?? (menu.app?.appId ?? "")
                             elide: Text.ElideRight
-                            font.pixelSize: 13 * IrisStyle.typeScale
-                            font.weight: Font.DemiBold
+                            font.pixelSize: IrisStyle.typeLabel
+                            font.weight: IrisStyle.weight(Font.DemiBold)
                         }
                         IrisText {
                             text: (menu.windows?.length ?? 0) === 0 ? Translation.tr("Not running")
                                 : (menu.windows.length === 1 ? Translation.tr("1 window") : Translation.tr("%1 windows").arg(menu.windows.length))
                             color: IrisStyle.muted
-                            font.pixelSize: 11.5 * IrisStyle.typeScale
+                            font.pixelSize: IrisStyle.typeMeta
                         }
                     }
                     Repeater {

@@ -26,6 +26,6 @@ Rectangle {
         font.family: IrisStyle.fontNumbers
         font.features: ({ "tnum": 1 })
         font.pixelSize: root.size * 0.62
-        font.weight: Font.Bold
+        font.weight: IrisStyle.weight(Font.Bold)
     }
 }

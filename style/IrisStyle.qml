@@ -1,6 +1,9 @@
 pragma Singleton
 
 import QtQuick
+import QtQml
+import Quickshell
+import qs
 import qs.modules.common
 import qs.modules.common.functions
 
@@ -72,23 +75,81 @@ QtObject {
     readonly property real density: Math.max(0.8, Math.min(1.35, Number(root.appearance?.density ?? 1.0)))
     // Density scales geometry only; type has its own scale.
     readonly property real typeScale: Math.max(0.75, Math.min(1.6, (Appearance.fontSizeScale ?? 1.0) * root.tweak("text", 0.85, 1.25)))
+    readonly property int typeCaption: Math.round(10 * root.typeScale)
+    readonly property int typeFootnote: Math.round(11 * root.typeScale)
+    readonly property int typeMeta: Math.round(12 * root.typeScale)
+    readonly property int typeLabel: Math.round(13 * root.typeScale)
+    readonly property int typeBody: Math.round(14 * root.typeScale)
+    readonly property int typeHeadline: Math.round(15 * root.typeScale)
+    readonly property int typeTitle: Math.round(17 * root.typeScale)
+    readonly property int typeTitleLarge: Math.round(21 * root.typeScale)
+    readonly property int typeDisplay: Math.round(28 * root.typeScale)
+    // Inter's optical tracking (a + b·e^(c·size) em) in whole pixels: 0 to 25 px, −1 from 26, −2 from 68.
+    function tracking(px: real): int {
+        return Math.round(px * (-0.0223 + 0.185 * Math.exp(-0.1745 * px)))
+    }
 
     readonly property var theme: root.appearance?.theme ?? ({})
-    function hueOf(name: string, fallback: int): real {
-        const value = Number(root.theme?.[name] ?? fallback)
+    function wrapHue(hue, fallback: real): real {
+        const value = Number(hue)
         return (((isNaN(value) ? fallback : value) % 360) + 360) % 360 / 360
     }
+    function hueOf(name: string, fallback: int): real {
+        return root.wrapHue(root.theme?.[name], fallback)
+    }
+    // `theme` is rebuilt on every Config write; the tweaks reach consumers through a string that only
+    // changes when one of their values does, so a write elsewhere re-evaluates nothing downstream.
+    readonly property var tweakNames: ["text", "fill", "lines", "contrast", "shadow", "shape", "melt", "press",
+        "bounce", "contentTiming", "lightReach", "openTime", "moveTime"]
+    readonly property string tweakKey: JSON.stringify(root.tweakNames.map(name => root.theme?.[name] ?? 100))
+    readonly property var tweaks: {
+        const values = JSON.parse(root.tweakKey)
+        const out = {}
+        root.tweakNames.forEach((name, index) => out[name] = values[index])
+        return out
+    }
     function tweak(name: string, low: real, high: real): real {
-        const value = Number(root.theme?.[name] ?? 100)
+        const tweaks = root.tweaks ?? {}
+        const value = Number((name in tweaks ? tweaks[name] : root.theme?.[name]) ?? 100)
         return Math.max(low, Math.min(high, (isNaN(value) ? 100 : value) / 100 * IrisMood.factor(name)))
     }
     function surfaceRadius(id: string, fallback: int): int {
         const radius = Number(root.appearance?.surfaces?.[id]?.radius ?? 0)
-        return radius > 0 ? Math.round(radius * root.density) : fallback
+        if (radius > 0) return Math.round(radius * root.density)
+        if (id === "cards" && Number(root.cardDesign.radius ?? 0) > 0)
+            return Math.round(Number(root.cardDesign.radius) * root.density)
+        return fallback
     }
     function surfaceLight(id: string, light: color): color {
-        const mode = String(root.appearance?.surfaces?.[id]?.light ?? "inherit")
+        let mode = String(root.appearance?.surfaces?.[id]?.light ?? "inherit")
+        if (id === "cards" && mode === "inherit") mode = String(root.cardDesign.light ?? "inherit")
         return mode === "off" ? Qt.color("transparent") : mode === "wallpaper" ? root.wallpaperLight : light
+    }
+
+    // A card design is a named bundle of the knobs below it. Anything the user sets
+    // explicitly still wins: 0 and "inherit" mean "whatever the design says".
+    readonly property var cardDesigns: ({
+        welded:   { label: "Welded",   gap: 0,  radius: 0,  light: "inherit",   pad: 100, grabber: false },
+        floating: { label: "Floating", gap: 12, radius: 0,  light: "inherit",   pad: 100, grabber: true },
+        plain:    { label: "Plain",    gap: 0,  radius: 14, light: "off",       pad: 88,  grabber: false },
+        vibrant:  { label: "Vibrant",  gap: 0,  radius: 0,  light: "wallpaper", pad: 118, grabber: false }
+    })
+    readonly property var cardDesign: root.cardDesigns[String(root.appearance?.surfaces?.cards?.design ?? "welded")]
+        ?? root.cardDesigns.welded
+    readonly property real cardGap: {
+        const own = Number(root.appearance?.surfaces?.cards?.gap ?? 0)
+        return Math.round((own > 0 ? own : Number(root.cardDesign.gap ?? 0)) * root.density)
+    }
+    // A card fuses with its opener only when asked to and when its design leaves no air.
+    readonly property bool cardJoins: (root.appearance?.surfaces?.cards?.joinOrigin ?? false) && root.cardGap === 0
+    readonly property real cardPad: {
+        const own = Number(root.appearance?.surfaces?.cards?.pad ?? 0)
+        const percent = own > 0 ? own : Number(root.cardDesign.pad ?? 100)
+        return Math.round(16 * root.density * Math.max(0.5, Math.min(1.6, percent / 100)))
+    }
+    readonly property bool cardGrabber: {
+        const own = String(root.appearance?.surfaces?.cards?.grabber ?? "auto")
+        return own === "auto" ? Boolean(root.cardDesign.grabber ?? false) : own === "on"
     }
     readonly property int radius: Math.round(Math.max(16, Math.min(40, Number(root.appearance?.expandedRadius ?? 28))) * root.density)
     readonly property int radiusSmall: Math.max(4, Math.round(root.radius * 0.58))
@@ -116,19 +177,42 @@ QtObject {
     readonly property string presetName: root.presets[root.appearance?.preset ?? ""] ? root.appearance.preset : "iris"
     readonly property var preset: root.presets[root.presetName]
 
-    readonly property string fontMain: {
-        const configured = String(root.appearance?.fontFamily ?? "")
-        return configured.length > 0 ? configured : "Noto Sans"
+    readonly property Instantiator bundledFaces: Instantiator {
+        model: ["Light", "Regular", "Medium", "SemiBold", "Bold"].map(weight => `inter/Inter-${weight}`)
+            .concat(["Light", "Regular", "Medium", "SemiBold", "Bold"].map(weight => `inter/InterDisplay-${weight}`))
+            .concat(["Light", "Regular", "Medium", "SemiBold", "Bold", "ExtraBold", "Black"].map(weight => `rubik/Rubik-${weight}`))
+        delegate: FontLoader {
+            required property string modelData
+            source: Quickshell.shellPath(`assets/fonts/${modelData}.ttf`)
+        }
     }
-    readonly property string fontTitle: {
-        const configured = String(root.appearance?.titleFontFamily ?? "")
-        return configured.length > 0 ? configured : "Readex Pro"
+    readonly property string faceText: "Inter"
+    readonly property string faceTitle: "Inter Display"
+    readonly property string faceFigures: "Rubik"
+    readonly property var defaultFaces: ({
+        "iris.appearance.fontFamily": root.faceText,
+        "iris.appearance.titleFontFamily": root.faceTitle,
+        "iris.appearance.numbersFontFamily": root.faceFigures
+    })
+    function face(path: string, value: var): string {
+        const configured = String(value ?? "")
+        return configured.length > 0 ? configured : (root.defaultFaces[path] ?? root.faceText)
+    }
+    readonly property string fontMain: root.face("iris.appearance.fontFamily", root.appearance?.fontFamily)
+    readonly property string fontTitle: root.face("iris.appearance.titleFontFamily", root.appearance?.titleFontFamily)
+    // 220 font.weight bindings hang off this one. Read straight through `theme`, it is recomputed
+    // every time Config is reloaded — which is every write of any key — and drags all 220 with it,
+    // measured at six dropped frames per write. The name changes only when the weight really does.
+    readonly property string weightName: String(root.theme?.weight ?? "regular")
+    readonly property int weightShift: ({ light: -1, bold: 1 })[root.weightName] ?? 0
+    readonly property var weightSteps: [Font.Light, Font.Normal, Font.Medium, Font.DemiBold, Font.Bold, Font.ExtraBold]
+    function weight(base: int): int {
+        const steps = root.weightSteps
+        const at = steps.reduce((best, w, i) => Math.abs(w - base) < Math.abs(steps[best] - base) ? i : best, 0)
+        return steps[Math.max(0, Math.min(steps.length - 1, at + root.weightShift))]
     }
     readonly property int figureWeight: ({ light: Font.Light, regular: Font.Normal })[root.appearance?.figureWeight ?? "bold"] ?? Font.Bold
-    readonly property string fontNumbers: {
-        const configured = String(root.appearance?.numbersFontFamily ?? "")
-        return configured.length > 0 ? configured : "Rubik"
-    }
+    readonly property string fontNumbers: root.face("iris.appearance.numbersFontFamily", root.appearance?.numbersFontFamily)
 
     readonly property color canvas: Appearance.colors.colLayer0Base
     readonly property var materials: ({ black: "#000000", graphite: "#141416", midnight: "#0a0d17" })
@@ -168,19 +252,24 @@ QtObject {
     readonly property string glassRequested: ["wallpaper", "compositor"].includes(String(root.glassOptions?.mode ?? ""))
         ? root.glassOptions.mode : "off"
     readonly property bool glassy: root.glassRequested !== "off" && Appearance.effectsEnabled
+    readonly property bool menuCompact: String(root.appearance?.surfaces?.menus?.density ?? "compact") === "compact"
     readonly property bool glassCompositor: root.glassy && root.glassRequested === "compositor" && Appearance.compositorBlurActive
+        && IrisCompositorBlur.usable
     readonly property bool glassWallpaper: root.glassy && !root.glassCompositor
     readonly property real glassBlurAmount: Math.max(0, Math.min(1, Number(root.glassOptions?.blur ?? 100) / 100))
     readonly property real glassTint: {
         const chosen = Math.max(0.12, Math.min(0.96, Number(root.glassOptions?.tint ?? 58) / 100))
         const needed = IrisMood.sampled ? root.legibleVeil("glass", IrisMood.luminance, IrisMood.contrast * 0.5, 1) : 0
+        // Blur had a 66 % floor of its own, on the grounds that the windows below can be a white page
+        // the wallpaper reading knows nothing of. It cost the effect: at that tint there is nothing
+        // left to see through. The tint the user chose stands, as it does on wallpaper glass.
         return Math.max(chosen, Math.min(0.9, needed))
     }
     readonly property color bodyTint: root.glassy ? ColorUtils.applyAlpha(root.surfaceOpaque, root.glassTint) : root.bodySurface
     readonly property color bodyFill: root.glassy ? Qt.color("transparent") : root.bodySurface
     readonly property color bodyScrim: root.bodyTint
-    // iris-literal: a clipping chassis stops painting its children when fully transparent
-    readonly property color bodyClip: root.glassy ? Qt.rgba(0, 0, 0, 0.004) : root.bodySurface
+    // iris-literal: the field paints every body with its own soft edge; an opaque chassis on top drew a harder, stair-stepped one. Not 0: a transparent ClippingRectangle stops painting.
+    readonly property color bodyClip: Qt.rgba(0, 0, 0, 0.004)
     readonly property color placeSurface: root.glassy ? ColorUtils.applyAlpha(root.surfaceOpaque, root.glassTint) : root.surface
     readonly property real glassLip: 0
     readonly property real wallpaperVeil: IrisMood.sampled
@@ -189,7 +278,7 @@ QtObject {
         : root.tinted(root.surfaceHighOpaque, 0.16)
     readonly property color surfaceHighest: root.glassy ? ColorUtils.applyAlpha(root.fillInk, root.fillAlpha(0.12))
         : root.tinted(root.surfaceHighestOpaque, 0.2)
-    readonly property color field: root.surfaceHighestOpaque
+    readonly property color field: root.surfaceHighest
     readonly property color text: "#f5f5f7"
     // Secondary ink carries a whisper of the accent, so quiet text belongs to the theme instead of a stock grey.
     readonly property color quietInk: ColorUtils.mix(root.accent, root.text, 0.14)
@@ -205,13 +294,58 @@ QtObject {
     readonly property color themeAccent: root.legibleAccent(Appearance.colors.colPrimary, "#a8c7fa")
     readonly property var accents: ({ blue: "#a8c7fa", mint: "#8de0bd", rose: "#ffb2c4", lilac: "#d2baff" })
     readonly property var highlights: ({ orange: "#ff9f0a", yellow: "#ffd60a", red: "#ff6961", pink: "#ff6482", green: "#30d158" })
-    readonly property color accent: {
-        const choice = root.appearance?.accent ?? "blue"
+    readonly property var animePalettes: ({
+        sakura: { label: "Sakura", accent: "#f2a7d6", highlight: "#ff86b4" },
+        "neo-tokyo": { label: "Neo Tokyo", accent: "#4fd8ec", highlight: "#ff4fa3" },
+        "unit-01": { label: "Unit-01", accent: "#b39ddb", highlight: "#8fd06a" },
+        "magical-girl": { label: "Magical Girl", accent: "#ff6b8a", highlight: "#ffca5c" },
+        "spirit-forest": { label: "Spirit Forest", accent: "#5fd39a", highlight: "#f0b95c" }
+    })
+    readonly property string animeDefaultPalette: "sakura"
+    function animePaletteEntry(palette: string): var {
+        const name = String(palette ?? "")
+        return Object.prototype.hasOwnProperty.call(root.animePalettes, name)
+            ? root.animePalettes[name] : root.animePalettes[root.animeDefaultPalette]
+    }
+    function animeBlend(base: color, seed: color, strength: real): color {
+        const raw = Number(strength)
+        const t = isNaN(raw) ? 0 : Math.max(0, Math.min(1, raw))
+        return t <= 0 ? base : ColorUtils.mix(base, seed, 1 - t)
+    }
+    function animeAccent(base: color, palette: string, strength: real): color {
+        return root.animeBlend(base, root.legibleAccent(root.animePaletteEntry(palette).accent, base), strength)
+    }
+    function animeHighlight(base: color, palette: string, strength: real): color {
+        return root.animeBlend(base, root.vividHighlight(root.animePaletteEntry(palette).highlight, base), strength)
+    }
+    function accentFrom(choice: string, hue: real): color {
         if (choice === "theme") return root.themeAccent
         if (choice === "wallpaper") return root.legibleAccent(Appearance.wallpaperDominantColor, root.themeAccent)
-        if (choice === "custom") return Qt.hsla(root.hueOf("accentHue", 212), 0.7, 0.78, 1)
+        if (choice === "custom") return Qt.hsla(root.wrapHue(hue, 212), 0.7, 0.78, 1)
         return root.accents[choice] ?? root.accents.blue
     }
+    function highlightFrom(choice: string, hue: real, accent: color): color {
+        if (choice === "accent") return accent
+        if (choice === "theme") return root.vividHighlight(Appearance.colors.colTertiary, root.highlights.orange)
+        if (choice === "wallpaper") return root.vividHighlight(Appearance.colors.colSecondary,
+            root.vividHighlight(Appearance.wallpaperDominantColor, root.highlights.orange))
+        if (choice === "custom") return Qt.hsla(root.wrapHue(hue, 32), 0.92, 0.58, 1)
+        return root.highlights[choice] ?? root.highlights.orange
+    }
+    readonly property var animeLayer: root.appearance?.anime ?? ({})
+    readonly property bool animeEnabled: Boolean(root.animeLayer?.enabled ?? false)
+    readonly property string animePaletteName: {
+        const name = String(root.animeLayer?.palette ?? root.animeDefaultPalette)
+        return Object.prototype.hasOwnProperty.call(root.animePalettes, name) ? name : root.animeDefaultPalette
+    }
+    readonly property real animeStrength: {
+        const raw = Number(root.animeLayer?.strength ?? 0)
+        return isNaN(raw) ? 0 : Math.max(0, Math.min(1, raw / 100))
+    }
+    readonly property bool animeHighlightOn: Boolean(root.animeLayer?.highlight ?? false)
+    readonly property color baseAccent: root.accentFrom(String(root.appearance?.accent ?? "blue"), root.appearance?.theme?.accentHue)
+    readonly property color accent: root.animeEnabled
+        ? root.animeAccent(root.baseAccent, root.animePaletteName, root.animeStrength) : root.baseAccent
     readonly property color onAccent: Qt.color("#101318")
     readonly property color accentContainer: ColorUtils.mix(root.surface, root.accent, 0.78)
     readonly property color onAccentContainer: ColorUtils.mix(root.accent, root.text, 0.65)
@@ -221,14 +355,11 @@ QtObject {
         return Qt.hsla(c.hslHue, Math.max(0.62, Math.min(0.95, c.hslSaturation + 0.2)),
             Math.max(0.54, Math.min(0.66, c.hslLightness)), 1)
     }
+    readonly property color baseSecondaryAccent: root.highlightFrom(String(root.appearance?.highlight ?? "orange"), root.appearance?.theme?.highlightHue, root.baseAccent)
     readonly property color secondaryAccent: {
-        const choice = root.appearance?.highlight ?? "orange"
-        if (choice === "accent") return root.accent
-        if (choice === "theme") return root.vividHighlight(Appearance.colors.colTertiary, root.highlights.orange)
-        if (choice === "custom") return Qt.hsla(root.hueOf("highlightHue", 32), 0.92, 0.58, 1)
-        if (choice === "wallpaper") return root.vividHighlight(Appearance.colors.colSecondary,
-            root.vividHighlight(Appearance.wallpaperDominantColor, root.highlights.orange))
-        return root.highlights[choice] ?? root.highlights.orange
+        const base = root.baseSecondaryAccent
+        return root.animeEnabled && root.animeHighlightOn
+            ? root.animeHighlight(base, root.animePaletteName, root.animeStrength) : base
     }
     readonly property string auraName: ["off", "subtle", "vivid"].includes(root.appearance?.aura ?? "")
         ? root.appearance.aura : "subtle"
@@ -333,6 +464,8 @@ QtObject {
     readonly property color onMediaFill: ColorUtils.applyAlpha(root.onMedia, 0.2)
     readonly property color onMediaFillHover: ColorUtils.applyAlpha(root.onMedia, 0.3)
     readonly property color mediaScrim: Qt.rgba(0, 0, 0, 0.34)
+    readonly property color mediaGlass: Qt.rgba(0, 0, 0, 0.16)
+    readonly property color mediaHairline: ColorUtils.applyAlpha(root.onMedia, 0.16)
     readonly property color plateShadow: root.glowing(Math.min(0.9, 0.36 * root.tweak("shadow", 0, 1.6)))
     function skyWash(light: color): color { return ColorUtils.applyAlpha(light, 0.46) }
     function skyWashFade(light: color): color { return ColorUtils.applyAlpha(light, 0.05) }
@@ -423,6 +556,31 @@ QtObject {
     readonly property real accentRuleHeight: Math.max(2, Math.round(3 * root.density))
 
     readonly property bool motionEnabled: (root.appearance?.motion ?? true) && Appearance.animationsEnabled
+
+    // --- Arrival: the family grows inward once the shell has its first frame ------------------
+    // Boot, a reload and a family switch all end in shellEntryReady; the chassis rides this one
+    // value in from slightly past the screen edges. Reduced motion arrives at once.
+    property real arrival: 0
+    readonly property bool arriving: root.arrival < 1
+    readonly property NumberAnimation arrive: NumberAnimation {
+        target: root; property: "arrival"; from: 0; to: 1
+        duration: root.duration(Math.round(root.emergeDuration * 1.25))
+        easing.type: Easing.BezierSpline; easing.bezierCurve: root.emergeCurve
+    }
+    function startArrival(): void {
+        root.arrive.stop()
+        if (!root.motionEnabled) { root.arrival = 1; return }
+        root.arrival = 0
+        root.arrive.start()
+    }
+    readonly property Connections arrivalGate: Connections {
+        target: GlobalStates
+        function onShellEntryReadyChanged(): void {
+            if (GlobalStates.shellEntryReady) root.startArrival()
+            else { root.arrive.stop(); root.arrival = 0 }
+        }
+    }
+    Component.onCompleted: if (GlobalStates.shellEntryReady) root.startArrival()
         && root.appearance?.morph !== "instant"
     function duration(ms: int): int {
         return root.motionEnabled ? Appearance.calcEffectiveDuration(ms) : 0
@@ -463,20 +621,45 @@ QtObject {
     readonly property bool revealFades: root.revealName === "fade" || !root.motionEnabled
 
     readonly property int baseDuration: Math.max(100, Math.min(400, Number(root.appearance?.motionDuration ?? 220)))
-    function resolveSpring(entry: var, fallbackResponse: real, timeTweak: string): var {
+    function resolveStyleSpring(style: var, entry: var, fallbackResponse: real, timeTweak: string): var {
         const response = Math.round(root.baseDuration * Math.max(0.2, Number(entry?.response ?? fallbackResponse)) * root.tweak(timeTweak, 0.4, 2.5))
         const bounce = Number(entry?.bounce ?? 0) * root.tweak("bounce", 0, 2)
-        const curve = !root.morph?.curve ? null : entry?.curve ? root.curves[entry.curve] : root.directCurve
+        const curve = !style?.curve ? null : entry?.curve ? root.curves[entry.curve] : root.directCurve
         return { response: root.duration(response), bounce: curve ? 0 : Math.max(0, Math.min(0.6, bounce)), curve: curve }
+    }
+    function resolveSpring(entry: var, fallbackResponse: real, timeTweak: string): var {
+        return root.resolveStyleSpring(root.morph, entry, fallbackResponse, timeTweak)
+    }
+    // A surface may move in a style of its own ("" follows the family). It changes timing only:
+    // how content arrives stays the family's.
+    function surfaceMorph(id: string): string {
+        const name = String(root.appearance?.surfaces?.[id]?.morph ?? "")
+        return name.length > 0 && name !== root.morphName && root.morphStyles[name] ? name : ""
     }
     readonly property var emergeSpring: root.resolveSpring(root.morph?.emerge, 1.9, "openTime")
     readonly property var recedeSpring: root.resolveSpring(root.morph?.recede, 1.3, "openTime")
     readonly property var moveSpring: root.resolveSpring(root.morph?.move, 1.15, "moveTime")
+    // A surface's own material: "" follows the family's glass, "solid" or "glass" override it.
+    function surfaceMaterial(id: string): string {
+        const name = String(root.appearance?.surfaces?.[id]?.material ?? "")
+        return name === "solid" || name === "glass" ? name : ""
+    }
+    // The field's per-shape `glass` value for a surface.
+    function surfaceGlass(id: string): string {
+        const name = root.surfaceMaterial(id)
+        return name === "solid" ? "solid" : name === "glass" ? (root.glassCompositor ? "compositor" : "wallpaper") : "inherit"
+    }
     function surfaceSpeed(id: string): real {
         return id.length === 0 ? 1 : Math.max(0.4, Math.min(2.5, Number(root.appearance?.surfaces?.[id]?.speed ?? 100) / 100))
     }
     function springFor(intent: string, surface: string): var {
-        const base = intent === "move" ? root.moveSpring : intent === "emerge" ? root.emergeSpring : root.recedeSpring
+        const own = root.surfaceMorph(surface)
+        const style = own.length > 0 ? root.morphStyles[own] : null
+        const base = style
+            ? (intent === "move" ? root.resolveStyleSpring(style, style.move, 1.15, "moveTime")
+                : intent === "emerge" ? root.resolveStyleSpring(style, style.emerge, 1.9, "openTime")
+                : root.resolveStyleSpring(style, style.recede, 1.3, "openTime"))
+            : intent === "move" ? root.moveSpring : intent === "emerge" ? root.emergeSpring : root.recedeSpring
         const speed = root.surfaceSpeed(surface)
         return speed === 1 ? base : Object.assign({}, base, { response: Math.round(base.response / speed) })
     }

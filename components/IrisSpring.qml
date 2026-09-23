@@ -34,10 +34,24 @@ Item {
         loops: Animation.Infinite
     }
 
+    // Resolving a spring reads the surface's own style and speed out of Config, so it is done
+    // once per movement and not once per tick: the parameters cannot change mid-flight anyway.
+    property var resolved: null
     function params(intent: string): var {
-        const resolved = root.intent !== "auto" ? root.intent : intent
-        return IrisStyle.springFor(resolved, root.surface)
+        const wanted = root.intent !== "auto" ? root.intent : intent
+        const held = root.resolved
+        if (held && held[wanted]) return held[wanted]
+        const entry = IrisStyle.springFor(wanted, root.surface)
+        root.resolved = Object.assign({}, held ?? {}, { [wanted]: entry })
+        return entry
     }
+    function forget(): void { root.resolved = null }
+    readonly property var motionSignature: [IrisStyle.emergeSpring, IrisStyle.recedeSpring, IrisStyle.moveSpring,
+        String(IrisStyle.appearance?.surfaces?.[root.surface]?.morph ?? ""),
+        Number(IrisStyle.appearance?.surfaces?.[root.surface]?.speed ?? 100)]
+    onMotionSignatureChanged: root.forget()
+    onSurfaceChanged: root.forget()
+    onIntentChanged: root.forget()
     function jump(): void {
         root.running = false
         root.segments = []

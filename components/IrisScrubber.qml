@@ -1,6 +1,7 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
+import QtQuick.Effects
 import qs.modules.common.functions
 import qs.modules.iris.style
 
@@ -18,6 +19,7 @@ Item {
     activeFocusOnTab: root.seekable
 
     property real dragValue: -1
+    readonly property bool dragging: pointer.pressed
     readonly property bool engaged: root.seekable && (pointer.containsMouse || pointer.pressed || root.activeFocus)
     readonly property real shownValue: Math.max(0, Math.min(1, root.dragValue >= 0 ? root.dragValue : root.value))
 
@@ -65,7 +67,17 @@ Item {
         }
     }
 
+    // The same thumb as the switch: white, lifted by a soft shadow instead of an outline.
+    RectangularShadow {
+        visible: root.knob
+        anchors.fill: knobFace
+        radius: knobFace.radius
+        offset.y: IrisStyle.density
+        blur: 3 * IrisStyle.density
+        color: IrisStyle.shadow
+    }
     Rectangle {
+        id: knobFace
         visible: root.knob
         width: Math.round((root.engaged ? 20 : 18) * IrisStyle.density)
         height: width
@@ -73,8 +85,6 @@ Item {
         x: Math.max(0, Math.min(root.width - width, root.width * root.shownValue - width / 2))
         anchors.verticalCenter: parent.verticalCenter
         color: IrisStyle.onTint
-        border.width: 1
-        border.color: IrisStyle.veilLight
         Behavior on width { NumberAnimation { duration: IrisStyle.duration(120); easing.type: IrisStyle.feedbackEasing } }
     }
 

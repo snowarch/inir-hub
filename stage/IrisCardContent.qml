@@ -8,6 +8,7 @@ import Quickshell.Bluetooth
 import Quickshell.Widgets
 import qs
 import qs.services
+import qs.services.deferred
 import qs.modules.common
 import qs.modules.common.functions
 import qs.modules.common.widgets
@@ -42,6 +43,10 @@ Item {
         case "vitals": return IrisStyle.identity.teal
         case "workspaces": return IrisStyle.identity.purple
         case "updates": return IrisStyle.secondaryAccent
+        case "anime": return IrisStyle.identity.pink
+        case "watching": return IrisStyle.identity.pink
+        case "shellUpdate": return IrisStyle.secondaryAccent
+        case "vpn": return IrisStyle.identity.green
         default: return IrisStyle.wallpaperLight
         }
     }
@@ -69,7 +74,74 @@ Item {
             case "vitals": return vitalsCard
             case "workspaces": return workspacesCard
             case "updates": return updatesCard
+            case "anime": return animeCard
+            case "watching": return watchingCard
+            case "shellUpdate": return shellUpdateCard
+            case "vpn": return vpnCard
             default: return null
+            }
+        }
+    }
+
+    component VpnRow: MouseArea {
+        id: vpnRow
+        property string label: ""
+        property string detail: ""
+        property bool on: false
+        signal toggled()
+        implicitHeight: Math.round(42 * root.d)
+        cursorShape: Qt.PointingHandCursor
+        hoverEnabled: true
+        enabled: !Vpn.busy
+        Accessible.role: Accessible.CheckBox
+        Accessible.name: vpnRow.label
+        Accessible.checked: vpnRow.on
+        onClicked: vpnRow.toggled()
+        Rectangle {
+            anchors.fill: parent
+            radius: IrisStyle.radiusTile
+            color: vpnRow.containsMouse ? IrisStyle.fillHover : IrisStyle.fillQuiet
+            Behavior on color { ColorAnimation { duration: IrisStyle.duration(120); easing.type: IrisStyle.feedbackEasing } }
+        }
+        RowLayout {
+            anchors.fill: parent
+            anchors.leftMargin: Math.round(12 * root.d)
+            anchors.rightMargin: Math.round(10 * root.d)
+            spacing: 10 * root.d
+            ColumnLayout {
+                Layout.fillWidth: true
+                spacing: 0
+                IrisText {
+                    Layout.fillWidth: true
+                    text: vpnRow.label
+                    elide: Text.ElideRight
+                    font.pixelSize: IrisStyle.typeLabel
+                    font.weight: vpnRow.on ? Font.DemiBold : Font.Normal
+                }
+                IrisText {
+                    Layout.fillWidth: true
+                    visible: vpnRow.detail.length > 0
+                    text: vpnRow.detail
+                    color: IrisStyle.muted
+                    elide: Text.ElideRight
+                    font.pixelSize: IrisStyle.typeFootnote
+                }
+            }
+            Rectangle {
+                implicitWidth: Math.round(38 * root.d)
+                implicitHeight: Math.round(22 * root.d)
+                radius: height / 2
+                color: vpnRow.on ? IrisStyle.identity.green : IrisStyle.fillHover
+                Behavior on color { ColorAnimation { duration: IrisStyle.duration(140); easing.type: IrisStyle.feedbackEasing } }
+                Rectangle {
+                    y: Math.round(3 * root.d)
+                    x: vpnRow.on ? parent.width - width - Math.round(3 * root.d) : Math.round(3 * root.d)
+                    width: parent.height - Math.round(6 * root.d)
+                    height: width
+                    radius: width / 2
+                    color: IrisStyle.onTint
+                    Behavior on x { NumberAnimation { duration: IrisStyle.duration(140); easing.type: IrisStyle.feedbackEasing } }
+                }
             }
         }
     }
@@ -81,45 +153,6 @@ Item {
         onNavigate: root.close()
     }
 
-    component CardHeader: RowLayout {
-        id: header
-        property string glyph: ""
-        property string title: ""
-        property string detail: ""
-        property color tint: IrisStyle.accent
-        default property alias actions: actionRow.data
-        Layout.fillWidth: true
-        spacing: 8 * root.d
-        Rectangle {
-            implicitWidth: Math.round(24 * root.d)
-            implicitHeight: implicitWidth
-            radius: IrisStyle.iconRadius(width)
-            gradient: Gradient {
-                GradientStop { position: 0; color: Qt.lighter(header.tint, 1.2) }
-                GradientStop { position: 1; color: header.tint }
-            }
-            MaterialSymbol { anchors.centerIn: parent; text: header.glyph; fill: 1; iconSize: Math.round(15 * root.d); color: IrisStyle.onTint }
-        }
-        ColumnLayout {
-            Layout.fillWidth: true
-            spacing: 0
-            IrisText {
-                Layout.fillWidth: true
-                text: header.title
-                font.weight: Font.DemiBold
-                font.pixelSize: 14 * IrisStyle.typeScale
-                elide: Text.ElideRight
-            }
-            IrisText {
-                Layout.fillWidth: true
-                visible: text.length > 0
-                text: header.detail
-                role: IrisText.Meta
-                elide: Text.ElideRight
-            }
-        }
-        RowLayout { id: actionRow; spacing: 0 }
-    }
 
     readonly property var cardOptions: Config.options?.iris?.appearance?.surfaces?.cards ?? ({})
     component ColumnStrip: Item {
@@ -222,7 +255,7 @@ Item {
                                     width: Math.min(implicitWidth, tileTap.width - Math.round(44 * root.d))
                                     text: AppSearch.lookupDesktopEntry(String(tileTap.modelData.window.app_id ?? ""))?.name
                                         ?? String(tileTap.modelData.window.app_id ?? "")
-                                    font.pixelSize: 11 * IrisStyle.typeScale
+                                    font.pixelSize: IrisStyle.typeFootnote
                                     color: tileTap.focused ? IrisStyle.text : IrisStyle.subtext
                                     elide: Text.ElideRight
                                 }
@@ -245,7 +278,7 @@ Item {
                 id: floatingLabel
                 anchors.centerIn: parent
                 text: Translation.tr("%1 floating").arg(strip.floating.length)
-                font.pixelSize: 10 * IrisStyle.typeScale
+                font.pixelSize: IrisStyle.typeCaption
                 color: IrisStyle.subtext
             }
         }
@@ -266,7 +299,7 @@ Item {
             IrisNumber {
                 text: Math.round(level.value * 100) + "%"
                 color: IrisStyle.subtext
-                pixelSize: 13 * IrisStyle.typeScale
+                pixelSize: IrisStyle.typeLabel
                 weight: Font.DemiBold
             }
         }
@@ -464,7 +497,7 @@ Item {
                     Metric {
                         value: vital.modelData.value
                         unit: vital.modelData.unit
-                        pixelSize: 15 * IrisStyle.typeScale
+                        pixelSize: IrisStyle.typeHeadline
                         weight: Font.Bold
                         color: vital.tint
                     }
@@ -513,8 +546,8 @@ Item {
                             color: workspaceRow.modelData.is_active ? IrisStyle.accent : IrisStyle.text
                             font.family: IrisStyle.fontNumbers
                             font.features: ({ "tnum": 1 })
-                            font.pixelSize: 14 * IrisStyle.typeScale
-                            font.weight: Font.Bold
+                            font.pixelSize: IrisStyle.typeBody
+                            font.weight: IrisStyle.weight(Font.Bold)
                         }
                         MouseArea {
                             anchors.fill: parent
@@ -571,6 +604,244 @@ Item {
                     ShellExec.execCmd(Config.options?.apps?.update ?? "kitty -e sudo pacman -Syu")
                 }
             }
+        }
+    }
+    Component {
+        id: vpnCard
+        ColumnLayout {
+            id: vpn
+            spacing: 8 * root.d
+            Component.onCompleted: Vpn.keepAlive()
+            Component.onDestruction: Vpn.releaseKeepAlive()
+            CardHeader {
+                glyph: Vpn.connected ? "vpn_lock" : "vpn_key_off"
+                tint: Vpn.connected ? IrisStyle.identity.green : IrisStyle.muted
+                title: Translation.tr("VPN")
+                detail: Vpn.busy ? Translation.tr("Working…")
+                    : Vpn.connected ? Translation.tr("On through %1").arg(Vpn.activeName)
+                    : Translation.tr("Not connected")
+                IrisIconButton {
+                    materialIcon: "refresh"
+                    Accessible.name: Translation.tr("Check again")
+                    onClicked: Vpn.refresh()
+                }
+            }
+            IrisText {
+                Layout.fillWidth: true
+                visible: Vpn.profiles.length === 0
+                text: Vpn.available
+                    ? Translation.tr("OpenVPN and WireGuard profiles you add in NetworkManager show up here too.")
+                    : Translation.tr("No VPN yet. Add an OpenVPN or WireGuard profile in NetworkManager, or install Tailscale.")
+                color: IrisStyle.muted
+                wrapMode: Text.WordWrap
+                font.pixelSize: IrisStyle.typeMeta
+            }
+            VpnRow {
+                Layout.fillWidth: true
+                visible: Vpn.tailscaleInstalled
+                label: "Tailscale"
+                detail: Vpn.tailscaleUp ? Vpn.tailscaleAddress : Translation.tr("Off")
+                on: Vpn.tailscaleUp
+                onToggled: Vpn.toggleTailscale()
+            }
+            Repeater {
+                model: Vpn.profiles
+                VpnRow {
+                    required property var modelData
+                    Layout.fillWidth: true
+                    label: modelData.name
+                    detail: modelData.type
+                    on: modelData.active
+                    onToggled: Vpn.toggleProfile(modelData.uuid)
+                }
+            }
+            IrisText {
+                Layout.fillWidth: true
+                visible: Vpn.errorText.length > 0
+                text: Vpn.errorText
+                color: IrisStyle.danger
+                wrapMode: Text.WordWrap
+                maximumLineCount: 3
+                elide: Text.ElideRight
+                font.pixelSize: IrisStyle.typeMeta
+            }
+            IrisButton {
+                Layout.fillWidth: true
+                visible: Vpn.needsTailscaleOperator
+                enabled: !Vpn.busy
+                text: Translation.tr("Let me control Tailscale")
+                buttonRadius: IrisStyle.radiusTile
+                implicitHeight: Math.round(34 * root.d)
+                onClicked: Vpn.fixTailscaleOperator()
+            }
+        }
+    }
+    Component {
+        id: shellUpdateCard
+        ColumnLayout {
+            spacing: 10 * root.d
+            CardHeader {
+                glyph: "rocket_launch"
+                tint: IrisStyle.secondaryAccent
+                title: ShellUpdates.remoteVersion.length > 0
+                    ? Translation.tr("iNiR %1").arg(ShellUpdates.remoteVersion) : Translation.tr("New iNiR")
+                detail: ShellUpdates.repoDiverged
+                    ? Translation.tr("Upstream history changed; your local work is kept")
+                    : ShellUpdates.commitsBehind > 0
+                        ? Translation.tr("%1 commits behind").arg(ShellUpdates.commitsBehind)
+                        : Translation.tr("Ready to update")
+            }
+            IrisText {
+                Layout.fillWidth: true
+                visible: text.length > 0
+                text: ShellUpdates.latestMessage
+                color: IrisStyle.subtext
+                wrapMode: Text.WordWrap
+                maximumLineCount: 3
+                elide: Text.ElideRight
+                font.pixelSize: IrisStyle.typeMeta
+            }
+            IrisButton {
+                Layout.fillWidth: true
+                enabled: !ShellUpdates.isUpdating
+                text: ShellUpdates.isUpdating
+                    ? Translation.tr("Updating…") : Translation.tr("Update now")
+                buttonRadius: IrisStyle.radiusTile
+                implicitHeight: Math.round(38 * root.d)
+                onClicked: { root.close(); ShellUpdates.performUpdate() }
+            }
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: 8 * root.d
+                IrisButton {
+                    Layout.fillWidth: true
+                    quiet: true
+                    text: Translation.tr("What changed")
+                    buttonRadius: IrisStyle.radiusTile
+                    implicitHeight: Math.round(32 * root.d)
+                    onClicked: { root.close(); ShellUpdates.openOverlay() }
+                }
+                IrisButton {
+                    Layout.fillWidth: true
+                    quiet: true
+                    text: Translation.tr("Not now")
+                    buttonRadius: IrisStyle.radiusTile
+                    implicitHeight: Math.round(32 * root.d)
+                    onClicked: { root.close(); ShellUpdates.dismiss() }
+                }
+            }
+        }
+    }
+    Component {
+        id: animeCard
+        ColumnLayout {
+            id: airing
+            readonly property var shows: IrisPieces.animeUpcoming.slice(0,
+                Math.max(3, Math.min(8, Number(Config.options?.iris?.anime?.shows ?? 5))))
+            readonly property var next: IrisPieces.animeNext
+            spacing: 8 * root.d
+            Component.onCompleted: AnimeService.fetchTopAiring()
+            CardHeader {
+                glyph: IrisPieces.glyphOf("anime", "")
+                tint: IrisStyle.identity.pink
+                title: Translation.tr("Airing")
+                detail: airing.next
+                    ? Translation.tr("Ep %1 in %2").arg(airing.next.nextEpisode).arg(IrisPieces.animeWait(airing.next.airingAt))
+                    : Translation.tr("Nothing scheduled yet")
+                IrisIconButton {
+                    materialIcon: "refresh"
+                    Accessible.name: Translation.tr("Check again")
+                    onClicked: { AnimeService.invalidateTopCache(); AnimeService.fetchTopAiring() }
+                }
+            }
+            Repeater {
+                model: airing.shows
+                MouseArea {
+                    id: showRow
+                    required property var modelData
+                    readonly property bool followed: IrisPieces.animeFollows(showRow.modelData.id)
+                    Layout.fillWidth: true
+                    implicitHeight: Math.round(46 * root.d)
+                    cursorShape: Qt.PointingHandCursor
+                    hoverEnabled: true
+                    Accessible.role: Accessible.CheckBox
+                    Accessible.checked: showRow.followed
+                    Accessible.name: Translation.tr("Follow %1").arg(showRow.modelData.title)
+                    onClicked: IrisPieces.animeToggleFollow(showRow.modelData.id)
+                    Rectangle {
+                        anchors.fill: parent
+                        radius: IrisStyle.radiusTile
+                        color: showRow.containsMouse ? IrisStyle.fillHover : "transparent"
+                        Behavior on color { ColorAnimation { duration: IrisStyle.duration(120); easing.type: IrisStyle.feedbackEasing } }
+                    }
+                    RowLayout {
+                        anchors.fill: parent
+                        anchors.leftMargin: Math.round(6 * root.d)
+                        anchors.rightMargin: Math.round(8 * root.d)
+                        spacing: 10 * root.d
+                        ClippingRectangle {
+                            implicitWidth: Math.round(28 * root.d)
+                            implicitHeight: Math.round(38 * root.d)
+                            radius: IrisStyle.iconRadius(width)
+                            color: IrisStyle.fillQuiet
+                            IrisImage {
+                                anchors.fill: parent
+                                source: String(showRow.modelData.imageSmall ?? showRow.modelData.image ?? "")
+                            }
+                        }
+                        ColumnLayout {
+                            Layout.fillWidth: true
+                            spacing: 0
+                            IrisText {
+                                Layout.fillWidth: true
+                                text: showRow.modelData.title
+                                elide: Text.ElideRight
+                                font.pixelSize: IrisStyle.typeLabel
+                                font.weight: showRow.followed ? Font.DemiBold : Font.Normal
+                            }
+                            IrisText {
+                                Layout.fillWidth: true
+                                text: Translation.tr("Ep %1").arg(showRow.modelData.nextEpisode)
+                                color: IrisStyle.muted
+                                elide: Text.ElideRight
+                                font.pixelSize: IrisStyle.typeFootnote
+                            }
+                        }
+                        IrisText {
+                            text: IrisPieces.animeWait(showRow.modelData.airingAt)
+                            color: showRow.followed ? IrisStyle.identity.pink : IrisStyle.subtext
+                            font.family: IrisStyle.fontNumbers
+                            font.features: ({ "tnum": 1 })
+                            font.pixelSize: IrisStyle.typeMeta
+                            font.weight: IrisStyle.weight(Font.DemiBold)
+                        }
+                        MaterialSymbol {
+                            opacity: showRow.followed ? 1 : showRow.containsMouse ? 0.5 : 0
+                            text: "bookmark"
+                            fill: showRow.followed ? 1 : 0
+                            iconSize: Math.round(15 * root.d)
+                            color: showRow.followed ? IrisStyle.identity.pink : IrisStyle.subtext
+                            Behavior on opacity { NumberAnimation { duration: IrisStyle.duration(120); easing.type: IrisStyle.feedbackEasing } }
+                        }
+                    }
+                }
+            }
+            IrisText {
+                Layout.fillWidth: true
+                visible: airing.shows.length > 0
+                text: IrisPieces.animeFollowing.length > 0
+                    ? Translation.tr("The bubble shows what you follow first")
+                    : Translation.tr("Tap a show to follow it")
+                color: IrisStyle.muted
+                font.pixelSize: IrisStyle.typeMeta
+                horizontalAlignment: Text.AlignHCenter
+            }
+        }
+    }
+    Component {
+        id: watchingCard
+        IrisWatchingCard {
+            onCloseRequested: root.close()
         }
     }
     Component {

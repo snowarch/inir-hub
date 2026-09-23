@@ -1,10 +1,14 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
+import Quickshell
 import Quickshell.Widgets
 import qs
+import qs.modules.common
 import qs.modules.common.functions
+import qs.modules.iris.frame
 import qs.modules.iris.style
+import qs.modules.iris.field as Field
 
 Item {
     id: root
@@ -26,9 +30,38 @@ Item {
     property bool contentTravels: false
     property real originShare: IrisStyle.absorbShare
     property bool fieldBacked: false
+    // A surface in a window of its own draws its silhouette with a field of its own: the SDF edge
+    // every other body has, instead of a ClippingRectangle's harder one. Compositor blur keeps its pane.
+    property bool ownField: false
+    readonly property bool drawsOwnField: root.ownField && !root.fieldBacked && (!IrisStyle.glassCompositor || root.compositorBlurred)
+    // A Place that meets the frame hands its body to the chassis of its output (`fieldBacked`): the frame's
+    // field draws it with the join, the shadow and the blur, and this window only carries the content.
+    // `chassisJoin` adds what the body joins ({ id, joins, fuse }), an `edge` body to join past the screen
+    // edge, and `grow` ("top", "left"…) to extend the body under that edge by its radius.
+    property string chassisKey: ""
+    property var chassisJoin: ({})
+    readonly property var chassisBodies: {
+        if (!root.fieldBacked || root.chassisKey.length === 0 || !(root.open || root.presentation > 0)) return []
+        void (root.x + root.y + chassis.x + chassis.y + chassis.width + chassis.height + chassis.radius + (root.parent?.x ?? 0) + (root.parent?.y ?? 0))
+        const at = chassis.mapToItem(null, 0, 0)
+        const join = root.chassisJoin ?? {}
+        const r = chassis.radius
+        const body = { x: at.x + root.windowOffset.x, y: at.y + root.windowOffset.y, width: chassis.width, height: chassis.height, radius: r,
+            id: join.id ?? root.chassisKey, joins: join.joins ?? "", fuse: join.fuse ?? 0, paints: true,
+            glass: root.glass ? IrisStyle.surfaceGlass(root.motionSurface) : "solid" }
+        if (join.grow === "top") { body.y -= r; body.height += r }
+        else if (join.grow === "bottom") body.height += r
+        else if (join.grow === "left") { body.x -= r; body.width += r }
+        else if (join.grow === "right") body.width += r
+        return join.edge ? [join.edge, body] : [body]
+    }
+    onChassisBodiesChanged: IrisFrame.publishPlace(root.chassisKey, root.QsWindow.window?.screen?.name ?? "", root.chassisBodies)
+    Component.onDestruction: IrisFrame.publishPlace(root.chassisKey, "", [])
     property bool compositorBlurred: false
-    readonly property string material: !IrisStyle.glassy ? "solid"
-        : root.fieldBacked ? "field"
+    property bool glass: true
+    readonly property string surfaceMaterial: IrisStyle.surfaceMaterial(root.motionSurface)
+    readonly property string material: root.fieldBacked || root.drawsOwnField ? "field"
+        : !root.glass || root.surfaceMaterial === "solid" || (!IrisStyle.glassy && root.surfaceMaterial !== "glass") ? "solid"
         : IrisStyle.glassCompositor && root.compositorBlurred ? "compositor" : "wallpaper"
     default property alias content: contentHost.data
     readonly property real progress: root.presentation
@@ -38,6 +71,18 @@ Item {
             width: chassis.width, height: chassis.height, radius: chassis.radius }
     }
     readonly property bool settled: root.presentation >= 1
+    // In a window above its origin a body cannot pass under it, so it fades out as it reaches it instead of covering it.
+    property bool behindOrigin: !root.fieldBacked && (root.originItem !== null || root.origin !== null || root.originScene !== null)
+    property real emergenceSpan: 0.24
+    readonly property real emergence: root.behindOrigin ? IrisStyle.ramp(root.presentation, 0, root.emergenceSpan) : 1
+    readonly property bool blurs: !root.fieldBacked && IrisStyle.glassCompositor && root.compositorBlurred && root.glass
+        && root.surfaceMaterial !== "solid" && (IrisStyle.glassy || root.surfaceMaterial === "glass")
+    readonly property var blurShapes: {
+        if (!root.blurs || !(root.armed || root.presentation > 0) || root.emergence < 0.999) return []
+        void (root.x + root.y + chassis.x + chassis.y + chassis.width + chassis.height + chassis.radius + (root.parent?.x ?? 0) + (root.parent?.y ?? 0))
+        const at = chassis.mapToItem(null, 0, 0)
+        return [{ x: at.x, y: at.y, width: chassis.width, height: chassis.height, radius: chassis.radius }]
+    }
     signal closed()
 
     property var originScene: null
@@ -69,11 +114,19 @@ Item {
     }
     property bool armed: false
     property bool launched: false
+    // The first frame a body's content is drawn in builds its whole scene (text, grids, images): measured
+    // at 47 ms on the gallery, and the morph jumped from 0 to a fifth, faded in at 80 %, in one frame.
+    // Between arming and launching it is drawn barely above the threshold where Qt stops drawing a
+    // subtree (0.001 combined), so that frame is spent before the motion starts.
+    readonly property bool warming: root.armed && !root.launched && root.presentation <= 0
+    readonly property real warmth: 0.04
     property int launchFrames: 0
     Connections {
         target: root.Window.window
         enabled: root.armed && !root.launched
-        function onFrameSwapped(): void { if (++root.launchFrames >= 2) root.launched = true }
+        // One frame is enough: it is the warm frame that built the content. A still window draws no second
+        // one, so waiting for two always fell through to the timer (90 ms of nothing).
+        function onFrameSwapped(): void { if (++root.launchFrames >= 1) root.launched = true }
     }
     Timer { interval: 90; running: root.armed && !root.launched; onTriggered: root.launched = true }
     readonly property alias presentation: presentationSpring.value
@@ -114,16 +167,19 @@ Item {
         }
         root.armed = true
     }
-    onCanArmChanged: if (root.canArm) Qt.callLater(root.arm)
+    // Timers, not Qt.callLater: a Place unloads with its loader and a queued call would outlive it.
+    Timer { id: armLater; interval: 0; onTriggered: root.arm() }
+    Timer { id: captureLater; interval: 0; onTriggered: root.captureOrigin() }
+    onCanArmChanged: if (root.canArm) armLater.restart()
     onOpenChanged: {
         if (!root.open) {
             root.armed = false
-            if (root.fromIsland && root.originOwner.length === 0) Qt.callLater(root.captureOrigin)
+            if (root.fromIsland && root.originOwner.length === 0) captureLater.restart()
         } else {
-            Qt.callLater(root.arm)
+            armLater.restart()
         }
     }
-    Component.onCompleted: Qt.callLater(root.arm)
+    Component.onCompleted: armLater.restart()
 
     function lerp(a: real, b: real): real { return a + (b - a) * Math.min(1, root.presentation) }
     readonly property bool pullsAcross: Math.abs(root.width / 2 - root.start.x - root.start.width / 2)
@@ -162,6 +218,31 @@ Item {
     readonly property real snapX: Math.round(root.x) - root.x
     readonly property real snapY: Math.round(root.y) - root.y
 
+    Item {
+        id: fieldStrip
+        opacity: root.emergence
+        visible: root.drawsOwnField
+        x: -root.x
+        y: -root.y
+        width: root.parent ? root.parent.width : 0
+        height: root.parent ? root.parent.height : 0
+
+        Field.IrisField {
+            anchors.fill: parent
+            framed: false
+            compositorAllowed: root.blurs
+            sceneOrigin: {
+                void (root.x + root.y + (root.parent?.x ?? 0) + (root.parent?.y ?? 0))
+                const at = root.parent ? root.parent.mapToItem(null, 0, 0) : Qt.point(0, 0)
+                return Qt.point(root.windowOffset.x + at.x, root.windowOffset.y + at.y)
+            }
+            sceneSize: Qt.size(root.QsWindow.window?.screen?.width ?? 0, root.QsWindow.window?.screen?.height ?? 0)
+            shapes: root.drawsOwnField && (root.open || root.presentation > 0)
+                ? [Object.assign({ paints: true, fuse: 0, id: "place", glass: root.glass ? IrisStyle.surfaceGlass(root.motionSurface) : "solid" }, root.bodyRect)]
+                : []
+        }
+    }
+
     ClippingRectangle {
         id: chassis
         x: Math.round(root.x + root.lerpX(root.start.x, 0)
@@ -177,7 +258,7 @@ Item {
             : root.material === "compositor" ? IrisStyle.placeSurface : root.color
         // Visible from the request: forceActiveFocus() is ignored on invisible subtrees.
         visible: root.open || root.presentation > 0
-        opacity: root.armed || root.presentation > 0 ? 1 : 0
+        opacity: root.warming ? root.warmth : root.armed || root.presentation > 0 ? root.emergence : 0
 
         Loader {
             anchors.fill: parent
@@ -188,12 +269,13 @@ Item {
                     return chassis.mapToItem(null, 0, 0)
                 }
                 windowOffset: root.windowOffset
+                live: root.presentation > 0
             }
         }
 
         IrisLightWash {
             anchors.fill: parent
-            radius: chassis.radius
+            shapeRadius: chassis.radius
             light: root.light
             from: root.lightFrom
             presence: Math.max(0, Math.min(1, root.presentation))
@@ -205,7 +287,7 @@ Item {
             y: root.contentTravels ? 0 : Math.round(root.y + root.rideY) - root.y - chassis.y
             width: root.width
             height: root.height
-            opacity: root.drops
+            opacity: root.warming ? root.warmth : root.drops
                 ? IrisStyle.ramp(root.lagging, IrisStyle.dropRise, IrisStyle.dropSpan)
                 : IrisStyle.ramp(root.presentation, root.contentFadeStart, root.contentFadeSpan)
             scale: {

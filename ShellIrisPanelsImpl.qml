@@ -13,8 +13,8 @@ import qs.modules.iris.polkit
 import qs.modules.iris.style
 import qs.modules.iris.pieces
 import qs.modules.iris.settings
+import qs.modules.iris.lock
 import qs.modules.iris.sidebar
-import qs.modules.iris.studio
 import qs.modules.iris.wallpaper
 import qs.modules.background
 import qs.modules.lock
@@ -98,16 +98,9 @@ Item {
         closeGraceMs: IrisStyle.settleDuration * 2 + 160
         extraCondition: (Config.options?.iris?.modules?.notificationPopup ?? true)
             && (!(Config.options?.enabledPanels ?? []).includes("irisBar")
-                || (CompositorService.isNiri && GameMode.hasFullscreenOnOutput(GlobalStates.focusedScreen?.name ?? "") && !NiriService.inOverview))
+                || (CompositorService.isNiri && GameMode.hasFullscreenOnOutput(GlobalStates.focusedScreen?.name ?? "") && !NiriService.inOverview
+                    && (Config.options?.iris?.notifications?.fullscreen ?? true)))
         component: IrisNotificationPopup {}
-    }
-
-    OnDemandPanelLoader {
-        identifier: "irisStudio"
-        requireEnabledPanel: false
-        open: GlobalStates.irisStudioOpen
-        closeGraceMs: IrisStyle.settleDuration + 120
-        component: IrisStudio {}
     }
 
     OnDemandPanelLoader {
@@ -205,6 +198,13 @@ Item {
         requireEnabledPanel: false
         closeGraceMs: IrisStyle.settleDuration + 120
         component: IrisWallpaperPicker {}
+    }
+
+    OnDemandPanelLoader {
+        identifier: "irisLockRehearsal"
+        open: GlobalStates.irisLockEdit
+        requireEnabledPanel: false
+        component: IrisLockRehearsal {}
     }
 
     OnDemandPanelLoader {

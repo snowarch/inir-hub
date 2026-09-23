@@ -5,6 +5,7 @@ Item {
     id: root
     property real implicitSize: 22 * IrisStyle.density
     property color color: IrisStyle.accent
+    property bool orbiting: false
     implicitWidth: implicitSize
     implicitHeight: implicitSize
 
@@ -26,12 +27,22 @@ Item {
         color: root.color
     }
 
-    Rectangle {
-        x: root.width * 0.76
-        y: root.height * 0.08
-        width: root.implicitSize * 0.13
-        height: width
-        radius: width / 2
-        color: IrisStyle.secondaryAccent
+    Item {
+        anchors.fill: parent
+        Rectangle {
+            x: root.width * 0.76
+            y: root.height * 0.08
+            width: root.implicitSize * 0.13
+            height: width
+            radius: width / 2
+            color: IrisStyle.secondaryAccent
+        }
+        RotationAnimator on rotation {
+            running: root.orbiting && IrisStyle.motionEnabled
+            loops: Animation.Infinite
+            from: 0
+            to: 360
+            duration: 9000
+        }
     }
 }

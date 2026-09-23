@@ -22,7 +22,8 @@ IrisDeviceList 1.0 IrisDeviceList.qml
 IrisPlacePicker 1.0 IrisPlacePicker.qml
 IrisOutputHold 1.0 IrisOutputHold.qml
 IrisBadge 1.0 IrisBadge.qml
-IrisStudioMask 1.0 IrisStudioMask.qml
+IrisWallpaperView 1.0 IrisWallpaperView.qml
+IrisConfigDrag 1.0 IrisConfigDrag.qml
 IrisWheelPicker 1.0 IrisWheelPicker.qml
 IrisSpring 1.0 IrisSpring.qml
 IrisWheelIntent 1.0 IrisWheelIntent.qml
@@ -30,3 +31,10 @@ IrisNetworkList 1.0 IrisNetworkList.qml
 IrisBluetoothList 1.0 IrisBluetoothList.qml
 IrisGlassPane 1.0 IrisGlassPane.qml
 IrisLightWash 1.0 IrisLightWash.qml
+IrisTrayMenu 1.0 IrisTrayMenu.qml
+IrisTrayStrip 1.0 IrisTrayStrip.qml
+IrisImage 1.0 IrisImage.qml
+IrisScrollBar 1.0 IrisScrollBar.qml
+IrisSwitch 1.0 IrisSwitch.qml
+IrisSegmented 1.0 IrisSegmented.qml
+IrisChip 1.0 IrisChip.qml

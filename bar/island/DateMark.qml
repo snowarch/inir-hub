@@ -9,7 +9,7 @@ import qs.modules.iris.components
 
 Row {
     id: dateMark
-    property real pixelSize: 12 * IrisStyle.typeScale
+    property real pixelSize: IrisStyle.typeMeta
     property color dayColor: IrisStyle.secondaryAccent
     spacing: Math.round(dateMark.pixelSize * 0.3)
     IrisText {
@@ -17,7 +17,7 @@ Row {
         text: Qt.locale().toString(DateTime.clock.date, "ddd").replace(/\.$/, "")
         color: IrisStyle.muted
         font.pixelSize: dateMark.pixelSize * 0.92
-        font.weight: Font.Medium
+        font.weight: IrisStyle.weight(Font.Medium)
     }
     IrisText {
         anchors.baseline: weekdayText.baseline
@@ -25,7 +25,7 @@ Row {
         color: dateMark.dayColor
         font.pixelSize: dateMark.pixelSize
         font.family: IrisStyle.fontNumbers
-        font.weight: Font.Bold
+        font.weight: IrisStyle.weight(Font.Bold)
         font.features: ({ "tnum": 1 })
     }
 }

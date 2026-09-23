@@ -16,6 +16,9 @@ Item {
     property bool vertical: false
     property real thickness: 42
     property real heartLength: 0
+    // The band the zones sit in across the bar: all of it, or a menu bar's strip.
+    property real laneTop: 0
+    property real lane: zones.height
     property var start: []
     property var center: []
     property var end: []
@@ -26,17 +29,22 @@ Item {
     property color clockAccent: IrisStyle.secondaryAccent
 
     readonly property real d: IrisStyle.density
-    readonly property real pieceSize: Math.round(zones.thickness - 10 * zones.d)
-    readonly property real endInset: Math.round((zones.thickness - zones.pieceSize) / 2)
+    // The rail changes depth, but the controls keep the full bar's touch and glyph scale.
+    readonly property bool strip: zones.lane < zones.height - 0.5
+    readonly property real pieceSize: Math.round(zones.thickness)
+    readonly property real endInset: Math.round(10 * zones.d)
     readonly property real gap: Math.round(6 * zones.d)
     readonly property real length: zones.vertical ? zones.height : zones.width
+    // The tray remains one usable piece when its individual apps would squeeze the live heart.
+    readonly property bool trayApps: String(Config.options?.iris?.tray?.face ?? "apps") === "apps"
+        && zones.length >= 1100 * zones.d
 
     function taken(kind: string): bool {
         if (zones.absorbed.includes(kind)) return false
         return Config.options?.iris?.bubbles?.extras?.[kind]?.enable ?? false
     }
     function usable(kind: string): bool {
-        if (kind === "island" || kind === "window" || kind === "time") return true
+        if (kind === "island" || kind === "window" || kind === "time" || kind === "|") return true
         if (kind === "workspaces") return CompositorService.isNiri && !zones.taken(kind)
         return IrisPieces.extraIds.includes(kind) && IrisPieces.available(kind) && !zones.taken(kind)
     }
@@ -44,10 +52,11 @@ Item {
         const seen = []
         const out = [zones.start, zones.center, zones.end].map(list => Array.from(list ?? []).filter(kind => {
             const id = String(kind)
+            if (id === "|") return true
             if (seen.includes(id) || !zones.usable(id)) return false
             seen.push(id)
             return true
-        }))
+        }).filter((kind, i, list) => kind !== "|" || (i > 0 && i < list.length - 1 && list[i - 1] !== "|")))
         if (!seen.includes("island")) out[1].unshift("island")
         return out
     }
@@ -67,6 +76,8 @@ Item {
     function alongOf(group: Item): real { return zones.vertical ? group.height : group.width }
     readonly property real startEnd: zones.endInset + zones.alongOf(startGroup)
     readonly property real endStart: zones.length - zones.endInset - zones.alongOf(endGroup)
+    readonly property rect startArea: Qt.rect(startGroup.x, startGroup.y, startGroup.width, startGroup.height)
+    readonly property rect endArea: Qt.rect(endGroup.x, endGroup.y, endGroup.width, endGroup.height)
 
     component Group: Grid {
         property var kinds: []
@@ -76,17 +87,19 @@ Item {
         verticalItemAlignment: Grid.AlignVCenter
         horizontalItemAlignment: Grid.AlignHCenter
         x: zones.vertical ? Math.round((zones.width - width) / 2) : 0
-        y: zones.vertical ? 0 : Math.round((zones.height - height) / 2)
+        y: zones.vertical ? 0 : Math.round(zones.laneTop + (zones.lane - height) / 2)
         Repeater {
             model: parent.kinds
             delegate: Loader {
                 id: entry
                 required property string modelData
                 visible: (item?.implicitWidth ?? 0) > 0.5 && (item?.implicitHeight ?? 0) > 0.5
-                sourceComponent: entry.modelData === "island" ? heartSlot
+                sourceComponent: entry.modelData === "|" ? breathEntry
+                    : entry.modelData === "island" ? heartSlot
                     : entry.modelData === "workspaces" ? workspacesEntry
                     : entry.modelData === "window" ? windowEntry
-                    : entry.modelData === "time" ? timeEntry : pieceEntry
+                    : entry.modelData === "time" ? timeEntry
+                    : entry.modelData === "tray" && zones.trayApps ? trayEntry : pieceEntry
                 onLoaded: {
                     entry.item.kind = entry.modelData
                     if (entry.modelData === "island") zones.heartItem = entry
@@ -110,13 +123,13 @@ Item {
         id: startGroup
         kinds: zones.entries[0]
         x: zones.vertical ? Math.round((zones.width - width) / 2) : zones.endInset
-        y: zones.vertical ? zones.endInset : Math.round((zones.height - height) / 2)
+        y: zones.vertical ? zones.endInset : Math.round(zones.laneTop + (zones.lane - height) / 2)
     }
     Group {
         id: endGroup
         kinds: zones.entries[2]
         x: zones.vertical ? Math.round((zones.width - width) / 2) : Math.round(zones.width - zones.endInset - width)
-        y: zones.vertical ? Math.round(zones.height - zones.endInset - height) : Math.round((zones.height - height) / 2)
+        y: zones.vertical ? Math.round(zones.height - zones.endInset - height) : Math.round(zones.laneTop + (zones.lane - height) / 2)
     }
     Group {
         id: centerGroup
@@ -125,7 +138,7 @@ Item {
         readonly property real along: Math.round(Math.max(zones.startEnd + 2 * zones.gap,
             Math.min(zones.endStart - 2 * zones.gap - size, (zones.length - size) / 2)))
         x: zones.vertical ? Math.round((zones.width - width) / 2) : centerGroup.along
-        y: zones.vertical ? centerGroup.along : Math.round((zones.height - height) / 2)
+        y: zones.vertical ? centerGroup.along : Math.round(zones.laneTop + (zones.lane - height) / 2)
     }
 
     component Platter: Rectangle {
@@ -135,6 +148,16 @@ Item {
         color: IrisStyle.fillHover
         opacity: lit ? 1 : 0
         Behavior on opacity { NumberAnimation { duration: IrisStyle.duration(120); easing.type: IrisStyle.feedbackEasing } }
+    }
+
+    // Air between what the bar carries and the pieces it took in: grouped by space, never by a box.
+    Component {
+        id: breathEntry
+        Item {
+            property string kind: ""
+            implicitWidth: zones.vertical ? 1 : zones.gap * 2
+            implicitHeight: zones.vertical ? zones.gap * 2 : 1
+        }
     }
 
     Component {
@@ -185,6 +208,22 @@ Item {
             }
             Accessible.role: Accessible.Button
             Accessible.name: Translation.tr(IrisPieces.labelOf(piece.kind))
+        }
+    }
+
+    Component {
+        id: trayEntry
+        Item {
+            property string kind: ""
+            implicitWidth: strip.width
+            implicitHeight: strip.height
+            IrisTrayStrip {
+                id: strip
+                cellSize: zones.pieceSize
+                vertical: zones.vertical
+                screenName: zones.screenName
+                menuToward: zones.island.trayMenuToward
+            }
         }
     }
 
@@ -248,7 +287,7 @@ Item {
                                 : space.modelData.urgent ? IrisStyle.secondaryAccent
                                 : spaceHover.hovered ? IrisStyle.text
                                 : space.modelData.used ? IrisStyle.textSecondary : IrisStyle.textTertiary
-                            Behavior on color { ColorAnimation { duration: IrisStyle.duration(140) } }
+                            Behavior on color { ColorAnimation { duration: IrisStyle.duration(140); easing.type: IrisStyle.feedbackEasing } }
                         }
                         HoverHandler { id: spaceHover; cursorShape: Qt.PointingHandCursor }
                         TapHandler { onTapped: if (!space.modelData.active) NiriService.switchToWorkspaceById(space.modelData.id) }
@@ -294,8 +333,8 @@ Item {
                 anchors.verticalCenter: parent.verticalCenter
                 width: Math.min(current.maxTitle, implicitWidth)
                 text: current.title
-                font.pixelSize: 12.5 * IrisStyle.typeScale
-                font.weight: Font.Medium
+                font.pixelSize: IrisStyle.typeLabel
+                font.weight: IrisStyle.weight(Font.Medium)
                 elide: Text.ElideRight
             }
             Accessible.role: Accessible.StaticText

@@ -17,40 +17,35 @@ Item {
     property real headerReserve: 0
     property color tint: IrisStyle.text
     readonly property bool hasPlayer: root.player !== null && root.player !== undefined
+    // A stream is live when it has no length, cannot seek while playing, or its end keeps running
+    // away from a playhead that sits at it. Every sign is re-read, never latched: a browser that
+    // sends a track's title before its length, or a seek that republishes metadata, must not leave
+    // a normal video reading "Live" for the rest of the track.
+    readonly property string trackKey: (root.player?.dbusName ?? "") + "\n" + media.effectiveTitle
     property real seenLength: 0
-    property string seenTrack: ""
-    property bool lengthGrew: false
+    property int grewSamples: 0
     property int atEndSamples: 0
+    onTrackKeyChanged: { root.seenLength = 0; root.grewSamples = 0; root.atEndSamples = 0 }
     Timer {
         interval: 2000
         repeat: true
-        running: root.active && root.hasPlayer && media.effectiveIsPlaying && !root.liveStream
+        running: root.active && root.hasPlayer && media.effectiveIsPlaying
         onTriggered: {
             const len = media.effectiveLength
-            if (len > 0 && media.effectivePosition >= len - 1) root.atEndSamples++
-            else root.atEndSamples = 0
+            const pos = media.effectivePosition
+            const atEdge = len > 0 && pos >= len - 1
+            root.atEndSamples = atEdge ? root.atEndSamples + 1 : 0
+            const grew = root.seenLength > 0 && len > root.seenLength + 1 && pos >= root.seenLength - 3
+            root.grewSamples = grew ? root.grewSamples + 1 : 0
+            if (len > 0) root.seenLength = len
         }
     }
     readonly property bool liveStream: root.hasPlayer
         && (media.effectiveLength <= 0
             || (media.effectiveIsPlaying && !media.effectiveCanSeek)
-            || root.lengthGrew
+            || root.grewSamples >= 2
             || root.atEndSamples >= 2)
     readonly property bool hasTimeline: root.hasPlayer && !root.liveStream && media.effectiveLength > 0
-    Connections {
-        target: media
-        function onEffectiveTitleChanged(): void {
-            root.seenTrack = media.effectiveTitle
-            root.seenLength = media.effectiveLength
-            root.lengthGrew = false
-            root.atEndSamples = 0
-        }
-        function onEffectiveLengthChanged(): void {
-            const now = media.effectiveLength
-            if (root.seenLength > 0 && now > root.seenLength + 2) root.lengthGrew = true
-            root.seenLength = now
-        }
-    }
     implicitHeight: (root.compact ? compactBody.implicitHeight : body.implicitHeight) + 28 * IrisStyle.density
     implicitWidth: 360 * IrisStyle.density
     PlayerBase { id: media; player: root.player; positionUpdatesActive: root.active }
@@ -80,14 +75,14 @@ Item {
             spacing: 14 * IrisStyle.density
             IrisArtwork {
                 source: media.displayedArtFilePath
-                circular: Config.options?.iris?.player?.roundCover ?? true
+                circular: Config.options?.iris?.player?.roundCover ?? false
                 Layout.preferredWidth: 68 * IrisStyle.density
                 Layout.preferredHeight: 68 * IrisStyle.density
             }
             ColumnLayout {
                 Layout.fillWidth: true
                 spacing: 3
-                IrisText { Layout.fillWidth: true; text: root.hasPlayer ? media.effectiveTitle : Translation.tr("Nothing playing"); font.weight: Font.DemiBold; elide: Text.ElideRight }
+                IrisText { Layout.fillWidth: true; text: root.hasPlayer ? media.effectiveTitle : Translation.tr("Nothing playing"); font.weight: IrisStyle.weight(Font.DemiBold); elide: Text.ElideRight }
                 IrisText { Layout.fillWidth: true; text: root.hasPlayer ? media.effectiveArtist : Translation.tr("Your music appears here"); role: IrisText.Meta; elide: Text.ElideRight }
             }
         }
@@ -108,7 +103,7 @@ Item {
             IrisText {
                 text: StringUtils.friendlyTimeForSeconds(media.effectivePosition)
                 color: IrisStyle.textTertiary
-                font.pixelSize: 11 * IrisStyle.typeScale
+                font.pixelSize: IrisStyle.typeFootnote
                 font.family: IrisStyle.fontNumbers
                 font.features: ({ "tnum": 1 })
             }
@@ -116,7 +111,7 @@ Item {
             IrisText {
                 text: StringUtils.friendlyTimeForSeconds(media.effectiveLength)
                 color: IrisStyle.textTertiary
-                font.pixelSize: 11 * IrisStyle.typeScale
+                font.pixelSize: IrisStyle.typeFootnote
                 font.family: IrisStyle.fontNumbers
                 font.features: ({ "tnum": 1 })
             }
@@ -140,15 +135,15 @@ Item {
             IrisText {
                 text: Translation.tr("Live")
                 color: IrisStyle.textSecondary
-                font.pixelSize: 11.5 * IrisStyle.typeScale
-                font.weight: Font.DemiBold
+                font.pixelSize: IrisStyle.typeMeta
+                font.weight: IrisStyle.weight(Font.DemiBold)
             }
             Item { Layout.fillWidth: true }
             IrisText {
                 visible: media.effectivePosition > 0
                 text: StringUtils.friendlyTimeForSeconds(media.effectivePosition)
                 color: IrisStyle.textTertiary
-                font.pixelSize: 11 * IrisStyle.typeScale
+                font.pixelSize: IrisStyle.typeFootnote
                 font.family: IrisStyle.fontNumbers
                 font.features: ({ "tnum": 1 })
             }
@@ -175,14 +170,14 @@ Item {
         spacing: 12 * IrisStyle.density
         IrisArtwork {
             source: media.displayedArtFilePath
-            circular: Config.options?.iris?.player?.roundCover ?? true
+            circular: Config.options?.iris?.player?.roundCover ?? false
             Layout.preferredWidth: 46 * IrisStyle.density
             Layout.preferredHeight: 46 * IrisStyle.density
         }
         ColumnLayout {
             Layout.fillWidth: true
             spacing: 2
-            IrisText { Layout.fillWidth: true; text: root.hasPlayer ? media.effectiveTitle : Translation.tr("Nothing playing"); font.weight: Font.DemiBold; elide: Text.ElideRight }
+            IrisText { Layout.fillWidth: true; text: root.hasPlayer ? media.effectiveTitle : Translation.tr("Nothing playing"); font.weight: IrisStyle.weight(Font.DemiBold); elide: Text.ElideRight }
             IrisText { Layout.fillWidth: true; text: root.hasPlayer ? media.effectiveArtist : Translation.tr("Your music appears here"); role: IrisText.Meta; elide: Text.ElideRight }
             Rectangle {
                 Layout.fillWidth: true
