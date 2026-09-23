@@ -2,30 +2,69 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Effects
-import QtQuick.Layouts
+import QtQuick.Shapes
 import QtMultimedia
-import Quickshell.Widgets
+import Quickshell
 import qs
 import qs.services
 import qs.modules.common
-import qs.modules.common.functions
-import qs.modules.common.widgets
 import qs.modules.iris.style
-import qs.modules.iris.components
 
 Item {
     id: root
     required property var context
+    property bool editing: false
+    property string screenName: root.QsWindow.window?.screen?.name ?? ""
+    property bool leaving: false
+    readonly property bool sceneReady: !root.painted || wallpaper.status === Image.Ready || wallpaper.status === Image.Error
+    property real presence: 0
+    readonly property real arrival: IrisStyle.ramp(root.presence, 0.25, 0.75)
+    readonly property int presenceTarget: root.leaving || !(root.sceneReady || sceneTimeout.fired) ? 0 : 1
+    Behavior on presence {
+        NumberAnimation {
+            duration: root.presenceTarget > 0 ? IrisStyle.settleDuration : IrisStyle.recedeDuration
+            easing.type: Easing.BezierSpline
+            easing.bezierCurve: root.presenceTarget > 0 ? IrisStyle.emergeCurve : IrisStyle.recedeCurve
+        }
+    }
+    Timer { id: sceneTimeout; property bool fired: false; interval: 400; running: true; onTriggered: fired = true }
+    Component.onCompleted: {
+        root.presence = Qt.binding(() => root.presenceTarget)
+        root.focusPassword()
+    }
+    property alias peeking: stage.peeking
+    readonly property string selected: stage.selected
+    readonly property rect selectedRect: stage.selectedRect
     focus: true
 
     readonly property real d: IrisStyle.density
-    readonly property string wallpaperPath: Config.options?.background?.wallpaperPath ?? ""
-    readonly property string wallpaperLower: root.wallpaperPath.toLowerCase()
-    readonly property bool videoWallpaper: Wallpapers.isVideoFile(root.wallpaperLower)
+    readonly property var scene: {
+        Config.revision
+        return Config.options?.iris?.lock?.scene ?? ({})
+    }
+    readonly property string source: String(root.scene?.source ?? "desktop")
+    readonly property string wallpaperPath: root.source === "custom" && String(root.scene?.path ?? "").length > 0
+        ? String(root.scene.path) : (Config.options?.background?.wallpaperPath ?? "")
+    readonly property bool videoWallpaper: Wallpapers.isVideoFile(root.wallpaperPath.toLowerCase())
+    readonly property bool gifWallpaper: root.wallpaperPath.toLowerCase().endsWith(".gif")
     readonly property string wallpaperSource: Wallpapers.stillUrlFor(root.wallpaperPath)
-    readonly property bool playsVideo: root.videoWallpaper && !root.blurEnabled
-        && (Config.options?.lock?.enableAnimation ?? false)
-    readonly property bool blurEnabled: Config.options?.lock?.blur?.enable ?? true
+    readonly property int fillMode: String(root.scene?.fit ?? "cover") === "contain"
+        ? Image.PreserveAspectFit : Image.PreserveAspectCrop
+    readonly property real vignette: Math.max(0, Math.min(1, Number(root.scene?.vignette ?? 0) / 100))
+    readonly property bool drifts: root.painted && String(root.scene?.motion ?? "none") === "drift"
+        && IrisStyle.motionEnabled
+    readonly property real blur: Math.max(0, Math.min(1, Number(root.scene?.blur ?? 100) / 100))
+    readonly property real dim: Math.max(0, Math.min(1, Number(root.scene?.dim ?? 0) / 100))
+    readonly property real scrimStrength: Math.max(0, Math.min(2, Number(root.scene?.scrimStrength ?? 100) / 100))
+    readonly property string scrimStyle: String(root.scene?.scrim ?? "gradient")
+    readonly property bool painted: root.source !== "colour"
+    readonly property int driftMs: Math.max(4000, Math.round(Number(root.scene?.driftTime ?? 40) * 1000))
+    readonly property bool blurEnabled: root.painted && root.blur > 0.01
+    readonly property bool frosted: root.painted && IrisLockOptions.material === "glass"
+    readonly property bool animates: root.painted && (Config.options?.lock?.enableAnimation ?? false)
+        && !Wallpapers.batteryPauseActive
+    readonly property bool playsVideo: root.animates && root.videoWallpaper
+    readonly property bool playsGif: root.animates && root.gifWallpaper
 
     function wakeIfNeeded(): bool {
         if (!Brightness.asleep) return false
@@ -34,94 +73,16 @@ Item {
     }
 
     function focusPassword(): void {
-        Qt.callLater(() => {
-            const input = islandLoader.item?.input
-            input?.forceActiveFocus()
-        })
+        if (root.editing) return
+        Qt.callLater(() => stage.input?.forceActiveFocus())
     }
 
     function submit(): void {
+        if (root.editing) return
         if (!root.wakeIfNeeded() && root.context.currentText.length > 0 && !root.context.unlockInProgress)
             root.context.tryUnlock()
     }
 
-    function clockText(total: real): string {
-        const s = Math.max(0, Math.floor(total))
-        const h = Math.floor(s / 3600)
-        const m = Math.floor((s % 3600) / 60)
-        const sec = String(s % 60).padStart(2, "0")
-        return h > 0 ? h + ":" + String(m).padStart(2, "0") + ":" + sec : m + ":" + sec
-    }
-
-    component ActivityPlate: Item {
-        id: plate
-        property bool shown: false
-        property string glyph: ""
-        property color tint: IrisStyle.text
-        property string label: ""
-        property string figure: ""
-        property bool countDown: false
-        property real progress: -1
-        Layout.alignment: Qt.AlignHCenter
-        Layout.topMargin: plate.shown ? 10 * root.d : 0
-        visible: plate.shown
-        implicitWidth: Math.round(380 * root.d)
-        implicitHeight: plate.shown ? Math.round(64 * root.d) : 0
-
-        Rectangle {
-            anchors.fill: parent
-            radius: IrisStyle.radiusPlate
-            color: IrisStyle.mediaScrim
-        }
-        RowLayout {
-            anchors.fill: parent
-            anchors.leftMargin: 12 * root.d
-            anchors.rightMargin: 20 * root.d
-            spacing: 12 * root.d
-            Rectangle {
-                Layout.preferredWidth: Math.round(40 * root.d)
-                Layout.preferredHeight: Layout.preferredWidth
-                radius: width / 2
-                color: IrisStyle.tintFill(plate.tint)
-                MaterialSymbol {
-                    anchors.centerIn: parent
-                    text: plate.glyph
-                    fill: 1
-                    iconSize: 20 * root.d
-                    color: plate.tint
-                }
-            }
-            IrisText {
-                Layout.fillWidth: true
-                text: plate.label
-                color: IrisStyle.onMedia
-                font.pixelSize: Math.round(15 * IrisStyle.typeScale)
-                font.weight: Font.DemiBold
-                elide: Text.ElideRight
-            }
-            IrisNumber {
-                text: plate.figure
-                countDown: plate.countDown
-                color: plate.tint
-                pixelSize: Math.round(26 * IrisStyle.typeScale)
-                weight: Font.Bold
-                letterSpacing: -0.5
-            }
-        }
-        Rectangle {
-            visible: plate.progress >= 0
-            anchors.left: parent.left
-            anchors.bottom: parent.bottom
-            anchors.leftMargin: 22 * root.d
-            anchors.bottomMargin: 7 * root.d
-            width: (parent.width - 44 * root.d) * Math.max(0, Math.min(1, plate.progress))
-            height: Math.max(2, 2 * root.d)
-            radius: height / 2
-            color: plate.tint
-        }
-    }
-
-    Component.onCompleted: root.focusPassword()
     Connections {
         target: root.context
         function onShouldReFocus(): void { root.focusPassword() }
@@ -132,10 +93,22 @@ Item {
             event.accepted = true
             return
         }
-        if (event.key === Qt.Key_Escape) {
+        if (event.key === Qt.Key_Escape && !root.editing) {
             root.context.clearText()
             event.accepted = true
+            return
         }
+        if (!root.editing || stage.selected.length === 0) return
+        const step = (event.modifiers & Qt.ShiftModifier) ? 0.02 : 0.004
+        const by = ({})
+        by[Qt.Key_Left] = [-step, 0]
+        by[Qt.Key_Right] = [step, 0]
+        by[Qt.Key_Up] = [0, -step]
+        by[Qt.Key_Down] = [0, step]
+        const move = by[event.key]
+        if (!move) return
+        IrisLockOptions.nudge(stage.selected, move[0], move[1])
+        event.accepted = true
     }
 
     Rectangle {
@@ -145,282 +118,183 @@ Item {
 
     MouseArea {
         anchors.fill: parent
-        onClicked: {
-            if (!root.wakeIfNeeded()) root.focusPassword()
-        }
+        enabled: !root.editing
+        onClicked: { if (!root.wakeIfNeeded()) root.focusPassword() }
         onPositionChanged: root.wakeIfNeeded()
     }
 
-    Loader {
-        id: islandLoader
+    // One source item, one effect over it: still, GIF or live video all end up here,
+    // so blur, drift and the washes never have to know which kind is playing.
+    Item {
+        id: scenery
         anchors.fill: parent
-        sourceComponent: islandComponent
-    }
+        visible: root.painted && !root.blurEnabled
+        layer.enabled: root.blurEnabled
+        transform: [
+            Scale {
+                id: driftScale
+                origin.x: root.width / 2
+                origin.y: root.height / 2
+                xScale: root.blurEnabled ? 1 + 0.06 * root.presence : 1
+                yScale: driftScale.xScale
+            },
+            Translate { id: driftShift }
+        ]
 
-    Component {
-        id: islandComponent
-
-        Item {
-            id: stage
-            property alias input: passwordInput
-
-            Image {
-                id: wallpaper
-                anchors.fill: parent
+        Image {
+            id: wallpaper
+            anchors.fill: parent
+            source: root.painted ? root.wallpaperSource : ""
+            sourceSize: Qt.size(root.width, root.height)
+            fillMode: root.fillMode
+            asynchronous: false
+            cache: false
+        }
+        Loader {
+            anchors.fill: parent
+            active: root.playsGif
+            sourceComponent: AnimatedImage {
                 source: root.wallpaperSource
-                sourceSize: Qt.size(stage.width, stage.height)
-                fillMode: Image.PreserveAspectCrop
-                asynchronous: true
+                fillMode: root.fillMode
                 cache: false
-                visible: !root.blurEnabled
+                playing: true
             }
-            Loader {
-                anchors.fill: parent
-                active: root.playsVideo
-                sourceComponent: Video {
-                    source: "file://" + root.wallpaperPath
-                    fillMode: VideoOutput.PreserveAspectCrop
-                    loops: MediaPlayer.Infinite
-                    muted: true
-                    autoPlay: true
-                }
-            }
-            MultiEffect {
-                anchors.fill: parent
-                visible: root.blurEnabled && wallpaper.status === Image.Ready
-                source: wallpaper
-                blurEnabled: true
-                blur: 1
-                blurMax: 48
-                saturation: 0.15
-                transform: Scale { origin.x: stage.width / 2; origin.y: stage.height / 2; xScale: 1.06; yScale: 1.06 }
-            }
-            Rectangle {
-                anchors.fill: parent
-                gradient: Gradient {
-                    GradientStop { position: 0; color: Qt.rgba(0, 0, 0, 0.28) } // iris-literal: wallpaper legibility gradient
-                    GradientStop { position: 0.45; color: Qt.rgba(0, 0, 0, 0.12) } // iris-literal: wallpaper legibility gradient
-                    GradientStop { position: 1; color: Qt.rgba(0, 0, 0, 0.42) } // iris-literal: wallpaper legibility gradient
-                }
-            }
-
-            ColumnLayout {
-                anchors.horizontalCenter: parent.horizontalCenter
-                anchors.top: parent.top
-                anchors.topMargin: Math.round(parent.height * 0.09)
-                spacing: 0
-
-                IrisText {
-                    Layout.alignment: Qt.AlignHCenter
-                    text: Qt.locale().toString(DateTime.clock.date, "dddd, d MMMM")
-                    color: IrisStyle.onMedia
-                    font.pixelSize: Math.round(21 * IrisStyle.typeScale)
-                    font.weight: Font.DemiBold
-                }
-                IrisText {
-                    Layout.alignment: Qt.AlignHCenter
-                    Layout.topMargin: -6 * root.d
-                    text: DateTime.timeDisplay
-                    color: IrisStyle.onMedia
-                    font.family: IrisStyle.fontNumbers
-                    font.features: ({ "tnum": 1 })
-                    font.pixelSize: Math.round(112 * IrisStyle.typeScale)
-                    font.weight: Font.Bold
-                    font.letterSpacing: -2
-                }
-
-                Item {
-                    readonly property bool active: MprisController.activePlayer !== null
-                        && String(MprisController.activePlayer?.trackTitle ?? "").length > 0
-                    Layout.alignment: Qt.AlignHCenter
-                    Layout.topMargin: 18 * root.d
-                    visible: active
-                    implicitWidth: Math.round(380 * root.d)
-                    implicitHeight: active ? mediaCard.implicitHeight : 0
-                    Rectangle {
-                        anchors.fill: parent
-                        radius: IrisStyle.radiusPlate
-                        color: IrisStyle.mediaScrim
-                    }
-                    IrisMediaCard {
-                        id: mediaCard
-                        anchors.fill: parent
-                        active: parent.active
-                        showBackground: false
-                    }
-                }
-
-                ActivityPlate {
-                    shown: RecorderStatus.isRecording
-                    glyph: "radio_button_checked"
-                    tint: IrisStyle.danger
-                    label: Translation.tr("Recording")
-                    figure: root.clockText(RecorderStatus.elapsedSeconds)
-                }
-                ActivityPlate {
-                    readonly property string kind: TimerService.pomodoroRunning ? "pomodoro"
-                        : TimerService.countdownRunning ? "countdown"
-                        : TimerService.stopwatchRunning ? "stopwatch" : ""
-                    readonly property bool paused: kind === "pomodoro" ? TimerService.pomodoroPaused
-                        : kind === "countdown" ? TimerService.countdownPaused : TimerService.stopwatchPaused
-                    shown: kind.length > 0
-                    glyph: paused ? "pause" : kind === "stopwatch" ? "timer" : kind === "pomodoro" && TimerService.pomodoroBreak ? "coffee" : "hourglass_top"
-                    tint: paused ? IrisStyle.onMediaSecondary : IrisStyle.secondaryAccent
-                    label: kind === "pomodoro" ? (TimerService.pomodoroBreak ? Translation.tr("Break") : Translation.tr("Focus"))
-                        : kind === "countdown" ? Translation.tr("Timer") : Translation.tr("Stopwatch")
-                    countDown: kind !== "stopwatch"
-                    figure: root.clockText(kind === "pomodoro" ? TimerService.pomodoroSecondsLeft
-                        : kind === "countdown" ? TimerService.countdownSecondsLeft
-                        : Math.floor(TimerService.stopwatchTime / 100))
-                    progress: kind === "pomodoro" ? 1 - TimerService.pomodoroSecondsLeft / Math.max(1, TimerService.pomodoroLapDuration)
-                        : kind === "countdown" ? 1 - TimerService.countdownSecondsLeft / Math.max(1, TimerService.countdownDuration) : -1
-                }
-            }
-
-            ColumnLayout {
-                anchors.horizontalCenter: parent.horizontalCenter
-                anchors.bottom: parent.bottom
-                anchors.bottomMargin: Math.round(parent.height * 0.11)
-                spacing: 0
-
-                ClippingRectangle {
-                    id: avatar
-                    Layout.alignment: Qt.AlignHCenter
-                    implicitWidth: Math.round(76 * root.d)
-                    implicitHeight: implicitWidth
-                    radius: width / 2
-                    color: IrisStyle.onMediaFill
-                    property int sourceIndex: 0
-                    Image {
-                        id: avatarImage
-                        anchors.fill: parent
-                        source: Directories.avatarSourceAt(avatar.sourceIndex)
-                        fillMode: Image.PreserveAspectCrop
-                        asynchronous: true
-                        sourceSize.width: avatar.width * 2
-                        sourceSize.height: avatar.height * 2
-                        visible: status === Image.Ready
-                        onStatusChanged: {
-                            if (status === Image.Error && avatar.sourceIndex + 1 < Directories.userAvatarPaths.length)
-                                Qt.callLater(() => avatar.sourceIndex++)
-                        }
-                    }
-                    IrisText {
-                        anchors.centerIn: parent
-                        visible: avatarImage.status !== Image.Ready
-                        text: (SystemInfo.displayName || SystemInfo.username || "?").charAt(0).toUpperCase()
-                        color: IrisStyle.onMedia
-                        font.pixelSize: Math.round(32 * IrisStyle.typeScale)
-                        font.weight: Font.DemiBold
-                    }
-                }
-
-                IrisText {
-                    Layout.alignment: Qt.AlignHCenter
-                    Layout.topMargin: 12 * root.d
-                    text: SystemInfo.displayName || SystemInfo.username
-                    color: IrisStyle.onMedia
-                    font.pixelSize: Math.round(16 * IrisStyle.typeScale)
-                    font.weight: Font.DemiBold
-                }
-
-                Rectangle {
-                    id: capsule
-                    Layout.alignment: Qt.AlignHCenter
-                    Layout.topMargin: 14 * root.d
-                    implicitWidth: Math.round(248 * root.d)
-                    implicitHeight: Math.round(38 * root.d)
-                    radius: height / 2
-                    color: (passwordInput.activeFocus ? IrisStyle.onMediaFillHover : IrisStyle.onMediaFill)
-                    border.width: root.context.showFailure ? 1 : 0
-                    border.color: IrisStyle.tintBorder(IrisStyle.danger)
-                    Behavior on color { ColorAnimation { duration: IrisStyle.duration(120) } }
-
-                    transform: Translate { id: shakeOffset }
-                    SequentialAnimation {
-                        id: shake
-                        NumberAnimation { target: shakeOffset; property: "x"; to: -12 * root.d; duration: 45; easing.type: Easing.OutQuad }
-                        NumberAnimation { target: shakeOffset; property: "x"; to: 10 * root.d; duration: 70; easing.type: Easing.InOutQuad }
-                        NumberAnimation { target: shakeOffset; property: "x"; to: -6 * root.d; duration: 60; easing.type: Easing.InOutQuad }
-                        NumberAnimation { target: shakeOffset; property: "x"; to: 0; duration: 55; easing.type: Easing.OutQuad }
-                    }
-                    Connections {
-                        target: root.context
-                        function onFailed(): void { if (IrisStyle.motionEnabled) shake.restart() }
-                    }
-
-                    TextInput {
-                        id: passwordInput
-                        anchors.left: parent.left
-                        anchors.right: submitButton.left
-                        anchors.leftMargin: 16 * root.d
-                        anchors.rightMargin: 6 * root.d
-                        anchors.verticalCenter: parent.verticalCenter
-                        echoMode: TextInput.Password
-                        passwordCharacter: "●"
-                        horizontalAlignment: TextInput.AlignHCenter
-                        color: IrisStyle.onMedia
-                        selectionColor: IrisStyle.onMediaFillHover
-                        font.family: IrisStyle.fontMain
-                        font.pixelSize: Math.round(14 * IrisStyle.typeScale)
-                        font.letterSpacing: 1.5
-                        clip: true
-                        enabled: !root.context.unlockInProgress
-                        text: root.context.currentText
-                        onTextChanged: if (root.context.currentText !== text) root.context.currentText = text
-                        onAccepted: root.submit()
-
-                        IrisText {
-                            anchors.centerIn: parent
-                            visible: passwordInput.text.length === 0
-                            text: root.context.fingerprintsConfigured ? Translation.tr("Password or fingerprint") : Translation.tr("Enter Password")
-                            color: IrisStyle.onMediaSecondary
-                            font.pixelSize: Math.round(13 * IrisStyle.typeScale)
-                        }
-                    }
-
-                    Rectangle {
-                        id: submitButton
-                        anchors.right: parent.right
-                        anchors.rightMargin: 5 * root.d
-                        anchors.verticalCenter: parent.verticalCenter
-                        width: Math.round(28 * root.d)
-                        height: width
-                        radius: width / 2
-                        color: (submitArea.containsMouse ? IrisStyle.onMediaFillHover : IrisStyle.onMediaFill)
-                        opacity: root.context.currentText.length > 0 || root.context.unlockInProgress ? 1 : 0
-                        visible: opacity > 0
-                        Behavior on opacity { NumberAnimation { duration: IrisStyle.duration(120) } }
-                        MaterialSymbol {
-                            anchors.centerIn: parent
-                            text: root.context.unlockInProgress ? "more_horiz" : "arrow_forward"
-                            iconSize: Math.round(18 * root.d)
-                            color: IrisStyle.onMedia
-                        }
-                        MouseArea {
-                            id: submitArea
-                            anchors.fill: parent
-                            hoverEnabled: true
-                            cursorShape: Qt.PointingHandCursor
-                            Accessible.role: Accessible.Button
-                            Accessible.name: Translation.tr("Unlock")
-                            onClicked: root.submit()
-                        }
-                    }
-                }
-
-                IrisText {
-                    Layout.alignment: Qt.AlignHCenter
-                    Layout.topMargin: 10 * root.d
-                    text: root.context.unlockInProgress ? Translation.tr("Unlocking…")
-                        : root.context.showFailure ? Translation.tr("Incorrect password")
-                        : root.context.fingerprintsConfigured ? Translation.tr("Touch the fingerprint reader or enter your password")
-                        : " "
-                    color: root.context.showFailure ? IrisStyle.danger : IrisStyle.onMediaSecondary
-                    font.pixelSize: Math.round(12 * IrisStyle.typeScale)
-                }
+        }
+        Loader {
+            anchors.fill: parent
+            active: root.playsVideo
+            sourceComponent: Video {
+                source: "file://" + root.wallpaperPath
+                fillMode: root.fillMode === Image.PreserveAspectFit
+                    ? VideoOutput.PreserveAspectFit : VideoOutput.PreserveAspectCrop
+                loops: MediaPlayer.Infinite
+                muted: true
+                autoPlay: true
             }
         }
     }
 
+    SequentialAnimation {
+        running: root.drifts
+        loops: Animation.Infinite
+        ParallelAnimation {
+            NumberAnimation { target: driftScale; properties: "xScale"; to: 1.12; duration: root.driftMs; easing.type: Easing.InOutSine }
+            NumberAnimation { target: driftShift; property: "x"; to: Math.round(-18 * root.d); duration: root.driftMs; easing.type: Easing.InOutSine }
+            NumberAnimation { target: driftShift; property: "y"; to: Math.round(-12 * root.d); duration: root.driftMs; easing.type: Easing.InOutSine }
+        }
+        ParallelAnimation {
+            NumberAnimation { target: driftScale; properties: "xScale"; to: root.blurEnabled ? 1 + 0.06 * root.presence : 1; duration: root.driftMs; easing.type: Easing.InOutSine }
+            NumberAnimation { target: driftShift; property: "x"; to: 0; duration: root.driftMs; easing.type: Easing.InOutSine }
+            NumberAnimation { target: driftShift; property: "y"; to: 0; duration: root.driftMs; easing.type: Easing.InOutSine }
+        }
+        onRunningChanged: if (!running) {
+            driftScale.xScale = Qt.binding(() => root.blurEnabled ? 1 + 0.06 * root.presence : 1)
+            driftShift.x = 0
+            driftShift.y = 0
+        }
+    }
+
+    MultiEffect {
+        anchors.fill: parent
+        visible: root.blurEnabled
+        source: scenery
+        blurEnabled: true
+        blur: root.presence
+        blurMax: Math.round(48 * root.blur)
+        saturation: 1 - (1 - Math.max(0, Math.min(1, Number(root.scene?.saturation ?? 15) / 100))) * root.presence
+    }
+    Item {
+        anchors.fill: parent
+        opacity: root.presence
+        Rectangle {
+            anchors.fill: parent
+            visible: root.scrimStyle === "gradient"
+            gradient: Gradient {
+                GradientStop { position: 0; color: Qt.rgba(0, 0, 0, 0.28 * root.scrimStrength) } // iris-literal: wallpaper legibility wash
+                GradientStop { position: 0.45; color: Qt.rgba(0, 0, 0, 0.12 * root.scrimStrength) } // iris-literal: wallpaper legibility wash
+                GradientStop { position: 1; color: Qt.rgba(0, 0, 0, 0.42 * root.scrimStrength) } // iris-literal: wallpaper legibility wash
+            }
+        }
+        Rectangle {
+            anchors.fill: parent
+            visible: root.scrimStyle === "flat"
+            color: Qt.rgba(0, 0, 0, 0.32 * root.scrimStrength) // iris-literal: wallpaper legibility wash
+        }
+        // Rectangle only takes a linear gradient, so the vignette is a Shape.
+        Loader {
+            anchors.fill: parent
+            active: root.vignette > 0.001
+            sourceComponent: Shape {
+                preferredRendererType: Shape.CurveRenderer
+                ShapePath {
+                    strokeWidth: 0
+                    strokeColor: "transparent"
+                    fillGradient: RadialGradient {
+                        centerX: root.width / 2
+                        centerY: root.height / 2
+                        centerRadius: Math.max(root.width, root.height) * 0.72
+                        focalX: root.width / 2
+                        focalY: root.height / 2
+                        focalRadius: 0
+                        GradientStop { position: 0.4; color: "transparent" }
+                        GradientStop { position: 1; color: Qt.rgba(0, 0, 0, root.vignette) } // iris-literal: a vignette is black by definition
+                    }
+                    startX: 0; startY: 0
+                    PathLine { x: root.width; y: 0 }
+                    PathLine { x: root.width; y: root.height }
+                    PathLine { x: 0; y: root.height }
+                    PathLine { x: 0; y: 0 }
+                }
+            }
+        }
+        Rectangle {
+            anchors.fill: parent
+            visible: root.dim > 0.001
+            color: Qt.rgba(0, 0, 0, root.dim) // iris-literal: user dim, black by definition
+        }
+    }
+
+    // An explicit texture: handing the scene to MultiEffect directly hides the scene itself.
+    ShaderEffectSource {
+        id: sceneTexture
+        anchors.fill: parent
+        visible: false
+        sourceItem: root.frosted ? scenery : null
+        hideSource: false
+        live: true
+    }
+    Item {
+        id: frost
+        anchors.fill: parent
+        visible: false
+        layer.enabled: root.frosted
+        MultiEffect {
+            anchors.fill: parent
+            visible: root.frosted
+            autoPaddingEnabled: false
+            source: sceneTexture
+            blurEnabled: true
+            blur: 1
+            blurMax: 64
+            saturation: 0.35
+        }
+    }
+
+    IrisLockWidgets {
+        anchors.fill: parent
+        screenName: root.screenName
+        opacity: root.arrival
+        transform: Translate { y: Math.round((1 - root.arrival) * 18 * root.d) }
+    }
+
+    IrisLockStage {
+        id: stage
+        anchors.fill: parent
+        opacity: root.arrival
+        transform: Translate { y: Math.round((1 - root.arrival) * 24 * root.d) }
+        frost: root.frosted ? frost : null
+        context: root.context
+        editing: root.editing
+        onSubmitted: root.submit()
+    }
 }
