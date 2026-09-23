@@ -20,7 +20,7 @@ Rectangle {
     readonly property string effectiveTitle: MprisController.isYtMusicActive ? YtMusic.currentTitle : (activePlayer?.trackTitle ?? "")
     readonly property string effectiveArtist: MprisController.isYtMusicActive ? YtMusic.currentArtist : (activePlayer?.trackArtist ?? "")
     readonly property real effectivePosition: MprisController.isYtMusicActive
-        ? YtMusic.currentPosition : (activePlayer?.position ?? 0)
+        ? YtMusic.currentPosition : MprisController.positionOf(activePlayer)
     readonly property real effectiveLength: MprisController.isYtMusicActive
         ? YtMusic.currentDuration
         : ((activePlayer?.lengthSupported ?? false) ? activePlayer.length : 0)
@@ -232,7 +232,7 @@ Rectangle {
                         if (MprisController.isYtMusicActive && root.effectiveCanSeek)
                             YtMusic.seek(value)
                         else if (root.activePlayer && root.effectiveCanSeek)
-                            root.activePlayer.position = value
+                            MprisController.seek(root.activePlayer, value)
                     }
                 }
 
