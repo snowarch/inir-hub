@@ -47,6 +47,11 @@ ClippingRectangle {
     readonly property rect islandReach: {
         const g = root.island
         let x0 = g.x, y0 = g.y, x1 = g.x + g.width, y1 = g.y + g.height
+        // A full bar spans its edge: look at the middle of it, where the heart rests, not at all of it.
+        if (g.fullWidth) {
+            if (g.vertical) { const span = root.screenH * 0.4; y0 = (root.screenH - span) / 2; y1 = y0 + span }
+            else { const span = root.screenW * 0.4; x0 = (root.screenW - span) / 2; x1 = x0 + span }
+        }
         for (const sat of root.satellites) {
             x0 = Math.min(x0, sat.x); y0 = Math.min(y0, sat.y)
             x1 = Math.max(x1, sat.x + sat.width); y1 = Math.max(y1, sat.y + sat.height)
@@ -82,7 +87,7 @@ ClippingRectangle {
         const vertical = edge === "left" || edge === "right"
         const thick = IrisFrame.islandBand
         const span = vertical ? root.screenH : root.screenW
-        const full = root.layout === "full"
+        const full = root.layout === "full" || (root.layout === "menubar" && !vertical)
         const length = full ? span - 2 * IrisFrame.band : Math.round(thick * 4.2)
         const margin = IrisFrame.band + Math.round(16 * root.d)
         const along = full ? IrisFrame.band : root.layout === "left" ? margin
@@ -149,7 +154,8 @@ ClippingRectangle {
         default: return { x: -2 * IrisStyle.fuseDeep, y: -deep - 1, width: wide, height: deep, radius: 0, fuse: IrisStyle.fuseDeep, id: id }
         }
     }
-    readonly property var zoneLists: root.island.fullWidth && root.layout === "full"
+    readonly property bool menubar: root.layout === "menubar" && !root.island.vertical
+    readonly property var zoneLists: root.island.fullWidth && (root.layout === "full" || root.menubar)
         ? [IrisStyle.structuralValue("bar.fullStart", ["workspaces", "window"]), IrisStyle.structuralValue("bar.fullEnd", ["tray", "notifications", "sound", "controls"])]
         : [[], []]
     readonly property bool dockNotch: Boolean(root.dockOptions?.notch ?? false)
@@ -174,14 +180,12 @@ ClippingRectangle {
         width: root.screenW * root.s
         height: root.screenH * root.s
 
-        Image {
+        IrisWallpaperView {
+            live: false
             anchors.fill: parent
-            source: WallpaperListener.wallpaperUrlForScreen(root.screen)
-            fillMode: Image.PreserveAspectCrop
-            asynchronous: true
-            cache: true
-            sourceSize.width: Math.round(Math.max(1, canvas.width) * 1.5)
-            opacity: status === Image.Ready ? 1 : 0
+            screen: root.screen
+            decodeSize: Qt.size(Math.round(Math.max(1, canvas.width) * 1.5), 0)
+            opacity: ready ? 1 : 0
             Behavior on opacity { NumberAnimation { duration: IrisStyle.duration(180); easing.type: IrisStyle.feedbackEasing } }
         }
 
@@ -196,8 +200,20 @@ ClippingRectangle {
                 const out = []
                 const g = root.island
                 if (root.notch && !root.framed) out.push(root.edgeBody(root.islandEdge, "edge"))
-                out.push({ x: g.x, y: g.y, width: g.width, height: g.height, radius: Math.min(g.width, g.height) / 2,
-                    fuse: root.notch ? IrisStyle.fuseEdge : IrisStyle.fuse, id: "island",
+                if (root.menubar) {
+                    const strip = IrisFrame.islandBand
+                    const notchW = Math.round(g.height * 4.2)
+                    const inset = root.framed ? IrisFrame.band : 0
+                    out.push({ x: inset, y: g.edge === "bottom" ? g.y + g.height - strip : g.y,
+                        width: root.screenW - 2 * inset, height: strip, radius: 0,
+                        fuse: Math.round(16 * root.d), id: "island",
+                        joins: !root.notch ? "" : root.framed ? "frame" : "edge" })
+                    out.push({ x: g.x + (g.width - notchW) / 2, y: g.y, width: notchW, height: g.height, radius: g.height / 2,
+                        fuse: Math.round(32 * root.d), id: "islandnotch", joins: "island" })
+                } else out.push({ x: g.fullWidth && !g.vertical ? (root.framed ? IrisFrame.band : 0) : g.x,
+                    y: g.y, width: g.fullWidth && !g.vertical ? root.screenW - (root.framed ? 2 * IrisFrame.band : 0) : g.width,
+                    height: g.height, radius: g.fullWidth && !g.vertical ? 0 : Math.min(g.width, g.height) / 2,
+                    fuse: g.fullWidth && !g.vertical ? Math.round(16 * root.d) : root.notch ? IrisStyle.fuseEdge : IrisStyle.fuse, id: "island",
                     joins: !root.notch ? "" : root.framed ? "frame" : "edge" })
                 for (const sat of root.satellites)
                     out.push({ x: sat.x, y: sat.y, width: sat.width, height: sat.height,
@@ -219,11 +235,13 @@ ClippingRectangle {
             height: root.screenH
             scale: root.s
             transformOrigin: Item.TopLeft
-            layer.enabled: canvas.width > 0 && root.s < 0.75
+            layer.enabled: canvas.width > 0 && root.s < 0.999
             layer.smooth: true
+            layer.mipmap: true
             layer.textureSize: Qt.size(Math.max(1, Math.ceil(canvas.width * 2)), Math.max(1, Math.ceil(canvas.height * 2)))
 
             Item {
+                id: islandBox
                 x: root.island.x
                 y: root.island.y
                 width: root.island.width
@@ -246,10 +264,11 @@ ClippingRectangle {
                         readonly property real size: Math.round(Math.min(root.island.width, root.island.height) * 0.56)
                         readonly property real inset: Math.round((Math.min(root.island.width, root.island.height) - zone.size) / 2)
                         visible: zone.kinds.length > 0
-                        columns: root.island.vertical ? 1 : zone.kinds.length
+                        columns: zone.vertical ? 1 : zone.kinds.length
                         spacing: Math.round(6 * root.d)
-                        x: root.island.vertical ? zone.inset : zone.modelData === 0 ? zone.inset * 2 : parent.width - width - zone.inset * 2
-                        y: !root.island.vertical ? zone.inset : zone.modelData === 0 ? zone.inset * 2 : parent.height - height - zone.inset * 2
+                        readonly property bool vertical: root?.island?.vertical ?? false
+                        x: zone.vertical ? zone.inset : zone.modelData === 0 ? zone.inset * 2 : islandBox.width - width - zone.inset * 2
+                        y: !zone.vertical ? zone.inset : zone.modelData === 0 ? zone.inset * 2 : islandBox.height - height - zone.inset * 2
                         Repeater {
                             model: zone.kinds
                             Rectangle {
@@ -284,8 +303,8 @@ ClippingRectangle {
                         visible: root.clockStyle === "weather"
                         text: String(Weather.data?.temp ?? "").replace(/[CF]$/, "")
                         color: IrisStyle.subtext
-                        font.pixelSize: 12 * IrisStyle.typeScale
-                        font.weight: Font.Medium
+                        font.pixelSize: IrisStyle.typeMeta
+                        font.weight: IrisStyle.weight(Font.Medium)
                     }
                     IrisClock {
                         Layout.alignment: Qt.AlignVCenter
