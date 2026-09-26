@@ -28,13 +28,6 @@ ColumnLayout {
         return words.charAt(0).toUpperCase() + words.slice(1)
     }
     readonly property string wallpaperUrl: WallpaperListener.wallpaperUrlForScreen(root.QsWindow?.window?.screen ?? null)
-    readonly property string ownDesign: String(root.widget._readConfigKey("iris.design") ?? "auto")
-    readonly property string sharedDesign: String(Config.options?.iris?.widgets?.design ?? "iris")
-    readonly property var designs: [
-        { value: "auto", label: Translation.tr("Default"), icon: "tune" },
-        { value: "iris", label: Translation.tr("iRiS"), icon: "auto_awesome" },
-        { value: "material", label: Translation.tr("Material"), icon: "widgets" }
-    ]
     readonly property string ownMaterial: String(root.widget._readConfigKey("iris.material") ?? "auto")
     readonly property string sharedMaterial: String(Config.options?.iris?.widgets?.material ?? "glass")
     readonly property var materials: [
@@ -332,8 +325,8 @@ ColumnLayout {
                 Layout.fillWidth: true
                 Caption { text: Translation.tr("Design") }
                 IrisText {
-                    visible: !root.designs.some(entry => entry.value === root.ownDesign)
-                    text: (root.designs.find(entry => entry.value === root.sharedDesign)?.label ?? "") + " · " + Translation.tr("from Settings")
+                    text: root.widget.widgetDesignShared
+                        ? Translation.tr("Same as every widget") : Translation.tr("This widget only")
                     color: IrisStyle.textTertiary
                     font.pixelSize: IrisStyle.typeMeta
                 }
@@ -343,17 +336,23 @@ ColumnLayout {
                 Layout.fillWidth: true
                 spacing: Math.round(4 * root.d)
                 Repeater {
-                    model: root.designs
+                    model: root.widget.designChoices
                     FaceChoice {
                         required property var modelData
                         Layout.fillWidth: true
                         icon: modelData.icon
                         label: modelData.label
-                        selected: root.ownDesign === modelData.value
-                            || (modelData.value === "auto" && !root.designs.some(entry => entry.value === root.ownDesign))
-                        onClicked: root.widget._setOutputValue("iris.design", modelData.value)
+                        selected: root.widget.widgetDesign === modelData.value
+                        onClicked: root.widget.pickDesign(modelData.value)
                     }
                 }
+            }
+
+            IrisButton {
+                visible: root.widget.widgetDesignMatchable
+                Layout.fillWidth: true
+                text: Translation.tr("Use on every widget")
+                onClicked: root.widget.useDesignEverywhere()
             }
         }
 

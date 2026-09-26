@@ -8,6 +8,7 @@ import Quickshell.Io
 import qs.modules.common
 import qs.modules.common.functions
 import qs.modules.iris.style
+import qs.modules.background.widgets
 
 Singleton {
     id: root
@@ -62,8 +63,13 @@ Singleton {
     function apply(theme: var): void {
         if (!theme) return
         const updates = root.resolved(theme.values)
+        // The widget design goes through its owner so every widget follows the theme and the looks
+        // it replaces can be undone.
+        const design = String(updates["iris.widgets.design"] ?? "iris")
+        delete updates["iris.widgets.design"]
         updates["iris.appearance.themeId"] = String(theme.id ?? "")
         Config.setNestedValues(updates)
+        DesktopWidgetDesign.apply(design)
     }
     function find(id: string): var {
         return root.all.find(theme => theme.id === id) ?? null

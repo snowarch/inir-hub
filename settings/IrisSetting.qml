@@ -165,6 +165,15 @@ Item {
                 onToggled: root.commit(root.spec.invert ? toggle.on : !toggle.on)
             }
 
+            IrisButton {
+                visible: root.spec.kind === "action"
+                Layout.alignment: Qt.AlignVCenter
+                text: Translation.tr(String(root.spec.button ?? ""))
+                colBackground: IrisStyle.fill
+                colBackgroundHover: IrisStyle.fillHover
+                onClicked: root.spec.run()
+            }
+
             Loader {
                 active: root.inlineChoice
                 visible: active
