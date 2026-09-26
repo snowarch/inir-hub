@@ -6,6 +6,7 @@ import Quickshell
 import qs
 import qs.modules.common
 import qs.modules.common.functions
+import qs.services
 
 QtObject {
     id: root
@@ -272,6 +273,18 @@ QtObject {
     readonly property color bodyClip: Qt.rgba(0, 0, 0, 0.004)
     readonly property color placeSurface: root.glassy ? ColorUtils.applyAlpha(root.surfaceOpaque, root.glassTint) : root.surface
     readonly property real glassLip: 0
+    // The cut edge of Blur glass (IrisField.frag): lit where it faces up, a line elsewhere.
+    readonly property real glassEdgeLight: Math.max(0, Math.min(1, Number(root.glassOptions?.edgeLight ?? 34) / 100))
+    readonly property real glassEdgeLine: Math.max(0, Math.min(0.6, Number(root.glassOptions?.edgeLine ?? 10) / 100))
+    readonly property real glassEdgeWidth: Math.max(0.5, Math.min(3, Number(root.glassOptions?.edgeWidth ?? 1.5)))
+    readonly property color glassEdgeColour: {
+        const name = String(root.glassOptions?.edgeColour ?? "scene")
+        if (name === "white") return Qt.rgba(1, 1, 1, 1)
+        if (name === "accent") return root.accent
+        if (name === "highlight") return root.secondaryAccent
+        const l = root.wallpaperLight
+        return Qt.rgba(l.r * 0.45 + 0.55, l.g * 0.45 + 0.55, l.b * 0.45 + 0.55, 1)
+    }
     readonly property real wallpaperVeil: IrisMood.sampled
         ? Math.max(0.22, Math.min(0.72, root.legibleVeil("glass", IrisMood.luminance, IrisMood.contrast * 0.5, 0.6))) : 0.22
     readonly property color surfaceHigh: root.glassy ? ColorUtils.applyAlpha(root.fillInk, root.fillAlpha(0.07))
@@ -448,6 +461,36 @@ QtObject {
     readonly property color onTint: "#ffffff"
     function onTintFor(tint: color): color { return tint.hslLightness > 0.6 ? root.onAccent : root.onTint }
 
+    // Content on a light backdrop (a widget over a bright wallpaper): the Island's ink turned over.
+    // Near-black ink, frost instead of veil, and each accent's own hue taken deep enough to read.
+    readonly property color inkOnLight: "#1d1d1f"
+    readonly property color inkOnLightSoft: ColorUtils.applyAlpha(root.inkOnLight, 0.78)
+    readonly property color inkOnLightMuted: ColorUtils.applyAlpha(root.inkOnLight, 0.62)
+    readonly property color inkOnLightFaint: ColorUtils.applyAlpha(root.inkOnLight, 0.42)
+    readonly property color frost: "#f5f5f7"
+    readonly property real frostShadow: 0.5
+    function deepAccent(seed, fallback): color {
+        const c = Qt.color(seed)
+        if (!c.valid || c.hslHue < 0 || c.hslSaturation < 0.1) return fallback ?? root.inkOnLight
+        return Qt.hsla(c.hslHue, Math.max(0.55, Math.min(0.92, c.hslSaturation)),
+            Math.max(0.3, Math.min(0.4, c.hslLightness * 0.52)), 1)
+    }
+    // A coloured mark (state, identity, alert) on a bare backdrop Lume has read: its hue, held at `contrast` (3 for glyphs, 4.5 for figures).
+    function markOn(seed: color, sample: var, darkInk: bool, contrast: real): color {
+        return sample ? Lume.mark(seed, sample.level, sample.spread, darkInk, contrast) : seed
+    }
+    function fillQuietOf(ink: color): color { return ColorUtils.applyAlpha(ink, root.fillAlpha(0.08)) }
+    function fillOf(ink: color): color { return ColorUtils.applyAlpha(ink, root.fillAlpha(0.12)) }
+    function fillHoverOf(ink: color): color { return ColorUtils.applyAlpha(ink, root.fillAlpha(0.18)) }
+    function fillActiveOf(ink: color): color { return ColorUtils.applyAlpha(ink, root.fillAlpha(0.26)) }
+    function hairlineOf(ink: color): color { return ColorUtils.applyAlpha(ink, Math.min(0.3, 0.14 * root.tweak("lines", 0, 2))) }
+    // The frost a light-backdrop widget needs so its darkest patches still carry dark ink: the same
+    // solve as legibleVeil, mirrored (4.5:1 glass, 3:1 transparent, floor scaled by the opacity).
+    function legibleFrost(material: string, level: real, spread: real, strength: real): real {
+        return Lume.frost(level, spread, root.materialSpread[material] ?? 1, root.frost, root.inkOnLight,
+            root.materialContrast[material] ?? 4.5, (root.materialVeil[material] ?? 0.3) * strength, 0.86)
+    }
+
     readonly property color veilLight: ColorUtils.applyAlpha(root.surface, 0.22)
     readonly property color veil: ColorUtils.applyAlpha(root.surface, 0.42)
     readonly property color veilStrong: ColorUtils.applyAlpha(root.surface, 0.62)
@@ -475,20 +518,38 @@ QtObject {
     readonly property color clearRim: ColorUtils.applyAlpha(root.text, 0.07)
     readonly property int glassBlurMax: 48
     readonly property real glassSaturation: 0.3
-    readonly property var materialVeil: ({ glass: 0.3, clear: 0.04 })
-    readonly property var materialContrast: ({ glass: 4.5, clear: 3 })
-    readonly property var materialSpread: ({ glass: 1.0, clear: 1.2 })
+    readonly property var materialVeil: ({ glass: 0.3, clear: 0.04, panel: 0.3 })
+    // "panel": a surface that is mostly reading (Settings): 7:1 for its main ink so secondary ink still reads.
+    readonly property var materialContrast: ({ glass: 4.5, clear: 3, panel: 7 })
+    readonly property var materialSpread: ({ glass: 1.0, clear: 1.2, panel: 1.2 })
+    // Lume solves the veil (services/Lume.qml); the materials' contrast targets and floors are iRiS's.
     function legibleVeil(material: string, level: real, spread: real, strength: real): real {
-        const floor = (root.materialVeil[material] ?? 0.3) * strength
-        if (level < 0)
-            return Math.max(floor, 0.42)
-        const worst = Math.min(1, level + spread * (root.materialSpread[material] ?? 1))
-        const region = Math.pow(worst, 2.2)
-        const base = ColorUtils.relativeLuminance(root.surfaceOpaque)
-        const allowed = (ColorUtils.relativeLuminance(root.text) + 0.05) / (root.materialContrast[material] ?? 4.5) - 0.05
-        const needed = region > allowed ? (region - allowed) / Math.max(0.001, region - base) : 0
-        return Math.max(floor, Math.min(0.86, needed))
+        return Lume.veil(level, spread, root.materialSpread[material] ?? 1, root.surfaceOpaque, root.text,
+            root.materialContrast[material] ?? 4.5, (root.materialVeil[material] ?? 0.3) * strength, 0.86)
     }
+
+    // Lume for Places: a Place keeps the glass tint the person chose and plates only its reading surfaces
+    // (sidebar, cards), as thick as what sits behind it on the focused output needs. Under Blur with windows
+    // open that is unknown, so it is read as a mixed desktop of windows.
+    readonly property string placeOutput: String(GlobalStates.focusedScreen?.name ?? "")
+    readonly property bool placeCovered: root.glassCompositor && Lume.covered(root.placeOutput)
+    readonly property real placePlate: {
+        if (!root.glassy) return 0
+        let level = 0.72, spread = 0.18
+        if (!root.placeCovered) {
+            const screen = Lume.screenNamed(root.placeOutput)
+            const sample = screen ? Lume.read(root.placeOutput, screen.width * 0.2, screen.height * 0.12,
+                screen.width * 0.6, screen.height * 0.76) : null
+            if (!sample) return 0
+            level = sample.level
+            spread = sample.spread
+        }
+        return Lume.plateOver(root.glassTint, root.legibleVeil("glass", level, spread, 0))
+    }
+    readonly property color readingPlate: ColorUtils.applyAlpha(root.surfaceOpaque, root.placePlate)
+    readonly property color readingCard: root.glassy ? Lume.stack(root.readingPlate, root.surfaceHigh) : root.surfaceHigh
+    readonly property color readingSidebar: root.glassy
+        ? ColorUtils.applyAlpha(root.surfaceOpaque, Math.max(root.wallpaperVeil, root.placePlate)) : root.surfaceHigh
 
     readonly property QtObject identity: QtObject {
         readonly property color blue: "#0a84ff"
@@ -654,6 +715,8 @@ QtObject {
     }
     function springFor(intent: string, surface: string): var {
         const own = root.surfaceMorph(surface)
+        // A surface set to None appears and leaves on the next frame (IrisSpring jumps on a zero response).
+        if (own === "instant") return { response: 0, bounce: 0 }
         const style = own.length > 0 ? root.morphStyles[own] : null
         const base = style
             ? (intent === "move" ? root.resolveStyleSpring(style, style.move, 1.15, "moveTime")

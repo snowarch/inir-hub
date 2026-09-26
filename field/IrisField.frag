@@ -89,6 +89,10 @@ layout(std140, binding = 0) uniform buf {
     vec4 options;
     // Left, top, right, bottom of an inner rectangle nothing reaches: its pixels skip the whole pass.
     vec4 quiet;
+    // The colour that lights the cut edge of blurred glass (IrisStyle.glassEdgeColour).
+    vec4 sheen;
+    // x: light where the edge faces up, y: the line elsewhere, z: its width in pixels.
+    vec4 edgeGlass;
 } u;
 layout(binding = 1) uniform sampler2D backdrop;
 
@@ -227,6 +231,18 @@ void main() {
         vec4 mixed = (solid * share.x + glassy * share.y + blurred * share.z) * a;
         colour = mixed.rgb;
         alpha = mixed.a;
+    }
+    // Compositor blur has a 1-bit edge (a wl_region, no AA in Niri). The cut edge of the glass catches the
+    // light from above, like Liquid Glass: bright where it faces up, a faint line elsewhere, in the scene's own
+    // light, so the step reads as the edge of glass and not as a drawn frame.
+    if (share.z > 0.0) {
+        float depth = -united;
+        vec2 g = vec2(dFdx(united), dFdy(united));
+        float facing = clamp(-g.y / max(length(g), 1e-4), 0.0, 1.0);
+        float lip = coverage * (1.0 - smoothstep(u.edgeGlass.z * 0.4, u.edgeGlass.z + 0.1, depth));
+        float seal = lip * mix(u.edgeGlass.y, u.edgeGlass.x, facing * facing) * share.z * u.sheen.a * u.qt_Opacity;
+        colour = u.sheen.rgb * seal + colour * (1.0 - seal);
+        alpha = seal + alpha * (1.0 - seal);
     }
     if (u.edge.y > 0.5) {
         // A band just inside the silhouette, so it lands on the body's own edge

@@ -15,6 +15,7 @@ Item {
     property color tint: IrisStyle.bodySurface
     property color rim: IrisStyle.rim
     property real rimWidth: IrisStyle.rimWidth
+    property color sheen: IrisStyle.glassEdgeColour
     property real smoothing: IrisStyle.fuse
     property bool framed: IrisFrame.framed
     property real band: IrisFrame.band
@@ -213,6 +214,8 @@ Item {
         readonly property vector4d options: Qt.vector4d(0, 0, 0, 0)
         readonly property vector4d quiet: root.quietRect
         readonly property color rim: root.rim
+        readonly property color sheen: root.sheen
+        readonly property vector4d edgeGlass: Qt.vector4d(IrisStyle.glassEdgeLight, IrisStyle.glassEdgeLine, IrisStyle.glassEdgeWidth, 0)
         readonly property vector4d edge: Qt.vector4d(root.rimWidth, root.rim.a > 0 ? 1 : 0, 0, 0)
         readonly property vector4d shape0: pass.shapeAt(0)
         readonly property vector4d shape1: pass.shapeAt(1)
