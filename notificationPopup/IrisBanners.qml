@@ -132,8 +132,13 @@ Item {
             onHoveredChanged: if (banner.hovered) Notifications.cancelTimeout(banner.notification.notificationId)
             HoverHandler { id: bannerHover }
 
+            // Frozen: a discarded notification is destroyed before its banner leaves, orphaning a live key.
+            property string bodyKey: ""
             property real appear: 0
-            Component.onCompleted: banner.appear = 1
+            Component.onCompleted: {
+                banner.bodyKey = String(banner.notification?.notificationId ?? "")
+                banner.appear = 1
+            }
             Behavior on appear { NumberAnimation { duration: IrisStyle.emergeDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: IrisStyle.emergeCurve } }
             property real leave: 0
             readonly property bool swiped: Math.abs(banner.swipe) > 1
@@ -174,18 +179,18 @@ Item {
 
             readonly property real fade: 1 - Math.min(1, Math.abs(banner.swipe) / (banner.width * 0.6))
             readonly property var body: {
-                void (banner.y + popupColumn.y + popupColumn.contentY)
+                void (banner.y + popupColumn.y + popupColumn.contentY + plate.x + plate.y)
                 if (banner.bloom <= 0.01 || banner.fade <= 0.01) return null
                 const at = plate.mapToItem(root, 0, 0)
                 // Swiped away it shrinks about its centre as it slides, instead of fading.
                 const w = plate.width * banner.fade
                 const h = plate.height * banner.fade
                 return { x: at.x + (plate.width - w) / 2, y: at.y + (plate.height - h) / 2, width: w, height: h,
-                    radius: Math.min(h / 2, plate.radius), paints: false, id: "banner:" + banner.notification?.notificationId,
+                    radius: Math.min(h / 2, plate.radius), paints: false, id: "banner:" + banner.bodyKey,
                     joins: banner.meltsIntoIsland ? "island" : "", fuse: IrisStyle.fuseDeep * (1 - banner.bloom) }
             }
-            onBodyChanged: root.publish(String(banner.notification?.notificationId ?? ""), banner.body)
-            Component.onDestruction: root.publish(String(banner.notification?.notificationId ?? ""), null)
+            onBodyChanged: if (banner.bodyKey) root.publish(banner.bodyKey, banner.body)
+            Component.onDestruction: if (banner.bodyKey) root.publish(banner.bodyKey, null)
             Rectangle {
                 id: plate
                 width: Math.round(root.bubbleSize + (banner.width - root.bubbleSize) * banner.bloom)

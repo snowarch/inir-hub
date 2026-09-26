@@ -14,6 +14,7 @@ import qs.modules.common.widgets
 import qs.modules.iris.frame
 import qs.modules.iris.style
 import qs.modules.iris.components
+import qs.modules.iris.field as Field
 
 PanelWindow {
     id: root
@@ -56,6 +57,27 @@ PanelWindow {
     mask: Region { item: popupColumn }
     readonly property var island: GlobalStates.irisIslandGeometry?.[root.screen?.name ?? ""] ?? null
     readonly property real bubbleSize: Math.round(44 * root.d)
+
+    property var blurBodies: ({})
+    function publishBlur(key: string, shape: var): void {
+        const next = Object.assign({}, root.blurBodies)
+        if (shape) next[key] = shape
+        else delete next[key]
+        root.blurBodies = next
+    }
+    Field.IrisBlurRegion {
+        window: root
+        shapes: root.visible ? Object.values(root.blurBodies) : []
+        windowWidth: root.width
+        windowHeight: root.height
+    }
+    // One wallpaper source for the fallback window, borrowed by all its banners.
+    Field.IrisField {
+        anchors.fill: parent
+        framed: false
+        providesBackdrop: true
+        compositorAllowed: true
+    }
 
     property real now: Date.now()
     Timer { interval: 30000; repeat: true; running: root.visible; onTriggered: root.now = Date.now() }
@@ -121,7 +143,19 @@ PanelWindow {
             HoverHandler { id: bannerHover }
 
             property real appear: 0
-            Component.onCompleted: banner.appear = 1
+            property string blurKey: ""
+            Component.onCompleted: {
+                banner.blurKey = String(banner.notification?.notificationId ?? "")
+                root.publishBlur(banner.blurKey, banner.blurShape)
+                banner.appear = 1
+            }
+            Component.onDestruction: root.publishBlur(banner.blurKey, null)
+            readonly property var blurShape: {
+                if (!root.visible || !IrisStyle.glassCompositor || plate.opacity < 0.999) return null
+                return { x: popupColumn.x + banner.x + plate.x, y: popupColumn.y + banner.y + plate.y,
+                    width: plate.width, height: plate.height, radius: plate.radius }
+            }
+            onBlurShapeChanged: if (banner.blurKey.length > 0) root.publishBlur(banner.blurKey, banner.blurShape)
             Behavior on appear { NumberAnimation { duration: IrisStyle.emergeDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: IrisStyle.emergeCurve } }
             property real leave: 0
             readonly property bool swiped: Math.abs(banner.swipe) > 1
@@ -171,7 +205,19 @@ PanelWindow {
                 color: IrisStyle.shadow
                 opacity: plate.opacity * IrisStyle.shadowAt(banner.bloom)
             }
-            Rectangle {
+            Field.IrisField {
+                anchors.fill: parent
+                z: -1
+                framed: false
+                compositorAllowed: true
+                opacity: plate.opacity
+                sceneOrigin: Qt.point(root.margins.left + popupColumn.x + banner.x,
+                    root.margins.top + popupColumn.y + banner.y)
+                sceneSize: Qt.size(root.screen?.width ?? 0, root.screen?.height ?? 0)
+                shapes: plate.opacity > 0 ? [{ x: plate.x, y: plate.y, width: plate.width,
+                    height: plate.height, radius: plate.radius, paints: true, fuse: 0 }] : []
+            }
+            ClippingRectangle {
                 id: plate
                 width: Math.round(root.bubbleSize + (banner.width - root.bubbleSize) * banner.bloom)
                 height: Math.round(root.bubbleSize + (banner.fullHeight - root.bubbleSize) * banner.bloom)
@@ -183,8 +229,8 @@ PanelWindow {
                 opacity: Math.min(1, banner.bloom * 3)
                     * (1 - Math.min(1, Math.abs(banner.swipe) / (banner.width * 0.6)))
                 radius: Math.min(height / 2, root.bubbleSize / 2 + (Math.round(22 * root.d) - root.bubbleSize / 2) * banner.bloom)
-                color: IrisStyle.bodySurface
-                border.width: 1
+                color: IrisStyle.bodyClip
+                border.width: banner.critical ? 1 : 0
                 border.color: banner.critical ? IrisStyle.tintBorder(IrisStyle.danger)
                     : ColorUtils.applyAlpha(IrisStyle.border, IrisStyle.border.a * banner.bloom)
 

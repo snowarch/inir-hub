@@ -38,3 +38,4 @@ IrisScrollBar 1.0 IrisScrollBar.qml
 IrisSwitch 1.0 IrisSwitch.qml
 IrisSegmented 1.0 IrisSegmented.qml
 IrisChip 1.0 IrisChip.qml
+singleton IrisMotionMeter 1.0 IrisMotionMeter.qml

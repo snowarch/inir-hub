@@ -1331,6 +1331,7 @@ Item {
         id: card
         open: root.cardOpen
         motionSurface: "cards"
+        settles: true
         color: IrisStyle.bodySurface
         fieldBacked: true
         contentReady: cardContent.contentHeight > 0

@@ -69,14 +69,14 @@ ClippingRectangle {
     IrisImage {
         id: sharp
         anchors.fill: parent
-        source: root.settled ? String(root.entry?.fullUrl ?? "") : ""
+        source: root.settled && root.picker.opened ? String(root.entry?.fullUrl ?? "") : ""
         opacity: status === Image.Ready ? 1 : 0
         Behavior on opacity { NumberAnimation { duration: IrisStyle.duration(260); easing.type: IrisStyle.feedbackEasing } }
     }
     Loader {
         id: motionLoader
         anchors.fill: parent
-        active: root.settled && root.picker.playMotion && String(root.entry?.motionSource ?? "").length > 0
+        active: root.settled && root.picker.opened && root.picker.playMotion && String(root.entry?.motionSource ?? "").length > 0
         sourceComponent: Video {
             id: motion
             property bool shown: false

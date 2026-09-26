@@ -5,7 +5,6 @@ import Quickshell
 import qs
 import qs.services
 import qs.modules.common
-import qs.modules.iris.palette
 import qs.modules.iris.notificationPopup
 import qs.modules.iris.onScreenDisplay
 import qs.modules.iris.session
@@ -15,7 +14,6 @@ import qs.modules.iris.pieces
 import qs.modules.iris.settings
 import qs.modules.iris.lock
 import qs.modules.iris.sidebar
-import qs.modules.iris.wallpaper
 import qs.modules.background
 import qs.modules.lock
 
@@ -137,14 +135,6 @@ Item {
     }
 
     OnDemandPanelLoader {
-        identifier: "irisPalette"
-        open: GlobalStates.searchOpen
-        closeGraceMs: IrisStyle.settleDuration + 120
-        extraCondition: Config.options?.iris?.modules?.palette ?? true
-        component: IrisPalette {}
-    }
-
-    OnDemandPanelLoader {
         identifier: "irisSessionScreen"
         open: GlobalStates.sessionOpen
         extraCondition: Config.options?.iris?.modules?.sessionScreen ?? true
@@ -192,13 +182,6 @@ Item {
         source: "../regionSelector/RegionSelector.qml"
     }
 
-    OnDemandPanelLoader {
-        identifier: "irisWallpaperSelector"
-        open: GlobalStates.wallpaperSelectorOpen
-        requireEnabledPanel: false
-        closeGraceMs: IrisStyle.settleDuration + 120
-        component: IrisWallpaperPicker {}
-    }
 
     OnDemandPanelLoader {
         identifier: "irisLockRehearsal"

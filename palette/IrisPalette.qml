@@ -4,7 +4,6 @@ import QtQuick
 import QtQuick.Effects
 import QtQuick.Layouts
 import Quickshell
-import Quickshell.Wayland
 import qs
 import qs.services
 import qs.services.deferred
@@ -14,12 +13,18 @@ import qs.modules.common.models
 import qs.modules.common.widgets
 import qs.modules.iris.frame
 import qs.modules.iris.style
-import qs.modules.iris.field as Field
 import qs.modules.iris.components
 import qs.modules.iris.pieces
 
-PanelWindow {
+// Spotlight lives in the chassis window of its output, so its body, its content and the Island it grows
+// from are one surface: drawn and moved in the same frame.
+Item {
     id: root
+
+    property var screen: null
+    readonly property bool here: (root.screen?.name ?? "") === (GlobalStates.focusedScreen?.name ?? "")
+    readonly property bool present: root.here && (GlobalStates.searchOpen || (content.item?.progress ?? 0) > 0)
+    readonly property bool armed: root.here && GlobalStates.searchOpen && (content.item?.armed ?? false)
 
     readonly property var options: Config.options?.iris?.palette ?? ({})
     readonly property int configuredResultLimit: Math.max(3, Math.min(14, Number(root.options?.maxResults ?? 8)))
@@ -102,36 +107,7 @@ PanelWindow {
         return root.pointerSelectionArmed
     }
 
-    visible: GlobalStates.searchOpen || (content.item?.progress ?? 0) > 0
-    IrisOutputHold {
-        id: outputHold
-        wanted: GlobalStates.focusedScreen
-        live: root.visible
-    }
-    screen: outputHold.output
-    color: "transparent"
-    exclusionMode: ExclusionMode.Ignore
-    WlrLayershell.layer: WlrLayer.Overlay
-    WlrLayershell.namespace: "quickshell:iris-palette"
-    property var placeShapes: []
-    Field.IrisBlurRegion {
-        id: placeBlur
-        window: root
-        shapes: root.placeShapes
-        windowWidth: root.width
-        windowHeight: root.height
-    }
-    WlrLayershell.keyboardFocus: GlobalStates.searchOpen ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
-    anchors { top: true; bottom: true; left: true; right: true }
-    margins {
-        left: IrisFrame.band
-        right: IrisFrame.band
-        top: IrisFrame.band
-        bottom: IrisFrame.band
-    }
-    mask: GlobalStates.searchOpen && (content.item?.armed ?? false)
-        ? null : capsuleRegion
-    Region { id: capsuleRegion; item: content.item?.surfaceItem ?? null }
+    visible: root.present
 
     function focusInput(): void {
         Qt.callLater(() => content.item?.focusInput())
@@ -142,12 +118,12 @@ PanelWindow {
         LauncherSearch.query = GlobalStates.irisSpotlightQuery
         GlobalStates.irisSpotlightQuery = ""
     }
-    Component.onCompleted: if (GlobalStates.searchOpen) { root.takeRequestedQuery(); root.focusInput() }
+    Component.onCompleted: if (root.here && GlobalStates.searchOpen) { root.takeRequestedQuery(); root.focusInput() }
 
     Connections {
         target: GlobalStates
         function onSearchOpenChanged(): void {
-            if (!GlobalStates.searchOpen) return
+            if (!GlobalStates.searchOpen || !root.here) return
             root.selectedIndex = 0
             root.disarmPointerSelection(true)
             root.takeRequestedQuery()
@@ -204,7 +180,7 @@ PanelWindow {
 
     Shortcut {
         sequence: "Escape"
-        enabled: GlobalStates.searchOpen
+        enabled: root.here && GlobalStates.searchOpen
         onActivated: {
             if (LauncherSearch.query.length > 0) LauncherSearch.query = ""
             else GlobalStates.searchOpen = false
@@ -213,6 +189,8 @@ PanelWindow {
 
     MouseArea {
         anchors.fill: parent
+        anchors.margins: -IrisFrame.band
+        enabled: root.armed
         onClicked: GlobalStates.searchOpen = false
     }
 
@@ -296,14 +274,13 @@ PanelWindow {
             IrisMorphSurface {
                 id: surface
                 compositorBlurred: true
-                Binding { target: root; property: "placeShapes"; value: surface.blurShapes }
-                open: GlobalStates.searchOpen
+                open: root.here && GlobalStates.searchOpen
+                settles: true
                 motionSurface: "spotlight"
-                windowOffset: Qt.point(IrisFrame.band, IrisFrame.band)
-                ownField: !root.joinsEdge
-                fieldBacked: root.joinsEdge
+                fieldBacked: true
                 chassisKey: "spotlight"
                 chassisJoin: {
+                    if (!root.joinsEdge) return {}
                     const grow = root.islandBottom ? "bottom" : "top"
                     if (root.joinsFrame) return { id: "spotlight", joins: "frame", fuse: IrisStyle.fuseEdge, grow: grow }
                     const k = IrisStyle.fuseEdge, deep = Math.max(8, k)

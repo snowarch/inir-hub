@@ -15,13 +15,15 @@ Region {
     property real windowHeight: 0
     property real band: IrisFrame.band
     property real cornerRadius: IrisFrame.cornerRadius
-    // The compositor blurs exactly the shape it is given, and this region can only ever approximate
-    // the field's SDF silhouette. So it is kept strictly inside it: anything that falls short is a
-    // sharp pixel the field then paints over, while anything that overshoots is blur outside the
-    // body, which is what reads as the blur not sticking to the shape. The field's edge ramps over
-    // 1.4 px, so 2 clears it whole.
-    property real inset: 2
-    // Rebuilding this region is JS plus 64 bound sub-regions, and the chassis composes its table
+    // Niri blurs exactly the whole-pixel rects it is given, with no AA: at a 12 % tint that 1-bit step was the
+    // visible contour and stair-stepped on every curve. A pixel is blurred when its centre lies half a pixel inside
+    // the silhouette, so the step stays within the field's lit glass edge (IrisField.frag) and no sharp ring shows.
+    // Region geometry is whole pixels (qint32, truncated), so every edge is rounded here by that centre rule.
+    property real inset: 0.5
+    // First and past-the-last pixel whose centre is strictly inside; a tie stays out on both sides.
+    function lo(v: real): int { return Math.floor(v - 0.5) + 1 }
+    function hi(v: real): int { return Math.ceil(v - 0.5) }
+    // Rebuilding this region is JS plus 70 bound sub-regions and the join runs, and the chassis composes its table
     // from several sources that each arrive on their own: measured at 594 rebuilds a second during
     // a morph, eight per frame, for a shape the compositor reads once per frame. The zero timer
     // takes the last of those eight instead of each one, so the region still lands on its own frame
@@ -33,26 +35,40 @@ Region {
     onShapesChanged: {
         if ((root.shapes ?? []).length < (root.held ?? []).length) { perFrame.stop(); root.held = root.shapes ?? [] }
         else if (!perFrame.running) perFrame.restart()
+        root.settled = false
         settle.restart()
     }
     property Timer perFrame: Timer { interval: 0; onTriggered: root.held = root.shapes ?? [] }
-    property Timer settle: Timer { interval: 96; onTriggered: { root.held = root.shapes ?? []; root.kick() } }
-    readonly property var pieces: root.build(root.held ?? [])
+    property Timer settle: Timer { interval: 96; onTriggered: { root.held = root.shapes ?? []; root.settled = true; root.kick() } }
+    // Moving, a join is walked in 4 px strides and stays up to 3 px inside the silhouette; settled, to the pixel.
+    property bool settled: true
+    readonly property var built: root.build(root.held ?? [], root.settled)
+    readonly property var pieces: root.built.bodies
     readonly property bool empty: root.pieces.length === 0 && !root.framed
+    onBuiltChanged: root.placeRuns()
 
     // The window this region blurs. The region publishes itself, as DMS's WindowBlur does: nothing
     // while the window is hidden, a fresh commit once the shape settles (a nested Region can change
     // without the compositor hearing of it) and null before the window goes, so no blur outlives
     // the body it belonged to.
     property var window: null
+    // ext-background-effect is double-buffered: polish updates its pending region,
+    // but a settled/empty scene may not draw another frame to commit that change.
+    // Request a frame only at publication boundaries, never continuously.
+    function commitFrame(): void {
+        const quickWindow = root.window?.contentItem?.Window.window
+        if (root.window?.visible && quickWindow) quickWindow.update()
+    }
     function apply(): void {
         if (!root.window) return
         root.window.BackgroundEffect.blurRegion = root.empty || !root.window.visible ? null : root
+        root.commitFrame()
     }
     function kick(): void {
         if (!root.window || root.empty || !root.window.visible) return root.apply()
         root.window.BackgroundEffect.blurRegion = null
         root.window.BackgroundEffect.blurRegion = root
+        root.commitFrame()
     }
     onEmptyChanged: root.apply()
     onWindowChanged: root.apply()
@@ -64,99 +80,180 @@ Region {
     Component.onCompleted: root.apply()
     Component.onDestruction: if (root.window) root.window.BackgroundEffect.blurRegion = null
 
-    function bandRects(): var {
-        const w = root.windowWidth, h = root.windowHeight, b = root.band
-        return [{ x: 0, y: 0, width: w, height: b }, { x: 0, y: h - b, width: w, height: b },
-            { x: 0, y: 0, width: b, height: h }, { x: w - b, y: 0, width: b, height: h }]
+    // The field's own distances (IrisField.frag), so a join is measured on the shape it draws.
+    function boxDistance(s: var, x: real, y: real): real {
+        const hx = s.width / 2, hy = s.height / 2
+        const r = Math.min(Number(s.radius ?? 0), hx, hy)
+        const qx = Math.abs(x - s.x - hx) - (hx - r), qy = Math.abs(y - s.y - hy) - (hy - r)
+        const ox = Math.max(qx, 0), oy = Math.max(qy, 0)
+        return Math.sqrt(ox * ox + oy * oy) + Math.min(Math.max(qx, qy), 0) - r
     }
-    // The shader's smooth union of two perpendicular edges is, within 1.2 % of k, a quarter circle of radius 0.8536 k.
-    function joinPieces(s: var, t: var, out: var): void {
-        const k = Math.max(0, Number(s.fuse ?? 0))
-        const f = k * 0.8536
-        const r = Number(s.radius ?? 0)
-        const ox = Math.min(s.x + s.width, t.x + t.width) - Math.max(s.x, t.x)
-        const oy = Math.min(s.y + s.height, t.y + t.height) - Math.max(s.y, t.y)
+    function frameDistance(x: real, y: real): real {
+        return -root.boxDistance(root.memo.frame, x, y)
+    }
+    // The frame's inner box, set once per build from inside the `pieces` binding, so it must not notify: built
+    // per evaluation it was 95 % of the build (2.5 ms against 0.13).
+    readonly property var memo: ({ frame: null, runs: null })
+    function smoothUnion(a: real, b: real, k: real): real {
+        if (k <= 0.001) return Math.min(a, b)
+        const h = Math.max(0, Math.min(1, 0.5 + 0.5 * (b - a) / k))
+        return b + (a - b) * h - k * h * (1 - h)
+    }
+    // A joined body is blurred where the field draws it: its smooth union with what it joins swells the body
+    // and draws the fillets, so every row and column that crosses the body is walked out from the body's own
+    // span to the last pixel whose centre the union holds. Consecutive lines with the same span are one rect.
+    function lines(s: var, inside: var, rows: bool, reach: real, exact: bool, out: var): void {
         const i = root.inset
-        // Inside a fused body the inset is a seam, not a margin: base and fillets reach `i` into both shapes.
-        const fillet = (x, y, w, h, ex, ey, gl, gr, gt, gb) => out.push({ x: x - gl, y: y - gt, width: w + gl + gr, height: h + gt + gb, radius: 0,
-            cut: { x: ex - i, y: ey - i, width: 2 * w + 2 * i, height: 2 * h + 2 * i } })
-        if (ox > 0 && ox >= oy) {
-            const below = s.y + s.height / 2 > t.y + t.height / 2
-            const c = below ? t.y + t.height : t.y
-            const gap = below ? s.y - c : c - (s.y + s.height)
-            if (gap > k / 2) return
-            const y0 = below ? c - i : Math.min(c, s.y + s.height) - r
-            const y1 = below ? Math.max(c, s.y) + r : c + i
-            out.push({ x: Math.max(s.x, t.x) + i, y: y0, width: Math.max(0, ox - 2 * i), height: y1 - y0, radius: 0 })
-            if (f < 1) return
-            const narrow = s.width <= t.width ? s : t
-            const into = narrow === s ? below : !below
-            const fh = Math.min(f, (into ? narrow.y + narrow.height - c : c - narrow.y) - Number(narrow.radius ?? 0) / 2)
-            if (fh < 1) return
-            const fy = into ? c : c - fh
-            const ey = into ? c : c - 2 * fh
-            const gt = into ? i : 0, gb = into ? 0 : i
-            if (narrow.x - f >= Math.min(s.x, t.x) - 0.5) fillet(narrow.x - f, fy, f, fh, narrow.x - 2 * f, ey, 0, i, gt, gb)
-            if (narrow.x + narrow.width + f <= Math.max(s.x + s.width, t.x + t.width) + 0.5) fillet(narrow.x + narrow.width, fy, f, fh, narrow.x + narrow.width, ey, i, 0, gt, gb)
-        } else if (oy > 0) {
-            const right = s.x + s.width / 2 > t.x + t.width / 2
-            const c = right ? t.x + t.width : t.x
-            const gap = right ? s.x - c : c - (s.x + s.width)
-            if (gap > k / 2) return
-            const x0 = right ? c - i : Math.min(c, s.x + s.width) - r
-            const x1 = right ? Math.max(c, s.x) + r : c + i
-            out.push({ x: x0, y: Math.max(s.y, t.y) + i, width: x1 - x0, height: Math.max(0, oy - 2 * i), radius: 0 })
-            if (f < 1) return
-            const narrow = s.height <= t.height ? s : t
-            const into = narrow === s ? right : !right
-            const fw = Math.min(f, (into ? narrow.x + narrow.width - c : c - narrow.x) - Number(narrow.radius ?? 0) / 2)
-            if (fw < 1) return
-            const fx = into ? c : c - fw
-            const ex = into ? c : c - 2 * fw
-            const gl = into ? i : 0, gr = into ? 0 : i
-            if (narrow.y - f >= Math.min(s.y, t.y) - 0.5) fillet(fx, narrow.y - f, fw, f, ex, narrow.y - 2 * f, gl, gr, 0, i)
-            if (narrow.y + narrow.height + f <= Math.max(s.y + s.height, t.y + t.height) + 0.5) fillet(fx, narrow.y + narrow.height, fw, f, ex, narrow.y + narrow.height, gl, gr, i, 0)
+        const acrossLo = rows ? s.y : s.x, acrossLen = rows ? s.height : s.width
+        const alongLo = rows ? s.x : s.y, alongLen = rows ? s.width : s.height
+        const limit = rows ? root.windowWidth : root.windowHeight
+        const r = Math.min(Number(s.radius ?? 0), s.width / 2, s.height / 2)
+        const test = (along, across) => rows ? inside(along, across) : inside(across, along)
+        // The last pixel centre from `from` (inside) toward `to` that the union holds: 4 px strides, then 1 px.
+        const walk = (from, to, across) => {
+            const dir = to > from ? 1 : -1
+            let at = from
+            while (dir * (to - at) >= 4 && test(at + dir * 4, across)) at += dir * 4
+            while (exact && dir * (to - at) >= 1 && test(at + dir, across)) at += dir
+            return at
+        }
+        // Past the body too: the union swells its far edge and fills the pixel line where it meets what it joins.
+        const first = Math.max(0, Math.floor(acrossLo - reach / 2))
+        const last = Math.min((rows ? root.windowHeight : root.windowWidth) - 1, Math.ceil(acrossLo + acrossLen + reach / 2) - 1)
+        const band = root.framed ? root.hi(root.band - i) : 0, size = rows ? root.windowHeight : root.windowWidth
+        const mid = Math.floor(alongLo + alongLen / 2) + 0.5
+        // One line: the pixels the union holds around the body's middle, walked out from the body's own span (its
+        // rounded corners included). Null where the band already blurs it or the union misses the middle.
+        const span = n => {
+            if (n < band || n >= size - band) return null
+            const across = n + 0.5
+            if (!test(mid, across)) return null
+            const off = Math.max(0, Math.min(across - acrossLo, acrossLo + acrossLen - across))
+            const inset = off >= r ? 0 : r - Math.sqrt(Math.max(0, r * r - (r - off) ** 2))
+            const edgeA = Math.min(mid, Math.floor(alongLo + inset + i) + 1.5), edgeB = Math.max(mid, Math.ceil(alongLo + alongLen - inset - i) - 1.5)
+            return [Math.max(0, Math.floor(walk(test(edgeA, across) ? edgeA : mid, Math.max(0.5, Math.ceil(alongLo + inset) - reach - 0.5), across))),
+                Math.min(limit - 1, Math.floor(walk(test(edgeB, across) ? edgeB : mid, Math.min(limit - 0.5, Math.floor(alongLo + alongLen - inset) + reach + 0.5), across)))]
+        }
+        const same = (p, q) => p === q || (p !== null && q !== null && p[0] === q[0] && p[1] === q[1])
+        // Every fourth line, then each line between two that differ: the union is smooth, so between two equal
+        // lines nothing turns.
+        const spans = []
+        let prev = first
+        spans[first] = span(first)
+        for (let n = Math.min(first + 4, last); n > prev; n = Math.min(n + 4, last)) {
+            spans[n] = span(n)
+            const fill = same(spans[prev], spans[n])
+            for (let m = prev + 1; m < n; m++) spans[m] = fill ? spans[prev] : span(m)
+            prev = n
+            if (n === last) break
+        }
+        let open = null
+        const flush = () => {
+            if (!open) return
+            out.push(rows ? { x: open.a, y: open.from, width: open.b - open.a + 1, height: open.to - open.from + 1 }
+                : { x: open.from, y: open.a, width: open.to - open.from + 1, height: open.b - open.a + 1 })
+            open = null
+        }
+        for (let n = first; n <= last; n++) {
+            const q = spans[n]
+            if (!q) { flush(); continue }
+            if (open && open.a === q[0] && open.b === q[1]) open.to = n
+            else { flush(); open = { a: q[0], b: q[1], from: n, to: n } }
+        }
+        flush()
+    }
+    // A join's runs are kept while both bodies and the window stay put: in a morph only the moving body is walked.
+    function joinRuns(s: var, t: var, exact: bool, out: var, cache: var, kept: var): void {
+        const k = Math.max(0, Number(s.fuse ?? 0))
+        if (k < 0.5) return
+        const g = b => b.x + "," + b.y + "," + b.width + "," + b.height + "," + (b.radius ?? 0)
+        const key = g(s) + "," + k + "|" + (t === null ? "frame:" + g(root.memo.frame) + "," + root.windowWidth + "," + root.windowHeight
+            : g(t)) + "|" + root.framed + "," + root.band
+        // A still body keeps its exact runs while another one moves; only a moving one is walked coarse.
+        const known = cache[key] ?? (exact ? null : cache[key + "~"])
+        if (known) {
+            kept[cache[key] ? key : key + "~"] = known
+            for (const q of known) out.push(q)
+            return
+        }
+        const mine = []
+        kept[exact ? key : key + "~"] = mine
+        // Plain numbers in closures: this runs ~10k times a build, and a QML property read per call made it 15 ms.
+        const box = b => {
+            const hx = b.width / 2, hy = b.height / 2, r = Math.min(Number(b.radius ?? 0), hx, hy)
+            const cx = b.x + hx, cy = b.y + hy, ex = hx - r, ey = hy - r
+            return (x, y) => {
+                const qx = Math.abs(x - cx) - ex, qy = Math.abs(y - cy) - ey
+                const ox = qx > 0 ? qx : 0, oy = qy > 0 ? qy : 0
+                return Math.sqrt(ox * ox + oy * oy) + Math.min(qx > qy ? qx : qy, 0) - r
+            }
+        }
+        const own = box(s), joined = box(t === null ? root.memo.frame : t), sign = t === null ? -1 : 1, limit = -root.inset
+        const inside = (x, y) => {
+            const a = sign * joined(x, y), b = own(x, y)
+            const h = Math.max(0, Math.min(1, 0.5 + 0.5 * (b - a) / k))
+            return b + (a - b) * h - k * h * (1 - h) < limit
+        }
+        root.lines(s, inside, true, 2 * k, exact, mine)
+        root.lines(s, inside, false, 2 * k, exact, mine)
+        for (const q of mine) out.push(q)
+    }
+    // Runs past the declared pieces live in a pool of child regions, grown on demand and zeroed when unused.
+    readonly property Component runComponent: Component { Region {} }
+    property var runPool: []
+    function placeRuns(): void {
+        const runs = root.built.runs, pool = root.runPool
+        while (pool.length < runs.length) {
+            const made = root.runComponent.createObject(root)
+            root.regions.push(made)
+            pool.push(made)
+        }
+        for (let n = 0; n < pool.length; n++) {
+            const q = runs[n] ?? null, r = pool[n]
+            r.x = q ? q.x : 0
+            r.y = q ? q.y : 0
+            r.width = q ? q.width : 0
+            r.height = q ? q.height : 0
         }
     }
-    function build(list: var): var {
+    function build(list: var, exact: bool): var {
         const byId = {}
         for (const s of list) if (s.id) byId[s.id] = s
         const out = []
-        const joined = []
+        const runs = []
+        const cache = root.memo.runs ?? {}, kept = {}
+        const b = root.band
+        root.memo.frame = { x: b, y: b, width: root.windowWidth - 2 * b, height: root.windowHeight - 2 * b, radius: root.cornerRadius }
         for (const s of list) {
             const i = root.inset
             out.push({ x: s.x + i, y: s.y + i, width: s.width - 2 * i, height: s.height - 2 * i, radius: Math.max(0, Number(s.radius ?? 0) - i) })
             const joins = !s.joins ? [] : Array.isArray(s.joins) ? s.joins : [s.joins]
             for (const id of joins) {
                 if (id === "frame") {
-                    if (root.joinsFrame) for (const t of root.bandRects()) root.joinPieces(s, t, joined)
-                } else if (byId[id]) root.joinPieces(s, byId[id], joined)
+                    if (root.joinsFrame) root.joinRuns(s, null, exact, runs, cache, kept)
+                } else if (byId[id]) root.joinRuns(s, byId[id], exact, runs, cache, kept)
             }
         }
-        // Past the pool, a fillet goes before a body does.
-        return out.concat(joined).slice(0, 64)
+        root.memo.runs = kept
+        return { bodies: out.slice(0, 70), runs: runs }
     }
+
+
+
 
     component Piece: Region {
         id: piece
         required property int index
         readonly property var p: root.pieces[piece.index] ?? null
-        // Rounded inwards: a region is whole pixels, and the half pixel taken here is one the field
-        // paints over, while the half pixel given away would be blur past the body's edge.
-        x: piece.p ? Math.ceil(piece.p.x) : 0
-        y: piece.p ? Math.ceil(piece.p.y) : 0
-        width: piece.p ? Math.max(0, Math.floor(piece.p.x + piece.p.width) - Math.ceil(piece.p.x)) : 0
-        height: piece.p ? Math.max(0, Math.floor(piece.p.y + piece.p.height) - Math.ceil(piece.p.y)) : 0
-        radius: piece.p ? Math.min(Math.ceil(piece.p.radius), piece.width / 2, piece.height / 2) : 0
-        Region {
-            shape: RegionShape.Ellipse
-            intersection: Intersection.Subtract
-            // What is subtracted rounds the other way, for the same reason.
-            x: piece.p?.cut ? Math.floor(piece.p.cut.x) : 0
-            y: piece.p?.cut ? Math.floor(piece.p.cut.y) : 0
-            width: piece.p?.cut ? Math.ceil(piece.p.cut.width) : 0
-            height: piece.p?.cut ? Math.ceil(piece.p.cut.height) : 0
-        }
+        x: piece.p ? root.lo(piece.p.x) : 0
+        y: piece.p ? root.lo(piece.p.y) : 0
+        width: piece.p ? Math.max(0, root.hi(piece.p.x + piece.p.width) - root.lo(piece.p.x)) : 0
+        height: piece.p ? Math.max(0, root.hi(piece.p.y + piece.p.height) - root.lo(piece.p.y)) : 0
+        // A disc (a bubble, a satellite) is an ellipse: as a rounded box of odd size its radius truncates and bulges.
+        readonly property bool disc: piece.p !== null && Math.abs(piece.p.width - piece.p.height) < 1
+            && piece.p.radius >= piece.p.width / 2 - 0.5
+        shape: piece.disc ? RegionShape.Ellipse : RegionShape.Rect
+        radius: piece.p && !piece.disc ? Math.ceil(piece.p.radius) : 0
     }
 
     Region {
@@ -164,11 +261,13 @@ Region {
         height: root.framed ? root.windowHeight : 0
         Region {
             intersection: Intersection.Subtract
-            x: root.band - root.inset
-            y: root.band - root.inset
-            width: Math.max(0, root.windowWidth - 2 * (root.band - root.inset))
-            height: Math.max(0, root.windowHeight - 2 * (root.band - root.inset))
-            radius: root.cornerRadius + root.inset
+            readonly property int edge: root.hi(root.band - root.inset)
+            x: edge
+            y: edge
+            width: Math.max(0, root.windowWidth - 2 * edge)
+            height: Math.max(0, root.windowHeight - 2 * edge)
+            // Concentric with the frame's inner corner: the hole is grown by the pixel rounding of its edge.
+            radius: Math.round(root.cornerRadius + root.band - edge)
         }
     }
     Piece { index: 0 }
@@ -235,4 +334,36 @@ Region {
     Piece { index: 61 }
     Piece { index: 62 }
     Piece { index: 63 }
+    Piece { index: 64 }
+    Piece { index: 65 }
+    Piece { index: 66 }
+    Piece { index: 67 }
+    Piece { index: 68 }
+    Piece { index: 69 }
+    Piece { index: 70 }
+    Piece { index: 71 }
+    Piece { index: 72 }
+    Piece { index: 73 }
+    Piece { index: 74 }
+    Piece { index: 75 }
+    Piece { index: 76 }
+    Piece { index: 77 }
+    Piece { index: 78 }
+    Piece { index: 79 }
+    Piece { index: 80 }
+    Piece { index: 81 }
+    Piece { index: 82 }
+    Piece { index: 83 }
+    Piece { index: 84 }
+    Piece { index: 85 }
+    Piece { index: 86 }
+    Piece { index: 87 }
+    Piece { index: 88 }
+    Piece { index: 89 }
+    Piece { index: 90 }
+    Piece { index: 91 }
+    Piece { index: 92 }
+    Piece { index: 93 }
+    Piece { index: 94 }
+    Piece { index: 95 }
 }

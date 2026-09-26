@@ -7,7 +7,6 @@ import QtQuick.Effects
 import Quickshell
 import Quickshell.Io
 import Quickshell.Widgets
-import Quickshell.Wayland
 import qs
 import qs.services
 import qs.services.deferred
@@ -16,14 +15,24 @@ import qs.modules.common.functions
 import qs.modules.common.widgets
 import qs.modules.iris.frame
 import qs.modules.iris.style
-import qs.modules.iris.field as Field
 import qs.modules.iris.components
 
-PanelWindow {
+// The gallery lives in the chassis window of its output, so its body, its content and the Island it grows
+// from are one surface: drawn and moved in the same frame.
+Item {
     id: root
 
+    property var screen: null
+    readonly property var targetScreen: {
+        const name = GlobalStates.wallpaperSelectorTargetMonitor
+        return (name ? Quickshell.screens.find(s => s.name === name) : null) ?? GlobalStates.focusedScreen
+    }
+    readonly property bool here: (root.screen?.name ?? "") === (root.targetScreen?.name ?? "")
+    readonly property bool present: root.here && (root.morphOpen || surface.progress > 0)
+    readonly property bool armed: root.morphOpen && surface.armed
+
     readonly property real d: IrisStyle.density
-    readonly property bool morphOpen: GlobalStates.wallpaperSelectorOpen
+    readonly property bool morphOpen: root.here && GlobalStates.wallpaperSelectorOpen
     readonly property bool multiMonitor: Config.options?.background?.multiMonitor?.enable ?? false
     readonly property bool onlineEnabled: Config.options?.sidebar?.wallhaven?.enable ?? true
     readonly property var barOptions: Config.options?.iris?.bar ?? ({})
@@ -33,6 +42,8 @@ PanelWindow {
         ? String(root.options?.layout ?? "showcase") : "showcase"
     readonly property bool showcase: root.layoutName === "showcase"
     readonly property bool playMotion: (root.options?.motion ?? true) && root.morphOpen
+    // Full-size images and video wait for the open to finish: decoded mid-motion they cost it 4-7 frames.
+    readonly property bool opened: root.morphOpen && surface.settled
     property string targetMonitor: ""
     readonly property string selectionTarget: Wallpapers.currentSelectionTarget()
     readonly property bool overviewTargetable: (Config.options?.background?.backdrop?.enable ?? true)
@@ -409,7 +420,8 @@ PanelWindow {
         : root.pathMode ? "drive_file_move"
         : search.text.length > 0 ? "search_off"
         : root.libraryFolders.length > 0 ? "folder_open" : "hide_image"
-    readonly property string emptyText: root.online
+    readonly property string emptyText: root.online && !Network.online ? Network.offlineReason
+        : root.online
         ? (root.searching ? Translation.tr("Looking for wallpapers…") : (root.onlineMessage || Translation.tr("Nothing found")))
         : root.pathMode ? Translation.tr("Press Enter to open %1").arg(root.query)
         : search.text.length > 0 ? Translation.tr("No matches")
@@ -431,37 +443,7 @@ PanelWindow {
         else if (root.hoverKey === key) root.hoverKey = ""
     }
 
-    visible: root.morphOpen || surface.progress > 0
-    IrisOutputHold {
-        id: outputHold
-        wanted: {
-            const name = GlobalStates.wallpaperSelectorTargetMonitor
-            return (name ? Quickshell.screens.find(s => s.name === name) : null) ?? GlobalStates.focusedScreen
-        }
-        live: root.visible
-    }
-    screen: outputHold.output
-    color: "transparent"
-    exclusionMode: ExclusionMode.Ignore
-    WlrLayershell.layer: WlrLayer.Overlay
-    WlrLayershell.namespace: "quickshell:iris-wallpaper"
-    Field.IrisBlurRegion {
-        id: placeBlur
-        window: root
-        shapes: surface.blurShapes
-        windowWidth: root.width
-        windowHeight: root.height
-    }
-    WlrLayershell.keyboardFocus: root.morphOpen ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
-    anchors { left: true; right: true; top: true; bottom: true }
-    margins {
-        left: IrisFrame.band
-        right: IrisFrame.band
-        top: IrisFrame.band
-        bottom: IrisFrame.band
-    }
-    mask: root.morphOpen && surface.armed ? null : surfaceRegion
-    Region { id: surfaceRegion; item: surface }
+    visible: root.present
 
     property bool prepared: false
     function prepare(): void {
@@ -558,6 +540,7 @@ PanelWindow {
         root.setSource(ids[(at + step + ids.length) % ids.length], "")
     }
     function searchOnline(page: int, replace: bool): void {
+        if (!Network.online) return
         const option = root.discoveries[root.discovery] ?? root.discoveries[0]
         const live = root.provider === "motionbgs"
         const booru = root.provider === "konachan" || root.provider === "yandere"
@@ -572,6 +555,12 @@ PanelWindow {
             live ? { mode: "any" }
                 : { mode: "auto", width: screen?.width ?? 1920, height: screen?.height ?? 1080, ratioCode: "", aspect: (screen?.width ?? 16) / Math.max(1, screen?.height ?? 9) },
             live ? undefined : root.onlineSorting)
+    }
+    Connections {
+        target: Network
+        function onOnlineChanged(): void {
+            if (Network.online && root.morphOpen && root.online && root.onlineImages.length === 0) root.searchOnline(1, true)
+        }
     }
     Timer { id: onlineSearchDelay; interval: 450; onTriggered: { root.series = null; root.searchOnline(1, true) } }
 
@@ -676,7 +665,12 @@ PanelWindow {
         grid.positionViewAtIndex(root.selectedIndex, GridView.Contain)
     }
 
-    MouseArea { anchors.fill: parent; onClicked: GlobalStates.wallpaperSelectorOpen = false }
+    MouseArea {
+        anchors.fill: parent
+        anchors.margins: -IrisFrame.band
+        enabled: root.armed
+        onClicked: GlobalStates.wallpaperSelectorOpen = false
+    }
     Shortcut {
         sequence: "Escape"
         enabled: root.morphOpen
@@ -704,8 +698,9 @@ PanelWindow {
 
     IrisMorphSurface {
         motionSurface: "gallery"
-        windowOffset: Qt.point(IrisFrame.band, IrisFrame.band)
-        ownField: true
+        settles: true
+        fieldBacked: true
+        chassisKey: "gallery"
         id: surface
         compositorBlurred: true
         open: root.morphOpen

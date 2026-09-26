@@ -41,7 +41,7 @@ Item {
     property string chassisKey: ""
     property var chassisJoin: ({})
     readonly property var chassisBodies: {
-        if (!root.fieldBacked || root.chassisKey.length === 0 || !(root.open || root.presentation > 0)) return []
+        if (!root.visible || root.opacity <= 0 || !root.fieldBacked || root.chassisKey.length === 0 || !(root.armed || root.presentation > 0)) return []
         void (root.x + root.y + chassis.x + chassis.y + chassis.width + chassis.height + chassis.radius + (root.parent?.x ?? 0) + (root.parent?.y ?? 0))
         const at = chassis.mapToItem(null, 0, 0)
         const join = root.chassisJoin ?? {}
@@ -72,28 +72,40 @@ Item {
     }
     readonly property bool settled: root.presentation >= 1
     // In a window above its origin a body cannot pass under it, so it fades out as it reaches it instead of covering it.
-    property bool behindOrigin: !root.fieldBacked && (root.originItem !== null || root.origin !== null || root.originScene !== null)
+    property bool behindOrigin: !root.fieldBacked && !root.settles && (root.originItem !== null || root.origin !== null || root.originScene !== null)
     property real emergenceSpan: 0.24
     readonly property real emergence: root.behindOrigin ? IrisStyle.ramp(root.presentation, 0, root.emergenceSpan) : 1
     readonly property bool blurs: !root.fieldBacked && IrisStyle.glassCompositor && root.compositorBlurred && root.glass
         && root.surfaceMaterial !== "solid" && (IrisStyle.glassy || root.surfaceMaterial === "glass")
+    // A menu gives its blur up as it starts to go: the region trails the shrinking body by a frame, and when
+    // the action it ran keeps the main thread busy the untinted blur showed around it.
+    property bool blurWhileReceding: true
     readonly property var blurShapes: {
-        if (!root.blurs || !(root.armed || root.presentation > 0) || root.emergence < 0.999) return []
+        if (!root.visible || root.opacity <= 0 || !root.blurs || !(root.armed || root.presentation > 0) || root.emergence < 0.999) return []
+        if (!root.blurWhileReceding && !root.open) return []
         void (root.x + root.y + chassis.x + chassis.y + chassis.width + chassis.height + chassis.radius + (root.parent?.x ?? 0) + (root.parent?.y ?? 0))
         const at = chassis.mapToItem(null, 0, 0)
         return [{ x: at.x, y: at.y, width: chassis.width, height: chassis.height, radius: chassis.radius }]
     }
     signal closed()
+    // Settles in place (DESIGN §3.3): it arrives at 95 % of itself on its own centre, never from its origin, and
+    // leaves at 97 %, so a blurred body only ever changes size, never fades.
+    property bool settles: false
+    readonly property real settleShare: 0.95
+    readonly property real settleCut: 0.4
 
     property var originScene: null
     property string originOwner: ""
     property point windowOffset: Qt.point(0, 0)
     property real fromRadius: root.radius
-    readonly property rect from: root.originItem ? root.itemRect()
+    readonly property rect from: root.settles
+        ? Qt.rect(root.width * (1 - root.settleShare) / 2, root.height * (1 - root.settleShare) / 2,
+            root.width * root.settleShare, root.height * root.settleShare)
+        : root.originItem ? root.itemRect()
         : root.origin ? Qt.rect(root.origin.x - root.x, root.origin.y - root.y, root.origin.width, root.origin.height)
         : root.originScene ? root.sceneRect(root.originScene)
         : Qt.rect(root.width * 0.04, root.height * 0.04, root.width * 0.92, root.height * 0.92)
-    readonly property bool absorbs: IrisStyle.revealDrops && !root.contentTravels
+    readonly property bool absorbs: IrisStyle.revealDrops && !root.contentTravels && !root.settles
         && (root.originItem !== null || root.origin !== null || root.originScene !== null)
     readonly property rect start: {
         if (!root.absorbs) return root.from
@@ -129,6 +141,7 @@ Item {
         function onFrameSwapped(): void { if (++root.launchFrames >= 1) root.launched = true }
     }
     Timer { interval: 90; running: root.armed && !root.launched; onTriggered: root.launched = true }
+    onLaunchedChanged: if (root.launched && IrisMotionMeter.watching(root.motionSurface)) IrisMotionMeter.mark("launched")
     readonly property alias presentation: presentationSpring.value
     IrisSpring {
         id: presentationSpring
@@ -137,11 +150,43 @@ Item {
         intent: root.animationDuration > 0 ? "move" : "auto"
         minimum: 0
     }
-    onPresentationChanged: if (root.presentation <= 0 && !root.open) root.closed()
+    onPresentationChanged: {
+        // jump() re-enters here at 0 and signals `closed` itself.
+        if (root.settles && !root.open && !root.armed && root.presentation > 0 && root.presentation <= root.settleCut)
+            return presentationSpring.jump()
+        if (root.presentation <= 0 && !root.open) root.closed()
+    }
+    // After every animation of the tick has run, so a sample is the frame that is drawn, not the one before it.
+    Connections {
+        target: root.Window.window
+        enabled: IrisMotionMeter.watching(root.motionSurface) && (root.open || root.armed || root.presentation > 0)
+        function onAfterAnimating(): void {
+            const screen = root.QsWindow.window?.screen?.name ?? ""
+            const at = chassis.mapToItem(null, 0, 0)
+            const own = root.QsWindow.window
+            const chassisWindow = IrisMotionMeter.chassisOf(screen)
+            const bodyWindow = root.fieldBacked ? chassisWindow : own
+            const wantsBlur = IrisStyle.glassCompositor && root.glass && root.surfaceMaterial !== "solid"
+                && (IrisStyle.glassy || root.surfaceMaterial === "glass")
+            IrisMotionMeter.sample({
+                source: root,
+                presentation: root.presentation,
+                rect: { x: at.x + root.windowOffset.x, y: at.y + root.windowOffset.y, width: chassis.width, height: chassis.height },
+                opacity: !(root.armed || root.presentation > 0) ? 0 : root.fieldBacked ? 1 : root.drawsOwnField ? root.emergence * fieldStrip.opacity : chassis.opacity,
+                wantsBlur: wantsBlur,
+                blurred: root.fieldBacked ? wantsBlur && root.chassisBodies.length > 0 : root.blurs && root.blurShapes.length > 0,
+                published: root.chassisBodies.length > 0,
+                sameWindow: bodyWindow === own,
+                above: !root.fieldBacked && own !== chassisWindow,
+                island: GlobalStates.irisIslandGeometry?.[screen] ?? null
+            })
+        }
+    }
 
     readonly property bool fromIsland: !root.originItem && !root.origin && root.originScene !== null
 
     function captureOrigin(): void {
+        if (root.settles) { root.originOwner = ""; root.originScene = null; root.fromRadius = root.radius; return }
         if (root.originItem) { root.originOwner = ""; root.fromRadius = root.originItemRadius; return }
         if (root.origin) { root.originOwner = ""; root.fromRadius = root.origin.radius ?? root.radius; return }
         const origin = root.origin ?? GlobalStates.irisMorphOrigin
@@ -166,6 +211,7 @@ Item {
             root.launchFrames = 0
         }
         root.armed = true
+        if (IrisMotionMeter.watching(root.motionSurface)) IrisMotionMeter.mark("armed")
     }
     // Timers, not Qt.callLater: a Place unloads with its loader and a queued call would outlive it.
     Timer { id: armLater; interval: 0; onTriggered: root.arm() }
@@ -174,6 +220,7 @@ Item {
     onOpenChanged: {
         if (!root.open) {
             root.armed = false
+            if (root.settles) return
             if (root.fromIsland && root.originOwner.length === 0) captureLater.restart()
         } else {
             armLater.restart()
@@ -237,7 +284,8 @@ Item {
                 return Qt.point(root.windowOffset.x + at.x, root.windowOffset.y + at.y)
             }
             sceneSize: Qt.size(root.QsWindow.window?.screen?.width ?? 0, root.QsWindow.window?.screen?.height ?? 0)
-            shapes: root.drawsOwnField && (root.open || root.presentation > 0)
+            // From arming, with its blur: waiting for its content it drew its first rect unblurred.
+            shapes: root.drawsOwnField && (root.armed || root.presentation > 0)
                 ? [Object.assign({ paints: true, fuse: 0, id: "place", glass: root.glass ? IrisStyle.surfaceGlass(root.motionSurface) : "solid" }, root.bodyRect)]
                 : []
         }
