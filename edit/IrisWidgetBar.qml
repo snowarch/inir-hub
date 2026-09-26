@@ -40,10 +40,15 @@ Item {
     IrisSpring {
         id: presentSpring
         surface: "panels"
-        to: root.present ? 1 : 0
+        to: root.entered && root.present ? 1 : 0
         intent: "auto"
         minimum: 0
     }
+    // Made on demand when the mode starts, the spring would begin at its target and the bar would just be
+    // there, its blur ahead of its body. It starts hidden and is sent in on the next turn.
+    property bool entered: false
+    Timer { id: enterTimer; interval: 0; onTriggered: root.entered = true }
+    Component.onCompleted: enterTimer.start()
 
     DesktopEditToolbar {
         id: toolbar

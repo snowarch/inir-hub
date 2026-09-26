@@ -134,6 +134,7 @@ Loader {
             const list = []
             ;(root.shown ?? []).forEach((entry, index) => {
                 if (entry?.type !== "separator" && entry?.type !== "place" && entry?.type !== "header" && entry?.enabled !== false) list.push({ entry: index, tile: -1 })
+                if (entry?.type === "hero" && entry?.secondary) list.push({ entry: index, tile: 0 })
             })
             return list
         }
@@ -159,7 +160,7 @@ Loader {
             const s = popup.stops[popup.stop]
             if (!s) return
             const entry = root.shown[s.entry]
-            if (s.tile >= 0) popup.run(entry.items[s.tile].action)
+            if (s.tile >= 0) popup.run(entry.type === "hero" ? entry.secondary?.action : entry.items[s.tile].action)
             else popup.choose(entry)
         }
 
@@ -191,6 +192,7 @@ Loader {
             motionSurface: "menus"
             id: menu
             compositorBlurred: true
+            blurWhileReceding: false
             ownField: true
             MouseArea { anchors.fill: parent; acceptedButtons: Qt.AllButtons; z: -1 }
             open: true
@@ -313,8 +315,11 @@ Loader {
                                 id: hero
                                 readonly property bool lit: popup.isStop(row.index, -1)
                                 readonly property string image: String(row.modelData?.image ?? "")
-                                implicitWidth: Math.round(168 * root.d)
-                                implicitHeight: Math.round(width * 9 / 16)
+                                readonly property var secondary: row.modelData?.secondary ?? null
+                                // Shaped like the screen it shows, so the wallpaper reads as the desktop in miniature.
+                                readonly property real aspect: popup.screen ? popup.screen.height / Math.max(1, popup.screen.width) : 9 / 16
+                                implicitWidth: Math.round((root.compact ? 212 : 248) * root.d)
+                                implicitHeight: Math.round(width * Math.max(0.42, Math.min(0.75, hero.aspect)))
                                 hoverEnabled: true
                                 cursorShape: Qt.PointingHandCursor
                                 Accessible.role: Accessible.Button
@@ -352,18 +357,59 @@ Loader {
                                         anchors.bottom: parent.bottom
                                         anchors.margins: Math.round(10 * root.d)
                                         spacing: Math.round(6 * root.d)
-                                        IrisText {
+                                        ColumnLayout {
                                             Layout.fillWidth: true
-                                            text: row.modelData?.text ?? ""
-                                            color: IrisStyle.onMedia
-                                            font.pixelSize: root.textSize
-                                            font.weight: IrisStyle.weight(Font.DemiBold)
-                                            elide: Text.ElideRight
+                                            spacing: 0
+                                            IrisText {
+                                                Layout.fillWidth: true
+                                                text: row.modelData?.text ?? ""
+                                                color: IrisStyle.onMedia
+                                                font.pixelSize: root.textSize
+                                                font.weight: IrisStyle.weight(Font.DemiBold)
+                                                elide: Text.ElideRight
+                                            }
+                                            IrisText {
+                                                Layout.fillWidth: true
+                                                visible: text.length > 0
+                                                text: String(row.modelData?.detail ?? "")
+                                                color: IrisStyle.onMediaSecondary
+                                                font.pixelSize: IrisStyle.typeFootnote
+                                                elide: Text.ElideRight
+                                            }
                                         }
                                         MaterialSymbol {
+                                            visible: !hero.secondary
                                             text: row.modelData?.iconName ?? "chevron_right"
                                             iconSize: root.glyphSize
                                             color: IrisStyle.onMedia
+                                        }
+                                        // A second action on the image itself, a round glass button (next wallpaper).
+                                        Rectangle {
+                                            id: heroButton
+                                            visible: hero.secondary !== null
+                                            readonly property bool lit: popup.isStop(row.index, 0) || heroButtonHover.hovered
+                                            Layout.preferredWidth: Math.round(28 * root.d)
+                                            Layout.preferredHeight: Layout.preferredWidth
+                                            radius: width / 2
+                                            color: heroButton.lit ? IrisStyle.onMediaFill : IrisStyle.veil
+                                            scale: heroButtonTap.pressed ? IrisStyle.pressScale(0.9) : 1
+                                            Behavior on color { ColorAnimation { duration: IrisStyle.feedbackDuration; easing.type: IrisStyle.feedbackEasing } }
+                                            Behavior on scale { NumberAnimation { duration: IrisStyle.feedbackDuration; easing.type: IrisStyle.feedbackEasing } }
+                                            MaterialSymbol {
+                                                anchors.centerIn: parent
+                                                text: hero.secondary?.iconName ?? ""
+                                                iconSize: Math.round(root.glyphSize * 0.95)
+                                                color: IrisStyle.onMedia
+                                            }
+                                            HoverHandler { id: heroButtonHover; cursorShape: Qt.PointingHandCursor }
+                                            // Its own MouseArea takes the press first, so the hero behind never sees it.
+                                            MouseArea {
+                                                id: heroButtonTap
+                                                anchors.fill: parent
+                                                onClicked: popup.run(hero.secondary?.action)
+                                            }
+                                            Accessible.role: Accessible.Button
+                                            Accessible.name: hero.secondary?.text ?? ""
                                         }
                                     }
                                 }
