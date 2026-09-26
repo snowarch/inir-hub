@@ -1,6 +1,7 @@
 pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Controls
+import QtQuick.Effects
 import QtQuick.Layouts
 import Quickshell
 import Quickshell.Wayland
@@ -123,7 +124,7 @@ PanelWindow {
         const rows = entry.rows.filter(spec => root.shown(spec))
         const parts = [...new Set(rows.map(spec => root.valueText(spec)).filter(text => text.length > 0))]
         if (parts.length === 0 && rows.length > 0 && rows.every(spec => spec.kind === "switch")) return Translation.tr("Off")
-        return parts.slice(0, 3).join(", ")
+        return parts.slice(0, 2).join(", ")
     }
     function modifiedIn(entry: var): bool {
         Config.revision
@@ -340,6 +341,7 @@ PanelWindow {
 
     IrisMorphSurface {
         motionSurface: "settings"
+        settles: true
         windowOffset: Qt.point(IrisFrame.band, IrisFrame.band)
         ownField: true
         id: frame
@@ -372,7 +374,7 @@ PanelWindow {
                 Layout.preferredWidth: Math.min(272 * root.d, frame.width * 0.3)
                 topLeftRadius: frame.radius
                 bottomLeftRadius: frame.radius
-                color: IrisStyle.glassy ? ColorUtils.applyAlpha(IrisStyle.surfaceOpaque, IrisStyle.wallpaperVeil) : IrisStyle.surfaceHigh
+                color: IrisStyle.readingSidebar
                 Rectangle {
                     anchors.right: parent.right
                     anchors.top: parent.top
@@ -427,7 +429,7 @@ PanelWindow {
                             IrisText {
                                 anchors.verticalCenter: parent.verticalCenter
                                 visible: searchField.text.length === 0
-                                text: Translation.tr("Search")
+                                text: Translation.tr("Search settings")
                                 color: IrisStyle.muted
                                 font.pixelSize: searchField.font.pixelSize
                             }
@@ -455,6 +457,16 @@ PanelWindow {
                         contentHeight: sidebarColumn.implicitHeight
                         boundsBehavior: Flickable.StopAtBounds
                         ScrollBar.vertical: IrisScrollBar {}
+                        // The list itself fades under the footer: a gradient painted over it read as a square
+                        // shadow on glass.
+                        readonly property bool fades: sidebarFlick.contentY + sidebarFlick.height < sidebarFlick.contentHeight - 1
+                        layer.enabled: sidebarFlick.fades
+                        layer.effect: MultiEffect {
+                            maskEnabled: true
+                            maskSource: sidebarFade
+                            maskThresholdMin: 0.5
+                            maskSpreadAtMin: 1
+                        }
 
                         Column {
                             id: sidebarColumn
@@ -517,16 +529,19 @@ PanelWindow {
                             }
                         }
 
-                        Rectangle {
+                        Item {
+                            id: sidebarFade
                             parent: sidebarFlick
-                            anchors.left: parent.left
-                            anchors.right: parent.right
-                            anchors.bottom: parent.bottom
-                            height: Math.round(28 * root.d)
-                            visible: sidebarFlick.contentY + sidebarFlick.height < sidebarFlick.contentHeight - 1
-                            gradient: Gradient {
-                                GradientStop { position: 0; color: ColorUtils.applyAlpha(sidebar.color, 0) }
-                                GradientStop { position: 1; color: sidebar.color }
+                            anchors.fill: parent
+                            visible: false
+                            layer.enabled: true
+                            Rectangle {
+                                anchors.fill: parent
+                                gradient: Gradient {
+                                    GradientStop { position: 0; color: "white" }
+                                    GradientStop { position: Math.max(0, 1 - 28 * root.d / Math.max(1, sidebarFade.height)); color: "white" }
+                                    GradientStop { position: 1; color: "transparent" }
+                                }
                             }
                         }
                     }
@@ -711,8 +726,8 @@ PanelWindow {
                                 visible: root.browsing && root.section !== "system" && root.section !== "general" && root.section !== "gaming"
                                 tint: root.currentSection.tint
                                 glyph: root.currentSection.icon
-                                title: Translation.tr(root.currentSection.title)
-                                text: Translation.tr(root.currentSection.tip ?? root.currentSection.subtitle)
+                                title: Translation.tr(root.currentSection.subtitle)
+                                text: Translation.tr(root.currentSection.tip ?? "")
                                 sceneSection: root.browsing ? root.section : ""
                                 sceneGroup: ""
                             }
@@ -732,8 +747,8 @@ PanelWindow {
                                 visible: !root.searching && root.openGroup.length > 0 && root.advancedPage < 0 && stageAvailable
                                 tint: IrisOptions.groupTints[groupHero.key] ?? root.currentSection.tint
                                 glyph: IrisOptions.groupGlyphs[groupHero.key] ?? root.currentSection.icon
-                                title: root.openGroup
-                                text: groupHero.caption.length > 0 ? groupHero.caption : Translation.tr(root.currentSection.title)
+                                title: groupHero.caption.length > 0 ? groupHero.caption : root.openGroup
+                                text: Translation.tr(root.currentSection.tip ?? "")
                                 sceneSection: !root.searching && root.openGroup.length > 0 && root.advancedPage < 0 ? root.section : ""
                                 sceneGroup: groupHero.key
                             }
@@ -785,7 +800,7 @@ PanelWindow {
                                     required property string modelData
                                     Layout.fillWidth: true
                                     spacing: 8 * root.d
-                                    IrisText { text: panelEditor.modelData === "left" ? Translation.tr("Focus sections") : Translation.tr("Today sections"); color: IrisStyle.muted }
+                                    IrisText { text: panelEditor.modelData === "left" ? Translation.tr("Focus sections") : Translation.tr("Today sections"); color: IrisStyle.label; font.weight: IrisStyle.weight(Font.DemiBold) }
                                     IrisSidebarEditor { Layout.fillWidth: true; side: panelEditor.modelData }
                                 }
                             }
@@ -864,7 +879,7 @@ PanelWindow {
             anchors.bottom: parent.bottom
             height: Math.round(27 * root.d)
             radius: IrisStyle.radiusRow
-            color: sectionRow.selected ? IrisStyle.tintFill(IrisStyle.accent)
+            color: sectionRow.selected ? IrisStyle.accent
                 : sectionRow.containsMouse ? IrisStyle.fillHover : "transparent"
             Behavior on color { ColorAnimation { duration: IrisStyle.duration(110); easing.type: IrisStyle.feedbackEasing } }
             IrisSquircle {
@@ -884,8 +899,9 @@ PanelWindow {
                 anchors.rightMargin: 8 * root.d
                 anchors.verticalCenter: parent.verticalCenter
                 text: Translation.tr(sectionRow.modelData.title)
+                color: sectionRow.selected ? IrisStyle.onAccent : IrisStyle.text
                 font.pixelSize: IrisStyle.typeLabel
-                font.weight: sectionRow.selected ? Font.DemiBold : Font.Normal
+                font.weight: IrisStyle.weight(sectionRow.selected ? Font.DemiBold : Font.Medium)
                 elide: Text.ElideRight
             }
         }
@@ -906,7 +922,7 @@ PanelWindow {
         Layout.fillWidth: true
         implicitHeight: hero.staged ? Math.round(150 * root.d) + 2 * hero.pad : heroText.implicitHeight + 28 * root.d
         radius: IrisStyle.radiusTile
-        color: IrisStyle.surfaceHigh
+        color: IrisStyle.readingCard
 
         RowLayout {
             id: heroText
@@ -973,7 +989,7 @@ PanelWindow {
         Layout.fillWidth: true
         implicitHeight: listColumn.implicitHeight
         radius: IrisStyle.radiusTile
-        color: IrisStyle.surfaceHigh
+        color: IrisStyle.readingCard
         Column {
             id: listColumn
             width: parent.width
@@ -1050,7 +1066,7 @@ PanelWindow {
                 width: Math.ceil(Math.min(implicitWidth, parent.width * 0.42))
                 text: groupRow.lone ? Translation.tr(groupRow.rows[0].label) : groupRow.modelData.title
                 font.pixelSize: IrisStyle.typeLabel
-                font.weight: groupRow.unfolded ? Font.DemiBold : Font.Normal
+                font.weight: IrisStyle.weight(groupRow.unfolded ? Font.DemiBold : Font.Medium)
                 elide: Text.ElideRight
             }
             IrisText {
@@ -1149,7 +1165,7 @@ PanelWindow {
         IrisText {
             Layout.leftMargin: 16 * root.d
             text: moreGroup.modelData
-            color: IrisStyle.muted
+            color: IrisStyle.label
             font.family: IrisStyle.fontTitle
             font.pixelSize: IrisStyle.typeMeta
             font.weight: IrisStyle.weight(Font.DemiBold)
@@ -1162,20 +1178,50 @@ PanelWindow {
         required property var modelData
         Layout.fillWidth: true
         spacing: 6 * root.d
-        IrisText {
+        MouseArea {
+            id: resultSection
+            readonly property var section: IrisOptions.sectionById(String(group.modelData.rows[0]?.section ?? ""))
             visible: root.searching
-            Layout.leftMargin: 16 * root.d
-            text: group.modelData.title
-            color: IrisStyle.muted
-            font.family: IrisStyle.fontTitle
-            font.pixelSize: IrisStyle.typeMeta
-            font.weight: IrisStyle.weight(Font.DemiBold)
+            Layout.leftMargin: 14 * root.d
+            implicitWidth: resultCaption.implicitWidth
+            implicitHeight: resultCaption.implicitHeight
+            hoverEnabled: true
+            cursorShape: Qt.PointingHandCursor
+            Accessible.role: Accessible.Link
+            Accessible.name: group.modelData.title
+            onClicked: root.selectSection(resultSection.section.id)
+            Row {
+                id: resultCaption
+                spacing: 8 * root.d
+                IrisSquircle {
+                    anchors.verticalCenter: parent.verticalCenter
+                    width: Math.round(18 * root.d)
+                    height: width
+                    tint: resultSection.section.tint ?? IrisStyle.identity.gray
+                    glyph: resultSection.section.icon ?? "settings"
+                }
+                IrisText {
+                    anchors.verticalCenter: parent.verticalCenter
+                    text: group.modelData.title
+                    color: resultSection.containsMouse ? IrisStyle.text : IrisStyle.label
+                    font.family: IrisStyle.fontTitle
+                    font.pixelSize: IrisStyle.typeMeta
+                    font.weight: IrisStyle.weight(Font.DemiBold)
+                }
+                MaterialSymbol {
+                    anchors.verticalCenter: parent.verticalCenter
+                    text: "chevron_right"
+                    iconSize: Math.round(14 * root.d)
+                    color: IrisStyle.label
+                    opacity: resultSection.containsMouse ? 1 : 0
+                }
+            }
         }
         Rectangle {
             Layout.fillWidth: true
             implicitHeight: groupRows.implicitHeight
             radius: IrisStyle.radiusTile
-            color: IrisStyle.surfaceHigh
+            color: IrisStyle.readingCard
             ColumnLayout {
                 id: groupRows
                 anchors.left: parent.left
@@ -1188,6 +1234,7 @@ PanelWindow {
                         required property int index
                         Layout.fillWidth: true
                         spec: modelData
+                        highlight: root.query
                         last: index === group.modelData.rows.length - 1
                     }
                 }

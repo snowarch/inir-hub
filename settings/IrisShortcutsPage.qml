@@ -132,7 +132,7 @@ Flickable {
             Layout.fillWidth: true
             implicitHeight: Math.round(36 * root.d)
             radius: height / 2
-            color: filter.activeFocus ? IrisStyle.fill : IrisStyle.surfaceHigh
+            color: filter.activeFocus ? IrisStyle.fill : IrisStyle.readingCard
             border.width: filter.activeFocus ? 1 : 0
             border.color: IrisStyle.tintBorder(IrisStyle.accent)
             MaterialSymbol {
@@ -185,7 +185,7 @@ Flickable {
             Layout.fillWidth: true
             implicitHeight: categoryList.implicitHeight
             radius: IrisStyle.radiusTile
-            color: IrisStyle.surfaceHigh
+            color: IrisStyle.readingCard
             visible: root.shownCategories.length > 0
             Column {
                 id: categoryList
@@ -210,7 +210,7 @@ Flickable {
             Layout.fillWidth: true
             implicitHeight: addColumn.implicitHeight
             radius: IrisStyle.radiusTile
-            color: IrisStyle.surfaceHigh
+            color: IrisStyle.readingCard
             Column {
                 id: addColumn
                 width: parent.width

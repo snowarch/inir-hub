@@ -774,7 +774,11 @@ Loader {
                     font.pixelSize: IrisStyle.typeLabel
                     elide: Text.ElideRight
                 }
-                IrisText { visible: CalendarSync.fetching; text: Translation.tr("Syncing…"); role: IrisText.Meta }
+                IrisText {
+                    visible: CalendarSync.fetching || (CalendarSync.enabled && CalendarSync.sources.length > 0 && !Network.online)
+                    text: CalendarSync.fetching ? Translation.tr("Syncing…") : Translation.tr("Offline")
+                    role: IrisText.Meta
+                }
                 IrisButton {
                     visible: !calendar.composing
                     text: Translation.tr("New event")

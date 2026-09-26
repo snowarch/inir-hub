@@ -3,6 +3,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Effects
 import QtQuick.Layouts
+import QtQuick.Shapes
 import Quickshell
 import Quickshell.Services.SystemTray
 import Quickshell.Widgets
@@ -11,6 +12,9 @@ import qs.services
 import qs.modules.common
 import qs.modules.common.functions
 import qs.modules.common.widgets
+import qs.modules.background.widgets
+import qs.modules.background.widgets.instrument
+import qs.modules.iris.lock
 import qs.modules.iris.style
 import qs.modules.iris.frame
 import qs.modules.iris.components
@@ -37,13 +41,22 @@ ClippingRectangle {
     function sceneFor(section: string, group: string): string {
         if (group.length === 0)
             return ({ dock: "dock", player: "player", desktop: "widgets", sidebars: "panels", controlCenter: "controlCenter", spotlight: "spotlight", bubbles: "bubbles",
-                bar: "islandEdge", appearance: "light", motion: "cards", notifications: "feedback", sound: "feedback" })[section] ?? ""
+                bar: "islandEdge", appearance: "light", motion: "motion", lock: "lock", frameMusic: "frame", notifications: "feedback", sound: "feedback" })[section] ?? ""
         const key = section + "/" + group
         return ({
             "bar/Size": "islandReserve", "bar/Interaction": "islandInteraction",
             "bar/Shape": "islandEdge", "bar/Layout": "islandEdge", "bar/Bar": "barZones",
             "appearance/Light": "light", "appearance/Shape": "fusion", "appearance/Glass": "glass",
             "appearance/Menus": "menus", "appearance/Settings": "settings",
+            "appearance/Material": "glass", "appearance/Material per surface": "glass", "appearance/Look": "fusion",
+            "appearance/Adaptive": "light", "appearance/Accent": "light", "appearance/Highlight": "typography",
+            "appearance/Faces": "typography", "appearance/Text": "typography", "appearance/Frame": "frame",
+            "desktop/Desktop menu": "menus",
+            "motion/Motion": "motion", "motion/Curve": "motion", "motion/Timing": "motion",
+            "motion/Per surface": "motion", "motion/Style per surface": "motion", "motion/Touch": "motion",
+            "frameMusic/On the edges": "frame", "frameMusic/Frame response": "frame", "frameMusic/Finish": "frame",
+            "lock/Scene": "lock", "lock/Type": "lock", "lock/Clock": "lock", "lock/At a glance": "lock",
+            "lock/Now playing": "lock", "lock/Activity": "lock", "lock/Sign in": "lock", "lock/Status": "lock",
             "bar/Desktop page": "islandPage", "bar/Pages": "islandPage", "bar/Player page": "islandPage",
             "bubbles/Behaviour": "bubbles", "bubbles/Floating": "bubbles", "bubbles/On the contour": "bubbles", "bubbles/Size": "bubbles",
             "bubbles/Cards": "cards", "bubbles/Card contents": "cards", "bubbles/Joining": "joining", "bubbles/Tray": "tray",
@@ -67,7 +80,7 @@ ClippingRectangle {
         live: false
         id: wallpaperImage
         anchors.fill: parent
-        active: root.available
+        active: root.available && root.visible
         screen: GlobalStates.focusedScreen
         provideTexture: true
         decodeSize: Qt.size(Math.round(root.width * 2), 0)
@@ -91,8 +104,9 @@ ClippingRectangle {
         Loader {
             id: sceneLoader
             anchors.fill: parent
-            active: root.available
+            active: root.available && root.visible
             sourceComponent: ({
+                typography: typographyScene, frame: frameScene, lock: lockScene, motion: motionScene,
                 dock: dockScene, widgets: widgetsScene, backdrop: backdropScene, gallery: galleryScene,
                 spotlight: spotlightScene, controlCenter: controlScene, cards: cardsScene, menus: menusScene,
                 settings: settingsScene, panels: panelsScene, joining: joiningScene, feedback: feedbackScene,
@@ -353,8 +367,9 @@ ClippingRectangle {
             Rectangle {
                 x: dockRoot.inset("left")
                 y: dockRoot.inset("top")
-                width: parent.width - x - dockRoot.inset("right")
-                height: parent.height - y - dockRoot.inset("bottom")
+                // From the targets, not the animating x/y, or the size overshoots while they move.
+                width: parent.width - dockRoot.inset("left") - dockRoot.inset("right")
+                height: parent.height - dockRoot.inset("top") - dockRoot.inset("bottom")
                 radius: IrisStyle.radiusTile
                 color: IrisStyle.surfaceHigh
                 border.width: 1
@@ -581,15 +596,16 @@ ClippingRectangle {
                 framed: false
                 shapes: {
                     const out = []
-                    if (edgeRoot.notch) out.push(Object.assign({ radius: 0, fuse: IrisStyle.fuseDeep, id: "edge", paints: true }, edgeRoot.edgeBody()))
-                    out.push(Object.assign({ radius: edgeRoot.spans ? 0 : edgeRoot.thick / 2,
+                    const clear = edgeRoot.layout === "menubar" && !edgeRoot.vertical && String(root.opt("iris.bar.strip", "clear")) === "clear"
+                    if (edgeRoot.notch || clear) out.push(Object.assign({ radius: 0, fuse: IrisStyle.fuseDeep, id: "edge", paints: true }, edgeRoot.edgeBody()))
+                    if (!clear) out.push(Object.assign({ radius: edgeRoot.spans ? 0 : edgeRoot.thick / 2,
                         fuse: edgeRoot.spans && !edgeRoot.vertical ? Math.round(16 * root.d) : edgeRoot.notch ? IrisStyle.fuseEdge : IrisStyle.fuse,
                         id: "island", joins: edgeRoot.notch ? "edge" : "", paints: true }, edgeRoot.island))
                     if (edgeRoot.layout === "menubar" && !edgeRoot.vertical) {
                         const height = IrisFrame.islandFullBand
                         const width = Math.round(height * 4.2)
-                        out.push(Object.assign({ radius: height / 2, fuse: Math.round(32 * root.d),
-                            id: "islandnotch", joins: "island", paints: true },
+                        out.push(Object.assign({ radius: height / 2, fuse: clear ? IrisStyle.fuseEdge : Math.round(32 * root.d),
+                            id: "islandnotch", joins: clear ? "edge" : "island", paints: true },
                             edgeRoot.place((edgeRoot.span - width) / 2, width, edgeRoot.depth, height)))
                     }
                     edgeRoot.satellites.forEach((sat, i) => out.push(Object.assign({ radius: IrisStyle.pieceRadius(edgeRoot.bubble), fuse: IrisStyle.fuse,
@@ -894,9 +910,13 @@ ClippingRectangle {
             readonly property real naturalWidth: Math.round(620 * root.d)
             readonly property real naturalHeight: Math.round(260 * root.d)
             readonly property bool on: root.opt("iris.modules.desktopWidgets", true)
+            readonly property string design: DesktopWidgetDesign.current
+            readonly property bool iris: widgetsRoot.design === "iris"
+            readonly property bool instrument: widgetsRoot.design === "instrument"
+            readonly property bool bare: widgetsRoot.instrument || widgetsRoot.design === "readout"
             readonly property string material: String(root.opt("iris.widgets.material", "glass"))
-            readonly property bool glass: widgetsRoot.material === "glass"
-            readonly property bool clear: widgetsRoot.material === "clear"
+            readonly property bool glass: widgetsRoot.iris && widgetsRoot.material === "glass"
+            readonly property bool clear: widgetsRoot.bare || (widgetsRoot.iris && widgetsRoot.material === "clear")
             readonly property color ink: String(root.opt("iris.widgets.tint", "wallpaper")) === "wallpaper" ? IrisStyle.wallpaperLight : IrisStyle.accent
             readonly property int weight: ({ light: Font.Light, regular: Font.Medium, bold: Font.Bold })[String(root.opt("iris.widgets.weight", "regular"))] ?? Font.Medium
             readonly property real strength: Math.max(0.2, Math.min(1, Number(root.opt("iris.widgets.opacity", 100)) / 100))
@@ -906,7 +926,7 @@ ClippingRectangle {
             readonly property real gap: Math.round(16 * root.d)
             readonly property real plateX: Math.round((widgetsRoot.width - widgetsRoot.wide - widgetsRoot.gap - widgetsRoot.unit) / 2)
             readonly property real plateY: Math.round((widgetsRoot.height - widgetsRoot.unit) / 2)
-            readonly property color plateColor: widgetsRoot.glass || widgetsRoot.clear
+            readonly property color plateColor: widgetsRoot.bare ? "transparent" : !widgetsRoot.iris ? Appearance.colors.colLayer2 : widgetsRoot.glass || widgetsRoot.clear
                 ? ColorUtils.applyAlpha(IrisStyle.surface, IrisStyle.legibleVeil(widgetsRoot.material, 0, 0, widgetsRoot.strength))
                 : ColorUtils.applyAlpha(widgetsRoot.material === "tinted"
                     ? ColorUtils.mix(IrisStyle.surface, Appearance.colors.colPrimary, 0.82) : IrisStyle.surface, widgetsRoot.strength)
@@ -957,16 +977,30 @@ ClippingRectangle {
                 color: widgetsRoot.plateColor
                 border.width: widgetsRoot.clear ? 0 : 1
                 border.color: IrisStyle.rim
+                InstrumentRing {
+                    anchors.fill: parent
+                    anchors.margins: Math.round(4 * root.d)
+                    visible: widgetsRoot.instrument
+                    fraction: DateTime.clock.date.getMinutes() / 60
+                    ink: IrisStyle.onMedia
+                    accent: widgetsRoot.ink
+                    accentSoft: IrisStyle.secondaryAccent
+                    showArc: false
+                    showComet: false
+                    animated: false
+                }
                 ColumnLayout {
                     anchors.left: parent.left; anchors.bottom: parent.bottom
                     anchors.margins: Math.round(18 * root.d)
+                    anchors.bottomMargin: widgetsRoot.instrument ? Math.round(44 * root.d) : Math.round(18 * root.d)
+                    anchors.leftMargin: widgetsRoot.instrument ? Math.round(60 * root.d) : Math.round(18 * root.d)
                     spacing: 0
                     IrisText { text: Qt.locale().toString(DateTime.clock.date, "dddd"); color: widgetsRoot.ink; font.weight: widgetsRoot.weight; font.pixelSize: IrisStyle.typeHeadline }
                     IrisText {
                         text: Qt.locale().toString(DateTime.clock.date, "hh:mm")
                         font.family: IrisStyle.fontNumbers
                         font.weight: widgetsRoot.weight
-                        font.pixelSize: 52 * IrisStyle.typeScale
+                        font.pixelSize: (widgetsRoot.instrument ? 36 : 52) * IrisStyle.typeScale
                         style: widgetsRoot.clear ? Text.Raised : Text.Normal
                         styleColor: IrisStyle.plateShadow
                     }
@@ -994,8 +1028,11 @@ ClippingRectangle {
             }
             OffState { visible: !widgetsRoot.on; text: Translation.tr("Desktop widgets off") }
             Caption {
-                glyph: widgetsRoot.glass ? "blur_on" : widgetsRoot.clear ? "select" : "square"
+                glyph: widgetsRoot.bare ? "avg_pace" : widgetsRoot.glass ? "blur_on" : widgetsRoot.clear ? "select" : "square"
                 text: !widgetsRoot.on ? ""
+                    : widgetsRoot.instrument ? Translation.tr("Dials, scales and ruled lists")
+                    : widgetsRoot.design === "readout" ? Translation.tr("Quiet figures and open lists")
+                    : !widgetsRoot.iris ? Translation.tr("Each widget keeps its Material design")
                     : widgetsRoot.glass ? Translation.tr("Frosted wallpaper · darker only where the wallpaper is bright")
                     : widgetsRoot.clear ? Translation.tr("Bare wallpaper · a veil only where text needs it")
                     : widgetsRoot.material === "tinted" ? Translation.tr("Black material with a trace of the wallpaper hue")
@@ -2447,9 +2484,10 @@ ClippingRectangle {
             }
             Rectangle {
                 x: reserveRoot.inset("left")
-                width: parent.width - x - reserveRoot.inset("right")
+                // From the targets, not the animating x/y, or the size overshoots while they move.
+                width: parent.width - reserveRoot.inset("left") - reserveRoot.inset("right")
                 y: reserveRoot.inset("top")
-                height: parent.height - y - reserveRoot.inset("bottom")
+                height: parent.height - reserveRoot.inset("top") - reserveRoot.inset("bottom")
                 Behavior on x { NumberAnimation { duration: IrisStyle.moveDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: IrisStyle.moveCurve } }
                 Behavior on width { NumberAnimation { duration: IrisStyle.moveDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: IrisStyle.moveCurve } }
                 radius: IrisStyle.radiusTile
@@ -2616,6 +2654,191 @@ ClippingRectangle {
                     actRoot.scroll === "none" ? Translation.tr("Scroll does nothing") : actRoot.scroll === "brightness" ? Translation.tr("Scroll sets brightness") : Translation.tr("Scroll sets volume"),
                     actRoot.events ? (actRoot.caps ? Translation.tr("System events and the Caps Lock badge") : Translation.tr("System events")) : Translation.tr("System events off")][actRoot.step]
             }
+        }
+    }
+
+    Component {
+        id: typographyScene
+        Item {
+            readonly property real naturalWidth: Math.round(560 * root.d)
+            readonly property real naturalHeight: Math.round(280 * root.d)
+            Plate {
+                anchors.centerIn: parent
+                width: Math.round(480 * root.d)
+                height: Math.round(216 * root.d)
+                ColumnLayout {
+                    anchors.fill: parent
+                    anchors.margins: Math.round(24 * root.d)
+                    spacing: Math.round(6 * root.d)
+                    IrisText { text: Translation.tr("A little room to breathe"); font.family: IrisStyle.fontTitle; font.pixelSize: IrisStyle.typeTitleLarge; font.weight: IrisStyle.weight(Font.Medium) }
+                    IrisClock { pixelSize: 56 * IrisStyle.typeScale; separatorColor: IrisStyle.secondaryAccent }
+                    Rectangle { Layout.fillWidth: true; height: 1; color: IrisStyle.hairline }
+                    RowLayout {
+                        Layout.fillWidth: true
+                        IrisText { text: Translation.tr("Words, figures, one family"); color: IrisStyle.subtext }
+                        Item { Layout.fillWidth: true }
+                        IrisText { text: "Aa 0123"; color: IrisStyle.accent; font.pixelSize: IrisStyle.typeTitle }
+                    }
+                }
+            }
+            Caption { glyph: "text_fields"; text: Translation.tr("Your typefaces, weight and text size") }
+        }
+    }
+
+    Component {
+        id: motionScene
+        Item {
+            readonly property real naturalWidth: Math.round(540 * root.d)
+            readonly property real naturalHeight: Math.round(280 * root.d)
+            IrisMotionLab {
+                anchors.fill: parent
+                anchors.margins: Math.round(12 * root.d)
+                playing: root.playing && root.visible && IrisStyle.motionEnabled
+            }
+            Caption { glyph: "animation"; text: IrisStyle.motionEnabled ? Translation.tr("The same motion when opening and closing") : Translation.tr("Motion is off") }
+        }
+    }
+
+    Component {
+        id: frameScene
+        Item {
+            id: framePreview
+            readonly property real naturalWidth: Math.round(540 * root.d)
+            readonly property real naturalHeight: Math.round(280 * root.d)
+            readonly property bool wave: root.section === "frameMusic" && root.opt("background.edgeWidgets.organic.enable", false) && String(root.opt("iris.surround.music", "widget")) === "widget"
+            readonly property bool music: root.section === "frameMusic"
+                && root.opt("background.edgeWidgets.organic.enable", false)
+                && String(root.opt("iris.surround.music", "widget")) === "frame"
+            property real phase: 0
+            readonly property real strength: Number(root.opt("iris.surround.musicStrength", 160)) / 100
+            readonly property real sensitivity: Number(root.opt("iris.surround.musicSensitivity", 140)) / 100
+            readonly property string edges: String(root.opt("iris.surround.musicEdges", "sides"))
+            Timer {
+                interval: 50
+                repeat: true
+                running: root.playing && root.visible && (framePreview.wave || (framePreview.music && IrisFrame.framed)) && IrisStyle.motionEnabled
+                onTriggered: framePreview.phase += 0.05 * Number(root.opt("iris.surround.musicSpeed", 100)) / 100
+            }
+            Field.IrisField {
+                anchors.fill: parent
+                anchors.margins: Math.round(16 * root.d)
+                framed: IrisFrame.framed
+                band: IrisFrame.band
+                cornerRadius: IrisFrame.cornerRadius
+                // Miniatures always sample wallpaper; they never blur Settings itself.
+                compositorAllowed: false
+                edgeWave: {
+                    const level = framePreview.music ? Math.min(20, (5 + 3 * Math.sin(framePreview.phase * 3)) * framePreview.strength * framePreview.sensitivity) : 0
+                    const sides = framePreview.edges !== "horizontal", horizontal = framePreview.edges !== "sides"
+                    return Qt.vector4d(horizontal ? level : 0, sides ? level : 0, horizontal ? level : 0, sides ? level : 0)
+                }
+                waveClock: framePreview.phase
+                frameMusicLevel: framePreview.music ? 0.5 : 0
+                shapes: [{ x: width / 2 - 66 * root.d, y: 0, width: 132 * root.d, height: 30 * root.d,
+                    radius: IrisStyle.radiusTile, id: "island", joins: "frame", fuse: IrisStyle.fuse }]
+            }
+            IrisClock { anchors.centerIn: parent; pixelSize: 48 * IrisStyle.typeScale; separatorColor: IrisStyle.secondaryAccent }
+            Shape {
+                anchors.fill: parent
+                visible: framePreview.wave
+                preferredRendererType: Shape.CurveRenderer
+                ShapePath {
+                    strokeColor: IrisStyle.accent
+                    strokeWidth: Math.round(3 * root.d)
+                    fillColor: "transparent"
+                    capStyle: ShapePath.RoundCap
+                    PathMultiline {
+                        paths: [Array.from({length: 49}, (_, i) => Qt.point(i / 48 * framePreview.width,
+                            framePreview.height - 24 * root.d - (10 + 7 * Math.sin(i * 0.2 + framePreview.phase * 3)) * root.d))]
+                    }
+                }
+            }
+            OffState { visible: !IrisFrame.framed && !framePreview.wave; text: Translation.tr("Frame off") }
+            Caption { glyph: "crop_free"; text: framePreview.wave ? Translation.tr("Music follows the screen edges") : framePreview.music ? Translation.tr("A sample of your frame's music response") : Translation.tr("The frame's width, corners and material") }
+        }
+    }
+
+    Component {
+        id: lockScene
+        Item {
+            id: lockPreview
+            readonly property real naturalWidth: Math.round(540 * root.d)
+            readonly property real naturalHeight: Math.round(300 * root.d)
+            readonly property string source: String(root.opt("iris.lock.scene.source", "desktop"))
+            readonly property real blur: Number(root.opt("iris.lock.scene.blur", 100)) / 100
+            readonly property real dim: Number(root.opt("iris.lock.scene.dim", 0)) / 100
+            readonly property string clockFormat: String(root.opt("iris.lock.type.clockFormat", "auto"))
+            readonly property string format: lockPreview.clockFormat === "24h" ? "HH:mm" : lockPreview.clockFormat === "12h" ? "h:mm AP" : String(Config.options?.time?.format ?? "hh:mm")
+            Rectangle { anchors.fill: parent; color: IrisStyle.surface }
+            IrisWallpaperView {
+                id: lockWall
+                anchors.fill: parent
+                active: root.visible && lockPreview.source !== "colour"
+                live: false
+                screen: GlobalStates.focusedScreen
+                path: lockPreview.source === "custom" ? String(root.opt("iris.lock.scene.path", "")) : configuredPath
+                provideTexture: true
+                decodeSize: Qt.size(Math.round(lockPreview.width), 0)
+                opacity: 0
+            }
+            MultiEffect {
+                anchors.fill: parent
+                visible: lockPreview.source !== "colour"
+                source: lockWall.textureItem
+                blurEnabled: lockPreview.blur > 0
+                blur: lockPreview.blur
+                blurMax: IrisStyle.glassBlurMax
+                saturation: Number(root.opt("iris.lock.scene.saturation", 100)) / 100 - 1
+                autoPaddingEnabled: false
+            }
+            Rectangle { anchors.fill: parent; color: IrisStyle.surface; opacity: lockPreview.dim }
+            ColumnLayout {
+                anchors.centerIn: parent
+                width: parent.width - Math.round(64 * root.d)
+                spacing: Math.round(10 * root.d)
+                IrisText {
+                    visible: root.opt("iris.lock.blocks.clock.enable", true)
+                    Layout.alignment: Qt.AlignHCenter
+                    text: Qt.locale().toString(DateTime.clock.date, lockPreview.format + (root.opt("iris.lock.type.seconds", false) ? ":ss" : ""))
+                    font.family: IrisLockOptions.clockFamily
+                    font.pixelSize: Number(root.opt("iris.lock.type.clockSize", 112)) * 0.6 * IrisLockOptions.typeScale
+                    font.weight: Number(root.opt("iris.lock.type.clockWeight", 700))
+                    font.letterSpacing: Number(root.opt("iris.lock.type.clockTracking", -4))
+                    color: IrisLockOptions.accentColour
+                }
+                IrisText {
+                    visible: root.opt("iris.lock.blocks.clock.enable", true) && String(root.opt("iris.lock.type.dateFormat", "long")) !== "none"
+                    Layout.alignment: Qt.AlignHCenter
+                    text: Qt.locale().toString(DateTime.clock.date, String(root.opt("iris.lock.type.dateFormat", "long")) === "short" ? "ddd d MMM" : "dddd d MMMM")
+                    color: IrisStyle.onMediaSecondary
+                }
+                RowLayout {
+                    visible: root.opt("iris.lock.blocks.glance.enable", true)
+                    Layout.alignment: Qt.AlignHCenter
+                    spacing: Math.round(16 * root.d)
+                    MaterialSymbol { visible: root.opt("iris.lock.blocks.glance.weather", true); text: "partly_cloudy_day"; color: IrisStyle.onMedia; iconSize: Math.round(22 * root.d) }
+                    MaterialSymbol { visible: root.opt("iris.lock.blocks.glance.events", true); text: "event"; color: IrisStyle.onMedia; iconSize: Math.round(22 * root.d) }
+                    MaterialSymbol { visible: root.opt("iris.lock.blocks.glance.battery", true); text: "battery_full"; color: IrisStyle.onMedia; iconSize: Math.round(22 * root.d) }
+                }
+                Rectangle {
+                    visible: root.opt("iris.lock.blocks.session.enable", true)
+                    Layout.alignment: Qt.AlignHCenter
+                    Layout.preferredWidth: Number(root.opt("iris.lock.blocks.session.width", 248)) * 0.65
+                    Layout.preferredHeight: Math.round(32 * root.d)
+                    radius: height / 2
+                    color: IrisStyle.onMediaFill
+                    MaterialSymbol { anchors.centerIn: parent; text: "lock"; color: IrisStyle.onMedia; iconSize: Math.round(18 * root.d) }
+                }
+                IrisText {
+                    visible: root.opt("iris.lock.blocks.media.enable", true)
+                    Layout.alignment: Qt.AlignHCenter
+                    Layout.maximumWidth: parent.width
+                    text: MprisController.activePlayer?.trackTitle || Translation.tr("Now playing")
+                    color: IrisStyle.onMediaSecondary
+                    elide: Text.ElideRight
+                }
+            }
+            Caption { glyph: "lock"; text: Translation.tr("Your lock screen, without locking") }
         }
     }
 }

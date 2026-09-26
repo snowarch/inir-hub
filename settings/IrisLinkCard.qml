@@ -13,7 +13,7 @@ Rectangle {
     Layout.fillWidth: true
     implicitHeight: linkColumn.implicitHeight
     radius: IrisStyle.radiusTile
-    color: IrisStyle.surfaceHigh
+    color: IrisStyle.readingCard
 
     Column {
         id: linkColumn

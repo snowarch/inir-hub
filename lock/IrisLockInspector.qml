@@ -163,7 +163,7 @@ Item {
                 contentHeight: rowColumn.implicitHeight
                 contentWidth: width
                 boundsBehavior: Flickable.StopAtBounds
-                ScrollBar.vertical: ScrollBar { policy: rowList.contentHeight > rowList.height ? ScrollBar.AsNeeded : ScrollBar.AlwaysOff }
+                ScrollBar.vertical: IrisScrollBar {}
                 Column {
                     id: rowColumn
                     width: rowList.width

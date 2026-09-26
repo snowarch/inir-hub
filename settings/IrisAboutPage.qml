@@ -110,7 +110,7 @@ Flickable {
         Layout.fillWidth: true
         implicitHeight: infoColumn.implicitHeight
         radius: IrisStyle.radiusTile
-        color: IrisStyle.surfaceHigh
+        color: IrisStyle.readingCard
         Column {
             id: infoColumn
             width: parent.width

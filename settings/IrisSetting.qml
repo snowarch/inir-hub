@@ -15,6 +15,16 @@ Item {
     id: root
     required property var spec
     property bool last: false
+    property string highlight: ""
+    function marked(text: string): string {
+        const plain = part => part.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+        const terms = root.highlight.trim().split(/\s+/).filter(term => term.length > 1)
+            .map(term => term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"))
+        if (terms.length === 0) return plain(text)
+        return text.split(new RegExp("(" + terms.join("|") + ")", "i"))
+            .map((part, index) => index % 2 ? "<font color='" + IrisStyle.accent + "'><b>" + plain(part) + "</b></font>" : plain(part))
+            .join("")
+    }
     readonly property real d: IrisStyle.density
     readonly property var value: {
         Config.revision
@@ -63,9 +73,10 @@ Item {
                     IrisText {
                         id: label
                         width: Math.min(implicitWidth, parent.width - resetMark.width - Math.round(6 * root.d))
-                        text: Translation.tr(root.spec.label)
+                        text: root.highlight.length > 0 ? root.marked(Translation.tr(root.spec.label)) : Translation.tr(root.spec.label)
+                        textFormat: root.highlight.length > 0 ? Text.StyledText : Text.PlainText
                         font.pixelSize: IrisStyle.typeLabel
-                        font.weight: IrisStyle.weight(Font.Normal)
+                        font.weight: IrisStyle.weight(Font.Medium)
                         wrapMode: Text.WordWrap
                     }
                     Item {

@@ -32,7 +32,7 @@ Rectangle {
     Layout.fillWidth: true
     implicitHeight: Math.round(96 * card.d)
     radius: IrisStyle.radiusTile
-    color: card.on ? IrisStyle.tintFill(IrisStyle.identity.green) : IrisStyle.surfaceHigh
+    color: card.on ? IrisStyle.tintFill(IrisStyle.identity.green) : IrisStyle.readingCard
     Behavior on color { ColorAnimation { duration: IrisStyle.duration(220); easing.type: IrisStyle.feedbackEasing } }
 
     RowLayout {

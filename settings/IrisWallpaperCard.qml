@@ -87,7 +87,7 @@ ClippingRectangle {
     Layout.fillWidth: true
     implicitHeight: card.stageHeight + (strip.visible ? strip.height + 2 * card.pad : 0)
     radius: IrisStyle.radiusTile
-    color: IrisStyle.surfaceHigh
+    color: IrisStyle.readingCard
 
     Item {
         id: stage

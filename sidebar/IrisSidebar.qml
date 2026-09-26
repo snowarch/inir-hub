@@ -164,6 +164,8 @@ PanelWindow {
 
     IrisMorphSurface {
         motionSurface: "panels"
+        // Out of its own edge, never faded: nothing sits between it and that edge to hide behind.
+        behindOrigin: false
         id: frame
         compositorBlurred: true
         ownField: !root.notch
@@ -203,12 +205,8 @@ PanelWindow {
             enabled: frame.settled && root.sectionMorphs === 0
             NumberAnimation { duration: IrisStyle.morphDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: IrisStyle.morphCurve }
         }
-        emergenceSpan: root.notch ? 0.24 : 0.7
-        origin: root.notch
-            ? ({ x: root.left ? 0 : root.width - Math.max(2, IrisFrame.band), y: frame.y,
-                width: Math.max(2, IrisFrame.band), height: frame.height, radius: Math.max(1, IrisFrame.band / 2) })
-            : ({ x: frame.x + (root.left ? -1 : 1) * Math.round(48 * root.d), y: frame.y,
-                width: frame.width, height: frame.height, radius: frame.radius })
+        origin: ({ x: root.left ? 0 : root.width - Math.max(2, IrisFrame.band), y: frame.y,
+            width: Math.max(2, IrisFrame.band), height: frame.height, radius: Math.max(1, IrisFrame.band / 2) })
         MouseArea { anchors.fill: parent }
         HoverHandler { id: frameHover; onHoveredChanged: if (hovered) root.engaged = true }
         PointHandler { onActiveChanged: if (active && root.peek) GlobalStates.irisSidebarPeek = "" }
@@ -306,7 +304,7 @@ PanelWindow {
                 contentHeight: content.implicitHeight
                 boundsBehavior: Flickable.StopAtBounds
                 clip: true
-                ScrollBar.vertical: ScrollBar { policy: ScrollBar.AsNeeded }
+                ScrollBar.vertical: IrisScrollBar {}
                 onWidthChanged: contentX = 0
                 ColumnLayout {
                     id: content

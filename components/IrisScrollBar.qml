@@ -14,8 +14,8 @@ ScrollBar {
     background: null
     contentItem: Item {
         implicitWidth: Math.round(14 * root.d)
-        opacity: root.size < 1 && (root.active || root.engaged) ? 1 : 0
-        Behavior on opacity { NumberAnimation { duration: IrisStyle.duration(root.active ? 120 : 420); easing.type: IrisStyle.feedbackEasing } }
+        opacity: root.size < 1 && root.engaged ? 1 : 0
+        Behavior on opacity { NumberAnimation { duration: IrisStyle.duration(root.engaged ? 120 : 420); easing.type: IrisStyle.feedbackEasing } }
         Rectangle {
             anchors.right: parent.right
             anchors.top: parent.top
