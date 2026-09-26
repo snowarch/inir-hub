@@ -46,7 +46,7 @@ IrisWidgetFace {
                 width: Math.min(parent.width, parent.height)
                 height: width
                 progress: root.fraction
-                tint: IrisStyle.secondaryAccent
+                tint: root.warm
                 stroke: Math.max(4, root.dp(9))
             }
             ColumnLayout {
@@ -97,7 +97,7 @@ IrisWidgetFace {
             Layout.fillWidth: true
             glyph: root.widget.isDaytime ? "light_mode" : "bedtime"
             text: IrisFaceData.capitalized(Qt.locale().toString(DateTime.clock.date, "dddd d"))
-            tint: IrisStyle.secondaryAccent
+            tint: root.warm
         }
         RowLayout {
             Layout.fillWidth: true
@@ -139,12 +139,12 @@ IrisWidgetFace {
                 anchors.verticalCenter: parent.verticalCenter
                 height: root.dp(8)
                 radius: height / 2
-                color: IrisStyle.fill
+                color: root.fill
                 Rectangle {
                     width: parent.width * root.fraction
                     height: parent.height
                     radius: height / 2
-                    color: IrisStyle.secondaryAccent
+                    color: root.warm
                 }
             }
             Repeater {
@@ -156,7 +156,7 @@ IrisWidgetFace {
                     text: modelData.glyph
                     fill: 1
                     iconSize: root.px(13)
-                    color: IrisStyle.secondaryAccent
+                    color: root.warm
                 }
             }
             Rectangle {

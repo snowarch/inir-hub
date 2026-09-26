@@ -28,14 +28,17 @@ IrisWidgetFace {
             Layout.fillWidth: true
             glyph: "newspaper"
             text: Translation.tr("News")
-            tint: IrisStyle.accent
+            trailing: !Network.online && root.stories.length > 0 ? Translation.tr("Offline") : ""
+            tint: root.accent
         }
 
         FaceText {
             face: root
             visible: root.stories.length === 0
             Layout.fillWidth: true
-            text: Translation.tr("Fetching headlines…")
+            text: !Network.online ? Network.offlineReason
+                : NewsService.lastError.length > 0 && !NewsService.loading ? Translation.tr("Headlines didn't load (´・ω・`)")
+                : Translation.tr("Fetching headlines…")
             color: root.inkTertiary
             size: 12.5
         }
@@ -74,7 +77,7 @@ IrisWidgetFace {
                         Layout.fillWidth: true
                         Layout.preferredHeight: 1
                         Layout.bottomMargin: root.dp(2)
-                        color: IrisStyle.hairline
+                        color: root.hairline
                     }
                     RowLayout {
                         visible: root.widget.showMeta || storyHover.hovered
@@ -85,7 +88,7 @@ IrisWidgetFace {
                             visible: root.widget.showMeta
                             Layout.fillWidth: true
                             text: String(story.modelData.source ?? "")
-                            color: story.lead ? IrisStyle.accent : root.inkSecondary
+                            color: story.lead ? root.accent : root.inkSecondary
                             size: 10.5
                             weight: Font.DemiBold
                         }
@@ -101,7 +104,7 @@ IrisWidgetFace {
                             visible: storyHover.hovered
                             text: "open_in_new"
                             iconSize: root.px(14)
-                            color: openHover.hovered ? IrisStyle.accent : root.inkTertiary
+                            color: openHover.hovered ? root.accent : root.inkTertiary
                             HoverHandler { id: openHover; cursorShape: Qt.PointingHandCursor }
                             TapHandler {
                                 gesturePolicy: TapHandler.WithinBounds
@@ -126,7 +129,7 @@ IrisWidgetFace {
                         verticalAlignment: Text.AlignTop
                         lineHeight: 1.08
                         maximumLineCount: !story.lead ? 2 : root.small ? 4 : root.medium ? 5 : 3
-                        color: openHover.hovered ? IrisStyle.accent : root.ink
+                        color: openHover.hovered ? root.accent : root.ink
                     }
                     HoverHandler { id: storyHover }
                 }

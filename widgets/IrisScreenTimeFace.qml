@@ -67,7 +67,7 @@ IrisWidgetFace {
                     height: Math.max(root.dp(3), parent.height * root.hourly[hour.index] / root.hourPeak)
                     radius: Math.min(width / 2, IrisStyle.radiusMicro)
                     color: hour.index === root.hourNow ? root.highlight
-                        : root.hourly[hour.index] > 0 ? root.tint : IrisStyle.fill
+                        : root.hourly[hour.index] > 0 ? root.tint : root.fill
                 }
             }
         }
@@ -218,7 +218,7 @@ IrisWidgetFace {
                     Layout.fillWidth: true
                     Layout.topMargin: root.dp(4)
                     implicitHeight: 1
-                    color: IrisStyle.hairline
+                    color: root.hairline
                 }
                 Repeater {
                     model: root.topApps
@@ -253,7 +253,7 @@ IrisWidgetFace {
                                 Layout.fillWidth: true
                                 implicitHeight: root.dp(4)
                                 radius: height / 2
-                                color: IrisStyle.fill
+                                color: root.fill
                                 Rectangle {
                                     width: parent.width * Math.min(1, appRow.modelData.seconds / Math.max(1, root.topApps[0]?.seconds ?? 1))
                                     height: parent.height

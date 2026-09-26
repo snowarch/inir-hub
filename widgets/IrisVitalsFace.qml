@@ -29,9 +29,9 @@ IrisWidgetFace {
     }
     function tint(key: string): color {
         if (root.level(key) >= 0.85)
-            return IrisStyle.danger
-        return key === "cpu" ? IrisStyle.accent
-            : key === "mem" || key === "temp" || key === "gpuTemp" ? IrisStyle.secondaryAccent
+            return root.danger
+        return key === "cpu" ? root.accent
+            : key === "mem" || key === "temp" || key === "gpuTemp" ? root.warm
             : key === "gpu" ? root.ink : root.inkSecondary
     }
     function name(entry: var): string {
@@ -193,7 +193,7 @@ IrisWidgetFace {
                     x: heat.expanded ? 0 : heat.width - width
                     y: heat.expanded ? (label.visible ? label.height + root.dp(3) : 0) : label.height - height
                     figureSize: heat.expanded ? (root.small ? 24 : 32) : root.small ? 14 : 18
-                    ink: root.level(key) >= 0.85 ? IrisStyle.danger : root.ink
+                    ink: root.level(key) >= 0.85 ? root.danger : root.ink
                 }
                 Trace {
                     visible: root.large && samples.length >= 2
@@ -222,7 +222,7 @@ IrisWidgetFace {
             key: "disk"
             anchors.right: parent.right
             figureSize: root.diskAlone ? 42 : root.small ? 13 : root.medium ? 15 : 21
-            ink: root.level(key) >= 0.85 ? IrisStyle.danger : root.ink
+            ink: root.level(key) >= 0.85 ? root.danger : root.ink
         }
         Rectangle {
             anchors.left: parent.left
@@ -230,7 +230,7 @@ IrisWidgetFace {
             anchors.bottom: parent.bottom
             height: capacity.trackHeight
             radius: height / 2
-            color: IrisStyle.fill
+            color: root.fill
             Rectangle {
                 width: parent.width * root.level("disk")
                 height: parent.height

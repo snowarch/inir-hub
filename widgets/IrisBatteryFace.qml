@@ -35,8 +35,8 @@ IrisWidgetFace {
     }
 
     function tint(device: var): color {
-        return device.low && !device.charging ? IrisStyle.danger
-            : device.charging ? IrisStyle.secondaryAccent : IrisStyle.accent
+        return device.low && !device.charging ? root.danger
+            : device.charging ? root.warm : root.accent
     }
 
     readonly property int columns: root.small ? Math.min(2, root.devices.length) : root.devices.length
@@ -109,7 +109,7 @@ IrisWidgetFace {
             text: "power"
             fill: 1
             iconSize: root.px(30)
-            color: IrisStyle.accent
+            color: root.accent
         }
         FaceText {
             face: root
@@ -170,7 +170,7 @@ IrisWidgetFace {
             Layout.topMargin: root.dp(8)
             Layout.preferredHeight: root.dp(9)
             radius: height / 2
-            color: IrisStyle.fill
+            color: root.fill
             Rectangle {
                 width: parent.width * (root.devices[0]?.level ?? 0)
                 height: parent.height

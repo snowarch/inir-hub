@@ -53,7 +53,7 @@ Item {
         width: root.r * 2
         height: width
         radius: width / 2
-        color: root.daylight ? IrisStyle.text : IrisStyle.fill
+        color: root.daylight ? IrisStyle.text : root.face.fill
     }
 
     Shape {

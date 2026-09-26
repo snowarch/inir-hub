@@ -127,6 +127,22 @@ ColumnLayout {
         Layout.fillWidth: true
         spacing: Math.round(8 * root.d)
 
+        Rectangle {
+            Layout.preferredWidth: Math.round(28 * root.d)
+            Layout.preferredHeight: Layout.preferredWidth
+            radius: IrisStyle.iconRadius(width)
+            gradient: Gradient {
+                GradientStop { position: 0; color: Qt.lighter(root.widget.identityTint, 1.18) }
+                GradientStop { position: 1; color: root.widget.identityTint }
+            }
+            MaterialSymbol {
+                anchors.centerIn: parent
+                text: root.widget.identityGlyph
+                fill: 1
+                iconSize: Math.round(17 * root.d)
+                color: IrisStyle.onTint
+            }
+        }
         IrisText {
             Layout.fillWidth: true
             text: Translation.tr(root.title)
@@ -144,49 +160,12 @@ ColumnLayout {
         }
     }
 
-    Rectangle {
-        id: tabs
+    IrisSegmented {
         Layout.fillWidth: true
-        implicitHeight: Math.round(30 * root.d)
-        radius: height / 2
-        color: IrisStyle.fillQuiet
-        readonly property int selectedIndex: root.pages.findIndex(entry => entry.value === root.page)
-
-        Rectangle {
-            y: 2
-            height: parent.height - 4
-            width: (parent.width - 4) / root.pages.length
-            x: 2 + width * Math.max(0, tabs.selectedIndex)
-            radius: height / 2
-            color: IrisStyle.fillHover
-            Behavior on x { NumberAnimation { duration: IrisStyle.morphDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: IrisStyle.morphCurve } }
-        }
-        Row {
-            anchors.fill: parent
-            anchors.margins: 2
-            Repeater {
-                model: root.pages
-                MouseArea {
-                    id: tab
-                    required property var modelData
-                    required property int index
-                    width: (tabs.width - 4) / root.pages.length
-                    height: tabs.height - 4
-                    cursorShape: Qt.PointingHandCursor
-                    onClicked: root.widget._quickTab = tab.modelData.value
-                    Accessible.role: Accessible.PageTab
-                    Accessible.name: tab.modelData.label
-                    Accessible.checked: tabs.selectedIndex === tab.index
-                    IrisText {
-                        anchors.centerIn: parent
-                        text: tab.modelData.label
-                        font.pixelSize: IrisStyle.typeLabel
-                        font.weight: tabs.selectedIndex === tab.index ? Font.DemiBold : Font.Normal
-                        color: tabs.selectedIndex === tab.index ? IrisStyle.text : IrisStyle.subtext
-                    }
-                }
-            }
-        }
+        options: root.pages
+        current: root.page
+        accessibleName: Translation.tr("Quick controls")
+        onPicked: value => root.widget._quickTab = value
     }
 
     ColumnLayout {

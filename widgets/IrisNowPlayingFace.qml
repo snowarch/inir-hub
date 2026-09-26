@@ -70,8 +70,8 @@ IrisWidgetFace {
             implicitWidth: Math.round(transport.disc * 1.2)
             glyph: root.playing ? "pause" : "play_arrow"
             name: root.playing ? Translation.tr("Pause") : Translation.tr("Play")
-            tint: root.playing ? IrisStyle.onTintFor(root.artLight) : root.ink
-            color: root.playing ? root.artLight : IrisStyle.fill
+            tint: root.playing ? root.onFill(root.artLight) : root.ink
+            color: root.playing ? root.artLight : root.fill
             onActivated: media.togglePlaying()
         }
         FaceAction {
@@ -88,7 +88,7 @@ IrisWidgetFace {
     component Progress: Rectangle {
         implicitHeight: root.dp(4)
         radius: height / 2
-        color: IrisStyle.fill
+        color: root.fill
         Rectangle {
             width: parent.width * root.progress
             height: parent.height
@@ -336,6 +336,14 @@ IrisWidgetFace {
             spacing: root.dp(4)
 
             Item { Layout.fillHeight: true }
+            FaceText {
+                face: root
+                Layout.fillWidth: true
+                visible: root.lyricsWanted && LyricsService.status === "offline"
+                text: Translation.tr("Lyrics need an internet connection")
+                color: root.inkTertiary
+                size: 12.5
+            }
             FaceText {
                 face: root
                 Layout.fillWidth: true

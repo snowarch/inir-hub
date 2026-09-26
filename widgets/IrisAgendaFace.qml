@@ -134,7 +134,7 @@ IrisWidgetFace {
         Rectangle {
             Layout.fillWidth: true
             Layout.preferredHeight: 1
-            color: IrisStyle.hairline
+            color: root.hairline
         }
         Repeater {
             model: root.large ? root.shown : []

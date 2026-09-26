@@ -93,7 +93,7 @@ IrisWidgetFace {
                     visible: row.index > 0
                     Layout.fillWidth: true
                     Layout.preferredHeight: 1
-                    color: IrisStyle.hairline
+                    color: root.hairline
                 }
                 RowLayout {
                     Layout.fillWidth: true

@@ -36,20 +36,35 @@ Item {
     readonly property bool clear: root.material === "clear"
     readonly property bool opaque: !root.glass && !root.clear
     readonly property real strength: root.widget.irisSurfaceOpacity
+    // Glass and transparent faces over a light region turn over: frost and near-black ink instead of
+    // a veil darkened until the glass is gone. An opaque plate keeps its own polarity.
+    readonly property bool lightBackdrop: root.opaque ? root.widget.forceDarkInk
+        : root.clear ? root.widget.inkOnLight : root.widget.glassInkOnLight
     readonly property real veil: root.opaque ? root.strength
+        : root.lightBackdrop ? IrisStyle.legibleFrost(root.material, root.widget.regionBrightness, root.widget.regionBrightnessSpread, root.strength)
         : IrisStyle.legibleVeil(root.material, root.widget.regionBrightness, root.widget.regionBrightnessSpread, root.strength)
 
-    readonly property color accent: root.widget.irisAccent
-    readonly property color highlight: root.widget.irisAccent3
-    readonly property color ink: IrisStyle.text
+    readonly property color accent: root.lightBackdrop ? IrisStyle.deepAccent(root.widget.irisAccent, IrisStyle.inkOnLight) : root.widget.irisAccent
+    readonly property color highlight: root.lightBackdrop ? IrisStyle.deepAccent(root.widget.irisAccent3, IrisStyle.inkOnLight) : root.widget.irisAccent3
+    readonly property color warm: root.lightBackdrop ? IrisStyle.deepAccent(IrisStyle.secondaryAccent, IrisStyle.inkOnLight) : IrisStyle.secondaryAccent
+    readonly property color danger: root.lightBackdrop ? IrisStyle.deepAccent(IrisStyle.danger, IrisStyle.inkOnLight) : IrisStyle.danger
+    readonly property color ink: root.lightBackdrop ? IrisStyle.inkOnLight : IrisStyle.text
     readonly property color inkSecondary: IrisStyle.secondaryOf(root.ink)
     readonly property color inkTertiary: IrisStyle.tertiaryOf(root.ink)
+    readonly property color fillQuiet: root.lightBackdrop ? IrisStyle.fillQuietOf(root.ink) : IrisStyle.fillQuiet
+    readonly property color fill: root.lightBackdrop ? IrisStyle.fillOf(root.ink) : IrisStyle.fill
+    readonly property color fillHover: root.lightBackdrop ? IrisStyle.fillHoverOf(root.ink) : IrisStyle.fillHover
+    readonly property color fillActive: root.lightBackdrop ? IrisStyle.fillActiveOf(root.ink) : IrisStyle.fillActive
+    readonly property color hairline: root.lightBackdrop ? IrisStyle.hairlineOf(root.ink) : IrisStyle.hairline
+    // Ink on a filled accent: light on the deep accents of a light face, the Island's dark otherwise.
+    function onFill(tint: color): color { return root.lightBackdrop ? IrisStyle.onTint : IrisStyle.onTintFor(tint) }
     readonly property int figureWeight: root.widget.widgetTitleWeight
     readonly property string fontMain: IrisStyle.fontMain
     readonly property string fontNumbers: IrisStyle.fontNumbers
     readonly property bool rimShown: !root.clear || root.widget.irisRim || GlobalStates.widgetEditMode
-    readonly property color plateColor: ColorUtils.applyAlpha(root.opaque ? root.widget.irisPlate : IrisStyle.surface, root.veil)
-    readonly property color knockout: root.opaque ? root.plateColor : IrisStyle.surface
+    readonly property color plateColor: ColorUtils.applyAlpha(root.opaque ? root.widget.irisPlate
+        : root.lightBackdrop ? IrisStyle.frost : IrisStyle.surface, root.veil)
+    readonly property color knockout: root.opaque ? root.plateColor : root.lightBackdrop ? IrisStyle.frost : IrisStyle.surface
 
     function dp(value: real): real { return Math.round(value * root.k) }
     function px(value: real): real { return Math.round(value * root.t) }
@@ -119,7 +134,7 @@ Item {
         radius: root.radius
         color: root.plateColor
         border.width: root.rimShown ? 1 : 0
-        border.color: root.clear ? IrisStyle.clearRim : IrisStyle.rim
+        border.color: root.lightBackdrop ? root.hairline : root.clear ? IrisStyle.clearRim : IrisStyle.rim
         Behavior on color { ColorAnimation { duration: IrisStyle.revealDuration; easing.type: IrisStyle.feedbackEasing } }
         Behavior on border.width { NumberAnimation { duration: IrisStyle.revealDuration; easing.type: IrisStyle.feedbackEasing } }
     }
@@ -151,13 +166,13 @@ Item {
         height: body.height
         visible: root.clear
         source: bodyCopy
-        brightness: -1
-        colorization: IrisStyle.glow > 0 ? 1 : 0
+        brightness: root.lightBackdrop ? 1 : -1
+        colorization: IrisStyle.glow > 0 && !root.lightBackdrop ? 1 : 0
         colorizationColor: Qt.rgba(IrisStyle.plateShadow.r, IrisStyle.plateShadow.g, IrisStyle.plateShadow.b, 1)
         blurEnabled: true
         blur: 0.5
         autoPaddingEnabled: true
-        opacity: IrisStyle.plateShadow.a
+        opacity: root.lightBackdrop ? IrisStyle.frostShadow : IrisStyle.plateShadow.a
     }
 
     Item {
