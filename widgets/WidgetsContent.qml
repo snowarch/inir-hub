@@ -256,7 +256,7 @@ WBarAttachedPanelContent {
                         WeatherStat { statLabel: Translation.tr("Precip"); statValue: Weather.data.precip }
                         WeatherStat { statLabel: Translation.tr("Sunrise"); statValue: Weather.data.sunrise }
                         WeatherStat { statLabel: Translation.tr("Sunset"); statValue: Weather.data.sunset }
-                        WeatherStat { statLabel: Translation.tr("Refreshed"); statValue: Weather.data.lastRefresh }
+                        WeatherStat { statLabel: Network.online ? Translation.tr("Refreshed") : Translation.tr("Offline, from"); statValue: Weather.updatedLabel }
                     }
 
                     // Daily forecast with temperature-range bars

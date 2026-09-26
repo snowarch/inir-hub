@@ -46,7 +46,13 @@ Scope {
             sourceUrl: "KeyboardLayoutOSD.qml",
             globalStateValue: "osdKeyboardLayoutOpen"
         },
+        {
+            id: "connection",
+            sourceUrl: "ConnectionOSD.qml",
+            globalStateValue: "osdConnectionOpen"
+        },
     ]
+    readonly property bool topNotice: root.currentIndicator === "keyboardLayout" || root.currentIndicator === "connection"
 
     // Suppress OSD during startup and gamemode niri-reload transitions
     Timer {
@@ -71,6 +77,11 @@ Scope {
             return;
         root.currentIndicator = "media";
         GlobalStates.osdMediaOpen = true;
+    }
+
+    function triggerConnectionOSD() {
+        root.currentIndicator = "connection";
+        GlobalStates.osdConnectionOpen = true;
     }
 
     function triggerKeyboardLayoutOSD() {
@@ -111,6 +122,15 @@ Scope {
         }
     }
 
+    Connections {
+        target: DeviceEvents
+        function onHappened(event) {
+            if (!root.initialized || GameMode.active)
+                return;
+            root.triggerConnectionOSD();
+        }
+    }
+
     // Open when global state changes
     Connections {
         target: GlobalStates
@@ -139,6 +159,12 @@ Scope {
                 panelLoader.active = true;
             }
         }
+        function onOsdConnectionOpenChanged() {
+            if (GlobalStates.osdConnectionOpen) {
+                root.currentIndicator = "connection";
+                panelLoader.active = true;
+            }
+        }
     }
 
     // The actual thing
@@ -161,12 +187,12 @@ Scope {
                 color: "transparent"
             exclusiveZone: 0
             WlrLayershell.namespace: "quickshell:wOnScreenDisplay"
-            WlrLayershell.layer: root.currentIndicator === "keyboardLayout"
+            WlrLayershell.layer: root.topNotice
                 ? WlrLayer.Top
                 : WlrLayer.Overlay
             anchors {
-                top: root.currentIndicator === "keyboardLayout" ? true : !(Config.options?.waffles?.bar?.bottom ?? false)
-                bottom: root.currentIndicator === "keyboardLayout" ? false : Config.options?.waffles?.bar?.bottom ?? false
+                top: root.topNotice ? true : !(Config.options?.waffles?.bar?.bottom ?? false)
+                bottom: root.topNotice ? false : Config.options?.waffles?.bar?.bottom ?? false
             }
             mask: Region {
                 item: osdIndicatorLoader
