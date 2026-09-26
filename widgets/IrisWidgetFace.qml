@@ -46,6 +46,7 @@ Item {
 
     readonly property color accent: root.lightBackdrop ? IrisStyle.deepAccent(root.widget.irisAccent, IrisStyle.inkOnLight) : root.widget.irisAccent
     readonly property color highlight: root.lightBackdrop ? IrisStyle.deepAccent(root.widget.irisAccent3, IrisStyle.inkOnLight) : root.widget.irisAccent3
+    readonly property color accent2: root.lightBackdrop ? IrisStyle.deepAccent(root.widget.irisAccent2, IrisStyle.inkOnLight) : root.widget.irisAccent2
     readonly property color warm: root.lightBackdrop ? IrisStyle.deepAccent(IrisStyle.secondaryAccent, IrisStyle.inkOnLight) : IrisStyle.secondaryAccent
     readonly property color danger: root.lightBackdrop ? IrisStyle.deepAccent(IrisStyle.danger, IrisStyle.inkOnLight) : IrisStyle.danger
     readonly property color ink: root.lightBackdrop ? IrisStyle.inkOnLight : IrisStyle.text

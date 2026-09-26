@@ -3,6 +3,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Shapes
 import qs.services
+import qs.modules.common.functions
 import qs.modules.iris.style
 import qs.modules.iris.bar.island
 
@@ -27,16 +28,21 @@ IrisWidgetFace {
     function level(key: string): real {
         return Math.max(0, Math.min(1, Number(root.widget._getValue(key)) || 0))
     }
+    // The widget accents (Settings › Widgets › Accents): processor the first, memory the second,
+    // graphics the third; each heat takes its chip's hue.
     function tint(key: string): color {
         if (root.level(key) >= 0.85)
             return root.danger
-        return key === "cpu" ? root.accent
-            : key === "mem" || key === "temp" || key === "gpuTemp" ? root.warm
-            : key === "gpu" ? root.ink : root.inkSecondary
+        return key === "cpu" || key === "temp" ? root.accent
+            : key === "mem" ? root.accent2
+            : key === "gpu" || key === "gpuTemp" ? root.highlight : root.inkSecondary
     }
     function name(entry: var): string {
         return entry.key === "temp" ? Translation.tr("CPU heat")
-            : entry.key === "gpuTemp" ? Translation.tr("GPU heat") : entry.label
+            : entry.key === "gpuTemp" ? Translation.tr("GPU heat")
+            : entry.key === "mem" ? Translation.tr("Memory")
+            : entry.key === "cpu" ? Translation.tr("Processor")
+            : entry.key === "gpu" ? Translation.tr("Graphics") : entry.label
     }
     function figure(key: string): string {
         return String(root.widget._getDisplayText(key)).replace(/[%°C]/g, "")
@@ -76,19 +82,29 @@ IrisWidgetFace {
         }
     }
 
+    // A trend, not a level: the line spans its own recent range (at least 10 points of it), so a steady
+    // 38 °C reads as a calm line in the middle instead of a flat stroke on the floor.
     component Trace: Shape {
         id: trace
         required property string key
-        readonly property var samples: root.history(trace.key)
+        readonly property var samples: root.history(trace.key).map(value => Math.max(0, Math.min(1, Number(value) || 0)))
+        readonly property real low: Math.min(...trace.samples)
+        readonly property real high: Math.max(...trace.samples)
+        readonly property real span: Math.max(0.10, trace.high - trace.low)
+        readonly property real base: (trace.low + trace.high) / 2 - trace.span / 2
         readonly property var line: trace.samples.map((value, i) => Qt.point(
             trace.width * i / Math.max(1, trace.samples.length - 1),
-            trace.height - 1 - Math.max(0, Math.min(1, Number(value) || 0)) * (trace.height - 2)))
+            trace.height - 1 - (value - trace.base) / trace.span * (trace.height - 2)))
         visible: trace.samples.length >= 2
         preferredRendererType: Shape.CurveRenderer
 
         ShapePath {
             strokeColor: "transparent"
-            fillColor: IrisStyle.tintFill(root.tint(trace.key))
+            fillGradient: LinearGradient {
+                x1: 0; y1: 0; x2: 0; y2: trace.height
+                GradientStop { position: 0; color: IrisStyle.tintFill(root.tint(trace.key)) }
+                GradientStop { position: 1; color: ColorUtils.applyAlpha(root.tint(trace.key), 0) }
+            }
             PathPolyline { path: [Qt.point(0, trace.height)].concat(trace.line, [Qt.point(trace.width, trace.height)]) }
         }
         ShapePath {
@@ -99,6 +115,14 @@ IrisWidgetFace {
             fillColor: "transparent"
             PathPolyline { path: trace.line }
         }
+    }
+
+    component Dot: Rectangle {
+        required property string key
+        implicitWidth: root.dp(root.small ? 6 : 8)
+        implicitHeight: implicitWidth
+        radius: width / 2
+        color: root.tint(key)
     }
 
     component Orbits: Item {
@@ -128,12 +152,14 @@ IrisWidgetFace {
         }
     }
 
+    // Small: dot, name, figure on one line. Medium: figure over dot and name. Large: a legend row
+    // for its ring, name at the start and the figure at the end, all on one baseline.
     component LoadReading: Item {
         id: load
         required property var entry
         property real figureSize: root.small ? 16 : root.medium ? 25 : 30
-        implicitHeight: root.small ? Math.max(value.height, label.height)
-            : value.height + (label.visible ? label.height : 0) + (root.large ? root.dp(13) : 0)
+        readonly property bool inline: root.small || root.large
+        implicitHeight: load.inline ? Math.max(value.height, label.height) : value.height + label.height + root.dp(2)
 
         Item {
             anchors.verticalCenter: parent.verticalCenter
@@ -143,25 +169,25 @@ IrisWidgetFace {
                 id: value
                 key: load.entry.key
                 figureSize: load.figureSize
-                x: root.small ? parent.width - width : 0
+                x: load.inline ? parent.width - width : 0
+            }
+            Dot {
+                id: dot
+                key: load.entry.key
+                x: 0
+                y: load.inline ? Math.round((value.height - height) / 2) : Math.round(value.height + root.dp(2) + (label.height - height) / 2)
             }
             FaceText {
                 id: label
                 face: root
                 visible: root.widget.showLabels
-                width: root.small ? Math.max(0, value.x - root.dp(2)) : parent.width
+                x: dot.width + root.dp(root.small ? 4 : 6)
+                width: load.inline ? Math.max(0, value.x - x - root.dp(4)) : parent.width - x
                 text: load.entry.label
-                size: root.small ? 8 : 11
-                color: root.inkSecondary
-                y: root.small ? Math.round((value.height - height) / 2) : value.height
-            }
-            Trace {
-                visible: root.large && samples.length >= 2
-                key: load.entry.key
-                anchors.left: parent.left
-                anchors.right: parent.right
-                anchors.bottom: parent.bottom
-                height: root.dp(10)
+                size: root.small ? 9 : root.large ? 13 : 11
+                weight: root.large ? Font.DemiBold : Font.Medium
+                color: root.large ? root.ink : root.inkSecondary
+                y: load.inline ? Math.round((value.height - height) / 2) : value.height + root.dp(2)
             }
         }
     }
@@ -189,10 +215,11 @@ IrisWidgetFace {
                     color: root.inkSecondary
                 }
                 Reading {
+                    id: heatValue
                     key: heat.modelData.key
                     x: heat.expanded ? 0 : heat.width - width
-                    y: heat.expanded ? (label.visible ? label.height + root.dp(3) : 0) : label.height - height
-                    figureSize: heat.expanded ? (root.small ? 24 : 32) : root.small ? 14 : 18
+                    y: heat.expanded ? (label.visible ? label.height + root.dp(2) : 0) : label.height - height
+                    figureSize: heat.expanded ? (root.small ? 24 : 28) : root.small ? 14 : 18
                     ink: root.level(key) >= 0.85 ? root.danger : root.ink
                 }
                 Trace {
@@ -201,7 +228,7 @@ IrisWidgetFace {
                     anchors.left: parent.left
                     anchors.right: parent.right
                     anchors.bottom: parent.bottom
-                    height: root.dp(16)
+                    height: root.dp(14)
                 }
             }
         }
@@ -270,7 +297,7 @@ IrisWidgetFace {
             y: root.medium ? 0 : Math.round((root.loadHeight - height) / 2)
             width: composition.width - x
             columns: root.medium ? Math.max(1, root.loads.length) : 1
-            spacing: root.dp(root.small ? 2 : 5)
+            spacing: root.dp(root.small ? 2 : root.large ? 12 : 5)
 
             Repeater {
                 model: root.loads
@@ -281,7 +308,7 @@ IrisWidgetFace {
                     height: root.small && root.loads.length > 1
                         ? Math.floor(root.loadHeight / root.loads.length - loadValues.spacing)
                         : implicitHeight
-                    figureSize: root.small ? 16 : root.medium ? 25 : 30
+                    figureSize: root.small ? 16 : root.medium ? 25 : 24
                 }
             }
         }

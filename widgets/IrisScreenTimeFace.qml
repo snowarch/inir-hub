@@ -21,7 +21,7 @@ IrisWidgetFace {
     readonly property real hourPeak: Math.max(900, ...root.hourly)
     readonly property int hourNow: { void root.revision; return new Date().getHours() }
     readonly property var apps: { void root.revision; return root.on ? ScreenTime.getAppList(1) : [] }
-    readonly property int appCount: root.large ? 5 : root.medium ? 3 : 1
+    readonly property int appCount: root.large ? 5 : root.medium ? 2 : 1
     readonly property var topApps: root.apps.slice(0, root.appCount)
     readonly property color tint: IrisStyle.identity.indigo
 
@@ -67,7 +67,7 @@ IrisWidgetFace {
                     height: Math.max(root.dp(3), parent.height * root.hourly[hour.index] / root.hourPeak)
                     radius: Math.min(width / 2, IrisStyle.radiusMicro)
                     color: hour.index === root.hourNow ? root.highlight
-                        : root.hourly[hour.index] > 0 ? root.tint : root.fill
+                        : root.hourly[hour.index] > 0 ? root.accent : root.fill
                 }
             }
         }
@@ -258,7 +258,7 @@ IrisWidgetFace {
                                     width: parent.width * Math.min(1, appRow.modelData.seconds / Math.max(1, root.topApps[0]?.seconds ?? 1))
                                     height: parent.height
                                     radius: height / 2
-                                    color: root.tint
+                                    color: root.accent
                                 }
                             }
                         }

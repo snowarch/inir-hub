@@ -305,6 +305,41 @@ QtObject {
             Math.max(0.72, Math.min(0.82, c.hslLightness)), 1)
     }
     readonly property color themeAccent: root.legibleAccent(Appearance.colors.colPrimary, "#a8c7fa")
+    // Widget accents: three hues from one source, pushed toward saturated and bright by `vibrance`
+    // (0 = the old pastel lift, 1 = strong). Hues closer than 36° to an earlier one turn away, so the
+    // three always read as three. Legibility over the wallpaper is solved later by markOn/deepAccent.
+    function widgetAccent(seed, fallback, vibrance: real): color {
+        const c = Qt.color(seed)
+        if (!c.valid || c.hslHue < 0 || c.hslSaturation < 0.12) return fallback
+        const v = Math.max(0, Math.min(1, vibrance))
+        return Qt.hsla(c.hslHue, Math.max(0.42 + 0.4 * v, Math.min(0.8 + 0.18 * v, c.hslSaturation)),
+            Math.max(0.72 - 0.1 * v, Math.min(0.82 - 0.12 * v, c.hslLightness)), 1)
+    }
+    function _apart(color: color, earlier: var): color {
+        let hue = color.hslHue
+        for (let i = 0; i < 6 && earlier.some(other => { const d = Math.abs(other.hslHue - hue); return Math.min(d, 1 - d) < 0.1 }); ++i)
+            hue = (hue + 0.13) % 1
+        return Qt.hsla(hue, color.hslSaturation, color.hslLightness, 1)
+    }
+    readonly property var widgetPaletteNames: ["wallpaper", "system", "spectrum", "mono"]
+    function widgetPalette(name: string, vibrance: real): var {
+        const c = Appearance.colors
+        const seeds = name === "system" ? [root.accent, root.secondaryAccent, root.success]
+            : name === "spectrum" ? [root.identity.blue, root.identity.orange, root.identity.teal]
+            : name === "mono" ? [root.accent, root.accent, root.accent]
+            : [c.colPrimary, c.colTertiary, c.colSecondary]
+        const fallbacks = [root.accent, root.secondaryAccent, root.success]
+        const out = []
+        for (let i = 0; i < 3; ++i) {
+            let tone = root.widgetAccent(seeds[i], fallbacks[i], vibrance)
+            if (name === "mono")
+                tone = Qt.hsla(tone.hslHue, tone.hslSaturation * [1, 1, 0.7][i], tone.hslLightness + [0, -0.14, 0.1][i], 1) // iris-literal: tonal steps of one hue
+            else if (name !== "spectrum")
+                tone = root._apart(tone, out)
+            out.push(tone)
+        }
+        return out
+    }
     readonly property var accents: ({ blue: "#a8c7fa", mint: "#8de0bd", rose: "#ffb2c4", lilac: "#d2baff" })
     readonly property var highlights: ({ orange: "#ff9f0a", yellow: "#ffd60a", red: "#ff6961", pink: "#ff6482", green: "#30d158" })
     readonly property var animePalettes: ({
