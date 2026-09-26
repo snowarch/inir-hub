@@ -318,9 +318,9 @@ Item {
                         Behavior on height { enabled: zones.vertical; NumberAnimation { duration: IrisStyle.moveDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: IrisStyle.moveCurve } }
                         Rectangle {
                             anchors.centerIn: parent
-                            readonly property real long: space.modelData.active ? space.extent - strip.slot + strip.dot : strip.dot
-                            width: zones.vertical ? strip.dot : long
-                            height: zones.vertical ? long : strip.dot
+                            readonly property real along: space.modelData.active ? space.extent - strip.slot + strip.dot : strip.dot
+                            width: zones.vertical ? strip.dot : along
+                            height: zones.vertical ? along : strip.dot
                             radius: strip.dot / 2
                             color: space.modelData.active ? IrisStyle.markOn(IrisStyle.accent, strip.backdrop, strip.light, 3)
                                 : space.modelData.urgent ? IrisStyle.markOn(IrisStyle.secondaryAccent, strip.backdrop, strip.light, 3)

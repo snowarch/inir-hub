@@ -276,9 +276,9 @@ ClippingRectangle {
                             model: zone.kinds
                             Rectangle {
                                 required property string modelData
-                                readonly property bool long: modelData === "workspaces" || modelData === "window"
-                                width: root.island.vertical || !long ? zone.size : zone.size * 2.4
-                                height: root.island.vertical && long ? zone.size * 2.4 : zone.size
+                                readonly property bool wide: modelData === "workspaces" || modelData === "window"
+                                width: root.island.vertical || !wide ? zone.size : zone.size * 2.4
+                                height: root.island.vertical && wide ? zone.size * 2.4 : zone.size
                                 radius: Math.min(width, height) / 2
                                 color: IrisStyle.fill
                             }

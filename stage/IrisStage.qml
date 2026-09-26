@@ -1140,9 +1140,9 @@ Item {
             required property string modelData
             readonly property bool active: root.target?.zone === edgeHint.modelData
             readonly property bool side: edgeHint.modelData === "left" || edgeHint.modelData === "right"
-            readonly property real long: Math.round(Math.max(root.drag?.width ?? 0, 160 * root.d))
-            width: edgeHint.side ? Math.round(root.size) : edgeHint.long
-            height: edgeHint.side ? edgeHint.long : Math.round(root.size)
+            readonly property real along: Math.round(Math.max(root.drag?.width ?? 0, 160 * root.d))
+            width: edgeHint.side ? Math.round(root.size) : edgeHint.along
+            height: edgeHint.side ? edgeHint.along : Math.round(root.size)
             x: edgeHint.modelData === "left" ? root.margin : edgeHint.modelData === "right" ? root.width - width - root.margin
                 : Math.round((root.width - width) / 2)
             y: edgeHint.modelData === "top" ? root.margin : edgeHint.modelData === "bottom" ? root.height - height - root.margin
