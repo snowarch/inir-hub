@@ -21,6 +21,23 @@ Item {
     readonly property bool editing: GlobalStates.irisControlEdit
     property var targetScreen: null
     property string picker: ""
+    function takePickerRequest(): void {
+        const wanted = GlobalStates.irisControlPickerRequest
+        if (wanted.length === 0) return
+        root.picker = wanted === "none" ? "" : wanted
+        GlobalStates.irisControlPickerRequest = ""
+    }
+    Connections {
+        target: GlobalStates
+        function onIrisControlPickerRequestChanged(): void { root.takePickerRequest() }
+    }
+    Component.onCompleted: root.takePickerRequest()
+    // Right click on any tile that has a list (Wi-Fi, Bluetooth) opens it, whatever the tile's shape:
+    // a small tile toggles on click and had no way to its networks or devices.
+    function togglePicker(list: string): void {
+        if (list.length === 0 || root.editing) return
+        root.picker = root.picker === list ? "" : list
+    }
     property string hint: ""
     readonly property real d: IrisStyle.density
     readonly property var monitor: Brightness.getMonitorForScreen(root.targetScreen)
@@ -367,8 +384,14 @@ Item {
         readonly property color tint: IrisControlOptions.tintFor(ctl.moduleId)
         readonly property color ink: !ctl.ready ? IrisStyle.textTertiary
             : ctl.lit ? IrisStyle.onTintFor(ctl.tint) : IrisStyle.text
+        // What a right click (or the chevron of a wide tile) unfolds under the grid: the list of that thing, or
+        // the page of its category.
         readonly property string expands: ctl.moduleId === "network" ? "network"
-            : ctl.moduleId === "bluetooth" ? "bluetooth" : ""
+            : ctl.moduleId === "bluetooth" ? "bluetooth"
+            : IrisControlOptions.categoryOf(ctl.moduleId) === "display" ? "display"
+            : IrisControlOptions.categoryOf(ctl.moduleId) === "system" ? "system"
+            : IrisControlOptions.categoryOf(ctl.moduleId) === "sound" ? "devices" : ""
+        readonly property bool listOnClick: ctl.moduleId === "network" || ctl.moduleId === "bluetooth"
         readonly property string caption: ["network", "bluetooth", "vpn", "hotspot"].includes(ctl.moduleId)
             && ctl.lit && ctl.detail.length > 0 ? ctl.detail : ctl.label
         function activate(): void {
@@ -406,6 +429,7 @@ Item {
         Accessible.checkable: true
         Accessible.checked: discButton.control.lit
         onClicked: discButton.control.activate()
+        altAction: () => { if (discButton.control.ready) root.togglePicker(discButton.control.expands) }
         HoverHandler { enabled: !root.editing; onHoveredChanged: discButton.control.hover(hovered) }
         MaterialSymbol {
             anchors.centerIn: parent
@@ -461,9 +485,10 @@ Item {
             Accessible.checked: faceState.lit
             onClicked: {
                 if (!faceState.ready || root.editing) return
-                if (face.wide && faceState.expands.length > 0) root.picker = root.picker === faceState.expands ? "" : faceState.expands
+                if (face.wide && faceState.listOnClick) root.togglePicker(faceState.expands)
                 else faceState.activate()
             }
+            altAction: () => { if (faceState.ready) root.togglePicker(faceState.expands) }
             HoverHandler { enabled: !root.editing; onHoveredChanged: faceState.hover(hovered) }
         }
 
@@ -531,6 +556,13 @@ Item {
                 text: root.picker === faceState.expands ? "expand_less" : "chevron_right"
                 iconSize: Math.round(17 * root.d)
                 color: root.picker === faceState.expands ? IrisStyle.accent : IrisStyle.textSecondary
+                MouseArea {
+                    anchors.fill: parent
+                    anchors.margins: -Math.round(10 * root.d)
+                    enabled: parent.visible && !root.editing
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: root.togglePicker(faceState.expands)
+                }
             }
         }
     }

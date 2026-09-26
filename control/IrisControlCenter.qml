@@ -107,6 +107,7 @@ Item {
         id: panel
         open: root.morphOpen
         motionSurface: "controlCenter"
+        settles: true
         color: IrisStyle.bodySurface
         fieldBacked: true
         contentReady: contents.contentHeight > 0

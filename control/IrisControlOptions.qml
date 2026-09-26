@@ -131,6 +131,7 @@ QtObject {
     function labelOf(id: string): string { return root.entryOf(id)?.label ?? id }
     function glyphOf(id: string): string { return root.entryOf(id)?.glyph ?? "toggle_on" }
     function kindOf(id: string): string { return root.entryOf(id)?.kind ?? "toggle" }
+    function categoryOf(id: string): string { return root.entryOf(id)?.category ?? "" }
 
     function parseShape(shape: string, columns: int): var {
         const parts = String(shape).split("x")

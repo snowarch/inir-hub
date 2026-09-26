@@ -235,8 +235,12 @@ ColumnLayout {
                     anchors.top: parent.top
                     anchors.margins: 6 * root.d
                     implicitHeight: root.picker === "network" ? networkList.implicitHeight
-                        : root.picker === "bluetooth" ? bluetoothList.implicitHeight : deviceList.implicitHeight
+                        : root.picker === "bluetooth" ? bluetoothList.implicitHeight
+                        : root.picker === "display" ? displayList.implicitHeight
+                        : root.picker === "system" ? systemList.implicitHeight : deviceList.implicitHeight
                     IrisDeviceList { id: deviceList; width: parent.width; visible: root.picker === "devices" }
+                    IrisDisplayList { id: displayList; width: parent.width; visible: root.picker === "display"; targetScreen: root.targetScreen }
+                    IrisSystemList { id: systemList; width: parent.width; visible: root.picker === "system" }
                     IrisNetworkList { id: networkList; width: parent.width; visible: root.picker === "network" }
                     IrisBluetoothList { id: bluetoothList; width: parent.width; visible: root.picker === "bluetooth" }
                 }
@@ -500,7 +504,7 @@ ColumnLayout {
                 contentHeight: shelfColumn.implicitHeight
                 boundsBehavior: Flickable.StopAtBounds
                 interactive: grid.carrying.length === 0
-                ScrollBar.vertical: ScrollBar { policy: shelf.contentHeight > shelf.height ? ScrollBar.AsNeeded : ScrollBar.AlwaysOff }
+                ScrollBar.vertical: IrisScrollBar {}
 
                 Column {
                     id: shelfColumn
