@@ -981,7 +981,14 @@ Item {
                 property var app: null
                 property var windows: []
                 function windowKey(entry: var): string { return String(entry?.niriWindowId ?? entry?._sourceKey ?? entry?.title ?? "") }
-                readonly property var windowKeys: menu.windows.map(entry => menu.windowKey(entry))
+                // In the order they sit on screen: by workspace, then by column along the strip.
+                function placeOf(entry: var): int {
+                    const w = (NiriService.windows ?? []).find(item => item.id === entry?.niriWindowId)
+                    const ws = (NiriService.allWorkspaces ?? []).find(item => item.id === w?.workspace_id)
+                    return Number(ws?.idx ?? 999) * 1000 + Number(w?.layout?.pos_in_scrolling_layout?.[0] ?? 999)
+                }
+                readonly property var windowKeys: menu.windows.slice().sort((a, b) => menu.placeOf(a) - menu.placeOf(b))
+                    .map(entry => menu.windowKey(entry))
                 property var shownKeys: []
                 onWindowKeysChanged: if (menu.windowKeys.join("\n") !== menu.shownKeys.join("\n")) menu.shownKeys = menu.windowKeys
                 property string mode: "menu"
@@ -1062,13 +1069,27 @@ Item {
                                 readonly property var niriWindow: (NiriService.windows ?? []).find(w => w.id === card.win?.niriWindowId) ?? null
                                 readonly property var workspace: (NiriService.allWorkspaces ?? []).find(ws => ws.id === card.win?.niriWorkspaceId) ?? null
                                 readonly property bool minimized: card.win?.niriWindowId !== undefined && MinimizedWindows.isMinimized(card.win.niriWindowId)
+                                readonly property int column: Number(card.niriWindow?.layout?.pos_in_scrolling_layout?.[0] ?? 0)
+                                readonly property int columns: {
+                                    const ws = card.niriWindow?.workspace_id
+                                    let most = card.column
+                                    for (const w of NiriService.windows ?? [])
+                                        if (w.workspace_id === ws && !w.is_floating)
+                                            most = Math.max(most, Number(w.layout?.pos_in_scrolling_layout?.[0] ?? 0))
+                                    return most
+                                }
                                 width: windowsContent.cardWidth
                                 height: plate.height + Math.round(8 * root.d) + caption.implicitHeight
                                 hoverEnabled: true
                                 cursorShape: Qt.PointingHandCursor
+                                acceptedButtons: Qt.LeftButton | Qt.MiddleButton
                                 Accessible.role: Accessible.Button
                                 Accessible.name: String(card.win?.title ?? "")
-                                onClicked: {
+                                onClicked: mouse => {
+                                    if (mouse.button === Qt.MiddleButton) {
+                                        if (card.win?.niriWindowId !== undefined) NiriService.closeWindow(card.win.niriWindowId)
+                                        return
+                                    }
                                     const id = card.win?.niriWindowId
                                     if (CompositorService.isNiri && id !== undefined) {
                                         if (MinimizedWindows.isMinimized(id)) MinimizedWindows.restore(id)
@@ -1135,49 +1156,43 @@ Item {
                                                 }
                                             }
                                         }
-                                        Column {
-                                            id: skeleton
-                                            anchors.left: parent.left
-                                            anchors.right: parent.right
-                                            anchors.top: parent.top
-                                            anchors.topMargin: Math.round(17 * root.d)
-                                            anchors.leftMargin: Math.round(8 * root.d)
-                                            anchors.rightMargin: Math.round(8 * root.d)
-                                            spacing: Math.round(5 * root.d)
-                                            Repeater {
-                                                model: Math.max(1, Math.min(6, Math.floor((silhouette.height - 24 * root.d) / (8 * root.d))))
-                                                Rectangle {
-                                                    required property int index
-                                                    readonly property real share: 0.35 + ((plate.seed * (index + 3) * 7919) % 55) / 100
-                                                    width: Math.round(skeleton.width * share)
-                                                    height: Math.max(2, Math.round(3 * root.d))
-                                                    radius: height / 2
-                                                    color: index === 0 ? IrisStyle.fillActive : IrisStyle.fill
-                                                }
-                                            }
+                                        SmartAppIcon {
+                                            anchors.centerIn: parent
+                                            anchors.verticalCenterOffset: Math.round(5 * root.d)
+                                            icon: IrisPieces.appIcon(menu.app?.appId ?? "")
+                                            fallback: "application-x-executable"
+                                            iconSize: Math.round(Math.min(34, Math.max(20, silhouette.height * 0.42)) * root.d)
                                         }
                                     }
-                                    SmartAppIcon {
-                                        x: Math.round(silhouette.x + silhouette.width - width * 0.7)
-                                        y: Math.round(silhouette.y + silhouette.height - height * 0.7)
-                                        icon: IrisPieces.appIcon(menu.app?.appId ?? "")
-                                        fallback: "application-x-executable"
-                                        iconSize: Math.round(24 * root.d)
-                                    }
+                                    // Where the window sits in its workspace's strip: one mark per column, its own lit. The
+                                    // one thing a glimpse cannot show otherwise, and the thing that tells two alike apart.
                                     Row {
-                                        x: Math.round(silhouette.x + 6 * root.d)
-                                        y: Math.round(silhouette.y + silhouette.height - height - 6 * root.d)
-                                        spacing: Math.round(4 * root.d)
+                                        anchors.horizontalCenter: parent.horizontalCenter
+                                        y: Math.round(plate.height - plate.room / 2 - height / 2)
+                                        spacing: Math.round(3 * root.d)
                                         MaterialSymbol {
                                             visible: card.niriWindow?.is_floating ?? false
+                                            anchors.verticalCenter: parent.verticalCenter
                                             text: "picture_in_picture"
-                                            iconSize: Math.round(12 * root.d)
+                                            iconSize: Math.round(11 * root.d)
                                             color: IrisStyle.subtext
+                                        }
+                                        Repeater {
+                                            model: card.niriWindow?.is_floating ? 0 : Math.min(9, card.columns)
+                                            Rectangle {
+                                                required property int index
+                                                readonly property bool own: index + 1 === card.column
+                                                anchors.verticalCenter: parent ? parent.verticalCenter : undefined
+                                                width: Math.round((own ? 10 : 5) * root.d)
+                                                height: Math.max(3, Math.round(4 * root.d))
+                                                radius: height / 2
+                                                color: own ? (card.focusedWindow ? IrisStyle.accent : IrisStyle.text) : IrisStyle.fillActive
+                                            }
                                         }
                                         Rectangle {
                                             visible: card.niriWindow?.is_urgent ?? false
                                             anchors.verticalCenter: parent.verticalCenter
-                                            width: Math.round(7 * root.d)
+                                            width: Math.round(6 * root.d)
                                             height: width
                                             radius: width / 2
                                             color: IrisStyle.secondaryAccent
@@ -1228,7 +1243,9 @@ Item {
                                         width: parent.width
                                         visible: text.length > 0
                                         text: card.minimized ? Translation.tr("Minimised")
-                                            : card.workspace ? (card.workspace.name || Translation.tr("Workspace %1").arg(card.workspace.idx)) : ""
+                                            : !card.workspace ? ""
+                                            : (card.workspace.name || Translation.tr("Workspace %1").arg(card.workspace.idx))
+                                                + (card.columns > 1 && card.column > 0 ? " · " + Translation.tr("%1 of %2").arg(card.column).arg(card.columns) : "")
                                         elide: Text.ElideRight
                                         horizontalAlignment: Text.AlignHCenter
                                         color: IrisStyle.muted
