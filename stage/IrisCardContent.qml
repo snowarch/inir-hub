@@ -146,6 +146,69 @@ Item {
         }
     }
 
+    // One fact of a connection: its name quiet on the left, the value on the right; a tap copies it.
+    component VpnFact: MouseArea {
+        id: fact
+        property string label: ""
+        property string value: ""
+        property string shown: fact.value
+        property string glyph: "content_copy"
+        signal copy(string value)
+        implicitHeight: Math.round(28 * root.d)
+        hoverEnabled: true
+        cursorShape: fact.value.length > 0 ? Qt.PointingHandCursor : Qt.ArrowCursor
+        visible: fact.value.length > 0
+        onClicked: fact.copy(fact.value)
+        Accessible.role: Accessible.Button
+        Accessible.name: fact.label + " " + fact.shown
+        Rectangle {
+            anchors.fill: parent
+            radius: IrisStyle.radiusRow
+            color: fact.containsMouse ? IrisStyle.fillHover : ColorUtils.applyAlpha(IrisStyle.fillHover, 0)
+            Behavior on color { ColorAnimation { duration: IrisStyle.duration(120); easing.type: IrisStyle.feedbackEasing } }
+        }
+        RowLayout {
+            anchors.fill: parent
+            anchors.leftMargin: Math.round(10 * root.d)
+            anchors.rightMargin: Math.round(8 * root.d)
+            spacing: Math.round(8 * root.d)
+            IrisText {
+                text: fact.label
+                color: IrisStyle.muted
+                font.pixelSize: IrisStyle.typeMeta
+            }
+            IrisText {
+                Layout.fillWidth: true
+                horizontalAlignment: Text.AlignRight
+                text: fact.shown
+                elide: Text.ElideMiddle
+                font.pixelSize: IrisStyle.typeMeta
+                font.features: ({ "tnum": 1 })
+            }
+            MaterialSymbol {
+                visible: fact.glyph.length > 0
+                text: fact.glyph
+                iconSize: Math.round(14 * root.d)
+                color: IrisStyle.muted
+                opacity: fact.containsMouse ? 1 : 0
+                Behavior on opacity { NumberAnimation { duration: IrisStyle.duration(120); easing.type: IrisStyle.feedbackEasing } }
+            }
+        }
+    }
+    // A connection's facts rest on one quiet fill under its row.
+    component VpnFacts: Rectangle {
+        default property alias facts: factColumn.data
+        implicitHeight: factColumn.implicitHeight + Math.round(8 * root.d)
+        radius: IrisStyle.radiusTile
+        color: IrisStyle.fillQuiet
+        ColumnLayout {
+            id: factColumn
+            anchors.fill: parent
+            anchors.margins: Math.round(4 * root.d)
+            spacing: 0
+        }
+    }
+
     component SectionCard: IrisSidebarSection {
         bare: true
         expanded: true
@@ -613,13 +676,56 @@ Item {
             spacing: 8 * root.d
             Component.onCompleted: Vpn.keepAlive()
             Component.onDestruction: Vpn.releaseKeepAlive()
+            // Hides addresses and the account for a screenshot; the values still copy whole.
+            property bool masked: true
+            property bool copied: false
+            // A window the card hands off to (a file chooser, NetworkManager's editor, a terminal) opens with the card gone.
+            Connections {
+                target: Vpn
+                function onHandOff(): void { GlobalStates.irisBubbleCard = null }
+            }
+            Timer { id: copiedTimer; interval: 1400; onTriggered: vpn.copied = false }
+            function copy(value: string): void {
+                Quickshell.clipboardText = value
+                vpn.copied = true
+                copiedTimer.restart()
+            }
+            function hide(value: string): string {
+                if (!vpn.masked || value.length === 0) return value
+                if (/^\d+\.\d+\.\d+\.\d+/.test(value)) return value.replace(/^(\d+\.\d+)\.\d+\.\d+/, "$1.•••.•••")
+                if (value.includes("@")) return value.slice(0, 2) + "•••" + value.slice(value.indexOf("@"))
+                if (value.includes(":")) return value.split(":")[0] + ":••••:••••"
+                return value.split(".")[0] + ".•••"
+            }
+            function rate(bytes: real): string {
+                return bytes >= 1048576 ? (bytes / 1048576).toFixed(1) + " MB/s"
+                    : bytes >= 1024 ? (bytes / 1024).toFixed(1) + " KB/s" : Math.round(bytes) + " B/s"
+            }
+            function traffic(dev: string): string {
+                const r = Vpn.rates[dev]
+                return r ? "↓ " + vpn.rate(r.down) + "   ↑ " + vpn.rate(r.up) : ""
+            }
             CardHeader {
                 glyph: Vpn.connected ? "vpn_lock" : "vpn_key_off"
                 tint: Vpn.connected ? IrisStyle.identity.green : IrisStyle.muted
                 title: Translation.tr("VPN")
-                detail: Vpn.busy ? Translation.tr("Working…")
+                detail: vpn.copied ? Translation.tr("Copied")
+                    : Vpn.busy ? Translation.tr("Working…")
                     : Vpn.connected ? Translation.tr("On through %1").arg(Vpn.activeName)
                     : Translation.tr("Not connected")
+                IrisIconButton {
+                    visible: Vpn.details
+                    materialIcon: vpn.masked ? "visibility_off" : "visibility"
+                    selected: vpn.masked
+                    Accessible.name: vpn.masked ? Translation.tr("Show addresses") : Translation.tr("Hide addresses")
+                    onClicked: vpn.masked = !vpn.masked
+                }
+                IrisIconButton {
+                    materialIcon: "info"
+                    selected: Vpn.details
+                    Accessible.name: Vpn.details ? Translation.tr("Hide details") : Translation.tr("Show details")
+                    onClicked: Vpn.setDetails(!Vpn.details)
+                }
                 IrisIconButton {
                     materialIcon: "refresh"
                     Accessible.name: Translation.tr("Check again")
@@ -640,19 +746,154 @@ Item {
                 Layout.fillWidth: true
                 visible: Vpn.tailscaleInstalled
                 label: "Tailscale"
-                detail: Vpn.tailscaleUp ? Vpn.tailscaleAddress : Translation.tr("Off")
+                detail: Vpn.tailscaleUp ? vpn.hide(Vpn.tailscaleAddress)
+                    : Vpn.tailscaleSignedOut ? Translation.tr("Signed out") : Translation.tr("Off")
                 on: Vpn.tailscaleUp
                 onToggled: Vpn.toggleTailscale()
             }
+            IrisButton {
+                Layout.fillWidth: true
+                visible: Vpn.tailscaleSignedOut
+                enabled: !Vpn.signingIn
+                emphasized: true
+                text: Vpn.signingIn ? Translation.tr("Finish in your browser…") : Translation.tr("Sign in to Tailscale")
+                buttonRadius: IrisStyle.radiusTile
+                implicitHeight: Math.round(34 * root.d)
+                onClicked: Vpn.signInTailscale()
+            }
+            VpnFacts {
+                Layout.fillWidth: true
+                visible: Vpn.details && Vpn.tailscaleInstalled && Vpn.tailscaleAddress.length > 0
+                VpnFact { Layout.fillWidth: true; label: Translation.tr("IPv4"); value: Vpn.tailscaleAddress; shown: vpn.hide(value); onCopy: value => vpn.copy(value) }
+                VpnFact { Layout.fillWidth: true; label: Translation.tr("IPv6"); value: Vpn.tailscaleAddress6; shown: vpn.hide(value); onCopy: value => vpn.copy(value) }
+                VpnFact { Layout.fillWidth: true; label: Translation.tr("Name"); value: Vpn.tailscaleDns; shown: vpn.hide(value); onCopy: value => vpn.copy(value) }
+                VpnFact { Layout.fillWidth: true; label: Translation.tr("Account"); value: Vpn.tailscaleAccount; shown: vpn.hide(value); onCopy: value => vpn.copy(value) }
+                VpnFact { Layout.fillWidth: true; label: Translation.tr("Exit node"); value: Vpn.tailscaleExitName.length > 0 ? Vpn.tailscaleExitName : Translation.tr("None, direct"); onCopy: value => vpn.copy(value) }
+                VpnFact { Layout.fillWidth: true; label: Translation.tr("Traffic"); value: Vpn.tailscaleUp ? vpn.traffic("tailscale0") : ""; onCopy: value => vpn.copy(value) }
+            }
+            ColumnLayout {
+                Layout.fillWidth: true
+                visible: Vpn.details && Vpn.tailscaleDevices.length > 0
+                spacing: Math.round(2 * root.d)
+                IrisText {
+                    Layout.leftMargin: Math.round(4 * root.d)
+                    Layout.topMargin: Math.round(4 * root.d)
+                    text: Translation.tr("Devices · %1 of %2 online").arg(Vpn.tailscaleOnline).arg(Vpn.tailscaleDevices.length)
+                    color: IrisStyle.muted
+                    font.pixelSize: IrisStyle.typeFootnote
+                    font.weight: IrisStyle.weight(Font.Medium)
+                }
+                Repeater {
+                    model: Vpn.tailscaleDevices.slice(0, 6)
+                    MouseArea {
+                        id: device
+                        required property var modelData
+                        Layout.fillWidth: true
+                        implicitHeight: Math.round(36 * root.d)
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: vpn.copy(device.modelData.address)
+                        Accessible.role: Accessible.Button
+                        Accessible.name: device.modelData.name
+                        Rectangle {
+                            anchors.fill: parent
+                            radius: IrisStyle.radiusRow
+                            color: device.containsMouse ? IrisStyle.fillHover : ColorUtils.applyAlpha(IrisStyle.fillHover, 0)
+                            Behavior on color { ColorAnimation { duration: IrisStyle.duration(120); easing.type: IrisStyle.feedbackEasing } }
+                        }
+                        RowLayout {
+                            anchors.fill: parent
+                            anchors.leftMargin: Math.round(10 * root.d)
+                            anchors.rightMargin: Math.round(8 * root.d)
+                            spacing: Math.round(10 * root.d)
+                            Rectangle {
+                                implicitWidth: Math.round(8 * root.d)
+                                implicitHeight: implicitWidth
+                                radius: width / 2
+                                color: device.modelData.online ? IrisStyle.identity.green : IrisStyle.fillActive
+                            }
+                            ColumnLayout {
+                                Layout.fillWidth: true
+                                spacing: 0
+                                IrisText {
+                                    Layout.fillWidth: true
+                                    text: device.modelData.name
+                                    elide: Text.ElideRight
+                                    font.pixelSize: IrisStyle.typeLabel
+                                    color: device.modelData.online ? IrisStyle.text : IrisStyle.textSecondary
+                                }
+                                IrisText {
+                                    Layout.fillWidth: true
+                                    text: [vpn.hide(device.modelData.address), device.modelData.os].filter(part => part.length > 0).join(" · ")
+                                    elide: Text.ElideRight
+                                    color: IrisStyle.muted
+                                    font.pixelSize: IrisStyle.typeFootnote
+                                    font.features: ({ "tnum": 1 })
+                                }
+                            }
+                            IrisChip {
+                                visible: Vpn.tailscaleUp && (device.modelData.exitOption || device.modelData.exitNode)
+                                selected: device.modelData.exitNode
+                                glyph: "logout"
+                                label: device.modelData.exitNode ? Translation.tr("Exit node") : Translation.tr("Use as exit")
+                                Accessible.name: device.modelData.exitNode ? Translation.tr("Stop using %1 as exit node").arg(device.modelData.name)
+                                    : Translation.tr("Send traffic through %1").arg(device.modelData.name)
+                                onClicked: Vpn.setExitNode(device.modelData.exitNode ? "" : device.modelData.address)
+                            }
+                        }
+                    }
+                }
+                IrisText {
+                    Layout.leftMargin: Math.round(10 * root.d)
+                    visible: Vpn.tailscaleDevices.length > 6
+                    text: Translation.tr("+%1 more").arg(Vpn.tailscaleDevices.length - 6)
+                    color: IrisStyle.muted
+                    font.pixelSize: IrisStyle.typeFootnote
+                }
+            }
             Repeater {
                 model: Vpn.profiles
-                VpnRow {
+                ColumnLayout {
+                    id: profile
                     required property var modelData
+                    readonly property var facts: Vpn.profileDetails[profile.modelData.uuid] ?? null
                     Layout.fillWidth: true
-                    label: modelData.name
-                    detail: modelData.type
-                    on: modelData.active
-                    onToggled: Vpn.toggleProfile(modelData.uuid)
+                    spacing: Math.round(4 * root.d)
+                    VpnRow {
+                        Layout.fillWidth: true
+                        label: profile.modelData.name
+                        detail: profile.modelData.active && profile.facts?.address ? profile.modelData.type + " · " + vpn.hide(profile.facts.address) : profile.modelData.type
+                        on: profile.modelData.active
+                        onToggled: Vpn.toggleProfile(profile.modelData.uuid)
+                    }
+                    VpnFacts {
+                        Layout.fillWidth: true
+                        visible: Vpn.details && profile.modelData.active && profile.facts !== null
+                        VpnFact { Layout.fillWidth: true; label: Translation.tr("Address"); value: profile.facts?.address ?? ""; shown: vpn.hide(value); onCopy: value => vpn.copy(value) }
+                        VpnFact { Layout.fillWidth: true; label: Translation.tr("Gateway"); value: profile.facts?.gateway ?? ""; shown: vpn.hide(value); onCopy: value => vpn.copy(value) }
+                        VpnFact { Layout.fillWidth: true; label: Translation.tr("DNS"); value: profile.facts?.dns ?? ""; shown: vpn.hide(value); onCopy: value => vpn.copy(value) }
+                        VpnFact { Layout.fillWidth: true; label: Translation.tr("Interface"); value: profile.facts?.device ?? ""; onCopy: value => vpn.copy(value) }
+                        VpnFact { Layout.fillWidth: true; label: Translation.tr("Traffic"); value: vpn.traffic(profile.facts?.device ?? ""); onCopy: value => vpn.copy(value) }
+                    }
+                    VpnFacts {
+                        Layout.fillWidth: true
+                        visible: Vpn.details
+                        VpnFact {
+                            Layout.fillWidth: true
+                            label: Translation.tr("Connect automatically")
+                            glyph: ""
+                            value: profile.modelData.autoconnect ? Translation.tr("On") : Translation.tr("Off")
+                            onCopy: Vpn.setAutoconnect(profile.modelData.uuid, !profile.modelData.autoconnect)
+                        }
+                        VpnFact {
+                            Layout.fillWidth: true
+                            visible: Vpn.canCreate
+                            label: Translation.tr("Settings")
+                            glyph: "open_in_new"
+                            value: Vpn.hasEditor ? Translation.tr("NetworkManager") : "nmtui"
+                            onCopy: Vpn.editProfile(profile.modelData.uuid)
+                        }
+                    }
                 }
             }
             IrisText {
@@ -664,6 +905,45 @@ Item {
                 maximumLineCount: 3
                 elide: Text.ElideRight
                 font.pixelSize: IrisStyle.typeMeta
+            }
+            IrisText {
+                Layout.fillWidth: true
+                visible: Vpn.hasNmcli && !Vpn.canCreate
+                text: Vpn.missingEditorText
+                color: IrisStyle.muted
+                wrapMode: Text.WordWrap
+                font.pixelSize: IrisStyle.typeMeta
+            }
+            RowLayout {
+                Layout.fillWidth: true
+                visible: Vpn.hasNmcli
+                spacing: Math.round(6 * root.d)
+                IrisButton {
+                    Layout.fillWidth: true
+                    visible: Vpn.canCreate
+                    enabled: !Vpn.busy
+                    text: Vpn.hasEditor ? Translation.tr("New WireGuard…") : Translation.tr("New VPN…")
+                    buttonRadius: IrisStyle.radiusTile
+                    implicitHeight: Math.round(34 * root.d)
+                    onClicked: Vpn.newProfile("wireguard")
+                }
+                IrisButton {
+                    Layout.fillWidth: true
+                    visible: Vpn.hasEditor && Vpn.hasVpnPlugins
+                    enabled: !Vpn.busy
+                    text: Translation.tr("Other VPN…")
+                    buttonRadius: IrisStyle.radiusTile
+                    implicitHeight: Math.round(34 * root.d)
+                    onClicked: Vpn.newProfile("vpn")
+                }
+                IrisButton {
+                    Layout.fillWidth: true
+                    enabled: !Vpn.busy
+                    text: Translation.tr("Import a file…")
+                    buttonRadius: IrisStyle.radiusTile
+                    implicitHeight: Math.round(34 * root.d)
+                    onClicked: Vpn.chooseProfileFile()
+                }
             }
             IrisButton {
                 Layout.fillWidth: true
@@ -747,8 +1027,11 @@ Item {
                 title: Translation.tr("Airing")
                 detail: airing.next
                     ? Translation.tr("Ep %1 in %2").arg(airing.next.nextEpisode).arg(IrisPieces.animeWait(airing.next.airingAt))
+                    : !Network.online ? Network.offlineReason
+                    : AnimeService.lastError.length > 0 && !AnimeService.loading ? Translation.tr("AniList didn't answer (´・ω・`)")
                     : Translation.tr("Nothing scheduled yet")
                 IrisIconButton {
+                    enabled: Network.online
                     materialIcon: "refresh"
                     Accessible.name: Translation.tr("Check again")
                     onClicked: { AnimeService.invalidateTopCache(); AnimeService.fetchTopAiring() }
