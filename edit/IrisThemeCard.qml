@@ -83,7 +83,7 @@ MouseArea {
             id: island
             readonly property bool vertical: card.sideways(card.islandEdge)
             readonly property bool menubar: card.look.layout === "menubar" && !island.vertical
-            readonly property bool full: card.look.layout === "full" || island.menubar
+            readonly property bool full: card.look.layout === "full" || card.look.layout === "menubar"
             readonly property real thick: Math.round((island.menubar ? 9 : 13) * card.d)
             readonly property real span: island.vertical ? parent.height : parent.width
             readonly property real length: island.full ? island.span - 2 * scene.band : Math.round(island.span * (island.vertical ? 0.5 : 0.36))
@@ -103,7 +103,7 @@ MouseArea {
             topRightRadius: island.flat && (card.islandEdge === "top" || card.islandEdge === "right") ? 0 : radius
             bottomLeftRadius: island.flat && (card.islandEdge === "bottom" || card.islandEdge === "left") ? 0 : radius
             bottomRightRadius: island.flat && (card.islandEdge === "bottom" || card.islandEdge === "right") ? 0 : radius
-            color: card.body
+            color: island.menubar && card.look.clearStrip ? "transparent" : card.body
             border.width: card.look.rim && !card.look.notch ? 1 : 0
             border.color: card.line
             Grid {

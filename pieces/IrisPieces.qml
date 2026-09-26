@@ -191,9 +191,14 @@ QtObject {
     function configPath(id: string): string {
         return root.extraIds.includes(id) ? "iris.bubbles.extras." + id : "iris.bubbles." + id
     }
+    // An extra floats while it is on and placed off the Island; on with place "island" it rides the Island, as the stage reads it.
+    function floats(options: var, id: string): bool {
+        const extra = options?.extras?.[id]
+        return (extra?.enable ?? false) && String(extra?.place ?? root.defaultPlace) !== "island"
+    }
     function anyFloating(options: var): bool {
         return root.slotIds.some(id => String(options?.[id]?.place ?? "island") !== "island")
-            || root.extraIds.some(id => options?.extras?.[id]?.enable ?? false)
+            || root.extraIds.some(id => root.floats(options, id))
             || (options?.apps ?? []).some(entry => entry && String(entry.appId ?? "").length > 0)
     }
 }

@@ -19,6 +19,8 @@ import qs.modules.iris.widgets
 import qs.modules.iris.dock
 import qs.modules.iris.edit
 import qs.modules.iris.notificationPopup
+import qs.modules.iris.palette
+import qs.modules.iris.wallpaper
 import qs.modules.iris.style
 import qs.modules.iris.components as IrisParts
 import qs.modules.iris.pieces
@@ -33,6 +35,7 @@ Scope {
     readonly property int restMargin: Math.max(0, Math.round(Number(root.options?.margin ?? 8) * IrisStyle.density))
     readonly property int outerMargin: (root.options?.notch ?? false) ? 0 : root.restMargin
     signal islandRequested(bool expanded, string page)
+    signal pieceTapRequested(string kind)
     property string editScreen: ""
     Connections {
         target: GlobalStates
@@ -153,6 +156,12 @@ Scope {
             Config.setNestedValue("iris.bar.layout", name)
             return name
         }
+        function strip(name: string): string {
+            const value = name === "transparent" ? "clear" : name
+            if (!["clear", "band"].includes(value)) return "Unknown strip: transparent or band"
+            Config.setNestedValue("iris.bar.strip", value)
+            return value === "clear" ? "transparent" : "band"
+        }
         function edge(name: string): string {
             if (!IrisFrame.edges.includes(name)) return "Unknown edge: top, bottom, left or right"
             Config.setNestedValue("iris.bar.position", name)
@@ -260,6 +269,11 @@ Scope {
             GlobalStates.irisBubbleCardRequest = kind
             return kind
         }
+        function tap(kind: string): string {
+            if (kind.length === 0) return "Which piece?"
+            root.pieceTapRequested(kind)
+            return kind
+        }
         function bubbleMenu(kind: string): string {
             if (kind.length === 0) return "Which bubble?"
             GlobalStates.irisBubbleMenuRequest = ""
@@ -298,10 +312,10 @@ Scope {
             return JSON.stringify(Config.getNestedValue(path, null))
         }
         function adaptive(amount: string): string {
-            const value = Math.round(Number(amount))
+            const value = String(amount).trim().length > 0 ? Math.round(Number(amount)) : NaN
             if (isNaN(value)) return JSON.stringify({ strength: IrisMood.strength, luminance: IrisMood.luminance,
                 contrast: IrisMood.contrast, colorfulness: IrisMood.colorfulness, colors: IrisMood.colors.length,
-                sampled: IrisMood.sampled, glassTint: IrisStyle.glassTint })
+                sampled: IrisMood.sampled, glassTint: IrisStyle.glassTint, placeCovered: IrisStyle.placeCovered, placePlate: IrisStyle.placePlate })
             Config.setNestedValue("iris.appearance.adaptive", Math.max(0, Math.min(100, value)))
             return String(Math.max(0, Math.min(100, value)))
         }
@@ -323,6 +337,18 @@ Scope {
                 return action
             }
             if (action === "undo") return IrisControlOptions.undo() ? "undone" : "nothing to undo"
+            if (action.startsWith("expand:")) {
+                const list = action.slice(7)
+                if (!["display", "system", "devices", "network", "bluetooth", "none"].includes(list))
+                    return "Unknown expansion. One of: display, system, devices, network, bluetooth, none"
+                if (!GlobalStates.controlPanelOpen) {
+                    GlobalStates.irisMorphOwner = ""
+                    GlobalStates.controlPanelOpen = true
+                }
+                GlobalStates.irisControlPickerRequest = ""
+                GlobalStates.irisControlPickerRequest = list
+                return list
+            }
             const tab = action.startsWith("tab:") ? action.slice(4) : ""
             if (tab.length > 0 && !["controls", "layouts", "panel"].includes(tab))
                 return "Unknown tab. One of: controls, layouts, panel"
@@ -457,9 +483,12 @@ Scope {
             AnimeWatch.skip(wanted)
             return wanted
         }
+        function motion(target: string): string { return IrisParts.IrisMotionMeter.start(target) }
+        function motioned(): string { return JSON.stringify(IrisParts.IrisMotionMeter.result) }
         function status(): string {
             return JSON.stringify({
                 islandExpanded: GlobalStates.irisIslandExpanded,
+                islandShape: GlobalStates.irisIslandShape,
                 islandPage: GlobalStates.irisIslandPage,
                 accent: Config.options?.iris?.appearance?.accent ?? "blue",
                 preset: IrisStyle.presetName,
@@ -526,11 +555,14 @@ Scope {
                 exclusionMode: ExclusionMode.Ignore
                 exclusiveZone: 0
                 WlrLayershell.namespace: "quickshell:iris-chassis"
+                Component.onCompleted: IrisParts.IrisMotionMeter.registerChassis(barWindow.screen?.name ?? "", barWindow)
+                Component.onDestruction: IrisParts.IrisMotionMeter.registerChassis(barWindow.screen?.name ?? "", null)
                 readonly property bool editHere: GlobalStates.irisEdit
                     && (root.editScreen.length === 0 || barWindow.screen?.name === root.editScreen)
                 readonly property bool presenting: barWindow.pinned || stage.cardPresent
                     || (controlCentreLoader.item?.present ?? false) || barWindow.editHere
                     || (dockLoader.item?.overFullscreen ?? false) || (dockLoader.item?.menuOpen ?? false)
+                    || (spotlightLoader.item?.present ?? false) || (galleryLoader.item?.present ?? false)
                 // Niri keeps a fullscreen window above the Top layer, so the overview
                 // over a game would show every other surface but this one.
                 readonly property bool overviewOverFullscreen: CompositorService.isNiri && NiriService.inOverview
@@ -542,7 +574,8 @@ Scope {
                 onOverlaidChanged: if (!barWindow.overlaid) GlobalStates.irisChassisEpoch++
                 WlrLayershell.layer: barWindow.overlaid ? WlrLayer.Overlay : WlrLayer.Top
                 WlrLayershell.keyboardFocus: barWindow.pinned || stage.cardOpen || (controlCentreLoader.item?.morphOpen ?? false)
-                    || (dockLoader.item?.menuOpen ?? false)
+                    || (dockLoader.item?.menuOpen ?? false) || (spotlightLoader.item?.here && GlobalStates.searchOpen)
+                    || (galleryLoader.item?.morphOpen ?? false)
                     ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
                 anchors { left: true; right: true; top: true; bottom: true }
                 readonly property bool suppressed: islandLoader.active
@@ -578,7 +611,8 @@ Scope {
                     onTriggered: if (!barWindow.pointerNearIsland) barWindow.islandEdgeIntent = false }
                 mask: barWindow.canvasSuppressed ? emptyRegion
                     : barWindow.pinned || stage.cardArmed || (controlCentreLoader.item?.armed ?? false)
-                        || (dockLoader.item?.menuOpen ?? false)
+                        || (dockLoader.item?.menuOpen ?? false) || (spotlightLoader.item?.armed ?? false)
+                        || (galleryLoader.item?.armed ?? false)
                         || (islandLoader.item?.morphing ?? false)
                         ? null : chassisRegion
                 Region { id: emptyRegion }
@@ -826,7 +860,23 @@ Scope {
                             && shape.y < b.y + b.height + reach && shape.y + shape.height > b.y - reach)
                         return body ? Object.assign({}, shape, { joins: [body.id].concat(Array.isArray(shape.joins) ? shape.joins.slice(1) : []), fuse: IrisStyle.fuse }) : shape
                     })
-                    const all = island.concat(hung)
+                    // Two bodies that meet the frame within reach of each other melt into one another too: joined to
+                    // the frame alone, their fillets met in a cusp along the band (a side panel under a corner plate).
+                    const framed = shape => (Array.isArray(shape.joins) ? shape.joins : [shape.joins]).length === 1
+                        && (Array.isArray(shape.joins) ? shape.joins[0] : shape.joins) === "frame" && !!shape.id
+                    const joined = island.concat(hung)
+                    const all = joined.map(shape => {
+                        if (!framed(shape)) return shape
+                        let near = null, best = Infinity
+                        for (const other of joined) {
+                            if (other === shape || !framed(other)) continue
+                            const dx = Math.max(0, other.x - shape.x - shape.width, shape.x - other.x - other.width)
+                            const dy = Math.max(0, other.y - shape.y - shape.height, shape.y - other.y - other.height)
+                            const gap = Math.hypot(dx, dy)
+                            if (gap < Number(shape.fuse ?? 0) && gap < best) { best = gap; near = other }
+                        }
+                        return near ? Object.assign({}, shape, { joins: ["frame", near.id] }) : shape
+                    })
                     if (all.length <= chassisField.capacity) return all
                     return all.filter(shape => !shape.paints)
                         .concat(all.filter(shape => shape.paints))
@@ -897,6 +947,11 @@ Scope {
                         screenOffsetY: 0
                         Connections {
                             target: root
+                            function onPieceTapRequested(kind: string): void {
+                                if (barWindow.screen?.name !== GlobalStates.focusedScreen?.name) return
+                                const part = island.pieceItem(kind)
+                                if (part) island.activatePiece(kind, part)
+                            }
                             function onIslandRequested(open: bool, page: string): void {
                                 if (!open || barWindow.screen?.name === GlobalStates.focusedScreen?.name) {
                                     if (open && (page === "next" || page === "prev")) {
@@ -910,6 +965,30 @@ Scope {
                             }
                         }
                     }
+                }
+
+                // Above the banners and the Dock, under the Island it grows out of.
+                Loader {
+                    id: spotlightLoader
+                    z: 2.5
+                    anchors.fill: parent
+                    anchors.margins: IrisFrame.band
+                    active: Config.ready && GlobalStates.deferredPanelsReady
+                        && (Config.options?.enabledPanels ?? []).includes("irisPalette")
+                        && (Config.options?.iris?.modules?.palette ?? true)
+                    asynchronous: true
+                    sourceComponent: IrisPalette { screen: barWindow.screen }
+                }
+
+                // Resident like Spotlight: built on open it cost ~90 ms before the first frame and grew from outside the Island.
+                Loader {
+                    id: galleryLoader
+                    z: 2.5
+                    anchors.fill: parent
+                    anchors.margins: IrisFrame.band
+                    active: Config.ready && GlobalStates.deferredPanelsReady
+                    asynchronous: true
+                    sourceComponent: IrisWallpaperPicker { screen: barWindow.screen }
                 }
 
                 IrisBanners {
@@ -948,18 +1027,20 @@ Scope {
                     id: editLoader
                     z: 4
                     anchors.fill: parent
-                    // Kept for the recede, on a grace timer: reading the item's own
-                    // state back into `active` is a binding loop.
-                    property bool grace: false
-                    Timer { id: editGrace; interval: 700; onTriggered: editLoader.grace = false }
+                    // Kept until its recede has played out, set imperatively (read back into `active` it is a
+                    // binding loop). A grace flag set from irisEditChanged lost the race with `active`, so
+                    // Done unloaded the bar inside its own click and the next click went nowhere.
+                    property bool lingering: false
+                    onLoaded: editLoader.lingering = true
                     Connections {
-                        target: GlobalStates
-                        function onIrisEditChanged(): void {
-                            if (GlobalStates.irisEdit) { editGrace.stop(); editLoader.grace = false }
-                            else if (editLoader.active) { editLoader.grace = true; editGrace.restart() }
+                        target: editLoader.item
+                        function onShownChanged(): void {
+                            if (editLoader.item.shown) editLoader.lingering = true
+                            else editRelease.restart()
                         }
                     }
-                    active: barWindow.editHere || editLoader.grace
+                    Timer { id: editRelease; interval: 0; onTriggered: editLoader.lingering = editLoader.item?.shown ?? false }
+                    active: barWindow.editHere || editLoader.lingering
                     sourceComponent: IrisEditBar { screenData: barWindow.screen; shapes: barWindow.fieldShapes.concat(stage.pieceShapes) }
                 }
 
@@ -967,16 +1048,19 @@ Scope {
                     id: widgetBarLoader
                     z: 4
                     anchors.fill: parent
-                    property bool grace: false
-                    Timer { id: widgetBarGrace; interval: 700; onTriggered: widgetBarLoader.grace = false }
+                    // The bar stays until its own exit has played out: tied to edit mode alone, Done unloaded
+                    // it from inside its own click, and the click that followed went nowhere.
+                    property bool lingering: false
+                    onLoaded: widgetBarLoader.lingering = true
                     Connections {
-                        target: GlobalStates
-                        function onWidgetEditModeChanged(): void {
-                            if (GlobalStates.widgetEditMode) { widgetBarGrace.stop(); widgetBarLoader.grace = false }
-                            else if (widgetBarLoader.active) { widgetBarLoader.grace = true; widgetBarGrace.restart() }
+                        target: widgetBarLoader.item
+                        function onShownChanged(): void {
+                            if (widgetBarLoader.item.shown) widgetBarLoader.lingering = true
+                            else widgetBarRelease.restart()
                         }
                     }
-                    active: (GlobalStates.widgetEditMode || widgetBarLoader.grace) && !barWindow.canvasSuppressed
+                    Timer { id: widgetBarRelease; interval: 0; onTriggered: widgetBarLoader.lingering = widgetBarLoader.item?.shown ?? false }
+                    active: (GlobalStates.widgetEditMode || widgetBarLoader.lingering) && !barWindow.canvasSuppressed
                     sourceComponent: IrisWidgetBar { screenData: barWindow.screen }
                 }
 

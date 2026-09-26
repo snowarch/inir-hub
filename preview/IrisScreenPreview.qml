@@ -87,7 +87,7 @@ ClippingRectangle {
         const vertical = edge === "left" || edge === "right"
         const thick = IrisFrame.islandBand
         const span = vertical ? root.screenH : root.screenW
-        const full = root.layout === "full" || (root.layout === "menubar" && !vertical)
+        const full = root.layout === "full" || root.layout === "menubar"
         const length = full ? span - 2 * IrisFrame.band : Math.round(thick * 4.2)
         const margin = IrisFrame.band + Math.round(16 * root.d)
         const along = full ? IrisFrame.band : root.layout === "left" ? margin
@@ -155,7 +155,7 @@ ClippingRectangle {
         }
     }
     readonly property bool menubar: root.layout === "menubar" && !root.island.vertical
-    readonly property var zoneLists: root.island.fullWidth && (root.layout === "full" || root.menubar)
+    readonly property var zoneLists: root.island.fullWidth && (root.layout === "full" || root.layout === "menubar")
         ? [IrisStyle.structuralValue("bar.fullStart", ["workspaces", "window"]), IrisStyle.structuralValue("bar.fullEnd", ["tray", "notifications", "sound", "controls"])]
         : [[], []]
     readonly property bool dockNotch: Boolean(root.dockOptions?.notch ?? false)
@@ -204,12 +204,15 @@ ClippingRectangle {
                     const strip = IrisFrame.islandBand
                     const notchW = Math.round(g.height * 4.2)
                     const inset = root.framed ? IrisFrame.band : 0
-                    out.push({ x: inset, y: g.edge === "bottom" ? g.y + g.height - strip : g.y,
+                    const clear = String(root.bar?.strip ?? "clear") === "clear"
+                    if (clear && !root.notch && !root.framed) out.push(root.edgeBody(root.islandEdge, "edge"))
+                    if (!clear) out.push({ x: inset, y: g.edge === "bottom" ? g.y + g.height - strip : g.y,
                         width: root.screenW - 2 * inset, height: strip, radius: 0,
                         fuse: Math.round(16 * root.d), id: "island",
                         joins: !root.notch ? "" : root.framed ? "frame" : "edge" })
                     out.push({ x: g.x + (g.width - notchW) / 2, y: g.y, width: notchW, height: g.height, radius: g.height / 2,
-                        fuse: Math.round(32 * root.d), id: "islandnotch", joins: "island" })
+                        fuse: clear ? IrisStyle.fuseEdge : Math.round(32 * root.d), id: "islandnotch",
+                        joins: !clear ? "island" : root.framed ? "frame" : "edge" })
                 } else out.push({ x: g.fullWidth && !g.vertical ? (root.framed ? IrisFrame.band : 0) : g.x,
                     y: g.y, width: g.fullWidth && !g.vertical ? root.screenW - (root.framed ? 2 * IrisFrame.band : 0) : g.width,
                     height: g.height, radius: g.fullWidth && !g.vertical ? 0 : Math.min(g.width, g.height) / 2,

@@ -52,7 +52,7 @@ Scope {
 
     function allows(nextKind: string): bool {
         if (root.gameRule === "hide") return false
-        if (root.gameRule === "quiet") return nextKind !== "media" && nextKind !== "keyboard"
+        if (root.gameRule === "quiet") return nextKind !== "media" && nextKind !== "keyboard" && nextKind !== "connection"
         return nextKind !== "keyboard" || (root.prefs?.keyboard ?? true)
     }
     function showLevel(nextKind: string): void {
@@ -64,7 +64,7 @@ Scope {
 
     readonly property bool level: root.kind === "volume" || root.kind === "brightness" || root.kind === "mic"
     readonly property var rows: ({ volume: levelRow, brightness: levelRow, mic: levelRow,
-        keyboard: keyboardRow, media: mediaRow, warning: warningRow })
+        keyboard: keyboardRow, media: mediaRow, warning: warningRow, connection: connectionRow })
 
     function show(nextKind: string, holdMs: int): void {
         if (!root.allows(nextKind)) return
@@ -159,6 +159,19 @@ Scope {
             root.show("warning", root.holdMs + 1100)
         }
     }
+    property var connection: null
+    readonly property color connectionTint: root.connection?.tone === "warn" ? IrisStyle.identity.orange
+        : root.connection?.tone === "off" ? IrisStyle.subtext
+        : ({ network: IrisStyle.identity.blue, internet: IrisStyle.identity.teal, bluetooth: IrisStyle.identity.blue, usb: IrisStyle.identity.sky,
+             power: IrisStyle.success, audio: IrisStyle.accent, displays: IrisStyle.identity.indigo,
+             drives: IrisStyle.identity.orange })[root.connection?.kind ?? ""] ?? IrisStyle.accent
+    Connections {
+        target: DeviceEvents
+        function onHappened(event: var): void {
+            root.connection = event
+            root.show("connection", root.holdMs + 1100)
+        }
+    }
     Connections {
         target: warm.ready ? KeyboardIndicators : null
         function onPopupSequenceChanged(): void {
@@ -232,7 +245,7 @@ Scope {
         readonly property real restWidth: Math.max(260, Math.min(520,
             Number(Config.options?.iris?.osd?.width ?? 320))) * osdWindow.d
         readonly property real pad: 29 * osdWindow.d
-        readonly property real targetHeight: Math.round((root.kind === "media" ? 64 : root.level && root.levelStyle === "minimal" ? 48 : 54) * osdWindow.d)
+        readonly property real targetHeight: Math.round((root.kind === "media" || root.kind === "connection" ? 64 : root.level && root.levelStyle === "minimal" ? 48 : 54) * osdWindow.d)
         readonly property real targetWidth: Math.round(Math.min(osdWindow.width - 24,
             root.level && root.levelStyle !== "minimal" ? osdWindow.restWidth
                 : Math.max(osdWindow.targetHeight * 2.2, Math.min(osdWindow.restWidth * 1.2,
@@ -343,6 +356,42 @@ Scope {
                     text: root.mediaIcon
                     iconSize: 20 * osdWindow.d
                     color: IrisStyle.accent
+                }
+            }
+
+            OsdRow {
+                id: connectionRow
+                Glyph {
+                    text: root.connection?.icon ?? ""
+                    iconSize: 20 * osdWindow.d
+                    color: root.connectionTint
+                    Layout.preferredWidth: 22 * osdWindow.d
+                }
+                ColumnLayout {
+                    Layout.fillWidth: true
+                    spacing: 0
+                    IrisText {
+                        Layout.fillWidth: true
+                        text: root.connection?.title ?? ""
+                        elide: Text.ElideRight
+                        font.pixelSize: IrisStyle.typeLabel
+                        font.weight: IrisStyle.weight(Font.DemiBold)
+                    }
+                    IrisText {
+                        Layout.fillWidth: true
+                        visible: text.length > 0
+                        text: root.connection?.detail ?? ""
+                        elide: Text.ElideRight
+                        color: IrisStyle.muted
+                        font.pixelSize: IrisStyle.typeMeta
+                    }
+                }
+                IrisText {
+                    visible: (root.connection?.value ?? -1) >= 0
+                    text: (root.connection?.value ?? 0) + "%"
+                    color: IrisStyle.muted
+                    font.pixelSize: IrisStyle.typeMeta
+                    font.features: ({ "tnum": 1 })
                 }
             }
 

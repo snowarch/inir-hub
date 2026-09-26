@@ -29,7 +29,9 @@ Item {
     property real availableAcross: 800
     property real compactHeight: 42
     // Spotlight opened as the Island is drawn by the same field: the Island hands it its face and folds its satellites.
-    property real spotlightYield: (IrisFrame.placeBodies["spotlight"]?.screen ?? "") === (root.targetScreen?.name ?? "-") ? 1 : 0
+    // Only Spotlight opened as the Island takes its place; a floating one leaves the Island as it is.
+    property real spotlightYield: String(Config.options?.iris?.palette?.opens ?? "floating") === "island"
+        && (IrisFrame.placeBodies["spotlight"]?.screen ?? "") === (root.targetScreen?.name ?? "-") ? 1 : 0
     Behavior on spotlightYield { NumberAnimation { duration: IrisStyle.duration(160); easing.type: IrisStyle.feedbackEasing } }
     property bool expanded: false
     property bool pinned: false
@@ -231,7 +233,7 @@ Item {
     property real screenOffsetY: 0
     function chassisBody(): var {
         const p = chassis.mapToItem(null, chassis.leftInset, chassis.topInset)
-        return { x: p.x, y: p.y, width: root.vertical ? root.compactHeight : chassis.width,
+        return { x: p.x, y: p.y, width: root.vertical ? chassis.across : chassis.width,
             height: root.vertical ? chassis.height : chassis.bodyHeight }
     }
     function partRect(part): var {
@@ -410,29 +412,21 @@ Item {
     Timer { id: eventsWarm; property bool ready: false; interval: 4000; running: true; onTriggered: ready = true }
     Connections {
         target: root.eventsEnabled && Battery.available ? Battery : null
-        function onIsPluggedInChanged(): void {
-            root.showEvent(Battery.isPluggedIn ? "battery_charging_full" : "battery_6_bar",
-                Battery.isPluggedIn ? IrisStyle.success : IrisStyle.text,
-                Battery.isPluggedIn ? Translation.tr("Charging") : Translation.tr("On battery"),
-                Battery.isPluggedIn && Battery.timeToFull > 0 ? Translation.tr("Full in %1").arg(root.durationText(Battery.timeToFull))
-                    : !Battery.isPluggedIn && Battery.timeToEmpty > 0 ? Translation.tr("%1 left").arg(root.durationText(Battery.timeToEmpty)) : "",
-                Battery.percentage)
-        }
         function onIsLowAndNotChargingChanged(): void {
             if (Battery.isLowAndNotCharging)
                 root.showEvent("battery_alert", IrisStyle.danger, Translation.tr("Low battery"), Translation.tr("Plug in soon"), Battery.percentage)
         }
     }
-    readonly property int bluetoothCount: root.eventsEnabled ? BluetoothStatus.activeDeviceCount : 0
-    property int lastBluetoothCount: -1
-    onBluetoothCountChanged: {
-        const device = BluetoothStatus.firstActiveDevice
-        if (root.lastBluetoothCount >= 0 && root.bluetoothCount > root.lastBluetoothCount && device)
-            root.showEvent("bluetooth_connected", IrisStyle.identity.blue, String(device.name ?? Translation.tr("Device")), Translation.tr("Connected"),
-                device.batteryAvailable ? device.battery : -1)
-        else if (root.lastBluetoothCount > root.bluetoothCount)
-            root.showEvent("bluetooth_disabled", IrisStyle.subtext, Translation.tr("Bluetooth"), Translation.tr("Device disconnected"), -1)
-        root.lastBluetoothCount = root.bluetoothCount
+    Connections {
+        target: root.eventsEnabled ? DeviceEvents : null
+        function onHappened(event: var): void {
+            const tint = event.tone === "warn" ? IrisStyle.identity.orange
+                : event.tone === "off" ? IrisStyle.subtext
+                : ({ network: IrisStyle.identity.blue, internet: IrisStyle.identity.teal, bluetooth: IrisStyle.identity.blue, usb: IrisStyle.identity.sky,
+                     power: IrisStyle.success, audio: IrisStyle.accent, displays: IrisStyle.identity.indigo,
+                     drives: IrisStyle.identity.orange })[event.kind] ?? IrisStyle.accent
+            root.showEvent(event.icon, tint, event.title, event.detail, event.value >= 0 ? event.value / 100 : -1)
+        }
     }
     Connections {
         target: root.eventsEnabled ? Notifications : null
@@ -555,7 +549,18 @@ Item {
     // Menu bar: a thin strip across the edge with the heart hanging from its middle as a notch.
     readonly property bool menubar: root.layout === "menubar" && !root.vertical
     readonly property bool fullWidth: root.layout === "full" || root.menubar
+    // A clear menu bar leaves its items on the wallpaper (macOS): the notch is the only body on the edge.
+    readonly property bool clearStrip: root.menubar && String(root.options?.strip ?? "clear") === "clear"
+    readonly property bool fromHeart: root.zoned && root.heartShown && root.extensionRole === "page"
+        && !(root.extensionOrigin?.visible ?? false)
     readonly property real heartSwell: Math.round(8 * root.d)
+    // A page from a bar's heart is the Island growing: one body from the screen edge over the heart, its own
+    // corners past the edge, so one material and one light run from the edge down; the heart row fades under it.
+    readonly property bool grownPage: root.zoned && root.fromHeart
+    readonly property real grownInset: root.grownPage ? Math.ceil(extension.targetRadius) : 0
+    readonly property real heartUncovered: root.grownPage ? Math.max(0, 1 - 2.5 * extension.presentation) : 1
+    // The heart's lip is the notch gesture: a bar with the notch off keeps one straight edge.
+    readonly property bool swellsHeart: root.layout === "full" && !root.vertical && root.heartShown && root.notch
     readonly property real stripHeight: root.menubar ? Math.max(Math.round(24 * root.d), Math.round(root.compactHeight * 0.72)) : root.compactHeight
     readonly property real notchX: chassis.x + barZones.heartAlong
     readonly property rect notchArea: root.menubar && root.heartShown
@@ -578,10 +583,13 @@ Item {
     readonly property real fullChassisWidth: Math.max(0,
         root.availableWidth - 2 * Math.max(root.sideReserveTarget, root.fillet))
     readonly property bool anchored: root.fullWidth || root.vertical
+    // A page is the Island itself growing, on every edge; only a full bar hangs its page beside the strip. On a
+    // side edge compact activities (a level, an event) still ride beside the upright capsule.
+    readonly property bool inlinePages: !root.fullWidth
     // The page is built synchronously (~90 ms): starting the shape before it is
     // ready spends the first frames of the morph inside that build.
     readonly property bool pageReady: !root.expanded || details.status === Loader.Ready
-    readonly property bool inlineExpanded: root.visualExpanded && !root.anchored && root.pageReady
+    readonly property bool inlineExpanded: root.visualExpanded && root.inlinePages && root.pageReady
     readonly property bool compactSizeClass: root.compactMode === "feedback" || root.compactMode === "event"
     readonly property bool spanning: root.fullWidth
     readonly property var compactRows: ({ idle: idleRow, media: mediaRow, record: recordRow,
@@ -597,6 +605,9 @@ Item {
     readonly property real chassisTargetWidth: root.inlineExpanded ? root.expandedWidth : root.compactTargetWidth
     readonly property string clockStyle: {
         const style = String(IrisStyle.structuralValue("bar.clockStyle", "dateTime"))
+        // A bar that already carries the calendar or the weather piece does not say it twice beside the time.
+        if (root.zoned && style === "dateTime" && barZones.itemFor("calendar")) return "time"
+        if (root.zoned && style === "weather" && barZones.itemFor("weather")) return "time"
         return style === "weather" && !(Weather.enabled && !String(Weather.data?.temp ?? "--").startsWith("--")) ? "time" : style
     }
     readonly property string trailing: String(IrisStyle.structuralValue("bar.trailing", "controls"))
@@ -606,7 +617,7 @@ Item {
         && !root.floatingSlots.includes("left")
         && root.primary !== "idle"
     readonly property bool rightSatelliteShown: root.rightSatelliteRest && !root.inlineExpanded
-    function floatsAlone(kind: string): bool { return Config.options?.iris?.bubbles?.extras?.[kind]?.enable ?? false }
+    function floatsAlone(kind: string): bool { return IrisPieces.floats(Config.options?.iris?.bubbles, kind) }
     readonly property bool rightSatelliteRest: !root.zoned && !root.feedback && !root.eventShown
         && !root.floatingSlots.includes("right") && !(IrisStyle.cluster && root.floatsAlone(root.trailingKind))
         && (IrisStyle.cluster ? root.trailingKind !== "none" : root.secondary.length > 0)
@@ -629,7 +640,7 @@ Item {
     readonly property var absorbedStart: Array.from(root.absorbed?.islandStart ?? [])
     function pieceTaken(kind: string): bool {
         if (root.absorbedPieces.includes(kind)) return false
-        if (Config.options?.iris?.bubbles?.extras?.[kind]?.enable ?? false) return true
+        if (root.floatsAlone(kind)) return true
         if (root.auxiliaryRest && root.auxiliary === kind) return true
         if (root.rightSatelliteRest && IrisStyle.cluster && root.trailingKind === kind) return true
         return root.leftSatelliteRest && kind === "media"
@@ -668,17 +679,21 @@ Item {
         : root.eventShown ? "event" : ""
     onWantedRoleChanged: if (root.wantedRole.length > 0) root.extensionRole = root.wantedRole
     readonly property bool extensionOpen: root.anchored && root.wantedRole.length > 0
+        && !(root.inlinePages && root.wantedRole === "page")
     readonly property real joinFillet: Math.round(root.compactHeight * 0.6)
+    readonly property real floatGap: Math.round(6 * root.d)
     readonly property Item extensionOrigin: root.extensionRole === "page" ? root.pageOrigin
         : root.extensionRole === "feedback"
             ? root.pieceItem(root.feedbackKind === "mic" ? "mic" : root.feedbackKind === "brightness" ? "tools" : "sound")
         : null
     readonly property real originWidth: root.extensionOrigin?.visible
-        ? (root.vertical ? root.extensionOrigin.height : root.extensionOrigin.width) : Math.round(40 * root.d)
+        ? (root.vertical ? root.extensionOrigin.height : root.extensionOrigin.width)
+        : root.fromHeart && root.heartLength > 1 ? root.heartLength
+        : Math.round(40 * root.d)
     readonly property real originCenterX: {
         const part = root.extensionOrigin
         if (part && part.visible) return part.mapToItem(root, part.width / 2, 0).x
-        if (root.extensionRole === "page" && root.pageOriginX >= 0) return root.pageOriginX
+        if (!root.zoned && root.extensionRole === "page" && root.pageOriginX >= 0) return root.pageOriginX
         if (root.zoned && root.heartShown) return chassis.x + barZones.heartAlong + root.heartLength / 2
         return chassis.x + chassis.width / 2
     }
@@ -691,7 +706,7 @@ Item {
     readonly property real originCenterY: {
         const part = root.extensionOrigin
         if (part && part.visible) return part.mapToItem(root, 0, part.height / 2).y
-        if (root.extensionRole === "page" && root.pageOriginY >= 0) return root.pageOriginY
+        if (!root.zoned && root.extensionRole === "page" && root.pageOriginY >= 0) return root.pageOriginY
         if (root.zoned && root.heartShown) return chassis.y + barZones.heartAlong + root.heartLength / 2
         return chassis.y + chassis.height / 2
     }
@@ -707,7 +722,7 @@ Item {
         return Math.round(Math.max(min, Math.min(max, root.originCenterY - height / 2)))
     }
 
-    implicitWidth: root.vertical ? root.compactHeight + extension.reach
+    implicitWidth: root.vertical ? chassis.across + (extension.anchoredShape ? extension.reach : 0)
         : chassis.width + 2 * Math.max(root.sideReserve, root.fillet)
     implicitHeight: root.vertical ? chassis.height + 2 * Math.max(root.sideReserve, root.fillet)
         : chassis.bodyHeight + (root.anchored ? extension.reach : 0)
@@ -718,10 +733,10 @@ Item {
     // grows, so a collapsing Island does not hand the compositor a region a frame.
     readonly property bool morphing: (chassis.presentation > 0.002 && chassis.presentation < 0.998)
         || (extension.presentation > 0.002 && extension.presentation < 0.998)
-    readonly property real inputWidthLive: root.vertical ? root.implicitWidth : Math.max(root.implicitWidth,
-        root.chassisTargetWidth + 2 * Math.max(root.sideReserveTarget, root.fillet))
+    readonly property real inputWidthLive: root.vertical ? Math.max(root.implicitWidth, root.inlineExpanded ? root.expandedWidth : 0)
+        : Math.max(root.implicitWidth, root.chassisTargetWidth + 2 * Math.max(root.sideReserveTarget, root.fillet))
     readonly property real inputHeightLive: root.vertical ? Math.max(root.implicitHeight,
-        root.chassisTargetWidth + 2 * Math.max(root.sideReserveTarget, root.fillet))
+        (root.inlineExpanded ? chassis.openHeightTarget : root.compactTargetWidth) + 2 * Math.max(root.sideReserveTarget, root.fillet))
         : Math.max(chassis.bodyHeight, chassis.bodyHeightTarget)
     property real inputWidthHeld: 0
     property real inputHeightHeld: 0
@@ -905,6 +920,12 @@ Item {
     // A piece the Island carries is still the stage's piece: what it opens, and where
     // that body grows from, is the same as when it floats.
     signal pieceActivated(string slot, string kind, var rect)
+    function pieceOpen(kind: string, part): bool {
+        const card = GlobalStates.irisBubbleCard
+        if (card && card.source === "island-piece-" + kind && card.screen === (root.targetScreen?.name ?? "")) return true
+        if (part && root.expanded && root.pageOrigin === part) return true
+        return kind === "controls" && root.focusedOutput && GlobalStates.controlPanelOpen && !root.expanded
+    }
     function activatePiece(kind: string, part): void {
         if (root.opensCards && root.cardKinds.includes(kind) && part) {
             root.toggleBubbleCard(kind, part, "island-piece-" + kind)
@@ -975,6 +996,13 @@ Item {
         else clockFlight.stop()
     }
     onEffectivePageChanged: if (root.visualExpanded) { coverFlight.stop(); clockFlight.stop() }
+    Binding {
+        target: GlobalStates
+        property: "irisIslandShape"
+        value: root.expanded ? "expanded" : root.compactMode
+        when: root.targetScreen?.name === GlobalStates.focusedScreen?.name
+        restoreMode: Binding.RestoreNone
+    }
     Binding {
         target: GlobalStates
         property: "irisIslandExpanded"
@@ -1280,7 +1308,7 @@ Item {
         const out = []
         if (root.suppressed || root.opacity <= 0.01) return out
         const melt = Math.min(1, Math.max(0, root.notchness))
-        if (melt > 0.01 && !IrisFrame.framed) {
+        if ((melt > 0.01 || root.clearStrip) && !IrisFrame.framed) {
             const window = root.Window.window
             const wide = (window?.width ?? 0) + 4 * IrisStyle.fuseDeep
             const deep = Math.max(8, IrisStyle.fuseDeep * 2)
@@ -1296,32 +1324,44 @@ Item {
         const strip = root.menubar ? root.stripHeight : body.height
         const across = root.fullWidth && !root.vertical ? root.Window.window?.width ?? body.x + body.width : 0
         const bandInset = IrisFrame.framed ? IrisFrame.band : 0
-        out.push({ x: across > 0 ? bandInset : body.x,
+        const edgeJoin = IrisFrame.framed ? "frame" : "edge"
+        if (!root.clearStrip) out.push({ x: across > 0 ? bandInset : body.x,
             y: root.menubar && root.bottomEdge ? body.y + body.height - strip : body.y,
             width: across > 0 ? across - bandInset * 2 : body.width, height: strip,
             radius: across > 0 ? 0 : root.menubar ? strip / 2 : chassis.radius, paints: true,
             fuse: across > 0 ? Math.round(16 * root.d) : IrisStyle.fuse + (IrisStyle.fuseEdge - IrisStyle.fuse) * melt, id: "island",
             joins: melt <= 0.01 ? "" : IrisFrame.framed ? "frame" : "edge" })
         // On its side, the heart of a full bar swells inward out of the bar: the same gesture as a menu bar's notch.
-        if (root.vertical && root.zoned && root.heartShown && compactColumn.height > 1) {
+        if (root.vertical && root.zoned && root.notch && root.heartShown && compactColumn.height > 1) {
             const at = compactColumn.mapToItem(null, 0, 0)
             const wide = body.width + root.heartSwell
             out.push({ x: root.rightEdge ? body.x - root.heartSwell : body.x, y: at.y, width: wide, height: compactColumn.height,
                 radius: wide / 2, paints: true, fuse: IrisStyle.fuseEdge, id: "islandheart", joins: "island" })
         }
+        // Across the top or bottom the heart of a full bar swells out of it the same way.
+        if (root.swellsHeart && root.heartLength > 1) {
+            const at = chassis.mapToItem(null, barZones.heartAlong, 0)
+            const tall = body.height + root.heartSwell
+            out.push({ x: at.x, y: root.bottomEdge ? body.y - root.heartSwell : body.y, width: root.heartLength, height: tall,
+                radius: Math.min(Math.round(12 * root.d), IrisStyle.radius), paints: true, fuse: Math.round(16 * root.d), id: "islandheart", joins: "island" })
+        }
         if (root.menubar && root.heartShown && root.heartLength > 1) {
             const at = chassis.mapToItem(null, barZones.heartAlong, 0)
             out.push({ x: at.x, y: body.y, width: root.heartLength, height: body.height, radius: root.compactHeight / 2,
-                paints: true, fuse: Math.round(32 * root.d), id: "islandnotch", joins: "island" })
+                paints: true, fuse: root.clearStrip ? IrisStyle.fuseEdge : Math.round(32 * root.d), id: "islandnotch",
+                joins: root.clearStrip ? edgeJoin : "island" })
         }
         if (extension.visible && extension.width > 1 && extension.height > 1) {
             const page = extension.mapToItem(null, 0, 0)
-            const sink = root.fullWidth ? Math.min(extension.radius, root.compactHeight) : 0
+            const floating = root.zoned && !root.vertical && !root.fromHeart
+            const grown = root.grownPage
+            const sink = grown ? 0 : root.fullWidth && !floating ? Math.min(extension.radius, root.compactHeight) : 0
             out.push({ x: page.x - (root.vertical && !root.rightEdge ? sink : 0), y: page.y - (!root.vertical && !root.bottomEdge ? sink : 0),
                 width: extension.width + (root.vertical ? sink : 0), height: extension.height + (root.vertical ? 0 : sink),
-                radius: extension.radius, paints: true, fuse: IrisStyle.fuseDeep,
+                radius: extension.radius, paints: true, fuse: grown ? IrisStyle.fuseEdge : IrisStyle.fuseDeep,
                 // Inline, the page is the chassis rectangle itself: a smooth union of two equal shapes swells the contour by fuse / 4.
-                joins: extension.anchoredShape ? "island" : "" })
+                joins: !extension.anchoredShape || floating ? "" : grown && root.clearStrip ? (IrisFrame.framed ? "frame" : "edge")
+                    : root.clearStrip ? "islandnotch" : "island" })
         }
         if (badgePill.visible) {
             const at = badgePill.mapToItem(null, (badgePill.width - badgePill.bodyWidth) / 2, 0)
@@ -1497,16 +1537,19 @@ Item {
         readonly property real bottomInset: root.bottomEdge ? chassis.edgeInset : 0
         readonly property real leftInset: root.edge === "left" ? chassis.edgeInset : 0
         readonly property real rightInset: root.rightEdge ? chassis.edgeInset : 0
+        // Upright on a side edge it grows out of its band like it grows down from the top: across, from the
+        // capsule's thickness to the page's width, and along, from the capsule's length to the page's height.
+        readonly property real across: Math.round(chassis.lerp(root.compactHeight, chassis.openW))
         x: !root.vertical ? Math.round((root.width - width) / 2)
-            : root.rightEdge ? root.width - root.compactHeight : -chassis.leftInset
+            : root.rightEdge ? root.width - chassis.across : -chassis.leftInset
         y: root.vertical ? Math.round((root.height - chassis.height) / 2)
             : root.bottomEdge ? root.height - chassis.bodyHeight : -chassis.topInset
-        width: root.vertical ? root.compactHeight + chassis.leftInset + chassis.rightInset
+        width: root.vertical ? chassis.across + chassis.leftInset + chassis.rightInset
             : Math.round(chassis.lerp(chassis.restW, chassis.openW))
-        height: root.vertical ? Math.round(chassis.restW) : chassis.bodyHeight + chassis.topInset + chassis.bottomInset
+        height: root.vertical ? Math.round(chassis.lerp(chassis.restW, chassis.openH)) : chassis.bodyHeight + chassis.topInset + chassis.bottomInset
         // Opaque: a transparent ClippingRectangle past the screen edge stops painting its children.
         color: IrisStyle.bodyClip
-        radius: Math.min((root.vertical ? chassis.height : chassis.width) / 2, chassis.restRadius
+        radius: Math.min((root.vertical ? Math.min(chassis.across, chassis.height) : chassis.width) / 2, chassis.restRadius
             + (chassis.openRadius - chassis.restRadius) * Math.min(1, chassis.presentation))
 
         HoverHandler {
@@ -1561,10 +1604,11 @@ Item {
 
         Item {
             id: compactLayer
-            x: root.vertical ? chassis.leftInset : 0
-            y: root.vertical ? 0 : root.bottomEdge ? chassis.height - chassis.bottomInset - height : chassis.topInset
+            x: root.vertical ? (root.rightEdge ? chassis.width - chassis.rightInset - width : chassis.leftInset) : 0
+            y: root.vertical ? Math.round((chassis.height - height) / 2)
+                : root.bottomEdge ? chassis.height - chassis.bottomInset - height : chassis.topInset
             width: root.vertical ? root.compactHeight : chassis.width
-            height: root.vertical ? chassis.height : root.compactHeight
+            height: root.vertical ? Math.round(chassis.restW) : root.compactHeight
             readonly property real fall: Math.min(1, chassis.presentation / Math.max(0.02, IrisStyle.contentFall))
             opacity: root.paintNudge * Math.max(0, 1 - compactLayer.fall) * IrisStyle.recompose * (1 - root.spotlightYield)
             transform: Scale {
@@ -1574,7 +1618,7 @@ Item {
                 yScale: IrisStyle.revealFades ? 1 : (1 - 0.1 * compactLayer.fall) * (0.96 + 0.04 * IrisStyle.recompose)
             }
             // Never transform the ClippingRectangle live: it can stop painting.
-            scale: compactPress.pressed ? IrisStyle.pressScale(0.93) : 1
+            scale: compactPress.pressed && !root.zoned ? IrisStyle.pressScale(0.93) : 1
             Behavior on scale { NumberAnimation { duration: IrisStyle.duration(compactPress.pressed ? 80 : 200); easing.type: IrisStyle.feedbackEasing } }
             // Kept in the scene across a morph: its rows carry the clock, glyphs and
             // figures, and rebuilding their nodes as the shape came back cost one
@@ -1599,7 +1643,9 @@ Item {
                     + (root.piecesAtStart ? root.barPieceReserve : 0)
                 width: Math.max(0, compactRow.laidWidth - compactRow.leadMargin - 15 * root.d - root.barPieceReserve)
                 spacing: 9 * root.d
-                opacity: root.compactMode === compactRow.mode && root.heartShown && !root.vertical ? 1 : 0
+                opacity: (root.compactMode === compactRow.mode && root.heartShown && !root.vertical ? 1 : 0) * root.heartUncovered
+                scale: root.zoned && compactPress.pressed ? IrisStyle.pressScale(0.93) : 1
+                Behavior on scale { NumberAnimation { duration: IrisStyle.duration(compactPress.pressed ? 80 : 200); easing.type: IrisStyle.feedbackEasing } }
                 visible: opacity > 0
                 Behavior on opacity { NumberAnimation { duration: IrisStyle.duration(140); easing.type: IrisStyle.feedbackEasing } }
             }
@@ -2002,6 +2048,7 @@ Item {
 
             IslandCompactColumn {
                 id: compactColumn
+                opacity: root.heartUncovered
                 visible: root.vertical && root.heartShown
                 island: root
                 mode: root.compactMode
@@ -2009,7 +2056,7 @@ Item {
                 clockScale: root.clockScale
                 clockAccent: root.clockAccent
                 clockStyle: root.clockStyle
-                x: root.zoned ? (root.rightEdge ? -root.heartSwell / 2 : root.heartSwell / 2) : 0
+                x: root.zoned && root.notch ? (root.rightEdge ? -root.heartSwell / 2 : root.heartSwell / 2) : 0
                 width: parent.width
                 height: root.zoned ? Math.round(root.heartLength) : parent.height - root.barPieceReserve
                 y: root.zoned ? Math.round(barZones.heartAlong) : root.piecesAtStart ? root.barPieceReserve : 0
@@ -2022,12 +2069,16 @@ Item {
                 vertical: root.vertical
                 island: root
                 thickness: root.stripHeight
-                laneTop: root.menubar && root.bottomEdge ? root.compactHeight - root.stripHeight : 0
-                lane: root.stripHeight
+                // A clear strip has no body of its own: its items share the notch's line, as a status bar shares the island's.
+                laneTop: root.menubar && root.bottomEdge && !root.clearStrip ? root.compactHeight - root.stripHeight : 0
+                lane: root.clearStrip ? root.compactHeight : root.stripHeight
+                clear: root.clearStrip
+                bottomEdge: root.bottomEdge
                 heartLength: root.heartLength
                 start: root.zoned ? Array.from(IrisStyle.structuralValue("bar.fullStart", ["workspaces", "window"])).concat(root.absorbedStart.length > 0 ? ["|"] : [], root.absorbedStart) : []
                 center: root.zoned ? IrisStyle.structuralValue("bar.fullCenter", ["island"]) : []
                 end: root.zoned ? Array.from(IrisStyle.structuralValue("bar.fullEnd", ["tray", "notifications", "sound", "controls"]))
+                    .concat(Array.from(IrisStyle.structuralValue("bar.pieces", [])).map(String).filter(kind => kind !== "media"))
                     .concat(root.absorbedPieces.some(kind => !root.absorbedStart.includes(kind)) ? ["|"] : [],
                         root.absorbedPieces.filter(kind => !root.absorbedStart.includes(kind))) : []
                 absorbed: root.absorbedPieces
@@ -2056,6 +2107,7 @@ Item {
                 QtObject {
                     id: islandGrip
                     property bool carrying: false
+                    property bool endedEdit: false
                     property point pressAt: Qt.point(0, 0)
                     function publish(mouse, released: bool): void {
                         const p = compactPress.mapToItem(null, mouse.x, mouse.y)
@@ -2066,7 +2118,7 @@ Item {
                         }
                     }
                 }
-                onPressed: mouse => islandGrip.pressAt = Qt.point(mouse.x, mouse.y)
+                onPressed: mouse => { islandGrip.pressAt = Qt.point(mouse.x, mouse.y); islandGrip.endedEdit = false }
                 onPressAndHold: mouse => {
                     if (mouse.button !== Qt.LeftButton || root.compactMode === "edit") return
                     islandGrip.carrying = true
@@ -2080,6 +2132,14 @@ Item {
                     if (islandGrip.carrying) islandGrip.publish(mouse, false)
                 }
                 onReleased: mouse => {
+                    // A hold past pressAndHoldInterval swallows onClicked; the edit row's Done ends on
+                    // release so a slow press still leaves arranging.
+                    if (!islandGrip.carrying && root.compactMode === "edit" && mouse.button === Qt.LeftButton
+                            && compactPress.containsMouse) {
+                        islandGrip.endedEdit = true
+                        GlobalStates.setWidgetEditMode(false)
+                        return
+                    }
                     if (!islandGrip.carrying) return
                     islandGrip.publish(mouse, true)
                     Qt.callLater(() => islandGrip.carrying = false)
@@ -2091,6 +2151,7 @@ Item {
                     islandGrip.carrying = false
                 }
                 onClicked: mouse => {
+                    if (islandGrip.endedEdit) { islandGrip.endedEdit = false; return }
                     if (islandGrip.carrying) return
                     if (mouse.button === Qt.MiddleButton) {
                         if (root.hasMedia) MprisController.togglePlaying()
@@ -2130,20 +2191,24 @@ Item {
         readonly property real liveWidth: Math.round(root.originWidth
             + ((root.vertical ? extension.targetHeight : extension.targetWidth) - root.originWidth) * extension.presentation)
         x: !extension.anchoredShape ? chassis.x
+            : root.grownPage && root.vertical ? (root.rightEdge ? root.width - extension.reach : -root.grownInset)
             : root.vertical ? (root.rightEdge ? chassis.x - extension.reach : chassis.x + chassis.width)
             : root.extensionX(root.originWidth) + (root.extensionX(extension.targetWidth)
                 - root.extensionX(root.originWidth)) * extension.presentation
         y: !extension.anchoredShape ? chassis.y
             : root.vertical ? root.extensionY(root.originWidth) + (root.extensionY(extension.targetHeight)
                 - root.extensionY(root.originWidth)) * extension.presentation
+            : root.zoned && !root.vertical && !root.fromHeart
+                ? (root.bottomEdge ? root.height - root.stripHeight - root.floatGap - extension.reach : root.stripHeight + root.floatGap)
+            : root.grownPage ? (root.bottomEdge ? root.height - extension.reach : -root.grownInset)
             : root.bottomEdge ? root.height - chassis.bodyHeight - extension.reach : chassis.bodyHeight
-        width: !extension.anchoredShape ? chassis.width : root.vertical ? extension.reach : extension.liveWidth
-        height: !extension.anchoredShape ? chassis.height : root.vertical ? extension.liveWidth : extension.reach
+        width: !extension.anchoredShape ? chassis.width : root.vertical ? extension.reach + root.grownInset : extension.liveWidth
+        height: !extension.anchoredShape ? chassis.height : root.vertical ? extension.liveWidth : extension.reach + root.grownInset
         radius: extension.anchoredShape
             ? root.originWidth / 2 + (extension.targetRadius - root.originWidth / 2) * extension.presentation
             : chassis.radius
         color: IrisStyle.bodyClip
-        readonly property bool anchoredShape: root.anchored
+        readonly property bool anchoredShape: root.anchored && !(root.inlinePages && root.extensionRole === "page")
         HoverHandler { id: extensionHover }
         WheelHandler {
             enabled: root.expanded
@@ -2178,9 +2243,13 @@ Item {
         }
         Loader {
             id: details
-            y: root.padding + (root.anchored ? 0 : chassis.topInset)
-                - (root.anchored || root.bottomEdge ? 0 : Math.round(Math.max(0, chassis.openH - chassis.bodyHeight)))
+            // Upright, the page is revealed from its middle as the body grows along the edge.
+            y: extension.anchoredShape ? root.padding + (root.vertical || root.bottomEdge ? 0 : root.grownInset)
+                : root.vertical ? root.padding - Math.round((chassis.openH - chassis.height) / 2)
+                : root.padding + chassis.topInset - (root.bottomEdge ? 0 : Math.round(Math.max(0, chassis.openH - chassis.bodyHeight)))
             anchors.horizontalCenter: parent.horizontalCenter
+            anchors.horizontalCenterOffset: root.vertical && !extension.anchoredShape ? (chassis.leftInset - chassis.rightInset) / 2
+                : root.vertical && root.grownPage ? (root.rightEdge ? -root.grownInset / 2 : root.grownInset / 2) : 0
             width: Math.max(0, root.expandedWidth - root.padding * 2)
             // Incubated: the chassis spring still waits for Loader.Ready, so nothing moves before the page exists.
             active: root.expanded || details.opacity > 0.004 || details.warm
@@ -2200,13 +2269,13 @@ Item {
                 }
             }
             onActiveChanged: { if (!active) root.page = "" }
-            readonly property real presentation: root.anchored ? extension.presentation : chassis.presentation
+            readonly property real presentation: extension.anchoredShape ? extension.presentation : chassis.presentation
             opacity: (root.anchored && root.extensionRole !== "page" ? 0 : 1) * IrisStyle.recompose * (IrisStyle.revealDrops
                 ? IrisStyle.ramp(details.presentation, IrisStyle.dropRise, IrisStyle.dropSpan)
                 : IrisStyle.contentAt(details.presentation))
             scale: IrisStyle.revealInflates
-                ? Math.max(0.35, Math.min(1, (root.anchored ? extension.height : chassis.bodyHeight)
-                    / Math.max(1, root.anchored ? extension.targetHeight : chassis.openH)))
+                ? Math.max(0.35, Math.min(1, (extension.anchoredShape ? extension.height : root.vertical ? chassis.height : chassis.bodyHeight)
+                    / Math.max(1, extension.anchoredShape ? extension.targetHeight : chassis.openH)))
                 : IrisStyle.revealFades ? 1 : 0.96 + 0.04 * details.opacity
             transformOrigin: root.bottomEdge ? Item.Bottom : Item.Top
             // Kept in the scene while warm: hiding it drops its render nodes, and

@@ -31,10 +31,14 @@ Item {
     IrisSpring {
         id: presentSpring
         surface: "panels"
-        to: root.present ? 1 : 0
+        to: root.entered && root.present ? 1 : 0
         intent: "auto"
         minimum: 0
     }
+    // Made on demand when the mode starts, the spring would begin at its target and the bar would just be
+    // there, its blur ahead of its body. It starts hidden and is sent in on the next turn.
+    property bool entered: false
+    Timer { id: enterTimer; interval: 0; onTriggered: root.entered = true }
 
     // ── What is open ─────────────────────────────────────────────────────
     property string tool: ""
@@ -62,7 +66,10 @@ Item {
         function onIrisEditTargetChanged(): void { root.route(GlobalStates.irisEditTarget) }
         function onIrisEditChanged(): void { if (!GlobalStates.irisEdit) root.tool = "" }
     }
-    Component.onCompleted: root.route(GlobalStates.irisEditTarget)
+    Component.onCompleted: {
+        root.route(GlobalStates.irisEditTarget)
+        enterTimer.start()
+    }
     // Escape folds the innermost thing open; false when there was nothing left but the mode itself.
     function fold(): bool {
         if (root.inspecting) { GlobalStates.irisEditSelection = ""; GlobalStates.irisEditTarget = ""; return true }
@@ -148,19 +155,31 @@ Item {
     readonly property real capsuleY: root.vertical ? root.capsuleRestY : Math.round(root.lerp(root.edge === "bottom" ? root.islandY
         : root.islandY + root.islandH - root.capsuleH, root.capsuleRestY, root.presentation))
 
+    // How far the capsule still sits over the Island while it slides out or back: its words never ride on the Island's.
+    readonly property real capsuleOverlap: Math.max(0, root.edge === "bottom" ? root.capsuleY + root.capsuleH - root.islandY
+        : root.edge === "top" ? root.islandY + root.islandH - root.capsuleY
+        : root.edge === "left" ? root.islandX + root.islandW - root.capsuleX
+        : root.capsuleX + root.capsuleW - root.islandX)
     IrisSpring { id: sheetSpring; surface: "cards"; to: root.shown && root.tool.length > 0 ? 1 : 0; intent: "auto"; minimum: 0 }
     readonly property real sheetP: sheetSpring.value
     readonly property bool sheetShown: root.sheetP > 0.002
     readonly property real sheetW: Math.min(root.width - 2 * root.lo, Math.round((root.tool === "themes" ? 640 : 520) * root.d))
-    readonly property real sheetMaxH: Math.round((root.vertical ? root.height : root.height - root.capsuleRestY - root.capsuleH) * 0.62)
+    // Room on the side the sheet grows toward: away from the edge the Island rests on.
+    readonly property real sheetRoom: root.vertical ? root.height
+        : root.edge === "bottom" ? root.capsuleRestY - root.gap - root.lo
+        : root.height - root.capsuleRestY - root.capsuleH
+    readonly property real sheetMaxH: Math.round(Math.min(root.sheetRoom, root.height * 0.62))
     readonly property real sheetFullH: Math.min(root.sheetMaxH, sheetContent.implicitHeight + Math.round(32 * root.d))
-    readonly property real sheetH: Math.round(Math.max(root.capsuleH, root.sheetFullH * root.sheetP))
-    readonly property real sheetX: root.edge === "left" ? root.capsuleX + root.capsuleW + root.gap
-        : root.edge === "right" ? root.capsuleX - root.gap - root.sheetW
-        : root.clampX(root.capsuleX + root.capsuleW / 2 - root.sheetW / 2, root.sheetW)
-    readonly property real sheetY: root.edge === "top" ? root.capsuleY + root.capsuleH + root.gap
-        : root.edge === "bottom" ? root.capsuleY - root.gap - root.sheetH
-        : root.clampY(root.capsuleY + root.capsuleH / 2 - root.sheetFullH / 2, root.sheetFullH)
+    // The sheet is the capsule going on: it leaves from the capsule's width and comes back into it, never a pill of its own.
+    readonly property real sheetLiveW: Math.round(root.vertical ? root.sheetW * root.sheetP : root.lerp(root.capsuleW, root.sheetW, root.sheetP))
+    readonly property real sheetH: Math.round(root.vertical ? root.lerp(root.capsuleH, root.sheetFullH, root.sheetP) : root.sheetFullH * root.sheetP)
+    readonly property real sheetGap: Math.round(root.gap * root.sheetP)
+    readonly property real sheetX: root.edge === "left" ? root.capsuleX + root.capsuleW + root.sheetGap
+        : root.edge === "right" ? root.capsuleX - root.sheetGap - root.sheetLiveW
+        : root.clampX(root.capsuleX + root.capsuleW / 2 - root.sheetLiveW / 2, root.sheetLiveW)
+    readonly property real sheetY: root.edge === "top" ? root.capsuleY + root.capsuleH + root.sheetGap
+        : root.edge === "bottom" ? root.capsuleY - root.sheetGap - root.sheetH
+        : root.clampY(root.capsuleY + root.capsuleH / 2 - root.sheetH / 2, root.sheetH)
 
     IrisSpring { id: inspectorSpring; surface: "cards"; to: root.shown && root.inspecting ? 1 : 0; intent: "auto"; minimum: 0 }
     readonly property real inspectorP: inspectorSpring.value
@@ -235,14 +254,14 @@ Item {
         : root.inspectorRawY
 
     readonly property var capsuleRect: root.shown ? Qt.rect(root.capsuleX, root.capsuleY, root.capsuleW, root.capsuleH) : Qt.rect(0, 0, 0, 0)
-    readonly property var sheetRect: root.sheetShown ? Qt.rect(root.sheetX, root.sheetY, root.sheetW, root.sheetH) : Qt.rect(0, 0, 0, 0)
+    readonly property var sheetRect: root.sheetShown ? Qt.rect(root.sheetX, root.sheetY, root.sheetLiveW, root.sheetH) : Qt.rect(0, 0, 0, 0)
     readonly property var inspectorRect: root.inspectorShown ? Qt.rect(root.inspectorX, root.inspectorY, root.inspectorW, root.inspectorH) : Qt.rect(0, 0, 0, 0)
     readonly property var hitRect: root.capsuleRect
     readonly property var fieldShapes: {
         if (!root.shown) return []
         const out = [{ x: root.capsuleX, y: root.capsuleY, width: root.capsuleW, height: root.capsuleH,
             radius: root.capsuleH / 2, fuse: IrisStyle.fuse, paints: true, id: "editcapsule", joins: "island" }]
-        if (root.sheetShown) out.push({ x: root.sheetX, y: root.sheetY, width: root.sheetW, height: root.sheetH,
+        if (root.sheetShown) out.push({ x: root.sheetX, y: root.sheetY, width: root.sheetLiveW, height: root.sheetH,
             radius: Math.min(IrisStyle.radiusSheet, root.sheetH / 2), fuse: IrisStyle.fuse, paints: true, id: "editsheet", joins: "editcapsule" })
         if (root.inspectorShown) out.push({ x: root.inspectorX, y: root.inspectorY, width: root.inspectorW, height: root.inspectorH,
             radius: Math.min(IrisStyle.radiusCard, root.inspectorH / 2), fuse: IrisStyle.fuse, paints: true, id: "inspector",
@@ -257,7 +276,7 @@ Item {
         width: root.capsuleW
         height: root.capsuleH
         visible: root.shown
-        opacity: IrisStyle.contentAt(root.presentation)
+        opacity: IrisStyle.contentAt(root.presentation) * Math.max(0, 1 - root.capsuleOverlap / (root.capsuleH * 0.4))
         MouseArea { anchors.fill: parent; acceptedButtons: Qt.AllButtons }
         RowLayout {
             id: capsuleRow
@@ -291,41 +310,49 @@ Item {
     Item {
         x: root.sheetX
         y: root.sheetY
-        width: root.sheetW
+        width: root.sheetLiveW
         height: root.sheetH
         visible: root.sheetShown
         clip: true
         opacity: IrisStyle.contentAt(root.sheetP)
         MouseArea { anchors.fill: parent; acceptedButtons: Qt.AllButtons }
-        Flickable {
-            id: sheetFlick
-            anchors.fill: parent
-            anchors.margins: Math.round(16 * root.d)
-            contentHeight: sheetContent.implicitHeight
-            boundsBehavior: Flickable.StopAtBounds
-            clip: true
-            ScrollBar.vertical: IrisScrollBar {}
-            ColumnLayout {
-                id: sheetContent
-                width: sheetFlick.width
-                spacing: Math.round(12 * root.d)
-                Loader {
-                    Layout.fillWidth: true
-                    active: root.tool === "themes"
-                    visible: active
-                    sourceComponent: themesSheet
-                }
-                Loader {
-                    Layout.fillWidth: true
-                    active: root.tool === "look"
-                    visible: active
-                    sourceComponent: lookSheet
-                }
-                Loader {
-                    Layout.fillWidth: true
-                    active: root.tool === "pieces"
-                    visible: active
-                    sourceComponent: IrisPieceLibrary {}
+        // Laid out once at the sheet's full size: the body grows around it instead of reflowing the grid every frame.
+        Item {
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.top: root.edge === "bottom" ? undefined : parent.top
+            anchors.bottom: root.edge === "bottom" ? parent.bottom : undefined
+            width: root.sheetW
+            height: root.sheetFullH
+            Flickable {
+                id: sheetFlick
+                anchors.fill: parent
+                anchors.margins: Math.round(16 * root.d)
+                contentHeight: sheetContent.implicitHeight
+                boundsBehavior: Flickable.StopAtBounds
+                clip: true
+                ScrollBar.vertical: IrisScrollBar {}
+                ColumnLayout {
+                    id: sheetContent
+                    width: sheetFlick.width
+                    spacing: Math.round(12 * root.d)
+                    Loader {
+                        Layout.fillWidth: true
+                        active: root.tool === "themes"
+                        visible: active
+                        sourceComponent: themesSheet
+                    }
+                    Loader {
+                        Layout.fillWidth: true
+                        active: root.tool === "look"
+                        visible: active
+                        sourceComponent: lookSheet
+                    }
+                    Loader {
+                        Layout.fillWidth: true
+                        active: root.tool === "pieces"
+                        visible: active
+                        sourceComponent: IrisPieceLibrary {}
+                    }
                 }
             }
         }
