@@ -28,7 +28,7 @@ QtObject {
     readonly property var groups: ["Layouts", "Scene", "Type", "Clock", "At a glance", "Widgets", "Now playing", "Activity", "Sign in", "Status"]
     readonly property var groupByBlock: ({ clock: "Clock", glance: "At a glance", media: "Now playing", activity: "Activity",
         session: "Sign in", status: "Status" })
-    function groupOf(id: string): string { return root.groupByBlock[id] ?? "Scene" }
+    function groupOf(id: string): string { return id.startsWith("widget:") ? "Widgets" : root.groupByBlock[id] ?? "Scene" }
     function blockForGroup(group: string): string {
         return root.blockIds.find(id => root.groupByBlock[id] === group) ?? ""
     }

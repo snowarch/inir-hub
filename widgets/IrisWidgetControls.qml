@@ -16,6 +16,13 @@ ColumnLayout {
     id: root
 
     required property var widget
+    // Hosted by the lock inspector: closing lets go of the selection and removing takes it off the lock only.
+    property bool onLock: false
+    signal closeRequested()
+    function close(): void {
+        if (root.onLock) root.closeRequested()
+        else root.widget.closeQuickControls()
+    }
     readonly property real d: IrisStyle.density
     readonly property var pages: [
         { value: "widget", label: Translation.tr("Widget") },
@@ -148,7 +155,7 @@ ColumnLayout {
             materialIcon: "close"
             iconSize: Math.round(16 * root.d)
             implicitWidth: Math.round(28 * root.d)
-            onClicked: root.widget.closeQuickControls()
+            onClicked: root.close()
             Accessible.name: Translation.tr("Close")
         }
     }
@@ -634,11 +641,13 @@ ColumnLayout {
             }
             ActionRow {
                 glyph: "remove_circle"
-                label: Translation.tr("Remove from desktop")
+                label: root.onLock ? Translation.tr("Remove widget") : Translation.tr("Remove from desktop")
                 danger: true
                 onActivated: {
-                    root.widget.closeQuickControls()
-                    DesktopWidgetLayout.setGloballyEnabled(root.widget.configEntryName, false)
+                    const widget = root.widget
+                    root.close()
+                    if (root.onLock) widget._setOutputValue("enable", false)
+                    else DesktopWidgetLayout.setGloballyEnabled(widget.configEntryName, false)
                 }
             }
         }

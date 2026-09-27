@@ -16,6 +16,8 @@ import qs.modules.iris.widgets
 Item {
     id: root
     property string screenName: ""
+    // The lock widget tapped on the stage: its Look opens here, written to the lock's own scope.
+    property var widget: null
     property rect avoid: Qt.rect(0, 0, 0, 0)
     property bool peeking: false
     // The inspector steps aside rather than sitting on the block you are editing.
@@ -172,16 +174,29 @@ Item {
                         model: root.group === "Layouts" ? IrisLockOptions.presets : []
                         delegate: LayoutCard {}
                     }
-                    IrisText {
-                        visible: root.group === "Widgets"
+                    Loader {
+                        active: root.group === "Widgets" && root.widget !== null
+                        visible: active
                         width: rowColumn.width
-                        text: Translation.tr("Your desktop widgets, as they look there. Drag one here to place it on the lock.")
+                        // Room for the last slider's thumb, which rides past its row.
+                        height: active ? (item?.implicitHeight ?? 0) + Math.round(10 * root.d) : 0
+                        sourceComponent: IrisWidgetControls {
+                            width: rowColumn.width
+                            widget: root.widget
+                            onLock: true
+                            onCloseRequested: GlobalStates.irisLockSelection = ""
+                        }
+                    }
+                    IrisText {
+                        visible: root.group === "Widgets" && root.widget === null
+                        width: rowColumn.width
+                        text: Translation.tr("Your desktop widgets, as they look there. Tap one on the lock to give it a shape and material of its own.")
                         color: IrisStyle.muted
                         wrapMode: Text.WordWrap
                         font.pixelSize: IrisStyle.typeMeta
                     }
                     Flow {
-                        visible: root.group === "Widgets"
+                        visible: root.group === "Widgets" && root.widget === null
                         width: rowColumn.width
                         spacing: Math.round(4 * root.d)
                         Repeater {

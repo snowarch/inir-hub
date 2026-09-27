@@ -379,6 +379,17 @@ Scope {
                 IrisLockOptions.toggleWidget(screen, key)
                 return IrisLockOptions.widgetShown(screen, key) ? key + " on the lock" : key + " off the lock"
             }
+            if (action.startsWith("select:")) {
+                const [key, tab] = action.slice(7).split("/")
+                const screen = GlobalStates.focusedScreen?.name ?? ""
+                if (!IrisLockOptions.widgetShown(screen, key)) return key + " is not on the lock; add it with widget:" + key
+                if (tab && !["widget", "look", "arrange"].includes(tab)) return "Unknown tab. One of: widget, look, arrange"
+                GlobalStates.irisLockEdit = true
+                GlobalStates.irisLockSelection = "widget:" + key
+                GlobalStates.irisLockWidgetTab = ""
+                GlobalStates.irisLockWidgetTab = tab ?? ""
+                return key + " selected" + (tab ? " on " + tab : "")
+            }
             if (action.startsWith("page:")) {
                 const page = IrisLockOptions.groups.find(group => group.toLowerCase() === action.slice(5).toLowerCase())
                 if (!page) return "Unknown page. One of: " + IrisLockOptions.groups.join(", ")

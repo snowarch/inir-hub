@@ -23,6 +23,7 @@ import qs.modules.background.widgets.worldClock
 import qs.modules.background.widgets.userCard
 import qs.modules.background.widgets.newsTicker
 import qs.modules.iris.widgets
+import qs.modules.iris.style
 
 Item {
     id: root
@@ -36,12 +37,54 @@ Item {
             .filter(key => DesktopWidgetLayout.enabled(root.scope, key, false))
     }
 
+    // While the lock is being designed, a tapped widget becomes the selection ("widget:<key>") and the
+    // inspector opens its own Look on this scope, so the lock keeps shapes and materials of its own.
+    readonly property string selectedKey: GlobalStates.irisLockEdit && GlobalStates.irisLockSelection.startsWith("widget:")
+        ? GlobalStates.irisLockSelection.slice(7) : ""
+    readonly property var selectedItem: root.selectedKey.length > 0 ? root.item(root.selectedKey) : null
+    function showTab(): void {
+        if (root.selectedItem && GlobalStates.irisLockWidgetTab.length > 0) root.selectedItem._quickTab = GlobalStates.irisLockWidgetTab
+    }
+    onSelectedItemChanged: root.showTab()
+    Connections {
+        target: GlobalStates
+        function onIrisLockWidgetTabChanged(): void { root.showTab() }
+    }
+    function item(key: string): var {
+        for (let i = 0; i < slots.count; i++) {
+            const slot = slots.itemAt(i)
+            if (slot?.modelData === key) return slot.item ?? null
+        }
+        return null
+    }
+
+    Rectangle {
+        readonly property real d: IrisStyle.density
+        readonly property real pad: Math.round(8 * d)
+        visible: root.selectedItem !== null
+        z: 1
+        x: (root.selectedItem?.x ?? 0) - pad
+        y: (root.selectedItem?.y ?? 0) - pad
+        width: (root.selectedItem?.width ?? 0) + pad * 2
+        height: (root.selectedItem?.height ?? 0) + pad * 2
+        radius: IrisStyle.radiusPlate
+        color: "transparent"
+        border.width: Math.max(1, Math.round(1.5 * d))
+        border.color: IrisStyle.accent
+    }
+
     Repeater {
+        id: slots
         model: IrisFaceData.galleryEntries.map(entry => entry.key)
         delegate: Loader {
             id: slot
             required property string modelData
             active: root.shown.includes(slot.modelData)
+            Connections {
+                target: slot.item
+                enabled: GlobalStates.irisLockEdit
+                function onPressed(): void { GlobalStates.irisLockSelection = "widget:" + slot.modelData }
+            }
             sourceComponent: ({
                 clock: clockWidget, weather: weatherWidget, mediaControls: mediaWidget, controls: controlsWidget,
                 monthCalendar: monthWidget, calendarUpcoming: upcomingWidget, todo: todoWidget, notes: notesWidget,

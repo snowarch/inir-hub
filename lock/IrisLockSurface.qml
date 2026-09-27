@@ -34,7 +34,10 @@ Item {
     }
     property alias peeking: stage.peeking
     readonly property string selected: stage.selected
-    readonly property rect selectedRect: stage.selectedRect
+    readonly property var selectedWidget: lockWidgets.selectedItem
+    readonly property rect selectedRect: root.selectedWidget
+        ? Qt.rect(root.selectedWidget.x, root.selectedWidget.y, root.selectedWidget.width, root.selectedWidget.height)
+        : stage.selectedRect
     focus: true
 
     readonly property real d: IrisStyle.density
@@ -99,6 +102,19 @@ Item {
             return
         }
         if (!root.editing || stage.selected.length === 0) return
+        if (root.selectedWidget) {
+            const px = (event.modifiers & Qt.ShiftModifier) ? 10 : 1
+            const offsets = ({})
+            offsets[Qt.Key_Left] = [-px, 0]
+            offsets[Qt.Key_Right] = [px, 0]
+            offsets[Qt.Key_Up] = [0, -px]
+            offsets[Qt.Key_Down] = [0, px]
+            const offset = offsets[event.key]
+            if (!offset) return
+            root.selectedWidget.nudge(offset[0], offset[1])
+            event.accepted = true
+            return
+        }
         const step = (event.modifiers & Qt.ShiftModifier) ? 0.02 : 0.004
         const by = ({})
         by[Qt.Key_Left] = [-step, 0]
@@ -281,6 +297,7 @@ Item {
     }
 
     IrisLockWidgets {
+        id: lockWidgets
         anchors.fill: parent
         screenName: root.screenName
         opacity: root.arrival

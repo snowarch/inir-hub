@@ -74,6 +74,7 @@ Scope {
                 z: 2
                 anchors.fill: parent
                 screenName: window.modelData?.name ?? ""
+                widget: surface.selectedWidget
                 avoid: surface.selectedRect
             }
             Binding {
