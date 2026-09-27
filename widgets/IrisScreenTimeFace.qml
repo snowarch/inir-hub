@@ -124,12 +124,14 @@ IrisWidgetFace {
             ColumnLayout {
                 Layout.fillHeight: true
                 Layout.fillWidth: root.small
-                Layout.preferredWidth: root.medium ? root.dp(118) : -1
+                // As wide as today's total, so "13h 46m" is never cut; the bars take the rest.
+                Layout.preferredWidth: root.medium ? Math.max(root.dp(96), totalFigure.implicitWidth) : -1
                 visible: !root.large
                 spacing: root.dp(2)
 
                 Item { Layout.fillHeight: true }
                 FaceFigure {
+                    id: totalFigure
                     face: root
                     Layout.fillWidth: true
                     text: root.shortDuration(root.total)
