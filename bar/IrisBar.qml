@@ -511,6 +511,11 @@ Scope {
                 spotlight: GlobalStates.searchOpen,
                 focus: { open: GlobalStates.sidebarLeftOpen, pinned: Config.options?.iris?.sidebars?.left?.pinned ?? false },
                 today: { open: GlobalStates.sidebarRightOpen, pinned: Config.options?.iris?.sidebars?.right?.pinned ?? false },
+                // Modes that take the screen over until someone closes them.
+                editing: { lock: GlobalStates.irisLockEdit, customize: GlobalStates.irisEdit, widgets: GlobalStates.widgetEditMode,
+                    controlCenter: GlobalStates.irisControlEdit, island: GlobalStates.irisArrange },
+                settings: GlobalStates.settingsOverlayOpen,
+                gallery: GlobalStates.wallpaperLauncherOpen,
                 media: MprisController.activePlayer ? {
                     player: MprisController.activePlayer.dbusName ?? "",
                     title: MprisController.activePlayer.trackTitle ?? "",
