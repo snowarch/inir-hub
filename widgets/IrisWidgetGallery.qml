@@ -6,6 +6,7 @@ import qs
 import qs.services
 import qs.modules.common
 import qs.modules.common.widgets
+import qs.modules.background.widgets
 import qs.modules.iris.style
 import qs.modules.iris.components
 
@@ -14,7 +15,15 @@ ColumnLayout {
 
     readonly property real d: IrisStyle.density
     readonly property string outputName: GlobalStates.focusedScreen?.name ?? ""
-    readonly property var entries: IrisFaceData.galleryEntries
+    // Widgets without an iRiS face that are on this screen anyway, listed after the set so they count and can be taken away.
+    readonly property var otherLabels: ({ visualizer: "Visualizer", editorial: "Editorial", mascot: "Mascot",
+        japaneseTypography: "Japanese Typography", customImage: "Image", imageConverter: "Image converter", shape: "Shape" })
+    readonly property var entries: {
+        Config.revision
+        const extra = Object.keys(root.otherLabels).filter(key => root.isOn(key))
+            .map(key => ({ key: key, glyph: DesktopWidgetIdentity.glyph(key), label: Translation.tr(root.otherLabels[key]), tint: DesktopWidgetIdentity.tint(key) }))
+        return IrisFaceData.galleryEntries.concat(extra)
+    }
     readonly property int placed: {
         Config.revision
         return root.entries.filter(entry => root.isOn(entry.key)).length
