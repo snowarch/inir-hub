@@ -41,8 +41,15 @@ Item {
     readonly property bool lightBackdrop: root.opaque ? root.widget.forceDarkInk
         : root.clear ? root.widget.inkOnLight : root.widget.glassInkOnLight
     readonly property real veil: root.opaque ? root.strength
-        : root.lightBackdrop ? IrisStyle.legibleFrost(root.material, root.widget.regionBrightness, root.widget.regionBrightnessSpread, root.strength)
-        : IrisStyle.legibleVeil(root.material, root.widget.regionBrightness, root.widget.regionBrightnessSpread, root.strength)
+        : root.lightBackdrop ? IrisStyle.legibleFrost(root.readMaterial, root.frostLevel, root.readSpread, root.strength)
+        : IrisStyle.legibleVeil(root.readMaterial, root.readLevel, root.readSpread, root.strength)
+    // Lume on every widget: the veil (light ink) is solved as if the region were bright and busy, the frost
+    // (dark ink) as if it were dim and busy.
+    readonly property real readLevel: root.widget.legibleAlways ? Math.max(0.72, root.widget.regionBrightness) : root.widget.regionBrightness
+    // ...and to the contrast of a reading panel (7:1), so Transparent and Glass both carry a real backing.
+    readonly property string readMaterial: root.widget.legibleAlways ? "panel" : root.material
+    readonly property real frostLevel: root.widget.legibleAlways ? Math.min(0.5, root.widget.regionBrightness) : root.widget.regionBrightness
+    readonly property real readSpread: root.widget.legibleAlways ? Math.max(0.24, root.widget.regionBrightnessSpread) : root.widget.regionBrightnessSpread
 
     readonly property color accent: root.lightBackdrop ? IrisStyle.deepAccent(root.widget.irisAccent, IrisStyle.inkOnLight) : root.widget.irisAccent
     readonly property color highlight: root.lightBackdrop ? IrisStyle.deepAccent(root.widget.irisAccent3, IrisStyle.inkOnLight) : root.widget.irisAccent3
