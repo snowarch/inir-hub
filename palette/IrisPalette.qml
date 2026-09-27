@@ -15,6 +15,7 @@ import qs.modules.iris.frame
 import qs.modules.iris.style
 import qs.modules.iris.components
 import qs.modules.iris.pieces
+import qs.modules.iris.settings
 
 // Spotlight lives in the chassis window of its output, so its body, its content and the Island it grows
 // from are one surface: drawn and moved in the same frame.
@@ -45,10 +46,45 @@ Item {
         return held - IrisFrame.band + IrisFrame.musicReach(edge) + Math.round(12 * IrisStyle.density)
     }
     readonly property bool mathQuery: /[0-9]/.test(LauncherSearch.query)
-    readonly property var searchResults: (LauncherSearch.results ?? [])
+    readonly property var searchResults: root.actionMode ? root.actionResults.slice(0, root.resultLimit)
+        : (LauncherSearch.results ?? [])
         .filter(entry => String(entry?.name ?? "").length > 0
             && (root.mathQuery || entry?.type !== Translation.tr("Math")))
         .slice(0, root.resultLimit)
+
+    // "/" lists what iRiS can flip or apply from here: its own switches, widget design and accents, themes
+    // (IrisOptions.quickActions), then the shell's actions that act under iRiS. A switch stays open to show
+    // its new state; the rest run and close.
+    readonly property string actionPrefix: Config.options?.search?.prefix?.action ?? "/"
+    readonly property bool actionMode: LauncherSearch.query.startsWith(root.actionPrefix)
+    readonly property var otherFamilyActions: ["toggle-bar-autohide", "toggle-dock", "toggle-dashboard", "toggle-media-controls",
+        "wallpaper-coverflow", "open-sidebar-left", "open-sidebar-right", "switch-family-iris"]
+    readonly property var actionResults: {
+        if (!root.actionMode) return []
+        const query = LauncherSearch.query.slice(root.actionPrefix.length).trim().toLowerCase()
+        const words = query.split(/\s+/).filter(word => word.length > 0)
+        // Every typed word starts a word of the entry: "lume" finds Lume, not "volume".
+        const hits = text => { const own = text.split(/[\s:·›,.()\/-]+/); return words.every(word => own.some(part => part.startsWith(word))) }
+        const rank = name => query.length > 0 && name.toLowerCase().startsWith(query) ? 0 : 1
+        const items = []
+        for (const action of IrisOptions.quickActions()) {
+            if (!hits((action.name + " " + action.words).toLowerCase())) continue
+            items.push({ name: action.name, comment: action.detail, iconName: action.icon, tint: action.tint,
+                iconType: LauncherSearchResult.IconType.Material, type: Translation.tr("Action"), verb: Translation.tr("Switch"),
+                isOn: action.isOn, pick: Boolean(action.pick), keepOpen: true, execute: action.run, rank: rank(action.name), priority: action.priority ?? 100 })
+        }
+        for (const action of GlobalActions.allActions) {
+            const id = String(action.id ?? "")
+            if (id.startsWith("style-") || root.otherFamilyActions.includes(id)) continue
+            if (!hits([action.name, action.description ?? "", id].concat(action.keywords ?? []).join(" ").toLowerCase())) continue
+            items.push({ name: action.name, comment: action.description ?? "", iconName: action.icon ?? "bolt",
+                iconType: LauncherSearchResult.IconType.Material, type: Translation.tr("Action"), verb: Translation.tr("Run"),
+                isOn: action.isOn ?? null, keepOpen: typeof action.isOn === "function", execute: () => action.execute(""),
+                rank: rank(action.name) + 1, priority: typeof action.isOn === "function" ? 10 : 200 })
+        }
+        items.forEach((item, index) => item.order = index)
+        return items.sort((a, b) => a.rank - b.rank || a.priority - b.priority || a.order - b.order)
+    }
 
     readonly property var island: GlobalStates.irisIslandGeometry?.[root.screen?.name ?? ""] ?? null
     readonly property bool fromIsland: String(root.options?.opens ?? "floating") === "island"
@@ -145,7 +181,7 @@ Item {
         const entry = root.visibleResults[root.selectedIndex]
         if (!entry || typeof entry.execute !== "function") return
         entry.execute()
-        GlobalStates.searchOpen = false
+        if (!entry.keepOpen) GlobalStates.searchOpen = false
     }
 
     function moveSelection(step: int): void {
@@ -698,7 +734,7 @@ Item {
                                         readonly property bool selected: root.selectedIndex === result.index
                                         readonly property var mark: root.clipboardMode
                                             ? stage.clipMark(String(result.modelData?.name ?? ""))
-                                            : ({ glyph: "", tint: stage.kindTint(String(result.modelData?.type ?? "")) })
+                                            : ({ glyph: "", tint: result.modelData?.tint ?? stage.kindTint(String(result.modelData?.type ?? "")) })
                                         readonly property bool showHeader: result.index === 0
                                             || stage.sectionAt(result.index) !== stage.sectionAt(result.index - 1)
                                         readonly property real rowY: row.y
@@ -747,7 +783,7 @@ Item {
                                             x: 8 * stage.d
                                             width: parent.width - 16 * stage.d
                                             height: root.clipboardMode ? Math.round(52 * stage.d)
-                                                : Math.round((result.mathHit ? 66 : result.topHit ? 58 : 40) * stage.d)
+                                                : Math.round((result.mathHit ? 66 : result.topHit ? 58 : root.actionMode ? 48 : 40) * stage.d)
                                             hoverEnabled: true
                                             cursorShape: root.pointerSelectionArmed ? Qt.PointingHandCursor : Qt.BlankCursor
                                             Accessible.role: Accessible.Button
@@ -868,7 +904,7 @@ Item {
                                                     }
                                                     IrisText {
                                                         Layout.fillWidth: true
-                                                        visible: result.topHit && text.length > 0
+                                                        visible: (result.topHit || root.actionMode) && text.length > 0
                                                         text: result.mathHit ? LauncherSearch.query
                                                             : result.modelData?.comment || result.modelData?.genericName || result.modelData?.type || ""
                                                         color: IrisStyle.subtext
@@ -897,8 +933,23 @@ Item {
                                                         root.selectedIndex = Math.max(0, Math.min(root.selectedIndex, root.visibleResults.length - 2))
                                                     }
                                                 }
+                                                MaterialSymbol {
+                                                    visible: Boolean(result.modelData?.pick) && result.modelData.isOn()
+                                                    text: "check"
+                                                    iconSize: Math.round(18 * stage.d)
+                                                    color: IrisStyle.accent
+                                                }
+                                                IrisSwitch {
+                                                    visible: typeof result.modelData?.isOn === "function" && !result.modelData?.pick
+                                                    on: visible && result.modelData.isOn()
+                                                    name: String(result.modelData?.name ?? "")
+                                                    onToggled: {
+                                                        root.selectedIndex = result.index
+                                                        root.executeSelected()
+                                                    }
+                                                }
                                                 IrisText {
-                                                    visible: result.selected && text.length > 0
+                                                    visible: result.selected && text.length > 0 && typeof result.modelData?.isOn !== "function"
                                                     text: String(result.modelData?.verb ?? "")
                                                     color: IrisStyle.subtext
                                                     font.pixelSize: IrisStyle.typeMeta

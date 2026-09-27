@@ -267,11 +267,11 @@ QtObject {
         { target: "dock", group: "Icons", label: "Magnification", visibleWhen: "iris.dock.magnification", description: "How large the icon under the pointer grows; its neighbours follow.", path: "iris.dock.magnifySize", kind: "range", fallback: 150, min: 110, max: 200, step: 5, unit: " %" },
         { target: "dock", group: "Icons", label: "Applications button", description: "Opens Spotlight from the start of the Dock.", path: "iris.dock.launcher", kind: "switch", fallback:true },
         { target: "desktop", group: "Widgets", label: "On the desktop", description: "Tap a widget to add it to this screen or take it away. Size, look and position are set on the widget itself: select it while arranging.", path: "background.widgets", kind: "widgets" },
-        { target: "desktop", group: "Widgets", label: "Design", description: "One look on every widget. iRiS draws its own faces, Material keeps each widget's own style, iNstrument reads like a set of gauges and Readout gives figures room.", path: "iris.widgets.design", widgetDesign: true, kind: "choice", fallback: "iris", choices: [{label:"iRiS",value:"iris",glyph:"auto_awesome"},{label:"Material",value:"material",glyph:"widgets"},{label:"iNstrument",value:"instrument",glyph:"avg_pace"},{label:"Readout",value:"readout",glyph:"view_agenda"}], keywords: ["global", "instrument", "readout", "shared", "material", "widgets", "style", "look", "all widgets", "match", "tech", "gauges"] },
+        { target: "desktop", group: "Widgets", label: "Design", quickName: "Widget design", description: "One look on every widget. iRiS draws its own faces, Material keeps each widget's own style, iNstrument reads like a set of gauges and Readout gives figures room.", path: "iris.widgets.design", widgetDesign: true, kind: "choice", fallback: "iris", choices: [{label:"iRiS",value:"iris",glyph:"auto_awesome"},{label:"Material",value:"material",glyph:"widgets"},{label:"iNstrument",value:"instrument",glyph:"avg_pace"},{label:"Readout",value:"readout",glyph:"view_agenda"}], keywords: ["global", "instrument", "readout", "shared", "material", "widgets", "style", "look", "all widgets", "match", "tech", "gauges"] },
         { target: "desktop", group: "Widgets", label: "Widgets with a look of their own", description: "Some widgets were given a different design in their Look controls. Match puts them on the design above.", kind: "action", button: "Match", run: () => DesktopWidgetDesign.apply(DesktopWidgetDesign.current), showIf: () => DesktopWidgetDesign.exceptionCount > 0, keywords: ["match", "same", "coherent", "exceptions", "design"] },
         { target: "desktop", group: "Widgets", label: "Undo the last design change", description: "Brings back the design and each widget's own look from before you started changing it.", kind: "action", button: "Undo", run: () => DesktopWidgetDesign.undo(), showIf: () => DesktopWidgetDesign.canUndo, keywords: ["undo", "revert", "restore", "back", "design"] },
         { target: "desktop", group: "Widgets", label: "Widget corners", description: "Individual widget overrides take priority.", path: "iris.widgets.radius", showIf: () => DesktopWidgetDesign.current === "iris", kind: "range", fallback:22,min:0,max:40,unit:" px" },
-        { target: "desktop", group: "Widgets", label: "Accents", description: "The three colours every widget draws its rings, bars and figures with. Wallpaper takes the generated colours, iRiS your accent and highlight, Spectrum fixed blue, orange and teal, Mono one hue in three tones.", path: "iris.widgets.tint", kind: "choice", fallback: "wallpaper", choices: [{label:"Wallpaper",value:"wallpaper",glyph:"wallpaper"},{label:"iRiS",value:"system",glyph:"auto_awesome"},{label:"Spectrum",value:"spectrum",glyph:"palette"},{label:"Mono",value:"mono",glyph:"contrast"}], keywords: ["colour", "color", "accent", "palette", "tint", "hue", "widgets"] },
+        { target: "desktop", group: "Widgets", label: "Accents", quickName: "Widget accents", description: "The three colours every widget draws its rings, bars and figures with. Wallpaper takes the generated colours, iRiS your accent and highlight, Spectrum fixed blue, orange and teal, Mono one hue in three tones.", path: "iris.widgets.tint", kind: "choice", fallback: "wallpaper", choices: [{label:"Wallpaper",value:"wallpaper",glyph:"wallpaper"},{label:"iRiS",value:"system",glyph:"auto_awesome"},{label:"Spectrum",value:"spectrum",glyph:"palette"},{label:"Mono",value:"mono",glyph:"contrast"}], keywords: ["colour", "color", "accent", "palette", "tint", "hue", "widgets"] },
         { target: "desktop", group: "Widgets", label: "Accent strength", description: "Low keeps soft pastels; high makes accents saturated and bright. They stay readable over the wallpaper either way.", path: "iris.widgets.vibrance", kind: "range", fallback: 85, min: 0, max: 100, step: 5, unit: " %", keywords: ["vibrance", "saturation", "strong", "vivid", "accent", "colour", "color"] },
         { target: "desktop", group: "Widgets", label: "Material", description: "Glass frosts the wallpaper behind each widget; Transparent leaves it bare. Both keep their text legible over whatever the wallpaper shows under them. A widget can choose its own in its Look controls.", path: "iris.widgets.material", showIf: () => DesktopWidgetDesign.current === "iris", kind: "choice", fallback: "glass", choices: [{label:"Glass",value:"glass",glyph:"blur_on"},{label:"Transparent",value:"clear",glyph:"select"},{label:"Solid",value:"solid",glyph:"square"},{label:"Tinted",value:"tinted",glyph:"format_color_fill"}] },
         { target: "desktop", group: "Widgets", label: "Lume on every widget", description: "Every widget reads as if the wallpaper under it were bright and busy: a deeper veil on glass and a firmer shadow on bare text, even where it is not needed.", path: "iris.widgets.legibleAlways", kind: "switch", fallback: false, keywords: ["lume", "legibility", "readable", "contrast", "veil", "shadow", "always", "force", "text"] },
@@ -943,6 +943,37 @@ QtObject {
         case "desktop": return "desktop"
         default: return "appearance"
         }
+    }
+    // Spotlight's "/" actions come from the rows themselves, so nothing is listed twice: every switch
+    // Settings shows flips in place, the widget design and accents pick a value, and themes apply.
+    // What "/" lists first with nothing typed: the switches people flip during a day.
+    readonly property var quickFirst: ["iris.widgets.legibleAlways", "notifications.silent", "light.night.enabled",
+        "performance.lowPower", "iris.bar.autoHide", "iris.surround.enable", "iris.appearance.anime.enabled", "iris.appearance.motion"]
+    function quickActions(): var {
+        const out = []
+        for (const spec of root.settings) {
+            if (!spec.path || !root.shown(spec)) continue
+            const section = root.sectionById(String(spec.section ?? ""))
+            const place = Translation.tr(section.title) + (spec.group ? " › " + Translation.tr(String(spec.group)) : "")
+            const words = [spec.label, spec.group ?? "", section.title].concat(spec.keywords ?? []).join(" ")
+            const icon = root.groupGlyphs[String(spec.group ?? "")] ?? section.icon
+            if (spec.kind === "switch") {
+                const first = root.quickFirst.indexOf(spec.path)
+                out.push({ id: "set:" + spec.path, name: Translation.tr(spec.label), detail: place, icon: icon, tint: section.tint,
+                    words: words, priority: first >= 0 ? first : 100, isOn: () => spec.invert ? !Boolean(root.currentValue(spec)) : Boolean(root.currentValue(spec)),
+                    run: () => root.commit(spec, !Boolean(root.currentValue(spec))) })
+            } else if (spec.kind === "choice" && (spec.widgetDesign || spec.path === "iris.widgets.tint")) {
+                for (const choice of root.choicesOf(spec))
+                    out.push({ id: "set:" + spec.path + "=" + choice.value, name: Translation.tr(spec.quickName ?? spec.label) + ": " + Translation.tr(choice.label),
+                        detail: place, icon: String(choice.glyph ?? icon), tint: section.tint, words: words + " " + choice.label, priority: 50, pick: true,
+                        isOn: () => root.currentValue(spec) === choice.value, run: () => root.commit(spec, choice.value) })
+            }
+        }
+        for (const theme of IrisThemes.all)
+            out.push({ id: "theme:" + theme.id, name: Translation.tr("Theme: %1").arg(theme.name), detail: Translation.tr("Theme"), pick: true,
+                icon: "palette", tint: IrisStyle.identity.purple, words: ["theme", "look", theme.name].concat(theme.tags ?? []).join(" "), priority: 60,
+                isOn: () => IrisThemes.activeId === theme.id && !IrisThemes.modified, run: () => IrisThemes.apply(theme) })
+        return out
     }
     readonly property var settings: {
         const rows = root.behaviour.concat(root.shared).concat(root.niriRows)
