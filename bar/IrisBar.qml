@@ -36,6 +36,7 @@ Scope {
     readonly property int outerMargin: (root.options?.notch ?? false) ? 0 : root.restMargin
     signal islandRequested(bool expanded, string page)
     signal pieceTapRequested(string kind)
+    property bool pieceTapped: false
     property string editScreen: ""
     Connections {
         target: GlobalStates
@@ -271,8 +272,9 @@ Scope {
         }
         function tap(kind: string): string {
             if (kind.length === 0) return "Which piece?"
+            root.pieceTapped = false
             root.pieceTapRequested(kind)
-            return kind
+            return root.pieceTapped ? kind : kind + " is not a piece on the focused screen's bar"
         }
         function bubbleMenu(kind: string): string {
             if (kind.length === 0) return "Which bubble?"
@@ -966,7 +968,9 @@ Scope {
                             function onPieceTapRequested(kind: string): void {
                                 if (barWindow.screen?.name !== GlobalStates.focusedScreen?.name) return
                                 const part = island.pieceItem(kind)
-                                if (part) island.activatePiece(kind, part)
+                                if (!part) return
+                                root.pieceTapped = true
+                                island.activatePiece(kind, part)
                             }
                             function onIslandRequested(open: bool, page: string): void {
                                 if (!open || barWindow.screen?.name === GlobalStates.focusedScreen?.name) {
