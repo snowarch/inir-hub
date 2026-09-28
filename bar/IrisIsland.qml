@@ -652,7 +652,7 @@ Item {
         return root.leftSatelliteRest && kind === "media"
     }
     readonly property var barPieces: {
-        const carried = Array.from(IrisStyle.structuralValue("bar.pieces", []))
+        const carried = IrisPieces.carriedBy(Config.options?.iris?.bubbles, IrisStyle.structuralValue("bar.pieces", []))
         for (const kind of root.absorbedPieces) if (!carried.includes(kind)) carried.push(kind)
         if (root.auxiliary === "tray" && root.trayAppsFace && !root.floatsAlone("tray")
                 && !root.floatingSlots.includes("utility") && !carried.includes("tray"))
@@ -2095,7 +2095,7 @@ Item {
                 start: root.zoned ? Array.from(IrisStyle.structuralValue("bar.fullStart", ["workspaces", "window"])).concat(root.absorbedStart.length > 0 ? ["|"] : [], root.absorbedStart) : []
                 center: root.zoned ? IrisStyle.structuralValue("bar.fullCenter", ["island"]) : []
                 end: root.zoned ? Array.from(IrisStyle.structuralValue("bar.fullEnd", ["tray", "notifications", "sound", "controls"]))
-                    .concat(Array.from(IrisStyle.structuralValue("bar.pieces", [])).map(String).filter(kind => kind !== "media"))
+                    .concat(IrisPieces.carriedBy(Config.options?.iris?.bubbles, IrisStyle.structuralValue("bar.pieces", [])).filter(kind => kind !== "media"))
                     .concat(root.absorbedPieces.some(kind => !root.absorbedStart.includes(kind)) ? ["|"] : [],
                         root.absorbedPieces.filter(kind => !root.absorbedStart.includes(kind))) : []
                 absorbed: root.absorbedPieces

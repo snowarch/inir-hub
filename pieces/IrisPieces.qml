@@ -196,6 +196,16 @@ QtObject {
         const extra = options?.extras?.[id]
         return (extra?.enable ?? false) && String(extra?.place ?? root.defaultPlace) !== "island"
     }
+    // What the Island carries: its own list, and any extra switched on whose place is the Island (a Settings switch
+    // can turn one on there without adding it to the list; it must not vanish).
+    function carriedBy(options: var, listed: var): var {
+        const out = Array.from(listed ?? []).map(String)
+        for (const id of root.extraIds) {
+            const extra = options?.extras?.[id]
+            if ((extra?.enable ?? false) && String(extra?.place ?? root.defaultPlace) === "island" && !out.includes(id)) out.push(id)
+        }
+        return out
+    }
     function anyFloating(options: var): bool {
         return root.slotIds.some(id => String(options?.[id]?.place ?? "island") !== "island")
             || root.extraIds.some(id => root.floats(options, id))
