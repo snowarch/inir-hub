@@ -156,6 +156,7 @@ Item {
     readonly property alias inputOff: window.inputOff
     readonly property alias hitItem: hitArea
     readonly property alias bodyShape: window.bodyShape
+    readonly property alias editShapes: window.editShapes
     function closeMenu(): void { window.menuApp = null }
 
     Item {
@@ -331,6 +332,23 @@ Item {
                 return (Math.cos(Math.PI * distance / range) + 1) / 2
             }
 
+            // Customize outlines an app or a piece of the Dock by its own mark (the hover plate's square), under the
+            // id its click selects, so pointing at kitty names kitty and not the whole Dock.
+            readonly property var editShapes: {
+                if (!GlobalStates.irisEdit || dock.opacity <= 0.01) return []
+                void (dock.x + dock.y + dock.width + dock.height + appRow.width + appRow.height + window.edgeOffset + window.screenOffsetY)
+                const out = []
+                const size = root.plateSize
+                for (const child of appRow.children) {
+                    const id = String(child.editId ?? "")
+                    const cell = child.editFace ?? null
+                    if (id.length === 0 || !cell || !child.visible || cell.width <= 0) continue
+                    const at = cell.mapToItem(window, root.edgeX(cell.width, size, 4 * root.d), root.edgeY(cell.height, size, 4 * root.d))
+                    out.push({ id: id, x: Math.round(at.x), y: Math.round(at.y + window.screenOffsetY), width: size, height: size,
+                        radius: IrisStyle.iconRadius(size), inDock: true })
+                }
+                return out
+            }
             readonly property var bodyShape: {
                 void (dock.x + dock.y + dock.width + dock.height + dock.radius
                     + window.edgeOffset + window.width + window.height + window.screenOffsetY
@@ -541,6 +559,8 @@ Item {
                             required property int index
                             readonly property var app: root.liveApps[entry.modelData.appId] ?? entry.modelData
                             readonly property bool separator: entry.modelData.appId === "SEPARATOR"
+                            readonly property string editId: entry.separator ? "" : "piece:" + appSlot.pieceId
+                            readonly property Item editFace: entry.separator ? null : appSlot
                             width: root.vertical ? root.thickness : entry.separator ? root.separatorWidth : appSlot.width
                             height: root.vertical ? (entry.separator ? root.separatorWidth : appSlot.height) : root.thickness
 
@@ -809,6 +829,8 @@ Item {
                             id: pieceSlot
                             required property var modelData
                             required property int index
+                            readonly property string editId: "piece:" + pieceSlot.modelData.slot
+                            readonly property Item editFace: pieceSlot
                             slotIndex: (root.showLauncher ? 1 : 0) + root.entries.length + 1 + pieceSlot.index
                             readonly property string label: Translation.tr(IrisPieces.labelOf(pieceSlot.modelData.kind))
                             function rect(): var {

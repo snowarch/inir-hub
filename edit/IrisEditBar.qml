@@ -3,6 +3,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls
+import QtQuick.Shapes
 import Quickshell
 import qs
 import qs.services
@@ -120,8 +121,9 @@ Item {
     readonly property var inspectorSpecs: {
         Config.revision
         const id = root.selectedId
+        // An app or piece in the Dock is shaped by the Dock: its inspector is the Dock's.
+        if (id === "dock" || root.selected?.inDock) return IrisOptions.studio.filter(spec => spec.target === "dock")
         if (id === "island") return IrisOptions.studio.filter(spec => spec.target === "island")
-        if (id === "dock") return IrisOptions.studio.filter(spec => spec.target === "dock")
         if (id.length === 0) return []
         const own = IrisPieces.isApp(GlobalStates.irisEditSelection) ? []
             : IrisOptions.behaviour.filter(spec => spec.piece === root.selectionKind)
@@ -613,8 +615,55 @@ Item {
         readonly property bool edgeRight: outline.opens && outline.shape.x + outline.shape.width >= root.width - outline.band - 1
         readonly property real ringRadius: Number(outline.shape?.radius ?? 0) + outline.gap
         readonly property real reach: outline.ringRadius + outline.gap + 4
+        readonly property int openSides: (outline.edgeTop ? 1 : 0) + (outline.edgeBottom ? 1 : 0) + (outline.edgeLeft ? 1 : 0) + (outline.edgeRight ? 1 : 0)
+        readonly property color ringColor: outline.strong ? IrisStyle.accent : Qt.alpha(IrisStyle.accent, 0.55) // iris-literal: a hover ring is the selection ring at half strength
+        readonly property real ringWidth: Math.max(1, Math.round((outline.strong ? 2 : 1.5) * root.d))
+        // Melted into one edge, the body flares into it with the notch's shoulders; the ring flares with it, drawn
+        // open toward that edge and ending on the band's line.
+        Item {
+            id: arch
+            visible: outline.openSides === 1
+            readonly property bool acrossX: outline.edgeLeft || outline.edgeRight
+            readonly property real bandLine: outline.edgeBottom ? root.height - outline.band - outline.y
+                : outline.edgeTop ? outline.band - outline.y
+                : outline.edgeRight ? root.width - outline.band - outline.x : outline.band - outline.x
+            readonly property real boxX: outline.edgeLeft ? arch.bandLine : 0
+            readonly property real boxY: outline.edgeTop ? arch.bandLine : 0
+            readonly property real boxW: outline.edgeRight ? arch.bandLine : outline.edgeLeft ? outline.width - arch.bandLine : outline.width
+            readonly property real boxH: outline.edgeBottom ? arch.bandLine : outline.edgeTop ? outline.height - arch.bandLine : outline.height
+            readonly property real along: arch.acrossX ? arch.boxH : arch.boxW
+            readonly property real across: arch.acrossX ? arch.boxW : arch.boxH
+            readonly property real corner: Math.max(0, Math.min(outline.ringRadius, arch.along / 2, arch.across))
+            // Measured on the Dock at fuseEdge 56: the side opens slowly and meets the band in a curve ~25 px tall.
+            readonly property real shoulder: Math.max(2, Math.min(arch.across / 2, Number(outline.shape?.fuse ?? 0) * 0.5 - outline.gap))
+            width: arch.along
+            height: arch.across
+            x: Math.round(arch.boxX + arch.boxW / 2 - arch.along / 2)
+            y: Math.round(arch.boxY + arch.boxH / 2 - arch.across / 2)
+            rotation: outline.edgeTop ? 180 : outline.edgeRight ? -90 : outline.edgeLeft ? 90 : 0
+            Shape {
+                anchors.fill: parent
+                preferredRendererType: Shape.CurveRenderer
+                ShapePath {
+                    strokeColor: outline.ringColor
+                    strokeWidth: outline.ringWidth
+                    fillColor: "transparent"
+                    capStyle: ShapePath.FlatCap
+                    joinStyle: ShapePath.RoundJoin
+                    startX: -arch.shoulder; startY: arch.across
+                    PathArc { x: 0; y: arch.across - arch.shoulder; radiusX: arch.shoulder; radiusY: arch.shoulder; direction: PathArc.Counterclockwise }
+                    PathLine { x: 0; y: arch.corner }
+                    PathArc { x: arch.corner; y: 0; radiusX: arch.corner; radiusY: arch.corner }
+                    PathLine { x: arch.along - arch.corner; y: 0 }
+                    PathArc { x: arch.along; y: arch.corner; radiusX: arch.corner; radiusY: arch.corner }
+                    PathLine { x: arch.along; y: arch.across - arch.shoulder }
+                    PathArc { x: arch.along + arch.shoulder; y: arch.across; radiusX: arch.shoulder; radiusY: arch.shoulder; direction: PathArc.Counterclockwise }
+                }
+            }
+        }
         Item {
             id: ringClip
+            visible: outline.openSides !== 1
             clip: outline.edgeTop || outline.edgeBottom || outline.edgeLeft || outline.edgeRight
             x: outline.edgeLeft ? Math.max(0, outline.band - outline.x) : 0
             y: outline.edgeTop ? Math.max(0, outline.band - outline.y) : 0
@@ -627,8 +676,8 @@ Item {
                 height: outline.height + (outline.edgeTop ? outline.reach : 0) + (outline.edgeBottom ? outline.reach : 0)
                 radius: outline.ringRadius
                 color: "transparent"
-                border.width: Math.max(1, Math.round((outline.strong ? 2 : 1.5) * root.d))
-                border.color: outline.strong ? IrisStyle.accent : Qt.alpha(IrisStyle.accent, 0.55) // iris-literal: a hover ring is the selection ring at half strength
+                border.width: outline.ringWidth
+                border.color: outline.ringColor
             }
         }
         Rectangle {
@@ -656,7 +705,8 @@ Item {
     }
 
     // A selected piece carries a knob on its corner toward the middle of the screen: dragging it sizes every bubble.
-    readonly property bool knobShown: root.selected !== null && !root.selected.orphan && String(root.selected.id).startsWith("piece:")
+    readonly property bool knobShown: root.selected !== null && !root.selected.orphan && !root.selected.inDock
+        && String(root.selected.id).startsWith("piece:")
     readonly property var knobRect: root.knobShown && root.shown
         ? Qt.rect(knob.x - knob.reach, knob.y - knob.reach, knob.width + 2 * knob.reach, knob.height + 2 * knob.reach) : null
     Item {
