@@ -114,6 +114,7 @@ Item {
         function onControlPanelOpenChanged(): void { if (GlobalStates.controlPanelOpen) root.seenAllAt = Date.now() }
     }
     readonly property real slotWidth: root.iconSize + 10 * root.d
+    readonly property real plateSize: Math.round(root.iconSize + 6 * root.d)
     readonly property real separatorWidth: 13 * root.d
     readonly property real slotSpacing: 2 * root.d
     readonly property real magnifyGain: Math.max(0.1, Math.min(1, (Number(root.options?.magnifySize ?? 150) - 100) / 100))
@@ -391,7 +392,10 @@ Item {
             readonly property real notchReveal: Math.max(0, Math.min(1, (window.edgeOffset + window.dockHeight) / window.dockHeight))
             IrisSurface {
                 id: dock
-                readonly property real padding: 8 * root.d
+                // The ends give the first and last hover plate room to sit concentric with the Dock's end curve:
+                // a plate of radius r starts R − r from an end of radius R (nothing changes on a tight Dock).
+                readonly property real padding: Math.max(8 * root.d,
+                    dock.radius - IrisStyle.iconRadius(root.plateSize) - (root.slotWidth - root.plateSize) / 2)
                 readonly property real baseWidth: (window.baseCenters.length > 0
                     ? window.baseCenters[window.baseCenters.length - 1] + root.slotWidth / 2 : 0) + dock.padding * 2
                 width: root.vertical ? window.dockHeight : Math.min(window.width - 32, appRow.implicitWidth + dock.padding * 2)
@@ -469,9 +473,6 @@ Item {
                         visible: root.showLauncher
                         slotIndex: 0
                         HoverPlate {
-                            bodyRadius: dock.radius
-                            atStart: true
-                            atEnd: root.entries.length === 0 && root.pieces.length === 0
                             lit: launcherArea.containsMouse || launcherArea.pressed
                         }
                         MouseArea {
@@ -613,9 +614,6 @@ Item {
                                 }
 
                                 HoverPlate {
-                                    bodyRadius: dock.radius
-                                    atStart: entry.index === 0 && !root.showLauncher
-                                    atEnd: entry.index === root.entries.length - 1 && root.pieces.length === 0
                                     lift: appSlot.lift + appIcon.hoverLift
                                     lit: appButton.hovered || appButton.down
                                 }
@@ -819,8 +817,6 @@ Item {
                                 return { x: p.x, y: p.y, size: size, source: "dock-" + pieceSlot.modelData.slot }
                             }
                             HoverPlate {
-                                bodyRadius: dock.radius
-                                atEnd: pieceSlot.index === root.pieces.length - 1
                                 lit: pieceHover.hovered || pieceTap.pressed
                             }
                             IrisBubbleFace {
@@ -1380,36 +1376,18 @@ Item {
             }
         }
 
-    // A slot's hover plate: a rounded square around the icon, 4·d from the lane's inner edge like the lane
-    // itself. On the first and last slot the corners facing the Dock's end take the body's radius less their
-    // gap, so the plate follows the end's curve instead of pushing a square corner into it; on a notch Dock the
-    // corners on the screen's side stay as they are, there is no curve there.
+    // A slot's hover plate: a rounded square around the icon, the same radius on every corner, 4·d from the lane's
+    // inner edge like the lane itself. The Dock's ends make room for it (dock.padding), so it never meets the curve.
     component HoverPlate: Rectangle {
         id: plate
-        property real bodyRadius: 0
-        property bool atStart: false
-        property bool atEnd: false
         property real lift: 0
         property bool lit: false
-        readonly property real inner: 4 * root.d
-        readonly property real outer: 8 * root.d
-        readonly property real base: IrisStyle.iconRadius(plate.width)
-        function fit(gap: real): real { return Math.max(plate.base, Math.min(plate.width / 2, plate.bodyRadius - gap)) }
-        // side: "start" | "end" | "" along the Dock; inward: the corner faces away from the screen edge.
-        function corner(along: string, inward: bool): real {
-            if (!((along === "start" && plate.atStart) || (along === "end" && plate.atEnd))) return plate.base
-            if (inward) return plate.fit(plate.inner)
-            return root.notch ? plate.base : plate.fit(plate.outer)
-        }
         visible: !root.magnify
-        width: Math.round(root.iconSize + 6 * root.d)
+        width: root.plateSize
         height: plate.width
+        radius: IrisStyle.iconRadius(plate.width)
         x: root.edgeX(parent.width, plate.width, 4 * root.d + plate.lift)
         y: root.edgeY(parent.height, plate.height, 4 * root.d + plate.lift)
-        topLeftRadius: plate.corner(root.vertical ? "start" : "start", root.vertical ? !root.atLeft : !root.atTop)
-        topRightRadius: plate.corner(root.vertical ? "start" : "end", root.vertical ? !root.atRight : !root.atTop)
-        bottomLeftRadius: plate.corner(root.vertical ? "end" : "start", root.vertical ? !root.atLeft : !root.atBottom)
-        bottomRightRadius: plate.corner(root.vertical ? "end" : "end", root.vertical ? !root.atRight : !root.atBottom)
         color: plate.lit ? IrisStyle.fill : ColorUtils.applyAlpha(IrisStyle.text, 0)
         Behavior on color { ColorAnimation { duration: IrisStyle.duration(120); easing.type: IrisStyle.feedbackEasing } }
     }
