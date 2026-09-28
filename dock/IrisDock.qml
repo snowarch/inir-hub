@@ -466,6 +466,11 @@ Item {
                         id: launcherSlot
                         visible: root.showLauncher
                         slotIndex: 0
+                        HoverPlate {
+                            bodyRadius: dock.radius
+                            bodyThickness: dock.thickness
+                            lit: launcherArea.containsMouse || launcherArea.pressed
+                        }
                         MouseArea {
                             id: launcherArea
                             anchors.fill: parent
@@ -604,6 +609,11 @@ Item {
                                     NumberAnimation { target: appSlot; property: "lift"; to: 0; duration: IrisStyle.duration(240); easing.type: Easing.InQuad }
                                 }
 
+                                HoverPlate {
+                                    bodyRadius: dock.radius
+                                    bodyThickness: dock.thickness
+                                    lit: appButton.hovered || appButton.down
+                                }
                                 IrisButton {
                                     id: appButton
                                     anchors.fill: parent
@@ -656,16 +666,6 @@ Item {
                                         const host = appButton.iconHost
                                         void (host?.x + host?.y + host?.width + host?.height + appButton.x + appButton.y + appButton.width + appButton.height)
                                         return host ? host.mapToItem(appSlot, appButton.iconCentre.x, appButton.iconCentre.y) : Qt.point(appSlot.width / 2, appSlot.height / 2)
-                                    }
-                                    Rectangle {
-                                        visible: !root.magnify
-                                        x: Math.round(appButton.iconCentre.x - width / 2)
-                                        y: Math.round(appButton.iconCentre.y - height / 2)
-                                        width: root.iconSize + 8 * root.d
-                                        height: width
-                                        radius: IrisStyle.iconRadius(width)
-                                        color: (appButton.hovered || appButton.down ? IrisStyle.fill : ColorUtils.applyAlpha(IrisStyle.text, 0))
-                                        Behavior on color { ColorAnimation { duration: IrisStyle.duration(120); easing.type: IrisStyle.feedbackEasing } }
                                     }
                                     SmartAppIcon {
                                         id: appIcon
@@ -813,14 +813,10 @@ Item {
                                 const size = pieceFace.width * pieceFace.scale
                                 return { x: p.x, y: p.y, size: size, source: "dock-" + pieceSlot.modelData.slot }
                             }
-                            Rectangle {
-                                visible: !root.magnify
-                                anchors.centerIn: pieceFace
-                                width: root.iconSize + 8 * root.d
-                                height: width
-                                radius: width / 2
-                                color: pieceHover.hovered || pieceTap.pressed ? IrisStyle.fill : ColorUtils.applyAlpha(IrisStyle.text, 0)
-                                Behavior on color { ColorAnimation { duration: IrisStyle.duration(120); easing.type: IrisStyle.feedbackEasing } }
+                            HoverPlate {
+                                bodyRadius: dock.radius
+                                bodyThickness: dock.thickness
+                                lit: pieceHover.hovered || pieceTap.pressed
                             }
                             IrisBubbleFace {
                                 id: pieceFace
@@ -1378,4 +1374,20 @@ Item {
                 }
             }
         }
+
+    // A slot's hover plate is the Dock's own shape, inset: one cell of the lane, its corners concentric with
+    // the body's (a capsule Dock lights discs, a squircle Dock squircles), the running dot inside it.
+    component HoverPlate: Rectangle {
+        property real bodyRadius: 0
+        property real bodyThickness: root.thickness
+        property bool lit: false
+        readonly property real inset: Math.max(0, (bodyThickness - root.thickness) / 2)
+        visible: !root.magnify
+        anchors.centerIn: parent
+        width: root.thickness
+        height: root.thickness
+        radius: Math.max(0, Math.min(width / 2, bodyRadius - inset))
+        color: lit ? IrisStyle.fill : ColorUtils.applyAlpha(IrisStyle.text, 0)
+        Behavior on color { ColorAnimation { duration: IrisStyle.duration(120); easing.type: IrisStyle.feedbackEasing } }
+    }
 }
