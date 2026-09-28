@@ -3,7 +3,6 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls
-import QtQuick.Shapes
 import Quickshell
 import qs
 import qs.services
@@ -14,6 +13,7 @@ import qs.modules.iris.pieces
 import qs.modules.iris.settings
 import qs.modules.iris.style
 import qs.modules.iris.components
+import qs.modules.iris.field as Field
 
 // Customize iRiS on the shell itself. The Island grows an edit capsule (Themes, Look, Pieces, undo, redo,
 // Done); each tool is a sheet grown from the capsule; touching anything on screen grows its inspector out
@@ -98,8 +98,15 @@ Item {
         }
         return best
     }
-    readonly property var hovered: root.present && pointer.hovered
-        ? root.shapeAt(pointer.point.position.x, pointer.point.position.y) : null
+    // The Dock is entered like a group: until it (or something in it) is selected, pointing at an app names the Dock,
+    // which is what a click there selects (IrisDock.editSelect).
+    readonly property bool dockEntered: root.selectedId === "dock" || Boolean(root.selected?.inDock)
+    readonly property var hovered: {
+        if (!root.present || !pointer.hovered) return null
+        const hit = root.shapeAt(pointer.point.position.x, pointer.point.position.y)
+        if (hit?.inDock && !root.dockEntered) return root.shapeOf("dock") ?? hit
+        return hit
+    }
     // A piece has two shapes under one id: its body in the field (melted into the edge, it reaches the edge) and
     // its face. The ring goes around the face, the last one listed, as the hover does.
     function shapeOf(id: string): var {
@@ -614,71 +621,68 @@ Item {
         readonly property bool edgeLeft: outline.opens && outline.shape.x <= outline.band + 1
         readonly property bool edgeRight: outline.opens && outline.shape.x + outline.shape.width >= root.width - outline.band - 1
         readonly property real ringRadius: Number(outline.shape?.radius ?? 0) + outline.gap
-        readonly property real reach: outline.ringRadius + outline.gap + 4
         readonly property int openSides: (outline.edgeTop ? 1 : 0) + (outline.edgeBottom ? 1 : 0) + (outline.edgeLeft ? 1 : 0) + (outline.edgeRight ? 1 : 0)
         readonly property color ringColor: outline.strong ? IrisStyle.accent : Qt.alpha(IrisStyle.accent, 0.55) // iris-literal: a hover ring is the selection ring at half strength
         readonly property real ringWidth: Math.max(1, Math.round((outline.strong ? 2 : 1.5) * root.d))
-        // Melted into one edge, the body flares into it with the notch's shoulders; the ring flares with it, drawn
-        // open toward that edge and ending on the band's line.
+        // A body melted into its edge is outlined by the field itself: the same body, grown by the ring's gap, drawn
+        // with no fill and an accent rim, joined to the same edge, so its shoulders are the body's own curves. The
+        // clip stops it at the band's line; a floating body is a plain rounded ring, which is already exact.
         Item {
-            id: arch
-            visible: outline.openSides === 1
-            readonly property bool acrossX: outline.edgeLeft || outline.edgeRight
-            readonly property real bandLine: outline.edgeBottom ? root.height - outline.band - outline.y
-                : outline.edgeTop ? outline.band - outline.y
-                : outline.edgeRight ? root.width - outline.band - outline.x : outline.band - outline.x
-            readonly property real boxX: outline.edgeLeft ? arch.bandLine : 0
-            readonly property real boxY: outline.edgeTop ? arch.bandLine : 0
-            readonly property real boxW: outline.edgeRight ? arch.bandLine : outline.edgeLeft ? outline.width - arch.bandLine : outline.width
-            readonly property real boxH: outline.edgeBottom ? arch.bandLine : outline.edgeTop ? outline.height - arch.bandLine : outline.height
-            readonly property real along: arch.acrossX ? arch.boxH : arch.boxW
-            readonly property real across: arch.acrossX ? arch.boxW : arch.boxH
-            readonly property real corner: Math.max(0, Math.min(outline.ringRadius, arch.along / 2, arch.across))
-            // Measured on the Dock at fuseEdge 56: the side opens slowly and meets the band in a curve ~25 px tall.
-            readonly property real shoulder: Math.max(2, Math.min(arch.across / 2, Number(outline.shape?.fuse ?? 0) * 0.5 - outline.gap))
-            width: arch.along
-            height: arch.across
-            x: Math.round(arch.boxX + arch.boxW / 2 - arch.along / 2)
-            y: Math.round(arch.boxY + arch.boxH / 2 - arch.across / 2)
-            rotation: outline.edgeTop ? 180 : outline.edgeRight ? -90 : outline.edgeLeft ? 90 : 0
-            Shape {
-                anchors.fill: parent
-                preferredRendererType: Shape.CurveRenderer
-                ShapePath {
-                    strokeColor: outline.ringColor
-                    strokeWidth: outline.ringWidth
-                    fillColor: "transparent"
-                    capStyle: ShapePath.FlatCap
-                    joinStyle: ShapePath.RoundJoin
-                    startX: -arch.shoulder; startY: arch.across
-                    PathArc { x: 0; y: arch.across - arch.shoulder; radiusX: arch.shoulder; radiusY: arch.shoulder; direction: PathArc.Counterclockwise }
-                    PathLine { x: 0; y: arch.corner }
-                    PathArc { x: arch.corner; y: 0; radiusX: arch.corner; radiusY: arch.corner }
-                    PathLine { x: arch.along - arch.corner; y: 0 }
-                    PathArc { x: arch.along; y: arch.corner; radiusX: arch.corner; radiusY: arch.corner }
-                    PathLine { x: arch.along; y: arch.across - arch.shoulder }
-                    PathArc { x: arch.along + arch.shoulder; y: arch.across; radiusX: arch.shoulder; radiusY: arch.shoulder; direction: PathArc.Counterclockwise }
+            id: fieldRing
+            readonly property var body: outline.shape
+            readonly property real bandBottom: root.height - outline.band
+            readonly property real bandRight: root.width - outline.band
+            readonly property real flare: Number(fieldRing.body?.fuse ?? 0) + outline.gap
+            visible: outline.openSides > 0
+            clip: true
+            x: (outline.edgeLeft ? outline.band : (fieldRing.body?.x ?? 0) - fieldRing.flare) - outline.x
+            y: (outline.edgeTop ? outline.band : (fieldRing.body?.y ?? 0) - fieldRing.flare) - outline.y
+            width: (outline.edgeRight ? fieldRing.bandRight : (fieldRing.body?.x ?? 0) + (fieldRing.body?.width ?? 0) + fieldRing.flare) - outline.x - fieldRing.x
+            height: (outline.edgeBottom ? fieldRing.bandBottom : (fieldRing.body?.y ?? 0) + (fieldRing.body?.height ?? 0) + fieldRing.flare) - outline.y - fieldRing.y
+            readonly property var ringShapes: {
+                const s = fieldRing.body
+                if (!s || !fieldRing.visible) return []
+                const g = outline.gap
+                const joins = Array.isArray(s.joins) ? s.joins : s.joins ? [s.joins] : []
+                const out = [{ id: "ring", x: s.x - g, y: s.y - g, width: s.width + 2 * g, height: s.height + 2 * g,
+                    radius: Number(s.radius ?? 0) + g, fuse: Number(s.fuse ?? IrisStyle.fuse), paints: true, glass: "solid", joins: [] }]
+                for (const name of joins) {
+                    if (name === "frame") {
+                        const deep = outline.band + 200
+                        const band = outline.edgeBottom ? { x: -200, y: root.height - outline.band, width: root.width + 400, height: deep }
+                            : outline.edgeTop ? { x: -200, y: outline.band - deep, width: root.width + 400, height: deep }
+                            : outline.edgeRight ? { x: root.width - outline.band, y: -200, width: deep, height: root.height + 400 }
+                            : { x: outline.band - deep, y: -200, width: deep, height: root.height + 400 }
+                        out.push(Object.assign({ id: "ringEdge", radius: 0, fuse: 0, paints: true, glass: "solid" }, band))
+                        out[0].joins.push("ringEdge")
+                    } else {
+                        const partner = (root.shapes ?? []).find(shape => shape.id === name)
+                        if (!partner) continue
+                        out.push(Object.assign({}, partner, { id: "ringJoin" + out.length, paints: true, glass: "solid", joins: [] }))
+                        out[0].joins.push("ringJoin" + (out.length - 1))
+                    }
                 }
+                return out
+            }
+            Field.IrisField {
+                x: -fieldRing.x - outline.x
+                y: -fieldRing.y - outline.y
+                width: root.width
+                height: root.height
+                framed: false
+                tint: "transparent"
+                rim: outline.ringColor
+                rimWidth: outline.ringWidth
+                shapes: fieldRing.ringShapes
             }
         }
-        Item {
-            id: ringClip
-            visible: outline.openSides !== 1
-            clip: outline.edgeTop || outline.edgeBottom || outline.edgeLeft || outline.edgeRight
-            x: outline.edgeLeft ? Math.max(0, outline.band - outline.x) : 0
-            y: outline.edgeTop ? Math.max(0, outline.band - outline.y) : 0
-            width: (outline.edgeRight ? Math.min(outline.width, root.width - outline.band - outline.x) : outline.width) - ringClip.x
-            height: (outline.edgeBottom ? Math.min(outline.height, root.height - outline.band - outline.y) : outline.height) - ringClip.y
-            Rectangle {
-                x: -ringClip.x - (outline.edgeLeft ? outline.reach : 0)
-                y: -ringClip.y - (outline.edgeTop ? outline.reach : 0)
-                width: outline.width + (outline.edgeLeft ? outline.reach : 0) + (outline.edgeRight ? outline.reach : 0)
-                height: outline.height + (outline.edgeTop ? outline.reach : 0) + (outline.edgeBottom ? outline.reach : 0)
-                radius: outline.ringRadius
-                color: "transparent"
-                border.width: outline.ringWidth
-                border.color: outline.ringColor
-            }
+        Rectangle {
+            visible: outline.openSides === 0
+            anchors.fill: parent
+            radius: outline.ringRadius
+            color: "transparent"
+            border.width: outline.ringWidth
+            border.color: outline.ringColor
         }
         Rectangle {
             // The inspector already names what is selected; the capsule is for what the pointer is over.

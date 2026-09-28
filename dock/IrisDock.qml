@@ -157,6 +157,21 @@ Item {
     readonly property alias hitItem: hitArea
     readonly property alias bodyShape: window.bodyShape
     readonly property alias editShapes: window.editShapes
+    // Customize selects the Dock first and what is in it second, as a design tool enters a group: a click on an app
+    // selects the whole Dock unless the Dock (or something in it) already is, then the app.
+    readonly property var editMembers: root.entries.filter(entry => entry.appId !== "SEPARATOR")
+        .map(entry => IrisPieces.appPieceId(entry.appId))
+        .concat(root.pieces.map(piece => String(piece.slot).startsWith("extra-") ? "extra:" + String(piece.slot).slice(6) : String(piece.slot)))
+    function editSelect(member: string): void {
+        const inside = GlobalStates.irisEditTarget === "dock" || root.editMembers.includes(GlobalStates.irisEditSelection)
+        if (!inside) {
+            GlobalStates.irisEditSelection = ""
+            GlobalStates.irisEditTarget = "dock"
+            return
+        }
+        GlobalStates.irisEditTarget = ""
+        GlobalStates.irisEditSelection = member
+    }
     function closeMenu(): void { window.menuApp = null }
 
     Item {
@@ -603,8 +618,7 @@ Item {
                                 readonly property bool carried: GlobalStates.irisBubbleDrag?.slot === appSlot.pieceId
                                 function primary(): void {
                                     if (GlobalStates.irisEdit) {
-                                        GlobalStates.irisEditTarget = ""
-                                        GlobalStates.irisEditSelection = appSlot.pieceId
+                                        root.editSelect(appSlot.pieceId)
                                         return
                                     }
                                     if ((entry.app.toplevels?.length ?? 0) > 1) {
@@ -874,9 +888,8 @@ Item {
                                         return
                                     }
                                     if (GlobalStates.irisEdit) {
-                                        GlobalStates.irisEditTarget = ""
-                                        GlobalStates.irisEditSelection = pieceSlot.modelData.slot.startsWith("extra-")
-                                            ? "extra:" + pieceSlot.modelData.slot.slice(6) : pieceSlot.modelData.slot
+                                        root.editSelect(pieceSlot.modelData.slot.startsWith("extra-")
+                                            ? "extra:" + pieceSlot.modelData.slot.slice(6) : pieceSlot.modelData.slot)
                                         return
                                     }
                                     root.pieceActivated(pieceSlot.modelData.slot, pieceSlot.modelData.kind, pieceSlot.rect())
