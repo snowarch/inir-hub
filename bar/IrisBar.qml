@@ -1068,7 +1068,7 @@ Scope {
                     }
                     Timer { id: editRelease; interval: 0; onTriggered: editLoader.lingering = editLoader.item?.shown ?? false }
                     active: barWindow.editHere || editLoader.lingering
-                    sourceComponent: IrisEditBar { screenData: barWindow.screen; shapes: barWindow.fieldShapes.concat(stage.pieceShapes) }
+                    sourceComponent: IrisEditBar { screenData: barWindow.screen; shapes: barWindow.fieldShapes.concat(stage.pieceShapes, islandLoader.item?.carriedShapes ?? []) }
                 }
 
                 Loader {

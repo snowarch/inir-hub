@@ -237,10 +237,12 @@ Item {
             readonly property bool overFullscreen: window.overviewOverFullscreen || (window.fullscreenCovered
                 && (window.askedShown || window.menuOpen || window.editingDock))
             readonly property bool fullscreenIdle: window.fullscreenCovered && !window.overFullscreen
-            readonly property bool stepAside: GlobalStates.widgetEditMode || (GlobalStates.irisEdit && !window.editingDock)
+            // The widget toolbar takes the edge opposite the Island, so the Dock makes room. Customize stays under
+            // the Island: the Dock is part of what is customized and stays in view to be touched.
+            readonly property bool stepAside: GlobalStates.widgetEditMode
             onStepAsideChanged: if (window.stepAside) window.menuApp = null
             readonly property bool revealed: !window.fullscreenIdle && !window.stepAside && (!root.autoHide || window.edgeIntent || window.menuOpen
-                || window.askedShown || window.spotlightHere || window.workspaceEmpty || window.editingDock)
+                || window.askedShown || window.spotlightHere || window.workspaceEmpty || GlobalStates.irisEdit)
             onPointerOnDockChanged: {
                 if (window.pointerOnDock) {
                     hideDelay.stop()

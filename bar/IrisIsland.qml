@@ -923,6 +923,23 @@ Item {
         }
         return null
     }
+    // Customize selects a carried piece by its mark inside the Island, under the same id as a floating one.
+    readonly property var carriedShapes: {
+        if (!GlobalStates.irisEdit) return []
+        void (root.x + root.y + chassis.x + chassis.width + (root.parent?.x ?? 0) + (root.parent?.y ?? 0) + root.heartLength)
+        const out = []
+        const kinds = root.zoned ? barZones.entries.flat() : root.barPieces
+        for (const kind of kinds) {
+            if (!IrisPieces.extraIds.includes(String(kind))) continue
+            const item = root.pieceItem(String(kind))
+            if (!item || !item.visible || item.width <= 0) continue
+            const at = item.mapToItem(null, 0, 0)
+            const size = Math.min(item.width, item.height)
+            out.push({ id: "piece:extra-" + kind, x: at.x + (item.width - size) / 2, y: at.y + (item.height - size) / 2,
+                width: size, height: size, radius: IrisStyle.pieceRadius(size) })
+        }
+        return out
+    }
     // A piece the Island carries is still the stage's piece: what it opens, and where
     // that body grows from, is the same as when it floats.
     signal pieceActivated(string slot, string kind, var rect)

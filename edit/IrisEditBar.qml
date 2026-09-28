@@ -99,8 +99,21 @@ Item {
     }
     readonly property var hovered: root.present && pointer.hovered
         ? root.shapeAt(pointer.point.position.x, pointer.point.position.y) : null
-    readonly property var selected: root.present && root.selectedId.length > 0
-        ? (root.shapes ?? []).find(shape => shape.id === root.selectedId) ?? null : null
+    // A piece has two shapes under one id: its body in the field (melted into the edge, it reaches the edge) and
+    // its face. The ring goes around the face, the last one listed, as the hover does.
+    function shapeOf(id: string): var {
+        const list = root.shapes ?? []
+        for (let i = list.length - 1; i >= 0; i--) if (list[i].id === id) return list[i]
+        return null
+    }
+    // A piece that is not on screen (off, or carried out of sight) is still selectable: its inspector grows from
+    // the capsule, with no ring and no knob, so it can be switched on or placed.
+    readonly property var selected: {
+        if (!root.present || root.selectedId.length === 0) return null
+        const face = root.shapeOf(root.selectedId)
+        if (face || !root.selectedId.startsWith("piece:")) return face
+        return { id: root.selectedId, orphan: true, x: root.capsuleX, y: root.capsuleY, width: root.capsuleW, height: root.capsuleH, radius: root.capsuleH / 2 }
+    }
     readonly property bool inspecting: root.selected !== null
     onInspectingChanged: if (root.inspecting) root.tool = ""
     readonly property string selectionKind: GlobalStates.irisEditSelection.replace(/^extra[:-]/, "")
@@ -116,7 +129,7 @@ Item {
         return own.length > 0 ? own : IrisOptions.studio.filter(spec => spec.target === "pieces")
     }
     HoverHandler { id: pointer; enabled: root.present }
-    Outline { shape: root.selected; strong: true }
+    Outline { shape: root.selected?.orphan ? null : root.selected; strong: true }
     Outline { shape: root.hovered && root.hovered.id !== root.selectedId ? root.hovered : null; strong: false }
 
     // ── Geometry ─────────────────────────────────────────────────────────
@@ -177,12 +190,12 @@ Item {
             if (!held || held.id !== shape.id || held.x !== shape.x || held.y !== shape.y
                     || held.width !== shape.width || held.height !== shape.height)
                 root.anchorShape = shape
-            const body = String(shape.id) === "island" ? "editcapsule" : root.holderOf(shape)
+            const body = String(shape.id) === "island" || shape.orphan ? "editcapsule" : root.holderOf(shape)
             if (body !== root.anchorBody) root.anchorBody = body
         }
     }
     // The Island's own options grow from the capsule it grew, never from the same edge as the capsule.
-    readonly property bool fromCapsule: String(root.anchorShape?.id ?? "") === "island"
+    readonly property bool fromCapsule: String(root.anchorShape?.id ?? "") === "island" || Boolean(root.anchorShape?.orphan)
     readonly property var a: root.fromCapsule
         ? ({ x: root.capsuleX, y: root.capsuleY, width: root.capsuleW, height: root.capsuleH, id: "editcapsule" })
         : root.anchorShape ?? ({ x: root.width / 2, y: root.height / 2, width: 0, height: 0 })
@@ -589,12 +602,34 @@ Item {
         y: Math.round((outline.shape?.y ?? 0) - outline.gap)
         width: Math.round((outline.shape?.width ?? 0) + 2 * outline.gap)
         height: Math.round((outline.shape?.height ?? 0) + 2 * outline.gap)
-        Rectangle {
-            anchors.fill: parent
-            radius: Number(outline.shape?.radius ?? 0) + outline.gap
-            color: "transparent"
-            border.width: Math.max(1, Math.round((outline.strong ? 2 : 1.5) * root.d))
-            border.color: outline.strong ? IrisStyle.accent : Qt.alpha(IrisStyle.accent, 0.55) // iris-literal: a hover ring is the selection ring at half strength
+        // A body melted into the edge has no side there: its ring opens toward the edge and stops at the band,
+        // so it follows the silhouette instead of closing a capsule inside it or across the frame.
+        readonly property real band: IrisFrame.band
+        // A piece's face is a disc: its ring stays whole, it reads better than arms up to the band.
+        readonly property bool opens: outline.shape !== null && !String(outline.shape.id ?? "").startsWith("piece:")
+        readonly property bool edgeTop: outline.opens && outline.shape.y <= outline.band + 1
+        readonly property bool edgeBottom: outline.opens && outline.shape.y + outline.shape.height >= root.height - outline.band - 1
+        readonly property bool edgeLeft: outline.opens && outline.shape.x <= outline.band + 1
+        readonly property bool edgeRight: outline.opens && outline.shape.x + outline.shape.width >= root.width - outline.band - 1
+        readonly property real ringRadius: Number(outline.shape?.radius ?? 0) + outline.gap
+        readonly property real reach: outline.ringRadius + outline.gap + 4
+        Item {
+            id: ringClip
+            clip: outline.edgeTop || outline.edgeBottom || outline.edgeLeft || outline.edgeRight
+            x: outline.edgeLeft ? Math.max(0, outline.band - outline.x) : 0
+            y: outline.edgeTop ? Math.max(0, outline.band - outline.y) : 0
+            width: (outline.edgeRight ? Math.min(outline.width, root.width - outline.band - outline.x) : outline.width) - ringClip.x
+            height: (outline.edgeBottom ? Math.min(outline.height, root.height - outline.band - outline.y) : outline.height) - ringClip.y
+            Rectangle {
+                x: -ringClip.x - (outline.edgeLeft ? outline.reach : 0)
+                y: -ringClip.y - (outline.edgeTop ? outline.reach : 0)
+                width: outline.width + (outline.edgeLeft ? outline.reach : 0) + (outline.edgeRight ? outline.reach : 0)
+                height: outline.height + (outline.edgeTop ? outline.reach : 0) + (outline.edgeBottom ? outline.reach : 0)
+                radius: outline.ringRadius
+                color: "transparent"
+                border.width: Math.max(1, Math.round((outline.strong ? 2 : 1.5) * root.d))
+                border.color: outline.strong ? IrisStyle.accent : Qt.alpha(IrisStyle.accent, 0.55) // iris-literal: a hover ring is the selection ring at half strength
+            }
         }
         Rectangle {
             // The inspector already names what is selected; the capsule is for what the pointer is over.
@@ -621,7 +656,7 @@ Item {
     }
 
     // A selected piece carries a knob on its corner toward the middle of the screen: dragging it sizes every bubble.
-    readonly property bool knobShown: root.selected !== null && String(root.selected.id).startsWith("piece:")
+    readonly property bool knobShown: root.selected !== null && !root.selected.orphan && String(root.selected.id).startsWith("piece:")
     readonly property var knobRect: root.knobShown && root.shown
         ? Qt.rect(knob.x - knob.reach, knob.y - knob.reach, knob.width + 2 * knob.reach, knob.height + 2 * knob.reach) : null
     Item {
