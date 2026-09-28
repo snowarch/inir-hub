@@ -561,6 +561,10 @@ Item {
     readonly property real heartUncovered: root.grownPage ? Math.max(0, 1 - 2.5 * extension.presentation) : 1
     // The heart's lip is the notch gesture: a bar with the notch off keeps one straight edge.
     readonly property bool swellsHeart: root.layout === "full" && !root.vertical && root.heartShown && root.notch
+    // A bar melted into the frame reads as one body from the screen edge down: its lanes centre in that whole
+    // body, band included, not in the part below the band.
+    readonly property real bandLift: root.zoned && !root.vertical && IrisFrame.framed
+        ? IrisFrame.band * Math.min(1, Math.max(0, root.notchness)) / 2 : 0
     readonly property real stripHeight: root.menubar ? Math.max(Math.round(24 * root.d), Math.round(root.compactHeight * 0.72)) : root.compactHeight
     readonly property real notchX: chassis.x + barZones.heartAlong
     readonly property rect notchArea: root.menubar && root.heartShown
@@ -1325,10 +1329,13 @@ Item {
         const across = root.fullWidth && !root.vertical ? root.Window.window?.width ?? body.x + body.width : 0
         const bandInset = IrisFrame.framed ? IrisFrame.band : 0
         const edgeJoin = IrisFrame.framed ? "frame" : "edge"
-        if (!root.clearStrip) out.push({ x: across > 0 ? bandInset : body.x,
+        // A bar melted into its edge runs frame to frame; one that floats keeps its gap on every side and rounds its ends.
+        const spanX = across > 0 ? bandInset + (body.x - bandInset) * (1 - melt) : body.x
+        const spanW = across > 0 ? (across - bandInset * 2) + (body.width - (across - bandInset * 2)) * (1 - melt) : body.width
+        if (!root.clearStrip) out.push({ x: spanX,
             y: root.menubar && root.bottomEdge ? body.y + body.height - strip : body.y,
-            width: across > 0 ? across - bandInset * 2 : body.width, height: strip,
-            radius: across > 0 ? 0 : root.menubar ? strip / 2 : chassis.radius, paints: true,
+            width: spanW, height: strip,
+            radius: across > 0 ? Math.min(strip / 2, chassis.radius) * (1 - melt) : root.menubar ? strip / 2 : chassis.radius, paints: true,
             fuse: across > 0 ? Math.round(16 * root.d) : IrisStyle.fuse + (IrisStyle.fuseEdge - IrisStyle.fuse) * melt, id: "island",
             joins: melt <= 0.01 ? "" : IrisFrame.framed ? "frame" : "edge" })
         // On its side, the heart of a full bar swells inward out of the bar: the same gesture as a menu bar's notch.
@@ -1537,16 +1544,19 @@ Item {
         readonly property real bottomInset: root.bottomEdge ? chassis.edgeInset : 0
         readonly property real leftInset: root.edge === "left" ? chassis.edgeInset : 0
         readonly property real rightInset: root.rightEdge ? chassis.edgeInset : 0
+        // A full bar's heart swells out of the bar as its own field body; the clip reaches it too, so the heart's
+        // row can centre in the heart instead of in the bar. The clip is all but transparent (bodyClip).
+        readonly property real swellInset: root.swellsHeart ? root.heartSwell : 0
         // Upright on a side edge it grows out of its band like it grows down from the top: across, from the
         // capsule's thickness to the page's width, and along, from the capsule's length to the page's height.
         readonly property real across: Math.round(chassis.lerp(root.compactHeight, chassis.openW))
         x: !root.vertical ? Math.round((root.width - width) / 2)
             : root.rightEdge ? root.width - chassis.across : -chassis.leftInset
         y: root.vertical ? Math.round((root.height - chassis.height) / 2)
-            : root.bottomEdge ? root.height - chassis.bodyHeight : -chassis.topInset
+            : root.bottomEdge ? root.height - chassis.bodyHeight - chassis.swellInset : -chassis.topInset
         width: root.vertical ? chassis.across + chassis.leftInset + chassis.rightInset
             : Math.round(chassis.lerp(chassis.restW, chassis.openW))
-        height: root.vertical ? Math.round(chassis.lerp(chassis.restW, chassis.openH)) : chassis.bodyHeight + chassis.topInset + chassis.bottomInset
+        height: root.vertical ? Math.round(chassis.lerp(chassis.restW, chassis.openH)) : chassis.bodyHeight + chassis.topInset + chassis.bottomInset + chassis.swellInset
         // Opaque: a transparent ClippingRectangle past the screen edge stops painting its children.
         color: IrisStyle.bodyClip
         radius: Math.min((root.vertical ? Math.min(chassis.across, chassis.height) : chassis.width) / 2, chassis.restRadius
@@ -1638,6 +1648,10 @@ Item {
                     ? Math.round((root.compactHeight - compactRow.lead) / 2) : 14 * root.d
                 anchors.top: parent.top
                 anchors.bottom: parent.bottom
+                // Centred in the heart, which swells out of the bar, not in the bar it swells from.
+                readonly property real swellShift: Math.round(chassis.swellInset / 2 - root.bandLift) * (root.bottomEdge ? -1 : 1)
+                anchors.topMargin: compactRow.swellShift
+                anchors.bottomMargin: -compactRow.swellShift
                 x: (root.zoned ? Math.round(barZones.heartAlong + (root.heartLength - compactRow.laidWidth) / 2)
                     : Math.round((parent.width - compactRow.laidWidth) / 2)) + compactRow.leadMargin
                     + (root.piecesAtStart ? root.barPieceReserve : 0)
@@ -2074,6 +2088,7 @@ Item {
                 lane: root.clearStrip ? root.compactHeight : root.stripHeight
                 clear: root.clearStrip
                 bottomEdge: root.bottomEdge
+                lift: root.bandLift
                 heartLength: root.heartLength
                 start: root.zoned ? Array.from(IrisStyle.structuralValue("bar.fullStart", ["workspaces", "window"])).concat(root.absorbedStart.length > 0 ? ["|"] : [], root.absorbedStart) : []
                 center: root.zoned ? IrisStyle.structuralValue("bar.fullCenter", ["island"]) : []

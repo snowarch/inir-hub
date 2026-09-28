@@ -562,9 +562,10 @@ ClippingRectangle {
             readonly property bool spans: edgeRoot.layout === "full" || (edgeRoot.layout === "menubar" && !edgeRoot.vertical)
             readonly property real thick: IrisFrame.islandBand
             readonly property real span: edgeRoot.vertical ? height : width
-            readonly property real length: edgeRoot.spans ? edgeRoot.span - 2 * IrisFrame.band
+            // A spanning bar that floats keeps its gap on every side (IrisFrame.islandMargin is 0 with the notch).
+            readonly property real length: edgeRoot.spans ? edgeRoot.span - 2 * (IrisFrame.band + IrisFrame.islandMargin)
                 : Math.round(edgeRoot.thick * (edgeRoot.vertical ? 3.2 : 3.6))
-            readonly property real along: edgeRoot.spans ? IrisFrame.band
+            readonly property real along: edgeRoot.spans ? IrisFrame.band + IrisFrame.islandMargin
                 : edgeRoot.layout === "left" ? IrisFrame.band + Math.round(20 * root.d)
                 : edgeRoot.layout === "right" ? edgeRoot.span - edgeRoot.length - IrisFrame.band - Math.round(20 * root.d)
                 : Math.round((edgeRoot.span - edgeRoot.length) / 2)
@@ -598,7 +599,7 @@ ClippingRectangle {
                     const out = []
                     const clear = edgeRoot.layout === "menubar" && !edgeRoot.vertical && String(root.opt("iris.bar.strip", "clear")) === "clear"
                     if (edgeRoot.notch || clear) out.push(Object.assign({ radius: 0, fuse: IrisStyle.fuseDeep, id: "edge", paints: true }, edgeRoot.edgeBody()))
-                    if (!clear) out.push(Object.assign({ radius: edgeRoot.spans ? 0 : edgeRoot.thick / 2,
+                    if (!clear) out.push(Object.assign({ radius: edgeRoot.spans ? (edgeRoot.notch ? 0 : IrisStyle.pieceRadius(edgeRoot.thick)) : edgeRoot.thick / 2,
                         fuse: edgeRoot.spans && !edgeRoot.vertical ? Math.round(16 * root.d) : edgeRoot.notch ? IrisStyle.fuseEdge : IrisStyle.fuse,
                         id: "island", joins: edgeRoot.notch ? "edge" : "", paints: true }, edgeRoot.island))
                     if (edgeRoot.layout === "menubar" && !edgeRoot.vertical) {

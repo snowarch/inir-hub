@@ -44,6 +44,8 @@ Item {
     readonly property color dangerInk: root.legible(IrisStyle.danger, 3)
     // In a bar's lane a face with a figure reads on one line, glyph then figure, and sizes from both.
     property bool lane: false
+    // A bar cell is its touch target; what it draws keeps the size of the bar's other marks.
+    property real contentInset: 0
     readonly property bool inline: root.lane && ["notifications", "weather", "calendar", "updates"].includes(root.kind)
     readonly property real laneWidth: root.inline ? Math.max(root.height, inlineFace.implicitWidth + 2 * Math.round(8 * root.d)) : root.height
     // What this piece opened (its card, its page, the Control Center) is showing: the plate stays lit, as a menu bar item does.
@@ -137,6 +139,7 @@ Item {
 
     Item {
         anchors.fill: parent
+        anchors.margins: root.contentInset
         scale: root.pressed ? IrisStyle.pressScale(0.88) : root.hovered ? 1.06 : 1
         Behavior on scale { NumberAnimation { duration: IrisStyle.duration(120); easing.type: IrisStyle.feedbackEasing } }
 

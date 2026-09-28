@@ -86,19 +86,20 @@ MouseArea {
             readonly property bool full: card.look.layout === "full" || card.look.layout === "menubar"
             readonly property real thick: Math.round((island.menubar ? 9 : 13) * card.d)
             readonly property real span: island.vertical ? parent.height : parent.width
-            readonly property real length: island.full ? island.span - 2 * scene.band : Math.round(island.span * (island.vertical ? 0.5 : 0.36))
+            readonly property real inset: card.look.notch ? scene.band : scene.band + Math.round(4 * card.d)
+            // A full bar melted into the edge runs frame to frame; one that floats keeps its gap on every side.
+            readonly property real length: island.full ? island.span - 2 * (card.look.notch ? scene.band : island.inset) : Math.round(island.span * (island.vertical ? 0.5 : 0.36))
             readonly property real along: card.look.layout === "left" ? scene.band + Math.round(8 * card.d)
                 : card.look.layout === "right" ? island.span - island.length - scene.band - Math.round(8 * card.d)
-                : island.full ? scene.band : (island.span - island.length) / 2
-            readonly property real inset: card.look.notch ? scene.band : scene.band + Math.round(4 * card.d)
+                : island.full ? (card.look.notch ? scene.band : island.inset) : (island.span - island.length) / 2
             readonly property real across: card.islandEdge === "bottom" ? parent.height - island.thick - island.inset
                 : card.islandEdge === "right" ? parent.width - island.thick - island.inset : island.inset
-            readonly property bool flat: island.full || card.look.notch
+            readonly property bool flat: card.look.notch
             width: island.vertical ? island.thick : island.length
             height: island.vertical ? island.length : island.thick
             x: island.vertical ? island.across : island.along
             y: island.vertical ? island.along : island.across
-            radius: island.full ? 0 : card.look.notch ? island.thick / 2 : card.piece(island.thick)
+            radius: island.full && card.look.notch ? 0 : card.look.notch ? island.thick / 2 : card.piece(island.thick)
             topLeftRadius: island.flat && (card.islandEdge === "top" || card.islandEdge === "left") ? 0 : radius
             topRightRadius: island.flat && (card.islandEdge === "top" || card.islandEdge === "right") ? 0 : radius
             bottomLeftRadius: island.flat && (card.islandEdge === "bottom" || card.islandEdge === "left") ? 0 : radius
