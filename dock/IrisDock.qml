@@ -468,7 +468,8 @@ Item {
                         slotIndex: 0
                         HoverPlate {
                             bodyRadius: dock.radius
-                            bodyThickness: dock.thickness
+                            atStart: true
+                            atEnd: root.entries.length === 0 && root.pieces.length === 0
                             lit: launcherArea.containsMouse || launcherArea.pressed
                         }
                         MouseArea {
@@ -611,7 +612,9 @@ Item {
 
                                 HoverPlate {
                                     bodyRadius: dock.radius
-                                    bodyThickness: dock.thickness
+                                    atStart: entry.index === 0 && !root.showLauncher
+                                    atEnd: entry.index === root.entries.length - 1 && root.pieces.length === 0
+                                    lift: appSlot.lift + appIcon.hoverLift
                                     lit: appButton.hovered || appButton.down
                                 }
                                 IrisButton {
@@ -815,7 +818,7 @@ Item {
                             }
                             HoverPlate {
                                 bodyRadius: dock.radius
-                                bodyThickness: dock.thickness
+                                atEnd: pieceSlot.index === root.pieces.length - 1
                                 lit: pieceHover.hovered || pieceTap.pressed
                             }
                             IrisBubbleFace {
@@ -1375,19 +1378,37 @@ Item {
             }
         }
 
-    // A slot's hover plate is the Dock's own shape, inset: one cell of the lane, its corners concentric with
-    // the body's (a capsule Dock lights discs, a squircle Dock squircles), the running dot inside it.
+    // A slot's hover plate: a rounded square around the icon, 4·d from the lane's inner edge like the lane
+    // itself. On the first and last slot the corners facing the Dock's end take the body's radius less their
+    // gap, so the plate follows the end's curve instead of pushing a square corner into it; on a notch Dock the
+    // corners on the screen's side stay as they are, there is no curve there.
     component HoverPlate: Rectangle {
+        id: plate
         property real bodyRadius: 0
-        property real bodyThickness: root.thickness
+        property bool atStart: false
+        property bool atEnd: false
+        property real lift: 0
         property bool lit: false
-        readonly property real inset: Math.max(0, (bodyThickness - root.thickness) / 2)
+        readonly property real inner: 4 * root.d
+        readonly property real outer: 8 * root.d
+        readonly property real base: IrisStyle.iconRadius(plate.width)
+        function fit(gap: real): real { return Math.max(plate.base, Math.min(plate.width / 2, plate.bodyRadius - gap)) }
+        // side: "start" | "end" | "" along the Dock; inward: the corner faces away from the screen edge.
+        function corner(along: string, inward: bool): real {
+            if (!((along === "start" && plate.atStart) || (along === "end" && plate.atEnd))) return plate.base
+            if (inward) return plate.fit(plate.inner)
+            return root.notch ? plate.base : plate.fit(plate.outer)
+        }
         visible: !root.magnify
-        anchors.centerIn: parent
-        width: root.thickness
-        height: root.thickness
-        radius: Math.max(0, Math.min(width / 2, bodyRadius - inset))
-        color: lit ? IrisStyle.fill : ColorUtils.applyAlpha(IrisStyle.text, 0)
+        width: Math.round(root.iconSize + 6 * root.d)
+        height: plate.width
+        x: root.edgeX(parent.width, plate.width, 4 * root.d + plate.lift)
+        y: root.edgeY(parent.height, plate.height, 4 * root.d + plate.lift)
+        topLeftRadius: plate.corner(root.vertical ? "start" : "start", root.vertical ? !root.atLeft : !root.atTop)
+        topRightRadius: plate.corner(root.vertical ? "start" : "end", root.vertical ? !root.atRight : !root.atTop)
+        bottomLeftRadius: plate.corner(root.vertical ? "end" : "start", root.vertical ? !root.atLeft : !root.atBottom)
+        bottomRightRadius: plate.corner(root.vertical ? "end" : "end", root.vertical ? !root.atRight : !root.atBottom)
+        color: plate.lit ? IrisStyle.fill : ColorUtils.applyAlpha(IrisStyle.text, 0)
         Behavior on color { ColorAnimation { duration: IrisStyle.duration(120); easing.type: IrisStyle.feedbackEasing } }
     }
 }
