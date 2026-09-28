@@ -603,9 +603,11 @@ Item {
     readonly property real compactFloor: root.compactHeight * 2.1
     readonly property real compactCeiling: Math.min(root.availableWidth,
         (root.compactMode === "media" ? 380 : root.compactMode === "event" ? 330 : 320) * root.d)
+    // The ceiling holds the Island's own content; the pieces it carries come on top of it, or they would be
+    // squeezed over the clock (a right Island with a corner plate absorbed, 2026-09-28).
     readonly property real compactTargetWidth: root.spanning ? root.fullChassisWidth
-        : Math.max(root.compactFloor, Math.min(root.compactCeiling,
-            root.compactContentWidth + Math.round(29 * root.d * root.breathing) + root.barPieceReserve))
+        : Math.max(root.compactFloor, Math.min(root.availableWidth, Math.min(root.compactCeiling,
+            root.compactContentWidth + Math.round(29 * root.d * root.breathing)) + root.barPieceReserve))
     readonly property real chassisTargetWidth: root.inlineExpanded ? root.expandedWidth : root.compactTargetWidth
     readonly property string clockStyle: {
         const style = String(IrisStyle.structuralValue("bar.clockStyle", "dateTime"))
