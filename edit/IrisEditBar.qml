@@ -25,18 +25,10 @@ Item {
     property var shapes: []
     readonly property real d: IrisStyle.density
     readonly property bool present: GlobalStates.irisEdit
-    readonly property real presentation: presentSpring.value
-    readonly property bool shown: root.presentation > 0.001
-
-    IrisSpring {
-        id: presentSpring
-        surface: "panels"
-        to: root.entered && root.present ? 1 : 0
-        intent: "auto"
-        minimum: 0
-    }
-    // Made on demand when the mode starts, the spring would begin at its target and the bar would just be
-    // there, its blur ahead of its body. It starts hidden and is sent in on the next turn.
+    // The capsule and its sheets appear and leave in place, with no morph: sliding under the Island and
+    // folding back into the capsule read as being swallowed (maintainer, 2026-09-27).
+    readonly property bool shown: root.entered && root.present
+    // Shown on the turn after loading, so the compositor's blur never lands ahead of the body's tint.
     property bool entered: false
     Timer { id: enterTimer; interval: 0; onTriggered: root.entered = true }
 
@@ -135,7 +127,6 @@ Item {
     readonly property real lo: IrisFrame.band + Math.round(12 * root.d)
     function clampX(x: real, w: real): real { return Math.round(Math.max(root.lo, Math.min(root.width - root.lo - w, x))) }
     function clampY(y: real, h: real): real { return Math.round(Math.max(root.lo, Math.min(root.height - root.lo - h, y))) }
-    function lerp(a: real, b: real, t: real): real { return a + (b - a) * t }
 
     readonly property real capsuleW: Math.round(capsuleRow.implicitWidth + 12 * root.d)
     readonly property real capsuleH: Math.round(44 * root.d)
@@ -149,41 +140,30 @@ Item {
     readonly property real capsuleRestY: root.edge === "bottom" ? root.islandY - root.gap - root.capsuleH
         : root.edge === "top" ? root.islandY + root.islandH + root.gap
         : root.clampY(root.islandY + root.islandH / 2 - root.capsuleH / 2, root.capsuleH)
-    // It grows out from under the Island: at rest behind it, then slides clear.
-    readonly property real capsuleX: root.vertical ? Math.round(root.lerp(root.edge === "left" ? root.islandX + root.islandW - root.capsuleW
-        : root.islandX, root.capsuleRestX, root.presentation)) : root.capsuleRestX
-    readonly property real capsuleY: root.vertical ? root.capsuleRestY : Math.round(root.lerp(root.edge === "bottom" ? root.islandY
-        : root.islandY + root.islandH - root.capsuleH, root.capsuleRestY, root.presentation))
+    readonly property real capsuleX: root.capsuleRestX
+    readonly property real capsuleY: root.capsuleRestY
 
-    // How far the capsule still sits over the Island while it slides out or back: its words never ride on the Island's.
-    readonly property real capsuleOverlap: Math.max(0, root.edge === "bottom" ? root.capsuleY + root.capsuleH - root.islandY
-        : root.edge === "top" ? root.islandY + root.islandH - root.capsuleY
-        : root.edge === "left" ? root.islandX + root.islandW - root.capsuleX
-        : root.capsuleX + root.capsuleW - root.islandX)
-    IrisSpring { id: sheetSpring; surface: "cards"; to: root.shown && root.tool.length > 0 ? 1 : 0; intent: "auto"; minimum: 0 }
-    readonly property real sheetP: sheetSpring.value
-    readonly property bool sheetShown: root.sheetP > 0.002
-    readonly property real sheetW: Math.min(root.width - 2 * root.lo, Math.round((root.tool === "themes" ? 640 : 520) * root.d))
+    readonly property bool sheetShown: root.shown && root.tool.length > 0
+    readonly property real sheetW: Math.min(root.width - 2 * root.lo, Math.round((root.tool === "themes" ? 640 : root.tool === "look" ? 600 : 520) * root.d))
     // Room on the side the sheet grows toward: away from the edge the Island rests on.
     readonly property real sheetRoom: root.vertical ? root.height
         : root.edge === "bottom" ? root.capsuleRestY - root.gap - root.lo
         : root.height - root.capsuleRestY - root.capsuleH
     readonly property real sheetMaxH: Math.round(Math.min(root.sheetRoom, root.height * 0.62))
     readonly property real sheetFullH: Math.min(root.sheetMaxH, sheetContent.implicitHeight + Math.round(32 * root.d))
-    // The sheet is the capsule going on: it leaves from the capsule's width and comes back into it, never a pill of its own.
-    readonly property real sheetLiveW: Math.round(root.vertical ? root.sheetW * root.sheetP : root.lerp(root.capsuleW, root.sheetW, root.sheetP))
-    readonly property real sheetH: Math.round(root.vertical ? root.lerp(root.capsuleH, root.sheetFullH, root.sheetP) : root.sheetFullH * root.sheetP)
-    readonly property real sheetGap: Math.round(root.gap * root.sheetP)
-    readonly property real sheetX: root.edge === "left" ? root.capsuleX + root.capsuleW + root.sheetGap
-        : root.edge === "right" ? root.capsuleX - root.sheetGap - root.sheetLiveW
+    readonly property real sheetLiveW: root.sheetW
+    readonly property real sheetH: Math.round(root.sheetFullH)
+    readonly property real sheetX: root.edge === "left" ? root.capsuleX + root.capsuleW + root.gap
+        : root.edge === "right" ? root.capsuleX - root.gap - root.sheetLiveW
         : root.clampX(root.capsuleX + root.capsuleW / 2 - root.sheetLiveW / 2, root.sheetLiveW)
-    readonly property real sheetY: root.edge === "top" ? root.capsuleY + root.capsuleH + root.sheetGap
-        : root.edge === "bottom" ? root.capsuleY - root.sheetGap - root.sheetH
+    readonly property real sheetY: root.edge === "top" ? root.capsuleY + root.capsuleH + root.gap
+        : root.edge === "bottom" ? root.capsuleY - root.gap - root.sheetH
         : root.clampY(root.capsuleY + root.capsuleH / 2 - root.sheetH / 2, root.sheetH)
 
     IrisSpring { id: inspectorSpring; surface: "cards"; to: root.shown && root.inspecting ? 1 : 0; intent: "auto"; minimum: 0 }
     readonly property real inspectorP: inspectorSpring.value
-    readonly property bool inspectorShown: root.inspectorP > 0.002
+    // The inspector grows from what was touched, but leaves with the mode at once, never after the capsule.
+    readonly property bool inspectorShown: root.shown && root.inspectorP > 0.002
     property var anchorShape: null
     // Latched a tick later: the shapes `selected` is found in include the inspector's own body.
     onSelectedChanged: anchorLatch.restart()
@@ -276,7 +256,6 @@ Item {
         width: root.capsuleW
         height: root.capsuleH
         visible: root.shown
-        opacity: IrisStyle.contentAt(root.presentation) * Math.max(0, 1 - root.capsuleOverlap / (root.capsuleH * 0.4))
         MouseArea { anchors.fill: parent; acceptedButtons: Qt.AllButtons }
         RowLayout {
             id: capsuleRow
@@ -314,9 +293,7 @@ Item {
         height: root.sheetH
         visible: root.sheetShown
         clip: true
-        opacity: IrisStyle.contentAt(root.sheetP)
         MouseArea { anchors.fill: parent; acceptedButtons: Qt.AllButtons }
-        // Laid out once at the sheet's full size: the body grows around it instead of reflowing the grid every frame.
         Item {
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.top: root.edge === "bottom" ? undefined : parent.top
