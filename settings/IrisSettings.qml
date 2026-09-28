@@ -38,6 +38,14 @@ PanelWindow {
     readonly property var specifications: IrisOptions.settings
     readonly property var currentSection: IrisOptions.sectionById(root.section)
     readonly property bool searching: root.query.length > 0
+    // Sidebar (every area beside the page), Rail (only their marks) or Home (every area on one page, each opened full width).
+    readonly property string layoutStyle: String(Config.options?.iris?.appearance?.settingsLayout ?? "sidebar")
+    readonly property bool railLayout: root.layoutStyle === "rail"
+    readonly property bool homeLayout: root.layoutStyle === "home"
+    readonly property bool atHome: root.homeLayout && root.section === "home" && !root.searching && root.advancedPage < 0
+    onHomeLayoutChanged: if (!root.homeLayout && root.section === "home") root.section = "general"
+    // The section a rail mark is pointed at: its name shows on a capsule beside the rail.
+    property var railHint: null
     // A section with a single group has nothing to choose between: it opens on that group.
     readonly property string openGroup: root.searching ? ""
         : root.group.length > 0 ? root.group
@@ -49,10 +57,14 @@ PanelWindow {
     readonly property var searchIndex: root.specifications.map(spec => {
         const label = Translation.tr(spec.label).toLowerCase()
         const sectionTitle = Translation.tr(IrisOptions.sectionById(spec.section).title)
-        return { spec: spec, label: label, section: sectionTitle.toLowerCase(), rest: [Translation.tr(spec.group ?? ""), sectionTitle, Translation.tr(spec.description ?? ""), ...(spec.keywords ?? [])].join(" ").toLowerCase() }
+        return { spec: spec, label: label, section: sectionTitle.toLowerCase(), rest: [Translation.tr(spec.group ?? ""), sectionTitle, Translation.tr(spec.description ?? ""), ...(spec.keywords ?? [])].join(" ").toLowerCase(),
+            loose: IrisSearch.prepare({ name: Translation.tr(spec.label), english: spec.label, detail: Translation.tr(spec.group ?? ""), areaName: sectionTitle,
+                words: [spec.group ?? ""].concat(spec.keywords ?? []).join(" ") }) }
     })
+    // Exact words first; then what the forgiving match reads through a typo, initials or letters in order.
     function searchScore(entry: var, terms: var): int {
-        if (!terms.every(term => entry.label.includes(term) || entry.rest.includes(term))) return 99
+        if (!terms.every(term => entry.label.includes(term) || entry.rest.includes(term)))
+            return IrisSearch.score(terms.join(" "), entry.loose) >= 0.6 ? 4 : 99
         const first = terms[0]
         if (terms.length === 1 && entry.section.startsWith(first)) return -1
         if (entry.label.startsWith(first)) return 0
@@ -263,7 +275,7 @@ PanelWindow {
         if (page >= 0) {
             const irisPage = page === root.irisPageIndex
             root.advancedPage = irisPage ? -1 : page
-            root.section = irisPage || root.irisPageFor(String(root.pages[page]?.key ?? "")).length > 0 ? "general" : "system"
+            root.section = irisPage || root.irisPageFor(String(root.pages[page]?.key ?? "")).length > 0 ? (root.homeLayout ? "home" : "general") : "system"
             if (irisPage && root.sections.some(s => s.id === root.requestedSection))
                 root.section = root.requestedSection
             GlobalStates.settingsOverlayCurrentPage = page
@@ -363,6 +375,25 @@ PanelWindow {
             }
         }
 
+        // A rail mark's name, on a capsule beside the rail while it is pointed at.
+        Rectangle {
+            z: 2
+            visible: root.railLayout && root.railHint !== null
+            x: Math.round(sidebar.width + 6 * root.d)
+            y: Math.round((root.railHint?.y ?? 0) - height / 2)
+            width: Math.round(railCaption.implicitWidth + 20 * root.d)
+            height: Math.round(26 * root.d)
+            radius: height / 2
+            color: IrisStyle.bodySurface
+            IrisText {
+                id: railCaption
+                anchors.centerIn: parent
+                text: root.railHint?.title ?? ""
+                font.pixelSize: IrisStyle.typeMeta
+                font.weight: IrisStyle.weight(Font.DemiBold)
+            }
+        }
+
         RowLayout {
             anchors.fill: parent
             spacing: 0
@@ -370,8 +401,9 @@ PanelWindow {
             Rectangle {
                 id: sidebar
                 readonly property int pad: IrisStyle.concentricPad(frame.radius, 12 * root.d)
+                visible: !root.homeLayout
                 Layout.fillHeight: true
-                Layout.preferredWidth: Math.min(272 * root.d, frame.width * 0.3)
+                Layout.preferredWidth: root.railLayout ? Math.round(76 * root.d) : Math.min(272 * root.d, frame.width * 0.3)
                 topLeftRadius: frame.radius
                 bottomLeftRadius: frame.radius
                 color: IrisStyle.readingSidebar
@@ -389,11 +421,18 @@ PanelWindow {
                     anchors.rightMargin: sidebar.pad - 4 * root.d
                     spacing: 0
 
-                    Rectangle {
+                    Item {
+                        id: sideSearchSlot
+                        visible: root.layoutStyle === "sidebar"
                         Layout.fillWidth: true
                         Layout.rightMargin: 4 * root.d
                         Layout.bottomMargin: 10 * root.d
                         implicitHeight: Math.round(32 * root.d)
+                    }
+                    // One search field: in the sidebar when there is one, in the header otherwise.
+                    Rectangle {
+                        parent: root.layoutStyle === "sidebar" ? sideSearchSlot : headSearchSlot
+                        anchors.fill: parent
                         radius: Math.min(height / 2, Math.max(IrisStyle.radiusRow, frame.radius - sidebar.pad))
                         color: searchField.activeFocus ? IrisStyle.fill : IrisStyle.fillQuiet
                         border.width: searchField.activeFocus ? 1 : 0
@@ -475,8 +514,9 @@ PanelWindow {
 
                             MouseArea {
                                 id: profile
+                                visible: !root.railLayout
                                 width: parent.width
-                                height: Math.round(50 * root.d)
+                                height: visible ? Math.round(50 * root.d) : 0
                                 hoverEnabled: true
                                 cursorShape: Qt.PointingHandCursor
                                 Accessible.role: Accessible.Button
@@ -580,6 +620,14 @@ PanelWindow {
                     Layout.preferredHeight: Math.round(52 * root.d)
                     spacing: 4 * root.d
                     IrisIconButton {
+                        visible: root.homeLayout
+                        materialIcon: "grid_view"
+                        enabled: !root.atHome
+                        opacity: enabled ? 1 : 0.35
+                        onClicked: root.selectSection("home")
+                        Accessible.name: Translation.tr("Every area")
+                    }
+                    IrisIconButton {
                         materialIcon: "chevron_left"
                         enabled: root.backStack.length > 0
                         opacity: enabled ? 1 : 0.35
@@ -602,6 +650,7 @@ PanelWindow {
                             text: root.searching ? Translation.tr("Results for “%1”").arg(root.query)
                                 : root.advancedPage >= 0 ? root.pageTitle(root.advancedPage)
                                 : root.openGroup.length > 0 ? root.openGroup
+                                : root.atHome ? Translation.tr("Settings")
                                 : Translation.tr(root.currentSection.title)
                             font.family: IrisStyle.fontTitle
                             font.pixelSize: IrisStyle.typeTitleLarge
@@ -617,6 +666,12 @@ PanelWindow {
                             font.pixelSize: IrisStyle.typeMeta
                             elide: Text.ElideRight
                         }
+                    }
+                    Item {
+                        id: headSearchSlot
+                        visible: root.layoutStyle !== "sidebar"
+                        Layout.preferredWidth: Math.round(240 * root.d)
+                        implicitHeight: Math.round(32 * root.d)
                     }
                     IrisButton {
                         readonly property bool rehearses: root.section === "lock"
@@ -643,9 +698,7 @@ PanelWindow {
                         buttonRadius: height / 2
                         onClicked: {
                             GlobalStates.settingsOverlayOpen = false
-                            GlobalStates.irisStudioTarget = target
-                            GlobalStates.irisEditTarget = target
-                            GlobalStates.irisEdit = true
+                            GlobalStates.openIrisCustomize(target)
                         }
                     }
                     IrisButton {
@@ -710,7 +763,7 @@ PanelWindow {
                     Flickable {
                         id: settingsFlick
                         anchors.fill: parent
-                        visible: root.advancedPage < 0
+                        visible: root.advancedPage < 0 && !root.atHome
                         contentHeight: settingsRows.implicitHeight + 32 * root.d
                         boundsBehavior: Flickable.StopAtBounds
                         ScrollBar.vertical: IrisScrollBar {}
@@ -829,6 +882,99 @@ PanelWindow {
                         }
                     }
 
+                    // Home: every area at once, in the sidebar's clusters, each one card of marks to open.
+                    Flickable {
+                        id: homeFlick
+                        anchors.fill: parent
+                        visible: root.atHome
+                        contentHeight: homeColumn.implicitHeight + 32 * root.d
+                        boundsBehavior: Flickable.StopAtBounds
+                        ScrollBar.vertical: IrisScrollBar {}
+                        ColumnLayout {
+                            id: homeColumn
+                            y: 6 * root.d
+                            width: Math.min(homeFlick.width - 56 * root.d, 820 * root.d)
+                            x: Math.round((homeFlick.width - width) / 2)
+                            spacing: 14 * root.d
+                            Repeater {
+                                model: Array.from(new Set(root.sections.map(section => section.cluster)))
+                                Rectangle {
+                                    id: cluster
+                                    required property int modelData
+                                    readonly property var members: root.sections.filter(section => section.cluster === cluster.modelData)
+                                    Layout.fillWidth: true
+                                    implicitHeight: tiles.implicitHeight + 16 * root.d
+                                    radius: IrisStyle.radiusTile
+                                    color: IrisStyle.readingCard
+                                    Flow {
+                                        id: tiles
+                                        readonly property real tileWidth: Math.floor((tiles.width - 2 * tiles.spacing) / 3)
+                                        anchors.left: parent.left
+                                        anchors.right: parent.right
+                                        anchors.top: parent.top
+                                        anchors.margins: 8 * root.d
+                                        spacing: 2 * root.d
+                                        Repeater {
+                                            model: cluster.members
+                                            MouseArea {
+                                                id: tile
+                                                required property var modelData
+                                                // A third each, whatever the cluster's count: every mark on the page sits in one grid.
+                                                width: tiles.tileWidth
+                                                height: Math.round(58 * root.d)
+                                                hoverEnabled: true
+                                                cursorShape: Qt.PointingHandCursor
+                                                Accessible.role: Accessible.Button
+                                                Accessible.name: Translation.tr(tile.modelData.title)
+                                                onClicked: root.selectSection(tile.modelData.id)
+                                                Rectangle {
+                                                    anchors.fill: parent
+                                                    radius: IrisStyle.radiusRow
+                                                    color: tile.pressed ? IrisStyle.fillActive : tile.containsMouse ? IrisStyle.fillHover : "transparent"
+                                                    Behavior on color { ColorAnimation { duration: IrisStyle.duration(110); easing.type: IrisStyle.feedbackEasing } }
+                                                }
+                                                IrisSquircle {
+                                                    id: tileMark
+                                                    anchors.left: parent.left
+                                                    anchors.leftMargin: 10 * root.d
+                                                    anchors.verticalCenter: parent.verticalCenter
+                                                    width: Math.round(34 * root.d)
+                                                    height: width
+                                                    tint: tile.modelData.tint
+                                                    glyph: tile.modelData.icon
+                                                }
+                                                Column {
+                                                    anchors.left: tileMark.right
+                                                    anchors.leftMargin: 10 * root.d
+                                                    anchors.right: parent.right
+                                                    anchors.rightMargin: 8 * root.d
+                                                    anchors.verticalCenter: parent.verticalCenter
+                                                    spacing: 2 * root.d
+                                                    IrisText {
+                                                        width: parent.width
+                                                        text: Translation.tr(tile.modelData.title)
+                                                        font.pixelSize: IrisStyle.typeLabel
+                                                        font.weight: IrisStyle.weight(Font.DemiBold)
+                                                        elide: Text.ElideRight
+                                                    }
+                                                    IrisText {
+                                                        width: parent.width
+                                                        text: Translation.tr(tile.modelData.subtitle ?? "")
+                                                        color: IrisStyle.muted
+                                                        font.pixelSize: IrisStyle.typeFootnote
+                                                        wrapMode: Text.WordWrap
+                                                        maximumLineCount: 2
+                                                        elide: Text.ElideRight
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
                     SettingsPageHost {
                         id: pageHost
                         anchors.fill: parent
@@ -864,8 +1010,16 @@ PanelWindow {
             || sectionRow.list[sectionRow.index - 1]?.cluster !== sectionRow.modelData.cluster)
         readonly property bool selected: !root.searching && root.section === sectionRow.modelData.id
         readonly property bool dimmed: root.searching && !root.matchedSections.has(sectionRow.modelData.id)
+        readonly property bool compact: root.railLayout
+        readonly property real rowHeight: Math.round((sectionRow.compact ? 36 : 27) * root.d)
         width: parent ? parent.width : 0
-        height: Math.round(27 * root.d) + (sectionRow.clusterStart ? Math.round(8 * root.d) : 0)
+        height: sectionRow.rowHeight + (sectionRow.clusterStart ? Math.round(8 * root.d) : 0)
+        onContainsMouseChanged: {
+            if (sectionRow.compact && sectionRow.containsMouse) {
+                const at = sectionRow.mapToItem(frame, 0, sectionRow.height - sectionRow.rowHeight / 2)
+                root.railHint = { title: Translation.tr(sectionRow.modelData.title), y: at.y }
+            } else if (root.railHint?.title === Translation.tr(sectionRow.modelData.title)) root.railHint = null
+        }
         hoverEnabled: true
         cursorShape: Qt.PointingHandCursor
         Accessible.role: Accessible.Button
@@ -877,22 +1031,22 @@ PanelWindow {
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.bottom: parent.bottom
-            height: Math.round(27 * root.d)
+            height: sectionRow.rowHeight
             radius: IrisStyle.radiusRow
-            color: sectionRow.selected ? IrisStyle.accent
+            color: sectionRow.selected ? (sectionRow.compact ? IrisStyle.tintFill(sectionRow.modelData.tint) : IrisStyle.accent)
                 : sectionRow.containsMouse ? IrisStyle.fillHover : "transparent"
             Behavior on color { ColorAnimation { duration: IrisStyle.duration(110); easing.type: IrisStyle.feedbackEasing } }
             IrisSquircle {
                 id: sectionMark
-                anchors.left: parent.left
-                anchors.leftMargin: 6 * root.d
+                x: sectionRow.compact ? Math.round((parent.width - width) / 2) : Math.round(6 * root.d)
                 anchors.verticalCenter: parent.verticalCenter
-                width: Math.round(20 * root.d)
+                width: Math.round((sectionRow.compact ? 24 : 20) * root.d)
                 height: width
                 tint: sectionRow.modelData.tint
                 glyph: sectionRow.modelData.icon
             }
             IrisText {
+                visible: !sectionRow.compact
                 anchors.left: sectionMark.right
                 anchors.leftMargin: 10 * root.d
                 anchors.right: parent.right
@@ -1203,7 +1357,7 @@ PanelWindow {
                 IrisText {
                     anchors.verticalCenter: parent.verticalCenter
                     text: group.modelData.title
-                    color: resultSection.containsMouse ? IrisStyle.text : IrisStyle.label
+                    color: resultSection.containsMouse ? IrisStyle.text : (resultSection.section.tint ?? IrisStyle.label)
                     font.family: IrisStyle.fontTitle
                     font.pixelSize: IrisStyle.typeMeta
                     font.weight: IrisStyle.weight(Font.DemiBold)
