@@ -144,32 +144,36 @@ Item {
     readonly property bool attached: IrisFrame.piecesAttached
     readonly property var zones: {
         const half = root.size / 2
-        const edge = (root.attached ? IrisFrame.pieceInset : root.margin) + half
+        const edgeOn = wall => (root.attached ? IrisFrame.pieceInsetOn(wall) : root.margin) + half
         const g = root.island
         const clearance = root.size / 2 + Math.round(10 * root.d)
         const side = g?.edge ?? (g?.bottomEdge ? "bottom" : "top")
         const top = g && side === "top"
-            ? Math.max(edge, g.fullWidth ? g.y + g.height + clearance : g.y + g.bubble / 2) : edge
+            ? Math.max(edgeOn("top"), g.fullWidth ? g.y + g.height + clearance : g.y + g.bubble / 2) : edgeOn("top")
         const bottom = g && side === "bottom"
-            ? Math.min(root.height - edge, g.fullWidth ? g.y - clearance : g.y + g.height - g.bubble / 2)
-            : root.height - edge
+            ? Math.min(root.height - edgeOn("bottom"), g.fullWidth ? g.y - clearance : g.y + g.height - g.bubble / 2)
+            : root.height - edgeOn("bottom")
         const left = g && side === "left"
-            ? Math.max(edge, g.fullWidth ? g.x + g.width + clearance : g.x + g.width / 2) : edge
+            ? Math.max(edgeOn("left"), g.fullWidth ? g.x + g.width + clearance : g.x + g.width / 2) : edgeOn("left")
         const right = g && side === "right"
-            ? Math.min(root.width - edge, g.fullWidth ? g.x - clearance : g.x + g.width / 2) : root.width - edge
+            ? Math.min(root.width - edgeOn("right"), g.fullWidth ? g.x - clearance : g.x + g.width / 2) : root.width - edgeOn("right")
         // An Island moved into a corner (a side layout, a theme) owns that corner: the plate there
         // starts beside it, on the same row, instead of landing on top of it.
         const along = g && !g.fullWidth && (side === "top" || side === "bottom") ? root.ownerSpan("island", side) : null
         const gapBeside = half + Math.round(10 * root.d)
-        const cornerLeft = along && along.lo < left + half ? Math.max(left, along.hi + gapBeside) : left
-        const cornerRight = along && along.hi > right - half ? Math.min(right, along.lo - gapBeside) : right
+        // A corner plate meets its side wall the way it meets its own edge.
+        const wallFor = edgeSide => Math.max(edgeOn("left"), edgeOn(edgeSide))
+        const leftOf = edgeSide => g && side === "left" ? left : wallFor(edgeSide)
+        const rightOf = edgeSide => g && side === "right" ? right : root.width - Math.max(edgeOn("right"), edgeOn(edgeSide))
+        const cornerLeftOf = edgeSide => along && along.lo < leftOf(edgeSide) + half ? Math.max(leftOf(edgeSide), along.hi + gapBeside) : leftOf(edgeSide)
+        const cornerRightOf = edgeSide => along && along.hi > rightOf(edgeSide) - half ? Math.min(rightOf(edgeSide), along.lo - gapBeside) : rightOf(edgeSide)
         const at = {
-            "top-left": { x: side === "top" ? cornerLeft : left, y: top },
-            "top-right": { x: side === "top" ? cornerRight : right, y: top },
+            "top-left": { x: side === "top" ? cornerLeftOf("top") : leftOf("top"), y: top },
+            "top-right": { x: side === "top" ? cornerRightOf("top") : rightOf("top"), y: top },
             "left": { x: left, y: root.height / 2 },
             "right": { x: right, y: root.height / 2 },
-            "bottom-left": { x: side === "bottom" ? cornerLeft : left, y: bottom },
-            "bottom-right": { x: side === "bottom" ? cornerRight : right, y: bottom }
+            "bottom-left": { x: side === "bottom" ? cornerLeftOf("bottom") : leftOf("bottom"), y: bottom },
+            "bottom-right": { x: side === "bottom" ? cornerRightOf("bottom") : rightOf("bottom"), y: bottom }
         }
         return IrisPieces.zones.map(zone => ({ zone: zone, x: at[zone].x, y: at[zone].y }))
     }
@@ -272,7 +276,7 @@ Item {
         // Pieces that melt into an edge each carry a notch of `edgeFuse` radius. Sitting
         // closer than that makes the field fuse the notches into one trough instead of
         // giving each piece its own, so the gap has to clear the fuse, not a quarter of it.
-        const gap = Math.round(12 * root.d + (IrisFrame.piecesMelt ? root.edgeFuse * 0.85 : 0))
+        const gapOn = wall => Math.round(12 * root.d + (IrisFrame.meltsOn(wall) ? root.edgeFuseOn(wall) * 0.85 : 0))
         const half = root.size / 2
         const owned = root.allSlots.filter(slot => !root.isTrayApp(slot))
         for (const slot of owned) {
@@ -297,7 +301,7 @@ Item {
                 hi = Math.max(hi, (vertical ? p.y : p.x) + half)
             }
             const block = root.ownerSpan(owner, side)
-            if (hi + gap <= block.lo || lo - gap >= block.hi) continue
+            if (hi + gapOn(side) <= block.lo || lo - gapOn(side) >= block.hi) continue
             bySlot[slot] = owner
             if (root.isApp(slot)) continue
             if (owner === "island") {
@@ -338,6 +342,22 @@ Item {
         return out
     }
     function placeOf(slot: string): point { return root.restPoints[slot] ?? root.rawPlaceOf(slot) }
+    // A plate on the Island's own row sits on the Island's centre line and takes the Island's thickness: a row of
+    // bodies of other heights than the object it belongs to reads as the wrong weight (2026-09-28).
+    function onIslandRow(zone: string): bool {
+        const g = root.island
+        const side = zone === "tray" ? IrisFrame.edgeOf(root.trayPlace) : IrisFrame.edgeOf(zone)
+        return g !== null && g !== undefined && !g.fullWidth && side.length > 0 && side === root.islandSideName
+    }
+    function acrossHalf(zone: string): real {
+        const full = root.size / 2 + root.barPad
+        if (!root.onIslandRow(zone)) return full
+        // Its pieces sit on the satellites' line (bubble / 2 in from the edge); the plate reaches from there to the
+        // Island's far side, so both end on one line, melted or floating.
+        const g = root.island
+        const thick = g.vertical ? Number(g.width ?? root.size) : Number(g.height ?? root.size)
+        return Math.max(root.size / 2 + Math.round(2 * root.d), thick - Number(g.bubble ?? root.size) / 2)
+    }
     function linePoint(slot: string, zone: string, line: var): point {
         if (zone.startsWith("edge:")) {
             const o = root.optionsFor(slot)
@@ -352,9 +372,10 @@ Item {
         const bar = root.barred && line.length > 1
         const step = root.size + (bar ? root.barGap : root.looseGap)
         const inset = bar ? root.barPad : 0
-        const x = found.x + (zone.endsWith("left") ? inset : -inset)
-        const y = zone.startsWith("top") ? found.y + inset
-            : zone.startsWith("bottom") ? found.y - inset : found.y
+        const across = root.onIslandRow(zone) ? 0 : inset
+        const x = found.x + (zone.endsWith("left") ? 1 : -1) * (root.stacks(zone) ? across : inset)
+        const y = zone.startsWith("top") ? found.y + across
+            : zone.startsWith("bottom") ? found.y - across : found.y
         if (root.stacks(zone)) return Qt.point(x, y + (index - (line.length - 1) / 2) * step)
         return Qt.point(x + (zone.endsWith("left") ? index : -index) * step, y)
     }
@@ -395,27 +416,33 @@ Item {
             if (line.length < 2) continue
             const first = root.placeOf(line[0])
             const last = root.placeOf(line[line.length - 1])
-            const half = root.size / 2 + root.barPad
-            const x = Math.round(Math.min(first.x, last.x) - half)
-            const y = Math.round(Math.min(first.y, last.y) - half)
+            const along = root.size / 2 + root.barPad
+            const across = root.acrossHalf(zone.zone)
+            const hx = root.stacks(zone.zone) ? across : along
+            const hy = root.stacks(zone.zone) ? along : across
+            const x = Math.round(Math.min(first.x, last.x) - hx)
+            const y = Math.round(Math.min(first.y, last.y) - hy)
             out.push({
                 zone: zone.zone,
                 x: x,
                 y: y,
-                width: Math.round(Math.max(first.x, last.x) + half) - x,
-                height: Math.round(Math.max(first.y, last.y) + half) - y,
+                width: Math.round(Math.max(first.x, last.x) + hx) - x,
+                height: Math.round(Math.max(first.y, last.y) + hy) - y,
                 stacks: root.stacks(zone.zone)
             })
         }
         if (root.trayGrouped && root.trayAppSlots.length > 1 && root.drag?.slot !== root.trayOwner) {
             const first = root.placeOf(root.trayAppSlots[0])
             const last = root.placeOf(root.trayAppSlots[root.trayAppSlots.length - 1])
-            const half = root.size / 2 + root.barPad
-            const x = Math.round(Math.min(first.x, last.x) - half)
-            const y = Math.round(Math.min(first.y, last.y) - half)
+            const along = root.size / 2 + root.barPad
+            const across = root.acrossHalf("tray")
+            const hx = root.trayStacks ? across : along
+            const hy = root.trayStacks ? along : across
+            const x = Math.round(Math.min(first.x, last.x) - hx)
+            const y = Math.round(Math.min(first.y, last.y) - hy)
             out.push({ zone: "tray", side: IrisFrame.edgeOf(root.trayPlace), x: x, y: y,
-                width: Math.round(Math.max(first.x, last.x) + half) - x,
-                height: Math.round(Math.max(first.y, last.y) + half) - y, stacks: root.trayStacks })
+                width: Math.round(Math.max(first.x, last.x) + hx) - x,
+                height: Math.round(Math.max(first.y, last.y) + hy) - y, stacks: root.trayStacks })
         }
         return out
     }
@@ -465,27 +492,32 @@ Item {
             lo = Math.min(lo, reached)
             hi = Math.max(hi, reached)
         }
-        const half = root.size / 2 + root.barPad
-        const x = Math.round((span.stacks ? span.cross : lo) - half)
-        const y = Math.round((span.stacks ? lo : span.cross) - half)
+        const along = root.size / 2 + root.barPad
+        const across = root.acrossHalf(zone)
+        const hx = span.stacks ? across : along
+        const hy = span.stacks ? along : across
+        const x = Math.round((span.stacks ? span.cross : lo) - hx)
+        const y = Math.round((span.stacks ? lo : span.cross) - hy)
         return {
             x: x,
             y: y,
-            width: Math.round((span.stacks ? span.cross : hi) + half) - x,
-            height: Math.round((span.stacks ? hi : span.cross) + half) - y
+            width: Math.round((span.stacks ? span.cross : hi) + hx) - x,
+            height: Math.round((span.stacks ? hi : span.cross) + hy) - y
         }
     }
-    readonly property real edgeFuse: IrisFrame.pieceJoin === "notch"
-        ? IrisStyle.edgeFuseFor(root.size, Number(root.options?.notchCurve ?? 100)) : IrisStyle.fuse
+    readonly property real edgeFuse: root.edgeFuseOn("")
+    function edgeFuseOn(side: string): real {
+        return IrisFrame.joinOn(side) === "notch" ? IrisStyle.edgeFuseFor(root.size, Number(root.options?.notchCurve ?? 100)) : IrisStyle.fuse
+    }
     function meltInto(shape: var, side: string, sides: var): var {
         if (!root.attached || side.length === 0) return Object.assign(shape, { fuse: IrisStyle.fuse, joins: "" })
-        if (!IrisFrame.piecesMelt) return Object.assign(shape, { fuse: IrisStyle.fuse, joins: IrisFrame.framed ? "frame" : "" })
+        if (!IrisFrame.meltsOn(side)) return Object.assign(shape, { fuse: IrisStyle.fuse, joins: IrisFrame.framed ? "frame" : "" })
         const reach = Math.min(shape.width, shape.height) / 2 + 1
         // A corner body also melts into the second wall it rests on: its rounded corner inside that fillet reads as a bump.
         const inset = IrisFrame.framed ? IrisFrame.band : 0
         const walls = [side].concat(["top", "bottom", "left", "right"]
             .filter(wall => wall !== side && root.gapTo(shape, wall, inset) <= 1))
-        const grown = Object.assign({}, shape, { fuse: root.edgeFuse, paints: true,
+        const grown = Object.assign({}, shape, { fuse: root.edgeFuseOn(side), paints: true,
             joins: IrisFrame.framed ? "frame" : walls.map(wall => "pieceEdge:" + wall) })
         for (const wall of walls) {
             if (wall === "top") { grown.y -= reach; grown.height += reach }
@@ -503,8 +535,8 @@ Item {
         return root.width - inset - shape.x - shape.width
     }
     function edgeBody(side: string): var {
-        const deep = Math.max(8, root.edgeFuse)
-        const k = root.edgeFuse
+        const deep = Math.max(8, root.edgeFuseOn(side))
+        const k = root.edgeFuseOn(side)
         if (side === "top") return { x: -2 * k, y: -deep - 1, width: root.width + 4 * k, height: deep, radius: 0, paints: true, fuse: 0, id: "pieceEdge:top" }
         if (side === "bottom") return { x: -2 * k, y: root.height + 1, width: root.width + 4 * k, height: deep, radius: 0, paints: true, fuse: 0, id: "pieceEdge:bottom" }
         if (side === "left") return { x: -deep - 1, y: -2 * k, width: deep, height: root.height + 4 * k, radius: 0, paints: true, fuse: 0, id: "pieceEdge:left" }

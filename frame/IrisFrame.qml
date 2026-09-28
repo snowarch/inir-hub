@@ -122,6 +122,22 @@ QtObject {
     readonly property real pieceScale: Math.max(0.6, Math.min(1.4, Number(root.bubbles?.scale ?? 100) / 100))
     readonly property real pieceBand: Math.round(root.islandBand * root.pieceScale)
     readonly property real pieceDepth: root.pieceGap + root.pieceBand
+    // How pieces meet a given edge. On the Island's own edge they meet it the way the Island does: melted with it,
+    // or floating at its margin when it floats (two grammars on one edge read as parts from different kits). A corner
+    // plate takes its edge's join on both walls (IrisStage.zones): floating, it keeps that margin from the frame's side
+    // too, never floating off one wall and welded to the other (2026-09-28).
+    readonly property bool islandSpans: String(root.bar?.layout ?? "island") === "full" || root.islandMenubar
+    function joinOn(side: string): string {
+        if (!root.piecesAttached) return "float"
+        if (side === root.islandEdge && !root.notch && !root.islandSpans && root.pieceJoin !== "gap") return "gap"
+        return root.pieceJoin
+    }
+    function meltsOn(side: string): bool { const join = root.joinOn(side); return join === "notch" || join === "weld" }
+    function pieceGapOn(side: string): real {
+        return root.joinOn(side) === "gap" ? Math.max(root.islandMargin, Math.round(Number(root.bar?.margin ?? 8) * root.d), Math.round(8 * root.d)) : 0
+    }
+    function pieceInsetOn(side: string): real { return root.band + root.pieceGapOn(side) }
+    function pieceDepthOn(side: string): real { return root.pieceGapOn(side) + root.pieceBand }
     function edgeOf(place: string): string {
         if (place.startsWith("edge:")) return ["top", "bottom", "left", "right"].includes(place.slice(5)) ? place.slice(5) : ""
         if (place === "top-left" || place === "top-right") return "top"
@@ -147,7 +163,7 @@ QtObject {
         let inner = 0
         if (edge === root.islandEdge) inner = Math.max(inner, root.islandVisualDepth)
         if (root.piecesAttached && root.pieceEdges.includes(edge))
-            inner = Math.max(inner, root.pieceDepth)
+            inner = Math.max(inner, root.pieceDepthOn(edge))
         if (edge === root.dockEdge) inner = Math.max(inner, root.dockVisualDepth)
         return Math.round(root.band + inner)
     }
@@ -225,7 +241,7 @@ QtObject {
         let inner = 0
         if (chassisPresent && edge === root.islandEdge) inner = Math.max(inner, root.islandDepth)
         if (chassisPresent && root.piecesReserve && root.pieceEdges.includes(edge))
-            inner = Math.max(inner, root.pieceDepth)
+            inner = Math.max(inner, root.pieceDepthOn(edge))
         if (edge === root.dockEdge) inner = Math.max(inner, root.dockDepth)
         return Math.round(root.band + inner)
     }
@@ -233,7 +249,7 @@ QtObject {
         let inner = 0
         if (edge === root.islandEdge) inner = Math.max(inner, root.islandVisualDepth)
         if (root.piecesAttached && root.pieceEdges.includes(edge))
-            inner = Math.max(inner, root.pieceDepth)
+            inner = Math.max(inner, root.pieceDepthOn(edge))
         if (edge === root.dockEdge) inner = Math.max(inner, root.dockVisualDepth)
         return Math.round(root.band + inner)
     }
