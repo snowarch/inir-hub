@@ -232,15 +232,16 @@ void main() {
         colour = mixed.rgb;
         alpha = mixed.a;
     }
-    // Compositor blur has a 1-bit edge (a wl_region, no AA in Niri). The cut edge of the glass catches the
-    // light from above, like Liquid Glass: bright where it faces up, a faint line elsewhere, in the scene's own
-    // light, so the step reads as the edge of glass and not as a drawn frame.
-    if (share.z > 0.0) {
+    // Glass has a cut edge that catches the light from above, like Liquid Glass: bright where it faces up, a faint
+    // line elsewhere, in the scene's own light. Without it wallpaper glass over a dimmed desktop has no edge at
+    // all, and compositor blur's 1-bit edge (a wl_region, no AA in Niri) reads as a step instead of glass.
+    float glassShare = share.y + share.z;
+    if (glassShare > 0.0) {
         float depth = -united;
         vec2 g = vec2(dFdx(united), dFdy(united));
         float facing = clamp(-g.y / max(length(g), 1e-4), 0.0, 1.0);
         float lip = coverage * (1.0 - smoothstep(u.edgeGlass.z * 0.4, u.edgeGlass.z + 0.1, depth));
-        float seal = lip * mix(u.edgeGlass.y, u.edgeGlass.x, facing * facing) * share.z * u.sheen.a * u.qt_Opacity;
+        float seal = lip * mix(u.edgeGlass.y, u.edgeGlass.x, facing * facing) * glassShare * u.sheen.a * u.qt_Opacity;
         colour = u.sheen.rgb * seal + colour * (1.0 - seal);
         alpha = seal + alpha * (1.0 - seal);
     }
