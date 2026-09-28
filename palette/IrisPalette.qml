@@ -46,44 +46,77 @@ Item {
         return held - IrisFrame.band + IrisFrame.musicReach(edge) + Math.round(12 * IrisStyle.density)
     }
     readonly property bool mathQuery: /[0-9]/.test(LauncherSearch.query)
-    readonly property var searchResults: root.actionMode ? root.actionResults.slice(0, root.resultLimit)
-        : (LauncherSearch.results ?? [])
+    readonly property var launcherResults: (LauncherSearch.results ?? [])
         .filter(entry => String(entry?.name ?? "").length > 0
             && (root.mathQuery || entry?.type !== Translation.tr("Math")))
-        .slice(0, root.resultLimit)
+    // A plain query also reaches iRiS's switches, actions and options (IrisSearch): a strong one leads when no
+    // app name starts with what was typed, the rest follow the apps; the calculator, command and web come last.
+    readonly property bool plainQuery: {
+        const prefix = Config.options?.search?.prefix ?? ({})
+        const q = LauncherSearch.query
+        return q.trim().length > 0 && ![prefix.clipboard ?? ";", prefix.emojis ?? ":", prefix.math ?? "=", prefix.shellCommand ?? "$",
+            prefix.webSearch ?? "?", prefix.action ?? "/", prefix.app ?? ">"].some(key => String(key).length > 0 && q.startsWith(key))
+    }
+    function rowOf(entry: var): var {
+        const opens = entry.kind === "setting" || entry.kind === "section"
+        return { name: entry.name, comment: entry.detail, iconName: entry.icon, tint: entry.tint, area: entry.areaName, areaTint: entry.tint,
+            iconType: LauncherSearchResult.IconType.Material, type: opens ? Translation.tr("Settings") : Translation.tr("Action"),
+            verb: opens ? Translation.tr("Open") : entry.kind === "switch" ? Translation.tr("Switch") : entry.pick ? Translation.tr("Apply") : Translation.tr("Run"),
+            isOn: typeof entry.isOn === "function" ? entry.isOn : null, pick: entry.pick, keepOpen: entry.keepOpen, execute: entry.run, fuzzy: true }
+    }
+    readonly property var blendedResults: {
+        if (!root.plainQuery) return root.launcherResults
+        const hits = IrisSearch.search(LauncherSearch.query).filter(hit => hit.score >= 0.7)
+        const acts = hits.filter(hit => hit.entry.kind !== "setting" && hit.entry.kind !== "section").slice(0, 4)
+        const opens = hits.filter(hit => hit.entry.kind === "setting" || hit.entry.kind === "section").slice(0, 3)
+        // Apps keep the lead, but three of them are enough to leave room for what the query also names.
+        const allApps = root.launcherResults.filter(entry => entry?.type === Translation.tr("App"))
+        const apps = hits.length > 0 ? allApps.slice(0, 3) : allApps
+        const rest = root.launcherResults.filter(entry => entry?.type !== Translation.tr("App"))
+        const typed = IrisSearch.fold(LauncherSearch.query).trim()
+        const appLeads = apps.length > 0 && IrisSearch.fold(apps[0].name).startsWith(typed)
+        const best = acts.concat(opens).sort((a, b) => b.score - a.score)[0] ?? null
+        if (best && best.score >= 0.9 && !appLeads) {
+            const others = acts.concat(opens).filter(hit => hit !== best)
+            return [root.rowOf(best.entry)].concat(apps, others.filter(hit => acts.includes(hit)).map(hit => root.rowOf(hit.entry)),
+                others.filter(hit => opens.includes(hit)).map(hit => root.rowOf(hit.entry)), allApps.slice(apps.length), rest)
+        }
+        return apps.concat(acts.map(hit => root.rowOf(hit.entry)), opens.map(hit => root.rowOf(hit.entry)), allApps.slice(apps.length), rest)
+    }
+    // "/" is a list to browse and scrolls; a plain query stays a short answer.
+    readonly property var searchResults: root.actionMode ? root.actionResults.slice(0, 120)
+        : root.blendedResults.slice(0, root.resultLimit + (root.clipboardMode ? root.clipboardExtra : 0))
+    // The clipboard opens on a first page (Settings › Spotlight › Entries shown) and keeps going as you
+    // scroll or step past its end, through the whole history.
+    property int clipboardExtra: 0
+    readonly property int clipboardTotal: root.clipboardMode ? root.launcherResults.length : 0
+    function loadMoreClipboard(): void {
+        if (root.clipboardMode && root.searchResults.length < root.clipboardTotal) root.clipboardExtra += root.resultLimit
+    }
 
-    // "/" lists what iRiS can flip or apply from here: its own switches, widget design and accents, themes
-    // (IrisOptions.quickActions), then the shell's actions that act under iRiS. A switch stays open to show
-    // its new state; the rest run and close.
+    // "/" lists what iRiS can flip, apply or run from here, grouped by area; typed words narrow it the forgiving
+    // way IrisSearch matches. A switch stays open to show its new state; the rest run and close.
     readonly property string actionPrefix: Config.options?.search?.prefix?.action ?? "/"
     readonly property bool actionMode: LauncherSearch.query.startsWith(root.actionPrefix)
-    readonly property var otherFamilyActions: ["toggle-bar-autohide", "toggle-dock", "toggle-dashboard", "toggle-media-controls",
-        "wallpaper-coverflow", "open-sidebar-left", "open-sidebar-right", "switch-family-iris"]
+    // One header per area: areas follow their best row, rows keep their rank inside the area.
+    function byArea(entries: var): var {
+        const order = [], groups = ({})
+        for (const entry of entries) {
+            const key = String(entry.areaName ?? "")
+            if (!groups[key]) { groups[key] = []; order.push(key) }
+            groups[key].push(entry)
+        }
+        return order.reduce((out, key) => out.concat(groups[key]), [])
+    }
     readonly property var actionResults: {
         if (!root.actionMode) return []
-        const query = LauncherSearch.query.slice(root.actionPrefix.length).trim().toLowerCase()
-        const words = query.split(/\s+/).filter(word => word.length > 0)
-        // Every typed word starts a word of the entry: "lume" finds Lume, not "volume".
-        const hits = text => { const own = text.split(/[\s:·›,.()\/-]+/); return words.every(word => own.some(part => part.startsWith(word))) }
-        const rank = name => query.length > 0 && name.toLowerCase().startsWith(query) ? 0 : 1
-        const items = []
-        for (const action of IrisOptions.quickActions()) {
-            if (!hits((action.name + " " + action.words).toLowerCase())) continue
-            items.push({ name: action.name, comment: action.detail, iconName: action.icon, tint: action.tint,
-                iconType: LauncherSearchResult.IconType.Material, type: Translation.tr("Action"), verb: Translation.tr("Switch"),
-                isOn: action.isOn, pick: Boolean(action.pick), keepOpen: true, execute: action.run, rank: rank(action.name), priority: action.priority ?? 100 })
-        }
-        for (const action of GlobalActions.allActions) {
-            const id = String(action.id ?? "")
-            if (id.startsWith("style-") || root.otherFamilyActions.includes(id)) continue
-            if (!hits([action.name, action.description ?? "", id].concat(action.keywords ?? []).join(" ").toLowerCase())) continue
-            items.push({ name: action.name, comment: action.description ?? "", iconName: action.icon ?? "bolt",
-                iconType: LauncherSearchResult.IconType.Material, type: Translation.tr("Action"), verb: Translation.tr("Run"),
-                isOn: action.isOn ?? null, keepOpen: typeof action.isOn === "function", execute: () => action.execute(""),
-                rank: rank(action.name) + 1, priority: typeof action.isOn === "function" ? 10 : 200 })
-        }
-        items.forEach((item, index) => item.order = index)
-        return items.sort((a, b) => a.rank - b.rank || a.priority - b.priority || a.order - b.order)
+        const query = LauncherSearch.query.slice(root.actionPrefix.length).trim()
+        if (query.length > 0) return root.byArea(IrisSearch.search(query).map(hit => hit.entry)).map(entry => root.rowOf(entry))
+        // Nothing typed: the everyday switches first, then everything else by area.
+        const doable = IrisSearch.entries().filter(entry => entry.kind !== "setting" && entry.kind !== "section")
+        const everyday = doable.filter(entry => entry.priority < 50).sort((a, b) => a.priority - b.priority)
+        return everyday.map(entry => Object.assign(root.rowOf(entry), { area: Translation.tr("Suggested"), areaTint: null }))
+            .concat(root.byArea(doable.filter(entry => entry.priority >= 50)).map(entry => root.rowOf(entry)))
     }
 
     readonly property var island: GlobalStates.irisIslandGeometry?.[root.screen?.name ?? ""] ?? null
@@ -173,6 +206,7 @@ Item {
         target: LauncherSearch
         function onQueryChanged(): void {
             root.selectedIndex = 0
+            root.clipboardExtra = 0
             root.disarmPointerSelection()
         }
     }
@@ -187,7 +221,8 @@ Item {
     function moveSelection(step: int): void {
         const count = root.visibleResults.length
         if (count === 0) return
-        root.selectedIndex = Math.max(0, Math.min(count - 1, root.selectedIndex + step))
+        if (step > 0 && root.selectedIndex + step >= count - 2) root.loadMoreClipboard()
+        root.selectedIndex = Math.max(0, Math.min(root.visibleResults.length - 1, root.selectedIndex + step))
     }
 
     function handleKey(event): void {
@@ -269,16 +304,18 @@ Item {
             }
 
             function sectionOf(entry): string {
+                if (root.actionMode && entry?.fuzzy) return String(entry.area ?? "")
                 const type = String(entry?.type ?? "")
                 if (type === Translation.tr("App")) return Translation.tr("Applications")
                 if (type === Translation.tr("Action")) return Translation.tr("Actions")
+                if (type === Translation.tr("Settings")) return Translation.tr("Settings")
                 if (type === Translation.tr("Math")) return Translation.tr("Calculator")
                 if (type === Translation.tr("Command")) return Translation.tr("Run command")
                 if (type === Translation.tr("Web")) return Translation.tr("Search the web")
                 return type.length > 0 ? type : Translation.tr("Other")
             }
             function sectionAt(index: int): string {
-                if (root.clipboardMode) return Translation.tr("Clipboard history")
+                if (root.clipboardMode) return Translation.tr("Clipboard history · %1").arg(root.clipboardTotal)
                 return index === 0 ? Translation.tr("Top hit") : stage.sectionOf(root.visibleResults[index])
             }
             function kindTint(type: string): color {
@@ -449,7 +486,7 @@ Item {
                             IrisText {
                                 anchors.verticalCenter: parent.verticalCenter
                                 visible: input.text.length === 0
-                                text: Translation.tr("Spotlight Search")
+                                text: Translation.tr("Apps, settings, actions… / lists them all")
                                 color: IrisStyle.muted
                                 font.pixelSize: input.font.pixelSize
                                 font.weight: IrisStyle.weight(Font.Normal)
@@ -689,6 +726,7 @@ Item {
                             clip: true
                             interactive: contentHeight > height + 1
                             boundsBehavior: Flickable.StopAtBounds
+                            onContentYChanged: if (contentY + height > contentHeight - 120 * stage.d) root.loadMoreClipboard()
 
                             Rectangle {
                                 id: highlight
@@ -715,7 +753,8 @@ Item {
                                     visible: root.visibleResults.length === 0
                                     IrisText {
                                         anchors.centerIn: parent
-                                        text: Translation.tr("No results")
+                                        text: root.actionMode ? Translation.tr("Nothing by that name. Fewer letters find more.")
+                                            : Translation.tr("No results. Try fewer letters, or / for every action.")
                                         color: IrisStyle.muted
                                     }
                                 }
@@ -751,7 +790,9 @@ Item {
                                                 verticalAlignment: Text.AlignBottom
                                                 bottomPadding: 5 * stage.d
                                                 text: stage.sectionAt(result.index)
-                                                color: IrisStyle.muted
+                                                // In "/" a header names an area and wears its colour; elsewhere headers stay quiet.
+                                                color: root.actionMode && result.index > 0 && result.modelData?.areaTint
+                                                    ? result.modelData.areaTint : IrisStyle.muted
                                                 font.pixelSize: IrisStyle.typeMeta
                                                 font.weight: IrisStyle.weight(Font.DemiBold)
                                             }
@@ -783,7 +824,7 @@ Item {
                                             x: 8 * stage.d
                                             width: parent.width - 16 * stage.d
                                             height: root.clipboardMode ? Math.round(52 * stage.d)
-                                                : Math.round((result.mathHit ? 66 : result.topHit ? 58 : root.actionMode ? 48 : 40) * stage.d)
+                                                : Math.round((result.mathHit ? 66 : result.topHit ? 58 : root.actionMode || result.modelData?.fuzzy ? 48 : 40) * stage.d)
                                             hoverEnabled: true
                                             cursorShape: root.pointerSelectionArmed ? Qt.PointingHandCursor : Qt.BlankCursor
                                             Accessible.role: Accessible.Button
@@ -904,7 +945,7 @@ Item {
                                                     }
                                                     IrisText {
                                                         Layout.fillWidth: true
-                                                        visible: (result.topHit || root.actionMode) && text.length > 0
+                                                        visible: (result.topHit || root.actionMode || Boolean(result.modelData?.fuzzy)) && text.length > 0
                                                         text: result.mathHit ? LauncherSearch.query
                                                             : result.modelData?.comment || result.modelData?.genericName || result.modelData?.type || ""
                                                         color: IrisStyle.subtext

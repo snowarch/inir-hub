@@ -478,7 +478,7 @@ QtObject {
         { section: "appearance", group: "Previews", label: "Animated previews", description: "The live scenes and miniatures in Settings and Customize. Off, none of them is built, which saves memory and a little work while you browse.", path: "iris.appearance.previews", kind: "switch", fallback: true },
         { section: "spotlight", group: "Spotlight", label: "Spotlight", path: "iris.modules.palette", kind: "switch", fallback:true },
         { section: "spotlight", group: "Spotlight", label: "Maximum results", path: "iris.palette.maxResults", kind: "range", fallback:8,min:3,max:14 },
-        { section: "spotlight", group: "Clipboard", label: "Entries shown", description: "How many recent copies Spotlight lists. Type ; to open it; typing after it searches the rest.", path: "iris.palette.clipboardResults", kind: "range", fallback: 8, min: 3, max: 20, keywords: ["clipboard", "history", "copy", "paste", "cliphist", "portapapeles", "entries", "limit"] },
+        { section: "spotlight", group: "Clipboard", label: "Entries shown", description: "How many recent copies Spotlight lists first; scroll or keep pressing Down to go through the whole history. Type ; to open it.", path: "iris.palette.clipboardResults", kind: "range", fallback: 8, min: 3, max: 20, keywords: ["clipboard", "history", "copy", "paste", "cliphist", "portapapeles", "entries", "limit"] },
         { section: "spotlight", group: "Spotlight", label: "Search mode shortcuts", description: "Clipboard, calculator, actions and more under the suggestions.", path: "iris.palette.showHints", kind: "switch", fallback:true },
         { section: "controlCenter", group: "Control Center", label: "Control Center", path: "iris.modules.controlCenter", kind: "switch", fallback:true },
         { section: "bubbles", group: "Tray", label: "Bubble shows", description: "Apps turns the bubble into the tray itself: every app is a disc you can click, right-click or scroll. Count keeps the number.", path: "iris.tray.face", kind: "choice", fallback: "apps", choices: [{label:"Apps",value:"apps",glyph:"apps"},{label:"Count",value:"count",glyph:"tag"}], keywords: ["tray", "icons", "background apps", "bubble", "count", "number", "system tray"] },
@@ -959,18 +959,20 @@ QtObject {
             const icon = root.groupGlyphs[String(spec.group ?? "")] ?? section.icon
             if (spec.kind === "switch") {
                 const first = root.quickFirst.indexOf(spec.path)
-                out.push({ id: "set:" + spec.path, name: Translation.tr(spec.label), detail: place, icon: icon, tint: section.tint,
+                out.push({ id: "set:" + spec.path, name: Translation.tr(spec.label), english: spec.label, detail: place, icon: icon, tint: section.tint,
+                    area: section.id, areaName: Translation.tr(section.title),
                     words: words, priority: first >= 0 ? first : 100, isOn: () => spec.invert ? !Boolean(root.currentValue(spec)) : Boolean(root.currentValue(spec)),
                     run: () => root.commit(spec, !Boolean(root.currentValue(spec))) })
             } else if (spec.kind === "choice" && (spec.widgetDesign || spec.path === "iris.widgets.tint")) {
                 for (const choice of root.choicesOf(spec))
                     out.push({ id: "set:" + spec.path + "=" + choice.value, name: Translation.tr(spec.quickName ?? spec.label) + ": " + Translation.tr(choice.label),
-                        detail: place, icon: String(choice.glyph ?? icon), tint: section.tint, words: words + " " + choice.label, priority: 50, pick: true,
+                        english: (spec.quickName ?? spec.label) + " " + choice.label, area: section.id, areaName: Translation.tr(section.title), detail: place, icon: String(choice.glyph ?? icon), tint: section.tint, words: words + " " + choice.label, priority: 50, pick: true,
                         isOn: () => root.currentValue(spec) === choice.value, run: () => root.commit(spec, choice.value) })
             }
         }
         for (const theme of IrisThemes.all)
-            out.push({ id: "theme:" + theme.id, name: Translation.tr("Theme: %1").arg(theme.name), detail: Translation.tr("Theme"), pick: true,
+            out.push({ id: "theme:" + theme.id, name: Translation.tr("Theme: %1").arg(theme.name), english: "Theme " + theme.name, detail: Translation.tr("Theme"), pick: true,
+                area: "appearance", areaName: Translation.tr("Appearance"),
                 icon: "palette", tint: IrisStyle.identity.purple, words: ["theme", "look", theme.name].concat(theme.tags ?? []).join(" "), priority: 60,
                 isOn: () => IrisThemes.activeId === theme.id && !IrisThemes.modified, run: () => IrisThemes.apply(theme) })
         return out
