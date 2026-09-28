@@ -290,14 +290,13 @@ MouseArea {
             font.weight: IrisStyle.weight(Font.DemiBold)
             elide: Text.ElideRight
         }
+        // A theme shows itself; only one of yours says whose it is.
         IrisText {
             Layout.fillWidth: true
-            text: card.mine ? (card.theme.description || (card.theme.author ? Translation.tr("by %1").arg(card.theme.author) : ""))
-                : Translation.tr(card.theme.description)
+            visible: text.length > 0
+            text: card.mine && card.theme.author ? Translation.tr("by %1").arg(card.theme.author) : ""
             color: IrisStyle.textSecondary
             font.pixelSize: IrisStyle.typeFootnote
-            maximumLineCount: 2
-            wrapMode: Text.WordWrap
             elide: Text.ElideRight
         }
     }

@@ -12,6 +12,7 @@ import qs.modules.iris.polkit
 import qs.modules.iris.style
 import qs.modules.iris.pieces
 import qs.modules.iris.settings
+import qs.modules.iris.studio
 import qs.modules.iris.lock
 import qs.modules.iris.sidebar
 import qs.modules.background
@@ -99,6 +100,14 @@ Item {
                 || (CompositorService.isNiri && GameMode.hasFullscreenOnOutput(GlobalStates.focusedScreen?.name ?? "") && !NiriService.inOverview
                     && (Config.options?.iris?.notifications?.fullscreen ?? true)))
         component: IrisNotificationPopup {}
+    }
+
+    OnDemandPanelLoader {
+        identifier: "irisStudio"
+        requireEnabledPanel: false
+        open: GlobalStates.irisStudioOpen
+        closeGraceMs: IrisStyle.settleDuration + 120
+        component: IrisStudio {}
     }
 
     OnDemandPanelLoader {

@@ -15,6 +15,8 @@ ColumnLayout {
     id: root
 
     property var specs: []
+    // A group's title wears the colour of the area it belongs to; neutral where there is none.
+    property color tint: IrisStyle.label
     readonly property real d: IrisStyle.density
     readonly property var groups: {
         Config.revision
@@ -44,7 +46,7 @@ ColumnLayout {
                 visible: group.modelData.title.length > 0
                 Layout.leftMargin: Math.round(12 * root.d)
                 text: Translation.tr(group.modelData.title)
-                color: IrisStyle.label
+                color: root.tint
                 font.family: IrisStyle.fontTitle
                 font.pixelSize: IrisStyle.typeMeta
                 font.weight: IrisStyle.weight(Font.DemiBold)

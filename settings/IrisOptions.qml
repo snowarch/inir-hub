@@ -475,6 +475,8 @@ QtObject {
         { section: "desktop", group: "Overview backdrop", label: "Blur", path: "background.backdrop.blurRadius", kind: "range", fallback:40,min:0,max:100,unit:" px" },
         { section: "desktop", group: "Overview backdrop", label: "Dim", path: "background.backdrop.dim", kind: "range", fallback:40,min:0,max:100,unit:" %" },
         { section: "desktop", group: "Overview backdrop", label: "Vignette", path: "background.backdrop.vignetteEnabled", kind: "switch", fallback:false },
+        { section: "appearance", group: "Themes", label: "Take only their colours", description: "A theme you choose brings its accent, highlight, material colour and light, and leaves your shapes, layout and motion as they are.", path: "iris.appearance.themeColoursOnly", kind: "switch", fallback: false, keywords: ["theme", "colours", "colors", "palette", "only", "tema", "colores"] },
+        { section: "appearance", group: "Customize", label: "Customize opens", description: "On the shell edits every surface where it is, with a capsule under the Island. Studio is a panel beside the screen, with every area in a column and one search.", path: "iris.appearance.customize", kind: "choice", fallback: "shell", choices: [{ label: "On the shell", value: "shell", glyph: "touch_app" }, { label: "Studio", value: "studio", glyph: "view_sidebar" }], keywords: ["studio", "customize", "editor", "panel", "look"] },
         { section: "appearance", group: "Previews", label: "Animated previews", description: "The live scenes and miniatures in Settings and Customize. Off, none of them is built, which saves memory and a little work while you browse.", path: "iris.appearance.previews", kind: "switch", fallback: true },
         { section: "spotlight", group: "Spotlight", label: "Spotlight", path: "iris.modules.palette", kind: "switch", fallback:true },
         { section: "spotlight", group: "Spotlight", label: "Maximum results", path: "iris.palette.maxResults", kind: "range", fallback:8,min:3,max:14 },
@@ -778,13 +780,46 @@ QtObject {
         { group: "Shell", key: "advanced", label: "Advanced", detail: "Visualizer and colour generation", icon: "construction", tint: IrisStyle.identity.gray, keywords: ["advanced", "cava", "visualizer", "matugen"] }
     ]
     readonly property var sectionOrder: root.sections.map(section => section.id)
+    // Customize's areas (Studio's rail, the capsule's sheets): identity, what each is, one line worth knowing.
+    readonly property var customizeAreas: [
+        { id: "material", label: "Material", glyph: "layers", tint: IrisStyle.identity.purple, tipOf: "", tip: "Character sets corners, fills and contrast at once; the rows below fine-tune it.",
+            about: "What every surface is made of: its character, corners, lines and the frame." },
+        { id: "colour", label: "Colour", glyph: "palette", tint: IrisStyle.identity.pink, tipOf: "", tip: "A wallpaper accent follows every new wallpaper.",
+            about: "Accent, highlight, the light bodies carry and how much wallpaper iRiS takes in." },
+        { id: "type", label: "Type", glyph: "text_fields", tint: IrisStyle.identity.orange, tipOf: "", tip: "Figures have their own face: the clock and every level read it.",
+            about: "Typefaces, figures and how large text reads." },
+        { id: "motion", label: "Motion", glyph: "animation", tint: IrisStyle.identity.indigo, tipOf: "motion",
+            about: "How shapes open, move and settle, everywhere at once or per surface." },
+        { id: "island", label: "Island", glyph: "pill", tint: IrisStyle.identity.blue, tipOf: "bar",
+            about: "Its shape on the edge, what it shows at rest, and its pages." },
+        { id: "pieces", label: "Pieces", glyph: "bubble_chart", tint: IrisStyle.identity.sky, tipOf: "bubbles",
+            about: "Bubbles off the Island and the bars they form." },
+        { id: "bodies", label: "Cards", glyph: "web_asset", tint: IrisStyle.identity.teal, tipOf: "controlCenter",
+            about: "Cards, the Control Center and the player." },
+        { id: "places", label: "Panels", glyph: "space_dashboard", tint: IrisStyle.identity.green, tipOf: "sidebars",
+            about: "Side panels, Spotlight, the gallery, Settings and menus." },
+        { id: "transients", label: "Feedback", glyph: "notifications", tint: IrisStyle.identity.red, tipOf: "notifications",
+            about: "Notifications and level feedback." },
+        { id: "dock", label: "Dock", glyph: "dock_to_bottom", tint: IrisStyle.identity.lavender, tipOf: "dock",
+            about: "The Dock's shape and its icons." },
+        { id: "desktop", label: "Desktop", glyph: "widgets", tint: IrisStyle.identity.yellow, tipOf: "desktop",
+            about: "Widgets on the desktop." },
+        { id: "themes", label: "Themes", glyph: "style", tint: IrisStyle.identity.gray, tipOf: "", tip: "A theme is one small file: copy it to share, paste one to try it.",
+            about: "Whole redesigns of iRiS, and the ones you save and share." }
+    ]
+    function customizeArea(id: string): var { return root.customizeAreas.find(area => area.id === id) ?? root.customizeAreas[0] }
+    function customizeTip(id: string): string {
+        const area = root.customizeArea(id)
+        if (area.tip) return Translation.tr(area.tip)
+        return area.tipOf.length > 0 ? Translation.tr(root.sectionById(area.tipOf).tip ?? "") : ""
+    }
     function sectionById(id: string): var {
         return root.sections.find(section => section.id === id) ?? root.sections[0]
     }
     readonly property var groupGlyphs: ({
         "Shell family": "swap_horiz",
         "Behind windows": "blur_on", "Japanese lookup": "translate", "Parallax": "3d_rotation", "Recording": "screen_record", "Snip": "screenshot_region",
-        "Accent": "palette", "Activity": "timer", "Adaptive": "auto_awesome", "App colours": "format_paint", "Airing": "live_tv", "Alert sounds": "music_note",
+        "Accent": "palette", "Customize": "brush", "Themes": "style", "Activity": "timer", "Adaptive": "auto_awesome", "App colours": "format_paint", "Airing": "live_tv", "Alert sounds": "music_note",
         "At a glance": "visibility", "At rest": "schedule", "Badges": "notifications_unread", "Banners": "notifications",
         "Bar": "width_full", "Behaviour": "touch_app", "Bubble": "bubble_chart", "Calendar": "calendar_month",
         "Card contents": "view_agenda", "Cards": "web_asset", "Charge limit": "battery_charging_80", "Clipboard": "content_paste", "Connections": "cable", "Clock": "schedule",
@@ -974,7 +1009,7 @@ QtObject {
             out.push({ id: "theme:" + theme.id, name: Translation.tr("Theme: %1").arg(theme.name), english: "Theme " + theme.name, detail: Translation.tr("Theme"), pick: true,
                 area: "appearance", areaName: Translation.tr("Appearance"),
                 icon: "palette", tint: IrisStyle.identity.purple, words: ["theme", "look", theme.name].concat(theme.tags ?? []).join(" "), priority: 60,
-                isOn: () => IrisThemes.activeId === theme.id && !IrisThemes.modified, run: () => IrisThemes.apply(theme) })
+                isOn: () => IrisThemes.activeId === theme.id && !IrisThemes.modified, run: () => IrisThemes.choose(theme) })
         return out
     }
     readonly property var settings: {

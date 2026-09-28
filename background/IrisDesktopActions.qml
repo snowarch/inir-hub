@@ -32,7 +32,7 @@ Singleton {
                 GlobalStates.desktopWidgetManagerToggleRequested(screen)
             } },
         { id: "customize", group: 0, label: Translation.tr("Customize iRiS"), glyph: "palette", tint: "purple",
-            run: screen => { GlobalStates.irisEdit = true } },
+            run: screen => GlobalStates.openIrisCustomize("") },
         { id: "nextWallpaper", group: 0, label: Translation.tr("Next wallpaper"), glyph: "shuffle", tint: "pink",
             run: screen => Wallpapers.randomFromCurrentFolder(Appearance.m3colors.darkmode, screen) },
         { id: "screenshot", group: 1, label: Translation.tr("Screenshot"), glyph: "screenshot_region", tint: "blue",

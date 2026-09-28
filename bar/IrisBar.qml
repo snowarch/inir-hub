@@ -81,6 +81,12 @@ Scope {
                 IrisThemes.apply(found)
                 return found.name
             }
+            case "colours": {
+                const found = IrisThemes.find(arg)
+                if (!found) return "Unknown theme: see `inir iris theme list`"
+                IrisThemes.applyColours(found)
+                return found.name
+            }
             case "save":
                 return IrisThemes.save(arg, "")
             case "import":
@@ -95,7 +101,7 @@ Scope {
             case "folder":
                 return IrisThemes.folder
             default:
-                return "list | apply:<id> | save:<name> | import:<path> | export[:<id>] | folder"
+                return "list | apply:<id> | colours:<id> | save:<name> | import:<path> | export[:<id>] | folder"
             }
         }
         function settings(section: string): void {
@@ -217,6 +223,7 @@ Scope {
             GlobalStates.irisEdit = wanted
             return wanted ? "on" : "off"
         }
+        // `studio <area>` opens Studio on an area, `studio search:<words>` with a search typed.
         function studio(action: string): string {
             if (!["on", "off", "toggle"].includes(action)) {
                 GlobalStates.irisStudioTarget = action

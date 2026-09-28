@@ -267,6 +267,14 @@ Item {
             Rectangle { Layout.preferredWidth: 1; Layout.preferredHeight: Math.round(20 * root.d); Layout.leftMargin: Math.round(4 * root.d); Layout.rightMargin: Math.round(4 * root.d); color: IrisStyle.hairline }
             IrisIconButton { materialIcon: "undo"; enabled: IrisEditHistory.undoStack.length > 0; opacity: enabled ? 1 : 0.35; Accessible.name: Translation.tr("Undo"); onClicked: IrisEditHistory.undo() }
             IrisIconButton { materialIcon: "redo"; enabled: IrisEditHistory.redoStack.length > 0; opacity: enabled ? 1 : 0.35; Accessible.name: Translation.tr("Redo"); onClicked: IrisEditHistory.redo() }
+            IrisIconButton {
+                materialIcon: "view_sidebar"
+                Accessible.name: Translation.tr("Open in Studio")
+                onClicked: {
+                    GlobalStates.irisStudioTarget = root.tool === "look" ? root.lookTab : root.tool
+                    GlobalStates.irisStudioOpen = true
+                }
+            }
             IrisText {
                 visible: IrisEditHistory.notice.length > 0
                 Layout.leftMargin: Math.round(4 * root.d)
@@ -328,7 +336,11 @@ Item {
                         Layout.fillWidth: true
                         active: root.tool === "pieces"
                         visible: active
-                        sourceComponent: IrisPieceLibrary {}
+                        sourceComponent: ColumnLayout {
+                            spacing: Math.round(12 * root.d)
+                            TipLine { Layout.fillWidth: true; area: "pieces" }
+                            IrisPieceLibrary { Layout.fillWidth: true }
+                        }
                     }
                 }
             }
@@ -378,6 +390,7 @@ Item {
                 IrisEditRows {
                     Layout.fillWidth: true
                     specs: root.inspectorSpecs
+                    tint: IrisOptions.customizeArea(root.selectedId === "dock" ? "dock" : root.selectedId === "island" ? "island" : "pieces").tint
                 }
             }
         }
@@ -391,12 +404,14 @@ Item {
             property string filter: "all"
             readonly property var list: IrisThemes.all.filter(theme => themes.filter === "all" || (theme.tags ?? []).includes("anime"))
             spacing: Math.round(12 * root.d)
+            TipLine { Layout.fillWidth: true; area: "themes" }
             RowLayout {
                 Layout.fillWidth: true
                 spacing: Math.round(6 * root.d)
                 ToolChip { glyph: ""; label: Translation.tr("All"); on: themes.filter === "all"; onActivated: themes.filter = "all" }
                 ToolChip { glyph: ""; label: Translation.tr("Anime"); on: themes.filter === "anime"; onActivated: themes.filter = "anime" }
                 Item { Layout.fillWidth: true }
+                ColoursOnly { Layout.rightMargin: Math.round(6 * root.d) }
                 IrisButton {
                     quiet: true
                     text: Translation.tr("Paste")
@@ -463,21 +478,60 @@ Item {
                 spacing: Math.round(6 * root.d)
                 Repeater {
                     model: ["iris", "soft", "round", "crisp", "angular", "contrast"]
-                    PresetTile {
+                    IrisPresetTile {
                         required property string modelData
                         Layout.fillWidth: true
                         name: modelData
                     }
                 }
             }
+            TipLine { Layout.fillWidth: true; area: root.lookTab }
             IrisEditRows {
                 Layout.fillWidth: true
                 specs: IrisOptions.studio.filter(spec => spec.target === root.lookTab)
+                tint: IrisOptions.customizeArea(root.lookTab).tint
             }
         }
     }
 
     // ── Parts ────────────────────────────────────────────────────────────
+    // Choosing a theme can take only its colours (iris.appearance.themeColoursOnly), said beside the switch.
+    component ColoursOnly: RowLayout {
+        spacing: Math.round(8 * root.d)
+        IrisText {
+            text: Translation.tr("Colours only")
+            color: IrisThemes.coloursOnly ? IrisStyle.text : IrisStyle.subtext
+            font.pixelSize: IrisStyle.typeLabel
+        }
+        IrisSwitch {
+            on: IrisThemes.coloursOnly
+            name: Translation.tr("Colours only")
+            onToggled: Config.setNestedValue("iris.appearance.themeColoursOnly", !IrisThemes.coloursOnly)
+        }
+    }
+    // One line worth knowing about an area, marked in its colour (IrisOptions.customizeAreas).
+    component TipLine: RowLayout {
+        id: tipLine
+        property string area: ""
+        readonly property string tip: IrisOptions.customizeTip(tipLine.area)
+        visible: tipLine.tip.length > 0
+        spacing: Math.round(6 * root.d)
+        MaterialSymbol {
+            Layout.alignment: Qt.AlignTop
+            text: "lightbulb"
+            fill: 1
+            iconSize: Math.round(14 * root.d)
+            color: IrisOptions.customizeArea(tipLine.area).tint
+        }
+        IrisText {
+            Layout.fillWidth: true
+            text: tipLine.tip
+            color: IrisStyle.muted
+            font.pixelSize: IrisStyle.typeFootnote
+            wrapMode: Text.WordWrap
+        }
+    }
+
     component ToolChip: MouseArea {
         id: chip
         property string glyph: ""
@@ -515,57 +569,6 @@ Item {
                 font.pixelSize: IrisStyle.typeLabel
                 font.weight: IrisStyle.weight(chip.on ? Font.DemiBold : Font.Medium)
             }
-        }
-    }
-
-    component PresetTile: MouseArea {
-        id: tile
-        required property string name
-        readonly property var values: IrisStyle.presets[tile.name] ?? IrisStyle.presets.iris
-        readonly property bool selected: IrisStyle.presetName === tile.name
-        implicitHeight: Math.round(62 * root.d)
-        hoverEnabled: true
-        cursorShape: Qt.PointingHandCursor
-        Accessible.role: Accessible.RadioButton
-        Accessible.name: tile.name
-        Accessible.checked: tile.selected
-        onClicked: Config.setNestedValue("iris.appearance.preset", tile.name)
-        Rectangle {
-            id: miniature
-            anchors.left: parent.left
-            anchors.right: parent.right
-            anchors.top: parent.top
-            height: Math.round(40 * root.d)
-            radius: Math.round(12 * tile.values.shape * root.d)
-            color: IrisStyle.surfaceOpaque
-            border.width: tile.selected ? 2 : 1
-            border.color: tile.selected ? IrisStyle.accent : (tile.containsMouse ? IrisStyle.borderStrong : IrisStyle.border)
-            Behavior on border.color { ColorAnimation { duration: IrisStyle.duration(110); easing.type: IrisStyle.feedbackEasing } }
-            Column {
-                anchors.fill: parent
-                anchors.margins: Math.round(7 * root.d)
-                spacing: Math.round(4 * root.d)
-                Rectangle {
-                    width: parent.width
-                    height: Math.round(13 * root.d)
-                    radius: Math.round(6 * tile.values.shape * root.d)
-                    color: Qt.alpha(IrisStyle.text, Math.min(0.5, 0.12 * tile.values.fill))
-                }
-                Row {
-                    spacing: Math.round(4 * root.d)
-                    Rectangle { width: Math.round(16 * root.d); height: Math.round(8 * root.d); radius: height / 2; color: IrisStyle.accent }
-                    Rectangle { width: Math.round(22 * root.d); height: Math.round(8 * root.d); radius: height / 2; color: Qt.alpha(IrisStyle.text, tile.values.textTertiary) }
-                }
-            }
-        }
-        IrisText {
-            anchors.top: miniature.bottom
-            anchors.topMargin: Math.round(4 * root.d)
-            anchors.horizontalCenter: parent.horizontalCenter
-            text: Translation.tr(tile.name.charAt(0).toUpperCase() + tile.name.slice(1))
-            color: tile.selected ? IrisStyle.text : IrisStyle.subtext
-            font.pixelSize: IrisStyle.typeFootnote
-            font.weight: tile.selected ? Font.DemiBold : Font.Normal
         }
     }
 

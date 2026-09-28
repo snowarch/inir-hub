@@ -77,19 +77,20 @@ Singleton {
         root.say(Translation.tr("Redone"))
     }
     function applyTheme(theme: var): void {
-        IrisThemes.apply(theme)
-        root.say(Translation.tr("Applied %1").arg(theme.name))
+        IrisThemes.choose(theme)
+        root.say(IrisThemes.coloursOnly ? Translation.tr("Took the colours of %1").arg(theme.name) : Translation.tr("Applied %1").arg(theme.name))
     }
 
     Timer { id: noticeTimer; interval: 2400; onTriggered: root.notice = "" }
     Timer { id: recordTimer; interval: 320; onTriggered: root.record() }
     Connections {
         target: Config
-        enabled: GlobalStates.irisEdit
+        enabled: GlobalStates.irisEdit || GlobalStates.irisStudioOpen
         function onRevisionChanged(): void { recordTimer.restart() }
     }
     Connections {
         target: GlobalStates
         function onIrisEditChanged(): void { if (GlobalStates.irisEdit) root.reset() }
+        function onIrisStudioOpenChanged(): void { if (GlobalStates.irisStudioOpen) root.reset() }
     }
 }
