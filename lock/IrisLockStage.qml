@@ -9,6 +9,7 @@ import qs.services
 import qs.modules.common
 import qs.modules.common.functions
 import qs.modules.common.widgets
+import qs.modules.lock as LockUi
 import qs.modules.iris.style
 import qs.modules.iris.components
 import qs.modules.iris.widgets
@@ -25,6 +26,7 @@ Item {
     property bool editing: false
     readonly property string selected: GlobalStates.irisLockSelection
     property Item input: null
+    property bool oskVisible: false
     property bool dragging: false
     property bool peeking: false
     property rect selectedRect: Qt.rect(0, 0, 0, 0)
@@ -773,11 +775,39 @@ Item {
                     function onFailed(): void { if (IrisStyle.motionEnabled) shake.restart() }
                 }
 
+                Rectangle {
+                    id: keyboardButton
+                    anchors.left: parent.left
+                    anchors.leftMargin: 6 * root.d
+                    anchors.verticalCenter: parent.verticalCenter
+                    width: Math.round(32 * root.d)
+                    height: width
+                    radius: width / 2
+                    color: root.oskVisible || keyboardArea.containsMouse ? IrisStyle.onMediaFillHover : IrisStyle.onMediaFill
+                    Behavior on color { ColorAnimation { duration: IrisStyle.duration(120); easing.type: IrisStyle.feedbackEasing } }
+                    MaterialSymbol {
+                        anchors.centerIn: parent
+                        text: "keyboard"
+                        iconSize: Math.round(18 * root.d)
+                        color: IrisStyle.onMedia
+                    }
+                    MouseArea {
+                        id: keyboardArea
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        enabled: !root.editing
+                        cursorShape: Qt.PointingHandCursor
+                        Accessible.role: Accessible.Button
+                        Accessible.name: Translation.tr("Virtual keyboard")
+                        onClicked: root.oskVisible = !root.oskVisible
+                    }
+                }
+
                 TextInput {
                     id: passwordInput
-                    anchors.left: parent.left
+                    anchors.left: keyboardButton.right
                     anchors.right: submitButton.left
-                    anchors.leftMargin: 16 * root.d
+                    anchors.leftMargin: 6 * root.d
                     anchors.rightMargin: 6 * root.d
                     anchors.verticalCenter: parent.verticalCenter
                     echoMode: TextInput.Password
@@ -852,5 +882,61 @@ Item {
                 font.pixelSize: Math.round(12 * root.typeScale)
             }
         }
+    }
+
+    // The shared lock keyboard (Material and Waffle have it too), in the lock's glass: keys type into the password field.
+    LockUi.LockKeyboard {
+        id: lockKeyboard
+        z: 10
+        visible: root.oskVisible && !root.editing
+        x: Math.round((root.width - width) / 2)
+        width: Math.min(root.width * 0.6, Math.round(640 * root.d))
+        themeBgColor: IrisStyle.surface
+        themeKeySurfaceColor: IrisStyle.fillHover
+        themeTextColor: IrisStyle.text
+        themeSubtextColor: IrisStyle.textSecondary
+        themeAccentColor: IrisStyle.accent
+        themeAccentActiveColor: IrisStyle.accent
+        themeAccentTextColor: IrisStyle.inkOnAccent
+        themeRounding: IrisStyle.radiusSheet
+        themeKeyRounding: IrisStyle.radiusRow
+        themeAnimDuration: IrisStyle.duration(120)
+        themeFontSize: IrisStyle.typeBody
+        themeFontSizeLarge: IrisStyle.typeHeadline
+        themeFontSizeSmall: IrisStyle.typeMeta
+        themeFontFamily: IrisStyle.fontMain
+
+        // Below the password field when there is room, above it otherwise: never over what is being typed.
+        function place(): void {
+            const gap = Math.round(14 * root.d)
+            const edge = Math.round(56 * root.d)
+            if (!root.input) { lockKeyboard.y = Math.round(root.height - lockKeyboard.height - edge); return }
+            const at = root.input.mapToItem(root, 0, 0)
+            const mid = at.y + root.input.height / 2
+            const capsuleBottom = mid + Math.round(22 * root.d) + Math.round(30 * root.d)
+            const capsuleTop = mid - Math.round(22 * root.d)
+            lockKeyboard.y = Math.round(root.height - capsuleBottom - gap - edge >= lockKeyboard.height
+                ? capsuleBottom + gap
+                : Math.max(edge, capsuleTop - gap - lockKeyboard.height))
+        }
+        onVisibleChanged: if (visible) lockKeyboard.place()
+        onHeightChanged: lockKeyboard.place()
+        Connections {
+            target: root
+            function onRelayout(): void { lockKeyboard.place() }
+        }
+
+        onKeyClicked: key => {
+            if (!root.input) return
+            root.input.text += key
+            root.input.forceActiveFocus()
+        }
+        onBackspaceClicked: {
+            if (!root.input) return
+            if (root.input.text.length > 0) root.input.text = root.input.text.slice(0, -1)
+            root.input.forceActiveFocus()
+        }
+        onEnterClicked: if (root.context.currentText.length > 0) root.submitted()
+        onCloseRequested: root.oskVisible = false
     }
 }
