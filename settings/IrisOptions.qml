@@ -654,21 +654,13 @@ QtObject {
         { label: "5 min", value: 300 }, { label: "10 min", value: 600 }, { label: "15 min", value: 900 },
         { label: "30 min", value: 1800 }, { label: "1 hour", value: 3600 }
     ]
-    function languageName(code: string): string {
-        const locale = Qt.locale(code)
-        const name = String(locale.nativeLanguageName ?? "")
-        if (name.length === 0) return code
-        const territory = String(locale.nativeTerritoryName ?? "")
-        return name.charAt(0).toUpperCase() + name.slice(1) + (territory.length > 0 ? " (" + territory + ")" : "")
-    }
-
     // Shared iNiR keys an iRiS surface acts on, so they are set where iRiS shows them. Material and
     // Waffle read the same keys; nothing here is copied.
     readonly property var shared: [
         { section: "general", group: "Date & time", label: "Clock", description: "The Island, the lock screen and every clock in iRiS.", path: "time.format", kind: "choice", fallback: "hh:mm", choices: [{label:"24-hour",value:"hh:mm"},{label:"12-hour",value:"h:mm ap"},{label:"12-hour AM/PM",value:"h:mm AP"}], keywords: ["time", "hour", "24", "12", "am", "pm", "hora"] },
         { section: "general", group: "Date & time", label: "Exact seconds", description: "Clocks that show seconds tick on the second. Costs a little more.", path: "time.secondPrecision", kind: "switch", fallback: false },
         { section: "general", group: "Language", label: "Language", description: "Every label in the shell. System follows your locale.", path: "language.ui", kind: "choice", fallback: "auto",
-            choices: [{ label: "System", value: "auto" }].concat(Translation.allAvailableLanguages.map(code => ({ label: root.languageName(code), value: code }))),
+            choices: [{ label: "System", value: "auto" }].concat(Translation.allAvailableLanguages.map(code => ({ label: Translation.languageDisplayName(code), value: code }))),
             keywords: ["language", "idioma", "translation", "locale", "español", "spanish"] },
         { section: "general", group: "Apps", label: "Terminal", description: "Where Spotlight's commands, package installs and anime playback open.", path: "apps.terminal", kind: "text", placeholder: "kitty", fallback: "kitty", keywords: ["terminal", "kitty", "foot", "alacritty", "ghostty", "wezterm", "default apps"] },
         { section: "general", group: "Settings window", label: "Layout", description: "Sidebar lists every area beside the page. Rail keeps only their marks, for more room. Home opens on every area at once; each opens full width.", path: "iris.appearance.settingsLayout", kind: "choice", fallback: "sidebar", choices: [{ label: "Sidebar", value: "sidebar", glyph: "view_sidebar" }, { label: "Rail", value: "rail", glyph: "view_week" }, { label: "Home", value: "home", glyph: "grid_view" }], keywords: ["settings", "navigation", "sidebar", "rail", "grid", "home", "layout"] },
