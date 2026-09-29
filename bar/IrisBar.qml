@@ -20,6 +20,7 @@ import qs.modules.iris.dock
 import qs.modules.iris.edit
 import qs.modules.iris.notificationPopup
 import qs.modules.iris.palette
+import qs.modules.iris.orbit
 import qs.modules.iris.wallpaper
 import qs.modules.iris.style
 import qs.modules.iris.components as IrisParts
@@ -264,6 +265,17 @@ Scope {
             const next = list.filter(id => id !== source).concat(on ? [source] : [])
             Config.setNestedValue("iris.wallpaper.sources", next)
             return next.join(" ")
+        }
+        function orbit(query: string): string {
+            if (!(Config.options?.iris?.orbit?.enable ?? true)) return "Orbit is off (Settings › Windows › Orbit)"
+            GlobalStates.irisOrbitQuery = query
+            GlobalStates.irisOrbitOpen = true
+            return "open"
+        }
+        function orbitCorner(): string { return JSON.stringify(GlobalStates.irisOrbitCorners) }
+        function orbitClose(): string {
+            GlobalStates.irisOrbitOpen = false
+            return "closed"
         }
         function spotlightClose(): string {
             GlobalStates.searchOpen = false
@@ -527,6 +539,7 @@ Scope {
                 dockShown: GlobalStates.irisDockShown,
                 controlCenter: GlobalStates.controlPanelOpen,
                 spotlight: GlobalStates.searchOpen,
+                orbit: GlobalStates.irisOrbitOpen,
                 focus: { open: GlobalStates.sidebarLeftOpen, pinned: Config.options?.iris?.sidebars?.left?.pinned ?? false },
                 today: { open: GlobalStates.sidebarRightOpen, pinned: Config.options?.iris?.sidebars?.right?.pinned ?? false },
                 // Modes that take the screen over until someone closes them.
@@ -608,6 +621,7 @@ Scope {
                     || (controlCentreLoader.item?.present ?? false) || barWindow.editHere
                     || (dockLoader.item?.overFullscreen ?? false) || (dockLoader.item?.menuOpen ?? false)
                     || (spotlightLoader.item?.present ?? false) || (galleryLoader.item?.present ?? false)
+                    || (orbitLoader.item?.present ?? false)
                 // Niri keeps a fullscreen window above the Top layer, so the overview
                 // over a game would show every other surface but this one.
                 readonly property bool overviewOverFullscreen: CompositorService.isNiri && NiriService.inOverview
@@ -627,7 +641,7 @@ Scope {
                 WlrLayershell.layer: barWindow.overlaid ? WlrLayer.Overlay : WlrLayer.Top
                 WlrLayershell.keyboardFocus: barWindow.pinned || stage.cardOpen || (controlCentreLoader.item?.morphOpen ?? false)
                     || (dockLoader.item?.menuOpen ?? false) || (spotlightLoader.item?.here && GlobalStates.searchOpen)
-                    || (galleryLoader.item?.morphOpen ?? false) || (widgetBarLoader.item?.holdsKeyboard ?? false)
+                    || (galleryLoader.item?.morphOpen ?? false) || (orbitLoader.item?.wanted ?? false) || (widgetBarLoader.item?.holdsKeyboard ?? false)
                     ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
                 anchors { left: true; right: true; top: true; bottom: true }
                 readonly property bool suppressed: islandLoader.active
@@ -664,7 +678,7 @@ Scope {
                 mask: barWindow.canvasSuppressed ? emptyRegion
                     : barWindow.pinned || stage.cardArmed || (controlCentreLoader.item?.armed ?? false)
                         || (dockLoader.item?.menuOpen ?? false) || (spotlightLoader.item?.armed ?? false)
-                        || (galleryLoader.item?.armed ?? false)
+                        || (galleryLoader.item?.armed ?? false) || (orbitLoader.item?.armed ?? false)
                         || (islandLoader.item?.morphing ?? false)
                         ? null : chassisRegion
                 Region { id: emptyRegion }
@@ -1043,6 +1057,17 @@ Scope {
                     active: Config.ready && GlobalStates.deferredPanelsReady
                     asynchronous: true
                     sourceComponent: IrisWallpaperPicker { screen: barWindow.screen }
+                }
+
+                // A Place like Spotlight: resident, so it opens on a warm frame and grows from where the Island rests.
+                Loader {
+                    id: orbitLoader
+                    z: 2.5
+                    anchors.fill: parent
+                    anchors.margins: IrisFrame.band
+                    active: Config.ready && GlobalStates.deferredPanelsReady && (Config.options?.iris?.orbit?.enable ?? true)
+                    asynchronous: true
+                    sourceComponent: IrisOrbit { screen: barWindow.screen }
                 }
 
                 IrisBanners {

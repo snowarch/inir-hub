@@ -15,6 +15,7 @@ import qs.modules.iris.settings
 import qs.modules.iris.studio
 import qs.modules.iris.lock
 import qs.modules.iris.sidebar
+import qs.modules.iris.orbit
 import qs.modules.background
 import qs.modules.lock
 
@@ -71,6 +72,12 @@ Item {
     }
 
     IrisAppsSync {}
+
+    // Orbit's hot corner: a few pixels in one screen corner, on Top, only while it is on and something can use it.
+    LazyLoader {
+        active: IrisGate.official && (Config.options?.iris?.orbit?.enable ?? true) && (Config.options?.iris?.orbit?.hotCorner ?? true)
+        component: IrisOrbitCorner {}
+    }
 
     LazyLoader {
         active: IrisGate.official

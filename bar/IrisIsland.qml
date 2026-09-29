@@ -30,8 +30,11 @@ Item {
     property real compactHeight: 42
     // Spotlight opened as the Island is drawn by the same field: the Island hands it its face and folds its satellites.
     // Only Spotlight opened as the Island takes its place; a floating one leaves the Island as it is.
-    property real spotlightYield: String(Config.options?.iris?.palette?.opens ?? "floating") === "island"
-        && (IrisFrame.placeBodies["spotlight"]?.screen ?? "") === (root.targetScreen?.name ?? "-") ? 1 : 0
+    // A Place that opens as the Island (Spotlight, Orbit) is given the Island's face while it is up.
+    property real spotlightYield: (String(Config.options?.iris?.palette?.opens ?? "floating") === "island"
+            && (IrisFrame.placeBodies["spotlight"]?.screen ?? "") === (root.targetScreen?.name ?? "-"))
+        || (String(Config.options?.iris?.orbit?.opens ?? "island") === "island"
+            && (IrisFrame.placeBodies["orbit"]?.screen ?? "") === (root.targetScreen?.name ?? "-")) ? 1 : 0
     Behavior on spotlightYield { NumberAnimation { duration: IrisStyle.duration(160); easing.type: IrisStyle.feedbackEasing } }
     property bool expanded: false
     property bool pinned: false
@@ -1079,6 +1082,10 @@ Item {
         function onSearchOpenChanged(): void {
             root.publishRestOrigin()
             if (GlobalStates.searchOpen) root.expanded = false
+        }
+        function onIrisOrbitOpenChanged(): void {
+            root.publishRestOrigin()
+            if (GlobalStates.irisOrbitOpen) root.expanded = false
         }
         function onControlPanelOpenChanged(): void {
             if (GlobalStates.irisMorphOwner === "stage") return

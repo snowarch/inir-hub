@@ -17,6 +17,7 @@ Singleton {
 
     readonly property var targets: ({
         spotlight: { surface: "spotlight", open: () => GlobalStates.searchOpen = true, close: () => GlobalStates.searchOpen = false },
+        orbit: { surface: "orbit", open: () => GlobalStates.irisOrbitOpen = true, close: () => GlobalStates.irisOrbitOpen = false },
         gallery: { surface: "gallery", open: () => GlobalStates.wallpaperSelectorOpen = true, close: () => GlobalStates.wallpaperSelectorOpen = false },
         settings: { surface: "settings", open: () => GlobalStates.openSettings(), close: () => GlobalStates.settingsOverlayOpen = false },
         focus: { surface: "panels", open: () => GlobalStates.openSidebarLeft(GlobalStates.focusedScreen?.name ?? ""), close: () => GlobalStates.closeSidebarLeft() },
