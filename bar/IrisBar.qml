@@ -613,6 +613,13 @@ Scope {
                 readonly property bool overviewOverFullscreen: CompositorService.isNiri && NiriService.inOverview
                     && GameMode.hasFullscreenOnOutput(barWindow.screen?.name ?? "")
                 readonly property bool canvasSuppressed: barWindow.suppressed && !barWindow.presenting
+                // Nothing of the chassis may cover, move or restack what sits still in it: continuous motion may
+                // then draw in a surface of its own (LiveLayer) instead of repainting the whole output.
+                readonly property bool liveCalm: !barWindow.presenting && !barWindow.expanded && !barWindow.overlaid
+                    && !barWindow.canvasSuppressed && !IrisStyle.arriving && !(islandLoader.item?.morphing ?? false)
+                    && (banners.fieldShapes ?? []).length === 0
+                readonly property int liveLayer: WlrLayer.Top
+                readonly property int liveEpoch: GlobalStates.irisChassisEpoch
                 readonly property bool overlaid: ((islandLoader.item?.fullscreenCovered ?? false) && !barWindow.canvasSuppressed)
                     || barWindow.overviewOverFullscreen
                 // Switching layers recreates the surface above the Dock's window, whose icons it would cover.

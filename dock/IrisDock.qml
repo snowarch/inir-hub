@@ -793,7 +793,7 @@ Item {
                                     visible: windows > 0
                                     Repeater {
                                         model: indicators.windows
-                                        Rectangle {
+                                        IrisPulse {
                                             id: indicator
                                             required property int index
                                             readonly property bool lead: indicator.index === indicators.focusedIndex
@@ -801,22 +801,16 @@ Item {
                                             property real along: indicator.lead ? 2 * Math.round(6 * root.d) : indicator.dot
                                             height: root.vertical ? Math.round(indicator.along) : indicator.dot
                                             width: root.vertical ? indicator.dot : Math.round(indicator.along)
-                                            antialiasing: true
                                             radius: Math.min(width, height) / 2
                                             color: indicators.minimizedOnly ? "transparent"
                                                 : indicators.urgent ? IrisStyle.secondaryAccent
                                                 : indicator.lead ? IrisStyle.text : (appSlot.focused ? IrisStyle.textSecondary : IrisStyle.textTertiary)
-                                            border.width: indicators.minimizedOnly ? Math.max(1, Math.round(1.2 * root.d)) : 0
-                                            border.color: IrisStyle.textSecondary
+                                            borderWidth: indicators.minimizedOnly ? Math.max(1, Math.round(1.2 * root.d)) : 0
+                                            borderColor: IrisStyle.textSecondary
                                             Behavior on along { NumberAnimation { duration: IrisStyle.morphDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: IrisStyle.morphCurve } }
                                             Behavior on color { ColorAnimation { duration: IrisStyle.duration(140); easing.type: IrisStyle.feedbackEasing } }
-                                            SequentialAnimation on opacity {
-                                                running: indicators.urgent && IrisStyle.motionEnabled && indicator.visible
-                                                loops: Animation.Infinite
-                                                NumberAnimation { to: 0.35; duration: 650; easing.type: Easing.InOutSine }
-                                                NumberAnimation { to: 1; duration: 650; easing.type: Easing.InOutSine }
-                                                onRunningChanged: if (!running) indicator.opacity = 1
-                                            }
+                                            pulsing: indicators.urgent && indicator.visible
+                                            halfPeriod: 650
                                         }
                                     }
                                 }

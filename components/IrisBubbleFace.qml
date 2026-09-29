@@ -201,21 +201,12 @@ Item {
             iconSize: 16 * root.d
             color: root.legible(IrisStyle.identityColor(String(task?.tint ?? "lavender")), 3)
         }
-        Rectangle {
-            id: recordDot
+        IrisPulse {
             visible: root.kind === "record"
             anchors.centerIn: parent
             width: 12 * root.d
             height: width
-            radius: width / 2
             color: root.dangerInk
-            SequentialAnimation on opacity {
-                running: recordDot.visible && IrisStyle.motionEnabled
-                loops: Animation.Infinite
-                NumberAnimation { to: 0.35; duration: 700; easing.type: Easing.InOutSine }
-                NumberAnimation { to: 1; duration: 700; easing.type: Easing.InOutSine }
-                onRunningChanged: if (!running) recordDot.opacity = 1
-            }
         }
         IrisTrayIcon {
             visible: root.kind === "trayApp"
