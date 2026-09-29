@@ -154,6 +154,29 @@ Scope {
             IrisPieces.placeApp(appId, "free", Math.min(1, Number(m[1])), Math.min(1, Number(m[2])))
             return place
         }
+        // The side panels and the Control Center by their iRiS names (the same paths as sidebarLeft,
+        // sidebarRight and controlPanel), for keybinds that read as what they open.
+        function focus(action: string): string {
+            if (action === "open") GlobalStates.openSidebarLeft("")
+            else if (action === "close") GlobalStates.closeSidebarLeft()
+            else if (action === "toggle" || action === "") GlobalStates.toggleSidebarLeft("")
+            else return "Choose open, close or toggle"
+            return GlobalStates.sidebarLeftOpen ? "open" : "closed"
+        }
+        function today(action: string): string {
+            if (action === "open") GlobalStates.openSidebarRight("")
+            else if (action === "close") GlobalStates.closeSidebarRight()
+            else if (action === "toggle" || action === "") GlobalStates.toggleSidebarRight("")
+            else return "Choose open, close or toggle"
+            return GlobalStates.sidebarRightOpen ? "open" : "closed"
+        }
+        function controlCenter(action: string): string {
+            if (action === "open") GlobalStates.controlPanelOpen = true
+            else if (action === "close") GlobalStates.controlPanelOpen = false
+            else if (action === "toggle" || action === "") GlobalStates.controlPanelOpen = !GlobalStates.controlPanelOpen
+            else return "Choose open, close or toggle"
+            return GlobalStates.controlPanelOpen ? "open" : "closed"
+        }
         function pin(side: string): void {
             if (side !== "left" && side !== "right") return
             const path = "iris.sidebars." + side + ".pinned"
