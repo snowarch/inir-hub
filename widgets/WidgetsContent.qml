@@ -581,9 +581,9 @@ WBarAttachedPanelContent {
                     clip: true
 
                     readonly property MprisPlayer activePlayer: MprisController.activePlayer
-                    readonly property string effectiveArtUrl: MprisController.isYtMusicActive ? YtMusic.currentThumbnail : (activePlayer?.trackArtUrl ?? "")
-                    readonly property string effectiveTitle: MprisController.isYtMusicActive ? YtMusic.currentTitle : (activePlayer?.trackTitle ?? "")
-                    readonly property string effectiveArtist: MprisController.isYtMusicActive ? YtMusic.currentArtist : (activePlayer?.trackArtist ?? "")
+                    readonly property string effectiveArtUrl: MprisController.isYtMusicActive ? YtMusic.currentThumbnail : (MprisController.artUrlOf(activePlayer) ?? "")
+                    readonly property string effectiveTitle: MprisController.isYtMusicActive ? YtMusic.currentTitle : (MprisController.titleOf(activePlayer) ?? "")
+                    readonly property string effectiveArtist: MprisController.isYtMusicActive ? YtMusic.currentArtist : (MprisController.artistOf(activePlayer) ?? "")
 
                     Rectangle {
                         anchors.fill: parent
@@ -634,7 +634,7 @@ WBarAttachedPanelContent {
 
                                 WText {
                                     Layout.fillWidth: true
-                                    text: StringUtils.cleanMusicTitle(MprisController.activePlayer?.trackTitle) ?? Translation.tr("No media")
+                                    text: StringUtils.cleanMusicTitle(MprisController.titleOf(MprisController.activePlayer)) ?? Translation.tr("No media")
                                     font.pixelSize: Looks.font.pixelSize.large
                                     font.weight: Font.DemiBold
                                     elide: Text.ElideRight
@@ -674,7 +674,7 @@ WBarAttachedPanelContent {
 
                             WText {
                                 Layout.fillWidth: true
-                                text: MprisController.activePlayer?.trackArtist ?? ""
+                                text: MprisController.artistOf(MprisController.activePlayer) ?? ""
                                 font.pixelSize: Looks.font.pixelSize.normal
                                 color: Looks.colors.fg1
                                 elide: Text.ElideRight

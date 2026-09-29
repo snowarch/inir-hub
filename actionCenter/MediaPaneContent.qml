@@ -17,8 +17,8 @@ Rectangle {
     color: Looks.colors.bgPanelBody
 
     readonly property var activePlayer: MprisController.activePlayer
-    readonly property string effectiveTitle: MprisController.isYtMusicActive ? YtMusic.currentTitle : (activePlayer?.trackTitle ?? "")
-    readonly property string effectiveArtist: MprisController.isYtMusicActive ? YtMusic.currentArtist : (activePlayer?.trackArtist ?? "")
+    readonly property string effectiveTitle: MprisController.isYtMusicActive ? YtMusic.currentTitle : (MprisController.titleOf(activePlayer) ?? "")
+    readonly property string effectiveArtist: MprisController.isYtMusicActive ? YtMusic.currentArtist : (MprisController.artistOf(activePlayer) ?? "")
     readonly property real effectivePosition: MprisController.isYtMusicActive
         ? YtMusic.currentPosition : MprisController.positionOf(activePlayer)
     readonly property real effectiveLength: MprisController.isYtMusicActive
