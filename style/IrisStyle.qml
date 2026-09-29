@@ -799,6 +799,11 @@ QtObject {
         return shape === "square" ? base * 0.45 : shape === "squircle" ? base * 0.75 : base
     }
     function iconRadius(size: real): int { return Math.round(size * 0.26 * Math.min(1.2, root.shapeScale)) }
+    // The tile pack's plates: the black and the white a plate can wear, the glyph carrying the colour.
+    readonly property color plateBlackTop: root.toned("#2e2e34")
+    readonly property color plateBlackBase: root.toned("#18181b")
+    readonly property color plateWhiteTop: root.toned("#f8f8fb")
+    readonly property color plateWhiteBase: root.toned("#e6e6ec")
 
     readonly property real panelPadding: Math.round(24 * root.density)
     readonly property real sectionGap: Math.round(24 * root.density)
