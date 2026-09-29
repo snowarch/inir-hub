@@ -1756,9 +1756,9 @@ Item {
                     font.pixelSize: (root.zoned ? 13 : 12) * IrisStyle.typeScale
                     font.weight: IrisStyle.weight(Font.Medium)
                 }
-                Waveform {
+                IrisVisualizer {
                     running: root.playing && root.compactMode === "media" && !root.visualExpanded
-                    tint: root.artTint
+                    tint: IrisStyle.visualizerTint(root.artTint)
                     barHeight: (root.zoned ? 18 : 15) * root.d
                 }
             }

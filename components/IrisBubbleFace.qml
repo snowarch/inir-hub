@@ -2,6 +2,7 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Shapes
+import Quickshell
 import Quickshell.Services.SystemTray
 import qs.services
 import qs.services.deferred
@@ -42,6 +43,7 @@ Item {
     readonly property color highlight: root.legible(IrisStyle.secondaryAccent, 3)
     readonly property color alertInk: root.legible(IrisStyle.badgeInk, 4.5)
     readonly property color dangerInk: root.legible(IrisStyle.danger, 3)
+    readonly property bool radialVisualizer: IrisStyle.visualizerStyle === "ring"
     // In a bar's lane a face with a figure reads on one line, glyph then figure, and sizes from both.
     property bool lane: false
     // A bar cell is its touch target; what it draws keeps the size of the bar's other marks.
@@ -611,6 +613,26 @@ Item {
         }
         Loader {
             anchors.fill: parent
+            active: root.kind === "visualizer"
+            sourceComponent: Item {
+                ColorQuantizer {
+                    id: vizArt
+                    source: IrisStyle.visualizerColour === "art" ? MediaArtwork.displaySource : ""
+                    depth: 2
+                    rescaleSize: 48
+                }
+                IrisVisualizer {
+                    anchors.centerIn: parent
+                    running: root.playing
+                    // A ring fills the round face; a row sits in it at the height of the other marks.
+                    barHeight: Math.round((root.radialVisualizer ? root.width - (8 + 4 * root.absorb) * root.d : 16 * root.d))
+                    tint: root.legible(IrisStyle.visualizerTint(IrisStyle.artTintOf(vizArt.colors)), 3)
+                    opacity: root.playing ? 1 : 0.55
+                }
+            }
+        }
+        Loader {
+            anchors.fill: parent
             active: root.kind === "vpn"
             sourceComponent: Item {
                 Component.onCompleted: Vpn.keepAlive()
@@ -823,6 +845,7 @@ Item {
         : root.kind === "tools" ? Translation.tr("Timers")
         : root.kind === "weather" ? Translation.tr("Weather")
         : root.kind === "media" ? Translation.tr("Now playing")
+        : root.kind === "visualizer" ? Translation.tr("Visualizer")
         : root.kind === "sound" ? Translation.tr("Sound")
         : root.kind === "mic" ? Translation.tr("Microphone")
         : root.kind === "network" ? Translation.tr("Network")

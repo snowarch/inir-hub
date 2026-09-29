@@ -32,6 +32,8 @@ QtObject {
         { id: "mic", label: "Microphone", description: "Input level as a ring; scroll to change it. Its card holds the inputs.", card: true },
         { id: "tools", label: "Timers", description: "Countdown presets, Focus and the stopwatch.", card: true },
         { id: "media", label: "Now playing", description: "The cover while something plays; opens its card.", card: true },
+        { id: "visualizer", label: "Visualizer", description: "What plays, drawn as it sounds: capsules, a rising equalizer, dots, a wave or a ring. Its look is in Now Playing; it opens the player's card.", card: true,
+            keywords: ["visualizer", "visualiser", "cava", "spectrum", "equalizer", "ecualizador", "bars", "barras", "wave", "onda", "audio", "music", "musica"] },
         { id: "tray", label: "Tray", description: "The apps running in the tray, as their icons or a count.", card: true },
         { id: "calendar", label: "Calendar", description: "Today's weekday over the date; its card holds the month and what is coming up.", card: true },
         { id: "clock", label: "Clock", description: "An analog face; opens the Desktop page.", card: false },
@@ -57,10 +59,10 @@ QtObject {
         return root.slots.concat(root.extras).find(piece => piece.id === id)?.label ?? id
     }
 
-    readonly property bool hasPlayer: String(MprisController.activePlayer?.trackTitle ?? "").length > 0
+    readonly property bool hasPlayer: String(MprisController.titleOf(MprisController.activePlayer) ?? "").length > 0
     readonly property int trayCount: SystemTray.items.values.filter(item => item && item.id).length
     function available(id: string): bool {
-        if (id === "media") return root.hasPlayer
+        if (id === "media" || id === "visualizer") return root.hasPlayer
         if (id === "tray") return root.trayCount > 0
         if (id === "battery") return Battery.available
         if (id === "bluetooth") return BluetoothStatus.available

@@ -94,10 +94,10 @@ GridLayout {
                     elide: Text.ElideRight
                 }
             }
-            Waveform {
+            IrisVisualizer {
                 Layout.alignment: Qt.AlignVCenter
                 running: media.effectiveIsPlaying && page.current && page.island.visualExpanded
-                tint: page.island.artTint
+                tint: IrisStyle.visualizerTint(page.island.artTint)
                 barHeight: 20 * IrisStyle.density
             }
         }
@@ -284,10 +284,10 @@ GridLayout {
                             circular: true
                             Layout.preferredWidth: Math.round(20 * IrisStyle.density)
                             Layout.preferredHeight: Layout.preferredWidth
-                            source: String(playerChip.modelData?.trackArtUrl ?? "")
+                            source: String(MprisController.artUrlOf(playerChip.modelData) ?? "")
                         }
                         IrisText {
-                            text: String(playerChip.modelData?.trackTitle || playerChip.modelData?.identity || "")
+                            text: String(MprisController.titleOf(playerChip.modelData) || playerChip.modelData?.identity || "")
                             font.pixelSize: IrisStyle.typeMeta
                             font.weight: IrisStyle.weight(Font.Medium)
                             elide: Text.ElideRight

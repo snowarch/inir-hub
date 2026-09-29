@@ -72,10 +72,10 @@ Item {
             circular: Config.options?.iris?.player?.roundCover ?? false
             radius: circular ? width / 2 : 6 * column.d
         }
-        Waveform {
+        IrisVisualizer {
             anchors.horizontalCenter: parent.horizontalCenter
             running: column.island.playing && column.mode === "media" && !column.island.visualExpanded
-            tint: column.island.artTint
+            tint: IrisStyle.visualizerTint(column.island.artTint)
             barHeight: 13 * column.d
         }
         // On its side there is room for the time under what plays.

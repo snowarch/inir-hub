@@ -6,7 +6,6 @@ Glyph 1.0 Glyph.qml
 GlyphButton 1.0 GlyphButton.qml
 RecordDot 1.0 RecordDot.qml
 ProgressRing 1.0 ProgressRing.qml
-Waveform 1.0 Waveform.qml
 IslandActivityPage 1.0 IslandActivityPage.qml
 IslandMediaPage 1.0 IslandMediaPage.qml
 IslandDesktopPage 1.0 IslandDesktopPage.qml

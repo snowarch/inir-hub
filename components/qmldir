@@ -43,3 +43,4 @@ singleton IrisMotionMeter 1.0 IrisMotionMeter.qml
 IrisControlRow 1.0 IrisControlRow.qml
 IrisDisplayList 1.0 IrisDisplayList.qml
 IrisSystemList 1.0 IrisSystemList.qml
+IrisVisualizer 1.0 IrisVisualizer.qml

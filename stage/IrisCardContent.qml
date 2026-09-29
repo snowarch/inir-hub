@@ -26,7 +26,7 @@ Item {
     property string screenName: ""
     property bool contentActive: true
     readonly property real d: IrisStyle.density
-    readonly property bool bleeds: root.kind === "weather" || root.kind === "notifications"
+    readonly property bool bleeds: ["weather", "notifications", "media", "visualizer"].includes(root.kind)
         || root.kind === "media" || root.kind === "calendar"
     readonly property real contentHeight: body.item?.implicitHeight ?? 0
     readonly property color light: {
@@ -37,7 +37,8 @@ Item {
         case "tools": return IrisStyle.secondaryAccent
         case "tray": return IrisStyle.identity.teal
         case "calendar": return IrisStyle.identity.red
-        case "media": return "transparent"
+        case "media":
+        case "visualizer": return "transparent"
         case "network": return IrisStyle.identity.blue
         case "bluetooth": return IrisStyle.identity.sky
         case "vitals": return IrisStyle.identity.teal
@@ -68,7 +69,8 @@ Item {
             case "mic": return micCard
             case "tools": return toolsCard
             case "tray": return trayCard
-            case "media": return mediaCard
+            case "media":
+            case "visualizer": return mediaCard
             case "network": return networkCard
             case "bluetooth": return bluetoothCard
             case "vitals": return vitalsCard
@@ -1137,22 +1139,17 @@ Item {
                 depth: 2
                 rescaleSize: 48
             }
-            readonly property color tint: {
-                const colors = tintQuantizer.colors ?? []
-                let best = null
-                let bestScore = -1
-                for (let i = 0; i < colors.length; i++) {
-                    const c = colors[i]
-                    const score = Math.max(0, c.hslSaturation) * (1 - Math.abs(c.hslLightness - 0.5))
-                    if (score > bestScore) { bestScore = score; best = c }
-                }
-                if (!best || best.hslSaturation < 0.14 || best.hslHue < 0) return IrisStyle.text
-                return Qt.hsla(best.hslHue, Math.max(0.5, best.hslSaturation),
-                    Math.max(0.64, Math.min(0.76, best.hslLightness + 0.22)), 1)
+            readonly property color tint: IrisStyle.artTintOf(tintQuantizer.colors)
+            // The artwork is the card's material, edge to edge in its own contour; the player sits on it at the card's margin.
+            readonly property real inset: Math.max(0, IrisStyle.cardPad - Math.round(14 * root.d))
+            implicitHeight: card.implicitHeight + player.inset * 2
+            Rectangle {
+                anchors.fill: parent
+                color: IrisStyle.surfaceHigh
+                visible: !artLoader.active
             }
-            readonly property real frameInset: IrisStyle.radiusSheet - IrisStyle.radiusCard
-            implicitHeight: card.implicitHeight + player.frameInset * 2
             Loader {
+                id: artLoader
                 anchors.fill: parent
                 active: (Config.options?.iris?.player?.artworkBackground ?? true)
                     && MediaArtwork.displaySource.length > 0
@@ -1168,18 +1165,12 @@ Item {
                     }
                 }
             }
-            Rectangle {
-                id: playerFrame
-                anchors.fill: parent
-                anchors.margins: player.frameInset
-                radius: IrisStyle.radiusCard
-                color: IrisStyle.fillQuiet
-            }
             IrisMediaCard {
                 id: card
-                anchors.left: playerFrame.left
-                anchors.right: playerFrame.right
-                anchors.top: playerFrame.top
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.top: parent.top
+                anchors.margins: player.inset
                 showBackground: false
                 active: root.contentActive
                 tint: player.tint
