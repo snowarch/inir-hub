@@ -40,7 +40,9 @@ Item {
     // a veil darkened until the glass is gone. An opaque plate keeps its own polarity.
     readonly property bool lightBackdrop: root.opaque ? root.widget.forceDarkInk
         : root.clear ? root.widget.inkOnLight : root.widget.glassInkOnLight
+    // Transparent is bare: it carries no plate unless Lume on every widget asks for one.
     readonly property real veil: root.opaque ? root.strength
+        : root.clear && !root.widget.legibleAlways ? 0
         : root.lightBackdrop ? IrisStyle.legibleFrost(root.readMaterial, root.frostLevel, root.readSpread, root.strength)
         : IrisStyle.legibleVeil(root.readMaterial, root.readLevel, root.readSpread, root.strength)
     // Lume on every widget: the veil (light ink) is solved as if the region were bright and busy, the frost
