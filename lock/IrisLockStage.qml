@@ -693,7 +693,7 @@ Item {
             Rectangle {
                 anchors.horizontalCenter: session.horizontalCenter
                 visible: avatar.visible
-                width: avatar.width + Math.round(8 * root.d)
+                width: avatar.width + Math.round(8 * IrisStyle.density)
                 height: width
                 radius: width / 2
                 color: IrisStyle.mediaGlass
