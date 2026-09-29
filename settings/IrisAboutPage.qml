@@ -20,9 +20,15 @@ Flickable {
     contentHeight: pageColumn.implicitHeight + 40 * root.d
     ScrollBar.vertical: IrisScrollBar {}
 
+    readonly property string irisVersion: irisVersionFile.text().trim()
+
     FileView {
         id: versionFile
         path: Quickshell.shellPath("VERSION")
+    }
+    FileView {
+        id: irisVersionFile
+        path: Quickshell.shellPath("modules/iris/VERSION")
     }
 
     ColumnLayout {
@@ -60,6 +66,7 @@ Flickable {
         InfoCard {
             rows: [
                 { label: Translation.tr("Family"), value: Translation.tr("iRiS · Island family") },
+                { label: "iRiS", value: root.irisVersion },
                 { label: Translation.tr("Branch"), value: ShellUpdates.localCommit.length > 0 ? ShellUpdates.currentBranch : "", highlight: ShellUpdates.isNonMainBranch },
                 { label: Translation.tr("Commit"), value: ShellUpdates.localCommit },
                 { label: Translation.tr("System"), value: SystemInfo.distroName },
