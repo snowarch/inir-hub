@@ -76,6 +76,11 @@ Singleton {
             if (token === word) best = Math.max(best, 0.8)
             else if (word.length >= 3 && token.startsWith(word)) best = Math.max(best, 0.7)
         }
+        // A word that only turns up in the description ranks under one the row is named or keyworded by.
+        for (const token of entry.describedTokens) {
+            if (token === word) best = Math.max(best, 0.64)
+            else if (word.length >= 3 && token.startsWith(word)) best = Math.max(best, 0.6)
+        }
         if (best < 0.6 && word.length >= 3 && entry.flat.includes(word)) best = 0.6
         return best
     }
@@ -102,6 +107,7 @@ Singleton {
         entry.nameTokens = root.tokens(name + " " + (entry.english ?? ""))
         entry.initials = root.tokens(name).map(token => token[0]).join("")
         entry.otherTokens = root.tokens([entry.detail ?? "", entry.areaName ?? "", entry.words ?? ""].join(" "))
+        entry.describedTokens = root.tokens(entry.description ?? "")
         entry.flat = entry.nameTokens.join("")
         return entry
     }
@@ -137,12 +143,12 @@ Singleton {
         }
         for (const spec of IrisOptions.settings) {
             const path = String(spec.path ?? "")
-            if (path.length === 0 || flipped.has(path) || !IrisOptions.shown(spec) || !spec.label) continue
+            if (path.length === 0 || flipped.has(path) || spec.mirror || !IrisOptions.shown(spec) || !spec.label) continue
             const section = IrisOptions.sectionById(String(spec.section ?? ""))
             const group = String(spec.group ?? "")
             out.push(root.prepare({ name: Translation.tr(spec.label), english: spec.label,
                 detail: Translation.tr(section.title) + (group ? " › " + Translation.tr(group) : ""), area: section.id, areaName: Translation.tr(section.title),
-                words: [group, section.title].concat(spec.keywords ?? []).join(" "), icon: IrisOptions.groupGlyphs[group] ?? section.icon, tint: section.tint,
+                words: [group, section.title].concat(spec.keywords ?? []).join(" "), description: spec.description ?? "", icon: IrisOptions.groupGlyphs[group] ?? section.icon, tint: section.tint,
                 kind: "setting", keepOpen: false, priority: 400, run: () => root.openSettings(group ? section.id + "/" + group : section.id) }))
         }
         return out

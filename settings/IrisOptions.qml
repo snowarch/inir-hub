@@ -98,7 +98,7 @@ QtObject {
         { label: "Technical", value: "technical", values: ["Space Grotesk", "Space Grotesk", "JetBrainsMono Nerd Font"] }
     ].filter(pairing => pairing.values.every(face => face.length === 0 || face === IrisStyle.faceText || Qt.fontFamilies().includes(face)))
 
-    readonly property var studio: [
+    readonly property var studioRows: [
         { target: "material", group: "Material", label: "Material", description: "What every surface is made of. Raised steps, fills and the frame follow it.", path: "iris.appearance.theme.surface", kind: "choice", fallback: "black", choices: [{label:"Black",value:"black",swatch:IrisStyle.materialSwatch("black")},{label:"Graphite",value:"graphite",swatch:IrisStyle.materialSwatch("graphite")},{label:"Midnight",value:"midnight",swatch:IrisStyle.materialSwatch("midnight")},{label:"Wallpaper",value:"wallpaper",swatch:IrisStyle.materialSwatch("wallpaper")},{label:"Theme",value:"theme",swatch:IrisStyle.materialSwatch("theme")}] },
         { target: "material", group: "Adaptive", label: "Adapt to the wallpaper", description: "Reads the wallpaper's brightness, contrast and colour and shapes iRiS from it: calmer images round corners and soften shadows, busy or bright ones sharpen and firm up lines, colourful ones carry more light. 0 keeps your values exactly.", path: "iris.appearance.adaptive", kind: "range", fallback: 0, min: 0, max: 100, step: 5, unit: " %" },
         { target: "material", group: "Material", label: "Fills", description: "Groups, tracks, hovered and pressed controls.", path: "iris.appearance.theme.fill", kind: "range", fallback: 100, min: 30, max: 200, step: 5, unit: " %" },
@@ -177,21 +177,20 @@ QtObject {
         { target: "motion", group: "Touch", label: "Press depth", description: "How far buttons, bubbles and the Island dip under a press. 0 keeps them still.", path: "iris.appearance.theme.press", kind: "range", fallback: 100, min: 0, max: 200, step: 10, unit: " %" },
         { target: "motion", group: "Motion", label: "Duration", visibleWhen: "iris.appearance.motion", description: "How long a shape takes to grow out of what opened it.", path: "iris.appearance.motionDuration", kind: "range", fallback:220,min:100,max:400,step:10,unit:" ms" },
         { target: "motion", group: "Motion", label: "Bounce", visibleWhen: "iris.appearance.motion", description: "How far arrivals and moves pass their place before settling, as a share of the style's own. 0 never bounces; leaving never does.", path: "iris.appearance.theme.bounce", kind: "range", fallback: 100, min: 0, max: 200, step: 10, unit: " %" },
-        { target: "island", group: "Shape", label: "Island layout", description: "Hug its content in the middle, hug one end, span the whole edge as a bar, or run a thin menu bar with the Island hanging from it as a notch.", path: "iris.bar.layout", kind: "choice", fallback: "island", choices: [{label:"Island",value:"island",glyph:"pill"},{label:"Left",value:"left",glyph:"align_horizontal_left"},{label:"Right",value:"right",glyph:"align_horizontal_right"},{label:"Full width",value:"full",glyph:"width_full"},{label:"Menu bar",value:"menubar",glyph:"toolbar"}], keywords: ["menu bar", "notch", "macbook", "mac", "strip", "bar"] },
-        { target: "island", group: "Shape", label: "Screen edge", path: "iris.bar.position", kind: "choice", fallback: "top", choices: [{label:"Top",value:"top",glyph:"vertical_align_top"},{label:"Bottom",value:"bottom",glyph:"vertical_align_bottom"},{label:"Left",value:"left",glyph:"align_horizontal_left"},{label:"Right",value:"right",glyph:"align_horizontal_right"}] },
-        { target: "island", group: "Shape", label: "Height", description: "The resting Island, and how deep its notch melts into the edge.", path: "iris.bar.height", kind: "range", fallback: 42, min: 32, max: 64, unit: " px" },
-        { target: "island", group: "Shape", label: "Menu bar strip", visibleWhen: "iris.bar.layout=menubar", description: "Transparent leaves your items on the wallpaper, like macOS; Band lays a bar under them.", path: "iris.bar.strip", kind: "choice", fallback: "clear", choices: [{label:"Transparent",value:"clear",glyph:"blur_off"},{label:"Band",value:"band",glyph:"toolbar"}], keywords: ["transparent", "clear", "macos", "tahoe", "menu bar", "strip", "band", "background"] },
+        { target: "island", group: "Layout", label: "Island layout", description: "Hug its content in the middle, hug one end, span the whole edge as a bar, or run a thin menu bar with the Island hanging from it as a notch.", path: "iris.bar.layout", kind: "choice", fallback: "island", choices: [{label:"Island",value:"island",glyph:"pill"},{label:"Left",value:"left",glyph:"align_horizontal_left"},{label:"Right",value:"right",glyph:"align_horizontal_right"},{label:"Full width",value:"full",glyph:"width_full"},{label:"Menu bar",value:"menubar",glyph:"toolbar"}], keywords: ["menu bar", "notch", "macbook", "mac", "strip", "bar"] },
+        { target: "island", group: "Layout", label: "Screen edge", path: "iris.bar.position", kind: "choice", fallback: "top", choices: [{label:"Top",value:"top",glyph:"vertical_align_top"},{label:"Bottom",value:"bottom",glyph:"vertical_align_bottom"},{label:"Left",value:"left",glyph:"align_horizontal_left"},{label:"Right",value:"right",glyph:"align_horizontal_right"}] },
+        { target: "island", group: "Layout", label: "Height", description: "The resting Island, and how deep its notch melts into the edge.", path: "iris.bar.height", kind: "range", fallback: 42, min: 32, max: 64, unit: " px" },
+        { target: "island", group: "Layout", label: "Gap from the edge", path: "iris.bar.margin", kind: "range", fallback:8,min:0,max:24,unit:" px" },
+        { target: "island", group: "Layout", label: "Menu bar strip", visibleWhen: "iris.bar.layout=menubar", description: "Transparent leaves your items on the wallpaper, like macOS; Band lays a bar under them.", path: "iris.bar.strip", kind: "choice", fallback: "clear", choices: [{label:"Transparent",value:"clear",glyph:"blur_off"},{label:"Band",value:"band",glyph:"toolbar"}], keywords: ["transparent", "clear", "macos", "tahoe", "menu bar", "strip", "band", "background"] },
         { target: "island", group: "Shape", label: "Attach as a notch", description: "Melts the Island into the screen edge.", path: "iris.bar.notch", kind: "switch", fallback: true },
         { target: "island", group: "Shape", label: "Notch curve", visibleWhen: "iris.bar.notch", description: "How wide the shoulders are where the Island turns into its edge.", path: "iris.bar.notchCurve", kind: "range", fallback: 100, min: 20, max: 200, step: 5, unit: " %" },
-        { target: "island", group: "Shape", label: "Bubble gap", description: "How far the bubbles beside the Island rest from it.", path: "iris.bar.satelliteGap", kind: "range", fallback: 6, min: 0, max: 24, unit: " px" },
-        { target: "island", group: "Shape", label: "Height", path: "iris.bar.height", kind: "range", fallback:42,min:32,max:64,unit:" px" },
-        { target: "island", group: "Shape", label: "Gap from the edge", path: "iris.bar.margin", kind: "range", fallback:8,min:0,max:24,unit:" px" },
         { target: "island", group: "Shape", label: "Expanded corners", path: "iris.appearance.expandedRadius", kind: "range", fallback:28,min:16,max:40,unit:" px" },
         { target: "island", group: "At rest", label: "Clock", description: "What the resting Island shows beside the time.", path: "iris.bar.clockStyle", kind: "choice", fallback: "dateTime", choices: [{label:"Time",value:"time"},{label:"Date",value:"dateTime"},{label:"Weather",value:"weather"}] },
         { target: "island", group: "At rest", label: "Utility island", description: "Emerges beside the Island; the tray hides when no apps are present.", path: "iris.bar.auxiliary", kind: "choice", fallback: "tray", choices: [{label:"Tray",value:"tray"},{label:"Timers",value:"tools"},{label:"Sound",value:"sound"},{label:"Microphone",value:"mic"},{label:"None",value:"none"}] },
         { target: "island", group: "At rest", label: "Clock size", description: "The time and date on the resting Island. The Island grows to fit them.", path: "iris.bar.clockScale", kind: "range", fallback: 100, min: 80, max: 150, step: 5, unit: " %" },
         { target: "island", group: "At rest", label: "Clock accent", description: "The colour of the time's separator and the day number on the resting Island.", path: "iris.bar.clockAccent", kind: "choice", fallback: "highlight", choices: [{label:"Highlight",value:"highlight",swatch:IrisStyle.secondaryAccent},{label:"Accent",value:"accent",swatch:IrisStyle.accent},{label:"Plain",value:"plain",swatch:IrisStyle.text}] },
         { target: "island", group: "At rest", label: "Breathing room", description: "Space around what the resting Island shows.", path: "iris.bar.padding", kind: "range", fallback: 100, min: 50, max: 250, step: 10, unit: " %" },
+        { target: "island", group: "At rest", label: "Bubble gap", description: "How far the bubbles beside the Island rest from it.", path: "iris.bar.satelliteGap", kind: "range", fallback: 6, min: 0, max: 24, unit: " px" },
         { target: "island", group: "At rest", label: "Bubble size", description: "The bubbles beside the Island, as a share of its height.", path: "iris.bar.satelliteScale", kind: "range", fallback: 100, min: 70, max: 100, step: 5, unit: " %" },
         { target: "island", group: "Desktop page", label: "Header", description: "What sits behind the time when the Island shows your desktop.", path: "iris.bar.desktopBanner", kind: "choice", fallback: "wallpaper", choices: [{label:"Wallpaper",value:"wallpaper"},{label:"None",value:"none"}] },
         { target: "island", group: "Desktop page", label: "Blocks", description: "What sits under the time, in the order you switch them on. You can also arrange them on the Island itself: open its desktop page and tap the pencil.", path: "iris.bar.desktopBlocks", kind: "pieces", fallback: ["profile", "context", "forecast", "agenda", "modules"], choices: [{label:"Profile",value:"profile"},{label:"Current app",value:"context"},{label:"Forecast",value:"forecast"},{label:"Up next",value:"agenda"},{label:"Vitals",value:"vitals"},{label:"Modules",value:"modules"}] },
@@ -298,7 +297,29 @@ QtObject {
         { target: "material", group: "Material per surface", label: "Menus", path: "iris.appearance.surfaces.menus.material", kind: "choice", fallback: "", choices: [{label:"Family",value:""},{label:"Solid",value:"solid",glyph:"crop_square"},{label:"Glass",value:"glass",glyph:"blur_on"}], keywords: ["glass", "solid", "blur", "material", "vidrio"] },
         { target: "material", group: "Material per surface", label: "Wallpaper gallery", path: "iris.appearance.surfaces.gallery.material", kind: "choice", fallback: "", choices: [{label:"Family",value:""},{label:"Solid",value:"solid",glyph:"crop_square"},{label:"Glass",value:"glass",glyph:"blur_on"}], keywords: ["glass", "solid", "blur", "material", "vidrio"] },
         { target: "material", group: "Material per surface", label: "Volume and song pill", path: "iris.appearance.surfaces.osd.material", kind: "choice", fallback: "", choices: [{label:"Family",value:""},{label:"Solid",value:"solid",glyph:"crop_square"},{label:"Glass",value:"glass",glyph:"blur_on"}], keywords: ["glass", "solid", "blur", "material", "vidrio"] }
-    ].map((spec, index) => Object.assign({}, spec, { modelKey: "studio:" + index }))
+    ]
+    // Every surface's corners in one place, beside the family's: each row is the surface's own (same path, same range),
+    // listed here as well because "how round is it" is asked of the look, not of a surface.
+    readonly property var cornerLabels: ({ cards: "Cards", controlCenter: "Control Center", panels: "Side panels", spotlight: "Spotlight",
+        settings: "Settings", gallery: "Wallpaper gallery", menus: "Menus", osd: "Volume and song pill" })
+    readonly property var cornerMirrors: {
+        const out = []
+        for (const spec of root.studioRows) {
+            const found = /^iris\.appearance\.surfaces\.(\w+)\.radius$/.exec(String(spec.path ?? ""))
+            if (!found || !root.cornerLabels[found[1]]) continue
+            const mirror = Object.assign({}, spec, { target: "material", group: "Corners per surface", label: root.cornerLabels[found[1]], mirror: true,
+                keywords: ["corners", "radius", "round", "rounded", "square"] })
+            delete mirror.description
+            out.push(mirror)
+        }
+        return out
+    }
+    readonly property var studio: {
+        const rows = root.studioRows.slice()
+        const at = rows.map(spec => spec.target === "material" && spec.group === "Shape").lastIndexOf(true)
+        rows.splice(at < 0 ? rows.length : at + 1, 0, ...root.cornerMirrors)
+        return rows.map((spec, index) => Object.assign({}, spec, { modelKey: "studio:" + index }))
+    }
 
     // Alternatives offered for a piece whose resting face is a glyph. The description
     // names what is drawn on screen, so searching for the glyph finds the control.
@@ -830,7 +851,7 @@ QtObject {
         "Focus · left": "dock_to_left", "Frame": "crop_free", "Frame response": "graphic_eq", "On the edges": "border_outer", "Finish": "flare", "Fullscreen": "fullscreen", "Game mode": "sports_esports",
         "Glass": "blur_on", "Highlight": "highlight", "Icons": "emoji_symbols", "Interaction": "ads_click", "Joining": "join_inner",
         "Language": "language", "Layout": "view_quilt", "Light": "light_mode", "Live wallpapers": "motion_photos_on",
-        "Desktop menu": "menu_open", "Look": "visibility", "Material": "layers", "Material per surface": "layers", "Menus": "menu", "Motion": "animation", "New iNiR": "rocket_launch",
+        "Desktop menu": "menu_open", "Look": "visibility", "Material": "layers", "Material per surface": "layers", "Corners per surface": "rounded_corner", "Menus": "menu", "Motion": "animation", "New iNiR": "rocket_launch",
         "Night Light": "nightlight", "Notifications": "notifications", "Now playing": "music_note", "On the contour": "border_outer",
         "Opening bodies": "open_in_full", "Overview backdrop": "grid_view", "Pages": "view_carousel", "Per surface": "tune",
         "Panel look": "dock_to_right", "Placement": "location_on", "Player": "music_note", "Player page": "album", "Previews": "preview",
@@ -973,7 +994,7 @@ QtObject {
             if (group === "Spotlight") return "spotlight"
             if (group === "Panel look") return "sidebars"
             return "appearance"
-        case "transients": return group === "Notifications" ? "notifications" : "sound"
+        case "transients": return group === "Notifications" || group === "Banners" ? "notifications" : "sound"
         case "motion": return "motion"
         case "dock": return "dock"
         case "desktop": return "desktop"
@@ -1013,19 +1034,30 @@ QtObject {
                 isOn: () => IrisThemes.activeId === theme.id && !IrisThemes.modified, run: () => IrisThemes.choose(theme) })
         return out
     }
+    // The order a section's groups are listed in: what someone came to change first, the rest as they were declared.
+    readonly property var groupOrder: ({
+        appearance: ["Look", "Themes", "Material", "Adaptive", "Glass", "Shape", "Corners per surface", "Frame", "Accent", "Highlight", "Colour layer", "Light", "Badges", "Wallpaper",
+            "Text", "Faces", "Settings", "Menus", "Material per surface", "Customize", "Previews", "App colours"],
+        bar: ["Layout", "Shape", "At rest", "Resting Island", "Bar", "Pages", "Desktop page", "Player page", "Size", "Interaction", "Connections"],
+        bubbles: ["Size", "Behaviour", "On the contour", "Floating", "Opening bodies", "Cards", "Card contents", "Joining", "Tray"],
+        dock: ["Look", "Icons", "Visibility"]
+    })
     readonly property var settings: {
         const rows = root.behaviour.concat(root.shared).concat(root.niriRows)
         const known = new Set(rows.map(spec => spec.path))
         const look = []
         for (const spec of root.studio) {
+            if (spec.mirror) { look.push(Object.assign({ section: root.sectionOf(spec) }, spec)); continue }
             if (spec.path !== undefined && known.has(spec.path)) continue
             if (spec.path !== undefined) known.add(spec.path)
             look.push(Object.assign({ section: root.sectionOf(spec) }, spec))
         }
         const out = []
         for (const section of root.sectionOrder) {
-            for (const spec of rows) if (spec.section === section) out.push(spec)
-            for (const spec of look) if (spec.section === section) out.push(spec)
+            const own = rows.filter(spec => spec.section === section).concat(look.filter(spec => spec.section === section))
+            const order = root.groupOrder[section] ?? []
+            const rank = spec => { const at = order.indexOf(String(spec.group ?? "")); return at < 0 ? order.length : at }
+            own.map((spec, at) => ({ spec: spec, at: at })).sort((a, b) => rank(a.spec) - rank(b.spec) || a.at - b.at).forEach(item => out.push(item.spec))
         }
         return out.map((spec, index) => Object.assign({}, spec, { modelKey: "settings:" + index }))
     }

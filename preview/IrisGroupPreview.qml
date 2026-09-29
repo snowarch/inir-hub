@@ -46,7 +46,7 @@ ClippingRectangle {
         return ({
             "bar/Size": "islandReserve", "bar/Interaction": "islandInteraction",
             "bar/Shape": "islandEdge", "bar/Layout": "islandEdge", "bar/Bar": "barZones",
-            "appearance/Light": "light", "appearance/Shape": "fusion", "appearance/Glass": "glass",
+            "appearance/Light": "light", "appearance/Shape": "fusion", "appearance/Corners per surface": "fusion", "appearance/Glass": "glass",
             "appearance/Menus": "menus", "appearance/Settings": "settings",
             "appearance/Material": "glass", "appearance/Material per surface": "glass", "appearance/Look": "fusion",
             "appearance/Adaptive": "light", "appearance/Accent": "light", "appearance/Highlight": "typography",

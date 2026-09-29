@@ -54,7 +54,7 @@ PanelWindow {
     function shown(spec: var): bool { return IrisOptions.shown(spec) }
 
     readonly property int searchLimit: 24
-    readonly property var searchIndex: root.specifications.map(spec => {
+    readonly property var searchIndex: root.specifications.filter(spec => !spec.mirror).map(spec => {
         const label = Translation.tr(spec.label).toLowerCase()
         const sectionTitle = Translation.tr(IrisOptions.sectionById(spec.section).title)
         return { spec: spec, label: label, section: sectionTitle.toLowerCase(), rest: [Translation.tr(spec.group ?? ""), sectionTitle, Translation.tr(spec.description ?? ""), ...(spec.keywords ?? [])].join(" ").toLowerCase(),

@@ -58,9 +58,9 @@ PanelWindow {
 
     // Search reads every area the forgiving way Spotlight does; results stay grouped under their area.
     property string query: ""
-    readonly property var searchable: root.specifications.map(spec => IrisSearch.prepare({
+    readonly property var searchable: root.specifications.filter(spec => !spec.mirror).map(spec => IrisSearch.prepare({
         name: Translation.tr(spec.label), english: spec.label, detail: Translation.tr(spec.group ?? ""),
-        areaName: Translation.tr(root.areaOf(spec.target).label), words: [spec.group ?? "", spec.description ?? ""].concat(spec.keywords ?? []).join(" "),
+        areaName: Translation.tr(root.areaOf(spec.target).label), words: [spec.group ?? ""].concat(spec.keywords ?? []).join(" "), description: spec.description ?? "",
         spec: spec }))
     readonly property var matches: {
         void Config.revision
