@@ -83,6 +83,8 @@ Item {
         function onVisualExpandedChanged(): void { if (!root.visualExpanded && root.focusedOutput) GlobalStates.irisArrange = false }
     }
     readonly property bool notch: root.options?.notch ?? false
+    // The corner of a body that is always melted into its edge (the menu bar's heart, the utility island): a capsule on Auto.
+    readonly property real meltedCorner: IrisStyle.profileRadius(IrisStyle.bodyProfile(IrisStyle.barShape, true), root.compactHeight)
     readonly property alias notchness: notchSpring.value
     IrisSpring { id: notchSpring; surface: "island"; intent: "move"; to: root.notch ? 1 : 0; minimum: 0 }
     property string edge: "top"
@@ -1373,7 +1375,7 @@ Item {
         }
         if (root.menubar && root.heartShown && root.heartLength > 1) {
             const at = chassis.mapToItem(null, barZones.heartAlong, 0)
-            out.push({ x: at.x, y: body.y, width: root.heartLength, height: body.height, radius: root.compactHeight / 2,
+            out.push({ x: at.x, y: body.y, width: root.heartLength, height: body.height, radius: root.meltedCorner,
                 paints: true, fuse: root.clearStrip ? IrisStyle.fuseEdge : Math.round(32 * root.d), id: "islandnotch",
                 joins: root.clearStrip ? edgeJoin : "island" })
         }
@@ -1537,7 +1539,7 @@ Item {
         // ClippingRectangle does not re-mask when per-corner radii change live.
         readonly property real restWidth: root.compactTargetWidth
         readonly property real restHeight: root.compactHeight
-        readonly property real restRadius: root.notch ? root.compactHeight / 2 : IrisStyle.pieceRadius(root.compactHeight)
+        readonly property real restRadius: IrisStyle.profileRadius(IrisStyle.bodyProfile(IrisStyle.barShape, root.notch), root.compactHeight)
         readonly property real openWidthTarget: root.expandedWidth
         readonly property real openHeightLive: (details.item?.implicitHeight ?? 0) + root.padding * 2
         property real openHeightHeld: 0
@@ -1545,7 +1547,7 @@ Item {
             chassis.openHeightHeld = chassis.openHeightLive
         readonly property real openHeightTarget: root.inlineExpanded || chassis.openHeightHeld <= 0
             ? chassis.openHeightLive : chassis.openHeightHeld
-        readonly property real openRadius: Math.max(IrisStyle.radius, 30 * root.d)
+        readonly property real openRadius: IrisStyle.openedRadius(IrisStyle.barShape, Math.max(IrisStyle.radius, 30 * root.d))
         readonly property alias restW: restWidthSpring.value
         readonly property alias openW: openWidthSpring.value
         readonly property alias openH: openHeightSpring.value
@@ -2218,7 +2220,7 @@ Item {
             ? (details.item?.implicitHeight ?? 0) + root.padding * 2
             : root.compactHeight
         readonly property real targetRadius: root.extensionRole === "page"
-            ? Math.max(IrisStyle.radius, 30 * root.d) : root.compactHeight / 2
+            ? IrisStyle.openedRadius(IrisStyle.barShape, Math.max(IrisStyle.radius, 30 * root.d)) : root.meltedCorner
         readonly property alias presentation: extensionSpring.value
         IrisSpring { id: extensionSpring; surface: "island"; to: root.extensionOpen ? 1 : 0; minimum: 0 }
         readonly property real reach: Math.round((root.vertical ? extension.targetWidth : extension.targetHeight) * extension.presentation)

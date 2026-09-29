@@ -140,7 +140,8 @@ ClippingRectangle {
         const along = Math.round(((vertical ? root.screenH : root.screenW) - length) / 2)
         return { x: vertical ? across : along, y: vertical ? along : across,
             width: vertical ? thick : length, height: vertical ? length : thick,
-            radius: dockNotch ? Math.round(16 * root.d) : Math.round(thick / 2) }
+            radius: IrisStyle.dockShape !== "auto" ? IrisStyle.profileRadius(IrisStyle.bodyProfile(IrisStyle.dockShape, dockNotch), thick)
+                : dockNotch ? Math.round(16 * root.d) : Math.round(thick / 2) }
     }
     readonly property bool dockVertical: IrisFrame.dockEdge === "left" || IrisFrame.dockEdge === "right"
     function edgeBody(edge: string, id: string): var {
@@ -210,12 +211,13 @@ ClippingRectangle {
                         width: root.screenW - 2 * inset, height: strip, radius: 0,
                         fuse: Math.round(16 * root.d), id: "island",
                         joins: !root.notch ? "" : root.framed ? "frame" : "edge" })
-                    out.push({ x: g.x + (g.width - notchW) / 2, y: g.y, width: notchW, height: g.height, radius: g.height / 2,
+                    out.push({ x: g.x + (g.width - notchW) / 2, y: g.y, width: notchW, height: g.height, radius: IrisStyle.profileRadius(IrisStyle.bodyProfile(IrisStyle.barShape, true), g.height),
                         fuse: clear ? IrisStyle.fuseEdge : Math.round(32 * root.d), id: "islandnotch",
                         joins: !clear ? "island" : root.framed ? "frame" : "edge" })
                 } else out.push({ x: g.fullWidth && !g.vertical ? (root.framed ? IrisFrame.band : 0) : g.x,
                     y: g.y, width: g.fullWidth && !g.vertical ? root.screenW - (root.framed ? 2 * IrisFrame.band : 0) : g.width,
-                    height: g.height, radius: g.fullWidth && !g.vertical ? 0 : Math.min(g.width, g.height) / 2,
+                    height: g.height, radius: g.fullWidth && !g.vertical ? 0
+                        : IrisStyle.profileRadius(IrisStyle.bodyProfile(IrisStyle.barShape, root.notch), Math.min(g.width, g.height)),
                     fuse: g.fullWidth && !g.vertical ? Math.round(16 * root.d) : root.notch ? IrisStyle.fuseEdge : IrisStyle.fuse, id: "island",
                     joins: !root.notch ? "" : root.framed ? "frame" : "edge" })
                 for (const sat of root.satellites)

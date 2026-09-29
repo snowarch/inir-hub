@@ -45,8 +45,8 @@ ClippingRectangle {
         const key = section + "/" + group
         return ({
             "bar/Size": "islandReserve", "bar/Interaction": "islandInteraction",
-            "bar/Shape": "islandEdge", "bar/Layout": "islandEdge", "bar/Bar": "barZones",
-            "appearance/Light": "light", "appearance/Shape": "fusion", "appearance/Corners per surface": "fusion", "appearance/Glass": "glass",
+            "bar/Shape": "shapes", "bar/Layout": "islandEdge", "bar/Bar": "barZones",
+            "appearance/Light": "light", "appearance/Shape": "shapes", "appearance/Corners per surface": "fusion", "appearance/Glass": "glass",
             "appearance/Menus": "menus", "appearance/Settings": "settings",
             "appearance/Material": "glass", "appearance/Material per surface": "glass", "appearance/Look": "fusion",
             "appearance/Adaptive": "light", "appearance/Accent": "light", "appearance/Highlight": "typography",
@@ -111,7 +111,7 @@ ClippingRectangle {
                 spotlight: spotlightScene, controlCenter: controlScene, cards: cardsScene, menus: menusScene,
                 settings: settingsScene, panels: panelsScene, joining: joiningScene, feedback: feedbackScene,
                 tray: trayScene, player: playerScene, islandReserve: reserveScene, islandEdge: edgeScene, barZones: zonesScene,
-                light: lightScene, fusion: fusionScene, glass: glassScene, islandInteraction: interactionScene, islandPage: islandPageScene, bubbles: bubblesScene
+                light: lightScene, fusion: fusionScene, shapes: shapesScene, glass: glassScene, islandInteraction: interactionScene, islandPage: islandPageScene, bubbles: bubblesScene
             })[root.scene] ?? null
         }
     }
@@ -428,7 +428,8 @@ ClippingRectangle {
                         : { x: -2 * f, y: H - band, width: W + 4 * f, height: band + deep })
                     Object.assign(out[0], { radius: 0, fuse: f, id: "edge", paints: true })
                     out.push({ x: dockRoot.plateX, y: dockRoot.plateY, width: dockRoot.plateW, height: dockRoot.plateH,
-                        radius: dockRoot.notch ? Math.round(16 * root.d) : dockRoot.thick / 2,
+                        radius: IrisStyle.dockShape !== "auto" ? IrisStyle.profileRadius(IrisStyle.bodyProfile(IrisStyle.dockShape, dockRoot.notch), dockRoot.thick)
+                            : dockRoot.notch ? Math.round(16 * root.d) : dockRoot.thick / 2,
                         fuse: dockRoot.notch ? IrisStyle.fuseEdge : IrisStyle.fuse, id: "dock", joins: dockRoot.notch ? "edge" : "", paints: true })
                     return out
                 }
@@ -599,13 +600,14 @@ ClippingRectangle {
                     const out = []
                     const clear = edgeRoot.layout === "menubar" && !edgeRoot.vertical && String(root.opt("iris.bar.strip", "clear")) === "clear"
                     if (edgeRoot.notch || clear) out.push(Object.assign({ radius: 0, fuse: IrisStyle.fuseDeep, id: "edge", paints: true }, edgeRoot.edgeBody()))
-                    if (!clear) out.push(Object.assign({ radius: edgeRoot.spans ? (edgeRoot.notch ? 0 : IrisStyle.pieceRadius(edgeRoot.thick)) : edgeRoot.thick / 2,
+                    if (!clear) out.push(Object.assign({ radius: edgeRoot.spans ? (edgeRoot.notch ? 0 : IrisStyle.pieceRadius(edgeRoot.thick))
+                        : IrisStyle.profileRadius(IrisStyle.bodyProfile(IrisStyle.barShape, edgeRoot.notch), edgeRoot.thick),
                         fuse: edgeRoot.spans && !edgeRoot.vertical ? Math.round(16 * root.d) : edgeRoot.notch ? IrisStyle.fuseEdge : IrisStyle.fuse,
                         id: "island", joins: edgeRoot.notch ? "edge" : "", paints: true }, edgeRoot.island))
                     if (edgeRoot.layout === "menubar" && !edgeRoot.vertical) {
                         const height = IrisFrame.islandFullBand
                         const width = Math.round(height * 4.2)
-                        out.push(Object.assign({ radius: height / 2, fuse: clear ? IrisStyle.fuseEdge : Math.round(32 * root.d),
+                        out.push(Object.assign({ radius: IrisStyle.profileRadius(IrisStyle.bodyProfile(IrisStyle.barShape, true), height), fuse: clear ? IrisStyle.fuseEdge : Math.round(32 * root.d),
                             id: "islandnotch", joins: clear ? "edge" : "island", paints: true },
                             edgeRoot.place((edgeRoot.span - width) / 2, width, edgeRoot.depth, height)))
                     }
@@ -846,6 +848,87 @@ ClippingRectangle {
                 glyph: "join_inner"
                 text: (fuseRoot.melt > 0 ? Translation.tr("Fusion %1%").arg(Math.round(fuseRoot.melt)) : Translation.tr("Crisp joins"))
                     + " · " + Translation.tr("corners %1%").arg(Math.round(fuseRoot.corners))
+            }
+        }
+    }
+
+    Component {
+        id: shapesScene
+        Item {
+            id: shapeRoot
+            readonly property real naturalWidth: Math.round(440 * root.d)
+            readonly property real naturalHeight: Math.round(260 * root.d)
+            readonly property bool notch: root.opt("iris.bar.notch", false)
+            readonly property bool dockNotch: root.opt("iris.dock.notch", false)
+            readonly property real rest: IrisFrame.islandBand
+            readonly property real gap: shapeRoot.notch ? 0 : Math.round(14 * root.d)
+            readonly property real dockThick: IrisFrame.dockBand
+            readonly property real dockGap: shapeRoot.dockNotch ? 0 : Math.round(14 * root.d)
+            readonly property real bubble: Math.round(shapeRoot.rest * 0.86)
+            readonly property var resting: ({ x: Math.round(34 * root.d), y: shapeRoot.gap, width: Math.round(150 * root.d), height: shapeRoot.rest })
+            readonly property var bubbleAt: ({ x: shapeRoot.resting.x + shapeRoot.resting.width + Math.round(6 * root.d),
+                y: shapeRoot.gap + (shapeRoot.rest - shapeRoot.bubble) / 2, width: shapeRoot.bubble, height: shapeRoot.bubble })
+            readonly property var opened: ({ x: Math.round(width - 34 * root.d - 190 * root.d), y: shapeRoot.gap, width: Math.round(190 * root.d), height: Math.round(104 * root.d) })
+            readonly property var docked: ({ x: Math.round(width / 2 - 120 * root.d), y: height - shapeRoot.dockThick - shapeRoot.dockGap,
+                width: Math.round(240 * root.d), height: shapeRoot.dockThick })
+            readonly property real openCorner: Math.min(shapeRoot.opened.height / 2,
+                IrisStyle.openedRadius(IrisStyle.barShape, Math.max(IrisStyle.radius, 30 * root.d)))
+            function shapeName(shape: string): string {
+                return Translation.tr(({ round: "Round", squircle: "Squircle", square: "Square" })[shape] ?? "Auto")
+            }
+            Field.IrisField {
+                anchors.fill: parent
+                framed: false
+                shapes: {
+                    const deep = Math.max(8, IrisStyle.fuseDeep * 2), f = IrisStyle.fuseDeep
+                    const out = []
+                    if (shapeRoot.notch) out.push({ x: -2 * f, y: -deep, width: width + 4 * f, height: deep, radius: 0, fuse: f, id: "edge", paints: true })
+                    const join = shapeRoot.notch ? "edge" : ""
+                    const fuse = shapeRoot.notch ? IrisStyle.fuseEdge : IrisStyle.fuse
+                    out.push(Object.assign({ radius: IrisStyle.profileRadius(IrisStyle.bodyProfile(IrisStyle.barShape, shapeRoot.notch), shapeRoot.rest),
+                        fuse: fuse, id: "island", joins: join, paints: true }, shapeRoot.resting))
+                    out.push(Object.assign({ radius: IrisStyle.pieceRadius(shapeRoot.bubble), fuse: IrisStyle.fuse, id: "satellite", joins: "island", paints: true }, shapeRoot.bubbleAt))
+                    out.push(Object.assign({ radius: shapeRoot.openCorner, fuse: fuse, id: "open", joins: join, paints: true }, shapeRoot.opened))
+                    if (shapeRoot.dockNotch) out.push({ x: -2 * f, y: height, width: width + 4 * f, height: deep, radius: 0, fuse: f, id: "dockEdge", paints: true })
+                    out.push(Object.assign({ radius: IrisStyle.profileRadius(IrisStyle.bodyProfile(IrisStyle.dockShape, shapeRoot.dockNotch), shapeRoot.dockThick),
+                        fuse: shapeRoot.dockNotch ? IrisStyle.fuseEdge : IrisStyle.fuse, id: "dock", joins: shapeRoot.dockNotch ? "dockEdge" : "", paints: true }, shapeRoot.docked))
+                    return out
+                }
+            }
+            IrisClock {
+                x: shapeRoot.resting.x + (shapeRoot.resting.width - width) / 2
+                y: shapeRoot.resting.y + (shapeRoot.resting.height - height) / 2
+                pixelSize: IrisStyle.typeHeadline
+                separatorColor: IrisStyle.secondaryAccent
+            }
+            Column {
+                x: shapeRoot.opened.x + IrisStyle.concentricPad(shapeRoot.openCorner, 16 * root.d)
+                y: shapeRoot.opened.y + IrisStyle.concentricPad(shapeRoot.openCorner, 16 * root.d)
+                spacing: Math.round(8 * root.d)
+                Rectangle { width: Math.round(96 * root.d); height: Math.round(10 * root.d); radius: IrisStyle.radiusMicro; color: IrisStyle.fillHover }
+                Rectangle { width: Math.round(140 * root.d); height: Math.round(10 * root.d); radius: IrisStyle.radiusMicro; color: IrisStyle.fill }
+                Row {
+                    spacing: Math.round(8 * root.d)
+                    Repeater { model: 3; Rectangle { required property int index; width: Math.round(40 * root.d); height: Math.round(30 * root.d); radius: IrisStyle.radiusTile; color: IrisStyle.fillQuiet } }
+                }
+            }
+            Row {
+                x: shapeRoot.docked.x + Math.round((shapeRoot.docked.width - width) / 2)
+                y: shapeRoot.docked.y + Math.round((shapeRoot.docked.height - height) / 2)
+                spacing: Math.round(10 * root.d)
+                Repeater {
+                    model: 5
+                    Rectangle {
+                        required property int index
+                        width: IrisFrame.dockIcon * 0.8; height: width
+                        radius: IrisStyle.iconRadius(width)
+                        color: index === 2 ? IrisStyle.fillActive : IrisStyle.fillHover
+                    }
+                }
+            }
+            Caption {
+                glyph: "rounded_corner"
+                text: Translation.tr("Island shape") + " · " + shapeRoot.shapeName(IrisStyle.barShape) + "   " + Translation.tr("Dock shape") + " · " + shapeRoot.shapeName(IrisStyle.dockShape)
             }
         }
     }

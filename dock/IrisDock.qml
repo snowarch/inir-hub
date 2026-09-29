@@ -438,7 +438,7 @@ Item {
                 y: root.vertical ? Math.round((window.height - height) / 2)
                     : root.atTop ? window.edgeOffset : window.height - height - window.edgeOffset
                 readonly property real thickness: root.vertical ? width : height
-                radius: root.notch ? dock.thickness / 2 : IrisStyle.pieceRadius(dock.thickness)
+                radius: IrisStyle.profileRadius(IrisStyle.bodyProfile(IrisStyle.dockShape, root.notch), dock.thickness)
                 quiet: true
                 opacity: window.revealed || window.edgeOffset > -window.dockHeight ? 1 : 0
 

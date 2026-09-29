@@ -635,11 +635,30 @@ QtObject {
         return Math.max(8, Math.round(56 * root.density * scale * Math.max(0.2, Math.min(2, curve / 100))))
     }
     readonly property string pieceShape: String(root.theme?.pieceShape ?? "circle")
-    function pieceRadius(size: real): real {
+    function profileRadius(profile: string, size: real): real {
         const half = size / 2
-        if (root.pieceShape === "squircle") return Math.min(half, size * 0.34 * Math.max(0.6, root.shapeScale))
-        if (root.pieceShape === "square") return Math.min(half, size * 0.22 * Math.max(0.6, root.shapeScale))
+        if (profile === "squircle") return Math.min(half, size * 0.34 * Math.max(0.6, root.shapeScale))
+        if (profile === "square") return Math.min(half, size * 0.22 * Math.max(0.6, root.shapeScale))
         return half
+    }
+    function pieceRadius(size: real): real { return root.profileRadius(root.pieceShape, size) }
+    // Auto is what the Island and the Dock always did: a capsule when melted into the edge, the bubbles' shape when floating.
+    // Linked, both take the bubbles' shape whatever their own choice.
+    readonly property bool linkShapes: Boolean(root.theme?.linkShapes ?? false)
+    readonly property string linkedShape: root.pieceShape === "circle" ? "round" : root.pieceShape
+    readonly property string barShape: root.linkShapes ? root.linkedShape : String(root.options?.bar?.shape ?? "auto")
+    readonly property string dockShape: root.linkShapes ? root.linkedShape : String(root.options?.dock?.shape ?? "auto")
+    function bodyProfile(shape: string, notched: bool): string {
+        if (shape === "round") return "circle"
+        if (shape === "squircle" || shape === "square") return shape
+        return notched ? "circle" : root.pieceShape
+    }
+    // A primitive, so bindings that read the open Island's corners do not re-run on every config write.
+    readonly property int islandOpenCorners: Math.round(Number(root.appearance?.surfaces?.island?.radius ?? 0) * root.density)
+    // An open body's corners step down with its resting ones, so a square Island opens square; a size chosen wins.
+    function openedRadius(shape: string, base: real): real {
+        if (root.islandOpenCorners > 0) return root.islandOpenCorners
+        return shape === "square" ? base * 0.45 : shape === "squircle" ? base * 0.75 : base
     }
     function iconRadius(size: real): int { return Math.round(size * 0.26 * Math.min(1.2, root.shapeScale)) }
 

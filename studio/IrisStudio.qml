@@ -41,12 +41,12 @@ PanelWindow {
     }
     function modifiedIn(id: string): int {
         void Config.revision
-        let count = 0
+        const counted = new Set()
         for (const spec of root.specifications) {
-            if (spec.target !== id || !String(spec.path).startsWith("iris.") || spec.fallback === undefined) continue
-            if (!IrisOptions.same(Config.getNestedValue(spec.path, spec.fallback), spec.fallback)) count++
+            if (spec.target !== id || !String(spec.path).startsWith("iris.") || spec.fallback === undefined || counted.has(spec.path)) continue
+            if (!IrisOptions.same(Config.getNestedValue(spec.path, spec.fallback), spec.fallback)) counted.add(spec.path)
         }
-        return count
+        return counted.size
     }
     function resetArea(): void {
         const updates = {}
