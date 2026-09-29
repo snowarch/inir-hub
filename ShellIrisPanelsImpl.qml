@@ -16,6 +16,7 @@ import qs.modules.iris.studio
 import qs.modules.iris.lock
 import qs.modules.iris.sidebar
 import qs.modules.iris.orbit
+import qs.modules.iris.osk
 import qs.modules.background
 import qs.modules.lock
 
@@ -196,7 +197,8 @@ Item {
         identifier: "irisOnScreenKeyboard"
         open: GlobalStates.oskOpen
         requireEnabledPanel: false
-        source: "../onScreenKeyboard/OnScreenKeyboard.qml"
+        closeGraceMs: IrisStyle.settleDuration + 80
+        component: IrisOnScreenKeyboard {}
     }
 
     OnDemandPanelLoader {
