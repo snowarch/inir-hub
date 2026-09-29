@@ -28,7 +28,9 @@ Item {
     property point sceneOrigin: Qt.point(0, 0)
     property size sceneSize: Qt.size(0, 0)
     readonly property int glassCode: IrisStyle.glassCompositor ? (root.compositorAllowed ? 2 : 1) : IrisStyle.glassWallpaper ? 1 : 0
-    property int frameGlass: IrisFrame.musicActive && root.framed && root.glassCode === 2 ? 1 : root.glassCode
+    // The music frame stays the compositor's glass: what the swell adds is blurred by strips below the chassis
+    // (IrisWaveBlur), so the moving band is one material with the resting one.
+    property int frameGlass: root.glassCode
     property vector4d edgeWave: Qt.vector4d(0, 0, 0, 0)
     property real waveClock: 0
     property real frameMusicLevel: 0

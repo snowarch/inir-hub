@@ -579,12 +579,23 @@ Scope {
             activeAsync: !windowLoader.recycling
 
             component: Scope {
+            // Declared first so its strips map before the chassis and sit below it (IrisWaveBlur).
+            IrisWaveBlur {
+                id: waveBlur
+                screen: windowLoader.modelData
+                active: barWindow.frameBlurred && !barWindow.overlaid && IrisFrame.musicActive
+                shapes: barWindow.blurShapes
+                edgeWave: framePulse.amplitudes
+                waveClock: framePulse.phase
+                smoothing: chassisField.smoothing
+            }
             PanelWindow {
                 id: barWindow
                 readonly property bool expanded: islandLoader.item?.expanded ?? false
                 readonly property bool pinned: islandLoader.item?.pinned ?? false
                 screen: windowLoader.modelData
-                visible: true
+                // After the wave strips, so Niri stacks the chassis above them (it keeps mapping order).
+                visible: waveBlur.ready
                 color: "transparent"
                 exclusionMode: ExclusionMode.Ignore
                 exclusiveZone: 0
