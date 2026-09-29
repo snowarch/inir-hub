@@ -375,7 +375,7 @@ MouseArea {
 
                 Row {
                     spacing: 4
-                    visible: Network.wifiEnabled
+                    visible: Network.ethernet || Network.wifiEnabled
 
                     MaterialSymbol {
                         anchors.verticalCenter: parent.verticalCenter
@@ -386,7 +386,7 @@ MouseArea {
 
                     Text {
                         anchors.verticalCenter: parent.verticalCenter
-                        text: Network.networkName ?? ""
+                        text: Network.ethernet ? Translation.tr("Ethernet") : (Network.networkName ?? "")
                         visible: text.length > 0 && text.length < 16
                         font.pixelSize: Looks.font.pixelSize.small
                         font.family: Looks.font.family.ui
