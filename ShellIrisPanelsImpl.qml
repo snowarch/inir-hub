@@ -24,7 +24,7 @@ Item {
     component PanelLoader: LazyLoader {
         required property string identifier
         property bool extraCondition: true
-        readonly property bool enabledPanel: Config.ready
+        readonly property bool enabledPanel: Config.ready && IrisGate.official
             && (Config.options?.enabledPanels ?? []).includes(identifier)
             && extraCondition
         loading: enabledPanel
@@ -34,7 +34,7 @@ Item {
     component DeferredPanelLoader: LazyLoader {
         required property string identifier
         property bool extraCondition: true
-        readonly property bool enabledPanel: Config.ready
+        readonly property bool enabledPanel: Config.ready && IrisGate.official
             && (Config.options?.enabledPanels ?? []).includes(identifier)
             && extraCondition
         loading: enabledPanel && GlobalStates.shellEntryReady
@@ -53,7 +53,7 @@ Item {
             interval: loader.closeGraceMs
             onTriggered: loader.resident = loader.open
         }
-        readonly property bool enabledPanel: Config.ready
+        readonly property bool enabledPanel: Config.ready && IrisGate.official
             && (!requireEnabledPanel || (Config.options?.enabledPanels ?? []).includes(identifier))
             && extraCondition
 
@@ -72,8 +72,14 @@ Item {
 
     IrisAppsSync {}
 
-    IrisSidebarEdge { side: "left" }
-    IrisSidebarEdge { side: "right" }
+    LazyLoader {
+        active: IrisGate.official
+        component: IrisSidebarEdge { side: "left" }
+    }
+    LazyLoader {
+        active: IrisGate.official
+        component: IrisSidebarEdge { side: "right" }
+    }
 
     OnDemandPanelLoader {
         identifier: "irisSidebarLeft"
@@ -121,14 +127,14 @@ Item {
     }
 
     LazyLoader {
-        activeAsync: Config.ready && GlobalStates.deferredPanelsReady
+        activeAsync: Config.ready && IrisGate.official && GlobalStates.deferredPanelsReady
             && CompositorService.isNiri
             && (Config.options?.background?.backdrop?.enable ?? false)
         source: "../background/Backdrop.qml"
     }
 
     LazyLoader {
-        activeAsync: Config.ready && GlobalStates.deferredPanelsReady
+        activeAsync: Config.ready && IrisGate.official && GlobalStates.deferredPanelsReady
             && (Config.options?.enabledPanels ?? []).includes("irisBackground")
             && (Config.options?.iris?.modules?.desktopWidgets ?? true)
         component: Background {}

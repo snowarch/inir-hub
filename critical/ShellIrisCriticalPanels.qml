@@ -6,6 +6,7 @@ import qs.modules.common
 import qs.modules.iris.background
 import qs.modules.iris.bar
 import qs.modules.iris.frame
+import qs.modules.iris.style
 
 Item {
     id: root
@@ -13,7 +14,7 @@ Item {
     component CriticalPanelLoader: LazyLoader {
         required property string identifier
         property bool extraCondition: true
-        active: Config.ready
+        active: Config.ready && IrisGate.official
             && (Config.options?.enabledPanels ?? []).includes(identifier)
             && extraCondition
     }
@@ -25,7 +26,7 @@ Item {
     }
 
     LazyLoader {
-        active: Config.ready
+        active: Config.ready && IrisGate.official
         component: IrisReservations {}
     }
 
