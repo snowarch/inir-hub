@@ -59,9 +59,12 @@ Item {
     }
     function rowOf(entry: var): var {
         const opens = entry.kind === "setting" || entry.kind === "section"
+        const widget = entry.kind === "widget"
         return { name: entry.name, comment: entry.detail, iconName: entry.icon, tint: entry.tint, area: entry.areaName, areaTint: entry.tint,
-            iconType: LauncherSearchResult.IconType.Material, type: opens ? Translation.tr("Settings") : Translation.tr("Action"),
-            verb: opens ? Translation.tr("Open") : entry.kind === "switch" ? Translation.tr("Switch") : entry.pick ? Translation.tr("Apply") : Translation.tr("Run"),
+            iconType: LauncherSearchResult.IconType.Material,
+            type: opens ? Translation.tr("Settings") : widget ? Translation.tr("Widget") : Translation.tr("Action"),
+            verb: opens ? Translation.tr("Open") : widget ? (entry.on ? Translation.tr("Show") : Translation.tr("Add"))
+                : entry.kind === "switch" ? Translation.tr("Switch") : entry.pick ? Translation.tr("Apply") : Translation.tr("Run"),
             isOn: typeof entry.isOn === "function" ? entry.isOn : null, pick: entry.pick, keepOpen: entry.keepOpen, execute: entry.run, fuzzy: true }
     }
     readonly property var blendedResults: {
@@ -112,11 +115,14 @@ Item {
         if (!root.actionMode) return []
         const query = LauncherSearch.query.slice(root.actionPrefix.length).trim()
         if (query.length > 0) return root.byArea(IrisSearch.search(query).map(hit => hit.entry)).map(entry => root.rowOf(entry))
-        // Nothing typed: the everyday switches first, then everything else by area.
+        // Nothing typed: the everyday switches first, then everything else by area. While widgets are being
+        // arranged, the widgets lead: that is what "/" was asked for there.
         const doable = IrisSearch.entries().filter(entry => entry.kind !== "setting" && entry.kind !== "section")
+        const arranging = GlobalStates.widgetEditMode ? doable.filter(entry => entry.kind === "widget") : []
         const everyday = doable.filter(entry => entry.priority < 50).sort((a, b) => a.priority - b.priority)
-        return everyday.map(entry => Object.assign(root.rowOf(entry), { area: Translation.tr("Suggested"), areaTint: null }))
-            .concat(root.byArea(doable.filter(entry => entry.priority >= 50)).map(entry => root.rowOf(entry)))
+        return arranging.map(entry => root.rowOf(entry))
+            .concat(everyday.map(entry => Object.assign(root.rowOf(entry), { area: Translation.tr("Suggested"), areaTint: null })))
+            .concat(root.byArea(doable.filter(entry => entry.priority >= 50 && !(GlobalStates.widgetEditMode && entry.kind === "widget"))).map(entry => root.rowOf(entry)))
     }
 
     readonly property var island: GlobalStates.irisIslandGeometry?.[root.screen?.name ?? ""] ?? null

@@ -7,6 +7,8 @@ import qs
 import qs.services
 import qs.modules.common
 import qs.modules.iris.style
+import qs.modules.iris.widgets
+import qs.modules.background.widgets
 
 // What Spotlight can do besides apps, by area: every switch and pick Settings shows (IrisOptions.quickActions),
 // every other option and section as a way into Settings, the themes, and the shell's actions that act under
@@ -112,6 +114,27 @@ Singleton {
         return entry
     }
 
+    // A desktop widget found by name: shown on the desktop when it is there, added first when it is not. Arranging
+    // is where a widget is found, so this enters it and selects the widget.
+    function findWidget(key: string, on: bool): void {
+        if (!on) DesktopWidgetLayout.setGloballyEnabled(key, true)
+        GlobalStates.setWidgetEditMode(true)
+        GlobalStates.selectDesktopWidget((GlobalStates.focusedScreen?.name ?? "") + "::" + key)
+    }
+    function widgetEntries(): var {
+        const output = GlobalStates.focusedScreen?.name ?? ""
+        const found = IrisFaceData.galleryEntries.concat(IrisFaceData.otherEntries)
+        for (const custom of (CustomWidgets.ready ? CustomWidgets.widgets : []))
+            found.push({ key: "custom." + custom.id, glyph: custom.icon || "widgets", english: custom.name, label: custom.name, tint: DesktopWidgetIdentity.customTint })
+        return found.map(widget => {
+            const on = DesktopWidgetLayout.enabled(output, widget.key, Config.getNestedValue("background.widgets." + widget.key + ".enable", false))
+            return root.prepare({ name: widget.label, english: widget.english, detail: on ? Translation.tr("On the desktop") : Translation.tr("Not on the desktop"),
+                area: "widgets", areaName: Translation.tr("Widgets"), words: widget.key + " " + DesktopWidgetIdentity.keywordsOf(widget.key),
+                icon: widget.glyph, tint: widget.tint, kind: "widget", on: on, keepOpen: false, priority: 250,
+                run: () => root.findWidget(widget.key, on) })
+        })
+    }
+
     function openSettings(where: string): void {
         const page = SettingsPageRegistry.pages.findIndex(entry => entry.key === "iris")
         if (page >= 0) GlobalStates.openSettingsPage(page, where)
@@ -134,6 +157,7 @@ Singleton {
                 words: [id].concat(action.keywords ?? []).join(" "), icon: action.icon ?? "bolt", tint: IrisStyle.identity.purple,
                 kind: "run", isOn: toggles ? action.isOn : null, keepOpen: toggles, run: () => action.execute(""), priority: toggles ? 10 : 200 }))
         }
+        for (const widget of root.widgetEntries()) out.push(widget)
         const flipped = new Set(quick.map(action => String(action.id ?? "").replace(/^set:/, "").split("=")[0]))
         for (const section of IrisOptions.sections) {
             const title = Translation.tr(section.title)
