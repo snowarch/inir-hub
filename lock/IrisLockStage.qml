@@ -668,8 +668,13 @@ Item {
                 unit: root.d
                 typeScale: root.typeScale
                 visible: Boolean(status.entry?.network ?? true)
-                glyph: Network.wifiEnabled ? "wifi" : "wifi_off"
-                label: Network.wifiEnabled ? (Network.networkName || Translation.tr("Wi-Fi")) : Translation.tr("Offline")
+                // What the machine is connected by, not whether the Wi-Fi radio is on.
+                glyph: Network.materialSymbol
+                label: Network.ethernet ? Translation.tr("Ethernet")
+                    : !Network.wifiEnabled ? Translation.tr("Offline")
+                    : (Network.wifiStatus === "connected" || Network.wifiStatus === "limited")
+                        ? (Network.networkName || Translation.tr("Wi-Fi"))
+                    : Translation.tr("Not connected")
             }
             Reading {
                 unit: root.d
