@@ -1053,7 +1053,7 @@ PanelWindow {
                 anchors.rightMargin: 8 * root.d
                 anchors.verticalCenter: parent.verticalCenter
                 text: Translation.tr(sectionRow.modelData.title)
-                color: sectionRow.selected ? IrisStyle.onAccent : IrisStyle.text
+                color: sectionRow.selected ? IrisStyle.inkOnAccent : IrisStyle.text
                 font.pixelSize: IrisStyle.typeLabel
                 font.weight: IrisStyle.weight(sectionRow.selected ? Font.DemiBold : Font.Medium)
                 elide: Text.ElideRight

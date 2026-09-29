@@ -13,8 +13,8 @@ RippleButton {
     property bool quiet: false
     property bool emphasized: false
     property bool danger: false
-    readonly property color foreground: root.danger && root.emphasized ? IrisStyle.onDanger
-        : root.emphasized ? IrisStyle.onAccent
+    property color foreground: root.danger && root.emphasized ? IrisStyle.inkOnDanger
+        : root.emphasized ? IrisStyle.inkOnAccent
         : root.danger ? IrisStyle.danger
         : root.selected ? IrisStyle.accent : IrisStyle.text
 
@@ -38,11 +38,11 @@ RippleButton {
         // The raised step of whatever the family is made of: solid on solid, a lit layer on glass.
         : IrisStyle.surfaceHigh
     colBackgroundHover: root.danger && root.emphasized
-        ? ColorUtils.mix(IrisStyle.danger, IrisStyle.onDanger, 0.90)
+        ? ColorUtils.mix(IrisStyle.danger, IrisStyle.inkOnDanger, 0.90)
         : root.danger
             ? IrisStyle.tintFill(IrisStyle.danger)
         : root.emphasized
-            ? ColorUtils.mix(IrisStyle.accent, IrisStyle.onAccent, 0.90)
+            ? ColorUtils.mix(IrisStyle.accent, IrisStyle.inkOnAccent, 0.90)
             : root.quiet
                 ? IrisStyle.fillHover
             : IrisStyle.surfaceHighest

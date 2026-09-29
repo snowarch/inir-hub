@@ -101,9 +101,9 @@ Scope {
     readonly property bool ytMusic: root.player !== null && root.player !== undefined
         && MprisController._isYtMusicMpv(root.player)
     readonly property string mediaTitle: StringUtils.cleanMusicTitle(
-        root.ytMusic ? YtMusic.currentTitle : String(root.player?.trackTitle ?? ""))
+        root.ytMusic ? YtMusic.currentTitle : String(MprisController.titleOf(root.player) ?? ""))
     readonly property string mediaArtist: root.ytMusic ? YtMusic.currentArtist
-        : String(root.player?.trackArtist ?? "")
+        : String(MprisController.artistOf(root.player) ?? "")
     readonly property string mediaIcon: root.mediaAction === "next" ? "skip_next"
         : root.mediaAction === "previous" ? "skip_previous"
         : root.mediaAction === "pause" ? "pause" : "play_arrow"

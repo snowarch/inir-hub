@@ -547,7 +547,7 @@ Loader {
                         Layout.bottomMargin: 8 * root.d
                         color: IrisStyle.text
                         selectionColor: IrisStyle.accentContainer
-                        selectedTextColor: IrisStyle.onAccentContainer
+                        selectedTextColor: IrisStyle.inkOnAccentContainer
                         font.family: IrisStyle.fontMain
                         font.pixelSize: IrisStyle.typeBody
                         font.weight: IrisStyle.weight(Font.DemiBold)
@@ -577,7 +577,7 @@ Loader {
                             placeholderTextColor: IrisStyle.muted
                             color: IrisStyle.text
                             selectionColor: IrisStyle.accentContainer
-                            selectedTextColor: IrisStyle.onAccentContainer
+                            selectedTextColor: IrisStyle.inkOnAccentContainer
                             font.family: IrisStyle.fontMain
                             font.pixelSize: IrisStyle.typeLabel
                             wrapMode: TextEdit.Wrap

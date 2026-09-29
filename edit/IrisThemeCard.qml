@@ -260,7 +260,7 @@ MouseArea {
             height: width
             radius: width / 2
             color: IrisStyle.accent
-            MaterialSymbol { anchors.centerIn: parent; text: "check"; iconSize: Math.round(13 * card.d); color: IrisStyle.onAccent }
+            MaterialSymbol { anchors.centerIn: parent; text: "check"; iconSize: Math.round(13 * card.d); color: IrisStyle.inkOnAccent }
         }
 
         Row {

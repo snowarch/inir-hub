@@ -132,8 +132,8 @@ QtObject {
     }
     readonly property color accentColour: {
         const chosen = String(root.typeOptions?.accent ?? "plain")
-        if (chosen === "accent") return IrisStyle.accent
-        if (chosen === "highlight") return IrisStyle.secondaryAccent
+        if (chosen === "accent") return IrisStyle.accentOnMedia
+        if (chosen === "highlight") return IrisStyle.highlightOnMedia
         return IrisStyle.onMedia
     }
 }

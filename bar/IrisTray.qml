@@ -84,7 +84,7 @@ ColumnLayout {
                         color: (button.containsMouse ? IrisStyle.fillHover : IrisStyle.fillQuiet)
                         Behavior on color { ColorAnimation { duration: IrisStyle.duration(110); easing.type: IrisStyle.feedbackEasing } }
                     }
-                    IconImage {
+                    IrisTrayIcon {
                         anchors.centerIn: parent
                         implicitSize: 26 * root.d
                         source: entry.modelData ? TrayService.getSafeIcon(entry.modelData) : ""

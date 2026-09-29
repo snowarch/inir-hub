@@ -180,12 +180,12 @@ ClippingRectangle {
                 anchors.verticalCenter: parent.verticalCenter
                 text: "check"
                 iconSize: Math.round(14 * root.d)
-                color: IrisStyle.onAccent
+                color: IrisStyle.inkOnAccent
             }
             IrisText {
                 anchors.verticalCenter: parent.verticalCenter
                 text: Translation.tr("In use")
-                color: IrisStyle.onAccent
+                color: IrisStyle.inkOnAccent
                 font.pixelSize: IrisStyle.typeMeta
                 font.weight: IrisStyle.weight(Font.DemiBold)
             }

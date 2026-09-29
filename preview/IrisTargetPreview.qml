@@ -78,7 +78,7 @@ Item {
                         implicitHeight: implicitWidth
                         radius: IrisStyle.iconRadius(width)
                         color: IrisStyle.accent
-                        MaterialSymbol { anchors.centerIn: parent; text: "palette"; fill: 1; iconSize: Math.round(19 * root.d); color: IrisStyle.onAccent }
+                        MaterialSymbol { anchors.centerIn: parent; text: "palette"; fill: 1; iconSize: Math.round(19 * root.d); color: IrisStyle.inkOnAccent }
                     }
                     ColumnLayout {
                         spacing: 0
@@ -118,7 +118,7 @@ Item {
                         implicitHeight: Math.round(32 * root.d)
                         radius: height / 2
                         color: IrisStyle.accent
-                        IrisText { id: accentLabel; anchors.centerIn: parent; text: Translation.tr("Accent"); color: IrisStyle.onAccent; font.weight: Font.DemiBold }
+                        IrisText { id: accentLabel; anchors.centerIn: parent; text: Translation.tr("Accent"); color: IrisStyle.inkOnAccent; font.weight: Font.DemiBold }
                     }
                     Rectangle {
                         implicitWidth: highlightLabel.implicitWidth + Math.round(26 * root.d)
@@ -133,7 +133,7 @@ Item {
                         implicitHeight: implicitWidth
                         radius: width / 2
                         color: IrisStyle.badge
-                        IrisText { anchors.centerIn: parent; text: "3"; color: IrisStyle.onBadge; font.family: IrisStyle.fontNumbers; font.weight: Font.Bold; font.pixelSize: IrisStyle.typeMeta }
+                        IrisText { anchors.centerIn: parent; text: "3"; color: IrisStyle.inkOnBadge; font.family: IrisStyle.fontNumbers; font.weight: Font.Bold; font.pixelSize: IrisStyle.typeMeta }
                     }
                 }
 

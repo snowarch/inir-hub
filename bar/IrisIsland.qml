@@ -94,9 +94,9 @@ Item {
 
     readonly property var player: MprisController.activePlayer
     readonly property bool hasMedia: root.player !== null && root.player !== undefined
-        && String(root.player.trackTitle ?? "").length > 0
+        && String(MprisController.titleOf(root.player) ?? "").length > 0
     readonly property bool ytMusic: root.hasMedia && MprisController._isYtMusicMpv(root.player)
-    readonly property string title: root.ytMusic ? YtMusic.currentTitle : String(root.player?.trackTitle ?? "")
+    readonly property string title: root.ytMusic ? YtMusic.currentTitle : String(MprisController.titleOf(root.player) ?? "")
     readonly property bool playing: root.hasMedia && (root.ytMusic ? YtMusic.isPlaying : (root.player?.isPlaying ?? false))
     readonly property real effectivePosition: root.ytMusic ? YtMusic.currentPosition : MprisController.positionOf(root.player)
     readonly property real effectiveLength: root.ytMusic ? YtMusic.currentDuration : MprisController.lengthOf(root.player)
@@ -490,7 +490,7 @@ Item {
         root.showEvent(action === "next" ? "skip_next" : action === "previous" ? "skip_previous"
             : action === "pause" ? "pause" : action === "play" ? "play_arrow" : "music_note", IrisStyle.accent,
             title.length > 0 ? title : Translation.tr("Now playing"),
-            root.ytMusic ? YtMusic.currentArtist : String(root.player?.trackArtist ?? ""), -1)
+            root.ytMusic ? YtMusic.currentArtist : String(MprisController.artistOf(root.player) ?? ""), -1)
     }
     Connections {
         target: root.eventsEnabled ? KeyboardIndicators : null
@@ -516,19 +516,7 @@ Item {
         depth: 2
         rescaleSize: 48
     }
-    readonly property color artTint: {
-        const colors = tintQuantizer.colors ?? []
-        let best = null
-        let bestScore = -1
-        for (let i = 0; i < colors.length; i++) {
-            const c = colors[i]
-            const score = Math.max(0, c.hslSaturation) * (1 - Math.abs(c.hslLightness - 0.5))
-            if (score > bestScore) { bestScore = score; best = c }
-        }
-        if (!best || best.hslSaturation < 0.14 || best.hslHue < 0) return IrisStyle.text
-        return Qt.hsla(best.hslHue, Math.max(0.5, best.hslSaturation),
-            Math.max(0.64, Math.min(0.76, best.hslLightness + 0.22)), 1)
-    }
+    readonly property color artTint: IrisStyle.artTintOf(tintQuantizer.colors)
 
     readonly property bool visualExpanded: root.expanded && details.status === Loader.Ready
     readonly property real bubble: root.compactHeight
@@ -930,7 +918,7 @@ Item {
         if (!GlobalStates.irisEdit) return []
         void (root.x + root.y + chassis.x + chassis.width + (root.parent?.x ?? 0) + (root.parent?.y ?? 0) + root.heartLength)
         const out = []
-        const kinds = root.zoned ? barZones.entries.flat() : root.barPieces
+        const kinds = root.zoned ? [].concat(...barZones.entries) : root.barPieces
         for (const kind of kinds) {
             if (!IrisPieces.extraIds.includes(String(kind))) continue
             const item = root.pieceItem(String(kind))
@@ -1743,7 +1731,7 @@ Item {
                     IrisText {
                         Layout.fillWidth: true
                         visible: root.zoned && text.length > 0
-                        text: root.ytMusic ? YtMusic.currentArtist : String(root.player?.trackArtist ?? "")
+                        text: root.ytMusic ? YtMusic.currentArtist : String(MprisController.artistOf(root.player) ?? "")
                         color: IrisStyle.subtext
                         font.pixelSize: IrisStyle.typeFootnote
                         elide: Text.ElideRight
@@ -1926,7 +1914,7 @@ Item {
                         id: doneLabel
                         anchors.centerIn: parent
                         text: Translation.tr("Done")
-                        color: IrisStyle.onAccent
+                        color: IrisStyle.inkOnAccent
                         font.pixelSize: IrisStyle.typeLabel
                         font.weight: IrisStyle.weight(Font.Bold)
                     }

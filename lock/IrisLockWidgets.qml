@@ -70,7 +70,7 @@ Item {
         radius: IrisStyle.radiusPlate
         color: "transparent"
         border.width: Math.max(1, Math.round(1.5 * d))
-        border.color: IrisStyle.accent
+        border.color: IrisStyle.accentOnMedia
     }
 
     Repeater {

@@ -32,6 +32,7 @@ IrisBluetoothList 1.0 IrisBluetoothList.qml
 IrisGlassPane 1.0 IrisGlassPane.qml
 IrisLightWash 1.0 IrisLightWash.qml
 IrisTrayMenu 1.0 IrisTrayMenu.qml
+IrisTrayIcon 1.0 IrisTrayIcon.qml
 IrisTrayStrip 1.0 IrisTrayStrip.qml
 IrisImage 1.0 IrisImage.qml
 IrisScrollBar 1.0 IrisScrollBar.qml

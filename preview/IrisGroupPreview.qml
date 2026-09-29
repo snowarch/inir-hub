@@ -46,10 +46,10 @@ ClippingRectangle {
         return ({
             "bar/Size": "islandReserve", "bar/Interaction": "islandInteraction",
             "bar/Shape": "shapes", "bar/Layout": "islandEdge", "bar/Bar": "barZones",
-            "appearance/Light": "light", "appearance/Shape": "shapes", "appearance/Corners per surface": "fusion", "appearance/Glass": "glass",
+            "appearance/Light": "light", "appearance/Shape": "shapes", "appearance/Colour theme": "glass", "appearance/Scheme": "glass", "appearance/Dark look": "glass", "appearance/Ink look": "glass", "appearance/Light look": "glass", "appearance/Corners per surface": "fusion", "appearance/Glass": "glass",
             "appearance/Menus": "menus", "appearance/Settings": "settings",
             "appearance/Material": "glass", "appearance/Material per surface": "glass", "appearance/Look": "fusion",
-            "appearance/Adaptive": "light", "appearance/Accent": "light", "appearance/Highlight": "typography",
+            "appearance/Adaptive": "fusion", "appearance/Accent": "controlCenter", "appearance/Highlight": "controlCenter",
             "appearance/Faces": "typography", "appearance/Text": "typography", "appearance/Frame": "frame",
             "desktop/Desktop menu": "menus",
             "motion/Motion": "motion", "motion/Curve": "motion", "motion/Timing": "motion",
@@ -218,7 +218,7 @@ ClippingRectangle {
             implicitHeight: implicitWidth
             radius: IrisStyle.iconRadius(width)
             color: row2.lit ? IrisStyle.accent : IrisStyle.fill
-            MaterialSymbol { anchors.centerIn: parent; text: row2.glyph; iconSize: Math.round(16 * root.d); color: row2.lit ? IrisStyle.onAccent : IrisStyle.text }
+            MaterialSymbol { anchors.centerIn: parent; text: row2.glyph; iconSize: Math.round(16 * root.d); color: row2.lit ? IrisStyle.inkOnAccent : IrisStyle.text }
         }
         IrisText { Layout.fillWidth: true; text: row2.title; font.weight: row2.lit ? Font.DemiBold : Font.Normal; elide: Text.ElideRight }
         IrisText { text: row2.detail; color: IrisStyle.muted; font.pixelSize: IrisStyle.typeMeta }
@@ -475,7 +475,7 @@ ClippingRectangle {
                             anchors.margins: -Math.round(3 * root.d)
                             width: Math.round(17 * root.d); height: width; radius: width / 2
                             color: IrisStyle.badge
-                            IrisText { anchors.centerIn: parent; text: dockIcon.index; color: IrisStyle.onBadge; font.pixelSize: IrisStyle.typeCaption; font.weight: IrisStyle.weight(Font.Bold) }
+                            IrisText { anchors.centerIn: parent; text: dockIcon.index; color: IrisStyle.inkOnBadge; font.pixelSize: IrisStyle.typeCaption; font.weight: IrisStyle.weight(Font.Bold) }
                         }
                     }
                 }
@@ -780,7 +780,7 @@ ClippingRectangle {
                                 implicitHeight: implicitWidth
                                 radius: IrisStyle.pieceRadius(implicitWidth)
                                 color: index === 0 ? IrisStyle.accent : IrisStyle.fill
-                                MaterialSymbol { anchors.centerIn: parent; text: parent.modelData; fill: 1; iconSize: Math.round(18 * root.d); color: parent.index === 0 ? IrisStyle.onAccent : IrisStyle.text }
+                                MaterialSymbol { anchors.centerIn: parent; text: parent.modelData; fill: 1; iconSize: Math.round(18 * root.d); color: parent.index === 0 ? IrisStyle.inkOnAccent : IrisStyle.text }
                             }
                         }
                     }
@@ -979,9 +979,10 @@ ClippingRectangle {
                 }
             }
             Caption {
-                glyph: glassRoot.mode === "off" ? "crop_square" : "blur_on"
-                text: glassRoot.mode === "off" ? Translation.tr("Off: solid material")
-                    : Translation.tr("Tint %1% · frost %2%").arg(Math.round(IrisStyle.glassTint * 100)).arg(Math.round(IrisStyle.glassBlurAmount * 100))
+                glyph: IrisStyle.glassy ? "blur_on" : "crop_square"
+                text: !IrisStyle.glassy ? Translation.tr("Off: solid material")
+                    : (glassRoot.mode === "off" ? Translation.tr("Lume frost") + " · " : "")
+                        + Translation.tr("Tint %1% · frost %2%").arg(Math.round(IrisStyle.glassTint * 100)).arg(Math.round(IrisStyle.glassBlurAmount * 100))
                         + (glassRoot.mode === "compositor" ? " · " + Translation.tr("Blur previews as Glass") : "")
             }
         }
@@ -1447,7 +1448,7 @@ ClippingRectangle {
                                             height: width
                                             radius: width / 2
                                             color: index === 0 ? IrisStyle.accent : IrisStyle.fill
-                                            MaterialSymbol { anchors.centerIn: parent; text: IrisControlOptions.glyphOf(parent.modelData); iconSize: Math.round(17 * root.d); color: parent.index === 0 ? IrisStyle.onAccent : IrisStyle.text }
+                                            MaterialSymbol { anchors.centerIn: parent; text: IrisControlOptions.glyphOf(parent.modelData); iconSize: Math.round(17 * root.d); color: parent.index === 0 ? IrisStyle.inkOnAccent : IrisStyle.text }
                                         }
                                     }
                                 }
@@ -1482,7 +1483,7 @@ ClippingRectangle {
                                     y: block.kind === "level" && block.upright ? parent.height - height - Math.round(14 * root.d) : Math.round((parent.height - height) / 2)
                                     text: IrisControlOptions.glyphOf(block.modelData)
                                     iconSize: Math.round(18 * root.d)
-                                    color: block.kind === "level" ? IrisStyle.surface : block.index === 0 ? IrisStyle.onAccent : IrisStyle.text
+                                    color: block.kind === "level" ? IrisStyle.surface : block.index === 0 ? IrisStyle.inkOnAccent : IrisStyle.text
                                 }
                                 RowLayout {
                                     visible: block.wide || block.kind === "media"
@@ -1499,13 +1500,13 @@ ClippingRectangle {
                                             anchors.centerIn: parent
                                             text: block.kind === "media" ? "music_note" : IrisControlOptions.glyphOf(block.modelData)
                                             iconSize: Math.round(16 * root.d)
-                                            color: block.kind === "media" ? IrisStyle.subtext : IrisStyle.onAccent
+                                            color: block.kind === "media" ? IrisStyle.subtext : IrisStyle.inkOnAccent
                                         }
                                     }
                                     IrisText {
                                         Layout.fillWidth: true
                                         Layout.alignment: Qt.AlignVCenter
-                                        text: block.kind === "media" ? (MprisController.activePlayer?.trackTitle || Translation.tr("Not playing"))
+                                        text: block.kind === "media" ? (MprisController.titleOf(MprisController.activePlayer) || Translation.tr("Not playing"))
                                             : Translation.tr(IrisControlOptions.labelOf(block.modelData))
                                         font.weight: IrisStyle.weight(Font.DemiBold)
                                         font.pixelSize: IrisStyle.typeMeta
@@ -2046,7 +2047,7 @@ ClippingRectangle {
         Item {
             id: playerRoot
             readonly property var player: MprisController.activePlayer
-            readonly property string art: String(playerRoot.player?.trackArtUrl ?? "")
+            readonly property string art: String(MprisController.artUrlOf(playerRoot.player) ?? "")
             readonly property string cover: playerRoot.art.length > 0 ? playerRoot.art : root.wallpaper
             readonly property bool roundCover: root.opt("iris.player.roundCover", false)
             readonly property bool artBackground: root.opt("iris.player.artworkBackground", true)
@@ -2095,8 +2096,8 @@ ClippingRectangle {
                         ColumnLayout {
                             Layout.fillWidth: true
                             spacing: Math.round(2 * root.d)
-                            IrisText { Layout.fillWidth: true; text: playerRoot.player?.trackTitle || Translation.tr("Song title"); color: playerRoot.artBackground ? IrisStyle.onMedia : IrisStyle.text; font.weight: IrisStyle.weight(Font.DemiBold); font.pixelSize: IrisStyle.typeHeadline; elide: Text.ElideRight }
-                            IrisText { Layout.fillWidth: true; text: playerRoot.player?.trackArtist || Translation.tr("Artist"); color: playerRoot.artBackground ? IrisStyle.onMediaSecondary : IrisStyle.subtext; elide: Text.ElideRight }
+                            IrisText { Layout.fillWidth: true; text: MprisController.titleOf(playerRoot.player) || Translation.tr("Song title"); color: playerRoot.artBackground ? IrisStyle.onMedia : IrisStyle.text; font.weight: IrisStyle.weight(Font.DemiBold); font.pixelSize: IrisStyle.typeHeadline; elide: Text.ElideRight }
+                            IrisText { Layout.fillWidth: true; text: MprisController.artistOf(playerRoot.player) || Translation.tr("Artist"); color: playerRoot.artBackground ? IrisStyle.onMediaSecondary : IrisStyle.subtext; elide: Text.ElideRight }
                         }
                         MaterialSymbol { visible: playerRoot.pinned; Layout.alignment: Qt.AlignTop; text: "keep"; fill: 1; iconSize: Math.round(18 * root.d); color: playerRoot.artBackground ? IrisStyle.onMedia : IrisStyle.accent }
                     }
@@ -2335,14 +2336,14 @@ ClippingRectangle {
                                         implicitWidth: Math.round(56 * root.d); implicitHeight: implicitWidth
                                         radius: IrisStyle.radiusTile
                                         color: IrisStyle.fill
-                                        IrisImage { anchors.fill: parent; source: String(pageRoot.player?.trackArtUrl ?? "") }
-                                        MaterialSymbol { anchors.centerIn: parent; visible: String(pageRoot.player?.trackArtUrl ?? "").length === 0; text: "music_note"; fill: 1; iconSize: Math.round(26 * root.d); color: IrisStyle.subtext }
+                                        IrisImage { anchors.fill: parent; source: String(MprisController.artUrlOf(pageRoot.player) ?? "") }
+                                        MaterialSymbol { anchors.centerIn: parent; visible: String(MprisController.artUrlOf(pageRoot.player) ?? "").length === 0; text: "music_note"; fill: 1; iconSize: Math.round(26 * root.d); color: IrisStyle.subtext }
                                     }
                                     ColumnLayout {
                                         Layout.fillWidth: true
                                         spacing: Math.round(2 * root.d)
-                                        IrisText { Layout.fillWidth: true; text: pageRoot.player?.trackTitle || Translation.tr("Song title"); font.weight: IrisStyle.weight(Font.DemiBold); font.pixelSize: IrisStyle.typeHeadline; elide: Text.ElideRight }
-                                        IrisText { Layout.fillWidth: true; text: pageRoot.player?.trackArtist || Translation.tr("Artist"); color: IrisStyle.subtext; elide: Text.ElideRight }
+                                        IrisText { Layout.fillWidth: true; text: MprisController.titleOf(pageRoot.player) || Translation.tr("Song title"); font.weight: IrisStyle.weight(Font.DemiBold); font.pixelSize: IrisStyle.typeHeadline; elide: Text.ElideRight }
+                                        IrisText { Layout.fillWidth: true; text: MprisController.artistOf(pageRoot.player) || Translation.tr("Artist"); color: IrisStyle.subtext; elide: Text.ElideRight }
                                     }
                                 }
                             }
@@ -2918,7 +2919,7 @@ ClippingRectangle {
                     visible: root.opt("iris.lock.blocks.media.enable", true)
                     Layout.alignment: Qt.AlignHCenter
                     Layout.maximumWidth: parent.width
-                    text: MprisController.activePlayer?.trackTitle || Translation.tr("Now playing")
+                    text: MprisController.titleOf(MprisController.activePlayer) || Translation.tr("Now playing")
                     color: IrisStyle.onMediaSecondary
                     elide: Text.ElideRight
                 }

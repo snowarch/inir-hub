@@ -87,7 +87,7 @@ ColumnLayout {
                             text: entry.on ? "remove" : "add"
                             iconSize: Math.round(13 * root.d)
                             font.weight: IrisStyle.weight(Font.Bold)
-                            color: entry.on ? IrisStyle.text : IrisStyle.onAccent
+                            color: entry.on ? IrisStyle.text : IrisStyle.inkOnAccent
                         }
                     }
                 }

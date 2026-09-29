@@ -475,7 +475,7 @@ Item {
                             text: LauncherSearch.query
                             color: IrisStyle.text
                             selectionColor: IrisStyle.accentContainer
-                            selectedTextColor: IrisStyle.onAccentContainer
+                            selectedTextColor: IrisStyle.inkOnAccentContainer
                             font.family: IrisStyle.fontMain
                             font.pixelSize: IrisStyle.typeTitleLarge
                             clip: true

@@ -62,6 +62,12 @@ QtObject {
             .map(widget => ({ label: String(widget.name ?? widget.id), value: "custom:" + widget.id }))
         return spec.choices ?? []
     }
+    // A scheme's tuning is listed only when that scheme can be the one in use: the one chosen, or dark and light under Auto.
+    function schemeShown(name: string): bool {
+        const choice = String(Config.getNestedValue("iris.appearance.scheme", "auto"))
+        if (choice !== "auto") return choice === name
+        return IrisStyle.colourTheme === "iris-ink" ? name === "ink" : name !== "ink"
+    }
     function shown(spec: var): bool {
         if (spec.showIf && !spec.showIf()) return false
         const when = String(spec.visibleWhen ?? "")
@@ -98,26 +104,107 @@ QtObject {
         { label: "Technical", value: "technical", values: ["Space Grotesk", "Space Grotesk", "JetBrainsMono Nerd Font"] }
     ].filter(pairing => pairing.values.every(face => face.length === 0 || face === IrisStyle.faceText || Qt.fontFamilies().includes(face)))
 
+    // The palettes iRiS lists (every one is still in the shared Themes page): what the apps wear, one swatch each.
+    // What each scheme calls its materials: the three stored names stay black, graphite and midnight.
+    readonly property var materialChoices: {
+        const names = IrisStyle.ink ? ["Washi", "Kraft", "Mist"] : IrisStyle.light ? ["Snow", "Silver", "Sky"] : ["Black", "Graphite", "Midnight"]
+        return [{ label: names[0], value: "black", get swatch() { return IrisStyle.materialSwatch("black") } },
+            { label: names[1], value: "graphite", get swatch() { return IrisStyle.materialSwatch("graphite") } },
+            { label: names[2], value: "midnight", get swatch() { return IrisStyle.materialSwatch("midnight") } },
+            { label: "Wallpaper", value: "wallpaper", get swatch() { return IrisStyle.materialSwatch("wallpaper") } },
+            { label: "Theme", value: "theme", get swatch() { return IrisStyle.materialSwatch("theme") } }]
+    }
+    function schemeName(name: string): string {
+        return Translation.tr(({ dark: "Dark mode", ink: "Ink", light: "Light mode" })[name] ?? "Dark mode")
+    }
+    // The state of what this row depends on, said where the person is looking, so a row never reads as broken.
+    function followNote(): string {
+        if (!IrisStyle.followsTheme) return ""
+        const preset = ThemePresets.getPreset(IrisStyle.colourTheme)
+        return Translation.tr("Follows the %1 colour theme. Turn off Match the shell to choose your own.").arg(String(preset.name))
+    }
+    function themeNote(): string {
+        return IrisStyle.followsTheme ? Translation.tr("Applied to the shell, your terminals and the apps switched on under App colours.")
+            : IrisStyle.colourTheme === "auto" ? "" : Translation.tr("Applied to your terminals and apps. The shell keeps its own colours: Match the shell is off.")
+    }
+    // Where the mode in use comes from, so Auto never reads as a mystery: a colour theme, the wallpaper or the last choice.
+    function schemeNote(): string {
+        const name = root.schemeName(IrisStyle.scheme)
+        const choice = String(Config.getNestedValue("iris.appearance.scheme", "auto"))
+        const themed = IrisStyle.colourTheme !== "auto"
+        const presetName = themed ? String(ThemePresets.getPreset(IrisStyle.colourTheme).name) : ""
+        if (choice === "auto") {
+            if (themed) return Translation.tr("In use: %1, set by the %2 colour theme").arg(name).arg(presetName)
+            return Config.getNestedValue("appearance.wallpaperTheming.autoDarkLightMode", false)
+                ? Translation.tr("In use: %1, from the wallpaper").arg(name) : Translation.tr("In use: %1, from your last choice").arg(name)
+        }
+        const themeDark = themed ? Boolean(ThemePresets.getPreset(IrisStyle.colourTheme).colors?.darkmode) : (choice === "dark")
+        if (themed && themeDark !== (choice === "dark")) return Translation.tr("In use: %1. Your apps follow the %2 colour theme.").arg(name).arg(presetName)
+        return Translation.tr("In use: %1").arg(name)
+    }
+    function glassNote(): string {
+        const mode = String(Config.getNestedValue("iris.appearance.glass.mode", "off"))
+        return mode === "off" && IrisStyle.glassy ? Translation.tr("Off here, but Lume frost is on for the %1 scheme, so surfaces are frost anyway.").arg(root.schemeName(IrisStyle.scheme)) : ""
+    }
+    // Adaptive works by nudging fills, lines, corners, shadows and light a few tens of percent: this says what it is doing now.
+    function adaptiveNote(): string {
+        if (Number(Config.getNestedValue("iris.appearance.adaptive", 0)) <= 0) return Translation.tr("Off: your values apply as they are.")
+        if (!IrisMood.sampled) return Translation.tr("Reading the wallpaper…")
+        const pct = name => { const v = Math.round((IrisMood.factor(name) - 1) * 100); return (v < 0 ? "−" : "+") + Math.abs(v) + " %" }
+        return Translation.tr("Now: fills %1, lines %2, corners %3, shadows %4, light %5").arg(pct("fill")).arg(pct("lines")).arg(pct("shape")).arg(pct("shadow")).arg(pct("lightReach"))
+    }
+    readonly property var colourThemeIds: ["auto", "iris-ink", "catppuccin-latte", "sakura", "zen-garden", "vitesse-light", "catppuccin-mocha",
+        "catppuccin-macchiato", "catppuccin-frappe", "rose-pine", "tokyo-night", "nord", "gruvbox-material", "kanagawa", "everforest",
+        "dracula", "one-dark", "material-black"]
+    readonly property var colourThemeChoices: root.colourThemeIds.map(id => {
+        const preset = ThemePresets.getPreset(id)
+        return { label: id === "auto" ? "Wallpaper" : String(preset.name), value: id,
+            get palette() {
+                if (id === "auto") return { wallpaper: true }
+                const c = preset.colors ?? ({})
+                const of = (hex, fallback) => hex ? Qt.color(String(hex)) : fallback
+                return { dark: Boolean(c.darkmode), bg: of(c.m3background, IrisStyle.bodySurface), fg: of(c.m3onBackground, IrisStyle.text),
+                    dots: [c.m3primary, c.m3secondary, c.m3tertiary].map(hex => of(hex, IrisStyle.identity.gray)) }
+            },
+            get swatch() { return id === "auto" ? IrisStyle.wallpaperLight : preset.colors?.m3primary ? Qt.color(String(preset.colors.m3primary)) : IrisStyle.identity.gray } }
+    })
     readonly property var studioRows: [
-        { target: "material", group: "Material", label: "Material", description: "What every surface is made of. Raised steps, fills and the frame follow it.", path: "iris.appearance.theme.surface", kind: "choice", fallback: "black", choices: [{label:"Black",value:"black",swatch:IrisStyle.materialSwatch("black")},{label:"Graphite",value:"graphite",swatch:IrisStyle.materialSwatch("graphite")},{label:"Midnight",value:"midnight",swatch:IrisStyle.materialSwatch("midnight")},{label:"Wallpaper",value:"wallpaper",swatch:IrisStyle.materialSwatch("wallpaper")},{label:"Theme",value:"theme",swatch:IrisStyle.materialSwatch("theme")}] },
-        { target: "material", group: "Adaptive", label: "Adapt to the wallpaper", description: "Reads the wallpaper's brightness, contrast and colour and shapes iRiS from it: calmer images round corners and soften shadows, busy or bright ones sharpen and firm up lines, colourful ones carry more light. 0 keeps your values exactly.", path: "iris.appearance.adaptive", kind: "range", fallback: 0, min: 0, max: 100, step: 5, unit: " %" },
+        { target: "material", group: "Colour theme", label: "Colour theme", description: "The palette the shell and your apps wear. Wallpaper takes it from each wallpaper.", path: "appearance.theme", kind: "choice", tiles: true, fallback: "auto", choices: root.colourThemeChoices, note: () => root.themeNote(), keywords: ["palette", "catppuccin", "nord", "gruvbox", "dracula", "rose pine", "tokyo night", "everforest", "kanagawa", "theme", "apps", "terminal", "colours", "colors", "tema", "paleta", "ink"] },
+        { target: "material", group: "Colour theme", label: "Match the shell", description: "iRiS takes the theme's accent, highlight and material, so the shell and your apps look like one.", path: "iris.appearance.followTheme", visibleWhen: "!appearance.theme=auto", kind: "switch", fallback: true, keywords: ["sync", "match", "follow", "apps", "shell", "accent", "sincronizar"] },
+        { target: "material", group: "Scheme", label: "Scheme", description: "Auto follows the system: dark or light. Ink is a softer mode in between, paper and ink instead of white and black.", path: "iris.appearance.scheme", kind: "choice", fallback: "auto", choices: [{label:"Auto",value:"auto",glyph:"auto_awesome"},{label:"Dark mode",value:"dark",glyph:"dark_mode"},{label:"Ink",value:"ink",glyph:"ink_pen"},{label:"Light mode",value:"light",glyph:"light_mode"}], keywords: ["light", "dark", "ink", "sumi", "washi", "paper", "japanese", "day", "night", "mode", "theme", "bright", "white", "black", "claro", "oscuro", "tinta", "modo"] , note: () => root.schemeNote() },
+        { target: "material", group: "Scheme", label: "Light or dark from the wallpaper", description: "With Auto, a bright wallpaper picks light and a dark one picks dark, in the shell and in your apps.", path: "appearance.wallpaperTheming.autoDarkLightMode", visibleWhen: "iris.appearance.scheme=auto", kind: "switch", fallback: false, keywords: ["auto", "brightness", "night", "day", "wallpaper", "luminance", "claro", "oscuro"] },
+        { target: "material", group: "Dark look", showIf: () => root.schemeShown("dark"), label: "Tone", description: "Lifts or dims this mode's material.", path: "iris.appearance.tune.dark.tone", kind: "range", fallback: 0, min: -30, max: 30, step: 2, unit: " %", keywords: ["brightness", "dim", "darker", "lighter", "grey", "gray", "eyes", "glare", "tone"] },
+        { target: "material", group: "Dark look", showIf: () => root.schemeShown("dark"), label: "Colour strength", description: "How strong accents and colours read in this mode.", path: "iris.appearance.tune.dark.colour", kind: "range", fallback: 100, min: 0, max: 100, step: 5, unit: " %", keywords: ["saturation", "vivid", "muted", "pastel", "strong", "blue", "accent", "colour", "color"] },
+        { target: "material", group: "Dark look", showIf: () => root.schemeShown("dark"), label: "Widget colour", description: "How colourful the desktop widgets read in this mode: their accents and the glass over the wallpaper.", path: "iris.appearance.tune.dark.widgets", kind: "range", fallback: 100, min: 40, max: 160, step: 5, unit: " %", keywords: ["widgets", "desktop", "dull", "faded", "muted", "washed", "vivid", "bright", "colourful", "colorful", "saturation", "colour", "color", "dark"] },
+        { target: "material", group: "Dark look", showIf: () => root.schemeShown("dark"), label: "Lume frost", description: "Surfaces become frost the wallpaper shows through, as thick as reading needs, instead of solid.", path: "iris.appearance.tune.dark.lume", kind: "switch", fallback: false, keywords: ["dark", "tone", "colour", "color", "lume", "frost", "tune"] },
+        { target: "material", group: "Ink look", showIf: () => root.schemeShown("ink"), label: "Tone", description: "Lifts or dims this mode's material.", path: "iris.appearance.tune.ink.tone", kind: "range", fallback: 0, min: -30, max: 30, step: 2, unit: " %", keywords: ["brightness", "dim", "darker", "lighter", "grey", "gray", "eyes", "glare", "tone"] },
+        { target: "material", group: "Ink look", showIf: () => root.schemeShown("ink"), label: "Colour strength", description: "How strong accents and colours read in this mode.", path: "iris.appearance.tune.ink.colour", kind: "range", fallback: 100, min: 0, max: 100, step: 5, unit: " %", keywords: ["saturation", "vivid", "muted", "pastel", "strong", "blue", "accent", "colour", "color"] },
+        { target: "material", group: "Ink look", showIf: () => root.schemeShown("ink"), label: "Widget colour", description: "How colourful the desktop widgets read in this mode: their accents and the glass over the wallpaper.", path: "iris.appearance.tune.ink.widgets", kind: "range", fallback: 120, min: 40, max: 160, step: 5, unit: " %", keywords: ["widgets", "desktop", "dull", "faded", "muted", "washed", "vivid", "bright", "colourful", "colorful", "saturation", "colour", "color", "ink"] },
+        { target: "material", group: "Ink look", showIf: () => root.schemeShown("ink"), label: "Lume frost", description: "Surfaces become frost the wallpaper shows through, as thick as reading needs, instead of solid.", path: "iris.appearance.tune.ink.lume", kind: "switch", fallback: true, keywords: ["ink", "tone", "colour", "color", "lume", "frost", "tune"] },
+        { target: "material", group: "Light look", showIf: () => root.schemeShown("light"), label: "Tone", description: "Lifts or dims this mode's material.", path: "iris.appearance.tune.light.tone", kind: "range", fallback: 0, min: -30, max: 30, step: 2, unit: " %", keywords: ["brightness", "dim", "darker", "lighter", "grey", "gray", "eyes", "glare", "tone"] },
+        { target: "material", group: "Light look", showIf: () => root.schemeShown("light"), label: "Colour strength", description: "How strong accents and colours read in this mode.", path: "iris.appearance.tune.light.colour", kind: "range", fallback: 85, min: 0, max: 100, step: 5, unit: " %", keywords: ["saturation", "vivid", "muted", "pastel", "strong", "blue", "accent", "colour", "color"] },
+        { target: "material", group: "Light look", showIf: () => root.schemeShown("light"), label: "Widget colour", description: "How colourful the desktop widgets read in this mode: their accents and the glass over the wallpaper.", path: "iris.appearance.tune.light.widgets", kind: "range", fallback: 110, min: 40, max: 160, step: 5, unit: " %", keywords: ["widgets", "desktop", "dull", "faded", "muted", "washed", "vivid", "bright", "colourful", "colorful", "saturation", "colour", "color", "light"] },
+        { target: "material", group: "Light look", showIf: () => root.schemeShown("light"), label: "Lume frost", description: "Surfaces become frost the wallpaper shows through, as thick as reading needs, instead of solid.", path: "iris.appearance.tune.light.lume", kind: "switch", fallback: true, keywords: ["light", "tone", "colour", "color", "lume", "frost", "tune"] },
+        { target: "material", group: "Material", label: "Material", description: "What every surface is made of. Raised steps, fills and the frame follow it.", path: "iris.appearance.theme.surface", kind: "choice", fallback: "black", choices: root.materialChoices, locked: () => IrisStyle.followsTheme, note: () => root.followNote() },
+        { target: "material", group: "Material", label: "Apps use this material", description: "Your terminals and apps sit on the same surfaces as the shell. Accents still come from the wallpaper.", path: "iris.appearance.materialForApps", visibleWhen: "appearance.theme=auto", kind: "switch", fallback: true, keywords: ["apps", "terminal", "gtk", "sync", "match", "surfaces", "background", "sincronizar", "aplicaciones"] },
+        { target: "material", group: "Adaptive", label: "Adapt to the wallpaper", description: "Reads the wallpaper's brightness, contrast and colour and shapes iRiS from it: calmer images round corners and soften shadows, busy or bright ones sharpen and firm up lines, colourful ones carry more light. 0 keeps your values exactly.", path: "iris.appearance.adaptive", kind: "range", fallback: 0, min: 0, max: 100, step: 5, unit: " %" , note: () => root.adaptiveNote() },
         { target: "material", group: "Material", label: "Fills", description: "Groups, tracks, hovered and pressed controls.", path: "iris.appearance.theme.fill", kind: "range", fallback: 100, min: 30, max: 200, step: 5, unit: " %" },
         { target: "material", group: "Material", label: "Lines", description: "Hairlines and borders. 0 removes them.", path: "iris.appearance.theme.lines", kind: "range", fallback: 100, min: 0, max: 200, step: 5, unit: " %" },
         { target: "material", group: "Material", label: "Shadows", description: "Under bodies floating over windows.", path: "iris.appearance.theme.shadow", kind: "range", fallback: 100, min: 0, max: 160, step: 5, unit: " %" },
         { target: "material", group: "Material", label: "Outline", description: "A hairline around every silhouette, so black holds over dark windows.", path: "iris.appearance.theme.rim", kind: "switch", fallback: true },
         { target: "material", group: "Material", label: "Outline colour", path: "iris.appearance.theme.rimTint", visibleWhen: "iris.appearance.theme.rim", kind: "choice", fallback: "neutral", choices: [{label:"Neutral",value:"neutral"},{label:"Accent",value:"accent"},{label:"Highlight",value:"highlight"}] },
         { target: "material", group: "Material", label: "Outline width", path: "iris.appearance.theme.rimWidth", visibleWhen: "iris.appearance.theme.rim", kind: "range", fallback: 1, min: 1, max: 3, unit: " px" },
-        { target: "material", group: "Glass", label: "Glass", description: "Glass shows the blurred wallpaper; Blur has Niri blur the windows behind every iRiS surface (needs Niri 26.04). A music-driven frame and bodies joined to it use wallpaper glass so their moving contour stays aligned.", path: "iris.appearance.glass.mode", kind: "choice", fallback: "off", choices: [{label:"Off",value:"off",glyph:"crop_square"},{label:"Glass",value:"wallpaper",glyph:"blur_on"},{label:"Blur (beta)",value:"compositor",glyph:"lens_blur"}] },
-        { target: "material", group: "Glass", label: "Tint", description: "How much of the material stays over the glass. iRiS raises it on bright wallpapers so text stays legible.", path: "iris.appearance.glass.tint", kind: "range", fallback: 58, min: 12, max: 96, step: 2, unit: " %" },
-        { target: "material", group: "Glass", label: "Frost", description: "How blurred the wallpaper is behind the glass.", path: "iris.appearance.glass.blur", visibleWhen: "iris.appearance.glass.mode=wallpaper", kind: "range", fallback: 100, min: 20, max: 100, step: 5, unit: " %" },
+        { target: "material", group: "Glass", label: "Glass", description: "Glass shows the blurred wallpaper; Blur has Niri blur the windows behind every iRiS surface (needs Niri 26.04). A music-driven frame and bodies joined to it use wallpaper glass so their moving contour stays aligned.", path: "iris.appearance.glass.mode", kind: "choice", fallback: "off", choices: [{label:"Off",value:"off",glyph:"crop_square"},{label:"Glass",value:"wallpaper",glyph:"blur_on"},{label:"Blur (beta)",value:"compositor",glyph:"lens_blur"}] , note: () => root.glassNote() },
+        { target: "material", group: "Glass", label: "Tint", showIf: () => IrisStyle.glassy, description: "How much of the material stays over the glass. iRiS raises it on bright wallpapers so text stays legible.", path: "iris.appearance.glass.tint", kind: "range", fallback: 58, min: 12, max: 96, step: 2, unit: " %" },
+        { target: "material", group: "Glass", label: "Frost", description: "How blurred the wallpaper is behind the glass.", path: "iris.appearance.glass.blur", showIf: () => IrisStyle.glassWallpaper, kind: "range", fallback: 100, min: 20, max: 100, step: 5, unit: " %" },
         { target: "material", group: "Glass", niri: "blur", key: "enabled", label: "Niri blur", description: "Blur asks Niri to blur what is behind iRiS. Off here turns it off for every app.", visibleWhen: "iris.appearance.glass.mode=compositor", showIf: () => IrisCompositorBlur.available, kind: "switch", fallback: true, keywords: ["niri", "blur", "compositor", "desenfoque"] },
         { target: "material", group: "Glass", niri: "blur", key: "strength", label: "Blur strength", visibleWhen: "iris.appearance.glass.mode=compositor", showIf: () => IrisCompositorBlur.usable, kind: "choice", fallback: "balanced", choices: [{label:"Light",value:"light"},{label:"Balanced",value:"balanced"},{label:"Strong",value:"strong"}], keywords: ["niri", "blur", "radius", "passes"] },
         { target: "material", group: "Glass", niri: "blur", key: "saturation", label: "Colour behind", description: "Above 1 makes what is blurred more vivid.", visibleWhen: "iris.appearance.glass.mode=compositor", showIf: () => IrisCompositorBlur.usable, kind: "range", fallback: 1.5, min: 0.5, max: 2.5, step: 0.1, unit: "×", keywords: ["saturation", "vibrancy"] },
         { target: "material", group: "Glass", niri: "blur", key: "noise", label: "Grain", description: "A little noise hides banding in soft gradients.", visibleWhen: "iris.appearance.glass.mode=compositor", showIf: () => IrisCompositorBlur.usable, kind: "range", fallback: 0.02, min: 0, max: 0.1, step: 0.01, scale: 100, unit: " %", keywords: ["noise", "grain", "banding"] },
-        { target: "material", group: "Glass", label: "Edge light", description: "How much light the top of each glass edge catches, like the cut edge of glass. It is what lets glass read over a dark desktop.", path: "iris.appearance.glass.edgeLight", visibleWhen: "!iris.appearance.glass.mode=off", kind: "range", fallback: 34, min: 0, max: 100, step: 2, unit: " %", zeroLabel: "Off", keywords: ["edge", "rim", "highlight", "border", "outline", "shine", "borde", "filo", "brillo"] },
-        { target: "material", group: "Glass", label: "Edge line", description: "The same edge where it does not face the light. With Blur it also smooths the stepped curves.", path: "iris.appearance.glass.edgeLine", visibleWhen: "!iris.appearance.glass.mode=off", kind: "range", fallback: 10, min: 0, max: 60, step: 2, unit: " %", zeroLabel: "Off", keywords: ["edge", "border", "outline", "jagged", "aliasing", "borde", "serrucho"] },
-        { target: "material", group: "Glass", label: "Edge width", path: "iris.appearance.glass.edgeWidth", visibleWhen: "!iris.appearance.glass.mode=off", kind: "range", fallback: 1.5, min: 0.5, max: 3, step: 0.5, unit: " px", keywords: ["edge", "border", "thickness", "borde", "grosor"] },
-        { target: "material", group: "Glass", label: "Edge colour", description: "Scene takes the wallpaper's light.", path: "iris.appearance.glass.edgeColour", visibleWhen: "!iris.appearance.glass.mode=off", kind: "choice", fallback: "scene", choices: [{label:"Scene",value:"scene",glyph:"wallpaper"},{label:"White",value:"white",glyph:"light_mode"},{label:"Accent",value:"accent",glyph:"palette"},{label:"Highlight",value:"highlight",glyph:"auto_awesome"}], keywords: ["edge", "colour", "color", "borde", "color del borde"] },
+        { target: "material", group: "Glass", label: "Edge light", description: "How much light the top of each glass edge catches, like the cut edge of glass. It is what lets glass read over a dark desktop.", path: "iris.appearance.glass.edgeLight", showIf: () => IrisStyle.glassy, kind: "range", fallback: 34, min: 0, max: 100, step: 2, unit: " %", zeroLabel: "Off", keywords: ["edge", "rim", "highlight", "border", "outline", "shine", "borde", "filo", "brillo"] },
+        { target: "material", group: "Glass", label: "Edge line", description: "The same edge where it does not face the light. With Blur it also smooths the stepped curves.", path: "iris.appearance.glass.edgeLine", showIf: () => IrisStyle.glassy, kind: "range", fallback: 10, min: 0, max: 60, step: 2, unit: " %", zeroLabel: "Off", keywords: ["edge", "border", "outline", "jagged", "aliasing", "borde", "serrucho"] },
+        { target: "material", group: "Glass", label: "Edge width", path: "iris.appearance.glass.edgeWidth", showIf: () => IrisStyle.glassy, kind: "range", fallback: 1.5, min: 0.5, max: 3, step: 0.5, unit: " px", keywords: ["edge", "border", "thickness", "borde", "grosor"] },
+        { target: "material", group: "Glass", label: "Edge colour", description: "Scene takes the wallpaper's light.", path: "iris.appearance.glass.edgeColour", showIf: () => IrisStyle.glassy, kind: "choice", fallback: "scene", choices: [{label:"Scene",value:"scene",glyph:"wallpaper"},{label:"White",value:"white",glyph:"light_mode"},{label:"Accent",value:"accent",glyph:"palette"},{label:"Highlight",value:"highlight",glyph:"auto_awesome"}], keywords: ["edge", "colour", "color", "borde", "color del borde"] },
         { target: "material", group: "Shape", label: "Base corners", description: "Corners of side panels, buttons and text fields. Panels with their own corners keep them.", path: "iris.appearance.expandedRadius", kind: "range", fallback: 28, min: 16, max: 40, unit: " px", keywords: ["expanded", "radius", "buttons", "fields", "panels", "round"] },
         { target: "material", group: "Shape", label: "Corners", description: "Every radius in the family; nested corners keep stepping down.", path: "iris.appearance.theme.shape", kind: "range", fallback: 100, min: 30, max: 160, step: 5, unit: " %" },
         { target: "material", group: "Shape", label: "One shape for all", mirror: true, description: "The Island, the Dock and the bubbles share the bubbles' shape.", path: "iris.appearance.theme.linkShapes", kind: "switch", fallback: false, keywords: ["same", "match", "link", "linked", "together", "sync", "unify", "everything", "one shape", "mismo", "igual", "todo", "juntos", "vincular"] },
@@ -137,22 +224,22 @@ QtObject {
         { section: "frameMusic", group: "Frame response", label: "Sensitivity", description: "How strongly quiet passages move the frame.", path: "iris.surround.musicSensitivity", visibleWhen: "iris.surround.music=frame", showIf: () => Boolean(Config.options?.background?.edgeWidgets?.organic?.enable) && Boolean(Config.options?.iris?.surround?.enable), kind: "range", fallback: 140, min: 50, max: 250, step: 10, unit: " %" },
         { section: "frameMusic", group: "Frame response", label: "Travel speed", description: "How quickly the swell flows along the edge.", path: "iris.surround.musicSpeed", visibleWhen: "iris.surround.music=frame", showIf: () => Boolean(Config.options?.background?.edgeWidgets?.organic?.enable) && Boolean(Config.options?.iris?.surround?.enable), kind: "range", fallback: 100, min: 40, max: 200, step: 10, unit: " %" },
         { section: "frameMusic", group: "Finish", label: "Appearance", description: "Sculpted is pure shape. Etched catches a fine line on the inner edge. Satin lets light fall softly across the band.", path: "iris.surround.musicAppearance", visibleWhen: "iris.surround.music=frame", showIf: () => Boolean(Config.options?.background?.edgeWidgets?.organic?.enable) && Boolean(Config.options?.iris?.surround?.enable), kind: "choice", fallback: "etched", choices: [{label:"Sculpted",value:"sculpted"},{label:"Etched",value:"etched"},{label:"Satin",value:"satin"}] },
-        { section: "frameMusic", group: "Finish", label: "Light colour", description: "Pearl follows iRiS ink; the other choices follow your theme and wallpaper.", path: "iris.surround.musicColour", visibleWhen: "iris.surround.music=frame", showIf: () => Boolean(Config.options?.background?.edgeWidgets?.organic?.enable) && Boolean(Config.options?.iris?.surround?.enable) && String(Config.options?.iris?.surround?.musicAppearance ?? "etched") !== "sculpted", kind: "choice", fallback: "pearl", choices: [{label:"Pearl",value:"pearl",swatch:IrisStyle.text},{label:"Accent",value:"accent",swatch:IrisStyle.accent},{label:"Highlight",value:"highlight",swatch:IrisStyle.secondaryAccent},{label:"Wallpaper",value:"wallpaper",swatch:IrisStyle.wallpaperLight}] },
+        { section: "frameMusic", group: "Finish", label: "Light colour", description: "Pearl follows iRiS ink; the other choices follow your theme and wallpaper.", path: "iris.surround.musicColour", visibleWhen: "iris.surround.music=frame", showIf: () => Boolean(Config.options?.background?.edgeWidgets?.organic?.enable) && Boolean(Config.options?.iris?.surround?.enable) && String(Config.options?.iris?.surround?.musicAppearance ?? "etched") !== "sculpted", kind: "choice", fallback: "pearl", choices: [{label:"Pearl",value:"pearl",get swatch() { return IrisStyle.text }},{label:"Accent",value:"accent",get swatch() { return IrisStyle.accent }},{label:"Highlight",value:"highlight",get swatch() { return IrisStyle.secondaryAccent }},{label:"Wallpaper",value:"wallpaper",get swatch() { return IrisStyle.wallpaperLight }}] },
         { section: "frameMusic", group: "Finish", label: "Light", description: "How much of the chosen colour rests on the moving frame.", path: "iris.surround.musicLight", visibleWhen: "iris.surround.music=frame", showIf: () => Boolean(Config.options?.background?.edgeWidgets?.organic?.enable) && Boolean(Config.options?.iris?.surround?.enable) && String(Config.options?.iris?.surround?.musicAppearance ?? "etched") !== "sculpted", kind: "range", fallback: 35, min: 0, max: 100, step: 5, unit: " %", zeroLabel: "Off" },
         { section: "frameMusic", group: "Finish", label: "Light width", description: "A hairline for Etched, or a wider falloff for Satin.", path: "iris.surround.musicLightWidth", visibleWhen: "iris.surround.music=frame", showIf: () => Boolean(Config.options?.background?.edgeWidgets?.organic?.enable) && Boolean(Config.options?.iris?.surround?.enable) && String(Config.options?.iris?.surround?.musicAppearance ?? "etched") !== "sculpted", kind: "range", fallback: 5, min: 1, max: 18, unit: " px" },
-        { target: "colour", group: "Accent", label: "System accent", description: "Selection and controls across iRiS. Activity colours keep their identity.", path: "iris.appearance.accent", kind: "choice", fallback: "blue", choices: [{label:"Blue",value:"blue",swatch:IrisStyle.accents.blue},{label:"Mint",value:"mint",swatch:IrisStyle.accents.mint},{label:"Rose",value:"rose",swatch:IrisStyle.accents.rose},{label:"Lilac",value:"lilac",swatch:IrisStyle.accents.lilac},{label:"Theme",value:"theme",swatch:IrisStyle.themeAccent},{label:"Wallpaper",value:"wallpaper"},{label:"Custom",value:"custom"}] },
-        { target: "colour", group: "Accent", label: "Accent hue", visibleWhen: "iris.appearance.accent=custom", path: "iris.appearance.theme.accentHue", kind: "hue", fallback: 212 },
-        { target: "colour", group: "Highlight", label: "Highlight", description: "The glanced detail: clock separator, day number, timers.", path: "iris.appearance.highlight", kind: "choice", fallback: "orange", choices: [{label:"Orange",value:"orange",swatch:IrisStyle.highlights.orange},{label:"Yellow",value:"yellow",swatch:IrisStyle.highlights.yellow},{label:"Red",value:"red",swatch:IrisStyle.highlights.red},{label:"Pink",value:"pink",swatch:IrisStyle.highlights.pink},{label:"Green",value:"green",swatch:IrisStyle.highlights.green},{label:"Accent",value:"accent"},{label:"Theme",value:"theme",swatch:IrisStyle.vividHighlight(Appearance.colors.colTertiary, IrisStyle.highlights.orange)},{label:"Wallpaper",value:"wallpaper"},{label:"Custom",value:"custom"}] },
-        { target: "colour", group: "Highlight", label: "Highlight hue", visibleWhen: "iris.appearance.highlight=custom", path: "iris.appearance.theme.highlightHue", kind: "hue", fallback: 32 },
+        { target: "colour", group: "Accent", label: "System accent", description: "Selection and controls across iRiS. Activity colours keep their identity.", path: "iris.appearance.accent", kind: "choice", fallback: "blue", choices: [{label:"Blue",value:"blue",get swatch() { return IrisStyle.accents.blue }},{label:"Mint",value:"mint",get swatch() { return IrisStyle.accents.mint }},{label:"Rose",value:"rose",get swatch() { return IrisStyle.accents.rose }},{label:"Lilac",value:"lilac",get swatch() { return IrisStyle.accents.lilac }},{label:"Theme",value:"theme",get swatch() { return IrisStyle.themeAccent }},{label:"Wallpaper",value:"wallpaper"},{label:"Custom",value:"custom"}], locked: () => IrisStyle.followsTheme, note: () => root.followNote() },
+        { target: "colour", group: "Accent", label: "Accent hue", visibleWhen: "iris.appearance.accent=custom", path: "iris.appearance.theme.accentHue", kind: "hue", fallback: 212, locked: () => IrisStyle.followsTheme, note: () => root.followNote() },
+        { target: "colour", group: "Highlight", label: "Highlight", description: "The glanced detail: clock separator, day number, timers.", path: "iris.appearance.highlight", kind: "choice", fallback: "orange", choices: [{label:"Orange",value:"orange",get swatch() { return IrisStyle.highlights.orange }},{label:"Yellow",value:"yellow",get swatch() { return IrisStyle.highlights.yellow }},{label:"Red",value:"red",get swatch() { return IrisStyle.highlights.red }},{label:"Pink",value:"pink",get swatch() { return IrisStyle.highlights.pink }},{label:"Green",value:"green",get swatch() { return IrisStyle.highlights.green }},{label:"Accent",value:"accent"},{label:"Theme",value:"theme",get swatch() { return IrisStyle.vividHighlight(Appearance.colors.colTertiary, IrisStyle.highlights.orange) }},{label:"Wallpaper",value:"wallpaper"},{label:"Custom",value:"custom"}], locked: () => IrisStyle.followsTheme, note: () => root.followNote() },
+        { target: "colour", group: "Highlight", label: "Highlight hue", visibleWhen: "iris.appearance.highlight=custom", path: "iris.appearance.theme.highlightHue", kind: "hue", fallback: 32, locked: () => IrisStyle.followsTheme, note: () => root.followNote() },
         { target: "colour", group: "Colour layer", section: "anime", label: "Anime colour layer", description: "Anime-inspired accents without changing your layout; switch off to restore your colours.", path: "iris.appearance.anime.enabled", kind: "switch", fallback: false, keywords: ["anime", "weeb", "otaku", "japanese", "japones", "palette", "accent", "colour", "color"] },
         { target: "colour", group: "Colour layer", section: "anime", label: "Palette", visibleWhen: "iris.appearance.anime.enabled", path: "iris.appearance.anime.palette", kind: "choice", fallback: "sakura",
-            choices: Object.keys(IrisStyle.animePalettes).map(key => ({ label: IrisStyle.animePalettes[key].label, value: key, swatch: IrisStyle.animeAccent(IrisStyle.accents.blue, key, 1) })),
+            choices: Object.keys(IrisStyle.animePalettes).map(key => ({ label: IrisStyle.animePalettes[key].label, value: key, get swatch() { return IrisStyle.animeAccent(IrisStyle.accents.blue, key, 1) } })),
             keywords: ["anime", "weeb", "otaku", "palette", "colour", "color", "pink", "rose", "cyan", "magenta", "violet", "purple", "green", "gold", "amber"].concat(Object.values(IrisStyle.animePalettes).map(entry => entry.label.toLowerCase())) },
         { target: "colour", group: "Colour layer", section: "anime", label: "Strength", visibleWhen: "iris.appearance.anime.enabled", description: "How far the palette pulls the accents away from your own; 0 keeps them exactly.", path: "iris.appearance.anime.strength", kind: "range", fallback: 60, min: 0, max: 100, step: 5, unit: " %", keywords: ["anime", "weeb", "otaku", "palette", "intensidad", "intensity", "strength", "blend"] },
         { target: "colour", group: "Colour layer", section: "anime", label: "Recolour the highlight", visibleWhen: "iris.appearance.anime.enabled", description: "The highlight joins the palette. Off keeps your own highlight, even when it is set to Accent.", path: "iris.appearance.anime.highlight", kind: "switch", fallback: false, keywords: ["anime", "weeb", "otaku", "palette", "highlight", "colour", "color"] },
         { target: "colour", group: "Airing", section: "anime", label: "Airing bubble", description: "Shows the next anime episode on the Island. Its card lists what is coming and follows the shows you tap.", path: "iris.bubbles.extras.anime.enable", kind: "switch", fallback: false, keywords: ["anime", "weeb", "otaku", "airing", "japanese", "japones", "tracker", "following", "episodes", "episodio", "schedule", "live tv"] },
         { target: "colour", group: "Airing", section: "anime", label: "Episodes in the card", description: "How many upcoming episodes the Airing bubble lists.", path: "iris.anime.shows", kind: "range", fallback: 5, min: 3, max: 8, keywords: ["anime", "weeb", "otaku", "airing", "episodes", "episodio", "following", "shows"] },
-        { target: "colour", group: "Badges", label: "Unread counts", description: "The family's red, your accent, the highlight, or a quiet neutral.", path: "iris.appearance.theme.badge", kind: "choice", fallback: "alert", choices: [{label:"Alert",value:"alert",swatch:IrisStyle.identity.red},{label:"Accent",value:"accent"},{label:"Highlight",value:"highlight",swatch:IrisStyle.secondaryAccent},{label:"Neutral",value:"neutral",swatch:IrisStyle.surfaceHighestOpaque}] },
+        { target: "colour", group: "Badges", label: "Unread counts", description: "The family's red, your accent, the highlight, or a quiet neutral.", path: "iris.appearance.theme.badge", kind: "choice", fallback: "alert", choices: [{label:"Alert",value:"alert",get swatch() { return IrisStyle.identity.red }},{label:"Accent",value:"accent"},{label:"Highlight",value:"highlight",get swatch() { return IrisStyle.secondaryAccent }},{label:"Neutral",value:"neutral",get swatch() { return IrisStyle.surfaceHighestOpaque }}] },
         { target: "colour", group: "Light", label: "Light", description: "What an open card or panel is lit by: its own colour — the sky for weather, the highlight for timers — or the wallpaper's. It pours in from where the body grew.", path: "iris.appearance.aura", kind: "choice", fallback: "subtle", choices: [{label:"Off",value:"off",glyph:"light_off"},{label:"Subtle",value:"subtle",glyph:"light_mode"},{label:"Vivid",value:"vivid",glyph:"wb_sunny"}] },
         { target: "colour", group: "Light", label: "Reach", description: "How far the light goes into a body: just its head, or deeper.", path: "iris.appearance.theme.lightReach", kind: "range", fallback: 100, min: 50, max: 300, step: 5, unit: " %" },
         { target: "colour", group: "Light", label: "Glow", description: "Bodies that float over your windows (cards, Spotlight, banners, the Dock menu) cast a halo in the accent colour instead of a dark shadow.", path: "iris.appearance.theme.glow", kind: "range", fallback: 0, min: 0, max: 100, step: 5, unit: " %" },
@@ -197,7 +284,7 @@ QtObject {
         { target: "island", group: "At rest", label: "Clock", description: "What the resting Island shows beside the time.", path: "iris.bar.clockStyle", kind: "choice", fallback: "dateTime", choices: [{label:"Time",value:"time"},{label:"Date",value:"dateTime"},{label:"Weather",value:"weather"}] },
         { target: "island", group: "At rest", label: "Utility island", description: "Emerges beside the Island; the tray hides when no apps are present.", path: "iris.bar.auxiliary", kind: "choice", fallback: "tray", choices: [{label:"Tray",value:"tray"},{label:"Timers",value:"tools"},{label:"Sound",value:"sound"},{label:"Microphone",value:"mic"},{label:"None",value:"none"}] },
         { target: "island", group: "At rest", label: "Clock size", description: "The time and date on the resting Island. The Island grows to fit them.", path: "iris.bar.clockScale", kind: "range", fallback: 100, min: 80, max: 150, step: 5, unit: " %" },
-        { target: "island", group: "At rest", label: "Clock accent", description: "The colour of the time's separator and the day number on the resting Island.", path: "iris.bar.clockAccent", kind: "choice", fallback: "highlight", choices: [{label:"Highlight",value:"highlight",swatch:IrisStyle.secondaryAccent},{label:"Accent",value:"accent",swatch:IrisStyle.accent},{label:"Plain",value:"plain",swatch:IrisStyle.text}] },
+        { target: "island", group: "At rest", label: "Clock accent", description: "The colour of the time's separator and the day number on the resting Island.", path: "iris.bar.clockAccent", kind: "choice", fallback: "highlight", choices: [{label:"Highlight",value:"highlight",get swatch() { return IrisStyle.secondaryAccent }},{label:"Accent",value:"accent",get swatch() { return IrisStyle.accent }},{label:"Plain",value:"plain",get swatch() { return IrisStyle.text }}] },
         { target: "island", group: "At rest", label: "Breathing room", description: "Space around what the resting Island shows.", path: "iris.bar.padding", kind: "range", fallback: 100, min: 50, max: 250, step: 10, unit: " %" },
         { target: "island", group: "At rest", label: "Bubble gap", description: "How far the bubbles beside the Island rest from it.", path: "iris.bar.satelliteGap", kind: "range", fallback: 6, min: 0, max: 24, unit: " px" },
         { target: "island", group: "At rest", label: "Bubble size", description: "The bubbles beside the Island, as a share of its height.", path: "iris.bar.satelliteScale", kind: "range", fallback: 100, min: 70, max: 100, step: 5, unit: " %" },
@@ -242,6 +329,12 @@ QtObject {
         { target: "bodies", group: "Control Center", label: "Levels", description: "Which sliders stand side by side in Levels.", path: "iris.controlCenter.levels", kind: "pieces", fallback: ["brightness", "volume", "microphone"], choices: [{label:"Brightness",value:"brightness"},{label:"Volume",value:"volume"},{label:"Microphone",value:"microphone"}], keywords: ["slider", "brightness", "volume", "mic"] },
         { target: "bodies", group: "Control Center", label: "Opens as", description: "The Island itself becomes the Control Center, or a panel hangs from it. From a bubble it always grows beside that bubble.", path: "iris.controlCenter.opens", kind: "choice", fallback: "island", choices: [{label:"The Island",value:"island",glyph:"pill"},{label:"A panel",value:"panel",glyph:"web_asset"}] },
         { target: "bodies", group: "Control Center", label: "Width", path: "iris.controlCenter.width", kind: "range", fallback:360,min:320,max:540,step:10,unit:" px" },
+        { target: "bodies", group: "Visualizer", label: "Visualizer", description: "How what plays is drawn on the resting Island, its player page and the Visualizer bubble.", path: "iris.player.visualizer.style", kind: "choice", fallback: "capsules",
+            choices: [{label:"Capsules",value:"capsules",glyph:"graphic_eq"},{label:"Equalizer",value:"rise",glyph:"equalizer"},{label:"Dots",value:"dots",glyph:"more_horiz"},{label:"Wave",value:"wave",glyph:"airwave"},{label:"Ring",value:"ring",glyph:"brightness_empty"}],
+            keywords: ["visualizer", "visualiser", "cava", "spectrum", "equalizer", "ecualizador", "bars", "barras", "wave", "onda", "dots", "puntos", "ring", "anillo"] },
+        { target: "bodies", group: "Visualizer", label: "Bands", description: "How many parts of the sound it follows.", path: "iris.player.visualizer.bars", kind: "range", fallback: 5, min: 3, max: 9, step: 1 },
+        { target: "bodies", group: "Visualizer", label: "Visualizer colour", description: "The artwork's own colour, the accent, the highlight or the ink.", path: "iris.player.visualizer.colour", kind: "choice", fallback: "art",
+            choices: [{label:"Artwork",value:"art"},{label:"Accent",value:"accent"},{label:"Highlight",value:"highlight"},{label:"Ink",value:"ink"}] },
         { target: "bodies", group: "Player", label: "Round album cover", path: "iris.player.roundCover", kind: "switch", fallback: false },
         { target: "bodies", group: "Player", label: "Blurred album background", description: "Tints the expanded Island and media cards with the cover.", path: "iris.player.artworkBackground", kind: "switch", fallback:true },
         { target: "places", group: "Panel look", label: "Corners", description: "Auto keeps the family's shape for side panels.", path: "iris.appearance.surfaces.panels.radius", kind: "range", fallback: 0, min: 0, max: 44, unit: " px", zeroLabel: "Auto" },
@@ -684,12 +777,12 @@ QtObject {
     ]
 
     readonly property var swatchChoices: [
-        { label: "Accent", value: String(IrisStyle.accent), swatch: IrisStyle.accent },
-        { label: "Highlight", value: String(IrisStyle.secondaryAccent), swatch: IrisStyle.secondaryAccent },
-        { label: "Blue", value: String(IrisStyle.identity.blue), swatch: IrisStyle.identity.blue },
-        { label: "Green", value: String(IrisStyle.identity.green), swatch: IrisStyle.identity.green },
-        { label: "Pink", value: String(IrisStyle.identity.pink), swatch: IrisStyle.identity.pink },
-        { label: "Gray", value: String(IrisStyle.identity.gray), swatch: IrisStyle.identity.gray }
+        { label: "Accent", value: String(IrisStyle.accent), get swatch() { return IrisStyle.accent } },
+        { label: "Highlight", value: String(IrisStyle.secondaryAccent), get swatch() { return IrisStyle.secondaryAccent } },
+        { label: "Blue", value: String(IrisStyle.identity.blue), get swatch() { return IrisStyle.identity.blue } },
+        { label: "Green", value: String(IrisStyle.identity.green), get swatch() { return IrisStyle.identity.green } },
+        { label: "Pink", value: String(IrisStyle.identity.pink), get swatch() { return IrisStyle.identity.pink } },
+        { label: "Gray", value: String(IrisStyle.identity.gray), get swatch() { return IrisStyle.identity.gray } }
     ]
     // Niri's own settings, read and written through scripts/niri-config.py (IrisNiri). `niri` is the config section.
     readonly property var niriRows: [
@@ -779,68 +872,69 @@ QtObject {
     ].concat(IrisPieces.extras.filter(piece => piece.id !== "workspaces").map(piece => ({ label: piece.label, value: piece.id })))
     // Settings' sidebar, in the order and clusters it shows. `tip` is the one line a section opens on.
     readonly property var sections: [
-        { id: "general", cluster: 0, title: "General", subtitle: "Time, language and how iRiS behaves", icon: "settings", tint: IrisStyle.identity.gray, tip: "Settings that shape the whole shell, whichever surface shows them." },
-        { id: "appearance", cluster: 0, title: "Appearance", subtitle: "Material, colour, type and shape", icon: "palette", tint: IrisStyle.identity.purple, tip: "Customize edits the same values live, on top of your desktop." },
-        { id: "motion", cluster: 0, title: "Motion", subtitle: "How every shape grows, moves and settles", icon: "animation", tint: IrisStyle.identity.indigo, tip: "Shorter durations feel snappier; the curve stays the same." },
-        { id: "bar", cluster: 1, title: "Island", subtitle: "Composition, size and how the Island responds", icon: "pill", tint: IrisStyle.identity.blue, tip: "Rest on the Island to peek, click to keep it, scroll for volume." },
-        { id: "bubbles", cluster: 1, title: "Bubbles & Cards", subtitle: "Pieces you carry and the cards they grow", icon: "bubble_chart", tint: IrisStyle.identity.sky, tip: "Hold a bubble to carry it; drop it beside the Island to bring it back." },
-        { id: "dock", cluster: 1, title: "Dock", subtitle: "Visibility, material and app icons", icon: "dock_to_bottom", tint: IrisStyle.identity.indigo, tip: "Right-click an icon for its windows or to float it as a bubble; middle-click opens a new one." },
-        { id: "desktop", cluster: 1, title: "Desktop & Wallpaper", subtitle: "Widgets, wallpapers and the overview backdrop", icon: "wallpaper", tint: IrisStyle.identity.teal, tip: "Right-click the desktop to edit widgets." },
-        { id: "windows", cluster: 1, title: "Windows", subtitle: "Gaps, borders, corners and how Niri moves them", icon: "select_window", tint: IrisStyle.identity.orange, tip: "Niri draws these; they change right away and live in your Niri config." },
-        { id: "sidebars", cluster: 1, title: "Side Panels", subtitle: "Focus and Today, arranged around your workflow", icon: "dock_to_right", tint: IrisStyle.identity.green, tip: "Ctrl+E customizes a panel; Keep open makes room beside windows." },
-        { id: "controlCenter", cluster: 2, title: "Control Center", subtitle: "What it carries and how it looks", icon: "toggle_on", tint: IrisStyle.identity.gray, tip: "Arrange it in place from the button beside the lock in its header." },
-        { id: "spotlight", cluster: 2, title: "Spotlight", subtitle: "Search apps, files, the clipboard and more", icon: "search", tint: IrisStyle.identity.blue, tip: "Prefixes: ; clipboard, = calculator, / actions." },
-        { id: "notifications", cluster: 2, title: "Notifications", subtitle: "Banners, quiet hours and Do Not Disturb", icon: "notifications", tint: IrisStyle.identity.red, tip: "Hover a banner to keep it; swipe it away to dismiss." },
-        { id: "sound", cluster: 2, title: "Sound & Feedback", subtitle: "Volume, alert sounds and what the OSD shows", icon: "volume_up", tint: IrisStyle.identity.pink, tip: "Scroll on the Island for volume; Ctrl for the microphone." },
-        { id: "capture", cluster: 2, title: "Screenshots & Recording", subtitle: "Snip, annotate, read Japanese and record", icon: "screenshot_region", tint: IrisStyle.identity.orange, tip: "Super+Shift+S snips; the toolbar switches to text, search or recording." },
-        { id: "display", cluster: 3, title: "Display", subtitle: "Resolution, scale, night light and bright flashes", icon: "brightness_6", tint: IrisStyle.identity.blue, tip: "Shift and scroll on the Island for brightness." },
-        { id: "keyboard", cluster: 3, title: "Keyboard & Mouse", subtitle: "Layouts, repeat, pointer speed and cursor", icon: "keyboard", tint: IrisStyle.identity.gray, tip: "Your shortcuts are in General, Keyboard shortcuts." },
-        { id: "battery", cluster: 3, title: "Battery", subtitle: "Warnings, suspend and charge limit", icon: "battery_full", tint: IrisStyle.identity.green, tip: "Only matters on a machine with a battery." },
-        { id: "gaming", cluster: 3, title: "Gaming & Fullscreen", subtitle: "What iRiS steps back from while you play", icon: "sports_esports", tint: IrisStyle.identity.purple, tip: "Game mode turns on by itself for fullscreen games." },
-        { id: "lock", cluster: 3, title: "Lock Screen", subtitle: "What it shows, when it locks and how it reads", icon: "lock", tint: IrisStyle.identity.gray, tip: "Rehearse it: the real surface, editable, with nothing to unlock." },
-        { id: "player", cluster: 4, title: "Now Playing", subtitle: "Music in the Island and on the lock screen", icon: "music_note", tint: IrisStyle.identity.pink, tip: "Middle-click the Island to play or pause." },
-        { id: "frameMusic", cluster: 4, title: "Frame Music", subtitle: "Shape and response of the music-driven frame", icon: "graphic_eq", tint: IrisStyle.identity.pink, tip: "Choose The frame to make the screen contour move with your music." },
-        { id: "anime", cluster: 4, title: "Anime", subtitle: "Airing, Continue and the anime colour layer", icon: "live_tv", tint: IrisStyle.identity.purple, tip: "Airing tracks what is coming; Continue resumes what you were watching." },
-        { id: "sources", cluster: 5, title: "Sources", subtitle: "Where the Island gets what it shows", icon: "cloud_sync", tint: IrisStyle.identity.yellow, tip: "A setting belongs here when an iRiS surface puts its data on screen." },
-        { id: "system", cluster: 5, title: "More Settings", subtitle: "Wallpaper engine, Niri, widgets and services", icon: "tune", tint: IrisStyle.identity.gray, tip: "Pages iRiS shares with the other families." }
+        { id: "general", cluster: 0, title: "General", subtitle: "Time, language and how iRiS behaves", icon: "settings", get tint() { return IrisStyle.identity.gray }, tip: "Settings that shape the whole shell, whichever surface shows them." },
+        { id: "appearance", cluster: 0, title: "Appearance", subtitle: "Material, colour, type and shape", icon: "palette", get tint() { return IrisStyle.identity.purple }, tip: "Customize edits the same values live, on top of your desktop." },
+        { id: "motion", cluster: 0, title: "Motion", subtitle: "How every shape grows, moves and settles", icon: "animation", get tint() { return IrisStyle.identity.indigo }, tip: "Shorter durations feel snappier; the curve stays the same." },
+        { id: "bar", cluster: 1, title: "Island", subtitle: "Composition, size and how the Island responds", icon: "pill", get tint() { return IrisStyle.identity.blue }, tip: "Rest on the Island to peek, click to keep it, scroll for volume." },
+        { id: "bubbles", cluster: 1, title: "Bubbles & Cards", subtitle: "Pieces you carry and the cards they grow", icon: "bubble_chart", get tint() { return IrisStyle.identity.sky }, tip: "Hold a bubble to carry it; drop it beside the Island to bring it back." },
+        { id: "dock", cluster: 1, title: "Dock", subtitle: "Visibility, material and app icons", icon: "dock_to_bottom", get tint() { return IrisStyle.identity.indigo }, tip: "Right-click an icon for its windows or to float it as a bubble; middle-click opens a new one." },
+        { id: "desktop", cluster: 1, title: "Desktop & Wallpaper", subtitle: "Widgets, wallpapers and the overview backdrop", icon: "wallpaper", get tint() { return IrisStyle.identity.teal }, tip: "Right-click the desktop to edit widgets." },
+        { id: "windows", cluster: 1, title: "Windows", subtitle: "Gaps, borders, corners and how Niri moves them", icon: "select_window", get tint() { return IrisStyle.identity.orange }, tip: "Niri draws these; they change right away and live in your Niri config." },
+        { id: "sidebars", cluster: 1, title: "Side Panels", subtitle: "Focus and Today, arranged around your workflow", icon: "dock_to_right", get tint() { return IrisStyle.identity.green }, tip: "Ctrl+E customizes a panel; Keep open makes room beside windows." },
+        { id: "controlCenter", cluster: 2, title: "Control Center", subtitle: "What it carries and how it looks", icon: "toggle_on", get tint() { return IrisStyle.identity.gray }, tip: "Arrange it in place from the button beside the lock in its header." },
+        { id: "spotlight", cluster: 2, title: "Spotlight", subtitle: "Search apps, files, the clipboard and more", icon: "search", get tint() { return IrisStyle.identity.blue }, tip: "Prefixes: ; clipboard, = calculator, / actions." },
+        { id: "notifications", cluster: 2, title: "Notifications", subtitle: "Banners, quiet hours and Do Not Disturb", icon: "notifications", get tint() { return IrisStyle.identity.red }, tip: "Hover a banner to keep it; swipe it away to dismiss." },
+        { id: "sound", cluster: 2, title: "Sound & Feedback", subtitle: "Volume, alert sounds and what the OSD shows", icon: "volume_up", get tint() { return IrisStyle.identity.pink }, tip: "Scroll on the Island for volume; Ctrl for the microphone." },
+        { id: "capture", cluster: 2, title: "Screenshots & Recording", subtitle: "Snip, annotate, read Japanese and record", icon: "screenshot_region", get tint() { return IrisStyle.identity.orange }, tip: "Super+Shift+S snips; the toolbar switches to text, search or recording." },
+        { id: "display", cluster: 3, title: "Display", subtitle: "Resolution, scale, night light and bright flashes", icon: "brightness_6", get tint() { return IrisStyle.identity.blue }, tip: "Shift and scroll on the Island for brightness." },
+        { id: "keyboard", cluster: 3, title: "Keyboard & Mouse", subtitle: "Layouts, repeat, pointer speed and cursor", icon: "keyboard", get tint() { return IrisStyle.identity.gray }, tip: "Your shortcuts are in General, Keyboard shortcuts." },
+        { id: "battery", cluster: 3, title: "Battery", subtitle: "Warnings, suspend and charge limit", icon: "battery_full", get tint() { return IrisStyle.identity.green }, tip: "Only matters on a machine with a battery." },
+        { id: "gaming", cluster: 3, title: "Gaming & Fullscreen", subtitle: "What iRiS steps back from while you play", icon: "sports_esports", get tint() { return IrisStyle.identity.purple }, tip: "Game mode turns on by itself for fullscreen games." },
+        { id: "lock", cluster: 3, title: "Lock Screen", subtitle: "What it shows, when it locks and how it reads", icon: "lock", get tint() { return IrisStyle.identity.gray }, tip: "Rehearse it: the real surface, editable, with nothing to unlock." },
+        { id: "player", cluster: 4, title: "Now Playing", subtitle: "Music in the Island and on the lock screen", icon: "music_note", get tint() { return IrisStyle.identity.pink }, tip: "Middle-click the Island to play or pause." },
+        { id: "frameMusic", cluster: 4, title: "Frame Music", subtitle: "Shape and response of the music-driven frame", icon: "graphic_eq", get tint() { return IrisStyle.identity.pink }, tip: "Choose The frame to make the screen contour move with your music." },
+        { id: "anime", cluster: 4, title: "Anime", subtitle: "Airing, Continue and the anime colour layer", icon: "live_tv", get tint() { return IrisStyle.identity.purple }, tip: "Airing tracks what is coming; Continue resumes what you were watching." },
+        { id: "sources", cluster: 5, title: "Sources", subtitle: "Where the Island gets what it shows", icon: "cloud_sync", get tint() { return IrisStyle.identity.yellow }, tip: "A setting belongs here when an iRiS surface puts its data on screen." },
+        { id: "system", cluster: 5, title: "More Settings", subtitle: "Wallpaper engine, Niri, widgets and services", icon: "tune", get tint() { return IrisStyle.identity.gray }, tip: "Pages iRiS shares with the other families." }
     ]
     // The shared iNiR pages that still act under iRiS, as "More Settings" lists them. Pages for other families stay out.
     readonly property var morePages: [
-        { group: "Desktop", key: "wallpaper", label: "Wallpaper engine", detail: "Backend, transitions, rotation", icon: "wallpaper", tint: IrisStyle.identity.teal, keywords: ["wallpaper", "awww", "transition", "slideshow", "fondo"] },
-        { group: "Desktop", key: "widgets", label: "Desktop widgets", detail: "Every widget's own options", icon: "widgets", tint: IrisStyle.identity.sky, keywords: ["widgets", "clock", "weather", "media"] },
-        { group: "Desktop", key: "monitors", label: "Monitors", detail: "What each screen shows", icon: "display_settings", tint: IrisStyle.identity.blue, keywords: ["monitor", "screen", "output", "display", "pantalla"] },
-        { group: "System", key: "autostart", label: "Autostart", detail: "Apps that start with you", icon: "rocket_launch", tint: IrisStyle.identity.orange, keywords: ["autostart", "startup", "login", "inicio"] },
-        { group: "System", key: "services", label: "Services", detail: "Search, network and data", icon: "settings_suggest", tint: IrisStyle.identity.gray, keywords: ["services", "network", "search", "data"] },
-        { group: "System", key: "tools", label: "Tools", detail: "Recording codecs and snip details", icon: "build", tint: IrisStyle.identity.red, keywords: ["tools", "codec", "ffmpeg", "vaapi", "discord", "crosshair"] },
-        { group: "Shell", key: "system", label: "System", detail: "Keyboard indicators, work safety", icon: "browse", tint: IrisStyle.identity.green, keywords: ["system", "keyboard", "caps lock", "safety"] },
-        { group: "Shell", key: "advanced", label: "Advanced", detail: "Visualizer and colour generation", icon: "construction", tint: IrisStyle.identity.gray, keywords: ["advanced", "cava", "visualizer", "matugen"] }
+        { group: "Desktop", key: "wallpaper", label: "Wallpaper engine", detail: "Backend, transitions, rotation", icon: "wallpaper", get tint() { return IrisStyle.identity.teal }, keywords: ["wallpaper", "awww", "transition", "slideshow", "fondo"] },
+        { group: "Desktop", key: "widgets", label: "Desktop widgets", detail: "Every widget's own options", icon: "widgets", get tint() { return IrisStyle.identity.sky }, keywords: ["widgets", "clock", "weather", "media"] },
+        { group: "Desktop", key: "monitors", label: "Monitors", detail: "What each screen shows", icon: "display_settings", get tint() { return IrisStyle.identity.blue }, keywords: ["monitor", "screen", "output", "display", "pantalla"] },
+        { group: "System", key: "autostart", label: "Autostart", detail: "Apps that start with you", icon: "rocket_launch", get tint() { return IrisStyle.identity.orange }, keywords: ["autostart", "startup", "login", "inicio"] },
+        { group: "System", key: "services", label: "Services", detail: "Search, network and data", icon: "settings_suggest", get tint() { return IrisStyle.identity.gray }, keywords: ["services", "network", "search", "data"] },
+        { group: "System", key: "tools", label: "Tools", detail: "Recording codecs and snip details", icon: "build", get tint() { return IrisStyle.identity.red }, keywords: ["tools", "codec", "ffmpeg", "vaapi", "discord", "crosshair"] },
+        { group: "Shell", key: "themes", label: "Colour themes", detail: "Every palette, with previews", icon: "palette", get tint() { return IrisStyle.identity.purple }, keywords: ["theme", "palette", "colours", "catppuccin", "apps"] },
+        { group: "Shell", key: "system", label: "System", detail: "Keyboard indicators, work safety", icon: "browse", get tint() { return IrisStyle.identity.green }, keywords: ["system", "keyboard", "caps lock", "safety"] },
+        { group: "Shell", key: "advanced", label: "Advanced", detail: "Visualizer and colour generation", icon: "construction", get tint() { return IrisStyle.identity.gray }, keywords: ["advanced", "cava", "visualizer", "matugen"] }
     ]
     readonly property var sectionOrder: root.sections.map(section => section.id)
     // Customize's areas (Studio's rail, the capsule's sheets): identity, what each is, one line worth knowing.
     readonly property var customizeAreas: [
-        { id: "material", label: "Material", glyph: "layers", tint: IrisStyle.identity.purple, tipOf: "", tip: "Character sets corners, fills and contrast at once; the rows below fine-tune it.",
+        { id: "material", label: "Material", glyph: "layers", get tint() { return IrisStyle.identity.purple }, tipOf: "", tip: "Character sets corners, fills and contrast at once; the rows below fine-tune it.",
             about: "What every surface is made of: its character, corners, lines and the frame." },
-        { id: "colour", label: "Colour", glyph: "palette", tint: IrisStyle.identity.pink, tipOf: "", tip: "A wallpaper accent follows every new wallpaper.",
+        { id: "colour", label: "Colour", glyph: "palette", get tint() { return IrisStyle.identity.pink }, tipOf: "", tip: "A wallpaper accent follows every new wallpaper.",
             about: "Accent, highlight, the light bodies carry and how much wallpaper iRiS takes in." },
-        { id: "type", label: "Type", glyph: "text_fields", tint: IrisStyle.identity.orange, tipOf: "", tip: "Figures have their own face: the clock and every level read it.",
+        { id: "type", label: "Type", glyph: "text_fields", get tint() { return IrisStyle.identity.orange }, tipOf: "", tip: "Figures have their own face: the clock and every level read it.",
             about: "Typefaces, figures and how large text reads." },
-        { id: "motion", label: "Motion", glyph: "animation", tint: IrisStyle.identity.indigo, tipOf: "motion",
+        { id: "motion", label: "Motion", glyph: "animation", get tint() { return IrisStyle.identity.indigo }, tipOf: "motion",
             about: "How shapes open, move and settle, everywhere at once or per surface." },
-        { id: "island", label: "Island", glyph: "pill", tint: IrisStyle.identity.blue, tipOf: "bar",
+        { id: "island", label: "Island", glyph: "pill", get tint() { return IrisStyle.identity.blue }, tipOf: "bar",
             about: "Its shape on the edge, what it shows at rest, and its pages." },
-        { id: "pieces", label: "Pieces", glyph: "bubble_chart", tint: IrisStyle.identity.sky, tipOf: "bubbles",
+        { id: "pieces", label: "Pieces", glyph: "bubble_chart", get tint() { return IrisStyle.identity.sky }, tipOf: "bubbles",
             about: "Bubbles off the Island and the bars they form." },
-        { id: "bodies", label: "Cards", glyph: "web_asset", tint: IrisStyle.identity.teal, tipOf: "controlCenter",
+        { id: "bodies", label: "Cards", glyph: "web_asset", get tint() { return IrisStyle.identity.teal }, tipOf: "controlCenter",
             about: "Cards, the Control Center and the player." },
-        { id: "places", label: "Panels", glyph: "space_dashboard", tint: IrisStyle.identity.green, tipOf: "sidebars",
+        { id: "places", label: "Panels", glyph: "space_dashboard", get tint() { return IrisStyle.identity.green }, tipOf: "sidebars",
             about: "Side panels, Spotlight, the gallery, Settings and menus." },
-        { id: "transients", label: "Feedback", glyph: "notifications", tint: IrisStyle.identity.red, tipOf: "notifications",
+        { id: "transients", label: "Feedback", glyph: "notifications", get tint() { return IrisStyle.identity.red }, tipOf: "notifications",
             about: "Notifications and level feedback." },
-        { id: "dock", label: "Dock", glyph: "dock_to_bottom", tint: IrisStyle.identity.lavender, tipOf: "dock",
+        { id: "dock", label: "Dock", glyph: "dock_to_bottom", get tint() { return IrisStyle.identity.lavender }, tipOf: "dock",
             about: "The Dock's shape and its icons." },
-        { id: "desktop", label: "Desktop", glyph: "widgets", tint: IrisStyle.identity.yellow, tipOf: "desktop",
+        { id: "desktop", label: "Desktop", glyph: "widgets", get tint() { return IrisStyle.identity.yellow }, tipOf: "desktop",
             about: "Widgets on the desktop." },
-        { id: "themes", label: "Themes", glyph: "style", tint: IrisStyle.identity.gray, tipOf: "", tip: "A theme is one small file: copy it to share, paste one to try it.",
+        { id: "themes", label: "Themes", glyph: "style", get tint() { return IrisStyle.identity.gray }, tipOf: "", tip: "A theme is one small file: copy it to share, paste one to try it.",
             about: "Whole redesigns of iRiS, and the ones you save and share." }
     ]
     function customizeArea(id: string): var { return root.customizeAreas.find(area => area.id === id) ?? root.customizeAreas[0] }
@@ -855,7 +949,7 @@ QtObject {
     readonly property var groupGlyphs: ({
         "Shell family": "swap_horiz",
         "Behind windows": "blur_on", "Japanese lookup": "translate", "Parallax": "3d_rotation", "Recording": "screen_record", "Snip": "screenshot_region",
-        "Accent": "palette", "Customize": "brush", "Themes": "style", "Settings window": "settings_applications", "Activity": "timer", "Adaptive": "auto_awesome", "App colours": "format_paint", "Airing": "live_tv", "Alert sounds": "music_note",
+        "Accent": "palette", "Visualizer": "graphic_eq", "Customize": "brush", "Themes": "style", "Settings window": "settings_applications", "Activity": "timer", "Adaptive": "auto_awesome", "App colours": "format_paint", "Airing": "live_tv", "Alert sounds": "music_note",
         "At a glance": "visibility", "At rest": "schedule", "Badges": "notifications_unread", "Banners": "notifications",
         "Bar": "width_full", "Behaviour": "touch_app", "Bubble": "bubble_chart", "Calendar": "calendar_month",
         "Card contents": "view_agenda", "Cards": "web_asset", "Charge limit": "battery_charging_80", "Clipboard": "content_paste", "Connections": "cable", "Clock": "schedule",
@@ -865,7 +959,7 @@ QtObject {
         "Focus · left": "dock_to_left", "Frame": "crop_free", "Frame response": "graphic_eq", "On the edges": "border_outer", "Finish": "flare", "Fullscreen": "fullscreen", "Game mode": "sports_esports",
         "Glass": "blur_on", "Highlight": "highlight", "Icons": "emoji_symbols", "Interaction": "ads_click", "Joining": "join_inner",
         "Language": "language", "Layout": "view_quilt", "Light": "light_mode", "Live wallpapers": "motion_photos_on",
-        "Desktop menu": "menu_open", "Look": "visibility", "Material": "layers", "Material per surface": "layers", "Corners per surface": "rounded_corner", "Menus": "menu", "Motion": "animation", "New iNiR": "rocket_launch",
+        "Desktop menu": "menu_open", "Look": "visibility", "Material": "layers", "Material per surface": "layers", "Corners per surface": "rounded_corner", "Colour theme": "palette", "Scheme": "contrast", "Dark look": "dark_mode", "Ink look": "ink_pen", "Light look": "light_mode", "Menus": "menu", "Motion": "animation", "New iNiR": "rocket_launch",
         "Night Light": "nightlight", "Notifications": "notifications", "Now playing": "music_note", "On the contour": "border_outer",
         "Opening bodies": "open_in_full", "Overview backdrop": "grid_view", "Pages": "view_carousel", "Per surface": "tune",
         "Panel look": "dock_to_right", "Placement": "location_on", "Player": "music_note", "Player page": "album", "Previews": "preview",
@@ -880,121 +974,121 @@ QtObject {
         "Room for iRiS": "fit_screen", "Keyboard": "keyboard", "Mouse": "mouse", "Trackpad": "touch_app", "Pointer": "arrow_selector_tool", "Screen": "monitor"
     })
     readonly property var groupTints: ({
-        "Shell family": IrisStyle.identity.purple,
-        "About iNiR": IrisStyle.identity.lavender,
-        "Accent": IrisStyle.identity.blue,
-        "Activity": IrisStyle.identity.orange,
-        "Adaptive": IrisStyle.identity.teal,
-        "Airing": IrisStyle.identity.purple,
-        "Alert sounds": IrisStyle.identity.pink,
-        "App colours": IrisStyle.identity.orange,
-        "Apps": IrisStyle.identity.pink,
-        "At a glance": IrisStyle.identity.sky,
-        "At rest": IrisStyle.identity.indigo,
-        "Badges": IrisStyle.identity.red,
-        "Banners": IrisStyle.identity.red,
-        "Bar": IrisStyle.identity.indigo,
-        "Behaviour": IrisStyle.identity.green,
-        "Behind windows": IrisStyle.identity.indigo,
-        "Borders": IrisStyle.identity.orange,
-        "Bubble": IrisStyle.identity.sky,
-        "Calendar": IrisStyle.identity.red,
-        "Card contents": IrisStyle.identity.teal,
-        "Cards": IrisStyle.identity.blue,
-        "Charge limit": IrisStyle.identity.green,
-        "Clipboard": IrisStyle.identity.teal,
-        "Clock": IrisStyle.identity.orange,
-        "Closing": IrisStyle.identity.red,
-        "Room for iRiS": IrisStyle.identity.teal,
-        "Colour layer": IrisStyle.identity.pink,
-        "Comfort": IrisStyle.identity.yellow,
-        "Continue": IrisStyle.identity.green,
-        "Control Center": IrisStyle.identity.gray,
-        "Curve": IrisStyle.identity.teal,
-        "Date & time": IrisStyle.identity.orange,
-        "Desktop page": IrisStyle.identity.teal,
-        "Do Not Disturb": IrisStyle.identity.indigo,
-        "Extra bubbles": IrisStyle.identity.green,
-        "Faces": IrisStyle.identity.gray,
-        "Feedback": IrisStyle.identity.orange,
-        "Floating": IrisStyle.identity.sky,
-        "Focus · left": IrisStyle.identity.green,
-        "Frame": IrisStyle.identity.gray,
-        "Fullscreen": IrisStyle.identity.blue,
-        "Game mode": IrisStyle.identity.purple,
-        "Glass": IrisStyle.identity.sky,
-        "Highlight": IrisStyle.identity.orange,
-        "Icons": IrisStyle.identity.yellow,
-        "Interaction": IrisStyle.identity.green,
-        "Connections": IrisStyle.identity.blue,
-        "Japanese lookup": IrisStyle.identity.purple,
-        "Joining": IrisStyle.identity.teal,
-        "Keyboard": IrisStyle.identity.gray,
-        "Keyboard shortcuts": IrisStyle.identity.indigo,
-        "Language": IrisStyle.identity.teal,
-        "Layout": IrisStyle.identity.blue,
-        "Light": IrisStyle.identity.yellow,
-        "Live wallpapers": IrisStyle.identity.pink,
-        "Look": IrisStyle.identity.purple,
-        "Material": IrisStyle.identity.indigo,
-        "Material per surface": IrisStyle.identity.indigo,
-        "Menus": IrisStyle.identity.gray,
-        "Motion": IrisStyle.identity.indigo,
-        "Mouse": IrisStyle.identity.blue,
-        "Movement": IrisStyle.identity.indigo,
-        "New iNiR": IrisStyle.identity.purple,
-        "Night Light": IrisStyle.identity.orange,
-        "Notifications": IrisStyle.identity.red,
-        "Now playing": IrisStyle.identity.pink,
-        "On the contour": IrisStyle.identity.teal,
-        "Opening bodies": IrisStyle.identity.blue,
-        "Overview backdrop": IrisStyle.identity.indigo,
-        "Pages": IrisStyle.identity.blue,
-        "Panel look": IrisStyle.identity.green,
-        "Parallax": IrisStyle.identity.teal,
-        "Per surface": IrisStyle.identity.orange,
-        "Performance": IrisStyle.identity.green,
-        "Placement": IrisStyle.identity.red,
-        "Player": IrisStyle.identity.pink,
-        "Player page": IrisStyle.identity.pink,
-        "Pointer": IrisStyle.identity.orange,
-        "Previews": IrisStyle.identity.teal,
-        "Read text": IrisStyle.identity.blue,
-        "Recording": IrisStyle.identity.pink,
-        "Resting Island": IrisStyle.identity.blue,
-        "Scene": IrisStyle.identity.teal,
-        "Screen": IrisStyle.identity.blue,
-        "Security": IrisStyle.identity.gray,
-        "Settings": IrisStyle.identity.gray,
-        "Shape": IrisStyle.identity.purple,
-        "Sign in": IrisStyle.identity.blue,
-        "Size": IrisStyle.identity.orange,
-        "Snip": IrisStyle.identity.orange,
-        "Sound": IrisStyle.identity.pink,
-        "Spotlight": IrisStyle.identity.blue,
-        "Status": IrisStyle.identity.green,
-        "Style per surface": IrisStyle.identity.purple,
-        "Suspend": IrisStyle.identity.indigo,
-        "Text": IrisStyle.identity.gray,
-        "Timing": IrisStyle.identity.orange,
-        "Today · right": IrisStyle.identity.orange,
-        "Touch": IrisStyle.identity.green,
-        "Trackpad": IrisStyle.identity.teal,
-        "Tray": IrisStyle.identity.teal,
-        "Type": IrisStyle.identity.gray,
-        "Updates": IrisStyle.identity.green,
-        "VPN": IrisStyle.identity.blue,
-        "Visibility": IrisStyle.identity.blue,
-        "Volume": IrisStyle.identity.pink,
-        "Wallpaper": IrisStyle.identity.teal,
-        "Wallpaper gallery": IrisStyle.identity.purple,
-        "Warnings": IrisStyle.identity.red,
-        "Weather": IrisStyle.identity.sky,
-        "Web search": IrisStyle.identity.teal,
-        "When idle": IrisStyle.identity.indigo,
-        "Widgets": IrisStyle.identity.teal,
-        "Windows": IrisStyle.identity.blue,
-        "Workspaces": IrisStyle.identity.indigo
+        get "Shell family"() { return IrisStyle.identity.purple },
+        get "About iNiR"() { return IrisStyle.identity.lavender },
+        get "Accent"() { return IrisStyle.identity.blue },
+        get "Activity"() { return IrisStyle.identity.orange },
+        get "Adaptive"() { return IrisStyle.identity.teal },
+        get "Airing"() { return IrisStyle.identity.purple },
+        get "Alert sounds"() { return IrisStyle.identity.pink },
+        get "App colours"() { return IrisStyle.identity.orange },
+        get "Apps"() { return IrisStyle.identity.pink },
+        get "At a glance"() { return IrisStyle.identity.sky },
+        get "At rest"() { return IrisStyle.identity.indigo },
+        get "Badges"() { return IrisStyle.identity.red },
+        get "Banners"() { return IrisStyle.identity.red },
+        get "Bar"() { return IrisStyle.identity.indigo },
+        get "Behaviour"() { return IrisStyle.identity.green },
+        get "Behind windows"() { return IrisStyle.identity.indigo },
+        get "Borders"() { return IrisStyle.identity.orange },
+        get "Bubble"() { return IrisStyle.identity.sky },
+        get "Calendar"() { return IrisStyle.identity.red },
+        get "Card contents"() { return IrisStyle.identity.teal },
+        get "Cards"() { return IrisStyle.identity.blue },
+        get "Charge limit"() { return IrisStyle.identity.green },
+        get "Clipboard"() { return IrisStyle.identity.teal },
+        get "Clock"() { return IrisStyle.identity.orange },
+        get "Closing"() { return IrisStyle.identity.red },
+        get "Room for iRiS"() { return IrisStyle.identity.teal },
+        get "Colour layer"() { return IrisStyle.identity.pink },
+        get "Comfort"() { return IrisStyle.identity.yellow },
+        get "Continue"() { return IrisStyle.identity.green },
+        get "Control Center"() { return IrisStyle.identity.gray },
+        get "Curve"() { return IrisStyle.identity.teal },
+        get "Date & time"() { return IrisStyle.identity.orange },
+        get "Desktop page"() { return IrisStyle.identity.teal },
+        get "Do Not Disturb"() { return IrisStyle.identity.indigo },
+        get "Extra bubbles"() { return IrisStyle.identity.green },
+        get "Faces"() { return IrisStyle.identity.gray },
+        get "Feedback"() { return IrisStyle.identity.orange },
+        get "Floating"() { return IrisStyle.identity.sky },
+        get "Focus · left"() { return IrisStyle.identity.green },
+        get "Frame"() { return IrisStyle.identity.gray },
+        get "Fullscreen"() { return IrisStyle.identity.blue },
+        get "Game mode"() { return IrisStyle.identity.purple },
+        get "Glass"() { return IrisStyle.identity.sky },
+        get "Highlight"() { return IrisStyle.identity.orange },
+        get "Icons"() { return IrisStyle.identity.yellow },
+        get "Interaction"() { return IrisStyle.identity.green },
+        get "Connections"() { return IrisStyle.identity.blue },
+        get "Japanese lookup"() { return IrisStyle.identity.purple },
+        get "Joining"() { return IrisStyle.identity.teal },
+        get "Keyboard"() { return IrisStyle.identity.gray },
+        get "Keyboard shortcuts"() { return IrisStyle.identity.indigo },
+        get "Language"() { return IrisStyle.identity.teal },
+        get "Layout"() { return IrisStyle.identity.blue },
+        get "Light"() { return IrisStyle.identity.yellow },
+        get "Live wallpapers"() { return IrisStyle.identity.pink },
+        get "Look"() { return IrisStyle.identity.purple },
+        get "Material"() { return IrisStyle.identity.indigo },
+        get "Material per surface"() { return IrisStyle.identity.indigo },
+        get "Menus"() { return IrisStyle.identity.gray },
+        get "Motion"() { return IrisStyle.identity.indigo },
+        get "Mouse"() { return IrisStyle.identity.blue },
+        get "Movement"() { return IrisStyle.identity.indigo },
+        get "New iNiR"() { return IrisStyle.identity.purple },
+        get "Night Light"() { return IrisStyle.identity.orange },
+        get "Notifications"() { return IrisStyle.identity.red },
+        get "Now playing"() { return IrisStyle.identity.pink },
+        get "On the contour"() { return IrisStyle.identity.teal },
+        get "Opening bodies"() { return IrisStyle.identity.blue },
+        get "Overview backdrop"() { return IrisStyle.identity.indigo },
+        get "Pages"() { return IrisStyle.identity.blue },
+        get "Panel look"() { return IrisStyle.identity.green },
+        get "Parallax"() { return IrisStyle.identity.teal },
+        get "Per surface"() { return IrisStyle.identity.orange },
+        get "Performance"() { return IrisStyle.identity.green },
+        get "Placement"() { return IrisStyle.identity.red },
+        get "Player"() { return IrisStyle.identity.pink },
+        get "Player page"() { return IrisStyle.identity.pink },
+        get "Pointer"() { return IrisStyle.identity.orange },
+        get "Previews"() { return IrisStyle.identity.teal },
+        get "Read text"() { return IrisStyle.identity.blue },
+        get "Recording"() { return IrisStyle.identity.pink },
+        get "Resting Island"() { return IrisStyle.identity.blue },
+        get "Scene"() { return IrisStyle.identity.teal },
+        get "Screen"() { return IrisStyle.identity.blue },
+        get "Security"() { return IrisStyle.identity.gray },
+        get "Settings"() { return IrisStyle.identity.gray },
+        get "Shape"() { return IrisStyle.identity.purple },
+        get "Sign in"() { return IrisStyle.identity.blue },
+        get "Size"() { return IrisStyle.identity.orange },
+        get "Snip"() { return IrisStyle.identity.orange },
+        get "Sound"() { return IrisStyle.identity.pink },
+        get "Spotlight"() { return IrisStyle.identity.blue },
+        get "Status"() { return IrisStyle.identity.green },
+        get "Style per surface"() { return IrisStyle.identity.purple },
+        get "Suspend"() { return IrisStyle.identity.indigo },
+        get "Text"() { return IrisStyle.identity.gray },
+        get "Timing"() { return IrisStyle.identity.orange },
+        get "Today · right"() { return IrisStyle.identity.orange },
+        get "Touch"() { return IrisStyle.identity.green },
+        get "Trackpad"() { return IrisStyle.identity.teal },
+        get "Tray"() { return IrisStyle.identity.teal },
+        get "Type"() { return IrisStyle.identity.gray },
+        get "Updates"() { return IrisStyle.identity.green },
+        get "VPN"() { return IrisStyle.identity.blue },
+        get "Visibility"() { return IrisStyle.identity.blue },
+        get "Volume"() { return IrisStyle.identity.pink },
+        get "Wallpaper"() { return IrisStyle.identity.teal },
+        get "Wallpaper gallery"() { return IrisStyle.identity.purple },
+        get "Warnings"() { return IrisStyle.identity.red },
+        get "Weather"() { return IrisStyle.identity.sky },
+        get "Web search"() { return IrisStyle.identity.teal },
+        get "When idle"() { return IrisStyle.identity.indigo },
+        get "Widgets"() { return IrisStyle.identity.teal },
+        get "Windows"() { return IrisStyle.identity.blue },
+        get "Workspaces"() { return IrisStyle.identity.indigo }
     })
     function sectionOf(spec: var): string {
         const path = String(spec.path ?? "")
@@ -1044,13 +1138,13 @@ QtObject {
         for (const theme of IrisThemes.all)
             out.push({ id: "theme:" + theme.id, name: Translation.tr("Theme: %1").arg(theme.name), english: "Theme " + theme.name, detail: Translation.tr("Theme"), pick: true,
                 area: "appearance", areaName: Translation.tr("Appearance"),
-                icon: "palette", tint: IrisStyle.identity.purple, words: ["theme", "look", theme.name].concat(theme.tags ?? []).join(" "), priority: 60,
+                icon: "palette", get tint() { return IrisStyle.identity.purple }, words: ["theme", "look", theme.name].concat(theme.tags ?? []).join(" "), priority: 60,
                 isOn: () => IrisThemes.activeId === theme.id && !IrisThemes.modified, run: () => IrisThemes.choose(theme) })
         return out
     }
     // The order a section's groups are listed in: what someone came to change first, the rest as they were declared.
     readonly property var groupOrder: ({
-        appearance: ["Look", "Themes", "Material", "Adaptive", "Glass", "Shape", "Corners per surface", "Frame", "Accent", "Highlight", "Colour layer", "Light", "Badges", "Wallpaper",
+        appearance: ["Look", "Themes", "Colour theme", "Scheme", "Dark look", "Ink look", "Light look", "Material", "Adaptive", "Glass", "Shape", "Corners per surface", "Frame", "Accent", "Highlight", "Colour layer", "Light", "Badges", "Wallpaper",
             "Text", "Faces", "Settings", "Menus", "Material per surface", "Customize", "Previews", "App colours"],
         bar: ["Layout", "Shape", "At rest", "Resting Island", "Bar", "Pages", "Desktop page", "Player page", "Size", "Interaction", "Connections"],
         bubbles: ["Size", "Behaviour", "On the contour", "Floating", "Opening bodies", "Cards", "Card contents", "Joining", "Tray"],

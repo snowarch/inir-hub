@@ -19,7 +19,7 @@ Item {
     readonly property real r: Math.min(width, height) / 2
     readonly property real cx: width / 2
     readonly property real cy: height / 2
-    readonly property color ink: root.disc && root.daylight ? IrisStyle.onAccent : root.face.ink
+    readonly property color ink: root.disc && root.daylight ? IrisStyle.inkOnAccent : root.face.ink
     readonly property color inkQuiet: IrisStyle.tertiaryOf(root.ink)
     readonly property color hand: root.face.highlight
     readonly property real hours: (root.time.getHours() % 12) + root.time.getMinutes() / 60

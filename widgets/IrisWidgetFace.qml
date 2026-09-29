@@ -38,8 +38,10 @@ Item {
     readonly property real strength: root.widget.irisSurfaceOpacity
     // Glass and transparent faces over a light region turn over: frost and near-black ink instead of
     // a veil darkened until the glass is gone. An opaque plate keeps its own polarity.
-    readonly property bool lightBackdrop: root.opaque ? root.widget.forceDarkInk
+    // In the light scheme a plate is light, so its ink is the dark one; a bare widget still follows the wallpaper.
+    readonly property bool lightBackdrop: IrisStyle.light && !root.clear ? true : root.opaque ? root.widget.forceDarkInk
         : root.clear ? root.widget.inkOnLight : root.widget.glassInkOnLight
+    readonly property bool ownInk: root.lightBackdrop || (IrisStyle.light && root.clear)
     // Transparent is bare: it carries no plate unless Lume on every widget asks for one.
     readonly property real veil: root.opaque ? root.strength
         : root.clear && !root.widget.legibleAlways ? 0
@@ -58,14 +60,14 @@ Item {
     readonly property color accent2: root.lightBackdrop ? IrisStyle.deepAccent(root.widget.irisAccent2, IrisStyle.inkOnLight) : root.widget.irisAccent2
     readonly property color warm: root.lightBackdrop ? IrisStyle.deepAccent(IrisStyle.secondaryAccent, IrisStyle.inkOnLight) : IrisStyle.secondaryAccent
     readonly property color danger: root.lightBackdrop ? IrisStyle.deepAccent(IrisStyle.danger, IrisStyle.inkOnLight) : IrisStyle.danger
-    readonly property color ink: root.lightBackdrop ? IrisStyle.inkOnLight : IrisStyle.text
+    readonly property color ink: root.lightBackdrop ? IrisStyle.inkOnLight : IrisStyle.light ? IrisStyle.inkOnDark : IrisStyle.text
     readonly property color inkSecondary: IrisStyle.secondaryOf(root.ink)
     readonly property color inkTertiary: IrisStyle.tertiaryOf(root.ink)
-    readonly property color fillQuiet: root.lightBackdrop ? IrisStyle.fillQuietOf(root.ink) : IrisStyle.fillQuiet
-    readonly property color fill: root.lightBackdrop ? IrisStyle.fillOf(root.ink) : IrisStyle.fill
-    readonly property color fillHover: root.lightBackdrop ? IrisStyle.fillHoverOf(root.ink) : IrisStyle.fillHover
-    readonly property color fillActive: root.lightBackdrop ? IrisStyle.fillActiveOf(root.ink) : IrisStyle.fillActive
-    readonly property color hairline: root.lightBackdrop ? IrisStyle.hairlineOf(root.ink) : IrisStyle.hairline
+    readonly property color fillQuiet: root.ownInk ? IrisStyle.fillQuietOf(root.ink) : IrisStyle.fillQuiet
+    readonly property color fill: root.ownInk ? IrisStyle.fillOf(root.ink) : IrisStyle.fill
+    readonly property color fillHover: root.ownInk ? IrisStyle.fillHoverOf(root.ink) : IrisStyle.fillHover
+    readonly property color fillActive: root.ownInk ? IrisStyle.fillActiveOf(root.ink) : IrisStyle.fillActive
+    readonly property color hairline: root.ownInk ? IrisStyle.hairlineOf(root.ink) : IrisStyle.hairline
     // Ink on a filled accent: light on the deep accents of a light face, the Island's dark otherwise.
     function onFill(tint: color): color { return root.lightBackdrop ? IrisStyle.onTint : IrisStyle.onTintFor(tint) }
     readonly property int figureWeight: root.widget.widgetTitleWeight
@@ -133,7 +135,7 @@ Item {
                     blurEnabled: true
                     blur: IrisStyle.glassBlur
                     blurMax: IrisStyle.glassBlurMax
-                    saturation: IrisStyle.glassSaturation
+                    saturation: IrisStyle.widgetGlassSaturation
                 }
             }
         }

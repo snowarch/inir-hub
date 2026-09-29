@@ -13,7 +13,7 @@ MaterialTextField {
     color: IrisStyle.text
     placeholderTextColor: "transparent"
     selectionColor: IrisStyle.accentContainer
-    selectedTextColor: IrisStyle.onAccentContainer
+    selectedTextColor: IrisStyle.inkOnAccentContainer
     font.family: IrisStyle.fontTitle
     font.pixelSize: IrisStyle.typeHeadline
     leftPadding: 14 * IrisStyle.density

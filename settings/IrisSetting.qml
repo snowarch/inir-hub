@@ -2,6 +2,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Effects
 import QtQuick.Layouts
+import Quickshell.Widgets
 import qs.services
 import qs.modules.common
 import qs.modules.common.functions
@@ -40,16 +41,22 @@ Item {
         IrisNiri.revision
         return IrisOptions.choicesOf(root.spec)
     }
+    // A row can say why it does not answer right now (`locked`) and what state it is in (`note`), so it never reads as broken.
+    readonly property bool locked: { Config.revision; return root.spec.locked ? Boolean(root.spec.locked()) : false }
+    readonly property string noteText: { Config.revision; return root.spec.note ? String(root.spec.note() ?? "") : "" }
+    readonly property real controlOpacity: root.locked ? 0.42 : 1
     readonly property bool resettable: IrisOptions.resettable(root.spec)
     readonly property bool modified: root.resettable && !IrisOptions.same(root.value, root.spec.fallback)
     readonly property bool pictured: root.choices.some(choice => String(choice.glyph ?? "").length > 0)
     readonly property bool swatched: root.spec.kind === "choice" && root.choices.length > 0
         && root.choices.every(choice => choice.swatch !== undefined || ["wallpaper", "accent", "custom", "theme"].includes(choice.value))
         && root.choices.some(choice => choice.swatch !== undefined)
+    readonly property bool tiled: root.spec.kind === "choice" && root.spec.tiles === true && root.choices.length > 0
     readonly property bool inlineChoice: root.spec.kind === "choice" && root.choices.length <= 3 && !root.pictured && !root.swatched
         && root.choices.every(choice => String(choice.label).length <= 11)
 
     implicitHeight: layout.implicitHeight + Math.round(22 * root.d)
+    enabled: !root.locked
 
     ColumnLayout {
         id: layout
@@ -133,6 +140,24 @@ Item {
                         onClicked: description.full = !description.full
                     }
                 }
+                RowLayout {
+                    Layout.fillWidth: true
+                    visible: root.noteText.length > 0
+                    spacing: Math.round(6 * root.d)
+                    MaterialSymbol {
+                        Layout.alignment: Qt.AlignTop
+                        text: root.locked ? "link" : "info"
+                        iconSize: Math.round(14 * root.d)
+                        color: IrisStyle.accent
+                    }
+                    IrisText {
+                        Layout.fillWidth: true
+                        text: root.noteText
+                        color: IrisStyle.accent
+                        font.pixelSize: IrisStyle.typeMeta
+                        wrapMode: Text.WordWrap
+                    }
+                }
             }
 
             // A trailing value reads on the title's line, in the interface face: the title leads, the value answers.
@@ -159,6 +184,7 @@ Item {
 
             IrisSwitch {
                 id: toggle
+                opacity: root.controlOpacity
                 visible: root.spec.kind === "switch"
                 on: root.spec.invert ? !Boolean(root.value) : Boolean(root.value)
                 name: Translation.tr(root.spec.label)
@@ -167,6 +193,7 @@ Item {
 
             IrisButton {
                 visible: root.spec.kind === "action"
+                opacity: root.controlOpacity
                 Layout.alignment: Qt.AlignVCenter
                 text: Translation.tr(String(root.spec.button ?? ""))
                 colBackground: IrisStyle.fill
@@ -175,6 +202,7 @@ Item {
             }
 
             Loader {
+                opacity: root.controlOpacity
                 active: root.inlineChoice
                 visible: active
                 Layout.preferredWidth: Math.round(Math.min(90 * root.choices.length, 270) * root.d)
@@ -182,6 +210,7 @@ Item {
             }
 
             Loader {
+                opacity: root.controlOpacity
                 active: root.spec.kind === "zone"
                 visible: active
                 sourceComponent: zoneComponent
@@ -193,6 +222,7 @@ Item {
             Layout.fillWidth: true
             Layout.preferredHeight: Math.round(22 * root.d)
             visible: root.spec.kind === "range"
+            opacity: root.controlOpacity
             knob: true
             Accessible.name: Translation.tr(root.spec.label)
             stepSize: (root.spec.step ?? 1) / Math.max(1, root.spec.max - root.spec.min)
@@ -212,6 +242,7 @@ Item {
         }
 
         Loader {
+            opacity: root.controlOpacity
             Layout.fillWidth: true
             active: root.spec.kind === "choice" && !root.inlineChoice && !root.swatched
             visible: active
@@ -219,13 +250,23 @@ Item {
         }
 
         Loader {
+            opacity: root.controlOpacity
             Layout.fillWidth: true
-            active: root.swatched
+            active: root.swatched && !root.tiled
             visible: active
             sourceComponent: swatchComponent
         }
 
         Loader {
+            Layout.fillWidth: true
+            opacity: root.controlOpacity
+            active: root.tiled
+            visible: active
+            sourceComponent: tilesComponent
+        }
+
+        Loader {
+            opacity: root.controlOpacity
             Layout.fillWidth: true
             active: root.spec.kind === "curve"
             visible: active
@@ -233,6 +274,7 @@ Item {
         }
 
         Loader {
+            opacity: root.controlOpacity
             Layout.fillWidth: true
             active: root.spec.kind === "hue"
             visible: active
@@ -240,6 +282,7 @@ Item {
         }
 
         Loader {
+            opacity: root.controlOpacity
             Layout.fillWidth: true
             active: root.spec.kind === "pieces"
             visible: active
@@ -247,6 +290,7 @@ Item {
         }
 
         Loader {
+            opacity: root.controlOpacity
             Layout.fillWidth: true
             // A field sized by its text feeds its width back through fillWidth: a loop.
             Layout.preferredWidth: 0
@@ -256,6 +300,7 @@ Item {
         }
 
         Loader {
+            opacity: root.controlOpacity
             Layout.fillWidth: true
             active: root.spec.kind === "icon"
             visible: active
@@ -263,6 +308,7 @@ Item {
         }
 
         Loader {
+            opacity: root.controlOpacity
             Layout.fillWidth: true
             active: root.spec.kind === "niriMotion"
             visible: active
@@ -270,6 +316,7 @@ Item {
         }
 
         Loader {
+            opacity: root.controlOpacity
             Layout.fillWidth: true
             active: root.spec.kind === "widgets"
             visible: active
@@ -348,6 +395,120 @@ Item {
         }
     }
 
+    // Palettes as cards that paint themselves in their own colours, so each reads as the theme it is, light ones and dark ones apart.
+    Component {
+        id: tilesComponent
+        Column {
+            id: tiles
+            readonly property real gap: Math.round(10 * root.d)
+            readonly property int columns: width >= 700 * root.d ? 4 : width >= 480 * root.d ? 3 : 2
+            readonly property real tileWidth: Math.floor((width - (tiles.columns - 1) * tiles.gap) / tiles.columns)
+            spacing: Math.round(14 * root.d)
+            Repeater {
+                model: [
+                    { title: "", pick: choice => Boolean(choice.palette?.wallpaper) },
+                    { title: "Light mode", pick: choice => !choice.palette?.wallpaper && !choice.palette?.dark },
+                    { title: "Dark mode", pick: choice => !choice.palette?.wallpaper && Boolean(choice.palette?.dark) }
+                ]
+                Column {
+                    id: band
+                    required property var modelData
+                    readonly property var members: root.choices.filter(band.modelData.pick)
+                    visible: band.members.length > 0
+                    width: tiles.width
+                    spacing: Math.round(8 * root.d)
+                    IrisText {
+                        visible: band.modelData.title.length > 0
+                        text: Translation.tr(band.modelData.title)
+                        color: IrisStyle.muted
+                        font.pixelSize: IrisStyle.typeMeta
+                        font.weight: IrisStyle.weight(Font.DemiBold)
+                    }
+                    Flow {
+                        width: band.width
+                        spacing: tiles.gap
+                        Repeater {
+                            model: band.members
+                            Rectangle {
+                                id: tile
+                                required property var modelData
+                                readonly property bool selected: root.value === tile.modelData.value
+                                readonly property var pal: tile.modelData.palette ?? ({})
+                                readonly property bool wall: Boolean(tile.pal.wallpaper)
+                                width: tiles.tileWidth
+                                height: Math.round(66 * root.d)
+                                radius: IrisStyle.radiusTile
+                                color: tile.wall ? IrisStyle.fillQuiet : tile.pal.bg
+                                border.width: tile.selected ? 2 : 1
+                                border.color: tile.selected ? IrisStyle.accent : tileHover.hovered ? IrisStyle.borderStrong : IrisStyle.border
+                                scale: tileTap.pressed ? IrisStyle.pressScale(0.97) : tileHover.hovered ? 1.015 : 1
+                                Behavior on scale { NumberAnimation { duration: IrisStyle.feedbackDuration; easing.type: IrisStyle.feedbackEasing } }
+                                Behavior on border.color { ColorAnimation { duration: IrisStyle.feedbackDuration; easing.type: IrisStyle.feedbackEasing } }
+                                Accessible.name: Translation.tr(root.spec.label) + ": " + Translation.tr(tile.modelData.label)
+                                Accessible.role: Accessible.Button
+                                Accessible.checked: tile.selected
+                                Loader {
+                                    anchors.fill: parent
+                                    anchors.margins: tile.border.width
+                                    active: tile.wall
+                                    sourceComponent: ClippingRectangle {
+                                        radius: Math.max(0, tile.radius - tile.border.width)
+                                        color: "transparent"
+                                        IrisImage { anchors.fill: parent; source: Wallpapers.stillUrlFor(String(Wallpapers.effectiveWallpaperPath ?? "")) }
+                                        Rectangle { anchors.fill: parent; color: IrisStyle.veil }
+                                    }
+                                }
+                                Column {
+                                    anchors.left: parent.left
+                                    anchors.leftMargin: Math.round(12 * root.d)
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    spacing: 0
+                                    IrisText {
+                                        text: "Aa"
+                                        color: tile.wall ? IrisStyle.onMedia : tile.pal.fg
+                                        font.pixelSize: Math.round(20 * IrisStyle.typeScale)
+                                        font.weight: IrisStyle.weight(Font.DemiBold)
+                                    }
+                                    IrisText {
+                                        width: tile.width - Math.round(44 * root.d)
+                                        text: Translation.tr(tile.modelData.label)
+                                        color: tile.wall ? IrisStyle.onMedia : tile.pal.fg
+                                        opacity: 0.85
+                                        elide: Text.ElideRight
+                                        font.pixelSize: IrisStyle.typeMeta
+                                    }
+                                }
+                                Row {
+                                    visible: !tile.wall
+                                    anchors.right: parent.right
+                                    anchors.rightMargin: Math.round(12 * root.d)
+                                    anchors.top: parent.top
+                                    anchors.topMargin: Math.round(12 * root.d)
+                                    spacing: Math.round(4 * root.d)
+                                    Repeater {
+                                        model: tile.pal.dots ?? []
+                                        Rectangle { required property var modelData; width: Math.round(11 * root.d); height: width; radius: width / 2; color: modelData }
+                                    }
+                                }
+                                Rectangle {
+                                    visible: tile.selected
+                                    anchors.right: parent.right
+                                    anchors.bottom: parent.bottom
+                                    anchors.margins: Math.round(8 * root.d)
+                                    width: Math.round(18 * root.d); height: width; radius: width / 2
+                                    color: IrisStyle.accent
+                                    MaterialSymbol { anchors.centerIn: parent; text: "check"; iconSize: Math.round(13 * root.d); color: IrisStyle.inkOnAccent }
+                                }
+                                HoverHandler { id: tileHover; cursorShape: Qt.PointingHandCursor }
+                                TapHandler { id: tileTap; onTapped: root.commit(tile.modelData.value) }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     Component {
         id: swatchComponent
 
@@ -403,7 +564,7 @@ Item {
                             visible: swatch.special === "wallpaper" || swatch.special === "accent"
                             text: swatch.special === "wallpaper" ? "wallpaper" : "link"
                             iconSize: Math.round(13 * root.d)
-                            color: IrisStyle.onAccent
+                            color: IrisStyle.inkOnAccent
                         }
                     }
                 }

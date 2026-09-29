@@ -164,6 +164,7 @@ Item {
                 anchors.centerIn: parent
                 text: "pause"
                 iconSize: 15 * root.d
+                color: IrisStyle.onMedia
             }
         }
         Ring {
@@ -214,7 +215,7 @@ Item {
                 onRunningChanged: if (!running) recordDot.opacity = 1
             }
         }
-        IconImage {
+        IrisTrayIcon {
             visible: root.kind === "trayApp"
             anchors.centerIn: parent
             implicitSize: Math.min(parent.width - 2 * root.platedInset, Math.max(Math.round(16 * root.d), Math.round((parent.width - 2 * root.platedInset) * 0.52)))
@@ -282,7 +283,7 @@ Item {
             spacing: Math.round(trayApps.inner * 0.05)
             Repeater {
                 model: trayApps.overflow ? root.trayItems.slice(0, 3) : root.trayItems.slice(0, 4)
-                IconImage {
+                IrisTrayIcon {
                     required property var modelData
                     implicitSize: trayApps.cell
                     source: modelData ? TrayService.getSafeIcon(modelData) : ""

@@ -772,7 +772,7 @@ Item {
                 id: figure
                 anchors.centerIn: parent
                 text: Number(knobDrag.write.pending ?? Config.options?.iris?.bubbles?.scale ?? 100) + "%"
-                color: IrisStyle.onAccent
+                color: IrisStyle.inkOnAccent
                 font.family: IrisStyle.fontNumbers
                 font.features: ({ "tnum": 1 })
                 font.pixelSize: IrisStyle.typeMeta

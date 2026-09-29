@@ -328,6 +328,15 @@ Scope {
             Config.setNestedValue("iris.appearance.adaptive", Math.max(0, Math.min(100, value)))
             return String(Math.max(0, Math.min(100, value)))
         }
+        function palette(id: string): string {
+            const known = IrisOptions.colourThemeIds
+            if (id === "list") return JSON.stringify(known)
+            if (id === "current") return String(ThemeService.currentTheme)
+            if (!known.includes(id) && !ThemePresets.presets.some(preset => preset.id === id))
+                return "Unknown colour theme. `list` names the ones iRiS shows; `auto` follows the wallpaper"
+            ThemeService.setTheme(id)
+            return String(ThemeService.currentTheme)
+        }
         function preset(name: string): string {
             if (!Object.keys(IrisStyle.presets).includes(name)) return "Unknown preset"
             Config.setNestedValue("iris.appearance.preset", name)
@@ -527,7 +536,7 @@ Scope {
                 gallery: GlobalStates.wallpaperLauncherOpen,
                 media: MprisController.activePlayer ? {
                     player: MprisController.activePlayer.dbusName ?? "",
-                    title: MprisController.activePlayer.trackTitle ?? "",
+                    title: MprisController.titleOf(MprisController.activePlayer) ?? "",
                     playing: MprisController.activePlayer.isPlaying ?? false,
                     position: Math.round(MprisController.positionOf(MprisController.activePlayer) * 10) / 10,
                     length: Math.round(MprisController.lengthOf(MprisController.activePlayer) * 10) / 10,

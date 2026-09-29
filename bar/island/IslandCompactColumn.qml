@@ -160,7 +160,7 @@ Item {
                 anchors.centerIn: parent
                 text: "check"
                 iconSize: 16 * column.d
-                color: IrisStyle.onAccent
+                color: IrisStyle.inkOnAccent
             }
         }
     }

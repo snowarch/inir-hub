@@ -132,7 +132,7 @@ Item {
         id: plate
         property bool shown: false
         property string glyph: ""
-        property color tint: IrisStyle.text
+        property color tint: IrisStyle.onMedia
         property string label: ""
         property string figure: ""
         property bool countDown: false
@@ -230,10 +230,10 @@ Item {
             anchors.fill: parent
             anchors.margins: -Math.round(8 * root.d)
             radius: IrisStyle.radiusPlate
-            color: body.picked ? IrisStyle.tintFill(IrisStyle.accent)
+            color: body.picked ? IrisStyle.tintFill(IrisStyle.accentOnMedia)
                 : grip.containsMouse ? IrisStyle.onMediaFill : "transparent"
             border.width: body.picked || grip.containsMouse ? Math.max(1, Math.round(1.5 * root.d)) : 0
-            border.color: body.picked ? IrisStyle.accent : IrisStyle.onMediaFillHover
+            border.color: body.picked ? IrisStyle.accentOnMedia : IrisStyle.onMediaFillHover
             Behavior on color { ColorAnimation { duration: IrisStyle.duration(120); easing.type: IrisStyle.feedbackEasing } }
         }
         Row {
@@ -248,12 +248,12 @@ Item {
                 width: chromeLabel.implicitWidth + Math.round(16 * root.d)
                 height: Math.round(24 * root.d)
                 radius: height / 2
-                color: body.picked ? IrisStyle.accent : IrisStyle.mediaScrim
+                color: body.picked ? IrisStyle.accentOnMedia : IrisStyle.mediaScrim
                 IrisText {
                     id: chromeLabel
                     anchors.centerIn: parent
                     text: IrisLockOptions.labelOf(body.blockId)
-                    color: body.picked ? IrisStyle.onAccent : IrisStyle.onMedia
+                    color: body.picked ? IrisStyle.onTintFor(IrisStyle.accentOnMedia) : IrisStyle.onMedia
                     font.pixelSize: IrisStyle.typeFootnote
                     font.weight: IrisStyle.weight(Font.DemiBold)
                 }
@@ -411,7 +411,7 @@ Item {
         width: Math.max(1, Math.round(root.d))
         height: root.height
         x: Math.round(root.width / 2 - width / 2)
-        color: IrisStyle.accent
+        color: IrisStyle.accentOnMedia
         opacity: 0.7
     }
     Rectangle {
@@ -419,7 +419,7 @@ Item {
         height: Math.max(1, Math.round(root.d))
         width: root.width
         y: Math.round(root.height / 2 - height / 2)
-        color: IrisStyle.accent
+        color: IrisStyle.accentOnMedia
         opacity: 0.7
     }
 
@@ -438,9 +438,9 @@ Item {
             radius: seatRing.width / 2
             x: Math.round(seatRing.seat.x - seatRing.width / 2)
             y: Math.round(seatRing.seat.y - seatRing.height / 2)
-            color: seatRing.hot ? IrisStyle.tintFill(IrisStyle.accent) : "transparent"
+            color: seatRing.hot ? IrisStyle.tintFill(IrisStyle.accentOnMedia) : "transparent"
             border.width: Math.max(1, Math.round(1.5 * root.d))
-            border.color: seatRing.hot ? IrisStyle.accent : IrisStyle.onMediaFillHover
+            border.color: seatRing.hot ? IrisStyle.accentOnMedia : IrisStyle.onMediaFillHover
             Behavior on width { NumberAnimation { duration: IrisStyle.duration(140); easing.type: IrisStyle.feedbackEasing } }
         }
     }
@@ -581,7 +581,7 @@ Item {
             Chip {
                 visible: Boolean(glance.entry?.battery ?? true) && Battery.available
                 glyph: Battery.isCharging ? "battery_charging_full" : Battery.percentage < 0.2 ? "battery_alert" : "battery_full"
-                tint: Battery.percentage < 0.2 && !Battery.isCharging ? IrisStyle.danger : IrisStyle.onMedia
+                tint: Battery.percentage < 0.2 && !Battery.isCharging ? IrisStyle.dangerOnMedia : IrisStyle.onMedia
                 figure: Math.round(Battery.percentage * 100) + "%"
             }
         }
@@ -592,7 +592,7 @@ Item {
         Item {
             id: media
             readonly property bool playing: MprisController.activePlayer !== null
-                && String(MprisController.activePlayer?.trackTitle ?? "").length > 0
+                && String(MprisController.titleOf(MprisController.activePlayer) ?? "").length > 0
             readonly property bool bare: {
                 Config.revision
                 return String(IrisLockOptions.entry("media")?.style ?? "card") === "bare"
@@ -609,6 +609,7 @@ Item {
                 anchors.fill: parent
                 active: media.playing
                 showBackground: false
+                overMedia: true
             }
         }
     }
@@ -620,7 +621,7 @@ Item {
             ActivityPlate {
                 shown: RecorderStatus.isRecording
                 glyph: "radio_button_checked"
-                tint: IrisStyle.danger
+                tint: IrisStyle.dangerOnMedia
                 label: Translation.tr("Recording")
                 figure: root.clockText(RecorderStatus.elapsedSeconds)
             }
@@ -632,7 +633,7 @@ Item {
                     : kind === "countdown" ? TimerService.countdownPaused : TimerService.stopwatchPaused
                 shown: kind.length > 0
                 glyph: paused ? "pause" : kind === "stopwatch" ? "timer" : kind === "pomodoro" && TimerService.pomodoroBreak ? "coffee" : "hourglass_top"
-                tint: paused ? IrisStyle.onMediaSecondary : IrisStyle.secondaryAccent
+                tint: paused ? IrisStyle.onMediaSecondary : IrisStyle.highlightOnMedia
                 label: kind === "pomodoro" ? (TimerService.pomodoroBreak ? Translation.tr("Break") : Translation.tr("Focus"))
                     : kind === "countdown" ? Translation.tr("Timer") : Translation.tr("Stopwatch")
                 countDown: kind !== "stopwatch"
@@ -755,7 +756,7 @@ Item {
                     radius: height / 2
                     color: passwordInput.activeFocus ? IrisStyle.onMediaFill : "transparent"
                     border.width: root.context.showFailure ? Math.max(1, Math.round(1.5 * root.d)) : 0
-                    border.color: IrisStyle.tintBorder(IrisStyle.danger)
+                    border.color: IrisStyle.tintBorder(IrisStyle.dangerOnMedia)
                     Behavior on color { ColorAnimation { duration: IrisStyle.duration(120); easing.type: IrisStyle.feedbackEasing } }
                 }
 
@@ -847,7 +848,7 @@ Item {
                     : root.context.showFailure ? Translation.tr("Incorrect password")
                     : root.context.fingerprintsConfigured ? Translation.tr("Touch the fingerprint reader or enter your password")
                     : " "
-                color: root.context.showFailure ? IrisStyle.danger : IrisStyle.onMediaSecondary
+                color: root.context.showFailure ? IrisStyle.dangerOnMedia : IrisStyle.onMediaSecondary
                 font.pixelSize: Math.round(12 * root.typeScale)
             }
         }

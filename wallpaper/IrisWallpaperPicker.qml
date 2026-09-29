@@ -888,7 +888,7 @@ Item {
                         anchors.verticalCenter: parent.verticalCenter
                         color: IrisStyle.text
                         selectionColor: IrisStyle.accentContainer
-                        selectedTextColor: IrisStyle.onAccentContainer
+                        selectedTextColor: IrisStyle.inkOnAccentContainer
                         font.family: IrisStyle.fontMain
                         font.pixelSize: IrisStyle.typeLabel
                         clip: true

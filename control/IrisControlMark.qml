@@ -35,7 +35,7 @@ Rectangle {
         text: root.glyph
         fill: 1
         iconSize: Math.round((root.glyph === "remove" ? 15 : 12) * root.d)
-        color: root.active ? (root.danger ? IrisStyle.onDanger : IrisStyle.onAccent) : IrisStyle.text
+        color: root.active ? (root.danger ? IrisStyle.inkOnDanger : IrisStyle.inkOnAccent) : IrisStyle.text
     }
 
     MouseArea {

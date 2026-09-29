@@ -70,6 +70,8 @@ Item {
         activeAsync: enabledPanel && GlobalStates.deferredPanelsReady && resident
     }
 
+    IrisAppsSync {}
+
     IrisSidebarEdge { side: "left" }
     IrisSidebarEdge { side: "right" }
 

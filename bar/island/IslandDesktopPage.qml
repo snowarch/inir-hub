@@ -126,7 +126,7 @@ ColumnLayout {
                 width: Math.round(9 * IrisStyle.density)
                 height: Math.max(2, Math.round(2 * IrisStyle.density))
                 radius: height / 2
-                color: IrisStyle.onDanger
+                color: IrisStyle.inkOnDanger
             }
         }
         Item {
@@ -289,6 +289,7 @@ ColumnLayout {
             anchors.topMargin: -Math.round(6 * IrisStyle.density)
             glyph: page.island.studio ? "check" : "edit"
             glyphSize: 17 * IrisStyle.density
+            glyphColor: page.showBanner ? IrisStyle.onMedia : IrisStyle.text
             implicitWidth: Math.round(32 * IrisStyle.density)
             colBackground: page.showBanner ? IrisStyle.veil : IrisStyle.fillQuiet
             colBackgroundHover: page.showBanner ? IrisStyle.veilStrong : IrisStyle.fillHover
@@ -306,6 +307,7 @@ ColumnLayout {
             anchors.topMargin: -Math.round(6 * IrisStyle.density)
             glyph: "wallpaper"
             glyphSize: 17 * IrisStyle.density
+            glyphColor: IrisStyle.onMedia
             implicitWidth: Math.round(32 * IrisStyle.density)
             colBackground: IrisStyle.veil
             colBackgroundHover: IrisStyle.veilStrong
@@ -437,6 +439,7 @@ ColumnLayout {
                             anchors.centerIn: parent
                             text: "edit"
                             iconSize: 17 * IrisStyle.density
+                            color: IrisStyle.onMedia
                             opacity: avatarHover.hovered ? 1 : 0
                             Behavior on opacity { NumberAnimation { duration: IrisStyle.duration(120); easing.type: IrisStyle.feedbackEasing } }
                         }

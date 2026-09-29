@@ -1244,7 +1244,7 @@ Item {
                                             anchors.centerIn: parent
                                             text: "close"
                                             iconSize: Math.round(13 * root.d)
-                                            color: IrisStyle.text
+                                            color: IrisStyle.onMedia
                                         }
                                         HoverHandler { id: closeHover; cursorShape: Qt.PointingHandCursor }
                                         TapHandler {

@@ -94,7 +94,7 @@ ColumnLayout {
                             width: parent.width * 0.45
                             height: Math.round(3 * root.d)
                             radius: height / 2
-                            color: tile.on ? IrisStyle.onAccent : IrisStyle.surface
+                            color: tile.on ? IrisStyle.inkOnAccent : IrisStyle.surface
                             opacity: 0.55
                         }
                     }

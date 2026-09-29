@@ -171,7 +171,7 @@ ClippingRectangle {
                         radius: width / 2
                         color: "transparent"
                         border.width: avatar.ring
-                        border.color: IrisStyle.accent
+                        border.color: IrisStyle.accentOnMedia
                         opacity: avatar.containsMouse ? 1 : 0.85
                         Behavior on opacity { NumberAnimation { duration: IrisStyle.feedbackDuration; easing.type: IrisStyle.feedbackEasing } }
                     }
@@ -220,7 +220,7 @@ ClippingRectangle {
                         Layout.fillWidth: true
                         role: IrisText.Display
                         text: card.name
-                        color: IrisStyle.accent
+                        color: IrisStyle.accentOnMedia
                         elide: Text.ElideRight
                     }
                 }
@@ -271,7 +271,7 @@ ClippingRectangle {
                     radius: IrisStyle.radiusRow
                     color: "transparent"
                     border.width: 2
-                    border.color: IrisStyle.accent
+                    border.color: IrisStyle.accentOnMedia
                 }
                 ClippingRectangle {
                     anchors.fill: parent

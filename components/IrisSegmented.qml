@@ -51,7 +51,7 @@ Rectangle {
         // From the target slot, not from the animating x: tied to x the thumb stretched past the new slot first.
         width: root.slotX(Math.max(0, root.selectedIndex) + 1) - root.slotX(Math.max(0, root.selectedIndex))
         radius: root.pictured ? IrisStyle.radiusTile - root.inset : height / 2
-        color: IrisStyle.fillHover
+        color: IrisStyle.raised
         Behavior on x { NumberAnimation { duration: IrisStyle.moveDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: IrisStyle.moveCurve } }
         Behavior on width { NumberAnimation { duration: IrisStyle.moveDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: IrisStyle.moveCurve } }
     }

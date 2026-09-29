@@ -142,7 +142,7 @@ MouseArea {
                 anchors.centerIn: parent
                 text: root.busy ? "downloading" : "check"
                 iconSize: Math.round(14 * root.d)
-                color: root.busy ? IrisStyle.accent : IrisStyle.onAccent
+                color: root.busy ? IrisStyle.accent : IrisStyle.inkOnAccent
             }
         }
     }
