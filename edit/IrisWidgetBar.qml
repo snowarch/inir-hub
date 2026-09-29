@@ -20,6 +20,32 @@ Item {
     readonly property bool present: GlobalStates.widgetEditMode
     readonly property real presentation: presentSpring.value
     readonly property bool shown: root.presentation > 0.001
+    // Arranging widgets on this screen: the chassis owns the keyboard, because the desktop layer under the windows
+    // never gets it without a click (Niri gives Bottom-layer surfaces on-demand focus only). Ctrl+F finds a widget,
+    // the arrows move the selected one, Escape steps out: search, then selection, then the mode.
+    // A Place opened from here (Settings, Spotlight, the Control Center) has its own keys.
+    readonly property bool holdsKeyboard: root.present && (GlobalStates.focusedScreen?.name ?? root.outputName) === root.outputName
+        && !GlobalStates.searchOpen && !GlobalStates.settingsOverlayOpen && !GlobalStates.controlPanelOpen
+    readonly property bool selecting: GlobalStates.selectedDesktopWidget.length > 0
+    Shortcut { sequence: "Ctrl+F"; enabled: root.holdsKeyboard && !toolbar.searching; onActivated: toolbar.openSearch() }
+    Shortcut {
+        sequence: "Escape"
+        enabled: root.holdsKeyboard
+        onActivated: {
+            if (toolbar.searching) toolbar.escapeSearch()
+            else if (root.selecting) GlobalStates.clearDesktopWidgetSelection()
+            else GlobalStates.setWidgetEditMode(false)
+        }
+    }
+    readonly property bool nudging: root.holdsKeyboard && root.selecting && !toolbar.searching
+    Shortcut { sequence: "Left"; enabled: root.nudging; onActivated: GlobalStates.desktopWidgetNudge(-1, 0) }
+    Shortcut { sequence: "Right"; enabled: root.nudging; onActivated: GlobalStates.desktopWidgetNudge(1, 0) }
+    Shortcut { sequence: "Up"; enabled: root.nudging; onActivated: GlobalStates.desktopWidgetNudge(0, -1) }
+    Shortcut { sequence: "Down"; enabled: root.nudging; onActivated: GlobalStates.desktopWidgetNudge(0, 1) }
+    Shortcut { sequence: "Shift+Left"; enabled: root.nudging; onActivated: GlobalStates.desktopWidgetNudge(-10, 0) }
+    Shortcut { sequence: "Shift+Right"; enabled: root.nudging; onActivated: GlobalStates.desktopWidgetNudge(10, 0) }
+    Shortcut { sequence: "Shift+Up"; enabled: root.nudging; onActivated: GlobalStates.desktopWidgetNudge(0, -10) }
+    Shortcut { sequence: "Shift+Down"; enabled: root.nudging; onActivated: GlobalStates.desktopWidgetNudge(0, 10) }
 
     readonly property real bodyWidth: toolbar.bodyWidth
     readonly property real bodyHeight: toolbar.bodyHeight

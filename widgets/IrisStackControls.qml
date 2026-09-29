@@ -9,19 +9,22 @@ import qs.modules.common.widgets
 import qs.modules.iris.style
 import qs.modules.iris.components
 
-// The stack of a widget in its quick controls: its pages in order, how they turn and how to split them; for a
-// widget that stands alone, the widgets it could be stacked with. Dropping one widget on another does the same.
+// The stack of a widget in its quick controls. `manage` is the Stack page of a widget that is in one: its pages in
+// order, how they turn and how to split them. `join` is a block of the Arrange page of one that is not: the widgets
+// it could be stacked with. Dropping one widget on another does the same.
 ColumnLayout {
     id: root
 
     required property var widget
+    property string part: "manage"
     readonly property real d: IrisStyle.density
     readonly property var stack: root.widget.stack
     readonly property var others: root.stack ? [] : DesktopWidgetStacks.candidates(root.widget.outputName, root.widget.configEntryName)
     readonly property var intervals: [10, 20, 30, 60, 300]
 
     Layout.fillWidth: true
-    visible: root.stack !== null || (root.widget.stackable && root.others.length > 0)
+    visible: root.part === "manage" ? root.stack !== null
+        : root.stack === null && root.widget.stackable && root.others.length > 0
     spacing: Math.round(8 * root.d)
 
     function entry(key: string): var {
@@ -41,7 +44,8 @@ ColumnLayout {
 
     IrisText {
         Layout.fillWidth: true
-        text: root.stack ? Translation.tr("Stack") : Translation.tr("Stack with")
+        visible: root.part === "join"
+        text: Translation.tr("Stack with")
         color: IrisStyle.textSecondary
         font.pixelSize: IrisStyle.typeMeta
         font.weight: IrisStyle.weight(Font.DemiBold)
@@ -164,7 +168,7 @@ ColumnLayout {
 
     Flow {
         Layout.fillWidth: true
-        visible: root.stack === null
+        visible: root.part === "join"
         spacing: Math.round(4 * root.d)
 
         Repeater {

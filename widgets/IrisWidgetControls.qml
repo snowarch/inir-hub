@@ -28,7 +28,7 @@ ColumnLayout {
         { value: "widget", label: Translation.tr("Widget") },
         { value: "look", label: Translation.tr("Look") },
         { value: "arrange", label: Translation.tr("Arrange") }
-    ]
+    ].concat(root.widget.stacked ? [{ value: "stack", label: Translation.tr("Stack") }] : [])
     readonly property string page: root.pages.some(entry => entry.value === root.widget._quickTab) ? root.widget._quickTab : "widget"
     readonly property string title: {
         const words = String(root.widget.configEntryName).split(".").pop().replace(/([A-Z])/g, " $1").toLowerCase()
@@ -230,8 +230,6 @@ ColumnLayout {
             }
         }
 
-        IrisStackControls { widget: root.widget }
-
         Repeater {
             model: root.widget.irisOptions
 
@@ -319,6 +317,12 @@ ColumnLayout {
                 }
             }
         }
+    }
+
+    IrisStackControls {
+        visible: root.page === "stack"
+        widget: root.widget
+        part: "manage"
     }
 
     ColumnLayout {
@@ -615,6 +619,11 @@ ColumnLayout {
                     onClicked: root.widget._setOutputValue("placementStrategy", "leastBusy")
                 }
             }
+        }
+
+        IrisStackControls {
+            widget: root.widget
+            part: "join"
         }
 
         Rectangle {
