@@ -75,7 +75,7 @@ Item {
 
     // Orbit's hot corner: a few pixels in one screen corner, on Top, only while it is on and something can use it.
     LazyLoader {
-        active: IrisGate.official && (Config.options?.iris?.orbit?.enable ?? true) && (Config.options?.iris?.orbit?.hotCorner ?? true)
+        active: IrisGate.official && (Config.options?.iris?.orbit?.enable ?? false) && (Config.options?.iris?.orbit?.hotCorner ?? true)
         component: IrisOrbitCorner {}
     }
 

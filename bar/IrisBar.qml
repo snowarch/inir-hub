@@ -290,7 +290,7 @@ Scope {
             return next.join(" ")
         }
         function orbit(query: string): string {
-            if (!(Config.options?.iris?.orbit?.enable ?? true)) return "Orbit is off (Settings › Windows › Orbit)"
+            if (!(Config.options?.iris?.orbit?.enable ?? false)) return "Orbit is off: turn it on in Settings › Orbit or with inir iris set iris.orbit.enable true"
             GlobalStates.irisOrbitQuery = query
             GlobalStates.irisOrbitOpen = true
             return "open"
@@ -1088,7 +1088,7 @@ Scope {
                     z: 2.5
                     anchors.fill: parent
                     anchors.margins: IrisFrame.band
-                    active: Config.ready && GlobalStates.deferredPanelsReady && (Config.options?.iris?.orbit?.enable ?? true)
+                    active: Config.ready && GlobalStates.deferredPanelsReady && (Config.options?.iris?.orbit?.enable ?? false)
                     asynchronous: true
                     sourceComponent: IrisOrbit { screen: barWindow.screen }
                 }
