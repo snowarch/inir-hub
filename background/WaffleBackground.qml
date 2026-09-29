@@ -253,6 +253,9 @@ Variants {
                             || AwwwBackend.shaderHandoffPending)
                     anchors.fill: parent
                     fillMode: Image.PreserveAspectCrop
+                    // Decoded at the size it is drawn (cover), not the file's full resolution.
+                    sourceSize: Qt.size(Math.ceil(wallpaperContainer.width * panelRoot.devicePixelRatio),
+                        Math.ceil(wallpaperContainer.height * panelRoot.devicePixelRatio))
                     enableTransitions: (!AwwwBackend.active
                             || panelRoot.internalShaderTransitionRequested)
                         && (Config.options?.background?.transition?.enable ?? true)
