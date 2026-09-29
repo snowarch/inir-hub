@@ -29,3 +29,5 @@ IrisControlsFace 1.0 IrisControlsFace.qml
 IrisScreenTimeFace 1.0 IrisScreenTimeFace.qml
 IrisNowPlayingFace 1.0 IrisNowPlayingFace.qml
 IrisWidgetGallery 1.0 IrisWidgetGallery.qml
+IrisStackDots 1.0 IrisStackDots.qml
+IrisStackControls 1.0 IrisStackControls.qml

@@ -8,6 +8,7 @@ import qs
 import qs.services
 import qs.modules.common
 import qs.modules.common.functions
+import qs.modules.common.widgets
 import qs.modules.iris.style
 
 Item {
@@ -78,12 +79,17 @@ Item {
         : root.lightBackdrop ? IrisStyle.frost : IrisStyle.surface, root.veil)
     readonly property color knockout: root.opaque ? root.plateColor : root.lightBackdrop ? IrisStyle.frost : IrisStyle.surface
 
+    // In a stack the plate stays and the pages' contents slide over it (DesktopWidgetStacks).
+    readonly property bool stacked: root.widget.stacked
+    readonly property real slide: root.widget.stackPos
+    readonly property bool plated: !root.stacked || root.widget.stackShown
+
     function dp(value: real): real { return Math.round(value * root.k) }
     function px(value: real): real { return Math.round(value * root.t) }
 
     RectangularShadow {
         anchors.fill: parent
-        visible: !root.clear
+        visible: !root.clear && root.plated
         radius: root.radius
         blur: root.dp(28)
         spread: -root.dp(4)
@@ -94,6 +100,7 @@ Item {
     Loader {
         anchors.fill: parent
         active: root.glass
+        visible: root.plated
         sourceComponent: ClippingRectangle {
             id: glassPane
             // The desktop's own wallpaper layer: live, parallax included, no second decoder.
@@ -143,6 +150,7 @@ Item {
 
     Rectangle {
         anchors.fill: parent
+        visible: root.plated
         radius: root.radius
         color: root.plateColor
         border.width: root.rimShown ? 1 : 0
@@ -155,7 +163,7 @@ Item {
         anchors.fill: parent
         anchors.margins: 1
         visible: !root.clear && root.light.a > 0
-        opacity: root.glass ? IrisStyle.glassWash : 1
+        opacity: (root.glass ? IrisStyle.glassWash : 1) * (1 - Math.min(1, Math.abs(root.slide)))
         radius: Math.max(0, root.radius - 1)
         gradient: Gradient {
             GradientStop { position: 0; color: IrisStyle.skyWash(root.light) }
@@ -163,33 +171,120 @@ Item {
         }
     }
 
-    ShaderEffectSource {
-        id: bodyCopy
-        anchors.fill: body
-        sourceItem: root.clear ? body : null
-        hideSource: false
-        visible: false
-    }
-    // The shadow comes from a copy behind the body: a layered body would resample its text.
-    MultiEffect {
-        x: body.x
-        y: body.y + 1
-        width: body.width
-        height: body.height
-        visible: root.clear
-        source: bodyCopy
-        brightness: root.lightBackdrop ? 1 : -1
-        colorization: IrisStyle.glow > 0 && !root.lightBackdrop ? 1 : 0
-        colorizationColor: Qt.rgba(IrisStyle.plateShadow.r, IrisStyle.plateShadow.g, IrisStyle.plateShadow.b, 1)
-        blurEnabled: true
-        blur: 0.5
-        autoPaddingEnabled: true
-        opacity: root.lightBackdrop ? IrisStyle.frostShadow : IrisStyle.plateShadow.a
+    // Pages slide inside the plate's box and are cut at its edge while they move.
+    Item {
+        id: viewport
+        anchors.fill: parent
+        clip: root.stacked && root.slide !== 0
+
+        Item {
+            id: slider
+            width: viewport.width
+            height: viewport.height
+            // The page travels half its height while it fades, so two pages cross instead of one pushing the other out.
+            y: Math.round(root.slide * root.height * 0.5)
+            opacity: 1 - Math.pow(Math.min(1, Math.abs(root.slide)), 1.5)
+
+            ShaderEffectSource {
+                id: bodyCopy
+                anchors.fill: body
+                sourceItem: root.clear ? body : null
+                hideSource: false
+                visible: false
+            }
+            // The shadow comes from a copy behind the body: a layered body would resample its text.
+            MultiEffect {
+                x: body.x
+                y: body.y + 1
+                width: body.width
+                height: body.height
+                visible: root.clear
+                source: bodyCopy
+                brightness: root.lightBackdrop ? 1 : -1
+                colorization: IrisStyle.glow > 0 && !root.lightBackdrop ? 1 : 0
+                colorizationColor: Qt.rgba(IrisStyle.plateShadow.r, IrisStyle.plateShadow.g, IrisStyle.plateShadow.b, 1)
+                blurEnabled: true
+                blur: 0.5
+                autoPaddingEnabled: true
+                opacity: root.lightBackdrop ? IrisStyle.frostShadow : IrisStyle.plateShadow.a
+            }
+
+            Item {
+                id: body
+                anchors.fill: parent
+                anchors.margins: root.padding
+            }
+        }
     }
 
-    Item {
-        id: body
+    // Carried over by another widget: this is where it will land.
+    Rectangle {
+        z: 140
         anchors.fill: parent
-        anchors.margins: root.padding
+        radius: root.radius
+        visible: opacity > 0
+        opacity: root.widget.stackDropHint ? 1 : 0
+        color: IrisStyle.tintFill(root.accent)
+        border.width: 2
+        border.color: root.accent
+        Behavior on opacity { NumberAnimation { duration: IrisStyle.feedbackDuration; easing.type: IrisStyle.feedbackEasing } }
+
+        Rectangle {
+            anchors.centerIn: parent
+            width: root.dp(44)
+            height: width
+            radius: IrisStyle.iconRadius(width)
+            scale: root.widget.stackDropHint ? 1 : 0.8
+            Behavior on scale { NumberAnimation { duration: IrisStyle.feedbackDuration; easing.type: IrisStyle.feedbackEasing } }
+            gradient: Gradient {
+                GradientStop { position: 0; color: Qt.lighter(root.accent, 1.18) }
+                GradientStop { position: 1; color: root.accent }
+            }
+            MaterialSymbol {
+                anchors.centerIn: parent
+                text: "stacks"
+                fill: 1
+                iconSize: root.dp(24)
+                color: root.onFill(root.accent)
+            }
+        }
     }
+
+    Loader {
+        active: root.stacked
+        z: 150
+        anchors.right: parent.right
+        anchors.verticalCenter: parent.verticalCenter
+        visible: active && root.widget.stackShown
+        sourceComponent: IrisStackDots { face: root }
+    }
+
+    // Wheel over a stack turns its page, one per gesture: a touchpad's tail is held off until the page has settled.
+    property real _wheel: 0
+    Timer { id: wheelHold; interval: 360 }
+    Timer { id: wheelReset; interval: 260; onTriggered: root._wheel = 0 }
+    WheelHandler {
+        enabled: root.stacked && root.widget.stackShown
+        acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
+        onWheel: event => {
+            if (wheelHold.running)
+                return
+            root._wheel += event.angleDelta.y
+            wheelReset.restart()
+            if (Math.abs(root._wheel) < 120)
+                return
+            const forward = root._wheel < 0
+            root._wheel = 0
+            wheelHold.restart()
+            DesktopWidgetStacks.step(root.widget.outputName, root.widget.stack.id, forward ? 1 : -1)
+        }
+    }
+
+    // A stack holds its page while the pointer is on it or the widget is being carried.
+    HoverHandler {
+        id: stackHover
+        enabled: root.stacked
+    }
+    readonly property bool _holding: root.stacked && root.widget.stackShown && (stackHover.hovered || root.widget.containsPress)
+    on_HoldingChanged: if (root.stacked) DesktopWidgetStacks.setHovered(root.widget.stack.id, root._holding)
 }

@@ -174,7 +174,7 @@ ColumnLayout {
         spacing: Math.round(14 * root.d)
 
         ColumnLayout {
-            visible: root.widget.irisSizes.length > 1
+            visible: root.widget.irisSizeChoices.length > 1
             Layout.fillWidth: true
             spacing: Math.round(8 * root.d)
 
@@ -185,7 +185,7 @@ ColumnLayout {
                 spacing: Math.round(8 * root.d)
 
                 Repeater {
-                    model: root.widget.irisSizes
+                    model: root.widget.irisSizeChoices
 
                     Rectangle {
                         id: sizeTile
@@ -229,6 +229,8 @@ ColumnLayout {
                 }
             }
         }
+
+        IrisStackControls { widget: root.widget }
 
         Repeater {
             model: root.widget.irisOptions
@@ -325,6 +327,7 @@ ColumnLayout {
         spacing: Math.round(14 * root.d)
 
         ColumnLayout {
+            visible: !root.widget.stacked
             Layout.fillWidth: true
             spacing: Math.round(8 * root.d)
 
