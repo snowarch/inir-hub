@@ -166,6 +166,9 @@ void main() {
         weights += w * vec3(u.glass.y < 0.5 ? 1.0 : 0.0, u.glass.y > 0.5 && u.glass.y < 1.5 ? 1.0 : 0.0, u.glass.y > 1.5 ? 1.0 : 0.0);
     }
     float bodies[20];
+    // What the compositor's blur region holds (IrisBlurRegion): the compositor-glass bodies and their joins with
+    // each other; the band and its joins only while the frame is compositor glass too.
+    float held = FAR * 10.0;
     for (int i = 0; i < 20; ++i) {
         vec4 s = shapeAt(i);
         bodies[i] = FAR * 10.0;
@@ -177,6 +180,8 @@ void main() {
         bodies[i] = roundedBox(p, s.xy, s.zw, radius);
         united = min(united, bodies[i]);
         float m = blockValue(block, slot, u.glassA, u.glassB, u.glassC, u.glassD, u.glassE);
+        if (m > 1.5)
+            held = min(held, bodies[i]);
         float w = exp(-clamp(bodies[i], -40.0, 40.0) / 2.0);
         weights += w * vec3(m < 0.5 ? 1.0 : 0.0, m > 0.5 && m < 1.5 ? 1.0 : 0.0, m > 1.5 ? 1.0 : 0.0);
     }
@@ -191,20 +196,29 @@ void main() {
         float k = max(0.0, blockValue(block, slot, u.fuseA, u.fuseB, u.fuseC, u.fuseD, u.fuseE));
         float join = blockValue(block, slot, u.joinA, u.joinB, u.joinC, u.joinD, u.joinE);
         float also = blockValue(block, slot, u.alsoA, u.alsoB, u.alsoC, u.alsoD, u.alsoE);
+        bool blurred = blockValue(block, slot, u.glassA, u.glassB, u.glassC, u.glassD, u.glassE) > 1.5;
         if (join < -0.5 || join > 0.5) {
-            float other = join < 0.0 ? frameDistance : bodies[int(join + 0.5) - 1];
+            int j = int(join + 0.5) - 1;
+            float other = join < 0.0 ? frameDistance : bodies[j];
             if (other < FAR) {
-                united = min(united, smoothUnion(other, bodies[i], k));
+                float fused = smoothUnion(other, bodies[i], k);
+                united = min(united, fused);
                 if (join < 0.0)
-                    frameClusterDistance = min(frameClusterDistance, smoothUnion(frameDistance, bodies[i], k));
+                    frameClusterDistance = min(frameClusterDistance, fused);
+                else if (blurred && blockValue(j / 4, j - (j / 4) * 4, u.glassA, u.glassB, u.glassC, u.glassD, u.glassE) > 1.5)
+                    held = min(held, fused);
             }
         }
         if (also < -0.5 || also > 0.5) {
-            float other = also < 0.0 ? frameDistance : bodies[int(also + 0.5) - 1];
+            int j = int(also + 0.5) - 1;
+            float other = also < 0.0 ? frameDistance : bodies[j];
             if (other < FAR) {
-                united = min(united, smoothUnion(other, bodies[i], k));
+                float fused = smoothUnion(other, bodies[i], k);
+                united = min(united, fused);
                 if (also < 0.0)
-                    frameClusterDistance = min(frameClusterDistance, smoothUnion(frameDistance, bodies[i], k));
+                    frameClusterDistance = min(frameClusterDistance, fused);
+                else if (blurred && blockValue(j / 4, j - (j / 4) * 4, u.glassA, u.glassB, u.glassC, u.glassD, u.glassE) > 1.5)
+                    held = min(held, fused);
             }
         }
     }
@@ -221,6 +235,16 @@ void main() {
     vec3 colour = u.tint.rgb * fillAlpha;
     float alpha = fillAlpha;
     vec3 share = weights / max(1e-4, weights.x + weights.y + weights.z);
+    // With the frame in another material (the music frame's wallpaper glass, whose band moves every frame) the
+    // region carries no band and no join to it, so compositor glass there was a thin tint over the unblurred scene:
+    // the fillets under a body and the band beside it showed sharp through. There the band's own material holds.
+    if (u.field.y > 0.5 && u.glass.y < 1.5 && share.z > 0.0) {
+        float fillet = min(frameDistance, held) - frameClusterDistance;
+        float band = max(smoothstep(0.0, 1.0, fillet), 1.0 - smoothstep(-0.7, 0.7, frameDistance));
+        float given = share.z * band * smoothstep(-1.5, -0.5, held);
+        share.z -= given;
+        if (u.glass.y > 0.5) share.y += given; else share.x += given;
+    }
     if (u.glass.x < 0.5) { share.x += share.y; share.y = 0.0; }
     if (share.x < 0.999) {
         float a = coverage * u.qt_Opacity;
