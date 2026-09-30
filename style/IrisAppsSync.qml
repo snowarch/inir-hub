@@ -15,6 +15,8 @@ Item {
     // The wallpaper colour theme only: a preset is its own palette, and the Theme material reads colors.json back.
     readonly property bool wanted: ThemeService.irisMaterialApps && ThemeService.isAutoTheme && IrisStyle.materialName !== "theme"
     readonly property string seed: root.wanted ? root.hex(IrisStyle.appsSurface) : ""
+    // Glass waits for the wallpaper to be read: until then the seed is only the bare material.
+    readonly property bool ready: !root.wanted || IrisStyle.appsSurfaceReady
     property string applied: ""
     property bool loaded: false
 
@@ -30,12 +32,15 @@ Item {
         onTriggered: root.push()
     }
     function push(): void {
-        if (!root.loaded || root.seed === root.applied) return
+        if (!root.loaded || !root.ready || root.seed === root.applied) return
         root.applied = root.seed
         Quickshell.execDetached(["/usr/bin/bash", "-c", 'mkdir -p "$(dirname "$1")" && printf \'{"seed": "%s"}\\n\' "$2" > "$1"', "iris-surface", root.path, root.seed])
         ThemeService.regenerateAutoTheme()
     }
     onSeedChanged: if (root.loaded) settle.restart()
+    onReadyChanged: if (root.loaded && root.ready) settle.restart()
+    // What the apps wait for (MaterialThemeLoader holds them until a generation carries it); "pending" never matches.
+    Binding { target: ThemeService; property: "appsSurfaceSeed"; value: root.ready ? root.seed : "pending" }
 
     FileView {
         path: root.path

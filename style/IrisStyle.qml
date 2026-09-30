@@ -320,10 +320,20 @@ QtObject {
     // and apps on the raw material read white beside it. Solid, or before the wallpaper is read, it is the material itself;
     // under glass it is the material veiled by `glassTint` over the wallpaper's average, held to a paper (or a night) so the
     // generator still has room to solve its text against it.
+    // It follows the glass the person chose, never Game mode switching effects off for a while: every flip regenerates every
+    // app's theme, so a fullscreen game recoloured Spotify and Steam to the bare material and back (#275).
     readonly property string appsOutput: String(Quickshell.screens[0]?.name ?? "")
+    readonly property bool appsGlassy: root.glassRequested !== "off" && !(Config.options?.performance?.lowPower ?? false)
+    // False while glass waits for the wallpaper to be read: the material alone would be handed over, and every app
+    // regenerated on it, for the second a new wallpaper takes to read (IrisAppsSync waits instead).
+    readonly property bool appsSurfaceReady: {
+        if (!root.appsGlassy) return true
+        const screen = Lume.screenNamed(root.appsOutput)
+        return !screen || Lume.read(root.appsOutput, 0, 0, screen.width, screen.height) !== null
+    }
     readonly property color appsSurface: {
         const screen = Lume.screenNamed(root.appsOutput)
-        const sample = root.glassy && screen ? Lume.read(root.appsOutput, 0, 0, screen.width, screen.height) : null
+        const sample = root.appsGlassy && screen ? Lume.read(root.appsOutput, 0, 0, screen.width, screen.height) : null
         if (!sample) return root.surfaceOpaque
         const body = ColorUtils.mix(root.surfaceOpaque, sample.color, root.glassTint)
         return Qt.hsla(Math.max(0, body.hslHue), body.hslSaturation, root.light
