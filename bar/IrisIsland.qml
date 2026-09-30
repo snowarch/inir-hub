@@ -532,10 +532,20 @@ Item {
     readonly property real satelliteGap: Math.round(Math.max(0, Math.min(24, Number(Config.options?.iris?.bar?.satelliteGap ?? 6))) * root.d)
     readonly property real satelliteOffset: root.satelliteGap + Math.round(IrisStyle.fuseEdge / 4 * root.notchness)
     readonly property real fillet: Math.round(chassis.radius * 0.62 * root.notchness)
-    readonly property real expandedWidth: Math.min(root.vertical ? root.availableAcross : root.availableWidth - 2 * (root.bubble + root.satelliteGap),
-        root.effectivePage === "controls" ? (Math.max(340, Number(Config.options?.iris?.controlCenter?.width ?? 360))
+    readonly property real expandedRoom: root.vertical ? root.availableAcross : root.availableWidth - 2 * (root.bubble + root.satelliteGap)
+    readonly property real pageBodyWidth: root.effectivePage === "controls" ? (Math.max(340, Number(Config.options?.iris?.controlCenter?.width ?? 360))
             + (GlobalStates.irisControlEdit ? IrisControlOptions.editorExtra : 0)) * root.d + 2 * root.padding
-            : (root.effectivePage === "activity" ? root.pageWidth * 384 / 440 : root.pageWidth) * root.d)
+            : (root.effectivePage === "activity" ? root.pageWidth * 384 / 440 : root.pageWidth) * root.d
+    // The page navigation fits its page: a button added while something runs (recording, a timer) first narrows the
+    // buttons from 36 to 30 px, then the Island widens around the row, so the row never runs into the body's edge.
+    readonly property int navButtons: root.navEntries.filter(entry => entry.kind !== "|").length
+    readonly property int navDividers: root.navEntries.length - root.navButtons
+    readonly property real navFixed: root.navDividers * Math.round(9 * root.d) + Math.max(0, root.navEntries.length - 1) * 4 * root.d
+        + 2 * (["veil", "glass", "solid"].includes(root.pagePlate) ? Math.round(4 * root.d) : 0)
+    readonly property real navSlot: Math.max(Math.round(30 * root.d), Math.min(Math.round(36 * root.d),
+        Math.floor((Math.min(root.expandedRoom, root.pageBodyWidth) - 2 * root.padding - root.navFixed) / Math.max(1, root.navButtons))))
+    readonly property real navWidth: root.navFixed + root.navButtons * root.navSlot
+    readonly property real expandedWidth: Math.min(root.expandedRoom, Math.max(root.pageBodyWidth, root.navWidth + 2 * root.padding))
     readonly property real pageWidth: Math.max(360, Math.min(600, Number(root.options?.pageWidth ?? 440)))
     readonly property real padding: Math.round(20 * root.d)
     readonly property bool editingDesktop: GlobalStates.widgetEditMode
@@ -2502,7 +2512,7 @@ Item {
                                     readonly property string target: navSlot.modelData.page ?? ""
                                     selected: navButton.target.length > 0 && root.effectivePage === navButton.target
                                     quiet: !navButton.selected
-                                    implicitWidth: Math.round(36 * root.d)
+                                    implicitWidth: root.navSlot
                                     implicitHeight: Math.round(30 * root.d)
                                     buttonRadius: navFrame.controlRadius
                                     buttonRadiusPressed: navFrame.controlRadius
