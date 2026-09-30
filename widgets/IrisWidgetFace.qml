@@ -87,7 +87,8 @@ Item {
         || (root.widget.irisOutline === "auto" && (!root.clear || root.widget.irisRim))
     // Glass wears the shell's glass edge (Appearance › Glass › Edge light, Edge line, Edge width, Edge colour):
     // lit where it faces up, a line elsewhere. With both at 0 Auto draws no line, like the shell's glass.
-    readonly property bool glassEdge: root.glass && !root.lightBackdrop
+    // Appearance › Edges › Light gives every plated widget that edge, whatever its material.
+    readonly property bool glassEdge: (root.glass || IrisStyle.edgeLit) && !root.lightBackdrop
         && (IrisStyle.glassEdgeLight > 0 || IrisStyle.glassEdgeLine > 0)
     readonly property bool flatRim: root.rimShown && !root.glassEdge
         && !(root.glass && !root.lightBackdrop && root.widget.irisOutline === "auto" && !GlobalStates.widgetEditMode)

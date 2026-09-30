@@ -84,8 +84,15 @@ Item {
             radius: glass.radius
             color: glass.material === "glass" ? IrisStyle.mediaGlass
                 : glass.material === "tint" ? IrisStyle.mediaScrim : "transparent"
-            border.width: glass.material !== "tint" ? 1 : 0
+            border.width: glass.material !== "tint" && !glass.lit ? 1 : 0
             border.color: glass.material === "none" ? IrisStyle.onMediaFill : IrisStyle.mediaHairline
+        }
+        // Appearance › Edges › Lit: glass plates wear the shell's lit edge instead of the hairline.
+        readonly property bool lit: glass.material === "glass" && IrisStyle.edgeLit
+        IrisGlassEdge {
+            anchors.fill: parent
+            visible: glass.lit && shown
+            radius: glass.radius
         }
     }
 

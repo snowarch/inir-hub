@@ -36,7 +36,7 @@ Rectangle {
 
     IrisGlassEdge {
         anchors.fill: parent
-        visible: IrisStyle.controlPlate === "glass" && shown
+        visible: (IrisStyle.controlPlate === "glass" || (IrisStyle.controlPlated && IrisStyle.edgeLit)) && shown
         radius: root.radius
     }
 

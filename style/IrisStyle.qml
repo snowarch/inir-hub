@@ -583,7 +583,13 @@ QtObject {
     readonly property color border: ColorUtils.applyAlpha(root.text, Math.min(0.5, 0.12 * root.preset.fill * root.tweak("lines", 0, 2)))
     readonly property color borderStrong: ColorUtils.applyAlpha(root.text, Math.min(0.6, 0.28 * root.preset.fill * root.tweak("lines", 0, 2)))
     readonly property string rimTint: String(root.theme?.rimTint ?? "neutral")
-    readonly property color rim: !(root.theme?.rim ?? true) ? Qt.color("transparent")
+    // Appearance › Edges: the edge every body wears, on every material. Line is the even hairline (rim); Light is
+    // the glass edge (lit where it faces up, a faint line elsewhere, `glassEdge*`) on solid bodies too. Glass keeps
+    // its lit edge whatever this is: without it glass vanishes over a dark desktop.
+    readonly property string edgeStyle: !(root.theme?.rim ?? true) ? "none"
+        : String(root.theme?.edges ?? "line") === "light" ? "light" : "line"
+    readonly property bool edgeLit: root.edgeStyle === "light" && (root.glassEdgeLight > 0 || root.glassEdgeLine > 0)
+    readonly property color rim: root.edgeStyle !== "line" ? Qt.color("transparent")
         : root.rimTint === "accent" ? ColorUtils.applyAlpha(root.accent, Math.min(0.9, 0.3 + 0.3 * root.tweak("lines", 0, 2)))
         : root.rimTint === "highlight" ? ColorUtils.applyAlpha(root.secondaryAccent, Math.min(0.9, 0.3 + 0.3 * root.tweak("lines", 0, 2)))
         : root.border

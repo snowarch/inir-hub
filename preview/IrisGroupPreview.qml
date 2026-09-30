@@ -46,7 +46,7 @@ ClippingRectangle {
         return ({
             "bar/Visibility": "islandReserve", "bar/Interaction": "islandInteraction",
             "bar/Shape": "shapes", "bar/Layout": "islandEdge", "bar/Bar": "barZones",
-            "appearance/Light": "light", "appearance/Shape": "shapes", "appearance/Colour theme": "glass", "appearance/Scheme": "glass", "appearance/Dark look": "glass", "appearance/Ink look": "glass", "appearance/Light look": "glass", "appearance/Corners per surface": "fusion", "appearance/Glass": "glass",
+            "appearance/Light": "light", "appearance/Shape": "shapes", "appearance/Colour theme": "glass", "appearance/Scheme": "glass", "appearance/Dark look": "glass", "appearance/Ink look": "glass", "appearance/Light look": "glass", "appearance/Corners per surface": "fusion", "appearance/Glass": "glass", "appearance/Edges": "glass",
             "appearance/Menus": "menus", "appearance/Settings": "settings",
             "appearance/Material": "glass", "appearance/Material per surface": "glass", "appearance/Look": "fusion",
             "appearance/Adaptive": "fusion", "appearance/Accent": "controlCenter", "appearance/Highlight": "controlCenter",
@@ -134,6 +134,7 @@ ClippingRectangle {
         color: IrisStyle.bodySurface
         border.width: IrisStyle.rim.a > 0 ? 1 : 0
         border.color: IrisStyle.rim
+        IrisGlassEdge { anchors.fill: parent; z: 10; visible: IrisStyle.edgeLit && shown; radius: parent.radius }
         IrisLightWash {
             anchors.fill: parent
             radius: plate.radius
@@ -191,6 +192,7 @@ ClippingRectangle {
         color: IrisStyle.bodySurface
         border.width: IrisStyle.rim.a > 0 ? 1 : 0
         border.color: IrisStyle.rim
+        IrisGlassEdge { anchors.fill: parent; z: 10; visible: IrisStyle.edgeLit && shown; radius: parent.radius }
         IrisClock {
             visible: !pill.vertical
             anchors.centerIn: parent
@@ -511,6 +513,7 @@ ClippingRectangle {
         color: IrisStyle.bodySurface
         border.width: IrisStyle.rim.a > 0 ? 1 : 0
         border.color: IrisStyle.rim
+        IrisGlassEdge { anchors.fill: parent; z: 10; visible: IrisStyle.edgeLit && shown; radius: parent.radius }
         IrisLightWash {
             anchors.fill: parent
             radius: lit.radius
@@ -669,6 +672,7 @@ ClippingRectangle {
                 color: IrisStyle.bodySurface
                 border.width: IrisStyle.rim.a > 0 ? 1 : 0
                 border.color: IrisStyle.rim
+                IrisGlassEdge { anchors.fill: parent; z: 10; visible: IrisStyle.edgeLit && shown; radius: parent.radius }
                 Repeater {
                     model: 3
                     Row {
@@ -997,7 +1001,7 @@ ClippingRectangle {
                     }
                 }
                 // The glass edge the field draws on bodies (Appearance › Glass › Edge light, line, width, colour).
-                IrisGlassEdge { anchors.fill: parent; visible: IrisStyle.glassy && shown; radius: pane.radius }
+                IrisGlassEdge { anchors.fill: parent; visible: (IrisStyle.glassy || IrisStyle.edgeLit) && shown; radius: pane.radius }
             }
             Caption {
                 glyph: IrisStyle.glassy ? "blur_on" : "crop_square"
@@ -1031,7 +1035,7 @@ ClippingRectangle {
             readonly property string outline: String(root.opt("iris.widgets.outline", "auto"))
             readonly property bool rimShown: !widgetsRoot.bare && widgetsRoot.iris && (widgetsRoot.outline === "always"
                 || (widgetsRoot.outline === "auto" && (!widgetsRoot.clear || Boolean(root.opt("iris.widgets.rim", false)))))
-            readonly property bool edgeLit: widgetsRoot.rimShown && widgetsRoot.glass && (IrisStyle.glassEdgeLight > 0 || IrisStyle.glassEdgeLine > 0)
+            readonly property bool edgeLit: widgetsRoot.rimShown && (widgetsRoot.glass || IrisStyle.edgeLit) && (IrisStyle.glassEdgeLight > 0 || IrisStyle.glassEdgeLine > 0)
             readonly property real plateRadius: Math.round(Math.max(0, Math.min(40, Number(root.opt("iris.widgets.radius", 22)))) * root.d)
             readonly property real unit: Math.round(170 * root.d)
             readonly property real wide: Math.round(250 * root.d)
@@ -2014,6 +2018,7 @@ ClippingRectangle {
                 color: IrisStyle.bodySurface
                 border.width: IrisStyle.rim.a > 0 ? 1 : 0
                 border.color: IrisStyle.rim
+                IrisGlassEdge { anchors.fill: parent; z: 10; visible: IrisStyle.edgeLit && shown; radius: parent.radius }
                 RowLayout {
                     anchors.fill: parent
                     anchors.leftMargin: Math.round(14 * root.d)
@@ -2113,6 +2118,7 @@ ClippingRectangle {
                 color: IrisStyle.bodySurface
                 border.width: IrisStyle.rim.a > 0 ? 1 : 0
                 border.color: IrisStyle.rim
+                IrisGlassEdge { anchors.fill: parent; z: 10; visible: IrisStyle.edgeLit && shown; radius: parent.radius }
                 Image {
                     id: artSource
                     anchors.fill: parent
@@ -2863,6 +2869,7 @@ ClippingRectangle {
                 color: IrisStyle.bodySurface
                 border.width: IrisStyle.rim.a > 0 ? 1 : 0
                 border.color: IrisStyle.rim
+                IrisGlassEdge { anchors.fill: parent; z: 10; visible: IrisStyle.edgeLit && shown; radius: parent.radius }
                 Behavior on width { NumberAnimation { duration: IrisStyle.morphDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: IrisStyle.morphCurve } }
                 Behavior on height { NumberAnimation { duration: IrisStyle.morphDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: IrisStyle.morphCurve } }
                 Behavior on radius { NumberAnimation { duration: IrisStyle.morphDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: IrisStyle.morphCurve } }
