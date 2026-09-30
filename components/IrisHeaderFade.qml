@@ -1,8 +1,8 @@
 import QtQuick
 import qs.modules.iris.style
 
-// The mask of the Island's wallpaper header (IrisHeaderScrim holds the geometry). Solid bodies keep the image
-// under the scrim; glass fades it out at the join and at the bottom so the body's glass shows there.
+// The mask of the Island's wallpaper header (IrisHeaderScrim holds the geometry): it cuts the image at the join so
+// the body, and its edge, show there on every material; glass also fades it out at the bottom.
 Item {
     id: root
     required property IrisHeaderScrim scrim
@@ -11,8 +11,8 @@ Item {
     Rectangle {
         anchors.fill: parent
         gradient: Gradient {
-            GradientStop { position: 0; color: IrisStyle.glassy ? "transparent" : "white" }
-            GradientStop { position: root.scrim.maskSolidEnd; color: IrisStyle.glassy ? "transparent" : "white" }
+            GradientStop { position: 0; color: "transparent" }
+            GradientStop { position: root.scrim.maskSolidEnd; color: "transparent" }
             GradientStop { position: Math.min(0.99, root.scrim.maskRampEnd + 0.08 * root.scrim.meltTop); color: "white" }
             GradientStop { position: Math.max(0.6, root.scrim.midAt); color: "white" }
             GradientStop { position: 1; color: IrisStyle.glassy ? "transparent" : "white" }

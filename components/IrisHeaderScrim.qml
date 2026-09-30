@@ -26,7 +26,9 @@ Rectangle {
     readonly property real topAlpha: 0.12 * root.meltVeil // iris-literal: hero fade ramp
     readonly property real midAlpha: IrisStyle.wallpaperVeil * root.meltVeil
     readonly property real midAt: Math.min(0.8, 0.42 + (1 - root.meltFade) * 0.38)
-    readonly property real solidAlpha: root.hangs && !IrisStyle.glassy ? 1 : root.topAlpha
+    // The join is left to the body: the mask (IrisHeaderFade) cuts the image there instead of this scrim painting the
+    // body's colour over it, which also covered the body's own edge (Appearance › Edges) at the top.
+    readonly property real solidAlpha: root.topAlpha
     // Header top: lower lets the wallpaper rise higher. Hanging from its edge it keeps the join the family uses for
     // artwork (IrisMediaBackdrop's edgeTop): the body's own material down past the shoulders, then a ramp as long
     // again, so the end of the shoulder curve sits under the veil and no corner of the image shows beside it.
