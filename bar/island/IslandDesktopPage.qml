@@ -266,44 +266,24 @@ ColumnLayout {
                     asynchronous: page.island.heroPreloadItem.status !== Image.Ready
                     decodeSize: Qt.size(page.island.heroDecodeWidth, 0)
                 }
-                Rectangle {
+                IrisHeaderScrim {
                     id: heroScrim
                     anchors.fill: parent
-                    readonly property bool hangs: (page.island.notch && !page.island.bottomEdge) || heroBleed.navBand > 0
-                    readonly property real solidTop: (page.island.notch && !page.island.bottomEdge ? page.island.chassisItem.topInset : 0)
+                    hangs: (page.island.notch && !page.island.bottomEdge) || heroBleed.navBand > 0
+                    solidTop: (page.island.notch && !page.island.bottomEdge ? page.island.chassisItem.topInset : 0)
                         + (heroBleed.navBand > 0 ? page.island.padding + heroBleed.navBand * 0.5 : 0)
-                    readonly property real edge: hangs ? solidTop / Math.max(1, height) : 0
-                    readonly property real topFade: hangs ? (solidTop + 30 * IrisStyle.density + heroBleed.navBand * 0.5) / Math.max(1, height) : 0.001
-                    // Veil scales the dimming; Fade moves where the body takes over and how solid the bottom gets.
-                    readonly property real topAlpha: 0.12 * page.bannerVeil // iris-literal: hero fade ramp
-                    readonly property real midAlpha: IrisStyle.wallpaperVeil * page.bannerVeil
-                    // Header fade: where the body starts taking over (lower starts it later); the header always ends
-                    // in the body, so its bottom never shows a straight cut.
-                    readonly property real midAt: Math.min(0.8, 0.42 + (1 - page.bannerFade) * 0.38)
-                    readonly property real solidAlpha: heroScrim.hangs && !IrisStyle.glassy ? 1 : heroScrim.topAlpha
-                    // Header top: 100 % is the designed melt. Lower lets the wallpaper rise higher; on an Island that
-                    // hangs from its edge it takes the join the family already uses for artwork (IrisMediaBackdrop's
-                    // edgeTop): the body's own material down past the shoulders, then a ramp as long again, so the
-                    // end of the shoulder curve sits under the veil and no corner of the image shows beside it.
-                    // Measured from the chassis, not the header: while the Island opens the page rides above the body's top,
-                // and a join fixed in the header's coordinates slid off the screen, letting the image touch the band.
-                readonly property real chassisTop: {
-                    void (page.island.chassisItem.bodyHeight + page.island.chassisItem.height + heroBleed.height + heroBleed.y)
-                    return heroBleed.mapToItem(page.island.chassisItem, 0, 0).y
-                }
-                readonly property real joinDepth: page.island.chassisItem.topInset + page.island.fillet + 4 * IrisStyle.density - heroScrim.chassisTop
-                    readonly property bool topJoin: page.island.notch && page.island.edge === "top"
-                    readonly property real shoulderEnd: heroScrim.topJoin ? Math.min(0.6, heroScrim.joinDepth / Math.max(1, height)) : 0
-                    readonly property real solidEnd: heroScrim.shoulderEnd + (heroScrim.edge - heroScrim.shoulderEnd) * page.bannerTop
-                    readonly property real joinRamp: heroScrim.topJoin ? Math.min(0.9, heroScrim.shoulderEnd / 0.45) : 0.001
-                    readonly property real rampEnd: Math.max(heroScrim.solidEnd + 0.001, heroScrim.joinRamp + (heroScrim.topFade - heroScrim.joinRamp) * page.bannerTop)
-                    gradient: Gradient {
-                        GradientStop { position: 0; color: ColorUtils.applyAlpha(IrisStyle.bodyScrim, heroScrim.solidAlpha) }
-                        GradientStop { position: heroScrim.solidEnd; color: ColorUtils.applyAlpha(IrisStyle.bodyScrim, heroScrim.solidAlpha) }
-                        GradientStop { position: heroScrim.rampEnd; color: ColorUtils.applyAlpha(IrisStyle.bodyScrim, heroScrim.topAlpha) }
-                        GradientStop { position: heroScrim.midAt; color: ColorUtils.applyAlpha(IrisStyle.surfaceOpaque, heroScrim.midAlpha) }
-                        GradientStop { position: 1; color: ColorUtils.applyAlpha(IrisStyle.bodyScrim, heroScrim.bottomAlpha) }
+                    navBand: heroBleed.navBand
+                    topJoin: page.island.notch && page.island.edge === "top"
+                    // Measured from the chassis, not the header: while the Island opens the page rides above the body's
+                    // top, and a join fixed in the header's coordinates slid off the screen, letting the image touch the band.
+                    joinDepth: page.island.chassisItem.topInset + page.island.fillet + 4 * IrisStyle.density - heroScrim.chassisTop
+                    readonly property real chassisTop: {
+                        void (page.island.chassisItem.bodyHeight + page.island.chassisItem.height + heroBleed.height + heroBleed.y)
+                        return heroBleed.mapToItem(page.island.chassisItem, 0, 0).y
                     }
+                    meltTop: page.bannerTop
+                    meltFade: page.bannerFade
+                    meltVeil: page.bannerVeil
                 }
             }
         }
@@ -345,26 +325,13 @@ ColumnLayout {
             }
         }
 
-        Item {
+        IrisHeaderFade {
             id: heroFade
+            scrim: heroScrim
             x: heroBleed.x
             y: heroBleed.y
             width: heroBleed.width
             height: heroBleed.height
-            visible: false
-            layer.enabled: true
-            readonly property real solidEnd: heroScrim.hangs ? heroScrim.solidEnd : 0
-            readonly property real rampEnd: heroScrim.hangs ? heroScrim.rampEnd : 0.001 + 0.08 * page.bannerTop
-            Rectangle {
-                anchors.fill: parent
-                gradient: Gradient {
-                    GradientStop { position: 0; color: IrisStyle.glassy ? "transparent" : "white" }
-                    GradientStop { position: heroFade.solidEnd; color: IrisStyle.glassy ? "transparent" : "white" }
-                    GradientStop { position: Math.min(0.99, heroFade.rampEnd + 0.08 * page.bannerTop); color: "white" }
-                    GradientStop { position: Math.max(0.6, heroScrim.midAt); color: "white" }
-                    GradientStop { position: 1; color: IrisStyle.glassy ? "transparent" : "white" }
-                }
-            }
         }
 
         // The header's tools share the Island's plate (IrisIsland.pagePlate); bare, each keeps its own veil.
