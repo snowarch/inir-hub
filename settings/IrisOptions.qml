@@ -648,6 +648,9 @@ QtObject {
         { section: "bubbles", group: "Tray", label: "App names", path: "iris.tray.labels", kind: "switch", fallback:true },
         { section: "bubbles", group: "Tray", label: "Hide passive apps", path: "iris.tray.hidePassive", kind: "switch", fallback:false },
         { section: "bubbles", group: "Tray", label: "Columns", path: "iris.tray.columns", kind: "range", fallback:4,min:2,max:6 },
+        { section: "desktop", group: "Wallpaper shuffle", label: "Shuffle wallpapers", description: "A new wallpaper from your folder every few minutes. Next wallpaper in the desktop menu does it once.", path: "background.autoWallpaper.enable", kind: "switch", fallback: false, keywords: ["shuffle", "random", "slideshow", "rotate", "cycle", "change", "automatic", "timer", "next wallpaper"] },
+        { section: "desktop", group: "Wallpaper shuffle", label: "Every", path: "background.autoWallpaper.intervalMinutes", visibleWhen: "background.autoWallpaper.enable", kind: "range", fallback: 30, min: 1, max: 240, step: 1, unit: " min", keywords: ["interval", "minutes", "how often", "slideshow"] },
+        { section: "desktop", group: "Wallpaper shuffle", label: "Colours follow", description: "Each new wallpaper recolours the shell and your apps. Off keeps the current colours.", path: "background.autoWallpaper.generateColors", visibleWhen: "background.autoWallpaper.enable", kind: "switch", fallback: true, keywords: ["colors", "theme", "recolor", "palette"] },
         { section: "desktop", group: "Wallpaper gallery", label: "Preview on the desktop", description: "The highlighted wallpaper shows behind the gallery; closing without applying restores yours.", path: "iris.wallpaper.livePreview", kind: "switch", fallback: true },
         { section: "desktop", group: "Wallpaper gallery", label: "Play previews", description: "Live wallpapers play a muted preview while chosen or hovered in the gallery. Only one plays at a time.", path: "iris.wallpaper.motion", kind: "switch", fallback: true },
         { section: "desktop", group: "Wallpaper gallery", label: "Library order", description: "How your folders line up in the gallery.", path: "iris.wallpaper.sort", kind: "choice", fallback: "newest", choices: [{label:"Newest",value:"newest",glyph:"schedule"},{label:"Oldest",value:"oldest",glyph:"history"},{label:"Name",value:"name",glyph:"sort_by_alpha"}], keywords: ["sort", "order", "date", "recent", "newest", "oldest", "name", "alphabetical"] },
@@ -974,6 +977,7 @@ QtObject {
     }
     readonly property var groupGlyphs: ({
         "Shell family": "swap_horiz",
+        "Wallpaper shuffle": "shuffle",
         "Behind windows": "blur_on", "Japanese lookup": "translate", "Parallax": "3d_rotation", "Recording": "screen_record", "Snip": "screenshot_region",
         "Accent": "palette", "Visualizer": "graphic_eq", "Customize": "brush", "Themes": "style", "Settings window": "settings_applications", "Activity": "timer", "Adaptive": "auto_awesome", "App colours": "format_paint", "Airing": "live_tv", "Alert sounds": "music_note",
         "At a glance": "visibility", "At rest": "schedule", "Badges": "notifications_unread", "Banners": "notifications",
