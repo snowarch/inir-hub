@@ -44,7 +44,7 @@ ClippingRectangle {
                 bar: "islandEdge", appearance: "light", motion: "motion", lock: "lock", frameMusic: "frame", notifications: "feedback", sound: "feedback" })[section] ?? ""
         const key = section + "/" + group
         return ({
-            "bar/Size": "islandReserve", "bar/Interaction": "islandInteraction",
+            "bar/Visibility": "islandReserve", "bar/Interaction": "islandInteraction",
             "bar/Shape": "shapes", "bar/Layout": "islandEdge", "bar/Bar": "barZones",
             "appearance/Light": "light", "appearance/Shape": "shapes", "appearance/Colour theme": "glass", "appearance/Scheme": "glass", "appearance/Dark look": "glass", "appearance/Ink look": "glass", "appearance/Light look": "glass", "appearance/Corners per surface": "fusion", "appearance/Glass": "glass",
             "appearance/Menus": "menus", "appearance/Settings": "settings",
