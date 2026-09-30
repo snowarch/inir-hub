@@ -24,8 +24,7 @@ Item {
         anchors.fill: parent
         visible: root.framed
         radius: root.controlRadius + root.inset
-        color: root.material === "veil" ? IrisStyle.veil
-            : root.material === "solid" ? IrisStyle.readingCard : IrisStyle.fill
+        color: IrisStyle.plateFillFor(root.material)
     }
     IrisGlassEdge {
         anchors.fill: parent

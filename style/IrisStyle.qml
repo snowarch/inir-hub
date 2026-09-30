@@ -779,6 +779,12 @@ QtObject {
         const value = String(root.appearance?.controlPlate ?? "none")
         return ["veil", "glass", "solid"].includes(value) ? value : "none"
     }
+    // What a control's track or plate is made of under Button rows: every iRiS control that holds choices or a row
+    // of buttons (IrisControlPlate, IrisSegmented, IrisChip) reads these, so one choice changes them together.
+    readonly property bool controlPlated: root.controlPlate !== "none"
+    function plateFillFor(material: string): color {
+        return material === "veil" ? root.veil : material === "solid" ? root.readingCard : root.fill
+    }
     function profileRadius(profile: string, size: real): real {
         const half = size / 2
         if (profile === "squircle") return Math.min(half, size * 0.34 * Math.max(0.6, root.shapeScale))

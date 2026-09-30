@@ -30,6 +30,9 @@ QtObject {
         if (spec.niri) return IrisNiri.value(spec)
         if (spec.kind === "niriMotion") return NiriAnimationPresets.activeId
         if (spec.kind === "icon") return IrisPieces.chosenGlyph(String(spec.piece ?? ""))
+        // A floating bubble the Island's list carries reads as off: it is on the Island (IrisPieces.listedOnIsland).
+        if (/^iris\.bubbles\.extras\.\w+\.enable$/.test(String(spec.path ?? "")) && IrisPieces.listedOnIsland(String(spec.path).split(".")[3]))
+            return false
         if (spec.bundle) {
             if (spec.keyed) return String(Config.getNestedValue(spec.bundle[0], "") ?? "")
             const now = spec.bundle.map(path => String(Config.getNestedValue(path, "") ?? ""))
@@ -50,6 +53,27 @@ QtObject {
                 spec.bundle.forEach((path, index) => updates[path] = choice.values[index])
                 Config.setNestedValues(updates)
             }
+        }
+        else if (spec.path === "iris.bar.pieces") {
+            // As a drag onto the Island does (IrisStage.place): a piece added here leaves its floating place.
+            const updates = { "iris.bar.pieces": Array.from(next ?? []) }
+            const before = Array.from(Config.options?.iris?.bar?.pieces ?? []).map(entry => String(entry))
+            for (const id of Array.from(next ?? []).map(entry => String(entry)))
+                if (!before.includes(id) && (Config.options?.iris?.bubbles?.extras?.[id]?.enable ?? false))
+                    updates["iris.bubbles.extras." + id + ".enable"] = false
+            Config.setNestedValues(updates)
+        }
+        else if (/^iris\.bubbles\.extras\.\w+\.(enable|place)$/.test(String(spec.path))) {
+            // A bubble switched on to float (or moved off the Island) leaves the Island's list.
+            const id = String(spec.path).split(".")[3]
+            const updates = ({})
+            updates[spec.path] = next
+            const place = String(spec.path).endsWith(".place") ? String(next)
+                : String(Config.options?.iris?.bubbles?.extras?.[id]?.place ?? IrisPieces.defaultPlace)
+            const floating = (spec.path.endsWith(".enable") ? Boolean(next) : true) && place !== "island"
+            const listed = Array.from(Config.options?.iris?.bar?.pieces ?? []).map(entry => String(entry))
+            if (floating && listed.includes(id)) updates["iris.bar.pieces"] = listed.filter(entry => entry !== id)
+            Config.setNestedValues(updates)
         }
         else Config.setNestedValue(spec.path, next)
     }
@@ -285,7 +309,7 @@ QtObject {
         { target: "island", group: "Shape", label: "One shape for all", description: "The Island, the Dock and the bubbles share the bubbles' shape.", path: "iris.appearance.theme.linkShapes", kind: "switch", fallback: false, keywords: ["same", "match", "link", "linked", "together", "sync", "unify", "everything", "one shape", "mismo", "igual", "todo", "juntos", "vincular"] },
         { target: "island", group: "Shape", label: "Island shape", visibleWhen: "!iris.appearance.theme.linkShapes", description: "Auto keeps the iRiS capsule. With Square, lower the Notch curve to straighten the shoulders.", path: "iris.bar.shape", kind: "choice", fallback: "auto", choices: [{label:"Auto",value:"auto",glyph:"auto_awesome"},{label:"Round",value:"round",glyph:"circle"},{label:"Squircle",value:"squircle",glyph:"rounded_corner"},{label:"Square",value:"square",glyph:"square"}], keywords: ["square", "squared", "boxy", "rectangle", "sharp", "round", "rounded", "capsule", "pill", "circle", "squircle", "corners", "radius", "curves", "cuadrado", "cuadrada", "redondo", "redonda", "esquinas", "curvas", "forma"] },
         { target: "island", group: "Shape", label: "All shapes", mirror: true, visibleWhen: "iris.appearance.theme.linkShapes", path: "iris.appearance.theme.pieceShape", kind: "choice", fallback: "circle", choices: [{label:"Circle",value:"circle",glyph:"circle"},{label:"Squircle",value:"squircle",glyph:"rounded_corner"},{label:"Square",value:"square",glyph:"square"}], keywords: ["square", "squared", "boxy", "rectangle", "sharp", "round", "rounded", "circle", "squircle", "corners", "radius", "curves", "cuadrado", "cuadrada", "redondo", "redonda", "esquinas", "curvas", "forma"] },
-        { target: "island", group: "Shape", label: "Attach as a notch", description: "Melts the Island into the screen edge.", path: "iris.bar.notch", kind: "switch", fallback: true },
+        { target: "island", group: "Notch", label: "Notch", description: "The Island melts into the screen edge, like the notch it grows from. Off, it floats clear of the edge.", path: "iris.bar.notch", kind: "switch", fallback: true, keywords: ["notch", "attach", "melt", "edge", "dynamic island", "float", "floating", "muesca"] },
         { target: "island", group: "Shape", label: "Notch curve", visibleWhen: "iris.bar.notch", description: "How wide the shoulders are where the Island turns into its edge.", path: "iris.bar.notchCurve", kind: "range", fallback: 100, min: 20, max: 200, step: 5, unit: " %" },
         { target: "island", group: "Shape", label: "Open corners", description: "Auto follows the Island's shape; a size here overrides it.", path: "iris.appearance.surfaces.island.radius", kind: "range", fallback: 0, min: 0, max: 44, unit: " px", zeroLabel: "Auto", keywords: ["corners", "radius", "round", "expanded", "open"] },
         { target: "island", group: "At rest", label: "Clock", description: "What the resting Island shows beside the time.", path: "iris.bar.clockStyle", kind: "choice", fallback: "dateTime", choices: [{label:"Time",value:"time"},{label:"Date",value:"dateTime"},{label:"Weather",value:"weather"}] },
@@ -380,7 +404,7 @@ QtObject {
         { target: "dock", group: "Look", label: "One shape for all", mirror: true, description: "The Island, the Dock and the bubbles share the bubbles' shape.", path: "iris.appearance.theme.linkShapes", kind: "switch", fallback: false, keywords: ["same", "match", "link", "linked", "together", "sync", "unify", "everything", "one shape", "mismo", "igual", "todo", "juntos", "vincular"] },
         { target: "dock", group: "Look", label: "All shapes", mirror: true, visibleWhen: "iris.appearance.theme.linkShapes", path: "iris.appearance.theme.pieceShape", kind: "choice", fallback: "circle", choices: [{label:"Circle",value:"circle",glyph:"circle"},{label:"Squircle",value:"squircle",glyph:"rounded_corner"},{label:"Square",value:"square",glyph:"square"}], keywords: ["square", "squared", "boxy", "rectangle", "sharp", "round", "rounded", "circle", "squircle", "corners", "radius", "curves", "cuadrado", "cuadrada", "redondo", "redonda", "esquinas", "curvas", "forma"] },
         { target: "dock", group: "Look", label: "Dock shape", visibleWhen: "!iris.appearance.theme.linkShapes", description: "Auto keeps the iRiS capsule. It works on a floating Dock and on a notched one.", path: "iris.dock.shape", kind: "choice", fallback: "auto", choices: [{label:"Auto",value:"auto",glyph:"auto_awesome"},{label:"Round",value:"round",glyph:"circle"},{label:"Squircle",value:"squircle",glyph:"rounded_corner"},{label:"Square",value:"square",glyph:"square"}], keywords: ["square", "squared", "boxy", "rectangle", "sharp", "round", "rounded", "capsule", "pill", "circle", "squircle", "corners", "radius", "curves", "cuadrado", "cuadrada", "redondo", "redonda", "esquinas", "curvas", "forma"] },
-        { target: "dock", group: "Look", label: "Attach as a notch", path: "iris.dock.notch", kind: "switch", fallback:true },
+        { target: "dock", group: "Notch", label: "Dock notch", description: "The Dock melts into its screen edge like the Island's notch. Off, it floats clear of the edge.", path: "iris.dock.notch", kind: "switch", fallback: true, keywords: ["notch", "attach", "melt", "edge", "float", "floating", "muesca"] },
         { target: "dock", group: "Look", label: "Material", description: "Follow iRiS, stay solid, glass over the blurred wallpaper, or real blur of the windows below (Niri 26.04+). Blur is still under construction: the Dock may look rough while it moves or opens a menu.", path: "iris.dock.material", kind: "choice", fallback: "inherit", choices: [{label:"iRiS",value:"inherit"},{label:"Solid",value:"solid"},{label:"Glass",value:"glass"},{label:"Blur (beta)",value:"blur"}] },
         { target: "dock", group: "Icons", label: "Icon size", path: "iris.dock.iconSize", kind: "range", fallback:40,min:28,max:64,unit:" px" },
         { target: "dock", group: "Icons", label: "Magnify on hover", path: "iris.dock.magnification", kind: "switch", fallback:false },
@@ -540,8 +564,8 @@ QtObject {
         { section: "bar", group: "Interaction", label: "Hover delay", path: "iris.bar.hoverDelay", kind: "range", fallback:300,min:120,max:800,step:20,unit:" ms" },
         { section: "bar", group: "Interaction", label: "Scroll on the Island", description: "On the resting Island: Shift swaps volume and brightness; Ctrl adjusts the microphone. On the open Island scrolling never closes it: over the navigation row, or sideways anywhere, it moves between pages.", path: "iris.bar.scrollAction", kind: "choice", fallback: "volume", choices: [{label:"Volume",value:"volume"},{label:"Brightness",value:"brightness"},{label:"Off",value:"none"}] },
         { section: "bar", group: "Interaction", label: "Scroll on bubbles", description: "Also adjust over the media, controls and tray bubbles. Sound and Microphone bubbles always adjust their level.", path: "iris.bar.scrollBubbles", kind: "switch", fallback: true },
-        { section: "bar", group: "Resting Island", label: "Trailing bubble", description: "Cluster only. Sound and Microphone show their level: scroll to adjust, click to mute.", path: "iris.bar.trailing", kind: "choice", fallback: "controls", choices: [{label:"Controls",value:"controls"},{label:"Notifications",value:"notifications"},{label:"Weather",value:"weather"},{label:"Sound",value:"sound"},{label:"Microphone",value:"mic"},{label:"None",value:"none"}] },
-        { section: "bar", group: "Resting Island", label: "Bubbles in the Island", description: "Small faces the Island carries itself, in the order you switch them on. Each one opens its card, and levels adjust on scroll.", path: "iris.bar.pieces", kind: "pieces", fallback: [], choices: IrisPieces.extras.map(piece => ({ label: piece.label, value: piece.id })) },
+        { section: "bar", group: "Resting Island", label: "Trailing bubble", description: "The bubble beside a Cluster Island. Sound and Microphone show their level: scroll to adjust, click to mute.", visibleWhen: "iris.bar.composition=cluster", path: "iris.bar.trailing", kind: "choice", fallback: "controls", choices: [{label:"Controls",value:"controls"},{label:"Notifications",value:"notifications"},{label:"Weather",value:"weather"},{label:"Sound",value:"sound"},{label:"Microphone",value:"mic"},{label:"None",value:"none"}] },
+        { section: "bar", group: "Resting Island", label: "Bubbles in the Island", description: "Small faces the Island carries itself, in the order you switch them on. Each one opens its card, and levels adjust on scroll. A bubble picked here leaves the frame; Bubbles › Extra bubbles floats one on the frame instead.", path: "iris.bar.pieces", kind: "pieces", fallback: [], choices: IrisPieces.extras.map(piece => ({ label: piece.label, value: piece.id })) },
         { section: "bar", group: "Resting Island", label: "Where they sit", description: "Which end of the Island carries them. On a side Island, before means above.", path: "iris.bar.piecesSide", kind: "choice", fallback: "end", choices: [{label:"After the clock",value:"end"},{label:"Before the clock",value:"start"}] },
         { section: "bar", group: "Bar", showIf: () => ["full", "menubar"].includes(String(Config.options?.iris?.bar?.layout ?? "island")), label: "Start", description: "What rests at the start of the full-width Island, in the order you switch it on. The Island itself is the live part: the time, or whatever is happening.", path: "iris.bar.fullStart", kind: "pieces", fallback: ["workspaces", "window"], choices: root.barZoneChoices },
         { section: "bar", group: "Bar", showIf: () => ["full", "menubar"].includes(String(Config.options?.iris?.bar?.layout ?? "island")), label: "Centre", description: "Kept in the middle of the edge while there is room.", path: "iris.bar.fullCenter", kind: "pieces", fallback: ["island"], choices: root.barZoneChoices },
@@ -1002,7 +1026,7 @@ QtObject {
         return root.sections.find(section => section.id === id) ?? root.sections[0]
     }
     readonly property var groupGlyphs: ({
-        "Shell family": "swap_horiz",
+        "Shell family": "swap_horiz", "Notch": "vertical_align_top",
         "Wallpaper shuffle": "shuffle",
         "Behind windows": "blur_on", "Japanese lookup": "translate", "Parallax": "3d_rotation", "Recording": "screen_record", "Snip": "screenshot_region",
         "Accent": "palette", "Visualizer": "graphic_eq", "Customize": "brush", "Themes": "style", "Settings window": "settings_applications", "Activity": "timer", "Adaptive": "auto_awesome", "App colours": "format_paint", "Airing": "live_tv", "Alert sounds": "music_note",
@@ -1032,6 +1056,7 @@ QtObject {
     })
     readonly property var groupTints: ({
         get "Shell family"() { return IrisStyle.identity.purple },
+        get "Notch"() { return IrisStyle.identity.blue },
         get "About iNiR"() { return IrisStyle.identity.lavender },
         get "Accent"() { return IrisStyle.identity.blue },
         get "Activity"() { return IrisStyle.identity.orange },
@@ -1173,7 +1198,7 @@ QtObject {
     // Spotlight's "/" actions come from the rows themselves, so nothing is listed twice: every switch
     // Settings shows flips in place, the widget design and accents pick a value, and themes apply.
     // What "/" lists first with nothing typed: the switches people flip during a day.
-    readonly property var quickFirst: ["iris.widgets.legibleAlways", "notifications.silent", "light.night.enabled",
+    readonly property var quickFirst: ["iris.bar.notch", "iris.widgets.legibleAlways", "notifications.silent", "light.night.enabled",
         "performance.lowPower", "iris.bar.autoHide", "iris.surround.enable", "iris.appearance.anime.enabled", "iris.appearance.motion"]
     function quickActions(): var {
         const out = []
@@ -1207,9 +1232,9 @@ QtObject {
     readonly property var groupOrder: ({
         appearance: ["Look", "Themes", "Colour theme", "Scheme", "Dark look", "Ink look", "Light look", "Material", "Adaptive", "Glass", "Shape", "Icons", "Corners per surface", "Frame", "Accent", "Highlight", "Colour layer", "Light", "Badges", "Wallpaper",
             "Text", "Faces", "Settings", "Menus", "Material per surface", "Customize", "Previews", "App colours"],
-        bar: ["Layout", "Shape", "At rest", "Resting Island", "Bar", "Pages", "Desktop page", "Player page", "Size", "Interaction", "Connections"],
+        bar: ["Notch", "Layout", "Shape", "At rest", "Resting Island", "Bar", "Pages", "Desktop page", "Player page", "Size", "Interaction", "Connections"],
         bubbles: ["Size", "Behaviour", "On the contour", "Floating", "Opening bodies", "Cards", "Card contents", "Joining", "Tray"],
-        dock: ["Look", "Icons", "Visibility"]
+        dock: ["Notch", "Look", "Icons", "Visibility"]
     })
     readonly property var settings: {
         const rows = root.behaviour.concat(root.shared).concat(root.niriRows)

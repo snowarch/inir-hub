@@ -2248,29 +2248,33 @@ ClippingRectangle {
                 Item {
                     id: previewHeader
                     visible: pageRoot.mode !== "media" && pageRoot.banner
+                    // IslandDesktopPage's geometry on this Island, which hangs from the top: the join is its radius,
+                    // the navigation row the band above the hero, the hero at least 112 px.
                     readonly property real join: islandBody.radius
-                    readonly property real designedStart: islandBody.radius + Math.round(40 * root.d)
+                    readonly property real navBand: previewNav.height + Math.round(14 * root.d)
+                    readonly property real solidTop: previewHeader.join + Math.round(14 * root.d) + previewHeader.navBand * 0.5
+                    readonly property real topFade: previewHeader.solidTop + Math.round(30 * root.d) + previewHeader.navBand * 0.5
+                    readonly property real joinDepth: previewHeader.join * 1.62 + Math.round(4 * root.d)
+                    readonly property real solidEnd: previewHeader.joinDepth + (previewHeader.solidTop - previewHeader.joinDepth) * pageRoot.bannerTop
+                    readonly property real rampEnd: Math.max(previewHeader.solidEnd + 1,
+                        previewHeader.joinDepth / 0.45 + (previewHeader.topFade - previewHeader.joinDepth / 0.45) * pageRoot.bannerTop)
+                    readonly property real midAt: Math.min(0.8, 0.42 + (1 - pageRoot.bannerFade) * 0.38)
                     x: 0; y: 0
                     width: parent.width
-                    height: islandBody.radius + Math.min(Math.round(150 * root.d), islandBody.height - 2 * islandBody.radius)
+                    height: Math.min(islandBody.height, pageColumn.y + previewHeader.navBand + Math.round(126 * root.d))
                     IrisImage {
-                        id: previewHeaderImage
                         anchors.fill: parent
                         source: root.wallpaper
                         layer.enabled: pageRoot.bannerBlur > 0
-                        layer.effect: MultiEffect { blurEnabled: true; blur: pageRoot.bannerBlur; blurMax: 32 }
+                        layer.effect: MultiEffect { blurEnabled: true; blur: pageRoot.bannerBlur; blurMax: 48 }
                     }
                     Rectangle {
-                        id: previewScrim
                         anchors.fill: parent
-                        readonly property real solidEnd: (previewHeader.join + (previewHeader.designedStart - previewHeader.join) * pageRoot.bannerTop) / Math.max(1, height)
-                        readonly property real rampEnd: Math.min(0.9, solidEnd + (Math.round(24 * root.d) + Math.round(24 * root.d) * pageRoot.bannerTop) / Math.max(1, height))
-                        readonly property real midAt: Math.min(0.8, 0.42 + (1 - pageRoot.bannerFade) * 0.38)
                         gradient: Gradient {
                             GradientStop { position: 0; color: IrisStyle.bodySurface }
-                            GradientStop { position: previewScrim.solidEnd; color: IrisStyle.bodySurface }
-                            GradientStop { position: previewScrim.rampEnd; color: ColorUtils.applyAlpha(IrisStyle.bodySurface, 0.12 * pageRoot.bannerVeil) } // iris-literal: hero fade ramp, as IslandDesktopPage
-                            GradientStop { position: Math.max(previewScrim.rampEnd + 0.01, previewScrim.midAt); color: ColorUtils.applyAlpha(IrisStyle.bodySurface, IrisStyle.wallpaperVeil * pageRoot.bannerVeil) }
+                            GradientStop { position: previewHeader.solidEnd / Math.max(1, previewHeader.height); color: IrisStyle.bodySurface }
+                            GradientStop { position: previewHeader.rampEnd / Math.max(1, previewHeader.height); color: ColorUtils.applyAlpha(IrisStyle.bodySurface, 0.12 * pageRoot.bannerVeil) } // iris-literal: hero fade ramp, as IslandDesktopPage
+                            GradientStop { position: previewHeader.midAt; color: ColorUtils.applyAlpha(IrisStyle.surfaceOpaque, IrisStyle.wallpaperVeil * pageRoot.bannerVeil) }
                             GradientStop { position: 1; color: IrisStyle.bodySurface }
                         }
                     }

@@ -18,8 +18,9 @@ IrisButton {
 
     implicitHeight: Math.round(30 * chip.d)
     implicitWidth: chipRow.implicitWidth + chip.inset * 2
-    buttonRadius: height / 2
-    buttonRadiusPressed: height / 2
+    // Under Button rows a chip takes the bubbles' shape like the controls around it.
+    buttonRadius: IrisStyle.controlPlated ? IrisStyle.pieceRadius(height) : height / 2
+    buttonRadiusPressed: buttonRadius
     Accessible.name: chip.label
 
     Row {
