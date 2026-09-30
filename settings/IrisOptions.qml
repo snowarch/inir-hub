@@ -295,6 +295,10 @@ QtObject {
         { target: "island", group: "At rest", label: "Bubble gap", description: "How far the bubbles beside the Island rest from it.", path: "iris.bar.satelliteGap", kind: "range", fallback: 6, min: 0, max: 24, unit: " px" },
         { target: "island", group: "At rest", label: "Bubble size", description: "The bubbles beside the Island, as a share of its height.", path: "iris.bar.satelliteScale", kind: "range", fallback: 100, min: 70, max: 100, step: 5, unit: " %" },
         { target: "island", group: "Desktop page", label: "Header", description: "What sits behind the time when the Island shows your desktop.", path: "iris.bar.desktopBanner", kind: "choice", fallback: "wallpaper", choices: [{label:"Wallpaper",value:"wallpaper"},{label:"None",value:"none"}] },
+        { target: "island", group: "Desktop page", label: "Header fade", description: "How far the wallpaper melts into the Island under the time. Lower keeps more of it showing.", path: "iris.bar.desktopBannerFade", visibleWhen: "iris.bar.desktopBanner=wallpaper", kind: "range", fallback: 100, min: 0, max: 100, step: 5, unit: " %", keywords: ["header", "banner", "gradient", "fade", "transparency", "wallpaper", "hero", "degradado"] },
+        { target: "island", group: "Desktop page", label: "Header top", description: "How the wallpaper melts into the Island at the top, under its buttons. Lower lets it reach the edge.", path: "iris.bar.desktopBannerTop", visibleWhen: "iris.bar.desktopBanner=wallpaper", kind: "range", fallback: 100, min: 0, max: 100, step: 5, unit: " %", keywords: ["header", "banner", "top", "gradient", "fade", "transparency", "wallpaper", "hero", "degradado"] },
+        { target: "island", group: "Desktop page", label: "Header veil", description: "How much the wallpaper is dimmed behind the time. Below 100 % the time can be harder to read on bright wallpapers.", path: "iris.bar.desktopBannerVeil", visibleWhen: "iris.bar.desktopBanner=wallpaper", kind: "range", fallback: 100, min: 0, max: 100, step: 5, unit: " %", keywords: ["header", "banner", "dim", "dark", "veil", "scrim", "contrast", "wallpaper"] },
+        { target: "island", group: "Desktop page", label: "Header blur", description: "Softens the wallpaper behind the time.", path: "iris.bar.desktopBannerBlur", visibleWhen: "iris.bar.desktopBanner=wallpaper", kind: "range", fallback: 0, min: 0, max: 100, step: 5, unit: " %", keywords: ["header", "banner", "blur", "soft", "frost", "wallpaper"] },
         { target: "island", group: "Desktop page", label: "Blocks", description: "What sits under the time, in the order you switch them on. You can also arrange them on the Island itself: open its desktop page and tap the pencil.", path: "iris.bar.desktopBlocks", kind: "pieces", fallback: ["profile", "context", "forecast", "agenda", "modules"], choices: [{label:"Profile",value:"profile"},{label:"Current app",value:"context"},{label:"Forecast",value:"forecast"},{label:"Up next",value:"agenda"},{label:"Vitals",value:"vitals"},{label:"Modules",value:"modules"}] },
         { target: "island", group: "Desktop page", label: "Your modules", description: "Modules written with the iRiS SDK sit in the page's Modules block. Make one with inir customWidgets create <name>; it shows up here.", path: "iris.bar.rightModules", kind: "pieces", fallback: [], choicesFrom: "irisModules", showIf: () => (CustomWidgets.widgets ?? []).some(widget => String(widget.irisQmlPath ?? "").length > 0), keywords: ["sdk", "custom", "module", "plugin", "extension", "widget"] },
         { target: "island", group: "Desktop page", label: "Block style", description: "Plain rows sit on the Island's black like the rest of the page; Grouped puts the forecast and vitals strips on quiet plates.", path: "iris.bar.blockStyle", kind: "choice", fallback: "plain", choices: [{label:"Plain",value:"plain",glyph:"view_agenda"},{label:"Grouped",value:"grouped",glyph:"splitscreen"}] },
@@ -432,10 +436,26 @@ QtObject {
         }
         return out
     }
+    // Glass widgets wear the shell's glass edge; Desktop › Widgets shows the same rows beside Outline.
+    readonly property var edgeKeys: ["edgeLight", "edgeLine", "edgeWidth", "edgeColour"]
+    readonly property var edgeMirrors: {
+        const out = []
+        for (const spec of root.studioRows) {
+            const found = /^iris\.appearance\.glass\.(\w+)$/.exec(String(spec.path ?? ""))
+            if (!found || !root.edgeKeys.includes(found[1])) continue
+            out.push(Object.assign({}, spec, { target: "desktop", group: "Widgets", mirror: true,
+                description: "The edge of glass widgets, the same as the Island's and the Dock's glass.",
+                showIf: () => root.widgetGlass && String(Config.options?.iris?.widgets?.outline ?? "auto") !== "none",
+                keywords: ["outline", "border", "frame", "edge", "line", "light", "rim", "marco", "borde", "widgets"] }))
+        }
+        return out
+    }
     readonly property var studio: {
         const rows = root.studioRows.slice()
         const at = rows.map(spec => spec.target === "material" && spec.group === "Shape").lastIndexOf(true)
         rows.splice(at < 0 ? rows.length : at + 1, 0, ...root.cornerMirrors)
+        const outline = rows.findIndex(spec => spec.path === "iris.widgets.outline")
+        rows.splice(outline < 0 ? rows.length : outline + 1, 0, ...root.edgeMirrors)
         return rows.map((spec, index) => Object.assign({}, spec, { modelKey: "studio:" + index }))
     }
 

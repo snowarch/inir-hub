@@ -192,6 +192,14 @@ ColumnLayout {
     readonly property string bannerSource: String(page.island.options?.desktopBanner ?? "wallpaper") === "wallpaper"
         ? WallpaperListener.wallpaperUrlForScreen(page.island.targetScreen) : ""
     readonly property bool showBanner: page.bannerSource.length > 0
+    // Settings › Island › Desktop page: 100 / 100 / 0 is the header as designed.
+    function bannerPart(key: string, fallback: int): real {
+        return Math.max(0, Math.min(100, Number(page.island.options?.[key] ?? fallback))) / 100
+    }
+    readonly property real bannerFade: page.bannerPart("desktopBannerFade", 100)
+    readonly property real bannerTop: page.bannerPart("desktopBannerTop", 100)
+    readonly property real bannerVeil: page.bannerPart("desktopBannerVeil", 100)
+    readonly property real bannerBlur: page.bannerPart("desktopBannerBlur", 0)
     function blockAvailable(kind: string): bool {
         if (kind === "context") return page.focusedWindow !== null || page.workspaces.length > 1
         if (kind === "modules") return page.customModules.length > 0
@@ -227,6 +235,9 @@ ColumnLayout {
                 maskSource: heroFade
                 maskThresholdMin: 0.5
                 maskSpreadAtMin: 1
+                blurEnabled: page.bannerBlur > 0
+                blur: page.bannerBlur
+                blurMax: 48
             }
             opacity: heroImage.ready ? 1 : 0
             x: -page.island.padding
@@ -251,12 +262,19 @@ ColumnLayout {
                     + (heroBleed.navBand > 0 ? page.island.padding + heroBleed.navBand * 0.5 : 0)
                 readonly property real edge: hangs ? solidTop / Math.max(1, height) : 0
                 readonly property real topFade: hangs ? (solidTop + 30 * IrisStyle.density + heroBleed.navBand * 0.5) / Math.max(1, height) : 0.001
+                // Veil scales the dimming; Fade moves where the body takes over and how solid the bottom gets.
+                readonly property real topAlpha: 0.12 * page.bannerVeil // iris-literal: hero fade ramp
+                readonly property real midAlpha: IrisStyle.wallpaperVeil * page.bannerVeil
+                readonly property real midAt: Math.min(0.9, 0.42 + (1 - page.bannerFade) * 0.4)
+                readonly property real solidAlpha: heroScrim.topAlpha
+                    + ((heroScrim.hangs && !IrisStyle.glassy ? 1 : heroScrim.topAlpha) - heroScrim.topAlpha) * page.bannerTop
+                readonly property real bottomAlpha: heroScrim.midAlpha + (IrisStyle.bodyScrim.a - heroScrim.midAlpha) * page.bannerFade
                 gradient: Gradient {
-                    GradientStop { position: 0; color: ColorUtils.applyAlpha(IrisStyle.bodyScrim, heroScrim.hangs && !IrisStyle.glassy ? 1 : 0.12) } // iris-literal: hero fade ramp
-                    GradientStop { position: heroScrim.edge; color: ColorUtils.applyAlpha(IrisStyle.bodyScrim, heroScrim.hangs && !IrisStyle.glassy ? 1 : 0.12) } // iris-literal: hero fade ramp
-                    GradientStop { position: heroScrim.topFade; color: ColorUtils.applyAlpha(IrisStyle.bodyScrim, 0.12) } // iris-literal: hero fade ramp
-                    GradientStop { position: 0.42; color: ColorUtils.applyAlpha(IrisStyle.surfaceOpaque, IrisStyle.wallpaperVeil) }
-                    GradientStop { position: 1; color: IrisStyle.bodyScrim }
+                    GradientStop { position: 0; color: ColorUtils.applyAlpha(IrisStyle.bodyScrim, heroScrim.solidAlpha) }
+                    GradientStop { position: heroScrim.edge; color: ColorUtils.applyAlpha(IrisStyle.bodyScrim, heroScrim.solidAlpha) }
+                    GradientStop { position: heroScrim.topFade; color: ColorUtils.applyAlpha(IrisStyle.bodyScrim, heroScrim.topAlpha) }
+                    GradientStop { position: heroScrim.midAt; color: ColorUtils.applyAlpha(IrisStyle.surfaceOpaque, heroScrim.midAlpha) }
+                    GradientStop { position: 1; color: ColorUtils.applyAlpha(IrisStyle.bodyScrim, heroScrim.bottomAlpha) }
                 }
             }
         }
@@ -273,11 +291,11 @@ ColumnLayout {
             Rectangle {
                 anchors.fill: parent
                 gradient: Gradient {
-                    GradientStop { position: 0; color: IrisStyle.glassy ? "transparent" : "white" }
-                    GradientStop { position: heroFade.solidEnd; color: IrisStyle.glassy ? "transparent" : "white" }
+                    GradientStop { position: 0; color: IrisStyle.glassy ? Qt.rgba(1, 1, 1, 1 - page.bannerTop) : "white" }
+                    GradientStop { position: heroFade.solidEnd; color: IrisStyle.glassy ? Qt.rgba(1, 1, 1, 1 - page.bannerTop) : "white" }
                     GradientStop { position: Math.min(0.99, heroScrim.topFade + 0.08); color: "white" }
-                    GradientStop { position: 0.6; color: "white" }
-                    GradientStop { position: 1; color: IrisStyle.glassy ? "transparent" : "white" }
+                    GradientStop { position: Math.max(0.6, heroScrim.midAt); color: "white" }
+                    GradientStop { position: 1; color: IrisStyle.glassy ? Qt.rgba(1, 1, 1, 1 - page.bannerFade) : "white" }
                 }
             }
         }
