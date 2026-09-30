@@ -934,7 +934,7 @@ QtObject {
         { group: "System", key: "autostart", label: "Autostart", detail: "Apps that start with you", icon: "rocket_launch", get tint() { return IrisStyle.identity.orange }, keywords: ["autostart", "startup", "login", "inicio"] },
         { group: "System", key: "services", label: "Services", detail: "Search, network and data", icon: "settings_suggest", get tint() { return IrisStyle.identity.gray }, keywords: ["services", "network", "search", "data"] },
         { group: "System", key: "tools", label: "Tools", detail: "Recording codecs and snip details", icon: "build", get tint() { return IrisStyle.identity.red }, keywords: ["tools", "codec", "ffmpeg", "vaapi", "discord", "crosshair"] },
-        { group: "Shell", key: "themes", label: "Colour themes", detail: "Every palette, with previews", icon: "palette", get tint() { return IrisStyle.identity.purple }, keywords: ["theme", "palette", "colours", "catppuccin", "apps"] },
+        { group: "Shell", key: "themes", label: "Colour themes", detail: "Every palette, with previews; app icon theme", icon: "palette", get tint() { return IrisStyle.identity.purple }, keywords: ["theme", "palette", "colours", "catppuccin", "apps", "icons", "icon theme", "icon pack", "papirus", "tray icons", "iconos"] },
         { group: "Shell", key: "system", label: "System", detail: "Keyboard indicators, work safety", icon: "browse", get tint() { return IrisStyle.identity.green }, keywords: ["system", "keyboard", "caps lock", "safety"] },
         { group: "Shell", key: "advanced", label: "Advanced", detail: "Visualizer and colour generation", icon: "construction", get tint() { return IrisStyle.identity.gray }, keywords: ["advanced", "cava", "visualizer", "matugen"] }
     ]
