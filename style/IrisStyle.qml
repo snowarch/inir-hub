@@ -774,6 +774,11 @@ QtObject {
         return Math.max(8, Math.round(56 * root.density * scale * Math.max(0.2, Math.min(2, curve / 100))))
     }
     readonly property string pieceShape: String(root.theme?.pieceShape ?? "circle")
+    // Settings › Appearance › Button rows: rows of round controls on a plate (IrisControlPlate), or bare.
+    readonly property string controlPlate: {
+        const value = String(root.appearance?.controlPlate ?? "none")
+        return ["veil", "glass", "solid"].includes(value) ? value : "none"
+    }
     function profileRadius(profile: string, size: real): real {
         const half = size / 2
         if (profile === "squircle") return Math.min(half, size * 0.34 * Math.max(0.6, root.shapeScale))

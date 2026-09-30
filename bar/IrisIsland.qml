@@ -86,6 +86,12 @@ Item {
         function onVisualExpandedChanged(): void { if (!root.visualExpanded && root.focusedOutput) GlobalStates.irisArrange = false }
     }
     readonly property bool notch: root.options?.notch ?? false
+    // The plate the open Island's rows of controls sit on (Settings › Island › Pages › Page buttons; Auto follows
+    // Appearance › Button rows): the page navigation and the desktop header's tools share it.
+    readonly property string pagePlate: {
+        const value = String(root.options?.navFrame ?? "auto")
+        return ["none", "veil", "glass", "solid"].includes(value) ? value : IrisStyle.controlPlate
+    }
     // The corner of a body that is always melted into its edge (the menu bar's heart, the utility island): a capsule on Auto.
     readonly property real meltedCorner: IrisStyle.profileRadius(IrisStyle.bodyProfile(IrisStyle.barShape, true), root.compactHeight)
     readonly property alias notchness: notchSpring.value
@@ -2460,39 +2466,15 @@ Item {
                     }
                 }
 
-                // Settings › Island › Pages › Page buttons: bare (as designed), or held on a plate whose corners follow
-                // the bubbles' shape and stay concentric with the buttons inside it.
-                Item {
+                // Settings › Island › Pages › Page buttons: Auto follows Appearance › Button rows (IrisControlPlate).
+                IrisControlPlate {
                     id: navFrame
                     Layout.row: root.bottomEdge ? 1 : 0
                     Layout.alignment: Qt.AlignHCenter
-                    readonly property string material: {
-                        const value = String(root.options?.navFrame ?? "none")
-                        return ["veil", "glass", "solid"].includes(value) ? value : "none"
-                    }
-                    readonly property bool framed: navFrame.material !== "none"
-                    readonly property real inset: navFrame.framed ? Math.round(4 * root.d) : 0
-                    readonly property real buttonRadius: navFrame.framed ? IrisStyle.pieceRadius(Math.round(30 * root.d)) : Math.round(15 * root.d)
-                    implicitWidth: navRow.implicitWidth + navFrame.inset * 2
-                    implicitHeight: navRow.implicitHeight + navFrame.inset * 2
-
-                    Rectangle {
-                        id: navPlate
-                        anchors.fill: parent
-                        visible: navFrame.framed
-                        radius: navFrame.buttonRadius + navFrame.inset
-                        color: navFrame.material === "veil" ? IrisStyle.veil
-                            : navFrame.material === "solid" ? IrisStyle.readingCard : IrisStyle.fill
-                    }
-                    IrisGlassEdge {
-                        anchors.fill: parent
-                        visible: navFrame.material === "glass" && shown
-                        radius: navPlate.radius
-                    }
+                    material: root.pagePlate
 
                     RowLayout {
                         id: navRow
-                        anchors.centerIn: parent
                         spacing: 4 * root.d
 
                         WheelHandler {
@@ -2522,8 +2504,8 @@ Item {
                                     quiet: !navButton.selected
                                     implicitWidth: Math.round(36 * root.d)
                                     implicitHeight: Math.round(30 * root.d)
-                                    buttonRadius: navFrame.buttonRadius
-                                    buttonRadiusPressed: navFrame.buttonRadius
+                                    buttonRadius: navFrame.controlRadius
+                                    buttonRadiusPressed: navFrame.controlRadius
                                     colBackgroundHover: IrisStyle.fillHover
                                     Accessible.name: Translation.tr(navSlot.modelData.label ?? "")
                                     onHoveredChanged: {

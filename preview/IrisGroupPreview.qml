@@ -977,6 +977,27 @@ ClippingRectangle {
                     IrisText { width: parent.width; text: Translation.tr("Secondary text stays readable over the wallpaper"); color: IrisStyle.muted; wrapMode: Text.WordWrap; font.pixelSize: IrisStyle.typeMeta }
                     IrisText { text: Translation.tr("Tertiary detail"); color: IrisStyle.textTertiary; font.pixelSize: IrisStyle.typeMeta }
                 }
+                // Appearance › Button rows on this material.
+                IrisControlPlate {
+                    id: glassControls
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    anchors.bottom: parent.bottom
+                    anchors.bottomMargin: IrisStyle.concentricPad(pane.radius, 12 * root.d)
+                    controlHeight: Math.round(30 * root.d)
+                    Row {
+                        spacing: glassControls.framed ? Math.round(4 * root.d) : Math.round(18 * root.d)
+                        Repeater {
+                            model: ["skip_previous", "pause", "skip_next"]
+                            Item {
+                                required property string modelData
+                                width: Math.round(30 * root.d); height: width
+                                MaterialSymbol { anchors.centerIn: parent; text: parent.modelData; fill: 1; iconSize: Math.round(20 * root.d); color: IrisStyle.text }
+                            }
+                        }
+                    }
+                }
+                // The glass edge the field draws on bodies (Appearance › Glass › Edge light, line, width, colour).
+                IrisGlassEdge { anchors.fill: parent; visible: IrisStyle.glassy && shown; radius: pane.radius }
             }
             Caption {
                 glyph: IrisStyle.glassy ? "blur_on" : "crop_square"
@@ -1005,6 +1026,12 @@ ClippingRectangle {
             readonly property color ink: String(root.opt("iris.widgets.tint", "wallpaper")) === "wallpaper" ? IrisStyle.wallpaperLight : IrisStyle.accent
             readonly property int weight: ({ light: Font.Light, regular: Font.Medium, bold: Font.Bold })[String(root.opt("iris.widgets.weight", "regular"))] ?? Font.Medium
             readonly property real strength: Math.max(0.2, Math.min(1, Number(root.opt("iris.widgets.opacity", 100)) / 100))
+            // Outline as IrisWidgetFace draws it: Auto on Glass, Solid and Tinted (glass wears the glass edge), none on
+            // Transparent unless the legacy hairline asks; Always everywhere; None nowhere.
+            readonly property string outline: String(root.opt("iris.widgets.outline", "auto"))
+            readonly property bool rimShown: !widgetsRoot.bare && widgetsRoot.iris && (widgetsRoot.outline === "always"
+                || (widgetsRoot.outline === "auto" && (!widgetsRoot.clear || Boolean(root.opt("iris.widgets.rim", false)))))
+            readonly property bool edgeLit: widgetsRoot.rimShown && widgetsRoot.glass && (IrisStyle.glassEdgeLight > 0 || IrisStyle.glassEdgeLine > 0)
             readonly property real plateRadius: Math.round(Math.max(0, Math.min(40, Number(root.opt("iris.widgets.radius", 22)))) * root.d)
             readonly property real unit: Math.round(170 * root.d)
             readonly property real wide: Math.round(250 * root.d)
@@ -1047,7 +1074,7 @@ ClippingRectangle {
                         source: widgetsWall
                         autoPaddingEnabled: false
                         blurEnabled: true
-                        blur: IrisStyle.glassBlur
+                        blur: IrisStyle.glassBlurAmount
                         blurMax: IrisStyle.glassBlurMax
                         saturation: IrisStyle.glassSaturation
                     }
@@ -1062,8 +1089,9 @@ ClippingRectangle {
                 height: widgetsRoot.unit
                 radius: widgetsRoot.plateRadius
                 color: widgetsRoot.plateColor
-                border.width: widgetsRoot.clear ? 0 : 1
-                border.color: IrisStyle.rim
+                border.width: widgetsRoot.rimShown && !widgetsRoot.edgeLit ? 1 : 0
+                border.color: widgetsRoot.clear || IrisStyle.rim.a === 0 ? IrisStyle.clearRim : IrisStyle.rim
+                IrisGlassEdge { anchors.fill: parent; visible: widgetsRoot.edgeLit; radius: parent.radius }
                 InstrumentRing {
                     anchors.fill: parent
                     anchors.margins: Math.round(4 * root.d)
@@ -1101,8 +1129,9 @@ ClippingRectangle {
                 height: widgetsRoot.unit
                 radius: widgetsRoot.plateRadius
                 color: widgetsRoot.plateColor
-                border.width: widgetsRoot.clear ? 0 : 1
-                border.color: IrisStyle.rim
+                border.width: widgetsRoot.rimShown && !widgetsRoot.edgeLit ? 1 : 0
+                border.color: widgetsRoot.clear || IrisStyle.rim.a === 0 ? IrisStyle.clearRim : IrisStyle.rim
+                IrisGlassEdge { anchors.fill: parent; visible: widgetsRoot.edgeLit; radius: parent.radius }
                 ColumnLayout {
                     anchors.fill: parent
                     anchors.margins: Math.round(18 * root.d)
@@ -1120,6 +1149,7 @@ ClippingRectangle {
                     : widgetsRoot.instrument ? Translation.tr("Dials, scales and ruled lists")
                     : widgetsRoot.design === "readout" ? Translation.tr("Quiet figures and open lists")
                     : !widgetsRoot.iris ? Translation.tr("Each widget keeps its Material design")
+                    : widgetsRoot.glass && Boolean(root.opt("iris.widgets.brightWallpapers", false)) ? Translation.tr("Frosted wallpaper · turns to frost over a bright wallpaper")
                     : widgetsRoot.glass ? Translation.tr("Frosted wallpaper · darker only where the wallpaper is bright")
                     : widgetsRoot.clear ? Translation.tr("Bare wallpaper · a veil only where text needs it")
                     : widgetsRoot.material === "tinted" ? Translation.tr("Black material with a trace of the wallpaper hue")
@@ -1831,6 +1861,24 @@ ClippingRectangle {
                             IrisText { text: Translation.tr("Today"); font.family: IrisStyle.fontTitle; font.weight: IrisStyle.weight(Font.Bold); font.pixelSize: IrisStyle.typeTitle }
                             IrisText { text: Qt.locale().toString(DateTime.clock.date, "dddd, MMMM"); color: IrisStyle.subtext; font.pixelSize: IrisStyle.typeMeta }
                         }
+                        Item { Layout.fillWidth: true }
+                        // The header's tools, on Appearance › Button rows as IrisSidebar draws them.
+                        IrisControlPlate {
+                            id: previewPanelTools
+                            Layout.alignment: Qt.AlignVCenter
+                            controlHeight: Math.round(28 * root.d)
+                            Row {
+                                spacing: Math.round(2 * root.d)
+                                Repeater {
+                                    model: ["keep", "tune", "close"]
+                                    Item {
+                                        required property string modelData
+                                        width: Math.round(28 * root.d); height: width
+                                        MaterialSymbol { anchors.centerIn: parent; text: parent.modelData; iconSize: Math.round(16 * root.d); color: IrisStyle.textSecondary }
+                                    }
+                                }
+                            }
+                        }
                     }
                     Repeater {
                         model: [["calendar_month", Translation.tr("Calendar"), IrisStyle.identity.red], ["partly_cloudy_day", Translation.tr("Weather"), IrisStyle.identity.sky], ["notifications", Translation.tr("Notifications"), IrisStyle.identity.orange]]
@@ -2104,12 +2152,21 @@ ClippingRectangle {
                     }
                     Item { Layout.fillHeight: true }
                     Level { value: 0.38; tint: playerRoot.artBackground ? IrisStyle.onMedia : IrisStyle.text; color: playerRoot.artBackground ? IrisStyle.onMediaFill : IrisStyle.fill }
-                    RowLayout {
+                    // Appearance › Button rows, as IrisMediaCard draws it.
+                    IrisControlPlate {
+                        id: previewTransport
                         Layout.alignment: Qt.AlignHCenter
-                        spacing: Math.round(26 * root.d)
-                        Repeater {
-                            model: ["skip_previous", "pause", "skip_next"]
-                            MaterialSymbol { required property string modelData; text: modelData; fill: 1; iconSize: Math.round(24 * root.d); color: playerRoot.artBackground ? IrisStyle.onMedia : IrisStyle.text }
+                        controlHeight: Math.round(32 * root.d)
+                        Row {
+                            spacing: previewTransport.framed ? Math.round(4 * root.d) : Math.round(26 * root.d)
+                            Repeater {
+                                model: ["skip_previous", "pause", "skip_next"]
+                                Item {
+                                    required property string modelData
+                                    width: Math.round(32 * root.d); height: width
+                                    MaterialSymbol { anchors.centerIn: parent; text: parent.modelData; fill: 1; iconSize: Math.round(24 * root.d); color: playerRoot.artBackground ? IrisStyle.onMedia : IrisStyle.text }
+                                }
+                            }
                         }
                     }
                 }
@@ -2129,6 +2186,17 @@ ClippingRectangle {
             readonly property string mode: root.group === "Player page" ? "media" : root.group === "Pages" ? "pages" : "desktop"
             readonly property real pageW: Math.max(360, Math.min(600, Number(root.opt("iris.bar.pageWidth", 440)))) * root.d
             readonly property bool banner: String(root.opt("iris.bar.desktopBanner", "wallpaper")) === "wallpaper"
+            // Same resolution as IrisIsland.pagePlate and the header's options as IslandDesktopPage reads them.
+            readonly property string plate: {
+                const value = String(root.opt("iris.bar.navFrame", "auto"))
+                const global = String(root.opt("iris.appearance.controlPlate", "none"))
+                return ["none", "veil", "glass", "solid"].includes(value) ? value : ["veil", "glass", "solid"].includes(global) ? global : "none"
+            }
+            function part(key: string, fallback: int): real { return Math.max(0, Math.min(100, Number(root.opt("iris.bar." + key, fallback)))) / 100 }
+            readonly property real bannerTop: pageRoot.part("desktopBannerTop", 100)
+            readonly property real bannerFade: pageRoot.part("desktopBannerFade", 100)
+            readonly property real bannerVeil: pageRoot.part("desktopBannerVeil", 100)
+            readonly property real bannerBlur: pageRoot.part("desktopBannerBlur", 0)
             readonly property bool grouped: String(root.opt("iris.bar.blockStyle", "plain")) === "grouped"
             readonly property var desktopBlocks: Array.from(root.opt("iris.bar.desktopBlocks", ["profile", "context", "forecast", "agenda", "modules"]))
             readonly property var mediaBlocks: Array.from(root.opt("iris.bar.mediaBlocks", ["player", "timeline", "transport", "players", "levels"]))
@@ -2175,17 +2243,64 @@ ClippingRectangle {
                 clip: true
                 Behavior on width { NumberAnimation { duration: IrisStyle.moveDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: IrisStyle.moveCurve } }
 
-                IrisImage {
+                // The header as the Island draws it: the join stays body at the top (it hangs from the edge here),
+                // Header top lets the image rise toward it, Fade moves where the body takes over, Veil dims, Blur softens.
+                Item {
+                    id: previewHeader
                     visible: pageRoot.mode !== "media" && pageRoot.banner
-                    x: 0; y: islandBody.radius
+                    readonly property real join: islandBody.radius
+                    readonly property real designedStart: islandBody.radius + Math.round(40 * root.d)
+                    x: 0; y: 0
                     width: parent.width
-                    height: Math.min(Math.round(150 * root.d), islandBody.height - 2 * islandBody.radius)
-                    source: root.wallpaper
-                    Rectangle {
+                    height: islandBody.radius + Math.min(Math.round(150 * root.d), islandBody.height - 2 * islandBody.radius)
+                    IrisImage {
+                        id: previewHeaderImage
                         anchors.fill: parent
+                        source: root.wallpaper
+                        layer.enabled: pageRoot.bannerBlur > 0
+                        layer.effect: MultiEffect { blurEnabled: true; blur: pageRoot.bannerBlur; blurMax: 32 }
+                    }
+                    Rectangle {
+                        id: previewScrim
+                        anchors.fill: parent
+                        readonly property real solidEnd: (previewHeader.join + (previewHeader.designedStart - previewHeader.join) * pageRoot.bannerTop) / Math.max(1, height)
+                        readonly property real rampEnd: Math.min(0.9, solidEnd + (Math.round(24 * root.d) + Math.round(24 * root.d) * pageRoot.bannerTop) / Math.max(1, height))
+                        readonly property real midAt: Math.min(0.8, 0.42 + (1 - pageRoot.bannerFade) * 0.38)
                         gradient: Gradient {
-                            GradientStop { position: 0; color: IrisStyle.veilLight }
+                            GradientStop { position: 0; color: IrisStyle.bodySurface }
+                            GradientStop { position: previewScrim.solidEnd; color: IrisStyle.bodySurface }
+                            GradientStop { position: previewScrim.rampEnd; color: ColorUtils.applyAlpha(IrisStyle.bodySurface, 0.12 * pageRoot.bannerVeil) } // iris-literal: hero fade ramp, as IslandDesktopPage
+                            GradientStop { position: Math.max(previewScrim.rampEnd + 0.01, previewScrim.midAt); color: ColorUtils.applyAlpha(IrisStyle.bodySurface, IrisStyle.wallpaperVeil * pageRoot.bannerVeil) }
                             GradientStop { position: 1; color: IrisStyle.bodySurface }
+                        }
+                    }
+                }
+
+                // The header's tools, placed as on the Island: bare each wears its veil, on a plate they share it.
+                IrisControlPlate {
+                    id: previewTools
+                    visible: pageRoot.mode === "desktop" && pageRoot.banner
+                    material: pageRoot.plate
+                    controlHeight: Math.round(28 * root.d)
+                    x: islandBody.width - width - Math.round(20 * root.d) + previewTools.inset
+                    y: pageColumn.y + previewNav.height + Math.round(8 * root.d) - previewTools.inset
+                    Row {
+                        spacing: previewTools.framed ? Math.round(2 * root.d) : Math.round(6 * root.d)
+                        Repeater {
+                            model: ["edit", "wallpaper"]
+                            Rectangle {
+                                required property string modelData
+                                width: Math.round(28 * root.d)
+                                height: width
+                                radius: previewTools.controlRadius
+                                color: previewTools.framed ? "transparent" : IrisStyle.veil
+                                MaterialSymbol {
+                                    anchors.centerIn: parent
+                                    text: parent.modelData
+                                    iconSize: Math.round(15 * root.d)
+                                    color: IrisStyle.onMedia
+                                }
+                            }
                         }
                     }
                 }
@@ -2197,8 +2312,12 @@ ClippingRectangle {
                     width: parent.width - 2 * x
                     spacing: Math.round(14 * root.d)
 
-                    Row {
+                    IrisControlPlate {
+                        id: previewNav
                         Layout.alignment: Qt.AlignHCenter
+                        material: pageRoot.plate
+                        controlHeight: Math.round(28 * root.d)
+                    Row {
                         spacing: Math.round(6 * root.d)
                         Repeater {
                             model: pageRoot.navEntries
@@ -2218,7 +2337,7 @@ ClippingRectangle {
                                 Rectangle {
                                     visible: !navEntry.divider
                                     anchors.fill: parent
-                                    radius: height / 2
+                                    radius: previewNav.controlRadius
                                     color: navEntry.selected ? IrisStyle.tintFill(IrisStyle.secondaryAccent) : pageRoot.mode === "pages" && navEntry.modelData.page ? IrisStyle.fillQuiet : "transparent"
                                     MaterialSymbol {
                                         anchors.centerIn: parent
@@ -2230,6 +2349,7 @@ ClippingRectangle {
                                 }
                             }
                         }
+                    }
                     }
 
                     ColumnLayout {

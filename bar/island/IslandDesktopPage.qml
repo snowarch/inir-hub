@@ -367,39 +367,53 @@ ColumnLayout {
             }
         }
 
-        GlyphButton {
-            anchors.right: wallpaperButton.visible ? wallpaperButton.left : parent.right
-            anchors.rightMargin: wallpaperButton.visible ? Math.round(6 * IrisStyle.density) : 0
-            anchors.top: parent.top
-            anchors.topMargin: -Math.round(6 * IrisStyle.density)
-            glyph: page.island.studio ? "check" : "edit"
-            glyphSize: 17 * IrisStyle.density
-            glyphColor: page.showBanner ? IrisStyle.onMedia : IrisStyle.text
-            implicitWidth: Math.round(32 * IrisStyle.density)
-            colBackground: page.showBanner ? IrisStyle.veil : IrisStyle.fillQuiet
-            colBackgroundHover: page.showBanner ? IrisStyle.veilStrong : IrisStyle.fillHover
-            Accessible.name: page.island.studio ? Translation.tr("Done") : Translation.tr("Arrange this page")
-            onClicked: {
-                page.island.pinned = true
-                GlobalStates.irisArrange = !page.island.studio
-            }
-        }
-        GlyphButton {
-            id: wallpaperButton
-            visible: page.showBanner
+        // The header's tools share the Island's plate (IrisIsland.pagePlate); bare, each keeps its own veil.
+        IrisControlPlate {
+            id: heroTools
             anchors.right: parent.right
+            anchors.rightMargin: -heroTools.inset
             anchors.top: parent.top
-            anchors.topMargin: -Math.round(6 * IrisStyle.density)
-            glyph: "wallpaper"
-            glyphSize: 17 * IrisStyle.density
-            glyphColor: IrisStyle.onMedia
-            implicitWidth: Math.round(32 * IrisStyle.density)
-            colBackground: IrisStyle.veil
-            colBackgroundHover: IrisStyle.veilStrong
-            Accessible.name: Translation.tr("Change wallpaper")
-            onClicked: {
-                GlobalStates.wallpaperSelectorTargetMonitor = page.island.targetScreen?.name ?? ""
-                GlobalStates.wallpaperSelectorOpen = true
+            anchors.topMargin: -Math.round(6 * IrisStyle.density) - heroTools.inset
+            material: page.island.pagePlate
+            controlHeight: Math.round(32 * IrisStyle.density)
+
+            RowLayout {
+                spacing: heroTools.framed ? Math.round(2 * IrisStyle.density) : Math.round(6 * IrisStyle.density)
+
+                GlyphButton {
+                    glyph: page.island.studio ? "check" : "edit"
+                    glyphSize: 17 * IrisStyle.density
+                    glyphColor: page.showBanner ? IrisStyle.onMedia : IrisStyle.text
+                    implicitWidth: Math.round(32 * IrisStyle.density)
+                    buttonRadius: heroTools.framed ? heroTools.controlRadius : height / 2
+                    buttonRadiusPressed: heroTools.framed ? heroTools.controlRadius : height / 2
+                    quiet: heroTools.framed
+                    colBackground: heroTools.framed ? "transparent" : page.showBanner ? IrisStyle.veil : IrisStyle.fillQuiet
+                    colBackgroundHover: heroTools.framed ? IrisStyle.fillHover : page.showBanner ? IrisStyle.veilStrong : IrisStyle.fillHover
+                    Accessible.name: page.island.studio ? Translation.tr("Done") : Translation.tr("Arrange this page")
+                    onClicked: {
+                        page.island.pinned = true
+                        GlobalStates.irisArrange = !page.island.studio
+                    }
+                }
+                GlyphButton {
+                    id: wallpaperButton
+                    visible: page.showBanner
+                    glyph: "wallpaper"
+                    glyphSize: 17 * IrisStyle.density
+                    glyphColor: IrisStyle.onMedia
+                    implicitWidth: Math.round(32 * IrisStyle.density)
+                    buttonRadius: heroTools.framed ? heroTools.controlRadius : height / 2
+                    buttonRadiusPressed: heroTools.framed ? heroTools.controlRadius : height / 2
+                    quiet: heroTools.framed
+                    colBackground: heroTools.framed ? "transparent" : IrisStyle.veil
+                    colBackgroundHover: heroTools.framed ? IrisStyle.fillHover : IrisStyle.veilStrong
+                    Accessible.name: Translation.tr("Change wallpaper")
+                    onClicked: {
+                        GlobalStates.wallpaperSelectorTargetMonitor = page.island.targetScreen?.name ?? ""
+                        GlobalStates.wallpaperSelectorOpen = true
+                    }
+                }
             }
         }
 
