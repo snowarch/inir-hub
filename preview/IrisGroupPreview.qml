@@ -2227,216 +2227,293 @@ ClippingRectangle {
                 return (NiriService.windows ?? []).slice().sort((a, b) => stamp(b) - stamp(a))[0] ?? null
             }
             readonly property real naturalWidth: pageRoot.pageW + Math.round(160 * root.d)
-            readonly property real naturalHeight: islandBody.y + islandBody.height + Math.round(56 * root.d)
+            readonly property real naturalHeight: pageRoot.bodyY + pageRoot.bodyHeight + Math.round(56 * root.d)
             readonly property bool cropBottom: true
+            // The Island's own geometry (IrisIsland): notched it hangs from the frame and its content starts one corner
+            // down (edgeInset); floating it sits the Island margin below the band.
+            readonly property bool notch: Boolean(root.opt("iris.bar.notch", true))
+            readonly property real corner: IrisStyle.openedRadius(IrisStyle.barShape, Math.max(IrisStyle.radius, 30 * root.d))
+            readonly property real topInset: pageRoot.notch ? Math.ceil(pageRoot.corner) : 0
+            readonly property real padding: Math.round(20 * root.d)
+            readonly property real navBand: previewNav.height + Math.round(14 * root.d)
+            readonly property real bodyX: Math.round((width - pageRoot.pageW) / 2)
+            readonly property real bodyY: pageRoot.notch ? 0 : IrisFrame.band + Math.round(Number(root.opt("iris.bar.margin", 8)) * root.d)
+            readonly property real bodyHeight: pageColumn.y + pageColumn.implicitHeight + pageRoot.padding
 
-            Rectangle {
+            // The Island as it opens on the desktop: the field draws its body and, notched, its join to the frame;
+            // the page sits in a clip that follows it. Hanging from the edge, the clip's top corners sit above
+            // the view so the join stays the field's.
+            Field.IrisField {
+                anchors.fill: parent
+                framed: false
+                shapes: {
+                    const f = IrisStyle.fuseDeep, deep = Math.max(8, f * 2)
+                    const out = []
+                    if (pageRoot.notch || IrisFrame.framed)
+                        out.push({ x: -2 * f, y: -deep, width: width + 4 * f, height: deep + (IrisFrame.framed ? IrisFrame.band : 0), radius: 0, fuse: f, id: "edge", paints: true })
+                    out.push({ x: pageRoot.bodyX, y: pageRoot.bodyY, width: pageRoot.pageW, height: pageRoot.bodyHeight, radius: pageRoot.corner,
+                        fuse: pageRoot.notch ? IrisStyle.fuseEdge : IrisStyle.fuse, id: "island", joins: pageRoot.notch ? "edge" : "", paints: true })
+                    return out
+                }
+            }
+
+            ClippingRectangle {
                 id: islandBody
-                anchors.horizontalCenter: parent.horizontalCenter
-                y: -radius
+                x: pageRoot.bodyX
+                y: pageRoot.bodyY - pageRoot.topInset
                 width: pageRoot.pageW
-                height: radius + pageColumn.implicitHeight + Math.round(36 * root.d)
-                radius: IrisStyle.radius
-                color: IrisStyle.bodySurface
-                border.width: IrisStyle.rim.a > 0 ? 1 : 0
-                border.color: IrisStyle.rim
-                clip: true
-                Behavior on width { NumberAnimation { duration: IrisStyle.moveDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: IrisStyle.moveCurve } }
+                height: pageRoot.bodyHeight + pageRoot.topInset
+                radius: pageRoot.corner
+                color: "transparent"
 
-                // The header as the Island draws it: the join stays body at the top (it hangs from the edge here),
-                // Header top lets the image rise toward it, Fade moves where the body takes over, Veil dims, Blur softens.
                 Item {
-                    id: previewHeader
-                    visible: pageRoot.mode !== "media" && pageRoot.banner
-                    // IslandDesktopPage's geometry on this Island, which hangs from the top: the join is its radius,
-                    // the navigation row the band above the hero, the hero at least 112 px.
-                    readonly property real join: islandBody.radius
-                    readonly property real navBand: previewNav.height + Math.round(14 * root.d)
-                    readonly property real solidTop: previewHeader.join + Math.round(14 * root.d) + previewHeader.navBand * 0.5
-                    readonly property real topFade: previewHeader.solidTop + Math.round(30 * root.d) + previewHeader.navBand * 0.5
-                    readonly property real joinDepth: previewHeader.join * 1.62 + Math.round(4 * root.d)
-                    readonly property real solidEnd: previewHeader.joinDepth + (previewHeader.solidTop - previewHeader.joinDepth) * pageRoot.bannerTop
-                    readonly property real rampEnd: Math.max(previewHeader.solidEnd + 1,
-                        previewHeader.joinDepth / 0.45 + (previewHeader.topFade - previewHeader.joinDepth / 0.45) * pageRoot.bannerTop)
-                    readonly property real midAt: Math.min(0.8, 0.42 + (1 - pageRoot.bannerFade) * 0.38)
-                    x: 0; y: 0
+                    id: bodyContent
+                    y: pageRoot.topInset
                     width: parent.width
-                    height: Math.min(islandBody.height, pageColumn.y + previewHeader.navBand + Math.round(126 * root.d))
-                    IrisImage {
-                        anchors.fill: parent
-                        source: root.wallpaper
-                        layer.enabled: pageRoot.bannerBlur > 0
-                        layer.effect: MultiEffect { blurEnabled: true; blur: pageRoot.bannerBlur; blurMax: 48 }
-                    }
-                    Rectangle {
-                        anchors.fill: parent
-                        gradient: Gradient {
-                            GradientStop { position: 0; color: IrisStyle.bodySurface }
-                            GradientStop { position: previewHeader.solidEnd / Math.max(1, previewHeader.height); color: IrisStyle.bodySurface }
-                            GradientStop { position: previewHeader.rampEnd / Math.max(1, previewHeader.height); color: ColorUtils.applyAlpha(IrisStyle.bodySurface, 0.12 * pageRoot.bannerVeil) } // iris-literal: hero fade ramp, as IslandDesktopPage
-                            GradientStop { position: previewHeader.midAt; color: ColorUtils.applyAlpha(IrisStyle.surfaceOpaque, IrisStyle.wallpaperVeil * pageRoot.bannerVeil) }
-                            GradientStop { position: 1; color: IrisStyle.bodySurface }
+                    height: pageRoot.bodyHeight
+
+                    // The header, from the shared IrisHeaderScrim and IrisHeaderFade with the Island's own geometry.
+                    Item {
+                        id: previewHeader
+                        visible: pageRoot.mode !== "media" && pageRoot.banner
+                        width: parent.width
+                        height: pageColumn.y + previewHero.height + Math.round(12 * root.d)
+                        layer.enabled: true
+                        layer.effect: MultiEffect {
+                            maskEnabled: true
+                            maskSource: previewFade
+                            maskThresholdMin: 0.5
+                            maskSpreadAtMin: 1
+                            blurEnabled: pageRoot.bannerBlur > 0
+                            blur: pageRoot.bannerBlur
+                            blurMax: 48
+                        }
+                        IrisImage {
+                            anchors.fill: parent
+                            source: root.wallpaper
+                        }
+                        IrisHeaderScrim {
+                            id: previewScrim
+                            anchors.fill: parent
+                            hangs: true
+                            solidTop: pageRoot.topInset + pageRoot.padding + pageRoot.navBand * 0.5
+                            navBand: pageRoot.navBand
+                            topJoin: pageRoot.notch
+                            joinDepth: pageRoot.topInset + Math.round(pageRoot.corner * 0.62) + 4 * root.d
+                            unit: root.d
+                            meltTop: pageRoot.bannerTop
+                            meltFade: pageRoot.bannerFade
+                            meltVeil: pageRoot.bannerVeil
                         }
                     }
-                }
-
-                // The header's tools, placed as on the Island: bare each wears its veil, on a plate they share it.
-                IrisControlPlate {
-                    id: previewTools
-                    visible: pageRoot.mode === "desktop" && pageRoot.banner
-                    material: pageRoot.plate
-                    controlHeight: Math.round(28 * root.d)
-                    x: islandBody.width - width - Math.round(20 * root.d) + previewTools.inset
-                    y: pageColumn.y + previewNav.height + Math.round(8 * root.d) - previewTools.inset
-                    Row {
-                        spacing: previewTools.framed ? Math.round(2 * root.d) : Math.round(6 * root.d)
-                        Repeater {
-                            model: ["edit", "wallpaper"]
-                            Rectangle {
-                                required property string modelData
-                                width: Math.round(28 * root.d)
-                                height: width
-                                radius: previewTools.controlRadius
-                                color: previewTools.framed ? "transparent" : IrisStyle.veil
-                                MaterialSymbol {
-                                    anchors.centerIn: parent
-                                    text: parent.modelData
-                                    iconSize: Math.round(15 * root.d)
-                                    color: IrisStyle.onMedia
-                                }
-                            }
-                        }
+                    IrisHeaderFade {
+                        id: previewFade
+                        scrim: previewScrim
+                        width: previewHeader.width
+                        height: previewHeader.height
                     }
-                }
 
-                ColumnLayout {
-                    id: pageColumn
-                    x: Math.round(20 * root.d)
-                    y: islandBody.radius + Math.round(14 * root.d)
-                    width: parent.width - 2 * x
-                    spacing: Math.round(14 * root.d)
-
+                    // The navigation row as the Island draws it (IrisIsland's navFrame): 36 × 30 buttons, 4 px apart.
                     IrisControlPlate {
                         id: previewNav
-                        Layout.alignment: Qt.AlignHCenter
+                        x: Math.round((bodyContent.width - width) / 2)
+                        y: pageRoot.topInset + pageRoot.padding
                         material: pageRoot.plate
-                        controlHeight: Math.round(28 * root.d)
-                    Row {
-                        spacing: Math.round(6 * root.d)
-                        Repeater {
-                            model: pageRoot.navEntries
-                            Item {
-                                id: navEntry
-                                required property var modelData
-                                readonly property bool divider: navEntry.modelData.kind === "|"
-                                readonly property bool selected: navEntry.modelData.kind === pageRoot.current
-                                width: navEntry.divider ? Math.round(9 * root.d) : Math.round(32 * root.d)
-                                height: Math.round(28 * root.d)
-                                Rectangle {
-                                    visible: navEntry.divider
-                                    anchors.centerIn: parent
-                                    width: 1; height: Math.round(16 * root.d)
-                                    color: IrisStyle.hairlineStrong
-                                }
-                                Rectangle {
-                                    visible: !navEntry.divider
-                                    anchors.fill: parent
-                                    radius: previewNav.controlRadius
-                                    color: navEntry.selected ? IrisStyle.tintFill(IrisStyle.secondaryAccent) : pageRoot.mode === "pages" && navEntry.modelData.page ? IrisStyle.fillQuiet : "transparent"
-                                    MaterialSymbol {
+                        Row {
+                            spacing: Math.round(4 * root.d)
+                            Repeater {
+                                model: pageRoot.navEntries
+                                Item {
+                                    id: navEntry
+                                    required property var modelData
+                                    readonly property bool divider: navEntry.modelData.kind === "|"
+                                    readonly property bool selected: navEntry.modelData.kind === pageRoot.current
+                                    width: navEntry.divider ? Math.round(9 * root.d) : Math.round(36 * root.d)
+                                    height: Math.round(30 * root.d)
+                                    Rectangle {
+                                        visible: navEntry.divider
                                         anchors.centerIn: parent
-                                        text: navEntry.modelData.glyph ?? ""
-                                        fill: navEntry.selected ? 1 : 0
-                                        iconSize: Math.round(17 * root.d)
-                                        color: navEntry.selected ? IrisStyle.secondaryAccent : IrisStyle.subtext
+                                        width: 1; height: Math.round(14 * root.d)
+                                        color: IrisStyle.fill
+                                    }
+                                    Rectangle {
+                                        visible: !navEntry.divider
+                                        anchors.fill: parent
+                                        radius: previewNav.controlRadius
+                                        color: navEntry.selected ? IrisStyle.tintFill(IrisStyle.accent) : pageRoot.mode === "pages" && navEntry.modelData.page ? IrisStyle.fillQuiet : "transparent"
+                                        MaterialSymbol {
+                                            anchors.centerIn: parent
+                                            text: navEntry.modelData.glyph ?? ""
+                                            fill: navEntry.selected ? 1 : 0
+                                            iconSize: Math.round(18 * root.d)
+                                            color: navEntry.selected ? IrisStyle.accent : IrisStyle.textSecondary
+                                        }
                                     }
                                 }
                             }
                         }
                     }
-                    }
 
                     ColumnLayout {
-                        visible: pageRoot.mode !== "media"
-                        Layout.fillWidth: true
-                        Layout.topMargin: pageRoot.banner ? Math.round(14 * root.d) : 0
-                        spacing: Math.round(2 * root.d)
-                        IrisText {
-                            text: "<font color='" + IrisStyle.secondaryAccent + "'><b>" + Qt.locale().toString(DateTime.clock.date, "dddd") + "</b></font> " + Qt.locale().toString(DateTime.clock.date, "d MMMM")
-                            textFormat: Text.StyledText
-                            font.pixelSize: IrisStyle.typeLabel
-                        }
-                        RowLayout {
-                            Layout.fillWidth: true
-                            IrisClock { pixelSize: 36 * IrisStyle.typeScale }
-                            Item { Layout.fillWidth: true }
-                            MaterialSymbol { visible: pageRoot.weatherReady; text: Icons.getWeatherIcon(Weather.data?.wCode, Weather.isNightNow()) ?? "cloud"; fill: 1; iconSize: Math.round(22 * root.d); color: IrisStyle.text }
-                            IrisText { visible: pageRoot.weatherReady; text: String(Weather.data?.temp ?? ""); font.family: IrisStyle.fontNumbers; font.weight: IrisStyle.figureWeight; font.pixelSize: 22 * IrisStyle.typeScale }
-                        }
-                    }
+                        id: pageColumn
+                        x: pageRoot.padding
+                        y: previewNav.y + pageRoot.navBand
+                        width: parent.width - 2 * x
+                        spacing: Math.round(14 * root.d)
 
-                    Repeater {
-                        model: pageRoot.mode === "desktop" ? pageRoot.desktopBlocks : []
-                        Loader {
-                            id: desktopBlock
-                            required property string modelData
+                        // The hero as IslandDesktopPage draws it: date and time on the left, the weather on the right,
+                        // the header's tools on its top corner.
+                        Item {
+                            id: previewHero
+                            visible: pageRoot.mode !== "media"
                             Layout.fillWidth: true
-                            sourceComponent: desktopBlock.modelData === "forecast" || desktopBlock.modelData === "vitals" ? stripBlock : rowBlock
-                            Component {
-                                id: rowBlock
-                                BlockRow {
-                                    glyph: ({ profile: "account_circle", context: "select_window", agenda: "event_upcoming", modules: "widgets" })[desktopBlock.modelData] ?? "circle"
-                                    title: ({ profile: SystemInfo.displayName || SystemInfo.username || Translation.tr("You"),
-                                        context: pageRoot.lastWindow?.title || Translation.tr("Current app"),
-                                        agenda: Translation.tr("Up next"), modules: Translation.tr("Modules") })[desktopBlock.modelData] ?? ""
-                                    detail: ({ profile: Translation.tr("Up %1").arg(DateTime.uptime), context: AppSearch.lookupDesktopEntry(pageRoot.lastWindow?.app_id ?? "")?.name || Translation.tr("Workspace"),
-                                        agenda: Translation.tr("This week is clear"), modules: Translation.tr("Your desktop widgets") })[desktopBlock.modelData] ?? ""
+                            implicitHeight: pageRoot.banner
+                                ? Math.max(Math.round(112 * root.d), heroRow.implicitHeight + Math.round(26 * root.d))
+                                : heroRow.implicitHeight
+
+                            // The header's tools share the Island's plate; bare, each keeps its own veil.
+                            IrisControlPlate {
+                                id: previewTools
+                                visible: pageRoot.mode === "desktop"
+                                anchors.right: parent.right
+                                anchors.rightMargin: -previewTools.inset
+                                anchors.top: parent.top
+                                anchors.topMargin: -Math.round(6 * root.d) - previewTools.inset
+                                material: pageRoot.plate
+                                controlHeight: Math.round(32 * root.d)
+                                Row {
+                                    spacing: previewTools.framed ? Math.round(2 * root.d) : Math.round(6 * root.d)
+                                    Repeater {
+                                        model: pageRoot.banner ? ["edit", "wallpaper"] : ["edit"]
+                                        Rectangle {
+                                            required property string modelData
+                                            width: Math.round(32 * root.d)
+                                            height: width
+                                            radius: previewTools.framed ? previewTools.controlRadius : height / 2
+                                            color: previewTools.framed ? "transparent" : pageRoot.banner ? IrisStyle.veil : IrisStyle.fillQuiet
+                                            MaterialSymbol {
+                                                anchors.centerIn: parent
+                                                text: parent.modelData
+                                                iconSize: Math.round(17 * root.d)
+                                                color: pageRoot.banner ? IrisStyle.onMedia : IrisStyle.text
+                                            }
+                                        }
+                                    }
                                 }
                             }
-                            Component {
-                                id: stripBlock
-                                Rectangle {
-                                    implicitHeight: stripRow.implicitHeight + (pageRoot.grouped ? Math.round(20 * root.d) : 0)
-                                    radius: IrisStyle.radiusTile
-                                    color: pageRoot.grouped ? IrisStyle.fillQuiet : "transparent"
+
+                            RowLayout {
+                                id: heroRow
+                                anchors.left: parent.left
+                                anchors.right: parent.right
+                                anchors.bottom: parent.bottom
+                                spacing: Math.round(12 * root.d)
+                                ColumnLayout {
+                                    Layout.fillWidth: true
+                                    Layout.alignment: Qt.AlignBottom
+                                    spacing: -Math.round(2 * root.d)
+                                    IrisText {
+                                        textFormat: Text.StyledText
+                                        text: "<font color='" + (pageRoot.banner ? IrisStyle.textStrong : IrisStyle.secondaryAccent) + "'><b>"
+                                            + Qt.locale().toString(DateTime.clock.date, "dddd") + "</b></font> "
+                                            + Qt.locale().toString(DateTime.clock.date, "d MMMM")
+                                        color: pageRoot.banner ? IrisStyle.textStrong : IrisStyle.textSecondary
+                                        font.pixelSize: IrisStyle.typeLabel
+                                        font.weight: IrisStyle.weight(Font.Medium)
+                                    }
+                                    IrisClock { pixelSize: 46 * IrisStyle.typeScale }
+                                }
+                                ColumnLayout {
+                                    visible: pageRoot.weatherReady
+                                    Layout.alignment: Qt.AlignBottom
+                                    spacing: 0
                                     RowLayout {
-                                        id: stripRow
-                                        anchors.centerIn: parent
-                                        width: parent.width - (pageRoot.grouped ? Math.round(20 * root.d) : 0)
-                                        spacing: 0
-                                        Repeater {
-                                            model: desktopBlock.modelData === "forecast"
-                                                ? (pageRoot.hours.length > 0 ? pageRoot.hours : [{}, {}, {}, {}, {}, {}])
-                                                : [{ glyph: "memory", value: Math.round(ResourceUsage.cpuUsage * 100) + "%" },
-                                                    { glyph: "memory_alt", value: Math.round(ResourceUsage.memoryUsedPercentage * 100) + "%" },
-                                                    { glyph: "device_thermostat", value: ResourceUsage.maxTemp + "°" },
-                                                    { glyph: "hard_drive", value: Math.round(ResourceUsage.diskUsedPercentage * 100) + "%" }]
-                                            ColumnLayout {
-                                                id: stripCell
-                                                required property var modelData
-                                                required property int index
-                                                Layout.fillWidth: true
-                                                Layout.preferredWidth: 1
-                                                spacing: Math.round(4 * root.d)
-                                                IrisText {
-                                                    visible: desktopBlock.modelData === "forecast"
-                                                    Layout.alignment: Qt.AlignHCenter
-                                                    text: stripCell.index === 0 ? Translation.tr("Now") : String(stripCell.modelData.label ?? "").slice(0, 2)
-                                                    color: IrisStyle.muted
-                                                    font.pixelSize: IrisStyle.typeMeta
-                                                }
-                                                MaterialSymbol {
-                                                    Layout.alignment: Qt.AlignHCenter
-                                                    text: desktopBlock.modelData === "forecast" ? (Icons.getWeatherIcon(stripCell.modelData.code, stripCell.modelData.isNight) ?? "cloud") : stripCell.modelData.glyph
-                                                    fill: 1
-                                                    iconSize: Math.round(17 * root.d)
-                                                    color: desktopBlock.modelData === "forecast" ? IrisStyle.skyLight(text) : IrisStyle.subtext
-                                                }
-                                                IrisText {
-                                                    Layout.alignment: Qt.AlignHCenter
-                                                    text: desktopBlock.modelData === "forecast" ? String(stripCell.modelData.temp ?? "—") : stripCell.modelData.value
-                                                    font.family: IrisStyle.fontNumbers
-                                                    font.pixelSize: IrisStyle.typeLabel
+                                        Layout.alignment: Qt.AlignRight
+                                        spacing: Math.round(6 * root.d)
+                                        MaterialSymbol { text: Icons.getWeatherIcon(Weather.data?.wCode, Weather.isNightNow()) ?? "cloud"; fill: 1; iconSize: Math.round(22 * root.d); color: IrisStyle.text }
+                                        IslandParts.Metric {
+                                            readonly property string raw: String(Weather.data?.temp ?? "")
+                                            value: raw.replace(/°?[CF]$/, "")
+                                            unit: raw.length > value.length ? raw.slice(value.length) : ""
+                                            pixelSize: 26 * IrisStyle.typeScale
+                                            weight: Font.DemiBold
+                                        }
+                                    }
+                                    IrisText {
+                                        Layout.alignment: Qt.AlignRight
+                                        Layout.maximumWidth: Math.round(150 * root.d)
+                                        text: String(Weather.data?.description ?? "")
+                                        color: pageRoot.banner ? IrisStyle.textStrong : IrisStyle.textSecondary
+                                        font.pixelSize: IrisStyle.typeMeta
+                                        elide: Text.ElideRight
+                                    }
+                                }
+                            }
+                        }
+
+                        Repeater {
+                            model: pageRoot.mode === "desktop" ? pageRoot.desktopBlocks : []
+                            Loader {
+                                id: desktopBlock
+                                required property string modelData
+                                Layout.fillWidth: true
+                                sourceComponent: desktopBlock.modelData === "forecast" || desktopBlock.modelData === "vitals" ? stripBlock : rowBlock
+                                Component {
+                                    id: rowBlock
+                                    BlockRow {
+                                        glyph: ({ profile: "account_circle", context: "select_window", agenda: "event_upcoming", modules: "widgets" })[desktopBlock.modelData] ?? "circle"
+                                        title: ({ profile: SystemInfo.displayName || SystemInfo.username || Translation.tr("You"),
+                                            context: pageRoot.lastWindow?.title || Translation.tr("Current app"),
+                                            agenda: Translation.tr("Up next"), modules: Translation.tr("Modules") })[desktopBlock.modelData] ?? ""
+                                        detail: ({ profile: Translation.tr("Up %1").arg(DateTime.uptime), context: AppSearch.lookupDesktopEntry(pageRoot.lastWindow?.app_id ?? "")?.name || Translation.tr("Workspace"),
+                                            agenda: Translation.tr("This week is clear"), modules: Translation.tr("Your desktop widgets") })[desktopBlock.modelData] ?? ""
+                                    }
+                                }
+                                Component {
+                                    id: stripBlock
+                                    Rectangle {
+                                        implicitHeight: stripRow.implicitHeight + (pageRoot.grouped ? Math.round(20 * root.d) : 0)
+                                        radius: IrisStyle.radiusTile
+                                        color: pageRoot.grouped ? IrisStyle.fillQuiet : "transparent"
+                                        RowLayout {
+                                            id: stripRow
+                                            anchors.centerIn: parent
+                                            width: parent.width - (pageRoot.grouped ? Math.round(20 * root.d) : 0)
+                                            spacing: 0
+                                            Repeater {
+                                                model: desktopBlock.modelData === "forecast"
+                                                    ? (pageRoot.hours.length > 0 ? pageRoot.hours : [{}, {}, {}, {}, {}, {}])
+                                                    : [{ glyph: "memory", value: Math.round(ResourceUsage.cpuUsage * 100) + "%" },
+                                                        { glyph: "memory_alt", value: Math.round(ResourceUsage.memoryUsedPercentage * 100) + "%" },
+                                                        { glyph: "device_thermostat", value: ResourceUsage.maxTemp + "°" },
+                                                        { glyph: "hard_drive", value: Math.round(ResourceUsage.diskUsedPercentage * 100) + "%" }]
+                                                ColumnLayout {
+                                                    id: stripCell
+                                                    required property var modelData
+                                                    required property int index
+                                                    Layout.fillWidth: true
+                                                    Layout.preferredWidth: 1
+                                                    spacing: Math.round(4 * root.d)
+                                                    IrisText {
+                                                        visible: desktopBlock.modelData === "forecast"
+                                                        Layout.alignment: Qt.AlignHCenter
+                                                        text: stripCell.index === 0 ? Translation.tr("Now") : String(stripCell.modelData.label ?? "").slice(0, 2)
+                                                        color: IrisStyle.muted
+                                                        font.pixelSize: IrisStyle.typeMeta
+                                                    }
+                                                    MaterialSymbol {
+                                                        Layout.alignment: Qt.AlignHCenter
+                                                        text: desktopBlock.modelData === "forecast" ? (Icons.getWeatherIcon(stripCell.modelData.code, stripCell.modelData.isNight) ?? "cloud") : stripCell.modelData.glyph
+                                                        fill: 1
+                                                        iconSize: Math.round(17 * root.d)
+                                                        color: desktopBlock.modelData === "forecast" ? IrisStyle.skyLight(text) : IrisStyle.subtext
+                                                    }
+                                                    IrisText {
+                                                        Layout.alignment: Qt.AlignHCenter
+                                                        text: desktopBlock.modelData === "forecast" ? String(stripCell.modelData.temp ?? "—") : stripCell.modelData.value
+                                                        font.family: IrisStyle.fontNumbers
+                                                        font.pixelSize: IrisStyle.typeLabel
+                                                    }
                                                 }
                                             }
                                         }
@@ -2444,68 +2521,68 @@ ClippingRectangle {
                                 }
                             }
                         }
-                    }
 
-                    Repeater {
-                        model: pageRoot.mode === "media" ? pageRoot.mediaBlocks : []
-                        Loader {
-                            id: mediaBlock
-                            required property string modelData
-                            Layout.fillWidth: true
-                            sourceComponent: ({ player: playerBlock, timeline: timelineBlock, transport: transportBlock, players: playersBlock, levels: levelsBlock })[mediaBlock.modelData] ?? null
-                            Component {
-                                id: playerBlock
-                                RowLayout {
-                                    spacing: Math.round(14 * root.d)
-                                    ClippingRectangle {
-                                        implicitWidth: Math.round(56 * root.d); implicitHeight: implicitWidth
-                                        radius: IrisStyle.radiusTile
-                                        color: IrisStyle.fill
-                                        IrisImage { anchors.fill: parent; source: String(MprisController.artUrlOf(pageRoot.player) ?? "") }
-                                        MaterialSymbol { anchors.centerIn: parent; visible: String(MprisController.artUrlOf(pageRoot.player) ?? "").length === 0; text: "music_note"; fill: 1; iconSize: Math.round(26 * root.d); color: IrisStyle.subtext }
-                                    }
-                                    ColumnLayout {
-                                        Layout.fillWidth: true
-                                        spacing: Math.round(2 * root.d)
-                                        IrisText { Layout.fillWidth: true; text: MprisController.titleOf(pageRoot.player) || Translation.tr("Song title"); font.weight: IrisStyle.weight(Font.DemiBold); font.pixelSize: IrisStyle.typeHeadline; elide: Text.ElideRight }
-                                        IrisText { Layout.fillWidth: true; text: MprisController.artistOf(pageRoot.player) || Translation.tr("Artist"); color: IrisStyle.subtext; elide: Text.ElideRight }
-                                    }
-                                }
-                            }
-                            Component { id: timelineBlock; Level { value: 0.34; tint: IrisStyle.text } }
-                            Component {
-                                id: transportBlock
-                                Item {
-                                    implicitHeight: Math.round(30 * root.d)
-                                    Row {
-                                        anchors.centerIn: parent
-                                        spacing: Math.round(34 * root.d)
-                                        Repeater {
-                                            model: ["fast_rewind", pageRoot.player?.isPlaying ? "pause" : "play_arrow", "fast_forward"]
-                                            MaterialSymbol { required property string modelData; text: modelData; fill: 1; iconSize: Math.round(26 * root.d); color: IrisStyle.text }
+                        Repeater {
+                            model: pageRoot.mode === "media" ? pageRoot.mediaBlocks : []
+                            Loader {
+                                id: mediaBlock
+                                required property string modelData
+                                Layout.fillWidth: true
+                                sourceComponent: ({ player: playerBlock, timeline: timelineBlock, transport: transportBlock, players: playersBlock, levels: levelsBlock })[mediaBlock.modelData] ?? null
+                                Component {
+                                    id: playerBlock
+                                    RowLayout {
+                                        spacing: Math.round(14 * root.d)
+                                        ClippingRectangle {
+                                            implicitWidth: Math.round(56 * root.d); implicitHeight: implicitWidth
+                                            radius: IrisStyle.radiusTile
+                                            color: IrisStyle.fill
+                                            IrisImage { anchors.fill: parent; source: String(MprisController.artUrlOf(pageRoot.player) ?? "") }
+                                            MaterialSymbol { anchors.centerIn: parent; visible: String(MprisController.artUrlOf(pageRoot.player) ?? "").length === 0; text: "music_note"; fill: 1; iconSize: Math.round(26 * root.d); color: IrisStyle.subtext }
+                                        }
+                                        ColumnLayout {
+                                            Layout.fillWidth: true
+                                            spacing: Math.round(2 * root.d)
+                                            IrisText { Layout.fillWidth: true; text: MprisController.titleOf(pageRoot.player) || Translation.tr("Song title"); font.weight: IrisStyle.weight(Font.DemiBold); font.pixelSize: IrisStyle.typeHeadline; elide: Text.ElideRight }
+                                            IrisText { Layout.fillWidth: true; text: MprisController.artistOf(pageRoot.player) || Translation.tr("Artist"); color: IrisStyle.subtext; elide: Text.ElideRight }
                                         }
                                     }
                                 }
-                            }
-                            Component {
-                                id: playersBlock
-                                BlockRow { glyph: "queue_music"; title: Translation.tr("Other players"); detail: Translation.tr("%1 playing").arg(Math.max(1, (MprisController.players ?? []).length)) }
-                            }
-                            Component {
-                                id: levelsBlock
-                                ColumnLayout {
-                                    spacing: Math.round(10 * root.d)
-                                    Rectangle { Layout.fillWidth: true; implicitHeight: 1; color: IrisStyle.hairline }
-                                    Repeater {
-                                        model: [0.66, 0.9]
-                                        RowLayout {
-                                            id: levelRow
-                                            required property real modelData
-                                            required property int index
-                                            spacing: Math.round(12 * root.d)
-                                            MaterialSymbol { text: levelRow.index === 0 ? "music_note" : "public"; fill: 1; iconSize: Math.round(17 * root.d); color: IrisStyle.subtext }
-                                            IrisText { Layout.preferredWidth: Math.round(110 * root.d); text: levelRow.index === 0 ? Translation.tr("Player") : Translation.tr("Browser"); elide: Text.ElideRight }
-                                            Level { value: levelRow.modelData; tint: IrisStyle.text }
+                                Component { id: timelineBlock; Level { value: 0.34; tint: IrisStyle.text } }
+                                Component {
+                                    id: transportBlock
+                                    Item {
+                                        implicitHeight: Math.round(30 * root.d)
+                                        Row {
+                                            anchors.centerIn: parent
+                                            spacing: Math.round(34 * root.d)
+                                            Repeater {
+                                                model: ["fast_rewind", pageRoot.player?.isPlaying ? "pause" : "play_arrow", "fast_forward"]
+                                                MaterialSymbol { required property string modelData; text: modelData; fill: 1; iconSize: Math.round(26 * root.d); color: IrisStyle.text }
+                                            }
+                                        }
+                                    }
+                                }
+                                Component {
+                                    id: playersBlock
+                                    BlockRow { glyph: "queue_music"; title: Translation.tr("Other players"); detail: Translation.tr("%1 playing").arg(Math.max(1, (MprisController.players ?? []).length)) }
+                                }
+                                Component {
+                                    id: levelsBlock
+                                    ColumnLayout {
+                                        spacing: Math.round(10 * root.d)
+                                        Rectangle { Layout.fillWidth: true; implicitHeight: 1; color: IrisStyle.hairline }
+                                        Repeater {
+                                            model: [0.66, 0.9]
+                                            RowLayout {
+                                                id: levelRow
+                                                required property real modelData
+                                                required property int index
+                                                spacing: Math.round(12 * root.d)
+                                                MaterialSymbol { text: levelRow.index === 0 ? "music_note" : "public"; fill: 1; iconSize: Math.round(17 * root.d); color: IrisStyle.subtext }
+                                                IrisText { Layout.preferredWidth: Math.round(110 * root.d); text: levelRow.index === 0 ? Translation.tr("Player") : Translation.tr("Browser"); elide: Text.ElideRight }
+                                                Level { value: levelRow.modelData; tint: IrisStyle.text }
+                                            }
                                         }
                                     }
                                 }
