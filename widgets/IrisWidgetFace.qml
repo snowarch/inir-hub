@@ -9,6 +9,7 @@ import qs.services
 import qs.modules.common
 import qs.modules.common.functions
 import qs.modules.common.widgets
+import qs.modules.iris.components
 import qs.modules.iris.style
 
 Item {
@@ -88,7 +89,6 @@ Item {
     // lit where it faces up, a line elsewhere. With both at 0 Auto draws no line, like the shell's glass.
     readonly property bool glassEdge: root.glass && !root.lightBackdrop
         && (IrisStyle.glassEdgeLight > 0 || IrisStyle.glassEdgeLine > 0)
-    readonly property real edgeWidth: Math.max(1, Math.round(IrisStyle.glassEdgeWidth * IrisStyle.density))
     readonly property bool flatRim: root.rimShown && !root.glassEdge
         && !(root.glass && !root.lightBackdrop && root.widget.irisOutline === "auto" && !GlobalStates.widgetEditMode)
     readonly property color plateColor: ColorUtils.applyAlpha(root.opaque ? root.widget.irisPlate
@@ -169,51 +169,16 @@ Item {
         visible: root.plated
         radius: root.radius
         color: root.plateColor
-        border.width: root.glassEdge && root.rimShown ? root.edgeWidth : root.flatRim ? 1 : 0
-        border.color: root.glassEdge && root.rimShown ? ColorUtils.applyAlpha(IrisStyle.glassEdgeColour, IrisStyle.glassEdgeLine)
-            : root.lightBackdrop ? root.hairline : root.clear || IrisStyle.rim.a === 0 ? IrisStyle.clearRim : IrisStyle.rim
+        border.width: root.flatRim ? 1 : 0
+        border.color: root.lightBackdrop ? root.hairline : root.clear || IrisStyle.rim.a === 0 ? IrisStyle.clearRim : IrisStyle.rim
         Behavior on color { ColorAnimation { duration: IrisStyle.revealDuration; easing.type: IrisStyle.feedbackEasing } }
         Behavior on border.width { NumberAnimation { duration: IrisStyle.revealDuration; easing.type: IrisStyle.feedbackEasing } }
     }
 
-    // The lit top of the glass edge: a native (antialiased) border, faded downward by a smooth vertical mask,
-    // so the curve keeps the plate border's antialiasing; the line itself is the plate's own border.
-    Loader {
+    IrisGlassEdge {
         anchors.fill: parent
-        active: root.glassEdge && root.rimShown && IrisStyle.glassEdgeLight > IrisStyle.glassEdgeLine
-        visible: root.plated
-        sourceComponent: Item {
-            id: edge
-            Rectangle {
-                id: litRing
-                anchors.fill: parent
-                radius: root.radius
-                color: "transparent"
-                antialiasing: true
-                border.width: root.edgeWidth
-                border.color: ColorUtils.applyAlpha(IrisStyle.glassEdgeColour, IrisStyle.glassEdgeLight)
-                visible: false
-                layer.enabled: true
-            }
-            Rectangle {
-                id: litFade
-                anchors.fill: parent
-                visible: false
-                layer.enabled: true
-                gradient: Gradient {
-                    GradientStop { position: 0; color: "white" }
-                    GradientStop { position: 0.45; color: "transparent" }
-                }
-            }
-            MultiEffect {
-                anchors.fill: parent
-                source: litRing
-                maskEnabled: true
-                maskSource: litFade
-                maskThresholdMin: 0
-                maskSpreadAtMin: 1
-            }
-        }
+        visible: root.glassEdge && root.rimShown && root.plated
+        radius: root.radius
     }
 
     Rectangle {

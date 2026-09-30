@@ -2454,69 +2454,99 @@ Item {
                             sourceComponent: IslandDesktopPage {
                                 width: desktopLoader.width
                                 island: root
-                                navOffset: navRow.height + expandedContent.rowSpacing
+                                navOffset: navFrame.height + expandedContent.rowSpacing
                             }
                         }
                     }
                 }
 
-                RowLayout {
-                    id: navRow
+                // Settings › Island › Pages › Page buttons: bare (as designed), or held on a plate whose corners follow
+                // the bubbles' shape and stay concentric with the buttons inside it.
+                Item {
+                    id: navFrame
                     Layout.row: root.bottomEdge ? 1 : 0
                     Layout.alignment: Qt.AlignHCenter
-                    spacing: 4 * root.d
+                    readonly property string material: {
+                        const value = String(root.options?.navFrame ?? "none")
+                        return ["veil", "glass", "solid"].includes(value) ? value : "none"
+                    }
+                    readonly property bool framed: navFrame.material !== "none"
+                    readonly property real inset: navFrame.framed ? Math.round(4 * root.d) : 0
+                    readonly property real buttonRadius: navFrame.framed ? IrisStyle.pieceRadius(Math.round(30 * root.d)) : Math.round(15 * root.d)
+                    implicitWidth: navRow.implicitWidth + navFrame.inset * 2
+                    implicitHeight: navRow.implicitHeight + navFrame.inset * 2
 
-                    WheelHandler {
-                        acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
-                        onWheel: event => root.wheelPages(event, true)
+                    Rectangle {
+                        id: navPlate
+                        anchors.fill: parent
+                        visible: navFrame.framed
+                        radius: navFrame.buttonRadius + navFrame.inset
+                        color: navFrame.material === "veil" ? IrisStyle.veil
+                            : navFrame.material === "solid" ? IrisStyle.readingCard : IrisStyle.fill
+                    }
+                    IrisGlassEdge {
+                        anchors.fill: parent
+                        visible: navFrame.material === "glass" && shown
+                        radius: navPlate.radius
                     }
 
-                    Repeater {
-                        model: root.navEntries
-                        delegate: Item {
-                            id: navSlot
-                            required property var modelData
-                            implicitWidth: navSlot.modelData.kind === "|" ? Math.round(9 * root.d) : navButton.implicitWidth
-                            implicitHeight: navButton.implicitHeight
-                            Rectangle {
-                                visible: navSlot.modelData.kind === "|"
-                                anchors.centerIn: parent
-                                width: 1
-                                height: Math.round(14 * root.d)
-                                color: IrisStyle.fill
-                            }
-                            IrisButton {
-                                id: navButton
-                                visible: navSlot.modelData.kind !== "|"
-                                readonly property string target: navSlot.modelData.page ?? ""
-                                selected: navButton.target.length > 0 && root.effectivePage === navButton.target
-                                quiet: !navButton.selected
-                                implicitWidth: Math.round(36 * root.d)
-                                implicitHeight: Math.round(30 * root.d)
-                                buttonRadius: height / 2
-                                buttonRadiusPressed: height / 2
-                                colBackgroundHover: IrisStyle.fillHover
-                                Accessible.name: Translation.tr(navSlot.modelData.label ?? "")
-                                onHoveredChanged: {
-                                    if (navButton.target.length > 0) {
-                                        if (navButton.hovered) {
-                                            pageIntentExpiry.stop()
-                                            root.pageIntent = navButton.target
-                                        } else if (root.pageIntent === navButton.target) {
-                                            pageIntentExpiry.restart()
-                                        }
-                                    }
-                                    if (navSlot.modelData.kind === "settings" && root.focusedOutput)
-                                        root.settingsIntent = navButton.hovered
-                                }
-                                onClicked: root.activateNav(navSlot.modelData.kind)
-                                Glyph {
+                    RowLayout {
+                        id: navRow
+                        anchors.centerIn: parent
+                        spacing: 4 * root.d
+
+                        WheelHandler {
+                            acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
+                            onWheel: event => root.wheelPages(event, true)
+                        }
+
+                        Repeater {
+                            model: root.navEntries
+                            delegate: Item {
+                                id: navSlot
+                                required property var modelData
+                                implicitWidth: navSlot.modelData.kind === "|" ? Math.round(9 * root.d) : navButton.implicitWidth
+                                implicitHeight: navButton.implicitHeight
+                                Rectangle {
+                                    visible: navSlot.modelData.kind === "|"
                                     anchors.centerIn: parent
-                                    text: navSlot.modelData.glyph ?? ""
-                                    fill: navButton.selected ? 1 : 0
-                                    iconSize: 18 * root.d
-                                    color: navButton.selected ? IrisStyle.accent
-                                        : navButton.hovered ? IrisStyle.text : IrisStyle.textSecondary
+                                    width: 1
+                                    height: Math.round(14 * root.d)
+                                    color: IrisStyle.fill
+                                }
+                                IrisButton {
+                                    id: navButton
+                                    visible: navSlot.modelData.kind !== "|"
+                                    readonly property string target: navSlot.modelData.page ?? ""
+                                    selected: navButton.target.length > 0 && root.effectivePage === navButton.target
+                                    quiet: !navButton.selected
+                                    implicitWidth: Math.round(36 * root.d)
+                                    implicitHeight: Math.round(30 * root.d)
+                                    buttonRadius: navFrame.buttonRadius
+                                    buttonRadiusPressed: navFrame.buttonRadius
+                                    colBackgroundHover: IrisStyle.fillHover
+                                    Accessible.name: Translation.tr(navSlot.modelData.label ?? "")
+                                    onHoveredChanged: {
+                                        if (navButton.target.length > 0) {
+                                            if (navButton.hovered) {
+                                                pageIntentExpiry.stop()
+                                                root.pageIntent = navButton.target
+                                            } else if (root.pageIntent === navButton.target) {
+                                                pageIntentExpiry.restart()
+                                            }
+                                        }
+                                        if (navSlot.modelData.kind === "settings" && root.focusedOutput)
+                                            root.settingsIntent = navButton.hovered
+                                    }
+                                    onClicked: root.activateNav(navSlot.modelData.kind)
+                                    Glyph {
+                                        anchors.centerIn: parent
+                                        text: navSlot.modelData.glyph ?? ""
+                                        fill: navButton.selected ? 1 : 0
+                                        iconSize: 18 * root.d
+                                        color: navButton.selected ? IrisStyle.accent
+                                            : navButton.hovered ? IrisStyle.text : IrisStyle.textSecondary
+                                    }
                                 }
                             }
                         }
