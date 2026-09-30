@@ -243,6 +243,7 @@ Item {
         
         // === Waffle Style (8) ===
         { pageIndex: 8, pageName: "Waffle Style", section: "Theming", label: "Use Material colors", targetLabel: "Use Material colors", keywords: ["material", "colors", "theme", "grey", "accent"] },
+        { pageIndex: 8, pageName: "Waffle Style", section: "Alt+Tab Switcher", label: "Alt+Tab opens", targetLabel: "Alt+Tab opens", keywords: ["alt", "tab", "alt+tab", "switcher", "window", "recent", "niri", "inir", "keybind", "shortcut"] },
         { pageIndex: 8, pageName: "Waffle Style", section: "Alt+Tab Switcher", label: "Style", targetLabel: "Style", keywords: ["alt", "tab", "switcher", "style", "thumbnails", "cards", "compact", "list"] },
         { pageIndex: 8, pageName: "Waffle Style", section: "Alt+Tab Switcher", label: "Quick switch", targetLabel: "Quick switch", keywords: ["alt", "tab", "quick", "switch", "fast"] },
         { pageIndex: 8, pageName: "Waffle Style", section: "Alt+Tab Switcher", label: "Most recent first", targetLabel: "Most recent first", keywords: ["alt", "tab", "recent", "order", "mru"] },
