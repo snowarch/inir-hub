@@ -308,13 +308,14 @@ Item {
             color: root.faceAccent
         }
         Ring {
+            id: soundRing
             visible: root.kind === "sound" || root.kind === "mic"
             anchors.fill: parent
             anchors.margins: 3 * root.d + root.platedInset
             readonly property bool muted: root.kind === "mic" ? Audio.micMuted : (Audio.sink?.audio?.muted ?? false)
             tint: muted ? (root.kind === "mic" ? root.dangerInk : root.inkMuted) : root.ink
             progress: muted ? 0 : Math.min(1, root.kind === "mic" ? (Audio.micVolume ?? 0) : (Audio.value ?? 0))
-            Behavior on progress { NumberAnimation { duration: IrisStyle.duration(110); easing.type: IrisStyle.feedbackEasing } }
+            Behavior on progress { enabled: soundRing.visible; NumberAnimation { duration: IrisStyle.duration(110); easing.type: IrisStyle.feedbackEasing } }
         }
         Glyph {
             visible: root.kind === "sound" || root.kind === "mic"
@@ -439,7 +440,7 @@ Item {
                 : Battery.isCritical ? root.dangerInk
                 : Battery.isLow ? root.highlight : root.ink
             progress: batteryRing.level
-            Behavior on progress { NumberAnimation { duration: IrisStyle.duration(220); easing.type: IrisStyle.feedbackEasing } }
+            Behavior on progress { enabled: batteryRing.visible; NumberAnimation { duration: IrisStyle.duration(220); easing.type: IrisStyle.feedbackEasing } }
         }
         Column {
             visible: root.kind === "battery"
@@ -527,7 +528,8 @@ Item {
             tint: vitalsRing.load > 0.85 ? root.dangerInk
                 : vitalsRing.load > 0.6 ? root.highlight : root.legible(IrisStyle.identity.teal, 3)
             progress: vitalsRing.load
-            Behavior on progress { NumberAnimation { duration: IrisStyle.duration(220); easing.type: IrisStyle.feedbackEasing } }
+            // Every face builds this ring; hidden, an eased reading still redraws the whole chassis each poll.
+            Behavior on progress { enabled: vitalsRing.visible; NumberAnimation { duration: IrisStyle.duration(220); easing.type: IrisStyle.feedbackEasing } }
         }
         FaceText {
             visible: root.kind === "vitals"
