@@ -10,6 +10,7 @@ import qs.services
 import qs.services.deferred
 import qs.modules.common
 import qs.modules.settings
+import qs.modules.iris.background
 import qs.modules.iris.control
 import qs.modules.iris.field
 import qs.modules.iris.frame
@@ -510,6 +511,9 @@ Scope {
             if (!found) return `No option matches: ${query}`
             AnimeWatch.choose(AnimeWatch.pickValue(found))
             return AnimeWatch.pickLabel(found)
+        }
+        function desktopAction(id: string): string {
+            return IrisDesktopActions.run(id, NiriService.currentOutput || (Quickshell.screens[0]?.name ?? ""))
         }
         function desktopMenu(x: string, y: string): string {
             const output = NiriService.currentOutput

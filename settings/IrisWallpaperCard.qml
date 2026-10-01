@@ -237,7 +237,7 @@ ClippingRectangle {
                 Layout.topMargin: Math.round(14 * card.d)
                 spacing: Math.round(8 * card.d)
                 GlassButton { glyph: "photo_library"; label: Translation.tr("Change wallpaper"); onClicked: card.openGallery() }
-                GlassButton { glyph: "shuffle"; label: ""; onClicked: Wallpapers.randomFromCurrentFolder() }
+                GlassButton { glyph: "shuffle"; label: ""; onClicked: Wallpapers.nextWallpaper() }
             }
         }
     }

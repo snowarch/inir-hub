@@ -34,7 +34,7 @@ Singleton {
         { id: "customize", group: 0, label: Translation.tr("Customize iRiS"), glyph: "palette", tint: "purple",
             run: screen => GlobalStates.openIrisCustomize("") },
         { id: "nextWallpaper", group: 0, label: Translation.tr("Next wallpaper"), glyph: "shuffle", tint: "pink",
-            run: screen => Wallpapers.randomFromCurrentFolder(Appearance.m3colors.darkmode, screen) },
+            run: screen => Wallpapers.nextWallpaper(Appearance.m3colors.darkmode, screen) },
         { id: "screenshot", group: 1, label: Translation.tr("Screenshot"), glyph: "screenshot_region", tint: "blue",
             run: screen => root.inir(["region", "screenshot"]) },
         { id: "record", group: 1, label: Translation.tr("Record screen"), glyph: "screen_record", tint: "red",
@@ -62,14 +62,14 @@ Singleton {
     function menu(screenName: string, wallpaper: string, preview: string): var {
         const out = []
         if (root.showWallpaper)
-            out.push({ type: "hero", text: Translation.tr("Wallpaper"), detail: Translation.tr("Change"), image: preview,
+            out.push({ type: "hero", id: "wallpaper", text: Translation.tr("Wallpaper"), detail: Translation.tr("Change"), image: preview,
                 iconName: "chevron_right",
                 action: () => {
                     GlobalStates.wallpaperSelectorTargetMonitor = screenName
                     GlobalActions.runLauncher(["wallpaperSelector", "toggle"])
                 },
-                secondary: { iconName: "shuffle", text: Translation.tr("Next wallpaper"),
-                    action: () => Wallpapers.randomFromCurrentFolder(Appearance.m3colors.darkmode, screenName) } })
+                secondary: { id: "wallpaperNext", iconName: "shuffle", text: Translation.tr("Next wallpaper"),
+                    action: () => Wallpapers.nextWallpaper(Appearance.m3colors.darkmode, screenName) } })
         const groupOf = id => root.catalogue.find(item => item.id === id).group
         const ordered = root.chosen.map((id, index) => ({ id: id, index: index }))
             .sort((a, b) => groupOf(a.id) - groupOf(b.id) || a.index - b.index).map(item => item.id)
@@ -79,8 +79,22 @@ Singleton {
             if (group >= 0 ? entry.group !== group : out.length > 0)
                 out.push({ type: "separator" })
             group = entry.group
-            out.push({ text: entry.label, iconName: entry.glyph, tint: entry.tint, action: () => entry.run(screenName) })
+            out.push({ id: entry.id, text: entry.label, iconName: entry.glyph, tint: entry.tint, action: () => entry.run(screenName) })
         }
         return out
+    }
+
+    // Runs one entry of the menu as a click would, through the menu's own action (`inir iris desktopAction`).
+    // `wallpaperNext` is the round button on the wallpaper; any catalogue id works, shown in the menu or not.
+    function run(id: string, screenName: string): string {
+        const shown = root.menu(screenName, "", "")
+        for (const item of shown) {
+            if (item.id === id && item.action) { item.action(); return id }
+            if (item.secondary?.id === id) { item.secondary.action(); return id }
+        }
+        const entry = root.catalogue.find(item => item.id === id)
+        if (!entry) return "Unknown action: wallpaper, wallpaperNext or " + root.catalogue.map(item => item.id).join(", ")
+        entry.run(screenName)
+        return id
     }
 }
