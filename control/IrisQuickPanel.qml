@@ -13,6 +13,9 @@ import qs.modules.iris.style
 
 ColumnLayout {
     id: root
+
+    // The monitor's own buttons may have moved the level since the shell wrote it.
+    onVisibleChanged: if (visible) Brightness.getMonitorForScreen(root.targetScreen)?.refresh()
     property var targetScreen
     readonly property real d: IrisStyle.density
     readonly property real blockRadius: IrisStyle.radiusPlate
