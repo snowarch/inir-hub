@@ -828,6 +828,14 @@ WSettingsPage {
         }
 
         WSettingsSwitch {
+            label: Translation.tr("LiMusic")
+            icon: "music-note-2"
+            description: Translation.tr("LiMusic follows your wallpaper colours, from the next time it opens")
+            checked: Config.options?.appearance?.wallpaperTheming?.enableLimusic ?? false
+            onCheckedChanged: Config.setNestedValue("appearance.wallpaperTheming.enableLimusic", checked)
+        }
+
+        WSettingsSwitch {
             label: Translation.tr("Zed editor")
             icon: "terminal"
             description: Translation.tr("Generate Zed editor theme from wallpaper colors")
