@@ -1189,6 +1189,14 @@ WSettingsPage {
             onSelected: newValue => Config.setNestedValue("waffles.theming.font.family", newValue)
         }
 
+        WSettingsSwitch {
+            label: Translation.tr("Apps use this font")
+            icon: "apps"
+            description: Translation.tr("Your apps' text follows the font the shell shows.")
+            checked: Config.options?.appearance?.typography?.syncWithSystem ?? true
+            onCheckedChanged: Config.setNestedValue("appearance.typography.syncWithSystem", checked)
+        }
+
         WSettingsSpinBox {
             label: Translation.tr("Font scale")
             icon: "auto"
