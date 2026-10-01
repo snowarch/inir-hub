@@ -802,7 +802,7 @@ WSettingsPage {
             description: Translation.tr("Choose the Spicetify layout while keeping iNiR wallpaper colors")
             currentValue: Config.options?.appearance?.wallpaperTheming?.spicetifyTheme ?? "Inir"
             options: [
-                { value: "Inir", displayName: Translation.tr("Sleek") },
+                { value: "Inir", displayName: "iNiR" },
                 { value: "InirTUI", displayName: Translation.tr("Text (TUI)") }
             ]
             onSelected: newValue => {
