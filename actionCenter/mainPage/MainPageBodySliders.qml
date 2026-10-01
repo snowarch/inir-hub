@@ -13,6 +13,8 @@ ColumnLayout {
     id: root
     property var screen: root.QsWindow.window?.screen
     property var brightnessMonitor: Brightness.getMonitorForScreen(screen)
+    // The monitor's own buttons may have moved the level since the shell wrote it.
+    onVisibleChanged: if (visible) root.brightnessMonitor?.refresh()
     spacing: 12
 
     RowLayout {
