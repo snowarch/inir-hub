@@ -867,7 +867,6 @@ QtObject {
         }
     }
     Component.onCompleted: if (GlobalStates.shellEntryReady) root.startArrival()
-        && root.appearance?.morph !== "instant"
     function duration(ms: int): int {
         return root.motionEnabled ? Appearance.calcEffectiveDuration(ms) : 0
     }
