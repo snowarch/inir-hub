@@ -836,6 +836,14 @@ WSettingsPage {
         }
 
         WSettingsSwitch {
+            label: Translation.tr("Claude Code")
+            icon: "terminal"
+            description: Translation.tr("Adds iNiR themes to Claude Code's theme list: two follow your wallpaper, two keep a fixed Monokai palette")
+            checked: Config.options?.appearance?.wallpaperTheming?.enableClaudeCode ?? false
+            onCheckedChanged: Config.setNestedValue("appearance.wallpaperTheming.enableClaudeCode", checked)
+        }
+
+        WSettingsSwitch {
             label: Translation.tr("Zed editor")
             icon: "terminal"
             description: Translation.tr("Generate Zed editor theme from wallpaper colors")
