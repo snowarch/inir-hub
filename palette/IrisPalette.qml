@@ -45,7 +45,10 @@ Item {
             held = Math.max(held, IrisFrame.band + IrisFrame.dockBand + IrisFrame.dockMargin)
         return held - IrisFrame.band + IrisFrame.musicReach(edge) + Math.round(12 * IrisStyle.density)
     }
-    readonly property bool mathQuery: /[0-9]/.test(LauncherSearch.query)
+    // Results follow the query once typing pauses, the same moment the apps answer: searching on every key
+    // ran iRiS's search twice per key and rebuilt every row two or three times (60-100 ms of the GUI thread).
+    readonly property string settled: LauncherSearch.settledQuery
+    readonly property bool mathQuery: /[0-9]/.test(root.settled)
     readonly property var launcherResults: (LauncherSearch.results ?? [])
         .filter(entry => String(entry?.name ?? "").length > 0
             && (root.mathQuery || entry?.type !== Translation.tr("Math")))
@@ -53,7 +56,7 @@ Item {
     // app name starts with what was typed, the rest follow the apps; the calculator, command and web come last.
     readonly property bool plainQuery: {
         const prefix = Config.options?.search?.prefix ?? ({})
-        const q = LauncherSearch.query
+        const q = root.settled
         return q.trim().length > 0 && ![prefix.clipboard ?? ";", prefix.emojis ?? ":", prefix.math ?? "=", prefix.shellCommand ?? "$",
             prefix.webSearch ?? "?", prefix.action ?? "/", prefix.app ?? ">"].some(key => String(key).length > 0 && q.startsWith(key))
     }
@@ -67,16 +70,17 @@ Item {
                 : entry.kind === "switch" ? Translation.tr("Switch") : entry.pick ? Translation.tr("Apply") : Translation.tr("Run"),
             isOn: typeof entry.isOn === "function" ? entry.isOn : null, pick: entry.pick, keepOpen: entry.keepOpen, execute: entry.run, fuzzy: true }
     }
+    readonly property var irisHits: root.plainQuery ? IrisSearch.search(root.settled).filter(hit => hit.score >= 0.7) : []
     readonly property var blendedResults: {
         if (!root.plainQuery) return root.launcherResults
-        const hits = IrisSearch.search(LauncherSearch.query).filter(hit => hit.score >= 0.7)
+        const hits = root.irisHits
         const acts = hits.filter(hit => hit.entry.kind !== "setting" && hit.entry.kind !== "section").slice(0, 4)
         const opens = hits.filter(hit => hit.entry.kind === "setting" || hit.entry.kind === "section").slice(0, 3)
         // Apps keep the lead, but three of them are enough to leave room for what the query also names.
         const allApps = root.launcherResults.filter(entry => entry?.type === Translation.tr("App"))
         const apps = hits.length > 0 ? allApps.slice(0, 3) : allApps
         const rest = root.launcherResults.filter(entry => entry?.type !== Translation.tr("App"))
-        const typed = IrisSearch.fold(LauncherSearch.query).trim()
+        const typed = IrisSearch.fold(root.settled).trim()
         const appLeads = apps.length > 0 && IrisSearch.fold(apps[0].name).startsWith(typed)
         const best = acts.concat(opens).sort((a, b) => b.score - a.score)[0] ?? null
         if (best && best.score >= 0.9 && !appLeads) {
@@ -100,7 +104,7 @@ Item {
     // "/" lists what iRiS can flip, apply or run from here, grouped by area; typed words narrow it the forgiving
     // way IrisSearch matches. A switch stays open to show its new state; the rest run and close.
     readonly property string actionPrefix: Config.options?.search?.prefix?.action ?? "/"
-    readonly property bool actionMode: LauncherSearch.query.startsWith(root.actionPrefix)
+    readonly property bool actionMode: root.settled.startsWith(root.actionPrefix)
     // One header per area: areas follow their best row, rows keep their rank inside the area.
     function byArea(entries: var): var {
         const order = [], groups = ({})
@@ -113,7 +117,7 @@ Item {
     }
     readonly property var actionResults: {
         if (!root.actionMode) return []
-        const query = LauncherSearch.query.slice(root.actionPrefix.length).trim()
+        const query = root.settled.slice(root.actionPrefix.length).trim()
         if (query.length > 0) return root.byArea(IrisSearch.search(query).map(hit => hit.entry)).map(entry => root.rowOf(entry))
         // Nothing typed: the everyday switches first, then everything else by area. While widgets are being
         // arranged, the widgets lead: that is what "/" was asked for there.
@@ -133,7 +137,7 @@ Item {
     readonly property bool joinsEdge: root.fromIsland && IrisFrame.notch
     readonly property bool joinsFrame: root.joinsEdge && IrisFrame.framed
 
-    readonly property bool browsing: LauncherSearch.query.length === 0
+    readonly property bool browsing: root.settled.length === 0
     readonly property var suggestions: {
         return (TaskbarApps.apps ?? []).filter(app => app.appId !== "SEPARATOR").slice(0, 8).map(app => {
             const entry = AppSearch.lookupDesktopEntry(app.appId)
@@ -156,8 +160,22 @@ Item {
         })
     }
     readonly property var visibleResults: root.browsing ? root.suggestions : root.searchResults
+    // The rows keep their delegate while the same result stays (ScriptModel by rowKey): a plain array made the
+    // Repeater destroy and build every row on each update, ~2.5 ms a row.
+    readonly property var keyedResults: {
+        const seen = ({})
+        const single = [Translation.tr("Math"), Translation.tr("Command"), Translation.tr("Web")]
+        return (root.browsing ? [] : root.searchResults).map(entry => {
+            const type = String(entry?.type ?? "")
+            let key = single.includes(type) ? type
+                : type + "|" + String(entry?.rawValue ?? entry?.id ?? (String(entry?.name ?? "") + "|" + String(entry?.comment ?? "")))
+            seen[key] = (seen[key] ?? 0) + 1
+            if (seen[key] > 1) key += "#" + seen[key]
+            return Object.assign({}, entry, { rowKey: key })
+        })
+    }
     readonly property string clipboardPrefix: Config.options?.search?.prefix?.clipboard ?? ";"
-    readonly property bool clipboardMode: LauncherSearch.query.startsWith(root.clipboardPrefix)
+    readonly property bool clipboardMode: root.settled.startsWith(root.clipboardPrefix)
     onClipboardModeChanged: if (root.clipboardMode) Cliphist.refresh()
     property int selectedIndex: 0
     property bool pointerSelectionArmed: false
@@ -203,6 +221,10 @@ Item {
             root.disarmPointerSelection(true)
             root.takeRequestedQuery()
             root.focusInput()
+        }
+        // `inir iris spotlight <query>` while it is open types the new query in.
+        function onIrisSpotlightQueryChanged(): void {
+            if (GlobalStates.searchOpen && root.here) root.takeRequestedQuery()
         }
     }
 
@@ -300,7 +322,7 @@ Item {
                 return value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
             }
             function emphasised(name: string): string {
-                const query = LauncherSearch.query.trim()
+                const query = root.settled.trim()
                 const at = query.length > 0 ? name.toLowerCase().indexOf(query.toLowerCase()) : -1
                 const dim = IrisStyle.textSecondary
                 if (at < 0) return stage.escapeHtml(name)
@@ -702,7 +724,7 @@ Item {
                         id: results
                         Layout.row: body.fieldLast ? 0 : 3
                         Layout.fillWidth: true
-                        visible: !root.browsing && LauncherSearch.query.length > 0
+                        visible: !root.browsing
                         implicitHeight: resultColumn.implicitHeight + 16 * stage.d
                         Layout.fillHeight: true
                         Layout.minimumHeight: Math.min(results.implicitHeight, Math.round(96 * stage.d))
@@ -767,7 +789,10 @@ Item {
 
                                 Repeater {
                                     id: resultRepeater
-                                    model: root.browsing ? [] : root.visibleResults
+                                    model: ScriptModel {
+                                        objectProp: "rowKey"
+                                        values: root.keyedResults
+                                    }
                                     Column {
                                         id: result
                                         required property var modelData
@@ -952,7 +977,7 @@ Item {
                                                     IrisText {
                                                         Layout.fillWidth: true
                                                         visible: (result.topHit || root.actionMode || Boolean(result.modelData?.fuzzy)) && text.length > 0
-                                                        text: result.mathHit ? LauncherSearch.query
+                                                        text: result.mathHit ? root.settled
                                                             : result.modelData?.comment || result.modelData?.genericName || result.modelData?.type || ""
                                                         color: IrisStyle.subtext
                                                         font.pixelSize: IrisStyle.typeMeta
