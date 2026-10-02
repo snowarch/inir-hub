@@ -821,6 +821,7 @@ QtObject {
         { section: "appearance", group: "App colours", label: "Spotify theme", path: "appearance.wallpaperTheming.spicetifyTheme", visibleWhen: "appearance.wallpaperTheming.enableSpicetify", kind: "choice", fallback: "Inir", choices: [{label:"iNiR",value:"Inir"},{label:"Text (TUI)",value:"InirTUI"}] },
         { section: "appearance", group: "App colours", label: "YouTube Music (Pear Desktop)", path: "appearance.wallpaperTheming.enablePearDesktop", kind: "switch", fallback: true, keywords: ["youtube", "ytmusic", "pear", "music", "musica"] },
         { section: "appearance", group: "App colours", label: "LiMusic", description: "Follows the wallpaper, from the next time LiMusic opens.", path: "appearance.wallpaperTheming.enableLimusic", kind: "switch", fallback: false, keywords: ["limusic", "youtube", "music", "musica"] },
+        { section: "appearance", group: "App colours", label: "Claude Code", description: "Adds iNiR themes to Claude Code's theme list: two follow the wallpaper, two keep a fixed Monokai palette.", path: "appearance.wallpaperTheming.enableClaudeCode", kind: "switch", fallback: false, keywords: ["claude", "claude code", "anthropic", "terminal", "cli", "syntax", "sintaxis", "theme"] },
         { section: "appearance", group: "App colours", label: "Steam", path: "appearance.wallpaperTheming.enableSteam", kind: "switch", fallback: false },
         { section: "appearance", group: "App colours", label: "Neovim", path: "appearance.wallpaperTheming.enableNeovim", kind: "switch", fallback: false },
 
