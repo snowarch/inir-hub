@@ -1325,6 +1325,7 @@ Item {
             const page = GlobalStates.irisIslandPageRequest
             if (page.length === 0 || !root.focusedOutput) return
             GlobalStates.irisIslandPageRequest = ""
+            if (page === "collapse") { root.expanded = false; return }
             root.openPage(page, true, null)
         }
     }

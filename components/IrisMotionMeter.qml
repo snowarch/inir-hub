@@ -21,7 +21,8 @@ Singleton {
         gallery: { surface: "gallery", open: () => GlobalStates.wallpaperSelectorOpen = true, close: () => GlobalStates.wallpaperSelectorOpen = false },
         settings: { surface: "settings", open: () => GlobalStates.openSettings(), close: () => GlobalStates.settingsOverlayOpen = false },
         focus: { surface: "panels", open: () => GlobalStates.openSidebarLeft(GlobalStates.focusedScreen?.name ?? ""), close: () => GlobalStates.closeSidebarLeft() },
-        today: { surface: "panels", open: () => GlobalStates.openSidebarRight(GlobalStates.focusedScreen?.name ?? ""), close: () => GlobalStates.closeSidebarRight() }
+        today: { surface: "panels", open: () => GlobalStates.openSidebarRight(GlobalStates.focusedScreen?.name ?? ""), close: () => GlobalStates.closeSidebarRight() },
+        card: { surface: "cards", open: () => { GlobalStates.irisBubbleCardRequest = ""; GlobalStates.irisBubbleCardRequest = "media" }, close: () => GlobalStates.irisBubbleCard = null }
     })
 
     property string target: ""
@@ -83,6 +84,7 @@ Singleton {
         root.result = { state: "running", target: name }
         refresh.running = true
         root.targets[name].close()
+        root.islandWasExpanded = GlobalStates.irisIslandExpanded
         GlobalStates.irisIslandPageRequest = "desktop"
         root.phase = "prepare"
         step.interval = 900
@@ -98,6 +100,7 @@ Singleton {
         return { x: name === "focus" ? 0 : screen.width - band, y: 0, width: band, height: screen.height }
     }
     property var lastSource: null
+    property bool islandWasExpanded: false
     function begin(kind: string): void {
         root.current = { kind: kind, requested: Date.now(), frames: [], origin: root.originFor(root.target) }
     }
@@ -146,6 +149,8 @@ Singleton {
             case "clean":
                 root.phase = ""
                 root.result = root.report(t)
+                // The run expanded the Island to measure from it; leave it as it was found.
+                if (!root.islandWasExpanded) GlobalStates.irisIslandPageRequest = "collapse"
                 break
             }
         }

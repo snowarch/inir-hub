@@ -156,6 +156,14 @@ Item {
             return presentationSpring.jump()
         if (root.presentation <= 0 && !root.open) root.closed()
     }
+    // A closed body that has not reached 0 keeps its shape, and with Blur its untinted blur, on screen. Reported, so a
+    // leftover the maintainer sees once ("blur stays after closing, with slow motion") is in the log with its surface.
+    Timer {
+        interval: 3000
+        running: !root.open && !root.armed && root.presentation > 0
+        onTriggered: console.warn("iRiS: " + root.motionSurface + " closed but still drawn at " + root.presentation.toFixed(4)
+            + " (" + (root.chassisKey || "own window") + ")")
+    }
     // After every animation of the tick has run, so a sample is the frame that is drawn, not the one before it.
     Connections {
         target: root.Window.window
