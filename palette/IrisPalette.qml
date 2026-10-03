@@ -14,6 +14,7 @@ import qs.modules.common.widgets
 import qs.modules.iris.frame
 import qs.modules.iris.style
 import qs.modules.iris.components
+import qs.modules.iris.dock
 import qs.modules.iris.pieces
 import qs.modules.iris.settings
 
@@ -139,7 +140,7 @@ Item {
 
     readonly property bool browsing: root.settled.length === 0
     readonly property var suggestions: {
-        return (TaskbarApps.apps ?? []).filter(app => app.appId !== "SEPARATOR").slice(0, 8).map(app => {
+        return IrisDockOrder.entries.filter(app => app.appId !== "SEPARATOR").slice(0, 8).map(app => {
             const entry = AppSearch.lookupDesktopEntry(app.appId)
             const windows = app.toplevels ?? []
             return {

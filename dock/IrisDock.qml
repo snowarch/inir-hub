@@ -48,13 +48,95 @@ Item {
     readonly property bool magnify: (root.options?.magnification ?? true) && IrisStyle.motionEnabled
     readonly property bool badges: root.options?.badges ?? true
     readonly property bool revealOnEmpty: root.options?.revealOnEmpty ?? true
-    readonly property var apps: TaskbarApps.apps
     readonly property var entries: {
-        const list = root.apps.slice()
-        while (list.length > 0 && list[0].appId === "SEPARATOR") list.shift()
-        while (list.length > 0 && list[list.length - 1].appId === "SEPARATOR") list.pop()
+        const list = root.trimmed(root.ordered)
         if (root.showLauncher && list.length > 0) list.unshift({ appId: "SEPARATOR" })
         return list
+    }
+    function trimmed(list: var): var {
+        const out = list.slice()
+        while (out.length > 0 && (out[0].appId ?? out[0]) === "SEPARATOR") out.shift()
+        while (out.length > 0 && (out[out.length - 1].appId ?? out[out.length - 1]) === "SEPARATOR") out.pop()
+        return out
+    }
+
+    readonly property bool reorder: root.options?.reorder ?? true
+    property string slideApp: ""
+    property var slideIds: null
+    property var slideOrigin: []
+    property bool sliding: false
+    property real slideFrom: 0
+    property real slideAt: 0
+    Behavior on slideAt {
+        enabled: !root.sliding && IrisStyle.motionEnabled
+        NumberAnimation { duration: IrisStyle.duration(220); easing.type: IrisStyle.feedbackEasing }
+    }
+    readonly property var ordered: {
+        const base = IrisDockOrder.entries
+        if (!root.slideIds) return base
+        const byId = {}
+        for (const e of base) byId[e.appId] = e
+        const out = root.slideIds.filter(id => id === "SEPARATOR" || byId[id] !== undefined)
+            .map(id => id === "SEPARATOR" ? ({ appId: "SEPARATOR" }) : byId[id])
+        for (const e of base) if (e.appId !== "SEPARATOR" && !root.slideIds.includes(e.appId)) out.push(e)
+        return out
+    }
+    function centreIn(ids: var, appId: string): real {
+        let x = root.showLauncher ? root.slotWidth + root.separatorWidth + 2 * root.slotSpacing : 0
+        for (const id of root.trimmed(ids)) {
+            const w = id === "SEPARATOR" ? root.separatorWidth : root.slotWidth
+            if (id === appId) return x + w / 2
+            x += w + root.slotSpacing
+        }
+        return x
+    }
+    function slideBegin(appId: string): void {
+        settleDelay.stop()
+        root.slideOrigin = root.ordered.map(e => e.appId)
+        root.slideIds = root.slideOrigin
+        root.slideApp = appId
+        root.sliding = true
+        root.slideFrom = root.centreIn(root.slideIds, appId)
+        root.slideAt = root.slideFrom
+        nameLabel.present(null, "")
+    }
+    function slideTo(along: real): void {
+        if (!root.sliding) return
+        root.slideAt = root.slideFrom + along
+        const others = root.slideIds.filter(id => id !== root.slideApp)
+        let best = root.slideIds
+        let bestDistance = Math.abs(root.centreIn(best, root.slideApp) - root.slideAt)
+        for (let k = 0; k <= others.length; k++) {
+            const ids = others.slice(0, k).concat([root.slideApp], others.slice(k))
+            const distance = Math.abs(root.centreIn(ids, root.slideApp) - root.slideAt)
+            if (distance < bestDistance - 0.5) { best = ids; bestDistance = distance }
+        }
+        if (best !== root.slideIds) root.slideIds = best
+    }
+    function slideEnd(committed: bool): void {
+        if (!root.sliding) return
+        if (!committed || !IrisDockOrder.drop(root.slideApp, root.slideIds)) root.slideIds = root.slideOrigin
+        root.sliding = false
+        root.slideAt = root.centreIn(root.slideIds, root.slideApp)
+        settleDelay.restart()
+    }
+    Connections {
+        target: GlobalStates
+        function onIrisDockSlideChanged(): void {
+            const request = GlobalStates.irisDockSlide
+            if (!request || root.screen?.name !== GlobalStates.focusedScreen?.name) return
+            if (!root.sliding) {
+                if (!root.ordered.some(e => e.appId === request.appId)) return
+                root.slideBegin(request.appId)
+            }
+            root.slideTo(request.along)
+            if (request.done) root.slideEnd(true)
+        }
+    }
+    Timer {
+        id: settleDelay
+        interval: IrisStyle.duration(220) + 80
+        onTriggered: { root.slideApp = ""; root.slideIds = null }
     }
     // Keyed by appId: TaskbarApps rebuilds entries on every window event.
     readonly property var liveApps: {
@@ -321,7 +403,7 @@ Item {
             property var frozenSlotX: null
             readonly property var pointerSlotX: {
                 if (window.menuOpen) return window.frozenSlotX
-                if (!root.magnify || !window.pointerOnDock || !window.revealed) return null
+                if (!root.magnify || !window.pointerOnDock || !window.revealed || root.slideApp.length > 0) return null
                 const x = root.vertical ? windowHover.point.position.y - (window.height - dock.baseWidth) / 2
                     : windowHover.point.position.x - (window.width - dock.baseWidth) / 2
                 if (x < -root.slotWidth || x > dock.baseWidth + root.slotWidth) return null
@@ -487,6 +569,10 @@ Item {
                     x: root.vertical ? (root.atLeft ? Math.round(4 * root.d) : parent.width - width - Math.round(4 * root.d)) : dock.padding
                     y: root.vertical ? dock.padding : (root.atTop ? Math.round(4 * root.d) : parent.height - height - Math.round(4 * root.d))
                     spacing: root.slotSpacing
+                    move: Transition {
+                        enabled: root.slideApp.length > 0 && IrisStyle.motionEnabled
+                        NumberAnimation { properties: "x,y"; duration: IrisStyle.duration(200); easing.type: IrisStyle.feedbackEasing }
+                    }
 
                     component Slot: Item {
                         id: slot
@@ -578,6 +664,13 @@ Item {
                             readonly property Item editFace: entry.separator ? null : appSlot
                             width: root.vertical ? root.thickness : entry.separator ? root.separatorWidth : appSlot.width
                             height: root.vertical ? (entry.separator ? root.separatorWidth : appSlot.height) : root.thickness
+                            readonly property real slideOffset: !entry.separator && entry.modelData.appId === root.slideApp
+                                ? root.slideAt - (root.vertical ? entry.y + entry.height / 2 : entry.x + entry.width / 2) : 0
+                            z: entry.slideOffset !== 0 ? 10 : 0
+                            transform: Translate {
+                                x: root.vertical ? 0 : entry.slideOffset
+                                y: root.vertical ? entry.slideOffset : 0
+                            }
 
                             Connections {
                                 target: GlobalStates
@@ -755,7 +848,11 @@ Item {
                                         pullDistance: GlobalStates.irisEdit ? 6 * root.d : root.iconSize * 0.7
                                         enabled: !entry.separator && !window.menuOpen
                                             && !IrisPieces.appFloating(entry.modelData.appId)
-                                        onTapped: appSlot.primary()
+                                    slideEnabled: root.reorder && !GlobalStates.irisEdit
+                                    onTapped: appSlot.primary()
+                                    onSlidingChanged: if (sliding) root.slideBegin(entry.modelData.appId)
+                                    onSlid: along => root.slideTo(along)
+                                    onSlideEnded: committed => root.slideEnd(committed)
                                     }
                                 }
                                 IrisBadge {

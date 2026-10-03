@@ -152,6 +152,16 @@ Scope {
             GlobalStates.irisDockMenuRequest = { appId: appId, mode: mode }
             return appId
         }
+        // `position` counts the Dock's icons from 1, the separator included: landing before it pins, after it unpins.
+        function dockMove(appId: string, position: int): string {
+            const ids = IrisDockOrder.entries.map(entry => entry.appId)
+            const id = appId.toLowerCase()
+            if (!ids.includes(id)) return "Not in the Dock: " + ids.filter(i => i !== "SEPARATOR").join(", ")
+            const rest = ids.filter(i => i !== id)
+            rest.splice(Math.max(0, Math.min(rest.length, position - 1)), 0, id)
+            if (!IrisDockOrder.drop(id, rest)) return "Stays where it was: a pinned app with no window has no place among the open ones"
+            return rest.join(" ")
+        }
         function appBubble(appId: string, place: string): string {
             if (appId.length === 0) return "Unknown app"
             if (place === "dock" || place === "off") { IrisPieces.removeApp(appId); return "docked" }
