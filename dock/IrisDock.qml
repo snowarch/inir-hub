@@ -709,6 +709,18 @@ Item {
                                 property real lift: 0
                                 readonly property string pieceId: IrisPieces.appPieceId(entry.modelData.appId)
                                 readonly property bool carried: GlobalStates.irisBubbleDrag?.slot === appSlot.pieceId
+                                Binding {
+                                    target: GlobalStates
+                                    property: "irisDockHome"
+                                    when: appSlot.carried
+                                    restoreMode: Binding.RestoreNone
+                                    value: {
+                                        void (entry.x + entry.y + appRow.x + appRow.y + dock.x + dock.y + window.edgeOffset + window.screenOffsetY)
+                                        const c = appSlot.mapToItem(window, appButton.iconCentreInSlot.x, appButton.iconCentreInSlot.y)
+                                        return { screen: root.screen?.name ?? "", appId: entry.modelData.appId,
+                                            x: Math.round(c.x), y: Math.round(c.y + window.screenOffsetY) }
+                                    }
+                                }
                                 function primary(): void {
                                     if (GlobalStates.irisEdit) {
                                         root.editSelect(appSlot.pieceId)
@@ -812,8 +824,8 @@ Item {
                                         readonly property real press: appButton.down || appGrip.pressed ? IrisStyle.pressScale(0.92) : 1
                                         scale: appSlot.iconScale * press
                                         visible: !largeIcon.visible
+                                        // The bubble leaves from and lands on this very square: a swap, no fade, or the slot blinks empty.
                                         opacity: appSlot.carried ? 0 : 1
-                                        Behavior on opacity { NumberAnimation { duration: IrisStyle.duration(120); easing.type: IrisStyle.feedbackEasing } }
                                     }
                                     SmartAppIcon {
                                         id: largeIcon

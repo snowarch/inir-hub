@@ -320,7 +320,12 @@ Item {
     }
     onAbsorptionChanged: absorbedPublish.restart()
     // Publishing moves the Island and the Dock, which feed the zones this is computed from.
-    Timer { id: absorbedPublish; interval: 0; onTriggered: root.publishAbsorbed() }
+    Timer { id: absorbedPublish; interval: 0; onTriggered: { root.publishAbsorbed(); root.returnAbsorbedApps() } }
+    function returnAbsorbedApps(): void {
+        if (root.drag || landing.running || root.dockHeld?.edge !== IrisFrame.dockEdge) return
+        for (const slot in root.absorption.bySlot)
+            if (root.isApp(slot) && root.absorption.bySlot[slot] === "dock") IrisPieces.removeApp(IrisPieces.appIdOf(slot))
+    }
     Component.onDestruction: {
         if (root.screenName.length === 0) return
         const next = Object.assign({}, GlobalStates.irisAbsorbed ?? {})
@@ -602,7 +607,37 @@ Item {
         return out
     }
 
+    function dockCatches(zone: string, x: real, y: real): bool {
+        if (!root.dockOn) return false
+        const b = root.dockBodyNow
+        const reach = Math.round(24 * root.d)
+        if (b && x > b.x - reach && x < b.x + b.width + reach && y > b.y - reach && y < b.y + b.height + reach) return true
+        const side = IrisFrame.edgeOf(zone)
+        if (side.length === 0 || root.ownerOf(side) !== "dock") return false
+        const span = root.ownerSpan("dock", side)
+        const along = IrisFrame.vertical(side) ? y : x
+        const clear = root.size / 2 + Math.round(12 * root.d)
+        return along + clear > span.lo && along - clear < span.hi
+    }
+    function dockTarget(x: real, y: real): var {
+        const home = GlobalStates.irisDockHome
+        if (home && home.screen === root.screenName && root.drag && home.appId === IrisPieces.appIdOf(root.drag.slot))
+            return { zone: "dock", x: home.x, y: home.y }
+        const b = root.dockBodyNow
+        if (!b) return { zone: "dock", x: x, y: y }
+        const vertical = IrisFrame.vertical(IrisFrame.dockEdge)
+        const half = Math.min(b.width, b.height) / 2
+        return { zone: "dock",
+            x: vertical ? b.x + b.width / 2 : Math.max(b.x + half, Math.min(b.x + b.width - half, x)),
+            y: vertical ? Math.max(b.y + half, Math.min(b.y + b.height - half, y)) : b.y + b.height / 2 }
+    }
     function resolve(x: real, y: real): var {
+        const place = root.resolvePlace(x, y)
+        if (place && root.drag && !root.carryingIsland && root.isApp(root.drag.slot) && place.zone !== "island"
+            && root.dockCatches(place.zone, place.x ?? x, place.y ?? y)) return root.dockTarget(x, y)
+        return place
+    }
+    function resolvePlace(x: real, y: real): var {
         if (!root.drag) return null
         if (root.carryingIsland) {
             const sides = [{ zone: "top", d: y }, { zone: "bottom", d: root.height - y },
@@ -648,7 +683,7 @@ Item {
         slot = root.ownerSlot(slot)
         if (root.isApp(slot)) {
             const appId = IrisPieces.appIdOf(slot)
-            if (place.zone === "island") IrisPieces.removeApp(appId)
+            if (place.zone === "island" || place.zone === "dock") IrisPieces.removeApp(appId)
             else IrisPieces.placeApp(appId, place.zone,
                 Math.round((place.x ?? 0) / Math.max(1, root.width) * 10000) / 10000,
                 Math.round((place.y ?? 0) / Math.max(1, root.height) * 10000) / 10000)
@@ -700,7 +735,9 @@ Item {
         landing.kind = drag.kind
         landing.fromX = drag.x
         landing.fromY = drag.y
-        landing.attaching = place.zone === "island"
+        landing.attaching = place.zone === "island" || place.zone === "dock"
+        // Onto the Dock the bubble grows into the Dock icon it becomes (the face's icon is its width less 12·d).
+        landing.endScale = place.zone === "dock" ? IrisFrame.dockIcon / Math.max(1, root.size - 12 * root.d) : 1
         root.writeEntry(drag.slot, place)
         const lands = landing.attaching ? Qt.point(place.x, place.y) : root.placeOf(drag.slot)
         landing.toX = lands.x
@@ -716,6 +753,7 @@ Item {
         property real toX: 0
         property real toY: 0
         property bool attaching: false
+        property real endScale: 1
         NumberAnimation {
             target: carried
             property: "travel"
@@ -1153,7 +1191,8 @@ Item {
         }
     }
     Rectangle {
-        readonly property bool shown: String(root.target?.zone ?? "").startsWith("edge:") && !(root.drag?.released ?? true)
+        readonly property bool shown: (String(root.target?.zone ?? "").startsWith("edge:") || root.target?.zone === "dock")
+            && !(root.drag?.released ?? true)
         width: root.size + 10 * root.d
         height: width
         x: Math.round((root.target?.x ?? 0) - width / 2)
@@ -1212,7 +1251,7 @@ Item {
         x: carried.at.x - width / 2
         y: carried.at.y - height / 2
         z: 10
-        scale: landing.running ? 1.12 - 0.12 * carried.travel : 1.12
+        scale: landing.running ? 1.12 + (landing.endScale - 1.12) * carried.travel : 1.12
 
         IrisBubbleFace {
             anchors.fill: parent
