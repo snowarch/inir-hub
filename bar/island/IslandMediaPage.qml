@@ -150,7 +150,6 @@ GridLayout {
             Layout.bottomMargin: -4 * IrisStyle.density
             spacing: 0
             Item { Layout.fillWidth: true }
-            // The transport shares the Island's plate (IrisIsland.pagePlate), concentric with play.
             IrisControlPlate {
                 id: transport
                 material: page.island.pagePlate

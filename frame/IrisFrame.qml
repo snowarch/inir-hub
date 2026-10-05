@@ -125,7 +125,7 @@ QtObject {
     // How pieces meet a given edge. On the Island's own edge they meet it the way the Island does: melted with it,
     // or floating at its margin when it floats (two grammars on one edge read as parts from different kits). A corner
     // plate takes its edge's join on both walls (IrisStage.zones): floating, it keeps that margin from the frame's side
-    // too, never floating off one wall and welded to the other (2026-09-28).
+    // too, never floating off one wall and welded to the other.
     readonly property bool islandSpans: String(root.bar?.layout ?? "island") === "full" || root.islandMenubar
     function joinOn(side: string): string {
         if (!root.piecesAttached) return "float"

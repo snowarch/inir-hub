@@ -13,7 +13,6 @@ IrisButton {
     readonly property real d: IrisStyle.density
     readonly property real inset: Math.round(12 * chip.d)
     property real labelCap: Math.round(200 * chip.d)
-    // A typeface choice names itself in its own face.
     property string labelFamily: ""
 
     implicitHeight: Math.max(Math.round(30 * chip.d), Math.round(chipLabel.implicitHeight + 10 * chip.d))

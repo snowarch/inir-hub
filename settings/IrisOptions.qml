@@ -30,7 +30,6 @@ QtObject {
         if (spec.niri) return IrisNiri.value(spec)
         if (spec.kind === "niriMotion") return NiriAnimationPresets.activeId
         if (spec.kind === "icon") return IrisPieces.chosenGlyph(String(spec.piece ?? ""))
-        // A floating bubble the Island's list carries reads as off: it is on the Island (IrisPieces.listedOnIsland).
         if (/^iris\.bubbles\.extras\.\w+\.enable$/.test(String(spec.path ?? "")) && IrisPieces.listedOnIsland(String(spec.path).split(".")[3]))
             return false
         if (spec.bundle) {
@@ -55,7 +54,6 @@ QtObject {
             }
         }
         else if (spec.path === "iris.bar.pieces") {
-            // As a drag onto the Island does (IrisStage.place): a piece added here leaves its floating place.
             const updates = { "iris.bar.pieces": Array.from(next ?? []) }
             const before = Array.from(Config.options?.iris?.bar?.pieces ?? []).map(entry => String(entry))
             for (const id of Array.from(next ?? []).map(entry => String(entry)))
@@ -64,7 +62,6 @@ QtObject {
             Config.setNestedValues(updates)
         }
         else if (/^iris\.bubbles\.extras\.\w+\.(enable|place)$/.test(String(spec.path))) {
-            // A bubble switched on to float (or moved off the Island) leaves the Island's list.
             const id = String(spec.path).split(".")[3]
             const updates = ({})
             updates[spec.path] = next
@@ -119,7 +116,6 @@ QtObject {
         return root.resettable(spec) && !root.same(root.currentValue(spec), spec.fallback)
     }
 
-    // Glass widgets wear the shell's glass (frost and edge), so those rows show while widgets are iRiS faces.
     readonly property bool widgetGlass: DesktopWidgetDesign.current === "iris"
     readonly property var pairings: [
         { label: "iRiS", value: "iris", values: ["", "", ""] },
@@ -463,7 +459,6 @@ QtObject {
         }
         return out
     }
-    // Glass widgets wear the shell's glass edge; Desktop › Widgets shows the same rows beside Outline.
     readonly property var edgeKeys: ["edgeLight", "edgeLine", "edgeWidth", "edgeColour"]
     readonly property var edgeMirrors: {
         const out = []
@@ -1262,7 +1257,6 @@ QtObject {
             const own = rows.filter(spec => spec.section === section).concat(look.filter(spec => spec.section === section))
             const order = root.groupOrder[section] ?? []
             const rank = spec => { const at = order.indexOf(String(spec.group ?? "")); return at < 0 ? order.length : at }
-            // Inside a group, what a surface does comes before how it looks (its corners, light and material).
             const lookRank = spec => String(spec.path ?? "").startsWith("iris.appearance.surfaces.") ? 1 : 0
             own.map((spec, at) => ({ spec: spec, at: at })).sort((a, b) => rank(a.spec) - rank(b.spec) || lookRank(a.spec) - lookRank(b.spec) || a.at - b.at).forEach(item => out.push(item.spec))
         }

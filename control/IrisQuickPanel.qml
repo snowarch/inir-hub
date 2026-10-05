@@ -14,7 +14,6 @@ import qs.modules.iris.style
 ColumnLayout {
     id: root
 
-    // The monitor's own buttons may have moved the level since the shell wrote it.
     onVisibleChanged: if (visible) Brightness.getMonitorForScreen(root.targetScreen)?.refresh()
     property var targetScreen
     readonly property real d: IrisStyle.density
@@ -168,14 +167,12 @@ ColumnLayout {
             buttonRadius: height / 2
             onClicked: GlobalStates.irisControlEdit = false
         }
-        // Appearance › Button rows: the header's tools on one plate, concentric with it.
         IrisControlPlate {
             id: headerTools
             visible: !root.editing
             Layout.alignment: Qt.AlignVCenter
             controlHeight: Math.round(34 * root.d)
             RowLayout {
-                // Bare, the header's own spacing, as before the plate.
                 spacing: headerTools.framed ? Math.round(2 * root.d) : 8 * root.d
                 IrisIconButton {
                     buttonRadius: headerTools.framed ? headerTools.controlRadius : IrisStyle.radiusSmall

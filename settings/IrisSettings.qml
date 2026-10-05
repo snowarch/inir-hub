@@ -131,7 +131,6 @@ PanelWindow {
             if (spec.fallback !== undefined && IrisOptions.same(value, spec.fallback)) return ""
             return Translation.tr(spec.label) + " " + Translation.tr(IrisOptions.rangeText(spec, value))
         case "pieces": {
-            // The first pieces in the order chosen: a group made only of lists still says what it holds.
             const choices = IrisOptions.choicesOf(spec)
             return Array.from(value ?? []).slice(0, 2)
                 .map(item => Translation.tr(String(choices.find(choice => IrisOptions.same(choice.value, item))?.label ?? "")))

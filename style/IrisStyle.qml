@@ -24,7 +24,7 @@ QtObject {
     // value and multiply their content by `recompose`, so a recomposition is one
     // transition for the whole family instead of one animation per part racing
     // the others. Geometry still springs across the swap: the silhouette is
-    // continuous, its contents are replaced (DESIGN §0.4).
+    // continuous, its contents are replaced.
     readonly property var structuralPaths: ["bar.composition", "bar.clockStyle", "bar.trailing",
         "bar.auxiliary", "bar.pieces", "bar.fullStart", "bar.fullCenter", "bar.fullEnd", "bar.navItems", "bar.desktopBlocks", "bar.mediaBlocks",
         "controlCenter.sections", "controlCenter.controls"]
@@ -593,9 +593,7 @@ QtObject {
     readonly property color border: ColorUtils.applyAlpha(root.text, Math.min(0.5, 0.12 * root.preset.fill * root.tweak("lines", 0, 2)))
     readonly property color borderStrong: ColorUtils.applyAlpha(root.text, Math.min(0.6, 0.28 * root.preset.fill * root.tweak("lines", 0, 2)))
     readonly property string rimTint: String(root.theme?.rimTint ?? "neutral")
-    // Appearance › Edges: the edge every body wears, on every material. Line is the even hairline (rim); Light is
-    // the glass edge (lit where it faces up, a faint line elsewhere, `glassEdge*`) on solid bodies too. Glass keeps
-    // its lit edge whatever this is: without it glass vanishes over a dark desktop.
+    // Glass keeps its lit edge whatever this is: without it glass vanishes over a dark desktop.
     readonly property string edgeStyle: !(root.theme?.rim ?? true) ? "none"
         : String(root.theme?.edges ?? "line") === "light" ? "light" : "line"
     readonly property bool edgeLit: root.edgeStyle === "light" && (root.glassEdgeLight > 0 || root.glassEdgeLine > 0)
@@ -790,13 +788,10 @@ QtObject {
         return Math.max(8, Math.round(56 * root.density * scale * Math.max(0.2, Math.min(2, curve / 100))))
     }
     readonly property string pieceShape: String(root.theme?.pieceShape ?? "circle")
-    // Settings › Appearance › Button rows: rows of round controls on a plate (IrisControlPlate), or bare.
     readonly property string controlPlate: {
         const value = String(root.appearance?.controlPlate ?? "none")
         return ["veil", "glass", "solid"].includes(value) ? value : "none"
     }
-    // What a control's track or plate is made of under Button rows: every iRiS control that holds choices or a row
-    // of buttons (IrisControlPlate, IrisSegmented, IrisChip) reads these, so one choice changes them together.
     readonly property bool controlPlated: root.controlPlate !== "none"
     function plateFillFor(material: string): color {
         return material === "veil" ? root.veil : material === "solid" ? root.readingCard : root.fill

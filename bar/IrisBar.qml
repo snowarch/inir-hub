@@ -143,7 +143,6 @@ Scope {
         function dockApp(appId: string, mode: string): string {
             if (mode === "close") { GlobalStates.irisDockMenuRequest = { appId: "", mode: "close" }; GlobalStates.irisDockShown = false; return "closed" }
             if (mode === "pin") {
-                // The same path as the Dock menu's Keep in Dock / Unpin from Dock.
                 TaskbarApps.togglePin(appId)
                 const lower = appId.toLowerCase()
                 return (Config.options?.dock?.pinnedApps ?? []).some(p => String(p).toLowerCase() === lower) ? "pinned" : "unpinned"

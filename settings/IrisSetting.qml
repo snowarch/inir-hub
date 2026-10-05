@@ -785,9 +785,6 @@ Item {
         }
     }
 
-    // Any font on the system, as Material's font selector offers: the chip names the one in use (or asks),
-    // and opens a search over the installed families, each drawn in its own face.
-    // The same plate, fill steps and ink as the face chips beside it (chipsComponent).
     component FaceChip: IrisChip {
         implicitHeight: Math.round(28 * root.d)
         colBackground: IrisStyle.fillQuiet

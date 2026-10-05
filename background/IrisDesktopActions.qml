@@ -84,8 +84,6 @@ Singleton {
         return out
     }
 
-    // Runs one entry of the menu as a click would, through the menu's own action (`inir iris desktopAction`).
-    // `wallpaperNext` is the round button on the wallpaper; any catalogue id works, shown in the menu or not.
     function run(id: string, screenName: string): string {
         const shown = root.menu(screenName, "", "")
         for (const item of shown) {

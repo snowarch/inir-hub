@@ -103,7 +103,6 @@ Singleton {
         if (best < 0.6 && word.length >= 3 && entry.flat.includes(word)) best = 0.6
         return best
     }
-    // The query split once and reused for every entry it is scored against (callers loop over hundreds).
     readonly property var parsed: ({ query: null, words: [], aliasParts: [], whole: "" })
     function parse(query: string): var {
         if (root.parsed.query !== query) {

@@ -86,8 +86,6 @@ Item {
         function onVisualExpandedChanged(): void { if (!root.visualExpanded && root.focusedOutput) GlobalStates.irisArrange = false }
     }
     readonly property bool notch: root.options?.notch ?? false
-    // The plate the open Island's rows of controls sit on (Settings › Island › Pages › Page buttons; Auto follows
-    // Appearance › Button rows): the page navigation and the desktop header's tools share it.
     readonly property string pagePlate: {
         const value = String(root.options?.navFrame ?? "auto")
         return ["none", "veil", "glass", "solid"].includes(value) ? value : IrisStyle.controlPlate
@@ -536,8 +534,6 @@ Item {
     readonly property real pageBodyWidth: root.effectivePage === "controls" ? (Math.max(340, Number(Config.options?.iris?.controlCenter?.width ?? 360))
             + (GlobalStates.irisControlEdit ? IrisControlOptions.editorExtra : 0)) * root.d + 2 * root.padding
             : (root.effectivePage === "activity" ? root.pageWidth * 384 / 440 : root.pageWidth) * root.d
-    // The page navigation fits its page: a button added while something runs (recording, a timer) first narrows the
-    // buttons from 36 to 30 px, then the Island widens around the row, so the row never runs into the body's edge.
     readonly property int navButtons: root.navEntries.filter(entry => entry.kind !== "|").length
     readonly property int navDividers: root.navEntries.length - root.navButtons
     readonly property real navFixed: root.navDividers * Math.round(9 * root.d) + Math.max(0, root.navEntries.length - 1) * 4 * root.d
@@ -613,7 +609,7 @@ Item {
     readonly property real compactCeiling: Math.min(root.availableWidth,
         (root.compactMode === "media" ? 380 : root.compactMode === "event" ? 330 : 320) * root.d)
     // The ceiling holds the Island's own content; the pieces it carries come on top of it, or they would be
-    // squeezed over the clock (a right Island with a corner plate absorbed, 2026-09-28).
+    // squeezed over the clock.
     readonly property real compactTargetWidth: root.spanning ? root.fullChassisWidth
         : Math.max(root.compactFloor, Math.min(root.availableWidth, Math.min(root.compactCeiling,
             root.compactContentWidth + Math.round(29 * root.d * root.breathing)) + root.barPieceReserve))
@@ -2477,7 +2473,6 @@ Item {
                     }
                 }
 
-                // Settings › Island › Pages › Page buttons: Auto follows Appearance › Button rows (IrisControlPlate).
                 IrisControlPlate {
                     id: navFrame
                     Layout.row: root.bottomEdge ? 1 : 0

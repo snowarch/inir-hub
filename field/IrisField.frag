@@ -259,7 +259,6 @@ void main() {
     // Glass has a cut edge that catches the light from above, like Liquid Glass: bright where it faces up, a faint
     // line elsewhere, in the scene's own light. Without it wallpaper glass over a dimmed desktop has no edge at
     // all, and compositor blur's 1-bit edge (a wl_region, no AA in Niri) reads as a step instead of glass.
-    // Appearance › Edges › Light (edgeGlass.w) gives solid bodies the same edge.
     float glassShare = max(share.y + share.z, u.edgeGlass.w);
     if (glassShare > 0.0) {
         float depth = -united;
@@ -268,7 +267,6 @@ void main() {
         vec2 dp = vec2(dFdx(p.x), dFdy(p.y));
         vec2 g = vec2(dFdx(united), dFdy(united)) / vec2(abs(dp.x) > 1e-6 ? dp.x : 1.0, abs(dp.y) > 1e-6 ? dp.y : 1.0);
         float facing = clamp(-g.y / max(length(g), 1e-4), 0.0, 1.0);
-        // A band as wide as IrisGlassEdge's border (edgeGlass.z, whole pixels), so bodies and plates wear one edge.
         float lip = coverage * (1.0 - smoothstep(u.edgeGlass.z - 0.5, u.edgeGlass.z + 0.5, depth));
         float seal = lip * mix(u.edgeGlass.y, u.edgeGlass.x, facing * facing) * glassShare * u.sheen.a * u.qt_Opacity;
         colour = u.sheen.rgb * seal + colour * (1.0 - seal);

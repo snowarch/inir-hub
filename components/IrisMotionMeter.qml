@@ -9,8 +9,7 @@ import qs.services
 import qs.modules.iris.style
 import qs.modules.iris.frame
 
-// Measures a Place's open, close and mid-way reversal against the acceptance criteria in
-// SYSTEM.md §13, from the frames the Place itself samples (`IrisMorphSurface` feeds `sample`).
+// Measures a Place's open, close and mid-way reversal from the frames the Place itself samples (`IrisMorphSurface` feeds `sample`).
 // Driven by `inir iris motion <target>` and read back with `inir iris motioned`.
 Singleton {
     id: root
@@ -149,7 +148,6 @@ Singleton {
             case "clean":
                 root.phase = ""
                 root.result = root.report(t)
-                // The run expanded the Island to measure from it; leave it as it was found.
                 if (!root.islandWasExpanded) GlobalStates.irisIslandPageRequest = "collapse"
                 break
             }

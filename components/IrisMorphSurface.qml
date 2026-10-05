@@ -88,7 +88,7 @@ Item {
         return [{ x: at.x, y: at.y, width: chassis.width, height: chassis.height, radius: chassis.radius }]
     }
     signal closed()
-    // Settles in place (DESIGN §3.3): it arrives at 95 % of itself on its own centre, never from its origin, and
+    // Settles in place: it arrives at 95 % of itself on its own centre, never from its origin, and
     // leaves at 97 %, so a blurred body only ever changes size, never fades.
     property bool settles: false
     readonly property real settleShare: 0.95
@@ -156,8 +156,6 @@ Item {
             return presentationSpring.jump()
         if (root.presentation <= 0 && !root.open) root.closed()
     }
-    // A closed body that has not reached 0 keeps its shape, and with Blur its untinted blur, on screen. Reported, so a
-    // leftover the maintainer sees once ("blur stays after closing, with slow motion") is in the log with its surface.
     Timer {
         interval: 3000
         running: !root.open && !root.armed && root.presentation > 0

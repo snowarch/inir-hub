@@ -192,7 +192,6 @@ ColumnLayout {
     readonly property string bannerSource: String(page.island.options?.desktopBanner ?? "wallpaper") === "wallpaper"
         ? WallpaperListener.wallpaperUrlForScreen(page.island.targetScreen) : ""
     readonly property bool showBanner: page.bannerSource.length > 0
-    // Settings › Island › Desktop page: 100 / 100 / 0 is the header as designed.
     function bannerPart(key: string, fallback: int): real {
         return Math.max(0, Math.min(100, Number(page.island.options?.[key] ?? fallback))) / 100
     }
@@ -245,7 +244,6 @@ ColumnLayout {
             width: hero.width + page.island.padding * 2
             height: hero.height + heroBleed.topBleed + Math.round(12 * IrisStyle.density)
 
-            // On a side edge the join is beside the header: the same treatment turned sideways (sideJoin).
             Item {
                 id: heroContent
                 anchors.fill: parent
@@ -288,15 +286,11 @@ ColumnLayout {
             }
         }
 
-        // The Island notched on a side edge: its body runs into the frame beside the header. The image keeps off
-        // the band and the shoulders (the body's own material there) and enters on a ramp as long again, the
-        // same join as at the top.
         Item {
             id: sideJoin
             readonly property string edge: page.island.notch ? String(page.island.edge) : ""
             readonly property bool active: sideJoin.edge === "left" || sideJoin.edge === "right"
             readonly property real depth: IrisFrame.band + page.island.fillet + 4 * IrisStyle.density
-            // Where the screen edge falls in the header's own coordinates.
             readonly property real edgeX: {
                 void (heroBleed.width + heroBleed.x + page.island.chassisItem.width + page.island.chassisItem.x)
                 const window = heroBleed.Window.window
@@ -334,7 +328,6 @@ ColumnLayout {
             height: heroBleed.height
         }
 
-        // The header's tools share the Island's plate (IrisIsland.pagePlate); bare, each keeps its own veil.
         IrisControlPlate {
             id: heroTools
             anchors.right: parent.right

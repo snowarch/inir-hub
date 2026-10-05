@@ -349,7 +349,7 @@ Item {
     }
     function placeOf(slot: string): point { return root.restPoints[slot] ?? root.rawPlaceOf(slot) }
     // A plate on the Island's own row sits on the Island's centre line and takes the Island's thickness: a row of
-    // bodies of other heights than the object it belongs to reads as the wrong weight (2026-09-28).
+    // bodies of other heights than the object it belongs to reads as the wrong weight.
     function onIslandRow(zone: string): bool {
         const g = root.island
         const side = zone === "tray" ? IrisFrame.edgeOf(root.trayPlace) : IrisFrame.edgeOf(zone)

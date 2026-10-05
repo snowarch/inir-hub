@@ -44,11 +44,6 @@ Item {
     readonly property bool lightBackdrop: IrisStyle.light && !root.clear ? true : root.opaque ? root.widget.forceDarkInk
         : root.clear ? root.widget.inkOnLight : root.widget.glassInkOnLight
     readonly property bool ownInk: root.lightBackdrop || (IrisStyle.light && root.clear)
-    // Transparent is bare: it carries no plate unless Lume on every widget asks for one. Glass is solved as
-    // thick as its text needs, then Surface opacity thins it (100 % keeps the solve); Lume on every widget
-    // keeps the full solve, since reading first is what that switch asks for.
-    // Glass thinned below its solve reads like Transparent: its text carries the same shadow, as strong as
-    // the veil it gave up.
     readonly property real textShadow: root.clear ? 1
         : root.glass && !root.widget.legibleAlways ? Math.min(1, (1 - root.strength) * 1.4) : 0
     readonly property real veil: root.opaque ? root.strength
@@ -85,9 +80,6 @@ Item {
     // Outline: Auto follows the shell's outline and leaves Transparent bare; while arranging it always shows.
     readonly property bool rimShown: GlobalStates.widgetEditMode || root.widget.irisOutline === "always"
         || (root.widget.irisOutline === "auto" && (!root.clear || root.widget.irisRim))
-    // Glass wears the shell's glass edge (Appearance › Glass › Edge light, Edge line, Edge width, Edge colour):
-    // lit where it faces up, a line elsewhere. With both at 0 Auto draws no line, like the shell's glass.
-    // Appearance › Edges › Light gives every plated widget that edge, whatever its material.
     readonly property bool glassEdge: (root.glass || IrisStyle.edgeLit) && !root.lightBackdrop
         && (IrisStyle.glassEdgeLight > 0 || IrisStyle.glassEdgeLine > 0)
     readonly property bool flatRim: root.rimShown && !root.glassEdge

@@ -223,7 +223,6 @@ Item {
             root.takeRequestedQuery()
             root.focusInput()
         }
-        // `inir iris spotlight <query>` while it is open types the new query in.
         function onIrisSpotlightQueryChanged(): void {
             if (GlobalStates.searchOpen && root.here) root.takeRequestedQuery()
         }

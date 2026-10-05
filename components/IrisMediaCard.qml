@@ -156,7 +156,6 @@ Item {
             Layout.alignment: Qt.AlignHCenter
             spacing: 0
             Item { Layout.fillWidth: true }
-            // Appearance › Button rows: the transport on one plate, its buttons concentric with it.
             IrisControlPlate {
                 id: transport
                 controlHeight: Math.round(34 * IrisStyle.density)

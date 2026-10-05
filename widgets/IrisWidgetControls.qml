@@ -524,7 +524,6 @@ ColumnLayout {
                 stepSize: 5 / (100 - root.opacityMin)
                 value: (root.opacityValue - root.opacityMin) / (100 - root.opacityMin)
                 onMoved: value => root.widget.previewIrisValue("iris.opacity", root.opacityFrom(value))
-                // Landing on the shared value follows it again instead of pinning this widget.
                 onSeekRequested: value => {
                     const chosen = root.opacityFrom(value)
                     root.widget.commitIrisValue("iris.opacity",

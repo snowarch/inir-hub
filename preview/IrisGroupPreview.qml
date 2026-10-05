@@ -981,7 +981,6 @@ ClippingRectangle {
                     IrisText { width: parent.width; text: Translation.tr("Secondary text stays readable over the wallpaper"); color: IrisStyle.muted; wrapMode: Text.WordWrap; font.pixelSize: IrisStyle.typeMeta }
                     IrisText { text: Translation.tr("Tertiary detail"); color: IrisStyle.textTertiary; font.pixelSize: IrisStyle.typeMeta }
                 }
-                // Appearance › Button rows on this material.
                 IrisControlPlate {
                     id: glassControls
                     anchors.horizontalCenter: parent.horizontalCenter
@@ -1000,7 +999,6 @@ ClippingRectangle {
                         }
                     }
                 }
-                // The glass edge the field draws on bodies (Appearance › Glass › Edge light, line, width, colour).
                 IrisGlassEdge { anchors.fill: parent; visible: (IrisStyle.glassy || IrisStyle.edgeLit) && shown; radius: pane.radius }
             }
             Caption {
@@ -1030,8 +1028,6 @@ ClippingRectangle {
             readonly property color ink: String(root.opt("iris.widgets.tint", "wallpaper")) === "wallpaper" ? IrisStyle.wallpaperLight : IrisStyle.accent
             readonly property int weight: ({ light: Font.Light, regular: Font.Medium, bold: Font.Bold })[String(root.opt("iris.widgets.weight", "regular"))] ?? Font.Medium
             readonly property real strength: Math.max(0.2, Math.min(1, Number(root.opt("iris.widgets.opacity", 100)) / 100))
-            // Outline as IrisWidgetFace draws it: Auto on Glass, Solid and Tinted (glass wears the glass edge), none on
-            // Transparent unless the legacy hairline asks; Always everywhere; None nowhere.
             readonly property string outline: String(root.opt("iris.widgets.outline", "auto"))
             readonly property bool rimShown: !widgetsRoot.bare && widgetsRoot.iris && (widgetsRoot.outline === "always"
                 || (widgetsRoot.outline === "auto" && (!widgetsRoot.clear || Boolean(root.opt("iris.widgets.rim", false)))))
@@ -1866,7 +1862,6 @@ ClippingRectangle {
                             IrisText { text: Qt.locale().toString(DateTime.clock.date, "dddd, MMMM"); color: IrisStyle.subtext; font.pixelSize: IrisStyle.typeMeta }
                         }
                         Item { Layout.fillWidth: true }
-                        // The header's tools, on Appearance › Button rows as IrisSidebar draws them.
                         IrisControlPlate {
                             id: previewPanelTools
                             Layout.alignment: Qt.AlignVCenter
@@ -2158,7 +2153,6 @@ ClippingRectangle {
                     }
                     Item { Layout.fillHeight: true }
                     Level { value: 0.38; tint: playerRoot.artBackground ? IrisStyle.onMedia : IrisStyle.text; color: playerRoot.artBackground ? IrisStyle.onMediaFill : IrisStyle.fill }
-                    // Appearance › Button rows, as IrisMediaCard draws it.
                     IrisControlPlate {
                         id: previewTransport
                         Layout.alignment: Qt.AlignHCenter
@@ -2192,7 +2186,6 @@ ClippingRectangle {
             readonly property string mode: root.group === "Player page" ? "media" : root.group === "Pages" ? "pages" : "desktop"
             readonly property real pageW: Math.max(360, Math.min(600, Number(root.opt("iris.bar.pageWidth", 440)))) * root.d
             readonly property bool banner: String(root.opt("iris.bar.desktopBanner", "wallpaper")) === "wallpaper"
-            // Same resolution as IrisIsland.pagePlate and the header's options as IslandDesktopPage reads them.
             readonly property string plate: {
                 const value = String(root.opt("iris.bar.navFrame", "auto"))
                 const global = String(root.opt("iris.appearance.controlPlate", "none"))
@@ -2235,8 +2228,6 @@ ClippingRectangle {
             readonly property real naturalWidth: pageRoot.pageW + Math.round(160 * root.d)
             readonly property real naturalHeight: pageRoot.bodyY + pageRoot.bodyHeight + Math.round(56 * root.d)
             readonly property bool cropBottom: true
-            // The Island's own geometry (IrisIsland): notched it hangs from the frame and its content starts one corner
-            // down (edgeInset); floating it sits the Island margin below the band.
             readonly property bool notch: Boolean(root.opt("iris.bar.notch", true))
             readonly property real corner: IrisStyle.openedRadius(IrisStyle.barShape, Math.max(IrisStyle.radius, 30 * root.d))
             readonly property real topInset: pageRoot.notch ? Math.ceil(pageRoot.corner) : 0
@@ -2246,9 +2237,6 @@ ClippingRectangle {
             readonly property real bodyY: pageRoot.notch ? 0 : IrisFrame.band + Math.round(Number(root.opt("iris.bar.margin", 8)) * root.d)
             readonly property real bodyHeight: pageColumn.y + pageColumn.implicitHeight + pageRoot.padding
 
-            // The Island as it opens on the desktop: the field draws its body and, notched, its join to the frame;
-            // the page sits in a clip that follows it. Hanging from the edge, the clip's top corners sit above
-            // the view so the join stays the field's.
             Field.IrisField {
                 anchors.fill: parent
                 framed: false
@@ -2278,7 +2266,6 @@ ClippingRectangle {
                     width: parent.width
                     height: pageRoot.bodyHeight
 
-                    // The header, from the shared IrisHeaderScrim and IrisHeaderFade with the Island's own geometry.
                     Item {
                         id: previewHeader
                         visible: pageRoot.mode !== "media" && pageRoot.banner
@@ -2319,7 +2306,6 @@ ClippingRectangle {
                         height: previewHeader.height
                     }
 
-                    // The navigation row as the Island draws it (IrisIsland's navFrame): 36 × 30 buttons, 4 px apart.
                     IrisControlPlate {
                         id: previewNav
                         x: Math.round((bodyContent.width - width) / 2)
@@ -2367,8 +2353,6 @@ ClippingRectangle {
                         width: parent.width - 2 * x
                         spacing: Math.round(14 * root.d)
 
-                        // The hero as IslandDesktopPage draws it: date and time on the left, the weather on the right,
-                        // the header's tools on its top corner.
                         Item {
                             id: previewHero
                             visible: pageRoot.mode !== "media"
@@ -2377,7 +2361,6 @@ ClippingRectangle {
                                 ? Math.max(Math.round(112 * root.d), heroRow.implicitHeight + Math.round(26 * root.d))
                                 : heroRow.implicitHeight
 
-                            // The header's tools share the Island's plate; bare, each keeps its own veil.
                             IrisControlPlate {
                                 id: previewTools
                                 visible: pageRoot.mode === "desktop"

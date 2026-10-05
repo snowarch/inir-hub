@@ -282,7 +282,6 @@ PanelWindow {
                         elide: Text.ElideRight
                     }
                 }
-                // Appearance › Button rows: the header's tools on one plate, concentric with it.
                 IrisControlPlate {
                     id: headerTools
                     Layout.alignment: Qt.AlignVCenter
