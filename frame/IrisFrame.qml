@@ -237,6 +237,53 @@ QtObject {
             x: primary.x, y: primary.y }
     }
 
+    // The fillet a body melted into a wall draws there: the field's polynomial smooth union of two perpendicular edges
+    // bulges k/4 along the diagonal, which is a circular fillet of radius k / (4·(1 − 1/√2)).
+    function filletRadius(fuse: real): real { return fuse / (4 * (1 - Math.SQRT1_2)) }
+    function meltFuse(side: string, pieceSize: real): real {
+        return root.joinOn(side) === "notch"
+            ? IrisStyle.edgeFuseFor(pieceSize, Number(root.bubbles?.notchCurve ?? 100)) : IrisStyle.fuse
+    }
+    function nestRadius(rect: var, radius: real, origin: var, originFuse: real, screenWidth: real, screenHeight: real): real {
+        if (!rect || rect.width <= 0 || rect.height <= 0) return radius
+        const reach = Math.max(root.bodyAir, root.bodyMargin) + 2 * root.d
+        const floor = Math.round(6 * root.d)
+        const gap = { left: rect.x - root.band, right: screenWidth - root.band - rect.x - rect.width,
+            top: rect.y - root.band, bottom: screenHeight - root.band - rect.y - rect.height }
+        const o = origin?.obstacle ?? origin
+        const touches = (r, wall) => r && (wall === "left" ? r.x - root.band
+            : wall === "right" ? screenWidth - root.band - r.x - r.width
+            : wall === "top" ? r.y - root.band : screenHeight - root.band - r.y - r.height) <= 1.5
+        const nests = []
+        for (const side of ["left", "right"]) {
+            for (const end of ["top", "bottom"]) {
+                if (gap[side] > reach) continue
+                if (root.framed && gap[end] <= reach) {
+                    nests.push(root.cornerRadius - (gap[side] + gap[end]) / 2)
+                    continue
+                }
+                if (o && touches(o, side) && o.width > 0) {
+                    const between = end === "top" ? rect.y - (o.y + o.height) : o.y - (rect.y + rect.height)
+                    if (between >= -1 && between <= reach)
+                        nests.push(root.filletRadius(originFuse) - (gap[side] + between) / 2)
+                }
+            }
+        }
+        for (const end of ["top", "bottom"]) {
+            for (const side of ["left", "right"]) {
+                if (gap[end] > reach || !o || !touches(o, end) || o.height <= 0) continue
+                const between = side === "left" ? rect.x - (o.x + o.width) : o.x - (rect.x + rect.width)
+                if (between >= -1 && between <= reach)
+                    nests.push(root.filletRadius(originFuse) - (gap[end] + between) / 2)
+            }
+        }
+        if (nests.length === 0) return radius
+        // Or nothing: a corner much tighter than the body would square a sheet off to the floor; it keeps its own radius and floats.
+        const nested = Math.min(...nests)
+        if (nested < Math.max(floor * 2, radius * 0.4)) return radius
+        return Math.round(Math.min(Math.min(rect.width, rect.height) / 2, nested))
+    }
+
     function reserve(edge: string, chassisPresent: bool): real {
         let inner = 0
         if (chassisPresent && edge === root.islandEdge) inner = Math.max(inner, root.islandDepth)

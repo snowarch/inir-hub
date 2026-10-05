@@ -1050,7 +1050,8 @@ Item {
         GlobalStates.irisMorphOrigin = { x: rect.x, y: rect.y, width: rect.size, height: rect.size,
             radius: IrisStyle.pieceRadius(rect.size), screen: root.screenName, owner: "stage",
             fieldId: inDock ? "dock" : plate ? "plate:" + zone : "piece:" + slot,
-            obstacle: plate ? { x: plate.x, y: plate.y, width: plate.width, height: plate.height } : null }
+            obstacle: plate ? { x: plate.x, y: plate.y, width: plate.width, height: plate.height } : null,
+            nestFuse: root.edgeFuseOn(plate ? (plate.side ?? IrisFrame.edgeOf(plate.zone)) : IrisFrame.edgeOf(root.placeName(slot))) }
     }
     function activate(slot: string, kind: string, rect: var): void {
         const workspaceCard = kind === "workspaces"
@@ -1332,6 +1333,8 @@ Item {
             return Object.assign({}, a, { obstacle: { x: x, y: y,
                 width: Math.max(a.x + a.width, g.x + g.width) - x, height: Math.max(a.y + a.height, g.y + g.height) - y } })
         }
+        const plate = a && root.cardNest && root.cardNest.rect !== undefined && root.plateFor(root.cardSource.slice(6))
+        if (plate) return Object.assign({}, a, { obstacle: { x: plate.x, y: plate.y, width: plate.width, height: plate.height } })
         return a
     }
     readonly property var cardAvoidRects: {
@@ -1365,8 +1368,21 @@ Item {
         }
         return out
     }
+    readonly property real cardBaseRadius: IrisStyle.surfaceRadius("cards", IrisStyle.radiusSheet)
+    readonly property var cardNest: {
+        const slot = root.cardFloats ? root.cardSource.slice(6) : ""
+        if (slot.length === 0) return null
+        const plate = root.plateFor(slot)
+        if (plate) return { rect: plate, side: plate.side ?? IrisFrame.edgeOf(plate.zone) }
+        const rect = root.rects[root.allSlots.indexOf(slot)]
+        return rect ? { rect: { x: rect.x, y: rect.y, width: rect.size, height: rect.size }, side: IrisFrame.edgeOf(root.placeName(slot)) } : null
+    }
+    readonly property real cardRadius: root.cardPlacement && !IrisStyle.cardJoins
+        ? IrisFrame.nestRadius({ x: root.cardPlacement.x, y: root.cardPlacement.y, width: card.width, height: card.height },
+            root.cardBaseRadius, root.cardNest?.rect ?? null, root.edgeFuseOn(root.cardNest?.side ?? ""), root.width, root.height)
+        : root.cardBaseRadius
     readonly property var cardPlacement: root.cardAnchor && !root.cardHangs
-        ? IrisFrame.place(root.cardOrigin, card.width, card.height, root.width, root.height, card.radius,
+        ? IrisFrame.place(root.cardOrigin, card.width, card.height, root.width, root.height, root.cardBaseRadius,
             root.cardAvoidRects, !root.cardFromSatellite && IrisStyle.cardJoins
                 ? -IrisStyle.weld : Math.max(IrisFrame.bodyAir, IrisStyle.cardGap)) : null
     readonly property string cardOriginId: {
@@ -1407,7 +1423,7 @@ Item {
         color: IrisStyle.bodySurface
         fieldBacked: true
         contentReady: cardContent.contentHeight > 0
-        radius: IrisStyle.surfaceRadius("cards", IrisStyle.radiusSheet)
+        radius: root.cardRadius
         origin: root.cardAnchor
         light: IrisStyle.surfaceLight("cards", cardContent.light)
         lightFrom: !root.cardAnchor ? "top"
