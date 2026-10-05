@@ -1020,7 +1020,7 @@ PanelWindow {
         readonly property bool selected: !root.searching && root.section === sectionRow.modelData.id
         readonly property bool dimmed: root.searching && !root.matchedSections.has(sectionRow.modelData.id)
         readonly property bool compact: root.railLayout
-        readonly property real rowHeight: Math.round((sectionRow.compact ? 36 : 27) * root.d)
+        readonly property real rowHeight: Math.round((sectionRow.compact ? 36 : 27) * root.d * Math.max(1, IrisStyle.typeScale))
         width: parent ? parent.width : 0
         height: sectionRow.rowHeight + (sectionRow.clusterStart ? Math.round(8 * root.d) : 0)
         onContainsMouseChanged: {
