@@ -1240,7 +1240,10 @@ Loader {
                         required property var modelData
                         readonly property real level: Math.max(0, Math.min(1, Number(gauge.modelData.level) || 0))
                         readonly property color tint: gauge.level >= gauge.modelData.warn ? IrisStyle.danger : IrisStyle.accent
+                        // Four equal columns, each ring centred in its own: a layout with no filling child stops at its implicit width.
                         Layout.fillWidth: true
+                        Layout.preferredWidth: 1
+                        Layout.maximumWidth: Number.POSITIVE_INFINITY
                         spacing: 4 * root.d
                         Item {
                             Layout.alignment: Qt.AlignHCenter
