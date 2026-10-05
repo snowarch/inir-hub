@@ -15,6 +15,7 @@ Item {
     property bool active: visible
     property bool showBackground: true
     property real headerReserve: 0
+    property bool showPlayers: true
     // On a veil over imagery (the lock), which stays dark in every scheme: media ink instead of the scheme's.
     property bool overMedia: false
     readonly property color ink: root.overMedia ? IrisStyle.onMedia : IrisStyle.text
@@ -167,6 +168,14 @@ Item {
                 }
             }
             Item { Layout.fillWidth: true }
+        }
+        IrisPlayerChips {
+            id: playerChips
+            Layout.fillWidth: true
+            visible: root.showPlayers && playerChips.players.length > 0
+            player: root.player
+            accent: root.tint
+            overMedia: root.overMedia
         }
     }
 

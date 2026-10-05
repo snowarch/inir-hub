@@ -8,6 +8,7 @@ IrisSlider 1.0 IrisSlider.qml
 IrisField 1.0 IrisField.qml
 IrisArtwork 1.0 IrisArtwork.qml
 IrisMediaCard 1.0 IrisMediaCard.qml
+IrisPlayerChips 1.0 IrisPlayerChips.qml
 IrisScrubber 1.0 IrisScrubber.qml
 IrisMorphSurface 1.0 IrisMorphSurface.qml
 IrisCapsuleSlider 1.0 IrisCapsuleSlider.qml
