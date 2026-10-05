@@ -129,9 +129,18 @@ Item {
     OnDemandPanelLoader {
         identifier: "irisSettings"
         requireEnabledPanel: false
-        open: GlobalStates.settingsOverlayOpen || GlobalStates.irisSettingsWarm
+        open: !root.settingsWindowed && (GlobalStates.settingsOverlayOpen || GlobalStates.irisSettingsWarm)
         closeGraceMs: IrisStyle.settleDuration + 120
-        component: IrisSettings {}
+        component: IrisSettingsOverlay {}
+    }
+
+    readonly property bool settingsWindowed: (Config.options?.iris?.appearance?.settingsHost ?? "overlay") === "window"
+    OnDemandPanelLoader {
+        identifier: "irisSettingsWindow"
+        requireEnabledPanel: false
+        open: root.settingsWindowed && GlobalStates.settingsOverlayOpen
+        closeGraceMs: 0
+        component: IrisSettingsWindow {}
     }
 
     LazyLoader {
