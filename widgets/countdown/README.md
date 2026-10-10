@@ -4,7 +4,7 @@ Days left until a date you care about, with a face for every family.
 
 | Family | Where it shows |
 | --- | --- |
-| Material | A card on the desktop |
+| Material | A card on the desktop: the figure in a Material shape you pick, and a wavy bar for how much of the wait has gone by |
 | iRiS | A line on the Island's Desktop page |
 | Waffle | A card in the Widgets panel |
 
@@ -15,7 +15,7 @@ Days left until a date you care about, with a face for every family.
 | What it counts down to | The name above the figure. Default: New year |
 | Date | `YYYY-MM-DD`, or `YYYY-MM-DDTHH:MM` for a time of day |
 
-On the day itself it shows the hours and minutes left, then "Today". After the date it counts the days since.
+On the day itself it shows the hours and minutes left, then "Today" in a burst. After the date it counts the days since. In edit mode, pick the Shape or Instrument look, the shape, and whether the wait bar shows.
 
 ## For makers
 

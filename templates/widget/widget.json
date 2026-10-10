@@ -21,8 +21,16 @@
         "widgetOpacity": 100,
         "colorMode": "auto",
         "dim": 0,
+        "showBackground": true,
+        "backgroundOpacity": 0.16,
+        "borderWidth": 1,
+        "borderOpacity": 0.2,
+        "cornerRadius": -1,
+        "useBlur": false,
         "x": 240,
-        "y": 240
+        "y": 240,
+        "style": "shape",
+        "shape": "Cookie7Sided"
     },
     "configKeys": {
         "label": {
@@ -35,7 +43,7 @@
         "uniform": "widgetScale"
     },
     "defaultSize": {
-        "width": 180,
-        "height": 96
+        "width": 296,
+        "height": 116
     }
 }

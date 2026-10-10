@@ -39,7 +39,7 @@ An install puts the item where iNiR already reads it (your widgets, themes and s
 
 ## Make something
 
-[CONTRIBUTING.md](CONTRIBUTING.md) has the whole path. The short one:
+[CONTRIBUTING.md](CONTRIBUTING.md) has the whole path, and [the Material guide](guides/material.md) shows how a widget earns its place beside the built-in ones. The short one:
 
 ```sh
 python3 tools/hub.py new widget my-clock --author your-github-handle

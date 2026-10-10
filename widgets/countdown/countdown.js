@@ -21,7 +21,7 @@ function hasTime(text) {
 function dateLine(target, text) {
     if (!target)
         return ""
-    return Qt.locale("en_US").toString(target, hasTime(text) ? "ddd d MMM yyyy · HH:mm" : "dddd d MMMM yyyy")
+    return Qt.locale("en_US").toString(target, hasTime(text) ? "ddd d MMM · HH:mm" : "ddd d MMM yyyy")
 }
 
 // Calendar days between two moments, so 23:00 today to 09:00 tomorrow is one day, not zero.
@@ -47,4 +47,26 @@ function describe(target, now) {
         return { valid: true, past: true, figure: "Today", unit: "" }
     const n = Math.abs(days)
     return { valid: true, past: days < 0, figure: String(n), unit: (n === 1 ? "day" : "days") + (days < 0 ? " ago" : "") }
+}
+
+// "2026-10-10": the day a moment falls on, as the config stores it.
+function isoDay(date) {
+    const two = n => (n < 10 ? "0" : "") + n
+    return `${date.getFullYear()}-${two(date.getMonth() + 1)}-${two(date.getDate())}`
+}
+
+// How much of the wait has gone by, 0..1, from the day the date was set; -1 when that is unknown.
+function progress(since, target, now) {
+    if (!since || !target || target.getTime() <= since.getTime())
+        return -1
+    return Math.max(0, Math.min(1, (now.getTime() - since.getTime()) / (target.getTime() - since.getTime())))
+}
+
+// The words beside the figure: "days left", "left today", "days ago", "Today".
+function caption(reading) {
+    if (!reading.valid)
+        return "No date yet"
+    if (reading.past)
+        return reading.unit.length > 0 ? reading.unit : "Today"
+    return reading.unit === "left" ? "left today" : `${reading.unit} left`
 }

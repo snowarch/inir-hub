@@ -45,7 +45,7 @@ An item is a folder with the file iNiR itself reads, plus `hub.json` for the lis
 | Field | |
 | --- | --- |
 | `version` | `x.y.z`. Raise it with every change; CI compares it with `main`. For widgets and web apps it matches the version in the native file. |
-| `summary` | One line for the card, 8 to 90 characters. Say what it does, not what it is. |
+| `summary` | What the card says, 8 to 80 characters: two lines on the smallest card. Say what it does, not what it is. |
 | `description` | Optional, up to 600 characters. Widgets and themes take it from their own file. |
 | `authors` | GitHub handles. |
 | `license` | An SPDX id: `MIT`, `GPL-3.0-or-later`, `CC-BY-4.0`… |
@@ -60,26 +60,28 @@ An item is a folder with the file iNiR itself reads, plus `hub.json` for the lis
 
 One widget can have three faces. Give it the ones you can make well; the Hub says where it shows.
 
+**Start with [the Material guide](guides/material.md).** It shows the shapes, bars, looks and states the built-in widgets use, and what a widget needs to sit beside them.
+
 | Face | `widget.json` | Draws with | Look at |
 | --- | --- | --- | --- |
-| Material desktop | `main` | `AbstractBackgroundWidget`, `Appearance.*`, `StyledText`, `MaterialSymbol` | `countdown/Countdown.qml` |
+| Material desktop | `main` | `AbstractBackgroundWidget`, `MaterialShape`, `WidgetSurface`, the `Instrument*` parts, `Appearance.*` | `countdown/Countdown.qml`, [guide](guides/material.md) |
 | iRiS Island | `iris.main`, `iris.slots` | `IrisStyle.*` tokens, `IrisText` and the other `Iris*` parts | `countdown/IrisCountdown.qml` |
 | Waffle Widgets panel | `waffle.main` | `Looks.*`, `WText` and the other `W*` parts, Fluent icons | `countdown/WaffleCountdown.qml` |
 
 What makes a widget belong:
 
-- **Each face uses its family's own tokens.** No hex colours, no hand-picked font sizes: the user's theme, scale and light or dark scheme must reach your widget. A Material face reads `root.colText` for ink, so it stays readable on any wallpaper.
+- **Each face uses its family's own tokens.** No hex colours, no hand-picked font sizes: the user's theme, scale and light or dark scheme must reach your widget. A Material face reads `root.widgetInk` for ink, so it stays readable on any wallpaper.
 - **Shared logic lives in one `.js` file** that every face imports, like `countdown.js`. Faces only lay things out, so they never disagree.
 - **Settings are `configKeys`** in `widget.json`. iNiR draws the controls; faces read them with `root._readConfigKey(key)` (desktop) or `CustomWidgets.getConfigValue("<id>", key, fallback)` (Island and Waffle).
 - **The desktop face's `configEntryName` is `"custom.<id>"`.** That is where its position and settings are saved.
-- **It costs nothing while nobody looks.** Clocks tick by the minute when minutes are enough (`SystemClock.Minutes`); timers and processes run only while `visible` (and `motionActive` on the desktop).
+- **It costs nothing while nobody looks.** Clocks tick by the minute when minutes are enough (`SystemClock.Minutes`); timers and processes run only while `visible` (and `motionActive` on the desktop, after a first run).
 - **Every state has words.** Empty, loading and failed each show something useful, never a blank card. `shell-line` shows what a failing command printed.
 
 ## Colour themes
 
 `theme.json` is a Material palette: `name`, `description`, `author`, `darkmode`, and every `m3…` colour as `#rrggbb`. The template lists the ones iNiR needs. Applying it colours Material and Waffle and every app iNiR themes, and it lands in Settings › Themes beside the user's own.
 
-The Hub draws a palette card from your colours. A screenshot of the desktop wearing it is welcome too: set `preview`.
+The Hub draws your theme as a small Material desktop wearing it: bar, media card, toggles and notification, all in your colours. A real screenshot is welcome too: set `preview`.
 
 ## iRiS themes
 
@@ -102,6 +104,7 @@ A web app that ships scripts to run inside the page declares `inject`.
 ## Previews
 
 - A real screenshot of the item running. No mockups.
+- Widgets: `inir background widgetSnapshot custom.<id> shot.png` at 200 %, then `python3 tools/hub.py preview widgets/<id> --wallpaper <image> --shot shot.png` frames it the way every card is framed.
 - WebP (or PNG or JPEG), at least 800×450, landscape between 6:5 and 2:1; 16:10 at 1280×800 is ideal. Under 700 KB.
 - The item large enough to read when the card is small. Crop around it.
 - A wallpaper that leaves it readable, and nothing private: no messages, notifications, names or file paths.

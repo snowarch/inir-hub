@@ -3,12 +3,14 @@
     "icon": "hourglass_bottom",
     "version": "1.0.0",
     "author": "snowarch",
-    "description": "Days left until a date you care about. One widget with three faces: a card on the Material desktop, a line on the iRiS Island and a card in Waffle's Widgets panel. Set the date and its name in the widget's settings.",
+    "description": "Days left until a date you care about. The figure sits in a Material shape you pick, and a wavy bar shows how much of the wait has gone by. Also a line on the iRiS Island and a card in Waffle's Widgets panel.",
     "category": "time",
     "main": "Countdown.qml",
     "iris": {
         "main": "IrisCountdown.qml",
-        "slots": ["island.desktop"]
+        "slots": [
+            "island.desktop"
+        ]
     },
     "waffle": {
         "main": "WaffleCountdown.qml"
@@ -19,13 +21,35 @@
         "widgetOpacity": 100,
         "colorMode": "auto",
         "dim": 0,
+        "showBackground": true,
+        "backgroundOpacity": 0.16,
+        "borderWidth": 1,
+        "borderOpacity": 0.2,
+        "cornerRadius": -1,
+        "useBlur": false,
         "x": 240,
-        "y": 240
+        "y": 240,
+        "style": "shape",
+        "shape": "Cookie9Sided",
+        "showProgress": true
     },
     "configKeys": {
-        "label": { "type": "string", "default": "New year", "label": "What it counts down to" },
-        "date": { "type": "string", "default": "2027-01-01", "label": "Date: YYYY-MM-DD, or YYYY-MM-DDTHH:MM" }
+        "label": {
+            "type": "string",
+            "default": "New year",
+            "label": "What it counts down to"
+        },
+        "date": {
+            "type": "string",
+            "default": "2027-01-01",
+            "label": "Date: YYYY-MM-DD, or YYYY-MM-DDTHH:MM"
+        }
     },
-    "resizableAxes": { "uniform": "widgetScale" },
-    "defaultSize": { "width": 220, "height": 128 }
+    "resizableAxes": {
+        "uniform": "widgetScale"
+    },
+    "defaultSize": {
+        "width": 320,
+        "height": 132
+    }
 }
