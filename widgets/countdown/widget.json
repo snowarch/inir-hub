@@ -1,0 +1,31 @@
+{
+    "name": "Countdown",
+    "icon": "hourglass_bottom",
+    "version": "1.0.0",
+    "author": "snowarch",
+    "description": "Days left until a date you care about. One widget with three faces: a card on the Material desktop, a line on the iRiS Island and a card in Waffle's Widgets panel. Set the date and its name in the widget's settings.",
+    "category": "time",
+    "main": "Countdown.qml",
+    "iris": {
+        "main": "IrisCountdown.qml",
+        "slots": ["island.desktop"]
+    },
+    "waffle": {
+        "main": "WaffleCountdown.qml"
+    },
+    "defaultConfig": {
+        "placementStrategy": "free",
+        "widgetScale": 100,
+        "widgetOpacity": 100,
+        "colorMode": "auto",
+        "dim": 0,
+        "x": 240,
+        "y": 240
+    },
+    "configKeys": {
+        "label": { "type": "string", "default": "New year", "label": "What it counts down to" },
+        "date": { "type": "string", "default": "2027-01-01", "label": "Date: YYYY-MM-DD, or YYYY-MM-DDTHH:MM" }
+    },
+    "resizableAxes": { "uniform": "widgetScale" },
+    "defaultSize": { "width": 220, "height": 128 }
+}

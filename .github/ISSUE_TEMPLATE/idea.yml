@@ -1,0 +1,17 @@
+name: An idea for the Hub
+description: Something you'd like to see here, or a better way for the Hub to work.
+labels: [idea]
+body:
+  - type: textarea
+    id: idea
+    attributes:
+      label: The idea
+      description: What it is and who would use it.
+    validations:
+      required: true
+  - type: dropdown
+    id: family
+    attributes:
+      label: Family
+      multiple: true
+      options: [Material, iRiS, Waffle, Any]

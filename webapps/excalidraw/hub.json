@@ -1,0 +1,11 @@
+{
+    "$schema": "../../schema/hub.schema.json",
+    "version": "1.0.0",
+    "summary": "A hand-drawn whiteboard in the left sidebar",
+    "description": "Excalidraw as a tab of Material's left sidebar: sketch a layout, a flow or an idea without leaving the desktop. Your drawings stay in the site's own storage.",
+    "authors": ["snowarch"],
+    "license": "MIT",
+    "tags": ["drawing", "productivity"],
+    "permissions": [],
+    "preview": "preview.webp"
+}

@@ -1,0 +1,8 @@
+{
+    "id": "excalidraw",
+    "name": "Excalidraw",
+    "url": "https://excalidraw.com",
+    "icon": "draw",
+    "version": "1.0.0",
+    "display": "tab"
+}

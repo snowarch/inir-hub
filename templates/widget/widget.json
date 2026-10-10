@@ -1,0 +1,41 @@
+{
+    "name": "__NAME__",
+    "icon": "widgets",
+    "version": "1.0.0",
+    "author": "__AUTHOR__",
+    "description": "What it shows and where. Say it the way you would to someone looking at it.",
+    "category": "other",
+    "main": "__PASCAL__.qml",
+    "iris": {
+        "main": "Iris__PASCAL__.qml",
+        "slots": [
+            "island.desktop"
+        ]
+    },
+    "waffle": {
+        "main": "Waffle__PASCAL__.qml"
+    },
+    "defaultConfig": {
+        "placementStrategy": "free",
+        "widgetScale": 100,
+        "widgetOpacity": 100,
+        "colorMode": "auto",
+        "dim": 0,
+        "x": 240,
+        "y": 240
+    },
+    "configKeys": {
+        "label": {
+            "type": "string",
+            "default": "Now",
+            "label": "Label"
+        }
+    },
+    "resizableAxes": {
+        "uniform": "widgetScale"
+    },
+    "defaultSize": {
+        "width": 180,
+        "height": 96
+    }
+}

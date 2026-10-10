@@ -1,0 +1,9 @@
+{
+    "$schema": "../../schema/hub.schema.json",
+    "version": "1.0.0",
+    "summary": "Sea-glass teal over deep slate",
+    "authors": ["snowarch"],
+    "license": "MIT",
+    "tags": ["dark", "cool"],
+    "permissions": []
+}

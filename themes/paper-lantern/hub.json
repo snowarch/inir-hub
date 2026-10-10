@@ -1,0 +1,9 @@
+{
+    "$schema": "../../schema/hub.schema.json",
+    "version": "1.0.0",
+    "summary": "Warm paper and amber light for daytime",
+    "authors": ["snowarch"],
+    "license": "MIT",
+    "tags": ["light", "warm"],
+    "permissions": []
+}

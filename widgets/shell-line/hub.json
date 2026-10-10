@@ -1,0 +1,11 @@
+{
+    "$schema": "../../schema/hub.schema.json",
+    "version": "1.0.0",
+    "summary": "Any command's output, refreshed while it is on screen",
+    "authors": ["snowarch"],
+    "license": "MIT",
+    "tags": ["system", "terminal", "example"],
+    "permissions": ["process"],
+    "minInir": "2.33.0",
+    "preview": "preview.webp"
+}

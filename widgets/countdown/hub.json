@@ -1,0 +1,11 @@
+{
+    "$schema": "../../schema/hub.schema.json",
+    "version": "1.0.0",
+    "summary": "Days left until a date you care about, in every family",
+    "authors": ["snowarch"],
+    "license": "MIT",
+    "tags": ["time", "example"],
+    "permissions": [],
+    "minInir": "2.33.0",
+    "preview": "preview.webp"
+}

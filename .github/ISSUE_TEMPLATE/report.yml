@@ -1,0 +1,17 @@
+name: Report an item
+description: An item does something it shouldn't, or something it doesn't say.
+labels: [report]
+body:
+  - type: input
+    id: item
+    attributes:
+      label: Item
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: What it does
+      description: What you saw, and where in its code if you found it.
+    validations:
+      required: true

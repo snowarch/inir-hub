@@ -1,0 +1,13 @@
+{
+    "$schema": "../../schema/hub.schema.json",
+    "version": "1.0.0",
+    "summary": "Its colours, in one line",
+    "authors": [
+        "__AUTHOR__"
+    ],
+    "license": "MIT",
+    "tags": [
+        "dark"
+    ],
+    "permissions": []
+}

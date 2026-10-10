@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>iNiR Hub</title>
+<meta name="description" content="Widgets, colour themes, iRiS themes and web apps for iNiR, made by the people who use it.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Rubik:wght@500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0e0b14; --surface: #17131f; --surface-2: #211b2c; --surface-3: #2a2338;
+  --line: rgba(255, 255, 255, .08); --ink: #ece8f4; --ink-2: #b4acc3; --ink-3: #7f7792;
+  --violet: #a58bff; --violet-fill: rgba(165, 139, 255, .14); --gold: #e7b84f;
+  --shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 12px 32px rgba(0, 0, 0, .28);
+  --radius: 18px; --radius-inner: 12px;
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg: #f6f4fa; --surface: #ffffff; --surface-2: #f0ecf6; --surface-3: #e6e0f0;
+    --line: rgba(27, 21, 37, .09); --ink: #1b1525; --ink-2: #4e4560; --ink-3: #857c96;
+    --violet: #5b3fc8; --violet-fill: rgba(91, 63, 200, .09); --gold: #a77a12;
+    --shadow: 0 1px 2px rgba(27, 21, 37, .06), 0 12px 32px rgba(27, 21, 37, .08);
+    color-scheme: light;
+  }
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body {
+  background: var(--bg); color: var(--ink);
+  font: 15px/1.5 Inter, system-ui, sans-serif; -webkit-font-smoothing: antialiased;
+}
+a { color: var(--violet); text-decoration: none; }
+a:hover { text-decoration: underline; }
+.wrap { max-width: 1180px; margin: 0 auto; padding: 0 24px; }
+
+header.wrap { padding-top: 56px; padding-bottom: 28px; }
+.mark { font: 600 15px Rubik, Inter, sans-serif; letter-spacing: .02em; color: var(--ink-2); }
+.mark b { color: var(--gold); font-weight: 600; }
+h1 { font: 600 clamp(28px, 5vw, 42px)/1.15 Rubik, Inter, sans-serif; margin: 10px 0 8px; letter-spacing: -.01em; }
+.lede { color: var(--ink-2); margin: 0 0 22px; max-width: 46em; }
+.lede a { white-space: nowrap; }
+
+.cmd {
+  display: inline-flex; align-items: center; gap: 10px; max-width: 100%;
+  background: var(--surface-2); border: 0; border-radius: 999px; padding: 7px 8px 7px 16px;
+  font: 500 13px ui-monospace, "JetBrains Mono", monospace; color: var(--ink); cursor: pointer;
+}
+.cmd code { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cmd span {
+  font: 500 12px Inter, sans-serif; color: var(--violet); background: var(--violet-fill);
+  border-radius: 999px; padding: 3px 10px; flex: none;
+}
+.cmd:hover { background: var(--surface-3); }
+
+.bar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; padding: 8px 0 22px; position: sticky; top: 0;
+  background: linear-gradient(var(--bg) 82%, transparent); z-index: 2; }
+.search {
+  flex: 1 1 260px; min-width: 0; height: 40px; border-radius: 999px; border: 0; padding: 0 18px;
+  background: var(--surface-2); color: var(--ink); font: inherit; outline: none;
+}
+.search:focus { box-shadow: 0 0 0 2px var(--violet); }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip {
+  height: 34px; padding: 0 14px; border-radius: 999px; border: 0; cursor: pointer;
+  background: transparent; color: var(--ink-2); font: 500 13px Inter, sans-serif;
+}
+.chip:hover { background: var(--surface-2); }
+.chip[aria-pressed="true"] { background: var(--violet-fill); color: var(--violet); }
+.count { color: var(--ink-3); font-size: 13px; margin-left: auto; font-variant-numeric: tabular-nums; }
+
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 18px; padding-bottom: 56px; }
+.card {
+  background: var(--surface); border-radius: var(--radius); overflow: hidden; cursor: pointer;
+  display: flex; flex-direction: column; text-align: left; border: 0; padding: 0; color: inherit; font: inherit;
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+.card:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
+.card:focus-visible { outline: 2px solid var(--violet); outline-offset: 2px; }
+.shot { aspect-ratio: 16 / 10; width: 100%; object-fit: cover; display: block; background: var(--surface-2); }
+.body { padding: 14px 16px 16px; display: flex; flex-direction: column; gap: 4px; flex: 1; }
+.name { font: 600 16px Rubik, Inter, sans-serif; }
+.meta { font-size: 12.5px; color: var(--ink-3); }
+.summary { color: var(--ink-2); font-size: 14px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.foot { display: flex; align-items: center; gap: 8px; margin-top: auto; padding-top: 10px; font-size: 12.5px; color: var(--ink-3); }
+.perm { color: var(--gold); }
+
+.state { padding: 72px 0; text-align: center; color: var(--ink-2); }
+.state b { display: block; color: var(--ink); font: 600 18px Rubik, Inter, sans-serif; margin-bottom: 6px; }
+
+dialog {
+  width: min(760px, calc(100vw - 32px)); max-height: calc(100vh - 48px); padding: 0; border: 0;
+  border-radius: 24px; background: var(--surface); color: var(--ink); box-shadow: var(--shadow);
+}
+dialog::backdrop { background: rgba(8, 6, 12, .62); backdrop-filter: blur(6px); }
+.sheet { padding: 0 0 24px; }
+.sheet .shot { border-radius: 0; }
+.sheet .inner { padding: 20px 24px 0; display: flex; flex-direction: column; gap: 14px; }
+.sheet h2 { font: 600 24px/1.2 Rubik, Inter, sans-serif; margin: 0; }
+.sheet p { margin: 0; color: var(--ink-2); }
+.facts { display: grid; grid-template-columns: auto 1fr; gap: 6px 18px; margin: 0; font-size: 14px; }
+.facts dt { color: var(--ink-3); }
+.facts dd { margin: 0; }
+.perms { background: var(--surface-2); border-radius: var(--radius-inner); padding: 12px 14px; font-size: 14px; }
+.perms ul { margin: 6px 0 0; padding-left: 18px; color: var(--ink-2); }
+.actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.close {
+  position: absolute; top: 12px; right: 12px; width: 36px; height: 36px; border-radius: 999px; border: 0;
+  background: rgba(0, 0, 0, .45); color: #fff; font-size: 18px; cursor: pointer;
+}
+
+footer { border-top: 1px solid var(--line); padding: 22px 0 40px; color: var(--ink-3); font-size: 13px; }
+footer .wrap { display: flex; flex-wrap: wrap; gap: 8px 22px; }
+
+@media (max-width: 560px) {
+  .wrap { padding: 0 16px; }
+  header.wrap { padding-top: 36px; }
+  .count { width: 100%; margin: 0; }
+}
+@media (prefers-reduced-motion: reduce) { .card { transition: none; } .card:hover { transform: none; } }
+</style>
+</head>
+<body>
+<header class="wrap">
+  <div class="mark">iNiR <b>Hub</b></div>
+  <h1>Made by people who use iNiR</h1>
+  <p class="lede">Widgets, colour themes, iRiS themes and web apps. Install them from Settings › Hub on your desktop, or with one command. Want to add yours? <a href="https://github.com/snowarch/inir-hub/blob/main/CONTRIBUTING.md">Here's how</a>.</p>
+  <button class="cmd" data-copy="inir hub open"><code>inir hub open</code><span>Copy</span></button>
+</header>
+
+<main class="wrap">
+  <div class="bar">
+    <input class="search" type="search" placeholder="Search the hub" aria-label="Search the hub">
+    <div class="chips" role="group" aria-label="Kind"></div>
+    <div class="count" aria-live="polite"></div>
+  </div>
+  <div class="grid"></div>
+  <div class="state" hidden></div>
+</main>
+
+<dialog aria-label="Item"></dialog>
+
+<footer>
+  <div class="wrap">
+    <a href="https://github.com/snowarch/inir-hub">Source</a>
+    <a href="https://github.com/snowarch/inir-hub/blob/main/CONTRIBUTING.md">Contribute</a>
+    <a href="https://github.com/snowarch/inir-hub/issues/new?template=report.yml">Report an item</a>
+    <a href="https://github.com/snowarch/inir">iNiR</a>
+  </div>
+</footer>
+
+<script>
+const KINDS = [
+  ["", "Everything"], ["widget", "Widgets"], ["theme", "Colour themes"], ["iris-theme", "iRiS themes"], ["webapp", "Web apps"],
+];
+const KIND_ONE = { "widget": "Widget", "theme": "Colour theme", "iris-theme": "iRiS theme", "webapp": "Web app" };
+const FAMILY = { material: "Material", iris: "iRiS", waffle: "Waffle" };
+const state = { items: [], permissions: {}, home: "https://github.com/snowarch/inir-hub", kind: "", query: "" };
+
+const $ = sel => document.querySelector(sel);
+const esc = text => String(text ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const by = item => (item.authors || []).map(a => "@" + a).join(", ");
+const families = item => (item.families || []).map(f => FAMILY[f] || f).join(" · ");
+const size = bytes => bytes < 1024 ? `${bytes} B` : bytes < 1048576 ? `${Math.round(bytes / 1024)} KB` : `${(bytes / 1048576).toFixed(1)} MB`;
+const source = item => `${state.home}/tree/main/${item.path}`;
+
+function copyButton(text) {
+  return `<button class="cmd" data-copy="${esc(text)}"><code>${esc(text)}</code><span>Copy</span></button>`;
+}
+
+function render() {
+  const words = state.query.toLowerCase().split(/\s+/).filter(Boolean);
+  const shown = state.items.filter(item => {
+    if (state.kind && item.kind !== state.kind) return false;
+    const hay = [item.name, item.id, item.summary, ...(item.tags || []), ...(item.authors || [])].join(" ").toLowerCase();
+    return words.every(w => hay.includes(w));
+  });
+  $(".count").textContent = `${shown.length} of ${state.items.length}`;
+  $(".grid").innerHTML = shown.map(item => `
+    <button class="card" data-id="${esc(item.id)}">
+      <img class="shot" src="${esc(item.preview)}" alt="" loading="lazy">
+      <div class="body">
+        <div class="name">${esc(item.name)}</div>
+        <div class="meta">${esc(KIND_ONE[item.kind] || item.kind)} · ${esc(by(item))}</div>
+        <div class="summary">${esc(item.summary)}</div>
+        <div class="foot"><span>${esc(families(item))}</span>${(item.permissions || []).length ? `<span class="perm" title="${esc((item.permissions || []).map(p => state.permissions[p] || p).join("\n"))}">· ${item.permissions.length === 1 ? "1 permission" : item.permissions.length + " permissions"}</span>` : ""}</div>
+      </div>
+    </button>`).join("");
+  const empty = shown.length === 0;
+  $(".state").hidden = !empty;
+  if (empty) $(".state").innerHTML = state.items.length
+    ? `<b>Nothing matches</b>Try fewer words, or another kind.`
+    : `<b>Nothing here yet</b>Be the first: <a href="https://github.com/snowarch/inir-hub/blob/main/CONTRIBUTING.md">add something</a>.`;
+}
+
+function open(id) {
+  const item = state.items.find(i => i.id === id);
+  if (!item) return;
+  const perms = item.permissions || [];
+  const facts = [
+    ["Works in", families(item)],
+    ["Version", item.version],
+    ["Updated", item.updated],
+    item.minInir ? ["Needs", `iNiR ${item.minInir} or newer`] : null,
+    ["License", item.license],
+    ["Size", size(item.size || 0)],
+  ].filter(Boolean);
+  const dialog = $("dialog");
+  dialog.innerHTML = `
+    <div class="sheet">
+      <button class="close" aria-label="Close">×</button>
+      <img class="shot" src="${esc(item.preview)}" alt="">
+      <div class="inner">
+        <div>
+          <h2>${esc(item.name)}</h2>
+          <div class="meta">${esc(KIND_ONE[item.kind] || item.kind)} by ${esc(by(item))}</div>
+        </div>
+        <p>${esc(item.description || item.summary)}</p>
+        <div class="actions">${copyButton("inir hub install " + item.id)}<a href="${esc(source(item))}">See its files</a></div>
+        <div class="perms">${perms.length
+          ? `<b>What it can do</b><ul>${perms.map(p => `<li>${esc(state.permissions[p] || p)}</li>`).join("")}</ul>`
+          : `<b>Nothing beyond the shell.</b> It doesn't run commands, use the internet or touch files outside its folder.`}</div>
+        <dl class="facts">${facts.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join("")}</dl>
+      </div>
+    </div>`;
+  dialog.showModal();
+  history.replaceState(null, "", "#" + item.id);
+}
+
+document.addEventListener("click", event => {
+  const copy = event.target.closest("[data-copy]");
+  if (copy) {
+    const label = copy.querySelector("span");
+    navigator.clipboard?.writeText(copy.dataset.copy).then(() => {
+      label.textContent = "Copied";
+      setTimeout(() => { label.textContent = "Copy"; }, 1400);
+    }).catch(() => {});
+    return;
+  }
+  const card = event.target.closest(".card");
+  if (card) return open(card.dataset.id);
+  const dialog = $("dialog");
+  if (event.target.closest(".close") || event.target === dialog) dialog.close();
+});
+$("dialog").addEventListener("close", () => history.replaceState(null, "", location.pathname));
+
+let typing;
+$(".search").addEventListener("input", event => {
+  clearTimeout(typing);
+  typing = setTimeout(() => { state.query = event.target.value; render(); }, 120);
+});
+
+$(".chips").innerHTML = KINDS.map(([id, label]) => `<button class="chip" data-kind="${id}" aria-pressed="${id === "" }">${label}</button>`).join("");
+$(".chips").addEventListener("click", event => {
+  const chip = event.target.closest(".chip");
+  if (!chip) return;
+  state.kind = chip.dataset.kind;
+  document.querySelectorAll(".chip").forEach(c => c.setAttribute("aria-pressed", String(c === chip)));
+  render();
+});
+
+fetch("index.json", { cache: "no-cache" })
+  .then(response => response.ok ? response.json() : Promise.reject(response.status))
+  .then(index => {
+    state.items = (index.items || []).sort((a, b) => String(b.updated).localeCompare(String(a.updated)) || a.name.localeCompare(b.name));
+    state.permissions = index.permissions || {};
+    state.home = index.home || state.home;
+    render();
+    if (location.hash.length > 1) open(decodeURIComponent(location.hash.slice(1)));
+  })
+  .catch(() => {
+    $(".state").hidden = false;
+    $(".state").innerHTML = `<b>Couldn't read the catalogue</b>Reload in a moment, or browse <a href="${state.home}">the repository</a>.`;
+  });
+</script>
+</body>
+</html>

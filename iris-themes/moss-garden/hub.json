@@ -1,0 +1,9 @@
+{
+    "$schema": "../../schema/hub.schema.json",
+    "version": "1.0.0",
+    "summary": "Soft moss-green glass with slow, gentle motion",
+    "authors": ["snowarch"],
+    "license": "MIT",
+    "tags": ["glass", "green", "calm"],
+    "permissions": []
+}

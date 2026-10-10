@@ -1,0 +1,30 @@
+{
+    "name": "Shell Line",
+    "icon": "terminal",
+    "version": "1.0.0",
+    "author": "snowarch",
+    "description": "The output of a command you choose, kept fresh on the desktop or on the iRiS Island. It only runs while it is on screen, and an error shows what the command said instead of a blank card.",
+    "category": "system",
+    "main": "ShellLine.qml",
+    "iris": {
+        "main": "IrisShellLine.qml",
+        "slots": ["island.desktop"]
+    },
+    "defaultConfig": {
+        "placementStrategy": "free",
+        "widgetScale": 100,
+        "widgetOpacity": 100,
+        "colorMode": "auto",
+        "dim": 0,
+        "x": 260,
+        "y": 420
+    },
+    "configKeys": {
+        "label": { "type": "string", "default": "Uptime", "label": "Label" },
+        "command": { "type": "string", "default": "uptime -p | sed 's/^up //'", "label": "Command (runs with sh -c)" },
+        "interval": { "type": "int", "default": 60, "min": 5, "max": 3600, "step": 5, "label": "Refresh every (seconds)" },
+        "lines": { "type": "int", "default": 1, "min": 1, "max": 6, "step": 1, "label": "Lines to show" }
+    },
+    "resizableAxes": { "uniform": "widgetScale" },
+    "defaultSize": { "width": 260, "height": 84 }
+}

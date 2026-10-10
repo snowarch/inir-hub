@@ -1,0 +1,17 @@
+{
+    "iris": "theme",
+    "version": 1,
+    "id": "__ID__",
+    "name": "__NAME__",
+    "author": "__AUTHOR__",
+    "description": "What changes: the material, the colour, the shape, the motion.",
+    "values": {
+        "iris.appearance.preset": "soft",
+        "iris.appearance.accent": "custom",
+        "iris.appearance.theme.accentHue": 210,
+        "iris.appearance.highlight": "custom",
+        "iris.appearance.theme.highlightHue": 32,
+        "iris.appearance.glass.mode": "wallpaper",
+        "iris.appearance.theme.shape": 100
+    }
+}

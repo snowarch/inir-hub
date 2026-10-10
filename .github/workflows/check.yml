@@ -1,0 +1,27 @@
+name: Check
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Validate every item
+        run: python3 tools/hub.py validate
+      - name: Changed items raise their version
+        if: github.event_name == 'pull_request'
+        run: python3 tools/hub.py bumps --base "origin/${{ github.base_ref }}"
+      - name: Build
+        run: python3 tools/hub.py build --out "$RUNNER_TEMP/dist"

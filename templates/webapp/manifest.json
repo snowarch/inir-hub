@@ -1,0 +1,8 @@
+{
+    "id": "__ID__",
+    "name": "__NAME__",
+    "url": "https://example.com",
+    "icon": "public",
+    "version": "1.0.0",
+    "display": "tab"
+}
