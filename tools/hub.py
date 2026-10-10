@@ -5,8 +5,10 @@
     python3 tools/hub.py bumps --base origin/main    changed items must raise their version
     python3 tools/hub.py new KIND ID [--author GH]   start an item from templates/KIND
     python3 tools/hub.py build [--out dist]          index.json, packages, previews, gallery
+    python3 tools/hub.py preview ITEM_DIR --wallpaper IMG [--shot PNG] [--side left|right]
+                                                     compose preview.webp the way every card is framed
 
-Standard library only. The build is reproducible: the same item folder always packs to the same
+Standard library only (preview also calls ImageMagick's `magick`). The build is reproducible: the same item folder always packs to the same
 bytes, so a package's sha256 only changes when its content does.
 """
 
@@ -26,6 +28,8 @@ import struct
 import subprocess
 import sys
 import tarfile
+import tempfile
+import time
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -230,8 +234,8 @@ def check_item(folder: Path, report: Report) -> dict | None:
     if not semver(version):
         report.error(folder / "hub.json", f'"version" must be x.y.z, got "{version}"')
     summary = str(hub.get("summary", "")).strip()
-    if not 8 <= len(summary) <= 90:
-        report.error(folder / "hub.json", '"summary" is one line for the card, 8-90 characters')
+    if not 8 <= len(summary) <= 80:
+        report.error(folder / "hub.json", '"summary" is what the card says, 8-80 characters (two lines on the smallest card)')
     authors = hub.get("authors")
     if not isinstance(authors, list) or not authors or not all(HANDLE_RE.match(str(a)) for a in authors):
         report.error(folder / "hub.json", '"authors" lists GitHub handles, e.g. ["octocat"]')
@@ -300,6 +304,7 @@ def check_item(folder: Path, report: Report) -> dict | None:
         entry["swatch"] = [native.get(k, "#000000") for k in ("m3background", "m3surfaceContainer", "m3primary",
                                                                 "m3secondary", "m3tertiary", "m3onSurface")]
         entry["dark"] = bool(native.get("darkmode"))
+        entry["_palette"] = {k: str(v) for k, v in native.items() if k.startswith("m3")}
     elif kind == "iris-theme":
         if native.get("iris") != "theme" or native.get("version") != 1:
             report.error(folder / "theme.json", 'an iRiS theme starts with "iris": "theme", "version": 1')
@@ -460,18 +465,85 @@ def git(*args: str) -> str:
 
 
 def theme_card(entry: dict) -> str:
-    """A palette card for a Material theme that ships no screenshot: the theme is its colours."""
-    bg, container, primary, secondary, tertiary, ink = entry["swatch"]
+    """A Material desktop wearing a colour theme that ships no screenshot: bar, clock, media card and
+    sidebar drawn from its own roles, so a card shows what applying it does rather than a swatch."""
+    p = entry["_palette"]
+
+    def c(role: str) -> str:
+        return p.get(role, "#808080")
+
     name = html.escape(entry["name"])
+    toggles = []
+    for i in range(6):
+        col, row = i % 2, i // 2
+        x, y = 888 + col * 176, 188 + row * 76
+        on = i in (0, 1, 4)
+        plate, ink = (c("m3primary"), c("m3onPrimary")) if on else (c("m3surfaceContainerHigh"), c("m3onSurfaceVariant"))
+        toggles.append(f'<rect x="{x}" y="{y}" width="168" height="64" rx="22" fill="{plate}"/>'
+                       f'<circle cx="{x + 32}" cy="{y + 32}" r="11" fill="{ink}"/>'
+                       f'<rect x="{x + 56}" y="{y + 22}" width="{72 if on else 60}" height="10" rx="5" fill="{ink}"/>'
+                       f'<rect x="{x + 56}" y="{y + 38}" width="44" height="8" rx="4" fill="{ink}" fill-opacity="0.6"/>')
+    days = []
+    for i in range(21):
+        col, row = i % 7, i // 7
+        cx, cy = 922 + col * 46, 676 + row * 30
+        if i == 9:
+            days.append(f'<circle cx="{cx}" cy="{cy}" r="13" fill="{c("m3primary")}"/>'
+                        f'<circle cx="{cx}" cy="{cy}" r="4" fill="{c("m3onPrimary")}"/>')
+        else:
+            days.append(f'<circle cx="{cx}" cy="{cy}" r="4" fill="{c("m3onSurfaceVariant")}" fill-opacity="0.45"/>')
+    workspaces = "".join(f'<circle cx="{150 + i * 22}" cy="46" r="5" fill="{c("m3onSurfaceVariant")}" fill-opacity="0.5"/>'
+                         for i in range(3))
     return f"""<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="800" viewBox="0 0 1280 800">
-<rect width="1280" height="800" fill="{bg}"/>
-<rect x="96" y="96" width="1088" height="608" rx="48" fill="{container}"/>
-<circle cx="296" cy="400" r="120" fill="{primary}"/>
-<circle cx="536" cy="400" r="88" fill="{secondary}"/>
-<circle cx="728" cy="400" r="64" fill="{tertiary}"/>
-<rect x="856" y="336" width="232" height="28" rx="14" fill="{ink}"/>
-<rect x="856" y="388" width="168" height="20" rx="10" fill="{ink}" fill-opacity="0.55"/>
-<rect x="856" y="428" width="200" height="20" rx="10" fill="{ink}" fill-opacity="0.35"/>
+<defs>
+<linearGradient id="wall" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="{c("m3tertiaryContainer")}"/><stop offset="0.55" stop-color="{c("m3surfaceContainerLow")}"/><stop offset="1" stop-color="{c("m3background")}"/></linearGradient>
+<radialGradient id="glowA" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stop-color="{c("m3primary")}" stop-opacity="0.42"/><stop offset="1" stop-color="{c("m3primary")}" stop-opacity="0"/></radialGradient>
+<radialGradient id="glowB" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stop-color="{c("m3tertiary")}" stop-opacity="0.30"/><stop offset="1" stop-color="{c("m3tertiary")}" stop-opacity="0"/></radialGradient>
+<linearGradient id="art" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="{c("m3tertiary")}"/><stop offset="1" stop-color="{c("m3primaryContainer")}"/></linearGradient>
+</defs>
+<rect width="1280" height="800" fill="url(#wall)"/>
+<circle cx="300" cy="620" r="420" fill="url(#glowA)"/>
+<circle cx="760" cy="140" r="360" fill="url(#glowB)"/>
+<rect x="24" y="20" width="1232" height="52" rx="26" fill="{c("m3surfaceContainer")}"/>
+<circle cx="58" cy="46" r="11" fill="{c("m3onSurfaceVariant")}"/>
+<rect x="88" y="36" width="44" height="20" rx="10" fill="{c("m3primary")}"/>
+{workspaces}
+<rect x="590" y="39" width="100" height="14" rx="7" fill="{c("m3onSurface")}"/>
+<circle cx="1146" cy="46" r="7" fill="{c("m3onSurfaceVariant")}"/>
+<circle cx="1176" cy="46" r="7" fill="{c("m3onSurfaceVariant")}"/>
+<rect x="1198" y="38" width="32" height="16" rx="8" fill="{c("m3secondaryContainer")}"/>
+<text x="56" y="300" font-family="Rubik, Roboto Flex, sans-serif" font-size="164" font-weight="600" fill="{c("m3primary")}" letter-spacing="-4">12:30</text>
+<rect x="64" y="332" width="220" height="16" rx="8" fill="{c("m3onSurface")}" fill-opacity="0.75"/>
+<rect x="56" y="548" width="520" height="196" rx="32" fill="{c("m3surfaceContainerLow")}"/>
+<rect x="76" y="568" width="156" height="156" rx="22" fill="url(#art)"/>
+<rect x="256" y="592" width="200" height="18" rx="9" fill="{c("m3onSurface")}"/>
+<rect x="256" y="622" width="130" height="14" rx="7" fill="{c("m3onSurfaceVariant")}"/>
+<rect x="256" y="660" width="290" height="8" rx="4" fill="{c("m3secondaryContainer")}"/>
+<rect x="256" y="660" width="170" height="8" rx="4" fill="{c("m3primary")}"/>
+<rect x="256" y="686" width="76" height="40" rx="20" fill="{c("m3primary")}"/>
+<path d="M287 696 L287 716 L304 706 Z" fill="{c("m3onPrimary")}"/>
+<circle cx="364" cy="706" r="18" fill="{c("m3secondaryContainer")}"/>
+<circle cx="408" cy="706" r="18" fill="{c("m3secondaryContainer")}"/>
+<rect x="864" y="92" width="392" height="688" rx="32" fill="{c("m3background")}"/>
+<circle cx="910" cy="140" r="22" fill="{c("m3primaryContainer")}"/>
+<rect x="946" y="128" width="120" height="14" rx="7" fill="{c("m3onSurface")}"/>
+<rect x="946" y="150" width="80" height="10" rx="5" fill="{c("m3onSurfaceVariant")}"/>
+<circle cx="1212" cy="140" r="18" fill="{c("m3surfaceContainerHigh")}"/>
+{"".join(toggles)}
+<rect x="888" y="420" width="344" height="44" rx="22" fill="{c("m3secondaryContainer")}"/>
+<rect x="888" y="420" width="220" height="44" rx="22" fill="{c("m3primary")}"/>
+<circle cx="914" cy="442" r="9" fill="{c("m3onPrimary")}"/>
+<rect x="888" y="484" width="344" height="124" rx="24" fill="{c("m3surfaceContainerHigh")}"/>
+<circle cx="926" cy="522" r="18" fill="{c("m3tertiaryContainer")}"/>
+<circle cx="926" cy="522" r="7" fill="{c("m3tertiary")}"/>
+<rect x="956" y="510" width="140" height="13" rx="6.5" fill="{c("m3onSurface")}"/>
+<rect x="1180" y="512" width="32" height="9" rx="4.5" fill="{c("m3onSurfaceVariant")}"/>
+<rect x="956" y="534" width="250" height="9" rx="4.5" fill="{c("m3onSurfaceVariant")}" fill-opacity="0.75"/>
+<rect x="956" y="552" width="190" height="9" rx="4.5" fill="{c("m3onSurfaceVariant")}" fill-opacity="0.75"/>
+<rect x="956" y="574" width="84" height="20" rx="10" fill="{c("m3secondaryContainer")}"/>
+<rect x="1048" y="574" width="84" height="20" rx="10" fill="{c("m3secondaryContainer")}"/>
+<rect x="888" y="628" width="344" height="132" rx="24" fill="{c("m3surfaceContainerLow")}"/>
+{"".join(days)}
 <title>{name}</title>
 </svg>
 """
@@ -549,6 +621,7 @@ def build(out: Path) -> int:
     (out / "packages").mkdir(parents=True)
     (out / "previews").mkdir()
     commit = git("rev-parse", "HEAD")
+    featured = set((load_json(ROOT / "featured.json", report) or {}).get("items", [])) if (ROOT / "featured.json").is_file() else set()
     items = []
     for entry in sorted(entries, key=lambda e: (e["kind"], e["id"])):
         data = pack(entry)
@@ -573,6 +646,8 @@ def build(out: Path) -> int:
             "updated": updated,
             "path": folder_rel,
         })
+        if entry["id"] in featured:
+            item["featured"] = True
         items.append(item)
     index = {
         "schema": SCHEMA,
@@ -652,6 +727,55 @@ def new(kind: str, item_id: str, author: str) -> int:
     return 0
 
 
+PREVIEW_W, PREVIEW_H = 1280, 800
+
+
+def preview(folder: Path, wallpaper: Path, shot: Path | None, side: str) -> int:
+    """Frame a widget the way every card in the Hub is framed: the wallpaper filling 1280x800, the widget
+    at about half the width on one side, off the picture's centre. The shot is the widget as iNiR draws
+    it (`inir background widgetSnapshot custom.<id> shot.png`), taken at 200 % so it stays sharp."""
+    if shutil.which("magick") is None:
+        print("preview needs ImageMagick (the magick command)", file=sys.stderr)
+        return 2
+    if not folder.is_dir() or not wallpaper.is_file():
+        print("give an item folder and a wallpaper image", file=sys.stderr)
+        return 2
+    with tempfile.TemporaryDirectory() as tmp:
+        if shot is None:
+            shot = Path(tmp) / "shot.png"
+            run = subprocess.run(["inir", "background", "widgetSnapshot", f"custom.{folder.name}", str(shot)],
+                                 capture_output=True, text=True)
+            # iNiR saves the shot a moment after it answers (the widget renders offscreen first).
+            for _ in range(50):
+                if shot.is_file() and shot.stat().st_size > 0:
+                    break
+                time.sleep(0.1)
+            if run.returncode != 0 or not shot.is_file():
+                print("could not take the shot: install the widget, put it on the desktop, show the desktop and try again"
+                      + (f" ({run.stdout.strip() or run.stderr.strip()})" if (run.stdout or run.stderr) else ""), file=sys.stderr)
+                return 1
+        dims = image_size(shot)
+        if dims is None:
+            print(f"{shot}: not an image", file=sys.stderr)
+            return 2
+        w, h = dims
+        scale = min(PREVIEW_W * 0.46 / w, PREVIEW_H * 0.62 / h, 1.0)
+        if scale >= 1.0 and w < PREVIEW_W * 0.36:
+            print(f"note: the shot is {w}x{h}; set the widget to 200 % before shooting so it reads at card size",
+                  file=sys.stderr)
+        tw, th = round(w * scale), round(h * scale)
+        margin = round(PREVIEW_W * 0.08)
+        x = margin if side == "left" else PREVIEW_W - margin - tw
+        y = max(margin // 2, round((PREVIEW_H - th) / 2) - 24)
+        out = folder / "preview.webp"
+        subprocess.run(["magick", f"{wallpaper}[0]", "-resize", f"{PREVIEW_W}x{PREVIEW_H}^", "-gravity", "center",
+                        "-extent", f"{PREVIEW_W}x{PREVIEW_H}", "(", str(shot), "-background", "black", "-alpha", "background", "-resize", f"{tw}x{th}", ")",
+                        "-gravity", "northwest", "-geometry", f"+{x}+{y}", "-composite", "-quality", "88", str(out)],
+                       check=True)
+    print(f"wrote {rel(out)} ({out.stat().st_size // 1024} KB): look at it at card size before you commit it")
+    return 0
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(prog="hub.py", description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = parser.add_subparsers(dest="cmd", required=True)
@@ -665,6 +789,11 @@ def main() -> int:
     p.add_argument("--author", default="")
     p = sub.add_parser("build")
     p.add_argument("--out", default=str(ROOT / "dist"))
+    p = sub.add_parser("preview")
+    p.add_argument("item")
+    p.add_argument("--wallpaper", required=True)
+    p.add_argument("--shot")
+    p.add_argument("--side", choices=("left", "right"), default="left")
     args = parser.parse_args()
 
     if args.cmd == "validate":
@@ -679,6 +808,9 @@ def main() -> int:
         return bumps(args.base)
     if args.cmd == "new":
         return new(args.kind, args.id, args.author)
+    if args.cmd == "preview":
+        return preview(Path(args.item).resolve(), Path(args.wallpaper).expanduser(),
+                       Path(args.shot).expanduser() if args.shot else None, args.side)
     return build(Path(args.out).resolve())
 
 

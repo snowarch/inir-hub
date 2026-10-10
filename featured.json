@@ -1,0 +1,4 @@
+{
+    "about": "Items the Hub puts first, in this order of preference. Chosen by the maintainers, not by pull requests.",
+    "items": ["countdown"]
+}

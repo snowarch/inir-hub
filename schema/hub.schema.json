@@ -23,7 +23,7 @@
         "summary": {
             "type": "string",
             "minLength": 8,
-            "maxLength": 90,
+            "maxLength": 80,
             "description": "One line for the card"
         },
         "description": {
