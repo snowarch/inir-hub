@@ -16,9 +16,11 @@ concurrency:
 
 jobs:
   build:
+    # Pages needs a public repo on the free plan; publishing starts by itself once it is public.
+    if: ${{ !github.event.repository.private }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - uses: actions/setup-python@v5
