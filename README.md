@@ -42,9 +42,9 @@ An install puts the item where iNiR already reads it (your widgets, themes and s
 [CONTRIBUTING.md](CONTRIBUTING.md) has the whole path, and [the Material guide](guides/material.md) shows how a widget earns its place beside the built-in ones. The short one:
 
 ```sh
-python3 tools/hub.py new widget my-clock --author your-github-handle
-python3 tools/hub.py validate widgets/my-clock
-python3 tools/hub.py build && INIR_HUB_SOURCES=$PWD/dist inir hub install my-clock
+inir hub new widget my-clock --author your-github-handle
+inir hub validate widgets/my-clock
+inir hub build && INIR_HUB_SOURCES=$PWD/dist inir hub install my-clock
 ```
 
 Then open a pull request. The examples here (`countdown`, `shell-line`, `tidepool`, `moss-garden`, `excalidraw`) are written to be copied.
@@ -57,7 +57,7 @@ Found something that misbehaves? [Report it](https://github.com/snowarch/inir-hu
 
 ## Other hubs
 
-iNiR reads more than one hub. Add the address of any `index.json` (or a local folder with one) in the Hub page under Sources, or in `hub.sources` in your config. `python3 tools/hub.py build` makes one from a repository laid out like this.
+iNiR reads more than one hub. Add the address of any `index.json` (or a local folder with one) in the Hub page under Sources, or in `hub.sources` in your config. `inir hub build` makes one from a repository laid out like this.
 
 ## License
 

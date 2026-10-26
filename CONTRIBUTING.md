@@ -7,7 +7,7 @@ Anything in the Hub installs with one command and removes cleanly. To keep it th
 1. Fork this repository and start from a template:
 
    ```sh
-   python3 tools/hub.py new widget my-clock --author your-github-handle
+   inir hub new widget my-clock --author your-github-handle
    ```
 
    Kinds: `widget`, `theme`, `iris-theme`, `webapp`. The id is the folder name: 3 to 48 characters, lowercase letters, digits and dashes. It is also what people type in `inir hub install`.
@@ -15,13 +15,13 @@ Anything in the Hub installs with one command and removes cleanly. To keep it th
 2. Make it, add a preview, and validate:
 
    ```sh
-   python3 tools/hub.py validate widgets/my-clock
+   inir hub validate widgets/my-clock
    ```
 
 3. Try it installed, the way people will get it:
 
    ```sh
-   python3 tools/hub.py build
+   inir hub build
    INIR_HUB_SOURCES=$PWD/dist inir hub install my-clock
    inir logs --issues            # nothing new from your item
    INIR_HUB_SOURCES=$PWD/dist inir hub remove my-clock
@@ -104,7 +104,7 @@ A web app that ships scripts to run inside the page declares `inject`.
 ## Previews
 
 - A real screenshot of the item running. No mockups.
-- Widgets: `inir background widgetSnapshot custom.<id> shot.png` at 200 %, then `python3 tools/hub.py preview widgets/<id> --wallpaper <image> --shot shot.png` frames it the way every card is framed.
+- Widgets: `inir background widgetSnapshot custom.<id> shot.png` at 200 %, then `inir hub preview widgets/<id> --wallpaper <image> --shot shot.png` frames it the way every card is framed.
 - WebP (or PNG or JPEG), at least 800×450, landscape between 6:5 and 2:1; 16:10 at 1280×800 is ideal. Under 700 KB.
 - The item large enough to read when the card is small. Crop around it.
 - A wallpaper that leaves it readable, and nothing private: no messages, notifications, names or file paths.

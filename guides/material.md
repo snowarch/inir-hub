@@ -2,7 +2,7 @@
 
 How to make a desktop widget that looks like it shipped with iNiR. Read it with
 [`widgets/countdown/Countdown.qml`](../widgets/countdown/Countdown.qml) open beside it: every rule here is used there.
-`python3 tools/hub.py new widget <id>` starts you from a template built the same way.
+`inir hub new widget <id>` starts you from a template built the same way.
 
 ![Countdown in its four states: days left, hours left, no date yet, and the Instrument look](images/material-countdown-states.webp)
 
@@ -123,7 +123,7 @@ The Hub card is your widget on a real wallpaper, framed the same way for every i
 # 1. Install it, put it on the desktop, set it to 200 % in edit mode, in the state worth showing.
 # 2. Shoot it (offscreen, your windows stay where they are) and frame it on a wallpaper you choose:
 inir background widgetSnapshot custom.my-widget /tmp/shot.png
-python3 tools/hub.py preview widgets/my-widget --wallpaper ~/Pictures/calm-wallpaper.jpg --shot /tmp/shot.png --side left
+inir hub preview widgets/my-widget --wallpaper ~/Pictures/calm-wallpaper.jpg --shot /tmp/shot.png --side left
 ```
 
 Pick a wallpaper with a calm area where the widget sits and a focal point it leaves free. Look at the result at card
@@ -137,5 +137,5 @@ size before you commit it.
 - [ ] A label 50 % longer and the longest real value stay inside the card
 - [ ] 100 % and 200 % scale
 - [ ] Quick controls change what they say
-- [ ] `python3 tools/hub.py validate widgets/<id>` passes
+- [ ] `inir hub validate widgets/<id>` passes
 - [ ] The preview reads at card size
