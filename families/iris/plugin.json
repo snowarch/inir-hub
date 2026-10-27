@@ -3,6 +3,8 @@
   "kind": "family",
   "name": "iRiS",
   "summary": "One living body: the Island, the chassis and Apple-grade motion.",
+  "tagline": "Island, pieces and a Dock on any edge.",
+  "icon": "visibility",
   "version": "2.33.0",
   "provides": "modules/iris",
   "parts": {
@@ -51,7 +53,8 @@
     "regionToolbar": "regionSelector/IrisOptionsToolbar.qml",
     "familyTransition": "IrisFamilyTransition.qml",
     "config": "IrisConfigSchema.qml",
-    "layout": "IrisLayout.qml"
+    "layout": "IrisLayout.qml",
+    "welcome": "welcome/IrisWelcome.qml"
   },
   "flags": {
     "lockSurfaceSync": true,

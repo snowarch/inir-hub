@@ -3,6 +3,8 @@
   "kind": "family",
   "name": "Waffle",
   "summary": "Windows 11 for people who want it: taskbar, Start, Action Center.",
+  "tagline": "Taskbar, Start menu, Action Center and notification center.",
+  "icon": "grid_view",
   "version": "2.33.0",
   "provides": "modules/waffle",
   "parts": {
@@ -16,7 +18,8 @@
     "familyTransition": "WaffleFamilyTransition.qml",
     "settingsApp": "settings/WaffleSettingsApp.qml",
     "config": "WaffleConfigSchema.qml",
-    "layout": "WaffleLayout.qml"
+    "layout": "WaffleLayout.qml",
+    "welcome": "welcome/WaffleWelcome.qml"
   },
   "settingsFrom": {
     "family": "ii",

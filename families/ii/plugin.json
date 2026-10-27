@@ -3,6 +3,8 @@
   "kind": "family",
   "name": "Material",
   "summary": "Material 3 Expressive panels, bars, docks and widgets in nine global styles.",
+  "tagline": "Modular bars, sidebars and Material controls.",
+  "icon": "dashboard",
   "version": "2.33.0",
   "provides": "modules/ii",
   "parts": {
