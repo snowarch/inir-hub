@@ -1,0 +1,20 @@
+{
+    "$schema": "../../schema/hub.schema.json",
+    "version": "2.33.0",
+    "summary": "One living body: the Island, the chassis and Apple-grade motion.",
+    "authors": [
+        "snowarch"
+    ],
+    "license": "GPL-3.0-only",
+    "tags": [
+        "family"
+    ],
+    "permissions": [
+        "process",
+        "network",
+        "files"
+    ],
+    "minInir": "2.33.0",
+    "provides": "modules/iris",
+    "preview": "preview.webp"
+}

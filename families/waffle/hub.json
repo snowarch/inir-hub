@@ -1,0 +1,19 @@
+{
+    "$schema": "../../schema/hub.schema.json",
+    "version": "2.33.0",
+    "summary": "Windows 11 for people who want it: taskbar, Start, Action Center.",
+    "authors": [
+        "snowarch"
+    ],
+    "license": "GPL-3.0-only",
+    "tags": [
+        "family"
+    ],
+    "permissions": [
+        "process",
+        "files"
+    ],
+    "minInir": "2.33.0",
+    "provides": "modules/waffle",
+    "preview": "preview.webp"
+}
