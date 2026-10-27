@@ -101,6 +101,13 @@ The Hub draws a card from your accent, highlight and shape. A real screenshot sa
 
 A web app that ships scripts to run inside the page declares `inject`.
 
+## Families, components and Designs
+
+These are shell code: `plugin.json` names the parts the base loads, and `hub.json` says where it links in the shell
+(`provides`, like `modules/iris`). Every folder that holds types carries a `qmldir` listing all of them. Stock
+Quickshell reads those instead of scanning your plugin at every start, and trusts them whole, so a type left out is
+"not a type" for everyone on Quickshell. `inir hub validate --fix` writes the missing ones for you.
+
 ## Previews
 
 - A real screenshot of the item running. No mockups.
