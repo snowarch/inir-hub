@@ -180,7 +180,7 @@ Item {
         activeAsync: Config.ready && IrisGate.official && GlobalStates.deferredPanelsReady
             && CompositorService.isNiri
             && (Config.options?.background?.backdrop?.enable ?? false)
-        source: "../shared/background/Backdrop.qml"
+        source: Plugins.baseUrl("modules/shared/background/Backdrop.qml")
     }
 
     LazyLoader {
@@ -226,14 +226,14 @@ Item {
         requireEnabledPanel: false
         keep: true
         warmMs: 4500
-        source: "../shared/overlay/Overlay.qml"
+        source: Plugins.baseUrl("modules/shared/overlay/Overlay.qml")
     }
 
     OnDemandPanelLoader {
         identifier: "irisCheatsheet"
         open: GlobalStates.cheatsheetOpen
         requireEnabledPanel: false
-        source: "../shared/cheatsheet/Cheatsheet.qml"
+        source: Plugins.baseUrl("modules/shared/cheatsheet/Cheatsheet.qml")
     }
 
     OnDemandPanelLoader {
@@ -248,7 +248,7 @@ Item {
         identifier: "irisRegionSelector"
         open: GlobalStates.regionSelectorOpen || GlobalStates.annotationEditorOpen
         requireEnabledPanel: false
-        source: "../shared/regionSelector/RegionSelector.qml"
+        source: Plugins.baseUrl("modules/shared/regionSelector/RegionSelector.qml")
     }
 
 
@@ -263,14 +263,14 @@ Item {
         identifier: "irisWallpaperLauncher"
         open: GlobalStates.wallpaperLauncherOpen
         requireEnabledPanel: false
-        source: "../shared/wallpaperLauncher/WallpaperLauncher.qml"
+        source: Plugins.baseUrl("modules/shared/wallpaperLauncher/WallpaperLauncher.qml")
     }
 
     OnDemandPanelLoader {
         identifier: "irisCoverflowSelector"
         open: GlobalStates.coverflowSelectorOpen
         requireEnabledPanel: false
-        source: "../shared/wallpaperSelector/WallpaperCoverflow.qml"
+        source: Plugins.baseUrl("modules/shared/wallpaperSelector/WallpaperCoverflow.qml")
     }
 
     OnDemandPanelLoader {
@@ -279,13 +279,13 @@ Item {
         requireEnabledPanel: false
         extraCondition: !(GlobalStates.barOpen
             && (Config.options?.enabledPanels ?? []).includes("irisBar"))
-        source: "../shared/recordingOsd/RecordingOsd.qml"
+        source: Plugins.baseUrl("modules/shared/recordingOsd/RecordingOsd.qml")
     }
 
     OnDemandPanelLoader {
         identifier: "irisTilingOverlay"
         open: GlobalStates.tilingOverlayPickerOpen || GlobalStates.tilingOverlayOsdOpen
         requireEnabledPanel: false
-        source: "../shared/tilingOverlay/TilingOverlay.qml"
+        source: Plugins.baseUrl("modules/shared/tilingOverlay/TilingOverlay.qml")
     }
 }

@@ -7,20 +7,19 @@ import qs.services
 import qs.modules.common
 import qs.modules.common.widgets
 import qs.modules.shared.background.widgets
-import "../../shared/background/widgets/OrganicEdgeConfig.js" as EdgeConfig
 
 ColumnLayout {
     id: root
     spacing: 12
     function value(key: string): var {
-        return Config.getNestedValue(EdgeConfig.path + "." + key, EdgeConfig.defaults[key])
+        return Config.getNestedValue(OrganicEdgeConfig.path + "." + key, OrganicEdgeConfig.defaults[key])
     }
     function setValue(key: string, value): void {
-        Config.setNestedValue(EdgeConfig.path + "." + key, value)
+        Config.setNestedValue(OrganicEdgeConfig.path + "." + key, value)
     }
     function applyValues(values): void {
         const updates = {}
-        for (const key of Object.keys(values)) updates[EdgeConfig.path + "." + key] = values[key]
+        for (const key of Object.keys(values)) updates[OrganicEdgeConfig.path + "." + key] = values[key]
         Config.setNestedValues(updates)
     }
     function valuesEqual(first, second): bool {
@@ -32,20 +31,20 @@ ColumnLayout {
         return first === second
     }
     function isDefault(key: string): bool {
-        return root.valuesEqual(root.value(key), EdgeConfig.defaults[key])
+        return root.valuesEqual(root.value(key), OrganicEdgeConfig.defaults[key])
     }
     function resetValue(key: string): void {
-        root.setValue(key, EdgeConfig.defaults[key])
+        root.setValue(key, OrganicEdgeConfig.defaults[key])
     }
     function resetKeys(keys): void {
-        root.applyValues(EdgeConfig.defaultValues(keys))
+        root.applyValues(OrganicEdgeConfig.defaultValues(keys))
     }
     function groupModified(keys): bool {
         for (let i = 0; i < keys.length; ++i)
             if (!root.isDefault(keys[i])) return true
         return false
     }
-    readonly property var selectedEdges: EdgeConfig.selectedEdges(root.value("edges"), root.value("edge"))
+    readonly property var selectedEdges: OrganicEdgeConfig.selectedEdges(root.value("edges"), root.value("edge"))
     function presetMatches(preset): bool {
         for (const key of Object.keys(preset.values)) {
             const current = root.value(key)
@@ -513,7 +512,7 @@ ColumnLayout {
                 columnSpacing: 8
                 rowSpacing: 8
                 Repeater {
-                    model: EdgeConfig.scenePresets
+                    model: OrganicEdgeConfig.scenePresets
                     PresetTile {
                         required property var modelData
                         preset: modelData
@@ -525,7 +524,7 @@ ColumnLayout {
                 buttonIcon: "restart_alt"
                 buttonText: Translation.tr("Reset Organic edge")
                 onClicked: {
-                    const values = Object.assign({}, EdgeConfig.defaults)
+                    const values = Object.assign({}, OrganicEdgeConfig.defaults)
                     delete values.enable
                     delete values.screenList
                     root.applyValues(values)
@@ -544,7 +543,7 @@ ColumnLayout {
             GroupHeader {
                 label: Translation.tr("Compositions")
                 description: Translation.tr("These presets change only placement and topology. Your material, palette and music response stay intact.")
-                resetKeys: EdgeConfig.compositionKeys
+                resetKeys: OrganicEdgeConfig.compositionKeys
             }
             GridLayout {
                 Layout.fillWidth: true
@@ -552,7 +551,7 @@ ColumnLayout {
                 columnSpacing: 8
                 rowSpacing: 8
                 Repeater {
-                    model: EdgeConfig.compositionPresets
+                    model: OrganicEdgeConfig.compositionPresets
                     CompositionTile {
                         required property var modelData
                         preset: modelData
@@ -619,7 +618,7 @@ ColumnLayout {
                 resetKeys: ["span", "position", "depth", "inset", "topScale", "rightScale",
                     "bottomScale", "leftScale", "cornerRadius", "cornerBlend", "taper"]
             }
-            Metrics { entries: EdgeConfig.geometry }
+            Metrics { entries: OrganicEdgeConfig.geometry }
         }
     }
 
@@ -633,7 +632,7 @@ ColumnLayout {
             GroupHeader {
                 label: Translation.tr("Material presets")
                 description: Translation.tr("Material presets alter body, contour and light only. They do not change your edge layout, palette or music tuning.")
-                resetKeys: EdgeConfig.materialKeys
+                resetKeys: OrganicEdgeConfig.materialKeys
             }
             GridLayout {
                 Layout.fillWidth: true
@@ -641,7 +640,7 @@ ColumnLayout {
                 columnSpacing: 8
                 rowSpacing: 8
                 Repeater {
-                    model: EdgeConfig.materialPresets
+                    model: OrganicEdgeConfig.materialPresets
                     PresetTile {
                         required property var modelData
                         preset: modelData
@@ -659,28 +658,28 @@ ColumnLayout {
             SelectionBlock {
                 label: Translation.tr("Contour language")
                 settingKey: "shape"
-                options: EdgeConfig.shapes.map(p => ({displayName: Translation.tr(p.name), value: p.value}))
+                options: OrganicEdgeConfig.shapes.map(p => ({displayName: Translation.tr(p.name), value: p.value}))
             }
             GroupHeader {
                 label: Translation.tr("Color")
                 description: Translation.tr("Choose where color comes from and how it travels. The visual effect changes light behavior, not the underlying palette.")
-                resetKeys: EdgeConfig.colorKeys
+                resetKeys: OrganicEdgeConfig.colorKeys
             }
             SelectionBlock {
                 label: Translation.tr("Palette source")
                 settingKey: "palette"
-                displayValue: EdgeConfig.paletteValue(root.value("palette"))
-                options: EdgeConfig.palettes.map(p => ({displayName: Translation.tr(p.name), value: p.value}))
+                displayValue: OrganicEdgeConfig.paletteValue(root.value("palette"))
+                options: OrganicEdgeConfig.palettes.map(p => ({displayName: Translation.tr(p.name), value: p.value}))
             }
             SelectionBlock {
                 label: Translation.tr("Color movement")
                 settingKey: "colorMode"
-                options: EdgeConfig.colorModes.map(p => ({displayName: Translation.tr(p.name), value: p.value}))
+                options: OrganicEdgeConfig.colorModes.map(p => ({displayName: Translation.tr(p.name), value: p.value}))
             }
             SelectionBlock {
                 label: Translation.tr("Light behavior")
                 settingKey: "effectMode"
-                options: EdgeConfig.effects.map(p => ({displayName: Translation.tr(p.name), value: p.value}))
+                options: OrganicEdgeConfig.effects.map(p => ({displayName: Translation.tr(p.name), value: p.value}))
             }
             ColumnLayout {
                 Layout.fillWidth: true
@@ -696,7 +695,7 @@ ColumnLayout {
                             Layout.fillWidth: true
                             label: Translation.tr(modelData.label)
                             colorKey: modelData.key
-                            configPath: EdgeConfig.path + "." + colorKey
+                            configPath: OrganicEdgeConfig.path + "." + colorKey
                         }
                         ResetButton {
                             visible: !root.isDefault(modelData.key)
@@ -708,19 +707,19 @@ ColumnLayout {
             }
             GroupHeader {
                 label: Translation.tr("Body")
-                resetKeys: EdgeConfig.materialBody.map(item => item.key)
+                resetKeys: OrganicEdgeConfig.materialBody.map(item => item.key)
             }
-            Metrics { entries: EdgeConfig.materialBody }
+            Metrics { entries: OrganicEdgeConfig.materialBody }
             GroupHeader {
                 label: Translation.tr("Light")
-                resetKeys: EdgeConfig.materialLight.map(item => item.key)
+                resetKeys: OrganicEdgeConfig.materialLight.map(item => item.key)
             }
-            Metrics { entries: EdgeConfig.materialLight }
+            Metrics { entries: OrganicEdgeConfig.materialLight }
             GroupHeader {
                 label: Translation.tr("Color tuning")
-                resetKeys: EdgeConfig.colorTuning.map(item => item.key)
+                resetKeys: OrganicEdgeConfig.colorTuning.map(item => item.key)
             }
-            Metrics { entries: EdgeConfig.colorTuning }
+            Metrics { entries: OrganicEdgeConfig.colorTuning }
         }
     }
 
@@ -750,7 +749,7 @@ ColumnLayout {
             GroupHeader {
                 label: Translation.tr("Rest state")
                 description: Translation.tr("Silence is a designed state: keep a low ambient current, settle into a still frame, or fade the field out after its remaining energy decays.")
-                resetKeys: EdgeConfig.idleKeys
+                resetKeys: OrganicEdgeConfig.idleKeys
             }
             SelectionBlock {
                 label: Translation.tr("When silent")
@@ -759,11 +758,11 @@ ColumnLayout {
                     {displayName: Translation.tr("Still when silent"), value: "still"},
                     {displayName: Translation.tr("Hide when silent"), value: "hidden"}]
             }
-            Metrics { entries: EdgeConfig.idle }
+            Metrics { entries: OrganicEdgeConfig.idle }
             GroupHeader {
                 label: Translation.tr("Response presets")
                 description: Translation.tr("These tune envelope and frequency response only; they never change the visual composition.")
-                resetKeys: EdgeConfig.responseKeys
+                resetKeys: OrganicEdgeConfig.responseKeys
             }
             GridLayout {
                 Layout.fillWidth: true
@@ -771,7 +770,7 @@ ColumnLayout {
                 columnSpacing: 6
                 rowSpacing: 6
                 Repeater {
-                    model: EdgeConfig.responsePresets
+                    model: OrganicEdgeConfig.responsePresets
                     WidgetChoiceButton {
                         required property var modelData
                         Layout.fillWidth: true
@@ -796,7 +795,7 @@ ColumnLayout {
             }
             GroupHeader {
                 label: Translation.tr("Movement")
-                resetKeys: EdgeConfig.motionKeys
+                resetKeys: OrganicEdgeConfig.motionKeys
             }
             SelectionBlock {
                 label: Translation.tr("Travel direction")
@@ -804,17 +803,17 @@ ColumnLayout {
                 options: [{displayName: Translation.tr("Clockwise"), value: "clockwise"},
                     {displayName: Translation.tr("Counter-clockwise"), value: "counterclockwise"}]
             }
-            Metrics { entries: EdgeConfig.motion }
+            Metrics { entries: OrganicEdgeConfig.motion }
             GroupHeader {
                 label: Translation.tr("Music dynamics")
-                resetKeys: EdgeConfig.audioDynamics.map(item => item.key)
+                resetKeys: OrganicEdgeConfig.audioDynamics.map(item => item.key)
             }
-            Metrics { entries: EdgeConfig.audioDynamics }
+            Metrics { entries: OrganicEdgeConfig.audioDynamics }
             GroupHeader {
                 label: Translation.tr("Frequency character")
-                resetKeys: EdgeConfig.audioTone.map(item => item.key)
+                resetKeys: OrganicEdgeConfig.audioTone.map(item => item.key)
             }
-            Metrics { entries: EdgeConfig.audioTone }
+            Metrics { entries: OrganicEdgeConfig.audioTone }
             SettingsNote { text: Translation.tr("Bass moves the body, mids shape local groove, treble concentrates in the crest and light, and transients create short-lived motion. Attack catches the hit; Release controls how naturally the field returns to rest.") }
         }
     }

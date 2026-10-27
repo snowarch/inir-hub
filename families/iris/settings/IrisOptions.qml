@@ -13,7 +13,6 @@ import qs.modules.iris.control
 import qs.modules.iris.background
 import qs
 import qs.modules.shared.background.widgets
-import "../../shared/background/widgets/OrganicEdgeConfig.js" as EdgeConfig
 
 QtObject {
     id: root
@@ -31,19 +30,19 @@ QtObject {
     // The Organic wave's curated scenes, as one bundle over every key any of them sets (a key a scene leaves out is kept).
     readonly property var waveKeys: {
         const keys = []
-        for (const scene of EdgeConfig.scenePresets)
+        for (const scene of OrganicEdgeConfig.scenePresets)
             for (const key of Object.keys(scene.values)) if (!keys.includes(key)) keys.push(key)
         return keys
     }
     function waveScene(name: string, label: string, glyph: string): var {
-        const scene = EdgeConfig.scenePresets.find(entry => entry.name === name)
+        const scene = OrganicEdgeConfig.scenePresets.find(entry => entry.name === name)
         return { label: label, value: name, glyph: glyph, values: root.waveKeys.map(key => scene?.values[key] !== undefined ? scene.values[key] : null) }
     }
     function waveShown(): bool { return Boolean(Config.options?.background?.edgeWidgets?.organic?.enable) }
     // ── The Edge wave (Organic edge), whole, in Now Playing, after the group's own rows (`trail`) ──
     function edge(key: string, label: string, kind: string, extra: var): var {
-        return Object.assign({ section: "player", group: "Edge wave", path: EdgeConfig.path + "." + key, label: label, kind: kind,
-            fallback: EdgeConfig.defaults[key], visibleWhen: "iris.surround.music=widget", showIf: () => Boolean(Config.options?.background?.edgeWidgets?.organic?.enable), tune: true, trail: true }, extra ?? {})
+        return Object.assign({ section: "player", group: "Edge wave", path: OrganicEdgeConfig.path + "." + key, label: label, kind: kind,
+            fallback: OrganicEdgeConfig.defaults[key], visibleWhen: "iris.surround.music=widget", showIf: () => Boolean(Config.options?.background?.edgeWidgets?.organic?.enable), tune: true, trail: true }, extra ?? {})
     }
     function edgeChoices(list: var): var { return list.map(entry => ({ label: entry[1], value: entry[0] })) }
     readonly property var edgeRows: [
@@ -61,8 +60,8 @@ QtObject {
         root.edge("effectMode", "Light behavior", "choice", { part: "Material", choices: root.edgeChoices([["clean", "Clean"], ["shimmer", "Harmonic shimmer"], ["echo", "Pulse echo"], ["prism", "Spectral prism"],
             ["bloom", "Bass bloom"], ["caustic", "Liquid caustics"], ["afterglow", "Peak afterglow"]]) }),
         ...[["primaryColor", "Primary"], ["secondaryColor", "Secondary"], ["tertiaryColor", "Tertiary"]]
-            .map(entry => root.edge(entry[0], entry[1], "text", { part: "Material", placeholder: String(EdgeConfig.defaults[entry[0]]), showIf: () => Boolean(Config.options?.background?.edgeWidgets?.organic?.enable)
-                && String(Config.getNestedValue(EdgeConfig.path + ".palette", "theme")) === "custom" })),
+            .map(entry => root.edge(entry[0], entry[1], "text", { part: "Material", placeholder: String(OrganicEdgeConfig.defaults[entry[0]]), showIf: () => Boolean(Config.options?.background?.edgeWidgets?.organic?.enable)
+                && String(Config.getNestedValue(OrganicEdgeConfig.path + ".palette", "theme")) === "custom" })),
         ...[["thickness", "Body weight", 5, 70, 1], ["bodyOpacity", "Body opacity", 0, 100, 5], ["crestStrength", "Crest brightness", 0, 150, 5], ["detail", "Contour detail", 0, 100, 5],
             ["glow", "Glow intensity", 0, 100, 5], ["glowSpread", "Glow spread", 0, 100, 5], ["effectStrength", "Effect strength", 0, 100, 5],
             ["colorSpeed", "Color travel", 0, 100, 5], ["colorIntensity", "Color intensity", 0, 150, 5]]
@@ -502,7 +501,7 @@ QtObject {
         { target: "material", group: "Frame", label: "Screen corners", description: "How round the frame turns inward at the corners of the screen.", path: "iris.surround.radius", visibleWhen: "iris.surround.enable", kind: "range", fallback: 22, min: 0, max: 44, unit: " px" },
         { section: "player", group: "Frame music", label: "Music on the edges", description: "Let music animate an Organic Edge wave or swell the iRiS frame itself.", path: "background.edgeWidgets.organic.enable", kind: "switch", fallback: false, keywords: ["music", "frame", "visualizer", "cava"] },
         { section: "player", group: "Frame music", label: "Music drives", path: "iris.surround.music", visibleWhen: "background.edgeWidgets.organic.enable", kind: "choice", fallback: "widget", choices: [{label:"The wave",value:"widget"},{label:"The frame",value:"frame"}] },
-        { section: "player", group: "Edge wave", label: "Look", description: "Where the wave sits, what it is made of and how it answers the music, at once.", bundle: root.waveKeys.map(key => EdgeConfig.path + "." + key), visibleWhen: "iris.surround.music=widget", showIf: () => root.waveShown(), kind: "choice", choices: [root.waveScene("Quiet Horizon", "Horizon", "water"), root.waveScene("Aurora Rails", "Rails", "flare"), root.waveScene("Album Tide", "Tide", "album"), root.waveScene("Pulse Gate", "Pulse", "graphic_eq"), root.waveScene("Contour Frame", "Contour", "select_all")], keywords: ["wave", "organic", "edge", "scene", "preset", "horizon", "rails", "tide", "pulse", "contour", "onda", "borde"] },
+        { section: "player", group: "Edge wave", label: "Look", description: "Where the wave sits, what it is made of and how it answers the music, at once.", bundle: root.waveKeys.map(key => OrganicEdgeConfig.path + "." + key), visibleWhen: "iris.surround.music=widget", showIf: () => root.waveShown(), kind: "choice", choices: [root.waveScene("Quiet Horizon", "Horizon", "water"), root.waveScene("Aurora Rails", "Rails", "flare"), root.waveScene("Album Tide", "Tide", "album"), root.waveScene("Pulse Gate", "Pulse", "graphic_eq"), root.waveScene("Contour Frame", "Contour", "select_all")], keywords: ["wave", "organic", "edge", "scene", "preset", "horizon", "rails", "tide", "pulse", "contour", "onda", "borde"] },
         { section: "player", group: "Edge wave", label: "Colours", description: "Adaptive follows the wallpaper and the cover; Theme keeps to your accent.", path: "background.edgeWidgets.organic.palette", visibleWhen: "iris.surround.music=widget", showIf: () => root.waveShown(), tune: true, kind: "choice", fallback: "theme", choices: [{label:"Adaptive",value:"adaptive"},{label:"Theme",value:"theme"},{label:"Wallpaper",value:"wallpaper"},{label:"Album",value:"album"},{label:"Vivid",value:"vivid"},{label:"Iridescent",value:"iridescent"},{label:"Monochrome",value:"mono"},{label:"Cool",value:"cool"},{label:"Warm",value:"warm"},{label:"Your colours",value:"custom"}], keywords: ["colour", "color", "palette", "wave", "paleta", "colores"] },
         { section: "player", group: "Edge wave", label: "Moves with the music", description: "Off, it drifts on its own whatever plays.", path: "background.edgeWidgets.organic.audioReactive", visibleWhen: "iris.surround.music=widget", showIf: () => root.waveShown(), kind: "switch", fallback: true, keywords: ["audio", "music", "react", "cava", "musica"] },
         { section: "player", group: "Edge wave", label: "In silence", path: "background.edgeWidgets.organic.idleMode", visibleWhen: "iris.surround.music=widget", showIf: () => root.waveShown(), tune: true, kind: "choice", fallback: "ambient", choices: [{label:"Drifts",value:"ambient"},{label:"Rests",value:"still"},{label:"Hides",value:"hidden"}], keywords: ["idle", "silence", "quiet", "hidden", "silencio"] },

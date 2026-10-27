@@ -139,7 +139,7 @@ Item {
     readonly property bool osdStandaloneNeeded: !panelsRoot.pillOsdTakeover
         || panelsRoot.osdScreens.some(screen => !panelsRoot.pillHostScreenNames.includes(screen?.name ?? ""))
 
-    PanelLoader { identifier: "iiBackdrop"; extraCondition: Config.options?.background?.backdrop?.enable ?? false; source: "../shared/background/Backdrop.qml" }
+    PanelLoader { identifier: "iiBackdrop"; extraCondition: Config.options?.background?.backdrop?.enable ?? false; source: Plugins.baseUrl("modules/shared/background/Backdrop.qml") }
     PanelLoader {
         identifier: "iiNotificationPopup"
         extraCondition: panelsRoot.notificationStandaloneNeeded
@@ -156,7 +156,7 @@ Item {
     }
 
     DeferredPanelLoader { identifier: "iiBootGreeting"; component: BootGreeting {} }
-    OnDemandPanelLoader { identifier: "iiCheatsheet"; open: GlobalStates.cheatsheetOpen; source: "../shared/cheatsheet/Cheatsheet.qml" }
+    OnDemandPanelLoader { identifier: "iiCheatsheet"; open: GlobalStates.cheatsheetOpen; source: Plugins.baseUrl("modules/shared/cheatsheet/Cheatsheet.qml") }
     // Arranging the desktop: the toolbar and the shelf, while the desktop recedes into a card; held a beat after Done
     // so the card can grow back.
     OnDemandPanelLoader {
@@ -243,7 +243,7 @@ Item {
         open: GlobalStates.overlayOpen || OverlayContext.hasPinnedWidgets || OverlayContext.nativeDialogOpen
         component: Overlay {}
     }
-    OnDemandPanelLoader { identifier: "iiOverview"; open: GlobalStates.overviewOpen; retainAfterUse: true; closeGraceMs: 300; source: "../shared/overview/Overview.qml" }
+    OnDemandPanelLoader { identifier: "iiOverview"; open: GlobalStates.overviewOpen; retainAfterUse: true; closeGraceMs: 300; source: Plugins.baseUrl("modules/shared/overview/Overview.qml") }
     DeferredPanelLoader { identifier: "iiPolkit"; component: Polkit {} }
 
     DeferredPanelLoader { identifier: "iiRegionSelector"; component: RegionSelector {} }
