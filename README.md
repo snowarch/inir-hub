@@ -1,6 +1,6 @@
 # iNiR Hub
 
-Widgets, colour themes, iRiS themes and web apps for [iNiR](https://github.com/snowarch/inir), made by the people who use it.
+iNiR's three families, plus widgets, colour themes, iRiS themes and web apps for [iNiR](https://github.com/snowarch/iNiR), made by the people who use it.
 
 Browse them at **[inir.space/hub](https://inir.space/hub)**, or from your desktop (Settings, or `inir hub list`).
 
@@ -32,6 +32,7 @@ An install puts the item where iNiR already reads it (your widgets, themes and s
 
 | Kind | Folder | Shows up in |
 | --- | --- | --- |
+| Family | [`families/`](families) | The whole shell: Material, Waffle, iRiS. Setup installs the ones your config uses |
 | Widget | [`widgets/`](widgets) | The Material desktop, the iRiS Island, Waffle's Widgets panel (one widget can have all three faces) |
 | Colour theme | [`themes/`](themes) | Material and Waffle, and the apps iNiR themes |
 | iRiS theme | [`iris-themes/`](iris-themes) | A whole iRiS look: material, colour, shape, motion |
@@ -58,6 +59,13 @@ Found something that misbehaves? [Report it](https://github.com/snowarch/inir-hu
 ## Other hubs
 
 iNiR reads more than one hub. Add the address of any `index.json` (or a local folder with one) in the Hub page under Sources, or in `hub.sources` in your config. `inir hub build` makes one from a repository laid out like this.
+
+## Part of iNiR
+
+iNiR is a few pieces, each with one job: [iNiR](https://github.com/snowarch/iNiR) is the shell base, in QML;
+[qs-rs](https://github.com/snowarch/qs-rs) runs it; [inir-accel](https://github.com/snowarch/inir-accel) does what the
+shell runs in the background; [inir-cli](https://github.com/snowarch/inir-cli) is the `inir` command, `inir hub`
+included; this repo holds everything you install on top.
 
 ## License
 
