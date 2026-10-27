@@ -176,11 +176,17 @@ Item {
         component: IrisSettingsWindow {}
     }
 
+    // The source comes the first time it's wanted and stays: a LazyLoader compiles its source as soon as it has one,
+    // and dropping it would delete the component under a load still running.
     LazyLoader {
-        activeAsync: Config.ready && IrisGate.official && GlobalStates.deferredPanelsReady
-            && CompositorService.isNiri
-            && (Config.options?.background?.backdrop?.enable ?? false)
-        source: Plugins.baseUrl("modules/shared/background/Backdrop.qml")
+        id: backdropLoader
+        readonly property bool wanted: Config.ready && IrisGate.official && GlobalStates.deferredPanelsReady
+            && CompositorService.isNiri && (Config.options?.background?.backdrop?.enable ?? false)
+        property bool used: false
+        onWantedChanged: if (backdropLoader.wanted) backdropLoader.used = true
+        Component.onCompleted: backdropLoader.used = backdropLoader.used || backdropLoader.wanted
+        source: backdropLoader.used ? Plugins.baseUrl("modules/shared/background/Backdrop.qml") : ""
+        activeAsync: backdropLoader.wanted && backdropLoader.source !== ""
     }
 
     LazyLoader {
