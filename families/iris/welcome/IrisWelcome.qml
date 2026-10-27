@@ -78,11 +78,10 @@ Item {
         ? Translation.tr("Custom") : part.currentIrisArrangement.name
     readonly property string styleSummary: IrisThemes.active?.name ?? Translation.tr("Custom")
 
-    property bool desktopApplied: false
+    // the wizard calls this once per step in a run
     function entered(step: int): void {
-        if (step !== 1 || part.desktopApplied)
+        if (step !== 1)
             return
-        part.desktopApplied = true
         Config.setNestedValues({
             "background.effects.enableBlur": false,
             "background.effects.dim": 0,
