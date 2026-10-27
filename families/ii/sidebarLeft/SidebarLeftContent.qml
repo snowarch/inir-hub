@@ -83,11 +83,12 @@ Item {
     function _getOrCreateProfile(id: string): QtObject {
         const cached = root._profileCache[id]
         if (cached) return cached.instance()
-        const escaped = id.replace(/"/g, '\\"')
-        const proto = Qt.createQmlObject(
-            'import QtWebEngine; WebEngineProfilePrototype { storageName: "' + escaped + '"; httpCacheType: WebEngineProfile.DiskHttpCache; persistentCookiesPolicy: WebEngineProfile.ForcePersistentCookies }',
-            root, "pluginProfileProto_" + id
-        )
+        const comp = Qt.createComponent("plugins/WebAppProfile.qml")
+        const proto = comp.status === Component.Ready ? comp.createObject(root, { storageName: id }) : null
+        if (!proto) {
+            console.error("[Plugins] Failed to create the web app profile:", comp.errorString())
+            return null
+        }
         root._profileCache[id] = proto
         return proto.instance()
     }

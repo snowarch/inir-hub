@@ -149,6 +149,36 @@ FocusScope {
         lastOp = op
     }
 
+    // + - * / and parentheses, read left to right with the usual precedence (no eval: the hub refuses it)
+    function evaluate(text: string): real {
+        const tokens = text.match(/\d*\.?\d+|[-+*/()]/g) ?? []
+        let i = 0
+        const peek = () => tokens[i]
+        function primary() {
+            const t = tokens[i++]
+            if (t === "(") {
+                const v = sum()
+                if (tokens[i++] !== ")") return NaN
+                return v
+            }
+            if (t === "-") return -primary()
+            if (t === "+") return primary()
+            return t === undefined ? NaN : Number(t)
+        }
+        function product() {
+            let v = primary()
+            while (peek() === "*" || peek() === "/") v = tokens[i++] === "*" ? v * primary() : v / primary()
+            return v
+        }
+        function sum() {
+            let v = product()
+            while (peek() === "+" || peek() === "-") v = tokens[i++] === "+" ? v + product() : v - product()
+            return v
+        }
+        const value = sum()
+        return i === tokens.length ? value : NaN
+    }
+
     function calculate() {
         try {
             let finalExpr = expression + displayValue
@@ -156,7 +186,7 @@ FocusScope {
             finalExpr = finalExpr.replace(/[^-()\d/*+.\s]/g, '')
             if (!finalExpr.trim()) return
             
-            let result = eval(finalExpr)
+            let result = root.evaluate(finalExpr)
             
             if (!isFinite(result)) {
                 displayValue = "Error"

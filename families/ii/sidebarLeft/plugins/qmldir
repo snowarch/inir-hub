@@ -1,6 +1,7 @@
 module qs.modules.ii.sidebarLeft.plugins
 
-# WebAppView.qml is created by URL only (SidebarLeftContent.openWebApp), so the module still
+# WebAppView.qml and WebAppProfile.qml are created by URL only (SidebarLeftContent.openWebApp), so the module still
 # loads where QtWebEngine is not installed.
 PluginsTab 1.0 PluginsTab.qml
+WebAppProfile 1.0 WebAppProfile.qml
 WebAppView 1.0 WebAppView.qml
