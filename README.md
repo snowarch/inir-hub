@@ -2,7 +2,7 @@
 
 Widgets, colour themes, iRiS themes and web apps for [iNiR](https://github.com/snowarch/inir), made by the people who use it.
 
-Browse them at **[snowarch.github.io/inir-hub](https://snowarch.github.io/inir-hub)**, or from your desktop.
+Browse them at **[inir.space/hub](https://inir.space/hub)**, or from your desktop (Settings, or `inir hub list`).
 
 ## Get something
 

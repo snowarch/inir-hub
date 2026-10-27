@@ -1,5 +1,8 @@
 name: Publish
 
+# The catalogue is served from inir.space/hub: inir-site's deploy builds it from this repo on every deploy (and
+# daily). A merge here asks it to deploy now when the SITE_DISPATCH_TOKEN secret (a token that can dispatch to
+# snowarch/inir-site) is set; without it the next daily build picks the change up.
 on:
   push:
     branches: [main]
@@ -7,42 +10,14 @@ on:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
-
-concurrency:
-  group: pages
-  cancel-in-progress: false
 
 jobs:
-  build:
-    # Pages needs a public repo on the free plan; publishing starts by itself once it is public.
-    if: ${{ !github.event.repository.private }}
+  site:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
-        with:
-          fetch-depth: 0
-      - uses: actions/setup-go@v5
-        with:
-          go-version: "1.26"
-      - name: The inir command (its hub verbs check and build the catalogue)
-        run: go install github.com/snowarch/inir-cli/cmd/inir@latest
-      - name: Build the catalogue
+      - name: Ask inir.space to deploy
+        env:
+          GH_TOKEN: ${{ secrets.SITE_DISPATCH_TOKEN }}
         run: |
-          inir hub build --out dist
-          mkdir -p dist/schema && cp schema/hub.schema.json dist/schema/
-      - uses: actions/configure-pages@v5
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: dist
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - id: deployment
-        uses: actions/deploy-pages@v4
+          if [ -z "$GH_TOKEN" ]; then echo "no SITE_DISPATCH_TOKEN: the daily site build publishes this"; exit 0; fi
+          gh api repos/snowarch/inir-site/dispatches -f event_type=hub-updated
