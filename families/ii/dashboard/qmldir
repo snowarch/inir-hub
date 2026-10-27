@@ -1,0 +1,18 @@
+module qs.modules.ii.dashboard
+DashAgenda 1.0 DashAgenda.qml
+DashCalendar 1.0 DashCalendar.qml
+DashCard 1.0 DashCard.qml
+DashClock 1.0 DashClock.qml
+DashFocus 1.0 DashFocus.qml
+DashGithub 1.0 DashGithub.qml
+DashLayoutEditor 1.0 DashLayoutEditor.qml
+DashMedia 1.0 DashMedia.qml
+DashNotes 1.0 DashNotes.qml
+DashNotifications 1.0 DashNotifications.qml
+DashSystem 1.0 DashSystem.qml
+DashTodo 1.0 DashTodo.qml
+DashWeather 1.0 DashWeather.qml
+DashWelcome 1.0 DashWelcome.qml
+Dashboard 1.0 Dashboard.qml
+DashboardContent 1.0 DashboardContent.qml
+DashboardHeader 1.0 DashboardHeader.qml

@@ -1,0 +1,3 @@
+module qs.modules.waffle.critical
+ShellWaffleCriticalPanels 1.0 ShellWaffleCriticalPanels.qml
+WaffleVerbs 1.0 WaffleVerbs.qml

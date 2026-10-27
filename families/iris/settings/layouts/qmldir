@@ -1,0 +1,11 @@
+module qs.modules.iris.settings.layouts
+AreaPool 1.0 AreaPool.qml
+AreaRows 1.0 AreaRows.qml
+Drawer 1.0 Drawer.qml
+DrawerPage 1.0 DrawerPage.qml
+FineTune 1.0 FineTune.qml
+Folio 1.0 Folio.qml
+FolioPage 1.0 FolioPage.qml
+LayoutSwitch 1.0 LayoutSwitch.qml
+Pocket 1.0 Pocket.qml
+PocketPage 1.0 PocketPage.qml

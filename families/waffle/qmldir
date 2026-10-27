@@ -1,0 +1,6 @@
+module qs.modules.waffle
+ShellWafflePanelsImpl 1.0 ShellWafflePanelsImpl.qml
+WaffleConfigSchema 1.0 WaffleConfigSchema.qml
+WaffleFamilyStyle 1.0 WaffleFamilyStyle.qml
+WaffleFamilyTransition 1.0 WaffleFamilyTransition.qml
+WaffleLayout 1.0 WaffleLayout.qml

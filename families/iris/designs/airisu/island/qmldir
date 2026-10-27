@@ -1,0 +1,7 @@
+module qs.modules.iris.designs.airisu.island
+Activity 1.0 Activity.qml
+ArtBackdrop 1.0 ArtBackdrop.qml
+Desktop 1.0 Desktop.qml
+Face 1.0 Face.qml
+Media 1.0 Media.qml
+Nav 1.0 Nav.qml

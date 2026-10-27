@@ -1,0 +1,24 @@
+module qs.modules.iris.designs.airisu.widgets
+Agenda 1.0 Agenda.qml
+Calendar 1.0 Calendar.qml
+Charge 1.0 Charge.qml
+Clock 1.0 Clock.qml
+DayLog 1.0 DayLog.qml
+DayRule 1.0 DayRule.qml
+Forecast 1.0 Forecast.qml
+Hanko 1.0 Hanko.qml
+Leaf 1.0 Leaf.qml
+News 1.0 News.qml
+Notes 1.0 Notes.qml
+NowPlaying 1.0 NowPlaying.qml
+Poster 1.0 Poster.qml
+Print 1.0 Print.qml
+Profile 1.0 Profile.qml
+Spectrum 1.0 Spectrum.qml
+Stock 1.0 Stock.qml
+Swatch 1.0 Swatch.qml
+Tasks 1.0 Tasks.qml
+Timers 1.0 Timers.qml
+Uptime 1.0 Uptime.qml
+Vitals 1.0 Vitals.qml
+WorldClock 1.0 WorldClock.qml

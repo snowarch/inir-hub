@@ -1,0 +1,8 @@
+module qs.modules.ii.onScreenDisplay.indicators
+BrightnessIndicator 1.0 BrightnessIndicator.qml
+ConnectionIndicator 1.0 ConnectionIndicator.qml
+KeyboardLayoutIndicator 1.0 KeyboardLayoutIndicator.qml
+MediaIndicator 1.0 MediaIndicator.qml
+MicIndicator 1.0 MicIndicator.qml
+VoiceSearchIndicator 1.0 VoiceSearchIndicator.qml
+VolumeIndicator 1.0 VolumeIndicator.qml

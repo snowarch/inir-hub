@@ -1,0 +1,6 @@
+module qs.modules.ii.sidebarRight.calendar
+CalendarDayButton 1.0 CalendarDayButton.qml
+CalendarDayDetail 1.0 CalendarDayDetail.qml
+CalendarEventRow 1.0 CalendarEventRow.qml
+CalendarHeaderButton 1.0 CalendarHeaderButton.qml
+CalendarWidget 1.0 CalendarWidget.qml

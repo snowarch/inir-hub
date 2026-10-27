@@ -1,0 +1,6 @@
+module qs.modules.ii.edit
+MaterialEditDesk 1.0 MaterialEditDesk.qml
+MaterialEditStage 1.0 MaterialEditStage.qml
+MaterialShelfFace 1.0 MaterialShelfFace.qml
+MaterialWidgetOutfit 1.0 MaterialWidgetOutfit.qml
+MaterialWidgetSheet 1.0 MaterialWidgetSheet.qml

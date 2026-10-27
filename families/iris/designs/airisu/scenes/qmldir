@@ -1,0 +1,4 @@
+module qs.modules.iris.designs.airisu.scenes
+Banner 1.0 Banner.qml
+Osd 1.0 Osd.qml
+Session 1.0 Session.qml
