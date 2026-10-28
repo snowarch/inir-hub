@@ -458,7 +458,6 @@ WSettingsPage {
                                     hoverEnabled: true
                                     cursorShape: Qt.PointingHandCursor
                                     onClicked: ThemeService.setTheme(themeCard.modelData.id)
-                                    onDoubleClicked: ThemeService.setTheme(themeCard.modelData.id)
                                 }
 
                                 RowLayout {
