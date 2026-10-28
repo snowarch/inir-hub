@@ -11,5 +11,92 @@
 				"ORGANIC_EDGE"
 			]
 		}
-	]
+	],
+	"shots": {
+		"material-bar": {
+			"family": "ii",
+			"alt": "Material's bar on each edge",
+			"choose": {
+				"label": "Bar",
+				"options": [
+					{
+						"key": "top",
+						"label": "Top"
+					},
+					{
+						"key": "bottom",
+						"label": "Bottom",
+						"steps": [
+							[
+								"config",
+								"bar.bottom",
+								true
+							]
+						]
+					},
+					{
+						"key": "vertical",
+						"label": "Vertical",
+						"steps": [
+							[
+								"config",
+								"bar.bottom",
+								false
+							],
+							[
+								"config",
+								"bar.vertical",
+								true
+							]
+						]
+					}
+				]
+			}
+		},
+		"material-sidebars": {
+			"family": "ii",
+			"alt": "Material's two sidebars",
+			"choose": {
+				"label": "Sidebar",
+				"options": [
+					{
+						"key": "left",
+						"label": "Left",
+						"steps": [
+							[
+								"ipc",
+								"sidebarLeft",
+								"open"
+							]
+						],
+						"after": [
+							[
+								"ipc",
+								"sidebarLeft",
+								"close"
+							]
+						]
+					},
+					{
+						"key": "right",
+						"label": "Right",
+						"steps": [
+							[
+								"ipc",
+								"sidebarRight",
+								"open"
+							]
+						],
+						"after": [
+							[
+								"ipc",
+								"sidebarRight",
+								"close"
+							]
+						]
+					}
+				]
+			}
+		}
+	}
 }

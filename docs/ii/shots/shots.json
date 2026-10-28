@@ -1,0 +1,58 @@
+{
+ "material-bar": {
+  "alt": "Material's bar on each edge",
+  "label": "Bar",
+  "width": 1600,
+  "height": 900,
+  "variants": [
+   {
+    "key": "top",
+    "label": "Top",
+    "file": "material-bar-top.webp",
+    "family": "ii"
+   },
+   {
+    "key": "bottom",
+    "label": "Bottom",
+    "file": "material-bar-bottom.webp",
+    "family": "ii"
+   },
+   {
+    "key": "vertical",
+    "label": "Vertical",
+    "file": "material-bar-vertical.webp",
+    "family": "ii"
+   }
+  ],
+  "made": {
+   "base": "e797f712",
+   "ii": "56eb3c3"
+  },
+  "spec": "{\"alt\": \"Material's bar on each edge\", \"choose\": {\"label\": \"Bar\", \"options\": [{\"key\": \"top\", \"label\": \"Top\"}, {\"key\": \"bottom\", \"label\": \"Bottom\", \"steps\": [[\"config\", \"bar.bottom\", true]]}, {\"key\": \"vertical\", \"label\": \"Vertical\", \"steps\": [[\"config\", \"bar.bottom\", false], [\"config\", \"bar.vertical\", true]]}]}, \"family\": \"ii\"}"
+ },
+ "material-sidebars": {
+  "alt": "Material's two sidebars",
+  "label": "Sidebar",
+  "width": 1600,
+  "height": 900,
+  "variants": [
+   {
+    "key": "left",
+    "label": "Left",
+    "file": "material-sidebars-left.webp",
+    "family": "ii"
+   },
+   {
+    "key": "right",
+    "label": "Right",
+    "file": "material-sidebars-right.webp",
+    "family": "ii"
+   }
+  ],
+  "made": {
+   "base": "e797f712",
+   "ii": "56eb3c3"
+  },
+  "spec": "{\"alt\": \"Material's two sidebars\", \"choose\": {\"label\": \"Sidebar\", \"options\": [{\"after\": [[\"ipc\", \"sidebarLeft\", \"close\"]], \"key\": \"left\", \"label\": \"Left\", \"steps\": [[\"ipc\", \"sidebarLeft\", \"open\"]]}, {\"after\": [[\"ipc\", \"sidebarRight\", \"close\"]], \"key\": \"right\", \"label\": \"Right\", \"steps\": [[\"ipc\", \"sidebarRight\", \"open\"]]}]}, \"family\": \"ii\"}"
+ }
+}

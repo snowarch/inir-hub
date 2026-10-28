@@ -1,0 +1,107 @@
+{
+ "iris-dock": {
+  "alt": "The Dock on each edge",
+  "label": "Dock",
+  "width": 1600,
+  "height": 900,
+  "variants": [
+   {
+    "key": "bottom",
+    "label": "Bottom",
+    "file": "iris-dock-bottom.webp",
+    "family": "iris"
+   },
+   {
+    "key": "left",
+    "label": "Left",
+    "file": "iris-dock-left.webp",
+    "family": "iris"
+   },
+   {
+    "key": "right",
+    "label": "Right",
+    "file": "iris-dock-right.webp",
+    "family": "iris"
+   }
+  ],
+  "made": {
+   "base": "e797f712",
+   "iris": "dd51930"
+  },
+  "spec": "{\"alt\": \"The Dock on each edge\", \"choose\": {\"label\": \"Dock\", \"options\": [{\"key\": \"bottom\", \"label\": \"Bottom\", \"steps\": [[\"ipc\", \"iris\", \"dockEdge\", \"bottom\"]]}, {\"key\": \"left\", \"label\": \"Left\", \"steps\": [[\"ipc\", \"iris\", \"dockEdge\", \"left\"]]}, {\"key\": \"right\", \"label\": \"Right\", \"steps\": [[\"ipc\", \"iris\", \"dockEdge\", \"right\"]]}]}, \"family\": \"iris\"}"
+ },
+ "iris-edge": {
+  "alt": "The Island open on each edge",
+  "label": "Edge",
+  "width": 1600,
+  "height": 900,
+  "variants": [
+   {
+    "key": "top",
+    "label": "Top",
+    "file": "iris-edge-top.webp",
+    "family": "iris"
+   },
+   {
+    "key": "bottom",
+    "label": "Bottom",
+    "file": "iris-edge-bottom.webp",
+    "family": "iris"
+   },
+   {
+    "key": "left",
+    "label": "Left",
+    "file": "iris-edge-left.webp",
+    "family": "iris"
+   },
+   {
+    "key": "right",
+    "label": "Right",
+    "file": "iris-edge-right.webp",
+    "family": "iris"
+   }
+  ],
+  "made": {
+   "base": "e797f712",
+   "iris": "dd51930"
+  },
+  "spec": "{\"after\": [[\"ipc\", \"iris\", \"close\"]], \"alt\": \"The Island open on each edge\", \"choose\": {\"label\": \"Edge\", \"options\": [{\"key\": \"top\", \"label\": \"Top\", \"steps\": [[\"ipc\", \"iris\", \"close\"], [\"ipc\", \"iris\", \"edge\", \"top\"], [\"wait\", 900], [\"ipc\", \"iris\", \"page\", \"media\"]]}, {\"key\": \"bottom\", \"label\": \"Bottom\", \"steps\": [[\"ipc\", \"iris\", \"close\"], [\"ipc\", \"iris\", \"edge\", \"bottom\"], [\"wait\", 900], [\"ipc\", \"iris\", \"page\", \"media\"]]}, {\"key\": \"left\", \"label\": \"Left\", \"steps\": [[\"ipc\", \"iris\", \"close\"], [\"ipc\", \"iris\", \"edge\", \"left\"], [\"wait\", 900], [\"ipc\", \"iris\", \"page\", \"media\"]]}, {\"key\": \"right\", \"label\": \"Right\", \"steps\": [[\"ipc\", \"iris\", \"close\"], [\"ipc\", \"iris\", \"edge\", \"right\"], [\"wait\", 900], [\"ipc\", \"iris\", \"page\", \"media\"]]}]}, \"family\": \"iris\"}"
+ },
+ "iris-layout": {
+  "alt": "iRiS's Island layouts",
+  "label": "Layout",
+  "width": 1600,
+  "height": 900,
+  "variants": [
+   {
+    "key": "island",
+    "label": "Island",
+    "file": "iris-layout-island.webp",
+    "family": "iris"
+   },
+   {
+    "key": "left",
+    "label": "Left",
+    "file": "iris-layout-left.webp",
+    "family": "iris"
+   },
+   {
+    "key": "full",
+    "label": "Full width",
+    "file": "iris-layout-full.webp",
+    "family": "iris"
+   },
+   {
+    "key": "menubar",
+    "label": "Menu bar",
+    "file": "iris-layout-menubar.webp",
+    "family": "iris"
+   }
+  ],
+  "made": {
+   "base": "e797f712",
+   "iris": "dd51930"
+  },
+  "spec": "{\"alt\": \"iRiS's Island layouts\", \"choose\": {\"label\": \"Layout\", \"options\": [{\"key\": \"island\", \"label\": \"Island\"}, {\"key\": \"left\", \"label\": \"Left\", \"steps\": [[\"ipc\", \"iris\", \"layout\", \"left\"]]}, {\"key\": \"full\", \"label\": \"Full width\", \"steps\": [[\"ipc\", \"iris\", \"layout\", \"full\"]]}, {\"key\": \"menubar\", \"label\": \"Menu bar\", \"steps\": [[\"ipc\", \"iris\", \"layout\", \"menubar\"]]}]}, \"family\": \"iris\"}"
+ }
+}

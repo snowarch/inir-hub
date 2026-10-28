@@ -9,5 +9,225 @@
 				"IRIS"
 			]
 		}
-	]
+	],
+	"shots": {
+		"iris-edge": {
+			"family": "iris",
+			"alt": "The Island open on each edge",
+			"choose": {
+				"label": "Edge",
+				"options": [
+					{
+						"key": "top",
+						"label": "Top",
+						"steps": [
+							[
+								"ipc",
+								"iris",
+								"close"
+							],
+							[
+								"ipc",
+								"iris",
+								"edge",
+								"top"
+							],
+							[
+								"wait",
+								900
+							],
+							[
+								"ipc",
+								"iris",
+								"page",
+								"media"
+							]
+						]
+					},
+					{
+						"key": "bottom",
+						"label": "Bottom",
+						"steps": [
+							[
+								"ipc",
+								"iris",
+								"close"
+							],
+							[
+								"ipc",
+								"iris",
+								"edge",
+								"bottom"
+							],
+							[
+								"wait",
+								900
+							],
+							[
+								"ipc",
+								"iris",
+								"page",
+								"media"
+							]
+						]
+					},
+					{
+						"key": "left",
+						"label": "Left",
+						"steps": [
+							[
+								"ipc",
+								"iris",
+								"close"
+							],
+							[
+								"ipc",
+								"iris",
+								"edge",
+								"left"
+							],
+							[
+								"wait",
+								900
+							],
+							[
+								"ipc",
+								"iris",
+								"page",
+								"media"
+							]
+						]
+					},
+					{
+						"key": "right",
+						"label": "Right",
+						"steps": [
+							[
+								"ipc",
+								"iris",
+								"close"
+							],
+							[
+								"ipc",
+								"iris",
+								"edge",
+								"right"
+							],
+							[
+								"wait",
+								900
+							],
+							[
+								"ipc",
+								"iris",
+								"page",
+								"media"
+							]
+						]
+					}
+				]
+			},
+			"after": [
+				[
+					"ipc",
+					"iris",
+					"close"
+				]
+			]
+		},
+		"iris-layout": {
+			"family": "iris",
+			"alt": "iRiS's Island layouts",
+			"choose": {
+				"label": "Layout",
+				"options": [
+					{
+						"key": "island",
+						"label": "Island"
+					},
+					{
+						"key": "left",
+						"label": "Left",
+						"steps": [
+							[
+								"ipc",
+								"iris",
+								"layout",
+								"left"
+							]
+						]
+					},
+					{
+						"key": "full",
+						"label": "Full width",
+						"steps": [
+							[
+								"ipc",
+								"iris",
+								"layout",
+								"full"
+							]
+						]
+					},
+					{
+						"key": "menubar",
+						"label": "Menu bar",
+						"steps": [
+							[
+								"ipc",
+								"iris",
+								"layout",
+								"menubar"
+							]
+						]
+					}
+				]
+			}
+		},
+		"iris-dock": {
+			"family": "iris",
+			"alt": "The Dock on each edge",
+			"choose": {
+				"label": "Dock",
+				"options": [
+					{
+						"key": "bottom",
+						"label": "Bottom",
+						"steps": [
+							[
+								"ipc",
+								"iris",
+								"dockEdge",
+								"bottom"
+							]
+						]
+					},
+					{
+						"key": "left",
+						"label": "Left",
+						"steps": [
+							[
+								"ipc",
+								"iris",
+								"dockEdge",
+								"left"
+							]
+						]
+					},
+					{
+						"key": "right",
+						"label": "Right",
+						"steps": [
+							[
+								"ipc",
+								"iris",
+								"dockEdge",
+								"right"
+							]
+						]
+					}
+				]
+			}
+		}
+	}
 }

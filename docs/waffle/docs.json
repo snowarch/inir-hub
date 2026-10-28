@@ -9,5 +9,120 @@
 				"WAFFLE"
 			]
 		}
-	]
+	],
+	"shots": {
+		"waffle-start": {
+			"family": "waffle",
+			"alt": "Waffle's Start menu",
+			"choose": {
+				"label": "Taskbar",
+				"options": [
+					{
+						"key": "center",
+						"label": "Centered",
+						"steps": [
+							[
+								"ipc",
+								"search",
+								"open"
+							]
+						],
+						"after": [
+							[
+								"ipc",
+								"search",
+								"close"
+							]
+						]
+					},
+					{
+						"key": "left",
+						"label": "Left",
+						"steps": [
+							[
+								"config",
+								"waffles.bar.leftAlignApps",
+								true
+							],
+							[
+								"wait",
+								800
+							],
+							[
+								"ipc",
+								"search",
+								"open"
+							]
+						],
+						"after": [
+							[
+								"ipc",
+								"search",
+								"close"
+							]
+						]
+					}
+				]
+			}
+		},
+		"waffle-panels": {
+			"family": "waffle",
+			"alt": "Waffle's Action Center and Notification Center",
+			"choose": {
+				"label": "Panel",
+				"options": [
+					{
+						"key": "action",
+						"label": "Action Center",
+						"steps": [
+							[
+								"ipc",
+								"wactionCenter",
+								"open"
+							]
+						],
+						"after": [
+							[
+								"ipc",
+								"wactionCenter",
+								"close"
+							]
+						]
+					},
+					{
+						"key": "notifications",
+						"label": "Notifications",
+						"steps": [
+							[
+								"ipc",
+								"notifications",
+								"test"
+							],
+							[
+								"wait",
+								1500
+							],
+							[
+								"ipc",
+								"wnotificationCenter",
+								"open"
+							]
+						],
+						"after": [
+							[
+								"ipc",
+								"wnotificationCenter",
+								"close"
+							],
+							[
+								"ipc",
+								"notifications",
+								"clearAll"
+							]
+						]
+					}
+				]
+			}
+		}
+	}
 }

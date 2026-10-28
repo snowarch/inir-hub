@@ -3,7 +3,7 @@
 Waffle is laid out like Windows 11: a taskbar along the bottom, a Start menu, an Action Center and a Notification
 Center. Everything here is set in **Waffle Settings**, which opens with **Super+,**.
 
-<!-- preview waffle taskbar,start choose=apps,taskbar -->
+<!-- preview shot=waffle-start -->
 
 ## On your screen
 
@@ -16,7 +16,7 @@ Center. Everything here is set in **Waffle Settings**, which opens with **Super+
 - **Widgets panel**: weather, media, the calendar and the widgets you add from the Hub.
 - **Task View**: every window and workspace.
 
-<!-- preview waffle action-center,notifications -->
+<!-- preview shot=waffle-panels -->
 
 ## Where things are in Waffle Settings
 

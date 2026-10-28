@@ -1,0 +1,52 @@
+{
+ "waffle-panels": {
+  "alt": "Waffle's Action Center and Notification Center",
+  "label": "Panel",
+  "width": 1600,
+  "height": 900,
+  "variants": [
+   {
+    "key": "action",
+    "label": "Action Center",
+    "file": "waffle-panels-action.webp",
+    "family": "waffle"
+   },
+   {
+    "key": "notifications",
+    "label": "Notifications",
+    "file": "waffle-panels-notifications.webp",
+    "family": "waffle"
+   }
+  ],
+  "made": {
+   "base": "e797f712",
+   "waffle": "56eb3c3"
+  },
+  "spec": "{\"alt\": \"Waffle's Action Center and Notification Center\", \"choose\": {\"label\": \"Panel\", \"options\": [{\"after\": [[\"ipc\", \"wactionCenter\", \"close\"]], \"key\": \"action\", \"label\": \"Action Center\", \"steps\": [[\"ipc\", \"wactionCenter\", \"open\"]]}, {\"after\": [[\"ipc\", \"wnotificationCenter\", \"close\"], [\"ipc\", \"notifications\", \"clearAll\"]], \"key\": \"notifications\", \"label\": \"Notifications\", \"steps\": [[\"ipc\", \"notifications\", \"test\"], [\"wait\", 1500], [\"ipc\", \"wnotificationCenter\", \"open\"]]}]}, \"family\": \"waffle\"}"
+ },
+ "waffle-start": {
+  "alt": "Waffle's Start menu",
+  "label": "Taskbar",
+  "width": 1600,
+  "height": 900,
+  "variants": [
+   {
+    "key": "center",
+    "label": "Centered",
+    "file": "waffle-start-center.webp",
+    "family": "waffle"
+   },
+   {
+    "key": "left",
+    "label": "Left",
+    "file": "waffle-start-left.webp",
+    "family": "waffle"
+   }
+  ],
+  "made": {
+   "base": "e797f712",
+   "waffle": "56eb3c3"
+  },
+  "spec": "{\"alt\": \"Waffle's Start menu\", \"choose\": {\"label\": \"Taskbar\", \"options\": [{\"after\": [[\"ipc\", \"search\", \"close\"]], \"key\": \"center\", \"label\": \"Centered\", \"steps\": [[\"ipc\", \"search\", \"open\"]]}, {\"after\": [[\"ipc\", \"search\", \"close\"]], \"key\": \"left\", \"label\": \"Left\", \"steps\": [[\"config\", \"waffles.bar.leftAlignApps\", true], [\"wait\", 800], [\"ipc\", \"search\", \"open\"]]}]}, \"family\": \"waffle\"}"
+ }
+}

@@ -3,7 +3,7 @@
 Material (ii) is the default family: a bar on an edge, two sidebars, a dock and an overview, in nine global styles.
 Everything here is set in **Settings**, which opens with **Super+,**.
 
-<!-- preview ii bar,dock choose=bar -->
+<!-- preview shot=material-bar -->
 
 ## On your screen
 
@@ -16,7 +16,7 @@ Everything here is set in **Settings**, which opens with **Super+,**.
 - **Overview**: **Super+Space** shows your workspaces and searches apps and [actions](GLOBAL_ACTIONS.md).
 - **Dashboard**, **Orbit** and the **Workspace Strip** are optional panels, each with its own page in Settings.
 
-<!-- preview ii sidebar-left,sidebar-right -->
+<!-- preview shot=material-sidebars -->
 
 ## Where things are in Settings
 
