@@ -103,11 +103,22 @@ QtObject {
     function commit(spec: var, next: var): void { root.write(spec, next) }
     // Back to factory at once, with the way back on the Undo notice.
     function restore(specs: var, what: string): void {
+        // A bundle keeps its raw keys: a hand-made mix matches no choice, and a choice is all commit can write back.
+        const raw = spec => {
+            if (!spec.bundle) return null
+            const out = {}
+            for (const path of spec.bundle) {
+                const v = Config.getNestedValue(path, null)
+                if (v !== null && v !== undefined) out[path] = JSON.parse(JSON.stringify(v))
+            }
+            return out
+        }
         const before = specs.filter(spec => root.modified(spec))
-            .map(spec => ({ spec: spec, value: JSON.parse(JSON.stringify(root.currentValue(spec) ?? null)) }))
+            .map(spec => ({ spec: spec, raw: raw(spec), value: JSON.parse(JSON.stringify(root.currentValue(spec) ?? null)) }))
         if (before.length === 0) return
         before.forEach(item => root.commit(item.spec, item.spec.fallback))
-        Undo.offer(Translation.tr("Reset %1").arg(what), () => before.forEach(item => root.commit(item.spec, item.value)))
+        Undo.offer(Translation.tr("Reset %1").arg(what), () => before.forEach(item =>
+            item.raw ? Config.setNestedValues(item.raw) : root.commit(item.spec, item.value)))
     }
     function write(spec: var, next: var): void {
         // A family switch goes through the shell's transition, never a bare config write.
