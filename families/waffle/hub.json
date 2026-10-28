@@ -1,6 +1,6 @@
 {
     "$schema": "../../schema/hub.schema.json",
-    "version": "2.33.0",
+    "version": "2.33.1",
     "summary": "Windows 11 for people who want it: taskbar, Start, Action Center.",
     "authors": [
         "snowarch"
@@ -15,5 +15,8 @@
     ],
     "minInir": "2.33.0",
     "provides": "modules/waffle",
+    "requires": [
+        "ii"
+    ],
     "preview": "preview.webp"
 }
