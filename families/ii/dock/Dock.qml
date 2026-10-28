@@ -87,11 +87,16 @@ Scope {
                 visible: !GlobalStates.screenLocked
                     && !GlobalStates.widgetEditMode
 
+                // Shows on a rest at the edge, not on a pass; stays a moment after the pointer slips off.
+                EdgeReveal {
+                    id: dockEdge
+                    hovered: (Config.options?.dock?.hoverToReveal ?? false) && dockMouseArea.containsMouse
+                }
                 property bool reveal: !GlobalStates.coverflowSelectorOpen
                     && !(GlobalStates.wallpaperLauncherOpen && root.position === "bottom")
                     && GlobalStates.shellEntryReady
                     && (ShellEditSession.active || root.pinned
-                        || (Config.options?.dock?.hoverToReveal && dockMouseArea.containsMouse)
+                        || dockEdge.revealed
                         || (dockApps?.requestDockShow || dockAppsVertical?.requestDockShow)
                         || (Config.options?.dock?.showOnDesktop !== false
                             && !ToplevelManager.activeToplevel?.activated))
@@ -224,6 +229,7 @@ Scope {
                     id: dockMouseArea
                     hoverEnabled: true
                     acceptedButtons: Qt.NoButton
+                    onPositionChanged: mouse => dockEdge.moved(mouse.x, mouse.y)
 
                     width: root.isVertical
                         ? parent.width

@@ -120,8 +120,12 @@ Scope {
                 property bool controlPanelHold: false
                 readonly property bool interactionHold: contextMenuHold || leftSidebarHold
                     || rightSidebarHold || mediaControlsHold || controlPanelHold
-                readonly property bool pointerShow: !overviewOwnsEdge
-                    && (hoverRegion.containsMouse || autoHideEdgeHover.revealHover)
+                readonly property bool pointerShow: !overviewOwnsEdge && barEdge.revealed
+                // Shows on a rest at the edge, not on a pass; stays a moment after the pointer slips off.
+                EdgeReveal {
+                    id: barEdge
+                    hovered: !barRoot.overviewOwnsEdge && (hoverRegion.containsMouse || autoHideEdgeHover.revealHover)
+                }
                 readonly property bool reservationWanted: pointerShow || interactionHold
                 property bool mustShow: pointerShow || superShow || ShellEditSession.active || interactionHold
                 property bool reservationActive: false
@@ -605,6 +609,7 @@ Scope {
                     readonly property bool inRightReservedCorner: mouseX >= width - barRoot.edgeCornerReserve(false)
                     readonly property bool revealHover: enabled && containsMouse
                         && !inLeftReservedCorner && !inRightReservedCorner && !barRoot.overviewOwnsEdge
+                    onPositionChanged: mouse => barEdge.moved(mouse.x, mouse.y)
                     anchors {
                         left: parent.left
                         right: parent.right
