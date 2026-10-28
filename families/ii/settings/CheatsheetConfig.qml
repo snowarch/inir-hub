@@ -476,7 +476,7 @@ ContentPage {
                 kbRow.saving = false
                 // New keys on an existing bind move it instead of leaving a copy behind.
                 if (kbRow.keyCombo.length > 0 && keyCombo !== kbRow.keyCombo)
-                    NiriKeybinds.removeBind(kbRow.keyCombo)
+                    NiriKeybinds.removeBindQuietly(kbRow.keyCombo)
                 kbRow.editState = "display"
             }
             function onBindError(message) {

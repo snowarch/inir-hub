@@ -431,7 +431,7 @@ Flickable {
                 editor.saving = false
                 // New keys on an existing bind move it instead of leaving a copy behind.
                 if (editor.combo.length > 0 && keyCombo !== editor.combo)
-                    NiriKeybinds.removeBind(editor.combo)
+                    NiriKeybinds.removeBindQuietly(editor.combo)
                 editor.done()
             }
             function onBindError(message) { editor.saving = false; editor.error = message }
