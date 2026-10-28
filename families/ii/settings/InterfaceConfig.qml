@@ -535,7 +535,7 @@ ContentPage {
                 stepSize: 50
                 onValueChanged: Config.setNestedValue("altSwitcher.autoHideDelayMs", value)
                 StyledToolTip {
-                    text: Translation.tr("How long to wait before hiding the switcher after releasing Alt")
+                    text: Translation.tr("How long a pick waits before switching, even with Alt still held")
                 }
             }
 

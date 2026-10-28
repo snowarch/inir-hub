@@ -22,6 +22,7 @@ Scope {
     property bool overviewOpenedByAltSwitcher: false
     property int currentIndex: 0
     property bool quickSwitchDone: false  // Track if quick switch already happened this session
+    property bool navigated: false  // moved since it opened: the auto-hide commits that pick
     property var noUiSnapshot: []
     property int noUiIndex: 0
 
@@ -204,6 +205,7 @@ Scope {
             rebuildSnapshot()
         }
         quickSwitchResetTimer.stop()  // Cancel reset timer since we're opening UI
+        navigated = false
         if (itemSnapshot.length === 0) return
         if (root.getPreset() === "skew")
             currentIndex = itemSnapshot.length > 1 ? 1 : 0
@@ -227,6 +229,7 @@ Scope {
         WaffleState.altSwitcherOpen = false
         root.cardVisible = false
         quickSwitchDone = false  // Reset for next session
+        navigated = false
         // The window unmaps right here (the fade already ran in the content), so drop the delegates
         itemSnapshot = []
         maybeCloseOverview()
@@ -253,6 +256,7 @@ Scope {
     function nextItem() {
         if (itemSnapshot.length === 0) return
         currentIndex = (currentIndex + 1) % itemSnapshot.length
+        navigated = true
         if (root.getAutoHide() && root.getPreset() !== "skew")
             autoHideTimer.restart()
     }
@@ -260,6 +264,7 @@ Scope {
     function previousItem() {
         if (itemSnapshot.length === 0) return
         currentIndex = (currentIndex - 1 + itemSnapshot.length) % itemSnapshot.length
+        navigated = true
         if (root.getAutoHide() && root.getPreset() !== "skew")
             autoHideTimer.restart()
     }
@@ -289,7 +294,8 @@ Scope {
         id: autoHideTimer
         interval: root.getAutoHideDelayMs()
         repeat: false
-        onTriggered: root.closeSwitcher()
+        // A pick left alone commits, as the release would; one only opened just closes
+        onTriggered: root.navigated ? root.confirmCurrent() : root.closeSwitcher()
     }
 
     // Reset quick switch state after a short delay if user doesn't continue switching
@@ -377,7 +383,8 @@ Scope {
             focus: WaffleState.altSwitcherOpen
 
             Keys.onReleased: event => {
-                if (root.getPreset() === "skew" && event.key === Qt.Key_Alt) {
+                // Every preset commits when the held modifier lets go; Esc leaves focus where it was
+                if ([Qt.Key_Alt, Qt.Key_Meta, Qt.Key_Super_L, Qt.Key_Super_R, Qt.Key_Control].includes(event.key)) {
                     root.confirmCurrent()
                     event.accepted = true
                 }
@@ -392,12 +399,7 @@ Scope {
                         break
                     case Qt.Key_Return:
                     case Qt.Key_Enter:
-                        if (root.getPreset() === "skew")
-                            root.confirmCurrent()
-                        else {
-                            root.activateCurrent()
-                            if (root.getCloseOnFocus()) root.closeSwitcher()
-                        }
+                        root.confirmCurrent()
                         event.accepted = true
                         break
                     case Qt.Key_Tab:
@@ -524,7 +526,6 @@ Scope {
                 root.openSwitcher()
             }
             root.nextItem()
-            root.activateCurrent()
         }
 
         /// Focus previous window
@@ -567,7 +568,6 @@ Scope {
                 root.openSwitcher()
             }
             root.previousItem()
-            root.activateCurrent()
         }
     }
 }

@@ -118,7 +118,7 @@ WSettingsPage {
             configPath: "waffles.altSwitcher.autoHide"
             label: Translation.tr("Auto-hide")
             icon: "arrow-clockwise"
-            description: Translation.tr("Hide after releasing Alt key")
+            description: Translation.tr("Switches to the pick after the delay, even with Alt still held")
             checked: Config.options?.waffles?.altSwitcher?.autoHide ?? true
             onCheckedChanged: Config.setNestedValue("waffles.altSwitcher.autoHide", checked)
         }
