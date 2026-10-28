@@ -10,7 +10,10 @@ Everything here is set in **Settings**, which opens with **Super+,**.
 - **Bar**: along the top by default. **Settings › Quick › Bar position** puts it on any edge, and **Settings › Bar**
   sets its look, its corners and which modules sit in each of its five zones.
 - **Dock**: **Settings › Dock** turns it on and sets its position, how it reveals itself and the window previews.
-- **Left sidebar**: AI chat, YT Music, the Wallhaven browser, the translator and the world clock.
+- **Left sidebar**: AI chat, YT Music, the Wallhaven browser, the translator and the world clock. On iNiR's runtime
+  (qs-rs) it can also hold **Web Apps** (**Settings › Sidebars › Web Apps**): Discord, YouTube Music and the other web
+  apps from the Hub. They need Qt WebEngine, a one-time download of about 110 MB that `inir update` brings while the
+  tab is on. If it is missing, the tab says so and has a **Download** button.
 - **Right sidebar**: quick toggles, sliders, the notification history and the calendar. Both sidebars are arranged in
   **Settings › Sidebars**.
 - **Overview**: **Super+Space** shows your workspaces and searches apps and [actions](GLOBAL_ACTIONS.md).
