@@ -1,6 +1,6 @@
 {
     "$schema": "../../schema/hub.schema.json",
-    "version": "2.33.2",
+    "version": "2.33.3",
     "summary": "Material 3 Expressive panels, bars, docks and widgets in nine global styles.",
     "authors": [
         "snowarch"

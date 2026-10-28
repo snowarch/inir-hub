@@ -79,7 +79,7 @@ Flickable {
         IrisLinkCard {
             tinted: true
             links: [
-                { label: Translation.tr("Documentation"), icon: "menu_book", tint: IrisStyle.identity.sky, action: () => Qt.openUrlExternally("https://github.com/snowarch/inir/wiki") },
+                { label: Translation.tr("Documentation"), icon: "menu_book", tint: IrisStyle.identity.sky, action: () => Qt.openUrlExternally("https://inir.space/docs/") },
                 { label: Translation.tr("Report an issue"), icon: "bug_report", tint: IrisStyle.identity.red, action: () => Qt.openUrlExternally("https://github.com/snowarch/inir/issues") },
                 { label: Translation.tr("Source code"), value: "github.com/snowarch/inir", icon: "code", tint: IrisStyle.identity.lavender, action: () => Qt.openUrlExternally("https://github.com/snowarch/inir") }
             ]

@@ -5,7 +5,7 @@
   "summary": "Windows 11 for people who want it: taskbar, Start, Action Center.",
   "tagline": "Taskbar, Start menu, Action Center and notification center.",
   "icon": "grid_view",
-  "version": "2.33.1",
+  "version": "2.33.2",
   "provides": "modules/waffle",
   "parts": {
     "critical": "critical/ShellWaffleCriticalPanels.qml",

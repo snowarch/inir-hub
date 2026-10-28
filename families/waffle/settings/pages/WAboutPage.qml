@@ -140,10 +140,10 @@ WSettingsPage {
 
         WSettingsButton {
             label: Translation.tr("Documentation")
-            description: "github.com/snowarch/inir/wiki"
+            description: "inir.space/docs"
             icon: "library"
             buttonText: Translation.tr("Open")
-            onButtonClicked: Qt.openUrlExternally("https://github.com/snowarch/inir/wiki")
+            onButtonClicked: Qt.openUrlExternally("https://inir.space/docs/")
         }
         
         WSettingsButton {
