@@ -4,6 +4,7 @@ import QtQuick
 import Quickshell
 import qs.modules.common
 import qs.modules.iris.style
+import qs.services
 
 QtObject {
     id: root
@@ -33,7 +34,7 @@ QtObject {
         else delete next[screen]
         root.chassisShown = next
     }
-    readonly property bool nativeRaster: typeof Quickshell.hasVersion === "function" && Quickshell.hasVersion(0, 3, ["field-region"])
+    readonly property bool nativeRaster: SystemInfo.runtimeHas(["field-region"])
     // Places in Overlay windows of their own (Settings, side panels, menus) in the order they opened: Niri stacks a
     // later one above an earlier one.
     property var overlayPlaces: []

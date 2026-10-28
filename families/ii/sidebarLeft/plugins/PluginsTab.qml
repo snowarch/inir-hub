@@ -21,6 +21,16 @@ Item {
     property var plugins: []
     property bool pluginsLoaded: false
 
+    // No Qt WebEngine: qs-rs's prebuilt runtime brings it as its own download (inir webengine; 25 = offline)
+    readonly property bool engineMissing: Qt.createComponent("WebAppProfile.qml").status === Component.Error
+    property int engineExit: 0
+
+    Process {
+        id: engineFetch
+        command: [Quickshell.shellPath("scripts/inir"), "webengine"]
+        onExited: (exitCode, exitStatus) => root.engineExit = exitCode
+    }
+
     // Add form state
     property bool showAddForm: false
     property bool addingInProgress: false
@@ -166,6 +176,7 @@ Item {
                 }
                 // Refresh
                 RippleButton {
+                    visible: !root.engineMissing
                     Layout.preferredWidth: 28
                     Layout.preferredHeight: 28
                     buttonRadius: root.rounding
@@ -181,6 +192,7 @@ Item {
                 }
                 // Add button
                 RippleButton {
+                    visible: !root.engineMissing
                     Layout.preferredWidth: 28
                     Layout.preferredHeight: 28
                     buttonRadius: root.rounding
@@ -192,6 +204,55 @@ Item {
                         text: root.showAddForm ? "close" : "add"
                         iconSize: 18
                         color: root.showAddForm ? root.colTextSecondary : Appearance.colors.colPrimary
+                    }
+                }
+            }
+
+            // ── No Qt WebEngine ──────────────────────────────────
+            Rectangle {
+                Layout.fillWidth: true
+                visible: root.engineMissing
+                implicitHeight: engineCol.implicitHeight + 24
+                radius: root.rounding
+                color: root.colBg
+                border.width: Appearance.inirEverywhere || Appearance.angelEverywhere ? 1 : 0
+                border.color: root.colBorder
+
+                ColumnLayout {
+                    id: engineCol
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    anchors.verticalCenter: parent.verticalCenter
+                    anchors.margins: 12
+                    spacing: 8
+
+                    StyledText {
+                        Layout.fillWidth: true
+                        text: Translation.tr("Web apps need Qt WebEngine")
+                        font.pixelSize: Appearance.font.pixelSize.normal
+                        font.weight: Font.Medium
+                        color: root.colText
+                        wrapMode: Text.Wrap
+                    }
+                    StyledText {
+                        Layout.fillWidth: true
+                        text: root.engineExit === 25
+                            ? Translation.tr("The download did not finish. Check your connection and try again.")
+                            : root.engineExit !== 0
+                            ? Translation.tr("Could not install it. Run inir webengine in a terminal to see why.")
+                            : Translation.tr("A one-time download of about 110 MB. The shell restarts when it is in.")
+                        font.pixelSize: Appearance.font.pixelSize.smaller
+                        color: root.colTextSecondary
+                        wrapMode: Text.Wrap
+                    }
+                    DialogButton {
+                        Layout.alignment: Qt.AlignRight
+                        buttonText: engineFetch.running ? Translation.tr("Downloading…") : Translation.tr("Download")
+                        enabled: !engineFetch.running
+                        onClicked: {
+                            root.engineExit = 0
+                            engineFetch.running = true
+                        }
                     }
                 }
             }
@@ -293,7 +354,7 @@ Item {
 
             // ── Plugin cards ─────────────────────────────────────
             Repeater {
-                model: root.plugins
+                model: root.engineMissing ? [] : root.plugins
 
                 delegate: RippleButton {
                     id: pluginCard
@@ -399,7 +460,7 @@ Item {
     ColumnLayout {
         anchors.centerIn: parent
         spacing: 12
-        visible: root.pluginsLoaded && root.plugins.length === 0 && !root.showAddForm
+        visible: root.pluginsLoaded && root.plugins.length === 0 && !root.showAddForm && !root.engineMissing
 
         MaterialSymbol {
             Layout.alignment: Qt.AlignHCenter

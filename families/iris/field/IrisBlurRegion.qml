@@ -5,6 +5,7 @@ import Quickshell
 import Quickshell.Wayland
 import qs.modules.iris.frame
 import qs.modules.iris.style
+import qs.services
 
 Region {
     id: root
@@ -12,7 +13,7 @@ Region {
     property var shapes: []
     // qs-rs rasterises the field itself on every build (FieldRegion, IrisFieldRegion.qml): exact on every frame, with the
     // music's wave in the band, so nothing below runs there. Quickshell walks it here.
-    readonly property bool nativeRaster: typeof Quickshell.hasVersion === "function" && Quickshell.hasVersion(0, 3, ["field-region"])
+    readonly property bool nativeRaster: SystemInfo.runtimeHas(["field-region"])
     property var nativeRegion: null
     property vector4d edgeWave: Qt.vector4d(0, 0, 0, 0)
     property real waveClock: 0

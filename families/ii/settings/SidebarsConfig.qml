@@ -361,7 +361,7 @@ ContentPage {
 
                 // Only where the runtime can host Chromium (SidebarLeftContent.webAppsAvailable)
                 SettingsSwitch {
-                    visible: Quickshell.hasVersion(0, 3, ["webengine"])
+                    visible: SystemInfo.runtimeHas(["webengine"])
                     buttonIcon: "extension"
                     text: Translation.tr("Web Apps")
                     checked: Config.options?.sidebar?.plugins?.enable ?? false

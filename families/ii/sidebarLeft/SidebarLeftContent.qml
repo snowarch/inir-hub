@@ -43,7 +43,7 @@ Item {
     property bool softwareEnabled: Config.options?.sidebar?.software?.enable ?? false
     property bool ytMusicEnabled: Config.options?.sidebar?.ytmusic?.enable ?? false
     // Web apps need a runtime that can host Chromium (qs-rs; stock Quickshell crashes on a WebEngineView).
-    readonly property bool webAppsAvailable: Quickshell.hasVersion(0, 3, ["webengine"])
+    readonly property bool webAppsAvailable: SystemInfo.runtimeHas(["webengine"])
     property bool pluginsEnabled: webAppsAvailable && (Config.options?.sidebar?.plugins?.enable ?? false)
 
     // Tabs exposing contentPreferredHeight (Widgets) can let the panel hug
