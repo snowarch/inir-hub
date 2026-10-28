@@ -283,11 +283,13 @@ WPanelPageColumn {
             }
         }
 
-        onClicked: userMenu.open()
+        onPressed: { if (userMenu.visible) userMenu.close(); else if (Date.now() - userMenu.closedAt > 250) userMenu.open() }
         WToolTip { text: SystemInfo.displayName || SystemInfo.username }
 
         Popup {
             id: userMenu
+            property double closedAt: 0
+            onClosed: userMenu.closedAt = Date.now()
             x: -51
             y: -userMenu.implicitHeight + userButton.implicitHeight / 2 - 10
             background: null
@@ -398,10 +400,12 @@ WPanelPageColumn {
         }
 
         WToolTip { text: Translation.tr("Power") }
-        onClicked: powerMenu.open()
+        onPressed: { if (powerMenu.visible) powerMenu.close(); else if (Date.now() - powerMenu.closedAt > 250) powerMenu.open() }
 
         WMenu {
             id: powerMenu
+            property double closedAt: 0
+            onClosed: powerMenu.closedAt = Date.now()
             x: -powerMenu.implicitWidth / 2 + powerButton.implicitWidth / 2
             y: -powerMenu.implicitHeight - 4
             Action { icon.name: "lock-closed"; text: Translation.tr("Lock"); onTriggered: Session.lock() }

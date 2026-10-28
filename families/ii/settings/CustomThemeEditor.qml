@@ -1222,12 +1222,15 @@ ColumnLayout {
                         }
                     }
 
-                    onClicked: presetPopup.visible ? presetPopup.close() : presetPopup.open()
+                    // Opens on press; a press that just closed it (outside the popup) only closes.
+                    downAction: () => { if (presetPopup.visible) presetPopup.close(); else if (Date.now() - presetPopup.closedAt > 250) presetPopup.open() }
                 }
             }
 
             Popup {
                 id: presetPopup
+                property double closedAt: 0
+                onClosed: presetPopup.closedAt = Date.now()
                 y: presetColumn.height + 4
                 width: parent.width
                 height: Math.min(300, presetListView.contentHeight + presetSearchField.height + 24)

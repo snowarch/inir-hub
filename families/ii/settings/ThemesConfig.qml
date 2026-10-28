@@ -965,11 +965,14 @@ ContentPage {
                             MaterialSymbol { text: dayThemePopup.visible ? "expand_less" : "expand_more"; iconSize: 14; color: Appearance.colors.colSubtext }
                         }
 
-                        onClicked: dayThemePopup.visible ? dayThemePopup.close() : dayThemePopup.open()
+                        // Opens on press; a press that just closed it (outside the popup) only closes.
+                        downAction: () => { if (dayThemePopup.visible) dayThemePopup.close(); else if (Date.now() - dayThemePopup.closedAt > 250) dayThemePopup.open() }
                     }
 
                     Popup {
                         id: dayThemePopup
+                        property double closedAt: 0
+                        onClosed: dayThemePopup.closedAt = Date.now()
                         y: dayThemeBtn.height + 4
                         width: parent.width
                         height: Math.min(200, dayThemeList.contentHeight + 16)
@@ -1046,11 +1049,14 @@ ContentPage {
                             MaterialSymbol { text: nightThemePopup.visible ? "expand_less" : "expand_more"; iconSize: 14; color: Appearance.colors.colSubtext }
                         }
 
-                        onClicked: nightThemePopup.visible ? nightThemePopup.close() : nightThemePopup.open()
+                        // Opens on press; a press that just closed it (outside the popup) only closes.
+                        downAction: () => { if (nightThemePopup.visible) nightThemePopup.close(); else if (Date.now() - nightThemePopup.closedAt > 250) nightThemePopup.open() }
                     }
 
                     Popup {
                         id: nightThemePopup
+                        property double closedAt: 0
+                        onClosed: nightThemePopup.closedAt = Date.now()
                         y: nightThemeBtn.height + 4
                         width: parent.width
                         height: Math.min(200, nightThemeList.contentHeight + 16)
