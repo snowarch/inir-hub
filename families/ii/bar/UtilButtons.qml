@@ -343,7 +343,7 @@ Item {
         }
 
         Loader {
-            active: Config.options?.bar?.utilButtons?.showPerformanceProfileToggle ?? false
+            active: (Config.options?.bar?.utilButtons?.showPerformanceProfileToggle ?? false) && PowerProfilePersistence.available
             visible: active
             sourceComponent: CircleUtilButton {
                 Layout.alignment: Qt.AlignVCenter

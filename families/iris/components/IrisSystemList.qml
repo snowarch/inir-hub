@@ -52,7 +52,7 @@ ColumnLayout {
         onToggled: awake.mainAction()
     }
     RowLayout {
-        visible: PowerProfiles.profile !== undefined
+        visible: PowerProfilePersistence.available
         Layout.fillWidth: true
         Layout.leftMargin: 10 * root.d
         Layout.rightMargin: 6 * root.d
@@ -71,8 +71,8 @@ ColumnLayout {
             accessibleName: Translation.tr("Power profile")
             options: [{ value: PowerProfile.PowerSaver, label: Translation.tr("Saver") },
                 { value: PowerProfile.Balanced, label: Translation.tr("Balanced") }]
-                .concat(PowerProfiles.hasPerformanceProfile ? [{ value: PowerProfile.Performance, label: Translation.tr("Performance") }] : [])
-            current: PowerProfiles.profile
+                .concat(PowerProfilePersistence.available && PowerProfiles.hasPerformanceProfile ? [{ value: PowerProfile.Performance, label: Translation.tr("Performance") }] : [])
+            current: PowerProfilePersistence.available ? PowerProfiles.profile : PowerProfile.Balanced
             onPicked: value => PowerProfiles.profile = value
         }
     }

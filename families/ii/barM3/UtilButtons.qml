@@ -268,7 +268,7 @@ Item {
         }
 
         Loader {
-            active: Config.options.bar.m3.utilButtons.showPerformanceProfileToggle
+            active: Config.options.bar.m3.utilButtons.showPerformanceProfileToggle && PowerProfilePersistence.available
             visible: active
             sourceComponent: isMaterial ? perfM3 : legacyPerf
         }

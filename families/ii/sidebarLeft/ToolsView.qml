@@ -48,31 +48,36 @@ Item {
 
             // === Power Profiles ===
             CollapsibleSection {
+                // no daemon (TLP and the like): no section, and PowerProfiles never touched
+                visible: PowerProfilePersistence.available
                 title: Translation.tr("Power Profile")
                 icon: "bolt"
                 expanded: true
                 enableSettingsSearch: false
 
-                RowLayout {
+                Loader {
+                    active: PowerProfilePersistence.available
                     Layout.fillWidth: true
                     Layout.margins: 4
-                    spacing: 4
+                    sourceComponent: RowLayout {
+                        spacing: 4
 
-                    PowerProfileButton {
-                        profile: PowerProfile.PowerSaver
-                        profileIcon: "energy_savings_leaf"
-                        label: Translation.tr("Saver")
-                    }
-                    PowerProfileButton {
-                        profile: PowerProfile.Balanced
-                        profileIcon: "balance"
-                        label: Translation.tr("Balanced")
-                    }
-                    PowerProfileButton {
-                        profile: PowerProfile.Performance
-                        profileIcon: "local_fire_department"
-                        label: Translation.tr("Performance")
-                        enabled: PowerProfiles.hasPerformanceProfile
+                        PowerProfileButton {
+                            profile: PowerProfile.PowerSaver
+                            profileIcon: "energy_savings_leaf"
+                            label: Translation.tr("Saver")
+                        }
+                        PowerProfileButton {
+                            profile: PowerProfile.Balanced
+                            profileIcon: "balance"
+                            label: Translation.tr("Balanced")
+                        }
+                        PowerProfileButton {
+                            profile: PowerProfile.Performance
+                            profileIcon: "local_fire_department"
+                            label: Translation.tr("Performance")
+                            enabled: PowerProfiles.hasPerformanceProfile
+                        }
                     }
                 }
             }

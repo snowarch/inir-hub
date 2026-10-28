@@ -9,20 +9,26 @@ import Quickshell.Services.UPower
 AndroidQuickToggleButton {
     id: root
 
+    // without a daemon PowerProfiles is never touched (Quickshell warns on it) and the button does nothing
+    readonly property int profile: PowerProfilePersistence.available ? PowerProfiles.profile : PowerProfile.Balanced
+
     name: Translation.tr("Power Profile")
-    toggled: PowerProfiles.profile !== PowerProfile.Balanced
-    buttonIcon: switch(PowerProfiles.profile) {
+    enabled: PowerProfilePersistence.available
+    toggled: root.profile !== PowerProfile.Balanced
+    buttonIcon: switch(root.profile) {
         case PowerProfile.PowerSaver: return "energy_savings_leaf"
         case PowerProfile.Balanced: return "settings_slow_motion"
         case PowerProfile.Performance: return "local_fire_department"
     }
-    statusText: switch(PowerProfiles.profile) {
+    statusText: switch(root.profile) {
         case PowerProfile.PowerSaver: return "Power Saver"
         case PowerProfile.Balanced: return "Balanced"
         case PowerProfile.Performance: return "Performance"
     }
     
     mainAction: () => {
+        if (!PowerProfilePersistence.available)
+            return
         if (PowerProfiles.hasPerformanceProfile) {
             switch(PowerProfiles.profile) {
                 case PowerProfile.PowerSaver: PowerProfiles.profile = PowerProfile.Balanced

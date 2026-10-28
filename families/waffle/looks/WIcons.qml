@@ -109,7 +109,7 @@ Singleton {
     property string notificationsIcon: (Notifications?.silent ?? false) ? "alert-snooze" : "alert"
 
     property string powerProfileIcon: {
-        const profile = PowerProfiles?.profile;
+        const profile = PowerProfilePersistence.available ? PowerProfiles.profile : PowerProfile.Balanced;
         if (profile === PowerProfile.PowerSaver) return "leaf-two";
         if (profile === PowerProfile.Performance) return "fire";
         return "flash-on"; // Balanced or default
