@@ -289,7 +289,7 @@ QtObject {
     }
 
     // --- The palette ------------------------------------------------------------------------------------------------
-    // Every colour role below comes from one solve (scripts/colors/washi through IrisWashi): papers, ink, accent,
+    // Every colour role below comes from one solve (inir-accel's washi through IrisWashi): papers, ink, accent,
     // highlight, status, identity and widget data for each scheme, each held to its contrast on every ground of the
     // material in use. Surfaces consume these roles as they are; glass and Lume only decide how thick the paper is.
     readonly property var washi: IrisWashi.palette(root.scheme)

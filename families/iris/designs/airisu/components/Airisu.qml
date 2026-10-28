@@ -19,7 +19,7 @@ QtObject {
     readonly property color inkSecond: ColorUtils.mix(IrisStyle.text, IrisStyle.bodySurface, 0.66) // iris-literal: AIRISU's second tone, solid
     readonly property color inkThird: ColorUtils.mix(IrisStyle.text, IrisStyle.bodySurface, 0.44)  // iris-literal: AIRISU's third tone, solid
     // ── Lacquer (漆) and the 90/8/2 rule: ninety parts lacquer and ink (shikkoku, sumi, tetsu), eight of gofun, two of
-    // seal. The ladder is the solver's (scripts/colors/washi/airisu.go): canvas, raised and rule rungs. A subject's
+    // seal. The ladder is the solver's (inir-accel's washi, language airisu): canvas, raised and rule rungs. A subject's
     // pigment never colours a whole panel; it is breathed into the rung (a few parts in a hundred) and spent whole only
     // on what is live: the seal, a level's run, a mark.
     function pigment(subject: string): color {

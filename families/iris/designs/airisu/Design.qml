@@ -9,7 +9,7 @@ QtObject {
     readonly property string id: "airisu"
     readonly property string name: "AIRISU"
     readonly property string theme: "airisu"
-    // The solver's language for this Design (scripts/colors/washi/airisu.go): urushi, its pigments, the vermilion seal.
+    // The solver's language for this Design (inir-accel's washi, language airisu): urushi, its pigments, the vermilion seal.
     readonly property string palette: "airisu"
     readonly property var parts: ({
         insignia: "parts/Insignia.qml",

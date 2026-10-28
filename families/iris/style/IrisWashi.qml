@@ -7,14 +7,14 @@ import Quickshell.Io
 import qs.modules.common
 import qs.services
 
-// iRiS's palette, solved once for the shell and the apps it themes. `scripts/colors/washi` turns what the person
+// iRiS's palette, solved once for the shell and the apps it themes. inir-accel's washi turns what the person
 // chose and the seeds of the wallpaper and the colour theme into every role of every scheme (paper, ink, accent,
 // highlight, status, identity, widget data, app roles), each held to its contrast on every ground. This asks it
 // again when a choice or a seed changes and keeps the last answer on disk, so a start shows it at once.
 Singleton {
     id: root
 
-    // The solver's version (scripts/colors/washi Version): a newer solver answers the same request again.
+    // The solver's version (inir-accel's washi VERSION): a newer solver answers the same request again.
     readonly property int version: 32
     readonly property string cachePath: `${Directories.stateUserPath}/generated/iris-washi.json`
     readonly property var appearance: Config.options?.iris?.appearance ?? ({})

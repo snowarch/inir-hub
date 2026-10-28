@@ -241,7 +241,7 @@ QtObject {
     // The palettes iRiS lists (every one is still in the shared Themes page): what the apps wear, one swatch each.
     // What each scheme calls its materials: the three stored names stay black, graphite and midnight.
     readonly property var materialChoices: {
-        // In words, what the solver makes of each (scripts/colors/washi: iris.go, washi.go paper tables).
+        // In words, what the solver makes of each (inir-accel's washi: its iris and paper tables).
         const details = IrisStyle.ink ? ["Cream paper", "Tan paper", "Blue-grey paper"]
             : IrisStyle.light ? ["Warm white", "Light grey", "Cool grey"] : ["Pure black", "Neutral dark grey", "Blue black"]
         return ["black", "graphite", "midnight"].map((name, at) => ({ label: IrisStyle.materialLabel(name), value: name, detail: details[at],
@@ -249,7 +249,7 @@ QtObject {
             .concat([{ label: "Wallpaper", value: "wallpaper", detail: "Your wallpaper's hue", get swatch() { return IrisStyle.materialSwatch("wallpaper") } },
                 { label: "Theme", value: "theme", detail: "Your theme's colour", get swatch() { return IrisStyle.materialSwatch("theme") } }])
     }
-    // A paper scheme's levels: tone and warmth together (scripts/colors/washi paperLevels, same numbers), each tile
+    // A paper scheme's levels: tone and warmth together (inir-accel's washi paper_levels, same numbers), each tile
     // painted with the paper the solver gives it on the current material.
     function paperChoices(scheme: string): var {
         const levels = scheme === "ink"
