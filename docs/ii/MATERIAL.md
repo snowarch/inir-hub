@@ -50,3 +50,8 @@ follow the wallpaper or a colour theme: [Colours and themes](THEMING_PRESETS.md)
 - Blur, glass and animations: **Settings › Effects**. See [Optimization](OPTIMIZATION.md).
 - Notifications, Alt+Tab and the floating tools (**Super+G**): **Settings › Panels**.
 - Kira, the mascot: **Settings › Mascot**.
+- Clipboard history: **Super+V** opens it (it needs `cliphist`); **Settings › Modules** turns the panel on or off.
+- Screenshots, text and recording: **Super+Shift+S** opens the region toolbar. Where files go, the snip and the
+  recording sound: **Settings › Tools**.
+- Lock screen: **Super+Alt+L** locks; **Settings › System › Lock screen** sets what it shows.
+- Weather: **Settings › Services › Weather** (place, units, how often it refreshes).

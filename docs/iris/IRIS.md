@@ -52,6 +52,17 @@ The Dock is set under iRiS Settings › Dock:
 - Desktop › Widgets › Lume on every widget: every widget's text reads as if the wallpaper behind it were bright and busy.
 - Spotlight: type `/` to list iRiS's own switches, including Frame Music and Edge Music.
 
+## Lock, capture, windows, Spotlight and Now Playing
+
+- **Lock Screen**: what it shows (scene, clock, at a glance, now playing, activity), how you sign in and when it locks on
+  its own (Security, When idle). **Super+Alt+L** locks.
+- **Screenshots & Recording**: **Super+Shift+S** opens the snip; the page sets the snip, Read text (the language it
+  reads), recording and the Japanese lookup.
+- **Windows**: Niri's gaps, borders, corners and movement, the glass behind apps and the room windows leave for iRiS.
+- **Spotlight**: search for apps, files, the clipboard and more; the page sets results, the clipboard, prefixes and web search.
+- **Now Playing**: music on the Island, the lock screen and the frame: Frame music, the edge wave, the bubble, song
+  naming, the visualizer and the player.
+
 ## Settings
 
 Open Settings with Super+,. It appears over the desktop, or as a window if you choose that under Home › Settings window › Opens as. The layout is Classic, Folio, Pocket or Drawer (Home › Settings window › Layout).
