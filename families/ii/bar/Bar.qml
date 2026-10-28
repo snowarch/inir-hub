@@ -251,7 +251,7 @@ Scope {
                     function onActiveContextMenuCountChanged(): void {
                         if (GlobalStates.activeContextMenuCount <= 0) {
                             barRoot.contextMenuHold = false
-                        } else if ((barRoot.pointerShow || barEdge.hovered)) {
+                        } else if (barRoot.pointerShow || barEdge.hovered) {
                             barRoot.contextMenuHold = true
                         }
                     }
@@ -277,14 +277,14 @@ Scope {
                     function onMediaControlsOpenChanged(): void {
                         if (!GlobalStates.mediaControlsOpen)
                             barRoot.mediaControlsHold = false
-                        else if ((barRoot.pointerShow || barEdge.hovered))
+                        else if (barRoot.pointerShow || barEdge.hovered)
                             barRoot.mediaControlsHold = true
                     }
 
                     function onControlPanelOpenChanged(): void {
                         if (!GlobalStates.controlPanelOpen)
                             barRoot.controlPanelHold = false
-                        else if ((barRoot.pointerShow || barEdge.hovered))
+                        else if (barRoot.pointerShow || barEdge.hovered)
                             barRoot.controlPanelHold = true
                     }
                 }
