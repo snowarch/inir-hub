@@ -1,0 +1,13 @@
+{
+	"id": "iris",
+	"edit": "https://github.com/snowarch/inir-hub/edit/main/docs/iris/",
+	"order": 3,
+	"groups": [
+		{
+			"label": "Families",
+			"pages": [
+				"IRIS"
+			]
+		}
+	]
+}

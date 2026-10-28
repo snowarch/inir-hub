@@ -1,0 +1,13 @@
+{
+	"id": "waffle",
+	"edit": "https://github.com/snowarch/inir-hub/edit/main/docs/waffle/",
+	"order": 2,
+	"groups": [
+		{
+			"label": "Families",
+			"pages": [
+				"WAFFLE"
+			]
+		}
+	]
+}
