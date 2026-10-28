@@ -41,8 +41,11 @@ ContentPage {
         root.editingGroup = -1
     }
 
+    property Item dragItem: null
+
     function _endDrag(): void {
         root.dragInfo = null
+        root.dragItem = null
         root.pageDropCategory = -2
         root.pageDropIndex = -1
     }
@@ -198,9 +201,13 @@ ContentPage {
                     anchors.fill: parent
                     hoverEnabled: true
                     cursorShape: drag.active ? Qt.ClosedHandCursor : Qt.OpenHandCursor
+                    enabled: !dragEscape.letGo
                     drag.target: rowRoot
                     drag.axis: Drag.XAndYAxis
-                    onPressed: root._beginPageDrag(rowRoot.categoryIndex, rowRoot.pageIndex, rowRoot.pageIdx)
+                    onPressed: {
+                        root._beginPageDrag(rowRoot.categoryIndex, rowRoot.pageIndex, rowRoot.pageIdx)
+                        root.dragItem = rowRoot
+                    }
                     onReleased: {
                         if (rowRoot.Drag.target) rowRoot.Drag.drop()
                         else root._endDrag()
@@ -369,12 +376,15 @@ ContentPage {
                     MouseArea {
                         id: groupDrag
                         anchors.fill: parent
-                        enabled: parent.enabled
+                        enabled: parent.enabled && !dragEscape.letGo
                         hoverEnabled: true
                         cursorShape: drag.active ? Qt.ClosedHandCursor : Qt.OpenHandCursor
                         drag.target: cardRoot
                         drag.axis: Drag.XAndYAxis
-                        onPressed: root._beginGroupDrag(cardRoot.categoryIndex)
+                        onPressed: {
+                            root._beginGroupDrag(cardRoot.categoryIndex)
+                            root.dragItem = cardRoot
+                        }
                         onReleased: {
                             if (cardRoot.Drag.target) cardRoot.Drag.drop()
                             else root._endDrag()
@@ -611,6 +621,9 @@ ContentPage {
                 width: root.width
                 height: root.height
             }
+            // Esc puts the page or group back; held near the page's edge it scrolls it
+            DragEscape { id: dragEscape; active: root.dragInfo !== null }
+            DragAutoScroll { active: root.dragInfo !== null; carried: root.dragItem }
         }
 
         Repeater {

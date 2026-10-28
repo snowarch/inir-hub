@@ -537,7 +537,7 @@ Item {
                                         MouseArea {
                                             id: dragMa
                                             anchors.fill: parent
-                                            enabled: root.editMode
+                                            enabled: root.editMode && !dragEscape.letGo
                                             hoverEnabled: true
                                             // preventStealing: the card sits inside the column
                                             // Flickable; without this the scroll steals the drag.
@@ -732,6 +732,7 @@ Item {
                                 anchors.fill: parent
                                 hoverEnabled: true
                                 preventStealing: true
+                                enabled: !dragEscape.letGo
                                 cursorShape: (root.dragging && chip.isSource) ? Qt.ClosedHandCursor : Qt.OpenHandCursor
                                 onPressed: mouse => {
                                     chip._pressScene = mapToItem(root, mouse.x, mouse.y)
@@ -769,6 +770,9 @@ Item {
                 }
             }
         }
+
+        // Esc puts the card back where it was
+        DragEscape { id: dragEscape; active: root.dragging }
 
         // Floating drag ghost — follows the cursor above every column and the tray.
         Item {

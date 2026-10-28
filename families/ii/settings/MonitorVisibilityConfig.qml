@@ -842,7 +842,7 @@ ContentPage {
         DragHandler {
             id: monitorDrag
             target: null
-            enabled: !root.monitorLayoutBusy && root.niriOutputNames().length > 1
+            enabled: !root.monitorLayoutBusy && root.niriOutputNames().length > 1 && !monitorEscape.letGo
             acceptedButtons: Qt.LeftButton
             grabPermissions: PointerHandler.CanTakeOverFromAnything
 
@@ -932,7 +932,7 @@ ContentPage {
                     monitorRect.logicalWidth, monitorRect.logicalHeight)
             }
 
-            onCanceled: {
+            function putBack(): void {
                 monitorRect.dragging = false
                 root.draggingLayoutOutput = ""
                 monitorRect.awaitingCommit = false
@@ -940,7 +940,10 @@ ContentPage {
                 monitorRect.heldX = monitorRect.baseCanvasX
                 monitorRect.heldY = monitorRect.baseCanvasY
             }
+            onCanceled: putBack()
         }
+        // Esc: the display goes back where it was, nothing is written
+        DragEscape { id: monitorEscape; active: monitorDrag.active; onCancel: monitorDrag.putBack() }
     }
 
     component SurfaceVisibilityBlock: Rectangle {

@@ -108,6 +108,7 @@ Item {
             id: handleDrag
             anchors.fill: parent
             hoverEnabled: true
+            enabled: !handleEscape.letGo
             cursorShape: drag.active ? Qt.ClosedHandCursor : Qt.OpenHandCursor
             drag.target: dragHandle
             drag.axis: Drag.XAndYAxis
@@ -122,5 +123,6 @@ Item {
                 dragHandle.y = 4
             }
         }
+        DragEscape { id: handleEscape; active: handleDrag.drag.active }
     }
 }

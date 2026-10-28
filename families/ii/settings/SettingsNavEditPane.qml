@@ -37,8 +37,11 @@ Item {
         root.dragInfo = ({ type: "group", index })
     }
 
+    property Item dragItem: null
+
     function endDrag(): void {
         root.dragInfo = null
+        root.dragItem = null
         root.pageDropCategory = -2
         root.pageDropIndex = -1
     }
@@ -158,9 +161,13 @@ Item {
                         anchors.fill: parent
                         hoverEnabled: true
                         cursorShape: drag.active ? Qt.ClosedHandCursor : Qt.OpenHandCursor
+                        enabled: !dragEscape.letGo
                         drag.target: rowCard
                         drag.axis: Drag.XAndYAxis
-                        onPressed: root.beginPageDrag(rowWrap.categoryIndex, rowWrap.pageIndex, rowWrap.pageIdx)
+                        onPressed: {
+                            root.beginPageDrag(rowWrap.categoryIndex, rowWrap.pageIndex, rowWrap.pageIdx)
+                            root.dragItem = rowCard
+                        }
                         onReleased: {
                             if (rowCard.Drag.target)
                                 rowCard.Drag.drop()
@@ -313,9 +320,13 @@ Item {
                         anchors.fill: parent
                         hoverEnabled: true
                         cursorShape: drag.active ? Qt.ClosedHandCursor : Qt.OpenHandCursor
+                        enabled: !dragEscape.letGo
                         drag.target: groupHandle
                         drag.axis: Drag.XAndYAxis
-                        onPressed: root.beginGroupDrag(categoryBlock.categoryIndex)
+                        onPressed: {
+                            root.beginGroupDrag(categoryBlock.categoryIndex)
+                            root.dragItem = groupHandle
+                        }
                         onReleased: {
                             if (groupHandle.Drag.target)
                                 groupHandle.Drag.drop()
@@ -599,4 +610,8 @@ Item {
         z: 1000
         clip: false
     }
+
+    // Esc puts the page or group back; held near the list's edge it scrolls the list
+    DragEscape { id: dragEscape; active: root.dragInfo !== null }
+    DragAutoScroll { active: root.dragInfo !== null; carried: root.dragItem; flickable: editFlick }
 }

@@ -314,6 +314,7 @@ Rectangle {
                                     id: dragMouse
                                     anchors.fill: parent
                                     hoverEnabled: true
+                                    enabled: !rowEscape.letGo
                                     cursorShape: drag.active ? Qt.ClosedHandCursor : Qt.OpenHandCursor
                                     drag.target: rowRoot
                                     drag.axis: Drag.XAndYAxis
@@ -322,6 +323,9 @@ Rectangle {
                                             rowRoot.Drag.drop()
                                     }
                                 }
+                                // Esc puts the row back; held near the page's edge it scrolls the page
+                                DragEscape { id: rowEscape; active: dragMouse.drag.active }
+                                DragAutoScroll { active: dragMouse.drag.active; carried: rowRoot }
                             }
 
                             Rectangle {

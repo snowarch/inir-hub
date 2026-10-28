@@ -26,6 +26,9 @@ Item {
     implicitHeight: Math.max(1, root.pinned.length) * root.rowHeight
 
     // Where a row sits while another is dragged: the ones it passes step aside.
+    // Esc puts the app back in its place
+    DragEscape { id: pinEscape; active: root.dragFrom >= 0 }
+
     function slotOf(index: int): int {
         if (root.dragFrom < 0 || index === root.dragFrom) return index
         if (root.dragFrom < root.dragTo && index > root.dragFrom && index <= root.dragTo) return index - 1
@@ -169,6 +172,7 @@ Item {
                 anchors.bottom: parent.bottom
                 cursorShape: pressed ? Qt.ClosedHandCursor : Qt.OpenHandCursor
                 preventStealing: true
+                enabled: !pinEscape.letGo
                 property real grab: 0
                 onPressed: mouse => {
                     row.forceActiveFocus()

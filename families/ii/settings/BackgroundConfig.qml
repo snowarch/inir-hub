@@ -1765,6 +1765,9 @@ ContentPage {
                             font.pixelSize: Appearance.font.pixelSize.small
                         }
 
+                        // Esc: the picture slides back to the saved pan, nothing is written
+                        DragEscape { id: panEscape; active: panDragArea.drag.active }
+
                         MouseArea {
                             id: panDragArea
                             anchors.fill: parent
@@ -1775,7 +1778,7 @@ ContentPage {
                             drag.minimumY: -(panWallpaperImage.excessY)
                             drag.maximumY: 0
                             cursorShape: drag.active ? Qt.ClosedHandCursor : Qt.OpenHandCursor
-                            enabled: panWallpaperImage.visible
+                            enabled: panWallpaperImage.visible && !panEscape.letGo
                             scrollGestureEnabled: false
 
                             onReleased: {

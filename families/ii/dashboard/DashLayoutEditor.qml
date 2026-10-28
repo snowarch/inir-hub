@@ -211,6 +211,14 @@ ColumnLayout {
         Layout.preferredHeight: 0
         z: 100
         clip: false
+        // Esc puts the item back; held near the page's edge it scrolls the page (the pointer moves through it)
+        DragEscape { id: dragEscape; active: root.dragging }
+        DragAutoScroll {
+            active: root.dragging
+            carried: ghost
+            keepCarried: false
+            onScrolled: dy => root._move(Qt.point(root.dragScene.x, root.dragScene.y + dy))
+        }
         Item {
             id: dragLayer
             width: root.width
@@ -306,6 +314,7 @@ ColumnLayout {
             id: dragMa
             anchors.fill: parent
             hoverEnabled: true
+            enabled: !dragEscape.letGo
             // preventStealing: the editor is nested inside Flickables (the
             // settings scroll + the in-panel edit sheet). Without this the
             // Flickable steals the vertical gesture and the drag never starts.
@@ -550,6 +559,7 @@ ColumnLayout {
                             anchors.fill: parent
                             hoverEnabled: true
                             preventStealing: true
+                            enabled: !dragEscape.letGo
                             cursorShape: (root.dragging && chip.isSource) ? Qt.ClosedHandCursor : Qt.OpenHandCursor
                             onPressed: mouse => {
                                 chip._pressScene = mapToItem(root, mouse.x, mouse.y)

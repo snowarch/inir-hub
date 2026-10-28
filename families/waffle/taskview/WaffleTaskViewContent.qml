@@ -623,6 +623,12 @@ Item {
                             root.draggingFromWorkspace = wsIdx
                             root.draggingWindowId = windowId
                         }
+                        onDragCanceled: {
+                            root.isDragging = false
+                            root.draggingFromWorkspace = -1
+                            root.dragTargetWorkspace = -1
+                            root.draggingWindowId = -1
+                        }
                         onDragEnded: function() {
                             const fromWs = root.draggingFromWorkspace
                             const targetWs = root.dragTargetWorkspace

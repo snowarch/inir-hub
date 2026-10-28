@@ -59,6 +59,7 @@ Item {
 
     signal dragStarted(int workspaceIdx, int windowId)
     signal dragEnded()
+    signal dragCanceled()
     signal niriAction(string action, int windowId)
     signal focusRequested(int workspaceSlot)  // Request to center this workspace
 
@@ -371,11 +372,17 @@ Item {
                 }
             }
 
+            DragEscape {
+                id: thumbEscape
+                active: root.isBeingDragged
+            }
+
             // Drag/click area
             MouseArea {
                 id: dragArea
                 anchors.fill: parent
                 hoverEnabled: true
+                enabled: !thumbEscape.letGo
                 drag.target: root
                 acceptedButtons: Qt.LeftButton | Qt.MiddleButton | Qt.RightButton
 
@@ -451,6 +458,16 @@ Item {
                             WaffleState.taskViewOpen = false
                         }
                     }
+                }
+
+                // Esc or a lost grab: the window stays where it was
+                onCanceled: {
+                    if (!root.isBeingDragged) return
+                    root.Drag.active = false
+                    root.isBeingDragged = false
+                    root.dragCanceled()
+                    root.x = Qt.binding(() => root.baseX)
+                    root.y = Qt.binding(() => root.baseY)
                 }
 
                 onDoubleClicked: mouse => {
