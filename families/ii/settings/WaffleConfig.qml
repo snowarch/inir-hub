@@ -142,6 +142,7 @@ ContentPage {
             }
 
             ConfigSpinBox {
+                configPath: "waffles.background.effects.blurRadius"
                 visible: Config.options?.waffles?.background?.effects?.enableBlur ?? false
                 icon: "blur_medium"
                 text: Translation.tr("Blur radius")
@@ -151,6 +152,7 @@ ContentPage {
             }
 
             ConfigSpinBox {
+                configPath: "waffles.background.effects.dim"
                 icon: "brightness_5"
                 text: Translation.tr("Dim (%)")
                 from: 0; to: 100; stepSize: 5
@@ -159,6 +161,7 @@ ContentPage {
             }
 
             ConfigSpinBox {
+                configPath: "waffles.background.effects.dynamicDim"
                 icon: "brightness_auto"
                 text: Translation.tr("Dynamic dim (%)")
                 from: 0; to: 100; stepSize: 5
@@ -245,6 +248,7 @@ ContentPage {
             }
 
             ConfigSpinBox {
+                configPath: "waffles.background.backdrop.blurRadius"
                 visible: Config.options?.waffles?.background?.backdrop?.enable ?? true
                 icon: "blur_on"
                 text: Translation.tr("Blur radius")
@@ -254,6 +258,7 @@ ContentPage {
             }
 
             ConfigSpinBox {
+                configPath: "waffles.background.backdrop.dim"
                 visible: Config.options?.waffles?.background?.backdrop?.enable ?? true
                 icon: "brightness_5"
                 text: Translation.tr("Dim (%)")
@@ -263,6 +268,7 @@ ContentPage {
             }
 
             ConfigSpinBox {
+                configPath: "waffles.background.backdrop.saturation"
                 visible: Config.options?.waffles?.background?.backdrop?.enable ?? true
                 icon: "contrast"
                 text: Translation.tr("Saturation")
@@ -272,6 +278,7 @@ ContentPage {
             }
 
             ConfigSpinBox {
+                configPath: "waffles.background.backdrop.contrast"
                 visible: Config.options?.waffles?.background?.backdrop?.enable ?? true
                 icon: "exposure"
                 text: Translation.tr("Contrast")
@@ -289,6 +296,7 @@ ContentPage {
             }
 
             ConfigSpinBox {
+                configPath: "waffles.background.backdrop.vignetteIntensity"
                 visible: (Config.options?.waffles?.background?.backdrop?.enable ?? true) && (Config.options?.waffles?.background?.backdrop?.vignetteEnabled ?? false)
                 icon: "opacity"
                 text: Translation.tr("Vignette intensity")
@@ -367,6 +375,7 @@ ContentPage {
             }
 
             ConfigSelectionArray {
+                configPath: "waffles.theming.font.family"
                 options: [
                     { displayName: "Segoe UI", icon: "window", value: "Segoe UI Variable" },
                     { displayName: "Inter", icon: "text_fields", value: "Inter" },
@@ -386,6 +395,7 @@ ContentPage {
             }
 
             ConfigSpinBox {
+                configPath: "waffles.theming.font.scale"
                 icon: "format_size"
                 text: Translation.tr("Font scale (%)")
                 from: 80; to: 150; stepSize: 5
@@ -492,6 +502,7 @@ ContentPage {
 
         SettingsGroup {
             ConfigSelectionArray {
+                configPath: "waffles.startMenu.sizePreset"
                 options: [
                     { displayName: Translation.tr("Mini"), icon: "crop_square", value: "mini" },
                     { displayName: Translation.tr("Compact"), icon: "view_compact", value: "compact" },
@@ -504,6 +515,7 @@ ContentPage {
             }
 
             ConfigSpinBox {
+                configPath: "waffles.startMenu.scale"
                 icon: "format_size"
                 text: Translation.tr("Text scale (%)")
                 from: 80; to: 150; stepSize: 5
@@ -619,6 +631,7 @@ ContentPage {
             }
 
             ConfigSpinBox {
+                configPath: "waffles.altSwitcher.autoHideDelayMs"
                 visible: Config.options?.waffles?.altSwitcher?.autoHide ?? true
                 icon: "hourglass_empty"
                 text: Translation.tr("Auto-hide delay (ms)")
@@ -642,6 +655,7 @@ ContentPage {
             }
 
             ConfigSpinBox {
+                configPath: "waffles.altSwitcher.thumbnailWidth"
                 visible: (Config.options?.waffles?.altSwitcher?.preset ?? "thumbnails") === "thumbnails"
                 icon: "width"
                 text: Translation.tr("Thumbnail width")
@@ -651,6 +665,7 @@ ContentPage {
             }
 
             ConfigSpinBox {
+                configPath: "waffles.altSwitcher.thumbnailHeight"
                 visible: (Config.options?.waffles?.altSwitcher?.preset ?? "thumbnails") === "thumbnails"
                 icon: "height"
                 text: Translation.tr("Thumbnail height")
@@ -670,6 +685,7 @@ ContentPage {
             // }
 
             ConfigSpinBox {
+                configPath: "waffles.altSwitcher.scrimOpacity"
                 icon: "opacity"
                 text: Translation.tr("Scrim opacity")
                 from: 0; to: 100; stepSize: 5

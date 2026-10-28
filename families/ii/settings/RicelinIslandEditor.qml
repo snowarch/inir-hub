@@ -204,6 +204,7 @@ ColumnLayout {
         ConfigRow {
             uniform: true
             ConfigSpinBox {
+                configPath: "appearance.island.opacity"
                 icon: "opacity"
                 text: Translation.tr("Body opacity (%)")
                 value: Math.round(root.bodyOpacity * 100)
@@ -225,6 +226,7 @@ ColumnLayout {
         ConfigRow {
             uniform: true
             ConfigSpinBox {
+                configPath: "appearance.island.glassBlur"
                 icon: "lens_blur"
                 text: Translation.tr("Glass blur (%)")
                 enabled: root.glassEnabled
@@ -235,6 +237,7 @@ ColumnLayout {
                 onValueChanged: Config.setNestedValue("appearance.island.glassBlur", value / 100)
             }
             ConfigSpinBox {
+                configPath: "appearance.island.radius"
                 icon: "rounded_corner"
                 text: Translation.tr("Base radius (px)")
                 value: Config.options?.appearance?.island?.radius ?? 18

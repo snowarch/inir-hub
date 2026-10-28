@@ -51,6 +51,7 @@ WindowDialog {
         }
 
         ConfigSwitch {
+            configPath: "light.night.automatic"
             anchors {
                 left: parent.left
                 right: parent.right
@@ -80,6 +81,7 @@ WindowDialog {
             }
 
             ConfigTimeInput {
+                configPath: "light.night.from"
                 anchors {
                     left: parent.left
                     right: parent.right
@@ -93,6 +95,7 @@ WindowDialog {
             }
 
             ConfigTimeInput {
+                configPath: "light.night.to"
                 anchors {
                     left: parent.left
                     right: parent.right
@@ -139,6 +142,7 @@ WindowDialog {
         Layout.fillWidth: true
 
         ConfigSwitch {
+            configPath: "light.antiFlashbang.enable"
             anchors {
                 left: parent.left
                 right: parent.right

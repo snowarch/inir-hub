@@ -486,6 +486,7 @@ ContentPage {
                 title: Translation.tr("Bar appearance")
 
                 ConfigSelectionArray {
+                    configPath: "bar.appearanceStyle"
                     currentValue: Config.options?.bar?.appearanceStyle ?? "classic"
                     onSelected: newValue => {
                         Config.setNestedValue("bar.appearanceStyle", newValue);
@@ -564,6 +565,7 @@ ContentPage {
                     title: Translation.tr("Corner style")
 
                     ConfigSelectionArray {
+                        configPath: "bar.cornerStyle"
                         enabled: root.cornerStyleApplies
                         opacity: enabled ? 1 : 0.5
                         currentValue: Config.options?.bar?.cornerStyle ?? 0
@@ -1397,6 +1399,7 @@ ContentPage {
                 ConfigRow {
                     uniform: true
                     ConfigSpinBox {
+                        configPath: "bar.islands.inset"
                         icon: "height"
                         text: Translation.tr("Inset (px)")
                         value: Config.options?.bar?.islands?.inset ?? 4
@@ -1409,6 +1412,7 @@ ContentPage {
                         }
                     }
                     ConfigSpinBox {
+                        configPath: "bar.islands.padding"
                         icon: "width"
                         text: Translation.tr("Capsule padding (px)")
                         value: Config.options?.bar?.islands?.padding ?? 12
@@ -1476,6 +1480,7 @@ ContentPage {
             }
 
             ConfigSpinBox {
+                configPath: "bar.customRounding"
                 visible: root.barAppearance !== "islands"
                 icon: "rounded_corner"
                 text: Translation.tr("Custom bar rounding (px)")
@@ -1497,6 +1502,7 @@ ContentPage {
             ConfigRow {
                 uniform: true
                 ConfigSpinBox {
+                    configPath: "bar.height"
                     icon: "height"
                     text: Translation.tr("Bar height (px)")
                     value: Config.options?.bar?.height ?? 40
@@ -1509,6 +1515,7 @@ ContentPage {
                     }
                 }
                 ConfigSpinBox {
+                    configPath: "bar.opacity"
                     icon: "opacity"
                     text: Translation.tr("Bar opacity (%)")
                     value: Math.round((Config.options?.bar?.opacity ?? 1) * 100)
@@ -1978,6 +1985,7 @@ ContentPage {
                     title: Translation.tr("Group style")
 
                     ConfigSelectionArray {
+                        configPath: "bar.borderless"
                         currentValue: Config.options?.bar?.borderless ?? false
                         onSelected: newValue => {
                             Config.setNestedValue("bar.borderless", newValue);
@@ -1993,6 +2001,7 @@ ContentPage {
                     title: Translation.tr("Auto-hide")
 
                     ConfigSelectionArray {
+                        configPath: "bar.autoHide.enable"
                         currentValue: Config.options?.bar?.autoHide?.enable ?? false
                         onSelected: newValue => {
                             Config.setNestedValue("bar.autoHide.enable", newValue);
@@ -2030,6 +2039,7 @@ ContentPage {
                     ConfigRow {
                         uniform: true
                         ConfigSpinBox {
+                            configPath: "bar.autoHide.hoverRegionWidth"
                             icon: "linear_scale"
                             text: Translation.tr("Hover trigger height (px)")
                             value: Config.options?.bar?.autoHide?.hoverRegionWidth ?? 2
@@ -2042,6 +2052,7 @@ ContentPage {
                             }
                         }
                         ConfigSpinBox {
+                            configPath: "bar.autoHide.showWhenPressingSuper.delay"
                             icon: "timer"
                             text: Translation.tr("Super peek delay (ms)")
                             value: Config.options?.bar?.autoHide?.showWhenPressingSuper?.delay ?? 140
@@ -2139,6 +2150,7 @@ ContentPage {
                     }
 
                     ConfigSpinBox {
+                        configPath: "bar.clock.timePixelSize"
                         icon: "format_size"
                         text: Translation.tr("Time size (px)")
                         description: Translation.tr("0 = inherit global size")
@@ -2173,6 +2185,7 @@ ContentPage {
                     }
 
                     ConfigSpinBox {
+                        configPath: "bar.clock.datePixelSize"
                         icon: "format_size"
                         text: Translation.tr("Date size (px)")
                         description: Translation.tr("0 = inherit global size")
@@ -2253,6 +2266,7 @@ ContentPage {
                     title: Translation.tr("Left scroll action")
 
                     ConfigSelectionArray {
+                        configPath: "bar.leftScrollAction"
                         currentValue: Config.options?.bar?.leftScrollAction ?? "brightness"
                         onSelected: newValue => {
                             Config.setNestedValue("bar.leftScrollAction", newValue)
@@ -2270,6 +2284,7 @@ ContentPage {
                     title: Translation.tr("Right scroll action")
 
                     ConfigSelectionArray {
+                        configPath: "bar.rightScrollAction"
                         currentValue: Config.options?.bar?.rightScrollAction ?? "volume"
                         onSelected: newValue => {
                             Config.setNestedValue("bar.rightScrollAction", newValue)
@@ -2305,6 +2320,7 @@ ContentPage {
             }
 
             ConfigSpinBox {
+                configPath: "bar.vignette.intensity"
                 visible: root.hasVignette
                 icon: "opacity"
                 text: Translation.tr("Intensity (%)")
@@ -2318,6 +2334,7 @@ ContentPage {
             }
 
             ConfigSpinBox {
+                configPath: "bar.vignette.radius"
                 visible: root.hasVignette
                 icon: "blur_on"
                 text: Translation.tr("Radius (%)")
@@ -2377,6 +2394,7 @@ ContentPage {
                     }
 
                     ConfigSpinBox {
+                        configPath: "bar.media.maxWidth"
                         visible: Config.options?.bar?.modules?.media ?? true
                         icon: "music_note"
                         text: Translation.tr("Music width (px)")
@@ -2457,6 +2475,7 @@ ContentPage {
             }
 
             ConfigSpinBox {
+                configPath: "bar.layout.spacerWidth"
                 visible: root.stockHorizontalLayoutActive
                 icon: "space_bar"
                 text: Translation.tr("Flexible spacer width")
@@ -2471,6 +2490,7 @@ ContentPage {
             }
 
             ConfigSelectionArray {
+                configPath: "bar.layout.spacerMode"
                 visible: root.stockHorizontalLayoutActive
                 currentValue: Config.options?.bar?.layout?.spacerMode ?? "auto"
                 onSelected: (newValue) => Config.setNestedValue("bar.layout.spacerMode", newValue)
@@ -2589,6 +2609,7 @@ ContentPage {
             ConfigRow {
                 uniform: true
                 ConfigSpinBox {
+                    configPath: "bar.resources.memoryWarningThreshold"
                     icon: "memory"
                     text: Translation.tr("RAM warning (%)")
                     value: Config.options?.bar?.resources?.memoryWarningThreshold ?? 90
@@ -2598,6 +2619,7 @@ ContentPage {
                     onValueChanged: Config.setNestedValue("bar.resources.memoryWarningThreshold", value)
                 }
                 ConfigSpinBox {
+                    configPath: "bar.resources.cpuWarningThreshold"
                     icon: "planner_review"
                     text: Translation.tr("CPU warning (%)")
                     value: Config.options?.bar?.resources?.cpuWarningThreshold ?? 90
@@ -2611,6 +2633,7 @@ ContentPage {
             ConfigRow {
                 uniform: true
                 ConfigSpinBox {
+                    configPath: "bar.resources.gpuWarningThreshold"
                     icon: "videocam"
                     text: Translation.tr("GPU warning (%)")
                     value: Config.options?.bar?.resources?.gpuWarningThreshold ?? 90
@@ -2620,6 +2643,7 @@ ContentPage {
                     onValueChanged: Config.setNestedValue("bar.resources.gpuWarningThreshold", value)
                 }
                 ConfigSpinBox {
+                    configPath: "bar.resources.swapWarningThreshold"
                     icon: "swap_horiz"
                     text: Translation.tr("Swap warning (%)")
                     value: Config.options?.bar?.resources?.swapWarningThreshold ?? 85
@@ -2633,6 +2657,7 @@ ContentPage {
             ConfigRow {
                 uniform: true
                 ConfigSpinBox {
+                    configPath: "bar.resources.tempCautionThreshold"
                     icon: "thermostat"
                     text: Translation.tr("Temp caution (°C)")
                     value: Config.options?.bar?.resources?.tempCautionThreshold ?? 65
@@ -2642,6 +2667,7 @@ ContentPage {
                     onValueChanged: Config.setNestedValue("bar.resources.tempCautionThreshold", value)
                 }
                 ConfigSpinBox {
+                    configPath: "bar.resources.tempWarningThreshold"
                     icon: "device_thermostat"
                     text: Translation.tr("Temp warning (°C)")
                     value: Config.options?.bar?.resources?.tempWarningThreshold ?? 80
@@ -2673,6 +2699,7 @@ ContentPage {
                 title: Translation.tr("Popup mode")
 
                 ConfigSelectionArray {
+                    configPath: "media.popupMode"
                     currentValue: Config.options?.media?.popupMode ?? "dock"
                     onSelected: newValue => {
                         Config.setNestedValue("media.popupMode", newValue)
@@ -2713,6 +2740,7 @@ ContentPage {
                 visible: CompositorService.isNiri
 
                 ConfigSelectionArray {
+                    configPath: "bar.workspaces.scrollBehavior"
                     currentValue: Config.options?.bar?.workspaces?.scrollBehavior ?? "workspace"
                     onSelected: newValue => {
                         Config.setNestedValue("bar.workspaces.scrollBehavior", newValue)
@@ -2864,6 +2892,7 @@ ContentPage {
             ConfigRow {
                 uniform: true
                 ConfigSpinBox {
+                    configPath: "bar.workspaces.shown"
                     icon: "view_column"
                     text: Translation.tr("Shown")
                     value: Config.options?.bar?.workspaces?.shown ?? 10
@@ -2875,6 +2904,7 @@ ContentPage {
                     opacity: enabled ? 1 : 0.5
                 }
                 ConfigSpinBox {
+                    configPath: "bar.workspaces.scrollSteps"
                     icon: "mouse"
                     text: Translation.tr("Scroll steps")
                     value: Config.options?.bar?.workspaces?.scrollSteps ?? 3
@@ -2886,6 +2916,7 @@ ContentPage {
             }
 
             ConfigSpinBox {
+                configPath: "bar.workspaces.showNumberDelay"
                 icon: "touch_long"
                 text: Translation.tr("Number reveal delay (ms)")
                 value: Config.options?.bar?.workspaces?.showNumberDelay ?? 300
@@ -2909,6 +2940,7 @@ ContentPage {
                 title: Translation.tr("Number style")
 
                 ConfigSelectionArray {
+                    configPath: "bar.workspaces.numberMap"
                     enabled: Config.options?.bar?.workspaces?.alwaysShowNumbers ?? false
                     opacity: enabled ? 1 : 0.5
                     currentValue: JSON.stringify(Config.options?.bar?.workspaces?.numberMap ?? ["1","2"])

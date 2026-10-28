@@ -148,6 +148,7 @@ ContentPage {
                 tooltip: Translation.tr("Choose the Spicetify layout while keeping iNiR wallpaper colors")
 
                 ConfigSelectionArray {
+                    configPath: "appearance.wallpaperTheming.spicetifyTheme"
                     visible: !root.irisFamily
                     currentValue: Config.options?.appearance?.wallpaperTheming?.spicetifyTheme ?? "Inir"
                     onSelected: newValue => {
@@ -484,6 +485,7 @@ ContentPage {
                 }
             }
             ConfigSpinBox {
+                configPath: "appearance.wallpaperTheming.terminalGenerationProps.harmonizeThreshold"
                 icon: "gradient"
                 text: Translation.tr("Terminal: Harmonize threshold")
                 value: Config.options?.appearance?.wallpaperTheming?.terminalGenerationProps?.harmonizeThreshold ?? 100
@@ -499,6 +501,7 @@ ContentPage {
                 }
             }
             ConfigSpinBox {
+                configPath: "appearance.wallpaperTheming.terminalGenerationProps.termFgBoost"
                 icon: "format_color_text"
                 text: Translation.tr("Terminal: Foreground boost (%)")
                 value: Math.round((Config.options?.appearance?.wallpaperTheming?.terminalGenerationProps?.termFgBoost ?? 0) * 100)

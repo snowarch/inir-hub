@@ -400,6 +400,7 @@ ContentPage {
 
             // ── Color scheme variant chips ──
             ConfigSelectionArray {
+                configPath: "appearance.palette.type"
                 currentValue: Config.options?.appearance?.palette?.type ?? "auto"
                 onSelected: newValue => {
                     Config.setNestedValue("appearance.palette.type", newValue)
@@ -453,6 +454,7 @@ ContentPage {
             }
 
             ConfigSpinBox {
+                configPath: "appearance.wallpaperTheming.colorStrength"
                 icon: "palette"
                 text: Translation.tr("Wallpaper color strength") + " (%)"
                 value: Math.round((Config.options?.appearance?.wallpaperTheming?.colorStrength ?? 1.0) * 100)
@@ -820,6 +822,7 @@ ContentPage {
 
         SettingsGroup {
             ConfigSwitch {
+                configPath: "background.multiMonitor.enable"
                 buttonIcon: "monitor"
                 text: Translation.tr("Per-monitor wallpapers")
                 checked: Config.options?.background?.multiMonitor?.enable ?? false
@@ -1653,6 +1656,7 @@ ContentPage {
 
                             // Derive theme colors from backdrop
                             ConfigSwitch {
+                                configPath: "appearance.wallpaperTheming.useBackdropForColors"
                                 visible: multiMonitorPanel.backdropEnabled
                                 buttonIcon: "palette"
                                 text: Translation.tr("Derive theme colors from backdrop")
@@ -1741,6 +1745,7 @@ ContentPage {
                     title: Translation.tr("Bar style")
 
                     ConfigSelectionArray {
+                        configPath: "bar.cornerStyle"
                         currentValue: Config.options?.bar?.cornerStyle ?? 0
                         onSelected: newValue => {
                             // HUG mode (0) is incompatible with Angel style — revert to Float
@@ -1785,6 +1790,7 @@ ContentPage {
                     title: Translation.tr("Screen round corner")
 
                     ConfigSelectionArray {
+                        configPath: "appearance.fakeScreenRounding"
                         currentValue: Config.options?.appearance?.fakeScreenRounding ?? 0
                         onSelected: newValue => {
                             Config.setNestedValue("appearance.fakeScreenRounding", newValue)
@@ -1813,6 +1819,7 @@ ContentPage {
                     title: Translation.tr("Wallpaper mode")
 
                     ConfigSelectionArray {
+                        configPath: "background.backdrop.hideWallpaper"
                         currentValue: Config.options?.background?.backdrop?.hideWallpaper ? 1 : 0
                         onSelected: newValue => {
                             Config.setNestedValue("background.backdrop.hideWallpaper", newValue === 1);

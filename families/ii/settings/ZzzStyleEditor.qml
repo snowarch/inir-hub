@@ -83,6 +83,7 @@ ColumnLayout {
     }
 
     ConfigSelectionArray {
+        configPath: "appearance.zzz.shape"
         Layout.fillWidth: true
         currentValue: Config.options?.appearance?.zzz?.shape ?? "square"
         onSelected: (newValue) => {
@@ -103,6 +104,7 @@ ColumnLayout {
     }
 
     ConfigSwitch {
+        configPath: "appearance.zzz.glass"
         Layout.fillWidth: true
         text: Translation.tr("Wallpaper glass")
         checked: Config.options?.appearance?.zzz?.glass ?? true
@@ -133,6 +135,7 @@ ColumnLayout {
         }
 
         ConfigSwitch {
+            configPath: "appearance.zzz.backdrop.burst"
             Layout.fillWidth: true
             text: Translation.tr("Diagonal burst")
             checked: Config.options?.appearance?.zzz?.backdrop?.burst ?? true
@@ -140,6 +143,7 @@ ColumnLayout {
         }
 
         ConfigSwitch {
+            configPath: "appearance.zzz.backdrop.ghost"
             Layout.fillWidth: true
             text: Translation.tr("Ghost wordmark")
             checked: Config.options?.appearance?.zzz?.backdrop?.ghost ?? true
@@ -147,6 +151,7 @@ ColumnLayout {
         }
 
         ConfigSwitch {
+            configPath: "appearance.zzz.backdrop.grid"
             Layout.fillWidth: true
             text: Translation.tr("Technical grid")
             checked: Config.options?.appearance?.zzz?.backdrop?.grid ?? true
@@ -154,6 +159,7 @@ ColumnLayout {
         }
 
         ConfigSwitch {
+            configPath: "appearance.zzz.backdrop.ticks"
             Layout.fillWidth: true
             text: Translation.tr("Scan ticks")
             checked: Config.options?.appearance?.zzz?.backdrop?.ticks ?? true

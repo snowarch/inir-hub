@@ -70,6 +70,7 @@ ContentPage {
             ConfigRow {
                 enabled: Config.options?.audio?.protection?.enable ?? false
                 ConfigSpinBox {
+                    configPath: "audio.protection.maxAllowedIncrease"
                     icon: "arrow_warm_up"
                     text: Translation.tr("Max allowed increase")
                     value: Config.options?.audio?.protection?.maxAllowedIncrease ?? 0
@@ -84,6 +85,7 @@ ContentPage {
                     }
                 }
                 ConfigSpinBox {
+                    configPath: "audio.protection.maxAllowed"
                     icon: "vertical_align_top"
                     text: Translation.tr("Volume limit")
                     value: Config.options?.audio?.protection?.maxAllowed ?? 0
@@ -116,6 +118,7 @@ ContentPage {
             ConfigRow {
                 uniform: true
                 ConfigSpinBox {
+                    configPath: "battery.low"
                     icon: "warning"
                     text: Translation.tr("Low warning")
                     value: Config.options?.battery?.low ?? 0
@@ -130,6 +133,7 @@ ContentPage {
                     }
                 }
                 ConfigSpinBox {
+                    configPath: "battery.critical"
                     icon: "dangerous"
                     text: Translation.tr("Critical warning")
                     value: Config.options?.battery?.critical ?? 0
@@ -162,6 +166,7 @@ ContentPage {
                     }
                 }
                 ConfigSpinBox {
+                    configPath: "battery.suspend"
                     enabled: Config.options?.battery?.automaticSuspend ?? false
                     text: Translation.tr("at")
                     value: Config.options?.battery?.suspend ?? 0
@@ -182,6 +187,7 @@ ContentPage {
             ConfigRow {
                 uniform: true
                 ConfigSpinBox {
+                    configPath: "battery.full"
                     icon: "charger"
                     text: Translation.tr("Full warning")
                     value: Config.options?.battery?.full ?? 0
@@ -218,6 +224,7 @@ ContentPage {
                     }
                 }
                 ConfigSpinBox {
+                    configPath: "battery.chargeLimit.threshold"
                     property bool _ready: false
                     visible: Battery.chargeLimitAdjustable
                     enabled: (Config.options?.battery?.chargeLimit?.enable ?? false) && Battery.chargeLimitAdjustable
@@ -269,6 +276,7 @@ ContentPage {
                 tooltip: Translation.tr("Select the language for the user interface.\n\"Auto\" will use your system's locale.")
 
                 ConfigSelectionArray {
+                    configPath: "language.ui"
                     id: languageSelector
                     currentValue: Config.options?.language?.ui ?? "auto"
                     onSelected: newValue => {
@@ -338,6 +346,7 @@ ContentPage {
                     title: Translation.tr("AI")
                     tooltip: Translation.tr("Control AI features availability")
                     ConfigSelectionArray {
+                        configPath: "policies.ai"
                         currentValue: Config.options?.policies?.ai ?? 0
                         onSelected: newValue => {
                             Config.setNestedValue("policies.ai", newValue);
@@ -354,6 +363,7 @@ ContentPage {
                     title: Translation.tr("Weeb")
                     tooltip: Translation.tr("Control anime content visibility")
                     ConfigSelectionArray {
+                        configPath: "policies.weeb"
                         currentValue: Config.options?.policies?.weeb ?? 0
                         onSelected: newValue => {
                             Config.setNestedValue("policies.weeb", newValue);
@@ -522,6 +532,7 @@ ContentPage {
                 tooltip: Translation.tr("Choose between 12-hour and 24-hour clock formats")
 
                 ConfigSelectionArray {
+                    configPath: "time.format"
                     currentValue: Config.options?.time?.format ?? "hh:mm"
                     onSelected: newValue => {
                         Config.setNestedValue("time.format", newValue);
@@ -762,6 +773,7 @@ ContentPage {
             SettingsDivider {}
 
             ConfigSpinBox {
+                configPath: "bootGreeting.autoDismissDelay"
                 enabled: Config.options?.bootGreeting?.enable ?? true
                 icon: "timer"
                 text: Translation.tr("Auto-dismiss delay (ms)")
@@ -897,6 +909,7 @@ ContentPage {
                 }
 
                 ConfigSpinBox {
+                    configPath: "lock.notifications.maxCount"
                     visible: Config.options?.lock?.notifications?.enable ?? false
                     icon: "format_list_numbered"
                     text: Translation.tr("Max notifications shown")
@@ -919,6 +932,7 @@ ContentPage {
                 tooltip: Translation.tr("Auto centres on Material, right-aligns on Waffle.")
 
                 ConfigSelectionArray {
+                    configPath: "lock.notifications.position"
                     currentValue: Config.options?.lock?.notifications?.position ?? "auto"
                     options: [
                         { displayName: Translation.tr("Auto"), value: "auto" },
@@ -935,6 +949,7 @@ ContentPage {
                 tooltip: Translation.tr("Visual style for the lock screen clock")
 
                 ConfigSelectionArray {
+                    configPath: "lock.clock.style"
                     currentValue: Config.options?.lock?.clock?.style ?? "default"
                     options: [
                         { displayName: Translation.tr("Default"), value: "default" },
@@ -950,6 +965,7 @@ ContentPage {
                 tooltip: Translation.tr("Where the clock appears on the lock screen")
 
                 ConfigSelectionArray {
+                    configPath: "lock.clock.position"
                     currentValue: Config.options?.lock?.clock?.position ?? "center"
                     options: [
                         { displayName: Translation.tr("Center"), value: "center" },
@@ -988,6 +1004,7 @@ ContentPage {
                 }
 
                 ConfigSpinBox {
+                    configPath: "lock.dim.opacity"
                     visible: Config.options?.lock?.dim?.enable ?? false
                     text: Translation.tr("Dim amount")
                     icon: "opacity"
@@ -1095,6 +1112,7 @@ ContentPage {
                 }
 
                 ConfigSpinBox {
+                    configPath: "lock.blur.radius"
                     icon: "blur_linear"
                     text: Translation.tr("Blur radius")
                     value: Config.options?.lock?.blur?.radius ?? 100
@@ -1110,6 +1128,7 @@ ContentPage {
                 }
 
                 ConfigSpinBox {
+                    configPath: "lock.blur.extraZoom"
                     icon: "loupe"
                     text: Translation.tr("Extra wallpaper zoom (%)")
                     value: (Config.options?.lock?.blur?.extraZoom ?? 1.1) * 100
@@ -1131,6 +1150,7 @@ ContentPage {
                 tooltip: Translation.tr("Where you sign in after starting the computer. Automatic shows iRiS while you use iRiS.")
 
                 ConfigSelectionArray {
+                    configPath: "lock.loginScreen"
                     currentValue: Config.options?.lock?.loginScreen ?? "auto"
                     options: [
                         { displayName: Translation.tr("Automatic"), icon: "auto_awesome", value: "auto" },
@@ -1149,6 +1169,7 @@ ContentPage {
                 tooltip: Translation.tr("Cover shows your picture sharp, Frame hangs it in a mat, Lens cuts the time out of it.")
 
                 ConfigSelectionArray {
+                    configPath: "lock.loginStyle"
                     currentValue: Config.options?.lock?.loginStyle ?? "lens"
                     options: [
                         { displayName: Translation.tr("Cover"), icon: "image", value: "cover" },

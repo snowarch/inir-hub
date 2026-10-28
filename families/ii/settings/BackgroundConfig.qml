@@ -181,6 +181,7 @@ ContentPage {
             }
 
             ConfigSpinBox {
+                configPath: "background.parallax.workspaceShift"
                 icon: "north"
                 text: Translation.tr("Workspace travel (%)")
                 value: Math.round((root.iiParallax.workspaceShift ?? 1) * 100)
@@ -192,6 +193,7 @@ ContentPage {
             }
 
             ConfigSpinBox {
+                configPath: "background.parallax.panelShift"
                 icon: "left_panel_open"
                 text: Translation.tr("Sidebar travel (%)")
                 value: Math.round((root.iiParallax.panelShift ?? root.iiParallax.sidebarShift ?? 0.15) * 100)
@@ -225,6 +227,7 @@ ContentPage {
             }
 
             ConfigSpinBox {
+                configPath: "background.parallax.transitionSettleMs"
                 icon: "timer"
                 text: Translation.tr("Transition settle (ms)")
                 value: root.iiParallax.transitionSettleMs ?? 220
@@ -1078,6 +1081,7 @@ ContentPage {
 
                             // Derive theme colors from backdrop
                             ConfigSwitch {
+                                configPath: "appearance.wallpaperTheming.useBackdropForColors"
                                 visible: Config.options?.background?.backdrop?.enable ?? true
                                 buttonIcon: "palette"
                                 text: Translation.tr("Derive theme colors from backdrop")
@@ -1131,6 +1135,7 @@ ContentPage {
 
         SettingsGroup {
             ConfigSelectionArray {
+                configPath: "background.backend.provider"
                 currentValue: Config.options?.background?.backend?.provider ?? "awww"
                 options: [
                     { displayName: Translation.tr("Standard"), icon: "image", value: "awww" },
@@ -1157,6 +1162,7 @@ ContentPage {
             }
 
             ConfigSpinBox {
+                configPath: "background.backend.awww.transitionFps"
                 visible: (Config.options?.background?.backend?.provider ?? "awww") === "awww" && AwwwBackend.available
                 icon: "speed"
                 text: Translation.tr("awww transition FPS")
@@ -1172,6 +1178,7 @@ ContentPage {
                 uniform: true
 
                 ConfigSpinBox {
+                    configPath: "background.backend.awww.simpleStep"
                     icon: "blur_on"
                     text: Translation.tr("Simple step")
                     value: Config.options?.background?.backend?.awww?.simpleStep ?? 5
@@ -1182,6 +1189,7 @@ ContentPage {
                 }
 
                 ConfigSpinBox {
+                    configPath: "background.backend.awww.spatialStep"
                     icon: "swipe"
                     text: Translation.tr("Spatial step")
                     value: Config.options?.background?.backend?.awww?.spatialStep ?? 30
@@ -1288,6 +1296,7 @@ ContentPage {
             }
 
             ConfigSpinBox {
+                configPath: "background.autoWallpaper.intervalMinutes"
                 enabled: Config.options?.background?.autoWallpaper?.enable ?? false
                 icon: "timer"
                 text: Translation.tr("Change every") + ` (${value} ${value === 1 ? Translation.tr("minute") : Translation.tr("minutes")})`
@@ -1409,6 +1418,7 @@ ContentPage {
                 }
 
                 ConfigSelectionArray {
+                    configPath: "background.transition.type"
                     currentValue: {
                         const raw = Config.options?.background?.transition?.type ?? "crossfade"
                         return AwwwBackend.isInternalShaderTransitionType(raw)
@@ -1483,6 +1493,7 @@ ContentPage {
                 }
 
                 ConfigSelectionArray {
+                    configPath: "background.transition.direction"
                     currentValue: Config.options?.background?.transition?.direction ?? "right"
                     onSelected: newValue => {
                         Config.setNestedValue("background.transition.direction", newValue);
@@ -1497,6 +1508,7 @@ ContentPage {
             }
 
             ConfigSpinBox {
+                configPath: "background.transition.duration"
                 visible: {
                     if (!(Config.options?.background?.transition?.enable ?? true))
                         return false
@@ -1540,6 +1552,7 @@ ContentPage {
             ContentSubsection {
                 title: Translation.tr("Fill crops, Fit shows bars, Span lays one picture across every screen")
                 ConfigSelectionArray {
+                    configPath: "background.fillMode"
                     currentValue: Config.options?.background?.fillMode ?? "fill"
                     onSelected: newValue => {
                         Config.setNestedValue("background.fillMode", newValue);
@@ -1925,6 +1938,7 @@ ContentPage {
             }
 
             ConfigSpinBox {
+                configPath: "background.effects.blurRadius"
                 visible: Config.options?.background?.effects?.enableBlur ?? false
                 icon: "blur_medium"
                 text: Translation.tr("Blur radius")
@@ -1941,6 +1955,7 @@ ContentPage {
             }
 
             ConfigSpinBox {
+                configPath: "background.effects.thumbnailBlurStrength"
                 visible: Config.options?.background?.effects?.enableBlur ?? false
                 icon: "blur_circular"
                 text: Translation.tr("Thumbnail blur strength (%)")
@@ -1957,6 +1972,7 @@ ContentPage {
             }
 
             ConfigSpinBox {
+                configPath: "background.effects.dim"
                 icon: "brightness_6"
                 text: Translation.tr("Dim overlay (%)")
                 value: Config.options?.background?.effects?.dim ?? 0
@@ -1975,6 +1991,7 @@ ContentPage {
             }
 
             ConfigSpinBox {
+                configPath: "background.effects.dynamicDim"
                 icon: "brightness_low"
                 text: Translation.tr("Extra dim when windows (%)")
                 value: Config.options?.background?.effects?.dynamicDim ?? 0
@@ -2066,6 +2083,7 @@ ContentPage {
                     SettingsDivider {}
 
                     ConfigSpinBox {
+                        configPath: "background.effects.ripple.rippleDuration"
                         icon: "schedule"
                         text: Translation.tr("Animation duration (ms)")
                         value: Config.options?.background?.effects?.ripple?.rippleDuration ?? 3000
@@ -2091,6 +2109,7 @@ ContentPage {
                     }
 
                     ConfigSpinBox {
+                        configPath: "background.effects.ripple.sparkleIntensity"
                         icon: "auto_awesome"
                         text: Translation.tr("Sparkle intensity")
                         value: Math.round((Config.options?.background?.effects?.ripple?.sparkleIntensity ?? 1.0) * 100)
@@ -2106,6 +2125,7 @@ ContentPage {
                     }
 
                     ConfigSpinBox {
+                        configPath: "background.effects.ripple.glowIntensity"
                         icon: "flare"
                         text: Translation.tr("Glow intensity")
                         value: Math.round((Config.options?.background?.effects?.ripple?.glowIntensity ?? 1.0) * 100)
@@ -2121,6 +2141,7 @@ ContentPage {
                     }
 
                     ConfigSpinBox {
+                        configPath: "background.effects.ripple.ringWidth"
                         icon: "radio_button_checked"
                         text: Translation.tr("Ring width")
                         value: Math.round((Config.options?.background?.effects?.ripple?.ringWidth ?? 0.15) * 100)
@@ -2209,6 +2230,7 @@ ContentPage {
                 }
 
                 ConfigSpinBox {
+                    configPath: "background.backdrop.auroraOverlayOpacity"
                     visible: (Config.options?.background?.backdrop?.enable ?? true) && (Config.options?.background?.backdrop?.useAuroraStyle ?? false)
                     icon: "opacity"
                     text: Translation.tr("Aurora overlay opacity (%)")
@@ -2277,6 +2299,7 @@ ContentPage {
                 }
 
                 ConfigSpinBox {
+                    configPath: "background.backdrop.blurRadius"
                     visible: Config.options?.background?.backdrop?.enable ?? true
                     icon: "blur_on"
                     text: Translation.tr("Backdrop blur radius")
@@ -2293,6 +2316,7 @@ ContentPage {
                 }
 
                 ConfigSpinBox {
+                    configPath: "background.backdrop.dim"
                     visible: Config.options?.background?.backdrop?.enable ?? true
                     icon: "brightness_5"
                     text: Translation.tr("Backdrop dim (%)")
@@ -2309,6 +2333,7 @@ ContentPage {
                 }
 
                 ConfigSpinBox {
+                    configPath: "background.backdrop.saturation"
                     visible: Config.options?.background?.backdrop?.enable ?? true
                     icon: "palette"
                     text: Translation.tr("Backdrop saturation")
@@ -2325,6 +2350,7 @@ ContentPage {
                 }
 
                 ConfigSpinBox {
+                    configPath: "background.backdrop.contrast"
                     visible: Config.options?.background?.backdrop?.enable ?? true
                     icon: "contrast"
                     text: Translation.tr("Backdrop contrast")
@@ -2357,6 +2383,7 @@ ContentPage {
                 }
 
                 ConfigSpinBox {
+                    configPath: "background.backdrop.vignetteIntensity"
                     visible: (Config.options?.background?.backdrop?.enable ?? true) && (Config.options?.background?.backdrop?.vignetteEnabled ?? false)
                     icon: "blur_circular"
                     text: Translation.tr("Vignette intensity")
@@ -2373,6 +2400,7 @@ ContentPage {
                 }
 
                 ConfigSpinBox {
+                    configPath: "background.backdrop.vignetteRadius"
                     visible: (Config.options?.background?.backdrop?.enable ?? true) && (Config.options?.background?.backdrop?.vignetteEnabled ?? false)
                     icon: "trip_origin"
                     text: Translation.tr("Vignette radius")

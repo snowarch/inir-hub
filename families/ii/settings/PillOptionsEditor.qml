@@ -277,6 +277,7 @@ ColumnLayout {
             font.weight: Font.Medium
         }
         ConfigSelectionArray {
+            configPath: "bar.pill.superSpaceLauncher"
             Layout.fillWidth: true
             currentValue: Config.options?.bar?.pill?.superSpaceLauncher ?? "overview"
             onSelected: (newValue) => Config.setNestedValue("bar.pill.superSpaceLauncher", newValue)
@@ -294,6 +295,7 @@ ColumnLayout {
             font.weight: Font.Medium
         }
         ConfigSelectionArray {
+            configPath: "bar.pill.mediaAccess"
             Layout.fillWidth: true
             currentValue: (Config.options?.bar?.pill?.mediaAccess ?? "row") === "bud" ? "bud" : "row"
             onSelected: (newValue) => Config.setNestedValue("bar.pill.mediaAccess", newValue)
@@ -327,6 +329,7 @@ ColumnLayout {
         title: Translation.tr("Size & readability")
 
         ConfigSpinBox {
+            configPath: "bar.pill.scale"
             icon: "zoom_in"
             text: Translation.tr("Scale (%)")
             value: Math.round((Config.options?.bar?.pill?.scale ?? 1) * 100)
@@ -347,6 +350,7 @@ ColumnLayout {
         ConfigRow {
             uniform: true
             ConfigSpinBox {
+                configPath: "bar.pill.iconSize"
                 icon: "pinch"
                 text: Translation.tr("Icon size (px)")
                 value: Config.options?.bar?.pill?.iconSize ?? 19
@@ -356,6 +360,7 @@ ColumnLayout {
                 onValueChanged: Config.setNestedValue("bar.pill.iconSize", value)
             }
             ConfigSpinBox {
+                configPath: "bar.pill.iconSpacing"
                 icon: "space_bar"
                 text: Translation.tr("Icon spacing (px)")
                 value: Config.options?.bar?.pill?.iconSpacing ?? 14
@@ -367,6 +372,7 @@ ColumnLayout {
         }
 
         ConfigSpinBox {
+            configPath: "bar.pill.rowSpacing"
             icon: "format_letter_spacing"
             text: Translation.tr("Group spacing (px)")
             value: Config.options?.bar?.pill?.rowSpacing ?? 24
@@ -379,6 +385,7 @@ ColumnLayout {
         ConfigRow {
             uniform: true
             ConfigSpinBox {
+                configPath: "bar.pill.restWidth"
                 icon: "width"
                 text: Translation.tr("Rest width (px)")
                 value: Config.options?.bar?.pill?.restWidth ?? 176
@@ -388,6 +395,7 @@ ColumnLayout {
                 onValueChanged: Config.setNestedValue("bar.pill.restWidth", value)
             }
             ConfigSpinBox {
+                configPath: "bar.pill.restHeight"
                 icon: "height"
                 text: Translation.tr("Rest height (px)")
                 value: Config.options?.bar?.pill?.restHeight ?? 44
@@ -399,6 +407,7 @@ ColumnLayout {
         }
 
         ConfigSpinBox {
+            configPath: "bar.pill.expandedHeight"
             icon: "unfold_more"
             text: Translation.tr("Expanded height (px)")
             value: Config.options?.bar?.pill?.expandedHeight ?? 66
@@ -478,6 +487,7 @@ ColumnLayout {
             visible: Config.options?.bar?.pill?.modules?.battery ?? true
         }
         ConfigSelectionArray {
+            configPath: "bar.pill.batteryDisplay"
             Layout.fillWidth: true
             visible: Config.options?.bar?.pill?.modules?.battery ?? true
             currentValue: Config.options?.bar?.pill?.batteryDisplay ?? "both"
@@ -591,6 +601,7 @@ ColumnLayout {
         ConfigRow {
             uniform: true
             ConfigSpinBox {
+                configPath: "bar.pill.topGap"
                 icon: "vertical_align_top"
                 text: Translation.tr("Top gap (px)")
                 value: Math.round((Config.options?.bar?.pill?.topGap ?? 1) * 8)
@@ -600,6 +611,7 @@ ColumnLayout {
                 onValueChanged: Config.setNestedValue("bar.pill.topGap", value / 8)
             }
             ConfigSpinBox {
+                configPath: "bar.pill.appGap"
                 icon: "expand"
                 text: Translation.tr("Window gap (%)")
                 enabled: !(Config.options?.bar?.pill?.floatOverWindows ?? false)
@@ -613,6 +625,7 @@ ColumnLayout {
             }
         }
         ConfigSpinBox {
+            configPath: "bar.pill.mixerAppRows"
             icon: "format_list_numbered"
             text: Translation.tr("Visible app faders")
             value: Config.options?.bar?.pill?.mixerAppRows ?? 5
@@ -631,6 +644,7 @@ ColumnLayout {
                 onCheckedChanged: Config.setNestedValue("bar.pill.soul.enable", checked)
             }
             ConfigSpinBox {
+                configPath: "bar.pill.soul.size"
                 icon: "zoom_in"
                 text: Translation.tr("Bead size (%)")
                 value: Math.round((Config.options?.bar?.pill?.soul?.size ?? 1) * 100)
@@ -642,6 +656,7 @@ ColumnLayout {
         }
 
         ConfigSelectionArray {
+            configPath: "bar.pill.soul.style"
             Layout.fillWidth: true
             currentValue: Config.options?.bar?.pill?.soul?.style ?? "orb"
             onSelected: (newValue) => Config.setNestedValue("bar.pill.soul.style", newValue)

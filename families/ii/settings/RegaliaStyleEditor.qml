@@ -145,6 +145,7 @@ ColumnLayout {
         title: Translation.tr("Glass")
 
         ConfigSwitch {
+            configPath: "appearance.regalia.glass"
             buttonIcon: "blur_on"
             text: Translation.tr("Wallpaper glass")
             checked: Config.options?.appearance?.regalia?.glass ?? true

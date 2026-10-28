@@ -81,6 +81,7 @@ ContentPage {
                 title: Translation.tr("Edge")
 
                 ConfigSelectionArray {
+                    configPath: "workspaceStrip.side"
                     currentValue: Config.options?.workspaceStrip?.side ?? "right"
                     onSelected: value => Config.setNestedValue("workspaceStrip.side", value)
                     options: [
@@ -94,6 +95,7 @@ ContentPage {
                 title: Translation.tr("Look")
 
                 ConfigSelectionArray {
+                    configPath: "workspaceStrip.style"
                     currentValue: Config.options?.workspaceStrip?.style ?? "auto"
                     onSelected: value => Config.setNestedValue("workspaceStrip.style", value)
                     options: [
@@ -117,6 +119,7 @@ ContentPage {
                 // One spinbox per row: stacked three-up they collide because each
                 // ConfigSpinBox already carries its own label + control.
                 ConfigSpinBox {
+                    configPath: "workspaceStrip.panelWidth"
                     Layout.fillWidth: true
                     icon: "width"
                     text: Translation.tr("Panel width")
@@ -131,6 +134,7 @@ ContentPage {
                 }
 
                 ConfigSpinBox {
+                    configPath: "workspaceStrip.previewSize"
                     Layout.fillWidth: true
                     icon: "photo_size_select_large"
                     text: Translation.tr("Preview size")
@@ -145,6 +149,7 @@ ContentPage {
                 }
 
                 ConfigSpinBox {
+                    configPath: "workspaceStrip.triggerWidth"
                     Layout.fillWidth: true
                     icon: "swipe"
                     text: Translation.tr("Trigger width")
@@ -163,6 +168,7 @@ ContentPage {
                 title: Translation.tr("Hover timing")
 
                 ConfigSpinBox {
+                    configPath: "workspaceStrip.openDelay"
                     Layout.fillWidth: true
                     icon: "timer"
                     text: Translation.tr("Open delay")
@@ -175,6 +181,7 @@ ContentPage {
                 }
 
                 ConfigSpinBox {
+                    configPath: "workspaceStrip.closeDelay"
                     Layout.fillWidth: true
                     icon: "timer_off"
                     text: Translation.tr("Close delay")
@@ -191,6 +198,7 @@ ContentPage {
                 title: Translation.tr("Navigation")
 
                 ConfigSwitch {
+                    configPath: "workspaceStrip.scrollNavigation"
                     text: Translation.tr("Scroll to navigate")
                     description: Translation.tr("Use the mouse wheel over the strip to move between workspaces instead of scrolling the thumbnail list")
                     checked: Config.options?.workspaceStrip?.scrollNavigation ?? false
@@ -198,6 +206,7 @@ ContentPage {
                 }
 
                 ConfigSwitch {
+                    configPath: "workspaceStrip.scrollNavigationSwitchWorkspace"
                     enabled: Config.options?.workspaceStrip?.scrollNavigation ?? false
                     text: Translation.tr("Switch workspace on scroll")
                     description: Translation.tr("Also focus the workspace in the compositor when scrolling through the strip")
@@ -206,6 +215,7 @@ ContentPage {
                 }
 
                 ConfigSpinBox {
+                    configPath: "workspaceStrip.scrollNavigationDebounceMs"
                     Layout.fillWidth: true
                     enabled: Config.options?.workspaceStrip?.scrollNavigation ?? false
                     icon: "speed"
@@ -236,6 +246,7 @@ ContentPage {
 
         SettingsGroup {
             ConfigSwitch {
+                configPath: "workspaceStrip.showPreviews"
                 text: Translation.tr("Window previews")
                 description: Translation.tr("Live preview for the active workspace and refreshed snapshots for hidden workspaces")
                 checked: Config.options?.workspaceStrip?.showPreviews ?? true
@@ -243,6 +254,7 @@ ContentPage {
             }
 
             ConfigSwitch {
+                configPath: "workspaceStrip.showMetadata"
                 text: Translation.tr("Window metadata")
                 description: Translation.tr("Show workspace name, focused window title and window count")
                 checked: Config.options?.workspaceStrip?.showMetadata ?? true
@@ -250,6 +262,7 @@ ContentPage {
             }
 
             ConfigSwitch {
+                configPath: "workspaceStrip.showAppIcons"
                 text: Translation.tr("App icons")
                 description: Translation.tr("Show icons for open applications on the selected workspace card")
                 checked: Config.options?.workspaceStrip?.showAppIcons ?? true
@@ -257,6 +270,7 @@ ContentPage {
             }
 
             ConfigSwitch {
+                configPath: "workspaceStrip.showMediaPlayer"
                 text: Translation.tr("Now-playing player")
                 description: Translation.tr("Add a media card at the top of the strip with playback controls when music is playing")
                 checked: Config.options?.workspaceStrip?.showMediaPlayer ?? true
@@ -264,6 +278,7 @@ ContentPage {
             }
 
             ConfigSwitch {
+                configPath: "workspaceStrip.perMonitor"
                 text: Translation.tr("Per-monitor workspaces")
                 description: CompositorService.isNiri
                     ? Translation.tr("Each screen shows only its own Niri workspaces")
