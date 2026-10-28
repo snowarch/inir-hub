@@ -445,19 +445,24 @@ Scope {
     }
 
     // IPC handler reached via the global altSwitcher router in AltSwitcher.qml
+    /// Waffle Alt+Tab window switcher. Separate from the ii `altSwitcher`, supports quick-switch (first tab switches
+    /// instantly, second opens UI) and no-visual-UI mode.
     IpcHandler {
         target: "waffleAltSwitcher"
 
+        /// Open switcher
         function open(): void {
             if (!WaffleState.altSwitcherOpen) {
                 root.openSwitcher()
             }
         }
 
+        /// Close switcher
         function close(): void {
             root.closeSwitcher()
         }
 
+        /// Toggle switcher
         function toggle(): void {
             if (WaffleState.altSwitcherOpen) {
                 root.closeSwitcher()
@@ -466,6 +471,7 @@ Scope {
             }
         }
 
+        /// Focus next window
         function next(): void {
             if (root.getNoVisualUi()) {
                 autoHideTimer.stop()
@@ -521,6 +527,7 @@ Scope {
             root.activateCurrent()
         }
 
+        /// Focus previous window
         function previous(): void {
             if (root.getNoVisualUi()) {
                 autoHideTimer.stop()

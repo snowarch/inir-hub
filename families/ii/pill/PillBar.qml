@@ -107,17 +107,28 @@ Scope {
      * Same surface ladder the hover icons use, reachable from keybinds and the
      * CLI. The target only registers while the pill bar is the active bar style.
      */
+    /// The pill bar's morphing surfaces (only registered while Bar appearance is set to Pill). Valid surface names:
+    /// `power`, `media`, `battery`, `calendar`, `link`, `mixer`, `sysmon`, `clipboard`, `glance`, `launcher`,
+    /// `recorder`.
+    ///
+    /// ```kdl
+    /// Super+V repeat=false { spawn "inir" "pill" "toggle" "clipboard"; }
+    /// ```
     IpcHandler {
         target: "pill"
 
+        /// Open a surface by name on the focused monitor
         function open(surface: string): void { root.openSurfaceByName(surface) }
+        /// Close the open surface
         function close(): void { root.close() }
+        /// Open a surface, or close it if already open
         function toggle(surface: string): void {
             if (root.openSurface === surface)
                 root.close();
             else
                 root.openSurfaceByName(surface);
         }
+        /// Print the open surface name, or `closed`
         function state(): string { return root.openSurface.length > 0 ? root.openSurface : "closed" }
     }
 

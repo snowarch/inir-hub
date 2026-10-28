@@ -61,16 +61,34 @@ Scope {
         }
     }
 
+    /// iRiS bar and Island design. Available while the iRiS bar is enabled.
+    ///
+    /// ```bash
+    /// inir iris open
+    /// inir iris page desktop
+    /// inir iris toggle
+    /// inir iris dock toggle
+    /// inir iris card toggle
+    /// inir iris bubble right top-right
+    /// inir iris appBubble kitty top-right
+    /// inir iris pin right
+    /// inir iris status
+    /// inir iris close
+    /// ```
     IpcHandler {
         target: "iris"
+        /// Expand the island on the focused output
         function open(): void { GlobalStates.barOpen = true; root.islandRequested(true, "") }
+        /// Expand the island on a page: `media`, `activity`, `desktop`, `tray` or `tools`, or step through its
+        /// navigation with `next` / `prev` (the same path as scrolling over the navigation row)
         function page(name: string): void {
             if (!["media", "activity", "desktop", "shelf", "weather", "calendar", "vitals", "tray", "tools", "next", "prev"].includes(name)) return
             GlobalStates.barOpen = true
             root.islandRequested(true, name)
         }
+        /// Collapse the island
         function close(): void { root.islandRequested(false, "") }
-        // The Shelf page: open, close or toggle (open on another page counts as closed).
+        /// `open`, `close` or `toggle` the Island's Shelf page (open on another page counts as closed)
         function shelf(action: string): string {
             if (!["open", "close", "toggle"].includes(action)) return "shelf takes open, close or toggle"
             if (action === "close") { root.islandRequested(false, ""); return "closed" }
@@ -78,10 +96,12 @@ Scope {
             root.islandRequested(true, action === "toggle" ? "shelf:toggle" : "shelf")
             return action
         }
+        /// Expand or collapse the island on the focused output
         function toggle(): void {
             if (IrisState.islandExpanded) root.islandRequested(false, "")
             else { GlobalStates.barOpen = true; root.islandRequested(true, "") }
         }
+        /// `open`, `close` or `toggle` the media bubble's floating card, or `pin` to keep it open
         function card(action: string): void {
             if (action === "pin") {
                 Config.setNestedValue("iris.player.cardPinned", !(Config.options?.iris?.player?.cardPinned ?? false))
@@ -93,6 +113,9 @@ Scope {
             IrisState.bubbleCardRequest = ""
             IrisState.bubbleCardRequest = "media"
         }
+        /// iRiS themes, each a whole redesign of the family: `list`, `apply:<id>`, `save:<name>` (what you see now
+        /// becomes a theme file), `import:<path>` (a shared `.json`), `export` or `export:<id>` (prints the theme as
+        /// JSON to share) and `folder` (where theme files live, `~/.config/inir/iris/themes`)
         function theme(action: string): string {
             const verb = String(action).split(":")[0]
             const arg = String(action).slice(verb.length + 1)
@@ -128,6 +151,12 @@ Scope {
                 return "list | apply:<id> | colours:<id> | save:<name> | import:<path> | export[:<id>] | folder"
             }
         }
+        /// Open iRiS Settings on a section: `general`, `appearance`, `motion`, `bar`, `bubbles`, `dock`, `desktop`,
+        /// `windows`, `sidebars`, `controlCenter`, `spotlight`, `orbit`, `notifications`, `sound`, `capture`,
+        /// `display`, `keyboard`, `battery`, `gaming`, `lock`, `player`, `anime`, `sources` or `system`; add
+        /// `/<group>` to open that group, e.g. `bubbles/behaviour` or `lock/security`. It also takes `next`, `prev`,
+        /// `back`, `forward` (the history), `search:<words>` and `open` (the first result), and `tune:open` /
+        /// `tune:close` (every Fine-tune fold on the page)
         function settings(section: string): string {
             // An area for hardware this computer lacks is not in Settings: opening it fell to General without a word.
             if (section.split("/")[0] === "battery" && !Battery.available) {
@@ -138,11 +167,17 @@ Scope {
             return ""
         }
         // Closes iRiS Settings in either host (over the desktop or a window); does nothing when it is closed.
+        /// Close iRiS Settings in either host, over the desktop or as a window; a bare `inir settings` is a toggle
         function settingsClose(): string {
             const was = GlobalStates.settingsOverlayOpen
             GlobalStates.settingsOverlayOpen = false
             return was ? "closed" : "already closed"
         }
+        /// Place an Island bubble (`left`, `right`, `utility`) or an extra bubble (`weather`, `notifications`,
+        /// `controls`, `sound`, `mic`, `tools`, `media`, `visualizer`, `tray`): a zone (`top-left`, `top-right`,
+        /// `left`, `right`, `bottom-left`, `bottom-right`), `edge:<top|bottom|left|right>` with an optional
+        /// `:<fraction>` along that edge (e.g. `edge:top:0.3`), `x,y` fractions of the output, `island` (slots) or
+        /// `off` (extras)
         function bubble(slot: string, place: string): string {
             const extra = IrisPieces.extraIds.includes(slot)
             if (!extra && !IrisPieces.slotIds.includes(slot)) return "Unknown bubble"
@@ -169,9 +204,12 @@ Scope {
             Config.setNestedValues(updates)
             return place
         }
+        /// `reveal`, `hide` or `toggle` the iRiS Dock (revealed stays until hidden or an app is chosen)
         function dock(action: string): void {
             IrisState.dockShown = action === "reveal" ? true : action === "hide" ? false : !IrisState.dockShown
         }
+        /// Open a Dock app's `windows` or `menu` by app id (e.g. `kitty windows`), `pin` to keep it in the Dock or
+        /// unpin it (prints which), or `<any> close`
         function dockApp(appId: string, mode: string): string {
             if (mode === "close") { IrisState.dockMenuRequest = { appId: "", mode: "close" }; IrisState.dockShown = false; return "closed" }
             if (mode === "pin") {
@@ -184,6 +222,8 @@ Scope {
             return appId
         }
         // `position` counts the Dock's icons from 1, the separator included: landing before it pins, after it unpins.
+        /// Move a Dock app to a position, counting icons from 1 with the separator between pinned and open apps (e.g.
+        /// `firefox 2`): before the separator pins it, after it lines it up among the open apps
         function dockMove(appId: string, position: int): string {
             const ids = IrisDockOrder.entries.map(entry => entry.appId)
             const id = appId.toLowerCase()
@@ -193,6 +233,8 @@ Scope {
             if (!IrisDockOrder.drop(id, rest)) return "Stays where it was: a pinned app with no window has no place among the open ones"
             return rest.join(" ")
         }
+        /// Carry a Dock app out as a bubble of its own (e.g. `kitty right`): a zone, `x,y` fractions of the output,
+        /// or `dock` to send it back
         function appBubble(appId: string, place: string): string {
             if (appId.length === 0) return "Unknown app"
             if (place === "dock" || place === "off") { IrisPieces.removeApp(appId); return "docked" }
@@ -204,6 +246,7 @@ Scope {
         }
         // The side panels and the Control Center by their iRiS names (the same paths as sidebarLeft,
         // sidebarRight and controlPanel), for keybinds that read as what they open.
+        /// `open`, `close` or `toggle` the Focus panel (the left one), and say whether it is open
         function focus(action: string): string {
             if (action === "open") GlobalStates.openSidebarLeft("")
             else if (action === "close") GlobalStates.closeSidebarLeft()
@@ -211,6 +254,7 @@ Scope {
             else return "Choose open, close or toggle"
             return GlobalStates.sidebarLeftOpen ? "open" : "closed"
         }
+        /// `open`, `close` or `toggle` the Today panel (the right one), and say whether it is open
         function today(action: string): string {
             if (action === "open") GlobalStates.openSidebarRight("")
             else if (action === "close") GlobalStates.closeSidebarRight()
@@ -218,6 +262,7 @@ Scope {
             else return "Choose open, close or toggle"
             return GlobalStates.sidebarRightOpen ? "open" : "closed"
         }
+        /// `open`, `close` or `toggle` the Control Center, and say whether it is open
         function controlCenter(action: string): string {
             if (action === "open") GlobalStates.controlPanelOpen = true
             else if (action === "close") GlobalStates.controlPanelOpen = false
@@ -225,32 +270,40 @@ Scope {
             else return "Choose open, close or toggle"
             return GlobalStates.controlPanelOpen ? "open" : "closed"
         }
+        /// Keep the `left` (Focus) or `right` (Today) panel open beside windows, or stop
         function pin(side: string): void {
             if (side !== "left" && side !== "right") return
             const path = "iris.sidebars." + side + ".pinned"
             Config.setNestedValue(path, !(Config.getNestedValue(path, false)))
         }
+        /// How the Island sits on its edge: `island`, `left`, `right`, `full` or `menubar` (top or bottom)
         function layout(name: string): string {
             if (!["island", "left", "right", "full", "menubar"].includes(name)) return "Unknown layout: island, left, right, full or menubar"
             Config.setNestedValue("iris.bar.layout", name)
             return name
         }
+        /// What the menu bar lays under its items: `transparent` (on the wallpaper) or `band`
         function strip(name: string): string {
             const value = name === "transparent" ? "clear" : name
             if (!["clear", "band"].includes(value)) return "Unknown strip: transparent or band"
             Config.setNestedValue("iris.bar.strip", value)
             return value === "clear" ? "transparent" : "band"
         }
+        /// Move the Island to a screen edge: `top`, `bottom`, `left` or `right` (on a side edge it rests as an
+        /// upright capsule and its pages grow inward)
         function edge(name: string): string {
             if (!IrisFrame.edges.includes(name)) return "Unknown edge: top, bottom, left or right"
             Config.setNestedValue("iris.bar.position", name)
             return name
         }
+        /// Move the Dock: `auto` (opposite the Island), `top`, `bottom`, `left` or `right`
         function dockEdge(name: string): string {
             if (name !== "auto" && !IrisFrame.edges.includes(name)) return "Unknown edge: auto, top, bottom, left or right"
             Config.setNestedValue("iris.dock.position", name)
             return IrisFrame.dockEdge
         }
+        /// What a full-width Island carries in a zone: `start`, `center` or `end`, then kinds joined by `+`
+        /// (`island`, `workspaces`, `window`, `time` or a piece kind), or `none`
         function zone(name: string, kinds: string): string {
             const path = ({ start: "iris.bar.fullStart", center: "iris.bar.fullCenter", end: "iris.bar.fullEnd" })[name]
             if (!path) return "Unknown zone: start, center or end"
@@ -258,6 +311,8 @@ Scope {
             Config.setNestedValue(path, list)
             return JSON.stringify(list)
         }
+        /// Turn one of the Island's own pieces on or off: `weather`, `notifications`, `controls`, `sound`, `mic`,
+        /// `tools`, `media`, `visualizer` or `tray`, plus `on`, `off` or `toggle`
         function barPiece(kind: string, action: string): string {
             if (!IrisPieces.extraIds.includes(kind)) return "Unknown piece"
             const current = Array.from(Config.options?.iris?.bar?.pieces ?? [])
@@ -269,12 +324,17 @@ Scope {
             Config.setNestedValue("iris.bar.pieces", next)
             return wanted ? "on" : "off"
         }
+        /// Arrange the Island's desktop page in place — move, remove and add its blocks: `on`, `off` or `toggle`
         function arrange(action: string): string {
             const wanted = action === "on" ? true : action === "off" ? false : !IrisState.arrange
             if (wanted) IrisState.islandPageRequest = "desktop"
             IrisState.arrange = wanted
             return wanted ? "on" : "off"
         }
+        /// Customize iRiS on the shell itself: the Island grows a capsule (Themes, Look, Pieces, undo, Done) and
+        /// whatever you click (a piece, the Island, the Dock) grows its own options: `on`, `off`, `toggle`, a sheet
+        /// (`themes`, `pieces`, or a Look tab: `material`, `colour`, `type`, `motion`, `bodies`, `places`,
+        /// `transients`, `desktop`), `island`, `dock` or a piece to inspect (`vitals`, `left`, `app:kitty`)
         function edit(action: string): string {
             if (action.startsWith("tab:")) {
                 const targets = { pieces: "pieces", look: "material", motion: "motion", layout: "island" }
@@ -296,6 +356,9 @@ Scope {
             return wanted ? "on" : "off"
         }
         // `studio <area>` opens Studio on an area, `studio search:<words>` with a search typed.
+        /// Customize as a panel beside the screen (Studio): `on`, `off`, `toggle`, an area to open it on (`material`,
+        /// `colour`, `type`, `motion`, `island`, `pieces`, `bodies`, `places`, `transients`, `dock`, `desktop`,
+        /// `themes`) or `search:<words>` to open it with a search typed
         function studio(action: string): string {
             if (!["on", "off", "toggle"].includes(action)) {
                 IrisState.studioTarget = action
@@ -306,27 +369,34 @@ Scope {
             IrisState.studioOpen = wanted
             return wanted ? "on" : "off"
         }
+        /// Melt the Island into its edge (or into the Surround band): `on`, `off` or `toggle`
         function notch(action: string): string {
             const on = Config.options?.iris?.bar?.notch ?? false
             const wanted = action === "on" ? true : action === "off" ? false : !on
             Config.setNestedValue("iris.bar.notch", wanted)
             return wanted ? "on" : "off"
         }
+        /// Close the shell around the screen with a band on every edge: `on`, `off` or `toggle`
         function surround(action: string): string {
             const on = Config.options?.iris?.surround?.enable ?? false
             const wanted = action === "on" ? true : action === "off" ? false : !on
             Config.setNestedValue("iris.surround.enable", wanted)
             return wanted ? "on" : "off"
         }
+        /// Set iRiS accent: `blue`, `mint`, `rose`, `lilac` or `wallpaper`
         function accent(name: string): string {
             if (!["blue", "mint", "rose", "lilac", "wallpaper"].includes(name)) return "Unknown accent"
             Config.setNestedValue("iris.appearance.accent", name)
             return String(Config.options.iris.appearance.accent)
         }
+        /// Open Spotlight with a query already typed, e.g. `firefox` or `12*7` (empty for suggestions); while it is
+        /// open, replaces the query
         function spotlight(query: string): void {
             IrisState.spotlightQuery = query
             GlobalStates.searchOpen = true
         }
+        /// Show or hide an online source in the wallpaper gallery: `wallhaven`, `live`, `konachan` or `yandere`, then
+        /// `on`, `off` or `toggle`; returns the sources shown, in order
         function gallerySource(source: string, state: string): string {
             const known = ["wallhaven", "live", "konachan", "yandere"]
             if (!known.includes(source)) return "Unknown source: " + known.join(", ")
@@ -337,21 +407,28 @@ Scope {
             Config.setNestedValue("iris.wallpaper.sources", next)
             return next.join(" ")
         }
+        /// Open Orbit with a search already typed, e.g. `firefox` (empty for all the workspaces)
         function orbit(query: string): string {
             if (!(Config.options?.iris?.orbit?.enable ?? false)) return "Orbit is off: turn it on in Settings › Orbit or with inir iris set iris.orbit.enable true"
             IrisState.orbitQuery = query
             IrisState.orbitOpen = true
             return "open"
         }
+        /// The corner each output's Orbit hot corner is on right now, as JSON (empty where Niri's own corner or the
+        /// setting leaves none)
         function orbitCorner(): string { return JSON.stringify(IrisState.orbitCorners) }
+        /// Close Orbit
         function orbitClose(): string {
             IrisState.orbitOpen = false
             return "closed"
         }
+        /// Close Spotlight
         function spotlightClose(): string {
             GlobalStates.searchOpen = false
             return "closed"
         }
+        /// Grow a bubble's own card: `weather`, `notifications`, `sound`, `mic`, `tools` or `tray` (from the bubble
+        /// showing it, else the Island), or `close`
         function bubbleCard(kind: string): string {
             if (kind === "close") { IrisState.bubbleCard = null; return "closed" }
             if (!IrisPieces.cardIds.includes(kind)) return "Unknown card"
@@ -360,23 +437,33 @@ Scope {
             IrisState.bubbleCardRequest = kind
             return kind
         }
+        /// Tap a piece the Island carries (`controls`, `sound`, `tray`, `notifications`, `weather`…) as a click
+        /// would: its card or page grows from it, or says the focused screen's bar has no such piece
         function tap(kind: string): string {
             if (kind.length === 0) return "Which piece?"
             root.pieceTapped = false
             root.pieceTapRequested(kind)
             return root.pieceTapped ? kind : kind + " is not a piece on the focused screen's bar"
         }
+        /// Open a floating bubble's own menu — what it opens, where it rests and how to put it away — by kind
+        /// (`weather`, `sound`, …) or piece id (`app:kitty`)
         function bubbleMenu(kind: string): string {
             if (kind.length === 0) return "Which bubble?"
             IrisState.bubbleMenuRequest = ""
             IrisState.bubbleMenuRequest = kind
             return kind
         }
+        /// Set how iRiS morphs: `direct`, `liquid`, `glide`, `snap`, `elastic` or `instant`
         function morph(name: string): string {
             if (!Object.keys(IrisStyle.morphStyles).includes(name)) return "Unknown morph style"
             Config.setNestedValue("iris.appearance.morph", name)
             return name
         }
+        /// Publish a live activity into the Island from any script: `<action> <id> <value>` — `start <id> <title>`,
+        /// `title`, `progress` (`0.4`, `40`, `40%` or `-1` for indeterminate), `detail`, `glyph` (a Material Symbol),
+        /// `tint` (`blue`, `sky`, `teal`, `green`, `yellow`, `orange`, `red`, `pink`, `indigo`, `purple`, `lavender`,
+        /// `gray`), `end <id> <detail>` (shows a done event and retires), `dismiss <id> -`, `clear all -`. Values
+        /// cannot contain commas
         function activity(action: string, id: string, value: string): string {
             let result = null
             switch (action) {
@@ -393,9 +480,12 @@ Scope {
             }
             return result ? JSON.stringify(result) : "No activity " + id
         }
+        /// Return the live activities scripts have published, as JSON
         function activities(): string {
             return JSON.stringify(LiveActivities.active)
         }
+        /// Set any iRiS option by path, e.g. `iris.appearance.theme.pieceShape squircle` or `iris.bubbles.scale 120`
+        /// (values are JSON when they parse)
         function set(path: string, value: string): string {
             if (!path.startsWith("iris.")) return "Only iris.* options"
             let parsed = value
@@ -403,6 +493,7 @@ Scope {
             Config.setNestedValue(path, parsed)
             return JSON.stringify(Config.getNestedValue(path, null))
         }
+        /// How much the wallpaper shapes iRiS, `0`-`100`; any other word prints what was read from the wallpaper
         function adaptive(amount: string): string {
             const value = String(amount).trim().length > 0 ? Math.round(Number(amount)) : NaN
             if (isNaN(value)) return JSON.stringify({ strength: IrisMood.strength, luminance: IrisMood.luminance,
@@ -411,9 +502,14 @@ Scope {
             Config.setNestedValue("iris.appearance.adaptive", Math.max(0, Math.min(100, value)))
             return String(Math.max(0, Math.min(100, value)))
         }
+        /// JSON with the colours iRiS resolved for the current look and the contrast of each text, accent and fill on
+        /// the surface it sits on (worst case over glass), plus the ones below their target
         function tokens(): string { return JSON.stringify(IrisStyle.audit()) }
         // Every row iRiS Settings declares, as data: where it writes, whether it is offered now, and what it can take.
         // `<section>@<page>` lists 40 rows at a time (an IPC reply has a size limit); an empty list is the end.
+        /// JSON with every row iRiS Settings declares in a section (`appearance`, `dock`...; empty for all): the
+        /// paths it writes, whether it is shown now, whether the Design owns it, its value and choices.
+        /// `<section>@<page>` lists 40 rows at a time, for sections too long for one reply
         function options(section: string): string {
             const page = section.includes("@") ? Number(section.split("@")[1]) : -1
             section = section.split("@")[0]
@@ -442,6 +538,8 @@ Scope {
         }
         // Applies a value in memory only, as a Settings slider does while it is dragged; nothing is written to disk.
         // Returns the value it replaced, as JSON, so the caller can put it back.
+        /// Apply a value in memory only, the way a Settings slider does while it is dragged; nothing is saved.
+        /// Returns the value it replaced, as JSON, to put it back
         function preview(path: string, value: string): string {
             const was = JSON.stringify(IrisOptions.plain(Config.getNestedValue(path, null)))
             let parsed = value
@@ -450,12 +548,16 @@ Scope {
             return was
         }
         // The active Design's control parts in every state, saved as one image (an absolute .png path).
+        /// Draw every control the active Design skins, in each state a person reaches (rest, pointer, press,
+        /// keyboard, inactive), and save it as one image at an absolute `.png` path
         function proof(path: string): string {
             if (!path.startsWith("/") || !path.endsWith(".png")) return "needs an absolute .png path"
             proofLoader.target = path
             proofLoader.active = true
             return "rendering " + path
         }
+        /// The colour theme the shell and your apps wear: an id such as `catppuccin-mocha` or `iris-ink`, `auto` to
+        /// follow the wallpaper, `list` for the ones iRiS shows, or `current` for the one in use
         function palette(id: string): string {
             const known = IrisOptions.colourThemeIds
             if (id === "list") return JSON.stringify(known)
@@ -465,11 +567,15 @@ Scope {
             ThemeService.setTheme(id)
             return String(ThemeService.currentTheme)
         }
+        /// Set the iRiS appearance preset: `iris`, `soft`, `round`, `crisp`, `angular` or `contrast`
         function preset(name: string): string {
             if (!Object.keys(IrisStyle.presets).includes(name)) return "Unknown preset"
             Config.setNestedValue("iris.appearance.preset", name)
             return String(Config.options.iris.appearance.preset)
         }
+        /// Choose the glyph a piece wears: `controls`, `tools`, `focus`, `notifications`, `bluetooth`, `updates`,
+        /// `anime` or `watching`, then a Material Symbol name (e.g. `inir iris icon controls settings`) or `reset` to
+        /// go back to its own face
         function icon(piece: string, glyph: string): string {
             if (!IrisPieces.iconKinds.includes(piece))
                 return "Unknown piece. One of: " + IrisPieces.iconKinds.join(", ")
@@ -477,6 +583,10 @@ Scope {
             const chosen = IrisPieces.chosenGlyph(piece)
             return chosen.length > 0 ? chosen : "default (" + IrisPieces.defaultGlyph(piece) + ")"
         }
+        /// Arrange the Control Center in place (drag controls, resize them from a corner, add or take them out):
+        /// `edit`, `done`, `toggle`, `undo`, `tab:<controls|layouts|panel>` to open the side library on that page,
+        /// `expand:<display|system|devices|network|bluetooth|none>` to open the Control Center with that expansion
+        /// unfolded, or a layout (`iris`, `discs`, `compact`, `glance`, `studio`, `everything`)
         function control(action: string): string {
             if (IrisControlOptions.presets.some(preset => preset.id === action)) {
                 IrisControlOptions.applyPreset(action)
@@ -512,6 +622,13 @@ Scope {
             if (tab.length > 0) IrisState.controlTab = tab
             return tab.length > 0 ? tab : "arranging"
         }
+        /// Rehearse the lock screen (the real surface, editable, with nothing to unlock): `edit`, `done`, `toggle`,
+        /// `page:<name>` to open the inspector on a page (`layouts`, `scene`, `type`, `clock`, `widgets`…),
+        /// `widget:<key>` to put a desktop widget on the lock or take it off (`clock`, `weather`, `monthCalendar`…),
+        /// `select:<key>` to select one on the lock and open its controls in the inspector (`select:<key>/look` for
+        /// shape, material and opacity; `/arrange`, `/widget`), `select:<block>` to take a block (`clock`, `glance`,
+        /// `media`, `activity`, `session`, `status`), `peek` and `unpeek` to see the lock without the handles, or a
+        /// layout (`iris`, `centered`, `corner`, `minimal`)
         function lock(action: string): string {
             if (IrisLockOptions.presetOf(action)) {
                 IrisLockOptions.applyPreset(action)
@@ -558,11 +675,16 @@ Scope {
             if (!wanted) IrisState.lockPeek = false
             return wanted ? "editing" : "closed"
         }
+        /// Set the utility satellite: `tray`, `tools`, `sound`, `mic` or `none`
         function utility(name: string): string {
             if (!["tray", "tools", "sound", "mic", "none"].includes(name)) return "Unknown utility"
             Config.setNestedValue("iris.bar.auxiliary", name)
             return String(Config.options.iris.bar.auxiliary)
         }
+        /// What the Continue bubble has in progress, or resume one of them: no argument lists them numbered with the
+        /// episode and saved position, a number or part of a title resumes that show. Anything that matches nothing
+        /// in progress starts a search instead. Only ani-cli can be pointed at one show; jerry and curd run their own
+        /// picker
         function watch(which: string): string {
             const shows = AnimeWatch.shows ?? []
             const query = String(which ?? "").trim()
@@ -591,6 +713,8 @@ Scope {
             AnimeWatch.resume(chosen)
             return `${chosen.title} · ep ${AnimeWatch.targetEpisodeOf(chosen)}`
         }
+        /// Answer whatever the Continue bubble is asking (which show, which episode, what next once one ends, which
+        /// quality): no argument lists the options, a number or part of a label chooses one, `cancel` stops the run
         function watchPick(value: string): string {
             const query = String(value ?? "").trim()
             if (query === "cancel") {
@@ -608,9 +732,12 @@ Scope {
             AnimeWatch.choose(AnimeWatch.pickValue(found))
             return AnimeWatch.pickLabel(found)
         }
+        /// Run a desktop menu entry on the focused output as a click would: `wallpaper`, `wallpaperNext` (the round
+        /// button on the wallpaper) or an action id such as `nextWallpaper`, `terminal`, `screenshot`
         function desktopAction(id: string): string {
             return IrisDesktopActions.run(id, NiriService.currentOutput || (Quickshell.screens[0]?.name ?? ""))
         }
+        /// Open the desktop menu on the focused output at that point, in pixels; no point opens it in the middle
         function desktopMenu(x: string, y: string): string {
             const output = NiriService.currentOutput
             const screen = Quickshell.screens.find(s => s.name === output) ?? Quickshell.screens[0]
@@ -620,12 +747,15 @@ Scope {
             GlobalStates.familyDesktopMenuRequested(screen?.name ?? "", px, py)
             return `${screen?.name ?? ""} ${Math.round(px)} ${Math.round(py)}`
         }
+        /// Close whichever iRiS or shell context menu is open
         function menuClose(): string {
             const menu = GlobalStates.activeContextMenu
             if (!menu) return "No menu open"
             menu.close ? menu.close() : (menu.active = false)
             return "closed"
         }
+        /// Subtitles of the episode that is playing: `size+`, `size-` (kept for every episode), `delay+`, `delay-`,
+        /// `delay0` (this episode), `off`, `track:<id>`, `file:<path>` to load one. No argument lists the tracks
         function watchSubs(command: string): string {
             if (AnimeWatch.phase !== "playing") return "No episode playing"
             const c = String(command ?? "").trim()
@@ -639,6 +769,7 @@ Scope {
             return `size ${AnimeWatch.subtitleScale} %, delay ${AnimeWatch.subtitleDelay.toFixed(1)} s, track ${AnimeWatch.subtitleId}\n`
                 + AnimeWatch.subtitles.map((t, i) => `${t.id}\t${AnimeWatch.subtitleLabel(t, i)}`).join("\n")
         }
+        /// Jump inside the episode that is playing by seconds: `85` skips an opening, `-10` goes back
         function watchSeek(seconds: string): string {
             if (AnimeWatch.phase !== "playing") return "No episode playing"
             const value = Number(seconds)
@@ -646,6 +777,8 @@ Scope {
             AnimeWatch.seekBy(value)
             return String(value)
         }
+        /// Close the episode that is playing and start the `next` (default) or `previous` one without searching
+        /// again. Its place is saved first
         function watchSkip(direction: string): string {
             const wanted = String(direction ?? "").trim() || "next"
             if (wanted !== "next" && wanted !== "previous") return "Use next or previous"
@@ -653,8 +786,15 @@ Scope {
             AnimeWatch.skip(wanted)
             return wanted
         }
+        /// Measure how a Place opens, closes and reverses halfway, from the expanded Island: `spotlight`, `orbit`,
+        /// `gallery`, `settings`, `focus`, `today` or `card` (the music card). Read the result with `motioned`
         function motion(target: string): string { return IrisParts.IrisMotionMeter.start(target) }
+        /// The last `motion` measurement as JSON: frame pace, continuity, material, one surface, origin and a clean
+        /// end, each passed or not, with the numbers behind them
         function motioned(): string { return JSON.stringify(IrisParts.IrisMotionMeter.result) }
+        /// JSON with the Island, Dock, Control Center, Spotlight and side panel state, which edit modes, Settings or
+        /// the wallpaper gallery hold the screen (`editing`, `settings`, `gallery`), plus the player the Island
+        /// follows (title, position, length)
         function status(): string {
             return JSON.stringify({
                 islandExpanded: IrisState.islandExpanded,

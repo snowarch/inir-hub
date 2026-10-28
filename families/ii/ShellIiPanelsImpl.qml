@@ -195,13 +195,29 @@ Item {
             Item {
                 Component.onCompleted: EasyEffects.ensureEqualizer()
 
+                /// Open the ii-family EasyEffects output equalizer. The integration is optional and disabled until
+                /// you enable it. Run `inir settings`, then go to **Modules → Optional → EasyEffects Equalizer** and
+                /// enable the switch. While it is disabled the IPC target is intentionally not constructed. On a
+                /// fresh empty EasyEffects output pipeline, iNiR bootstraps a neutral 10-band `iNiR Equalizer`
+                /// preset. Existing non-empty effect chains are never replaced automatically.
+                ///
+                /// ```kdl
+                /// Ctrl+Alt+F { spawn "inir" "equalizer" "toggle"; }
+                /// ```
                 IpcHandler {
                     target: "equalizer"
+                    /// Open/close equalizer
                     function toggle(): void { GlobalStates.toggleEqualizer("") }
+                    /// Hide equalizer
                     function close(): void { GlobalStates.closeEqualizer() }
+                    /// Show equalizer
                     function open(): void { GlobalStates.openEqualizer("") }
+                    /// Refresh EasyEffects equalizer state
                     function refresh(): void { EasyEffects.refreshEqualizer() }
+                    /// Ensure Equalizer control is available; bootstraps a neutral Equalizer only when the output
+                    /// pipeline is empty
                     function ensure(): void { EasyEffects.ensureEqualizer() }
+                    /// Return current equalizer state as JSON
                     function status(): string {
                         return JSON.stringify({
                             ready: EasyEffects.equalizerReady,
@@ -215,16 +231,19 @@ Item {
                             error: EasyEffects.equalizerError
                         })
                     }
+                    /// Set one 0-based band gain in dB
                     function setBand(index: int, gain: real): string {
                         if (!EasyEffects.equalizerReady) return "not_ready"
                         EasyEffects.setEqualizerBand(index, gain)
                         return "queued"
                     }
+                    /// Apply one built-in EQ preset
                     function preset(name: string): string {
                         if (!EasyEffects.equalizerReady) return "not_ready"
                         EasyEffects.applyEqualizerPreset(name)
                         return "queued"
                     }
+                    /// Convert the active Equalizer to the iNiR 10-band layout
                     function configure(): string {
                         if (!EasyEffects.equalizerPluginAvailable || !EasyEffects.equalizerSupported)
                             return "not_ready"

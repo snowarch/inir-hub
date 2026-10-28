@@ -136,17 +136,21 @@ Scope {
         }
     }
 
+    /// Waffle taskbar visibility.
     IpcHandler {
         target: "wbar"
 
+        /// Show/hide taskbar
         function toggle(): void {
             GlobalStates.barOpen = !GlobalStates.barOpen
         }
 
+        /// Hide taskbar
         function close(): void {
             GlobalStates.barOpen = false
         }
 
+        /// Show taskbar
         function open(): void {
             GlobalStates.barOpen = true
         }

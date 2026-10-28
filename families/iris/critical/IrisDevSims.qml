@@ -28,8 +28,15 @@ Item {
         }
     }
 
+    /// Simulated hands for measuring iRiS (present while iRiS is the family).
+    ///
+    /// ```bash
+    /// inir irisDev dragSim extra-clock 8; inir dev meter 2400; sleep 3; inir dev metered
+    /// ```
     IpcHandler {
         target: "irisDev"
+        /// Simulate carrying an iRiS bubble (slot id, default `extra-clock`) around the focused output for 2.5 s,
+        /// publishing the given number of moves per frame (1–16); never writes the config
         function dragSim(slot: string, perFrame: string): string {
             if (!GlobalStates.focusedScreen) return "error:no-screen"
             root.dragSlot = slot.length > 0 ? slot : "extra-clock"
@@ -39,6 +46,7 @@ Item {
             dragSim.restart()
             return "dragging:" + root.dragSlot + "x" + root.dragPerFrame
         }
+        /// Drop an iRiS bubble (slot id, or `app:<id>`) at a point of the focused output, released after 200 ms
         function dropBubble(slot: string, x: string, y: string): string {
             const screen = GlobalStates.focusedScreen
             if (!screen) return "error:no-screen"
@@ -47,6 +55,7 @@ Item {
             dropRelease.restart()
             return "dropped:" + slot + "@" + x + "," + y
         }
+        /// Slide a Dock icon (app id) along the Dock by the given pixels over 1 s
         function dockSlide(appId: string, pixels: string): string {
             if (!GlobalStates.focusedScreen) return "error:no-screen"
             root.slideApp = appId.toLowerCase()
