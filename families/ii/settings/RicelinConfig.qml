@@ -25,6 +25,7 @@ ContentPage {
 
         SettingsGroup {
             SettingsSwitch {
+                configPath: "bar.appearanceStyle"
                 buttonIcon: "blur_on"
                 text: Translation.tr("Use Pill bar")
                 checked: root.pillActive

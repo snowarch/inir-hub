@@ -88,6 +88,7 @@ WSettingsPage {
         }
 
         WSettingsSwitch {
+            configPath: "mascot.enable"
             label: Translation.tr("Show mascot illustration")
             icon: "image"
             description: Translation.tr("Show the iNiR mascot in About, empty states and other shell surfaces")
@@ -97,6 +98,7 @@ WSettingsPage {
         }
 
         WSettingsSwitch {
+            configPath: "mascot.companion.enable"
             label: Translation.tr("Playful companion")
             icon: "wand"
             description: Translation.tr("She occasionally peeks from a screen edge and reacts to music, battery and updates. Never over fullscreen apps or games")
@@ -106,6 +108,7 @@ WSettingsPage {
         }
 
         WSettingsSpinBox {
+            configPath: "mascot.companion.minQuietMinutes"
             label: Translation.tr("Minimum quiet time")
             icon: "timer"
             from: 3; to: 60; stepSize: 1
@@ -114,6 +117,7 @@ WSettingsPage {
         }
 
         WSettingsSpinBox {
+            configPath: "mascot.companion.maxVisitsPerHour"
             label: Translation.tr("Maximum visits per hour")
             icon: "timer"
             from: 1; to: 6; stepSize: 1
@@ -122,6 +126,7 @@ WSettingsPage {
         }
 
             WSettingsSwitch {
+                configPath: "mascot.companion.respectQuiet"
                 label: Translation.tr("Respect Do Not Disturb and quiet hours")
                 icon: "alert-snooze"
                 checked: Config.options?.mascot?.companion?.respectQuiet ?? true
@@ -129,6 +134,7 @@ WSettingsPage {
             }
 
             WSettingsSwitch {
+                configPath: "mascot.companion.shellReactions"
                 label: Translation.tr("React to opened shell panels")
                 icon: "panel-left-expand"
                 checked: Config.options?.mascot?.companion?.shellReactions ?? true
@@ -136,6 +142,7 @@ WSettingsPage {
             }
 
             WSettingsSwitch {
+                configPath: "mascot.companion.dialogue"
                 label: Translation.tr("Speech bubbles")
                 icon: "news"
                 checked: Config.options?.mascot?.companion?.dialogue ?? true
@@ -143,6 +150,7 @@ WSettingsPage {
             }
 
         WSettingsSpinBox {
+            configPath: "mascot.companion.intervalMinutes"
             label: Translation.tr("Companion visit interval")
             icon: "timer"
             description: Translation.tr("Roughly how often she peeks on her own")
@@ -155,6 +163,7 @@ WSettingsPage {
         }
 
         WSettingsSpinBox {
+            configPath: "mascot.companion.size"
             label: Translation.tr("Companion size")
             icon: "image"
             suffix: " px"
@@ -166,6 +175,7 @@ WSettingsPage {
         }
 
         WSettingsSpinBox {
+            configPath: "mascot.companion.visibleSeconds"
             label: Translation.tr("Visit length")
             icon: "timer"
             description: Translation.tr("How long she stays before sliding away")
@@ -178,6 +188,7 @@ WSettingsPage {
         }
 
         WSettingsSpinBox {
+            configPath: "mascot.companion.slideMs"
             label: Translation.tr("Slide animation")
             icon: "flash-on"
             description: Translation.tr("How fast she slides in and out")
@@ -190,6 +201,7 @@ WSettingsPage {
         }
 
         WSettingsSwitch {
+            configPath: "mascot.companion.placement"
             label: Translation.tr("Panel-sitter mode")
             icon: "pin"
             description: Translation.tr("She sits on the bar/dock instead of floating off-screen edges")
@@ -199,6 +211,7 @@ WSettingsPage {
         }
 
         WSettingsSwitch {
+            configPath: "mascot.companion.contextualPlacement"
             label: Translation.tr("Contextual placement")
             icon: "drag_pan"
             description: Translation.tr("Event reactions appear near the triggering widget instead of a random edge")
@@ -208,6 +221,7 @@ WSettingsPage {
         }
 
         WSettingsSwitch {
+            configPath: "mascot.companion.monitor"
             label: Translation.tr("Follow focused monitor")
             icon: "desktop"
             description: Translation.tr("She appears on the monitor with the focused workspace instead of the primary one")
@@ -217,6 +231,7 @@ WSettingsPage {
         }
 
         WSettingsSwitch {
+            configPath: "mascot.personality.commentary"
             label: Translation.tr("Personal commentary")
             icon: "people"
             description: Translation.tr("Observations about YOUR habits (3AM sessions, uptime, marathons); off = generic small talk only")
@@ -226,6 +241,7 @@ WSettingsPage {
         }
 
         WSettingsDropdown {
+            configPath: "mascot.personality.voiceMode"
             label: Translation.tr("Voice")
             // `chat` is not in assets/icons/fluent — it rendered blank.
             icon: "people"
@@ -242,6 +258,7 @@ WSettingsPage {
         }
 
         WSettingsSwitch {
+            configPath: "mascot.personality.enabled"
             label: Translation.tr("Mood personality")
             icon: "pulse"
             description: Translation.tr("Her lines change with session mood (sleepy/hyper/snarky/contemplative)")
@@ -251,6 +268,7 @@ WSettingsPage {
         }
 
         WSettingsSpinBox {
+            configPath: "mascot.personality.idleMoodIntervalMinutes"
             label: Translation.tr("Mood change interval")
             icon: "timer"
             suffix: " min"
@@ -262,6 +280,7 @@ WSettingsPage {
         }
 
         WSettingsDropdown {
+            configPath: "mascot.chaos.artStyle"
             label: Translation.tr("Character art")
             icon: "image"
             currentValue: Config.options?.mascot?.chaos?.artStyle ?? "jrpg"
@@ -273,6 +292,7 @@ WSettingsPage {
             onSelected: newValue => Config.setNestedValue("mascot.chaos.artStyle", newValue)
         }
         WSettingsSpinBox {
+            configPath: "mascot.chaos.intervalMinutes"
             label: Translation.tr("Minimum time between chaos visits")
             icon: "timer"
             suffix: " min"
@@ -281,6 +301,7 @@ WSettingsPage {
             onValueChanged: Config.setNestedValue("mascot.chaos.intervalMinutes", value)
         }
         WSettingsSwitch {
+            configPath: "mascot.chaos.enable"
             label: Translation.tr("Chaos mode")
             icon: "flash-on"
             description: Translation.tr("Occasional visits to widgets and panels. Mouse chase and hide-and-seek only start when you ask.")
@@ -290,6 +311,7 @@ WSettingsPage {
         }
 
         WSettingsSwitch {
+            configPath: "mascot.chaos.sfx"
             label: Translation.tr("Impact sounds")
             icon: "speaker-0"
             description: Translation.tr("Little thuds and bells from the system sound theme when she hits things")
@@ -299,6 +321,7 @@ WSettingsPage {
         }
 
         WSettingsSwitch {
+            configPath: "mascot.chaos.allowRearrange"
             label: Translation.tr("Let her rearrange widgets")
             icon: "drag_pan"
             description: Translation.tr("Displaced widgets keep their new position; otherwise everything bounces back")
@@ -308,6 +331,7 @@ WSettingsPage {
         }
 
         WSettingsSwitch {
+            configPath: "mascot.chaos.systemEvents"
             label: Translation.tr("React to system events")
             icon: "flash-on"
             description: Translation.tr("Occasional reactions to real shell activity, sharing the same quiet time and visit limit")
@@ -317,6 +341,7 @@ WSettingsPage {
         }
 
         WSettingsSwitch {
+            configPath: "mascot.chaos.callingCards"
             label: Translation.tr("Calling-card notifications")
             icon: "news"
             description: Translation.tr("After a destructive prank, Kira may leave a playful desktop notification")
@@ -356,6 +381,7 @@ WSettingsPage {
         }
 
         WSettingsSwitch {
+            configPath: "mascot.companion.musicRequireArtist"
             label: Translation.tr("Only react to real music")
             icon: "music-note-2"
             description: Translation.tr("Skips browser videos and players without artist metadata")
@@ -389,6 +415,7 @@ WSettingsPage {
                 spacing: 0
 
                 WSettingsSwitch {
+                    configPath: "mascot.companion.events." + eventCol.modelData.key
                     Layout.fillWidth: true
                     label: eventCol.modelData.label
                     icon: eventCol.modelData.icon
@@ -423,24 +450,28 @@ WSettingsPage {
         }
 
         WSettingsSwitch {
+            configPath: "mascot.companion.edges.left"
             label: Translation.tr("Peek from left edge")
             icon: "chevron-left"
             checked: Config.options?.mascot?.companion?.edges?.left ?? true
             onCheckedChanged: Config.setNestedValue("mascot.companion.edges.left", checked)
         }
         WSettingsSwitch {
+            configPath: "mascot.companion.edges.right"
             label: Translation.tr("Peek from right edge")
             icon: "chevron-right"
             checked: Config.options?.mascot?.companion?.edges?.right ?? true
             onCheckedChanged: Config.setNestedValue("mascot.companion.edges.right", checked)
         }
         WSettingsSwitch {
+            configPath: "mascot.companion.edges.top"
             label: Translation.tr("Peek from top edge")
             icon: "chevron-up"
             checked: Config.options?.mascot?.companion?.edges?.top ?? true
             onCheckedChanged: Config.setNestedValue("mascot.companion.edges.top", checked)
         }
         WSettingsSwitch {
+            configPath: "mascot.companion.edges.bottom"
             label: Translation.tr("Peek from bottom edge")
             icon: "chevron-down"
             checked: Config.options?.mascot?.companion?.edges?.bottom ?? true
@@ -484,6 +515,7 @@ WSettingsPage {
         icon: "image"
 
         WSettingsSwitch {
+            configPath: "mascot.surfaces.emptyStates"
             label: Translation.tr("Empty states")
             icon: "alert"
             description: Translation.tr("Notifications, clipboard, todo, media, calendar, wallpapers, search results")
@@ -491,48 +523,56 @@ WSettingsPage {
             onCheckedChanged: Config.setNestedValue("mascot.surfaces.emptyStates", checked)
         }
         WSettingsSwitch {
+            configPath: "mascot.surfaces.about"
             label: Translation.tr("About pages")
             icon: "info"
             checked: Config.options?.mascot?.surfaces?.about ?? true
             onCheckedChanged: Config.setNestedValue("mascot.surfaces.about", checked)
         }
         WSettingsSwitch {
+            configPath: "mascot.surfaces.session"
             label: Translation.tr("Session screen")
             icon: "power"
             checked: Config.options?.mascot?.surfaces?.session ?? true
             onCheckedChanged: Config.setNestedValue("mascot.surfaces.session", checked)
         }
         WSettingsSwitch {
+            configPath: "mascot.surfaces.aiChat"
             label: Translation.tr("AI chat")
             icon: "alert-snooze"
             checked: Config.options?.mascot?.surfaces?.aiChat ?? true
             onCheckedChanged: Config.setNestedValue("mascot.surfaces.aiChat", checked)
         }
         WSettingsSwitch {
+            configPath: "mascot.surfaces.dashboard"
             label: Translation.tr("Dashboard")
             icon: "apps"
             checked: Config.options?.mascot?.surfaces?.dashboard ?? true
             onCheckedChanged: Config.setNestedValue("mascot.surfaces.dashboard", checked)
         }
         WSettingsSwitch {
+            configPath: "mascot.surfaces.cheatsheet"
             label: Translation.tr("Cheatsheet")
             icon: "keyboard"
             checked: Config.options?.mascot?.surfaces?.cheatsheet ?? true
             onCheckedChanged: Config.setNestedValue("mascot.surfaces.cheatsheet", checked)
         }
         WSettingsSwitch {
+            configPath: "mascot.surfaces.bootGreeting"
             label: Translation.tr("Boot greeting")
             icon: "weather-sunny"
             checked: Config.options?.mascot?.surfaces?.bootGreeting ?? true
             onCheckedChanged: Config.setNestedValue("mascot.surfaces.bootGreeting", checked)
         }
         WSettingsSwitch {
+            configPath: "mascot.surfaces.updates"
             label: Translation.tr("Update overlay")
             icon: "arrow-sync"
             checked: Config.options?.mascot?.surfaces?.updates ?? true
             onCheckedChanged: Config.setNestedValue("mascot.surfaces.updates", checked)
         }
         WSettingsSwitch {
+            configPath: "mascot.surfaces.dialogs"
             label: Translation.tr("Dialogs")
             icon: "alert"
             description: Translation.tr("Close confirmation and similar dialogs")

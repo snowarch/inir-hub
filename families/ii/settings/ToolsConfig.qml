@@ -458,6 +458,7 @@ ContentPage {
             }
 
             SettingsSwitch {
+                configPath: "screenRecord.recordingOsd.autoHide"
                 buttonIcon: "mouse"
                 text: Translation.tr("Auto-hide recording OSD")
                 checked: Config.options?.screenRecord?.recordingOsd?.autoHide ?? false
@@ -465,6 +466,7 @@ ContentPage {
             }
 
             SettingsSwitch {
+                configPath: "screenRecord.showNotifications"
                 visible: !root.irisFamily
                 buttonIcon: "notifications"
                 text: Translation.tr("Recording notifications")
@@ -587,6 +589,7 @@ ContentPage {
                 title: Translation.tr("Discord compression")
 
                 SettingsSwitch {
+                    configPath: "screenRecord.discordCompress.enabled"
                     buttonIcon: "compress"
                     text: Translation.tr("Compress recordings for Discord")
                     checked: Config.options?.screenRecord?.discordCompress?.enabled ?? false
@@ -646,6 +649,7 @@ ContentPage {
                 }
 
                 SettingsSwitch {
+                    configPath: "screenRecord.discordCompress.onlyIfNeeded"
                     visible: Config.options?.screenRecord?.discordCompress?.enabled ?? false
                     buttonIcon: "done_all"
                     text: Translation.tr("Skip compression when already under target")
@@ -821,6 +825,7 @@ ContentPage {
                 title: Translation.tr("Snip behavior")
 
                 SettingsSwitch {
+                    configPath: "regionSelector.rememberSnipChoice"
                     buttonIcon: "history"
                     text: Translation.tr("Remember last snip choice")
                     checked: Config.options?.regionSelector?.rememberSnipChoice ?? true
@@ -911,6 +916,7 @@ ContentPage {
                 title: Translation.tr("Japanese study assistant")
 
                 SettingsSwitch {
+                    configPath: "regionSelector.japaneseLookup.enabled"
                     visible: !root.irisFamily
                     buttonIcon: "dictionary"
                     text: Translation.tr("Open study card after Japanese OCR")
@@ -1035,6 +1041,7 @@ ContentPage {
                 }
 
                 SettingsSwitch {
+                    configPath: "regionSelector.japaneseLookup.anki.enabled"
                     visible: !root.irisFamily
                     buttonIcon: "school"
                     text: Translation.tr("Show Anki actions in the study card")
@@ -1225,6 +1232,7 @@ ContentPage {
                 ConfigRow {
                     uniform: true
                     SettingsSwitch {
+                        configPath: "regionSelector.targetRegions.windows"
                         visible: !root.irisFamily
                         buttonIcon: "select_window"
                         text: Translation.tr('Windows')
@@ -1237,6 +1245,7 @@ ContentPage {
                         }
                     }
                     SettingsSwitch {
+                        configPath: "regionSelector.targetRegions.layers"
                         buttonIcon: "right_panel_open"
                         text: Translation.tr('Layers')
                         checked: Config.options?.regionSelector?.targetRegions?.layers ?? true
@@ -1248,6 +1257,7 @@ ContentPage {
                         }
                     }
                     SettingsSwitch {
+                        configPath: "regionSelector.targetRegions.content"
                         buttonIcon: "nearby"
                         text: Translation.tr('Content')
                         checked: Config.options?.regionSelector?.targetRegions?.content ?? false
@@ -1316,6 +1326,7 @@ ContentPage {
                 title: Translation.tr("Rectangular selection")
 
                 SettingsSwitch {
+                    configPath: "regionSelector.rect.showAimLines"
                     buttonIcon: "point_scan"
                     text: Translation.tr("Show aim lines")
                     checked: Config.options?.regionSelector?.rect?.showAimLines ?? true

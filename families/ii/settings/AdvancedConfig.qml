@@ -77,6 +77,7 @@ ContentPage {
 
         SettingsGroup {
             SettingsSwitch {
+                configPath: "appearance.wallpaperTheming.enableAppsAndShell"
                 visible: !root.irisFamily
                 buttonIcon: "hardware"
                 text: Translation.tr("Shell & utilities")
@@ -90,6 +91,7 @@ ContentPage {
                 }
             }
             SettingsSwitch {
+                configPath: "appearance.wallpaperTheming.enableQtApps"
                 visible: !root.irisFamily
                 buttonIcon: "tv_options_input_settings"
                 text: Translation.tr("Qt apps")
@@ -103,6 +105,7 @@ ContentPage {
                 }
             }
             SettingsSwitch {
+                configPath: "appearance.wallpaperTheming.enableTerminal"
                 visible: !root.irisFamily
                 buttonIcon: "terminal"
                 text: Translation.tr("Terminal")
@@ -116,6 +119,7 @@ ContentPage {
                 }
             }
             SettingsSwitch {
+                configPath: "appearance.wallpaperTheming.enableVesktop"
                 visible: !root.irisFamily
                 buttonIcon: "chat"
                 text: Translation.tr("Vesktop/Discord")
@@ -129,6 +133,7 @@ ContentPage {
                 }
             }
             SettingsSwitch {
+                configPath: "appearance.wallpaperTheming.enableSpicetify"
                 visible: !root.irisFamily
                 buttonIcon: "music_note"
                 text: Translation.tr("Spotify (Spicetify)")
@@ -162,6 +167,7 @@ ContentPage {
                 }
             }
             SettingsSwitch {
+                configPath: "appearance.wallpaperTheming.enableSteam"
                 visible: !root.irisFamily
                 buttonIcon: "sports_esports"
                 text: Translation.tr("Steam (Millennium)")
@@ -175,6 +181,7 @@ ContentPage {
                 }
             }
             SettingsSwitch {
+                configPath: "appearance.wallpaperTheming.enablePearDesktop"
                 visible: !root.irisFamily
                 buttonIcon: "music_note"
                 text: Translation.tr("Pear Desktop (YouTube Music)")
@@ -188,6 +195,7 @@ ContentPage {
                 }
             }
             SettingsSwitch {
+                configPath: "appearance.wallpaperTheming.enableLimusic"
                 visible: !root.irisFamily
                 buttonIcon: "music_note"
                 text: Translation.tr("LiMusic")
@@ -201,6 +209,7 @@ ContentPage {
                 }
             }
             SettingsSwitch {
+                configPath: "appearance.wallpaperTheming.enableClaudeCode"
                 visible: !root.irisFamily
                 buttonIcon: "terminal"
                 text: Translation.tr("Claude Code")
@@ -214,6 +223,7 @@ ContentPage {
                 }
             }
             SettingsSwitch {
+                configPath: "appearance.wallpaperTheming.enableZed"
                 visible: !root.irisFamily
                 buttonIcon: "code"
                 text: Translation.tr("Zed editor")
@@ -227,6 +237,7 @@ ContentPage {
                 }
             }
             SettingsSwitch {
+                configPath: "appearance.wallpaperTheming.enableVSCode"
                 visible: !root.irisFamily
                 buttonIcon: "code"
                 text: Translation.tr("VSCode editors")
@@ -240,6 +251,7 @@ ContentPage {
                 }
             }
             SettingsSwitch {
+                configPath: "appearance.wallpaperTheming.enableChrome"
                 visible: !root.irisFamily
                 buttonIcon: "language"
                 text: Translation.tr("Chrome / Chromium")
@@ -253,6 +265,7 @@ ContentPage {
                 }
             }
             SettingsSwitch {
+                configPath: "appearance.wallpaperTheming.enableFirefox"
                 visible: !root.irisFamily
                 buttonIcon: "public"
                 text: Translation.tr("Firefox")
@@ -266,6 +279,7 @@ ContentPage {
                 }
             }
             SettingsSwitch {
+                configPath: "appearance.wallpaperTheming.enableOpenCode"
                 visible: !root.irisFamily
                 buttonIcon: "code"
                 text: Translation.tr("OpenCode")
@@ -279,6 +293,7 @@ ContentPage {
                 }
             }
             SettingsSwitch {
+                configPath: "appearance.wallpaperTheming.enableNeovim"
                 visible: !root.irisFamily
                 buttonIcon: "code"
                 text: Translation.tr("Neovim / LazyVim")
@@ -451,6 +466,7 @@ ContentPage {
             ConfigRow {
                 uniform: true
                 SettingsSwitch {
+                    configPath: "appearance.wallpaperTheming.terminalGenerationProps.forceDarkMode"
                     visible: !root.irisFamily
                     buttonIcon: "dark_mode"
                     text: Translation.tr("Force dark mode in terminal")
@@ -532,6 +548,7 @@ ContentPage {
 
         SettingsGroup {
             SettingsSwitch {
+                configPath: "resources.monitorGpu"
                 buttonIcon: "memory_alt"
                 text: Translation.tr("GPU monitoring")
                 checked: Config.options?.resources?.monitorGpu ?? true

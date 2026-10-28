@@ -94,6 +94,7 @@ ContentPage {
 
         SettingsGroup {
             SettingsSwitch {
+                configPath: "background.parallax.enable"
                 buttonIcon: "image"
                 text: Translation.tr("Enable parallax")
                 checked: root.iiParallax.enable ?? ((root.iiParallax.enableWorkspace ?? false) || (root.iiParallax.enableSidebar ?? false))
@@ -143,6 +144,7 @@ ContentPage {
             ConfigRow {
                 uniform: true
                 SettingsSwitch {
+                    configPath: "background.parallax.enableWorkspace"
                     buttonIcon: "counter_1"
                     text: Translation.tr("Follow workspace")
                     checked: root.iiParallax.enableWorkspace ?? false
@@ -153,6 +155,7 @@ ContentPage {
                     }
                 }
                 SettingsSwitch {
+                    configPath: "background.parallax.enableSidebar"
                     buttonIcon: "side_navigation"
                     text: Translation.tr("Follow sidebars")
                     checked: root.iiParallax.enableSidebar ?? false
@@ -219,6 +222,7 @@ ContentPage {
             }
 
             SettingsSwitch {
+                configPath: "background.parallax.pauseDuringTransitions"
                 buttonIcon: "transition_fade"
                 text: Translation.tr("Pause during wallpaper transitions")
                 checked: root.iiParallax.pauseDuringTransitions ?? true
@@ -253,6 +257,7 @@ ContentPage {
 
         SettingsGroup {
             SettingsSwitch {
+                configPath: "background.hideWhenFullscreen"
                 buttonIcon: "visibility_off"
                 text: Translation.tr("Hide main wallpaper in fullscreen")
                 checked: Config.options?.background?.hideWhenFullscreen ?? true
@@ -285,6 +290,7 @@ ContentPage {
 
         SettingsGroup {
             SettingsSwitch {
+                configPath: "background.multiMonitor.enable"
                 buttonIcon: "monitor"
                 text: Translation.tr("Per-monitor wallpapers")
                 checked: Config.options?.background?.multiMonitor?.enable ?? false
@@ -1225,6 +1231,7 @@ ContentPage {
             }
 
             SettingsSwitch {
+                configPath: "background.backend.web.interactive"
                 visible: (Config.options?.background?.backend?.provider ?? "awww") === "web"
                 buttonIcon: "sports_esports"
                 text: Translation.tr("Interactive mode")
@@ -1286,6 +1293,7 @@ ContentPage {
 
         SettingsGroup {
             SettingsSwitch {
+                configPath: "background.autoWallpaper.enable"
                 buttonIcon: "autorenew"
                 text: Translation.tr("Shuffle wallpapers automatically")
                 checked: Config.options?.background?.autoWallpaper?.enable ?? false
@@ -1311,6 +1319,7 @@ ContentPage {
             }
 
             SettingsSwitch {
+                configPath: "background.autoWallpaper.generateColors"
                 enabled: Config.options?.background?.autoWallpaper?.enable ?? false
                 buttonIcon: "palette"
                 text: Translation.tr("Regenerate theme colors on shuffle")
@@ -1349,6 +1358,7 @@ ContentPage {
 
         SettingsGroup {
             SettingsSwitch {
+                configPath: "background.transition.enable"
                 buttonIcon: "animation"
                 text: Translation.tr("Enable wallpaper transitions")
                 checked: Config.options?.background?.transition?.enable ?? true
@@ -1874,6 +1884,7 @@ ContentPage {
             }
             
             SettingsSwitch {
+                configPath: "background.enableAnimation"
                 buttonIcon: "play_circle"
                 text: Translation.tr("Enable animated wallpapers (videos/GIFs)")
                 checked: Config.options?.background?.enableAnimation ?? true
@@ -1886,6 +1897,7 @@ ContentPage {
             }
 
             SettingsSwitch {
+                configPath: "background.pauseAnimationOnBattery"
                 visible: Config.options?.background?.enableAnimation ?? true
                 buttonIcon: "battery_saver"
                 text: Translation.tr("Pause animated wallpapers on battery")
@@ -1899,6 +1911,7 @@ ContentPage {
             }
 
             SettingsSwitch {
+                configPath: "background.effects.enableAnimatedBlur"
                 visible: Config.options?.background?.enableAnimation ?? true
                 buttonIcon: "blur_on"
                 text: Translation.tr("Blur animated wallpapers (videos/GIFs)")
@@ -1926,6 +1939,7 @@ ContentPage {
 
         SettingsGroup {
             SettingsSwitch {
+                configPath: "background.effects.enableBlur"
                 buttonIcon: "blur_on"
                 text: Translation.tr("Enable wallpaper blur")
                 checked: Config.options?.background?.effects?.enableBlur ?? false
@@ -2012,6 +2026,7 @@ ContentPage {
                 title: Translation.tr("Fluid Ripple (AOSP Port)")
 
                 SettingsSwitch {
+                    configPath: "background.effects.ripple.enable"
                     buttonIcon: "check_circle"
                     text: Translation.tr("Enable all ripples")
                     checked: Config.options?.background?.effects?.ripple?.enable ?? false
@@ -2027,6 +2042,7 @@ ContentPage {
                     visible: Config.options?.background?.effects?.ripple?.enable ?? false
 
                     SettingsSwitch {
+                        configPath: "background.effects.ripple.charging"
                         buttonIcon: "bolt"
                         text: Translation.tr("On charging")
                         checked: Config.options?.background?.effects?.ripple?.charging ?? true
@@ -2036,6 +2052,7 @@ ContentPage {
                     }
 
                     SettingsSwitch {
+                        configPath: "background.effects.ripple.overview"
                         buttonIcon: "grid_view"
                         text: Translation.tr("On Niri overview open")
                         checked: Config.options?.background?.effects?.ripple?.overview ?? true
@@ -2045,6 +2062,7 @@ ContentPage {
                     }
 
                     SettingsSwitch {
+                        configPath: "background.effects.ripple.hotcorners"
                         buttonIcon: "near_me"
                         text: Translation.tr("On hotcorner activation")
                         checked: Config.options?.background?.effects?.ripple?.hotcorners ?? true
@@ -2054,6 +2072,7 @@ ContentPage {
                     }
 
                     SettingsSwitch {
+                        configPath: "background.effects.ripple.reload"
                         buttonIcon: "refresh"
                         text: Translation.tr("On shell reload")
                         checked: Config.options?.background?.effects?.ripple?.reload ?? true
@@ -2063,6 +2082,7 @@ ContentPage {
                     }
 
                     SettingsSwitch {
+                        configPath: "background.effects.ripple.lock"
                         buttonIcon: "lock"
                         text: Translation.tr("On screen lock")
                         checked: Config.options?.background?.effects?.ripple?.lock ?? true
@@ -2072,6 +2092,7 @@ ContentPage {
                     }
 
                     SettingsSwitch {
+                        configPath: "background.effects.ripple.session"
                         buttonIcon: "logout"
                         text: Translation.tr("On session screen open")
                         checked: Config.options?.background?.effects?.ripple?.session ?? true
@@ -2162,6 +2183,7 @@ ContentPage {
                 title: Translation.tr("Backdrop (overview)")
 
                 SettingsSwitch {
+                    configPath: "background.backdrop.enable"
                     buttonIcon: "texture"
                     text: Translation.tr("Enable backdrop layer for overview")
                     checked: Config.options?.background?.backdrop?.enable ?? true
@@ -2174,6 +2196,7 @@ ContentPage {
                 }
 
                 SettingsSwitch {
+                    configPath: "appearance.wallpaperTheming.useBackdropForColors"
                     visible: Config.options?.background?.backdrop?.enable ?? true
                     buttonIcon: "palette"
                     text: Translation.tr("Derive theme colors from backdrop")
@@ -2191,6 +2214,7 @@ ContentPage {
                 }
 
                 SettingsSwitch {
+                    configPath: "background.backdrop.enableAnimation"
                     visible: Config.options?.background?.backdrop?.enable ?? true
                     buttonIcon: "play_circle"
                     text: Translation.tr("Enable animated wallpapers (videos/GIFs)")
@@ -2204,6 +2228,7 @@ ContentPage {
                 }
 
                 SettingsSwitch {
+                    configPath: "background.backdrop.enableAnimatedBlur"
                     visible: (Config.options?.background?.backdrop?.enable ?? true) && (Config.options?.background?.backdrop?.enableAnimation ?? true)
                     buttonIcon: "blur_circular"
                     text: Translation.tr("Blur animated wallpapers (videos/GIFs)")
@@ -2217,6 +2242,7 @@ ContentPage {
                 }
 
                 SettingsSwitch {
+                    configPath: "background.backdrop.useAuroraStyle"
                     visible: Config.options?.background?.backdrop?.enable ?? true
                     buttonIcon: "blur_on"
                     text: Translation.tr("Aurora glass effect")
@@ -2247,6 +2273,7 @@ ContentPage {
                 }
 
                 SettingsSwitch {
+                    configPath: "background.backdrop.hideWallpaper"
                     visible: Config.options?.background?.backdrop?.enable ?? true
                     buttonIcon: "visibility_off"
                     text: Translation.tr("Hide main wallpaper (show only backdrop)")
@@ -2370,6 +2397,7 @@ ContentPage {
                     uniform: true
                     visible: Config.options?.background?.backdrop?.enable ?? true
                     SettingsSwitch {
+                        configPath: "background.backdrop.vignetteEnabled"
                         buttonIcon: "gradient"
                         text: Translation.tr("Enable vignette")
                         checked: Config.options?.background?.backdrop?.vignetteEnabled ?? false
@@ -2434,6 +2462,7 @@ ContentPage {
 
         SettingsGroup {
             SettingsSwitch {
+                configPath: "background.hideUpscaleNotification"
                 buttonIcon: "hide_image"
                 text: Translation.tr("Hide wallpaper upscale notification")
                 checked: Config.options?.background?.hideUpscaleNotification ?? false

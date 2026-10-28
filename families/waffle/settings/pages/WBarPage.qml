@@ -28,6 +28,7 @@ WSettingsPage {
         icon: "panel-left-expand"
         
         WSettingsSwitch {
+            configPath: "waffles.bar.bottom"
             label: Translation.tr("Bottom position")
             icon: "caret-down"
             description: Translation.tr("Place taskbar at bottom of screen")
@@ -36,6 +37,7 @@ WSettingsPage {
         }
         
         WSettingsSwitch {
+            configPath: "waffles.bar.leftAlignApps"
             label: Translation.tr("Left-align apps")
             icon: "chevron-left"
             description: Translation.tr("Align taskbar apps to the left instead of center")
@@ -50,6 +52,7 @@ WSettingsPage {
         icon: "apps"
         
         WSettingsSwitch {
+            configPath: "waffles.bar.monochromeIcons"
             label: Translation.tr("Tint app icons")
             icon: "dark-theme"
             description: Translation.tr("Apply accent color to taskbar app icons")
@@ -58,6 +61,7 @@ WSettingsPage {
         }
         
         WSettingsSwitch {
+            configPath: "waffles.bar.tintTrayIcons"
             label: Translation.tr("Tint tray icons")
             icon: "eyedropper"
             description: Translation.tr("Apply accent color to system tray icons")
@@ -66,6 +70,7 @@ WSettingsPage {
         }
 
         WSettingsSpinBox {
+            configPath: "waffles.bar.iconSize"
             label: Translation.tr("Taskbar icon size")
             icon: "apps"
             suffix: "px"
@@ -75,6 +80,7 @@ WSettingsPage {
         }
 
         WSettingsSpinBox {
+            configPath: "waffles.bar.searchIconSize"
             label: Translation.tr("Search app icon size")
             icon: "search"
             suffix: "px"
@@ -90,6 +96,7 @@ WSettingsPage {
         icon: "eye"
         
         WSettingsSwitch {
+            configPath: "waffles.bar.desktopPeek.hoverPeek"
             label: Translation.tr("Enable hover peek")
             icon: "eye"
             description: Translation.tr("Show desktop when hovering the corner button")
@@ -98,6 +105,7 @@ WSettingsPage {
         }
         
         WSettingsSpinBox {
+            configPath: "waffles.bar.desktopPeek.hoverDelay"
             visible: Config.options?.waffles?.bar?.desktopPeek?.hoverPeek ?? false
             label: Translation.tr("Hover delay")
             icon: "timer"
@@ -114,6 +122,7 @@ WSettingsPage {
         icon: "arrow-clockwise"
         
         WSettingsSwitch {
+            configPath: "time.secondPrecision"
             label: Translation.tr("Show seconds")
             icon: "timer"
             description: Translation.tr("Display seconds in taskbar clock")
@@ -122,6 +131,7 @@ WSettingsPage {
         }
         
         WSettingsSwitch {
+            configPath: "waffles.bar.notifications.showUnreadCount"
             label: Translation.tr("Show unread count")
             icon: "alert-filled"
             description: Translation.tr("Display notification count badge on clock")
@@ -130,6 +140,7 @@ WSettingsPage {
         }
 
         WSettingsSwitch {
+            configPath: "waffles.bar.activationWatermark.enable"
             label: Translation.tr("Activation watermark")
             icon: "key"
             description: Translation.tr("Show a fake activation message on the taskbar")
@@ -144,6 +155,7 @@ WSettingsPage {
         icon: "arrow-sync"
         
         WSettingsSpinBox {
+            configPath: "updates.checkInterval"
             label: Translation.tr("Check interval")
             icon: "arrow-clockwise"
             suffix: "m"
@@ -153,6 +165,7 @@ WSettingsPage {
         }
         
         WSettingsSpinBox {
+            configPath: "updates.adviseUpdateThreshold"
             label: Translation.tr("Show icon threshold")
             icon: "alert"
             description: Translation.tr("Show update icon when packages exceed this")
@@ -162,6 +175,7 @@ WSettingsPage {
         }
         
         WSettingsSpinBox {
+            configPath: "updates.stronglyAdviseUpdateThreshold"
             label: Translation.tr("Warning threshold")
             icon: "alert"
             description: Translation.tr("Show warning color when packages exceed this")

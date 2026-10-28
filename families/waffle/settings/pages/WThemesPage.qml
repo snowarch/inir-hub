@@ -645,6 +645,7 @@ WSettingsPage {
         }
 
         WSettingsDropdown {
+            configPath: "appearance.palette.type"
             label: Translation.tr("Palette type")
             icon: "dark-theme"
             description: Translation.tr("How colors are generated from wallpaper")
@@ -701,6 +702,7 @@ WSettingsPage {
         }
 
         WSettingsSwitch {
+            configPath: "appearance.colorInvert"
             label: Translation.tr("Invert colors (complementary)")
             icon: "dark-theme"
             description: Translation.tr("Rotate every color 180° on the color wheel. Shell-only: external apps keep their original colors.")
@@ -715,6 +717,7 @@ WSettingsPage {
         icon: "eyedropper"
 
         WSettingsSwitch {
+            configPath: "waffles.theming.useMaterialColors"
             label: Translation.tr("Use Material colors")
             icon: "dark-theme"
             description: Translation.tr("Apply Material color scheme instead of Windows 11 grey")
@@ -726,6 +729,7 @@ WSettingsPage {
         }
 
         WSettingsSlider {
+            configPath: "appearance.wallpaperTheming.colorStrength"
             label: Translation.tr("Color strength")
             icon: "eyedropper"
             description: Translation.tr("Controls how vivid wallpaper-derived accent colors are")
@@ -754,6 +758,7 @@ WSettingsPage {
         }
 
         WSettingsSwitch {
+            configPath: "appearance.softenColors"
             label: Translation.tr("Soften colors")
             icon: "paint-bucket"
             description: Translation.tr("Subtly soften theme colors for a more natural look")
@@ -765,6 +770,7 @@ WSettingsPage {
         }
 
         WSettingsSwitch {
+            configPath: "appearance.wallpaperTheming.autoDarkLightMode"
             label: Translation.tr("Auto light/dark from wallpaper")
             icon: "auto"
             description: Translation.tr("Pick the light or dark scheme from each wallpaper's brightness so text stays readable")
@@ -776,6 +782,7 @@ WSettingsPage {
         }
 
         WSettingsSwitch {
+            configPath: "appearance.wallpaperTheming.enableVesktop"
             label: Translation.tr("Vesktop/Discord theming")
             icon: "people"
             description: Translation.tr("Generate Discord theme from wallpaper colors")
@@ -784,6 +791,7 @@ WSettingsPage {
         }
 
         WSettingsSwitch {
+            configPath: "appearance.wallpaperTheming.enableSpicetify"
             label: Translation.tr("Spotify theming")
             icon: "music-note-2"
             description: Translation.tr("Generate and apply Spicetify theme from wallpaper colors")
@@ -795,6 +803,7 @@ WSettingsPage {
         }
 
         WSettingsDropdown {
+            configPath: "appearance.wallpaperTheming.spicetifyTheme"
             visible: Config.options?.appearance?.wallpaperTheming?.enableSpicetify ?? true
             label: Translation.tr("Spotify theme")
             icon: "terminal"
@@ -811,6 +820,7 @@ WSettingsPage {
         }
 
         WSettingsSwitch {
+            configPath: "appearance.wallpaperTheming.enableSteam"
             label: Translation.tr("Steam theming")
             icon: "gamepad"
             description: Translation.tr("Apply Material You colors to Steam via Millennium Material-Theme")
@@ -819,6 +829,7 @@ WSettingsPage {
         }
 
         WSettingsSwitch {
+            configPath: "appearance.wallpaperTheming.enablePearDesktop"
             label: Translation.tr("Pear Desktop (YouTube Music)")
             icon: "music-note-2"
             description: Translation.tr("Apply Material You colors to YouTube Music Desktop App")
@@ -827,6 +838,7 @@ WSettingsPage {
         }
 
         WSettingsSwitch {
+            configPath: "appearance.wallpaperTheming.enableLimusic"
             label: Translation.tr("LiMusic")
             icon: "music-note-2"
             description: Translation.tr("LiMusic follows your wallpaper colours, from the next time it opens")
@@ -835,6 +847,7 @@ WSettingsPage {
         }
 
         WSettingsSwitch {
+            configPath: "appearance.wallpaperTheming.enableClaudeCode"
             label: Translation.tr("Claude Code")
             icon: "terminal"
             description: Translation.tr("Adds iNiR themes to Claude Code's theme list: two follow your wallpaper, two keep a fixed Monokai palette")
@@ -843,6 +856,7 @@ WSettingsPage {
         }
 
         WSettingsSwitch {
+            configPath: "appearance.wallpaperTheming.enableZed"
             label: Translation.tr("Zed editor")
             icon: "terminal"
             description: Translation.tr("Generate Zed editor theme from wallpaper colors")
@@ -851,6 +865,7 @@ WSettingsPage {
         }
 
         WSettingsSwitch {
+            configPath: "appearance.wallpaperTheming.enableVSCode"
             label: Translation.tr("VSCode editors")
             icon: "terminal"
             description: Translation.tr("Generate theme for VSCode and its forks from wallpaper colors")
@@ -859,6 +874,7 @@ WSettingsPage {
         }
 
         WSettingsSwitch {
+            configPath: "appearance.wallpaperTheming.enableChrome"
             label: Translation.tr("Chrome / Chromium")
             icon: "globe-search"
             description: Translation.tr("Apply wallpaper-derived colors to Chrome and Chromium browser")
@@ -867,6 +883,7 @@ WSettingsPage {
         }
 
         WSettingsSwitch {
+            configPath: "appearance.wallpaperTheming.enableFirefox"
             label: Translation.tr("Firefox")
             icon: "globe-shield"
             description: Translation.tr("Follows the wallpaper from its next launch; LibreWolf, Floorp, Waterfox and Zen too.")
@@ -875,6 +892,7 @@ WSettingsPage {
         }
 
         WSettingsSwitch {
+            configPath: "appearance.wallpaperTheming.enableOpenCode"
             label: Translation.tr("OpenCode")
             icon: "terminal"
             description: Translation.tr("Apply wallpaper-derived theme to OpenCode AI editor")
@@ -883,6 +901,7 @@ WSettingsPage {
         }
 
         WSettingsSwitch {
+            configPath: "appearance.wallpaperTheming.enableNeovim"
             label: Translation.tr("Neovim / LazyVim")
             icon: "terminal"
             description: Translation.tr("Generate inir.nvim theme plugin for Neovim/LazyVim from wallpaper colors (writes to ~/.config/nvim/lua/plugins/neovim.lua)")
@@ -901,6 +920,7 @@ WSettingsPage {
         }
 
         WSettingsSwitch {
+            configPath: "appearance.transparency.enable"
             label: Translation.tr("Transparency")
             icon: "eye"
             description: Translation.tr("Enable transparent UI elements")
@@ -1019,6 +1039,7 @@ WSettingsPage {
         }
 
         WSettingsTextField {
+            configPath: "appearance.cava.blockedApps"
             label: Translation.tr("Blocked visualizer apps")
             icon: "music-note-2"
             description: Translation.tr("Comma-separated playback apps to exclude from visualizers. Empty keeps automatic active-player selection.")
@@ -1060,6 +1081,7 @@ WSettingsPage {
         }
 
         WSettingsSlider {
+            configPath: "appearance.wallpaperTheming.terminalColorAdjustments.saturation"
             id: termSaturationSlider
             label: Translation.tr("Color saturation")
             icon: "dark-theme"
@@ -1080,6 +1102,7 @@ WSettingsPage {
         }
 
         WSettingsSlider {
+            configPath: "appearance.wallpaperTheming.terminalColorAdjustments.brightness"
             id: termBrightnessSlider
             label: Translation.tr("Color brightness")
             icon: "brightness-high"
@@ -1100,6 +1123,7 @@ WSettingsPage {
         }
 
         WSettingsSlider {
+            configPath: "appearance.wallpaperTheming.terminalColorAdjustments.harmony"
             id: termHarmonySlider
             label: Translation.tr("Theme harmony")
             icon: "color"
@@ -1120,6 +1144,7 @@ WSettingsPage {
         }
 
         WSettingsSlider {
+            configPath: "appearance.wallpaperTheming.terminalColorAdjustments.backgroundBrightness"
             id: termBgBrightnessSlider
             label: Translation.tr("Background brightness")
             icon: "border-none"
@@ -1175,6 +1200,7 @@ WSettingsPage {
         }
 
         WSettingsDropdown {
+            configPath: "waffles.theming.font.family"
             label: Translation.tr("Font family")
             icon: "auto"
             description: Translation.tr("Font used in Waffle panels")
@@ -1205,6 +1231,7 @@ WSettingsPage {
         }
 
         WSettingsSwitch {
+            configPath: "appearance.typography.syncWithSystem"
             label: Translation.tr("Apps use this font")
             icon: "apps"
             description: Translation.tr("Your apps' text follows the font the shell shows.")
@@ -1213,6 +1240,7 @@ WSettingsPage {
         }
 
         WSettingsSpinBox {
+            configPath: "waffles.theming.font.scale"
             label: Translation.tr("Font scale")
             icon: "auto"
             description: Translation.tr("Scale all text in Waffle panels")

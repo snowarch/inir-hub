@@ -29,6 +29,7 @@ WSettingsPage {
         title: Translation.tr("Blur and glass")
         icon: "eye"
         WSettingsDropdown {
+            configPath: "performance.blurBackend"
             label: Translation.tr("Default blur backend")
             icon: "eye"
             currentValue: Config.options?.performance?.blurBackend ?? "auto"
@@ -36,6 +37,7 @@ WSettingsPage {
             onSelected: value => Config.setNestedValue("performance.blurBackend", value)
         }
         WSettingsSwitch {
+            configPath: "performance.compositorBlur"
             visible: Appearance.nativeBlurSupported
             label: Translation.tr("Allow compositor blur")
             icon: "eye"
@@ -64,18 +66,21 @@ WSettingsPage {
         title: Translation.tr("Motion and power")
         icon: "settings-cog-multiple"
         WSettingsSwitch {
+            configPath: "performance.reduceAnimations"
             label: Translation.tr("Reduce animations")
             icon: "eye-off"
             checked: Config.options?.performance?.reduceAnimations ?? false
             onCheckedChanged: Config.setNestedValue("performance.reduceAnimations", checked)
         }
         WSettingsSwitch {
+            configPath: "performance.lowPower"
             label: Translation.tr("Low power effects")
             icon: "eye-off"
             checked: Config.options?.performance?.lowPower ?? false
             onCheckedChanged: Config.setNestedValue("performance.lowPower", checked)
         }
         WSettingsSwitch {
+            configPath: "performance.memoryWarningNotification"
             label: Translation.tr("Notify when a restart would free memory")
             icon: "alert"
             checked: Config.options?.performance?.memoryWarningNotification ?? false

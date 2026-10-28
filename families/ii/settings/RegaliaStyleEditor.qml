@@ -60,6 +60,10 @@ ColumnLayout {
                 }
             }
 
+            ConfigResetKey {
+                path: sliderRow.configPath
+                label: sliderRow.label
+            }
             StyledText {
                 Layout.preferredWidth: 58
                 text: sliderRow.valueText

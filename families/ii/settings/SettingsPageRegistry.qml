@@ -358,6 +358,7 @@ Singleton {
                     label: Translation.tr(label),
                     description: "",
                     keywords: entry.keywords || [],
+                    configPath: String(entry.configPath || ""),
                     generated: true
                 })
             }

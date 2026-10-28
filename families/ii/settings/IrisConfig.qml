@@ -158,6 +158,7 @@ ContentPage {
                         }
                     }
                     SettingsSwitch {
+                        configPath: "iris.appearance.motion"
                         buttonIcon: "animation"
                         text: Translation.tr("Motion")
                         checked: Config.options?.iris?.appearance?.motion ?? true
@@ -217,12 +218,14 @@ ContentPage {
                         }
                     }
                     SettingsSwitch {
+                        configPath: "iris.bar.autoHide"
                         buttonIcon: "visibility_off"
                         text: Translation.tr("Automatically hide")
                         checked: Config.options?.iris?.bar?.autoHide ?? false
                         onCheckedChanged: Config.setNestedValue("iris.bar.autoHide", checked)
                     }
                     SettingsSwitch {
+                        configPath: "iris.bar.reserveSpace"
                         buttonIcon: "view_compact"
                         text: Translation.tr("Reserve workspace space")
                         visible: !(Config.options?.iris?.bar?.autoHide ?? false)
@@ -330,30 +333,35 @@ ContentPage {
 
                 SettingsGroup {
                     SettingsSwitch {
+                        configPath: "iris.modules.desktopWidgets"
                         buttonIcon: "widgets"
                         text: Translation.tr("Desktop widgets")
                         checked: Config.options?.iris?.modules?.desktopWidgets ?? true
                         onCheckedChanged: Config.setNestedValue("iris.modules.desktopWidgets", checked)
                     }
                     SettingsSwitch {
+                        configPath: "iris.dock.enable"
                         buttonIcon: "dock_to_bottom"
                         text: Translation.tr("Dock")
                         checked: Config.options?.iris?.dock?.enable ?? true
                         onCheckedChanged: Config.setNestedValue("iris.dock.enable", checked)
                     }
                     SettingsSwitch {
+                        configPath: "iris.dock.autoHide"
                         buttonIcon: "visibility"
                         text: Translation.tr("Automatically hide dock")
                         checked: Config.options?.iris?.dock?.autoHide ?? true
                         onCheckedChanged: Config.setNestedValue("iris.dock.autoHide", checked)
                     }
                     SettingsSwitch {
+                        configPath: "iris.dock.blur"
                         buttonIcon: "blur_on"
                         text: Translation.tr("Dock blur")
                         checked: Config.options?.iris?.dock?.blur ?? false
                         onCheckedChanged: Config.setNestedValue("iris.dock.blur", checked)
                     }
                     SettingsSwitch {
+                        configPath: "iris.dock.magnification"
                         buttonIcon: "zoom_in"
                         text: Translation.tr("Magnify icons on hover")
                         checked: Config.options?.iris?.dock?.magnification ?? true
@@ -370,42 +378,49 @@ ContentPage {
                         onValueChanged: Config.setNestedValue("iris.dock.iconSize", value)
                     }
                     SettingsSwitch {
+                        configPath: "iris.modules.palette"
                         buttonIcon: "search"
                         text: Translation.tr("Palette")
                         checked: Config.options?.iris?.modules?.palette ?? true
                         onCheckedChanged: Config.setNestedValue("iris.modules.palette", checked)
                     }
                     SettingsSwitch {
+                        configPath: "iris.modules.controlCenter"
                         buttonIcon: "tune"
                         text: Translation.tr("Control center")
                         checked: Config.options?.iris?.modules?.controlCenter ?? true
                         onCheckedChanged: Config.setNestedValue("iris.modules.controlCenter", checked)
                     }
                     SettingsSwitch {
+                        configPath: "iris.modules.notificationPopup"
                         buttonIcon: "notifications"
                         text: Translation.tr("Notification popups")
                         checked: Config.options?.iris?.modules?.notificationPopup ?? true
                         onCheckedChanged: Config.setNestedValue("iris.modules.notificationPopup", checked)
                     }
                     SettingsSwitch {
+                        configPath: "iris.modules.osd"
                         buttonIcon: "monitoring"
                         text: Translation.tr("OSD")
                         checked: Config.options?.iris?.modules?.osd ?? true
                         onCheckedChanged: Config.setNestedValue("iris.modules.osd", checked)
                     }
                     SettingsSwitch {
+                        configPath: "iris.modules.sessionScreen"
                         buttonIcon: "power_settings_new"
                         text: Translation.tr("Session screen")
                         checked: Config.options?.iris?.modules?.sessionScreen ?? true
                         onCheckedChanged: Config.setNestedValue("iris.modules.sessionScreen", checked)
                     }
                     SettingsSwitch {
+                        configPath: "iris.modules.lock"
                         buttonIcon: "lock"
                         text: Translation.tr("Lock screen")
                         checked: Config.options?.iris?.modules?.lock ?? true
                         onCheckedChanged: Config.setNestedValue("iris.modules.lock", checked)
                     }
                     SettingsSwitch {
+                        configPath: "iris.modules.polkit"
                         buttonIcon: "admin_panel_settings"
                         text: Translation.tr("Polkit authentication")
                         checked: Config.options?.iris?.modules?.polkit ?? true
@@ -446,6 +461,7 @@ ContentPage {
                         onValueChanged: Config.setNestedValue("iris.palette.maxResults", value)
                     }
                     SettingsSwitch {
+                        configPath: "iris.palette.showHints"
                         buttonIcon: "keyboard"
                         text: Translation.tr("Palette shortcut hints")
                         checked: Config.options?.iris?.palette?.showHints ?? true

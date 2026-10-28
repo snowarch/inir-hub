@@ -147,6 +147,7 @@ ContentPage {
                 title: Translation.tr("Background & dim")
 
                 SettingsSwitch {
+                    configPath: "overlay.darkenScreen"
                     buttonIcon: "water"
                     text: Translation.tr("Darken screen behind overlay")
                     checked: Config.options?.overlay?.darkenScreen ?? false
@@ -202,6 +203,7 @@ ContentPage {
                 }
 
                 SettingsSwitch {
+                    configPath: "overlay.gamePerformance.transparentBackground"
                     buttonIcon: "opacity"
                     text: Translation.tr("Transparent Game Performance background")
                     checked: Config.options?.overlay?.gamePerformance?.transparentBackground ?? false
@@ -217,6 +219,7 @@ ContentPage {
                 title: Translation.tr("Animations")
 
                 SettingsSwitch {
+                    configPath: "overlay.openingZoomAnimation"
                     buttonIcon: "movie"
                     text: Translation.tr("Enable opening zoom animation")
                     checked: Config.options?.overlay?.openingZoomAnimation ?? true
@@ -276,6 +279,7 @@ ContentPage {
 
         SettingsGroup {
             SettingsSwitch {
+                configPath: "appearance.desaturation.enable"
                 buttonIcon: "filter_b_and_w"
                 text: Translation.tr("Desaturation effect")
                 checked: Boolean(Config.options?.appearance?.desaturation?.enable)
@@ -368,30 +372,35 @@ ContentPage {
                 spacing: 0
 
                 SettingsSwitch {
+                    configPath: "appearance.desaturation.bar"
                     buttonIcon: "toolbar"
                     text: Translation.tr("Bar")
                     checked: Config.options?.appearance?.desaturation?.bar ?? true
                     onCheckedChanged: Config.setNestedValue("appearance.desaturation.bar", checked)
                 }
                 SettingsSwitch {
+                    configPath: "appearance.desaturation.dock"
                     buttonIcon: "dock_to_bottom"
                     text: Translation.tr("Dock")
                     checked: Config.options?.appearance?.desaturation?.dock ?? true
                     onCheckedChanged: Config.setNestedValue("appearance.desaturation.dock", checked)
                 }
                 SettingsSwitch {
+                    configPath: "appearance.desaturation.sidebars"
                     buttonIcon: "view_sidebar"
                     text: Translation.tr("Sidebars")
                     checked: Config.options?.appearance?.desaturation?.sidebars ?? true
                     onCheckedChanged: Config.setNestedValue("appearance.desaturation.sidebars", checked)
                 }
                 SettingsSwitch {
+                    configPath: "appearance.desaturation.overlays"
                     buttonIcon: "layers"
                     text: Translation.tr("Overlays")
                     checked: Config.options?.appearance?.desaturation?.overlays ?? true
                     onCheckedChanged: Config.setNestedValue("appearance.desaturation.overlays", checked)
                 }
                 SettingsSwitch {
+                    configPath: "appearance.desaturation.popups"
                     buttonIcon: "picture_in_picture"
                     text: Translation.tr("Popups")
                     checked: Config.options?.appearance?.desaturation?.popups ?? true
@@ -414,6 +423,7 @@ ContentPage {
 
         SettingsGroup {
             SettingsSwitch {
+                configPath: "altSwitcher.noVisualUi"
                 enabled: (Config.options?.altSwitcher?.preset ?? "default") !== "skew"
                 buttonIcon: "visibility_off"
                 text: Translation.tr("No visual UI (cycle windows only)")
@@ -427,6 +437,7 @@ ContentPage {
             }
 
             SettingsSwitch {
+                configPath: "altSwitcher.monochromeIcons"
                 buttonIcon: "colors"
                 text: Translation.tr("Tint app icons")
                 checked: Config.options?.altSwitcher?.monochromeIcons ?? false
@@ -437,6 +448,7 @@ ContentPage {
             }
 
             SettingsSwitch {
+                configPath: "altSwitcher.enableAnimation"
                 buttonIcon: "movie"
                 text: Translation.tr("Enable slide animation")
                 checked: Config.options?.altSwitcher?.enableAnimation ?? true
@@ -461,6 +473,7 @@ ContentPage {
             }
 
             SettingsSwitch {
+                configPath: "altSwitcher.useMostRecentFirst"
                 buttonIcon: "history"
                 text: Translation.tr("Most recently used first")
                 checked: Config.options?.altSwitcher?.useMostRecentFirst ?? true
@@ -527,6 +540,7 @@ ContentPage {
             }
 
             SettingsSwitch {
+                configPath: "altSwitcher.showOverviewWhileSwitching"
                 buttonIcon: "overview_key"
                 text: Translation.tr("Show Niri overview while switching")
                 checked: Config.options?.altSwitcher?.showOverviewWhileSwitching ?? false
@@ -553,6 +567,7 @@ ContentPage {
                 title: Translation.tr("Layout & alignment")
 
                 SettingsSwitch {
+                    configPath: "altSwitcher.compactStyle"
                     enabled: (Config.options?.altSwitcher?.preset ?? "default") !== "list"
                         && (Config.options?.altSwitcher?.preset ?? "default") !== "skew"
                     buttonIcon: "view_compact"
@@ -578,6 +593,7 @@ ContentPage {
                 }
 
                 SettingsSwitch {
+                    configPath: "altSwitcher.useM3Layout"
                     enabled: !(Config.options?.altSwitcher?.compactStyle ?? false)
                         && (Config.options?.altSwitcher?.preset ?? "default") !== "list"
                         && (Config.options?.altSwitcher?.preset ?? "default") !== "skew"
@@ -749,6 +765,7 @@ ContentPage {
 
         SettingsGroup {
             SettingsSwitch {
+                configPath: "controlPanel.compactMode"
                 buttonIcon: "density_medium"
                 text: Translation.tr("Compact cards")
                 checked: Config.options?.controlPanel?.compactMode ?? true
@@ -759,6 +776,7 @@ ContentPage {
             }
 
             SettingsSwitch {
+                configPath: "controlPanel.showWallpaperSection"
                 buttonIcon: "wallpaper"
                 text: Translation.tr("Show wallpaper card")
                 checked: Config.options?.controlPanel?.showWallpaperSection ?? true
@@ -769,6 +787,7 @@ ContentPage {
             }
 
             SettingsSwitch {
+                configPath: "controlPanel.showWallpaperSchemeChips"
                 buttonIcon: "palette"
                 text: Translation.tr("Show wallpaper scheme buttons")
                 enabled: Config.options?.controlPanel?.showWallpaperSection ?? true
@@ -783,6 +802,7 @@ ContentPage {
                 title: Translation.tr("Visible sections")
 
                 SettingsSwitch {
+                    configPath: "controlPanel.showMediaSection"
                     buttonIcon: "music_note"
                     text: Translation.tr("Media")
                     checked: Config.options?.controlPanel?.showMediaSection ?? true
@@ -790,6 +810,7 @@ ContentPage {
                 }
 
                 SettingsSwitch {
+                    configPath: "controlPanel.showWeatherSection"
                     buttonIcon: "partly_cloudy_day"
                     text: Translation.tr("Weather")
                     checked: Config.options?.controlPanel?.showWeatherSection ?? true
@@ -797,6 +818,7 @@ ContentPage {
                 }
 
                 SettingsSwitch {
+                    configPath: "controlPanel.showSystemSection"
                     buttonIcon: "monitoring"
                     text: Translation.tr("System status")
                     checked: Config.options?.controlPanel?.showSystemSection ?? true
@@ -804,6 +826,7 @@ ContentPage {
                 }
 
                 SettingsSwitch {
+                    configPath: "controlPanel.showSlidersSection"
                     buttonIcon: "tune"
                     text: Translation.tr("Sliders")
                     checked: Config.options?.controlPanel?.showSlidersSection ?? true
@@ -811,6 +834,7 @@ ContentPage {
                 }
 
                 SettingsSwitch {
+                    configPath: "controlPanel.showQuickActionsSection"
                     buttonIcon: "apps"
                     text: Translation.tr("Quick actions")
                     checked: Config.options?.controlPanel?.showQuickActionsSection ?? true
@@ -819,6 +843,7 @@ ContentPage {
             }
 
             SettingsSwitch {
+                configPath: "controlPanel.keepLoaded"
                 buttonIcon: "memory"
                 text: Translation.tr("Keep control panel loaded")
                 checked: Config.options?.controlPanel?.keepLoaded ?? false
@@ -847,6 +872,7 @@ ContentPage {
                 tooltip: Translation.tr("Toggle which widgets appear in the sidebar")
 
                 SettingsSwitch {
+                    configPath: "sidebar.widgets.media"
                     buttonIcon: "music_note"
                     text: Translation.tr("Media player")
                     checked: Config.options?.sidebar?.widgets?.media ?? true
@@ -854,6 +880,7 @@ ContentPage {
                 }
 
                 SettingsSwitch {
+                    configPath: "sidebar.widgets.week"
                     buttonIcon: "calendar_today"
                     text: Translation.tr("Week strip")
                     checked: Config.options?.sidebar?.widgets?.week ?? true
@@ -861,6 +888,7 @@ ContentPage {
                 }
 
                 SettingsSwitch {
+                    configPath: "sidebar.widgets.context"
                     buttonIcon: "partly_cloudy_day"
                     text: Translation.tr("Context card (Weather/Timer)")
                     checked: Config.options?.sidebar?.widgets?.context ?? true
@@ -868,6 +896,7 @@ ContentPage {
                 }
 
                 SettingsSwitch {
+                    configPath: "sidebar.widgets.contextShowWeather"
                     buttonIcon: "cloud"
                     text: Translation.tr("Show weather in context card")
                     checked: Config.options?.sidebar?.widgets?.contextShowWeather ?? true
@@ -876,6 +905,7 @@ ContentPage {
                 }
 
                 SettingsSwitch {
+                    configPath: "sidebar.widgets.note"
                     buttonIcon: "edit_note"
                     text: Translation.tr("Quick note")
                     checked: Config.options?.sidebar?.widgets?.note ?? true
@@ -883,6 +913,7 @@ ContentPage {
                 }
 
                 SettingsSwitch {
+                    configPath: "sidebar.widgets.launch"
                     buttonIcon: "apps"
                     text: Translation.tr("Quick launch")
                     checked: Config.options?.sidebar?.widgets?.launch ?? true
@@ -1093,6 +1124,7 @@ ContentPage {
                 }
 
                 SettingsSwitch {
+                    configPath: "sidebar.widgets.controls"
                     buttonIcon: "toggle_on"
                     text: Translation.tr("Controls")
                     checked: Config.options?.sidebar?.widgets?.controls ?? true
@@ -1100,6 +1132,7 @@ ContentPage {
                 }
 
                 SettingsSwitch {
+                    configPath: "sidebar.widgets.status"
                     buttonIcon: "monitoring"
                     text: Translation.tr("System status")
                     checked: Config.options?.sidebar?.widgets?.status ?? true
@@ -1107,6 +1140,7 @@ ContentPage {
                 }
 
                 SettingsSwitch {
+                    configPath: "sidebar.widgets.crypto"
                     buttonIcon: "currency_bitcoin"
                     text: Translation.tr("Crypto prices")
                     checked: Config.options?.sidebar?.widgets?.crypto ?? false
@@ -1114,6 +1148,7 @@ ContentPage {
                 }
 
                 SettingsSwitch {
+                    configPath: "sidebar.widgets.wallpaper"
                     buttonIcon: "wallpaper"
                     text: Translation.tr("Wallpaper picker")
                     checked: Config.options?.sidebar?.widgets?.wallpaper ?? false
@@ -1121,6 +1156,7 @@ ContentPage {
                 }
 
                 SettingsSwitch {
+                    configPath: "sidebar.widgets.worldClock"
                     buttonIcon: "schedule"
                     text: Translation.tr("World Clock")
                     checked: Config.options?.sidebar?.widgets?.worldClock ?? true
@@ -1529,6 +1565,7 @@ ContentPage {
                 }
 
                 SettingsSwitch {
+                    configPath: "sidebar.widgets.worldClock_settings.use24Hour"
                     buttonIcon: "schedule"
                     text: Translation.tr("24-hour format")
                     checked: Config.options?.sidebar?.widgets?.worldClock_settings?.use24Hour ?? true
@@ -1539,6 +1576,7 @@ ContentPage {
                 }
 
                 SettingsSwitch {
+                    configPath: "sidebar.widgets.worldClock_settings.showSeconds"
                     buttonIcon: "timer"
                     text: Translation.tr("Show seconds")
                     checked: Config.options?.sidebar?.widgets?.worldClock_settings?.showSeconds ?? false
@@ -1549,6 +1587,7 @@ ContentPage {
                 }
 
                 SettingsSwitch {
+                    configPath: "sidebar.widgets.worldClock_settings.showDate"
                     buttonIcon: "today"
                     text: Translation.tr("Show date & GMT offset")
                     checked: Config.options?.sidebar?.widgets?.worldClock_settings?.showDate ?? true
@@ -1559,6 +1598,7 @@ ContentPage {
                 }
 
                 SettingsSwitch {
+                    configPath: "sidebar.widgets.worldClock_settings.highlightLocal"
                     buttonIcon: "my_location"
                     text: Translation.tr("Highlight local timezone")
                     checked: Config.options?.sidebar?.widgets?.worldClock_settings?.highlightLocal ?? true
@@ -1937,6 +1977,7 @@ ContentPage {
                 }
 
                 SettingsSwitch {
+                    configPath: "sidebar.widgets.quickWallpaper.showHeader"
                     buttonIcon: "title"
                     text: Translation.tr("Show header")
                     checked: Config.options?.sidebar?.widgets?.quickWallpaper?.showHeader ?? true
@@ -1955,6 +1996,7 @@ ContentPage {
                 tooltip: Translation.tr("Configure the header with time and quick indicators")
 
                 SettingsSwitch {
+                    configPath: "sidebar.widgets.glance.showVolume"
                     buttonIcon: "volume_up"
                     text: Translation.tr("Volume button")
                     checked: Config.options?.sidebar?.widgets?.glance?.showVolume ?? true
@@ -1962,6 +2004,7 @@ ContentPage {
                 }
 
                 SettingsSwitch {
+                    configPath: "sidebar.widgets.glance.showGameMode"
                     buttonIcon: "sports_esports"
                     text: Translation.tr("Game mode indicator")
                     checked: Config.options?.sidebar?.widgets?.glance?.showGameMode ?? true
@@ -1969,6 +2012,7 @@ ContentPage {
                 }
 
                 SettingsSwitch {
+                    configPath: "sidebar.widgets.glance.showDnd"
                     buttonIcon: "do_not_disturb_on"
                     text: Translation.tr("Do not disturb indicator")
                     checked: Config.options?.sidebar?.widgets?.glance?.showDnd ?? true
@@ -1981,6 +2025,7 @@ ContentPage {
                 tooltip: Translation.tr("Configure which system metrics to show")
 
                 SettingsSwitch {
+                    configPath: "sidebar.widgets.statusRings.showCpu"
                     buttonIcon: "memory"
                     text: Translation.tr("CPU usage")
                     checked: Config.options?.sidebar?.widgets?.statusRings?.showCpu ?? true
@@ -1988,6 +2033,7 @@ ContentPage {
                 }
 
                 SettingsSwitch {
+                    configPath: "sidebar.widgets.statusRings.showRam"
                     buttonIcon: "memory_alt"
                     text: Translation.tr("RAM usage")
                     checked: Config.options?.sidebar?.widgets?.statusRings?.showRam ?? true
@@ -1995,6 +2041,7 @@ ContentPage {
                 }
 
                 SettingsSwitch {
+                    configPath: "sidebar.widgets.statusRings.showDisk"
                     buttonIcon: "hard_drive"
                     text: Translation.tr("Disk usage")
                     checked: Config.options?.sidebar?.widgets?.statusRings?.showDisk ?? true
@@ -2002,6 +2049,7 @@ ContentPage {
                 }
 
                 SettingsSwitch {
+                    configPath: "sidebar.widgets.statusRings.showTemp"
                     buttonIcon: "thermostat"
                     text: Translation.tr("Temperature")
                     checked: Config.options?.sidebar?.widgets?.statusRings?.showTemp ?? true
@@ -2009,6 +2057,7 @@ ContentPage {
                 }
 
                 SettingsSwitch {
+                    configPath: "sidebar.widgets.statusRings.showBattery"
                     buttonIcon: "battery_full"
                     text: Translation.tr("Battery")
                     checked: Config.options?.sidebar?.widgets?.statusRings?.showBattery ?? true
@@ -2023,6 +2072,7 @@ ContentPage {
                 ContentSubsectionLabel { text: Translation.tr("Toggles") }
 
                 SettingsSwitch {
+                    configPath: "sidebar.widgets.controlsCard.showDarkMode"
                     buttonIcon: "dark_mode"
                     text: Translation.tr("Dark mode")
                     checked: Config.options?.sidebar?.widgets?.controlsCard?.showDarkMode ?? true
@@ -2030,6 +2080,7 @@ ContentPage {
                 }
 
                 SettingsSwitch {
+                    configPath: "sidebar.widgets.controlsCard.showDnd"
                     buttonIcon: "do_not_disturb_on"
                     text: Translation.tr("Do not disturb")
                     checked: Config.options?.sidebar?.widgets?.controlsCard?.showDnd ?? true
@@ -2037,6 +2088,7 @@ ContentPage {
                 }
 
                 SettingsSwitch {
+                    configPath: "sidebar.widgets.controlsCard.showNightLight"
                     buttonIcon: "nightlight"
                     text: Translation.tr("Night light")
                     checked: Config.options?.sidebar?.widgets?.controlsCard?.showNightLight ?? true
@@ -2044,6 +2096,7 @@ ContentPage {
                 }
 
                 SettingsSwitch {
+                    configPath: "sidebar.widgets.controlsCard.showGameMode"
                     buttonIcon: "sports_esports"
                     text: Translation.tr("Game mode")
                     checked: Config.options?.sidebar?.widgets?.controlsCard?.showGameMode ?? true
@@ -2053,6 +2106,7 @@ ContentPage {
                 ContentSubsectionLabel { text: Translation.tr("Actions") }
 
                 SettingsSwitch {
+                    configPath: "sidebar.widgets.controlsCard.showNetwork"
                     buttonIcon: "wifi"
                     text: Translation.tr("Network")
                     checked: Config.options?.sidebar?.widgets?.controlsCard?.showNetwork ?? true
@@ -2060,6 +2114,7 @@ ContentPage {
                 }
 
                 SettingsSwitch {
+                    configPath: "sidebar.widgets.controlsCard.showBluetooth"
                     buttonIcon: "bluetooth"
                     text: Translation.tr("Bluetooth")
                     checked: Config.options?.sidebar?.widgets?.controlsCard?.showBluetooth ?? true
@@ -2067,6 +2122,7 @@ ContentPage {
                 }
 
                 SettingsSwitch {
+                    configPath: "sidebar.widgets.controlsCard.showSettings"
                     buttonIcon: "settings"
                     text: Translation.tr("Settings")
                     checked: Config.options?.sidebar?.widgets?.controlsCard?.showSettings ?? true
@@ -2074,6 +2130,7 @@ ContentPage {
                 }
 
                 SettingsSwitch {
+                    configPath: "sidebar.widgets.controlsCard.showLock"
                     buttonIcon: "lock"
                     text: Translation.tr("Lock")
                     checked: Config.options?.sidebar?.widgets?.controlsCard?.showLock ?? true
@@ -2096,6 +2153,7 @@ ContentPage {
 
         SettingsGroup {
             SettingsSwitch {
+                configPath: "overview.enable"
                 buttonIcon: "check"
                 text: Translation.tr("Enable")
                 checked: Config.options?.overview?.enable ?? true
@@ -2117,6 +2175,7 @@ ContentPage {
                 StyledToolTip { text: Translation.tr("Show a control center dashboard below workspace previews") }
             }
             SettingsSwitch {
+                configPath: "overview.dashboard.showToggles"
                 buttonIcon: "toggle_on"
                 text: Translation.tr("Dashboard: Quick toggles")
                 checked: Config.options?.overview?.dashboard?.showToggles ?? true
@@ -2124,6 +2183,7 @@ ContentPage {
                 visible: Config.options?.overview?.dashboard?.enable ?? false
             }
             SettingsSwitch {
+                configPath: "overview.dashboard.showMedia"
                 buttonIcon: "music_note"
                 text: Translation.tr("Dashboard: Media player")
                 checked: Config.options?.overview?.dashboard?.showMedia ?? true
@@ -2131,6 +2191,7 @@ ContentPage {
                 visible: Config.options?.overview?.dashboard?.enable ?? false
             }
             SettingsSwitch {
+                configPath: "overview.dashboard.showVolume"
                 buttonIcon: "volume_up"
                 text: Translation.tr("Dashboard: Volume slider")
                 checked: Config.options?.overview?.dashboard?.showVolume ?? true
@@ -2138,6 +2199,7 @@ ContentPage {
                 visible: Config.options?.overview?.dashboard?.enable ?? false
             }
             SettingsSwitch {
+                configPath: "overview.dashboard.showWeather"
                 buttonIcon: "cloud"
                 text: Translation.tr("Dashboard: Weather")
                 checked: Config.options?.overview?.dashboard?.showWeather ?? true
@@ -2145,6 +2207,7 @@ ContentPage {
                 visible: Config.options?.overview?.dashboard?.enable ?? false
             }
             SettingsSwitch {
+                configPath: "overview.dashboard.showSystem"
                 buttonIcon: "memory"
                 text: Translation.tr("Dashboard: System stats")
                 checked: Config.options?.overview?.dashboard?.showSystem ?? true
@@ -2155,6 +2218,7 @@ ContentPage {
                 title: Translation.tr("All-apps grid")
 
                 SettingsSwitch {
+                    configPath: "overview.allAppsGrid"
                     buttonIcon: "apps"
                     text: Translation.tr("Show all-apps grid")
                     checked: Config.options?.overview?.allAppsGrid ?? false
@@ -2179,6 +2243,7 @@ ContentPage {
                 }
             }
             SettingsSwitch {
+                configPath: "overview.centerIcons"
                 buttonIcon: "center_focus_strong"
                 text: Translation.tr("Center icons")
                 checked: Config.options.overview.centerIcons
@@ -2190,6 +2255,7 @@ ContentPage {
                 }
             }
             SettingsSwitch {
+                configPath: "overview.showPreviews"
                 buttonIcon: "preview"
                 text: Translation.tr("Show window previews")
                 checked: Config.options?.overview?.showPreviews !== false
@@ -2252,6 +2318,7 @@ ContentPage {
                 title: Translation.tr("Wallpaper background")
 
                 SettingsSwitch {
+                    configPath: "overview.backgroundBlurEnable"
                     buttonIcon: "blur_on"
                     text: Translation.tr("Enable wallpaper blur")
                     checked: !Config.options.overview || Config.options.overview.backgroundBlurEnable !== false
@@ -2322,6 +2389,7 @@ ContentPage {
                 title: Translation.tr("Positioning")
 
                 SettingsSwitch {
+                    configPath: "overview.respectBar"
                     buttonIcon: "dashboard_customize"
                     text: Translation.tr("Respect bar area (never overlap)")
                     checked: !Config.options.overview || Config.options.overview.respectBar !== false
@@ -2475,6 +2543,7 @@ ContentPage {
                 title: Translation.tr("Behaviour")
 
                 SettingsSwitch {
+                    configPath: "overview.switchToWorkspaceOnOpen"
                     buttonIcon: "workspaces"
                     text: Translation.tr("Switch to dedicated workspace when opening Overview")
                     checked: Config.options.overview && Config.options.overview.switchToWorkspaceOnOpen
@@ -2522,6 +2591,7 @@ ContentPage {
                     }
                 }
                 SettingsSwitch {
+                    configPath: "overview.keepOverviewOpenOnWindowClick"
                     buttonIcon: "overview_key"
                     text: Translation.tr("Keep Overview open when clicking windows")
                     checked: !Config.options.overview || Config.options.overview.keepOverviewOpenOnWindowClick !== false
@@ -2533,6 +2603,7 @@ ContentPage {
                     }
                 }
                 SettingsSwitch {
+                    configPath: "overview.closeAfterWindowMove"
                     buttonIcon: "close_fullscreen"
                     text: Translation.tr("Close Overview after moving window")
                     checked: !Config.options.overview || Config.options.overview.closeAfterWindowMove !== false
@@ -2544,6 +2615,7 @@ ContentPage {
                     }
                 }
                 SettingsSwitch {
+                    configPath: "overview.showWorkspaceNumbers"
                     buttonIcon: "looks_one"
                     text: Translation.tr("Show workspace numbers")
                     checked: !Config.options.overview || Config.options.overview.showWorkspaceNumbers !== false
@@ -2559,6 +2631,7 @@ ContentPage {
                 title: Translation.tr("Animation")
 
                 SettingsSwitch {
+                    configPath: "overview.focusAnimationEnable"
                     buttonIcon: "motion_play"
                     text: Translation.tr("Enable focus animation")
                     checked: !Config.options.overview || Config.options.overview.focusAnimationEnable !== false

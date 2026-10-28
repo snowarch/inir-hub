@@ -94,6 +94,7 @@ ContentPage {
             }
 
             SettingsSwitch {
+                configPath: "idle.lockBeforeSleep"
                 buttonIcon: "lock_clock"
                 text: Translation.tr("Lock before sleep")
                 checked: Config.options?.idle?.lockBeforeSleep ?? true
@@ -105,6 +106,7 @@ ContentPage {
 
             // Battery profile is meaningless without a battery.
             SettingsSwitch {
+                configPath: "idle.onBattery.enable"
                 visible: Battery.available
                 buttonIcon: "battery_saver"
                 text: Translation.tr("Separate timeouts on battery")
@@ -272,6 +274,7 @@ ContentPage {
             }
 
             SettingsSwitch {
+                configPath: "hotspot.band"
                 text: Translation.tr("Use 5 GHz band")
                 checked: (Config.options?.hotspot?.band ?? "bg") === "a"
                 onCheckedChanged: Config.setNestedValue("hotspot.band", checked ? "a" : "bg")
@@ -349,6 +352,7 @@ ContentPage {
             }
 
             SettingsSwitch {
+                configPath: "search.sloppy"
                 text: Translation.tr("Use Levenshtein distance-based algorithm instead of fuzzy")
                 checked: Config.options?.search?.sloppy ?? false
                 onCheckedChanged: {
@@ -523,6 +527,7 @@ ContentPage {
             }
 
             SettingsSwitch {
+                configPath: "shellUpdates.enabled"
                 buttonIcon: "toggle_on"
                 text: Translation.tr("Enable shell update checker")
                 checked: Config.options?.shellUpdates?.enabled ?? true
@@ -545,6 +550,7 @@ ContentPage {
             }
 
             SettingsSwitch {
+                configPath: "shellUpdates.openTerminalOnUpdate"
                 buttonIcon: "terminal"
                 text: Translation.tr("Open terminal during update")
                 checked: Config.options?.shellUpdates?.openTerminalOnUpdate ?? true
@@ -1013,6 +1019,7 @@ ContentPage {
             }
 
             SettingsSwitch {
+                configPath: "bar.weather.enable"
                 buttonIcon: "toggle_on"
                 text: Translation.tr("Enable weather service")
                 checked: Config.options?.bar?.weather?.enable ?? false
@@ -1020,6 +1027,7 @@ ContentPage {
             }
 
             SettingsSwitch {
+                configPath: "bar.modules.weather"
                 buttonIcon: "view_timeline"
                 text: Translation.tr("Show in top bar")
                 checked: Config.options?.bar?.modules?.weather ?? false
@@ -1028,6 +1036,7 @@ ContentPage {
             }
 
             SettingsSwitch {
+                configPath: "bar.weather.hideLocation"
                 buttonIcon: "visibility_off"
                 text: Translation.tr("Hide weather location")
                 checked: Config.options?.bar?.weather?.hideLocation ?? false
@@ -1129,6 +1138,7 @@ ContentPage {
             }
 
             SettingsSwitch {
+                configPath: "bar.weather.enableGPS"
                 buttonIcon: "my_location"
                 text: Translation.tr("Use GPS location (requires geoclue)")
                 checked: Config.options?.bar?.weather?.enableGPS ?? false
@@ -1151,6 +1161,7 @@ ContentPage {
             }
 
             SettingsSwitch {
+                configPath: "bar.weather.useUSCS"
                 buttonIcon: "thermometer"
                 text: Translation.tr("Use Fahrenheit (°F)")
                 checked: Config.options?.bar?.weather?.useUSCS ?? false
@@ -1185,6 +1196,7 @@ ContentPage {
 
         SettingsGroup {
             SettingsSwitch {
+                configPath: "calendar.externalSync.enable"
                 buttonIcon: "sync"
                 text: Translation.tr("Enable external calendar sync")
                 checked: Config.options?.calendar?.externalSync?.enable ?? false
@@ -1204,6 +1216,7 @@ ContentPage {
             }
 
             SettingsSwitch {
+                configPath: "calendar.showUpcoming"
                 buttonIcon: "event"
                 text: Translation.tr("Show upcoming events below calendar")
                 checked: Config.options?.calendar?.showUpcoming ?? true

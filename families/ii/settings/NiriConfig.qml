@@ -1682,6 +1682,7 @@ ContentPage {
             }
 
             SettingsSwitch {
+                configPath: "compositor.autoExpandSingleTilingWindow"
                 Layout.fillWidth: true
                 buttonIcon: "fullscreen"
                 text: Translation.tr("Auto-expand a single tiling window")

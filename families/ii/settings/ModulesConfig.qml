@@ -1134,6 +1134,7 @@ ContentPage {
                 }
 
                 SettingsSwitch {
+                    configPath: "wallpaperSelector.coverflowView"
                     visible: (Config.options?.wallpaperSelector?.style ?? "grid") === "coverflow"
                     buttonIcon: "view_array"
                     text: Translation.tr("Skew view (parallelogram cards)")
@@ -1149,6 +1150,7 @@ ContentPage {
                 title: Translation.tr("Behavior")
 
                 SettingsSwitch {
+                    configPath: "wallpaperSelector.useSystemFileDialog"
                     buttonIcon: "open_in_new"
                     text: Translation.tr("Use system file picker")
                     checked: Config.options?.wallpaperSelector?.useSystemFileDialog ?? false
@@ -1182,6 +1184,7 @@ ContentPage {
             }
 
             SettingsSwitch {
+                configPath: "settingsUi.easyMode"
                 buttonIcon: "school"
                 text: Translation.tr("Easy mode (essentials only)")
                 checked: Config.options?.settingsUi?.easyMode ?? false

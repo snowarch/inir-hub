@@ -2069,6 +2069,7 @@ ContentPage {
                     ConfigRow {
                         uniform: true
                         SettingsSwitch {
+                            configPath: "bar.autoHide.showWhenPressingSuper.enable"
                             buttonIcon: "keyboard_command_key"
                             text: Translation.tr("Peek on Super press")
                             checked: Config.options?.bar?.autoHide?.showWhenPressingSuper?.enable ?? true
@@ -2082,6 +2083,7 @@ ContentPage {
                             }
                         }
                         SettingsSwitch {
+                            configPath: "bar.autoHide.pushWindows"
                             buttonIcon: "open_in_full"
                             text: Translation.tr("Push windows when shown")
                             checked: Config.options?.bar?.autoHide?.pushWindows ?? false
@@ -2097,6 +2099,7 @@ ContentPage {
             SettingsDivider {}
 
             SettingsSwitch {
+                configPath: "bar.showBackground"
                 buttonIcon: "layers"
                 text: Translation.tr("Show background")
                 checked: Config.options?.bar?.showBackground ?? true
@@ -2107,6 +2110,7 @@ ContentPage {
             }
 
             SettingsSwitch {
+                configPath: "bar.showScrollHints"
                 buttonIcon: "touch_app"
                 text: Translation.tr("Show scroll hints")
                 checked: Config.options?.bar?.showScrollHints ?? true
@@ -2117,6 +2121,7 @@ ContentPage {
             }
 
             SettingsSwitch {
+                configPath: "bar.verbose"
                 buttonIcon: "unfold_more"
                 text: Translation.tr("Verbose mode")
                 checked: Config.options?.bar?.verbose ?? true
@@ -2248,6 +2253,7 @@ ContentPage {
             }
 
             SettingsSwitch {
+                configPath: "bar.floatStyleShadow"
                 buttonIcon: "deployed_code"
                 text: Translation.tr("Float style drop shadow")
                 checked: Config.options?.bar?.floatStyleShadow ?? true
@@ -2308,6 +2314,7 @@ ContentPage {
             SettingsDivider {}
 
             SettingsSwitch {
+                configPath: "bar.vignette.enabled"
                 buttonIcon: "vignette"
                 text: Translation.tr("Vignette effect")
                 checked: root.hasVignette
@@ -2371,6 +2378,7 @@ ContentPage {
 
                 SettingsGroup {
                     SettingsSwitch {
+                        configPath: "bar.modules.taskbar"
                         visible: root.taskbarModeSupported
                         buttonIcon: "dock_to_bottom"
                         text: Translation.tr("Taskbar (apps in bar)")
@@ -2385,6 +2393,7 @@ ContentPage {
                     }
 
                     SettingsSwitch {
+                        configPath: "bar.activeWindow.showTitle"
                         visible: (Config.options?.bar?.modules?.activeWindow ?? true)
                             && (!root.taskbarModeSupported || !(Config.options?.bar?.modules?.taskbar ?? false))
                         buttonIcon: "subtitles"
@@ -2535,12 +2544,14 @@ ContentPage {
             ConfigRow {
                 uniform: true
                 SettingsSwitch {
+                    configPath: "bar.resources.showMemoryIndicator"
                     buttonIcon: "memory"
                     text: Translation.tr("Show RAM indicator")
                     checked: Config.options?.bar?.resources?.showMemoryIndicator ?? true
                     onCheckedChanged: Config.setNestedValue("bar.resources.showMemoryIndicator", checked)
                 }
                 SettingsSwitch {
+                    configPath: "bar.resources.showTempIndicator"
                     buttonIcon: "thermostat"
                     text: Translation.tr("Show temp indicator")
                     checked: Config.options?.bar?.resources?.showTempIndicator ?? true
@@ -2551,12 +2562,14 @@ ContentPage {
             ConfigRow {
                 uniform: true
                 SettingsSwitch {
+                    configPath: "bar.resources.showCpuIndicator"
                     buttonIcon: "planner_review"
                     text: Translation.tr("Show CPU indicator")
                     checked: Config.options?.bar?.resources?.showCpuIndicator ?? true
                     onCheckedChanged: Config.setNestedValue("bar.resources.showCpuIndicator", checked)
                 }
                 SettingsSwitch {
+                    configPath: "bar.resources.showGpuIndicator"
                     buttonIcon: "videocam"
                     text: Translation.tr("Show GPU indicator")
                     checked: Config.options?.bar?.resources?.showGpuIndicator ?? true
@@ -2567,6 +2580,7 @@ ContentPage {
             ConfigRow {
                 uniform: true
                 SettingsSwitch {
+                    configPath: "bar.resources.showSwapIndicator"
                     buttonIcon: "swap_horiz"
                     text: Translation.tr("Show swap indicator")
                     checked: Config.options?.bar?.resources?.showSwapIndicator ?? true
@@ -2580,12 +2594,14 @@ ContentPage {
             ConfigRow {
                 uniform: true
                 SettingsSwitch {
+                    configPath: "bar.resources.alwaysShowCpu"
                     buttonIcon: "visibility"
                     text: Translation.tr("Always show CPU")
                     checked: Config.options?.bar?.resources?.alwaysShowCpu ?? true
                     onCheckedChanged: Config.setNestedValue("bar.resources.alwaysShowCpu", checked)
                 }
                 SettingsSwitch {
+                    configPath: "bar.resources.alwaysShowGpu"
                     buttonIcon: "visibility"
                     text: Translation.tr("Always show GPU")
                     checked: Config.options?.bar?.resources?.alwaysShowGpu ?? true
@@ -2596,6 +2612,7 @@ ContentPage {
             ConfigRow {
                 uniform: true
                 SettingsSwitch {
+                    configPath: "bar.resources.alwaysShowTemp"
                     buttonIcon: "visibility"
                     text: Translation.tr("Always show temp")
                     checked: Config.options?.bar?.resources?.alwaysShowTemp ?? true
@@ -2755,6 +2772,7 @@ ContentPage {
             ConfigRow {
                 uniform: true
                 SettingsSwitch {
+                    configPath: "bar.workspaces.alwaysShowNumbers"
                     buttonIcon: "counter_1"
                     text: Translation.tr("Always show numbers")
                     checked: Config.options?.bar?.workspaces?.alwaysShowNumbers ?? false
@@ -2764,6 +2782,7 @@ ContentPage {
                     }
                 }
                 SettingsSwitch {
+                    configPath: "bar.workspaces.showAppIcons"
                     buttonIcon: "award_star"
                     text: Translation.tr("Show app icons")
                     checked: Config.options?.bar?.workspaces?.showAppIcons ?? true
@@ -2774,6 +2793,7 @@ ContentPage {
             ConfigRow {
                 uniform: true
                 SettingsSwitch {
+                    configPath: "bar.workspaces.monochromeIcons"
                     buttonIcon: "colors"
                     text: Translation.tr("Tint app icons")
                     checked: Config.options?.bar?.workspaces?.monochromeIcons ?? true
@@ -2782,6 +2802,7 @@ ContentPage {
                     opacity: enabled ? 1 : 0.5
                 }
                 SettingsSwitch {
+                    configPath: "bar.workspaces.dynamicCount"
                     buttonIcon: "dynamic_feed"
                     text: Translation.tr("Dynamic count")
                     checked: Config.options?.bar?.workspaces?.dynamicCount ?? true
@@ -2793,6 +2814,7 @@ ContentPage {
             }
 
             SettingsSwitch {
+                configPath: "bar.workspaces.wrapAround"
                 buttonIcon: "all_inclusive"
                 text: Translation.tr("Wrap around")
                 checked: Config.options?.bar?.workspaces?.wrapAround ?? true
@@ -2803,6 +2825,7 @@ ContentPage {
             }
 
             SettingsSwitch {
+                configPath: "bar.workspaces.perMonitor"
                 buttonIcon: "desktop_windows"
                 text: Translation.tr("Per-monitor")
                 checked: Config.options?.bar?.workspaces?.perMonitor ?? true
@@ -2814,6 +2837,7 @@ ContentPage {
             }
 
             SettingsSwitch {
+                configPath: "bar.workspaces.invertScroll"
                 buttonIcon: "swap_vert"
                 text: Translation.tr("Invert scroll")
                 checked: Config.options?.bar?.workspaces?.invertScroll ?? false
@@ -2832,6 +2856,7 @@ ContentPage {
                     uniform: true
 
                     SettingsSwitch {
+                        configPath: "bar.workspaces.automaticIndicatorColor"
                         buttonIcon: "auto_awesome"
                         text: Translation.tr("Automatic")
                         checked: Config.options?.bar?.workspaces?.automaticIndicatorColor ?? true
@@ -2979,6 +3004,7 @@ ContentPage {
 
         SettingsGroup {
             SettingsSwitch {
+                configPath: "bar.tray.invertPinnedItems"
                 buttonIcon: "keep"
                 text: Translation.tr("Pin icons by default")
                 checked: Config.options?.bar?.tray?.invertPinnedItems ?? true
@@ -2989,6 +3015,7 @@ ContentPage {
             }
 
             SettingsSwitch {
+                configPath: "bar.tray.monochromeIcons"
                 buttonIcon: "colors"
                 text: Translation.tr("Tint icons")
                 checked: Config.options?.bar?.tray?.monochromeIcons ?? true
@@ -2999,6 +3026,7 @@ ContentPage {
             }
 
             SettingsSwitch {
+                configPath: "bar.tray.showItemId"
                 buttonIcon: "bug_report"
                 text: Translation.tr("Show item ID in tooltip")
                 checked: Config.options?.bar?.tray?.showItemId ?? false
@@ -3042,12 +3070,14 @@ ContentPage {
             ConfigRow {
                 uniform: true
                 SettingsSwitch {
+                    configPath: "bar.utilButtons.showScreenSnip"
                     buttonIcon: "content_cut"
                     text: Translation.tr("Screen snip")
                     checked: Config.options?.bar?.utilButtons?.showScreenSnip ?? true
                     onCheckedChanged: Config.setNestedValue("bar.utilButtons.showScreenSnip", checked)
                 }
                 SettingsSwitch {
+                    configPath: "bar.utilButtons.showScreenRecord"
                     buttonIcon: "videocam"
                     text: Translation.tr("Screen record")
                     checked: Config.options?.bar?.utilButtons?.showScreenRecord ?? true
@@ -3058,6 +3088,7 @@ ContentPage {
             ConfigRow {
                 uniform: true
                 SettingsSwitch {
+                    configPath: "bar.utilButtons.showScreenCast"
                     buttonIcon: "visibility"
                     text: Translation.tr("Screen cast")
                     checked: Config.options?.bar?.utilButtons?.showScreenCast ?? false
@@ -3067,6 +3098,7 @@ ContentPage {
                     }
                 }
                 SettingsSwitch {
+                    configPath: "bar.utilButtons.showColorPicker"
                     buttonIcon: "colorize"
                     text: Translation.tr("Color picker")
                     checked: Config.options?.bar?.utilButtons?.showColorPicker ?? false
@@ -3077,6 +3109,7 @@ ContentPage {
             ConfigRow {
                 uniform: true
                 SettingsSwitch {
+                    configPath: "bar.utilButtons.showNotepad"
                     buttonIcon: "edit_note"
                     text: Translation.tr("Notepad")
                     checked: Config.options?.bar?.utilButtons?.showNotepad ?? true
@@ -3120,12 +3153,14 @@ ContentPage {
             ConfigRow {
                 uniform: true
                 SettingsSwitch {
+                    configPath: "bar.utilButtons.showKeyboardToggle"
                     buttonIcon: "keyboard"
                     text: Translation.tr("Virtual keyboard")
                     checked: Config.options?.bar?.utilButtons?.showKeyboardToggle ?? true
                     onCheckedChanged: Config.setNestedValue("bar.utilButtons.showKeyboardToggle", checked)
                 }
                 SettingsSwitch {
+                    configPath: "bar.utilButtons.showKeyboardLayoutSwitch"
                     buttonIcon: "language"
                     text: Translation.tr("Keyboard layout switch")
                     checked: Config.options?.bar?.utilButtons?.showKeyboardLayoutSwitch ?? false
@@ -3136,12 +3171,14 @@ ContentPage {
             ConfigRow {
                 uniform: true
                 SettingsSwitch {
+                    configPath: "bar.utilButtons.showMicToggle"
                     buttonIcon: "mic"
                     text: Translation.tr("Mic toggle")
                     checked: Config.options?.bar?.utilButtons?.showMicToggle ?? false
                     onCheckedChanged: Config.setNestedValue("bar.utilButtons.showMicToggle", checked)
                 }
                 SettingsSwitch {
+                    configPath: "bar.utilButtons.showDarkModeToggle"
                     buttonIcon: "dark_mode"
                     text: Translation.tr("Dark/Light mode")
                     checked: Config.options?.bar?.utilButtons?.showDarkModeToggle ?? true
@@ -3152,6 +3189,7 @@ ContentPage {
             ConfigRow {
                 uniform: true
                 SettingsSwitch {
+                    configPath: "bar.utilButtons.showPerformanceProfileToggle"
                     buttonIcon: "speed"
                     text: Translation.tr("Power profile")
                     checked: Config.options?.bar?.utilButtons?.showPerformanceProfileToggle ?? false
@@ -3177,6 +3215,7 @@ ContentPage {
 
         SettingsGroup {
             SettingsSwitch {
+                configPath: "bar.indicators.notifications.showUnreadCount"
                 buttonIcon: "counter_2"
                 text: Translation.tr("Show unread count")
                 checked: Config.options?.bar?.indicators?.notifications?.showUnreadCount ?? false

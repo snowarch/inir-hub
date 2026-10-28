@@ -101,6 +101,14 @@ QtObject {
         return Config.getNestedValue(spec.path, spec.fallback)
     }
     function commit(spec: var, next: var): void { root.write(spec, next) }
+    // Back to factory at once, with the way back on the Undo notice.
+    function restore(specs: var, what: string): void {
+        const before = specs.filter(spec => root.modified(spec))
+            .map(spec => ({ spec: spec, value: JSON.parse(JSON.stringify(root.currentValue(spec) ?? null)) }))
+        if (before.length === 0) return
+        before.forEach(item => root.commit(item.spec, item.spec.fallback))
+        Undo.offer(Translation.tr("Reset %1").arg(what), () => before.forEach(item => root.commit(item.spec, item.value)))
+    }
     function write(spec: var, next: var): void {
         // A family switch goes through the shell's transition, never a bare config write.
         if (spec.path === "panelFamily") Quickshell.execDetached([Quickshell.shellPath("scripts/inir"), "panelFamily", "set", String(next)])

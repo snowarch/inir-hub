@@ -114,6 +114,7 @@ WSettingsPage {
         }
 
         WSettingsSwitch {
+            configPath: "background.multiMonitor.enable"
             label: Translation.tr("Per-monitor wallpapers")
             icon: "settings-cog-multiple"
             description: Translation.tr("Set different wallpapers for each monitor")
@@ -156,6 +157,7 @@ WSettingsPage {
         }
 
         WSettingsDropdown {
+            configPath: "wallpaperSelector.style"
             label: Translation.tr("Wallpaper selector")
             icon: "image"
             description: Translation.tr("Choose how the wallpaper library opens")
@@ -901,6 +903,7 @@ WSettingsPage {
 
                         // Derive theme colors from backdrop
                         WSettingsSwitch {
+                            configPath: "appearance.wallpaperTheming.useBackdropForColors"
                             visible: root.wBackdrop.enable ?? true
                             label: Translation.tr("Derive theme colors from backdrop")
                             icon: "eyedropper"
@@ -1323,6 +1326,7 @@ WSettingsPage {
                 }
 
                 WSettingsSwitch {
+                    configPath: "appearance.wallpaperTheming.useBackdropForColors"
                     visible: root.wBackdrop.enable ?? true
                     label: Translation.tr("Derive theme colors from backdrop")
                     icon: "eyedropper"
@@ -1473,6 +1477,7 @@ WSettingsPage {
                     }
 
                     WSettingsDropdown {
+                        configPath: "waffles.background.widgets.clock.style"
                         label: Translation.tr("Clock style")
                         icon: "options"
                         description: Translation.tr("Choose how prominent the wallpaper clock feels")
@@ -1486,6 +1491,7 @@ WSettingsPage {
                     }
 
                     WSettingsDropdown {
+                        configPath: "waffles.background.widgets.clock.timeFormat"
                         label: Translation.tr("Time format")
                         icon: "schedule"
                         description: Translation.tr("Follow the global clock format or override it for the wallpaper clock")
@@ -1515,6 +1521,7 @@ WSettingsPage {
                     }
 
                     WSettingsDropdown {
+                        configPath: "waffles.background.widgets.clock.dateStyle"
                         visible: root.wClock.showDate ?? true
                         label: Translation.tr("Date style")
                         icon: "list"
@@ -1530,6 +1537,7 @@ WSettingsPage {
                     }
 
                     WSettingsDropdown {
+                        configPath: "waffles.background.widgets.clock.colorMode"
                         label: Translation.tr("Color tone")
                         icon: "eyedropper"
                         description: Translation.tr("Blend with wallpaper colors or keep the text neutral")

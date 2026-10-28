@@ -21,6 +21,7 @@ WSettingsPage {
         icon: "speaker-2-filled"
         
         WSettingsSwitch {
+            configPath: "audio.protection.enable"
             label: Translation.tr("Volume protection")
             icon: "speaker-mute"
             description: Translation.tr("Limit volume to prevent hearing damage")
@@ -29,6 +30,7 @@ WSettingsPage {
         }
         
         WSettingsSpinBox {
+            configPath: "audio.protection.maxAllowed"
             visible: Config.options?.audio?.protection?.enable ?? false
             label: Translation.tr("Maximum volume")
             icon: "speaker-1"
@@ -39,6 +41,7 @@ WSettingsPage {
         }
         
         WSettingsSpinBox {
+            configPath: "audio.protection.maxAllowedIncrease"
             visible: Config.options?.audio?.protection?.enable ?? false
             label: Translation.tr("Max increase per step")
             icon: "speaker-1"
@@ -55,6 +58,7 @@ WSettingsPage {
         icon: "battery-full"
         
         WSettingsSpinBox {
+            configPath: "battery.low"
             label: Translation.tr("Low battery warning")
             icon: "battery-warning"
             suffix: "%"
@@ -64,6 +68,7 @@ WSettingsPage {
         }
         
         WSettingsSpinBox {
+            configPath: "battery.critical"
             label: Translation.tr("Critical battery")
             icon: "battery-0"
             description: Translation.tr("Auto-suspend threshold")
@@ -74,6 +79,7 @@ WSettingsPage {
         }
         
         WSettingsSwitch {
+            configPath: "battery.notifyFull"
             label: Translation.tr("Full battery notification")
             icon: "battery-charge"
             checked: Config.options?.battery?.notifyFull ?? true
@@ -81,6 +87,7 @@ WSettingsPage {
         }
 
         WSettingsSwitch {
+            configPath: "battery.chargeLimit.enable"
             property bool _ready: false
             label: Translation.tr("Charge limit")
             icon: "battery-saver"
@@ -99,6 +106,7 @@ WSettingsPage {
         }
 
         WSettingsSpinBox {
+            configPath: "battery.chargeLimit.threshold"
             property bool _ready: false
             visible: Battery.chargeLimitAdjustable
             enabled: Config.options?.battery?.chargeLimit?.enable ?? false
@@ -120,6 +128,7 @@ WSettingsPage {
         icon: "globe-search"
         
         WSettingsSwitch {
+            configPath: "time.secondPrecision"
             label: Translation.tr("Show seconds")
             icon: "timer"
             description: Translation.tr("Display seconds in clock")
@@ -128,6 +137,7 @@ WSettingsPage {
         }
 
         WSettingsTextField {
+            configPath: "time.dateFormat"
             label: Translation.tr("Long date format")
             icon: "schedule"
             description: Translation.tr("Used by clocks and full date labels. Example: dddd, MMMM dd")
@@ -137,6 +147,7 @@ WSettingsPage {
         }
 
         WSettingsTextField {
+            configPath: "time.shortDateFormat"
             label: Translation.tr("Short date format")
             icon: "schedule"
             description: Translation.tr("Used by compact date surfaces. Example: dd/MM")
@@ -146,6 +157,7 @@ WSettingsPage {
         }
         
         WSettingsDropdown {
+            configPath: "language.ui"
             label: Translation.tr("Language")
             icon: "globe-search"
             currentValue: Config.options?.language?.ui ?? "auto"
@@ -165,6 +177,7 @@ WSettingsPage {
         icon: "keyboard"
 
         WSettingsSwitch {
+            configPath: "keyboardIndicators.showPopup"
             label: Translation.tr("Keyboard popups")
             icon: "keyboard"
             description: Translation.tr("Show a popup when Caps Lock, Num Lock, or the keyboard layout changes")
@@ -173,6 +186,7 @@ WSettingsPage {
         }
 
         WSettingsSwitch {
+            configPath: "keyboardIndicators.popup.layout"
             label: Translation.tr("Layout popup")
             icon: "keyboard"
             description: Translation.tr("Show a popup when the keyboard layout changes")
@@ -181,6 +195,7 @@ WSettingsPage {
         }
 
         WSettingsSwitch {
+            configPath: "keyboardIndicators.popup.caps"
             label: Translation.tr("Caps Lock popup")
             icon: "key"
             description: Translation.tr("Show a popup when Caps Lock changes")
@@ -189,6 +204,7 @@ WSettingsPage {
         }
 
         WSettingsSwitch {
+            configPath: "keyboardIndicators.popup.num"
             label: Translation.tr("Num Lock popup")
             icon: "keyboard-dock"
             description: Translation.tr("Show a popup when Num Lock changes")
@@ -197,6 +213,7 @@ WSettingsPage {
         }
 
         WSettingsSwitch {
+            configPath: "keyboardIndicators.showPanel"
             label: Translation.tr("Keyboard panel indicators")
             icon: "keyboard-dock"
             description: Translation.tr("Show layout and lock state indicators in the bar or taskbar")
@@ -205,6 +222,7 @@ WSettingsPage {
         }
 
         WSettingsSwitch {
+            configPath: "keyboardIndicators.panel.layout"
             label: Translation.tr("Layout indicator")
             icon: "keyboard"
             description: Translation.tr("Show the current keyboard layout in the taskbar")
@@ -213,6 +231,7 @@ WSettingsPage {
         }
 
         WSettingsSwitch {
+            configPath: "keyboardIndicators.panel.caps"
             label: Translation.tr("Caps Lock indicator")
             icon: "key"
             description: Translation.tr("Show Caps Lock in the taskbar")
@@ -221,6 +240,7 @@ WSettingsPage {
         }
 
         WSettingsSwitch {
+            configPath: "keyboardIndicators.panel.num"
             label: Translation.tr("Num Lock indicator")
             icon: "keyboard-dock"
             description: Translation.tr("Show Num Lock in the taskbar")
@@ -248,6 +268,7 @@ WSettingsPage {
         icon: "app-generic"
         
         WSettingsSwitch {
+            configPath: "closeConfirm.enabled"
             visible: CompositorService.isNiri
             label: Translation.tr("Confirm before closing")
             icon: "shield"
@@ -257,6 +278,7 @@ WSettingsPage {
         }
 
         WSettingsSwitch {
+            configPath: "compositor.autoExpandSingleTilingWindow"
             visible: CompositorService.isNiri
             label: Translation.tr("Auto-expand a single tiling window")
             icon: "auto"
@@ -266,6 +288,7 @@ WSettingsPage {
         }
         
         WSettingsSwitch {
+            configPath: "sounds.battery"
             label: Translation.tr("Battery sounds")
             icon: "speaker"
             checked: Config.options?.sounds?.battery ?? false
@@ -273,6 +296,7 @@ WSettingsPage {
         }
         
         WSettingsSwitch {
+            configPath: "sounds.notifications"
             label: Translation.tr("Notification sounds")
             icon: "music-note-2"
             checked: Config.options?.sounds?.notifications ?? true
@@ -280,6 +304,7 @@ WSettingsPage {
         }
 
         WSettingsSpinBox {
+            configPath: "sounds.volume"
             label: Translation.tr("Sound volume")
             icon: "speaker-1"
             suffix: "%"
@@ -323,6 +348,7 @@ WSettingsPage {
         icon: "weather-moon"
         
         WSettingsSpinBox {
+            configPath: "idle.screenOffTimeout"
             label: Translation.tr("Screen off timeout")
             icon: "flash-off"
             description: Translation.tr("Turn off screen after inactivity (0 = never)")
@@ -333,6 +359,7 @@ WSettingsPage {
         }
         
         WSettingsSpinBox {
+            configPath: "idle.lockTimeout"
             label: Translation.tr("Lock timeout")
             icon: "lock-closed"
             description: Translation.tr("Lock screen after inactivity (0 = never)")
@@ -343,6 +370,7 @@ WSettingsPage {
         }
         
         WSettingsSpinBox {
+            configPath: "idle.suspendTimeout"
             label: Translation.tr("Suspend timeout")
             icon: "weather-moon"
             description: Translation.tr("Suspend after inactivity (0 = never)")
@@ -353,6 +381,7 @@ WSettingsPage {
         }
         
         WSettingsSwitch {
+            configPath: "idle.lockBeforeSleep"
             label: Translation.tr("Lock before sleep")
             icon: "lock-closed"
             description: Translation.tr("Lock screen before suspending")
@@ -362,6 +391,7 @@ WSettingsPage {
 
         // Battery profile is meaningless without a battery.
         WSettingsSwitch {
+            configPath: "idle.onBattery.enable"
             visible: Battery.available
             label: Translation.tr("Separate timeouts on battery")
             icon: "battery-5"
@@ -371,6 +401,7 @@ WSettingsPage {
         }
 
         WSettingsSpinBox {
+            configPath: "idle.onBattery.screenOffTimeout"
             visible: Battery.available
             enabled: Config.options?.idle?.onBattery?.enable ?? false
             label: Translation.tr("Battery: screen off")
@@ -382,6 +413,7 @@ WSettingsPage {
         }
 
         WSettingsSpinBox {
+            configPath: "idle.onBattery.lockTimeout"
             visible: Battery.available
             enabled: Config.options?.idle?.onBattery?.enable ?? false
             label: Translation.tr("Battery: lock")
@@ -393,6 +425,7 @@ WSettingsPage {
         }
 
         WSettingsSpinBox {
+            configPath: "idle.onBattery.suspendTimeout"
             visible: Battery.available
             enabled: Config.options?.idle?.onBattery?.enable ?? false
             label: Translation.tr("Battery: suspend")
@@ -409,6 +442,7 @@ WSettingsPage {
         icon: "games"
         
         WSettingsSwitch {
+            configPath: "gameMode.autoDetect"
             label: Translation.tr("Auto-detect fullscreen")
             icon: "eye"
             description: Translation.tr("Enable game mode when apps go fullscreen")
@@ -417,6 +451,7 @@ WSettingsPage {
         }
         
         WSettingsSwitch {
+            configPath: "gameMode.disableAnimations"
             label: Translation.tr("Disable animations")
             icon: "wand"
             description: Translation.tr("Turn off UI animations in game mode")
@@ -425,6 +460,7 @@ WSettingsPage {
         }
         
         WSettingsSwitch {
+            configPath: "gameMode.disableEffects"
             label: Translation.tr("Disable effects")
             icon: "eye-off"
             description: Translation.tr("Turn off blur and shadows in game mode")
@@ -433,6 +469,7 @@ WSettingsPage {
         }
 
         WSettingsSwitch {
+            configPath: "gameMode.disableVisualizers"
             label: Translation.tr("Disable audio visualizers")
             icon: "music-note-2"
             description: Translation.tr("Stop Cava and hide audio visualizers while game mode is active")
@@ -441,6 +478,7 @@ WSettingsPage {
         }
 
         WSettingsSwitch {
+            configPath: "gameMode.disableNiriAnimations"
             label: Translation.tr("Disable Niri animations")
             icon: "pulse"
             description: Translation.tr("Turn off compositor animations in game mode")
@@ -449,6 +487,7 @@ WSettingsPage {
         }
 
         WSettingsSwitch {
+            configPath: "gameMode.disableDiscoverOverlay"
             visible: GameMode.discoverOverlayInstalled
             label: Translation.tr("Disable Discover overlay")
             icon: "headphones"
@@ -458,6 +497,7 @@ WSettingsPage {
         }
 
         WSettingsSwitch {
+            configPath: "gameMode.minimalMode"
             label: Translation.tr("Minimal mode")
             icon: "leaf-two"
             description: Translation.tr("Make shell surfaces lighter while game mode is active")
@@ -466,6 +506,7 @@ WSettingsPage {
         }
 
         WSettingsSwitch {
+            configPath: "gameMode.suppressNotifications"
             label: Translation.tr("Suppress notifications")
             icon: "alert-off"
             description: Translation.tr("Hide notification popups while game mode is active")
@@ -474,6 +515,7 @@ WSettingsPage {
         }
 
         WSettingsSwitch {
+            configPath: "gameMode.disableReloadToasts"
             label: Translation.tr("Hide reload toasts")
             icon: "alert-snooze"
             description: Translation.tr("Suppress reload notifications when Game Mode is active")
@@ -487,6 +529,7 @@ WSettingsPage {
         icon: "wifi-tethering"
 
         WSettingsTextField {
+            configPath: "hotspot.ssid"
             label: Translation.tr("Network name (SSID)")
             icon: "wifi-tethering"
             description: Translation.tr("The name your hotspot will broadcast")
@@ -495,6 +538,7 @@ WSettingsPage {
         }
 
         WSettingsTextField {
+            configPath: "hotspot.password"
             label: Translation.tr("Password")
             icon: "key"
             description: Translation.tr("WPA2 passphrase for the hotspot")
@@ -503,6 +547,7 @@ WSettingsPage {
         }
 
         WSettingsSwitch {
+            configPath: "hotspot.band"
             label: Translation.tr("Use 5 GHz band")
             icon: "pulse"
             description: Translation.tr("Use 5 GHz (802.11a) instead of 2.4 GHz. Requires adapter support.")
@@ -516,6 +561,7 @@ WSettingsPage {
         icon: "schedule"
 
         WSettingsSwitch {
+            configPath: "calendar.externalSync.enable"
             label: Translation.tr("External calendar sync")
             icon: "arrow-sync"
             description: Translation.tr("Sync events from external ICS/iCal URLs (Google Calendar, Outlook, etc.)")
@@ -524,6 +570,7 @@ WSettingsPage {
         }
 
         WSettingsSpinBox {
+            configPath: "calendar.externalSync.refreshMinutes"
             label: Translation.tr("Refresh interval")
             icon: "arrow-clockwise"
             description: Translation.tr("Minutes between calendar fetches")
@@ -536,6 +583,7 @@ WSettingsPage {
         }
 
         WSettingsSwitch {
+            configPath: "calendar.showUpcoming"
             label: Translation.tr("Show upcoming events")
             icon: "list"
             description: Translation.tr("Display upcoming events below the calendar")
@@ -544,6 +592,7 @@ WSettingsPage {
         }
 
         WSettingsSpinBox {
+            configPath: "calendar.upcomingDays"
             label: Translation.tr("Upcoming days")
             icon: "timer"
             description: Translation.tr("How many days ahead to show")
