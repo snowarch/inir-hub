@@ -29,6 +29,8 @@ Shortcuts, About, Monitors, Autostart, Workspace Strip, Mascot, AI, Effects, She
 - **Interface**: display scaling, notifications, the floating tools (**Super+G**), the on-screen display and the lock
   screen.
 - **Waffle Style**: Alt+Tab, Task View, Start, the Widgets panel, weather and the calendar.
+  In Alt+Tab, Tab and the arrows move the pick and the window switches when you let go of Alt or press Enter; Esc
+  leaves focus where it was. With Alt still held, the auto-hide delay switches to the pick on its own.
 - **Gowall**: recolours an image with your palette, pixelates or upscales it.
 
 ## Its looks

@@ -51,6 +51,8 @@ follow the wallpaper or a colour theme: [Colours and themes](THEMING_PRESETS.md)
 - Desktop widgets and their grid: **Settings › Widgets**.
 - Blur, glass and animations: **Settings › Effects**. See [Optimization](OPTIMIZATION.md).
 - Notifications, Alt+Tab and the floating tools (**Super+G**): **Settings › Panels**.
+  In Alt+Tab, Tab and the arrows move the pick and the window switches when you let go of Alt or press Enter; Esc
+  leaves focus where it was. With Alt still held, the auto-hide delay switches to the pick on its own.
 - Kira, the mascot: **Settings › Mascot**.
 - Clipboard history: **Super+V** opens it (it needs `cliphist`); **Settings › Modules** turns the panel on or off.
 - Screenshots, text and recording: **Super+Shift+S** opens the region toolbar. Where files go, the snip and the
