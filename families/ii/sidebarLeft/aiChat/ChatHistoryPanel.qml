@@ -115,7 +115,6 @@ Rectangle {
                 required property var modelData
                 readonly property bool isLastSession: modelData === "lastSession"
                 property bool renaming: false
-                property bool confirmingDelete: false
 
                 width: chatListView.width
                 implicitHeight: Math.max(40, rowContent.implicitHeight + 12)
@@ -133,7 +132,6 @@ Rectangle {
                         Ai.loadChat(chatRow.modelData);
                         root.requestClose();
                     }
-                    onExited: chatRow.confirmingDelete = false
                 }
 
                 RowLayout {
@@ -193,16 +191,9 @@ Rectangle {
 
                     AiMessageControlButton {
                         visible: !chatRow.renaming && rowMouseArea.containsMouse
-                        buttonIcon: chatRow.confirmingDelete ? "delete_forever" : "delete"
-                        activated: chatRow.confirmingDelete
-                        onClicked: {
-                            if (!chatRow.confirmingDelete) {
-                                chatRow.confirmingDelete = true;
-                                return;
-                            }
-                            Ai.deleteChat(chatRow.modelData);
-                        }
-                        StyledToolTip { text: chatRow.confirmingDelete ? Translation.tr("Click again to delete") : Translation.tr("Delete") }
+                        buttonIcon: "delete"
+                        onClicked: Ai.deleteChat(chatRow.modelData)
+                        StyledToolTip { text: Translation.tr("Delete") }
                     }
                 }
             }

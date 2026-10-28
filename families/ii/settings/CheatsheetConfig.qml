@@ -464,7 +464,7 @@ ContentPage {
         property bool canEdit: false
         property var keySubstitutions: ({})
 
-        // State: "display" | "editing" | "confirmDelete"
+        // State: "display" | "editing"
         property string editState: "display"
         property bool saving: false
         property string editError: ""
@@ -605,7 +605,7 @@ ContentPage {
                         implicitHeight: 26
                         buttonRadius: Appearance.rounding.small
                         colBackground: "transparent"
-                        releaseAction: () => { kbRow.editState = "confirmDelete" }
+                        releaseAction: () => NiriKeybinds.removeBind(kbRow.keyCombo)
                         contentItem: MaterialSymbol {
                             anchors.centerIn: parent
                             text: "delete"
@@ -761,47 +761,6 @@ ContentPage {
                                         buttonText: Translation.tr("Cancel")
                                         releaseAction: () => { kbRow.editError = ""; kbRow.editState = "display" }
                                     }
-                                }
-                            }
-                        }
-                    }
-
-                    // ── Confirm delete ───────────────────────────────────────
-                    SettingsTaskLoader {
-                        id: confirmDeleteLoader
-                        requested: kbRow.editState === "confirmDelete"
-
-                        sourceComponent: Component {
-                            RowLayout {
-                                spacing: 8
-                                Layout.bottomMargin: 4
-
-                                MaterialSymbol {
-                                    text: "warning"
-                                    iconSize: Appearance.font.pixelSize.normal
-                                    color: Appearance.colors.colError
-                                }
-
-                                StyledText {
-                                    Layout.fillWidth: true
-                                    text: Translation.tr("Remove keybind ") + kbRow.keyCombo + "?"
-                                    font.pixelSize: Appearance.font.pixelSize.small
-                                    color: Appearance.colors.colOnLayer1
-                                    wrapMode: Text.WordWrap
-                                }
-
-                                DialogButton {
-                                    buttonText: Translation.tr("Remove")
-                                    colText: Appearance.colors.colError
-                                    releaseAction: () => {
-                                        NiriKeybinds.removeBind(kbRow.keyCombo)
-                                        kbRow.editState = "display"
-                                    }
-                                }
-
-                                DialogButton {
-                                    buttonText: Translation.tr("Cancel")
-                                    releaseAction: () => { kbRow.editState = "display" }
                                 }
                             }
                         }

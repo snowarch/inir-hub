@@ -343,9 +343,8 @@ Flickable {
         required property var modelData
         required property int index
         property bool editing: false
-        property bool confirming: false
         width: parent ? parent.width : 0
-        implicitHeight: Math.round(40 * root.d) + (editorLoader.active ? editorLoader.implicitHeight : 0) + (bindRow.confirming ? confirmRow.implicitHeight + Math.round(10 * root.d) : 0)
+        implicitHeight: Math.round(40 * root.d) + (editorLoader.active ? editorLoader.implicitHeight : 0)
 
         HoverHandler { id: rowHover }
         Rectangle {
@@ -379,14 +378,14 @@ Flickable {
             IrisIconButton {
                 materialIcon: "edit"
                 iconSize: Math.round(16 * root.d)
-                onClicked: { bindRow.confirming = false; bindRow.editing = !bindRow.editing }
+                onClicked: bindRow.editing = !bindRow.editing
                 Accessible.name: Translation.tr("Edit")
             }
             IrisIconButton {
                 materialIcon: "delete"
                 iconSize: Math.round(16 * root.d)
                 danger: true
-                onClicked: { bindRow.editing = false; bindRow.confirming = !bindRow.confirming }
+                onClicked: NiriKeybinds.removeBind(bindRow.modelData.keyCombo)
                 Accessible.name: Translation.tr("Delete")
             }
         }
@@ -399,33 +398,6 @@ Flickable {
             Repeater {
                 model: [...(bindRow.modelData.mods ?? []), bindRow.modelData.key].filter(part => String(part).length > 0)
                 KeyCap { required property var modelData; keyText: modelData }
-            }
-        }
-        RowLayout {
-            id: confirmRow
-            visible: bindRow.confirming
-            anchors.left: parent.left
-            anchors.leftMargin: root.markInset
-            anchors.right: parent.right
-            anchors.rightMargin: 14 * root.d
-            y: Math.round(40 * root.d)
-            spacing: 8 * root.d
-            IrisText {
-                Layout.fillWidth: true
-                text: Translation.tr("Remove %1?").arg(bindRow.modelData.keyCombo)
-                font.pixelSize: IrisStyle.typeLabel
-                elide: Text.ElideRight
-            }
-            IrisButton {
-                text: Translation.tr("Cancel")
-                quiet: true
-                onClicked: bindRow.confirming = false
-            }
-            IrisButton {
-                text: Translation.tr("Remove")
-                danger: true
-                emphasized: true
-                onClicked: { NiriKeybinds.removeBind(bindRow.modelData.keyCombo); bindRow.confirming = false }
             }
         }
         Loader {
