@@ -251,7 +251,7 @@ Scope {
                     function onActiveContextMenuCountChanged(): void {
                         if (GlobalStates.activeContextMenuCount <= 0) {
                             barRoot.contextMenuHold = false
-                        } else if (barRoot.pointerShow) {
+                        } else if ((barRoot.pointerShow || barEdge.hovered)) {
                             barRoot.contextMenuHold = true
                         }
                     }
@@ -259,7 +259,7 @@ Scope {
                     function onSidebarLeftOpenChanged(): void {
                         if (!GlobalStates.sidebarLeftOpen) {
                             barRoot.leftSidebarHold = false
-                        } else if (barRoot.pointerShow
+                        } else if ((barRoot.pointerShow || barEdge.hovered)
                                 && GlobalStates.sidebarLeftPresentationOutput === barRoot.outputName) {
                             barRoot.leftSidebarHold = true
                         }
@@ -268,7 +268,7 @@ Scope {
                     function onSidebarRightOpenChanged(): void {
                         if (!GlobalStates.sidebarRightOpen) {
                             barRoot.rightSidebarHold = false
-                        } else if (barRoot.pointerShow
+                        } else if ((barRoot.pointerShow || barEdge.hovered)
                                 && GlobalStates.sidebarRightPresentationOutput === barRoot.outputName) {
                             barRoot.rightSidebarHold = true
                         }
@@ -277,14 +277,14 @@ Scope {
                     function onMediaControlsOpenChanged(): void {
                         if (!GlobalStates.mediaControlsOpen)
                             barRoot.mediaControlsHold = false
-                        else if (barRoot.pointerShow)
+                        else if ((barRoot.pointerShow || barEdge.hovered))
                             barRoot.mediaControlsHold = true
                     }
 
                     function onControlPanelOpenChanged(): void {
                         if (!GlobalStates.controlPanelOpen)
                             barRoot.controlPanelHold = false
-                        else if (barRoot.pointerShow)
+                        else if ((barRoot.pointerShow || barEdge.hovered))
                             barRoot.controlPanelHold = true
                     }
                 }
