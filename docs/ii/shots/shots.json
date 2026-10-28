@@ -25,8 +25,8 @@
    }
   ],
   "made": {
-   "base": "e797f712",
-   "ii": "56eb3c3"
+   "base": "9ff05b70",
+   "ii": "5714f9f"
   },
   "spec": "{\"alt\": \"Material's bar on each edge\", \"choose\": {\"label\": \"Bar\", \"options\": [{\"key\": \"top\", \"label\": \"Top\"}, {\"key\": \"bottom\", \"label\": \"Bottom\", \"steps\": [[\"config\", \"bar.bottom\", true]]}, {\"key\": \"vertical\", \"label\": \"Vertical\", \"steps\": [[\"config\", \"bar.bottom\", false], [\"config\", \"bar.vertical\", true]]}]}, \"family\": \"ii\"}"
  },
@@ -50,8 +50,8 @@
    }
   ],
   "made": {
-   "base": "e797f712",
-   "ii": "56eb3c3"
+   "base": "9ff05b70",
+   "ii": "5714f9f"
   },
   "spec": "{\"alt\": \"Material's two sidebars\", \"choose\": {\"label\": \"Sidebar\", \"options\": [{\"after\": [[\"ipc\", \"sidebarLeft\", \"close\"]], \"key\": \"left\", \"label\": \"Left\", \"steps\": [[\"ipc\", \"sidebarLeft\", \"open\"]]}, {\"after\": [[\"ipc\", \"sidebarRight\", \"close\"]], \"key\": \"right\", \"label\": \"Right\", \"steps\": [[\"ipc\", \"sidebarRight\", \"open\"]]}]}, \"family\": \"ii\"}"
  }

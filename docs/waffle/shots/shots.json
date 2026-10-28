@@ -19,8 +19,8 @@
    }
   ],
   "made": {
-   "base": "e797f712",
-   "waffle": "56eb3c3"
+   "base": "9ff05b70",
+   "waffle": "5714f9f"
   },
   "spec": "{\"alt\": \"Waffle's Action Center and Notification Center\", \"choose\": {\"label\": \"Panel\", \"options\": [{\"after\": [[\"ipc\", \"wactionCenter\", \"close\"]], \"key\": \"action\", \"label\": \"Action Center\", \"steps\": [[\"ipc\", \"wactionCenter\", \"open\"]]}, {\"after\": [[\"ipc\", \"wnotificationCenter\", \"close\"], [\"ipc\", \"notifications\", \"clearAll\"]], \"key\": \"notifications\", \"label\": \"Notifications\", \"steps\": [[\"ipc\", \"notifications\", \"test\"], [\"wait\", 1500], [\"ipc\", \"wnotificationCenter\", \"open\"]]}]}, \"family\": \"waffle\"}"
  },
@@ -44,8 +44,8 @@
    }
   ],
   "made": {
-   "base": "e797f712",
-   "waffle": "56eb3c3"
+   "base": "9ff05b70",
+   "waffle": "5714f9f"
   },
   "spec": "{\"alt\": \"Waffle's Start menu\", \"choose\": {\"label\": \"Taskbar\", \"options\": [{\"after\": [[\"ipc\", \"search\", \"close\"]], \"key\": \"center\", \"label\": \"Centered\", \"steps\": [[\"ipc\", \"search\", \"open\"]]}, {\"after\": [[\"ipc\", \"search\", \"close\"]], \"key\": \"left\", \"label\": \"Left\", \"steps\": [[\"config\", \"waffles.bar.leftAlignApps\", true], [\"wait\", 800], [\"ipc\", \"search\", \"open\"]]}]}, \"family\": \"waffle\"}"
  }
