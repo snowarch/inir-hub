@@ -9,11 +9,11 @@ import Quickshell.Services.UPower
 AndroidQuickToggleButton {
     id: root
 
-    // without a daemon PowerProfiles is never touched (Quickshell warns on it) and the button does nothing
+    // without a daemon (TLP and the like) the tile hides and PowerProfiles is never touched (Quickshell warns on it)
     readonly property int profile: PowerProfilePersistence.available ? PowerProfiles.profile : PowerProfile.Balanced
 
     name: Translation.tr("Power Profile")
-    enabled: PowerProfilePersistence.available
+    visible: PowerProfilePersistence.available
     toggled: root.profile !== PowerProfile.Balanced
     buttonIcon: switch(root.profile) {
         case PowerProfile.PowerSaver: return "energy_savings_leaf"
