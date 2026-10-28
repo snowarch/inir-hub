@@ -12,7 +12,7 @@ Item {
     implicitHeight: row.implicitHeight
 
     property var locale: {
-        const env = Quickshell.env("LC_TIME") || Quickshell.env("LC_ALL") || Quickshell.env("LANG") || ""
+        const env = Quickshell.env("LC_ALL") || Quickshell.env("LC_TIME") || Quickshell.env("LANG") || ""
         const cleaned = (env.split(".")[0] ?? "").split("@")[0] ?? ""
         return cleaned ? Qt.locale(cleaned) : Qt.locale()
     }
