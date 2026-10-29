@@ -578,18 +578,21 @@ WSettingsPage {
     // ── Wallpaper grid ─────────────────────────────────────────────────
     Rectangle {
         id: gridCard
-        Layout.fillWidth: true
+        // Cells come from the column's width, not the card's: a short folder (the three pictures a new install has)
+        // hugs its pictures, where a full-width plate left two thirds of it empty (10-29).
+        readonly property int itemCount: Wallpapers.folderModel?.count ?? 0
+        readonly property int cols: Math.max(1, Math.floor(((parent?.width ?? 0) - 12) / 140))
+        readonly property real cell: ((parent?.width ?? 0) - 12) / cols
+        readonly property bool hugs: itemCount > 0 && itemCount < cols && !root.isInSubfolder
+        Layout.fillWidth: !hugs
+        Layout.preferredWidth: hugs ? Math.ceil(itemCount * cell + 12) : -1
         Layout.preferredHeight: {
-            const itemCount = Wallpapers.folderModel?.count ?? 0
             const navH = root.isInSubfolder ? 36 : 0
             if (itemCount === 0)
                 return Math.max(160, navH + 80)
 
-            const cols = Math.max(1, Math.floor((width - 12) / 140))
-            const rows = Math.ceil(itemCount / cols)
-            const cellH = ((width - 12) / cols) * 0.625
             // ends at its last row: a short folder left a plate of air under its pictures (10-29)
-            return Math.min(380, rows * cellH + 12 + navH)
+            return Math.min(380, Math.ceil(itemCount / cols) * cell * 0.625 + 12 + navH)
         }
         radius: Looks.radius.large
         color: Looks.colors.bg1Base
@@ -687,9 +690,7 @@ WSettingsPage {
             model: Wallpapers.folderModelReady ? Wallpapers.folderModel : null
             Component.onCompleted: root.refreshGridThumbnails()
 
-            property int minCellWidth: 140
-            property int columns: Math.max(1, Math.floor(width / minCellWidth))
-            cellWidth: width / columns
+            cellWidth: gridCard.cell
             cellHeight: cellWidth * 0.625
 
             interactive: contentHeight > height
@@ -868,78 +869,6 @@ WSettingsPage {
         }
     }
 
-    // ── Color scheme chip strip ────────────────────────────────────────
-    Flow {
-        id: schemeChipStrip
-        Layout.fillWidth: true
-        spacing: 6
-
-        Repeater {
-            model: [
-                { value: "auto", name: Translation.tr("Auto") },
-                { value: "scheme-content", name: Translation.tr("Content") },
-                { value: "scheme-expressive", name: Translation.tr("Expressive") },
-                { value: "scheme-fidelity", name: Translation.tr("Fidelity") },
-                { value: "scheme-fruit-salad", name: Translation.tr("Fruit Salad") },
-                { value: "scheme-monochrome", name: Translation.tr("Monochrome") },
-                { value: "scheme-neutral", name: Translation.tr("Neutral") },
-                { value: "scheme-rainbow", name: Translation.tr("Rainbow") },
-                { value: "scheme-tonal-spot", name: Translation.tr("Tonal Spot") }
-            ]
-
-            Rectangle {
-                id: schemeChip
-                required property var modelData
-                required property int index
-
-                readonly property bool selected: root.currentScheme === modelData.value
-
-                width: schemeChipText.implicitWidth + 20
-                height: 28
-                radius: height / 2
-                color: schemeChip.selected
-                    ? Looks.colors.accent
-                    : schemeChipMa.containsMouse
-                        ? Looks.colors.bg2Hover
-                        : Looks.colors.bg1Base
-                border.width: schemeChip.selected ? 0 : 1
-                border.color: Looks.colors.bg1Border
-
-                Behavior on color {
-                    animation: ColorAnimation { duration: Looks.transition.enabled ? 70 : 0 }
-                }
-
-                WText {
-                    id: schemeChipText
-                    anchors.centerIn: parent
-                    text: schemeChip.modelData.name
-                    font.pixelSize: Looks.font.pixelSize.small
-                    font.weight: schemeChip.selected ? Looks.font.weight.strong : Looks.font.weight.regular
-                    color: schemeChip.selected ? Looks.colors.accentFg : Looks.colors.fg
-                }
-
-                MouseArea {
-                    id: schemeChipMa
-                    anchors.fill: parent
-                    hoverEnabled: true
-                    cursorShape: Qt.PointingHandCursor
-                    onClicked: {
-                        const val = schemeChip.modelData.value
-                        Config.setNestedValue("appearance.palette.type", val)
-                        if (!ThemeService.isAutoTheme) {
-                            // Manual preset: apply variant immediately
-                            const hex = MaterialThemeLoader.colorToHex(Appearance.m3colors.m3primary)
-                            const mode = Appearance.m3colors.darkmode ? "dark" : "light"
-                            MaterialThemeLoader.applySchemeVariant(hex, val, mode)
-                        }
-                        // Auto theme: ThemeService detects palette type change in
-                        // liveRegenSignature and regenerates automatically.
-                    }
-                }
-            }
-        }
-    }
-
     // ── Wallpaper & options ────────────────────────────────────────────
     WSettingsCard {
         title: Translation.tr("Wallpaper & Colors")
@@ -1036,10 +965,36 @@ WSettingsPage {
             }
         }
 
+        // Was a row of nine pills with no name above the card: one more answer at a card's right, as Windows does.
+        WSettingsDropdown {
+            label: Translation.tr("Palette type")
+            icon: "dark-theme"
+            description: Translation.tr("How colors are generated from wallpaper")
+            currentValue: root.currentScheme
+            options: [
+                { value: "auto", displayName: Translation.tr("Auto") },
+                { value: "scheme-content", displayName: Translation.tr("Content") },
+                { value: "scheme-expressive", displayName: Translation.tr("Expressive") },
+                { value: "scheme-fidelity", displayName: Translation.tr("Fidelity") },
+                { value: "scheme-fruit-salad", displayName: Translation.tr("Fruit Salad") },
+                { value: "scheme-monochrome", displayName: Translation.tr("Monochrome") },
+                { value: "scheme-neutral", displayName: Translation.tr("Neutral") },
+                { value: "scheme-rainbow", displayName: Translation.tr("Rainbow") },
+                { value: "scheme-tonal-spot", displayName: Translation.tr("Tonal Spot") }
+            ]
+            onSelected: newValue => {
+                Config.setNestedValue("appearance.palette.type", newValue)
+                // Auto theme: ThemeService sees the type change and regenerates by itself.
+                if (!ThemeService.isAutoTheme)
+                    MaterialThemeLoader.applySchemeVariant(MaterialThemeLoader.colorToHex(Appearance.m3colors.m3primary),
+                        newValue, Appearance.m3colors.darkmode ? "dark" : "light")
+            }
+        }
+
         WSettingsSpinBox {
             id: colorStrengthSpinBox
             label: Translation.tr("Color strength")
-            icon: "eyedropper"
+            icon: "color"
             description: Translation.tr("Controls how vivid wallpaper-derived accent colors are")
             suffix: "%"
             from: 60

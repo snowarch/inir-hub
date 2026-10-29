@@ -47,10 +47,9 @@ ClippingRectangle {
             : folder.split(/[-_\s]+/).filter(word => word.length > 0).map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(" ")
     }
     readonly property string name: SystemInfo.displayName || SystemInfo.username
-    // The welcome: a greeting in time with the day, who and where you are, and how far into the day it is.
+    // The welcome: a greeting in time with the day, who and where you are.
     readonly property date now: DateTime.clock.date
     readonly property int hour: card.now.getHours()
-    readonly property real dayFrac: (card.hour * 60 + card.now.getMinutes()) / 1440
     readonly property string greeting: card.hour >= 5 && card.hour < 12 ? Translation.tr("Good morning")
         : card.hour >= 12 && card.hour < 19 ? Translation.tr("Good afternoon")
         : card.hour >= 19 && card.hour < 24 ? Translation.tr("Good evening") : Translation.tr("Good night")
@@ -148,16 +147,6 @@ ClippingRectangle {
         Rectangle {
             anchors.fill: parent
             color: IrisStyle.veilStrong
-        }
-
-        // The day so far, along the stage's foot.
-        Rectangle {
-            anchors.left: parent.left
-            anchors.bottom: parent.bottom
-            width: Math.round(parent.width * card.dayFrac)
-            height: Math.max(2, Math.round(2 * card.d))
-            color: IrisStyle.accentOnMedia
-            opacity: 0.75
         }
 
         RectangularShadow {

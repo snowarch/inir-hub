@@ -24,7 +24,7 @@ Item {
         { value: "angel", name: Translation.tr("Angel"), line: Translation.tr("Glass, offset shadows, gold") },
         { value: "regalia", name: Translation.tr("Regalia"), line: Translation.tr("Dark, ivory and gold") },
         { value: "zzz", name: Translation.tr("ZZZ"), line: Translation.tr("Poster plates, cut corners") },
-        { value: "cookie", name: Translation.tr("Cookie Shapes"), line: Translation.tr("Expressive at its loudest") },
+        { value: "cookie", name: Translation.tr("Cookie"), line: Translation.tr("Expressive at its loudest") },
         { value: "editorial", name: Translation.tr("Editorial"), line: Translation.tr("Paper, ink and strong type") }
     ]
     readonly property real gap: 10

@@ -261,9 +261,9 @@ Item {
             }
 
             // A trailing value reads on the title's line, in the interface face: the title leads, the value answers.
-            // Cards and tiles name the picked one themselves.
+            // Cards and tiles name the picked one themselves, and so do source cards with their swatches.
             Loader {
-                active: root.swatched && !root.carded && !root.tiled
+                active: root.swatched && !root.carded && !root.tiled && root.spec.sources !== true
                 visible: active
                 Layout.alignment: root.inlineSwatch ? Qt.AlignVCenter : Qt.AlignTop
                 Layout.preferredHeight: root.inlineSwatch ? -1 : label.implicitHeight
@@ -1163,6 +1163,7 @@ Item {
                 ? root.choices.filter(choice => root.sourceRank.indexOf(String(choice.value)) >= 0)
                     .sort((a, b) => root.sourceRank.indexOf(String(a.value)) - root.sourceRank.indexOf(String(b.value))) : []
             readonly property var named: root.choices.filter(choice => swatchSet.sources.indexOf(choice) < 0)
+            property string hovered: ""
             readonly property real gap: Math.round(8 * root.d)
             // As many in a line as fit at a readable width; four that do not all fit sit two by two, never three and one.
             readonly property int fits: Math.max(1, Math.floor((width + gap) / (150 * root.d + gap)))
@@ -1358,6 +1359,8 @@ Item {
                         activeFocusOnTab: true
                         Keys.onSpacePressed: root.commit(swatch.modelData.value)
                         onClicked: root.commit(swatch.modelData.value)
+                        onContainsMouseChanged: swatchSet.hovered = swatch.containsMouse ? Translation.tr(swatch.modelData.label)
+                            : swatchSet.hovered === Translation.tr(swatch.modelData.label) ? "" : swatchSet.hovered
                         Rectangle {
                             anchors.fill: parent
                             radius: IrisStyle.capsule(width)
@@ -1395,6 +1398,18 @@ Item {
                             }
                         }
                     }
+                }
+                // Beside source cards bare dots read as nothing: the one under the pointer or the one chosen is
+                // named after them, so nothing moves.
+                IrisText {
+                    readonly property var fixed: swatchSet.named.find(choice => choice.value === root.value)
+                    visible: swatchSet.sources.length > 0
+                    height: Math.round(30 * root.d)
+                    leftPadding: Math.round(4 * root.d)
+                    verticalAlignment: Text.AlignVCenter
+                    text: swatchSet.hovered.length > 0 ? swatchSet.hovered : fixed ? Translation.tr(fixed.label) : Translation.tr("Or a fixed colour")
+                    color: swatchSet.hovered.length > 0 || fixed ? IrisStyle.text : IrisStyle.subtext
+                    font.pixelSize: IrisStyle.typeMeta
                 }
             }
         }

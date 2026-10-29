@@ -5,6 +5,7 @@ import QtQuick.Layouts
 import Qt5Compat.GraphicalEffects
 import Quickshell
 import Quickshell.Io
+import Quickshell.Widgets
 import qs.services
 import qs.modules.common
 import qs.modules.common.widgets
@@ -21,6 +22,18 @@ ColumnLayout {
     readonly property int outer: Math.round(28 * Appearance.rounding.scale)
     readonly property int inner: SettingsMaterialPreset.tileInnerRadius
     readonly property bool wide: root.width >= 640
+    // Same names and lines as the Themes page's style cards (GlobalStylePicker).
+    readonly property var styles: [
+        { value: "material", name: Translation.tr("Material"), line: Translation.tr("Tonal, soft, expressive") },
+        { value: "cards", name: Translation.tr("Cards"), line: Translation.tr("Material in separate cards") },
+        { value: "aurora", name: Translation.tr("Aurora"), line: Translation.tr("Frosted glass panels") },
+        { value: "inir", name: Translation.tr("Inir"), line: Translation.tr("Terminal calm, lines and type") },
+        { value: "angel", name: Translation.tr("Angel"), line: Translation.tr("Glass, offset shadows, gold") },
+        { value: "regalia", name: Translation.tr("Regalia"), line: Translation.tr("Dark, ivory and gold") },
+        { value: "zzz", name: Translation.tr("ZZZ"), line: Translation.tr("Poster plates, cut corners") },
+        { value: "cookie", name: Translation.tr("Cookie"), line: Translation.tr("Expressive at its loudest") },
+        { value: "editorial", name: Translation.tr("Editorial"), line: Translation.tr("Paper, ink and strong type") }
+    ]
 
     // pictures from the web, for people whose policy asks for them (policies.weeb)
     Process {
@@ -250,20 +263,25 @@ ColumnLayout {
                     font.pixelSize: SettingsMaterialPreset.supportingSize
                     color: SettingsMaterialPreset.supportingColor
                 }
-                // the scheme's own roles, so each choice is seen before it is read
-                RowLayout {
-                    spacing: 6
-                    Repeater {
-                        model: [Appearance.colors.colPrimary, Appearance.colors.colSecondary, Appearance.colors.colTertiary,
-                            Appearance.colors.colPrimaryContainer, Appearance.colors.colSecondaryContainer]
-                        delegate: Rectangle {
-                            required property color modelData
-                            implicitWidth: 28
-                            implicitHeight: 28
-                            radius: 14
-                            color: modelData
-                            border.width: 1
-                            border.color: ColorUtils.transparentize(Appearance.colors.colOnSurface, 0.85)
+                // The scheme's own roles as one strip: a palette to read, not five dots that look like buttons.
+                ClippingRectangle {
+                    implicitWidth: 5 * 36
+                    implicitHeight: 20
+                    radius: height / 2
+                    color: "transparent"
+                    border.width: 1
+                    border.color: ColorUtils.transparentize(Appearance.colors.colOnSurface, 0.85)
+                    Row {
+                        anchors.fill: parent
+                        Repeater {
+                            model: [Appearance.colors.colPrimary, Appearance.colors.colSecondary, Appearance.colors.colTertiary,
+                                Appearance.colors.colPrimaryContainer, Appearance.colors.colSecondaryContainer]
+                            delegate: Rectangle {
+                                required property color modelData
+                                width: 36
+                                height: 20
+                                color: modelData
+                            }
                         }
                     }
                 }
@@ -296,22 +314,20 @@ ColumnLayout {
                     font.pixelSize: SettingsMaterialPreset.labelSize
                     color: SettingsMaterialPreset.labelColor
                 }
+                // A style's name alone says nothing ("Regalia"?): the chosen one says what it is, as Color does.
+                StyledText {
+                    Layout.fillWidth: true
+                    Layout.topMargin: -8
+                    text: root.styles.find(style => style.value === (Config.options?.appearance?.globalStyle ?? "material"))?.line ?? ""
+                    font.pixelSize: SettingsMaterialPreset.supportingSize
+                    color: SettingsMaterialPreset.supportingColor
+                }
                 ConfigSelectionArray {
                     Layout.fillWidth: true
                     enableSettingsSearch: false
                     currentValue: Config.options?.appearance?.globalStyle ?? "material"
                     onSelected: value => ThemeService.setGlobalStyle(value)
-                    options: [
-                        { displayName: Translation.tr("Material"), value: "material" },
-                        { displayName: Translation.tr("Cards"), value: "cards" },
-                        { displayName: Translation.tr("Aurora"), value: "aurora" },
-                        { displayName: Translation.tr("Inir"), value: "inir" },
-                        { displayName: Translation.tr("Angel"), value: "angel" },
-                        { displayName: Translation.tr("Regalia"), value: "regalia" },
-                        { displayName: Translation.tr("ZZZ"), value: "zzz" },
-                        { displayName: Translation.tr("Cookie"), value: "cookie" },
-                        { displayName: Translation.tr("Editorial"), value: "editorial" }
-                    ]
+                    options: root.styles.map(style => ({ displayName: style.name, value: style.value }))
                 }
             }
         }
