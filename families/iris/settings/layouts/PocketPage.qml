@@ -166,11 +166,24 @@ Item {
 
     // Asked from outside (a link, the CLI): put a group's head at the top, or a row a third down, with one glide.
     function showGroup(wanted: string): void {
+        showAgain.tries = 0
+        page.seek(wanted)
+    }
+    function seek(wanted: string): void {
         const lower = wanted.toLowerCase()
         const target = rows.targets().find(entry => entry.key === wanted || entry.key.toLowerCase() === lower
             || Translation.tr(entry.key).toLowerCase() === lower)
-        if (target) page.glideTo(target.item.mapToItem(flick.contentItem, 0, 0).y - page.u(8))
+        if (target) { page.glideTo(target.item.mapToItem(flick.contentItem, 0, 0).y - page.u(8)) }
+        else {
+            // A group waiting under the area's Fine-tune opens it, then shows once built.
+            if (!rows.blocks.some(block => block.rest && block.key.toLowerCase() === lower) || showAgain.tries >= 8) return
+            if (!rows.moreOpen) rows.fold("more")
+            showAgain.tries++
+            showAgain.wanted = wanted
+            showAgain.restart()
+        }
     }
+    Timer { id: showAgain; property string wanted: ""; property int tries: 0; interval: 200; onTriggered: page.seek(showAgain.wanted) }
     function reveal(row: Item): void { page.glideTo(row.mapToItem(flick.contentItem, 0, 0).y - flick.height * 0.3) }
     function glideTo(y: real): void {
         const to = Math.max(0, Math.min(Math.max(0, flick.contentHeight - flick.height), y))

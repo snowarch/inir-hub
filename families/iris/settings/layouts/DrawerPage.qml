@@ -208,11 +208,27 @@ Item {
     }
     // Asked from outside (a link, the CLI): the column scrolls the group's head to its top.
     function showGroup(wanted: string): void {
+        showAgain.tries = 0
+        page.seek(wanted)
+    }
+    function seek(wanted: string): void {
         const lower = wanted.toLowerCase()
         const target = page.targets().find(entry => entry.key === wanted || entry.key.toLowerCase() === lower
             || Translation.tr(entry.key).toLowerCase() === lower)
-        if (target) page.glideTo(target.item.mapToItem(flick.contentItem, 0, 0).y - page.u(8))
+        if (target) { page.glideTo(target.item.mapToItem(flick.contentItem, 0, 0).y - page.u(8)) }
+        else {
+            // A group waiting under its column's Fine-tune opens it, then shows once built.
+            for (let i = 0; i < columnRepeater.count; i++) {
+                const column = columnRepeater.itemAt(i)
+                if (!column || !column.blocks.some(block => block.rest && block.key.toLowerCase() === lower) || showAgain.tries >= 8) continue
+                if (!column.moreOpen) column.fold("more")
+                showAgain.tries++
+                showAgain.wanted = wanted
+                showAgain.restart()
+            }
+        }
     }
+    Timer { id: showAgain; property string wanted: ""; property int tries: 0; interval: 200; onTriggered: page.seek(showAgain.wanted) }
     function reveal(row: Item): void { page.glideTo(row.mapToItem(flick.contentItem, 0, 0).y - flick.height * 0.3) }
     function glideTo(y: real): void {
         const to = Math.max(0, Math.min(Math.max(0, flick.contentHeight - flick.height), y))

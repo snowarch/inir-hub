@@ -61,18 +61,27 @@ ColumnLayout {
             if (group.rows.length === 1 && lone[group.rows[0].label] > 1 && group.key.length > 0)
                 group.rows = [Object.assign({}, group.rows[0], { label: group.key })]
         }
+        // Groups that are all fine-tuning (Corners per surface, every widget's extras) wait together at the area's foot,
+        // behind one Fine-tune that names them: the page shows what people change, not every group it holds.
+        const rest = groups.filter(group => group.rows.length > 0 && group.rows.every(spec => IrisOptions.foldsAway(spec)))
+        const resting = rest.length >= 2 && rest.length < groups.length
+        const shown = resting ? groups.filter(group => !rest.includes(group)) : groups
         const out = []
         if (!flat) {
-            for (const group of groups) out.push({ title: group.title, caption: "", key: group.key, rows: group.rows, flat: false })
+            for (const group of shown) out.push({ title: group.title, caption: "", key: group.key, rows: group.rows, flat: false })
         } else {
             let previous = null
-            for (const group of groups) {
+            for (const group of shown) {
                 const single = group.rows.length === 1 && group.rows[0].kind !== "list"
                 if (single && previous?.loose) { previous.rows = previous.rows.concat(group.rows); continue }
                 previous = { title: single ? "​" + group.key : group.title, caption: single ? "" : group.title, key: group.key,
                     rows: group.rows.slice(), loose: single, flat: true }
                 out.push(previous)
             }
+        }
+        if (resting) {
+            out.push({ title: "\u200bmore", caption: "", key: "", rows: [], flat: true, more: true, names: rest.map(group => group.title) })
+            for (const group of rest) out.push({ title: group.title, caption: group.title, key: group.key, rows: group.rows, flat: true, rest: true })
         }
         rows.blocks = out
         rows.stale = false
@@ -84,8 +93,15 @@ ColumnLayout {
     onLiveChanged: if (rows.live && rows.stale) rows.refresh()
     Component.onCompleted: rows.refresh()
 
-    // Fine-tune folds opened by hand, by group.
+    // Fine-tune folds opened by hand, by group; "more" is the area's own, over its all-fine-tuning groups.
     property var unfolded: ({})
+    readonly property bool moreOpen: (rows.host?.tuneAll ?? false) || (rows.unfolded["more"] ?? false)
+    // A search landing on a row there opens it first.
+    readonly property bool landsInMore: {
+        const landing = String(rows.host?.landingPath ?? "")
+        return landing.length > 0 && rows.blocks.some(block => block.rest && block.rows.some(spec => String(spec.path ?? "") === landing))
+    }
+    onLandsInMoreChanged: if (rows.landsInMore && !rows.moreOpen) rows.fold("more")
     function fold(key: string): void {
         const next = Object.assign({}, rows.unfolded)
         next[key] = !(next[key] ?? false)
@@ -120,11 +136,11 @@ ColumnLayout {
             let below = 0
             for (let i = 0; i < rows.builtUpTo; i++) below += (48 + 56 * (rows.blocks[i].rows?.length ?? 0)) * rows.d
             const last = blockRepeater.itemAt(Math.min(rows.builtUpTo, blockRepeater.count) - 1)
-            if ((last?.status === Loader.Ready || last?.status === Loader.Error) && below <= rows.reach) rows.builtUpTo++
+            if ((last?.status === Loader.Ready || last?.status === Loader.Error || last?.wanted === false) && below <= rows.reach) rows.builtUpTo++
         }
         const upTo = Math.min(rows.builtUpTo, blockRepeater.count)
         let built = blockRepeater.count >= rows.blocks.length
-        for (let i = 0; built && i < upTo; i++) built = blockRepeater.itemAt(i)?.status === Loader.Ready
+        for (let i = 0; built && i < upTo; i++) built = blockRepeater.itemAt(i)?.status === Loader.Ready || blockRepeater.itemAt(i)?.wanted === false
         rows.whole = built
     }
     onBlocksChanged: Qt.callLater(rows.weigh)
@@ -160,8 +176,10 @@ ColumnLayout {
             required property var modelData
             required property int index
             Layout.fillWidth: true
-            active: slot.index < rows.builtUpTo
+            readonly property bool wanted: !slot.modelData.rest || rows.moreOpen
+            active: slot.index < rows.builtUpTo && slot.wanted
             visible: slot.active
+            onWantedChanged: Qt.callLater(rows.weigh)
             asynchronous: slot.index > 0 && rows.streams
             onStatusChanged: if (rows) Qt.callLater(rows.weigh)
             sourceComponent: ColumnLayout {
@@ -174,7 +192,8 @@ ColumnLayout {
                 readonly property string caption: String(block.modelData.caption ?? "")
                 readonly property string tuneKey: rows?.section + "/" + block.key
                 readonly property var tuned: block.modelData.rows?.filter(spec => IrisOptions.foldsAway(spec))
-                readonly property bool tunes: block.tuned.length >= 2
+                // Under the area's Fine-tune a group is already the fine-tuning: its rows stand open.
+                readonly property bool tunes: !block.modelData.rest && block.tuned.length >= 2
                 readonly property bool tuneOpen: block.tunes && ((rows?.host?.tuneAll ?? false) || (rows?.unfolded[block.tuneKey] ?? false))
                 readonly property var shownRows: block.tunes && !block.tuneOpen ? block.modelData.rows?.filter(spec => !block.tuned.includes(spec)) : block.modelData.rows
                 readonly property string landing: String(rows?.host?.landingPath ?? "")
@@ -227,8 +246,30 @@ ColumnLayout {
                     }
                 }
 
+                // The area's Fine-tune: the groups it holds, opening under it.
+                Rectangle {
+                    visible: Boolean(block.modelData.more)
+                    Layout.fillWidth: true
+                    Layout.topMargin: Math.round(18 * rows?.d)
+                    implicitHeight: moreTune.implicitHeight
+                    radius: IrisStyle.radiusTile
+                    color: IrisStyle.fieldChamfer ? "transparent" : (rows?.groupFill ?? "transparent")
+                    IrisCutPlate { anchors.fill: parent; visible: IrisStyle.fieldChamfer && (rows?.groupFill.a ?? 0) > 0; color: rows?.groupFill ?? "transparent" }
+                    FineTune {
+                        id: moreTune
+                        width: parent.width
+                        open: rows?.moreOpen ?? false
+                        names: (block.modelData.names ?? []).map(name => String(name))
+                        // Against what shows, so a click under "open all" (tune:open) still closes it.
+                        onClicked: {
+                            const next = Object.assign({}, rows.unfolded)
+                            next["more"] = !rows.moreOpen
+                            rows.unfolded = next
+                        }
+                    }
+                }
                 Repeater {
-                    model: ScriptModel { values: block.loneSwitch ? [] : block.parts }
+                    model: ScriptModel { values: block.loneSwitch || block.modelData.more ? [] : block.parts }
                     ColumnLayout {
                         id: part
                         required property string modelData
