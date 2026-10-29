@@ -590,7 +590,7 @@ ContentPage {
             StyledText {
                 Layout.fillWidth: true
                 Layout.topMargin: 4
-                text: Translation.tr("Mod+T and Mod+Return use this terminal. Run './setup update' to apply keybind migration.")
+                text: Translation.tr("Mod+T and Mod+Return use this terminal.")
                 color: Appearance.colors.colSubtext
                 font.pixelSize: Appearance.font.pixelSize.smaller
                 font.italic: true
