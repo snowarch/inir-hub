@@ -64,7 +64,7 @@ Flickable {
         if (item.kind === "iris-theme") {
             if (IrisThemes.activeId === item.id)
                 return { text: Translation.tr("In use") }
-            return { text: Translation.tr("Apply"), run: () => root.applyTheme(item.id) }
+            return { text: Translation.tr("Use"), run: () => root.applyTheme(item.id) }
         }
         if (item.kind === "widget" && Hub.fits(item, "iris")) {
             if (Hub.widgetInUse(item.id, "iris"))
@@ -132,7 +132,7 @@ Flickable {
             IrisButton {
                 visible: Hub.updates > 0
                 emphasized: true
-                text: Translation.tr("Update all")
+                text: Translation.tr("Update %1").arg(Hub.updates)
                 onClicked: Hub.updateAll()
             }
             IrisIconButton {
@@ -177,7 +177,8 @@ Flickable {
                 IrisText {
                     anchors.verticalCenter: parent.verticalCenter
                     visible: searchField.text.length === 0
-                    text: Translation.tr("Search the hub")
+                    text: Hub.items.length > 0 ? Translation.tr("Search %1 widgets, themes and web apps").arg(Hub.items.length)
+                        : Translation.tr("Search the hub")
                     color: IrisStyle.muted
                     font.pixelSize: searchField.font.pixelSize
                 }

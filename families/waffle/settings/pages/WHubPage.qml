@@ -48,7 +48,7 @@ WSettingsPage {
         case "get": return { text: Translation.tr("Get"), accent: true, run: () => Hub.install(item.id) }
         }
         if (item.kind === "theme")
-            return { text: Translation.tr("Apply"), run: () => Hub.useTheme(item.id) }
+            return { text: Translation.tr("Use"), run: () => Hub.useTheme(item.id) }
         if (item.kind === "widget" && Hub.fits(item, "waffle")) {
             if (root.customCards)
                 return { text: Translation.tr("In use") }
@@ -69,7 +69,7 @@ WSettingsPage {
         WTextField {
             id: searchField
             Layout.fillWidth: true
-            placeholderText: Translation.tr("Search the hub")
+            placeholderText: Hub.items.length > 0 ? Translation.tr("Search %1 widgets, themes and web apps").arg(Hub.items.length) : Translation.tr("Search the hub")
             onTextChanged: searchDelay.restart()
             Timer { id: searchDelay; interval: 140; onTriggered: root.query = searchField.text }
         }

@@ -244,7 +244,7 @@ Item {
                         iconName: "checkmark"
                         onClicked: root.clearAll()
                         WToolTip {
-                            text: Translation.tr("Confirm")
+                            text: Translation.tr("Clear all")
                         }
                     }
 

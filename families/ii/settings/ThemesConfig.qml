@@ -225,7 +225,7 @@ ContentPage {
 
                             Text {
                                 anchors.verticalCenter: parent.verticalCenter
-                                text: Translation.tr("Search...")
+                                text: Translation.tr("Search themes...")
                                 font: parent.font
                                 color: Appearance.colors.colSubtext
                                 opacity: 0.6

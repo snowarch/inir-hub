@@ -1088,7 +1088,7 @@ ColumnLayout {
                             }
 
                             StyledText {
-                                text: Translation.tr("Apply")
+                                text: Translation.tr("Use")
                                 font.pixelSize: Appearance.font.pixelSize.smallest
                                 color: Appearance.colors.colOnPrimary
                             }

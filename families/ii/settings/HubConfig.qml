@@ -89,7 +89,7 @@ ContentPage {
         case "get": return { text: Translation.tr("Get"), icon: "download", tone: Hub.fits(item, root.family) ? "primary" : "tonal", run: () => Hub.install(item.id) }
         }
         if (item.kind === "theme" && Hub.fits(item, root.family))
-            return { text: Translation.tr("Apply"), icon: "format_paint", tone: "tonal", run: () => Hub.useTheme(item.id) }
+            return { text: Translation.tr("Use"), icon: "format_paint", tone: "tonal", run: () => Hub.useTheme(item.id) }
         if (item.kind === "widget" && Hub.fits(item, root.family) && root.family !== "waffle") {
             if (Hub.widgetInUse(item.id, root.family))
                 return { text: Translation.tr("On your desktop"), icon: "check", tone: "off" }
