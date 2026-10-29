@@ -41,7 +41,8 @@ MaterialTextField {
         font.family: root.font.family
         font.pixelSize: root.font.pixelSize
         color: root.clipped ? IrisStyle.text : IrisStyle.subtext
-        elide: Text.ElideRight
+        // A path keeps its last folder, the part that says which one it is.
+        elide: /^~?\//.test(text) ? Text.ElideMiddle : Text.ElideRight
     }
 
     background: Rectangle {

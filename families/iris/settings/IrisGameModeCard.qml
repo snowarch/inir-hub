@@ -30,7 +30,8 @@ Rectangle {
         : Translation.tr("Off")
 
     Layout.fillWidth: true
-    implicitHeight: Math.round(96 * card.d)
+    // Its words set its height: a larger text scale ran them out of a fixed card and over the next group's head.
+    implicitHeight: Math.max(Math.round(96 * card.d), Math.ceil(words.implicitHeight + 32 * card.d))
     radius: IrisStyle.radiusTile
     readonly property color plate: card.on ? IrisStyle.tintFill(IrisStyle.identity.green) : IrisStyle.readingCard
     color: IrisStyle.fieldChamfer ? "transparent" : card.plate
@@ -51,6 +52,7 @@ Rectangle {
             glyphShare: 0.6
         }
         ColumnLayout {
+            id: words
             Layout.fillWidth: true
             spacing: 3 * card.d
             IrisText {

@@ -46,15 +46,15 @@ PreviewScene {
             RowLayout {
                 spacing: Math.round(6 * lightRoot.d)
                 MaterialSymbol { text: "partly_cloudy_day"; fill: 1; iconSize: Math.round(18 * lightRoot.d); color: IrisStyle.identity.sky }
-                IrisText { text: Translation.tr("Weather"); font.weight: IrisStyle.weight(Font.DemiBold) }
+                IrisText { font.pixelSize: Math.round((voiceSize) / Math.max(1, IrisStyle.typeScale)); text: Translation.tr("Weather"); font.weight: IrisStyle.weight(Font.DemiBold) }
             }
             IrisText {
                 text: "18°"
                 font.family: IrisStyle.fontNumbers
                 font.weight: IrisStyle.figureWeight
-                font.pixelSize: IrisStyle.typeDotL
+                font.pixelSize: Math.round((IrisStyle.typeDotL) / Math.max(1, IrisStyle.typeScale))
             }
-            IrisText { text: Translation.tr("Partly cloudy"); color: IrisStyle.muted; font.pixelSize: IrisStyle.typeMeta }
+            IrisText { text: Translation.tr("Partly cloudy"); color: IrisStyle.muted; font.pixelSize: Math.round((IrisStyle.typeMeta) / Math.max(1, IrisStyle.typeScale))}
             Item { Layout.fillHeight: true }
         }
     }
@@ -73,7 +73,7 @@ PreviewScene {
             RowLayout {
                 spacing: Math.round(6 * lightRoot.d)
                 MaterialSymbol { text: "tune"; iconSize: Math.round(18 * lightRoot.d); color: IrisStyle.text }
-                IrisText { text: Translation.tr("Control Center"); font.weight: IrisStyle.weight(Font.DemiBold) }
+                IrisText { font.pixelSize: Math.round((voiceSize) / Math.max(1, IrisStyle.typeScale)); text: Translation.tr("Control Center"); font.weight: IrisStyle.weight(Font.DemiBold) }
             }
             RowLayout {
                 spacing: Math.round(8 * lightRoot.d)

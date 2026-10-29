@@ -125,10 +125,10 @@ PreviewScene {
         RowLayout {
             spacing: Math.round(8 * bubRoot.d)
             MaterialSymbol { text: "volume_up"; fill: 1; iconSize: Math.round(18 * bubRoot.d); color: IrisStyle.identity.indigo }
-            IrisText { text: Translation.tr("Sound"); font.weight: IrisStyle.weight(Font.DemiBold) }
+            IrisText { font.pixelSize: Math.round((voiceSize) / Math.max(1, IrisStyle.typeScale)); text: Translation.tr("Sound"); font.weight: IrisStyle.weight(Font.DemiBold) }
         }
         Level { value: 0.62; tint: IrisStyle.identity.indigo }
-        IrisText { text: Translation.tr("Speakers"); color: IrisStyle.muted; font.pixelSize: IrisStyle.typeMeta }
+        IrisText { text: Translation.tr("Speakers"); color: IrisStyle.muted; font.pixelSize: Math.round((IrisStyle.typeMeta) / Math.max(1, IrisStyle.typeScale))}
     }
 
     Pointer {

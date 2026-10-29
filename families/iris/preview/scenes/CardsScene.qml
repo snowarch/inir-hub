@@ -52,8 +52,8 @@ PreviewScene {
                 }
                 ColumnLayout {
                     spacing: 0
-                    IrisText { text: Translation.tr("Sound"); font.weight: IrisStyle.weight(Font.DemiBold) }
-                    IrisText { text: Audio.sink?.description ?? Translation.tr("Speakers"); color: IrisStyle.subtext; font.pixelSize: IrisStyle.typeMeta }
+                    IrisText { font.pixelSize: Math.round((voiceSize) / Math.max(1, IrisStyle.typeScale)); text: Translation.tr("Sound"); font.weight: IrisStyle.weight(Font.DemiBold) }
+                    IrisText { text: Audio.sink?.description ?? Translation.tr("Speakers"); color: IrisStyle.subtext; font.pixelSize: Math.round((IrisStyle.typeMeta) / Math.max(1, IrisStyle.typeScale))}
                 }
             }
             RowLayout {
@@ -61,7 +61,7 @@ PreviewScene {
                 spacing: Math.round(10 * cardRoot.d)
                 MaterialSymbol { text: "volume_up"; iconSize: Math.round(18 * cardRoot.d); color: IrisStyle.text }
                 Level { value: Math.min(1, Audio.value ?? 0.6); tint: IrisStyle.text }
-                IrisText { text: Math.round(Math.min(1, Audio.value ?? 0.6) * 100); font.family: IrisStyle.fontNumbers; font.weight: IrisStyle.weight(Font.DemiBold) }
+                IrisText { font.pixelSize: Math.round((voiceSize) / Math.max(1, IrisStyle.typeScale)); text: Math.round(Math.min(1, Audio.value ?? 0.6) * 100); font.family: IrisStyle.fontNumbers; font.weight: IrisStyle.weight(Font.DemiBold) }
             }
             Row {
                 visible: cardRoot.devices
@@ -74,7 +74,7 @@ PreviewScene {
                         width: devLabel.implicitWidth + Math.round(20 * cardRoot.d); height: Math.round(26 * cardRoot.d)
                         radius: IrisStyle.capsule(height)
                         color: index === 0 ? IrisStyle.tintFill(IrisStyle.accent) : IrisStyle.fillQuiet
-                        IrisText { id: devLabel; anchors.centerIn: parent; text: parent.modelData; color: parent.index === 0 ? IrisStyle.accent : IrisStyle.subtext; font.pixelSize: IrisStyle.typeMeta }
+                        IrisText { id: devLabel; anchors.centerIn: parent; text: parent.modelData; color: parent.index === 0 ? IrisStyle.accent : IrisStyle.subtext; font.pixelSize: Math.round((IrisStyle.typeMeta) / Math.max(1, IrisStyle.typeScale))}
                     }
                 }
             }

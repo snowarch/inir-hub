@@ -94,7 +94,7 @@ PreviewScene {
             font.letterSpacing: Number(lockPreview.opt("iris.lock.type.clockTracking", -4))
             color: IrisLockOptions.accentColour
         }
-        IrisText {
+        IrisText { font.pixelSize: Math.round((voiceSize) / Math.max(1, IrisStyle.typeScale));
             visible: lockPreview.opt("iris.lock.blocks.clock.enable", true) && String(lockPreview.opt("iris.lock.type.dateFormat", "long")) !== "none"
             Layout.alignment: Qt.AlignHCenter
             text: Translation.locale.toString(DateTime.clock.date, String(lockPreview.opt("iris.lock.type.dateFormat", "long")) === "short" ? "ddd d MMM" : "dddd d MMMM")
@@ -117,7 +117,7 @@ PreviewScene {
             color: IrisStyle.onMediaFill
             MaterialSymbol { anchors.centerIn: parent; text: "lock"; color: IrisStyle.onMedia; iconSize: Math.round(18 * lockPreview.d) }
         }
-        IrisText {
+        IrisText { font.pixelSize: Math.round((voiceSize) / Math.max(1, IrisStyle.typeScale));
             visible: lockPreview.opt("iris.lock.blocks.media.enable", true)
             Layout.alignment: Qt.AlignHCenter
             Layout.maximumWidth: parent.width

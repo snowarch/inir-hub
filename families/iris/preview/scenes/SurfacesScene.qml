@@ -115,7 +115,7 @@ PreviewScene {
                 elide: Text.ElideRight
                 text: tile.label
                 font.weight: IrisStyle.weight(Font.DemiBold)
-                font.pixelSize: IrisStyle.typeMeta
+                font.pixelSize: Math.round((IrisStyle.typeMeta) / Math.max(1, IrisStyle.typeScale))
             }
         }
     }

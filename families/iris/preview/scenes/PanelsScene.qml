@@ -30,11 +30,11 @@ PreviewScene {
             spacing: Math.round(10 * panelRoot.d)
             RowLayout {
                 spacing: Math.round(10 * panelRoot.d)
-                IrisText { text: Translation.locale.toString(DateTime.clock.date, "d"); color: IrisStyle.identity.red; font.family: IrisStyle.fontDot; font.weight: IrisStyle.figureWeight; font.pixelSize: IrisStyle.typeDotM }
+                IrisText { text: Translation.locale.toString(DateTime.clock.date, "d"); color: IrisStyle.identity.red; font.family: IrisStyle.fontDot; font.weight: IrisStyle.figureWeight; font.pixelSize: Math.round((IrisStyle.typeDotM) / Math.max(1, IrisStyle.typeScale))}
                 ColumnLayout {
                     spacing: 0
-                    IrisText { text: Translation.tr("Today"); font.family: IrisStyle.fontTitle; font.weight: IrisStyle.weight(Font.Bold); font.pixelSize: IrisStyle.typeTitle }
-                    IrisText { text: Translation.locale.toString(DateTime.clock.date, "dddd, MMMM"); color: IrisStyle.subtext; font.pixelSize: IrisStyle.typeMeta }
+                    IrisText { text: Translation.tr("Today"); font.family: IrisStyle.fontTitle; font.weight: IrisStyle.weight(Font.Bold); font.pixelSize: Math.round((IrisStyle.typeTitle) / Math.max(1, IrisStyle.typeScale))}
+                    IrisText { text: Translation.locale.toString(DateTime.clock.date, "dddd, MMMM"); color: IrisStyle.subtext; font.pixelSize: Math.round((IrisStyle.typeMeta) / Math.max(1, IrisStyle.typeScale))}
                 }
                 Item { Layout.fillWidth: true }
                 IrisControlPlate {
@@ -79,7 +79,7 @@ PreviewScene {
                             radius: IrisStyle.iconRadius(width); color: IrisStyle.plainMarks ? "transparent" : parent.parent.modelData[2]
                             MaterialSymbol { anchors.centerIn: parent; text: parent.parent.parent.modelData[0]; fill: 1; iconSize: Math.round(14 * panelRoot.d); color: IrisStyle.plainMarks ? IrisStyle.text : IrisStyle.onTint }
                         }
-                        IrisText {
+                        IrisText { font.pixelSize: Math.round((voiceSize) / Math.max(1, IrisStyle.typeScale));
                             text: parent.parent.modelData[1]
                             font.family: IrisStyle.lineSections ? IrisStyle.fontTitle : IrisStyle.fontMain
                             font.weight: IrisStyle.weight(IrisStyle.lineSections ? Font.ExtraBold : Font.DemiBold)

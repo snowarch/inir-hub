@@ -87,8 +87,8 @@ PreviewScene {
                 ColumnLayout {
                     Layout.fillWidth: true
                     spacing: Math.round(2 * playerRoot.d)
-                    IrisText { Layout.fillWidth: true; text: MprisController.titleOf(playerRoot.player) || Translation.tr("Song title"); color: playerRoot.artBackground ? IrisStyle.onMedia : IrisStyle.text; font.weight: IrisStyle.weight(Font.DemiBold); font.pixelSize: IrisStyle.typeHeadline; elide: Text.ElideRight }
-                    IrisText { Layout.fillWidth: true; text: MprisController.artistOf(playerRoot.player) || Translation.tr("Artist"); color: playerRoot.artBackground ? IrisStyle.onMediaSecondary : IrisStyle.subtext; elide: Text.ElideRight }
+                    IrisText { Layout.fillWidth: true; text: MprisController.titleOf(playerRoot.player) || Translation.tr("Song title"); color: playerRoot.artBackground ? IrisStyle.onMedia : IrisStyle.text; font.weight: IrisStyle.weight(Font.DemiBold); font.pixelSize: Math.round((IrisStyle.typeHeadline) / Math.max(1, IrisStyle.typeScale)); elide: Text.ElideRight }
+                    IrisText { font.pixelSize: Math.round((voiceSize) / Math.max(1, IrisStyle.typeScale)); Layout.fillWidth: true; text: MprisController.artistOf(playerRoot.player) || Translation.tr("Artist"); color: playerRoot.artBackground ? IrisStyle.onMediaSecondary : IrisStyle.subtext; elide: Text.ElideRight }
                 }
                 MaterialSymbol { visible: playerRoot.pinned; Layout.alignment: Qt.AlignTop; text: "keep"; fill: 1; iconSize: Math.round(18 * playerRoot.d); color: playerRoot.artBackground ? IrisStyle.onMedia : IrisStyle.accent }
             }

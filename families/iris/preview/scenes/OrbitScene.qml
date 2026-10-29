@@ -96,7 +96,7 @@ PreviewScene {
                             anchors.centerIn: parent
                             text: orbitRoot.names ? "2 · " + Translation.tr("Workspace") : "2"
                             color: IrisStyle.onMedia
-                            font.pixelSize: IrisStyle.typeMeta
+                            font.pixelSize: Math.round((IrisStyle.typeMeta) / Math.max(1, IrisStyle.typeScale))
                             font.weight: IrisStyle.weight(Font.DemiBold)
                         }
                     }

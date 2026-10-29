@@ -23,7 +23,7 @@ PreviewScene {
         anchors.centerIn: parent
         width: trayGrid.implicitWidth + Math.round(32 * trayRoot.d)
         height: trayGrid.implicitHeight + Math.round(64 * trayRoot.d)
-        IrisText {
+        IrisText { font.pixelSize: Math.round((voiceSize) / Math.max(1, IrisStyle.typeScale));
             x: Math.round(16 * trayRoot.d); y: Math.round(14 * trayRoot.d)
             text: Translation.tr("Tray") + "  " + trayRoot.items.length
             font.weight: IrisStyle.weight(Font.DemiBold)
@@ -53,7 +53,7 @@ PreviewScene {
                         horizontalAlignment: Text.AlignHCenter
                         text: trayEntry.modelData?.tooltipTitle || trayEntry.modelData?.title || trayEntry.modelData?.id || Translation.tr("App")
                         elide: Text.ElideRight
-                        font.pixelSize: IrisStyle.typeFootnote
+                        font.pixelSize: Math.round((IrisStyle.typeFootnote) / Math.max(1, IrisStyle.typeScale))
                         color: IrisStyle.subtext
                     }
                 }

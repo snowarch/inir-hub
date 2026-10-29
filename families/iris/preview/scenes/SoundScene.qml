@@ -109,7 +109,7 @@ PreviewScene {
                 }
             }
             Item { visible: !pill.bar && !pill.minimal; Layout.fillWidth: true }
-            IrisText {
+            IrisText { font.pixelSize: Math.round((voiceSize) / Math.max(1, IrisStyle.typeScale));
                 visible: soundRoot.figure
                 text: Math.round(soundRoot.level * 100)
                 font.family: IrisStyle.fontNumbers

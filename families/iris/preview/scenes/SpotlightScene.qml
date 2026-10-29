@@ -55,7 +55,7 @@ PreviewScene {
                     color: IrisStyle.textTertiary
                     font.family: IrisStyle.fontTitle
                     font.weight: IrisStyle.weight(Font.ExtraBold)
-                    font.pixelSize: IrisStyle.typeHeadline
+                    font.pixelSize: Math.round((IrisStyle.typeHeadline) / Math.max(1, IrisStyle.typeScale))
                 }
                 Rectangle { id: rule; anchors.bottom: parent.bottom; width: parent.width; height: 1; color: IrisStyle.textTertiary }
             }
@@ -70,7 +70,7 @@ PreviewScene {
                     anchors.leftMargin: Math.round(14 * spotRoot.d)
                     spacing: Math.round(8 * spotRoot.d)
                     MaterialSymbol { text: "search"; iconSize: Math.round(18 * spotRoot.d); color: IrisStyle.muted }
-                    IrisText { text: Translation.tr("Search apps, files and actions"); color: IrisStyle.muted; font.pixelSize: IrisStyle.typeLabel }
+                    IrisText { text: Translation.tr("Search apps, files and actions"); color: IrisStyle.muted; font.pixelSize: Math.round((IrisStyle.typeLabel) / Math.max(1, IrisStyle.typeScale))}
                 }
             }
             Row {
@@ -84,7 +84,7 @@ PreviewScene {
                         height: Math.round(24 * spotRoot.d)
                         radius: IrisStyle.capsule(height)
                         color: IrisStyle.fillQuiet
-                        IrisText { id: hintLabel; anchors.centerIn: parent; text: parent.modelData; color: IrisStyle.subtext; font.pixelSize: IrisStyle.typeFootnote }
+                        IrisText { id: hintLabel; anchors.centerIn: parent; text: parent.modelData; color: IrisStyle.subtext; font.pixelSize: Math.round((IrisStyle.typeFootnote) / Math.max(1, IrisStyle.typeScale))}
                     }
                 }
             }
@@ -97,7 +97,7 @@ PreviewScene {
                 Layout.topMargin: Math.round(4 * spotRoot.d)
                 implicitHeight: headSkin.active ? (headSkin.item?.implicitHeight ?? 0) : headText.implicitHeight
                 IrisSkin { id: headSkin; part: "sectionTab"; host: topHead }
-                IrisText { id: headText; visible: !headSkin.active; text: topHead.title; role: IrisText.Meta }
+                IrisText { font.pixelSize: Math.round((voiceSize) / Math.max(1, IrisStyle.typeScale)); id: headText; visible: !headSkin.active; text: topHead.title; role: IrisText.Meta }
             }
             Repeater {
                 model: spotRoot.results
@@ -124,16 +124,16 @@ PreviewScene {
                                 text: IrisStyle.indexLabel(hit.index)
                                 color: hit.index === 0 ? IrisStyle.rowSelectionInk : IrisStyle.textTertiary
                                 font.family: IrisStyle.fontNumbers
-                                font.pixelSize: IrisStyle.typeMeta
+                                font.pixelSize: Math.round((IrisStyle.typeMeta) / Math.max(1, IrisStyle.typeScale))
                                 font.weight: IrisStyle.weight(Font.DemiBold)
                             }
                             SmartAppIcon { implicitSize: Math.round(24 * spotRoot.d); icon: IrisPieces.appIcon(hit.app?.appId ?? ""); fallback: "application-x-executable" }
-                            IrisText {
+                            IrisText { font.pixelSize: Math.round((voiceSize) / Math.max(1, IrisStyle.typeScale));
                                 Layout.fillWidth: true
                                 text: DesktopEntries.heuristicLookup(hit.app?.appId ?? "")?.name ?? String(hit.app?.appId ?? Translation.tr("Result"))
                                 elide: Text.ElideRight
                             }
-                            IrisText { text: hit.index === 0 ? Translation.tr("Open") : Translation.tr("App"); color: IrisStyle.muted; font.pixelSize: IrisStyle.typeMeta }
+                            IrisText { text: hit.index === 0 ? Translation.tr("Open") : Translation.tr("App"); color: IrisStyle.muted; font.pixelSize: Math.round((IrisStyle.typeMeta) / Math.max(1, IrisStyle.typeScale))}
                         }
                     }
                 }

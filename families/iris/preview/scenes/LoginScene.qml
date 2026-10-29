@@ -89,7 +89,7 @@ PreviewScene {
             NumberAnimation { duration: IrisStyle.duration(IrisStyle.settleDuration); easing.type: Easing.BezierSpline; easing.bezierCurve: IrisStyle.emergeCurve }
         }
     }
-    component Figure: IrisText {
+    component Figure: IrisText { font.pixelSize: Math.round((voiceSize) / Math.max(1, IrisStyle.typeScale));
         font.features: ({ "tnum": 1 })
         renderType: Text.NativeRendering
     }

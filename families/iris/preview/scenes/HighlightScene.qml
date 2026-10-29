@@ -76,7 +76,7 @@ PreviewScene {
                                 font.family: IrisStyle.fontNumbers
                                 font.weight: hlDay.isToday ? IrisStyle.weight(Font.Bold) : IrisStyle.weight(Font.Medium)
                                 font.features: ({ "tnum": 1 })
-                                font.pixelSize: IrisStyle.typeMeta
+                                font.pixelSize: Math.round((IrisStyle.typeMeta) / Math.max(1, IrisStyle.typeScale))
                             }
                         }
                     }
@@ -102,14 +102,14 @@ PreviewScene {
                         font.family: IrisStyle.fontNumbers
                         font.weight: IrisStyle.weight(Font.Bold)
                         font.features: ({ "tnum": 1 })
-                        font.pixelSize: IrisStyle.typeMeta
+                        font.pixelSize: Math.round((IrisStyle.typeMeta) / Math.max(1, IrisStyle.typeScale))
                     }
                 }
                 IrisText {
                     Layout.alignment: Qt.AlignHCenter
                     text: Translation.tr("Timer")
                     color: IrisStyle.textTertiary
-                    font.pixelSize: IrisStyle.typeFootnote
+                    font.pixelSize: Math.round((IrisStyle.typeFootnote) / Math.max(1, IrisStyle.typeScale))
                 }
             }
         }

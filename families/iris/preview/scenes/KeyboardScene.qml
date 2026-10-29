@@ -59,7 +59,7 @@ PreviewScene {
             elide: Text.ElideLeft
             text: keysRoot.line + "|"
             font.family: IrisStyle.fontMono
-            font.pixelSize: IrisStyle.typeLabel
+            font.pixelSize: Math.round((IrisStyle.typeLabel) / Math.max(1, IrisStyle.typeScale))
         }
     }
     Plate {
@@ -96,7 +96,7 @@ PreviewScene {
                                 anchors.centerIn: parent
                                 text: cap.modelData
                                 color: cap.down ? IrisStyle.inkOnAccent : IrisStyle.textSecondary
-                                font.pixelSize: IrisStyle.typeMeta
+                                font.pixelSize: Math.round((IrisStyle.typeMeta) / Math.max(1, IrisStyle.typeScale))
                                 font.weight: IrisStyle.weight(Font.Medium)
                             }
                         }
@@ -124,7 +124,7 @@ PreviewScene {
                             anchors.centerIn: parent
                             text: modKey.lit ? Translation.tr("Mod") : modKey.modelData
                             color: modKey.lit ? IrisStyle.accent : IrisStyle.textTertiary
-                            font.pixelSize: IrisStyle.typeCaption
+                            font.pixelSize: Math.round((IrisStyle.typeCaption) / Math.max(1, IrisStyle.typeScale))
                             font.weight: modKey.lit ? IrisStyle.weight(Font.DemiBold) : IrisStyle.weight(Font.Medium)
                         }
                     }

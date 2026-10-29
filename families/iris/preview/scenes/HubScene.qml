@@ -50,7 +50,7 @@ PreviewScene {
                     }
                     MaterialSymbol { anchors.centerIn: parent; text: card.modelData.glyph; fill: 1; iconSize: Math.round(30 * hubRoot.d); color: IrisStyle.onMedia }
                 }
-                IrisText {
+                IrisText { font.pixelSize: Math.round((voiceSize) / Math.max(1, IrisStyle.typeScale));
                     x: Math.round(14 * hubRoot.d)
                     y: parent.height * 0.5 + Math.round(16 * hubRoot.d)
                     text: card.modelData.name
@@ -72,7 +72,7 @@ PreviewScene {
                         anchors.centerIn: parent
                         spacing: Math.round(6 * hubRoot.d)
                         MaterialSymbol { text: take.done > 0.98 ? "check" : "add"; iconSize: Math.round(15 * hubRoot.d); color: take.done > 0.5 ? IrisStyle.inkOnAccent : IrisStyle.text }
-                        IrisText { text: take.done > 0.98 ? Translation.tr("Added") : Translation.tr("Get"); font.pixelSize: IrisStyle.typeMeta; font.weight: IrisStyle.weight(Font.DemiBold); color: take.done > 0.5 ? IrisStyle.inkOnAccent : IrisStyle.text }
+                        IrisText { text: take.done > 0.98 ? Translation.tr("Added") : Translation.tr("Get"); font.pixelSize: Math.round((IrisStyle.typeMeta) / Math.max(1, IrisStyle.typeScale)); font.weight: IrisStyle.weight(Font.DemiBold); color: take.done > 0.5 ? IrisStyle.inkOnAccent : IrisStyle.text }
                     }
                 }
             }

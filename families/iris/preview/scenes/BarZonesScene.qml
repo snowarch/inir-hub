@@ -60,7 +60,7 @@ PreviewScene {
                             id: chipLabel
                             anchors.centerIn: parent
                             text: modelData === "time" ? Qt.formatTime(new Date(), "hh:mm") : Translation.tr(zonesRoot.names[modelData] ?? modelData)
-                            font.pixelSize: IrisStyle.typeMeta
+                            font.pixelSize: Math.round((IrisStyle.typeMeta) / Math.max(1, IrisStyle.typeScale))
                             color: parent.current ? IrisStyle.text : IrisStyle.subtext
                         }
                     }

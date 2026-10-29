@@ -227,8 +227,9 @@ Item {
                     color: IrisStyle.fieldChamfer ? IrisStyle.muted : IrisStyle.subtext
                     font.pixelSize: IrisStyle.typeMeta
                     wrapMode: Text.WordWrap
-                    // Folio is read like a page: what a row does is never cut there.
-                    maximumLineCount: description.full || root.voice === "folio" ? 12 : 3
+                    // Folio is read like a page: what a row does is never cut there. Elsewhere three lines' worth,
+                    // counted at the person's text scale.
+                    maximumLineCount: description.full || root.voice === "folio" ? 12 : Math.ceil(3 * Math.max(1, IrisStyle.typeScale))
                     elide: Text.ElideRight
                     MouseArea {
                         anchors.fill: parent
@@ -986,9 +987,10 @@ Item {
             id: materials
             readonly property real gap: Math.round(8 * root.d)
             readonly property int count: root.choices.length
-            // All in one line when they fit at a readable width; else two lines as even as the count allows.
+            // All in one line when they fit at a readable width (it grows with the text scale); else two lines as
+            // even as the count allows.
             readonly property int columns: {
-                const fits = Math.max(1, Math.floor((width + gap) / (128 * root.d + gap)))
+                const fits = Math.max(1, Math.floor((width + gap) / (128 * root.d * Math.max(1, IrisStyle.typeScale) + gap)))
                 return fits >= materials.count ? materials.count : Math.max(1, Math.min(fits, Math.ceil(materials.count / 2)))
             }
             readonly property real cardWidth: Math.floor((width - (materials.columns - 1) * materials.gap) / materials.columns)
@@ -1181,8 +1183,9 @@ Item {
             readonly property var named: root.choices.filter(choice => swatchSet.sources.indexOf(choice) < 0)
             property string hovered: ""
             readonly property real gap: Math.round(8 * root.d)
-            // As many in a line as fit at a readable width; four that do not all fit sit two by two, never three and one.
-            readonly property int fits: Math.max(1, Math.floor((width + gap) / (150 * root.d + gap)))
+            // As many in a line as fit at a readable width (it grows with the text scale); four that do not all fit
+            // sit two by two, never three and one.
+            readonly property int fits: Math.max(1, Math.floor((width + gap) / (150 * root.d * Math.max(1, IrisStyle.typeScale) + gap)))
             readonly property int columns: {
                 const count = Math.max(1, swatchSet.sources.length)
                 const across = Math.min(count, swatchSet.fits)
@@ -1691,7 +1694,7 @@ Item {
 
         IrisField {
             id: field
-            implicitWidth: Math.round(160 * root.d)
+            implicitWidth: Math.round(160 * root.d * Math.max(1, IrisStyle.typeScale))
             implicitHeight: Math.round(36 * root.d)
             font.pixelSize: IrisStyle.typeLabel
             placeholderText: Translation.tr(String(root.spec.placeholder ?? ""))

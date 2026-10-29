@@ -66,7 +66,7 @@ PreviewScene {
                     anchors.right: parent.right
                     anchors.bottom: parent.bottom
                     anchors.margins: Math.round(10 * menuRoot.d)
-                    IrisText { Layout.fillWidth: true; text: Translation.tr("Wallpaper"); color: IrisStyle.onMedia; font.pixelSize: IrisStyle.typeLabel; font.weight: IrisStyle.weight(Font.DemiBold) }
+                    IrisText { Layout.fillWidth: true; text: Translation.tr("Wallpaper"); color: IrisStyle.onMedia; font.pixelSize: Math.round((IrisStyle.typeLabel) / Math.max(1, IrisStyle.typeScale)); font.weight: IrisStyle.weight(Font.DemiBold) }
                     MaterialSymbol { text: "chevron_right"; iconSize: Math.round(16 * menuRoot.d); color: IrisStyle.onMedia }
                 }
             }

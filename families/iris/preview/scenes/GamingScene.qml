@@ -48,7 +48,7 @@ PreviewScene {
             anchors.margins: Math.round(12 * gameRoot.d)
             spacing: Math.round(10 * gameRoot.d)
             IrisMark { implicitSize: Math.round(30 * gameRoot.d) }
-            IrisText { Layout.fillWidth: true; elide: Text.ElideRight; text: Translation.tr("A message for you"); font.weight: IrisStyle.weight(Font.DemiBold) }
+            IrisText { font.pixelSize: Math.round((voiceSize) / Math.max(1, IrisStyle.typeScale)); Layout.fillWidth: true; elide: Text.ElideRight; text: Translation.tr("A message for you"); font.weight: IrisStyle.weight(Font.DemiBold) }
         }
     }
     Rectangle {
@@ -111,7 +111,7 @@ PreviewScene {
                     anchors.centerIn: parent
                     spacing: Math.round(6 * gameRoot.d)
                     MaterialSymbol { text: stop.modelData.glyph; iconSize: Math.round(14 * gameRoot.d); color: IrisStyle.onMediaSecondary }
-                    IrisText { text: stop.modelData.name; color: IrisStyle.onMedia; font.pixelSize: IrisStyle.typeCaption; font.strikeout: stop.modelData.on }
+                    IrisText { text: stop.modelData.name; color: IrisStyle.onMedia; font.pixelSize: Math.round((IrisStyle.typeCaption) / Math.max(1, IrisStyle.typeScale)); font.strikeout: stop.modelData.on }
                 }
             }
         }

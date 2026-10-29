@@ -80,7 +80,7 @@ PreviewScene {
             x: Math.round(14 * ccRoot.d); y: Math.round(14 * ccRoot.d)
             width: parent.width - 2 * x
             spacing: Math.round(10 * ccRoot.d)
-            IrisText { id: ccTitle; text: Translation.tr("Control Center"); font.weight: IrisStyle.weight(Font.DemiBold); font.pixelSize: IrisStyle.typeHeadline }
+            IrisText { id: ccTitle; text: Translation.tr("Control Center"); font.weight: IrisStyle.weight(Font.DemiBold); font.pixelSize: Math.round((IrisStyle.typeHeadline) / Math.max(1, IrisStyle.typeScale))}
             Item {
                 id: ccGrid
                 readonly property real gap: Math.round(8 * ccRoot.d)
@@ -205,7 +205,7 @@ PreviewScene {
                                 text: block.kind === "media" ? (MprisController.titleOf(MprisController.activePlayer) || Translation.tr("Not playing"))
                                     : Translation.tr(IrisControlOptions.labelOf(block.modelData))
                                 font.weight: IrisStyle.weight(Font.DemiBold)
-                                font.pixelSize: IrisStyle.typeMeta
+                                font.pixelSize: Math.round((IrisStyle.typeMeta) / Math.max(1, IrisStyle.typeScale))
                                 elide: Text.ElideRight
                             }
                         }
@@ -222,7 +222,7 @@ PreviewScene {
                     anchors.fill: parent
                     anchors.margins: Math.round(12 * ccRoot.d)
                     MaterialSymbol { text: "notifications"; iconSize: Math.round(17 * ccRoot.d); color: IrisStyle.subtext }
-                    IrisText { Layout.fillWidth: true; text: Translation.tr("You're all caught up"); color: IrisStyle.subtext }
+                    IrisText { font.pixelSize: Math.round((voiceSize) / Math.max(1, IrisStyle.typeScale)); Layout.fillWidth: true; text: Translation.tr("You're all caught up"); color: IrisStyle.subtext }
                 }
             }
         }

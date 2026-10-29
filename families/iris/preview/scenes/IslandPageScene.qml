@@ -241,7 +241,7 @@ PreviewScene {
                                     + Translation.locale.toString(DateTime.clock.date, "dddd") + "</b></font> "
                                     + Translation.locale.toString(DateTime.clock.date, "d MMMM")
                                 color: pageRoot.banner ? IrisStyle.textStrong : IrisStyle.textSecondary
-                                font.pixelSize: IrisStyle.typeLabel
+                                font.pixelSize: Math.round((IrisStyle.typeLabel) / Math.max(1, IrisStyle.typeScale))
                                 font.weight: IrisStyle.weight(Font.Medium)
                             }
                             IrisClock { pixelSize: IrisStyle.typeHero }
@@ -267,7 +267,7 @@ PreviewScene {
                                 Layout.maximumWidth: Math.round(150 * pageRoot.d)
                                 text: String(Weather.data?.description ?? "")
                                 color: pageRoot.banner ? IrisStyle.textStrong : IrisStyle.textSecondary
-                                font.pixelSize: IrisStyle.typeMeta
+                                font.pixelSize: Math.round((IrisStyle.typeMeta) / Math.max(1, IrisStyle.typeScale))
                                 elide: Text.ElideRight
                             }
                         }
@@ -322,7 +322,7 @@ PreviewScene {
                                                 Layout.alignment: Qt.AlignHCenter
                                                 text: stripCell.index === 0 ? Translation.tr("Now") : String(stripCell.modelData.label ?? "").slice(0, 2)
                                                 color: IrisStyle.muted
-                                                font.pixelSize: IrisStyle.typeMeta
+                                                font.pixelSize: Math.round((IrisStyle.typeMeta) / Math.max(1, IrisStyle.typeScale))
                                             }
                                             MaterialSymbol {
                                                 Layout.alignment: Qt.AlignHCenter
@@ -335,7 +335,7 @@ PreviewScene {
                                                 Layout.alignment: Qt.AlignHCenter
                                                 text: desktopBlock.modelData === "forecast" ? String(stripCell.modelData.temp ?? "—") : stripCell.modelData.value
                                                 font.family: IrisStyle.fontNumbers
-                                                font.pixelSize: IrisStyle.typeLabel
+                                                font.pixelSize: Math.round((IrisStyle.typeLabel) / Math.max(1, IrisStyle.typeScale))
                                             }
                                         }
                                     }
@@ -366,8 +366,8 @@ PreviewScene {
                                 ColumnLayout {
                                     Layout.fillWidth: true
                                     spacing: Math.round(2 * pageRoot.d)
-                                    IrisText { Layout.fillWidth: true; text: MprisController.titleOf(pageRoot.player) || Translation.tr("Song title"); font.weight: IrisStyle.weight(Font.DemiBold); font.pixelSize: IrisStyle.typeHeadline; elide: Text.ElideRight }
-                                    IrisText { Layout.fillWidth: true; text: MprisController.artistOf(pageRoot.player) || Translation.tr("Artist"); color: IrisStyle.subtext; elide: Text.ElideRight }
+                                    IrisText { Layout.fillWidth: true; text: MprisController.titleOf(pageRoot.player) || Translation.tr("Song title"); font.weight: IrisStyle.weight(Font.DemiBold); font.pixelSize: Math.round((IrisStyle.typeHeadline) / Math.max(1, IrisStyle.typeScale)); elide: Text.ElideRight }
+                                    IrisText { font.pixelSize: Math.round((voiceSize) / Math.max(1, IrisStyle.typeScale)); Layout.fillWidth: true; text: MprisController.artistOf(pageRoot.player) || Translation.tr("Artist"); color: IrisStyle.subtext; elide: Text.ElideRight }
                                 }
                             }
                         }
@@ -403,7 +403,7 @@ PreviewScene {
                                         required property int index
                                         spacing: Math.round(12 * pageRoot.d)
                                         MaterialSymbol { text: levelRow.index === 0 ? "music_note" : "public"; fill: 1; iconSize: Math.round(17 * pageRoot.d); color: IrisStyle.subtext }
-                                        IrisText { Layout.preferredWidth: Math.round(110 * pageRoot.d); text: levelRow.index === 0 ? Translation.tr("Player") : Translation.tr("Browser"); elide: Text.ElideRight }
+                                        IrisText { font.pixelSize: Math.round((voiceSize) / Math.max(1, IrisStyle.typeScale)); Layout.preferredWidth: Math.round(110 * pageRoot.d); text: levelRow.index === 0 ? Translation.tr("Player") : Translation.tr("Browser"); elide: Text.ElideRight }
                                         Level { value: levelRow.modelData; tint: IrisStyle.text }
                                     }
                                 }

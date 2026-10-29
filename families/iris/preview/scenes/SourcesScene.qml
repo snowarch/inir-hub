@@ -56,7 +56,7 @@ PreviewScene {
                     width: parent.width - 2 * x
                     spacing: Math.round(8 * sourcesRoot.d)
                     MaterialSymbol { text: source.modelData.glyph; fill: 1; iconSize: Math.round(17 * sourcesRoot.d); color: source.modelData.tint }
-                    IrisText { Layout.fillWidth: true; text: source.modelData.name; font.weight: IrisStyle.weight(Font.DemiBold); font.pixelSize: IrisStyle.typeMeta }
+                    IrisText { Layout.fillWidth: true; text: source.modelData.name; font.weight: IrisStyle.weight(Font.DemiBold); font.pixelSize: Math.round((IrisStyle.typeMeta) / Math.max(1, IrisStyle.typeScale))}
                     MaterialSymbol {
                         text: "sync"
                         iconSize: Math.round(15 * sourcesRoot.d)
@@ -77,7 +77,7 @@ PreviewScene {
                         text: sourcesRoot.fahrenheit ? "64°F" : "18°C"
                         font.family: IrisStyle.fontNumbers
                         font.weight: IrisStyle.figureWeight
-                        font.pixelSize: IrisStyle.typeTitle
+                        font.pixelSize: Math.round((IrisStyle.typeTitle) / Math.max(1, IrisStyle.typeScale))
                     }
                     RowLayout {
                         visible: source.index === 1
@@ -85,7 +85,7 @@ PreviewScene {
                         width: parent.width
                         spacing: Math.round(8 * sourcesRoot.d)
                         Rectangle { implicitWidth: Math.round(4 * sourcesRoot.d); implicitHeight: Math.round(24 * sourcesRoot.d); radius: width / 2; color: IrisStyle.identity.red }
-                        IrisText { Layout.fillWidth: true; elide: Text.ElideRight; text: Translation.tr("Dinner"); font.pixelSize: IrisStyle.typeMeta }
+                        IrisText { Layout.fillWidth: true; elide: Text.ElideRight; text: Translation.tr("Dinner"); font.pixelSize: Math.round((IrisStyle.typeMeta) / Math.max(1, IrisStyle.typeScale))}
                         MaterialSymbol { visible: sourcesRoot.calendars; text: "cloud_sync"; iconSize: Math.round(15 * sourcesRoot.d); color: IrisStyle.textSecondary }
                     }
                     Column {
@@ -110,7 +110,7 @@ PreviewScene {
                         height: Math.round(24 * sourcesRoot.d)
                         radius: height / 2
                         color: Qt.rgba(IrisStyle.identity.yellow.r, IrisStyle.identity.yellow.g, IrisStyle.identity.yellow.b, 0.2)
-                        IrisText { id: updateText; anchors.centerIn: parent; text: Translation.tr("Ready to update"); font.pixelSize: IrisStyle.typeCaption; font.weight: IrisStyle.weight(Font.DemiBold) }
+                        IrisText { id: updateText; anchors.centerIn: parent; text: Translation.tr("Ready to update"); font.pixelSize: Math.round((IrisStyle.typeCaption) / Math.max(1, IrisStyle.typeScale)); font.weight: IrisStyle.weight(Font.DemiBold) }
                     }
                 }
             }

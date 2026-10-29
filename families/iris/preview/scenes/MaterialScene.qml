@@ -123,8 +123,8 @@ PreviewScene {
                 ColumnLayout {
                     Layout.fillWidth: true
                     spacing: 0
-                    IrisText { Layout.fillWidth: true; elide: Text.ElideRight; text: Translation.tr("Now playing"); font.weight: IrisStyle.weight(Font.DemiBold); font.pixelSize: IrisStyle.typeLabel }
-                    IrisText { Layout.fillWidth: true; elide: Text.ElideRight; text: Translation.tr("Artist"); color: IrisStyle.muted; font.pixelSize: IrisStyle.typeMeta }
+                    IrisText { Layout.fillWidth: true; elide: Text.ElideRight; text: Translation.tr("Now playing"); font.weight: IrisStyle.weight(Font.DemiBold); font.pixelSize: Math.round((IrisStyle.typeLabel) / Math.max(1, IrisStyle.typeScale))}
+                    IrisText { Layout.fillWidth: true; elide: Text.ElideRight; text: Translation.tr("Artist"); color: IrisStyle.muted; font.pixelSize: Math.round((IrisStyle.typeMeta) / Math.max(1, IrisStyle.typeScale))}
                 }
             }
             Rectangle { Layout.fillWidth: true; implicitHeight: 1; color: IrisStyle.hairline }
@@ -196,7 +196,7 @@ PreviewScene {
                         elide: Text.ElideRight
                         text: panelRow.modelData[1]
                         font.weight: IrisStyle.weight(Font.DemiBold)
-                        font.pixelSize: IrisStyle.typeMeta
+                        font.pixelSize: Math.round((IrisStyle.typeMeta) / Math.max(1, IrisStyle.typeScale))
                     }
                 }
             }

@@ -48,13 +48,15 @@ Item {
         id: index
         x: root.u(8)
         y: root.u(8)
-        // As wide as the longest area name in its open weight (a translation runs longer), within a third more.
+        // As wide as the longest area name in its open weight (a translation runs longer), within a third more; both
+        // bounds grow with the text scale.
         readonly property real widest: {
             Translation.activeTranslations
             return Math.max(0, ...root.sections.map(entry => indexType.advanceWidth(Translation.tr(String(entry.title ?? "")))))
         }
         FontMetrics { id: indexType; font.family: IrisStyle.fontRead; font.pixelSize: IrisStyle.typeBody; font.weight: IrisStyle.weight(Font.DemiBold) }
-        width: Math.min(root.u(root.compact ? 280 : 320), Math.max(root.u(root.compact ? 216 : 244), Math.ceil(index.widest) + root.u(92)))
+        readonly property real textGrowth: Math.max(1, IrisStyle.typeScale)
+        width: Math.min(root.u(root.compact ? 280 : 320) * index.textGrowth, Math.max(root.u(root.compact ? 216 : 244) * index.textGrowth, Math.ceil(index.widest) + root.u(92)))
         height: root.height - 2 * root.u(8)
         radius: IrisStyle.fieldChamfer ? 0 : Math.max(root.u(12), IrisStyle.radiusPanel - root.u(8))
         color: IrisStyle.glassy ? IrisStyle.readingSidebar : Qt.rgba(IrisStyle.text.r, IrisStyle.text.g, IrisStyle.text.b, IrisStyle.light ? 0.03 : 0.035) // iris-literal: the index sits a step off the sheet
@@ -199,7 +201,7 @@ Item {
             width: page.width
             height: root.u(38)
             spacing: root.u(10)
-            Item { id: searchSlot; Layout.preferredWidth: root.u(root.compact ? 240 : 320); Layout.preferredHeight: root.u(36) }
+            Item { id: searchSlot; Layout.preferredWidth: root.u(root.compact ? 240 : 320) * Math.max(1, IrisStyle.typeScale); Layout.preferredHeight: root.u(36) }
             Item { Layout.fillWidth: true }
             LayoutSwitch { host: root.host; voice: "folio"; compact: root.compact }
             RoundKey {

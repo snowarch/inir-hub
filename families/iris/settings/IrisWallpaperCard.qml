@@ -183,12 +183,14 @@ ClippingRectangle {
             width: column.measure
             anchors.verticalCenter: parent.verticalCenter
             spacing: 0
-            // the greeting, then the day it is (and its weather) in a quieter voice, on one line that gives way at the end
+            // the greeting, then the day it is (and its weather) in a quieter voice, on one line: the weather gives way
+            // whole before a word of it is cut
             RowLayout {
                 Layout.fillWidth: true
                 Layout.bottomMargin: Math.round(8 * card.d)
                 spacing: Math.round(10 * card.d)
                 IrisText {
+                    id: greeting
                     text: card.greeting
                     color: IrisStyle.onMediaSecondary
                     font.family: IrisStyle.monoCaptions ? IrisStyle.fontMono : IrisStyle.fontMain
@@ -197,8 +199,11 @@ ClippingRectangle {
                     font.weight: IrisStyle.weight(Font.Medium)
                 }
                 IrisText {
+                    id: day
+                    readonly property string full: card.weather.length > 0 ? DateTime.date + "  ·  " + card.weather : DateTime.date
                     Layout.fillWidth: true
-                    text: card.weather.length > 0 ? DateTime.date + "  ·  " + card.weather : DateTime.date
+                    text: { dayType.font; return dayType.advanceWidth(day.full) <= column.room - greeting.implicitWidth - Math.round(10 * card.d) ? day.full : DateTime.date }
+                    FontMetrics { id: dayType; font: day.font }
                     color: IrisStyle.onMediaSecondary
                     opacity: 0.7
                     font.pixelSize: IrisStyle.typeMeta

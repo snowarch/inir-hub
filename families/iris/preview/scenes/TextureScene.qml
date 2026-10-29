@@ -116,8 +116,8 @@ PreviewScene {
             }
             Column {
                 anchors.verticalCenter: parent.verticalCenter
-                IrisText { text: Translation.tr("Now playing"); font.weight: IrisStyle.weight(Font.DemiBold); font.pixelSize: IrisStyle.typeLabel }
-                IrisText { text: Translation.tr("Artist"); color: IrisStyle.muted; font.pixelSize: IrisStyle.typeMeta }
+                IrisText { text: Translation.tr("Now playing"); font.weight: IrisStyle.weight(Font.DemiBold); font.pixelSize: Math.round((IrisStyle.typeLabel) / Math.max(1, IrisStyle.typeScale))}
+                IrisText { text: Translation.tr("Artist"); color: IrisStyle.muted; font.pixelSize: Math.round((IrisStyle.typeMeta) / Math.max(1, IrisStyle.typeScale))}
             }
         }
         Rectangle {

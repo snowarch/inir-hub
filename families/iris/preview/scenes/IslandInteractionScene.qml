@@ -89,7 +89,7 @@ PreviewScene {
             visible: actRoot.step === 3 && actRoot.events && !actRoot.expanded
             spacing: Math.round(8 * actRoot.d)
             IrisBatteryMark { Layout.alignment: Qt.AlignVCenter; markHeight: Math.round(9 * actRoot.d); level: 0.64; tint: IrisStyle.identity.green; frame: IrisStyle.trackOf(IrisStyle.identity.green) }
-            IrisText { text: Translation.tr("Charger connected"); font.weight: IrisStyle.weight(Font.DemiBold) }
+            IrisText { font.pixelSize: Math.round((voiceSize) / Math.max(1, IrisStyle.typeScale)); text: Translation.tr("Charger connected"); font.weight: IrisStyle.weight(Font.DemiBold) }
         }
         ColumnLayout {
             anchors.fill: parent
@@ -97,8 +97,8 @@ PreviewScene {
             visible: actRoot.expanded
             opacity: actRoot.expanded ? 1 : 0
             Behavior on opacity { NumberAnimation { duration: IrisStyle.duration(200); easing.type: IrisStyle.feedbackEasing } }
-            IrisText { text: Translation.locale.toString(DateTime.clock.date, "dddd d MMMM"); color: IrisStyle.secondaryAccent; font.weight: IrisStyle.weight(Font.DemiBold) }
-            IrisText { text: Translation.locale.toString(DateTime.clock.date, "hh:mm"); font.family: IrisStyle.fontDot; font.weight: IrisStyle.figureWeight; font.pixelSize: IrisStyle.typeDotL }
+            IrisText { font.pixelSize: Math.round((voiceSize) / Math.max(1, IrisStyle.typeScale)); text: Translation.locale.toString(DateTime.clock.date, "dddd d MMMM"); color: IrisStyle.secondaryAccent; font.weight: IrisStyle.weight(Font.DemiBold) }
+            IrisText { text: Translation.locale.toString(DateTime.clock.date, "hh:mm"); font.family: IrisStyle.fontDot; font.weight: IrisStyle.figureWeight; font.pixelSize: Math.round((IrisStyle.typeDotL) / Math.max(1, IrisStyle.typeScale))}
             Item { Layout.fillHeight: true }
             Level { value: 0.6 }
         }
@@ -112,7 +112,7 @@ PreviewScene {
         height: Math.round(26 * actRoot.d)
         radius: IrisStyle.capsule(height)
         color: IrisStyle.bodySurface
-        IrisText { id: capsLabel; anchors.centerIn: parent; text: Translation.tr("Caps Lock on"); font.pixelSize: IrisStyle.typeMeta; font.weight: IrisStyle.weight(Font.DemiBold) }
+        IrisText { id: capsLabel; anchors.centerIn: parent; text: Translation.tr("Caps Lock on"); font.pixelSize: Math.round((IrisStyle.typeMeta) / Math.max(1, IrisStyle.typeScale)); font.weight: IrisStyle.weight(Font.DemiBold) }
     }
     MaterialSymbol {
         id: pointer

@@ -49,8 +49,8 @@ PreviewScene {
             ColumnLayout {
                 Layout.fillWidth: true
                 spacing: Math.round(2 * feedRoot.d)
-                IrisText { text: Translation.tr("A notification"); font.weight: IrisStyle.weight(Font.DemiBold) }
-                IrisText { Layout.fillWidth: true; text: Translation.tr("Stays %1 s, then folds back into the Island.").arg(feedRoot.seconds); color: IrisStyle.textSecondary; elide: Text.ElideRight }
+                IrisText { font.pixelSize: Math.round((voiceSize) / Math.max(1, IrisStyle.typeScale)); text: Translation.tr("A notification"); font.weight: IrisStyle.weight(Font.DemiBold) }
+                IrisText { font.pixelSize: Math.round((voiceSize) / Math.max(1, IrisStyle.typeScale)); Layout.fillWidth: true; text: Translation.tr("Stays %1 s, then folds back into the Island.").arg(feedRoot.seconds); color: IrisStyle.textSecondary; elide: Text.ElideRight }
             }
         }
         Rectangle {
@@ -108,7 +108,7 @@ PreviewScene {
             spacing: Math.round(10 * feedRoot.d)
             MaterialSymbol { text: "volume_up"; fill: 1; iconSize: Math.round(18 * feedRoot.d); color: IrisStyle.text }
             Level { value: Math.min(1, Audio.value ?? 0.7); tint: IrisStyle.text }
-            IrisText { text: Math.round(Math.min(1, Audio.value ?? 0.7) * 100); font.family: IrisStyle.fontNumbers; font.weight: IrisStyle.weight(Font.DemiBold) }
+            IrisText { font.pixelSize: Math.round((voiceSize) / Math.max(1, IrisStyle.typeScale)); text: Math.round(Math.min(1, Audio.value ?? 0.7) * 100); font.family: IrisStyle.fontNumbers; font.weight: IrisStyle.weight(Font.DemiBold) }
         }
     }
     Caption {

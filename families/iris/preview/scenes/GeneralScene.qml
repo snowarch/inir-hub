@@ -53,7 +53,7 @@ PreviewScene {
                     text: generalRoot.time
                     font.family: IrisStyle.fontDot
                     font.weight: IrisStyle.figureWeight
-                    font.pixelSize: Math.round(IrisStyle.typeDisplay * 1.3)
+                    font.pixelSize: Math.round((Math.round(IrisStyle.typeDisplay * 1.3)) / Math.max(1, IrisStyle.typeScale))
                     font.features: { "tnum": 1 }
                 }
                 IrisText {
@@ -61,7 +61,7 @@ PreviewScene {
                     anchors.baseline: timeText.baseline
                     text: generalRoot.half
                     color: IrisStyle.textSecondary
-                    font.pixelSize: IrisStyle.typeTitle
+                    font.pixelSize: Math.round((IrisStyle.typeTitle) / Math.max(1, IrisStyle.typeScale))
                     font.weight: IrisStyle.weight(Font.DemiBold)
                 }
             }
@@ -69,7 +69,7 @@ PreviewScene {
                 anchors.horizontalCenter: parent.horizontalCenter
                 text: Qt.formatDate(generalRoot.now, "dddd d MMMM")
                 color: IrisStyle.textSecondary
-                font.pixelSize: IrisStyle.typeLabel
+                font.pixelSize: Math.round((IrisStyle.typeLabel) / Math.max(1, IrisStyle.typeScale))
             }
         }
         MaterialSymbol {
@@ -170,7 +170,7 @@ PreviewScene {
                     anchors.centerIn: parent
                     text: screen.modelData === "iris" ? "iRiS" : screen.modelData === "ii" ? Translation.tr("Material") : Translation.tr("Windows 11")
                     color: screen.on ? IrisStyle.onMedia : IrisStyle.onMediaSecondary
-                    font.pixelSize: IrisStyle.typeMeta
+                    font.pixelSize: Math.round((IrisStyle.typeMeta) / Math.max(1, IrisStyle.typeScale))
                     font.weight: screen.on ? IrisStyle.weight(Font.DemiBold) : IrisStyle.weight(Font.Medium)
                 }
             }

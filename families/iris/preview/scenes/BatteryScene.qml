@@ -112,7 +112,7 @@ PreviewScene {
                 iconSize: Math.round(17 * batteryRoot.d)
                 color: batteryRoot.alarm === "low" ? IrisStyle.identity.orange : IrisStyle.danger
             }
-            IrisText {
+            IrisText { font.pixelSize: Math.round((voiceSize) / Math.max(1, IrisStyle.typeScale));
                 text: batteryRoot.alarm === "sleep" ? Translation.tr("Going to sleep") : batteryRoot.alarm === "critical" ? Translation.tr("Battery critical") : Translation.tr("Battery low")
                 color: IrisStyle.onMedia
                 font.weight: IrisStyle.weight(Font.DemiBold)

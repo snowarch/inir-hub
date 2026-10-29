@@ -960,6 +960,8 @@ Item {
                             Timer { id: searchDelay; interval: 160; onTriggered: root.query = searchField.text }
                             IrisText {
                                 anchors.verticalCenter: parent.verticalCenter
+                                width: parent.width
+                                elide: Text.ElideRight
                                 visible: searchField.text.length === 0
                                 text: String(root.scene?.searchHint ?? "") || Translation.tr("Search settings")
                                 color: searchSkin.item?.placeholderColour ?? IrisStyle.muted

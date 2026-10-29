@@ -40,8 +40,8 @@ PreviewScene {
             x: Math.round(14 * pal.d); y: Math.round(14 * pal.d)
             width: parent.width - 2 * x
             spacing: Math.round(8 * pal.d)
-            IrisText { text: Translation.tr("Your shell"); font.weight: IrisStyle.weight(Font.DemiBold); font.pixelSize: IrisStyle.typeBody }
-            IrisText { Layout.fillWidth: true; text: Translation.tr("Ink on its paper, colours that keep their meaning"); color: IrisStyle.subtext; wrapMode: Text.WordWrap; maximumLineCount: 2; elide: Text.ElideRight; font.pixelSize: IrisStyle.typeMeta }
+            IrisText { text: Translation.tr("Your shell"); font.weight: IrisStyle.weight(Font.DemiBold); font.pixelSize: Math.round((IrisStyle.typeBody) / Math.max(1, IrisStyle.typeScale))}
+            IrisText { Layout.fillWidth: true; text: Translation.tr("Ink on its paper, colours that keep their meaning"); color: IrisStyle.subtext; wrapMode: Text.WordWrap; maximumLineCount: 2; elide: Text.ElideRight; font.pixelSize: Math.round((IrisStyle.typeMeta) / Math.max(1, IrisStyle.typeScale))}
             Row {
                 spacing: Math.round(8 * pal.d)
                 Repeater {
@@ -70,10 +70,10 @@ PreviewScene {
                     implicitHeight: Math.round(28 * pal.d)
                     radius: IrisStyle.capsule(height)
                     color: IrisStyle.accent
-                    IrisText { id: palButton; anchors.centerIn: parent; text: Translation.tr("Accent"); color: IrisStyle.inkOnAccent; font.weight: IrisStyle.weight(Font.DemiBold); font.pixelSize: IrisStyle.typeMeta }
+                    IrisText { id: palButton; anchors.centerIn: parent; text: Translation.tr("Accent"); color: IrisStyle.inkOnAccent; font.weight: IrisStyle.weight(Font.DemiBold); font.pixelSize: Math.round((IrisStyle.typeMeta) / Math.max(1, IrisStyle.typeScale))}
                 }
                 Item { Layout.fillWidth: true }
-                IrisText { text: "42"; color: IrisStyle.secondaryAccent; font.family: IrisStyle.fontNumbers; font.weight: IrisStyle.weight(Font.DemiBold); font.pixelSize: IrisStyle.typeHeadline }
+                IrisText { text: "42"; color: IrisStyle.secondaryAccent; font.family: IrisStyle.fontNumbers; font.weight: IrisStyle.weight(Font.DemiBold); font.pixelSize: Math.round((IrisStyle.typeHeadline) / Math.max(1, IrisStyle.typeScale))}
             }
         }
     }
@@ -116,21 +116,21 @@ PreviewScene {
             y: Math.round(36 * pal.d)
             width: parent.width - 2 * x
             spacing: Math.round(6 * pal.d)
-            IrisText { text: Translation.tr("An app"); color: pal.app("onSurface", IrisStyle.text); font.weight: IrisStyle.weight(Font.DemiBold); font.pixelSize: IrisStyle.typeBody }
+            IrisText { text: Translation.tr("An app"); color: pal.app("onSurface", IrisStyle.text); font.weight: IrisStyle.weight(Font.DemiBold); font.pixelSize: Math.round((IrisStyle.typeBody) / Math.max(1, IrisStyle.typeScale))}
             Rectangle {
                 width: parent.width
                 height: Math.round(24 * pal.d)
                 radius: IrisStyle.radiusRow
                 color: pal.app("primaryContainer", IrisStyle.accentContainer)
-                IrisText { anchors.verticalCenter: parent.verticalCenter; x: Math.round(8 * pal.d); text: Translation.tr("Selected"); color: pal.app("onPrimaryContainer", IrisStyle.text); font.pixelSize: IrisStyle.typeMeta }
+                IrisText { anchors.verticalCenter: parent.verticalCenter; x: Math.round(8 * pal.d); text: Translation.tr("Selected"); color: pal.app("onPrimaryContainer", IrisStyle.text); font.pixelSize: Math.round((IrisStyle.typeMeta) / Math.max(1, IrisStyle.typeScale))}
             }
-            IrisText { width: parent.width; text: Translation.tr("Its text and its quieter lines"); color: pal.app("onSurfaceVariant", IrisStyle.subtext); elide: Text.ElideRight; font.pixelSize: IrisStyle.typeMeta }
+            IrisText { width: parent.width; text: Translation.tr("Its text and its quieter lines"); color: pal.app("onSurfaceVariant", IrisStyle.subtext); elide: Text.ElideRight; font.pixelSize: Math.round((IrisStyle.typeMeta) / Math.max(1, IrisStyle.typeScale))}
             Rectangle {
                 width: palAppButton.implicitWidth + Math.round(22 * pal.d)
                 height: Math.round(26 * pal.d)
                 radius: IrisStyle.capsule(height)
                 color: pal.app("primary", IrisStyle.accent)
-                IrisText { id: palAppButton; anchors.centerIn: parent; text: Translation.tr("OK"); color: pal.app("onPrimary", IrisStyle.inkOnAccent); font.weight: IrisStyle.weight(Font.DemiBold); font.pixelSize: IrisStyle.typeMeta }
+                IrisText { id: palAppButton; anchors.centerIn: parent; text: Translation.tr("OK"); color: pal.app("onPrimary", IrisStyle.inkOnAccent); font.weight: IrisStyle.weight(Font.DemiBold); font.pixelSize: Math.round((IrisStyle.typeMeta) / Math.max(1, IrisStyle.typeScale))}
             }
         }
     }

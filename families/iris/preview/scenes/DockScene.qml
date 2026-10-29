@@ -217,7 +217,7 @@ PreviewScene {
                     anchors.margins: -Math.round(3 * dockRoot.d)
                     width: Math.round(17 * dockRoot.d); height: width; radius: width / 2
                     color: IrisStyle.badge
-                    IrisText { anchors.centerIn: parent; text: dockIcon.index; color: IrisStyle.inkOnBadge; font.pixelSize: IrisStyle.typeCaption; font.weight: IrisStyle.weight(Font.Bold) }
+                    IrisText { anchors.centerIn: parent; text: dockIcon.index; color: IrisStyle.inkOnBadge; font.pixelSize: Math.round((IrisStyle.typeCaption) / Math.max(1, IrisStyle.typeScale)); font.weight: IrisStyle.weight(Font.Bold) }
                 }
             }
         }

@@ -125,7 +125,7 @@ PreviewScene {
                         anchors.centerIn: parent
                         text: sourcePill.modelData
                         color: sourcePill.index === 0 ? IrisStyle.text : IrisStyle.subtext
-                        font.pixelSize: IrisStyle.typeMeta
+                        font.pixelSize: Math.round((IrisStyle.typeMeta) / Math.max(1, IrisStyle.typeScale))
                         font.weight: IrisStyle.weight(Font.Medium)
                     }
                 }
@@ -143,7 +143,7 @@ PreviewScene {
                 x: Math.round(12 * galleryRoot.u)
                 text: Translation.tr("Search")
                 color: IrisStyle.muted
-                font.pixelSize: IrisStyle.typeMeta
+                font.pixelSize: Math.round((IrisStyle.typeMeta) / Math.max(1, IrisStyle.typeScale))
             }
         }
         Row {
@@ -177,7 +177,7 @@ PreviewScene {
                     required property int index
                     text: modelData
                     color: index === 0 ? IrisStyle.text : IrisStyle.subtext
-                    font.pixelSize: IrisStyle.typeMeta
+                    font.pixelSize: Math.round((IrisStyle.typeMeta) / Math.max(1, IrisStyle.typeScale))
                     font.weight: IrisStyle.weight(index === 0 ? Font.DemiBold : Font.Normal)
                 }
             }
@@ -208,7 +208,7 @@ PreviewScene {
             elide: Text.ElideRight
             text: String(galleryRoot.paths[galleryRoot.focusIndex % galleryRoot.paths.length] ?? "").split("/").pop()
             font.family: IrisStyle.fontTitle
-            font.pixelSize: IrisStyle.typeBody
+            font.pixelSize: Math.round((IrisStyle.typeBody) / Math.max(1, IrisStyle.typeScale))
             font.weight: IrisStyle.weight(Font.DemiBold)
         }
         Rectangle {
@@ -224,7 +224,7 @@ PreviewScene {
                 anchors.centerIn: parent
                 text: Translation.tr("Apply")
                 color: IrisStyle.inkOnAccent
-                font.pixelSize: IrisStyle.typeMeta
+                font.pixelSize: Math.round((IrisStyle.typeMeta) / Math.max(1, IrisStyle.typeScale))
                 font.weight: IrisStyle.weight(Font.DemiBold)
             }
         }

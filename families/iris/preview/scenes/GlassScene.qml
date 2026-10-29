@@ -98,9 +98,9 @@ PreviewScene {
             y: x
             width: pane.width - 2 * x
             spacing: Math.round(4 * glassRoot.d)
-            IrisText { text: Translation.tr("Now playing"); font.weight: IrisStyle.weight(Font.DemiBold); font.pixelSize: IrisStyle.typeBody }
-            IrisText { width: parent.width; text: Translation.tr("Secondary text stays readable over the wallpaper"); color: IrisStyle.muted; wrapMode: Text.WordWrap; font.pixelSize: IrisStyle.typeMeta }
-            IrisText { text: Translation.tr("Tertiary detail"); color: IrisStyle.textTertiary; font.pixelSize: IrisStyle.typeMeta }
+            IrisText { text: Translation.tr("Now playing"); font.weight: IrisStyle.weight(Font.DemiBold); font.pixelSize: Math.round((IrisStyle.typeBody) / Math.max(1, IrisStyle.typeScale))}
+            IrisText { width: parent.width; text: Translation.tr("Secondary text stays readable over the wallpaper"); color: IrisStyle.muted; wrapMode: Text.WordWrap; font.pixelSize: Math.round((IrisStyle.typeMeta) / Math.max(1, IrisStyle.typeScale))}
+            IrisText { text: Translation.tr("Tertiary detail"); color: IrisStyle.textTertiary; font.pixelSize: Math.round((IrisStyle.typeMeta) / Math.max(1, IrisStyle.typeScale))}
         }
         IrisControlPlate {
             id: glassControls
