@@ -65,6 +65,8 @@ Rectangle {
                 text: card.state
                 color: IrisStyle.subtext
                 font.pixelSize: IrisStyle.typeLabel
+                wrapMode: Text.WordWrap
+                maximumLineCount: 2
                 elide: Text.ElideRight
             }
             IrisText {
@@ -73,6 +75,9 @@ Rectangle {
                 text: (card.on ? Translation.tr("Holding back %1") : Translation.tr("Holds back %1")).arg(card.held.join(", "))
                 color: IrisStyle.muted
                 font.pixelSize: IrisStyle.typeMeta
+                // The list grows with what the person runs: cut mid-word on one line it read as broken (Pocket, 10-29).
+                wrapMode: Text.WordWrap
+                maximumLineCount: 2
                 elide: Text.ElideRight
             }
         }

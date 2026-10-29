@@ -174,15 +174,20 @@ Item {
         const lower = wanted.toLowerCase()
         const target = rows.targets().find(entry => entry.key === wanted || entry.key.toLowerCase() === lower
             || Translation.tr(entry.key).toLowerCase() === lower)
-        if (target) { page.glideTo(target.item.mapToItem(flick.contentItem, 0, 0).y - page.u(8)) }
-        else {
+        // Asked while the rows still build, the group may not be there yet, or the glide is held short by a content
+        // height that is still growing: the page stayed at its top (10-29, as in Drawer).
+        if (target) {
+            const y = target.item.mapToItem(flick.contentItem, 0, 0).y - page.u(8)
+            page.glideTo(y)
+            if (y <= flick.contentHeight - flick.height + 1) return
+        } else if (!rows.moreOpen && rows.blocks.some(block => block.rest && block.key.toLowerCase() === lower)) {
             // A group waiting under the area's Fine-tune opens it, then shows once built.
-            if (!rows.blocks.some(block => block.rest && block.key.toLowerCase() === lower) || showAgain.tries >= 8) return
-            if (!rows.moreOpen) rows.fold("more")
-            showAgain.tries++
-            showAgain.wanted = wanted
-            showAgain.restart()
+            rows.fold("more")
         }
+        if (showAgain.tries >= 8) return
+        showAgain.tries++
+        showAgain.wanted = wanted
+        showAgain.restart()
     }
     Timer { id: showAgain; property string wanted: ""; property int tries: 0; interval: 200; onTriggered: page.seek(showAgain.wanted) }
     function reveal(row: Item): void { page.glideTo(row.mapToItem(flick.contentItem, 0, 0).y - flick.height * 0.3) }

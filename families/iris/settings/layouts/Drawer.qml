@@ -133,7 +133,8 @@ Item {
                                 entry: modelData
                                 areas: [modelData]
                                 spelled: true
-                                anchors.verticalCenter: parent.verticalCenter
+                                // A Repeater's key is made before it has a parent and keeps none on the way out.
+                                anchors.verticalCenter: parent?.verticalCenter
                             }
                         }
                     }

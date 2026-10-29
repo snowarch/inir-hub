@@ -530,6 +530,9 @@ Item {
         repeat: true
         onRunningChanged: if (running) tries = 0
         onTriggered: {
+            // Opened by the request, the layout's page loads a moment after: asked before it stood, the group went to
+            // Classic's pool and Drawer stayed at its top (10-29, "appearance/Faces").
+            if (!root.layoutStands && ++tries <= 40) return
             // A layout that draws its own rows knows its groups; the engine has none to match (the jump never came).
             if (root.layoutRows) {
                 stop()

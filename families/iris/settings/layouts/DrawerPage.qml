@@ -220,18 +220,27 @@ Item {
         const lower = wanted.toLowerCase()
         const target = page.targets().find(entry => entry.key === wanted || entry.key.toLowerCase() === lower
             || Translation.tr(entry.key).toLowerCase() === lower)
-        if (target) { page.glideTo(target.item.mapToItem(flick.contentItem, 0, 0).y - page.u(8)) }
-        else {
-            // A group waiting under its column's Fine-tune opens it, then shows once built.
-            for (let i = 0; i < columnRepeater.count; i++) {
-                const column = columnRepeater.itemAt(i)
-                if (!column || !column.blocks.some(block => block.rest && block.key.toLowerCase() === lower) || showAgain.tries >= 8) continue
-                if (!column.moreOpen) column.fold("more")
-                showAgain.tries++
-                showAgain.wanted = wanted
-                showAgain.restart()
-            }
+        // Asked while the columns still build, the group may not be there yet, or the glide is held short by a
+        // content height that is still growing: the page stayed at its top (10-29: Faces left under the drawer's edge).
+        if (target) {
+            const y = target.item.mapToItem(flick.contentItem, 0, 0).y - page.u(8)
+            page.glideTo(y)
+            if (y <= flick.contentHeight - flick.height + 1 || showAgain.tries >= 8) return
+            showAgain.tries++
+            showAgain.wanted = wanted
+            showAgain.restart()
+            return
         }
+        // A group waiting under its column's Fine-tune opens it, then shows once built.
+        for (let i = 0; i < columnRepeater.count; i++) {
+            const column = columnRepeater.itemAt(i)
+            if (column && !column.moreOpen && column.blocks.some(block => block.rest && block.key.toLowerCase() === lower))
+                column.fold("more")
+        }
+        if (showAgain.tries >= 8) return
+        showAgain.tries++
+        showAgain.wanted = wanted
+        showAgain.restart()
     }
     Timer { id: showAgain; property string wanted: ""; property int tries: 0; interval: 200; onTriggered: page.seek(showAgain.wanted) }
     function reveal(row: Item): void { page.glideTo(row.mapToItem(flick.contentItem, 0, 0).y - flick.height * 0.3) }

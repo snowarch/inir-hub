@@ -1730,7 +1730,9 @@ Item {
             readonly property string chosenFace: String(root.value ?? "")
             options: root.choices
             current: root.value
-            maxWidth: root.controlWidth
+            // A short name leaves the row's room to the answer: font names are long and drawn in their own face,
+            // "Archivo SemiExpanded" was cut at the column in Drawer (10-29). Never past 60 % of the row.
+            maxWidth: Math.round(Math.min(layout.width * 0.6, Math.max(root.controlWidth, layout.width - label.implicitWidth - 24 * root.d)))
             accessibleName: Translation.tr(root.spec.label)
             fontFor: root.spec.previewFont ? (choice => root.previewFace(choice)) : null
             otherText: root.spec.installedFonts === true && chosenFace.length > 0 ? chosenFace : Translation.tr("Custom")
