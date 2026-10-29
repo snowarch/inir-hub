@@ -30,7 +30,8 @@ Item {
     readonly property string voice: "drawer"
     readonly property bool ownsStage: true
     readonly property bool drawsRows: true
-    readonly property string searchHint: Translation.tr("Search settings")
+    // The head already says where it searches, and the field narrows on a small screen: one word fits any language.
+    readonly property string searchHint: Translation.tr("Search")
     // Raised to the room's top; the engine reads it for the body's height.
     property bool tall: false
 
@@ -92,32 +93,92 @@ Item {
         width: root.width - 2 * root.pad
         height: root.u(40)
         spacing: root.u(10)
-        Item { id: searchSlot; Layout.preferredWidth: root.u(250); Layout.preferredHeight: root.u(36) }
-        Flickable {
-            id: keyFlick
-            Layout.fillWidth: true
-            Layout.preferredHeight: root.u(40)
-            contentWidth: keyRow.width
-            contentHeight: height
-            flickableDirection: Flickable.HorizontalFlick
-            boundsBehavior: Flickable.StopAtBounds
-            interactive: keyRow.width > keyFlick.width
-            clip: true
-            Row {
-                id: keyRow
-                x: Math.max(0, Math.round((keyFlick.width - width) / 2))
-                height: keyFlick.height
-                spacing: root.u(2)
-                Repeater {
-                    model: root.shelves
+        Item { id: searchSlot; Layout.preferredWidth: root.searchWidth; Layout.preferredHeight: root.u(36) }
+        Item { id: keyGap; Layout.fillWidth: true; Layout.preferredHeight: root.u(40) }
+        LayoutSwitch { id: switcher; host: root.host; voice: "drawer"; compact: true }
+        HeadKey {
+            glyph: root.windowed ? "layers" : "web_asset"
+            name: root.windowed ? Translation.tr("Open over the desktop") : Translation.tr("Open as a window")
+            onClicked: root.host.switchHost()
+        }
+        HeadKey { glyph: "close"; name: Translation.tr("Close settings"); onClicked: root.host.close() }
+    }
+
+    // The keys fit their room, never cut (a 1366 px laptop hid Lock & Login, Sources and the Hub past the edge): the
+    // open kind names all its areas while they fit beside the search, then only the open one keeps its name and the
+    // search narrows, and a narrow window gives the keys a row of their own. The room a rested name takes is kept, and
+    // the widths come from the names, so laying the row out never feeds back into choosing it.
+    IrisText { id: nameProbe; visible: false; font.pixelSize: IrisStyle.typeMeta; font.weight: IrisStyle.weight(Font.DemiBold) }
+    FontMetrics { id: nameMetrics; font: nameProbe.font }
+    function rowNeed(spellAll: bool, section: string): real {
+        nameMetrics.font
+        const named = entry => Math.ceil(nameMetrics.advanceWidth(Translation.tr(String(entry.title ?? "")))) + root.u(48)
+        let width = 0, keys = 0, rest = 0
+        root.shelves.forEach((shelf, i) => {
+            if (i > 0 && root.shelves[i - 1].cluster !== shelf.cluster) { width += root.u(15); keys++ }
+            const spelled = shelf.areas.length > 1 && shelf.areas.some(entry => entry.id === section)
+            for (const entry of spelled ? shelf.areas : [shelf.entry]) {
+                const on = (spelled || shelf.areas.length === 1) && String(entry.id) === section
+                if (spellAll && (on || spelled)) width += named(entry)
+                else { width += root.u(38); rest = Math.max(rest, named(entry) - root.u(38)) }
+                keys++
+            }
+        })
+        return width + Math.max(0, keys - 1) * root.u(2) + rest
+    }
+    readonly property real headFree: head.width - switcher.implicitWidth - 2 * root.u(36) - 4 * head.spacing
+    // Measured for the widest area, so the search and the row's place hold still from one area to the next.
+    readonly property real needSpelled: root.sections.reduce((most, entry) => Math.max(most, root.rowNeed(true, String(entry.id))), 0)
+    readonly property real needTight: root.sections.reduce((most, entry) => Math.max(most, root.rowNeed(false, String(entry.id))), 0)
+    // 0: one row, the open kind's areas by name; 1: one row of glyphs and one name at a time, the open area's until
+    // another key is rested on; 2: the keys on a row of their own, by name if they fit there.
+    readonly property int headFit: root.needSpelled + root.u(180) <= root.headFree ? 0
+        : root.needTight + root.u(180) <= root.headFree ? 1 : 2
+    readonly property bool spellAll: root.headFit === 0 || (root.headFit === 2 && root.needSpelled <= head.width)
+    readonly property real searchWidth: root.headFit === 2 ? root.u(250)
+        : Math.max(root.u(180), Math.min(root.u(250), root.headFree - (root.headFit === 0 ? root.needSpelled : root.needTight)))
+
+    Flickable {
+        id: keyFlick
+        x: root.headFit < 2 ? head.x + keyGap.x : head.x
+        y: root.headFit < 2 ? head.y : head.y + head.height + root.u(8)
+        width: root.headFit < 2 ? keyGap.width : head.width
+        height: root.u(40)
+        contentWidth: keyRow.width
+        contentHeight: height
+        flickableDirection: Flickable.HorizontalFlick
+        boundsBehavior: Flickable.StopAtBounds
+        interactive: keyRow.width > keyFlick.width
+        clip: true
+        Row {
+            id: keyRow
+            x: Math.max(0, Math.round((keyFlick.width - width) / 2))
+            height: keyFlick.height
+            spacing: root.u(2)
+            Repeater {
+                model: root.shelves
+                Item {
+                    id: slot
+                    required property var modelData
+                    required property int index
+                    readonly property bool starts: slot.index > 0 && root.shelves[slot.index - 1]?.cluster !== slot.modelData.cluster
+                    readonly property bool spelled: slot.modelData.areas.length > 1 && !root.searching && !root.paged
+                        && slot.modelData.areas.some(entry => entry.id === root.section)
+                    width: slotRow.width
+                    height: keyRow.height
+                    // The open kind holds its areas in one tray, so a glyph beside the open area reads as its sibling.
+                    Rectangle {
+                        visible: slot.spelled
+                        x: slot.starts ? root.u(17) : 0
+                        anchors.verticalCenter: parent.verticalCenter
+                        width: slotRow.width - x
+                        height: root.u(38)
+                        radius: IrisStyle.capsule(height)
+                        color: IrisStyle.fillQuiet
+                    }
                     Row {
-                        id: slot
-                        required property var modelData
-                        required property int index
-                        readonly property bool starts: slot.index > 0 && root.shelves[slot.index - 1]?.cluster !== slot.modelData.cluster
-                        readonly property bool spelled: slot.modelData.areas.length > 1 && !root.searching && !root.paged
-                            && slot.modelData.areas.some(entry => entry.id === root.section)
-                        height: keyRow.height
+                        id: slotRow
+                        height: parent.height
                         spacing: root.u(2)
                         Item {
                             visible: slot.starts
@@ -141,20 +202,13 @@ Item {
                 }
             }
         }
-        LayoutSwitch { host: root.host; voice: "drawer"; compact: true }
-        HeadKey {
-            glyph: root.windowed ? "layers" : "web_asset"
-            name: root.windowed ? Translation.tr("Open over the desktop") : Translation.tr("Open as a window")
-            onClicked: root.host.switchHost()
-        }
-        HeadKey { glyph: "close"; name: Translation.tr("Close settings"); onClicked: root.host.close() }
     }
 
     // ── The body: an area of the pool, or a search's results and a shared page on their own sheet.
     Item {
         id: body
         x: root.pad
-        y: head.y + head.height + root.u(16)
+        y: keyFlick.y + keyFlick.height + root.u(16)
         width: root.width - 2 * root.pad
         height: root.height - y - root.u(14)
 
@@ -210,7 +264,8 @@ Item {
         readonly property string areaId: String(key.areas[0]?.id ?? "")
         readonly property bool on: key.areas.length === 1 && key.areaId === root.section && !root.searching && !root.paged
         readonly property bool found: !root.searching || key.areas.some(area => root.host?.matchedSections?.has(area.id) ?? false)
-        readonly property bool open: key.on || key.spelled || root.named === String(key.entry.id ?? "")
+        readonly property bool open: (key.on && (root.spellAll || root.named.length === 0)) || (key.spelled && root.spellAll)
+            || root.named === String(key.entry.id ?? "")
         readonly property int noted: key.areas.reduce((sum, area) => sum + Number(root.noteCounts[area.id] ?? 0), 0)
         width: key.open ? keyName.implicitWidth + root.u(48) : root.u(38)
         height: root.u(38)
