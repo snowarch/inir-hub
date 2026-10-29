@@ -121,7 +121,7 @@ Item {
     readonly property real voicedNatural: root.voicedChoice ? root.choiceHug : 0
     readonly property bool inlineChoice: root.voicedChoice ? root.voicedNatural > 0 && root.voicedNatural <= root.controlWidth
         : root.spec.kind === "choice" && root.roomy && root.choices.length >= 2 && root.choices.length <= 4
-        && !root.swatched && !root.tiled && !root.carded && root.segmentNatural <= root.controlWidth
+        && !root.swatched && !root.tiled && !root.carded && root.choiceHug <= root.controlWidth
     // A flat list the column's track cannot hold (HIG: past a few choices, or names too long to share it) answers as a
     // pop-up button in the same column. Pictures stay pictures: up to five glyph choices keep their track under the text.
     readonly property bool menuChoice: root.spec.kind === "choice" && root.choices.length > 0 && !root.inlineChoice
@@ -468,9 +468,9 @@ Item {
         Loader {
             opacity: root.controlOpacity
             // A voiced track under its row keeps its names' width, at the row's right like the column it left.
-            Layout.fillWidth: root.voice.length === 0
+            // every page and a search alike: the track hugs its names at the row's right, never across the pane
             Layout.alignment: Qt.AlignRight
-            Layout.preferredWidth: root.voice.length > 0 ? Math.min(Math.max(item?.implicitWidth ?? 0, root.choiceHug), parent.width) : -1
+            Layout.preferredWidth: Math.min(Math.max(item?.implicitWidth ?? 0, root.choiceHug), parent.width)
             active: root.spec.kind === "choice" && !root.inlineChoice && !root.swatched && !root.menuChoice && !root.tiled && !root.carded
             visible: active
             sourceComponent: segmentedComponent

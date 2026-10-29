@@ -1689,9 +1689,9 @@ Item {
                     Layout.fillWidth: true
                     implicitHeight: groupRows.implicitHeight
                     radius: IrisStyle.radiusTile
-                    // In the pane the pane is the card: rows sit on it, parts apart by their caption and air.
+                    // A search or a shared page groups its rows on the same form plates as an area's page (10-29).
                     color: root.sceneDrawn && root.scene.groupFill !== undefined ? root.scene.groupFill
-                        : root.split || IrisStyle.fieldChamfer ? "transparent" : IrisStyle.readingCard
+                        : IrisStyle.fieldChamfer ? "transparent" : IrisStyle.formPlate
                     IrisCutPlate { anchors.fill: parent; visible: !root.split && IrisStyle.fieldChamfer; color: IrisStyle.readingCard }
                     ColumnLayout {
                         id: groupRows
