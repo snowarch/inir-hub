@@ -82,6 +82,24 @@ Item {
             : root.navPageOrder[(i - 1 + root.navPageOrder.length) % root.navPageOrder.length]
     }
 
+    function stepNav(forward: bool): void {
+        root.currentPage = forward ? root.nextNavPage(root.currentPage) : root.prevNavPage(root.currentPage)
+    }
+    // The view follows the keyboard: whatever Tab reaches scrolls into its list or page with some air.
+    readonly property Item keyed: root.Window.activeFocusItem
+    onKeyedChanged: if (root.keyed) Qt.callLater(root.followFocus, root.keyed)
+    function followFocus(item: Item): void {
+        let scroller = null
+        for (let p = item?.parent ?? null; p && p !== root; p = p.parent)
+            if (p.contentItem !== undefined && p.contentY !== undefined && p.flickableDirection !== undefined) { scroller = p; break }
+        if (!scroller || !item.visible || scroller.contentHeight <= scroller.height) return
+        const top = item.mapToItem(scroller.contentItem, 0, 0).y
+        const air = 24
+        if (top - air < scroller.contentY) scroller.contentY = Math.max(0, top - air)
+        else if (top + item.height + air > scroller.contentY + scroller.height)
+            scroller.contentY = Math.min(scroller.contentHeight - scroller.height, top + item.height + air - scroller.height)
+    }
+
     // A page by number, then a part of it by name (`inir settingsNav open bar modules`).
     function openPage(index: int, section: string): void {
         if (index >= 0 && index < root.pages.length)
@@ -297,6 +315,12 @@ Item {
         } else if (event.modifiers & Qt.ControlModifier && (event.key === Qt.Key_PageUp || event.key === Qt.Key_Backtab)) {
             root.currentPage = root.prevNavPage(root.currentPage)
             event.accepted = true
+        } else if (event.text.length === 1 && event.text.charCodeAt(0) > 32 && event.text.charCodeAt(0) !== 127
+                && !(event.modifiers & (Qt.ControlModifier | Qt.AltModifier | Qt.MetaModifier))) {
+            // Typing anywhere searches, as in GNOME Settings: the first letter lands in the field instead of nowhere.
+            searchField.forceActiveFocus()
+            searchField.insert(searchField.cursorPosition, event.text)
+            event.accepted = true
         }
     }
 
@@ -508,6 +532,13 @@ Item {
                     clip: true
                     boundsBehavior: Flickable.StopAtBounds
                     ScrollBar.vertical: StyledScrollBar {}
+                    // The rail is one Tab stop (thirty stood between the search and the page): the open page wears the
+                    // ring, ↑ ↓ open the page above or below.
+                    activeFocusOnTab: true
+                    Accessible.role: Accessible.List
+                    Accessible.name: Translation.tr("Pages")
+                    Keys.onUpPressed: root.stepNav(false)
+                    Keys.onDownPressed: root.stepNav(true)
 
                     ColumnLayout {
                         id: navColumn
@@ -547,6 +578,7 @@ Item {
                                         Layout.fillWidth: true
                                         implicitHeight: 52
                                         pressScaleEnabled: false
+                                        focusRingInward: true
                                         // the chosen page morphs fully round (M3 Expressive's selected list item)
                                         buttonRadiusTop: navItem.current ? 26 : navItem.first ? SettingsMaterialPreset.tileOuterRadius : SettingsMaterialPreset.tileInnerRadius
                                         buttonRadiusBottom: navItem.current ? 26 : navItem.last ? SettingsMaterialPreset.tileOuterRadius : SettingsMaterialPreset.tileInnerRadius
@@ -566,6 +598,9 @@ Item {
                                         }
                                         Accessible.role: Accessible.PageTab
                                         Accessible.name: navItem.modelData.name
+                                        focusPolicy: Qt.NoFocus
+                                        focusRingShown: navFlick.activeFocus && navItem.current
+                                        onFocusRingShownChanged: if (navItem.focusRingShown) Qt.callLater(root.followFocus, navItem)
 
                                         contentItem: RowLayout {
                                             spacing: 14
@@ -714,6 +749,7 @@ Item {
                     width: resultsList.width
                     implicitHeight: 68
                     pressScaleEnabled: false
+                    focusRingInward: true
                     buttonRadiusTop: result.index === 0 ? SettingsMaterialPreset.tileOuterRadius : SettingsMaterialPreset.tileInnerRadius
                     buttonRadiusBottom: result.index === resultsList.count - 1 ? SettingsMaterialPreset.tileOuterRadius : SettingsMaterialPreset.tileInnerRadius
                     toggled: result.index === root.selectedResult
