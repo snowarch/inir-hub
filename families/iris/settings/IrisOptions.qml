@@ -793,13 +793,13 @@ QtObject {
             const icon = root.pieceIcons[kind]
             rows.push({ section: "bubbles", group: "Icons", label: IrisPieces.labelOf(kind) + " icon",
                 description: icon.description, piece: kind, glyphs: icon.glyphs,
-                path: "iris.pieces.icons", kind: "icon", fallback: "" })
+                path: "iris.pieces.icons", kind: "icon", fallback: "", tune: true })
         }
         for (const piece of IrisPieces.slots)
             rows.push({ section: "bubbles", group: "Placement", label: piece.label, description: piece.description,
                 piece: piece.id,
                 path: IrisPieces.configPath(piece.id) + ".place", kind: "zone", fallback: "island",
-                choices: IrisPieces.zoneChoices(true) })
+                choices: IrisPieces.zoneChoices(true), tune: true })
         for (const piece of IrisPieces.extras) {
             if (IrisFrame.announcements.includes(piece.id)) continue
             const path = IrisPieces.configPath(piece.id)
@@ -812,11 +812,12 @@ QtObject {
             rows.push({ section: section, group: group, label: piece.label,
                 description: hint.length > 0 ? hint : piece.description,
                 piece: piece.id, keywords: piece.keywords ?? [],
-                path: path + ".enable", kind: "switch", fallback: false })
+                // Under Bubbles the extras are a long list of switches: they wait behind the area's Fine-tune.
+                path: path + ".enable", kind: "switch", fallback: false, tune: !anime })
             rows.push({ section: section, group: group, label: piece.label + " bubble rests",
                 piece: piece.id,
                 path: path + ".place", visibleWhen: path + ".enable", kind: "zone",
-                fallback: IrisPieces.defaultPlace, choices: IrisPieces.zoneChoices(false) })
+                fallback: IrisPieces.defaultPlace, choices: IrisPieces.zoneChoices(false), tune: !anime })
             if (piece.id === "workspaces") {
                 rows.push({ section: "bubbles", group: "Workspaces", label: "Tap opens", description: "Open Niri's Overview, or grow a workspace switcher from this bubble.", piece: piece.id,
                     path: path + ".opens", visibleWhen: path + ".enable", kind: "choice", fallback: "card",
@@ -1789,7 +1790,8 @@ QtObject {
         return move && move.groups.indexOf(String(spec.group ?? "")) >= 0 ? Object.assign({}, spec, { section: move.to }) : spec
     }
     readonly property var settings: {
-        const rows = root.behaviour.concat(root.shared).concat(root.niriRows).concat(DesktopWidgetOptions.rows).concat(root.edgeRows).map(spec => root.placed(spec))
+        // A widget goes on or off in Desktop's grid; Widgets holds only what each one on the desktop offers.
+        const rows = root.behaviour.concat(root.shared).concat(root.niriRows).concat(DesktopWidgetOptions.rows.filter(spec => !spec.widgetEnable)).concat(root.edgeRows).map(spec => root.placed(spec))
         const known = new Set(rows.filter(spec => !spec.mirror).map(spec => spec.path))
         const own = path => rows.find(spec => spec.path === path && !spec.mirror) ?? root.studio.find(spec => spec.path === path && !spec.mirror)
         // Home: the rows it was given (Customize › On Home), each the area's own row said once more.
