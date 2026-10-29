@@ -2,6 +2,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import qs.services
 import qs.modules.common
 import qs.modules.waffle.looks
 
@@ -14,10 +15,19 @@ WSettingsRow {
     clickable: true
     onClicked: root.checked = !root.checked
     
+    // Windows puts the state in words left of the toggle (ToggleSwitch OnContent / OffContent)
     control: Component {
-        WSwitch {
-            checked: root.checked
-            onClicked: root.checked = !root.checked
+        RowLayout {
+            spacing: Looks.dp(12)
+            WText {
+                text: root.checked ? Translation.tr("On") : Translation.tr("Off")
+                font.pixelSize: Looks.settings.body
+                font.weight: Looks.font.weight.thin
+            }
+            WSwitch {
+                checked: root.checked
+                onClicked: root.checked = !root.checked
+            }
         }
     }
 }

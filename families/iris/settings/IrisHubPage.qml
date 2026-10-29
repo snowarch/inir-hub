@@ -227,6 +227,7 @@ Flickable {
             IrisText {
                 Layout.alignment: Qt.AlignHCenter
                 text: root.query.length > 0 ? Translation.tr("Nothing matches “%1”").arg(root.query)
+                    : Hub.cliMissing ? Translation.tr("The hub comes with the inir command: run inir update once to get it")
                     : Hub.items.length === 0 ? Translation.tr("The hub didn't answer. Check your connection and try again")
                     : root.installedOnly ? Translation.tr("Nothing installed from the hub yet")
                     : Translation.tr("Nothing here yet")

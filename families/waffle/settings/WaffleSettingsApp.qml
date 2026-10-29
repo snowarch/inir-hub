@@ -17,103 +17,134 @@ ApplicationWindow {
     
     property var pages: [
         {
-            name: Translation.tr("Quick"),
+            name: Translation.tr("Home"),
+            desc: Translation.tr("What you change most"),
             icon: "flash-on",
             component: Qt.resolvedUrl("pages/WQuickPage.qml")
         },
         {
             name: Translation.tr("General"),
+            desc: Translation.tr("Sound, power, time, input, idle"),
             icon: "settings",
             component: Qt.resolvedUrl("pages/WGeneralPage.qml")
         },
         {
             name: Translation.tr("Taskbar"),
-            icon: "desktop",
+            desc: Translation.tr("Alignment, icons, clock, tray"),
+            icon: "pin",
             component: Qt.resolvedUrl("pages/WBarPage.qml")
         },
         {
             name: Translation.tr("Background"),
+            desc: Translation.tr("Wallpaper, slideshow, effects"),
             icon: "image",
             component: Qt.resolvedUrl("pages/WBackgroundPage.qml")
         },
         {
             name: Translation.tr("Themes"),
+            desc: Translation.tr("Colors, light and dark, fonts"),
             icon: "dark-theme",
             component: Qt.resolvedUrl("pages/WThemesPage.qml")
         },
         {
             name: Translation.tr("Gowall"),
+            desc: Translation.tr("Recolor wallpapers to your theme"),
             icon: "wand",
             component: Qt.resolvedUrl("pages/WGowallPage.qml")
         },
         {
             name: Translation.tr("Interface"),
-            icon: "apps",
+            desc: Translation.tr("Start, Action Center, notifications"),
+            icon: "widgets",
             component: Qt.resolvedUrl("pages/WInterfacePage.qml")
         },
         {
             name: Translation.tr("Modules"),
+            desc: Translation.tr("Which parts of the shell run"),
             icon: "settings-cog-multiple",
             component: Qt.resolvedUrl("pages/WModulesPage.qml")
         },
         {
             name: Translation.tr("Waffle Style"),
-            icon: "desktop",
+            desc: Translation.tr("The Windows 11 look and its details"),
+            icon: "start-here",
             component: Qt.resolvedUrl("pages/WWaffleStylePage.qml")
         },
         {
             name: Translation.tr("Shortcuts"),
+            desc: Translation.tr("Every key combination"),
             icon: "keyboard",
             component: Qt.resolvedUrl("pages/WShortcutsPage.qml")
         },
         {
             name: Translation.tr("About"),
+            desc: Translation.tr("Version, system, credits"),
             icon: "info",
             component: Qt.resolvedUrl("pages/WAboutPage.qml")
         },
         {
             name: Translation.tr("Monitors"),
+            desc: Translation.tr("What shows on each display"),
             icon: "desktop",
             component: Qt.resolvedUrl("pages/WMonitorVisibilityPage.qml")
         },
         {
             name: Translation.tr("Autostart"),
+            desc: Translation.tr("Apps that start with iNiR"),
             icon: "power",
             component: Qt.resolvedUrl("pages/WAutostartPage.qml")
         },
         {
             name: Translation.tr("Workspace Strip"),
-            icon: "desktop",
+            desc: Translation.tr("The workspace switcher at the screen edge"),
+            icon: "panel-left-expand",
             component: Qt.resolvedUrl("pages/WWorkspaceStripPage.qml")
         },
         {
             name: Translation.tr("Mascot"),
-            icon: "image",
+            desc: Translation.tr("Kira on your desktop"),
+            icon: "people",
             component: Qt.resolvedUrl("pages/WMascotPage.qml")
         },
         {
             name: Translation.tr("AI"),
+            desc: Translation.tr("Models, providers, privacy"),
             icon: "wand",
             component: Qt.resolvedUrl("pages/WAiPage.qml")
         },
         {
             name: Translation.tr("Effects"),
+            desc: Translation.tr("Blur, glass, motion"),
             icon: "eye",
             component: Qt.resolvedUrl("pages/WEffectsPage.qml")
         },
         {
             name: Translation.tr("Shell Layout"),
-            icon: "desktop",
+            desc: Translation.tr("Move and size the panels"),
+            icon: "panel-left-contract",
             component: Qt.resolvedUrl("pages/WShellLayoutPage.qml")
         },
         {
             key: "hub",
             name: Translation.tr("Hub"),
+            desc: Translation.tr("Widgets, themes and web apps"),
             icon: "store-microsoft",
             component: Qt.resolvedUrl("pages/WHubPage.qml")
         }
     ]
     
+    // the pane shows these; a category with one page opens it, more show their link cards (Windows' Settings IA)
+    readonly property var categories: [
+        { name: Translation.tr("Home"), icon: "widgets", tint: "#0067C0", tintDark: "#60CDFF", pages: [0] },
+        { name: Translation.tr("System"), icon: "desktop", tint: "#0067C0", tintDark: "#4CC2FF", pages: [1, 11, 12], hero: "system" },
+        { name: Translation.tr("Personalization"), icon: "paint-bucket", tint: "#C239B3", tintDark: "#F08CE4", pages: [3, 4, 2, 8, 5, 14], hero: "desktop" },
+        { name: Translation.tr("Windows & layout"), icon: "apps", tint: "#8764B8", tintDark: "#C6A8F5", pages: [6, 7, 17, 13, 16] },
+        { name: Translation.tr("Keyboard & shortcuts"), icon: "keyboard", tint: "#038387", tintDark: "#4FD8D8", pages: [9] },
+        { name: Translation.tr("AI"), icon: "wand", tint: "#CA5010", tintDark: "#FFA266", pages: [15] },
+        { name: Translation.tr("Hub"), icon: "store-microsoft", tint: "#107C10", tintDark: "#6CCB5F", pages: [18] },
+        { name: Translation.tr("About"), icon: "info", tint: "#5D5A58", tintDark: "#C8C6C4", pages: [10], apart: true }
+    ]
+
     property int currentPage: 0
     property int _requestedStartPage: -1
     property bool _navigationInitialized: false
@@ -185,8 +216,8 @@ ApplicationWindow {
     
     minimumWidth: 700
     minimumHeight: 450
-    width: 1000
-    height: 650
+    width: 1280
+    height: 820
     color: root.uiReady ? Looks.colors.bg0Opaque : "transparent"
     
     // Loading state
@@ -238,6 +269,7 @@ ApplicationWindow {
         opacity: visible ? 1 : 0
         
         pages: root.pages
+        categories: root.categories
         currentPage: root.currentPage
         loadEnabled: root.uiReady && root._navigationInitialized
         onCurrentPageChanged: {

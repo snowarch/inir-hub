@@ -523,7 +523,7 @@ WSettingsPage {
 
         WSettingsSpinBox {
             label: Translation.tr("Game Performance background opacity (%)")
-            icon: "monitor_heart"
+            icon: "pulse"
             suffix: "%"
             from: 0; to: 100; stepSize: 5
             value: Math.round(root.gamePerformanceBackgroundOpacity() * 100)
@@ -534,7 +534,7 @@ WSettingsPage {
 
         WSettingsSwitch {
             label: Translation.tr("Transparent Game Performance background")
-            icon: "opacity"
+            icon: "eye"
             description: Translation.tr("Set panel opacity to 0%; metrics remain visible")
             checked: Config.options?.overlay?.gamePerformance?.transparentBackground ?? false
             onCheckedChanged: Config.setNestedValue(

@@ -612,7 +612,7 @@ WSettingsPage {
 
     WSettingsCard {
         title: Translation.tr("Overview placement")
-        icon: "multitasking"
+        icon: "task-view-dark"
 
         WSettingsSwitch {
             label: Translation.tr("Active screen only")

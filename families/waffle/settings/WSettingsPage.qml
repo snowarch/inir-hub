@@ -16,11 +16,14 @@ Flickable {
     signal navigateRequested(int pageIndex)
     
     // Settings search context
+    // the Settings frame draws the title as a breadcrumb and sets these
+    property bool showHeader: true
+    property int sidePadding: 28
     property int settingsPageIndex: -1
     property string settingsPageName: pageTitle
     
     clip: true
-    contentHeight: contentColumn.implicitHeight + 48
+    contentHeight: contentColumn.implicitHeight + 56
     boundsBehavior: Flickable.StopAtBounds
     pressDelay: 50
     
@@ -28,16 +31,11 @@ Flickable {
     
     ColumnLayout {
         id: contentColumn
-        anchors {
-            top: parent.top
-            left: parent.left
-            right: parent.right
-            topMargin: 24
-            leftMargin: 28
-            rightMargin: 28
-            bottomMargin: 20
-        }
-        spacing: 10
+        // Windows' Settings keeps a page to 1000 px, left-aligned under its title
+        x: root.sidePadding
+        y: root.showHeader ? 24 : 0
+        width: Math.min(root.width - root.sidePadding * 2, Looks.dp(1000))
+        spacing: Looks.settings.cardSpacing
 
         opacity: 0
         transform: Translate { id: contentTranslate; y: Looks.transition.enabled ? 14 : 0 }
@@ -73,6 +71,7 @@ Flickable {
 
         // Page header
         ColumnLayout {
+            visible: root.showHeader
             Layout.fillWidth: true
             Layout.bottomMargin: 6
             spacing: 4

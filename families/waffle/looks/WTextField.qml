@@ -18,8 +18,32 @@ TextField {
     font {
         hintingPreference: Font.PreferDefaultHinting
         family: Looks.font.family.ui
-        pixelSize: Looks.font.pixelSize.normal
-        weight: Looks.font.weight.regular
+        weight: Looks.font.weight.thin
+    }
+
+    // WinUI 3 TextBox drawn from our tokens: FluentWinUI3 reads the app palette, which stays light in a dark
+    // shell and left a grey slab (Hub search, 10-29)
+    implicitHeight: Looks.dp(32)
+    leftPadding: Looks.dp(11)
+    rightPadding: Looks.dp(11)
+    font.pixelSize: Looks.settings.body
+    placeholderTextColor: Looks.colors.subfg
+    selectionColor: Looks.colors.accent
+    selectedTextColor: Looks.colors.accentFg
+    background: Rectangle {
+        radius: Looks.settings.radiusSmall
+        color: root.activeFocus ? (Looks.dark ? Qt.rgba(0.12, 0.12, 0.12, 0.7) : "#FFFFFF")
+            : root.hovered ? Looks.settings.cardHover : Qt.alpha(Looks.colors.fg, Looks.dark ? 0.06 : 0.7)
+        border.width: 1
+        border.color: Looks.settings.cardStroke
+        clip: true
+        Rectangle {
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.bottom: parent.bottom
+            height: root.activeFocus ? 2 : 1
+            color: root.activeFocus ? Looks.colors.accent : Qt.alpha(Looks.colors.fg, Looks.dark ? 0.54 : 0.45)
+        }
     }
 
     MouseArea {

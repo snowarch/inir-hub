@@ -346,6 +346,22 @@ Singleton {
         readonly property color tile: ColorUtils.applyAlpha(ink, root.dark ? 0.065 : 0.045)
         readonly property color tileHover: ColorUtils.applyAlpha(ink, root.dark ? 0.125 : 0.075)
         readonly property color tilePressed: ColorUtils.applyAlpha(ink, root.dark ? 0.19 : 0.115)
+        // Windows 11 SettingsCard (CommunityToolkit SettingsCard.xaml, read 10-29): CardBackgroundFillColorDefault,
+        // CardStrokeColorDefault (a shade, not a light rim), ControlFillColorSecondary / Tertiary under the pointer
+        readonly property color card: root.dark ? ColorUtils.applyAlpha("#FFFFFF", 0.05) : ColorUtils.applyAlpha("#FFFFFF", 0.7)
+        readonly property color cardHover: root.dark ? ColorUtils.applyAlpha("#FFFFFF", 0.085) : ColorUtils.applyAlpha("#F9F9F9", 0.5)
+        readonly property color cardPressed: root.dark ? ColorUtils.applyAlpha("#FFFFFF", 0.035) : ColorUtils.applyAlpha("#F9F9F9", 0.3)
+        readonly property color cardStroke: ColorUtils.applyAlpha("#000000", root.dark ? 0.1 : 0.0578)
+        readonly property int cardMinHeight: root.dp(68)
+        readonly property int cardItemMinHeight: root.dp(52)
+        readonly property int cardPadding: root.dp(16)
+        readonly property int cardSpacing: root.dp(4)
+        readonly property int cardIconSize: root.dp(20)
+        // Windows type ramp: Caption 12, Body 14, BodyStrong 14 semibold, Subtitle 20, Title 28
+        readonly property int caption: root.dp(12)
+        readonly property int body: root.dp(14)
+        readonly property int subtitle: root.dp(20)
+        readonly property int title: root.dp(28)
     }
 
     font: QtObject {

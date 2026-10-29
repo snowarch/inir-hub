@@ -386,6 +386,7 @@ Item {
     
     function openSearchResult(entry: var): void {
         if (entry && entry.pageIndex !== undefined && entry.pageIndex >= 0) {
+            root.landingCategory = -1;
             currentPage = entry.pageIndex;
             
             // Focus option - try optionId first (dynamic registry), then targetLabel (static index)
@@ -445,123 +446,122 @@ Item {
         }
     }
     
+    // ── Windows 11 Settings: categories in the pane, pages inside them, a breadcrumb over the page ──
+    property var categories: []
+    // a category's own page (its pages as link cards) while >= 0
+    property int landingCategory: -1
+    function categoryOf(page: int): int {
+        for (let i = 0; i < root.categories.length; ++i)
+            if (root.categories[i].pages.indexOf(page) >= 0)
+                return i
+        return -1
+    }
+    readonly property int activeCategory: root.landingCategory >= 0 ? root.landingCategory : root.categoryOf(root.currentPage)
+    function openCategory(index: int): void {
+        const cat = root.categories[index]
+        if (!cat)
+            return
+        if (cat.pages.length === 1) {
+            root.landingCategory = -1
+            root.currentPage = cat.pages[0]
+        } else {
+            root.landingCategory = index
+        }
+    }
+    function openPage(page: int): void {
+        root.landingCategory = -1
+        root.currentPage = page
+    }
+
     RowLayout {
         anchors.fill: parent
         spacing: 0
-        
-        // Navigation sidebar
-        Rectangle {
+
+        // ── Navigation pane (NavigationView, OpenPaneLength 320) ──
+        Item {
+            id: navPane
             Layout.fillHeight: true
-            Layout.preferredWidth: root.navExpanded ? Looks.dp(240) : Looks.dp(56)
-            color: Looks.colors.bg1Base
-            
+            Layout.preferredWidth: root.navExpanded ? Looks.dp(320) : Looks.dp(56)
+
             Behavior on Layout.preferredWidth {
                 animation: NumberAnimation { duration: Looks.transition.enabled ? Looks.transition.duration.medium : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.standard }
             }
-            
+
             ColumnLayout {
                 anchors {
                     fill: parent
-                    topMargin: Looks.dp(10)
-                    bottomMargin: Looks.dp(10)
-                    leftMargin: Looks.dp(12)
-                    rightMargin: Looks.dp(12)
+                    topMargin: Looks.dp(14)
+                    bottomMargin: Looks.dp(8)
+                    leftMargin: root.navExpanded ? Looks.dp(16) : Looks.dp(4)
+                    rightMargin: root.navExpanded ? Looks.dp(16) : Looks.dp(4)
                 }
                 spacing: Looks.dp(4)
-                
-                // Header with app name (expanded)
+
+                // the person, as Windows opens Settings: picture, name, and what this machine runs
                 Revealer {
                     vertical: true
                     reveal: root.navExpanded
                     Layout.fillWidth: true
-                RowLayout {
-                    anchors.left: parent.left
-                    anchors.right: parent.right
-                    Layout.bottomMargin: Looks.dp(6)
-                    spacing: Looks.dp(10)
+                    RowLayout {
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        spacing: Looks.dp(14)
 
-                    WUserAvatar {
-                        sourceSize: Qt.size(Looks.dp(32), Looks.dp(32))
-                    }
-
-                    ColumnLayout {
-                        Layout.fillWidth: true
-                        spacing: 1
-
-                        WText {
-                            text: Translation.tr("Settings")
-                            font.pixelSize: Looks.font.pixelSize.larger
-                            font.weight: Looks.font.weight.stronger
-                            color: Looks.colors.fg
+                        WUserAvatar {
+                            Layout.topMargin: Looks.dp(6)
+                            Layout.bottomMargin: Looks.dp(14)
+                            sourceSize: Qt.size(Looks.dp(64), Looks.dp(64))
                         }
-
-                        WText {
-                            text: SystemInfo.displayName || SystemInfo.username
-                            font.pixelSize: Looks.font.pixelSize.small
-                            color: Looks.colors.subfg
-                            elide: Text.ElideRight
+                        ColumnLayout {
+                            Layout.fillWidth: true
+                            spacing: Looks.dp(2)
+                            WText {
+                                Layout.fillWidth: true
+                                text: SystemInfo.displayName || SystemInfo.username
+                                font.pixelSize: Looks.settings.body
+                                font.weight: Looks.font.weight.strong
+                                elide: Text.ElideRight
+                            }
+                            WText {
+                                Layout.fillWidth: true
+                                text: [SystemInfo.distroName, "iNiR " + Translation.tr("Waffle")].filter(t => t && t !== "Unknown").join(" \u00b7 ")
+                                font.pixelSize: Looks.settings.caption
+                                font.weight: Looks.font.weight.thin
+                                color: Looks.colors.subfg
+                                elide: Text.ElideRight
+                            }
                         }
-                    }
-
-                    WBorderlessButton {
-                        implicitWidth: 28
-                        implicitHeight: 28
-                        onClicked: Quickshell.execDetached([Quickshell.shellPath("scripts/inir"), "lock", "activate"])
-
-                        contentItem: FluentIcon {
-                            anchors.centerIn: parent
-                            icon: "lock-closed"
-                            implicitSize: 14
-                            color: Looks.colors.subfg
-                        }
-                    }
-
-                    WBorderlessButton {
-                        implicitWidth: 28
-                        implicitHeight: 28
-                        onClicked: root.closeRequested()
-                        
-                        contentItem: FluentIcon {
-                            anchors.centerIn: parent
-                            icon: "dismiss"
-                            implicitSize: 14
-                            color: Looks.colors.subfg
+                        WBorderlessButton {
+                            Layout.alignment: Qt.AlignTop
+                            implicitWidth: Looks.dp(32)
+                            implicitHeight: Looks.dp(32)
+                            onClicked: root.closeRequested()
+                            contentItem: FluentIcon {
+                                anchors.centerIn: parent
+                                icon: "dismiss"
+                                implicitSize: Looks.dp(14)
+                                color: Looks.colors.subfg
+                            }
                         }
                     }
                 }
-                }
-                
-                // Subtle separator under header
-                Revealer {
-                    vertical: true
-                    reveal: root.navExpanded
-                    Layout.fillWidth: true
-                    Rectangle {
-                        implicitWidth: parent.width
-                        implicitHeight: 1
-                        color: Looks.settings.stroke
-                        opacity: 0.15
-                    }
-                }
-                
-                // Header icon (collapsed)
+
                 Revealer {
                     vertical: true
                     reveal: !root.navExpanded
                     Layout.fillWidth: true
-                Item {
-                    implicitWidth: parent.width
-                    implicitHeight: Looks.dp(38)
-
-                    FluentIcon {
-                        anchors.centerIn: parent
-                        icon: "settings"
-                        implicitSize: 20
-                        color: Looks.colors.subfg
+                    Item {
+                        implicitWidth: parent.width
+                        implicitHeight: Looks.dp(40)
+                        FluentIcon {
+                            anchors.centerIn: parent
+                            icon: "settings"
+                            implicitSize: Looks.dp(18)
+                            color: Looks.colors.subfg
+                        }
                     }
                 }
-                }
-                
+
                 // Search bar (only when expanded)
                 Revealer {
                     vertical: true
@@ -571,32 +571,31 @@ Item {
                     id: searchBarContainer
                     // Revealer sizes itself from its child's implicit size.
                     implicitWidth: parent.width
-                    implicitHeight: Looks.dp(36)
-                    radius: Looks.settings.radiusLarge
-                    color: searchInput.activeFocus
-                        ? Looks.settings.tileHover : Looks.settings.tile
-                    border.width: searchInput.activeFocus ? 2 : 1
-                    border.color: searchInput.activeFocus
-                        ? Looks.colors.accent : Looks.settings.stroke
-                    
-                      Behavior on border.color {
-                          animation: ColorAnimation { duration: Looks.transition.enabled ? 70 : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.standard }
-                      }
-                    
+                    implicitHeight: Looks.dp(32)
+                    radius: Looks.settings.radiusSmall
+                    color: searchInput.activeFocus ? (Looks.dark ? Qt.rgba(0.12, 0.12, 0.12, 0.7) : "#FFFFFF")
+                        : searchHover.hovered ? Looks.settings.cardHover : Looks.settings.card
+                    border.width: 1
+                    border.color: Looks.settings.cardStroke
+                    clip: true
+                    HoverHandler { id: searchHover }
+                    // TextControlElevationBorder: a darker line at the bottom, the accent and 2 px on focus
+                    Rectangle {
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        anchors.bottom: parent.bottom
+                        height: searchInput.activeFocus ? 2 : 1
+                        color: searchInput.activeFocus ? Looks.colors.accent : Qt.alpha(Looks.colors.fg, Looks.dark ? 0.54 : 0.45)
+                    }
+
                     RowLayout {
                         anchors {
                             fill: parent
-                            leftMargin: 9
-                            rightMargin: 9
+                            leftMargin: Looks.dp(11)
+                            rightMargin: Looks.dp(6)
                         }
-                        spacing: 7
-                        
-                        FluentIcon {
-                            icon: "search"
-                            implicitSize: 14
-                            color: Looks.colors.subfg
-                        }
-                        
+                        spacing: Looks.dp(6)
+
                         Item {
                             Layout.fillWidth: true
                             Layout.fillHeight: true
@@ -609,7 +608,7 @@ Item {
                                 selectionColor: Looks.colors.accent
                                 selectedTextColor: Looks.colors.accentFg
                                 font.family: Looks.font.family.ui
-                                font.pixelSize: Looks.font.pixelSize.normal
+                                font.pixelSize: Looks.settings.body
                                 clip: true
                                 
                                 onTextChanged: {
@@ -639,9 +638,9 @@ Item {
                                 text: Translation.tr("Find a setting")
                                 color: Looks.colors.subfg
                                 font.family: Looks.font.family.ui
-                                font.pixelSize: Looks.font.pixelSize.normal
+                                font.pixelSize: Looks.settings.body
+                                font.weight: Looks.font.weight.thin
                                 visible: !searchInput.text
-                                opacity: 0.6
                             }
                         }
                         
@@ -675,6 +674,12 @@ Item {
                                     }
                                 }
                             }
+                        }
+                        FluentIcon {
+                            Layout.rightMargin: Looks.dp(4)
+                            icon: "search"
+                            implicitSize: Looks.dp(14)
+                            color: Looks.colors.subfg
                         }
                     }
                 }
@@ -875,147 +880,400 @@ Item {
                 }
                 }
 
-                Item { height: Looks.dp(4) }
-                
-                // Navigation items
+
+                Item { implicitHeight: Looks.dp(8) }
+
                 Flickable {
                     Layout.fillWidth: true
                     Layout.fillHeight: true
                     contentHeight: navColumn.implicitHeight
                     clip: true
                     boundsBehavior: Flickable.StopAtBounds
-                    
+
                     ColumnLayout {
                         id: navColumn
                         width: parent.width
-                        spacing: Looks.dp(2)
-                        
+                        spacing: Looks.dp(4)
+
                         Repeater {
-                            model: root.pages
-                            
-                            WSettingsNavItem {
+                            model: root.categories
+
+                            // NavigationViewItem: 36 px, radius 4, 16 px icon, Body text; the chosen one on a subtle
+                            // fill with a 3 x 16 accent pill at its left edge
+                            Item {
+                                id: navEntry
                                 required property int index
                                 required property var modelData
-                                
+                                readonly property bool selected: root.activeCategory === navEntry.index
                                 Layout.fillWidth: true
-                                text: modelData.name
-                                navIcon: modelData.icon
-                                selected: root.currentPage === index
-                                expanded: root.navExpanded
-                                
-                                onClicked: root.currentPage = index
+                                // the last one (About) stands apart, as Windows Update does
+                                Layout.topMargin: navEntry.modelData.apart ? Looks.dp(12) : 0
+                                implicitHeight: Looks.dp(36)
+
+                                Rectangle {
+                                    anchors.fill: parent
+                                    radius: Looks.settings.radiusSmall
+                                    color: navMouse.pressed ? Qt.alpha(Looks.colors.fg, 0.03)
+                                        : navEntry.selected || navMouse.containsMouse ? Qt.alpha(Looks.colors.fg, Looks.dark ? 0.06 : 0.04)
+                                        : "transparent"
+                                    Behavior on color {
+                                        animation: ColorAnimation { duration: Looks.transition.enabled ? 83 : 0 }
+                                    }
+                                }
+                                Rectangle {
+                                    anchors.left: parent.left
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    width: Looks.dp(3)
+                                    height: navMouse.pressed && navEntry.selected ? Looks.dp(10) : Looks.dp(16)
+                                    radius: width / 2
+                                    color: Looks.colors.accent
+                                    opacity: navEntry.selected ? 1 : 0
+                                    Behavior on opacity {
+                                        animation: NumberAnimation { duration: Looks.transition.enabled ? 120 : 0 }
+                                    }
+                                    Behavior on height {
+                                        animation: NumberAnimation { duration: Looks.transition.enabled ? 120 : 0 }
+                                    }
+                                }
+                                MouseArea {
+                                    id: navMouse
+                                    anchors.fill: parent
+                                    hoverEnabled: true
+                                    cursorShape: Qt.PointingHandCursor
+                                    onClicked: root.openCategory(navEntry.index)
+                                }
+                                RowLayout {
+                                    anchors.fill: parent
+                                    anchors.leftMargin: root.navExpanded ? Looks.dp(16) : 0
+                                    spacing: Looks.dp(16)
+                                    FluentIcon {
+                                        Layout.alignment: root.navExpanded ? Qt.AlignVCenter : Qt.AlignCenter
+                                        Layout.fillWidth: !root.navExpanded
+                                        icon: navEntry.modelData.icon
+                                        filled: true
+                                        implicitSize: Looks.dp(18)
+                                        // each category keeps its colour, as Windows' Settings icons do: found by hue
+                                        color: Looks.dark ? navEntry.modelData.tintDark : navEntry.modelData.tint
+                                    }
+                                    WText {
+                                        visible: root.navExpanded
+                                        Layout.fillWidth: true
+                                        text: navEntry.modelData.name
+                                        font.pixelSize: Looks.settings.body
+                                        font.weight: Looks.font.weight.thin
+                                        elide: Text.ElideRight
+                                    }
+                                }
                             }
                         }
                     }
                 }
-                
-                // Separator above collapse button
-                Rectangle {
-                    Layout.fillWidth: true
-                    Layout.topMargin: Looks.dp(4)
-                    height: 1
-                    color: Looks.settings.stroke
-                    opacity: 0.15
-                }
-                
-                // Expand/collapse button
+
                 WBorderlessButton {
                     Layout.fillWidth: true
-                    Layout.preferredHeight: Looks.dp(32)
-                    
+                    Layout.preferredHeight: Looks.dp(36)
                     contentItem: RowLayout {
-                        spacing: Looks.dp(10)
-                        
-                        Item {
-                            implicitWidth: Looks.dp(20)
-                            implicitHeight: Looks.dp(20)
-                            Layout.leftMargin: root.navExpanded ? Looks.dp(12) : 0
+                        spacing: Looks.dp(16)
+                        FluentIcon {
+                            Layout.leftMargin: root.navExpanded ? Looks.dp(16) : 0
                             Layout.fillWidth: !root.navExpanded
                             Layout.alignment: root.navExpanded ? Qt.AlignVCenter : Qt.AlignCenter
-                            
-                            FluentIcon {
-                                anchors.centerIn: parent
-                                icon: root.navExpanded ? "panel-left-contract" : "panel-left-expand"
-                                implicitSize: Looks.dp(16)
-                                color: Looks.colors.subfg
-                            }
+                            icon: root.navExpanded ? "panel-left-contract" : "panel-left-expand"
+                            implicitSize: Looks.dp(16)
+                            color: Looks.colors.subfg
                         }
-                        
                         WText {
                             visible: root.navExpanded
                             Layout.fillWidth: true
                             text: Translation.tr("Collapse")
-                            font.pixelSize: Looks.font.pixelSize.normal
+                            font.pixelSize: Looks.settings.body
+                            font.weight: Looks.font.weight.thin
                             color: Looks.colors.subfg
                         }
                     }
-                    
                     onClicked: root.navExpanded = !root.navExpanded
                 }
             }
         }
-        
-        // Separator — subtle divider
+
+        // ── Content: a layer over the window with its top-left corner rounded, as Windows' Settings frame ──
         Rectangle {
-            Layout.fillHeight: true
-            width: 1
-            color: Looks.settings.stroke
-            opacity: 0.2
-        }
-        
-        // Content area
-        Rectangle {
+            id: contentLayer
             Layout.fillWidth: true
             Layout.fillHeight: true
-            color: Looks.colors.bg0
-            
-            // Page stack
+            topLeftRadius: Looks.dp(8)
+            color: Looks.dark ? Qt.rgba(0.227, 0.227, 0.227, 0.3) : Qt.rgba(1, 1, 1, 0.5)
+            border.width: 1
+            border.color: Looks.settings.cardStroke
+
+            readonly property int sidePadding: width < Looks.dp(640) ? Looks.dp(20) : Looks.dp(40)
+            readonly property int columnWidth: Math.min(width - sidePadding * 2, Looks.dp(1000))
+
+            // breadcrumb: the category, then the page, in Windows' Title (28 semibold); the category goes back
+            RowLayout {
+                id: crumb
+                x: contentLayer.sidePadding
+                y: Looks.dp(26)
+                width: contentLayer.columnWidth
+                spacing: Looks.dp(14)
+                readonly property var cat: root.categories[root.activeCategory] ?? null
+                readonly property bool nested: crumb.cat !== null && crumb.cat.pages.length > 1 && root.landingCategory < 0
+
+                WText {
+                    visible: crumb.nested
+                    text: crumb.cat ? crumb.cat.name : ""
+                    font.pixelSize: Looks.settings.title
+                    font.weight: Looks.font.weight.strong
+                    color: crumbMouse.containsMouse ? Looks.colors.fg : Looks.colors.subfg
+                    MouseArea {
+                        id: crumbMouse
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: root.landingCategory = root.activeCategory
+                    }
+                }
+                FluentIcon {
+                    visible: crumb.nested
+                    icon: "chevron-right"
+                    implicitSize: Looks.dp(16)
+                    color: Looks.colors.subfg
+                }
+                WText {
+                    Layout.fillWidth: true
+                    text: root.landingCategory >= 0 ? (crumb.cat ? crumb.cat.name : "")
+                        : (root.pages[root.currentPage]?.name ?? "")
+                    font.pixelSize: Looks.settings.title
+                    font.weight: Looks.font.weight.strong
+                    elide: Text.ElideRight
+                    Accessible.role: Accessible.Heading
+                }
+            }
+
             Item {
                 id: pageStack
                 anchors.fill: parent
-                
-                // Keep only the active page alive. Search navigates to an
-                // unloaded page and the targetLabel focus retry waits for it to
-                // register its controls.
+                anchors.topMargin: crumb.y + crumb.height + Looks.dp(10)
+                visible: root.landingCategory < 0
+
+                // Keep only the active page alive. Search navigates to an unloaded page and the targetLabel focus
+                // retry waits for it to register its controls.
                 property int keepRadius: 0
 
-                 Repeater {
-                     id: pageRepeater
-                     model: root.pages.length
+                Repeater {
+                    id: pageRepeater
+                    model: root.pages.length
 
-                     Loader {
-                         id: pageLoader
-                         required property int index
-                         anchors.fill: parent
-                         active: root.loadEnabled && Math.abs(index - root.currentPage) <= pageStack.keepRadius
+                    Loader {
+                        id: pageLoader
+                        required property int index
+                        anchors.fill: parent
+                        active: root.loadEnabled && Math.abs(index - root.currentPage) <= pageStack.keepRadius
                         asynchronous: index !== root.currentPage
                         source: root.pages[index].component
                         visible: index === root.currentPage && status === Loader.Ready
                         opacity: visible ? 1 : 0
                         // Disabled pages must not intercept mouse events even at opacity 0
                         enabled: visible
+                        // the breadcrumb above says the page's name: the page drops its own
+                        onLoaded: if (item && item.hasOwnProperty("showHeader")) {
+                            item.showHeader = false
+                            item.sidePadding = Qt.binding(() => contentLayer.sidePadding)
+                        }
 
-                         Behavior on opacity {
-                             animation: NumberAnimation { duration: Looks.transition.enabled ? Looks.transition.duration.normal : 0; easing.type: Easing.OutCubic }
-                         }
+                        Behavior on opacity {
+                            animation: NumberAnimation { duration: Looks.transition.enabled ? Looks.transition.duration.normal : 0; easing.type: Easing.OutCubic }
+                        }
 
-                         Connections {
-                             target: pageLoader.item
-                             ignoreUnknownSignals: true
+                        Connections {
+                            target: pageLoader.item
+                            ignoreUnknownSignals: true
+                            function onNavigateRequested(pageIndex) {
+                                if (pageIndex < 0 || pageIndex >= root.pages.length)
+                                    return
+                                root.openPage(pageIndex)
+                            }
+                        }
+                    }
+                }
+            }
 
-                             function onNavigateRequested(pageIndex) {
-                                 if (pageIndex < 0 || pageIndex >= root.pages.length)
-                                     return
+            // a category's page: what is inside it, one link card per page (SettingsCard with an action chevron)
+            Flickable {
+                id: landing
+                anchors.fill: parent
+                anchors.topMargin: pageStack.anchors.topMargin
+                visible: root.landingCategory >= 0
+                clip: true
+                contentHeight: landingColumn.implicitHeight + Looks.dp(32)
+                boundsBehavior: Flickable.StopAtBounds
+                ScrollBar.vertical: WScrollBar {}
 
-                                 root.currentPage = pageIndex
-                             }
-                         }
-                     }
-                 }
-             }
-         }
-     }
-    
+                ColumnLayout {
+                    id: landingColumn
+                    x: contentLayer.sidePadding
+                    y: Looks.dp(8)
+                    width: contentLayer.columnWidth
+                    spacing: Looks.settings.cardSpacing
+
+                    // Windows opens Personalization and System on the desktop itself: ours shows the real one
+                    Rectangle {
+                        id: hero
+                        readonly property string kind: root.landingCategory >= 0 ? (root.categories[root.landingCategory].hero ?? "") : ""
+                        visible: hero.kind !== ""
+                        Layout.fillWidth: true
+                        Layout.bottomMargin: Looks.dp(20)
+                        implicitHeight: heroRow.implicitHeight + Looks.dp(32)
+                        radius: Looks.settings.radiusSmall
+                        color: Looks.settings.card
+                        border.width: 1
+                        border.color: Looks.settings.cardStroke
+
+                        component FluentButton: Rectangle {
+                            id: fb
+                            property string text: ""
+                            property bool accent: false
+                            property bool chosen: false
+                            signal clicked()
+                            implicitWidth: fbText.implicitWidth + Looks.dp(24)
+                            implicitHeight: Looks.dp(32)
+                            radius: Looks.settings.radiusSmall
+                            color: fb.accent || fb.chosen
+                                ? (fbMouse.pressed ? Qt.alpha(Looks.colors.accent, 0.8) : fbMouse.containsMouse ? Qt.alpha(Looks.colors.accent, 0.9) : Looks.colors.accent)
+                                : (fbMouse.pressed ? Qt.alpha(Looks.colors.fg, 0.03) : fbMouse.containsMouse ? Qt.alpha(Looks.colors.fg, 0.08) : Qt.alpha(Looks.colors.fg, Looks.dark ? 0.06 : 0.7))
+                            border.width: 1
+                            border.color: Qt.alpha(fb.accent || fb.chosen ? "#FFFFFF" : Looks.colors.fg, fb.accent || fb.chosen ? 0.08 : 0.07)
+                            WText {
+                                id: fbText
+                                anchors.centerIn: parent
+                                text: fb.text
+                                font.pixelSize: Looks.settings.body
+                                font.weight: Looks.font.weight.thin
+                                color: fb.accent || fb.chosen ? Looks.colors.accentFg : Looks.colors.fg
+                            }
+                            MouseArea {
+                                id: fbMouse
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: fb.clicked()
+                            }
+                        }
+
+                        RowLayout {
+                            id: heroRow
+                            anchors.left: parent.left
+                            anchors.right: parent.right
+                            anchors.top: parent.top
+                            anchors.margins: Looks.dp(16)
+                            spacing: Looks.dp(24)
+
+                            // the desktop at a glance: wallpaper and the bar where it sits
+                            Rectangle {
+                                Layout.preferredWidth: Looks.dp(256)
+                                Layout.preferredHeight: Looks.dp(144)
+                                radius: Looks.dp(6)
+                                color: Looks.colors.bg0
+                                border.width: 1
+                                border.color: Looks.settings.cardStroke
+                                clip: true
+                                StyledImage {
+                                    anchors.fill: parent
+                                    anchors.margins: 1
+                                    fillMode: Image.PreserveAspectCrop
+                                    source: hero.visible ? Wallpapers.effectiveWallpaperUrl : ""
+                                    sourceSize.width: 520
+                                    asynchronous: true
+                                    cache: false
+                                }
+                                Rectangle {
+                                    anchors.left: parent.left
+                                    anchors.right: parent.right
+                                    anchors.margins: 1
+                                    y: (Config.options?.waffles?.bar?.bottom ?? true) ? parent.height - height - 1 : 1
+                                    height: Looks.dp(12)
+                                    color: Qt.alpha(Looks.colors.bg1Base, 0.9)
+                                    Row {
+                                        anchors.centerIn: parent
+                                        spacing: Looks.dp(3)
+                                        Repeater {
+                                            model: 5
+                                            Rectangle {
+                                                required property int index
+                                                width: Looks.dp(6)
+                                                height: Looks.dp(6)
+                                                radius: Looks.dp(1.5)
+                                                color: index === 0 ? Looks.colors.accent : Qt.alpha(Looks.colors.fg, 0.6)
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
+                            ColumnLayout {
+                                Layout.fillWidth: true
+                                Layout.alignment: Qt.AlignVCenter
+                                spacing: Looks.dp(4)
+
+                                WText {
+                                    Layout.fillWidth: true
+                                    text: hero.kind === "system" ? (SystemInfo.hostname || SystemInfo.distroName) : Translation.tr("Your desktop")
+                                    font.pixelSize: Looks.settings.subtitle
+                                    font.weight: Looks.font.weight.strong
+                                    elide: Text.ElideRight
+                                }
+                                WText {
+                                    Layout.fillWidth: true
+                                    text: hero.kind === "system"
+                                        ? [SystemInfo.distroName, SystemInfo.windowingSystem, Array.from(Quickshell.screens).map(sc => `${sc.width}\u00d7${sc.height}`).join(", ")].filter(t => t && t !== "Unknown").join(" \u00b7 ")
+                                        : decodeURIComponent(String(Wallpapers.effectiveWallpaperUrl).split("/").pop() || "")
+                                    font.pixelSize: Looks.settings.caption
+                                    font.weight: Looks.font.weight.thin
+                                    color: Looks.colors.subfg
+                                    elide: Text.ElideMiddle
+                                }
+                                RowLayout {
+                                    visible: hero.kind === "desktop"
+                                    Layout.topMargin: Looks.dp(10)
+                                    spacing: Looks.dp(8)
+                                    FluentButton {
+                                        accent: true
+                                        text: Translation.tr("Change wallpaper")
+                                        onClicked: Quickshell.execDetached([Quickshell.shellPath("scripts/inir"), "wallpaperSelector", "toggle"])
+                                    }
+                                    FluentButton {
+                                        text: Translation.tr("Light")
+                                        chosen: !Looks.dark
+                                        onClicked: MaterialThemeLoader.setDarkMode(false)
+                                    }
+                                    FluentButton {
+                                        text: Translation.tr("Dark")
+                                        chosen: Looks.dark
+                                        onClicked: MaterialThemeLoader.setDarkMode(true)
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    Repeater {
+                        model: root.landingCategory >= 0 ? root.categories[root.landingCategory].pages : []
+                        WSettingsRow {
+                            required property int modelData
+                            enableSettingsSearch: false
+                            icon: root.pages[modelData]?.icon ?? ""
+                            label: root.pages[modelData]?.name ?? ""
+                            description: root.pages[modelData]?.desc ?? ""
+                            clickable: true
+                            showChevron: true
+                            onClicked: root.openPage(modelData)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     // Keyboard shortcut for search
     Shortcut {
         sequences: [StandardKey.Find]

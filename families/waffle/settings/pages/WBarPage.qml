@@ -22,6 +22,11 @@ WSettingsPage {
         message: Translation.tr("These settings only apply when using the Windows 11 (Waffle) panel style. Go to Modules to enable it.")
     }
     
+    WTaskbarPreview {
+        visible: root.isWaffleActive
+        Layout.bottomMargin: Looks.dp(6)
+    }
+
     WSettingsCard {
         visible: root.isWaffleActive
         title: Translation.tr("Position & Layout")

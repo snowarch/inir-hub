@@ -30,7 +30,6 @@ Item {
     Layout.fillWidth: true
     Layout.leftMargin: 0
     Layout.rightMargin: 0
-    implicitHeight: Math.max(Looks.dp(52), contentRow.implicitHeight + Looks.dp(20))
     
     // Highlight animation for search focus
     Behavior on opacity {
@@ -120,34 +119,46 @@ Item {
         }
     }
     
+    // "card": a Windows 11 SettingsCard on its own; "item": a row inside an expander (WSettingsCard sets it),
+    // flat with a hairline above, indented past the expander's icon
+    property string cardStyle: "card"
+    readonly property string settingsCardRole: "row"
+    readonly property bool _item: root.cardStyle === "item"
+
+    implicitHeight: Math.max(root._item ? Looks.settings.cardItemMinHeight : Looks.settings.cardMinHeight,
+        contentRow.implicitHeight + (root._item ? Looks.dp(16) : Looks.dp(26)))
+
     Rectangle {
         id: background
         anchors.fill: parent
-        anchors.leftMargin: Looks.dp(2)
-        anchors.rightMargin: Looks.dp(2)
-        radius: Looks.settings.radiusLarge
+        radius: root._item ? 0 : Looks.settings.radiusSmall
         color: {
             if (root.clickable && mouseArea.pressed)
-                return root.rowPressed
-            if (mouseArea.containsMouse)
-                return root.rowHover
-            return "transparent"
+                return Looks.settings.cardPressed
+            if (root.clickable && mouseArea.containsMouse)
+                return Looks.settings.cardHover
+            return root._item ? "transparent" : Looks.settings.card
         }
-        scale: root.clickable && mouseArea.pressed ? 0.985 : 1.0
-        
+        border.width: root._item ? 0 : 1
+        border.color: Looks.settings.cardStroke
         Behavior on color {
-            animation: ColorAnimation { duration: Looks.transition.enabled ? 70 : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.standard }
+            animation: ColorAnimation { duration: Looks.transition.enabled ? 83 : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.standard }
         }
-        Behavior on scale {
-            animation: NumberAnimation { duration: Looks.transition.enabled ? Looks.transition.duration.ultraFast : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.standard }
+        Rectangle {
+            visible: root._item
+            anchors.top: parent.top
+            anchors.left: parent.left
+            anchors.right: parent.right
+            height: 1
+            color: Looks.settings.cardStroke
         }
     }
-    
+
     // Highlight overlay for search focus
     Rectangle {
         id: highlightOverlay
         anchors.fill: parent
-        radius: Looks.settings.radiusLarge
+        radius: background.radius
         color: Looks.colors.accent
         opacity: 0
     }
@@ -158,7 +169,7 @@ Item {
         PauseAnimation { duration: 600 }
         NumberAnimation { target: highlightOverlay; property: "opacity"; to: 0; duration: 400; easing.type: Easing.InCubic }
     }
-    
+
     MouseArea {
         id: mouseArea
         anchors.fill: parent
@@ -166,76 +177,64 @@ Item {
         cursorShape: root.clickable ? Qt.PointingHandCursor : Qt.ArrowCursor
         onClicked: if (root.clickable) root.clicked()
     }
-    
+
     RowLayout {
         id: contentRow
         anchors {
-            fill: parent
-            leftMargin: Looks.dp(12)
-            rightMargin: Looks.dp(12)
+            left: parent.left
+            right: parent.right
+            verticalCenter: parent.verticalCenter
+            leftMargin: root._item ? Looks.dp(root.icon !== "" ? 16 : 58) : Looks.settings.cardPadding
+            rightMargin: root._item ? Looks.dp(44) : Looks.settings.cardPadding
         }
-        spacing: Looks.dp(10)
-        
-        Rectangle {
-            visible: root.icon !== ""
-            implicitWidth: Looks.dp(30)
-            implicitHeight: Looks.dp(30)
-            radius: Looks.settings.radiusLarge
-            color: mouseArea.containsMouse ? Looks.colors.selection : root.rowTile
-            border.width: 1
-            border.color: mouseArea.containsMouse
-                ? Looks.colors.accent : Looks.settings.stroke
-            Layout.alignment: Qt.AlignVCenter
-            
-            Behavior on color {
-                animation: ColorAnimation { duration: Looks.transition.enabled ? 120 : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.standard }
-            }
+        spacing: Looks.dp(16)
 
-            FluentIcon {
-                anchors.centerIn: parent
-                icon: root.icon
-                implicitSize: Looks.dp(16)
-                color: mouseArea.containsMouse ? Looks.colors.accent : Looks.colors.subfg
-                
-                Behavior on color {
-                    animation: ColorAnimation { duration: Looks.transition.enabled ? 70 : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.standard }
-                }
-            }
+        // SettingsCard header icon: 20 px glyph, 20 px before the text (HeaderIconMargin 2,0,20,0)
+        FluentIcon {
+            visible: root.icon !== ""
+            Layout.leftMargin: Looks.dp(2)
+            Layout.rightMargin: Looks.dp(4)
+            Layout.alignment: Qt.AlignVCenter
+            icon: root.icon
+            implicitSize: Looks.settings.cardIconSize
+            color: Looks.colors.fg
         }
-        
+
         ColumnLayout {
             Layout.fillWidth: true
-            spacing: Looks.dp(2)
-            
+            Layout.alignment: Qt.AlignVCenter
+            spacing: 0
+
             WText {
                 Layout.fillWidth: true
                 text: root.label
-                font.pixelSize: Looks.font.pixelSize.normal
+                font.pixelSize: Looks.settings.body
+                font.weight: Looks.font.weight.thin
                 elide: Text.ElideRight
             }
-            
+
             WText {
                 visible: root.description !== ""
                 Layout.fillWidth: true
                 text: root.description
-                font.pixelSize: Looks.font.pixelSize.small
+                font.pixelSize: Looks.settings.caption
+                font.weight: Looks.font.weight.thin
                 color: Looks.colors.subfg
                 wrapMode: Text.WordWrap
-                lineHeight: 1.2
+                lineHeight: 1.15
             }
         }
-        
+
         Loader {
             id: controlLoader
             Layout.alignment: Qt.AlignVCenter
         }
-        
+
         FluentIcon {
             visible: root.showChevron
             icon: "chevron-right"
-            implicitSize: Looks.dp(14)
-            color: Looks.colors.subfg
-            opacity: 0.7
+            implicitSize: Looks.dp(13)
+            color: Looks.colors.fg
         }
     }
 }

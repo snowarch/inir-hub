@@ -122,6 +122,7 @@ WSettingsPage {
         severity: WSettingsInfoBar.Severity.Warning
         message: !Hub.online ? Translation.tr("You're offline: this is the list from the last time the hub answered")
             : Hub.items.length > 0 ? Translation.tr("The hub didn't answer: this is the list from the last time it did")
+            : Hub.cliMissing ? Translation.tr("The hub comes with the inir command: run inir update once to get it")
             : Translation.tr("The hub didn't answer. Check your connection and try again")
     }
 
