@@ -88,7 +88,9 @@ Item {
         Rectangle {
             anchors.fill: parent
             radius: bar.corner
-            color: root.synth ? IrisStyle.synthLedOff : root.trackColor
+            // A track is a control's ground: Fills at 30 % left it at 1.05:1 on a light plate, gone. Fills scales it
+            // down to Apple's light track (~1.2:1), never under.
+            color: root.synth ? IrisStyle.synthLedOff : Qt.rgba(root.trackColor.r, root.trackColor.g, root.trackColor.b, Math.max(root.trackColor.a, 0.1))
         }
         Item {
             width: bar.width * root.shownValue
@@ -142,6 +144,10 @@ Item {
         x: Math.max(0, Math.min(bar.width - width, bar.width * root.shownValue - width / 2))
         anchors.verticalCenter: parent.verticalCenter
         color: root.synth ? IrisStyle.synthCap : IrisStyle.onTint
+        // A white knob on a light plate is only its edge once Shadows is at 0: a hairline of ink keeps it (Apple's
+        // thumb carries one too). Under dark ink it is white on white and draws nothing.
+        border.width: root.synth || root.gel ? 0 : 1
+        border.color: Qt.rgba(IrisStyle.text.r, IrisStyle.text.g, IrisStyle.text.b, 0.16)
         Behavior on width { NumberAnimation { duration: IrisStyle.duration(120); easing.type: IrisStyle.feedbackEasing } }
         Loader {
             active: root.gel

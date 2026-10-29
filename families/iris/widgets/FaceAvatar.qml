@@ -15,6 +15,9 @@ ClippingRectangle {
     readonly property string primarySource: Directories.userAvatarSourcePrimary
     onPrimarySourceChanged: root.sourceIndex = 0
 
+    // Over imagery (the Settings hero) the initial takes the media ink: the scheme's dark ink vanished on its dark veil.
+    property color ink: IrisStyle.text
+
     radius: IrisStyle.capsule(width)
     color: IrisStyle.fill
 
@@ -31,7 +34,7 @@ ClippingRectangle {
         anchors.centerIn: parent
         visible: picture.status !== Image.Ready
         text: (SystemInfo.displayName || SystemInfo.username || "?").charAt(0).toUpperCase()
-        color: IrisStyle.text
+        color: root.ink
         font.family: IrisStyle.fontTitle
         font.pixelSize: root.height * 0.42
         font.weight: IrisStyle.weight(Font.DemiBold)

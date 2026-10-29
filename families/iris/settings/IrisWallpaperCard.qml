@@ -231,6 +231,8 @@ ClippingRectangle {
                         Behavior on opacity { NumberAnimation { duration: IrisStyle.feedbackDuration; easing.type: IrisStyle.feedbackEasing } }
                     }
                     FaceAvatar {
+                        ink: IrisStyle.onMedia
+                        color: IrisStyle.onMediaFill
                         anchors.fill: parent
                         anchors.margins: avatar.ring + avatar.air
                         scale: avatar.pressed ? IrisStyle.pressScale(0.96) : 1
