@@ -1172,12 +1172,7 @@ ContentPage {
             terminalDetector.running = true
         }
 
-        // Auto-detect on first expand
-        onExpandedChanged: {
-            if (expanded && !detectionDone) {
-                runDetection()
-            }
-        }
+        Component.onCompleted: runDetection()
 
         SettingsGroup {
             StyledText {
@@ -1792,8 +1787,9 @@ ContentPage {
     SettingsCardSection {
         id: customThemeEditorSection
         settingsTaskSection: "advanced"
-        expanded: root.customThemeEditorExpanded
-        onExpandedChanged: root.customThemeEditorExpanded = expanded
+        // the editor's live preview runs while its section is on screen
+        Component.onCompleted: root.customThemeEditorExpanded = true
+        Component.onDestruction: root.customThemeEditorExpanded = false
         icon: "edit"
         title: Translation.tr("Custom Theme Editor")
 

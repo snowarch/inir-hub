@@ -59,7 +59,7 @@ ContentPage {
         transform: Translate {
             y: sectionLoader.requested && sectionLoader.status === Loader.Ready ? 0 : 4
             Behavior on y {
-                enabled: Appearance.animationsEnabled && !SettingsMaterialPreset.unified
+                enabled: Appearance.animationsEnabled
                 NumberAnimation {
                     duration: Appearance.animation.elementMoveEnter.duration
                     easing.type: Appearance.animation.elementMoveEnter.type
@@ -69,7 +69,7 @@ ContentPage {
         }
 
         Behavior on opacity {
-            enabled: Appearance.animationsEnabled && !SettingsMaterialPreset.unified
+            enabled: Appearance.animationsEnabled
             NumberAnimation {
                 duration: Appearance.animation.elementMoveEnter.duration
                 easing.type: Appearance.animation.elementMoveEnter.type
@@ -89,8 +89,6 @@ ContentPage {
             if (requested) {
                 unloadDelay.stop()
                 resident = true
-            } else if (SettingsMaterialPreset.unified) {
-                unloadDelay.stop()
             } else if (status === Loader.Ready) {
                 unloadDelay.restart()
             } else {

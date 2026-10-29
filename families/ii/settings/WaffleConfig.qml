@@ -19,28 +19,45 @@ ContentPage {
         return Config.options?.enabledPanels?.includes(panelId) ?? false
     }
 
+    // Waffle's own surfaces only load under Waffle; until then the page says so once and offers the switch.
+    // The family transition applies from any family, so it stays.
     SettingsCardSection {
         visible: !root.isWaffleActive
         expanded: true
-        icon: "info"
-        title: Translation.tr("Not Active")
+        icon: "window"
+        title: Translation.tr("Windows 11 style")
 
         SettingsGroup {
-            StyledText {
-                Layout.fillWidth: true
-                text: Translation.tr("These settings only apply when using the Windows 11 (Waffle) panel style. Go to Modules → Panel Style to enable it.")
-                color: Appearance.colors.colSubtext
-                font.pixelSize: Appearance.font.pixelSize.small
-                wrapMode: Text.WordWrap
+            ContentSubsection {
+                title: Translation.tr("Waffle isn't your panel style")
+                tooltip: Translation.tr("Its wallpaper, taskbar and style settings show here once it is. Your Material setup stays as it is.")
+                RippleButton {
+                    implicitHeight: 40
+                    implicitWidth: switchLabel.implicitWidth + 40
+                    buttonRadius: 20
+                    colBackground: Appearance.colors.colPrimary
+                    colBackgroundHover: Appearance.colors.colPrimaryHover
+                    colRipple: Appearance.colors.colPrimaryActive
+                    onClicked: Quickshell.execDetached([Quickshell.shellPath("scripts/inir"), "panelFamily", "set", "waffle"])
+                    contentItem: StyledText {
+                        id: switchLabel
+                        horizontalAlignment: Text.AlignHCenter
+                        text: Translation.tr("Switch to Waffle")
+                        font.pixelSize: Math.round(14 * Appearance.fontSizeScale)
+                        font.weight: Font.Medium
+                        color: Appearance.colors.colOnPrimary
+                    }
+                }
             }
         }
     }
 
-    // Wallpaper section
-    // Wallpaper section
-    property string activeSection: "wallpaper"
+    // search writes it to open a section, so it is set, never bound
+    property string activeSection: root.isWaffleActive ? "wallpaper" : "transition"
+    onIsWaffleActiveChanged: root.activeSection = root.isWaffleActive ? "wallpaper" : "transition"
 
     SettingsTaskNavigator {
+        visible: root.isWaffleActive
         icon: "window"
         title: Translation.tr("Waffle Style")
         description: Translation.tr("Tune the Windows 11 style surfaces in focused views: wallpaper, taskbar, theming and family switching.")

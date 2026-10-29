@@ -18,9 +18,9 @@ Singleton {
     readonly property var pages: [
         {
             key: "quick",
-            name: Translation.tr("Quick"),
-            icon: "instant_mix",
-            desc: Translation.tr("Wallpaper & quick tweaks"),
+            name: Translation.tr("Home"),
+            icon: "home",
+            desc: Translation.tr("What you change most"),
             essential: true,
             component: "modules/ii/settings/QuickConfig.qml"
         },

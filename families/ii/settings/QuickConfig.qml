@@ -16,7 +16,7 @@ import qs.modules.common.m3
 ContentPage {
     id: root
     settingsPageIndex: 0
-    settingsPageName: Translation.tr("Quick")
+    settingsPageName: Translation.tr("Home")
     readonly property bool isOverlayPage: GlobalStates.settingsOverlayOpen ?? false
     property string activeSection: "wallpaper"
     property string captureFolderTarget: "recordings"
@@ -134,6 +134,8 @@ ContentPage {
         captureFolderDialog.open()
     }
 
+    SettingsHome {}
+
     SettingsTaskNavigator {
         icon: "bolt"
         title: ""
@@ -182,18 +184,6 @@ ContentPage {
         Wallpapers.load()
     }
 
-    Process {
-        id: randomWallProc
-        property string status: ""
-        property string scriptPath: `${Directories.scriptsPath}/colors/random/random_konachan_wall.sh`
-        command: ["/usr/bin/bash", "-c", FileUtils.trimFileProtocol(randomWallProc.scriptPath)]
-        stdout: SplitParser {
-            onRead: data => {
-                randomWallProc.status = data.trim();
-            }
-        }
-    }
-
     // Wallpaper selection
     SettingsTaskLoader {
         requested: root.activeSection === "wallpaper"
@@ -206,252 +196,6 @@ ContentPage {
         Layout.fillWidth: true
 
         SettingsGroup {
-            // ── Hero wallpaper preview ──
-            Rectangle {
-                id: heroCard
-                Layout.fillWidth: true
-                Layout.preferredHeight: 220
-                radius: Appearance.rounding.normal
-                color: Appearance.angelEverywhere ? Appearance.angel.colGlassCard
-                     : Appearance.inirEverywhere ? Appearance.inir.colLayer0
-                     : Appearance.auroraEverywhere ? Appearance.aurora.colSubSurface
-                     : Appearance.colors.colLayer0
-                border.width: Appearance.angelEverywhere ? Appearance.angel.cardBorderWidth
-                    : Appearance.inirEverywhere ? 1 : (Appearance.auroraEverywhere ? 0 : 1)
-                border.color: Appearance.angelEverywhere ? Appearance.angel.colCardBorder
-                           : Appearance.inirEverywhere ? Appearance.inir.colBorder
-                           : Appearance.colors.colLayer0Border
-                layer.enabled: true
-                layer.smooth: true
-                layer.effect: OpacityMask {
-                    maskSource: Rectangle {
-                        width: heroCard.width
-                        height: heroCard.height
-                        radius: heroCard.radius
-                    }
-                }
-
-                StyledImage {
-                    id: wallpaperPreview
-                    anchors.fill: parent
-                    fillMode: Image.PreserveAspectCrop
-                    source: Wallpapers.effectiveWallpaperUrl
-                    cache: false
-                    mipmap: true
-                    smooth: true
-                }
-
-                // Top gradient for controls
-                Rectangle {
-                    anchors.top: parent.top
-                    anchors.left: parent.left
-                    anchors.right: parent.right
-                    height: 60
-                    gradient: Gradient {
-                        GradientStop { position: 0.0; color: Qt.rgba(0, 0, 0, 0.45) }
-                        GradientStop { position: 1.0; color: "transparent" }
-                    }
-                }
-
-                // Bottom gradient for controls
-                Rectangle {
-                    anchors.bottom: parent.bottom
-                    anchors.left: parent.left
-                    anchors.right: parent.right
-                    height: 80
-                    gradient: Gradient {
-                        GradientStop { position: 0.0; color: "transparent" }
-                        GradientStop { position: 0.4; color: Qt.rgba(0, 0, 0, 0.25) }
-                        GradientStop { position: 1.0; color: Qt.rgba(0, 0, 0, 0.65) }
-                    }
-                }
-
-                // Right-side gradient for button contrast
-                Rectangle {
-                    anchors.top: parent.top
-                    anchors.bottom: parent.bottom
-                    anchors.right: parent.right
-                    width: parent.width * 0.45
-                    gradient: Gradient {
-                        orientation: Gradient.Horizontal
-                        GradientStop { position: 0.0; color: "transparent" }
-                        GradientStop { position: 0.6; color: Qt.rgba(0, 0, 0, 0.25) }
-                        GradientStop { position: 1.0; color: Qt.rgba(0, 0, 0, 0.55) }
-                    }
-                }
-
-                // Light/Dark toggle — top right
-                ButtonGroup {
-                    anchors.top: parent.top
-                    anchors.right: parent.right
-                    anchors.margins: 10
-                    uniformCellSizes: true
-                    spacing: 0
-
-                    SelectionGroupButton {
-                        buttonIcon: "light_mode"
-                        buttonText: Translation.tr("Light")
-                        toggled: !Appearance.m3colors.darkmode
-                        leftmost: true
-                        onClicked: MaterialThemeLoader.setDarkMode(false)
-                    }
-                    SelectionGroupButton {
-                        buttonIcon: "dark_mode"
-                        buttonText: Translation.tr("Dark")
-                        toggled: Appearance.m3colors.darkmode
-                        rightmost: true
-                        onClicked: MaterialThemeLoader.setDarkMode(true)
-                    }
-                }
-
-                // Bottom left — random buttons (conditional on weeb policy)
-                RowLayout {
-                    anchors.bottom: parent.bottom
-                    anchors.left: parent.left
-                    anchors.margins: 10
-                    spacing: 6
-                    visible: (Config.options?.policies?.weeb ?? 0) === 1
-
-                    RippleButtonWithIcon {
-                        enabled: !randomWallProc.running
-                        buttonRadius: Appearance.zzzEverywhere ? Appearance.zzz.controlRadius : Appearance.rounding.full
-                        materialIcon: "ifl"
-                        mainText: randomWallProc.running ? Translation.tr("...") : Translation.tr("Konachan")
-                        colBackground: Qt.rgba(Appearance.colors.colLayer1.r, Appearance.colors.colLayer1.g, Appearance.colors.colLayer1.b, 0.75)
-                        colBackgroundHover: Qt.rgba(Appearance.colors.colLayer1.r, Appearance.colors.colLayer1.g, Appearance.colors.colLayer1.b, 0.85)
-                        mainContentComponent: Component {
-                            StyledText {
-                                text: randomWallProc.running ? Translation.tr("...") : Translation.tr("Konachan")
-                                font.pixelSize: Appearance.font.pixelSize.smaller
-                                color: Appearance.colors.colOnLayer0
-                            }
-                        }
-                        onClicked: {
-                            randomWallProc.scriptPath = `${Directories.scriptsPath}/colors/random/random_konachan_wall.sh`;
-                            randomWallProc.running = true;
-                        }
-                        StyledToolTip {
-                            text: Translation.tr("Random SFW Anime wallpaper from Konachan\nImage is saved to ~/Pictures/Wallpapers").replace("~/Pictures/Wallpapers", Directories.shortHomePath(Directories.wallpapersPath))
-                        }
-                    }
-                    RippleButtonWithIcon {
-                        enabled: !randomWallProc.running
-                        buttonRadius: Appearance.zzzEverywhere ? Appearance.zzz.controlRadius : Appearance.rounding.full
-                        materialIcon: "ifl"
-                        mainText: randomWallProc.running ? Translation.tr("...") : Translation.tr("osu!")
-                        colBackground: Qt.rgba(Appearance.colors.colLayer1.r, Appearance.colors.colLayer1.g, Appearance.colors.colLayer1.b, 0.75)
-                        colBackgroundHover: Qt.rgba(Appearance.colors.colLayer1.r, Appearance.colors.colLayer1.g, Appearance.colors.colLayer1.b, 0.85)
-                        mainContentComponent: Component {
-                            StyledText {
-                                text: randomWallProc.running ? Translation.tr("...") : Translation.tr("osu!")
-                                font.pixelSize: Appearance.font.pixelSize.smaller
-                                color: Appearance.colors.colOnLayer0
-                            }
-                        }
-                        onClicked: {
-                            randomWallProc.scriptPath = `${Directories.scriptsPath}/colors/random/random_osu_wall.sh`;
-                            randomWallProc.running = true;
-                        }
-                        StyledToolTip {
-                            text: Translation.tr("Random osu! seasonal background\nImage is saved to ~/Pictures/Wallpapers").replace("~/Pictures/Wallpapers", Directories.shortHomePath(Directories.wallpapersPath))
-                        }
-                    }
-                }
-
-                // Bottom right — choose file button with keyboard shortcut
-                RippleButtonWithIcon {
-                    anchors.bottom: parent.bottom
-                    anchors.right: parent.right
-                    anchors.margins: 10
-                    buttonRadius: Appearance.zzzEverywhere ? Appearance.zzz.controlRadius : Appearance.rounding.full
-                    materialIcon: "wallpaper"
-                    colBackground: Qt.rgba(Appearance.colors.colLayer1.r, Appearance.colors.colLayer1.g, Appearance.colors.colLayer1.b, 0.75)
-                    colBackgroundHover: Qt.rgba(Appearance.colors.colLayer1.r, Appearance.colors.colLayer1.g, Appearance.colors.colLayer1.b, 0.85)
-                    onClicked: {
-                        Quickshell.execDetached(`${Directories.wallpaperSwitchScriptPath}`);
-                    }
-                    mainContentComponent: Component {
-                        RowLayout {
-                            spacing: 8
-                            StyledText {
-                                font.pixelSize: Appearance.font.pixelSize.smaller
-                                text: Translation.tr("Choose file")
-                                color: Appearance.colors.colOnLayer0
-                            }
-                            RowLayout {
-                                spacing: 2
-                                KeyboardKey { key: "Ctrl" }
-                                KeyboardKey { key: "Alt" }
-                                StyledText {
-                                    Layout.alignment: Qt.AlignVCenter
-                                    text: "+"
-                                    color: ColorUtils.transparentize(Appearance.colors.colOnLayer0, 0.4)
-                                    font.pixelSize: Appearance.font.pixelSize.smaller
-                                }
-                                KeyboardKey { key: "T" }
-                            }
-                        }
-                    }
-                    StyledToolTip {
-                        text: Translation.tr("Pick wallpaper image on your system")
-                    }
-                }
-            }
-
-            // ── Color scheme variant chips ──
-            ConfigSelectionArray {
-                currentValue: Config.options?.appearance?.palette?.type ?? "auto"
-                onSelected: newValue => {
-                    Config.setNestedValue("appearance.palette.type", newValue)
-                    if (!ThemeService.isAutoTheme) {
-                        // Manual preset: apply variant immediately via MaterialThemeLoader
-                        const hex = MaterialThemeLoader.colorToHex(Appearance.m3colors.m3primary)
-                        const mode = Appearance.m3colors.darkmode ? "dark" : "light"
-                        MaterialThemeLoader.applySchemeVariant(hex, newValue, mode)
-                    }
-                    // Auto theme: ThemeService detects palette type change in
-                    // liveRegenSignature and regenerates automatically.
-                }
-                options: [
-                    {
-                        "value": "auto",
-                        "displayName": Translation.tr("Auto")
-                    },
-                    {
-                        "value": "scheme-content",
-                        "displayName": Translation.tr("Content")
-                    },
-                    {
-                        "value": "scheme-expressive",
-                        "displayName": Translation.tr("Expressive")
-                    },
-                    {
-                        "value": "scheme-fidelity",
-                        "displayName": Translation.tr("Fidelity")
-                    },
-                    {
-                        "value": "scheme-fruit-salad",
-                        "displayName": Translation.tr("Fruit Salad")
-                    },
-                    {
-                        "value": "scheme-monochrome",
-                        "displayName": Translation.tr("Monochrome")
-                    },
-                    {
-                        "value": "scheme-neutral",
-                        "displayName": Translation.tr("Neutral")
-                    },
-                    {
-                        "value": "scheme-rainbow",
-                        "displayName": Translation.tr("Rainbow")
-                    },
-                    {
-                        "value": "scheme-tonal-spot",
-                        "displayName": Translation.tr("Tonal Spot")
-                    }
-                ]
-            }
-
             ConfigSpinBox {
                 icon: "palette"
                 text: Translation.tr("Wallpaper color strength") + " (%)"

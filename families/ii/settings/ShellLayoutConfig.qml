@@ -226,82 +226,44 @@ ContentPage {
             SettingsGroup {
                 visible: surfaceSection.sidebarRole
 
-                RowLayout {
-                    Layout.fillWidth: true
-                    spacing: 10
-
-                    StyledText {
-                        Layout.preferredWidth: 150
-                        text: Translation.tr("Height mode")
-                        color: Appearance.colors.colOnLayer1
-                    }
-
-                    StyledComboBox {
-                        Layout.fillWidth: true
-                        readonly property var modeOptions: [
-                            { displayName: Translation.tr("Full"), value: "full" },
-                            { displayName: Translation.tr("Fit"), value: "fit" },
-                            { displayName: Translation.tr("Custom"), value: "custom" }
+                ContentSubsection {
+                    title: Translation.tr("Height")
+                    ConfigSelectionArray {
+                        enableSettingsSearch: false
+                        currentValue: surfaceSection.currentState?.sizeMode ?? "full"
+                        onSelected: value => ShellLayoutController.setProperty(
+                            surfaceSection.surfaceId, "sizeMode", value, ShellEditSession.targetOutputName)
+                        options: [
+                            { displayName: Translation.tr("Full"), icon: "height", value: "full" },
+                            { displayName: Translation.tr("Fit"), icon: "fit_screen", value: "fit" },
+                            { displayName: Translation.tr("Custom"), icon: "tune", value: "custom" }
                         ]
-                        model: modeOptions
-                        textRole: "displayName"
-                        currentIndex: {
-                            const mode = surfaceSection.currentState?.sizeMode ?? "full"
-                            const index = modeOptions.findIndex(option => option.value === mode)
-                            return index >= 0 ? index : 0
-                        }
-                        onActivated: index => {
-                            if (index >= 0 && index < modeOptions.length)
-                                ShellLayoutController.setProperty(
-                                    surfaceSection.surfaceId, "sizeMode",
-                                    modeOptions[index].value,
-                                    ShellEditSession.targetOutputName)
-                        }
                     }
                 }
 
-                RowLayout {
-                    Layout.fillWidth: true
-                    spacing: 10
-
-                    StyledText {
-                        Layout.preferredWidth: 150
-                        text: Translation.tr("Custom height")
-                        color: Appearance.colors.colOnLayer1
-                    }
-
-                    StyledSpinBox {
-                        Layout.fillWidth: true
-                        from: 320
-                        to: 2160
-                        stepSize: 10
-                        value: surfaceSection.currentState?.customHeight ?? 720
-                        onValueModified: ShellLayoutController.setProperty(
-                            surfaceSection.surfaceId, "height", value,
-                            ShellEditSession.targetOutputName)
-                    }
+                ConfigSpinBox {
+                    visible: (surfaceSection.currentState?.sizeMode ?? "full") === "custom"
+                    enableSettingsSearch: false
+                    icon: "straighten"
+                    text: Translation.tr("Custom height (px)")
+                    from: 320
+                    to: 2160
+                    stepSize: 10
+                    value: surfaceSection.currentState?.customHeight ?? 720
+                    onValueModified: ShellLayoutController.setProperty(
+                        surfaceSection.surfaceId, "height", value, ShellEditSession.targetOutputName)
                 }
 
-                RowLayout {
-                    Layout.fillWidth: true
-                    spacing: 10
-
-                    StyledText {
-                        Layout.preferredWidth: 150
-                        text: Translation.tr("Width")
-                        color: Appearance.colors.colOnLayer1
-                    }
-
-                    StyledSpinBox {
-                        Layout.fillWidth: true
-                        from: 320
-                        to: 900
-                        stepSize: 10
-                        value: surfaceSection.currentState?.width ?? 460
-                        onValueModified: ShellLayoutController.setProperty(
-                            surfaceSection.surfaceId, "thickness", value,
-                            ShellEditSession.targetOutputName)
-                    }
+                ConfigSpinBox {
+                    enableSettingsSearch: false
+                    icon: "width"
+                    text: Translation.tr("Width (px)")
+                    from: 320
+                    to: 900
+                    stepSize: 10
+                    value: surfaceSection.currentState?.width ?? 460
+                    onValueModified: ShellLayoutController.setProperty(
+                        surfaceSection.surfaceId, "thickness", value, ShellEditSession.targetOutputName)
                 }
             }
         }

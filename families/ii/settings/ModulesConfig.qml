@@ -1184,7 +1184,7 @@ ContentPage {
                 checked: Config.options?.settingsUi?.easyMode ?? false
                 onCheckedChanged: Config.setNestedValue("settingsUi.easyMode", checked)
                 StyledToolTip {
-                    text: Translation.tr("Show a curated set of essential settings and hide the more advanced pages and sections. You can switch back to Advanced anytime from the title bar.")
+                    text: Translation.tr("Show a curated set of essential settings and hide the more advanced pages and sections. Turn this off to see every page again.")
                 }
             }
 
@@ -1202,38 +1202,6 @@ ContentPage {
                 }
                 StyledToolTip {
                     text: Translation.tr("When enabled, Settings opens as a floating overlay inside the shell instead of a separate window. Switching modes takes effect immediately and keeps you on this Settings page.")
-                }
-            }
-
-            ContentSubsection {
-                title: Translation.tr("Overlay layout")
-                visible: Config.options?.settingsUi?.overlayMode ?? false
-
-                ConfigSelectionArray {
-                    currentValue: Config.options?.settingsUi?.overlayStyle ?? "rail"
-                    options: [
-                        { displayName: Translation.tr("Nav rail"), icon: "view_sidebar", value: "rail" },
-                        { displayName: Translation.tr("Focus"), icon: "grid_view", value: "focus" },
-                        { displayName: Translation.tr("Unified"), icon: "side_navigation", value: "unified" },
-                        { displayName: Translation.tr("Editorial"), icon: "auto_stories", value: "editorial" }
-                    ]
-                    onSelected: value => Quickshell.execDetached([Quickshell.shellPath("scripts/inir"),
-                        "ipc", "settings", "setOverlayStyle", value, String(modulesPage.settingsPageIndex)])
-                }
-
-                StyledText {
-                    Layout.fillWidth: true
-                    readonly property string overlayStyle: Config.options?.settingsUi?.overlayStyle ?? "rail"
-                    text: overlayStyle === "focus"
-                        ? Translation.tr("One page at a time: a grid of every settings page, then the page you pick, full width. Escape steps back.")
-                        : overlayStyle === "editorial"
-                            ? Translation.tr("A paper Settings studio with expressive typography. Pair with the Editorial global style for the complete composition.")
-                        : overlayStyle === "unified"
-                            ? Translation.tr("A fast, consistent Settings layout with a fixed sidebar and unified controls.")
-                            : Translation.tr("A persistent category rail beside the page you are editing.")
-                    color: Appearance.colors.colSubtext
-                    font.pixelSize: Appearance.font.pixelSize.smaller
-                    wrapMode: Text.WordWrap
                 }
             }
 

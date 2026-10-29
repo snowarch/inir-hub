@@ -6,12 +6,11 @@ import qs.modules.ii.settings
 import qs.modules.common
 
 // Material's Settings while it is the one in use: its page names for everyone who opens a page by name, and the
-// overlay chrome when Settings opens inside the shell. overlayStyle picks the chrome; anything unknown is the nav rail.
+// overlay when Settings opens inside the shell.
 Scope {
     id: root
 
     readonly property bool overlay: Config.options?.settingsUi?.overlayMode ?? false
-    readonly property string overlayStyle: Config.options?.settingsUi?.overlayStyle ?? "rail"
 
     Binding {
         target: GlobalStates
@@ -27,17 +26,7 @@ Scope {
     }
 
     LazyLoader {
-        active: root.overlay && root.overlayStyle !== "focus" && root.overlayStyle !== "editorial"
+        active: root.overlay
         component: SettingsOverlay {}
-    }
-
-    LazyLoader {
-        active: root.overlay && root.overlayStyle === "focus"
-        component: SettingsFocus {}
-    }
-
-    LazyLoader {
-        active: root.overlay && root.overlayStyle === "editorial"
-        component: SettingsEditorial {}
     }
 }
