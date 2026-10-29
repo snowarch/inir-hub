@@ -130,7 +130,7 @@ WSettingsPage {
             return Translation.tr("Saved outputs missing")
         if (selected.length === 1)
             return selected[0]
-        return selected.length + Translation.tr(" monitors")
+        return Translation.tr("%1 monitors").arg(selected.length)
     }
 
     function setSurfaceAll(path: string): void {
@@ -309,7 +309,7 @@ WSettingsPage {
 
                 WText {
                     Layout.fillWidth: true
-                    text: screenName || (Translation.tr("Monitor ") + (index + 1))
+                    text: screenName || Translation.tr("Monitor %1").arg(index + 1)
                     font.pixelSize: Looks.font.pixelSize.normal
                     font.weight: Looks.font.weight.strong
                     color: Looks.colors.fg
