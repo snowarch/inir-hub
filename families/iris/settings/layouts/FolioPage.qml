@@ -21,6 +21,9 @@ Item {
     required property string area
     property Item host
     property real shift: 0
+    // Classic names the area in its own head and holds the area's actions there.
+    property bool titled: true
+    property bool actions: true
     transform: Translate { y: page.shift }
 
     readonly property real d: Number(page.host?.d ?? IrisStyle.settingsDensity)
@@ -33,6 +36,7 @@ Item {
 
     Column {
         id: title
+        visible: page.titled
         width: page.width
         spacing: page.u(4)
         IrisText {
@@ -56,7 +60,7 @@ Item {
 
     Item {
         id: areaBox
-        y: title.height + page.u(18)
+        y: page.titled ? title.height + page.u(18) : 0
         width: page.width
         height: page.height - y
         readonly property bool staged: stage.available
@@ -109,7 +113,7 @@ Item {
                 width: plate.width
                 spacing: page.u(6)
                 Repeater {
-                    model: page.live ? (page.host?.pageActions ?? []) : []
+                    model: page.live && page.actions ? (page.host?.pageActions ?? []) : []
                     MouseArea {
                         id: act
                         required property var modelData

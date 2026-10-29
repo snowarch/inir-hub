@@ -30,7 +30,6 @@ Item {
     readonly property real need: 0
     readonly property string voice: "folio"
     readonly property bool ownsStage: true
-    readonly property bool readsWhole: true
     readonly property bool drawsRows: true
     readonly property string searchHint: Translation.tr("Search, or say what to change")
 

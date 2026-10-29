@@ -183,6 +183,7 @@ Item {
                     onCountChanged: Qt.callLater(page.weigh)
                     AreaRows {
                         required property var modelData
+                        required property int index
                         width: Math.floor((flick.width - page.gap * (page.split.length - 1)) / Math.max(1, page.split.length))
                         section: page.area
                         host: page.host
@@ -190,6 +191,7 @@ Item {
                         live: page.live
                         welcome: false
                         only: modelData
+                        extras: index === page.split.length - 1
                         groupFill: "transparent"
                         onWholeChanged: Qt.callLater(page.weigh)
                         onReveal: row => page.reveal(row)

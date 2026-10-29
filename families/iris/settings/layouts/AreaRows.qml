@@ -7,6 +7,7 @@ import qs.services
 import qs.modules.common
 import qs.modules.iris.style
 import qs.modules.iris.components
+import qs.modules.iris.sidebar
 import qs.modules.iris.settings
 
 // One area's groups and rows, for a page of the AreaPool: its section never changes. Rows are keyed, so a write never
@@ -23,6 +24,9 @@ ColumnLayout {
     property var skip: []
     // Home's welcome over the first group; a layout that sets it elsewhere turns it off.
     property bool welcome: true
+    // The area's own cards and links (Game mode, the side panels' sections, Home's pages): once per area, so a layout
+    // that splits it into columns gives them to one.
+    property bool extras: rows.only === null
     property color groupFill: IrisStyle.readingCard
     // The group the page reads now, for the head that marks it.
     property string reading: ""
@@ -138,6 +142,14 @@ ColumnLayout {
         Layout.rightMargin: Math.round(8 * rows.d)
         Layout.bottomMargin: Math.round(6 * rows.d)
         sourceComponent: IrisWallpaperCard { screen: rows.QsWindow.window?.screen ?? GlobalStates.focusedScreen }
+    }
+    // Game mode's state and its switch lead the area that holds what it does.
+    Loader {
+        active: rows.section === "gaming" && rows.extras
+        visible: active
+        Layout.fillWidth: true
+        Layout.bottomMargin: Math.round(6 * rows.d)
+        sourceComponent: IrisGameModeCard {}
     }
     Repeater {
         id: blockRepeater
@@ -275,6 +287,57 @@ ColumnLayout {
                         }
                     }
                 }
+            }
+        }
+    }
+    // After the groups, once they all stand: what the area opens or edits beyond its values.
+    ColumnLayout {
+        visible: rows.extras && rows.builtUpTo >= rows.blocks.length && extraLinks.links.length + panelEditors.count > 0
+        Layout.fillWidth: true
+        Layout.topMargin: Math.round(18 * rows.d)
+        spacing: Math.round(18 * rows.d)
+        IrisLinkCard {
+            id: extraLinks
+            readonly property var host: rows.host
+            Layout.fillWidth: true
+            visible: extraLinks.links.length > 0
+            tinted: rows.section === "general"
+            links: {
+                if (!rows.extras) return []
+                if (rows.section === "sidebars") return [
+                    { label: Translation.tr("Open Focus"), icon: "dock_to_left", tint: IrisStyle.identity.green, action: () => { GlobalStates.settingsOverlayOpen = false; GlobalStates.openSidebarLeft("") } },
+                    { label: Translation.tr("Open Today"), icon: "dock_to_right", tint: IrisStyle.identity.orange, action: () => { GlobalStates.settingsOverlayOpen = false; GlobalStates.openSidebarRight("") } }
+                ]
+                if (rows.section === "desktop") return [
+                    { label: Translation.tr("Edit desktop widgets"), icon: "edit", tint: IrisStyle.identity.yellow, action: () => { GlobalStates.settingsOverlayOpen = false; GlobalStates.setWidgetEditMode(true) } }
+                ]
+                if (rows.section === "general" && extraLinks.host) return [
+                    { key: "about", label: Translation.tr("About iNiR"), icon: "info", tint: IrisStyle.identity.lavender },
+                    { key: "shortcuts", label: Translation.tr("Keyboard shortcuts"), icon: "keyboard", tint: IrisStyle.identity.indigo }
+                ].filter(link => extraLinks.host.pages.some(page => page.key === link.key)).map(link => ({
+                    label: link.label, icon: link.icon, tint: link.tint,
+                    action: () => extraLinks.host.go({ section: "general", group: "", advancedPage: extraLinks.host.pageIndexOf(link.key) })
+                }))
+                return []
+            }
+        }
+        Repeater {
+            id: panelEditors
+            model: rows.extras && rows.section === "sidebars" ? ["left", "right"] : []
+            ColumnLayout {
+                id: panelEditor
+                required property string modelData
+                Layout.fillWidth: true
+                spacing: Math.round(6 * rows.d)
+                IrisText {
+                    Layout.leftMargin: Math.round(16 * rows.d)
+                    text: panelEditor.modelData === "left" ? Translation.tr("Focus sections") : Translation.tr("Today sections")
+                    color: IrisStyle.text
+                    font.family: IrisStyle.fontTitle
+                    font.pixelSize: IrisStyle.typeBody
+                    font.weight: IrisStyle.weight(Font.DemiBold)
+                }
+                IrisSidebarEditor { Layout.fillWidth: true; side: panelEditor.modelData }
             }
         }
     }
