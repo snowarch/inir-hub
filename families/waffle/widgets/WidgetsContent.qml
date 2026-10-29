@@ -817,7 +817,6 @@ WBarAttachedPanelContent {
                         }
 
                         ConfigSelectionArray {
-                            configPath: "appearance.palette.type"
                             Layout.fillWidth: true
                             currentValue: Config.options?.appearance?.palette?.type ?? "auto"
                             onSelected: newValue => {

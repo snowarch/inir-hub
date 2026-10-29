@@ -120,7 +120,6 @@ ContentPage {
             }
 
             ConfigSwitch {
-                configPath: "orbit.enable"
                 text: Translation.tr("Enable Orbit")
                 description: Translation.tr("Allow Orbit to open from its hot corner and IPC entry point")
                 checked: root.orbitOptions.enable ?? true
@@ -128,7 +127,6 @@ ContentPage {
             }
 
             ConfigSwitch {
-                configPath: "orbit.hotCornerEnable"
                 enabled: root.orbitOptions.enable ?? true
                 text: Translation.tr("Hot corner")
                 description: Translation.tr("Open Orbit by pushing the pointer into the selected screen corner")
@@ -141,7 +139,6 @@ ContentPage {
                 enabled: (root.orbitOptions.enable ?? true) && (root.orbitOptions.hotCornerEnable ?? true)
 
                 ConfigSelectionArray {
-                    configPath: "orbit.hotCorner"
                     currentValue: root.configuredHotCorner
                     onSelected: value => Config.setNestedValue("orbit.hotCorner", value)
                     options: [
@@ -165,7 +162,6 @@ ContentPage {
             }
 
             ConfigSpinBox {
-                configPath: "orbit.hotCornerSize"
                 Layout.fillWidth: true
                 enabled: (root.orbitOptions.enable ?? true) && (root.orbitOptions.hotCornerEnable ?? true)
                 icon: "crop_free"
@@ -179,7 +175,6 @@ ContentPage {
             }
 
             ConfigSpinBox {
-                configPath: "orbit.hotCornerActivationDistance"
                 Layout.fillWidth: true
                 enabled: (root.orbitOptions.enable ?? true) && (root.orbitOptions.hotCornerEnable ?? true)
                 icon: "near_me"
@@ -193,7 +188,6 @@ ContentPage {
             }
 
             ConfigSpinBox {
-                configPath: "orbit.hotCornerDwellMs"
                 Layout.fillWidth: true
                 enabled: (root.orbitOptions.enable ?? true) && (root.orbitOptions.hotCornerEnable ?? true)
                 icon: "timer"
@@ -235,7 +229,6 @@ ContentPage {
                 title: Translation.tr("Orbit Studio")
 
                 ConfigSelectionArray {
-                    configPath: "orbit.studio.surfaceStyle"
                     currentValue: root.orbitOptions.studio?.surfaceStyle ?? "ricelin"
                     onSelected: value => Config.setNestedValue("orbit.studio.surfaceStyle", value)
                     options: [
@@ -245,7 +238,6 @@ ContentPage {
                 }
 
                 ConfigSelectionArray {
-                    configPath: "orbit.studio.density"
                     currentValue: root.orbitOptions.studio?.density ?? "compact"
                     onSelected: value => Config.setNestedValue("orbit.studio.density", value)
                     options: [
@@ -255,7 +247,6 @@ ContentPage {
                 }
 
                 ConfigSpinBox {
-                    configPath: "orbit.studio.widthPercent"
                     Layout.fillWidth: true
                     icon: "width"
                     text: Translation.tr("Docked Studio width")
@@ -268,7 +259,6 @@ ContentPage {
                 }
 
                 ConfigSwitch {
-                    configPath: "orbit.studio.showDescriptions"
                     text: Translation.tr("Section descriptions")
                     description: Translation.tr("Show the short explanation under each Studio section title")
                     checked: root.orbitOptions.studio?.showDescriptions ?? true
@@ -333,7 +323,6 @@ ContentPage {
                 title: Translation.tr("Stage")
 
                 ConfigSelectionArray {
-                    configPath: "orbit.stageMode"
                     currentValue: root.orbitOptions.stageMode ?? "stage"
                     onSelected: value => Config.setNestedValue("orbit.stageMode", value)
                     options: [
@@ -348,7 +337,6 @@ ContentPage {
                 title: Translation.tr("Orbital space")
 
                 ConfigSelectionArray {
-                    configPath: "orbit.orbital.layout"
                     currentValue: root.orbitOptions.orbital?.layout ?? "orbit"
                     onSelected: value => Config.setNestedValue("orbit.orbital.layout", value)
                     options: [
@@ -361,7 +349,6 @@ ContentPage {
                 }
 
                 ConfigSpinBox {
-                    configPath: "orbit.orbital.visibleWorkspaces"
                     Layout.fillWidth: true
                     icon: "hub"
                     text: Translation.tr("Visible workspaces")
@@ -373,7 +360,6 @@ ContentPage {
                 }
 
                 ConfigSpinBox {
-                    configPath: "orbit.orbital.coreSizePercent"
                     Layout.fillWidth: true
                     icon: "center_focus_strong"
                     text: Translation.tr("Core size")
@@ -385,7 +371,6 @@ ContentPage {
                 }
 
                 ConfigSpinBox {
-                    configPath: "orbit.orbital.satelliteSizePercent"
                     Layout.fillWidth: true
                     icon: "satellite_alt"
                     text: Translation.tr("Satellite size")
@@ -397,7 +382,6 @@ ContentPage {
                 }
 
                 ConfigSpinBox {
-                    configPath: "orbit.orbital.horizontalSpreadPercent"
                     Layout.fillWidth: true
                     icon: "swap_horiz"
                     text: Translation.tr("Horizontal spread")
@@ -409,7 +393,6 @@ ContentPage {
                 }
 
                 ConfigSpinBox {
-                    configPath: "orbit.orbital.verticalSpreadPercent"
                     Layout.fillWidth: true
                     icon: "height"
                     text: Translation.tr("Vertical spread")
@@ -421,7 +404,6 @@ ContentPage {
                 }
 
                 ConfigSpinBox {
-                    configPath: "orbit.orbital.depthPercent"
                     Layout.fillWidth: true
                     icon: "layers"
                     text: Translation.tr("Depth")
@@ -437,7 +419,6 @@ ContentPage {
                     title: Translation.tr("Advanced geometry")
 
                     ConfigSpinBox {
-                        configPath: "orbit.orbital.geometry.edgePadding"
                         Layout.fillWidth: true
                         icon: "padding"
                         text: Translation.tr("Orbit edge padding")
@@ -449,7 +430,6 @@ ContentPage {
                     }
 
                     ConfigSpinBox {
-                        configPath: "orbit.orbital.geometry.horizonGap"
                         Layout.fillWidth: true
                         icon: "view_column"
                         text: Translation.tr("Horizon card gap")
@@ -461,7 +441,6 @@ ContentPage {
                     }
 
                     ConfigSpinBox {
-                        configPath: "orbit.orbital.geometry.horizonInset"
                         Layout.fillWidth: true
                         icon: "width"
                         text: Translation.tr("Horizon rail inset")
@@ -473,7 +452,6 @@ ContentPage {
                     }
 
                     ConfigSpinBox {
-                        configPath: "orbit.orbital.geometry.horizonVerticalBase"
                         Layout.fillWidth: true
                         icon: "vertical_align_center"
                         text: Translation.tr("Horizon base separation")
@@ -485,7 +463,6 @@ ContentPage {
                     }
 
                     ConfigSpinBox {
-                        configPath: "orbit.orbital.geometry.horizonVerticalRange"
                         Layout.fillWidth: true
                         icon: "height"
                         text: Translation.tr("Horizon spread range")
@@ -497,7 +474,6 @@ ContentPage {
                     }
 
                     ConfigSpinBox {
-                        configPath: "orbit.orbital.geometry.galleryBaseGap"
                         Layout.fillWidth: true
                         icon: "space_bar"
                         text: Translation.tr("Gallery side gap")
@@ -509,7 +485,6 @@ ContentPage {
                     }
 
                     ConfigSpinBox {
-                        configPath: "orbit.orbital.geometry.galleryRowGap"
                         Layout.fillWidth: true
                         icon: "swap_vert"
                         text: Translation.tr("Gallery row gap")
@@ -521,7 +496,6 @@ ContentPage {
                     }
 
                     ConfigSpinBox {
-                        configPath: "orbit.orbital.geometry.deckBaseGap"
                         Layout.fillWidth: true
                         icon: "space_bar"
                         text: Translation.tr("Deck base gap")
@@ -533,7 +507,6 @@ ContentPage {
                     }
 
                     ConfigSpinBox {
-                        configPath: "orbit.orbital.geometry.deckStep"
                         Layout.fillWidth: true
                         icon: "stacks"
                         text: Translation.tr("Deck stack step")
@@ -545,7 +518,6 @@ ContentPage {
                     }
 
                     ConfigSpinBox {
-                        configPath: "orbit.orbital.geometry.deckLiftStep"
                         Layout.fillWidth: true
                         icon: "swap_vert"
                         text: Translation.tr("Deck fan step")
@@ -557,7 +529,6 @@ ContentPage {
                     }
 
                     ConfigSpinBox {
-                        configPath: "orbit.orbital.geometry.atlasGap"
                         Layout.fillWidth: true
                         icon: "grid_view"
                         text: Translation.tr("Atlas card gap")
@@ -569,7 +540,6 @@ ContentPage {
                     }
 
                     ConfigSpinBox {
-                        configPath: "orbit.orbital.geometry.atlasColumns"
                         Layout.fillWidth: true
                         icon: "view_column"
                         text: Translation.tr("Atlas columns")
@@ -581,7 +551,6 @@ ContentPage {
                     }
 
                     ConfigSpinBox {
-                        configPath: "orbit.orbital.geometry.atlasCoreBoostPercent"
                         Layout.fillWidth: true
                         icon: "center_focus_strong"
                         text: Translation.tr("Atlas Core emphasis")
@@ -593,7 +562,6 @@ ContentPage {
                     }
 
                     ConfigSpinBox {
-                        configPath: "orbit.orbital.geometry.coreContentMargin"
                         Layout.fillWidth: true
                         icon: "crop_free"
                         text: Translation.tr("Core content inset")
@@ -605,7 +573,6 @@ ContentPage {
                     }
 
                     ConfigSpinBox {
-                        configPath: "orbit.orbital.geometry.satelliteContentMargin"
                         Layout.fillWidth: true
                         icon: "crop_din"
                         text: Translation.tr("Satellite content inset")
@@ -618,7 +585,6 @@ ContentPage {
                 }
 
                 ConfigSwitch {
-                    configPath: "orbit.orbital.satellitePreviews"
                     text: Translation.tr("Satellite window previews")
                     description: Translation.tr("Disable to keep full previews only in the core workspace and reduce capture work")
                     checked: root.orbitOptions.orbital?.satellitePreviews ?? true
@@ -626,7 +592,6 @@ ContentPage {
                 }
 
                 ConfigSelectionArray {
-                    configPath: "orbit.orbital.satelliteClickAction"
                     currentValue: root.orbitOptions.orbital?.satelliteClickAction ?? "select"
                     onSelected: value => Config.setNestedValue("orbit.orbital.satelliteClickAction", value)
                     options: [
@@ -636,7 +601,6 @@ ContentPage {
                 }
 
                 ConfigSelectionArray {
-                    configPath: "orbit.orbital.workspaceLabelMode"
                     currentValue: {
                         const configured = String(root.orbitOptions.orbital?.workspaceLabelMode ?? "")
                         if (["index", "name", "workspace", "full", "off"].includes(configured)) return configured
@@ -664,7 +628,6 @@ ContentPage {
                 }
 
                 ConfigSwitch {
-                    configPath: "orbit.orbital.showWorkspaceWallpaper"
                     text: Translation.tr("Workspace wallpaper")
                     description: Translation.tr("Show the wallpaper currently in use on this output behind each virtual workspace")
                     checked: root.orbitOptions.orbital?.showWorkspaceWallpaper ?? true
@@ -672,7 +635,6 @@ ContentPage {
                 }
 
                 ConfigSpinBox {
-                    configPath: "orbit.orbital.workspaceWallpaperOpacity"
                     Layout.fillWidth: true
                     enabled: root.orbitOptions.orbital?.showWorkspaceWallpaper ?? true
                     icon: "opacity"
@@ -690,7 +652,6 @@ ContentPage {
                 title: Translation.tr("Classic stage")
 
                 ConfigSpinBox {
-                    configPath: "orbit.workspaceCount"
                     Layout.fillWidth: true
                     icon: "view_week"
                     text: Translation.tr("Visible workspaces")
@@ -702,7 +663,6 @@ ContentPage {
                 }
 
                 ConfigSpinBox {
-                    configPath: "orbit.workspaceScalePercent"
                     Layout.fillWidth: true
                     icon: "zoom_out_map"
                     text: Translation.tr("Workspace scale")
@@ -715,7 +675,6 @@ ContentPage {
                 }
 
                 ConfigSpinBox {
-                    configPath: "orbit.maxPanelWidthPercent"
                     Layout.fillWidth: true
                     icon: "width"
                     text: Translation.tr("Maximum panel width")
@@ -727,7 +686,6 @@ ContentPage {
                 }
 
                 ConfigSpinBox {
-                    configPath: "orbit.workspaceSpacing"
                     Layout.fillWidth: true
                     icon: "space_bar"
                     text: Translation.tr("Workspace spacing")
@@ -742,7 +700,6 @@ ContentPage {
                     title: Translation.tr("Window labels")
 
                     ConfigSelectionArray {
-                        configPath: "orbit.windowLabels"
                         currentValue: root.orbitOptions.windowLabels ?? "hover"
                         onSelected: value => Config.setNestedValue("orbit.windowLabels", value)
                         options: [
@@ -754,7 +711,6 @@ ContentPage {
                 }
 
                 ConfigSwitch {
-                    configPath: "orbit.windowLabelIcons"
                     enabled: (root.orbitOptions.windowLabels ?? "hover") !== "off"
                     text: Translation.tr("App icons in window labels")
                     checked: root.orbitOptions.windowLabelIcons ?? true
@@ -762,7 +718,6 @@ ContentPage {
                 }
 
                 ConfigSwitch {
-                    configPath: "orbit.balancedGrid"
                     text: Translation.tr("Balanced window grid")
                     description: Translation.tr("Prefer readable 2D cards instead of reproducing Niri's scrolling columns literally")
                     checked: root.orbitOptions.balancedGrid ?? true
@@ -774,7 +729,6 @@ ContentPage {
                 title: Translation.tr("Workspace surface")
 
                 ConfigSelectionArray {
-                    configPath: "orbit.orbital.surface.style"
                     currentValue: root.orbitOptions.orbital?.surface?.style ?? "current"
                     onSelected: value => Config.setNestedValue("orbit.orbital.surface.style", value)
                     options: [
@@ -784,14 +738,12 @@ ContentPage {
                 }
 
                 ConfigSwitch {
-                    configPath: "orbit.orbital.surface.outline"
                     text: Translation.tr("Workspace outline")
                     checked: root.orbitOptions.orbital?.surface?.outline ?? true
                     onCheckedChanged: Config.setNestedValue("orbit.orbital.surface.outline", checked)
                 }
 
                 ConfigSpinBox {
-                    configPath: "orbit.orbital.surface.outlineWidth"
                     Layout.fillWidth: true
                     enabled: root.orbitOptions.orbital?.surface?.outline ?? true
                     icon: "border_style"
@@ -805,7 +757,6 @@ ContentPage {
                 }
 
                 ConfigSpinBox {
-                    configPath: "orbit.orbital.surface.outlineOpacityPercent"
                     Layout.fillWidth: true
                     enabled: root.orbitOptions.orbital?.surface?.outline ?? true
                     icon: "opacity"
@@ -819,7 +770,6 @@ ContentPage {
                 }
 
                 ConfigSpinBox {
-                    configPath: "orbit.orbital.surface.radiusPercent"
                     Layout.fillWidth: true
                     icon: "rounded_corner"
                     text: Translation.tr("Workspace rounding")
@@ -831,7 +781,6 @@ ContentPage {
                 }
 
                 ConfigSpinBox {
-                    configPath: "orbit.orbital.surface.frameInset"
                     Layout.fillWidth: true
                     icon: "padding"
                     text: Translation.tr("Material frame inset")
@@ -844,7 +793,6 @@ ContentPage {
                 }
 
                 ConfigSelectionArray {
-                    configPath: "orbit.orbital.surface.shadowMode"
                     currentValue: root.orbitOptions.orbital?.surface?.shadowMode ?? "core"
                     onSelected: value => Config.setNestedValue("orbit.orbital.surface.shadowMode", value)
                     options: [
@@ -855,7 +803,6 @@ ContentPage {
                 }
 
                 ConfigSpinBox {
-                    configPath: "orbit.orbital.surface.shadowOpacityPercent"
                     Layout.fillWidth: true
                     enabled: (root.orbitOptions.orbital?.surface?.shadowMode ?? "core") !== "off"
                     icon: "opacity"
@@ -869,7 +816,6 @@ ContentPage {
             }
 
             ConfigSpinBox {
-                configPath: "orbit.windowGap"
                 Layout.fillWidth: true
                 icon: "grid_view"
                 text: Translation.tr("Window gap")
@@ -896,14 +842,12 @@ ContentPage {
 
         SettingsGroup {
             ConfigSwitch {
-                configPath: "orbit.closeOnSelect"
                 text: Translation.tr("Close after selecting a window")
                 checked: root.orbitOptions.closeOnSelect ?? true
                 onCheckedChanged: Config.setNestedValue("orbit.closeOnSelect", checked)
             }
 
             ConfigSwitch {
-                configPath: "orbit.keyboardNavigation"
                 text: Translation.tr("Keyboard navigation")
                 description: Translation.tr("Navigate previews and Shelf controls without leaving Orbit")
                 checked: root.orbitOptions.keyboardNavigation ?? true
@@ -922,14 +866,12 @@ ContentPage {
             }
 
             ConfigSwitch {
-                configPath: "orbit.scrollNavigation"
                 text: Translation.tr("Scroll between workspaces")
                 checked: root.orbitOptions.scrollNavigation ?? true
                 onCheckedChanged: Config.setNestedValue("orbit.scrollNavigation", checked)
             }
 
             ConfigSwitch {
-                configPath: "orbit.scrollSwitchWorkspace"
                 visible: (root.orbitOptions.stageMode ?? "stage") === "orbital"
                 enabled: root.orbitOptions.scrollNavigation ?? true
                 text: Translation.tr("Switch Niri workspace")
@@ -939,7 +881,6 @@ ContentPage {
             }
 
             ConfigSwitch {
-                configPath: "orbit.scrollWrapAround"
                 enabled: root.orbitOptions.scrollNavigation ?? true
                 text: Translation.tr("Wrap around")
                 description: Translation.tr("Continue from the last workspace to the first, and from the first back to the last")
@@ -948,7 +889,6 @@ ContentPage {
             }
 
             ConfigSpinBox {
-                configPath: "orbit.scrollSteps"
                 Layout.fillWidth: true
                 enabled: root.orbitOptions.scrollNavigation ?? true
                 icon: "speed"
@@ -962,7 +902,6 @@ ContentPage {
             }
 
             ConfigSwitch {
-                configPath: "orbit.canvasScrubNavigation"
                 text: Translation.tr("Right-drag canvas scrub")
                 description: Translation.tr("Drag empty Orbit space horizontally to step through workspaces")
                 checked: root.orbitOptions.canvasScrubNavigation ?? true
@@ -970,7 +909,6 @@ ContentPage {
             }
 
             ConfigSpinBox {
-                configPath: "orbit.canvasScrubThreshold"
                 Layout.fillWidth: true
                 enabled: root.orbitOptions.canvasScrubNavigation ?? true
                 icon: "swipe"
@@ -997,7 +935,6 @@ ContentPage {
 
         SettingsGroup {
             ConfigSwitch {
-                configPath: "orbit.shelf.enable"
                 text: Translation.tr("Show Shelf")
                 description: Translation.tr("Keep fast window history, Niri controls and shell actions below the workspace band")
                 checked: root.shelfOptions.enable ?? true
@@ -1005,7 +942,6 @@ ContentPage {
             }
 
             ConfigSwitch {
-                configPath: "orbit.shelf.showStudioButton"
                 enabled: root.shelfOptions.enable ?? true
                 text: Translation.tr("Studio button")
                 description: Translation.tr("Keep the live Orbit Studio editor one click away in the workspace locator")
@@ -1018,7 +954,6 @@ ContentPage {
                 enabled: root.shelfOptions.enable ?? true
 
                 ConfigSelectionArray {
-                    configPath: "orbit.shelf.layout"
                     currentValue: root.shelfOptions.layout ?? "islands"
                     onSelected: value => Config.setNestedValue("orbit.shelf.layout", value)
                     options: [
@@ -1034,7 +969,6 @@ ContentPage {
                 enabled: root.shelfOptions.enable ?? true
 
                 ConfigSelectionArray {
-                    configPath: "orbit.shelf.density"
                     currentValue: root.shelfOptions.density ?? "comfortable"
                     onSelected: value => Config.setNestedValue("orbit.shelf.density", value)
                     options: [
@@ -1050,7 +984,6 @@ ContentPage {
                 enabled: root.shelfOptions.enable ?? true
 
                 ConfigSelectionArray {
-                    configPath: "orbit.shelf.labels"
                     currentValue: root.shelfOptions.labels ?? "auto"
                     onSelected: value => Config.setNestedValue("orbit.shelf.labels", value)
                     options: [
@@ -1074,7 +1007,6 @@ ContentPage {
                 }
 
                 ConfigSelectionArray {
-                    configPath: "orbit.shelf.islandStyle"
                     currentValue: root.shelfOptions.islandStyle ?? "material"
                     onSelected: value => Config.setNestedValue("orbit.shelf.islandStyle", value)
                     options: [
@@ -1086,7 +1018,6 @@ ContentPage {
             }
 
             ConfigSpinBox {
-                configPath: "orbit.shelf.moduleSpacing"
                 Layout.fillWidth: true
                 enabled: root.shelfOptions.enable ?? true
                 icon: "space_bar"
@@ -1100,7 +1031,6 @@ ContentPage {
             }
 
             ConfigSpinBox {
-                configPath: "orbit.shelf.islandPadding"
                 Layout.fillWidth: true
                 visible: (root.shelfOptions.layout ?? "islands") === "islands"
                 enabled: (root.shelfOptions.enable ?? true) && visible
@@ -1120,7 +1050,6 @@ ContentPage {
                     && root.shelfModules.includes("locator")
 
                 ConfigSelectionArray {
-                    configPath: "orbit.shelf.locatorLabel"
                     currentValue: root.shelfOptions.locatorLabel ?? "auto"
                     onSelected: value => Config.setNestedValue("orbit.shelf.locatorLabel", value)
                     options: [
@@ -1132,7 +1061,6 @@ ContentPage {
             }
 
             ConfigSwitch {
-                configPath: "orbit.showTrail"
                 enabled: root.shelfOptions.enable ?? true
                 text: Translation.tr("Recent window Trail")
                 description: Translation.tr("Allow the Trail module to surface recently focused windows")
@@ -1141,7 +1069,6 @@ ContentPage {
             }
 
             ConfigSwitch {
-                configPath: "orbit.showStash"
                 text: Translation.tr("Enable Stash")
                 description: Translation.tr("Reveal the Stash drop target while dragging; its Shelf module can be hidden independently")
                 checked: root.orbitOptions.showStash ?? true
@@ -1149,7 +1076,6 @@ ContentPage {
             }
 
             ConfigSwitch {
-                configPath: "orbit.showNewWorkspaceDrop"
                 text: Translation.tr("New workspace drop target")
                 description: Translation.tr("Offer Niri's trailing empty workspace as a fast destination while dragging a window")
                 checked: root.orbitOptions.showNewWorkspaceDrop ?? true
@@ -1171,7 +1097,6 @@ ContentPage {
             }
 
             ConfigSpinBox {
-                configPath: "orbit.trailItems"
                 Layout.fillWidth: true
                 enabled: (root.shelfOptions.enable ?? true)
                     && root.shelfModules.includes("trail")
@@ -1193,7 +1118,6 @@ ContentPage {
                     && (root.orbitOptions.showTrail ?? true)
 
                 ConfigSelectionArray {
-                    configPath: "orbit.shelf.trailScope"
                     currentValue: root.shelfOptions.trailScope ?? "output"
                     onSelected: value => Config.setNestedValue("orbit.shelf.trailScope", value)
                     options: [
@@ -1208,7 +1132,6 @@ ContentPage {
                 enabled: root.orbitOptions.showStash ?? true
 
                 ConfigSelectionArray {
-                    configPath: "orbit.stashRestoreMode"
                     currentValue: root.orbitOptions.stashRestoreMode ?? "original"
                     onSelected: value => Config.setNestedValue("orbit.stashRestoreMode", value)
                     options: [
@@ -1223,7 +1146,6 @@ ContentPage {
                 enabled: root.orbitOptions.showStash ?? true
 
                 ConfigSelectionArray {
-                    configPath: "orbit.pocket.layout"
                     currentValue: root.pocketOptions.layout ?? "cards"
                     onSelected: value => Config.setNestedValue("orbit.pocket.layout", value)
                     options: [
@@ -1234,7 +1156,6 @@ ContentPage {
             }
 
             ConfigSwitch {
-                configPath: "orbit.pocket.showPreviews"
                 enabled: root.orbitOptions.showStash ?? true
                 text: Translation.tr("Pocket snapshots")
                 description: Translation.tr("Show cached window previews in Pocket; disable for a denser icon-first view")
@@ -1243,7 +1164,6 @@ ContentPage {
             }
 
             ConfigSwitch {
-                configPath: "orbit.shelf.closeOnAction"
                 enabled: (root.shelfOptions.enable ?? true)
                     && root.shelfModules.includes("actions")
                 text: Translation.tr("Close Orbit after an action")
@@ -1338,7 +1258,6 @@ ContentPage {
                 }
 
                 ConfigSwitch {
-                    configPath: "orbit.presentation.advanced"
                     text: Translation.tr("Advanced presentation")
                     description: Translation.tr("Tune entry assembly and exit travel behind the preset")
                     checked: root.orbitOptions.presentation?.advanced ?? false
@@ -1346,7 +1265,6 @@ ContentPage {
                 }
 
                 ConfigSelectionArray {
-                    configPath: "orbit.presentation.entryStyle"
                     visible: root.orbitOptions.presentation?.advanced ?? false
                     currentValue: root.orbitOptions.presentation?.entryStyle ?? "cascade"
                     onSelected: value => Config.setNestedValue("orbit.presentation.entryStyle", value)
@@ -1359,7 +1277,6 @@ ContentPage {
                 }
 
                 ConfigSelectionArray {
-                    configPath: "orbit.presentation.direction"
                     visible: root.orbitOptions.presentation?.advanced ?? false
                     enabled: (root.orbitOptions.presentation?.preset ?? "float") !== "instant"
                     currentValue: root.orbitOptions.presentation?.direction ?? "top"
@@ -1374,7 +1291,6 @@ ContentPage {
                 }
 
                 ConfigSpinBox {
-                    configPath: "orbit.presentation.distance"
                     Layout.fillWidth: true
                     visible: root.orbitOptions.presentation?.advanced ?? false
                     enabled: (root.orbitOptions.presentation?.preset ?? "float") !== "instant"
@@ -1388,7 +1304,6 @@ ContentPage {
                 }
 
                 ConfigSpinBox {
-                    configPath: "orbit.presentation.enterDurationMs"
                     Layout.fillWidth: true
                     visible: root.orbitOptions.presentation?.advanced ?? false
                     enabled: (root.orbitOptions.presentation?.preset ?? "float") !== "instant"
@@ -1402,7 +1317,6 @@ ContentPage {
                 }
 
                 ConfigSpinBox {
-                    configPath: "orbit.presentation.exitDurationMs"
                     Layout.fillWidth: true
                     visible: root.orbitOptions.presentation?.advanced ?? false
                     enabled: (root.orbitOptions.presentation?.preset ?? "float") !== "instant"
@@ -1416,7 +1330,6 @@ ContentPage {
                 }
 
                 ConfigSpinBox {
-                    configPath: "orbit.presentation.entryDelayMs"
                     Layout.fillWidth: true
                     visible: root.orbitOptions.presentation?.advanced ?? false
                     icon: "hourglass_top"
@@ -1429,7 +1342,6 @@ ContentPage {
                 }
 
                 ConfigSpinBox {
-                    configPath: "orbit.presentation.entryOpacityPercent"
                     Layout.fillWidth: true
                     visible: root.orbitOptions.presentation?.advanced ?? false
                     icon: "opacity"
@@ -1442,7 +1354,6 @@ ContentPage {
                 }
 
                 ConfigSpinBox {
-                    configPath: "orbit.presentation.entryStaggerMs"
                     Layout.fillWidth: true
                     visible: root.orbitOptions.presentation?.advanced ?? false
                     icon: "format_line_spacing"
@@ -1455,7 +1366,6 @@ ContentPage {
                 }
 
                 ConfigSpinBox {
-                    configPath: "orbit.presentation.shelfDelayMs"
                     Layout.fillWidth: true
                     visible: root.orbitOptions.presentation?.advanced ?? false
                     icon: "dock_to_bottom"
@@ -1487,7 +1397,6 @@ ContentPage {
                 }
 
                 ConfigSwitch {
-                    configPath: "orbit.navigationMotion.advanced"
                     text: Translation.tr("Advanced navigation")
                     description: Translation.tr("Tune scroll and workspace-switch motion")
                     checked: root.orbitOptions.navigationMotion?.advanced ?? false
@@ -1495,7 +1404,6 @@ ContentPage {
                 }
 
                 ConfigSpinBox {
-                    configPath: "orbit.navigationMotion.durationMs"
                     Layout.fillWidth: true
                     visible: root.orbitOptions.navigationMotion?.advanced ?? false
                     icon: "timer"
@@ -1508,7 +1416,6 @@ ContentPage {
                 }
 
                 ConfigSelectionArray {
-                    configPath: "orbit.navigationMotion.easing"
                     visible: root.orbitOptions.navigationMotion?.advanced ?? false
                     currentValue: root.orbitOptions.navigationMotion?.easing ?? "smooth"
                     onSelected: value => Config.setNestedValue("orbit.navigationMotion.easing", value)
@@ -1521,7 +1428,6 @@ ContentPage {
             }
 
             ConfigSpinBox {
-                configPath: "orbit.scrimDim"
                 Layout.fillWidth: true
                 icon: "contrast"
                 text: Translation.tr("Backdrop dim")
@@ -1536,7 +1442,6 @@ ContentPage {
                 title: Translation.tr("Backdrop blur")
 
                 ConfigSelectionArray {
-                    configPath: "orbit.backdropBlurMode"
                     currentValue: {
                         const mode = String(root.orbitOptions.backdropBlurMode ?? "")
                         if (mode === "off") return "off"
@@ -1550,7 +1455,6 @@ ContentPage {
                 }
 
                 ConfigSpinBox {
-                    configPath: "orbit.backdropBlurStrength"
                     Layout.fillWidth: true
                     enabled: root.orbitOptions.backdropBlurMode !== "off"
                     icon: "blur_on"
@@ -1563,7 +1467,6 @@ ContentPage {
                 }
 
                 ConfigSpinBox {
-                    configPath: "orbit.backdropBlurSaturation"
                     Layout.fillWidth: true
                     enabled: root.orbitOptions.backdropBlurMode !== "off"
                     icon: "palette"
@@ -1576,7 +1479,6 @@ ContentPage {
                 }
 
                 ConfigSpinBox {
-                    configPath: "orbit.backdropBlurTint"
                     Layout.fillWidth: true
                     enabled: root.orbitOptions.backdropBlurMode !== "off"
                     icon: "opacity"
@@ -1590,7 +1492,6 @@ ContentPage {
             }
 
             ConfigSwitch {
-                configPath: "orbit.showWorkspaceNumbers"
                 text: Translation.tr("Workspace numbers")
                 checked: root.orbitOptions.showWorkspaceNumbers ?? true
                 onCheckedChanged: Config.setNestedValue("orbit.showWorkspaceNumbers", checked)

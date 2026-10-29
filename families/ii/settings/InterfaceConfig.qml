@@ -157,7 +157,6 @@ ContentPage {
                 }
 
                 ConfigSpinBox {
-                    configPath: "overlay.scrimDim"
                     icon: "opacity"
                     text: Translation.tr("Overlay scrim dim (%)")
                     value: Config.options?.overlay?.scrimDim ?? 30
@@ -172,7 +171,6 @@ ContentPage {
                 }
 
                 ConfigSpinBox {
-                    configPath: "overlay.backgroundOpacity"
                     icon: "opacity"
                     text: Translation.tr("Overlay background opacity (%)")
                     value: Math.round((Config.options?.overlay?.backgroundOpacity ?? 0.9) * 100)
@@ -186,7 +184,6 @@ ContentPage {
                 }
 
                 ConfigSpinBox {
-                    configPath: "overlay.gamePerformance.backgroundOpacity"
                     icon: "monitor_heart"
                     text: Translation.tr("Game Performance background opacity (%)")
                     value: Math.round(root.gamePerformanceBackgroundOpacity() * 100)
@@ -227,7 +224,6 @@ ContentPage {
                 }
 
                 ConfigSpinBox {
-                    configPath: "overlay.animationDurationMs"
                     icon: "speed"
                     text: Translation.tr("Overlay animation duration (ms)")
                     value: Config.options?.overlay?.animationDurationMs ?? 180
@@ -241,7 +237,6 @@ ContentPage {
                 }
 
                 ConfigSpinBox {
-                    configPath: "overlay.scrimAnimationDurationMs"
                     icon: "speed"
                     text: Translation.tr("Background dim animation (ms)")
                     value: Config.options?.overlay?.scrimAnimationDurationMs ?? 140
@@ -291,7 +286,6 @@ ContentPage {
                 enabled: Boolean(Config.options?.appearance?.desaturation?.enable)
                 uniform: true
                 ConfigSpinBox {
-                    configPath: "appearance.desaturation.saturation"
                     icon: "invert_colors"
                     text: Translation.tr("Saturation %")
                     value: Math.round((Config.options?.appearance?.desaturation?.saturation ?? -0.7) * -100)
@@ -304,7 +298,6 @@ ContentPage {
                     }
                 }
                 ConfigSpinBox {
-                    configPath: "appearance.desaturation.brightness"
                     icon: "brightness_6"
                     text: Translation.tr("Dim %")
                     value: Math.round((Config.options?.appearance?.desaturation?.brightness ?? -0.15) * -100)
@@ -447,7 +440,6 @@ ContentPage {
             }
 
             ConfigSpinBox {
-                configPath: "altSwitcher.animationDurationMs"
                 icon: "speed"
                 text: Translation.tr("Animation duration (ms)")
                 value: Config.options?.altSwitcher?.animationDurationMs ?? 200
@@ -471,7 +463,6 @@ ContentPage {
             }
 
             ConfigSpinBox {
-                configPath: "altSwitcher.backgroundOpacity"
                 icon: "opacity"
                 text: Translation.tr("Background opacity (%)")
                 value: Math.round((Config.options?.altSwitcher?.backgroundOpacity ?? 0.9) * 100)
@@ -485,7 +476,6 @@ ContentPage {
             }
 
             ConfigSpinBox {
-                configPath: "altSwitcher.blurAmount"
                 icon: "blur_on"
                 text: Translation.tr("Blur amount (%)")
                 value: Math.round((Config.options?.altSwitcher?.blurAmount ?? 0.4) * 100)
@@ -499,7 +489,6 @@ ContentPage {
             }
 
             ConfigSpinBox {
-                configPath: "altSwitcher.scrimDim"
                 icon: "opacity"
                 text: Translation.tr("Scrim dim (%)")
                 value: Config.options?.altSwitcher?.scrimDim ?? 35
@@ -513,7 +502,6 @@ ContentPage {
             }
 
             ConfigSpinBox {
-                configPath: "altSwitcher.autoHideDelayMs"
                 icon: "hourglass_top"
                 text: Translation.tr("Auto-hide delay after selection (ms)")
                 value: Config.options?.altSwitcher?.autoHideDelayMs ?? 500
@@ -565,7 +553,6 @@ ContentPage {
                 }
 
                 ConfigSelectionArray {
-                    configPath: "altSwitcher.panelAlignment"
                     enabled: !(Config.options?.altSwitcher?.compactStyle ?? false)
                         && (Config.options?.altSwitcher?.preset ?? "default") !== "list"
                         && (Config.options?.altSwitcher?.preset ?? "default") !== "skew"
@@ -606,7 +593,6 @@ ContentPage {
 
         SettingsGroup {
             ConfigSpinBox {
-                configPath: "notifications.timeoutNormal"
                 icon: "av_timer"
                 text: Translation.tr("Timeout (ms)")
                 value: Config.options?.notifications?.timeoutNormal ?? 7000
@@ -622,7 +608,6 @@ ContentPage {
             }
 
             ConfigSwitch {
-                configPath: "notifications.scaleOnHover"
                 buttonIcon: "pinch"
                 text: Translation.tr("Scale on hover")
                 checked: Config.options?.notifications?.scaleOnHover ?? false
@@ -635,7 +620,6 @@ ContentPage {
             }
 
             ConfigSwitch {
-                configPath: "notifications.quietHours.enable"
                 buttonIcon: "bedtime"
                 text: Translation.tr("Quiet hours")
                 checked: Config.options?.notifications?.quietHours?.enable ?? false
@@ -688,7 +672,6 @@ ContentPage {
                 Item { Layout.fillWidth: true }
             }
             ConfigSpinBox {
-                configPath: "notifications.edgeMargin"
                 icon: "vertical_align_top"
                 text: Translation.tr("Margin (px)")
                 value: Config.options?.notifications?.edgeMargin ?? 4
@@ -704,7 +687,6 @@ ContentPage {
             }
 
             ConfigSwitch {
-                configPath: "notifications.useLegacyCounter"
                 buttonIcon: "sync"
                 text: Translation.tr("Auto-sync badge with popup list")
                 checked: !(Config.options?.notifications?.useLegacyCounter ?? true)
@@ -720,7 +702,6 @@ ContentPage {
                 title: Translation.tr("Anchor")
 
                 ConfigSelectionArray {
-                    configPath: "notifications.position"
                     currentValue: Config.options?.notifications?.position ?? "topRight"
                     onSelected: newValue => {
                         Config.setNestedValue("notifications.position", newValue)
@@ -1132,7 +1113,6 @@ ContentPage {
                 title: Translation.tr("Layout")
 
                 ConfigSpinBox {
-                    configPath: "sidebar.widgets.spacing"
                     icon: "format_line_spacing"
                     text: Translation.tr("Widget spacing")
                     value: Config.options?.sidebar?.widgets?.spacing ?? 8
@@ -1186,7 +1166,6 @@ ContentPage {
                 }
 
                 ConfigSpinBox {
-                    configPath: "sidebar.widgets.crypto_settings.refreshInterval"
                     icon: "schedule"
                     text: Translation.tr("Refresh interval (seconds)")
                     value: Config.options?.sidebar?.widgets?.crypto_settings?.refreshInterval ?? 60
@@ -1926,7 +1905,6 @@ ContentPage {
                 visible: Config.options?.sidebar?.widgets?.wallpaper ?? false
 
                 ConfigSpinBox {
-                    configPath: "sidebar.widgets.quickWallpaper.itemSize"
                     icon: "photo_size_select_large"
                     text: Translation.tr("Thumbnail size")
                     value: Config.options?.sidebar?.widgets?.quickWallpaper?.itemSize ?? 56
@@ -2166,7 +2144,6 @@ ContentPage {
                 }
 
                 ConfigSelectionArray {
-                    configPath: "overview.allAppsGridMode"
                     currentValue: Config.options?.overview?.allAppsGridMode ?? "minimal"
                     enabled: (Config.options?.overview?.allAppsGrid ?? false) && !(Config.options?.overview?.dashboard?.enable ?? false)
                     onSelected: (newValue) => {
@@ -2201,7 +2178,6 @@ ContentPage {
                 }
             }
             ConfigSpinBox {
-                configPath: "overview.scale"
                 icon: "loupe"
                 text: Translation.tr("Scale (%)")
                 value: Config.options.overview.scale * 100
@@ -2218,7 +2194,6 @@ ContentPage {
             ConfigRow {
                 uniform: true
                 ConfigSpinBox {
-                    configPath: "overview.rows"
                     icon: "splitscreen_bottom"
                     text: Translation.tr("Rows")
                     value: Config.options.overview.rows
@@ -2233,7 +2208,6 @@ ContentPage {
                     }
                 }
                 ConfigSpinBox {
-                    configPath: "overview.columns"
                     icon: "splitscreen_right"
                     text: Translation.tr("Columns")
                     value: Config.options.overview.columns
@@ -2264,7 +2238,6 @@ ContentPage {
                 }
 
                 ConfigSpinBox {
-                    configPath: "overview.backgroundBlurRadius"
                     icon: "loupe"
                     text: Translation.tr("Wallpaper blur radius")
                     value: Config.options.overview && Config.options.overview.backgroundBlurRadius !== undefined
@@ -2283,7 +2256,6 @@ ContentPage {
                 }
 
                 ConfigSpinBox {
-                    configPath: "overview.backgroundDim"
                     icon: "opacity"
                     text: Translation.tr("Wallpaper dim (%)")
                     value: Config.options.overview && Config.options.overview.backgroundDim !== undefined
@@ -2301,7 +2273,6 @@ ContentPage {
                 }
 
                 ConfigSpinBox {
-                    configPath: "overview.scrimDim"
                     icon: "opacity"
                     text: Translation.tr("Overlay scrim dim (%)")
                     value: Config.options.overview && Config.options.overview.scrimDim !== undefined
@@ -2336,7 +2307,6 @@ ContentPage {
                 ConfigRow {
                     uniform: true
                     ConfigSpinBox {
-                        configPath: "overview.topMargin"
                         icon: "vertical_align_top"
                         text: Translation.tr("Extra top margin (px)")
                         value: Config.options.overview && Config.options.overview.topMargin !== undefined
@@ -2353,7 +2323,6 @@ ContentPage {
                         }
                     }
                     ConfigSpinBox {
-                        configPath: "overview.bottomMargin"
                         icon: "vertical_align_bottom"
                         text: Translation.tr("Extra bottom margin (px)")
                         value: Config.options.overview && Config.options.overview.bottomMargin !== undefined
@@ -2375,7 +2344,6 @@ ContentPage {
                 title: Translation.tr("Layout & gaps")
 
                 ConfigSpinBox {
-                    configPath: "overview.maxPanelWidthRatio"
                     icon: "open_in_full"
                     text: Translation.tr("Max panel width (%) of screen")
                     value: Config.options.overview && Config.options.overview.maxPanelWidthRatio !== undefined
@@ -2395,7 +2363,6 @@ ContentPage {
                 ConfigRow {
                     uniform: true
                     ConfigSpinBox {
-                        configPath: "overview.workspaceSpacing"
                         icon: "grid_3x3"
                         text: Translation.tr("Workspace gap (px)")
                         value: Config.options.overview && Config.options.overview.workspaceSpacing !== undefined
@@ -2412,7 +2379,6 @@ ContentPage {
                         }
                     }
                     ConfigSpinBox {
-                        configPath: "overview.windowTileMargin"
                         icon: "view_comfy_alt"
                         text: Translation.tr("Window tile gap (px)")
                         value: Config.options.overview && Config.options.overview.windowTileMargin !== undefined
@@ -2436,7 +2402,6 @@ ContentPage {
                 ConfigRow {
                     uniform: true
                     ConfigSpinBox {
-                        configPath: "overview.iconMinSize"
                         icon: "format_size"
                         text: Translation.tr("Min icon size (px)")
                         value: Config.options.overview && Config.options.overview.iconMinSize !== undefined
@@ -2453,7 +2418,6 @@ ContentPage {
                         }
                     }
                     ConfigSpinBox {
-                        configPath: "overview.iconMaxSize"
                         icon: "format_overline"
                         text: Translation.tr("Max icon size (px)")
                         value: Config.options.overview && Config.options.overview.iconMaxSize !== undefined
@@ -2487,7 +2451,6 @@ ContentPage {
                 }
 
                 ConfigSpinBox {
-                    configPath: "overview.switchWorkspaceIndex"
                     icon: "looks_one"
                     text: Translation.tr("Workspace number (1-based)")
                     enabled: Config.options.overview && Config.options.overview.switchToWorkspaceOnOpen
@@ -2505,7 +2468,6 @@ ContentPage {
                     }
                 }
                 ConfigSpinBox {
-                    configPath: "overview.scrollWorkspaceSteps"
                     icon: "swap_vert"
                     text: Translation.tr("Wheel steps per workspace (Overview)")
                     value: Config.options.overview && Config.options.overview.scrollWorkspaceSteps !== undefined
@@ -2571,7 +2533,6 @@ ContentPage {
                 }
 
                 ConfigSpinBox {
-                    configPath: "overview.focusAnimationDurationMs"
                     icon: "speed"
                     text: Translation.tr("Focus animation duration (ms)")
                     enabled: !Config.options.overview || Config.options.overview.focusAnimationEnable !== false

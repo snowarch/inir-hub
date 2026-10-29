@@ -59,7 +59,6 @@ WindowDialog {
         }
 
         ConfigSwitch {
-            configPath: "hotspot.band"
             anchors {
                 left: parent.left
                 right: parent.right

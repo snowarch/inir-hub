@@ -56,21 +56,18 @@ ContentPage {
 
         SettingsGroup {
             ConfigSwitch {
-                configPath: "dashboard.enable"
                 text: Translation.tr("Enable dashboard")
                 description: Translation.tr("Centered hub with clock, notifications, media, weather and more")
                 checked: Config.options?.dashboard?.enable ?? true
                 onCheckedChanged: Config.setNestedValue("dashboard.enable", checked)
             }
             ConfigSwitch {
-                configPath: "dashboard.showHeader"
                 text: Translation.tr("Show header")
                 description: Translation.tr("Uptime chip and quick action buttons at the top")
                 checked: Config.options?.dashboard?.showHeader ?? true
                 onCheckedChanged: Config.setNestedValue("dashboard.showHeader", checked)
             }
             ConfigSwitch {
-                configPath: "dashboard.showPowerButtons"
                 text: Translation.tr("Show power buttons")
                 description: Translation.tr("Lock and session buttons in the header")
                 enabled: Config.options?.dashboard?.showHeader ?? true
@@ -78,14 +75,12 @@ ContentPage {
                 onCheckedChanged: Config.setNestedValue("dashboard.showPowerButtons", checked)
             }
             ConfigSwitch {
-                configPath: "dashboard.keepLoaded"
                 text: Translation.tr("Keep loaded in memory")
                 description: Translation.tr("Faster opening at the cost of RAM")
                 checked: Config.options?.dashboard?.keepLoaded ?? false
                 onCheckedChanged: Config.setNestedValue("dashboard.keepLoaded", checked)
             }
             ConfigSpinBox {
-                configPath: "dashboard.widthRatio"
                 text: Translation.tr("Panel width (% of screen)")
                 value: Math.round((Config.options?.dashboard?.widthRatio ?? 0.62) * 100)
                 from: 40
@@ -165,7 +160,6 @@ ContentPage {
             ContentSubsection {
                 title: Translation.tr("Density")
                 ConfigSelectionArray {
-                    configPath: "dashboard.appearance.density"
                     currentValue: Config.options?.dashboard?.appearance?.density ?? "comfortable"
                     onSelected: newValue => Config.setNestedValue("dashboard.appearance.density", newValue)
                     options: [
@@ -175,7 +169,6 @@ ContentPage {
                 }
             }
             ConfigSpinBox {
-                configPath: "dashboard.appearance.cardOpacity"
                 text: Translation.tr("Card opacity (%)")
                 value: Math.round((Config.options?.dashboard?.appearance?.cardOpacity ?? 1) * 100)
                 from: 30
@@ -184,7 +177,6 @@ ContentPage {
                 onValueChanged: Config.setNestedValue("dashboard.appearance.cardOpacity", value / 100)
             }
             ConfigSwitch {
-                configPath: "dashboard.appearance.showCardTitles"
                 text: Translation.tr("Show card titles")
                 description: Translation.tr("Icon and name header on each widget card")
                 checked: Config.options?.dashboard?.appearance?.showCardTitles ?? true

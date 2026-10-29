@@ -86,7 +86,6 @@ ContentPage {
                 title: Translation.tr("General")
 
                 ConfigSelectionArray {
-                    configPath: "sidebar.style"
                     currentValue: Config.options?.sidebar?.style ?? "panel"
                     onSelected: newValue => {
                         Config.setNestedValue("sidebar.style", newValue);
@@ -393,7 +392,6 @@ ContentPage {
                 tooltip: Translation.tr("Look of the system section at the top of the right sidebar")
 
                 ConfigSelectionArray {
-                    configPath: "sidebar.right.headerStyle"
                     Layout.fillWidth: false
                     currentValue: Config.options?.sidebar?.right?.headerStyle ?? "profile"
                     onSelected: newValue => {
@@ -514,7 +512,6 @@ ContentPage {
                 }
 
                 ConfigSelectionArray {
-                    configPath: "sidebar.right.headerBanner"
                     Layout.fillWidth: false
                     visible: (Config.options?.sidebar?.right?.headerStyle ?? "profile") === "profile"
                     currentValue: Config.options?.sidebar?.right?.headerBanner ?? "wallpaper"
@@ -689,7 +686,6 @@ ContentPage {
                 title: Translation.tr("Quick toggles")
 
                 ConfigSelectionArray {
-                    configPath: "sidebar.quickToggles.style"
                     Layout.fillWidth: false
                     currentValue: Config.options.sidebar.quickToggles.style
                     onSelected: newValue => {
@@ -702,7 +698,6 @@ ContentPage {
                 }
 
                 ConfigSpinBox {
-                    configPath: "sidebar.quickToggles.android.columns"
                     enabled: Config.options.sidebar.quickToggles.style === "android"
                     icon: "splitscreen_left"
                     text: Translation.tr("Columns")
@@ -817,7 +812,6 @@ ContentPage {
                 }
 
                 ConfigSelectionArray {
-                    configPath: "sidebar.ytmusic.audioQuality"
                     options: [
                         { displayName: Translation.tr("Best"), icon: "high_quality", value: "best" },
                         { displayName: Translation.tr("Medium (≤128 kbps)"), icon: "graphic_eq", value: "medium" },
@@ -964,7 +958,6 @@ ContentPage {
                 visible: Config.options.sidebar?.wallhaven?.enable ?? true
 
                 ConfigSpinBox {
-                    configPath: "sidebar.wallhaven.limit"
                     icon: "format_list_numbered"
                     text: Translation.tr("Results per page")
                     value: Config.options.sidebar?.wallhaven?.limit ?? 24
@@ -1039,7 +1032,6 @@ ContentPage {
                         onCheckedChanged: Config.setNestedValue("sidebar.edgeOpen.enable", checked)
                     }
                     ConfigSpinBox {
-                        configPath: "sidebar.edgeOpen.regionWidth"
                         icon: "width"
                         text: Translation.tr("Trigger width (px)")
                         value: Config.options?.sidebar?.edgeOpen?.regionWidth ?? 2
@@ -1097,7 +1089,6 @@ ContentPage {
                         }
                     }
                     ConfigSpinBox {
-                        configPath: "sidebar.cornerOpen.clicklessCornerVerticalOffset"
                         icon: "arrow_cool_down"
                         text: Translation.tr("with vertical offset")
                         value: Config.options.sidebar.cornerOpen.clicklessCornerVerticalOffset
@@ -1153,7 +1144,6 @@ ContentPage {
                 }
                 ConfigRow {
                     ConfigSpinBox {
-                        configPath: "sidebar.cornerOpen.cornerRegionWidth"
                         icon: "arrow_range"
                         text: Translation.tr("Region width")
                         value: Config.options.sidebar.cornerOpen.cornerRegionWidth
@@ -1168,7 +1158,6 @@ ContentPage {
                         }
                     }
                     ConfigSpinBox {
-                        configPath: "sidebar.cornerOpen.cornerRegionHeight"
                         icon: "height"
                         text: Translation.tr("Region height")
                         value: Config.options.sidebar.cornerOpen.cornerRegionHeight

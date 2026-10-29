@@ -868,7 +868,6 @@ ColumnLayout {
         }
 
         ConfigSwitch {
-            configPath: "appearance.angel.escalonadoShadow.glass"
             Layout.fillWidth: true
             text: Translation.tr("Glass blur on shadow")
             checked: Appearance.angel.shadowGlass

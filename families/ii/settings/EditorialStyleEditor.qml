@@ -412,7 +412,6 @@ ColumnLayout {
                 StudioColumnLabel { text: Translation.tr("PAPER") }
 
                 ConfigSelectionArray {
-                    configPath: "appearance.editorial.paperMode"
                     currentValue: Appearance.editorial.paperMode
                     options: [
                         { displayName: Translation.tr("Follow theme"), value: "theme" },
@@ -423,7 +422,6 @@ ColumnLayout {
                 }
 
                 ConfigSelectionArray {
-                    configPath: "appearance.editorial.paperTone"
                     currentValue: Appearance.editorial.paperTone
                     options: [
                         { displayName: Translation.tr("Neutral"), value: "neutral" },
@@ -459,7 +457,6 @@ ColumnLayout {
                 }
 
                 ConfigSwitch {
-                    configPath: "appearance.editorial.paperStack"
                     buttonIcon: "layers"
                     text: Translation.tr("Second paper layer")
                     description: Translation.tr("A restrained backing sheet beneath major surfaces; compact controls stay flat.")
@@ -486,7 +483,6 @@ ColumnLayout {
                 StudioColumnLabel { text: Translation.tr("ATMOSPHERE") }
 
                 ConfigSwitch {
-                    configPath: "appearance.editorial.glass"
                     buttonIcon: "blur_on"
                     text: Translation.tr("Glass background")
                     description: Translation.tr("Frost wallpaper beneath Editorial paper without changing host geometry.")
@@ -504,7 +500,6 @@ ColumnLayout {
                 }
 
                 ConfigSelectionArray {
-                    configPath: "appearance.editorial.sidebarGlassBackground"
                     visible: Appearance.editorial.glass
                     currentValue: Appearance.editorial.sidebarGlassBackground ? "full" : "leading"
                     options: [
@@ -555,7 +550,6 @@ ColumnLayout {
                 StudioColumnLabel { text: Translation.tr("TYPOGRAPHY") }
 
                 ConfigSelectionArray {
-                    configPath: "appearance.editorial.typography"
                     currentValue: root.value("typography", "poster")
                     options: [
                         { displayName: Translation.tr("Poster sans"), icon: "text_fields", value: "poster" },
@@ -614,7 +608,6 @@ ColumnLayout {
                 StudioColumnLabel { text: Translation.tr("ACCENT INK") }
 
                 ConfigSelectionArray {
-                    configPath: "appearance.editorial.accentRole"
                     currentValue: Appearance.editorial.accentRole
                     options: [
                         { displayName: Translation.tr("Primary"), value: "primary" },
@@ -713,7 +706,6 @@ ColumnLayout {
             }
 
             ConfigSwitch {
-                configPath: "appearance.editorial.ornaments"
                 Layout.fillWidth: true
                 buttonIcon: "flare"
                 text: Translation.tr("Flower accents")

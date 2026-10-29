@@ -1265,7 +1265,6 @@ ContentPage {
                 title: Translation.tr("Google Lens")
 
                 ConfigSelectionArray {
-                    configPath: "search.imageSearch.useCircleSelection"
                     currentValue: (Config.options?.search?.imageSearch?.useCircleSelection ?? false) ? "circle" : "rectangles"
                     onSelected: newValue => {
                         Config.setNestedValue("search.imageSearch.useCircleSelection", newValue === "circle");
@@ -1281,7 +1280,6 @@ ContentPage {
                 title: Translation.tr("Element appearance")
 
                 ConfigSpinBox {
-                    configPath: "regionSelector.borderSize"
                     icon: "border_style"
                     text: Translation.tr("Border size (px)")
                     value: Config.options?.regionSelector?.borderSize ?? 2
@@ -1296,7 +1294,6 @@ ContentPage {
                     }
                 }
                 ConfigSpinBox {
-                    configPath: "regionSelector.numSize"
                     icon: "format_size"
                     text: Translation.tr("Numbers size (px)")
                     value: Config.options?.regionSelector?.numSize ?? 30
@@ -1332,7 +1329,6 @@ ContentPage {
                 title: Translation.tr("Circle selection")
 
                 ConfigSpinBox {
-                    configPath: "regionSelector.circle.strokeWidth"
                     icon: "eraser_size_3"
                     text: Translation.tr("Stroke width")
                     value: Config.options?.regionSelector?.circle?.strokeWidth ?? 3
@@ -1348,7 +1344,6 @@ ContentPage {
                 }
 
                 ConfigSpinBox {
-                    configPath: "regionSelector.circle.padding"
                     icon: "screenshot_frame_2"
                     text: Translation.tr("Padding")
                     value: Config.options?.regionSelector?.circle?.padding ?? 20
@@ -1465,7 +1460,6 @@ ContentPage {
 
         SettingsGroup {
             ConfigSwitch {
-                configPath: "osd.mediaEnabled"
                 buttonIcon: "music_note"
                 text: Translation.tr("Media OSD")
                 checked: Config.options?.osd?.mediaEnabled ?? true
@@ -1478,7 +1472,6 @@ ContentPage {
             }
 
             ConfigSpinBox {
-                configPath: "osd.timeout"
                 icon: "av_timer"
                 text: Translation.tr("Timeout (ms)")
                 value: Config.options?.osd?.timeout ?? 1500
@@ -1496,7 +1489,6 @@ ContentPage {
 
         SettingsGroup {
             ConfigSwitch {
-                configPath: "osd.connections.enable"
                 buttonIcon: "cable"
                 text: Translation.tr("Connection notices")
                 checked: Config.options?.osd?.connections?.enable ?? true
@@ -1507,7 +1499,6 @@ ContentPage {
             }
 
             ConfigSwitch {
-                configPath: "osd.connections.network"
                 visible: Config.options?.osd?.connections?.enable ?? true
                 buttonIcon: "lan"
                 text: Translation.tr("Network")
@@ -1517,7 +1508,6 @@ ContentPage {
             }
 
             ConfigSwitch {
-                configPath: "osd.connections.internet"
                 visible: Config.options?.osd?.connections?.enable ?? true
                 buttonIcon: "cloud_off"
                 text: Translation.tr("Internet")
@@ -1527,7 +1517,6 @@ ContentPage {
             }
 
             ConfigSwitch {
-                configPath: "osd.connections.bluetooth"
                 visible: Config.options?.osd?.connections?.enable ?? true
                 buttonIcon: "bluetooth_connected"
                 text: Translation.tr("Bluetooth devices")
@@ -1537,7 +1526,6 @@ ContentPage {
             }
 
             ConfigSwitch {
-                configPath: "osd.connections.usb"
                 visible: Config.options?.osd?.connections?.enable ?? true
                 buttonIcon: "mouse"
                 text: Translation.tr("USB devices")
@@ -1547,7 +1535,6 @@ ContentPage {
             }
 
             ConfigSwitch {
-                configPath: "osd.connections.power"
                 visible: Config.options?.osd?.connections?.enable ?? true
                 buttonIcon: "battery_charging_full"
                 text: Translation.tr("Charger")
@@ -1557,7 +1544,6 @@ ContentPage {
             }
 
             ConfigSwitch {
-                configPath: "osd.connections.audio"
                 visible: Config.options?.osd?.connections?.enable ?? true
                 buttonIcon: "headphones"
                 text: Translation.tr("Sound output")
@@ -1567,7 +1553,6 @@ ContentPage {
             }
 
             ConfigSwitch {
-                configPath: "osd.connections.displays"
                 visible: Config.options?.osd?.connections?.enable ?? true
                 buttonIcon: "desktop_windows"
                 text: Translation.tr("Displays")
@@ -1577,7 +1562,6 @@ ContentPage {
             }
 
             ConfigSwitch {
-                configPath: "osd.connections.drives"
                 visible: Config.options?.osd?.connections?.enable ?? true
                 buttonIcon: "usb"
                 text: Translation.tr("Drives and memory cards")

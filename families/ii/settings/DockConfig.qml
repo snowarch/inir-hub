@@ -43,7 +43,6 @@ ContentPage {
                 tooltip: Translation.tr("How the dock surface is drawn.")
 
                 ConfigSelectionArray {
-                    configPath: "dock.style"
                     currentValue: Config.options?.dock?.style ?? "panel"
                     onSelected: newValue => {
                         Config.setNestedValue("dock.style", newValue)
@@ -191,7 +190,6 @@ ContentPage {
                 }
 
                 ConfigSpinBox {
-                    configPath: "dock.height"
                     icon: "height"
                     text: Translation.tr("Dock height (px)")
                     value: Config.options.dock.height ?? 60
@@ -207,7 +205,6 @@ ContentPage {
                 }
 
                 ConfigSpinBox {
-                    configPath: "dock.iconSize"
                     icon: "aspect_ratio"
                     text: Translation.tr("Icon size (px)")
                     value: Config.options.dock.iconSize ?? 35
@@ -223,7 +220,6 @@ ContentPage {
                 }
 
                 ConfigSpinBox {
-                    configPath: "dock.hoverRegionHeight"
                     icon: {
                         const pos = Config.options?.dock?.position ?? "bottom"
                         switch (pos) {
@@ -276,7 +272,6 @@ ContentPage {
                 }
 
                 ConfigSpinBox {
-                    configPath: "dock.maxIndicatorDots"
                     icon: "filter_5"
                     text: Translation.tr("Maximum indicator dots")
                     value: Config.options.dock.maxIndicatorDots ?? 5
@@ -308,7 +303,6 @@ ContentPage {
                 }
 
                 ConfigSpinBox {
-                    configPath: "dock.hoverPreviewDelay"
                     icon: "timer"
                     text: Translation.tr("Hover delay (ms)")
                     value: Config.options.dock.hoverPreviewDelay ?? 400

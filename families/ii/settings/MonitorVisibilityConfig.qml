@@ -1374,7 +1374,6 @@ ContentPage {
                 tooltip: Translation.tr("Used as the default output when a popup cannot infer the focused monitor.")
 
                 ConfigSelectionArray {
-                    configPath: "display.primaryMonitor"
                     currentValue: Config.options?.display?.primaryMonitor ?? ""
                     options: root.monitorOptions()
                     onSelected: newValue => Config.setNestedValue("display.primaryMonitor", newValue)

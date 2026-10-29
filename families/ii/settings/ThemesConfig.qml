@@ -671,7 +671,6 @@ ContentPage {
             }
 
             ConfigSwitch {
-                configPath: "appearance.colorInvert"
                 buttonIcon: "invert_colors"
                 text: Translation.tr("Invert colors (complementary)")
                 checked: Config.options?.appearance?.colorInvert ?? false
@@ -705,7 +704,6 @@ ContentPage {
             }
 
             ConfigSelectionArray {
-                configPath: "appearance.palette.type"
                 currentValue: Config.options?.appearance?.palette?.type ?? "auto"
                 onSelected: newValue => {
                     Config.setNestedValue("appearance.palette.type", newValue)
@@ -742,7 +740,6 @@ ContentPage {
                 color: Appearance.colors.colSubtext
             }
             ConfigSelectionArray {
-                configPath: "appearance.palette.harmony"
                 currentValue: Config.options?.appearance?.palette?.harmony ?? "accent"
                 onSelected: newValue => Config.setNestedValue("appearance.palette.harmony", newValue)
                 options: [
@@ -752,7 +749,6 @@ ContentPage {
             }
 
             ConfigSwitch {
-                configPath: "appearance.wallpaperTheming.autoDarkLightMode"
                 buttonIcon: "contrast"
                 text: Translation.tr("Auto light/dark from wallpaper")
                 checked: Config.options?.appearance?.wallpaperTheming?.autoDarkLightMode ?? false
@@ -865,7 +861,6 @@ ContentPage {
 
         SettingsGroup {
             ConfigSelectionArray {
-                configPath: "appearance.iiMotionProfile"
                 currentValue: Config.options?.appearance?.iiMotionProfile ?? "classic"
                 onSelected: newValue => Config.setNestedValue("appearance.iiMotionProfile", newValue)
                 options: [
@@ -925,7 +920,6 @@ ContentPage {
 
         SettingsGroup {
             ConfigSwitch {
-                configPath: "appearance.themeSchedule.enabled"
                 buttonIcon: "schedule"
                 text: Translation.tr("Enable automatic theme switching")
                 checked: Config.options?.appearance?.themeSchedule?.enabled ?? false
@@ -1195,7 +1189,6 @@ ContentPage {
             }
 
             ConfigSwitch {
-                configPath: "appearance.wallpaperTheming.enableTerminal"
                 buttonIcon: "terminal"
                 text: Translation.tr("Enable terminal theming")
                 checked: Config.options?.appearance?.wallpaperTheming?.enableTerminal ?? true
@@ -1234,7 +1227,6 @@ ContentPage {
                 visible: Config.options?.appearance?.wallpaperTheming?.enableTerminal ?? true
 
                 ConfigSwitch {
-                    configPath: "appearance.wallpaperTheming.terminals.kitty"
                     buttonIcon: "terminal"
                     text: "Kitty" + (terminalColorsSection.detectionDone && !(terminalColorsSection.installedTerminals["kitty"] ?? false) ? " ⌀" : "")
                     checked: Config.options?.appearance?.wallpaperTheming?.terminals?.kitty ?? true
@@ -1243,7 +1235,6 @@ ContentPage {
                 }
 
                 ConfigSwitch {
-                    configPath: "appearance.wallpaperTheming.terminals.alacritty"
                     buttonIcon: "terminal"
                     text: "Alacritty" + (terminalColorsSection.detectionDone && !(terminalColorsSection.installedTerminals["alacritty"] ?? false) ? " ⌀" : "")
                     checked: Config.options?.appearance?.wallpaperTheming?.terminals?.alacritty ?? true
@@ -1252,7 +1243,6 @@ ContentPage {
                 }
 
                 ConfigSwitch {
-                    configPath: "appearance.wallpaperTheming.terminals.foot"
                     buttonIcon: "terminal"
                     text: "Foot" + (terminalColorsSection.detectionDone && !(terminalColorsSection.installedTerminals["foot"] ?? false) ? " ⌀" : "")
                     checked: Config.options?.appearance?.wallpaperTheming?.terminals?.foot ?? true
@@ -1266,7 +1256,6 @@ ContentPage {
                 visible: Config.options?.appearance?.wallpaperTheming?.enableTerminal ?? true
 
                 ConfigSwitch {
-                    configPath: "appearance.wallpaperTheming.terminals.wezterm"
                     buttonIcon: "terminal"
                     text: "WezTerm" + (terminalColorsSection.detectionDone && !(terminalColorsSection.installedTerminals["wezterm"] ?? false) ? " ⌀" : "")
                     checked: Config.options?.appearance?.wallpaperTheming?.terminals?.wezterm ?? true
@@ -1275,7 +1264,6 @@ ContentPage {
                 }
 
                 ConfigSwitch {
-                    configPath: "appearance.wallpaperTheming.terminals.ghostty"
                     buttonIcon: "terminal"
                     text: "Ghostty" + (terminalColorsSection.detectionDone && !(terminalColorsSection.installedTerminals["ghostty"] ?? false) ? " ⌀" : "")
                     checked: Config.options?.appearance?.wallpaperTheming?.terminals?.ghostty ?? true
@@ -1284,7 +1272,6 @@ ContentPage {
                 }
 
                 ConfigSwitch {
-                    configPath: "appearance.wallpaperTheming.terminals.konsole"
                     buttonIcon: "terminal"
                     text: "Konsole" + (terminalColorsSection.detectionDone && !(terminalColorsSection.installedTerminals["konsole"] ?? false) ? " ⌀" : "")
                     checked: Config.options?.appearance?.wallpaperTheming?.terminals?.konsole ?? true
@@ -1298,7 +1285,6 @@ ContentPage {
                 visible: Config.options?.appearance?.wallpaperTheming?.enableTerminal ?? true
 
                 ConfigSwitch {
-                    configPath: "appearance.wallpaperTheming.terminals.starship"
                     buttonIcon: "rocket_launch"
                     text: "Starship" + (terminalColorsSection.detectionDone && !(terminalColorsSection.installedTerminals["starship"] ?? false) ? " ⌀" : "")
                     checked: Config.options?.appearance?.wallpaperTheming?.terminals?.starship ?? true
@@ -1315,7 +1301,6 @@ ContentPage {
                 visible: Config.options?.appearance?.wallpaperTheming?.enableTerminal ?? true
 
                 ConfigSwitch {
-                    configPath: "appearance.wallpaperTheming.terminals.btop"
                     buttonIcon: "monitoring"
                     text: "btop" + (terminalColorsSection.detectionDone && !(terminalColorsSection.installedTerminals["btop"] ?? false) ? " ⌀" : "")
                     checked: Config.options?.appearance?.wallpaperTheming?.terminals?.btop ?? true
@@ -1327,7 +1312,6 @@ ContentPage {
                 }
 
                 ConfigSwitch {
-                    configPath: "appearance.wallpaperTheming.terminals.lazygit"
                     buttonIcon: "account_tree"
                     text: "lazygit" + (terminalColorsSection.detectionDone && !(terminalColorsSection.installedTerminals["lazygit"] ?? false) ? " ⌀" : "")
                     checked: Config.options?.appearance?.wallpaperTheming?.terminals?.lazygit ?? true
@@ -1339,7 +1323,6 @@ ContentPage {
                 }
 
                 ConfigSwitch {
-                    configPath: "appearance.wallpaperTheming.terminals.yazi"
                     buttonIcon: "folder_open"
                     text: "yazi" + (terminalColorsSection.detectionDone && !(terminalColorsSection.installedTerminals["yazi"] ?? false) ? " ⌀" : "")
                     checked: Config.options?.appearance?.wallpaperTheming?.terminals?.yazi ?? true
@@ -1483,7 +1466,6 @@ ContentPage {
 
             // Saturation slider
             ConfigSpinBox {
-                configPath: "appearance.wallpaperTheming.terminalColorAdjustments.saturation"
                 id: saturationSpinBox
                 icon: "palette"
                 text: Translation.tr("Color Saturation") + " (%)"
@@ -1502,7 +1484,6 @@ ContentPage {
 
             // Brightness slider
             ConfigSpinBox {
-                configPath: "appearance.wallpaperTheming.terminalColorAdjustments.brightness"
                 id: brightnessSpinBox
                 icon: "brightness_6"
                 text: Translation.tr("Color Brightness") + " (%)"
@@ -1521,7 +1502,6 @@ ContentPage {
 
             // Harmony slider
             ConfigSpinBox {
-                configPath: "appearance.wallpaperTheming.terminalColorAdjustments.harmony"
                 id: harmonySpinBox
                 icon: "tune"
                 text: Translation.tr("Theme Harmony") + " (%)"
@@ -1544,7 +1524,6 @@ ContentPage {
 
             // Background brightness slider
             ConfigSpinBox {
-                configPath: "appearance.wallpaperTheming.terminalColorAdjustments.backgroundBrightness"
                 id: bgBrightnessSpinBox
                 icon: "contrast"
                 text: Translation.tr("Background Brightness") + " (%)"
@@ -1960,7 +1939,6 @@ ContentPage {
                 }
 
                 ConfigSwitch {
-                    configPath: "appearance.typography.syncWithSystem"
                     buttonIcon: "apps"
                     text: Translation.tr("Apps use this font")
                     checked: Config.options?.appearance?.typography?.syncWithSystem ?? true
@@ -1971,7 +1949,6 @@ ContentPage {
 
             // Size Scale
             ConfigSpinBox {
-                configPath: "appearance.typography.sizeScale"
                 icon: "format_size"
                 text: Translation.tr("Size scale (%)")
                 value: Math.round((Config.options?.appearance?.typography?.sizeScale ?? 1.0) * 100)
@@ -2024,7 +2001,6 @@ ContentPage {
                 spacing: 4
 
                 ConfigSpinBox {
-                    configPath: "appearance.typography.variableAxes.wght"
                     id: weightSpinBox
                     icon: "line_weight"
                     text: Translation.tr("Weight")
@@ -2046,7 +2022,6 @@ ContentPage {
                 }
 
                 ConfigSpinBox {
-                    configPath: "appearance.typography.variableAxes.wdth"
                     id: widthSpinBox
                     icon: "width"
                     text: Translation.tr("Width")
@@ -2068,7 +2043,6 @@ ContentPage {
                 }
 
                 ConfigSpinBox {
-                    configPath: "appearance.typography.variableAxes.grad"
                     id: gradeSpinBox
                     icon: "gradient"
                     text: Translation.tr("Grade")

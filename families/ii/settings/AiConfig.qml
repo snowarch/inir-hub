@@ -944,7 +944,6 @@ ContentPage {
                 tooltip: Translation.tr("What the assistant is allowed to do.")
 
                 ConfigSelectionArray {
-                    configPath: "ai.tool"
                     enableSettingsSearch: false
                     currentValue: Config.options?.ai?.tool ?? "search"
                     onSelected: newValue => {
@@ -1022,7 +1021,6 @@ ContentPage {
                 tooltip: Translation.tr("Local only restricts the assistant to models running on this machine, such as Ollama or LM Studio")
 
                 ConfigSelectionArray {
-                    configPath: "policies.ai"
                     enableSettingsSearch: false
                     currentValue: Config.options?.policies?.ai ?? 0
                     onSelected: newValue => {
@@ -1056,7 +1054,6 @@ ContentPage {
                 tooltip: Translation.tr("Auto prefers local Whisper, then connected online speech providers")
 
                 ConfigSelectionArray {
-                    configPath: "voiceSearch.provider"
                     enableSettingsSearch: false
                     currentValue: Config.options?.voiceSearch?.provider ?? "auto"
                     onSelected: newValue => Config.setNestedValue("voiceSearch.provider", newValue)
@@ -1106,7 +1103,6 @@ ContentPage {
             ContentSubsection {
                 title: Translation.tr("Language")
                 ConfigSelectionArray {
-                    configPath: "voiceSearch.language"
                     enableSettingsSearch: false
                     currentValue: Config.options?.voiceSearch?.language ?? "auto"
                     onSelected: newValue => Config.setNestedValue("voiceSearch.language", newValue)
@@ -1123,7 +1119,6 @@ ContentPage {
             }
 
             ConfigSpinBox {
-                configPath: "voiceSearch.duration"
                 id: voiceDurationSpin
                 // Without the guard the spin box writes its own default over the
                 // user's value while the page is still being created.

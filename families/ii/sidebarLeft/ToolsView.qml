@@ -90,7 +90,6 @@ Item {
                 enableSettingsSearch: false
 
                 ConfigSwitch {
-                    configPath: "appearance.customTheme.darkmode"
                     buttonIcon: "dark_mode"
                     text: Translation.tr("Dark mode")
                     checked: Appearance.m3colors?.darkmode ?? false

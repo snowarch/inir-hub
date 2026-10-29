@@ -52,7 +52,6 @@ ContentPage {
 
         SettingsGroup {
             ConfigSpinBox {
-                configPath: "idle.screenOffTimeout"
                 icon: "monitor"
                 text: Translation.tr("Screen off") + ` (${value > 0 ? Math.floor(value/60) + "m " + (value%60) + "s" : Translation.tr("disabled")})`
                 value: Config.options?.idle?.screenOffTimeout ?? 300
@@ -66,7 +65,6 @@ ContentPage {
             }
 
             ConfigSpinBox {
-                configPath: "idle.lockTimeout"
                 icon: "lock"
                 text: Translation.tr("Lock screen") + ` (${value > 0 ? Math.floor(value/60) + "m" : Translation.tr("disabled")})`
                 value: Config.options?.idle?.lockTimeout ?? 600
@@ -80,7 +78,6 @@ ContentPage {
             }
 
             ConfigSpinBox {
-                configPath: "idle.suspendTimeout"
                 icon: "dark_mode"
                 text: Translation.tr("Suspend") + ` (${value > 0 ? Math.floor(value/60) + "m" : Translation.tr("disabled")})`
                 value: Config.options?.idle?.suspendTimeout ?? 0
@@ -116,7 +113,6 @@ ContentPage {
             }
 
             ConfigSpinBox {
-                configPath: "idle.onBattery.screenOffTimeout"
                 visible: Battery.available
                 enabled: Config.options?.idle?.onBattery?.enable ?? false
                 icon: "lock_clock"
@@ -129,7 +125,6 @@ ContentPage {
             }
 
             ConfigSpinBox {
-                configPath: "idle.onBattery.lockTimeout"
                 visible: Battery.available
                 enabled: Config.options?.idle?.onBattery?.enable ?? false
                 icon: "lock"
@@ -142,7 +137,6 @@ ContentPage {
             }
 
             ConfigSpinBox {
-                configPath: "idle.onBattery.suspendTimeout"
                 visible: Battery.available
                 enabled: Config.options?.idle?.onBattery?.enable ?? false
                 icon: "dark_mode"
@@ -181,7 +175,6 @@ ContentPage {
 
         SettingsGroup {
             ConfigSpinBox {
-                configPath: "musicRecognition.timeout"
                 icon: "timer_off"
                 text: Translation.tr("Total duration timeout (s)")
                 value: Config.options?.musicRecognition?.timeout ?? 16
@@ -196,7 +189,6 @@ ContentPage {
                 }
             }
             ConfigSpinBox {
-                configPath: "musicRecognition.interval"
                 icon: "av_timer"
                 text: Translation.tr("Polling interval (s)")
                 value: Config.options?.musicRecognition?.interval ?? 4
@@ -295,7 +287,6 @@ ContentPage {
 
         SettingsGroup {
             ConfigSpinBox {
-                configPath: "resources.updateInterval"
                 icon: "av_timer"
                 text: Translation.tr("Polling interval (ms)")
                 value: Config.options?.resources?.updateInterval ?? 3000
@@ -328,7 +319,6 @@ ContentPage {
                 title: Translation.tr("Surface style")
 
                 ConfigSelectionArray {
-                    configPath: "search.style"
                     currentValue: Config.options?.search?.style ?? "default"
                     onSelected: newValue => {
                         Config.setNestedValue("search.style", newValue);
@@ -451,7 +441,6 @@ ContentPage {
 
         SettingsGroup {
             ConfigSpinBox {
-                configPath: "updates.checkInterval"
                 icon: "av_timer"
                 text: Translation.tr("Check interval") + ` (${value}m)`
                 value: Config.options?.updates?.checkInterval ?? 120
@@ -465,7 +454,6 @@ ContentPage {
             }
 
             ConfigSpinBox {
-                configPath: "updates.adviseUpdateThreshold"
                 icon: "notifications"
                 text: Translation.tr("Show icon threshold")
                 value: Config.options?.updates?.adviseUpdateThreshold ?? 10
@@ -479,7 +467,6 @@ ContentPage {
             }
 
             ConfigSpinBox {
-                configPath: "updates.stronglyAdviseUpdateThreshold"
                 icon: "warning"
                 text: Translation.tr("Warning threshold")
                 value: Config.options?.updates?.stronglyAdviseUpdateThreshold ?? 50
@@ -530,7 +517,6 @@ ContentPage {
             }
 
             ConfigSpinBox {
-                configPath: "shellUpdates.checkIntervalMinutes"
                 icon: "schedule"
                 text: Translation.tr("Check interval") + ` (${value}m)`
                 value: Config.options?.shellUpdates?.checkIntervalMinutes ?? 360
@@ -1159,7 +1145,6 @@ ContentPage {
             }
 
             ConfigSpinBox {
-                configPath: "bar.weather.fetchInterval"
                 icon: "update"
                 text: Translation.tr("Update interval (minutes)")
                 value: Config.options?.bar?.weather?.fetchInterval ?? 10
@@ -1192,7 +1177,6 @@ ContentPage {
             }
 
             ConfigSpinBox {
-                configPath: "calendar.externalSync.refreshMinutes"
                 icon: "update"
                 text: Translation.tr("Refresh interval (minutes)")
                 value: Config.options?.calendar?.externalSync?.refreshMinutes ?? 15
@@ -1211,7 +1195,6 @@ ContentPage {
             }
 
             ConfigSpinBox {
-                configPath: "calendar.upcomingDays"
                 icon: "date_range"
                 text: Translation.tr("Upcoming days to show")
                 value: Config.options?.calendar?.upcomingDays ?? 3

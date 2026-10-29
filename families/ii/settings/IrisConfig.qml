@@ -147,7 +147,6 @@ ContentPage {
                     ConfigRow {
                         uniform: true
                         ConfigSpinBox {
-                            configPath: "iris.appearance.density"
                             icon: "density_medium"
                             text: Translation.tr("Density (%)")
                             value: Math.round((Config.options?.iris?.appearance?.density ?? 1.0) * 100)
@@ -198,7 +197,6 @@ ContentPage {
                     ConfigRow {
                         uniform: true
                         ConfigSpinBox {
-                            configPath: "iris.bar.height"
                             icon: "height"
                             text: Translation.tr("Height")
                             value: Config.options?.iris?.bar?.height ?? 42
@@ -207,7 +205,6 @@ ContentPage {
                             onValueChanged: Config.setNestedValue("iris.bar.height", value)
                         }
                         ConfigSpinBox {
-                            configPath: "iris.bar.margin"
                             icon: "space_bar"
                             text: Translation.tr("Screen gap")
                             value: Config.options?.iris?.bar?.margin ?? 8
@@ -360,7 +357,6 @@ ContentPage {
                         onCheckedChanged: Config.setNestedValue("iris.dock.magnification", checked)
                     }
                     ConfigSpinBox {
-                        configPath: "iris.dock.iconSize"
                         icon: "photo_size_select_small"
                         text: Translation.tr("Dock icon size")
                         value: Config.options?.iris?.dock?.iconSize ?? 40
@@ -427,7 +423,6 @@ ContentPage {
 
                 SettingsGroup {
                     ConfigSpinBox {
-                        configPath: "iris.palette.width"
                         icon: "search"
                         text: Translation.tr("Palette width")
                         value: Config.options?.iris?.palette?.width ?? 640
@@ -437,7 +432,6 @@ ContentPage {
                         onValueChanged: Config.setNestedValue("iris.palette.width", value)
                     }
                     ConfigSpinBox {
-                        configPath: "iris.palette.maxResults"
                         icon: "format_list_numbered"
                         text: Translation.tr("Palette results")
                         value: Config.options?.iris?.palette?.maxResults ?? 8
@@ -454,7 +448,6 @@ ContentPage {
                     ConfigRow {
                         uniform: true
                         ConfigSpinBox {
-                            configPath: "iris.controlCenter.width"
                             icon: "tune"
                             text: Translation.tr("Control width")
                             value: Config.options?.iris?.controlCenter?.width ?? 360
@@ -464,7 +457,6 @@ ContentPage {
                             onValueChanged: Config.setNestedValue("iris.controlCenter.width", value)
                         }
                         ConfigSpinBox {
-                            configPath: "iris.notifications.width"
                             icon: "notifications"
                             text: Translation.tr("Notification width")
                             value: Config.options?.iris?.notifications?.width ?? 380
@@ -475,7 +467,6 @@ ContentPage {
                         }
                     }
                     ConfigSpinBox {
-                        configPath: "iris.osd.width"
                         icon: "monitoring"
                         text: Translation.tr("OSD width")
                         value: Config.options?.iris?.osd?.width ?? 320

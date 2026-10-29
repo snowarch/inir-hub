@@ -281,7 +281,6 @@ ContentPage {
             }
 
             ConfigSwitch {
-                configPath: "familyTransitionAnimation"
                 Layout.fillWidth: true
                 buttonIcon: "animation"
                 text: Translation.tr("Animated switch")
@@ -1068,7 +1067,6 @@ ContentPage {
             ConfigRow {
                 uniform: true
                 ConfigSpinBox {
-                    configPath: "appearance.typography.sizeScale"
                     icon: "zoom_in"
                     text: Translation.tr("UI scale (%)")
                     value: Math.round((Config.options?.appearance?.typography?.sizeScale ?? 1.0) * 100)
@@ -1123,7 +1121,6 @@ ContentPage {
                 title: Translation.tr("Selector style")
 
                 ConfigSelectionArray {
-                    configPath: "wallpaperSelector.style"
                     currentValue: Config.options?.wallpaperSelector?.style ?? "grid"
                     options: [
                         { displayName: Translation.tr("Grid"), icon: "grid_view", value: "grid" },
@@ -1245,7 +1242,6 @@ ContentPage {
                 visible: Config.options?.settingsUi?.overlayMode ?? false
 
                 ConfigSpinBox {
-                    configPath: "settingsUi.overlayAppearance.backdropBlur"
                     icon: "blur_on"
                     text: Translation.tr("Backdrop blur (%)")
                     value: Config.options?.settingsUi?.overlayAppearance?.backdropBlur ?? 0
@@ -1259,7 +1255,6 @@ ContentPage {
                 }
 
                 ConfigSpinBox {
-                    configPath: "settingsUi.overlayAppearance.scrimDim"
                     icon: "water"
                     text: Translation.tr("Background dim (%)")
                     value: Config.options?.settingsUi?.overlayAppearance?.scrimDim ?? 35
@@ -1278,7 +1273,6 @@ ContentPage {
                 // hosts clamp on read too, so an older stored value cannot reach
                 // the panel even if this page is never opened.
                 ConfigSpinBox {
-                    configPath: "settingsUi.overlayAppearance.backgroundOpacity"
                     icon: "opacity"
                     text: Translation.tr("Panel background opacity (%)")
                     value: Math.round((Config.options?.settingsUi?.overlayAppearance?.backgroundOpacity ?? 1.0) * 100)

@@ -85,7 +85,6 @@ ContentPage {
             }
 
             ConfigSpinBox {
-                configPath: "mascot.companion.minQuietMinutes"
                 icon: "timelapse"
                 text: Translation.tr("Minimum quiet time")
                 from: 3; to: 60; stepSize: 1
@@ -96,7 +95,6 @@ ContentPage {
             }
 
             ConfigSpinBox {
-                configPath: "mascot.companion.maxVisitsPerHour"
                 icon: "schedule"
                 text: Translation.tr("Maximum visits per hour")
                 from: 1; to: 6; stepSize: 1
@@ -128,7 +126,6 @@ ContentPage {
             }
 
             ConfigSpinBox {
-                configPath: "mascot.companion.intervalMinutes"
                 icon: "schedule"
                 text: Translation.tr("Companion visit interval") + " (min)"
                 value: Config.options?.mascot?.companion?.intervalMinutes ?? 25
@@ -144,7 +141,6 @@ ContentPage {
             }
 
             ConfigSpinBox {
-                configPath: "mascot.companion.size"
                 icon: "photo_size_select_large"
                 text: Translation.tr("Companion size") + " (px)"
                 value: Config.options?.mascot?.companion?.size ?? 150
@@ -160,7 +156,6 @@ ContentPage {
             }
 
             ConfigSpinBox {
-                configPath: "mascot.companion.visibleSeconds"
                 icon: "hourglass_empty"
                 text: Translation.tr("Visit length") + " (s)"
                 value: Config.options?.mascot?.companion?.visibleSeconds ?? 5
@@ -176,7 +171,6 @@ ContentPage {
             }
 
             ConfigSpinBox {
-                configPath: "mascot.companion.slideMs"
                 icon: "speed"
                 text: Translation.tr("Slide animation") + " (ms)"
                 value: Config.options?.mascot?.companion?.slideMs ?? 400
@@ -247,7 +241,6 @@ ContentPage {
                 }
 
                 ConfigSelectionArray {
-                    configPath: "mascot.personality.voiceMode"
                     currentValue: Config.options?.mascot?.personality?.voiceMode ?? "adaptive"
                     onSelected: newValue => Config.setNestedValue("mascot.personality.voiceMode", newValue)
                     options: [
@@ -272,7 +265,6 @@ ContentPage {
             }
 
             ConfigSpinBox {
-                configPath: "mascot.personality.idleMoodIntervalMinutes"
                 icon: "timer"
                 text: Translation.tr("Mood change interval") + " (min)"
                 value: Config.options?.mascot?.personality?.idleMoodIntervalMinutes ?? 30
@@ -305,7 +297,6 @@ ContentPage {
             ContentSubsection {
                 title: Translation.tr("Character art")
                 ConfigSelectionArray {
-                    configPath: "mascot.chaos.artStyle"
                     currentValue: Config.options?.mascot?.chaos?.artStyle ?? "jrpg"
                     options: [
                     { displayName: Translation.tr("JRPG"), value: "jrpg" },
@@ -316,7 +307,6 @@ ContentPage {
                 }
             }
             ConfigSpinBox {
-                configPath: "mascot.chaos.intervalMinutes"
                 icon: "timer"
                 text: Translation.tr("Minimum time between chaos visits") + " (min)"
                 from: 15; to: 180; stepSize: 5
