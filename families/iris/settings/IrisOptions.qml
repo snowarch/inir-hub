@@ -1277,7 +1277,7 @@ QtObject {
         { label: "Pink", value: String(IrisStyle.identity.pink), get swatch() { return IrisStyle.identity.pink } },
         { label: "Gray", value: String(IrisStyle.identity.gray), get swatch() { return IrisStyle.identity.gray } }
     ]
-    // Niri's own settings, read and written through scripts/niri-config.py (IrisNiri). `niri` is the config section.
+    // Niri's own settings, read and written through inir-accel niri-config (IrisNiri). `niri` is the config section.
     readonly property var niriRows: [
         { section: "windows", group: "Layout", niri: "layout", key: "gaps", label: "Gaps", description: "Space around and between windows.", kind: "range", fallback: 16, min: 0, max: 48, unit: " px", keywords: ["niri", "gaps", "spacing", "padding"] },
         { section: "windows", group: "Layout", niri: "layout", key: "center-focused-column", read: "center_focused", label: "Centre the focused column", summary: false, kind: "choice", fallback: "never", choices: [{label:"Never",value:"never"},{label:"When it overflows",value:"on-overflow"},{label:"Always",value:"always"}], keywords: ["niri", "center", "centre", "column"] },

@@ -24,7 +24,7 @@ Singleton {
 
     Process {
         id: reader
-        command: ["python3", Quickshell.shellPath("scripts/niri-config.py"), "get-blur"]
+        command: [Quickshell.shellPath("scripts/lib/accel-run"), "niri-config", "get-blur"]
         stdout: StdioCollector {
             onStreamFinished: {
                 try {

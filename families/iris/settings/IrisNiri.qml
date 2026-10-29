@@ -11,7 +11,7 @@ import qs.modules.iris.style
 Singleton {
     id: root
 
-    readonly property string script: Quickshell.shellPath("scripts/niri-config.py")
+    readonly property string accelRun: Quickshell.shellPath("scripts/lib/accel-run")
     readonly property bool available: CompositorService.isNiri
     property int revision: 0
     property var data: ({ input: {}, layout: {}, animations: {}, "window-rules": {} })
@@ -30,7 +30,7 @@ Singleton {
     readonly property int revertAfter: 15
 
     // The config is read again only once niri reloads it (it watches the file itself) or the outputs change: every open
-    // started six python3 to read what had not moved. Cursor themes and devices come and go outside it.
+    // started six readers for what had not moved. Cursor themes and devices come and go outside it.
     property var stale: ({ input: true, layout: true, animations: true, "window-rules": true, outputs: true })
     function ensure(): void {
         if (!root.available) return
@@ -86,7 +86,7 @@ Singleton {
         const item = root.queue[0]
         root.queue = root.queue.slice(1)
         writer.section = item.section
-        writer.command = ["python3", root.script, "set", item.section, item.key, item.value]
+        writer.command = [root.accelRun, "niri-config", "set", item.section, item.key, item.value]
         writer.running = true
     }
     function parse(text: string, onValue: var): bool {
@@ -224,7 +224,7 @@ Singleton {
         if (wanted === previous) return
         root.pending = { output: out.name, key: setting, value: wanted, previous: previous }
         root.secondsLeft = root.revertAfter
-        applier.command = ["python3", root.script, "apply-output", out.name, `${setting}=${wanted}`]
+        applier.command = [root.accelRun, "niri-config", "apply-output", out.name, `${setting}=${wanted}`]
         applier.running = true
         countdown.restart()
     }
@@ -240,14 +240,14 @@ Singleton {
             const rect = root.logicalRect(entry)
             layout[entry.name] = entry.name === out.name ? at : { x: rect.x, y: rect.y }
         }
-        layoutWriter.command = ["python3", root.script, "persist-layout", JSON.stringify(layout)]
+        layoutWriter.command = [root.accelRun, "niri-config", "persist-layout", JSON.stringify(layout)]
         layoutWriter.running = true
     }
     function keepDisplay(): void {
         const change = root.pending
         if (!change) return
         countdown.stop()
-        persister.command = ["python3", root.script, "persist-output", change.output, `${change.key}=${change.value}`]
+        persister.command = [root.accelRun, "niri-config", "persist-output", change.output, `${change.key}=${change.value}`]
         persister.running = true
         root.pending = null
     }
@@ -256,7 +256,7 @@ Singleton {
         if (!change) return
         countdown.stop()
         root.pending = null
-        applier.command = ["python3", root.script, "apply-output", change.output, `${change.key}=${change.previous}`]
+        applier.command = [root.accelRun, "niri-config", "apply-output", change.output, `${change.key}=${change.previous}`]
         applier.running = true
     }
 
@@ -273,7 +273,7 @@ Singleton {
     component Reader: Process {
         id: reader
         required property string section
-        command: ["python3", root.script, "get-" + reader.section]
+        command: [root.accelRun, "niri-config", "get-" + reader.section]
         stdout: StdioCollector {
             // A read that failed is read again on the next open.
             onStreamFinished: if (!root.parse(text, value => root.store(reader.section, value))) root.stale[reader.section] = true
@@ -296,14 +296,14 @@ Singleton {
     Timer { id: layoutSettle; interval: 600; onTriggered: root.reload(["outputs"]) }
     Process {
         id: outputsReader
-        command: ["python3", root.script, "outputs"]
+        command: [root.accelRun, "niri-config", "outputs"]
         stdout: StdioCollector {
             onStreamFinished: if (!root.parse(text, value => { root.outputs = Array.isArray(value) ? value : [] })) root.stale.outputs = true
         }
     }
     Process {
         id: cursorReader
-        command: ["python3", root.script, "list-cursor-themes"]
+        command: [root.accelRun, "niri-config", "list-cursor-themes"]
         stdout: StdioCollector {
             onStreamFinished: root.parse(text, value => { root.cursorThemes = Array.isArray(value) ? value : [] })
         }
