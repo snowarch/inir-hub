@@ -76,7 +76,6 @@ ContentPage {
                 }
             }
             SettingsSwitch {
-                configPath: "performance.compositorBlur"
                 visible: Appearance.nativeBlurSupported
                 buttonIcon: "blur_on"
                 text: Translation.tr("Allow compositor blur")
@@ -139,21 +138,18 @@ ContentPage {
         title: Translation.tr("Motion and power")
         SettingsGroup {
             SettingsSwitch {
-                configPath: "performance.reduceAnimations"
                 buttonIcon: "animation"
                 text: Translation.tr("Reduce animations")
                 checked: Config.options?.performance?.reduceAnimations ?? false
                 onCheckedChanged: Config.setNestedValue("performance.reduceAnimations", checked)
             }
             SettingsSwitch {
-                configPath: "performance.lowPower"
                 buttonIcon: "energy_savings_leaf"
                 text: Translation.tr("Low power effects")
                 checked: Config.options?.performance?.lowPower ?? false
                 onCheckedChanged: Config.setNestedValue("performance.lowPower", checked)
             }
             SettingsSwitch {
-                configPath: "performance.memoryWarningNotification"
                 buttonIcon: "memory"
                 text: Translation.tr("Notify when a restart would free memory")
                 checked: Config.options?.performance?.memoryWarningNotification ?? false

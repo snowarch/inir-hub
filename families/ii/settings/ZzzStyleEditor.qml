@@ -58,10 +58,6 @@ ColumnLayout {
             }
         }
 
-        ConfigResetKey {
-            path: sliderRowRoot.configPath
-            label: sliderRowRoot.label
-        }
         StyledText {
             text: Math.round(slider.value * 100) + "%"
             font.pixelSize: Appearance.font.pixelSize.small

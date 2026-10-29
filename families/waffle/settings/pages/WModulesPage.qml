@@ -110,7 +110,6 @@ WSettingsPage {
                 { value: "iris", label: Translation.tr("iRiS in the switch shortcut") }
             ]
             WSettingsSwitch {
-                configPath: "familyCycle"
                 required property var modelData
                 readonly property var cycle: Array.from(Config.options?.familyCycle ?? ["ii", "waffle", "iris"])
                 label: modelData.label
@@ -220,7 +219,6 @@ WSettingsPage {
         }
 
         WSettingsSwitch {
-            configPath: "sidebar.screenTime.enable"
             label: Translation.tr("Screen Time")
             icon: "schedule"
             description: Translation.tr("Track time spent in each application. Shows in the Action Center.")
@@ -234,7 +232,6 @@ WSettingsPage {
         icon: "panel-left-expand"
 
         WSettingsSwitch {
-            configPath: "sidebar.collapseEmptyNotifications"
             label: Translation.tr("Collapse notifications when empty")
             icon: "panel-left-contract"
             description: Translation.tr("Shrink the right sidebar when there are no notifications")
@@ -243,7 +240,6 @@ WSettingsPage {
         }
 
         WSettingsSwitch {
-            configPath: "sidebar.collapseWidgetsTab"
             label: Translation.tr("Fit left sidebar to widgets")
             icon: "panel-left-expand"
             description: Translation.tr("Shrink the left sidebar to its content on the Widgets tab instead of full height")

@@ -100,7 +100,6 @@ ContentPage {
             }
 
             SettingsSwitch {
-                configPath: "waffles.background.hideWhenFullscreen"
                 buttonIcon: "fullscreen_exit"
                 text: Translation.tr("Hide main wallpaper in fullscreen")
                 checked: Config.options?.waffles?.background?.hideWhenFullscreen ?? true
@@ -111,7 +110,6 @@ ContentPage {
             }
             
             SettingsSwitch {
-                configPath: "waffles.background.enableAnimation"
                 buttonIcon: "play_circle"
                 text: Translation.tr("Enable animated wallpapers (videos/GIFs)")
                 checked: Config.options?.waffles?.background?.enableAnimation ?? true
@@ -137,7 +135,6 @@ ContentPage {
 
         SettingsGroup {
             SettingsSwitch {
-                configPath: "waffles.background.effects.enableBlur"
                 buttonIcon: "blur_on"
                 text: Translation.tr("Enable blur")
                 checked: Config.options?.waffles?.background?.effects?.enableBlur ?? false
@@ -195,7 +192,6 @@ ContentPage {
             }
 
             SettingsSwitch {
-                configPath: "waffles.background.backdrop.enable"
                 buttonIcon: "texture"
                 text: Translation.tr("Enable backdrop layer for overview")
                 checked: Config.options?.waffles?.background?.backdrop?.enable ?? true
@@ -205,7 +201,6 @@ ContentPage {
             }
 
             SettingsSwitch {
-                configPath: "waffles.background.backdrop.enableAnimation"
                 visible: Config.options?.waffles?.background?.backdrop?.enable ?? true
                 buttonIcon: "play_circle"
                 text: Translation.tr("Enable animated wallpapers (videos/GIFs)")
@@ -219,7 +214,6 @@ ContentPage {
             }
 
             SettingsSwitch {
-                configPath: "waffles.background.backdrop.hideWallpaper"
                 visible: Config.options?.waffles?.background?.backdrop?.enable ?? true
                 buttonIcon: "visibility_off"
                 text: Translation.tr("Hide main wallpaper (show only backdrop)")
@@ -294,7 +288,6 @@ ContentPage {
             }
 
             SettingsSwitch {
-                configPath: "waffles.background.backdrop.vignetteEnabled"
                 visible: Config.options?.waffles?.background?.backdrop?.enable ?? true
                 buttonIcon: "vignette"
                 text: Translation.tr("Vignette")
@@ -326,7 +319,6 @@ ContentPage {
 
         SettingsGroup {
             SettingsSwitch {
-                configPath: "waffles.bar.bottom"
                 buttonIcon: "vertical_align_bottom"
                 text: Translation.tr("Bottom position")
                 checked: Config.options?.waffles?.bar?.bottom ?? true
@@ -334,7 +326,6 @@ ContentPage {
             }
 
             SettingsSwitch {
-                configPath: "waffles.bar.leftAlignApps"
                 buttonIcon: "format_align_left"
                 text: Translation.tr("Left-align apps")
                 checked: Config.options?.waffles?.bar?.leftAlignApps ?? false
@@ -342,7 +333,6 @@ ContentPage {
             }
 
             SettingsSwitch {
-                configPath: "waffles.bar.monochromeIcons"
                 buttonIcon: "palette"
                 text: Translation.tr("Tint app icons")
                 checked: Config.options?.waffles?.bar?.monochromeIcons ?? false
@@ -350,7 +340,6 @@ ContentPage {
             }
 
             SettingsSwitch {
-                configPath: "waffles.bar.tintTrayIcons"
                 buttonIcon: "palette"
                 text: Translation.tr("Tint tray icons")
                 checked: Config.options?.waffles?.bar?.tintTrayIcons ?? false
@@ -375,7 +364,6 @@ ContentPage {
 
         SettingsGroup {
             SettingsSwitch {
-                configPath: "waffles.theming.useMaterialColors"
                 buttonIcon: "format_color_fill"
                 text: Translation.tr("Use Material colors")
                 enabled: !Appearance.editorialEverywhere
@@ -467,7 +455,6 @@ ContentPage {
 
         SettingsGroup {
             SettingsSwitch {
-                configPath: "waffles.behavior.allowMultiplePanels"
                 buttonIcon: "stacks"
                 text: Translation.tr("Allow multiple panels open")
                 checked: Config.options?.waffles?.behavior?.allowMultiplePanels ?? false
@@ -496,7 +483,6 @@ ContentPage {
             }
 
             SettingsSwitch {
-                configPath: "familyTransitionAnimation"
                 buttonIcon: "animation"
                 text: Translation.tr("Animated transition")
                 checked: Config.options?.familyTransitionAnimation ?? true
@@ -548,7 +534,6 @@ ContentPage {
 
         SettingsGroup {
             SettingsSwitch {
-                configPath: "waffles.tweaks.smootherMenuAnimations"
                 buttonIcon: "animation"
                 text: Translation.tr("Smoother menu animations")
                 checked: Config.options?.waffles?.tweaks?.smootherMenuAnimations ?? true
@@ -556,7 +541,6 @@ ContentPage {
             }
 
             SettingsSwitch {
-                configPath: "waffles.tweaks.switchHandlePositionFix"
                 buttonIcon: "toggle_on"
                 text: Translation.tr("Switch handle position fix")
                 checked: Config.options?.waffles?.tweaks?.switchHandlePositionFix ?? true
@@ -573,7 +557,6 @@ ContentPage {
 
         SettingsGroup {
             SettingsSwitch {
-                configPath: "waffles.calendar.force2CharDayOfWeek"
                 buttonIcon: "calendar_today"
                 text: Translation.tr("Force 2-character day of week")
                 checked: Config.options?.waffles?.calendar?.force2CharDayOfWeek ?? true
@@ -598,7 +581,6 @@ ContentPage {
                 onSelected: newValue => NiriKeybinds.setAltTabSource(newValue)
             }
             SettingsSwitch {
-                configPath: "waffles.altSwitcher.noVisualUi"
                 enabled: {
                     const preset = Config.options?.waffles?.altSwitcher?.preset ?? "thumbnails"
                     return preset !== "skew" && preset !== "none"
@@ -634,7 +616,6 @@ ContentPage {
             }
 
             SettingsSwitch {
-                configPath: "waffles.altSwitcher.quickSwitch"
                 buttonIcon: "bolt"
                 text: Translation.tr("Quick switch (Alt+Tab once to switch)")
                 checked: Config.options?.waffles?.altSwitcher?.quickSwitch ?? true
@@ -643,7 +624,6 @@ ContentPage {
             }
 
             SettingsSwitch {
-                configPath: "waffles.altSwitcher.autoHide"
                 buttonIcon: "timer"
                 text: Translation.tr("Auto-hide after delay")
                 checked: Config.options?.waffles?.altSwitcher?.autoHide ?? true
@@ -661,7 +641,6 @@ ContentPage {
             }
 
             SettingsSwitch {
-                configPath: "waffles.altSwitcher.closeOnFocus"
                 buttonIcon: "close"
                 text: Translation.tr("Close on window focus")
                 checked: Config.options?.waffles?.altSwitcher?.closeOnFocus ?? true
@@ -669,7 +648,6 @@ ContentPage {
             }
 
             SettingsSwitch {
-                configPath: "waffles.altSwitcher.useMostRecentFirst"
                 buttonIcon: "history"
                 text: Translation.tr("Most recent first")
                 checked: Config.options?.waffles?.altSwitcher?.useMostRecentFirst ?? true
@@ -716,7 +694,6 @@ ContentPage {
             }
 
             SettingsSwitch {
-                configPath: "waffles.altSwitcher.showOverviewWhileSwitching"
                 buttonIcon: "grid_view"
                 text: Translation.tr("Show Niri overview while switching")
                 checked: Config.options?.waffles?.altSwitcher?.showOverviewWhileSwitching ?? false
@@ -734,7 +711,6 @@ ContentPage {
 
         SettingsGroup {
             SettingsSwitch {
-                configPath: "waffles.widgetsPanel.showDateTime"
                 buttonIcon: "schedule"
                 text: Translation.tr("Date & Time")
                 checked: Config.options?.waffles?.widgetsPanel?.showDateTime ?? true
@@ -742,7 +718,6 @@ ContentPage {
             }
 
             SettingsSwitch {
-                configPath: "waffles.widgetsPanel.showWeather"
                 buttonIcon: "cloud"
                 text: Translation.tr("Weather")
                 checked: Config.options?.waffles?.widgetsPanel?.showWeather ?? true
@@ -750,7 +725,6 @@ ContentPage {
             }
 
             SettingsSwitch {
-                configPath: "waffles.widgetsPanel.showSystem"
                 buttonIcon: "memory"
                 text: Translation.tr("System Resources")
                 checked: Config.options?.waffles?.widgetsPanel?.showSystem ?? true
@@ -758,7 +732,6 @@ ContentPage {
             }
 
             SettingsSwitch {
-                configPath: "waffles.widgetsPanel.showMedia"
                 buttonIcon: "music_note"
                 text: Translation.tr("Media Player")
                 checked: Config.options?.waffles?.widgetsPanel?.showMedia ?? true
@@ -766,7 +739,6 @@ ContentPage {
             }
 
             SettingsSwitch {
-                configPath: "waffles.widgetsPanel.showQuickActions"
                 buttonIcon: "bolt"
                 text: Translation.tr("Quick Actions")
                 checked: Config.options?.waffles?.widgetsPanel?.showQuickActions ?? true

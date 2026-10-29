@@ -297,7 +297,6 @@ WSettingsPage {
         icon: "screenshot"
 
         WSettingsSpinBox {
-            configPath: "appearance.typography.sizeScale"
             id: scaleSpinBox
             label: Translation.tr("UI scale")
             icon: "screenshot"
@@ -325,7 +324,6 @@ WSettingsPage {
         icon: "screenshot"
         
         WSettingsDropdown {
-            configPath: "appearance.fakeScreenRounding"
             label: Translation.tr("Fake rounded corners")
             icon: "screenshot"
             description: Translation.tr("Add rounded corners to flat screens")
@@ -349,7 +347,6 @@ WSettingsPage {
         icon: "alert"
         
         WSettingsSpinBox {
-            configPath: "notifications.timeoutNormal"
             label: Translation.tr("Normal timeout")
             icon: "arrow-clockwise"
             description: Translation.tr("How long normal notifications stay visible")
@@ -360,7 +357,6 @@ WSettingsPage {
         }
         
         WSettingsSpinBox {
-            configPath: "notifications.timeoutLow"
             label: Translation.tr("Low priority timeout")
             icon: "alert-snooze"
             suffix: "ms"
@@ -370,7 +366,6 @@ WSettingsPage {
         }
         
         WSettingsSpinBox {
-            configPath: "notifications.timeoutCritical"
             label: Translation.tr("Critical timeout")
             icon: "alert-filled"
             description: Translation.tr("0 = never auto-dismiss")
@@ -381,7 +376,6 @@ WSettingsPage {
         }
 
         WSettingsSwitch {
-            configPath: "notifications.quietHours.enable"
             label: Translation.tr("Quiet hours")
             icon: "weather-moon"
             description: Translation.tr("Hold back popups during a daily window. Notifications still reach the history.")
@@ -400,7 +394,6 @@ WSettingsPage {
                 color: Looks.colors.subfg
             }
             WSettingsTextField {
-                configPath: "notifications.quietHours.start"
                 Layout.preferredWidth: 100
                 placeholderText: "22:00"
                 text: Config.options?.notifications?.quietHours?.start ?? "22:00"
@@ -415,7 +408,6 @@ WSettingsPage {
                 color: Looks.colors.subfg
             }
             WSettingsTextField {
-                configPath: "notifications.quietHours.end"
                 Layout.preferredWidth: 100
                 placeholderText: "08:00"
                 text: Config.options?.notifications?.quietHours?.end ?? "08:00"
@@ -428,7 +420,6 @@ WSettingsPage {
         }
         
         WSettingsSwitch {
-            configPath: "notifications.ignoreAppTimeout"
             label: Translation.tr("Ignore app timeout")
             icon: "alert-off"
             description: Translation.tr("Always use your timeout settings instead of app-defined ones")
@@ -437,7 +428,6 @@ WSettingsPage {
         }
         
         WSettingsDropdown {
-            configPath: "notifications.position"
             label: Translation.tr("Popup position")
             icon: "panel-left-expand"
             currentValue: Config.options?.notifications?.position ?? "bottomRight"
@@ -451,7 +441,6 @@ WSettingsPage {
         }
         
         WSettingsSwitch {
-            configPath: "notifications.silent"
             label: Translation.tr("Do Not Disturb")
             icon: "weather-moon"
             description: Translation.tr("Silence all notifications")
@@ -460,7 +449,6 @@ WSettingsPage {
         }
 
         WSettingsTextField {
-            configPath: "notifications.blockedApps"
             label: Translation.tr("Blocked apps")
             icon: "alert-off"
             description: Translation.tr("Comma-separated app or service names. Blocked notifications never enter history, sounds or popups.")
@@ -507,7 +495,6 @@ WSettingsPage {
         }
 
         WSettingsSwitch {
-            configPath: "overlay.darkenScreen"
             label: Translation.tr("Darken screen behind overlay")
             icon: "eye"
             description: Translation.tr("Add a dark scrim behind overlay panels for better visibility")
@@ -516,7 +503,6 @@ WSettingsPage {
         }
 
         WSettingsSpinBox {
-            configPath: "overlay.scrimDim"
             label: Translation.tr("Overlay scrim dim (%)")
             icon: "eye"
             suffix: "%"
@@ -527,7 +513,6 @@ WSettingsPage {
         }
 
         WSettingsSpinBox {
-            configPath: "overlay.backgroundOpacity"
             label: Translation.tr("Overlay background opacity (%)")
             icon: "eye"
             suffix: "%"
@@ -537,7 +522,6 @@ WSettingsPage {
         }
 
         WSettingsSpinBox {
-            configPath: "overlay.gamePerformance.backgroundOpacity"
             label: Translation.tr("Game Performance background opacity (%)")
             icon: "monitor_heart"
             suffix: "%"
@@ -549,7 +533,6 @@ WSettingsPage {
         }
 
         WSettingsSwitch {
-            configPath: "overlay.gamePerformance.transparentBackground"
             label: Translation.tr("Transparent Game Performance background")
             icon: "opacity"
             description: Translation.tr("Set panel opacity to 0%; metrics remain visible")
@@ -559,7 +542,6 @@ WSettingsPage {
         }
 
         WSettingsSwitch {
-            configPath: "overlay.openingZoomAnimation"
             label: Translation.tr("Enable opening zoom animation")
             icon: "play"
             checked: Config.options?.overlay?.openingZoomAnimation ?? true
@@ -567,7 +549,6 @@ WSettingsPage {
         }
 
         WSettingsSpinBox {
-            configPath: "overlay.animationDurationMs"
             label: Translation.tr("Overlay animation duration (ms)")
             icon: "arrow-clockwise"
             suffix: "ms"
@@ -577,7 +558,6 @@ WSettingsPage {
         }
 
         WSettingsSpinBox {
-            configPath: "overlay.scrimAnimationDurationMs"
             label: Translation.tr("Background dim animation (ms)")
             icon: "arrow-clockwise"
             suffix: "ms"
@@ -592,7 +572,6 @@ WSettingsPage {
         icon: "pulse"
 
         WSettingsSwitch {
-            configPath: "osd.mediaEnabled"
             label: Translation.tr("Media OSD")
             icon: "music-note-2"
             description: Translation.tr("Show feedback for explicit media controls. Pill also announces automatic track changes outside games.")
@@ -601,7 +580,6 @@ WSettingsPage {
         }
         
         WSettingsSpinBox {
-            configPath: "osd.timeout"
             label: Translation.tr("OSD timeout")
             icon: "arrow-clockwise"
             description: Translation.tr("How long volume, brightness and media OSD stays visible")
@@ -612,7 +590,6 @@ WSettingsPage {
         }
 
         WSettingsSwitch {
-            configPath: "osd.connections.enable"
             label: Translation.tr("Connection notices")
             icon: "arrow-sync"
             description: Translation.tr("A short notice when something is plugged in, connected, unplugged or lost")
@@ -621,7 +598,6 @@ WSettingsPage {
         }
 
         WSettingsSwitch {
-            configPath: "osd.connections.network"
             visible: Config.options?.osd?.connections?.enable ?? true
             label: Translation.tr("Network")
             icon: "ethernet"
@@ -631,7 +607,6 @@ WSettingsPage {
         }
 
         WSettingsSwitch {
-            configPath: "osd.connections.internet"
             visible: Config.options?.osd?.connections?.enable ?? true
             label: Translation.tr("Internet")
             icon: "wifi-warning"
@@ -641,7 +616,6 @@ WSettingsPage {
         }
 
         WSettingsSwitch {
-            configPath: "osd.connections.bluetooth"
             visible: Config.options?.osd?.connections?.enable ?? true
             label: Translation.tr("Bluetooth devices")
             icon: "bluetooth-connected"
@@ -651,7 +625,6 @@ WSettingsPage {
         }
 
         WSettingsSwitch {
-            configPath: "osd.connections.usb"
             visible: Config.options?.osd?.connections?.enable ?? true
             label: Translation.tr("USB devices")
             icon: "keyboard"
@@ -661,7 +634,6 @@ WSettingsPage {
         }
 
         WSettingsSwitch {
-            configPath: "osd.connections.power"
             visible: Config.options?.osd?.connections?.enable ?? true
             label: Translation.tr("Charger")
             icon: "battery-charge"
@@ -671,7 +643,6 @@ WSettingsPage {
         }
 
         WSettingsSwitch {
-            configPath: "osd.connections.audio"
             visible: Config.options?.osd?.connections?.enable ?? true
             label: Translation.tr("Sound output")
             icon: "headphones"
@@ -681,7 +652,6 @@ WSettingsPage {
         }
 
         WSettingsSwitch {
-            configPath: "osd.connections.displays"
             visible: Config.options?.osd?.connections?.enable ?? true
             label: Translation.tr("Displays")
             icon: "desktop"
@@ -691,7 +661,6 @@ WSettingsPage {
         }
 
         WSettingsSwitch {
-            configPath: "osd.connections.drives"
             visible: Config.options?.osd?.connections?.enable ?? true
             label: Translation.tr("Drives and memory cards")
             icon: "folder"
@@ -711,7 +680,6 @@ WSettingsPage {
         icon: "lock-closed"
         
         WSettingsSwitch {
-            configPath: "lock.blur.enable"
             label: Translation.tr("Enable blur")
             icon: "eye"
             description: Translation.tr("Blur background on lock screen")
@@ -720,7 +688,6 @@ WSettingsPage {
         }
         
         WSettingsSpinBox {
-            configPath: "lock.blur.radius"
             visible: Config.options?.lock?.blur?.enable ?? true
             label: Translation.tr("Blur radius")
             icon: "eyedropper"
@@ -730,7 +697,6 @@ WSettingsPage {
         }
         
         WSettingsSwitch {
-            configPath: "lock.centerClock"
             label: Translation.tr("Center clock")
             icon: "panel-left-contract"
             checked: Config.options?.lock?.centerClock ?? true
@@ -738,7 +704,6 @@ WSettingsPage {
         }
         
         WSettingsSwitch {
-            configPath: "lock.showLockedText"
             label: Translation.tr("Show 'Locked' text")
             icon: "lock-closed"
             checked: Config.options?.lock?.showLockedText ?? true
@@ -746,7 +711,6 @@ WSettingsPage {
         }
 
         WSettingsSwitch {
-            configPath: "lock.notifications.enable"
             label: Translation.tr("Show notifications")
             icon: "alert"
             description: Translation.tr("Display recent notifications on the lock screen")
@@ -755,7 +719,6 @@ WSettingsPage {
         }
 
         WSettingsSwitch {
-            configPath: "lock.notifications.showBody"
             visible: Config.options?.lock?.notifications?.enable ?? false
             label: Translation.tr("Show notification body")
             icon: "eye"
@@ -765,7 +728,6 @@ WSettingsPage {
         }
 
         WSettingsSpinBox {
-            configPath: "lock.notifications.maxCount"
             visible: Config.options?.lock?.notifications?.enable ?? false
             label: Translation.tr("Max notifications shown")
             icon: "list"
@@ -775,7 +737,6 @@ WSettingsPage {
         }
 
         WSettingsDropdown {
-            configPath: "lock.notifications.position"
             visible: Config.options?.lock?.notifications?.enable ?? false
             label: Translation.tr("Notification position")
             icon: "panel-left-expand"
@@ -791,7 +752,6 @@ WSettingsPage {
         }
 
         WSettingsDropdown {
-            configPath: "lock.clock.style"
             label: Translation.tr("Clock style")
             icon: "arrow-clockwise"
             description: Translation.tr("Visual style for the lock screen clock")
@@ -805,7 +765,6 @@ WSettingsPage {
         }
 
         WSettingsDropdown {
-            configPath: "lock.clock.position"
             label: Translation.tr("Clock position")
             icon: "pin"
             description: Translation.tr("Where the clock appears on the lock screen")
@@ -819,7 +778,6 @@ WSettingsPage {
         }
 
         WSettingsSwitch {
-            configPath: "lock.status.enable"
             label: Translation.tr("Show status indicators")
             icon: "info"
             description: Translation.tr("Show WiFi, Bluetooth, volume and battery on the lock screen")
@@ -828,7 +786,6 @@ WSettingsPage {
         }
 
         WSettingsSwitch {
-            configPath: "lock.dim.enable"
             label: Translation.tr("Dim wallpaper")
             icon: "dark-theme"
             description: Translation.tr("Apply a dark overlay to the wallpaper for better contrast")
@@ -837,7 +794,6 @@ WSettingsPage {
         }
 
         WSettingsSlider {
-            configPath: "lock.dim.opacity"
             visible: Config.options?.lock?.dim?.enable ?? false
             label: Translation.tr("Dim amount")
             icon: "brightness-high"
@@ -851,7 +807,6 @@ WSettingsPage {
         }
 
         WSettingsDropdown {
-            configPath: "lock.loginScreen"
             visible: MaterialThemeLoader.loginScreenInstalled
             label: Translation.tr("Login screen")
             icon: "key"
@@ -866,7 +821,6 @@ WSettingsPage {
         }
 
         WSettingsDropdown {
-            configPath: "lock.loginStyle"
             readonly property string look: Config.options?.lock?.loginScreen ?? "auto"
             visible: MaterialThemeLoader.loginScreenInstalled
                 && (look === "iris" || (look === "auto" && (Config.options?.panelFamily ?? "ii") === "iris"))
@@ -915,7 +869,6 @@ WSettingsPage {
         }
 
         WSettingsDropdown {
-            configPath: "screenRecord.qualityPreset"
             label: Translation.tr("Quality preset")
             icon: "options"
             description: Translation.tr("Trade off file size and output quality")
@@ -986,7 +939,6 @@ WSettingsPage {
         }
 
         WSettingsTextField {
-            configPath: "regionSelector.savePath"
             label: Translation.tr("Screenshots folder")
             icon: "image"
             description: Translation.tr("Leave empty to use Pictures/Screenshots")
@@ -996,7 +948,6 @@ WSettingsPage {
         }
 
         WSettingsTextField {
-            configPath: "screenRecord.recordingNameFormat"
             label: Translation.tr("Filename format")
             icon: "text-font"
             description: Translation.tr("date(1) tokens for recording filenames (without extension)")
@@ -1014,7 +965,6 @@ WSettingsPage {
         }
 
         WSettingsSwitch {
-            configPath: "screenRecord.discordCompress.enabled"
             label: Translation.tr("Compress recordings for Discord")
             icon: "record"
             description: Translation.tr("Creates a separate H.264 copy that fits Discord upload limits")
@@ -1030,7 +980,6 @@ WSettingsPage {
         }
 
         WSettingsDropdown {
-            configPath: "screenRecord.discordCompress.targetSizeMb"
             visible: Config.options?.screenRecord?.discordCompress?.enabled ?? false
             label: Translation.tr("Discord target size")
             icon: "pulse"
@@ -1041,7 +990,6 @@ WSettingsPage {
         }
 
         WSettingsDropdown {
-            configPath: "screenRecord.discordCompress.maxDimension"
             visible: Config.options?.screenRecord?.discordCompress?.enabled ?? false
             label: Translation.tr("Discord max dimension")
             icon: "screenshot"
@@ -1052,7 +1000,6 @@ WSettingsPage {
         }
 
         WSettingsDropdown {
-            configPath: "screenRecord.discordCompress.preset"
             visible: Config.options?.screenRecord?.discordCompress?.enabled ?? false
             label: Translation.tr("Discord encoder speed")
             icon: "arrow-clockwise"
@@ -1063,7 +1010,6 @@ WSettingsPage {
         }
 
         WSettingsDropdown {
-            configPath: "screenRecord.discordCompress.audioBitrateKbps"
             visible: Config.options?.screenRecord?.discordCompress?.enabled ?? false
             label: Translation.tr("Discord audio bitrate")
             icon: "speaker"
@@ -1074,7 +1020,6 @@ WSettingsPage {
         }
 
         WSettingsSwitch {
-            configPath: "screenRecord.discordCompress.onlyIfNeeded"
             visible: Config.options?.screenRecord?.discordCompress?.enabled ?? false
             label: Translation.tr("Skip compression when already under target")
             icon: "checkmark"

@@ -83,7 +83,6 @@ WSettingsPage {
         }
 
         WSettingsSpinBox {
-            configPath: "workspaceStrip.panelWidth"
             label: Translation.tr("Panel width")
             icon: "desktop"
             suffix: "px"
@@ -93,7 +92,6 @@ WSettingsPage {
         }
 
         WSettingsSpinBox {
-            configPath: "workspaceStrip.previewSize"
             label: Translation.tr("Preview size")
             icon: "image"
             suffix: "px"
@@ -103,7 +101,6 @@ WSettingsPage {
         }
 
         WSettingsSpinBox {
-            configPath: "workspaceStrip.triggerWidth"
             label: Translation.tr("Trigger width")
             icon: "panel-left-expand"
             suffix: "px"
@@ -113,7 +110,6 @@ WSettingsPage {
         }
 
         WSettingsSpinBox {
-            configPath: "workspaceStrip.openDelay"
             label: Translation.tr("Open delay")
             icon: "timer"
             suffix: "ms"
@@ -123,7 +119,6 @@ WSettingsPage {
         }
 
         WSettingsSpinBox {
-            configPath: "workspaceStrip.closeDelay"
             label: Translation.tr("Close delay")
             icon: "timer"
             suffix: "ms"
@@ -138,7 +133,6 @@ WSettingsPage {
         icon: "arrow-sync"
 
         WSettingsSwitch {
-            configPath: "workspaceStrip.scrollNavigation"
             label: Translation.tr("Scroll to navigate")
             icon: "arrow-sync"
             description: Translation.tr("Use the mouse wheel over the strip to move between workspaces instead of scrolling the thumbnail list")
@@ -147,7 +141,6 @@ WSettingsPage {
         }
 
         WSettingsSwitch {
-            configPath: "workspaceStrip.scrollNavigationSwitchWorkspace"
             visible: Config.options?.workspaceStrip?.scrollNavigation ?? false
             label: Translation.tr("Switch workspace on scroll")
             icon: "desktop"
@@ -157,7 +150,6 @@ WSettingsPage {
         }
 
         WSettingsSpinBox {
-            configPath: "workspaceStrip.scrollNavigationDebounceMs"
             visible: Config.options?.workspaceStrip?.scrollNavigation ?? false
             label: Translation.tr("Scroll debounce")
             icon: "timer"
@@ -173,7 +165,6 @@ WSettingsPage {
         icon: "apps"
 
         WSettingsSwitch {
-            configPath: "workspaceStrip.showPreviews"
             label: Translation.tr("Window previews")
             icon: "image"
             description: Translation.tr("Live preview for the active workspace and refreshed snapshots for hidden workspaces")
@@ -182,7 +173,6 @@ WSettingsPage {
         }
 
         WSettingsSwitch {
-            configPath: "workspaceStrip.showMetadata"
             label: Translation.tr("Window metadata")
             icon: "info"
             description: Translation.tr("Show workspace name, focused window title and window count")
@@ -191,7 +181,6 @@ WSettingsPage {
         }
 
         WSettingsSwitch {
-            configPath: "workspaceStrip.showAppIcons"
             label: Translation.tr("App icons")
             icon: "apps"
             description: Translation.tr("Show icons for open applications on the selected workspace card")
@@ -200,7 +189,6 @@ WSettingsPage {
         }
 
         WSettingsSwitch {
-            configPath: "workspaceStrip.showMediaPlayer"
             label: Translation.tr("Now-playing player")
             icon: "settings"
             description: Translation.tr("Add a media card at the top of the strip with playback controls when music is playing")
@@ -209,7 +197,6 @@ WSettingsPage {
         }
 
         WSettingsSwitch {
-            configPath: "workspaceStrip.perMonitor"
             enabled: CompositorService.isNiri
             label: Translation.tr("Per-monitor workspaces")
             icon: "desktop"

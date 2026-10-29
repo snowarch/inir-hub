@@ -474,7 +474,6 @@ WSettingsPage {
         icon: "wand"
 
         WSettingsTextField {
-            configPath: "ai.systemPrompt"
             id: systemPromptInput
             label: Translation.tr("AI system prompt")
             icon: "info"
@@ -617,7 +616,6 @@ WSettingsPage {
         }
 
         WSettingsSpinBox {
-            configPath: "voiceSearch.duration"
             id: voiceDurationSpin
             // Without the guard the spin box writes its own default over the
             // user's value while the page is still being created.

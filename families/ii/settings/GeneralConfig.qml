@@ -54,7 +54,6 @@ ContentPage {
 
         SettingsGroup {
             SettingsSwitch {
-                configPath: "audio.protection.enable"
                 buttonIcon: "hearing"
                 text: Translation.tr("Earbang protection")
                 checked: Config.options?.audio?.protection?.enable ?? false
@@ -156,7 +155,6 @@ ContentPage {
                 uniform: false
                 Layout.fillWidth: false
                 SettingsSwitch {
-                    configPath: "battery.automaticSuspend"
                     buttonIcon: "pause"
                     text: Translation.tr("Automatic suspend")
                     checked: Config.options?.battery?.automaticSuspend ?? false
@@ -212,7 +210,6 @@ ContentPage {
                 uniform: false
                 Layout.fillWidth: false
                 SettingsSwitch {
-                    configPath: "battery.chargeLimit.enable"
                     buttonIcon: "battery_saver"
                     text: Translation.tr("Charge limit")
                     checked: Config.options?.battery?.chargeLimit?.enable ?? false
@@ -411,7 +408,6 @@ ContentPage {
             ConfigRow {
                 uniform: true
                 SettingsSwitch {
-                    configPath: "sounds.battery"
                     buttonIcon: "battery_android_full"
                     text: Translation.tr("Battery")
                     checked: Config.options?.sounds?.battery ?? false
@@ -423,7 +419,6 @@ ContentPage {
                     }
                 }
                 SettingsSwitch {
-                    configPath: "sounds.timer"
                     buttonIcon: "hourglass_empty"
                     text: Translation.tr("Timer")
                     checked: Config.options?.sounds?.timer ?? false
@@ -435,7 +430,6 @@ ContentPage {
                     }
                 }
                 SettingsSwitch {
-                    configPath: "sounds.pomodoro"
                     buttonIcon: "av_timer"
                     text: Translation.tr("Pomodoro")
                     checked: Config.options?.sounds?.pomodoro ?? false
@@ -447,7 +441,6 @@ ContentPage {
                     }
                 }
                 SettingsSwitch {
-                    configPath: "sounds.notifications"
                     buttonIcon: "notifications"
                     text: Translation.tr("Notifications")
                     checked: Config.options?.sounds?.notifications ?? true
@@ -521,7 +514,6 @@ ContentPage {
 
         SettingsGroup {
             SettingsSwitch {
-                configPath: "time.secondPrecision"
                 buttonIcon: "pace"
                 text: Translation.tr("Second precision")
                 checked: Config.options?.time?.secondPrecision ?? false
@@ -606,7 +598,6 @@ ContentPage {
 
         SettingsGroup {
             SettingsSwitch {
-                configPath: "keyboardIndicators.showPopup"
                 buttonIcon: "keyboard"
                 text: Translation.tr("Keyboard popups")
                 checked: Config.options?.keyboardIndicators?.showPopup ?? true
@@ -617,7 +608,6 @@ ContentPage {
             }
 
             SettingsSwitch {
-                configPath: "keyboardIndicators.popup.layout"
                 buttonIcon: "language"
                 text: Translation.tr("Layout popup")
                 checked: Config.options?.keyboardIndicators?.popup?.layout ?? true
@@ -628,7 +618,6 @@ ContentPage {
             }
 
             SettingsSwitch {
-                configPath: "keyboardIndicators.popup.caps"
                 buttonIcon: "keyboard_capslock"
                 text: Translation.tr("Caps Lock popup")
                 checked: Config.options?.keyboardIndicators?.popup?.caps ?? true
@@ -639,7 +628,6 @@ ContentPage {
             }
 
             SettingsSwitch {
-                configPath: "keyboardIndicators.popup.num"
                 buttonIcon: "dialpad"
                 text: Translation.tr("Num Lock popup")
                 checked: Config.options?.keyboardIndicators?.popup?.num ?? false
@@ -650,7 +638,6 @@ ContentPage {
             }
 
             SettingsSwitch {
-                configPath: "keyboardIndicators.showPanel"
                 buttonIcon: "dock_to_right"
                 text: Translation.tr("Keyboard panel indicators")
                 checked: Config.options?.keyboardIndicators?.showPanel ?? true
@@ -661,7 +648,6 @@ ContentPage {
             }
 
             SettingsSwitch {
-                configPath: "keyboardIndicators.panel.layout"
                 buttonIcon: "language"
                 text: Translation.tr("Layout indicator")
                 checked: Config.options?.keyboardIndicators?.panel?.layout ?? true
@@ -672,7 +658,6 @@ ContentPage {
             }
 
             SettingsSwitch {
-                configPath: "keyboardIndicators.panel.caps"
                 buttonIcon: "keyboard_capslock"
                 text: Translation.tr("Caps Lock indicator")
                 checked: Config.options?.keyboardIndicators?.panel?.caps ?? true
@@ -683,7 +668,6 @@ ContentPage {
             }
 
             SettingsSwitch {
-                configPath: "keyboardIndicators.panel.num"
                 buttonIcon: "dialpad"
                 text: Translation.tr("Num Lock indicator")
                 checked: Config.options?.keyboardIndicators?.panel?.num ?? false
@@ -708,7 +692,6 @@ ContentPage {
 
         SettingsGroup {
             SettingsSwitch {
-                configPath: "closeConfirm.enabled"
                 visible: CompositorService.isNiri
                 buttonIcon: "help"
                 text: Translation.tr("Confirm before closing windows")
@@ -736,7 +719,6 @@ ContentPage {
 
         SettingsGroup {
             SettingsSwitch {
-                configPath: "workSafety.enable.clipboard"
                 buttonIcon: "assignment"
                 text: Translation.tr("Hide clipboard images copied from sussy sources")
                 checked: Config.options?.workSafety?.enable?.clipboard ?? false
@@ -751,7 +733,6 @@ ContentPage {
             SettingsDivider {}
 
             SettingsSwitch {
-                configPath: "workSafety.enable.wallpaper"
                 buttonIcon: "wallpaper"
                 text: Translation.tr("Hide sussy/anime wallpapers")
                 checked: Config.options?.workSafety?.enable?.wallpaper ?? false
@@ -778,7 +759,6 @@ ContentPage {
 
         SettingsGroup {
             SettingsSwitch {
-                configPath: "bootGreeting.enable"
                 buttonIcon: "waving_hand"
                 text: Translation.tr("Show greeting on startup")
                 checked: Config.options?.bootGreeting?.enable ?? true
@@ -814,7 +794,6 @@ ContentPage {
             ConfigRow {
                 uniform: true
                 SettingsSwitch {
-                    configPath: "bootGreeting.showWeather"
                     enabled: Config.options?.bootGreeting?.enable ?? true
                     buttonIcon: "thermostat"
                     text: Translation.tr("Show weather")
@@ -824,7 +803,6 @@ ContentPage {
                     }
                 }
                 SettingsSwitch {
-                    configPath: "bootGreeting.showDate"
                     enabled: Config.options?.bootGreeting?.enable ?? true
                     buttonIcon: "calendar_today"
                     text: Translation.tr("Show date")
@@ -850,7 +828,6 @@ ContentPage {
 
         SettingsGroup {
             SettingsSwitch {
-                configPath: "lock.useHyprlock"
                 visible: CompositorService.isHyprland
                 buttonIcon: "water_drop"
                 text: Translation.tr('Use Hyprlock (instead of Quickshell)')
@@ -864,7 +841,6 @@ ContentPage {
             }
 
             SettingsSwitch {
-                configPath: "lock.launchOnStartup"
                 buttonIcon: "account_circle"
                 text: Translation.tr('Launch on startup')
                 checked: Config.options?.lock?.launchOnStartup ?? false
@@ -880,7 +856,6 @@ ContentPage {
                 title: Translation.tr("Security")
 
                 SettingsSwitch {
-                    configPath: "lock.security.requirePasswordToPower"
                     buttonIcon: "settings_power"
                     text: Translation.tr('Require password to power off/restart')
                     checked: Config.options?.lock?.security?.requirePasswordToPower ?? true
@@ -893,7 +868,6 @@ ContentPage {
                 }
 
                 SettingsSwitch {
-                    configPath: "lock.security.unlockKeyring"
                     buttonIcon: "key_vertical"
                     text: Translation.tr('Also unlock keyring')
                     checked: Config.options?.lock?.security?.unlockKeyring ?? true
@@ -910,7 +884,6 @@ ContentPage {
                 title: Translation.tr("Style: general")
 
                 SettingsSwitch {
-                    configPath: "lock.notifications.enable"
                     buttonIcon: "notifications"
                     text: Translation.tr('Show notifications on lock screen')
                     checked: Config.options?.lock?.notifications?.enable ?? false
@@ -923,7 +896,6 @@ ContentPage {
                 }
 
                 SettingsSwitch {
-                    configPath: "lock.notifications.showBody"
                     visible: Config.options?.lock?.notifications?.enable ?? false
                     buttonIcon: "visibility"
                     text: Translation.tr('Show notification body text')
@@ -1008,7 +980,6 @@ ContentPage {
                 title: Translation.tr("Extras")
 
                 SettingsSwitch {
-                    configPath: "lock.status.enable"
                     buttonIcon: "info"
                     text: Translation.tr('Show status indicators')
                     checked: Config.options?.lock?.status?.enable ?? true
@@ -1021,7 +992,6 @@ ContentPage {
                 }
 
                 SettingsSwitch {
-                    configPath: "lock.dim.enable"
                     buttonIcon: "brightness_6"
                     text: Translation.tr('Dim wallpaper')
                     checked: Config.options?.lock?.dim?.enable ?? false
@@ -1049,7 +1019,6 @@ ContentPage {
                 }
 
                 SettingsSwitch {
-                    configPath: "lock.centerClock"
                     buttonIcon: "center_focus_weak"
                     text: Translation.tr('Center clock')
                     checked: Config.options?.lock?.centerClock ?? false
@@ -1062,7 +1031,6 @@ ContentPage {
                 }
 
                 SettingsSwitch {
-                    configPath: "lock.showLockedText"
                     buttonIcon: "info"
                     text: Translation.tr('Show "Locked" text')
                     checked: Config.options?.lock?.showLockedText ?? true
@@ -1075,7 +1043,6 @@ ContentPage {
                 }
 
                 SettingsSwitch {
-                    configPath: "lock.materialShapeChars"
                     buttonIcon: "shapes"
                     text: Translation.tr('Use varying shapes for password characters')
                     checked: Config.options?.lock?.materialShapeChars ?? false
@@ -1088,7 +1055,6 @@ ContentPage {
                 }
 
                 SettingsSwitch {
-                    configPath: "lock.enableAnimation"
                     buttonIcon: "play_circle"
                     text: Translation.tr("Animate video/GIF wallpapers")
                     checked: Config.options?.lock?.enableAnimation ?? false
@@ -1103,7 +1069,6 @@ ContentPage {
                 title: Translation.tr("Widgets")
 
                 SettingsSwitch {
-                    configPath: "lock.widgets.weather"
                     buttonIcon: "thermostat"
                     text: Translation.tr("Weather")
                     checked: Config.options?.lock?.widgets?.weather ?? true
@@ -1111,7 +1076,6 @@ ContentPage {
                 }
 
                 SettingsSwitch {
-                    configPath: "lock.widgets.media"
                     buttonIcon: "music_note"
                     text: Translation.tr("Media player")
                     checked: Config.options?.lock?.widgets?.media ?? true
@@ -1119,7 +1083,6 @@ ContentPage {
                 }
 
                 SettingsSwitch {
-                    configPath: "lock.widgets.powerButtons"
                     buttonIcon: "power_settings_new"
                     text: Translation.tr("Power buttons")
                     checked: Config.options?.lock?.widgets?.powerButtons ?? true
@@ -1127,7 +1090,6 @@ ContentPage {
                 }
 
                 SettingsSwitch {
-                    configPath: "lock.widgets.hintText"
                     buttonIcon: "touch_app"
                     text: Translation.tr("Unlock hint text")
                     checked: Config.options?.lock?.widgets?.hintText ?? true
@@ -1138,7 +1100,6 @@ ContentPage {
                 title: Translation.tr("Style: Blurred")
 
                 SettingsSwitch {
-                    configPath: "lock.blur.enable"
                     buttonIcon: "blur_on"
                     text: Translation.tr('Enable blur')
                     checked: Config.options?.lock?.blur?.enable ?? true

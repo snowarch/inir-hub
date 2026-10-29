@@ -140,10 +140,6 @@ ColumnLayout {
                 font.pixelSize: Appearance.font.pixelSize.small
                 color: Appearance.editorial.ink
             }
-            ConfigResetKey {
-                path: sliderRoot.configPath
-                label: sliderRoot.label
-            }
             StyledText {
                 text: (sliderRoot.commitOnRelease && slider.pressed ? slider.value : sliderRoot.value)
                     .toFixed(sliderRoot.stepSize >= 1 ? 0 : 2) + sliderRoot.suffix

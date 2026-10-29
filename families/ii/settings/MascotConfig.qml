@@ -63,7 +63,6 @@ ContentPage {
             }
 
             SettingsSwitch {
-                configPath: "mascot.enable"
                 buttonIcon: "pets"
                 text: Translation.tr("Show mascot illustration")
                 enabled: MascotCatalog.packAvailable
@@ -75,7 +74,6 @@ ContentPage {
             }
 
             SettingsSwitch {
-                configPath: "mascot.companion.enable"
                 buttonIcon: "waving_hand"
                 text: Translation.tr("Playful companion")
                 checked: Config.options?.mascot?.companion?.enable ?? true
@@ -109,7 +107,6 @@ ContentPage {
             }
 
             SettingsSwitch {
-                configPath: "mascot.companion.respectQuiet"
                 text: Translation.tr("Respect Do Not Disturb and quiet hours")
                 buttonIcon: "chat"
                 checked: Config.options?.mascot?.companion?.respectQuiet ?? true
@@ -117,7 +114,6 @@ ContentPage {
             }
 
             SettingsSwitch {
-                configPath: "mascot.companion.shellReactions"
                 text: Translation.tr("React to opened shell panels")
                 buttonIcon: "chat"
                 checked: Config.options?.mascot?.companion?.shellReactions ?? true
@@ -125,7 +121,6 @@ ContentPage {
             }
 
             SettingsSwitch {
-                configPath: "mascot.companion.dialogue"
                 text: Translation.tr("Speech bubbles")
                 buttonIcon: "chat"
                 checked: Config.options?.mascot?.companion?.dialogue ?? true
@@ -197,7 +192,6 @@ ContentPage {
             }
 
             SettingsSwitch {
-                configPath: "mascot.companion.placement"
                 buttonIcon: "dock"
                 text: Translation.tr("Panel-sitter mode")
                 checked: Config.options?.mascot?.companion?.placement === "panel-sitter"
@@ -209,7 +203,6 @@ ContentPage {
             }
 
             SettingsSwitch {
-                configPath: "mascot.companion.contextualPlacement"
                 buttonIcon: "my_location"
                 text: Translation.tr("Contextual placement")
                 checked: Config.options?.mascot?.companion?.contextualPlacement ?? false
@@ -221,7 +214,6 @@ ContentPage {
             }
 
             SettingsSwitch {
-                configPath: "mascot.companion.monitor"
                 buttonIcon: "monitor"
                 text: Translation.tr("Follow focused monitor")
                 checked: (Config.options?.mascot?.companion?.monitor ?? "primary") === "focused"
@@ -233,7 +225,6 @@ ContentPage {
             }
 
             SettingsSwitch {
-                configPath: "mascot.personality.commentary"
                 buttonIcon: "record_voice_over"
                 text: Translation.tr("Personal commentary")
                 checked: Config.options?.mascot?.personality?.commentary ?? true
@@ -270,7 +261,6 @@ ContentPage {
             }
 
             SettingsSwitch {
-                configPath: "mascot.personality.enabled"
                 buttonIcon: "psychology"
                 text: Translation.tr("Mood personality")
                 checked: Config.options?.mascot?.personality?.enabled ?? true
@@ -336,7 +326,6 @@ ContentPage {
                 onValueChanged: if (_ready) Config.setNestedValue("mascot.chaos.intervalMinutes", value)
             }
             SettingsSwitch {
-                configPath: "mascot.chaos.enable"
                 buttonIcon: "cyclone"
                 text: Translation.tr("Enable chaos mode")
                 checked: Config.options?.mascot?.chaos?.enable ?? false
@@ -344,7 +333,6 @@ ContentPage {
                 onCheckedChanged: Config.setNestedValue("mascot.chaos.enable", checked)
             }
             SettingsSwitch {
-                configPath: "mascot.chaos.sfx"
                 buttonIcon: "volume_up"
                 text: Translation.tr("Impact sounds")
                 checked: Config.options?.mascot?.chaos?.sfx ?? true
@@ -355,7 +343,6 @@ ContentPage {
                 }
             }
             SettingsSwitch {
-                configPath: "mascot.chaos.allowRearrange"
                 buttonIcon: "open_with"
                 text: Translation.tr("Let her rearrange widgets")
                 checked: Config.options?.mascot?.chaos?.allowRearrange ?? false
@@ -366,7 +353,6 @@ ContentPage {
                 }
             }
             SettingsSwitch {
-                configPath: "mascot.chaos.systemEvents"
                 buttonIcon: "bolt"
                 text: Translation.tr("React to system events")
                 checked: Config.options?.mascot?.chaos?.systemEvents ?? true
@@ -377,7 +363,6 @@ ContentPage {
                 }
             }
             SettingsSwitch {
-                configPath: "mascot.chaos.callingCards"
                 buttonIcon: "notifications"
                 text: Translation.tr("Calling-card notifications")
                 checked: Config.options?.mascot?.chaos?.callingCards ?? false
@@ -461,28 +446,24 @@ ContentPage {
             }
 
             SettingsSwitch {
-                configPath: "mascot.companion.edges.left"
                 buttonIcon: "keyboard_arrow_left"
                 text: Translation.tr("Left")
                 checked: Config.options?.mascot?.companion?.edges?.left ?? true
                 onCheckedChanged: Config.setNestedValue("mascot.companion.edges.left", checked)
             }
             SettingsSwitch {
-                configPath: "mascot.companion.edges.right"
                 buttonIcon: "keyboard_arrow_right"
                 text: Translation.tr("Right")
                 checked: Config.options?.mascot?.companion?.edges?.right ?? true
                 onCheckedChanged: Config.setNestedValue("mascot.companion.edges.right", checked)
             }
             SettingsSwitch {
-                configPath: "mascot.companion.edges.top"
                 buttonIcon: "keyboard_arrow_up"
                 text: Translation.tr("Top")
                 checked: Config.options?.mascot?.companion?.edges?.top ?? true
                 onCheckedChanged: Config.setNestedValue("mascot.companion.edges.top", checked)
             }
             SettingsSwitch {
-                configPath: "mascot.companion.edges.bottom"
                 buttonIcon: "keyboard_arrow_down"
                 text: Translation.tr("Bottom")
                 checked: Config.options?.mascot?.companion?.edges?.bottom ?? true
@@ -561,7 +542,6 @@ ContentPage {
             }
 
             SettingsSwitch {
-                configPath: "mascot.companion.musicRequireArtist"
                 buttonIcon: "artist"
                 text: Translation.tr("Only react to real music")
                 checked: Config.options?.mascot?.companion?.musicRequireArtist ?? true
@@ -581,7 +561,6 @@ ContentPage {
                     spacing: 4
 
                     SettingsSwitch {
-                        configPath: "mascot.companion.events." + eventRow.modelData.key
                         Layout.fillWidth: true
                         buttonIcon: eventRow.modelData.icon
                         text: eventRow.modelData.label
@@ -677,7 +656,6 @@ ContentPage {
             }
 
             SettingsSwitch {
-                configPath: "mascot.surfaces.emptyStates"
                 buttonIcon: "inbox"
                 text: Translation.tr("Empty states")
                 checked: Config.options?.mascot?.surfaces?.emptyStates ?? true
@@ -685,56 +663,48 @@ ContentPage {
                 StyledToolTip { text: Translation.tr("Notifications, clipboard, todo, media, calendar, wallpapers, search results") }
             }
             SettingsSwitch {
-                configPath: "mascot.surfaces.about"
                 buttonIcon: "info"
                 text: Translation.tr("About pages")
                 checked: Config.options?.mascot?.surfaces?.about ?? true
                 onCheckedChanged: Config.setNestedValue("mascot.surfaces.about", checked)
             }
             SettingsSwitch {
-                configPath: "mascot.surfaces.session"
                 buttonIcon: "power_settings_new"
                 text: Translation.tr("Session screen")
                 checked: Config.options?.mascot?.surfaces?.session ?? true
                 onCheckedChanged: Config.setNestedValue("mascot.surfaces.session", checked)
             }
             SettingsSwitch {
-                configPath: "mascot.surfaces.aiChat"
                 buttonIcon: "neurology"
                 text: Translation.tr("AI chat")
                 checked: Config.options?.mascot?.surfaces?.aiChat ?? true
                 onCheckedChanged: Config.setNestedValue("mascot.surfaces.aiChat", checked)
             }
             SettingsSwitch {
-                configPath: "mascot.surfaces.dashboard"
                 buttonIcon: "dashboard"
                 text: Translation.tr("Dashboard")
                 checked: Config.options?.mascot?.surfaces?.dashboard ?? true
                 onCheckedChanged: Config.setNestedValue("mascot.surfaces.dashboard", checked)
             }
             SettingsSwitch {
-                configPath: "mascot.surfaces.cheatsheet"
                 buttonIcon: "keyboard"
                 text: Translation.tr("Cheatsheet")
                 checked: Config.options?.mascot?.surfaces?.cheatsheet ?? true
                 onCheckedChanged: Config.setNestedValue("mascot.surfaces.cheatsheet", checked)
             }
             SettingsSwitch {
-                configPath: "mascot.surfaces.bootGreeting"
                 buttonIcon: "wb_sunny"
                 text: Translation.tr("Boot greeting")
                 checked: Config.options?.mascot?.surfaces?.bootGreeting ?? true
                 onCheckedChanged: Config.setNestedValue("mascot.surfaces.bootGreeting", checked)
             }
             SettingsSwitch {
-                configPath: "mascot.surfaces.updates"
                 buttonIcon: "system_update"
                 text: Translation.tr("Update overlay")
                 checked: Config.options?.mascot?.surfaces?.updates ?? true
                 onCheckedChanged: Config.setNestedValue("mascot.surfaces.updates", checked)
             }
             SettingsSwitch {
-                configPath: "mascot.surfaces.dialogs"
                 buttonIcon: "warning"
                 text: Translation.tr("Dialogs")
                 checked: Config.options?.mascot?.surfaces?.dialogs ?? true

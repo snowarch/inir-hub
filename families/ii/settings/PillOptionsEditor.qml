@@ -240,7 +240,6 @@ ColumnLayout {
         ConfigRow {
             uniform: true
             SettingsSwitch {
-                configPath: "bar.pill.barMode"
                 buttonIcon: "expand_content"
                 text: Translation.tr("Persistent bar mode")
                 checked: Config.options?.bar?.pill?.barMode ?? false
@@ -248,7 +247,6 @@ ColumnLayout {
                 StyledToolTip { text: Translation.tr("Keep the expanded Ricelin row visible without hovering.") }
             }
             SettingsSwitch {
-                configPath: "bar.pill.compactAnnounces"
                 buttonIcon: "unfold_less"
                 text: Translation.tr("Compact feedback")
                 enabled: (Config.options?.bar?.pill?.toasts ?? true) || (Config.options?.bar?.pill?.osd ?? true)
@@ -259,7 +257,6 @@ ColumnLayout {
         }
 
         SettingsSwitch {
-            configPath: "bar.pill.floatOverWindows"
             buttonIcon: "picture_in_picture"
             text: Translation.tr("Float over windows")
             enabled: !(Config.options?.bar?.autoHide?.enable ?? false)
@@ -311,14 +308,12 @@ ColumnLayout {
         ConfigRow {
             uniform: true
             SettingsSwitch {
-                configPath: "bar.pill.toasts"
                 buttonIcon: "notifications"
                 text: Translation.tr("Notifications in Pill")
                 checked: Config.options?.bar?.pill?.toasts ?? true
                 onCheckedChanged: Config.setNestedValue("bar.pill.toasts", checked)
             }
             SettingsSwitch {
-                configPath: "bar.pill.osd"
                 buttonIcon: "page_info"
                 text: Translation.tr("OSD in Pill")
                 checked: Config.options?.bar?.pill?.osd ?? true
@@ -446,7 +441,6 @@ ColumnLayout {
                 Repeater {
                     model: root.surfaceDescriptors.slice(index * 2, index * 2 + 2)
                     SettingsSwitch {
-                        configPath: "bar.pill.surfaces." + modelData.key
                         required property var modelData
                         buttonIcon: modelData.icon
                         text: modelData.label
@@ -473,7 +467,6 @@ ColumnLayout {
                 Repeater {
                     model: root.moduleDescriptors.slice(index * 2, index * 2 + 2)
                     SettingsSwitch {
-                        configPath: "bar.pill.modules." + modelData.key
                         required property var modelData
                         buttonIcon: modelData.icon
                         text: modelData.label
@@ -515,14 +508,12 @@ ColumnLayout {
         ConfigRow {
             uniform: true
             SettingsSwitch {
-                configPath: "bar.pill.showGlyphs"
                 buttonIcon: "translate"
                 text: Translation.tr("Kanji glyphs")
                 checked: Config.options?.bar?.pill?.showGlyphs ?? true
                 onCheckedChanged: Config.setNestedValue("bar.pill.showGlyphs", checked)
             }
             SettingsSwitch {
-                configPath: "bar.pill.clockSeconds"
                 buttonIcon: "schedule"
                 text: Translation.tr("Clock seconds")
                 checked: Config.options?.bar?.pill?.clockSeconds ?? false
@@ -530,7 +521,6 @@ ColumnLayout {
             }
         }
         SettingsSwitch {
-            configPath: "bar.pill.time12h"
             buttonIcon: "update"
             text: Translation.tr("12-hour time")
             checked: Config.options?.bar?.pill?.time12h ?? false
@@ -648,7 +638,6 @@ ColumnLayout {
         ConfigRow {
             uniform: true
             SettingsSwitch {
-                configPath: "bar.pill.soul.enable"
                 buttonIcon: "motion_photos_on"
                 text: Translation.tr("Soul bead")
                 checked: Config.options?.bar?.pill?.soul?.enable ?? true

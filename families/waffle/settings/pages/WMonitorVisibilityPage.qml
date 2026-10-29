@@ -589,7 +589,6 @@ WSettingsPage {
         }
 
         WSettingsDropdown {
-            configPath: "display.primaryMonitor"
             label: Translation.tr("Primary monitor")
             icon: "desktop"
             description: Translation.tr("Fallback output for popups when the focused monitor is unknown")
@@ -616,7 +615,6 @@ WSettingsPage {
         icon: "multitasking"
 
         WSettingsSwitch {
-            configPath: "overview.activeScreenOnly"
             label: Translation.tr("Active screen only")
             icon: "desktop"
             description: Translation.tr("Open the overview on the monitor where it was invoked")

@@ -106,7 +106,6 @@ ContentPage {
                 }
 
                 SettingsSwitch {
-                    configPath: "sidebar.cardStyle"
                     buttonIcon: "branding_watermark"
                     text: Translation.tr("Use Card style")
                     enabled: Appearance.globalStyle === "material"
@@ -126,7 +125,6 @@ ContentPage {
                 }
 
                 SettingsSwitch {
-                    configPath: "sidebar.collapseEmptyNotifications"
                     buttonIcon: "unfold_less"
                     text: Translation.tr("Collapse notifications when empty")
                     checked: Config.options.sidebar?.collapseEmptyNotifications ?? false
@@ -137,7 +135,6 @@ ContentPage {
                 }
 
                 SettingsSwitch {
-                    configPath: "sidebar.collapseWidgetsTab"
                     buttonIcon: "fit_screen"
                     text: Translation.tr("Fit left sidebar to widgets")
                     checked: Config.options.sidebar?.collapseWidgetsTab ?? false
@@ -160,7 +157,6 @@ ContentPage {
             }
 
             SettingsSwitch {
-                configPath: "sidebar.instantOpen"
                 buttonIcon: "animation"
                 text: Translation.tr("Instant sidebar opening")
                 checked: Config.options.sidebar?.instantOpen ?? false
@@ -215,7 +211,6 @@ ContentPage {
             }
 
             SettingsSwitch {
-                configPath: "sidebar.openFolderOnDownload"
                 buttonIcon: "folder_open"
                 text: Translation.tr("Open folder after wallpaper download")
                 checked: Config.options.sidebar?.openFolderOnDownload ?? false
@@ -256,7 +251,6 @@ ContentPage {
                 tooltip: Translation.tr("Choose which tabs appear in the left sidebar")
 
                 SettingsSwitch {
-                    configPath: "sidebar.widgets.enable"
                     buttonIcon: "widgets"
                     text: Translation.tr("Widgets")
                     checked: Config.options.sidebar?.widgets?.enable ?? true
@@ -267,7 +261,6 @@ ContentPage {
                 }
 
                 SettingsSwitch {
-                    configPath: "policies.ai"
                     buttonIcon: "neurology"
                     text: Translation.tr("AI Chat")
                     readonly property int currentAiPolicy: Config.options?.policies?.ai ?? 0
@@ -283,7 +276,6 @@ ContentPage {
                 }
 
                 SettingsSwitch {
-                    configPath: "sidebar.translator.enable"
                     buttonIcon: "translate"
                     text: Translation.tr("Translator")
                     checked: Config.options.sidebar?.translator?.enable ?? false
@@ -294,7 +286,6 @@ ContentPage {
                 }
 
                 SettingsSwitch {
-                    configPath: "policies.weeb"
                     buttonIcon: "bookmark_heart"
                     text: Translation.tr("Anime")
                     readonly property int currentWeebPolicy: Config.options?.policies?.weeb ?? 0
@@ -310,7 +301,6 @@ ContentPage {
                 }
 
                 SettingsSwitch {
-                    configPath: "sidebar.wallhaven.enable"
                     buttonIcon: "image"
                     text: Translation.tr("Wallhaven")
                     checked: Config.options.sidebar?.wallhaven?.enable ?? true
@@ -321,7 +311,6 @@ ContentPage {
                 }
 
                 SettingsSwitch {
-                    configPath: "sidebar.news.enable"
                     buttonIcon: "newspaper"
                     text: Translation.tr("News")
                     checked: Config.options.sidebar?.news?.enable ?? true
@@ -332,7 +321,6 @@ ContentPage {
                 }
 
                 SettingsSwitch {
-                    configPath: "sidebar.animeSchedule.enable"
                     buttonIcon: "calendar_month"
                     text: Translation.tr("Anime Schedule")
                     checked: Config.options.sidebar?.animeSchedule?.enable ?? false
@@ -343,7 +331,6 @@ ContentPage {
                 }
 
                 SettingsSwitch {
-                    configPath: "sidebar.tools.enable"
                     buttonIcon: "build"
                     text: Translation.tr("Tools")
                     checked: Config.options.sidebar?.tools?.enable ?? false
@@ -354,7 +341,6 @@ ContentPage {
                 }
 
                 SettingsSwitch {
-                    configPath: "sidebar.software.enable"
                     buttonIcon: "store"
                     text: Translation.tr("Software")
                     checked: Config.options.sidebar?.software?.enable ?? false
@@ -365,7 +351,6 @@ ContentPage {
                 }
 
                 SettingsSwitch {
-                    configPath: "sidebar.ytmusic.enable"
                     buttonIcon: "library_music"
                     text: Translation.tr("YT Music")
                     checked: Config.options.sidebar?.ytmusic?.enable ?? false
@@ -377,7 +362,6 @@ ContentPage {
 
                 // Only where the runtime can host Chromium (SidebarLeftContent.webAppsAvailable)
                 SettingsSwitch {
-                    configPath: "sidebar.plugins.enable"
                     visible: SystemInfo.runtimeHas(["webengine"])
                     buttonIcon: "extension"
                     text: Translation.tr("Web Apps")
@@ -691,7 +675,6 @@ ContentPage {
                 }
 
                 SettingsSwitch {
-                    configPath: "sidebar.screenTime.enable"
                     buttonIcon: "av_timer"
                     text: Translation.tr("Screen Time")
                     Component.onCompleted: checked = rightSidebarWidgets.isEnabled("screentime")
@@ -741,7 +724,6 @@ ContentPage {
                 title: Translation.tr("Sliders")
 
                 SettingsSwitch {
-                    configPath: "sidebar.quickSliders.enable"
                     buttonIcon: "check"
                     text: Translation.tr("Enable")
                     checked: Config.options.sidebar.quickSliders.enable
@@ -754,7 +736,6 @@ ContentPage {
                 }
 
                 SettingsSwitch {
-                    configPath: "sidebar.quickSliders.showBrightness"
                     buttonIcon: "brightness_6"
                     text: Translation.tr("Brightness")
                     enabled: Config.options.sidebar.quickSliders.enable
@@ -768,7 +749,6 @@ ContentPage {
                 }
 
                 SettingsSwitch {
-                    configPath: "sidebar.quickSliders.showVolume"
                     buttonIcon: "volume_up"
                     text: Translation.tr("Volume")
                     enabled: Config.options.sidebar.quickSliders.enable
@@ -782,7 +762,6 @@ ContentPage {
                 }
 
                 SettingsSwitch {
-                    configPath: "sidebar.quickSliders.showMic"
                     buttonIcon: "mic"
                     text: Translation.tr("Microphone")
                     enabled: Config.options.sidebar.quickSliders.enable
@@ -817,7 +796,6 @@ ContentPage {
                 visible: Config.options.sidebar?.ytmusic?.enable ?? false
 
                 SettingsSwitch {
-                    configPath: "sidebar.ytmusic.upNextNotifications"
                     buttonIcon: "music_note"
                     text: Translation.tr("Up Next notifications")
                     checked: Config.options.sidebar?.ytmusic?.upNextNotifications ?? true
@@ -828,7 +806,6 @@ ContentPage {
                 }
 
                 SettingsSwitch {
-                    configPath: "sidebar.ytmusic.suppressUpNextInFullscreen"
                     buttonIcon: "sports_esports"
                     text: Translation.tr("Mute while fullscreen or GameMode")
                     enabled: Config.options.sidebar?.ytmusic?.upNextNotifications ?? true
@@ -854,7 +831,6 @@ ContentPage {
                 }
 
                 SettingsSwitch {
-                    configPath: "sidebar.ytmusic.normalizeVolume"
                     buttonIcon: "graphic_eq"
                     text: Translation.tr("Normalize loudness")
                     checked: Config.options.sidebar?.ytmusic?.normalizeVolume ?? true
@@ -871,7 +847,6 @@ ContentPage {
                 visible: Config.options.sidebar?.animeSchedule?.enable ?? false
 
                 SettingsSwitch {
-                    configPath: "sidebar.animeSchedule.showNsfw"
                     buttonIcon: "visibility_off"
                     text: Translation.tr("Show NSFW")
                     checked: Config.options.sidebar?.animeSchedule?.showNsfw ?? false
@@ -1058,7 +1033,6 @@ ContentPage {
                 ConfigRow {
                     uniform: true
                     SettingsSwitch {
-                        configPath: "sidebar.edgeOpen.enable"
                         buttonIcon: "dock_to_left"
                         text: Translation.tr("Hover screen edges")
                         checked: Config.options?.sidebar?.edgeOpen?.enable ?? false
@@ -1086,7 +1060,6 @@ ContentPage {
                 ConfigRow {
                     uniform: true
                     SettingsSwitch {
-                        configPath: "sidebar.cornerOpen.enable"
                         buttonIcon: "check"
                         text: Translation.tr("Enable")
                         checked: Config.options.sidebar.cornerOpen.enable
@@ -1099,7 +1072,6 @@ ContentPage {
                     }
                 }
                 SettingsSwitch {
-                    configPath: "sidebar.cornerOpen.clickless"
                     buttonIcon: "highlight_mouse_cursor"
                     text: Translation.tr("Hover to trigger")
                     checked: Config.options.sidebar.cornerOpen.clickless
@@ -1113,7 +1085,6 @@ ContentPage {
                 }
                 ConfigRow {
                     SettingsSwitch {
-                        configPath: "sidebar.cornerOpen.clicklessCornerEnd"
                         enabled: !Config.options.sidebar.cornerOpen.clickless
                         text: Translation.tr("Force hover open at absolute corner")
                         checked: Config.options.sidebar.cornerOpen.clicklessCornerEnd
@@ -1145,7 +1116,6 @@ ContentPage {
                 ConfigRow {
                     uniform: true
                     SettingsSwitch {
-                        configPath: "sidebar.cornerOpen.bottom"
                         buttonIcon: "vertical_align_bottom"
                         text: Translation.tr("Place at bottom")
                         checked: Config.options.sidebar.cornerOpen.bottom
@@ -1158,7 +1128,6 @@ ContentPage {
                         }
                     }
                     SettingsSwitch {
-                        configPath: "sidebar.cornerOpen.valueScroll"
                         buttonIcon: "unfold_more_double"
                         text: Translation.tr("Value scroll")
                         checked: Config.options.sidebar.cornerOpen.valueScroll
@@ -1172,7 +1141,6 @@ ContentPage {
                     }
                 }
                 SettingsSwitch {
-                    configPath: "sidebar.cornerOpen.visualize"
                     buttonIcon: "visibility"
                     text: Translation.tr("Visualize region")
                     checked: Config.options.sidebar.cornerOpen.visualize

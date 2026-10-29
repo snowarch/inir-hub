@@ -77,7 +77,6 @@ WSettingsPage {
         }
         
         WSettingsSwitch {
-            configPath: "waffles.altSwitcher.quickSwitch"
             label: Translation.tr("Quick switch")
             icon: "flash-on"
             description: Translation.tr("Single Alt+Tab switches instantly without UI")
@@ -86,7 +85,6 @@ WSettingsPage {
         }
 
         WSettingsSwitch {
-            configPath: "waffles.altSwitcher.noVisualUi"
             label: Translation.tr("No visual UI")
             icon: "eye-off"
             description: Translation.tr("Switch windows without showing overlay")
@@ -106,7 +104,6 @@ WSettingsPage {
         }
         
         WSettingsSwitch {
-            configPath: "waffles.altSwitcher.useMostRecentFirst"
             label: Translation.tr("Most recent first")
             icon: "arrow-counterclockwise"
             description: Translation.tr("Order windows by most recently used")
@@ -115,7 +112,6 @@ WSettingsPage {
         }
         
         WSettingsSwitch {
-            configPath: "waffles.altSwitcher.autoHide"
             label: Translation.tr("Auto-hide")
             icon: "arrow-clockwise"
             description: Translation.tr("Switches to the pick after the delay, even with Alt still held")
@@ -124,7 +120,6 @@ WSettingsPage {
         }
         
         WSettingsSpinBox {
-            configPath: "waffles.altSwitcher.autoHideDelayMs"
             visible: Config.options?.waffles?.altSwitcher?.autoHide ?? true
             label: Translation.tr("Auto-hide delay")
             icon: "arrow-clockwise"
@@ -135,7 +130,6 @@ WSettingsPage {
         }
 
         WSettingsSwitch {
-            configPath: "waffles.altSwitcher.closeOnFocus"
             label: Translation.tr("Close on window focus")
             icon: "dismiss"
             checked: Config.options?.waffles?.altSwitcher?.closeOnFocus ?? true
@@ -143,7 +137,6 @@ WSettingsPage {
         }
 
         WSettingsSpinBox {
-            configPath: "waffles.altSwitcher.thumbnailWidth"
             visible: (Config.options?.waffles?.altSwitcher?.preset ?? "thumbnails") === "thumbnails"
             label: Translation.tr("Thumbnail width")
             icon: "image-copy"
@@ -154,7 +147,6 @@ WSettingsPage {
         }
 
         WSettingsSpinBox {
-            configPath: "waffles.altSwitcher.thumbnailHeight"
             visible: (Config.options?.waffles?.altSwitcher?.preset ?? "thumbnails") === "thumbnails"
             label: Translation.tr("Thumbnail height")
             icon: "image-copy"
@@ -165,7 +157,6 @@ WSettingsPage {
         }
 
         WSettingsSpinBox {
-            configPath: "waffles.altSwitcher.scrimOpacity"
             label: Translation.tr("Background dim")
             icon: "dark-theme"
             description: Translation.tr("Scrim opacity behind the switcher")
@@ -176,7 +167,6 @@ WSettingsPage {
         }
 
         WSettingsSwitch {
-            configPath: "waffles.altSwitcher.showOverviewWhileSwitching"
             label: Translation.tr("Show Niri overview while switching")
             icon: "open"
             description: Translation.tr("Open compositor overview alongside the switcher")
@@ -198,7 +188,6 @@ WSettingsPage {
         }
         
         WSettingsDropdown {
-            configPath: "waffles.taskView.mode"
             label: Translation.tr("View mode")
             icon: "task-view-dark"
             description: Translation.tr("Carousel shows desktops equally. Centered highlights the active one.")
@@ -211,7 +200,6 @@ WSettingsPage {
         }
         
         WSettingsSwitch {
-            configPath: "waffles.taskView.closeOnSelect"
             label: Translation.tr("Close on window select")
             icon: "dismiss"
             description: Translation.tr("Exit Task View when clicking a window")
@@ -232,7 +220,6 @@ WSettingsPage {
         icon: "settings"
         
         WSettingsSwitch {
-            configPath: "waffles.behavior.allowMultiplePanels"
             label: Translation.tr("Allow multiple panels open")
             icon: "panel-left-expand"
             description: Translation.tr("Keep start menu open when opening action center")
@@ -241,7 +228,6 @@ WSettingsPage {
         }
         
         WSettingsSwitch {
-            configPath: "waffles.tweaks.smootherMenuAnimations"
             label: Translation.tr("Smoother menu animations")
             icon: "wand"
             description: Translation.tr("Use smoother closing animations for popups")
@@ -250,7 +236,6 @@ WSettingsPage {
         }
 
         WSettingsSwitch {
-            configPath: "waffles.tweaks.switchHandlePositionFix"
             label: Translation.tr("Switch handle position fix")
             icon: "settings"
             description: Translation.tr("Fix toggle switch handle alignment")
@@ -278,7 +263,6 @@ WSettingsPage {
         }
 
         WSettingsDropdown {
-            configPath: "waffles.startMenu.sizePreset"
             label: Translation.tr("Size preset")
             icon: "options"
             description: Translation.tr("Choose the start menu size")
@@ -294,7 +278,6 @@ WSettingsPage {
         }
 
         WSettingsSpinBox {
-            configPath: "waffles.startMenu.scale"
             label: Translation.tr("Text scale")
             icon: "auto"
             description: Translation.tr("Scale text in the start menu")
@@ -310,7 +293,6 @@ WSettingsPage {
         icon: "arrow-sync"
 
         WSettingsSwitch {
-            configPath: "familyTransitionAnimation"
             label: Translation.tr("Animated transition")
             icon: "wand"
             description: Translation.tr("Smooth animated overlay when switching between panel families")
@@ -332,7 +314,6 @@ WSettingsPage {
         }
         
         WSettingsSwitch {
-            configPath: "waffles.widgetsPanel.showDateTime"
             label: Translation.tr("Show date & time")
             icon: "schedule"
             description: Translation.tr("Display date and time widget")
@@ -341,7 +322,6 @@ WSettingsPage {
         }
         
         WSettingsSwitch {
-            configPath: "waffles.widgetsPanel.showWeather"
             label: Translation.tr("Show weather")
             icon: "weather-sunny"
             description: Translation.tr("Display weather conditions widget")
@@ -350,7 +330,6 @@ WSettingsPage {
         }
 
         WSettingsSwitch {
-            configPath: "bar.weather.hideLocation"
             label: Translation.tr("Hide weather location")
             icon: "eye-off"
             description: Translation.tr("Hide the city/location name in the weather widget and taskbar button")
@@ -359,7 +338,6 @@ WSettingsPage {
         }
         
         WSettingsSwitch {
-            configPath: "waffles.widgetsPanel.showSystem"
             label: Translation.tr("Show system info")
             icon: "pulse"
             description: Translation.tr("Display CPU, RAM, and disk usage")
@@ -368,7 +346,6 @@ WSettingsPage {
         }
         
         WSettingsSwitch {
-            configPath: "waffles.widgetsPanel.showMedia"
             label: Translation.tr("Show media controls")
             icon: "music-note-2"
             description: Translation.tr("Display now playing and media controls")
@@ -377,7 +354,6 @@ WSettingsPage {
         }
         
         WSettingsSwitch {
-            configPath: "waffles.widgetsPanel.showCustom"
             label: Translation.tr("Show your widgets")
             icon: "apps"
             description: Translation.tr("Cards from widgets you installed, from the Hub or your own")
@@ -386,7 +362,6 @@ WSettingsPage {
         }
 
         WSettingsSwitch {
-            configPath: "waffles.widgetsPanel.showQuickActions"
             label: Translation.tr("Show quick actions")
             icon: "flash-on"
             description: Translation.tr("Display quick action buttons")
@@ -395,7 +370,6 @@ WSettingsPage {
         }
 
         WSettingsSwitch {
-            configPath: "waffles.widgetsPanel.showFiles"
             visible: Config.options?.waffles?.widgetsPanel?.showQuickActions ?? true
             label: Translation.tr("Files shortcut")
             icon: "folder"
@@ -404,7 +378,6 @@ WSettingsPage {
         }
 
         WSettingsSwitch {
-            configPath: "waffles.widgetsPanel.showTerminal"
             visible: Config.options?.waffles?.widgetsPanel?.showQuickActions ?? true
             label: Translation.tr("Terminal shortcut")
             icon: "terminal"
@@ -413,7 +386,6 @@ WSettingsPage {
         }
 
         WSettingsSwitch {
-            configPath: "waffles.widgetsPanel.showSettings"
             visible: Config.options?.waffles?.widgetsPanel?.showQuickActions ?? true
             label: Translation.tr("Settings shortcut")
             icon: "settings"
@@ -422,7 +394,6 @@ WSettingsPage {
         }
 
         WSettingsSwitch {
-            configPath: "waffles.widgetsPanel.showWallpaper"
             visible: Config.options?.waffles?.widgetsPanel?.showQuickActions ?? true
             label: Translation.tr("Wallpaper shortcut")
             icon: "image"
@@ -431,7 +402,6 @@ WSettingsPage {
         }
 
         WSettingsSwitch {
-            configPath: "waffles.widgetsPanel.showScreenshot"
             visible: Config.options?.waffles?.widgetsPanel?.showQuickActions ?? true
             label: Translation.tr("Screenshot shortcut")
             icon: "screenshot"
@@ -440,7 +410,6 @@ WSettingsPage {
         }
 
         WSettingsSwitch {
-            configPath: "waffles.widgetsPanel.showScreenRecord"
             visible: Config.options?.waffles?.widgetsPanel?.showQuickActions ?? true
             label: Translation.tr("Screen Record shortcut")
             icon: "record"
@@ -449,7 +418,6 @@ WSettingsPage {
         }
 
         WSettingsSwitch {
-            configPath: "waffles.widgetsPanel.showSession"
             visible: Config.options?.waffles?.widgetsPanel?.showQuickActions ?? true
             label: Translation.tr("Session shortcut")
             icon: "power"
@@ -458,7 +426,6 @@ WSettingsPage {
         }
 
         WSettingsSwitch {
-            configPath: "waffles.widgetsPanel.showColorScheme"
             label: Translation.tr("Color Scheme selector")
             icon: "color"
             checked: Config.options?.waffles?.widgetsPanel?.showColorScheme ?? true
@@ -477,7 +444,6 @@ WSettingsPage {
         icon: "weather-sunny"
         
         WSettingsTextField {
-            configPath: "bar.weather.city"
             label: Translation.tr("City")
             icon: "globe-search"
             description: Translation.tr("Leave empty to auto-detect from IP")
@@ -487,7 +453,6 @@ WSettingsPage {
         }
         
         WSettingsTextField {
-            configPath: "bar.weather.manualLat"
             label: Translation.tr("Latitude")
             icon: "globe-search"
             description: Translation.tr("Manual latitude (overrides city). e.g. -34.6037")
@@ -503,7 +468,6 @@ WSettingsPage {
         }
         
         WSettingsTextField {
-            configPath: "bar.weather.manualLon"
             label: Translation.tr("Longitude")
             icon: "globe-search"
             description: Translation.tr("Manual longitude (overrides city). e.g. -58.3816")
@@ -519,7 +483,6 @@ WSettingsPage {
         }
         
         WSettingsSwitch {
-            configPath: "bar.weather.enableGPS"
             label: Translation.tr("Use GPS location")
             icon: "globe-search"
             description: Translation.tr("Uses GPS when no manual location is set (requires geoclue)")
@@ -536,7 +499,6 @@ WSettingsPage {
         }
         
         WSettingsSwitch {
-            configPath: "bar.weather.useUSCS"
             label: Translation.tr("Use Fahrenheit")
             icon: "weather-sunny"
             description: Translation.tr("Display temperature in °F instead of °C")
@@ -545,7 +507,6 @@ WSettingsPage {
         }
         
         WSettingsSpinBox {
-            configPath: "bar.weather.fetchInterval"
             label: Translation.tr("Update interval")
             icon: "arrow-sync"
             description: Translation.tr("How often to refresh weather data")
@@ -569,7 +530,6 @@ WSettingsPage {
         }
         
         WSettingsSwitch {
-            configPath: "waffles.calendar.force2CharDayOfWeek"
             label: Translation.tr("Force 2-char day names")
             icon: "news"
             description: Translation.tr("Use Mo, Tu, We instead of Mon, Tue, Wed")

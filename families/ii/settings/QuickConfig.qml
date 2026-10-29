@@ -478,7 +478,6 @@ ContentPage {
             // ── Options strip ──
             ConfigRow {
                 SettingsSwitch {
-                    configPath: "appearance.transparency.enable"
                     buttonIcon: "ev_shadow"
                     text: Translation.tr("Transparency")
                     checked: Config.options?.appearance?.transparency?.enable ?? false
@@ -1857,7 +1856,6 @@ ContentPage {
 
         SettingsGroup {
             SettingsSwitch {
-                configPath: "gameMode.autoDetect"
                 buttonIcon: "fullscreen"
                 text: Translation.tr("Auto-detect fullscreen")
                 checked: Config.options?.gameMode?.autoDetect ?? true
@@ -1870,7 +1868,6 @@ ContentPage {
             }
 
             SettingsSwitch {
-                configPath: "gameMode.disableAnimations"
                 buttonIcon: "animation"
                 text: Translation.tr("Disable animations")
                 checked: Config.options?.gameMode?.disableAnimations ?? true
@@ -1883,7 +1880,6 @@ ContentPage {
             }
 
             SettingsSwitch {
-                configPath: "gameMode.disableEffects"
                 buttonIcon: "blur_on"
                 text: Translation.tr("Disable effects")
                 checked: Config.options?.gameMode?.disableEffects ?? true
@@ -1896,7 +1892,6 @@ ContentPage {
             }
 
             SettingsSwitch {
-                configPath: "gameMode.disableVisualizers"
                 buttonIcon: "graphic_eq"
                 text: Translation.tr("Disable audio visualizers")
                 checked: Config.options?.gameMode?.disableVisualizers ?? true
@@ -1909,7 +1904,6 @@ ContentPage {
             }
 
             SettingsSwitch {
-                configPath: "gameMode.disableNiriAnimations"
                 buttonIcon: "desktop_windows"
                 text: Translation.tr("Disable Niri animations")
                 checked: Config.options?.gameMode?.disableNiriAnimations ?? true
@@ -1922,7 +1916,6 @@ ContentPage {
             }
 
             SettingsSwitch {
-                configPath: "gameMode.disableDiscoverOverlay"
                 visible: GameMode.discoverOverlayInstalled
                 buttonIcon: "visibility_off"
                 text: Translation.tr("Disable Discover overlay")
@@ -1936,7 +1929,6 @@ ContentPage {
             }
 
             SettingsSwitch {
-                configPath: "gameMode.minimalMode"
                 buttonIcon: "visibility_off"
                 text: Translation.tr("Minimal mode")
                 checked: Config.options?.gameMode?.minimalMode ?? true
@@ -1949,7 +1941,6 @@ ContentPage {
             }
 
             SettingsSwitch {
-                configPath: "gameMode.suppressNotifications"
                 buttonIcon: "notifications_off"
                 text: Translation.tr("Suppress notifications")
                 checked: Config.options?.gameMode?.suppressNotifications ?? true
@@ -2548,7 +2539,6 @@ ContentPage {
             }
 
             SettingsSwitch {
-                configPath: "reloadToasts.enable"
                 buttonIcon: "notifications_active"
                 text: Translation.tr("Show reload toasts")
                 checked: Config.options?.reloadToasts?.enable ?? true
@@ -2559,7 +2549,6 @@ ContentPage {
             }
 
             SettingsSwitch {
-                configPath: "gameMode.disableReloadToasts"
                 buttonIcon: "sports_esports"
                 text: Translation.tr("Hide reload toasts in Game Mode")
                 checked: Config.options?.gameMode?.disableReloadToasts ?? true
@@ -2572,7 +2561,6 @@ ContentPage {
             }
 
             SettingsSwitch {
-                configPath: "closeConfirm.enabled"
                 visible: CompositorService.isNiri
                 buttonIcon: "help"
                 text: Translation.tr("Confirm before closing windows")

@@ -111,22 +111,6 @@ ApplicationWindow {
     // Global settings search
     property string settingsSearchText: ""
     property var settingsSearchResults: []
-    // The "Changed" list: every row whose setting differs from a fresh install (support's first question too).
-    property bool showingChanged: false
-    readonly property var changedSettings: ConfigFactory.ready && Config.revision >= 0 ? root.changedResults() : []
-    onChangedSettingsChanged: if (root.showingChanged) root.recomputeSettingsSearchResults()
-
-    function changedResults(): var {
-        const changed = new Set(ConfigFactory.changed())
-        const activeFamily = Config.options?.panelFamily ?? "ii"
-        const seen = {}
-        return SettingsPageRegistry.searchIndex().filter(entry => {
-            if (!entry.configPath || !changed.has(entry.configPath) || seen[entry.configPath]) return false
-            if (!SettingsPageRegistry.searchable(entry.pageIndex, activeFamily)) return false
-            seen[entry.configPath] = true
-            return true
-        })
-    }
 
     // Search navigation focus state
     property var searchTargetControl: null
@@ -135,10 +119,9 @@ ApplicationWindow {
     function recomputeSettingsSearchResults() {
         var q = String(settingsSearchText || "").toLowerCase().trim();
         if (!q.length) {
-            settingsSearchResults = root.showingChanged ? root.changedSettings : [];
+            settingsSearchResults = [];
             return;
         }
-        root.showingChanged = false;
 
         var results = [];
 
@@ -207,7 +190,6 @@ ApplicationWindow {
 
     function openSearchResult(entry) {
         // Clear search immediately
-        showingChanged = false;
         settingsSearchText = "";
         if (settingsSearchField) {
             settingsSearchField.text = "";
@@ -385,7 +367,6 @@ ApplicationWindow {
     title: "Settings — iNiR"
 
     Component.onCompleted: {
-        ConfigFactory.load()
         Quickshell.watchFiles = false
         Config.readWriteDelay = 0 // Settings app always only sets one var at a time so delay isn't needed
 
@@ -822,41 +803,6 @@ ApplicationWindow {
                                     event.accepted = true;
                                 }
                             }
-                        }
-                    }
-
-                    RippleButton {
-                        id: changedChip
-                        Layout.preferredHeight: 28
-                        Layout.alignment: Qt.AlignVCenter
-                        implicitWidth: changedChipRow.implicitWidth + 20
-                        buttonRadius: Appearance.rounding.full
-                        visible: root.settingsSearchText.length === 0 && root.changedSettings.length > 0
-                        toggled: root.showingChanged
-                        onClicked: {
-                            root.showingChanged = !root.showingChanged;
-                            root.recomputeSettingsSearchResults();
-                        }
-
-                        contentItem: RowLayout {
-                            id: changedChipRow
-                            anchors.centerIn: parent
-                            spacing: 4
-                            MaterialSymbol {
-                                text: "restart_alt"
-                                iconSize: 16
-                                color: changedChip.toggled ? Appearance.colors.colOnPrimary : Appearance.colors.colPrimary
-                            }
-                            StyledText {
-                                text: Translation.tr("Changed %1").arg(root.changedSettings.length)
-                                font.pixelSize: Appearance.font.pixelSize.smaller
-                                font.weight: Font.Medium
-                                color: changedChip.toggled ? Appearance.colors.colOnPrimary : Appearance.colors.colOnLayer1
-                            }
-                        }
-
-                        StyledToolTip {
-                            text: Translation.tr("Settings that differ from a fresh install")
                         }
                     }
 
@@ -1583,7 +1529,7 @@ ApplicationWindow {
                 Rectangle {
                     id: settingsSearchOverlay
                     anchors.fill: parent
-                    visible: (root.settingsSearchText.length > 0 || root.showingChanged) && root.settingsSearchResults.length > 0
+                    visible: root.settingsSearchText.length > 0 && root.settingsSearchResults.length > 0
                     color: "transparent"
                     z: 100
 

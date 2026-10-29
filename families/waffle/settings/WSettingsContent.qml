@@ -4,7 +4,6 @@ import QtQuick.Controls
 import QtQuick.Layouts
 import Qt5Compat.GraphicalEffects
 import Quickshell
-import Quickshell.Io
 import qs.services
 import qs.modules.common
 import qs.modules.common.widgets
@@ -27,41 +26,8 @@ Item {
     property string searchText: ""
     property var searchResults: []
     property bool navExpanded: width > Looks.dp(760)
-    // The "Changed" list: every row whose setting differs from a fresh install (support's first question too).
-    property bool showingChanged: false
-    readonly property var changedSettings: ConfigFactory.ready && Config.revision >= 0 && settingRows.loaded
-        ? root.changedResults() : []
-    onChangedSettingsChanged: if (root.showingChanged) root.recomputeSearchResults()
 
-    function changedResults(): var {
-        const changed = new Set(ConfigFactory.changed())
-        const seen = {}
-        let rows = []
-        try { rows = JSON.parse(settingRows.text()) } catch (e) { return [] }
-        return rows.filter(row => {
-            if (!changed.has(row.configPath) || seen[row.configPath] || !root.pages[row.pageIndex]) return false
-            seen[row.configPath] = true
-            return true
-        }).map(row => ({
-            pageIndex: row.pageIndex,
-            pageName: root.pages[row.pageIndex].name,
-            section: row.section ? Translation.tr(row.section) : "",
-            label: Translation.tr(row.label),
-            targetLabel: Translation.tr(row.label)
-        }))
-    }
-
-    // Which row writes which setting, generated from the pages.
-    FileView {
-        id: settingRows
-        path: Qt.resolvedUrl("settings-paths.generated.json")
-        printErrors: false
-    }
-
-    Component.onCompleted: {
-        ConfigFactory.load()
-        Qt.callLater(() => root.navigationReady = true)
-    }
+    Component.onCompleted: Qt.callLater(() => root.navigationReady = true)
     
     // Complete search index with all individual options + targetLabel for spotlight
     property var searchIndex: [
@@ -327,10 +293,9 @@ Item {
     function recomputeSearchResults(): void {
         var q = String(searchText || "").toLowerCase().trim();
         if (!q.length) {
-            searchResults = root.showingChanged ? root.changedSettings : [];
+            searchResults = [];
             return;
         }
-        root.showingChanged = false;
         
         var terms = q.split(/\s+/).filter(t => t.length > 0);
         var results = [];
@@ -420,7 +385,6 @@ Item {
     }
     
     function openSearchResult(entry: var): void {
-        root.showingChanged = false;
         if (entry && entry.pageIndex !== undefined && entry.pageIndex >= 0) {
             currentPage = entry.pageIndex;
             
@@ -681,29 +645,6 @@ Item {
                             }
                         }
                         
-                        WBorderlessButton {
-                            id: changedChip
-                            implicitHeight: Looks.dp(22)
-                            implicitWidth: changedChipText.implicitWidth + Looks.dp(16)
-                            radius: Looks.dp(11)
-                            visible: searchInput.text.length === 0 && root.changedSettings.length > 0
-                            checked: root.showingChanged
-                            onClicked: {
-                                root.showingChanged = !root.showingChanged
-                                root.recomputeSearchResults()
-                            }
-                            contentItem: WText {
-                                id: changedChipText
-                                anchors.centerIn: parent
-                                text: Translation.tr("Changed %1").arg(root.changedSettings.length)
-                                font.pixelSize: Looks.font.pixelSize.small
-                                color: changedChip.checked ? Looks.colors.accent : Looks.colors.subfg
-                            }
-                            WToolTip {
-                                text: Translation.tr("Settings that differ from a fresh install")
-                            }
-                        }
-
                         // Clear button
                         Item {
                             Layout.preferredWidth: 20
@@ -742,7 +683,7 @@ Item {
                 // Search results dropdown
                 Revealer {
                     vertical: true
-                    reveal: (root.searchText.length > 0 || root.showingChanged) && root.searchResults.length > 0
+                    reveal: root.searchText.length > 0 && root.searchResults.length > 0
                     Layout.fillWidth: true
                 Rectangle {
                     id: searchResultsDropdown

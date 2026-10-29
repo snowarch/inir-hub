@@ -27,7 +27,6 @@ ContentPage {
 
         SettingsGroup {
             SettingsSwitch {
-                configPath: "dock.enable"
                 buttonIcon: "check"
                 text: Translation.tr("Enable")
                 checked: Config.options.dock.enable
@@ -109,7 +108,6 @@ ContentPage {
                         }
                     }
                     SettingsSwitch {
-                        configPath: "dock.pinnedOnStartup"
                         buttonIcon: "keep"
                         text: Translation.tr("Pinned on startup")
                         // A pinned dock can never hide, which cancels Hover reveal.
@@ -127,7 +125,6 @@ ContentPage {
             }
 
             SettingsSwitch {
-                configPath: "dock.monochromeIcons"
                 buttonIcon: "colors"
                 text: Translation.tr("Tint app icons")
                 checked: Config.options.dock.monochromeIcons
@@ -139,7 +136,6 @@ ContentPage {
                 }
             }
             SettingsSwitch {
-                configPath: "dock.showBackground"
                 buttonIcon: "widgets"
                 text: Translation.tr("Show dock background")
                 checked: Config.options.dock.showBackground
@@ -183,7 +179,6 @@ ContentPage {
                 title: Translation.tr("Appearance")
 
                 SettingsSwitch {
-                    configPath: "dock.cardStyle"
                     buttonIcon: "branding_watermark"
                     text: Translation.tr("Use Card style")
                     checked: Config.options.dock?.cardStyle ?? false
@@ -257,7 +252,6 @@ ContentPage {
                 title: Translation.tr("Window indicators")
 
                 SettingsSwitch {
-                    configPath: "dock.smartIndicator"
                     buttonIcon: "my_location"
                     text: Translation.tr("Smart indicator (highlight focused window)")
                     checked: Config.options.dock.smartIndicator !== false
@@ -270,7 +264,6 @@ ContentPage {
                 }
 
                 SettingsSwitch {
-                    configPath: "dock.showAllWindowDots"
                     buttonIcon: "more_horiz"
                     text: Translation.tr("Show dots for inactive apps")
                     checked: Config.options.dock.showAllWindowDots !== false
@@ -303,7 +296,6 @@ ContentPage {
                 title: Translation.tr("Window preview")
 
                 SettingsSwitch {
-                    configPath: "dock.hoverPreview"
                     buttonIcon: "preview"
                     text: Translation.tr("Show preview on hover")
                     checked: Config.options.dock.hoverPreview !== false
@@ -333,7 +325,6 @@ ContentPage {
                 }
 
                 SettingsSwitch {
-                    configPath: "dock.keepPreviewOnClick"
                     buttonIcon: "keep"
                     text: Translation.tr("Keep preview on click")
                     enabled: Config.options.dock.hoverPreview !== false

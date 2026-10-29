@@ -54,10 +54,6 @@ ColumnLayout {
             }
         }
 
-        ConfigResetKey {
-            path: sliderRowRoot.configPath
-            label: sliderRowRoot.label
-        }
         StyledText {
             text: Math.round(slider.value * 100) + "%"
             font.pixelSize: Appearance.font.pixelSize.small
@@ -101,7 +97,6 @@ ColumnLayout {
         ConfigSpinBox {
             Layout.fillWidth: true
             icon: spinRowRoot.icon
-            configPath: spinRowRoot.configPath
             text: spinRowRoot.label
             value: spinRowRoot.configValue
             from: spinRowRoot.from
@@ -136,7 +131,6 @@ ColumnLayout {
         ConfigSpinBox {
             Layout.fillWidth: true
             icon: realSpinRowRoot.icon
-            configPath: realSpinRowRoot.configPath
             text: realSpinRowRoot.label
             value: Math.round(realSpinRowRoot.configValue * 10)
             from: Math.round(realSpinRowRoot.from * 10)

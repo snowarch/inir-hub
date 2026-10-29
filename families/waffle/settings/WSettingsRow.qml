@@ -4,7 +4,6 @@ import QtQuick.Controls
 import QtQuick.Layouts
 import qs.modules.common
 import qs.modules.common.widgets
-import qs.services
 import qs.modules.waffle.looks
 
 // Single settings row with label and control - Windows 11 style
@@ -17,10 +16,6 @@ Item {
     property alias control: controlLoader.sourceComponent
     property bool clickable: false
     property bool showChevron: false
-    // The setting this row writes: a value changed from a fresh install shows a key that puts it back.
-    property string configPath: ""
-    readonly property bool changed: root.configPath.length > 0 && ConfigFactory.ready && Config.revision >= 0
-        && ConfigFactory.isChanged(root.configPath)
     
     // Settings search integration
     property bool enableSettingsSearch: true
@@ -100,7 +95,6 @@ Item {
     }
     
     Component.onCompleted: {
-        if (root.configPath.length > 0) ConfigFactory.load();
         if (!enableSettingsSearch) return;
         if (typeof SettingsSearchRegistry === "undefined") return;
         if (!root.label) return;
@@ -231,29 +225,6 @@ Item {
             }
         }
         
-        WBorderlessButton {
-            id: resetKey
-            // Keeps its place while dark, so the control beside it never moves under the pointer.
-            visible: root.configPath.length > 0
-            enabled: root.changed
-            opacity: root.changed ? 1 : 0
-            implicitWidth: Looks.dp(28)
-            implicitHeight: Looks.dp(28)
-            radius: Looks.settings.radiusMedium
-            Layout.alignment: Qt.AlignVCenter
-            Accessible.name: Translation.tr("Reset %1").arg(root.label)
-            onClicked: ConfigFactory.resetWithUndo(root.configPath, root.label)
-            contentItem: FluentIcon {
-                anchors.centerIn: parent
-                icon: "arrow-reset"
-                implicitSize: Looks.dp(16)
-                color: Looks.colors.accent
-            }
-            WToolTip {
-                text: Translation.tr("Reset %1").arg(root.label)
-            }
-        }
-
         Loader {
             id: controlLoader
             Layout.alignment: Qt.AlignVCenter

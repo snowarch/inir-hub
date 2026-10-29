@@ -215,7 +215,6 @@ ColumnLayout {
                 StyledToolTip { text: Translation.tr("Only the Ricelin card body fades. Content stays fully opaque.") }
             }
             SettingsSwitch {
-                configPath: "appearance.island.glass"
                 buttonIcon: "blur_on"
                 text: Translation.tr("Glass background")
                 checked: root.glassEnabled
@@ -253,14 +252,12 @@ ColumnLayout {
         ConfigRow {
             uniform: true
             SettingsSwitch {
-                configPath: "appearance.island.shadow"
                 buttonIcon: "ev_shadow"
                 text: Translation.tr("Drop shadow")
                 checked: Config.options?.appearance?.island?.shadow ?? true
                 onCheckedChanged: Config.setNestedValue("appearance.island.shadow", checked)
             }
             SettingsSwitch {
-                configPath: "appearance.island.sheen"
                 buttonIcon: "flare"
                 text: Translation.tr("Lit top edge")
                 checked: Config.options?.appearance?.island?.sheen ?? true

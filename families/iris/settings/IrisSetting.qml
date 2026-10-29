@@ -249,7 +249,7 @@ Item {
                                     cursorShape: Qt.PointingHandCursor
                                     Accessible.role: Accessible.Button
                                     Accessible.name: Translation.tr("Reset %1").arg(Translation.tr(root.spec.label))
-                                    onClicked: IrisOptions.restore([root.spec], Translation.tr(root.spec.label))
+                                    onClicked: root.commit(root.spec.fallback)
                                 }
                             }
                         }

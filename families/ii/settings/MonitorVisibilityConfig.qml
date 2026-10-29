@@ -1414,7 +1414,6 @@ ContentPage {
 
         SettingsGroup {
             SettingsSwitch {
-                configPath: "overview.activeScreenOnly"
                 buttonIcon: "screen_share"
                 text: Translation.tr("Active screen only")
                 checked: Config.options?.overview?.activeScreenOnly ?? true

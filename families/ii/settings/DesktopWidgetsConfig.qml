@@ -651,17 +651,17 @@ ContentPage {
     // ── Reusable placement selector (resolves zone names) ──────
     component WidgetPlacementSelector: ConfigSelectionArray {
         id: wps
-        required property string widgetPath
+        required property string configPath
         required property var configEntry
         required property string defaultStrategy
         Layout.fillWidth: true
         Layout.preferredWidth: 360
         Layout.minimumWidth: 180
 
-        readonly property string currentStrategy: root.readPath(wps.widgetPath + ".placementStrategy", configEntry?.placementStrategy ?? defaultStrategy)
+        readonly property string currentStrategy: root.readPath(wps.configPath + ".placementStrategy", configEntry?.placementStrategy ?? defaultStrategy)
 
         currentValue: root._resolvedMode(wps.currentStrategy)
-        onSelected: newValue => root._applyMode(wps.widgetPath, newValue, wps.currentStrategy)
+        onSelected: newValue => root._applyMode(wps.configPath, newValue, wps.currentStrategy)
         options: root._placementOptions()
     }
 
@@ -878,7 +878,7 @@ ContentPage {
                 icon: "open_with"
                 trailing: false
                 WidgetPlacementSelector {
-                    widgetPath: stateControls.configPath
+                    configPath: stateControls.configPath
                     configEntry: stateControls.configEntry
                     defaultStrategy: stateControls.defaultStrategy
                 }

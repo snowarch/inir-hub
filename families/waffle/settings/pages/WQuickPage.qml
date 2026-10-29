@@ -946,7 +946,6 @@ WSettingsPage {
 
         // Per-monitor wallpapers
         WSettingsSwitch {
-            configPath: "background.multiMonitor.enable"
             label: Translation.tr("Per-monitor wallpapers")
             icon: "settings-cog-multiple"
             description: Translation.tr("Set different wallpapers for each monitor")
@@ -1037,7 +1036,6 @@ WSettingsPage {
         }
 
         WSettingsSpinBox {
-            configPath: "appearance.wallpaperTheming.colorStrength"
             id: colorStrengthSpinBox
             label: Translation.tr("Color strength")
             icon: "eyedropper"
@@ -1061,7 +1059,6 @@ WSettingsPage {
         }
 
         WSettingsSwitch {
-            configPath: "appearance.transparency.enable"
             label: Translation.tr("Transparency")
             icon: "auto"
             description: Translation.tr("Enable transparent surfaces across the shell")
@@ -1117,7 +1114,6 @@ WSettingsPage {
 
     WSettingsCard {
         WSettingsSwitch {
-            configPath: "reloadToasts.enable"
             label: Translation.tr("Show reload notifications")
             icon: "alert"
             description: Translation.tr("Toast when Quickshell or Niri config reloads")

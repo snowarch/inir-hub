@@ -70,14 +70,7 @@ Item {
         const ink = IrisStyle.text
         return Qt.rgba(tint.r * 0.72 + ink.r * 0.28, tint.g * 0.72 + ink.g * 0.28, tint.b * 0.72 + ink.b * 0.28, 1)
     }
-    readonly property bool searching: root.query.length > 0 || root.showingChanged
-    // The "Changed" list: every row whose value differs from a fresh install (support's first question too).
-    property bool showingChanged: false
-    readonly property var changedSpecs: {
-        Config.revision
-        return root.specifications.filter(spec => !spec.mirror && root.shown(spec)
-            && root.sections.some(section => section.id === spec.section) && IrisOptions.modified(spec))
-    }
+    readonly property bool searching: root.query.length > 0
     // A Design may lay the whole page out its own way (DESIGNS.md › Composiciones): its `settingsPage` draws the areas,
     // the head and the foot, and holds this file's search, scene, rows and shared pages in its slots. The model, the
     // history and every row stay here.
@@ -236,7 +229,6 @@ Item {
     }
     readonly property var matches: {
         Config.revision
-        if (root.showingChanged && root.query.length === 0) return root.changedSpecs
         const q = IrisSearch.intent(root.query)
         q.asksArea = q.hard.some(term => root.areaWords.has(term.word))
         if (q.hard.length === 0 && q.soft.length === 0) return []
@@ -260,7 +252,7 @@ Item {
     readonly property var entries: {
         Config.revision
         if (root.layoutRows) return []
-        return root.searching ? (root.showingChanged ? root.matches : root.matches.slice(0, root.searchLimit))
+        return root.searching ? root.matches.slice(0, root.searchLimit)
             : root.specifications.filter(spec => spec.section === root.section && root.shown(spec))
     }
     readonly property var groups: {
@@ -950,7 +942,7 @@ Item {
             if (root.scene?.release && root.scene.release()) return
             if (IrisOptions.homeEditing) IrisOptions.homeEditing = false
             else if (IrisOptions.openList.length > 0) IrisOptions.openList = ""
-            else if (root.searching) { root.showingChanged = false; searchField.text = "" }
+            else if (root.searching) searchField.text = ""
             else if (root.group.length > 0 && !root.split) root.leaveGroup()
             else if (root.advancedPage >= 0 && !root.pageInPane) root.go({ section: root.section, group: "", advancedPage: -1 })
             else if (!root.windowed) GlobalStates.settingsOverlayOpen = false
@@ -1160,7 +1152,7 @@ Item {
                             id: searchField
                             anchors.left: searchGlyph.right
                             anchors.leftMargin: 6 * root.d
-                            anchors.right: changedKey.left
+                            anchors.right: clearSearch.left
                             anchors.rightMargin: 4 * root.d
                             anchors.verticalCenter: parent.verticalCenter
                             color: IrisStyle.text
@@ -1171,7 +1163,6 @@ Item {
                             clip: true
                             onTextChanged: {
                                 if (text.length === 0) { searchDelay.stop(); root.query = ""; return }
-                                root.showingChanged = false
                                 root.advancedPage = -1
                                 searchDelay.restart()
                             }
@@ -1188,18 +1179,6 @@ Item {
                                 color: searchSkin.item?.placeholderColour ?? IrisStyle.muted
                                 font.pixelSize: searchField.font.pixelSize
                             }
-                        }
-                        IrisChip {
-                            id: changedKey
-                            anchors.right: clearSearch.left
-                            anchors.rightMargin: visible ? 4 * root.d : 0
-                            anchors.verticalCenter: parent.verticalCenter
-                            visible: searchField.text.length === 0 && root.changedSpecs.length > 0
-                            width: visible ? implicitWidth : 0
-                            implicitHeight: Math.round(22 * root.d)
-                            label: Translation.tr("Changed %1").arg(root.changedSpecs.length)
-                            selected: root.showingChanged
-                            onClicked: root.showingChanged = !root.showingChanged
                         }
                         MaterialSymbol {
                             id: clearSearch
@@ -1380,8 +1359,7 @@ Item {
                         IrisText {
                             id: pageTitle
                             Layout.fillWidth: true
-                            text: root.showingChanged && root.query.length === 0 ? Translation.tr("Changed %1").arg(root.changedSpecs.length)
-                                : root.searching ? Translation.tr("Results for “%1”").arg(root.query)
+                            text: root.searching ? Translation.tr("Results for “%1”").arg(root.query)
                                 : root.advancedPage >= 0 ? root.pageTitle(root.advancedPage)
                                 : root.openGroup.length > 0 ? root.openGroup
                                 : Translation.tr(root.currentSection.title)
@@ -1459,7 +1437,7 @@ Item {
                         shown: !root.searching && root.advancedPage < 0 && modified
                         glyph: "restart_alt"
                         label: Translation.tr("Restore defaults")
-                        onClicked: IrisOptions.restore(resettable, root.openGroup || Translation.tr(root.currentSection.title))
+                        onClicked: resettable.forEach(spec => IrisOptions.commit(spec, spec.fallback))
                     }
                     }
                     // Classic's way back to the layouts.
