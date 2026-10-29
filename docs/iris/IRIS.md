@@ -65,7 +65,7 @@ The Dock is set under iRiS Settings › Dock:
 
 ## Settings
 
-Open Settings with Super+,. It appears over the desktop, or as a window if you choose that under Home › Settings window › Opens as. The layout is Classic, Folio, Pocket or Drawer (Home › Settings window › Layout). Every layout shows an area as one page: its groups open, each control in its own row, with a live preview where the area has one. Rows people rarely touch wait behind Fine-tune at the foot of their group.
+Open Settings with Super+,. It appears over the desktop, or as a window if you choose that under Home › Settings window › Opens as. The layout is Classic, Folio, Pocket or Drawer (Home › Settings window › Layout). Every layout shows an area as one page: its groups open, each control in its own row, with a live preview where the area has one. Rows people rarely touch wait behind Fine-tune at the foot of their group, and groups that are all fine-tuning (corners or material per surface, say) wait together behind one Fine-tune at the foot of the area.
 
 The sidebar lists these areas, in this order:
 
