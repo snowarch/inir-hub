@@ -1054,6 +1054,12 @@ QtObject {
     // body's lit edge and its light on one half of the window and kept them on the other.
     readonly property color readingCard: root.glassy ? Lume.stack(root.readingPlate, root.surfaceHigh)
         : root.textured ? root.surfaceHigh : root.liftOver(root.surfaceHigh, root.surfaceOpaque)
+    // A group of Settings rows over the reading surface (a form's plate): a step out of it, lighter in both schemes,
+    // as a grouped form sits over its pane (macOS Tahoe). readingCard alone left the groups a shade from the sheet.
+    // On glass the reading sheet carries legibility and the plate is a veil of white over it (nearly opaque in light, a
+    // breath in dark); mixing readingCard (2 % alpha in light) toward white kept its dark rgb and gave grey slabs.
+    readonly property color formPlate: !root.glassy ? root.readingCard
+        : root.light ? Qt.rgba(1, 1, 1, 0.66) : Qt.rgba(1, 1, 1, 0.055) // iris-literal: white veils of a form's plate
     readonly property color readingSidebar: root.glassy
         ? ColorUtils.applyAlpha(root.surfaceOpaque, Math.max(root.wallpaperVeil, root.placePlate)) : root.readingCard
 

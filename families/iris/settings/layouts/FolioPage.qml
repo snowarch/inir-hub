@@ -222,7 +222,9 @@ Item {
                     voice: "folio"
                     live: page.live
                     reach: flick.contentY + flick.height * 1.5
-                    groupFill: "transparent"
+                    // grouped like a form: each group a plate, its rows a hairline apart (the rows floated on the
+                    // body and a page read as loose text, 10-29)
+                    groupFill: IrisStyle.formPlate
                     reading: page.reading
                     onReveal: row => page.reveal(row)
                 }

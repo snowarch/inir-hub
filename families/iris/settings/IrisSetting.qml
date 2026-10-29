@@ -114,7 +114,11 @@ Item {
     // In a layout's voice the choice is measured by its own Segmented (its names hug): it sits in the column when it fits.
     readonly property bool voicedChoice: root.voice.length > 0 && root.spec.kind === "choice" && root.roomy && root.choices.length >= 2
         && root.choices.length <= 5 && !root.swatched && !root.tiled && !root.carded
-    readonly property real voicedNatural: root.voicedChoice ? Number(inlineSegments.item?.implicitWidth ?? 0) : 0
+    // Every segment hugs its name (no layout voices the track any more: its skin left an implicit width of 0, and every
+    // choice fell under its row at the full width, 10-29).
+    readonly property real choiceHug: root.spec.kind !== "choice" || root.choices.length === 0 ? 0
+        : Math.ceil(root.choices.reduce((sum, choice) => sum + choiceMetrics.advanceWidth(Translation.tr(String(choice.label ?? ""))) + 24 * root.d, 0) + 6 * root.d)
+    readonly property real voicedNatural: root.voicedChoice ? Math.max(Number(inlineSegments.item?.implicitWidth ?? 0), root.choiceHug) : 0
     readonly property bool inlineChoice: root.voicedChoice ? root.voicedNatural > 0 && root.voicedNatural <= root.controlWidth
         : root.spec.kind === "choice" && root.roomy && root.choices.length >= 2 && root.choices.length <= 4
         && !root.swatched && !root.tiled && !root.carded && root.segmentNatural <= root.controlWidth
@@ -464,9 +468,9 @@ Item {
         Loader {
             opacity: root.controlOpacity
             // A voiced track under its row keeps its names' width, at the row's right like the column it left.
-            Layout.fillWidth: root.voice.length === 0 || (item?.implicitWidth ?? 0) <= 0
+            Layout.fillWidth: root.voice.length === 0
             Layout.alignment: Qt.AlignRight
-            Layout.preferredWidth: root.voice.length > 0 ? Math.min(item?.implicitWidth ?? 0, parent.width) : -1
+            Layout.preferredWidth: root.voice.length > 0 ? Math.min(Math.max(item?.implicitWidth ?? 0, root.choiceHug), parent.width) : -1
             active: root.spec.kind === "choice" && !root.inlineChoice && !root.swatched && !root.menuChoice && !root.tiled && !root.carded
             visible: active
             sourceComponent: segmentedComponent

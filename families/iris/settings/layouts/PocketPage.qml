@@ -135,6 +135,7 @@ Item {
                 section: page.area
                 host: page.host
                 voice: "pocket"
+                groupFill: IrisStyle.formPlate
                 live: page.live
                 reading: page.reading
                 // Home's pinned rows and welcome lead Home itself; General's page holds the rest.

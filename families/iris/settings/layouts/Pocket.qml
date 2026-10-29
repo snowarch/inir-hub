@@ -142,6 +142,7 @@ Item {
                         section: "general"
                         host: root.host
                         voice: "pocket"
+                        groupFill: IrisStyle.formPlate
                         live: home.visible && root.level < 2
                         only: ["Every day"]
                     }

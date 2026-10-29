@@ -220,8 +220,8 @@ ColumnLayout {
                     Layout.fillWidth: true
                     Layout.leftMargin: Math.round(16 * rows?.d)
                     Layout.rightMargin: Math.round(16 * rows?.d)
-                    Layout.topMargin: Math.round((block.index > 0 ? 18 : 6) * rows?.d)
-                    Layout.bottomMargin: Math.round(4 * rows?.d)
+                    Layout.topMargin: Math.round((block.index > 0 ? 22 : 6) * rows?.d)
+                    Layout.bottomMargin: Math.round(2 * rows?.d)
                     implicitHeight: headSkin.active ? (headSkin.item?.implicitHeight ?? 0) : plainHead.implicitHeight
                     IrisSkin { id: headSkin; part: "groupHeader"; host: head; voice: rows?.voice }
                     IrisText {
@@ -283,12 +283,9 @@ ColumnLayout {
                             visible: text.length > 0
                             Layout.leftMargin: Math.round(16 * rows?.d)
                             text: part.modelData.length > 0 ? Translation.tr(part.modelData) : ""
-                            color: IrisStyle.textTertiary
-                            font.family: IrisStyle.fontMono
-                            font.pixelSize: Math.max(10, IrisStyle.typeCaption)
-                            font.weight: IrisStyle.weight(Font.Medium)
-                            font.capitalization: Font.AllUppercase
-                            font.letterSpacing: Math.round(Math.max(10, IrisStyle.typeCaption) * 0.08)
+                            color: IrisStyle.subtext
+                            font.pixelSize: IrisStyle.typeMeta
+                            font.weight: IrisStyle.weight(Font.DemiBold)
                         }
                         Rectangle {
                             Layout.fillWidth: true
