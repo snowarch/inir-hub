@@ -40,10 +40,13 @@ Rectangle {
     readonly property real lit: Math.max(0, Math.min(1, travel.value))
     readonly property real stroke: Math.max(1, Math.round(1.5 * root.d * 2) / 2)
     readonly property color ring: IrisStyle.ringInk
+    // Off is a control's ground, not a fill to tune away: Fills at 30 % left the track at 1.1:1 on a light plate. Fills
+    // scales it down to iOS's light off track (~1.2:1), never under.
+    readonly property color offTrack: Qt.rgba(IrisStyle.fillHover.r, IrisStyle.fillHover.g, IrisStyle.fillHover.b, Math.max(IrisStyle.fillHover.a, 0.1))
     radius: root.skinned ? 0 : root.synth ? IrisStyle.synthKeyRadius : height / 2
     color: root.skinned || root.synth ? "transparent"
         : root.gel ? IrisStyle.fillHover
-        : root.nothing ? ColorUtils.applyAlpha(IrisStyle.accentFill, root.lit) : ColorUtils.mix(IrisStyle.appleAccent, IrisStyle.fillHover, root.lit)
+        : root.nothing ? ColorUtils.applyAlpha(IrisStyle.accentFill, root.lit) : ColorUtils.mix(IrisStyle.appleAccent, root.offTrack, root.lit)
     border.width: root.skinned || !root.nothing ? 0 : root.stroke
     border.color: ColorUtils.mix(IrisStyle.accentFill, root.ring, root.lit)
     Accessible.role: Accessible.CheckBox
@@ -145,8 +148,9 @@ Rectangle {
         x: knob.pad + (root.width - 2 * knob.pad - knob.width) * travel.value
         radius: IrisStyle.capsule(height)
         color: root.nothing ? ColorUtils.applyAlpha(IrisStyle.inkOnAccentFill, root.lit) : IrisStyle.onTint
-        border.width: root.nothing ? root.stroke * (1 - root.lit) : 0
-        border.color: root.ring
+        // The white knob keeps a hairline of ink, as the slider's does: with Shadows at 0 it was white on white.
+        border.width: root.nothing ? root.stroke * (1 - root.lit) : root.gel || root.synth ? 0 : 1
+        border.color: root.nothing ? root.ring : Qt.rgba(IrisStyle.text.r, IrisStyle.text.g, IrisStyle.text.b, 0.16)
         Behavior on width { NumberAnimation { duration: IrisStyle.feedbackDuration; easing.type: IrisStyle.feedbackEasing } }
         Loader {
             active: root.gel
