@@ -18,7 +18,14 @@ WSettingsRow {
         ComboBox {
             id: combo
             WFocusVisual { shown: combo.visualFocus; radius: Looks.settings.radiusLarge }
-            implicitWidth: 160
+            // As wide as its widest option (WinUI: the box never jumps as the choice changes), 160 to 300.
+            FontMetrics { id: optionMetrics; font: comboLabel.font }
+            implicitWidth: {
+                let widest = 0
+                for (const option of root.options)
+                    widest = Math.max(widest, optionMetrics.advanceWidth(String(option?.displayName ?? "")))
+                return Math.min(Looks.dp(300), Math.max(160, Math.ceil(widest) + 12 + 8 + 12 + 8 + 2))
+            }
             implicitHeight: 32
             
             model: root.options
@@ -55,6 +62,7 @@ WSettingsRow {
                 spacing: 8
                 
                 WText {
+                    id: comboLabel
                     Layout.fillWidth: true
                     Layout.leftMargin: 12
                     text: combo.displayText

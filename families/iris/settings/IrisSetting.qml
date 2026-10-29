@@ -994,9 +994,22 @@ Item {
             readonly property real cardWidth: Math.floor((width - (materials.columns - 1) * materials.gap) / materials.columns)
             readonly property url picture: Wallpapers.stillUrlFor(String(Wallpapers.effectiveWallpaperPath ?? ""))
             spacing: materials.gap
+            // Every card as tall as the one whose detail wraps (a German compound in a narrow card), so a line of
+            // cards keeps one bottom edge.
+            property int generation: 0
+            readonly property real textHeight: {
+                materials.generation
+                let tallest = 0
+                for (let i = 0; i < materialCards.count; ++i)
+                    tallest = Math.max(tallest, materialCards.itemAt(i)?.textHeight ?? 0)
+                return tallest
+            }
 
             Repeater {
+                id: materialCards
                 model: root.choices
+                onItemAdded: materials.generation++
+                onItemRemoved: materials.generation++
                 Rectangle {
                     id: card
                     required property var modelData
@@ -1004,7 +1017,8 @@ Item {
                     readonly property color stuff: card.modelData.swatch ?? IrisStyle.surfaceOpaque
                     readonly property real inset: Math.round(6 * root.d)
                     width: materials.cardWidth
-                    height: scene.height + cardText.implicitHeight + card.inset + Math.round(18 * root.d)
+                    readonly property real textHeight: cardText.implicitHeight
+                    height: scene.height + Math.max(cardText.implicitHeight, materials.textHeight) + card.inset + Math.round(18 * root.d)
                     radius: IrisStyle.radiusTile
                     readonly property color plate: root.pickFill(card.selected, cardHover.hovered)
                     color: IrisStyle.fieldChamfer ? "transparent" : card.plate
@@ -1143,6 +1157,8 @@ Item {
                             width: parent.width
                             text: Translation.tr(card.modelData.detail ?? "")
                             color: root.pickDetail(card.selected)
+                            wrapMode: Text.Wrap
+                            maximumLineCount: 2
                             elide: Text.ElideRight
                             font.pixelSize: IrisStyle.typeMeta
                         }
@@ -1176,11 +1192,24 @@ Item {
             spacing: Math.round(14 * root.d)
 
             Flow {
+                id: sourceFlow
                 visible: swatchSet.sources.length > 0
                 width: swatchSet.width
                 spacing: swatchSet.gap
+                // As the material cards: one bottom edge when a detail takes two lines.
+                property int generation: 0
+                readonly property real textHeight: {
+                    sourceFlow.generation
+                    let tallest = 0
+                    for (let i = 0; i < sourceCards.count; ++i)
+                        tallest = Math.max(tallest, sourceCards.itemAt(i)?.textHeight ?? 0)
+                    return tallest
+                }
                 Repeater {
+                    id: sourceCards
                     model: swatchSet.sources
+                    onItemAdded: sourceFlow.generation++
+                    onItemRemoved: sourceFlow.generation++
                     Rectangle {
                         id: source
                         required property var modelData
@@ -1189,7 +1218,8 @@ Item {
                         readonly property color gives: source.modelData.swatch !== undefined ? source.modelData.swatch : root.liveColour
                         readonly property real inset: Math.round(6 * root.d)
                         width: swatchSet.cardWidth
-                        height: picture.height + sourceText.implicitHeight + source.inset + Math.round(18 * root.d)
+                        readonly property real textHeight: sourceText.implicitHeight
+                        height: picture.height + Math.max(sourceText.implicitHeight, sourceFlow.textHeight) + source.inset + Math.round(18 * root.d)
                         radius: IrisStyle.radiusTile
                         readonly property color plate: root.pickFill(source.selected, sourceHover.hovered)
                         color: IrisStyle.fieldChamfer ? "transparent" : source.plate
@@ -1328,6 +1358,8 @@ Item {
                                 width: parent.width
                                 text: root.sourceDetail(source.kind)
                                 color: root.pickDetail(source.selected)
+                                wrapMode: Text.Wrap
+                                maximumLineCount: 2
                                 elide: Text.ElideRight
                                 font.pixelSize: IrisStyle.typeMeta
                             }

@@ -17,6 +17,8 @@ PreviewScene {
     readonly property real bannerWidth: Math.max(340, Math.min(560, Number(feedRoot.opt("iris.notifications.width", 380)))) * feedRoot.d
     readonly property real osdWidth: Math.max(260, Math.min(520, Number(feedRoot.opt("iris.osd.width", 320)))) * feedRoot.d
     readonly property int duration: Math.max(2000, Math.min(12000, Number(feedRoot.opt("iris.notifications.duration", 4000))))
+    // In the person's figures and without a dead ".0": "4 s", "4,5 s" in German.
+    readonly property string seconds: (feedRoot.duration / 1000).toLocaleString(Translation.locale, "f", feedRoot.duration % 1000 === 0 ? 0 : 1)
     readonly property real naturalWidth: Math.max(feedRoot.bannerWidth, feedRoot.osdWidth) + Math.round(120 * feedRoot.d)
     readonly property real naturalHeight: Math.round(300 * feedRoot.d)
     IslandPill { id: feedIsland; anchors.horizontalCenter: parent.horizontalCenter; y: IrisFrame.band }
@@ -48,7 +50,7 @@ PreviewScene {
                 Layout.fillWidth: true
                 spacing: Math.round(2 * feedRoot.d)
                 IrisText { text: Translation.tr("A notification"); font.weight: IrisStyle.weight(Font.DemiBold) }
-                IrisText { Layout.fillWidth: true; text: Translation.tr("Stays %1 s, then folds back into the Island.").arg((feedRoot.duration / 1000).toFixed(1)); color: IrisStyle.textSecondary; elide: Text.ElideRight }
+                IrisText { Layout.fillWidth: true; text: Translation.tr("Stays %1 s, then folds back into the Island.").arg(feedRoot.seconds); color: IrisStyle.textSecondary; elide: Text.ElideRight }
             }
         }
         Rectangle {
@@ -74,7 +76,7 @@ PreviewScene {
         if (!bannerSkin.item) return
         bannerSkin.item.notification = ({ notificationId: -1, appName: "iNiR", appIcon: "", image: "", urgency: "1",
             summary: Translation.tr("A notification"), time: Date.now(), timer: ({ interval: feedRoot.duration }), actions: [],
-            body: Translation.tr("Stays %1 s, then folds back into the Island.").arg((feedRoot.duration / 1000).toFixed(1)) })
+            body: Translation.tr("Stays %1 s, then folds back into the Island.").arg(feedRoot.seconds) })
     }
     Timer { interval: feedRoot.duration + 600; running: feedRoot.playing && bannerSkin.item !== null; repeat: true; onTriggered: feedRoot.resetNotice() }
     Rectangle {
