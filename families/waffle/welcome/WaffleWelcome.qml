@@ -32,11 +32,23 @@ Item {
     readonly property real welcomeChoiceRadius: Looks.settings.radiusLarge
     readonly property real welcomeCardRadius: Looks.settings.radiusLarge
 
+    // one look: Appearance is the wallpaper and light or dark; the starting profiles set Material's pieces
+    readonly property bool welcomeStyles: false
+    readonly property bool welcomeProfiles: false
+    readonly property var placementRows: [
+        { label: Translation.tr("Taskbar"), key: "waffles.bar.bottom", fallback: true, options: [
+            { displayName: Translation.tr("Bottom"), icon: "vertical_align_bottom", value: true },
+            { displayName: Translation.tr("Top"), icon: "vertical_align_top", value: false }] },
+        { label: Translation.tr("Alignment"), key: "waffles.bar.leftAlignApps", fallback: false, options: [
+            { displayName: Translation.tr("Center"), icon: "format_align_center", value: false },
+            { displayName: Translation.tr("Left"), icon: "format_align_left", value: true }] }
+    ]
+
     readonly property var steps: [
         {
             icon: "tune", title: Translation.tr("Starting point"),
-            headline: Translation.tr("Choose your starting setup"),
-            subtitle: Translation.tr("Start simple, balanced or with more tools. You can change every module later.")
+            headline: Translation.tr("Choose your effects"),
+            subtitle: Translation.tr("How much motion and blur the desktop uses.")
         },
         {
             icon: "palette", title: Translation.tr("Appearance"),
