@@ -1,7 +1,6 @@
 import qs
 import QtQuick
 import QtQuick.Controls
-import QtQuick.Dialogs
 import QtQuick.Layouts
 import Qt5Compat.GraphicalEffects
 import Quickshell
@@ -19,18 +18,8 @@ ContentPage {
     settingsPageName: Translation.tr("Quick")
     readonly property bool isOverlayPage: GlobalStates.settingsOverlayOpen ?? false
     property string activeSection: "wallpaper"
-    property string captureFolderTarget: "recordings"
     property bool showManualNotificationFilter: false
     property bool showManualVisualizerFilter: false
-    readonly property string effectiveRecordingPath: {
-        const configured = String(Config.getNestedValue("screenRecord.savePath", ""))
-        return configured.length > 0 ? configured : Directories.videosPath
-    }
-    readonly property string effectiveScreenshotPath: Directories.screenshotsPath
-
-    function _normalizedAppKey(value): string {
-        return String(value ?? "").toLowerCase().replace(/[^a-z0-9]/g, "")
-    }
 
     function _uniqueApps(values): var {
         const out = []
@@ -129,11 +118,6 @@ ContentPage {
         return out
     }
 
-    function openCaptureFolderDialog(target: string): void {
-        root.captureFolderTarget = target
-        captureFolderDialog.open()
-    }
-
     SettingsTaskNavigator {
         icon: "bolt"
         title: ""
@@ -156,28 +140,8 @@ ContentPage {
         ]
     }
 
-    FolderDialog {
-        id: captureFolderDialog
-        title: root.captureFolderTarget === "screenshots"
-            ? Translation.tr("Select screenshots folder")
-            : Translation.tr("Select recordings folder")
-        currentFolder: `file://${root.captureFolderTarget === "screenshots"
-            ? root.effectiveScreenshotPath : root.effectiveRecordingPath}`
-        onAccepted: {
-            const path = FileUtils.trimFileProtocol(String(selectedFolder))
-            Config.setNestedValue(root.captureFolderTarget === "screenshots"
-                ? "regionSelector.savePath" : "screenRecord.savePath", path)
-        }
-    }
-
-    SettingsNativeDialogGuard {
-        dialog: captureFolderDialog
-        dialogKey: "quick-capture-folder"
-    }
     // Deferred in both modes: entering the page must never kick off directory-wide
     // thumbnail generation. The user asks for the grid explicitly.
-
-    Component.onCompleted: {
         Wallpapers.load()
     }
 
@@ -1879,86 +1843,6 @@ ContentPage {
                 }
                 StyledToolTip {
                     text: Translation.tr("Hide notification popups while Game Mode is active")
-                }
-            }
-        }
-    }
-        }
-    }
-
-    SettingsTaskLoader {
-        requested: true
-        sourceComponent: Component {
-    SettingsCardSection {
-        settingsTaskSection: "capture"
-        expanded: true
-        icon: "photo_camera"
-        title: Translation.tr("Capture locations")
-
-        SettingsGroup {
-            NoticeBox {
-                Layout.fillWidth: true
-                materialIcon: "folder"
-                text: Translation.tr("Recordings and iNiR screenshots can use different folders. These paths are also available in Tools for detailed capture settings.")
-            }
-
-            ContentSubsection {
-                title: Translation.tr("Recordings")
-
-                StyledText {
-                    Layout.fillWidth: true
-                    text: Directories.shortHomePath(root.effectiveRecordingPath)
-                    color: Appearance.colors.colOnLayer1
-                    elide: Text.ElideMiddle
-                }
-
-                RowLayout {
-                    Layout.fillWidth: true
-                    spacing: Appearance.sizes.spacingSmall
-
-                    RippleButtonWithIcon {
-                        Layout.fillWidth: true
-                        materialIcon: "folder_open"
-                        mainText: Translation.tr("Open folder")
-                        onClicked: ShellExec.openDirectory(root.effectiveRecordingPath, Translation.tr("Open recordings folder"))
-                    }
-
-                    RippleButtonWithIcon {
-                        Layout.fillWidth: true
-                        materialIcon: "drive_file_move"
-                        mainText: Translation.tr("Change folder")
-                        onClicked: root.openCaptureFolderDialog("recordings")
-                    }
-                }
-            }
-
-            ContentSubsection {
-                title: Translation.tr("Screenshots")
-
-                StyledText {
-                    Layout.fillWidth: true
-                    text: Directories.shortHomePath(root.effectiveScreenshotPath)
-                    color: Appearance.colors.colOnLayer1
-                    elide: Text.ElideMiddle
-                }
-
-                RowLayout {
-                    Layout.fillWidth: true
-                    spacing: Appearance.sizes.spacingSmall
-
-                    RippleButtonWithIcon {
-                        Layout.fillWidth: true
-                        materialIcon: "folder_open"
-                        mainText: Translation.tr("Open folder")
-                        onClicked: ShellExec.openDirectory(root.effectiveScreenshotPath, Translation.tr("Open screenshots folder"))
-                    }
-
-                    RippleButtonWithIcon {
-                        Layout.fillWidth: true
-                        materialIcon: "drive_file_move"
-                        mainText: Translation.tr("Change folder")
-                        onClicked: root.openCaptureFolderDialog("screenshots")
-                    }
                 }
             }
         }
