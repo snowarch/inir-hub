@@ -54,10 +54,12 @@ Item {
     readonly property var currentSection: IrisOptions.sectionById(root.section)
     // Every area is a row of the sidebar (DI49g); clusters part by air, no captions.
     readonly property var sideSections: {
-        const out = root.sections.filter(section => section.id === "general")
+        const out = root.sections.filter(section => section.id === "general").map(section => ({ id: section.id, title: section.title, icon: section.icon, cluster: section.cluster }))
         IrisOptions.categories.filter(category => !category.foot).forEach((category, at) => {
             category.sections.map(id => root.sections.find(section => section.id === id)).filter(section => !!section)
-                .forEach(section => out.push(Object.assign({}, section, { cluster: at })))
+                // Its plain fields only: copying ran the area's tint getter here and rebuilt the whole sidebar on every colour
+                // change. A row reads the tint itself (SectionRow.tint).
+                .forEach(section => out.push({ id: section.id, title: section.title, icon: section.icon, cluster: at }))
         })
         return out
     }
@@ -195,37 +197,44 @@ Item {
     function shown(spec: var): bool { return IrisOptions.shown(spec) }
 
     readonly property int searchLimit: 24
-    // Every row's words by where they sit (translated and English), read once per language.
-    readonly property var searchIndex: root.specifications.filter(spec => !spec.mirror).map(spec => {
-        const section = IrisOptions.sectionById(spec.section)
-        const sectionTitle = Translation.tr(section.title)
-        const words = text => IrisSearch.tokens(text)
-        return { spec: spec,
-            fields: { label: words(Translation.tr(spec.label) + " " + spec.label), keys: words((spec.keywords ?? []).join(" ")),
-                group: words(Translation.tr(spec.group ?? "") + " " + (spec.group ?? "")), section: words(sectionTitle + " " + section.title),
-                desc: words(Translation.tr(spec.description ?? "") + " " + (spec.description ?? "")) },
-            loose: IrisSearch.prepare({ name: Translation.tr(spec.label), english: spec.label, detail: Translation.tr(spec.group ?? ""), areaName: sectionTitle,
-                words: [spec.group ?? ""].concat(spec.keywords ?? []).join(" ") }) }
-    })
+    // Every row's words by where they sit (translated and English), built the first time a search runs after the rows or
+    // the language changed. As a binding it was rebuilt with the rows on every colour change, Settings closed or not.
+    // Filled in place, never reassigned: a write here would wake the very binding (matches) that asked for it.
+    readonly property var searchCache: ({ rows: null, language: "", index: [], areaWords: new Set() })
+    function searchIndex(): var {
+        const rows = root.specifications, language = Translation.languageCode
+        if (root.searchCache.rows === rows && root.searchCache.language === language) return root.searchCache.index
+        const index = rows.filter(spec => !spec.mirror).map(spec => {
+            const section = IrisOptions.sectionById(spec.section)
+            const sectionTitle = Translation.tr(section.title)
+            const words = text => IrisSearch.tokens(text)
+            return { spec: spec,
+                fields: { label: words(Translation.tr(spec.label) + " " + spec.label), keys: words((spec.keywords ?? []).join(" ")),
+                    group: words(Translation.tr(spec.group ?? "") + " " + (spec.group ?? "")), section: words(sectionTitle + " " + section.title),
+                    desc: words(Translation.tr(spec.description ?? "") + " " + (spec.description ?? "")) },
+                loose: IrisSearch.prepare({ name: Translation.tr(spec.label), english: spec.label, detail: Translation.tr(spec.group ?? ""), areaName: sectionTitle,
+                    words: [spec.group ?? ""].concat(spec.keywords ?? []).join(" ") }) }
+        })
+        // Every word an area's title is made of: a query that names an area keeps the rows of other areas behind its own.
+        const areaWords = new Set()
+        for (const entry of index) for (const word of entry.fields.section) areaWords.add(word)
+        Object.assign(root.searchCache, { rows: rows, language: language, index: index, areaWords: areaWords })
+        return index
+    }
     // What people mean first (IrisSearch.intent: filler words out, the words Settings uses for theirs, the area they
     // name); only when that finds nothing, what the forgiving match reads through a typo, initials or letters in order.
-    // Every word an area's title is made of: a query that names an area keeps the rows of other areas behind its own.
-    readonly property var areaWords: {
-        const out = new Set()
-        for (const entry of root.searchIndex) for (const word of entry.fields.section) out.add(word)
-        return out
-    }
     readonly property var matches: {
         Config.revision
         const q = IrisSearch.intent(root.query)
-        q.asksArea = q.hard.some(term => root.areaWords.has(term.word))
         if (q.hard.length === 0 && q.soft.length === 0) return []
+        const index = root.searchIndex()
+        q.asksArea = q.hard.some(term => root.searchCache.areaWords.has(term.word))
         const shown = hit => root.shown(hit.spec) && root.sections.some(section => section.id === hit.spec.section)
-        let hits = root.searchIndex
+        let hits = index
             .map((entry, order) => ({ spec: entry.spec, order: order, score: IrisSearch.settingScore(q, entry.fields, entry.spec) }))
             .filter(hit => hit.score > 0 && shown(hit))
         if (hits.length === 0)
-            hits = root.searchIndex
+            hits = index
                 .map((entry, order) => ({ spec: entry.spec, order: order, score: IrisSearch.score(root.query, entry.loose) }))
                 .filter(hit => hit.score >= 0.6 && shown(hit))
         return hits.sort((a, b) => b.score - a.score || a.order - b.order).map(hit => hit.spec)
@@ -1486,7 +1495,8 @@ Item {
         readonly property bool travels: sectionRow.gapAbove
         // Where you are speaks one colour, the area's own: its glyph fills, the wash under it takes a tint of it and so
         // does its name, a step heavier (DI49i: the chosen row reads at a glance, not only by its wash).
-        readonly property color own: IrisStyle.plainMarks ? IrisStyle.accent : sectionRow.modelData.tint
+        readonly property color tint: IrisOptions.sectionById(sectionRow.modelData.id).tint
+        readonly property color own: IrisStyle.plainMarks ? IrisStyle.accent : sectionRow.tint
         readonly property real washRadius: Math.min(sectionRow.rowHeight / 2, IrisStyle.iconRadius(sectionMark.width) + sectionMark.x)
         onSelectedChanged: if (sectionRow.selected && sectionRow.travels) root.travelRow = sectionRow
         Component.onCompleted: if (sectionRow.selected && sectionRow.travels) root.travelRow = sectionRow
@@ -1528,7 +1538,7 @@ Item {
                 IrisSquircle {
                     visible: !sectionMark.numbered
                     anchors.fill: parent
-                    tint: sectionRow.modelData.tint
+                    tint: sectionRow.tint
                     glyph: sectionRow.modelData.icon
                     reversed: sectionRow.selected && IrisStyle.plateSelection
                 }

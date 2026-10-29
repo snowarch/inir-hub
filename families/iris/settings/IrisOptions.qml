@@ -240,12 +240,15 @@ QtObject {
 
     // The palettes iRiS lists (every one is still in the shared Themes page): what the apps wear, one swatch each.
     // What each scheme calls its materials: the three stored names stay black, graphite and midnight.
+    // In words, what the solver makes of each (inir-accel's washi: its iris and paper tables). Read by the row that shows
+    // it: read here, the scheme it depends on rebuilt every row of Settings on each switch.
+    function materialDetail(at: int): string {
+        return (IrisStyle.ink ? ["Cream paper", "Tan paper", "Blue-grey paper"]
+            : IrisStyle.light ? ["Warm white", "Light grey", "Cool grey"] : ["Pure black", "Neutral dark grey", "Blue black"])[at]
+    }
     readonly property var materialChoices: {
-        // In words, what the solver makes of each (inir-accel's washi: its iris and paper tables).
-        const details = IrisStyle.ink ? ["Cream paper", "Tan paper", "Blue-grey paper"]
-            : IrisStyle.light ? ["Warm white", "Light grey", "Cool grey"] : ["Pure black", "Neutral dark grey", "Blue black"]
-        return ["black", "graphite", "midnight"].map((name, at) => ({ label: IrisStyle.materialLabel(name), value: name, detail: details[at],
-                get swatch() { return IrisStyle.materialSwatch(name) } }))
+        return ["black", "graphite", "midnight"].map((name, at) => ({ get label() { return IrisStyle.materialLabel(name) }, value: name,
+                get detail() { return root.materialDetail(at) }, get swatch() { return IrisStyle.materialSwatch(name) } }))
             .concat([{ label: "Wallpaper", value: "wallpaper", detail: "Your wallpaper's hue", get swatch() { return IrisStyle.materialSwatch("wallpaper") } },
                 { label: "Theme", value: "theme", detail: "Your theme's colour", get swatch() { return IrisStyle.materialSwatch("theme") } }])
     }
@@ -1251,13 +1254,15 @@ QtObject {
         { section: "login", group: "Login Screen", label: "Login style", description: "Cover shows your picture sharp, Frame hangs it in a mat, Lens cuts the time out of it.", path: "lock.loginStyle", showIf: () => ["iris", "auto"].indexOf(Config.options?.lock?.loginScreen ?? "auto") >= 0, locked: () => !MaterialThemeLoader.loginScreenInstalled, kind: "choice", fallback: "lens", choices: [{label:"Cover",value:"cover"},{label:"Frame",value:"frame"},{label:"Lens",value:"lens"}], keywords: ["login", "sddm", "greeter", "sign in", "style", "cover", "frame", "lens", "mat", "picture", "clock", "blur", "portada", "marco", "lente"] }
     ]
 
+    // Values read when a row asks, never when the list is built: a colour read here put the whole registry, and the search
+    // index built from it, behind every scheme or accent change (10-29: 1.4 s of the shell held on one switch).
     readonly property var swatchChoices: [
-        { label: "Accent", value: String(IrisStyle.accent), get swatch() { return IrisStyle.accent } },
-        { label: "Highlight", value: String(IrisStyle.secondaryAccent), get swatch() { return IrisStyle.secondaryAccent } },
-        { label: "Blue", value: String(IrisStyle.identity.blue), get swatch() { return IrisStyle.identity.blue } },
-        { label: "Green", value: String(IrisStyle.identity.green), get swatch() { return IrisStyle.identity.green } },
-        { label: "Pink", value: String(IrisStyle.identity.pink), get swatch() { return IrisStyle.identity.pink } },
-        { label: "Gray", value: String(IrisStyle.identity.gray), get swatch() { return IrisStyle.identity.gray } }
+        { label: "Accent", get value() { return String(IrisStyle.accent) }, get swatch() { return IrisStyle.accent } },
+        { label: "Highlight", get value() { return String(IrisStyle.secondaryAccent) }, get swatch() { return IrisStyle.secondaryAccent } },
+        { label: "Blue", get value() { return String(IrisStyle.identity.blue) }, get swatch() { return IrisStyle.identity.blue } },
+        { label: "Green", get value() { return String(IrisStyle.identity.green) }, get swatch() { return IrisStyle.identity.green } },
+        { label: "Pink", get value() { return String(IrisStyle.identity.pink) }, get swatch() { return IrisStyle.identity.pink } },
+        { label: "Gray", get value() { return String(IrisStyle.identity.gray) }, get swatch() { return IrisStyle.identity.gray } }
     ]
     // Niri's own settings, read and written through inir-accel niri-config (IrisNiri). `niri` is the config section.
     readonly property var niriRows: [
@@ -1716,7 +1721,7 @@ QtObject {
             const label = String(spec.label ?? "")
             const group = String(spec.group ?? "")
             out.push({ value: value, label: label, area: String(area?.title ?? ""), group: group !== label ? group : "", icon: String(area?.icon ?? "settings"),
-                tint: area?.tint ?? IrisStyle.identity.gray, daily: root.homeSuggested.includes(value),
+                get tint() { return area?.tint ?? IrisStyle.identity.gray }, daily: root.homeSuggested.includes(value),
                 search: [label, Translation.tr(label), group, Translation.tr(group), String(area?.title ?? ""), Translation.tr(String(area?.title ?? ""))].concat(spec.keywords ?? []).join(" ").toLowerCase() })
         }
         root.dailySwitches.forEach(spec => add(spec, spec.id))
