@@ -118,7 +118,7 @@ Item {
     // choice fell under its row at the full width, 10-29).
     readonly property real choiceHug: root.spec.kind !== "choice" || root.choices.length === 0 ? 0
         : Math.ceil(root.choices.reduce((sum, choice) => sum + choiceMetrics.advanceWidth(Translation.tr(String(choice.label ?? ""))) + 24 * root.d, 0) + 6 * root.d)
-    readonly property real voicedNatural: root.voicedChoice ? Math.max(Number(inlineSegments.item?.implicitWidth ?? 0), root.choiceHug) : 0
+    readonly property real voicedNatural: root.voicedChoice ? root.choiceHug : 0
     readonly property bool inlineChoice: root.voicedChoice ? root.voicedNatural > 0 && root.voicedNatural <= root.controlWidth
         : root.spec.kind === "choice" && root.roomy && root.choices.length >= 2 && root.choices.length <= 4
         && !root.swatched && !root.tiled && !root.carded && root.segmentNatural <= root.controlWidth
