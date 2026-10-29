@@ -17,7 +17,7 @@ Item {
     property string pluginName: ""
     property string pluginIcon: "language"
 
-    // Userscript JS source code — pre-read by scan-plugins.py
+    // Userscript JS source code — pre-read by accel scan-plugins
     // Injected via runJavaScript after each successful page load.
     property var userscriptSources: []
 

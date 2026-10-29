@@ -92,7 +92,7 @@ Item {
     // ─── Processes ───────────────────────────────────────────────────
     Process {
         id: scanProcess
-        command: ["/usr/bin/python3", Quickshell.shellPath("scripts/scan-plugins.py")]
+        command: [Quickshell.shellPath("scripts/lib/accel-run"), "scan-plugins", "--defaults", Quickshell.shellPath("defaults/plugins")]
         stdout: SplitParser {
             onRead: data => root._parsePluginList(data)
         }
