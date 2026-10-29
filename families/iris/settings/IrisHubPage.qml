@@ -60,6 +60,8 @@ Flickable {
         case "conflict": return { text: Translation.tr("Name taken") }
         case "incompatible": return { text: Translation.tr("Needs iNiR %1").arg(item.minInir) }
         case "get": return { text: Translation.tr("Get"), strong: true, run: () => Hub.install(item.id) }
+        case "active": return { text: Translation.tr("In use") }
+        case "present": return { text: Translation.tr("Use"), run: () => Hub.useFamily(item.id) }
         }
         if (item.kind === "iris-theme") {
             if (IrisThemes.activeId === item.id)
@@ -74,7 +76,7 @@ Flickable {
         return { text: Translation.tr("Installed") }
     }
     function whereOf(item: var): string {
-        return Hub.fits(item, "iris") ? Hub.whereText(item, "iris") : Translation.tr("For %1").arg(Hub.familyNames(item))
+        return Hub.whereOf(item, "iris")
     }
     function applyTheme(id: string): void {
         const theme = IrisThemes.find(id)
@@ -126,7 +128,7 @@ Flickable {
                         : !Hub.online ? Translation.tr("Offline · the list from the last time the hub answered")
                         : Hub.error.length > 0 ? Translation.tr("The hub didn't answer · the list from the last time it did")
                         : Hub.updates > 0 ? Translation.tr("%1 updates waiting").arg(Hub.updates)
-                        : Translation.tr("%1 in the hub · %2 installed").arg(Hub.items.length).arg(Hub.items.filter(item => item.installed).length)
+                        : Translation.tr("%1 in the hub · %2 installed").arg(Hub.items.length).arg(Hub.items.filter(item => Hub.owned(item)).length)
                 }
             }
             IrisButton {
@@ -177,8 +179,7 @@ Flickable {
                 IrisText {
                     anchors.verticalCenter: parent.verticalCenter
                     visible: searchField.text.length === 0
-                    text: Hub.items.length > 0 ? Translation.tr("Search %1 widgets, themes and web apps").arg(Hub.items.length)
-                        : Translation.tr("Search the hub")
+                    text: Translation.tr("Search the hub")
                     color: IrisStyle.muted
                     font.pixelSize: searchField.font.pixelSize
                 }
@@ -455,7 +456,7 @@ Flickable {
                 IrisText {
                     Layout.fillWidth: true
                     role: IrisText.Meta
-                    text: [Translation.tr(Hub.kindLabel(card.modelData.kind)), Array.from(card.modelData.authors ?? []).join(", ")]
+                    text: [Translation.tr(Hub.kindName(card.modelData.kind)), Array.from(card.modelData.authors ?? []).join(", ")]
                         .filter(part => part.length > 0).join(" · ")
                     elide: Text.ElideRight
                 }

@@ -46,6 +46,8 @@ WSettingsPage {
         case "conflict": return { text: Translation.tr("Name taken") }
         case "incompatible": return { text: Translation.tr("Needs iNiR %1").arg(item.minInir) }
         case "get": return { text: Translation.tr("Get"), accent: true, run: () => Hub.install(item.id) }
+        case "active": return { text: Translation.tr("In use") }
+        case "present": return { text: Translation.tr("Use"), run: () => Hub.useFamily(item.id) }
         }
         if (item.kind === "theme")
             return { text: Translation.tr("Use"), run: () => Hub.useTheme(item.id) }
@@ -57,7 +59,7 @@ WSettingsPage {
         return { text: Translation.tr("Installed") }
     }
     function whereOf(item: var): string {
-        return Hub.fits(item, "waffle") ? Hub.whereText(item, "waffle") : Translation.tr("For %1").arg(Hub.familyNames(item))
+        return Hub.whereOf(item, "waffle")
     }
 
     // ── Search, filters, state ────────────────────────────────────────
@@ -69,7 +71,7 @@ WSettingsPage {
         WTextField {
             id: searchField
             Layout.fillWidth: true
-            placeholderText: Hub.items.length > 0 ? Translation.tr("Search %1 widgets, themes and web apps").arg(Hub.items.length) : Translation.tr("Search the hub")
+            placeholderText: Translation.tr("Search the hub")
             onTextChanged: searchDelay.restart()
             Timer { id: searchDelay; interval: 140; onTriggered: root.query = searchField.text }
         }
@@ -315,7 +317,7 @@ WSettingsPage {
                 }
                 WText {
                     Layout.fillWidth: true
-                    text: [Translation.tr(Hub.kindLabel(card.modelData.kind)), Array.from(card.modelData.authors ?? []).join(", ")]
+                    text: [Translation.tr(Hub.kindName(card.modelData.kind)), Array.from(card.modelData.authors ?? []).join(", ")]
                         .filter(part => part.length > 0).join(" · ")
                     font.pixelSize: Looks.font.pixelSize.small
                     color: Looks.colors.subfg

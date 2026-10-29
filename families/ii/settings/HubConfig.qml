@@ -87,6 +87,8 @@ ContentPage {
         case "conflict": return { text: Translation.tr("Name taken"), icon: "block", tone: "off" }
         case "incompatible": return { text: Translation.tr("Needs iNiR %1").arg(item.minInir), icon: "block", tone: "off" }
         case "get": return { text: Translation.tr("Get"), icon: "download", tone: Hub.fits(item, root.family) ? "primary" : "tonal", run: () => Hub.install(item.id) }
+        case "active": return { text: Translation.tr("In use"), icon: "check", tone: "off" }
+        case "present": return { text: Translation.tr("Use"), icon: "swap_horiz", tone: "tonal", run: () => Hub.useFamily(item.id) }
         }
         if (item.kind === "theme" && Hub.fits(item, root.family))
             return { text: Translation.tr("Use"), icon: "format_paint", tone: "tonal", run: () => Hub.useTheme(item.id) }
@@ -98,7 +100,7 @@ ContentPage {
         return { text: Translation.tr("Installed"), icon: "check", tone: "off" }
     }
     function whereOf(item: var): string {
-        return Hub.fits(item, root.family) ? Hub.whereText(item, root.family) : Translation.tr("For %1").arg(Hub.familyNames(item))
+        return Hub.whereOf(item, root.family)
     }
     function authorsOf(item: var): string {
         return Array.from(item?.authors ?? []).join(", ")
@@ -163,7 +165,6 @@ ContentPage {
                             width: parent.width
                             visible: searchInput.text.length === 0
                             text: !Hub.loaded ? Translation.tr("Reading the hub…")
-                                : Hub.items.length > 0 ? Translation.tr("Search %1 widgets, themes and web apps").arg(Hub.items.length)
                                 : Translation.tr("Search the hub")
                             font.pixelSize: Appearance.font.pixelSize.normal
                             color: Appearance.colors.colSubtext
