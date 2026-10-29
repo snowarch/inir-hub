@@ -33,7 +33,9 @@ TextField {
     background: Rectangle {
         radius: Looks.settings.radiusSmall
         color: root.activeFocus ? (Looks.dark ? Qt.rgba(0.12, 0.12, 0.12, 0.7) : "#FFFFFF")
-            : root.hovered ? Looks.settings.cardHover : Qt.alpha(Looks.colors.fg, Looks.dark ? 0.06 : 0.7)
+            // ControlFillColorDefault is white in both themes (#0FFFFFFF dark, #B3FFFFFF light): the ink at 70 %
+            // painted a dark slab on every light page (Hub search, Autostart's command line).
+            : root.hovered ? Looks.settings.cardHover : Qt.rgba(1, 1, 1, Looks.dark ? 0.06 : 0.7)
         border.width: 1
         border.color: Looks.settings.cardStroke
         clip: true
