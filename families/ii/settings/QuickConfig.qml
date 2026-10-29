@@ -140,8 +140,7 @@ ContentPage {
         ]
     }
 
-    // Deferred in both modes: entering the page must never kick off directory-wide
-    // thumbnail generation. The user asks for the grid explicitly.
+    Component.onCompleted: {
         Wallpapers.load()
     }
 
