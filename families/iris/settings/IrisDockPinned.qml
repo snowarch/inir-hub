@@ -113,6 +113,15 @@ Item {
                 opacity: row.dragged ? 1 : row.activeFocus ? 0.6 : 0
                 Behavior on opacity { NumberAnimation { duration: 120; easing.type: IrisStyle.feedbackEasing } }
             }
+            // Keyboard focus also wears the accent ring every row does: the plate alone was too faint to find.
+            Rectangle {
+                visible: row.activeFocus && !row.dragged
+                anchors.fill: parent
+                radius: IrisStyle.radiusTile
+                color: "transparent"
+                border.width: 1
+                border.color: IrisStyle.appleAccent
+            }
             Rectangle {
                 visible: !row.dragged && root.dragFrom < 0 && row.index < root.pinned.length - 1
                 anchors.left: mark.left

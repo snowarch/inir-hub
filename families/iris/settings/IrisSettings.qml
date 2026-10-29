@@ -702,9 +702,44 @@ Item {
     Shortcut { sequence: "Ctrl+F"; enabled: GlobalStates.settingsOverlayOpen; onActivated: searchField.forceActiveFocus() }
     // Typing anywhere on the page searches: a letter no control takes reaches the page and goes to the field.
     // ↑ and ↓ walk the sidebar's areas when nothing on the page holds the keys (DI49a: they did nothing).
-    Keys.onUpPressed: event => { if (event.modifiers === Qt.NoModifier) root.stepSection(-1); else event.accepted = false }
-    Keys.onDownPressed: event => { if (event.modifiers === Qt.NoModifier) root.stepSection(1); else event.accepted = false }
+    // From a control on the page they go to the control above or below instead, as in a list of preferences: jumping to
+    // another area from a focused switch lost the place.
+    Keys.onUpPressed: event => {
+        if (event.modifiers !== Qt.NoModifier) event.accepted = false
+        else if (!root.stepFocus(root.Window.activeFocusItem, false)) root.stepSection(-1)
+    }
+    Keys.onDownPressed: event => {
+        if (event.modifiers !== Qt.NoModifier) event.accepted = false
+        else if (!root.stepFocus(root.Window.activeFocusItem, true)) root.stepSection(1)
+    }
     Keys.onPressed: event => typeAhead.take(event)
+    // The page a control scrolls in (any mode's own Flickable), null for the head and the sidebar.
+    function pageScroller(item: Item): Item {
+        for (let p = item?.parent ?? null; p && p !== root; p = p.parent)
+            if (p === sidebarFlick) return null
+            else if (p.contentItem !== undefined && p.contentY !== undefined && p.flickableDirection !== undefined) return p
+        return null
+    }
+    function stepFocus(item: Item, forward: bool): bool {
+        const scroller = root.pageScroller(item)
+        if (!scroller) return false
+        const next = item.nextItemInFocusChain(forward)
+        if (next && next !== item && root.pageScroller(next) === scroller)
+            next.forceActiveFocus(forward ? Qt.TabFocusReason : Qt.BacktabFocusReason)
+        return true
+    }
+    // The page follows the keyboard: a control Tab reaches below the fold scrolls into view with some air.
+    readonly property Item keyed: root.Window.activeFocusItem
+    onKeyedChanged: if (root.keyed) Qt.callLater(root.followFocus, root.keyed)
+    function followFocus(item: Item): void {
+        const scroller = root.pageScroller(item)
+        if (!scroller || !item.visible || scroller.contentHeight <= scroller.height) return
+        const top = item.mapToItem(scroller.contentItem, 0, 0).y
+        const air = 32 * root.d
+        if (top - air < scroller.contentY) scroller.contentY = Math.max(0, top - air)
+        else if (top + item.height + air > scroller.contentY + scroller.height)
+            scroller.contentY = Math.min(scroller.contentHeight - scroller.height, top + item.height + air - scroller.height)
+    }
     IrisTypeAhead { id: typeAhead; field: searchField }
     // The other host opens where this one stands.
     readonly property bool hostHere: root.windowed === ((Config.options?.iris?.appearance?.settingsHost ?? "overlay") === "window")

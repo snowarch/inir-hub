@@ -167,7 +167,16 @@ Rectangle {
         }
     }
 
+    // One Tab stop for the whole choice, on the chosen segment (a radio group): ← → pick the neighbour and the focus
+    // goes with it. A stop per segment made Screen edge alone five Tabs.
+    function stepFrom(index: int, delta: int): void {
+        const next = index + delta
+        if (next < 0 || next >= root.count) return
+        root.picked(root.options[next].value)
+        segments.itemAt(next)?.forceActiveFocus(Qt.TabFocusReason)
+    }
     Repeater {
+        id: segments
         model: root.options
         MouseArea {
             id: segment
@@ -180,13 +189,13 @@ Rectangle {
             height: root.height - 2 * root.inset
             hoverEnabled: true
             cursorShape: Qt.PointingHandCursor
-            activeFocusOnTab: true
+            activeFocusOnTab: segment.selected || (root.selectedIndex < 0 && segment.index === 0)
             Accessible.role: Accessible.RadioButton
             Accessible.name: (root.accessibleName.length > 0 ? root.accessibleName + ": " : "") + Translation.tr(String(segment.modelData.label ?? ""))
             Accessible.checked: segment.selected
             Keys.onSpacePressed: root.picked(segment.modelData.value)
-            Keys.onLeftPressed: if (segment.index > 0) root.picked(root.options[segment.index - 1].value)
-            Keys.onRightPressed: if (segment.index < root.count - 1) root.picked(root.options[segment.index + 1].value)
+            Keys.onLeftPressed: root.stepFrom(segment.index, -1)
+            Keys.onRightPressed: root.stepFrom(segment.index, 1)
             Keys.onReturnPressed: root.picked(segment.modelData.value)
             onClicked: root.picked(segment.modelData.value)
             onContainsMouseChanged: if (segment.containsMouse) root.hoveredIndex = segment.index
