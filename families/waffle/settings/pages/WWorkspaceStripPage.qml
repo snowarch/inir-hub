@@ -49,7 +49,7 @@ WSettingsPage {
 
         WSettingsRow {
             label: Translation.tr("Edge")
-            icon: "border-outside"
+            icon: "panel-left-expand"
 
             control: Component {
                 WSettingsChoiceGroup {

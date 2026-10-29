@@ -1031,10 +1031,18 @@ Item {
                 spacing: Looks.dp(14)
                 readonly property var cat: root.categories[root.activeCategory] ?? null
                 readonly property bool nested: crumb.cat !== null && crumb.cat.pages.length > 1 && root.landingCategory < 0
+                // As WinUI's BreadcrumbBar: when the path runs out of room the category folds into "…", still the way back.
+                readonly property bool folded: {
+                    crumbType.font
+                    return crumb.nested && crumbType.advanceWidth(crumb.cat.name) + crumbType.advanceWidth(pageCrumb.text)
+                        + Looks.dp(16) + 2 * crumb.spacing > crumb.width
+                }
+                FontMetrics { id: crumbType; font: pageCrumb.font }
 
                 WText {
                     visible: crumb.nested
-                    text: crumb.cat ? crumb.cat.name : ""
+                    text: crumb.folded ? "…" : crumb.cat ? crumb.cat.name : ""
+                    Accessible.name: crumb.cat ? crumb.cat.name : ""
                     font.pixelSize: Looks.settings.title
                     font.weight: Looks.font.weight.strong
                     color: crumbMouse.containsMouse ? Looks.colors.fg : Looks.colors.subfg
@@ -1053,6 +1061,7 @@ Item {
                     color: Looks.colors.subfg
                 }
                 WText {
+                    id: pageCrumb
                     Layout.fillWidth: true
                     text: root.landingCategory >= 0 ? (crumb.cat ? crumb.cat.name : "")
                         : (root.pages[root.currentPage]?.name ?? "")
