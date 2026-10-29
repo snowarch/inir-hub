@@ -27,7 +27,7 @@ ClippingRectangle {
     // The desk takes at most a third of a narrow card and leaves when the card cannot hold it beside a readable
     // column (a Settings window, a large text scale): the strip under it still shows the wallpapers.
     readonly property bool deskShown: card.width >= 520 * card.d
-    readonly property real deskHeight: Math.round(Math.min(card.stageHeight - 60 * card.d, card.width * 0.54 * desk.screenH / Math.max(1, desk.screenW)))
+    readonly property real deskHeight: Math.round(Math.min(card.stageHeight - 36 * card.d, card.width * 0.54 * desk.screenH / Math.max(1, desk.screenW)))
     property var screen: GlobalStates.focusedScreen
     readonly property string current: Wallpapers.effectiveWallpaperPath
     readonly property string kind: Wallpapers.isVideoFile(card.current) ? Translation.tr("Live")
