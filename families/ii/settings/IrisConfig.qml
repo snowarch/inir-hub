@@ -153,7 +153,7 @@ ContentPage {
                             from: 80
                             to: 135
                             stepSize: 5
-                            onValueChanged: Config.setNestedValue("iris.appearance.density", value / 100)
+                            onValueModified: Config.setNestedValue("iris.appearance.density", value / 100)
                         }
                     }
                     SettingsSwitch {
@@ -202,7 +202,7 @@ ContentPage {
                             value: Config.options?.iris?.bar?.height ?? 42
                             from: 32
                             to: 64
-                            onValueChanged: Config.setNestedValue("iris.bar.height", value)
+                            onValueModified: Config.setNestedValue("iris.bar.height", value)
                         }
                         ConfigSpinBox {
                             icon: "space_bar"
@@ -210,7 +210,7 @@ ContentPage {
                             value: Config.options?.iris?.bar?.margin ?? 8
                             from: 0
                             to: 24
-                            onValueChanged: Config.setNestedValue("iris.bar.margin", value)
+                            onValueModified: Config.setNestedValue("iris.bar.margin", value)
                         }
                     }
                     SettingsSwitch {
@@ -363,7 +363,7 @@ ContentPage {
                         from: 28
                         to: 64
                         stepSize: 2
-                        onValueChanged: Config.setNestedValue("iris.dock.iconSize", value)
+                        onValueModified: Config.setNestedValue("iris.dock.iconSize", value)
                     }
                     SettingsSwitch {
                         buttonIcon: "search"
@@ -429,7 +429,7 @@ ContentPage {
                         from: 420
                         to: 900
                         stepSize: 10
-                        onValueChanged: Config.setNestedValue("iris.palette.width", value)
+                        onValueModified: Config.setNestedValue("iris.palette.width", value)
                     }
                     ConfigSpinBox {
                         icon: "format_list_numbered"
@@ -437,7 +437,7 @@ ContentPage {
                         value: Config.options?.iris?.palette?.maxResults ?? 8
                         from: 3
                         to: 14
-                        onValueChanged: Config.setNestedValue("iris.palette.maxResults", value)
+                        onValueModified: Config.setNestedValue("iris.palette.maxResults", value)
                     }
                     SettingsSwitch {
                         buttonIcon: "keyboard"
@@ -454,7 +454,7 @@ ContentPage {
                             from: 300
                             to: 540
                             stepSize: 10
-                            onValueChanged: Config.setNestedValue("iris.controlCenter.width", value)
+                            onValueModified: Config.setNestedValue("iris.controlCenter.width", value)
                         }
                         ConfigSpinBox {
                             icon: "notifications"
@@ -463,7 +463,7 @@ ContentPage {
                             from: 300
                             to: 560
                             stepSize: 10
-                            onValueChanged: Config.setNestedValue("iris.notifications.width", value)
+                            onValueModified: Config.setNestedValue("iris.notifications.width", value)
                         }
                     }
                     ConfigSpinBox {
@@ -471,9 +471,9 @@ ContentPage {
                         text: Translation.tr("OSD width")
                         value: Config.options?.iris?.osd?.width ?? 320
                         from: 260
-                        to: 480
+                        to: 520
                         stepSize: 10
-                        onValueChanged: Config.setNestedValue("iris.osd.width", value)
+                        onValueModified: Config.setNestedValue("iris.osd.width", value)
                     }
                 }
             }
@@ -506,13 +506,13 @@ ContentPage {
                                 text: Translation.tr("Width")
                                 value: sideSection.options.width ?? 380
                                 from: 300; to: 600; stepSize: 10
-                                onValueChanged: Config.setNestedValue(sideSection.path + ".width", value)
+                                onValueModified: Config.setNestedValue(sideSection.path + ".width", value)
                             }
                             ConfigSpinBox {
                                 text: Translation.tr("Height (%)")
                                 value: sideSection.options.height ?? 88
                                 from: 45; to: 100
-                                onValueChanged: Config.setNestedValue(sideSection.path + ".height", value)
+                                onValueModified: Config.setNestedValue(sideSection.path + ".height", value)
                             }
                             RowLayout {
                                 StyledText { Layout.fillWidth: true; text: Translation.tr("Alignment") }

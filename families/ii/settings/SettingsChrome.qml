@@ -442,6 +442,8 @@ Item {
                     color: searchField.activeFocus ? SettingsMaterialPreset.controlHoverColor : SettingsMaterialPreset.controlColor
                     border.width: searchField.activeFocus ? 2 : 0
                     border.color: SettingsMaterialPreset.subheaderColor
+                    // The key hint is the first thing to go when the words would run into it (a large text scale).
+                    readonly property bool hintFits: 16 + 22 + 12 + searchHint.implicitWidth + 12 + keyHintChip.implicitWidth + 6 + 8 <= searchBox.width
 
                     MouseArea {
                         anchors.fill: parent
@@ -486,7 +488,10 @@ Item {
                                 }
                             }
                             StyledText {
+                                id: searchHint
                                 anchors.verticalCenter: parent.verticalCenter
+                                width: parent.width
+                                elide: Text.ElideRight
                                 visible: searchField.text.length === 0
                                 text: Translation.tr("Search settings")
                                 font.pixelSize: SettingsMaterialPreset.labelSize
@@ -494,9 +499,10 @@ Item {
                             }
                         }
                         Rectangle {
-                            visible: searchField.text.length === 0 && !searchField.activeFocus
+                            id: keyHintChip
+                            visible: searchField.text.length === 0 && !searchField.activeFocus && searchBox.hintFits
                             implicitWidth: keyHint.implicitWidth + 14
-                            implicitHeight: 24
+                            implicitHeight: keyHint.implicitHeight + 6
                             radius: 6
                             color: "transparent"
                             border.width: 1

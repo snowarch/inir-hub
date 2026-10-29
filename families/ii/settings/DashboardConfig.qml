@@ -86,7 +86,7 @@ ContentPage {
                 from: 40
                 to: 90
                 stepSize: 2
-                onValueChanged: Config.setNestedValue("dashboard.widthRatio", value / 100)
+                onValueModified: Config.setNestedValue("dashboard.widthRatio", value / 100)
             }
         }
 
@@ -174,7 +174,7 @@ ContentPage {
                 from: 30
                 to: 100
                 stepSize: 5
-                onValueChanged: Config.setNestedValue("dashboard.appearance.cardOpacity", value / 100)
+                onValueModified: Config.setNestedValue("dashboard.appearance.cardOpacity", value / 100)
             }
             ConfigSwitch {
                 text: Translation.tr("Show card titles")

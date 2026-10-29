@@ -205,7 +205,7 @@ ContentPage {
                 stepSize: 5
                 property bool _ready: false
                 Component.onCompleted: _ready = true
-                onValueChanged: {
+                onValueModified: {
                     if (!_ready) return;
                     Config.setNestedValue("appearance.wallpaperTheming.colorStrength", value / 100)
                     if (ThemeService.isAutoTheme)

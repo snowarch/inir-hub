@@ -1081,21 +1081,13 @@ ContentPage {
                     from: 50
                     to: 200
                     stepSize: 5
-                    onValueChanged: {
+                    onValueModified: {
                         Config.setNestedValue("appearance.typography.sizeScale", value / 100)
                     }
                     StyledToolTip {
                         text: Translation.tr("Scale fonts and spacing throughout the shell. Takes effect immediately.")
                     }
                 }
-            }
-
-            StyledText {
-                Layout.leftMargin: 16
-                text: Translation.tr("Current: %1%. Takes effect immediately.").arg(
-                    Math.round((Config.options?.appearance?.typography?.sizeScale ?? 1.0) * 100))
-                font.pixelSize: Appearance.font.pixelSize.smaller
-                color: Appearance.colors.colSubtext
             }
 
             RowLayout {
@@ -1224,7 +1216,7 @@ ContentPage {
                     from: 0
                     to: 100
                     stepSize: 10
-                    onValueChanged: Config.setNestedValue("settingsUi.overlayAppearance.backdropBlur", value)
+                    onValueModified: Config.setNestedValue("settingsUi.overlayAppearance.backdropBlur", value)
                     StyledToolTip {
                         text: Translation.tr("Blur the wallpaper behind the Settings overlay while it is open, using the same glass the rest of the shell paints. 0 turns it off and costs nothing.")
                     }
@@ -1237,7 +1229,7 @@ ContentPage {
                     from: 0
                     to: 80
                     stepSize: 5
-                    onValueChanged: Config.setNestedValue("settingsUi.overlayAppearance.scrimDim", value)
+                    onValueModified: Config.setNestedValue("settingsUi.overlayAppearance.scrimDim", value)
                     StyledToolTip {
                         text: Translation.tr("How dark the backdrop behind the Settings panel should be (0 = transparent, 80 = very dark)")
                     }
@@ -1255,7 +1247,7 @@ ContentPage {
                     from: 60
                     to: 100
                     stepSize: 5
-                    onValueChanged: Config.setNestedValue("settingsUi.overlayAppearance.backgroundOpacity", value / 100)
+                    onValueModified: Config.setNestedValue("settingsUi.overlayAppearance.backgroundOpacity", value / 100)
                     StyledToolTip {
                         text: Translation.tr("Opacity of the Settings panel background. Lower values let the shell show through; with a glass style it thins the frosted tint instead.")
                     }

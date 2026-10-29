@@ -164,7 +164,7 @@ ContentPage {
                     to: 100
                     stepSize: 5
                     enabled: Config.options?.overlay?.darkenScreen ?? false
-                    onValueChanged: Config.setNestedValue("overlay.scrimDim", value)
+                    onValueModified: Config.setNestedValue("overlay.scrimDim", value)
                     StyledToolTip {
                         text: Translation.tr("How dark the background scrim should be")
                     }
@@ -177,7 +177,7 @@ ContentPage {
                     from: 20
                     to: 100
                     stepSize: 5
-                    onValueChanged: Config.setNestedValue("overlay.backgroundOpacity", value / 100)
+                    onValueModified: Config.setNestedValue("overlay.backgroundOpacity", value / 100)
                     StyledToolTip {
                         text: Translation.tr("Opacity of the overlay panel background")
                     }
@@ -191,7 +191,7 @@ ContentPage {
                     to: 100
                     stepSize: 5
                     enabled: !(Config.options?.overlay?.gamePerformance?.transparentBackground ?? false)
-                    onValueChanged: Config.setNestedValue(
+                    onValueModified: Config.setNestedValue(
                         "overlay.gamePerformance.backgroundOpacity", value / 100)
                     StyledToolTip {
                         text: Translation.tr("Opacity of the Game Performance panel; set 0 for a transparent readout")
@@ -230,7 +230,7 @@ ContentPage {
                     from: 0
                     to: 1000
                     stepSize: 20
-                    onValueChanged: Config.setNestedValue("overlay.animationDurationMs", value)
+                    onValueModified: Config.setNestedValue("overlay.animationDurationMs", value)
                     StyledToolTip {
                         text: Translation.tr("Duration of overlay open/close animations")
                     }
@@ -243,7 +243,7 @@ ContentPage {
                     from: 0
                     to: 1000
                     stepSize: 20
-                    onValueChanged: Config.setNestedValue("overlay.scrimAnimationDurationMs", value)
+                    onValueModified: Config.setNestedValue("overlay.scrimAnimationDurationMs", value)
                     StyledToolTip {
                         text: Translation.tr("Duration of the background scrim fade animation")
                     }
@@ -292,7 +292,7 @@ ContentPage {
                     from: 0
                     to: 100
                     stepSize: 10
-                    onValueChanged: Config.setNestedValue("appearance.desaturation.saturation", -value / 100)
+                    onValueModified: Config.setNestedValue("appearance.desaturation.saturation", -value / 100)
                     StyledToolTip {
                         text: Translation.tr("Amount of color to remove (0 = normal, 100 = grayscale)")
                     }
@@ -304,7 +304,7 @@ ContentPage {
                     from: 0
                     to: 50
                     stepSize: 5
-                    onValueChanged: Config.setNestedValue("appearance.desaturation.brightness", -value / 100)
+                    onValueModified: Config.setNestedValue("appearance.desaturation.brightness", -value / 100)
                     StyledToolTip {
                         text: Translation.tr("Amount of brightness reduction (0 = normal)")
                     }
@@ -446,7 +446,7 @@ ContentPage {
                 from: 0
                 to: 1000
                 stepSize: 25
-                onValueChanged: Config.setNestedValue("altSwitcher.animationDurationMs", value)
+                onValueModified: Config.setNestedValue("altSwitcher.animationDurationMs", value)
                 StyledToolTip {
                     text: Translation.tr("Duration of the slide animation between windows")
                 }
@@ -469,7 +469,7 @@ ContentPage {
                 from: 10
                 to: 100
                 stepSize: 5
-                onValueChanged: Config.setNestedValue("altSwitcher.backgroundOpacity", value / 100)
+                onValueModified: Config.setNestedValue("altSwitcher.backgroundOpacity", value / 100)
                 StyledToolTip {
                     text: Translation.tr("Opacity of the switcher panel background")
                 }
@@ -482,7 +482,7 @@ ContentPage {
                 from: 0
                 to: 100
                 stepSize: 5
-                onValueChanged: Config.setNestedValue("altSwitcher.blurAmount", value / 100)
+                onValueModified: Config.setNestedValue("altSwitcher.blurAmount", value / 100)
                 StyledToolTip {
                     text: Translation.tr("Amount of blur applied to the switcher background")
                 }
@@ -495,7 +495,7 @@ ContentPage {
                 from: 0
                 to: 100
                 stepSize: 5
-                onValueChanged: Config.setNestedValue("altSwitcher.scrimDim", value)
+                onValueModified: Config.setNestedValue("altSwitcher.scrimDim", value)
                 StyledToolTip {
                     text: Translation.tr("How dark the screen behind the switcher should be")
                 }
@@ -508,7 +508,7 @@ ContentPage {
                 from: 50
                 to: 2000
                 stepSize: 50
-                onValueChanged: Config.setNestedValue("altSwitcher.autoHideDelayMs", value)
+                onValueModified: Config.setNestedValue("altSwitcher.autoHideDelayMs", value)
                 StyledToolTip {
                     text: Translation.tr("How long a pick waits before switching, even with Alt still held")
                 }
@@ -599,7 +599,7 @@ ContentPage {
                 from: 1000
                 to: 30000
                 stepSize: 500
-                onValueChanged: {
+                onValueModified: {
                     Config.setNestedValue("notifications.timeoutNormal", value)
                 }
                 StyledToolTip {
@@ -678,7 +678,7 @@ ContentPage {
                 from: 0
                 to: 100
                 stepSize: 1
-                onValueChanged: {
+                onValueModified: {
                     Config.setNestedValue("notifications.edgeMargin", value)
                 }
                 StyledToolTip {
@@ -1119,7 +1119,7 @@ ContentPage {
                     from: 0
                     to: 24
                     stepSize: 2
-                    onValueChanged: Config.setNestedValue("sidebar.widgets.spacing", value)
+                    onValueModified: Config.setNestedValue("sidebar.widgets.spacing", value)
                     StyledToolTip {
                         text: Translation.tr("Space between widgets in pixels")
                     }
@@ -1172,7 +1172,7 @@ ContentPage {
                     from: 30
                     to: 300
                     stepSize: 30
-                    onValueChanged: Config.setNestedValue("sidebar.widgets.crypto_settings.refreshInterval", value)
+                    onValueModified: Config.setNestedValue("sidebar.widgets.crypto_settings.refreshInterval", value)
                 }
 
                 // Coin input with autocomplete
@@ -1911,7 +1911,7 @@ ContentPage {
                     from: 40
                     to: 80
                     stepSize: 4
-                    onValueChanged: Config.setNestedValue("sidebar.widgets.quickWallpaper.itemSize", value)
+                    onValueModified: Config.setNestedValue("sidebar.widgets.quickWallpaper.itemSize", value)
                 }
 
                 SettingsSwitch {
@@ -2184,7 +2184,7 @@ ContentPage {
                 from: 1
                 to: 100
                 stepSize: 1
-                onValueChanged: {
+                onValueModified: {
                     Config.setNestedValue("overview.scale", value / 100);
                 }
                 StyledToolTip {
@@ -2200,7 +2200,7 @@ ContentPage {
                     from: 1
                     to: 20
                     stepSize: 1
-                    onValueChanged: {
+                    onValueModified: {
                         Config.setNestedValue("overview.rows", value);
                     }
                     StyledToolTip {
@@ -2214,7 +2214,7 @@ ContentPage {
                     from: 1
                     to: 20
                     stepSize: 1
-                    onValueChanged: {
+                    onValueModified: {
                         Config.setNestedValue("overview.columns", value);
                     }
                     StyledToolTip {
@@ -2247,7 +2247,7 @@ ContentPage {
                     to: 100
                     stepSize: 1
                     enabled: !Config.options.overview || Config.options.overview.backgroundBlurEnable !== false
-                    onValueChanged: {
+                    onValueModified: {
                         Config.setNestedValue("overview.backgroundBlurRadius", value);
                     }
                     StyledToolTip {
@@ -2264,7 +2264,7 @@ ContentPage {
                     from: 0
                     to: 100
                     stepSize: 5
-                    onValueChanged: {
+                    onValueModified: {
                         Config.setNestedValue("overview.backgroundDim", value);
                     }
                     StyledToolTip {
@@ -2281,7 +2281,7 @@ ContentPage {
                     from: 0
                     to: 100
                     stepSize: 5
-                    onValueChanged: {
+                    onValueModified: {
                         Config.setNestedValue("overview.scrimDim", value);
                     }
                     StyledToolTip {
@@ -2315,7 +2315,7 @@ ContentPage {
                         from: 0
                         to: 400
                         stepSize: 1
-                        onValueChanged: {
+                        onValueModified: {
                             Config.setNestedValue("overview.topMargin", value);
                         }
                         StyledToolTip {
@@ -2331,7 +2331,7 @@ ContentPage {
                         from: 0
                         to: 400
                         stepSize: 1
-                        onValueChanged: {
+                        onValueModified: {
                             Config.setNestedValue("overview.bottomMargin", value);
                         }
                         StyledToolTip {
@@ -2352,7 +2352,7 @@ ContentPage {
                     from: 10
                     to: 100
                     stepSize: 5
-                    onValueChanged: {
+                    onValueModified: {
                         Config.setNestedValue("overview.maxPanelWidthRatio", value / 100);
                     }
                     StyledToolTip {
@@ -2371,7 +2371,7 @@ ContentPage {
                         from: 0
                         to: 80
                         stepSize: 1
-                        onValueChanged: {
+                        onValueModified: {
                             Config.setNestedValue("overview.workspaceSpacing", value);
                         }
                         StyledToolTip {
@@ -2387,7 +2387,7 @@ ContentPage {
                         from: 0
                         to: 80
                         stepSize: 1
-                        onValueChanged: {
+                        onValueModified: {
                             Config.setNestedValue("overview.windowTileMargin", value);
                         }
                         StyledToolTip {
@@ -2410,7 +2410,7 @@ ContentPage {
                         from: 0
                         to: 512
                         stepSize: 2
-                        onValueChanged: {
+                        onValueModified: {
                             Config.setNestedValue("overview.iconMinSize", value);
                         }
                         StyledToolTip {
@@ -2426,7 +2426,7 @@ ContentPage {
                         from: 0
                         to: 512
                         stepSize: 2
-                        onValueChanged: {
+                        onValueModified: {
                             Config.setNestedValue("overview.iconMaxSize", value);
                         }
                         StyledToolTip {
@@ -2460,7 +2460,7 @@ ContentPage {
                     from: 1
                     to: 20
                     stepSize: 1
-                    onValueChanged: {
+                    onValueModified: {
                         Config.setNestedValue("overview.switchWorkspaceIndex", value);
                     }
                     StyledToolTip {
@@ -2476,7 +2476,7 @@ ContentPage {
                     from: 1
                     to: 10
                     stepSize: 1
-                    onValueChanged: {
+                    onValueModified: {
                         Config.setNestedValue("overview.scrollWorkspaceSteps", value);
                     }
                     StyledToolTip {
@@ -2542,7 +2542,7 @@ ContentPage {
                     from: 0
                     to: 1000
                     stepSize: 10
-                    onValueChanged: {
+                    onValueModified: {
                         Config.setNestedValue("overview.focusAnimationDurationMs", value);
                     }
                     StyledToolTip {

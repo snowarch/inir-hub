@@ -1286,7 +1286,7 @@ ContentPage {
                     from: 1
                     to: 10
                     stepSize: 1
-                    onValueChanged: {
+                    onValueModified: {
                         Config.setNestedValue("regionSelector.borderSize", value);
                     }
                     StyledToolTip {
@@ -1300,7 +1300,7 @@ ContentPage {
                     from: 10
                     to: 100
                     stepSize: 2
-                    onValueChanged: {
+                    onValueModified: {
                         Config.setNestedValue("regionSelector.numSize", value);
                     }
                     StyledToolTip {
@@ -1335,7 +1335,7 @@ ContentPage {
                     from: 1
                     to: 20
                     stepSize: 1
-                    onValueChanged: {
+                    onValueModified: {
                         Config.setNestedValue("regionSelector.circle.strokeWidth", value);
                     }
                     StyledToolTip {
@@ -1350,7 +1350,7 @@ ContentPage {
                     from: 0
                     to: 100
                     stepSize: 5
-                    onValueChanged: {
+                    onValueModified: {
                         Config.setNestedValue("regionSelector.circle.padding", value);
                     }
                     StyledToolTip {
@@ -1476,9 +1476,9 @@ ContentPage {
                 text: Translation.tr("Timeout (ms)")
                 value: Config.options?.osd?.timeout ?? 1500
                 from: 100
-                to: 3000
+                to: 5000
                 stepSize: 100
-                onValueChanged: {
+                onValueModified: {
                     Config.setNestedValue("osd.timeout", value);
                 }
                 StyledToolTip {

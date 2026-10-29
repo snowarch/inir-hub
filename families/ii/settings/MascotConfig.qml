@@ -91,7 +91,7 @@ ContentPage {
                 value: Config.options?.mascot?.companion?.minQuietMinutes ?? 10
                 property bool _ready: false
                 Component.onCompleted: _ready = true
-                onValueChanged: if (_ready) Config.setNestedValue("mascot.companion.minQuietMinutes", value)
+                onValueModified: if (_ready) Config.setNestedValue("mascot.companion.minQuietMinutes", value)
             }
 
             ConfigSpinBox {
@@ -101,7 +101,7 @@ ContentPage {
                 value: Config.options?.mascot?.companion?.maxVisitsPerHour ?? 3
                 property bool _ready: false
                 Component.onCompleted: _ready = true
-                onValueChanged: if (_ready) Config.setNestedValue("mascot.companion.maxVisitsPerHour", value)
+                onValueModified: if (_ready) Config.setNestedValue("mascot.companion.maxVisitsPerHour", value)
             }
 
             SettingsSwitch {
@@ -134,7 +134,7 @@ ContentPage {
                 stepSize: 1
                 property bool _ready: false
                 Component.onCompleted: _ready = true
-                onValueChanged: {
+                onValueModified: {
                     if (!_ready) return;
                     Config.setNestedValue("mascot.companion.intervalMinutes", value)
                 }
@@ -149,7 +149,7 @@ ContentPage {
                 stepSize: 10
                 property bool _ready: false
                 Component.onCompleted: _ready = true
-                onValueChanged: {
+                onValueModified: {
                     if (!_ready) return;
                     Config.setNestedValue("mascot.companion.size", value)
                 }
@@ -164,7 +164,7 @@ ContentPage {
                 stepSize: 1
                 property bool _ready: false
                 Component.onCompleted: _ready = true
-                onValueChanged: {
+                onValueModified: {
                     if (!_ready) return;
                     Config.setNestedValue("mascot.companion.visibleSeconds", value)
                 }
@@ -179,7 +179,7 @@ ContentPage {
                 stepSize: 50
                 property bool _ready: false
                 Component.onCompleted: _ready = true
-                onValueChanged: {
+                onValueModified: {
                     if (!_ready) return;
                     Config.setNestedValue("mascot.companion.slideMs", value)
                 }
@@ -273,7 +273,7 @@ ContentPage {
                 stepSize: 5
                 property bool _ready: false
                 Component.onCompleted: _ready = true
-                onValueChanged: {
+                onValueModified: {
                     if (!_ready) return;
                     Config.setNestedValue("mascot.personality.idleMoodIntervalMinutes", value)
                 }
@@ -313,7 +313,7 @@ ContentPage {
                 value: Config.options?.mascot?.chaos?.intervalMinutes ?? 45
                 property bool _ready: false
                 Component.onCompleted: _ready = true
-                onValueChanged: if (_ready) Config.setNestedValue("mascot.chaos.intervalMinutes", value)
+                onValueModified: if (_ready) Config.setNestedValue("mascot.chaos.intervalMinutes", value)
             }
             SettingsSwitch {
                 buttonIcon: "cyclone"

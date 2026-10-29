@@ -196,7 +196,7 @@ ContentPage {
                     from: 40
                     to: 100
                     stepSize: 5
-                    onValueChanged: {
+                    onValueModified: {
                         Config.setNestedValue("dock.height", value);
                     }
                     StyledToolTip {
@@ -211,7 +211,7 @@ ContentPage {
                     from: 20
                     to: 60
                     stepSize: 5
-                    onValueChanged: {
+                    onValueModified: {
                         Config.setNestedValue("dock.iconSize", value);
                     }
                     StyledToolTip {
@@ -235,7 +235,7 @@ ContentPage {
                     to: 20
                     stepSize: 1
                     enabled: Config.options.dock.hoverToReveal
-                    onValueChanged: {
+                    onValueModified: {
                         Config.setNestedValue("dock.hoverRegionHeight", value);
                     }
                     StyledToolTip {
@@ -278,7 +278,7 @@ ContentPage {
                     from: 1
                     to: 10
                     stepSize: 1
-                    onValueChanged: {
+                    onValueModified: {
                         Config.setNestedValue("dock.maxIndicatorDots", value);
                     }
                     StyledToolTip {
@@ -310,7 +310,7 @@ ContentPage {
                     to: 1000
                     stepSize: 50
                     enabled: Config.options.dock.hoverPreview !== false
-                    onValueChanged: {
+                    onValueModified: {
                         Config.setNestedValue("dock.hoverPreviewDelay", value);
                     }
                     StyledToolTip {

@@ -124,7 +124,7 @@ ContentPage {
                 from: 0
                 to: 3600
                 stepSize: 30
-                onValueChanged: Config.setNestedValue("idle.onBattery.screenOffTimeout", value)
+                onValueModified: Config.setNestedValue("idle.onBattery.screenOffTimeout", value)
             }
 
             ConfigSpinBox {
@@ -136,7 +136,7 @@ ContentPage {
                 from: 0
                 to: 7200
                 stepSize: 30
-                onValueChanged: Config.setNestedValue("idle.onBattery.lockTimeout", value)
+                onValueModified: Config.setNestedValue("idle.onBattery.lockTimeout", value)
             }
 
             ConfigSpinBox {
@@ -148,7 +148,7 @@ ContentPage {
                 from: 0
                 to: 7200
                 stepSize: 60
-                onValueChanged: Config.setNestedValue("idle.onBattery.suspendTimeout", value)
+                onValueModified: Config.setNestedValue("idle.onBattery.suspendTimeout", value)
             }
 
             SettingsSwitch {
@@ -184,7 +184,7 @@ ContentPage {
                 from: 10
                 to: 100
                 stepSize: 2
-                onValueChanged: {
+                onValueModified: {
                     Config.setNestedValue("musicRecognition.timeout", value)
                 }
                 StyledToolTip {
@@ -198,7 +198,7 @@ ContentPage {
                 from: 2
                 to: 10
                 stepSize: 1
-                onValueChanged: {
+                onValueModified: {
                     Config.setNestedValue("musicRecognition.interval", value)
                 }
                 StyledToolTip {
@@ -296,7 +296,7 @@ ContentPage {
                 from: 100
                 to: 10000
                 stepSize: 100
-                onValueChanged: {
+                onValueModified: {
                     Config.setNestedValue("resources.updateInterval", value)
                 }
                 StyledToolTip {
@@ -450,7 +450,7 @@ ContentPage {
                 from: 15
                 to: 1440
                 stepSize: 15
-                onValueChanged: Config.setNestedValue("updates.checkInterval", value)
+                onValueModified: Config.setNestedValue("updates.checkInterval", value)
                 StyledToolTip {
                     text: Translation.tr("How often to check for system updates (in minutes)")
                 }
@@ -463,7 +463,7 @@ ContentPage {
                 from: 1
                 to: 200
                 stepSize: 5
-                onValueChanged: Config.setNestedValue("updates.adviseUpdateThreshold", value)
+                onValueModified: Config.setNestedValue("updates.adviseUpdateThreshold", value)
                 StyledToolTip {
                     text: Translation.tr("Show update icon in bar when available updates exceed this number")
                 }
@@ -476,7 +476,7 @@ ContentPage {
                 from: 10
                 to: 500
                 stepSize: 10
-                onValueChanged: Config.setNestedValue("updates.stronglyAdviseUpdateThreshold", value)
+                onValueModified: Config.setNestedValue("updates.stronglyAdviseUpdateThreshold", value)
                 StyledToolTip {
                     text: Translation.tr("Show warning color when available updates exceed this number")
                 }
@@ -526,7 +526,7 @@ ContentPage {
                 from: 30
                 to: 1440
                 stepSize: 30
-                onValueChanged: Config.setNestedValue("shellUpdates.checkIntervalMinutes", value)
+                onValueModified: Config.setNestedValue("shellUpdates.checkIntervalMinutes", value)
                 enabled: Config.options?.shellUpdates?.enabled ?? true
                 StyledToolTip {
                     text: Translation.tr("How often to check for iNiR updates (in minutes). Default: 360 (6 hours)")
@@ -1154,7 +1154,7 @@ ContentPage {
                 from: 5
                 to: 60
                 stepSize: 5
-                onValueChanged: Config.setNestedValue("bar.weather.fetchInterval", value)
+                onValueModified: Config.setNestedValue("bar.weather.fetchInterval", value)
                 enabled: Config.options?.bar?.weather?.enable ?? false
             }
         }
@@ -1186,7 +1186,7 @@ ContentPage {
                 from: 5
                 to: 120
                 stepSize: 5
-                onValueChanged: Config.setNestedValue("calendar.externalSync.refreshMinutes", value)
+                onValueModified: Config.setNestedValue("calendar.externalSync.refreshMinutes", value)
                 enabled: Config.options?.calendar?.externalSync?.enable ?? false
             }
 
@@ -1204,7 +1204,7 @@ ContentPage {
                 from: 1
                 to: 14
                 stepSize: 1
-                onValueChanged: Config.setNestedValue("calendar.upcomingDays", value)
+                onValueModified: Config.setNestedValue("calendar.upcomingDays", value)
             }
         }
 

@@ -124,7 +124,7 @@ ContentPage {
                     from: 360
                     to: 760
                     stepSize: 4
-                    onValueChanged: Config.setNestedValue("workspaceStrip.panelWidth", value)
+                    onValueModified: Config.setNestedValue("workspaceStrip.panelWidth", value)
                     StyledToolTip {
                         text: Translation.tr("Total width of the strip, including the side flyout")
                     }
@@ -138,7 +138,7 @@ ContentPage {
                     from: 96
                     to: 260
                     stepSize: 4
-                    onValueChanged: Config.setNestedValue("workspaceStrip.previewSize", value)
+                    onValueModified: Config.setNestedValue("workspaceStrip.previewSize", value)
                     StyledToolTip {
                         text: Translation.tr("Width of the workspace thumbnails in pixels")
                     }
@@ -152,7 +152,7 @@ ContentPage {
                     from: 1
                     to: 16
                     stepSize: 1
-                    onValueChanged: Config.setNestedValue("workspaceStrip.triggerWidth", value)
+                    onValueModified: Config.setNestedValue("workspaceStrip.triggerWidth", value)
                     StyledToolTip {
                         text: Translation.tr("Invisible edge area that opens the strip")
                     }
@@ -170,7 +170,7 @@ ContentPage {
                     from: 1
                     to: 500
                     stepSize: 10
-                    onValueChanged: Config.setNestedValue("workspaceStrip.openDelay", value)
+                    onValueModified: Config.setNestedValue("workspaceStrip.openDelay", value)
                     StyledToolTip { text: Translation.tr("Milliseconds before edge hover opens the strip") }
                 }
 
@@ -182,7 +182,7 @@ ContentPage {
                     from: 100
                     to: 1200
                     stepSize: 20
-                    onValueChanged: Config.setNestedValue("workspaceStrip.closeDelay", value)
+                    onValueModified: Config.setNestedValue("workspaceStrip.closeDelay", value)
                     StyledToolTip { text: Translation.tr("Milliseconds before the strip closes after leaving") }
                 }
             }
@@ -214,7 +214,7 @@ ContentPage {
                     from: 50
                     to: 800
                     stepSize: 10
-                    onValueChanged: Config.setNestedValue("workspaceStrip.scrollNavigationDebounceMs", value)
+                    onValueModified: Config.setNestedValue("workspaceStrip.scrollNavigationDebounceMs", value)
                     StyledToolTip {
                         text: Translation.tr("Minimum milliseconds between scroll-navigation steps — prevents rapid workspace cycling")
                     }

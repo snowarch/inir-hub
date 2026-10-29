@@ -210,7 +210,7 @@ ColumnLayout {
                 from: 20
                 to: 100
                 stepSize: 5
-                onValueChanged: Config.setNestedValue("appearance.island.opacity", value / 100)
+                onValueModified: Config.setNestedValue("appearance.island.opacity", value / 100)
                 StyledToolTip { text: Translation.tr("Only the Ricelin card body fades. Content stays fully opaque.") }
             }
             SettingsSwitch {
@@ -232,7 +232,7 @@ ColumnLayout {
                 from: 20
                 to: 100
                 stepSize: 10
-                onValueChanged: Config.setNestedValue("appearance.island.glassBlur", value / 100)
+                onValueModified: Config.setNestedValue("appearance.island.glassBlur", value / 100)
             }
             ConfigSpinBox {
                 icon: "rounded_corner"
@@ -241,7 +241,7 @@ ColumnLayout {
                 from: 4
                 to: 32
                 stepSize: 2
-                onValueChanged: Config.setNestedValue("appearance.island.radius", value)
+                onValueModified: Config.setNestedValue("appearance.island.radius", value)
                 StyledToolTip { text: Translation.tr("Used by Pill and generic Island cards. Sidebars, search and other specialized surfaces keep their own contextual geometry.") }
             }
         }

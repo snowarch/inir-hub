@@ -101,7 +101,7 @@ ColumnLayout {
             value: spinRowRoot.configValue
             from: spinRowRoot.from
             to: spinRowRoot.to
-            onValueChanged: {
+            onValueModified: {
                 if (spinRowRoot.configPath !== "") {
                     Config.setNestedValue(spinRowRoot.configPath, value)
                 }
@@ -135,7 +135,7 @@ ColumnLayout {
             value: Math.round(realSpinRowRoot.configValue * 10)
             from: Math.round(realSpinRowRoot.from * 10)
             to: Math.round(realSpinRowRoot.to * 10)
-            onValueChanged: {
+            onValueModified: {
                 if (realSpinRowRoot.configPath !== "") {
                     Config.setNestedValue(realSpinRowRoot.configPath, value / 10)
                 }

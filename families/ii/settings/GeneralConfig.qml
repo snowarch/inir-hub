@@ -76,7 +76,7 @@ ContentPage {
                     from: 0
                     to: 100
                     stepSize: 2
-                    onValueChanged: {
+                    onValueModified: {
                         Config.setNestedValue("audio.protection.maxAllowedIncrease", value);
                     }
                     StyledToolTip {
@@ -90,7 +90,7 @@ ContentPage {
                     from: 0
                     to: 154 // pavucontrol allows up to 153%
                     stepSize: 2
-                    onValueChanged: {
+                    onValueModified: {
                         Config.setNestedValue("audio.protection.maxAllowed", value);
                     }
                     StyledToolTip {
@@ -122,7 +122,7 @@ ContentPage {
                     from: 0
                     to: 100
                     stepSize: 5
-                    onValueChanged: {
+                    onValueModified: {
                         Config.setNestedValue("battery.low", value);
                     }
                     StyledToolTip {
@@ -136,7 +136,7 @@ ContentPage {
                     from: 0
                     to: 100
                     stepSize: 5
-                    onValueChanged: {
+                    onValueModified: {
                         Config.setNestedValue("battery.critical", value);
                     }
                     StyledToolTip {
@@ -168,7 +168,7 @@ ContentPage {
                     from: 0
                     to: 100
                     stepSize: 5
-                    onValueChanged: {
+                    onValueModified: {
                         Config.setNestedValue("battery.suspend", value);
                     }
                     StyledToolTip {
@@ -188,7 +188,7 @@ ContentPage {
                     from: 0
                     to: 101
                     stepSize: 5
-                    onValueChanged: {
+                    onValueModified: {
                         Config.setNestedValue("battery.full", value);
                     }
                     StyledToolTip {
@@ -228,7 +228,7 @@ ContentPage {
                     to: 100
                     stepSize: 5
                     Component.onCompleted: _ready = true
-                    onValueChanged: {
+                    onValueModified: {
                         if (_ready && value !== (Config.options?.battery?.chargeLimit?.threshold ?? 80))
                             Config.setNestedValue("battery.chargeLimit.threshold", value);
                     }
@@ -769,7 +769,7 @@ ContentPage {
                 from: 2000
                 to: 15000
                 stepSize: 500
-                onValueChanged: {
+                onValueModified: {
                     Config.setNestedValue("bootGreeting.autoDismissDelay", value);
                 }
                 StyledToolTip {
@@ -904,7 +904,7 @@ ContentPage {
                     from: 1
                     to: 10
                     stepSize: 1
-                    onValueChanged: {
+                    onValueModified: {
                         Config.setNestedValue("lock.notifications.maxCount", value);
                     }
                     StyledToolTip {
@@ -995,7 +995,7 @@ ContentPage {
                     from: 10
                     to: 80
                     stepSize: 5
-                    onValueChanged: Config.setNestedValue("lock.dim.opacity", value / 100)
+                    onValueModified: Config.setNestedValue("lock.dim.opacity", value / 100)
                     StyledToolTip {
                         text: Translation.tr("How much to dim the wallpaper (percentage)")
                     }
@@ -1101,7 +1101,7 @@ ContentPage {
                     from: 0
                     to: 200
                     stepSize: 10
-                    onValueChanged: {
+                    onValueModified: {
                         Config.setNestedValue("lock.blur.radius", value);
                     }
                     StyledToolTip {
@@ -1116,7 +1116,7 @@ ContentPage {
                     from: 1
                     to: 150
                     stepSize: 2
-                    onValueChanged: {
+                    onValueModified: {
                         Config.setNestedValue("lock.blur.extraZoom", value / 100);
                     }
                     StyledToolTip {

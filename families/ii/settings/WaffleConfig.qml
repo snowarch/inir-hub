@@ -164,7 +164,7 @@ ContentPage {
                 text: Translation.tr("Blur radius")
                 from: 0; to: 64; stepSize: 2
                 value: Config.options?.waffles?.background?.effects?.blurRadius ?? 32
-                onValueChanged: Config.setNestedValue("waffles.background.effects.blurRadius", value)
+                onValueModified: Config.setNestedValue("waffles.background.effects.blurRadius", value)
             }
 
             ConfigSpinBox {
@@ -172,7 +172,7 @@ ContentPage {
                 text: Translation.tr("Dim (%)")
                 from: 0; to: 100; stepSize: 5
                 value: Config.options?.waffles?.background?.effects?.dim ?? 0
-                onValueChanged: Config.setNestedValue("waffles.background.effects.dim", value)
+                onValueModified: Config.setNestedValue("waffles.background.effects.dim", value)
             }
 
             ConfigSpinBox {
@@ -180,7 +180,7 @@ ContentPage {
                 text: Translation.tr("Dynamic dim (%)")
                 from: 0; to: 100; stepSize: 5
                 value: Config.options?.waffles?.background?.effects?.dynamicDim ?? 0
-                onValueChanged: Config.setNestedValue("waffles.background.effects.dynamicDim", value)
+                onValueModified: Config.setNestedValue("waffles.background.effects.dynamicDim", value)
                 StyledToolTip { text: Translation.tr("Extra dim when windows are present on current workspace") }
             }
         }
@@ -267,7 +267,7 @@ ContentPage {
                 text: Translation.tr("Blur radius")
                 from: 0; to: 100; stepSize: 5
                 value: Config.options?.waffles?.background?.backdrop?.blurRadius ?? 32
-                onValueChanged: Config.setNestedValue("waffles.background.backdrop.blurRadius", value)
+                onValueModified: Config.setNestedValue("waffles.background.backdrop.blurRadius", value)
             }
 
             ConfigSpinBox {
@@ -276,7 +276,7 @@ ContentPage {
                 text: Translation.tr("Dim (%)")
                 from: 0; to: 100; stepSize: 5
                 value: Config.options?.waffles?.background?.backdrop?.dim ?? 35
-                onValueChanged: Config.setNestedValue("waffles.background.backdrop.dim", value)
+                onValueModified: Config.setNestedValue("waffles.background.backdrop.dim", value)
             }
 
             ConfigSpinBox {
@@ -285,7 +285,7 @@ ContentPage {
                 text: Translation.tr("Saturation")
                 from: 0; to: 200; stepSize: 10
                 value: Math.round((Config.options?.waffles?.background?.backdrop?.saturation ?? 1.0) * 100)
-                onValueChanged: Config.setNestedValue("waffles.background.backdrop.saturation", value / 100.0)
+                onValueModified: Config.setNestedValue("waffles.background.backdrop.saturation", value / 100.0)
             }
 
             ConfigSpinBox {
@@ -294,7 +294,7 @@ ContentPage {
                 text: Translation.tr("Contrast")
                 from: 0; to: 200; stepSize: 10
                 value: Math.round((Config.options?.waffles?.background?.backdrop?.contrast ?? 1.0) * 100)
-                onValueChanged: Config.setNestedValue("waffles.background.backdrop.contrast", value / 100.0)
+                onValueModified: Config.setNestedValue("waffles.background.backdrop.contrast", value / 100.0)
             }
 
             SettingsSwitch {
@@ -311,7 +311,7 @@ ContentPage {
                 text: Translation.tr("Vignette intensity")
                 from: 0; to: 100; stepSize: 5
                 value: Math.round((Config.options?.waffles?.background?.backdrop?.vignetteIntensity ?? 0.5) * 100)
-                onValueChanged: Config.setNestedValue("waffles.background.backdrop.vignetteIntensity", value / 100.0)
+                onValueModified: Config.setNestedValue("waffles.background.backdrop.vignetteIntensity", value / 100.0)
             }
         }
     }
@@ -407,7 +407,7 @@ ContentPage {
                 text: Translation.tr("Font scale (%)")
                 from: 80; to: 150; stepSize: 5
                 value: Math.round((Config.options?.waffles?.theming?.font?.scale ?? 1.0) * 100)
-                onValueChanged: Config.setNestedValue("waffles.theming.font.scale", value / 100.0)
+                onValueModified: Config.setNestedValue("waffles.theming.font.scale", value / 100.0)
                 StyledToolTip { text: Translation.tr("Scale all Waffle UI text (80% - 150%)") }
             }
 
@@ -525,7 +525,7 @@ ContentPage {
                 text: Translation.tr("Text scale (%)")
                 from: 80; to: 150; stepSize: 5
                 value: Math.round((Config.options?.waffles?.startMenu?.scale ?? 1.0) * 100)
-                onValueChanged: Config.setNestedValue("waffles.startMenu.scale", value / 100.0)
+                onValueModified: Config.setNestedValue("waffles.startMenu.scale", value / 100.0)
                 StyledToolTip { text: Translation.tr("Scale text in the start menu (80% - 150%)") }
             }
         }
@@ -641,7 +641,7 @@ ContentPage {
                 text: Translation.tr("Auto-hide delay (ms)")
                 from: 100; to: 5000; stepSize: 100
                 value: Config.options?.waffles?.altSwitcher?.autoHideDelayMs ?? 500
-                onValueChanged: Config.setNestedValue("waffles.altSwitcher.autoHideDelayMs", value)
+                onValueModified: Config.setNestedValue("waffles.altSwitcher.autoHideDelayMs", value)
             }
 
             SettingsSwitch {
@@ -664,7 +664,7 @@ ContentPage {
                 text: Translation.tr("Thumbnail width")
                 from: 150; to: 500; stepSize: 20
                 value: Config.options?.waffles?.altSwitcher?.thumbnailWidth ?? 280
-                onValueChanged: Config.setNestedValue("waffles.altSwitcher.thumbnailWidth", value)
+                onValueModified: Config.setNestedValue("waffles.altSwitcher.thumbnailWidth", value)
             }
 
             ConfigSpinBox {
@@ -673,7 +673,7 @@ ContentPage {
                 text: Translation.tr("Thumbnail height")
                 from: 100; to: 400; stepSize: 20
                 value: Config.options?.waffles?.altSwitcher?.thumbnailHeight ?? 180
-                onValueChanged: Config.setNestedValue("waffles.altSwitcher.thumbnailHeight", value)
+                onValueModified: Config.setNestedValue("waffles.altSwitcher.thumbnailHeight", value)
             }
 
             // List width option disabled - WPane doesn't support dynamic width properly
@@ -683,7 +683,7 @@ ContentPage {
             //     text: Translation.tr("List width")
             //     from: 350; to: 800; stepSize: 25
             //     value: Config.options?.waffles?.altSwitcher?.listWidth ?? 500
-            //     onValueChanged: Config.options.waffles.altSwitcher.listWidth = value
+            //     onValueModified: Config.options.waffles.altSwitcher.listWidth = value
             // }
 
             ConfigSpinBox {
@@ -691,7 +691,7 @@ ContentPage {
                 text: Translation.tr("Scrim opacity")
                 from: 0; to: 100; stepSize: 5
                 value: Math.round((Config.options?.waffles?.altSwitcher?.scrimOpacity ?? 0.4) * 100)
-                onValueChanged: Config.setNestedValue("waffles.altSwitcher.scrimOpacity", value / 100.0)
+                onValueModified: Config.setNestedValue("waffles.altSwitcher.scrimOpacity", value / 100.0)
             }
 
             SettingsSwitch {

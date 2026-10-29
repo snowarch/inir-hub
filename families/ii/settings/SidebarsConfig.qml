@@ -705,7 +705,7 @@ ContentPage {
                     from: 1
                     to: 8
                     stepSize: 1
-                    onValueChanged: {
+                    onValueModified: {
                         Config.setNestedValue("sidebar.quickToggles.android.columns", value);
                     }
                     StyledToolTip {
@@ -964,7 +964,7 @@ ContentPage {
                     from: 12
                     to: 72
                     stepSize: 4
-                    onValueChanged: Config.setNestedValue("sidebar.wallhaven.limit", value)
+                    onValueModified: Config.setNestedValue("sidebar.wallhaven.limit", value)
                     StyledToolTip {
                         text: Translation.tr("Number of wallpapers to fetch per request")
                     }
@@ -1040,7 +1040,7 @@ ContentPage {
                         stepSize: 1
                         enabled: Config.options?.sidebar?.edgeOpen?.enable ?? false
                         opacity: enabled ? 1 : 0.5
-                        onValueChanged: Config.setNestedValue("sidebar.edgeOpen.regionWidth", value)
+                        onValueModified: Config.setNestedValue("sidebar.edgeOpen.regionWidth", value)
                     }
                 }
             }
@@ -1095,7 +1095,7 @@ ContentPage {
                         from: 0
                         to: 20
                         stepSize: 1
-                        onValueChanged: {
+                        onValueModified: {
                             Config.setNestedValue("sidebar.cornerOpen.clicklessCornerVerticalOffset", value);
                         }
                         StyledToolTip {
@@ -1150,7 +1150,7 @@ ContentPage {
                         from: 1
                         to: 300
                         stepSize: 1
-                        onValueChanged: {
+                        onValueModified: {
                             Config.setNestedValue("sidebar.cornerOpen.cornerRegionWidth", value);
                         }
                         StyledToolTip {
@@ -1164,7 +1164,7 @@ ContentPage {
                         from: 1
                         to: 300
                         stepSize: 1
-                        onValueChanged: {
+                        onValueModified: {
                             Config.setNestedValue("sidebar.cornerOpen.cornerRegionHeight", value);
                         }
                         StyledToolTip {

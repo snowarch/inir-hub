@@ -1131,7 +1131,7 @@ ContentPage {
                 from: 3
                 to: 60
                 stepSize: 1
-                onValueChanged: {
+                onValueModified: {
                     if (voiceDurationSpin._ready)
                         Config.setNestedValue("voiceSearch.duration", value)
                 }

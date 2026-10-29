@@ -1540,7 +1540,7 @@ ContentPage {
                         from: -10000
                         to: 10000
                         stepSize: 10
-                        onValueChanged: {
+                        onValueModified: {
                             if (!root.outputReady || !root.positionEditorReady) return
                             root.applyAndPersistOutput("position", `${value},${positionYSpin.value}`)
                         }
@@ -1555,7 +1555,7 @@ ContentPage {
                         from: -10000
                         to: 10000
                         stepSize: 10
-                        onValueChanged: {
+                        onValueModified: {
                             if (!root.outputReady || !root.positionEditorReady) return
                             root.applyAndPersistOutput("position", `${positionXSpin.value},${value}`)
                         }
@@ -1646,7 +1646,7 @@ ContentPage {
                     from: 0
                     to: 64
                     stepSize: 1
-                    onValueChanged: {
+                    onValueModified: {
                         if (!root.layoutReady) return
                         root.setConfig("layout", "gaps", value)
                     }
@@ -1748,7 +1748,7 @@ ContentPage {
                     from: 1
                     to: 8
                     stepSize: 1
-                    onValueChanged: {
+                    onValueModified: {
                         if (!root.layoutReady) return
                         root.setConfig("layout", "border.width", value)
                     }
@@ -1830,7 +1830,7 @@ ContentPage {
                     from: 1
                     to: 8
                     stepSize: 1
-                    onValueChanged: {
+                    onValueModified: {
                         if (!root.layoutReady) return
                         root.setConfig("layout", "focus-ring.width", value)
                     }
@@ -1892,7 +1892,7 @@ ContentPage {
                     from: 0
                     to: 100
                     stepSize: 1
-                    onValueChanged: {
+                    onValueModified: {
                         if (!root.layoutReady) return
                         root.setConfig("layout", "shadow.softness", value)
                     }
@@ -1909,7 +1909,7 @@ ContentPage {
                     from: -32
                     to: 64
                     stepSize: 1
-                    onValueChanged: {
+                    onValueModified: {
                         if (!root.layoutReady) return
                         root.setConfig("layout", "shadow.spread", value)
                     }
@@ -1932,7 +1932,7 @@ ContentPage {
                         from: -100
                         to: 100
                         stepSize: 1
-                        onValueChanged: {
+                        onValueModified: {
                             if (!root.layoutReady || !root.shadowEditorReady) return
                             root.setConfig("layout", "shadow.offset", `${value},${shadowOffsetYSpin.value}`)
                         }
@@ -1946,7 +1946,7 @@ ContentPage {
                         from: -100
                         to: 100
                         stepSize: 1
-                        onValueChanged: {
+                        onValueModified: {
                             if (!root.layoutReady || !root.shadowEditorReady) return
                             root.setConfig("layout", "shadow.offset", `${shadowOffsetXSpin.value},${value}`)
                         }
@@ -1989,7 +1989,7 @@ ContentPage {
                     from: 0
                     to: 512
                     stepSize: 8
-                    onValueChanged: {
+                    onValueModified: {
                         if (!root.layoutReady) return
                         root.setConfig("layout", "struts.left", value)
                     }
@@ -2003,7 +2003,7 @@ ContentPage {
                     from: 0
                     to: 512
                     stepSize: 8
-                    onValueChanged: {
+                    onValueModified: {
                         if (!root.layoutReady) return
                         root.setConfig("layout", "struts.right", value)
                     }
@@ -2022,7 +2022,7 @@ ContentPage {
                     from: 0
                     to: 512
                     stepSize: 8
-                    onValueChanged: {
+                    onValueModified: {
                         if (!root.layoutReady) return
                         root.setConfig("layout", "struts.top", value)
                     }
@@ -2036,7 +2036,7 @@ ContentPage {
                     from: 0
                     to: 512
                     stepSize: 8
-                    onValueChanged: {
+                    onValueModified: {
                         if (!root.layoutReady) return
                         root.setConfig("layout", "struts.bottom", value)
                     }
@@ -2055,7 +2055,7 @@ ContentPage {
                     from: 30
                     to: 100
                     stepSize: 5
-                    onValueChanged: {
+                    onValueModified: {
                         if (!root.layoutReady) return
                         root.setConfig("layout", "overview.zoom", (value / 100.0).toFixed(2))
                     }
@@ -2297,7 +2297,7 @@ ContentPage {
                     from: 100
                     to: 1000
                     stepSize: 50
-                    onValueChanged: {
+                    onValueModified: {
                         if (!root.inputReady) return
                         root.setConfig("input", "keyboard.repeat-delay", value)
                     }
@@ -2314,7 +2314,7 @@ ContentPage {
                     from: 10
                     to: 100
                     stepSize: 5
-                    onValueChanged: {
+                    onValueModified: {
                         if (!root.inputReady) return
                         root.setConfig("input", "keyboard.repeat-rate", value)
                     }
@@ -2923,7 +2923,7 @@ ContentPage {
                     from: 0
                     to: 100
                     stepSize: 5
-                    onValueChanged: {
+                    onValueModified: {
                         if (!root.inputReady) return
                         root.setFocusFollowsMouse(true, value)
                     }

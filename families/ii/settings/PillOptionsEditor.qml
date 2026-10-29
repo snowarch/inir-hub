@@ -333,7 +333,7 @@ ColumnLayout {
             from: 40
             to: 160
             stepSize: 5
-            onValueChanged: Config.setNestedValue("bar.pill.scale", value / 100)
+            onValueModified: Config.setNestedValue("bar.pill.scale", value / 100)
             StyledToolTip {
                 text: Translation.tr("Relative scale for the whole Pill and its surfaces. Logical monitor size is applied automatically; compact displays can be reduced further here.")
             }
@@ -353,7 +353,7 @@ ColumnLayout {
                 from: 17
                 to: 28
                 stepSize: 1
-                onValueChanged: Config.setNestedValue("bar.pill.iconSize", value)
+                onValueModified: Config.setNestedValue("bar.pill.iconSize", value)
             }
             ConfigSpinBox {
                 icon: "space_bar"
@@ -362,7 +362,7 @@ ColumnLayout {
                 from: 12
                 to: 28
                 stepSize: 2
-                onValueChanged: Config.setNestedValue("bar.pill.iconSpacing", value)
+                onValueModified: Config.setNestedValue("bar.pill.iconSpacing", value)
             }
         }
 
@@ -373,7 +373,7 @@ ColumnLayout {
             from: 20
             to: 44
             stepSize: 2
-            onValueChanged: Config.setNestedValue("bar.pill.rowSpacing", value)
+            onValueModified: Config.setNestedValue("bar.pill.rowSpacing", value)
         }
 
         ConfigRow {
@@ -385,7 +385,7 @@ ColumnLayout {
                 from: 160
                 to: 280
                 stepSize: 4
-                onValueChanged: Config.setNestedValue("bar.pill.restWidth", value)
+                onValueModified: Config.setNestedValue("bar.pill.restWidth", value)
             }
             ConfigSpinBox {
                 icon: "height"
@@ -394,7 +394,7 @@ ColumnLayout {
                 from: 38
                 to: 60
                 stepSize: 2
-                onValueChanged: Config.setNestedValue("bar.pill.restHeight", value)
+                onValueModified: Config.setNestedValue("bar.pill.restHeight", value)
             }
         }
 
@@ -405,7 +405,7 @@ ColumnLayout {
             from: 58
             to: 88
             stepSize: 2
-            onValueChanged: Config.setNestedValue("bar.pill.expandedHeight", value)
+            onValueModified: Config.setNestedValue("bar.pill.expandedHeight", value)
         }
     }
 
@@ -597,7 +597,7 @@ ColumnLayout {
                 from: 0
                 to: 32
                 stepSize: 2
-                onValueChanged: Config.setNestedValue("bar.pill.topGap", value / 8)
+                onValueModified: Config.setNestedValue("bar.pill.topGap", value / 8)
             }
             ConfigSpinBox {
                 icon: "expand"
@@ -608,7 +608,7 @@ ColumnLayout {
                 from: 0
                 to: 200
                 stepSize: 10
-                onValueChanged: Config.setNestedValue("bar.pill.appGap", value / 100)
+                onValueModified: Config.setNestedValue("bar.pill.appGap", value / 100)
                 StyledToolTip { text: Translation.tr("Space between Pill and windows while the top edge is reserved.") }
             }
         }
@@ -619,7 +619,7 @@ ColumnLayout {
             from: 3
             to: 8
             stepSize: 1
-            onValueChanged: Config.setNestedValue("bar.pill.mixerAppRows", value)
+            onValueModified: Config.setNestedValue("bar.pill.mixerAppRows", value)
         }
 
         ConfigRow {
@@ -637,7 +637,7 @@ ColumnLayout {
                 from: 60
                 to: 160
                 stepSize: 10
-                onValueChanged: Config.setNestedValue("bar.pill.soul.size", value / 100)
+                onValueModified: Config.setNestedValue("bar.pill.soul.size", value / 100)
             }
         }
 

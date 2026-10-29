@@ -355,7 +355,7 @@ ContentPage {
                     value: Config.options?.appearance?.cava?.gradientCount ?? 8
                     from: 1
                     to: 8
-                    onValueChanged: root.setCavaValue(
+                    onValueModified: root.setCavaValue(
                         "appearance.cava.gradientCount", value, true)
                     StyledToolTip {
                         text: Translation.tr("Use one color for a solid spectrum, or up to eight gradient stops")
@@ -369,7 +369,7 @@ ContentPage {
                     from: 1
                     to: 500
                     stepSize: 10
-                    onValueChanged: root.setCavaValue(
+                    onValueModified: root.setCavaValue(
                         "appearance.cava.sensitivity", value, true)
                     StyledToolTip {
                         text: Translation.tr("Audio sensitivity (higher = more reactive)")
@@ -382,7 +382,7 @@ ContentPage {
                     from: 0
                     to: 200
                     stepSize: 8
-                    onValueChanged: root.setCavaValue(
+                    onValueModified: root.setCavaValue(
                         "appearance.cava.bars", value, true)
                     StyledToolTip {
                         text: Translation.tr("Number of frequency data points (0 = auto)")
@@ -395,7 +395,7 @@ ContentPage {
                     from: 30
                     to: 165
                     stepSize: 5
-                    onValueChanged: root.setCavaValue(
+                    onValueModified: root.setCavaValue(
                         "appearance.cava.framerate", value, true)
                     StyledToolTip {
                         text: Translation.tr("Target refresh rate for the visualizer")
@@ -418,7 +418,7 @@ ContentPage {
                     from: 5
                     to: 100
                     stepSize: 5
-                    onValueChanged: root.setCavaValue(
+                    onValueModified: root.setCavaValue(
                         "appearance.cava.waveOpacity", value, false)
                     StyledToolTip {
                         text: Translation.tr("Default fill opacity for shared wave visualizers. The bar spectrum has its own opacity control.")
@@ -471,7 +471,7 @@ ContentPage {
                 from: 0
                 to: 100
                 stepSize: 10
-                onValueChanged: {
+                onValueModified: {
                     const nextValue = value / 100;
                     // Keep both keys in sync: terminalColorAdjustments is the active runtime source,
                     // terminalGenerationProps is retained for backwards-compatibility surfaces.
@@ -490,7 +490,7 @@ ContentPage {
                 from: 0
                 to: 100
                 stepSize: 10
-                onValueChanged: {
+                onValueModified: {
                     Config.setNestedValue("appearance.wallpaperTheming.terminalGenerationProps.harmonizeThreshold", value);
                     colorRegenTimer.restart();
                 }
@@ -505,7 +505,7 @@ ContentPage {
                 from: 0
                 to: 100
                 stepSize: 10
-                onValueChanged: {
+                onValueModified: {
                     Config.setNestedValue("appearance.wallpaperTheming.terminalGenerationProps.termFgBoost", value / 100);
                     colorRegenTimer.restart();
                 }

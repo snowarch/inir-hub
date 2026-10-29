@@ -850,7 +850,7 @@ ContentPage {
                             from: 0
                             to: 64
                             stepSize: 1
-                            onValueChanged: root.setM3Value("bar.m3.clock.timePixelSize", value)
+                            onValueModified: root.setM3Value("bar.m3.clock.timePixelSize", value)
                             StyledToolTip {
                                 text: Translation.tr("Pixel size of the time digits in the M3 bar clock. 0 inherits the global typography scale.")
                             }
@@ -884,7 +884,7 @@ ContentPage {
                             from: 0
                             to: 64
                             stepSize: 1
-                            onValueChanged: root.setM3Value("bar.m3.clock.datePixelSize", value)
+                            onValueModified: root.setM3Value("bar.m3.clock.datePixelSize", value)
                             StyledToolTip {
                                 text: Translation.tr("Pixel size of the date string in the M3 bar clock. 0 inherits the global typography scale.")
                             }
@@ -964,7 +964,7 @@ ContentPage {
                             enabled: (Config.options?.bar?.m3?.cornerStyle ?? 3) === 3
                                 || (Config.options?.bar?.m3?.cornerStyle ?? 3) === 1
                             opacity: enabled ? 1 : 0.5
-                            onValueChanged: root.setM3Value("bar.m3.gapsOut", value)
+                            onValueModified: root.setM3Value("bar.m3.gapsOut", value)
                         }
                     }
 
@@ -999,7 +999,7 @@ ContentPage {
                         stepSize: 2
                         enabled: (Config.options?.bar?.m3?.divider?.style ?? "rect") === "space"
                         opacity: enabled ? 1 : 0.45
-                        onValueChanged: root.setM3Value("bar.m3.divider.spacing", value)
+                        onValueModified: root.setM3Value("bar.m3.divider.spacing", value)
                     }
 
                 }
@@ -1045,7 +1045,7 @@ ContentPage {
                             from: 60
                             to: 360
                             stepSize: 10
-                            onValueChanged: {
+                            onValueModified: {
                                 if (!root.m3ControlsReady) return
                                 const maximum = Config.options?.bar?.m3?.media?.maxWidth ?? 280
                                 root.setM3Value("bar.m3.media.minWidth", Math.min(value, maximum))
@@ -1058,7 +1058,7 @@ ContentPage {
                             from: 100
                             to: 640
                             stepSize: 10
-                            onValueChanged: {
+                            onValueModified: {
                                 if (!root.m3ControlsReady) return
                                 const minimum = Config.options?.bar?.m3?.media?.minWidth ?? 100
                                 root.setM3Value("bar.m3.media.maxWidth", Math.max(value, minimum))
@@ -1133,7 +1133,7 @@ ContentPage {
                             from: 50
                             to: 100
                             stepSize: 5
-                            onValueChanged: root.setM3Value("bar.m3.resources.memoryWarningThreshold", value)
+                            onValueModified: root.setM3Value("bar.m3.resources.memoryWarningThreshold", value)
                         }
                         ConfigSpinBox {
                             icon: "developer_board"
@@ -1142,7 +1142,7 @@ ContentPage {
                             from: 50
                             to: 100
                             stepSize: 5
-                            onValueChanged: root.setM3Value("bar.m3.resources.cpuWarningThreshold", value)
+                            onValueModified: root.setM3Value("bar.m3.resources.cpuWarningThreshold", value)
                         }
                         ConfigSpinBox {
                             icon: "swap_horiz"
@@ -1153,7 +1153,7 @@ ContentPage {
                             stepSize: 5
                             enabled: Config.options?.bar?.m3?.resources?.alwaysShowSwap ?? false
                             opacity: enabled ? 1 : 0.5
-                            onValueChanged: root.setM3Value("bar.m3.resources.swapWarningThreshold", value)
+                            onValueModified: root.setM3Value("bar.m3.resources.swapWarningThreshold", value)
                         }
                     }
                 }
@@ -1315,7 +1315,7 @@ ContentPage {
                             from: 0
                             to: 48
                             stepSize: 1
-                            onValueChanged: root.setM3Value("bar.m3.dockToPanel.iconSize", value)
+                            onValueModified: root.setM3Value("bar.m3.dockToPanel.iconSize", value)
                         }
                         ConfigSpinBox {
                             icon: "crop_square"
@@ -1324,7 +1324,7 @@ ContentPage {
                             from: 0
                             to: 56
                             stepSize: 1
-                            onValueChanged: root.setM3Value("bar.m3.dockToPanel.buttonSize", value)
+                            onValueModified: root.setM3Value("bar.m3.dockToPanel.buttonSize", value)
                         }
                         ConfigSpinBox {
                             icon: "space_bar"
@@ -1333,7 +1333,7 @@ ContentPage {
                             from: 0
                             to: 16
                             stepSize: 1
-                            onValueChanged: root.setM3Value("bar.m3.dockToPanel.buttonSpacing", value)
+                            onValueModified: root.setM3Value("bar.m3.dockToPanel.buttonSpacing", value)
                         }
                     }
                 }
@@ -1401,7 +1401,7 @@ ContentPage {
                         from: 0
                         to: 10
                         stepSize: 1
-                        onValueChanged: Config.setNestedValue("bar.islands.inset", value)
+                        onValueModified: Config.setNestedValue("bar.islands.inset", value)
                         StyledToolTip {
                             text: Translation.tr("Vertical breathing room around each island. Smaller = taller capsules.")
                         }
@@ -1413,7 +1413,7 @@ ContentPage {
                         from: 4
                         to: 24
                         stepSize: 2
-                        onValueChanged: Config.setNestedValue("bar.islands.padding", value)
+                        onValueModified: Config.setNestedValue("bar.islands.padding", value)
                         StyledToolTip {
                             text: Translation.tr("Horizontal air between an edge island's border and its content.")
                         }
@@ -1482,7 +1482,7 @@ ContentPage {
                 from: -1
                 to: 50
                 stepSize: 1
-                onValueChanged: {
+                onValueModified: {
                     Config.setNestedValue("bar.customRounding", value);
                 }
                 StyledToolTip {
@@ -1502,7 +1502,7 @@ ContentPage {
                     from: 24
                     to: 80
                     stepSize: 2
-                    onValueChanged: Config.setNestedValue("bar.height", value)
+                    onValueModified: Config.setNestedValue("bar.height", value)
                     StyledToolTip {
                         text: Translation.tr("Content height of the bar before font scaling. Default is 40.")
                     }
@@ -1514,7 +1514,7 @@ ContentPage {
                     from: 20
                     to: 100
                     stepSize: 5
-                    onValueChanged: Config.setNestedValue("bar.opacity", value / 100)
+                    onValueModified: Config.setNestedValue("bar.opacity", value / 100)
                     enabled: Config.options?.bar?.showBackground ?? true
                     opacity: enabled ? 1 : 0.5
                     StyledToolTip {
@@ -1659,7 +1659,7 @@ ContentPage {
                             from: 4
                             to: 32
                             stepSize: 1
-                            onValueChanged: root.setSpectrumValue("bar.visualizer.density", value)
+                            onValueModified: root.setSpectrumValue("bar.visualizer.density", value)
                         }
                         ConfigSpinBox {
                             icon: "space_bar"
@@ -1668,7 +1668,7 @@ ContentPage {
                             from: 0
                             to: 12
                             stepSize: 1
-                            onValueChanged: root.setSpectrumValue("bar.visualizer.gap", value)
+                            onValueModified: root.setSpectrumValue("bar.visualizer.gap", value)
                         }
                         ConfigSpinBox {
                             icon: "blur_on"
@@ -1677,7 +1677,7 @@ ContentPage {
                             from: 0
                             to: 8
                             stepSize: 1
-                            onValueChanged: root.setSpectrumValue("bar.visualizer.smoothing", value)
+                            onValueModified: root.setSpectrumValue("bar.visualizer.smoothing", value)
                         }
                     }
 
@@ -1690,7 +1690,7 @@ ContentPage {
                             from: 10
                             to: 100
                             stepSize: 5
-                            onValueChanged: root.setSpectrumValue("bar.visualizer.height", value / 100)
+                            onValueModified: root.setSpectrumValue("bar.visualizer.height", value / 100)
                         }
                         ConfigSpinBox {
                             icon: "opacity"
@@ -1699,7 +1699,7 @@ ContentPage {
                             from: 5
                             to: 100
                             stepSize: 5
-                            onValueChanged: root.setSpectrumValue("bar.visualizer.opacity", value / 100)
+                            onValueModified: root.setSpectrumValue("bar.visualizer.opacity", value / 100)
                         }
                     }
 
@@ -1714,7 +1714,7 @@ ContentPage {
                             stepSize: 1
                             enabled: (Config.options?.bar?.visualizer?.type ?? "bars") === "wave"
                             opacity: enabled ? 1 : 0.45
-                            onValueChanged: root.setSpectrumValue("bar.visualizer.lineWidth", value)
+                            onValueModified: root.setSpectrumValue("bar.visualizer.lineWidth", value)
                         }
                         ConfigSpinBox {
                             icon: "width_full"
@@ -1723,7 +1723,7 @@ ContentPage {
                             from: 6
                             to: 32
                             stepSize: 1
-                            onValueChanged: root.setSpectrumValue("bar.visualizer.edgeInset", value)
+                            onValueModified: root.setSpectrumValue("bar.visualizer.edgeInset", value)
                         }
                         ConfigSpinBox {
                             icon: "rounded_corner"
@@ -1732,7 +1732,7 @@ ContentPage {
                             from: 0
                             to: 100
                             stepSize: 5
-                            onValueChanged: root.setSpectrumValue("bar.visualizer.edgeSoftness", value)
+                            onValueModified: root.setSpectrumValue("bar.visualizer.edgeSoftness", value)
                             StyledToolTip {
                                 text: Translation.tr("Compresses peaks only near rounded corners. Square surfaces remain edge-to-edge.")
                             }
@@ -1749,7 +1749,7 @@ ContentPage {
                         stepSize: 5
                         enabled: (Config.options?.bar?.visualizer?.frequencyProfile ?? "flat") !== "flat"
                         opacity: enabled ? 1 : 0.45
-                        onValueChanged: root.setSpectrumValue("bar.visualizer.accentStrength", value)
+                        onValueModified: root.setSpectrumValue("bar.visualizer.accentStrength", value)
                     }
 
                     ConfigRow {
@@ -1762,7 +1762,7 @@ ContentPage {
                             from: 0
                             to: 100
                             stepSize: 5
-                            onValueChanged: root.setSpectrumValue("bar.visualizer.organicSensitivity", value)
+                            onValueModified: root.setSpectrumValue("bar.visualizer.organicSensitivity", value)
                         }
                         ConfigSpinBox {
                             icon: "pulse_alert"
@@ -1771,7 +1771,7 @@ ContentPage {
                             from: 0
                             to: 100
                             stepSize: 5
-                            onValueChanged: root.setSpectrumValue("bar.visualizer.organicPulse", value)
+                            onValueModified: root.setSpectrumValue("bar.visualizer.organicPulse", value)
                         }
                         ConfigSpinBox {
                             icon: "speed"
@@ -1780,7 +1780,7 @@ ContentPage {
                             from: 25
                             to: 150
                             stepSize: 5
-                            onValueChanged: root.setSpectrumValue("bar.visualizer.organicMotionSpeed", value)
+                            onValueModified: root.setSpectrumValue("bar.visualizer.organicMotionSpeed", value)
                         }
                     }
 
@@ -1794,7 +1794,7 @@ ContentPage {
                             from: 0
                             to: 100
                             stepSize: 5
-                            onValueChanged: root.setSpectrumValue("bar.visualizer.organicIdleMotion", value)
+                            onValueModified: root.setSpectrumValue("bar.visualizer.organicIdleMotion", value)
                         }
                         ConfigSpinBox {
                             icon: "flare"
@@ -1803,7 +1803,7 @@ ContentPage {
                             from: 0
                             to: 100
                             stepSize: 5
-                            onValueChanged: root.setSpectrumValue("bar.visualizer.organicGlow", value)
+                            onValueModified: root.setSpectrumValue("bar.visualizer.organicGlow", value)
                         }
                         ConfigSpinBox {
                             icon: "rounded_corner"
@@ -1812,7 +1812,7 @@ ContentPage {
                             from: 0
                             to: 100
                             stepSize: 5
-                            onValueChanged: root.setSpectrumValue("bar.visualizer.organicBaseRadius", value)
+                            onValueModified: root.setSpectrumValue("bar.visualizer.organicBaseRadius", value)
                         }
                     }
 
@@ -1838,7 +1838,7 @@ ContentPage {
                             from: 60
                             to: 480
                             stepSize: 10
-                            onValueChanged: root.setSpectrumValue("bar.visualizer.pillWingLength", value)
+                            onValueModified: root.setSpectrumValue("bar.visualizer.pillWingLength", value)
                         }
                         ConfigSpinBox {
                             icon: "space_bar"
@@ -1847,7 +1847,7 @@ ContentPage {
                             from: 0
                             to: 64
                             stepSize: 2
-                            onValueChanged: root.setSpectrumValue("bar.visualizer.pillWingGap", value)
+                            onValueModified: root.setSpectrumValue("bar.visualizer.pillWingGap", value)
                         }
                     }
 
@@ -1862,7 +1862,7 @@ ContentPage {
                             from: 0
                             to: 240
                             stepSize: 4
-                            onValueChanged: root.setSpectrumValue("bar.visualizer.pillScreenPadding", value)
+                            onValueModified: root.setSpectrumValue("bar.visualizer.pillScreenPadding", value)
                         }
                         ConfigSpinBox {
                             icon: "space_bar"
@@ -1871,7 +1871,7 @@ ContentPage {
                             from: 0
                             to: 64
                             stepSize: 2
-                            onValueChanged: root.setSpectrumValue("bar.visualizer.pillWingGap", value)
+                            onValueModified: root.setSpectrumValue("bar.visualizer.pillWingGap", value)
                         }
                     }
 
@@ -1886,7 +1886,7 @@ ContentPage {
                             from: 0
                             to: 240
                             stepSize: 4
-                            onValueChanged: root.setSpectrumValue("bar.visualizer.pillScreenPadding", value)
+                            onValueModified: root.setSpectrumValue("bar.visualizer.pillScreenPadding", value)
                         }
                         ConfigSpinBox {
                             icon: "layers"
@@ -1895,7 +1895,7 @@ ContentPage {
                             from: 0
                             to: 160
                             stepSize: 4
-                            onValueChanged: root.setSpectrumValue("bar.visualizer.pillUnderlap", value)
+                            onValueModified: root.setSpectrumValue("bar.visualizer.pillUnderlap", value)
                         }
                     }
 
@@ -1908,7 +1908,7 @@ ContentPage {
                         from: 0
                         to: 100
                         stepSize: 5
-                        onValueChanged: root.setSpectrumValue("bar.visualizer.pillEdgeFade", value)
+                        onValueModified: root.setSpectrumValue("bar.visualizer.pillEdgeFade", value)
                     }
                 }
 
@@ -2035,7 +2035,7 @@ ContentPage {
                             from: 1
                             to: 12
                             stepSize: 1
-                            onValueChanged: Config.setNestedValue("bar.autoHide.hoverRegionWidth", value)
+                            onValueModified: Config.setNestedValue("bar.autoHide.hoverRegionWidth", value)
                             StyledToolTip {
                                 text: Translation.tr("How thick the screen-edge zone is that reveals the hidden bar.")
                             }
@@ -2047,7 +2047,7 @@ ContentPage {
                             from: 0
                             to: 800
                             stepSize: 20
-                            onValueChanged: Config.setNestedValue("bar.autoHide.showWhenPressingSuper.delay", value)
+                            onValueModified: Config.setNestedValue("bar.autoHide.showWhenPressingSuper.delay", value)
                             enabled: CompositorService.isHyprland
                                 && (Config.options?.bar?.autoHide?.showWhenPressingSuper?.enable ?? true)
                             opacity: enabled ? 1 : 0.5
@@ -2145,7 +2145,7 @@ ContentPage {
                         from: 0
                         to: 64
                         stepSize: 1
-                        onValueChanged: Config.setNestedValue("bar.clock.timePixelSize", value)
+                        onValueModified: Config.setNestedValue("bar.clock.timePixelSize", value)
                         StyledToolTip {
                             text: Translation.tr("Pixel size of the time digits in the bar clock. 0 inherits the global typography scale.")
                         }
@@ -2179,7 +2179,7 @@ ContentPage {
                         from: 0
                         to: 64
                         stepSize: 1
-                        onValueChanged: Config.setNestedValue("bar.clock.datePixelSize", value)
+                        onValueModified: Config.setNestedValue("bar.clock.datePixelSize", value)
                         StyledToolTip {
                             text: Translation.tr("Pixel size of the date string in the bar clock. 0 inherits the global typography scale.")
                         }
@@ -2311,7 +2311,7 @@ ContentPage {
                 from: 0
                 to: 100
                 stepSize: 5
-                onValueChanged: {
+                onValueModified: {
                     Config.setNestedValue("bar.vignette.intensity", value / 100)
                 }
             }
@@ -2324,7 +2324,7 @@ ContentPage {
                 from: 10
                 to: 100
                 stepSize: 5
-                onValueChanged: {
+                onValueModified: {
                     Config.setNestedValue("bar.vignette.radius", value / 100)
                 }
             }
@@ -2383,7 +2383,7 @@ ContentPage {
                         from: 120
                         to: 640
                         stepSize: 10
-                        onValueChanged: if (value !== (Config.options?.bar?.media?.maxWidth ?? 220)) Config.setNestedValue("bar.media.maxWidth", value)
+                        onValueModified: if (value !== (Config.options?.bar?.media?.maxWidth ?? 220)) Config.setNestedValue("bar.media.maxWidth", value)
                         StyledToolTip {
                             text: Translation.tr("How wide the song title gets. The window title gives way; a crowded bar still shrinks music first.")
                         }
@@ -2463,7 +2463,7 @@ ContentPage {
                 from: 0
                 to: 480
                 stepSize: 8
-                onValueChanged: Config.setNestedValue("bar.layout.spacerWidth", value)
+                onValueModified: Config.setNestedValue("bar.layout.spacerWidth", value)
                 StyledToolTip {
                     text: Translation.tr("Minimum width for each Flexible spacer module. 0 keeps it fully elastic.")
                 }
@@ -2594,7 +2594,7 @@ ContentPage {
                     from: 50
                     to: 100
                     stepSize: 1
-                    onValueChanged: Config.setNestedValue("bar.resources.memoryWarningThreshold", value)
+                    onValueModified: Config.setNestedValue("bar.resources.memoryWarningThreshold", value)
                 }
                 ConfigSpinBox {
                     icon: "planner_review"
@@ -2603,7 +2603,7 @@ ContentPage {
                     from: 50
                     to: 100
                     stepSize: 1
-                    onValueChanged: Config.setNestedValue("bar.resources.cpuWarningThreshold", value)
+                    onValueModified: Config.setNestedValue("bar.resources.cpuWarningThreshold", value)
                 }
             }
 
@@ -2616,7 +2616,7 @@ ContentPage {
                     from: 50
                     to: 100
                     stepSize: 1
-                    onValueChanged: Config.setNestedValue("bar.resources.gpuWarningThreshold", value)
+                    onValueModified: Config.setNestedValue("bar.resources.gpuWarningThreshold", value)
                 }
                 ConfigSpinBox {
                     icon: "swap_horiz"
@@ -2625,7 +2625,7 @@ ContentPage {
                     from: 50
                     to: 100
                     stepSize: 1
-                    onValueChanged: Config.setNestedValue("bar.resources.swapWarningThreshold", value)
+                    onValueModified: Config.setNestedValue("bar.resources.swapWarningThreshold", value)
                 }
             }
 
@@ -2638,7 +2638,7 @@ ContentPage {
                     from: 40
                     to: 100
                     stepSize: 1
-                    onValueChanged: Config.setNestedValue("bar.resources.tempCautionThreshold", value)
+                    onValueModified: Config.setNestedValue("bar.resources.tempCautionThreshold", value)
                 }
                 ConfigSpinBox {
                     icon: "device_thermostat"
@@ -2647,7 +2647,7 @@ ContentPage {
                     from: 50
                     to: 120
                     stepSize: 1
-                    onValueChanged: Config.setNestedValue("bar.resources.tempWarningThreshold", value)
+                    onValueModified: Config.setNestedValue("bar.resources.tempWarningThreshold", value)
                 }
             }
         }
@@ -2869,7 +2869,7 @@ ContentPage {
                     from: 1
                     to: 30
                     stepSize: 1
-                    onValueChanged: Config.setNestedValue("bar.workspaces.shown", value)
+                    onValueModified: Config.setNestedValue("bar.workspaces.shown", value)
                     enabled: !(Config.options?.bar?.workspaces?.dynamicCount ?? true)
                     opacity: enabled ? 1 : 0.5
                 }
@@ -2880,7 +2880,7 @@ ContentPage {
                     from: 1
                     to: 10
                     stepSize: 1
-                    onValueChanged: Config.setNestedValue("bar.workspaces.scrollSteps", value)
+                    onValueModified: Config.setNestedValue("bar.workspaces.scrollSteps", value)
                 }
             }
 
@@ -2891,7 +2891,7 @@ ContentPage {
                 from: 0
                 to: 1000
                 stepSize: 50
-                onValueChanged: Config.setNestedValue("bar.workspaces.showNumberDelay", value)
+                onValueModified: Config.setNestedValue("bar.workspaces.showNumberDelay", value)
                 enabled: !(Config.options?.bar?.workspaces?.alwaysShowNumbers ?? false)
                 opacity: enabled ? 1 : 0.5
             }

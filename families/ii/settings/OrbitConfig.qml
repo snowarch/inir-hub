@@ -171,7 +171,7 @@ ContentPage {
                 from: 4
                 to: 40
                 stepSize: 1
-                onValueChanged: Config.setNestedValue("orbit.hotCornerSize", value)
+                onValueModified: Config.setNestedValue("orbit.hotCornerSize", value)
             }
 
             ConfigSpinBox {
@@ -184,7 +184,7 @@ ContentPage {
                 from: 1
                 to: 32
                 stepSize: 1
-                onValueChanged: Config.setNestedValue("orbit.hotCornerActivationDistance", value)
+                onValueModified: Config.setNestedValue("orbit.hotCornerActivationDistance", value)
             }
 
             ConfigSpinBox {
@@ -197,7 +197,7 @@ ContentPage {
                 from: 0
                 to: 500
                 stepSize: 25
-                onValueChanged: Config.setNestedValue("orbit.hotCornerDwellMs", value)
+                onValueModified: Config.setNestedValue("orbit.hotCornerDwellMs", value)
             }
 
             RippleButtonWithIcon {
@@ -255,7 +255,7 @@ ContentPage {
                     from: 20
                     to: 34
                     stepSize: 1
-                    onValueChanged: Config.setNestedValue("orbit.studio.widthPercent", value)
+                    onValueModified: Config.setNestedValue("orbit.studio.widthPercent", value)
                 }
 
                 ConfigSwitch {
@@ -356,7 +356,7 @@ ContentPage {
                     from: 3
                     to: 7
                     stepSize: 2
-                    onValueChanged: Config.setNestedValue("orbit.orbital.visibleWorkspaces", value)
+                    onValueModified: Config.setNestedValue("orbit.orbital.visibleWorkspaces", value)
                 }
 
                 ConfigSpinBox {
@@ -367,7 +367,7 @@ ContentPage {
                     from: 36
                     to: 62
                     stepSize: 1
-                    onValueChanged: Config.setNestedValue("orbit.orbital.coreSizePercent", value)
+                    onValueModified: Config.setNestedValue("orbit.orbital.coreSizePercent", value)
                 }
 
                 ConfigSpinBox {
@@ -378,7 +378,7 @@ ContentPage {
                     from: 28
                     to: 60
                     stepSize: 1
-                    onValueChanged: Config.setNestedValue("orbit.orbital.satelliteSizePercent", value)
+                    onValueModified: Config.setNestedValue("orbit.orbital.satelliteSizePercent", value)
                 }
 
                 ConfigSpinBox {
@@ -389,7 +389,7 @@ ContentPage {
                     from: 58
                     to: 96
                     stepSize: 1
-                    onValueChanged: Config.setNestedValue("orbit.orbital.horizontalSpreadPercent", value)
+                    onValueModified: Config.setNestedValue("orbit.orbital.horizontalSpreadPercent", value)
                 }
 
                 ConfigSpinBox {
@@ -400,7 +400,7 @@ ContentPage {
                     from: 40
                     to: 82
                     stepSize: 1
-                    onValueChanged: Config.setNestedValue("orbit.orbital.verticalSpreadPercent", value)
+                    onValueModified: Config.setNestedValue("orbit.orbital.verticalSpreadPercent", value)
                 }
 
                 ConfigSpinBox {
@@ -412,7 +412,7 @@ ContentPage {
                     from: 0
                     to: 35
                     stepSize: 1
-                    onValueChanged: Config.setNestedValue("orbit.orbital.depthPercent", value)
+                    onValueModified: Config.setNestedValue("orbit.orbital.depthPercent", value)
                 }
 
                 ContentSubsection {
@@ -426,7 +426,7 @@ ContentPage {
                         from: 0
                         to: 48
                         stepSize: 2
-                        onValueChanged: Config.setNestedValue("orbit.orbital.geometry.edgePadding", value)
+                        onValueModified: Config.setNestedValue("orbit.orbital.geometry.edgePadding", value)
                     }
 
                     ConfigSpinBox {
@@ -437,7 +437,7 @@ ContentPage {
                         from: 0
                         to: 48
                         stepSize: 2
-                        onValueChanged: Config.setNestedValue("orbit.orbital.geometry.horizonGap", value)
+                        onValueModified: Config.setNestedValue("orbit.orbital.geometry.horizonGap", value)
                     }
 
                     ConfigSpinBox {
@@ -448,7 +448,7 @@ ContentPage {
                         from: 0
                         to: 96
                         stepSize: 4
-                        onValueChanged: Config.setNestedValue("orbit.orbital.geometry.horizonInset", value)
+                        onValueModified: Config.setNestedValue("orbit.orbital.geometry.horizonInset", value)
                     }
 
                     ConfigSpinBox {
@@ -459,7 +459,7 @@ ContentPage {
                         from: 0
                         to: 80
                         stepSize: 2
-                        onValueChanged: Config.setNestedValue("orbit.orbital.geometry.horizonVerticalBase", value)
+                        onValueModified: Config.setNestedValue("orbit.orbital.geometry.horizonVerticalBase", value)
                     }
 
                     ConfigSpinBox {
@@ -470,7 +470,7 @@ ContentPage {
                         from: 0
                         to: 96
                         stepSize: 2
-                        onValueChanged: Config.setNestedValue("orbit.orbital.geometry.horizonVerticalRange", value)
+                        onValueModified: Config.setNestedValue("orbit.orbital.geometry.horizonVerticalRange", value)
                     }
 
                     ConfigSpinBox {
@@ -481,7 +481,7 @@ ContentPage {
                         from: 0
                         to: 120
                         stepSize: 4
-                        onValueChanged: Config.setNestedValue("orbit.orbital.geometry.galleryBaseGap", value)
+                        onValueModified: Config.setNestedValue("orbit.orbital.geometry.galleryBaseGap", value)
                     }
 
                     ConfigSpinBox {
@@ -492,7 +492,7 @@ ContentPage {
                         from: 0
                         to: 48
                         stepSize: 2
-                        onValueChanged: Config.setNestedValue("orbit.orbital.geometry.galleryRowGap", value)
+                        onValueModified: Config.setNestedValue("orbit.orbital.geometry.galleryRowGap", value)
                     }
 
                     ConfigSpinBox {
@@ -503,7 +503,7 @@ ContentPage {
                         from: 0
                         to: 120
                         stepSize: 2
-                        onValueChanged: Config.setNestedValue("orbit.orbital.geometry.deckBaseGap", value)
+                        onValueModified: Config.setNestedValue("orbit.orbital.geometry.deckBaseGap", value)
                     }
 
                     ConfigSpinBox {
@@ -514,7 +514,7 @@ ContentPage {
                         from: 12
                         to: 120
                         stepSize: 2
-                        onValueChanged: Config.setNestedValue("orbit.orbital.geometry.deckStep", value)
+                        onValueModified: Config.setNestedValue("orbit.orbital.geometry.deckStep", value)
                     }
 
                     ConfigSpinBox {
@@ -525,7 +525,7 @@ ContentPage {
                         from: 0
                         to: 80
                         stepSize: 2
-                        onValueChanged: Config.setNestedValue("orbit.orbital.geometry.deckLiftStep", value)
+                        onValueModified: Config.setNestedValue("orbit.orbital.geometry.deckLiftStep", value)
                     }
 
                     ConfigSpinBox {
@@ -536,7 +536,7 @@ ContentPage {
                         from: 0
                         to: 48
                         stepSize: 2
-                        onValueChanged: Config.setNestedValue("orbit.orbital.geometry.atlasGap", value)
+                        onValueModified: Config.setNestedValue("orbit.orbital.geometry.atlasGap", value)
                     }
 
                     ConfigSpinBox {
@@ -547,7 +547,7 @@ ContentPage {
                         from: 2
                         to: 3
                         stepSize: 1
-                        onValueChanged: Config.setNestedValue("orbit.orbital.geometry.atlasColumns", value)
+                        onValueModified: Config.setNestedValue("orbit.orbital.geometry.atlasColumns", value)
                     }
 
                     ConfigSpinBox {
@@ -558,7 +558,7 @@ ContentPage {
                         from: 0
                         to: 20
                         stepSize: 1
-                        onValueChanged: Config.setNestedValue("orbit.orbital.geometry.atlasCoreBoostPercent", value)
+                        onValueModified: Config.setNestedValue("orbit.orbital.geometry.atlasCoreBoostPercent", value)
                     }
 
                     ConfigSpinBox {
@@ -569,7 +569,7 @@ ContentPage {
                         from: 0
                         to: 28
                         stepSize: 1
-                        onValueChanged: Config.setNestedValue("orbit.orbital.geometry.coreContentMargin", value)
+                        onValueModified: Config.setNestedValue("orbit.orbital.geometry.coreContentMargin", value)
                     }
 
                     ConfigSpinBox {
@@ -580,7 +580,7 @@ ContentPage {
                         from: 0
                         to: 24
                         stepSize: 1
-                        onValueChanged: Config.setNestedValue("orbit.orbital.geometry.satelliteContentMargin", value)
+                        onValueModified: Config.setNestedValue("orbit.orbital.geometry.satelliteContentMargin", value)
                     }
                 }
 
@@ -643,7 +643,7 @@ ContentPage {
                     from: 20
                     to: 100
                     stepSize: 5
-                    onValueChanged: Config.setNestedValue("orbit.orbital.workspaceWallpaperOpacity", value)
+                    onValueModified: Config.setNestedValue("orbit.orbital.workspaceWallpaperOpacity", value)
                 }
             }
 
@@ -659,7 +659,7 @@ ContentPage {
                     from: 1
                     to: 5
                     stepSize: 1
-                    onValueChanged: Config.setNestedValue("orbit.workspaceCount", value)
+                    onValueModified: Config.setNestedValue("orbit.workspaceCount", value)
                 }
 
                 ConfigSpinBox {
@@ -671,7 +671,7 @@ ContentPage {
                     from: 16
                     to: 42
                     stepSize: 1
-                    onValueChanged: Config.setNestedValue("orbit.workspaceScalePercent", value)
+                    onValueModified: Config.setNestedValue("orbit.workspaceScalePercent", value)
                 }
 
                 ConfigSpinBox {
@@ -682,7 +682,7 @@ ContentPage {
                     from: 60
                     to: 100
                     stepSize: 1
-                    onValueChanged: Config.setNestedValue("orbit.maxPanelWidthPercent", value)
+                    onValueModified: Config.setNestedValue("orbit.maxPanelWidthPercent", value)
                 }
 
                 ConfigSpinBox {
@@ -693,7 +693,7 @@ ContentPage {
                     from: 0
                     to: 40
                     stepSize: 1
-                    onValueChanged: Config.setNestedValue("orbit.workspaceSpacing", value)
+                    onValueModified: Config.setNestedValue("orbit.workspaceSpacing", value)
                 }
 
                 ContentSubsection {
@@ -753,7 +753,7 @@ ContentPage {
                     from: 0
                     to: 4
                     stepSize: 1
-                    onValueChanged: Config.setNestedValue("orbit.orbital.surface.outlineWidth", value)
+                    onValueModified: Config.setNestedValue("orbit.orbital.surface.outlineWidth", value)
                 }
 
                 ConfigSpinBox {
@@ -766,7 +766,7 @@ ContentPage {
                     from: 0
                     to: 100
                     stepSize: 4
-                    onValueChanged: Config.setNestedValue("orbit.orbital.surface.outlineOpacityPercent", value)
+                    onValueModified: Config.setNestedValue("orbit.orbital.surface.outlineOpacityPercent", value)
                 }
 
                 ConfigSpinBox {
@@ -777,7 +777,7 @@ ContentPage {
                     from: 55
                     to: 160
                     stepSize: 5
-                    onValueChanged: Config.setNestedValue("orbit.orbital.surface.radiusPercent", value)
+                    onValueModified: Config.setNestedValue("orbit.orbital.surface.radiusPercent", value)
                 }
 
                 ConfigSpinBox {
@@ -789,7 +789,7 @@ ContentPage {
                     from: 0
                     to: 18
                     stepSize: 1
-                    onValueChanged: Config.setNestedValue("orbit.orbital.surface.frameInset", value)
+                    onValueModified: Config.setNestedValue("orbit.orbital.surface.frameInset", value)
                 }
 
                 ConfigSelectionArray {
@@ -811,7 +811,7 @@ ContentPage {
                     from: 0
                     to: 100
                     stepSize: 4
-                    onValueChanged: Config.setNestedValue("orbit.orbital.surface.shadowOpacityPercent", value)
+                    onValueModified: Config.setNestedValue("orbit.orbital.surface.shadowOpacityPercent", value)
                 }
             }
 
@@ -823,7 +823,7 @@ ContentPage {
                 from: 0
                 to: 16
                 stepSize: 1
-                onValueChanged: Config.setNestedValue("orbit.windowGap", value)
+                onValueModified: Config.setNestedValue("orbit.windowGap", value)
             }
 
         }
@@ -898,7 +898,7 @@ ContentPage {
                 from: 1
                 to: 4
                 stepSize: 1
-                onValueChanged: Config.setNestedValue("orbit.scrollSteps", value)
+                onValueModified: Config.setNestedValue("orbit.scrollSteps", value)
             }
 
             ConfigSwitch {
@@ -917,7 +917,7 @@ ContentPage {
                 from: 48
                 to: 180
                 stepSize: 4
-                onValueChanged: Config.setNestedValue("orbit.canvasScrubThreshold", value)
+                onValueModified: Config.setNestedValue("orbit.canvasScrubThreshold", value)
             }
         }
     }
@@ -1027,7 +1027,7 @@ ContentPage {
                 from: 0
                 to: 16
                 stepSize: 1
-                onValueChanged: Config.setNestedValue("orbit.shelf.moduleSpacing", value)
+                onValueModified: Config.setNestedValue("orbit.shelf.moduleSpacing", value)
             }
 
             ConfigSpinBox {
@@ -1041,7 +1041,7 @@ ContentPage {
                 from: 6
                 to: 16
                 stepSize: 1
-                onValueChanged: Config.setNestedValue("orbit.shelf.islandPadding", value)
+                onValueModified: Config.setNestedValue("orbit.shelf.islandPadding", value)
             }
 
             ContentSubsection {
@@ -1108,7 +1108,7 @@ ContentPage {
                 from: 2
                 to: 8
                 stepSize: 1
-                onValueChanged: Config.setNestedValue("orbit.trailItems", value)
+                onValueModified: Config.setNestedValue("orbit.trailItems", value)
             }
 
             ContentSubsection {
@@ -1300,7 +1300,7 @@ ContentPage {
                     from: 0
                     to: 160
                     stepSize: 4
-                    onValueChanged: Config.setNestedValue("orbit.presentation.distance", value)
+                    onValueModified: Config.setNestedValue("orbit.presentation.distance", value)
                 }
 
                 ConfigSpinBox {
@@ -1313,7 +1313,7 @@ ContentPage {
                     from: 80
                     to: 600
                     stepSize: 10
-                    onValueChanged: Config.setNestedValue("orbit.presentation.enterDurationMs", value)
+                    onValueModified: Config.setNestedValue("orbit.presentation.enterDurationMs", value)
                 }
 
                 ConfigSpinBox {
@@ -1326,7 +1326,7 @@ ContentPage {
                     from: 60
                     to: 500
                     stepSize: 10
-                    onValueChanged: Config.setNestedValue("orbit.presentation.exitDurationMs", value)
+                    onValueModified: Config.setNestedValue("orbit.presentation.exitDurationMs", value)
                 }
 
                 ConfigSpinBox {
@@ -1338,7 +1338,7 @@ ContentPage {
                     from: 0
                     to: 240
                     stepSize: 8
-                    onValueChanged: Config.setNestedValue("orbit.presentation.entryDelayMs", value)
+                    onValueModified: Config.setNestedValue("orbit.presentation.entryDelayMs", value)
                 }
 
                 ConfigSpinBox {
@@ -1350,7 +1350,7 @@ ContentPage {
                     from: 0
                     to: 90
                     stepSize: 5
-                    onValueChanged: Config.setNestedValue("orbit.presentation.entryOpacityPercent", value)
+                    onValueModified: Config.setNestedValue("orbit.presentation.entryOpacityPercent", value)
                 }
 
                 ConfigSpinBox {
@@ -1362,7 +1362,7 @@ ContentPage {
                     from: 0
                     to: 120
                     stepSize: 4
-                    onValueChanged: Config.setNestedValue("orbit.presentation.entryStaggerMs", value)
+                    onValueModified: Config.setNestedValue("orbit.presentation.entryStaggerMs", value)
                 }
 
                 ConfigSpinBox {
@@ -1374,7 +1374,7 @@ ContentPage {
                     from: 0
                     to: 240
                     stepSize: 8
-                    onValueChanged: Config.setNestedValue("orbit.presentation.shelfDelayMs", value)
+                    onValueModified: Config.setNestedValue("orbit.presentation.shelfDelayMs", value)
                 }
             }
 
@@ -1412,7 +1412,7 @@ ContentPage {
                     from: 80
                     to: 600
                     stepSize: 10
-                    onValueChanged: Config.setNestedValue("orbit.navigationMotion.durationMs", value)
+                    onValueModified: Config.setNestedValue("orbit.navigationMotion.durationMs", value)
                 }
 
                 ConfigSelectionArray {
@@ -1435,7 +1435,7 @@ ContentPage {
                 from: 0
                 to: 80
                 stepSize: 5
-                onValueChanged: Config.setNestedValue("orbit.scrimDim", value)
+                onValueModified: Config.setNestedValue("orbit.scrimDim", value)
             }
 
             ContentSubsection {
@@ -1463,7 +1463,7 @@ ContentPage {
                     from: 0
                     to: 100
                     stepSize: 2
-                    onValueChanged: Config.setNestedValue("orbit.backdropBlurStrength", value)
+                    onValueModified: Config.setNestedValue("orbit.backdropBlurStrength", value)
                 }
 
                 ConfigSpinBox {
@@ -1475,7 +1475,7 @@ ContentPage {
                     from: 0
                     to: 100
                     stepSize: 2
-                    onValueChanged: Config.setNestedValue("orbit.backdropBlurSaturation", value)
+                    onValueModified: Config.setNestedValue("orbit.backdropBlurSaturation", value)
                 }
 
                 ConfigSpinBox {
@@ -1487,7 +1487,7 @@ ContentPage {
                     from: 0
                     to: 80
                     stepSize: 2
-                    onValueChanged: Config.setNestedValue("orbit.backdropBlurTint", value)
+                    onValueModified: Config.setNestedValue("orbit.backdropBlurTint", value)
                 }
             }
 

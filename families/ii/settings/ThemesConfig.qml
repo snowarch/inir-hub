@@ -1470,7 +1470,7 @@ ContentPage {
                 stepSize: 5
                 property bool _ready: false
                 Component.onCompleted: _ready = true
-                onValueChanged: {
+                onValueModified: {
                     if (!_ready) return;
                     Config.setNestedValue("appearance.wallpaperTheming.terminalColorAdjustments.saturation", value / 100);
                     terminalColorDebounce.restart();
@@ -1488,7 +1488,7 @@ ContentPage {
                 stepSize: 5
                 property bool _ready: false
                 Component.onCompleted: _ready = true
-                onValueChanged: {
+                onValueModified: {
                     if (!_ready) return;
                     Config.setNestedValue("appearance.wallpaperTheming.terminalColorAdjustments.brightness", value / 100);
                     terminalColorDebounce.restart();
@@ -1506,7 +1506,7 @@ ContentPage {
                 stepSize: 5
                 property bool _ready: false
                 Component.onCompleted: _ready = true
-                onValueChanged: {
+                onValueModified: {
                     if (!_ready) return;
                     Config.setNestedValue("appearance.wallpaperTheming.terminalColorAdjustments.harmony", value / 100);
                     terminalColorDebounce.restart();
@@ -1528,7 +1528,7 @@ ContentPage {
                 stepSize: 5
                 property bool _ready: false
                 Component.onCompleted: _ready = true
-                onValueChanged: {
+                onValueModified: {
                     if (!_ready) return;
                     Config.setNestedValue("appearance.wallpaperTheming.terminalColorAdjustments.backgroundBrightness", value / 100);
                     terminalColorDebounce.restart();
@@ -1572,12 +1572,11 @@ ContentPage {
                 }
 
                 onClicked: {
-                    // Update spinbox values directly (this triggers onValueChanged which saves to config)
-                    saturationSpinBox.value = 65;  // 0.65 * 100
-                    brightnessSpinBox.value = 60;  // 0.60 * 100
-                    harmonySpinBox.value = 40;     // 0.40 * 100
-                    bgBrightnessSpinBox.value = 50; // 0.50 * 100
-                    // Note: ThemeService.regenerateAutoTheme() is called by onValueChanged
+                    Config.setNestedValue("appearance.wallpaperTheming.terminalColorAdjustments.saturation", 0.65)
+                    Config.setNestedValue("appearance.wallpaperTheming.terminalColorAdjustments.brightness", 0.60)
+                    Config.setNestedValue("appearance.wallpaperTheming.terminalColorAdjustments.harmony", 0.40)
+                    Config.setNestedValue("appearance.wallpaperTheming.terminalColorAdjustments.backgroundBrightness", 0.50)
+                    terminalColorDebounce.restart()
                 }
             }
 
@@ -1943,23 +1942,6 @@ ContentPage {
                 }
             }
 
-            // Size Scale
-            ConfigSpinBox {
-                icon: "format_size"
-                text: Translation.tr("Size scale (%)")
-                value: Math.round((Config.options?.appearance?.typography?.sizeScale ?? 1.0) * 100)
-                from: 80
-                to: 150
-                stepSize: 5
-                onValueChanged: {
-                    if (Config.options?.appearance?.typography)
-                        Config.setNestedValue("appearance.typography.sizeScale", value / 100)
-                }
-                StyledToolTip {
-                    text: Translation.tr("Scale all text in the shell")
-                }
-            }
-
             // Variable Font Axes - Collapsible
             RippleButton {
                 id: advancedToggle
@@ -2004,7 +1986,7 @@ ContentPage {
                     to: 900
                     stepSize: 50
                     value: Config.options?.appearance?.typography?.variableAxes?.wght ?? 300
-                    onValueChanged: {
+                    onValueModified: {
                         if (Config.options?.appearance?.typography?.variableAxes)
                             Config.setNestedValue("appearance.typography.variableAxes.wght", value)
                     }
@@ -2025,7 +2007,7 @@ ContentPage {
                     to: 125
                     stepSize: 5
                     value: Config.options?.appearance?.typography?.variableAxes?.wdth ?? 105
-                    onValueChanged: {
+                    onValueModified: {
                         if (Config.options?.appearance?.typography?.variableAxes)
                             Config.setNestedValue("appearance.typography.variableAxes.wdth", value)
                     }
@@ -2046,7 +2028,7 @@ ContentPage {
                     to: 150
                     stepSize: 25
                     value: Config.options?.appearance?.typography?.variableAxes?.grad ?? 150
-                    onValueChanged: {
+                    onValueModified: {
                         if (Config.options?.appearance?.typography?.variableAxes)
                             Config.setNestedValue("appearance.typography.variableAxes.grad", value)
                     }

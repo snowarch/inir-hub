@@ -171,7 +171,7 @@ ContentPage {
                 from: 10
                 to: 200
                 stepSize: 1
-                onValueChanged: {
+                onValueModified: {
                     Config.setNestedValue("background.parallax.zoom", value / 100)
                     Config.setNestedValue("background.parallax.workspaceZoom", value / 100)
                 }
@@ -188,7 +188,7 @@ ContentPage {
                 to: 150
                 stepSize: 5
                 enabled: (root.iiParallax.enable ?? true) && (root.iiParallax.enableWorkspace ?? false)
-                onValueChanged: Config.setNestedValue("background.parallax.workspaceShift", value / 100)
+                onValueModified: Config.setNestedValue("background.parallax.workspaceShift", value / 100)
             }
 
             ConfigSpinBox {
@@ -199,7 +199,7 @@ ContentPage {
                 to: 30
                 stepSize: 1
                 enabled: (root.iiParallax.enable ?? true) && (root.iiParallax.enableSidebar ?? false)
-                onValueChanged: Config.setNestedValue("background.parallax.panelShift", value / 100)
+                onValueModified: Config.setNestedValue("background.parallax.panelShift", value / 100)
             }
 
             ConfigSpinBox {
@@ -210,7 +210,7 @@ ContentPage {
                 to: 180
                 stepSize: 5
                 enabled: root.iiParallax.enable ?? true
-                onValueChanged: {
+                onValueModified: {
                     Config.setNestedValue("background.parallax.widgetDepth", value / 100)
                     Config.setNestedValue("background.parallax.widgetsFactor", value / 100)
                 }
@@ -232,7 +232,7 @@ ContentPage {
                 to: 1200
                 stepSize: 20
                 enabled: (root.iiParallax.enable ?? true) && (root.iiParallax.pauseDuringTransitions ?? true)
-                onValueChanged: Config.setNestedValue("background.parallax.transitionSettleMs", value)
+                onValueModified: Config.setNestedValue("background.parallax.transitionSettleMs", value)
             }
         }
     }
@@ -1164,7 +1164,7 @@ ContentPage {
                 from: 10
                 to: 240
                 stepSize: 5
-                onValueChanged: Config.setNestedValue("background.backend.awww.transitionFps", value)
+                onValueModified: Config.setNestedValue("background.backend.awww.transitionFps", value)
             }
 
             ConfigRow {
@@ -1178,7 +1178,7 @@ ContentPage {
                     from: 1
                     to: 64
                     stepSize: 1
-                    onValueChanged: Config.setNestedValue("background.backend.awww.simpleStep", value)
+                    onValueModified: Config.setNestedValue("background.backend.awww.simpleStep", value)
                 }
 
                 ConfigSpinBox {
@@ -1188,7 +1188,7 @@ ContentPage {
                     from: 1
                     to: 128
                     stepSize: 1
-                    onValueChanged: Config.setNestedValue("background.backend.awww.spatialStep", value)
+                    onValueModified: Config.setNestedValue("background.backend.awww.spatialStep", value)
                 }
             }
 
@@ -1295,7 +1295,7 @@ ContentPage {
                 from: 1
                 to: 1440
                 stepSize: 1
-                onValueChanged: Config.setNestedValue("background.autoWallpaper.intervalMinutes", value)
+                onValueModified: Config.setNestedValue("background.autoWallpaper.intervalMinutes", value)
                 StyledToolTip {
                     text: Translation.tr("How often to pick a new random wallpaper")
                 }
@@ -1515,7 +1515,7 @@ ContentPage {
                 from: 200
                 to: 3000
                 stepSize: 100
-                onValueChanged: {
+                onValueModified: {
                     Config.setNestedValue("background.transition.duration", value);
                 }
                 StyledToolTip {
@@ -1935,7 +1935,7 @@ ContentPage {
                 from: 0
                 to: 100
                 stepSize: 2
-                onValueChanged: {
+                onValueModified: {
                     Config.setNestedValue("background.effects.blurRadius", value);
                 }
                 StyledToolTip {
@@ -1951,7 +1951,7 @@ ContentPage {
                 from: 0
                 to: 100
                 stepSize: 5
-                onValueChanged: {
+                onValueModified: {
                     Config.setNestedValue("background.effects.thumbnailBlurStrength", value);
                 }
                 StyledToolTip {
@@ -1966,7 +1966,7 @@ ContentPage {
                 from: 0
                 to: 100
                 stepSize: 5
-                onValueChanged: {
+                onValueModified: {
                     Config.setNestedValue("background.effects.dim", value);
                 }
                 StyledToolTip {
@@ -1984,7 +1984,7 @@ ContentPage {
                 from: 0
                 to: 100
                 stepSize: 5
-                onValueChanged: {
+                onValueModified: {
                     Config.setNestedValue("background.effects.dynamicDim", value);
                 }
                 StyledToolTip {
@@ -2075,7 +2075,7 @@ ContentPage {
                         from: 500
                         to: 10000
                         stepSize: 250
-                        onValueChanged: {
+                        onValueModified: {
                             Config.setNestedValue("background.effects.ripple.rippleDuration", value);
                         }
                         StyledToolTip {
@@ -2100,7 +2100,7 @@ ContentPage {
                         from: 0
                         to: 200
                         stepSize: 10
-                        onValueChanged: {
+                        onValueModified: {
                             Config.setNestedValue("background.effects.ripple.sparkleIntensity", value / 100);
                         }
                         StyledToolTip {
@@ -2115,7 +2115,7 @@ ContentPage {
                         from: 0
                         to: 200
                         stepSize: 10
-                        onValueChanged: {
+                        onValueModified: {
                             Config.setNestedValue("background.effects.ripple.glowIntensity", value / 100);
                         }
                         StyledToolTip {
@@ -2130,7 +2130,7 @@ ContentPage {
                         from: 5
                         to: 50
                         stepSize: 1
-                        onValueChanged: {
+                        onValueModified: {
                             Config.setNestedValue("background.effects.ripple.ringWidth", value / 100);
                         }
                         StyledToolTip {
@@ -2219,7 +2219,7 @@ ContentPage {
                     from: 0
                     to: 200
                     stepSize: 5
-                    onValueChanged: {
+                    onValueModified: {
                         Config.setNestedValue("background.backdrop.auroraOverlayOpacity", value / 100.0);
                     }
                     StyledToolTip {
@@ -2287,7 +2287,7 @@ ContentPage {
                     from: 0
                     to: 100
                     stepSize: 2
-                    onValueChanged: {
+                    onValueModified: {
                         Config.setNestedValue("background.backdrop.blurRadius", value);
                     }
                     StyledToolTip {
@@ -2303,7 +2303,7 @@ ContentPage {
                     from: 0
                     to: 100
                     stepSize: 5
-                    onValueChanged: {
+                    onValueModified: {
                         Config.setNestedValue("background.backdrop.dim", value);
                     }
                     StyledToolTip {
@@ -2319,7 +2319,7 @@ ContentPage {
                     from: -100
                     to: 100
                     stepSize: 5
-                    onValueChanged: {
+                    onValueModified: {
                         Config.setNestedValue("background.backdrop.saturation", value / 100.0);
                     }
                     StyledToolTip {
@@ -2335,7 +2335,7 @@ ContentPage {
                     from: -100
                     to: 100
                     stepSize: 5
-                    onValueChanged: {
+                    onValueModified: {
                         Config.setNestedValue("background.backdrop.contrast", value / 100.0);
                     }
                     StyledToolTip {
@@ -2367,7 +2367,7 @@ ContentPage {
                     from: 0
                     to: 100
                     stepSize: 5
-                    onValueChanged: {
+                    onValueModified: {
                         Config.setNestedValue("background.backdrop.vignetteIntensity", value / 100.0);
                     }
                     StyledToolTip {
@@ -2383,7 +2383,7 @@ ContentPage {
                     from: 10
                     to: 100
                     stepSize: 5
-                    onValueChanged: {
+                    onValueModified: {
                         Config.setNestedValue("background.backdrop.vignetteRadius", value / 100.0);
                     }
                     StyledToolTip {
