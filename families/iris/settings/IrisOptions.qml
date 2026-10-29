@@ -860,10 +860,10 @@ QtObject {
         { section: "sources", group: "Weather", label: "Weather", description: "The forecast every weather piece and widget shows.", path: "bar.weather.enable", kind: "switch", fallback: true, keywords: ["weather", "forecast", "temperature", "clima", "tiempo"] },
         { section: "sources", group: "Weather", label: "Latitude", description: "With longitude, overrides the place.", path: "bar.weather.manualLat", visibleWhen: "bar.weather.enable", kind: "text", numeric: true, placeholder: "-34.6037", fallback: 0, tune: true, keywords: ["coordinates", "latitude", "location", "coordenadas"] },
         { section: "sources", group: "Weather", label: "Longitude", path: "bar.weather.manualLon", visibleWhen: "bar.weather.enable", kind: "text", numeric: true, placeholder: "-58.3816", fallback: 0, tune: true, keywords: ["coordinates", "longitude", "location", "coordenadas"] },
-        { section: "sources", group: "Hotspot", label: "Network name", description: "What other devices see when the hotspot in the Control Center is on.", path: "hotspot.ssid", kind: "text", placeholder: "iNiR Hotspot", fallback: "iNiR Hotspot", keywords: ["hotspot", "ssid", "wifi", "share", "tethering", "compartir"] },
-        { section: "sources", group: "Hotspot", label: "Password", path: "hotspot.password", kind: "text", secret: true, placeholder: "At least 8 characters", fallback: "", keywords: ["hotspot", "password", "key", "contraseña"] },
-        { tune: true, section: "sources", group: "Hotspot", label: "Band", description: "5 GHz is faster nearby; 2.4 GHz reaches further and works with older devices.", path: "hotspot.band", kind: "choice", fallback: "bg", choices: [{label:"2.4 GHz",value:"bg"},{label:"5 GHz",value:"a"}] },
-        { tune: true, section: "sources", group: "Network", label: "Browser identity", description: "The user agent sent to wallpaper, news and image sites that refuse unknown clients.", path: "networking.userAgent", kind: "text", placeholder: "Mozilla/5.0 …", fallback: "", keywords: ["user agent", "browser", "network", "wallhaven"] },
+        { section: "controlCenter", group: "Hotspot", label: "Network name", description: "What other devices see when the hotspot in the Control Center is on.", path: "hotspot.ssid", kind: "text", placeholder: "iNiR Hotspot", fallback: "iNiR Hotspot", keywords: ["hotspot", "ssid", "wifi", "share", "tethering", "compartir"] },
+        { section: "controlCenter", group: "Hotspot", label: "Password", path: "hotspot.password", kind: "text", secret: true, placeholder: "At least 8 characters", fallback: "", keywords: ["hotspot", "password", "key", "contraseña"] },
+        { tune: true, section: "controlCenter", group: "Hotspot", label: "Band", description: "5 GHz is faster nearby; 2.4 GHz reaches further and works with older devices.", path: "hotspot.band", kind: "choice", fallback: "bg", choices: [{label:"2.4 GHz",value:"bg"},{label:"5 GHz",value:"a"}] },
+        { tune: true, section: "sources", group: "Network", label: "Browser identity", description: "The user agent sent to wallpaper, news and image sites that refuse unknown clients.", path: "networking.userAgent", kind: "text", placeholder: "Mozilla/5.0 …", fallback: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36", keywords: ["user agent", "browser", "network", "wallhaven"] },
         { section: "sources", group: "Weather", label: "Fahrenheit", description: "Degrees and distances in US units instead of Celsius and metric.", path: "bar.weather.useUSCS", kind: "switch", fallback: false },
         { section: "sources", group: "Weather", label: "Place", description: "The city the forecast is for. Leave it empty and iRiS works it out from your connection, which is usually close but not always right.", path: "bar.weather.city", kind: "text", placeholder: "Automatic", fallback: "" },
         { tune: true, section: "sources", group: "Weather", label: "Use GPS when there is one", description: "Asks geoclue instead of guessing from your connection.", path: "bar.weather.enableGPS", kind: "switch", fallback: false },
@@ -872,8 +872,8 @@ QtObject {
         { section: "sources", group: "Calendar", label: "Calendars", description: "What each feed brings in the next two weeks.", kind: "list", view: Qt.resolvedUrl("IrisCalendarAccounts.qml"), summary: false, visibleWhen: "calendar.externalSync.enable", keywords: ["google calendar", "outlook", "ical", "ics", "caldav", "nextcloud", "accounts", "feed", "events", "calendario", "cuentas"] },
         { section: "sources", group: "Calendar", label: "Refresh every", path: "calendar.externalSync.refreshMinutes", visibleWhen: "calendar.externalSync.enable", kind: "range", fallback: 15, min: 5, max: 120, step: 5, unit: " min" },
         { section: "sources", group: "Updates", label: "Look for updates every", description: "How often the Updates bubble counts what is waiting.", path: "updates.checkInterval", kind: "range", fallback: 120, min: 15, max: 720, step: 15, unit: " min" },
-        { section: "sources", group: "VPN", label: "VPN button in quick controls", description: "Adds a VPN switch to the Control Center beside Ethernet and Bluetooth.", path: "vpn.quickToggle", kind: "switch", fallback: false },
-        { tune: true, section: "sources", group: "VPN", label: "Connection details", description: "The VPN card shows addresses, the tailnet's devices and live traffic; tap a value to copy it.", path: "vpn.details", kind: "switch", fallback: false, keywords: ["vpn", "tailscale", "wireguard", "ip", "ipv4", "ipv6", "address", "devices", "traffic", "details", "detalles", "dirección"] },
+        { section: "controlCenter", group: "VPN", label: "VPN button in quick controls", description: "Adds a VPN switch to the Control Center beside Ethernet and Bluetooth.", path: "vpn.quickToggle", kind: "switch", fallback: false },
+        { tune: true, section: "controlCenter", group: "VPN", label: "Connection details", description: "The VPN card shows addresses, the tailnet's devices and live traffic; tap a value to copy it.", path: "vpn.details", kind: "switch", fallback: false, keywords: ["vpn", "tailscale", "wireguard", "ip", "ipv4", "ipv6", "address", "devices", "traffic", "details", "detalles", "dirección"] },
         { section: "sources", group: "New iNiR", label: "Watch for new iNiR versions", description: "A bubble shows up on its own when there is a new iNiR upstream, and goes away once you update.", path: "shellUpdates.enabled", kind: "switch", fallback: true },
         { section: "sources", group: "New iNiR", label: "Where it shows up", description: "The bubble's place while an update waits: a spot on the frame, or the Island.", path: "iris.bubbles.extras.shellUpdate.place", visibleWhen: "shellUpdates.enabled", kind: "zone", fallback: "right", choices: IrisPieces.zoneChoices(true) },
         { section: "sources", group: "New iNiR", label: "Check every", path: "shellUpdates.checkIntervalMinutes", visibleWhen: "shellUpdates.enabled", kind: "range", fallback: 360, min: 60, max: 1440, step: 60, unit: " min" },
@@ -1261,7 +1261,7 @@ QtObject {
     ]
     // Niri's own settings, read and written through inir-accel niri-config (IrisNiri). `niri` is the config section.
     readonly property var niriRows: [
-        { section: "windows", group: "Layout", niri: "layout", key: "gaps", label: "Gaps", description: "Space around and between windows.", kind: "range", fallback: 16, min: 0, max: 48, unit: " px", keywords: ["niri", "gaps", "spacing", "padding"] },
+        { tune: false, section: "windows", group: "Layout", niri: "layout", key: "gaps", label: "Gaps", description: "Space around and between windows.", kind: "range", fallback: 16, min: 0, max: 48, unit: " px", keywords: ["niri", "gaps", "spacing", "padding"] },
         { section: "windows", group: "Layout", niri: "layout", key: "center-focused-column", read: "center_focused", label: "Centre the focused column", summary: false, kind: "choice", fallback: "never", choices: [{label:"Never",value:"never"},{label:"When it overflows",value:"on-overflow"},{label:"Always",value:"always"}], keywords: ["niri", "center", "centre", "column"] },
         { tune: true, section: "windows", group: "Layout", niri: "layout", key: "always-center-single-column", label: "Centre a column that is alone", kind: "switch", fallback: false },
         { tune: true, section: "windows", group: "Layout", niri: "layout", key: "default-column-display", label: "New columns", kind: "choice", fallback: "normal", choices: [{label:"Side by side",value:"normal"},{label:"Tabbed",value:"tabbed"}], keywords: ["niri", "tabs", "tabbed"] },
@@ -1275,12 +1275,12 @@ QtObject {
         { section: "windows", group: "Borders", niri: "layout", key: "focus-ring.width", label: "Ring width", showIf: () => IrisNiri.value({ niri: "layout", key: "focus-ring.enabled" }) === true, kind: "range", fallback: 4, min: 1, max: 10, unit: " px" },
         { section: "windows", group: "Borders", niri: "layout", key: "focus-ring.active-color", label: "Ring colour", showIf: () => IrisNiri.value({ niri: "layout", key: "focus-ring.enabled" }) === true, kind: "choice", fallback: "", choices: root.swatchChoices },
 
-        { section: "windows", group: "Shape", niri: "window-rules", key: "corner-radius", label: "Window corners", description: "Rounds every window's corners.", kind: "range", fallback: 0, min: 0, max: 24, unit: " px", keywords: ["niri", "radius", "rounded", "corners"] },
+        { tune: false, section: "windows", group: "Shape", niri: "window-rules", key: "corner-radius", label: "Window corners", description: "Rounds every window's corners.", kind: "range", fallback: 0, min: 0, max: 24, unit: " px", keywords: ["niri", "radius", "rounded", "corners"] },
         { tune: true, section: "windows", group: "Shape", niri: "window-rules", key: "clip-to-geometry", label: "Clip content to the corners", kind: "switch", fallback: false, write: on => on ? "true" : "false" },
         { section: "windows", group: "Shape", niri: "layout", key: "shadow.enabled", label: "Shadows", kind: "switch", fallback: false, keywords: ["niri", "shadow"] },
         { section: "windows", group: "Shape", niri: "layout", key: "shadow.softness", label: "Softness", showIf: () => IrisNiri.value({ niri: "layout", key: "shadow.enabled" }) === true, kind: "range", fallback: 30, min: 0, max: 80, unit: " px" },
         { section: "windows", group: "Shape", niri: "layout", key: "shadow.spread", label: "Spread", showIf: () => IrisNiri.value({ niri: "layout", key: "shadow.enabled" }) === true, kind: "range", fallback: 5, min: 0, max: 40, unit: " px" },
-        { section: "windows", group: "Glass behind apps", niri: "window-rules", key: "active-opacity", label: "Window in focus", description: "Blur only shows through a window that is not fully opaque.", kind: "range", fallback: 1, min: 0.5, max: 1, step: 0.05, scale: 100, unit: " %", keywords: ["niri", "opacity", "transparent", "transparency", "focused", "active", "opacidad"] },
+        { tune: false, section: "windows", group: "Glass behind apps", niri: "window-rules", key: "active-opacity", label: "Window in focus", description: "Blur only shows through a window that is not fully opaque.", kind: "range", fallback: 1, min: 0.5, max: 1, step: 0.05, scale: 100, unit: " %", keywords: ["niri", "opacity", "transparent", "transparency", "focused", "active", "opacidad"] },
         { section: "windows", group: "Glass behind apps", niri: "window-rules", key: "inactive-opacity", label: "Windows out of focus", description: "How opaque the windows you are not using stay.", kind: "range", fallback: 1, min: 0.5, max: 1, step: 0.05, scale: 100, unit: " %", keywords: ["niri", "opacity", "transparent", "inactive", "background", "unfocused", "opacidad"] },
         { section: "windows", group: "Glass behind apps", niri: "window-rules", key: "blur", label: "Blur behind apps", description: "Niri blurs what is behind every window that lets it through.", showIf: () => IrisCompositorBlur.available, kind: "switch", fallback: false, keywords: ["niri", "blur", "glass", "frosted", "transparent", "apps", "windows", "desenfoque"] },
         { section: "windows", group: "Glass behind apps", niri: "window-rules", key: "xray", label: "Blur shows", description: "The wallpaper is blurred once and costs almost nothing; everything behind follows other windows and costs more.", showIf: () => IrisNiri.value({ niri: "window-rules", key: "blur" }) === true, kind: "choice", fallback: true, choices: [{label:"The wallpaper",value:true,glyph:"wallpaper"},{label:"Everything behind",value:false,glyph:"layers"}], keywords: ["niri", "xray", "blur", "windows behind"] },
@@ -1683,6 +1683,7 @@ QtObject {
     }
     // The order a section's groups are listed in: what someone came to change first, the rest as they were declared.
     readonly property var groupOrder: ({
+        controlCenter: ["Control Center", "Hotspot", "VPN"],
         general: ["Every day", "Date & time", "Language", "At login", "Apps", "Performance", "Settings window", "Shell family"],
         appearance: ["Look", "Themes", "Material", "Glass", "Texture", "Edges", "Light", "Shape", "Corners per surface",
             "Frame", "Text", "Faces", "Icons", "Material per surface", "Menus", "Settings", "Badges", "Customize", "Previews"],
@@ -1696,60 +1697,6 @@ QtObject {
         lock: ["When idle", "Security", "Scene", "Clock", "At a glance", "Now playing", "Activity", "Status", "Sign in", "Type"],
         player: ["Bubble", "Visualizer", "Player", "Frame music", "Edge wave", "Frame response", "Frame finish"]
     })
-    // How a section's page reads: named blocks of groups, by what someone came to change.
-    readonly property var groupClusters: ({
-        widgets: DesktopWidgetOptions.clusters,
-        sources: [
-            { caption: "Internet", groups: ["Weather", "Calendar", "Network"] },
-            { caption: "Connections", groups: ["Hotspot", "VPN"] },
-            { caption: "Updates", groups: ["Updates", "New iNiR"] },
-            { caption: "This computer", groups: ["System readings"] }
-        ],
-        appearance: [
-            { caption: "Look", groups: ["Look", "Themes"] },
-            { caption: "Surfaces", groups: ["Material", "Glass", "Texture", "Edges", "Light", "Adaptive"] },
-            { caption: "Shape and type", groups: ["Shape", "Corners per surface", "Frame", "Text", "Faces", "Icons"] },
-            { caption: "Per surface", groups: ["Material per surface", "Menus", "Settings"] }
-        ],
-        bar: [
-            { caption: "Shape", groups: ["Notch", "Layout", "Shape"] },
-            { caption: "What it shows", groups: ["At rest", "Resting Island", "Bar", "Pages", "Desktop page", "Player page"] },
-            { caption: "Behaviour", groups: ["Interaction", "Visibility", "Connections"] }
-        ],
-        bubbles: [
-            { caption: "Bubbles", groups: ["Size", "Behaviour", "On the contour", "Floating"] },
-            { caption: "Cards", groups: ["Opening bodies", "Cards", "Card contents", "Joining", "Tray"] }
-        ],
-        colour: [
-            { caption: "What you see first", groups: ["Scheme", "Signal", "Accent", "Highlight"] },
-            { caption: "Where colour comes from, and where it goes", flow: true, groups: ["Colour theme", "Day and night", "App colours"] },
-            { caption: "Fine tuning", groups: ["Dark look", "Ink look", "Light look", "Wallpaper tint"] }
-        ],
-        wallpaper: [
-            { caption: "Changing it", groups: ["Wallpaper shuffle", "Transition", "Live wallpapers", "Wallpaper gallery", "Library"] },
-            { caption: "How it sits", groups: ["Scaling", "Behind windows", "Parallax", "Overview backdrop"] }
-        ],
-        motion: [
-            { caption: "Motion", groups: ["Motion", "Curve", "Timing", "Touch"] },
-            { caption: "Per surface", groups: ["Per surface", "Style per surface"] }
-        ],
-        orbit: [
-            { caption: "Orbit", groups: ["Orbit", "Size", "Look"] },
-            { caption: "Behaviour", groups: ["Behaviour", "Shelf", "Hot corner"] }
-        ],
-        windows: [
-            { caption: "Layout", groups: ["Layout", "Room for iRiS", "Closing"] },
-            { caption: "Look", groups: ["Borders", "Shape", "Glass behind apps"] },
-            { caption: "Movement", groups: ["Movement"] }
-        ],
-        lock: [
-            { caption: "Locking", groups: ["When idle", "Security"] },
-            { caption: "Look", groups: ["Scene", "Clock", "Type"] },
-            { caption: "What it shows", groups: ["At a glance", "Now playing", "Activity", "Status", "Sign in"] }
-        ]
-    })
-    // Topics big enough to be looked for by name have a section of their own; their rows are declared where their
-    // surface's other rows are (Customize reads them there) and are shown here.
     // Home's live switches (not config) and what it holds until it is given its own rows.
     readonly property var homeDefault: ["iris.appearance.scheme", "iris.appearance.accent", "iris.appearance.look", "iris.appearance.glass.mode", "notifications.silent", "nightLight", "gameMode"]
     readonly property var dailySwitches: [

@@ -64,7 +64,7 @@ ColumnLayout {
         // Groups that are all fine-tuning (Corners per surface, every widget's extras) wait together at the area's foot,
         // behind one Fine-tune that names them: the page shows what people change, not every group it holds.
         const rest = groups.filter(group => group.rows.length > 0 && group.rows.every(spec => IrisOptions.foldsAway(spec)))
-        const resting = rest.length >= 2 && rest.length < groups.length
+        const resting = rest.length > 0 && rest.length < groups.length
         const shown = resting ? groups.filter(group => !rest.includes(group)) : groups
         const out = []
         if (!flat) {
