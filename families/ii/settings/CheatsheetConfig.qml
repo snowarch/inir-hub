@@ -533,10 +533,21 @@ ContentPage {
                 spacing: 12
                 Layout.preferredHeight: 36
 
+                // The action leads, the keys answer at the right: people arrive with "how do I ...", and the
+                // names keep the tiles' left edge.
+                StyledText {
+                    Layout.fillWidth: true
+                    text: kbRow.action + (kbRow.isCommented ? "  " + Translation.tr("(disabled)") : "")
+                    font.pixelSize: Appearance.font.pixelSize.small
+                    color: kbRow.isCommented
+                        ? Appearance.colors.colSubtext
+                        : Appearance.colors.colOnLayer1
+                    elide: Text.ElideRight
+                }
+
                 // Key badges
                 Row {
-                    Layout.preferredWidth: 200
-                    Layout.minimumWidth: 140
+                    Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
                     spacing: 4
                     opacity: kbRow.isCommented ? 0.4 : 1.0
 
@@ -560,17 +571,6 @@ ContentPage {
                         visible: kbRow.keyName.length > 0
                         keyText: kbRow.keySubstitutions[kbRow.keyName] ?? kbRow.keyName
                     }
-                }
-
-                // Action description
-                StyledText {
-                    Layout.fillWidth: true
-                    text: kbRow.action + (kbRow.isCommented ? "  " + Translation.tr("(disabled)") : "")
-                    font.pixelSize: Appearance.font.pixelSize.small
-                    color: kbRow.isCommented
-                        ? Appearance.colors.colSubtext
-                        : Appearance.colors.colOnLayer1
-                    elide: Text.ElideRight
                 }
 
                 // Edit / delete icon buttons (enriched mode only, fade in on hover)

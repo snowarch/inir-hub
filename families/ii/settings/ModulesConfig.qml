@@ -83,7 +83,7 @@ ContentPage {
     function activateSettingsSearchSection(section: string): bool {
         const label = String(section || "").toLowerCase().trim()
         const sections = {
-            "shell modules": "panels",
+            "shell modules": "modules",
             "panel style": "panels",
             "default terminal": "terminal",
             "modules": "modules",
@@ -119,11 +119,13 @@ ContentPage {
         ]
     }
 
+    // Sat alone in Panels, a promise ("enable or disable shell modules") over nothing but a reset: it heads the tab
+    // whose switches it speaks of.
     SettingsTaskLoader {
-        requested: modulesPage.activeSection === "panels"
+        requested: modulesPage.activeSection === "modules"
         sourceComponent: Component {
     SettingsCardSection {
-        settingsTaskSection: "panels"
+        settingsTaskSection: "modules"
         expanded: true
         icon: "extension"
         title: Translation.tr("Shell Modules")
@@ -176,7 +178,7 @@ ContentPage {
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "panels"
-        expanded: false
+        expanded: true
         icon: "style"
         title: Translation.tr("Panel Style")
 
@@ -296,17 +298,23 @@ ContentPage {
                 wrapMode: Text.WordWrap
             }
             Flow {
+                id: cycleChips
                 Layout.fillWidth: true
                 spacing: 6
+                readonly property var cycle: Array.from(Config.options?.familyCycle ?? ["ii", "waffle", "iris"])
+                readonly property var families: [
+                    { value: "ii", label: "Material", icon: "dashboard" },
+                    { value: "waffle", label: "Windows 11", icon: "window" },
+                    { value: "iris", label: "iRiS", icon: "visibility" }
+                ]
                 Repeater {
-                    model: [
-                        { value: "ii", label: "Material", icon: "dashboard" },
-                        { value: "waffle", label: "Windows 11", icon: "window" },
-                        { value: "iris", label: "iRiS", icon: "visibility" }
-                    ]
+                    // "In this order" is read left to right: the cycle first, numbered, then the ones left out
+                    // (it read "2 Material, Windows 11, 1 iRiS").
+                    model: cycleChips.cycle.map(id => cycleChips.families.find(family => family.value === id)).filter(Boolean)
+                        .concat(cycleChips.families.filter(family => !cycleChips.cycle.includes(family.value)))
                     FilterChip {
                         required property var modelData
-                        readonly property var cycle: Array.from(Config.options?.familyCycle ?? ["ii", "waffle", "iris"])
+                        readonly property var cycle: cycleChips.cycle
                         chipIcon: modelData.icon
                         text: cycle.includes(modelData.value)
                             ? `${cycle.indexOf(modelData.value) + 1}  ${modelData.label}` : modelData.label

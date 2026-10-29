@@ -12,7 +12,6 @@ Item {
     property var mods: []
     property string keyName: ""
     property string action: ""
-    property bool showDivider: true
     property var keySubstitutions: ({})
     
     // Search registration
@@ -116,10 +115,17 @@ Item {
         anchors.rightMargin: Looks.dp(12)
         spacing: Looks.dp(12)
 
+        // The action leads and the keys answer at the right, as every card does: people arrive with "how do I ...".
+        WText {
+            Layout.fillWidth: true
+            text: root.action
+            font.pixelSize: Looks.font.pixelSize.normal
+            elide: Text.ElideRight
+        }
+
         // Keys
         Row {
-            Layout.preferredWidth: Looks.dp(180)
-            Layout.minimumWidth: Looks.dp(120)
+            Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
             spacing: Looks.dp(4)
             
             Repeater {
@@ -169,26 +175,5 @@ Item {
                 }
             }
         }
-        
-        // Action
-        WText {
-            Layout.fillWidth: true
-            text: root.action
-            font.pixelSize: Looks.font.pixelSize.normal
-            elide: Text.ElideRight
-        }
-    }
-    
-    // Divider
-    Rectangle {
-        visible: root.showDivider
-        anchors.bottom: parent.bottom
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.leftMargin: Looks.dp(12)
-        anchors.rightMargin: Looks.dp(12)
-        height: 1
-        color: Looks.settings.stroke
-        opacity: 0.5
     }
 }

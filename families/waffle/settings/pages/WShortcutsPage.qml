@@ -96,7 +96,6 @@ WSettingsPage {
                     mods: modelData.mods ?? []
                     keyName: modelData.key ?? ""
                     action: modelData.comment ?? ""
-                    showDivider: index < categoryCard.categoryKeybinds.length - 1
                     keySubstitutions: root.keySubstitutions
                     
                     // Search registration
