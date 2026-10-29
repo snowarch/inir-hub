@@ -43,7 +43,7 @@ ContentPage {
     ]
 
     SettingsTaskLoader {
-        requested: true
+        requested: root.activeSection === "glass"
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "glass"
@@ -88,7 +88,7 @@ ContentPage {
     }
 
     SettingsTaskLoader {
-        requested: true
+        requested: root.activeSection === "areas"
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "areas"
@@ -129,7 +129,7 @@ ContentPage {
     }
 
     SettingsTaskLoader {
-        requested: true
+        requested: root.activeSection === "motion"
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "motion"
