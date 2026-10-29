@@ -83,7 +83,7 @@ ContentPage {
     }
 
     SettingsTaskLoader {
-        requested: true
+        requested: root.activeSection === "tools"
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "tools"
@@ -113,7 +113,7 @@ ContentPage {
     }
 
     SettingsTaskLoader {
-        requested: true
+        requested: root.activeSection === "tools"
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "tools"
@@ -256,7 +256,7 @@ ContentPage {
 
     // ── Shell Desaturation Effect ───────────────────────────────────────
     SettingsTaskLoader {
-        requested: true
+        requested: root.activeSection === "tools"
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "tools"
@@ -397,7 +397,7 @@ ContentPage {
     }
 
     SettingsTaskLoader {
-        requested: root.isIiActive && !(Config.options?.settingsUi?.easyMode ?? false)
+        requested: root.activeSection === "tools" && root.isIiActive && !(Config.options?.settingsUi?.easyMode ?? false)
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "tools"
@@ -583,7 +583,7 @@ ContentPage {
     }
 
     SettingsTaskLoader {
-        requested: root.isIiActive
+        requested: root.activeSection === "notifications" && root.isIiActive
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "notifications"
@@ -720,7 +720,7 @@ ContentPage {
     }
 
     SettingsTaskLoader {
-        requested: root.isIiActive
+        requested: root.activeSection === "control" && root.isIiActive
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "control"
@@ -814,7 +814,7 @@ ContentPage {
     }
 
     SettingsTaskLoader {
-        requested: root.isIiActive && !(Config.options?.settingsUi?.easyMode ?? false)
+        requested: root.activeSection === "widgets" && root.isIiActive && !(Config.options?.settingsUi?.easyMode ?? false)
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "widgets"
@@ -1417,7 +1417,7 @@ ContentPage {
                 Process {
                     id: sysTzProc
                     command: ["/usr/bin/readlink", "/etc/localtime"]
-                    running: root.visible
+                    running: root.activeSection === "widgets"
                     stdout: StdioCollector {
                         onStreamFinished: {
                             const raw = text.trim()
@@ -1486,7 +1486,7 @@ ContentPage {
 
                 Timer {
                     interval: 20000
-                    running: worldClockSection.visible
+                    running: root.activeSection === "widgets" && worldClockSection.visible
                     repeat: true
                     triggeredOnStart: true
                     onTriggered: worldClockSection.refreshLiveTimes()
@@ -1495,7 +1495,7 @@ ContentPage {
                 Connections {
                     target: Config
                     function onConfigChanged() {
-                        if (root.visible)
+                        if (root.activeSection === "widgets")
                             worldClockSection.refreshLiveTimes()
                     }
                 }
@@ -2064,7 +2064,7 @@ ContentPage {
     }
 
     SettingsTaskLoader {
-        requested: root.isIiActive && !(Config.options?.settingsUi?.easyMode ?? false)
+        requested: root.activeSection === "overview" && root.isIiActive && !(Config.options?.settingsUi?.easyMode ?? false)
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "overview"

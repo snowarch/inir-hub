@@ -17,7 +17,7 @@ ContentPage {
     property bool isIiActive: (Config.options?.panelFamily ?? "ii") === "ii"
     property bool isWaffleActive: Config.options?.panelFamily === "waffle"
     property string activeSection: "source"
-    readonly property bool screensTaskActive: root.isIiActive
+    readonly property bool screensTaskActive: root.isIiActive && root.activeSection === "screens"
 
     SettingsTaskNavigator {
         visible: root.isIiActive
@@ -84,7 +84,7 @@ ContentPage {
     }
 
     SettingsTaskLoader {
-        requested: root.isIiActive
+        requested: root.isIiActive && root.activeSection === "motion"
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "motion"
@@ -240,7 +240,7 @@ ContentPage {
     }
 
     SettingsTaskLoader {
-        requested: root.isIiActive
+        requested: root.isIiActive && root.activeSection === "screens"
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "screens"
@@ -272,7 +272,7 @@ ContentPage {
     }
 
     SettingsTaskLoader {
-        requested: root.isIiActive
+        requested: root.isIiActive && root.activeSection === "screens"
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "screens"
@@ -1121,7 +1121,7 @@ ContentPage {
     }
 
     SettingsTaskLoader {
-        requested: true
+        requested: !root.isIiActive || root.activeSection === "source"
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "source"
@@ -1241,7 +1241,7 @@ ContentPage {
     }
 
     SettingsTaskLoader {
-        requested: true
+        requested: !root.isIiActive || root.activeSection === "source"
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "source"
@@ -1268,7 +1268,7 @@ ContentPage {
 
     // iRiS sets shuffle in its own Settings › Wallpaper: under iRiS this card is not shown twice.
     SettingsTaskLoader {
-        requested: (Config.options?.panelFamily ?? "ii") !== "iris"
+        requested: (!root.isIiActive || root.activeSection === "source") && (Config.options?.panelFamily ?? "ii") !== "iris"
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "source"
@@ -1330,7 +1330,7 @@ ContentPage {
     }
 
     SettingsTaskLoader {
-        requested: root.isIiActive
+        requested: root.isIiActive && root.activeSection === "motion"
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "motion"
@@ -1528,7 +1528,7 @@ ContentPage {
     }
 
     SettingsTaskLoader {
-        requested: root.isIiActive
+        requested: root.isIiActive && root.activeSection === "screens"
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "screens"
@@ -1906,7 +1906,7 @@ ContentPage {
     }
 
     SettingsTaskLoader {
-        requested: root.isIiActive
+        requested: root.isIiActive && root.activeSection === "effects"
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "effects"
@@ -2399,7 +2399,7 @@ ContentPage {
     // Desktop widget settings moved to DesktopWidgetsConfig.qml (settingsPageIndex: 14)
 
     SettingsTaskLoader {
-        requested: true
+        requested: !root.isIiActive || root.activeSection === "notifications"
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "notifications"

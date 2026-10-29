@@ -56,7 +56,7 @@ ContentPage {
     }
 
     SettingsTaskLoader {
-        requested: root.isWaffleActive && root.isPanelEnabled("wBackground")
+        requested: root.isWaffleActive && root.isPanelEnabled("wBackground") && root.activeSection === "wallpaper"
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "wallpaper"
@@ -126,7 +126,7 @@ ContentPage {
     }
 
     SettingsTaskLoader {
-        requested: root.isWaffleActive && root.isPanelEnabled("wBackground")
+        requested: root.isWaffleActive && root.isPanelEnabled("wBackground") && root.activeSection === "wallpaper"
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "wallpaper"
@@ -172,7 +172,7 @@ ContentPage {
     }
 
     SettingsTaskLoader {
-        requested: root.isWaffleActive
+        requested: root.isWaffleActive && root.activeSection === "wallpaper"
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "wallpaper"
@@ -302,7 +302,7 @@ ContentPage {
     }
 
     SettingsTaskLoader {
-        requested: root.isWaffleActive && root.isPanelEnabled("wBar")
+        requested: root.isWaffleActive && root.isPanelEnabled("wBar") && root.activeSection === "taskbar"
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "taskbar"
@@ -343,7 +343,7 @@ ContentPage {
     }
 
     SettingsTaskLoader {
-        requested: root.isWaffleActive
+        requested: root.isWaffleActive && root.activeSection === "style"
         sourceComponent: Component {
     SettingsCardSection {
         id: themingSection
@@ -436,7 +436,7 @@ ContentPage {
     }
 
     SettingsTaskLoader {
-        requested: root.isWaffleActive
+        requested: root.isWaffleActive && root.activeSection === "style"
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "style"
@@ -456,7 +456,7 @@ ContentPage {
     }
 
     SettingsTaskLoader {
-        requested: true
+        requested: root.activeSection === "transition"
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "transition"

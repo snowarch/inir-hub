@@ -1,6 +1,7 @@
 import qs
 import QtQuick
 import QtQuick.Controls
+import QtQuick.Dialogs
 import QtQuick.Layouts
 import Qt5Compat.GraphicalEffects
 import Quickshell
@@ -18,8 +19,18 @@ ContentPage {
     settingsPageName: Translation.tr("Quick")
     readonly property bool isOverlayPage: GlobalStates.settingsOverlayOpen ?? false
     property string activeSection: "wallpaper"
+    property string captureFolderTarget: "recordings"
     property bool showManualNotificationFilter: false
     property bool showManualVisualizerFilter: false
+    readonly property string effectiveRecordingPath: {
+        const configured = String(Config.getNestedValue("screenRecord.savePath", ""))
+        return configured.length > 0 ? configured : Directories.videosPath
+    }
+    readonly property string effectiveScreenshotPath: Directories.screenshotsPath
+
+    function _normalizedAppKey(value): string {
+        return String(value ?? "").toLowerCase().replace(/[^a-z0-9]/g, "")
+    }
 
     function _uniqueApps(values): var {
         const out = []
@@ -118,6 +129,11 @@ ContentPage {
         return out
     }
 
+    function openCaptureFolderDialog(target: string): void {
+        root.captureFolderTarget = target
+        captureFolderDialog.open()
+    }
+
     SettingsTaskNavigator {
         icon: "bolt"
         title: ""
@@ -140,6 +156,28 @@ ContentPage {
         ]
     }
 
+    FolderDialog {
+        id: captureFolderDialog
+        title: root.captureFolderTarget === "screenshots"
+            ? Translation.tr("Select screenshots folder")
+            : Translation.tr("Select recordings folder")
+        currentFolder: `file://${root.captureFolderTarget === "screenshots"
+            ? root.effectiveScreenshotPath : root.effectiveRecordingPath}`
+        onAccepted: {
+            const path = FileUtils.trimFileProtocol(String(selectedFolder))
+            Config.setNestedValue(root.captureFolderTarget === "screenshots"
+                ? "regionSelector.savePath" : "screenRecord.savePath", path)
+        }
+    }
+
+    SettingsNativeDialogGuard {
+        dialog: captureFolderDialog
+        dialogKey: "quick-capture-folder"
+    }
+    // Deferred in both modes: entering the page must never kick off directory-wide
+    // thumbnail generation. The user asks for the grid explicitly.
+    property bool quickGridLoaded: false
+
     Component.onCompleted: {
         Wallpapers.load()
     }
@@ -158,7 +196,7 @@ ContentPage {
 
     // Wallpaper selection
     SettingsTaskLoader {
-        requested: true
+        requested: root.activeSection === "wallpaper"
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "wallpaper"
@@ -360,49 +398,58 @@ ContentPage {
                 }
             }
 
-            // Nine variants read as a wall of chips; past five a choice sits in a popup.
-            RowLayout {
-                Layout.fillWidth: true
-                spacing: 12
-                MaterialSymbol {
-                    text: "palette"
-                    iconSize: Appearance.font.pixelSize.larger
-                    color: Appearance.colors.colOnLayer1
-                }
-                StyledText {
-                    Layout.fillWidth: true
-                    text: Translation.tr("Palette style")
-                    color: Appearance.colors.colOnLayer1
-                }
-                StyledComboBox {
-                    Layout.preferredWidth: Math.min(210, Math.max(140, root.width * 0.38))
-                    readonly property var options: [
-                        { value: "auto", displayName: Translation.tr("Auto") },
-                        { value: "scheme-content", displayName: Translation.tr("Content") },
-                        { value: "scheme-expressive", displayName: Translation.tr("Expressive") },
-                        { value: "scheme-fidelity", displayName: Translation.tr("Fidelity") },
-                        { value: "scheme-fruit-salad", displayName: Translation.tr("Fruit Salad") },
-                        { value: "scheme-monochrome", displayName: Translation.tr("Monochrome") },
-                        { value: "scheme-neutral", displayName: Translation.tr("Neutral") },
-                        { value: "scheme-rainbow", displayName: Translation.tr("Rainbow") },
-                        { value: "scheme-tonal-spot", displayName: Translation.tr("Tonal Spot") }
-                    ]
-                    model: options
-                    textRole: "displayName"
-                    currentIndex: Math.max(0, options.findIndex(o => o.value === (Config.options?.appearance?.palette?.type ?? "auto")))
-                    onActivated: index => {
-                        const newValue = options[index].value
-                        Config.setNestedValue("appearance.palette.type", newValue)
-                        if (!ThemeService.isAutoTheme) {
-                            // Manual preset: apply variant immediately via MaterialThemeLoader
-                            const hex = MaterialThemeLoader.colorToHex(Appearance.m3colors.m3primary)
-                            const mode = Appearance.m3colors.darkmode ? "dark" : "light"
-                            MaterialThemeLoader.applySchemeVariant(hex, newValue, mode)
-                        }
-                        // Auto theme: ThemeService detects palette type change in
-                        // liveRegenSignature and regenerates automatically.
+            // ── Color scheme variant chips ──
+            ConfigSelectionArray {
+                currentValue: Config.options?.appearance?.palette?.type ?? "auto"
+                onSelected: newValue => {
+                    Config.setNestedValue("appearance.palette.type", newValue)
+                    if (!ThemeService.isAutoTheme) {
+                        // Manual preset: apply variant immediately via MaterialThemeLoader
+                        const hex = MaterialThemeLoader.colorToHex(Appearance.m3colors.m3primary)
+                        const mode = Appearance.m3colors.darkmode ? "dark" : "light"
+                        MaterialThemeLoader.applySchemeVariant(hex, newValue, mode)
                     }
+                    // Auto theme: ThemeService detects palette type change in
+                    // liveRegenSignature and regenerates automatically.
                 }
+                options: [
+                    {
+                        "value": "auto",
+                        "displayName": Translation.tr("Auto")
+                    },
+                    {
+                        "value": "scheme-content",
+                        "displayName": Translation.tr("Content")
+                    },
+                    {
+                        "value": "scheme-expressive",
+                        "displayName": Translation.tr("Expressive")
+                    },
+                    {
+                        "value": "scheme-fidelity",
+                        "displayName": Translation.tr("Fidelity")
+                    },
+                    {
+                        "value": "scheme-fruit-salad",
+                        "displayName": Translation.tr("Fruit Salad")
+                    },
+                    {
+                        "value": "scheme-monochrome",
+                        "displayName": Translation.tr("Monochrome")
+                    },
+                    {
+                        "value": "scheme-neutral",
+                        "displayName": Translation.tr("Neutral")
+                    },
+                    {
+                        "value": "scheme-rainbow",
+                        "displayName": Translation.tr("Rainbow")
+                    },
+                    {
+                        "value": "scheme-tonal-spot",
+                        "displayName": Translation.tr("Tonal Spot")
+                    }
+                ]
             }
 
             ConfigSpinBox {
@@ -566,6 +613,59 @@ ContentPage {
                         }
                     }
 
+                    Rectangle {
+                        id: placeholderCard
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: quickGridDeferredContent.implicitHeight + 24
+                        opacity: root.quickGridLoaded ? 0 : 1
+                        visible: opacity > 0
+                        scale: root.quickGridLoaded ? 0.96 : 1
+                        radius: Appearance.rounding.normal
+                        Behavior on Layout.preferredHeight { enabled: Appearance.animationsEnabled; NumberAnimation { duration: Appearance.animation.elementMoveExit.duration; easing.type: Appearance.animation.elementMoveExit.type; easing.bezierCurve: Appearance.animation.elementMoveExit.bezierCurve } }
+                        Behavior on opacity { enabled: Appearance.animationsEnabled; NumberAnimation { duration: Appearance.animation.elementMoveExit.duration; easing.type: Appearance.animation.elementMoveExit.type; easing.bezierCurve: Appearance.animation.elementMoveExit.bezierCurve } }
+                        Behavior on scale { enabled: Appearance.animationsEnabled; NumberAnimation { duration: Appearance.animation.elementMoveExit.duration; easing.type: Appearance.animation.elementMoveExit.type; easing.bezierCurve: Appearance.animation.elementMoveExit.bezierCurve } }
+                        color: Appearance.angelEverywhere ? Appearance.angel.colGlassCard
+                             : Appearance.inirEverywhere ? Appearance.inir.colLayer0
+                             : Appearance.auroraEverywhere ? Appearance.aurora.colSubSurface
+                             : Appearance.colors.colLayer0
+                        border.width: Appearance.angelEverywhere ? Appearance.angel.cardBorderWidth
+                            : Appearance.inirEverywhere ? 1 : (Appearance.auroraEverywhere ? 0 : 1)
+                        border.color: Appearance.angelEverywhere ? Appearance.angel.colCardBorder
+                                   : Appearance.inirEverywhere ? Appearance.inir.colBorder
+                                   : Appearance.colors.colLayer0Border
+
+                        ColumnLayout {
+                            id: quickGridDeferredContent
+                            anchors.fill: parent
+                            anchors.margins: 12
+                            spacing: 10
+
+                            StyledText {
+                                Layout.fillWidth: true
+                                text: Translation.tr("Quick wallpaper thumbnails are loaded on demand.")
+                                wrapMode: Text.WordWrap
+                                color: Appearance.colors.colOnLayer0
+                                font.pixelSize: Appearance.font.pixelSize.normal
+                                font.weight: Font.Medium
+                            }
+
+                            StyledText {
+                                Layout.fillWidth: true
+                                text: Translation.tr("Load them only when you actually need the grid. The full selector button above stays available.")
+                                wrapMode: Text.WordWrap
+                                color: Appearance.colors.colSubtext
+                                font.pixelSize: Appearance.font.pixelSize.small
+                            }
+
+                            RippleButtonWithIcon {
+                                buttonRadius: Appearance.zzzEverywhere ? Appearance.zzz.controlRadius : Appearance.rounding.full
+                                materialIcon: "image"
+                                mainText: Translation.tr("Load quick grid")
+                                onClicked: root.quickGridLoaded = true
+                            }
+                        }
+                    }
+
                     Item {
                         id: quickGridHost
                         Layout.fillWidth: true
@@ -576,7 +676,7 @@ ContentPage {
                         Loader {
                             id: quickGridLoader
                             anchors.fill: parent
-                            active: true
+                            active: root.quickGridLoaded
                             asynchronous: true
 
                             sourceComponent: Rectangle {
@@ -1595,7 +1695,7 @@ ContentPage {
     }
 
     SettingsTaskLoader {
-        requested: true
+        requested: root.activeSection === "screen"
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "screen"
@@ -1739,7 +1839,7 @@ ContentPage {
     }
 
     SettingsTaskLoader {
-        requested: true
+        requested: root.activeSection === "game"
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "game"
@@ -1850,7 +1950,87 @@ ContentPage {
     }
 
     SettingsTaskLoader {
-        requested: true
+        requested: root.activeSection === "capture"
+        sourceComponent: Component {
+    SettingsCardSection {
+        settingsTaskSection: "capture"
+        expanded: true
+        icon: "photo_camera"
+        title: Translation.tr("Capture locations")
+
+        SettingsGroup {
+            NoticeBox {
+                Layout.fillWidth: true
+                materialIcon: "folder"
+                text: Translation.tr("Recordings and iNiR screenshots can use different folders. These paths are also available in Tools for detailed capture settings.")
+            }
+
+            ContentSubsection {
+                title: Translation.tr("Recordings")
+
+                StyledText {
+                    Layout.fillWidth: true
+                    text: Directories.shortHomePath(root.effectiveRecordingPath)
+                    color: Appearance.colors.colOnLayer1
+                    elide: Text.ElideMiddle
+                }
+
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: Appearance.sizes.spacingSmall
+
+                    RippleButtonWithIcon {
+                        Layout.fillWidth: true
+                        materialIcon: "folder_open"
+                        mainText: Translation.tr("Open folder")
+                        onClicked: ShellExec.openDirectory(root.effectiveRecordingPath, Translation.tr("Open recordings folder"))
+                    }
+
+                    RippleButtonWithIcon {
+                        Layout.fillWidth: true
+                        materialIcon: "drive_file_move"
+                        mainText: Translation.tr("Change folder")
+                        onClicked: root.openCaptureFolderDialog("recordings")
+                    }
+                }
+            }
+
+            ContentSubsection {
+                title: Translation.tr("Screenshots")
+
+                StyledText {
+                    Layout.fillWidth: true
+                    text: Directories.shortHomePath(root.effectiveScreenshotPath)
+                    color: Appearance.colors.colOnLayer1
+                    elide: Text.ElideMiddle
+                }
+
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: Appearance.sizes.spacingSmall
+
+                    RippleButtonWithIcon {
+                        Layout.fillWidth: true
+                        materialIcon: "folder_open"
+                        mainText: Translation.tr("Open folder")
+                        onClicked: ShellExec.openDirectory(root.effectiveScreenshotPath, Translation.tr("Open screenshots folder"))
+                    }
+
+                    RippleButtonWithIcon {
+                        Layout.fillWidth: true
+                        materialIcon: "drive_file_move"
+                        mainText: Translation.tr("Change folder")
+                        onClicked: root.openCaptureFolderDialog("screenshots")
+                    }
+                }
+            }
+        }
+    }
+        }
+    }
+
+    SettingsTaskLoader {
+        requested: root.activeSection === "filters"
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "filters"
@@ -2313,7 +2493,7 @@ ContentPage {
 
     // Quick Actions
     SettingsTaskLoader {
-        requested: true
+        requested: root.activeSection === "actions"
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "actions"
@@ -2388,5 +2568,16 @@ ContentPage {
         }
     }
         }
+    }
+
+    // Subtle footer
+    StyledText {
+        Layout.fillWidth: true
+        Layout.topMargin: Appearance.sizes.spacingSmall
+        horizontalAlignment: Text.AlignHCenter
+        font.pixelSize: Appearance.font.pixelSize.smaller
+        color: Appearance.colors.colSubtext
+        opacity: 0.6
+        text: Translation.tr("More options in other tabs • Config: %1").arg(FileUtils.trimFileProtocol(Directories.shellConfigPath))
     }
 }

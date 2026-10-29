@@ -394,14 +394,17 @@ ContentPage {
         loadCustomizations()
     }
 
-    // Every section is on the page at once, so a refresh reads them all.
     function refreshActiveSection(): void {
-        loadOutputs()
-        loadInput()
-        loadCursorThemes()
-        loadLayout()
-        loadAnimations()
-        loadWindowRules()
+        switch (root.activeSection) {
+        case "displays": loadOutputs(); break
+        case "input":
+            loadInput()
+            loadCursorThemes()
+            break
+        case "layout": loadLayout(); break
+        case "animations": loadAnimations(); break
+        case "rules": loadWindowRules(); break
+        }
     }
 
     function refreshInitial(): void {
@@ -665,7 +668,7 @@ ContentPage {
         const messages = []
         for (const key of ["outputs", "input", "layout", "animations", "windowRules", "cursorThemes", "validation", "customizations"]) {
             const message = String(processErrors[key] ?? "").trim()
-            if (message.length > 0 && !messages.includes(message))
+            if (message.length > 0)
                 messages.push(message)
         }
         return messages.join("\n")
@@ -1376,7 +1379,7 @@ ContentPage {
     // DISPLAYS SECTION
     // =====================
     SettingsTaskLoader {
-        requested: true
+        requested: root.activeSection === "displays"
         sourceComponent: Component {
     SettingsCardSection {
         id: displaysSection
@@ -1624,7 +1627,7 @@ ContentPage {
     // LAYOUT SECTION
     // =====================
     SettingsTaskLoader {
-        requested: true
+        requested: root.activeSection === "layout"
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "layout"
@@ -2067,7 +2070,7 @@ ContentPage {
     // WINDOW RULES SECTION
     // =====================
     SettingsTaskLoader {
-        requested: true
+        requested: root.activeSection === "rules"
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "rules"
@@ -2165,7 +2168,7 @@ ContentPage {
     // KEYBOARD SECTION
     // =====================
     SettingsTaskLoader {
-        requested: true
+        requested: root.activeSection === "input"
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "input"
@@ -2326,7 +2329,7 @@ ContentPage {
     // TOUCHPAD SECTION
     // =====================
     SettingsTaskLoader {
-        requested: true
+        requested: root.activeSection === "input"
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "input"
@@ -2527,7 +2530,7 @@ ContentPage {
     // MOUSE SECTION
     // =====================
     SettingsTaskLoader {
-        requested: true
+        requested: root.activeSection === "input"
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "input"
@@ -2649,7 +2652,7 @@ ContentPage {
     // TRACKPOINT SECTION
     // =====================
     SettingsTaskLoader {
-        requested: true
+        requested: root.activeSection === "input"
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "input"
@@ -2769,7 +2772,7 @@ ContentPage {
     // CURSOR SECTION
     // =====================
     SettingsTaskLoader {
-        requested: true
+        requested: root.activeSection === "input"
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "input"
@@ -2843,7 +2846,7 @@ ContentPage {
     // GENERAL INPUT SECTION
     // =====================
     SettingsTaskLoader {
-        requested: true
+        requested: root.activeSection === "input"
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "input"
@@ -2943,7 +2946,7 @@ ContentPage {
     // ANIMATIONS SECTION
     // =====================
     SettingsTaskLoader {
-        requested: true
+        requested: root.activeSection === "animations"
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "animations"
@@ -3126,7 +3129,7 @@ ContentPage {
     // APPLICATIONS SECTION
     // =====================
     SettingsTaskLoader {
-        requested: true
+        requested: root.activeSection === "rules"
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "rules"

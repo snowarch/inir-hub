@@ -73,7 +73,7 @@ ContentPage {
     }
 
     SettingsTaskLoader {
-        requested: root.isIiActive && !(Config.options?.settingsUi?.easyMode ?? false)
+        requested: root.isIiActive && !(Config.options?.settingsUi?.easyMode ?? false) && root.activeSection === "general"
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "general"
@@ -236,7 +236,7 @@ ContentPage {
     }
 
     SettingsTaskLoader {
-        requested: root.isIiActive && !(Config.options?.settingsUi?.easyMode ?? false)
+        requested: root.isIiActive && !(Config.options?.settingsUi?.easyMode ?? false) && root.activeSection === "left"
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "left"
@@ -378,7 +378,7 @@ ContentPage {
     }
 
     SettingsTaskLoader {
-        requested: root.isIiActive && !(Config.options?.settingsUi?.easyMode ?? false)
+        requested: root.isIiActive && !(Config.options?.settingsUi?.easyMode ?? false) && root.activeSection === "right"
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "right"
@@ -776,7 +776,7 @@ ContentPage {
     }
 
     SettingsTaskLoader {
-        requested: root.isIiActive && !(Config.options?.settingsUi?.easyMode ?? false)
+        requested: root.isIiActive && !(Config.options?.settingsUi?.easyMode ?? false) && root.activeSection === "media"
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "media"
@@ -1010,7 +1010,7 @@ ContentPage {
     }
 
     SettingsTaskLoader {
-        requested: root.isIiActive && !(Config.options?.settingsUi?.easyMode ?? false)
+        requested: root.isIiActive && !(Config.options?.settingsUi?.easyMode ?? false) && root.activeSection === "open"
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "open"

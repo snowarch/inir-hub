@@ -120,7 +120,7 @@ ContentPage {
     }
 
     SettingsTaskLoader {
-        requested: true
+        requested: modulesPage.activeSection === "panels"
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "panels"
@@ -172,7 +172,7 @@ ContentPage {
     }
 
     SettingsTaskLoader {
-        requested: true
+        requested: modulesPage.activeSection === "panels"
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "panels"
@@ -326,7 +326,7 @@ ContentPage {
 
     // ==================== DEFAULT TERMINAL ====================
     SettingsTaskLoader {
-        requested: true
+        requested: modulesPage.activeSection === "terminal"
         sourceComponent: Component {
     SettingsCardSection {
         id: terminalSection
@@ -602,7 +602,7 @@ ContentPage {
 
     // ==================== MATERIAL II ====================
     SettingsTaskLoader {
-        requested: modulesPage.isIi
+        requested: modulesPage.isIi && modulesPage.activeSection === "modules"
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "modules"
@@ -680,7 +680,7 @@ ContentPage {
     }
 
     SettingsTaskLoader {
-        requested: modulesPage.isIi
+        requested: modulesPage.isIi && modulesPage.activeSection === "modules"
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "modules"
@@ -718,7 +718,7 @@ ContentPage {
     }
 
     SettingsTaskLoader {
-        requested: modulesPage.isIi
+        requested: modulesPage.isIi && modulesPage.activeSection === "modules"
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "modules"
@@ -804,7 +804,7 @@ ContentPage {
     }
 
     SettingsTaskLoader {
-        requested: modulesPage.isIi
+        requested: modulesPage.isIi && modulesPage.activeSection === "modules"
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "modules"
@@ -851,7 +851,7 @@ ContentPage {
 
     // ==================== WAFFLE ====================
     SettingsTaskLoader {
-        requested: modulesPage.isWaffle
+        requested: modulesPage.isWaffle && modulesPage.activeSection === "modules"
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "modules"
@@ -929,7 +929,7 @@ ContentPage {
     }
 
     SettingsTaskLoader {
-        requested: modulesPage.isWaffle
+        requested: modulesPage.isWaffle && modulesPage.activeSection === "modules"
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "modules"
@@ -1055,7 +1055,7 @@ ContentPage {
     }
 
     SettingsTaskLoader {
-        requested: true
+        requested: modulesPage.activeSection === "interface"
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "interface"
@@ -1108,7 +1108,7 @@ ContentPage {
     }
 
     SettingsTaskLoader {
-        requested: true
+        requested: modulesPage.activeSection === "interface"
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "interface"
@@ -1161,7 +1161,7 @@ ContentPage {
     }
 
     SettingsTaskLoader {
-        requested: true
+        requested: modulesPage.activeSection === "interface"
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "interface"
