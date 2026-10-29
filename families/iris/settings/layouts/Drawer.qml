@@ -14,8 +14,8 @@ import qs.modules.iris.settings
 import qs.modules.iris.settings.layouts.drawer as Skins // so Quickshell mirrors the skins IrisSkin loads by url
 
 // Drawer: Settings pulled out from the foot of the screen like a desk's drawer, the desktop above it left in view. Its
-// head is a row of keys, one per area, the way the Dock holds apps: the open one names itself, a key you rest on says
-// its name. An area is its title and live stage on the left and its groups flowing across columns; the grip raises
+// head is a row of keys, the way the Dock holds apps: one per kind of area (Appearance, Island & Dock...), and the kind
+// you are in opens into its areas by name, the open one inverted; a key you rest on says its name. An area is its title and live stage on the left and its groups flowing across columns; the grip raises
 // the drawer to the top of the room for a long area.
 Item {
     id: root
@@ -42,6 +42,16 @@ Item {
     readonly property var noteCounts: root.host?.noteCounts ?? ({})
     readonly property color signal: IrisStyle["signal"] ?? IrisStyle.danger
     readonly property real pad: root.u(20)
+    // Home, then each kind of area; a kind holding the open area spells its areas out, the rest stay one glyph.
+    readonly property var shelves: {
+        const out = root.sections.filter(entry => entry.id === "general").map(entry => ({ entry: entry, areas: [entry], cluster: -1 }))
+        for (const category of IrisOptions.categories) {
+            const areas = category.sections.map(id => root.sections.find(entry => entry.id === id)).filter(entry => !!entry)
+            if (category.foot) areas.forEach(entry => out.push({ entry: entry, areas: [entry], cluster: category.cluster }))
+            else if (areas.length > 0) out.push({ entry: category, areas: areas, cluster: category.cluster })
+        }
+        return out
+    }
 
     // ── The grip: a click raises or lowers the drawer, a pull up or down says which.
     MouseArea {
@@ -99,12 +109,14 @@ Item {
                 height: keyFlick.height
                 spacing: root.u(2)
                 Repeater {
-                    model: root.sections
+                    model: root.shelves
                     Row {
                         id: slot
                         required property var modelData
                         required property int index
-                        readonly property bool starts: slot.index > 0 && root.sections[slot.index - 1]?.cluster !== slot.modelData.cluster
+                        readonly property bool starts: slot.index > 0 && root.shelves[slot.index - 1]?.cluster !== slot.modelData.cluster
+                        readonly property bool spelled: slot.modelData.areas.length > 1 && !root.searching && !root.paged
+                            && slot.modelData.areas.some(entry => entry.id === root.section)
                         height: keyRow.height
                         spacing: root.u(2)
                         Item {
@@ -113,7 +125,17 @@ Item {
                             height: parent.height
                             Rectangle { anchors.centerIn: parent; width: 1; height: root.u(20); color: IrisStyle.hairline }
                         }
-                        AreaKey { entry: slot.modelData; anchors.verticalCenter: parent.verticalCenter }
+                        AreaKey { visible: !slot.spelled; entry: slot.modelData.entry; areas: slot.modelData.areas; anchors.verticalCenter: parent.verticalCenter }
+                        Repeater {
+                            model: slot.spelled ? slot.modelData.areas : []
+                            AreaKey {
+                                required property var modelData
+                                entry: modelData
+                                areas: [modelData]
+                                spelled: true
+                                anchors.verticalCenter: parent.verticalCenter
+                            }
+                        }
                     }
                 }
             }
@@ -177,15 +199,18 @@ Item {
     property string named: ""
     Timer { id: nameSoon; interval: 260; onTriggered: root.named = root.resting }
 
-    // An area's key: its glyph; open, an inverted capsule with its name; rested on, its name in a quiet capsule.
+    // A key: its glyph; open, an inverted capsule with its name; spelled out or rested on, its name beside it. A kind's
+    // key opens its first area.
     component AreaKey: MouseArea {
         id: key
         property var entry: ({})
-        readonly property string areaId: String(key.entry.id ?? "")
-        readonly property bool on: key.areaId === root.section && !root.searching && !root.paged
-        readonly property bool found: !root.searching || (root.host?.matchedSections?.has(key.areaId) ?? false)
-        readonly property bool open: key.on || root.named === key.areaId
-        readonly property int noted: Number(root.noteCounts[key.areaId] ?? 0)
+        property var areas: [key.entry]
+        property bool spelled: false
+        readonly property string areaId: String(key.areas[0]?.id ?? "")
+        readonly property bool on: key.areas.length === 1 && key.areaId === root.section && !root.searching && !root.paged
+        readonly property bool found: !root.searching || key.areas.some(area => root.host?.matchedSections?.has(area.id) ?? false)
+        readonly property bool open: key.on || key.spelled || root.named === String(key.entry.id ?? "")
+        readonly property int noted: key.areas.reduce((sum, area) => sum + Number(root.noteCounts[area.id] ?? 0), 0)
         width: key.open ? keyName.implicitWidth + root.u(48) : root.u(38)
         height: root.u(38)
         hoverEnabled: true
@@ -197,10 +222,10 @@ Item {
         Behavior on width { enabled: IrisStyle.motionEnabled; NumberAnimation { duration: IrisStyle.morphDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: IrisStyle.morphCurve } }
         onContainsMouseChanged: {
             if (key.containsMouse) {
-                root.resting = key.areaId
-                if (root.named.length > 0) root.named = key.areaId
+                root.resting = String(key.entry.id ?? "")
+                if (root.named.length > 0) root.named = root.resting
                 else nameSoon.restart()
-            } else if (root.resting === key.areaId) {
+            } else if (root.resting === String(key.entry.id ?? "")) {
                 root.resting = ""
                 Qt.callLater(() => { if (root.resting.length === 0) { nameSoon.stop(); root.named = "" } })
             }
@@ -209,7 +234,7 @@ Item {
         Rectangle {
             anchors.fill: parent
             radius: IrisStyle.capsule(height)
-            color: key.on ? IrisStyle.text : key.containsMouse || key.open ? IrisStyle.fillHover : "transparent"
+            color: key.on ? IrisStyle.text : key.containsMouse || (key.open && !key.spelled) ? IrisStyle.fillHover : "transparent"
             Behavior on color { ColorAnimation { duration: IrisStyle.feedbackDuration; easing.type: IrisStyle.feedbackEasing } }
         }
         MaterialSymbol {
@@ -230,7 +255,7 @@ Item {
             opacity: key.open ? 1 : 0
             Behavior on opacity { NumberAnimation { duration: IrisStyle.duration(160); easing.type: IrisStyle.feedbackEasing } }
             text: Translation.tr(String(key.entry.title ?? ""))
-            color: key.on ? IrisStyle.surfaceOpaque : IrisStyle.text
+            color: key.on ? IrisStyle.surfaceOpaque : key.spelled && !key.containsMouse ? IrisStyle.subtext : IrisStyle.text
             font.pixelSize: IrisStyle.typeMeta
             font.weight: IrisStyle.weight(Font.DemiBold)
         }
