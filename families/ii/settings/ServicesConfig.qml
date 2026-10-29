@@ -53,40 +53,43 @@ ContentPage {
         SettingsGroup {
             ConfigSpinBox {
                 icon: "monitor"
-                text: Translation.tr("Screen off") + ` (${value > 0 ? Math.floor(value/60) + "m " + (value%60) + "s" : Translation.tr("disabled")})`
-                value: Config.options?.idle?.screenOffTimeout ?? 300
+                text: Translation.tr("Screen off after (min)")
+                specialValueText: Translation.tr("Never")
+                value: Math.round((Config.options?.idle?.screenOffTimeout ?? 300) / 60)
                 from: 0
-                to: 3600
-                stepSize: 30
-                onValueChanged: Config.setNestedValue("idle.screenOffTimeout", value)
+                to: 60
+                stepSize: 1
+                onValueModified: Config.setNestedValue("idle.screenOffTimeout", value * 60)
                 StyledToolTip {
-                    text: Translation.tr("Turn off display after this many seconds of inactivity (0 = never)")
+                    text: Translation.tr("Turn the display off when nothing happens for this long")
                 }
             }
 
             ConfigSpinBox {
                 icon: "lock"
-                text: Translation.tr("Lock screen") + ` (${value > 0 ? Math.floor(value/60) + "m" : Translation.tr("disabled")})`
-                value: Config.options?.idle?.lockTimeout ?? 600
+                text: Translation.tr("Lock after (min)")
+                specialValueText: Translation.tr("Never")
+                value: Math.round((Config.options?.idle?.lockTimeout ?? 600) / 60)
                 from: 0
-                to: 3600
-                stepSize: 60
-                onValueChanged: Config.setNestedValue("idle.lockTimeout", value)
+                to: 60
+                stepSize: 1
+                onValueModified: Config.setNestedValue("idle.lockTimeout", value * 60)
                 StyledToolTip {
-                    text: Translation.tr("Lock screen after this many seconds of inactivity (0 = never)")
+                    text: Translation.tr("Lock the screen when nothing happens for this long")
                 }
             }
 
             ConfigSpinBox {
                 icon: "dark_mode"
-                text: Translation.tr("Suspend") + ` (${value > 0 ? Math.floor(value/60) + "m" : Translation.tr("disabled")})`
-                value: Config.options?.idle?.suspendTimeout ?? 0
+                text: Translation.tr("Suspend after (min)")
+                specialValueText: Translation.tr("Never")
+                value: Math.round((Config.options?.idle?.suspendTimeout ?? 0) / 60)
                 from: 0
-                to: 7200
-                stepSize: 60
-                onValueChanged: Config.setNestedValue("idle.suspendTimeout", value)
+                to: 120
+                stepSize: 1
+                onValueModified: Config.setNestedValue("idle.suspendTimeout", value * 60)
                 StyledToolTip {
-                    text: Translation.tr("Suspend system after this many seconds of inactivity (0 = never)")
+                    text: Translation.tr("Suspend the computer when nothing happens for this long")
                 }
             }
 

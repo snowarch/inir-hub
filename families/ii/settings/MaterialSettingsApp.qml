@@ -19,7 +19,10 @@ ApplicationWindow {
     minimumHeight: 520
     width: 1240
     height: 820
-    color: Config.ready ? SettingsMaterialPreset.windowColor : "transparent"
+    // a plain window gets no blur behind it: glass styles stand on the surface they tint, opaque
+    color: !Config.ready ? "transparent"
+        : SettingsMaterialPreset.glass ? (SettingsMaterialPreset.dark ? Appearance.m3colors.m3surface : Appearance.m3colors.m3surfaceContainer)
+        : SettingsMaterialPreset.windowColor
 
     Component.onCompleted: {
         Quickshell.watchFiles = false

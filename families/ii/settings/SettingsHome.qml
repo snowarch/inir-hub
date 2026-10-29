@@ -215,27 +215,24 @@ ColumnLayout {
                 }
             }
 
+            // the three read as one column: a name, then its choices under it, left aligned, never wrapped beside it
             HeroTile {
                 first: true
-                RowLayout {
+                StyledText {
                     Layout.fillWidth: true
-                    spacing: 12
-                    StyledText {
-                        Layout.fillWidth: true
-                        text: Translation.tr("Mode")
-                        font.pixelSize: SettingsMaterialPreset.labelSize
-                        color: SettingsMaterialPreset.labelColor
-                    }
-                    ConfigSelectionArray {
-                        Layout.fillWidth: false
-                        enableSettingsSearch: false
-                        currentValue: Appearance.m3colors.darkmode ? "dark" : "light"
-                        onSelected: value => MaterialThemeLoader.setDarkMode(value === "dark")
-                        options: [
-                            { displayName: Translation.tr("Light"), icon: "light_mode", value: "light" },
-                            { displayName: Translation.tr("Dark"), icon: "dark_mode", value: "dark" }
-                        ]
-                    }
+                    text: Translation.tr("Mode")
+                    font.pixelSize: SettingsMaterialPreset.labelSize
+                    color: SettingsMaterialPreset.labelColor
+                }
+                ConfigSelectionArray {
+                    Layout.fillWidth: true
+                    enableSettingsSearch: false
+                    currentValue: Appearance.m3colors.darkmode ? "dark" : "light"
+                    onSelected: value => MaterialThemeLoader.setDarkMode(value === "dark")
+                    options: [
+                        { displayName: Translation.tr("Light"), icon: "light_mode", value: "light" },
+                        { displayName: Translation.tr("Dark"), icon: "dark_mode", value: "dark" }
+                    ]
                 }
             }
 

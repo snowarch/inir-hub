@@ -1476,8 +1476,9 @@ ContentPage {
             ConfigSpinBox {
                 visible: root.barAppearance !== "islands"
                 icon: "rounded_corner"
-                text: Translation.tr("Custom bar rounding (px)")
+                text: Translation.tr("Bar rounding (px)")
                 value: Config.options?.bar?.customRounding ?? -1
+                specialValueText: Translation.tr("Theme")
                 from: -1
                 to: 50
                 stepSize: 1
@@ -1485,7 +1486,7 @@ ContentPage {
                     Config.setNestedValue("bar.customRounding", value);
                 }
                 StyledToolTip {
-                    text: Translation.tr("Override bar corner rounding independently from the global theme.\n-1 = use theme default, 0 = sharp corners, higher = rounder")
+                    text: Translation.tr("Theme follows your global style; 0 is sharp, higher is rounder")
                 }
             }
 
