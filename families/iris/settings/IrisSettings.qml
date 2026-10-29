@@ -2124,7 +2124,7 @@ Item {
             IrisText {
                 anchors.left: groupTitle.right
                 anchors.leftMargin: 16 * groupRow.d
-                anchors.right: changedDot.left
+                anchors.right: trailing.left
                 anchors.rightMargin: 8 * groupRow.d
                 anchors.verticalCenter: parent.verticalCenter
                 horizontalAlignment: Text.AlignRight
@@ -2133,17 +2133,6 @@ Item {
                 color: IrisStyle.muted
                 font.pixelSize: IrisStyle.typeLabel
                 elide: Text.ElideRight
-            }
-            Rectangle {
-                id: changedDot
-                anchors.right: trailing.left
-                anchors.rightMargin: groupRow.modified ? 8 * groupRow.d : 0
-                anchors.verticalCenter: parent.verticalCenter
-                width: groupRow.modified ? Math.round(6 * groupRow.d) : 0
-                height: width
-                radius: IrisStyle.capsule(width)
-                color: IrisStyle.accent
-                Accessible.name: Translation.tr("Changed")
             }
             Item {
                 id: trailing
