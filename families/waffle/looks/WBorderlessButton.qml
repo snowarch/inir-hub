@@ -7,6 +7,7 @@ import qs.modules.waffle.looks
 
 Button {
     id: root
+    WFocusVisual { shown: root.visualFocus; radius: root.radius }
 
     implicitHeight: 36
 

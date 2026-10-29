@@ -14,6 +14,19 @@ Item {
 
     signal selected(var newValue)
 
+    // One Tab stop for the choice, as WinUI's RadioButtons: the arrows move the pick, the chosen chip wears the focus
+    // visual (the chips were mouse-only).
+    activeFocusOnTab: true
+    Accessible.role: Accessible.Grouping
+    function step(delta: int): void {
+        const index = root.options.findIndex(option => option.value === root.currentValue) + delta
+        if (index >= 0 && index < root.options.length) root.selected(root.options[index].value)
+    }
+    Keys.onLeftPressed: root.step(-1)
+    Keys.onUpPressed: root.step(-1)
+    Keys.onRightPressed: root.step(1)
+    Keys.onDownPressed: root.step(1)
+
     // Row controls need the grid's intrinsic width.
     Layout.fillWidth: true
     implicitWidth: grid.implicitWidth
@@ -61,6 +74,7 @@ Item {
                     }
                 }
 
+                WFocusVisual { shown: root.activeFocus && chip.checked; radius: chip.radius }
                 MouseArea {
                     id: chipMa
                     anchors.fill: parent

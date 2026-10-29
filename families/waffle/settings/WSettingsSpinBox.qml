@@ -21,6 +21,7 @@ WSettingsRow {
             
             WBorderlessButton {
                 id: decrementBtn
+                focusPolicy: Qt.NoFocus
                 implicitWidth: Looks.dp(32)
                 implicitHeight: Looks.dp(32)
                 enabled: root.value > root.from
@@ -46,9 +47,19 @@ WSettingsRow {
             }
             
             Rectangle {
+                id: valueBox
                 implicitWidth: Math.max(Looks.dp(58), valueText.implicitWidth + Looks.dp(20))
                 implicitHeight: Looks.dp(32)
                 radius: Looks.settings.radiusLarge
+                // One Tab stop, as WinUI's NumberBox: ↑ → step up, ↓ ← step down; the − + keys stay for the pointer.
+                activeFocusOnTab: true
+                Accessible.role: Accessible.SpinBox
+                Accessible.name: root.label
+                Keys.onUpPressed: incrementBtn.clicked()
+                Keys.onRightPressed: incrementBtn.clicked()
+                Keys.onDownPressed: decrementBtn.clicked()
+                Keys.onLeftPressed: decrementBtn.clicked()
+                WFocusVisual { shown: valueBox.activeFocus; radius: valueBox.radius }
                 color: Looks.colors.inputBg
                 border.width: 1
                 border.color: Looks.settings.strokeStrong
@@ -65,6 +76,7 @@ WSettingsRow {
             
             WBorderlessButton {
                 id: incrementBtn
+                focusPolicy: Qt.NoFocus
                 implicitWidth: Looks.dp(32)
                 implicitHeight: Looks.dp(32)
                 enabled: root.value < root.to

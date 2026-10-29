@@ -7,6 +7,7 @@ WBorderedButton 1.0 WBorderedButton.qml
 WBorderlessButton 1.0 WBorderlessButton.qml
 WSlider 1.0 WSlider.qml
 WSwitch 1.0 WSwitch.qml
+WFocusVisual 1.0 WFocusVisual.qml
 WText 1.0 WText.qml
 WTextInput 1.0 WTextInput.qml
 WToolTip 1.0 WToolTip.qml

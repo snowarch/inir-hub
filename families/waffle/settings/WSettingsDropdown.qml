@@ -17,6 +17,7 @@ WSettingsRow {
     control: Component {
         ComboBox {
             id: combo
+            WFocusVisual { shown: combo.visualFocus; radius: Looks.settings.radiusLarge }
             implicitWidth: 160
             implicitHeight: 32
             

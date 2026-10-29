@@ -10,6 +10,8 @@ import qs.modules.waffle.looks
 // Generic button with background
 Button {
     id: root
+    // WinUI's keyboard focus visual; Cookie's morphing face draws its own ring.
+    WFocusVisual { shown: root.visualFocus && !Looks.cookieEverywhere; radius: Looks.radius.medium }
 
     property color colBackground: ColorUtils.transparentize(Looks.colors.bg1)
     property color colBackgroundHover: Looks.colors.interactiveSurfaceHover

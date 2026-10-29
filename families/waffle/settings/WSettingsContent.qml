@@ -27,7 +27,8 @@ Item {
     property var searchResults: []
     property bool navExpanded: width > Looks.dp(760)
 
-    Component.onCompleted: Qt.callLater(() => root.navigationReady = true)
+    // Windows' Settings opens with the keyboard in "Find a setting": open it and type.
+    Component.onCompleted: Qt.callLater(() => { root.navigationReady = true; searchInput.forceActiveFocus() })
     
     // Complete search index with all individual options + targetLabel for spotlight
     property var searchIndex: [
@@ -884,11 +885,18 @@ Item {
                 Item { implicitHeight: Looks.dp(8) }
 
                 Flickable {
+                    id: navFlick
                     Layout.fillWidth: true
                     Layout.fillHeight: true
                     contentHeight: navColumn.implicitHeight
                     clip: true
                     boundsBehavior: Flickable.StopAtBounds
+                    // NavigationView's menu is one Tab stop (TabFocusNavigation Once): ↑ ↓ open the category above or
+                    // below; the entries were mouse-only before.
+                    activeFocusOnTab: true
+                    Accessible.role: Accessible.List
+                    Keys.onUpPressed: if (root.activeCategory > 0) root.openCategory(root.activeCategory - 1)
+                    Keys.onDownPressed: if (root.activeCategory < root.categories.length - 1) root.openCategory(root.activeCategory + 1)
 
                     ColumnLayout {
                         id: navColumn
@@ -934,6 +942,11 @@ Item {
                                     Behavior on height {
                                         animation: NumberAnimation { duration: Looks.transition.enabled ? 120 : 0 }
                                     }
+                                }
+                                WFocusVisual {
+                                    shown: navFlick.activeFocus && navEntry.selected
+                                    margin: 0
+                                    radius: Looks.settings.radiusSmall
                                 }
                                 MouseArea {
                                     id: navMouse

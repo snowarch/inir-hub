@@ -6,6 +6,7 @@ import qs.modules.waffle.looks
 
 Switch {
     id: root
+    WFocusVisual { shown: root.visualFocus; radius: root.height / 2 }
 
     implicitWidth: 40
     implicitHeight: 20

@@ -13,6 +13,7 @@ Button {
     implicitHeight: 30
     implicitWidth: 30
     property alias radius: closeButtonBg.radius
+    WFocusVisual { shown: root.visualFocus; radius: root.radius }
 
     Rectangle {
         z: 0

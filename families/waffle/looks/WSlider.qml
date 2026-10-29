@@ -8,6 +8,7 @@ import qs.modules.common.widgets
 
 Slider {
     id: root
+    WFocusVisual { shown: root.visualFocus; radius: Looks.radius.medium }
 
     property real trackWidth: 4
     property string tooltipContent: `${Math.round(value * 100)}`

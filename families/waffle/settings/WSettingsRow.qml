@@ -26,6 +26,14 @@ Item {
     readonly property color rowTile: Looks.settings.tile
 
     signal clicked()
+
+    // A clickable row (a link card to a page) is a Tab stop that Enter or Space opens, as a SettingsCard is; it was
+    // mouse-only, so a category's pages could not be reached by keyboard.
+    activeFocusOnTab: root.clickable
+    Keys.onReturnPressed: if (root.clickable) root.clicked()
+    Keys.onEnterPressed: if (root.clickable) root.clicked()
+    Keys.onSpacePressed: if (root.clickable) root.clicked()
+    WFocusVisual { shown: root.activeFocus && root.clickable; radius: root._item ? 0 : Looks.settings.radiusSmall }
     
     Layout.fillWidth: true
     Layout.leftMargin: 0
