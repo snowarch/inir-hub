@@ -588,7 +588,8 @@ WSettingsPage {
             const cols = Math.max(1, Math.floor((width - 12) / 140))
             const rows = Math.ceil(itemCount / cols)
             const cellH = ((width - 12) / cols) * 0.625
-            return Math.min(380, Math.max(160, rows * cellH + 12 + navH))
+            // ends at its last row: a short folder left a plate of air under its pictures (10-29)
+            return Math.min(380, rows * cellH + 12 + navH)
         }
         radius: Looks.radius.large
         color: Looks.colors.bg1Base
