@@ -416,7 +416,9 @@ WSettingsPage {
                     Grid {
                         id: themeGridContent
                         width: themeGridFlickable.width
-                        columns: 3
+                        // Three across when a name like "Catppuccin Macchiato" fits beside its swatches, two in a
+                        // narrow window (a half-screen 1366 px laptop cut it to "Catppuccin Macc…").
+                        columns: width >= 3 * Looks.dp(200) + 2 * columnSpacing ? 3 : 2
                         columnSpacing: 4
                         rowSpacing: 4
 
@@ -438,7 +440,7 @@ WSettingsPage {
                                     return modelData.colors[key] ?? fallback;
                                 }
 
-                                width: (themeGridContent.width - themeGridContent.columnSpacing * 2) / 3
+                                width: (themeGridContent.width - themeGridContent.columnSpacing * (themeGridContent.columns - 1)) / themeGridContent.columns
                                 height: 36
                                 radius: Looks.radius.small
                                 color: isActive ? Qt.alpha(Looks.colors.accent, 0.12) : cardMouseArea.containsMouse ? Looks.colors.bg2Hover : Looks.colors.bg2
