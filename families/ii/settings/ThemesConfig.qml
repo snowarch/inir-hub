@@ -474,7 +474,7 @@ ContentPage {
 
                         ThemePresetCard {
                             required property var modelData
-                            width: Math.min(160, (parent.width - 8) / 3)
+                            width: Math.max(Math.min(160, (parent.width - 8) / 3), implicitWidth)
                             preset: modelData
                             onClicked: ThemeService.setTheme(modelData.id)
                         }

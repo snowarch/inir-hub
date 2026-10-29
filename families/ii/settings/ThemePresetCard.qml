@@ -14,6 +14,17 @@ Item {
 
     signal clicked()
 
+    // What the card needs to show its whole name, measured chosen (DemiBold) and with the trailing check or star slot
+    // always counted, so choosing it never changes its width: "Auto (Wallpaper)" was cut once its check showed (10-29).
+    TextMetrics {
+        id: nameMetrics
+        text: root.preset.name
+        font.family: nameText.font.family
+        font.pixelSize: nameText.font.pixelSize
+        font.weight: Font.DemiBold
+    }
+    implicitWidth: Math.ceil(8 + 34 + 6 + (root.preset.saved === true ? 19 : 0) + nameMetrics.advanceWidth + 6 + 28 + 4)
+
     // Helper to safely get color from preset
     function getColor(key, fallback) {
         if (!preset.colors) return Appearance.m3colors[key] ?? fallback
@@ -98,6 +109,7 @@ Item {
             Layout.fillHeight: true
 
             StyledText {
+                id: nameText
                 anchors.verticalCenter: parent.verticalCenter
                 anchors.left: parent.left
                 anchors.right: parent.right
