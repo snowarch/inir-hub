@@ -390,13 +390,14 @@ WSettingsPage {
             }
         }
 
-        // Theme grid — 3 columns
+        // Theme grid, 3 columns, whole: the search and filters above narrow it. Capped at 300 with its own scroll it
+        // trapped the wheel inside the page and cut its next row to a 3 px sliver (10-29); Windows nests no scroll.
         Item {
             Layout.fillWidth: true
             Layout.leftMargin: 0
             Layout.rightMargin: 0
             Layout.bottomMargin: 4
-            implicitHeight: Math.min(300, themeGridContent.implicitHeight + 12)
+            implicitHeight: themeGridContent.implicitHeight + 12
 
             Rectangle {
                 anchors.fill: parent
@@ -409,6 +410,7 @@ WSettingsPage {
                     anchors.fill: parent
                     anchors.margins: 6
                     contentHeight: themeGridContent.implicitHeight
+                    interactive: false
                     boundsBehavior: Flickable.StopAtBounds
 
                     Grid {

@@ -121,10 +121,10 @@ WSettingsPage {
                     color: Looks.colors.subfg
                 }
 
-                WSettingsButton {
-                    buttonText: Translation.tr("Reload")
-                    buttonIcon: "arrow-clockwise"
-                    onButtonClicked: Autostart.reload()
+                // A bare button: the settings-row one squeezed to its icon beside the path, its word 1 px wide.
+                WBorderedButton {
+                    text: Translation.tr("Reload")
+                    onClicked: Autostart.reload()
                 }
             }
         }
@@ -293,21 +293,24 @@ WSettingsPage {
                 color: Looks.colors.subfg
             }
 
+            // The bare field and button, as the Hub's sources row: the settings-row versions are cards of their own,
+            // and side by side they split the line into two half cards with a small field lost in the first (10-29).
             RowLayout {
                 Layout.fillWidth: true
-                spacing: 8
+                spacing: Looks.dp(8)
 
-                WSettingsTextField {
+                WTextField {
                     id: commandInput
                     Layout.fillWidth: true
                     placeholderText: Translation.tr("e.g. telegram-desktop --start-minimized")
-                    onTextEdited: (newText) => { commandInput.text = newText }
+                    onAccepted: addCommand.clicked()
                 }
 
-                WSettingsButton {
-                    buttonText: Translation.tr("Add")
-                    buttonIcon: "add"
-                    onButtonClicked: {
+                WBorderedButton {
+                    id: addCommand
+                    text: Translation.tr("Add")
+                    enabled: commandInput.text.trim().length > 0
+                    onClicked: {
                         Autostart.addCommand(commandInput.text)
                         commandInput.text = ""
                     }
@@ -356,10 +359,9 @@ WSettingsPage {
                         onClicked: Autostart.setEntryEnabled(cmdDelegate.modelData.originalIndex, !checked)
                     }
 
-                    WSettingsButton {
-                        buttonText: Translation.tr("Remove")
-                        buttonIcon: "delete"
-                        onButtonClicked: Autostart.removeEntry(cmdDelegate.modelData.originalIndex)
+                    WBorderedButton {
+                        text: Translation.tr("Remove")
+                        onClicked: Autostart.removeEntry(cmdDelegate.modelData.originalIndex)
                     }
                 }
             }
