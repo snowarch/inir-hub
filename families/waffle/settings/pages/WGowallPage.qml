@@ -827,9 +827,13 @@ WSettingsPage {
                 Layout.preferredHeight: 36
                 radius: Looks.radius.medium
                 opacity: root.canOperate ? 1.0 : 0.5
-                color: previewMa.pressed ? Looks.colors.bg2Active
-                    : previewMa.containsMouse ? Looks.colors.bg2Hover
-                    : Looks.colors.bg2
+                // A WinUI standard button (ControlFillColorDefault / Secondary / Tertiary, ControlStrokeColorDefault):
+                // on the card's own fill with no edge it read as a label beside Apply.
+                color: previewMa.pressed ? (Looks.dark ? Qt.rgba(1, 1, 1, 0.03) : Qt.rgba(0.976, 0.976, 0.976, 0.3))
+                    : previewMa.containsMouse ? (Looks.dark ? Qt.rgba(1, 1, 1, 0.082) : Qt.rgba(0.976, 0.976, 0.976, 0.5))
+                    : Qt.rgba(1, 1, 1, Looks.dark ? 0.06 : 0.7)
+                border.width: 1
+                border.color: Looks.dark ? Qt.rgba(1, 1, 1, 0.07) : Qt.rgba(0, 0, 0, 0.06)
 
                 Behavior on color {
                     animation: ColorAnimation { duration: Looks.transition.enabled ? 70 : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.standard }
