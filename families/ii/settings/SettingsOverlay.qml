@@ -119,8 +119,11 @@ Scope {
             Rectangle {
                 id: card
                 anchors.centerIn: parent
-                width: Math.min(panel.width - 64, Math.round(1320 * Appearance.fontSizeScale))
-                height: Math.min(panel.height - 64, Math.round(900 * Appearance.fontSizeScale))
+                // Clear of the bar and the dock on every edge (on a 768 px laptop the card covered the clock and sat
+                // under the dock), and fixed: resizing the bar from this card never moves it under the pointer.
+                readonly property int safeEdge: 68
+                width: Math.min(panel.width - 2 * safeEdge, Math.round(1320 * Appearance.fontSizeScale))
+                height: Math.min(panel.height - 2 * safeEdge, Math.round(900 * Appearance.fontSizeScale))
                 radius: SettingsMaterialPreset.windowRadius
                 color: SettingsMaterialPreset.glass || Appearance.regaliaEverywhere ? "transparent"
                     : CF.ColorUtils.applyAlpha(SettingsMaterialPreset.windowColor, panel.bgOpacity)
