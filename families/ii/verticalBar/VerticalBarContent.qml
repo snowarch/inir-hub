@@ -347,6 +347,8 @@ Item { // Bar content region
             layer.effect: MultiEffect {
                 source: blurredWallpaper
                 anchors.fill: source
+                contrast: Appearance.aurora.backdropContrast
+                brightness: Appearance.aurora.backdropBrightness
                 saturation: Appearance.angelEverywhere
                     ? Appearance.angel.blurSaturation
                     : (Appearance.effectsEnabled ? Appearance.aurora.backdropSaturation : 0)

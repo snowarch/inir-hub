@@ -516,6 +516,8 @@ Scope {
                                     layer.effect: MultiEffect {
                                         source: dockBlurredWallpaper
                                         anchors.fill: source
+                                        contrast: Appearance.aurora.backdropContrast
+                                        brightness: Appearance.aurora.backdropBrightness
                                         saturation: dockVisualBackground.angelEverywhere
                                             ? (Appearance.angel.blurSaturation * Appearance.angel.colorStrength)
                                             : dockVisualBackground.editorialGlassActive ? 0.04

@@ -490,6 +490,8 @@ Item {
             layer.effect: MultiEffect {
                 source: sidebarLeftBlurredWallpaper
                 anchors.fill: source
+                contrast: Appearance.aurora.backdropContrast
+                brightness: Appearance.aurora.backdropBrightness
                 saturation: sidebarLeftBackground.angelEverywhere
                     ? (Appearance.angel.blurSaturation * Appearance.angel.colorStrength)
                     : sidebarLeftBackground.editorialGlassActive ? 0.04

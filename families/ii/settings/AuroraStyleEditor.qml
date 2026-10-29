@@ -362,7 +362,7 @@ ColumnLayout {
             label: Translation.tr("Wallpaper color")
             icon: "palette"
             description: Translation.tr("How much of the wallpaper's color the glass lets through. Lower is calmer on vivid wallpapers.")
-            configValue: 1 + Appearance.aurora.backdropSaturation
+            configValue: Appearance.aurora.wallpaperColor
             configPath: "appearance.aurora.wallpaperColor"
         }
 

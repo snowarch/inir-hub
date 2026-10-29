@@ -354,6 +354,8 @@ Item {
             layer.effect: MultiEffect {
                 source: blurredWallpaper
                 anchors.fill: source
+                contrast: Appearance.aurora.backdropContrast
+                brightness: Appearance.aurora.backdropBrightness
                 saturation: root.angelEverywhere
                     ? Appearance.angel.blurSaturation
                     : (Appearance.effectsEnabled ? Appearance.aurora.backdropSaturation : 0)
