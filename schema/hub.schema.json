@@ -72,7 +72,7 @@
         "preview": {
             "type": "string",
             "pattern": "\\.(webp|png|jpe?g)$",
-            "description": "Screenshot in the item folder"
+            "description": "Screenshot in the item folder, 1280x800 (CONTRIBUTING.md, Previews)"
         }
     }
 }

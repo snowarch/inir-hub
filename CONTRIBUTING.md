@@ -112,9 +112,10 @@ Quickshell reads those instead of scanning your plugin at every start, and trust
 
 - A real screenshot of the item running. No mockups.
 - Widgets: `inir background widgetSnapshot custom.<id> shot.png` at 200 %, then `inir hub preview widgets/<id> --wallpaper <image> --shot shot.png` frames it the way every card is framed.
-- WebP (or PNG or JPEG), at least 800×450, landscape between 6:5 and 2:1; 16:10 at 1280×800 is ideal. Under 700 KB.
+- Anything else (a web app, a family, a component): a screenshot of the screen with it open, then `inir hub preview <folder> --shot screenshot.png` crops it to fill the card.
+- 1280×800 (16:10), the size of every card in the Hub and on inir.space; `inir hub validate` holds it and `inir hub preview` makes exactly that. WebP (or PNG or JPEG), under 700 KB.
 - The item large enough to read when the card is small. Crop around it.
-- A wallpaper that leaves it readable, and nothing private: no messages, notifications, names or file paths.
+- A wallpaper that leaves it readable, and nothing private: no messages, notifications, names, places or file paths.
 
 ## Permissions
 

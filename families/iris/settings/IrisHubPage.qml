@@ -512,7 +512,7 @@ Flickable {
         }
         Preview {
             Layout.fillWidth: true
-            Layout.preferredHeight: Math.round(page.width * 9 / 16)
+            Layout.preferredHeight: Math.round(page.width * 10 / 16)
             radius: IrisStyle.radiusCard
             item: page.item
         }

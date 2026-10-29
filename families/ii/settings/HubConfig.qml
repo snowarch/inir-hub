@@ -908,7 +908,7 @@ ContentPage {
         Preview {
             Layout.alignment: Qt.AlignHCenter
             Layout.preferredWidth: page.width
-            Layout.preferredHeight: Math.round(Layout.preferredWidth * 9 / 16)
+            Layout.preferredHeight: Math.round(Layout.preferredWidth * 10 / 16)
             radius: Appearance.rounding.large
             item: page.item
         }
