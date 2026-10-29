@@ -67,7 +67,7 @@ ContentPage {
     }
 
     SettingsTaskLoader {
-        requested: root.activeSection === "color"
+        requested: true
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "color"
@@ -519,7 +519,7 @@ ContentPage {
     }
 
     SettingsTaskLoader {
-        requested: root.activeSection === "resources" && !root.irisFamily
+        requested: !root.irisFamily
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "resources"

@@ -427,7 +427,7 @@ ContentPage {
     }
 
     SettingsTaskLoader {
-        requested: root.activeSection === "recording"
+        requested: true
         sourceComponent: Component {
             SettingsCardSection {
                 id: screenRecordSection
@@ -808,7 +808,7 @@ ContentPage {
     }
 
     SettingsTaskLoader {
-        requested: root.activeSection === "snipping"
+        requested: true
         sourceComponent: Component {
             SettingsCardSection {
                 settingsTaskSection: "snipping"
@@ -1378,7 +1378,7 @@ ContentPage {
     }
 
     SettingsTaskLoader {
-        requested: root.activeSection === "crosshair"
+        requested: true
         sourceComponent: Component {
             SettingsCardSection {
                 settingsTaskSection: "crosshair"
@@ -1426,7 +1426,7 @@ ContentPage {
     }
 
     SettingsTaskLoader {
-        requested: root.activeSection === "discord"
+        requested: true
         sourceComponent: Component {
             SettingsCardSection {
                 settingsTaskSection: "discord"
@@ -1450,7 +1450,7 @@ ContentPage {
     }
 
     SettingsTaskLoader {
-        requested: root.activeSection === "osd"
+        requested: true
         sourceComponent: Component {
             SettingsCardSection {
                 settingsTaskSection: "osd"

@@ -244,6 +244,7 @@ ApplicationWindow {
 
         if (taskActivated && pendingSpotlightOptionId < 0
                 && pendingSpotlightLabel.length === 0 && pendingSpotlightSection.length === 0) {
+            SettingsSearchRegistry.revealTask(pageItem)
             resetSearchTarget()
             return
         }

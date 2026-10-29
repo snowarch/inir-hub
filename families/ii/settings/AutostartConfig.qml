@@ -104,7 +104,7 @@ ContentPage {
     // ── Info banner ──────────────────────────────────────────────────────
 
     SettingsTaskLoader {
-        requested: Autostart.isNiri && root.activeSection === "guide"
+        requested: Autostart.isNiri
         sourceComponent: Component {
     SettingsCardSection {
         expanded: true
@@ -178,7 +178,7 @@ ContentPage {
     // ── Applications ─────────────────────────────────────────────────────
 
     SettingsTaskLoader {
-        requested: Autostart.isNiri && root.activeSection === "apps"
+        requested: Autostart.isNiri
         sourceComponent: Component {
     SettingsCardSection {
         expanded: true
@@ -358,7 +358,7 @@ ContentPage {
     // ── Custom Commands ──────────────────────────────────────────────────
 
     SettingsTaskLoader {
-        requested: Autostart.isNiri && root.activeSection === "commands"
+        requested: Autostart.isNiri
         sourceComponent: Component {
     SettingsCardSection {
         expanded: true

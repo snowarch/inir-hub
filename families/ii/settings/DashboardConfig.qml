@@ -46,7 +46,7 @@ ContentPage {
     }
 
     SettingsTaskLoader {
-        requested: root.isIiActive && root.activeSection === "general"
+        requested: root.isIiActive
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "general"
@@ -148,7 +148,7 @@ ContentPage {
     }
 
     SettingsTaskLoader {
-        requested: root.isIiActive && root.activeSection === "appearance"
+        requested: root.isIiActive
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "appearance"
@@ -188,7 +188,7 @@ ContentPage {
     }
 
     SettingsTaskLoader {
-        requested: root.isIiActive && root.activeSection === "layout"
+        requested: root.isIiActive
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "layout"

@@ -4,10 +4,10 @@ Editorial is a global style for iNiR. It gives the shell paper-like surfaces, a 
 
 ## Turn it on
 
-- Material: **Settings › Themes › Style › Global Style**, then pick **Editorial**.
+- Material: **Settings › Themes › Global Style**, then pick **Editorial**.
 - Waffle: **Waffle Settings › Themes › Global Style**, then pick **Editorial**. Waffle keeps its own layouts and takes Editorial's colours and type.
 
-Once Editorial is the global style, its editor appears under **Settings › Themes › Style › Editorial**. Waffle uses the same values, so tune them there.
+Once Editorial is the global style, its editor appears under **Settings › Themes › Editorial**. Waffle uses the same values, so tune them there.
 
 ## Presets
 

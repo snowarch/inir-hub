@@ -44,7 +44,7 @@ ContentPage {
     }
 
     SettingsTaskLoader {
-        requested: root.activeSection === "audio"
+        requested: true
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "audio"
@@ -104,7 +104,7 @@ ContentPage {
     }
 
     SettingsTaskLoader {
-        requested: root.activeSection === "power"
+        requested: true
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "power"
@@ -255,7 +255,7 @@ ContentPage {
     }
     
     SettingsTaskLoader {
-        requested: root.activeSection === "locale"
+        requested: true
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "locale"
@@ -322,7 +322,7 @@ ContentPage {
     }
 
     SettingsTaskLoader {
-        requested: root.activeSection === "safety" && !(Config.options?.settingsUi?.easyMode ?? false)
+        requested: !(Config.options?.settingsUi?.easyMode ?? false)
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "safety"
@@ -372,7 +372,7 @@ ContentPage {
     }
 
     SettingsTaskLoader {
-        requested: root.activeSection === "audio"
+        requested: true
         sourceComponent: Component {
     SettingsCardSection {
         id: soundsSection
@@ -494,7 +494,7 @@ ContentPage {
     }
     
     SettingsTaskLoader {
-        requested: root.activeSection === "locale"
+        requested: true
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "locale"
@@ -577,7 +577,7 @@ ContentPage {
     }
 
     SettingsTaskLoader {
-        requested: root.activeSection === "input"
+        requested: true
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "input"
@@ -671,7 +671,7 @@ ContentPage {
     }
 
     SettingsTaskLoader {
-        requested: root.activeSection === "input" && !(Config.options?.settingsUi?.easyMode ?? false)
+        requested: !(Config.options?.settingsUi?.easyMode ?? false)
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "input"
@@ -698,7 +698,7 @@ ContentPage {
     }
 
     SettingsTaskLoader {
-        requested: root.activeSection === "safety" && !(Config.options?.settingsUi?.easyMode ?? false)
+        requested: !(Config.options?.settingsUi?.easyMode ?? false)
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "safety"
@@ -738,7 +738,7 @@ ContentPage {
     }
 
     SettingsTaskLoader {
-        requested: root.activeSection === "locale"
+        requested: true
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "locale"
@@ -806,7 +806,7 @@ ContentPage {
     }
 
     SettingsTaskLoader {
-        requested: root.activeSection === "safety"
+        requested: true
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "safety"

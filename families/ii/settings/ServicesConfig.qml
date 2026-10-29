@@ -42,7 +42,7 @@ ContentPage {
     }
 
     SettingsTaskLoader {
-        requested: root.activeSection === "system" && !root.irisFamily
+        requested: !root.irisFamily
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "system"
@@ -165,7 +165,7 @@ ContentPage {
     }
 
     SettingsTaskLoader {
-        requested: root.activeSection === "system" && !root.irisFamily
+        requested: !root.irisFamily
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "system"
@@ -208,7 +208,7 @@ ContentPage {
     }
 
     SettingsTaskLoader {
-        requested: root.activeSection === "network"
+        requested: true
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "network"
@@ -232,7 +232,7 @@ ContentPage {
     }
 
     SettingsTaskLoader {
-        requested: root.activeSection === "network"
+        requested: true
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "network"
@@ -277,7 +277,7 @@ ContentPage {
     }
 
     SettingsTaskLoader {
-        requested: root.activeSection === "system" && !root.irisFamily
+        requested: !root.irisFamily
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "system"
@@ -306,7 +306,7 @@ ContentPage {
     }
 
     SettingsTaskLoader {
-        requested: root.activeSection === "search" && !root.irisFamily
+        requested: !root.irisFamily
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "search"
@@ -431,7 +431,7 @@ ContentPage {
     }
 
     SettingsTaskLoader {
-        requested: root.activeSection === "updates"
+        requested: true
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "updates"
@@ -492,7 +492,7 @@ ContentPage {
     }
 
     SettingsTaskLoader {
-        requested: root.activeSection === "updates"
+        requested: true
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "updates"
@@ -981,7 +981,7 @@ ContentPage {
     }
 
     SettingsTaskLoader {
-        requested: root.activeSection === "data" && !root.irisFamily
+        requested: !root.irisFamily
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "data"
@@ -1160,7 +1160,7 @@ ContentPage {
     }
 
     SettingsTaskLoader {
-        requested: root.activeSection === "data"
+        requested: true
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "data"

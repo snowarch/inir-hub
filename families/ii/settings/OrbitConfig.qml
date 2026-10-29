@@ -100,7 +100,7 @@ ContentPage {
     }
 
     SettingsTaskLoader {
-        requested: root.activeSection === "activation"
+        requested: true
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "activation"
@@ -271,7 +271,7 @@ ContentPage {
     }
 
     SettingsTaskLoader {
-        requested: root.activeSection === "layout"
+        requested: true
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "layout"
@@ -832,7 +832,7 @@ ContentPage {
     }
 
     SettingsTaskLoader {
-        requested: root.activeSection === "navigation"
+        requested: true
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "navigation"
@@ -925,7 +925,7 @@ ContentPage {
     }
 
     SettingsTaskLoader {
-        requested: root.activeSection === "shelf"
+        requested: true
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "shelf"
@@ -1230,7 +1230,7 @@ ContentPage {
     }
 
     SettingsTaskLoader {
-        requested: root.activeSection === "motion"
+        requested: true
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "motion"

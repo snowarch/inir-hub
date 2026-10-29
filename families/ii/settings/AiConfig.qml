@@ -41,7 +41,7 @@ ContentPage {
 
     // ── Setup status ─────────────────────────────────────────────
     SettingsTaskLoader {
-        requested: root.activeSection === "setup"
+        requested: true
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "setup"
@@ -170,7 +170,7 @@ ContentPage {
 
     // ── Providers ────────────────────────────────────────────────
     SettingsTaskLoader {
-        requested: root.activeSection === "providers"
+        requested: true
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "providers"
@@ -913,7 +913,7 @@ ContentPage {
 
     // ── Assistant behavior ───────────────────────────────────────
     SettingsTaskLoader {
-        requested: root.activeSection === "behavior"
+        requested: true
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "behavior"
@@ -1007,7 +1007,7 @@ ContentPage {
 
     // ── Privacy ──────────────────────────────────────────────────
     SettingsTaskLoader {
-        requested: root.activeSection === "privacy"
+        requested: true
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "privacy"
@@ -1040,7 +1040,7 @@ ContentPage {
 
     // ── Voice input ──────────────────────────────────────────────
     SettingsTaskLoader {
-        requested: root.activeSection === "voice"
+        requested: true
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "voice"
