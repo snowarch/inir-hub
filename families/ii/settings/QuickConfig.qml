@@ -196,7 +196,7 @@ ContentPage {
 
     // Wallpaper selection
     SettingsTaskLoader {
-        requested: root.activeSection === "wallpaper"
+        requested: true
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "wallpaper"
@@ -1695,7 +1695,7 @@ ContentPage {
     }
 
     SettingsTaskLoader {
-        requested: root.activeSection === "screen"
+        requested: true
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "screen"
@@ -1839,7 +1839,7 @@ ContentPage {
     }
 
     SettingsTaskLoader {
-        requested: root.activeSection === "game"
+        requested: true
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "game"
@@ -1950,7 +1950,7 @@ ContentPage {
     }
 
     SettingsTaskLoader {
-        requested: root.activeSection === "capture"
+        requested: true
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "capture"
@@ -2030,7 +2030,7 @@ ContentPage {
     }
 
     SettingsTaskLoader {
-        requested: root.activeSection === "filters"
+        requested: true
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "filters"
@@ -2493,7 +2493,7 @@ ContentPage {
 
     // Quick Actions
     SettingsTaskLoader {
-        requested: root.activeSection === "actions"
+        requested: true
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "actions"

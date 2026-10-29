@@ -39,7 +39,7 @@ ContentPage {
     }
 
     SettingsTaskLoader {
-        requested: root.activeSection === "behavior"
+        requested: true
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "behavior"
@@ -226,7 +226,7 @@ ContentPage {
     }
 
     SettingsTaskLoader {
-        requested: root.activeSection === "cards"
+        requested: true
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "cards"

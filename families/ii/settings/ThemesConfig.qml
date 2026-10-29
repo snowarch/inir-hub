@@ -57,7 +57,7 @@ ContentPage {
     Timer {
         interval: 2000
         repeat: true
-        running: root.visible && root.activeSection === "advanced" && root.customThemeEditorExpanded
+        running: root.visible && root.customThemeEditorExpanded
         triggeredOnStart: true
         onTriggered: root.refreshSavedThemes()
     }
@@ -119,7 +119,7 @@ ContentPage {
     }
 
     SettingsTaskLoader {
-        requested: root.activeSection === "colors"
+        requested: true
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "colors"
@@ -686,7 +686,7 @@ ContentPage {
 
     // Scheme Variant Section
     SettingsTaskLoader {
-        requested: root.activeSection === "colors"
+        requested: true
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "colors"
@@ -764,7 +764,7 @@ ContentPage {
 
     // Motion Section
     SettingsTaskLoader {
-        requested: root.activeSection === "motion" && (Config.options?.panelFamily ?? "ii") === "ii"
+        requested: (Config.options?.panelFamily ?? "ii") === "ii"
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "motion"
@@ -910,7 +910,7 @@ ContentPage {
 
     // Theme Scheduling Section
     SettingsTaskLoader {
-        requested: root.activeSection === "motion" && !(Config.options?.settingsUi?.easyMode ?? false)
+        requested: !(Config.options?.settingsUi?.easyMode ?? false)
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "motion"
@@ -1155,7 +1155,7 @@ ContentPage {
 
     // Terminal Colors Section
     SettingsTaskLoader {
-        requested: root.activeSection === "advanced" && !(Config.options?.settingsUi?.easyMode ?? false)
+        requested: !(Config.options?.settingsUi?.easyMode ?? false)
         sourceComponent: Component {
     SettingsCardSection {
         id: terminalColorsSection
@@ -1646,7 +1646,7 @@ ContentPage {
     }
 
     SettingsTaskLoader {
-        requested: root.activeSection === "style" && !root.irisFamily
+        requested: !root.irisFamily
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "style"
@@ -1682,7 +1682,7 @@ ContentPage {
     }
 
     SettingsTaskLoader {
-        requested: root.activeSection === "style" && Appearance.editorialEverywhere && !root.irisFamily
+        requested: Appearance.editorialEverywhere && !root.irisFamily
         sourceComponent: Component {
     SettingsCardSection {
         id: editorialStyleEditorSection
@@ -1693,7 +1693,7 @@ ContentPage {
 
         SettingsGroup {
             SettingsTaskLoader {
-                requested: root.activeSection === "style" && editorialStyleEditorSection.expanded
+                requested: editorialStyleEditorSection.expanded
                     && Appearance.editorialEverywhere
                 source: "EditorialStyleEditor.qml"
             }
@@ -1703,7 +1703,7 @@ ContentPage {
     }
 
     SettingsTaskLoader {
-        requested: root.activeSection === "style" && Appearance.auroraEverywhere && !Appearance.angelEverywhere && !root.irisFamily
+        requested: Appearance.auroraEverywhere && !Appearance.angelEverywhere && !root.irisFamily
         sourceComponent: Component {
     SettingsCardSection {
         id: auroraStyleEditorSection
@@ -1714,7 +1714,7 @@ ContentPage {
 
         SettingsGroup {
             SettingsTaskLoader {
-                requested: root.activeSection === "style" && auroraStyleEditorSection.expanded
+                requested: auroraStyleEditorSection.expanded
                     && Appearance.auroraEverywhere && !Appearance.angelEverywhere
                 source: "AuroraStyleEditor.qml"
             }
@@ -1724,7 +1724,7 @@ ContentPage {
     }
 
     SettingsTaskLoader {
-        requested: root.activeSection === "style" && Appearance.angelEverywhere && !root.irisFamily
+        requested: Appearance.angelEverywhere && !root.irisFamily
         sourceComponent: Component {
     SettingsCardSection {
         id: angelStyleEditorSection
@@ -1735,7 +1735,7 @@ ContentPage {
 
         SettingsGroup {
             SettingsTaskLoader {
-                requested: root.activeSection === "style" && angelStyleEditorSection.expanded
+                requested: angelStyleEditorSection.expanded
                     && Appearance.angelEverywhere
                 source: "AngelStyleEditor.qml"
             }
@@ -1745,7 +1745,7 @@ ContentPage {
     }
 
     SettingsTaskLoader {
-        requested: root.activeSection === "style" && Appearance.regaliaEverywhere && !root.irisFamily
+        requested: Appearance.regaliaEverywhere && !root.irisFamily
         sourceComponent: Component {
     SettingsCardSection {
         id: regaliaStyleEditorSection
@@ -1756,7 +1756,7 @@ ContentPage {
 
         SettingsGroup {
             SettingsTaskLoader {
-                requested: root.activeSection === "style" && regaliaStyleEditorSection.expanded
+                requested: regaliaStyleEditorSection.expanded
                     && Appearance.regaliaEverywhere
                 source: "RegaliaStyleEditor.qml"
             }
@@ -1766,7 +1766,7 @@ ContentPage {
     }
 
     SettingsTaskLoader {
-        requested: root.activeSection === "style" && Appearance.zzzEverywhere
+        requested: Appearance.zzzEverywhere
         sourceComponent: Component {
     SettingsCardSection {
         id: zzzStyleEditorSection
@@ -1777,7 +1777,7 @@ ContentPage {
 
         SettingsGroup {
             SettingsTaskLoader {
-                requested: root.activeSection === "style" && zzzStyleEditorSection.expanded
+                requested: zzzStyleEditorSection.expanded
                     && Appearance.zzzEverywhere
                 source: "ZzzStyleEditor.qml"
             }
@@ -1787,7 +1787,7 @@ ContentPage {
     }
 
     SettingsTaskLoader {
-        requested: root.activeSection === "advanced" && !(Config.options?.settingsUi?.easyMode ?? false)
+        requested: !(Config.options?.settingsUi?.easyMode ?? false)
         sourceComponent: Component {
     SettingsCardSection {
         id: customThemeEditorSection
@@ -1799,7 +1799,7 @@ ContentPage {
 
         SettingsGroup {
             SettingsTaskLoader {
-                requested: root.activeSection === "advanced"
+                requested: true
                     && !(Config.options?.settingsUi?.easyMode ?? false)
                     && customThemeEditorSection.expanded
                 source: "CustomThemeEditor.qml"
@@ -1810,7 +1810,7 @@ ContentPage {
     }
 
     SettingsTaskLoader {
-        requested: root.activeSection === "advanced" && !(Config.options?.settingsUi?.easyMode ?? false)
+        requested: !(Config.options?.settingsUi?.easyMode ?? false)
         sourceComponent: Component {
     SettingsCardSection {
         id: gowallEditorSection
@@ -1821,7 +1821,7 @@ ContentPage {
 
         SettingsGroup {
             SettingsTaskLoader {
-                requested: root.activeSection === "advanced"
+                requested: true
                     && !(Config.options?.settingsUi?.easyMode ?? false)
                     && gowallEditorSection.expanded
                 source: "GowallWallpaperEditor.qml"
@@ -1832,7 +1832,7 @@ ContentPage {
     }
 
     SettingsTaskLoader {
-        requested: root.activeSection === "type"
+        requested: true
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "type"
@@ -2078,7 +2078,7 @@ ContentPage {
     }
 
     SettingsTaskLoader {
-        requested: root.activeSection === "type"
+        requested: true
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "type"
@@ -2118,7 +2118,7 @@ ContentPage {
     }
 
     SettingsTaskLoader {
-        requested: root.activeSection === "advanced" && !(Config.options?.settingsUi?.easyMode ?? false)
+        requested: !(Config.options?.settingsUi?.easyMode ?? false)
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "advanced"

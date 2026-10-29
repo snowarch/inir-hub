@@ -341,6 +341,7 @@ Scope {
 
         if (taskActivated && root._pendingOptionId < 0
                 && root._pendingLabel.length === 0 && root._pendingSection.length === 0) {
+            SettingsSearchRegistry.revealTask(pageItem)
             root._pendingPageIndex = -1
             root._pendingTask = ""
             root._pendingIsSection = false

@@ -49,7 +49,7 @@ ContentPage {
         property bool _countedLoading: false
 
         Layout.fillWidth: true
-        asynchronous: false
+        asynchronous: true
         active: resident
         visible: requested && status !== Loader.Null
         enabled: requested && status === Loader.Ready && opacity > 0.99
@@ -473,7 +473,7 @@ ContentPage {
     // APPEARANCE & LAYOUT
     // ═══════════════════════════════════════════════════════════════════
     LazySection {
-        requested: root.isIiActive && root.activeSection === "appearance"
+        requested: root.isIiActive
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "appearance"
@@ -596,7 +596,7 @@ ContentPage {
     }
 
     LazySection {
-        requested: root.isIiActive && root.activeSection === "m3"
+        requested: root.isIiActive
         sourceComponent: Component {
             SettingsCardSection {
                 settingsTaskSection: "m3"
@@ -1346,7 +1346,7 @@ ContentPage {
     }
 
     LazySection {
-        requested: root.isIiActive && root.activeSection === "islands"
+        requested: root.isIiActive
         sourceComponent: Component {
             SettingsCardSection {
                 settingsTaskSection: "islands"
@@ -1436,7 +1436,7 @@ ContentPage {
     }
 
     LazySection {
-        requested: root.isIiActive && root.activeSection === "appearance"
+        requested: root.isIiActive
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "appearance"
@@ -1536,7 +1536,7 @@ ContentPage {
     }
 
     LazySection {
-        requested: root.isIiActive && root.activeSection === "spectrum"
+        requested: root.isIiActive
         sourceComponent: Component {
             SettingsCardSection {
                 settingsTaskSection: "spectrum"
@@ -1961,7 +1961,7 @@ ContentPage {
     }
 
     LazySection {
-        requested: root.isIiActive && root.activeSection === "behavior"
+        requested: root.isIiActive
         sourceComponent: Component {
             SettingsCardSection {
                 settingsTaskSection: "behavior"
@@ -2344,7 +2344,7 @@ ContentPage {
     // MODULE BEHAVIOR (settings not represented by the layout editor)
     // ═══════════════════════════════════════════════════════════════════
     LazySection {
-        requested: root.isIiActive && root.activeSection === "modules"
+        requested: root.isIiActive
         sourceComponent: Component {
             SettingsCardSection {
                 settingsTaskSection: "modules"
@@ -2438,7 +2438,7 @@ ContentPage {
     // MODULE LAYOUT (reorder / relocate)
     // ═══════════════════════════════════════════════════════════════════
     LazySection {
-        requested: root.isIiActive && root.activeSection === "modules"
+        requested: root.isIiActive
         sourceComponent: Component {
             SettingsCardSection {
                 settingsTaskSection: "modules"
@@ -2496,7 +2496,7 @@ ContentPage {
     // RESOURCES
     // ═══════════════════════════════════════════════════════════════════
     LazySection {
-        requested: root.isIiActive && !(Config.options?.settingsUi?.easyMode ?? false) && root.activeSection === "modules"
+        requested: root.isIiActive && !(Config.options?.settingsUi?.easyMode ?? false)
         sourceComponent: Component {
             SettingsCardSection {
                 settingsTaskSection: "modules"
@@ -2660,7 +2660,7 @@ ContentPage {
     // MEDIA
     // ═══════════════════════════════════════════════════════════════════
     LazySection {
-        requested: root.isIiActive && root.activeSection === "modules"
+        requested: root.isIiActive
         sourceComponent: Component {
             SettingsCardSection {
                 settingsTaskSection: "modules"
@@ -2699,7 +2699,7 @@ ContentPage {
     // WORKSPACES
     // ═══════════════════════════════════════════════════════════════════
     LazySection {
-        requested: root.isIiActive && !(Config.options?.settingsUi?.easyMode ?? false) && root.activeSection === "modules"
+        requested: root.isIiActive && !(Config.options?.settingsUi?.easyMode ?? false)
         sourceComponent: Component {
             SettingsCardSection {
                 settingsTaskSection: "modules"
@@ -2937,7 +2937,7 @@ ContentPage {
     // SYSTEM TRAY
     // ═══════════════════════════════════════════════════════════════════
     LazySection {
-        requested: root.isIiActive && root.activeSection === "modules"
+        requested: root.isIiActive
         sourceComponent: Component {
             SettingsCardSection {
                 settingsTaskSection: "modules"
@@ -2991,7 +2991,7 @@ ContentPage {
     // UTILITY BUTTONS
     // ═══════════════════════════════════════════════════════════════════
     LazySection {
-        requested: root.isIiActive && root.activeSection === "modules"
+        requested: root.isIiActive
         sourceComponent: Component {
             SettingsCardSection {
                 settingsTaskSection: "modules"
@@ -3135,7 +3135,7 @@ ContentPage {
     // NOTIFICATIONS
     // ═══════════════════════════════════════════════════════════════════
     LazySection {
-        requested: root.isIiActive && root.activeSection === "modules"
+        requested: root.isIiActive
         sourceComponent: Component {
             SettingsCardSection {
                 settingsTaskSection: "modules"

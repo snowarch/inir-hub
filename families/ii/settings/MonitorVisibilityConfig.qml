@@ -1186,7 +1186,7 @@ ContentPage {
     }
 
     SettingsTaskLoader {
-        requested: root.activeSection === "outputs" && CompositorService.isNiri
+        requested: CompositorService.isNiri
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "outputs"
@@ -1354,7 +1354,7 @@ ContentPage {
     }
 
     SettingsTaskLoader {
-        requested: root.activeSection === "outputs"
+        requested: true
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "outputs"
@@ -1403,7 +1403,7 @@ ContentPage {
     }
 
     SettingsTaskLoader {
-        requested: root.activeSection === "outputs"
+        requested: true
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "outputs"
@@ -1427,7 +1427,7 @@ ContentPage {
     }
 
     SettingsTaskLoader {
-        requested: root.activeSection === "surfaces"
+        requested: true
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "surfaces"
@@ -1477,7 +1477,7 @@ ContentPage {
     }
 
     SettingsTaskLoader {
-        requested: root.activeSection === "widgets"
+        requested: true
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "widgets"
@@ -1510,7 +1510,7 @@ ContentPage {
     }
 
     SettingsTaskLoader {
-        requested: root.activeSection === "popups"
+        requested: true
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "popups"

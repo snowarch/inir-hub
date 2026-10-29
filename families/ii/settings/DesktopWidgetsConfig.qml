@@ -1695,7 +1695,7 @@ ContentPage {
 
     // ── Widgets at a glance ─────────────────────────────────
     SettingsTaskLoader {
-        requested: root.isIiActive && root.activeSection === "manage"
+        requested: root.isIiActive
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "manage"
@@ -1734,7 +1734,7 @@ ContentPage {
 
     // ── Every widget at once ────────────────────────────────
     SettingsTaskLoader {
-        requested: root.isIiActive && root.activeSection === "manage"
+        requested: root.isIiActive
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "manage"
@@ -1795,7 +1795,7 @@ ContentPage {
 
     // ── Edit Mode ───────────────────────────────────────────
     SettingsTaskLoader {
-        requested: root.isIiActive && root.activeSection === "manage"
+        requested: root.isIiActive
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "manage"
@@ -1849,7 +1849,7 @@ ContentPage {
 
     // ── Widget Colors ───────────────────────────────────────
     SettingsTaskLoader {
-        requested: root.isIiActive && root.activeSection === "manage"
+        requested: root.isIiActive
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "manage"
@@ -1951,7 +1951,7 @@ ContentPage {
 
     // ── Power Saving ────────────────────────────────────────
     SettingsTaskLoader {
-        requested: root.isIiActive && root.activeSection === "manage"
+        requested: root.isIiActive
         sourceComponent: Component {
     SettingsCardSection {
         id: powerSavingSection
@@ -2048,7 +2048,7 @@ ContentPage {
 
     // ── Clock ───────────────────────────────────────────────
     LazySection {
-        requested: root.isIiActive && root.activeSection === "time"
+        requested: root.isIiActive
         sourceComponent: Component {
             SettingsCardSection {
                 id: clockSection
@@ -2682,7 +2682,7 @@ ContentPage {
 
     // ── World clock ─────────────────────────────────────────
     LazySection {
-        requested: root.isIiActive && root.activeSection === "time"
+        requested: root.isIiActive
         sourceComponent: Component {
             SettingsCardSection {
                 settingsTaskSection: "time"
@@ -2891,7 +2891,7 @@ ContentPage {
 
     // ── Month Calendar ──────────────────────────────────────
     LazySection {
-        requested: root.isIiActive && root.activeSection === "time"
+        requested: root.isIiActive
         sourceComponent: Component {
             SettingsCardSection {
                 settingsTaskSection: "time"
@@ -2999,7 +2999,7 @@ ContentPage {
 
     // ── Upcoming Events ─────────────────────────────────────
     LazySection {
-        requested: root.isIiActive && root.activeSection === "time"
+        requested: root.isIiActive
         sourceComponent: Component {
             SettingsCardSection {
                 settingsTaskSection: "time"
@@ -3122,7 +3122,7 @@ ContentPage {
 
     // ── Date badge ──────────────────────────────────────────
     LazySection {
-        requested: root.isIiActive && root.activeSection === "time"
+        requested: root.isIiActive
         sourceComponent: Component {
             SettingsCardSection {
                 settingsTaskSection: "time"
@@ -3229,7 +3229,7 @@ ContentPage {
 
     // ── Day progress ────────────────────────────────────────
     LazySection {
-        requested: root.isIiActive && root.activeSection === "time"
+        requested: root.isIiActive
         sourceComponent: Component {
             SettingsCardSection {
                 settingsTaskSection: "time"
@@ -3349,7 +3349,7 @@ ContentPage {
 
     // ── Timers ──────────────────────────────────────────────
     LazySection {
-        requested: root.isIiActive && root.activeSection === "time"
+        requested: root.isIiActive
         sourceComponent: Component {
             SettingsCardSection {
                 settingsTaskSection: "time"
@@ -3450,7 +3450,7 @@ ContentPage {
 
     // ── System uptime ───────────────────────────────────────
     LazySection {
-        requested: root.isIiActive && root.activeSection === "time"
+        requested: root.isIiActive
         sourceComponent: Component {
             SettingsCardSection {
                 settingsTaskSection: "time"
@@ -3552,7 +3552,7 @@ ContentPage {
 
     // ── Media Controls ──────────────────────────────────────
     LazySection {
-        requested: root.isIiActive && root.activeSection === "media"
+        requested: root.isIiActive
         sourceComponent: Component {
             SettingsCardSection {
                 settingsTaskSection: "media"
@@ -3876,7 +3876,7 @@ ContentPage {
 
     // ── Visualizer ──────────────────────────────────────────
     LazySection {
-        requested: root.isIiActive && root.activeSection === "media"
+        requested: root.isIiActive
         sourceComponent: Component {
             SettingsCardSection {
                 settingsTaskSection: "media"
@@ -4399,7 +4399,7 @@ ContentPage {
 
     // ── System Monitor ──────────────────────────────────────
     LazySection {
-        requested: root.isIiActive && root.activeSection === "system"
+        requested: root.isIiActive
         sourceComponent: Component {
             SettingsCardSection {
                 settingsTaskSection: "system"
@@ -4642,7 +4642,7 @@ ContentPage {
 
     // ── Battery ─────────────────────────────────────────────
     LazySection {
-        requested: root.isIiActive && root.activeSection === "system"
+        requested: root.isIiActive
         sourceComponent: Component {
             SettingsCardSection {
                 settingsTaskSection: "system"
@@ -4858,7 +4858,7 @@ ContentPage {
 
     // ── Weather ─────────────────────────────────────────────
     LazySection {
-        requested: root.isIiActive && root.activeSection === "system"
+        requested: root.isIiActive
         sourceComponent: Component {
             SettingsCardSection {
                 settingsTaskSection: "system"
@@ -5153,7 +5153,7 @@ ContentPage {
 
     // ── News Ticker ─────────────────────────────────────────
     LazySection {
-        requested: root.isIiActive && root.activeSection === "system"
+        requested: root.isIiActive
         sourceComponent: Component {
             SettingsCardSection {
                 settingsTaskSection: "system"
@@ -5241,7 +5241,7 @@ ContentPage {
 
     // ── Notes ───────────────────────────────────────────────
     LazySection {
-        requested: root.isIiActive && root.activeSection === "personal"
+        requested: root.isIiActive
         sourceComponent: Component {
             SettingsCardSection {
                 settingsTaskSection: "personal"
@@ -5367,7 +5367,7 @@ ContentPage {
 
     // ── Todo ────────────────────────────────────────────────
     LazySection {
-        requested: root.isIiActive && root.activeSection === "personal"
+        requested: root.isIiActive
         sourceComponent: Component {
             SettingsCardSection {
                 settingsTaskSection: "personal"
@@ -5461,7 +5461,7 @@ ContentPage {
 
     // ── User card ───────────────────────────────────────────
     LazySection {
-        requested: root.isIiActive && root.activeSection === "personal"
+        requested: root.isIiActive
         sourceComponent: Component {
             SettingsCardSection {
                 settingsTaskSection: "personal"
@@ -5567,7 +5567,7 @@ ContentPage {
 
     // ── Custom image ────────────────────────────────────────
     LazySection {
-        requested: root.isIiActive && root.activeSection === "personal"
+        requested: root.isIiActive
         sourceComponent: Component {
             SettingsCardSection {
                 settingsTaskSection: "personal"
@@ -5930,7 +5930,7 @@ ContentPage {
 
     // ── Image converter ─────────────────────────────────────
     LazySection {
-        requested: root.isIiActive && root.activeSection === "personal"
+        requested: root.isIiActive
         sourceComponent: Component {
             SettingsCardSection {
                 settingsTaskSection: "personal"
@@ -5996,7 +5996,7 @@ ContentPage {
 
     // ── Custom Widgets ──────────────────────────────────────
     LazySection {
-        requested: root.isIiActive && root.activeSection === "personal"
+        requested: root.isIiActive
         sourceComponent: Component {
             SettingsCardSection {
                 settingsTaskSection: "personal"
@@ -6356,7 +6356,7 @@ ContentPage {
 
     // ── Decorative shape ────────────────────────────────────
     LazySection {
-        requested: root.isIiActive && root.activeSection === "art"
+        requested: root.isIiActive
         sourceComponent: Component {
             SettingsCardSection {
                 settingsTaskSection: "art"
@@ -6446,7 +6446,7 @@ ContentPage {
 
     // ── Japanese Typography ─────────────────────────────────
     LazySection {
-        requested: root.isIiActive && root.activeSection === "art"
+        requested: root.isIiActive
         sourceComponent: Component {
             SettingsCardSection {
                 settingsTaskSection: "art"
@@ -6902,7 +6902,7 @@ ContentPage {
 
     // ── Editorial ───────────────────────────────────────────
     LazySection {
-        requested: root.isIiActive && root.activeSection === "art"
+        requested: root.isIiActive
         sourceComponent: Component {
             SettingsCardSection {
                 settingsTaskSection: "art"
@@ -6983,7 +6983,7 @@ ContentPage {
 
     // ── Mascot ──────────────────────────────────────────────
     LazySection {
-        requested: root.isIiActive && root.activeSection === "art"
+        requested: root.isIiActive
         sourceComponent: Component {
             SettingsCardSection {
                 settingsTaskSection: "art"
@@ -7127,7 +7127,7 @@ ContentPage {
 
     // ── Screen edges ────────────────────────────────────────
     LazySection {
-        requested: root.isIiActive && root.activeSection === "edges"
+        requested: root.isIiActive
         sourceComponent: OrganicEdgeSettings {}
     }
 

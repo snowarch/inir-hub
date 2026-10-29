@@ -82,7 +82,7 @@ ContentPage {
     }
 
     SettingsTaskLoader {
-        requested: root.activeSection === "design"
+        requested: true
         sourceComponent: Component {
             SettingsCardSection {
                 settingsTaskSection: "design"
@@ -136,7 +136,7 @@ ContentPage {
     }
 
     SettingsTaskLoader {
-        requested: root.activeSection === "design"
+        requested: true
         sourceComponent: Component {
             SettingsCardSection {
                 settingsTaskSection: "design"
@@ -168,7 +168,7 @@ ContentPage {
     }
 
     SettingsTaskLoader {
-        requested: root.activeSection === "bar"
+        requested: true
         sourceComponent: Component {
             SettingsCardSection {
                 settingsTaskSection: "bar"
@@ -232,7 +232,7 @@ ContentPage {
     }
 
     SettingsTaskLoader {
-        requested: root.activeSection === "modules"
+        requested: true
         sourceComponent: Component {
             SettingsCardSection {
                 settingsTaskSection: "modules"
@@ -317,7 +317,7 @@ ContentPage {
     }
 
     SettingsTaskLoader {
-        requested: root.activeSection === "surfaces"
+        requested: true
         sourceComponent: Component {
             SettingsCardSection {
                 settingsTaskSection: "surfaces"
@@ -413,7 +413,7 @@ ContentPage {
     }
 
     SettingsTaskLoader {
-        requested: root.activeSection === "surfaces"
+        requested: true
         sourceComponent: Component {
             SettingsCardSection {
                 settingsTaskSection: "surfaces"
@@ -481,7 +481,7 @@ ContentPage {
     }
 
     SettingsTaskLoader {
-        requested: root.activeSection === "sidebars"
+        requested: true
         sourceComponent: Component {
             ColumnLayout {
                 Repeater {
