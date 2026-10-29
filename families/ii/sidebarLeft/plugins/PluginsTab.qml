@@ -78,7 +78,7 @@ Item {
     function addPlugin(url: string): void {
         if (!url || root.addingInProgress) return
         root.addingInProgress = true
-        addProcess.command = ["/usr/bin/python3", Quickshell.shellPath("scripts/add-plugin.py"), "--url", url]
+        addProcess.command = [Quickshell.shellPath("scripts/lib/accel-run"), "add-plugin", "--url", url]
         addProcess.running = true
     }
 
