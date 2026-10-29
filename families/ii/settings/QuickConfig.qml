@@ -176,7 +176,6 @@ ContentPage {
     }
     // Deferred in both modes: entering the page must never kick off directory-wide
     // thumbnail generation. The user asks for the grid explicitly.
-    property bool quickGridLoaded: false
 
     Component.onCompleted: {
         Wallpapers.load()
@@ -398,58 +397,49 @@ ContentPage {
                 }
             }
 
-            // ── Color scheme variant chips ──
-            ConfigSelectionArray {
-                currentValue: Config.options?.appearance?.palette?.type ?? "auto"
-                onSelected: newValue => {
-                    Config.setNestedValue("appearance.palette.type", newValue)
-                    if (!ThemeService.isAutoTheme) {
-                        // Manual preset: apply variant immediately via MaterialThemeLoader
-                        const hex = MaterialThemeLoader.colorToHex(Appearance.m3colors.m3primary)
-                        const mode = Appearance.m3colors.darkmode ? "dark" : "light"
-                        MaterialThemeLoader.applySchemeVariant(hex, newValue, mode)
-                    }
-                    // Auto theme: ThemeService detects palette type change in
-                    // liveRegenSignature and regenerates automatically.
+            // Nine variants read as a wall of chips; past five a choice sits in a popup.
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: 12
+                MaterialSymbol {
+                    text: "palette"
+                    iconSize: Appearance.font.pixelSize.larger
+                    color: Appearance.colors.colOnLayer1
                 }
-                options: [
-                    {
-                        "value": "auto",
-                        "displayName": Translation.tr("Auto")
-                    },
-                    {
-                        "value": "scheme-content",
-                        "displayName": Translation.tr("Content")
-                    },
-                    {
-                        "value": "scheme-expressive",
-                        "displayName": Translation.tr("Expressive")
-                    },
-                    {
-                        "value": "scheme-fidelity",
-                        "displayName": Translation.tr("Fidelity")
-                    },
-                    {
-                        "value": "scheme-fruit-salad",
-                        "displayName": Translation.tr("Fruit Salad")
-                    },
-                    {
-                        "value": "scheme-monochrome",
-                        "displayName": Translation.tr("Monochrome")
-                    },
-                    {
-                        "value": "scheme-neutral",
-                        "displayName": Translation.tr("Neutral")
-                    },
-                    {
-                        "value": "scheme-rainbow",
-                        "displayName": Translation.tr("Rainbow")
-                    },
-                    {
-                        "value": "scheme-tonal-spot",
-                        "displayName": Translation.tr("Tonal Spot")
+                StyledText {
+                    Layout.fillWidth: true
+                    text: Translation.tr("Palette style")
+                    color: Appearance.colors.colOnLayer1
+                }
+                StyledComboBox {
+                    Layout.preferredWidth: Math.min(210, Math.max(140, root.width * 0.38))
+                    readonly property var options: [
+                        { value: "auto", displayName: Translation.tr("Auto") },
+                        { value: "scheme-content", displayName: Translation.tr("Content") },
+                        { value: "scheme-expressive", displayName: Translation.tr("Expressive") },
+                        { value: "scheme-fidelity", displayName: Translation.tr("Fidelity") },
+                        { value: "scheme-fruit-salad", displayName: Translation.tr("Fruit Salad") },
+                        { value: "scheme-monochrome", displayName: Translation.tr("Monochrome") },
+                        { value: "scheme-neutral", displayName: Translation.tr("Neutral") },
+                        { value: "scheme-rainbow", displayName: Translation.tr("Rainbow") },
+                        { value: "scheme-tonal-spot", displayName: Translation.tr("Tonal Spot") }
+                    ]
+                    model: options
+                    textRole: "displayName"
+                    currentIndex: Math.max(0, options.findIndex(o => o.value === (Config.options?.appearance?.palette?.type ?? "auto")))
+                    onActivated: index => {
+                        const newValue = options[index].value
+                        Config.setNestedValue("appearance.palette.type", newValue)
+                        if (!ThemeService.isAutoTheme) {
+                            // Manual preset: apply variant immediately via MaterialThemeLoader
+                            const hex = MaterialThemeLoader.colorToHex(Appearance.m3colors.m3primary)
+                            const mode = Appearance.m3colors.darkmode ? "dark" : "light"
+                            MaterialThemeLoader.applySchemeVariant(hex, newValue, mode)
+                        }
+                        // Auto theme: ThemeService detects palette type change in
+                        // liveRegenSignature and regenerates automatically.
                     }
-                ]
+                }
             }
 
             ConfigSpinBox {
@@ -613,59 +603,6 @@ ContentPage {
                         }
                     }
 
-                    Rectangle {
-                        id: placeholderCard
-                        Layout.fillWidth: true
-                        Layout.preferredHeight: quickGridDeferredContent.implicitHeight + 24
-                        opacity: root.quickGridLoaded ? 0 : 1
-                        visible: opacity > 0
-                        scale: root.quickGridLoaded ? 0.96 : 1
-                        radius: Appearance.rounding.normal
-                        Behavior on Layout.preferredHeight { enabled: Appearance.animationsEnabled; NumberAnimation { duration: Appearance.animation.elementMoveExit.duration; easing.type: Appearance.animation.elementMoveExit.type; easing.bezierCurve: Appearance.animation.elementMoveExit.bezierCurve } }
-                        Behavior on opacity { enabled: Appearance.animationsEnabled; NumberAnimation { duration: Appearance.animation.elementMoveExit.duration; easing.type: Appearance.animation.elementMoveExit.type; easing.bezierCurve: Appearance.animation.elementMoveExit.bezierCurve } }
-                        Behavior on scale { enabled: Appearance.animationsEnabled; NumberAnimation { duration: Appearance.animation.elementMoveExit.duration; easing.type: Appearance.animation.elementMoveExit.type; easing.bezierCurve: Appearance.animation.elementMoveExit.bezierCurve } }
-                        color: Appearance.angelEverywhere ? Appearance.angel.colGlassCard
-                             : Appearance.inirEverywhere ? Appearance.inir.colLayer0
-                             : Appearance.auroraEverywhere ? Appearance.aurora.colSubSurface
-                             : Appearance.colors.colLayer0
-                        border.width: Appearance.angelEverywhere ? Appearance.angel.cardBorderWidth
-                            : Appearance.inirEverywhere ? 1 : (Appearance.auroraEverywhere ? 0 : 1)
-                        border.color: Appearance.angelEverywhere ? Appearance.angel.colCardBorder
-                                   : Appearance.inirEverywhere ? Appearance.inir.colBorder
-                                   : Appearance.colors.colLayer0Border
-
-                        ColumnLayout {
-                            id: quickGridDeferredContent
-                            anchors.fill: parent
-                            anchors.margins: 12
-                            spacing: 10
-
-                            StyledText {
-                                Layout.fillWidth: true
-                                text: Translation.tr("Quick wallpaper thumbnails are loaded on demand.")
-                                wrapMode: Text.WordWrap
-                                color: Appearance.colors.colOnLayer0
-                                font.pixelSize: Appearance.font.pixelSize.normal
-                                font.weight: Font.Medium
-                            }
-
-                            StyledText {
-                                Layout.fillWidth: true
-                                text: Translation.tr("Load them only when you actually need the grid. The full selector button above stays available.")
-                                wrapMode: Text.WordWrap
-                                color: Appearance.colors.colSubtext
-                                font.pixelSize: Appearance.font.pixelSize.small
-                            }
-
-                            RippleButtonWithIcon {
-                                buttonRadius: Appearance.zzzEverywhere ? Appearance.zzz.controlRadius : Appearance.rounding.full
-                                materialIcon: "image"
-                                mainText: Translation.tr("Load quick grid")
-                                onClicked: root.quickGridLoaded = true
-                            }
-                        }
-                    }
-
                     Item {
                         id: quickGridHost
                         Layout.fillWidth: true
@@ -676,7 +613,7 @@ ContentPage {
                         Loader {
                             id: quickGridLoader
                             anchors.fill: parent
-                            active: root.quickGridLoaded
+                            active: true
                             asynchronous: true
 
                             sourceComponent: Rectangle {
@@ -2568,16 +2505,5 @@ ContentPage {
         }
     }
         }
-    }
-
-    // Subtle footer
-    StyledText {
-        Layout.fillWidth: true
-        Layout.topMargin: Appearance.sizes.spacingSmall
-        horizontalAlignment: Text.AlignHCenter
-        font.pixelSize: Appearance.font.pixelSize.smaller
-        color: Appearance.colors.colSubtext
-        opacity: 0.6
-        text: Translation.tr("More options in other tabs • Config: %1").arg(FileUtils.trimFileProtocol(Directories.shellConfigPath))
     }
 }
