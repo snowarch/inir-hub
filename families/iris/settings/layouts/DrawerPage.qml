@@ -126,13 +126,17 @@ Item {
             if (spec.section !== page.area || !IrisOptions.shown(spec)) continue
             const key = String(spec.group ?? "")
             let group = groups.find(entry => entry.key === key)
-            if (!group) { group = { key: key, weight: 1.4 }; groups.push(group) }
+            if (!group) { group = { key: key, weight: 1.4, rest: true }; groups.push(group) }
+            group.rest = group.rest && IrisOptions.foldsAway(spec)
             group.weight += IrisOptions.foldsAway(spec) ? 0.15 : spec.description ? 1.5 : 1
         }
-        const count = Math.min(page.columns, Math.max(1, groups.length))
+        // Groups that are all fine-tuning go to the last column, so the area has one Fine-tune at its foot, not one per column.
+        const resting = groups.filter(group => group.rest)
+        const dealt = resting.length < groups.length ? groups.filter(group => !group.rest) : groups
+        const count = Math.min(page.columns, Math.max(1, dealt.length))
         const out = []
-        let column = [], held = 0, left = groups.reduce((sum, group) => sum + group.weight, 0)
-        for (const group of groups) {
+        let column = [], held = 0, left = dealt.reduce((sum, group) => sum + group.weight, 0)
+        for (const group of dealt) {
             const share = left / (count - out.length)
             if (column.length > 0 && count - out.length > 1 && held + group.weight / 2 > share) {
                 out.push(column)
@@ -144,6 +148,7 @@ Item {
             held += group.weight
         }
         if (column.length > 0) out.push(column)
+        if (dealt !== groups) out[out.length - 1] = out[out.length - 1].concat(resting.map(group => group.key))
         page.split = out
     }
     onColumnsChanged: Qt.callLater(page.plan)
