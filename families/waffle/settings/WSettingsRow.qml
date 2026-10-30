@@ -33,7 +33,9 @@ Item {
     Keys.onReturnPressed: if (root.clickable) root.clicked()
     Keys.onEnterPressed: if (root.clickable) root.clicked()
     Keys.onSpacePressed: if (root.clickable) root.clicked()
-    WFocusVisual { shown: root.activeFocus && root.clickable; radius: root._item ? 0 : Looks.settings.radiusSmall }
+    // A search landing wears the system focus visual too, as Windows' Settings marks the setting it found.
+    property bool landed: false
+    WFocusVisual { shown: (root.activeFocus && root.clickable) || root.landed; radius: root._item ? 0 : Looks.settings.radiusSmall }
     
     Layout.fillWidth: true
     Layout.leftMargin: 0
@@ -173,8 +175,11 @@ Item {
 
     SequentialAnimation {
         id: highlightAnim
+        // Long enough to be found after the page turns (0.8 s was gone before the eye arrived).
+        ScriptAction { script: root.landed = true }
         NumberAnimation { target: highlightOverlay; property: "opacity"; to: 0.18; duration: 200; easing.type: Easing.OutCubic }
-        PauseAnimation { duration: 600 }
+        PauseAnimation { duration: 1400 }
+        ScriptAction { script: root.landed = false }
         NumberAnimation { target: highlightOverlay; property: "opacity"; to: 0; duration: 400; easing.type: Easing.InCubic }
     }
 
