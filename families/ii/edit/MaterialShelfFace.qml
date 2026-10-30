@@ -225,7 +225,7 @@ QtObject {
                 colBackground: "transparent"
                 colBackgroundHover: Appearance.colors.colLayer2Hover
                 Accessible.name: Translation.tr("Widget settings")
-                onClicked: GlobalStates.openSettingsAt("widgets")
+                onClicked: { GlobalStates.setWidgetEditMode(false); GlobalStates.openSettingsAt("widgets") } // a Settings window would sit over the card
                 contentItem: MaterialSymbol {
                     anchors.centerIn: parent
                     text: "tune"
