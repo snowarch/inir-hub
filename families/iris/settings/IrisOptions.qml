@@ -1472,7 +1472,7 @@ QtObject {
         "Arranging": "drag_pan", "Power saving": "energy_savings_leaf", "World clock": "public", "Month Calendar": "calendar_month", "Upcoming Events": "event_upcoming", "Date badge": "today", "Day progress": "wb_twilight", "Timers": "timer", "System uptime": "history", "Media Controls": "album", "System Monitor": "monitoring", "Battery": "battery_full", "Controls": "toggle_on", "Screen time": "hourglass_top", "News": "newspaper", "Notes": "sticky_note_2", "Todo": "checklist", "User card": "account_circle", "Custom image": "image", "Image converter": "transform", "Decorative shape": "interests", "Japanese Typography": "translate", "Editorial": "article", "Mascot": "pets", "Hotspot": "wifi_tethering", "Network": "language", "Screens": "desktop_windows"
     })
     readonly property var groupTints: ({
-        get "At login"() { return IrisStyle.identity.orange },
+        get "At login"() { return IrisStyle.identity.yellow },
         get "Every day"() { return IrisStyle.identity.yellow },
         get "Day and night"() { return IrisStyle.identity.indigo },
         get "Shell family"() { return IrisStyle.identity.purple },
@@ -1529,6 +1529,7 @@ QtObject {
         get "Keyboard"() { return IrisStyle.identity.gray },
         get "Keyboard shortcuts"() { return IrisStyle.identity.indigo },
         get "Language"() { return IrisStyle.identity.teal },
+        get "Settings window"() { return IrisStyle.identity.indigo },
         get "Layout"() { return IrisStyle.identity.blue },
         get "Light"() { return IrisStyle.identity.yellow },
         get "Live wallpapers"() { return IrisStyle.identity.pink },

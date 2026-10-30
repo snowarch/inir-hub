@@ -86,9 +86,12 @@ ColumnLayout {
             }
         }
         if (resting) {
-            out.push({ title: "\u200bmore", caption: "", key: "", rows: [], flat: true, more: true, names: rest.map(group => group.title) })
-            for (const group of rest) out.push({ title: group.title, caption: group.title, key: group.key, rows: group.rows, flat: true, rest: true })
+            out.push({ title: "\u200bmore", caption: home ? Translation.tr("General") : "", key: "", rows: [], flat: true, more: true, names: rest.map(group => group.title),
+                groups: home ? rest.map(group => ({ key: group.key, title: group.title, rows: group.rows })) : [] })
+            // On Home a group opens under its tile, which already names it.
+            for (const group of rest) out.push({ title: group.title, caption: home ? "" : group.title, key: group.key, rows: group.rows, flat: true, rest: true })
         }
+        rows.homeGroups = home && resting
         rows.blocks = out
         rows.stale = false
     }
@@ -102,12 +105,25 @@ ColumnLayout {
     // Fine-tune folds opened by hand, by group; "more" is the area's own, over its all-fine-tuning groups.
     property var unfolded: ({})
     readonly property bool moreOpen: (rows.host?.tuneAll ?? false) || (rows.unfolded["more"] ?? false)
+    // Home shows General's groups as tiles; one opens under them at a time.
+    property bool homeGroups: false
+    property string homeOpen: ""
+    function opensRest(key: string): bool {
+        return rows.homeGroups ? (rows.host?.tuneAll ?? false) || rows.homeOpen === key : rows.moreOpen
+    }
     // A search landing on a row there opens it first.
     readonly property bool landsInMore: {
         const landing = String(rows.host?.landingPath ?? "")
         return landing.length > 0 && rows.blocks.some(block => block.rest && block.rows.some(spec => String(spec.path ?? "") === landing))
     }
-    onLandsInMoreChanged: if (rows.landsInMore && !rows.moreOpen) rows.fold("more")
+    onLandsInMoreChanged: {
+        if (!rows.landsInMore) return
+        const landing = String(rows.host?.landingPath ?? "")
+        if (rows.homeGroups)
+            rows.homeOpen = String(rows.blocks.find(block => block.rest && block.rows.some(spec => String(spec.path ?? "") === landing))?.key ?? "")
+        else if (!rows.moreOpen)
+            rows.fold("more")
+    }
     function fold(key: string): void {
         const next = Object.assign({}, rows.unfolded)
         next[key] = !(next[key] ?? false)
@@ -182,7 +198,7 @@ ColumnLayout {
             required property var modelData
             required property int index
             Layout.fillWidth: true
-            readonly property bool wanted: !slot.modelData.rest || rows.moreOpen
+            readonly property bool wanted: !slot.modelData.rest || rows.opensRest(String(slot.modelData.key ?? ""))
             active: slot.index < rows.builtUpTo && slot.wanted
             visible: slot.active
             onWantedChanged: Qt.callLater(rows.weigh)
@@ -255,9 +271,125 @@ ColumnLayout {
                     }
                 }
 
+                // Home: General's groups as tiles, each saying what it holds now; one opens under them.
+                GridLayout {
+                    id: groupGrid
+                    visible: (block.modelData.groups ?? []).length > 0
+                    Layout.fillWidth: true
+                    readonly property real gap: Math.round(8 * rows?.d)
+                    columns: Math.max(2, Math.floor((width + gap) / (Math.round(232 * rows?.d) * Math.max(1, IrisStyle.typeScale) + gap)))
+                    columnSpacing: gap
+                    rowSpacing: gap
+                    Repeater {
+                        model: ScriptModel { objectProp: "key"; values: block.modelData.groups ?? [] }
+                        Item {
+                            id: group
+                            required property var modelData
+                            readonly property string key: String(group.modelData.key ?? "")
+                            readonly property bool open: rows?.homeOpen === group.key
+                            readonly property color tint: IrisOptions.groupTints[group.key] ?? IrisOptions.sectionById(rows?.section)?.tint ?? IrisStyle.identity.gray
+                            // What it holds now, in words: its first rows' values, a switch by its name while on ("24-hour", "Low power").
+                            readonly property string glance: {
+                                Config.revision
+                                const said = []
+                                for (const spec of group.modelData.rows ?? []) {
+                                    if (said.length >= 2) break
+                                    const value = IrisOptions.currentValue(spec)
+                                    const choice = (spec.choices ?? []).find(entry => String(entry.value) === String(value))
+                                    const word = spec.kind === "switch" ? ((spec.invert ? !value : Boolean(value)) ? Translation.tr(String(spec.label ?? "")) : "")
+                                        : choice ? Translation.tr(String(choice.label ?? ""))
+                                        : spec.kind === "range" ? IrisOptions.rangeText(spec, value)
+                                        : spec.kind === "text" && String(value ?? "").length > 0 && String(value).length <= 24 ? String(value) : ""
+                                    if (word.length > 0) said.push(word)
+                                }
+                                return said.join(" · ")
+                            }
+                            function act(): void { rows.homeOpen = group.open ? "" : group.key }
+                            Layout.fillWidth: true
+                            Layout.preferredWidth: 1
+                            implicitHeight: Math.max(Math.round(64 * rows?.d), groupWords.implicitHeight + Math.round(24 * rows?.d))
+                            activeFocusOnTab: true
+                            Accessible.role: Accessible.Button
+                            Accessible.name: Translation.tr(String(group.modelData.title ?? ""))
+                            Accessible.description: group.glance
+                            Keys.onSpacePressed: group.act()
+                            Keys.onReturnPressed: group.act()
+
+                            Rectangle {
+                                anchors.fill: parent
+                                radius: IrisStyle.radiusTile
+                                color: group.open ? IrisStyle.tintFill(group.tint) : (rows?.groupFill ?? "transparent")
+                                border.width: group.open || group.activeFocus ? 1 : 0
+                                border.color: IrisStyle.accent
+                                scale: groupArea.pressed ? IrisStyle.pressScale(0.97) : 1
+                                Behavior on color { ColorAnimation { duration: IrisStyle.duration(110); easing.type: IrisStyle.feedbackEasing } }
+                                Behavior on scale { NumberAnimation { duration: IrisStyle.feedbackDuration; easing.type: IrisStyle.feedbackEasing } }
+                                Rectangle {
+                                    anchors.fill: parent
+                                    radius: parent.radius
+                                    color: groupArea.pressed ? IrisStyle.fillActive : IrisStyle.fillQuiet
+                                    opacity: groupArea.containsMouse || groupArea.pressed ? 1 : 0
+                                    Behavior on opacity { NumberAnimation { duration: IrisStyle.duration(110); easing.type: IrisStyle.feedbackEasing } }
+                                }
+                                IrisSquircle {
+                                    id: groupMark
+                                    x: Math.round(12 * rows?.d)
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    width: Math.round(32 * rows?.d)
+                                    height: width
+                                    tint: group.tint
+                                    glyph: IrisOptions.groupGlyphs[group.key] ?? "settings"
+                                }
+                                Column {
+                                    id: groupWords
+                                    anchors.left: groupMark.right
+                                    anchors.leftMargin: Math.round(10 * rows?.d)
+                                    anchors.right: groupChevron.left
+                                    anchors.rightMargin: Math.round(6 * rows?.d)
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    spacing: Math.round(1 * rows?.d)
+                                    IrisText {
+                                        width: parent.width
+                                        text: Translation.tr(String(group.modelData.title ?? ""))
+                                        color: IrisStyle.text
+                                        font.pixelSize: IrisStyle.typeBody
+                                        font.weight: IrisStyle.weight(Font.DemiBold)
+                                        elide: Text.ElideRight
+                                    }
+                                    IrisText {
+                                        width: parent.width
+                                        visible: group.glance.length > 0
+                                        text: group.glance
+                                        color: IrisStyle.textSecondary
+                                        font.pixelSize: IrisStyle.typeMeta
+                                        elide: Text.ElideRight
+                                    }
+                                }
+                                MaterialSymbol {
+                                    id: groupChevron
+                                    anchors.right: parent.right
+                                    anchors.rightMargin: Math.round(12 * rows?.d)
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    text: "expand_more"
+                                    iconSize: Math.round(18 * rows?.d)
+                                    color: group.open || groupArea.containsMouse ? IrisStyle.text : IrisStyle.textTertiary
+                                    rotation: group.open ? 180 : 0
+                                    Behavior on rotation { NumberAnimation { duration: IrisStyle.duration(180); easing.type: Easing.OutCubic } }
+                                }
+                            }
+                            MouseArea {
+                                id: groupArea
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: group.act()
+                            }
+                        }
+                    }
+                }
                 // The area's Fine-tune: the groups it holds, opening under it.
                 Rectangle {
-                    visible: Boolean(block.modelData.more)
+                    visible: Boolean(block.modelData.more) && !groupGrid.visible
                     Layout.fillWidth: true
                     Layout.topMargin: Math.round(18 * rows?.d)
                     implicitHeight: moreTune.implicitHeight
