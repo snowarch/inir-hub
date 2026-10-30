@@ -165,47 +165,23 @@ ContentPage {
                 }
             }
 
-            ColumnLayout {
-                Layout.fillWidth: true
+            // seven choices read at a glance as chips, like Dock style; a menu hid six of them
+            ContentSubsection {
                 visible: !(Config.options?.sidebar?.instantOpen ?? false)
-                spacing: 4
+                title: Translation.tr("Sidebar animation")
 
-                RowLayout {
-                    spacing: 8
-                    MaterialSymbol {
-                        text: "swipe_right"
-                        iconSize: Appearance.font.pixelSize.hugeass
-                        color: Appearance.m3colors?.m3OnSurface ?? Appearance.colors.colOnLayer1
-                    }
-                    StyledText {
-                        text: Translation.tr("Sidebar animation")
-                        font.pixelSize: Appearance.font.pixelSize.normal
-                        color: Appearance.m3colors?.m3OnSurface ?? Appearance.colors.colOnLayer1
-                    }
-                }
-
-                StyledComboBox {
-                    Layout.fillWidth: true
-                    readonly property var animOptions: [
-                        { displayName: Translation.tr("Slide"), value: "slide" },
-                        { displayName: Translation.tr("Fade"), value: "fade" },
-                        { displayName: Translation.tr("Pop"), value: "pop" },
-                        { displayName: Translation.tr("Reveal"), value: "reveal" },
-                        { displayName: Translation.tr("Swing"), value: "swing" },
-                        { displayName: Translation.tr("Drop"), value: "drop" },
-                        { displayName: Translation.tr("Elastic"), value: "elastic" }
+                ConfigSelectionArray {
+                    currentValue: Config.options?.sidebar?.animationType ?? "slide"
+                    onSelected: newValue => Config.setNestedValue("sidebar.animationType", newValue)
+                    options: [
+                        { displayName: Translation.tr("Slide"), icon: "swipe_right", value: "slide" },
+                        { displayName: Translation.tr("Fade"), icon: "gradient", value: "fade" },
+                        { displayName: Translation.tr("Pop"), icon: "zoom_in", value: "pop" },
+                        { displayName: Translation.tr("Reveal"), icon: "visibility", value: "reveal" },
+                        { displayName: Translation.tr("Swing"), icon: "rotate_right", value: "swing" },
+                        { displayName: Translation.tr("Drop"), icon: "south", value: "drop" },
+                        { displayName: Translation.tr("Elastic"), icon: "waves", value: "elastic" }
                     ]
-                    model: animOptions
-                    textRole: "displayName"
-                    currentIndex: {
-                        const current = Config.options?.sidebar?.animationType ?? "slide"
-                        const idx = animOptions.findIndex(o => o.value === current)
-                        return idx >= 0 ? idx : 0
-                    }
-                    onActivated: index => {
-                        if (index >= 0 && index < animOptions.length)
-                            Config.setNestedValue("sidebar.animationType", animOptions[index].value)
-                    }
                 }
             }
 
