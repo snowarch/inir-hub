@@ -55,64 +55,61 @@ ContentPage {
 
             }
 
-            ConfigRow {
-                uniform: true
-                ContentSubsection {
-                    title: Translation.tr("Dock position")
+            ContentSubsection {
+                title: Translation.tr("Dock position")
 
-                    ConfigSelectionArray {
-                        currentValue: Config.options?.dock?.position ?? "bottom"
-                        onSelected: newValue => {
-                            Config.setNestedValue('dock.position', newValue);
-                        }
-                        options: [
-                            { displayName: Translation.tr("Top"), icon: "arrow_upward", value: "top" },
-                            { displayName: Translation.tr("Left"), icon: "arrow_back", value: "left" },
-                            { displayName: Translation.tr("Bottom"), icon: "arrow_downward", value: "bottom" },
-                            { displayName: Translation.tr("Right"), icon: "arrow_forward", value: "right" }
-                        ]
+                ConfigSelectionArray {
+                    currentValue: Config.options?.dock?.position ?? "bottom"
+                    onSelected: newValue => {
+                        Config.setNestedValue('dock.position', newValue);
                     }
+                    options: [
+                        { displayName: Translation.tr("Top"), icon: "arrow_upward", value: "top" },
+                        { displayName: Translation.tr("Left"), icon: "arrow_back", value: "left" },
+                        { displayName: Translation.tr("Bottom"), icon: "arrow_downward", value: "bottom" },
+                        { displayName: Translation.tr("Right"), icon: "arrow_forward", value: "right" }
+                    ]
                 }
-                ContentSubsection {
-                    title: Translation.tr("Reveal behavior")
-                    tooltip: Translation.tr("When the dock shows. Hover hides it until you reach the screen edge; Empty workspace keeps it visible on an empty desktop.")
+            }
 
-                    ConfigSelectionArray {
-                        currentValue: Config.options?.dock?.hoverToReveal ?? true
-                        onSelected: newValue => {
-                            Config.setNestedValue('dock.hoverToReveal', newValue);
-                        }
-                        options: [
-                            { displayName: Translation.tr("Hover"), icon: "highlight_mouse_cursor", value: true },
-                            { displayName: Translation.tr("Empty workspace"), icon: "desktop_windows", value: false }
-                        ]
+            ContentSubsection {
+                title: Translation.tr("Reveal behavior")
+                tooltip: Translation.tr("When the dock shows. Hover hides it until you reach the screen edge; Empty workspace keeps it visible on an empty desktop.")
+
+                ConfigSelectionArray {
+                    currentValue: Config.options?.dock?.hoverToReveal ?? true
+                    onSelected: newValue => {
+                        Config.setNestedValue('dock.hoverToReveal', newValue);
                     }
-                    SettingsSwitch {
-                        buttonIcon: "desktop_windows"
-                        text: Translation.tr("Show on desktop")
-                        // In Hover mode the dock is already hidden by default, so
-                        // this only matters for Empty workspace mode.
-                        enabled: !(Config.options?.dock?.hoverToReveal ?? true)
-                        checked: Config.options?.dock?.showOnDesktop ?? true
-                        onCheckedChanged: Config.setNestedValue('dock.showOnDesktop', checked)
-                        StyledToolTip {
-                            text: Translation.tr("Show dock when no window is focused (Empty workspace mode only)")
-                        }
-                    }
-                    SettingsSwitch {
-                        buttonIcon: "keep"
-                        text: Translation.tr("Pinned on startup")
-                        // A pinned dock can never hide, which cancels Hover reveal.
-                        // Disable it under Hover so the contradiction is visible.
-                        enabled: !(Config.options?.dock?.hoverToReveal ?? true)
-                        checked: Config.options.dock.pinnedOnStartup
-                        onCheckedChanged: {
-                            Config.setNestedValue("dock.pinnedOnStartup", checked);
-                        }
-                        StyledToolTip {
-                            text: Translation.tr("Keep dock visible at all times (Empty workspace mode only)")
-                        }
-                    }
+                    options: [
+                        { displayName: Translation.tr("Hover"), icon: "highlight_mouse_cursor", value: true },
+                        { displayName: Translation.tr("Empty workspace"), icon: "desktop_windows", value: false }
+                    ]
+                }
+            }
+
+            // Both only mean something under Empty workspace: Hover already hides the dock, and a pinned dock would
+            // cancel Hover. Disabled there so the contradiction shows.
+            SettingsSwitch {
+                buttonIcon: "desktop_windows"
+                text: Translation.tr("Show on desktop")
+                enabled: !(Config.options?.dock?.hoverToReveal ?? true)
+                checked: Config.options?.dock?.showOnDesktop ?? true
+                onCheckedChanged: Config.setNestedValue('dock.showOnDesktop', checked)
+                StyledToolTip {
+                    text: Translation.tr("Show dock when no window is focused (Empty workspace mode only)")
+                }
+            }
+            SettingsSwitch {
+                buttonIcon: "keep"
+                text: Translation.tr("Pinned on startup")
+                enabled: !(Config.options?.dock?.hoverToReveal ?? true)
+                checked: Config.options.dock.pinnedOnStartup
+                onCheckedChanged: {
+                    Config.setNestedValue("dock.pinnedOnStartup", checked);
+                }
+                StyledToolTip {
+                    text: Translation.tr("Keep dock visible at all times (Empty workspace mode only)")
                 }
             }
 
