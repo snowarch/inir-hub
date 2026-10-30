@@ -230,6 +230,14 @@ ClippingRectangle {
                         : IrisStyle.profileRadius(IrisStyle.bodyProfile(IrisStyle.barShape, root.notch), Math.min(g.width, g.height)),
                     fuse: g.fullWidth && !g.vertical ? Math.round(16 * root.d) : root.notch ? IrisStyle.fuseEdge : IrisStyle.fuse, id: "island",
                     joins: !root.notch ? "" : root.framed ? "frame" : "edge" })
+                // Shelf: the Island rising out of its middle, as IrisIsland draws it.
+                const rise = Math.round(({ none: 0, low: 10, deep: 20 })[String(root.bar?.rise ?? "deep")] ?? 20) * root.d
+                if (root.layout === "full" && !g.vertical && rise > 0) {
+                    const heartW = Math.round(g.height * 4.2), tall = g.height + rise
+                    out.push({ x: Math.round((root.screenW - heartW) / 2), y: g.edge === "bottom" ? g.y - rise : g.y,
+                        width: heartW, height: tall, radius: Math.round(tall * 0.4),
+                        fuse: Math.round(rise * 1.1 + 6 * root.d), id: "islandheart", joins: "island" })
+                }
                 for (const sat of root.satellites)
                     out.push({ x: sat.x, y: sat.y, width: sat.width, height: sat.height,
                         radius: IrisStyle.pieceRadius(sat.width), fuse: IrisStyle.fuse, id: "satellite:" + sat.slot, joins: "island" })

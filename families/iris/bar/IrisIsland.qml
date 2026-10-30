@@ -654,14 +654,15 @@ Item {
     readonly property bool clearStrip: root.menubar && String(root.options?.strip ?? "clear") === "clear"
     readonly property bool fromHeart: root.zoned && root.heartShown && root.extensionRole === "page"
         && !(root.extensionOrigin?.visible ?? false)
-    readonly property real heartSwell: Math.round(8 * root.d)
+    // Shelf (the full layout): how far the Island rises out of the shelf's middle (Settings › Island › Island rise).
+    readonly property real heartSwell: Math.round(({ none: 0, low: 10, deep: 20 })[String(root.options?.rise ?? "deep")] ?? 20) * root.d
     // A page from a bar's heart is the Island growing: one body from the screen edge over the heart, its own
     // corners past the edge, so one material and one light run from the edge down; the heart row fades under it.
     readonly property bool grownPage: root.zoned && root.fromHeart
     readonly property real grownInset: root.grownPage ? Math.ceil(extension.targetRadius) : 0
     readonly property real heartUncovered: root.grownPage ? Math.max(0, 1 - 2.5 * extension.presentation) : 1
     // The heart's lip is the notch gesture: a bar with the notch off keeps one straight edge.
-    readonly property bool swellsHeart: root.layout === "full" && !root.vertical && root.heartShown && root.notch
+    readonly property bool swellsHeart: root.layout === "full" && !root.vertical && root.heartShown && root.heartSwell > 0
     // A bar melted into the frame reads as one body from the screen edge down: its lanes centre in that whole
     // body, band included, not in the part below the band.
     readonly property real bandLift: root.zoned && !root.vertical && IrisFrame.framed
@@ -1485,8 +1486,11 @@ Item {
         if (root.swellsHeart && root.heartLength > 1) {
             const at = chassis.mapToItem(null, barZones.heartAlong, 0)
             const tall = body.height + root.heartSwell
+            // Its far corners round like the Island it is; the shoulders where it leaves the shelf are concave, as wide as
+            // the rise is deep, so shelf and Island read as one piece.
             out.push({ x: at.x, y: root.bottomEdge ? body.y - root.heartSwell : body.y, width: root.heartLength, height: tall,
-                radius: Math.min(Math.round(12 * root.d), IrisStyle.radius), paints: true, fuse: Math.round(16 * root.d), id: "islandheart", joins: "island" })
+                radius: Math.min(root.heartLength / 2, Math.round(tall * 0.4)),
+                paints: true, fuse: Math.round(root.heartSwell * 1.1 + 6 * root.d), id: "islandheart", joins: "island" })
         }
         if (root.menubar && root.heartShown && root.heartLength > 1) {
             const at = chassis.mapToItem(null, barZones.heartAlong, 0)

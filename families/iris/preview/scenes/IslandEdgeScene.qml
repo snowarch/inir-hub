@@ -38,6 +38,6 @@ PreviewScene {
         anchors.leftMargin: Math.round((edgeRoot.edge === "left" ? edgeRoot.subject.x + edgeRoot.subject.width : 0) + 14 * edgeRoot.d)
         glyph: ({ top: "vertical_align_top", bottom: "vertical_align_bottom", left: "align_horizontal_left", right: "align_horizontal_right" })[edgeRoot.edge] ?? "pill"
         text: Translation.tr(({ top: "Top edge", bottom: "Bottom edge", left: "Left edge", right: "Right edge" })[edgeRoot.edge] ?? "")
-            + " · " + (edgeRoot.layout === "menubar" ? Translation.tr("a menu bar with a notch") : edgeRoot.spans ? Translation.tr("a bar across it") : edgeRoot.notch ? Translation.tr("melts into it") : Translation.tr("floats off it"))
+            + " · " + (edgeRoot.layout === "menubar" ? Translation.tr("a menu bar with a notch") : edgeRoot.spans ? Translation.tr("a shelf across it") : edgeRoot.notch ? Translation.tr("melts into it") : Translation.tr("floats off it"))
     }
 }
