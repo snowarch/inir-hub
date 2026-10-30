@@ -48,6 +48,7 @@ The Dock is set under iRiS Settings › Dock:
 
 ## Wallpaper, desktop and Spotlight
 
+- Wallpaper › Wallpaper gallery › Picker: Gallery is iRiS's own, out of the Island; Grid, Coverflow and Launcher open Material's pickers instead, from the same shortcut, piece or Island button.
 - Wallpaper › Wallpaper gallery › Live wallpaper downloads: Best takes the 4K file when there is one, Light takes HD.
 - Desktop › Widgets › Lume on every widget: every widget's text reads as if the wallpaper behind it were bright and busy.
 - Spotlight: type `/` to list iRiS's own switches, including Frame Music and Edge Music.

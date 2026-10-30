@@ -1,6 +1,6 @@
 {
     "$schema": "../../schema/hub.schema.json",
-    "version": "2.33.4",
+    "version": "2.33.5",
     "summary": "One living body: the Island, the chassis and Apple-grade motion.",
     "authors": [
         "snowarch"

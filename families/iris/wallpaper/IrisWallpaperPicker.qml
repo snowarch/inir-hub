@@ -24,7 +24,9 @@ Item {
     readonly property bool here: (root.screen?.name ?? "") === (root.targetScreen?.name ?? "")
     readonly property bool present: root.here && (root.morphOpen || surface.progress > 0)
     readonly property bool armed: root.morphOpen && surface.armed
+    // Settings › Desktop › Picker can hand the open to one of Material's pickers (ShellIrisPanelsImpl).
     readonly property bool morphOpen: root.here && GlobalStates.wallpaperSelectorOpen
+        && String(Config.options?.iris?.wallpaper?.picker ?? "iris") !== "material"
     // Full-size images and video wait for the open to finish: decoded mid-motion they cost it 4-7 frames.
     readonly property bool opened: root.morphOpen && surface.settled
 

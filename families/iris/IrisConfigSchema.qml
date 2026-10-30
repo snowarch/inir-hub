@@ -348,6 +348,7 @@ JsonObject {
     property JsonObject wallpaper: JsonObject {
         // The highlighted wallpaper shows on the desktop while browsing.
         property bool livePreview: true
+        property string picker: "iris" // "iris": the gallery; "material": Material's picker named by wallpaperSelector.style
         property string layout: "reel" // reel | mosaic | browser (strip/showcase read as reel, wall as browser)
         property bool motion: true // live wallpapers play their preview while chosen
         property string liveQuality: "best" // "best": the 4K file when offered; "light": HD

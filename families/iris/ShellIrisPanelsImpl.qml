@@ -265,6 +265,27 @@ Item {
         component: IrisLockRehearsal {}
     }
 
+    // Material's pickers, when Settings › Desktop › Picker names one. Whatever opens the gallery directly (Island,
+    // pieces, Settings) lands on the chosen one: the grid answers wallpaperSelectorOpen, the other two take it over.
+    readonly property bool materialPicker: String(Config.options?.iris?.wallpaper?.picker ?? "iris") === "material"
+    readonly property bool galleryAsked: GlobalStates.wallpaperSelectorOpen
+    onGalleryAskedChanged: {
+        if (!root.galleryAsked || !root.materialPicker) return
+        const style = String(Config.options?.wallpaperSelector?.style ?? "grid")
+        if (style !== "coverflow" && style !== "launcher") return
+        GlobalStates.wallpaperSelectorOpen = false
+        if (style === "coverflow") GlobalStates.coverflowSelectorOpen = true
+        else GlobalStates.wallpaperLauncherOpen = true
+    }
+
+    OnDemandPanelLoader {
+        identifier: "irisMaterialWallpaperSelector"
+        open: root.materialPicker && GlobalStates.wallpaperSelectorOpen
+        requireEnabledPanel: false
+        closeGraceMs: 250
+        source: Plugins.baseUrl("modules/shared/wallpaperSelector/WallpaperSelector.qml")
+    }
+
     OnDemandPanelLoader {
         identifier: "irisWallpaperLauncher"
         open: GlobalStates.wallpaperLauncherOpen
