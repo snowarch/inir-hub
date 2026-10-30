@@ -51,20 +51,15 @@ Item {
         property bool extraCondition: true
         property bool requireEnabledPanel: true
         property int closeGraceMs: IrisStyle.revealDuration + 30
-        // What people open all day is built once, while the shell is idle after start, then only shown and hidden
-        // (hidden it unmaps and draws nothing). Built on open, every open waited for its tree (Settings ~450 ms in a
-        // nest) and drew its first frames heavy; torn down on close, the next open built it again.
+        // A panel is built when it opens and let go a while after it closes: reopened within `keepMs` it only shows
+        // again. Built at idle and kept for good (10-26), Settings, both sidebars and the overlay held ~16k objects and
+        // ~160 MB from start on a shell that never opened them.
         property bool keep: false
-        property int warmMs: 4000
+        property int keepMs: 60000
         property bool resident: open
         property Timer closeGrace: Timer {
-            interval: loader.closeGraceMs
-            onTriggered: loader.resident = loader.open || loader.keep
-        }
-        property Timer warm: Timer {
-            running: loader.keep && loader.enabledPanel && GlobalStates.deferredPanelsReady && !loader.resident
-            interval: loader.warmMs
-            onTriggered: loader.resident = true
+            interval: loader.keep ? Math.max(loader.closeGraceMs, loader.keepMs) : loader.closeGraceMs
+            onTriggered: loader.resident = loader.open
         }
         readonly property bool enabledPanel: Config.ready && IrisGate.official
             && (!requireEnabledPanel || (Config.options?.enabledPanels ?? []).includes(identifier))
@@ -119,7 +114,6 @@ Item {
         open: GlobalStates.sidebarLeftOpen
         extraCondition: Config.options?.iris?.sidebars?.left?.enable ?? true
         keep: true
-        warmMs: 3000
         component: IrisSidebar { side: "left" }
     }
 
@@ -129,7 +123,6 @@ Item {
         open: GlobalStates.sidebarRightOpen
         extraCondition: Config.options?.iris?.sidebars?.right?.enable ?? true
         keep: true
-        warmMs: 3500
         component: IrisSidebar { side: "right" }
     }
 
@@ -159,7 +152,6 @@ Item {
         // Only the host in use is kept: switching hosts builds the other once.
         extraCondition: !root.settingsWindowed
         keep: true
-        warmMs: 6000
         closeGraceMs: 0
         component: IrisSettingsOverlay {}
     }
@@ -171,7 +163,6 @@ Item {
         open: GlobalStates.settingsOverlayOpen
         extraCondition: root.settingsWindowed
         keep: true
-        warmMs: 6000
         closeGraceMs: 0
         component: IrisSettingsWindow {}
     }
@@ -231,7 +222,6 @@ Item {
         open: GlobalStates.overlayOpen
         requireEnabledPanel: false
         keep: true
-        warmMs: 4500
         source: Plugins.baseUrl("modules/shared/overlay/Overlay.qml")
     }
 
