@@ -20,7 +20,7 @@ IrisWidgetFace {
     designFace: IrisDesign.skin("widgetNowPlaying")
     readonly property bool hasPlayer: root.player !== null && root.player !== undefined
     readonly property bool playing: root.hasPlayer && media.effectiveIsPlaying
-    readonly property bool restsWhenPaused: Boolean(root.widget.irisOption("rest", true))
+    readonly property bool restsWhenPaused: Boolean(root.widget.irisOption("rest", false))
     readonly property bool resting: !root.hasPlayer || (root.restsWhenPaused && !root.playing && restDelay.elapsed)
     readonly property string art: root.hasPlayer ? media.displayedArtFilePath : ""
     readonly property color artLight: IrisStyle.vividHighlight(media.colorQuantizer?.colors?.[0] ?? root.accent, root.accent)
@@ -165,6 +165,7 @@ IrisWidgetFace {
         last.artist = media.effectiveArtist
         last.source = root.source
         last.art = root.art
+        last.entry = String(root.player?.desktopEntry ?? "")
         last.at = Date.now()
     }
     function ago(at: real): string {
@@ -203,7 +204,13 @@ IrisWidgetFace {
         visible: root.resting
         readonly property bool paused: root.hasPlayer
         readonly property var last: Persistent.states.lastPlayed
-        readonly property bool remembered: !rest.paused && String(rest.last.title ?? "").length > 0
+        // Only what a tap can bring back: a closed browser video stayed here and a tap did nothing (his 10-30).
+        readonly property bool remembered: !rest.paused && String(rest.last.title ?? "").length > 0 && MprisController.lastPlayedApp() !== null
+        // A tap wakes it: plays what is paused, or opens the app that played last. Where the face carries its own play
+        // button (paused, medium and large) that button is the target.
+        readonly property bool tappable: rest.remembered || (rest.paused && root.small)
+        TapHandler { enabled: rest.tappable; onTapped: rest.paused ? media.togglePlaying() : MprisController.resumeLast() }
+        HoverHandler { enabled: rest.tappable; cursorShape: Qt.PointingHandCursor }
         readonly property bool known: rest.paused || rest.remembered
         readonly property string coverArt: rest.paused ? root.art : rest.remembered ? String(rest.last.art ?? "") : ""
         readonly property bool cover: rest.coverArt.length > 0
