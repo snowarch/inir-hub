@@ -89,7 +89,7 @@ ClippingRectangle {
         const vertical = edge === "left" || edge === "right"
         const thick = IrisFrame.islandBand
         const span = vertical ? root.screenH : root.screenW
-        const full = root.layout === "full" || root.layout === "menubar"
+        const full = root.layout === "full" || root.layout === "menubar" || root.layout === "pods"
         const length = full ? span - 2 * (IrisFrame.band + IrisFrame.islandMargin) : Math.round(thick * 4.2)
         const margin = IrisFrame.band + Math.round(16 * root.d)
         const along = full ? IrisFrame.band + IrisFrame.islandMargin : root.layout === "left" ? margin

@@ -649,7 +649,10 @@ Item {
     readonly property string layout: String(root.options?.layout ?? "island")
     // Menu bar: a thin strip across the edge with the heart hanging from its middle as a notch.
     readonly property bool menubar: root.layout === "menubar" && !root.vertical
-    readonly property bool fullWidth: root.layout === "full" || root.menubar
+    // Pods: the spanning bar without a strip: its start, the Island and its end are three bodies on one line, melting
+    // into each other only where they come close (a wide activity).
+    readonly property bool pods: root.layout === "pods" && !root.vertical
+    readonly property bool fullWidth: root.layout === "full" || root.menubar || root.pods
     // Corner: Left or Right across an edge, docked in that corner and filleted into both walls when welded. Its
     // bubbles rest on the inner side; the room the item keeps on the wall side is handed back (IrisBar places it).
     readonly property string cornerSide: !root.vertical && (root.layout === "left" || root.layout === "right") ? root.layout : ""
@@ -1480,7 +1483,24 @@ Item {
         const spanW = across > 0 ? (across - bandInset * 2) + (body.width - (across - bandInset * 2)) * (1 - melt) : body.width
         // Welded into a corner, the body runs on past the side wall so only its inner corners round.
         const pastSide = root.cornerSide.length > 0 ? Math.ceil(chassis.radius * melt) : 0
-        if (!root.clearStrip) out.push({ x: spanX - (root.cornerSide === "left" ? pastSide : 0),
+        if (root.pods) {
+            const podJoin = melt <= 0.01 ? [] : [IrisFrame.framed ? "frame" : "edge"]
+            const podFuse = Math.round(28 * root.d)
+            const rise = Math.round(5 * root.d)
+            for (const [id, area] of [["podStart", barZones.startArea], ["podEnd", barZones.endArea]]) {
+                if (area.width < 1) continue
+                const at = barZones.mapToItem(null, area.x, 0)
+                const tall = body.height - 2 * rise
+                out.push({ x: at.x - Math.round(6 * root.d), y: body.y + rise, width: area.width + Math.round(12 * root.d), height: tall,
+                    radius: tall / 2, paints: true, fuse: podFuse, id: id, joins: podJoin.concat(["island"]) })
+            }
+            if (root.heartShown && root.heartLength > 1) {
+                const at = chassis.mapToItem(null, barZones.heartAlong, 0)
+                out.push({ x: at.x, y: body.y, width: root.heartLength, height: body.height, radius: body.height / 2,
+                    paints: true, fuse: podFuse, id: "island", joins: podJoin.concat(["podStart", "podEnd"]) })
+            }
+        }
+        if (!root.clearStrip && !root.pods) out.push({ x: spanX - (root.cornerSide === "left" ? pastSide : 0),
             y: root.menubar && root.bottomEdge ? body.y + body.height - strip : body.y,
             width: spanW + pastSide, height: strip,
             radius: across > 0 ? Math.min(strip / 2, chassis.radius) * (1 - melt) : root.menubar ? strip / 2 : chassis.radius, paints: true,
@@ -2385,7 +2405,7 @@ Item {
                 lane: root.clearStrip ? root.compactHeight : root.stripHeight
                 clear: root.clearStrip
                 shelf: root.layout === "full"
-                menuBar: root.menubar
+                menuBar: root.menubar || root.pods
                 bottomEdge: root.bottomEdge
                 lift: root.bandLift
                 heartLength: root.heartLength

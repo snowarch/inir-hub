@@ -278,7 +278,7 @@ Scope {
         }
         /// How the Island sits on its edge: `island`, `left`, `right`, `full` or `menubar` (top or bottom)
         function layout(name: string): string {
-            if (!["island", "left", "right", "full", "menubar"].includes(name)) return "Unknown layout: island, left, right, full or menubar"
+            if (!["island", "left", "right", "full", "menubar", "pods"].includes(name)) return "Unknown layout: island, left, right, full, menubar or pods"
             Config.setNestedValue("iris.bar.layout", name)
             return name
         }

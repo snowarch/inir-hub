@@ -166,7 +166,7 @@ QtObject {
     // or floating at its margin when it floats (two grammars on one edge read as parts from different kits). A corner
     // plate takes its edge's join on both walls (IrisStage.zones): floating, it keeps that margin from the frame's side
     // too, never floating off one wall and welded to the other.
-    readonly property bool islandSpans: String(root.bar?.layout ?? "island") === "full" || root.islandMenubar
+    readonly property bool islandSpans: ["full", "pods"].includes(String(root.bar?.layout ?? "island")) || root.islandMenubar
     function joinOn(side: string): string {
         if (!root.piecesAttached) return "float"
         if (side === root.islandEdge && !root.notch && !root.islandSpans && root.pieceJoin !== "gap") return "gap"
