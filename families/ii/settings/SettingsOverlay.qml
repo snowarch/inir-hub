@@ -154,6 +154,8 @@ Scope {
                     inset: Appearance.regalia.panelInset
                     elevated: true
                     glassEnabled: true
+                    glassScreenX: card.x
+                    glassScreenY: card.y
                 }
 
                 // aurora and angel: the wallpaper, blurred and tinted, is the window
