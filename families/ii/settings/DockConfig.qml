@@ -27,14 +27,11 @@ ContentPage {
 
         SettingsGroup {
             SettingsSwitch {
-                buttonIcon: "check"
+                buttonIcon: "dock_to_bottom"
                 text: Translation.tr("Enable")
                 checked: Config.options.dock.enable
                 onCheckedChanged: {
                     Config.setNestedValue("dock.enable", checked);
-                }
-                StyledToolTip {
-                    text: Translation.tr("Show the macOS-style dock at the bottom of the screen")
                 }
             }
 

@@ -219,7 +219,7 @@ Flickable {
                     IrisText {
                         anchors.verticalCenter: parent.verticalCenter
                         visible: searchField.text.length === 0
-                        text: Hub.loaded ? Translation.tr("Search %1 items").arg(Hub.items.length) : Translation.tr("Search the hub")
+                        text: Hub.items.length > 0 ? Translation.tr("Search %1 items").arg(Hub.items.length) : Translation.tr("Search the hub")
                         color: IrisStyle.muted
                         font.pixelSize: searchField.font.pixelSize
                     }

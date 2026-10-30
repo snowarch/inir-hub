@@ -99,7 +99,8 @@ WSettingsPage {
         WTextField {
             id: searchField
             Layout.fillWidth: true
-            placeholderText: Hub.loaded ? Translation.tr("Search %1 items").arg(Hub.items.length) : Translation.tr("Reading the hub…")
+            placeholderText: !Hub.loaded ? Translation.tr("Reading the hub…")
+                : Hub.items.length > 0 ? Translation.tr("Search %1 items").arg(Hub.items.length) : Translation.tr("Search the hub")
             onTextChanged: searchDelay.restart()
             Timer { id: searchDelay; interval: 140; onTriggered: root.query = searchField.text.trim() }
         }

@@ -186,7 +186,7 @@ ContentPage {
                         width: parent.width
                         visible: searchInput.text.length === 0
                         text: !Hub.loaded ? Translation.tr("Reading the hub…")
-                            : Translation.tr("Search %1 items").arg(Hub.items.length)
+                            : Hub.items.length > 0 ? Translation.tr("Search %1 items").arg(Hub.items.length) : Translation.tr("Search the hub")
                         font.pixelSize: SettingsMaterialPreset.labelSize
                         color: SettingsMaterialPreset.supportingColor
                         elide: Text.ElideRight
