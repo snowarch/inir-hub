@@ -343,7 +343,7 @@ ColumnLayout {
                             Keys.onSpacePressed: group.act()
                             Keys.onReturnPressed: group.act()
 
-                            Rectangle {
+                            IrisPlate {
                                 anchors.fill: parent
                                 radius: IrisStyle.radiusTile
                                 // Open: a wash of its own colour, as the sidebar marks where you are (his 10-30: an
@@ -416,7 +416,7 @@ ColumnLayout {
                     }
                 }
                 // The area's Fine-tune: the groups it holds, opening under it.
-                Rectangle {
+                IrisPlate {
                     visible: Boolean(block.modelData.more) && !groupGrid.visible
                     Layout.fillWidth: true
                     Layout.topMargin: Math.round(18 * rows?.d)
@@ -488,15 +488,16 @@ ColumnLayout {
                             Keys.onSpacePressed: tile.act()
                             Keys.onReturnPressed: tile.act()
 
-                            Rectangle {
+                            IrisPlate {
                                 id: tilePlate
                                 anchors.fill: parent
                                 radius: IrisStyle.radiusTile
-                                color: tile.on ? IrisStyle.accentFill : tile.edit ? "transparent"
+                                color: tile.on ? IrisStyle.lookPlate : tile.edit ? "transparent"
                                     : tile.open ? IrisStyle.tintFillHover(tile.accentTile ? IrisStyle.accent : (tile.area?.tint ?? IrisStyle.identity.gray))
                                     : (rows?.groupFill ?? "transparent")
-                                border.width: tile.edit ? 1 : 0
-                                border.color: IrisStyle.hairlineStrong
+                                lit: tile.on || tile.open
+                                border.width: tile.edit ? 1 : IrisStyle.plateEdge.a > 0 ? 1 : 0
+                                border.color: tile.edit ? IrisStyle.hairlineStrong : IrisStyle.plateEdge
                                 scale: tileArea.pressed ? IrisStyle.pressScale(0.97) : 1
                                 Behavior on color { ColorAnimation { duration: IrisStyle.duration(110); easing.type: IrisStyle.feedbackEasing } }
                                 Behavior on scale { NumberAnimation { duration: IrisStyle.feedbackDuration; easing.type: IrisStyle.feedbackEasing } }
@@ -514,7 +515,7 @@ ColumnLayout {
                                     width: Math.round(32 * rows?.d)
                                     height: width
                                     visible: !tile.edit
-                                    tint: tile.on ? IrisStyle.inkOnAccentFill : tile.accentTile ? IrisStyle.accent : (tile.area?.tint ?? IrisStyle.identity.gray)
+                                    tint: tile.on ? IrisStyle.inkOnLookPlate : tile.accentTile ? IrisStyle.accent : (tile.area?.tint ?? IrisStyle.identity.gray)
                                     glyph: tile.accentTile ? "palette" : tile.glyph
                                 }
                                 MaterialSymbol {
@@ -535,7 +536,7 @@ ColumnLayout {
                                     IrisText {
                                         width: parent.width
                                         text: Translation.tr(String(tile.spec.label ?? ""))
-                                        color: tile.on ? IrisStyle.inkOnAccentFill : tile.edit ? IrisStyle.textSecondary : IrisStyle.text
+                                        color: tile.on ? IrisStyle.inkOnLookPlate : tile.edit ? IrisStyle.textSecondary : IrisStyle.text
                                         font.pixelSize: IrisStyle.typeBody
                                         font.weight: IrisStyle.weight(tile.edit ? Font.Medium : Font.DemiBold)
                                         elide: Text.ElideRight
@@ -544,7 +545,7 @@ ColumnLayout {
                                         width: parent.width
                                         visible: tile.words.length > 0
                                         text: tile.words
-                                        color: tile.on ? IrisStyle.secondaryOf(IrisStyle.inkOnAccentFill) : IrisStyle.textSecondary
+                                        color: tile.on ? IrisStyle.secondaryOf(IrisStyle.inkOnLookPlate) : IrisStyle.textSecondary
                                         font.pixelSize: IrisStyle.typeMeta
                                         elide: Text.ElideRight
                                     }
@@ -578,7 +579,7 @@ ColumnLayout {
                     active: block.tiled && tileGrid.openedSpec !== null
                     visible: active
                     Layout.fillWidth: true
-                    sourceComponent: Rectangle {
+                    sourceComponent: IrisPlate {
                         implicitHeight: openRow.implicitHeight
                         radius: IrisStyle.radiusTile
                         color: rows?.groupFill ?? "transparent"
@@ -610,7 +611,7 @@ ColumnLayout {
                             font.pixelSize: IrisStyle.typeMeta
                             font.weight: IrisStyle.weight(Font.DemiBold)
                         }
-                        Rectangle {
+                        IrisPlate {
                             Layout.fillWidth: true
                             implicitHeight: partRows.implicitHeight
                             radius: IrisStyle.radiusTile

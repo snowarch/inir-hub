@@ -146,7 +146,7 @@ ClippingRectangle {
         }
         Rectangle {
             anchors.fill: parent
-            color: IrisStyle.veilStrong
+            color: IrisStyle.sceneVeilStrong
         }
 
         RectangularShadow {
@@ -192,7 +192,7 @@ ClippingRectangle {
                 IrisText {
                     id: greeting
                     text: card.greeting
-                    color: IrisStyle.onMediaSecondary
+                    color: IrisStyle.onSceneSecondary
                     font.family: IrisStyle.monoCaptions ? IrisStyle.fontMono : IrisStyle.fontMain
                     font.capitalization: IrisStyle.monoCaptions ? Font.AllUppercase : Font.MixedCase
                     font.pixelSize: IrisStyle.typeLabel
@@ -204,7 +204,7 @@ ClippingRectangle {
                     Layout.fillWidth: true
                     text: { dayType.font; return dayType.advanceWidth(day.full) <= column.room - greeting.implicitWidth - Math.round(10 * card.d) ? day.full : DateTime.date }
                     FontMetrics { id: dayType; font: day.font }
-                    color: IrisStyle.onMediaSecondary
+                    color: IrisStyle.onSceneSecondary
                     opacity: 0.7
                     font.pixelSize: IrisStyle.typeMeta
                     elide: Text.ElideRight
@@ -231,13 +231,13 @@ ClippingRectangle {
                         radius: IrisStyle.capsule(width)
                         color: "transparent"
                         border.width: avatar.ring
-                        border.color: IrisStyle.accentOnMedia
+                        border.color: IrisStyle.accentOnScene
                         opacity: avatar.containsMouse ? 1 : 0.85
                         Behavior on opacity { NumberAnimation { duration: IrisStyle.feedbackDuration; easing.type: IrisStyle.feedbackEasing } }
                     }
                     FaceAvatar {
-                        ink: IrisStyle.onMedia
-                        color: IrisStyle.onMediaFill
+                        ink: IrisStyle.onScene
+                        color: IrisStyle.onSceneFill
                         anchors.fill: parent
                         anchors.margins: avatar.ring + avatar.air
                         scale: avatar.pressed ? IrisStyle.pressScale(0.96) : 1
@@ -273,7 +273,7 @@ ClippingRectangle {
                         Layout.fillWidth: true
                         role: IrisText.Display
                         text: card.name
-                        color: IrisStyle.accentOnMedia
+                        color: IrisStyle.accentOnScene
                         elide: Text.ElideRight
                     }
                     // Narrow (a plate, a column), who and how long up take a line each instead of losing the uptime.
@@ -282,7 +282,7 @@ ClippingRectangle {
                         Layout.fillWidth: true
                         Layout.topMargin: Math.round(2 * card.d)
                         text: whereLine.advanceWidth <= where.width ? card.whereabouts : card.who + "\n" + card.up
-                        color: IrisStyle.onMediaSecondary
+                        color: IrisStyle.onSceneSecondary
                         font.family: IrisStyle.fontMono
                         font.pixelSize: IrisStyle.typeMeta
                         elide: Text.ElideRight
@@ -296,7 +296,7 @@ ClippingRectangle {
                 Layout.topMargin: Math.round(12 * card.d)
                 visible: card.title.length > 0
                 text: card.kind + "  ·  " + card.title
-                color: IrisStyle.onMediaSecondary
+                color: IrisStyle.onSceneSecondary
                 opacity: 0.8
                 font.pixelSize: IrisStyle.typeLabel
                 elide: Text.ElideRight
@@ -354,7 +354,7 @@ ClippingRectangle {
                     radius: IrisStyle.radiusRow
                     color: "transparent"
                     border.width: 2
-                    border.color: IrisStyle.accentOnMedia
+                    border.color: IrisStyle.accentOnScene
                 }
                 ClippingRectangle {
                     anchors.fill: parent
@@ -419,7 +419,7 @@ ClippingRectangle {
         Rectangle {
             anchors.fill: parent
             radius: IrisStyle.fieldChamfer ? 0 : height / 2
-            color: glass.containsMouse ? IrisStyle.onMediaFillHover : IrisStyle.onMediaFill
+            color: glass.containsMouse ? IrisStyle.onSceneFillHover : IrisStyle.onSceneFill
             scale: glass.pressed ? IrisStyle.pressScale(0.94) : 1
             Behavior on color { ColorAnimation { duration: IrisStyle.duration(110); easing.type: IrisStyle.feedbackEasing } }
             Behavior on scale { NumberAnimation { duration: IrisStyle.feedbackDuration; easing.type: IrisStyle.feedbackEasing } }
@@ -432,13 +432,13 @@ ClippingRectangle {
                 anchors.verticalCenter: parent.verticalCenter
                 text: glass.glyph
                 iconSize: Math.round(17 * card.d)
-                color: IrisStyle.onMedia
+                color: IrisStyle.onScene
             }
             IrisText {
                 anchors.verticalCenter: parent.verticalCenter
                 visible: glass.label.length > 0
                 text: glass.label
-                color: IrisStyle.onMedia
+                color: IrisStyle.onScene
                 font.family: IrisStyle.monoCaptions ? IrisStyle.fontMono : IrisStyle.fontMain
                 font.capitalization: IrisStyle.monoCaptions ? Font.AllUppercase : Font.MixedCase
                 font.letterSpacing: IrisStyle.monoCaptions ? Math.round(IrisStyle.typeMeta * 0.12) : 0

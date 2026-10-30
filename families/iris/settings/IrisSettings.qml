@@ -1746,7 +1746,7 @@ Item {
                     font.capitalization: IrisStyle.monoCaptions ? Font.AllUppercase : Font.MixedCase
                     font.letterSpacing: IrisStyle.monoCaptions ? Math.round(IrisStyle.typeCaption * 0.16) : 0
                 }
-                Rectangle {
+                IrisPlate {
                     Layout.fillWidth: true
                     implicitHeight: groupRows.implicitHeight
                     radius: IrisStyle.radiusTile

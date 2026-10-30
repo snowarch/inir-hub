@@ -269,7 +269,7 @@ Item {
         onLoaded: item.face = root
     }
 
-    Rectangle {
+    IrisPlate {
         anchors.fill: parent
         visible: root.plated && !root.ownPlate
         radius: root.radius

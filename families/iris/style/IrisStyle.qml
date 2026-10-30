@@ -172,7 +172,7 @@ QtObject {
     readonly property int radiusSmall: root.fieldChamfer ? 0 : Math.max(4, Math.round(root.radius * 0.58))
     // A capsule's (or a disc's) corner: half its side, or square inside a chamfered Design, where a pill or a dot under
     // the pointer would be the one round thing among cut plates.
-    function capsule(side: real): real { return root.fieldChamfer ? 0 : side / 2 }
+    function capsule(side: real): real { return root.fieldChamfer ? 0 : root.look === "synth" ? Math.min(side / 2, root.synthKeyRadius * 1.6) : side / 2 }
     readonly property int spaceSmall: Math.max(4, Math.round(6 * root.density))
 
     readonly property var presets: ({
@@ -232,7 +232,11 @@ QtObject {
     }
     // A Design's type is part of it (AIRISU: Archivo to read, Archivo SemiExpanded for titles and figures).
     readonly property string fontMain: IrisDesign.font("text") || root.face("iris.appearance.fontFamily", root.appearance?.fontFamily)
-    readonly property string fontTitle: IrisDesign.font("title") || root.face("iris.appearance.titleFontFamily", root.appearance?.titleFontFamily)
+    // A look sets titles in its own face unless the person chose one: Synth's label mono, Gel's round Rubik.
+    readonly property string fontTitle: IrisDesign.font("title")
+        || (String(root.appearance?.titleFontFamily ?? "").length === 0 && root.look === "synth" ? "Geist Mono" // iris-literal: Synth's label face
+            : String(root.appearance?.titleFontFamily ?? "").length === 0 && root.look === "gel" ? "Rubik" // iris-literal: Gel's face
+            : root.face("iris.appearance.titleFontFamily", root.appearance?.titleFontFamily))
     // 220 font.weight bindings hang off this one. Read straight through `theme`, it is recomputed
     // every time Config is reloaded — which is every write of any key — and drags all 220 with it,
     // measured at six dropped frames per write. The name changes only when the weight really does.
@@ -318,6 +322,31 @@ QtObject {
         if (root.look === "nothing") return root.wearsNothing(item) ? "nothing" : "apple"
         return root.lookAt(root.placeOf(item)) ? root.look : "apple"
     }
+    // Each look is a whole dialect of iRiS, worn by every surface through the tokens below and not by its controls alone
+    // (his 10-30: "que todo iris se transforme con cada elección"): corners, plates, marks, voices, the chosen thing and
+    // the bodies' edge. The traits are the Designs' own (IrisDesign.trait); a Design keeps the ones it sets.
+    readonly property var lookTraits: ({
+        nothing: { marks: "glyph", selection: "plate", captions: "mono", plate: "line" },
+        synth: { marks: "key", selection: "plate", captions: "mono", titles: "lower", plate: "key" },
+        gel: { marks: "gloss", selection: "plate", plate: "gloss" }
+    })[root.look] ?? ({})
+    function trait(name: string): var {
+        const own = IrisDesign.trait(name)
+        return own !== undefined && own !== null && own !== "" ? own : root.lookTraits[name]
+    }
+    // Machined keys for Synth, soft pebbles for Gel: every fixed corner of the shell follows (`corner`, `iconRadius`,
+    // `capsule`).
+    readonly property real lookCorner: ({ synth: 0.42, gel: 1.3 })[root.look] ?? 1
+    // How a plate (a group, a tile, a card) is made: a fill (Apple), a hairline (Nothing), an opaque key panel on its
+    // drop edge (Synth), a gloss under a light cap (Gel). IrisPlate draws it.
+    readonly property string plateStyle: root.fieldChamfer ? "flat" : String(root.trait("plate") ?? "flat")
+    readonly property string marksStyle: String(root.trait("marks") ?? "tile")
+    readonly property color plateEdge: root.plateStyle === "line" ? ColorUtils.applyAlpha(root.text, root.light ? 0.2 : 0.18)
+        : root.plateStyle === "gloss" ? Qt.rgba(1, 1, 1, root.light ? 0.7 : 0.1) : Qt.color("transparent") // iris-literal: gel's lit rim
+    readonly property color synthPanel: ColorUtils.mix(root.text, root.surfaceOpaque, root.light ? 0.05 : 0.07)
+    // The chosen thing in a look that marks it with a plate: Synth's orange key, Gel's glossy accent, the accent plate.
+    readonly property color lookPlate: root.look === "synth" ? root.synthOn : root.look === "gel" ? root.gelBody : root.accentFill
+    readonly property color inkOnLookPlate: root.look === "synth" ? root.inkOnSynthOn : root.look === "gel" ? root.inkOnGel : root.inkOnAccentFill
     // Synth: an instrument panel. A switch is a key that sinks and lights its LED, a level a fader over ticks, a choice
     // a row of keys; each kind keeps its colour: orange is on and the one act, blue a level.
     readonly property color synthOn: "#ff5b00" // iris-literal: Synth's orange
@@ -895,7 +924,13 @@ QtObject {
     readonly property string edgeStyle: !(root.theme?.rim ?? true) || root.afterglow ? "none"
         : String(root.theme?.edges ?? "line") === "light" ? "light" : "line"
     readonly property bool edgeLit: root.edgeStyle === "light" && (root.glassEdgeLight > 0 || root.glassEdgeLine > 0)
-    readonly property color rim: root.edgeStyle !== "line" ? Qt.color("transparent")
+    // Bodies (Island, Dock, bubbles, panels) wear the look's edge: Nothing's hairline, Synth's machined edge, Gel's lit rim.
+    readonly property color rim: root.fieldChamfer ? root.lineRim
+        : root.look === "nothing" ? ColorUtils.applyAlpha(root.text, root.light ? 0.24 : 0.2)
+        : root.look === "synth" ? root.synthKeyEdge
+        : root.look === "gel" ? Qt.rgba(1, 1, 1, root.light ? 0.8 : 0.32) // iris-literal: gel's lit rim
+        : root.lineRim
+    readonly property color lineRim: root.edgeStyle !== "line" ? Qt.color("transparent")
         : root.rimTint === "accent" ? ColorUtils.applyAlpha(root.accent, Math.min(0.9, 0.3 + 0.3 * root.tweak("lines", 0, 2)))
         : root.rimTint === "highlight" ? ColorUtils.applyAlpha(root.secondaryAccent, Math.min(0.9, 0.3 + 0.3 * root.tweak("lines", 0, 2)))
         : root.border
@@ -1032,7 +1067,23 @@ QtObject {
                 material === "clear" || strength <= 0 ? 0 : root.paperGlass * strength)
             : Lume.veil(level, spread, root.materialSpread[material] ?? 1, root.surfaceOpaque, root.text, contrast, floor, 0.86)
     }
-    // A Place over imagery (Session) keeps its dark veil and onMedia ink in every scheme (§0.3); Lume solves how thick,
+    // A place whose picture is only its backdrop (Session, Settings' welcome, the desktop menu's head) wears the scheme
+    // over it: a frost of paper and the scheme's ink in Light and Ink, the dark veil and white ink in Dark (his 10-30: Ink
+    // left them black). Pictures that are the content (covers, photos, thumbnails) keep the media ink.
+    readonly property color sceneSurface: root.light ? root.surfaceOpaque : root.darkSurfaceOpaque
+    readonly property color onScene: root.light ? root.text : root.onMedia
+    readonly property color onSceneSecondary: ColorUtils.applyAlpha(root.onScene, 0.72)
+    readonly property color onSceneTertiary: ColorUtils.applyAlpha(root.onScene, 0.56)
+    readonly property color onSceneFill: ColorUtils.applyAlpha(root.onScene, root.light ? 0.1 : 0.2)
+    readonly property color onSceneFillHover: ColorUtils.applyAlpha(root.onScene, root.light ? 0.16 : 0.3)
+    readonly property color accentOnScene: root.light ? root.accent : root.accentOnMedia
+    readonly property color dangerOnScene: root.light ? root.danger : root.dangerOnMedia
+    readonly property color sceneVeil: root.light ? ColorUtils.applyAlpha(root.surfaceOpaque, 0.62) : root.veil
+    readonly property color sceneVeilStrong: root.light ? ColorUtils.applyAlpha(root.surfaceOpaque, 0.78) : root.veilStrong
+    function sceneVeilOver(level: real, spread: real): real {
+        return root.light ? Math.max(0.62, root.legibleVeil("panel", level, spread, 1)) : root.mediaVeil(level, spread)
+    }
+    // A Place over imagery keeps its dark veil and onMedia ink in every scheme (§0.3); Lume solves how thick,
     // at the reading contrast so the secondary ink still holds. `veil` is the floor: a dark wallpaper looks as before.
     function mediaVeil(level: real, spread: real): real {
         return Lume.veil(level, spread, root.materialSpread.panel, root.darkSurfaceOpaque, root.onMedia,
@@ -1066,7 +1117,7 @@ QtObject {
     // as a grouped form sits over its pane (macOS Tahoe). readingCard alone left the groups a shade from the sheet.
     // On glass the reading sheet carries legibility and the plate is a veil of white over it (nearly opaque in light, a
     // breath in dark); mixing readingCard (2 % alpha in light) toward white kept its dark rgb and gave grey slabs.
-    readonly property color formPlate: !root.glassy ? root.readingCard
+    readonly property color formPlate: root.plateStyle === "key" ? root.synthPanel : !root.glassy ? root.readingCard
         : root.light ? Qt.rgba(1, 1, 1, 0.66) : Qt.rgba(1, 1, 1, 0.055) // iris-literal: white veils of a form's plate
     readonly property color readingSidebar: root.glassy
         ? ColorUtils.applyAlpha(root.surfaceOpaque, Math.max(root.wallpaperVeil, root.placePlate)) : root.readingCard
@@ -1096,7 +1147,7 @@ QtObject {
         // Inside a chamfered silhouette every plate is square: the cut is the only corner (concentric or nothing).
         if (root.fieldChamfer) return 0
         const cap = px >= 18 ? 1.3 : px >= 10 ? 1.4 : 1.6
-        return Math.max(2, Math.round(px * Math.min(root.shapeScale, cap) * root.density))
+        return Math.max(2, Math.round(px * Math.min(root.shapeScale, cap) * root.lookCorner * root.density))
     }
     function concentricPad(outerRadius: real, floor: real): int {
         return Math.max(Math.round(floor), Math.round(outerRadius * 0.3 + 7 * root.density))
@@ -1157,26 +1208,26 @@ QtObject {
     // body at 45° by `chamferCut` and squares the other two; the plates inside go square (`corner`).
     readonly property bool fieldChamfer: IrisDesign.fieldCorner === "chamfer"
     // The active Design's traits (IrisDesign.traits), as primitives the surfaces bind to.
-    readonly property bool plainMarks: IrisDesign.trait("marks") === "glyph" || root.mono
-    readonly property bool plateSelection: IrisDesign.trait("selection") === "plate"
+    readonly property bool plainMarks: root.trait("marks") === "glyph" || root.mono
+    readonly property bool plateSelection: root.trait("selection") === "plate"
     readonly property bool indexed: IrisDesign.trait("index") === true
     // Signal: every caption and group head speaks in the Label voice, in every Design.
-    readonly property bool monoCaptions: root.mono || IrisDesign.trait("captions") === "mono"
+    readonly property bool monoCaptions: root.mono || root.trait("captions") === "mono"
     // A side panel's section is headed by a bar of its line colour, as a station sign marks a line, instead of a glyph.
     readonly property bool lineSections: IrisDesign.trait("sections") === "line"
     // The shell's shared toasts (reloaded, copied, failed) take the Design's own toast under iRiS when it has one.
     readonly property string toastSkin: IrisDesign.skin("toast")
-    readonly property bool lowerTitles: IrisDesign.trait("titles") === "lower"
+    readonly property bool lowerTitles: root.trait("titles") === "lower"
     // Where you are and what is chosen (a row, a cell, a tile): the accent wash in iRiS, a solid plate of the accent with
     // its own ink in a plate Design (never the text colour as a plate: a white slab on every chosen row).
     // `selectionInk` marks (the chosen glyph, a check), `selectionLabel` the label on it.
     // Signal: chosen is inverted in every Design (ink plate, paper word); the current row of a list is one step of ink.
     readonly property bool invertSelection: root.plateSelection || root.mono
-    readonly property color selectionFill: root.invertSelection ? root.accentFill : root.tintFill(root.accent)
-    readonly property color selectionInk: root.invertSelection ? root.inkOnAccentFill : root.accent
-    readonly property color selectionLabel: root.invertSelection ? root.inkOnAccentFill : root.text
+    readonly property color selectionFill: root.invertSelection ? root.lookPlate : root.tintFill(root.accent)
+    readonly property color selectionInk: root.invertSelection ? root.inkOnLookPlate : root.accent
+    readonly property color selectionLabel: root.invertSelection ? root.inkOnLookPlate : root.text
     // A detail on the chosen row (its comment, its verb): the second tone of the plate's ink in a plate Design.
-    readonly property color selectionDetail: root.invertSelection ? ColorUtils.mix(root.inkOnAccentFill, root.accentFill, 0.72) : root.subtext
+    readonly property color selectionDetail: root.invertSelection ? ColorUtils.mix(root.inkOnLookPlate, root.lookPlate, 0.72) : root.subtext
     // The current row of a list (Spotlight's result, a browse tile): a plate Design lays it one step of ink over the body
     // and keeps the ink, leaving the seal to what marks it; a whole row of the accent read as an alarm bar on every query.
     readonly property color rowSelectionFill: root.invertSelection ? ColorUtils.mix(root.text, root.surfaceOpaque, 0.12) : root.selectionFill // iris-literal: one step of ink
@@ -1204,7 +1255,7 @@ QtObject {
         if (root.islandOpenCorners > 0) return root.islandOpenCorners
         return shape === "square" ? base * 0.45 : shape === "squircle" ? base * 0.75 : base
     }
-    function iconRadius(size: real): int { return root.fieldChamfer ? 0 : Math.round(size * 0.26 * Math.min(1.2, root.shapeScale)) }
+    function iconRadius(size: real): int { return root.fieldChamfer ? 0 : Math.round(size * (root.look === "synth" ? 0.14 : root.look === "gel" ? 0.32 : 0.26) * Math.min(1.2, root.shapeScale)) }
     // The tile pack's plates: the black and the white a plate can wear, the glyph carrying the colour.
     readonly property color plateBlackTop: root.toned("#2e2e34")
     readonly property color plateBlackBase: root.toned("#18181b")

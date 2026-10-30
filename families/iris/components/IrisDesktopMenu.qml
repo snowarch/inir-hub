@@ -433,7 +433,7 @@ Loader {
                                         height: Math.round(parent.height * 0.55)
                                         gradient: Gradient {
                                             GradientStop { position: 0; color: ColorUtils.applyAlpha(IrisStyle.mediaScrim, 0) }
-                                            GradientStop { position: 1; color: hero.lit ? IrisStyle.veil : IrisStyle.veilStrong }
+                                            GradientStop { position: 1; color: hero.lit ? IrisStyle.sceneVeil : IrisStyle.sceneVeilStrong }
                                         }
                                     }
                                     // A plate Design labels the picture with a die-cut tag laid on it instead of a scrim.
@@ -446,7 +446,7 @@ Loader {
                                         height: heroWords.implicitHeight + Math.round(10 * root.d)
                                         // It sits in the picture's cut corner, so it takes the parallel edge too.
                                         cutLength: IrisStyle.nestedCut(heroDie.cutLength, x)
-                                        color: hero.lit ? IrisStyle.veil : IrisStyle.veilStrong
+                                        color: hero.lit ? IrisStyle.sceneVeil : IrisStyle.sceneVeilStrong
                                     }
                                     RowLayout {
                                         anchors.left: parent.left
@@ -462,7 +462,7 @@ Loader {
                                             IrisText {
                                                 Layout.fillWidth: !IrisStyle.plateSelection
                                                 text: row.modelData?.text ?? ""
-                                                color: IrisStyle.onMedia
+                                                color: IrisStyle.onScene
                                                 font.pixelSize: root.textSize
                                                 font.weight: IrisStyle.weight(Font.DemiBold)
                                                 elide: Text.ElideRight
@@ -471,7 +471,7 @@ Loader {
                                                 Layout.fillWidth: !IrisStyle.plateSelection
                                                 visible: text.length > 0
                                                 text: String(row.modelData?.detail ?? "")
-                                                color: IrisStyle.onMediaSecondary
+                                                color: IrisStyle.onSceneSecondary
                                                 font.pixelSize: IrisStyle.typeFootnote
                                                 font.family: IrisStyle.plateSelection ? IrisStyle.fontMono : IrisStyle.fontMain
                                                 font.capitalization: IrisStyle.plateSelection ? Font.AllUppercase : Font.MixedCase
@@ -483,7 +483,7 @@ Loader {
                                             visible: !hero.secondary
                                             text: row.modelData?.iconName ?? "chevron_right"
                                             iconSize: root.glyphSize
-                                            color: IrisStyle.onMedia
+                                            color: IrisStyle.onScene
                                         }
                                         // A second action on the image itself, a round glass button (next wallpaper).
                                         Rectangle {
@@ -493,7 +493,7 @@ Loader {
                                             Layout.preferredWidth: Math.round(28 * root.d)
                                             Layout.preferredHeight: Layout.preferredWidth
                                             radius: IrisStyle.fieldChamfer ? 0 : width / 2
-                                            color: heroButton.lit ? IrisStyle.onMediaFill : IrisStyle.veil
+                                            color: heroButton.lit ? IrisStyle.onSceneFill : IrisStyle.sceneVeil
                                             scale: heroButtonTap.pressed ? IrisStyle.pressScale(0.9) : 1
                                             Behavior on color { ColorAnimation { duration: IrisStyle.feedbackDuration; easing.type: IrisStyle.feedbackEasing } }
                                             Behavior on scale { NumberAnimation { duration: IrisStyle.feedbackDuration; easing.type: IrisStyle.feedbackEasing } }
@@ -501,7 +501,7 @@ Loader {
                                                 anchors.centerIn: parent
                                                 text: hero.secondary?.iconName ?? ""
                                                 iconSize: Math.round(root.glyphSize * 0.95)
-                                                color: IrisStyle.onMedia
+                                                color: IrisStyle.onScene
                                             }
                                             HoverHandler { id: heroButtonHover; cursorShape: Qt.PointingHandCursor }
                                             // Its own MouseArea takes the press first, so the hero behind never sees it.
