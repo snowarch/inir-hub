@@ -27,7 +27,18 @@ Anything in the Hub installs with one command and removes cleanly. To keep it th
    INIR_HUB_SOURCES=$PWD/dist inir hub remove my-clock
    ```
 
-4. Open a pull request with only your item's folder. `dist/` is built by CI; leave it out.
+4. Send it. With `gh` logged in, this checks it once more, commits it on its own branch, pushes to your fork and opens
+   the pull request with the reviewer's card as its body (`--dry-run` shows the steps first):
+
+   ```sh
+   inir hub submit widgets/my-clock
+   ```
+
+   Without `gh`: commit only your item's folder on a branch, push it and open the pull request yourself. `dist/` is
+   built by CI; leave it out.
+
+Once it is merged, the item gets a thread in Discussions > Reviews. People vote there (a thumbs up or down on the first
+post, or `inir hub rate my-clock up`) and say what works; its downloads are counted from the packages release.
 
 ## Every item
 

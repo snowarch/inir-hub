@@ -1,0 +1,40 @@
+name: Stats
+
+# Daily, before inir.space's build (05:17 UTC): downloads from the packages release and votes from each item's
+# thread in Discussions > Reviews (a thread is started for every new item) into stats.json on the "stats" branch,
+# which `inir hub build` reads.
+on:
+  schedule:
+    - cron: "40 4 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  discussions: write
+
+jobs:
+  gather:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.26"
+      - run: go install github.com/snowarch/inir-cli/cmd/inir@main
+      - name: Gather
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: inir hub stats --repo "$GITHUB_REPOSITORY" --category reviews --open --out "$RUNNER_TEMP/stats.json"
+      - name: Keep it on the stats branch
+        run: |
+          git config user.name "inir-hub stats"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if git fetch -q origin stats; then git switch -q stats; else git switch -q --orphan stats; fi
+          # A day with the same numbers commits nothing.
+          if cmp -s <(jq -S .items stats.json 2>/dev/null) <(jq -S .items "$RUNNER_TEMP/stats.json"); then exit 0; fi
+          cp "$RUNNER_TEMP/stats.json" stats.json
+          git add stats.json
+          git commit -qm "stats: $(date -u +%F)"
+          git push -q origin stats

@@ -1,0 +1,39 @@
+name: Packages
+
+# Every package `inir hub install` downloads is also an asset of the "packages" release, and that asset's download
+# count is the item's downloads (`inir hub stats`). Assets are never replaced: a changed item carries a new version,
+# so a new name. Until its asset is up, people get the copy beside the index on inir.space.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: packages
+  cancel-in-progress: false
+
+jobs:
+  upload:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.26"
+      - run: go install github.com/snowarch/inir-cli/cmd/inir@main
+      - run: inir hub build --out "$RUNNER_TEMP/dist"
+      - name: Upload the packages the release lacks
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release view packages >/dev/null 2>&1 || gh release create packages --title "Packages" --latest=false \
+            --notes 'What `inir hub install` downloads. Each asset'\''s download count is that item'\''s downloads.'
+          have=$(gh release view packages --json assets -q '.assets[].name')
+          for f in "$RUNNER_TEMP"/dist/packages/*.tar.gz; do
+            grep -qxF "$(basename "$f")" <<<"$have" || gh release upload packages "$f"
+          done
