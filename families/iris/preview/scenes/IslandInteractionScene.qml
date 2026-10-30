@@ -63,6 +63,9 @@ PreviewScene {
         // Drawn by the field, as the Island it shows.
         Field.IrisField {
             anchors.fill: parent
+            backdropOverride: actRoot.glass
+            sceneOrigin: Qt.point(pill.x, pill.y)
+            sceneSize: Qt.size(actRoot.width, actRoot.height)
             framed: false
             shapes: [{ id: "island", x: 0, y: 0, width: pill.width, height: pill.height, radius: pill.radius }]
         }

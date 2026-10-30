@@ -26,6 +26,7 @@ PreviewScene {
     readonly property var neighbour: ({ x: joinRoot.card.x + joinRoot.card.width + joinRoot.air, y: joinRoot.card.y + (joinRoot.along ? 0 : Math.round(20 * joinRoot.d)), width: Math.round(120 * joinRoot.d), height: Math.round(100 * joinRoot.d) })
     Field.IrisField {
         anchors.fill: parent
+        backdropOverride: joinRoot.glass
         framed: false
         shapes: {
             const deep = Math.max(8, IrisStyle.fuseDeep * 2)

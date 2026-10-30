@@ -138,6 +138,7 @@ PreviewScene {
 
     Field.IrisField {
         anchors.fill: parent
+        backdropOverride: dockRoot.glass
         visible: dockRoot.enabledDock
         framed: false
         tint: dockRoot.blur ? IrisStyle.veilStrong : IrisStyle.bodySurface

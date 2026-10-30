@@ -15,8 +15,13 @@ Item {
     readonly property real radius: Math.min(width, height) / 2
     width: pill.vertical ? Math.round(IrisFrame.islandBand) : Math.round(150 * IrisStyle.density)
     height: pill.vertical ? Math.round(150 * IrisStyle.density) : Math.round(IrisFrame.islandBand)
+    // Set on a scene (PreviewScene), the pill wears the scene's glass where it sits on it.
+    property Item glass: pill.parent?.glass ?? null
     Field.IrisField {
         anchors.fill: parent
+        backdropOverride: pill.glass
+        sceneOrigin: Qt.point(pill.x, pill.y)
+        sceneSize: Qt.size(pill.parent?.width ?? 0, pill.parent?.height ?? 0)
         framed: false
         shapes: [{ id: "island", x: 0, y: 0, width: pill.width, height: pill.height, radius: pill.radius }]
     }

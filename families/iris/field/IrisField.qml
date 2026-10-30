@@ -77,17 +77,20 @@ Item {
     }
     // The window's chassis field lends its backdrop to every other field and pane in that window.
     property bool providesBackdrop: false
+    // A picture of a screen (Settings' previews) lends its own wallpaper instead: the window's would show what is behind
+    // Settings, at the wrong place and scale. Anything with ready, texture and clearTexture, covering this field's scene.
+    property Item backdropOverride: null
     readonly property bool wantsBackdrop: root.visible && ((root.framed && root.frameGlass === 1)
         || (root.shapes ?? []).some(shape => root.glassOf(shape) === 1))
     readonly property Item windowHost: root.QsWindow.contentItem ?? null
-    readonly property Item sharedBackdrop: root.wantsBackdrop && !root.providesBackdrop
+    readonly property Item sharedBackdrop: root.wantsBackdrop && !root.providesBackdrop && !root.backdropOverride
         ? IrisGlassBackdrops.find(root.windowHost, null) : null
-    readonly property Item backdropSource: root.sharedBackdrop ?? backdropLoader.item
+    readonly property Item backdropSource: root.backdropOverride ?? root.sharedBackdrop ?? backdropLoader.item
 
     Loader {
         id: backdropLoader
-        active: (root.providesBackdrop && root.visible && root.glassCode === 1)
-            || (root.wantsBackdrop && !root.sharedBackdrop)
+        active: !root.backdropOverride && ((root.providesBackdrop && root.visible && root.glassCode === 1)
+            || (root.wantsBackdrop && !root.sharedBackdrop))
         sourceComponent: IrisGlassSource {
             screen: root.QsWindow.window?.screen ?? null
         }

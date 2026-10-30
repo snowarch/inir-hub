@@ -25,6 +25,8 @@ Item {
     readonly property string wallpaper: scene.preview.wallpaper
     // The host's wallpaper, decoded once: glass and blur sample its textureItem.
     readonly property Item wallpaperView: scene.preview.wallpaperView
+    // The glass the scene's bodies wear: the host's wallpaper blurred at the screen's scale (IrisGroupPreview.glass).
+    readonly property Item glass: scene.preview.glass ?? null
 
     function opt(path: string, fallback: var): var {
         scene.rev

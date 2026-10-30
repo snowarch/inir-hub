@@ -32,6 +32,7 @@ PreviewScene {
     }
     Field.IrisField {
         anchors.fill: parent
+        backdropOverride: shapeRoot.glass
         framed: false
         shapes: {
             const deep = Math.max(8, IrisStyle.fuseDeep * 2), f = IrisStyle.fuseDeep

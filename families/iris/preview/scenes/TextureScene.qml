@@ -68,6 +68,7 @@ PreviewScene {
 
     Field.IrisField {
         anchors.fill: parent
+        backdropOverride: tex.glass
         framed: tex.framed
         shapes: [
             { id: "island", x: tex.island.x, y: tex.island.y, width: tex.island.width, height: tex.island.height,

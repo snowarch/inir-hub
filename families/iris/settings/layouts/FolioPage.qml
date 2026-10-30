@@ -208,12 +208,21 @@ Item {
             height: areaBox.height
             radius: IrisStyle.radiusSheet
             color: IrisStyle.glassy ? IrisStyle.readingSidebar : "transparent"
+            // Classic's stage stays over the sheet while its rows scroll under it: a change is seen where it happens
+            // (his 10-30: the band scrolled away with the first rows).
+            Item {
+                id: bannerSlot
+                x: flick.x
+                y: IrisStyle.glassy ? page.u(6) : 0
+                width: flick.width - page.u(8)
+                height: page.banner && areaBox.staged ? Math.round(Math.min(width * 0.3, page.u(260), sheet.height * 0.34)) : 0
+            }
             Flickable {
                 id: flick
                 anchors.fill: parent
                 anchors.leftMargin: IrisStyle.glassy ? page.u(6) : 0
                 anchors.rightMargin: IrisStyle.glassy ? page.u(6) : 0
-                anchors.topMargin: IrisStyle.glassy ? page.u(6) : 0
+                anchors.topMargin: (IrisStyle.glassy ? page.u(6) : 0) + (bannerSlot.height > 0 ? bannerSlot.height + page.u(10) : 0)
                 contentHeight: rows.y + rows.implicitHeight + page.u(24)
                 boundsBehavior: Flickable.StopAtBounds
                 clip: true
@@ -228,14 +237,9 @@ Item {
                     maskThresholdMin: 0.5
                     maskSpreadAtMin: 1
                 }
-                Item {
-                    id: bannerSlot
-                    width: rows.width
-                    height: page.banner && areaBox.staged ? Math.round(Math.min(rows.width * 0.32, page.u(230))) : 0
-                }
                 AreaRows {
                     id: rows
-                    y: bannerSlot.height > 0 ? bannerSlot.height + page.u(14) : 0
+                    y: bannerSlot.height > 0 ? page.u(4) : 0
                     width: flick.width - page.u(8)
                     section: page.area
                     host: page.host

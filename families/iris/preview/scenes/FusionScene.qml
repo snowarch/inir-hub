@@ -23,6 +23,7 @@ PreviewScene {
     readonly property var card: ({ x: Math.round(width / 2 - 130 * fuseRoot.d), y: fuseRoot.cardTop, width: Math.round(260 * fuseRoot.d), height: Math.round(150 * fuseRoot.d) })
     Field.IrisField {
         anchors.fill: parent
+        backdropOverride: fuseRoot.glass
         framed: false
         shapes: [
             Object.assign({ radius: fuseRoot.bubble / 2, fuse: IrisStyle.fuse, id: "island", paints: true }, fuseRoot.island),

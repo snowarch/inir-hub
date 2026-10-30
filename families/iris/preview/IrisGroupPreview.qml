@@ -8,11 +8,14 @@ import qs.modules.common
 import qs.modules.iris.style
 import qs.modules.iris.components
 import qs.modules.iris.preview.scenes
+import qs.modules.iris.preview.parts
 
 // The live preview a Settings group shows above its rows: picks the group's scene (preview/scenes, built from the parts
 // in preview/parts), decodes the wallpaper once for it and scales it to the frame.
 ClippingRectangle {
     id: root
+
+    readonly property Item glass: IrisStyle.glassy && root.available ? previewGlass : null
 
     property string section: ""
     property string group: ""
@@ -103,7 +106,7 @@ ClippingRectangle {
         const key = section + "/" + group
         return ({
             "bar/Visibility": "islandReserve", "bar/Interaction": "islandInteraction",
-            "bar/Shape": "shapes", "bar/Layout": "islandEdge", "bar/Bar": "barZones",
+            "bar/Shape": "islandEdge", "bar/Layout": "islandEdge", "bar/Bar": "barZones",
             "appearance/Light": "light", "appearance/Shape": "shapes", "appearance/Corners per surface": "surfaces", "appearance/Glass": "glass", "appearance/Edges": "glass",
             "appearance/Menus": "menus", "appearance/Settings": "settings",
             "appearance/Texture": "texture", "appearance/Material": "material", "appearance/Material per surface": "surfaces", "appearance/Look": "fusion",
@@ -159,6 +162,13 @@ ClippingRectangle {
         // At least twice the frame, in one of two sizes Settings keeps decoded: the picture comes from the image cache.
         decodeSize: root.decodeFor(root.width)
         opacity: root.scene !== "backdrop" ? 1 : 0
+    }
+    PreviewGlass {
+        id: previewGlass
+        anchors.fill: parent
+        source: IrisStyle.glassy && root.available ? wallpaperImage.textureItem : null
+        k: Math.max(root.width / Math.max(1, GlobalStates.focusedScreen?.width ?? 1920),
+            root.height / Math.max(1, GlobalStates.focusedScreen?.height ?? 1080))
     }
 
     Item {

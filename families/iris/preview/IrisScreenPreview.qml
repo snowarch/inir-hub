@@ -15,6 +15,7 @@ import qs.modules.iris.pieces
 import qs.modules.iris.bar.island
 import qs.modules.iris.field as Field
 import qs.modules.iris.state
+import qs.modules.iris.preview.parts
 
 ClippingRectangle {
     id: root
@@ -75,7 +76,7 @@ ClippingRectangle {
     readonly property real clockScale: Math.max(0.8, Math.min(1.5, Number(root.bar?.clockScale ?? 100) / 100))
     readonly property color clockAccent: String(root.bar?.clockAccent ?? "highlight") === "accent" ? IrisStyle.accent
         : String(root.bar?.clockAccent ?? "highlight") === "plain" ? IrisStyle.text : IrisStyle.secondaryAccent
-    readonly property string clockStyle: String(IrisStyle.structuralValue("iris.bar.clockStyle", "dateTime"))
+    readonly property string clockStyle: String(IrisStyle.structuralValue("bar.clockStyle", "dateTime"))
 
     readonly property string layout: String(root.bar?.layout ?? "island")
     readonly property var island: {
@@ -183,6 +184,7 @@ ClippingRectangle {
         height: root.screenH * root.s
 
         IrisWallpaperView {
+            id: canvasWallpaper
             live: false
             anchors.fill: parent
             screen: root.screen
@@ -190,9 +192,16 @@ ClippingRectangle {
             opacity: ready ? 1 : 0
             Behavior on opacity { NumberAnimation { duration: IrisStyle.duration(180); easing.type: IrisStyle.feedbackEasing } }
         }
+        PreviewGlass {
+            id: screenGlass
+            anchors.fill: parent
+            source: IrisStyle.glassy ? canvasWallpaper.textureItem : null
+            k: root.s
+        }
 
         Field.IrisField {
             anchors.fill: parent
+            backdropOverride: IrisStyle.glassy ? screenGlass : null
             framed: root.framed
             band: IrisFrame.band * root.s
             cornerRadius: IrisFrame.cornerRadius * root.s
@@ -358,8 +367,11 @@ ClippingRectangle {
         }
     }
 
+    // A scene inside Settings' own framed stage leaves the outline to the stage.
+    property bool outlined: true
     Rectangle {
         anchors.fill: parent
+        visible: root.outlined
         radius: root.radius
         color: "transparent"
         border.width: 1

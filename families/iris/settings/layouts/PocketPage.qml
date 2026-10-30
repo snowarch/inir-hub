@@ -13,7 +13,7 @@ import qs.modules.iris.preview
 import qs.modules.iris.settings
 
 // One area as Pocket holds it, built once and kept by Pocket's AreaPool: its title large over its live stage, then its
-// groups as cards down one column. The whole page scrolls as one, the way a phone's settings page does.
+// groups as cards down one column scrolling under them.
 Item {
     id: page
     required property string area
@@ -27,9 +27,105 @@ Item {
     readonly property bool whole: rows.whole
     readonly property bool staged: page.area !== "general" && stage.available
 
+    // The title and the stage hold still at the top and the groups scroll under them: the stage shows what a row
+    // changes while that row is in reach (his 10-30: it scrolled away with the title).
+    Column {
+        id: head
+        x: page.u(16)
+        width: page.width - 2 * page.u(16)
+        spacing: page.u(12)
+        Column {
+            width: parent.width
+            topPadding: page.u(4)
+            spacing: page.u(2)
+            IrisText {
+                width: parent.width
+                elide: Text.ElideRight
+                // Home's own groups read as General: Home is the column you came from.
+                text: page.area === "general" ? Translation.tr("General") : Translation.tr(String(page.entry.title ?? ""))
+                color: IrisStyle.text
+                font.family: IrisStyle.fontTitle
+                font.pixelSize: page.u(30)
+                font.weight: IrisStyle.weight(Font.Bold)
+                font.letterSpacing: -Math.round(page.u(30) * 0.01)
+            }
+            IrisText {
+                width: parent.width
+                wrapMode: Text.WordWrap
+                maximumLineCount: 2
+                elide: Text.ElideRight
+                text: page.area === "general" ? Translation.tr("Language, time, startup and the shell itself")
+                    : Translation.tr(String(page.entry.subtitle ?? ""))
+                color: IrisStyle.muted
+                font.pixelSize: IrisStyle.typeBody
+            }
+        }
+        ClippingRectangle {
+            visible: page.staged
+            width: parent.width
+            height: page.staged ? Math.round(Math.min(page.u(230), width * 0.56)) : 0
+            radius: IrisStyle.radiusSheet
+            color: IrisStyle.readingCard
+            IrisGroupPreview {
+                id: stage
+                anchors.fill: parent
+                anchors.margins: page.u(10)
+                radius: Math.max(IrisStyle.radiusRow, IrisStyle.radiusSheet - page.u(10))
+                standIn: true
+                captionOutside: true
+                playing: page.live && page.staged
+                section: page.area === "general" ? "" : page.area
+                niriValue: (section, key) => IrisNiri.value(IrisOptions.settings.find(spec => spec.niri === section && spec.key === key) ?? { niri: section, key: key })
+                niriRevision: IrisNiri.revision
+                group: page.stageGroup
+            }
+        }
+        IrisText {
+            visible: page.staged && stage.caption.length > 0
+            x: page.u(4)
+            width: parent.width - x
+            wrapMode: Text.WordWrap
+            maximumLineCount: 2
+            elide: Text.ElideRight
+            text: stage.caption
+            color: IrisStyle.muted
+            font.pixelSize: IrisStyle.typeMeta
+        }
+        // What can be done to the area (rehearse, customize, restore) as capsules under its stage.
+        Flow {
+            width: parent.width
+            spacing: page.u(6)
+            visible: actions.count > 0
+            Repeater {
+                id: actions
+                model: page.live && page.area !== "general" ? (page.host?.pageActions ?? []) : []
+                MouseArea {
+                    id: act
+                    required property var modelData
+                    width: actRow.implicitWidth + page.u(22)
+                    height: page.u(32)
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    Accessible.role: Accessible.Button
+                    Accessible.name: String(act.modelData.label ?? "")
+                    onClicked: act.modelData.clicked()
+                    Rectangle { anchors.fill: parent; radius: IrisStyle.capsule(height); color: act.containsMouse ? IrisStyle.fillHover : IrisStyle.fillQuiet }
+                    Row {
+                        id: actRow
+                        anchors.centerIn: parent
+                        spacing: page.u(6)
+                        MaterialSymbol { anchors.verticalCenter: parent.verticalCenter; text: String(act.modelData.glyph ?? ""); iconSize: page.u(16); color: IrisStyle.text }
+                        IrisText { anchors.verticalCenter: parent.verticalCenter; text: String(act.modelData.label ?? ""); color: IrisStyle.text; font.pixelSize: IrisStyle.typeMeta }
+                    }
+                }
+            }
+        }
+    }
+
     Flickable {
         id: flick
         anchors.fill: parent
+        anchors.topMargin: head.height + page.u(12)
         contentHeight: column.implicitHeight + page.u(28)
         boundsBehavior: Flickable.StopAtBounds
         clip: true
@@ -41,92 +137,6 @@ Item {
             x: page.u(16)
             width: page.width - 2 * page.u(16)
             spacing: page.u(12)
-            Column {
-                width: parent.width
-                topPadding: page.u(4)
-                spacing: page.u(2)
-                IrisText {
-                    width: parent.width
-                    elide: Text.ElideRight
-                    // Home's own groups read as General: Home is the column you came from.
-                    text: page.area === "general" ? Translation.tr("General") : Translation.tr(String(page.entry.title ?? ""))
-                    color: IrisStyle.text
-                    font.family: IrisStyle.fontTitle
-                    font.pixelSize: page.u(30)
-                    font.weight: IrisStyle.weight(Font.Bold)
-                    font.letterSpacing: -Math.round(page.u(30) * 0.01)
-                }
-                IrisText {
-                    width: parent.width
-                    wrapMode: Text.WordWrap
-                    maximumLineCount: 2
-                    elide: Text.ElideRight
-                    text: page.area === "general" ? Translation.tr("Language, time, startup and the shell itself")
-                        : Translation.tr(String(page.entry.subtitle ?? ""))
-                    color: IrisStyle.muted
-                    font.pixelSize: IrisStyle.typeBody
-                }
-            }
-            ClippingRectangle {
-                visible: page.staged
-                width: parent.width
-                height: page.staged ? Math.round(Math.min(page.u(230), width * 0.56)) : 0
-                radius: IrisStyle.radiusSheet
-                color: IrisStyle.readingCard
-                IrisGroupPreview {
-                    id: stage
-                    anchors.fill: parent
-                    anchors.margins: page.u(10)
-                    radius: Math.max(IrisStyle.radiusRow, IrisStyle.radiusSheet - page.u(10))
-                    standIn: true
-                    captionOutside: true
-                    playing: page.live && page.staged
-                    section: page.area === "general" ? "" : page.area
-                    niriValue: (section, key) => IrisNiri.value(IrisOptions.settings.find(spec => spec.niri === section && spec.key === key) ?? { niri: section, key: key })
-                    niriRevision: IrisNiri.revision
-                    group: page.stageGroup
-                }
-            }
-            IrisText {
-                visible: page.staged && stage.caption.length > 0
-                x: page.u(4)
-                width: parent.width - x
-                wrapMode: Text.WordWrap
-                maximumLineCount: 2
-                elide: Text.ElideRight
-                text: stage.caption
-                color: IrisStyle.muted
-                font.pixelSize: IrisStyle.typeMeta
-            }
-            // What can be done to the area (rehearse, customize, restore) as capsules under its stage.
-            Flow {
-                width: parent.width
-                spacing: page.u(6)
-                visible: actions.count > 0
-                Repeater {
-                    id: actions
-                    model: page.live && page.area !== "general" ? (page.host?.pageActions ?? []) : []
-                    MouseArea {
-                        id: act
-                        required property var modelData
-                        width: actRow.implicitWidth + page.u(22)
-                        height: page.u(32)
-                        hoverEnabled: true
-                        cursorShape: Qt.PointingHandCursor
-                        Accessible.role: Accessible.Button
-                        Accessible.name: String(act.modelData.label ?? "")
-                        onClicked: act.modelData.clicked()
-                        Rectangle { anchors.fill: parent; radius: IrisStyle.capsule(height); color: act.containsMouse ? IrisStyle.fillHover : IrisStyle.fillQuiet }
-                        Row {
-                            id: actRow
-                            anchors.centerIn: parent
-                            spacing: page.u(6)
-                            MaterialSymbol { anchors.verticalCenter: parent.verticalCenter; text: String(act.modelData.glyph ?? ""); iconSize: page.u(16); color: IrisStyle.text }
-                            IrisText { anchors.verticalCenter: parent.verticalCenter; text: String(act.modelData.label ?? ""); color: IrisStyle.text; font.pixelSize: IrisStyle.typeMeta }
-                        }
-                    }
-                }
-            }
             AreaRows {
                 id: rows
                 width: parent.width

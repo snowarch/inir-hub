@@ -32,6 +32,9 @@ PreviewScene {
     Field.IrisField {
         anchors.fill: parent
         anchors.margins: Math.round(16 * framePreview.d)
+        backdropOverride: framePreview.glass
+        sceneOrigin: Qt.point(x, y)
+        sceneSize: Qt.size(framePreview.width, framePreview.height)
         framed: IrisFrame.framed
         band: IrisFrame.band
         cornerRadius: IrisFrame.cornerRadius

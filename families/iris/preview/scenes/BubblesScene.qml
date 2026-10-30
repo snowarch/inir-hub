@@ -68,6 +68,7 @@ PreviewScene {
 
     Field.IrisField {
         anchors.fill: parent
+        backdropOverride: bubRoot.glass
         shapes: {
             const out = []
             const s = bubRoot.size
