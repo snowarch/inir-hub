@@ -15,6 +15,16 @@ ContentPage {
     settingsPageName: Translation.tr("Background")
 
     property bool isIiActive: (Config.options?.panelFamily ?? "ii") === "ii"
+    // awww plays the chosen transition: fades read one step, sweeps and circles another; shaders and None, neither
+    readonly property string awwwStepKind: {
+        if ((Config.options?.background?.backend?.provider ?? "awww") !== "awww" || !AwwwBackend.available)
+            return ""
+        const raw = Config.options?.background?.transition?.type ?? "crossfade"
+        if (AwwwBackend.isInternalShaderTransitionType(raw))
+            return ""
+        const t = AwwwBackend.normalizedAwwwTransitionType(raw, Config.options?.background?.transition?.direction ?? "right")
+        return t === "none" ? "" : (t === "simple" || t === "fade") ? "fade" : "sweep"
+    }
     property bool isWaffleActive: Config.options?.panelFamily === "waffle"
     property string activeSection: "source"
     readonly property bool screensTaskActive: root.isIiActive && root.activeSection === "screens"
@@ -1143,10 +1153,7 @@ ContentPage {
                 Layout.fillWidth: true
                 visible: (Config.options?.background?.backend?.provider ?? "awww") === "awww"
                 text: AwwwBackend.available
-                    ? (AwwwBackend.isInternalShaderTransitionType(
-                            Config.options?.background?.transition?.type ?? "crossfade")
-                        ? Translation.tr("This transition plays in the shell; awww keeps drawing the wallpaper once it ends.")
-                        : Translation.tr("awww draws your wallpapers and their transitions. GIFs, videos and the backdrop are drawn by the shell."))
+                    ? Translation.tr("awww draws your wallpapers and their transitions. GIFs, videos and the backdrop are drawn by the shell.")
                     : Translation.tr("awww isn't installed, so the shell draws your wallpapers itself. Install awww for lighter wallpapers and its transitions.")
                 color: !AwwwBackend.available
                     ? Appearance.colors.colError
@@ -1154,43 +1161,6 @@ ContentPage {
                 font.pixelSize: Appearance.font.pixelSize.small
                 wrapMode: Text.WordWrap
                 opacity: 0.9
-            }
-
-            ConfigSpinBox {
-                visible: (Config.options?.background?.backend?.provider ?? "awww") === "awww" && AwwwBackend.available
-                icon: "speed"
-                text: Translation.tr("Transition frame rate")
-                unit: "fps"
-                value: Config.options?.background?.backend?.awww?.transitionFps ?? 60
-                from: 10
-                to: 240
-                stepSize: 5
-                onValueModified: Config.setNestedValue("background.backend.awww.transitionFps", value)
-            }
-
-            ConfigRow {
-                visible: (Config.options?.background?.backend?.provider ?? "awww") === "awww" && AwwwBackend.available
-                uniform: true
-
-                ConfigSpinBox {
-                    icon: "blur_on"
-                    text: Translation.tr("Simple step")
-                    value: Config.options?.background?.backend?.awww?.simpleStep ?? 5
-                    from: 1
-                    to: 64
-                    stepSize: 1
-                    onValueModified: Config.setNestedValue("background.backend.awww.simpleStep", value)
-                }
-
-                ConfigSpinBox {
-                    icon: "swipe"
-                    text: Translation.tr("Spatial step")
-                    value: Config.options?.background?.backend?.awww?.spatialStep ?? 30
-                    from: 1
-                    to: 128
-                    stepSize: 1
-                    onValueModified: Config.setNestedValue("background.backend.awww.spatialStep", value)
-                }
             }
 
             StyledText {
@@ -1410,52 +1380,79 @@ ContentPage {
                     wrapMode: Text.WordWrap
                 }
 
-                ConfigSelectionArray {
-                    currentValue: {
-                        const raw = Config.options?.background?.transition?.type ?? "crossfade"
-                        return AwwwBackend.isInternalShaderTransitionType(raw)
-                            ? raw
-                            : AwwwBackend.normalizedAwwwTransitionType(
-                                raw, Config.options?.background?.transition?.direction ?? "right")
-                    }
-                    onSelected: newValue => {
-                        Config.setNestedValue("background.transition.type", newValue);
-                    }
-                    options: [
-                        { displayName: Translation.tr("None"), icon: "block", value: "none" },
-                        { displayName: Translation.tr("Simple"), icon: "transition_fade", value: "simple" },
-                        { displayName: Translation.tr("Fade"), icon: "motion_photos_on", value: "fade" },
-                        { displayName: Translation.tr("From left"), icon: "west", value: "left" },
-                        { displayName: Translation.tr("From right"), icon: "east", value: "right" },
-                        { displayName: Translation.tr("From top"), icon: "north", value: "top" },
-                        { displayName: Translation.tr("From bottom"), icon: "south", value: "bottom" },
-                        { displayName: Translation.tr("Wipe"), icon: "left_panel_open", value: "wipe" },
-                        { displayName: Translation.tr("Wave"), icon: "water", value: "wave" },
-                        { displayName: Translation.tr("Grow"), icon: "filter_center_focus", value: "grow" },
-                        { displayName: Translation.tr("Center"), icon: "center_focus_strong", value: "center" },
-                        { displayName: Translation.tr("Any"), icon: "shuffle", value: "any" },
-                        { displayName: Translation.tr("Outer"), icon: "blur_circular", value: "outer" },
-                        { displayName: Translation.tr("Random"), icon: "casino", value: "random" },
-                        { displayName: Translation.tr("Circle shader"), icon: "circle", value: "circleSelect" },
-                        { displayName: Translation.tr("Circle pit"), icon: "blur_circular", value: "circlePit" },
-                        { displayName: Translation.tr("Magic"), icon: "auto_awesome", value: "magic" },
-                        { displayName: Translation.tr("Doom"), icon: "whatshot", value: "Doom" },
-                        { displayName: Translation.tr("Peel"), icon: "layers", value: "Peel" },
-                        { displayName: Translation.tr("Shader fade"), icon: "gradient", value: "transition" },
-                        { displayName: Translation.tr("Pixelate"), icon: "grain", value: "pixelate" },
-                        { displayName: Translation.tr("Stripes"), icon: "texture_minus", value: "stripes" },
-                        { displayName: Translation.tr("CRT"), icon: "tv", value: "crt" },
-                        { displayName: Translation.tr("Dissolve"), icon: "blur_on", value: "dissolve" },
-                        { displayName: Translation.tr("Glitch"), icon: "bug_report", value: "glitch" },
-                        { displayName: Translation.tr("Ripple"), icon: "water", value: "ripple" },
-                        { displayName: Translation.tr("Shatter"), icon: "broken_image", value: "shatter" },
-                        { displayName: Translation.tr("iNiR Melt"), icon: "waterfall_chart", value: "inirMelt" },
-                        { displayName: Translation.tr("Chromatic Veil"), icon: "gradient", value: "inirVeil" },
-                        { displayName: Translation.tr("Glass Fracture"), icon: "deployed_code", value: "inirFracture" },
-                        { displayName: Translation.tr("Sumi Wash"), icon: "ink_highlighter", value: "inirInk" },
-                        { displayName: Translation.tr("Prism Slices"), icon: "view_column_2", value: "inirPrism" },
-                        { displayName: Translation.tr("Random shader"), icon: "shuffle", value: "shaderRandom" }
+                // one wall of 34 chips read as noise: grouped by what the eye sees
+                Repeater {
+                    model: [
+                        { name: Translation.tr("Fades"), options: [
+                            { displayName: Translation.tr("None"), icon: "block", value: "none" },
+                            { displayName: Translation.tr("Simple"), icon: "transition_fade", value: "simple" },
+                            { displayName: Translation.tr("Fade"), icon: "motion_photos_on", value: "fade" },
+                            { displayName: Translation.tr("Shader fade"), icon: "gradient", value: "transition" },
+                            { displayName: Translation.tr("Dissolve"), icon: "blur_on", value: "dissolve" }
+                        ] },
+                        { name: Translation.tr("Sweeps"), options: [
+                            { displayName: Translation.tr("From left"), icon: "west", value: "left" },
+                            { displayName: Translation.tr("From right"), icon: "east", value: "right" },
+                            { displayName: Translation.tr("From top"), icon: "north", value: "top" },
+                            { displayName: Translation.tr("From bottom"), icon: "south", value: "bottom" },
+                            { displayName: Translation.tr("Wipe"), icon: "left_panel_open", value: "wipe" },
+                            { displayName: Translation.tr("Wave"), icon: "water", value: "wave" },
+                            { displayName: Translation.tr("Chromatic Veil"), icon: "gradient", value: "inirVeil" },
+                            { displayName: Translation.tr("Prism Slices"), icon: "view_column_2", value: "inirPrism" }
+                        ] },
+                        { name: Translation.tr("Circles"), options: [
+                            { displayName: Translation.tr("Grow"), icon: "filter_center_focus", value: "grow" },
+                            { displayName: Translation.tr("Center"), icon: "center_focus_strong", value: "center" },
+                            { displayName: Translation.tr("Anywhere"), icon: "shuffle", value: "any" },
+                            { displayName: Translation.tr("Outer"), icon: "blur_circular", value: "outer" },
+                            { displayName: Translation.tr("Circle shader"), icon: "circle", value: "circleSelect" },
+                            { displayName: Translation.tr("Circle pit"), icon: "blur_circular", value: "circlePit" },
+                            { displayName: Translation.tr("Ripple"), icon: "water", value: "ripple" }
+                        ] },
+                        { name: Translation.tr("Effects"), options: [
+                            { displayName: Translation.tr("Magic"), icon: "auto_awesome", value: "magic" },
+                            { displayName: Translation.tr("Doom"), icon: "whatshot", value: "Doom" },
+                            { displayName: Translation.tr("Peel"), icon: "layers", value: "Peel" },
+                            { displayName: Translation.tr("Pixelate"), icon: "grain", value: "pixelate" },
+                            { displayName: Translation.tr("Stripes"), icon: "texture_minus", value: "stripes" },
+                            { displayName: Translation.tr("CRT"), icon: "tv", value: "crt" },
+                            { displayName: Translation.tr("Glitch"), icon: "bug_report", value: "glitch" },
+                            { displayName: Translation.tr("Shatter"), icon: "broken_image", value: "shatter" },
+                            { displayName: Translation.tr("iNiR Melt"), icon: "waterfall_chart", value: "inirMelt" },
+                            { displayName: Translation.tr("Glass Fracture"), icon: "deployed_code", value: "inirFracture" },
+                            { displayName: Translation.tr("Sumi Wash"), icon: "ink_highlighter", value: "inirInk" }
+                        ] },
+                        { name: Translation.tr("Random"), options: [
+                            { displayName: Translation.tr("Random"), icon: "casino", value: "random" },
+                            { displayName: Translation.tr("Random shader"), icon: "shuffle", value: "shaderRandom" }
+                        ] }
                     ]
+                    delegate: ColumnLayout {
+                        id: transitionGroup
+                        required property var modelData
+                        Layout.fillWidth: true
+                        Layout.topMargin: 6
+                        spacing: 4
+
+                        StyledText {
+                            text: transitionGroup.modelData.name
+                            font.pixelSize: Appearance.font.pixelSize.smaller
+                            font.weight: Font.Medium
+                            color: Appearance.colors.colSubtext
+                        }
+                        ConfigSelectionArray {
+                            Layout.fillWidth: true
+                            currentValue: {
+                                const raw = Config.options?.background?.transition?.type ?? "crossfade"
+                                return AwwwBackend.isInternalShaderTransitionType(raw)
+                                    ? raw
+                                    : AwwwBackend.normalizedAwwwTransitionType(
+                                        raw, Config.options?.background?.transition?.direction ?? "right")
+                            }
+                            onSelected: newValue => Config.setNestedValue("background.transition.type", newValue)
+                            options: transitionGroup.modelData.options
+                        }
+                    }
                 }
             }
 
@@ -1522,6 +1519,36 @@ ContentPage {
                 }
                 StyledToolTip {
                     text: Translation.tr("How long the transition takes in milliseconds. Ignored for 'Simple' and 'None' modes; shader transitions use this duration directly.")
+                }
+            }
+
+            ConfigSpinBox {
+                visible: root.awwwStepKind !== "" && (Config.options?.background?.transition?.enable ?? true)
+                icon: "speed"
+                text: Translation.tr("Frame rate")
+                unit: "fps"
+                value: Config.options?.background?.backend?.awww?.transitionFps ?? 60
+                from: 10
+                to: 240
+                stepSize: 5
+                onValueModified: Config.setNestedValue("background.backend.awww.transitionFps", value)
+            }
+
+            // fades and sweeps keep their own step: the row edits the one the chosen transition reads
+            ConfigSpinBox {
+                visible: root.awwwStepKind !== "" && (Config.options?.background?.transition?.enable ?? true)
+                icon: "stairs"
+                text: Translation.tr("Change per frame")
+                value: root.awwwStepKind === "fade"
+                    ? (Config.options?.background?.backend?.awww?.simpleStep ?? 5)
+                    : (Config.options?.background?.backend?.awww?.spatialStep ?? 30)
+                from: 1
+                to: root.awwwStepKind === "fade" ? 64 : 128
+                stepSize: 1
+                onValueModified: Config.setNestedValue(root.awwwStepKind === "fade"
+                    ? "background.backend.awww.simpleStep" : "background.backend.awww.spatialStep", value)
+                StyledToolTip {
+                    text: Translation.tr("How much the picture changes each frame: higher is quicker and harder, lower is softer.")
                 }
             }
         }

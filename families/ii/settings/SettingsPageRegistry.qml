@@ -45,7 +45,7 @@ Singleton {
             key: "wallpaper",
             name: Translation.tr("Wallpaper"),
             icon: "texture",
-            desc: Translation.tr("Backend, effects, backdrop"),
+            desc: Translation.tr("Source, motion, screens, effects"),
             essential: false,
             component: "modules/ii/settings/BackgroundConfig.qml"
         },
