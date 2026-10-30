@@ -167,7 +167,7 @@ WSettingsRow {
 
                         model: {
                             const search = fontSearchField.text.toLowerCase()
-                            const allFonts = Qt.fontFamilies()
+                            const allFonts = FontSyncService.pickableFamilies()
                             const featured = root.featuredFonts.filter(f => allFonts.indexOf(f) !== -1)
                             let filtered
 

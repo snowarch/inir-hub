@@ -1755,14 +1755,7 @@ Item {
             id: fonts
             property string query: ""
             readonly property string current: String(root.value ?? "")
-            readonly property var families: {
-                const seen = {}
-                return Qt.fontFamilies().filter(family => {
-                    if (family.startsWith(".") || seen[family]) return false
-                    seen[family] = true
-                    return true
-                })
-            }
+            readonly property var families: FontSyncService.pickableFamilies()
             readonly property var matches: {
                 const words = fonts.query.trim().toLowerCase()
                 const found = words.length > 0 ? fonts.families.filter(family => family.toLowerCase().includes(words)) : fonts.families
