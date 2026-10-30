@@ -52,10 +52,10 @@ ColumnLayout {
         Item {
             id: wallTile
             Layout.fillWidth: !root.wide
-            Layout.preferredWidth: root.wide ? Math.round(root.width * 0.42) : -1
+            Layout.preferredWidth: root.wide ? Math.round(root.width * 0.45) : -1
             Layout.fillHeight: root.wide
             Layout.preferredHeight: root.wide ? -1 : Math.round(root.width * 9 / 16)
-            Layout.minimumHeight: 220
+            Layout.minimumHeight: 200
 
             Rectangle {
                 id: wallMask
@@ -101,14 +101,23 @@ ColumnLayout {
                 }
             }
             RowLayout {
+                id: wallActions
+                // the long "Change wallpaper" (Spanish, German) pushed the folder key off the tile: past the room it
+                // keeps only its glyph
+                readonly property bool roomy: wallTile.width >= changeMetrics.advanceWidth + 200
                 anchors.left: parent.left
                 anchors.bottom: parent.bottom
-                anchors.margins: 16
-                spacing: 8
+                anchors.margins: 14
+                spacing: 6
+                TextMetrics {
+                    id: changeMetrics
+                    font: changeLabel.font
+                    text: changeLabel.text
+                }
                 RippleButton {
-                    implicitHeight: 40
-                    implicitWidth: changeRow.implicitWidth + 32
-                    buttonRadius: 20
+                    implicitHeight: 36
+                    implicitWidth: wallActions.roomy ? changeRow.implicitWidth + 28 : 36
+                    buttonRadius: 18
                     colBackground: Appearance.colors.colPrimaryContainer
                     colBackgroundHover: ColorUtils.mix(Appearance.colors.colPrimaryContainer, Appearance.colors.colOnPrimaryContainer, 0.92)
                     colRipple: ColorUtils.mix(Appearance.colors.colPrimaryContainer, Appearance.colors.colOnPrimaryContainer, 0.88)
@@ -117,18 +126,25 @@ ColumnLayout {
                         id: changeRow
                         spacing: 8
                         MaterialSymbol {
-                            Layout.leftMargin: 16
+                            Layout.alignment: Qt.AlignCenter
+                            Layout.leftMargin: wallActions.roomy ? 14 : 0
                             text: "wallpaper"
                             iconSize: 20
                             color: Appearance.colors.colOnPrimaryContainer
                         }
                         StyledText {
-                            Layout.rightMargin: 16
+                            id: changeLabel
+                            visible: wallActions.roomy
+                            Layout.rightMargin: 14
                             text: Translation.tr("Change wallpaper")
                             font.pixelSize: Math.round(14 * Appearance.fontSizeScale)
                             font.weight: Font.Medium
                             color: Appearance.colors.colOnPrimaryContainer
                         }
+                    }
+                    StyledToolTip {
+                        text: changeLabel.text
+                        extraVisibleCondition: !wallActions.roomy
                     }
                 }
                 component PictureAction: RippleButton {
@@ -136,9 +152,9 @@ ColumnLayout {
                     property string symbol: ""
                     property string label: ""
                     property string tip: ""
-                    implicitHeight: 40
-                    implicitWidth: action.label.length > 0 ? actionRow.implicitWidth + 28 : 40
-                    buttonRadius: 20
+                    implicitHeight: 36
+                    implicitWidth: action.label.length > 0 ? actionRow.implicitWidth + 28 : 36
+                    buttonRadius: 18
                     colBackground: ColorUtils.transparentize(Appearance.colors.colSurfaceContainerHighest, 0.15)
                     colBackgroundHover: Appearance.colors.colSurfaceContainerHighestHover
                     contentItem: RowLayout {
@@ -210,7 +226,7 @@ ColumnLayout {
                 property bool last: false
                 default property alias tileData: tileColumn.data
                 Layout.fillWidth: true
-                implicitHeight: tileColumn.implicitHeight + 32
+                implicitHeight: tileColumn.implicitHeight + 28
                 color: SettingsMaterialPreset.tileColor
                 topLeftRadius: root.wide ? root.inner : (heroTile.first ? root.inner : root.inner)
                 topRightRadius: heroTile.first ? (root.wide ? root.outer : root.inner) : root.inner
@@ -221,10 +237,10 @@ ColumnLayout {
                     anchors.left: parent.left
                     anchors.right: parent.right
                     anchors.top: parent.top
-                    anchors.margins: 16
-                    anchors.leftMargin: 20
-                    anchors.rightMargin: 20
-                    spacing: 10
+                    anchors.margins: 14
+                    anchors.leftMargin: 18
+                    anchors.rightMargin: 18
+                    spacing: 8
                 }
             }
 
@@ -359,10 +375,12 @@ ColumnLayout {
                 property string stateText: ""
                 property bool on: false
                 Layout.fillWidth: true
-                implicitHeight: 72
+                // equal columns: a long state ("Screen stays on") widened its tile past the others
+                Layout.preferredWidth: 1
+                implicitHeight: 60
                 pressScaleEnabled: false
                 // M3 Expressive: on, the tile and its icon square off a little, filled with the accent's container
-                buttonRadius: day.on ? 20 : 36
+                buttonRadius: day.on ? 18 : 30
                 toggled: day.on
                 colBackground: SettingsMaterialPreset.tileColor
                 colBackgroundHover: SettingsMaterialPreset.tileHoverColor
@@ -382,9 +400,9 @@ ColumnLayout {
                     spacing: 12
                     Rectangle {
                         Layout.leftMargin: 8
-                        implicitWidth: 56
-                        implicitHeight: 56
-                        radius: day.on ? 16 : 28
+                        implicitWidth: 44
+                        implicitHeight: 44
+                        radius: day.on ? 14 : 22
                         color: day.on ? Appearance.colors.colPrimary : SettingsMaterialPreset.controlColor
                         Behavior on radius {
                             enabled: Appearance.animationsEnabled
@@ -393,18 +411,19 @@ ColumnLayout {
                         MaterialSymbol {
                             anchors.centerIn: parent
                             text: day.symbol
-                            iconSize: 24
+                            iconSize: 22
                             fill: day.on ? 1 : 0
                             color: day.on ? Appearance.colors.colOnPrimary : SettingsMaterialPreset.labelColor
                         }
                     }
                     ColumnLayout {
                         Layout.fillWidth: true
+                        Layout.rightMargin: 10
                         spacing: 0
                         StyledText {
                             Layout.fillWidth: true
                             text: day.label
-                            font.pixelSize: Math.round(15 * Appearance.fontSizeScale)
+                            font.pixelSize: Math.round(14 * Appearance.fontSizeScale)
                             font.weight: Font.Medium
                             color: day.on ? Appearance.colors.colOnPrimaryContainer : SettingsMaterialPreset.labelColor
                             elide: Text.ElideRight
@@ -412,10 +431,12 @@ ColumnLayout {
                         StyledText {
                             Layout.fillWidth: true
                             text: day.stateText
-                            font.pixelSize: Math.round(13 * Appearance.fontSizeScale)
+                            font.pixelSize: Math.round(12 * Appearance.fontSizeScale)
                             color: day.on ? Appearance.colors.colOnPrimaryContainer : SettingsMaterialPreset.supportingColor
                             opacity: day.on ? 0.8 : 1
                             elide: Text.ElideRight
+                            wrapMode: Text.Wrap
+                            maximumLineCount: 2
                         }
                     }
                 }

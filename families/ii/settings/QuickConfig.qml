@@ -168,9 +168,9 @@ ContentPage {
                     readonly property bool open: root.activeSection === part.modelData.value
                     Layout.fillWidth: true
                     Layout.preferredWidth: 1
-                    implicitHeight: 64
+                    implicitHeight: 56
                     pressScaleEnabled: false
-                    buttonRadius: part.open ? 20 : 32
+                    buttonRadius: part.open ? 18 : 28
                     toggled: part.open
                     colBackground: SettingsMaterialPreset.tileColor
                     colBackgroundHover: SettingsMaterialPreset.tileHoverColor
@@ -189,10 +189,10 @@ ContentPage {
                         spacing: 12
                         MaterialShapeWrappedMaterialSymbol {
                             Layout.leftMargin: 8
-                            implicitSize: 44
+                            implicitSize: 40
                             shape: part.modelData.shape
                             text: part.modelData.icon
-                            iconSize: 22
+                            iconSize: 20
                             // three tonal roles in turn, so the eye tells the parts apart by colour before reading
                             color: part.open ? Appearance.colors.colPrimary
                                 : [Appearance.colors.colPrimaryContainer, Appearance.colors.colSecondaryContainer, Appearance.colors.colTertiaryContainer][part.modelData.role]
@@ -202,7 +202,7 @@ ContentPage {
                         StyledText {
                             Layout.fillWidth: true
                             text: part.modelData.name
-                            font.pixelSize: Math.round(15 * Appearance.fontSizeScale)
+                            font.pixelSize: Math.round(14 * Appearance.fontSizeScale)
                             font.weight: Font.Medium
                             color: part.open ? Appearance.colors.colOnPrimaryContainer : SettingsMaterialPreset.labelColor
                             elide: Text.ElideRight

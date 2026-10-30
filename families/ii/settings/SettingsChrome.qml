@@ -408,7 +408,7 @@ Item {
         property string pageKey: ""
         property string icon: ""
         property real iconRotation: 0
-        property int size: 36
+        property int size: 30
         readonly property var hue: root.hueOf(badge.pageKey)
         implicitWidth: badge.size
         implicitHeight: badge.size
@@ -428,16 +428,16 @@ Item {
         id: action
         property string symbol: ""
         property string tip: ""
-        implicitWidth: 40
-        implicitHeight: 40
-        buttonRadius: 20
+        implicitWidth: 36
+        implicitHeight: 36
+        buttonRadius: 18
         colBackground: "transparent"
         colBackgroundHover: SettingsMaterialPreset.tileHoverColor
         colRipple: SettingsMaterialPreset.tilePressColor
         Accessible.name: action.tip
         contentItem: MaterialSymbol {
             text: action.symbol
-            iconSize: 22
+            iconSize: 20
             color: SettingsMaterialPreset.supportingColor
         }
         StyledToolTip {
@@ -453,14 +453,14 @@ Item {
         Item {
             id: navPane
             Layout.fillHeight: true
-            Layout.preferredWidth: root.navEditMode ? 360 : 320
+            Layout.preferredWidth: root.navEditMode ? 340 : 280
 
             ColumnLayout {
                 anchors.fill: parent
                 anchors.leftMargin: 12
                 anchors.rightMargin: 8
-                anchors.topMargin: 16
-                spacing: 12
+                anchors.topMargin: 14
+                spacing: 10
 
                 RowLayout {
                     Layout.fillWidth: true
@@ -470,7 +470,7 @@ Item {
                         Layout.fillWidth: true
                         text: Translation.tr("Settings")
                         font.family: Appearance.font.family.title
-                        font.pixelSize: Math.round(28 * Appearance.fontSizeScale)
+                        font.pixelSize: Math.round(22 * Appearance.fontSizeScale)
                         color: SettingsMaterialPreset.labelColor
                         elide: Text.ElideRight
                     }
@@ -494,13 +494,13 @@ Item {
                 Rectangle {
                     id: searchBox
                     Layout.fillWidth: true
-                    implicitHeight: 52
+                    implicitHeight: 44
                     radius: height / 2
                     color: searchField.activeFocus ? SettingsMaterialPreset.controlHoverColor : SettingsMaterialPreset.controlColor
                     border.width: searchField.activeFocus ? 2 : 0
                     border.color: SettingsMaterialPreset.subheaderColor
                     // The key hint is the first thing to go when the words would run into it (a large text scale).
-                    readonly property bool hintFits: 16 + 22 + 12 + searchHint.implicitWidth + 12 + keyHintChip.implicitWidth + 6 + 8 <= searchBox.width
+                    readonly property bool hintFits: 14 + 20 + 10 + searchHint.implicitWidth + 12 + keyHintChip.implicitWidth + 6 + 8 <= searchBox.width
 
                     MouseArea {
                         anchors.fill: parent
@@ -510,12 +510,12 @@ Item {
 
                     RowLayout {
                         anchors.fill: parent
-                        anchors.leftMargin: 16
-                        anchors.rightMargin: 8
-                        spacing: 12
+                        anchors.leftMargin: 14
+                        anchors.rightMargin: 6
+                        spacing: 10
                         MaterialSymbol {
                             text: "search"
-                            iconSize: 22
+                            iconSize: 20
                             color: SettingsMaterialPreset.supportingColor
                         }
                         Item {
@@ -620,10 +620,10 @@ Item {
                                 StyledText {
                                     Layout.fillWidth: true
                                     Layout.leftMargin: 16
-                                    Layout.topMargin: navGroup.index === 0 ? 4 : 18
-                                    Layout.bottomMargin: 6
+                                    Layout.topMargin: navGroup.index === 0 ? 2 : 14
+                                    Layout.bottomMargin: 4
                                     text: navGroup.modelData.label
-                                    font.pixelSize: Math.round(13 * Appearance.fontSizeScale)
+                                    font.pixelSize: Math.round(12 * Appearance.fontSizeScale)
                                     font.weight: Font.Medium
                                     color: SettingsMaterialPreset.supportingColor
                                     elide: Text.ElideRight
@@ -639,12 +639,12 @@ Item {
                                         readonly property bool first: navItem.index === 0
                                         readonly property bool last: navItem.index === navGroup.modelData.pages.length - 1
                                         Layout.fillWidth: true
-                                        implicitHeight: 52
+                                        implicitHeight: 42
                                         pressScaleEnabled: false
                                         focusRingInward: true
                                         // the chosen page morphs fully round (M3 Expressive's selected list item)
-                                        buttonRadiusTop: navItem.current ? 26 : navItem.first ? SettingsMaterialPreset.tileOuterRadius : SettingsMaterialPreset.tileInnerRadius
-                                        buttonRadiusBottom: navItem.current ? 26 : navItem.last ? SettingsMaterialPreset.tileOuterRadius : SettingsMaterialPreset.tileInnerRadius
+                                        buttonRadiusTop: navItem.current ? 21 : navItem.first ? SettingsMaterialPreset.tileOuterRadius : SettingsMaterialPreset.tileInnerRadius
+                                        buttonRadiusBottom: navItem.current ? 21 : navItem.last ? SettingsMaterialPreset.tileOuterRadius : SettingsMaterialPreset.tileInnerRadius
                                         toggled: navItem.current
                                         colBackground: SettingsMaterialPreset.tileColor
                                         colBackgroundHover: SettingsMaterialPreset.tileHoverColor
@@ -666,9 +666,10 @@ Item {
                                         onFocusRingShownChanged: if (navItem.focusRingShown) Qt.callLater(root.followFocus, navItem)
 
                                         contentItem: RowLayout {
-                                            spacing: 14
+                                            spacing: 12
                                             PageBadge {
-                                                Layout.leftMargin: 8
+                                                Layout.leftMargin: 6
+                                                size: 28
                                                 pageKey: navItem.modelData.key
                                                 icon: navItem.modelData.icon
                                                 iconRotation: navItem.modelData.iconRotation ?? 0
@@ -721,23 +722,23 @@ Item {
                 anchors.left: parent.left
                 anchors.right: parent.right
                 anchors.top: parent.top
-                height: headerColumn.implicitHeight + 36
+                height: headerColumn.implicitHeight + 24
 
                 ColumnLayout {
                     id: headerColumn
                     anchors.left: parent.left
                     anchors.right: parent.right
                     anchors.top: parent.top
-                    anchors.leftMargin: 40
-                    anchors.rightMargin: 72
-                    anchors.topMargin: 28
-                    spacing: 4
+                    anchors.leftMargin: 32
+                    anchors.rightMargin: 64
+                    anchors.topMargin: 20
+                    spacing: 2
 
                     StyledText {
                         Layout.fillWidth: true
                         text: root.searchText.length > 0 ? Translation.tr("Search") : (root.currentMeta.name ?? "")
                         font.family: Appearance.font.family.title
-                        font.pixelSize: Math.round(36 * Appearance.fontSizeScale)
+                        font.pixelSize: Math.round(28 * Appearance.fontSizeScale)
                         color: SettingsMaterialPreset.labelColor
                         elide: Text.ElideRight
                     }
@@ -773,7 +774,7 @@ Item {
                 anchors.left: parent.left
                 anchors.right: parent.right
                 anchors.bottom: parent.bottom
-                anchors.leftMargin: 16
+                anchors.leftMargin: 8
                 pages: root.pages
                 requestedIndex: root.currentPage
                 loadEnabled: Config.ready && root.active
@@ -794,8 +795,8 @@ Item {
                 anchors.top: pageHeader.bottom
                 anchors.left: parent.left
                 anchors.bottom: parent.bottom
-                anchors.leftMargin: 40
-                width: Math.min(parent.width - 80, SettingsMaterialPreset.pageMaxWidth)
+                anchors.leftMargin: 32
+                width: Math.min(parent.width - 64, SettingsMaterialPreset.pageMaxWidth)
                 clip: true
                 spacing: SettingsMaterialPreset.tileGap
                 model: root.searchResults
@@ -810,7 +811,7 @@ Item {
                     required property int index
                     readonly property var page: root.pages[result.modelData.pageIndex] ?? ({})
                     width: resultsList.width
-                    implicitHeight: 68
+                    implicitHeight: 56
                     pressScaleEnabled: false
                     focusRingInward: true
                     buttonRadiusTop: result.index === 0 ? SettingsMaterialPreset.tileOuterRadius : SettingsMaterialPreset.tileInnerRadius
@@ -831,7 +832,7 @@ Item {
                             pageKey: result.page.key ?? ""
                             icon: result.page.icon ?? "settings"
                             iconRotation: result.page.iconRotation ?? 0
-                            size: 40
+                            size: 32
                         }
                         ColumnLayout {
                             Layout.fillWidth: true
@@ -868,8 +869,8 @@ Item {
                 visible: root.searchText.length > 0 && root.searchResults.length === 0 && !searchDebounce.running
                 anchors.top: pageHeader.bottom
                 anchors.left: parent.left
-                anchors.leftMargin: 40
-                anchors.topMargin: 24
+                anchors.leftMargin: 32
+                anchors.topMargin: 20
                 spacing: 8
                 MaterialSymbol {
                     text: "search_off"
