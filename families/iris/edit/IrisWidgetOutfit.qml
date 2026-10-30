@@ -212,13 +212,18 @@ Item {
         minimum: 0
     }
     readonly property Item keysItem: keys
-    Row {
+    // One opaque capsule: loose glass keys vanished on a dark wallpaper and went grey on a light one (his 10-30 capture).
+    Item {
         id: keys
         readonly property real out: Math.max(0, Math.min(1, emerge.value))
-        spacing: Math.round(6 * root.d)
+        readonly property real pad: Math.round(4 * root.d)
+        implicitWidth: keyRow.implicitWidth + 2 * keys.pad
+        implicitHeight: keyRow.implicitHeight + 2 * keys.pad
+        width: implicitWidth
+        height: implicitHeight
         scale: root.hair * (0.6 + 0.4 * keys.out)
         transformOrigin: root.keysAt === "below" ? Item.TopRight : Item.BottomRight
-        // The row is scaled about its right edge: place that edge.
+        // The capsule is scaled about its right edge: place that edge.
         x: root.keysX + root.keysWidth - keys.width
         y: root.keysAt === "above" ? -2 * root.gap - keys.height
             : root.keysAt === "below" ? root.height + 2 * root.gap
@@ -227,103 +232,123 @@ Item {
         visible: keys.out > 0.01
         enabled: root.selected
 
-        // Chosen, its name leads the keys: one row, never a tag stacked on them.
         Rectangle {
-            implicitHeight: Math.round(32 * root.d)
-            implicitWidth: keyName.implicitWidth + Math.round(24 * root.d)
+            anchors.fill: parent
             radius: root.cut ? 0 : height / 2
             color: IrisStyle.surfaceOpaque
             border.width: IrisStyle.devicePx
             border.color: IrisStyle.hairlineStrong
-            Row {
-                anchors.centerIn: parent
-                spacing: Math.round(6 * root.d)
-                MaterialSymbol {
-                    visible: root.locked
-                    anchors.verticalCenter: parent.verticalCenter
-                    text: "lock"
-                    iconSize: Math.round(13 * root.d)
-                    color: IrisStyle.textSecondary
-                }
-                StyledText {
-                    id: keyName
-                    anchors.verticalCenter: parent.verticalCenter
-                    text: root.name
-                    color: IrisStyle.text
-                    font.family: root.ink ? IrisStyle.fontLabel : IrisStyle.fontMain
-                    font.pixelSize: root.ink ? Math.round(10 * root.d) : IrisStyle.typeFootnote
-                    font.weight: IrisStyle.weight(Font.DemiBold)
-                    font.capitalization: root.ink ? Font.AllUppercase : Font.MixedCase
-                    font.letterSpacing: root.ink ? 0.8 * root.d : 0
-                }
-            }
         }
-        // The size it is, as a little grid of the cells it takes; a press moves to the next one.
-        IrisButton {
-            visible: root.sized && !root.locked
-            implicitHeight: Math.round(32 * root.d)
-            implicitWidth: sizeRow.implicitWidth + Math.round(20 * root.d)
-            Accessible.name: Translation.tr("Size: %1").arg(root.sizeName)
-            onClicked: root.nextSize()
-            Row {
-                id: sizeRow
-                anchors.centerIn: parent
-                spacing: Math.round(6 * root.d)
-                Grid {
-                    anchors.verticalCenter: parent.verticalCenter
-                    columns: 2
-                    spacing: Math.round(2 * root.d)
-                    Repeater {
-                        model: 4
-                        delegate: Rectangle {
-                            required property int index
-                            readonly property bool filled: root.size === "large" || index === 0 || (root.size === "medium" && index === 1)
-                            width: Math.round(5 * root.d)
-                            height: width
-                            radius: root.cut ? 0 : Math.round(1.5 * root.d)
-                            color: IrisStyle.text
-                            opacity: filled ? 1 : 0.28
-                            Behavior on opacity { NumberAnimation { duration: 110; easing.type: IrisStyle.feedbackEasing } }
-                        }
+
+        Row {
+            id: keyRow
+            x: keys.pad
+            y: keys.pad
+            spacing: Math.round(2 * root.d)
+
+            // Chosen, its name leads the keys: one row, never a tag stacked on them.
+            Item {
+                implicitHeight: Math.round(28 * root.d)
+                implicitWidth: nameRow.implicitWidth + Math.round(20 * root.d)
+                Row {
+                    id: nameRow
+                    anchors.centerIn: parent
+                    spacing: Math.round(6 * root.d)
+                    MaterialSymbol {
+                        visible: root.locked
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: "lock"
+                        iconSize: Math.round(13 * root.d)
+                        color: IrisStyle.textSecondary
+                    }
+                    StyledText {
+                        id: keyName
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: root.name
+                        color: IrisStyle.text
+                        font.family: root.ink ? IrisStyle.fontLabel : IrisStyle.fontMain
+                        font.pixelSize: root.ink ? Math.round(10 * root.d) : IrisStyle.typeFootnote
+                        font.weight: IrisStyle.weight(Font.DemiBold)
+                        font.capitalization: root.ink ? Font.AllUppercase : Font.MixedCase
+                        font.letterSpacing: root.ink ? 0.8 * root.d : 0
                     }
                 }
-                StyledText {
-                    anchors.verticalCenter: parent.verticalCenter
-                    text: root.sizeName
-                    color: IrisStyle.text
-                    font.family: root.ink ? IrisStyle.fontLabel : IrisStyle.fontMain
-                    font.pixelSize: root.ink ? Math.round(10 * root.d) : IrisStyle.typeFootnote
-                    font.weight: IrisStyle.weight(Font.DemiBold)
-                    font.capitalization: root.ink ? Font.AllUppercase : Font.MixedCase
+            }
+            Rectangle {
+                visible: !root.locked
+                anchors.verticalCenter: parent.verticalCenter
+                width: IrisStyle.devicePx
+                height: Math.round(16 * root.d)
+                color: IrisStyle.hairlineStrong
+            }
+            // The size it is, as a little grid of the cells it takes; a press moves to the next one.
+            IrisButton {
+                visible: root.sized && !root.locked
+                quiet: true
+                implicitHeight: Math.round(28 * root.d)
+                implicitWidth: sizeRow.implicitWidth + Math.round(18 * root.d)
+                Accessible.name: Translation.tr("Size: %1").arg(root.sizeName)
+                onClicked: root.nextSize()
+                Row {
+                    id: sizeRow
+                    anchors.centerIn: parent
+                    spacing: Math.round(6 * root.d)
+                    Grid {
+                        anchors.verticalCenter: parent.verticalCenter
+                        columns: 2
+                        spacing: Math.round(2 * root.d)
+                        Repeater {
+                            model: 4
+                            delegate: Rectangle {
+                                required property int index
+                                readonly property bool filled: root.size === "large" || index === 0 || (root.size === "medium" && index === 1)
+                                width: Math.round(5 * root.d)
+                                height: width
+                                radius: root.cut ? 0 : Math.round(1.5 * root.d)
+                                color: IrisStyle.text
+                                opacity: filled ? 1 : 0.28
+                                Behavior on opacity { NumberAnimation { duration: 110; easing.type: IrisStyle.feedbackEasing } }
+                            }
+                        }
+                    }
+                    StyledText {
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: root.sizeName
+                        color: IrisStyle.text
+                        font.family: root.ink ? IrisStyle.fontLabel : IrisStyle.fontMain
+                        font.pixelSize: root.ink ? Math.round(10 * root.d) : IrisStyle.typeFootnote
+                        font.weight: IrisStyle.weight(Font.DemiBold)
+                        font.capitalization: root.ink ? Font.AllUppercase : Font.MixedCase
+                    }
                 }
             }
-        }
-        IrisIconButton {
-            visible: !root.locked
-            implicitWidth: Math.round(32 * root.d)
-            quiet: false
-            materialIcon: "tune"
-            selected: (root.widget?.quickControlsOpen ?? false) && root.widget?.quickTab !== root.widget?._arrangeTab
-            Accessible.name: Translation.tr("Edit")
-            onClicked: selected ? root.widget.closeQuickControls() : root.widget.openQuickControls("widget")
-        }
-        IrisIconButton {
-            implicitWidth: Math.round(32 * root.d)
-            quiet: false
-            materialIcon: root.locked ? "lock" : "lock_open"
-            selected: root.locked
-            Accessible.name: root.locked ? Translation.tr("Unlock") : Translation.tr("Lock")
-            onClicked: root.widget._setOutputValue("locked", !root.locked)
-        }
-        IrisIconButton {
-            visible: !root.locked
-            implicitWidth: Math.round(32 * root.d)
-            quiet: false
-            materialIcon: "remove"
-            Accessible.name: Translation.tr("Put back")
-            onClicked: {
-                GlobalStates.clearDesktopWidgetSelection()
-                root.widget.takeAway()
+            IrisIconButton {
+                visible: !root.locked
+                implicitWidth: Math.round(28 * root.d)
+                implicitHeight: Math.round(28 * root.d)
+                materialIcon: "tune"
+                selected: (root.widget?.quickControlsOpen ?? false) && root.widget?.quickTab !== root.widget?._arrangeTab
+                Accessible.name: Translation.tr("Edit")
+                onClicked: selected ? root.widget.closeQuickControls() : root.widget.openQuickControls("widget")
+            }
+            IrisIconButton {
+                implicitWidth: Math.round(28 * root.d)
+                implicitHeight: Math.round(28 * root.d)
+                materialIcon: root.locked ? "lock" : "lock_open"
+                selected: root.locked
+                Accessible.name: root.locked ? Translation.tr("Unlock") : Translation.tr("Lock")
+                onClicked: root.widget._setOutputValue("locked", !root.locked)
+            }
+            IrisIconButton {
+                visible: !root.locked
+                implicitWidth: Math.round(28 * root.d)
+                implicitHeight: Math.round(28 * root.d)
+                materialIcon: "remove"
+                Accessible.name: Translation.tr("Put back")
+                onClicked: {
+                    GlobalStates.clearDesktopWidgetSelection()
+                    root.widget.takeAway()
+                }
             }
         }
     }
