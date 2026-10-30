@@ -2470,6 +2470,7 @@ ContentPage {
                 ConfigSpinBox {
                     icon: "swap_vert"
                     text: Translation.tr("Wheel steps per workspace (Overview)")
+                    unit: ""
                     value: Config.options.overview && Config.options.overview.scrollWorkspaceSteps !== undefined
                            ? Config.options.overview.scrollWorkspaceSteps
                            : 2
