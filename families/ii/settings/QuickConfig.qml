@@ -2056,13 +2056,15 @@ ContentPage {
                     }
                 }
 
-                RippleButtonWithIcon {
-                    Layout.alignment: Qt.AlignLeft
-                    materialIcon: root.showManualNotificationFilter ? "expand_less" : "add"
-                    mainText: root.showManualNotificationFilter
-                        ? Translation.tr("Hide manual entry")
-                        : Translation.tr("App not listed?")
-                    onClicked: root.showManualNotificationFilter = !root.showManualNotificationFilter
+                SettingsFold {
+                    glyph: "add"
+                    text: Translation.tr("App not listed?")
+                    open: root.showManualNotificationFilter
+                    onClicked: {
+                        root.showManualNotificationFilter = !root.showManualNotificationFilter
+                        if (root.showManualNotificationFilter)
+                            notificationManualApp.forceActiveFocus()
+                    }
                 }
 
                 RowLayout {
@@ -2288,13 +2290,15 @@ ContentPage {
                     }
                 }
 
-                RippleButtonWithIcon {
-                    Layout.alignment: Qt.AlignLeft
-                    materialIcon: root.showManualVisualizerFilter ? "expand_less" : "add"
-                    mainText: root.showManualVisualizerFilter
-                        ? Translation.tr("Hide manual entry")
-                        : Translation.tr("Audio app not listed?")
-                    onClicked: root.showManualVisualizerFilter = !root.showManualVisualizerFilter
+                SettingsFold {
+                    glyph: "add"
+                    text: Translation.tr("Audio app not listed?")
+                    open: root.showManualVisualizerFilter
+                    onClicked: {
+                        root.showManualVisualizerFilter = !root.showManualVisualizerFilter
+                        if (root.showManualVisualizerFilter)
+                            visualizerManualApp.forceActiveFocus()
+                    }
                 }
 
                 RowLayout {

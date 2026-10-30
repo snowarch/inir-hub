@@ -497,7 +497,7 @@ ContentPage {
                         const ordered = all.filter(p => !anim.includes(p)).concat(all.filter(p => anim.includes(p)))
                         mascotReactionsGroup.poseOptions = [{ displayName: Translation.tr("Auto (rotate pool)"), value: "", image: "" }]
                             .concat(ordered.map(p => ({
-                                displayName: p,
+                                displayName: p.replace(/-/g, " ").replace(/^./, c => c.toUpperCase()),
                                 value: p,
                                 image: Quickshell.shellPath(`assets/images/mascot/inir-mascot-${p}.${anim.includes(p) ? "gif" : "png"}`)
                             })))
@@ -550,22 +550,18 @@ ContentPage {
                     Layout.fillWidth: true
                     spacing: 4
 
-                    SettingsSwitch {
-                        Layout.fillWidth: true
-                        buttonIcon: eventRow.modelData.icon
+                    SettingsFold {
+                        readonly property bool eventOn: Config.options?.mascot?.companion?.events?.[eventRow.modelData.key] ?? true
+                        readonly property string pose: Config.options?.mascot?.companion?.eventPoses?.[eventRow.modelData.key] ?? ""
+                        glyph: eventRow.modelData.icon
                         text: eventRow.modelData.label
-                        checked: Config.options?.mascot?.companion?.events?.[eventRow.modelData.key] ?? true
-                        onCheckedChanged: Config.setNestedValue("mascot.companion.events." + eventRow.modelData.key, checked)
-                    }
-
-                    RippleButtonWithIcon {
-                        Layout.fillWidth: true
-                        Layout.leftMargin: 12
-                        visible: Config.options?.mascot?.companion?.events?.[eventRow.modelData.key] ?? true
-                        materialIcon: eventRow.poseExpanded ? "expand_less" : "image"
-                        mainText: eventRow.poseExpanded
-                            ? Translation.tr("Hide event pose")
-                            : Translation.tr("Configure event pose")
+                        summary: Translation.tr("Pose: %1").arg(pose.length > 0
+                            ? (mascotReactionsGroup.poseOptions.find(o => o.value === pose)?.displayName ?? pose)
+                            : Translation.tr("Automatic"))
+                        open: eventRow.poseExpanded
+                        hasSwitch: true
+                        switchOn: eventOn
+                        onSwitchToggled: checked => Config.setNestedValue("mascot.companion.events." + eventRow.modelData.key, checked)
                         onClicked: eventRow.poseExpanded = !eventRow.poseExpanded
                     }
 
@@ -574,10 +570,14 @@ ContentPage {
                         Layout.leftMargin: 12
                         sourceComponent: Component {
                             MascotPoseGallery {
+                                headless: true
                                 label: Translation.tr("Pose for this event")
                                 options: mascotReactionsGroup.poseOptions
                                 currentValue: Config.options?.mascot?.companion?.eventPoses?.[eventRow.modelData.key] ?? ""
-                                onSelected: value => Config.setNestedValue("mascot.companion.eventPoses." + eventRow.modelData.key, value)
+                                onSelected: value => {
+                                    Config.setNestedValue("mascot.companion.eventPoses." + eventRow.modelData.key, value)
+                                    eventRow.poseExpanded = false
+                                }
                             }
                         }
                     }
@@ -587,23 +587,12 @@ ContentPage {
 
         // Which image each placement shows — override any spot's curated pose
         SettingsGroup {
-            StyledText {
+            SettingsFold {
+                readonly property int custom: Object.values(Config.options?.mascot?.surfacePoses ?? {}).filter(v => v.length > 0).length
+                glyph: "photo_library"
                 text: Translation.tr("Surface poses")
-                font.pixelSize: Appearance.font.pixelSize.normal
-                color: Appearance.colors.colOnLayer1
-            }
-            StyledText {
-                Layout.fillWidth: true
-                text: Translation.tr("Pick your own image for each placement; Auto keeps the curated default. Animated spots keep their animation.")
-                font.pixelSize: Appearance.font.pixelSize.smaller
-                color: Appearance.colors.colSubtext
-                wrapMode: Text.Wrap
-            }
-            RippleButtonWithIcon {
-                materialIcon: root.surfacePosesExpanded ? "expand_less" : "tune"
-                mainText: root.surfacePosesExpanded
-                    ? Translation.tr("Hide surface pose overrides")
-                    : Translation.tr("Configure surface pose overrides")
+                summary: custom > 0 ? Translation.tr("Modified by you: %1").arg(custom) : Translation.tr("Automatic")
+                open: root.surfacePosesExpanded
                 onClicked: root.surfacePosesExpanded = !root.surfacePosesExpanded
             }
             Repeater {

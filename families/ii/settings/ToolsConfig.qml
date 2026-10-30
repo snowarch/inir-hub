@@ -66,69 +66,6 @@ ContentPage {
     property bool showAnki: false
     readonly property bool japaneseOn: Config.options?.regionSelector?.japaneseLookup?.enabled ?? true
 
-    // A fold that says what it holds, as one row of its section's run: icon, name, what is inside, a chevron that
-    // turns. The flat "More…" buttons hid a page's worth of rows behind words that named nothing (10-29).
-    component Disclosure: RippleButton {
-        id: fold
-        property string glyph: ""
-        property string title: ""
-        property string summary: ""
-        property bool open: false
-        readonly property string settingsTileRole: "tile"
-        property bool tileTop: true
-        property bool tileBottom: true
-        Layout.fillWidth: true
-        implicitHeight: Math.max(SettingsMaterialPreset.rowMinHeight, contentItem.implicitHeight + topPadding + bottomPadding)
-        leftPadding: SettingsMaterialPreset.tilePaddingX
-        rightPadding: SettingsMaterialPreset.tilePaddingX
-        topPadding: SettingsMaterialPreset.tilePaddingY
-        bottomPadding: SettingsMaterialPreset.tilePaddingY
-        buttonRadiusTop: fold.tileTop ? SettingsMaterialPreset.tileOuterRadius : SettingsMaterialPreset.tileInnerRadius
-        buttonRadiusBottom: fold.tileBottom ? SettingsMaterialPreset.tileOuterRadius : SettingsMaterialPreset.tileInnerRadius
-        colBackground: SettingsMaterialPreset.tileColor
-        colBackgroundHover: SettingsMaterialPreset.tileHoverColor
-        colRipple: SettingsMaterialPreset.tilePressColor
-        pressScaleEnabled: false
-        focusRingInward: true
-        Accessible.name: fold.title
-        Accessible.description: fold.summary
-        contentItem: RowLayout {
-            spacing: SettingsMaterialPreset.tilePaddingX
-            MaterialSymbol {
-                text: fold.glyph
-                iconSize: SettingsMaterialPreset.iconSize
-                color: fold.open ? SettingsMaterialPreset.subheaderColor : SettingsMaterialPreset.supportingColor
-            }
-            ColumnLayout {
-                Layout.fillWidth: true
-                Layout.alignment: Qt.AlignVCenter
-                spacing: 2
-                StyledText {
-                    Layout.fillWidth: true
-                    text: fold.title
-                    font.pixelSize: SettingsMaterialPreset.labelSize
-                    color: SettingsMaterialPreset.labelColor
-                    elide: Text.ElideRight
-                }
-                StyledText {
-                    Layout.fillWidth: true
-                    visible: fold.summary.length > 0
-                    text: fold.summary
-                    font.pixelSize: SettingsMaterialPreset.supportingSize
-                    color: SettingsMaterialPreset.supportingColor
-                    elide: Text.ElideRight
-                }
-            }
-            MaterialSymbol {
-                text: "expand_more"
-                iconSize: SettingsMaterialPreset.iconSize
-                color: SettingsMaterialPreset.supportingColor
-                rotation: fold.open ? 180 : 0
-                Behavior on rotation { animation: NumberAnimation { duration: Appearance.animation.elementMoveFast.duration; easing.type: Easing.OutCubic } }
-            }
-        }
-    }
-
     readonly property string recordingAudioMode: RecorderStatus.configuredAudioMode
     readonly property string effectiveRecordingPath: {
         const configured = String(Config.getNestedValue("screenRecord.savePath", ""))
@@ -935,9 +872,9 @@ ContentPage {
                     }
                 }
 
-                Disclosure {
+                SettingsFold {
                     glyph: "tune"
-                    title: Translation.tr("Advanced OCR options")
+                    text: Translation.tr("Advanced OCR options")
                     summary: Translation.tr("Custom Tesseract language code")
                     open: root.showAdvancedOcr
                     onClicked: root.showAdvancedOcr = !root.showAdvancedOcr
@@ -990,10 +927,10 @@ ContentPage {
                     }
                 }
 
-                Disclosure {
+                SettingsFold {
                     visible: root.japaneseOn
                     glyph: "translate"
-                    title: Translation.tr("More dictionary options")
+                    text: Translation.tr("More dictionary options")
                     summary: JapaneseDictionary.jitendexInstalled ? Translation.tr("Japanese dictionary ready") : Translation.tr("One-time dictionary setup")
                     open: root.showAdvancedJapanese
                     onClicked: root.showAdvancedJapanese = !root.showAdvancedJapanese
@@ -1101,10 +1038,10 @@ ContentPage {
                 }
                 }
 
-                Disclosure {
+                SettingsFold {
                     visible: root.japaneseOn
                     glyph: "style"
-                    title: Translation.tr("Anki (optional)")
+                    text: Translation.tr("Anki (optional)")
                     summary: Translation.tr("Ready-made Japanese study decks")
                     open: root.showAnki
                     onClicked: root.showAnki = !root.showAnki
@@ -1199,10 +1136,10 @@ ContentPage {
                     }
                 }
 
-                Disclosure {
+                SettingsFold {
                     visible: Config.options?.regionSelector?.japaneseLookup?.anki?.enabled ?? false
                     glyph: "settings"
-                    title: Translation.tr("Advanced Anki settings")
+                    text: Translation.tr("Advanced Anki settings")
                     summary: Translation.tr("AnkiConnect endpoint") + ", " + Translation.tr("Deck name")
                     open: root.showAdvancedAnki
                     onClicked: root.showAdvancedAnki = !root.showAdvancedAnki
