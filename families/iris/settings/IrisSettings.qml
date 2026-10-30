@@ -799,26 +799,26 @@ Item {
         readonly property real goalX: root.windowed ? 0
             : frame.place === "pocket" ? Math.round(root.room.x + root.room.width - width)
             : frame.place === "drawer" ? Math.round(root.room.x)
-            : frame.laid ? Math.round(root.room.x + (root.room.width - width) / 2) : Math.round((parent.width - width) / 2)
+            : Math.round(root.room.x + (root.room.width - width) / 2)
         readonly property real goalY: root.windowed ? 0
             : frame.place === "pocket" ? Math.round(root.room.y)
             : frame.place === "drawer" ? Math.round(parent.height - frame.footGap - height)
-            : frame.laid ? Math.round(root.room.y + (root.room.height - height) / 2) : Math.round((parent.height - height) / 2)
+            : Math.round(root.room.y + (root.room.height - height) / 2)
         readonly property real goalW: root.windowed ? parent.width
             : frame.place === "pocket" ? Math.round(Math.min(root.room.width, 500 * root.d))
             : frame.place === "drawer" ? Math.round(root.room.width)
             : frame.laid ? Math.round(Math.min(root.room.width, 1480 * root.d))
             // The sidebar and the rows at their measure; Settings sits on the desktop, it does not replace it.
-            : Math.round(Math.min(parent.width - 32 - IrisFrame.musicReach("left") - IrisFrame.musicReach("right"), 1240 * root.d))
+            : Math.round(Math.min(root.room.width, 1240 * root.d))
         readonly property real goalH: root.windowed ? parent.height
             : frame.place === "pocket" ? Math.round(root.room.height)
             // Drawer stands a little under half the screen; its grip raises it to the room's top.
             : frame.place === "drawer" ? Math.round(root.scene?.tall ? frame.drawerRoom : Math.min(frame.drawerRoom, Math.max(440 * root.d, frame.drawerRoom * 0.46)))
             : frame.laid ? Math.round(Math.min(root.room.height, 900 * root.d))
-            // Most of the screen's height, and never shorter than the sidebar's list: measured by the list alone, ten
-            // categories left a 640 px strip that cut every page at its second row.
-            : Math.round(Math.min(parent.height - 48 - IrisFrame.musicReach("top") - IrisFrame.musicReach("bottom"),
-                Math.max(640 * root.d, parent.height * 0.86, root.sidebarNeed)))
+            // As tall as the sidebar's list asks, inside the room the Island and the Dock leave (his 10-30: measured on
+            // the screen it ran over both); a short room scrolls the list. Measured by the list alone, ten categories
+            // once left a 640 px strip that cut every page at its second row.
+            : Math.round(Math.min(root.room.height, Math.max(720 * root.d, root.sidebarNeed)))
         x: frame.goalX
         y: frame.goalY
         width: frame.goalW
