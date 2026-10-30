@@ -129,28 +129,24 @@ WSettingsPage {
     }
 
     WSettingsCard {
-        title: Translation.tr("Navigation")
+        section: Translation.tr("Navigation")
+        collapsible: true
+        expanded: false
+        title: Translation.tr("Scroll to navigate")
         icon: "arrow-sync"
+        description: Translation.tr("Use the mouse wheel over the strip to move between workspaces instead of scrolling the thumbnail list")
+        toggle: true
+        checked: Config.options?.workspaceStrip?.scrollNavigation ?? false
+        onToggled: on => Config.setNestedValue("workspaceStrip.scrollNavigation", on)
 
         WSettingsSwitch {
-            label: Translation.tr("Scroll to navigate")
-            icon: "arrow-sync"
-            description: Translation.tr("Use the mouse wheel over the strip to move between workspaces instead of scrolling the thumbnail list")
-            checked: Config.options?.workspaceStrip?.scrollNavigation ?? false
-            onCheckedChanged: Config.setNestedValue("workspaceStrip.scrollNavigation", checked)
-        }
-
-        WSettingsSwitch {
-            visible: Config.options?.workspaceStrip?.scrollNavigation ?? false
             label: Translation.tr("Switch workspace on scroll")
             icon: "desktop"
             description: Translation.tr("Also focus the workspace in the compositor when scrolling through the strip")
             checked: Config.options?.workspaceStrip?.scrollNavigationSwitchWorkspace ?? true
             onCheckedChanged: Config.setNestedValue("workspaceStrip.scrollNavigationSwitchWorkspace", checked)
         }
-
         WSettingsSpinBox {
-            visible: Config.options?.workspaceStrip?.scrollNavigation ?? false
             label: Translation.tr("Scroll debounce")
             icon: "timer"
             suffix: "ms"

@@ -337,11 +337,6 @@ WSettingsPage {
         }
     }
 
-    WSettingsSection {
-        title: Translation.tr("Notifications & Alerts")
-        icon: "alert"
-    }
-
     WSettingsCard {
         title: Translation.tr("Notifications")
         icon: "alert"
@@ -588,80 +583,68 @@ WSettingsPage {
             value: Config.options?.osd?.timeout ?? 1000
             onValueChanged: Config.setNestedValue("osd.timeout", value)
         }
+    }
+
+    WSettingsCard {
+        collapsible: true
+        expanded: false
+        title: Translation.tr("Connection notices")
+        icon: "arrow-sync"
+        description: Translation.tr("A short notice when something is plugged in, connected, unplugged or lost")
+        toggle: true
+        checked: Config.options?.osd?.connections?.enable ?? true
+        onToggled: on => Config.setNestedValue("osd.connections.enable", on)
 
         WSettingsSwitch {
-            label: Translation.tr("Connection notices")
-            icon: "arrow-sync"
-            description: Translation.tr("A short notice when something is plugged in, connected, unplugged or lost")
-            checked: Config.options?.osd?.connections?.enable ?? true
-            onCheckedChanged: Config.setNestedValue("osd.connections.enable", checked)
-        }
-
-        WSettingsSwitch {
-            visible: Config.options?.osd?.connections?.enable ?? true
             label: Translation.tr("Network")
             icon: "ethernet"
             description: Translation.tr("Wi-Fi or cable connected and dropped")
             checked: Config.options?.osd?.connections?.network ?? true
             onCheckedChanged: Config.setNestedValue("osd.connections.network", checked)
         }
-
         WSettingsSwitch {
-            visible: Config.options?.osd?.connections?.enable ?? true
             label: Translation.tr("Internet")
             icon: "wifi-warning"
             description: Translation.tr("Lost and back online")
             checked: Config.options?.osd?.connections?.internet ?? true
             onCheckedChanged: Config.setNestedValue("osd.connections.internet", checked)
         }
-
         WSettingsSwitch {
-            visible: Config.options?.osd?.connections?.enable ?? true
             label: Translation.tr("Bluetooth devices")
             icon: "bluetooth-connected"
             description: Translation.tr("Headphones, keyboards, controllers")
             checked: Config.options?.osd?.connections?.bluetooth ?? true
             onCheckedChanged: Config.setNestedValue("osd.connections.bluetooth", checked)
         }
-
         WSettingsSwitch {
-            visible: Config.options?.osd?.connections?.enable ?? true
             label: Translation.tr("USB devices")
             icon: "keyboard"
             description: Translation.tr("Mice, keyboards, controllers, cameras, phones, by name")
             checked: Config.options?.osd?.connections?.usb ?? true
             onCheckedChanged: Config.setNestedValue("osd.connections.usb", checked)
         }
-
         WSettingsSwitch {
-            visible: Config.options?.osd?.connections?.enable ?? true
             label: Translation.tr("Charger")
             icon: "battery-charge"
             description: Translation.tr("Plugged in and on battery")
             checked: Config.options?.osd?.connections?.power ?? true
             onCheckedChanged: Config.setNestedValue("osd.connections.power", checked)
         }
-
         WSettingsSwitch {
-            visible: Config.options?.osd?.connections?.enable ?? true
             label: Translation.tr("Sound output")
             icon: "headphones"
             description: Translation.tr("Headphones or speakers take over")
             checked: Config.options?.osd?.connections?.audio ?? true
             onCheckedChanged: Config.setNestedValue("osd.connections.audio", checked)
         }
-
         WSettingsSwitch {
-            visible: Config.options?.osd?.connections?.enable ?? true
             label: Translation.tr("Displays")
             icon: "desktop"
             description: Translation.tr("A monitor plugged in or removed")
             checked: Config.options?.osd?.connections?.displays ?? true
             onCheckedChanged: Config.setNestedValue("osd.connections.displays", checked)
         }
-
         WSettingsSwitch {
-            visible: Config.options?.osd?.connections?.enable ?? true
             label: Translation.tr("Drives and memory cards")
             icon: "folder"
             description: Translation.tr("Pendrives, external disks and SD cards, with their name and size")
@@ -670,11 +653,6 @@ WSettingsPage {
         }
     }
     
-    WSettingsSection {
-        title: Translation.tr("Lock Screen")
-        icon: "lock-closed"
-    }
-
     WSettingsCard {
         title: Translation.tr("Lock Screen")
         icon: "lock-closed"
@@ -709,35 +687,33 @@ WSettingsPage {
             checked: Config.options?.lock?.showLockedText ?? true
             onCheckedChanged: Config.setNestedValue("lock.showLockedText", checked)
         }
+    }
+
+    WSettingsCard {
+        collapsible: true
+        expanded: false
+        title: Translation.tr("Show notifications")
+        icon: "alert"
+        description: Translation.tr("Display recent notifications on the lock screen")
+        toggle: true
+        checked: Config.options?.lock?.notifications?.enable ?? false
+        onToggled: on => Config.setNestedValue("lock.notifications.enable", on)
 
         WSettingsSwitch {
-            label: Translation.tr("Show notifications")
-            icon: "alert"
-            description: Translation.tr("Display recent notifications on the lock screen")
-            checked: Config.options?.lock?.notifications?.enable ?? false
-            onCheckedChanged: Config.setNestedValue("lock.notifications.enable", checked)
-        }
-
-        WSettingsSwitch {
-            visible: Config.options?.lock?.notifications?.enable ?? false
             label: Translation.tr("Show notification body")
             icon: "eye"
             description: Translation.tr("Display message content. Disable for privacy.")
             checked: Config.options?.lock?.notifications?.showBody ?? true
             onCheckedChanged: Config.setNestedValue("lock.notifications.showBody", checked)
         }
-
         WSettingsSpinBox {
-            visible: Config.options?.lock?.notifications?.enable ?? false
             label: Translation.tr("Max notifications shown")
             icon: "list"
             from: 1; to: 10; stepSize: 1
             value: Config.options?.lock?.notifications?.maxCount ?? 3
             onValueChanged: Config.setNestedValue("lock.notifications.maxCount", value)
         }
-
         WSettingsDropdown {
-            visible: Config.options?.lock?.notifications?.enable ?? false
             label: Translation.tr("Notification position")
             icon: "panel-left-expand"
             description: Translation.tr("Where notifications appear on the lock screen")
@@ -750,7 +726,9 @@ WSettingsPage {
             ]
             onSelected: newValue => Config.setNestedValue("lock.notifications.position", newValue)
         }
+    }
 
+    WSettingsCard {
         WSettingsDropdown {
             label: Translation.tr("Clock style")
             icon: "arrow-clockwise"
@@ -835,11 +813,6 @@ WSettingsPage {
             ]
             onSelected: newValue => Config.setNestedValue("lock.loginStyle", newValue)
         }
-    }
-
-    WSettingsSection {
-        title: Translation.tr("Screen Recording")
-        icon: "record"
     }
 
     WSettingsCard {
@@ -963,24 +936,19 @@ WSettingsPage {
             checked: Config.options?.screenRecord?.enableFallback ?? true
             onCheckedChanged: root.setRecordingConfig("screenRecord.enableFallback", checked)
         }
+    }
 
-        WSettingsSwitch {
-            label: Translation.tr("Compress recordings for Discord")
-            icon: "record"
-            description: Translation.tr("Creates a separate H.264 copy that fits Discord upload limits")
-            checked: Config.options?.screenRecord?.discordCompress?.enabled ?? false
-            onCheckedChanged: Config.setNestedValue("screenRecord.discordCompress.enabled", checked)
-        }
-
-        WSettingsRow {
-            visible: Config.options?.screenRecord?.discordCompress?.enabled ?? false
-            label: Translation.tr("Discord compression")
-            icon: "info"
-            description: Translation.tr("Two-pass compression keeps the original recording and squeezes a sharing copy. Tiny file, less drama.")
-        }
+    WSettingsCard {
+        collapsible: true
+        expanded: false
+        title: Translation.tr("Compress recordings for Discord")
+        icon: "record"
+        description: Translation.tr("Creates a separate H.264 copy that fits Discord upload limits")
+        toggle: true
+        checked: Config.options?.screenRecord?.discordCompress?.enabled ?? false
+        onToggled: on => Config.setNestedValue("screenRecord.discordCompress.enabled", on)
 
         WSettingsDropdown {
-            visible: Config.options?.screenRecord?.discordCompress?.enabled ?? false
             label: Translation.tr("Discord target size")
             icon: "pulse"
             description: Translation.tr("10 MB fits Discord Free")
@@ -988,9 +956,7 @@ WSettingsPage {
             options: root.recordingDiscordTargetSizeOptions
             onSelected: newValue => Config.setNestedValue("screenRecord.discordCompress.targetSizeMb", newValue)
         }
-
         WSettingsDropdown {
-            visible: Config.options?.screenRecord?.discordCompress?.enabled ?? false
             label: Translation.tr("Discord max dimension")
             icon: "screenshot"
             description: Translation.tr("Lower values help long clips fit without becoming a pixel smoothie")
@@ -998,9 +964,7 @@ WSettingsPage {
             options: root.recordingDiscordDimensionOptions
             onSelected: newValue => Config.setNestedValue("screenRecord.discordCompress.maxDimension", newValue)
         }
-
         WSettingsDropdown {
-            visible: Config.options?.screenRecord?.discordCompress?.enabled ?? false
             label: Translation.tr("Discord encoder speed")
             icon: "arrow-clockwise"
             description: Translation.tr("Slower is smaller and cleaner")
@@ -1008,9 +972,7 @@ WSettingsPage {
             options: root.recordingSoftwarePresetOptions
             onSelected: newValue => Config.setNestedValue("screenRecord.discordCompress.preset", newValue)
         }
-
         WSettingsDropdown {
-            visible: Config.options?.screenRecord?.discordCompress?.enabled ?? false
             label: Translation.tr("Discord audio bitrate")
             icon: "speaker"
             description: Translation.tr("Automatically reduced when video needs the budget")
@@ -1018,15 +980,15 @@ WSettingsPage {
             options: root.recordingAudioBitrateOptions
             onSelected: newValue => Config.setNestedValue("screenRecord.discordCompress.audioBitrateKbps", newValue)
         }
-
         WSettingsSwitch {
-            visible: Config.options?.screenRecord?.discordCompress?.enabled ?? false
             label: Translation.tr("Skip compression when already under target")
             icon: "checkmark"
             checked: Config.options?.screenRecord?.discordCompress?.onlyIfNeeded ?? true
             onCheckedChanged: Config.setNestedValue("screenRecord.discordCompress.onlyIfNeeded", checked)
         }
+    }
 
+    WSettingsCard {
         WSettingsDropdown {
             visible: root.customRecordingPreset
             label: Translation.tr("Video codec")

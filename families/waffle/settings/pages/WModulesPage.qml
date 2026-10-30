@@ -256,13 +256,8 @@ WSettingsPage {
         }
     }
 
-    WSettingsSection {
-        title: Translation.tr("Action Center Toggles")
-        icon: "options"
-    }
-
     WSettingsCard {
-        title: Translation.tr("Visible toggles")
+        title: Translation.tr("Action Center Toggles")
         icon: "checkmark"
 
         Repeater {

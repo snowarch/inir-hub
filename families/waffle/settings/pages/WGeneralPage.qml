@@ -17,19 +17,17 @@ WSettingsPage {
     pageDescription: Translation.tr("System behavior and preferences")
     
     WSettingsCard {
-        title: Translation.tr("Audio")
-        icon: "speaker-2-filled"
-        
-        WSettingsSwitch {
-            label: Translation.tr("Volume protection")
-            icon: "speaker-mute"
-            description: Translation.tr("Limit volume to prevent hearing damage")
-            checked: Config.options?.audio?.protection?.enable ?? false
-            onCheckedChanged: Config.setNestedValue("audio.protection.enable", checked)
-        }
-        
+        section: Translation.tr("Audio")
+        collapsible: true
+        expanded: false
+        title: Translation.tr("Volume protection")
+        icon: "speaker-mute"
+        description: Translation.tr("Limit volume to prevent hearing damage")
+        toggle: true
+        checked: Config.options?.audio?.protection?.enable ?? false
+        onToggled: on => Config.setNestedValue("audio.protection.enable", on)
+
         WSettingsSpinBox {
-            visible: Config.options?.audio?.protection?.enable ?? false
             label: Translation.tr("Maximum volume")
             icon: "speaker-1"
             suffix: "%"
@@ -37,9 +35,7 @@ WSettingsPage {
             value: Config.options?.audio?.protection?.maxAllowed ?? 99
             onValueChanged: Config.setNestedValue("audio.protection.maxAllowed", value)
         }
-        
         WSettingsSpinBox {
-            visible: Config.options?.audio?.protection?.enable ?? false
             label: Translation.tr("Max increase per step")
             icon: "speaker-settings"
             description: Translation.tr("Maximum volume increase per key press")
@@ -352,20 +348,20 @@ WSettingsPage {
             checked: Config.options?.idle?.lockBeforeSleep ?? true
             onCheckedChanged: Config.setNestedValue("idle.lockBeforeSleep", checked)
         }
+    }
 
-        // Battery profile is meaningless without a battery.
-        WSettingsSwitch {
-            visible: Battery.available
-            label: Translation.tr("Separate timeouts on battery")
-            icon: "battery-5"
-            description: Translation.tr("Use shorter idle timeouts while unplugged")
-            checked: Config.options?.idle?.onBattery?.enable ?? false
-            onCheckedChanged: Config.setNestedValue("idle.onBattery.enable", checked)
-        }
+    WSettingsCard {
+        collapsible: true
+        expanded: false
+        title: Translation.tr("Separate timeouts on battery")
+        icon: "battery-5"
+        description: Translation.tr("Use shorter idle timeouts while unplugged")
+        toggle: true
+        checked: Config.options?.idle?.onBattery?.enable ?? false
+        onToggled: on => Config.setNestedValue("idle.onBattery.enable", on)
 
         WSettingsSpinBox {
             visible: Battery.available
-            enabled: Config.options?.idle?.onBattery?.enable ?? false
             label: Translation.tr("Battery: screen off")
             icon: "desktop"
             suffix: "s"
@@ -373,10 +369,8 @@ WSettingsPage {
             value: Config.options?.idle?.onBattery?.screenOffTimeout ?? 120
             onValueChanged: Config.setNestedValue("idle.onBattery.screenOffTimeout", value)
         }
-
         WSettingsSpinBox {
             visible: Battery.available
-            enabled: Config.options?.idle?.onBattery?.enable ?? false
             label: Translation.tr("Battery: lock")
             icon: "lock-closed"
             suffix: "s"
@@ -384,10 +378,8 @@ WSettingsPage {
             value: Config.options?.idle?.onBattery?.lockTimeout ?? 300
             onValueChanged: Config.setNestedValue("idle.onBattery.lockTimeout", value)
         }
-
         WSettingsSpinBox {
             visible: Battery.available
-            enabled: Config.options?.idle?.onBattery?.enable ?? false
             label: Translation.tr("Battery: suspend")
             icon: "weather-moon"
             suffix: "s"

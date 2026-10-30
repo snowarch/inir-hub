@@ -280,60 +280,61 @@ WSettingsPage {
             value: Config.options?.mascot?.chaos?.intervalMinutes ?? 45
             onValueChanged: Config.setNestedValue("mascot.chaos.intervalMinutes", value)
         }
-        WSettingsSwitch {
-            label: Translation.tr("Chaos mode")
-            icon: "flash-on"
-            description: Translation.tr("Occasional visits to widgets and panels. Mouse chase and hide-and-seek only start when you ask.")
-            checked: Config.options?.mascot?.chaos?.enable ?? false
-            enabled: Config.options?.mascot?.companion?.enable ?? true
-            onCheckedChanged: Config.setNestedValue("mascot.chaos.enable", checked)
-        }
+    }
+
+    WSettingsCard {
+        enabled: Config.options?.mascot?.companion?.enable ?? true
+        collapsible: true
+        expanded: false
+        title: Translation.tr("Chaos mode")
+        icon: "flash-on"
+        description: Translation.tr("Occasional visits to widgets and panels. Mouse chase and hide-and-seek only start when you ask.")
+        toggle: true
+        checked: Config.options?.mascot?.chaos?.enable ?? false
+        onToggled: on => Config.setNestedValue("mascot.chaos.enable", on)
 
         WSettingsSwitch {
             label: Translation.tr("Impact sounds")
             icon: "speaker-0"
             description: Translation.tr("Little thuds and bells from the system sound theme when she hits things")
             checked: Config.options?.mascot?.chaos?.sfx ?? true
-            enabled: Config.options?.mascot?.chaos?.enable ?? false
             onCheckedChanged: Config.setNestedValue("mascot.chaos.sfx", checked)
         }
-
         WSettingsSwitch {
             label: Translation.tr("Let her rearrange widgets")
             icon: "drag_pan"
             description: Translation.tr("Displaced widgets keep their new position; otherwise everything bounces back")
             checked: Config.options?.mascot?.chaos?.allowRearrange ?? false
-            enabled: Config.options?.mascot?.chaos?.enable ?? false
             onCheckedChanged: Config.setNestedValue("mascot.chaos.allowRearrange", checked)
         }
-
         WSettingsSwitch {
             label: Translation.tr("React to system events")
             icon: "flash-on"
             description: Translation.tr("Occasional reactions to real shell activity, sharing the same quiet time and visit limit")
             checked: Config.options?.mascot?.chaos?.systemEvents ?? true
-            enabled: Config.options?.mascot?.chaos?.enable ?? false
             onCheckedChanged: Config.setNestedValue("mascot.chaos.systemEvents", checked)
         }
-
         WSettingsSwitch {
             label: Translation.tr("Calling-card notifications")
             icon: "news"
             description: Translation.tr("After a destructive prank, Kira may leave a playful desktop notification")
             checked: Config.options?.mascot?.chaos?.callingCards ?? false
-            enabled: Config.options?.mascot?.chaos?.enable ?? false
             onCheckedChanged: Config.setNestedValue("mascot.chaos.callingCards", checked)
         }
-
         WSettingsButton {
             label: Translation.tr("Unleash chaos")
+            buttonText: Translation.tr("Start")
             icon: "flash-on"
-            enabled: Config.options?.mascot?.chaos?.enable ?? false
             onClicked: Quickshell.execDetached([Quickshell.shellPath("scripts/inir"), "mascot", "romp"])
         }
+    }
+
+    WSettingsCard {
+        title: Translation.tr("Actions")
 
         WSettingsButton {
             label: Translation.tr("Tidy up")
+            buttonText: Translation.tr("Run")
             description: Translation.tr("Every displaced widget returns home")
             icon: "delete"
             onClicked: Quickshell.execDetached([Quickshell.shellPath("scripts/inir"), "mascot", "tidy"])
@@ -341,6 +342,7 @@ WSettingsPage {
 
         WSettingsButton {
             label: Translation.tr("Play chase")
+            buttonText: Translation.tr("Play")
             description: Translation.tr("Explicitly start the mouse chase game; it never starts on its own")
             icon: "gamepad"
             enabled: Config.options?.mascot?.chaos?.enable ?? false
@@ -349,68 +351,16 @@ WSettingsPage {
 
         WSettingsButton {
             label: Translation.tr("Hide and seek")
+            buttonText: Translation.tr("Play")
             description: Translation.tr("Explicitly start hide-and-seek; find Kira before the timer expires")
             icon: "search"
             enabled: Config.options?.mascot?.chaos?.enable ?? false
             onClicked: Quickshell.execDetached([Quickshell.shellPath("scripts/inir"), "mascot", "hideSeek"])
         }
 
-        WSettingsSwitch {
-            label: Translation.tr("Only react to real music")
-            icon: "music-note-2"
-            description: Translation.tr("Skips browser videos and players without artist metadata")
-            checked: Config.options?.mascot?.companion?.musicRequireArtist ?? true
-            enabled: Config.options?.mascot?.companion?.enable ?? true
-            onCheckedChanged: Config.setNestedValue("mascot.companion.musicRequireArtist", checked)
-        }
-
-        // Every event reaction: on/off + which pose she uses for it
-        Repeater {
-            id: mascotEventRepeater
-
-            readonly property var eventDescriptors: [
-                { key: "music", icon: "music-note-2", label: Translation.tr("React to music") },
-                { key: "battery", icon: "battery-warning", label: Translation.tr("React to low battery") },
-                { key: "update", icon: "arrow-clockwise", label: Translation.tr("React to updates") },
-                { key: "network", icon: "wifi-1", label: Translation.tr("React to network drops") },
-                { key: "dnd", icon: "weather-moon", label: Translation.tr("React to do-not-disturb") },
-                { key: "notification", icon: "alert", label: Translation.tr("Notification snoop") },
-                { key: "wallpaper", icon: "paint-bucket", label: Translation.tr("React to wallpaper change") },
-                { key: "screenshot", icon: "screenshot", label: Translation.tr("React to screenshots") },
-                { key: "gaming", icon: "gamepad", label: Translation.tr("React to game sessions") },
-                { key: "workspace", icon: "desktop", label: Translation.tr("React to workspace frenzy") },
-                { key: "unlock", icon: "lock-open", label: Translation.tr("React to screen unlock") }
-            ]
-            model: eventDescriptors
-            delegate: ColumnLayout {
-                id: eventCol
-                required property var modelData
-                Layout.fillWidth: true
-                spacing: 0
-
-                WSettingsSwitch {
-                    Layout.fillWidth: true
-                    label: eventCol.modelData.label
-                    icon: eventCol.modelData.icon
-                    checked: Config.options?.mascot?.companion?.events?.[eventCol.modelData.key] ?? true
-                    enabled: Config.options?.mascot?.companion?.enable ?? true
-                    onCheckedChanged: Config.setNestedValue("mascot.companion.events." + eventCol.modelData.key, checked)
-                }
-
-                WMascotPoseGallery {
-                    Layout.fillWidth: true
-                    Layout.leftMargin: 12
-                    visible: Config.options?.mascot?.companion?.events?.[eventCol.modelData.key] ?? true
-                    label: Translation.tr("Pose for this event")
-                    options: mascotCard.poseOptions
-                    currentValue: Config.options?.mascot?.companion?.eventPoses?.[eventCol.modelData.key] ?? ""
-                    onSelected: value => Config.setNestedValue("mascot.companion.eventPoses." + eventCol.modelData.key, value)
-                }
-            }
-        }
-
         WSettingsButton {
             label: Translation.tr("Peek now")
+            buttonText: Translation.tr("Run")
             description: Translation.tr("Try her right now instead of waiting for the interval")
             icon: "wand"
             onClicked: Quickshell.execDetached([Quickshell.shellPath("scripts/inir"), "mascot", "poke"])
@@ -418,9 +368,70 @@ WSettingsPage {
 
         WSettingsButton {
             label: Translation.tr("Send her away")
+            buttonText: Translation.tr("Hide")
             icon: "eye-off"
             onClicked: Quickshell.execDetached([Quickshell.shellPath("scripts/inir"), "mascot", "hide"])
         }
+    }
+
+    WSettingsSection {
+        title: Translation.tr("Event reactions")
+    }
+
+    // One expander per event, as Windows draws a setting that holds more: its switch in the header, the pose it
+    // wears inside (they were eleven switches each with a pose card under it, cards inside a card)
+    Repeater {
+        model: [
+            { key: "music", icon: "music-note-2", label: Translation.tr("React to music") },
+            { key: "battery", icon: "battery-warning", label: Translation.tr("React to low battery") },
+            { key: "update", icon: "arrow-clockwise", label: Translation.tr("React to updates") },
+            { key: "network", icon: "wifi-1", label: Translation.tr("React to network drops") },
+            { key: "dnd", icon: "weather-moon", label: Translation.tr("React to do-not-disturb") },
+            { key: "notification", icon: "alert", label: Translation.tr("Notification snoop") },
+            { key: "wallpaper", icon: "paint-bucket", label: Translation.tr("React to wallpaper change") },
+            { key: "screenshot", icon: "screenshot", label: Translation.tr("React to screenshots") },
+            { key: "gaming", icon: "gamepad", label: Translation.tr("React to game sessions") },
+            { key: "workspace", icon: "desktop", label: Translation.tr("React to workspace frenzy") },
+            { key: "unlock", icon: "lock-open", label: Translation.tr("React to screen unlock") }
+        ]
+        delegate: WSettingsCard {
+            id: eventCard
+            required property var modelData
+            readonly property string pose: Config.options?.mascot?.companion?.eventPoses?.[modelData.key] ?? ""
+            collapsible: true
+            expanded: false
+            title: modelData.label
+            icon: modelData.icon
+            description: Translation.tr("Pose: %1").arg(pose.length > 0
+                ? (mascotCard.poseOptions.find(p => p.value === pose)?.displayName ?? pose)
+                : Translation.tr("Automatic"))
+            toggle: true
+            checked: Config.options?.mascot?.companion?.events?.[modelData.key] ?? true
+            enabled: Config.options?.mascot?.companion?.enable ?? true
+            onToggled: on => Config.setNestedValue("mascot.companion.events." + modelData.key, on)
+
+            WSettingsSwitch {
+                visible: eventCard.modelData.key === "music"
+                label: Translation.tr("Only react to real music")
+                icon: "checkmark"
+                description: Translation.tr("Skips browser videos and players without artist metadata")
+                checked: Config.options?.mascot?.companion?.musicRequireArtist ?? true
+                enabled: Config.options?.mascot?.companion?.enable ?? true
+                onCheckedChanged: Config.setNestedValue("mascot.companion.musicRequireArtist", checked)
+            }
+
+            WMascotPoseGallery {
+                Layout.fillWidth: true
+                headless: true
+                options: mascotCard.poseOptions
+                currentValue: eventCard.pose
+                onSelected: value => Config.setNestedValue("mascot.companion.eventPoses." + eventCard.modelData.key, value)
+            }
+        }
+    }
+
+    WSettingsCard {
+        title: Translation.tr("Screen edges")
 
         WSettingsSwitch {
             label: Translation.tr("Peek from left edge")
@@ -450,37 +461,6 @@ WSettingsPage {
 
     WSettingsCard {
         title: Translation.tr("Mascot surfaces")
-
-        // Per-surface pose overrides (Auto = curated default per spot)
-        Repeater {
-            model: [
-                { key: "notifications", label: Translation.tr("Notifications pose") },
-                { key: "clipboard", label: Translation.tr("Clipboard pose") },
-                { key: "mediaControls", label: Translation.tr("Media controls pose") },
-                { key: "todo", label: Translation.tr("Todo list pose") },
-                { key: "calendar", label: Translation.tr("Calendar pose") },
-                { key: "wifi", label: Translation.tr("Wi-Fi dialog pose") },
-                { key: "startMenu", label: Translation.tr("Start menu pose") },
-                { key: "wallpaperSelector", label: Translation.tr("Wallpaper selector pose") },
-                { key: "bootGreeting", label: Translation.tr("Boot greeting pose") },
-                { key: "emptyStates", label: Translation.tr("Other empty states pose") },
-                { key: "about", label: Translation.tr("About pose") },
-                { key: "session", label: Translation.tr("Session screen pose") },
-                { key: "aiChat", label: Translation.tr("AI chat pose") },
-                { key: "dashboard", label: Translation.tr("Dashboard pose") },
-                { key: "cheatsheet", label: Translation.tr("Cheatsheet pose") },
-                { key: "updates", label: Translation.tr("Update overlay pose") },
-                { key: "dialogs", label: Translation.tr("Dialogs pose") }
-            ]
-            delegate: WMascotPoseGallery {
-                required property var modelData
-                Layout.fillWidth: true
-                label: modelData.label
-                options: mascotCard.poseOptions
-                currentValue: Config.options?.mascot?.surfacePoses?.[modelData.key] ?? ""
-                onSelected: value => Config.setNestedValue("mascot.surfacePoses." + modelData.key, value)
-            }
-        }
         icon: "image"
 
         WSettingsSwitch {
@@ -538,6 +518,46 @@ WSettingsPage {
             description: Translation.tr("Close confirmation and similar dialogs")
             checked: Config.options?.mascot?.surfaces?.dialogs ?? true
             onCheckedChanged: Config.setNestedValue("mascot.surfaces.dialogs", checked)
+        }
+    }
+
+    WSettingsCard {
+        readonly property int custom: Object.values(Config.options?.mascot?.surfacePoses ?? {}).filter(v => !!v).length
+        collapsible: true
+        expanded: false
+        title: Translation.tr("Surface poses")
+        icon: "image"
+        description: custom > 0 ? Translation.tr("Modified by you: %1").arg(custom) : Translation.tr("Automatic")
+
+        // the pose each surface wears (Auto = its curated default)
+        Repeater {
+            model: [
+                { key: "notifications", label: Translation.tr("Notifications pose") },
+                { key: "clipboard", label: Translation.tr("Clipboard pose") },
+                { key: "mediaControls", label: Translation.tr("Media controls pose") },
+                { key: "todo", label: Translation.tr("Todo list pose") },
+                { key: "calendar", label: Translation.tr("Calendar pose") },
+                { key: "wifi", label: Translation.tr("Wi-Fi dialog pose") },
+                { key: "startMenu", label: Translation.tr("Start menu pose") },
+                { key: "wallpaperSelector", label: Translation.tr("Wallpaper selector pose") },
+                { key: "bootGreeting", label: Translation.tr("Boot greeting pose") },
+                { key: "emptyStates", label: Translation.tr("Other empty states pose") },
+                { key: "about", label: Translation.tr("About pose") },
+                { key: "session", label: Translation.tr("Session screen pose") },
+                { key: "aiChat", label: Translation.tr("AI chat pose") },
+                { key: "dashboard", label: Translation.tr("Dashboard pose") },
+                { key: "cheatsheet", label: Translation.tr("Cheatsheet pose") },
+                { key: "updates", label: Translation.tr("Update overlay pose") },
+                { key: "dialogs", label: Translation.tr("Dialogs pose") }
+            ]
+            delegate: WMascotPoseGallery {
+                required property var modelData
+                Layout.fillWidth: true
+                label: modelData.label
+                options: mascotCard.poseOptions
+                currentValue: Config.options?.mascot?.surfacePoses?.[modelData.key] ?? ""
+                onSelected: value => Config.setNestedValue("mascot.surfacePoses." + modelData.key, value)
+            }
         }
     }
 

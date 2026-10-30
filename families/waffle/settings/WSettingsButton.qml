@@ -28,7 +28,8 @@ WSettingsRow {
                 ? Looks.colors.accentActive : Looks.colors.interactiveSurfaceActive
             colForeground: root.accent ? Looks.colors.accentFg : Looks.colors.fg
             
-            onClicked: root.buttonClicked()
+            // pages wire either signal (onClicked reads as the row's own)
+            onClicked: { root.buttonClicked(); root.clicked() }
         }
     }
 }

@@ -360,71 +360,63 @@ WSettingsPage {
             checked: Config.options?.waffles?.widgetsPanel?.showCustom ?? true
             onCheckedChanged: Config.setNestedValue("waffles.widgetsPanel.showCustom", checked)
         }
+    }
+
+    WSettingsCard {
+        collapsible: true
+        expanded: false
+        title: Translation.tr("Show quick actions")
+        icon: "flash-on"
+        description: Translation.tr("Display quick action buttons")
+        toggle: true
+        checked: Config.options?.waffles?.widgetsPanel?.showQuickActions ?? true
+        onToggled: on => Config.setNestedValue("waffles.widgetsPanel.showQuickActions", on)
 
         WSettingsSwitch {
-            label: Translation.tr("Show quick actions")
-            icon: "flash-on"
-            description: Translation.tr("Display quick action buttons")
-            checked: Config.options?.waffles?.widgetsPanel?.showQuickActions ?? true
-            onCheckedChanged: Config.setNestedValue("waffles.widgetsPanel.showQuickActions", checked)
-        }
-
-        WSettingsSwitch {
-            visible: Config.options?.waffles?.widgetsPanel?.showQuickActions ?? true
             label: Translation.tr("Files shortcut")
             icon: "folder"
             checked: Config.options?.waffles?.widgetsPanel?.showFiles ?? true
             onCheckedChanged: Config.setNestedValue("waffles.widgetsPanel.showFiles", checked)
         }
-
         WSettingsSwitch {
-            visible: Config.options?.waffles?.widgetsPanel?.showQuickActions ?? true
             label: Translation.tr("Terminal shortcut")
             icon: "terminal"
             checked: Config.options?.waffles?.widgetsPanel?.showTerminal ?? true
             onCheckedChanged: Config.setNestedValue("waffles.widgetsPanel.showTerminal", checked)
         }
-
         WSettingsSwitch {
-            visible: Config.options?.waffles?.widgetsPanel?.showQuickActions ?? true
             label: Translation.tr("Settings shortcut")
             icon: "settings"
             checked: Config.options?.waffles?.widgetsPanel?.showSettings ?? true
             onCheckedChanged: Config.setNestedValue("waffles.widgetsPanel.showSettings", checked)
         }
-
         WSettingsSwitch {
-            visible: Config.options?.waffles?.widgetsPanel?.showQuickActions ?? true
             label: Translation.tr("Wallpaper shortcut")
             icon: "image"
             checked: Config.options?.waffles?.widgetsPanel?.showWallpaper ?? true
             onCheckedChanged: Config.setNestedValue("waffles.widgetsPanel.showWallpaper", checked)
         }
-
         WSettingsSwitch {
-            visible: Config.options?.waffles?.widgetsPanel?.showQuickActions ?? true
             label: Translation.tr("Screenshot shortcut")
             icon: "screenshot"
             checked: Config.options?.waffles?.widgetsPanel?.showScreenshot ?? true
             onCheckedChanged: Config.setNestedValue("waffles.widgetsPanel.showScreenshot", checked)
         }
-
         WSettingsSwitch {
-            visible: Config.options?.waffles?.widgetsPanel?.showQuickActions ?? true
             label: Translation.tr("Screen Record shortcut")
             icon: "record"
             checked: Config.options?.waffles?.widgetsPanel?.showScreenRecord ?? true
             onCheckedChanged: Config.setNestedValue("waffles.widgetsPanel.showScreenRecord", checked)
         }
-
         WSettingsSwitch {
-            visible: Config.options?.waffles?.widgetsPanel?.showQuickActions ?? true
             label: Translation.tr("Session shortcut")
             icon: "power"
             checked: Config.options?.waffles?.widgetsPanel?.showSession ?? true
             onCheckedChanged: Config.setNestedValue("waffles.widgetsPanel.showSession", checked)
         }
+    }
 
+    WSettingsCard {
         WSettingsSwitch {
             label: Translation.tr("Color Scheme selector")
             icon: "color"

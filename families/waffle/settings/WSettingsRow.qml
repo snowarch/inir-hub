@@ -68,10 +68,22 @@ Item {
     }
     
     function focusFromSettingsSearch(): void {
-        // A row inside a closed expander opens it first
+        // A row inside a closed expander opens it first; an expander's own header is the setting and stays closed
+        let opened = null;
         for (let e = root.parent; e; e = e.parent)
-            if (e.expander === true && !e.expanded)
+            if (e.expander === true && !e.expanded && e.header !== root) {
                 e.expanded = true;
+                opened = e;
+            }
+        // the page grows as the expander opens: centre the row once it has its place
+        if (opened) {
+            opened.landAfterOpen(root);
+            return;
+        }
+        root.land();
+    }
+
+    function land(): void {
         // Find parent Flickable
         var flick = null;
         var p = root.parent;
@@ -107,7 +119,11 @@ Item {
         highlightAnim.start();
     }
     
-    Component.onCompleted: {
+    // A Repeater's delegate completes before it is placed in the page, so the page is read a turn later
+    // (an expander per mascot event registered with no page and its search never landed)
+    Component.onCompleted: Qt.callLater(root._registerForSearch)
+
+    function _registerForSearch(): void {
         if (!enableSettingsSearch) return;
         if (typeof SettingsSearchRegistry === "undefined") return;
         if (!root.label) return;
@@ -136,6 +152,9 @@ Item {
     // "card": a Windows 11 SettingsCard on its own; "item": a row inside an expander (WSettingsCard sets it),
     // flat with a hairline above, indented past the expander's icon
     property string cardStyle: "card"
+    property bool flatBottom: false
+    // an expander's header keeps its control left of the chevron, over its items' controls (44)
+    property real endInset: root._item ? Looks.dp(44) : Looks.settings.cardPadding
     readonly property string settingsCardRole: "row"
     readonly property bool _item: root.cardStyle === "item"
 
@@ -146,6 +165,9 @@ Item {
         id: background
         anchors.fill: parent
         radius: root._item ? 0 : Looks.settings.radiusSmall
+        // an open expander's header meets its rows with a straight edge
+        bottomLeftRadius: root.flatBottom ? 0 : radius
+        bottomRightRadius: root.flatBottom ? 0 : radius
         color: {
             if (root.clickable && mouseArea.pressed)
                 return Looks.settings.cardPressed
@@ -204,7 +226,7 @@ Item {
             right: parent.right
             verticalCenter: parent.verticalCenter
             leftMargin: root._item ? Looks.dp(root.icon !== "" ? 16 : 58) : Looks.settings.cardPadding
-            rightMargin: root._item ? Looks.dp(44) : Looks.settings.cardPadding
+            rightMargin: root.endInset
         }
         spacing: Looks.dp(16)
 

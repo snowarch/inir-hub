@@ -29,6 +29,19 @@ Item {
     default property alias content: contentColumn.data
 
     readonly property bool expander: root.collapsible
+    readonly property Item header: expanderHeader
+
+    // a search that opened this expander lands on its row after the body has grown
+    function landAfterOpen(row: Item): void {
+        landTimer.row = row
+        landTimer.restart()
+    }
+    Timer {
+        id: landTimer
+        property Item row: null
+        interval: (Looks.transition.enabled ? Looks.transition.duration.medium : 0) + 60
+        onTriggered: if (row) row.land()
+    }
     // kept for pages that read them
     readonly property int cardRadius: Looks.settings.radiusSmall
     readonly property int cardPadding: Looks.settings.cardPadding
@@ -104,97 +117,48 @@ Item {
             }
         }
 
-        // ── Expander: the header card ──
-        Item {
+        // ── Expander: the header card, a row of its own (search lands on it, keyboard reaches it) ──
+        WSettingsRow {
             id: expanderHeader
             visible: root.expander
+            enableSettingsSearch: root.expander
             Layout.fillWidth: true
-            implicitHeight: Math.max(Looks.settings.cardMinHeight, headerRow.implicitHeight + Looks.dp(26))
-
-            Rectangle {
-                anchors.fill: parent
-                bottomLeftRadius: root.expanded ? 0 : Looks.settings.radiusSmall
-                bottomRightRadius: bottomLeftRadius
-                topLeftRadius: Looks.settings.radiusSmall
-                topRightRadius: Looks.settings.radiusSmall
-                color: headerMouse.pressed ? Looks.settings.cardPressed
-                    : headerMouse.containsMouse ? Looks.settings.cardHover : Looks.settings.card
-                border.width: 1
-                border.color: Looks.settings.cardStroke
-                Behavior on color {
-                    animation: ColorAnimation { duration: Looks.transition.enabled ? 83 : 0 }
-                }
-            }
-            MouseArea {
-                id: headerMouse
-                anchors.fill: parent
-                hoverEnabled: true
-                cursorShape: Qt.PointingHandCursor
-                onClicked: root.expanded = !root.expanded
-            }
-            RowLayout {
-                id: headerRow
-                anchors.left: parent.left
-                anchors.right: parent.right
-                anchors.verticalCenter: parent.verticalCenter
-                anchors.leftMargin: Looks.settings.cardPadding
-                anchors.rightMargin: Looks.dp(8)
-                spacing: Looks.dp(16)
-
-                FluentIcon {
-                    visible: root.icon !== ""
-                    Layout.leftMargin: Looks.dp(2)
-                    Layout.rightMargin: Looks.dp(4)
-                    icon: root.icon
-                    implicitSize: Looks.settings.cardIconSize
-                    color: Looks.colors.fg
-                }
-                ColumnLayout {
-                    Layout.fillWidth: true
-                    spacing: 0
-                    WText {
-                        Layout.fillWidth: true
-                        text: root.title
-                        font.pixelSize: Looks.settings.body
-                        font.weight: Looks.font.weight.thin
-                        elide: Text.ElideRight
-                    }
-                    WText {
-                        visible: root.description !== ""
-                        Layout.fillWidth: true
-                        text: root.description
-                        font.pixelSize: Looks.settings.caption
-                        font.weight: Looks.font.weight.thin
-                        color: Looks.colors.subfg
-                        wrapMode: Text.WordWrap
-                    }
-                }
+            label: root.title
+            icon: root.icon
+            description: root.description
+            clickable: true
+            flatBottom: root.expanded
+            endInset: Looks.dp(8)
+            onClicked: root.expanded = !root.expanded
+            control: Component {
                 RowLayout {
-                    visible: root.toggle
                     spacing: Looks.dp(12)
                     WText {
+                        visible: root.toggle
                         text: root.checked ? Translation.tr("On") : Translation.tr("Off")
                         font.pixelSize: Looks.settings.body
                         font.weight: Looks.font.weight.thin
                     }
                     WSwitch {
+                        visible: root.toggle
                         checked: root.checked
                         Accessible.name: root.title
                         onClicked: root.toggled(!root.checked)
                     }
-                }
-                // the chevron sits in a 32 px button like the expander's toggle
-                Item {
-                    implicitWidth: Looks.dp(32)
-                    implicitHeight: Looks.dp(32)
-                    FluentIcon {
-                        anchors.centerIn: parent
-                        icon: "chevron-down"
-                        implicitSize: Looks.dp(13)
-                        color: Looks.colors.fg
-                        rotation: root.expanded ? 180 : 0
-                        Behavior on rotation {
-                            animation: NumberAnimation { duration: Looks.transition.enabled ? Looks.transition.duration.medium : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.standard }
+                    // the chevron sits in a 32 px button like the expander's toggle
+                    Item {
+                        Layout.leftMargin: Looks.dp(-8)
+                        implicitWidth: Looks.dp(32)
+                        implicitHeight: Looks.dp(32)
+                        FluentIcon {
+                            anchors.centerIn: parent
+                            icon: "chevron-down"
+                            implicitSize: Looks.dp(13)
+                            color: Looks.colors.fg
+                            rotation: root.expanded ? 180 : 0
+                            Behavior on rotation {
+                                animation: NumberAnimation { duration: Looks.transition.enabled ? Looks.transition.duration.medium : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.standard }
+                            }
                         }
                     }
                 }
