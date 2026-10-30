@@ -18,7 +18,8 @@ ContentPage {
     settingsPageIndex: 0
     settingsPageName: Translation.tr("Home")
     readonly property bool isOverlayPage: GlobalStates.settingsOverlayOpen ?? false
-    property string activeSection: "wallpaper"
+    // nothing open on arrival: Home is the hero, the day's switches and a way into each part (his 10-29: no wall of rows)
+    property string activeSection: ""
     property string captureFolderTarget: "recordings"
     property bool showManualNotificationFilter: false
     property bool showManualVisualizerFilter: false
@@ -136,7 +137,96 @@ ContentPage {
 
     SettingsHome {}
 
+    // The page's parts as M3 Expressive tiles, each mark its own shape; one opens its rows under them, again shuts them.
+    ColumnLayout {
+        Layout.fillWidth: true
+        spacing: 8
+        StyledText {
+            Layout.leftMargin: SettingsMaterialPreset.tilePaddingX
+            text: Translation.tr("More")
+            font.pixelSize: SettingsMaterialPreset.subheaderSize
+            font.weight: Font.Medium
+            color: SettingsMaterialPreset.subheaderColor
+        }
+        GridLayout {
+            Layout.fillWidth: true
+            columns: width >= 760 ? 3 : 2
+            columnSpacing: 8
+            rowSpacing: 8
+            Repeater {
+                model: [
+                    { name: Translation.tr("Wallpaper"), icon: "format_paint", value: "wallpaper", shape: MaterialShape.Shape.Cookie9Sided, role: 0 },
+                    { name: Translation.tr("Bar & screen"), icon: "screenshot_monitor", value: "screen", shape: MaterialShape.Shape.Pentagon, role: 2 },
+                    { name: Translation.tr("Gaming"), icon: "sports_esports", value: "game", shape: MaterialShape.Shape.Clover4Leaf, role: 1 },
+                    { name: Translation.tr("Capture"), icon: "photo_camera", value: "capture", shape: MaterialShape.Shape.Sunny, role: 0 },
+                    { name: Translation.tr("Filters"), icon: "filter_alt", value: "filters", shape: MaterialShape.Shape.Gem, role: 2 },
+                    { name: Translation.tr("Actions"), icon: "bolt", value: "actions", shape: MaterialShape.Shape.Flower, role: 1 }
+                ]
+                RippleButton {
+                    id: part
+                    required property var modelData
+                    readonly property bool open: root.activeSection === part.modelData.value
+                    Layout.fillWidth: true
+                    Layout.preferredWidth: 1
+                    implicitHeight: 64
+                    pressScaleEnabled: false
+                    buttonRadius: part.open ? 20 : 32
+                    toggled: part.open
+                    colBackground: SettingsMaterialPreset.tileColor
+                    colBackgroundHover: SettingsMaterialPreset.tileHoverColor
+                    colBackgroundToggled: Appearance.colors.colPrimaryContainer
+                    colBackgroundToggledHover: ColorUtils.mix(Appearance.colors.colPrimaryContainer, Appearance.colors.colOnPrimaryContainer, 0.92)
+                    colRipple: SettingsMaterialPreset.tilePressColor
+                    colRippleToggled: ColorUtils.mix(Appearance.colors.colPrimaryContainer, Appearance.colors.colOnPrimaryContainer, 0.88)
+                    Accessible.role: Accessible.Button
+                    Accessible.name: part.modelData.name
+                    onClicked: root.activeSection = part.open ? "" : part.modelData.value
+                    Behavior on buttonRadius {
+                        enabled: Appearance.animationsEnabled
+                        NumberAnimation { duration: Appearance.animationCurves.expressiveFastSpatialDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Appearance.animationCurves.expressiveFastSpatial }
+                    }
+                    contentItem: RowLayout {
+                        spacing: 12
+                        MaterialShapeWrappedMaterialSymbol {
+                            Layout.leftMargin: 8
+                            implicitSize: 44
+                            shape: part.modelData.shape
+                            text: part.modelData.icon
+                            iconSize: 22
+                            // three tonal roles in turn, so the eye tells the parts apart by colour before reading
+                            color: part.open ? Appearance.colors.colPrimary
+                                : [Appearance.colors.colPrimaryContainer, Appearance.colors.colSecondaryContainer, Appearance.colors.colTertiaryContainer][part.modelData.role]
+                            colSymbol: part.open ? Appearance.colors.colOnPrimary
+                                : [Appearance.colors.colOnPrimaryContainer, Appearance.colors.colOnSecondaryContainer, Appearance.colors.colOnTertiaryContainer][part.modelData.role]
+                        }
+                        StyledText {
+                            Layout.fillWidth: true
+                            text: part.modelData.name
+                            font.pixelSize: Math.round(15 * Appearance.fontSizeScale)
+                            font.weight: Font.Medium
+                            color: part.open ? Appearance.colors.colOnPrimaryContainer : SettingsMaterialPreset.labelColor
+                            elide: Text.ElideRight
+                        }
+                        MaterialSymbol {
+                            Layout.rightMargin: 12
+                            text: "expand_more"
+                            iconSize: 20
+                            rotation: part.open ? 180 : 0
+                            color: part.open ? Appearance.colors.colOnPrimaryContainer : SettingsMaterialPreset.supportingColor
+                            Behavior on rotation {
+                                enabled: Appearance.animationsEnabled
+                                NumberAnimation { duration: Appearance.animationCurves.expressiveFastSpatialDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: Appearance.animationCurves.expressiveFastSpatial }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // Kept for search: a result inside a part opens it through here; the tiles above are what people see.
     SettingsTaskNavigator {
+        visible: false
         icon: "bolt"
         title: ""
         description: ""
