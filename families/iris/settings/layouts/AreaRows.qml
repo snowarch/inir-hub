@@ -85,7 +85,7 @@ ColumnLayout {
             for (const group of shown) {
                 const single = group.rows.length === 1 && group.rows[0].kind !== "list"
                 if (single && previous?.loose) { previous.rows = previous.rows.concat(group.rows); continue }
-                previous = { title: single ? "​" + group.key : group.title, caption: single ? "" : group.title, key: group.key,
+                previous = { title: single ? "\u200B" + group.key : group.title, caption: single ? "" : group.title, key: group.key,
                     rows: group.rows.slice(), loose: single, flat: true }
                 out.push(previous)
             }
