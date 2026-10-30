@@ -32,6 +32,10 @@ Item {
     // A clear menu bar leaves its items on the wallpaper: each group reads what is under it (Lume) and takes
     // dark ink over a light one, as macOS does.
     property bool clear: false
+    // Shelf (the full layout across an edge): its start and end sit on soft plates of their own, workspaces are numbered
+    // slots, the focused app reads by name; the Island rises between them.
+    property bool shelf: false
+    readonly property bool plates: zones.shelf && !zones.vertical && !zones.clear
     property bool bottomEdge: false
     // How far the lane's centre moves toward the screen edge, so it sits in the middle of the body the eye sees.
     property real lift: 0
@@ -149,6 +153,20 @@ Item {
             }
         }
     }
+
+    component GroupPlate: Rectangle {
+        required property Item group
+        readonly property real inset: Math.round(5 * zones.d)
+        visible: zones.plates && group.width > 1
+        x: group.x - Math.round(4 * zones.d)
+        y: group.y + inset
+        width: group.width + Math.round(8 * zones.d)
+        height: Math.max(0, group.height - 2 * inset)
+        radius: height / 2
+        color: IrisStyle.fillQuiet
+    }
+    GroupPlate { group: startGroup }
+    GroupPlate { group: endGroup }
 
     Group {
         id: startGroup
@@ -286,7 +304,7 @@ Item {
                     .map(ws => ({ id: ws.id, active: ws.is_active, urgent: ws.is_urgent ?? false,
                         used: windows.some(w => w.workspace_id === ws.id) }))
             }
-            readonly property real slot: Math.round(14 * zones.d)
+            readonly property real slot: Math.round((zones.plates ? 24 : 14) * zones.d)
             readonly property real dot: Math.max(4, Math.round(6 * zones.d))
             readonly property real pad: Math.round(6 * zones.d)
             implicitWidth: strip.list.length === 0 ? 0 : zones.vertical ? zones.pieceSize : dots.implicitWidth + 2 * strip.pad
@@ -317,7 +335,9 @@ Item {
                     delegate: Item {
                         id: space
                         required property var modelData
-                        readonly property real extent: space.modelData.active ? strip.slot + Math.round(10 * zones.d) : strip.slot
+                        required property int index
+                        readonly property real extent: space.modelData.active ? strip.slot + Math.round((zones.plates ? 8 : 10) * zones.d) : strip.slot
+                        readonly property int number: space.index + 1
                         width: zones.vertical ? zones.pieceSize : space.extent
                         height: zones.vertical ? space.extent : zones.pieceSize
                         Behavior on width { enabled: !zones.vertical; NumberAnimation { duration: IrisStyle.moveDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: IrisStyle.moveCurve } }
@@ -325,14 +345,28 @@ Item {
                         Rectangle {
                             anchors.centerIn: parent
                             readonly property real along: space.modelData.active ? space.extent - strip.slot + strip.dot : strip.dot
-                            width: zones.vertical ? strip.dot : along
-                            height: zones.vertical ? along : strip.dot
-                            radius: strip.dot / 2
-                            color: space.modelData.active ? IrisStyle.markOn(IrisStyle.accent, strip.backdrop, strip.light, 3)
+                            readonly property real chip: Math.round(22 * zones.d)
+                            width: zones.plates ? space.extent - Math.round(2 * zones.d) : zones.vertical ? strip.dot : along
+                            height: zones.plates ? chip : zones.vertical ? along : strip.dot
+                            radius: height / 2
+                            color: zones.plates ? (space.modelData.active ? IrisStyle.tintFill(IrisStyle.accent) : spaceHover.hovered ? IrisStyle.fillHover : "transparent")
+                                : space.modelData.active ? IrisStyle.markOn(IrisStyle.accent, strip.backdrop, strip.light, 3)
                                 : space.modelData.urgent ? IrisStyle.markOn(IrisStyle.secondaryAccent, strip.backdrop, strip.light, 3)
                                 : spaceHover.hovered ? strip.ink
                                 : space.modelData.used ? (strip.light ? IrisStyle.inkOnLightMuted : IrisStyle.textSecondary)
                                 : strip.light ? IrisStyle.inkOnLightFaint : IrisStyle.textTertiary
+                            Behavior on color { ColorAnimation { duration: IrisStyle.duration(140); easing.type: IrisStyle.feedbackEasing } }
+                        }
+                        IrisText {
+                            visible: zones.plates
+                            anchors.centerIn: parent
+                            text: String(space.number)
+                            font.pixelSize: IrisStyle.typeMeta
+                            font.weight: IrisStyle.weight(space.modelData.active ? Font.Bold : Font.DemiBold)
+                            font.features: { "tnum": 1 }
+                            color: space.modelData.active ? IrisStyle.markOn(IrisStyle.accent, strip.backdrop, strip.light, 4.5)
+                                : space.modelData.urgent ? IrisStyle.secondaryAccent
+                                : space.modelData.used || spaceHover.hovered ? IrisStyle.text : IrisStyle.textTertiary
                             Behavior on color { ColorAnimation { duration: IrisStyle.duration(140); easing.type: IrisStyle.feedbackEasing } }
                         }
                         HoverHandler { id: spaceHover; cursorShape: Qt.PointingHandCursor }
@@ -359,6 +393,12 @@ Item {
                 return onWorkspace.find(w => w.id === ws.active_window_id) ?? null
             }
             readonly property string title: String(current.window?.title ?? "")
+            // The app leads by name on a shelf (a menu bar's habit); the title follows a step quieter.
+            readonly property string appName: {
+                const id = String(current.window?.app_id ?? "")
+                const tail = id.split(".").pop() ?? id
+                return tail.length === 0 ? "" : tail.charAt(0).toUpperCase() + tail.slice(1)
+            }
             readonly property real iconSize: Math.round(18 * zones.d)
             readonly property real pad: Math.round(8 * zones.d)
             readonly property real maxTitle: Math.round(Math.min(280 * zones.d, zones.length * 0.22))
@@ -380,10 +420,13 @@ Item {
                 anchors.leftMargin: Math.round(8 * zones.d)
                 anchors.verticalCenter: parent.verticalCenter
                 width: Math.min(current.maxTitle, implicitWidth)
-                text: current.title
+                text: zones.plates && current.appName.length > 0
+                    ? current.appName + (current.title.length > 0 && current.title !== current.appName ? "  <font color=\"" + IrisStyle.textSecondary + "\">" + current.title.replace(/&/g, "&amp;").replace(/</g, "&lt;") + "</font>" : "")
+                    : current.title
+                textFormat: zones.plates ? Text.StyledText : Text.PlainText
                 color: current.light ? IrisStyle.inkOnLight : IrisStyle.text
                 font.pixelSize: IrisStyle.typeLabel
-                font.weight: IrisStyle.weight(Font.Medium)
+                font.weight: IrisStyle.weight(zones.plates ? Font.DemiBold : Font.Medium)
                 elide: Text.ElideRight
             }
             Accessible.role: Accessible.StaticText
