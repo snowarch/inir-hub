@@ -27,20 +27,17 @@ Item {
 
     readonly property real d: Number(page.host?.d ?? IrisStyle.settingsDensity)
     function u(n: real): int { return Math.round(n * page.d) }
-    readonly property bool compact: page.width < page.u(900)
     readonly property var entry: IrisOptions.sectionById(page.area) ?? ({})
     // The page in front: only then do writes reach its rows and its stage plays.
     readonly property bool live: page.visible && page.area === String(page.host?.section ?? "")
     readonly property bool whole: rows.whole
-    // Classic (untitled, beside its sidebar) leads the sheet with the stage as a band across it, the way Apple's panes
-    // open on their picture; a stage column beside the sheet there made three columns and squeezed every control into
-    // the last one (his 10-30).
-    readonly property bool banner: !page.titled
+    // Every page leads its sheet with the stage as a band across it, the way Apple's panes open on their picture: a stage
+    // column beside the sheet squeezed every control into what was left (his 10-30, Classic first, then Folio too).
 
     Column {
         id: title
         visible: page.titled
-        width: page.width
+        width: page.width - (titleActions.visible ? titleActions.width + page.u(16) : 0)
         spacing: page.u(4)
         IrisText {
             width: parent.width
@@ -61,21 +58,51 @@ Item {
         }
     }
 
+    // What can be done to the area (customize, restore) on the title's line, as a pane's toolbar holds it.
+    Row {
+        id: titleActions
+        visible: page.titled && page.actions && actionsRepeater.count > 0
+        anchors.right: parent.right
+        y: page.u(4)
+        spacing: page.u(6)
+        Repeater {
+            id: actionsRepeater
+            model: page.live && page.actions ? (page.host?.pageActions ?? []) : []
+            MouseArea {
+                id: titleAct
+                required property var modelData
+                width: titleActRow.implicitWidth + page.u(22)
+                height: page.u(32)
+                hoverEnabled: true
+                cursorShape: Qt.PointingHandCursor
+                Accessible.role: Accessible.Button
+                Accessible.name: String(titleAct.modelData.label ?? "")
+                onClicked: titleAct.modelData.clicked()
+                Rectangle { anchors.fill: parent; radius: IrisStyle.capsule(height); color: titleAct.containsMouse ? IrisStyle.fillHover : IrisStyle.fillQuiet }
+                Row {
+                    id: titleActRow
+                    anchors.centerIn: parent
+                    spacing: page.u(6)
+                    MaterialSymbol { anchors.verticalCenter: parent.verticalCenter; text: String(titleAct.modelData.glyph ?? ""); iconSize: page.u(16); color: IrisStyle.text }
+                    IrisText { anchors.verticalCenter: parent.verticalCenter; text: String(titleAct.modelData.label ?? ""); color: IrisStyle.text; font.pixelSize: IrisStyle.typeMeta }
+                }
+            }
+        }
+    }
+
     Item {
         id: areaBox
         y: page.titled ? title.height + page.u(18) : 0
         width: page.width
         height: page.height - y
         readonly property bool staged: stage.available
-        readonly property bool beside: areaBox.staged && !page.banner
-        readonly property real gap: page.u(page.compact ? 18 : 24)
 
         ClippingRectangle {
             id: plate
-            parent: page.banner ? bannerSlot : areaBox
+            parent: bannerSlot
             visible: areaBox.staged
-            width: page.banner ? bannerSlot.width : Math.round(areaBox.width * (page.compact ? 0.40 : 0.42))
-            height: page.banner ? bannerSlot.height : Math.round(Math.min(areaBox.height, width * 0.78, page.u(440)))
+            width: bannerSlot.width
+            height: bannerSlot.height
             radius: IrisStyle.radiusSheet
             color: IrisStyle.readingCard
             border.width: 1
@@ -86,7 +113,7 @@ Item {
                 anchors.margins: page.u(12)
                 radius: Math.max(IrisStyle.radiusRow, IrisStyle.radiusSheet - page.u(12))
                 standIn: true
-                captionOutside: !page.banner
+                captionOutside: false
                 playing: page.live
                 // Home leads with the welcome over its rows, so its rows get the width.
                 section: page.area === "general" ? "" : page.area
@@ -96,114 +123,10 @@ Item {
             }
         }
 
-        // Under the stage: what it shows now, what can be done to the area, then the area at a glance.
-        Column {
-            id: underStage
-            visible: areaBox.beside
-            y: plate.height + page.u(14)
-            width: plate.width
-            spacing: page.u(14)
-            IrisText {
-                visible: stage.caption.length > 0
-                x: page.u(4)
-                width: parent.width - x
-                wrapMode: Text.WordWrap
-                maximumLineCount: 2
-                elide: Text.ElideRight
-                text: stage.caption
-                color: IrisStyle.muted
-                font.pixelSize: IrisStyle.typeMeta
-            }
-            Flow {
-                width: plate.width
-                spacing: page.u(6)
-                Repeater {
-                    model: page.live && page.actions ? (page.host?.pageActions ?? []) : []
-                    MouseArea {
-                        id: act
-                        required property var modelData
-                        width: actRow.implicitWidth + page.u(22)
-                        height: page.u(32)
-                        hoverEnabled: true
-                        cursorShape: Qt.PointingHandCursor
-                        Accessible.role: Accessible.Button
-                        Accessible.name: String(act.modelData.label ?? "")
-                        onClicked: act.modelData.clicked()
-                        Rectangle { anchors.fill: parent; radius: IrisStyle.capsule(height); color: act.containsMouse ? IrisStyle.fillHover : IrisStyle.fillQuiet }
-                        Row {
-                            id: actRow
-                            anchors.centerIn: parent
-                            spacing: page.u(6)
-                            MaterialSymbol { anchors.verticalCenter: parent.verticalCenter; text: String(act.modelData.glyph ?? ""); iconSize: page.u(16); color: IrisStyle.text }
-                            IrisText { anchors.verticalCenter: parent.verticalCenter; text: String(act.modelData.label ?? ""); color: IrisStyle.text; font.pixelSize: IrisStyle.typeMeta }
-                        }
-                    }
-                }
-            }
-            // The area's groups as a book's contents, the one being read marked: a click glides the sheet to it
-            // (SekaiPop's jump chips). An "at a glance" of values stood here and said again what the sheet beside it says.
-            Column {
-                id: contents
-                readonly property var heads: rows.blocks.filter(block => String(block.caption ?? "").length > 0 && (!block.rest || rows.opensRest(String(block.key ?? ""))))
-                readonly property int at: Math.max(0, contents.heads.findIndex(block => String(block.key) === page.reading))
-                readonly property int fit: Math.max(0, Math.floor((areaBox.height - plate.height - page.u(150)) / page.u(32)))
-                // More groups than room: the list keeps the one being read inside it.
-                readonly property int from: Math.max(0, Math.min(contents.heads.length - contents.fit, contents.at - Math.floor(contents.fit / 2)))
-                visible: contents.heads.length > 1 && contents.fit >= 2
-                width: plate.width
-                IrisText {
-                    x: page.u(4)
-                    bottomPadding: page.u(6)
-                    text: Translation.tr("On this page")
-                    color: IrisStyle.textTertiary
-                    font.family: IrisStyle.fontMono
-                    font.pixelSize: Math.max(10, IrisStyle.typeCaption)
-                    font.weight: IrisStyle.weight(Font.Medium)
-                    font.capitalization: Font.AllUppercase
-                    font.letterSpacing: Math.round(Math.max(10, IrisStyle.typeCaption) * 0.08)
-                }
-                Repeater {
-                    model: contents.heads.slice(contents.from, contents.from + contents.fit)
-                    MouseArea {
-                        id: head
-                        required property var modelData
-                        readonly property bool on: String(head.modelData.key) === page.reading
-                        width: contents.width
-                        height: page.u(32)
-                        hoverEnabled: true
-                        cursorShape: Qt.PointingHandCursor
-                        Accessible.role: Accessible.Link
-                        Accessible.name: String(head.modelData.caption)
-                        onClicked: page.showGroup(String(head.modelData.key))
-                        Rectangle { anchors.fill: parent; radius: IrisStyle.fieldChamfer ? 0 : page.u(10); color: head.containsMouse ? IrisStyle.fillHover : "transparent" }
-                        Rectangle {
-                            x: page.u(6)
-                            anchors.verticalCenter: parent.verticalCenter
-                            width: page.u(3)
-                            height: head.on ? page.u(16) : page.u(6)
-                            radius: width / 2
-                            color: head.on ? IrisStyle.accent : IrisStyle.hairlineStrong
-                            Behavior on height { NumberAnimation { duration: IrisStyle.duration(160); easing.type: IrisStyle.feedbackEasing } }
-                        }
-                        IrisText {
-                            x: page.u(18)
-                            anchors.verticalCenter: parent.verticalCenter
-                            width: parent.width - x - page.u(6)
-                            elide: Text.ElideRight
-                            text: String(head.modelData.caption)
-                            color: head.on ? IrisStyle.text : IrisStyle.subtext
-                            font.pixelSize: IrisStyle.typeMeta
-                            font.weight: IrisStyle.weight(head.on ? Font.DemiBold : Font.Normal)
-                        }
-                    }
-                }
-            }
-        }
-
         // The groups' sheet: rows on the body in solid, on a reading fill over glass (never glass on glass).
         Rectangle {
             id: sheet
-            x: areaBox.beside ? plate.width + areaBox.gap : 0
+            x: 0
             width: areaBox.width - x
             height: areaBox.height
             radius: IrisStyle.radiusSheet
@@ -215,7 +138,7 @@ Item {
                 x: flick.x
                 y: IrisStyle.glassy ? page.u(6) : 0
                 width: flick.width - page.u(8)
-                height: page.banner && areaBox.staged ? Math.round(Math.min(width * 0.3, page.u(260), sheet.height * 0.34)) : 0
+                height: areaBox.staged ? Math.round(Math.min(width * 0.3, page.u(260), sheet.height * 0.34)) : 0
             }
             Flickable {
                 id: flick
