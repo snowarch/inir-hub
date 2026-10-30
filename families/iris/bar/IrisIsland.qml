@@ -2182,6 +2182,27 @@ Item {
                 Item { Layout.fillWidth: true }
             }
 
+            // Halo: a hairline under the time for the day, lit as far as it has gone, now a dot in the highlight; it
+            // keeps to the minute (DateTime's), so it never ticks between them.
+            Item {
+                id: dayLine
+                readonly property real fraction: { void DateTime.timeDisplay; const t = new Date(); return (t.getHours() * 60 + t.getMinutes()) / 1440 }
+                visible: root.design === "halo" && clockRow.visible && !root.vertical && clusterClock.width > 0
+                opacity: clockRow.opacity
+                x: clockRow.x + clusterClock.x
+                y: clockRow.y + clusterClock.y + clusterClock.height + Math.round(2 * root.d)
+                width: clusterClock.width
+                height: Math.max(2, Math.round(2 * root.d))
+                Rectangle { anchors.fill: parent; radius: height / 2; color: IrisStyle.hairline }
+                Rectangle { width: Math.round(parent.width * dayLine.fraction); height: parent.height; radius: height / 2; color: IrisStyle.textTertiary }
+                Rectangle {
+                    readonly property real size: Math.round(5 * root.d)
+                    x: Math.round(parent.width * dayLine.fraction - size / 2); y: Math.round((parent.height - size) / 2)
+                    width: size; height: size; radius: size / 2
+                    color: root.clockAccent
+                }
+            }
+
             CompactRow {
                 id: eventRow
                 mode: "event"
