@@ -35,7 +35,10 @@ Item {
     // Shelf (the full layout across an edge): its start and end sit on soft plates of their own, workspaces are numbered
     // slots, the focused app reads by name; the Island rises between them.
     property bool shelf: false
+    // A menu bar names its app and numbers its workspaces the same way, without plates: its strip is too thin to hold them.
+    property bool menuBar: false
     readonly property bool plates: zones.shelf && !zones.vertical && !zones.clear
+    readonly property bool named: (zones.shelf || zones.menuBar) && !zones.vertical
     property bool bottomEdge: false
     // How far the lane's centre moves toward the screen edge, so it sits in the middle of the body the eye sees.
     property real lift: 0
@@ -304,7 +307,7 @@ Item {
                     .map(ws => ({ id: ws.id, active: ws.is_active, urgent: ws.is_urgent ?? false,
                         used: windows.some(w => w.workspace_id === ws.id) }))
             }
-            readonly property real slot: Math.round((zones.plates ? 24 : 14) * zones.d)
+            readonly property real slot: Math.round((zones.named ? 24 : 14) * zones.d)
             readonly property real dot: Math.max(4, Math.round(6 * zones.d))
             readonly property real pad: Math.round(6 * zones.d)
             implicitWidth: strip.list.length === 0 ? 0 : zones.vertical ? zones.pieceSize : dots.implicitWidth + 2 * strip.pad
@@ -336,7 +339,7 @@ Item {
                         id: space
                         required property var modelData
                         required property int index
-                        readonly property real extent: space.modelData.active ? strip.slot + Math.round((zones.plates ? 8 : 10) * zones.d) : strip.slot
+                        readonly property real extent: space.modelData.active ? strip.slot + Math.round((zones.named ? 8 : 10) * zones.d) : strip.slot
                         readonly property int number: space.index + 1
                         width: zones.vertical ? zones.pieceSize : space.extent
                         height: zones.vertical ? space.extent : zones.pieceSize
@@ -346,10 +349,10 @@ Item {
                             anchors.centerIn: parent
                             readonly property real along: space.modelData.active ? space.extent - strip.slot + strip.dot : strip.dot
                             readonly property real chip: Math.round(22 * zones.d)
-                            width: zones.plates ? space.extent - Math.round(2 * zones.d) : zones.vertical ? strip.dot : along
-                            height: zones.plates ? chip : zones.vertical ? along : strip.dot
+                            width: zones.named ? space.extent - Math.round(2 * zones.d) : zones.vertical ? strip.dot : along
+                            height: zones.named ? Math.min(chip, zones.lane - Math.round(6 * zones.d)) : zones.vertical ? along : strip.dot
                             radius: height / 2
-                            color: zones.plates ? (space.modelData.active ? IrisStyle.tintFill(IrisStyle.accent) : spaceHover.hovered ? IrisStyle.fillHover : "transparent")
+                            color: zones.named ? (space.modelData.active ? IrisStyle.tintFill(IrisStyle.accent) : spaceHover.hovered ? IrisStyle.fillHover : "transparent")
                                 : space.modelData.active ? IrisStyle.markOn(IrisStyle.accent, strip.backdrop, strip.light, 3)
                                 : space.modelData.urgent ? IrisStyle.markOn(IrisStyle.secondaryAccent, strip.backdrop, strip.light, 3)
                                 : spaceHover.hovered ? strip.ink
@@ -358,7 +361,7 @@ Item {
                             Behavior on color { ColorAnimation { duration: IrisStyle.duration(140); easing.type: IrisStyle.feedbackEasing } }
                         }
                         IrisText {
-                            visible: zones.plates
+                            visible: zones.named
                             anchors.centerIn: parent
                             text: String(space.number)
                             font.pixelSize: IrisStyle.typeMeta
@@ -420,13 +423,13 @@ Item {
                 anchors.leftMargin: Math.round(8 * zones.d)
                 anchors.verticalCenter: parent.verticalCenter
                 width: Math.min(current.maxTitle, implicitWidth)
-                text: zones.plates && current.appName.length > 0
+                text: zones.named && current.appName.length > 0
                     ? current.appName + (current.title.length > 0 && current.title !== current.appName ? "  <font color=\"" + IrisStyle.textSecondary + "\">" + current.title.replace(/&/g, "&amp;").replace(/</g, "&lt;") + "</font>" : "")
                     : current.title
-                textFormat: zones.plates ? Text.StyledText : Text.PlainText
+                textFormat: zones.named ? Text.StyledText : Text.PlainText
                 color: current.light ? IrisStyle.inkOnLight : IrisStyle.text
                 font.pixelSize: IrisStyle.typeLabel
-                font.weight: IrisStyle.weight(zones.plates ? Font.DemiBold : Font.Medium)
+                font.weight: IrisStyle.weight(zones.named ? Font.DemiBold : Font.Medium)
                 elide: Text.ElideRight
             }
             Accessible.role: Accessible.StaticText

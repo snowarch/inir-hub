@@ -2385,6 +2385,7 @@ Item {
                 lane: root.clearStrip ? root.compactHeight : root.stripHeight
                 clear: root.clearStrip
                 shelf: root.layout === "full"
+                menuBar: root.menubar
                 bottomEdge: root.bottomEdge
                 lift: root.bandLift
                 heartLength: root.heartLength
