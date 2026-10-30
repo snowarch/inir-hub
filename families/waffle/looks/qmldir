@@ -21,6 +21,7 @@ WUserAvatar 1.0 WUserAvatar.qml
 WProgressBar 1.0 WProgressBar.qml
 WIndeterminateProgressBar 1.0 WIndeterminateProgressBar.qml
 WChoiceButton 1.0 WChoiceButton.qml
+WComboBox 1.0 WComboBox.qml
 WListView 1.0 WListView.qml
 WScrollBar 1.0 WScrollBar.qml
 WBarAttachedPanelContent 1.0 WBarAttachedPanelContent.qml

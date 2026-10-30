@@ -1,0 +1,156 @@
+pragma ComponentBehavior: Bound
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
+import qs.modules.common
+
+// The Windows 11 dropdown: a model of {displayName, value}, as wide as its widest option.
+ComboBox {
+    id: combo
+    WFocusVisual { shown: combo.visualFocus; radius: Looks.settings.radiusLarge }
+    // As wide as its widest option (WinUI: the box never jumps as the choice changes), 160 to 300.
+    FontMetrics { id: optionMetrics; font: comboLabel.font }
+    implicitWidth: {
+        let widest = 0
+        for (const option of Array.from(combo.model ?? []))
+            widest = Math.max(widest, optionMetrics.advanceWidth(String(option?.displayName ?? "")))
+        return Math.min(Looks.dp(300), Math.max(160, Math.ceil(widest) + 12 + 8 + 12 + 8 + 2))
+    }
+    implicitHeight: 32
+    
+    textRole: "displayName"
+    valueRole: "value"
+    // contentItem owns the only chevron.
+    indicator: null
+    background: Rectangle {
+        radius: Looks.settings.radiusLarge
+        color: combo.down
+            ? Looks.settings.tilePressed
+            : combo.hovered
+                ? Looks.settings.tileHover
+                : Looks.colors.inputBg
+        border.width: 1
+        border.color: combo.activeFocus
+            ? Looks.colors.accent : Looks.settings.strokeStrong
+    }
+    
+    contentItem: RowLayout {
+        spacing: 8
+        
+        WText {
+            id: comboLabel
+            Layout.fillWidth: true
+            Layout.leftMargin: 12
+            text: combo.displayText
+            font.pixelSize: Looks.font.pixelSize.normal
+            elide: Text.ElideRight
+        }
+        
+        FluentIcon {
+            Layout.rightMargin: 8
+            icon: "chevron-down"
+            implicitSize: 12
+            color: Looks.colors.subfg
+        }
+    }
+    
+    popup: Popup {
+        y: combo.height + 4
+        width: combo.width
+        implicitHeight: contentItem.implicitHeight + 8
+        padding: 4
+        
+        enter: Transition {
+            ParallelAnimation {
+                NumberAnimation { property: "opacity"; from: 0; to: 1; duration: Looks.transition.enabled ? Looks.transition.duration.fast : 0; easing.type: Easing.OutCubic }
+                NumberAnimation { property: "scale"; from: 0.95; to: 1.0; duration: Looks.transition.enabled ? Looks.transition.duration.fast : 0; easing.type: Easing.OutCubic }
+            }
+        }
+        exit: Transition {
+            ParallelAnimation {
+                NumberAnimation { property: "opacity"; from: 1; to: 0; duration: Looks.transition.enabled ? Looks.transition.duration.ultraFast : 0; easing.type: Easing.InQuad }
+                NumberAnimation { property: "scale"; from: 1.0; to: 0.97; duration: Looks.transition.enabled ? Looks.transition.duration.ultraFast : 0; easing.type: Easing.InQuad }
+            }
+        }
+        
+        background: Item {
+            Rectangle {
+                id: popupBg
+                anchors.fill: parent
+                radius: Looks.settings.radiusLarge
+                color: Looks.colors.bgPanelFooter
+                border.width: 1
+                border.color: Looks.settings.strokeStrong
+            }
+            
+            WRectangularShadow {
+                target: popupBg
+                visible: Looks.effectsEnabled
+            }
+        }
+        
+        contentItem: ListView {
+            clip: true
+            implicitHeight: contentHeight
+            model: combo.popup.visible ? combo.delegateModel : null
+            currentIndex: combo.highlightedIndex
+            
+            ScrollBar.vertical: WScrollBar {}
+        }
+    }
+    
+    delegate: ItemDelegate {
+        id: delegateItem
+        required property int index
+        required property var modelData
+        
+        width: combo.width - 8
+        height: 36
+        highlighted: combo.highlightedIndex === index
+        
+        background: Rectangle {
+            radius: Looks.settings.radiusLarge
+            color: {
+                if (delegateItem.index === combo.currentIndex)
+                    return Looks.colors.selection
+                if (delegateItem.highlighted)
+                    return Looks.settings.tileHover
+                return "transparent"
+            }
+            border.width: delegateItem.index === combo.currentIndex ? 1 : 0
+            border.color: Looks.colors.accent
+            
+            Behavior on color {
+                animation: ColorAnimation { duration: Looks.transition.enabled ? 70 : 0; easing.type: Easing.BezierSpline; easing.bezierCurve: Looks.transition.easing.bezierCurve.standard }
+            }
+        }
+        
+        contentItem: RowLayout {
+            spacing: 6
+            
+            FluentIcon {
+                Layout.leftMargin: 8
+                icon: "checkmark"
+                implicitSize: 12
+                color: delegateItem.index === combo.currentIndex
+                    ? Looks.colors.accent : Looks.colors.fg
+                visible: delegateItem.index === combo.currentIndex
+            }
+            
+            Item {
+                Layout.leftMargin: 8
+                implicitWidth: 12
+                visible: delegateItem.index !== combo.currentIndex
+            }
+            
+            WText {
+                Layout.fillWidth: true
+                text: delegateItem.modelData.displayName
+                font.pixelSize: Looks.font.pixelSize.normal
+                font.weight: delegateItem.index === combo.currentIndex ? Looks.font.weight.strong : Looks.font.weight.regular
+                color: Looks.colors.fg
+                verticalAlignment: Text.AlignVCenter
+            }
+        }
+    }
+}
