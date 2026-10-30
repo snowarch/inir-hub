@@ -68,6 +68,10 @@ Item {
     }
     
     function focusFromSettingsSearch(): void {
+        // A row inside a closed expander opens it first
+        for (let e = root.parent; e; e = e.parent)
+            if (e.expander === true && !e.expanded)
+                e.expanded = true;
         // Find parent Flickable
         var flick = null;
         var p = root.parent;
@@ -193,6 +197,8 @@ Item {
 
     RowLayout {
         id: contentRow
+        // WinUI's disabled ink (TextFillColorDisabled, ~36-40 %): a row under an expander that is off rests here
+        opacity: root.enabled ? 1 : 0.4
         anchors {
             left: parent.left
             right: parent.right

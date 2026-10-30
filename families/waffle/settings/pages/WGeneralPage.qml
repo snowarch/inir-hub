@@ -161,74 +161,60 @@ WSettingsPage {
     }
 
     WSettingsCard {
-        title: Translation.tr("Keyboard indicators")
+        section: Translation.tr("Keyboard indicators")
+        collapsible: true
+        expanded: false
+        title: Translation.tr("Keyboard popups")
         icon: "keyboard"
-
-        WSettingsSwitch {
-            label: Translation.tr("Keyboard popups")
-            icon: "keyboard"
-            description: Translation.tr("Show a popup when Caps Lock, Num Lock, or the keyboard layout changes")
-            checked: Config.options?.keyboardIndicators?.showPopup ?? true
-            onCheckedChanged: Config.setNestedValue("keyboardIndicators.showPopup", checked)
-        }
+        description: Translation.tr("Show a popup when Caps Lock, Num Lock, or the keyboard layout changes")
+        toggle: true
+        checked: Config.options?.keyboardIndicators?.showPopup ?? true
+        onToggled: on => Config.setNestedValue("keyboardIndicators.showPopup", on)
 
         WSettingsSwitch {
             label: Translation.tr("Layout popup")
-            icon: "globe-search"
-            description: Translation.tr("Show a popup when the keyboard layout changes")
             checked: Config.options?.keyboardIndicators?.popup?.layout ?? true
             onCheckedChanged: Config.setNestedValue("keyboardIndicators.popup.layout", checked)
         }
-
         WSettingsSwitch {
             label: Translation.tr("Caps Lock popup")
-            icon: "key"
-            description: Translation.tr("Show a popup when Caps Lock changes")
             checked: Config.options?.keyboardIndicators?.popup?.caps ?? true
             onCheckedChanged: Config.setNestedValue("keyboardIndicators.popup.caps", checked)
         }
-
         WSettingsSwitch {
             label: Translation.tr("Num Lock popup")
-            icon: "calculator"
-            description: Translation.tr("Show a popup when Num Lock changes")
             checked: Config.options?.keyboardIndicators?.popup?.num ?? false
             onCheckedChanged: Config.setNestedValue("keyboardIndicators.popup.num", checked)
         }
+    }
 
-        WSettingsSwitch {
-            label: Translation.tr("Keyboard panel indicators")
-            icon: "keyboard-dock"
-            description: Translation.tr("Show layout and lock state indicators in the bar or taskbar")
-            checked: Config.options?.keyboardIndicators?.showPanel ?? true
-            onCheckedChanged: Config.setNestedValue("keyboardIndicators.showPanel", checked)
-        }
+    WSettingsCard {
+        collapsible: true
+        expanded: false
+        title: Translation.tr("Keyboard panel indicators")
+        icon: "keyboard-dock"
+        description: Translation.tr("Show layout and lock state indicators in the bar or taskbar")
+        toggle: true
+        checked: Config.options?.keyboardIndicators?.showPanel ?? true
+        onToggled: on => Config.setNestedValue("keyboardIndicators.showPanel", on)
 
         WSettingsSwitch {
             label: Translation.tr("Layout indicator")
-            icon: "keyboard"
-            description: Translation.tr("Show the current keyboard layout in the taskbar")
             checked: Config.options?.keyboardIndicators?.panel?.layout ?? true
             onCheckedChanged: Config.setNestedValue("keyboardIndicators.panel.layout", checked)
         }
-
         WSettingsSwitch {
             label: Translation.tr("Caps Lock indicator")
-            icon: "key"
-            description: Translation.tr("Show Caps Lock in the taskbar")
             checked: Config.options?.keyboardIndicators?.panel?.caps ?? true
             onCheckedChanged: Config.setNestedValue("keyboardIndicators.panel.caps", checked)
         }
-
         WSettingsSwitch {
             label: Translation.tr("Num Lock indicator")
-            icon: "keyboard-dock"
-            description: Translation.tr("Show Num Lock in the taskbar")
             checked: Config.options?.keyboardIndicators?.panel?.num ?? false
             onCheckedChanged: Config.setNestedValue("keyboardIndicators.panel.num", checked)
         }
     }
-    
+
     WSettingsCard {
         visible: CompositorService.isNiri
         title: Translation.tr("Window animations")

@@ -2,6 +2,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import qs.services
 import qs.modules.common
 import qs.modules.common.widgets
 import qs.modules.waffle.looks
@@ -10,6 +11,8 @@ import qs.modules.waffle.looks
 // Open: a BodyStrong section header, then every setting its own card, 4 px apart. Collapsible: a SettingsExpander,
 // one 68 px header card whose rows sit inside it, flat, a hairline apart, indented past its icon.
 // Content that isn't a row (a preview, a button strip, a note) gets a card of its own with the card's padding.
+// An expander may carry a toggle in its header (`toggle`, as Windows' SettingsExpander with a ToggleSwitch): the
+// header turns the thing on, the rows inside tune it and rest disabled while it is off.
 Item {
     id: root
 
@@ -18,6 +21,11 @@ Item {
     property string description: ""
     property bool expanded: true
     property bool collapsible: false
+    // the section header above an expander (an open group's header is its title)
+    property string section: ""
+    property bool toggle: false
+    property bool checked: false
+    signal toggled(bool checked)
     default property alias content: contentColumn.data
 
     readonly property bool expander: root.collapsible
@@ -37,6 +45,8 @@ Item {
             const c = kids[i]
             if (c.settingsCardRole === "row") {
                 c.cardStyle = root.expander ? "item" : "card"
+                if (root.toggle)
+                    c.enabled = Qt.binding(() => root.checked)
                 continue
             }
             if (!c.visible || c.height <= 0 || c.Layout === undefined)
@@ -68,7 +78,7 @@ Item {
 
         // ── Open group: the section header ──
         ColumnLayout {
-            visible: !root.expander && root.title !== ""
+            visible: root.expander ? root.section !== "" : root.title !== ""
             Layout.fillWidth: true
             Layout.topMargin: Looks.dp(18)
             Layout.bottomMargin: Looks.dp(6)
@@ -77,14 +87,14 @@ Item {
 
             WText {
                 Layout.fillWidth: true
-                text: root.title
+                text: root.expander ? root.section : root.title
                 font.pixelSize: Looks.settings.body
                 font.weight: Looks.font.weight.strong
                 elide: Text.ElideRight
                 Accessible.role: Accessible.Heading
             }
             WText {
-                visible: root.description !== ""
+                visible: !root.expander && root.description !== ""
                 Layout.fillWidth: true
                 text: root.description
                 font.pixelSize: Looks.settings.caption
@@ -157,6 +167,20 @@ Item {
                         font.weight: Looks.font.weight.thin
                         color: Looks.colors.subfg
                         wrapMode: Text.WordWrap
+                    }
+                }
+                RowLayout {
+                    visible: root.toggle
+                    spacing: Looks.dp(12)
+                    WText {
+                        text: root.checked ? Translation.tr("On") : Translation.tr("Off")
+                        font.pixelSize: Looks.settings.body
+                        font.weight: Looks.font.weight.thin
+                    }
+                    WSwitch {
+                        checked: root.checked
+                        Accessible.name: root.title
+                        onClicked: root.toggled(!root.checked)
                     }
                 }
                 // the chevron sits in a 32 px button like the expander's toggle
