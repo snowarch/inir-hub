@@ -720,7 +720,7 @@ WSettingsPage {
 
         WSettingsSwitch {
             label: Translation.tr("Use Material colors")
-            icon: "dark-theme"
+            icon: "color"
             description: Translation.tr("Apply Material color scheme instead of Windows 11 grey")
             enabled: !Appearance.editorialEverywhere
             checked: Appearance.editorialEverywhere || (Config.options?.waffles?.theming?.useMaterialColors ?? false)
@@ -832,7 +832,7 @@ WSettingsPage {
 
         WSettingsSwitch {
             label: Translation.tr("LiMusic")
-            icon: "music-note-2"
+            icon: "headphones"
             description: Translation.tr("LiMusic follows your wallpaper colours, from the next time it opens")
             checked: Config.options?.appearance?.wallpaperTheming?.enableLimusic ?? false
             onCheckedChanged: Config.setNestedValue("appearance.wallpaperTheming.enableLimusic", checked)
@@ -848,7 +848,7 @@ WSettingsPage {
 
         WSettingsSwitch {
             label: Translation.tr("Zed editor")
-            icon: "terminal"
+            icon: "flash-on"
             description: Translation.tr("Generate Zed editor theme from wallpaper colors")
             checked: Config.options?.appearance?.wallpaperTheming?.enableZed ?? true
             onCheckedChanged: Config.setNestedValue("appearance.wallpaperTheming.enableZed", checked)
@@ -856,7 +856,7 @@ WSettingsPage {
 
         WSettingsSwitch {
             label: Translation.tr("VSCode editors")
-            icon: "terminal"
+            icon: "window-console"
             description: Translation.tr("Generate theme for VSCode and its forks from wallpaper colors")
             checked: Config.options?.appearance?.wallpaperTheming?.enableVSCode ?? true
             onCheckedChanged: Config.setNestedValue("appearance.wallpaperTheming.enableVSCode", checked)
@@ -880,7 +880,7 @@ WSettingsPage {
 
         WSettingsSwitch {
             label: Translation.tr("OpenCode")
-            icon: "terminal"
+            icon: "wand"
             description: Translation.tr("Apply wallpaper-derived theme to OpenCode AI editor")
             checked: Config.options?.appearance?.wallpaperTheming?.enableOpenCode ?? false
             onCheckedChanged: Config.setNestedValue("appearance.wallpaperTheming.enableOpenCode", checked)
@@ -888,7 +888,7 @@ WSettingsPage {
 
         WSettingsSwitch {
             label: Translation.tr("Neovim / LazyVim")
-            icon: "terminal"
+            icon: "text-font"
             description: Translation.tr("Generate inir.nvim theme plugin for Neovim/LazyVim from wallpaper colors (writes to ~/.config/nvim/lua/plugins/neovim.lua)")
             checked: Config.options?.appearance?.wallpaperTheming?.enableNeovim ?? false
             onCheckedChanged: Config.setNestedValue("appearance.wallpaperTheming.enableNeovim", checked)

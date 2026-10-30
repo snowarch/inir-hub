@@ -193,7 +193,7 @@ ContentPage {
             StyledText {
                 Layout.fillWidth: true
                 wrapMode: Text.Wrap
-                text: Translation.tr("Toggle an app to launch it at login via niri's spawn-at-startup. Apps already in your startup file outside iNiR's control are shown as \"External\" — edit the file below to change those.")
+                text: Translation.tr("On starts it at login. External entries live in your niri file below; edit them there.")
                 font.pixelSize: Appearance.font.pixelSize.smaller
                 color: Appearance.colors.colSubtext
             }

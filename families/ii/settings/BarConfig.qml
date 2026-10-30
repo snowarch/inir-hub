@@ -843,7 +843,7 @@ ContentPage {
                         }
 
                         ConfigSpinBox {
-                            icon: "format_size"
+                            icon: "schedule"
                             text: Translation.tr("Time size (px)")
                             description: Translation.tr("0 = inherit global size")
                             value: Config.options?.bar?.m3?.clock?.timePixelSize ?? 0
@@ -877,7 +877,7 @@ ContentPage {
                         }
 
                         ConfigSpinBox {
-                            icon: "format_size"
+                            icon: "calendar_today"
                             text: Translation.tr("Date size (px)")
                             description: Translation.tr("0 = inherit global size")
                             value: Config.options?.bar?.m3?.clock?.datePixelSize ?? 0
@@ -2138,7 +2138,7 @@ ContentPage {
                     }
 
                     ConfigSpinBox {
-                        icon: "format_size"
+                        icon: "schedule"
                         text: Translation.tr("Time size (px)")
                         description: Translation.tr("0 = inherit global size")
                         value: Config.options?.bar?.clock?.timePixelSize ?? 0
@@ -2172,7 +2172,7 @@ ContentPage {
                     }
 
                     ConfigSpinBox {
-                        icon: "format_size"
+                        icon: "calendar_today"
                         text: Translation.tr("Date size (px)")
                         description: Translation.tr("0 = inherit global size")
                         value: Config.options?.bar?.clock?.datePixelSize ?? 0
@@ -2559,13 +2559,13 @@ ContentPage {
             ConfigRow {
                 uniform: true
                 SettingsSwitch {
-                    buttonIcon: "visibility"
+                    buttonIcon: "memory"
                     text: Translation.tr("Always show CPU")
                     checked: Config.options?.bar?.resources?.alwaysShowCpu ?? true
                     onCheckedChanged: Config.setNestedValue("bar.resources.alwaysShowCpu", checked)
                 }
                 SettingsSwitch {
-                    buttonIcon: "visibility"
+                    buttonIcon: "developer_board"
                     text: Translation.tr("Always show GPU")
                     checked: Config.options?.bar?.resources?.alwaysShowGpu ?? true
                     onCheckedChanged: Config.setNestedValue("bar.resources.alwaysShowGpu", checked)
@@ -2575,7 +2575,7 @@ ContentPage {
             ConfigRow {
                 uniform: true
                 SettingsSwitch {
-                    buttonIcon: "visibility"
+                    buttonIcon: "thermostat"
                     text: Translation.tr("Always show temp")
                     checked: Config.options?.bar?.resources?.alwaysShowTemp ?? true
                     onCheckedChanged: Config.setNestedValue("bar.resources.alwaysShowTemp", checked)

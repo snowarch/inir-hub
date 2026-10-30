@@ -616,7 +616,7 @@ WSettingsPage {
 
         WSettingsSwitch {
             label: Translation.tr("Active screen only")
-            icon: "desktop"
+            icon: "eye"
             description: Translation.tr("Open the overview on the monitor where it was invoked")
             checked: Config.options?.overview?.activeScreenOnly ?? true
             onCheckedChanged: Config.setNestedValue("overview.activeScreenOnly", checked)

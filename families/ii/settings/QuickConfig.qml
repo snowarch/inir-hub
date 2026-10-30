@@ -1756,7 +1756,7 @@ ContentPage {
             }
 
             SettingsSwitch {
-                buttonIcon: "visibility_off"
+                buttonIcon: "density_small"
                 text: Translation.tr("Minimal mode")
                 checked: Config.options?.gameMode?.minimalMode ?? true
                 onCheckedChanged: {

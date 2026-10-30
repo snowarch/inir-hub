@@ -1192,6 +1192,7 @@ ContentPage {
 
             // Individual terminal toggles
             RowLayout {
+                visible: Config.options?.appearance?.wallpaperTheming?.enableTerminal ?? true
                 Layout.fillWidth: true
                 Layout.topMargin: 12
                 spacing: 6
@@ -1222,24 +1223,27 @@ ContentPage {
                 visible: Config.options?.appearance?.wallpaperTheming?.enableTerminal ?? true
 
                 ConfigSwitch {
-                    buttonIcon: "terminal"
-                    text: "Kitty" + (terminalColorsSection.detectionDone && !(terminalColorsSection.installedTerminals["kitty"] ?? false) ? " ⌀" : "")
+                    buttonIcon: "pets"
+                    text: "Kitty"
+                    description: terminalColorsSection.detectionDone && !(terminalColorsSection.installedTerminals["kitty"] ?? false) ? Translation.tr("Not installed") : ""
                     checked: Config.options?.appearance?.wallpaperTheming?.terminals?.kitty ?? true
                     onCheckedChanged: Config.setNestedValue("appearance.wallpaperTheming.terminals.kitty", checked)
                     opacity: terminalColorsSection.detectionDone && !(terminalColorsSection.installedTerminals["kitty"] ?? false) ? 0.5 : 1
                 }
 
                 ConfigSwitch {
-                    buttonIcon: "terminal"
-                    text: "Alacritty" + (terminalColorsSection.detectionDone && !(terminalColorsSection.installedTerminals["alacritty"] ?? false) ? " ⌀" : "")
+                    buttonIcon: "speed"
+                    text: "Alacritty"
+                    description: terminalColorsSection.detectionDone && !(terminalColorsSection.installedTerminals["alacritty"] ?? false) ? Translation.tr("Not installed") : ""
                     checked: Config.options?.appearance?.wallpaperTheming?.terminals?.alacritty ?? true
                     onCheckedChanged: Config.setNestedValue("appearance.wallpaperTheming.terminals.alacritty", checked)
                     opacity: terminalColorsSection.detectionDone && !(terminalColorsSection.installedTerminals["alacritty"] ?? false) ? 0.5 : 1
                 }
 
                 ConfigSwitch {
-                    buttonIcon: "terminal"
-                    text: "Foot" + (terminalColorsSection.detectionDone && !(terminalColorsSection.installedTerminals["foot"] ?? false) ? " ⌀" : "")
+                    buttonIcon: "footprint"
+                    text: "Foot"
+                    description: terminalColorsSection.detectionDone && !(terminalColorsSection.installedTerminals["foot"] ?? false) ? Translation.tr("Not installed") : ""
                     checked: Config.options?.appearance?.wallpaperTheming?.terminals?.foot ?? true
                     onCheckedChanged: Config.setNestedValue("appearance.wallpaperTheming.terminals.foot", checked)
                     opacity: terminalColorsSection.detectionDone && !(terminalColorsSection.installedTerminals["foot"] ?? false) ? 0.5 : 1
@@ -1252,23 +1256,26 @@ ContentPage {
 
                 ConfigSwitch {
                     buttonIcon: "terminal"
-                    text: "WezTerm" + (terminalColorsSection.detectionDone && !(terminalColorsSection.installedTerminals["wezterm"] ?? false) ? " ⌀" : "")
+                    text: "WezTerm"
+                    description: terminalColorsSection.detectionDone && !(terminalColorsSection.installedTerminals["wezterm"] ?? false) ? Translation.tr("Not installed") : ""
                     checked: Config.options?.appearance?.wallpaperTheming?.terminals?.wezterm ?? true
                     onCheckedChanged: Config.setNestedValue("appearance.wallpaperTheming.terminals.wezterm", checked)
                     opacity: terminalColorsSection.detectionDone && !(terminalColorsSection.installedTerminals["wezterm"] ?? false) ? 0.5 : 1
                 }
 
                 ConfigSwitch {
-                    buttonIcon: "terminal"
-                    text: "Ghostty" + (terminalColorsSection.detectionDone && !(terminalColorsSection.installedTerminals["ghostty"] ?? false) ? " ⌀" : "")
+                    buttonIcon: "cloud"
+                    text: "Ghostty"
+                    description: terminalColorsSection.detectionDone && !(terminalColorsSection.installedTerminals["ghostty"] ?? false) ? Translation.tr("Not installed") : ""
                     checked: Config.options?.appearance?.wallpaperTheming?.terminals?.ghostty ?? true
                     onCheckedChanged: Config.setNestedValue("appearance.wallpaperTheming.terminals.ghostty", checked)
                     opacity: terminalColorsSection.detectionDone && !(terminalColorsSection.installedTerminals["ghostty"] ?? false) ? 0.5 : 1
                 }
 
                 ConfigSwitch {
-                    buttonIcon: "terminal"
-                    text: "Konsole" + (terminalColorsSection.detectionDone && !(terminalColorsSection.installedTerminals["konsole"] ?? false) ? " ⌀" : "")
+                    buttonIcon: "desktop_windows"
+                    text: "Konsole"
+                    description: terminalColorsSection.detectionDone && !(terminalColorsSection.installedTerminals["konsole"] ?? false) ? Translation.tr("Not installed") : ""
                     checked: Config.options?.appearance?.wallpaperTheming?.terminals?.konsole ?? true
                     onCheckedChanged: Config.setNestedValue("appearance.wallpaperTheming.terminals.konsole", checked)
                     opacity: terminalColorsSection.detectionDone && !(terminalColorsSection.installedTerminals["konsole"] ?? false) ? 0.5 : 1
@@ -1281,7 +1288,8 @@ ContentPage {
 
                 ConfigSwitch {
                     buttonIcon: "rocket_launch"
-                    text: "Starship" + (terminalColorsSection.detectionDone && !(terminalColorsSection.installedTerminals["starship"] ?? false) ? " ⌀" : "")
+                    text: "Starship"
+                    description: terminalColorsSection.detectionDone && !(terminalColorsSection.installedTerminals["starship"] ?? false) ? Translation.tr("Not installed") : ""
                     checked: Config.options?.appearance?.wallpaperTheming?.terminals?.starship ?? true
                     onCheckedChanged: Config.setNestedValue("appearance.wallpaperTheming.terminals.starship", checked)
                     opacity: terminalColorsSection.detectionDone && !(terminalColorsSection.installedTerminals["starship"] ?? false) ? 0.5 : 1
@@ -1297,7 +1305,8 @@ ContentPage {
 
                 ConfigSwitch {
                     buttonIcon: "monitoring"
-                    text: "btop" + (terminalColorsSection.detectionDone && !(terminalColorsSection.installedTerminals["btop"] ?? false) ? " ⌀" : "")
+                    text: "btop"
+                    description: terminalColorsSection.detectionDone && !(terminalColorsSection.installedTerminals["btop"] ?? false) ? Translation.tr("Not installed") : ""
                     checked: Config.options?.appearance?.wallpaperTheming?.terminals?.btop ?? true
                     onCheckedChanged: Config.setNestedValue("appearance.wallpaperTheming.terminals.btop", checked)
                     opacity: terminalColorsSection.detectionDone && !(terminalColorsSection.installedTerminals["btop"] ?? false) ? 0.5 : 1
@@ -1308,7 +1317,8 @@ ContentPage {
 
                 ConfigSwitch {
                     buttonIcon: "account_tree"
-                    text: "lazygit" + (terminalColorsSection.detectionDone && !(terminalColorsSection.installedTerminals["lazygit"] ?? false) ? " ⌀" : "")
+                    text: "lazygit"
+                    description: terminalColorsSection.detectionDone && !(terminalColorsSection.installedTerminals["lazygit"] ?? false) ? Translation.tr("Not installed") : ""
                     checked: Config.options?.appearance?.wallpaperTheming?.terminals?.lazygit ?? true
                     onCheckedChanged: Config.setNestedValue("appearance.wallpaperTheming.terminals.lazygit", checked)
                     opacity: terminalColorsSection.detectionDone && !(terminalColorsSection.installedTerminals["lazygit"] ?? false) ? 0.5 : 1
@@ -1319,7 +1329,8 @@ ContentPage {
 
                 ConfigSwitch {
                     buttonIcon: "folder_open"
-                    text: "yazi" + (terminalColorsSection.detectionDone && !(terminalColorsSection.installedTerminals["yazi"] ?? false) ? " ⌀" : "")
+                    text: "yazi"
+                    description: terminalColorsSection.detectionDone && !(terminalColorsSection.installedTerminals["yazi"] ?? false) ? Translation.tr("Not installed") : ""
                     checked: Config.options?.appearance?.wallpaperTheming?.terminals?.yazi ?? true
                     onCheckedChanged: Config.setNestedValue("appearance.wallpaperTheming.terminals.yazi", checked)
                     opacity: terminalColorsSection.detectionDone && !(terminalColorsSection.installedTerminals["yazi"] ?? false) ? 0.5 : 1
@@ -1400,6 +1411,7 @@ ContentPage {
 
             // Terminal color preview
             RowLayout {
+                visible: Config.options?.appearance?.wallpaperTheming?.enableTerminal ?? true
                 Layout.fillWidth: true
                 Layout.topMargin: 8
                 spacing: 4
@@ -1461,6 +1473,7 @@ ContentPage {
 
             // Saturation slider
             ConfigSpinBox {
+                visible: Config.options?.appearance?.wallpaperTheming?.enableTerminal ?? true
                 id: saturationSpinBox
                 icon: "palette"
                 text: Translation.tr("Color Saturation") + " (%)"
@@ -1479,6 +1492,7 @@ ContentPage {
 
             // Brightness slider
             ConfigSpinBox {
+                visible: Config.options?.appearance?.wallpaperTheming?.enableTerminal ?? true
                 id: brightnessSpinBox
                 icon: "brightness_6"
                 text: Translation.tr("Color Brightness") + " (%)"
@@ -1497,6 +1511,7 @@ ContentPage {
 
             // Harmony slider
             ConfigSpinBox {
+                visible: Config.options?.appearance?.wallpaperTheming?.enableTerminal ?? true
                 id: harmonySpinBox
                 icon: "tune"
                 text: Translation.tr("Theme Harmony") + " (%)"
@@ -1519,6 +1534,7 @@ ContentPage {
 
             // Background brightness slider
             ConfigSpinBox {
+                visible: Config.options?.appearance?.wallpaperTheming?.enableTerminal ?? true
                 id: bgBrightnessSpinBox
                 icon: "contrast"
                 text: Translation.tr("Background Brightness") + " (%)"
@@ -1541,6 +1557,7 @@ ContentPage {
 
             // Reset button
             RippleButton {
+                visible: Config.options?.appearance?.wallpaperTheming?.enableTerminal ?? true
                 Layout.alignment: Qt.AlignRight
                 Layout.topMargin: 8
                 implicitWidth: resetRow.implicitWidth + 16

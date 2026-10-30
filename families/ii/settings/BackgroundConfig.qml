@@ -1890,7 +1890,7 @@ ContentPage {
 
             SettingsSwitch {
                 visible: Config.options?.background?.enableAnimation ?? true
-                buttonIcon: "blur_on"
+                buttonIcon: "motion_blur"
                 text: Translation.tr("Blur animated wallpapers (videos/GIFs)")
                 checked: Config.options?.background?.effects?.enableAnimatedBlur ?? false
                 onCheckedChanged: {

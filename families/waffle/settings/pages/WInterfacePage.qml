@@ -470,7 +470,7 @@ WSettingsPage {
     
     WSettingsCard {
         title: Translation.tr("Floating tools (Super+G)")
-        icon: "apps"
+        icon: "widgets"
 
         WSettingsInfoBar {
             severity: WSettingsInfoBar.Severity.Info
@@ -486,7 +486,7 @@ WSettingsPage {
 
         WSettingsButton {
             label: Translation.tr("Floating tools (Super+G)")
-            icon: "apps"
+            icon: "widgets"
             description: "Super+G"
             buttonText: Translation.tr("Open")
             buttonIcon: "open"
@@ -496,7 +496,7 @@ WSettingsPage {
 
         WSettingsSwitch {
             label: Translation.tr("Darken screen behind overlay")
-            icon: "eye"
+            icon: "weather-moon"
             description: Translation.tr("Add a dark scrim behind overlay panels for better visibility")
             checked: Config.options?.overlay?.darkenScreen ?? false
             onCheckedChanged: Config.setNestedValue("overlay.darkenScreen", checked)
@@ -504,7 +504,7 @@ WSettingsPage {
 
         WSettingsSpinBox {
             label: Translation.tr("Overlay scrim dim (%)")
-            icon: "eye"
+            icon: "brightness-high"
             suffix: "%"
             from: 0; to: 100; stepSize: 5
             enabled: Config.options?.overlay?.darkenScreen ?? false
@@ -550,7 +550,7 @@ WSettingsPage {
 
         WSettingsSpinBox {
             label: Translation.tr("Overlay animation duration (ms)")
-            icon: "arrow-clockwise"
+            icon: "timer"
             suffix: "ms"
             from: 0; to: 1000; stepSize: 20
             value: Config.options?.overlay?.animationDurationMs ?? 180
@@ -559,7 +559,7 @@ WSettingsPage {
 
         WSettingsSpinBox {
             label: Translation.tr("Background dim animation (ms)")
-            icon: "arrow-clockwise"
+            icon: "schedule"
             suffix: "ms"
             from: 0; to: 1000; stepSize: 20
             value: Config.options?.overlay?.scrimAnimationDurationMs ?? 140
@@ -1066,7 +1066,7 @@ WSettingsPage {
         WSettingsDropdown {
             visible: root.customRecordingPreset
             label: Translation.tr("Audio bitrate")
-            icon: "mic"
+            icon: "pulse"
             currentValue: Config.options?.screenRecord?.audioBitrateKbps ?? 192
             options: root.recordingAudioBitrateOptions
             onSelected: newValue => root.setRecordingConfig("screenRecord.audioBitrateKbps", newValue)

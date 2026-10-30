@@ -106,14 +106,14 @@ ContentPage {
 
             SettingsSwitch {
                 text: Translation.tr("Respect Do Not Disturb and quiet hours")
-                buttonIcon: "chat"
+                buttonIcon: "do_not_disturb_on"
                 checked: Config.options?.mascot?.companion?.respectQuiet ?? true
                 onCheckedChanged: Config.setNestedValue("mascot.companion.respectQuiet", checked)
             }
 
             SettingsSwitch {
                 text: Translation.tr("React to opened shell panels")
-                buttonIcon: "chat"
+                buttonIcon: "web_asset"
                 checked: Config.options?.mascot?.companion?.shellReactions ?? true
                 onCheckedChanged: Config.setNestedValue("mascot.companion.shellReactions", checked)
             }

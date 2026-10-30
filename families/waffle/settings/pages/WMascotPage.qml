@@ -115,7 +115,7 @@ WSettingsPage {
 
         WSettingsSpinBox {
             label: Translation.tr("Maximum visits per hour")
-            icon: "timer"
+            icon: "schedule"
             from: 1; to: 6; stepSize: 1
             value: Config.options?.mascot?.companion?.maxVisitsPerHour ?? 3
             onValueChanged: Config.setNestedValue("mascot.companion.maxVisitsPerHour", value)
@@ -228,7 +228,7 @@ WSettingsPage {
         WSettingsDropdown {
             label: Translation.tr("Voice")
             // `chat` is not in assets/icons/fluent — it rendered blank.
-            icon: "people"
+            icon: "speaker"
             description: Translation.tr("Adaptive follows her mood; fixed modes keep one conversational register")
             currentValue: Config.options?.mascot?.personality?.voiceMode ?? "adaptive"
             options: [

@@ -113,7 +113,7 @@ WSettingsPage {
         
         WSettingsSwitch {
             label: Translation.tr("Auto-hide")
-            icon: "arrow-clockwise"
+            icon: "eye-off"
             description: Translation.tr("Switches to the pick after the delay, even with Alt still held")
             checked: Config.options?.waffles?.altSwitcher?.autoHide ?? true
             onCheckedChanged: Config.setNestedValue("waffles.altSwitcher.autoHide", checked)
@@ -122,7 +122,7 @@ WSettingsPage {
         WSettingsSpinBox {
             visible: Config.options?.waffles?.altSwitcher?.autoHide ?? true
             label: Translation.tr("Auto-hide delay")
-            icon: "arrow-clockwise"
+            icon: "timer"
             suffix: "ms"
             from: 100; to: 2000; stepSize: 100
             value: Config.options?.waffles?.altSwitcher?.autoHideDelayMs ?? 500
@@ -149,7 +149,7 @@ WSettingsPage {
         WSettingsSpinBox {
             visible: (Config.options?.waffles?.altSwitcher?.preset ?? "thumbnails") === "thumbnails"
             label: Translation.tr("Thumbnail height")
-            icon: "image-copy"
+            icon: "image"
             suffix: "px"
             from: 100; to: 400; stepSize: 20
             value: Config.options?.waffles?.altSwitcher?.thumbnailHeight ?? 180
@@ -494,7 +494,7 @@ WSettingsPage {
         WSettingsRow {
             visible: Weather.location.valid
             label: Translation.tr("Detected location")
-            icon: "globe-search"
+            icon: "pin"
             description: Weather.location.name || (Weather.location.lat + ", " + Weather.location.lon)
         }
         

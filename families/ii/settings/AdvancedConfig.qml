@@ -188,7 +188,7 @@ ContentPage {
             }
             SettingsSwitch {
                 visible: !root.irisFamily
-                buttonIcon: "music_note"
+                buttonIcon: "headphones"
                 text: Translation.tr("LiMusic")
                 checked: Config.options?.appearance?.wallpaperTheming?.enableLimusic ?? false
                 onCheckedChanged: {
@@ -214,7 +214,7 @@ ContentPage {
             }
             SettingsSwitch {
                 visible: !root.irisFamily
-                buttonIcon: "code"
+                buttonIcon: "bolt"
                 text: Translation.tr("Zed editor")
                 checked: Config.options?.appearance?.wallpaperTheming?.enableZed ?? true
                 onCheckedChanged: {
@@ -266,7 +266,7 @@ ContentPage {
             }
             SettingsSwitch {
                 visible: !root.irisFamily
-                buttonIcon: "code"
+                buttonIcon: "smart_toy"
                 text: Translation.tr("OpenCode")
                 checked: Config.options?.appearance?.wallpaperTheming?.enableOpenCode ?? false
                 onCheckedChanged: {
@@ -279,7 +279,7 @@ ContentPage {
             }
             SettingsSwitch {
                 visible: !root.irisFamily
-                buttonIcon: "code"
+                buttonIcon: "terminal"
                 text: Translation.tr("Neovim / LazyVim")
                 checked: Config.options?.appearance?.wallpaperTheming?.enableNeovim ?? false
                 onCheckedChanged: {

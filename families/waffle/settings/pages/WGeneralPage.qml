@@ -41,7 +41,7 @@ WSettingsPage {
         WSettingsSpinBox {
             visible: Config.options?.audio?.protection?.enable ?? false
             label: Translation.tr("Max increase per step")
-            icon: "speaker-1"
+            icon: "speaker-settings"
             description: Translation.tr("Maximum volume increase per key press")
             suffix: "%"
             from: 1; to: 20; stepSize: 1
@@ -103,7 +103,7 @@ WSettingsPage {
             visible: Battery.chargeLimitAdjustable
             enabled: Config.options?.battery?.chargeLimit?.enable ?? false
             label: Translation.tr("Charge limit threshold")
-            icon: "battery-saver"
+            icon: "battery-8"
             suffix: "%"
             from: 20; to: 100; stepSize: 5
             value: Config.options?.battery?.chargeLimit?.threshold ?? 80
@@ -174,7 +174,7 @@ WSettingsPage {
 
         WSettingsSwitch {
             label: Translation.tr("Layout popup")
-            icon: "keyboard"
+            icon: "globe-search"
             description: Translation.tr("Show a popup when the keyboard layout changes")
             checked: Config.options?.keyboardIndicators?.popup?.layout ?? true
             onCheckedChanged: Config.setNestedValue("keyboardIndicators.popup.layout", checked)
@@ -190,7 +190,7 @@ WSettingsPage {
 
         WSettingsSwitch {
             label: Translation.tr("Num Lock popup")
-            icon: "keyboard-dock"
+            icon: "calculator"
             description: Translation.tr("Show a popup when Num Lock changes")
             checked: Config.options?.keyboardIndicators?.popup?.num ?? false
             onCheckedChanged: Config.setNestedValue("keyboardIndicators.popup.num", checked)
@@ -381,7 +381,7 @@ WSettingsPage {
             visible: Battery.available
             enabled: Config.options?.idle?.onBattery?.enable ?? false
             label: Translation.tr("Battery: screen off")
-            icon: "battery-5"
+            icon: "desktop"
             suffix: "s"
             from: 0; to: 3600; stepSize: 30
             value: Config.options?.idle?.onBattery?.screenOffTimeout ?? 120

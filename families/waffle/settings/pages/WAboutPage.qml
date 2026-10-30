@@ -203,7 +203,7 @@ WSettingsPage {
         WSettingsRow {
             label: Translation.tr("Config path")
             description: FileUtils.trimFileProtocol(`${Directories.config}/illogical-impulse/`)
-            icon: "folder"
+            icon: "settings"
         }
         
         WSettingsRow {

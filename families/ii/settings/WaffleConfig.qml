@@ -349,7 +349,7 @@ ContentPage {
             }
 
             SettingsSwitch {
-                buttonIcon: "palette"
+                buttonIcon: "more_horiz"
                 text: Translation.tr("Tint tray icons")
                 checked: Config.options?.waffles?.bar?.tintTrayIcons ?? false
                 onCheckedChanged: Config.setNestedValue("waffles.bar.tintTrayIcons", checked)

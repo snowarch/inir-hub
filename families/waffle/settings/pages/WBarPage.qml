@@ -120,7 +120,7 @@ WSettingsPage {
         
         WSettingsSwitch {
             label: Translation.tr("Show seconds")
-            icon: "timer"
+            icon: "schedule"
             description: Translation.tr("Display seconds in taskbar clock")
             checked: Config.options?.time?.secondPrecision ?? false
             onCheckedChanged: Config.setNestedValue("time.secondPrecision", checked)
@@ -168,7 +168,7 @@ WSettingsPage {
         
         WSettingsSpinBox {
             label: Translation.tr("Warning threshold")
-            icon: "alert"
+            icon: "battery-warning"
             description: Translation.tr("Show warning color when packages exceed this")
             from: 10; to: 500; stepSize: 10
             value: Config.options?.updates?.stronglyAdviseUpdateThreshold ?? 50

@@ -20,17 +20,17 @@ WSettingsPage {
     readonly property var areaDescriptors: [
         { key: "bar", icon: "desktop", label: Translation.tr("Bars") },
         { key: "dock", icon: "apps", label: Translation.tr("Dock") },
-        { key: "panels", icon: "apps", label: Translation.tr("Panels and popups") },
+        { key: "panels", icon: "panel-left-expand", label: Translation.tr("Panels and popups") },
         { key: "islands", icon: "paint-bucket", label: Translation.tr("Islands and Ricelin") },
-        { key: "widgets", icon: "apps", label: Translation.tr("Desktop widgets") }
+        { key: "widgets", icon: "widgets", label: Translation.tr("Desktop widgets") }
     ]
 
     WSettingsCard {
         title: Translation.tr("Blur and glass")
-        icon: "eye"
+        icon: "options"
         WSettingsDropdown {
             label: Translation.tr("Default blur backend")
-            icon: "eye"
+            icon: "server"
             currentValue: Config.options?.performance?.blurBackend ?? "auto"
             options: root.backendOptions
             onSelected: value => Config.setNestedValue("performance.blurBackend", value)
@@ -71,7 +71,7 @@ WSettingsPage {
         }
         WSettingsSwitch {
             label: Translation.tr("Low power effects")
-            icon: "eye-off"
+            icon: "leaf-two"
             checked: Config.options?.performance?.lowPower ?? false
             onCheckedChanged: Config.setNestedValue("performance.lowPower", checked)
         }

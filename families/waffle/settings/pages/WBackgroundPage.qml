@@ -154,7 +154,7 @@ WSettingsPage {
 
         WSettingsDropdown {
             label: Translation.tr("Scaling")
-            icon: "image"
+            icon: "border-outside"
             description: Translation.tr("Fill crops, Fit shows bars, Span lays one picture across every screen.")
             currentValue: Config.options?.background?.fillMode ?? "fill"
             options: [
@@ -1415,7 +1415,7 @@ WSettingsPage {
                 WSettingsSpinBox {
                     visible: (root.wBackdrop.enable ?? true) && (root.wBackdrop.vignetteEnabled ?? false)
                     label: Translation.tr("Vignette intensity")
-                    icon: "border-outside"
+                    icon: "brightness-high"
                     description: Translation.tr("How dark the vignette effect should be")
                     suffix: "%"
                     from: 0; to: 100; stepSize: 5
@@ -1426,7 +1426,7 @@ WSettingsPage {
                 WSettingsSpinBox {
                     visible: (root.wBackdrop.enable ?? true) && (root.wBackdrop.vignetteEnabled ?? false)
                     label: Translation.tr("Vignette radius")
-                    icon: "border-outside"
+                    icon: "eye"
                     description: Translation.tr("How far the vignette extends from the edges")
                     suffix: "%"
                     from: 10; to: 100; stepSize: 5
@@ -1575,7 +1575,7 @@ WSettingsPage {
 
                     WSettingsSpinBox {
                         label: Translation.tr("Time scale")
-                        icon: "auto"
+                        icon: "schedule"
                         description: Translation.tr("Scale the main time line independently")
                         suffix: "%"
                         from: 65; to: 160; stepSize: 5
@@ -1586,7 +1586,7 @@ WSettingsPage {
                     WSettingsSpinBox {
                         visible: root.wClock.showDate ?? true
                         label: Translation.tr("Date scale")
-                        icon: "auto"
+                        icon: "text-font"
                         description: Translation.tr("Scale the date line independently")
                         suffix: "%"
                         from: 65; to: 160; stepSize: 5

@@ -1170,14 +1170,6 @@ ContentPage {
         title: Translation.tr("Settings UI")
 
         SettingsGroup {
-            StyledText {
-                Layout.fillWidth: true
-                text: Translation.tr("Choose how the Settings window opens. Overlay mode renders settings as a layer on top of the shell, so you can see changes to the bar, sidebars, and background in real time.")
-                color: Appearance.colors.colOnSurfaceVariant
-                font.pixelSize: Appearance.font.pixelSize.small
-                wrapMode: Text.WordWrap
-            }
-
             SettingsSwitch {
                 buttonIcon: "school"
                 text: Translation.tr("Easy mode (essentials only)")
@@ -1201,7 +1193,7 @@ ContentPage {
                         Qt.quit()
                 }
                 StyledToolTip {
-                    text: Translation.tr("When enabled, Settings opens as a floating overlay inside the shell instead of a separate window. Switching modes takes effect immediately and keeps you on this Settings page.")
+                    text: Translation.tr("Settings opens over the desktop, so each change shows on the bar, panels and wallpaper as you make it. Off opens it as a window.")
                 }
             }
 
@@ -1250,81 +1242,6 @@ ContentPage {
                     onValueModified: Config.setNestedValue("settingsUi.overlayAppearance.backgroundOpacity", value / 100)
                     StyledToolTip {
                         text: Translation.tr("Opacity of the Settings panel background. Lower values let the shell show through; with a glass style it thins the frosted tint instead.")
-                    }
-                }
-            }
-
-            Rectangle {
-                Layout.fillWidth: true
-                Layout.preferredHeight: modeHintRow.implicitHeight + 16
-                radius: Appearance.zzzEverywhere ? Appearance.zzz.cardRadius : Appearance.rounding.small
-                color: Appearance.zzzEverywhere ? "transparent" : Appearance.colors.colSurfaceContainerLow
-                border.width: Appearance.zzzEverywhere ? 0 : 1
-                border.color: Appearance.zzzEverywhere ? "transparent" : Appearance.colors.colLayer0Border
-                Behavior on radius {
-                    enabled: Appearance.animationsEnabled
-                    NumberAnimation { duration: Appearance.animation.elementMoveFast.duration }
-                }
-                Behavior on color {
-                    enabled: Appearance.animationsEnabled
-                    ColorAnimation { duration: Appearance.animation.elementMoveFast.duration }
-                }
-                Behavior on border.width {
-                    enabled: Appearance.animationsEnabled
-                    NumberAnimation { duration: Appearance.animation.elementMoveFast.duration }
-                }
-                Behavior on border.color {
-                    enabled: Appearance.animationsEnabled
-                    ColorAnimation { duration: Appearance.animation.elementMoveFast.duration }
-                }
-
-                ZzzPlate {
-                    anchors.fill: parent
-                    visible: Appearance.zzzEverywhere
-                    fillColor: Appearance.colors.colLayer1
-                    strokeColor: Appearance.zzz.hairline
-                    radius: Appearance.zzz.cardRadius
-                    chamfer: Appearance.zzz.cutCorner * 0.45
-                    chamferTopRight: !Appearance.zzz.round
-                }
-
-                RowLayout {
-                    id: modeHintRow
-                    anchors {
-                        fill: parent
-                        margins: 8
-                    }
-                    spacing: 8
-
-                    MaterialSymbol {
-                        text: (Config.options?.settingsUi?.overlayMode ?? false) ? "layers" : "open_in_new"
-                        iconSize: Appearance.font.pixelSize.huge
-                        color: Appearance.colors.colPrimary
-                    }
-
-                    ColumnLayout {
-                        Layout.fillWidth: true
-                        spacing: 2
-
-                        StyledText {
-                            text: (Config.options?.settingsUi?.overlayMode ?? false)
-                                ? Translation.tr("Overlay mode")
-                                : Translation.tr("Window mode")
-                            font {
-                                pixelSize: Appearance.font.pixelSize.small
-                                weight: Font.Medium
-                            }
-                            color: Appearance.colors.colOnSurface
-                        }
-                        StyledText {
-                            Layout.fillWidth: true
-                            text: (Config.options?.settingsUi?.overlayMode ?? false)
-                                ? Translation.tr("Settings will open as a floating panel over the shell. Press Esc or click outside to close.")
-                                : Translation.tr("Settings will open as a separate application window (current behavior).")
-                            font.pixelSize: Appearance.font.pixelSize.smallest
-                            color: Appearance.colors.colSubtext
-                            wrapMode: Text.WordWrap
-                        }
                     }
                 }
             }

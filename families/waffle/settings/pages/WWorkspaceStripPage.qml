@@ -32,7 +32,7 @@ WSettingsPage {
 
     WSettingsInfoBar {
         severity: WSettingsInfoBar.Severity.Info
-        message: Translation.tr("Optional edge navigator, disabled on fresh installs. Hover the configured edge to open it, hover a workspace to inspect it, click cards or windows to focus them, drag windows between cards, and hold × to close. Window snapshots are available on Niri.")
+        message: Translation.tr("Off on new installs. Push the pointer to the edge, then click a workspace to go there, drag a window onto another, or hold × to close it.")
     }
 
     WSettingsCard {
@@ -120,7 +120,7 @@ WSettingsPage {
 
         WSettingsSpinBox {
             label: Translation.tr("Close delay")
-            icon: "timer"
+            icon: "schedule"
             suffix: "ms"
             from: 100; to: 1200; stepSize: 20
             value: Config.options?.workspaceStrip?.closeDelay ?? 320

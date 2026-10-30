@@ -157,7 +157,7 @@ ContentPage {
                 }
 
                 ConfigSpinBox {
-                    icon: "opacity"
+                    icon: "contrast"
                     text: Translation.tr("Overlay scrim dim (%)")
                     value: Config.options?.overlay?.scrimDim ?? 30
                     from: 0
@@ -224,7 +224,7 @@ ContentPage {
                 }
 
                 ConfigSpinBox {
-                    icon: "speed"
+                    icon: "timer"
                     text: Translation.tr("Overlay animation duration (ms)")
                     value: Config.options?.overlay?.animationDurationMs ?? 180
                     from: 0
@@ -694,7 +694,7 @@ ContentPage {
                     Config.setNestedValue("notifications.useLegacyCounter", !checked)
                 }
                 StyledToolTip {
-                    text: Translation.tr("Automatically sync notification badge with actual popup count.\nFixes issue where externally cleared notifications (e.g., Discord) don't update the badge.\nDisable to use the classic manual counter behavior.")
+                    text: Translation.tr("Counts the popups still open, so ones cleared in their own app (like Discord) leave the badge. Off keeps the classic counter.")
                 }
             }
 
@@ -2256,7 +2256,7 @@ ContentPage {
                 }
 
                 ConfigSpinBox {
-                    icon: "opacity"
+                    icon: "brightness_4"
                     text: Translation.tr("Wallpaper dim (%)")
                     value: Config.options.overview && Config.options.overview.backgroundDim !== undefined
                            ? Config.options.overview.backgroundDim

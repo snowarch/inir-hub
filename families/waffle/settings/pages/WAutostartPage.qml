@@ -98,7 +98,7 @@ WSettingsPage {
             WText {
                 Layout.fillWidth: true
                 wrapMode: Text.Wrap
-                text: Translation.tr("Apps and commands here are written to niri's startup file and launched by niri at login — iNiR doesn't start them itself, so they keep running even if the shell restarts.")
+                text: Translation.tr("niri starts these at login, not iNiR, so they keep running when the shell restarts.")
                 font.pixelSize: Looks.font.pixelSize.small
                 color: Looks.colors.fg
             }
