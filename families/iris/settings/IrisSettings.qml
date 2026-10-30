@@ -1462,12 +1462,20 @@ Item {
     // What Home holds, edited over the body (Home › Customize › Edit). Built only while it shows: ~380 objects otherwise
     // kept with every Settings.
     Loader {
-        active: IrisOptions.homeEditing || (item?.visible ?? false)
+        id: homeEditorHost
+        // Kept while the sheet fades out. Read from the item's signal, never in `active`'s binding: that read the item
+        // `active` makes and looped on every open.
+        property bool fading: false
+        active: IrisOptions.homeEditing || fading
         x: frame.x
         y: frame.y
         width: frame.width
         height: frame.height
         sourceComponent: IrisHomeEditor { d: root.d; bodyRadius: frame.radius }
+        Connections {
+            target: homeEditorHost.item
+            function onVisibleChanged() { homeEditorHost.fading = homeEditorHost.item.visible }
+        }
     }
 
     // The toolbar's actions: one anatomy, a quiet capsule with its glyph. None of them is the page's answer, so none
