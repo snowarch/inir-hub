@@ -197,7 +197,7 @@ Item {
                         welcome: false
                         only: modelData
                         extras: index === page.split.length - 1
-                        groupFill: "transparent"
+                        groupFill: IrisStyle.formPlate
                         onWholeChanged: Qt.callLater(page.weigh)
                         onReveal: row => page.reveal(row)
                     }
