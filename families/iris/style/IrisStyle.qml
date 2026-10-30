@@ -726,7 +726,14 @@ QtObject {
     }
     readonly property bool animeHighlightOn: Boolean(root.animeLayer?.highlight ?? false)
     // The accent: actions, selection, links, live marks. 4.5:1 on every ground, and on paper a fill under white ink.
-    readonly property color baseAccent: root.accentFrom(root.followsTheme ? "theme" : String(root.appearance?.accent ?? "blue"), root.appearance?.theme?.accentHue ?? 212)
+    readonly property color baseAccent: root.vivid(root.accentFrom(root.followsTheme ? "theme" : String(root.appearance?.accent ?? "blue"), root.appearance?.theme?.accentHue ?? 212), false)
+    // The person's hue at the strength Apple gives an accent (systemBlue's), not the solver's pastel: #accbeb next to
+    // #dfe7ef ink made a chosen word, a lit switch and a thumb read as the rest (his 10-30). A grey accent stays grey;
+    // a Design with its own palette (AIRISU's vermilion) keeps it exact.
+    function vivid(tint: color, fill: bool): color {
+        if (IrisDesign.current !== "iris" || tint.hslSaturation < 0.12) return tint
+        return Qt.hsla(tint.hslHue, Math.max(0.78, tint.hslSaturation), root.light ? (fill ? 0.5 : 0.42) : (fill ? 0.58 : 0.68), 1)
+    }
     // Under Signal the accent is the ink itself: what was an accent mark reads as ink, and an accent fill with its
     // own ink on it turns into the inverted plate (ink fill, paper word), Nothing's "chosen".
     readonly property color accent: root.animeEnabled
@@ -735,7 +742,7 @@ QtObject {
     readonly property color appleAccent: root.animeEnabled || !root.mono ? root.accent : root.baseAccent
     readonly property color appleAccentFill: !root.mono ? root.accentFill : root.washi?.accentFill ? Qt.color(root.washi.accentFill) : root.baseAccent
     readonly property color appleInkOnAccentFill: !root.mono ? root.inkOnAccentFill : root.washi?.onAccentFill ? Qt.color(root.washi.onAccentFill) : root.role("onAccent", "#101318")
-    readonly property color inkOnAccent: root.animeEnabled ? root.onTintFor(root.accent) : root.mono ? root.paper : root.role("onAccent", "#101318")
+    readonly property color inkOnAccent: root.animeEnabled || IrisDesign.current === "iris" && !root.mono ? root.onTintFor(root.accent) : root.mono ? root.paper : root.role("onAccent", "#101318")
     // Colour over imagery (the lock, artwork veils), which stays dark in every scheme: the night palette's roles.
     readonly property color mediaInk: root.neutral(Qt.color(root.washiDark?.text ?? "#f2f2f0"))
     readonly property color accentOnMedia: root.animeEnabled ? Lume.mark(root.accent, 0.35, 0, false, 3)
@@ -811,8 +818,9 @@ QtObject {
     // A filled alert (a badge): the shu pigment with its own ink; `danger` stays the red that reads as text.
     // The accent as a filled shape (a seal, a lit plate): the solver's pigment, which a Design palette keeps exact
     // (AIRISU's vermilion hanko) where the accent that is text has to move to read.
-    readonly property color accentFill: root.mono || !root.washi?.accentFill ? root.accent : Qt.color(root.washi.accentFill)
-    readonly property color inkOnAccentFill: root.mono || !root.washi?.onAccentFill ? root.inkOnAccent : Qt.color(root.washi.onAccentFill)
+    readonly property color accentFill: root.mono || !root.washi?.accentFill ? root.accent : root.vivid(Qt.color(root.washi.accentFill), true)
+    readonly property color inkOnAccentFill: root.mono || !root.washi?.onAccentFill ? root.inkOnAccent
+        : IrisDesign.current === "iris" ? root.onTintFor(root.accentFill) : Qt.color(root.washi.onAccentFill)
     readonly property color dangerFill: root.mono ? root.signal : root.role("dangerFill", "#e57766")
     readonly property color inkOnDangerFill: root.mono ? root.inkOnSignal : root.role("onDangerFill", "#22110d")
     function line(base: color): color {

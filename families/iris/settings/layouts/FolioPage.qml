@@ -32,6 +32,10 @@ Item {
     // The page in front: only then do writes reach its rows and its stage plays.
     readonly property bool live: page.visible && page.area === String(page.host?.section ?? "")
     readonly property bool whole: rows.whole
+    // Classic (untitled, beside its sidebar) leads the sheet with the stage as a band across it, the way Apple's panes
+    // open on their picture; a stage column beside the sheet there made three columns and squeezed every control into
+    // the last one (his 10-30).
+    readonly property bool banner: !page.titled
 
     Column {
         id: title
@@ -63,13 +67,15 @@ Item {
         width: page.width
         height: page.height - y
         readonly property bool staged: stage.available
+        readonly property bool beside: areaBox.staged && !page.banner
         readonly property real gap: page.u(page.compact ? 18 : 24)
 
         ClippingRectangle {
             id: plate
+            parent: page.banner ? bannerSlot : areaBox
             visible: areaBox.staged
-            width: Math.round(areaBox.width * (page.compact ? 0.40 : 0.42))
-            height: Math.round(Math.min(areaBox.height, width * 0.78, page.u(440)))
+            width: page.banner ? bannerSlot.width : Math.round(areaBox.width * (page.compact ? 0.40 : 0.42))
+            height: page.banner ? bannerSlot.height : Math.round(Math.min(areaBox.height, width * 0.78, page.u(440)))
             radius: IrisStyle.radiusSheet
             color: IrisStyle.readingCard
             border.width: 1
@@ -80,7 +86,7 @@ Item {
                 anchors.margins: page.u(12)
                 radius: Math.max(IrisStyle.radiusRow, IrisStyle.radiusSheet - page.u(12))
                 standIn: true
-                captionOutside: true
+                captionOutside: !page.banner
                 playing: page.live
                 // Home leads with the welcome over its rows, so its rows get the width.
                 section: page.area === "general" ? "" : page.area
@@ -93,7 +99,7 @@ Item {
         // Under the stage: what it shows now, what can be done to the area, then the area at a glance.
         Column {
             id: underStage
-            visible: areaBox.staged
+            visible: areaBox.beside
             y: plate.height + page.u(14)
             width: plate.width
             spacing: page.u(14)
@@ -197,7 +203,7 @@ Item {
         // The groups' sheet: rows on the body in solid, on a reading fill over glass (never glass on glass).
         Rectangle {
             id: sheet
-            x: areaBox.staged ? plate.width + areaBox.gap : 0
+            x: areaBox.beside ? plate.width + areaBox.gap : 0
             width: areaBox.width - x
             height: areaBox.height
             radius: IrisStyle.radiusSheet
@@ -208,7 +214,7 @@ Item {
                 anchors.leftMargin: IrisStyle.glassy ? page.u(6) : 0
                 anchors.rightMargin: IrisStyle.glassy ? page.u(6) : 0
                 anchors.topMargin: IrisStyle.glassy ? page.u(6) : 0
-                contentHeight: rows.implicitHeight + page.u(24)
+                contentHeight: rows.y + rows.implicitHeight + page.u(24)
                 boundsBehavior: Flickable.StopAtBounds
                 clip: true
                 ScrollBar.vertical: IrisScrollBar {}
@@ -222,8 +228,14 @@ Item {
                     maskThresholdMin: 0.5
                     maskSpreadAtMin: 1
                 }
+                Item {
+                    id: bannerSlot
+                    width: rows.width
+                    height: page.banner && areaBox.staged ? Math.round(Math.min(rows.width * 0.32, page.u(230))) : 0
+                }
                 AreaRows {
                     id: rows
+                    y: bannerSlot.height > 0 ? bannerSlot.height + page.u(14) : 0
                     width: flick.width - page.u(8)
                     section: page.area
                     host: page.host

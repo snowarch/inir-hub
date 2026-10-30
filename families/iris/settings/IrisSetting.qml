@@ -271,6 +271,8 @@ Item {
                     // the shared subtext (nine tenths of the ink) both read as one black block.
                     color: IrisStyle.fieldChamfer ? IrisStyle.muted : IrisStyle.subtext
                     font.pixelSize: IrisStyle.typeMeta
+                    // Medium like the name over it: at Normal a 12 px line read thin on glass (his 10-30).
+                    font.weight: IrisStyle.weight(Font.Medium)
                     wrapMode: Text.WordWrap
                     // Folio is read like a page: what a row does is never cut there. Elsewhere three lines' worth,
                     // counted at the person's text scale.

@@ -1541,7 +1541,7 @@ Item {
         readonly property bool dimmed: root.searching && !root.matchedSections.has(sectionRow.modelData.id)
         readonly property real rowHeight: Math.round(26 * sectionRow.d * Math.max(1, IrisStyle.typeScale))
         readonly property string caption: sectionRow.clusterStart ? Translation.tr(String(sectionRow.modelData.caption ?? "")) : ""
-        readonly property real washY: sectionRow.caption.length > 0 ? Math.round(14 * sectionRow.d) + captionText.implicitHeight + Math.round(4 * sectionRow.d)
+        readonly property real washY: sectionRow.caption.length > 0 ? Math.round(9 * sectionRow.d) + captionText.implicitHeight + Math.round(2 * sectionRow.d)
             : sectionRow.clusterStart ? Math.round(8 * sectionRow.d) : 0
         width: parent ? parent.width : 0
         height: sectionRow.washY + sectionRow.rowHeight
@@ -1556,11 +1556,11 @@ Item {
             id: captionText
             visible: sectionRow.caption.length > 0
             x: Math.round(6 * sectionRow.d)
-            y: Math.round(14 * sectionRow.d)
+            y: Math.round(9 * sectionRow.d)
             width: sectionRow.width - x
             text: sectionRow.caption
             color: IrisStyle.textTertiary
-            font.pixelSize: IrisStyle.typeMeta
+            font.pixelSize: IrisStyle.typeFootnote
             font.weight: IrisStyle.weight(Font.DemiBold)
             elide: Text.ElideRight
         }
@@ -1612,7 +1612,7 @@ Item {
                 text: Translation.tr(sectionRow.modelData.title)
                 // Where you are takes the area's colour, lifted to read on the wash; on a plate (AIRISU) the plate's ink.
                 color: sectionRow.selected && IrisStyle.plateSelection ? IrisStyle.selectionLabel
-                    : IrisStyle.text
+                    : sectionRow.selected ? root.tintInk(sectionRow.own) : IrisStyle.text
                 Behavior on color { ColorAnimation { duration: IrisStyle.duration(140); easing.type: IrisStyle.feedbackEasing } }
                 font.weight: IrisStyle.weight(sectionRow.selected ? Font.Bold : Font.Medium)
                 elide: Text.ElideRight

@@ -162,7 +162,7 @@ ColumnLayout {
             rows.builtUpTo = Math.max(rows.builtUpTo, rows.blocks.length)
         } else {
             let below = 0
-            for (let i = 0; i < rows.builtUpTo; i++)
+            for (let i = 0; i < Math.min(rows.builtUpTo, rows.blocks.length); i++)
                 if (blockRepeater.itemAt(i)?.wanted !== false) below += (48 + 56 * (rows.blocks[i].rows?.length ?? 0)) * rows.d
             // A block nobody asked for (Home's closed groups) builds nothing and weighs nothing: the build steps over it
             // in the same call. Waiting on it for a status that never comes left every block after it unbuilt (Shell
@@ -284,8 +284,8 @@ ColumnLayout {
                         text: head.title
                         color: IrisStyle.text
                         font.family: IrisStyle.fontTitle
-                        font.pixelSize: IrisStyle.typeBody
-                        font.weight: IrisStyle.weight(Font.DemiBold)
+                        font.pixelSize: IrisStyle.typeHeadline
+                        font.weight: IrisStyle.weight(Font.Bold)
                         elide: Text.ElideRight
                     }
                     IrisSwitch {

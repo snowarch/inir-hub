@@ -19,8 +19,9 @@ Item {
         text: String(root.host?.title ?? "")
         color: IrisStyle.text
         font.family: IrisStyle.fontTitle
-        font.pixelSize: IrisStyle.typeBody
-        font.weight: IrisStyle.weight(Font.DemiBold)
+        // A step up in size and weight from the rows (now Medium): the anchor the eye jumps between (his 10-30).
+        font.pixelSize: IrisStyle.typeHeadline
+        font.weight: IrisStyle.weight(Font.Bold)
         Accessible.role: Accessible.Heading
     }
 }
