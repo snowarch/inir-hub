@@ -1117,7 +1117,9 @@ QtObject {
     // as a grouped form sits over its pane (macOS Tahoe). readingCard alone left the groups a shade from the sheet.
     // On glass the reading sheet carries legibility and the plate is a veil of white over it (nearly opaque in light, a
     // breath in dark); mixing readingCard (2 % alpha in light) toward white kept its dark rgb and gave grey slabs.
+    // Ink's plate is its own paper a step brighter, never white: a white veil read as bleached cards on washi (his 10-30).
     readonly property color formPlate: root.plateStyle === "key" ? root.synthPanel : !root.glassy ? root.readingCard
+        : root.ink ? ColorUtils.applyAlpha(ColorUtils.mix(Qt.rgba(1, 1, 1, 1), root.surfaceOpaque, 0.32), 0.82) // iris-literal: paper lift
         : root.light ? Qt.rgba(1, 1, 1, 0.66) : Qt.rgba(1, 1, 1, 0.055) // iris-literal: white veils of a form's plate
     readonly property color readingSidebar: root.glassy
         ? ColorUtils.applyAlpha(root.surfaceOpaque, Math.max(root.wallpaperVeil, root.placePlate)) : root.readingCard

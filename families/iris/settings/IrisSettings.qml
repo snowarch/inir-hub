@@ -756,35 +756,6 @@ Item {
     Shortcut { sequences: ["Alt+Right", "Ctrl+]"]; enabled: GlobalStates.settingsOverlayOpen; onActivated: root.goForward() }
     MouseArea { anchors.fill: parent; enabled: !root.windowed; onClicked: GlobalStates.settingsOverlayOpen = false }
 
-    // Over the desktop the Island's and the Dock's pages point at the real one on screen: what a change moves is
-    // already there, past the sheet (his 10-30). Geometry is screen-local; this body starts at the band.
-    Item {
-        id: targetRing
-        readonly property var shape: {
-            if (root.windowed || !GlobalStates.settingsOverlayOpen) return null
-            const name = root.screen?.name ?? ""
-            if (root.section === "bar") return IrisState.islandGeometry?.[name] ?? null
-            if (root.section !== "dock") return null
-            const published = IrisState.dockBody?.[name]
-            return Array.isArray(published) ? published.find(shape => shape.id === "dock") ?? null : null
-        }
-        readonly property real gap: Math.round(5 * IrisStyle.density)
-        z: 10
-        visible: opacity > 0
-        opacity: targetRing.shape && targetRing.shape.width > 0 ? 1 : 0
-        Behavior on opacity { NumberAnimation { duration: IrisStyle.duration(220); easing.type: IrisStyle.feedbackEasing } }
-        x: (targetRing.shape?.x ?? 0) - IrisFrame.band - targetRing.gap
-        y: (targetRing.shape?.y ?? 0) - IrisFrame.band - targetRing.gap
-        width: (targetRing.shape?.width ?? 0) + targetRing.gap * 2
-        height: (targetRing.shape?.height ?? 0) + targetRing.gap * 2
-        Rectangle {
-            anchors.fill: parent
-            radius: Math.min(height / 2, (targetRing.shape?.radius ?? 0) + targetRing.gap)
-            color: "transparent"
-            border.width: Math.max(2, Math.round(2 * IrisStyle.density))
-            border.color: IrisStyle.accent
-        }
-    }
 
     // A textured material (Afterglow's bevel, Light leak's lit rim) must follow the corners Niri clips the window to.
     readonly property bool windowField: root.windowed && IrisStyle.textured
