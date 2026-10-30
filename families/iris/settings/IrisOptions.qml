@@ -10,6 +10,7 @@ import qs.modules.iris.style
 import qs.modules.iris.pieces
 import qs.modules.iris.frame
 import qs.modules.iris.control
+import qs.modules.iris.state
 import qs.modules.iris.background
 import qs
 import qs.modules.shared.background.widgets
@@ -967,7 +968,8 @@ QtObject {
         { section: "desktop", group: "Overview backdrop", label: "Blur", path: "background.backdrop.blurRadius", kind: "range", fallback:40,min:0,max:100,unit:" px" },
         { section: "desktop", group: "Overview backdrop", label: "Dim", path: "background.backdrop.dim", kind: "range", fallback:40,min:0,max:100,unit:" %" },
         { tune: true, section: "desktop", group: "Overview backdrop", label: "Vignette", path: "background.backdrop.vignetteEnabled", kind: "switch", fallback:false },
-        { section: "appearance", group: "Themes", label: "Take only their colours", description: "Themes change your colours only, not shapes, layout or motion.", path: "iris.appearance.themeColoursOnly", kind: "switch", fallback: false, keywords: ["theme", "colours", "colors", "palette", "only", "tema", "colores"] },
+        { section: "appearance", group: "Themes", label: "Browse themes", description: "Whole redesigns of iRiS and the ones you saved, in Customize: try one, Undo takes it back.", kind: "action", button: "Open", run: () => { GlobalStates.settingsOverlayOpen = false; IrisState.openCustomize("themes") }, keywords: ["theme", "themes", "preset", "redesign", "share", "studio", "temas"] },
+        { section: "appearance", group: "Themes", label: "Take only their colours", tune: true, description: "Themes change your colours only, not shapes, layout or motion.", path: "iris.appearance.themeColoursOnly", kind: "switch", fallback: false, keywords: ["theme", "colours", "colors", "palette", "only", "tema", "colores"] },
         { section: "appearance", group: "Customize", label: "Customize opens", description: "On the shell edits in place; Studio is a side panel with search.", path: "iris.appearance.customize", kind: "choice", tune: true, fallback: "shell", choices: [{ label: "On the shell", value: "shell", glyph: "touch_app" }, { label: "Studio", value: "studio", glyph: "view_sidebar" }], keywords: ["studio", "customize", "editor", "panel", "look"] },
         { section: "appearance", group: "Previews", label: "Animated previews", description: "Live scenes in Settings and Customize.", path: "iris.appearance.previews", kind: "switch", tune: true, fallback: true },
         { section: "spotlight", group: "Spotlight", label: "Spotlight", path: "iris.modules.palette", kind: "switch", fallback:true },
@@ -1698,8 +1700,8 @@ QtObject {
     readonly property var groupOrder: ({
         controlCenter: ["Control Center", "Hotspot", "VPN"],
         general: ["Every day", "Date & time", "Language", "At login", "Apps", "Performance", "Settings window", "Shell family"],
-        appearance: ["Look", "Themes", "Material", "Glass", "Texture", "Edges", "Light", "Shape", "Corners per surface",
-            "Frame", "Text", "Faces", "Icons", "Material per surface", "Menus", "Settings", "Badges", "Customize", "Previews"],
+        appearance: ["Look", "Material", "Glass", "Texture", "Edges", "Light", "Shape", "Corners per surface",
+            "Frame", "Text", "Faces", "Icons", "Material per surface", "Menus", "Settings", "Badges", "Customize", "Previews", "Themes"],
         colour: ["Scheme", "Signal", "Accent", "Highlight", "Colour theme", "Day and night", "App colours", "Dark look", "Ink look", "Light look", "Wallpaper tint"],
         bar: ["Notch", "Layout", "Shape", "At rest", "Resting Island", "Bar", "Pages", "Desktop page", "Player page", "Interaction", "Visibility", "Connections"],
         bubbles: ["Size", "Behaviour", "On the contour", "Floating", "Opening bodies", "Cards", "Card contents", "Joining", "Tray"],
