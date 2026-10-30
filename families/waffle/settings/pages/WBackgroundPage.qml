@@ -132,6 +132,19 @@ WSettingsPage {
         }
 
         WSettingsSwitch {
+            label: Translation.tr("Colors only mode")
+            icon: "eyedropper"
+            description: Translation.tr("Use a wallpaper as a palette source without replacing the background")
+            checked: Config.options?.appearance?.wallpaperTheming?.colorsOnlyMode ?? false
+            onCheckedChanged: {
+                if (checked === (Config.options?.appearance?.wallpaperTheming?.colorsOnlyMode ?? false)) return
+                Config.setNestedValue("appearance.wallpaperTheming.colorsOnlyMode", checked)
+                if (!checked)
+                    Config.setNestedValue("appearance.wallpaperTheming.previewSourcePath", "")
+            }
+        }
+
+        WSettingsSwitch {
             label: Translation.tr("Hide main wallpaper in fullscreen")
             icon: "eye-off"
             description: Translation.tr("Hide the main wallpaper while a fullscreen window is active. The Task View backdrop stays available.")

@@ -36,10 +36,8 @@ Item {
         { pageIndex: 17, pageName: "Shell Layout", section: "Taskbar placement", label: "Current position", targetLabel: "Current position", keywords: ["layout", "taskbar", "top", "bottom", "position", "reset"] },
         // === Quick (0) ===
         { pageIndex: 0, pageName: "Quick", section: "Wallpaper & Colors", label: "Dark mode", targetLabel: "Dark mode", keywords: ["quick", "dark", "light", "mode", "theme", "scheme"] },
-        { pageIndex: 0, pageName: "Quick", section: "Wallpaper & Colors", label: "Per-monitor wallpapers", targetLabel: "Per-monitor wallpapers", keywords: ["quick", "wallpaper", "monitor", "display", "multi-monitor", "per-monitor"] },
-        { pageIndex: 0, pageName: "Quick", section: "Wallpaper & Colors", label: "Colors only mode", targetLabel: "Colors only mode", keywords: ["quick", "wallpaper", "colors", "theme source", "preview", "palette"] },
-        { pageIndex: 0, pageName: "Quick", section: "Wallpaper & Colors", label: "Color scheme", targetLabel: "Color scheme", keywords: ["quick", "colors", "scheme", "palette", "material", "theme"] },
-        { pageIndex: 0, pageName: "Quick", section: "Wallpaper & Colors", label: "Color strength", targetLabel: "Color strength", keywords: ["quick", "wallpaper", "color", "strength", "vivid", "accent"] },
+        { pageIndex: 3, pageName: "Background", section: "Wallpaper", label: "Colors only mode", targetLabel: "Colors only mode", keywords: ["quick", "wallpaper", "colors", "theme source", "preview", "palette"] },
+        { pageIndex: 4, pageName: "Themes", section: "Theming", label: "Color strength", targetLabel: "Color strength", keywords: ["quick", "wallpaper", "color", "strength", "vivid", "accent"] },
         { pageIndex: 14, pageName: "Mascot", section: "Mascot", label: "Show mascot illustration", targetLabel: "Show mascot illustration", keywords: ["mascot", "cat", "girl", "branding", "illustration", "waifu"] },
         { pageIndex: 14, pageName: "Mascot", section: "Mascot", label: "Playful companion", targetLabel: "Playful companion", keywords: ["mascot", "companion", "peek", "interactive", "playful", "edge"] },
         { pageIndex: 14, pageName: "Mascot", section: "Mascot", label: "Minimum quiet time", targetLabel: "Minimum quiet time", keywords: ["mascot", "quiet", "cooldown", "minutes", "frequency", "interrupt"] },
@@ -71,8 +69,8 @@ Item {
         { pageIndex: 15, pageName: "AI", section: "Privacy & policy", label: "Allow AI features", targetLabel: "Allow AI features", keywords: ["ai", "privacy", "policy", "local", "allow", "disable"] },
         { pageIndex: 15, pageName: "AI", section: "Voice input", label: "Voice input", targetLabel: "Voice input", keywords: ["voice", "mic", "microphone", "dictate", "speech", "transcribe", "recording"] },
 
-        { pageIndex: 0, pageName: "Quick", section: "Wallpaper & Colors", label: "Transparency", targetLabel: "Transparency", keywords: ["quick", "transparency", "glass", "blur", "appearance"] },
-        { pageIndex: 0, pageName: "Quick", section: "Quick actions", label: "Show reload notifications", targetLabel: "Show reload notifications", keywords: ["quick", "reload", "notifications", "toast", "quickshell", "niri"] },
+        { pageIndex: 4, pageName: "Themes", section: "Theming", label: "Transparency", targetLabel: "Transparency", keywords: ["quick", "transparency", "glass", "blur", "appearance"] },
+        { pageIndex: 1, pageName: "General", section: "Windows & Sounds", label: "Show reload notifications", targetLabel: "Show reload notifications", keywords: ["quick", "reload", "notifications", "toast", "quickshell", "niri"] },
         { pageIndex: 0, pageName: "Quick", section: "Capture locations", label: "Recordings folder", targetLabel: "Recordings folder", keywords: ["quick", "capture", "record", "recording", "video", "save", "folder", "path"] },
         { pageIndex: 0, pageName: "Quick", section: "Capture locations", label: "Screenshots folder", targetLabel: "Screenshots folder", keywords: ["quick", "capture", "screenshot", "snip", "save", "folder", "path"] },
 

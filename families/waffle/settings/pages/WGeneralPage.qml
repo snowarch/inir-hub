@@ -248,6 +248,13 @@ WSettingsPage {
         icon: "app-generic"
         
         WSettingsSwitch {
+            label: Translation.tr("Show reload notifications")
+            icon: "alert"
+            description: Translation.tr("Toast when Quickshell or Niri config reloads")
+            checked: Config.options?.reloadToasts?.enable ?? true
+            onCheckedChanged: Config.setNestedValue("reloadToasts.enable", checked)
+        }
+        WSettingsSwitch {
             visible: CompositorService.isNiri
             label: Translation.tr("Confirm before closing")
             icon: "shield"
