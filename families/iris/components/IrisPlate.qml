@@ -35,7 +35,7 @@ Rectangle {
         topRightRadius: Math.max(0, root.radius - 1)
         gradient: Gradient {
             GradientStop { position: 0; color: Qt.rgba(1, 1, 1, IrisStyle.light ? 0.7 : (root.lit ? 0.22 : 0.12)) } // iris-literal: gel's cap
-            GradientStop { position: 1; color: Qt.rgba(1, 1, 1, 0) }
+            GradientStop { position: 1; color: Qt.rgba(1, 1, 1, 0) } // iris-literal: clear white, a clear black would grey the fade
         }
     }
 }

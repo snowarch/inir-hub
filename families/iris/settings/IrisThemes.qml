@@ -240,7 +240,8 @@ Singleton {
 
     function swatch(theme: var): var {
         const v = root.resolved(theme?.values ?? {})
-        const baseAccent = IrisStyle.accentFrom(String(v["iris.appearance.accent"] ?? "blue"), v["iris.appearance.theme.accentHue"])
+        // the accent the shell will wear: vivid, like IrisStyle.baseAccent, or the swatch shows a pastel nothing uses
+        const baseAccent = IrisStyle.vivid(IrisStyle.accentFrom(String(v["iris.appearance.accent"] ?? "blue"), v["iris.appearance.theme.accentHue"]), false)
         const animeOn = Boolean(v["iris.appearance.anime.enabled"] ?? false)
         const animePalette = String(v["iris.appearance.anime.palette"] ?? "sakura")
         const animeStrength = Number(v["iris.appearance.anime.strength"] ?? 0) / 100

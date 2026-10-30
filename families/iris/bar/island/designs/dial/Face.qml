@@ -25,7 +25,7 @@ Item {
     Row {
         id: row
         anchors.centerIn: parent
-        spacing: Math.round(9 * root.d)
+        spacing: Math.round(8 * root.d)
         Item {
             anchors.verticalCenter: parent.verticalCenter
             width: Math.round(root.h - 10 * root.d)
