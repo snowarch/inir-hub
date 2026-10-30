@@ -93,9 +93,12 @@ Item {
     // apart from it by a seam, instead of growing the strip into the page.
     // Three designs of the Island (10-25): the engine's own (Halo), Ledger and Tiles, which skin its face, its page
     // buttons and its desktop page. A shell Design (AIRISU) that skins a part keeps it.
-    readonly property string design: ["ledger", "tiles"].includes(String(root.options?.design ?? "halo")) ? String(root.options.design) : "halo"
+    readonly property string design: ["ledger", "tiles", "dial", "marquee", "duo"].includes(String(root.options?.design ?? "halo")) ? String(root.options.design) : "halo"
+    // What each design draws of its own; the engine draws the rest (Dial, Marquee and Duo keep Halo's pages).
+    readonly property var designParts: ({ ledger: ["Face.qml", "Nav.qml", "Desktop.qml"], tiles: ["Face.qml", "Nav.qml", "Desktop.qml"],
+        dial: ["Face.qml"], marquee: ["Face.qml"], duo: ["Face.qml"] })
     function skinOf(own: string, file: string): string {
-        return own.length > 0 || root.design === "halo" ? own : Qt.resolvedUrl("island/designs/" + root.design + "/" + file)
+        return own.length > 0 || !(root.designParts[root.design] ?? []).includes(file) ? own : Qt.resolvedUrl("island/designs/" + root.design + "/" + file)
     }
     readonly property string faceUrl: root.vertical ? "" : root.skinOf(IrisDesign.skin("islandFace"), "Face.qml")
     readonly property string navUrl: root.skinOf(IrisDesign.skin("islandNav"), "Nav.qml")
@@ -2182,24 +2185,40 @@ Item {
                 Item { Layout.fillWidth: true }
             }
 
-            // Halo: a hairline under the time for the day, lit as far as it has gone, now a dot in the highlight; it
-            // keeps to the minute (DateTime's), so it never ticks between them.
+            // Halo: the sun's path under the time, a shallow arc from sunrise to sunset with the sun on it where it is
+            // now (the Sunrise widget's reading, at the Island's size). Night dims the arc and sets the sun down at its
+            // end. It moves with Weather's minute, never between.
             Item {
-                id: dayLine
-                readonly property real fraction: { void DateTime.timeDisplay; const t = new Date(); return (t.getHours() * 60 + t.getMinutes()) / 1440 }
-                visible: root.design === "halo" && clockRow.visible && !root.vertical && clusterClock.width > 0
+                id: sunPath
+                readonly property real progress: Weather.sunProgress
+                readonly property bool day: Weather.sunState === "day"
+                // At night the sun is under the horizon: Halo is the time alone.
+                visible: root.design === "halo" && sunPath.day && clockRow.visible && !root.vertical && clusterClock.width > 0
                 opacity: clockRow.opacity
-                x: clockRow.x + clusterClock.x
-                y: clockRow.y + clusterClock.y + clusterClock.height + Math.round(2 * root.d)
-                width: clusterClock.width
-                height: Math.max(2, Math.round(2 * root.d))
-                Rectangle { anchors.fill: parent; radius: height / 2; color: IrisStyle.hairline }
-                Rectangle { width: Math.round(parent.width * dayLine.fraction); height: parent.height; radius: height / 2; color: IrisStyle.textTertiary }
+                x: clockRow.x + clusterClock.x + Math.round(clusterClock.width * 0.08)
+                y: clockRow.y + clusterClock.y + clusterClock.height + Math.round(1 * root.d)
+                width: Math.round(clusterClock.width * 0.84)
+                height: Math.round(6 * root.d)
+                Shape {
+                    anchors.fill: parent
+                    preferredRendererType: Shape.CurveRenderer
+                    ShapePath {
+                        strokeWidth: Math.max(1, IrisStyle.devicePx)
+                        strokeColor: sunPath.day ? IrisStyle.hairlineStrong : IrisStyle.hairline
+                        fillColor: "transparent"
+                        capStyle: ShapePath.RoundCap
+                        startX: 0; startY: sunPath.height
+                        PathQuad { x: sunPath.width; y: sunPath.height; controlX: sunPath.width / 2; controlY: -sunPath.height }
+                    }
+                }
                 Rectangle {
                     readonly property real size: Math.round(5 * root.d)
-                    x: Math.round(parent.width * dayLine.fraction - size / 2); y: Math.round((parent.height - size) / 2)
+                    readonly property real t: sunPath.progress
+                    // On the quad above: x runs straight across, y = h - 4h·t(1-t).
+                    x: Math.round(sunPath.width * t - size / 2)
+                    y: Math.round(sunPath.height - 4 * sunPath.height * t * (1 - t) - size / 2)
                     width: size; height: size; radius: size / 2
-                    color: root.clockAccent
+                    color: sunPath.day ? root.clockAccent : IrisStyle.textTertiary
                 }
             }
 
