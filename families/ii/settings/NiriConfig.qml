@@ -1439,32 +1439,35 @@ ContentPage {
                 implicitHeight: monitorInfoRow.implicitHeight + 8
                 visible: root.currentOutput !== null
 
+                // a settings row like the others: the block already gets the tile's padding, and the icon keeps
+                // its own size (a free MaterialSymbol here pushed the name 190 px right)
                 RowLayout {
                     id: monitorInfoRow
                     anchors {
                         left: parent.left; right: parent.right
                         verticalCenter: parent.verticalCenter
-                        leftMargin: 8; rightMargin: 8
                     }
-                    spacing: 10
+                    spacing: SettingsMaterialPreset.tilePaddingX
 
                     MaterialSymbol {
+                        Layout.preferredWidth: SettingsMaterialPreset.iconSize
                         text: "monitor"
-                        iconSize: Appearance.font.pixelSize.hugeass
-                        color: Appearance.colors.colPrimary
+                        iconSize: SettingsMaterialPreset.iconSize
+                        color: SettingsMaterialPreset.supportingColor
                     }
 
                     ColumnLayout {
                         Layout.fillWidth: true
-                        spacing: 0
+                        spacing: 2
 
                         StyledText {
+                            Layout.fillWidth: true
                             text: root.currentOutputName
-                            font.pixelSize: Appearance.font.pixelSize.normal
-                            font.weight: Font.Medium
-                            color: Appearance.colors.colOnLayer1
+                            font.pixelSize: SettingsMaterialPreset.labelSize
+                            color: SettingsMaterialPreset.labelColor
                         }
                         StyledText {
+                            Layout.fillWidth: true
                             text: {
                                 const o = root.currentOutput
                                 if (!o) return ""
@@ -1478,8 +1481,8 @@ ContentPage {
                                 }
                                 return info
                             }
-                            font.pixelSize: Appearance.font.pixelSize.smaller
-                            color: Appearance.colors.colSubtext
+                            font.pixelSize: SettingsMaterialPreset.supportingSize
+                            color: SettingsMaterialPreset.supportingColor
                         }
                     }
                 }
