@@ -11,38 +11,49 @@ import qs.modules.common
 import qs.modules.common.widgets
 import qs.modules.common.functions
 
-// The community hub in Material Settings. The shelf leads with one featured item, then what works in
-// Material, then what works in the other families; an item's page leads with its picture and its
-// action. Hub owns the catalogue and the installs; this page only presents them.
+// The community hub in Material Settings, built to browse hundreds: one toolbar (search, order, list or grid),
+// kind chips with their counts, a small featured band, then the catalogue as Settings' own segmented rows.
+// An item's page leads with its name, votes and action. Hub owns the catalogue and the installs.
 ContentPage {
     id: root
     settingsPageIndex: 29
     settingsPageName: Translation.tr("Hub")
 
     property string kind: ""
-    property bool installedOnly: false
+    property string filter: "" // "", "installed" or "updates"
     property string query: ""
     property string openId: ""
     property real shelfScroll: 0
+    property int shownCount: root.pageSize
 
+    readonly property int pageSize: 40
     readonly property string family: Hub.family
-    readonly property var shown: Hub.items.filter(item => Hub.matches(item, root.kind, root.query, root.installedOnly))
+    readonly property string sort: Config.options?.hub?.sort ?? "popular"
+    readonly property bool grid: (Config.options?.hub?.view ?? "list") === "grid"
+    readonly property var shown: Hub.sorted(Hub.items.filter(item => Hub.matches(item, root.kind, root.query, root.filter === "installed")
+        && (root.filter !== "updates" || Hub.stateOf(item) === "update")), root.sort)
+    readonly property var listed: root.shown.slice(0, root.shownCount)
     readonly property var opened: root.openId.length > 0 ? Hub.find(root.openId) : null
-    readonly property bool browsing: root.kind === "" && root.query === "" && !root.installedOnly
-    readonly property var featured: root.browsing ? Hub.featuredFor(root.family) : null
-    readonly property var forHere: root.shown.filter(item => Hub.fits(item, root.family) && item.id !== root.featured?.id)
-    readonly property var forOthers: root.shown.filter(item => !Hub.fits(item, root.family))
+    readonly property bool browsing: root.kind === "" && root.query === "" && root.filter === ""
+    readonly property bool hasStats: Hub.items.some(item => item.downloads !== undefined || Hub.votes(item) > 0)
 
-    // Cards are laid out from the page width: as many columns of at least minCard as fit, up to four.
-    readonly property int gap: 16
-    readonly property real minCard: 236
-    readonly property real usable: Math.max(0, root.width - 2 * root._horizontalMargin)
-    readonly property int columns: Math.max(1, Math.min(4, Math.floor((root.usable + root.gap) / (root.minCard + root.gap))))
-    readonly property real cardWidth: Math.floor((root.usable - (root.columns - 1) * root.gap) / root.columns)
+    readonly property real usable: Math.min(root.maxContentWidth, Math.max(0, root.width - 2 * root._horizontalMargin))
+    readonly property bool wideRows: root.usable >= 640
+    readonly property int bandColumns: root.usable >= 720 ? 3 : 2
+    readonly property var featured: root.browsing ? Hub.sorted(Hub.items.filter(item => item.featured === true && Hub.fits(item, root.family)
+        && item.compatible !== false && !item.blocked), "popular").slice(0, root.bandColumns) : []
+    readonly property int gap: 12
+    readonly property int columns: Math.max(2, Math.min(5, Math.floor((root.usable + root.gap) / (196 + root.gap))))
+    readonly property real tileWidth: Math.floor((root.usable - (root.columns - 1) * root.gap) / root.columns)
 
     readonly property var permissionGlyphs: ({ process: "terminal", network: "public", files: "folder_open", inject: "code" })
-    readonly property var kindGlyphs: ({ widget: "widgets", theme: "palette", "iris-theme": "style", webapp: "language" })
+    readonly property var kindGlyphs: ({ widget: "widgets", theme: "palette", "iris-theme": "style", webapp: "language", family: "dashboard" })
     readonly property var familyNames: ({ material: "Material", iris: "iRiS", waffle: "Waffle" })
+
+    onKindChanged: root.shownCount = root.pageSize
+    onFilterChanged: root.shownCount = root.pageSize
+    onQueryChanged: root.shownCount = root.pageSize
+    onSortChanged: root.shownCount = root.pageSize
 
     Component.onCompleted: {
         Hub.ensureLoaded()
@@ -57,8 +68,7 @@ ContentPage {
         }
     }
 
-
-    // An item's page opens at its top; going back returns to where the shelf was.
+    // An item's page opens at its top; going back returns to where the list was.
     function openItem(id: string): void {
         if (root.openId.length === 0)
             root.shelfScroll = root.contentY
@@ -83,6 +93,8 @@ ContentPage {
         case "updating": return { text: Translation.tr("Updating…"), icon: "downloading", busy: true }
         case "removing": return { text: Translation.tr("Removing…"), icon: "delete", busy: true }
         case "failed": return { text: Translation.tr("Try again"), icon: "refresh", tone: "error", run: () => item.installed ? Hub.update(item.id) : Hub.install(item.id) }
+        case "pulled": return { text: Translation.tr("Remove"), icon: "delete", tone: "error", run: () => Hub.remove(item.id) }
+        case "blocked": return { text: Translation.tr("Pulled"), icon: "block", tone: "off" }
         case "update": return { text: Translation.tr("Update"), icon: "upgrade", tone: "primary", run: () => Hub.update(item.id) }
         case "conflict": return { text: Translation.tr("Name taken"), icon: "block", tone: "off" }
         case "incompatible": return { text: Translation.tr("Needs iNiR %1").arg(item.minInir), icon: "block", tone: "off" }
@@ -109,195 +121,229 @@ ContentPage {
     function otherFamilies(item: var): string {
         return Array.from(item?.families ?? []).filter(name => name !== root.family).map(name => root.familyNames[name] ?? name).join(" · ")
     }
+    function likedText(item: var): string {
+        const liked = Hub.liked(item)
+        return liked < 0 ? "–" : `${Math.round(liked * 100)}%`
+    }
+    function votesText(item: var): string {
+        return Hub.votes(item) > 0 ? Translation.tr("%1 of %2 people liked it").arg(item.votesUp ?? 0).arg(Hub.votes(item))
+            : Translation.tr("No votes yet")
+    }
+    function dateText(date: string): string {
+        if (!date)
+            return ""
+        const day = new Date(date + "T12:00:00")
+        return Qt.formatDate(day, day.getFullYear() === new Date().getFullYear() ? "d MMM" : "MMM yyyy")
+    }
 
-    // ── Search, filters ───────────────────────────────────────────────
-    ColumnLayout {
+    // ── Toolbar: search, order, view ──────────────────────────────────
+    RowLayout {
         Layout.fillWidth: true
         visible: root.opened === null
-        spacing: 12
+        spacing: 8
 
-        RowLayout {
+        Rectangle {
             Layout.fillWidth: true
-            spacing: 10
-
-            // The search bar also says how much there is to search, and holds the refresh.
-            Rectangle {
-                Layout.fillWidth: true
-                implicitHeight: 48
-                radius: Appearance.rounding.full
-                color: searchInput.activeFocus ? Appearance.colors.colLayer2Hover : Appearance.colors.colLayer2
-                border.width: searchInput.activeFocus ? 2 : 0
-                border.color: Appearance.colors.colPrimary
-                Behavior on color {
-                    enabled: Appearance.animationsEnabled
-                    ColorAnimation { duration: Appearance.animation.elementMoveFast.duration }
-                }
-
-                TapHandler { onTapped: searchInput.forceActiveFocus() }
-
-                RowLayout {
-                    anchors.fill: parent
-                    anchors.leftMargin: 18
-                    anchors.rightMargin: 6
-                    spacing: 12
-                    MaterialSymbol {
-                        text: "search"
-                        iconSize: Appearance.font.pixelSize.huge
-                        color: searchInput.activeFocus ? Appearance.colors.colPrimary : Appearance.colors.colSubtext
-                    }
-                    StyledTextInput {
-                        id: searchInput
-                        Layout.fillWidth: true
-                        font.pixelSize: Appearance.font.pixelSize.normal
-                        color: Appearance.colors.colOnLayer1
-                        clip: true
-                        onTextChanged: searchDelay.restart()
-                        Keys.onEscapePressed: event => {
-                            if (text.length === 0) {
-                                event.accepted = false
-                                return
-                            }
-                            text = ""
-                        }
-                        Timer { id: searchDelay; interval: 140; onTriggered: root.query = searchInput.text.trim() }
-                        StyledText {
-                            anchors.verticalCenter: parent.verticalCenter
-                            width: parent.width
-                            visible: searchInput.text.length === 0
-                            text: !Hub.loaded ? Translation.tr("Reading the hub…")
-                                : Translation.tr("Search the hub")
-                            font.pixelSize: Appearance.font.pixelSize.normal
-                            color: Appearance.colors.colSubtext
-                            elide: Text.ElideRight
-                        }
-                    }
-                    IconToolbarButton {
-                        visible: searchInput.text.length > 0
-                        implicitWidth: 36
-                        implicitHeight: 36
-                        iconSize: 20
-                        text: "close"
-                        onClicked: searchInput.text = ""
-                        StyledToolTip { text: Translation.tr("Clear") }
-                    }
-                    Rectangle {
-                        implicitWidth: 1
-                        implicitHeight: 24
-                        color: Appearance.colors.colOutlineVariant
-                    }
-                    IconToolbarButton {
-                        id: refreshButton
-                        implicitWidth: 36
-                        implicitHeight: 36
-                        iconSize: 20
-                        text: "refresh"
-                        enabled: !Hub.loading
-                        onClicked: Hub.refresh(true)
-                        StyledToolTip {
-                            text: Hub.checkedAt > 0
-                                ? Translation.tr("Checked %1 · check again").arg(Qt.formatTime(new Date(Hub.checkedAt), "hh:mm"))
-                                : Translation.tr("Check the hub now")
-                        }
-                        RotationAnimator on rotation {
-                            running: Hub.loading && refreshButton.visible && Appearance.animationsEnabled
-                            from: 0
-                            to: 360
-                            duration: 900
-                            loops: Animation.Infinite
-                            onRunningChanged: if (!running) refreshButton.rotation = 0
-                        }
-                    }
-                }
+            implicitHeight: 40
+            radius: Appearance.rounding.full
+            color: searchInput.activeFocus || searchHover.hovered ? SettingsMaterialPreset.tileHoverColor : SettingsMaterialPreset.tileColor
+            border.width: searchInput.activeFocus ? 2 : 0
+            border.color: Appearance.colors.colPrimary
+            Behavior on color {
+                enabled: Appearance.animationsEnabled
+                ColorAnimation { duration: Appearance.animation.elementMoveFast.duration }
             }
+            HoverHandler { id: searchHover; cursorShape: Qt.IBeamCursor }
+            TapHandler { onTapped: searchInput.forceActiveFocus() }
 
-            RippleButtonWithIcon {
-                visible: Hub.updates > 0
-                implicitHeight: 48
-                horizontalPadding: 18
-                buttonRadius: Appearance.rounding.full
-                materialIcon: "upgrade"
-                mainText: Translation.tr("Update all (%1)").arg(Hub.updates)
-                colBackground: Appearance.colors.colPrimary
-                colBackgroundHover: Appearance.colors.colPrimaryHover
-                contentColor: Appearance.colors.colOnPrimary
-                onClicked: Hub.updateAll()
+            RowLayout {
+                anchors.fill: parent
+                anchors.leftMargin: 14
+                anchors.rightMargin: 4
+                spacing: 10
+                MaterialSymbol {
+                    text: "search"
+                    iconSize: SettingsMaterialPreset.iconSize
+                    color: searchInput.activeFocus ? Appearance.colors.colPrimary : SettingsMaterialPreset.supportingColor
+                }
+                StyledTextInput {
+                    id: searchInput
+                    Layout.fillWidth: true
+                    font.pixelSize: SettingsMaterialPreset.labelSize
+                    color: SettingsMaterialPreset.labelColor
+                    clip: true
+                    onTextChanged: searchDelay.restart()
+                    Keys.onEscapePressed: event => {
+                        if (text.length === 0) {
+                            event.accepted = false
+                            return
+                        }
+                        text = ""
+                    }
+                    Timer { id: searchDelay; interval: 140; onTriggered: root.query = searchInput.text.trim() }
+                    StyledText {
+                        anchors.verticalCenter: parent.verticalCenter
+                        width: parent.width
+                        visible: searchInput.text.length === 0
+                        text: !Hub.loaded ? Translation.tr("Reading the hub…")
+                            : Translation.tr("Search %1 items").arg(Hub.items.length)
+                        font.pixelSize: SettingsMaterialPreset.labelSize
+                        color: SettingsMaterialPreset.supportingColor
+                        elide: Text.ElideRight
+                    }
+                }
+                IconToolbarButton {
+                    visible: searchInput.text.length > 0
+                    implicitWidth: 32
+                    implicitHeight: 32
+                    iconSize: 18
+                    text: "close"
+                    onClicked: searchInput.text = ""
+                    StyledToolTip { text: Translation.tr("Clear") }
+                }
             }
         }
 
-        Flow {
-            Layout.fillWidth: true
-            spacing: 8
+        StyledComboBox {
+            Layout.preferredWidth: Math.round(176 * Appearance.fontSizeScale)
+            enableSettingsSearch: false
+            model: Hub.sorts.map(entry => ({ displayName: Translation.tr(entry.label) }))
+            textRole: "displayName"
+            currentIndex: Math.max(0, Hub.sorts.findIndex(entry => entry.id === root.sort))
+            onActivated: index => Config.setNestedValue("hub.sort", Hub.sorts[index].id)
+        }
 
-            FilterChip {
-                text: Translation.tr("Everything")
-                selected: root.kind === "" && !root.installedOnly
-                onClicked: {
-                    root.kind = ""
-                    root.installedOnly = false
+        // List or grid: one connected pair, the chosen key filled.
+        Rectangle {
+            implicitWidth: viewKeys.implicitWidth + 8
+            implicitHeight: 40
+            radius: Appearance.rounding.full
+            color: SettingsMaterialPreset.tileColor
+            Row {
+                id: viewKeys
+                anchors.centerIn: parent
+                spacing: 2
+                Repeater {
+                    model: [{ id: "list", icon: "view_agenda", tip: "List" }, { id: "grid", icon: "grid_view", tip: "Grid" }]
+                    delegate: IconToolbarButton {
+                        id: viewKey
+                        required property var modelData
+                        implicitWidth: 40
+                        implicitHeight: 32
+                        iconSize: 18
+                        text: modelData.icon
+                        toggled: root.grid === (modelData.id === "grid")
+                        onClicked: Config.setNestedValue("hub.view", modelData.id)
+                        StyledToolTip { text: Translation.tr(viewKey.modelData.tip) }
+                    }
                 }
-            }
-            Repeater {
-                model: Hub.kinds.filter(entry => Hub.items.some(item => item.kind === entry.id))
-                delegate: FilterChip {
-                    required property var modelData
-                    text: Translation.tr(modelData.label)
-                    chipIcon: modelData.icon
-                    selected: root.kind === modelData.id
-                    onClicked: root.kind = root.kind === modelData.id ? "" : modelData.id
-                }
-            }
-            FilterChip {
-                visible: Hub.items.some(item => item.installed)
-                text: Translation.tr("Installed")
-                chipIcon: "download_done"
-                selected: root.installedOnly
-                onClicked: root.installedOnly = !root.installedOnly
             }
         }
 
-        // Offline or unreachable: the shelf still shows what was loaded last.
-        NoticeBox {
-            Layout.fillWidth: true
-            visible: Hub.loaded && (!Hub.online || Hub.error.length > 0)
-            materialIcon: Hub.online ? "cloud_off" : "wifi_off"
-            text: !Hub.online ? Translation.tr("You're offline: this is the list from the last time the hub answered")
-                : Hub.items.length > 0 ? Translation.tr("The hub didn't answer: this is the list from the last time it did")
-                : Hub.cliMissing ? Translation.tr("The hub comes with the inir command: run inir update once to get it")
-                : Translation.tr("The hub didn't answer. Check your connection and try again")
+        IconToolbarButton {
+            id: refreshButton
+            implicitWidth: 40
+            implicitHeight: 40
+            iconSize: SettingsMaterialPreset.iconSize
+            text: "refresh"
+            enabled: !Hub.loading
+            onClicked: Hub.refresh(true)
+            StyledToolTip {
+                text: Hub.checkedAt > 0
+                    ? Translation.tr("Checked %1 · check again").arg(Qt.formatTime(new Date(Hub.checkedAt), "hh:mm"))
+                    : Translation.tr("Check the hub now")
+            }
+            RotationAnimator on rotation {
+                running: Hub.loading && refreshButton.visible && Appearance.animationsEnabled
+                from: 0
+                to: 360
+                duration: 900
+                loops: Animation.Infinite
+                onRunningChanged: if (!running) refreshButton.rotation = 0
+            }
         }
     }
 
-    // ── Loading: the shelf's shape, quiet ─────────────────────────────
-    GridLayout {
+    // ── Kinds and states, with how many of each ───────────────────────
+    Flow {
         Layout.fillWidth: true
-        Layout.topMargin: 8
-        visible: !Hub.loaded
-        columns: root.columns
-        columnSpacing: root.gap
-        rowSpacing: root.gap
+        Layout.topMargin: -12
+        visible: root.opened === null && Hub.items.length > 0
+        spacing: 6
+
+        FilterChip {
+            text: `${Translation.tr("Everything")}  ${Hub.items.length}`
+            selected: root.kind === "" && root.filter === ""
+            onClicked: {
+                root.kind = ""
+                root.filter = ""
+            }
+        }
         Repeater {
-            model: root.columns * 2
+            model: Hub.kinds.map(entry => Object.assign({ count: Hub.items.filter(item => item.kind === entry.id).length }, entry))
+                .filter(entry => entry.count > 0)
+            delegate: FilterChip {
+                required property var modelData
+                text: `${Translation.tr(modelData.label)}  ${modelData.count}`
+                selected: root.kind === modelData.id
+                onClicked: root.kind = root.kind === modelData.id ? "" : modelData.id
+            }
+        }
+        FilterChip {
+            readonly property int count: Hub.items.filter(item => Hub.owned(item)).length
+            visible: count > 0
+            text: `${Translation.tr("Installed")}  ${count}`
+            selected: root.filter === "installed"
+            onClicked: root.filter = root.filter === "installed" ? "" : "installed"
+        }
+        FilterChip {
+            visible: Hub.updates > 0
+            text: `${Translation.tr("Updates")}  ${Hub.updates}`
+            selected: root.filter === "updates"
+            onClicked: root.filter = root.filter === "updates" ? "" : "updates"
+        }
+    }
+
+    // Offline or unreachable with a list in hand: the list from last time, said once.
+    NoticeBox {
+        Layout.fillWidth: true
+        visible: root.opened === null && Hub.loaded && Hub.items.length > 0 && (!Hub.online || Hub.error.length > 0)
+        materialIcon: Hub.online ? "cloud_off" : "wifi_off"
+        text: !Hub.online ? Translation.tr("You're offline: this is the list from the last time the hub answered")
+            : Translation.tr("The hub didn't answer: this is the list from the last time it did")
+    }
+
+    // ── Loading: the list's shape, quiet ──────────────────────────────
+    ColumnLayout {
+        Layout.fillWidth: true
+        visible: !Hub.loaded
+        spacing: SettingsMaterialPreset.tileGap
+        Repeater {
+            model: 6
             delegate: Rectangle {
                 id: ghost
                 required property int index
-                Layout.preferredWidth: root.cardWidth
-                implicitHeight: Math.round(root.cardWidth * 10 / 16) + 104
-                radius: Appearance.rounding.normal
-                color: Appearance.colors.colLayer2
+                Layout.fillWidth: true
+                implicitHeight: Math.round(64 * Appearance.fontSizeScale)
+                topLeftRadius: ghost.index === 0 ? SettingsMaterialPreset.tileOuterRadius : SettingsMaterialPreset.tileInnerRadius
+                topRightRadius: topLeftRadius
+                bottomLeftRadius: ghost.index === 5 ? SettingsMaterialPreset.tileOuterRadius : SettingsMaterialPreset.tileInnerRadius
+                bottomRightRadius: bottomLeftRadius
+                color: SettingsMaterialPreset.tileColor
                 Rectangle {
-                    width: parent.width
-                    height: Math.round(root.cardWidth * 10 / 16)
-                    topLeftRadius: parent.radius
-                    topRightRadius: parent.radius
-                    color: Appearance.colors.colLayer3
+                    x: 10
+                    anchors.verticalCenter: parent.verticalCenter
+                    width: Math.round((parent.height - 16) * 1.6)
+                    height: parent.height - 16
+                    radius: 8
+                    color: SettingsMaterialPreset.controlColor
                 }
                 Column {
-                    x: 16
-                    y: Math.round(root.cardWidth * 10 / 16) + 18
-                    spacing: 10
-                    Rectangle { width: ghost.width * 0.5; height: 12; radius: 6; color: Appearance.colors.colLayer3 }
-                    Rectangle { width: ghost.width * 0.32; height: 9; radius: 4.5; color: Appearance.colors.colLayer3 }
-                    Rectangle { width: ghost.width * 0.78; height: 9; radius: 4.5; color: Appearance.colors.colLayer3 }
+                    x: Math.round((parent.height - 16) * 1.6) + 24
+                    anchors.verticalCenter: parent.verticalCenter
+                    spacing: 8
+                    Rectangle { width: ghost.width * 0.22; height: 10; radius: 5; color: SettingsMaterialPreset.controlColor }
+                    Rectangle { width: ghost.width * 0.44; height: 8; radius: 4; color: SettingsMaterialPreset.controlColor }
                 }
                 SequentialAnimation on opacity {
                     running: ghost.visible && Appearance.animationsEnabled
@@ -312,21 +358,23 @@ ContentPage {
 
     MaterialPlaceholderMessage {
         Layout.fillWidth: true
-        Layout.topMargin: 32
+        Layout.topMargin: 24
         shown: Hub.loaded && root.opened === null && root.shown.length === 0
         visible: shown
-        icon: root.query.length > 0 ? "search_off" : root.installedOnly ? "download_done" : "storefront"
+        icon: root.query.length > 0 ? "search_off" : root.filter === "installed" ? "download_done"
+            : Hub.items.length === 0 && Hub.error.length > 0 ? (Hub.online ? "cloud_off" : "wifi_off") : "storefront"
         text: root.query.length > 0 ? Translation.tr("Nothing matches “%1”").arg(root.query)
-            : root.installedOnly ? Translation.tr("Nothing installed from the hub yet")
+            : root.filter === "installed" ? Translation.tr("Nothing installed from the hub yet")
             : Hub.items.length === 0 && Hub.error.length > 0 ? Translation.tr("The hub didn't answer")
             : Translation.tr("Nothing here yet")
         explanation: root.query.length > 0 ? Translation.tr("Try a shorter word, or look through everything")
-            : root.installedOnly ? Translation.tr("What you get from the hub shows up here, with its updates")
+            : root.filter === "installed" ? Translation.tr("What you get from the hub shows up here, with its updates")
+            : Hub.cliMissing ? Translation.tr("The hub comes with the inir command: run inir update once to get it")
+            : Hub.items.length === 0 && Hub.error.length > 0 ? Translation.tr("The hub didn't answer. Check your connection and try again")
             : ""
         actionIcon: root.browsing ? "refresh" : "filter_alt_off"
-        actionText: root.browsing ? (Hub.error.length > 0 ? Translation.tr("Try again") : "") : Translation.tr("See everything")
         helpfulAction: Action {
-            text: root.browsing ? Translation.tr("Try again") : Translation.tr("See everything")
+            text: root.browsing ? (Hub.error.length > 0 ? Translation.tr("Try again") : "") : Translation.tr("See everything")
             onTriggered: {
                 if (root.browsing) {
                     Hub.refresh(true)
@@ -335,30 +383,80 @@ ContentPage {
                 searchInput.text = ""
                 root.query = ""
                 root.kind = ""
-                root.installedOnly = false
+                root.filter = ""
             }
         }
     }
 
-    // ── The shelf ─────────────────────────────────────────────────────
-    FeaturedCard {
+    // ── Featured: a band, never a banner ──────────────────────────────
+    ColumnLayout {
         Layout.fillWidth: true
-        Layout.topMargin: 8
-        visible: Hub.loaded && root.opened === null && root.featured !== null
-        item: root.featured
+        visible: Hub.loaded && root.opened === null && root.featured.length > 0
+        spacing: 8
+        Subheader { text: Translation.tr("Featured") }
+        RowLayout {
+            Layout.fillWidth: true
+            spacing: root.gap
+            Repeater {
+                model: root.featured
+                delegate: FeaturedTile {}
+            }
+            Item {
+                Layout.fillWidth: true
+                Layout.preferredWidth: root.bandColumns - root.featured.length
+                visible: root.featured.length < root.bandColumns
+            }
+        }
     }
 
-    Shelf {
-        visible: Hub.loaded && root.opened === null && root.forHere.length > 0
-        title: root.browsing ? Translation.tr("For %1").arg(root.familyNames[root.family] ?? root.family) : ""
-        items: root.forHere
-    }
+    // ── The catalogue ─────────────────────────────────────────────────
+    ColumnLayout {
+        Layout.fillWidth: true
+        visible: Hub.loaded && root.opened === null && root.shown.length > 0
+        spacing: 8
 
-    Shelf {
-        visible: Hub.loaded && root.opened === null && root.forOthers.length > 0
-        title: Translation.tr("For other families")
-        caption: Translation.tr("They do their part once you switch to the family they were made for")
-        items: root.forOthers
+        Subheader {
+            text: root.browsing ? Translation.tr("Everything") : Translation.tr("%1 results").arg(root.shown.length)
+        }
+
+        ColumnLayout {
+            Layout.fillWidth: true
+            visible: !root.grid
+            spacing: SettingsMaterialPreset.tileGap
+            Repeater {
+                model: root.grid ? [] : root.listed
+                delegate: ItemRow {
+                    count: root.listed.length
+                }
+            }
+        }
+
+        GridLayout {
+            Layout.fillWidth: true
+            visible: root.grid
+            columns: root.columns
+            columnSpacing: root.gap
+            rowSpacing: root.gap
+            Repeater {
+                model: root.grid ? root.listed : []
+                delegate: ItemTile {}
+            }
+        }
+
+        RippleButtonWithIcon {
+            Layout.alignment: Qt.AlignHCenter
+            Layout.topMargin: 4
+            visible: root.shown.length > root.listed.length
+            implicitHeight: 40
+            horizontalPadding: 18
+            buttonRadius: Appearance.rounding.full
+            materialIcon: "expand_more"
+            mainText: Translation.tr("Show %1 more").arg(Math.min(root.pageSize, root.shown.length - root.listed.length))
+            colBackground: SettingsMaterialPreset.tileColor
+            colBackgroundHover: SettingsMaterialPreset.tileHoverColor
+            contentColor: SettingsMaterialPreset.labelColor
+            onClicked: root.shownCount += root.pageSize
+        }
     }
 
     // ── One item ──────────────────────────────────────────────────────
@@ -373,7 +471,6 @@ ContentPage {
 
     // ── Sources ───────────────────────────────────────────────────────
     SettingsCardSection {
-        Layout.topMargin: 12
         visible: root.opened === null && Hub.loaded
         expanded: false
         icon: "dns"
@@ -452,12 +549,21 @@ ContentPage {
 
     // ── Pieces ────────────────────────────────────────────────────────
 
+    component Subheader: StyledText {
+        Layout.fillWidth: true
+        Layout.leftMargin: 4
+        font.pixelSize: SettingsMaterialPreset.subheaderSize
+        font.weight: Font.Medium
+        color: SettingsMaterialPreset.subheaderColor
+        elide: Text.ElideRight
+    }
+
     // The picture of an item: its preview, or its kind's glyph on a quiet plate while there is none.
     component Preview: ClippingRectangle {
         id: preview
         property var item
         property bool zoomed: false
-        color: Appearance.colors.colLayer3
+        color: SettingsMaterialPreset.controlColor
         Image {
             id: previewImage
             anchors.fill: parent
@@ -481,18 +587,18 @@ ContentPage {
             anchors.centerIn: parent
             visible: previewImage.status !== Image.Ready
             text: root.kindGlyphs[preview.item?.kind] ?? "extension"
-            iconSize: Math.round(preview.height * 0.28)
+            iconSize: Math.round(preview.height * 0.36)
             fill: 1
             color: Appearance.colors.colOutlineVariant
         }
     }
 
-    // The main button, the same everywhere; `compact` is the card's size.
+    // The main button, the same everywhere; `compact` is the list's size.
     component ActionButton: RippleButtonWithIcon {
         id: action
         property var item
         property bool compact: false
-        // On a card a fresh "Get" is tonal: a shelf of filled buttons has no focal point.
+        // In a list a fresh "Get" is tonal: a column of filled buttons has no focal point.
         readonly property var plan: {
             const plan = root.actionOf(action.item)
             if (action.compact && plan.tone === "primary" && Hub.stateOf(action.item) === "get")
@@ -500,7 +606,7 @@ ContentPage {
             return plan
         }
         readonly property bool quiet: action.plan.tone === "off" || action.plan.busy === true
-        implicitHeight: action.compact ? 32 : 44
+        implicitHeight: action.compact ? 32 : 40
         horizontalPadding: action.quiet ? (action.compact ? 4 : 8) : (action.compact ? 14 : 20)
         buttonRadius: Appearance.rounding.full
         materialIcon: action.plan.icon ?? ""
@@ -517,299 +623,315 @@ ContentPage {
         contentColor: action.plan.tone === "primary" ? Appearance.colors.colOnPrimary
             : action.plan.tone === "error" ? Appearance.colors.colOnErrorContainer
             : action.plan.tone === "tonal" ? Appearance.colors.colOnSecondaryContainer
-            : Appearance.colors.colSubtext
+            : SettingsMaterialPreset.supportingColor
         onClicked: action.plan.run()
         StyledToolTip {
             text: Hub.stateOf(action.item) === "conflict" ? Translation.tr("A folder with this name is already there and did not come from the hub")
                 : Hub.stateOf(action.item) === "failed" ? String(Hub.failures[action.item.id] ?? "")
-                : ""
+                : String(action.item?.installedBlocked || action.item?.blocked || "")
         }
     }
 
-    // A titled group of cards.
-    component Shelf: ColumnLayout {
-        id: shelf
-        property string title: ""
-        property string caption: ""
-        property var items: []
-        Layout.fillWidth: true
-        Layout.topMargin: 14
-        spacing: 12
-
-        ColumnLayout {
-            Layout.fillWidth: true
-            visible: shelf.title.length > 0
-            spacing: 2
-            StyledText {
-                Layout.fillWidth: true
-                text: shelf.title
-                font.family: Appearance.font.family.title
-                font.pixelSize: Appearance.font.pixelSize.larger
-                font.weight: Font.DemiBold
-                color: Appearance.colors.colOnLayer0
-            }
-            StyledText {
-                Layout.fillWidth: true
-                visible: shelf.caption.length > 0
-                text: shelf.caption
-                font.pixelSize: Appearance.font.pixelSize.smallie
-                color: Appearance.colors.colSubtext
-                wrapMode: Text.WordWrap
-            }
+    // A number with its glyph, for rows and tiles: votes, downloads, a date.
+    component Stat: Row {
+        id: stat
+        property string glyph: ""
+        property string text: ""
+        property string tip: ""
+        property color tint: SettingsMaterialPreset.supportingColor
+        spacing: 4
+        MaterialSymbol {
+            anchors.verticalCenter: parent.verticalCenter
+            text: stat.glyph
+            iconSize: 15
+            fill: 1
+            color: stat.tint
         }
-        GridLayout {
-            Layout.fillWidth: true
-            columns: root.columns
-            columnSpacing: root.gap
-            rowSpacing: root.gap
-            Repeater {
-                model: shelf.items
-                delegate: ItemCard {}
-            }
+        StyledText {
+            anchors.verticalCenter: parent.verticalCenter
+            text: stat.text
+            font.pixelSize: Appearance.font.pixelSize.smaller
+            font.features: { "tnum": 1 }
+            color: stat.tint
+        }
+        HoverHandler { id: statHover }
+        StyledToolTip {
+            text: stat.tip
+            extraVisibleCondition: statHover.hovered && stat.tip.length > 0
         }
     }
 
-    // A card on the shelf: the picture first, then name, kind and author, two lines of summary,
-    // and a quiet action. The page behind it has the rest.
-    component ItemCard: ClippingRectangle {
-        id: card
+    // One row of the catalogue, a tile of Settings' segmented groups: picture, name and who made it,
+    // one line of what it is, then votes, downloads, the last update and the action.
+    component ItemRow: Rectangle {
+        id: row
         required property var modelData
-        readonly property bool here: Hub.fits(card.modelData, root.family)
-        Layout.preferredWidth: root.cardWidth
-        Layout.alignment: Qt.AlignTop
-        implicitHeight: cardColumn.implicitHeight
-        radius: Appearance.rounding.normal
-        color: cardHover.hovered ? Appearance.colors.colLayer2Hover : Appearance.colors.colLayer2
+        required property int index
+        property int count: 1
+        readonly property bool here: row.modelData.kind === "family" || Hub.fits(row.modelData, root.family)
+        readonly property var permissions: Array.from(row.modelData.permissions ?? [])
+        Layout.fillWidth: true
+        implicitHeight: Math.round(64 * Appearance.fontSizeScale)
+        topLeftRadius: row.index === 0 ? SettingsMaterialPreset.tileOuterRadius : SettingsMaterialPreset.tileInnerRadius
+        topRightRadius: row.topLeftRadius
+        bottomLeftRadius: row.index === row.count - 1 ? SettingsMaterialPreset.tileOuterRadius : SettingsMaterialPreset.tileInnerRadius
+        bottomRightRadius: row.bottomLeftRadius
+        color: rowTap.pressed ? SettingsMaterialPreset.tilePressColor
+            : rowHover.hovered ? SettingsMaterialPreset.tileHoverColor : SettingsMaterialPreset.tileColor
         Behavior on color {
             enabled: Appearance.animationsEnabled
             ColorAnimation { duration: Appearance.animation.elementMoveFast.duration }
         }
+        HoverHandler { id: rowHover; cursorShape: Qt.PointingHandCursor }
+        TapHandler { id: rowTap; onTapped: root.openItem(row.modelData.id) }
 
-        HoverHandler { id: cardHover; cursorShape: Qt.PointingHandCursor }
-        TapHandler { onTapped: root.openItem(card.modelData.id) }
-
-        ColumnLayout {
-            id: cardColumn
-            width: card.width
-            spacing: 0
+        RowLayout {
+            anchors.fill: parent
+            anchors.leftMargin: 8
+            anchors.rightMargin: 12
+            spacing: 14
 
             Preview {
-                Layout.fillWidth: true
-                Layout.preferredHeight: Math.round(card.width * 10 / 16)
-                item: card.modelData
-                zoomed: cardHover.hovered
-                opacity: card.here ? 1 : 0.82
+                Layout.preferredHeight: row.height - 16
+                Layout.preferredWidth: Math.round((row.height - 16) * 1.6)
+                radius: Math.max(6, row.topLeftRadius - 6)
+                item: row.modelData
+                zoomed: rowHover.hovered
+                opacity: row.here ? 1 : 0.7
             }
 
-            RowLayout {
+            ColumnLayout {
                 Layout.fillWidth: true
-                Layout.leftMargin: 16
-                Layout.rightMargin: 12
-                Layout.topMargin: 14
-                spacing: 10
-
-                ColumnLayout {
+                spacing: 2
+                // The name keeps its width; who made it and what kind elide beside it.
+                Item {
                     Layout.fillWidth: true
-                    spacing: 1
+                    implicitHeight: rowName.implicitHeight
                     StyledText {
-                        Layout.fillWidth: true
-                        text: card.modelData.name
-                        font.pixelSize: Appearance.font.pixelSize.normal
+                        id: rowName
+                        width: Math.min(implicitWidth, parent.width)
+                        text: row.modelData.name ?? row.modelData.id
+                        font.pixelSize: SettingsMaterialPreset.labelSize
                         font.weight: Font.DemiBold
-                        color: Appearance.colors.colOnLayer1
+                        color: SettingsMaterialPreset.labelColor
                         elide: Text.ElideRight
                     }
-                    // Kind and author, then what it may do; plain positions, since the line elides to make room.
-                    Item {
-                        id: metaRow
-                        Layout.fillWidth: true
-                        implicitHeight: metaText.implicitHeight
-                        StyledText {
-                            id: metaText
-                            width: Math.min(implicitWidth, metaRow.width - (marks.width > 0 ? marks.width + 6 : 0))
-                            text: [Translation.tr(Hub.kindName(card.modelData.kind)), root.authorsOf(card.modelData)]
-                                .filter(part => part.length > 0).join(" · ")
-                            font.pixelSize: Appearance.font.pixelSize.smaller
-                            color: Appearance.colors.colSubtext
-                            elide: Text.ElideRight
-                        }
-                        Row {
-                            id: marks
-                            x: metaText.width + 6
-                            anchors.verticalCenter: metaText.verticalCenter
-                            spacing: 4
-                            Repeater {
-                                model: Array.from(card.modelData.permissions ?? [])
-                                delegate: MaterialSymbol {
-                                    id: permissionMark
-                                    required property string modelData
-                                    text: root.permissionGlyphs[modelData] ?? "shield"
-                                    iconSize: Appearance.font.pixelSize.small
-                                    color: Appearance.colors.colTertiary
-                                    HoverHandler { id: permissionHover }
-                                    StyledToolTip {
-                                        text: Translation.tr(Hub.permissionText[permissionMark.modelData] ?? "")
-                                        extraVisibleCondition: permissionHover.hovered
-                                    }
-                                }
-                            }
-                        }
+                    StyledText {
+                        x: rowName.width + 8
+                        width: Math.max(0, parent.width - x)
+                        anchors.baseline: rowName.baseline
+                        visible: width > 30
+                        text: [Translation.tr(Hub.kindName(row.modelData.kind)), root.authorsOf(row.modelData),
+                            row.here ? "" : Translation.tr("For %1").arg(root.otherFamilies(row.modelData))]
+                            .filter(part => part.length > 0).join(" · ")
+                        font.pixelSize: Appearance.font.pixelSize.smaller
+                        color: SettingsMaterialPreset.supportingColor
+                        elide: Text.ElideRight
                     }
                 }
-
-                ActionButton {
-                    Layout.alignment: Qt.AlignVCenter
-                    visible: card.here || Hub.stateOf(card.modelData) !== "get"
-                    compact: true
-                    item: card.modelData
-                }
-                // Made for another family: say which instead of offering it.
                 StyledText {
-                    Layout.alignment: Qt.AlignVCenter
-                    visible: !card.here && Hub.stateOf(card.modelData) === "get"
-                    text: root.otherFamilies(card.modelData)
-                    font.pixelSize: Appearance.font.pixelSize.smaller
-                    font.weight: Font.DemiBold
-                    color: Appearance.colors.colSubtext
+                    Layout.fillWidth: true
+                    text: row.modelData.summary ?? ""
+                    font.pixelSize: SettingsMaterialPreset.supportingSize
+                    color: SettingsMaterialPreset.supportingColor
+                    elide: Text.ElideRight
+                    maximumLineCount: 1
                 }
             }
 
+            MaterialSymbol {
+                opacity: row.permissions.length > 0 ? 1 : 0
+                text: "shield"
+                iconSize: 16
+                color: Appearance.colors.colTertiary
+                HoverHandler { id: shieldHover }
+                StyledToolTip {
+                    text: row.permissions.map(permission => Translation.tr(Hub.permissionText[permission] ?? permission)).join("\n")
+                    extraVisibleCondition: shieldHover.hovered
+                }
+            }
+            Stat {
+                Layout.preferredWidth: 52
+                visible: root.wideRows && root.hasStats
+                glyph: "thumb_up"
+                text: root.likedText(row.modelData)
+                tip: root.votesText(row.modelData)
+            }
+            Stat {
+                Layout.preferredWidth: 58
+                visible: root.wideRows && root.hasStats
+                glyph: "download"
+                text: Hub.countText(row.modelData.downloads ?? 0)
+                tip: Translation.tr("%1 downloads").arg(Number(row.modelData.downloads ?? 0).toLocaleString(Qt.locale(), "f", 0))
+            }
             StyledText {
-                id: summaryText
-                Layout.fillWidth: true
-                Layout.leftMargin: 16
-                Layout.rightMargin: 16
-                Layout.topMargin: 8
-                Layout.bottomMargin: 16
-                Layout.preferredHeight: Math.ceil(summaryMetrics.height * 2 + 2)
-                text: card.modelData.summary ?? ""
-                font.pixelSize: Appearance.font.pixelSize.smallie
-                color: ColorUtils.mix(Appearance.colors.colOnLayer1, Appearance.colors.colSubtext, 0.4)
-                wrapMode: Text.WordWrap
-                maximumLineCount: 2
-                elide: Text.ElideRight
-                verticalAlignment: Text.AlignTop
-                FontMetrics { id: summaryMetrics; font: summaryText.font }
+                Layout.preferredWidth: 52
+                visible: root.wideRows
+                horizontalAlignment: Text.AlignRight
+                text: root.dateText(row.modelData.updated ?? "")
+                font.pixelSize: Appearance.font.pixelSize.smaller
+                font.features: { "tnum": 1 }
+                color: SettingsMaterialPreset.supportingColor
+            }
+            Item {
+                Layout.preferredWidth: root.wideRows ? 152 : rowAction.implicitWidth
+                Layout.fillHeight: true
+                ActionButton {
+                    id: rowAction
+                    anchors.right: parent.right
+                    anchors.verticalCenter: parent.verticalCenter
+                    compact: true
+                    item: row.modelData
+                }
             }
         }
     }
 
-    // The first thing on the shelf: one item, large, with its action at hand.
-    component FeaturedCard: ClippingRectangle {
-        id: hero
-        property var item
-        readonly property bool stacked: hero.width < 640
-        readonly property real pictureWidth: hero.stacked ? hero.width - 24 : Math.round((hero.width - 24) * 0.56)
-        implicitHeight: hero.stacked ? heroText.implicitHeight + Math.round(hero.pictureWidth * 10 / 16) + 36
-            : Math.max(heroText.implicitHeight + 24, Math.round(hero.pictureWidth * 10 / 16) + 24)
-        radius: Appearance.rounding.large
-        color: heroHover.hovered ? Appearance.colors.colPrimaryContainerHover : Appearance.colors.colPrimaryContainer
+    // A card of the grid: the picture, name, who made it, votes and downloads, the action.
+    component ItemTile: ClippingRectangle {
+        id: tile
+        required property var modelData
+        readonly property bool here: tile.modelData.kind === "family" || Hub.fits(tile.modelData, root.family)
+        Layout.preferredWidth: root.tileWidth
+        Layout.alignment: Qt.AlignTop
+        implicitHeight: tileColumn.implicitHeight
+        radius: SettingsMaterialPreset.tileOuterRadius
+        color: tileTap.pressed ? SettingsMaterialPreset.tilePressColor
+            : tileHover.hovered ? SettingsMaterialPreset.tileHoverColor : SettingsMaterialPreset.tileColor
         Behavior on color {
             enabled: Appearance.animationsEnabled
             ColorAnimation { duration: Appearance.animation.elementMoveFast.duration }
         }
-
-        HoverHandler { id: heroHover; cursorShape: Qt.PointingHandCursor }
-        TapHandler { onTapped: root.openItem(hero.item.id) }
-
-        Preview {
-            id: heroPicture
-            x: hero.stacked ? 12 : hero.width - width - 12
-            y: 12
-            width: hero.pictureWidth
-            height: Math.round(width * 10 / 16)
-            radius: Appearance.rounding.normal
-            item: hero.item
-            zoomed: heroHover.hovered
-        }
+        HoverHandler { id: tileHover; cursorShape: Qt.PointingHandCursor }
+        TapHandler { id: tileTap; onTapped: root.openItem(tile.modelData.id) }
 
         ColumnLayout {
-            id: heroText
-            x: hero.stacked ? 28 : 32
-            y: hero.stacked ? heroPicture.height + 28 : Math.round((hero.height - height) / 2)
-            width: hero.stacked ? hero.width - 56 : hero.width - hero.pictureWidth - 12 - 32 - 28
-            spacing: 6
-
-            RowLayout {
-                spacing: 6
-                MaterialSymbol {
-                    text: "kid_star"
-                    iconSize: Appearance.font.pixelSize.small
-                    fill: 1
-                    color: Appearance.colors.colOnPrimaryContainer
-                    opacity: 0.8
-                }
-                StyledText {
-                    text: hero.item?.featured === true ? Translation.tr("Featured") : Translation.tr("New in the hub")
-                    font.pixelSize: Appearance.font.pixelSize.smaller
-                    font.weight: Font.DemiBold
-                    font.letterSpacing: 1
-                    font.capitalization: Font.AllUppercase
-                    color: Appearance.colors.colOnPrimaryContainer
-                    opacity: 0.8
-                }
+            id: tileColumn
+            width: tile.width
+            spacing: 0
+            Preview {
+                Layout.fillWidth: true
+                Layout.preferredHeight: Math.round(tile.width * 10 / 16)
+                radius: 0
+                item: tile.modelData
+                zoomed: tileHover.hovered
+                opacity: tile.here ? 1 : 0.7
             }
             StyledText {
                 Layout.fillWidth: true
-                text: hero.item?.name ?? ""
-                font.family: Appearance.font.family.title
-                font.pixelSize: Math.round(Appearance.font.pixelSize.hugeass * 1.35)
-                font.weight: Font.DemiBold
-                color: Appearance.colors.colOnPrimaryContainer
-                wrapMode: Text.WordWrap
-                maximumLineCount: 2
-                elide: Text.ElideRight
-            }
-            StyledText {
-                Layout.fillWidth: true
-                text: hero.item?.summary ?? ""
-                font.pixelSize: Appearance.font.pixelSize.normal
-                color: Appearance.colors.colOnPrimaryContainer
-                opacity: 0.86
-                wrapMode: Text.WordWrap
-            }
-            StyledText {
-                Layout.fillWidth: true
-                text: [Translation.tr(Hub.kindName(hero.item?.kind ?? "")), Translation.tr("by %1").arg(root.authorsOf(hero.item))].join(" · ")
-                font.pixelSize: Appearance.font.pixelSize.smaller
-                color: Appearance.colors.colOnPrimaryContainer
-                opacity: 0.7
-                elide: Text.ElideRight
-            }
-            RowLayout {
+                Layout.leftMargin: 12
+                Layout.rightMargin: 12
                 Layout.topMargin: 10
-                spacing: 8
-                ActionButton {
-                    item: hero.item
+                text: tile.modelData.name ?? tile.modelData.id
+                font.pixelSize: SettingsMaterialPreset.labelSize
+                font.weight: Font.DemiBold
+                color: SettingsMaterialPreset.labelColor
+                elide: Text.ElideRight
+            }
+            StyledText {
+                Layout.fillWidth: true
+                Layout.leftMargin: 12
+                Layout.rightMargin: 12
+                text: [Translation.tr(Hub.kindName(tile.modelData.kind)),
+                    tile.here ? root.authorsOf(tile.modelData) : Translation.tr("For %1").arg(root.otherFamilies(tile.modelData))]
+                    .filter(part => part.length > 0).join(" · ")
+                font.pixelSize: Appearance.font.pixelSize.smaller
+                color: SettingsMaterialPreset.supportingColor
+                elide: Text.ElideRight
+            }
+            RowLayout {
+                Layout.fillWidth: true
+                Layout.leftMargin: 12
+                Layout.rightMargin: 8
+                Layout.topMargin: 6
+                Layout.bottomMargin: 8
+                spacing: 10
+                Stat {
+                    visible: root.hasStats
+                    glyph: "thumb_up"
+                    text: root.likedText(tile.modelData)
+                    tip: root.votesText(tile.modelData)
                 }
-                RippleButtonWithIcon {
-                    implicitHeight: 44
-                    horizontalPadding: 16
-                    buttonRadius: Appearance.rounding.full
-                    materialIcon: "arrow_forward"
-                    mainText: Translation.tr("Details")
-                    colBackground: "transparent"
-                    colBackgroundHover: ColorUtils.applyAlpha(Appearance.colors.colOnPrimaryContainer, 0.08)
-                    contentColor: Appearance.colors.colOnPrimaryContainer
-                    onClicked: root.openItem(hero.item.id)
+                Stat {
+                    visible: root.hasStats
+                    glyph: "download"
+                    text: Hub.countText(tile.modelData.downloads ?? 0)
+                }
+                Item { Layout.fillWidth: true }
+                ActionButton {
+                    compact: true
+                    item: tile.modelData
                 }
             }
         }
     }
 
-    // An item's page: who made it and the action, its picture, the facts in one strip, what it
-    // is and does, then more of the same kind.
+    // A featured item: small, tonal, its picture beside two lines of what it is.
+    component FeaturedTile: Rectangle {
+        id: feature
+        required property var modelData
+        Layout.fillWidth: true
+        Layout.preferredWidth: 1
+        implicitHeight: Math.round(84 * Appearance.fontSizeScale)
+        radius: SettingsMaterialPreset.tileOuterRadius
+        color: featureHover.hovered ? Appearance.colors.colSecondaryContainerHover : Appearance.colors.colSecondaryContainer
+        Behavior on color {
+            enabled: Appearance.animationsEnabled
+            ColorAnimation { duration: Appearance.animation.elementMoveFast.duration }
+        }
+        HoverHandler { id: featureHover; cursorShape: Qt.PointingHandCursor }
+        TapHandler { onTapped: root.openItem(feature.modelData.id) }
+
+        RowLayout {
+            anchors.fill: parent
+            anchors.margins: 8
+            anchors.rightMargin: 14
+            spacing: 12
+            Preview {
+                Layout.fillHeight: true
+                Layout.preferredWidth: Math.round(height * 1.6)
+                radius: Math.max(6, feature.radius - 8)
+                item: feature.modelData
+                zoomed: featureHover.hovered
+            }
+            ColumnLayout {
+                Layout.fillWidth: true
+                spacing: 2
+                StyledText {
+                    Layout.fillWidth: true
+                    text: feature.modelData.name ?? ""
+                    font.pixelSize: SettingsMaterialPreset.labelSize
+                    font.weight: Font.DemiBold
+                    color: Appearance.colors.colOnSecondaryContainer
+                    elide: Text.ElideRight
+                }
+                StyledText {
+                    Layout.fillWidth: true
+                    text: feature.modelData.summary ?? ""
+                    font.pixelSize: SettingsMaterialPreset.supportingSize
+                    color: Appearance.colors.colOnSecondaryContainer
+                    opacity: 0.78
+                    wrapMode: Text.WordWrap
+                    maximumLineCount: 2
+                    elide: Text.ElideRight
+                }
+            }
+        }
+    }
+
+    // An item's page: back, who made it with its votes and action, its picture, the facts, what it is beside
+    // what it may do, then more of the same kind.
     component ItemPage: ColumnLayout {
         id: page
         property var item
-        readonly property bool wide: page.width >= 760
-        readonly property var related: Hub.items.filter(other => other.id !== page.item?.id && other.kind === page.item?.kind)
-            .sort((a, b) => Number(Hub.fits(b, root.family)) - Number(Hub.fits(a, root.family)))
-            .slice(0, root.columns)
+        readonly property bool wide: page.width >= 720
+        readonly property var related: Hub.sorted(Hub.items.filter(other => other.id !== page.item?.id && other.kind === page.item?.kind
+            && Hub.fits(other, root.family)), "popular").slice(0, 4)
         readonly property var permissions: Array.from(page.item?.permissions ?? [])
-        spacing: 20
+        readonly property var hosts: Array.from(page.item?.hosts ?? [])
+        readonly property string pulled: String(page.item?.installedBlocked || page.item?.blocked || "")
+        spacing: 16
 
-        // Back, and where this is.
         RowLayout {
             Layout.fillWidth: true
             spacing: 6
@@ -821,19 +943,19 @@ ContentPage {
             StyledText {
                 text: Translation.tr("Hub")
                 font.pixelSize: Appearance.font.pixelSize.small
-                color: Appearance.colors.colSubtext
+                color: SettingsMaterialPreset.supportingColor
                 TapHandler { onTapped: root.closeItem() }
                 HoverHandler { cursorShape: Qt.PointingHandCursor }
             }
             MaterialSymbol {
                 text: "chevron_right"
                 iconSize: Appearance.font.pixelSize.normal
-                color: Appearance.colors.colSubtext
+                color: SettingsMaterialPreset.supportingColor
             }
             StyledText {
                 text: Translation.tr(Hub.kindLabel(page.item?.kind ?? ""))
                 font.pixelSize: Appearance.font.pixelSize.small
-                color: Appearance.colors.colSubtext
+                color: SettingsMaterialPreset.supportingColor
                 TapHandler {
                     onTapped: {
                         root.kind = page.item.kind
@@ -845,16 +967,24 @@ ContentPage {
             }
         }
 
-        // Who made it, and what to do with it.
+        // Pulled from the hub: why, first, and the way out.
+        NoticeBox {
+            Layout.fillWidth: true
+            visible: page.pulled.length > 0
+            materialIcon: "gpp_bad"
+            text: Translation.tr("Pulled from the hub: %1").arg(page.pulled)
+        }
+
+        // Who made it, how people took it, and what to do with it.
         RowLayout {
             Layout.fillWidth: true
-            spacing: 16
+            spacing: 14
 
             MaterialShapeWrappedMaterialSymbol {
                 Layout.alignment: Qt.AlignTop
                 text: page.item?.icon || root.kindGlyphs[page.item?.kind] || "extension"
-                iconSize: 30
-                padding: 14
+                iconSize: 24
+                padding: 12
                 fill: 1
                 shape: MaterialShape.Shape.Cookie9Sided
                 color: Appearance.colors.colPrimaryContainer
@@ -867,31 +997,41 @@ ContentPage {
                     Layout.fillWidth: true
                     text: page.item?.name ?? ""
                     font.family: Appearance.font.family.title
-                    font.pixelSize: Math.round(Appearance.font.pixelSize.hugeass * 1.25)
+                    font.pixelSize: Appearance.font.pixelSize.huge
                     font.weight: Font.DemiBold
-                    color: Appearance.colors.colOnLayer0
+                    color: SettingsMaterialPreset.labelColor
                     wrapMode: Text.WordWrap
                 }
                 StyledText {
                     Layout.fillWidth: true
-                    text: Translation.tr("by %1").arg(root.authorsOf(page.item))
-                    font.pixelSize: Appearance.font.pixelSize.small
-                    color: Appearance.colors.colPrimary
+                    text: [Translation.tr("by %1").arg(root.authorsOf(page.item)), Translation.tr(Hub.kindName(page.item?.kind ?? "")),
+                        root.whereOf(page.item)].join(" · ")
+                    font.pixelSize: Appearance.font.pixelSize.smallie
+                    color: SettingsMaterialPreset.supportingColor
                     elide: Text.ElideRight
                 }
-                StyledText {
-                    Layout.fillWidth: true
-                    text: [Translation.tr(Hub.kindName(page.item?.kind ?? "")), root.whereOf(page.item)].join(" · ")
-                    font.pixelSize: Appearance.font.pixelSize.smaller
-                    color: Appearance.colors.colSubtext
-                    elide: Text.ElideRight
+                Row {
+                    Layout.topMargin: 4
+                    spacing: 14
+                    visible: root.hasStats
+                    Stat {
+                        glyph: "thumb_up"
+                        text: root.likedText(page.item)
+                        tip: root.votesText(page.item)
+                        tint: Hub.liked(page.item) >= 0.8 ? Appearance.colors.colPrimary : SettingsMaterialPreset.supportingColor
+                    }
+                    Stat {
+                        glyph: "download"
+                        text: Hub.countText(page.item?.downloads ?? 0)
+                        tip: Translation.tr("%1 downloads").arg(Number(page.item?.downloads ?? 0).toLocaleString(Qt.locale(), "f", 0))
+                    }
                 }
             }
             RippleButtonWithIcon {
                 Layout.alignment: Qt.AlignVCenter
-                visible: Boolean(page.item?.installed) && Hub.stateOf(page.item) !== "removing"
-                implicitHeight: 44
-                horizontalPadding: 16
+                visible: Boolean(page.item?.installed) && Hub.stateOf(page.item) !== "removing" && Hub.stateOf(page.item) !== "pulled"
+                implicitHeight: 40
+                horizontalPadding: 14
                 buttonRadius: Appearance.rounding.full
                 materialIcon: "delete"
                 mainText: Translation.tr("Remove")
@@ -906,104 +1046,94 @@ ContentPage {
             }
         }
 
-        // Its picture, as large as the page allows without towering over it.
+        // Its picture, capped: a page about a clock is not a poster of it.
         Preview {
-            Layout.alignment: Qt.AlignHCenter
-            Layout.preferredWidth: page.width
+            Layout.preferredWidth: Math.min(page.width, 640)
             Layout.preferredHeight: Math.round(Layout.preferredWidth * 10 / 16)
-            radius: Appearance.rounding.large
+            radius: SettingsMaterialPreset.tileOuterRadius
             item: page.item
         }
 
-        // The facts, in one strip.
-        Rectangle {
+        // The facts, in one segmented strip.
+        RowLayout {
             Layout.fillWidth: true
-            implicitHeight: factsRow.implicitHeight + 28
-            radius: Appearance.rounding.normal
-            color: Appearance.colors.colLayer2
-
-            RowLayout {
-                id: factsRow
-                anchors.fill: parent
-                anchors.margins: 14
-                spacing: 0
-                Repeater {
-                    model: [
-                        { label: Translation.tr("Version"), value: String(page.item?.version ?? ""),
-                          note: page.item?.installed && page.item.installed !== page.item.version ? Translation.tr("you have %1").arg(page.item.installed) : "" },
-                        { label: Translation.tr("Size"), value: page.item?.size ? Hub.sizeText(page.item.size) : "" },
-                        { label: Translation.tr("Updated"), value: page.item?.updated ? Qt.formatDate(new Date(page.item.updated + "T12:00:00"), "d MMM yyyy") : "" },
-                        { label: Translation.tr("License"), value: String(page.item?.license ?? "") },
-                        { label: Translation.tr("Works in"), value: Hub.familyNames(page.item) }
-                    ].filter(fact => fact.value.length > 0)
-                    delegate: RowLayout {
-                        id: fact
-                        required property var modelData
-                        required property int index
-                        Layout.fillWidth: true
-                        Layout.preferredWidth: 1
-                        spacing: 0
-                        Rectangle {
-                            visible: fact.index > 0
-                            implicitWidth: 1
-                            Layout.fillHeight: true
-                            color: Appearance.colors.colOutlineVariant
-                        }
-                        ColumnLayout {
+            spacing: SettingsMaterialPreset.tileGap
+            Repeater {
+                id: facts
+                model: [
+                    { label: Translation.tr("Version"), value: String(page.item?.version ?? ""),
+                      note: page.item?.installed && page.item.installed !== page.item.version ? Translation.tr("you have %1").arg(page.item.installed) : "" },
+                    { label: Translation.tr("Size"), value: page.item?.size ? Hub.sizeText(page.item.size) : "" },
+                    { label: Translation.tr("Updated"), value: root.dateText(page.item?.updated ?? "") },
+                    { label: Translation.tr("Added"), value: root.dateText(page.item?.added ?? "") },
+                    { label: Translation.tr("License"), value: String(page.item?.license ?? "") },
+                    { label: Translation.tr("Works in"), value: Hub.familyNames(page.item) }
+                ].filter(fact => fact.value.length > 0)
+                delegate: Rectangle {
+                    id: fact
+                    required property var modelData
+                    required property int index
+                    Layout.fillWidth: true
+                    Layout.preferredWidth: 1
+                    implicitHeight: factColumn.implicitHeight + 20
+                    topLeftRadius: fact.index === 0 ? SettingsMaterialPreset.tileOuterRadius : SettingsMaterialPreset.tileInnerRadius
+                    bottomLeftRadius: fact.topLeftRadius
+                    topRightRadius: fact.index === facts.count - 1 ? SettingsMaterialPreset.tileOuterRadius : SettingsMaterialPreset.tileInnerRadius
+                    bottomRightRadius: fact.topRightRadius
+                    color: SettingsMaterialPreset.tileColor
+                    ColumnLayout {
+                        id: factColumn
+                        anchors.centerIn: parent
+                        width: parent.width - 16
+                        spacing: 1
+                        StyledText {
                             Layout.fillWidth: true
-                            spacing: 2
-                            StyledText {
-                                Layout.fillWidth: true
-                                horizontalAlignment: Text.AlignHCenter
-                                text: fact.modelData.value
-                                font.pixelSize: Appearance.font.pixelSize.normal
-                                font.weight: Font.DemiBold
-                                color: Appearance.colors.colOnLayer1
-                                elide: Text.ElideRight
-                            }
-                            StyledText {
-                                Layout.fillWidth: true
-                                horizontalAlignment: Text.AlignHCenter
-                                text: fact.modelData.note || fact.modelData.label
-                                font.pixelSize: Appearance.font.pixelSize.smaller
-                                color: fact.modelData.note ? Appearance.colors.colPrimary : Appearance.colors.colSubtext
-                                elide: Text.ElideRight
-                            }
+                            horizontalAlignment: Text.AlignHCenter
+                            text: fact.modelData.value
+                            font.pixelSize: SettingsMaterialPreset.labelSize
+                            font.weight: Font.DemiBold
+                            color: SettingsMaterialPreset.labelColor
+                            elide: Text.ElideRight
+                        }
+                        StyledText {
+                            Layout.fillWidth: true
+                            horizontalAlignment: Text.AlignHCenter
+                            text: fact.modelData.note || fact.modelData.label
+                            font.pixelSize: Appearance.font.pixelSize.smaller
+                            color: fact.modelData.note ? Appearance.colors.colPrimary : SettingsMaterialPreset.supportingColor
+                            elide: Text.ElideRight
                         }
                     }
                 }
             }
         }
 
-        // What it is, beside what it can do. Side by side when there is room.
+        // What it is, beside what it may do. Side by side when there is room.
         GridLayout {
             Layout.fillWidth: true
             columns: page.wide ? 2 : 1
-            columnSpacing: 28
-            rowSpacing: 20
+            columnSpacing: 24
+            rowSpacing: 16
 
             ColumnLayout {
                 Layout.fillWidth: true
                 Layout.alignment: Qt.AlignTop
-                spacing: 10
-                StyledText {
+                spacing: 8
+                Subheader {
+                    Layout.leftMargin: 0
                     text: Translation.tr("About")
-                    font.family: Appearance.font.family.title
-                    font.pixelSize: Appearance.font.pixelSize.larger
-                    font.weight: Font.DemiBold
-                    color: Appearance.colors.colOnLayer0
                 }
                 StyledText {
                     Layout.fillWidth: true
                     text: page.item?.description || page.item?.summary || ""
                     font.pixelSize: Appearance.font.pixelSize.small
-                    color: Appearance.colors.colOnLayer0
+                    color: SettingsMaterialPreset.labelColor
                     wrapMode: Text.WordWrap
                     lineHeight: 1.3
                 }
                 Flow {
                     Layout.fillWidth: true
-                    Layout.topMargin: 4
+                    Layout.topMargin: 2
                     spacing: 6
                     visible: Array.from(page.item?.tags ?? []).length > 0
                     Repeater {
@@ -1016,33 +1146,45 @@ ContentPage {
                         }
                     }
                 }
-                RippleButtonWithIcon {
+                Flow {
+                    Layout.fillWidth: true
                     Layout.topMargin: 4
-                    visible: String(page.item?.page ?? "").length > 0
-                    buttonRadius: Appearance.rounding.full
-                    horizontalPadding: 14
-                    materialIcon: "code"
-                    mainText: Translation.tr("Source and setup guide")
-                    colBackground: "transparent"
-                    colBackgroundHover: Appearance.colors.colLayer2
-                    contentColor: Appearance.colors.colPrimary
-                    onClicked: Qt.openUrlExternally(page.item.page)
+                    spacing: 4
+                    LinkButton {
+                        visible: String(page.item?.page ?? "").length > 0
+                        materialIcon: "code"
+                        mainText: Translation.tr("Source and setup guide")
+                        onClicked: Qt.openUrlExternally(page.item.page)
+                    }
+                    LinkButton {
+                        visible: Hub.discussionUrl(page.item).length > 0
+                        materialIcon: "forum"
+                        mainText: Translation.tr("Reviews and votes")
+                        onClicked: Qt.openUrlExternally(Hub.discussionUrl(page.item))
+                    }
+                    LinkButton {
+                        visible: Hub.reportUrl(page.item).length > 0
+                        materialIcon: "flag"
+                        mainText: Translation.tr("Report")
+                        contentColor: Appearance.colors.colError
+                        onClicked: Qt.openUrlExternally(Hub.reportUrl(page.item))
+                    }
                 }
             }
 
             Rectangle {
                 Layout.fillWidth: !page.wide
-                Layout.preferredWidth: page.wide ? 320 : -1
+                Layout.preferredWidth: page.wide ? 300 : -1
                 Layout.alignment: Qt.AlignTop
-                implicitHeight: trustColumn.implicitHeight + 36
-                radius: Appearance.rounding.normal
-                color: Appearance.colors.colLayer2
+                implicitHeight: trustColumn.implicitHeight + 32
+                radius: SettingsMaterialPreset.tileOuterRadius
+                color: SettingsMaterialPreset.tileColor
 
                 ColumnLayout {
                     id: trustColumn
                     anchors.fill: parent
-                    anchors.margins: 18
-                    spacing: 14
+                    anchors.margins: 16
+                    spacing: 12
 
                     InfoLine {
                         glyph: "place_item"
@@ -1052,30 +1194,15 @@ ContentPage {
                     InfoLine {
                         glyph: page.permissions.length > 0 ? "shield" : "verified_user"
                         title: page.permissions.length > 0 ? Translation.tr("What it can do") : Translation.tr("Nothing beyond the shell")
-                        text: page.permissions.length > 0 ? "" : Translation.tr("It only draws inside the shell: it runs no commands, reaches no websites and reads no files of yours.")
+                        text: page.permissions.length > 0 ? page.permissions.map(permission => Translation.tr(Hub.permissionText[permission] ?? permission)).join("\n")
+                            : Translation.tr("It only draws inside the shell: it runs no commands, reaches no websites and reads no files of yours.")
                         tint: page.permissions.length > 0 ? Appearance.colors.colTertiary : Appearance.colors.colPrimary
                     }
-                    Repeater {
-                        model: page.permissions
-                        delegate: RowLayout {
-                            id: permission
-                            required property string modelData
-                            Layout.fillWidth: true
-                            Layout.leftMargin: 36
-                            spacing: 10
-                            MaterialSymbol {
-                                text: root.permissionGlyphs[permission.modelData] ?? "shield"
-                                iconSize: Appearance.font.pixelSize.normal
-                                color: Appearance.colors.colTertiary
-                            }
-                            StyledText {
-                                Layout.fillWidth: true
-                                text: Translation.tr(Hub.permissionText[permission.modelData] ?? permission.modelData)
-                                font.pixelSize: Appearance.font.pixelSize.smallie
-                                color: Appearance.colors.colOnLayer1
-                                wrapMode: Text.WordWrap
-                            }
-                        }
+                    InfoLine {
+                        glyph: "public"
+                        title: page.hosts.length > 0 ? Translation.tr("Reaches") : ""
+                        text: page.hosts.join(", ")
+                        tint: Appearance.colors.colTertiary
                     }
                     InfoLine {
                         glyph: "dns"
@@ -1086,12 +1213,34 @@ ContentPage {
             }
         }
 
-        Shelf {
-            visible: page.related.length > 0
+        ColumnLayout {
+            Layout.fillWidth: true
             Layout.topMargin: 8
-            title: Translation.tr("More %1").arg(Translation.tr(Hub.kindLabel(page.item?.kind ?? "")).toLowerCase())
-            items: page.related
+            visible: page.related.length > 0
+            spacing: 8
+            Subheader {
+                text: Translation.tr("More %1").arg(Translation.tr(Hub.kindLabel(page.item?.kind ?? "")).toLowerCase())
+            }
+            ColumnLayout {
+                Layout.fillWidth: true
+                spacing: SettingsMaterialPreset.tileGap
+                Repeater {
+                    model: page.related
+                    delegate: ItemRow {
+                        count: page.related.length
+                    }
+                }
+            }
         }
+    }
+
+    component LinkButton: RippleButtonWithIcon {
+        implicitHeight: 36
+        horizontalPadding: 12
+        buttonRadius: Appearance.rounding.full
+        colBackground: "transparent"
+        colBackgroundHover: SettingsMaterialPreset.tileHoverColor
+        contentColor: Appearance.colors.colPrimary
     }
 
     // A fact on an item's page: glyph, a short title, and a line under it.
@@ -1100,14 +1249,14 @@ ContentPage {
         property string glyph: ""
         property string title: ""
         property string text: ""
-        property color tint: Appearance.colors.colSubtext
+        property color tint: SettingsMaterialPreset.supportingColor
         Layout.fillWidth: true
         visible: line.title.length > 0
-        spacing: 14
+        spacing: 12
         MaterialSymbol {
             Layout.alignment: Qt.AlignTop
             text: line.glyph
-            iconSize: Appearance.font.pixelSize.huge
+            iconSize: SettingsMaterialPreset.iconSize
             color: line.tint
         }
         ColumnLayout {
@@ -1118,7 +1267,7 @@ ContentPage {
                 text: line.title
                 font.pixelSize: Appearance.font.pixelSize.small
                 font.weight: Font.DemiBold
-                color: Appearance.colors.colOnLayer1
+                color: SettingsMaterialPreset.labelColor
                 wrapMode: Text.WordWrap
             }
             StyledText {
@@ -1126,7 +1275,7 @@ ContentPage {
                 visible: line.text.length > 0
                 text: line.text
                 font.pixelSize: Appearance.font.pixelSize.smallie
-                color: Appearance.colors.colSubtext
+                color: SettingsMaterialPreset.supportingColor
                 wrapMode: Text.WordWrap
             }
         }
