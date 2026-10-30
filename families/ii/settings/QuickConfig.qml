@@ -2404,14 +2404,4 @@ ContentPage {
         }
     }
 
-    // Subtle footer
-    StyledText {
-        Layout.fillWidth: true
-        Layout.topMargin: Appearance.sizes.spacingSmall
-        horizontalAlignment: Text.AlignHCenter
-        font.pixelSize: Appearance.font.pixelSize.smaller
-        color: Appearance.colors.colSubtext
-        opacity: 0.6
-        text: Translation.tr("More options in other tabs • Config: %1").arg(FileUtils.trimFileProtocol(Directories.shellConfigPath))
-    }
 }

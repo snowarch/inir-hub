@@ -23,6 +23,7 @@ Item {
     property bool windowed: false
     signal closeRequested()
     signal windowRequested(int page)
+    signal overlayRequested(int page)
 
     readonly property Item pageHostItem: pagesHost
     readonly property bool dark: SettingsMaterialPreset.dark
@@ -425,11 +426,12 @@ Item {
                         colBackgroundToggled: Appearance.colors.colSecondaryContainer
                         onClicked: root.navEditMode = !root.navEditMode
                     }
+                    // Both ways stay in reach: the window goes back over the desktop from the same place.
                     IconAction {
-                        visible: !root.windowed
-                        symbol: "open_in_new"
-                        tip: Translation.tr("Open as a window")
-                        onClicked: root.windowRequested(root.currentPage)
+                        objectName: "settingsHostSwitch"
+                        symbol: root.windowed ? "layers" : "open_in_new"
+                        tip: root.windowed ? Translation.tr("Open over the desktop") : Translation.tr("Open as a window")
+                        onClicked: root.windowed ? root.overlayRequested(root.currentPage) : root.windowRequested(root.currentPage)
                     }
                 }
 

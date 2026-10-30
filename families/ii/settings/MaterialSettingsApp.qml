@@ -44,6 +44,11 @@ ApplicationWindow {
         focus: true
         windowed: true
         onCloseRequested: root.close()
+        // The shell opens the overlay on this page; this window has nothing left to show.
+        onOverlayRequested: page => {
+            Quickshell.execDetached([Quickshell.shellPath("scripts/inir"), "ipc", "settings", "openOverlayAt", String(page)])
+            Qt.quit()
+        }
 
         // A number or a page's key (`inir settingsNav open hub`), and a part of it.
         function applyStart(): void {
