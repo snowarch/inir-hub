@@ -22,9 +22,14 @@ Item {
         radius: root.controlRadius + root.inset
         color: IrisStyle.plateFillFor(root.material)
     }
+    IrisGlassPlate {
+        anchors.fill: parent
+        visible: root.material === "glass"
+        radius: plate.radius
+    }
     IrisGlassEdge {
         anchors.fill: parent
-        visible: (root.material === "glass" || (root.framed && IrisStyle.edgeLit)) && shown
+        visible: root.material !== "glass" && root.framed && IrisStyle.edgeLit && shown
         radius: plate.radius
     }
     Item {

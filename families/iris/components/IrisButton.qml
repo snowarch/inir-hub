@@ -86,6 +86,14 @@ RippleButton {
     Accessible.role: Accessible.Button
     Accessible.checked: root.selected
 
+    // Button rows in glass: the button wears it under its face (the plate colour stays clear).
+    IrisGlassPlate {
+        anchors.fill: parent
+        z: -1
+        visible: !root.skinned && !root.emphasized && !root.quiet && !root.synth && !root.toggled && IrisStyle.controlPlate === "glass"
+        radius: root.buttonRadius
+    }
+
     // Synth's drop edge and the solid key over it, under the face (a Control's background sits at z -1): a film of a
     // fill over glass would show the edge through.
     Loader {

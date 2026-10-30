@@ -75,9 +75,15 @@ MouseArea {
         border.width: root.activeFocus ? 1 : 0
         border.color: IrisStyle.tintBorder(IrisStyle.accent)
         Behavior on color { ColorAnimation { duration: IrisStyle.duration(110); easing.type: IrisStyle.feedbackEasing } }
+        IrisGlassPlate {
+            anchors.fill: parent
+            z: -1
+            visible: root.plated && IrisStyle.controlPlate === "glass"
+            radius: parent.radius
+        }
         IrisGlassEdge {
             anchors.fill: parent
-            visible: root.plated && (IrisStyle.controlPlate === "glass" || IrisStyle.edgeLit) && shown
+            visible: root.plated && IrisStyle.controlPlate !== "glass" && IrisStyle.edgeLit && shown
             radius: parent.radius
         }
     }

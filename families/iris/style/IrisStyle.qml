@@ -1197,7 +1197,8 @@ QtObject {
     // On paper the veil darkens in the body's ink: the dark media veil left dark plates under dark ink.
     function plateFillFor(material: string): color {
         if (material === "veil") return root.light ? ColorUtils.applyAlpha(root.fillInk, root.fillAlpha(0.2)) : root.veil
-        return material === "solid" ? root.readingCard : root.fill
+        // Glass draws its own body, sheen, bevel and shadow (IrisGlassPlate): the control's colour stays clear.
+        return material === "solid" ? root.readingCard : material === "glass" ? "transparent" : root.fill
     }
     function profileRadius(profile: string, size: real): real {
         const half = size / 2

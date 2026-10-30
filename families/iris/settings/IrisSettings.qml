@@ -1491,6 +1491,12 @@ Item {
         buttonRadius: IrisStyle.capsule(height)
         // Under a Design's skin the plate is the skin's (AIRISU: a blade-cut outline): no capsule under it.
         colBackground: action.skinned ? "transparent" : IrisStyle.controlPlated ? IrisStyle.plateFillFor(IrisStyle.controlPlate) : IrisStyle.fill
+        IrisGlassPlate {
+            anchors.fill: parent
+            z: -1
+            visible: !action.skinned && IrisStyle.controlPlate === "glass"
+            radius: action.buttonRadius
+        }
         colBackgroundHover: action.skinned ? "transparent" : IrisStyle.fillHover
         implicitHeight: Math.round(30 * root.d)
         implicitWidth: action.folded ? implicitHeight : actionRow.implicitWidth + Math.round(24 * root.d)

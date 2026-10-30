@@ -89,9 +89,15 @@ Rectangle {
     color: root.skinned || root.synth ? "transparent" : IrisStyle.controlPlated ? IrisStyle.plateFillFor(IrisStyle.controlPlate) : IrisStyle.fillQuiet
 
     IrisSkin { id: skin; part: "segmented"; voice: root.voice }
+    IrisGlassPlate {
+        anchors.fill: parent
+        z: -1
+        visible: !root.skinned && !root.synth && !root.pictured && IrisStyle.controlPlate === "glass"
+        radius: root.radius
+    }
     IrisGlassEdge {
         anchors.fill: parent
-        visible: !root.skinned && (IrisStyle.controlPlate === "glass" || (IrisStyle.controlPlated && IrisStyle.edgeLit)) && shown
+        visible: !root.skinned && IrisStyle.controlPlate !== "glass" && IrisStyle.controlPlated && IrisStyle.edgeLit && shown
         radius: root.radius
     }
 
