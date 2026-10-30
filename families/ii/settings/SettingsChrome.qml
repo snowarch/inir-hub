@@ -94,8 +94,17 @@ Item {
         for (let p = item?.parent ?? null; p && p !== root; p = p.parent)
             if (p.contentItem !== undefined && p.contentY !== undefined && p.flickableDirection !== undefined) { scroller = p; break }
         if (!scroller || !item.visible || scroller.contentHeight <= scroller.height) return
+        // A search landing focuses the section around its row; the row is already placed.
+        for (let t = root.searchTargetControl; t; t = t.parent)
+            if (t === item) return
         const top = item.mapToItem(scroller.contentItem, 0, 0).y
         const air = 24
+        // Taller than the view: its end is no place to land, so only bring its top in when none of it shows.
+        if (item.height + 2 * air > scroller.height) {
+            if (top + item.height < scroller.contentY || top > scroller.contentY + scroller.height)
+                scroller.contentY = Math.max(0, Math.min(scroller.contentHeight - scroller.height, top - air))
+            return
+        }
         if (top - air < scroller.contentY) scroller.contentY = Math.max(0, top - air)
         else if (top + item.height + air > scroller.contentY + scroller.height)
             scroller.contentY = Math.min(scroller.contentHeight - scroller.height, top + item.height + air - scroller.height)
@@ -250,6 +259,9 @@ Item {
             spotlightPageLoadTimer.restart()
             return
         }
+        // A row that never shows under its name still lands on its section, never on the page's top.
+        if (!control && pageItem && root.spotlightRetryCount >= 5 && root.pendingSpotlightSection.length > 0)
+            control = SettingsSearchRegistry.findLoadedTarget(pageItem, "", root.pendingSpotlightSection, true)
         if (control) {
             root.navigateToControl(control)
         } else if (root.spotlightRetryCount < root.spotlightMaxRetries) {
@@ -262,19 +274,28 @@ Item {
 
     // Scrolls the row into the middle of the page and rings it for a moment: the eye lands where the search sent it.
     function navigateToControl(control): void {
+        root.resetSearchTarget()
+        root.searchTargetControl = control
         SettingsSearchRegistry.activateTaskSectionForControl(control)
         SettingsSearchRegistry.expandSectionForControl(control)
-        let flick = control.parent
-        while (flick && !(flick.hasOwnProperty("contentY") && flick.hasOwnProperty("contentItem")))
-            flick = flick.parent
-        if (flick) {
+        // Sections above it open and close first; centring waits for that layout, the ring follows meanwhile.
+        landingScroll.restart()
+        landedRing.show(control)
+    }
+    Timer {
+        id: landingScroll
+        interval: 48
+        onTriggered: {
+            const control = root.searchTargetControl
+            let flick = control?.parent ?? null
+            while (flick && !(flick.hasOwnProperty("contentY") && flick.hasOwnProperty("contentItem")))
+                flick = flick.parent
+            if (!flick)
+                return
             const y = control.mapToItem(flick.contentItem, 0, 0).y
             const target = y - flick.height / 2 + control.height / 2
             flick.contentY = Math.max(0, Math.min(target, Math.max(0, flick.contentHeight - flick.height)))
         }
-        root.resetSearchTarget()
-        root.searchTargetControl = control
-        landedRing.show(control)
     }
 
     function resetSearchTarget(): void {
@@ -836,7 +857,13 @@ Item {
                     landedRing.target = item
                     landedFade.restart()
                 }
-                readonly property point at: target ? target.mapToItem(contentPane, 0, 0) : Qt.point(0, 0)
+                // mapToItem doesn't follow a scroll or a late layout: re-read each frame of its two seconds.
+                property point at: Qt.point(0, 0)
+                FrameAnimation {
+                    running: landedRing.visible
+                    onTriggered: if (landedRing.target) landedRing.at = landedRing.target.mapToItem(contentPane, 0, 0)
+                }
+                onTargetChanged: if (target) at = target.mapToItem(contentPane, 0, 0)
                 visible: target !== null && opacity > 0
                 x: at.x - 3
                 y: at.y - 3
@@ -852,7 +879,7 @@ Item {
                     NumberAnimation { target: landedRing; property: "opacity"; to: 1; duration: 120 }
                     PauseAnimation { duration: 1400 }
                     NumberAnimation { target: landedRing; property: "opacity"; to: 0; duration: 600 }
-                    ScriptAction { script: landedRing.target = null }
+                    ScriptAction { script: { landedRing.target = null; root.searchTargetControl = null } }
                 }
             }
         }
