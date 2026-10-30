@@ -1834,6 +1834,17 @@ ContentPage {
                     }
                 }
             }
+            WidgetSettingRow {
+                label: Translation.tr("Shrink the desktop while editing")
+                icon: "zoom_in_map"
+                WidgetToggleChip {
+                    configPath: "background.widgets.editCard"
+                    defaultValue: true
+                    buttonIcon: "zoom_in_map"
+                    buttonText: Translation.tr("Card")
+                    StyledToolTip { text: Translation.tr("Off: widgets are arranged in place, at full size") }
+                }
+            }
             SliderRow {
                 label: Translation.tr("Fade with windows")
                 icon: "visibility_off"
