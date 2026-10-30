@@ -29,6 +29,9 @@ Item {
 
     // The title and the stage hold still at the top and the groups scroll under them: the stage shows what a row
     // changes while that row is in reach (his 10-30: it scrolled away with the title).
+    // Scrolled, the large title folds into a bar title and the sentence and actions go (iOS large title): the stage
+    // keeps the room.
+    readonly property real fold: Math.max(0, Math.min(1, flick.contentY / page.u(72)))
     Column {
         id: head
         x: page.u(16)
@@ -45,12 +48,15 @@ Item {
                 text: page.area === "general" ? Translation.tr("General") : Translation.tr(String(page.entry.title ?? ""))
                 color: IrisStyle.text
                 font.family: IrisStyle.fontTitle
-                font.pixelSize: page.u(30)
+                font.pixelSize: Math.round(page.u(30) - page.u(12) * page.fold)
                 font.weight: IrisStyle.weight(Font.Bold)
                 font.letterSpacing: -Math.round(page.u(30) * 0.01)
             }
             IrisText {
                 width: parent.width
+                height: implicitHeight * (1 - page.fold)
+                opacity: 1 - page.fold
+                visible: opacity > 0
                 wrapMode: Text.WordWrap
                 maximumLineCount: 2
                 elide: Text.ElideRight
@@ -95,7 +101,10 @@ Item {
         Flow {
             width: parent.width
             spacing: page.u(6)
-            visible: actions.count > 0
+            height: implicitHeight * (1 - page.fold)
+            opacity: 1 - page.fold
+            clip: true
+            visible: actions.count > 0 && opacity > 0
             Repeater {
                 id: actions
                 model: page.live && page.area !== "general" ? (page.host?.pageActions ?? []) : []
