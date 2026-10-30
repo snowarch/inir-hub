@@ -199,6 +199,7 @@ Item {
         }
     }
     TextInput {
+        cursorDelegate: Kit.TextCursor { accent: IrisStyle.accent }
         id: typing
         visible: false
         anchors.right: parent.right

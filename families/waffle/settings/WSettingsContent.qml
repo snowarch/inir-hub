@@ -403,6 +403,7 @@ Item {
                             Layout.fillHeight: true
                             
                             TextInput {
+                                cursorDelegate: TextCursor { accent: Looks.colors.accent }
                                 id: searchInput
                                 anchors.fill: parent
                                 verticalAlignment: Text.AlignVCenter

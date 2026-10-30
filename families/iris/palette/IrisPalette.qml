@@ -546,6 +546,7 @@ Item {
                             }
                         }
                         TextInput {
+                            cursorDelegate: TextCursor { accent: IrisStyle.accent }
                             id: input
                             anchors.left: parent.left
                             anchors.leftMargin: head.look ? Number(head.look.inputLeft ?? 0) : searchGlyph.x + searchGlyph.width + 12 * stage.d

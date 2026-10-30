@@ -145,6 +145,7 @@ Flickable {
                 color: IrisStyle.muted
             }
             TextInput {
+                cursorDelegate: TextCursor { accent: IrisStyle.accent }
                 id: filter
                 anchors.left: filterGlyph.right
                 anchors.leftMargin: 8 * root.d
@@ -509,6 +510,7 @@ Flickable {
             border.width: input.activeFocus ? 1 : 0
             border.color: IrisStyle.tintBorder(IrisStyle.accent)
             TextInput {
+                cursorDelegate: TextCursor { accent: IrisStyle.accent }
                 id: input
                 anchors.left: parent.left
                 anchors.right: parent.right

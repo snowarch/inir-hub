@@ -6,6 +6,7 @@ import Quickshell
 import Quickshell.Io
 import Quickshell.Networking
 import qs.modules.common
+import qs.modules.common.widgets
 import qs.services
 import qs.modules.common.pill
 
@@ -896,6 +897,7 @@ Item {
                             height: 30 * root.s
 
                             TextField {
+                                cursorDelegate: TextCursor {}
                                 id: pwField
                                 anchors.left: parent.left
                                 anchors.leftMargin: 10 * root.s
@@ -1054,6 +1056,7 @@ Item {
                 }
 
                 TextField {
+                    cursorDelegate: TextCursor {}
                     id: crField
                     visible: cr.editing
                     anchors.right: parent.right

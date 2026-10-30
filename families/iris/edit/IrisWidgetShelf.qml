@@ -156,6 +156,7 @@ WidgetShelf {
                         color: IrisStyle.muted
                     }
                     TextInput {
+                        cursorDelegate: TextCursor { accent: IrisStyle.accent }
                         id: searchInput
                         anchors.left: searchGlyph.right
                         anchors.leftMargin: Math.round(6 * head.d)

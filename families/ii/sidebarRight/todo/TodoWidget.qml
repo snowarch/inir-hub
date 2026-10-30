@@ -313,11 +313,7 @@ Item {
                         color: "transparent"
                     }
 
-                    cursorDelegate: Rectangle {
-                        width: 1
-                        color: todoInput.activeFocus ? Appearance.colors.colPrimary : "transparent"
-                        radius: 1
-                    }
+                    cursorDelegate: TextCursor {}
                 }
 
                 RowLayout {

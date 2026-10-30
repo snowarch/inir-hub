@@ -142,6 +142,7 @@ WSettingsPage {
             spacing: 8
 
             TextField {
+                cursorDelegate: TextCursor { accent: Looks.colors.accent }
                 id: appSearchField
                 Layout.fillWidth: true
                 placeholderText: Translation.tr("Search applications...")

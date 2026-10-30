@@ -276,6 +276,7 @@ ColumnLayout {
                 border.color: SettingsMaterialPreset.groupBorderColor
 
                 TextInput {
+                    cursorDelegate: TextCursor {}
                     id: themeSearchField
                     anchors.fill: parent
                     anchors.leftMargin: 12

@@ -167,6 +167,7 @@ Item {
                         color: IrisStyle.muted
                     }
                     TextInput {
+                        cursorDelegate: TextCursor { accent: IrisStyle.accent }
                         id: query
                         anchors.left: findGlyph.right
                         anchors.leftMargin: root.u(8)

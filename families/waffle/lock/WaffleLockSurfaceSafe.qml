@@ -1089,6 +1089,7 @@ MouseArea {
                     }
 
                     TextInput {
+                        cursorDelegate: TextCursor { accent: Looks.colors.accent }
                         id: passwordField
                         Layout.fillWidth: true
                         Layout.fillHeight: true

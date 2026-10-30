@@ -503,6 +503,7 @@ Item {
                             Behavior on color { ColorAnimation { duration: IrisStyle.duration(120); easing.type: IrisStyle.feedbackEasing } }
                         }
                         TextInput {
+                            cursorDelegate: TextCursor { accent: IrisStyle.accent }
                             id: input
                             anchors.left: searchGlyph.right
                             anchors.leftMargin: Math.round(12 * root.d)

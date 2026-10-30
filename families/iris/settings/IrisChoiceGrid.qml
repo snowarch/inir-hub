@@ -76,6 +76,7 @@ Item {
             color: IrisStyle.muted
         }
         TextInput {
+            cursorDelegate: TextCursor { accent: IrisStyle.accent }
             id: filterInput
             anchors.left: filterGlyph.right
             anchors.leftMargin: Math.round(8 * root.d)

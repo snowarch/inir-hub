@@ -1250,6 +1250,7 @@ ColumnLayout {
                     spacing: 8
 
                     TextField {
+                        cursorDelegate: TextCursor {}
                         id: presetSearchField
                         Layout.fillWidth: true
                         placeholderText: Translation.tr("Search presets...")
@@ -1639,6 +1640,7 @@ ColumnLayout {
                     anchors.margins: 8
 
                     TextArea {
+                        cursorDelegate: TextCursor {}
                         id: importTextArea
                         placeholderText: Translation.tr("Paste theme JSON here...")
                         renderType: Text.NativeRendering
@@ -1876,6 +1878,7 @@ ColumnLayout {
                     border.color: Appearance.colors.colPrimary
 
                     TextInput {
+                        cursorDelegate: TextCursor {}
                         id: saveNameInput
                         anchors.fill: parent
                         anchors.margins: 12

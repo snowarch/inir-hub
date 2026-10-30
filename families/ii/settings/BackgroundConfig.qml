@@ -2257,6 +2257,7 @@ ContentPage {
                 }
 
                 TextEdit {
+                    cursorDelegate: TextCursor {}
                     visible: (Config.options?.background?.backdrop?.enable ?? true)
                              && !(Config.options?.background?.backdrop?.useMainWallpaper ?? true)
                     Layout.fillWidth: true

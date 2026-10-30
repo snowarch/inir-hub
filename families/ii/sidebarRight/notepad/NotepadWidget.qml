@@ -284,6 +284,7 @@ Item {
                 ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
 
                 TextArea {
+                    cursorDelegate: TextCursor {}
                     id: textArea
                     width: scrollView.availableWidth
                     wrapMode: TextArea.Wrap

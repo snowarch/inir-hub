@@ -216,6 +216,7 @@ PanelWindow {
                         color: searchField.text.length > 0 ? IrisStyle.accent : IrisStyle.muted
                     }
                     TextInput {
+                        cursorDelegate: TextCursor { accent: IrisStyle.accent }
                         id: searchField
                         Layout.fillWidth: true
                         verticalAlignment: TextInput.AlignVCenter

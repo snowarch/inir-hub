@@ -5,6 +5,7 @@ import QtQuick.Controls.FluentWinUI3
 import QtQuick.Controls
 
 TextField {
+    cursorDelegate: TextCursor { accent: Looks.colors.accent }
     id: root
     
     clip: true

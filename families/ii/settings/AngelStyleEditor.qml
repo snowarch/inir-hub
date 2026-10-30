@@ -511,6 +511,7 @@ ColumnLayout {
                 border.color: Appearance.angelEverywhere ? Appearance.angel.colPrimary : Appearance.colors.colPrimary
 
                 TextInput {
+                    cursorDelegate: TextCursor {}
                     id: profileNameField
                     anchors.fill: parent
                     anchors.leftMargin: 10

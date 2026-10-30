@@ -4,6 +4,7 @@ import QtQuick
 import QtQuick.Controls
 import Quickshell
 import qs.modules.common
+import qs.modules.common.widgets
 import qs.services
 import qs.modules.common.pill
 
@@ -324,6 +325,7 @@ PillSurface {
                         }
                     }
                     TextField {
+                        cursorDelegate: TextCursor {}
                         id: cityField
                         visible: cityBox.editing
                         anchors.left: parent.left
@@ -974,6 +976,7 @@ PillSurface {
                     height: 28 * root.s
 
                     TextField {
+                        cursorDelegate: TextCursor {}
                         id: titleField
                         anchors.fill: parent
                         background: null
@@ -1053,6 +1056,7 @@ PillSurface {
                     height: 26 * root.s
 
                     TextField {
+                        cursorDelegate: TextCursor {}
                         id: startField
                         anchors.fill: parent
                         background: null
@@ -1087,6 +1091,7 @@ PillSurface {
                     height: 26 * root.s
 
                     TextField {
+                        cursorDelegate: TextCursor {}
                         id: endField
                         anchors.fill: parent
                         background: null

@@ -578,6 +578,7 @@ Loader {
                     anchors.right: parent.right
                     spacing: 0
                     TextInput {
+                        cursorDelegate: TextCursor { accent: IrisStyle.accent }
                         id: noteTitle
                         Layout.fillWidth: true
                         Layout.topMargin: 11 * root.d
@@ -613,6 +614,7 @@ Loader {
                         // The note wraps to the view, never widens it: its width read the view's (a loop at large sizes).
                         contentWidth: availableWidth
                         TextArea {
+                            cursorDelegate: TextCursor { accent: IrisStyle.accent }
                             id: noteEditor
                             placeholderText: Translation.tr("Write something to keep…")
                             placeholderTextColor: IrisStyle.muted

@@ -95,6 +95,7 @@ Item {
                 : Appearance.inirEverywhere ? Appearance.inir.colPrimary
                 : Appearance.colors.colPrimary
             TextInput {
+                cursorDelegate: TextCursor {}
                 anchors.centerIn: parent
                 width: parent.width - 8
                 text: adjustRow.isMinutes ? Math.floor(adjustRow.currentValue / 60).toString() : adjustRow.currentValue.toString()

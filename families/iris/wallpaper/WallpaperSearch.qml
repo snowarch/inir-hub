@@ -92,6 +92,7 @@ Rectangle {
         }
     }
     TextInput {
+        cursorDelegate: TextCursor { accent: IrisStyle.accent }
         id: field
         anchors.left: pivot.visible ? pivot.right : glyph.right
         anchors.leftMargin: Math.round(8 * root.d)

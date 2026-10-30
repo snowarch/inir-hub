@@ -7,6 +7,7 @@ import qs.modules.common.widgets
 import qs.modules.iris.style
 
 MaterialTextField {
+    cursorDelegate: TextCursor { accent: IrisStyle.accent }
     id: root
 
     enableSettingsSearch: false

@@ -111,6 +111,7 @@ Item {
                     clip: true
 
                     TextArea {
+                        cursorDelegate: TextCursor {}
                         id: textArea
                         width: parent.width
                         text: root.editing ? root.draft : Notepad.text

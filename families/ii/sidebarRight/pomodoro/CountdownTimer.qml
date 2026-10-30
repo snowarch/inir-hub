@@ -88,6 +88,7 @@ Item {
                             : Appearance.colors.colPrimary
 
                         TextInput {
+                            cursorDelegate: TextCursor {}
                             id: minutesInput
                             anchors.centerIn: parent
                             width: parent.width - 8
@@ -150,6 +151,7 @@ Item {
                             : Appearance.colors.colPrimary
 
                         TextInput {
+                            cursorDelegate: TextCursor {}
                             id: secondsInput
                             anchors.centerIn: parent
                             width: parent.width - 8

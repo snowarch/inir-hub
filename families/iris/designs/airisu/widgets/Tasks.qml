@@ -159,6 +159,7 @@ Item {
             height: root.dp(26)
             Rectangle { anchors.bottom: parent.bottom; width: parent.width; height: Airisu.hair; color: stock.ink; antialiasing: false }
             TextInput {
+                cursorDelegate: TextCursor { accent: IrisStyle.accent }
                 id: entry
                 anchors.fill: parent
                 verticalAlignment: TextInput.AlignVCenter

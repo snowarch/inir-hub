@@ -304,6 +304,7 @@ Item {
                             border.color: urlInput.activeFocus ? Appearance.colors.colPrimary : root.colBorder
 
                             TextInput {
+                                cursorDelegate: TextCursor {}
                                 id: urlInput
                                 anchors.fill: parent
                                 anchors.leftMargin: 10

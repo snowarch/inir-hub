@@ -933,6 +933,7 @@ Item {
                             color: searchSkin.item?.glyphColour ?? IrisStyle.muted
                         }
                         TextInput {
+                            cursorDelegate: TextCursor { accent: IrisStyle.accent }
                             id: searchField
                             anchors.left: searchGlyph.right
                             anchors.leftMargin: 6 * root.d

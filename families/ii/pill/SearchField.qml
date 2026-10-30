@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import qs.modules.common
+import qs.modules.common.widgets
 import qs.modules.common.pill
 
 Item {
@@ -58,7 +59,7 @@ Item {
         placeholderTextColor: PillTheme.faint
         selectByMouse: true
         selectionColor: PillTheme.verm
-        cursorDelegate: Item {}
+        cursorDelegate: TextCursor { accent: PillTheme.verm }
         Keys.onUpPressed: root.moved(-1)
         Keys.onDownPressed: root.moved(1)
         Keys.onPressed: (e) => {

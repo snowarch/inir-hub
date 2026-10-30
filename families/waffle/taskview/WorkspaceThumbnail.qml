@@ -7,6 +7,7 @@ import Quickshell
 import qs
 import qs.services
 import qs.modules.common
+import qs.modules.common.widgets
 import qs.modules.common.functions
 import qs.modules.waffle.looks
 
@@ -185,6 +186,7 @@ Item {
                 border.color: Looks.colors.accent
                 
                 TextInput {
+                    cursorDelegate: TextCursor { accent: Looks.colors.accent }
                     id: nameEditor
                     anchors.centerIn: parent
                     width: Math.max(80, contentWidth + 4)

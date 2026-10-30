@@ -485,6 +485,7 @@ Item {
                             font.weight: IrisStyle.figureWeight
                         }
                         TextInput {
+                            cursorDelegate: TextCursor { accent: IrisStyle.accent }
                             id: figureInput
                             anchors.fill: parent
                             visible: figure.editing

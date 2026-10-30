@@ -1,7 +1,9 @@
 import QtQuick
+import qs.modules.common.widgets
 import QtQuick.Controls
 
 TextInput {
+    cursorDelegate: TextCursor { accent: Looks.colors.accent }
     id: root
     renderType: Text.NativeRendering
     verticalAlignment: Text.AlignVCenter

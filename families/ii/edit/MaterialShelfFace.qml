@@ -178,6 +178,7 @@ QtObject {
                     color: Appearance.colors.colSubtext
                 }
                 TextInput {
+                    cursorDelegate: TextCursor {}
                     id: searchInput
                     anchors.left: searchGlyph.right
                     anchors.leftMargin: 6

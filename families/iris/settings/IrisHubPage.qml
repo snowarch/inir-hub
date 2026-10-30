@@ -162,6 +162,7 @@ Flickable {
                 color: IrisStyle.muted
             }
             TextInput {
+                cursorDelegate: TextCursor { accent: IrisStyle.accent }
                 id: searchField
                 anchors.left: searchGlyph.right
                 anchors.leftMargin: Math.round(6 * root.d)
@@ -327,6 +328,7 @@ Flickable {
                     radius: IrisStyle.radiusRow
                     color: sourceInput.activeFocus ? IrisStyle.fill : IrisStyle.fillQuiet
                     TextInput {
+                        cursorDelegate: TextCursor { accent: IrisStyle.accent }
                         id: sourceInput
                         anchors.left: parent.left
                         anchors.right: addSource.left

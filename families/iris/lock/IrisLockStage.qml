@@ -1006,6 +1006,7 @@ Item {
             IrisSkin { id: sessionSkin; part: "lockSignIn"; host: session }
 
             TextInput {
+                cursorDelegate: TextCursor { accent: IrisStyle.accent }
                 id: passwordInput
                 // Between the capsule's two buttons, or over the field a Design draws (its marks are the Design's).
                 x: session.look ? Math.round(session.look.fieldX ?? 0)
