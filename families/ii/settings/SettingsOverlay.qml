@@ -116,6 +116,13 @@ Scope {
                 function onSettingsOverlayRequestedSectionChanged() { root.applyRequestedNavigation() }
             }
 
+            // beside the card, never inside it: a child shadow painted ~30 % black over the card's own fill
+            StyledRectangularShadow {
+                target: card
+                opacity: card.opacity
+                visible: card.visible && !SettingsMaterialPreset.glass
+            }
+
             Rectangle {
                 id: card
                 anchors.centerIn: parent
@@ -137,11 +144,6 @@ Scope {
                 opacity: root.settingsOpen ? 1 : 0
                 visible: opacity > 0
                 clip: true
-
-                StyledRectangularShadow {
-                    target: card
-                    visible: !SettingsMaterialPreset.glass
-                }
 
                 RegaliaPlate {
                     anchors.fill: parent
