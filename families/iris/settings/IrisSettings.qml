@@ -39,7 +39,6 @@ Item {
     property string group: ""
     property var backStack: []
     property var forwardStack: []
-    property int travel: 1
     property string requestedSection: ""
     property bool placed: false
     readonly property real d: IrisStyle.settingsDensity
@@ -52,14 +51,15 @@ Item {
     readonly property int footerCluster: 4
     readonly property var specifications: IrisOptions.settings
     readonly property var currentSection: IrisOptions.sectionById(root.section)
-    // Every area is a row of the sidebar (DI49g); clusters part by air, no captions.
+    // Every area is a row of the sidebar (DI49g); each group of areas opens under its name (his 10-30: parted by air
+    // alone, the list read as one run in no order).
     readonly property var sideSections: {
         const out = root.sections.filter(section => section.id === "general").map(section => ({ id: section.id, title: section.title, icon: section.icon, cluster: section.cluster }))
         IrisOptions.categories.filter(category => !category.foot).forEach((category, at) => {
             category.sections.map(id => root.sections.find(section => section.id === id)).filter(section => !!section)
                 // Its plain fields only: copying ran the area's tint getter here and rebuilt the whole sidebar on every colour
                 // change. A row reads the tint itself (SectionRow.tint).
-                .forEach(section => out.push({ id: section.id, title: section.title, icon: section.icon, cluster: at }))
+                .forEach(section => out.push({ id: section.id, title: section.title, icon: section.icon, cluster: at, caption: category.title }))
         })
         return out
     }
@@ -484,8 +484,7 @@ Item {
     function same(a: var, b: var): bool {
         return a.section === b.section && a.group === b.group && a.advancedPage === b.advancedPage
     }
-    function arrive(place: var, direction: int): void {
-        root.travel = direction
+    function arrive(place: var): void {
         root.section = place.section
         root.advancedPage = root.landingPage(place.section, place.advancedPage)
         if (searchField.text.length > 0) searchField.text = ""
@@ -500,21 +499,21 @@ Item {
         if (root.same(now, place) && !root.searching) return
         root.backStack = root.backStack.concat([now]).slice(-40)
         root.forwardStack = []
-        root.arrive(place, direction === -1 ? -1 : 1)
+        root.arrive(place)
     }
     function goBack(): void {
         if (root.backStack.length === 0) return
         const place = root.backStack[root.backStack.length - 1]
         root.forwardStack = root.forwardStack.concat([root.here()])
         root.backStack = root.backStack.slice(0, -1)
-        root.arrive(place, -1)
+        root.arrive(place)
     }
     function goForward(): void {
         if (root.forwardStack.length === 0) return
         const place = root.forwardStack[root.forwardStack.length - 1]
         root.backStack = root.backStack.concat([root.here()])
         root.forwardStack = root.forwardStack.slice(0, -1)
-        root.arrive(place, 1)
+        root.arrive(place)
     }
     function selectSection(id: string): void { root.go({ section: id, group: "", advancedPage: -1 }) }
     function openGroupNamed(title: string): void { root.go({ section: root.section, group: title, advancedPage: -1 }) }
@@ -679,11 +678,9 @@ Item {
     // arrows and typing reached nothing until the search was clicked.
     Timer { id: takeKeys; interval: 160; onTriggered: if (!searchField.activeFocus && GlobalStates.settingsOverlayOpen) root.forceActiveFocus() }
     // A Design's scene sets its own page; the engine's slide would only move chrome nobody sees.
-    function enterPage(): void { if (!root.sceneDesigned) pageEnter.restart() }
-    onSectionChanged: { IrisOptions.settle(); settingsFlick.contentY = 0; root.tuneAll = false; IrisOptions.openList = ""; root.enterPage() }
+    onSectionChanged: { IrisOptions.settle(); settingsFlick.contentY = 0; root.tuneAll = false; IrisOptions.openList = "" }
     onPageKeyChanged: Qt.callLater(root.feedPage)
-    onOpenGroupChanged: { settingsFlick.contentY = 0; root.enterPage() }
-    onAdvancedPageChanged: root.enterPage()
+    onOpenGroupChanged: settingsFlick.contentY = 0
 
     Shortcut {
         sequence: "Escape"
@@ -1279,12 +1276,6 @@ Item {
                     Layout.fillHeight: true
                     clip: true
 
-                    ParallelAnimation {
-                        id: pageEnter
-                        NumberAnimation { target: pageArea; property: "opacity"; from: 0.2; to: 1; duration: IrisStyle.duration(180); easing.type: IrisStyle.feedbackEasing }
-                        NumberAnimation { target: pageShift; property: "x"; from: 22 * root.d * root.travel; to: 0; duration: IrisStyle.morphDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: IrisStyle.morphCurve }
-                    }
-                    transform: Translate { id: pageShift }
 
 
                     Rectangle {
@@ -1316,8 +1307,6 @@ Item {
                                 settled: root.bodySettled
                                 urlFor: id => Qt.resolvedUrl("layouts/FolioPage.qml")
                                 propsFor: id => ({ host: root, titled: false, actions: false })
-                                order: IrisOptions.sectionOrder
-                                distance: Math.round(26 * root.d)
                                 property string wanted: ""
                                 // A jump waits for its own area only: leaving first drops it.
                                 onCurrentChanged: classicPool.wanted = ""
@@ -1551,7 +1540,9 @@ Item {
         Component.onDestruction: if (root.travelRow === sectionRow) root.travelRow = null
         readonly property bool dimmed: root.searching && !root.matchedSections.has(sectionRow.modelData.id)
         readonly property real rowHeight: Math.round(26 * sectionRow.d * Math.max(1, IrisStyle.typeScale))
-        readonly property real washY: sectionRow.clusterStart ? Math.round(8 * sectionRow.d) : 0
+        readonly property string caption: sectionRow.clusterStart ? Translation.tr(String(sectionRow.modelData.caption ?? "")) : ""
+        readonly property real washY: sectionRow.caption.length > 0 ? Math.round(14 * sectionRow.d) + captionText.implicitHeight + Math.round(4 * sectionRow.d)
+            : sectionRow.clusterStart ? Math.round(8 * sectionRow.d) : 0
         width: parent ? parent.width : 0
         height: sectionRow.washY + sectionRow.rowHeight
         hoverEnabled: true
@@ -1561,6 +1552,18 @@ Item {
         onClicked: root.selectSection(sectionRow.modelData.id)
         opacity: sectionRow.dimmed ? 0.4 : 1
         Behavior on opacity { NumberAnimation { duration: IrisStyle.duration(140); easing.type: IrisStyle.feedbackEasing } }
+        IrisText {
+            id: captionText
+            visible: sectionRow.caption.length > 0
+            x: Math.round(6 * sectionRow.d)
+            y: Math.round(14 * sectionRow.d)
+            width: sectionRow.width - x
+            text: sectionRow.caption
+            color: IrisStyle.textTertiary
+            font.pixelSize: IrisStyle.typeMeta
+            font.weight: IrisStyle.weight(Font.DemiBold)
+            elide: Text.ElideRight
+        }
         Rectangle {
             id: rowPlate
             anchors.left: parent.left

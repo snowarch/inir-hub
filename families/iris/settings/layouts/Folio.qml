@@ -227,8 +227,6 @@ Item {
                 settled: Boolean(root.host?.bodySettled ?? true)
                 urlFor: id => Qt.resolvedUrl("FolioPage.qml")
                 propsFor: id => ({ host: root.host })
-                order: root.sections.map(entry => entry.id)
-                distance: root.u(26)
                 onArrived: id => {
                     if (root.wantedGroup.length > 0 && id === root.section) {
                         pool.shownItem?.showGroup?.(root.wantedGroup)

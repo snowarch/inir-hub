@@ -19,8 +19,6 @@ Item {
     id: page
     required property string area
     property Item host
-    property real shift: 0
-    transform: Translate { x: page.shift }
 
     readonly property real d: Number(page.host?.d ?? IrisStyle.settingsDensity)
     function u(n: real): int { return Math.round(n * page.d) }

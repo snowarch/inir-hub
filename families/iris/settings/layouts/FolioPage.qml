@@ -2,6 +2,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import Quickshell
 import QtQuick.Controls
+import QtQuick.Effects
 import Quickshell.Widgets
 import qs
 import qs.services
@@ -20,11 +21,9 @@ Item {
     id: page
     required property string area
     property Item host
-    property real shift: 0
     // Classic names the area in its own head and holds the area's actions there.
     property bool titled: true
     property bool actions: true
-    transform: Translate { y: page.shift }
 
     readonly property real d: Number(page.host?.d ?? IrisStyle.settingsDensity)
     function u(n: real): int { return Math.round(n * page.d) }
@@ -214,6 +213,15 @@ Item {
                 clip: true
                 ScrollBar.vertical: IrisScrollBar {}
                 onContentYChanged: spyPace.restart()
+                // Rows soften into a blur and fade at the edge with more past it, cut by the sheet's own curve (his
+                // 10-30: plates hit a square clip inside the round sheet, and the soft edge was gone).
+                layer.enabled: flickEdge.active
+                layer.effect: MultiEffect {
+                    maskEnabled: true
+                    maskSource: flickEdge.mask
+                    maskThresholdMin: 0.5
+                    maskSpreadAtMin: 1
+                }
                 AreaRows {
                     id: rows
                     width: flick.width - page.u(8)
@@ -227,7 +235,15 @@ Item {
                     groupFill: IrisStyle.formPlate
                     reading: page.reading
                     onReveal: row => page.reveal(row)
+                    onBring: item => page.bring(item)
                 }
+            }
+            IrisScrollEdge {
+                id: flickEdge
+                flick: flick
+                anchors.fill: flick
+                reach: page.u(28)
+                radius: IrisStyle.glassy ? Math.max(0, sheet.radius - page.u(6)) : 0
             }
         }
     }
@@ -276,6 +292,13 @@ Item {
     property string waiting: ""
     onWholeChanged: if (page.whole && page.waiting.length > 0) showSoon.restart()
     Timer { id: showSoon; interval: 120; onTriggered: if (page.waiting.length > 0) page.showGroup(page.waiting) }
+    // Scrolls only as far as the item needs to stand whole in view, its top kept in sight when it is taller than the page.
+    function bring(item: Item): void {
+        const top = item.mapToItem(flick.contentItem, 0, 0).y
+        const air = page.u(24)
+        const to = Math.min(top - air, top + item.height + air - flick.height)
+        if (to > flick.contentY) page.glideTo(to)
+    }
     function reveal(row: Item): void { page.glideTo(row.mapToItem(flick.contentItem, 0, 0).y - flick.height * 0.3) }
     function glideTo(y: real): void {
         const to = Math.max(0, Math.min(Math.max(0, flick.contentHeight - flick.height), y))

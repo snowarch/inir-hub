@@ -264,7 +264,7 @@ Rectangle {
                     horizontalAlignment: Text.AlignHCenter
                     text: Translation.tr(String(segment.modelData.label ?? ""))
                     font.pixelSize: IrisStyle.typeFootnote
-                    font.weight: IrisStyle.weight(segment.selected ? Font.DemiBold : Font.Normal)
+                    font.weight: IrisStyle.weight(segment.selected ? Font.DemiBold : Font.Medium)
                     color: root.inkFor(segment.index)
                     elide: Text.ElideRight
                 }
@@ -297,7 +297,7 @@ Rectangle {
                     font.capitalization: root.synth ? Font.AllLowercase : Font.MixedCase
                     // Mono runs wider: Synth's keys print a step smaller so a word still fits its key.
                     font.pixelSize: root.synth ? IrisStyle.typeFootnote : IrisStyle.typeMeta
-                    font.weight: IrisStyle.weight(segment.selected ? Font.DemiBold : Font.Normal)
+                    font.weight: IrisStyle.weight(segment.selected ? Font.DemiBold : Font.Medium)
                     color: root.inkFor(segment.index)
                 }
             }

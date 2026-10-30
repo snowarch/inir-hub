@@ -4,7 +4,8 @@ import Quickshell
 import qs.modules.iris.style
 
 // The area a layout shows, one page at a time like Classic: the next page incubates in slices the runtime spreads
-// across frames, the one on screen stays until it is Ready, the two trade places in one move and the old one goes.
+// across frames, the one on screen stays until it is Ready, then the two swap in one frame (his 10-30: a page turn
+// that slid the whole page was unwanted) and the old one goes.
 // Keeping every area seen (and prewarming the neighbours) held 3-6x Classic's objects, and each of them re-read the
 // config on every write: the three layouts felt slow next to Classic (2026-10-24).
 Item {
@@ -23,16 +24,9 @@ Item {
     // block does; built in slices it showed 0.2-0.7 s later in a nest. During the open it builds in slices, and one
     // still building when the open ends keeps building so.
     property bool settled: true
-    // Motion of a turn: the areas in their order, and how far a page arriving travels from the side it lies on.
-    property var order: []
-    property real distance: 0
-    property int duration: IrisStyle.morphDuration
-
-    // On screen: the last area whose page stood ready; `leaving` fades under it during a turn.
+    // On screen: the last area whose page stood ready.
     property string shown: ""
-    property string leaving: ""
     readonly property Item shownItem: pool.itemFor(pool.shown)
-    readonly property bool turning: turn.running || prep.running
     property var resident: []
     property var used: ({})
     property int clock: 0
@@ -67,70 +61,23 @@ Item {
     function trim(): void {
         const extra = pool.resident.length - (pool.keep + 1)
         if (extra <= 0) return
-        const spare = pool.resident.filter(id => id !== pool.shown && id !== pool.current && id !== pool.leaving)
+        const spare = pool.resident.filter(id => id !== pool.shown && id !== pool.current)
             .sort((a, b) => (pool.used[a] ?? 0) - (pool.used[b] ?? 0)).slice(0, extra)
         if (spare.length > 0) pool.resident = pool.resident.filter(id => !spare.includes(id))
     }
-    // Ends a turn where it would have landed (a click mid-move): nothing stays faded or shifted.
-    function endTurn(): void {
-        prep.stop()
-        turn.stop()
-        const left = pool.itemFor(pool.leaving)
-        if (left) left.opacity = 1
-        const here = pool.itemFor(pool.shown)
-        if (here) { here.opacity = 1; here.shift = 0 }
-        pool.leaving = ""
+    function settle(): void {
+        if (pool.current.length === 0 || pool.current === pool.shown || !pool.ready(pool.current)) return
+        pool.shown = pool.current
+        pool.arrived(pool.shown)
         // Never in this frame: settle runs inside a delegate's creation, and trimming there rewrote the model the
         // Repeater was building (a binding loop on `values`).
         Qt.callLater(pool.trim)
-    }
-    function settle(): void {
-        if (pool.current.length === 0 || pool.current === pool.shown || !pool.ready(pool.current)) return
-        pool.endTurn()
-        const from = pool.shown
-        const moves = from.length > 0 && IrisStyle.motionEnabled && !pool.hidden
-        pool.leaving = moves ? from : ""
-        pool.shown = pool.current
-        const arriving = pool.itemFor(pool.shown)
-        if (moves) {
-            arriving.opacity = 0
-            arriving.shift = (pool.order.indexOf(pool.shown) < pool.order.indexOf(from) ? -1 : 1) * pool.distance
-            inFade.target = arriving
-            inMove.target = arriving
-            outFade.target = pool.itemFor(from)
-            prep.arm()
-        }
-        pool.arrived(pool.shown)
-        // The page left goes once the turn ends, so the turn's frame destroys nothing.
-        if (!pool.turning) Qt.callLater(pool.trim)
     }
     onCurrentChanged: {
         pool.forced = ""
         wholeLimit.restart()
         pool.hold(pool.current)
         pool.settle()
-    }
-
-    // The turn starts once the new page has been drawn (SekaiPop's phone does the same before each move): started in
-    // its build frame, the move's clock ran through the build and the first draw, and it showed up part-way done.
-    FrameAnimation {
-        id: prep
-        property int drawn: 0
-        property real since: 0
-        function arm(): void { prep.drawn = 0; prep.since = Date.now(); prep.start() }
-        onTriggered: {
-            if (++prep.drawn < 2 && Date.now() - prep.since < 80) return
-            prep.stop()
-            turn.start()
-        }
-    }
-    ParallelAnimation {
-        id: turn
-        NumberAnimation { id: inFade; property: "opacity"; to: 1; duration: pool.duration * 0.6; easing.type: Easing.OutCubic }
-        NumberAnimation { id: inMove; property: "shift"; to: 0; duration: pool.duration; easing.type: Easing.BezierSpline; easing.bezierCurve: IrisStyle.morphCurve }
-        NumberAnimation { id: outFade; property: "opacity"; to: 0; duration: pool.duration * 0.35; easing.type: Easing.OutCubic }
-        // Qt emits finished only when a run reaches its end, never on stop().
-        onFinished: pool.endTurn()
     }
 
     Repeater {
@@ -141,17 +88,12 @@ Item {
             id: page
             required property string modelData
             readonly property string area: page.modelData
-            readonly property bool onScreen: !pool.hidden && (page.area === pool.leaving
-                || page.area === pool.shown)
+            readonly property bool onScreen: !pool.hidden && page.area === pool.shown
             anchors.fill: parent
             // Never switched while it loads: going sync before the component is Ready makes Qt reload it without the props
             // (no `area`), and Ready lands from the loader thread later than any progress or event-loop turn shows.
             visible: page.onScreen && page.status === Loader.Ready
-            enabled: page.area === pool.shown && !pool.turning
-            z: page.area === pool.shown ? 1 : 0
-            // Only the pages moving are drawn as one texture each, and only while they move.
-            layer.enabled: pool.turning && page.visible
-            layer.smooth: true
+            enabled: page.area === pool.shown
             Component.onCompleted: {
                 page.asynchronous = !pool.settled
                 page.setSource(pool.urlFor(page.area), Object.assign({ area: page.area }, pool.propsFor(page.area)))

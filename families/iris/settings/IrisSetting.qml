@@ -212,7 +212,8 @@ Item {
                         textFormat: root.highlight.length > 0 ? Text.StyledText : Text.PlainText
                         color: root.headed ? (IrisStyle.fieldChamfer ? IrisStyle.muted : IrisStyle.subtext) : IrisStyle.text
                         font.pixelSize: root.headed ? IrisStyle.typeMeta : IrisStyle.typeBody
-                        font.weight: IrisStyle.weight(Font.Normal)
+                        // Medium: at Normal a 14 px name in the text faces read thin on glass (his 10-30).
+                        font.weight: IrisStyle.weight(Font.Medium)
                         wrapMode: Text.WordWrap
                     }
                     FontMetrics { id: labelMetrics; font: label.font }
@@ -1011,24 +1012,33 @@ Item {
                         layer.enabled: IrisStyle.fieldChamfer
                         color: "white" // iris-literal: a mask, never shown
                     }
-                    // Chosen: the accent ring the material cards wear, outside the picture so it never covers it.
+                    // Hovered, the picture lifts a tone; chosen, it carries a check on its corner (his 10-30: an
+                    // outline round a picture is the generic way, never ours).
                     Rectangle {
-                        visible: !IrisStyle.fieldChamfer
                         anchors.fill: parent
-                        anchors.margins: -Math.round(3 * root.d)
-                        radius: IrisStyle.radiusTile + Math.round(3 * root.d)
-                        color: "transparent"
-                        border.width: designCard.selected ? 2 : designHover.hovered ? 1 : 0
-                        border.color: designCard.selected ? IrisStyle.accent : IrisStyle.borderStrong
+                        radius: IrisStyle.radiusTile
+                        color: IrisStyle.fillQuiet
+                        opacity: designHover.hovered && !designCard.selected ? 1 : 0
+                        Behavior on opacity { NumberAnimation { duration: IrisStyle.duration(110); easing.type: IrisStyle.feedbackEasing } }
                     }
-                    IrisCutPlate {
-                        readonly property int out: Math.round(3 * root.d)
-                        visible: IrisStyle.fieldChamfer && (designCard.selected || designHover.hovered)
-                        anchors.fill: parent
-                        anchors.margins: -out
-                        cutLength: IrisStyle.chamferCut + Math.round(out * (2 - Math.SQRT2))
-                        stroke: designCard.selected ? (root.platePick ? IrisStyle.accentFill : IrisStyle.accent) : IrisStyle.borderStrong
-                        strokeWidth: designCard.selected ? 2 : 1
+                    Rectangle {
+                        anchors.top: parent.top
+                        anchors.right: parent.right
+                        anchors.margins: Math.round(10 * root.d)
+                        width: Math.round(24 * root.d)
+                        height: width
+                        radius: IrisStyle.capsule(width)
+                        color: IrisStyle.accentFill
+                        opacity: designCard.selected ? 1 : 0
+                        scale: designCard.selected ? 1 : 0.6
+                        Behavior on opacity { NumberAnimation { duration: IrisStyle.feedbackDuration; easing.type: IrisStyle.feedbackEasing } }
+                        Behavior on scale { NumberAnimation { duration: IrisStyle.feedbackDuration; easing.type: IrisStyle.feedbackEasing } }
+                        MaterialSymbol {
+                            anchors.centerIn: parent
+                            text: "check"
+                            iconSize: Math.round(16 * root.d)
+                            color: IrisStyle.inkOnAccentFill
+                        }
                     }
                     HoverHandler { id: designHover; cursorShape: Qt.PointingHandCursor }
                     TapHandler { id: designTap; onTapped: root.commit(designCard.modelData.value) }
@@ -1455,18 +1465,12 @@ Item {
                         onClicked: root.commit(swatch.modelData.value)
                         onContainsMouseChanged: swatchSet.hovered = swatch.containsMouse ? Translation.tr(swatch.modelData.label)
                             : swatchSet.hovered === Translation.tr(swatch.modelData.label) ? "" : swatchSet.hovered
-                        Rectangle {
-                            anchors.fill: parent
-                            radius: IrisStyle.capsule(width)
-                            color: "transparent"
-                            border.width: Math.max(2, Math.round(2 * root.d))
-                            border.color: swatch.selected ? IrisStyle.text : swatch.containsMouse ? IrisStyle.borderStrong : "transparent"
-                            Behavior on border.color { ColorAnimation { duration: IrisStyle.duration(110); easing.type: IrisStyle.feedbackEasing } }
-                        }
+                        // Chosen: the dot fills its place and carries a check; hovered it grows halfway. No ring.
                         Rectangle {
                             anchors.centerIn: parent
-                            width: parent.width - Math.round(8 * root.d)
+                            width: parent.width - Math.round((swatch.selected ? 0 : swatch.containsMouse ? 4 : 8) * root.d)
                             height: width
+                            Behavior on width { NumberAnimation { duration: IrisStyle.feedbackDuration; easing.type: IrisStyle.feedbackEasing } }
                             radius: IrisStyle.capsule(width)
                             border.width: 1
                             border.color: IrisStyle.borderStrong
@@ -1484,11 +1488,15 @@ Item {
                                 GradientStop { position: 1; color: Qt.hsla(0.95, 0.8, 0.62, 1) } // iris-literal: hue ramp
                             }
                             MaterialSymbol {
+                                id: swatchInk
+                                readonly property color under: swatch.special === "wallpaper" ? IrisStyle.wallpaperLight
+                                    : swatch.special === "accent" || swatch.special === "custom" ? IrisStyle.accent : swatch.modelData.swatch
                                 anchors.centerIn: parent
-                                visible: swatch.special === "wallpaper" || swatch.special === "accent"
-                                text: swatch.special === "wallpaper" ? "wallpaper" : "link"
-                                iconSize: Math.round(13 * root.d)
-                                color: IrisStyle.inkOnAccent
+                                visible: swatch.selected || swatch.special === "wallpaper" || swatch.special === "accent"
+                                text: swatch.selected ? "check" : swatch.special === "wallpaper" ? "wallpaper" : "link"
+                                iconSize: Math.round((swatch.selected ? 16 : 13) * root.d)
+                                color: swatch.special === "accent" ? IrisStyle.inkOnAccent
+                                    : 0.299 * swatchInk.under.r + 0.587 * swatchInk.under.g + 0.114 * swatchInk.under.b > 0.6 ? Qt.rgba(0, 0, 0, 0.82) : "white" // iris-literal: ink over any swatch
                             }
                         }
                     }

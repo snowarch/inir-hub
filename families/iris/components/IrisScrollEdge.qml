@@ -12,6 +12,8 @@ Item {
     property real reach: 28
     property bool blurs: true
     property real blurMax: 24
+    // The corners of what holds the list: rows passing them are cut by the same curve, never by a square clip.
+    property real radius: 0
     readonly property bool atTop: root.flick.contentY > 1
     readonly property bool atBottom: root.flick.contentY + root.flick.height < root.flick.contentHeight - 1
     readonly property bool active: root.atTop || root.atBottom
@@ -26,6 +28,7 @@ Item {
         layer.enabled: root.active
         Rectangle {
             anchors.fill: parent
+            radius: root.radius
             gradient: Gradient {
                 GradientStop { position: 0; color: root.atTop ? "transparent" : "white" }
                 GradientStop { position: root.share * 0.35; color: root.atTop ? Qt.rgba(1, 1, 1, 0.2) : "white" } // iris-literal: mask alpha, not a colour

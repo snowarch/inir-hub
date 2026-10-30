@@ -35,6 +35,8 @@ ColumnLayout {
     property string reading: ""
     // A row asked to be seen (a search landing): the page scrolls it into view.
     signal reveal(Item row)
+    // What a tile opened, to be brought whole into view (the page scrolls only as far as it needs).
+    signal bring(Item item)
 
     readonly property real d: IrisStyle.settingsDensity
     spacing: Math.round(6 * rows.d)
@@ -132,6 +134,10 @@ ColumnLayout {
     // A pending reveal waits a beat, so the row has its height before the page scrolls to it.
     property Item revealing: null
     Timer { id: revealSoon; interval: 120; onTriggered: if (rows.revealing) rows.reveal(rows.revealing) }
+    // A tile's options come into view the frame after they are laid out (his 10-30: he had to scroll for them).
+    property Item opening: null
+    function showOpened(item: Item): void { rows.opening = item; bringSoon.restart() }
+    Timer { id: bringSoon; interval: 60; onTriggered: if (rows.opening) rows.bring(rows.opening) }
 
     // What the page shows, in order, by group key: the page's wheel and its stage read these.
     function targets(): var {
@@ -154,11 +160,20 @@ ColumnLayout {
         // only in the frame after it is built (read 0 there). Inline: a queued weigh can land on a page being destroyed.
         if (!rows.streams || rows.reach === Infinity) {
             rows.builtUpTo = Math.max(rows.builtUpTo, rows.blocks.length)
-        } else if (rows.builtUpTo < rows.blocks.length) {
+        } else {
             let below = 0
-            for (let i = 0; i < rows.builtUpTo; i++) below += (48 + 56 * (rows.blocks[i].rows?.length ?? 0)) * rows.d
-            const last = blockRepeater.itemAt(Math.min(rows.builtUpTo, blockRepeater.count) - 1)
-            if ((last?.status === Loader.Ready || last?.status === Loader.Error || last?.wanted === false) && below <= rows.reach) rows.builtUpTo++
+            for (let i = 0; i < rows.builtUpTo; i++)
+                if (blockRepeater.itemAt(i)?.wanted !== false) below += (48 + 56 * (rows.blocks[i].rows?.length ?? 0)) * rows.d
+            // A block nobody asked for (Home's closed groups) builds nothing and weighs nothing: the build steps over it
+            // in the same call. Waiting on it for a status that never comes left every block after it unbuilt (Shell
+            // family opened on nothing, his 10-30).
+            while (rows.builtUpTo < rows.blocks.length && below <= rows.reach) {
+                const last = blockRepeater.itemAt(Math.min(rows.builtUpTo, blockRepeater.count) - 1)
+                if (!(last?.status === Loader.Ready || last?.status === Loader.Error || last?.wanted === false)) break
+                const next = blockRepeater.itemAt(rows.builtUpTo)
+                rows.builtUpTo++
+                if (next?.wanted !== false) break
+            }
         }
         const upTo = Math.min(rows.builtUpTo, blockRepeater.count)
         let built = blockRepeater.count >= rows.blocks.length
@@ -204,6 +219,7 @@ ColumnLayout {
             onWantedChanged: Qt.callLater(rows.weigh)
             asynchronous: slot.index > 0 && rows.streams
             onStatusChanged: if (rows) Qt.callLater(rows.weigh)
+            onLoaded: if (slot.modelData.rest && rows.homeGroups && rows.homeOpen === String(slot.modelData.key ?? "")) rows.showOpened(slot)
             sourceComponent: ColumnLayout {
                 id: block
                 readonly property var modelData: slot.modelData
@@ -330,9 +346,9 @@ ColumnLayout {
                             Rectangle {
                                 anchors.fill: parent
                                 radius: IrisStyle.radiusTile
-                                color: group.open ? IrisStyle.tintFill(group.tint) : (rows?.groupFill ?? "transparent")
-                                border.width: group.open || group.activeFocus ? 1 : 0
-                                border.color: IrisStyle.accent
+                                // Open: a wash of its own colour, as the sidebar marks where you are (his 10-30: an
+                                // outline is no way to say it).
+                                color: group.open ? IrisStyle.tintFillHover(group.tint) : (rows?.groupFill ?? "transparent")
                                 scale: groupArea.pressed ? IrisStyle.pressScale(0.97) : 1
                                 Behavior on color { ColorAnimation { duration: IrisStyle.duration(110); easing.type: IrisStyle.feedbackEasing } }
                                 Behavior on scale { NumberAnimation { duration: IrisStyle.feedbackDuration; easing.type: IrisStyle.feedbackEasing } }
@@ -340,7 +356,7 @@ ColumnLayout {
                                     anchors.fill: parent
                                     radius: parent.radius
                                     color: groupArea.pressed ? IrisStyle.fillActive : IrisStyle.fillQuiet
-                                    opacity: groupArea.containsMouse || groupArea.pressed ? 1 : 0
+                                    opacity: groupArea.containsMouse || groupArea.pressed || group.activeFocus ? 1 : 0
                                     Behavior on opacity { NumberAnimation { duration: IrisStyle.duration(110); easing.type: IrisStyle.feedbackEasing } }
                                 }
                                 IrisSquircle {
@@ -431,6 +447,7 @@ ColumnLayout {
                     columnSpacing: gap
                     rowSpacing: gap
                     property string opened: ""
+                    onOpenedChanged: if (tileGrid.opened.length > 0) rows.showOpened(openedTile)
                     readonly property var openedSpec: block.shownRows.find(spec => String(spec.modelKey ?? spec.path ?? "") === tileGrid.opened) ?? null
                     Repeater {
                         model: ScriptModel { objectProp: "modelKey"; values: block.tiled ? block.shownRows : [] }
@@ -475,9 +492,11 @@ ColumnLayout {
                                 id: tilePlate
                                 anchors.fill: parent
                                 radius: IrisStyle.radiusTile
-                                color: tile.on ? IrisStyle.accentFill : tile.edit ? "transparent" : (rows?.groupFill ?? "transparent")
-                                border.width: tile.edit || tile.open || tile.activeFocus ? 1 : 0
-                                border.color: tile.open || tile.activeFocus ? IrisStyle.accent : IrisStyle.hairlineStrong
+                                color: tile.on ? IrisStyle.accentFill : tile.edit ? "transparent"
+                                    : tile.open ? IrisStyle.tintFillHover(tile.accentTile ? IrisStyle.accent : (tile.area?.tint ?? IrisStyle.identity.gray))
+                                    : (rows?.groupFill ?? "transparent")
+                                border.width: tile.edit ? 1 : 0
+                                border.color: IrisStyle.hairlineStrong
                                 scale: tileArea.pressed ? IrisStyle.pressScale(0.97) : 1
                                 Behavior on color { ColorAnimation { duration: IrisStyle.duration(110); easing.type: IrisStyle.feedbackEasing } }
                                 Behavior on scale { NumberAnimation { duration: IrisStyle.feedbackDuration; easing.type: IrisStyle.feedbackEasing } }
@@ -485,7 +504,7 @@ ColumnLayout {
                                     anchors.fill: parent
                                     radius: parent.radius
                                     color: tileArea.pressed ? IrisStyle.fillActive : IrisStyle.fillQuiet
-                                    opacity: tileArea.containsMouse || tileArea.pressed ? 1 : 0
+                                    opacity: tileArea.containsMouse || tileArea.pressed || tile.activeFocus ? 1 : 0
                                     Behavior on opacity { NumberAnimation { duration: IrisStyle.duration(110); easing.type: IrisStyle.feedbackEasing } }
                                 }
                                 IrisSquircle {
@@ -555,6 +574,7 @@ ColumnLayout {
                 }
                 // The value a tile opened, as its own row, under the tiles.
                 Loader {
+                    id: openedTile
                     active: block.tiled && tileGrid.openedSpec !== null
                     visible: active
                     Layout.fillWidth: true

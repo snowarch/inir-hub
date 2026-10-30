@@ -18,8 +18,6 @@ Item {
     id: page
     required property string area
     property Item host
-    property real shift: 0
-    transform: Translate { x: page.shift }
 
     readonly property real d: Number(page.host?.d ?? IrisStyle.settingsDensity)
     function u(n: real): int { return Math.round(n * page.d) }
@@ -142,6 +140,7 @@ Item {
                 welcome: false
                 skip: page.area === "general" ? ["Every day"] : []
                 onReveal: row => page.reveal(row)
+                onBring: item => page.bring(item)
             }
         }
     }
@@ -190,6 +189,13 @@ Item {
         showAgain.restart()
     }
     Timer { id: showAgain; property string wanted: ""; property int tries: 0; interval: 200; onTriggered: page.seek(showAgain.wanted) }
+    // Scrolls only as far as the item needs to stand whole in view, its top kept in sight when it is taller than the page.
+    function bring(item: Item): void {
+        const top = item.mapToItem(flick.contentItem, 0, 0).y
+        const air = page.u(24)
+        const to = Math.min(top - air, top + item.height + air - flick.height)
+        if (to > flick.contentY) page.glideTo(to)
+    }
     function reveal(row: Item): void { page.glideTo(row.mapToItem(flick.contentItem, 0, 0).y - flick.height * 0.3) }
     function glideTo(y: real): void {
         const to = Math.max(0, Math.min(Math.max(0, flick.contentHeight - flick.height), y))
