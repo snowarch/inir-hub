@@ -6,6 +6,7 @@ import Quickshell.Io
 import qs.services
 import qs.modules.common
 import qs.modules.common.widgets
+import qs.modules.common.functions
 
 ContentPage {
     id: root
@@ -250,76 +251,55 @@ ContentPage {
                     }
                 }
 
-                // Soften colors toggle
+                // Which themes the list shows: one connected group. Soften colors used to sit here as a fourth
+                // identical circle, a setting dressed as a filter; it is a row below now.
                 Rectangle {
-                    width: 32
-                    height: 32
-                    radius: 16
-                    color: Config.options?.appearance?.softenColors ? Appearance.colors.colPrimary : Appearance.colors.colLayer1
+                    implicitWidth: tabRow.implicitWidth + 4
+                    implicitHeight: 32
+                    radius: height / 2
+                    color: SettingsMaterialPreset.controlColor
 
-                    MaterialSymbol {
+                    Row {
+                        id: tabRow
                         anchors.centerIn: parent
-                        text: "opacity"
-                        iconSize: 16
-                        color: Config.options?.appearance?.softenColors ? Appearance.colors.colOnPrimary : Appearance.colors.colOnLayer1
-                    }
+                        spacing: 2
 
-                    MouseArea {
-                        id: softenMouse
-                        anchors.fill: parent
-                        hoverEnabled: true
-                        cursorShape: Qt.PointingHandCursor
-                        onClicked: {
-                            const val = !(Config.options?.appearance?.softenColors ?? true)
-                            Config.setNestedValue("appearance.softenColors", val)
-                            // Regenerate theme (for auto theme, regenerates from wallpaper)
-                            ThemeService.regenerateAutoTheme()
-                        }
-                    }
+                        Repeater {
+                            model: [
+                                { icon: "apps", tip: Translation.tr("All") },
+                                { icon: "dark_mode", tip: Translation.tr("Dark") },
+                                { icon: "light_mode", tip: Translation.tr("Light") }
+                            ]
 
-                    StyledToolTip { text: Translation.tr("Soften colors (less intense)"); visible: softenMouse.containsMouse }
-                }
+                            Rectangle {
+                                required property var modelData
+                                required property int index
+                                readonly property bool chosen: themesGroup.selectedTab === index
 
-                // Tab pills
-                Row {
-                    spacing: 4
+                                width: 36
+                                height: 28
+                                radius: height / 2
+                                color: chosen ? Appearance.colors.colPrimary
+                                    : tabMouse.containsMouse ? ColorUtils.transparentize(Appearance.colors.colOnSurface, 0.92)
+                                    : "transparent"
 
-                    Repeater {
-                        model: [
-                            { icon: "apps", tip: "All" },
-                            { icon: "dark_mode", tip: "Dark" },
-                            { icon: "light_mode", tip: "Light" }
-                        ]
+                                MaterialSymbol {
+                                    anchors.centerIn: parent
+                                    text: modelData.icon
+                                    iconSize: 16
+                                    color: parent.chosen ? Appearance.colors.colOnPrimary : Appearance.colors.colOnSurfaceVariant
+                                }
 
-                        Rectangle {
-                            required property var modelData
-                            required property int index
+                                MouseArea {
+                                    id: tabMouse
+                                    anchors.fill: parent
+                                    hoverEnabled: true
+                                    cursorShape: Qt.PointingHandCursor
+                                    onClicked: themesGroup.selectedTab = index
+                                }
 
-                            width: 28
-                            height: 28
-                            radius: 14
-                            color: themesGroup.selectedTab === index
-                                ? Appearance.colors.colPrimary
-                                : tabMouse.containsMouse ? Appearance.colors.colLayer1Hover : Appearance.colors.colLayer1
-
-                            MaterialSymbol {
-                                anchors.centerIn: parent
-                                text: modelData.icon
-                                iconSize: 14
-                                color: themesGroup.selectedTab === index
-                                    ? Appearance.colors.colOnPrimary
-                                    : Appearance.colors.colOnLayer1
+                                StyledToolTip { text: modelData.tip; visible: tabMouse.containsMouse }
                             }
-
-                            MouseArea {
-                                id: tabMouse
-                                anchors.fill: parent
-                                hoverEnabled: true
-                                cursorShape: Qt.PointingHandCursor
-                                onClicked: themesGroup.selectedTab = index
-                            }
-
-                            StyledToolTip { text: modelData.tip; visible: tabMouse.containsMouse }
                         }
                     }
                 }
@@ -343,28 +323,33 @@ ContentPage {
 
                         readonly property bool isActive: themesGroup.selectedTag === modelData.id
 
-                        width: tagRow.implicitWidth + 12
-                        height: 24
-                        radius: 12
-                        color: isActive ? Appearance.colors.colPrimaryContainer
-                             : tagMouse.containsMouse ? Appearance.colors.colLayer1Hover
-                             : Appearance.colors.colLayer1
+                        // M3 filter chip: 28 px, outlined at rest, tonal with a leading check when chosen (10 px text read
+                        // as a footnote)
+                        width: tagRow.implicitWidth + 20
+                        height: 28
+                        radius: Appearance.rounding.small
+                        color: isActive ? Appearance.colors.colSecondaryContainer
+                             : tagMouse.containsMouse ? ColorUtils.transparentize(Appearance.colors.colOnSurface, 0.92)
+                             : "transparent"
+                        border.width: isActive ? 0 : 1
+                        border.color: Appearance.colors.colOutlineVariant
 
                         RowLayout {
                             id: tagRow
                             anchors.centerIn: parent
-                            spacing: 3
+                            spacing: 6
 
                             MaterialSymbol {
-                                text: modelData.icon
-                                iconSize: 12
-                                color: parent.parent.isActive ? Appearance.colors.colOnPrimaryContainer : Appearance.colors.colOnLayer1
+                                text: parent.parent.isActive ? "check" : modelData.icon
+                                iconSize: 16
+                                color: parent.parent.isActive ? Appearance.colors.colOnSecondaryContainer : Appearance.colors.colOnSurfaceVariant
                             }
 
                             StyledText {
                                 text: modelData.name
-                                font.pixelSize: Appearance.font.pixelSize.smallest
-                                color: parent.parent.isActive ? Appearance.colors.colOnPrimaryContainer : Appearance.colors.colOnLayer1
+                                font.pixelSize: Appearance.font.pixelSize.smaller
+                                font.weight: Font.Medium
+                                color: parent.parent.isActive ? Appearance.colors.colOnSecondaryContainer : Appearance.colors.colOnSurfaceVariant
                             }
                         }
 
@@ -382,9 +367,9 @@ ContentPage {
                 // Clear tag button
                 Rectangle {
                     visible: themesGroup.selectedTag.length > 0
-                    width: 24
-                    height: 24
-                    radius: 12
+                    width: 28
+                    height: 28
+                    radius: 14
                     color: clearMouse.containsMouse ? Appearance.colors.colLayer1Hover : Appearance.colors.colLayer1
 
                     MaterialSymbol {
@@ -668,6 +653,22 @@ ContentPage {
                         : Translation.tr("Theme presets will appear here")
                     compact: true
                     shape: MaterialShape.Shape.Bun
+                }
+            }
+
+            ConfigSwitch {
+                buttonIcon: "opacity"
+                text: Translation.tr("Soften colors")
+                checked: Config.options?.appearance?.softenColors ?? true
+                onCheckedChanged: {
+                    if (checked === (Config.options?.appearance?.softenColors ?? true))
+                        return
+                    Config.setNestedValue("appearance.softenColors", checked)
+                    // the wallpaper theme is generated with it: regenerate so the change shows
+                    ThemeService.regenerateAutoTheme()
+                }
+                StyledToolTip {
+                    text: Translation.tr("Soften colors (less intense)")
                 }
             }
 

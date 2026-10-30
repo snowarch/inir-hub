@@ -53,12 +53,10 @@ Item {
         // Get primary color from THIS preset (not current theme)
         readonly property color presetPrimary: root.getColor("m3primary", "#6366f1")
 
-        color: cardMouseArea.containsMouse
-            ? Appearance.colors.colLayer2Hover
-            : Appearance.colors.colLayer2
-
-        border.width: root.isActive ? 1.5 : 0
-        border.color: cardBg.presetPrimary
+        // chosen is Settings' tonal fill, not a ring in the preset's own primary (a dark preset's ink vanished on it)
+        color: root.isActive
+            ? (cardMouseArea.containsMouse ? Appearance.colors.colSecondaryContainerHover : Appearance.colors.colSecondaryContainer)
+            : cardMouseArea.containsMouse ? Appearance.colors.colLayer2Hover : Appearance.colors.colLayer2
 
         Behavior on color { enabled: Appearance.animationsEnabled; ColorAnimation { duration: 100 } }
     }
@@ -117,7 +115,7 @@ Item {
                 font.pixelSize: Appearance.font.pixelSize.smaller
                 font.weight: root.isActive ? Font.DemiBold : Font.Normal
                 color: root.isActive
-                    ? cardBg.presetPrimary
+                    ? Appearance.colors.colOnSecondaryContainer
                     : Appearance.colors.colOnLayer2
                 elide: Text.ElideRight
             }
@@ -178,7 +176,7 @@ Item {
             visible: root.isActive && !starButton.visible
             text: "check"
             iconSize: 16
-            color: cardBg.presetPrimary
+            color: Appearance.colors.colOnSecondaryContainer
         }
     }
 
