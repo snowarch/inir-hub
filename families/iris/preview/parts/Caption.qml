@@ -21,8 +21,8 @@ Rectangle {
     radius: IrisStyle.capsule(height)
     // A plate Design (AIRISU) labels the scene as a part: a die-cut tag, the words in mono capitals.
     readonly property bool tagged: IrisStyle.plateSelection
-    color: caption.tagged ? "transparent" : IrisStyle.veilHeavy
-    IrisCutPlate { anchors.fill: parent; visible: caption.tagged; color: IrisStyle.veilHeavy; cutLength: Math.round(caption.height / 3) }
+    color: caption.tagged ? "transparent" : IrisStyle.sceneVeilStrong
+    IrisCutPlate { anchors.fill: parent; visible: caption.tagged; color: IrisStyle.sceneVeilStrong; cutLength: Math.round(caption.height / 3) }
     visible: caption.text.length > 0 && !(caption.preview?.compact ?? false) && !(caption.preview?.captionOutside ?? false)
     // Only the scene on show speaks: while one group's scene hands over to the next, both are alive and both would write.
     Binding { target: caption.preview; property: "caption"; value: caption.text; when: caption.preview !== null && caption.preview.sceneItem === caption.parent }
@@ -30,14 +30,14 @@ Rectangle {
         id: captionRow
         anchors.centerIn: parent
         spacing: Math.round(6 * IrisStyle.density)
-        MaterialSymbol { text: caption.glyph; iconSize: Math.round(14 * IrisStyle.density); color: IrisStyle.subtext }
+        MaterialSymbol { text: caption.glyph; iconSize: Math.round(14 * IrisStyle.density); color: IrisStyle.onSceneSecondary }
         IrisText {
             text: caption.text
             font.pixelSize: caption.tagged ? IrisStyle.typeFootnote : IrisStyle.typeMeta
             font.family: caption.tagged ? IrisStyle.fontMono : IrisStyle.fontMain
             font.capitalization: caption.tagged ? Font.AllUppercase : Font.MixedCase
             font.letterSpacing: caption.tagged ? Math.round(IrisStyle.typeFootnote * 0.12) : 0
-            color: IrisStyle.text
+            color: IrisStyle.onScene
         }
     }
 }

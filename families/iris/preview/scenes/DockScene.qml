@@ -66,6 +66,8 @@ PreviewScene {
     }
     function inset(side: string): real {
         if (side === dockRoot.edge) return dockRoot.reach
+        // A bottom Dock puts the caption on top: the window starts under it.
+        if (side === "top" && dockRoot.edge === "bottom") return Math.round(54 * dockRoot.d)
         return Math.round((side === "top" || side === "bottom" ? 28 : 40) * dockRoot.d)
     }
     Timer {
@@ -95,7 +97,8 @@ PreviewScene {
         width: parent.width - dockRoot.inset("left") - dockRoot.inset("right")
         height: parent.height - dockRoot.inset("top") - dockRoot.inset("bottom")
         radius: IrisStyle.radiusTile
-        color: IrisStyle.surfaceHigh
+        // A window is opaque: the glass body's own surface left only its accent edge on the wallpaper.
+        color: IrisStyle.sceneSurface
         border.width: 1
         border.color: IrisStyle.border
         Behavior on x { NumberAnimation { duration: IrisStyle.moveDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: IrisStyle.moveCurve } }

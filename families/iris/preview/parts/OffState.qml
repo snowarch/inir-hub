@@ -14,13 +14,13 @@ Rectangle {
     implicitHeight: Math.round(36 * IrisStyle.density)
     radius: IrisStyle.capsule(height)
     // A plate Design (AIRISU) cuts it as a tag with its die.
-    color: IrisStyle.plateSelection ? "transparent" : IrisStyle.veilHeavy
+    color: IrisStyle.plateSelection ? "transparent" : IrisStyle.sceneVeilStrong
     border.width: IrisStyle.plateSelection ? 0 : 1
     border.color: IrisStyle.border
     IrisCutPlate {
         anchors.fill: parent
         visible: IrisStyle.plateSelection
-        color: IrisStyle.veilHeavy
+        color: IrisStyle.sceneVeilStrong
         stroke: IrisStyle.border
         strokeWidth: 1
         cutLength: Math.round(off.height / 3)
@@ -30,7 +30,7 @@ Rectangle {
         anchors.centerIn: parent
         spacing: Math.round(8 * IrisStyle.density)
         // The veil is dark in every scheme: its ink is the one made for imagery, never the page's.
-        MaterialSymbol { text: "visibility_off"; iconSize: Math.round(16 * IrisStyle.density); color: IrisStyle.onMediaSecondary }
-        IrisText { text: off.text; color: IrisStyle.onMedia; font.weight: IrisStyle.weight(Font.DemiBold) }
+        MaterialSymbol { text: "visibility_off"; iconSize: Math.round(16 * IrisStyle.density); color: IrisStyle.onSceneSecondary }
+        IrisText { text: off.text; color: IrisStyle.onScene; font.weight: IrisStyle.weight(Font.DemiBold) }
     }
 }
