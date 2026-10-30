@@ -2000,6 +2000,7 @@ ContentPage {
                     id: widthSpinBox
                     icon: "width"
                     text: Translation.tr("Width")
+                    unit: "%"
                     from: 75
                     to: 125
                     stepSize: 5

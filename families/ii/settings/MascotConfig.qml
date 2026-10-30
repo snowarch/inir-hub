@@ -87,6 +87,7 @@ ContentPage {
             ConfigSpinBox {
                 icon: "timelapse"
                 text: Translation.tr("Minimum quiet time")
+                unit: "min"
                 from: 3; to: 60; stepSize: 1
                 value: Config.options?.mascot?.companion?.minQuietMinutes ?? 10
                 property bool _ready: false

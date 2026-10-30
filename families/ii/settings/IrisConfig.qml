@@ -199,6 +199,7 @@ ContentPage {
                         ConfigSpinBox {
                             icon: "height"
                             text: Translation.tr("Height")
+                            unit: "px"
                             value: Config.options?.iris?.bar?.height ?? 42
                             from: 32
                             to: 64
@@ -207,6 +208,7 @@ ContentPage {
                         ConfigSpinBox {
                             icon: "space_bar"
                             text: Translation.tr("Screen gap")
+                            unit: "px"
                             value: Config.options?.iris?.bar?.margin ?? 8
                             from: 0
                             to: 24
@@ -359,6 +361,7 @@ ContentPage {
                     ConfigSpinBox {
                         icon: "photo_size_select_small"
                         text: Translation.tr("Dock icon size")
+                        unit: "px"
                         value: Config.options?.iris?.dock?.iconSize ?? 40
                         from: 28
                         to: 64
@@ -425,6 +428,7 @@ ContentPage {
                     ConfigSpinBox {
                         icon: "search"
                         text: Translation.tr("Palette width")
+                        unit: "px"
                         value: Config.options?.iris?.palette?.width ?? 640
                         from: 420
                         to: 900
@@ -450,6 +454,7 @@ ContentPage {
                         ConfigSpinBox {
                             icon: "tune"
                             text: Translation.tr("Control width")
+                            unit: "px"
                             value: Config.options?.iris?.controlCenter?.width ?? 360
                             from: 300
                             to: 540
@@ -459,6 +464,7 @@ ContentPage {
                         ConfigSpinBox {
                             icon: "notifications"
                             text: Translation.tr("Notification width")
+                            unit: "px"
                             value: Config.options?.iris?.notifications?.width ?? 380
                             from: 300
                             to: 560
@@ -469,6 +475,7 @@ ContentPage {
                     ConfigSpinBox {
                         icon: "monitoring"
                         text: Translation.tr("OSD width")
+                        unit: "px"
                         value: Config.options?.iris?.osd?.width ?? 320
                         from: 260
                         to: 520
@@ -504,6 +511,7 @@ ContentPage {
                             }
                             ConfigSpinBox {
                                 text: Translation.tr("Width")
+                                unit: "px"
                                 value: sideSection.options.width ?? 380
                                 from: 300; to: 600; stepSize: 10
                                 onValueModified: Config.setNestedValue(sideSection.path + ".width", value)

@@ -111,9 +111,8 @@ ContentPage {
         SettingsGroup {
             StyledText {
                 Layout.fillWidth: true
-                text: CompositorService.isNiri
-                    ? Translation.tr("Orbit is a Material workspace navigator built for Niri. The taskview IPC remains as a compatibility alias.")
-                    : Translation.tr("Orbit is currently available on Niri.")
+                visible: !CompositorService.isNiri
+                text: Translation.tr("Orbit is currently available on Niri.")
                 color: Appearance.colors.colSubtext
                 font.pixelSize: Appearance.font.pixelSize.smaller
                 wrapMode: Text.WordWrap
@@ -166,6 +165,7 @@ ContentPage {
                 enabled: (root.orbitOptions.enable ?? true) && (root.orbitOptions.hotCornerEnable ?? true)
                 icon: "crop_free"
                 text: Translation.tr("Corner capture area")
+                unit: "px"
                 description: Translation.tr("Invisible square that receives pointer movement near the corner")
                 value: root.orbitOptions.hotCornerSize ?? 12
                 from: 4
@@ -179,6 +179,7 @@ ContentPage {
                 enabled: (root.orbitOptions.enable ?? true) && (root.orbitOptions.hotCornerEnable ?? true)
                 icon: "near_me"
                 text: Translation.tr("Activation distance")
+                unit: "px"
                 description: Translation.tr("How close the pointer must get to both screen edges before Orbit opens")
                 value: root.orbitOptions.hotCornerActivationDistance ?? 2
                 from: 1
@@ -192,6 +193,7 @@ ContentPage {
                 enabled: (root.orbitOptions.enable ?? true) && (root.orbitOptions.hotCornerEnable ?? true)
                 icon: "timer"
                 text: Translation.tr("Corner dwell")
+                unit: "ms"
                 description: Translation.tr("Milliseconds to hold the pointer in the exact corner; 0 opens immediately")
                 value: root.orbitOptions.hotCornerDwellMs ?? 0
                 from: 0
@@ -250,6 +252,7 @@ ContentPage {
                     Layout.fillWidth: true
                     icon: "width"
                     text: Translation.tr("Docked Studio width")
+                    unit: "%"
                     description: Translation.tr("Percentage of the output reserved by Focus Studio")
                     value: root.orbitOptions.studio?.widthPercent ?? 26
                     from: 20
@@ -363,6 +366,7 @@ ContentPage {
                     Layout.fillWidth: true
                     icon: "center_focus_strong"
                     text: Translation.tr("Core size")
+                    unit: "%"
                     value: root.orbitOptions.orbital?.coreSizePercent ?? 48
                     from: 36
                     to: 62
@@ -374,6 +378,7 @@ ContentPage {
                     Layout.fillWidth: true
                     icon: "satellite_alt"
                     text: Translation.tr("Satellite size")
+                    unit: "%"
                     value: root.orbitOptions.orbital?.satelliteSizePercent ?? 42
                     from: 28
                     to: 60
@@ -385,6 +390,7 @@ ContentPage {
                     Layout.fillWidth: true
                     icon: "swap_horiz"
                     text: Translation.tr("Horizontal spread")
+                    unit: "%"
                     value: root.orbitOptions.orbital?.horizontalSpreadPercent ?? 82
                     from: 58
                     to: 96
@@ -396,6 +402,7 @@ ContentPage {
                     Layout.fillWidth: true
                     icon: "height"
                     text: Translation.tr("Vertical spread")
+                    unit: "%"
                     value: root.orbitOptions.orbital?.verticalSpreadPercent ?? 58
                     from: 40
                     to: 82
@@ -407,6 +414,7 @@ ContentPage {
                     Layout.fillWidth: true
                     icon: "layers"
                     text: Translation.tr("Depth")
+                    unit: "%"
                     description: Translation.tr("Perspective separation between front and rear workspace satellites")
                     value: root.orbitOptions.orbital?.depthPercent ?? 18
                     from: 0
@@ -422,6 +430,7 @@ ContentPage {
                         Layout.fillWidth: true
                         icon: "padding"
                         text: Translation.tr("Orbit edge padding")
+                        unit: "px"
                         value: root.orbitOptions.orbital?.geometry?.edgePadding ?? 10
                         from: 0
                         to: 48
@@ -433,6 +442,7 @@ ContentPage {
                         Layout.fillWidth: true
                         icon: "view_column"
                         text: Translation.tr("Horizon card gap")
+                        unit: "px"
                         value: root.orbitOptions.orbital?.geometry?.horizonGap ?? 12
                         from: 0
                         to: 48
@@ -444,6 +454,7 @@ ContentPage {
                         Layout.fillWidth: true
                         icon: "width"
                         text: Translation.tr("Horizon rail inset")
+                        unit: "px"
                         value: root.orbitOptions.orbital?.geometry?.horizonInset ?? 24
                         from: 0
                         to: 96
@@ -455,6 +466,7 @@ ContentPage {
                         Layout.fillWidth: true
                         icon: "vertical_align_center"
                         text: Translation.tr("Horizon base separation")
+                        unit: "px"
                         value: root.orbitOptions.orbital?.geometry?.horizonVerticalBase ?? 8
                         from: 0
                         to: 80
@@ -466,6 +478,7 @@ ContentPage {
                         Layout.fillWidth: true
                         icon: "height"
                         text: Translation.tr("Horizon spread range")
+                        unit: "px"
                         value: root.orbitOptions.orbital?.geometry?.horizonVerticalRange ?? 26
                         from: 0
                         to: 96
@@ -477,6 +490,7 @@ ContentPage {
                         Layout.fillWidth: true
                         icon: "space_bar"
                         text: Translation.tr("Gallery side gap")
+                        unit: "px"
                         value: root.orbitOptions.orbital?.geometry?.galleryBaseGap ?? 34
                         from: 0
                         to: 120
@@ -488,6 +502,7 @@ ContentPage {
                         Layout.fillWidth: true
                         icon: "swap_vert"
                         text: Translation.tr("Gallery row gap")
+                        unit: "px"
                         value: root.orbitOptions.orbital?.geometry?.galleryRowGap ?? 14
                         from: 0
                         to: 48
@@ -499,6 +514,7 @@ ContentPage {
                         Layout.fillWidth: true
                         icon: "space_bar"
                         text: Translation.tr("Deck base gap")
+                        unit: "px"
                         value: root.orbitOptions.orbital?.geometry?.deckBaseGap ?? 26
                         from: 0
                         to: 120
@@ -510,6 +526,7 @@ ContentPage {
                         Layout.fillWidth: true
                         icon: "stacks"
                         text: Translation.tr("Deck stack step")
+                        unit: "px"
                         value: root.orbitOptions.orbital?.geometry?.deckStep ?? 44
                         from: 12
                         to: 120
@@ -521,6 +538,7 @@ ContentPage {
                         Layout.fillWidth: true
                         icon: "swap_vert"
                         text: Translation.tr("Deck fan step")
+                        unit: "px"
                         value: root.orbitOptions.orbital?.geometry?.deckLiftStep ?? 24
                         from: 0
                         to: 80
@@ -532,6 +550,7 @@ ContentPage {
                         Layout.fillWidth: true
                         icon: "grid_view"
                         text: Translation.tr("Atlas card gap")
+                        unit: "px"
                         value: root.orbitOptions.orbital?.geometry?.atlasGap ?? 14
                         from: 0
                         to: 48
@@ -554,6 +573,7 @@ ContentPage {
                         Layout.fillWidth: true
                         icon: "center_focus_strong"
                         text: Translation.tr("Atlas Core emphasis")
+                        unit: "%"
                         value: root.orbitOptions.orbital?.geometry?.atlasCoreBoostPercent ?? 10
                         from: 0
                         to: 20
@@ -565,6 +585,7 @@ ContentPage {
                         Layout.fillWidth: true
                         icon: "crop_free"
                         text: Translation.tr("Core content inset")
+                        unit: "px"
                         value: root.orbitOptions.orbital?.geometry?.coreContentMargin ?? 9
                         from: 0
                         to: 28
@@ -576,6 +597,7 @@ ContentPage {
                         Layout.fillWidth: true
                         icon: "crop_din"
                         text: Translation.tr("Satellite content inset")
+                        unit: "px"
                         value: root.orbitOptions.orbital?.geometry?.satelliteContentMargin ?? 6
                         from: 0
                         to: 24
@@ -639,6 +661,7 @@ ContentPage {
                     enabled: root.orbitOptions.orbital?.showWorkspaceWallpaper ?? true
                     icon: "opacity"
                     text: Translation.tr("Workspace wallpaper strength")
+                    unit: "%"
                     value: root.orbitOptions.orbital?.workspaceWallpaperOpacity ?? 70
                     from: 20
                     to: 100
@@ -666,6 +689,7 @@ ContentPage {
                     Layout.fillWidth: true
                     icon: "zoom_out_map"
                     text: Translation.tr("Workspace scale")
+                    unit: "%"
                     description: Translation.tr("Percentage of the monitor size used by each workspace preview")
                     value: root.orbitOptions.workspaceScalePercent ?? 27
                     from: 16
@@ -678,6 +702,7 @@ ContentPage {
                     Layout.fillWidth: true
                     icon: "width"
                     text: Translation.tr("Maximum panel width")
+                    unit: "%"
                     value: root.orbitOptions.maxPanelWidthPercent ?? 92
                     from: 60
                     to: 100
@@ -689,6 +714,7 @@ ContentPage {
                     Layout.fillWidth: true
                     icon: "space_bar"
                     text: Translation.tr("Workspace spacing")
+                    unit: "px"
                     value: root.orbitOptions.workspaceSpacing ?? 18
                     from: 0
                     to: 40
@@ -748,6 +774,7 @@ ContentPage {
                     enabled: root.orbitOptions.orbital?.surface?.outline ?? true
                     icon: "border_style"
                     text: Translation.tr("Outline width")
+                    unit: "px"
                     description: Translation.tr("Stroke thickness around workspace previews")
                     value: root.orbitOptions.orbital?.surface?.outlineWidth ?? 1
                     from: 0
@@ -761,6 +788,7 @@ ContentPage {
                     enabled: root.orbitOptions.orbital?.surface?.outline ?? true
                     icon: "opacity"
                     text: Translation.tr("Outline intensity")
+                    unit: "%"
                     description: Translation.tr("Opacity of active/core workspace outlines")
                     value: root.orbitOptions.orbital?.surface?.outlineOpacityPercent ?? 72
                     from: 0
@@ -773,6 +801,7 @@ ContentPage {
                     Layout.fillWidth: true
                     icon: "rounded_corner"
                     text: Translation.tr("Workspace rounding")
+                    unit: "%"
                     value: root.orbitOptions.orbital?.surface?.radiusPercent ?? 100
                     from: 55
                     to: 160
@@ -784,6 +813,7 @@ ContentPage {
                     Layout.fillWidth: true
                     icon: "padding"
                     text: Translation.tr("Material frame inset")
+                    unit: "px"
                     description: Translation.tr("Leaves a visible band of the selected workspace material around wallpaper and previews")
                     value: root.orbitOptions.orbital?.surface?.frameInset ?? 5
                     from: 0
@@ -807,6 +837,7 @@ ContentPage {
                     enabled: (root.orbitOptions.orbital?.surface?.shadowMode ?? "core") !== "off"
                     icon: "opacity"
                     text: Translation.tr("Shadow intensity")
+                    unit: "%"
                     value: root.orbitOptions.orbital?.surface?.shadowOpacityPercent ?? 72
                     from: 0
                     to: 100
@@ -819,6 +850,7 @@ ContentPage {
                 Layout.fillWidth: true
                 icon: "grid_view"
                 text: Translation.tr("Window gap")
+                unit: "px"
                 value: root.orbitOptions.windowGap ?? 4
                 from: 0
                 to: 16
@@ -913,6 +945,7 @@ ContentPage {
                 enabled: root.orbitOptions.canvasScrubNavigation ?? true
                 icon: "swipe"
                 text: Translation.tr("Scrub step distance")
+                unit: "px"
                 value: root.orbitOptions.canvasScrubThreshold ?? 96
                 from: 48
                 to: 180
@@ -1022,6 +1055,7 @@ ContentPage {
                 enabled: root.shelfOptions.enable ?? true
                 icon: "space_bar"
                 text: Translation.tr("Module spacing")
+                unit: "px"
                 description: Translation.tr("Gap between Shelf modules")
                 value: root.shelfOptions.moduleSpacing ?? 7
                 from: 0
@@ -1036,6 +1070,7 @@ ContentPage {
                 enabled: (root.shelfOptions.enable ?? true) && visible
                 icon: "padding"
                 text: Translation.tr("Island padding")
+                unit: "px"
                 description: Translation.tr("Horizontal breathing room inside each Shelf island; the workspace locator keeps an additional safe inset")
                 value: root.shelfOptions.islandPadding ?? 8
                 from: 6
@@ -1296,6 +1331,7 @@ ContentPage {
                     enabled: (root.orbitOptions.presentation?.preset ?? "float") !== "instant"
                     icon: "open_with"
                     text: Translation.tr("Travel distance")
+                    unit: "px"
                     value: root.orbitOptions.presentation?.distance ?? 92
                     from: 0
                     to: 160
@@ -1309,6 +1345,7 @@ ContentPage {
                     enabled: (root.orbitOptions.presentation?.preset ?? "float") !== "instant"
                     icon: "login"
                     text: Translation.tr("Enter duration")
+                    unit: "ms"
                     value: root.orbitOptions.presentation?.enterDurationMs ?? 300
                     from: 80
                     to: 600
@@ -1322,6 +1359,7 @@ ContentPage {
                     enabled: (root.orbitOptions.presentation?.preset ?? "float") !== "instant"
                     icon: "logout"
                     text: Translation.tr("Exit duration")
+                    unit: "ms"
                     value: root.orbitOptions.presentation?.exitDurationMs ?? 220
                     from: 60
                     to: 500
@@ -1334,6 +1372,7 @@ ContentPage {
                     visible: root.orbitOptions.presentation?.advanced ?? false
                     icon: "hourglass_top"
                     text: Translation.tr("Entry pre-roll")
+                    unit: "ms"
                     value: root.orbitOptions.presentation?.entryDelayMs ?? 64
                     from: 0
                     to: 240
@@ -1346,6 +1385,7 @@ ContentPage {
                     visible: root.orbitOptions.presentation?.advanced ?? false
                     icon: "opacity"
                     text: Translation.tr("Entry start opacity")
+                    unit: "%"
                     value: root.orbitOptions.presentation?.entryOpacityPercent ?? 0
                     from: 0
                     to: 90
@@ -1358,6 +1398,7 @@ ContentPage {
                     visible: root.orbitOptions.presentation?.advanced ?? false
                     icon: "format_line_spacing"
                     text: Translation.tr("Card stagger")
+                    unit: "ms"
                     value: root.orbitOptions.presentation?.entryStaggerMs ?? 42
                     from: 0
                     to: 120
@@ -1370,6 +1411,7 @@ ContentPage {
                     visible: root.orbitOptions.presentation?.advanced ?? false
                     icon: "dock_to_bottom"
                     text: Translation.tr("Shelf entry delay")
+                    unit: "ms"
                     value: root.orbitOptions.presentation?.shelfDelayMs ?? 72
                     from: 0
                     to: 240
@@ -1408,6 +1450,7 @@ ContentPage {
                     visible: root.orbitOptions.navigationMotion?.advanced ?? false
                     icon: "timer"
                     text: Translation.tr("Navigation duration")
+                    unit: "ms"
                     value: root.orbitOptions.navigationMotion?.durationMs ?? 320
                     from: 80
                     to: 600
@@ -1431,6 +1474,7 @@ ContentPage {
                 Layout.fillWidth: true
                 icon: "contrast"
                 text: Translation.tr("Backdrop dim")
+                unit: "%"
                 value: root.orbitOptions.scrimDim ?? 35
                 from: 0
                 to: 80
@@ -1459,6 +1503,7 @@ ContentPage {
                     enabled: root.orbitOptions.backdropBlurMode !== "off"
                     icon: "blur_on"
                     text: Translation.tr("Blur strength")
+                    unit: "%"
                     value: root.orbitOptions.backdropBlurStrength ?? 72
                     from: 0
                     to: 100
@@ -1471,6 +1516,7 @@ ContentPage {
                     enabled: root.orbitOptions.backdropBlurMode !== "off"
                     icon: "palette"
                     text: Translation.tr("Blur saturation")
+                    unit: "%"
                     value: root.orbitOptions.backdropBlurSaturation ?? 18
                     from: 0
                     to: 100
@@ -1483,6 +1529,7 @@ ContentPage {
                     enabled: root.orbitOptions.backdropBlurMode !== "off"
                     icon: "opacity"
                     text: Translation.tr("Glass tint")
+                    unit: "%"
                     value: root.orbitOptions.backdropBlurTint ?? 28
                     from: 0
                     to: 80

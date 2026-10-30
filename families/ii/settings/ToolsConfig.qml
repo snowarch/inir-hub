@@ -1367,6 +1367,7 @@ ContentPage {
                 ConfigSpinBox {
                     icon: "eraser_size_3"
                     text: Translation.tr("Stroke width")
+                    unit: "px"
                     value: Config.options?.regionSelector?.circle?.strokeWidth ?? 3
                     from: 1
                     to: 20
@@ -1382,6 +1383,7 @@ ContentPage {
                 ConfigSpinBox {
                     icon: "screenshot_frame_2"
                     text: Translation.tr("Padding")
+                    unit: "px"
                     value: Config.options?.regionSelector?.circle?.padding ?? 20
                     from: 0
                     to: 100

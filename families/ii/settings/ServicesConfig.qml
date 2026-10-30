@@ -119,7 +119,9 @@ ContentPage {
                 visible: Battery.available
                 enabled: Config.options?.idle?.onBattery?.enable ?? false
                 icon: "lock_clock"
-                text: Translation.tr("Battery: screen off") + ` (${value > 0 ? Math.floor(value/60) + "m" : Translation.tr("disabled")})`
+                text: Translation.tr("Battery: screen off")
+                unit: "s"
+                specialValueText: Translation.tr("Never")
                 value: Config.options?.idle?.onBattery?.screenOffTimeout ?? 120
                 from: 0
                 to: 3600
@@ -131,7 +133,9 @@ ContentPage {
                 visible: Battery.available
                 enabled: Config.options?.idle?.onBattery?.enable ?? false
                 icon: "lock"
-                text: Translation.tr("Battery: lock") + ` (${value > 0 ? Math.floor(value/60) + "m" : Translation.tr("disabled")})`
+                text: Translation.tr("Battery: lock")
+                unit: "s"
+                specialValueText: Translation.tr("Never")
                 value: Config.options?.idle?.onBattery?.lockTimeout ?? 300
                 from: 0
                 to: 7200
@@ -143,7 +147,9 @@ ContentPage {
                 visible: Battery.available
                 enabled: Config.options?.idle?.onBattery?.enable ?? false
                 icon: "dark_mode"
-                text: Translation.tr("Battery: suspend") + ` (${value > 0 ? Math.floor(value/60) + "m" : Translation.tr("disabled")})`
+                text: Translation.tr("Battery: suspend")
+                unit: "s"
+                specialValueText: Translation.tr("Never")
                 value: Config.options?.idle?.onBattery?.suspendTimeout ?? 600
                 from: 0
                 to: 7200
@@ -445,7 +451,8 @@ ContentPage {
         SettingsGroup {
             ConfigSpinBox {
                 icon: "av_timer"
-                text: Translation.tr("Check interval") + ` (${value}m)`
+                text: Translation.tr("Check interval")
+                unit: "min"
                 value: Config.options?.updates?.checkInterval ?? 120
                 from: 15
                 to: 1440
@@ -521,7 +528,8 @@ ContentPage {
 
             ConfigSpinBox {
                 icon: "schedule"
-                text: Translation.tr("Check interval") + ` (${value}m)`
+                text: Translation.tr("Check interval")
+                unit: "min"
                 value: Config.options?.shellUpdates?.checkIntervalMinutes ?? 360
                 from: 30
                 to: 1440

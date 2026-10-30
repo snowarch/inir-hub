@@ -2459,6 +2459,7 @@ ContentPage {
                 visible: root.stockHorizontalLayoutActive
                 icon: "space_bar"
                 text: Translation.tr("Flexible spacer width")
+                unit: "px"
                 value: Config.options?.bar?.layout?.spacerWidth ?? 0
                 from: 0
                 to: 480

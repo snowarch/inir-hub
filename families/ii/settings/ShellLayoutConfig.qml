@@ -103,7 +103,7 @@ ContentPage {
 
                 StyledText {
                     Layout.fillWidth: true
-                    text: Translation.tr("Family") + ": " + root.activeFamily
+                    text: (({ ii: "Material", waffle: "Waffle", iris: "iRiS" })[root.activeFamily] ?? root.activeFamily)
                         + (ShellEditSession.targetOutputName.length > 0
                             ? " · " + ShellEditSession.targetOutputName : "")
                     color: Appearance.colors.colSubtext

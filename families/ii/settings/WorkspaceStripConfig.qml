@@ -120,6 +120,7 @@ ContentPage {
                     Layout.fillWidth: true
                     icon: "width"
                     text: Translation.tr("Panel width")
+                    unit: "px"
                     value: Config.options?.workspaceStrip?.panelWidth ?? 480
                     from: 360
                     to: 760
@@ -134,6 +135,7 @@ ContentPage {
                     Layout.fillWidth: true
                     icon: "photo_size_select_large"
                     text: Translation.tr("Preview size")
+                    unit: "px"
                     value: Config.options?.workspaceStrip?.previewSize ?? 150
                     from: 96
                     to: 260
@@ -148,6 +150,7 @@ ContentPage {
                     Layout.fillWidth: true
                     icon: "swipe"
                     text: Translation.tr("Trigger width")
+                    unit: "px"
                     value: Config.options?.workspaceStrip?.triggerWidth ?? 6
                     from: 1
                     to: 16
@@ -166,6 +169,7 @@ ContentPage {
                     Layout.fillWidth: true
                     icon: "timer"
                     text: Translation.tr("Open delay")
+                    unit: "ms"
                     value: Config.options?.workspaceStrip?.openDelay ?? 110
                     from: 1
                     to: 500
@@ -178,6 +182,7 @@ ContentPage {
                     Layout.fillWidth: true
                     icon: "timer_off"
                     text: Translation.tr("Close delay")
+                    unit: "ms"
                     value: Config.options?.workspaceStrip?.closeDelay ?? 320
                     from: 100
                     to: 1200
@@ -210,6 +215,7 @@ ContentPage {
                     enabled: Config.options?.workspaceStrip?.scrollNavigation ?? false
                     icon: "speed"
                     text: Translation.tr("Scroll debounce")
+                    unit: "ms"
                     value: Config.options?.workspaceStrip?.scrollNavigationDebounceMs ?? 180
                     from: 50
                     to: 800

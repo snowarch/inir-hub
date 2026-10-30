@@ -53,22 +53,20 @@ ContentPage {
     }
 
     // search writes it to open a section, so it is set, never bound
-    property string activeSection: root.isWaffleActive ? "wallpaper" : "transition"
-    onIsWaffleActiveChanged: root.activeSection = root.isWaffleActive ? "wallpaper" : "transition"
+    property string activeSection: "wallpaper"
 
     SettingsTaskNavigator {
         visible: root.isWaffleActive
         icon: "window"
         title: Translation.tr("Waffle Style")
         description: Translation.tr("Tune the Windows 11 style surfaces in focused views: wallpaper, taskbar, theming and family switching.")
-        summary: Translation.tr("Wallpaper \u00b7 Taskbar \u00b7 Style \u00b7 Transition")
+        summary: [Translation.tr("Wallpaper"), Translation.tr("Taskbar"), Translation.tr("Style")].join(" \u00b7 ")
         currentValue: root.activeSection
         onSelected: value => root.activeSection = value
         options: [
             { displayName: Translation.tr("Wallpaper"), icon: "wallpaper_slideshow", value: "wallpaper" },
             { displayName: Translation.tr("Taskbar"), icon: "toolbar", value: "taskbar" },
-            { displayName: Translation.tr("Style"), icon: "palette", value: "style" },
-            { displayName: Translation.tr("Transition"), icon: "swap_horiz", value: "transition" }
+            { displayName: Translation.tr("Style"), icon: "palette", value: "style" }
         ]
     }
 
@@ -162,6 +160,7 @@ ContentPage {
                 visible: Config.options?.waffles?.background?.effects?.enableBlur ?? false
                 icon: "blur_medium"
                 text: Translation.tr("Blur radius")
+                unit: "px"
                 from: 0; to: 64; stepSize: 2
                 value: Config.options?.waffles?.background?.effects?.blurRadius ?? 32
                 onValueModified: Config.setNestedValue("waffles.background.effects.blurRadius", value)
@@ -265,6 +264,7 @@ ContentPage {
                 visible: Config.options?.waffles?.background?.backdrop?.enable ?? true
                 icon: "blur_on"
                 text: Translation.tr("Blur radius")
+                unit: "px"
                 from: 0; to: 100; stepSize: 5
                 value: Config.options?.waffles?.background?.backdrop?.blurRadius ?? 32
                 onValueModified: Config.setNestedValue("waffles.background.backdrop.blurRadius", value)
@@ -283,6 +283,7 @@ ContentPage {
                 visible: Config.options?.waffles?.background?.backdrop?.enable ?? true
                 icon: "contrast"
                 text: Translation.tr("Saturation")
+                unit: "%"
                 from: 0; to: 200; stepSize: 10
                 value: Math.round((Config.options?.waffles?.background?.backdrop?.saturation ?? 1.0) * 100)
                 onValueModified: Config.setNestedValue("waffles.background.backdrop.saturation", value / 100.0)
@@ -292,6 +293,7 @@ ContentPage {
                 visible: Config.options?.waffles?.background?.backdrop?.enable ?? true
                 icon: "exposure"
                 text: Translation.tr("Contrast")
+                unit: "%"
                 from: 0; to: 200; stepSize: 10
                 value: Math.round((Config.options?.waffles?.background?.backdrop?.contrast ?? 1.0) * 100)
                 onValueModified: Config.setNestedValue("waffles.background.backdrop.contrast", value / 100.0)
@@ -309,6 +311,7 @@ ContentPage {
                 visible: (Config.options?.waffles?.background?.backdrop?.enable ?? true) && (Config.options?.waffles?.background?.backdrop?.vignetteEnabled ?? false)
                 icon: "opacity"
                 text: Translation.tr("Vignette intensity")
+                unit: "%"
                 from: 0; to: 100; stepSize: 5
                 value: Math.round((Config.options?.waffles?.background?.backdrop?.vignetteIntensity ?? 0.5) * 100)
                 onValueModified: Config.setNestedValue("waffles.background.backdrop.vignetteIntensity", value / 100.0)
@@ -466,35 +469,6 @@ ContentPage {
                 text: Translation.tr("Allow multiple panels open")
                 checked: Config.options?.waffles?.behavior?.allowMultiplePanels ?? false
                 onCheckedChanged: Config.setNestedValue("waffles.behavior.allowMultiplePanels", checked)
-            }
-        }
-    }
-        }
-    }
-
-    SettingsTaskLoader {
-        requested: root.activeSection === "transition"
-        sourceComponent: Component {
-    SettingsCardSection {
-        settingsTaskSection: "transition"
-        expanded: true
-        title: Translation.tr("Family Transition")
-
-        SettingsGroup {
-            StyledText {
-                Layout.fillWidth: true
-                text: Translation.tr("Settings for switching between Material ii, Waffle, and iRiS panel families.")
-                color: Appearance.colors.colSubtext
-                font.pixelSize: Appearance.font.pixelSize.small
-                wrapMode: Text.WordWrap
-            }
-
-            SettingsSwitch {
-                buttonIcon: "animation"
-                text: Translation.tr("Animated transition")
-                checked: Config.options?.familyTransitionAnimation ?? true
-                onCheckedChanged: Config.setNestedValue("familyTransitionAnimation", checked)
-                StyledToolTip { text: Translation.tr("Show a smooth animated overlay when switching between panel families") }
             }
         }
     }
@@ -662,6 +636,7 @@ ContentPage {
                 visible: (Config.options?.waffles?.altSwitcher?.preset ?? "thumbnails") === "thumbnails"
                 icon: "width"
                 text: Translation.tr("Thumbnail width")
+                unit: "px"
                 from: 150; to: 500; stepSize: 20
                 value: Config.options?.waffles?.altSwitcher?.thumbnailWidth ?? 280
                 onValueModified: Config.setNestedValue("waffles.altSwitcher.thumbnailWidth", value)
@@ -671,6 +646,7 @@ ContentPage {
                 visible: (Config.options?.waffles?.altSwitcher?.preset ?? "thumbnails") === "thumbnails"
                 icon: "height"
                 text: Translation.tr("Thumbnail height")
+                unit: "px"
                 from: 100; to: 400; stepSize: 20
                 value: Config.options?.waffles?.altSwitcher?.thumbnailHeight ?? 180
                 onValueModified: Config.setNestedValue("waffles.altSwitcher.thumbnailHeight", value)
@@ -689,6 +665,7 @@ ContentPage {
             ConfigSpinBox {
                 icon: "opacity"
                 text: Translation.tr("Scrim opacity")
+                unit: "%"
                 from: 0; to: 100; stepSize: 5
                 value: Math.round((Config.options?.waffles?.altSwitcher?.scrimOpacity ?? 0.4) * 100)
                 onValueModified: Config.setNestedValue("waffles.altSwitcher.scrimOpacity", value / 100.0)

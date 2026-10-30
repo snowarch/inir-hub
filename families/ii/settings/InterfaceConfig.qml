@@ -287,7 +287,8 @@ ContentPage {
                 uniform: true
                 ConfigSpinBox {
                     icon: "invert_colors"
-                    text: Translation.tr("Saturation %")
+                    text: Translation.tr("Saturation")
+                    unit: "%"
                     value: Math.round((Config.options?.appearance?.desaturation?.saturation ?? -0.7) * -100)
                     from: 0
                     to: 100
@@ -299,7 +300,8 @@ ContentPage {
                 }
                 ConfigSpinBox {
                     icon: "brightness_6"
-                    text: Translation.tr("Dim %")
+                    text: Translation.tr("Dim")
+                    unit: "%"
                     value: Math.round((Config.options?.appearance?.desaturation?.brightness ?? -0.15) * -100)
                     from: 0
                     to: 50
@@ -1115,6 +1117,7 @@ ContentPage {
                 ConfigSpinBox {
                     icon: "format_line_spacing"
                     text: Translation.tr("Widget spacing")
+                    unit: "px"
                     value: Config.options?.sidebar?.widgets?.spacing ?? 8
                     from: 0
                     to: 24
@@ -1907,6 +1910,7 @@ ContentPage {
                 ConfigSpinBox {
                     icon: "photo_size_select_large"
                     text: Translation.tr("Thumbnail size")
+                    unit: "px"
                     value: Config.options?.sidebar?.widgets?.quickWallpaper?.itemSize ?? 56
                     from: 40
                     to: 80
@@ -2240,6 +2244,7 @@ ContentPage {
                 ConfigSpinBox {
                     icon: "loupe"
                     text: Translation.tr("Wallpaper blur radius")
+                    unit: "px"
                     value: Config.options.overview && Config.options.overview.backgroundBlurRadius !== undefined
                            ? Config.options.overview.backgroundBlurRadius
                            : 22
@@ -2345,7 +2350,8 @@ ContentPage {
 
                 ConfigSpinBox {
                     icon: "open_in_full"
-                    text: Translation.tr("Max panel width (%) of screen")
+                    text: Translation.tr("Max panel width")
+                    unit: "%"
                     value: Config.options.overview && Config.options.overview.maxPanelWidthRatio !== undefined
                            ? Math.round(Config.options.overview.maxPanelWidthRatio * 100)
                            : 100

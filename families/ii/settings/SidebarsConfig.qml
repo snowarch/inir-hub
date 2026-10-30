@@ -83,7 +83,7 @@ ContentPage {
 
         SettingsGroup {
             ContentSubsection {
-                title: Translation.tr("General")
+                title: Translation.tr("Style")
 
                 ConfigSelectionArray {
                     currentValue: Config.options?.sidebar?.style ?? "panel"
@@ -1091,6 +1091,7 @@ ContentPage {
                     ConfigSpinBox {
                         icon: "arrow_cool_down"
                         text: Translation.tr("with vertical offset")
+                        unit: "px"
                         value: Config.options.sidebar.cornerOpen.clicklessCornerVerticalOffset
                         from: 0
                         to: 20
@@ -1146,6 +1147,7 @@ ContentPage {
                     ConfigSpinBox {
                         icon: "arrow_range"
                         text: Translation.tr("Region width")
+                        unit: "px"
                         value: Config.options.sidebar.cornerOpen.cornerRegionWidth
                         from: 1
                         to: 300
@@ -1160,6 +1162,7 @@ ContentPage {
                     ConfigSpinBox {
                         icon: "height"
                         text: Translation.tr("Region height")
+                        unit: "px"
                         value: Config.options.sidebar.cornerOpen.cornerRegionHeight
                         from: 1
                         to: 300

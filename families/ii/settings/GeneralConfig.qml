@@ -72,6 +72,7 @@ ContentPage {
                 ConfigSpinBox {
                     icon: "arrow_warm_up"
                     text: Translation.tr("Max allowed increase")
+                    unit: "%"
                     value: Config.options?.audio?.protection?.maxAllowedIncrease ?? 0
                     from: 0
                     to: 100
@@ -86,6 +87,7 @@ ContentPage {
                 ConfigSpinBox {
                     icon: "vertical_align_top"
                     text: Translation.tr("Volume limit")
+                    unit: "%"
                     value: Config.options?.audio?.protection?.maxAllowed ?? 0
                     from: 0
                     to: 154 // pavucontrol allows up to 153%
@@ -118,6 +120,7 @@ ContentPage {
                 ConfigSpinBox {
                     icon: "warning"
                     text: Translation.tr("Low warning")
+                    unit: "%"
                     value: Config.options?.battery?.low ?? 0
                     from: 0
                     to: 100
@@ -132,6 +135,7 @@ ContentPage {
                 ConfigSpinBox {
                     icon: "dangerous"
                     text: Translation.tr("Critical warning")
+                    unit: "%"
                     value: Config.options?.battery?.critical ?? 0
                     from: 0
                     to: 100
@@ -164,6 +168,7 @@ ContentPage {
                 ConfigSpinBox {
                     enabled: Config.options?.battery?.automaticSuspend ?? false
                     text: Translation.tr("at")
+                    unit: "%"
                     value: Config.options?.battery?.suspend ?? 0
                     from: 0
                     to: 100
@@ -184,6 +189,7 @@ ContentPage {
                 ConfigSpinBox {
                     icon: "charger"
                     text: Translation.tr("Full warning")
+                    unit: "%"
                     value: Config.options?.battery?.full ?? 0
                     from: 0
                     to: 101
@@ -223,6 +229,7 @@ ContentPage {
                     enabled: (Config.options?.battery?.chargeLimit?.enable ?? false) && Battery.chargeLimitAdjustable
                     icon: "speed"
                     text: Translation.tr("at")
+                    unit: "%"
                     value: Config.options?.battery?.chargeLimit?.threshold ?? 80
                     from: 20
                     to: 100
@@ -990,6 +997,7 @@ ContentPage {
                 ConfigSpinBox {
                     visible: Config.options?.lock?.dim?.enable ?? false
                     text: Translation.tr("Dim amount")
+                    unit: "%"
                     icon: "opacity"
                     value: Math.round((Config.options?.lock?.dim?.opacity ?? 0.3) * 100)
                     from: 10
@@ -1097,6 +1105,7 @@ ContentPage {
                 ConfigSpinBox {
                     icon: "blur_linear"
                     text: Translation.tr("Blur radius")
+                    unit: "px"
                     value: Config.options?.lock?.blur?.radius ?? 100
                     from: 0
                     to: 200

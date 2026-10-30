@@ -1145,9 +1145,9 @@ ContentPage {
                 text: AwwwBackend.available
                     ? (AwwwBackend.isInternalShaderTransitionType(
                             Config.options?.background?.transition?.type ?? "crossfade")
-                        ? Translation.tr("awww remains the static wallpaper renderer. The selected shader runs briefly in-shell during each change, then hands the final image back to awww.")
-                        : Translation.tr("awww is active. Static wallpapers are rendered externally with awww-native transitions, while GIF/video and backdrop layers use the internal fallback renderer automatically."))
-                    : Translation.tr("awww is the default backend, but the `awww` / `awww-daemon` binaries were not found in PATH. Install them to enable hardware-accelerated wallpaper rendering and transitions. The internal renderer is used as fallback until then.")
+                        ? Translation.tr("This transition plays in the shell; awww keeps drawing the wallpaper once it ends.")
+                        : Translation.tr("awww draws your wallpapers and their transitions. GIFs, videos and the backdrop are drawn by the shell."))
+                    : Translation.tr("awww isn't installed, so the shell draws your wallpapers itself. Install awww for lighter wallpapers and its transitions.")
                 color: !AwwwBackend.available
                     ? Appearance.colors.colError
                     : Appearance.colors.colSubtext
@@ -1159,7 +1159,8 @@ ContentPage {
             ConfigSpinBox {
                 visible: (Config.options?.background?.backend?.provider ?? "awww") === "awww" && AwwwBackend.available
                 icon: "speed"
-                text: Translation.tr("awww transition FPS")
+                text: Translation.tr("Transition frame rate")
+                unit: "fps"
                 value: Config.options?.background?.backend?.awww?.transitionFps ?? 60
                 from: 10
                 to: 240
@@ -1290,7 +1291,8 @@ ContentPage {
             ConfigSpinBox {
                 enabled: Config.options?.background?.autoWallpaper?.enable ?? false
                 icon: "timer"
-                text: Translation.tr("Change every") + ` (${value} ${value === 1 ? Translation.tr("minute") : Translation.tr("minutes")})`
+                text: Translation.tr("Change every")
+                unit: "min"
                 value: Config.options?.background?.autoWallpaper?.intervalMinutes ?? 30
                 from: 1
                 to: 1440
@@ -1931,6 +1933,7 @@ ContentPage {
                 visible: Config.options?.background?.effects?.enableBlur ?? false
                 icon: "blur_medium"
                 text: Translation.tr("Blur radius")
+                unit: "px"
                 value: Config.options?.background?.effects?.blurRadius ?? 32
                 from: 0
                 to: 100
@@ -2096,6 +2099,7 @@ ContentPage {
                     ConfigSpinBox {
                         icon: "auto_awesome"
                         text: Translation.tr("Sparkle intensity")
+                        unit: "%"
                         value: Math.round((Config.options?.background?.effects?.ripple?.sparkleIntensity ?? 1.0) * 100)
                         from: 0
                         to: 200
@@ -2111,6 +2115,7 @@ ContentPage {
                     ConfigSpinBox {
                         icon: "flare"
                         text: Translation.tr("Glow intensity")
+                        unit: "%"
                         value: Math.round((Config.options?.background?.effects?.ripple?.glowIntensity ?? 1.0) * 100)
                         from: 0
                         to: 200
@@ -2126,6 +2131,7 @@ ContentPage {
                     ConfigSpinBox {
                         icon: "radio_button_checked"
                         text: Translation.tr("Ring width")
+                        unit: "px"
                         value: Math.round((Config.options?.background?.effects?.ripple?.ringWidth ?? 0.15) * 100)
                         from: 5
                         to: 50
@@ -2284,6 +2290,7 @@ ContentPage {
                     visible: Config.options?.background?.backdrop?.enable ?? true
                     icon: "blur_on"
                     text: Translation.tr("Backdrop blur radius")
+                    unit: "px"
                     value: Config.options?.background?.backdrop?.blurRadius ?? 64
                     from: 0
                     to: 100
@@ -2316,6 +2323,7 @@ ContentPage {
                     visible: Config.options?.background?.backdrop?.enable ?? true
                     icon: "palette"
                     text: Translation.tr("Backdrop saturation")
+                    unit: "%"
                     value: Math.round((Config.options?.background?.backdrop?.saturation ?? 0) * 100)
                     from: -100
                     to: 100
@@ -2332,6 +2340,7 @@ ContentPage {
                     visible: Config.options?.background?.backdrop?.enable ?? true
                     icon: "contrast"
                     text: Translation.tr("Backdrop contrast")
+                    unit: "%"
                     value: Math.round((Config.options?.background?.backdrop?.contrast ?? 0) * 100)
                     from: -100
                     to: 100
@@ -2364,6 +2373,7 @@ ContentPage {
                     visible: (Config.options?.background?.backdrop?.enable ?? true) && (Config.options?.background?.backdrop?.vignetteEnabled ?? false)
                     icon: "blur_circular"
                     text: Translation.tr("Vignette intensity")
+                    unit: "%"
                     value: Math.round((Config.options?.background?.backdrop?.vignetteIntensity ?? 0.5) * 100)
                     from: 0
                     to: 100
@@ -2380,6 +2390,7 @@ ContentPage {
                     visible: (Config.options?.background?.backdrop?.enable ?? true) && (Config.options?.background?.backdrop?.vignetteEnabled ?? false)
                     icon: "trip_origin"
                     text: Translation.tr("Vignette radius")
+                    unit: "%"
                     value: Math.round((Config.options?.background?.backdrop?.vignetteRadius ?? 0.7) * 100)
                     from: 10
                     to: 100

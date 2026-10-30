@@ -1536,6 +1536,7 @@ ContentPage {
                         Layout.fillWidth: true
                         enabled: !root.displayControlsLocked
                         text: "X"
+                        unit: "px"
                         value: root.currentOutput?.position?.x ?? 0
                         from: -10000
                         to: 10000
@@ -1551,6 +1552,7 @@ ContentPage {
                         Layout.fillWidth: true
                         enabled: !root.displayControlsLocked
                         text: "Y"
+                        unit: "px"
                         value: root.currentOutput?.position?.y ?? 0
                         from: -10000
                         to: 10000
@@ -1888,6 +1890,7 @@ ContentPage {
 
                 ConfigSpinBox {
                     text: Translation.tr("Softness")
+                    unit: "px"
                     value: root.layoutData?.shadow?.softness ?? 30
                     from: 0
                     to: 100
@@ -1905,6 +1908,7 @@ ContentPage {
 
                 ConfigSpinBox {
                     text: Translation.tr("Spread")
+                    unit: "px"
                     value: root.layoutData?.shadow?.spread ?? 5
                     from: -32
                     to: 64
@@ -1928,6 +1932,7 @@ ContentPage {
                         id: shadowOffsetXSpin
                         Layout.fillWidth: true
                         text: "X"
+                        unit: "px"
                         value: root.layoutData?.shadow?.offset_x ?? 0
                         from: -100
                         to: 100
@@ -1942,6 +1947,7 @@ ContentPage {
                         id: shadowOffsetYSpin
                         Layout.fillWidth: true
                         text: "Y"
+                        unit: "px"
                         value: root.layoutData?.shadow?.offset_y ?? 5
                         from: -100
                         to: 100
@@ -1984,6 +1990,7 @@ ContentPage {
                 ConfigSpinBox {
                     Layout.fillWidth: true
                     text: Translation.tr("Left")
+                    unit: "px"
                     icon: "arrow_back"
                     value: root.layoutData?.struts?.left ?? 0
                     from: 0
@@ -1998,6 +2005,7 @@ ContentPage {
                 ConfigSpinBox {
                     Layout.fillWidth: true
                     text: Translation.tr("Right")
+                    unit: "px"
                     icon: "arrow_forward"
                     value: root.layoutData?.struts?.right ?? 0
                     from: 0
@@ -2017,6 +2025,7 @@ ContentPage {
                 ConfigSpinBox {
                     Layout.fillWidth: true
                     text: Translation.tr("Top")
+                    unit: "px"
                     icon: "arrow_upward"
                     value: root.layoutData?.struts?.top ?? 0
                     from: 0
@@ -2031,6 +2040,7 @@ ContentPage {
                 ConfigSpinBox {
                     Layout.fillWidth: true
                     text: Translation.tr("Bottom")
+                    unit: "px"
                     icon: "arrow_downward"
                     value: root.layoutData?.struts?.bottom ?? 0
                     from: 0

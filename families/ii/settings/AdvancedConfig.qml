@@ -391,6 +391,7 @@ ContentPage {
                 ConfigSpinBox {
                     icon: "speed"
                     text: Translation.tr("Framerate")
+                    unit: "fps"
                     value: Config.options?.appearance?.cava?.framerate ?? 60
                     from: 30
                     to: 165
@@ -414,6 +415,7 @@ ContentPage {
                 ConfigSpinBox {
                     icon: "opacity"
                     text: Translation.tr("Wave opacity")
+                    unit: "%"
                     value: Config.options?.appearance?.cava?.waveOpacity ?? 30
                     from: 5
                     to: 100
