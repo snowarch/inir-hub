@@ -212,8 +212,9 @@ Item {
                         textFormat: root.highlight.length > 0 ? Text.StyledText : Text.PlainText
                         color: root.headed ? (IrisStyle.fieldChamfer ? IrisStyle.muted : IrisStyle.subtext) : IrisStyle.text
                         font.pixelSize: root.headed ? IrisStyle.typeMeta : IrisStyle.typeBody
-                        // Medium: at Normal a 14 px name in the text faces read thin on glass (his 10-30).
-                        font.weight: IrisStyle.weight(Font.Medium)
+                        // A name leads its row by weight, what it does reads a step lighter under it: scanning a page
+                        // is reading the names (his 10-30).
+                        font.weight: IrisStyle.weight(root.headed ? Font.Medium : Font.DemiBold)
                         wrapMode: Text.WordWrap
                     }
                     FontMetrics { id: labelMetrics; font: label.font }
@@ -968,7 +969,9 @@ Item {
         Item {
             id: designs
             readonly property real gap: Math.round(10 * root.d)
-            readonly property real cardWidth: Math.floor((width - (root.choices.length - 1) * designs.gap) / Math.max(1, root.choices.length))
+            // Thumbnails, not posters: spread over the row they ate a third of Style (his 10-30).
+            readonly property real cardWidth: Math.min(Math.round(216 * root.d),
+                Math.floor((width - (root.choices.length - 1) * designs.gap) / Math.max(1, root.choices.length)))
             implicitHeight: Math.round(designs.cardWidth * 0.56)
 
             Repeater {

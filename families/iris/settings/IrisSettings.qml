@@ -1577,9 +1577,10 @@ Item {
             y: Math.round(9 * sectionRow.d)
             width: sectionRow.width - x
             text: sectionRow.caption
-            color: IrisStyle.textTertiary
+            // Each cluster is signed in the accent, lifted toward the ink so it reads on any scheme (his 10-30).
+            color: IrisStyle.plateSelection ? IrisStyle.textSecondary : root.tintInk(IrisStyle.accent)
             font.pixelSize: IrisStyle.typeFootnote
-            font.weight: IrisStyle.weight(Font.DemiBold)
+            font.weight: IrisStyle.weight(Font.Bold)
             elide: Text.ElideRight
         }
         Rectangle {
@@ -1642,7 +1643,7 @@ Item {
                 color: sectionRow.selected && IrisStyle.plateSelection ? IrisStyle.selectionLabel
                     : sectionRow.selected ? root.tintInk(sectionRow.own) : IrisStyle.text
                 Behavior on color { ColorAnimation { duration: IrisStyle.duration(140); easing.type: IrisStyle.feedbackEasing } }
-                font.weight: IrisStyle.weight(sectionRow.selected ? Font.Bold : Font.Medium)
+                font.weight: IrisStyle.weight(sectionRow.selected ? Font.Bold : Font.DemiBold)
                 elide: Text.ElideRight
             }
         }
