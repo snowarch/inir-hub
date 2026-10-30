@@ -153,7 +153,8 @@ WSettingsPage {
 
     Flow {
         Layout.fillWidth: true
-        visible: root.opened === null
+        // "Everything 0" over an empty hub counted nothing
+        visible: root.opened === null && Hub.items.length > 0
         spacing: Looks.dp(8)
         FilterPill {
             text: `${Translation.tr("Everything")}  ${Hub.items.length}`
@@ -201,7 +202,9 @@ WSettingsPage {
     ColumnLayout {
         Layout.fillWidth: true
         Layout.topMargin: Looks.dp(32)
-        visible: !Hub.loaded || (root.opened === null && root.shown.length === 0)
+        // with no catalogue at all the info bar above already says why: a second "Nothing here yet" said it twice
+        visible: !Hub.loaded || (root.opened === null && root.shown.length === 0
+            && !(Hub.items.length === 0 && (!Hub.online || Hub.error.length > 0)))
         spacing: Looks.dp(8)
         FluentIcon {
             Layout.alignment: Qt.AlignHCenter

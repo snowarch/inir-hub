@@ -123,55 +123,42 @@ Item {
             elide: Text.ElideRight
         }
 
-        // Keys
+        // Keys, a "+" between every two: it sat only before the last, so Super Shift + E read as two chords
         Row {
             Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
             spacing: Looks.dp(4)
-            
+
             Repeater {
-                model: root.mods
-                delegate: Rectangle {
+                model: root.mods.concat(root.keyName.length > 0 ? [root.keyName] : [])
+                delegate: Row {
+                    id: keyCell
                     required property var modelData
-                    implicitWidth: Math.max(keyText.implicitWidth + Looks.dp(10), Looks.dp(26))
-                    implicitHeight: Math.max(Looks.dp(24), keyText.implicitHeight + Looks.dp(4))
-                    radius: Looks.radius.small
-                    color: Looks.colors.bg2
-                    border.width: 1
-                    border.color: Looks.settings.stroke
-                    
+                    required property int index
+                    spacing: Looks.dp(4)
+
                     WText {
-                        id: keyText
-                        anchors.centerIn: parent
-                        text: root.keySubstitutions[modelData] ?? modelData
+                        visible: keyCell.index > 0
+                        text: "+"
+                        color: Looks.colors.subfg
                         font.pixelSize: Looks.font.pixelSize.small
-                        font.family: Looks.font.family.monospace
+                        anchors.verticalCenter: parent.verticalCenter
                     }
-                }
-            }
-            
-            WText {
-                visible: root.mods.length > 0 && root.keyName.length > 0
-                text: "+"
-                color: Looks.colors.subfg
-                font.pixelSize: Looks.font.pixelSize.small
-                anchors.verticalCenter: parent.verticalCenter
-            }
-            
-            Rectangle {
-                visible: root.keyName.length > 0
-                implicitWidth: Math.max(mainKeyText.implicitWidth + Looks.dp(10), Looks.dp(26))
-                implicitHeight: Math.max(Looks.dp(24), mainKeyText.implicitHeight + Looks.dp(4))
-                radius: Looks.radius.small
-                color: Looks.colors.bg2
-                border.width: 1
-                border.color: Looks.settings.stroke
-                
-                WText {
-                    id: mainKeyText
-                    anchors.centerIn: parent
-                    text: root.keySubstitutions[root.keyName] ?? root.keyName
-                    font.pixelSize: Looks.font.pixelSize.small
-                    font.family: Looks.font.family.monospace
+                    Rectangle {
+                        implicitWidth: Math.max(keyText.implicitWidth + Looks.dp(10), Looks.dp(26))
+                        implicitHeight: Math.max(Looks.dp(24), keyText.implicitHeight + Looks.dp(4))
+                        radius: Looks.radius.small
+                        color: Looks.colors.bg2
+                        border.width: 1
+                        border.color: Looks.settings.stroke
+
+                        WText {
+                            id: keyText
+                            anchors.centerIn: parent
+                            text: root.keySubstitutions[keyCell.modelData] ?? keyCell.modelData
+                            font.pixelSize: Looks.font.pixelSize.small
+                            font.family: Looks.font.family.monospace
+                        }
+                    }
                 }
             }
         }
