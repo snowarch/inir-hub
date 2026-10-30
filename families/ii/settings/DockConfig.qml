@@ -56,10 +56,6 @@ ContentPage {
                     ]
                 }
 
-                SettingsNote {
-                    icon: "dock_to_bottom"
-                    text: Translation.tr("Redraws the dock surface.")
-                }
             }
 
             ConfigRow {

@@ -1752,7 +1752,7 @@ ContentPage {
             }
             EveryWidgetRow {
                 label: Translation.tr("Background")
-                icon: "crop_square"
+                icon: "format_color_fill"
                 optionKey: "showBackground"
                 options: [
                     { displayName: Translation.tr("Show"), icon: "visibility", value: "true" },
@@ -1762,7 +1762,7 @@ ContentPage {
             EveryWidgetStrength {}
             EveryWidgetRow {
                 label: Translation.tr("Outline")
-                icon: "border_style"
+                icon: "border_outer"
                 optionKey: "showBorder"
                 options: [
                     { displayName: Translation.tr("Show"), icon: "visibility", value: "true" },
