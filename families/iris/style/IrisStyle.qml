@@ -1211,7 +1211,18 @@ QtObject {
     // body at 45° by `chamferCut` and squares the other two; the plates inside go square (`corner`).
     readonly property bool fieldChamfer: IrisDesign.fieldCorner === "chamfer"
     // The active Design's traits (IrisDesign.traits), as primitives the surfaces bind to.
-    readonly property bool plainMarks: root.trait("marks") === "glyph" || root.mono
+    // Settings › Style › Icons. The Glyph pack is Folio's index everywhere: the glyph alone, no plate.
+    readonly property var iconOptions: root.appearance?.icons ?? ({})
+    readonly property bool glyphPack: String(root.iconOptions.style ?? "iris") === "glyph"
+    readonly property bool plainMarks: root.trait("marks") === "glyph" || root.mono || root.glyphPack
+    readonly property bool glyphTinted: root.glyphPack && String(root.iconOptions.ink ?? "ink") === "tint"
+    readonly property string iconShape: String(root.iconOptions.shape ?? "auto")
+    readonly property int iconWeight: ({ light: Font.Light, bold: Font.DemiBold })[String(root.iconOptions.weight ?? "regular")] ?? Font.Normal
+    // A glyph's fill: what the surface would draw, unless the person fixed one.
+    function iconFill(auto: real): real {
+        const wanted = String(root.iconOptions.fill ?? "auto")
+        return wanted === "filled" ? 1 : wanted === "outlined" ? 0 : auto
+    }
     readonly property bool plateSelection: root.trait("selection") === "plate"
     readonly property bool indexed: IrisDesign.trait("index") === true
     // Signal: every caption and group head speaks in the Label voice, in every Design.
@@ -1258,7 +1269,9 @@ QtObject {
         if (root.islandOpenCorners > 0) return root.islandOpenCorners
         return shape === "square" ? base * 0.45 : shape === "squircle" ? base * 0.75 : base
     }
-    function iconRadius(size: real): int { return root.fieldChamfer ? 0 : Math.round(size * (root.look === "synth" ? 0.14 : root.look === "gel" ? 0.32 : 0.26) * Math.min(1.2, root.shapeScale)) }
+    function iconRadius(size: real): int { return root.fieldChamfer ? 0
+        : root.iconShape === "round" ? Math.round(size / 2) : root.iconShape === "square" ? Math.round(size * 0.12)
+        : Math.round(size * (root.look === "synth" ? 0.14 : root.look === "gel" ? 0.32 : 0.26) * Math.min(1.2, root.shapeScale)) }
     // The tile pack's plates: the black and the white a plate can wear, the glyph carrying the colour.
     readonly property color plateBlackTop: root.toned("#2e2e34")
     readonly property color plateBlackBase: root.toned("#18181b")

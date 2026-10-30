@@ -1017,9 +1017,20 @@ Item {
                             height: travelWash.row ? travelWash.row.rowHeight : 0
                             radius: IrisStyle.plateSelection ? 0 : travelWash.row ? travelWash.row.washRadius : 0
                             // A plate-selection Design (AIRISU) puts where you are on the solid plate of the accent.
-                            color: IrisStyle.plateSelection ? IrisStyle.selectionFill
-                                : IrisStyle.tintFillHover(travelWash.row?.own ?? IrisStyle.accent)
+                            readonly property color wash: IrisStyle.tintFillHover(travelWash.row?.own ?? IrisStyle.accent)
+                            color: IrisStyle.plateSelection ? IrisStyle.selectionFill : "transparent"
                             opacity: travelWash.shown ? 1 : 0
+                            // Where you are fades out toward the right: a flat block of tint read as a heavy bar (his 10-30).
+                            Rectangle {
+                                anchors.fill: parent
+                                visible: !IrisStyle.plateSelection
+                                radius: parent.radius
+                                gradient: Gradient {
+                                    orientation: Gradient.Horizontal
+                                    GradientStop { position: 0; color: travelWash.wash }
+                                    GradientStop { position: 1; color: ColorUtils.applyAlpha(travelWash.wash, 0) }
+                                }
+                            }
                             // It lands where it first appears and travels from then on. Moving the selection hides it for a
                             // moment (the old row lets go before the new one takes it): only a hide that lasts stops the travel.
                             onShownChanged: if (travelWash.shown) { washDisarm.stop(); if (!travelWash.travels) washArm.restart() }
@@ -1580,10 +1591,20 @@ Item {
             // Concentric with the mark it holds; where you are is a wash of the area's colour, as light as a hover, never a
             // solid block heavier than the buttons around it.
             radius: IrisStyle.plateSelection ? 0 : sectionRow.washRadius
-            color: sectionRow.selected && !sectionRow.travels ? (IrisStyle.plateSelection ? IrisStyle.selectionFill : IrisStyle.tintFillHover(sectionRow.own))
+            color: sectionRow.selected && !sectionRow.travels ? (IrisStyle.plateSelection ? IrisStyle.selectionFill : "transparent")
                 : sectionRow.selected ? "transparent"
                 : sectionRow.containsMouse ? IrisStyle.fillQuiet : "transparent"
             Behavior on color { ColorAnimation { duration: IrisStyle.duration(110); easing.type: IrisStyle.feedbackEasing } }
+            Rectangle {
+                anchors.fill: parent
+                visible: sectionRow.selected && !sectionRow.travels && !IrisStyle.plateSelection
+                radius: parent.radius
+                gradient: Gradient {
+                    orientation: Gradient.Horizontal
+                    GradientStop { position: 0; color: IrisStyle.tintFillHover(sectionRow.own) }
+                    GradientStop { position: 1; color: ColorUtils.applyAlpha(IrisStyle.tintFillHover(sectionRow.own), 0) }
+                }
+            }
             // Vivid tiles: the colour is how the eye finds an area, whatever material sits behind.
             Item {
                 id: sectionMark

@@ -141,8 +141,12 @@ JsonObject {
         // or "tile" (the app-icon look: a plate with the glyph in a gradient of
         // its own colour). `plate` picks that plate's colour.
         property JsonObject icons: JsonObject {
-            property string style: "iris"
+            property string style: "iris" // "iris", "tile" or "glyph" (the glyph alone, as Folio's index)
             property string plate: "black" // "black", "white", "tint" or "surface"
+            property string shape: "auto" // a plate's corners: "auto" (the look's), "round" or "square"
+            property string ink: "ink" // the Glyph pack's colour: "ink" or "tint" (each area's own)
+            property string fill: "auto" // "auto", "filled" or "outlined"
+            property string weight: "regular" // "light", "regular" or "bold"
         }
         property int expandedRadius: 28
         property int motionDuration: 220

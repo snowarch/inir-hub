@@ -38,7 +38,7 @@ Rectangle {
     readonly property bool glossed: !root.plain && IrisStyle.marksStyle === "gloss"
     // On a chosen row's plate (a plate Design): the plain glyph in the plate's own ink.
     property bool reversed: false
-    property color ink: root.plain ? (root.reversed ? IrisStyle.selectionLabel : IrisStyle.textSecondary)
+    property color ink: root.plain ? (root.reversed ? IrisStyle.selectionLabel : IrisStyle.glyphTinted ? root.vivid : IrisStyle.textSecondary)
         : root.keyed ? IrisStyle.text
         : root.tiled && root.plate !== "tint" ? root.vivid : IrisStyle.onTint
     radius: root.plain ? 0 : IrisStyle.iconRadius(width)
@@ -85,7 +85,8 @@ Rectangle {
     MaterialSymbol {
         anchors.centerIn: parent
         text: root.glyph
-        fill: root.plain || root.keyed ? 0 : 1
+        fill: IrisStyle.iconFill(root.keyed ? 0 : root.plain ? (root.reversed ? 1 : 0) : 1)
+        glyphWeight: IrisStyle.iconWeight
         iconSize: Math.round(root.width * (root.plain ? Math.min(0.82, root.glyphShare + 0.14) : root.keyed ? root.glyphShare * 0.8 : root.glyphShare))
         color: root.ink
         glyphGradient: root.tiled && !root.plain
