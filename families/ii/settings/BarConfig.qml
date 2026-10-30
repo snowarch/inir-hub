@@ -565,26 +565,35 @@ ContentPage {
                         enabled: root.cornerStyleApplies
                         opacity: enabled ? 1 : 0.5
                         currentValue: Config.options?.bar?.cornerStyle ?? 0
-                        onSelected: newValue => {
-                            // HUG mode (0) is incompatible with Angel style — revert to Float
-                            if (newValue === 0 && root.isAngel) {
-                                Config.setNestedValue("bar.cornerStyle", 1);
-                                return;
-                            }
-                            Config.setNestedValue("bar.cornerStyle", newValue);
-                        }
+                        onSelected: newValue => Config.setNestedValue("bar.cornerStyle", newValue)
+                        // Angel's offset shadows can't wrap Hug's screen corners: it isn't offered there
                         options: [
                             { displayName: Translation.tr("Hug"), icon: "line_curve", previewKind: "hug", value: 0 },
                             { displayName: Translation.tr("Float"), icon: "page_header", previewKind: "float", value: 1 },
                             { displayName: Translation.tr("Rect"), icon: "toolbar", previewKind: "rect", value: 2 },
                             { displayName: Translation.tr("Card"), icon: "branding_watermark", previewKind: "card", value: 3 }
-                        ]
+                        ].filter(o => !(root.isAngel && o.value === 0))
                     }
 
                     SettingsNote {
                         visible: !root.cornerStyleApplies
                         icon: "info"
                         text: Translation.tr("Only the Classic bar appearance uses corner style.")
+                    }
+                    SettingsNote {
+                        visible: root.cornerStyleApplies && root.hugNeedsBackground
+                        warning: true
+                        text: Translation.tr("Hug style requires background enabled to show the corner decorations.")
+                    }
+                    SettingsNote {
+                        visible: root.cornerStyleApplies && root.isAngel && root.isHugStyle
+                        warning: true
+                        text: Translation.tr("Hug mode is not compatible with Angel global style. Switch to Float, Rect, or Card.")
+                    }
+                    SettingsNote {
+                        visible: root.cornerStyleApplies && root.isCardStyle && !root.isGlobalCards
+                        warning: true
+                        text: Translation.tr("Card style here doesn't match dock/sidebar. Go to Themes → Global Style for consistency.")
                     }
                 }
             }
@@ -1443,35 +1452,6 @@ ContentPage {
         title: Translation.tr("Sizing & surface")
 
         SettingsGroup {
-
-            // Corner style conflict notes
-            SettingsNote {
-                visible: root.hugNeedsBackground
-                warning: true
-                icon: "warning"
-                text: Translation.tr("Hug style requires background enabled to show the corner decorations.")
-            }
-
-            SettingsNote {
-                visible: root.isAngel && root.isHugStyle
-                warning: true
-                icon: "sync_problem"
-                text: Translation.tr("Hug mode is not compatible with Angel global style. Switch to Float, Rect, or Card.")
-            }
-
-            SettingsNote {
-                visible: root.isAngel
-                warning: false
-                icon: "raven"
-                text: Translation.tr("Hug mode is disabled while Angel global style is active.")
-            }
-
-            SettingsNote {
-                visible: root.isCardStyle && !root.isGlobalCards
-                warning: true
-                icon: "sync_problem"
-                text: Translation.tr("Card style here doesn't match dock/sidebar. Go to Themes → Global Style for consistency.")
-            }
 
             ConfigSpinBox {
                 visible: root.barAppearance !== "islands"
