@@ -63,6 +63,71 @@ ContentPage {
     property bool showAdvancedOcr: false
     property bool showAdvancedJapanese: false
     property bool showAdvancedAnki: false
+    property bool showAnki: false
+    readonly property bool japaneseOn: Config.options?.regionSelector?.japaneseLookup?.enabled ?? true
+
+    // A fold that says what it holds, as one row of its section's run: icon, name, what is inside, a chevron that
+    // turns. The flat "More…" buttons hid a page's worth of rows behind words that named nothing (10-29).
+    component Disclosure: RippleButton {
+        id: fold
+        property string glyph: ""
+        property string title: ""
+        property string summary: ""
+        property bool open: false
+        readonly property string settingsTileRole: "tile"
+        property bool tileTop: true
+        property bool tileBottom: true
+        Layout.fillWidth: true
+        implicitHeight: Math.max(SettingsMaterialPreset.rowMinHeight, contentItem.implicitHeight + topPadding + bottomPadding)
+        leftPadding: SettingsMaterialPreset.tilePaddingX
+        rightPadding: SettingsMaterialPreset.tilePaddingX
+        topPadding: SettingsMaterialPreset.tilePaddingY
+        bottomPadding: SettingsMaterialPreset.tilePaddingY
+        buttonRadiusTop: fold.tileTop ? SettingsMaterialPreset.tileOuterRadius : SettingsMaterialPreset.tileInnerRadius
+        buttonRadiusBottom: fold.tileBottom ? SettingsMaterialPreset.tileOuterRadius : SettingsMaterialPreset.tileInnerRadius
+        colBackground: SettingsMaterialPreset.tileColor
+        colBackgroundHover: SettingsMaterialPreset.tileHoverColor
+        colRipple: SettingsMaterialPreset.tilePressColor
+        pressScaleEnabled: false
+        focusRingInward: true
+        Accessible.name: fold.title
+        Accessible.description: fold.summary
+        contentItem: RowLayout {
+            spacing: SettingsMaterialPreset.tilePaddingX
+            MaterialSymbol {
+                text: fold.glyph
+                iconSize: SettingsMaterialPreset.iconSize
+                color: fold.open ? SettingsMaterialPreset.subheaderColor : SettingsMaterialPreset.supportingColor
+            }
+            ColumnLayout {
+                Layout.fillWidth: true
+                Layout.alignment: Qt.AlignVCenter
+                spacing: 2
+                StyledText {
+                    Layout.fillWidth: true
+                    text: fold.title
+                    font.pixelSize: SettingsMaterialPreset.labelSize
+                    color: SettingsMaterialPreset.labelColor
+                    elide: Text.ElideRight
+                }
+                StyledText {
+                    Layout.fillWidth: true
+                    visible: fold.summary.length > 0
+                    text: fold.summary
+                    font.pixelSize: SettingsMaterialPreset.supportingSize
+                    color: SettingsMaterialPreset.supportingColor
+                    elide: Text.ElideRight
+                }
+            }
+            MaterialSymbol {
+                text: "expand_more"
+                iconSize: SettingsMaterialPreset.iconSize
+                color: SettingsMaterialPreset.supportingColor
+                rotation: fold.open ? 180 : 0
+                Behavior on rotation { animation: NumberAnimation { duration: Appearance.animation.elementMoveFast.duration; easing.type: Easing.OutCubic } }
+            }
+        }
+    }
 
     readonly property string recordingAudioMode: RecorderStatus.configuredAudioMode
     readonly property string effectiveRecordingPath: {
@@ -870,10 +935,11 @@ ContentPage {
                     }
                 }
 
-                RippleButtonWithIcon {
-                    Layout.fillWidth: true
-                    materialIcon: root.showAdvancedOcr ? "expand_less" : "tune"
-                    mainText: root.showAdvancedOcr ? Translation.tr("Hide advanced OCR options") : Translation.tr("Advanced OCR options")
+                Disclosure {
+                    glyph: "tune"
+                    title: Translation.tr("Advanced OCR options")
+                    summary: Translation.tr("Custom Tesseract language code")
+                    open: root.showAdvancedOcr
                     onClicked: root.showAdvancedOcr = !root.showAdvancedOcr
                 }
 
@@ -881,6 +947,9 @@ ContentPage {
                     Layout.fillWidth: true
                     visible: root.showAdvancedOcr
                     spacing: Appearance.sizes.spacingSmall
+                    // A search landing inside opens it (SettingsSearchRegistry.expandSectionForControl).
+                    property bool expanded: root.showAdvancedOcr
+                    function focusFromSettingsSearch() { root.showAdvancedOcr = true }
                     ContentSubsectionLabel { text: Translation.tr("Custom Tesseract language code") }
                     Item {
                         Layout.fillWidth: true
@@ -920,6 +989,22 @@ ContentPage {
                         text: Translation.tr("After Japanese OCR, iNiR finds a useful word in the captured text and opens a local dictionary card. Expand the card to inspect the full OCR text and translation.")
                     }
                 }
+
+                Disclosure {
+                    visible: root.japaneseOn
+                    glyph: "translate"
+                    title: Translation.tr("More dictionary options")
+                    summary: JapaneseDictionary.jitendexInstalled ? Translation.tr("Japanese dictionary ready") : Translation.tr("One-time dictionary setup")
+                    open: root.showAdvancedJapanese
+                    onClicked: root.showAdvancedJapanese = !root.showAdvancedJapanese
+                }
+
+                ColumnLayout {
+                    Layout.fillWidth: true
+                    visible: root.japaneseOn && root.showAdvancedJapanese
+                    spacing: Appearance.sizes.spacingSmall
+                    property bool expanded: root.showAdvancedJapanese
+                    function focusFromSettingsSearch() { root.showAdvancedJapanese = true }
 
                 Rectangle {
                     Layout.fillWidth: true
@@ -986,16 +1071,8 @@ ContentPage {
                     wrapMode: Text.WordWrap
                 }
 
-                RippleButtonWithIcon {
-                    Layout.fillWidth: true
-                    materialIcon: root.showAdvancedJapanese ? "expand_less" : "library_books"
-                    mainText: root.showAdvancedJapanese ? Translation.tr("Hide dictionary tools") : Translation.tr("More dictionary options")
-                    onClicked: root.showAdvancedJapanese = !root.showAdvancedJapanese
-                }
-
                 ColumnLayout {
                     Layout.fillWidth: true
-                    visible: root.showAdvancedJapanese
                     spacing: Appearance.sizes.spacingSmall
                     RowLayout {
                         Layout.fillWidth: true
@@ -1022,10 +1099,27 @@ ContentPage {
                         wrapMode: Text.WordWrap
                     }
                 }
+                }
+
+                Disclosure {
+                    visible: root.japaneseOn
+                    glyph: "style"
+                    title: Translation.tr("Anki (optional)")
+                    summary: Translation.tr("Ready-made Japanese study decks")
+                    open: root.showAnki
+                    onClicked: root.showAnki = !root.showAnki
+                }
             }
 
+            ColumnLayout {
+                Layout.fillWidth: true
+                visible: root.japaneseOn && root.showAnki
+                spacing: Appearance.sizes.spacingSmall
+                property bool expanded: root.showAnki
+                function focusFromSettingsSearch() { root.showAnki = true }
+
             ContentSubsection {
-                title: Translation.tr("Anki (optional)")
+                title: ""
 
                 StyledText {
                     Layout.fillWidth: true
@@ -1105,16 +1199,19 @@ ContentPage {
                     }
                 }
 
-                RippleButtonWithIcon {
-                    Layout.fillWidth: true
+                Disclosure {
                     visible: Config.options?.regionSelector?.japaneseLookup?.anki?.enabled ?? false
-                    materialIcon: root.showAdvancedAnki ? "expand_less" : "settings"
-                    mainText: root.showAdvancedAnki ? Translation.tr("Hide Anki advanced settings") : Translation.tr("Advanced Anki settings")
+                    glyph: "settings"
+                    title: Translation.tr("Advanced Anki settings")
+                    summary: Translation.tr("AnkiConnect endpoint") + ", " + Translation.tr("Deck name")
+                    open: root.showAdvancedAnki
                     onClicked: root.showAdvancedAnki = !root.showAdvancedAnki
                 }
 
                 ColumnLayout {
                     Layout.fillWidth: true
+                    property bool expanded: root.showAdvancedAnki
+                    function focusFromSettingsSearch() { root.showAdvancedAnki = true }
                     visible: (Config.options?.regionSelector?.japaneseLookup?.anki?.enabled ?? false) && root.showAdvancedAnki
                     spacing: Appearance.sizes.spacingSmall
                     ContentSubsectionLabel { text: Translation.tr("AnkiConnect endpoint") }
@@ -1188,6 +1285,8 @@ ContentPage {
                     mainText: Translation.tr("Browse more shared decks")
                     onClicked: Quickshell.execDetached(["xdg-open", "https://ankiweb.net/shared/decks?search=japanese"])
                 }
+            }
+
             }
 
             ContentSubsection {
