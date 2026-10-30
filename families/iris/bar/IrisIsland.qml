@@ -650,6 +650,10 @@ Item {
     // Menu bar: a thin strip across the edge with the heart hanging from its middle as a notch.
     readonly property bool menubar: root.layout === "menubar" && !root.vertical
     readonly property bool fullWidth: root.layout === "full" || root.menubar
+    // Corner: Left or Right across an edge, docked in that corner and filleted into both walls when welded. Its
+    // bubbles rest on the inner side; the room the item keeps on the wall side is handed back (IrisBar places it).
+    readonly property string cornerSide: !root.vertical && (root.layout === "left" || root.layout === "right") ? root.layout : ""
+    readonly property real wallSlack: root.cornerSide.length > 0 ? Math.max(root.sideReserve, root.fillet) * Math.min(1, root.notchness) : 0
     // A clear menu bar leaves its items on the wallpaper (macOS): the notch is the only body on the edge.
     readonly property bool clearStrip: root.menubar && String(root.options?.strip ?? "clear") === "clear"
     readonly property bool fromHeart: root.zoned && root.heartShown && root.extensionRole === "page"
@@ -1333,7 +1337,7 @@ Item {
             : root.bottomEdge ? root.height - (root.bubble + height) / 2 : (root.bubble - height) / 2
         x: root.vertical ? Math.round(satellite.acrossCentre - width / 2)
             : satellite.leftSide
-            ? chassis.x + (-root.satelliteOffset - width) * satellite.emerge
+            ? chassis.x + (-root.satelliteOffset - width) * satellite.slotIndex * satellite.emerge
             : chassis.x + chassis.width - width + (root.satelliteOffset + width) * satellite.slotIndex * satellite.emerge
         // Kept in the scene while the Island is open: a satellite's face carries
         // Shapes, and dropping their nodes on every open meant re-triangulating
@@ -1394,7 +1398,8 @@ Item {
     Satellite {
         id: leftSatellite
         slot: "left"
-        leftSide: true
+        leftSide: root.cornerSide !== "left"
+        slotIndex: root.cornerSide !== "left" ? 1 : (root.auxiliaryRest ? root.auxiliarySlot : rightSatellite.resting ? 1 : 0) + 1
         kind: root.leftKind
         task: root.islandActivity.length > 0 ? root.secondaryTask : root.task
         shown: root.leftSatelliteShown
@@ -1460,6 +1465,10 @@ Item {
                     radius: 0, paints: true, fuse: IrisStyle.fuseDeep, id: "edge" }
                 : { x: -2 * IrisStyle.fuseDeep, y: top, width: wide, height: deep,
                     radius: 0, paints: true, fuse: IrisStyle.fuseDeep, id: "edge" })
+            // A corner Island melts into its side wall too: the fillet under it is this wall's.
+            if (root.cornerSide.length > 0)
+                out.push({ x: root.cornerSide === "right" ? (window?.width ?? 0) + 1 : -deep - 1, y: -2 * IrisStyle.fuseDeep,
+                    width: deep, height: tall, radius: 0, paints: true, fuse: IrisStyle.fuseDeep, id: "edgeSide" })
         }
         const body = root.chassisBody()
         const strip = root.menubar ? root.stripHeight : body.height
@@ -1469,12 +1478,14 @@ Item {
         // A bar melted into its edge runs frame to frame; one that floats keeps its gap on every side and rounds its ends.
         const spanX = across > 0 ? bandInset + (body.x - bandInset) * (1 - melt) : body.x
         const spanW = across > 0 ? (across - bandInset * 2) + (body.width - (across - bandInset * 2)) * (1 - melt) : body.width
-        if (!root.clearStrip) out.push({ x: spanX,
+        // Welded into a corner, the body runs on past the side wall so only its inner corners round.
+        const pastSide = root.cornerSide.length > 0 ? Math.ceil(chassis.radius * melt) : 0
+        if (!root.clearStrip) out.push({ x: spanX - (root.cornerSide === "left" ? pastSide : 0),
             y: root.menubar && root.bottomEdge ? body.y + body.height - strip : body.y,
-            width: spanW, height: strip,
+            width: spanW + pastSide, height: strip,
             radius: across > 0 ? Math.min(strip / 2, chassis.radius) * (1 - melt) : root.menubar ? strip / 2 : chassis.radius, paints: true,
             fuse: across > 0 ? Math.round(16 * root.d) : IrisStyle.fuse + (IrisStyle.fuseEdge - IrisStyle.fuse) * melt, id: "island",
-            joins: melt <= 0.01 ? "" : IrisFrame.framed ? "frame" : "edge" })
+            joins: melt <= 0.01 ? "" : IrisFrame.framed ? "frame" : pastSide > 0 ? ["edge", "edgeSide"] : "edge" })
         // On its side, the heart of a full bar swells inward out of the bar: the same gesture as a menu bar's notch.
         if (root.vertical && root.zoned && root.notch && root.heartShown && compactColumn.height > 1) {
             const at = compactColumn.mapToItem(null, 0, 0)
@@ -1582,6 +1593,8 @@ Item {
         ? String(IrisState.bubbleDrag.slot) : ""
     Satellite {
         id: rightSatellite
+        leftSide: root.cornerSide === "right"
+        slotIndex: root.cornerSide === "right" && leftSatellite.resting ? 2 : 1
         slot: "right"
         kind: IrisStyle.cluster ? root.trailingKind : root.secondary
         task: root.secondaryTask
@@ -1597,6 +1610,7 @@ Item {
         id: auxiliarySatellite
         slot: "utility"
         kind: root.auxiliary
+        leftSide: root.cornerSide === "right"
         slotIndex: root.auxiliarySlot
         shown: root.auxiliaryShown
         resting: root.auxiliaryRest

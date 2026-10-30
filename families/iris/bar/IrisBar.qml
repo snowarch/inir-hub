@@ -1327,7 +1327,12 @@ Scope {
                     z: 3
                     active: GlobalStates.barOpen && root.islandAllowed(barWindow.screen)
                     readonly property string layout: String(root.options?.layout ?? "island")
-                    readonly property real inset: IrisFrame.band + root.outerMargin
+                    // Corner: welded, it sits in the corner itself (no margin along the edge, the wall-side room handed back).
+                    readonly property bool corner: (islandLoader.layout === "left" || islandLoader.layout === "right") && !windowLoader.loadedVertical
+                    readonly property real inset: IrisFrame.band + (islandLoader.corner && islandLoader.item
+                        ? Math.round(root.outerMargin * (1 - Math.min(1, islandLoader.item.notchness))) : root.outerMargin)
+                    readonly property real wallShift: !islandLoader.corner || !islandLoader.item ? 0
+                        : islandLoader.layout === "left" ? -islandLoader.item.wallSlack : islandLoader.item.wallSlack
                     readonly property real edgeMargin: IrisFrame.band + (islandLoader.item
                         ? Math.round(root.restMargin * (1 - Math.min(1, islandLoader.item.notchness))) : root.outerMargin)
                     readonly property real along: islandPlacement.value
@@ -1340,7 +1345,7 @@ Scope {
                         : windowLoader.loadedEdge === "right" ? islandLoader.tuck : -islandLoader.tuck
                     readonly property real tuckY: windowLoader.loadedVertical ? 0
                         : windowLoader.loadedBottom ? islandLoader.tuck : -islandLoader.tuck
-                    x: Math.round((!windowLoader.loadedVertical ? islandLoader.inset + islandLoader.along
+                    x: Math.round((!windowLoader.loadedVertical ? islandLoader.inset + islandLoader.along + islandLoader.wallShift
                         : windowLoader.loadedEdge === "right" ? parent.width - islandLoader.width - islandLoader.edgeMargin : islandLoader.edgeMargin)
                         + islandLoader.tuckX)
                     y: Math.round((windowLoader.loadedVertical ? islandLoader.inset + islandLoader.along
