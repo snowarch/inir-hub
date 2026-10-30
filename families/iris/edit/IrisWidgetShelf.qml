@@ -210,15 +210,27 @@ WidgetShelf {
                     y: Math.round((head.height - height) / 2)
                     spacing: Math.round(4 * head.d)
                     readonly property bool gridOn: Config.options?.background?.widgets?.editGrid?.snap ?? true
-                    readonly property bool platesOn: String(Config.options?.iris?.widgets?.material ?? "glass") !== "clear"
-                    // Every widget's plate away or back in one tap (the shared material; a widget's own stays its own).
+                    readonly property string plates: DesktopWidgetOptions.everyState("showBackground")
+                    readonly property string outlines: DesktopWidgetOptions.everyState("showBorder")
+                    // Every widget's background or outline away or back in one tap, the same switches Material's edit
+                    // mode and each widget's own rows use: lit while any widget still shows it.
                     IrisIconButton {
                         implicitWidth: head.height
-                        materialIcon: tail.platesOn ? "layers" : "layers_clear"
+                        visible: tail.plates !== ""
+                        materialIcon: tail.plates !== "false" ? "layers" : "layers_clear"
                         iconSize: Math.round(16 * head.d)
-                        selected: tail.platesOn
-                        Accessible.name: Translation.tr("Background")
-                        onClicked: Config.setNestedValue("iris.widgets.material", tail.platesOn ? "clear" : "glass")
+                        selected: tail.plates !== "false"
+                        Accessible.name: selected ? Translation.tr("Hide every background") : Translation.tr("Show every background")
+                        onClicked: DesktopWidgetOptions.setEvery("showBackground", !selected)
+                    }
+                    IrisIconButton {
+                        implicitWidth: head.height
+                        visible: tail.outlines !== ""
+                        materialIcon: "border_style"
+                        iconSize: Math.round(16 * head.d)
+                        selected: tail.outlines !== "false"
+                        Accessible.name: selected ? Translation.tr("Hide every outline") : Translation.tr("Show every outline")
+                        onClicked: DesktopWidgetOptions.setEvery("showBorder", !selected)
                     }
                     IrisIconButton {
                         implicitWidth: head.height

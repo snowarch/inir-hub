@@ -124,13 +124,14 @@ Item {
     readonly property string fontMain: IrisStyle.fontMain
     readonly property string fontNumbers: IrisStyle.fontNumbers
     readonly property string fontLabel: IrisStyle.fontLabel
-    // Outline: Auto follows the shell's outline and leaves Transparent bare; while arranging it always shows.
-    readonly property bool rimShown: GlobalStates.widgetEditMode || root.widget.irisOutline === "always"
+    // Outline: Auto follows the shell's outline and leaves Transparent bare. Arranging draws its own selection outline
+    // around the widget, so the widget's own stays as set (forced on while arranging, it read as the outline changing).
+    readonly property bool rimShown: root.widget.irisOutline === "always"
         || (root.widget.irisOutline === "auto" && (!root.clear || root.widget.irisRim))
     readonly property bool glassEdge: (root.glass || IrisStyle.edgeLit) && !root.lightBackdrop
         && (IrisStyle.glassEdgeLight > 0 || IrisStyle.glassEdgeLine > 0)
     readonly property bool flatRim: root.rimShown && !root.glassEdge
-        && !(root.glass && !root.lightBackdrop && root.widget.irisOutline === "auto" && !GlobalStates.widgetEditMode)
+        && !(root.glass && !root.lightBackdrop && root.widget.irisOutline === "auto")
     readonly property color plateColor: ColorUtils.applyAlpha(root.opaque ? root.widget.irisPlate
         : root.lightBackdrop && !root.paper ? IrisStyle.frost : IrisStyle.surface, root.veil)
     readonly property color knockout: root.opaque ? root.plateColor : root.lightBackdrop && !root.paper ? IrisStyle.frost : IrisStyle.surface
