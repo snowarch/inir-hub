@@ -227,17 +227,29 @@ ColumnLayout {
                     return block.modelData.flat && block.caption.length > 0 && !block.tunes
                         && block.shownRows.length === 1 && block.shownRows[0].kind === "switch"
                 }
+                // A group that opens with its own bare on/off ("Spotlight" under Spotlight, "Enable panel" under Focus)
+                // wears it on the head's line: the name once, the rest under it. One with a sentence keeps its row, where
+                // the sentence says what it does in the label's place (Orbit, Airing, Do Not Disturb).
+                readonly property bool namedSwitch: {
+                    const first = block.shownRows?.[0]
+                    if (!block.modelData.flat || block.caption.length === 0 || block.tiled || block.loneSwitch
+                            || !first || first.kind !== "switch" || block.shownRows.length < 2 || String(first.description ?? "").length > 0)
+                        return false
+                    const label = String(first.label ?? "")
+                    return Translation.tr(label).toLowerCase() === block.caption.toLowerCase() || /^Enable\b/.test(label)
+                }
+                readonly property var bodyRows: block.namedSwitch ? block.shownRows.slice(1) : block.shownRows
                 // Home's pins are tiles: a glance reads each one's state in words, a switch flips on the tile, any other
                 // value opens its own row under them. A wall of full rows (scheme, accent cards, look, glass) was no home.
                 readonly property bool tiled: rows?.section === "general" && block.key === "Every day"
                 function partOf(spec: var): string { return String(spec.part ?? "") }
-                readonly property var parts: block.shownRows.length === 0 ? [""] : [...new Set(block.shownRows.map(spec => block.partOf(spec)))]
+                readonly property var parts: block.bodyRows.length === 0 ? [""] : [...new Set(block.bodyRows.map(spec => block.partOf(spec)))]
 
                 // The head, in the layout's voice (IrisSkin groupHeader), holding a lone switch on its line.
                 Item {
                     id: head
                     readonly property string title: block.caption
-                    readonly property bool lone: block.loneSwitch
+                    readonly property bool lone: block.loneSwitch || block.namedSwitch
                     readonly property real switchHeight: headSwitch.implicitHeight
                     readonly property bool reading: rows?.reading === block.key
                     readonly property string glyph: IrisOptions.groupGlyphs[block.key] ?? IrisOptions.sectionById(rows?.section)?.icon ?? "settings"
@@ -565,7 +577,7 @@ ColumnLayout {
                         id: part
                         required property string modelData
                         required property int index
-                        readonly property var specs: block.shownRows.filter(spec => block.partOf(spec) === part.modelData)
+                        readonly property var specs: block.bodyRows.filter(spec => block.partOf(spec) === part.modelData)
                         readonly property bool lastPart: part.index === block.parts.length - 1
                         Layout.fillWidth: true
                         Layout.topMargin: part.index > 0 ? Math.round(12 * rows?.d) : 0

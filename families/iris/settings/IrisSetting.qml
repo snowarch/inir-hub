@@ -334,6 +334,21 @@ Item {
                 }
             }
 
+            // A choice whose list came back empty (niri gave no modes, no cursor theme is installed) says so: it drew
+            // a bare row with nothing to touch.
+            Loader {
+                active: root.spec.kind === "choice" && root.choices.length === 0 && !root.spec.cards && root.spec.tiles !== true
+                visible: active
+                Layout.alignment: Qt.AlignTop
+                Layout.preferredHeight: label.implicitHeight
+                sourceComponent: IrisText {
+                    verticalAlignment: Text.AlignVCenter
+                    text: Translation.tr("Not available")
+                    color: IrisStyle.textTertiary
+                    font.pixelSize: IrisStyle.typeLabel
+                }
+            }
+
             // One control per row, built for its kind only: every row used to carry a switch, a button and a range.
             Loader {
                 active: root.spec.kind === "switch"
@@ -516,7 +531,7 @@ Item {
             // every page and a search alike: the track hugs its names at the row's right, never across the pane
             Layout.alignment: Qt.AlignRight
             Layout.preferredWidth: Math.min(Math.max(item?.implicitWidth ?? 0, root.choiceHug), parent.width)
-            active: root.spec.kind === "choice" && !root.inlineChoice && !root.swatched && !root.menuChoice && !root.tiled && !root.carded
+            active: root.spec.kind === "choice" && root.choices.length > 0 && !root.inlineChoice && !root.swatched && !root.menuChoice && !root.tiled && !root.carded
             visible: active
             sourceComponent: segmentedComponent
         }
