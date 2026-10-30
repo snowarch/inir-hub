@@ -209,6 +209,7 @@ Item {
     readonly property int spotlightMaxRetries: 15
 
     function openSearchResult(entry): void {
+        root._landingAgain = 0
         root.searchText = ""
         searchField.text = ""
         root.resetSearchTarget()
@@ -274,6 +275,10 @@ Item {
 
     // Scrolls the row into the middle of the page and rings it for a moment: the eye lands where the search sent it.
     function navigateToControl(control): void {
+        root._landingAsk = root.pendingSpotlightPageIndex >= 0 ? {
+            optionId: root.pendingSpotlightOptionId, label: root.pendingSpotlightLabel, section: root.pendingSpotlightSection,
+            task: root.pendingSpotlightTask, page: root.pendingSpotlightPageIndex, isSection: root.pendingSpotlightIsSection
+        } : null
         root.resetSearchTarget()
         root.searchTargetControl = control
         SettingsSearchRegistry.activateTaskSectionForControl(control)
@@ -282,11 +287,40 @@ Item {
         landingScroll.restart()
         landedRing.show(control)
     }
+    // What the last landing asked for: a page built twice on arrival drops the first copy, row and all.
+    property var _landingAsk: null
+    property int _landingAgain: 0
+    function _onCurrentPage(item): bool {
+        for (let p = item; p; p = p.parent)
+            if (p === pagesHost.currentItem) return true
+        return false
+    }
+    function _landed(control): bool {
+        return control !== null && control !== undefined && control.visible && root._onCurrentPage(control)
+    }
+    function _reland(): bool {
+        const ask = root._landingAsk
+        if (!ask || root._landingAgain >= 4)
+            return false
+        root._landingAgain++
+        landedRing.target = null
+        root.pendingSpotlightOptionId = ask.optionId
+        root.pendingSpotlightLabel = ask.label
+        root.pendingSpotlightSection = ask.section
+        root.pendingSpotlightTask = ask.task
+        root.pendingSpotlightPageIndex = ask.page
+        root.pendingSpotlightIsSection = ask.isSection
+        root.spotlightRetryCount = 0
+        spotlightPageLoadTimer.restart()
+        return true
+    }
     Timer {
         id: landingScroll
         interval: 48
         onTriggered: {
             const control = root.searchTargetControl
+            if (!root._landed(control) && root._reland())
+                return
             let flick = control?.parent ?? null
             while (flick && !(flick.hasOwnProperty("contentY") && flick.hasOwnProperty("contentItem")))
                 flick = flick.parent
@@ -861,7 +895,13 @@ Item {
                 property point at: Qt.point(0, 0)
                 FrameAnimation {
                     running: landedRing.visible
-                    onTriggered: if (landedRing.target) landedRing.at = landedRing.target.mapToItem(contentPane, 0, 0)
+                    onTriggered: {
+                        // The page can be swapped for a fresh copy after landing: find the row again there.
+                        if (!root._landed(landedRing.target) && root._reland())
+                            return
+                        if (landedRing.target)
+                            landedRing.at = landedRing.target.mapToItem(contentPane, 0, 0)
+                    }
                 }
                 onTargetChanged: if (target) at = target.mapToItem(contentPane, 0, 0)
                 visible: target !== null && opacity > 0
