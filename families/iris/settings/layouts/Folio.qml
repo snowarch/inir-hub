@@ -246,7 +246,7 @@ Item {
                 Item {
                     id: rowsSlot
                     anchors.fill: parent
-                    anchors.leftMargin: IrisStyle.glassy ? root.u(6) : -root.u(12)
+                    anchors.leftMargin: IrisStyle.glassy ? root.u(6) : 0
                     anchors.rightMargin: IrisStyle.glassy ? root.u(6) : 0
                     anchors.topMargin: IrisStyle.glassy ? root.u(6) : 0
                 }

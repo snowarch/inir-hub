@@ -206,7 +206,7 @@ Item {
             Flickable {
                 id: flick
                 anchors.fill: parent
-                anchors.leftMargin: IrisStyle.glassy ? page.u(6) : -page.u(12)
+                anchors.leftMargin: IrisStyle.glassy ? page.u(6) : 0
                 anchors.rightMargin: IrisStyle.glassy ? page.u(6) : 0
                 anchors.topMargin: IrisStyle.glassy ? page.u(6) : 0
                 contentHeight: rows.implicitHeight + page.u(24)

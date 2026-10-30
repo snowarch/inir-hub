@@ -206,7 +206,7 @@ Item {
                     implicitHeight: label.implicitHeight
                     IrisText {
                         id: label
-                        width: Math.min(implicitWidth, parent.width)
+                        width: Math.min(implicitWidth, parent.width - resetMark.width - Math.round(6 * root.d))
                         text: root.headed ? Translation.tr(root.spec.description)
                             : root.highlight.length > 0 ? root.marked(Translation.tr(root.spec.label)) : Translation.tr(root.spec.label)
                         textFormat: root.highlight.length > 0 ? Text.StyledText : Text.PlainText
@@ -214,6 +214,50 @@ Item {
                         font.pixelSize: root.headed ? IrisStyle.typeMeta : IrisStyle.typeBody
                         font.weight: IrisStyle.weight(Font.Normal)
                         wrapMode: Text.WordWrap
+                    }
+                    FontMetrics { id: labelMetrics; font: label.font }
+                    Item {
+                        id: resetMark
+                        x: label.x + Math.min(label.contentWidth, label.width) + Math.round(6 * root.d)
+                        // Centred on the first line's lowercase, where the eye reads the word's middle.
+                        y: Math.round(label.baselineOffset - labelMetrics.xHeight / 2 - height / 2)
+                        width: Math.round(18 * root.d)
+                        height: width
+                        opacity: root.modified ? 1 : 0
+                        visible: opacity > 0
+                        Behavior on opacity { NumberAnimation { duration: IrisStyle.duration(140); easing.type: IrisStyle.feedbackEasing } }
+                        Loader {
+                            anchors.fill: parent
+                            active: resetMark.visible
+                            sourceComponent: Item {
+                                Rectangle {
+                                    anchors.centerIn: parent
+                                    width: resetArea.containsMouse ? resetMark.width : Math.round(7 * root.d)
+                                    height: width
+                                    radius: IrisStyle.capsule(width)
+                                    color: resetArea.containsMouse ? IrisStyle.tintFill(IrisStyle.accent) : IrisStyle.accent
+                                    Behavior on width { NumberAnimation { duration: IrisStyle.duration(140); easing.type: IrisStyle.feedbackEasing } }
+                                    MaterialSymbol {
+                                        anchors.centerIn: parent
+                                        text: "undo"
+                                        iconSize: Math.round(12 * root.d)
+                                        color: IrisStyle.accent
+                                        opacity: resetArea.containsMouse ? 1 : 0
+                                    }
+                                }
+                                MouseArea {
+                                    id: resetArea
+                                    anchors.fill: parent
+                                    enabled: root.modified
+                                    hoverEnabled: true
+                                    cursorShape: Qt.PointingHandCursor
+                                    Accessible.role: Accessible.Button
+                                    objectName: "resetMark"
+                                    Accessible.name: Translation.tr("Reset %1").arg(Translation.tr(root.spec.label))
+                                    onClicked: root.commit(root.spec.fallback)
+                                }
+                            }
+                        }
                     }
                 }
                 IrisText {
