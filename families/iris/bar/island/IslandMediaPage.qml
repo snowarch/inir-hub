@@ -309,6 +309,9 @@ GridLayout {
                 IrisImage {
                     Layout.preferredWidth: Math.round(22 * IrisStyle.density)
                     Layout.preferredHeight: Layout.preferredWidth
+                    // Decoded at the size it is given, not the size the row lays it at: that read its own decode back.
+                    decodeWidth: Math.round(22 * IrisStyle.density)
+                    decodeHeight: decodeWidth
                     Binding on source {
                         when: appLevel.live
                         restoreMode: Binding.RestoreNone
