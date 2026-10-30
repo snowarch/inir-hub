@@ -1924,20 +1924,6 @@ ContentPage {
                 wrapMode: Text.WordWrap
             }
 
-            SettingsSwitch {
-                visible: !root.irisActive
-                Layout.fillWidth: true
-                buttonIcon: "wallpaper"
-                text: Translation.tr("Ink follows the wallpaper")
-                autoToggle: false
-                checked: root.readPath(
-                    "background.widgets.adaptColorsToWallpaperPosition", true)
-                onToggledByUser: checked => root.writePath(
-                    "background.widgets.adaptColorsToWallpaperPosition", checked)
-                StyledToolTip {
-                    text: Translation.tr("Each widget reads the wallpaper under it: dark ink and deeper accents where it is light, light ink where it is dark. Off keeps the theme's ink everywhere.")
-                }
-            }
 
             WidgetPalettePresetPicker {
                 visible: !root.irisActive
@@ -2233,9 +2219,6 @@ ContentPage {
                         buttonIcon: "wallpaper"
                         text: Translation.tr("Adapt digital clock locally")
                         autoToggle: false
-                        enabled: root.readPath(
-                            "background.widgets.adaptColorsToWallpaperPosition", true)
-                        opacity: enabled ? 1 : 0.45
                         checked: root.readPath("background.widgets.clock.digital.adaptToWallpaper", true)
                         onToggledByUser: checked => root.writePath("background.widgets.clock.digital.adaptToWallpaper", checked)
                         StyledToolTip {

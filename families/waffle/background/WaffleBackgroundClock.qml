@@ -73,7 +73,7 @@ AbstractWidget {
     readonly property bool onBlurredLock: GlobalStates.screenLocked && (Config.options?.lock?.blur?.enable ?? false)
     readonly property var backdropSample: {
         void Lume.revision
-        if (root.colorMode !== "adaptive" || !(Config.options?.background?.widgets?.adaptColorsToWallpaperPosition ?? true))
+        if (root.colorMode !== "adaptive")
             return null
         return Lume.readFrom(WallpaperLuma.imagePath(root.wallpaperPath), root.outputName, root.x, root.y, root.width, root.height)
     }

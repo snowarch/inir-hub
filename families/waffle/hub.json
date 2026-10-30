@@ -1,6 +1,6 @@
 {
     "$schema": "../../schema/hub.schema.json",
-    "version": "2.33.3",
+    "version": "2.33.4",
     "summary": "Windows 11 for people who want it: taskbar, Start, Action Center.",
     "authors": [
         "snowarch"
