@@ -64,6 +64,15 @@
                 ]
             }
         },
+        "hosts": {
+            "type": "array",
+            "uniqueItems": true,
+            "description": "Every internet host the code reaches (a domain covers its subdomains); shown to people before they install",
+            "items": {
+                "type": "string",
+                "pattern": "^([a-z0-9]([a-z0-9-]*[a-z0-9])?\\.)+[a-z]{2,}$"
+            }
+        },
         "minInir": {
             "type": "string",
             "pattern": "^\\d+\\.\\d+\\.\\d+$",

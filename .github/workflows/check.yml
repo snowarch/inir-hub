@@ -20,6 +20,12 @@ jobs:
           go-version: "1.26"
       - name: The inir command (its hub verbs check and build the catalogue)
         run: go install github.com/snowarch/inir-cli/cmd/inir@main
+      - name: The reviewer's card for each changed item
+        if: always() && github.event_name == 'pull_request'
+        run: |
+          dirs=$(git diff --name-only "origin/${{ github.base_ref }}...HEAD" | cut -d/ -f1-2 | sort -u |
+            while read -r d; do [ -f "$d/hub.json" ] && echo "$d"; done)
+          [ -z "$dirs" ] || inir hub audit --markdown $dirs >> "$GITHUB_STEP_SUMMARY" || true
       - name: Validate every item
         run: inir hub validate
       - name: Changed items raise their version

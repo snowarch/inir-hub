@@ -14,6 +14,20 @@
         "network",
         "files"
     ],
+    "hosts": [
+        "9animetv.to",
+        "ankiweb.net",
+        "coingecko.com",
+        "google.com",
+        "jogruber.de",
+        "konachan.net",
+        "openai.com",
+        "vcrdb.net",
+        "wallhaven.cc",
+        "wikimedia.org",
+        "yande.re",
+        "youtube.com"
+    ],
     "minInir": "2.33.0",
     "provides": "modules/ii",
     "preview": "preview.webp"

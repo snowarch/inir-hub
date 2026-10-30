@@ -14,6 +14,13 @@
         "network",
         "files"
     ],
+    "hosts": [
+        "bing.com",
+        "brave.com",
+        "duckduckgo.com",
+        "google.com",
+        "startpage.com"
+    ],
     "minInir": "2.33.0",
     "provides": "modules/iris",
     "preview": "preview.webp"
