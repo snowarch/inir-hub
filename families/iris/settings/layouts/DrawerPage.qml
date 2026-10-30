@@ -198,6 +198,8 @@ Item {
                         only: modelData
                         extras: index === page.split.length - 1
                         groupFill: IrisStyle.formPlate
+                        // a column shows all it holds: Home's groups stay open across the columns
+                        foldHome: false
                         onWholeChanged: Qt.callLater(page.weigh)
                         onReveal: row => page.reveal(row)
                     }

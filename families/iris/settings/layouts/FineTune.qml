@@ -10,6 +10,8 @@ MouseArea {
     id: tune
     property bool open: false
     property var names: []
+    // what the fold is called while shut (Home names General's groups), Fine-tune otherwise
+    property string title: ""
     readonly property real d: IrisStyle.settingsDensity
     implicitHeight: Math.round((tune.open ? 44 : 54) * tune.d)
     hoverEnabled: true
@@ -53,7 +55,7 @@ MouseArea {
         spacing: Math.round(2 * tune.d)
         IrisText {
             width: parent.width
-            text: tune.open ? Translation.tr("Fewer settings") : Translation.tr("Fine-tune")
+            text: tune.open ? Translation.tr("Fewer settings") : tune.title.length > 0 ? tune.title : Translation.tr("Fine-tune")
             color: tune.containsMouse ? IrisStyle.text : IrisStyle.textSecondary
             font.pixelSize: IrisStyle.typeLabel
             font.weight: IrisStyle.weight(Font.Medium)

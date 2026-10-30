@@ -1749,7 +1749,8 @@ QtObject {
         // Home: the rows it was given (Customize › On Home), each the area's own row said once more.
         for (const id of Array.from(Config.options?.iris?.appearance?.settingsHome ?? root.homeDefault)) {
             const spec = root.dailySwitches.find(entry => entry.id === id) ?? own(id)
-            if (spec) rows.push(Object.assign({}, spec, { section: "general", group: "Every day", mirror: true, tune: false, description: undefined, cards: undefined, tiles: undefined, visibleWhen: undefined, target: undefined }))
+            if (spec) rows.push(Object.assign({}, spec, { section: "general", group: "Every day", mirror: true,
+                origin: { section: String(spec.section ?? root.placed(Object.assign({ section: root.sectionOf(spec) }, spec)).section), group: String(spec.group ?? "") }, tune: false, description: undefined, cards: undefined, tiles: undefined, visibleWhen: undefined, target: undefined }))
         }
         rows.push(root.homeEdit)
         const look = []

@@ -5,6 +5,7 @@ import QtQuick.Layouts
 import qs
 import qs.services
 import qs.modules.common
+import qs.modules.common.widgets
 import qs.modules.iris.style
 import qs.modules.iris.components
 import qs.modules.iris.sidebar
@@ -28,6 +29,8 @@ ColumnLayout {
     // that splits it into columns gives them to one.
     property bool extras: rows.only === null
     property color groupFill: IrisStyle.readingCard
+    // Home opens on what is changed every day; General's set-once groups wait behind one line that names them.
+    property bool foldHome: true
     // The group the page reads now, for the head that marks it.
     property string reading: ""
     // A row asked to be seen (a search landing): the page scrolls it into view.
@@ -63,7 +66,10 @@ ColumnLayout {
         }
         // Groups that are all fine-tuning (Corners per surface, every widget's extras) wait together at the area's foot,
         // behind one Fine-tune that names them: the page shows what people change, not every group it holds.
-        const rest = groups.filter(group => group.rows.length > 0 && group.rows.every(spec => IrisOptions.foldsAway(spec)))
+        // Home folds the rest of General the same way (his 10-29: arriving on a wall of options is not a home).
+        const home = rows.section === "general" && rows.foldHome && groups.some(group => group.key === "Every day")
+        const rest = groups.filter(group => group.rows.length > 0
+            && (home ? group.key !== "Every day" : group.rows.every(spec => IrisOptions.foldsAway(spec))))
         const resting = rest.length > 0 && rest.length < groups.length
         const shown = resting ? groups.filter(group => !rest.includes(group)) : groups
         const out = []
@@ -205,6 +211,9 @@ ColumnLayout {
                     return block.modelData.flat && block.caption.length > 0 && !block.tunes
                         && block.shownRows.length === 1 && block.shownRows[0].kind === "switch"
                 }
+                // Home's pins are tiles: a glance reads each one's state in words, a switch flips on the tile, any other
+                // value opens its own row under them. A wall of full rows (scheme, accent cards, look, glass) was no home.
+                readonly property bool tiled: rows?.section === "general" && block.key === "Every day"
                 function partOf(spec: var): string { return String(spec.part ?? "") }
                 readonly property var parts: block.shownRows.length === 0 ? [""] : [...new Set(block.shownRows.map(spec => block.partOf(spec)))]
 
@@ -259,6 +268,7 @@ ColumnLayout {
                         id: moreTune
                         width: parent.width
                         open: rows?.moreOpen ?? false
+                        title: rows?.section === "general" ? Translation.tr("General") : ""
                         names: (block.modelData.names ?? []).map(name => String(name))
                         // Against what shows, so a click under "open all" (tune:open) still closes it.
                         onClicked: {
@@ -268,8 +278,157 @@ ColumnLayout {
                         }
                     }
                 }
+                GridLayout {
+                    id: tileGrid
+                    visible: block.tiled
+                    Layout.fillWidth: true
+                    readonly property real gap: Math.round(8 * rows?.d)
+                    columns: Math.max(2, Math.floor((width + gap) / (Math.round(208 * rows?.d) * Math.max(1, IrisStyle.typeScale) + gap)))
+                    columnSpacing: gap
+                    rowSpacing: gap
+                    property string opened: ""
+                    readonly property var openedSpec: block.shownRows.find(spec => String(spec.modelKey ?? spec.path ?? "") === tileGrid.opened) ?? null
+                    Repeater {
+                        model: ScriptModel { objectProp: "modelKey"; values: block.tiled ? block.shownRows : [] }
+                        Item {
+                            id: tile
+                            required property var modelData
+                            readonly property var spec: tile.modelData
+                            readonly property string key: String(tile.spec.modelKey ?? tile.spec.path ?? "")
+                            readonly property bool edit: tile.spec.kind === "action"
+                            readonly property bool toggles: tile.spec.kind === "switch"
+                            readonly property var area: IrisOptions.sectionById(String(tile.spec.origin?.section ?? ""))
+                            readonly property var value: { Config.revision; return tile.edit ? null : IrisOptions.currentValue(tile.spec) }
+                            readonly property bool on: tile.toggles && (tile.spec.invert ? !Boolean(tile.value) : Boolean(tile.value))
+                            readonly property var choice: (tile.spec.choices ?? []).find(entry => String(entry.value) === String(tile.value)) ?? null
+                            readonly property bool open: tileGrid.opened === tile.key
+                            readonly property string words: tile.edit ? ""
+                                : tile.toggles ? (tile.on ? Translation.tr("On") : Translation.tr("Off"))
+                                : tile.choice ? Translation.tr(String(tile.choice.label ?? ""))
+                                : tile.spec.kind === "range" ? IrisOptions.rangeText(tile.spec, tile.value)
+                                : String(tile.value ?? "")
+                            readonly property string glyph: tile.edit ? "edit"
+                                : String(tile.choice?.glyph ?? tile.spec.glyph ?? IrisOptions.groupGlyphs[String(tile.spec.origin?.group ?? "")] ?? tile.area?.icon ?? "settings")
+                            readonly property bool accentTile: String(tile.spec.path ?? "") === "iris.appearance.accent"
+                            function act(): void {
+                                if (tile.edit) tile.spec.run()
+                                else if (tile.toggles) IrisOptions.commit(tile.spec, tile.spec.invert ? tile.on : !tile.on)
+                                else tileGrid.opened = tile.open ? "" : tile.key
+                            }
+                            Layout.fillWidth: true
+                            Layout.preferredWidth: 1
+                            implicitHeight: Math.max(Math.round(60 * rows?.d), tileWords.implicitHeight + Math.round(24 * rows?.d))
+                            activeFocusOnTab: true
+                            Accessible.role: tile.toggles ? Accessible.CheckBox : Accessible.Button
+                            Accessible.name: Translation.tr(String(tile.spec.label ?? ""))
+                            Accessible.description: tile.words
+                            Accessible.checkable: tile.toggles
+                            Accessible.checked: tile.on
+                            Keys.onSpacePressed: tile.act()
+                            Keys.onReturnPressed: tile.act()
+
+                            Rectangle {
+                                id: tilePlate
+                                anchors.fill: parent
+                                radius: IrisStyle.radiusTile
+                                color: tile.on ? IrisStyle.accentFill : tile.edit ? "transparent" : (rows?.groupFill ?? "transparent")
+                                border.width: tile.edit || tile.open || tile.activeFocus ? 1 : 0
+                                border.color: tile.open || tile.activeFocus ? IrisStyle.accent : IrisStyle.hairlineStrong
+                                scale: tileArea.pressed ? IrisStyle.pressScale(0.97) : 1
+                                Behavior on color { ColorAnimation { duration: IrisStyle.duration(110); easing.type: IrisStyle.feedbackEasing } }
+                                Behavior on scale { NumberAnimation { duration: IrisStyle.feedbackDuration; easing.type: IrisStyle.feedbackEasing } }
+                                Rectangle {
+                                    anchors.fill: parent
+                                    radius: parent.radius
+                                    color: tileArea.pressed ? IrisStyle.fillActive : IrisStyle.fillQuiet
+                                    opacity: tileArea.containsMouse || tileArea.pressed ? 1 : 0
+                                    Behavior on opacity { NumberAnimation { duration: IrisStyle.duration(110); easing.type: IrisStyle.feedbackEasing } }
+                                }
+                                IrisSquircle {
+                                    id: tileMark
+                                    x: Math.round(12 * rows?.d)
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    width: Math.round(32 * rows?.d)
+                                    height: width
+                                    visible: !tile.edit
+                                    tint: tile.on ? IrisStyle.inkOnAccentFill : tile.accentTile ? IrisStyle.accent : (tile.area?.tint ?? IrisStyle.identity.gray)
+                                    glyph: tile.accentTile ? "palette" : tile.glyph
+                                }
+                                MaterialSymbol {
+                                    visible: tile.edit
+                                    anchors.centerIn: tileMark
+                                    text: "edit"
+                                    iconSize: Math.round(18 * rows?.d)
+                                    color: IrisStyle.textSecondary
+                                }
+                                Column {
+                                    id: tileWords
+                                    anchors.left: tileMark.right
+                                    anchors.leftMargin: Math.round(10 * rows?.d)
+                                    anchors.right: tileChevron.visible ? tileChevron.left : parent.right
+                                    anchors.rightMargin: Math.round(tileChevron.visible ? 6 : 12) * (rows?.d ?? 1)
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    spacing: Math.round(1 * rows?.d)
+                                    IrisText {
+                                        width: parent.width
+                                        text: Translation.tr(String(tile.spec.label ?? ""))
+                                        color: tile.on ? IrisStyle.inkOnAccentFill : tile.edit ? IrisStyle.textSecondary : IrisStyle.text
+                                        font.pixelSize: IrisStyle.typeBody
+                                        font.weight: IrisStyle.weight(tile.edit ? Font.Medium : Font.DemiBold)
+                                        elide: Text.ElideRight
+                                    }
+                                    IrisText {
+                                        width: parent.width
+                                        visible: tile.words.length > 0
+                                        text: tile.words
+                                        color: tile.on ? IrisStyle.secondaryOf(IrisStyle.inkOnAccentFill) : IrisStyle.textSecondary
+                                        font.pixelSize: IrisStyle.typeMeta
+                                        elide: Text.ElideRight
+                                    }
+                                }
+                                MaterialSymbol {
+                                    id: tileChevron
+                                    visible: !tile.edit && !tile.toggles
+                                    anchors.right: parent.right
+                                    anchors.rightMargin: Math.round(12 * rows?.d)
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    text: "expand_more"
+                                    iconSize: Math.round(18 * rows?.d)
+                                    color: tile.open || tileArea.containsMouse ? IrisStyle.text : IrisStyle.textTertiary
+                                    rotation: tile.open ? 180 : 0
+                                    Behavior on rotation { NumberAnimation { duration: IrisStyle.duration(180); easing.type: Easing.OutCubic } }
+                                }
+                            }
+                            MouseArea {
+                                id: tileArea
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: tile.act()
+                            }
+                        }
+                    }
+                }
+                // The value a tile opened, as its own row, under the tiles.
+                Loader {
+                    active: block.tiled && tileGrid.openedSpec !== null
+                    visible: active
+                    Layout.fillWidth: true
+                    sourceComponent: Rectangle {
+                        implicitHeight: openRow.implicitHeight
+                        radius: IrisStyle.radiusTile
+                        color: rows?.groupFill ?? "transparent"
+                        IrisSetting {
+                            id: openRow
+                            width: parent.width
+                            spec: tileGrid.openedSpec
+                            voice: rows?.voice ?? ""
+                            last: true
+                        }
+                    }
+                }
                 Repeater {
-                    model: ScriptModel { values: block.loneSwitch || block.modelData.more ? [] : block.parts }
+                    model: ScriptModel { values: block.loneSwitch || block.modelData.more || block.tiled ? [] : block.parts }
                     ColumnLayout {
                         id: part
                         required property string modelData
