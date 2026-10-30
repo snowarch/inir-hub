@@ -6,20 +6,12 @@ import qs.modules.shared.mascot
 import qs.modules.shared.mediaControls
 import qs.modules.ii.notificationPopup
 import qs.modules.ii.onScreenDisplay
-import qs.modules.shared.onScreenKeyboard
-import qs.modules.shared.recordingOsd
 import qs.modules.shared.polkit
 import qs.modules.shared.regionSelector
 import qs.modules.shared.screenCorners
-import qs.modules.shared.sessionScreen
 import qs.modules.shared.tilingOverlay
-import qs.modules.shared.wallpaperSelector
-import qs.modules.shared.wallpaperLauncher
 import qs.modules.shared.overlay
-import qs.modules.shared.shellUpdate
 import qs.modules.shared.workspaceStrip
-import qs.modules.shared.clipboard as ClipboardModule
-import qs.modules.ii.equalizer
 
 import QtQuick
 import Quickshell
@@ -182,7 +174,7 @@ Item {
         identifier: "iiEqualizer"
         open: GlobalStates.equalizerOpen
         closeGraceMs: 260
-        component: EqualizerPanel {}
+        source: "./equalizer/EqualizerPanel.qml"
         onEnabledPanelChanged: {
             if (!enabledPanel)
                 GlobalStates.closeEqualizer()
@@ -256,7 +248,7 @@ Item {
     }
     DeferredPanelLoader { identifier: "iiLock"; component: Lock {} }
     DeferredPanelLoader { identifier: "iiMediaControls"; component: MediaControls {} }
-    OnDemandPanelLoader { identifier: "iiOnScreenKeyboard"; open: GlobalStates.oskOpen; component: OnScreenKeyboard {} }
+    OnDemandPanelLoader { identifier: "iiOnScreenKeyboard"; open: GlobalStates.oskOpen; source: Plugins.baseUrl("modules/shared/onScreenKeyboard/OnScreenKeyboard.qml") }
     OnDemandPanelLoader {
         identifier: "iiOverlay"
         open: GlobalStates.overlayOpen || OverlayContext.hasPinnedWidgets || OverlayContext.nativeDialogOpen
@@ -267,7 +259,7 @@ Item {
 
     DeferredPanelLoader { identifier: "iiRegionSelector"; component: RegionSelector {} }
     DeferredPanelLoader { identifier: "iiScreenCorners"; component: ScreenCorners {} }
-    OnDemandPanelLoader { identifier: "iiSessionScreen"; open: GlobalStates.sessionOpen; component: SessionScreen {} }
+    OnDemandPanelLoader { identifier: "iiSessionScreen"; open: GlobalStates.sessionOpen; source: Plugins.baseUrl("modules/shared/sessionScreen/SessionScreen.qml") }
 
     Variants {
         model: panelsRoot.screensFor(Config.options?.sidebar?.screenList ?? [])
@@ -325,12 +317,12 @@ Item {
         component: TilingOverlay {}
     }
 
-    OnDemandPanelLoader { identifier: "iiWallpaperSelector"; open: GlobalStates.wallpaperSelectorOpen; retainAfterUse: true; closeGraceMs: 250; component: WallpaperSelector {} }
-    OnDemandPanelLoader { identifier: "iiWallpaperLauncher"; open: GlobalStates.wallpaperLauncherOpen; retainAfterUse: true; closeGraceMs: 250; component: WallpaperLauncher {} }
-    OnDemandPanelLoader { identifier: "iiCoverflowSelector"; open: GlobalStates.coverflowSelectorOpen; retainAfterUse: true; closeGraceMs: 300; component: WallpaperCoverflow {} }
-    OnDemandPanelLoader { identifier: "iiClipboard"; open: GlobalStates.clipboardOpen; retainAfterUse: true; closeGraceMs: 250; component: ClipboardModule.ClipboardPanel {} }
-    OnDemandPanelLoader { identifier: "iiShellUpdate"; open: ShellUpdates.overlayOpen; closeGraceMs: 250; component: ShellUpdateOverlay {} }
-    OnDemandPanelLoader { identifier: "iiRecordingOsd"; open: RecorderStatus.isRecording; closeGraceMs: 250; component: RecordingOsd {} }
+    OnDemandPanelLoader { identifier: "iiWallpaperSelector"; open: GlobalStates.wallpaperSelectorOpen; retainAfterUse: true; closeGraceMs: 250; source: Plugins.baseUrl("modules/shared/wallpaperSelector/WallpaperSelector.qml") }
+    OnDemandPanelLoader { identifier: "iiWallpaperLauncher"; open: GlobalStates.wallpaperLauncherOpen; retainAfterUse: true; closeGraceMs: 250; source: Plugins.baseUrl("modules/shared/wallpaperLauncher/WallpaperLauncher.qml") }
+    OnDemandPanelLoader { identifier: "iiCoverflowSelector"; open: GlobalStates.coverflowSelectorOpen; retainAfterUse: true; closeGraceMs: 300; source: Plugins.baseUrl("modules/shared/wallpaperSelector/WallpaperCoverflow.qml") }
+    OnDemandPanelLoader { identifier: "iiClipboard"; open: GlobalStates.clipboardOpen; retainAfterUse: true; closeGraceMs: 250; source: Plugins.baseUrl("modules/shared/clipboard/ClipboardPanel.qml") }
+    OnDemandPanelLoader { identifier: "iiShellUpdate"; open: ShellUpdates.overlayOpen; closeGraceMs: 250; source: Plugins.baseUrl("modules/shared/shellUpdate/ShellUpdateOverlay.qml") }
+    OnDemandPanelLoader { identifier: "iiRecordingOsd"; open: RecorderStatus.isRecording; closeGraceMs: 250; source: Plugins.baseUrl("modules/shared/recordingOsd/RecordingOsd.qml") }
     DeferredPanelLoader { identifier: "iiWorkspaceStrip"; component: WorkspaceStrip {} }
     DeferredPanelLoader { identifier: "iiMascotCompanion"; extraCondition: (Config.options?.mascot?.enable ?? false) && (Config.options?.mascot?.companion?.enable ?? true); component: MascotCompanion {} }
 

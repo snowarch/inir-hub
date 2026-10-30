@@ -4,11 +4,7 @@ import QtQuick
 import Quickshell
 import qs
 import qs.modules.shared.background
-import qs.modules.ii.bar
-import qs.modules.ii.barM3 as BarM3
 import qs.modules.ii.dock
-import qs.modules.ii.pill
-import qs.modules.ii.verticalBar
 import qs.modules.common
 
 Item {
@@ -28,9 +24,9 @@ Item {
     }
 
     CriticalPanelLoader { identifier: "iiBackground"; component: Background { family: "ii" } }
-    CriticalPanelLoader { identifier: "iiBar"; extraCondition: !root.barVertical && root.barStock; component: Bar {} }
-    CriticalPanelLoader { identifier: "iiBar"; extraCondition: !root.barVertical && root.barPill && !GlobalStates.widgetEditMode; component: PillBar {} }
-    CriticalPanelLoader { identifier: "iiBar"; extraCondition: !root.barVertical && root.barM3 && !GlobalStates.widgetEditMode; component: BarM3.M3Bar {} }
-    CriticalPanelLoader { identifier: "iiVerticalBar"; extraCondition: root.barVertical; component: VerticalBar {} }
+    CriticalPanelLoader { identifier: "iiBar"; extraCondition: !root.barVertical && root.barStock; source: "../bar/Bar.qml" }
+    CriticalPanelLoader { identifier: "iiBar"; extraCondition: !root.barVertical && root.barPill && !GlobalStates.widgetEditMode; source: "../pill/PillBar.qml" }
+    CriticalPanelLoader { identifier: "iiBar"; extraCondition: !root.barVertical && root.barM3 && !GlobalStates.widgetEditMode; source: "../barM3/M3Bar.qml" }
+    CriticalPanelLoader { identifier: "iiVerticalBar"; extraCondition: root.barVertical; source: "../verticalBar/VerticalBar.qml" }
     CriticalPanelLoader { identifier: "iiDock"; extraCondition: Config.options?.dock?.enable ?? true; component: Dock {} }
 }
