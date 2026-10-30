@@ -66,13 +66,16 @@ ColumnLayout {
             if (group.rows.length === 1 && lone[group.rows[0].label] > 1 && group.key.length > 0)
                 group.rows = [Object.assign({}, group.rows[0], { label: group.key })]
         }
-        // Groups that are all fine-tuning (Corners per surface, every widget's extras) wait together at the area's foot,
-        // behind one Fine-tune that names them: the page shows what people change, not every group it holds.
-        // Home folds the rest of General the same way (his 10-29: arriving on a wall of options is not a home).
-        const home = rows.section === "general" && rows.foldHome && groups.some(group => group.key === "Every day")
-        const rest = groups.filter(group => group.rows.length > 0
-            && (home ? group.key !== "Every day" : group.rows.every(spec => IrisOptions.foldsAway(spec))))
-        const resting = rest.length > 0 && rest.length < groups.length
+        // Every area reads as Home (his 10-30): its lead group open, every other group a tile that says what it holds
+        // and opens under the tiles, one at a time. Home leads with Every day, General's other pages are all tiles;
+        // the rest lead with their first group. Nothing waits behind Fine-tune any more but a group's own ranges.
+        // A column of Drawer (foldHome off) or an area of two groups keeps them open, its all-fine-tuning groups folded.
+        const lead = groups.find(group => group.key === "Every day") ?? (rows.section === "general" ? null : groups[0])
+        const others = groups.filter(group => group !== lead && group.rows.length > 0)
+        const tiles = flat && rows.foldHome && others.length >= 2
+        const home = tiles && rows.section === "general"
+        const rest = tiles ? others : groups.filter(group => group.rows.length > 0 && group.rows.every(spec => IrisOptions.foldsAway(spec)))
+        const resting = rest.length > 0 && (tiles || rest.length < groups.length)
         const shown = resting ? groups.filter(group => !rest.includes(group)) : groups
         const out = []
         if (!flat) {
@@ -89,11 +92,11 @@ ColumnLayout {
         }
         if (resting) {
             out.push({ title: "\u200bmore", caption: home ? Translation.tr("General") : "", key: "", rows: [], flat: true, more: true, names: rest.map(group => group.title),
-                groups: home ? rest.map(group => ({ key: group.key, title: group.title, rows: group.rows })) : [] })
-            // On Home a group opens under its tile, which already names it.
-            for (const group of rest) out.push({ title: group.title, caption: home ? "" : group.title, key: group.key, rows: group.rows, flat: true, rest: true })
+                groups: tiles ? rest.map(group => ({ key: group.key, title: group.title, rows: group.rows })) : [] })
+            // A group opens under its tile, which already names it.
+            for (const group of rest) out.push({ title: group.title, caption: tiles ? "" : group.title, key: group.key, rows: group.rows, flat: true, rest: true })
         }
-        rows.homeGroups = home && resting
+        rows.groupTiles = tiles && resting
         rows.blocks = out
         rows.stale = false
     }
@@ -107,11 +110,22 @@ ColumnLayout {
     // Fine-tune folds opened by hand, by group; "more" is the area's own, over its all-fine-tuning groups.
     property var unfolded: ({})
     readonly property bool moreOpen: (rows.host?.tuneAll ?? false) || (rows.unfolded["more"] ?? false)
-    // Home shows General's groups as tiles; one opens under them at a time.
-    property bool homeGroups: false
-    property string homeOpen: ""
+    // Groups as tiles (every area but Drawer's columns); one opens under them at a time.
+    property bool groupTiles: false
+    property string openGroup: ""
     function opensRest(key: string): bool {
-        return rows.homeGroups ? (rows.host?.tuneAll ?? false) || rows.homeOpen === key : rows.moreOpen
+        return rows.groupTiles ? (rows.host?.tuneAll ?? false) || rows.openGroup === key : rows.moreOpen
+    }
+    // A link or a search asks for a resting group: its tile opens it, or the area's Fine-tune does. False when the
+    // area holds no such group.
+    function openRest(wanted: string): bool {
+        const lower = wanted.toLowerCase()
+        const block = rows.blocks.find(entry => entry.rest && (entry.key === wanted || entry.key.toLowerCase() === lower
+            || Translation.tr(entry.key).toLowerCase() === lower))
+        if (!block) return false
+        if (rows.groupTiles) rows.openGroup = block.key
+        else if (!rows.moreOpen) rows.fold("more")
+        return true
     }
     // A search landing on a row there opens it first.
     readonly property bool landsInMore: {
@@ -121,8 +135,8 @@ ColumnLayout {
     onLandsInMoreChanged: {
         if (!rows.landsInMore) return
         const landing = String(rows.host?.landingPath ?? "")
-        if (rows.homeGroups)
-            rows.homeOpen = String(rows.blocks.find(block => block.rest && block.rows.some(spec => String(spec.path ?? "") === landing))?.key ?? "")
+        if (rows.groupTiles)
+            rows.openGroup = String(rows.blocks.find(block => block.rest && block.rows.some(spec => String(spec.path ?? "") === landing))?.key ?? "")
         else if (!rows.moreOpen)
             rows.fold("more")
     }
@@ -219,7 +233,7 @@ ColumnLayout {
             onWantedChanged: Qt.callLater(rows.weigh)
             asynchronous: slot.index > 0 && rows.streams
             onStatusChanged: if (rows) Qt.callLater(rows.weigh)
-            onLoaded: if (slot.modelData.rest && rows.homeGroups && rows.homeOpen === String(slot.modelData.key ?? "")) rows.showOpened(slot)
+            onLoaded: if (slot.modelData.rest && rows.groupTiles && rows.openGroup === String(slot.modelData.key ?? "")) rows.showOpened(slot)
             sourceComponent: ColumnLayout {
                 id: block
                 readonly property var modelData: slot.modelData
@@ -299,11 +313,12 @@ ColumnLayout {
                     }
                 }
 
-                // Home: General's groups as tiles, each saying what it holds now; one opens under them.
+                // The area's other groups as tiles, each saying what it holds now; one opens under them.
                 GridLayout {
                     id: groupGrid
                     visible: (block.modelData.groups ?? []).length > 0
                     Layout.fillWidth: true
+                    Layout.topMargin: block.caption.length > 0 ? 0 : Math.round(14 * rows?.d)
                     readonly property real gap: Math.round(8 * rows?.d)
                     columns: Math.max(2, Math.floor((width + gap) / (Math.round(232 * rows?.d) * Math.max(1, IrisStyle.typeScale) + gap)))
                     columnSpacing: gap
@@ -314,7 +329,7 @@ ColumnLayout {
                             id: group
                             required property var modelData
                             readonly property string key: String(group.modelData.key ?? "")
-                            readonly property bool open: rows?.homeOpen === group.key
+                            readonly property bool open: rows?.openGroup === group.key
                             readonly property color tint: IrisOptions.groupTints[group.key] ?? IrisOptions.sectionById(rows?.section)?.tint ?? IrisStyle.identity.gray
                             // What it holds now, in words: its first rows' values, a switch by its name while on ("24-hour", "Low power").
                             readonly property string glance: {
@@ -332,7 +347,7 @@ ColumnLayout {
                                 }
                                 return said.join(" · ")
                             }
-                            function act(): void { rows.homeOpen = group.open ? "" : group.key }
+                            function act(): void { rows.openGroup = group.open ? "" : group.key }
                             Layout.fillWidth: true
                             Layout.preferredWidth: 1
                             implicitHeight: Math.max(Math.round(64 * rows?.d), groupWords.implicitHeight + Math.round(24 * rows?.d))

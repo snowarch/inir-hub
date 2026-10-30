@@ -189,9 +189,9 @@ Item {
             const y = target.item.mapToItem(flick.contentItem, 0, 0).y - page.u(8)
             page.glideTo(y)
             if (y <= flick.contentHeight - flick.height + 1) return
-        } else if (!rows.moreOpen && rows.blocks.some(block => block.rest && block.key.toLowerCase() === lower)) {
-            // A group waiting under the area's Fine-tune opens it, then shows once built.
-            rows.fold("more")
+        } else {
+            // A group resting under a tile (or the area's Fine-tune) opens, then shows once built.
+            rows.openRest(wanted)
         }
         if (showAgain.tries >= 8) return
         showAgain.tries++

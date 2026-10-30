@@ -144,7 +144,7 @@ Item {
             // (SekaiPop's jump chips). An "at a glance" of values stood here and said again what the sheet beside it says.
             Column {
                 id: contents
-                readonly property var heads: rows.blocks.filter(block => String(block.caption ?? "").length > 0 && (!block.rest || rows.moreOpen))
+                readonly property var heads: rows.blocks.filter(block => String(block.caption ?? "").length > 0 && (!block.rest || rows.opensRest(String(block.key ?? ""))))
                 readonly property int at: Math.max(0, contents.heads.findIndex(block => String(block.key) === page.reading))
                 readonly property int fit: Math.max(0, Math.floor((areaBox.height - plate.height - page.u(150)) / page.u(32)))
                 // More groups than room: the list keeps the one being read inside it.
@@ -292,10 +292,9 @@ Item {
         if (target) {
             page.waiting = ""
             page.glideTo(target.item.mapToItem(flick.contentItem, 0, 0).y - page.u(8))
-        } else if (!rows.moreOpen && rows.blocks.some(block => block.rest && (block.key === wanted || block.key.toLowerCase() === lower))) {
-            // A group waiting under the area's Fine-tune opens it first, then shows.
+        } else if (rows.openRest(wanted)) {
+            // A group resting under a tile (or the area's Fine-tune) opens first, then shows.
             page.waiting = wanted
-            rows.fold("more")
             rows.builtUpTo = rows.blocks.length
         } else if (rows.builtUpTo < rows.blocks.length) {
             // A group still waiting below the fold is built first (with the rest), then shown.

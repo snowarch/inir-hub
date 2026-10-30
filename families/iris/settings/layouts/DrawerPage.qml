@@ -234,8 +234,7 @@ Item {
         // A group waiting under its column's Fine-tune opens it, then shows once built.
         for (let i = 0; i < columnRepeater.count; i++) {
             const column = columnRepeater.itemAt(i)
-            if (column && !column.moreOpen && column.blocks.some(block => block.rest && block.key.toLowerCase() === lower))
-                column.fold("more")
+            column?.openRest(wanted)
         }
         if (showAgain.tries >= 8) return
         showAgain.tries++
