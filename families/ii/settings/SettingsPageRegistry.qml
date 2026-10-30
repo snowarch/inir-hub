@@ -190,7 +190,7 @@ Singleton {
             key: "ricelin",
             name: Translation.tr("Ricelin"),
             icon: "jp:リ",
-            desc: Translation.tr("The washi & flame dialect: pill bar, islands, surfaces"),
+            desc: Translation.tr("Pill bar and island surfaces"),
             essential: false,
             component: "modules/ii/settings/RicelinConfig.qml"
         },

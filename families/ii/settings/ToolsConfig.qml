@@ -319,7 +319,85 @@ ContentPage {
         return options
     }
 
-    component RecordingDropdownField: ColumnLayout {
+    // One setting = one tile in the page's segmented list, painted and padded like ConfigSpinBox's.
+    component SettingTile: Item {
+        id: tile
+        default property alias content: tileRow.data
+        readonly property string settingsTileRole: "tile"
+        property bool tileTop: true
+        property bool tileBottom: true
+        Layout.fillWidth: true
+        implicitHeight: Math.max(SettingsMaterialPreset.rowMinHeight, tileRow.implicitHeight + SettingsMaterialPreset.tilePaddingY * 2)
+
+        Rectangle {
+            anchors.fill: parent
+            color: SettingsMaterialPreset.tileColor
+            topLeftRadius: tile.tileTop ? SettingsMaterialPreset.tileOuterRadius : SettingsMaterialPreset.tileInnerRadius
+            topRightRadius: topLeftRadius
+            bottomLeftRadius: tile.tileBottom ? SettingsMaterialPreset.tileOuterRadius : SettingsMaterialPreset.tileInnerRadius
+            bottomRightRadius: bottomLeftRadius
+        }
+        RowLayout {
+            id: tileRow
+            anchors {
+                fill: parent
+                leftMargin: SettingsMaterialPreset.tilePaddingX
+                rightMargin: SettingsMaterialPreset.tilePaddingX
+                topMargin: SettingsMaterialPreset.tilePaddingY
+                bottomMargin: SettingsMaterialPreset.tilePaddingY
+            }
+            spacing: SettingsMaterialPreset.tilePaddingX
+        }
+    }
+
+    // A folder is one row: its name and path, then what you can do with it. Two half-width slabs under the path
+    // read as the setting itself.
+    component FolderRow: SettingTile {
+        id: folderRow
+        required property string title
+        required property string path
+        required property string openLabel
+        signal changeRequested()
+
+        MaterialSymbol {
+            text: "folder"
+            iconSize: SettingsMaterialPreset.iconSize
+            color: SettingsMaterialPreset.supportingColor
+        }
+        ColumnLayout {
+            Layout.fillWidth: true
+            spacing: 2
+            StyledText {
+                text: folderRow.title
+                font.pixelSize: SettingsMaterialPreset.labelSize
+                color: SettingsMaterialPreset.labelColor
+            }
+            StyledText {
+                Layout.fillWidth: true
+                text: Directories.shortHomePath(folderRow.path)
+                font.pixelSize: SettingsMaterialPreset.supportingSize
+                color: SettingsMaterialPreset.supportingColor
+                elide: Text.ElideMiddle
+            }
+        }
+        RowLayout {
+            spacing: 8
+            RippleButtonWithIcon {
+                materialIcon: "folder_open"
+                mainText: Translation.tr("Open")
+                onClicked: ShellExec.openDirectory(folderRow.path, folderRow.openLabel)
+            }
+            RippleButtonWithIcon {
+                materialIcon: "drive_file_move"
+                mainText: Translation.tr("Change")
+                onClicked: folderRow.changeRequested()
+            }
+        }
+    }
+
+    // A choice from a list is a row like every other setting: what it is on the left, the menu on the right.
+    // Full-width menus under their labels turned the page into a stack of slabs.
+    component RecordingDropdownField: SettingTile {
         id: field
         required property string title
         required property string description
@@ -328,27 +406,30 @@ ContentPage {
         property bool fieldEnabled: true
         signal selected(var newValue)
 
-        Layout.fillWidth: true
-        spacing: 4
-
-        StyledText {
+        ColumnLayout {
             Layout.fillWidth: true
-            text: field.title
-        }
+            spacing: 2
 
-        StyledText {
-            Layout.fillWidth: true
-            visible: field.description.length > 0
-            text: field.description
-            color: Appearance.angelEverywhere ? Appearance.angel.colTextMuted
-                : Appearance.inirEverywhere ? Appearance.inir.colTextSecondary
-                : Appearance.colors.colSubtext
-            font.pixelSize: Appearance.font.pixelSize.smallie
-            wrapMode: Text.WordWrap
+            StyledText {
+                Layout.fillWidth: true
+                text: field.title
+                font.pixelSize: SettingsMaterialPreset.labelSize
+                color: SettingsMaterialPreset.labelColor
+                wrapMode: Text.WordWrap
+            }
+            StyledText {
+                Layout.fillWidth: true
+                visible: field.description.length > 0
+                text: field.description
+                color: SettingsMaterialPreset.supportingColor
+                font.pixelSize: SettingsMaterialPreset.supportingSize
+                wrapMode: Text.WordWrap
+            }
         }
 
         StyledComboBox {
-            Layout.fillWidth: true
+            Layout.preferredWidth: Math.round(240 * Appearance.fontSizeScale)
+            Layout.alignment: Qt.AlignVCenter
             enabled: field.fieldEnabled
             model: field.options
             textRole: "displayName"
@@ -474,44 +555,11 @@ ContentPage {
                 onCheckedChanged: Config.setNestedValue("screenRecord.showNotifications", checked)
             }
 
-            NoticeBox {
-                Layout.fillWidth: true
-                materialIcon: recordingCapabilitiesLoaded ? (gpuRecordingAvailable ? "memory" : "developer_board") : "progress_activity"
-                text: !recordingCapabilitiesLoaded
-                    ? Translation.tr("Detecting available encoders…")
-                    : gpuRecordingAvailable
-                        ? Translation.tr("GPU recording available. Hardware acceleration will be used when possible.")
-                        : Translation.tr("No GPU encoder detected. Software recording will be used.")
-            }
-
-            ContentSubsection {
+            FolderRow {
                 title: Translation.tr("Recording folder")
-
-                StyledText {
-                    Layout.fillWidth: true
-                    text: Directories.shortHomePath(root.effectiveRecordingPath)
-                    color: Appearance.colors.colOnLayer1
-                    elide: Text.ElideMiddle
-                }
-
-                RowLayout {
-                    Layout.fillWidth: true
-                    spacing: Appearance.sizes.spacingSmall
-
-                    RippleButtonWithIcon {
-                        Layout.fillWidth: true
-                        materialIcon: "folder_open"
-                        mainText: Translation.tr("Open folder")
-                        onClicked: ShellExec.openDirectory(root.effectiveRecordingPath, Translation.tr("Open recordings folder"))
-                    }
-
-                    RippleButtonWithIcon {
-                        Layout.fillWidth: true
-                        materialIcon: "drive_file_move"
-                        mainText: Translation.tr("Change folder")
-                        onClicked: root.openCaptureFolderDialog("recordings")
-                    }
-                }
+                path: root.effectiveRecordingPath
+                openLabel: Translation.tr("Open recordings folder")
+                onChangeRequested: root.openCaptureFolderDialog("recordings")
             }
 
             ConfigRow {
@@ -532,7 +580,9 @@ ContentPage {
 
                 RecordingDropdownField {
                     title: Translation.tr("Acceleration")
-                    description: Translation.tr("Auto picks the best path for your hardware.")
+                    description: !root.recordingCapabilitiesLoaded ? Translation.tr("Detecting available encoders…")
+                        : root.gpuRecordingAvailable ? Translation.tr("GPU recording available. Hardware acceleration will be used when possible.")
+                        : Translation.tr("No GPU encoder detected. Software recording will be used.")
                     options: root.recordingAccelerationOptions
                     currentValue: Config.options?.screenRecord?.accelerationMode ?? "auto"
                     onSelected: newValue => root.setRecordingConfig("screenRecord.accelerationMode", newValue)
@@ -1226,34 +1276,11 @@ ContentPage {
 
             }
 
-            ContentSubsection {
+            FolderRow {
                 title: Translation.tr("Screenshots folder")
-
-                StyledText {
-                    Layout.fillWidth: true
-                    text: Directories.shortHomePath(root.effectiveScreenshotPath)
-                    color: Appearance.colors.colOnLayer1
-                    elide: Text.ElideMiddle
-                }
-
-                RowLayout {
-                    Layout.fillWidth: true
-                    spacing: Appearance.sizes.spacingSmall
-
-                    RippleButtonWithIcon {
-                        Layout.fillWidth: true
-                        materialIcon: "folder_open"
-                        mainText: Translation.tr("Open folder")
-                        onClicked: ShellExec.openDirectory(root.effectiveScreenshotPath, Translation.tr("Open screenshots folder"))
-                    }
-
-                    RippleButtonWithIcon {
-                        Layout.fillWidth: true
-                        materialIcon: "drive_file_move"
-                        mainText: Translation.tr("Change folder")
-                        onClicked: root.openCaptureFolderDialog("screenshots")
-                    }
-                }
+                path: root.effectiveScreenshotPath
+                openLabel: Translation.tr("Open screenshots folder")
+                onChangeRequested: root.openCaptureFolderDialog("screenshots")
             }
 
             ContentSubsection {

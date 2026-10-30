@@ -54,52 +54,13 @@ ColumnLayout {
         }
     }
 
-    Rectangle {
+    // a filled accent banner for a sentence of explanation shouted over the controls: a caption says it
+    StyledText {
         Layout.fillWidth: true
-        implicitHeight: intro.implicitHeight + 24
-        radius: Appearance.rounding.normal
-        color: Appearance.colors.colPrimaryContainer
-
-        ColumnLayout {
-            id: intro
-            anchors.fill: parent
-            anchors.margins: 12
-            spacing: 8
-
-            RowLayout {
-                Layout.fillWidth: true
-                spacing: 10
-                MaterialCookie {
-                    implicitSize: 40
-                    sides: 9
-                    color: Appearance.colors.colPrimary
-                    MaterialSymbol {
-                        anchors.centerIn: parent
-                        text: "layers"
-                        iconSize: 19
-                        color: Appearance.colors.colOnPrimary
-                    }
-                }
-                ColumnLayout {
-                    Layout.fillWidth: true
-                    spacing: 1
-                    StyledText {
-                        text: Translation.tr("One Ricelin skin, reused everywhere")
-                        font.pixelSize: Appearance.font.pixelSize.normal
-                        font.weight: Font.DemiBold
-                        color: Appearance.colors.colOnPrimaryContainer
-                    }
-                    StyledText {
-                        Layout.fillWidth: true
-                        text: Translation.tr("Opacity, glass and edge treatment are shared. Each surface keeps geometry appropriate to its role instead of becoming the same card everywhere.")
-                        font.pixelSize: Appearance.font.pixelSize.smaller
-                        color: Appearance.colors.colOnPrimaryContainer
-                        opacity: 0.82
-                        wrapMode: Text.WordWrap
-                    }
-                }
-            }
-        }
+        text: Translation.tr("Everything drawn as an island wears these: bar islands, panels and widgets. Each keeps its own shape.")
+        font.pixelSize: Appearance.font.pixelSize.smaller
+        color: Appearance.colors.colSubtext
+        wrapMode: Text.WordWrap
     }
 
     Rectangle {
