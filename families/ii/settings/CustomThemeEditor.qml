@@ -2017,11 +2017,6 @@ ColumnLayout {
                     elide: Text.ElideRight
                 }
             }
-            StyledText {
-                text: root.detailedColorsExpanded ? Translation.tr("Hide advanced") : Translation.tr("Show advanced")
-                font.pixelSize: Appearance.font.pixelSize.smallest
-                color: Appearance.colors.colPrimary
-            }
             MaterialSymbol {
                 text: root.detailedColorsExpanded ? "expand_less" : "expand_more"
                 iconSize: 20

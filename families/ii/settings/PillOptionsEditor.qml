@@ -517,40 +517,19 @@ ColumnLayout {
             onCheckedChanged: Config.setNestedValue("bar.pill.time12h", checked)
         }
 
-        RippleButton {
-            Layout.fillWidth: true
-            implicitHeight: 38
-            buttonRadius: Appearance.rounding.small
-            colBackground: Appearance.colors.colLayer1
-            colBackgroundHover: Appearance.colors.colLayer1Hover
+        SettingsFold {
+            visible: Config.options?.bar?.pill?.showGlyphs ?? true
+            glyph: "edit"
+            text: Translation.tr("Per-surface glyph overrides")
+            summary: root.glyphDescriptors.map(entry => PillTheme.glyph(entry.key)).join(" ")
+            open: root.glyphOverridesExpanded
             onClicked: root.glyphOverridesExpanded = !root.glyphOverridesExpanded
-
-            RowLayout {
-                anchors.fill: parent
-                anchors.leftMargin: 10
-                anchors.rightMargin: 10
-                spacing: 8
-                MaterialSymbol {
-                    text: root.glyphOverridesExpanded ? "expand_less" : "expand_more"
-                    iconSize: 18
-                    color: Appearance.colors.colSubtext
-                }
-                StyledText {
-                    Layout.fillWidth: true
-                    text: Translation.tr("Per-surface glyph overrides")
-                    font.pixelSize: Appearance.font.pixelSize.small
-                    font.weight: Font.Medium
-                }
-                StyledText {
-                    text: Translation.tr("Optional")
-                    color: Appearance.colors.colSubtext
-                    font.pixelSize: Appearance.font.pixelSize.smallest
-                }
-            }
         }
 
         ColumnLayout {
-            visible: root.glyphOverridesExpanded
+            visible: root.glyphOverridesExpanded && (Config.options?.bar?.pill?.showGlyphs ?? true)
+            readonly property bool expanded: root.glyphOverridesExpanded
+            function focusFromSettingsSearch() { root.glyphOverridesExpanded = true }
             Layout.fillWidth: true
             spacing: 8
 

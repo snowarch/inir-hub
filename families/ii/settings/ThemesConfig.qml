@@ -1942,40 +1942,19 @@ ContentPage {
                 }
             }
 
-            // Variable Font Axes - Collapsible
-            RippleButton {
-                id: advancedToggle
-                Layout.fillWidth: true
-                implicitHeight: 32
-                buttonRadius: Appearance.rounding.small
-                colBackground: "transparent"
-                property bool expanded: false
-
-                RowLayout {
-                    anchors.fill: parent
-                    anchors.leftMargin: 8
-                    spacing: 8
-
-                    MaterialSymbol {
-                        text: advancedToggle.expanded ? "expand_less" : "expand_more"
-                        iconSize: Appearance.font.pixelSize.small
-                        color: Appearance.colors.colSubtext
-                    }
-
-                    StyledText {
-                        text: Translation.tr("Variable Font Axes")
-                        font.pixelSize: Appearance.font.pixelSize.smaller
-                        color: Appearance.colors.colSubtext
-                    }
-                }
-
-                onClicked: expanded = !expanded
+            SettingsFold {
+                id: fontAxesFold
+                glyph: "tune"
+                text: Translation.tr("Variable Font Axes")
+                summary: [Translation.tr("Weight"), Translation.tr("Width"), Translation.tr("Grade")].join(", ")
+                onClicked: open = !open
             }
 
             ColumnLayout {
-                visible: advancedToggle.expanded
+                visible: fontAxesFold.open
+                readonly property bool expanded: fontAxesFold.open
+                function focusFromSettingsSearch() { fontAxesFold.open = true }
                 Layout.fillWidth: true
-                Layout.leftMargin: 16
                 spacing: 4
 
                 ConfigSpinBox {
