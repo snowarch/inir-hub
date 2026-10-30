@@ -711,14 +711,64 @@ Item {
         Column {
             id: pieces
             readonly property var picked: Array.from(root.value ?? [])
-            // Forty cities as chips filled the sheet (10-25): a long list shows what's picked and finds the rest.
+            // A long list (forty cities, every piece) shows what's added in its order, then everything still available,
+            // filtered as you type: an empty field that showed nothing until you guessed a name hid the choices (his 10-30).
             readonly property bool searchable: root.choices.length > 12
             readonly property string query: finder.text.trim().toLowerCase()
-            readonly property var shown: !pieces.searchable ? root.choices
-                : pieces.picked.map(value => root.choices.find(choice => String(choice.value) === value)).filter(Boolean)
-                    .concat(pieces.query.length === 0 ? [] : root.choices.filter(choice => !pieces.picked.includes(String(choice.value))
-                        && Translation.tr(String(choice.label)).toLowerCase().includes(pieces.query)).slice(0, 8))
+            property bool everything: false
+            readonly property var added: pieces.picked.map(value => root.choices.find(choice => String(choice.value) === value)).filter(Boolean)
+            readonly property var available: root.choices.filter(choice => !pieces.picked.includes(String(choice.value))
+                && (pieces.query.length === 0 || Translation.tr(String(choice.label)).toLowerCase().includes(pieces.query)
+                    || String(choice.value).toLowerCase().includes(pieces.query)))
+            readonly property int cap: pieces.everything || pieces.query.length > 0 ? 9999 : 18
             spacing: Math.round(8 * root.d)
+
+            component PieceChip: IrisChip {
+                id: chip
+                required property var modelData
+                readonly property int place: pieces.picked.indexOf(String(chip.modelData.value))
+                // A flags row is a set: no order to number.
+                order: root.spec.flags ? -1 : chip.place
+                selected: chip.place >= 0
+                glyph: String(chip.modelData.glyph ?? "")
+                label: Translation.tr(String(chip.modelData.label))
+                Accessible.role: Accessible.CheckBox
+                Accessible.description: chip.selected ? Translation.tr("Tap to remove") : Translation.tr("Tap to add")
+                onClicked: {
+                    const value = String(chip.modelData.value)
+                    const next = pieces.picked.filter(entry => entry !== value)
+                    if (!chip.selected) next.push(value)
+                    root.commit(next)
+                }
+            }
+
+            Flow {
+                width: parent.width
+                visible: !pieces.searchable
+                spacing: Math.round(8 * root.d)
+                Repeater {
+                    model: pieces.searchable ? [] : root.choices
+                    delegate: PieceChip {}
+                }
+            }
+
+            IrisText {
+                visible: pieces.searchable
+                text: pieces.added.length > 0 ? (root.spec.flags ? Translation.tr("On") : Translation.tr("Added, in this order"))
+                    : Translation.tr("Nothing added yet")
+                color: IrisStyle.textSecondary
+                font.pixelSize: IrisStyle.typeFootnote
+                font.weight: IrisStyle.weight(Font.DemiBold)
+            }
+            Flow {
+                width: parent.width
+                visible: pieces.searchable && pieces.added.length > 0
+                spacing: Math.round(8 * root.d)
+                Repeater {
+                    model: pieces.searchable ? pieces.added : []
+                    delegate: PieceChip {}
+                }
+            }
 
             IrisField {
                 id: finder
@@ -726,38 +776,35 @@ Item {
                 width: parent.width
                 implicitHeight: Math.round(34 * root.d)
                 font.pixelSize: IrisStyle.typeLabel
-                placeholderText: Translation.tr("Search to add")
+                placeholderText: Translation.tr("Filter %1 available").arg(pieces.available.length)
                 Accessible.name: Translation.tr(root.spec.label)
                 Keys.onEscapePressed: event => { if (text.length > 0) { text = ""; event.accepted = true } else event.accepted = false }
-            }
-
-        Flow {
-            id: picker
-            width: parent.width
-            readonly property var picked: pieces.picked
-            spacing: Math.round(8 * root.d)
-
-            Repeater {
-                model: pieces.shown
-                delegate: IrisChip {
-                    id: chip
-                    required property var modelData
-                    readonly property int place: picker.picked.indexOf(String(chip.modelData.value))
-                    // A flags row is a set: no order to number.
-                    order: root.spec.flags ? -1 : chip.place
-                    selected: chip.place >= 0
-                    label: Translation.tr(String(chip.modelData.label))
-                    Accessible.role: Accessible.CheckBox
-                    onClicked: {
-                        const value = String(chip.modelData.value)
-                        const next = picker.picked.filter(entry => entry !== value)
-                        if (!chip.selected) next.push(value)
-                        root.commit(next)
-                        if (!chip.selected) finder.text = ""
-                    }
+                Keys.onReturnPressed: if (pieces.available.length > 0 && pieces.query.length > 0) {
+                    root.commit(pieces.picked.concat([String(pieces.available[0].value)]))
+                    text = ""
                 }
             }
-        }
+            Flow {
+                width: parent.width
+                visible: pieces.searchable
+                spacing: Math.round(8 * root.d)
+                Repeater {
+                    model: pieces.searchable ? pieces.available.slice(0, pieces.cap) : []
+                    delegate: PieceChip {}
+                }
+                IrisChip {
+                    visible: pieces.available.length > pieces.cap
+                    glyph: "expand_more"
+                    label: Translation.tr("All %1").arg(pieces.available.length)
+                    onClicked: pieces.everything = true
+                }
+            }
+            IrisText {
+                visible: pieces.searchable && pieces.available.length === 0
+                text: pieces.query.length > 0 ? Translation.tr("Nothing matches") : Translation.tr("Everything is added")
+                color: IrisStyle.textTertiary
+                font.pixelSize: IrisStyle.typeMeta
+            }
         }
     }
 

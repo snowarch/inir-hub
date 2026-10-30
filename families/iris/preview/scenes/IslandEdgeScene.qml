@@ -29,9 +29,8 @@ PreviewScene {
         anchors.fill: parent
         radius: 0
         outlined: false
-        // Up to half again its size where the stage has room: drawn, not stretched (the wallpaper decodes at the
-        // canvas, the field and type draw at it), so it stays sharp.
-        maxScale: 1.5
+        // At its own size, as every other scene: scaled past 1 the clock and glyphs are bitmaps blown up (his 10-30: blurry).
+        maxScale: 1
         focusRect: screen.islandReach
     }
     Caption {

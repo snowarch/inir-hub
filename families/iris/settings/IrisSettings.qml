@@ -1020,15 +1020,15 @@ Item {
                             readonly property color wash: IrisStyle.tintFillHover(travelWash.row?.own ?? IrisStyle.accent)
                             color: IrisStyle.plateSelection ? IrisStyle.selectionFill : "transparent"
                             opacity: travelWash.shown ? 1 : 0
-                            // Where you are fades out toward the right: a flat block of tint read as a heavy bar (his 10-30).
+                            // Where you are fades in from the left, strongest at the right (his 10-30): a flat block of tint read as a heavy bar (his 10-30).
                             Rectangle {
                                 anchors.fill: parent
                                 visible: !IrisStyle.plateSelection
                                 radius: parent.radius
                                 gradient: Gradient {
                                     orientation: Gradient.Horizontal
-                                    GradientStop { position: 0; color: travelWash.wash }
-                                    GradientStop { position: 1; color: ColorUtils.applyAlpha(travelWash.wash, 0) }
+                                    GradientStop { position: 0; color: ColorUtils.applyAlpha(travelWash.wash, 0) }
+                                    GradientStop { position: 1; color: travelWash.wash }
                                 }
                             }
                             // It lands where it first appears and travels from then on. Moving the selection hides it for a
@@ -1602,8 +1602,8 @@ Item {
                 radius: parent.radius
                 gradient: Gradient {
                     orientation: Gradient.Horizontal
-                    GradientStop { position: 0; color: IrisStyle.tintFillHover(sectionRow.own) }
-                    GradientStop { position: 1; color: ColorUtils.applyAlpha(IrisStyle.tintFillHover(sectionRow.own), 0) }
+                    GradientStop { position: 0; color: ColorUtils.applyAlpha(IrisStyle.tintFillHover(sectionRow.own), 0) }
+                    GradientStop { position: 1; color: IrisStyle.tintFillHover(sectionRow.own) }
                 }
             }
             // Vivid tiles: the colour is how the eye finds an area, whatever material sits behind.
