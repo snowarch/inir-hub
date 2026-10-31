@@ -19,8 +19,11 @@ Rectangle {
     // A mark is a colour you tell areas apart by, so it is always vivid: a palette may keep its identity hues quiet on
     // purpose (washi's blue is #869dd5), and a quiet hue under white read as a grey tile. The hue stays; the plate
     // takes the HIG band of chroma and lightness (Apple's system blue sits at s 1.0, l 0.52). Greys stay grey.
-    readonly property color vivid: root.tint.hslSaturation < 0.14 ? root.tint
-        : Qt.hsla(root.tint.hslHue, Math.max(root.tint.hslSaturation, 0.78), Math.max(0.46, Math.min(0.58, root.tint.hslLightness)), 1)
+    // Style › Icons › Colour: the area's own, the accent for every area, or a grey plate (mono).
+    readonly property color hue: IrisStyle.iconHue(root.tint)
+    readonly property bool mono: IrisStyle.iconColour === "mono"
+    readonly property color vivid: root.hue.hslSaturation < 0.14 ? root.hue
+        : Qt.hsla(root.hue.hslHue, Math.max(root.hue.hslSaturation, 0.78), Math.max(0.46, Math.min(0.58, root.hue.hslLightness)), 1)
     readonly property color tileTop: root.plate === "white" ? IrisStyle.plateWhiteTop
         : root.plate === "tint" ? IrisStyle.tileTop(root.vivid)
         : root.plate === "surface" ? Qt.lighter(IrisStyle.surfaceHighestOpaque, 1.7)
@@ -38,9 +41,9 @@ Rectangle {
     readonly property bool glossed: !root.plain && IrisStyle.marksStyle === "gloss"
     // On a chosen row's plate (a plate Design): the plain glyph in the plate's own ink.
     property bool reversed: false
-    property color ink: root.plain ? (root.reversed ? IrisStyle.selectionLabel : IrisStyle.glyphTinted ? root.vivid : IrisStyle.textSecondary)
+    property color ink: root.plain ? (root.reversed ? IrisStyle.selectionLabel : root.mono ? IrisStyle.textSecondary : root.vivid)
         : root.keyed ? IrisStyle.text
-        : root.tiled && root.plate !== "tint" ? root.vivid : IrisStyle.onTint
+        : root.tiled && root.plate !== "tint" ? (root.mono ? IrisStyle.text : root.vivid) : IrisStyle.onTint
     radius: root.plain ? 0 : IrisStyle.iconRadius(width)
     color: "transparent"
     // The plate is its own child: a Rectangle's gradient cannot be bound back to none (Qt 6 keeps the last one).
@@ -89,6 +92,6 @@ Rectangle {
         glyphWeight: IrisStyle.iconWeight
         iconSize: Math.round(root.width * (root.plain ? Math.min(0.82, root.glyphShare + 0.14) : root.keyed ? root.glyphShare * 0.8 : root.glyphShare))
         color: root.ink
-        glyphGradient: root.tiled && !root.plain
+        glyphGradient: root.tiled && !root.plain && !root.mono
     }
 }

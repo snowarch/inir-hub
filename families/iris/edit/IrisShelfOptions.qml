@@ -14,6 +14,7 @@ import qs.modules.iris.settings
 // holds its control beside it, a switch, a short choice or a scrubber with its value. The card above shows each change
 // as it lands; the rest of the area is one tap away in Settings.
 Flickable {
+    IrisScrollFeel {}
     id: root
 
     required property string section
@@ -80,7 +81,6 @@ Flickable {
     contentWidth: board.width
     contentHeight: height
     flickableDirection: Flickable.HorizontalFlick
-    boundsBehavior: Flickable.StopAtBounds
     clip: true
     WheelHandler {
         acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad

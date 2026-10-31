@@ -75,7 +75,6 @@ QtObject {
         return 18 * root.d * Math.max(0.5, Math.min(3, Number(root.surround?.musicStrength ?? 160) / 100))
     }
     function safeInset(edge: string): real { return root.inset(edge) + root.musicReach(edge) }
-    function safeClear(edge: string): real { return root.clear(edge) + root.musicReach(edge) }
     readonly property int musicAppearanceCode: ({ sculpted: 0, etched: 1, satin: 2 })[String(root.surround?.musicAppearance ?? "etched")] ?? 1
     readonly property color musicInk: {
         const colour = String(root.surround?.musicColour ?? "pearl")
@@ -208,14 +207,6 @@ QtObject {
         return edges
     }
 
-    function clear(edge: string): real {
-        let inner = 0
-        if (edge === root.islandEdge) inner = Math.max(inner, root.islandVisualDepth)
-        if (root.piecesAttached && root.pieceEdges.includes(edge))
-            inner = Math.max(inner, root.pieceDepthOn(edge))
-        if (edge === root.dockEdge) inner = Math.max(inner, root.dockVisualDepth)
-        return Math.round(root.band + inner)
-    }
 
     readonly property var theme: Config.options?.iris?.appearance?.theme ?? ({})
     readonly property real bodyAir: Math.round(Math.max(0, Math.min(40, Number(root.theme?.air ?? 8))) * root.d)

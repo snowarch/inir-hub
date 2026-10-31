@@ -94,6 +94,10 @@ Item {
         && root.choices.some(choice => choice.swatch !== undefined)
     readonly property bool tiled: root.spec.kind === "choice" && root.spec.tiles === true && root.choices.length > 0
     readonly property bool carded: root.spec.kind === "choice" && (root.spec.cards === "material" || root.spec.cards === "design") && root.choices.length > 0
+    // Designs are thumbnails in the answer column while they fit there; a long catalogue takes the row under the text.
+    readonly property real designThumb: Math.round(140 * root.d)
+    readonly property real designRow: root.choices.length * root.designThumb + (root.choices.length - 1) * Math.round(10 * root.d)
+    readonly property bool designInline: root.carded && root.spec.cards === "design" && root.roomy && root.designRow <= root.controlWidth
     // Every control that fits answers in one right-hand column, the same width on every row, so a page reads as names on
     // the left and answers on the right. What needs more room (pictures, four or more choices, galleries) sits under the
     // text at full width.
@@ -399,6 +403,15 @@ Item {
 
             Loader {
                 opacity: root.controlOpacity
+                active: root.designInline
+                visible: active
+                Layout.preferredWidth: root.designRow
+                Layout.alignment: Qt.AlignVCenter
+                sourceComponent: designCardsComponent
+            }
+
+            Loader {
+                opacity: root.controlOpacity
                 active: root.menuChoice
                 visible: active
                 Layout.alignment: Qt.AlignVCenter
@@ -584,7 +597,7 @@ Item {
         Loader {
             opacity: root.controlOpacity
             Layout.fillWidth: true
-            active: root.carded
+            active: root.carded && !root.designInline
             visible: active
             sourceComponent: root.spec.cards === "design" ? designCardsComponent : materialCardsComponent
         }
@@ -1085,8 +1098,8 @@ Item {
                     Rectangle {
                         anchors.top: parent.top
                         anchors.right: parent.right
-                        anchors.margins: Math.round(10 * root.d)
-                        width: Math.round(24 * root.d)
+                        anchors.margins: Math.round(designs.cardWidth * 0.05)
+                        width: Math.round(Math.min(24 * root.d, designs.cardWidth * 0.15))
                         height: width
                         radius: IrisStyle.capsule(width)
                         color: IrisStyle.accentFill
@@ -1097,7 +1110,7 @@ Item {
                         MaterialSymbol {
                             anchors.centerIn: parent
                             text: "check"
-                            iconSize: Math.round(16 * root.d)
+                            iconSize: Math.round(parent.width * 0.66)
                             color: IrisStyle.inkOnAccentFill
                         }
                     }

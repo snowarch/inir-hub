@@ -16,12 +16,12 @@ import qs.modules.iris.preview
 import qs.modules.iris.components as Iris
 
 Flickable {
+    IrisScrollFeel {}
     readonly property var root: WelcomeHost.wizard
     id: irisAppearanceFlickable
     width: root.stepWidth
     contentHeight: irisAppearanceGrid.implicitHeight
     clip: true
-    boundsBehavior: Flickable.StopAtBounds
     interactive: contentHeight > height
     bottomMargin: 24
     topMargin: Math.max(root.compact ? 8 : 12,

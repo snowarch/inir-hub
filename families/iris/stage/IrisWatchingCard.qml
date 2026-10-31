@@ -296,7 +296,7 @@ ColumnLayout {
                     readonly property bool marked: watchRow.mine || watchRow.containsMouse || poster.status !== Image.Ready
                     implicitWidth: Math.round(28 * continuing.d)
                     implicitHeight: Math.round(38 * continuing.d)
-                    radius: IrisStyle.iconRadius(width)
+                    radius: IrisStyle.tileRadius(width)
                     color: watchRow.mine || watchRow.containsMouse
                         ? IrisStyle.tintFill(IrisStyle.identity.pink) : IrisStyle.fillQuiet
                     Behavior on color { ColorAnimation { duration: IrisStyle.duration(120); easing.type: IrisStyle.feedbackEasing } }

@@ -99,6 +99,7 @@ PanelWindow {
     }
 
     ListView {
+        IrisScrollFeel {}
         id: popupColumn
         anchors.top: parent.top
         anchors.horizontalCenter: parent.horizontalCenter

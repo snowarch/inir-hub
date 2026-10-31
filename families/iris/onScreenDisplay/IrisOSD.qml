@@ -38,7 +38,7 @@ Scope {
     readonly property var prefs: Config.options?.iris?.osd
     readonly property bool atTop: root.prefs?.position === "top"
     readonly property real edgeMargin: Math.max(0, Math.min(240, Number(root.prefs?.offset ?? 18))) * IrisStyle.density
-        + (root.fullscreen ? 0 : IrisFrame.safeClear(root.atTop ? "top" : "bottom"))
+        + (root.fullscreen ? 0 : IrisFrame.safeInset(root.atTop ? "top" : "bottom"))
     readonly property int holdMs: Math.max(800, Math.min(5000, Number(root.prefs?.duration ?? 1500)))
     readonly property string gameRule: root.fullscreen || GameMode.active ? String(root.prefs?.fullscreen ?? "show") : "show"
     readonly property string levelsMode: String(root.prefs?.levels ?? "yours")
@@ -234,8 +234,8 @@ Scope {
         }
         anchors { bottom: !root.atTop; top: root.atTop; left: true; right: true }
         margins {
-            left: root.fullscreen ? 0 : IrisFrame.safeClear("left")
-            right: root.fullscreen ? 0 : IrisFrame.safeClear("right")
+            left: root.fullscreen ? 0 : IrisFrame.safeInset("left")
+            right: root.fullscreen ? 0 : IrisFrame.safeInset("right")
         }
         implicitHeight: Math.round(root.edgeMargin + 110 * IrisStyle.density)
         mask: Region {}

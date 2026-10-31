@@ -127,7 +127,7 @@ Item {
     // The overlay's free box: clear of the band, the Island, the Dock and the pieces on their edges.
     readonly property var room: {
         const gap = Math.round(14 * root.d)
-        const side = edge => Math.max(0, IrisFrame.safeClear(edge) - IrisFrame.band,
+        const side = edge => Math.max(0, IrisFrame.safeInset(edge) - IrisFrame.band,
             root.workspaceEmpty ? IrisFrame.emptyDepth(edge) + IrisFrame.musicReach(edge) : 0) + gap
         const left = side("left"), right = side("right"), top = side("top"), bottom = side("bottom")
         return { x: left, y: top, width: Math.max(0, root.width - left - right), height: Math.max(0, root.height - top - bottom) }
@@ -987,6 +987,7 @@ Item {
                     }
 
                     Flickable {
+                        IrisScrollFeel {}
                         id: sidebarFlick
                         Layout.fillWidth: true
                         Layout.fillHeight: true
@@ -997,7 +998,6 @@ Item {
                         contentHeight: sidebarColumn.implicitHeight
                         // What the list asks for: the window's height comes from it (`root.sidebarNeed`).
                         implicitHeight: sidebarColumn.implicitHeight
-                        boundsBehavior: Flickable.StopAtBounds
                         ScrollBar.vertical: IrisScrollBar {}
                         // The list itself fades under the footer: a gradient painted over it read as a square
                         // shadow on glass.
@@ -1348,6 +1348,7 @@ Item {
                                 easing.bezierCurve: IrisStyle.morphCurve
                             }
                             Flickable {
+                                IrisScrollFeel {}
                                 id: settingsFlick
                                 anchors.fill: parent
                                 // The pane's corners stay its own: the last rows stop short of the curve.
@@ -1366,7 +1367,6 @@ Item {
                                 visible: root.advancedPage < 0 && !root.classicRows
                                 // Rows laid after the section changed (a Place opening, a fold) move every head: the reading is taken again.
                                 contentHeight: settingsRows.implicitHeight + 32 * root.d
-                                boundsBehavior: Flickable.StopAtBounds
                                 ScrollBar.vertical: IrisScrollBar {}
 
                                 ColumnLayout {
@@ -1556,8 +1556,8 @@ Item {
         // Where you are speaks one colour, the area's own: its glyph fills, the wash under it takes a tint of it and so
         // does its name, a step heavier (DI49i: the chosen row reads at a glance, not only by its wash).
         readonly property color tint: IrisOptions.sectionById(sectionRow.modelData.id).tint
-        readonly property color own: IrisStyle.plainMarks ? IrisStyle.accent : sectionRow.tint
-        readonly property real washRadius: Math.min(sectionRow.rowHeight / 2, IrisStyle.iconRadius(sectionMark.width) + sectionMark.x)
+        readonly property color own: IrisStyle.iconColour === "area" && !IrisStyle.plainMarks ? sectionRow.tint : IrisStyle.accent
+        readonly property real washRadius: Math.min(sectionRow.rowHeight / 2, IrisStyle.tileRadius(sectionMark.width) + sectionMark.x)
         onSelectedChanged: if (sectionRow.selected && sectionRow.travels) root.travelRow = sectionRow
         Component.onCompleted: if (sectionRow.selected && sectionRow.travels) root.travelRow = sectionRow
         Component.onDestruction: if (root.travelRow === sectionRow) root.travelRow = null

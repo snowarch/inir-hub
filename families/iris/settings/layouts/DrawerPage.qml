@@ -170,11 +170,11 @@ Item {
         radius: IrisStyle.radiusSheet
         color: IrisStyle.glassy ? IrisStyle.readingSidebar : "transparent"
         Flickable {
+            IrisScrollFeel {}
             id: flick
             anchors.fill: parent
             anchors.margins: IrisStyle.glassy ? page.u(8) : 0
             contentHeight: columnRow.implicitHeight + page.u(16)
-            boundsBehavior: Flickable.StopAtBounds
             clip: true
             ScrollBar.vertical: IrisScrollBar {}
             Row {

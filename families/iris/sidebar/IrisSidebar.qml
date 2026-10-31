@@ -26,7 +26,7 @@ PanelWindow {
     readonly property bool pinned: root.options.pinned ?? false
     readonly property real d: IrisStyle.density
     readonly property string outputName: root.left ? GlobalStates.sidebarLeftTargetOutput : GlobalStates.sidebarRightTargetOutput
-    readonly property real edgeHeld: IrisFrame.clear(root.left ? "left" : "right") - IrisFrame.band
+    readonly property real edgeHeld: IrisFrame.inset(root.left ? "left" : "right") - IrisFrame.band
     readonly property bool notch: (root.options.notch ?? false) && root.edgeHeld <= 0
     readonly property bool peek: root.open && !root.pinned && IrisState.sidebarPeek === root.side
     property bool editing: false
@@ -323,12 +323,12 @@ PanelWindow {
                 }
             }
             Flickable {
+                IrisScrollFeel {}
                 id: scroll
                 Layout.fillWidth: true
                 Layout.fillHeight: true
                 implicitHeight: content.implicitHeight
                 contentHeight: content.implicitHeight
-                boundsBehavior: Flickable.StopAtBounds
                 clip: true
                 ScrollBar.vertical: IrisScrollBar {}
                 onWidthChanged: contentX = 0

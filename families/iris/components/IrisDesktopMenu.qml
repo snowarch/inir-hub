@@ -13,6 +13,7 @@ import qs.modules.common.functions
 import qs.modules.common.widgets
 import qs.modules.iris.style
 import qs.modules.iris.field as Field
+import qs.modules.iris.frame
 
 Loader {
     id: root
@@ -145,10 +146,16 @@ Loader {
             const p = item.mapToItem(null, 0, 0)
             return Qt.rect(o.x + p.x, o.y + p.y, root.opensToward.length > 0 ? item.width : 1, root.opensToward.length > 0 ? item.height : 1)
         }
-        function clampX(x: real): real { return Math.round(Math.max(popup.edge, Math.min(popup.width - menu.width - popup.edge, x))) }
-        function clampY(y: real): real { return Math.round(Math.max(popup.edge, Math.min(popup.height - menu.height - popup.edge, y))) }
-        readonly property bool flipX: root.opensToward.length === 0 && popup.target.x + menu.width + popup.edge > popup.width
-        readonly property bool flipY: root.opensToward.length === 0 && popup.target.y + menu.height + popup.edge > popup.height
+        // The room a menu has: inside the frame when it is on and clear of the Island, the Dock and attached pieces, so
+        // it never lies over the shell's own bodies; with nothing at an edge, the screen's edge.
+        readonly property real roomLeft: IrisFrame.safeInset("left") + popup.edge
+        readonly property real roomRight: popup.width - IrisFrame.safeInset("right") - popup.edge
+        readonly property real roomTop: IrisFrame.safeInset("top") + popup.edge
+        readonly property real roomBottom: popup.height - IrisFrame.safeInset("bottom") - popup.edge
+        function clampX(x: real): real { return Math.round(Math.max(popup.roomLeft, Math.min(popup.roomRight - menu.width, x))) }
+        function clampY(y: real): real { return Math.round(Math.max(popup.roomTop, Math.min(popup.roomBottom - menu.height, y))) }
+        readonly property bool flipX: root.opensToward.length === 0 && popup.target.x + menu.width > popup.roomRight
+        readonly property bool flipY: root.opensToward.length === 0 && popup.target.y + menu.height > popup.roomBottom
 
         MouseArea {
             anchors.fill: parent
@@ -265,7 +272,9 @@ Loader {
                     : popup.flipY ? menu.y + menu.height - menu.seed : menu.y,
                 width: menu.seed, height: menu.seed, radius: menu.seed / 2 })
             contentReady: column.implicitHeight > 0
-            radius: IrisStyle.surfaceRadius("menus", root.compact ? IrisStyle.radiusTile : IrisStyle.radiusCard)
+            // Auto follows the family's curves and, framed, nests in the frame's inner corner by the gap it keeps.
+            radius: IrisStyle.surfaceRadius("menus", Math.max(root.compact ? IrisStyle.radiusTile : IrisStyle.radiusCard,
+                IrisFrame.framed && !IrisStyle.fieldChamfer ? IrisStyle.concentric(IrisFrame.cornerRadius, popup.edge, 0) : 0))
             light: IrisStyle.surfaceLight("menus", IrisStyle.wallpaperLight)
             lightFrom: root.opensToward === "up" ? "bottom" : root.opensToward === "left" ? "right" : root.opensToward === "right" ? "left" : "top"
             x: root.opensToward === "over" ? popup.clampX(popup.target.x + root.overTextX - root.pad - popup.textInset)

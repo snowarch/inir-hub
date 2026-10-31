@@ -336,11 +336,11 @@ Item {
             height: root.sheetFullH
             y: root.edge === "bottom" ? parent.height - height : 0
             Flickable {
+                IrisScrollFeel {}
                 id: sheetFlick
                 anchors.fill: parent
                 anchors.margins: Math.round(16 * root.d)
                 contentHeight: sheetContent.implicitHeight
-                boundsBehavior: Flickable.StopAtBounds
                 clip: true
                 ScrollBar.vertical: IrisScrollBar {}
                 ColumnLayout {
@@ -385,11 +385,11 @@ Item {
         opacity: IrisStyle.contentAt(root.inspectorP)
         MouseArea { anchors.fill: parent; acceptedButtons: Qt.AllButtons }
         Flickable {
+            IrisScrollFeel {}
             id: inspectorFlick
             anchors.fill: parent
             anchors.margins: Math.round(14 * root.d)
             contentHeight: inspectorContent.implicitHeight
-            boundsBehavior: Flickable.StopAtBounds
             clip: true
             ScrollBar.vertical: IrisScrollBar {}
             ColumnLayout {

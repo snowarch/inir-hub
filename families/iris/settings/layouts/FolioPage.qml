@@ -156,13 +156,13 @@ Item {
                 height: areaBox.staged ? Math.round(Math.min(width * 0.3, page.u(260), sheet.height * 0.34)) : 0
             }
             Flickable {
+                IrisScrollFeel {}
                 id: flick
                 anchors.fill: parent
                 anchors.leftMargin: IrisStyle.glassy ? page.u(6) : 0
                 anchors.rightMargin: IrisStyle.glassy ? page.u(6) : 0
                 anchors.topMargin: (IrisStyle.glassy ? page.u(6) : 0) + (bannerSlot.height > 0 ? bannerSlot.height + page.u(10) : 0)
                 contentHeight: rows.y + rows.implicitHeight + page.u(24)
-                boundsBehavior: Flickable.StopAtBounds
                 clip: true
                 ScrollBar.vertical: IrisScrollBar {}
                 onContentYChanged: spyPace.restart()

@@ -80,11 +80,11 @@ Scope {
             const cx = body.x + body.width / 2
             const cy = body.y + body.height / 2
             body.animatePosition = true
-            body.x = cx < oskWindow.width / 3 ? gap + IrisFrame.safeClear("left")
-                : cx > oskWindow.width * 2 / 3 ? oskWindow.width - body.width - gap - IrisFrame.safeClear("right")
+            body.x = cx < oskWindow.width / 3 ? gap + IrisFrame.safeInset("left")
+                : cx > oskWindow.width * 2 / 3 ? oskWindow.width - body.width - gap - IrisFrame.safeInset("right")
                 : Math.round((oskWindow.width - body.width) / 2)
-            body.y = cy < oskWindow.height / 2 ? gap + IrisFrame.safeClear("top")
-                : oskWindow.height - body.height - gap - IrisFrame.safeClear("bottom")
+            body.y = cy < oskWindow.height / 2 ? gap + IrisFrame.safeInset("top")
+                : oskWindow.height - body.height - gap - IrisFrame.safeInset("bottom")
         }
 
         Field.IrisBlurRegion {
@@ -124,7 +124,7 @@ Scope {
             height: Math.round(board.implicitHeight + 2 * root.pad)
             // Bottom centre until the first drag takes the position.
             x: Math.round((oskWindow.width - width) / 2)
-            y: Math.round(oskWindow.height - height - 14 * root.d - IrisFrame.safeClear("bottom"))
+            y: Math.round(oskWindow.height - height - 14 * root.d - IrisFrame.safeInset("bottom"))
             onClosed: if (!body.open) root.presentationVisible = false
 
             Behavior on x {

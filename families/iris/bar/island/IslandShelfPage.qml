@@ -47,13 +47,13 @@ ColumnLayout {
     }
 
     Flickable {
+        IrisScrollFeel {}
         id: view
         visible: page.shown.length > 0
         Layout.fillWidth: true
         // Three rows in view; more scroll.
         Layout.preferredHeight: Math.min(grid.implicitHeight, page.tileHeight * 3 + page.gap * 2)
         contentHeight: grid.implicitHeight
-        boundsBehavior: Flickable.StopAtBounds
         clip: true
 
         Grid {

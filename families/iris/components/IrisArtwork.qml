@@ -12,7 +12,7 @@ Item {
     // With no cover: the icon of the app an empty player offers to open, instead of a generic note.
     property string appIcon: ""
     property bool circular: false
-    property real radius: circular ? width / 2 : Math.min(IrisStyle.iconRadius(width), IrisStyle.radiusTile)
+    property real radius: circular ? width / 2 : Math.min(IrisStyle.tileRadius(width), IrisStyle.radiusTile)
     property real decodeSize: 0
     implicitWidth: 64 * IrisStyle.density
     implicitHeight: implicitWidth

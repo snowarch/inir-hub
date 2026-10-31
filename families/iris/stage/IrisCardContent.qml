@@ -490,7 +490,7 @@ Item {
                     Rectangle {
                         Layout.preferredWidth: Math.round(44 * root.d)
                         Layout.preferredHeight: Layout.preferredWidth
-                        radius: IrisStyle.iconRadius(width)
+                        radius: IrisStyle.tileRadius(width)
                         color: workspaceRow.modelData.is_active ? IrisStyle.tintFill(IrisStyle.accent) : IrisStyle.fillQuiet
                         border.width: workspaceRow.modelData.is_active ? 0 : 1
                         border.color: IrisStyle.border
@@ -951,7 +951,7 @@ Item {
                         ClippingRectangle {
                             implicitWidth: Math.round(28 * root.d)
                             implicitHeight: Math.round(38 * root.d)
-                            radius: IrisStyle.iconRadius(width)
+                            radius: IrisStyle.tileRadius(width)
                             color: IrisStyle.fillQuiet
                             IrisImage {
                                 anchors.fill: parent

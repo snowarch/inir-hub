@@ -139,6 +139,7 @@ Item {
         : Math.max(root.u(180), Math.min(root.u(250), root.headFree - (root.headFit === 0 ? root.needSpelled : root.needTight)))
 
     Flickable {
+        IrisScrollFeel {}
         id: keyFlick
         x: root.headFit < 2 ? head.x + keyGap.x : head.x
         y: root.headFit < 2 ? head.y : head.y + head.height + root.u(8)
@@ -147,7 +148,6 @@ Item {
         contentWidth: keyRow.width
         contentHeight: height
         flickableDirection: Flickable.HorizontalFlick
-        boundsBehavior: Flickable.StopAtBounds
         interactive: keyRow.width > keyFlick.width
         clip: true
         Row {

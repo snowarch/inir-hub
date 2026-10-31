@@ -107,7 +107,7 @@ PanelWindow {
     screen: outputHold.output
     color: "transparent"
     anchors { left: true; top: true; bottom: true }
-    implicitWidth: frame.width + Math.round(24 * root.d) + IrisFrame.clear("left")
+    implicitWidth: frame.width + Math.round(24 * root.d) + IrisFrame.inset("left")
     exclusionMode: ExclusionMode.Ignore
     WlrLayershell.namespace: "quickshell:iris-studio"
     WlrLayershell.layer: WlrLayer.Overlay
@@ -132,7 +132,7 @@ PanelWindow {
         motionSurface: "settings"
         radius: IrisStyle.surfaceRadius("settings", IrisStyle.radiusPanel)
         light: IrisStyle.surfaceLight("settings", IrisStyle.wallpaperLight)
-        x: Math.round(12 * root.d) + IrisFrame.clear("left")
+        x: Math.round(12 * root.d) + IrisFrame.inset("left")
         y: (parent.height - height) / 2
         width: Math.min((root.screen?.width ?? 1920) - Math.round(48 * root.d) - IrisFrame.band * 2, Math.round(560 * root.d))
         height: Math.min(parent.height - Math.round(24 * root.d) - IrisFrame.band * 2, Math.round(960 * root.d))
@@ -252,10 +252,10 @@ PanelWindow {
                 spacing: Math.round(12 * root.d)
 
                 Flickable {
+                    IrisScrollFeel {}
                     Layout.preferredWidth: Math.round(64 * root.d)
                     Layout.fillHeight: true
                     contentHeight: rail.implicitHeight
-                    boundsBehavior: Flickable.StopAtBounds
                     clip: true
                     opacity: root.query.length > 0 ? 0.4 : 1
                     Behavior on opacity { NumberAnimation { duration: IrisStyle.duration(140); easing.type: IrisStyle.feedbackEasing } }
@@ -388,12 +388,12 @@ PanelWindow {
                     }
 
                     Flickable {
+                        IrisScrollFeel {}
                         id: flick
                         Layout.fillWidth: true
                         Layout.fillHeight: true
                         clip: true
                         contentHeight: rows.implicitHeight + Math.round(8 * root.d)
-                        boundsBehavior: Flickable.StopAtBounds
                         ScrollBar.vertical: IrisScrollBar {}
 
                         ColumnLayout {

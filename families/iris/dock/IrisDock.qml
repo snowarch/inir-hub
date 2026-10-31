@@ -510,7 +510,7 @@ Item {
                 // The ends give the first and last hover plate room to sit concentric with the Dock's end curve:
                 // a plate of radius r starts R − r from an end of radius R (nothing changes on a tight Dock).
                 readonly property real padding: Math.max(8 * root.d,
-                    dock.radius - IrisStyle.iconRadius(root.plateSize) - (root.slotWidth - root.plateSize) / 2)
+                    dock.radius - IrisStyle.tileRadius(root.plateSize) - (root.slotWidth - root.plateSize) / 2)
                 readonly property real baseWidth: (window.baseCenters.length > 0
                     ? window.baseCenters[window.baseCenters.length - 1] + root.slotWidth / 2 : 0) + dock.padding * 2
                 width: root.vertical ? window.dockHeight : Math.min(window.width - 32, appRow.implicitWidth + dock.padding * 2)
@@ -1589,7 +1589,7 @@ Item {
         visible: !root.magnify && !plate.skinned
         width: root.plateSize
         height: plate.width
-        radius: IrisStyle.plainMarks ? 0 : IrisStyle.iconRadius(plate.width)
+        radius: IrisStyle.tileRadius(plate.width)
         x: root.edgeX(parent.width, plate.width, 4 * root.d + plate.lift)
         y: root.edgeY(parent.height, plate.height, 4 * root.d + plate.lift)
         color: plate.lit ? IrisStyle.fill : ColorUtils.applyAlpha(IrisStyle.text, 0)

@@ -2745,7 +2745,6 @@ Item {
                                 implicitHeight: Math.min(300 * root.d, trayContent.implicitHeight)
                                 contentHeight: trayContent.implicitHeight
                                 clip: true
-                                boundsBehavior: Flickable.StopAtBounds
                                 IrisTray { id: trayContent; width: parent.width; bottomEdge: root.bottomEdge; items: root.trayItems }
                             }
                         }
@@ -2765,7 +2764,6 @@ Item {
                                 implicitHeight: Math.min(Math.round(520 * root.d), cardContent.implicitHeight)
                                 contentHeight: cardContent.implicitHeight
                                 clip: true
-                                boundsBehavior: Flickable.StopAtBounds
                                 IrisCardContent {
                                     id: cardContent
                                     width: parent.width

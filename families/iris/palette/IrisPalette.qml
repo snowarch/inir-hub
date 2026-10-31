@@ -873,13 +873,13 @@ Item {
                         }
 
                         Flickable {
+                            IrisScrollFeel {}
                             id: resultsFlick
                             anchors.fill: parent
                             contentWidth: width
                             contentHeight: results.implicitHeight
                             clip: true
                             interactive: contentHeight > height + 1
-                            boundsBehavior: Flickable.StopAtBounds
                             onContentYChanged: if (contentY + height > contentHeight - 120 * stage.d) root.loadMoreClipboard()
 
                             Rectangle {

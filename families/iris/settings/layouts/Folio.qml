@@ -63,11 +63,11 @@ Item {
         color: IrisStyle.fieldChamfer ? "transparent" : paper
         IrisCutPlate { anchors.fill: parent; visible: IrisStyle.fieldChamfer; cutLength: IrisStyle.nestedCut(IrisStyle.chamferCut, root.u(8)); color: parent.paper }
         Flickable {
+            IrisScrollFeel {}
             id: indexFlick
             anchors.fill: parent
             anchors.margins: root.u(10)
             contentHeight: indexColumn.implicitHeight
-            boundsBehavior: Flickable.StopAtBounds
             clip: true
             // The open area's capsule: one pill that slides from key to key; each key's ink follows how much of the pill
             // covers it, so the words turn as the pill arrives instead of before it.

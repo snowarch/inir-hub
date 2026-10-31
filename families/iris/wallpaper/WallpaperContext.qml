@@ -12,6 +12,7 @@ import qs.modules.iris.components
 // Where the list stands, as one strip that scrolls sideways: in the library the folder's trail and its subfolders with
 // their covers; in favourites the kinds; on the web what to discover and the series airing now.
 Flickable {
+    IrisScrollFeel {}
     id: root
 
     required property var engine
@@ -25,7 +26,6 @@ Flickable {
 
     implicitHeight: root.rowHeight
     contentWidth: strip.implicitWidth
-    boundsBehavior: Flickable.StopAtBounds
     flickableDirection: Flickable.HorizontalFlick
     clip: true
     WheelHandler {

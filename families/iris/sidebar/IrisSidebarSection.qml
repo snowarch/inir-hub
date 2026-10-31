@@ -110,8 +110,8 @@ Loader {
                         visible: !IrisStyle.plainMarks
                         radius: parent.radius
                         gradient: Gradient {
-                            GradientStop { position: 0; color: IrisStyle.tileTop(section.tint) }
-                            GradientStop { position: 1; color: section.tint }
+                            GradientStop { position: 0; color: IrisStyle.tileTop(IrisStyle.iconHue(section.tint)) }
+                            GradientStop { position: 1; color: IrisStyle.iconHue(section.tint) }
                         }
                     }
                     MaterialSymbol {
@@ -120,7 +120,7 @@ Loader {
                         fill: IrisStyle.iconFill(IrisStyle.plainMarks ? 0 : 1)
                         glyphWeight: IrisStyle.iconWeight
                         iconSize: Math.round((IrisStyle.plainMarks ? 18 : 15) * root.d)
-                        color: IrisStyle.glyphTinted ? section.tint : IrisStyle.plainMarks ? IrisStyle.secondaryOf(section.ink) : IrisStyle.onTint
+                        color: !IrisStyle.plainMarks ? IrisStyle.onTint : IrisStyle.iconColour === "mono" ? IrisStyle.secondaryOf(section.ink) : IrisStyle.iconHue(section.tint)
                     }
                 }
                 IrisText {
@@ -543,11 +543,11 @@ Loader {
                 }
             ]
             Flickable {
+                IrisScrollFeel {}
                 Layout.fillWidth: true
                 visible: Notepad.tabs.length > 1
                 implicitHeight: tabs.implicitHeight
                 contentWidth: tabs.implicitWidth
-                boundsBehavior: Flickable.StopAtBounds
                 clip: true
                 Row {
                     id: tabs

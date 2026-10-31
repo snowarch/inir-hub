@@ -89,8 +89,8 @@ Item {
     // How far the body hangs from the Island: welded into it in iRiS, apart from it when a Design says so.
     readonly property real hang: root.scene.length > 0 ? Number(IrisDesign.surface("controlCenter", "gap", -IrisStyle.weld / IrisStyle.density)) * IrisStyle.density : -IrisStyle.weld
     readonly property real edge: Math.round(8 * IrisStyle.density) + IrisFrame.band
-    readonly property real edgeLeft: Math.round(8 * IrisStyle.density) + IrisFrame.safeClear("left")
-    readonly property real edgeRight: Math.round(8 * IrisStyle.density) + IrisFrame.safeClear("right")
+    readonly property real edgeLeft: Math.round(8 * IrisStyle.density) + IrisFrame.safeInset("left")
+    readonly property real edgeRight: Math.round(8 * IrisStyle.density) + IrisFrame.safeInset("right")
 
     MouseArea { anchors.fill: parent; onClicked: GlobalStates.controlPanelOpen = false }
     Shortcut { sequence: "Escape"; onActivated: GlobalStates.controlPanelOpen = false }
@@ -146,8 +146,8 @@ Item {
         onYChanged: if (!root.holding) root.heldTop = panel.y
         width: root.panelWidth
         readonly property real room: {
-            const top = IrisFrame.safeClear("top") + Math.round(8 * IrisStyle.density)
-            const bottom = IrisFrame.safeClear("bottom") + Math.round(8 * IrisStyle.density)
+            const top = IrisFrame.safeInset("top") + Math.round(8 * IrisStyle.density)
+            const bottom = IrisFrame.safeInset("bottom") + Math.round(8 * IrisStyle.density)
             const body = root.islandBody
             if (root.placement || root.islandSide || !body) return root.height - top - bottom
             return root.barBottom ? body.y - top : root.height - (body.y + body.height) - bottom
@@ -166,11 +166,11 @@ Item {
         HoverHandler { id: panelHover; onHoveredChanged: if (hovered) root.engaged = true }
 
         Flickable {
+            IrisScrollFeel {}
             id: contents
             anchors.fill: parent
             anchors.margins: root.contentPadding
             contentHeight: (root.scene.length > 0 ? designScene.item?.implicitHeight : quickPanel.item?.implicitHeight) ?? 0
-            boundsBehavior: Flickable.StopAtBounds
             // Scroll only when capped, or a drag on a capsule becomes a flick.
             interactive: contents.contentHeight > contents.height + 1
             clip: true

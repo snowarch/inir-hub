@@ -1272,11 +1272,22 @@ QtObject {
         return out
     }
     // The active Design's traits (IrisDesign.traits), as primitives the surfaces bind to.
-    // Settings › Style › Icons. The Glyph pack is Folio's index everywhere: the glyph alone, no plate.
+    // Settings › Style › Icons: the plate (iRiS's tinted squircle, an app-icon tile, or none), the colour icons carry,
+    // the glyph set, shape, fill and weight. They reach icons only: a cover, a poster or a hover plate is a tile.
     readonly property var iconOptions: root.appearance?.icons ?? ({})
     readonly property bool glyphPack: String(root.iconOptions.style ?? "iris") === "glyph"
     readonly property bool plainMarks: root.trait("marks") === "glyph" || root.mono || root.glyphPack
-    readonly property bool glyphTinted: root.glyphPack && String(root.iconOptions.ink ?? "ink") === "tint"
+    // Auto is each pack's own: plates in the area's colour, a glyph alone in the ink.
+    readonly property string iconColour: {
+        const wanted = String(root.iconOptions.colour ?? "auto")
+        return ["area", "accent", "mono"].includes(wanted) ? wanted : root.plainMarks ? "mono" : "area"
+    }
+    // The colour an icon of an area wears: its own, the accent for every area, or a grey plate (mono).
+    function iconHue(area: color): color {
+        return root.iconColour === "accent" ? root.accent : root.iconColour === "mono" ? root.identity.gray : area
+    }
+    // The glyph set every glyph of the shell is drawn from while iRiS is worn (FamilyStyle.glyphFont).
+    readonly property string glyphFont: ({ standard: "Material Symbols Outlined", sharp: "Material Symbols Sharp" })[String(root.iconOptions.glyphs ?? "rounded")] ?? ""
     readonly property string iconShape: String(root.iconOptions.shape ?? "auto")
     readonly property int iconWeight: ({ light: Font.Light, bold: Font.DemiBold })[String(root.iconOptions.weight ?? "regular")] ?? Font.Normal
     // A glyph's fill: what the surface would draw, unless the person fixed one.
@@ -1331,9 +1342,13 @@ QtObject {
         if (root.islandOpenCorners > 0) return root.islandOpenCorners
         return shape === "square" ? base * 0.45 : shape === "squircle" ? base * 0.75 : base
     }
-    function iconRadius(size: real): int { return root.fieldChamfer ? Math.round(size * 0.18)
-        : root.iconShape === "round" ? Math.round(size / 2) : root.iconShape === "square" ? Math.round(size * 0.12)
+    // A small piece's own corner (a cover, a poster, a workspace tile, the Dock's hover plate): the family's shape.
+    function tileRadius(size: real): int { return root.fieldChamfer ? Math.round(size * 0.18)
         : Math.round(size * (root.look === "synth" ? 0.14 : root.look === "gel" ? 0.32 : 0.26) * Math.min(1.2, root.shapeScale)) }
+    // An icon plate's corner: the icon shape when one is chosen, else the tile's.
+    function iconRadius(size: real): int { return root.fieldChamfer ? root.tileRadius(size)
+        : root.iconShape === "round" ? Math.round(size / 2) : root.iconShape === "square" ? Math.round(size * 0.12)
+        : root.tileRadius(size) }
     // The tile pack's plates: the black and the white a plate can wear, the glyph carrying the colour.
     readonly property color plateBlackTop: root.toned("#2e2e34")
     readonly property color plateBlackBase: root.toned("#18181b")

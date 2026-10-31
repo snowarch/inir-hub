@@ -109,6 +109,7 @@ Item {
         // The press lands here, not on the card under it.
         MouseArea { anchors.fill: parent; acceptedButtons: Qt.AllButtons }
         Flickable {
+            IrisScrollFeel {}
             id: scroller
             x: root.pad + (root.bodyWidth - root.fullWidth) / 2
             y: root.pad
@@ -116,7 +117,6 @@ Item {
             height: root.fullHeight - 2 * root.pad
             contentHeight: content.item?.implicitHeight ?? 0
             interactive: contentHeight > height
-            boundsBehavior: Flickable.StopAtBounds
             clip: true
             opacity: IrisStyle.contentAt(root.presentation)
             Loader {

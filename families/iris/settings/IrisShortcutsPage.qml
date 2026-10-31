@@ -12,6 +12,7 @@ import qs.modules.iris.components
 import qs.modules.iris.style
 
 Flickable {
+    IrisScrollFeel {}
     id: root
 
     readonly property real d: IrisStyle.settingsDensity
@@ -25,7 +26,6 @@ Flickable {
     property string statusType: "saved"
     property bool adding: false
 
-    boundsBehavior: Flickable.StopAtBounds
     clip: true
     contentHeight: pageColumn.implicitHeight + 40 * root.d
     ScrollBar.vertical: IrisScrollBar {}

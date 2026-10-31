@@ -161,13 +161,13 @@ Item {
             // A Column inside a Flickable, not a ListView: the panel is sized from the
             // rows' own height, and a list that fills the panel cannot report that.
             Flickable {
+                IrisScrollFeel {}
                 id: rowList
                 Layout.fillWidth: true
                 Layout.fillHeight: true
                 clip: true
                 contentHeight: rowColumn.implicitHeight
                 contentWidth: width
-                boundsBehavior: Flickable.StopAtBounds
                 ScrollBar.vertical: IrisScrollBar {}
                 Column {
                     id: rowColumn

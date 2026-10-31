@@ -115,13 +115,13 @@ Item {
     }
 
     Flickable {
+        IrisScrollFeel {}
         id: side
         x: root.pad
         y: root.pad
         width: root.sideWidth
         height: root.height - 2 * root.pad
         contentHeight: sideColumn.implicitHeight
-        boundsBehavior: Flickable.StopAtBounds
         clip: true
         ColumnLayout {
             id: sideColumn
@@ -271,6 +271,7 @@ Item {
         }
 
         GridView {
+            IrisScrollFeel {}
             id: grid
             Layout.fillWidth: true
             Layout.fillHeight: true
@@ -279,7 +280,6 @@ Item {
             cellWidth: Math.floor(width / grid.columns)
             cellHeight: Math.round(grid.cellWidth * 0.66)
             clip: true
-            boundsBehavior: Flickable.StopAtBounds
             cacheBuffer: Math.round(cellHeight * 3)
             model: ScriptModel {
                 values: root.engine.entries
@@ -361,11 +361,11 @@ Item {
         color: IrisStyle.readingCard
 
         Flickable {
+            IrisScrollFeel {}
             id: inspectorFlick
             anchors.fill: parent
             anchors.margins: Math.round(14 * root.d)
             contentHeight: inspectorColumn.implicitHeight
-            boundsBehavior: Flickable.StopAtBounds
             clip: true
             ColumnLayout {
                 id: inspectorColumn

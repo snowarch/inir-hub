@@ -1473,7 +1473,7 @@ Item {
         if (slot.length === 0) return ""
         return root.plateFor(slot) ? "plate:" + root.plateKey(slot) : "piece:" + slot
     }
-    function edgeClear(edge: string): real { return Math.round(8 * root.d) + IrisFrame.safeClear(edge) }
+    function edgeClear(edge: string): real { return Math.round(8 * root.d) + IrisFrame.safeInset(edge) }
 
     MouseArea {
         anchors.fill: parent
@@ -1596,13 +1596,13 @@ Item {
             color: "transparent"
 
             Flickable {
+                IrisScrollFeel {}
                 id: cardScroller
                 readonly property bool moreAbove: cardScroller.contentY > 1
                 readonly property bool moreBelow: cardScroller.contentY + cardScroller.height < cardScroller.contentHeight - 1
                 anchors.fill: parent
                 anchors.margins: cardContent.bleeds ? 0 : root.cardPad
                 contentHeight: cardContent.contentHeight
-                boundsBehavior: Flickable.StopAtBounds
                 interactive: cardScroller.contentHeight > cardScroller.height + 1
                 clip: !cardContent.bleeds
 

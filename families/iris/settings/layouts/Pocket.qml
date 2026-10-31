@@ -110,10 +110,10 @@ Item {
             Behavior on opacity { enabled: IrisStyle.motionEnabled; NumberAnimation { duration: IrisStyle.morphDuration * 0.6; easing.type: Easing.OutCubic } }
 
             Flickable {
+                IrisScrollFeel {}
                 id: homeFlick
                 anchors.fill: parent
                 contentHeight: homeColumn.implicitHeight + root.u(24)
-                boundsBehavior: Flickable.StopAtBounds
                 clip: true
                 ScrollBar.vertical: IrisScrollBar {}
                 ColumnLayout {

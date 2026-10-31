@@ -132,11 +132,11 @@ Item {
     }
 
     Flickable {
+        IrisScrollFeel {}
         id: flick
         anchors.fill: parent
         anchors.topMargin: head.height + page.u(12)
         contentHeight: column.implicitHeight + page.u(28)
-        boundsBehavior: Flickable.StopAtBounds
         clip: true
         ScrollBar.vertical: IrisScrollBar {}
         onContentYChanged: spyPace.restart()

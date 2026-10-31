@@ -559,6 +559,7 @@ ColumnLayout {
             }
 
             Flickable {
+                IrisScrollFeel {}
                 id: shelf
                 visible: !removeDrop.shown
                 Layout.fillWidth: true
@@ -566,7 +567,6 @@ ColumnLayout {
                 clip: true
                 contentWidth: width
                 contentHeight: shelfColumn.implicitHeight
-                boundsBehavior: Flickable.StopAtBounds
                 interactive: grid.carrying.length === 0
                 ScrollBar.vertical: IrisScrollBar {}
 

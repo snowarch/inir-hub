@@ -85,10 +85,10 @@ Item {
         MouseArea { anchors.fill: parent; onWheel: wheel => wheel.accepted = false }
 
         Flickable {
+            IrisScrollFeel {}
             anchors.fill: parent
             anchors.margins: sheet.pad
             contentHeight: body.implicitHeight
-            boundsBehavior: Flickable.StopAtBounds
             clip: true
             Column {
                 id: body

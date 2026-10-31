@@ -16,6 +16,7 @@ import qs.modules.iris.style
 // pictures). One item opens as a page with the store's fact strip. Hub owns the catalogue, the order and the
 // installs; widgets go to the Island when they have a module for it, iRiS themes apply through IrisThemes.
 Flickable {
+    IrisScrollFeel {}
     id: root
 
     readonly property real d: IrisStyle.settingsDensity
@@ -52,7 +53,6 @@ Flickable {
     readonly property var permissionGlyphs: ({ process: "terminal", network: "public", files: "folder_open", inject: "code" })
     readonly property var kindGlyphs: ({ widget: "widgets", theme: "palette", "iris-theme": "style", webapp: "language", family: "dashboard" })
 
-    boundsBehavior: Flickable.StopAtBounds
     clip: true
     contentHeight: pageColumn.implicitHeight + Math.round(40 * root.d)
     ScrollBar.vertical: IrisScrollBar {}
