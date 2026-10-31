@@ -76,7 +76,7 @@ Item {
             visible: root.visible && root.glassActive && Looks.useMaterial
             radius: borderRect.radius - borderRect.border.width
             fallbackColor: Appearance.colors.colLayer0
-            auroraTransparency: Appearance.angelEverywhere
+            auroraTransparency: Looks.angelEverywhere
                 ? Appearance.angel.panelTransparentize
                 : Math.max(0.12, Appearance.aurora.subSurfaceTransparentize - 0.14)
             screenX: root.screenX

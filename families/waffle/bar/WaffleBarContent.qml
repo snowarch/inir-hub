@@ -93,7 +93,7 @@ Rectangle {
             bottom: root.barAtBottom ? undefined : parent.bottom
         }
         color: root.glassActive
-            ? (Appearance.angelEverywhere ? Appearance.angel.colPanelBorder : Appearance.aurora.colTooltipBorder)
+            ? (Looks.angelEverywhere ? Appearance.angel.colPanelBorder : Appearance.aurora.colTooltipBorder)
             : Looks.colors.bg0Border
         implicitHeight: 1
     }

@@ -35,5 +35,6 @@ Shortcuts, About, Monitors, Autostart, Workspace Strip, Mascot, AI, Effects, She
 
 ## Its looks
 
-**Waffle Settings › Themes** picks the colour theme and the global style. Waffle keeps its own layouts and takes the
-style's colours and type. Colours follow the wallpaper unless you pick a theme: [Colours and themes](THEMING_PRESETS.md).
+**Waffle Settings › Themes** picks the colour theme. Waffle keeps its own layouts; with **Take style from Material**
+on (the default) it also wears Material's global style (Aurora glass, Angel, Editorial type...) and its transparency,
+chosen right below. Switch it off and Waffle is plain Fluent whatever Material uses. Colours follow the wallpaper unless you pick a theme: [Colours and themes](THEMING_PRESETS.md).

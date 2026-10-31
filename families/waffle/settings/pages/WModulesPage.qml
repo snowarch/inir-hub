@@ -228,35 +228,6 @@ WSettingsPage {
     }
 
     WSettingsCard {
-        title: Translation.tr("Sidebars")
-        icon: "panel-left-expand"
-
-        WSettingsSwitch {
-            label: Translation.tr("Collapse notifications when empty")
-            icon: "panel-left-contract"
-            description: Translation.tr("Shrink the right sidebar when there are no notifications")
-            checked: Config.options?.material?.sidebar?.collapseEmptyNotifications ?? false
-            onCheckedChanged: Config.setNestedValue("material.sidebar.collapseEmptyNotifications", checked)
-        }
-
-        WSettingsSwitch {
-            label: Translation.tr("Fit left sidebar to widgets")
-            icon: "panel-left-expand"
-            description: Translation.tr("Shrink the left sidebar to its content on the Widgets tab instead of full height")
-            checked: Config.options?.material?.sidebar?.collapseWidgetsTab ?? false
-            onCheckedChanged: Config.setNestedValue("material.sidebar.collapseWidgetsTab", checked)
-        }
-
-        SidebarHeightPreview {
-            Layout.fillWidth: true
-        }
-
-        SidebarLayoutEditor {
-            Layout.fillWidth: true
-        }
-    }
-
-    WSettingsCard {
         title: Translation.tr("Action Center Toggles")
         icon: "checkmark"
 

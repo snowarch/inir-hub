@@ -572,7 +572,16 @@ WSettingsPage {
         readonly property string derivedStyle: cardsEverywhere ? "cards" : "material"
         readonly property string currentStyle: (Config.options?.material?.style?.globalStyle ?? "").length > 0 ? Config.options?.material?.style?.globalStyle ?? "material" : derivedStyle
 
+        WSettingsSwitch {
+            label: Translation.tr("Take style from Material")
+            icon: "link"
+            description: Translation.tr("Waffle wears Material's global style and transparency. Off: its own Fluent look.")
+            checked: Looks.styleFromMaterial
+            onCheckedChanged: if (checked !== Looks.styleFromMaterial) Config.setNestedValue("waffles.theming.styleFromMaterial", checked)
+        }
+
         WSettingsDropdown {
+            visible: Looks.styleFromMaterial
             label: Translation.tr("Style")
             icon: "eyedropper"
             description: globalStyleCard.currentStyle === "editorial"
@@ -722,10 +731,10 @@ WSettingsPage {
             label: Translation.tr("Use Material colors")
             icon: "color"
             description: Translation.tr("Apply Material color scheme instead of Windows 11 grey")
-            enabled: !Appearance.editorialEverywhere
-            checked: Appearance.editorialEverywhere || (Config.options?.waffles?.theming?.useMaterialColors ?? false)
+            enabled: !Looks.editorialEverywhere
+            checked: Looks.editorialEverywhere || (Config.options?.waffles?.theming?.useMaterialColors ?? false)
             onCheckedChanged: {
-                if (!Appearance.editorialEverywhere) Config.setNestedValue("waffles.theming.useMaterialColors", checked)
+                if (!Looks.editorialEverywhere) Config.setNestedValue("waffles.theming.useMaterialColors", checked)
             }
         }
 
@@ -905,6 +914,7 @@ WSettingsPage {
         }
 
         WSettingsSwitch {
+            visible: Looks.styleFromMaterial
             label: Translation.tr("Transparency")
             icon: "eye"
             description: Translation.tr("Enable transparent UI elements")

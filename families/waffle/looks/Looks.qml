@@ -17,15 +17,18 @@ Singleton {
     property QtObject transition
     property string iconsPath: `${Directories.assetsPath}/icons/fluent`
     property bool dark: Appearance.m3colors.darkmode
-    property bool auroraEverywhere: {
-        const style = Config.options?.material?.style?.globalStyle ?? "material"
-        return style === "aurora" || style === "angel"
-    }
-    readonly property bool cookieEverywhere: Appearance.cookieEverywhere
-    readonly property bool editorialEverywhere: Appearance.editorialEverywhere
+    // Waffle wears Material's global style only while the person keeps "Take style from Material" on
+    // (waffles.theming.styleFromMaterial, on by default): every Waffle surface asks these, never Appearance's flags.
+    readonly property bool styleFromMaterial: Config.options?.waffles?.theming?.styleFromMaterial ?? true
+    readonly property string materialStyle: root.styleFromMaterial ? Appearance.globalStyle : "material"
+    readonly property bool auroraEverywhere: root.materialStyle === "aurora" || root.materialStyle === "angel"
+    readonly property bool angelEverywhere: root.materialStyle === "angel"
+    readonly property bool inirEverywhere: root.materialStyle === "inir"
+    readonly property bool cookieEverywhere: root.materialStyle === "cookie"
+    readonly property bool editorialEverywhere: root.materialStyle === "editorial"
     property bool useMaterial: root.editorialEverywhere || (Config.options?.waffles?.theming?.useMaterialColors ?? false)
     // Glass mode: aurora/angel active (not iNiR which has its own aesthetic)
-    readonly property bool glassActive: root.auroraEverywhere && !Appearance.inirEverywhere
+    readonly property bool glassActive: root.auroraEverywhere && !root.inirEverywhere
 
     readonly property bool effectsEnabled: Appearance.effectsEnabled
     readonly property bool gameModeActive: Appearance._gameModeActive
@@ -43,7 +46,7 @@ Singleton {
     // "Display scaling" slider in Interface settings also affects waffle fonts.
     readonly property real fontScale: (Config.options?.waffles?.theming?.font?.scale ?? 1.0) * Appearance.fontSizeScale
 
-    readonly property bool transparencyEnabled: Config.options?.material?.style?.transparency?.enable ?? false
+    readonly property bool transparencyEnabled: root.styleFromMaterial && (Config.options?.material?.style?.transparency?.enable ?? false)
     // When glass mode is active, ensure surfaces have enough transparency
     // so the glass/blur effect is visible beneath the dark base colors
     property real backgroundTransparency: root.auroraEverywhere
@@ -188,7 +191,7 @@ Singleton {
                     root.glassActive && root.dark ? root.darkColors.bg2Base : (root.dark ? root.darkColors.bgPanelBody : root.lightColors.bgPanelBody),
                     root.panelLayerTransparency)
         property color bgPanelSeparator: root.glassActive && root.useMaterial
-            ? (Appearance.angelEverywhere ? Appearance.angel.colBorderSubtle ?? "transparent" : Appearance.colors.colBorderSubtle ?? "transparent")
+            ? (root.angelEverywhere ? Appearance.angel.colBorderSubtle ?? "transparent" : Appearance.colors.colBorderSubtle ?? "transparent")
             : root.useMaterial
                 ? Appearance.colors.colOutlineVariant
                 : ColorUtils.transparentize(
@@ -201,7 +204,7 @@ Singleton {
             ? Appearance.colors.colLayer0 
             : ColorUtils.transparentize(bg0Opaque, root.backgroundTransparency)
         property color bg0Border: root.glassActive && root.useMaterial
-            ? (Appearance.angelEverywhere ? Appearance.angel.colBorderSubtle ?? "transparent" : Appearance.colors.colBorderSubtle ?? "transparent")
+            ? (root.angelEverywhere ? Appearance.angel.colBorderSubtle ?? "transparent" : Appearance.colors.colBorderSubtle ?? "transparent")
             : root.useMaterial 
                 ? Appearance.colors.colLayer0Border 
                 : ColorUtils.transparentize(root.dark ? root.darkColors.bg0Border : root.lightColors.bg0Border, root.backgroundTransparency)
@@ -224,7 +227,7 @@ Singleton {
                 root.glassActive && root.dark ? Qt.darker(root.darkColors.bg1Base, 1.15) : (root.dark ? root.darkColors.bg1Active : root.lightColors.bg1Active),
                 root.glassActive ? root.backgroundTransparency : root.contentTransparency)
         property color bg1Border: root.glassActive && root.useMaterial
-            ? (Appearance.angelEverywhere ? Appearance.angel.colBorderSubtle ?? "transparent" : Appearance.colors.colBorderSubtle ?? "transparent")
+            ? (root.angelEverywhere ? Appearance.angel.colBorderSubtle ?? "transparent" : Appearance.colors.colBorderSubtle ?? "transparent")
             : root.useMaterial 
                 ? Appearance.colors.colOutlineVariant 
                 : ColorUtils.transparentize(
@@ -249,35 +252,35 @@ Singleton {
                 root.glassActive && root.dark ? Qt.darker(root.darkColors.bg2Base, 1.15) : (root.dark ? root.darkColors.bg2Active : root.lightColors.bg2Active),
                 root.glassActive ? root.backgroundTransparency : root.contentTransparency)
         property color bg2Border: root.glassActive && root.useMaterial
-            ? (Appearance.angelEverywhere ? Appearance.angel.colBorderSubtle ?? "transparent" : Appearance.colors.colBorderSubtle ?? "transparent")
+            ? (root.angelEverywhere ? Appearance.angel.colBorderSubtle ?? "transparent" : Appearance.colors.colBorderSubtle ?? "transparent")
             : root.useMaterial 
                 ? Appearance.colors.colOutlineVariant 
                 : ColorUtils.transparentize(
                     root.glassActive && root.dark ? root.darkColors.bg0Border : (root.dark ? root.darkColors.bg2Border : root.lightColors.bg2Border),
                     root.glassActive ? root.backgroundTransparency : root.contentTransparency)
         property color interactiveSurface: root.glassActive && root.useMaterial
-            ? root.ensureMinOpacity(Appearance.angelEverywhere ? Appearance.angel.colGlassCard : Appearance.aurora.colSubSurface, 0.72)
+            ? root.ensureMinOpacity(root.angelEverywhere ? Appearance.angel.colGlassCard : Appearance.aurora.colSubSurface, 0.72)
             : bg1
         property color interactiveSurfaceHover: root.glassActive && root.useMaterial
-            ? root.ensureMinOpacity(Appearance.angelEverywhere ? Appearance.angel.colGlassCardHover : Appearance.aurora.colSubSurfaceHover, 0.78)
+            ? root.ensureMinOpacity(root.angelEverywhere ? Appearance.angel.colGlassCardHover : Appearance.aurora.colSubSurfaceHover, 0.78)
             : bg2Hover
         property color interactiveSurfaceActive: root.glassActive && root.useMaterial
-            ? root.ensureMinOpacity(Appearance.angelEverywhere ? Appearance.angel.colGlassCardActive : Appearance.aurora.colSubSurfaceActive, 0.84)
+            ? root.ensureMinOpacity(root.angelEverywhere ? Appearance.angel.colGlassCardActive : Appearance.aurora.colSubSurfaceActive, 0.84)
             : bg2Active
         property color popupSurface: root.glassActive && root.useMaterial
-            ? root.ensureMinOpacity(Appearance.angelEverywhere ? Appearance.angel.colGlassPopup : Appearance.aurora.colPopupSurface, 0.85)
+            ? root.ensureMinOpacity(root.angelEverywhere ? Appearance.angel.colGlassPopup : Appearance.aurora.colPopupSurface, 0.85)
             : bg2
         property color popupSurfaceHover: root.glassActive && root.useMaterial
-            ? root.ensureMinOpacity(Appearance.angelEverywhere ? Appearance.angel.colGlassPopupHover : Appearance.aurora.colPopupSurfaceHover, 0.88)
+            ? root.ensureMinOpacity(root.angelEverywhere ? Appearance.angel.colGlassPopupHover : Appearance.aurora.colPopupSurfaceHover, 0.88)
             : bg2Hover
         property color popupSurfaceActive: root.glassActive && root.useMaterial
-            ? root.ensureMinOpacity(Appearance.angelEverywhere ? Appearance.angel.colGlassPopupActive : Appearance.aurora.colPopupSurfaceActive, 0.92)
+            ? root.ensureMinOpacity(root.angelEverywhere ? Appearance.angel.colGlassPopupActive : Appearance.aurora.colPopupSurfaceActive, 0.92)
             : bg2Active
         property color tooltipSurface: root.glassActive && root.useMaterial
-            ? root.ensureMinOpacity(Appearance.angelEverywhere ? Appearance.angel.colGlassTooltip : Appearance.aurora.colTooltipSurface, 0.90)
+            ? root.ensureMinOpacity(root.angelEverywhere ? Appearance.angel.colGlassTooltip : Appearance.aurora.colTooltipSurface, 0.90)
             : bg2
         property color tooltipBorder: root.glassActive && root.useMaterial
-            ? (Appearance.angelEverywhere ? Appearance.angel.colBorderSubtle : Appearance.aurora.colTooltipBorder)
+            ? (root.angelEverywhere ? Appearance.angel.colBorderSubtle : Appearance.aurora.colTooltipBorder)
             : bg2Border
         property color subfg: root.useMaterial 
             ? Appearance.colors.colSubtext 

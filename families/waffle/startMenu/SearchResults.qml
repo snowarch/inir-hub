@@ -134,7 +134,7 @@ RowLayout {
         radius: Looks.radius.medium
         border.width: Looks.glassActive ? 1 : 0
         border.color: Looks.glassActive
-            ? (Appearance.angelEverywhere ? Appearance.angel.colPanelBorder : Appearance.aurora.colTooltipBorder)
+            ? (Looks.angelEverywhere ? Appearance.angel.colPanelBorder : Appearance.aurora.colTooltipBorder)
             : "transparent"
 
         ColumnLayout {
