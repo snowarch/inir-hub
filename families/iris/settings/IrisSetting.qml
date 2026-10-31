@@ -53,6 +53,11 @@ Item {
         Config.revision
         return IrisOptions.currentValue(root.spec)
     }
+    readonly property string pickedDetail: {
+        if (root.spec.kind !== "choice" || root.carded) return ""
+        const pick = (root.spec.choices ?? []).find(entry => String(entry.value) === String(root.value))
+        return pick?.detail ? Translation.tr(String(pick.detail)) : ""
+    }
     function commit(next: var): void { IrisOptions.commit(root.spec, next) }
     // A range shows the drag's own value while it moves. Its consumers see it live (Config.previewNestedValue: no
     // revision, no file write); the drag writes once, on release. A value the palette solver or Niri reads is not
@@ -267,7 +272,9 @@ Item {
                     property bool full: false
                     Layout.fillWidth: true
                     visible: text.length > 0
-                    text: root.spec.description && !root.headed ? Translation.tr(root.spec.description) : ""
+                    // A choice whose picks say what they do describes the one on, not all six in one paragraph.
+                    text: root.headed ? "" : root.pickedDetail.length > 0 ? root.pickedDetail
+                        : root.spec.description ? Translation.tr(root.spec.description) : ""
                     // A chamfered Design prints its row in two inks, the name in the ink and what it does a tone down: at
                     // the shared subtext (nine tenths of the ink) both read as one black block.
                     color: IrisStyle.fieldChamfer ? IrisStyle.muted : IrisStyle.subtext
