@@ -40,6 +40,9 @@ The Dock is set under iRiS Settings › Dock:
 - Style › Themes: curated looks for the whole family. Use Customize, Themes, Save current to keep the look you have as your own theme.
 - Customize: right-click the desktop and pick Customize iRiS. The Island grows a capsule with Themes, Look and Pieces, plus undo, redo and Done.
 - Style › Customize opens: On the shell, which edits in place, or Studio, a side panel with search.
+- Style › Icons › Colour: Areas (what Auto gives plates) colours by family. Each sidebar group has its own band: Appearance violets, Island to Control Center blues, Spotlight to Anime greens, Notifications to Login warm, Home and the foot grey. Accent paints every icon your accent; Mono keeps them grey.
+- Home › Every day: the Edit button on its title picks which settings Home pins.
+- Lists in Settings give a little at their ends, with a mouse wheel too, and spring back.
 
 ## Anime
 

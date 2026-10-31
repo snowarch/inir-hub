@@ -3,7 +3,8 @@ import qs.modules.iris.style
 
 // How every iRiS list scrolls. Declared inside a Flickable, ListView or GridView (Qt hands it to the content item, whose
 // parent is the view): the content stops at its ends and gives a little when a scroll runs into one, springing back as
-// Qt returns the overshoot; and whatever takes keyboard focus inside the view glides into sight.
+// Qt returns the overshoot; a mouse wheel, which Qt never overshoots, bumps the end it runs into; and whatever takes
+// keyboard focus inside the view glides into sight.
 Item {
     id: root
 
@@ -17,7 +18,46 @@ Item {
 
     readonly property Translate shift: Translate {
         x: root.flick ? root.give(root.flick.horizontalOvershoot) : 0
-        y: root.flick ? root.give(root.flick.verticalOvershoot) : 0
+        y: root.flick ? root.give(root.flick.verticalOvershoot) + root.bumpReach * Math.tanh(root.push / root.bumpReach) : 0
+    }
+
+    // The wheel's bump: each notch into an end pushes a few pixels, eased under `bumpReach`, then the Design's own
+    // spring brings it home. Only when nothing outside this list would scroll instead (Qt hands it the wheel then).
+    readonly property real bumpReach: Math.round(20 * IrisStyle.density)
+    property real push: 0
+    function outerScrolls(up: bool): bool {
+        for (let p = root.flick?.parent; p; p = p.parent) {
+            if (p.flickableDirection === undefined || p.contentHeight <= p.height) continue
+            if (up ? !p.atYBeginning : !p.atYEnd) return true
+        }
+        return false
+    }
+    Component {
+        id: wheelBump
+        WheelHandler {
+            target: null
+            acceptedDevices: PointerDevice.AllDevices
+            blocking: false
+            enabled: !!root.flick && root.flick.interactive && root.flick.contentHeight > root.flick.height
+            // Whatever the device says it is: a step with no gesture phase is a wheel; a touchpad's phased swipe already
+            // drags into Qt's own overshoot.
+            onWheel: event => {
+                const up = event.angleDelta.y > 0
+                if (event.angleDelta.y === 0 || event.phase !== Qt.NoScrollPhase || root.flick.verticalOvershoot !== 0) return
+                if (!(up ? root.flick.atYBeginning : root.flick.atYEnd) || root.outerScrolls(up)) return
+                const notches = Math.abs(event.angleDelta.y) / 120
+                // Notches landing in one frame add up on where the push is going, not where it has got to.
+                const from = bumpOut.running ? bumpOut.to : root.push
+                const next = from + (up ? 1 : -1) * Math.round(8 * IrisStyle.density) * notches
+                bumpOut.to = Math.max(-root.bumpReach * 2, Math.min(root.bumpReach * 2, next))
+                bump.restart()
+            }
+        }
+    }
+    SequentialAnimation {
+        id: bump
+        NumberAnimation { id: bumpOut; target: root; property: "push"; duration: IrisStyle.duration(80); easing.type: Easing.OutCubic }
+        NumberAnimation { target: root; property: "push"; to: 0; duration: IrisStyle.duration(340); easing.type: Easing.BezierSpline; easing.bezierCurve: IrisStyle.moveCurve }
     }
 
     function reveal(item: Item): void {
@@ -62,5 +102,7 @@ Item {
         const kept = []
         for (let i = 0; i < view.contentItem.transform.length; i++) kept.push(view.contentItem.transform[i])
         view.contentItem.transform = kept.concat([root.shift])
+        // On the view itself: a handler declared in here would sit on the content item.
+        wheelBump.createObject(view)
     }
 }

@@ -295,13 +295,25 @@ ColumnLayout {
                     IrisText {
                         id: plainHead
                         visible: !headSkin.active
-                        width: parent.width - (head.lone ? headSwitch.width + Math.round(12 * rows?.d) : 0)
+                        width: parent.width - (head.lone ? headSwitch.width + Math.round(12 * rows?.d) : headAction.visible ? headAction.width + Math.round(12 * rows?.d) : 0)
                         text: head.title
                         color: IrisStyle.text
                         font.family: IrisStyle.fontTitle
                         font.pixelSize: IrisStyle.typeHeadline
                         font.weight: IrisStyle.weight(Font.Bold)
                         elide: Text.ElideRight
+                    }
+                    // Home's Customize sits on the head's line, quiet, beside the pins it edits.
+                    IrisChip {
+                        id: headAction
+                        readonly property var spec: block.tiled ? (block.shownRows.find(spec => spec.kind === "action") ?? null) : null
+                        visible: headAction.spec !== null
+                        anchors.right: parent.right
+                        anchors.verticalCenter: parent.verticalCenter
+                        glyph: "edit"
+                        label: Translation.tr(String(headAction.spec?.button ?? "Edit"))
+                        Accessible.name: Translation.tr(String(headAction.spec?.label ?? ""))
+                        onClicked: headAction.spec?.run()
                     }
                     IrisSwitch {
                         id: headSwitch
@@ -329,9 +341,10 @@ ColumnLayout {
                         Item {
                             id: group
                             required property var modelData
+                            required property int index
                             readonly property string key: String(group.modelData.key ?? "")
                             readonly property bool open: rows?.openGroup === group.key
-                            readonly property color tint: IrisOptions.groupTints[group.key] ?? IrisOptions.sectionById(rows?.section)?.tint ?? IrisStyle.identity.gray
+                            readonly property color tint: IrisOptions.groupTint(String(rows?.section ?? ""), group.index)
                             // What it holds now, in words: its first rows' values, a switch by its name while on ("24-hour", "Low power").
                             readonly property string glance: {
                                 Config.revision
@@ -470,30 +483,26 @@ ColumnLayout {
                     onOpenedChanged: if (tileGrid.opened.length > 0) rows.showOpened(openedTile)
                     readonly property var openedSpec: block.shownRows.find(spec => String(spec.modelKey ?? spec.path ?? "") === tileGrid.opened) ?? null
                     Repeater {
-                        model: ScriptModel { objectProp: "modelKey"; values: block.tiled ? block.shownRows : [] }
+                        model: ScriptModel { objectProp: "modelKey"; values: block.tiled ? block.shownRows.filter(spec => spec.kind !== "action") : [] }
                         Item {
                             id: tile
                             required property var modelData
                             readonly property var spec: tile.modelData
                             readonly property string key: String(tile.spec.modelKey ?? tile.spec.path ?? "")
-                            readonly property bool edit: tile.spec.kind === "action"
                             readonly property bool toggles: tile.spec.kind === "switch"
                             readonly property var area: IrisOptions.sectionById(String(tile.spec.origin?.section ?? ""))
-                            readonly property var value: { Config.revision; return tile.edit ? null : IrisOptions.currentValue(tile.spec) }
+                            readonly property var value: { Config.revision; return IrisOptions.currentValue(tile.spec) }
                             readonly property bool on: tile.toggles && (tile.spec.invert ? !Boolean(tile.value) : Boolean(tile.value))
                             readonly property var choice: (tile.spec.choices ?? []).find(entry => String(entry.value) === String(tile.value)) ?? null
                             readonly property bool open: tileGrid.opened === tile.key
-                            readonly property string words: tile.edit ? ""
-                                : tile.toggles ? (tile.on ? Translation.tr("On") : Translation.tr("Off"))
+                            readonly property string words: tile.toggles ? (tile.on ? Translation.tr("On") : Translation.tr("Off"))
                                 : tile.choice ? Translation.tr(String(tile.choice.label ?? ""))
                                 : tile.spec.kind === "range" ? IrisOptions.rangeText(tile.spec, tile.value)
                                 : String(tile.value ?? "")
-                            readonly property string glyph: tile.edit ? "edit"
-                                : String(tile.choice?.glyph ?? tile.spec.glyph ?? IrisOptions.groupGlyphs[String(tile.spec.origin?.group ?? "")] ?? tile.area?.icon ?? "settings")
+                            readonly property string glyph: String(tile.choice?.glyph ?? tile.spec.glyph ?? IrisOptions.groupGlyphs[String(tile.spec.origin?.group ?? "")] ?? tile.area?.icon ?? "settings")
                             readonly property bool accentTile: String(tile.spec.path ?? "") === "iris.appearance.accent"
                             function act(): void {
-                                if (tile.edit) tile.spec.run()
-                                else if (tile.toggles) IrisOptions.commit(tile.spec, tile.spec.invert ? tile.on : !tile.on)
+                                if (tile.toggles) IrisOptions.commit(tile.spec, tile.spec.invert ? tile.on : !tile.on)
                                 else tileGrid.opened = tile.open ? "" : tile.key
                             }
                             Layout.fillWidth: true
@@ -512,12 +521,12 @@ ColumnLayout {
                                 id: tilePlate
                                 anchors.fill: parent
                                 radius: IrisStyle.radiusTile
-                                color: tile.on ? IrisStyle.lookPlate : tile.edit ? "transparent"
+                                color: tile.on ? IrisStyle.lookPlate
                                     : tile.open ? IrisStyle.tintFillHover(tile.accentTile ? IrisStyle.accent : (tile.area?.tint ?? IrisStyle.identity.gray))
                                     : (rows?.groupFill ?? "transparent")
                                 lit: tile.on || tile.open
-                                border.width: tile.edit ? 1 : IrisStyle.plateEdge.a > 0 ? 1 : 0
-                                border.color: tile.edit ? IrisStyle.hairlineStrong : IrisStyle.plateEdge
+                                border.width: IrisStyle.plateEdge.a > 0 ? 1 : 0
+                                border.color: IrisStyle.plateEdge
                                 scale: tileArea.pressed ? IrisStyle.pressScale(0.97) : 1
                                 Behavior on color { ColorAnimation { duration: IrisStyle.duration(110); easing.type: IrisStyle.feedbackEasing } }
                                 Behavior on scale { NumberAnimation { duration: IrisStyle.feedbackDuration; easing.type: IrisStyle.feedbackEasing } }
@@ -534,16 +543,8 @@ ColumnLayout {
                                     anchors.verticalCenter: parent.verticalCenter
                                     width: Math.round(32 * rows?.d)
                                     height: width
-                                    visible: !tile.edit
                                     tint: tile.on ? IrisStyle.inkOnLookPlate : tile.accentTile ? IrisStyle.accent : (tile.area?.tint ?? IrisStyle.identity.gray)
                                     glyph: tile.accentTile ? "palette" : tile.glyph
-                                }
-                                MaterialSymbol {
-                                    visible: tile.edit
-                                    anchors.centerIn: tileMark
-                                    text: "edit"
-                                    iconSize: Math.round(18 * rows?.d)
-                                    color: IrisStyle.textSecondary
                                 }
                                 Column {
                                     id: tileWords
@@ -556,9 +557,9 @@ ColumnLayout {
                                     IrisText {
                                         width: parent.width
                                         text: Translation.tr(String(tile.spec.label ?? ""))
-                                        color: tile.on ? IrisStyle.inkOnLookPlate : tile.edit ? IrisStyle.textSecondary : IrisStyle.text
+                                        color: tile.on ? IrisStyle.inkOnLookPlate : IrisStyle.text
                                         font.pixelSize: IrisStyle.typeBody
-                                        font.weight: IrisStyle.weight(tile.edit ? Font.Medium : Font.DemiBold)
+                                        font.weight: IrisStyle.weight(Font.DemiBold)
                                         elide: Text.ElideRight
                                     }
                                     IrisText {
@@ -572,7 +573,7 @@ ColumnLayout {
                                 }
                                 MaterialSymbol {
                                     id: tileChevron
-                                    visible: !tile.edit && !tile.toggles
+                                    visible: !tile.toggles
                                     anchors.right: parent.right
                                     anchors.rightMargin: Math.round(12 * rows?.d)
                                     anchors.verticalCenter: parent.verticalCenter
