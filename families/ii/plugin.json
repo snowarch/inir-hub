@@ -26,6 +26,7 @@
       "fallback": 220
     }
   },
+  "flags": { "widgetFreeSize": true },
   "name": "Material",
   "summary": "Material 3 Expressive panels, bars, docks and widgets in nine global styles.",
   "tagline": "Modular bars, sidebars and Material controls.",

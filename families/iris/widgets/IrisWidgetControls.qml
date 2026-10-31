@@ -450,7 +450,7 @@ ColumnLayout {
         }
 
         ColumnLayout {
-            visible: root.widget.irisSizeChoices.length > 1
+            visible: root.widget.sizeChoices.length > 1
             Layout.fillWidth: true
             spacing: Math.round(8 * root.d)
 
@@ -461,15 +461,15 @@ ColumnLayout {
                 spacing: Math.round(8 * root.d)
 
                 Repeater {
-                    model: root.widget.irisSizeChoices
+                    model: root.widget.sizeChoices
 
                     ChoiceTile {
                         id: sizeTile
                         required property string modelData
                         readonly property real cell: Math.round(14 * root.d)
-                        chosen: root.widget.irisSize === sizeTile.modelData
-                        label: root.widget.irisSizeLabels[sizeTile.modelData] ?? sizeTile.modelData
-                        onPicked: root.widget.commitIrisSize(sizeTile.modelData)
+                        chosen: root.widget.sizeClass === sizeTile.modelData
+                        label: root.widget.sizeLabels[sizeTile.modelData] ?? sizeTile.modelData
+                        onPicked: root.widget.commitSize(sizeTile.modelData)
                         Rectangle {
                             anchors.centerIn: parent
                             width: sizeTile.modelData === "small" ? sizeTile.cell : sizeTile.cell * 2 + 2

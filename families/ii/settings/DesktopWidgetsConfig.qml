@@ -191,16 +191,8 @@ ContentPage {
         const at = root._widgetPath(path)
         return at ? DesktopWidgetOptions.value(at.widget, at.key, fallback) : Config.getNestedValue(path, fallback)
     }
-    // Material's S/M/L cards: their size, never a width and height
-    function sizedWidget(widget: string): bool {
-        return DesktopWidgetOptions.sized(widget)
-    }
-    // one size for every family: the iRiS face takes it too
     function setWidgetSize(widget: string, size: string): void {
-        const values = { materialSize: size }
-        if (DesktopWidgetOptions.faced.includes(widget))
-            values["iris.size"] = size
-        DesktopWidgetLayout.setEverywhere(widget, values)
+        DesktopWidgetLayout.setEverywhere(widget, { sizeClass: size, freeWidth: 0, freeHeight: 0 })
     }
     function writePath(path: string, value: var): void {
         root.writePaths({ [path]: value })
@@ -804,13 +796,10 @@ ContentPage {
         property string enableTooltip: ""
         readonly property string widgetKey: stateControls.configPath.startsWith("background.widgets.")
             ? stateControls.configPath.substring("background.widgets.".length) : stateControls.configPath
-        readonly property var sizes: ["small", "medium", "large"]
-            .filter(size => DesktopWidgetDesign.materialSizesOf(stateControls.widgetKey).includes(size))
+        readonly property var sizes: DesktopWidgetRegistry.sizesOf(stateControls.widgetKey)
         readonly property string size: {
-            const drawn = DesktopWidgetDesign.materialSizesOf(stateControls.widgetKey)
-            const own = String(root.readPath(stateControls.configPath + ".materialSize", ""))
-            const other = String(root.readPath(stateControls.configPath + ".iris.size", ""))
-            return drawn.includes(own) ? own : drawn.includes(other) ? other : (drawn[0] ?? "")
+            const own = String(root.readPath(stateControls.configPath + ".sizeClass", ""))
+            return stateControls.sizes.includes(own) ? own : (stateControls.sizes[0] ?? "")
         }
         readonly property string design: {
             const own = String(root.readPath(stateControls.configPath + ".design", "auto"))
@@ -837,7 +826,7 @@ ContentPage {
             }
 
             WidgetSettingRow {
-                visible: root.sizedWidget(stateControls.widgetKey) && stateControls.sizes.length > 1
+                visible: stateControls.sizes.length > 1
                 label: Translation.tr("Size")
                 icon: "aspect_ratio"
                 trailing: false
@@ -2832,30 +2821,6 @@ ContentPage {
                 }
             }
 
-            ContentSubsection {
-                title: Translation.tr("Dimensions")
-                // a sized card takes its width and height from its size
-                visible: !root.sizedWidget("worldClock")
-
-                WidgetSettingRow {
-                    label: Translation.tr("Width")
-                    icon: "swap_horiz"
-                    StyledSpinBox {
-                        from: 240; to: 700; stepSize: 10
-                        value: root.readPath("background.widgets.worldClock.contentWidth", 300)
-                        onValueModified: root.writePath("background.widgets.worldClock.contentWidth", value)
-                    }
-                }
-                WidgetSettingRow {
-                    label: Translation.tr("Height")
-                    icon: "swap_vert"
-                    StyledSpinBox {
-                        from: 190; to: 480; stepSize: 4
-                        value: root.readPath("background.widgets.worldClock.contentHeight", 210)
-                        onValueModified: root.writePath("background.widgets.worldClock.contentHeight", value)
-                    }
-                }
-            }
 
             WidgetAppearanceControls {
                 configPath: "background.widgets.worldClock"
@@ -2868,7 +2833,7 @@ ContentPage {
             WidgetResetButton {
                 configPath: "background.widgets.worldClock"
                 defaults: ({
-                    placementStrategy: "free", contentWidth: 300, contentHeight: 210,
+                    placementStrategy: "free", ,
                     dim: 0, widgetScale: 100, widgetOpacity: 100, showBackground: true,
                     useBlur: false, showBorder: true, backgroundOpacity: 0.16,
                     borderWidth: 1, borderOpacity: 0.20, cornerRadius: -1,
@@ -2943,29 +2908,6 @@ ContentPage {
                             onToggledByUser: checked => root.writePath("background.widgets.monthCalendar.instrumentRule", checked)
                         }
                     }
-                    ContentSubsection {
-                        title: Translation.tr("Dimensions")
-                        // a sized card takes its width and height from its size
-                        visible: !root.sizedWidget("monthCalendar")
-                        WidgetSettingRow {
-                            label: Translation.tr("Width")
-                            icon: "swap_horiz"
-                            StyledSpinBox {
-                                from: 252; to: 520; stepSize: 4
-                                value: root.readPath("background.widgets.monthCalendar.contentWidth", 300)
-                                onValueModified: root.writePath("background.widgets.monthCalendar.contentWidth", value)
-                            }
-                        }
-                        WidgetSettingRow {
-                            label: Translation.tr("Height")
-                            icon: "swap_vert"
-                            StyledSpinBox {
-                                from: 290; to: 620; stepSize: 4
-                                value: root.readPath("background.widgets.monthCalendar.contentHeight", 340)
-                                onValueModified: root.writePath("background.widgets.monthCalendar.contentHeight", value)
-                            }
-                        }
-                    }
                     WidgetAppearanceControls {
                         configPath: "background.widgets.monthCalendar"
                         configEntry: root.readPath("background.widgets.monthCalendar", ({}))
@@ -2977,7 +2919,7 @@ ContentPage {
                     WidgetResetButton {
                         configPath: "background.widgets.monthCalendar"
                         defaults: ({
-                            placementStrategy: "free", contentWidth: 300, contentHeight: 340,
+                            placementStrategy: "free", ,
                             weekStart: 1, showAdjacentDays: true, style: "card", instrumentRule: true,
                             widgetScale: 100,
                             widgetOpacity: 100, showBackground: true, useBlur: false,
@@ -3064,30 +3006,6 @@ ContentPage {
                     }
                 }
             }
-            ContentSubsection {
-                title: Translation.tr("Dimensions")
-                // a sized card takes its width and height from its size
-                visible: !root.sizedWidget("calendarUpcoming")
-
-                WidgetSettingRow {
-                    label: Translation.tr("Width")
-                    icon: "swap_horiz"
-                    StyledSpinBox {
-                        from: 200; to: 720; stepSize: 10
-                        value: root.readPath("background.widgets.calendarUpcoming.contentWidth", 280)
-                        onValueModified: root.writePath("background.widgets.calendarUpcoming.contentWidth", value)
-                    }
-                }
-                WidgetSettingRow {
-                    label: Translation.tr("Height")
-                    icon: "swap_vert"
-                    StyledSpinBox {
-                        from: 140; to: 720; stepSize: 10
-                        value: root.readPath("background.widgets.calendarUpcoming.contentHeight", 220)
-                        onValueModified: root.writePath("background.widgets.calendarUpcoming.contentHeight", value)
-                    }
-                }
-            }
 
             WidgetAppearanceControls {
                 configPath: "background.widgets.calendarUpcoming"
@@ -3102,7 +3020,7 @@ ContentPage {
                 defaults: ({
                     placementStrategy: "free", maxEvents: 5, showDate: true, showTime: true,
                     showLocation: false, groupByDay: true, style: "card",
-                    contentWidth: 280, contentHeight: 240,
+                    ,
                     dim: 0, widgetScale: 100, widgetOpacity: 100, showBackground: true,
                     useBlur: false, showBorder: true, backgroundOpacity: 0.10,
                     borderWidth: 1, borderOpacity: 0.12, cornerRadius: -1,
@@ -3129,30 +3047,6 @@ ContentPage {
                 configPath: "background.widgets.dateBadge"
                 configEntry: root.readPath("background.widgets.dateBadge", ({}))
                 defaultStrategy: "free"
-            }
-            ContentSubsection {
-                title: Translation.tr("Dimensions")
-                // a sized card takes its width and height from its size
-                visible: !root.sizedWidget("dateBadge")
-
-                WidgetSettingRow {
-                    label: Translation.tr("Width")
-                    icon: "swap_horiz"
-                    StyledSpinBox {
-                        from: 140; to: 600; stepSize: 10
-                        value: root.readPath("background.widgets.dateBadge.contentWidth", 220)
-                        onValueModified: root.writePath("background.widgets.dateBadge.contentWidth", value)
-                    }
-                }
-                WidgetSettingRow {
-                    label: Translation.tr("Height")
-                    icon: "swap_vert"
-                    StyledSpinBox {
-                        from: 120; to: 240; stepSize: 4
-                        value: root.readPath("background.widgets.dateBadge.contentHeight", 140)
-                        onValueModified: root.writePath("background.widgets.dateBadge.contentHeight", value)
-                    }
-                }
             }
 
             ConfigSelectionArray {
@@ -3208,7 +3102,7 @@ ContentPage {
             WidgetResetButton {
                 configPath: "background.widgets.dateBadge"
                 defaults: ({
-                    placementStrategy: "free", contentWidth: 220, contentHeight: 140,
+                    placementStrategy: "free", ,
                     style: "ticket", showYear: true, showWeekday: true, showOrdinal: true,
                     instrumentMarks: true, dim: 0, widgetScale: 100, widgetOpacity: 100, showBackground: true,
                     useBlur: false, showBorder: true, backgroundOpacity: 0.16,
@@ -3236,30 +3130,6 @@ ContentPage {
                         configPath: "background.widgets.dayProgress"
                         configEntry: root.readPath("background.widgets.dayProgress", ({}))
                         defaultStrategy: "free"
-                    }
-                    ContentSubsection {
-                        title: Translation.tr("Dimensions")
-                        // a sized card takes its width and height from its size
-                        visible: !root.sizedWidget("dayProgress")
-
-                        WidgetSettingRow {
-                            label: Translation.tr("Width")
-                            icon: "swap_horiz"
-                            StyledSpinBox {
-                                from: 190; to: 500; stepSize: 10
-                                value: root.readPath("background.widgets.dayProgress.contentWidth", 240)
-                                onValueModified: root.writePath("background.widgets.dayProgress.contentWidth", value)
-                            }
-                        }
-                        WidgetSettingRow {
-                            label: Translation.tr("Height")
-                            icon: "swap_vert"
-                            StyledSpinBox {
-                                from: 190; to: 500; stepSize: 10
-                                value: root.readPath("background.widgets.dayProgress.contentHeight", 240)
-                                onValueModified: root.writePath("background.widgets.dayProgress.contentHeight", value)
-                            }
-                        }
                     }
 
                     ContentSubsection {
@@ -3328,7 +3198,7 @@ ContentPage {
                     WidgetResetButton {
                         configPath: "background.widgets.dayProgress"
                         defaults: ({
-                            placementStrategy: "free", contentWidth: 240, contentHeight: 240,
+                            placementStrategy: "free", ,
                             dim: 0, widgetScale: 100, widgetOpacity: 100, showBackground: false,
                             style: "ring", comet: true, showIcon: true, showDate: true, hourLabels: true, fontScale: 100,
                             useBlur: false, showBorder: false, backgroundOpacity: 0,
@@ -3458,30 +3328,6 @@ ContentPage {
                 configEntry: root.readPath("background.widgets.uptime", ({}))
                 defaultStrategy: "free"
             }
-            ContentSubsection {
-                title: Translation.tr("Dimensions")
-                // a sized card takes its width and height from its size
-                visible: !root.sizedWidget("uptime")
-
-                WidgetSettingRow {
-                    label: Translation.tr("Width")
-                    icon: "swap_horiz"
-                    StyledSpinBox {
-                        from: 180; to: 600; stepSize: 10
-                        value: root.readPath("background.widgets.uptime.contentWidth", 250)
-                        onValueModified: root.writePath("background.widgets.uptime.contentWidth", value)
-                    }
-                }
-                WidgetSettingRow {
-                    label: Translation.tr("Height")
-                    icon: "swap_vert"
-                    StyledSpinBox {
-                        from: 72; to: 240; stepSize: 4
-                        value: root.readPath("background.widgets.uptime.contentHeight", 96)
-                        onValueModified: root.writePath("background.widgets.uptime.contentHeight", value)
-                    }
-                }
-            }
 
             ContentSubsection {
                 title: Translation.tr("Style")
@@ -3532,7 +3378,7 @@ ContentPage {
                     style: "row",
                     showSince: true,
                     showBreakdown: true,
-                    placementStrategy: "free", contentWidth: 250, contentHeight: 96,
+                    placementStrategy: "free", ,
                     dim: 0, widgetScale: 100, widgetOpacity: 100, showBackground: true,
                     useBlur: false, showBorder: true, backgroundOpacity: 0.16,
                     borderWidth: 1, borderOpacity: 0.20, cornerRadius: -1,
@@ -3901,29 +3747,21 @@ ContentPage {
                         if (newValue === "default") {
                             root.writePath("background.widgets.visualizer.barRadius", 2);
                             root.writePath("background.widgets.visualizer.barMinHeight", 1);
-                            root.writePath("background.widgets.visualizer.contentWidth", 304);
-                            root.writePath("background.widgets.visualizer.contentHeight", 104);
                             root.writePath("background.widgets.visualizer.barCount", 48);
                             root.writePath("background.widgets.visualizer.barSpacing", 2);
                         } else if (newValue === "dense") {
                             root.writePath("background.widgets.visualizer.barRadius", 1);
                             root.writePath("background.widgets.visualizer.barMinHeight", 2);
-                            root.writePath("background.widgets.visualizer.contentWidth", 304);
-                            root.writePath("background.widgets.visualizer.contentHeight", 80);
                             root.writePath("background.widgets.visualizer.barCount", 64);
                             root.writePath("background.widgets.visualizer.barSpacing", 1);
                         } else if (newValue === "minimal") {
                             root.writePath("background.widgets.visualizer.barRadius", 4);
                             root.writePath("background.widgets.visualizer.barMinHeight", 1);
-                            root.writePath("background.widgets.visualizer.contentWidth", 200);
-                            root.writePath("background.widgets.visualizer.contentHeight", 80);
                             root.writePath("background.widgets.visualizer.barCount", 24);
                             root.writePath("background.widgets.visualizer.barSpacing", 3);
                         } else if (newValue === "wide") {
                             root.writePath("background.widgets.visualizer.barRadius", 2);
                             root.writePath("background.widgets.visualizer.barMinHeight", 1);
-                            root.writePath("background.widgets.visualizer.contentWidth", 480);
-                            root.writePath("background.widgets.visualizer.contentHeight", 120);
                             root.writePath("background.widgets.visualizer.barCount", 80);
                             root.writePath("background.widgets.visualizer.barSpacing", 2);
                         }
@@ -4300,28 +4138,6 @@ ContentPage {
                 }
             }
 
-            ContentSubsection {
-                title: Translation.tr("Dimensions")
-                // a sized card takes its width and height from its size
-                visible: !root.sizedWidget("visualizer")
-
-                WidgetSettingRow {
-                    label: Translation.tr("Width")
-                    StyledSpinBox {
-                        from: 100; to: 800; stepSize: 20
-                        value: root.readPath("background.widgets.visualizer.contentWidth", 304)
-                        onValueModified: root.writePath("background.widgets.visualizer.contentWidth", value)
-                    }
-                }
-                WidgetSettingRow {
-                    label: Translation.tr("Height")
-                    StyledSpinBox {
-                        from: 40; to: 400; stepSize: 10
-                        value: root.readPath("background.widgets.visualizer.contentHeight", 104)
-                        onValueModified: root.writePath("background.widgets.visualizer.contentHeight", value)
-                    }
-                }
-            }
 
             WidgetAppearanceControls {
                 configPath: "background.widgets.visualizer"
@@ -4381,8 +4197,6 @@ ContentPage {
                     "y": 100,
                     "barRadius": 2,
                     "barMinHeight": 1,
-                    "contentWidth": 304,
-                    "contentHeight": 104,
                     "locked": false
 })
             }
@@ -4422,17 +4236,9 @@ ContentPage {
                     onSelected: newValue => {
                         root.writePath("background.widgets.systemMonitor.preset", newValue);
                         if (newValue === "default") {
-                            root.writePath("background.widgets.systemMonitor.contentWidth", 320);
-                            root.writePath("background.widgets.systemMonitor.contentHeight", 120);
                         } else if (newValue === "compact") {
-                            root.writePath("background.widgets.systemMonitor.contentWidth", 240);
-                            root.writePath("background.widgets.systemMonitor.contentHeight", 80);
                         } else if (newValue === "wide") {
-                            root.writePath("background.widgets.systemMonitor.contentWidth", 480);
-                            root.writePath("background.widgets.systemMonitor.contentHeight", 120);
                         } else if (newValue === "tall") {
-                            root.writePath("background.widgets.systemMonitor.contentWidth", 320);
-                            root.writePath("background.widgets.systemMonitor.contentHeight", 180);
                         }
                     }
                     options: [
@@ -4528,28 +4334,6 @@ ContentPage {
                 }
             }
 
-            ContentSubsection {
-                title: Translation.tr("Dimensions")
-                // a sized card takes its width and height from its size
-                visible: !root.sizedWidget("systemMonitor")
-
-                WidgetSettingRow {
-                    label: Translation.tr("Width")
-                    StyledSpinBox {
-                        from: 120; to: 800; stepSize: 20
-                        value: root.readPath("background.widgets.systemMonitor.contentWidth", 320)
-                        onValueModified: root.writePath("background.widgets.systemMonitor.contentWidth", value)
-                    }
-                }
-                WidgetSettingRow {
-                    label: Translation.tr("Height")
-                    StyledSpinBox {
-                        from: 40; to: 400; stepSize: 10
-                        value: root.readPath("background.widgets.systemMonitor.contentHeight", 120)
-                        onValueModified: root.writePath("background.widgets.systemMonitor.contentHeight", value)
-                    }
-                }
-            }
 
             ContentSubsection {
                 title: Translation.tr("Style")
@@ -4624,8 +4408,6 @@ ContentPage {
                     "x": 50,
                     "y": 400,
                     "preset": "default",
-                    "contentWidth": 320,
-                    "contentHeight": 120,
                     "locked": false
 })
             }
@@ -5184,30 +4966,6 @@ ContentPage {
                     onToggledByUser: checked => root.writePath("background.widgets.newsTicker.showMeta", checked)
                 }
             }
-            ContentSubsection {
-                title: Translation.tr("Dimensions")
-                // a sized card takes its width and height from its size
-                visible: !root.sizedWidget("newsTicker")
-
-                WidgetSettingRow {
-                    label: Translation.tr("Width")
-                    icon: "swap_horiz"
-                StyledSpinBox {
-                    from: 200; to: 600; stepSize: 10
-                    value: root.readPath("background.widgets.newsTicker.contentWidth", 320)
-                    onValueModified: root.writePath("background.widgets.newsTicker.contentWidth", value)
-                }
-            }
-            WidgetSettingRow {
-                label: Translation.tr("Height")
-                icon: "swap_vert"
-                StyledSpinBox {
-                    from: 60; to: 300; stepSize: 4
-                    value: root.readPath("background.widgets.newsTicker.contentHeight", 92)
-                    onValueModified: root.writePath("background.widgets.newsTicker.contentHeight", value)
-                }
-            }
-            }
 
             WidgetAppearanceControls {
                 configPath: "background.widgets.newsTicker"
@@ -5220,7 +4978,7 @@ ContentPage {
             WidgetResetButton {
                 configPath: "background.widgets.newsTicker"
                 defaults: ({
-                    placementStrategy: "free", contentWidth: 320, contentHeight: 92,
+                    placementStrategy: "free", ,
                     style: "card", showMeta: true,
                     dim: 0, widgetScale: 100, widgetOpacity: 100, showBackground: true,
                     useBlur: false, showBorder: true, backgroundOpacity: 0.16,
@@ -5309,30 +5067,6 @@ ContentPage {
                     }
                 }
             }
-            ContentSubsection {
-                title: Translation.tr("Dimensions")
-                // a sized card takes its width and height from its size
-                visible: !root.sizedWidget("notes")
-
-                WidgetSettingRow {
-                    label: Translation.tr("Width")
-                    icon: "swap_horiz"
-                    StyledSpinBox {
-                        from: 160; to: 720; stepSize: 10
-                        value: root.readPath("background.widgets.notes.contentWidth", 240)
-                        onValueModified: root.writePath("background.widgets.notes.contentWidth", value)
-                    }
-                }
-                WidgetSettingRow {
-                    label: Translation.tr("Height")
-                    icon: "swap_vert"
-                    StyledSpinBox {
-                        from: 100; to: 720; stepSize: 10
-                        value: root.readPath("background.widgets.notes.contentHeight", 160)
-                        onValueModified: root.writePath("background.widgets.notes.contentHeight", value)
-                    }
-                }
-            }
 
             WidgetAppearanceControls {
                 configPath: "background.widgets.notes"
@@ -5347,7 +5081,7 @@ ContentPage {
                 defaults: ({
                     placementStrategy: "free", text: "", fontSize: 14, fontFamily: "sans",
                     textAlign: "left", style: "card", showRules: true,
-                    contentWidth: 240, contentHeight: 160, dim: 0,
+                    dim: 0,
                     widgetScale: 100, widgetOpacity: 100, showBackground: true,
                     useBlur: false, showBorder: true, backgroundOpacity: 0.10,
                     borderWidth: 1, borderOpacity: 0.12, cornerRadius: -1,
@@ -5406,29 +5140,6 @@ ContentPage {
                             onToggledByUser: checked => root.writePath("background.widgets.todo.showCompleted", checked)
                         }
                     }
-                    ContentSubsection {
-                        title: Translation.tr("Dimensions")
-                        // a sized card takes its width and height from its size
-                        visible: !root.sizedWidget("todo")
-                        WidgetSettingRow {
-                            label: Translation.tr("Width")
-                            icon: "swap_horiz"
-                            StyledSpinBox {
-                                from: 240; to: 560; stepSize: 4
-                                value: root.readPath("background.widgets.todo.contentWidth", 300)
-                                onValueModified: root.writePath("background.widgets.todo.contentWidth", value)
-                            }
-                        }
-                        WidgetSettingRow {
-                            label: Translation.tr("Height")
-                            icon: "swap_vert"
-                            StyledSpinBox {
-                                from: 220; to: 720; stepSize: 4
-                                value: root.readPath("background.widgets.todo.contentHeight", 276)
-                                onValueModified: root.writePath("background.widgets.todo.contentHeight", value)
-                            }
-                        }
-                    }
                     WidgetAppearanceControls {
                         configPath: "background.widgets.todo"
                         configEntry: root.readPath("background.widgets.todo", ({}))
@@ -5440,7 +5151,7 @@ ContentPage {
                     WidgetResetButton {
                         configPath: "background.widgets.todo"
                         defaults: ({
-                            placementStrategy: "free", contentWidth: 300, contentHeight: 276,
+                            placementStrategy: "free", ,
                             style: "card", instrumentRules: true, showCompleted: true,
                             widgetScale: 100, widgetOpacity: 100, showBackground: true,
                             useBlur: false, showBorder: true, backgroundOpacity: 0.14,
@@ -5510,30 +5221,6 @@ ContentPage {
                 }
             }
 
-            ContentSubsection {
-                title: Translation.tr("Dimensions")
-                // a sized card takes its width and height from its size
-                visible: !root.sizedWidget("userCard")
-
-                WidgetSettingRow {
-                    label: Translation.tr("Width")
-                    icon: "swap_horiz"
-                    StyledSpinBox {
-                        from: 240; to: 600; stepSize: 10
-                        value: root.readPath("background.widgets.userCard.contentWidth", 280)
-                        onValueModified: root.writePath("background.widgets.userCard.contentWidth", value)
-                    }
-                }
-                WidgetSettingRow {
-                    label: Translation.tr("Height")
-                    icon: "swap_vert"
-                    StyledSpinBox {
-                        from: 190; to: 320; stepSize: 2
-                        value: root.readPath("background.widgets.userCard.contentHeight", 176)
-                        onValueModified: root.writePath("background.widgets.userCard.contentHeight", value)
-                    }
-                }
-            }
 
             WidgetAppearanceControls {
                 configPath: "background.widgets.userCard"
@@ -5546,7 +5233,7 @@ ContentPage {
             WidgetResetButton {
                 configPath: "background.widgets.userCard"
                 defaults: ({
-                    placementStrategy: "free", contentWidth: 280, contentHeight: 176,
+                    placementStrategy: "free", ,
                     style: "card", showAvatar: true, showWeather: true, showHostname: true,
                     dim: 0, widgetScale: 100, widgetOpacity: 100, showBackground: true,
                     useBlur: false, showBorder: true, backgroundOpacity: 0.16,
@@ -5976,7 +5663,7 @@ ContentPage {
                 configPath: "background.widgets.imageConverter"
                 defaults: ({
                     enable: false, locked: false, placementStrategy: "free",
-                    selectedFormat: "webp", contentWidth: 292, contentHeight: 260,
+                    selectedFormat: "webp", ,
                     widgetScale: 100, widgetOpacity: 100, colorMode: "auto", dim: 0,
                     showBackground: true, useBlur: false, showBorder: true,
                     backgroundOpacity: 0.22, borderWidth: 1, borderOpacity: 0.22,
@@ -6203,40 +5890,6 @@ ContentPage {
                     }
                 }
 
-                ContentSubsection {
-                    visible: Object.keys(cwDelegate.modelData.resizableAxes || {}).length > 0
-                    title: Translation.tr("Size")
-
-                    WidgetSettingRow {
-                        visible: (cwDelegate.modelData.resizableAxes || {}).width !== undefined
-                        label: Translation.tr("Width")
-                        StyledSpinBox {
-                            from: 40; to: 2000; stepSize: 10
-                            value: CustomWidgets.getConfigValue(cwDelegate.modelData.id, (cwDelegate.modelData.resizableAxes || {}).width ?? "contentWidth", cwDelegate.modelData.defaultSize?.width ?? 200)
-                            onValueModified: CustomWidgets.setConfigValue(cwDelegate.modelData.id, (cwDelegate.modelData.resizableAxes || {}).width ?? "contentWidth", value)
-                        }
-                    }
-
-                    WidgetSettingRow {
-                        visible: (cwDelegate.modelData.resizableAxes || {}).height !== undefined
-                        label: Translation.tr("Height")
-                        StyledSpinBox {
-                            from: 30; to: 1200; stepSize: 10
-                            value: CustomWidgets.getConfigValue(cwDelegate.modelData.id, (cwDelegate.modelData.resizableAxes || {}).height ?? "contentHeight", cwDelegate.modelData.defaultSize?.height ?? 100)
-                            onValueModified: CustomWidgets.setConfigValue(cwDelegate.modelData.id, (cwDelegate.modelData.resizableAxes || {}).height ?? "contentHeight", value)
-                        }
-                    }
-
-                    WidgetSettingRow {
-                        visible: (cwDelegate.modelData.resizableAxes || {}).uniform !== undefined && (cwDelegate.modelData.resizableAxes || {}).uniform !== "widgetScale"
-                        label: Translation.tr("Size")
-                        StyledSpinBox {
-                            from: 30; to: 2000; stepSize: 10
-                            value: CustomWidgets.getConfigValue(cwDelegate.modelData.id, (cwDelegate.modelData.resizableAxes || {}).uniform ?? "size", cwDelegate.modelData.defaultSize?.width ?? 200)
-                            onValueModified: CustomWidgets.setConfigValue(cwDelegate.modelData.id, (cwDelegate.modelData.resizableAxes || {}).uniform ?? "size", value)
-                        }
-                    }
-                }
 
                 // Meta row: version, author, actions
                 RowLayout {
@@ -6364,30 +6017,6 @@ ContentPage {
                 configEntry: root.readPath("background.widgets.shape", ({}))
                 defaultStrategy: "free"
             }
-            ContentSubsection {
-                title: Translation.tr("Dimensions")
-                // a sized card takes its width and height from its size
-                visible: !root.sizedWidget("shape")
-
-                WidgetSettingRow {
-                    label: Translation.tr("Width")
-                    icon: "swap_horiz"
-                    StyledSpinBox {
-                        from: 64; to: 600; stepSize: 10
-                        value: root.readPath("background.widgets.shape.contentWidth", 160)
-                        onValueModified: root.writePath("background.widgets.shape.contentWidth", value)
-                    }
-                }
-                WidgetSettingRow {
-                    label: Translation.tr("Height")
-                    icon: "swap_vert"
-                    StyledSpinBox {
-                        from: 64; to: 240; stepSize: 4
-                        value: root.readPath("background.widgets.shape.contentHeight", 160)
-                        onValueModified: root.writePath("background.widgets.shape.contentHeight", value)
-                    }
-                }
-            }
 
             WidgetShapePicker {
                 Layout.fillWidth: true
@@ -6426,7 +6055,7 @@ ContentPage {
             WidgetResetButton {
                 configPath: "background.widgets.shape"
                 defaults: ({
-                    placementStrategy: "free", contentWidth: 160, contentHeight: 160,
+                    placementStrategy: "free", ,
                     dim: 0, widgetScale: 100, widgetOpacity: 100, shape: "Flower", treatment: "flat", outline: false, angle: 0, strokeWidth: 3, showBackground: false,
                     useBlur: false, showBorder: false, backgroundOpacity: 0,
                     borderWidth: 0, borderOpacity: 0.20, cornerRadius: -1,
@@ -6881,8 +6510,7 @@ ContentPage {
                     secondaryOpacity: 78, sealOpacity: 100, detailOpacity: 72,
                     ruleOpacity: 78, sealFillOpacity: 0, ruleThickness: 1,
                     outlineColor: "#000000", outlineOpacity: 0,
-                    shadowStrength: 35, contentWidth: 330,
-                    contentHeight: 600, dim: 10, widgetScale: 100,
+                    shadowStrength: 35, dim: 10, widgetScale: 100,
                     widgetOpacity: 100, showBackground: false, useBlur: false,
                     showBorder: false, backgroundOpacity: 0, borderWidth: 0,
                     borderOpacity: 0.12, cornerRadius: -1, colorMode: "auto",
@@ -6963,7 +6591,7 @@ ContentPage {
                     }
                     WidgetResetButton {
                         configPath: "background.widgets.editorial"
-                        defaults: ({ placementStrategy: "free", contentWidth: 360, contentHeight: 240,
+                        defaults: ({ placementStrategy: "free", ,
                             title: "Make room for wonder.", caption: "A LITTLE EVERY DAY", footer: "YOUR OWN PERSPECTIVE",
                             style: "poster", showAccent: true, widgetScale: 100, widgetOpacity: 100,
                             colorMode: "auto", dim: 0, locked: false, showBackground: false, showBorder: false,
@@ -7106,8 +6734,7 @@ ContentPage {
             WidgetResetButton {
                 configPath: "background.widgets.mascot"
                 defaults: ({
-                    placementStrategy: "free", contentWidth: 200,
-                    dim: 0, widgetScale: 100, widgetOpacity: 100, showBackground: false,
+                    placementStrategy: "free", dim: 0, widgetScale: 100, widgetOpacity: 100, showBackground: false,
                     useBlur: false, showBorder: false, backgroundOpacity: 0.16,
                     borderWidth: 1, borderOpacity: 0.20, cornerRadius: -1,
                     colorMode: "auto", pose: "reading", customPath: "",

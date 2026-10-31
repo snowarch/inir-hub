@@ -42,8 +42,8 @@ Item {
         const words = key.split(".").pop().replace(/([A-Z])/g, " $1").toLowerCase().trim()
         return words.charAt(0).toUpperCase() + words.slice(1)
     }
-    readonly property var sizes: (root.widget?.materialSized ?? false) ? (root.widget?.materialSizes ?? []) : []
-    readonly property string size: root.widget?.materialSize ?? ""
+    readonly property var sizes: root.widget?.sizeChoices ?? []
+    readonly property string size: root.widget?.sizeClass ?? ""
 
     property real lit: root.dressed ? (root.selected ? 1 : root.hovered ? 0.7 : 0) : 0
     Behavior on lit { NumberAnimation { duration: Appearance.animation.elementMoveFast.duration; easing.type: Easing.OutCubic } }
@@ -62,7 +62,7 @@ Item {
 
     // Free size (10-25): the right and bottom edges take any size, S, M or L puts the class back. Drawn in the edit
     // window, where the card's neighbours and the deselect area can't take the press.
-    readonly property bool grips: root.overlay && root.selected && !root.locked && !root.carried && (root.widget?.materialSized ?? false)
+    readonly property bool grips: root.overlay && root.selected && !root.locked && !root.carried && (root.widget?.sized ?? false) && Plugins.flag(Plugins.active, "widgetFreeSize")
     readonly property Item rightGripItem: rightGrip
     readonly property Item bottomGripItem: bottomGrip
     // The grip's whole box takes the press (it is the edit window's input region); the pill is what shows.
@@ -288,9 +288,9 @@ Item {
                             colBackground: "transparent"
                             colBackgroundHover: sizeKey.chosen ? "transparent" : Appearance.colors.colLayer3Hover
                             colRipple: sizeKey.chosen ? Appearance.colors.colPrimaryActive : Appearance.colors.colLayer3Active
-                            Accessible.name: root.widget?.materialSizeLabels?.[sizeKey.modelData] ?? sizeKey.modelData
+                            Accessible.name: root.widget?.sizeLabels?.[sizeKey.modelData] ?? sizeKey.modelData
                             // A free size (from the handles) goes back to the class even when it is the same one.
-                            onClicked: if (!sizeKey.chosen || root.widget.materialFree) root.widget.commitMaterialSize(sizeKey.modelData)
+                            onClicked: if (!sizeKey.chosen || root.widget.freeSized) root.widget.commitSize(sizeKey.modelData)
                             contentItem: StyledText {
                                 anchors.centerIn: parent
                                 horizontalAlignment: Text.AlignHCenter

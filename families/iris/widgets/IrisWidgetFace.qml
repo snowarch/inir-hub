@@ -36,7 +36,7 @@ Item {
     property real padding: root.edgePad
     default property alias content: body.data
 
-    readonly property string size: root.widget.irisSize
+    readonly property string size: root.widget.sizeClass
     readonly property bool small: root.size === "small"
     readonly property bool medium: root.size === "medium"
     readonly property bool large: root.size === "large"

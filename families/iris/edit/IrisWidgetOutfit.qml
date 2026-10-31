@@ -51,13 +51,13 @@ Item {
         const words = key.split(".").pop().replace(/([A-Z])/g, " $1").toLowerCase().trim()
         return words.charAt(0).toUpperCase() + words.slice(1)
     }
-    readonly property var sizes: root.widget?.irisSizeChoices ?? []
+    readonly property var sizes: root.widget?.sizeChoices ?? []
     readonly property bool sized: (root.widget?.irisFaced ?? false) && root.sizes.length > 1
-    readonly property string size: root.widget?.irisSize ?? ""
-    readonly property string sizeName: root.sized ? (root.widget?.irisSizeLabels?.[root.size] ?? "") : ""
+    readonly property string size: root.widget?.sizeClass ?? ""
+    readonly property string sizeName: root.sized ? (root.widget?.sizeLabels?.[root.size] ?? "") : ""
     function nextSize(): void {
         const i = root.sizes.indexOf(root.size)
-        root.widget.commitIrisSize(root.sizes[(i + 1) % root.sizes.length])
+        root.widget.commitSize(root.sizes[(i + 1) % root.sizes.length])
     }
 
     // ── The ring, or AIRISU's crop marks ──

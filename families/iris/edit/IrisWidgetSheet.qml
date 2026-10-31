@@ -23,7 +23,7 @@ Item {
     // Everything Settings offers for this widget, minus what the sheet already draws (size, Look, Arrange).
     readonly property var rows: {
         const key = String(root.held?.configEntryName ?? "")
-        const drawn = ["iris.size", "iris.design", "iris.material", "widgetScale", "placementStrategy", "locked"]
+        const drawn = ["sizeClass", "iris.design", "iris.material", "widgetScale", "placementStrategy", "locked"]
         return DesktopWidgetOptions.widgetRows.filter(spec => spec.widget === key && !spec.widgetEnable && !drawn.includes(spec.key))
             .map(spec => Object.assign({}, spec, { group: "" }))
     }

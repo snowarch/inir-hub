@@ -22,15 +22,11 @@ Item {
     property real reachWidth: 0
     property real reachHeight: 0
 
-    function sizeOf(name: string): var {
-        const unit = root.widget.irisUnit
-        const gutter = root.widget.irisGutter
-        return Qt.size(name === "small" ? unit : unit * 2 + gutter, name === "large" ? unit * 2 + gutter : unit)
-    }
+    function sizeOf(name: string): var { return root.widget.footprintOf(name) }
     function nearest(width: real, height: real): string {
-        let best = root.widget.irisSize
+        let best = root.widget.sizeClass
         let bestDistance = Infinity
-        for (const size of root.widget.irisSizeChoices) {
+        for (const size of root.widget.sizeChoices) {
             const target = root.sizeOf(size)
             const distance = Math.pow(width - target.width, 2) + Math.pow(height - target.height, 2)
             if (distance < bestDistance) {
@@ -107,12 +103,12 @@ Item {
             const point = area.mapToItem(root.widget.parent, mouse.x, mouse.y)
             area.startX = point.x
             area.startY = point.y
-            area.startSize = root.widget.irisSize
+            area.startSize = root.widget.sizeClass
             root.reachWidth = root.widget.width
             root.reachHeight = root.widget.height
             GlobalStates.selectDesktopWidget(root.widget.editInstanceKey)
-            root.widget._resizePreviewValues = ({ "iris.size": area.startSize })
-            root.widget._irisSizing = true
+            root.widget._resizePreviewValues = ({ "sizeClass": area.startSize })
+            root.widget._sizing = true
         }
         onPositionChanged: mouse => {
             if (!area.pressed)
@@ -122,10 +118,10 @@ Item {
             root.reachWidth = start.width + point.x - area.startX
             root.reachHeight = start.height + point.y - area.startY
             const size = root.nearest(root.reachWidth, root.reachHeight)
-            if (size !== root.widget.irisSize)
-                root.widget._resizePreviewValues = ({ "iris.size": size })
+            if (size !== root.widget.sizeClass)
+                root.widget._resizePreviewValues = ({ "sizeClass": size })
         }
-        onReleased: root.widget.commitIrisSize(root.widget.irisSize)
-        onCanceled: root.widget.commitIrisSize(area.startSize)
+        onReleased: root.widget.commitSize(root.widget.sizeClass)
+        onCanceled: root.widget.commitSize(area.startSize)
     }
 }
