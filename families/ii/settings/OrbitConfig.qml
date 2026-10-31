@@ -202,28 +202,77 @@ ContentPage {
                 onValueModified: Config.setNestedValue("orbit.hotCornerDwellMs", value)
             }
 
-            RippleButtonWithIcon {
-                enabled: CompositorService.isNiri && (root.orbitOptions.enable ?? true)
-                materialIcon: "open_in_full"
-                mainText: Translation.tr("Open Orbit")
-                onClicked: GlobalStates.openOrbit("")
-            }
+            // Trying it and starting over are one row at the group's end, not two loose slabs between settings.
+            Item {
+                id: actionTile
+                readonly property string settingsTileRole: "tile"
+                property bool tileTop: true
+                property bool tileBottom: true
+                Layout.fillWidth: true
+                implicitHeight: Math.max(SettingsMaterialPreset.rowMinHeight, actionRow.implicitHeight + SettingsMaterialPreset.tilePaddingY * 2)
 
-            RippleButtonWithIcon {
-                materialIcon: root.resetArmed ? "warning" : "restart_alt"
-                mainText: root.resetArmed
-                    ? Translation.tr("Confirm reset Orbit")
-                    : Translation.tr("Reset Orbit to defaults")
-                onClicked: {
-                    if (!root.resetArmed) {
-                        root.resetArmed = true
-                        resetArmTimer.restart()
-                        return
+                Rectangle {
+                    anchors.fill: parent
+                    color: SettingsMaterialPreset.tileColor
+                    topLeftRadius: actionTile.tileTop ? SettingsMaterialPreset.tileOuterRadius : SettingsMaterialPreset.tileInnerRadius
+                    topRightRadius: topLeftRadius
+                    bottomLeftRadius: actionTile.tileBottom ? SettingsMaterialPreset.tileOuterRadius : SettingsMaterialPreset.tileInnerRadius
+                    bottomRightRadius: bottomLeftRadius
+                }
+                RowLayout {
+                    id: actionRow
+                    anchors {
+                        fill: parent
+                        leftMargin: SettingsMaterialPreset.tilePaddingX
+                        rightMargin: SettingsMaterialPreset.tilePaddingX
+                        topMargin: SettingsMaterialPreset.tilePaddingY
+                        bottomMargin: SettingsMaterialPreset.tilePaddingY
                     }
-                    resetArmTimer.stop()
-                    root.resetArmed = false
-                    GlobalStates.orbitStageOverride = ""
-                    Config.setNestedValues(OrbitTuning.defaultConfigUpdates())
+                    spacing: SettingsMaterialPreset.tilePaddingX
+
+                    MaterialSymbol {
+                        Layout.preferredWidth: SettingsMaterialPreset.iconSize
+                        text: "hub"
+                        iconSize: SettingsMaterialPreset.iconSize
+                        color: SettingsMaterialPreset.supportingColor
+                    }
+                    ColumnLayout {
+                        Layout.fillWidth: true
+                        spacing: 2
+                        StyledText {
+                            text: Translation.tr("Orbit")
+                            font.pixelSize: SettingsMaterialPreset.labelSize
+                            color: SettingsMaterialPreset.labelColor
+                        }
+                        StyledText {
+                            Layout.fillWidth: true
+                            text: Translation.tr("Try a change, or put every Orbit setting back.")
+                            font.pixelSize: SettingsMaterialPreset.supportingSize
+                            color: SettingsMaterialPreset.supportingColor
+                            wrapMode: Text.WordWrap
+                        }
+                    }
+                    RippleButtonWithIcon {
+                        enabled: CompositorService.isNiri && (root.orbitOptions.enable ?? true)
+                        materialIcon: "open_in_full"
+                        mainText: Translation.tr("Open")
+                        onClicked: GlobalStates.openOrbit("")
+                    }
+                    RippleButtonWithIcon {
+                        materialIcon: root.resetArmed ? "warning" : "restart_alt"
+                        mainText: root.resetArmed ? Translation.tr("Confirm") : Translation.tr("Restore defaults")
+                        onClicked: {
+                            if (!root.resetArmed) {
+                                root.resetArmed = true
+                                resetArmTimer.restart()
+                                return
+                            }
+                            resetArmTimer.stop()
+                            root.resetArmed = false
+                            GlobalStates.orbitStageOverride = ""
+                            Config.setNestedValues(OrbitTuning.defaultConfigUpdates())
+                        }
+                    }
                 }
             }
 
