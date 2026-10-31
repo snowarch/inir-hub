@@ -11,7 +11,8 @@ import qs.modules.shared.background.widgets.weather
 import qs.modules.shared.background.widgets.systemMonitor
 import qs.modules.shared.background.widgets.battery
 import qs.modules.shared.background.widgets.notes
-import qs.modules.shared.background.widgets.calendar
+import qs.modules.shared.background.widgets.calendarUpcoming
+import qs.modules.shared.background.widgets.monthCalendar
 import qs.modules.shared.background.widgets.todo
 import qs.modules.shared.background.widgets.timers
 import qs.modules.shared.background.widgets.dateBadge
