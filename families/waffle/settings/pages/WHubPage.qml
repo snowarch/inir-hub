@@ -1,6 +1,7 @@
 pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Controls
+import QtQuick.Effects
 import QtQuick.Layouts
 import Quickshell
 import Quickshell.Widgets
@@ -151,41 +152,84 @@ WSettingsPage {
         }
     }
 
-    Flow {
+    // One strip that runs sideways when the window is narrow: wrapped, the last pill sat alone on a second line.
+    Flickable {
+        id: filterStrip
         Layout.fillWidth: true
         // "Everything 0" over an empty hub counted nothing
         visible: root.opened === null && Hub.items.length > 0
-        spacing: Looks.dp(8)
-        FilterPill {
-            text: `${Translation.tr("Everything")}  ${Hub.items.length}`
-            checked: root.kind === "" && root.filter === ""
-            onClicked: {
-                root.kind = ""
-                root.filter = ""
+        implicitHeight: filterRow.implicitHeight
+        contentWidth: filterRow.implicitWidth
+        flickableDirection: Flickable.HorizontalFlick
+        boundsBehavior: Flickable.StopAtBounds
+        interactive: contentWidth > width
+        clip: true
+        // The edge with more past it fades out instead of cutting a pill mid-word.
+        layer.enabled: interactive
+        layer.effect: MultiEffect {
+            maskEnabled: true
+            maskSource: stripFade
+            maskThresholdMin: 0.5
+            maskSpreadAtMin: 1
+        }
+        WheelHandler {
+            enabled: filterStrip.interactive
+            acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
+            onWheel: event => {
+                const delta = event.angleDelta.x !== 0 ? event.angleDelta.x : event.angleDelta.y
+                filterStrip.contentX = Math.max(0, Math.min(filterStrip.contentWidth - filterStrip.width, filterStrip.contentX - delta))
             }
         }
-        Repeater {
-            model: Hub.kinds.map(entry => Object.assign({ count: Hub.items.filter(item => item.kind === entry.id).length }, entry))
-                .filter(entry => entry.count > 0)
-            delegate: FilterPill {
-                required property var modelData
-                text: `${Translation.tr(modelData.label)}  ${modelData.count}`
-                checked: root.kind === modelData.id
-                onClicked: root.kind = root.kind === modelData.id ? "" : modelData.id
+        Row {
+            id: filterRow
+            spacing: Looks.dp(8)
+            FilterPill {
+                text: `${Translation.tr("Everything")}  ${Hub.items.length}`
+                checked: root.kind === "" && root.filter === ""
+                onClicked: {
+                    root.kind = ""
+                    root.filter = ""
+                }
+            }
+            Repeater {
+                model: Hub.kinds.map(entry => Object.assign({ count: Hub.items.filter(item => item.kind === entry.id).length }, entry))
+                    .filter(entry => entry.count > 0)
+                delegate: FilterPill {
+                    required property var modelData
+                    text: `${Translation.tr(modelData.label)}  ${modelData.count}`
+                    checked: root.kind === modelData.id
+                    onClicked: root.kind = root.kind === modelData.id ? "" : modelData.id
+                }
+            }
+            FilterPill {
+                readonly property int count: Hub.items.filter(item => Hub.owned(item)).length
+                visible: count > 0
+                text: `${Translation.tr("Installed")}  ${count}`
+                checked: root.filter === "installed"
+                onClicked: root.filter = root.filter === "installed" ? "" : "installed"
+            }
+            FilterPill {
+                visible: Hub.updates > 0
+                text: `${Translation.tr("Updates")}  ${Hub.updates}`
+                checked: root.filter === "updates"
+                onClicked: root.filter = root.filter === "updates" ? "" : "updates"
             }
         }
-        FilterPill {
-            readonly property int count: Hub.items.filter(item => Hub.owned(item)).length
-            visible: count > 0
-            text: `${Translation.tr("Installed")}  ${count}`
-            checked: root.filter === "installed"
-            onClicked: root.filter = root.filter === "installed" ? "" : "installed"
-        }
-        FilterPill {
-            visible: Hub.updates > 0
-            text: `${Translation.tr("Updates")}  ${Hub.updates}`
-            checked: root.filter === "updates"
-            onClicked: root.filter = root.filter === "updates" ? "" : "updates"
+    }
+
+    Rectangle {
+        id: stripFade
+        readonly property real fade: Looks.dp(40) / Math.max(1, width)
+        visible: false
+        layer.enabled: filterStrip.interactive
+        width: filterStrip.width
+        height: filterStrip.height
+        gradient: Gradient {
+            orientation: Gradient.Horizontal
+            GradientStop { position: 0; color: filterStrip.atXBeginning ? "white" : "transparent" }
+            GradientStop { position: stripFade.fade; color: "white" }
+            GradientStop { position: 1 - stripFade.fade; color: "white" }
+            GradientStop { position: 1; color: filterStrip.atXEnd ? "white" : "transparent" }
         }
     }
 
