@@ -38,3 +38,5 @@ WeatherPopup 1.0 WeatherPopup.qml
 Workspaces 1.0 Workspaces.qml
 GroupedList 1.0 GroupedList.qml
 StyledPopupValueRow 1.0 StyledPopupValueRow.qml
+BarWidgetSwitcher 1.0 BarWidgetSwitcher.qml
+BarWidgetSwitcherArea 1.0 BarWidgetSwitcherArea.qml

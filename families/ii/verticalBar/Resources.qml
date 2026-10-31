@@ -24,7 +24,7 @@ MouseArea {
             iconName: "memory"
             percentage: ResourceUsage.memoryUsedPercentage
             shown: Config.options?.material?.bar?.resources?.showMemoryIndicator ?? true
-            warningThreshold: Config.options?.material?.bar?.resources?.memoryWarningThreshold ?? 90
+            warningThreshold: Config.options?.resources?.memoryWarningThreshold ?? 90
         }
 
         Resource {
@@ -32,7 +32,7 @@ MouseArea {
             iconName: "swap_horiz"
             percentage: ResourceUsage.swapUsedPercentage
             shown: Config.options?.material?.bar?.resources?.showSwapIndicator ?? true
-            warningThreshold: Config.options?.material?.bar?.resources?.swapWarningThreshold ?? 90
+            warningThreshold: Config.options?.resources?.swapWarningThreshold ?? 90
         }
 
         Resource {
@@ -40,7 +40,7 @@ MouseArea {
             iconName: "planner_review"
             percentage: ResourceUsage.cpuUsage
             shown: Config.options?.material?.bar?.resources?.showCpuIndicator ?? true
-            warningThreshold: Config.options?.material?.bar?.resources?.cpuWarningThreshold ?? 90
+            warningThreshold: Config.options?.resources?.cpuWarningThreshold ?? 90
         }
 
         Resource {
@@ -48,7 +48,7 @@ MouseArea {
             iconName: "memory_alt"
             percentage: ResourceUsage.gpuUsage
             shown: Config.options?.material?.bar?.resources?.showGpuIndicator ?? true
-            warningThreshold: Config.options?.material?.bar?.resources?.gpuWarningThreshold ?? 90
+            warningThreshold: Config.options?.resources?.gpuWarningThreshold ?? 90
         }
 
     }

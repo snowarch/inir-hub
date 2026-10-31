@@ -266,10 +266,10 @@ Scope {
                     && (Config.options?.orbit?.hotCornerEnable ?? true)
                 if (orbitEnabled && String(Config.options?.orbit?.hotCorner ?? "topRight") === corner)
                     reserve = Math.max(reserve, Config.options?.orbit?.hotCornerSize ?? 12)
-                const sidebarCornerEnabled = Config.options?.material?.sidebar?.cornerOpen?.enable ?? false
-                const sidebarCornerBottom = Config.options?.material?.sidebar?.cornerOpen?.bottom ?? false
+                const sidebarCornerEnabled = Config.options?.cornerOpen?.enable ?? false
+                const sidebarCornerBottom = Config.options?.cornerOpen?.bottom ?? false
                 if (sidebarCornerEnabled && !sidebarCornerBottom)
-                    reserve = Math.max(reserve, Config.options?.material?.sidebar?.cornerOpen?.cornerRegionWidth ?? 20)
+                    reserve = Math.max(reserve, Config.options?.cornerOpen?.cornerRegionWidth ?? 20)
                 return reserve
             }
 

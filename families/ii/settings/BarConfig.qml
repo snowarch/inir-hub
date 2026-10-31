@@ -2571,20 +2571,20 @@ ContentPage {
                 ConfigSpinBox {
                     icon: "memory"
                     text: Translation.tr("RAM warning (%)")
-                    value: Config.options?.material?.bar?.resources?.memoryWarningThreshold ?? 90
+                    value: Config.options?.resources?.memoryWarningThreshold ?? 90
                     from: 50
                     to: 100
                     stepSize: 1
-                    onValueModified: Config.setNestedValue("material.bar.resources.memoryWarningThreshold", value)
+                    onValueModified: Config.setNestedValue("resources.memoryWarningThreshold", value)
                 }
                 ConfigSpinBox {
                     icon: "planner_review"
                     text: Translation.tr("CPU warning (%)")
-                    value: Config.options?.material?.bar?.resources?.cpuWarningThreshold ?? 90
+                    value: Config.options?.resources?.cpuWarningThreshold ?? 90
                     from: 50
                     to: 100
                     stepSize: 1
-                    onValueModified: Config.setNestedValue("material.bar.resources.cpuWarningThreshold", value)
+                    onValueModified: Config.setNestedValue("resources.cpuWarningThreshold", value)
                 }
             }
 
@@ -2593,20 +2593,20 @@ ContentPage {
                 ConfigSpinBox {
                     icon: "videocam"
                     text: Translation.tr("GPU warning (%)")
-                    value: Config.options?.material?.bar?.resources?.gpuWarningThreshold ?? 90
+                    value: Config.options?.resources?.gpuWarningThreshold ?? 90
                     from: 50
                     to: 100
                     stepSize: 1
-                    onValueModified: Config.setNestedValue("material.bar.resources.gpuWarningThreshold", value)
+                    onValueModified: Config.setNestedValue("resources.gpuWarningThreshold", value)
                 }
                 ConfigSpinBox {
                     icon: "swap_horiz"
                     text: Translation.tr("Swap warning (%)")
-                    value: Config.options?.material?.bar?.resources?.swapWarningThreshold ?? 85
+                    value: Config.options?.resources?.swapWarningThreshold ?? 85
                     from: 50
                     to: 100
                     stepSize: 1
-                    onValueModified: Config.setNestedValue("material.bar.resources.swapWarningThreshold", value)
+                    onValueModified: Config.setNestedValue("resources.swapWarningThreshold", value)
                 }
             }
 
@@ -2615,20 +2615,20 @@ ContentPage {
                 ConfigSpinBox {
                     icon: "thermostat"
                     text: Translation.tr("Temp caution (°C)")
-                    value: Config.options?.material?.bar?.resources?.tempCautionThreshold ?? 65
+                    value: Config.options?.resources?.tempCautionThreshold ?? 65
                     from: 40
                     to: 100
                     stepSize: 1
-                    onValueModified: Config.setNestedValue("material.bar.resources.tempCautionThreshold", value)
+                    onValueModified: Config.setNestedValue("resources.tempCautionThreshold", value)
                 }
                 ConfigSpinBox {
                     icon: "device_thermostat"
                     text: Translation.tr("Temp warning (°C)")
-                    value: Config.options?.material?.bar?.resources?.tempWarningThreshold ?? 80
+                    value: Config.options?.resources?.tempWarningThreshold ?? 80
                     from: 50
                     to: 120
                     stepSize: 1
-                    onValueModified: Config.setNestedValue("material.bar.resources.tempWarningThreshold", value)
+                    onValueModified: Config.setNestedValue("resources.tempWarningThreshold", value)
                 }
             }
         }
@@ -2768,8 +2768,8 @@ ContentPage {
             SettingsSwitch {
                 buttonIcon: "swap_vert"
                 text: Translation.tr("Invert scroll")
-                checked: Config.options?.material?.bar?.workspaces?.invertScroll ?? false
-                onCheckedChanged: Config.setNestedValue("material.bar.workspaces.invertScroll", checked)
+                checked: Config.options?.interactions?.scrolling?.invertWorkspaces ?? false
+                onCheckedChanged: Config.setNestedValue("interactions.scrolling.invertWorkspaces", checked)
                 StyledToolTip {
                     text: Translation.tr("Reverse mouse wheel direction for switching workspaces")
                 }

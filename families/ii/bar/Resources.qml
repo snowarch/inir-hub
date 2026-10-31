@@ -26,7 +26,7 @@ MouseArea {
             iconName: "memory"
             percentage: ResourceUsage.memoryUsedPercentage
             shown: Config.options?.material?.bar?.resources?.showMemoryIndicator ?? true
-            warningThreshold: Config.options?.material?.bar?.resources?.memoryWarningThreshold ?? 90
+            warningThreshold: Config.options?.resources?.memoryWarningThreshold ?? 90
         }
 
         Resource {
@@ -37,8 +37,8 @@ MouseArea {
                     !MprisController.activePlayer ||
                     root.alwaysShowAllResources)
             Layout.leftMargin: shown ? 6 : 0
-            cautionThreshold: Config.options?.material?.bar?.resources?.tempCautionThreshold ?? 65
-            warningThreshold: Config.options?.material?.bar?.resources?.tempWarningThreshold ?? 80
+            cautionThreshold: Config.options?.resources?.tempCautionThreshold ?? 65
+            warningThreshold: Config.options?.resources?.tempWarningThreshold ?? 80
         }
 
         Resource {
@@ -49,7 +49,7 @@ MouseArea {
                     !(MprisController.titleOf(MprisController.activePlayer)?.length > 0) ||
                     root.alwaysShowAllResources)
             Layout.leftMargin: shown ? 6 : 0
-            warningThreshold: Config.options?.material?.bar?.resources?.cpuWarningThreshold ?? 90
+            warningThreshold: Config.options?.resources?.cpuWarningThreshold ?? 90
         }
 
         Resource {
@@ -60,7 +60,7 @@ MouseArea {
                     !(MprisController.titleOf(MprisController.activePlayer)?.length > 0) ||
                     root.alwaysShowAllResources)
             Layout.leftMargin: shown ? 6 : 0
-            warningThreshold: Config.options?.material?.bar?.resources?.gpuWarningThreshold ?? 90
+            warningThreshold: Config.options?.resources?.gpuWarningThreshold ?? 90
         }
 
     }

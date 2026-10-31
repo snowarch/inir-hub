@@ -1030,9 +1030,9 @@ ContentPage {
                     SettingsSwitch {
                         buttonIcon: "check"
                         text: Translation.tr("Enable")
-                        checked: Config.options.material.sidebar.cornerOpen.enable
+                        checked: Config.options.cornerOpen.enable
                         onCheckedChanged: {
-                            Config.setNestedValue("material.sidebar.cornerOpen.enable", checked);
+                            Config.setNestedValue("cornerOpen.enable", checked);
                         }
                         StyledToolTip {
                             text: Translation.tr("Allow opening sidebars by interacting with screen corners")
@@ -1042,9 +1042,9 @@ ContentPage {
                 SettingsSwitch {
                     buttonIcon: "highlight_mouse_cursor"
                     text: Translation.tr("Hover to trigger")
-                    checked: Config.options.material.sidebar.cornerOpen.clickless
+                    checked: Config.options.cornerOpen.clickless
                     onCheckedChanged: {
-                        Config.setNestedValue("material.sidebar.cornerOpen.clickless", checked);
+                        Config.setNestedValue("cornerOpen.clickless", checked);
                     }
 
                     StyledToolTip {
@@ -1053,11 +1053,11 @@ ContentPage {
                 }
                 ConfigRow {
                     SettingsSwitch {
-                        enabled: !Config.options.material.sidebar.cornerOpen.clickless
+                        enabled: !Config.options.cornerOpen.clickless
                         text: Translation.tr("Force hover open at absolute corner")
-                        checked: Config.options.material.sidebar.cornerOpen.clicklessCornerEnd
+                        checked: Config.options.cornerOpen.clicklessCornerEnd
                         onCheckedChanged: {
-                            Config.setNestedValue("material.sidebar.cornerOpen.clicklessCornerEnd", checked);
+                            Config.setNestedValue("cornerOpen.clicklessCornerEnd", checked);
                         }
 
                         StyledToolTip {
@@ -1068,12 +1068,12 @@ ContentPage {
                         icon: "arrow_cool_down"
                         text: Translation.tr("with vertical offset")
                         unit: "px"
-                        value: Config.options.material.sidebar.cornerOpen.clicklessCornerVerticalOffset
+                        value: Config.options.cornerOpen.clicklessCornerVerticalOffset
                         from: 0
                         to: 20
                         stepSize: 1
                         onValueModified: {
-                            Config.setNestedValue("material.sidebar.cornerOpen.clicklessCornerVerticalOffset", value);
+                            Config.setNestedValue("cornerOpen.clicklessCornerVerticalOffset", value);
                         }
                         StyledToolTip {
                             text: Translation.tr("Why this is cool:\nFor non-0 values, it won't trigger when you reach the\nscreen corner along the horizontal edge, but it will when\nyou do along the vertical edge")
@@ -1086,9 +1086,9 @@ ContentPage {
                     SettingsSwitch {
                         buttonIcon: "vertical_align_bottom"
                         text: Translation.tr("Place at bottom")
-                        checked: Config.options.material.sidebar.cornerOpen.bottom
+                        checked: Config.options.cornerOpen.bottom
                         onCheckedChanged: {
-                            Config.setNestedValue("material.sidebar.cornerOpen.bottom", checked);
+                            Config.setNestedValue("cornerOpen.bottom", checked);
                         }
 
                         StyledToolTip {
@@ -1098,9 +1098,9 @@ ContentPage {
                     SettingsSwitch {
                         buttonIcon: "unfold_more_double"
                         text: Translation.tr("Value scroll")
-                        checked: Config.options.material.sidebar.cornerOpen.valueScroll
+                        checked: Config.options.cornerOpen.valueScroll
                         onCheckedChanged: {
-                            Config.setNestedValue("material.sidebar.cornerOpen.valueScroll", checked);
+                            Config.setNestedValue("cornerOpen.valueScroll", checked);
                         }
 
                         StyledToolTip {
@@ -1111,9 +1111,9 @@ ContentPage {
                 SettingsSwitch {
                     buttonIcon: "visibility"
                     text: Translation.tr("Visualize region")
-                    checked: Config.options.material.sidebar.cornerOpen.visualize
+                    checked: Config.options.cornerOpen.visualize
                     onCheckedChanged: {
-                        Config.setNestedValue("material.sidebar.cornerOpen.visualize", checked);
+                        Config.setNestedValue("cornerOpen.visualize", checked);
                     }
                     StyledToolTip {
                         text: Translation.tr("Show a colored overlay indicating the corner trigger areas (debug)")
@@ -1124,12 +1124,12 @@ ContentPage {
                         icon: "arrow_range"
                         text: Translation.tr("Region width")
                         unit: "px"
-                        value: Config.options.material.sidebar.cornerOpen.cornerRegionWidth
+                        value: Config.options.cornerOpen.cornerRegionWidth
                         from: 1
                         to: 300
                         stepSize: 1
                         onValueModified: {
-                            Config.setNestedValue("material.sidebar.cornerOpen.cornerRegionWidth", value);
+                            Config.setNestedValue("cornerOpen.cornerRegionWidth", value);
                         }
                         StyledToolTip {
                             text: Translation.tr("Horizontal size of the active corner area")
@@ -1139,12 +1139,12 @@ ContentPage {
                         icon: "height"
                         text: Translation.tr("Region height")
                         unit: "px"
-                        value: Config.options.material.sidebar.cornerOpen.cornerRegionHeight
+                        value: Config.options.cornerOpen.cornerRegionHeight
                         from: 1
                         to: 300
                         stepSize: 1
                         onValueModified: {
-                            Config.setNestedValue("material.sidebar.cornerOpen.cornerRegionHeight", value);
+                            Config.setNestedValue("cornerOpen.cornerRegionHeight", value);
                         }
                         StyledToolTip {
                             text: Translation.tr("Vertical size of the active corner area")

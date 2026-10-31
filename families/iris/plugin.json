@@ -101,6 +101,14 @@
     "bannerDuration": {
       "key": "iris.notifications.duration",
       "fallback": 4000
+    },
+    "barAutoHide": {
+      "key": "iris.bar.autoHide",
+      "fallback": false
+    },
+    "dockEnabled": {
+      "key": "iris.dock.enable",
+      "fallback": true
     }
   },
   "loginScreen": {

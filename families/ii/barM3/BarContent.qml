@@ -274,7 +274,7 @@ Item {
             else Audio.decrementVolume();
         } else if (action === "workspace") {
             let up = isUp;
-            if (Config.options?.material?.bar?.workspaces?.invertScroll ?? false) up = !up;
+            if (Config.options?.interactions?.scrolling?.invertWorkspaces ?? false) up = !up;
 
             if (CompositorService.isNiri) {
                 if (up) NiriService.focusWorkspaceUp();

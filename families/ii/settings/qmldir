@@ -57,3 +57,4 @@ ToolsConfig 1.0 ToolsConfig.qml
 ZzzStyleEditor 1.0 ZzzStyleEditor.qml
 SettingsChrome 1.0 SettingsChrome.qml
 SettingsHome 1.0 SettingsHome.qml
+BarModuleOrderEditor 1.0 BarModuleOrderEditor.qml

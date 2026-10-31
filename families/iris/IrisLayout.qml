@@ -49,13 +49,15 @@ QtObject {
                 && (GlobalStates.barOpen ?? true)) {
             const height = Math.max(32, Math.round(Number(iris.bar?.height ?? 42) * density))
             const margin = (iris.bar?.notch ?? false) ? 0 : Math.round(Number(iris.bar?.margin ?? 8) * density)
-            ShellLayoutController.applyInset(result, barEdge, height + margin * 2)
+            result.barThickness = height + margin * 2
+            ShellLayoutController.applyInset(result, barEdge, result.barThickness)
         }
         if (iris.dock?.enable ?? true) {
             result.dockEdge = barEdge === "bottom" ? "top" : "bottom"
             const icon = Math.max(28, Math.min(64, Number(iris.dock?.iconSize ?? 40))) * density
             const gap = (iris.dock?.notch ?? false) ? 0 : 10 * density
-            ShellLayoutController.applyInset(result, result.dockEdge, icon + 18 * density + gap * 2)
+            result.dockThickness = Math.round(icon + 18 * density + gap * 2)
+            ShellLayoutController.applyInset(result, result.dockEdge, result.dockThickness)
         }
         const band = bandWidth()
         for (const edge of ["left", "top", "right", "bottom"])

@@ -1,5 +1,8 @@
 import QtQuick
+import Quickshell
 import qs.modules.common
+import qs.modules.waffle.looks
+import qs.services
 
 // Waffle's persistent surfaces for ShellLayoutController: the taskbar, top or bottom.
 QtObject {
@@ -39,4 +42,14 @@ QtObject {
         return true
     }
     function resetSlot(surfaceId: string): string { return surfaceId === "waffleBar" ? "bottom" : "" }
+    function desktopInsets(outputName: string, result: var): var {
+        if (!ShellLayoutController.panelEnabled("wBar")
+                || !ShellLayoutController.outputEnabled(Config.options?.waffles?.bar?.screenList ?? [], outputName))
+            return result
+        const screen = Quickshell.screens.find(item => (item?.name ?? "") === outputName) ?? Quickshell.screens[0]
+        result.barEdge = (Config.options?.waffles?.bar?.bottom ?? true) ? "bottom" : "top"
+        result.barThickness = Looks.scaledBar(48, screen)
+        ShellLayoutController.applyInset(result, result.barEdge, result.barThickness)
+        return result
+    }
 }

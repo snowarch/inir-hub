@@ -1,3 +1,4 @@
 module qs.modules.ii
 MaterialConfigSchema 1.0 MaterialConfigSchema.qml
+MaterialLayout 1.0 MaterialLayout.qml
 ShellIiPanelsImpl 1.0 ShellIiPanelsImpl.qml

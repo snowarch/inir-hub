@@ -6,6 +6,14 @@
     "settingsOverlay": {
       "key": "material.settingsUi.overlayMode",
       "fallback": false
+    },
+    "barAutoHide": {
+      "key": "material.bar.autoHide.enable",
+      "fallback": false
+    },
+    "dockEnabled": {
+      "key": "material.dock.enable",
+      "fallback": true
     }
   },
   "name": "Material",
@@ -21,7 +29,8 @@
     "widgetOutfit": "edit/MaterialWidgetOutfit.qml",
     "settingsApp": "settings/MaterialSettingsApp.qml",
     "settingsHost": "settings/SettingsHost.qml",
-    "config": "MaterialConfigSchema.qml"
+    "config": "MaterialConfigSchema.qml",
+    "layout": "MaterialLayout.qml"
   },
   "enabledPanels": [
     "iiBar",

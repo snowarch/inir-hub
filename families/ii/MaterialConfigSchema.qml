@@ -342,12 +342,6 @@ JsonObject {
             property bool alwaysShowTemp: true
             property bool alwaysShowCpu: true
             property bool alwaysShowGpu: true
-            property int tempCautionThreshold: 65
-            property int tempWarningThreshold: 80
-            property int memoryWarningThreshold: 95
-            property int swapWarningThreshold: 85
-            property int cpuWarningThreshold: 90
-            property int gpuWarningThreshold: 90
         }
         property list<string> screenList: [] // List of names, like "eDP-1", find out with 'hyprctl monitors' command
         property JsonObject utilButtons: JsonObject {
@@ -372,7 +366,6 @@ JsonObject {
         }
         property JsonObject workspaces: JsonObject {
             property string scrollBehavior: "workspace" // "workspace" or "column"
-            property bool invertScroll: false // Invert scroll direction
             property bool monochromeIcons: true
             property bool dynamicCount: true // Auto-detect workspace count (Niri)
             property int shown: 10 // Only used when dynamicCount is false
@@ -529,17 +522,6 @@ JsonObject {
                 property int itemSize: 72
                 property bool showHeader: true
             }
-        }
-        property JsonObject cornerOpen: JsonObject {
-            property bool enable: false
-            property bool bottom: false
-            property bool valueScroll: true
-            property bool clickless: false
-            property int cornerRegionWidth: 250
-            property int cornerRegionHeight: 5
-            property bool visualize: false
-            property bool clicklessCornerEnd: true
-            property int clicklessCornerVerticalOffset: 1
         }
         property JsonObject edgeOpen: JsonObject {
             property bool enable: false
