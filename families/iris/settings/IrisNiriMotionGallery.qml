@@ -128,6 +128,9 @@ ColumnLayout {
                     text: tile.modelData.description
                     color: IrisStyle.muted
                     font.pixelSize: IrisStyle.typeFootnote
+                    // two lines: in Drawer's column one cut "Lands at once, then settles s…"
+                    wrapMode: Text.WordWrap
+                    maximumLineCount: 2
                     elide: Text.ElideRight
                 }
 

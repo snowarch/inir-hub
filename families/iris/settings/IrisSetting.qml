@@ -855,7 +855,8 @@ Item {
         Column {
             id: tiles
             readonly property real gap: Math.round(8 * root.d)
-            readonly property int columns: width >= 640 * root.d ? 4 : width >= 440 * root.d ? 3 : 2
+            // A tile under ~176 px left its name 71 px beside the chip and the check: "Monochro…" in Drawer's column.
+            readonly property int columns: width >= 640 * root.d ? 4 : width >= 440 * root.d ? 3 : width >= 352 * root.d ? 2 : 1
             readonly property real tileWidth: Math.floor((width - (tiles.columns - 1) * tiles.gap) / tiles.columns)
             spacing: Math.round(14 * root.d)
             Repeater {
