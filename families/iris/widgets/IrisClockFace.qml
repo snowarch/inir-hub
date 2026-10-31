@@ -59,7 +59,11 @@ IrisWidgetFace {
         anchors.left: root.analog ? dial.right : parent.left
         anchors.leftMargin: root.analog ? root.dp(18) : 0
         anchors.right: parent.right
-        y: root.large ? 0 : Math.round((parent.height - height) / 2)
+        // Beside a dial the column spans the dial's height: the date on its top line, the week on its bottom one, so
+        // the card keeps the same air at every edge instead of a short block floating in the middle.
+        readonly property bool spans: root.analog && root.medium
+        y: root.large || column.spans ? 0 : Math.round((parent.height - height) / 2)
+        height: column.spans ? parent.height : implicitHeight
         spacing: root.dp(2)
 
         // The week strip says the weekday wherever it shows.
@@ -80,7 +84,7 @@ IrisWidgetFace {
                 id: dateFigure
                 face: root
                 text: root.now.getDate()
-                size: 40
+                size: column.spans ? 48 : 40
             }
             FaceText {
                 face: root
@@ -110,6 +114,7 @@ IrisWidgetFace {
             color: root.inkSecondary
             size: root.small ? 12.5 : 13.5
         }
+        Item { visible: column.spans; Layout.fillHeight: true }
         Week {
             Layout.fillHeight: false
             visible: !root.small && !root.large && root.week
