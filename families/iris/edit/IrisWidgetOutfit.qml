@@ -52,7 +52,7 @@ Item {
         return words.charAt(0).toUpperCase() + words.slice(1)
     }
     readonly property var sizes: root.widget?.sizeChoices ?? []
-    readonly property bool sized: (root.widget?.irisFaced ?? false) && root.sizes.length > 1
+    readonly property bool sized: (root.widget?.familyFaced ?? false) && root.sizes.length > 1
     readonly property string size: root.widget?.sizeClass ?? ""
     readonly property string sizeName: root.sized ? (root.widget?.sizeLabels?.[root.size] ?? "") : ""
     function nextSize(): void {

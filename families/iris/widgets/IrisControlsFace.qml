@@ -23,12 +23,12 @@ IrisWidgetFace {
     readonly property var monitor: Brightness.getMonitorForScreen(root.QsWindow?.window?.screen ?? null)
     // The keys the person kept, in their order: small and medium show the first four, large eight.
     readonly property var kept: ["wifi", "bluetooth", "focus", "nightLight", "awake", "gameMode", "mic", "darkMode"]
-        .filter(key => Boolean(root.widget.irisOption("tile." + key, true)))
+        .filter(key => Boolean(root.widget.familyOption("tile." + key, true)))
     function shows(key: string): bool {
         const at = root.kept.indexOf(key)
         return at >= 0 && at < (root.large ? 8 : 4)
     }
-    readonly property bool sliders: Boolean(root.widget.irisOption("sliders", true))
+    readonly property bool sliders: Boolean(root.widget.familyOption("sliders", true))
 
     component Toggle: Item {
         id: toggle

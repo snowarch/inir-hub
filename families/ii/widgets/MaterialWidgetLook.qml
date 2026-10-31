@@ -2,6 +2,7 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import qs.modules.common
+import qs.modules.common.functions
 import qs.modules.shared.background.widgets
 
 // Desktop widgets in Material: what each global style changes on them.
@@ -12,6 +13,30 @@ WidgetLook {
     readonly property bool _island: !Appearance.zzzEverywhere && !Appearance.cookieEverywhere
         && !Appearance.angelEverywhere && !Appearance.auroraEverywhere && !Appearance.inirEverywhere
         && (Config.options?.background?.widgets?.style ?? "panel") === "island"
+
+    metaCapitalization: Appearance.editorialEverywhere ? Font.MixedCase : Font.AllUppercase
+    rowRadius: Appearance.zzzEverywhere ? Appearance.zzz.controlRadius
+        : Appearance.regaliaEverywhere ? Appearance.regalia.controlRadius : Appearance.rounding.small
+    chipEdge: Appearance.editorialEverywhere ? 1 : 0
+    chipEdgeColor: Appearance.editorialEverywhere ? Appearance.editorial.edge : "transparent"
+    function chipRadius(height: real): real {
+        return Appearance.zzzEverywhere ? Appearance.zzz.controlRadius
+            : Appearance.regaliaEverywhere ? Appearance.regalia.controlRadius
+            : Appearance.editorialEverywhere ? Appearance.rounding.small
+            : Appearance.angelEverywhere ? Appearance.angel.roundingSmall
+            : height / 2
+    }
+    function chipInk(selected: bool): color {
+        return Appearance.zzzEverywhere ? (selected ? Appearance.zzz.onSticker : Appearance.zzz.ink)
+            : Appearance.regaliaEverywhere ? (selected ? Appearance.regalia.primaryPlateInk : Appearance.regalia.onColor)
+            : selected ? Appearance.colors.colOnPrimary : Appearance.colors.colOnLayer2
+    }
+    function chipFill(selected: bool, hovered: bool): color {
+        if (selected && Appearance.zzzEverywhere) return Appearance.zzz.sticker
+        if (selected && Appearance.regaliaEverywhere) return Appearance.regalia.primaryPlate
+        return selected ? (hovered ? Appearance.colors.colPrimaryHover : Appearance.colors.colPrimary)
+            : ColorUtils.applyAlpha(Appearance.colors.colOnLayer2, hovered ? 0.1 : 0.055)
+    }
 
     function blurAvailable(widget: var): bool {
         return Appearance.effectsEnabled && (Appearance.angelEverywhere

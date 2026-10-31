@@ -26,7 +26,13 @@
       "fallback": 220
     }
   },
-  "flags": { "widgetFreeSize": true },
+  "widgetDesign": {
+    "key": "design",
+    "shared": "background.widgets.design",
+    "plain": "individual",
+    "choices": ["individual", "instrument", "readout"]
+  },
+  "flags": { "widgetFreeSize": true, "sharedDesktop": true },
   "name": "Material",
   "summary": "Material 3 Expressive panels, bars, docks and widgets in nine global styles.",
   "tagline": "Modular bars, sidebars and Material controls.",

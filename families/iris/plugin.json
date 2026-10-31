@@ -57,6 +57,15 @@
     "layout": "IrisLayout.qml",
     "welcome": "welcome/IrisWelcome.qml"
   },
+  "widgetDesign": {
+    "key": "iris.design",
+    "shared": "iris.widgets.design",
+    "prefix": "iris",
+    "face": "iris",
+    "faceLabel": "iRiS",
+    "plain": "material",
+    "choices": ["iris", "material", "instrument", "readout"]
+  },
   "flags": {
     "lockSurfaceSync": true,
     "lazyServices": true,
@@ -65,7 +74,9 @@
     "appsPalette": true,
     "liveJobs": true,
     "cameraWatch": true,
-    "quietScrollbars": true
+    "quietScrollbars": true,
+    "sharedDesktop": true,
+    "widgetSearch": true
   },
   "customWidget": {
     "face": "widgets/templates/IrisCompact.qml",
@@ -86,6 +97,11 @@
     "irisPolkit"
   ],
   "settings": {
+    "edgeMusic": {
+      "key": "iris.surround.music",
+      "when": "iris.surround.enable",
+      "fallback": "widget"
+    },
     "font": {
       "key": "iris.appearance.fontFamily",
       "fallback": "Geist"

@@ -398,7 +398,7 @@ ColumnLayout {
         // One tap takes this widget's plate away (Transparent) and brings it back.
         Rectangle {
             id: plateRow
-            visible: root.widget.irisFaced
+            visible: root.widget.familyFaced
             Layout.fillWidth: true
             implicitHeight: Math.round(40 * root.d)
             radius: root.plateRadius
@@ -409,7 +409,7 @@ ColumnLayout {
             IrisCutPlate { anchors.fill: parent; visible: IrisStyle.fieldChamfer; cutLength: root.plateCut; color: plateRow.stuff }
             function flip(): void {
                 const shared = String(Config.options?.iris?.widgets?.material ?? "glass")
-                root.widget.setIrisOption("material", plateRow.on ? "clear" : shared === "clear" ? "glass" : "auto")
+                root.widget.setFamilyOption("material", plateRow.on ? "clear" : shared === "clear" ? "glass" : "auto")
             }
             MaterialSymbol {
                 id: plateGlyph
@@ -490,19 +490,19 @@ ColumnLayout {
         }
 
         Repeater {
-            model: root.optionRows === null ? root.widget.irisOptions : []
+            model: root.optionRows === null ? root.widget.familyOptions : []
 
             ColumnLayout {
                 id: option
                 required property var modelData
                 readonly property var value: option.modelData.raw
                     ? root.widget._readConfigKey(option.modelData.key) ?? option.modelData.fallback
-                    : root.widget.irisOption(option.modelData.key, option.modelData.fallback)
+                    : root.widget.familyOption(option.modelData.key, option.modelData.fallback)
                 function store(value: var): void {
                     if (option.modelData.raw)
                         root.widget._setOutputValue(option.modelData.key, value)
                     else
-                        root.widget.setIrisOption(option.modelData.key, value)
+                        root.widget.setFamilyOption(option.modelData.key, value)
                 }
                 readonly property var picks: option.modelData.choices ?? []
                 readonly property bool choice: option.picks.length > 0
@@ -760,8 +760,8 @@ ColumnLayout {
                 fillColor: IrisStyle.accent
                 stepSize: 2 / root.cornerMax
                 value: Math.max(0, root.cornerValue) / root.cornerMax
-                onMoved: value => root.widget.previewIrisValue("cornerRadius", root.cornerFrom(value))
-                onSeekRequested: value => root.widget.commitIrisValue("cornerRadius", root.cornerFrom(value))
+                onMoved: value => root.widget.previewValue("cornerRadius", root.cornerFrom(value))
+                onSeekRequested: value => root.widget.commitValue("cornerRadius", root.cornerFrom(value))
             }
         }
 
@@ -788,10 +788,10 @@ ColumnLayout {
                 fillColor: IrisStyle.accent
                 stepSize: 5 / (100 - root.opacityMin)
                 value: (root.opacityValue - root.opacityMin) / (100 - root.opacityMin)
-                onMoved: value => root.widget.previewIrisValue("iris.opacity", root.opacityFrom(value))
+                onMoved: value => root.widget.previewValue("iris.opacity", root.opacityFrom(value))
                 onSeekRequested: value => {
                     const chosen = root.opacityFrom(value)
-                    root.widget.commitIrisValue("iris.opacity",
+                    root.widget.commitValue("iris.opacity",
                         chosen === Math.round(Number(Config.options?.iris?.widgets?.opacity ?? 100)) ? -1 : chosen)
                 }
             }
@@ -821,7 +821,7 @@ ColumnLayout {
                 fillColor: IrisStyle.accent
                 stepSize: 5 / (root.scaleMax - root.scaleMin)
                 value: (root.scaleValue - root.scaleMin) / (root.scaleMax - root.scaleMin)
-                onMoved: value => root.widget.previewIrisScale(Math.round((root.scaleMin + value * (root.scaleMax - root.scaleMin)) / 5) * 5)
+                onMoved: value => root.widget.previewScale(Math.round((root.scaleMin + value * (root.scaleMax - root.scaleMin)) / 5) * 5)
                 onSeekRequested: value => root.widget.commitIrisScale(Math.round((root.scaleMin + value * (root.scaleMax - root.scaleMin)) / 5) * 5)
             }
         }

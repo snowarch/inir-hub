@@ -11,9 +11,9 @@ import qs.modules.iris.components
 IrisWidgetFace {
     id: root
 
-    readonly property bool analog: String(root.widget.irisOption("face", "analog")) === "analog"
-    readonly property bool seconds: Boolean(root.widget.irisOption("seconds", true))
-    readonly property bool week: Boolean(root.widget.irisOption("week", true))
+    readonly property bool analog: String(root.widget.familyOption("face", "analog")) === "analog"
+    readonly property bool seconds: Boolean(root.widget.familyOption("seconds", true))
+    readonly property bool week: Boolean(root.widget.familyOption("week", true))
     readonly property var now: clock.date
     readonly property string timePattern: {
         const format = String(root.widget.timeFormat ?? "system")

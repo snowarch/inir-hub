@@ -7,7 +7,7 @@ import qs.modules.iris.style
 import qs.services
 import qs.modules.shared.background.widgets
 
-// Desktop widgets under iRiS: its faces (`widget.widgetIris`) and the other designs it wears.
+// Desktop widgets under iRiS: its faces (`widget.familyDesign`) and the other designs it wears.
 WidgetLook {
     id: look
 
@@ -25,6 +25,34 @@ WidgetLook {
     restBackdrop: IrisStyle.inkOnLight
     inkLight: IrisStyle.inkOnDark
     inkDark: IrisStyle.inkOnLight
+
+    density: IrisStyle.density
+    labelSize: IrisStyle.typeLabel
+    metaSize: IrisStyle.typeMeta
+    valueSize: IrisStyle.typeMeta
+    sheetTitleSize: IrisStyle.typeTitle
+    metaCapitalization: Font.MixedCase
+    metaSpacing: 0
+    controlInk: IrisStyle.text
+    valueInk: IrisStyle.textSecondary
+    quietInk: IrisStyle.textTertiary
+    feedbackDuration: IrisStyle.feedbackDuration
+    rowRadius: IrisStyle.radiusRow
+    tintedKeys: true
+    chipEdge: 1
+    chipEdgeColor: IrisStyle.tintBorder(IrisStyle.accent)
+    tagFill: IrisStyle.raised
+    tagInk: IrisStyle.text
+    tagSize: IrisStyle.typeFootnote
+    guideRadius: Math.round(Math.max(0, Math.min(40, look.options.radius ?? 22)) * IrisStyle.density)
+    guideFill: IrisStyle.tintFill(IrisStyle.accent)
+    function rowFill(hovered: bool): color { return hovered ? IrisStyle.fillHover : IrisStyle.fillQuiet }
+    function markRadius(size: real): real { return IrisStyle.iconRadius(size) }
+    function chipInk(selected: bool): color { return selected ? IrisStyle.text : IrisStyle.textSecondary }
+    function chipGlyphInk(selected: bool): color { return selected ? IrisStyle.accent : look.chipInk(selected) }
+    function chipFill(selected: bool, hovered: bool): color {
+        return selected ? IrisStyle.tintFill(IrisStyle.accent) : hovered ? IrisStyle.fillHover : IrisStyle.fillQuiet
+    }
 
     // Widgets keep the black Island material but can borrow the wallpaper: its generated hues are lifted into a range
     // that reads on black, and the plate can carry a trace of the same hue. Greyscale seeds keep iRiS blue.
@@ -60,42 +88,67 @@ WidgetLook {
         return Math.max(0, Math.min(100, Number.isFinite(value) ? value : 100)) / 100
     }
 
+    function resetValues(widget: var): var {
+        return widget.hasFamilyFace ? { "iris.material": "auto", "iris.design": "auto", "iris.opacity": -1 } : ({})
+    }
+    // Widgets that keep their own material or opacity, and the verbs over the shared one.
+    readonly property var ownSurfaces: DesktopWidgetDesign.scan(["iris.material", "iris.opacity"],
+        (key, value) => key === "iris.opacity" ? Number(value) >= 20 : look.materials.includes(String(value)))
+    readonly property int ownSurfaceCount: new Set(look.ownSurfaces.map(entry => entry.output + "::" + entry.widget)).size
+    function matchSurfaces(): string {
+        const count = look.ownSurfaceCount
+        if (count === 0) return "Every widget already follows the shared material"
+        Config.setNestedValues(DesktopWidgetDesign.cleared(look.ownSurfaces, key => key === "iris.opacity" ? -1 : "auto"))
+        return "matched " + count
+    }
+    function materialAction(action: string): string {
+        const now = String(look.options.material ?? "glass")
+        if (action === "match") return look.matchSurfaces()
+        if (action === "status") return now + " · " + look.ownSurfaceCount + " widgets with their own material or opacity"
+        if (action === "toggle" || action === "clear" || action === "glass") {
+            const next = action !== "toggle" ? action : now === "clear" ? "glass" : "clear"
+            Config.setNestedValue("iris.widgets.material", next)
+            return next
+        }
+        return "Use status, match, toggle, clear or glass"
+    }
+
     function plated(widget: var): bool {
-        return widget.irisFaced ? look.material(widget) !== "clear"
+        return widget.familyFaced ? look.material(widget) !== "clear"
             : widget.widgetHasSurface && (widget.backgroundOpacity > 0 || widget.effectiveBlur)
     }
     function readsRegion(widget: var): bool {
         const material = look.material(widget)
-        return widget.irisFaced && (material === "glass" || material === "clear")
+        return widget.familyFaced && (material === "glass" || material === "clear")
     }
     function plateColor(widget: var): color {
-        return widget.widgetIris && widget.forceDarkInk ? ColorUtils.mix(IrisStyle.text, IrisStyle.accent, 0.98)
-            : widget.widgetIris && widget.forceLightInk ? IrisStyle.surface
+        return widget.familyDesign && widget.forceDarkInk ? ColorUtils.mix(IrisStyle.text, IrisStyle.accent, 0.98)
+            : widget.familyDesign && widget.forceLightInk ? IrisStyle.surface
             : widget.widgetSemanticContainer(widget.widgetSurfaceRole)
     }
 
-    function bodyFamily(widget: var): string { return widget.widgetIris ? IrisStyle.fontMain : Appearance.font.family.main }
+    function bodyFamily(widget: var): string { return widget.familyDesign ? IrisStyle.fontMain : Appearance.font.family.main }
     function numbersFamily(widget: var): string { return IrisStyle.fontNumbers }
-    function titleFamily(widget: var): string { return widget.widgetIris ? IrisStyle.fontMain : Appearance.font.family.main }
+    function titleFamily(widget: var): string { return widget.familyDesign ? IrisStyle.fontMain : Appearance.font.family.main }
     // Display type: one chosen weight for titles and figures, with the slight negative tracking large numerals use.
     function titleWeight(widget: var): int {
-        return widget.widgetIris ? ({ light: Font.Light, regular: Font.Medium, bold: Font.Bold })[String(look.options.weight ?? "regular")] ?? Font.Medium
+        return widget.familyDesign ? ({ light: Font.Light, regular: Font.Medium, bold: Font.Bold })[String(look.options.weight ?? "regular")] ?? Font.Medium
             : Font.DemiBold
     }
-    function titleTracking(widget: var): real { return widget.widgetIris ? -0.4 : 0 }
+    function titleTracking(widget: var): real { return widget.familyDesign ? -0.4 : 0 }
     // Shouting caps are Material/Instrument grammar; iRiS uses sentence case.
-    function capitalization(widget: var): int { return widget.widgetIris ? Font.MixedCase : Font.AllUppercase }
+    function capitalization(widget: var): int { return widget.familyDesign ? Font.MixedCase : Font.AllUppercase }
     function caseOf(widget: var, text: string): string {
-        return widget.widgetIris ? text.charAt(0).toUpperCase() + text.slice(1) : text.toUpperCase()
+        return widget.familyDesign ? text.charAt(0).toUpperCase() + text.slice(1) : text.toUpperCase()
     }
-    function controlRadius(widget: var): real { return widget.widgetIris ? Math.round(12 * IrisStyle.density) : Appearance.rounding.normal }
+    function controlRadius(widget: var): real { return widget.familyDesign ? Math.round(12 * IrisStyle.density) : Appearance.rounding.normal }
     function cardRadius(widget: var): real {
-        return widget.widgetIris ? Math.round(Math.max(0, Math.min(40, look.options.radius ?? 22)) * IrisStyle.density)
+        return widget.familyDesign ? Math.round(Math.max(0, Math.min(40, look.options.radius ?? 22)) * IrisStyle.density)
             : Appearance.rounding.extralarge
     }
 
     function semanticSet(widget: var, role: string): var {
-        if (widget.widgetIris) {
+        if (widget.familyDesign) {
             const lifted = role === "surface" ? IrisStyle.text
                 : role === "signal" ? IrisStyle.danger
                 : role === "success" ? IrisStyle.success

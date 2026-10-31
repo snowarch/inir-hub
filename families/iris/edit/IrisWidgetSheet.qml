@@ -123,7 +123,7 @@ Item {
                 id: content
                 width: scroller.width
                 active: root.held !== null
-                sourceComponent: root.held?.irisFaced ? irisControls : root.held?.sheetPages ?? null
+                sourceComponent: root.held?.familyFaced ? irisControls : root.held?.sheetPages ?? null
             }
         }
     }

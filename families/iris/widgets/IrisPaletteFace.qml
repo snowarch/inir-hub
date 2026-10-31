@@ -201,7 +201,7 @@ IrisWidgetFace {
                     label: modelData.label
                     on: root.widget.colourSource === modelData.value
                     onActivated: modelData.value === "random" && root.widget.colourSource === "random"
-                        ? root.widget.shuffle() : root.widget.setIrisOption("source", modelData.value)
+                        ? root.widget.shuffle() : root.widget.setFamilyOption("source", modelData.value)
                 }
             }
         }

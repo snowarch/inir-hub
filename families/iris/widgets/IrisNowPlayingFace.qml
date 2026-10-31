@@ -20,13 +20,13 @@ IrisWidgetFace {
     designFace: IrisDesign.skin("widgetNowPlaying")
     readonly property bool hasPlayer: root.player !== null && root.player !== undefined
     readonly property bool playing: root.hasPlayer && media.effectiveIsPlaying
-    readonly property bool restsWhenPaused: Boolean(root.widget.irisOption("rest", false))
+    readonly property bool restsWhenPaused: Boolean(root.widget.familyOption("rest", false))
     readonly property bool resting: !root.hasPlayer || (root.restsWhenPaused && !root.playing && restDelay.elapsed)
     readonly property string art: root.hasPlayer ? media.displayedArtFilePath : ""
     readonly property color artLight: IrisStyle.vividHighlight(media.colorQuantizer?.colors?.[0] ?? root.accent, root.accent)
     readonly property real progress: media.effectiveLength > 0 ? Math.min(1, media.effectivePosition / media.effectiveLength) : 0
     readonly property bool lyricsWanted: root.large && root.live && root.hasPlayer
-        && Boolean(root.widget.irisOption("lyrics", true))
+        && Boolean(root.widget.familyOption("lyrics", true))
     readonly property bool lyricsReady: root.lyricsWanted && LyricsService.status === "ok" && LyricsService.lyricsLines.length > 0
     // Large without lyrics wears the cover whole: beside the title it left a 180 px hole where the lines go.
     readonly property bool coverLarge: root.large && !root.resting && !root.lyricsReady && root.art.length > 0
