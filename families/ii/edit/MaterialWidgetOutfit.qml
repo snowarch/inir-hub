@@ -114,7 +114,7 @@ Item {
 
     RectangularShadow {
         z: -1
-        visible: root.carried && !root.overlay
+        visible: root.carried && !root.overlay && (root.widget?.platedNow ?? false)
         y: 12 * root.hair
         width: root.width
         height: root.height

@@ -96,7 +96,7 @@ Item {
     // ── Lifted while carried ──
     IrisBodyShadow {
         z: -1
-        visible: root.carried && !root.overlay
+        visible: root.carried && !root.overlay && (root.widget?.platedNow ?? false)
         x: 0
         y: 10 * root.hair
         width: root.width
