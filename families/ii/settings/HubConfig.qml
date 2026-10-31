@@ -39,7 +39,8 @@ ContentPage {
 
     readonly property real usable: Math.min(root.maxContentWidth, Math.max(0, root.width - 2 * root._horizontalMargin))
     readonly property bool wideRows: root.usable >= 640
-    readonly property int bandColumns: root.usable >= 720 ? 3 : 2
+    // Three only on a wide page: at a third of ~860 px a summary had 133 px and was cut in the inir style's mono.
+    readonly property int bandColumns: root.usable >= 1080 ? 3 : 2
     readonly property var featured: root.browsing ? Hub.sorted(Hub.items.filter(item => item.featured === true && Hub.fits(item, root.family)
         && item.compatible !== false && !item.blocked), "popular").slice(0, root.bandColumns) : []
     readonly property int gap: 12
@@ -729,13 +730,15 @@ ContentPage {
                         elide: Text.ElideRight
                     }
                 }
+                // Two lines fit the row; one cut every family's summary mid-word.
                 StyledText {
                     Layout.fillWidth: true
                     text: row.modelData.summary ?? ""
                     font.pixelSize: SettingsMaterialPreset.supportingSize
                     color: SettingsMaterialPreset.supportingColor
+                    wrapMode: Text.WordWrap
                     elide: Text.ElideRight
-                    maximumLineCount: 1
+                    maximumLineCount: 2
                 }
             }
 
@@ -872,7 +875,9 @@ ContentPage {
         required property var modelData
         Layout.fillWidth: true
         Layout.preferredWidth: 1
-        implicitHeight: Math.round(84 * Appearance.fontSizeScale)
+        // A third of the band leaves the words little room: three lines, and the tile grows to hold them.
+        readonly property real baseHeight: Math.round(84 * Appearance.fontSizeScale)
+        implicitHeight: Math.max(feature.baseHeight, featureWords.implicitHeight + 16)
         radius: SettingsMaterialPreset.tileOuterRadius
         color: featureHover.hovered ? Appearance.colors.colSecondaryContainerHover : Appearance.colors.colSecondaryContainer
         Behavior on color {
@@ -889,12 +894,14 @@ ContentPage {
             spacing: 12
             Preview {
                 Layout.fillHeight: true
-                Layout.preferredWidth: Math.round(height * 1.6)
+                // from the base height, never its own: the words' height feeds the tile's
+                Layout.preferredWidth: Math.round((feature.baseHeight - 16) * 1.6)
                 radius: Math.max(6, feature.radius - 8)
                 item: feature.modelData
                 zoomed: featureHover.hovered
             }
             ColumnLayout {
+                id: featureWords
                 Layout.fillWidth: true
                 spacing: 2
                 StyledText {
@@ -912,7 +919,7 @@ ContentPage {
                     color: Appearance.colors.colOnSecondaryContainer
                     opacity: 0.78
                     wrapMode: Text.WordWrap
-                    maximumLineCount: 2
+                    maximumLineCount: 3
                     elide: Text.ElideRight
                 }
             }
