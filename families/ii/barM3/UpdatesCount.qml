@@ -12,8 +12,8 @@ import Quickshell.Io
 
 MouseArea {
     id: root
-    property bool vertical: Config.options.bar.vertical
-    property bool isMaterial: Config.options.bar.m3.cornerStyle === 3
+    property bool vertical: Config.options.material.bar.vertical
+    property bool isMaterial: Config.options.material.bar.m3.cornerStyle === 3
     readonly property color statusContainer: Updates.updateStronglyAdvised
         ? M3Palette.error
         : Updates.updateAdvised ? M3Palette.tertiary : M3Palette.primary

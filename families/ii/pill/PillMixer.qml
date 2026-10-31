@@ -22,7 +22,7 @@ PillSurface {
     readonly property var sink: Pipewire.defaultAudioSink
     readonly property var source: Pipewire.defaultAudioSource
     readonly property var appNodes: MprisController.mixerAppNodes
-    readonly property int appFaderLimit: Math.max(3, Math.min(8, Config.options?.bar?.pill?.mixerAppRows ?? 5))
+    readonly property int appFaderLimit: Math.max(3, Math.min(8, Config.options?.material?.bar?.pill?.mixerAppRows ?? 5))
     readonly property int visibleAppFaders: Math.max(1, Math.min(appFaderLimit, appNodes.length || 1))
     property string view: "apps"
     readonly property real desiredWidth: view === "apps"

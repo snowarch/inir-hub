@@ -36,28 +36,28 @@ Item {
             tip: Translation.tr("Dark mode")
             active: Appearance.m3colors?.darkmode ?? false
             onClicked: root.toggleDark()
-            visible: Config.options?.sidebar?.widgets?.controlsCard?.showDarkMode ?? true
+            visible: Config.options?.material?.sidebar?.widgets?.controlsCard?.showDarkMode ?? true
         }
         Toggle { 
             btnIcon: "do_not_disturb_on"
             tip: Translation.tr("Do not disturb")
             active: Notifications.silent ?? false
             onClicked: Notifications.toggleSilent()
-            visible: Config.options?.sidebar?.widgets?.controlsCard?.showDnd ?? true
+            visible: Config.options?.material?.sidebar?.widgets?.controlsCard?.showDnd ?? true
         }
         Toggle { 
             btnIcon: "nightlight"
             tip: Translation.tr("Night light")
             active: Hyprsunset.active ?? false
             onClicked: Hyprsunset.toggle()
-            visible: Config.options?.sidebar?.widgets?.controlsCard?.showNightLight ?? true
+            visible: Config.options?.material?.sidebar?.widgets?.controlsCard?.showNightLight ?? true
         }
         Toggle { 
             btnIcon: "sports_esports"
             tip: GameMode.active ? Translation.tr("Game mode (active)") : Translation.tr("Game mode")
             active: GameMode.active ?? false
             onClicked: GameMode.toggle()
-            visible: Config.options?.sidebar?.widgets?.controlsCard?.showGameMode ?? true
+            visible: Config.options?.material?.sidebar?.widgets?.controlsCard?.showGameMode ?? true
         }
 
         Rectangle { 
@@ -75,10 +75,10 @@ Item {
         }
 
         // Actions
-        Action { btnIcon: "wifi"; tip: Translation.tr("Network"); onClicked: function() { GlobalStates.sidebarLeftOpen = false; GlobalStates.requestWifiDialog = true }; visible: Config.options?.sidebar?.widgets?.controlsCard?.showNetwork ?? true }
-        Action { btnIcon: "bluetooth"; tip: Translation.tr("Bluetooth"); onClicked: function() { GlobalStates.sidebarLeftOpen = false; GlobalStates.requestBluetoothDialog = true }; visible: Config.options?.sidebar?.widgets?.controlsCard?.showBluetooth ?? true }
-        Action { btnIcon: "settings"; tip: Translation.tr("Settings"); onClicked: root.openSettings(); visible: Config.options?.sidebar?.widgets?.controlsCard?.showSettings ?? true }
-        Action { btnIcon: "lock"; tip: Translation.tr("Lock"); onClicked: Session.lock(); visible: Config.options?.sidebar?.widgets?.controlsCard?.showLock ?? true }
+        Action { btnIcon: "wifi"; tip: Translation.tr("Network"); onClicked: function() { GlobalStates.sidebarLeftOpen = false; GlobalStates.requestWifiDialog = true }; visible: Config.options?.material?.sidebar?.widgets?.controlsCard?.showNetwork ?? true }
+        Action { btnIcon: "bluetooth"; tip: Translation.tr("Bluetooth"); onClicked: function() { GlobalStates.sidebarLeftOpen = false; GlobalStates.requestBluetoothDialog = true }; visible: Config.options?.material?.sidebar?.widgets?.controlsCard?.showBluetooth ?? true }
+        Action { btnIcon: "settings"; tip: Translation.tr("Settings"); onClicked: root.openSettings(); visible: Config.options?.material?.sidebar?.widgets?.controlsCard?.showSettings ?? true }
+        Action { btnIcon: "lock"; tip: Translation.tr("Lock"); onClicked: Session.lock(); visible: Config.options?.material?.sidebar?.widgets?.controlsCard?.showLock ?? true }
 
         Item { Layout.fillWidth: true }
     }

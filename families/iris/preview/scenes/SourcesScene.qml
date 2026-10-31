@@ -17,8 +17,8 @@ PreviewScene {
     narrowest: Math.round(440 * sourcesRoot.d)
     lowest: Math.round(240 * sourcesRoot.d)
     subject: Qt.rect(grid.x, grid.y, grid.width, grid.height)
-    readonly property bool weather: sourcesRoot.opt("bar.weather.enable", false) === true
-    readonly property bool fahrenheit: sourcesRoot.opt("bar.weather.useUSCS", false) === true
+    readonly property bool weather: sourcesRoot.opt("weather.enable", false) === true
+    readonly property bool fahrenheit: sourcesRoot.opt("weather.useUSCS", false) === true
     readonly property bool calendars: sourcesRoot.opt("calendar.externalSync.enable", false) === true
     readonly property bool vpn: sourcesRoot.opt("vpn.quickToggle", false) === true
     readonly property bool updates: sourcesRoot.opt("shellUpdates.enabled", true) === true

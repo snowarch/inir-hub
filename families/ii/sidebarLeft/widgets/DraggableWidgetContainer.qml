@@ -18,24 +18,24 @@ Item {
     property bool dragPending: false
 
     property var widgetOrder: {
-        const saved = Config.options?.sidebar?.widgets?.widgetOrder
+        const saved = Config.options?.material?.sidebar?.widgets?.widgetOrder
         if (!saved) return defaultOrder
         const missing = defaultOrder.filter(id => !saved.includes(id))
         return [...saved, ...missing]
     }
     readonly property var defaultOrder: ["media", "week", "context", "note", "launch", "controls", "status", "crypto", "wallpaper", "worldclock"]
-    readonly property int widgetSpacing: Config.options?.sidebar?.widgets?.spacing ?? 8
+    readonly property int widgetSpacing: Config.options?.material?.sidebar?.widgets?.spacing ?? 8
 
-    readonly property bool showMedia: Config.options?.sidebar?.widgets?.media ?? true
-    readonly property bool showWeek: Config.options?.sidebar?.widgets?.week ?? true
-    readonly property bool showContext: Config.options?.sidebar?.widgets?.context ?? true
-    readonly property bool showNote: Config.options?.sidebar?.widgets?.note ?? true
-    readonly property bool showLaunch: Config.options?.sidebar?.widgets?.launch ?? true
-    readonly property bool showControls: Config.options?.sidebar?.widgets?.controls ?? true
-    readonly property bool showStatus: Config.options?.sidebar?.widgets?.status ?? true
-    readonly property bool showCrypto: Config.options?.sidebar?.widgets?.crypto ?? false
-    readonly property bool showWallpaper: Config.options?.sidebar?.widgets?.wallpaper ?? false
-    readonly property bool showWorldClock: Config.options?.sidebar?.widgets?.worldClock ?? true
+    readonly property bool showMedia: Config.options?.material?.sidebar?.widgets?.media ?? true
+    readonly property bool showWeek: Config.options?.material?.sidebar?.widgets?.week ?? true
+    readonly property bool showContext: Config.options?.material?.sidebar?.widgets?.context ?? true
+    readonly property bool showNote: Config.options?.material?.sidebar?.widgets?.note ?? true
+    readonly property bool showLaunch: Config.options?.material?.sidebar?.widgets?.launch ?? true
+    readonly property bool showControls: Config.options?.material?.sidebar?.widgets?.controls ?? true
+    readonly property bool showStatus: Config.options?.material?.sidebar?.widgets?.status ?? true
+    readonly property bool showCrypto: Config.options?.material?.sidebar?.widgets?.crypto ?? false
+    readonly property bool showWallpaper: Config.options?.material?.sidebar?.widgets?.wallpaper ?? false
+    readonly property bool showWorldClock: Config.options?.material?.sidebar?.widgets?.worldClock ?? true
 
     readonly property var visibleWidgets: {
         const order = widgetOrder ?? defaultOrder
@@ -109,7 +109,7 @@ Item {
         newOrder.splice(realFrom, 1)
         newOrder.splice(realTo, 0, fromId)
 
-        Config.setNestedValue("sidebar.widgets.widgetOrder", newOrder)
+        Config.setNestedValue("material.sidebar.widgets.widgetOrder", newOrder)
     }
 
     function startDrag(index: int, mouseY: real): void {

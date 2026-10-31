@@ -19,7 +19,7 @@ Item {
         { icon: "code", name: "Code", cmd: "/usr/bin/code" }
     ]
 
-    property var shortcuts: Config.options?.sidebar?.widgets?.quickLaunch ?? defaultShortcuts
+    property var shortcuts: Config.options?.material?.sidebar?.widgets?.quickLaunch ?? defaultShortcuts
 
     // Currently editing shortcut index
     property int editingIndex: -1
@@ -35,7 +35,7 @@ Item {
     }
 
     function saveShortcuts(newShortcuts) {
-        Config.setNestedValue("sidebar.widgets.quickLaunch", newShortcuts)
+        Config.setNestedValue("material.sidebar.widgets.quickLaunch", newShortcuts)
     }
 
     function removeShortcut(index) {

@@ -843,9 +843,9 @@ ContentPage {
                 from: 0.5
                 to: 2.0
                 stepSize: 0.05
-                value: Config.options?.appearance?.animationSpeed?.[motionRow.key] ?? 1.0
+                value: Config.options?.material?.style?.animationSpeed?.[motionRow.key] ?? 1.0
                 configuration: StyledSlider.Configuration.S
-                onMoved: if (!pressed) Config.setNestedValue(`appearance.animationSpeed.${motionRow.key}`, Math.round(value * 100) / 100)
+                onMoved: if (!pressed) Config.setNestedValue(`material.style.animationSpeed.${motionRow.key}`, Math.round(value * 100) / 100)
             }
 
             StyledComboBox {
@@ -853,18 +853,18 @@ ContentPage {
                 model: motionRow.curveOptions
                 textRole: "displayName"
                 currentIndex: {
-                    const current = Config.options?.appearance?.animationCurve?.[motionRow.key] ?? "default"
+                    const current = Config.options?.material?.style?.animationCurve?.[motionRow.key] ?? "default"
                     const idx = motionRow.curveOptions.findIndex(o => o.value === current)
                     return idx >= 0 ? idx : 0
                 }
-                onActivated: index => Config.setNestedValue(`appearance.animationCurve.${motionRow.key}`, motionRow.curveOptions[index].value)
+                onActivated: index => Config.setNestedValue(`material.style.animationCurve.${motionRow.key}`, motionRow.curveOptions[index].value)
             }
         }
 
         SettingsGroup {
             ConfigSelectionArray {
-                currentValue: Config.options?.appearance?.iiMotionProfile ?? "classic"
-                onSelected: newValue => Config.setNestedValue("appearance.iiMotionProfile", newValue)
+                currentValue: Config.options?.material?.style?.iiMotionProfile ?? "classic"
+                onSelected: newValue => Config.setNestedValue("material.style.iiMotionProfile", newValue)
                 options: [
                     { displayName: Translation.tr("Classic"), icon: "motion_photos_paused", value: "classic" },
                     { displayName: Translation.tr("Contextual"), icon: "gesture", value: "contextual" }
@@ -900,8 +900,8 @@ ContentPage {
 
                 onClicked: {
                     for (const key of ["movement", "enterExit", "clickBounce", "scroll"]) {
-                        Config.setNestedValue(`appearance.animationSpeed.${key}`, 1.0)
-                        Config.setNestedValue(`appearance.animationCurve.${key}`, "default")
+                        Config.setNestedValue(`material.style.animationSpeed.${key}`, 1.0)
+                        Config.setNestedValue(`material.style.animationCurve.${key}`, "default")
                     }
                 }
             }
@@ -912,7 +912,7 @@ ContentPage {
 
     // Theme Scheduling Section
     SettingsTaskLoader {
-        requested: root.activeSection === "motion" && !(Config.options?.settingsUi?.easyMode ?? false)
+        requested: root.activeSection === "motion" && !(Config.options?.material?.settingsUi?.easyMode ?? false)
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "motion"
@@ -1157,7 +1157,7 @@ ContentPage {
 
     // Terminal Colors Section
     SettingsTaskLoader {
-        requested: root.activeSection === "advanced" && !(Config.options?.settingsUi?.easyMode ?? false)
+        requested: root.activeSection === "advanced" && !(Config.options?.material?.settingsUi?.easyMode ?? false)
         sourceComponent: Component {
     SettingsCardSection {
         id: terminalColorsSection
@@ -1669,11 +1669,11 @@ ContentPage {
 
         SettingsGroup {
             id: globalStyleGroup
-            readonly property bool cardsEverywhere: (Config.options?.dock?.cardStyle ?? false) && (Config.options?.sidebar?.cardStyle ?? false) && ((Config.options?.bar?.cornerStyle ?? 0) === 3)
+            readonly property bool cardsEverywhere: (Config.options?.material?.dock?.cardStyle ?? false) && (Config.options?.material?.sidebar?.cardStyle ?? false) && ((Config.options?.material?.bar?.cornerStyle ?? 0) === 3)
 
             readonly property string derivedStyle: cardsEverywhere ? "cards" : "material"
-            readonly property string currentStyle: (Config.options?.appearance?.globalStyle ?? "").length > 0
-                ? Config.options?.appearance?.globalStyle ?? "material"
+            readonly property string currentStyle: (Config.options?.material?.style?.globalStyle ?? "").length > 0
+                ? Config.options?.material?.style?.globalStyle ?? "material"
                 : derivedStyle
 
             GlobalStylePicker {
@@ -1800,7 +1800,7 @@ ContentPage {
     }
 
     SettingsTaskLoader {
-        requested: root.activeSection === "advanced" && !(Config.options?.settingsUi?.easyMode ?? false)
+        requested: root.activeSection === "advanced" && !(Config.options?.material?.settingsUi?.easyMode ?? false)
         sourceComponent: Component {
     SettingsCardSection {
         id: customThemeEditorSection
@@ -1814,7 +1814,7 @@ ContentPage {
         SettingsGroup {
             SettingsTaskLoader {
                 requested: root.activeSection === "advanced"
-                    && !(Config.options?.settingsUi?.easyMode ?? false)
+                    && !(Config.options?.material?.settingsUi?.easyMode ?? false)
                     && customThemeEditorSection.expanded
                 source: "CustomThemeEditor.qml"
             }
@@ -1824,7 +1824,7 @@ ContentPage {
     }
 
     SettingsTaskLoader {
-        requested: root.activeSection === "advanced" && !(Config.options?.settingsUi?.easyMode ?? false)
+        requested: root.activeSection === "advanced" && !(Config.options?.material?.settingsUi?.easyMode ?? false)
         sourceComponent: Component {
     SettingsCardSection {
         id: gowallEditorSection
@@ -1836,7 +1836,7 @@ ContentPage {
         SettingsGroup {
             SettingsTaskLoader {
                 requested: root.activeSection === "advanced"
-                    && !(Config.options?.settingsUi?.easyMode ?? false)
+                    && !(Config.options?.material?.settingsUi?.easyMode ?? false)
                     && gowallEditorSection.expanded
                 source: "GowallWallpaperEditor.qml"
             }
@@ -2095,7 +2095,7 @@ ContentPage {
     }
 
     SettingsTaskLoader {
-        requested: root.activeSection === "advanced" && !(Config.options?.settingsUi?.easyMode ?? false)
+        requested: root.activeSection === "advanced" && !(Config.options?.material?.settingsUi?.easyMode ?? false)
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "advanced"

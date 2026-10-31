@@ -48,7 +48,7 @@ Item {
 
     Timer {
         id: translateTimer
-        interval: Config.options?.sidebar?.translator?.delay ?? 500
+        interval: Config.options?.translator?.delay ?? 500
         repeat: false
         onTriggered: () => {
             if (root.inputField.text.trim().length > 0) {

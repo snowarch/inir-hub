@@ -15,7 +15,7 @@ import qs.modules.ii.bar as Bar
 
 MouseArea {
     id: root
-    property bool borderless: Config.options.bar.borderless
+    property bool borderless: Config.options.material.bar.borderless
     readonly property MprisPlayer activePlayer: MprisController.activePlayer
     readonly property string cleanedTitle: StringUtils.cleanMusicTitle(MprisController.titleOf(activePlayer)) || Translation.tr("No media")
     readonly property string popupMode: Config.options?.media?.popupMode ?? "dock"
@@ -141,8 +141,8 @@ MouseArea {
                 window: root.QsWindow.window
                 item: root
                 // For vertical bar: popup appears to the right (left bar) or left (right bar)
-                edges: (Config.options?.bar?.bottom ?? false) ? Edges.Left : Edges.Right
-                gravity: (Config.options?.bar?.bottom ?? false) ? Edges.Left : Edges.Right
+                edges: (Config.options?.material?.bar?.bottom ?? false) ? Edges.Left : Edges.Right
+                gravity: (Config.options?.material?.bar?.bottom ?? false) ? Edges.Left : Edges.Right
             }
             implicitWidth: mediaPopupContent.width + Appearance.sizes.elevationMargin * 2
             implicitHeight: mediaPopupContent.height + Appearance.sizes.elevationMargin * 2

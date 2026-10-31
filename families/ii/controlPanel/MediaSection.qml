@@ -24,7 +24,7 @@ Item {
         enabled: Appearance.animationsEnabled
         NumberAnimation { duration: Appearance.animation.elementResize.duration; easing.type: Appearance.animation.elementResize.type; easing.bezierCurve: Appearance.animation.elementResize.bezierCurve }
     }
-    readonly property bool compactMode: Config.options?.controlPanel?.compactMode ?? true
+    readonly property bool compactMode: Config.options?.material?.controlPanel?.compactMode ?? true
     
     readonly property MprisPlayer player: MprisController.activePlayer
     readonly property bool isYtMusicActive: MprisController.isYtMusicActive

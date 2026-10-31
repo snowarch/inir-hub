@@ -20,9 +20,9 @@ Item {
     id: root
 
     property bool vertical: false
-    property bool isMaterial: Config.options.bar.m3.cornerStyle === 3
+    property bool isMaterial: Config.options.material.bar.m3.cornerStyle === 3
     readonly property MprisPlayer activePlayer: {
-        const preferred = Config.options.bar.m3.media.preferredPlayer.trim().toLowerCase()
+        const preferred = Config.options.material.bar.m3.media.preferredPlayer.trim().toLowerCase()
         if (preferred.length === 0) return MprisController.activePlayer
         const _ = MprisController.players.length
         for (const p of MprisController.players) {
@@ -43,7 +43,7 @@ Item {
     readonly property string artworkTransitionKey: `${activePlayer?.dbusName ?? ""}\u001f${activePlayer?.uniqueId ?? 0}\u001f${root.artUrl}`
     property bool   isPlaying:   activePlayer?.isPlaying   ?? false
     property bool   hasTrack:    trackTitle.length > 0
-    readonly property bool shouldShow: (Config.options?.bar?.m3?.media?.alwaysVisible ?? false) || root.hasTrack
+    readonly property bool shouldShow: (Config.options?.material?.bar?.m3?.media?.alwaysVisible ?? false) || root.hasTrack
     readonly property color mediaContainer: M3Palette.pillContainer("media")
     readonly property color mediaInk: M3Palette.pillInk("media")
     readonly property color playContainer: root.isPlaying
@@ -74,10 +74,10 @@ Item {
     implicitWidth: !root.shouldShow ? 0 : vertical
         ? Appearance.sizes.verticalBarWidth
         : Math.max(
-            Config.options.bar.m3.media.minWidth,
+            Config.options.material.bar.m3.media.minWidth,
             Math.min(
                 (isMaterial ? materialRow.implicitWidth : rowLayout.implicitWidth + 8),
-                Config.options.bar.m3.media.maxWidth
+                Config.options.material.bar.m3.media.maxWidth
             )
         )
     implicitHeight: vertical ? (isMaterial ? 32 : mediaCircProg.implicitHeight) : Appearance.sizes.barHeight
@@ -149,8 +149,8 @@ Item {
             anchor {
                 window: root.QsWindow.window
                 item: root
-                edges: (Config.options?.bar?.bottom ?? false) ? Edges.Top : Edges.Bottom
-                gravity: (Config.options?.bar?.bottom ?? false) ? Edges.Top : Edges.Bottom
+                edges: (Config.options?.material?.bar?.bottom ?? false) ? Edges.Top : Edges.Bottom
+                gravity: (Config.options?.material?.bar?.bottom ?? false) ? Edges.Top : Edges.Bottom
             }
             implicitWidth: mediaPopupContent.width + Appearance.sizes.elevationMargin * 2
             implicitHeight: mediaPopupContent.height + Appearance.sizes.elevationMargin * 2
@@ -171,7 +171,7 @@ Item {
                 }
                 opacity: presented ? 1 : 0
                 scale: presented ? 1 : 0.975
-                transformOrigin: (Config.options?.bar?.bottom ?? false) ? Item.Bottom : Item.Top
+                transformOrigin: (Config.options?.material?.bar?.bottom ?? false) ? Item.Bottom : Item.Top
                 Behavior on opacity {
                     enabled: Appearance.animationsEnabled
                     NumberAnimation { duration: Appearance.animation.elementMoveFast.duration; easing.type: Appearance.animation.elementMoveFast.type; easing.bezierCurve: Appearance.animation.elementMoveFast.bezierCurve }
@@ -187,7 +187,7 @@ Item {
     MouseArea {
         anchors.fill: parent
         acceptedButtons: Qt.MiddleButton | Qt.BackButton | Qt.ForwardButton | Qt.RightButton | Qt.LeftButton
-        hoverEnabled: !Config.options.bar.m3.tooltips.clickToShow
+        hoverEnabled: !Config.options.material.bar.m3.tooltips.clickToShow
         onPressed: (event) => {
             if (event.button === Qt.MiddleButton)      activePlayer?.togglePlaying()
             else if (event.button === Qt.BackButton)   MprisController.previousForPlayer(activePlayer)
@@ -271,14 +271,14 @@ Item {
                 }
             }
             StyledText {
-                visible: Config.options.bar.m3.verbose
+                visible: Config.options.material.bar.m3.verbose
                 Layout.alignment: Qt.AlignVCenter
                 Layout.fillWidth: true
                 Layout.rightMargin: 0
                 horizontalAlignment: Text.AlignHCenter
                 elide: Text.ElideRight
                 color: Appearance.colors.colOnLayer1
-                text: Config.options.bar.m3.media.onlyTitle ? root.cleanedTitle : `${root.cleanedTitle}${MprisController.artistOf(root.activePlayer) ? ' • ' + MprisController.artistOf(root.activePlayer) : ''}`
+                text: Config.options.material.bar.m3.media.onlyTitle ? root.cleanedTitle : `${root.cleanedTitle}${MprisController.artistOf(root.activePlayer) ? ' • ' + MprisController.artistOf(root.activePlayer) : ''}`
             }
         }
     }
@@ -409,7 +409,7 @@ Item {
 
                         StyledText {
                             id: artistText
-                            visible: !(Config.options?.bar?.m3?.media?.onlyTitle ?? false)
+                            visible: !(Config.options?.material?.bar?.m3?.media?.onlyTitle ?? false)
                                 && root.trackArtist.length > 0
                             text: root.trackArtist
                             font.pixelSize: Appearance.font.pixelSize.smaller
@@ -420,7 +420,7 @@ Item {
                         }
                         StyledText {
                             id: titleText
-                            readonly property bool titleOnly: Config.options?.bar?.m3?.media?.onlyTitle ?? false
+                            readonly property bool titleOnly: Config.options?.material?.bar?.m3?.media?.onlyTitle ?? false
                             Layout.topMargin: 0
                             text: StringUtils.cleanMusicTitle(root.trackTitle) || Translation.tr("No media")
                             font.pixelSize: titleOnly

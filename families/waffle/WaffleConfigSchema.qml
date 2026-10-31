@@ -138,6 +138,44 @@ JsonObject {
     }
     property JsonObject notifications: JsonObject {
         property bool showUnreadCount: true
+        // Posición del popup de notificaciones: topRight, bottomRight, topLeft, bottomLeft
+        property string position: "topRight"
+        // Margen respecto a los bordes de pantalla (px)
+        property int edgeMargin: 4
+        // Slightly enlarge notifications when the mouse hovers over them
+        property bool scaleOnHover: false
+    }
+    property JsonObject lock: JsonObject {
+        property JsonObject blur: JsonObject {
+            property bool enable: true
+            property real radius: 100
+            property real extraZoom: 1.1
+        }
+        property bool centerClock: true
+        property bool showLockedText: true
+        property JsonObject dim: JsonObject {
+            property bool enable: false
+            property real opacity: 0.3 // 0.0 = no dim, 1.0 = full black
+        }
+        property JsonObject clock: JsonObject {
+            property string style: "default" // "default", "minimal", "analog"
+            property string position: "center" // "center", "topLeft", "bottomLeft"
+        }
+        property JsonObject notifications: JsonObject {
+            property bool enable: false
+            property int maxCount: 3
+            property bool showBody: true
+            property string position: "auto" // "auto" (center ii, right waffle), "center", "left", "right"
+        }
+        property JsonObject status: JsonObject {
+            property bool enable: true
+        }
+        property JsonObject widgets: JsonObject {
+            property bool weather: true
+            property bool media: true
+            property bool powerButtons: true
+            property bool hintText: true
+        }
     }
     property JsonObject actionCenter: JsonObject {
         property list<string> toggles: ["network", "hotspot", "bluetooth", "easyEffects", "powerProfile", "idleInhibitor", "nightLight", "darkMode", "antiFlashbang", "vpn", "cloudflareWarp", "mic", "musicRecognition", "notifications", "onScreenKeyboard", "gameMode", "screenSnip", "colorPicker"]

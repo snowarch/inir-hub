@@ -32,17 +32,17 @@ Scope {
     }
     readonly property real screenWidth: root.targetScreen?.width ?? 1920
     readonly property real screenHeight: root.targetScreen?.height ?? 1080
-    readonly property var dockConfig: Config.options?.dock ?? ({})
+    readonly property var dockConfig: Config.options?.material?.dock ?? ({})
     readonly property bool dockEnabled: dockConfig?.enable ?? false
     readonly property real safePadding: Math.max(
         Appearance.sizes.hyprlandGapsOut * 2,
         Math.round(Math.min(root.screenWidth, root.screenHeight) * 0.02)
     )
     readonly property real topReservedSpace: root.safePadding
-        + (!(Config.options?.bar?.bottom ?? false) ? Appearance.sizes.baseBarHeight + Appearance.sizes.hyprlandGapsOut * 2 : 0)
+        + (!(Config.options?.material?.bar?.bottom ?? false) ? Appearance.sizes.baseBarHeight + Appearance.sizes.hyprlandGapsOut * 2 : 0)
         + ((root.dockEnabled && root.dockConfig?.position === "top") ? ((root.dockConfig?.height ?? 60) + root.safePadding) : 0)
     readonly property real bottomReservedSpace: root.safePadding
-        + ((Config.options?.bar?.bottom ?? false) ? Appearance.sizes.baseBarHeight + Appearance.sizes.hyprlandGapsOut * 2 : 0)
+        + ((Config.options?.material?.bar?.bottom ?? false) ? Appearance.sizes.baseBarHeight + Appearance.sizes.hyprlandGapsOut * 2 : 0)
         + ((root.dockEnabled && root.dockConfig?.position === "bottom") ? ((root.dockConfig?.height ?? 60) + root.safePadding) : 0)
     readonly property real leftReservedSpace: root.safePadding
         + ((root.dockEnabled && root.dockConfig?.position === "left") ? ((root.dockConfig?.width ?? root.dockConfig?.height ?? 60) + root.safePadding) : 0)

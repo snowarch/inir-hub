@@ -15,8 +15,8 @@ ColumnLayout {
     Layout.fillWidth: true
     spacing: 16
 
-    readonly property bool glassEnabled: Config.options?.appearance?.island?.glass ?? true
-    readonly property real bodyOpacity: Config.options?.appearance?.island?.opacity ?? 1
+    readonly property bool glassEnabled: Config.options?.material?.style?.island?.glass ?? true
+    readonly property real bodyOpacity: Config.options?.material?.style?.island?.opacity ?? 1
     readonly property bool glassEffective: glassEnabled && bodyOpacity < 0.999 && Appearance.effectsEnabled
 
     readonly property var surfaceDescriptors: [
@@ -30,10 +30,10 @@ ColumnLayout {
 
     function surfaceEnabled(key) {
         switch (key) {
-        case "dock": return (Config.options?.dock?.style ?? "panel") === "island";
-        case "sidebars": return (Config.options?.sidebar?.style ?? "panel") === "island";
+        case "dock": return (Config.options?.material?.dock?.style ?? "panel") === "island";
+        case "sidebars": return (Config.options?.material?.sidebar?.style ?? "panel") === "island";
         case "search": return (Config.options?.search?.style ?? "default") === "island";
-        case "controlPanel": return (Config.options?.controlPanel?.style ?? "panel") === "island";
+        case "controlPanel": return (Config.options?.material?.controlPanel?.style ?? "panel") === "island";
         case "widgets": return (Config.options?.background?.widgets?.style ?? "panel") === "island";
         case "workspaceStrip": return (Config.options?.workspaceStrip?.style ?? "auto") === "island";
         }
@@ -43,12 +43,12 @@ ColumnLayout {
     function setSurfaceEnabled(key, enabled) {
         switch (key) {
         case "dock":
-            if (enabled) Config.setNestedValue("dock.style", "island");
-            else if ((Config.options?.dock?.style ?? "panel") === "island") Config.setNestedValue("dock.style", "panel");
+            if (enabled) Config.setNestedValue("material.dock.style", "island");
+            else if ((Config.options?.material?.dock?.style ?? "panel") === "island") Config.setNestedValue("material.dock.style", "panel");
             break;
-        case "sidebars": Config.setNestedValue("sidebar.style", enabled ? "island" : "panel"); break;
+        case "sidebars": Config.setNestedValue("material.sidebar.style", enabled ? "island" : "panel"); break;
         case "search": Config.setNestedValue("search.style", enabled ? "island" : "default"); break;
-        case "controlPanel": Config.setNestedValue("controlPanel.style", enabled ? "island" : "panel"); break;
+        case "controlPanel": Config.setNestedValue("material.controlPanel.style", enabled ? "island" : "panel"); break;
         case "widgets": Config.setNestedValue("background.widgets.style", enabled ? "island" : "panel"); break;
         case "workspaceStrip": Config.setNestedValue("workspaceStrip.style", enabled ? "island" : "auto"); break;
         }
@@ -171,14 +171,14 @@ ColumnLayout {
                 from: 20
                 to: 100
                 stepSize: 5
-                onValueModified: Config.setNestedValue("appearance.island.opacity", value / 100)
+                onValueModified: Config.setNestedValue("material.style.island.opacity", value / 100)
                 StyledToolTip { text: Translation.tr("Only the Ricelin card body fades. Content stays fully opaque.") }
             }
             SettingsSwitch {
                 buttonIcon: "blur_on"
                 text: Translation.tr("Glass background")
                 checked: root.glassEnabled
-                onCheckedChanged: Config.setNestedValue("appearance.island.glass", checked)
+                onCheckedChanged: Config.setNestedValue("material.style.island.glass", checked)
                 StyledToolTip { text: Translation.tr("Blur the wallpaper behind translucent Island surfaces.") }
             }
         }
@@ -189,20 +189,20 @@ ColumnLayout {
                 icon: "lens_blur"
                 text: Translation.tr("Glass blur (%)")
                 enabled: root.glassEnabled
-                value: Math.round((Config.options?.appearance?.island?.glassBlur ?? 1) * 100)
+                value: Math.round((Config.options?.material?.style?.island?.glassBlur ?? 1) * 100)
                 from: 20
                 to: 100
                 stepSize: 10
-                onValueModified: Config.setNestedValue("appearance.island.glassBlur", value / 100)
+                onValueModified: Config.setNestedValue("material.style.island.glassBlur", value / 100)
             }
             ConfigSpinBox {
                 icon: "rounded_corner"
                 text: Translation.tr("Base radius (px)")
-                value: Config.options?.appearance?.island?.radius ?? 18
+                value: Config.options?.material?.style?.island?.radius ?? 18
                 from: 4
                 to: 32
                 stepSize: 2
-                onValueModified: Config.setNestedValue("appearance.island.radius", value)
+                onValueModified: Config.setNestedValue("material.style.island.radius", value)
                 StyledToolTip { text: Translation.tr("Used by Pill and generic Island cards. Sidebars, search and other specialized surfaces keep their own contextual geometry.") }
             }
         }
@@ -212,14 +212,14 @@ ColumnLayout {
             SettingsSwitch {
                 buttonIcon: "ev_shadow"
                 text: Translation.tr("Drop shadow")
-                checked: Config.options?.appearance?.island?.shadow ?? true
-                onCheckedChanged: Config.setNestedValue("appearance.island.shadow", checked)
+                checked: Config.options?.material?.style?.island?.shadow ?? true
+                onCheckedChanged: Config.setNestedValue("material.style.island.shadow", checked)
             }
             SettingsSwitch {
                 buttonIcon: "flare"
                 text: Translation.tr("Lit top edge")
-                checked: Config.options?.appearance?.island?.sheen ?? true
-                onCheckedChanged: Config.setNestedValue("appearance.island.sheen", checked)
+                checked: Config.options?.material?.style?.island?.sheen ?? true
+                onCheckedChanged: Config.setNestedValue("material.style.island.sheen", checked)
             }
         }
 

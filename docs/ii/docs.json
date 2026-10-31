@@ -30,7 +30,7 @@
 						"steps": [
 							[
 								"config",
-								"bar.bottom",
+								"material.bar.bottom",
 								true
 							]
 						]
@@ -41,12 +41,12 @@
 						"steps": [
 							[
 								"config",
-								"bar.bottom",
+								"material.bar.bottom",
 								false
 							],
 							[
 								"config",
-								"bar.vertical",
+								"material.bar.vertical",
 								true
 							]
 						]

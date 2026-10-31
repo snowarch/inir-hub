@@ -4,7 +4,7 @@ import Quickshell
 
 // Alias to the generic ContextMenu with dock-specific defaults
 ContextMenu {
-    readonly property string dockPosition: Config.options?.dock?.position ?? "bottom"
+    readonly property string dockPosition: Config.options?.material?.dock?.position ?? "bottom"
     readonly property bool isVertical: dockPosition === "left" || dockPosition === "right"
 
     // Do not arm hover dismissal until the pointer has actually entered the

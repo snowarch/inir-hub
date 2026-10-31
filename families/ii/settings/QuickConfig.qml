@@ -312,9 +312,9 @@ ContentPage {
                 SettingsSwitch {
                     buttonIcon: "ev_shadow"
                     text: Translation.tr("Transparency")
-                    checked: Config.options?.appearance?.transparency?.enable ?? false
+                    checked: Config.options?.material?.style?.transparency?.enable ?? false
                     onCheckedChanged: {
-                        Config.setNestedValue("appearance.transparency.enable", checked)
+                        Config.setNestedValue("material.style.transparency.enable", checked)
                     }
                     StyledToolTip {
                         text: Translation.tr("Might look ass. Unsupported.")
@@ -1542,10 +1542,10 @@ ContentPage {
                 ContentSubsection {
                     title: Translation.tr("Bar position")
                     ConfigSelectionArray {
-                        currentValue: ((Config.options?.bar?.bottom ?? false) ? 1 : 0) | ((Config.options?.bar?.vertical ?? false) ? 2 : 0)
+                        currentValue: ((Config.options?.material?.bar?.bottom ?? false) ? 1 : 0) | ((Config.options?.material?.bar?.vertical ?? false) ? 2 : 0)
                         onSelected: newValue => {
-                            Config.setNestedValue("bar.bottom", (newValue & 1) !== 0)
-                            Config.setNestedValue("bar.vertical", (newValue & 2) !== 0)
+                            Config.setNestedValue("material.bar.bottom", (newValue & 1) !== 0)
+                            Config.setNestedValue("material.bar.vertical", (newValue & 2) !== 0)
                         }
                         options: [
                             {
@@ -1575,14 +1575,14 @@ ContentPage {
                     title: Translation.tr("Bar style")
 
                     ConfigSelectionArray {
-                        currentValue: Config.options?.bar?.cornerStyle ?? 0
+                        currentValue: Config.options?.material?.bar?.cornerStyle ?? 0
                         onSelected: newValue => {
                             // HUG mode (0) is incompatible with Angel style — revert to Float
                             if (newValue === 0 && Appearance.angelEverywhere) {
-                                Config.setNestedValue("bar.cornerStyle", 1);
+                                Config.setNestedValue("material.bar.cornerStyle", 1);
                                 return;
                             }
-                            Config.setNestedValue("bar.cornerStyle", newValue);
+                            Config.setNestedValue("material.bar.cornerStyle", newValue);
                         }
                         options: [
                             {

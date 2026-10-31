@@ -6,7 +6,7 @@ import QtQuick.Layouts
 
 MouseArea {
     id: root
-    property bool borderless: Config.options?.bar?.borderless ?? false
+    property bool borderless: Config.options?.material?.bar?.borderless ?? false
     property bool alwaysShowAllResources: false
     implicitWidth: rowLayout.implicitWidth + rowLayout.anchors.leftMargin + rowLayout.anchors.rightMargin
     implicitHeight: Appearance.sizes.barHeight
@@ -25,42 +25,42 @@ MouseArea {
         Resource {
             iconName: "memory"
             percentage: ResourceUsage.memoryUsedPercentage
-            shown: Config.options?.bar?.resources?.showMemoryIndicator ?? true
-            warningThreshold: Config.options?.bar?.resources?.memoryWarningThreshold ?? 90
+            shown: Config.options?.material?.bar?.resources?.showMemoryIndicator ?? true
+            warningThreshold: Config.options?.material?.bar?.resources?.memoryWarningThreshold ?? 90
         }
 
         Resource {
             iconName: "thermostat"
             percentage: ResourceUsage.tempPercentage
-            shown: (Config.options?.bar?.resources?.showTempIndicator ?? true) &&
-                ((Config.options?.bar?.resources?.alwaysShowTemp ?? true) || 
+            shown: (Config.options?.material?.bar?.resources?.showTempIndicator ?? true) &&
+                ((Config.options?.material?.bar?.resources?.alwaysShowTemp ?? true) || 
                     !MprisController.activePlayer ||
                     root.alwaysShowAllResources)
             Layout.leftMargin: shown ? 6 : 0
-            cautionThreshold: Config.options?.bar?.resources?.tempCautionThreshold ?? 65
-            warningThreshold: Config.options?.bar?.resources?.tempWarningThreshold ?? 80
+            cautionThreshold: Config.options?.material?.bar?.resources?.tempCautionThreshold ?? 65
+            warningThreshold: Config.options?.material?.bar?.resources?.tempWarningThreshold ?? 80
         }
 
         Resource {
             iconName: "planner_review"
             percentage: ResourceUsage.cpuUsage
-            shown: (Config.options?.bar?.resources?.showCpuIndicator ?? true) &&
-                ((Config.options?.bar?.resources?.alwaysShowCpu ?? true) || 
+            shown: (Config.options?.material?.bar?.resources?.showCpuIndicator ?? true) &&
+                ((Config.options?.material?.bar?.resources?.alwaysShowCpu ?? true) || 
                     !(MprisController.titleOf(MprisController.activePlayer)?.length > 0) ||
                     root.alwaysShowAllResources)
             Layout.leftMargin: shown ? 6 : 0
-            warningThreshold: Config.options?.bar?.resources?.cpuWarningThreshold ?? 90
+            warningThreshold: Config.options?.material?.bar?.resources?.cpuWarningThreshold ?? 90
         }
 
         Resource {
             iconName: "memory_alt"
             percentage: ResourceUsage.gpuUsage
-            shown: (Config.options?.bar?.resources?.showGpuIndicator ?? true) &&
-                ((Config.options?.bar?.resources?.alwaysShowGpu ?? true) || 
+            shown: (Config.options?.material?.bar?.resources?.showGpuIndicator ?? true) &&
+                ((Config.options?.material?.bar?.resources?.alwaysShowGpu ?? true) || 
                     !(MprisController.titleOf(MprisController.activePlayer)?.length > 0) ||
                     root.alwaysShowAllResources)
             Layout.leftMargin: shown ? 6 : 0
-            warningThreshold: Config.options?.bar?.resources?.gpuWarningThreshold ?? 90
+            warningThreshold: Config.options?.material?.bar?.resources?.gpuWarningThreshold ?? 90
         }
 
     }

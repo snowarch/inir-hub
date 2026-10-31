@@ -19,8 +19,8 @@ Item {
     property bool error: false
     property bool _cacheLoaded: false
 
-    readonly property var coins: Config.options?.sidebar?.widgets?.crypto_settings?.coins ?? []
-    readonly property int refreshInterval: (Config.options?.sidebar?.widgets?.crypto_settings?.refreshInterval ?? 60) * 1000
+    readonly property var coins: Config.options?.material?.sidebar?.widgets?.crypto_settings?.coins ?? []
+    readonly property int refreshInterval: (Config.options?.material?.sidebar?.widgets?.crypto_settings?.refreshInterval ?? 60) * 1000
     readonly property string cachePath: FileUtils.trimFileProtocol(`${Directories.state}/user/crypto_cache.json`)
 
     // --- File-based cache ---

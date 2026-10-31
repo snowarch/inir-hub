@@ -98,17 +98,17 @@ Item {
         activeAsync: enabledPanel && GlobalStates.deferredPanelsReady && resident
     }
 
-    readonly property bool barVertical: Config.options?.bar?.vertical ?? false
-    readonly property bool barPill: (Config.options?.bar?.appearanceStyle ?? "classic") === "pill"
-    readonly property bool barM3: (Config.options?.bar?.appearanceStyle ?? "classic") === "m3"
+    readonly property bool barVertical: Config.options?.material?.bar?.vertical ?? false
+    readonly property bool barPill: (Config.options?.material?.bar?.appearanceStyle ?? "classic") === "pill"
+    readonly property bool barM3: (Config.options?.material?.bar?.appearanceStyle ?? "classic") === "m3"
     readonly property bool barStock: !panelsRoot.barPill && !panelsRoot.barM3
     readonly property bool pillHostActive: panelsRoot.barPill
         && !panelsRoot.barVertical
         && (Config.options?.enabledPanels ?? []).includes("iiBar")
     readonly property bool pillToastTakeover: panelsRoot.pillHostActive
-        && (Config.options?.bar?.pill?.toasts ?? true)
+        && (Config.options?.material?.bar?.pill?.toasts ?? true)
     readonly property bool pillOsdTakeover: panelsRoot.pillHostActive
-        && (Config.options?.bar?.pill?.osd ?? true)
+        && (Config.options?.material?.bar?.pill?.osd ?? true)
 
     function screensFor(list: var): var {
         const screens = Quickshell.screens
@@ -122,7 +122,7 @@ Item {
     }
 
     readonly property var pillHostScreens: panelsRoot.pillHostActive
-        ? panelsRoot.screensFor(Config.options?.bar?.screenList ?? []) : []
+        ? panelsRoot.screensFor(Config.options?.material?.bar?.screenList ?? []) : []
     readonly property var pillHostScreenNames: panelsRoot.pillHostScreens.map(screen => screen?.name ?? "")
     readonly property var notificationScreens: panelsRoot.screensFor(Config.options?.notifications?.screenList ?? [])
     readonly property var osdScreens: panelsRoot.screensFor(Config.options?.osd?.screenList ?? [])
@@ -161,13 +161,13 @@ Item {
     OnDemandPanelLoader {
         identifier: "iiControlPanel"
         open: GlobalStates.controlPanelOpen
-        keepLoaded: Config.options?.controlPanel?.keepLoaded ?? false
+        keepLoaded: Config.options?.material?.controlPanel?.keepLoaded ?? false
         source: "./controlPanel/ControlPanel.qml"
     }
     OnDemandPanelLoader {
         identifier: "iiDashboard"
         open: GlobalStates.dashboardOpen
-        keepLoaded: Config.options?.dashboard?.keepLoaded ?? false
+        keepLoaded: Config.options?.material?.dashboard?.keepLoaded ?? false
         source: "./dashboard/Dashboard.qml"
     }
     OnDemandPanelLoader {
@@ -262,7 +262,7 @@ Item {
     OnDemandPanelLoader { identifier: "iiSessionScreen"; open: GlobalStates.sessionOpen; source: Plugins.baseUrl("modules/shared/sessionScreen/SessionScreen.qml") }
 
     Variants {
-        model: panelsRoot.screensFor(Config.options?.sidebar?.screenList ?? [])
+        model: panelsRoot.screensFor(Config.options?.material?.sidebar?.screenList ?? [])
 
         PanelWindow {
             id: dualSidebarBackdrop

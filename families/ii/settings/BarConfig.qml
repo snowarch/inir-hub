@@ -126,9 +126,9 @@ ContentPage {
         options: [
             { displayName: Translation.tr("Shape & position"), icon: "style", value: "appearance" },
             { displayName: Translation.tr("M3 bar"), icon: "category", value: "m3",
-              dimmed: (Config.options?.bar?.appearanceStyle ?? "classic") !== "m3" },
+              dimmed: (Config.options?.material?.bar?.appearanceStyle ?? "classic") !== "m3" },
             { displayName: Translation.tr("Islands"), icon: "linear_scale", value: "islands",
-              dimmed: (Config.options?.bar?.appearanceStyle ?? "classic") !== "islands" },
+              dimmed: (Config.options?.material?.bar?.appearanceStyle ?? "classic") !== "islands" },
             { displayName: Translation.tr("Audio spectrum"), icon: "graphic_eq", value: "spectrum" },
             { displayName: Translation.tr("Behavior & clock"), icon: "visibility", value: "behavior" },
             { displayName: Translation.tr("Modules"), icon: "widgets", value: "modules" }
@@ -157,23 +157,23 @@ ContentPage {
     }
 
     // Conflict detection helpers
-    readonly property bool isCardStyle: Config.options?.bar?.cornerStyle === 3
-    readonly property bool isHugStyle: Config.options?.bar?.cornerStyle === 0
-    readonly property bool isFloatStyle: Config.options?.bar?.cornerStyle === 1
-    readonly property bool isRectStyle: Config.options?.bar?.cornerStyle === 2
-    readonly property bool isGlobalCards: Config.options?.dock?.cardStyle && Config.options?.sidebar?.cardStyle && isCardStyle
-    readonly property bool hasVignette: Config.options?.bar?.vignette?.enabled ?? false
-    readonly property bool isAutoHide: Config.options?.bar?.autoHide?.enable ?? false
-    readonly property bool isBorderless: Config.options?.bar?.borderless ?? false
-    readonly property bool showBackground: Config.options?.bar?.showBackground ?? true
-    readonly property string barAppearance: Config.options?.bar?.appearanceStyle ?? "classic"
+    readonly property bool isCardStyle: Config.options?.material?.bar?.cornerStyle === 3
+    readonly property bool isHugStyle: Config.options?.material?.bar?.cornerStyle === 0
+    readonly property bool isFloatStyle: Config.options?.material?.bar?.cornerStyle === 1
+    readonly property bool isRectStyle: Config.options?.material?.bar?.cornerStyle === 2
+    readonly property bool isGlobalCards: Config.options?.material?.dock?.cardStyle && Config.options?.material?.sidebar?.cardStyle && isCardStyle
+    readonly property bool hasVignette: Config.options?.material?.bar?.vignette?.enabled ?? false
+    readonly property bool isAutoHide: Config.options?.material?.bar?.autoHide?.enable ?? false
+    readonly property bool isBorderless: Config.options?.material?.bar?.borderless ?? false
+    readonly property bool showBackground: Config.options?.material?.bar?.showBackground ?? true
+    readonly property string barAppearance: Config.options?.material?.bar?.appearanceStyle ?? "classic"
     readonly property bool spectrumEnabled: root.barAppearance === "pill"
-        ? (Config.options?.bar?.pill?.musicViz ?? false)
-        : (Config.options?.bar?.visualizer?.enable ?? false)
+        ? (Config.options?.material?.bar?.pill?.musicViz ?? false)
+        : (Config.options?.material?.bar?.visualizer?.enable ?? false)
     readonly property color workspaceThemeIndicatorColor: Appearance.zzzEverywhere ? Appearance.zzz.accentSoft
         : Appearance.angelEverywhere ? Appearance.angel.colPrimary : Appearance.colors.colPrimary
     readonly property color workspaceIndicatorPreviewColor: {
-        const saved = Config.options?.bar?.workspaces?.indicatorColor ?? ""
+        const saved = Config.options?.material?.bar?.workspaces?.indicatorColor ?? ""
         if (saved.length === 0)
             return root.workspaceThemeIndicatorColor
         const parsed = Qt.color(saved)
@@ -183,7 +183,7 @@ ContentPage {
     ColorDialog {
         id: workspaceIndicatorColorDialog
         selectedColor: root.workspaceIndicatorPreviewColor
-        onAccepted: Config.setNestedValue("bar.workspaces.indicatorColor", selectedColor.toString())
+        onAccepted: Config.setNestedValue("material.bar.workspaces.indicatorColor", selectedColor.toString())
     }
 
     SettingsNativeDialogGuard {
@@ -195,7 +195,7 @@ ContentPage {
         if (!root.spectrumControlsReady)
             return
         Config.setNestedValue(root.barAppearance === "pill"
-            ? "bar.pill.musicViz" : "bar.visualizer.enable", enabled)
+            ? "material.bar.pill.musicViz" : "material.bar.visualizer.enable", enabled)
     }
 
     function setSpectrumValue(path, value): void {
@@ -207,40 +207,40 @@ ContentPage {
         if (!root.spectrumControlsReady)
             return
         Config.setNestedValues({
-            "bar.visualizer.enable": false,
-            "bar.visualizer.multiMonitorMode": "primary",
-            "bar.visualizer.type": "bars",
-            "bar.visualizer.height": 0.6,
-            "bar.visualizer.opacity": 0.35,
-            "bar.visualizer.barsOrigin": "bottom",
-            "bar.visualizer.density": 12,
-            "bar.visualizer.gap": 2,
-            "bar.visualizer.smoothing": 2,
-            "bar.visualizer.waveMode": "fill",
-            "bar.visualizer.lineWidth": 2,
-            "bar.visualizer.edgeInset": 6,
-            "bar.visualizer.edgeSoftness": 36,
-            "bar.visualizer.frequencyProfile": "flat",
-            "bar.visualizer.accentStrength": 70,
-            "bar.visualizer.organicFit": "auto",
-            "bar.visualizer.organicSensitivity": 42,
-            "bar.visualizer.organicPulse": 55,
-            "bar.visualizer.organicMotionSpeed": 80,
-            "bar.visualizer.organicIdleMotion": 0,
-            "bar.visualizer.organicGlow": 25,
-            "bar.visualizer.organicBaseRadius": 36,
-            "bar.visualizer.pillWingMode": "bounded",
-            "bar.visualizer.pillWingLength": 180,
-            "bar.visualizer.pillWingGap": 12,
-            "bar.visualizer.pillScreenPadding": 24,
-            "bar.visualizer.pillUnderlap": 28,
-            "bar.visualizer.pillEdgeFade": 92,
-            "bar.pill.musicViz": false,
+            "material.bar.visualizer.enable": false,
+            "material.bar.visualizer.multiMonitorMode": "primary",
+            "material.bar.visualizer.type": "bars",
+            "material.bar.visualizer.height": 0.6,
+            "material.bar.visualizer.opacity": 0.35,
+            "material.bar.visualizer.barsOrigin": "bottom",
+            "material.bar.visualizer.density": 12,
+            "material.bar.visualizer.gap": 2,
+            "material.bar.visualizer.smoothing": 2,
+            "material.bar.visualizer.waveMode": "fill",
+            "material.bar.visualizer.lineWidth": 2,
+            "material.bar.visualizer.edgeInset": 6,
+            "material.bar.visualizer.edgeSoftness": 36,
+            "material.bar.visualizer.frequencyProfile": "flat",
+            "material.bar.visualizer.accentStrength": 70,
+            "material.bar.visualizer.organicFit": "auto",
+            "material.bar.visualizer.organicSensitivity": 42,
+            "material.bar.visualizer.organicPulse": 55,
+            "material.bar.visualizer.organicMotionSpeed": 80,
+            "material.bar.visualizer.organicIdleMotion": 0,
+            "material.bar.visualizer.organicGlow": 25,
+            "material.bar.visualizer.organicBaseRadius": 36,
+            "material.bar.visualizer.pillWingMode": "bounded",
+            "material.bar.visualizer.pillWingLength": 180,
+            "material.bar.visualizer.pillWingGap": 12,
+            "material.bar.visualizer.pillScreenPadding": 24,
+            "material.bar.visualizer.pillUnderlap": 28,
+            "material.bar.visualizer.pillEdgeFade": 92,
+            "material.bar.pill.musicViz": false,
         })
     }
 
     // Global style detection
-    readonly property string currentGlobalStyle: Config.options?.appearance?.globalStyle ?? "material"
+    readonly property string currentGlobalStyle: Config.options?.material?.style?.globalStyle ?? "material"
     readonly property bool isAurora: currentGlobalStyle === "aurora"
     readonly property bool isInir: currentGlobalStyle === "inir"
     readonly property bool isCards: currentGlobalStyle === "cards"
@@ -249,16 +249,16 @@ ContentPage {
 
     // Corner style only shapes the classic bar surface; the other appearances draw
     // their own (islands capsules, scenic scrim, frame outline, pill).
-    readonly property bool cornerStyleApplies: (Config.options?.bar?.appearanceStyle ?? "classic") === "classic"
-    readonly property bool stockHorizontalLayoutActive: !(Config.options?.bar?.vertical ?? false)
-        && !["m3", "pill"].includes(Config.options?.bar?.appearanceStyle ?? "classic")
-    readonly property bool taskbarModeSupported: (Config.options?.bar?.vertical ?? false)
+    readonly property bool cornerStyleApplies: (Config.options?.material?.bar?.appearanceStyle ?? "classic") === "classic"
+    readonly property bool stockHorizontalLayoutActive: !(Config.options?.material?.bar?.vertical ?? false)
+        && !["m3", "pill"].includes(Config.options?.material?.bar?.appearanceStyle ?? "classic")
+    readonly property bool taskbarModeSupported: (Config.options?.material?.bar?.vertical ?? false)
         || root.stockHorizontalLayoutActive
 
     function detectM3LayoutPreset(): string {
-        const left = JSON.stringify(Config.options?.bar?.m3?.layouts?.leftLayout ?? [])
-        const middle = JSON.stringify(Config.options?.bar?.m3?.layouts?.middleLayout ?? [])
-        const right = JSON.stringify(Config.options?.bar?.m3?.layouts?.rightLayout ?? [])
+        const left = JSON.stringify(Config.options?.material?.bar?.m3?.layouts?.leftLayout ?? [])
+        const middle = JSON.stringify(Config.options?.material?.bar?.m3?.layouts?.middleLayout ?? [])
+        const right = JSON.stringify(Config.options?.material?.bar?.m3?.layouts?.rightLayout ?? [])
         if (left === JSON.stringify(["leftSidebarButton", "media", "workspaces"])
                 && middle === JSON.stringify(["docktoPanel"])
                 && right === JSON.stringify(["utilButtons", "weatherBar", "clockWidget", "systemIcons", "rightSidebarButton"]))
@@ -275,7 +275,7 @@ ContentPage {
     }
 
     readonly property string m3LayoutPreset: {
-        const stored = Config.options?.bar?.m3?.layoutMode ?? "auto"
+        const stored = Config.options?.material?.bar?.m3?.layoutMode ?? "auto"
         if (stored === "custom")
             return "custom"
         const detected = root.detectM3LayoutPreset()
@@ -286,9 +286,9 @@ ContentPage {
 
     function currentM3Layouts(): var {
         return {
-            left: Array.from(Config.options?.bar?.m3?.layouts?.leftLayout ?? []),
-            middle: Array.from(Config.options?.bar?.m3?.layouts?.middleLayout ?? []),
-            right: Array.from(Config.options?.bar?.m3?.layouts?.rightLayout ?? [])
+            left: Array.from(Config.options?.material?.bar?.m3?.layouts?.leftLayout ?? []),
+            middle: Array.from(Config.options?.material?.bar?.m3?.layouts?.middleLayout ?? []),
+            right: Array.from(Config.options?.material?.bar?.m3?.layouts?.rightLayout ?? [])
         }
     }
 
@@ -311,14 +311,14 @@ ContentPage {
         layouts[targetSection] = target
 
         root.setM3Values({
-            "bar.m3.layoutMode": "custom",
-            "bar.m3.customLayoutSaved": true,
-            "bar.m3.layouts.leftLayout": layouts.left,
-            "bar.m3.layouts.middleLayout": layouts.middle,
-            "bar.m3.layouts.rightLayout": layouts.right,
-            "bar.m3.customLayouts.leftLayout": layouts.left,
-            "bar.m3.customLayouts.middleLayout": layouts.middle,
-            "bar.m3.customLayouts.rightLayout": layouts.right
+            "material.bar.m3.layoutMode": "custom",
+            "material.bar.m3.customLayoutSaved": true,
+            "material.bar.m3.layouts.leftLayout": layouts.left,
+            "material.bar.m3.layouts.middleLayout": layouts.middle,
+            "material.bar.m3.layouts.rightLayout": layouts.right,
+            "material.bar.m3.customLayouts.leftLayout": layouts.left,
+            "material.bar.m3.customLayouts.middleLayout": layouts.middle,
+            "material.bar.m3.customLayouts.rightLayout": layouts.right
         })
         return true
     }
@@ -326,11 +326,11 @@ ContentPage {
     function updateM3CustomLayout(side, list): void {
         if (!root.m3ControlsReady) return
         const next = Array.from(list ?? [])
-        const activePath = "bar.m3.layouts." + side + "Layout"
-        const customPath = "bar.m3.customLayouts." + side + "Layout"
+        const activePath = "material.bar.m3.layouts." + side + "Layout"
+        const customPath = "material.bar.m3.customLayouts." + side + "Layout"
         root.setM3Values({
-            "bar.m3.layoutMode": "custom",
-            "bar.m3.customLayoutSaved": true,
+            "material.bar.m3.layoutMode": "custom",
+            "material.bar.m3.customLayoutSaved": true,
             [activePath]: next,
             [customPath]: next
         })
@@ -340,48 +340,48 @@ ContentPage {
         if (!root.m3ControlsReady) return
 
         if (value === "custom") {
-            const saved = Config.options?.bar?.m3?.customLayoutSaved ?? false
+            const saved = Config.options?.material?.bar?.m3?.customLayoutSaved ?? false
             if (saved) {
                 root.setM3Values({
-                    "bar.m3.layoutMode": "custom",
-                    "bar.m3.layouts.leftLayout": Array.from(Config.options?.bar?.m3?.customLayouts?.leftLayout ?? []),
-                    "bar.m3.layouts.middleLayout": Array.from(Config.options?.bar?.m3?.customLayouts?.middleLayout ?? []),
-                    "bar.m3.layouts.rightLayout": Array.from(Config.options?.bar?.m3?.customLayouts?.rightLayout ?? [])
+                    "material.bar.m3.layoutMode": "custom",
+                    "material.bar.m3.layouts.leftLayout": Array.from(Config.options?.material?.bar?.m3?.customLayouts?.leftLayout ?? []),
+                    "material.bar.m3.layouts.middleLayout": Array.from(Config.options?.material?.bar?.m3?.customLayouts?.middleLayout ?? []),
+                    "material.bar.m3.layouts.rightLayout": Array.from(Config.options?.material?.bar?.m3?.customLayouts?.rightLayout ?? [])
                 })
             } else {
                 const current = root.currentM3Layouts()
                 root.setM3Values({
-                    "bar.m3.layoutMode": "custom",
-                    "bar.m3.customLayoutSaved": true,
-                    "bar.m3.customLayouts.leftLayout": current.left,
-                    "bar.m3.customLayouts.middleLayout": current.middle,
-                    "bar.m3.customLayouts.rightLayout": current.right
+                    "material.bar.m3.layoutMode": "custom",
+                    "material.bar.m3.customLayoutSaved": true,
+                    "material.bar.m3.customLayouts.leftLayout": current.left,
+                    "material.bar.m3.customLayouts.middleLayout": current.middle,
+                    "material.bar.m3.customLayouts.rightLayout": current.right
                 })
             }
             return
         }
 
-        const updates = ({ "bar.m3.layoutMode": value })
+        const updates = ({ "material.bar.m3.layoutMode": value })
         if (root.m3LayoutPreset === "custom" || root.detectM3LayoutPreset() === "custom") {
             const current = root.currentM3Layouts()
-            updates["bar.m3.customLayoutSaved"] = true
-            updates["bar.m3.customLayouts.leftLayout"] = current.left
-            updates["bar.m3.customLayouts.middleLayout"] = current.middle
-            updates["bar.m3.customLayouts.rightLayout"] = current.right
+            updates["material.bar.m3.customLayoutSaved"] = true
+            updates["material.bar.m3.customLayouts.leftLayout"] = current.left
+            updates["material.bar.m3.customLayouts.middleLayout"] = current.middle
+            updates["material.bar.m3.customLayouts.rightLayout"] = current.right
         }
 
         if (value === "compact") {
-            updates["bar.m3.layouts.leftLayout"] = ["leftSidebarButton", "media", "workspaces"]
-            updates["bar.m3.layouts.middleLayout"] = ["docktoPanel"]
-            updates["bar.m3.layouts.rightLayout"] = ["utilButtons", "weatherBar", "clockWidget", "systemIcons", "rightSidebarButton"]
+            updates["material.bar.m3.layouts.leftLayout"] = ["leftSidebarButton", "media", "workspaces"]
+            updates["material.bar.m3.layouts.middleLayout"] = ["docktoPanel"]
+            updates["material.bar.m3.layouts.rightLayout"] = ["utilButtons", "weatherBar", "clockWidget", "systemIcons", "rightSidebarButton"]
         } else if (value === "showcase") {
-            updates["bar.m3.layouts.leftLayout"] = ["media", "workspaces"]
-            updates["bar.m3.layouts.middleLayout"] = ["visualizer", "docktoPanel", "visualizer"]
-            updates["bar.m3.layouts.rightLayout"] = ["utilButtons", "systemIcons", "weatherBar", "clockWidget"]
+            updates["material.bar.m3.layouts.leftLayout"] = ["media", "workspaces"]
+            updates["material.bar.m3.layouts.middleLayout"] = ["visualizer", "docktoPanel", "visualizer"]
+            updates["material.bar.m3.layouts.rightLayout"] = ["utilButtons", "systemIcons", "weatherBar", "clockWidget"]
         } else if (value === "information") {
-            updates["bar.m3.layouts.leftLayout"] = ["leftSidebarButton", "workspaces", "activeWindow"]
-            updates["bar.m3.layouts.middleLayout"] = ["docktoPanel"]
-            updates["bar.m3.layouts.rightLayout"] = ["resources", "networkSpeed", "updatesCount", "clockWidget", "powerButton"]
+            updates["material.bar.m3.layouts.leftLayout"] = ["leftSidebarButton", "workspaces", "activeWindow"]
+            updates["material.bar.m3.layouts.middleLayout"] = ["docktoPanel"]
+            updates["material.bar.m3.layouts.rightLayout"] = ["resources", "networkSpeed", "updatesCount", "clockWidget", "powerButton"]
         }
         root.setM3Values(updates)
     }
@@ -430,9 +430,9 @@ ContentPage {
     }
 
     readonly property var activeM3Widgets: [
-        ...(Config.options?.bar?.m3?.layouts?.leftLayout ?? []),
-        ...(Config.options?.bar?.m3?.layouts?.middleLayout ?? []),
-        ...(Config.options?.bar?.m3?.layouts?.rightLayout ?? [])
+        ...(Config.options?.material?.bar?.m3?.layouts?.leftLayout ?? []),
+        ...(Config.options?.material?.bar?.m3?.layouts?.middleLayout ?? []),
+        ...(Config.options?.material?.bar?.m3?.layouts?.rightLayout ?? [])
     ]
 
     function m3HasWidget(id): bool {
@@ -484,9 +484,9 @@ ContentPage {
                 title: Translation.tr("Bar appearance")
 
                 ConfigSelectionArray {
-                    currentValue: Config.options?.bar?.appearanceStyle ?? "classic"
+                    currentValue: Config.options?.material?.bar?.appearanceStyle ?? "classic"
                     onSelected: newValue => {
-                        Config.setNestedValue("bar.appearanceStyle", newValue);
+                        Config.setNestedValue("material.bar.appearanceStyle", newValue);
                     }
                     options: [
                         { displayName: Translation.tr("Classic"), icon: "toolbar", value: "classic" },
@@ -504,7 +504,7 @@ ContentPage {
                 }
 
                 RippleButton {
-                    visible: (Config.options?.bar?.appearanceStyle ?? "classic") === "pill"
+                    visible: (Config.options?.material?.bar?.appearanceStyle ?? "classic") === "pill"
                     Layout.fillWidth: true
                     implicitHeight: 40
                     buttonRadius: Appearance.rounding.small
@@ -544,10 +544,10 @@ ContentPage {
                     title: Translation.tr("Position")
 
                     ConfigSelectionArray {
-                        currentValue: ((Config.options?.bar?.bottom ?? false) ? 1 : 0) | ((Config.options?.bar?.vertical ?? false) ? 2 : 0)
+                        currentValue: ((Config.options?.material?.bar?.bottom ?? false) ? 1 : 0) | ((Config.options?.material?.bar?.vertical ?? false) ? 2 : 0)
                         onSelected: newValue => {
-                            Config.setNestedValue("bar.bottom", (newValue & 1) !== 0);
-                            Config.setNestedValue("bar.vertical", (newValue & 2) !== 0);
+                            Config.setNestedValue("material.bar.bottom", (newValue & 1) !== 0);
+                            Config.setNestedValue("material.bar.vertical", (newValue & 2) !== 0);
                         }
                         options: [
                             { displayName: Translation.tr("Top"), icon: "arrow_upward", value: 0 },
@@ -564,8 +564,8 @@ ContentPage {
                     ConfigSelectionArray {
                         enabled: root.cornerStyleApplies
                         opacity: enabled ? 1 : 0.5
-                        currentValue: Config.options?.bar?.cornerStyle ?? 0
-                        onSelected: newValue => Config.setNestedValue("bar.cornerStyle", newValue)
+                        currentValue: Config.options?.material?.bar?.cornerStyle ?? 0
+                        onSelected: newValue => Config.setNestedValue("material.bar.cornerStyle", newValue)
                         // Angel's offset shadows can't wrap Hug's screen corners: it isn't offered there
                         options: [
                             { displayName: Translation.tr("Hug"), icon: "line_curve", previewKind: "hug", value: 0 },
@@ -614,19 +614,19 @@ ContentPage {
         SettingsGroup {
 
             SettingsNote {
-                visible: (Config.options?.bar?.appearanceStyle ?? "classic") !== "m3"
+                visible: (Config.options?.material?.bar?.appearanceStyle ?? "classic") !== "m3"
                 icon: "info"
                 text: Translation.tr("These options configure the M3 bar and take effect when M3 is the active bar appearance.")
             }
 
             RippleButton {
-                visible: (Config.options?.bar?.appearanceStyle ?? "classic") !== "m3"
+                visible: (Config.options?.material?.bar?.appearanceStyle ?? "classic") !== "m3"
                 Layout.fillWidth: true
                 implicitHeight: 40
                 buttonRadius: Appearance.rounding.small
                 colBackground: Appearance.colors.colLayer1
                 colBackgroundHover: Appearance.colors.colLayer1Hover
-                onClicked: Config.setNestedValue("bar.appearanceStyle", "m3")
+                onClicked: Config.setNestedValue("material.bar.appearanceStyle", "m3")
 
                 RowLayout {
                     anchors.fill: parent
@@ -648,7 +648,7 @@ ContentPage {
             }
 
             ContentSubsection {
-                visible: (Config.options?.bar?.appearanceStyle ?? "classic") === "m3"
+                visible: (Config.options?.material?.bar?.appearanceStyle ?? "classic") === "m3"
                 title: Translation.tr("M3 options")
 
                 ContentSubsection {
@@ -666,8 +666,8 @@ ContentPage {
                 }
 
                     ConfigSelectionArray {
-                        currentValue: Config.options?.bar?.m3?.borderless ?? "pills"
-                        onSelected: newValue => root.setM3Value("bar.m3.borderless", newValue)
+                        currentValue: Config.options?.material?.bar?.m3?.borderless ?? "pills"
+                        onSelected: newValue => root.setM3Value("material.bar.m3.borderless", newValue)
                         options: [
                             { displayName: Translation.tr("Joined pills"), icon: "join", value: "pills" },
                             { displayName: Translation.tr("Separate pills"), icon: "space_bar", value: "separated" },
@@ -699,7 +699,7 @@ ContentPage {
                             sectionTitle: Translation.tr("Left")
                             sectionKey: "left"
                             orderHint: Translation.tr("Top to bottom")
-                            layout: Config.options?.bar?.m3?.layouts?.leftLayout ?? []
+                            layout: Config.options?.material?.bar?.m3?.layouts?.leftLayout ?? []
                             availableWidgets: root.availableM3Widgets()
                             getWidgetName: root.m3WidgetName
                             getWidgetDescription: root.m3WidgetDescription
@@ -715,7 +715,7 @@ ContentPage {
                             sectionTitle: Translation.tr("Center")
                             sectionKey: "middle"
                             orderHint: Translation.tr("Top to bottom")
-                            layout: Config.options?.bar?.m3?.layouts?.middleLayout ?? []
+                            layout: Config.options?.material?.bar?.m3?.layouts?.middleLayout ?? []
                             availableWidgets: root.availableM3Widgets()
                             getWidgetName: root.m3WidgetName
                             getWidgetDescription: root.m3WidgetDescription
@@ -731,7 +731,7 @@ ContentPage {
                             sectionTitle: Translation.tr("Right")
                             sectionKey: "right"
                             orderHint: Translation.tr("Top to bottom")
-                            layout: Config.options?.bar?.m3?.layouts?.rightLayout ?? []
+                            layout: Config.options?.material?.bar?.m3?.layouts?.rightLayout ?? []
                             availableWidgets: root.availableM3Widgets()
                             getWidgetName: root.m3WidgetName
                             getWidgetDescription: root.m3WidgetDescription
@@ -769,8 +769,8 @@ ContentPage {
                     SettingsSwitch {
                         buttonIcon: "branding_watermark"
                         text: Translation.tr("Show background")
-                        checked: Config.options?.bar?.m3?.showBackground ?? true
-                        onCheckedChanged: root.setM3Value("bar.m3.showBackground", checked)
+                        checked: Config.options?.material?.bar?.m3?.showBackground ?? true
+                        onCheckedChanged: root.setM3Value("material.bar.m3.showBackground", checked)
                     }
                     SettingsSwitch {
                         enabled: root.m3HasWidget("weatherBar") || root.m3HasWidget("clockWidget")
@@ -779,8 +779,8 @@ ContentPage {
                         opacity: enabled ? 1 : 0.45
                         buttonIcon: "tooltip"
                         text: Translation.tr("Open details on click")
-                        checked: Config.options?.bar?.m3?.tooltips?.clickToShow ?? false
-                        onCheckedChanged: root.setM3Value("bar.m3.tooltips.clickToShow", checked)
+                        checked: Config.options?.material?.bar?.m3?.tooltips?.clickToShow ?? false
+                        onCheckedChanged: root.setM3Value("material.bar.m3.tooltips.clickToShow", checked)
                     }
                 }
 
@@ -799,8 +799,8 @@ ContentPage {
                         opacity: enabled ? 1 : 0.45
                         buttonIcon: "notifications"
                         text: Translation.tr("Unread count")
-                        checked: Config.options?.bar?.m3?.indicators?.notifications?.showUnreadCount ?? false
-                        onCheckedChanged: root.setM3Value("bar.m3.indicators.notifications.showUnreadCount", checked)
+                        checked: Config.options?.material?.bar?.m3?.indicators?.notifications?.showUnreadCount ?? false
+                        onCheckedChanged: root.setM3Value("material.bar.m3.indicators.notifications.showUnreadCount", checked)
                     }
                     SettingsSwitch {
                         enabled: root.m3HasWidget("clockWidget") || root.m3HasWidget("systemIcons")
@@ -808,8 +808,8 @@ ContentPage {
                         opacity: enabled ? 1 : 0.45
                         buttonIcon: "notes"
                         text: Translation.tr("Verbose labels")
-                        checked: Config.options?.bar?.m3?.verbose ?? true
-                        onCheckedChanged: root.setM3Value("bar.m3.verbose", checked)
+                        checked: Config.options?.material?.bar?.m3?.verbose ?? true
+                        onCheckedChanged: root.setM3Value("material.bar.m3.verbose", checked)
                     }
                 }
 
@@ -839,14 +839,14 @@ ContentPage {
                             id: m3TimeFontSelector
                             label: Translation.tr("Time font")
                             icon: "schedule"
-                            selectedFont: Config.options?.bar?.m3?.clock?.timeFontFamily ?? ""
+                            selectedFont: Config.options?.material?.bar?.m3?.clock?.timeFontFamily ?? ""
                             onSelectedFontChanged: {
-                                root.setM3Value("bar.m3.clock.timeFontFamily", selectedFont)
+                                root.setM3Value("material.bar.m3.clock.timeFontFamily", selectedFont)
                             }
                             Connections {
-                                target: Config.options?.bar?.m3?.clock ?? null
+                                target: Config.options?.material?.bar?.m3?.clock ?? null
                                 function onTimeFontFamilyChanged() {
-                                    m3TimeFontSelector.selectedFont = Config.options.bar.m3.clock.timeFontFamily
+                                    m3TimeFontSelector.selectedFont = Config.options.material.bar.m3.clock.timeFontFamily
                                 }
                             }
                         }
@@ -855,11 +855,11 @@ ContentPage {
                             icon: "schedule"
                             text: Translation.tr("Time size (px)")
                             description: Translation.tr("0 = inherit global size")
-                            value: Config.options?.bar?.m3?.clock?.timePixelSize ?? 0
+                            value: Config.options?.material?.bar?.m3?.clock?.timePixelSize ?? 0
                             from: 0
                             to: 64
                             stepSize: 1
-                            onValueModified: root.setM3Value("bar.m3.clock.timePixelSize", value)
+                            onValueModified: root.setM3Value("material.bar.m3.clock.timePixelSize", value)
                             StyledToolTip {
                                 text: Translation.tr("Pixel size of the time digits in the M3 bar clock. 0 inherits the global typography scale.")
                             }
@@ -873,14 +873,14 @@ ContentPage {
                             id: m3DateFontSelector
                             label: Translation.tr("Date font")
                             icon: "font_download"
-                            selectedFont: Config.options?.bar?.m3?.clock?.dateFontFamily ?? ""
+                            selectedFont: Config.options?.material?.bar?.m3?.clock?.dateFontFamily ?? ""
                             onSelectedFontChanged: {
-                                root.setM3Value("bar.m3.clock.dateFontFamily", selectedFont)
+                                root.setM3Value("material.bar.m3.clock.dateFontFamily", selectedFont)
                             }
                             Connections {
-                                target: Config.options?.bar?.m3?.clock ?? null
+                                target: Config.options?.material?.bar?.m3?.clock ?? null
                                 function onDateFontFamilyChanged() {
-                                    m3DateFontSelector.selectedFont = Config.options.bar.m3.clock.dateFontFamily
+                                    m3DateFontSelector.selectedFont = Config.options.material.bar.m3.clock.dateFontFamily
                                 }
                             }
                         }
@@ -889,11 +889,11 @@ ContentPage {
                             icon: "calendar_today"
                             text: Translation.tr("Date size (px)")
                             description: Translation.tr("0 = inherit global size")
-                            value: Config.options?.bar?.m3?.clock?.datePixelSize ?? 0
+                            value: Config.options?.material?.bar?.m3?.clock?.datePixelSize ?? 0
                             from: 0
                             to: 64
                             stepSize: 1
-                            onValueModified: root.setM3Value("bar.m3.clock.datePixelSize", value)
+                            onValueModified: root.setM3Value("material.bar.m3.clock.datePixelSize", value)
                             StyledToolTip {
                                 text: Translation.tr("Pixel size of the date string in the M3 bar clock. 0 inherits the global typography scale.")
                             }
@@ -906,16 +906,16 @@ ContentPage {
                         buttonRadius: Appearance.rounding.small
                         colBackground: Appearance.colors.colLayer2
                         colBackgroundHover: Appearance.colors.colLayer2Hover
-                        enabled: (Config.options?.bar?.m3?.clock?.timeFontFamily ?? "").length > 0
-                            || (Config.options?.bar?.m3?.clock?.timePixelSize ?? 0) > 0
-                            || (Config.options?.bar?.m3?.clock?.dateFontFamily ?? "").length > 0
-                            || (Config.options?.bar?.m3?.clock?.datePixelSize ?? 0) > 0
+                        enabled: (Config.options?.material?.bar?.m3?.clock?.timeFontFamily ?? "").length > 0
+                            || (Config.options?.material?.bar?.m3?.clock?.timePixelSize ?? 0) > 0
+                            || (Config.options?.material?.bar?.m3?.clock?.dateFontFamily ?? "").length > 0
+                            || (Config.options?.material?.bar?.m3?.clock?.datePixelSize ?? 0) > 0
                         opacity: enabled ? 1 : 0.5
                         onClicked: root.setM3Values({
-                            "bar.m3.clock.timeFontFamily": "",
-                            "bar.m3.clock.timePixelSize": 0,
-                            "bar.m3.clock.dateFontFamily": "",
-                            "bar.m3.clock.datePixelSize": 0
+                            "material.bar.m3.clock.timeFontFamily": "",
+                            "material.bar.m3.clock.timePixelSize": 0,
+                            "material.bar.m3.clock.dateFontFamily": "",
+                            "material.bar.m3.clock.datePixelSize": 0
                         })
 
                         contentItem: Item {
@@ -951,8 +951,8 @@ ContentPage {
                     title: Translation.tr("Surface")
 
                     ConfigSelectionArray {
-                        currentValue: Config.options?.bar?.m3?.cornerStyle ?? 3
-                        onSelected: newValue => root.setM3Value("bar.m3.cornerStyle", newValue)
+                        currentValue: Config.options?.material?.bar?.m3?.cornerStyle ?? 3
+                        onSelected: newValue => root.setM3Value("material.bar.m3.cornerStyle", newValue)
                         options: [
                             { displayName: Translation.tr("Hug"), icon: "line_curve", value: 0 },
                             { displayName: Translation.tr("Float"), icon: "page_header", value: 1 },
@@ -966,20 +966,20 @@ ContentPage {
                         ConfigSpinBox {
                             icon: "space_dashboard"
                             text: Translation.tr("Outer gap (px)")
-                            value: Config.options?.bar?.m3?.gapsOut ?? 5
+                            value: Config.options?.material?.bar?.m3?.gapsOut ?? 5
                             from: 0
                             to: 24
                             stepSize: 1
-                            enabled: (Config.options?.bar?.m3?.cornerStyle ?? 3) === 3
-                                || (Config.options?.bar?.m3?.cornerStyle ?? 3) === 1
+                            enabled: (Config.options?.material?.bar?.m3?.cornerStyle ?? 3) === 3
+                                || (Config.options?.material?.bar?.m3?.cornerStyle ?? 3) === 1
                             opacity: enabled ? 1 : 0.5
-                            onValueModified: root.setM3Value("bar.m3.gapsOut", value)
+                            onValueModified: root.setM3Value("material.bar.m3.gapsOut", value)
                         }
                     }
 
                     SettingsNote {
-                        visible: !((Config.options?.bar?.m3?.cornerStyle ?? 3) === 3
-                            || (Config.options?.bar?.m3?.cornerStyle ?? 3) === 1)
+                        visible: !((Config.options?.material?.bar?.m3?.cornerStyle ?? 3) === 3
+                            || (Config.options?.material?.bar?.m3?.cornerStyle ?? 3) === 1)
                         icon: "info"
                         text: Translation.tr("Outer gap only applies to the Float and Material islands surfaces — the others sit flush against the screen edge.")
                     }
@@ -990,8 +990,8 @@ ContentPage {
                     title: Translation.tr("Divider")
 
                     ConfigSelectionArray {
-                        currentValue: Config.options?.bar?.m3?.divider?.style ?? "rect"
-                        onSelected: newValue => root.setM3Value("bar.m3.divider.style", newValue)
+                        currentValue: Config.options?.material?.bar?.m3?.divider?.style ?? "rect"
+                        onSelected: newValue => root.setM3Value("material.bar.m3.divider.style", newValue)
                         options: [
                             { displayName: Translation.tr("Line"), icon: "remove", value: "rect" },
                             { displayName: Translation.tr("Dot"), icon: "fiber_manual_record", value: "dot" },
@@ -1002,13 +1002,13 @@ ContentPage {
                     ConfigSpinBox {
                         icon: "width"
                         text: Translation.tr("Space width (px)")
-                        value: Config.options?.bar?.m3?.divider?.spacing ?? 20
+                        value: Config.options?.material?.bar?.m3?.divider?.spacing ?? 20
                         from: 4
                         to: 100
                         stepSize: 2
-                        enabled: (Config.options?.bar?.m3?.divider?.style ?? "rect") === "space"
+                        enabled: (Config.options?.material?.bar?.m3?.divider?.style ?? "rect") === "space"
                         opacity: enabled ? 1 : 0.45
-                        onValueModified: root.setM3Value("bar.m3.divider.spacing", value)
+                        onValueModified: root.setM3Value("material.bar.m3.divider.spacing", value)
                     }
 
                 }
@@ -1022,14 +1022,14 @@ ContentPage {
                         SettingsSwitch {
                             buttonIcon: "keep"
                             text: Translation.tr("Keep media visible")
-                            checked: Config.options?.bar?.m3?.media?.alwaysVisible ?? false
-                            onCheckedChanged: root.setM3Value("bar.m3.media.alwaysVisible", checked)
+                            checked: Config.options?.material?.bar?.m3?.media?.alwaysVisible ?? false
+                            onCheckedChanged: root.setM3Value("material.bar.m3.media.alwaysVisible", checked)
                         }
                         SettingsSwitch {
                             buttonIcon: "title"
                             text: Translation.tr("Media title only")
-                            checked: Config.options?.bar?.m3?.media?.onlyTitle ?? false
-                            onCheckedChanged: root.setM3Value("bar.m3.media.onlyTitle", checked)
+                            checked: Config.options?.material?.bar?.m3?.media?.onlyTitle ?? false
+                            onCheckedChanged: root.setM3Value("material.bar.m3.media.onlyTitle", checked)
                         }
                     }
 
@@ -1040,8 +1040,8 @@ ContentPage {
                         MaterialTextField {
                             Layout.fillWidth: true
                             placeholderText: Translation.tr("Preferred player — blank for any")
-                            text: Config.options?.bar?.m3?.media?.preferredPlayer ?? ""
-                            onTextChanged: root.setM3Value("bar.m3.media.preferredPlayer", text)
+                            text: Config.options?.material?.bar?.m3?.media?.preferredPlayer ?? ""
+                            onTextChanged: root.setM3Value("material.bar.m3.media.preferredPlayer", text)
                         }
                     }
 
@@ -1050,27 +1050,27 @@ ContentPage {
                         ConfigSpinBox {
                             icon: "width_normal"
                             text: Translation.tr("Minimum width (px)")
-                            value: Config.options?.bar?.m3?.media?.minWidth ?? 100
+                            value: Config.options?.material?.bar?.m3?.media?.minWidth ?? 100
                             from: 60
                             to: 360
                             stepSize: 10
                             onValueModified: {
                                 if (!root.m3ControlsReady) return
-                                const maximum = Config.options?.bar?.m3?.media?.maxWidth ?? 280
-                                root.setM3Value("bar.m3.media.minWidth", Math.min(value, maximum))
+                                const maximum = Config.options?.material?.bar?.m3?.media?.maxWidth ?? 280
+                                root.setM3Value("material.bar.m3.media.minWidth", Math.min(value, maximum))
                             }
                         }
                         ConfigSpinBox {
                             icon: "width_full"
                             text: Translation.tr("Maximum width (px)")
-                            value: Config.options?.bar?.m3?.media?.maxWidth ?? 280
+                            value: Config.options?.material?.bar?.m3?.media?.maxWidth ?? 280
                             from: 100
                             to: 640
                             stepSize: 10
                             onValueModified: {
                                 if (!root.m3ControlsReady) return
-                                const minimum = Config.options?.bar?.m3?.media?.minWidth ?? 100
-                                root.setM3Value("bar.m3.media.maxWidth", Math.max(value, minimum))
+                                const minimum = Config.options?.material?.bar?.m3?.media?.minWidth ?? 100
+                                root.setM3Value("material.bar.m3.media.maxWidth", Math.max(value, minimum))
                             }
                         }
                     }
@@ -1081,8 +1081,8 @@ ContentPage {
                     title: Translation.tr("Resources")
 
                     ConfigSelectionArray {
-                        currentValue: Config.options?.bar?.m3?.resources?.style ?? "filled"
-                        onSelected: newValue => root.setM3Value("bar.m3.resources.style", newValue)
+                        currentValue: Config.options?.material?.bar?.m3?.resources?.style ?? "filled"
+                        onSelected: newValue => root.setM3Value("material.bar.m3.resources.style", newValue)
                         options: [
                             { displayName: Translation.tr("Filled rings"), icon: "donut_large", value: "filled" },
                             { displayName: Translation.tr("Outline rings"), icon: "radio_button_unchecked", value: "outline" }
@@ -1094,20 +1094,20 @@ ContentPage {
                         SettingsSwitch {
                             buttonIcon: "percent"
                             text: Translation.tr("Show values")
-                            checked: Config.options?.bar?.m3?.resources?.showValue ?? false
-                            onCheckedChanged: root.setM3Value("bar.m3.resources.showValue", checked)
+                            checked: Config.options?.material?.bar?.m3?.resources?.showValue ?? false
+                            onCheckedChanged: root.setM3Value("material.bar.m3.resources.showValue", checked)
                         }
                         SettingsSwitch {
                             buttonIcon: "memory"
                             text: Translation.tr("RAM")
-                            checked: Config.options?.bar?.m3?.resources?.alwaysShowRam ?? true
-                            onCheckedChanged: root.setM3Value("bar.m3.resources.alwaysShowRam", checked)
+                            checked: Config.options?.material?.bar?.m3?.resources?.alwaysShowRam ?? true
+                            onCheckedChanged: root.setM3Value("material.bar.m3.resources.alwaysShowRam", checked)
                         }
                         SettingsSwitch {
                             buttonIcon: "developer_board"
                             text: Translation.tr("CPU")
-                            checked: Config.options?.bar?.m3?.resources?.alwaysShowCpu ?? true
-                            onCheckedChanged: root.setM3Value("bar.m3.resources.alwaysShowCpu", checked)
+                            checked: Config.options?.material?.bar?.m3?.resources?.alwaysShowCpu ?? true
+                            onCheckedChanged: root.setM3Value("material.bar.m3.resources.alwaysShowCpu", checked)
                         }
                     }
 
@@ -1116,20 +1116,20 @@ ContentPage {
                         SettingsSwitch {
                             buttonIcon: "thermostat"
                             text: Translation.tr("CPU temperature")
-                            checked: Config.options?.bar?.m3?.resources?.alwaysShowCpuTemp ?? false
-                            onCheckedChanged: root.setM3Value("bar.m3.resources.alwaysShowCpuTemp", checked)
+                            checked: Config.options?.material?.bar?.m3?.resources?.alwaysShowCpuTemp ?? false
+                            onCheckedChanged: root.setM3Value("material.bar.m3.resources.alwaysShowCpuTemp", checked)
                         }
                         SettingsSwitch {
                             buttonIcon: "hard_drive"
                             text: Translation.tr("Disk usage")
-                            checked: Config.options?.bar?.m3?.resources?.alwaysShowDisk ?? false
-                            onCheckedChanged: root.setM3Value("bar.m3.resources.alwaysShowDisk", checked)
+                            checked: Config.options?.material?.bar?.m3?.resources?.alwaysShowDisk ?? false
+                            onCheckedChanged: root.setM3Value("material.bar.m3.resources.alwaysShowDisk", checked)
                         }
                         SettingsSwitch {
                             buttonIcon: "swap_horiz"
                             text: Translation.tr("Swap usage")
-                            checked: Config.options?.bar?.m3?.resources?.alwaysShowSwap ?? false
-                            onCheckedChanged: root.setM3Value("bar.m3.resources.alwaysShowSwap", checked)
+                            checked: Config.options?.material?.bar?.m3?.resources?.alwaysShowSwap ?? false
+                            onCheckedChanged: root.setM3Value("material.bar.m3.resources.alwaysShowSwap", checked)
                         }
                     }
 
@@ -1138,31 +1138,31 @@ ContentPage {
                         ConfigSpinBox {
                             icon: "memory"
                             text: Translation.tr("RAM warning (%)")
-                            value: Config.options?.bar?.m3?.resources?.memoryWarningThreshold ?? 95
+                            value: Config.options?.material?.bar?.m3?.resources?.memoryWarningThreshold ?? 95
                             from: 50
                             to: 100
                             stepSize: 5
-                            onValueModified: root.setM3Value("bar.m3.resources.memoryWarningThreshold", value)
+                            onValueModified: root.setM3Value("material.bar.m3.resources.memoryWarningThreshold", value)
                         }
                         ConfigSpinBox {
                             icon: "developer_board"
                             text: Translation.tr("CPU warning (%)")
-                            value: Config.options?.bar?.m3?.resources?.cpuWarningThreshold ?? 90
+                            value: Config.options?.material?.bar?.m3?.resources?.cpuWarningThreshold ?? 90
                             from: 50
                             to: 100
                             stepSize: 5
-                            onValueModified: root.setM3Value("bar.m3.resources.cpuWarningThreshold", value)
+                            onValueModified: root.setM3Value("material.bar.m3.resources.cpuWarningThreshold", value)
                         }
                         ConfigSpinBox {
                             icon: "swap_horiz"
                             text: Translation.tr("Swap warning (%)")
-                            value: Config.options?.bar?.m3?.resources?.swapWarningThreshold ?? 85
+                            value: Config.options?.material?.bar?.m3?.resources?.swapWarningThreshold ?? 85
                             from: 50
                             to: 100
                             stepSize: 5
-                            enabled: Config.options?.bar?.m3?.resources?.alwaysShowSwap ?? false
+                            enabled: Config.options?.material?.bar?.m3?.resources?.alwaysShowSwap ?? false
                             opacity: enabled ? 1 : 0.5
-                            onValueModified: root.setM3Value("bar.m3.resources.swapWarningThreshold", value)
+                            onValueModified: root.setM3Value("material.bar.m3.resources.swapWarningThreshold", value)
                         }
                     }
                 }
@@ -1176,30 +1176,30 @@ ContentPage {
                         SettingsSwitch {
                             buttonIcon: "apps"
                             text: Translation.tr("Show app icons")
-                            checked: Config.options?.bar?.m3?.workspaces?.showAppIcons ?? true
-                            onCheckedChanged: root.setM3Value("bar.m3.workspaces.showAppIcons", checked)
+                            checked: Config.options?.material?.bar?.m3?.workspaces?.showAppIcons ?? true
+                            onCheckedChanged: root.setM3Value("material.bar.m3.workspaces.showAppIcons", checked)
                         }
                         SettingsSwitch {
                             buttonIcon: "filter_1"
                             text: Translation.tr("Always show numbers")
-                            checked: Config.options?.bar?.m3?.workspaces?.alwaysShowNumbers ?? false
-                            onCheckedChanged: root.setM3Value("bar.m3.workspaces.alwaysShowNumbers", checked)
+                            checked: Config.options?.material?.bar?.m3?.workspaces?.alwaysShowNumbers ?? false
+                            onCheckedChanged: root.setM3Value("material.bar.m3.workspaces.alwaysShowNumbers", checked)
                         }
                     }
 
                     SettingsSwitch {
                         Layout.fillWidth: true
-                        enabled: Config.options?.bar?.m3?.workspaces?.showAppIcons ?? true
+                        enabled: Config.options?.material?.bar?.m3?.workspaces?.showAppIcons ?? true
                         opacity: enabled ? 1 : 0.45
                         buttonIcon: "monochrome_photos"
                         text: Translation.tr("Monochrome icons")
-                        checked: Config.options?.bar?.m3?.workspaces?.monochromeIcons ?? true
-                        onCheckedChanged: root.setM3Value("bar.m3.workspaces.monochromeIcons", checked)
+                        checked: Config.options?.material?.bar?.m3?.workspaces?.monochromeIcons ?? true
+                        onCheckedChanged: root.setM3Value("material.bar.m3.workspaces.monochromeIcons", checked)
                     }
 
                     ConfigSelectionArray {
-                        currentValue: Config.options?.bar?.m3?.workspaces?.indicatorStyle ?? "dot"
-                        onSelected: newValue => root.setM3Value("bar.m3.workspaces.indicatorStyle", newValue)
+                        currentValue: Config.options?.material?.bar?.m3?.workspaces?.indicatorStyle ?? "dot"
+                        onSelected: newValue => root.setM3Value("material.bar.m3.workspaces.indicatorStyle", newValue)
                         options: [
                             { displayName: Translation.tr("Dot indicator"), icon: "fiber_manual_record", value: "dot" },
                             { displayName: Translation.tr("App icon indicator"), icon: "apps", value: "icon" }
@@ -1209,18 +1209,18 @@ ContentPage {
                     SettingsSwitch {
                         buttonIcon: "font_download"
                         text: Translation.tr("Use Nerd Font workspace labels")
-                        checked: Config.options?.bar?.m3?.workspaces?.useNerdFont ?? false
-                        onCheckedChanged: root.setM3Value("bar.m3.workspaces.useNerdFont", checked)
+                        checked: Config.options?.material?.bar?.m3?.workspaces?.useNerdFont ?? false
+                        onCheckedChanged: root.setM3Value("material.bar.m3.workspaces.useNerdFont", checked)
                     }
 
                     MaterialTextField {
                         Layout.fillWidth: true
                         placeholderText: Translation.tr("Workspace labels, comma separated")
-                        text: (Config.options?.bar?.m3?.workspaces?.numberMap ?? ["1", "2"]).join(", ")
+                        text: (Config.options?.material?.bar?.m3?.workspaces?.numberMap ?? ["1", "2"]).join(", ")
                         onEditingFinished: {
                             const labels = text.split(",").map(value => value.trim()).filter(value => value.length > 0)
                             if (labels.length > 0)
-                                root.setM3Value("bar.m3.workspaces.numberMap", labels)
+                                root.setM3Value("material.bar.m3.workspaces.numberMap", labels)
                         }
                     }
                 }
@@ -1233,8 +1233,8 @@ ContentPage {
                         Layout.fillWidth: true
                         buttonIcon: "colors"
                         text: Translation.tr("Match M3 colors")
-                        checked: Config.options?.bar?.m3?.tray?.monochromeIcons ?? true
-                        onCheckedChanged: root.setM3Value("bar.m3.tray.monochromeIcons", checked)
+                        checked: Config.options?.material?.bar?.m3?.tray?.monochromeIcons ?? true
+                        onCheckedChanged: root.setM3Value("material.bar.m3.tray.monochromeIcons", checked)
                         StyledToolTip {
                             text: Translation.tr("Use the tray's semantic M3 foreground color instead of each app's original icon colors")
                         }
@@ -1250,20 +1250,20 @@ ContentPage {
                         SettingsSwitch {
                             buttonIcon: "screenshot_region"
                             text: Translation.tr("Screen snip")
-                            checked: Config.options?.bar?.m3?.utilButtons?.showScreenSnip ?? true
-                            onCheckedChanged: root.setM3Value("bar.m3.utilButtons.showScreenSnip", checked)
+                            checked: Config.options?.material?.bar?.m3?.utilButtons?.showScreenSnip ?? true
+                            onCheckedChanged: root.setM3Value("material.bar.m3.utilButtons.showScreenSnip", checked)
                         }
                         SettingsSwitch {
                             buttonIcon: "colorize"
                             text: Translation.tr("Color picker")
-                            checked: Config.options?.bar?.m3?.utilButtons?.showColorPicker ?? false
-                            onCheckedChanged: root.setM3Value("bar.m3.utilButtons.showColorPicker", checked)
+                            checked: Config.options?.material?.bar?.m3?.utilButtons?.showColorPicker ?? false
+                            onCheckedChanged: root.setM3Value("material.bar.m3.utilButtons.showColorPicker", checked)
                         }
                         SettingsSwitch {
                             buttonIcon: "screen_record"
                             text: Translation.tr("Screen recording")
-                            checked: Config.options?.bar?.m3?.utilButtons?.showScreenRecord ?? false
-                            onCheckedChanged: root.setM3Value("bar.m3.utilButtons.showScreenRecord", checked)
+                            checked: Config.options?.material?.bar?.m3?.utilButtons?.showScreenRecord ?? false
+                            onCheckedChanged: root.setM3Value("material.bar.m3.utilButtons.showScreenRecord", checked)
                         }
                     }
 
@@ -1272,20 +1272,20 @@ ContentPage {
                         SettingsSwitch {
                             buttonIcon: "mic"
                             text: Translation.tr("Microphone")
-                            checked: Config.options?.bar?.m3?.utilButtons?.showMicToggle ?? false
-                            onCheckedChanged: root.setM3Value("bar.m3.utilButtons.showMicToggle", checked)
+                            checked: Config.options?.material?.bar?.m3?.utilButtons?.showMicToggle ?? false
+                            onCheckedChanged: root.setM3Value("material.bar.m3.utilButtons.showMicToggle", checked)
                         }
                         SettingsSwitch {
                             buttonIcon: "keyboard"
                             text: Translation.tr("Keyboard layout")
-                            checked: Config.options?.bar?.m3?.utilButtons?.showKeyboardToggle ?? true
-                            onCheckedChanged: root.setM3Value("bar.m3.utilButtons.showKeyboardToggle", checked)
+                            checked: Config.options?.material?.bar?.m3?.utilButtons?.showKeyboardToggle ?? true
+                            onCheckedChanged: root.setM3Value("material.bar.m3.utilButtons.showKeyboardToggle", checked)
                         }
                         SettingsSwitch {
                             buttonIcon: "wallpaper"
                             text: Translation.tr("Wallpaper")
-                            checked: Config.options?.bar?.m3?.utilButtons?.showWallpaperToggle ?? false
-                            onCheckedChanged: root.setM3Value("bar.m3.utilButtons.showWallpaperToggle", checked)
+                            checked: Config.options?.material?.bar?.m3?.utilButtons?.showWallpaperToggle ?? false
+                            onCheckedChanged: root.setM3Value("material.bar.m3.utilButtons.showWallpaperToggle", checked)
                         }
                     }
 
@@ -1294,14 +1294,14 @@ ContentPage {
                         SettingsSwitch {
                             buttonIcon: "dark_mode"
                             text: Translation.tr("Dark mode")
-                            checked: Config.options?.bar?.m3?.utilButtons?.showDarkModeToggle ?? true
-                            onCheckedChanged: root.setM3Value("bar.m3.utilButtons.showDarkModeToggle", checked)
+                            checked: Config.options?.material?.bar?.m3?.utilButtons?.showDarkModeToggle ?? true
+                            onCheckedChanged: root.setM3Value("material.bar.m3.utilButtons.showDarkModeToggle", checked)
                         }
                         SettingsSwitch {
                             buttonIcon: "speed"
                             text: Translation.tr("Performance profile")
-                            checked: Config.options?.bar?.m3?.utilButtons?.showPerformanceProfileToggle ?? false
-                            onCheckedChanged: root.setM3Value("bar.m3.utilButtons.showPerformanceProfileToggle", checked)
+                            checked: Config.options?.material?.bar?.m3?.utilButtons?.showPerformanceProfileToggle ?? false
+                            onCheckedChanged: root.setM3Value("material.bar.m3.utilButtons.showPerformanceProfileToggle", checked)
                         }
                     }
                 }
@@ -1320,29 +1320,29 @@ ContentPage {
                         ConfigSpinBox {
                             icon: "apps"
                             text: Translation.tr("Icon size (px)")
-                            value: Config.options?.bar?.m3?.dockToPanel?.iconSize ?? 0
+                            value: Config.options?.material?.bar?.m3?.dockToPanel?.iconSize ?? 0
                             from: 0
                             to: 48
                             stepSize: 1
-                            onValueModified: root.setM3Value("bar.m3.dockToPanel.iconSize", value)
+                            onValueModified: root.setM3Value("material.bar.m3.dockToPanel.iconSize", value)
                         }
                         ConfigSpinBox {
                             icon: "crop_square"
                             text: Translation.tr("Button size (px)")
-                            value: Config.options?.bar?.m3?.dockToPanel?.buttonSize ?? 0
+                            value: Config.options?.material?.bar?.m3?.dockToPanel?.buttonSize ?? 0
                             from: 0
                             to: 56
                             stepSize: 1
-                            onValueModified: root.setM3Value("bar.m3.dockToPanel.buttonSize", value)
+                            onValueModified: root.setM3Value("material.bar.m3.dockToPanel.buttonSize", value)
                         }
                         ConfigSpinBox {
                             icon: "space_bar"
                             text: Translation.tr("Button spacing (px)")
-                            value: Config.options?.bar?.m3?.dockToPanel?.buttonSpacing ?? 2
+                            value: Config.options?.material?.bar?.m3?.dockToPanel?.buttonSpacing ?? 2
                             from: 0
                             to: 16
                             stepSize: 1
-                            onValueModified: root.setM3Value("bar.m3.dockToPanel.buttonSpacing", value)
+                            onValueModified: root.setM3Value("material.bar.m3.dockToPanel.buttonSpacing", value)
                         }
                     }
                 }
@@ -1364,19 +1364,19 @@ ContentPage {
         SettingsGroup {
 
             SettingsNote {
-                visible: (Config.options?.bar?.appearanceStyle ?? "classic") !== "islands"
+                visible: (Config.options?.material?.bar?.appearanceStyle ?? "classic") !== "islands"
                 icon: "info"
                 text: Translation.tr("Islands is not the active bar appearance. Switch to it to see these geometry changes live.")
             }
 
             RippleButton {
-                visible: (Config.options?.bar?.appearanceStyle ?? "classic") !== "islands"
+                visible: (Config.options?.material?.bar?.appearanceStyle ?? "classic") !== "islands"
                 Layout.fillWidth: true
                 implicitHeight: 40
                 buttonRadius: Appearance.rounding.small
                 colBackground: Appearance.colors.colLayer1
                 colBackgroundHover: Appearance.colors.colLayer1Hover
-                onClicked: Config.setNestedValue("bar.appearanceStyle", "islands")
+                onClicked: Config.setNestedValue("material.bar.appearanceStyle", "islands")
 
                 RowLayout {
                     anchors.fill: parent
@@ -1398,7 +1398,7 @@ ContentPage {
             }
 
             ContentSubsection {
-                visible: (Config.options?.bar?.appearanceStyle ?? "classic") === "islands"
+                visible: (Config.options?.material?.bar?.appearanceStyle ?? "classic") === "islands"
                 title: Translation.tr("Islands options")
 
                 ConfigRow {
@@ -1406,11 +1406,11 @@ ContentPage {
                     ConfigSpinBox {
                         icon: "height"
                         text: Translation.tr("Inset (px)")
-                        value: Config.options?.bar?.islands?.inset ?? 4
+                        value: Config.options?.material?.bar?.islands?.inset ?? 4
                         from: 0
                         to: 10
                         stepSize: 1
-                        onValueModified: Config.setNestedValue("bar.islands.inset", value)
+                        onValueModified: Config.setNestedValue("material.bar.islands.inset", value)
                         StyledToolTip {
                             text: Translation.tr("Vertical breathing room around each island. Smaller = taller capsules.")
                         }
@@ -1418,11 +1418,11 @@ ContentPage {
                     ConfigSpinBox {
                         icon: "width"
                         text: Translation.tr("Capsule padding (px)")
-                        value: Config.options?.bar?.islands?.padding ?? 12
+                        value: Config.options?.material?.bar?.islands?.padding ?? 12
                         from: 4
                         to: 24
                         stepSize: 2
-                        onValueModified: Config.setNestedValue("bar.islands.padding", value)
+                        onValueModified: Config.setNestedValue("material.bar.islands.padding", value)
                         StyledToolTip {
                             text: Translation.tr("Horizontal air between an edge island's border and its content.")
                         }
@@ -1457,13 +1457,13 @@ ContentPage {
                 visible: root.barAppearance !== "islands"
                 icon: "rounded_corner"
                 text: Translation.tr("Bar rounding (px)")
-                value: Config.options?.bar?.customRounding ?? -1
+                value: Config.options?.material?.bar?.customRounding ?? -1
                 specialValueText: Translation.tr("Theme")
                 from: -1
                 to: 50
                 stepSize: 1
                 onValueModified: {
-                    Config.setNestedValue("bar.customRounding", value);
+                    Config.setNestedValue("material.bar.customRounding", value);
                 }
                 StyledToolTip {
                     text: Translation.tr("Theme follows your global style; 0 is sharp, higher is rounder")
@@ -1478,11 +1478,11 @@ ContentPage {
                 ConfigSpinBox {
                     icon: "height"
                     text: Translation.tr("Bar height (px)")
-                    value: Config.options?.bar?.height ?? 40
+                    value: Config.options?.material?.bar?.height ?? 40
                     from: 24
                     to: 80
                     stepSize: 2
-                    onValueModified: Config.setNestedValue("bar.height", value)
+                    onValueModified: Config.setNestedValue("material.bar.height", value)
                     StyledToolTip {
                         text: Translation.tr("Content height of the bar before font scaling. Default is 40.")
                     }
@@ -1490,12 +1490,12 @@ ContentPage {
                 ConfigSpinBox {
                     icon: "opacity"
                     text: Translation.tr("Bar opacity (%)")
-                    value: Math.round((Config.options?.bar?.opacity ?? 1) * 100)
+                    value: Math.round((Config.options?.material?.bar?.opacity ?? 1) * 100)
                     from: 20
                     to: 100
                     stepSize: 5
-                    onValueModified: Config.setNestedValue("bar.opacity", value / 100)
-                    enabled: Config.options?.bar?.showBackground ?? true
+                    onValueModified: Config.setNestedValue("material.bar.opacity", value / 100)
+                    enabled: Config.options?.material?.bar?.showBackground ?? true
                     opacity: enabled ? 1 : 0.5
                     StyledToolTip {
                         text: Translation.tr("Background fill opacity. Widgets stay fully opaque.")
@@ -1504,7 +1504,7 @@ ContentPage {
             }
 
             SettingsNote {
-                visible: !(Config.options?.bar?.showBackground ?? true)
+                visible: !(Config.options?.material?.bar?.showBackground ?? true)
                 icon: "info"
                 text: Translation.tr("Opacity has no effect while ‘Show background’ is off.")
             }
@@ -1542,9 +1542,9 @@ ContentPage {
                 ConfigSelectionArray {
                     enabled: root.spectrumEnabled
                     opacity: enabled ? 1 : 0.5
-                    currentValue: Config.options?.bar?.visualizer?.multiMonitorMode ?? "primary"
+                    currentValue: Config.options?.material?.bar?.visualizer?.multiMonitorMode ?? "primary"
                     onSelected: newValue => root.setSpectrumValue(
-                        "bar.visualizer.multiMonitorMode", newValue)
+                        "material.bar.visualizer.multiMonitorMode", newValue)
                     options: [
                         { displayName: Translation.tr("Primary only"), icon: "filter_1", value: "primary" },
                         { displayName: Translation.tr("All monitors"), icon: "select_all", value: "all" },
@@ -1554,8 +1554,8 @@ ContentPage {
                 ConfigSelectionArray {
                     enabled: root.spectrumEnabled
                     opacity: enabled ? 1 : 0.5
-                    currentValue: Config.options?.bar?.visualizer?.type ?? "bars"
-                    onSelected: newValue => root.setSpectrumValue("bar.visualizer.type", newValue)
+                    currentValue: Config.options?.material?.bar?.visualizer?.type ?? "bars"
+                    onSelected: newValue => root.setSpectrumValue("material.bar.visualizer.type", newValue)
                     options: [
                         { displayName: Translation.tr("Bars"), icon: "equalizer", value: "bars" },
                         { displayName: Translation.tr("Wave"), icon: "waves", value: "wave" },
@@ -1564,11 +1564,11 @@ ContentPage {
                 }
 
                 ConfigSelectionArray {
-                    visible: (Config.options?.bar?.visualizer?.type ?? "bars") === "bars"
+                    visible: (Config.options?.material?.bar?.visualizer?.type ?? "bars") === "bars"
                     enabled: root.spectrumEnabled
                     opacity: enabled ? 1 : 0.5
-                    currentValue: Config.options?.bar?.visualizer?.barsOrigin ?? "bottom"
-                    onSelected: newValue => root.setSpectrumValue("bar.visualizer.barsOrigin", newValue)
+                    currentValue: Config.options?.material?.bar?.visualizer?.barsOrigin ?? "bottom"
+                    onSelected: newValue => root.setSpectrumValue("material.bar.visualizer.barsOrigin", newValue)
                     options: [
                         { displayName: Translation.tr("Bottom"), icon: "vertical_align_bottom", value: "bottom" },
                         { displayName: Translation.tr("Top"), icon: "vertical_align_top", value: "top" },
@@ -1578,11 +1578,11 @@ ContentPage {
                 }
 
                 ConfigSelectionArray {
-                    visible: (Config.options?.bar?.visualizer?.type ?? "bars") === "wave"
+                    visible: (Config.options?.material?.bar?.visualizer?.type ?? "bars") === "wave"
                     enabled: root.spectrumEnabled
                     opacity: enabled ? 1 : 0.5
-                    currentValue: Config.options?.bar?.visualizer?.waveMode ?? "fill"
-                    onSelected: newValue => root.setSpectrumValue("bar.visualizer.waveMode", newValue)
+                    currentValue: Config.options?.material?.bar?.visualizer?.waveMode ?? "fill"
+                    onSelected: newValue => root.setSpectrumValue("material.bar.visualizer.waveMode", newValue)
                     options: [
                         { displayName: Translation.tr("Fill"), icon: "waves", value: "fill" },
                         { displayName: Translation.tr("Line"), icon: "line_weight", value: "line" },
@@ -1591,11 +1591,11 @@ ContentPage {
                 }
 
                 ConfigSelectionArray {
-                    visible: (Config.options?.bar?.visualizer?.type ?? "bars") === "organic"
+                    visible: (Config.options?.material?.bar?.visualizer?.type ?? "bars") === "organic"
                     enabled: root.spectrumEnabled
                     opacity: enabled ? 1 : 0.5
-                    currentValue: Config.options?.bar?.visualizer?.organicFit ?? "auto"
-                    onSelected: newValue => root.setSpectrumValue("bar.visualizer.organicFit", newValue)
+                    currentValue: Config.options?.material?.bar?.visualizer?.organicFit ?? "auto"
+                    onSelected: newValue => root.setSpectrumValue("material.bar.visualizer.organicFit", newValue)
                     options: [
                         { displayName: Translation.tr("Auto fit"), icon: "auto_awesome", value: "auto" },
                         { displayName: Translation.tr("Contained"), icon: "crop_free", value: "contained" },
@@ -1609,8 +1609,8 @@ ContentPage {
                 ConfigSelectionArray {
                     enabled: root.spectrumEnabled
                     opacity: enabled ? 1 : 0.5
-                    currentValue: Config.options?.bar?.visualizer?.frequencyProfile ?? "flat"
-                    onSelected: newValue => root.setSpectrumValue("bar.visualizer.frequencyProfile", newValue)
+                    currentValue: Config.options?.material?.bar?.visualizer?.frequencyProfile ?? "flat"
+                    onSelected: newValue => root.setSpectrumValue("material.bar.visualizer.frequencyProfile", newValue)
                     options: [
                         { displayName: Translation.tr("Flat"), icon: "horizontal_rule", value: "flat" },
                         { displayName: Translation.tr("Bass"), icon: "graphic_eq", value: "bass" },
@@ -1635,29 +1635,29 @@ ContentPage {
                         ConfigSpinBox {
                             icon: "view_column"
                             text: Translation.tr("Band density (px)")
-                            value: Config.options?.bar?.visualizer?.density ?? 12
+                            value: Config.options?.material?.bar?.visualizer?.density ?? 12
                             from: 4
                             to: 32
                             stepSize: 1
-                            onValueModified: root.setSpectrumValue("bar.visualizer.density", value)
+                            onValueModified: root.setSpectrumValue("material.bar.visualizer.density", value)
                         }
                         ConfigSpinBox {
                             icon: "space_bar"
                             text: Translation.tr("Band gap (px)")
-                            value: Config.options?.bar?.visualizer?.gap ?? 2
+                            value: Config.options?.material?.bar?.visualizer?.gap ?? 2
                             from: 0
                             to: 12
                             stepSize: 1
-                            onValueModified: root.setSpectrumValue("bar.visualizer.gap", value)
+                            onValueModified: root.setSpectrumValue("material.bar.visualizer.gap", value)
                         }
                         ConfigSpinBox {
                             icon: "blur_on"
                             text: Translation.tr("Smoothing")
-                            value: Config.options?.bar?.visualizer?.smoothing ?? 2
+                            value: Config.options?.material?.bar?.visualizer?.smoothing ?? 2
                             from: 0
                             to: 8
                             stepSize: 1
-                            onValueModified: root.setSpectrumValue("bar.visualizer.smoothing", value)
+                            onValueModified: root.setSpectrumValue("material.bar.visualizer.smoothing", value)
                         }
                     }
 
@@ -1666,20 +1666,20 @@ ContentPage {
                         ConfigSpinBox {
                             icon: "height"
                             text: Translation.tr("Spectrum height (%)")
-                            value: Math.round((Config.options?.bar?.visualizer?.height ?? 0.6) * 100)
+                            value: Math.round((Config.options?.material?.bar?.visualizer?.height ?? 0.6) * 100)
                             from: 10
                             to: 100
                             stepSize: 5
-                            onValueModified: root.setSpectrumValue("bar.visualizer.height", value / 100)
+                            onValueModified: root.setSpectrumValue("material.bar.visualizer.height", value / 100)
                         }
                         ConfigSpinBox {
                             icon: "opacity"
                             text: Translation.tr("Spectrum opacity (%)")
-                            value: Math.round((Config.options?.bar?.visualizer?.opacity ?? 0.35) * 100)
+                            value: Math.round((Config.options?.material?.bar?.visualizer?.opacity ?? 0.35) * 100)
                             from: 5
                             to: 100
                             stepSize: 5
-                            onValueModified: root.setSpectrumValue("bar.visualizer.opacity", value / 100)
+                            onValueModified: root.setSpectrumValue("material.bar.visualizer.opacity", value / 100)
                         }
                     }
 
@@ -1688,31 +1688,31 @@ ContentPage {
                         ConfigSpinBox {
                             icon: "line_weight"
                             text: Translation.tr("Wave edge (px)")
-                            value: Config.options?.bar?.visualizer?.lineWidth ?? 2
+                            value: Config.options?.material?.bar?.visualizer?.lineWidth ?? 2
                             from: 1
                             to: 8
                             stepSize: 1
-                            enabled: (Config.options?.bar?.visualizer?.type ?? "bars") === "wave"
+                            enabled: (Config.options?.material?.bar?.visualizer?.type ?? "bars") === "wave"
                             opacity: enabled ? 1 : 0.45
-                            onValueModified: root.setSpectrumValue("bar.visualizer.lineWidth", value)
+                            onValueModified: root.setSpectrumValue("material.bar.visualizer.lineWidth", value)
                         }
                         ConfigSpinBox {
                             icon: "width_full"
                             text: Translation.tr("Edge inset (px)")
-                            value: Math.max(6, Config.options?.bar?.visualizer?.edgeInset ?? 6)
+                            value: Math.max(6, Config.options?.material?.bar?.visualizer?.edgeInset ?? 6)
                             from: 6
                             to: 32
                             stepSize: 1
-                            onValueModified: root.setSpectrumValue("bar.visualizer.edgeInset", value)
+                            onValueModified: root.setSpectrumValue("material.bar.visualizer.edgeInset", value)
                         }
                         ConfigSpinBox {
                             icon: "rounded_corner"
                             text: Translation.tr("Curve headroom (%)")
-                            value: Config.options?.bar?.visualizer?.edgeSoftness ?? 36
+                            value: Config.options?.material?.bar?.visualizer?.edgeSoftness ?? 36
                             from: 0
                             to: 100
                             stepSize: 5
-                            onValueModified: root.setSpectrumValue("bar.visualizer.edgeSoftness", value)
+                            onValueModified: root.setSpectrumValue("material.bar.visualizer.edgeSoftness", value)
                             StyledToolTip {
                                 text: Translation.tr("Compresses peaks only near rounded corners. Square surfaces remain edge-to-edge.")
                             }
@@ -1723,83 +1723,83 @@ ContentPage {
                         Layout.fillWidth: true
                         icon: "tune"
                         text: Translation.tr("Frequency accent strength (%)")
-                        value: Config.options?.bar?.visualizer?.accentStrength ?? 70
+                        value: Config.options?.material?.bar?.visualizer?.accentStrength ?? 70
                         from: 0
                         to: 100
                         stepSize: 5
-                        enabled: (Config.options?.bar?.visualizer?.frequencyProfile ?? "flat") !== "flat"
+                        enabled: (Config.options?.material?.bar?.visualizer?.frequencyProfile ?? "flat") !== "flat"
                         opacity: enabled ? 1 : 0.45
-                        onValueModified: root.setSpectrumValue("bar.visualizer.accentStrength", value)
+                        onValueModified: root.setSpectrumValue("material.bar.visualizer.accentStrength", value)
                     }
 
                     ConfigRow {
-                        visible: (Config.options?.bar?.visualizer?.type ?? "bars") === "organic"
+                        visible: (Config.options?.material?.bar?.visualizer?.type ?? "bars") === "organic"
                         uniform: true
                         ConfigSpinBox {
                             icon: "graphic_eq"
                             text: Translation.tr("Organic response (%)")
-                            value: Config.options?.bar?.visualizer?.organicSensitivity ?? 42
+                            value: Config.options?.material?.bar?.visualizer?.organicSensitivity ?? 42
                             from: 0
                             to: 100
                             stepSize: 5
-                            onValueModified: root.setSpectrumValue("bar.visualizer.organicSensitivity", value)
+                            onValueModified: root.setSpectrumValue("material.bar.visualizer.organicSensitivity", value)
                         }
                         ConfigSpinBox {
                             icon: "pulse_alert"
                             text: Translation.tr("Beat pulse (%)")
-                            value: Config.options?.bar?.visualizer?.organicPulse ?? 55
+                            value: Config.options?.material?.bar?.visualizer?.organicPulse ?? 55
                             from: 0
                             to: 100
                             stepSize: 5
-                            onValueModified: root.setSpectrumValue("bar.visualizer.organicPulse", value)
+                            onValueModified: root.setSpectrumValue("material.bar.visualizer.organicPulse", value)
                         }
                         ConfigSpinBox {
                             icon: "speed"
                             text: Translation.tr("Motion speed (%)")
-                            value: Config.options?.bar?.visualizer?.organicMotionSpeed ?? 80
+                            value: Config.options?.material?.bar?.visualizer?.organicMotionSpeed ?? 80
                             from: 25
                             to: 150
                             stepSize: 5
-                            onValueModified: root.setSpectrumValue("bar.visualizer.organicMotionSpeed", value)
+                            onValueModified: root.setSpectrumValue("material.bar.visualizer.organicMotionSpeed", value)
                         }
                     }
 
                     ConfigRow {
-                        visible: (Config.options?.bar?.visualizer?.type ?? "bars") === "organic"
+                        visible: (Config.options?.material?.bar?.visualizer?.type ?? "bars") === "organic"
                         uniform: true
                         ConfigSpinBox {
                             icon: "motion_blur"
                             text: Translation.tr("Idle motion (%)")
-                            value: Config.options?.bar?.visualizer?.organicIdleMotion ?? 0
+                            value: Config.options?.material?.bar?.visualizer?.organicIdleMotion ?? 0
                             from: 0
                             to: 100
                             stepSize: 5
-                            onValueModified: root.setSpectrumValue("bar.visualizer.organicIdleMotion", value)
+                            onValueModified: root.setSpectrumValue("material.bar.visualizer.organicIdleMotion", value)
                         }
                         ConfigSpinBox {
                             icon: "flare"
                             text: Translation.tr("Glow (%)")
-                            value: Config.options?.bar?.visualizer?.organicGlow ?? 25
+                            value: Config.options?.material?.bar?.visualizer?.organicGlow ?? 25
                             from: 0
                             to: 100
                             stepSize: 5
-                            onValueModified: root.setSpectrumValue("bar.visualizer.organicGlow", value)
+                            onValueModified: root.setSpectrumValue("material.bar.visualizer.organicGlow", value)
                         }
                         ConfigSpinBox {
                             icon: "rounded_corner"
                             text: Translation.tr("Contour roundness (%)")
-                            value: Config.options?.bar?.visualizer?.organicBaseRadius ?? 36
+                            value: Config.options?.material?.bar?.visualizer?.organicBaseRadius ?? 36
                             from: 0
                             to: 100
                             stepSize: 5
-                            onValueModified: root.setSpectrumValue("bar.visualizer.organicBaseRadius", value)
+                            onValueModified: root.setSpectrumValue("material.bar.visualizer.organicBaseRadius", value)
                         }
                     }
 
                     ConfigSelectionArray {
                         visible: root.barAppearance === "pill"
-                        currentValue: Config.options?.bar?.visualizer?.pillWingMode ?? "bounded"
-                        onSelected: newValue => root.setSpectrumValue("bar.visualizer.pillWingMode", newValue)
+                        currentValue: Config.options?.material?.bar?.visualizer?.pillWingMode ?? "bounded"
+                        onSelected: newValue => root.setSpectrumValue("material.bar.visualizer.pillWingMode", newValue)
                         options: [
                             { displayName: Translation.tr("Bounded"), icon: "width_normal", value: "bounded" },
                             { displayName: Translation.tr("Full screen"), icon: "width_full", value: "screen" },
@@ -1809,73 +1809,73 @@ ContentPage {
 
                     ConfigRow {
                         visible: root.barAppearance === "pill"
-                            && (Config.options?.bar?.visualizer?.pillWingMode ?? "bounded") === "bounded"
+                            && (Config.options?.material?.bar?.visualizer?.pillWingMode ?? "bounded") === "bounded"
                         uniform: true
                         ConfigSpinBox {
                             icon: "swap_horiz"
                             text: Translation.tr("Wing length (px)")
-                            value: Config.options?.bar?.visualizer?.pillWingLength ?? 180
+                            value: Config.options?.material?.bar?.visualizer?.pillWingLength ?? 180
                             from: 60
                             to: 480
                             stepSize: 10
-                            onValueModified: root.setSpectrumValue("bar.visualizer.pillWingLength", value)
+                            onValueModified: root.setSpectrumValue("material.bar.visualizer.pillWingLength", value)
                         }
                         ConfigSpinBox {
                             icon: "space_bar"
                             text: Translation.tr("Wing gap (px)")
-                            value: Config.options?.bar?.visualizer?.pillWingGap ?? 12
+                            value: Config.options?.material?.bar?.visualizer?.pillWingGap ?? 12
                             from: 0
                             to: 64
                             stepSize: 2
-                            onValueModified: root.setSpectrumValue("bar.visualizer.pillWingGap", value)
+                            onValueModified: root.setSpectrumValue("material.bar.visualizer.pillWingGap", value)
                         }
                     }
 
                     ConfigRow {
                         visible: root.barAppearance === "pill"
-                            && (Config.options?.bar?.visualizer?.pillWingMode ?? "bounded") === "screen"
+                            && (Config.options?.material?.bar?.visualizer?.pillWingMode ?? "bounded") === "screen"
                         uniform: true
                         ConfigSpinBox {
                             icon: "width_full"
                             text: Translation.tr("Screen padding (px)")
-                            value: Config.options?.bar?.visualizer?.pillScreenPadding ?? 24
+                            value: Config.options?.material?.bar?.visualizer?.pillScreenPadding ?? 24
                             from: 0
                             to: 240
                             stepSize: 4
-                            onValueModified: root.setSpectrumValue("bar.visualizer.pillScreenPadding", value)
+                            onValueModified: root.setSpectrumValue("material.bar.visualizer.pillScreenPadding", value)
                         }
                         ConfigSpinBox {
                             icon: "space_bar"
                             text: Translation.tr("Pill gap (px)")
-                            value: Config.options?.bar?.visualizer?.pillWingGap ?? 12
+                            value: Config.options?.material?.bar?.visualizer?.pillWingGap ?? 12
                             from: 0
                             to: 64
                             stepSize: 2
-                            onValueModified: root.setSpectrumValue("bar.visualizer.pillWingGap", value)
+                            onValueModified: root.setSpectrumValue("material.bar.visualizer.pillWingGap", value)
                         }
                     }
 
                     ConfigRow {
                         visible: root.barAppearance === "pill"
-                            && (Config.options?.bar?.visualizer?.pillWingMode ?? "bounded") === "bleed"
+                            && (Config.options?.material?.bar?.visualizer?.pillWingMode ?? "bounded") === "bleed"
                         uniform: true
                         ConfigSpinBox {
                             icon: "width_full"
                             text: Translation.tr("Screen padding (px)")
-                            value: Config.options?.bar?.visualizer?.pillScreenPadding ?? 24
+                            value: Config.options?.material?.bar?.visualizer?.pillScreenPadding ?? 24
                             from: 0
                             to: 240
                             stepSize: 4
-                            onValueModified: root.setSpectrumValue("bar.visualizer.pillScreenPadding", value)
+                            onValueModified: root.setSpectrumValue("material.bar.visualizer.pillScreenPadding", value)
                         }
                         ConfigSpinBox {
                             icon: "layers"
                             text: Translation.tr("Underlap (px)")
-                            value: Config.options?.bar?.visualizer?.pillUnderlap ?? 28
+                            value: Config.options?.material?.bar?.visualizer?.pillUnderlap ?? 28
                             from: 0
                             to: 160
                             stepSize: 4
-                            onValueModified: root.setSpectrumValue("bar.visualizer.pillUnderlap", value)
+                            onValueModified: root.setSpectrumValue("material.bar.visualizer.pillUnderlap", value)
                         }
                     }
 
@@ -1884,11 +1884,11 @@ ContentPage {
                         Layout.fillWidth: true
                         icon: "gradient"
                         text: Translation.tr("Screen-edge fade (%)")
-                        value: Config.options?.bar?.visualizer?.pillEdgeFade ?? 92
+                        value: Config.options?.material?.bar?.visualizer?.pillEdgeFade ?? 92
                         from: 0
                         to: 100
                         stepSize: 5
-                        onValueModified: root.setSpectrumValue("bar.visualizer.pillEdgeFade", value)
+                        onValueModified: root.setSpectrumValue("material.bar.visualizer.pillEdgeFade", value)
                     }
                 }
 
@@ -1926,9 +1926,9 @@ ContentPage {
                 SettingsNote {
                     visible: root.barAppearance !== "pill" && root.barAppearance !== "islands"
                         && ((root.barAppearance === "m3"
-                                && !(Config.options?.bar?.m3?.showBackground ?? true))
+                                && !(Config.options?.material?.bar?.m3?.showBackground ?? true))
                             || (root.barAppearance !== "m3"
-                                && !(Config.options?.bar?.showBackground ?? true)))
+                                && !(Config.options?.material?.bar?.showBackground ?? true)))
                         && root.spectrumEnabled
                     icon: "info"
                     text: Translation.tr("The spectrum needs a visible bar surface, so it is hidden while the background is off.")
@@ -1957,9 +1957,9 @@ ContentPage {
                     title: Translation.tr("Group style")
 
                     ConfigSelectionArray {
-                        currentValue: Config.options?.bar?.borderless ?? false
+                        currentValue: Config.options?.material?.bar?.borderless ?? false
                         onSelected: newValue => {
-                            Config.setNestedValue("bar.borderless", newValue);
+                            Config.setNestedValue("material.bar.borderless", newValue);
                         }
                         options: [
                             { displayName: Translation.tr("Pills"), icon: "location_chip", value: false },
@@ -1972,9 +1972,9 @@ ContentPage {
                     title: Translation.tr("Auto-hide")
 
                     ConfigSelectionArray {
-                        currentValue: Config.options?.bar?.autoHide?.enable ?? false
+                        currentValue: Config.options?.material?.bar?.autoHide?.enable ?? false
                         onSelected: newValue => {
-                            Config.setNestedValue("bar.autoHide.enable", newValue);
+                            Config.setNestedValue("material.bar.autoHide.enable", newValue);
                         }
                         options: [
                             { displayName: Translation.tr("Off"), icon: "visibility", value: false },
@@ -2011,11 +2011,11 @@ ContentPage {
                         ConfigSpinBox {
                             icon: "linear_scale"
                             text: Translation.tr("Hover trigger height (px)")
-                            value: Config.options?.bar?.autoHide?.hoverRegionWidth ?? 2
+                            value: Config.options?.material?.bar?.autoHide?.hoverRegionWidth ?? 2
                             from: 1
                             to: 12
                             stepSize: 1
-                            onValueModified: Config.setNestedValue("bar.autoHide.hoverRegionWidth", value)
+                            onValueModified: Config.setNestedValue("material.bar.autoHide.hoverRegionWidth", value)
                             StyledToolTip {
                                 text: Translation.tr("How thick the screen-edge zone is that reveals the hidden bar.")
                             }
@@ -2023,13 +2023,13 @@ ContentPage {
                         ConfigSpinBox {
                             icon: "timer"
                             text: Translation.tr("Super peek delay (ms)")
-                            value: Config.options?.bar?.autoHide?.showWhenPressingSuper?.delay ?? 140
+                            value: Config.options?.material?.bar?.autoHide?.showWhenPressingSuper?.delay ?? 140
                             from: 0
                             to: 800
                             stepSize: 20
-                            onValueModified: Config.setNestedValue("bar.autoHide.showWhenPressingSuper.delay", value)
+                            onValueModified: Config.setNestedValue("material.bar.autoHide.showWhenPressingSuper.delay", value)
                             enabled: CompositorService.isHyprland
-                                && (Config.options?.bar?.autoHide?.showWhenPressingSuper?.enable ?? true)
+                                && (Config.options?.material?.bar?.autoHide?.showWhenPressingSuper?.enable ?? true)
                             opacity: enabled ? 1 : 0.5
                         }
                     }
@@ -2039,10 +2039,10 @@ ContentPage {
                         SettingsSwitch {
                             buttonIcon: "keyboard_command_key"
                             text: Translation.tr("Peek on Super press")
-                            checked: Config.options?.bar?.autoHide?.showWhenPressingSuper?.enable ?? true
+                            checked: Config.options?.material?.bar?.autoHide?.showWhenPressingSuper?.enable ?? true
                             enabled: CompositorService.isHyprland
                             opacity: enabled ? 1 : 0.5
-                            onCheckedChanged: Config.setNestedValue("bar.autoHide.showWhenPressingSuper.enable", checked)
+                            onCheckedChanged: Config.setNestedValue("material.bar.autoHide.showWhenPressingSuper.enable", checked)
                             StyledToolTip {
                                 text: CompositorService.isHyprland
                                     ? Translation.tr("Reveal the bar while the Super key is held.")
@@ -2052,8 +2052,8 @@ ContentPage {
                         SettingsSwitch {
                             buttonIcon: "open_in_full"
                             text: Translation.tr("Push windows when shown")
-                            checked: Config.options?.bar?.autoHide?.pushWindows ?? false
-                            onCheckedChanged: Config.setNestedValue("bar.autoHide.pushWindows", checked)
+                            checked: Config.options?.material?.bar?.autoHide?.pushWindows ?? false
+                            onCheckedChanged: Config.setNestedValue("material.bar.autoHide.pushWindows", checked)
                             StyledToolTip {
                                 text: Translation.tr("Reserve screen space when revealed instead of overlaying windows.")
                             }
@@ -2067,8 +2067,8 @@ ContentPage {
             SettingsSwitch {
                 buttonIcon: "layers"
                 text: Translation.tr("Show background")
-                checked: Config.options?.bar?.showBackground ?? true
-                onCheckedChanged: Config.setNestedValue("bar.showBackground", checked)
+                checked: Config.options?.material?.bar?.showBackground ?? true
+                onCheckedChanged: Config.setNestedValue("material.bar.showBackground", checked)
                 StyledToolTip {
                     text: Translation.tr("Display a background behind the bar")
                 }
@@ -2077,8 +2077,8 @@ ContentPage {
             SettingsSwitch {
                 buttonIcon: "touch_app"
                 text: Translation.tr("Show scroll hints")
-                checked: Config.options?.bar?.showScrollHints ?? true
-                onCheckedChanged: Config.setNestedValue("bar.showScrollHints", checked)
+                checked: Config.options?.material?.bar?.showScrollHints ?? true
+                onCheckedChanged: Config.setNestedValue("material.bar.showScrollHints", checked)
                 StyledToolTip {
                     text: Translation.tr("Show brightness/volume icons when hovering bar edges")
                 }
@@ -2087,8 +2087,8 @@ ContentPage {
             SettingsSwitch {
                 buttonIcon: "unfold_more"
                 text: Translation.tr("Verbose mode")
-                checked: Config.options?.bar?.verbose ?? true
-                onCheckedChanged: Config.setNestedValue("bar.verbose", checked)
+                checked: Config.options?.material?.bar?.verbose ?? true
+                onCheckedChanged: Config.setNestedValue("material.bar.verbose", checked)
                 StyledToolTip {
                     text: Translation.tr("Wider center groups, plus the date next to the clock, the media title and the utility buttons. Off = compact bar.")
                 }
@@ -2105,14 +2105,14 @@ ContentPage {
                         id: barTimeFontSelector
                         label: Translation.tr("Time font")
                         icon: "schedule"
-                        selectedFont: Config.options?.bar?.clock?.timeFontFamily ?? ""
+                        selectedFont: Config.options?.material?.bar?.clock?.timeFontFamily ?? ""
                         onSelectedFontChanged: {
-                            Config.setNestedValue("bar.clock.timeFontFamily", selectedFont)
+                            Config.setNestedValue("material.bar.clock.timeFontFamily", selectedFont)
                         }
                         Connections {
-                            target: Config.options?.bar?.clock ?? null
+                            target: Config.options?.material?.bar?.clock ?? null
                             function onTimeFontFamilyChanged() {
-                                barTimeFontSelector.selectedFont = Config.options.bar.clock.timeFontFamily
+                                barTimeFontSelector.selectedFont = Config.options.material.bar.clock.timeFontFamily
                             }
                         }
                     }
@@ -2121,11 +2121,11 @@ ContentPage {
                         icon: "schedule"
                         text: Translation.tr("Time size (px)")
                         description: Translation.tr("0 = inherit global size")
-                        value: Config.options?.bar?.clock?.timePixelSize ?? 0
+                        value: Config.options?.material?.bar?.clock?.timePixelSize ?? 0
                         from: 0
                         to: 64
                         stepSize: 1
-                        onValueModified: Config.setNestedValue("bar.clock.timePixelSize", value)
+                        onValueModified: Config.setNestedValue("material.bar.clock.timePixelSize", value)
                         StyledToolTip {
                             text: Translation.tr("Pixel size of the time digits in the bar clock. 0 inherits the global typography scale.")
                         }
@@ -2139,14 +2139,14 @@ ContentPage {
                         id: barDateFontSelector
                         label: Translation.tr("Date font")
                         icon: "font_download"
-                        selectedFont: Config.options?.bar?.clock?.dateFontFamily ?? ""
+                        selectedFont: Config.options?.material?.bar?.clock?.dateFontFamily ?? ""
                         onSelectedFontChanged: {
-                            Config.setNestedValue("bar.clock.dateFontFamily", selectedFont)
+                            Config.setNestedValue("material.bar.clock.dateFontFamily", selectedFont)
                         }
                         Connections {
-                            target: Config.options?.bar?.clock ?? null
+                            target: Config.options?.material?.bar?.clock ?? null
                             function onDateFontFamilyChanged() {
-                                barDateFontSelector.selectedFont = Config.options.bar.clock.dateFontFamily
+                                barDateFontSelector.selectedFont = Config.options.material.bar.clock.dateFontFamily
                             }
                         }
                     }
@@ -2155,11 +2155,11 @@ ContentPage {
                         icon: "calendar_today"
                         text: Translation.tr("Date size (px)")
                         description: Translation.tr("0 = inherit global size")
-                        value: Config.options?.bar?.clock?.datePixelSize ?? 0
+                        value: Config.options?.material?.bar?.clock?.datePixelSize ?? 0
                         from: 0
                         to: 64
                         stepSize: 1
-                        onValueModified: Config.setNestedValue("bar.clock.datePixelSize", value)
+                        onValueModified: Config.setNestedValue("material.bar.clock.datePixelSize", value)
                         StyledToolTip {
                             text: Translation.tr("Pixel size of the date string in the bar clock. 0 inherits the global typography scale.")
                         }
@@ -2172,16 +2172,16 @@ ContentPage {
                     buttonRadius: Appearance.rounding.small
                     colBackground: Appearance.colors.colLayer2
                     colBackgroundHover: Appearance.colors.colLayer2Hover
-                    enabled: (Config.options?.bar?.clock?.timeFontFamily ?? "").length > 0
-                        || (Config.options?.bar?.clock?.timePixelSize ?? 0) > 0
-                        || (Config.options?.bar?.clock?.dateFontFamily ?? "").length > 0
-                        || (Config.options?.bar?.clock?.datePixelSize ?? 0) > 0
+                    enabled: (Config.options?.material?.bar?.clock?.timeFontFamily ?? "").length > 0
+                        || (Config.options?.material?.bar?.clock?.timePixelSize ?? 0) > 0
+                        || (Config.options?.material?.bar?.clock?.dateFontFamily ?? "").length > 0
+                        || (Config.options?.material?.bar?.clock?.datePixelSize ?? 0) > 0
                     opacity: enabled ? 1 : 0.5
                     onClicked: Config.setNestedValues({
-                        "bar.clock.timeFontFamily": "",
-                        "bar.clock.timePixelSize": 0,
-                        "bar.clock.dateFontFamily": "",
-                        "bar.clock.datePixelSize": 0
+                        "material.bar.clock.timeFontFamily": "",
+                        "material.bar.clock.timePixelSize": 0,
+                        "material.bar.clock.dateFontFamily": "",
+                        "material.bar.clock.datePixelSize": 0
                     })
 
                     contentItem: Item {
@@ -2216,8 +2216,8 @@ ContentPage {
             SettingsSwitch {
                 buttonIcon: "deployed_code"
                 text: Translation.tr("Float style drop shadow")
-                checked: Config.options?.bar?.floatStyleShadow ?? true
-                onCheckedChanged: Config.setNestedValue("bar.floatStyleShadow", checked)
+                checked: Config.options?.material?.bar?.floatStyleShadow ?? true
+                onCheckedChanged: Config.setNestedValue("material.bar.floatStyleShadow", checked)
                 enabled: root.isFloatStyle || root.isCardStyle
                 opacity: enabled ? 1 : 0.5
                 StyledToolTip {
@@ -2232,9 +2232,9 @@ ContentPage {
                     title: Translation.tr("Left scroll action")
 
                     ConfigSelectionArray {
-                        currentValue: Config.options?.bar?.leftScrollAction ?? "brightness"
+                        currentValue: Config.options?.material?.bar?.leftScrollAction ?? "brightness"
                         onSelected: newValue => {
-                            Config.setNestedValue("bar.leftScrollAction", newValue)
+                            Config.setNestedValue("material.bar.leftScrollAction", newValue)
                         }
                         options: [
                             { displayName: Translation.tr("Brightness"), icon: "light_mode", value: "brightness" },
@@ -2249,9 +2249,9 @@ ContentPage {
                     title: Translation.tr("Right scroll action")
 
                     ConfigSelectionArray {
-                        currentValue: Config.options?.bar?.rightScrollAction ?? "volume"
+                        currentValue: Config.options?.material?.bar?.rightScrollAction ?? "volume"
                         onSelected: newValue => {
-                            Config.setNestedValue("bar.rightScrollAction", newValue)
+                            Config.setNestedValue("material.bar.rightScrollAction", newValue)
                         }
                         options: [
                             { displayName: Translation.tr("Brightness"), icon: "light_mode", value: "brightness" },
@@ -2276,7 +2276,7 @@ ContentPage {
                 text: Translation.tr("Vignette effect")
                 checked: root.hasVignette
                 onCheckedChanged: {
-                    Config.setNestedValue("bar.vignette.enabled", checked)
+                    Config.setNestedValue("material.bar.vignette.enabled", checked)
                 }
                 StyledToolTip {
                     text: Translation.tr("Gradient shadow from screen edge")
@@ -2287,12 +2287,12 @@ ContentPage {
                 visible: root.hasVignette
                 icon: "opacity"
                 text: Translation.tr("Intensity (%)")
-                value: Math.round((Config.options?.bar?.vignette?.intensity ?? 0.6) * 100)
+                value: Math.round((Config.options?.material?.bar?.vignette?.intensity ?? 0.6) * 100)
                 from: 0
                 to: 100
                 stepSize: 5
                 onValueModified: {
-                    Config.setNestedValue("bar.vignette.intensity", value / 100)
+                    Config.setNestedValue("material.bar.vignette.intensity", value / 100)
                 }
             }
 
@@ -2300,12 +2300,12 @@ ContentPage {
                 visible: root.hasVignette
                 icon: "blur_on"
                 text: Translation.tr("Radius (%)")
-                value: Math.round((Config.options?.bar?.vignette?.radius ?? 0.5) * 100)
+                value: Math.round((Config.options?.material?.bar?.vignette?.radius ?? 0.5) * 100)
                 from: 10
                 to: 100
                 stepSize: 5
                 onValueModified: {
-                    Config.setNestedValue("bar.vignette.radius", value / 100)
+                    Config.setNestedValue("material.bar.vignette.radius", value / 100)
                 }
             }
 
@@ -2336,34 +2336,34 @@ ContentPage {
                         visible: root.taskbarModeSupported
                         buttonIcon: "dock_to_bottom"
                         text: Translation.tr("Taskbar (apps in bar)")
-                        checked: Config.options?.bar?.modules?.taskbar ?? false
-                        onCheckedChanged: Config.setNestedValue("bar.modules.taskbar", checked)
+                        checked: Config.options?.material?.bar?.modules?.taskbar ?? false
+                        onCheckedChanged: Config.setNestedValue("material.bar.modules.taskbar", checked)
                     }
 
                     SettingsNote {
-                        visible: root.taskbarModeSupported && (Config.options?.bar?.modules?.taskbar ?? false)
+                        visible: root.taskbarModeSupported && (Config.options?.material?.bar?.modules?.taskbar ?? false)
                         icon: "info"
                         text: Translation.tr("Taskbar replaces the active window title. Pinned apps and running windows appear in the bar, like a traditional taskbar. Uses the same pinned apps as the dock.")
                     }
 
                     SettingsSwitch {
-                        visible: (Config.options?.bar?.modules?.activeWindow ?? true)
-                            && (!root.taskbarModeSupported || !(Config.options?.bar?.modules?.taskbar ?? false))
+                        visible: (Config.options?.material?.bar?.modules?.activeWindow ?? true)
+                            && (!root.taskbarModeSupported || !(Config.options?.material?.bar?.modules?.taskbar ?? false))
                         buttonIcon: "subtitles"
                         text: Translation.tr("Show window title under app name")
-                        checked: Config.options?.bar?.activeWindow?.showTitle ?? true
-                        onCheckedChanged: Config.setNestedValue("bar.activeWindow.showTitle", checked)
+                        checked: Config.options?.material?.bar?.activeWindow?.showTitle ?? true
+                        onCheckedChanged: Config.setNestedValue("material.bar.activeWindow.showTitle", checked)
                     }
 
                     ConfigSpinBox {
-                        visible: Config.options?.bar?.modules?.media ?? true
+                        visible: Config.options?.material?.bar?.modules?.media ?? true
                         icon: "music_note"
                         text: Translation.tr("Music width (px)")
-                        value: Config.options?.bar?.media?.maxWidth ?? 220
+                        value: Config.options?.material?.bar?.media?.maxWidth ?? 220
                         from: 120
                         to: 640
                         stepSize: 10
-                        onValueModified: if (value !== (Config.options?.bar?.media?.maxWidth ?? 220)) Config.setNestedValue("bar.media.maxWidth", value)
+                        onValueModified: if (value !== (Config.options?.material?.bar?.media?.maxWidth ?? 220)) Config.setNestedValue("material.bar.media.maxWidth", value)
                         StyledToolTip {
                             text: Translation.tr("How wide the song title gets. The window title gives way; a crowded bar still shrinks music first.")
                         }
@@ -2372,7 +2372,7 @@ ContentPage {
                     ColumnLayout {
                         Layout.fillWidth: true
                         spacing: 4
-                        visible: Config.options?.bar?.modules?.leftSidebarButton ?? true
+                        visible: Config.options?.material?.bar?.modules?.leftSidebarButton ?? true
 
                         StyledText {
                             Layout.fillWidth: true
@@ -2385,18 +2385,18 @@ ContentPage {
                             id: topLeftIconField
                             Layout.fillWidth: true
                             placeholderText: "distro"
-                            text: Config.options?.bar?.topLeftIcon ?? "distro"
+                            text: Config.options?.material?.bar?.topLeftIcon ?? "distro"
                             onTextChanged: topLeftIconCommit.restart()
                             onEditingFinished: {
                                 topLeftIconCommit.stop()
-                                Config.setNestedValue("bar.topLeftIcon", topLeftIconField.text)
+                                Config.setNestedValue("material.bar.topLeftIcon", topLeftIconField.text)
                             }
 
                             Timer {
                                 id: topLeftIconCommit
                                 interval: 600
                                 repeat: false
-                                onTriggered: Config.setNestedValue("bar.topLeftIcon", topLeftIconField.text)
+                                onTriggered: Config.setNestedValue("material.bar.topLeftIcon", topLeftIconField.text)
                             }
                         }
 
@@ -2430,7 +2430,7 @@ ContentPage {
                 Layout.fillWidth: true
                 visible: !root.stockHorizontalLayoutActive
                 materialIcon: "info"
-                text: (Config.options?.bar?.vertical ?? false)
+                text: (Config.options?.material?.bar?.vertical ?? false)
                     ? Translation.tr("The vertical bar has its own fixed adaptive composition. Switch to a horizontal bar to reorder these modules.")
                     : Translation.tr("This editor belongs to the horizontal Stock, Islands, Scenic and Frame bars. M3 and Pill use their own layout systems.")
             }
@@ -2440,11 +2440,11 @@ ContentPage {
                 icon: "space_bar"
                 text: Translation.tr("Flexible spacer width")
                 unit: "px"
-                value: Config.options?.bar?.layout?.spacerWidth ?? 0
+                value: Config.options?.material?.bar?.layout?.spacerWidth ?? 0
                 from: 0
                 to: 480
                 stepSize: 8
-                onValueModified: Config.setNestedValue("bar.layout.spacerWidth", value)
+                onValueModified: Config.setNestedValue("material.bar.layout.spacerWidth", value)
                 StyledToolTip {
                     text: Translation.tr("Minimum width for each Flexible spacer module. 0 keeps it fully elastic.")
                 }
@@ -2452,8 +2452,8 @@ ContentPage {
 
             ConfigSelectionArray {
                 visible: root.stockHorizontalLayoutActive
-                currentValue: Config.options?.bar?.layout?.spacerMode ?? "auto"
-                onSelected: (newValue) => Config.setNestedValue("bar.layout.spacerMode", newValue)
+                currentValue: Config.options?.material?.bar?.layout?.spacerMode ?? "auto"
+                onSelected: (newValue) => Config.setNestedValue("material.bar.layout.spacerMode", newValue)
                 options: [
                     { displayName: Translation.tr("Smart"), icon: "auto_awesome", value: "auto" },
                     { displayName: Translation.tr("Always elastic"), icon: "width_full", value: "fill" },
@@ -2476,7 +2476,7 @@ ContentPage {
     // RESOURCES
     // ═══════════════════════════════════════════════════════════════════
     LazySection {
-        requested: root.isIiActive && !(Config.options?.settingsUi?.easyMode ?? false) && root.activeSection === "modules"
+        requested: root.isIiActive && !(Config.options?.material?.settingsUi?.easyMode ?? false) && root.activeSection === "modules"
         sourceComponent: Component {
             SettingsCardSection {
                 settingsTaskSection: "modules"
@@ -2497,14 +2497,14 @@ ContentPage {
                 SettingsSwitch {
                     buttonIcon: "memory"
                     text: Translation.tr("Show RAM indicator")
-                    checked: Config.options?.bar?.resources?.showMemoryIndicator ?? true
-                    onCheckedChanged: Config.setNestedValue("bar.resources.showMemoryIndicator", checked)
+                    checked: Config.options?.material?.bar?.resources?.showMemoryIndicator ?? true
+                    onCheckedChanged: Config.setNestedValue("material.bar.resources.showMemoryIndicator", checked)
                 }
                 SettingsSwitch {
                     buttonIcon: "thermostat"
                     text: Translation.tr("Show temp indicator")
-                    checked: Config.options?.bar?.resources?.showTempIndicator ?? true
-                    onCheckedChanged: Config.setNestedValue("bar.resources.showTempIndicator", checked)
+                    checked: Config.options?.material?.bar?.resources?.showTempIndicator ?? true
+                    onCheckedChanged: Config.setNestedValue("material.bar.resources.showTempIndicator", checked)
                 }
             }
 
@@ -2513,14 +2513,14 @@ ContentPage {
                 SettingsSwitch {
                     buttonIcon: "planner_review"
                     text: Translation.tr("Show CPU indicator")
-                    checked: Config.options?.bar?.resources?.showCpuIndicator ?? true
-                    onCheckedChanged: Config.setNestedValue("bar.resources.showCpuIndicator", checked)
+                    checked: Config.options?.material?.bar?.resources?.showCpuIndicator ?? true
+                    onCheckedChanged: Config.setNestedValue("material.bar.resources.showCpuIndicator", checked)
                 }
                 SettingsSwitch {
                     buttonIcon: "videocam"
                     text: Translation.tr("Show GPU indicator")
-                    checked: Config.options?.bar?.resources?.showGpuIndicator ?? true
-                    onCheckedChanged: Config.setNestedValue("bar.resources.showGpuIndicator", checked)
+                    checked: Config.options?.material?.bar?.resources?.showGpuIndicator ?? true
+                    onCheckedChanged: Config.setNestedValue("material.bar.resources.showGpuIndicator", checked)
                 }
             }
 
@@ -2529,8 +2529,8 @@ ContentPage {
                 SettingsSwitch {
                     buttonIcon: "swap_horiz"
                     text: Translation.tr("Show swap indicator")
-                    checked: Config.options?.bar?.resources?.showSwapIndicator ?? true
-                    onCheckedChanged: Config.setNestedValue("bar.resources.showSwapIndicator", checked)
+                    checked: Config.options?.material?.bar?.resources?.showSwapIndicator ?? true
+                    onCheckedChanged: Config.setNestedValue("material.bar.resources.showSwapIndicator", checked)
                 }
                 Item { Layout.fillWidth: true }
             }
@@ -2542,14 +2542,14 @@ ContentPage {
                 SettingsSwitch {
                     buttonIcon: "memory"
                     text: Translation.tr("Always show CPU")
-                    checked: Config.options?.bar?.resources?.alwaysShowCpu ?? true
-                    onCheckedChanged: Config.setNestedValue("bar.resources.alwaysShowCpu", checked)
+                    checked: Config.options?.material?.bar?.resources?.alwaysShowCpu ?? true
+                    onCheckedChanged: Config.setNestedValue("material.bar.resources.alwaysShowCpu", checked)
                 }
                 SettingsSwitch {
                     buttonIcon: "developer_board"
                     text: Translation.tr("Always show GPU")
-                    checked: Config.options?.bar?.resources?.alwaysShowGpu ?? true
-                    onCheckedChanged: Config.setNestedValue("bar.resources.alwaysShowGpu", checked)
+                    checked: Config.options?.material?.bar?.resources?.alwaysShowGpu ?? true
+                    onCheckedChanged: Config.setNestedValue("material.bar.resources.alwaysShowGpu", checked)
                 }
             }
 
@@ -2558,8 +2558,8 @@ ContentPage {
                 SettingsSwitch {
                     buttonIcon: "thermostat"
                     text: Translation.tr("Always show temp")
-                    checked: Config.options?.bar?.resources?.alwaysShowTemp ?? true
-                    onCheckedChanged: Config.setNestedValue("bar.resources.alwaysShowTemp", checked)
+                    checked: Config.options?.material?.bar?.resources?.alwaysShowTemp ?? true
+                    onCheckedChanged: Config.setNestedValue("material.bar.resources.alwaysShowTemp", checked)
                 }
                 Item { Layout.fillWidth: true }
             }
@@ -2571,20 +2571,20 @@ ContentPage {
                 ConfigSpinBox {
                     icon: "memory"
                     text: Translation.tr("RAM warning (%)")
-                    value: Config.options?.bar?.resources?.memoryWarningThreshold ?? 90
+                    value: Config.options?.material?.bar?.resources?.memoryWarningThreshold ?? 90
                     from: 50
                     to: 100
                     stepSize: 1
-                    onValueModified: Config.setNestedValue("bar.resources.memoryWarningThreshold", value)
+                    onValueModified: Config.setNestedValue("material.bar.resources.memoryWarningThreshold", value)
                 }
                 ConfigSpinBox {
                     icon: "planner_review"
                     text: Translation.tr("CPU warning (%)")
-                    value: Config.options?.bar?.resources?.cpuWarningThreshold ?? 90
+                    value: Config.options?.material?.bar?.resources?.cpuWarningThreshold ?? 90
                     from: 50
                     to: 100
                     stepSize: 1
-                    onValueModified: Config.setNestedValue("bar.resources.cpuWarningThreshold", value)
+                    onValueModified: Config.setNestedValue("material.bar.resources.cpuWarningThreshold", value)
                 }
             }
 
@@ -2593,20 +2593,20 @@ ContentPage {
                 ConfigSpinBox {
                     icon: "videocam"
                     text: Translation.tr("GPU warning (%)")
-                    value: Config.options?.bar?.resources?.gpuWarningThreshold ?? 90
+                    value: Config.options?.material?.bar?.resources?.gpuWarningThreshold ?? 90
                     from: 50
                     to: 100
                     stepSize: 1
-                    onValueModified: Config.setNestedValue("bar.resources.gpuWarningThreshold", value)
+                    onValueModified: Config.setNestedValue("material.bar.resources.gpuWarningThreshold", value)
                 }
                 ConfigSpinBox {
                     icon: "swap_horiz"
                     text: Translation.tr("Swap warning (%)")
-                    value: Config.options?.bar?.resources?.swapWarningThreshold ?? 85
+                    value: Config.options?.material?.bar?.resources?.swapWarningThreshold ?? 85
                     from: 50
                     to: 100
                     stepSize: 1
-                    onValueModified: Config.setNestedValue("bar.resources.swapWarningThreshold", value)
+                    onValueModified: Config.setNestedValue("material.bar.resources.swapWarningThreshold", value)
                 }
             }
 
@@ -2615,20 +2615,20 @@ ContentPage {
                 ConfigSpinBox {
                     icon: "thermostat"
                     text: Translation.tr("Temp caution (°C)")
-                    value: Config.options?.bar?.resources?.tempCautionThreshold ?? 65
+                    value: Config.options?.material?.bar?.resources?.tempCautionThreshold ?? 65
                     from: 40
                     to: 100
                     stepSize: 1
-                    onValueModified: Config.setNestedValue("bar.resources.tempCautionThreshold", value)
+                    onValueModified: Config.setNestedValue("material.bar.resources.tempCautionThreshold", value)
                 }
                 ConfigSpinBox {
                     icon: "device_thermostat"
                     text: Translation.tr("Temp warning (°C)")
-                    value: Config.options?.bar?.resources?.tempWarningThreshold ?? 80
+                    value: Config.options?.material?.bar?.resources?.tempWarningThreshold ?? 80
                     from: 50
                     to: 120
                     stepSize: 1
-                    onValueModified: Config.setNestedValue("bar.resources.tempWarningThreshold", value)
+                    onValueModified: Config.setNestedValue("material.bar.resources.tempWarningThreshold", value)
                 }
             }
         }
@@ -2679,7 +2679,7 @@ ContentPage {
     // WORKSPACES
     // ═══════════════════════════════════════════════════════════════════
     LazySection {
-        requested: root.isIiActive && !(Config.options?.settingsUi?.easyMode ?? false) && root.activeSection === "modules"
+        requested: root.isIiActive && !(Config.options?.material?.settingsUi?.easyMode ?? false) && root.activeSection === "modules"
         sourceComponent: Component {
             SettingsCardSection {
                 settingsTaskSection: "modules"
@@ -2693,9 +2693,9 @@ ContentPage {
                 visible: CompositorService.isNiri
 
                 ConfigSelectionArray {
-                    currentValue: Config.options?.bar?.workspaces?.scrollBehavior ?? "workspace"
+                    currentValue: Config.options?.material?.bar?.workspaces?.scrollBehavior ?? "workspace"
                     onSelected: newValue => {
-                        Config.setNestedValue("bar.workspaces.scrollBehavior", newValue)
+                        Config.setNestedValue("material.bar.workspaces.scrollBehavior", newValue)
                     }
                     options: [
                         { displayName: Translation.tr("Switch workspaces"), icon: "workspaces", value: "workspace" },
@@ -2709,8 +2709,8 @@ ContentPage {
                 SettingsSwitch {
                     buttonIcon: "counter_1"
                     text: Translation.tr("Always show numbers")
-                    checked: Config.options?.bar?.workspaces?.alwaysShowNumbers ?? false
-                    onCheckedChanged: Config.setNestedValue("bar.workspaces.alwaysShowNumbers", checked)
+                    checked: Config.options?.material?.bar?.workspaces?.alwaysShowNumbers ?? false
+                    onCheckedChanged: Config.setNestedValue("material.bar.workspaces.alwaysShowNumbers", checked)
                     StyledToolTip {
                         text: Translation.tr("Show numbers instead of only when Super is held")
                     }
@@ -2718,8 +2718,8 @@ ContentPage {
                 SettingsSwitch {
                     buttonIcon: "award_star"
                     text: Translation.tr("Show app icons")
-                    checked: Config.options?.bar?.workspaces?.showAppIcons ?? true
-                    onCheckedChanged: Config.setNestedValue("bar.workspaces.showAppIcons", checked)
+                    checked: Config.options?.material?.bar?.workspaces?.showAppIcons ?? true
+                    onCheckedChanged: Config.setNestedValue("material.bar.workspaces.showAppIcons", checked)
                 }
             }
 
@@ -2728,16 +2728,16 @@ ContentPage {
                 SettingsSwitch {
                     buttonIcon: "colors"
                     text: Translation.tr("Tint app icons")
-                    checked: Config.options?.bar?.workspaces?.monochromeIcons ?? true
-                    onCheckedChanged: Config.setNestedValue("bar.workspaces.monochromeIcons", checked)
-                    enabled: Config.options?.bar?.workspaces?.showAppIcons ?? true
+                    checked: Config.options?.material?.bar?.workspaces?.monochromeIcons ?? true
+                    onCheckedChanged: Config.setNestedValue("material.bar.workspaces.monochromeIcons", checked)
+                    enabled: Config.options?.material?.bar?.workspaces?.showAppIcons ?? true
                     opacity: enabled ? 1 : 0.5
                 }
                 SettingsSwitch {
                     buttonIcon: "dynamic_feed"
                     text: Translation.tr("Dynamic count")
-                    checked: Config.options?.bar?.workspaces?.dynamicCount ?? true
-                    onCheckedChanged: Config.setNestedValue("bar.workspaces.dynamicCount", checked)
+                    checked: Config.options?.material?.bar?.workspaces?.dynamicCount ?? true
+                    onCheckedChanged: Config.setNestedValue("material.bar.workspaces.dynamicCount", checked)
                     StyledToolTip {
                         text: Translation.tr("Only show existing workspaces (Niri)")
                     }
@@ -2747,8 +2747,8 @@ ContentPage {
             SettingsSwitch {
                 buttonIcon: "all_inclusive"
                 text: Translation.tr("Wrap around")
-                checked: Config.options?.bar?.workspaces?.wrapAround ?? true
-                onCheckedChanged: Config.setNestedValue("bar.workspaces.wrapAround", checked)
+                checked: Config.options?.material?.bar?.workspaces?.wrapAround ?? true
+                onCheckedChanged: Config.setNestedValue("material.bar.workspaces.wrapAround", checked)
                 StyledToolTip {
                     text: Translation.tr("Cycle from last to first and vice versa")
                 }
@@ -2757,8 +2757,8 @@ ContentPage {
             SettingsSwitch {
                 buttonIcon: "desktop_windows"
                 text: Translation.tr("Per-monitor")
-                checked: Config.options?.bar?.workspaces?.perMonitor ?? true
-                onCheckedChanged: Config.setNestedValue("bar.workspaces.perMonitor", checked)
+                checked: Config.options?.material?.bar?.workspaces?.perMonitor ?? true
+                onCheckedChanged: Config.setNestedValue("material.bar.workspaces.perMonitor", checked)
                 visible: CompositorService.isNiri
                 StyledToolTip {
                     text: Translation.tr("Each bar shows workspaces for its own monitor")
@@ -2768,8 +2768,8 @@ ContentPage {
             SettingsSwitch {
                 buttonIcon: "swap_vert"
                 text: Translation.tr("Invert scroll")
-                checked: Config.options?.bar?.workspaces?.invertScroll ?? false
-                onCheckedChanged: Config.setNestedValue("bar.workspaces.invertScroll", checked)
+                checked: Config.options?.material?.bar?.workspaces?.invertScroll ?? false
+                onCheckedChanged: Config.setNestedValue("material.bar.workspaces.invertScroll", checked)
                 StyledToolTip {
                     text: Translation.tr("Reverse mouse wheel direction for switching workspaces")
                 }
@@ -2786,14 +2786,14 @@ ContentPage {
                     SettingsSwitch {
                         buttonIcon: "auto_awesome"
                         text: Translation.tr("Automatic")
-                        checked: Config.options?.bar?.workspaces?.automaticIndicatorColor ?? true
-                        onCheckedChanged: Config.setNestedValue("bar.workspaces.automaticIndicatorColor", checked)
+                        checked: Config.options?.material?.bar?.workspaces?.automaticIndicatorColor ?? true
+                        onCheckedChanged: Config.setNestedValue("material.bar.workspaces.automaticIndicatorColor", checked)
                     }
 
                     RippleButton {
                         Layout.fillWidth: true
                         implicitHeight: 40
-                        enabled: !(Config.options?.bar?.workspaces?.automaticIndicatorColor ?? true)
+                        enabled: !(Config.options?.material?.bar?.workspaces?.automaticIndicatorColor ?? true)
                         opacity: enabled ? 1 : 0.5
                         colBackground: Appearance.colors.colLayer2
                         colBackgroundHover: Appearance.colors.colLayer2Hover
@@ -2846,39 +2846,39 @@ ContentPage {
                 ConfigSpinBox {
                     icon: "view_column"
                     text: Translation.tr("Shown")
-                    value: Config.options?.bar?.workspaces?.shown ?? 10
+                    value: Config.options?.material?.bar?.workspaces?.shown ?? 10
                     from: 1
                     to: 30
                     stepSize: 1
-                    onValueModified: Config.setNestedValue("bar.workspaces.shown", value)
-                    enabled: !(Config.options?.bar?.workspaces?.dynamicCount ?? true)
+                    onValueModified: Config.setNestedValue("material.bar.workspaces.shown", value)
+                    enabled: !(Config.options?.material?.bar?.workspaces?.dynamicCount ?? true)
                     opacity: enabled ? 1 : 0.5
                 }
                 ConfigSpinBox {
                     icon: "mouse"
                     text: Translation.tr("Scroll steps")
-                    value: Config.options?.bar?.workspaces?.scrollSteps ?? 3
+                    value: Config.options?.material?.bar?.workspaces?.scrollSteps ?? 3
                     from: 1
                     to: 10
                     stepSize: 1
-                    onValueModified: Config.setNestedValue("bar.workspaces.scrollSteps", value)
+                    onValueModified: Config.setNestedValue("material.bar.workspaces.scrollSteps", value)
                 }
             }
 
             ConfigSpinBox {
                 icon: "touch_long"
                 text: Translation.tr("Number reveal delay (ms)")
-                value: Config.options?.bar?.workspaces?.showNumberDelay ?? 300
+                value: Config.options?.material?.bar?.workspaces?.showNumberDelay ?? 300
                 from: 0
                 to: 1000
                 stepSize: 50
-                onValueModified: Config.setNestedValue("bar.workspaces.showNumberDelay", value)
-                enabled: !(Config.options?.bar?.workspaces?.alwaysShowNumbers ?? false)
+                onValueModified: Config.setNestedValue("material.bar.workspaces.showNumberDelay", value)
+                enabled: !(Config.options?.material?.bar?.workspaces?.alwaysShowNumbers ?? false)
                 opacity: enabled ? 1 : 0.5
             }
 
             SettingsNote {
-                visible: Config.options?.bar?.workspaces?.alwaysShowNumbers ?? false
+                visible: Config.options?.material?.bar?.workspaces?.alwaysShowNumbers ?? false
                 icon: "info"
                 text: Translation.tr("Number reveal delay is ignored when 'Always show numbers' is enabled")
             }
@@ -2889,11 +2889,11 @@ ContentPage {
                 title: Translation.tr("Number style")
 
                 ConfigSelectionArray {
-                    enabled: Config.options?.bar?.workspaces?.alwaysShowNumbers ?? false
+                    enabled: Config.options?.material?.bar?.workspaces?.alwaysShowNumbers ?? false
                     opacity: enabled ? 1 : 0.5
-                    currentValue: JSON.stringify(Config.options?.bar?.workspaces?.numberMap ?? ["1","2"])
+                    currentValue: JSON.stringify(Config.options?.material?.bar?.workspaces?.numberMap ?? ["1","2"])
                     onSelected: newValue => {
-                        Config.setNestedValue("bar.workspaces.numberMap", JSON.parse(newValue))
+                        Config.setNestedValue("material.bar.workspaces.numberMap", JSON.parse(newValue))
                     }
                     options: [
                         { displayName: Translation.tr("Normal"), icon: "123", value: '["1","2","3","4","5","6","7","8","9","10"]' },
@@ -2904,7 +2904,7 @@ ContentPage {
             }
 
             SettingsNote {
-                visible: !Config.options?.bar?.workspaces?.alwaysShowNumbers
+                visible: !Config.options?.material?.bar?.workspaces?.alwaysShowNumbers
                 icon: "lightbulb"
                 text: Translation.tr("Enable 'Always show numbers' to use number styles")
             }
@@ -2929,8 +2929,8 @@ ContentPage {
             SettingsSwitch {
                 buttonIcon: "keep"
                 text: Translation.tr("Pin icons by default")
-                checked: Config.options?.bar?.tray?.invertPinnedItems ?? true
-                onCheckedChanged: Config.setNestedValue("bar.tray.invertPinnedItems", checked)
+                checked: Config.options?.material?.bar?.tray?.invertPinnedItems ?? true
+                onCheckedChanged: Config.setNestedValue("material.bar.tray.invertPinnedItems", checked)
                 StyledToolTip {
                     text: Translation.tr("New tray icons are visible by default instead of hidden")
                 }
@@ -2939,8 +2939,8 @@ ContentPage {
             SettingsSwitch {
                 buttonIcon: "colors"
                 text: Translation.tr("Tint icons")
-                checked: Config.options?.bar?.tray?.monochromeIcons ?? true
-                onCheckedChanged: Config.setNestedValue("bar.tray.monochromeIcons", checked)
+                checked: Config.options?.material?.bar?.tray?.monochromeIcons ?? true
+                onCheckedChanged: Config.setNestedValue("material.bar.tray.monochromeIcons", checked)
                 StyledToolTip {
                     text: Translation.tr("Apply accent color tint to tray icons")
                 }
@@ -2949,15 +2949,15 @@ ContentPage {
             SettingsSwitch {
                 buttonIcon: "bug_report"
                 text: Translation.tr("Show item ID in tooltip")
-                checked: Config.options?.bar?.tray?.showItemId ?? false
-                onCheckedChanged: Config.setNestedValue("bar.tray.showItemId", checked)
+                checked: Config.options?.material?.bar?.tray?.showItemId ?? false
+                onCheckedChanged: Config.setNestedValue("material.bar.tray.showItemId", checked)
                 StyledToolTip {
                     text: Translation.tr("Useful for debugging tray issues")
                 }
             }
 
             SettingsNote {
-                visible: !(Config.options?.bar?.modules?.sysTray ?? true)
+                visible: !(Config.options?.material?.bar?.modules?.sysTray ?? true)
                 warning: true
                 icon: "visibility_off"
                 text: Translation.tr("System tray is disabled in Modules section above")
@@ -2992,14 +2992,14 @@ ContentPage {
                 SettingsSwitch {
                     buttonIcon: "content_cut"
                     text: Translation.tr("Screen snip")
-                    checked: Config.options?.bar?.utilButtons?.showScreenSnip ?? true
-                    onCheckedChanged: Config.setNestedValue("bar.utilButtons.showScreenSnip", checked)
+                    checked: Config.options?.material?.bar?.utilButtons?.showScreenSnip ?? true
+                    onCheckedChanged: Config.setNestedValue("material.bar.utilButtons.showScreenSnip", checked)
                 }
                 SettingsSwitch {
                     buttonIcon: "videocam"
                     text: Translation.tr("Screen record")
-                    checked: Config.options?.bar?.utilButtons?.showScreenRecord ?? true
-                    onCheckedChanged: Config.setNestedValue("bar.utilButtons.showScreenRecord", checked)
+                    checked: Config.options?.material?.bar?.utilButtons?.showScreenRecord ?? true
+                    onCheckedChanged: Config.setNestedValue("material.bar.utilButtons.showScreenRecord", checked)
                 }
             }
 
@@ -3008,8 +3008,8 @@ ContentPage {
                 SettingsSwitch {
                     buttonIcon: "visibility"
                     text: Translation.tr("Screen cast")
-                    checked: Config.options?.bar?.utilButtons?.showScreenCast ?? false
-                    onCheckedChanged: Config.setNestedValue("bar.utilButtons.showScreenCast", checked)
+                    checked: Config.options?.material?.bar?.utilButtons?.showScreenCast ?? false
+                    onCheckedChanged: Config.setNestedValue("material.bar.utilButtons.showScreenCast", checked)
                     StyledToolTip {
                         text: Translation.tr("Toggle Niri dynamic screen casting (mirroring) to a target output")
                     }
@@ -3017,8 +3017,8 @@ ContentPage {
                 SettingsSwitch {
                     buttonIcon: "colorize"
                     text: Translation.tr("Color picker")
-                    checked: Config.options?.bar?.utilButtons?.showColorPicker ?? false
-                    onCheckedChanged: Config.setNestedValue("bar.utilButtons.showColorPicker", checked)
+                    checked: Config.options?.material?.bar?.utilButtons?.showColorPicker ?? false
+                    onCheckedChanged: Config.setNestedValue("material.bar.utilButtons.showColorPicker", checked)
                 }
             }
 
@@ -3027,15 +3027,15 @@ ContentPage {
                 SettingsSwitch {
                     buttonIcon: "edit_note"
                     text: Translation.tr("Notepad")
-                    checked: Config.options?.bar?.utilButtons?.showNotepad ?? true
-                    onCheckedChanged: Config.setNestedValue("bar.utilButtons.showNotepad", checked)
+                    checked: Config.options?.material?.bar?.utilButtons?.showNotepad ?? true
+                    onCheckedChanged: Config.setNestedValue("material.bar.utilButtons.showNotepad", checked)
                 }
                 // Empty slot for future button
                 Item { Layout.fillWidth: true }
             }
 
             StyledText {
-                visible: Config.options?.bar?.utilButtons?.showScreenCast ?? false
+                visible: Config.options?.material?.bar?.utilButtons?.showScreenCast ?? false
                 Layout.fillWidth: true
                 text: Translation.tr("Toggle button to start/stop Niri dynamic casting (screen mirroring) to a target output.")
                 color: Appearance.colors.colSubtext
@@ -3044,18 +3044,18 @@ ContentPage {
             }
 
             MaterialTextArea {
-                visible: Config.options?.bar?.utilButtons?.showScreenCast ?? false
+                visible: Config.options?.material?.bar?.utilButtons?.showScreenCast ?? false
                 Layout.fillWidth: true
                 placeholderText: "HDMI-A-1"
-                text: Config.options?.bar?.utilButtons?.screenCastOutput ?? "HDMI-A-1"
+                text: Config.options?.material?.bar?.utilButtons?.screenCastOutput ?? "HDMI-A-1"
                 wrapMode: TextEdit.NoWrap
                 onTextChanged: {
-                    Config.setNestedValue("bar.utilButtons.screenCastOutput", text)
+                    Config.setNestedValue("material.bar.utilButtons.screenCastOutput", text)
                 }
             }
 
             StyledText {
-                visible: Config.options?.bar?.utilButtons?.showScreenCast ?? false
+                visible: Config.options?.material?.bar?.utilButtons?.showScreenCast ?? false
                 Layout.fillWidth: true
                 text: Translation.tr("Run 'niri msg outputs' to find your output name")
                 color: Appearance.colors.colSubtext
@@ -3070,14 +3070,14 @@ ContentPage {
                 SettingsSwitch {
                     buttonIcon: "keyboard"
                     text: Translation.tr("Virtual keyboard")
-                    checked: Config.options?.bar?.utilButtons?.showKeyboardToggle ?? true
-                    onCheckedChanged: Config.setNestedValue("bar.utilButtons.showKeyboardToggle", checked)
+                    checked: Config.options?.material?.bar?.utilButtons?.showKeyboardToggle ?? true
+                    onCheckedChanged: Config.setNestedValue("material.bar.utilButtons.showKeyboardToggle", checked)
                 }
                 SettingsSwitch {
                     buttonIcon: "language"
                     text: Translation.tr("Keyboard layout switch")
-                    checked: Config.options?.bar?.utilButtons?.showKeyboardLayoutSwitch ?? false
-                    onCheckedChanged: Config.setNestedValue("bar.utilButtons.showKeyboardLayoutSwitch", checked)
+                    checked: Config.options?.material?.bar?.utilButtons?.showKeyboardLayoutSwitch ?? false
+                    onCheckedChanged: Config.setNestedValue("material.bar.utilButtons.showKeyboardLayoutSwitch", checked)
                 }
             }
 
@@ -3086,14 +3086,14 @@ ContentPage {
                 SettingsSwitch {
                     buttonIcon: "mic"
                     text: Translation.tr("Mic toggle")
-                    checked: Config.options?.bar?.utilButtons?.showMicToggle ?? false
-                    onCheckedChanged: Config.setNestedValue("bar.utilButtons.showMicToggle", checked)
+                    checked: Config.options?.material?.bar?.utilButtons?.showMicToggle ?? false
+                    onCheckedChanged: Config.setNestedValue("material.bar.utilButtons.showMicToggle", checked)
                 }
                 SettingsSwitch {
                     buttonIcon: "dark_mode"
                     text: Translation.tr("Dark/Light mode")
-                    checked: Config.options?.bar?.utilButtons?.showDarkModeToggle ?? true
-                    onCheckedChanged: Config.setNestedValue("bar.utilButtons.showDarkModeToggle", checked)
+                    checked: Config.options?.material?.bar?.utilButtons?.showDarkModeToggle ?? true
+                    onCheckedChanged: Config.setNestedValue("material.bar.utilButtons.showDarkModeToggle", checked)
                 }
             }
 
@@ -3102,8 +3102,8 @@ ContentPage {
                 SettingsSwitch {
                     buttonIcon: "speed"
                     text: Translation.tr("Power profile")
-                    checked: Config.options?.bar?.utilButtons?.showPerformanceProfileToggle ?? false
-                    onCheckedChanged: Config.setNestedValue("bar.utilButtons.showPerformanceProfileToggle", checked)
+                    checked: Config.options?.material?.bar?.utilButtons?.showPerformanceProfileToggle ?? false
+                    onCheckedChanged: Config.setNestedValue("material.bar.utilButtons.showPerformanceProfileToggle", checked)
                 }
             }
         }
@@ -3127,8 +3127,8 @@ ContentPage {
             SettingsSwitch {
                 buttonIcon: "counter_2"
                 text: Translation.tr("Show unread count")
-                checked: Config.options?.bar?.indicators?.notifications?.showUnreadCount ?? false
-                onCheckedChanged: Config.setNestedValue("bar.indicators.notifications.showUnreadCount", checked)
+                checked: Config.options?.material?.bar?.indicators?.notifications?.showUnreadCount ?? false
+                onCheckedChanged: Config.setNestedValue("material.bar.indicators.notifications.showUnreadCount", checked)
                 StyledToolTip {
                     text: Translation.tr("Show number instead of just a dot")
                 }

@@ -143,7 +143,7 @@ ColumnLayout {
                     font.weight: Font.Medium
                 }
                 StyledText {
-                    text: Math.round((Config.options?.bar?.pill?.scale ?? 1) * 100) + "%"
+                    text: Math.round((Config.options?.material?.bar?.pill?.scale ?? 1) * 100) + "%"
                     color: Appearance.colors.colOnLayer1
                     font.pixelSize: Appearance.font.pixelSize.small
                 }
@@ -155,17 +155,17 @@ ColumnLayout {
 
                 Item {
                     id: previewPill
-                    readonly property real previewScale: (Config.options?.bar?.pill?.scale ?? 1) * 1.25
+                    readonly property real previewScale: (Config.options?.material?.bar?.pill?.scale ?? 1) * 1.25
                     anchors.horizontalCenter: parent.horizontalCenter
                     anchors.verticalCenter: parent.verticalCenter
                     width: Math.min(parent.width - 24,
-                        Math.max(160, Config.options?.bar?.pill?.restWidth ?? 176) * previewScale)
-                    height: Math.max(38, Config.options?.bar?.pill?.restHeight ?? 44) * previewScale
+                        Math.max(160, Config.options?.material?.bar?.pill?.restWidth ?? 176) * previewScale)
+                    height: Math.max(38, Config.options?.material?.bar?.pill?.restHeight ?? 44) * previewScale
 
                     IslandPanel {
                         anchors.fill: parent
                         radius: Math.min(parent.height / 2,
-                            (Config.options?.appearance?.island?.radius ?? 18) * previewPill.previewScale)
+                            (Config.options?.material?.style?.island?.radius ?? 18) * previewPill.previewScale)
                         glassEnabled: true
                         screen: previewPill.QsWindow?.window?.screen ?? null
                     }
@@ -242,16 +242,16 @@ ColumnLayout {
             SettingsSwitch {
                 buttonIcon: "expand_content"
                 text: Translation.tr("Persistent bar mode")
-                checked: Config.options?.bar?.pill?.barMode ?? false
-                onCheckedChanged: Config.setNestedValue("bar.pill.barMode", checked)
+                checked: Config.options?.material?.bar?.pill?.barMode ?? false
+                onCheckedChanged: Config.setNestedValue("material.bar.pill.barMode", checked)
                 StyledToolTip { text: Translation.tr("Keep the expanded Ricelin row visible without hovering.") }
             }
             SettingsSwitch {
                 buttonIcon: "unfold_less"
                 text: Translation.tr("Compact feedback")
-                enabled: (Config.options?.bar?.pill?.toasts ?? true) || (Config.options?.bar?.pill?.osd ?? true)
-                checked: Config.options?.bar?.pill?.compactAnnounces ?? false
-                onCheckedChanged: Config.setNestedValue("bar.pill.compactAnnounces", checked)
+                enabled: (Config.options?.material?.bar?.pill?.toasts ?? true) || (Config.options?.material?.bar?.pill?.osd ?? true)
+                checked: Config.options?.material?.bar?.pill?.compactAnnounces ?? false
+                onCheckedChanged: Config.setNestedValue("material.bar.pill.compactAnnounces", checked)
                 StyledToolTip { text: Translation.tr("Keep notifications and OSD inside the resting pill instead of opening a larger face.") }
             }
         }
@@ -259,11 +259,11 @@ ColumnLayout {
         SettingsSwitch {
             buttonIcon: "picture_in_picture"
             text: Translation.tr("Float over windows")
-            enabled: !(Config.options?.bar?.autoHide?.enable ?? false)
-            checked: Config.options?.bar?.pill?.floatOverWindows ?? false
-            onCheckedChanged: Config.setNestedValue("bar.pill.floatOverWindows", checked)
+            enabled: !(Config.options?.material?.bar?.autoHide?.enable ?? false)
+            checked: Config.options?.material?.bar?.pill?.floatOverWindows ?? false
+            onCheckedChanged: Config.setNestedValue("material.bar.pill.floatOverWindows", checked)
             StyledToolTip {
-                text: !(Config.options?.bar?.autoHide?.enable ?? false)
+                text: !(Config.options?.material?.bar?.autoHide?.enable ?? false)
                     ? Translation.tr("Keep the visible Pill above normal windows instead of reserving the top edge. Fullscreen still hides and unmaps it.")
                     : Translation.tr("Auto-hide already controls whether the revealed Pill overlays or pushes windows.")
             }
@@ -278,8 +278,8 @@ ColumnLayout {
         }
         ConfigSelectionArray {
             Layout.fillWidth: true
-            currentValue: Config.options?.bar?.pill?.superSpaceLauncher ?? "overview"
-            onSelected: (newValue) => Config.setNestedValue("bar.pill.superSpaceLauncher", newValue)
+            currentValue: Config.options?.material?.bar?.pill?.superSpaceLauncher ?? "overview"
+            onSelected: (newValue) => Config.setNestedValue("material.bar.pill.superSpaceLauncher", newValue)
             options: [
                 { displayName: Translation.tr("iNiR Overview"), icon: "overview_key", value: "overview" },
                 { displayName: Translation.tr("Pill launcher"), icon: "search", value: "pill" }
@@ -295,8 +295,8 @@ ColumnLayout {
         }
         ConfigSelectionArray {
             Layout.fillWidth: true
-            currentValue: (Config.options?.bar?.pill?.mediaAccess ?? "row") === "bud" ? "bud" : "row"
-            onSelected: (newValue) => Config.setNestedValue("bar.pill.mediaAccess", newValue)
+            currentValue: (Config.options?.material?.bar?.pill?.mediaAccess ?? "row") === "bud" ? "bud" : "row"
+            onSelected: (newValue) => Config.setNestedValue("material.bar.pill.mediaAccess", newValue)
             options: [
                 { displayName: Translation.tr("Side bud"), icon: "music_note", value: "bud" },
                 { displayName: Translation.tr("Hover row"), icon: "view_week", value: "row" }
@@ -308,14 +308,14 @@ ColumnLayout {
             SettingsSwitch {
                 buttonIcon: "notifications"
                 text: Translation.tr("Notifications in Pill")
-                checked: Config.options?.bar?.pill?.toasts ?? true
-                onCheckedChanged: Config.setNestedValue("bar.pill.toasts", checked)
+                checked: Config.options?.material?.bar?.pill?.toasts ?? true
+                onCheckedChanged: Config.setNestedValue("material.bar.pill.toasts", checked)
             }
             SettingsSwitch {
                 buttonIcon: "page_info"
                 text: Translation.tr("OSD in Pill")
-                checked: Config.options?.bar?.pill?.osd ?? true
-                onCheckedChanged: Config.setNestedValue("bar.pill.osd", checked)
+                checked: Config.options?.material?.bar?.pill?.osd ?? true
+                onCheckedChanged: Config.setNestedValue("material.bar.pill.osd", checked)
                 StyledToolTip { text: Translation.tr("Show Pill feedback for volume, brightness and other system changes. Media feedback follows Tools › OSD › Media OSD; explicit skips stay visible during games while automatic track progression stays hidden.") }
             }
         }
@@ -329,11 +329,11 @@ ColumnLayout {
         ConfigSpinBox {
             icon: "zoom_in"
             text: Translation.tr("Scale (%)")
-            value: Math.round((Config.options?.bar?.pill?.scale ?? 1) * 100)
+            value: Math.round((Config.options?.material?.bar?.pill?.scale ?? 1) * 100)
             from: 40
             to: 160
             stepSize: 5
-            onValueModified: Config.setNestedValue("bar.pill.scale", value / 100)
+            onValueModified: Config.setNestedValue("material.bar.pill.scale", value / 100)
             StyledToolTip {
                 text: Translation.tr("Relative scale for the whole Pill and its surfaces. Logical monitor size is applied automatically; compact displays can be reduced further here.")
             }
@@ -349,31 +349,31 @@ ColumnLayout {
             ConfigSpinBox {
                 icon: "pinch"
                 text: Translation.tr("Icon size (px)")
-                value: Config.options?.bar?.pill?.iconSize ?? 19
+                value: Config.options?.material?.bar?.pill?.iconSize ?? 19
                 from: 17
                 to: 28
                 stepSize: 1
-                onValueModified: Config.setNestedValue("bar.pill.iconSize", value)
+                onValueModified: Config.setNestedValue("material.bar.pill.iconSize", value)
             }
             ConfigSpinBox {
                 icon: "space_bar"
                 text: Translation.tr("Icon spacing (px)")
-                value: Config.options?.bar?.pill?.iconSpacing ?? 14
+                value: Config.options?.material?.bar?.pill?.iconSpacing ?? 14
                 from: 12
                 to: 28
                 stepSize: 2
-                onValueModified: Config.setNestedValue("bar.pill.iconSpacing", value)
+                onValueModified: Config.setNestedValue("material.bar.pill.iconSpacing", value)
             }
         }
 
         ConfigSpinBox {
             icon: "format_letter_spacing"
             text: Translation.tr("Group spacing (px)")
-            value: Config.options?.bar?.pill?.rowSpacing ?? 24
+            value: Config.options?.material?.bar?.pill?.rowSpacing ?? 24
             from: 20
             to: 44
             stepSize: 2
-            onValueModified: Config.setNestedValue("bar.pill.rowSpacing", value)
+            onValueModified: Config.setNestedValue("material.bar.pill.rowSpacing", value)
         }
 
         ConfigRow {
@@ -381,31 +381,31 @@ ColumnLayout {
             ConfigSpinBox {
                 icon: "width"
                 text: Translation.tr("Rest width (px)")
-                value: Config.options?.bar?.pill?.restWidth ?? 176
+                value: Config.options?.material?.bar?.pill?.restWidth ?? 176
                 from: 160
                 to: 280
                 stepSize: 4
-                onValueModified: Config.setNestedValue("bar.pill.restWidth", value)
+                onValueModified: Config.setNestedValue("material.bar.pill.restWidth", value)
             }
             ConfigSpinBox {
                 icon: "height"
                 text: Translation.tr("Rest height (px)")
-                value: Config.options?.bar?.pill?.restHeight ?? 44
+                value: Config.options?.material?.bar?.pill?.restHeight ?? 44
                 from: 38
                 to: 60
                 stepSize: 2
-                onValueModified: Config.setNestedValue("bar.pill.restHeight", value)
+                onValueModified: Config.setNestedValue("material.bar.pill.restHeight", value)
             }
         }
 
         ConfigSpinBox {
             icon: "unfold_more"
             text: Translation.tr("Expanded height (px)")
-            value: Config.options?.bar?.pill?.expandedHeight ?? 66
+            value: Config.options?.material?.bar?.pill?.expandedHeight ?? 66
             from: 58
             to: 88
             stepSize: 2
-            onValueModified: Config.setNestedValue("bar.pill.expandedHeight", value)
+            onValueModified: Config.setNestedValue("material.bar.pill.expandedHeight", value)
         }
     }
 
@@ -435,8 +435,8 @@ ColumnLayout {
                         required property var modelData
                         buttonIcon: modelData.icon
                         text: modelData.label
-                        checked: Config.options?.bar?.pill?.surfaces?.[modelData.key] ?? (modelData.key !== "recorder")
-                        onCheckedChanged: Config.setNestedValue("bar.pill.surfaces." + modelData.key, checked)
+                        checked: Config.options?.material?.bar?.pill?.surfaces?.[modelData.key] ?? (modelData.key !== "recorder")
+                        onCheckedChanged: Config.setNestedValue("material.bar.pill.surfaces." + modelData.key, checked)
                     }
                 }
                 Item { visible: index * 2 + 1 >= root.surfaceDescriptors.length; Layout.fillWidth: visible }
@@ -461,8 +461,8 @@ ColumnLayout {
                         required property var modelData
                         buttonIcon: modelData.icon
                         text: modelData.label
-                        checked: Config.options?.bar?.pill?.modules?.[modelData.key] ?? true
-                        onCheckedChanged: Config.setNestedValue("bar.pill.modules." + modelData.key, checked)
+                        checked: Config.options?.material?.bar?.pill?.modules?.[modelData.key] ?? true
+                        onCheckedChanged: Config.setNestedValue("material.bar.pill.modules." + modelData.key, checked)
                     }
                 }
                 Item { visible: index * 2 + 1 >= root.moduleDescriptors.length; Layout.fillWidth: visible }
@@ -475,13 +475,13 @@ ColumnLayout {
             color: Appearance.colors.colSubtext
             font.pixelSize: Appearance.font.pixelSize.smaller
             font.weight: Font.Medium
-            visible: Config.options?.bar?.pill?.modules?.battery ?? true
+            visible: Config.options?.material?.bar?.pill?.modules?.battery ?? true
         }
         ConfigSelectionArray {
             Layout.fillWidth: true
-            visible: Config.options?.bar?.pill?.modules?.battery ?? true
-            currentValue: Config.options?.bar?.pill?.batteryDisplay ?? "both"
-            onSelected: (newValue) => Config.setNestedValue("bar.pill.batteryDisplay", newValue)
+            visible: Config.options?.material?.bar?.pill?.modules?.battery ?? true
+            currentValue: Config.options?.material?.bar?.pill?.batteryDisplay ?? "both"
+            onSelected: (newValue) => Config.setNestedValue("material.bar.pill.batteryDisplay", newValue)
             options: [
                 { displayName: Translation.tr("Icon"), icon: "battery_5_bar", value: "icon" },
                 { displayName: Translation.tr("Percentage"), icon: "percent", value: "percentage" },
@@ -500,25 +500,25 @@ ColumnLayout {
             SettingsSwitch {
                 buttonIcon: "translate"
                 text: Translation.tr("Kanji glyphs")
-                checked: Config.options?.bar?.pill?.showGlyphs ?? true
-                onCheckedChanged: Config.setNestedValue("bar.pill.showGlyphs", checked)
+                checked: Config.options?.material?.bar?.pill?.showGlyphs ?? true
+                onCheckedChanged: Config.setNestedValue("material.bar.pill.showGlyphs", checked)
             }
             SettingsSwitch {
                 buttonIcon: "schedule"
                 text: Translation.tr("Clock seconds")
-                checked: Config.options?.bar?.pill?.clockSeconds ?? false
-                onCheckedChanged: Config.setNestedValue("bar.pill.clockSeconds", checked)
+                checked: Config.options?.material?.bar?.pill?.clockSeconds ?? false
+                onCheckedChanged: Config.setNestedValue("material.bar.pill.clockSeconds", checked)
             }
         }
         SettingsSwitch {
             buttonIcon: "update"
             text: Translation.tr("12-hour time")
-            checked: Config.options?.bar?.pill?.time12h ?? false
-            onCheckedChanged: Config.setNestedValue("bar.pill.time12h", checked)
+            checked: Config.options?.material?.bar?.pill?.time12h ?? false
+            onCheckedChanged: Config.setNestedValue("material.bar.pill.time12h", checked)
         }
 
         SettingsFold {
-            visible: Config.options?.bar?.pill?.showGlyphs ?? true
+            visible: Config.options?.material?.bar?.pill?.showGlyphs ?? true
             glyph: "edit"
             text: Translation.tr("Per-surface glyph overrides")
             summary: root.glyphDescriptors.map(entry => PillTheme.glyph(entry.key)).join(" ")
@@ -527,7 +527,7 @@ ColumnLayout {
         }
 
         ColumnLayout {
-            visible: root.glyphOverridesExpanded && (Config.options?.bar?.pill?.showGlyphs ?? true)
+            visible: root.glyphOverridesExpanded && (Config.options?.material?.bar?.pill?.showGlyphs ?? true)
             readonly property bool expanded: root.glyphOverridesExpanded
             function focusFromSettingsSearch() { root.glyphOverridesExpanded = true }
             Layout.fillWidth: true
@@ -549,8 +549,8 @@ ColumnLayout {
                     MaterialTextField {
                         Layout.fillWidth: true
                         placeholderText: PillTheme.glyphDefaults[parent.modelData.key] ?? ""
-                        text: Config.options?.bar?.pill?.glyphs?.[parent.modelData.key] ?? ""
-                        onTextChanged: Config.setNestedValue("bar.pill.glyphs." + parent.modelData.key, text)
+                        text: Config.options?.material?.bar?.pill?.glyphs?.[parent.modelData.key] ?? ""
+                        onTextChanged: Config.setNestedValue("material.bar.pill.glyphs." + parent.modelData.key, text)
                     }
                 }
             }
@@ -572,33 +572,33 @@ ColumnLayout {
             ConfigSpinBox {
                 icon: "vertical_align_top"
                 text: Translation.tr("Top gap (px)")
-                value: Math.round((Config.options?.bar?.pill?.topGap ?? 1) * 8)
+                value: Math.round((Config.options?.material?.bar?.pill?.topGap ?? 1) * 8)
                 from: 0
                 to: 32
                 stepSize: 2
-                onValueModified: Config.setNestedValue("bar.pill.topGap", value / 8)
+                onValueModified: Config.setNestedValue("material.bar.pill.topGap", value / 8)
             }
             ConfigSpinBox {
                 icon: "expand"
                 text: Translation.tr("Window gap (%)")
-                enabled: !(Config.options?.bar?.pill?.floatOverWindows ?? false)
-                    || (Config.options?.bar?.autoHide?.enable ?? false)
-                value: Math.round((Config.options?.bar?.pill?.appGap ?? 1) * 100)
+                enabled: !(Config.options?.material?.bar?.pill?.floatOverWindows ?? false)
+                    || (Config.options?.material?.bar?.autoHide?.enable ?? false)
+                value: Math.round((Config.options?.material?.bar?.pill?.appGap ?? 1) * 100)
                 from: 0
                 to: 200
                 stepSize: 10
-                onValueModified: Config.setNestedValue("bar.pill.appGap", value / 100)
+                onValueModified: Config.setNestedValue("material.bar.pill.appGap", value / 100)
                 StyledToolTip { text: Translation.tr("Space between Pill and windows while the top edge is reserved.") }
             }
         }
         ConfigSpinBox {
             icon: "format_list_numbered"
             text: Translation.tr("Visible app faders")
-            value: Config.options?.bar?.pill?.mixerAppRows ?? 5
+            value: Config.options?.material?.bar?.pill?.mixerAppRows ?? 5
             from: 3
             to: 8
             stepSize: 1
-            onValueModified: Config.setNestedValue("bar.pill.mixerAppRows", value)
+            onValueModified: Config.setNestedValue("material.bar.pill.mixerAppRows", value)
         }
 
         ConfigRow {
@@ -606,24 +606,24 @@ ColumnLayout {
             SettingsSwitch {
                 buttonIcon: "motion_photos_on"
                 text: Translation.tr("Soul bead")
-                checked: Config.options?.bar?.pill?.soul?.enable ?? true
-                onCheckedChanged: Config.setNestedValue("bar.pill.soul.enable", checked)
+                checked: Config.options?.material?.bar?.pill?.soul?.enable ?? true
+                onCheckedChanged: Config.setNestedValue("material.bar.pill.soul.enable", checked)
             }
             ConfigSpinBox {
                 icon: "zoom_in"
                 text: Translation.tr("Bead size (%)")
-                value: Math.round((Config.options?.bar?.pill?.soul?.size ?? 1) * 100)
+                value: Math.round((Config.options?.material?.bar?.pill?.soul?.size ?? 1) * 100)
                 from: 60
                 to: 160
                 stepSize: 10
-                onValueModified: Config.setNestedValue("bar.pill.soul.size", value / 100)
+                onValueModified: Config.setNestedValue("material.bar.pill.soul.size", value / 100)
             }
         }
 
         ConfigSelectionArray {
             Layout.fillWidth: true
-            currentValue: Config.options?.bar?.pill?.soul?.style ?? "orb"
-            onSelected: (newValue) => Config.setNestedValue("bar.pill.soul.style", newValue)
+            currentValue: Config.options?.material?.bar?.pill?.soul?.style ?? "orb"
+            onSelected: (newValue) => Config.setNestedValue("material.bar.pill.soul.style", newValue)
             options: [
                 { displayName: Translation.tr("Orb"), icon: "blur_circular", value: "orb" },
                 { displayName: Translation.tr("Ember"), icon: "circle", value: "ember" },

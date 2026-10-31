@@ -23,7 +23,7 @@ Item { // Bar content region
     readonly property bool nativeBlurActive: !root.isIslands
         && Appearance.useCompositorBlur("bar", root.nativeBlurTopology)
         && root.nativeBlurAllowed
-        && (Config.options?.bar?.showBackground ?? true)
+        && (Config.options?.material?.bar?.showBackground ?? true)
         && !root.gameModeMinimal
 
     // Right-click context menu anchor (invisible, positioned at click)
@@ -35,7 +35,7 @@ Item { // Bar content region
 
     // For vertical bar: bottom config means bar is on the RIGHT side
     // (same config key reused for different meaning in vertical mode)
-    readonly property bool barOnRight: Config.options?.bar?.bottom ?? false
+    readonly property bool barOnRight: Config.options?.material?.bar?.bottom ?? false
 
     function openBarContextMenu(clickX, clickY, mouseArea) {
         // Position anchor at bar edge for correct horizontal popup positioning
@@ -74,7 +74,7 @@ Item { // Bar content region
             },
         ]
     }
-    readonly property bool cardStyleEverywhere: (Config.options?.dock?.cardStyle ?? false) && (Config.options?.sidebar?.cardStyle ?? false) && (Config.options?.bar?.cornerStyle === 3)
+    readonly property bool cardStyleEverywhere: (Config.options?.material?.dock?.cardStyle ?? false) && (Config.options?.material?.sidebar?.cardStyle ?? false) && (Config.options?.material?.bar?.cornerStyle === 3)
     readonly property color separatorColor: Appearance.zzzEverywhere ? Appearance.zzz.hairlineStrong : Appearance.colors.colOutlineVariant
     readonly property bool inirEverywhere: Appearance.inirEverywhere
     readonly property bool auroraEverywhere: Appearance.auroraEverywhere
@@ -82,11 +82,11 @@ Item { // Bar content region
     readonly property bool gameModeMinimal: Appearance.gameModeMinimal
     readonly property bool barSpectrumAudioPlaying: MprisController.isPlaying || YtMusic.isPlaying
     readonly property bool barSpectrumOutputEnabled:
-        (Config.options?.bar?.visualizer?.multiMonitorMode ?? "primary") === "all"
+        (Config.options?.material?.bar?.visualizer?.multiMonitorMode ?? "primary") === "all"
         || Quickshell.screens.length <= 1
         || String(root.screen?.name ?? "") === String(GlobalStates.primaryScreen?.name ?? "")
-    readonly property bool barSpectrumConfigured: (Config.options?.bar?.visualizer?.enable ?? false)
-        && (Config.options?.bar?.showBackground ?? true)
+    readonly property bool barSpectrumConfigured: (Config.options?.material?.bar?.visualizer?.enable ?? false)
+        && (Config.options?.material?.bar?.showBackground ?? true)
         && root.barSpectrumOutputEnabled
         && !root.gameModeMinimal
         && root.visible
@@ -95,42 +95,42 @@ Item { // Bar content region
     readonly property bool barSpectrumVisible: root.barSpectrumConfigured
         && verticalBarCava.audioSignalActive
     readonly property real barSpectrumFillRatio: Math.max(0.1,
-        Math.min(1, Config.options?.bar?.visualizer?.height ?? 0.6))
+        Math.min(1, Config.options?.material?.bar?.visualizer?.height ?? 0.6))
     readonly property real barSpectrumOpacity: Math.max(0,
-        Math.min(1, Config.options?.bar?.visualizer?.opacity ?? 0.35))
-    readonly property string barSpectrumType: Config.options?.bar?.visualizer?.type ?? "bars"
-    readonly property real barSpectrumDensity: Math.max(4, Config.options?.bar?.visualizer?.density ?? 12)
-    readonly property real barSpectrumGap: Math.max(0, Config.options?.bar?.visualizer?.gap ?? 2)
-    readonly property int barSpectrumSmoothing: Math.max(0, Config.options?.bar?.visualizer?.smoothing ?? 2)
-    readonly property string barSpectrumWaveMode: Config.options?.bar?.visualizer?.waveMode ?? "fill"
-    readonly property real barSpectrumLineWidth: Math.max(1, Config.options?.bar?.visualizer?.lineWidth ?? 2)
-    readonly property real barSpectrumEdgeInset: Math.max(6, Config.options?.bar?.visualizer?.edgeInset ?? 6)
+        Math.min(1, Config.options?.material?.bar?.visualizer?.opacity ?? 0.35))
+    readonly property string barSpectrumType: Config.options?.material?.bar?.visualizer?.type ?? "bars"
+    readonly property real barSpectrumDensity: Math.max(4, Config.options?.material?.bar?.visualizer?.density ?? 12)
+    readonly property real barSpectrumGap: Math.max(0, Config.options?.material?.bar?.visualizer?.gap ?? 2)
+    readonly property int barSpectrumSmoothing: Math.max(0, Config.options?.material?.bar?.visualizer?.smoothing ?? 2)
+    readonly property string barSpectrumWaveMode: Config.options?.material?.bar?.visualizer?.waveMode ?? "fill"
+    readonly property real barSpectrumLineWidth: Math.max(1, Config.options?.material?.bar?.visualizer?.lineWidth ?? 2)
+    readonly property real barSpectrumEdgeInset: Math.max(6, Config.options?.material?.bar?.visualizer?.edgeInset ?? 6)
     readonly property real barSpectrumEdgeSoftness: Math.max(0,
-        Math.min(1, (Config.options?.bar?.visualizer?.edgeSoftness ?? 36) / 100))
-    readonly property string barSpectrumFrequencyProfile: Config.options?.bar?.visualizer?.frequencyProfile ?? "flat"
+        Math.min(1, (Config.options?.material?.bar?.visualizer?.edgeSoftness ?? 36) / 100))
+    readonly property string barSpectrumFrequencyProfile: Config.options?.material?.bar?.visualizer?.frequencyProfile ?? "flat"
     readonly property real barSpectrumAccentStrength: Math.max(0,
-        Math.min(1, (Config.options?.bar?.visualizer?.accentStrength ?? 70) / 100))
-    readonly property string barSpectrumOrganicFit: Config.options?.bar?.visualizer?.organicFit ?? "auto"
+        Math.min(1, (Config.options?.material?.bar?.visualizer?.accentStrength ?? 70) / 100))
+    readonly property string barSpectrumOrganicFit: Config.options?.material?.bar?.visualizer?.organicFit ?? "auto"
     readonly property real barSpectrumOrganicLayoutScale: barSpectrumOrganicFit === "aura" ? 1
         : barSpectrumOrganicFit === "contained" ? 0.72 : 0.62
     readonly property real barSpectrumOrganicSensitivity: Math.max(0, Math.min(1,
-        (Config.options?.bar?.visualizer?.organicSensitivity ?? 42) / 100)) * barSpectrumOrganicLayoutScale
+        (Config.options?.material?.bar?.visualizer?.organicSensitivity ?? 42) / 100)) * barSpectrumOrganicLayoutScale
     readonly property real barSpectrumOrganicPulse: Math.max(0, Math.min(1,
-        (Config.options?.bar?.visualizer?.organicPulse ?? 55) / 100)) * barSpectrumOrganicLayoutScale
+        (Config.options?.material?.bar?.visualizer?.organicPulse ?? 55) / 100)) * barSpectrumOrganicLayoutScale
     readonly property real barSpectrumOrganicMotionSpeed: Math.max(0.25, Math.min(1.5,
-        (Config.options?.bar?.visualizer?.organicMotionSpeed ?? 80) / 100))
+        (Config.options?.material?.bar?.visualizer?.organicMotionSpeed ?? 80) / 100))
     readonly property real barSpectrumOrganicIdleMotion: Math.max(0, Math.min(1,
-        (Config.options?.bar?.visualizer?.organicIdleMotion ?? 0) / 100))
+        (Config.options?.material?.bar?.visualizer?.organicIdleMotion ?? 0) / 100))
     readonly property real barSpectrumOrganicGlow: Math.max(0, Math.min(1,
-        (Config.options?.bar?.visualizer?.organicGlow ?? 25) / 100)) * barSpectrumOrganicLayoutScale
+        (Config.options?.material?.bar?.visualizer?.organicGlow ?? 25) / 100)) * barSpectrumOrganicLayoutScale
     readonly property real barSpectrumOrganicBaseRadius: Math.max(0, Math.min(1,
-        (Config.options?.bar?.visualizer?.organicBaseRadius ?? 36) / 100))
+        (Config.options?.material?.bar?.visualizer?.organicBaseRadius ?? 36) / 100))
     readonly property bool barSpectrumOrganicEdgeAura: barSpectrumOrganicFit === "aura"
     readonly property color barSpectrumColor: root.inirEverywhere ? Appearance.inir.colPrimary
         : root.zzzEverywhere ? Appearance.zzz.accent
         : Appearance.colors.colPrimary
 
-    readonly property string barAppearance: Config.options?.bar?.appearanceStyle ?? "classic"
+    readonly property string barAppearance: Config.options?.material?.bar?.appearanceStyle ?? "classic"
     readonly property bool isIslands: root.barAppearance === "islands"
 
     readonly property string wallpaperUrl: Wallpapers.effectiveWallpaperUrl
@@ -157,9 +157,9 @@ Item { // Bar content region
 
     // Background shadow - for floating styles or always for angel
     Loader {
-        active: (Config.options?.bar?.showBackground ?? true) && !root.gameModeMinimal
+        active: (Config.options?.material?.bar?.showBackground ?? true) && !root.gameModeMinimal
             && !root.isIslands
-            && (Appearance.angelEverywhere || ((Config.options?.bar?.cornerStyle ?? 0) === 1 || (Config.options?.bar?.cornerStyle ?? 0) === 3))
+            && (Appearance.angelEverywhere || ((Config.options?.material?.bar?.cornerStyle ?? 0) === 1 || (Config.options?.material?.bar?.cornerStyle ?? 0) === 3))
         anchors.fill: barBackground
         sourceComponent: StyledRectangularShadow {
             anchors.fill: undefined // The loader's anchors act on this, and this should not have any anchor
@@ -172,14 +172,14 @@ Item { // Bar content region
         id: barBackground
         // Floating style: cornerStyle 1 (floating) or 3 (card) - NOT 0 (hug)
         // Aurora style forces floating appearance but hug mode should still work
-        readonly property bool floatingStyle: (Config.options?.bar?.cornerStyle ?? 0) === 1 || (Config.options?.bar?.cornerStyle ?? 0) === 3
+        readonly property bool floatingStyle: (Config.options?.material?.bar?.cornerStyle ?? 0) === 1 || (Config.options?.material?.bar?.cornerStyle ?? 0) === 3
 
         anchors {
             fill: parent
             // Only add margins for floating styles, NOT for hug mode (cornerStyle 0)
             margins: floatingStyle ? Appearance.sizes.hyprlandGapsOut : 0
         }
-        visible: (Config.options?.bar?.showBackground ?? true) && !root.gameModeMinimal && !root.isIslands
+        visible: (Config.options?.material?.bar?.showBackground ?? true) && !root.gameModeMinimal && !root.isIslands
         color: {
             if (Appearance.editorialEverywhere) return Appearance.editorial.paper
             if (root.zzzEverywhere) return Appearance.zzz.bg0
@@ -196,19 +196,19 @@ Item { // Bar content region
                     return ColorUtils.transparentize(base, Appearance.aurora.compositorOverlayTransparentize)
                 return ColorUtils.applyAlpha(base, 1)
             }
-            return root.cardStyleEverywhere ? Appearance.colors.colLayer1 : ((Config.options?.bar?.cornerStyle ?? 0) === 3 ? Appearance.colors.colLayer1 : Appearance.colors.colLayer0)
+            return root.cardStyleEverywhere ? Appearance.colors.colLayer1 : ((Config.options?.material?.bar?.cornerStyle ?? 0) === 3 ? Appearance.colors.colLayer1 : Appearance.colors.colLayer0)
         }
         radius: root.zzzEverywhere ? 0
             : Appearance.angelEverywhere ? Appearance.angel.roundingNormal
             : root.inirEverywhere ? Appearance.inir.roundingNormal
-            : floatingStyle ? ((Config.options?.bar?.cornerStyle ?? 0) === 3 ? Appearance.rounding.normal : Appearance.rounding.windowRounding) : 0
+            : floatingStyle ? ((Config.options?.material?.bar?.cornerStyle ?? 0) === 3 ? Appearance.rounding.normal : Appearance.rounding.windowRounding) : 0
         // No Behavior on the base radius — the per-corner radii below own the
         // corners, and a second interceptor on radius is unsupported (Qt warn).
 
         // ZZZ round mode: a FLUSH vertical bar softens only its INNER edge (facing
         // into the screen); a FLOATING bar rounds all four. bar.bottom doubles as the
         // side toggle here — false = left edge (inner = right), true = right edge.
-        readonly property bool isRightBar: Config.options?.bar?.bottom ?? false
+        readonly property bool isRightBar: Config.options?.material?.bar?.bottom ?? false
         readonly property real zzzRoundEdge: (root.zzzEverywhere && Appearance.zzz.round) ? Appearance.zzz.panelRadius : -1
         readonly property bool zzzAllCorners: zzzRoundEdge >= 0 && floatingStyle
         topLeftRadius: (zzzRoundEdge >= 0 && (zzzAllCorners || isRightBar)) ? zzzRoundEdge : radius
@@ -311,7 +311,7 @@ Item { // Bar content region
         id: auroraBlurLayer
         anchors.fill: barBackground
         visible: root.auroraEverywhere && !root.inirEverywhere && !root.gameModeMinimal
-            && (Config.options?.bar?.showBackground ?? true) && !root.nativeBlurActive
+            && (Config.options?.material?.bar?.showBackground ?? true) && !root.nativeBlurActive
             && !root.isIslands
 
         // Clip + mask to barBackground shape
@@ -450,7 +450,7 @@ Item { // Bar content region
             spectrumOrganicBaseRadius: root.barSpectrumOrganicBaseRadius
             spectrumDomain: root
             padding: 8
-            visible: Config.options?.bar?.modules?.taskbar ?? false
+            visible: Config.options?.material?.bar?.modules?.taskbar ?? false
 
             VerticalClockWidget {
                 Layout.fillWidth: true
@@ -505,7 +505,7 @@ Item { // Bar content region
             spectrumDomain: root
             padding: 8
             // Hide resources when taskbar is active to free vertical space
-            visible: !(Config.options?.bar?.modules?.taskbar ?? false)
+            visible: !(Config.options?.material?.bar?.modules?.taskbar ?? false)
             Resources {
                 Layout.fillWidth: true
                 Layout.fillHeight: false
@@ -520,7 +520,7 @@ Item { // Bar content region
         }
 
     HorizontalBarSeparator {
-            visible: Config.options?.bar?.borderless ?? false
+            visible: Config.options?.material?.bar?.borderless ?? false
         }
 
         Bar.BarGroup {
@@ -571,7 +571,7 @@ Item { // Bar content region
         }
 
         HorizontalBarSeparator {
-            visible: (Config.options?.bar?.modules?.taskbar ?? false) && (Config.options?.bar?.borderless ?? false)
+            visible: (Config.options?.material?.bar?.modules?.taskbar ?? false) && (Config.options?.material?.bar?.borderless ?? false)
         }
 
         // Taskbar (apps in bar) — vertical mode
@@ -604,7 +604,7 @@ Item { // Bar content region
             spectrumOrganicBaseRadius: root.barSpectrumOrganicBaseRadius
             spectrumDomain: root
             padding: 4
-            visible: Config.options?.bar?.modules?.taskbar ?? false
+            visible: Config.options?.material?.bar?.modules?.taskbar ?? false
 
             Bar.BarTaskbar {
                 vertical: true
@@ -622,7 +622,7 @@ Item { // Bar content region
         }
 
         HorizontalBarSeparator {
-            visible: Config.options?.bar?.borderless ?? false
+            visible: Config.options?.material?.bar?.borderless ?? false
         }
 
         // When taskbar is NOT active: clock/date stays in its original position
@@ -655,7 +655,7 @@ Item { // Bar content region
             spectrumOrganicBaseRadius: root.barSpectrumOrganicBaseRadius
             spectrumDomain: root
             padding: 8
-            visible: !(Config.options?.bar?.modules?.taskbar ?? false)
+            visible: !(Config.options?.material?.bar?.modules?.taskbar ?? false)
             
             VerticalClockWidget {
                 Layout.fillWidth: true
@@ -721,7 +721,7 @@ Item { // Bar content region
                 vertical: true
                 Layout.fillWidth: true
                 Layout.fillHeight: false
-                invertSide: Config?.options.bar.bottom
+                invertSide: Config?.options.material.bar.bottom
             }
 
             RippleButton { // Right sidebar button

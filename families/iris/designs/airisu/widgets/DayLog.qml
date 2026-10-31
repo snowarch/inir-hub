@@ -83,7 +83,7 @@ Item {
             Accessible.role: Accessible.Button
             Accessible.name: word.text
             HoverHandler { id: hover; cursorShape: Qt.PointingHandCursor }
-            TapHandler { id: tap; onTapped: Config.setNestedValue("sidebar.screenTime.enable", true) }
+            TapHandler { id: tap; onTapped: Config.setNestedValue("screenTime.enable", true) }
         }
     }
 

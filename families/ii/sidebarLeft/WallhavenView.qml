@@ -44,7 +44,7 @@ Item {
     property bool providerPickerOpen: false
     property bool filtersOpen: false
     readonly property var fitModeIds: ["auto", "native", "aspect", "any"]
-    readonly property string configuredFitMode: Config.options?.sidebar?.wallhaven?.fitMode ?? "auto"
+    readonly property string configuredFitMode: Config.options?.wallhaven?.fitMode ?? "auto"
     readonly property string fitMode: root.fitModeIds.includes(root.configuredFitMode)
         ? root.configuredFitMode : "auto"
     readonly property string activeProviderId: root.providerOptions[root.selectedProviderIndex]?.id ?? "wallhaven"
@@ -64,7 +64,7 @@ Item {
         { id: "any", label: Translation.tr("Any"), summary: Translation.tr("No display filter") }
     ]
     readonly property var resultCountOptions: [12, 18, 24]
-    readonly property int configuredResultCount: Number(Config.options?.sidebar?.wallhaven?.limit ?? 24)
+    readonly property int configuredResultCount: Number(Config.options?.wallhaven?.limit ?? 24)
     readonly property int resultCount: root.resultCountOptions.includes(root.configuredResultCount)
         ? root.configuredResultCount : 24
 
@@ -276,7 +276,7 @@ Item {
     function selectFitMode(mode: string): void {
         if (!root.fitModeIds.includes(mode))
             return
-        Config.setNestedValue("sidebar.wallhaven.fitMode", mode)
+        Config.setNestedValue("wallhaven.fitMode", mode)
         Qt.callLater(() => root.requestWallpapers(root.activeSearchTags, 1, true,
             Wallhaven.activeSearchCategory, root.activeProviderId))
     }
@@ -284,7 +284,7 @@ Item {
     function selectResultCount(count: int): void {
         if (!root.resultCountOptions.includes(count))
             return
-        Config.setNestedValue("sidebar.wallhaven.limit", count)
+        Config.setNestedValue("wallhaven.limit", count)
         Qt.callLater(() => root.requestWallpapers(root.activeSearchTags, 1, true,
             Wallhaven.activeSearchCategory, root.activeProviderId))
     }

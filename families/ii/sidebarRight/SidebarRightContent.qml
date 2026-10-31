@@ -72,7 +72,7 @@ Item {
         || showNightLightDialog || showWifiDialog || root.detailOpen
     // Collapse the notification zone (and the panel around it) when there is
     // nothing to show. Dialogs re-expand so they keep their full canvas.
-    readonly property bool notifsCollapsed: (Config.options?.sidebar?.collapseEmptyNotifications ?? false)
+    readonly property bool notifsCollapsed: (Config.options?.material?.sidebar?.collapseEmptyNotifications ?? false)
         && (Notifications.list?.length ?? 0) === 0
         && !anyDialogOpen
     readonly property real preferredContentHeight: SidebarGeometry.rightFitHeight(
@@ -177,11 +177,11 @@ Item {
     // ─── Modular sections (sidebar.right.sectionOrder) ───────────────
     // Sanitized: unknown ids dropped, missing ids appended in default order,
     // so a stale or hand-edited config can never blank the sidebar.
-    readonly property string headerStyle: Config.options?.sidebar?.right?.headerStyle ?? "profile"
+    readonly property string headerStyle: Config.options?.material?.sidebar?.right?.headerStyle ?? "profile"
     readonly property var _sectionDefaultOrder: ["system", "sliders", "toggles", "notifications", "widgets"]
     readonly property var sectionOrder: {
         const def = root._sectionDefaultOrder
-        const saved = Config.options?.sidebar?.right?.sectionOrder ?? def
+        const saved = Config.options?.material?.sidebar?.right?.sectionOrder ?? def
         const result = []
         for (let i = 0; i < saved.length; i++)
             if (def.includes(saved[i]) && !result.includes(saved[i])) result.push(saved[i])
@@ -243,7 +243,7 @@ Item {
         const newOrder = [...root.sectionOrder]
         const moved = newOrder.splice(fromIdx, 1)[0]
         newOrder.splice(toIdx, 0, moved)
-        Config.setNestedValue("sidebar.right.sectionOrder", newOrder)
+        Config.setNestedValue("material.sidebar.right.sectionOrder", newOrder)
     }
 
     function startSectionDrag(index: int, mouseY: real): void {
@@ -291,7 +291,7 @@ Item {
     function sectionWeight(sectionId: string): real {
         const previewValue = root._sectionWeightPreview?.[sectionId]
         if (previewValue !== undefined) return previewValue
-        const configured = Number(Config.options?.sidebar?.right?.sectionWeights?.[sectionId] ?? 1)
+        const configured = Number(Config.options?.material?.sidebar?.right?.sectionWeights?.[sectionId] ?? 1)
         return Number.isFinite(configured) ? Math.max(0.35, configured) : 1
     }
 
@@ -325,8 +325,8 @@ Item {
     function endSectionResize(): void {
         if (sectionResizeId.length === 0) return
         Config.setNestedValues({
-            "sidebar.right.sectionWeights.notifications": root.sectionWeight("notifications"),
-            "sidebar.right.sectionWeights.widgets": root.sectionWeight("widgets")
+            "material.sidebar.right.sectionWeights.notifications": root.sectionWeight("notifications"),
+            "material.sidebar.right.sectionWeights.widgets": root.sectionWeight("widgets")
         })
         sectionResizeId = ""
         sectionResizeStartY = 0
@@ -457,11 +457,11 @@ Item {
         // Clamp >= 0: preload parent.height is 0 here, raw subtraction went negative and froze layout.
         implicitHeight: Math.max(0, parent.height - Appearance.sizes.hyprlandGapsOut * 2)
         implicitWidth: sidebarWidth - Appearance.sizes.hyprlandGapsOut * 2
-        property bool cardStyle: Config.options?.sidebar?.cardStyle ?? false
+        property bool cardStyle: Config.options?.material?.sidebar?.cardStyle ?? false
         // Resolve one owner for the complete surface. Explicit Ricelin islands
         // override the global worldview; otherwise the selected global style owns it.
         readonly property string surfaceDialect: Appearance.surfaceDialectFor(
-            (Config.options?.sidebar?.style ?? "panel") === "island" ? "island" : "")
+            (Config.options?.material?.sidebar?.style ?? "panel") === "island" ? "island" : "")
         readonly property bool islandStyle: surfaceDialect === "island"
         readonly property bool zzzEverywhere: surfaceDialect === "zzz"
         readonly property bool regaliaEverywhere: surfaceDialect === "regalia"
@@ -511,7 +511,7 @@ Item {
             : angelEverywhere ? Appearance.angel.colPanelBorder
             : inirEverywhere ? Appearance.inir.colBorder
             : Appearance.colors.colLayer0Border
-        radius: islandStyle ? (Config.options?.appearance?.island?.radius ?? 18)
+        radius: islandStyle ? (Config.options?.material?.style?.island?.radius ?? 18)
             : zzzEverywhere ? Appearance.zzz.panelRadius
             : regaliaEverywhere ? Appearance.regalia.panelRadius
             : angelEverywhere ? Appearance.angel.roundingNormal
@@ -709,7 +709,7 @@ Item {
                     visible: active
                     active: {
                         if (modelData !== "sliders") return true
-                        const configQuickSliders = Config.options?.sidebar?.quickSliders
+                        const configQuickSliders = Config.options?.material?.sidebar?.quickSliders
                         if (!configQuickSliders?.enable) return false
                         if (!configQuickSliders?.showMic && !configQuickSliders?.showVolume && !configQuickSliders?.showBrightness) return false
                         return true
@@ -883,7 +883,7 @@ Item {
                                     ? systemSectionComponent : profileHeaderComponent
                             case "sliders": return slidersSectionComponent
                             case "toggles":
-                                return (Config.options?.sidebar?.quickToggles?.style ?? "classic") === "android"
+                                return (Config.options?.material?.sidebar?.quickToggles?.style ?? "classic") === "android"
                                     ? androidTogglesComponent : classicTogglesComponent
                             case "notifications": return centerSectionComponent
                             case "widgets": return widgetsSectionComponent
@@ -921,7 +921,7 @@ Item {
             SidebarProfileHeader {
                 editMode: root.editMode
                 sectionEditMode: root.sectionEditMode
-                androidToggles: (Config.options?.sidebar?.quickToggles?.style ?? "classic") === "android"
+                androidToggles: (Config.options?.material?.sidebar?.quickToggles?.style ?? "classic") === "android"
                 reloadEnabled: root.reloadButtonEnabled
                 settingsEnabled: root.settingsButtonEnabled
                 panelVisible: root.panelVisible
@@ -1283,7 +1283,7 @@ Item {
 
             QuickToggleButton {
                 toggled: root.editMode
-                visible: (Config.options?.sidebar?.quickToggles?.style ?? "classic") === "android"
+                visible: (Config.options?.material?.sidebar?.quickToggles?.style ?? "classic") === "android"
                 buttonIcon: "edit"
                 onClicked: root.editMode = !root.editMode
                 StyledToolTip {
@@ -1309,7 +1309,7 @@ Item {
             QuickToggleButton {
                 toggled: false
                 buttonIcon: "view_sidebar"
-                onClicked: Config.setNestedValue("sidebar.layout", "compact")
+                onClicked: Config.setNestedValue("material.sidebar.layout", "compact")
                 StyledToolTip {
                     position: "left"
                     text: Translation.tr("Switch to compact layout")

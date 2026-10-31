@@ -77,7 +77,7 @@ Scope {
     readonly property var surfaceNames: ["power", "media", "battery", "calendar", "link", "mixer", "sysmon", "clipboard", "glance", "launcher", "recorder", "settings"]
     readonly property var targetScreens: {
         const screens = Quickshell.screens;
-        const list = Config.options?.bar?.screenList ?? [];
+        const list = Config.options?.material?.bar?.screenList ?? [];
         if (!list || list.length === 0)
             return screens;
         const matchedScreens = screens.filter(screen => {
@@ -132,11 +132,11 @@ Scope {
         function state(): string { return root.openSurface.length > 0 ? root.openSurface : "closed" }
     }
 
-    readonly property real uiScale: Config.options?.bar?.pill?.scale ?? 1
-    readonly property real topGap: Config.options?.bar?.pill?.topGap ?? 1
-    readonly property real appGap: Config.options?.bar?.pill?.appGap ?? 1
+    readonly property real uiScale: Config.options?.material?.bar?.pill?.scale ?? 1
+    readonly property real topGap: Config.options?.material?.bar?.pill?.topGap ?? 1
+    readonly property real appGap: Config.options?.material?.bar?.pill?.appGap ?? 1
     readonly property bool floatOverWindows:
-        Config.options?.bar?.pill?.floatOverWindows ?? false
+        Config.options?.material?.bar?.pill?.floatOverWindows ?? false
 
     function openTrayMenu(item, anchorX, anchorY, hostWindow) {
         trayMenu.s = hostWindow ? hostWindow.s : 1;
@@ -162,9 +162,9 @@ Scope {
 
             readonly property real s: root.scaleForScreen(modelData)
             readonly property real topGapPx: 8 * root.topGap * s
-            readonly property real restHeight: (Config.options?.bar?.pill?.barMode ?? false)
-                ? Math.max(58, Config.options?.bar?.pill?.expandedHeight ?? 66) * s
-                : Math.max(38, Config.options?.bar?.pill?.restHeight ?? 44) * s
+            readonly property real restHeight: (Config.options?.material?.bar?.pill?.barMode ?? false)
+                ? Math.max(58, Config.options?.material?.bar?.pill?.expandedHeight ?? 66) * s
+                : Math.max(38, Config.options?.material?.bar?.pill?.restHeight ?? 44) * s
             readonly property real gameBarH: 34 * s
 
             /**
@@ -200,8 +200,8 @@ Scope {
             // detect/relayout cycle. Preserve the normal reservation contract;
             // fullscreen windows ignore it anyway, while non-fullscreen windows
             // no longer jump when Game Mode toggles.
-            readonly property real normalExclusiveZone: (Config.options?.bar?.autoHide?.enable ?? false)
-                ? ((Config.options?.bar?.autoHide?.pushWindows ?? false) && autoHideShown ? reservedH : 0)
+            readonly property real normalExclusiveZone: (Config.options?.material?.bar?.autoHide?.enable ?? false)
+                ? ((Config.options?.material?.bar?.autoHide?.pushWindows ?? false) && autoHideShown ? reservedH : 0)
                 : root.floatOverWindows ? 0 : reservedH
 
             screen: modelData
@@ -232,7 +232,7 @@ Scope {
             readonly property string surface: root.openMon === modelData.name ? root.openSurface : ""
             readonly property bool surfaceOpen: surface.length > 0
             readonly property bool modal: surfaceOpen || pill.held
-            readonly property bool autoHideEnabled: (Config.options?.bar?.autoHide?.enable ?? false)
+            readonly property bool autoHideEnabled: (Config.options?.material?.bar?.autoHide?.enable ?? false)
                 && !pill.fsHide
             readonly property bool transientMode: pill.mode !== "rest" && pill.mode !== "hover"
             property bool pointerReveal: false
@@ -266,17 +266,17 @@ Scope {
                     && (Config.options?.orbit?.hotCornerEnable ?? true)
                 if (orbitEnabled && String(Config.options?.orbit?.hotCorner ?? "topRight") === corner)
                     reserve = Math.max(reserve, Config.options?.orbit?.hotCornerSize ?? 12)
-                const sidebarCornerEnabled = Config.options?.sidebar?.cornerOpen?.enable ?? false
-                const sidebarCornerBottom = Config.options?.sidebar?.cornerOpen?.bottom ?? false
+                const sidebarCornerEnabled = Config.options?.material?.sidebar?.cornerOpen?.enable ?? false
+                const sidebarCornerBottom = Config.options?.material?.sidebar?.cornerOpen?.bottom ?? false
                 if (sidebarCornerEnabled && !sidebarCornerBottom)
-                    reserve = Math.max(reserve, Config.options?.sidebar?.cornerOpen?.cornerRegionWidth ?? 20)
+                    reserve = Math.max(reserve, Config.options?.material?.sidebar?.cornerOpen?.cornerRegionWidth ?? 20)
                 return reserve
             }
 
             function syncReservation(): void {
                 reservationShowTimer.stop()
                 reservationHideTimer.stop()
-                if (!autoHideEnabled || !(Config.options?.bar?.autoHide?.pushWindows ?? false)) {
+                if (!autoHideEnabled || !(Config.options?.material?.bar?.autoHide?.pushWindows ?? false)) {
                     reservationShown = false
                     root.setAutoHideShown(modelData?.name ?? "", false)
                     return
@@ -318,7 +318,7 @@ Scope {
                 interval: Appearance.animationsEnabled ? Appearance.animation.elementMoveEnter.duration : 1
                 onTriggered: {
                     if (overlay.autoHideEnabled && overlay.reservationWanted
-                            && (Config.options?.bar?.autoHide?.pushWindows ?? false)) {
+                            && (Config.options?.material?.bar?.autoHide?.pushWindows ?? false)) {
                         overlay.reservationShown = true
                         root.setAutoHideShown(modelData?.name ?? "", true)
                     }
@@ -338,7 +338,7 @@ Scope {
 
             Timer {
                 id: showBarTimer
-                interval: Config.options?.bar?.autoHide?.showWhenPressingSuper?.delay ?? 100
+                interval: Config.options?.material?.bar?.autoHide?.showWhenPressingSuper?.delay ?? 100
                 repeat: false
                 onTriggered: overlay.superShow = true
             }
@@ -346,7 +346,7 @@ Scope {
             Connections {
                 target: GlobalStates
                 function onSuperDownChanged() {
-                    if (!(Config.options?.bar?.autoHide?.showWhenPressingSuper?.enable ?? true))
+                    if (!(Config.options?.material?.bar?.autoHide?.showWhenPressingSuper?.enable ?? true))
                         return
                     if (GlobalStates.superDown)
                         showBarTimer.restart()
@@ -452,7 +452,7 @@ Scope {
                 id: edgeRevealRegion
                 anchors { top: parent.top; left: parent.left; right: parent.right }
                 height: overlay.autoHideEnabled
-                    ? Math.max(1, Config.options?.bar?.autoHide?.hoverRegionWidth ?? 2) : 0
+                    ? Math.max(1, Config.options?.material?.bar?.autoHide?.hoverRegionWidth ?? 2) : 0
                 MouseArea {
                     id: edgeRevealHover
                     anchors.fill: parent
@@ -495,11 +495,11 @@ Scope {
 
                 readonly property bool spectrumPlaying: MprisController.isPlaying || YtMusic.isPlaying
                 readonly property bool spectrumOutputEnabled:
-                    (Config.options?.bar?.visualizer?.multiMonitorMode ?? "primary") === "all"
+                    (Config.options?.material?.bar?.visualizer?.multiMonitorMode ?? "primary") === "all"
                     || Quickshell.screens.length <= 1
                     || String(overlay.modelData?.name ?? "")
                         === String(GlobalStates.primaryScreen?.name ?? "")
-                readonly property bool spectrumConfigured: (Config.options?.bar?.pill?.musicViz ?? false)
+                readonly property bool spectrumConfigured: (Config.options?.material?.bar?.pill?.musicViz ?? false)
                     && spectrumOutputEnabled
                     && !Appearance.gameModeMinimal
                 readonly property bool spectrumProcessWanted: spectrumConfigured && spectrumPlaying

@@ -9,8 +9,8 @@ import qs.modules.common.m3
 
 RippleButton {
     id: root
-    property bool isMaterial: Config.options.bar.m3.cornerStyle === 3
-    property bool vertical: Config.options.bar.vertical
+    property bool isMaterial: Config.options.material.bar.m3.cornerStyle === 3
+    property bool vertical: Config.options.material.bar.vertical
     property real buttonPadding: 5
 
     implicitWidth: 32

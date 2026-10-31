@@ -33,7 +33,7 @@ AbstractWidget {
     readonly property string timeFormatMode: String(clockConfig.timeFormat ?? "system")
     readonly property string dateDisplayStyle: String(clockConfig.dateStyle ?? "long")
     readonly property string colorMode: String(clockConfig.colorMode ?? "adaptive")
-    readonly property bool forceCenter: GlobalStates.screenLocked && (Config.options?.lock?.centerClock ?? false)
+    readonly property bool forceCenter: GlobalStates.screenLocked && (Config.options?.waffles?.lock?.centerClock ?? false)
     readonly property bool showDate: clockConfig.showDate ?? true
     readonly property bool showSeconds: clockConfig.showSeconds ?? false
     readonly property bool showShadow: clockConfig.showShadow ?? true
@@ -70,7 +70,7 @@ AbstractWidget {
     readonly property bool dominantColorIsDark: dominantColor.hslLightness < 0.5
     // Adaptive ink follows the wallpaper under the clock (WallpaperLuma, the desktop widgets' reading):
     // Fluent's dark foreground once that region reads light, the light one once it reads dark again.
-    readonly property bool onBlurredLock: GlobalStates.screenLocked && (Config.options?.lock?.blur?.enable ?? false)
+    readonly property bool onBlurredLock: GlobalStates.screenLocked && (Config.options?.waffles?.lock?.blur?.enable ?? false)
     readonly property var backdropSample: {
         void Lume.revision
         if (root.colorMode !== "adaptive")
@@ -298,7 +298,7 @@ AbstractWidget {
 
         RowLayout {
             Layout.alignment: Qt.AlignHCenter
-            visible: root.showLockStatus && GlobalStates.screenLocked && (Config.options?.lock?.showLockedText ?? false)
+            visible: root.showLockStatus && GlobalStates.screenLocked && (Config.options?.waffles?.lock?.showLockedText ?? false)
             spacing: 6
 
             MaterialSymbol {

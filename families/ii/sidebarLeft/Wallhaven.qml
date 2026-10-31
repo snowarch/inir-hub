@@ -93,7 +93,7 @@ Item {
                     break;
                 }
             }
-            Wallhaven.makeRequest(tagList, Persistent.states.booru.allowNsfw, Config.options?.sidebar?.wallhaven?.limit ?? 24, pageIndex);
+            Wallhaven.makeRequest(tagList, Persistent.states.booru.allowNsfw, Config.options?.wallhaven?.limit ?? 24, pageIndex);
         }
     }
 

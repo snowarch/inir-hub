@@ -51,7 +51,7 @@ Scope {
                 right: true
             }
 
-            readonly property var look: Config.options?.settingsUi?.overlayAppearance ?? ({})
+            readonly property var look: Config.options?.material?.settingsUi?.overlayAppearance ?? ({})
             readonly property real bgOpacity: Math.max(0.6, panel.look.backgroundOpacity ?? 1.0)
 
             // Blurred desktop behind the scrim (Settings › Modules › Settings UI).

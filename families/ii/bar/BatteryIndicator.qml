@@ -7,7 +7,7 @@ import QtQuick.Layouts
 
 MouseArea {
     id: root
-    property bool borderless: Config.options.bar.borderless
+    property bool borderless: Config.options.material.bar.borderless
 
     // Easter egg: long-press the battery and she boops in
     onPressAndHold: {

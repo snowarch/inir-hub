@@ -13,10 +13,10 @@ Singleton {
     readonly property string city: Weather.visibleCity ?? ""
 
     /** The manual town, shared with the rest of the shell's weather settings. */
-    readonly property string configCity: Config.options?.bar?.weather?.city ?? ""
+    readonly property string configCity: Config.options?.weather?.city ?? ""
 
     function setCity(name) {
-        Config.setNestedValue("bar.weather.city", String(name).trim());
+        Config.setNestedValue("weather.city", String(name).trim());
     }
     readonly property int codeNow: parseInt(Weather.data?.wCode ?? "113")
     readonly property bool isDay: Weather.sunState === "day"

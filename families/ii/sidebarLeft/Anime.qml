@@ -119,7 +119,7 @@ Item {
                     break;
                 }
             }
-            Booru.makeRequest(tagList, Persistent.states.booru.allowNsfw, Config.options?.sidebar?.booru?.limit ?? 24, pageIndex);
+            Booru.makeRequest(tagList, Persistent.states.booru.allowNsfw, Config.options?.booru?.limit ?? 24, pageIndex);
         }
     }
 

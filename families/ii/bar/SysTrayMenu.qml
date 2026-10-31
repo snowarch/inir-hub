@@ -128,16 +128,16 @@ PopupWindow {
             readonly property real padding: 3
             property bool shown: false
             anchors {
-                left: (Config.options?.bar?.vertical ?? false)
-                    ? ((Config.options?.bar?.bottom ?? false) ? undefined : parent.left)
+                left: (Config.options?.material?.bar?.vertical ?? false)
+                    ? ((Config.options?.material?.bar?.bottom ?? false) ? undefined : parent.left)
                     : parent.left
-                right: (Config.options?.bar?.vertical ?? false)
-                    ? ((Config.options?.bar?.bottom ?? false) ? parent.right : undefined)
+                right: (Config.options?.material?.bar?.vertical ?? false)
+                    ? ((Config.options?.material?.bar?.bottom ?? false) ? parent.right : undefined)
                     : parent.right
-                top: (Config.options?.bar?.vertical ?? false) ? parent.top
-                    : (Config.options?.bar?.bottom ?? false) ? undefined : parent.top
-                bottom: (Config.options?.bar?.vertical ?? false) ? parent.bottom
-                    : (Config.options?.bar?.bottom ?? false) ? parent.bottom : undefined
+                top: (Config.options?.material?.bar?.vertical ?? false) ? parent.top
+                    : (Config.options?.material?.bar?.bottom ?? false) ? undefined : parent.top
+                bottom: (Config.options?.material?.bar?.vertical ?? false) ? parent.bottom
+                    : (Config.options?.material?.bar?.bottom ?? false) ? parent.bottom : undefined
                 margins: root.padding
             }
 
@@ -169,7 +169,7 @@ PopupWindow {
                 : (Appearance.motion.popupReveal.enableScale
                     ? Appearance.motion.popupReveal.closedScale
                     : 1)
-            transformOrigin: (Config.options?.bar?.bottom ?? false) ? Item.Bottom : Item.Top
+            transformOrigin: (Config.options?.material?.bar?.bottom ?? false) ? Item.Bottom : Item.Top
             implicitWidth: stackView.implicitWidth + popupBackground.padding * 2
             implicitHeight: stackView.implicitHeight + popupBackground.padding * 2
 

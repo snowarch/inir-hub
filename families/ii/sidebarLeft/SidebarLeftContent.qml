@@ -32,26 +32,26 @@ Item {
     property string outerSizeMode: "full"
 
     property bool aiChatEnabled: (Config.options?.policies?.ai ?? 0) !== 0
-    property bool translatorEnabled: (Config.options?.sidebar?.translator?.enable ?? false)
+    property bool translatorEnabled: (Config.options?.translator?.enable ?? false)
     property bool animeEnabled: (Config.options?.policies?.weeb ?? 0) !== 0
     property bool animeCloset: (Config.options?.policies?.weeb ?? 0) === 2
-    property bool animeScheduleEnabled: Config.options?.sidebar?.animeSchedule?.enable ?? false
-    property bool wallhavenEnabled: Config.options?.sidebar?.wallhaven?.enable !== false
-    property bool newsEnabled: Config.options?.sidebar?.news?.enable ?? true
-    property bool widgetsEnabled: Config.options?.sidebar?.widgets?.enable ?? true
-    property bool toolsEnabled: Config.options?.sidebar?.tools?.enable ?? false
-    property bool softwareEnabled: Config.options?.sidebar?.software?.enable ?? false
-    property bool ytMusicEnabled: Config.options?.sidebar?.ytmusic?.enable ?? false
+    property bool animeScheduleEnabled: Config.options?.animeSchedule?.enable ?? false
+    property bool wallhavenEnabled: Config.options?.wallhaven?.enable !== false
+    property bool newsEnabled: Config.options?.news?.enable ?? true
+    property bool widgetsEnabled: Config.options?.material?.sidebar?.widgets?.enable ?? true
+    property bool toolsEnabled: Config.options?.material?.sidebar?.tools?.enable ?? false
+    property bool softwareEnabled: Config.options?.material?.sidebar?.software?.enable ?? false
+    property bool ytMusicEnabled: Config.options?.ytmusic?.enable ?? false
     // Web apps need a runtime that can host Chromium (qs-rs; stock Quickshell crashes on a WebEngineView).
     readonly property bool webAppsAvailable: SystemInfo.runtimeHas(["webengine"])
-    property bool pluginsEnabled: webAppsAvailable && (Config.options?.sidebar?.plugins?.enable ?? false)
+    property bool pluginsEnabled: webAppsAvailable && (Config.options?.material?.sidebar?.plugins?.enable ?? false)
 
     // Tabs exposing contentPreferredHeight (Widgets) can let the panel hug
     // their content instead of reserving the full output height.
     readonly property real activeTabContentHeight: swipeView.currentItem?.item?.contentPreferredHeight ?? -1
     readonly property bool activeTabEditing: swipeView.currentItem?.item?.editMode ?? false
     readonly property bool fitToContent:
-        ((Config.options?.sidebar?.collapseWidgetsTab ?? false)
+        ((Config.options?.material?.sidebar?.collapseWidgetsTab ?? false)
             || root.outerSizeMode === "fit")
         && !pluginViewActive && !activeTabEditing && activeTabContentHeight > 0
     readonly property real availableContentHeight: Math.max(0,
@@ -131,7 +131,7 @@ Item {
         view.visible = true
         root._activeWebAppId = id
         // Saved so the next sidebar open restores it
-        Config.setNestedValue("sidebar.plugins.lastActivePlugin", id)
+        Config.setNestedValue("material.sidebar.plugins.lastActivePlugin", id)
     }
     function closeWebApp(): void {
         if (root._activeWebAppId && root._webViewCache[root._activeWebAppId]) {
@@ -154,7 +154,7 @@ Item {
         }
         if (root._activeWebAppId === id) {
             root._activeWebAppId = ""
-            Config.setNestedValue("sidebar.plugins.lastActivePlugin", "")
+            Config.setNestedValue("material.sidebar.plugins.lastActivePlugin", "")
         }
     }
 
@@ -164,7 +164,7 @@ Item {
     function _tryRestoreLastPlugin(): void {
         if (root._restoredLastPlugin || !root.pluginsEnabled || !Config.ready) return
         root._restoredLastPlugin = true
-        if (!(Config.options?.sidebar?.plugins?.lastActivePlugin ?? "")) return
+        if (!(Config.options?.material?.sidebar?.plugins?.lastActivePlugin ?? "")) return
         restoreProcess.running = true
     }
 
@@ -174,7 +174,7 @@ Item {
         stdout: StdioCollector {
             onStreamFinished: {
                 try {
-                    const lastId = Config.options?.sidebar?.plugins?.lastActivePlugin ?? ""
+                    const lastId = Config.options?.material?.sidebar?.plugins?.lastActivePlugin ?? ""
                     const plugin = JSON.parse(text).find(p => p.id === lastId)
                     if (plugin) root.openWebApp(plugin.id, plugin.url ?? "", plugin.name ?? plugin.id,
                         plugin.icon ?? "language", plugin.userscriptSources ?? [])
@@ -204,7 +204,7 @@ Item {
     ]
     readonly property var resolvedTabOrder: {
         const result = []
-        const saved = Config.options?.sidebar?.left?.tabOrder ?? root._tabDefaultOrder
+        const saved = Config.options?.material?.sidebar?.left?.tabOrder ?? root._tabDefaultOrder
         for (let i = 0; i < saved.length; i++) {
             const id = saved[i]
             if (root._tabDefaultOrder.includes(id) && !result.includes(id)) result.push(id)
@@ -265,7 +265,7 @@ Item {
 
         const movedId = order.splice(fromOrderIndex, 1)[0]
         order.splice(toOrderIndex, 0, movedId)
-        Config.setNestedValue("sidebar.left.tabOrder", order)
+        Config.setNestedValue("material.sidebar.left.tabOrder", order)
     }
 
     function syncSelectedTabIndex(): void {
@@ -354,11 +354,11 @@ Item {
                 easing.bezierCurve: Appearance.animation.elementResize.bezierCurve
             }
         }
-        property bool cardStyle: Config.options?.sidebar?.cardStyle ?? false
+        property bool cardStyle: Config.options?.material?.sidebar?.cardStyle ?? false
         // Resolve one owner for the complete surface. Explicit Ricelin islands
         // override the global worldview; otherwise the selected global style owns it.
         readonly property string surfaceDialect: Appearance.surfaceDialectFor(
-            (Config.options?.sidebar?.style ?? "panel") === "island" ? "island" : "")
+            (Config.options?.material?.sidebar?.style ?? "panel") === "island" ? "island" : "")
         readonly property bool islandStyle: surfaceDialect === "island"
         readonly property bool zzzEverywhere: surfaceDialect === "zzz"
         readonly property bool regaliaEverywhere: surfaceDialect === "regalia"
@@ -407,7 +407,7 @@ Item {
             : angelEverywhere ? Appearance.angel.colPanelBorder
             : inirEverywhere ? Appearance.inir.colBorder
             : Appearance.colors.colLayer0Border
-        radius: islandStyle ? (Config.options?.appearance?.island?.radius ?? 18)
+        radius: islandStyle ? (Config.options?.material?.style?.island?.radius ?? 18)
             : zzzEverywhere ? Appearance.zzz.panelRadius
             : regaliaEverywhere ? Appearance.regalia.panelRadius
             : angelEverywhere ? Appearance.angel.roundingNormal

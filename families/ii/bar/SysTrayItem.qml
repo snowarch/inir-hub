@@ -80,13 +80,13 @@ MouseArea {
             anchorHovered: root.containsMouse
             anchor {
                 item: root
-                edges: (Config.options?.bar?.vertical ?? false)
-                    ? ((Config.options?.bar?.bottom ?? false) ? Edges.Left : Edges.Right)
-                    : ((Config.options?.bar?.bottom ?? false) ? Edges.Top : Edges.Bottom)
-                gravity: (Config.options?.bar?.vertical ?? false)
-                    ? ((Config.options?.bar?.bottom ?? false) ? Edges.Left : Edges.Right)
-                    : ((Config.options?.bar?.bottom ?? false) ? Edges.Top : Edges.Bottom)
-                adjustment: (Config.options?.bar?.vertical ?? false)
+                edges: (Config.options?.material?.bar?.vertical ?? false)
+                    ? ((Config.options?.material?.bar?.bottom ?? false) ? Edges.Left : Edges.Right)
+                    : ((Config.options?.material?.bar?.bottom ?? false) ? Edges.Top : Edges.Bottom)
+                gravity: (Config.options?.material?.bar?.vertical ?? false)
+                    ? ((Config.options?.material?.bar?.bottom ?? false) ? Edges.Left : Edges.Right)
+                    : ((Config.options?.material?.bar?.bottom ?? false) ? Edges.Top : Edges.Bottom)
+                adjustment: (Config.options?.material?.bar?.vertical ?? false)
                     ? PopupAdjustment.SlideY : PopupAdjustment.SlideX
             }
             onMenuOpened: (window) => root.menuOpened(window);
@@ -99,7 +99,7 @@ MouseArea {
 
     IconImage {
         id: trayIcon
-        visible: !(Config.options?.bar?.tray?.monochromeIcons ?? false)
+        visible: !(Config.options?.material?.bar?.tray?.monochromeIcons ?? false)
         source: root.item?.icon ?? ""
         anchors.centerIn: parent
         width: parent.width
@@ -107,7 +107,7 @@ MouseArea {
     }
 
     Loader {
-        active: Config.options?.bar?.tray?.monochromeIcons ?? false
+        active: Config.options?.material?.bar?.tray?.monochromeIcons ?? false
         anchors.centerIn: parent
         width: root.width
         height: root.height
@@ -137,9 +137,9 @@ MouseArea {
         id: tooltip
         extraVisibleCondition: root.containsMouse
         alternativeVisibleCondition: extraVisibleCondition
-        anchorEdges: (Config.options?.bar?.vertical ?? false)
-            ? ((Config.options?.bar?.bottom ?? false) ? Edges.Left : Edges.Right)
-            : ((Config.options?.bar?.bottom ?? false) ? Edges.Top : Edges.Bottom)
+        anchorEdges: (Config.options?.material?.bar?.vertical ?? false)
+            ? ((Config.options?.material?.bar?.bottom ?? false) ? Edges.Left : Edges.Right)
+            : ((Config.options?.material?.bar?.bottom ?? false) ? Edges.Top : Edges.Bottom)
     }
 
 }

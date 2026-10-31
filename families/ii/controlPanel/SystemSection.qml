@@ -12,13 +12,13 @@ import qs.modules.common.functions
 PanelSurface {
     id: root
     property QtObject resourceMonitor: ResourceUsageMonitor { target: root }
-    islandSkin: (Config.options?.controlPanel?.style ?? "panel") === "island"
+    islandSkin: (Config.options?.material?.controlPanel?.style ?? "panel") === "island"
     Layout.fillWidth: true
     implicitHeight: statsRow.implicitHeight + 12
     elevation: 1
     radiusOverride: islandSkin ? -1 : (Appearance.inirEverywhere ? Appearance.inir.roundingSmall : Appearance.rounding.small)
 
-    readonly property bool compactMode: Config.options?.controlPanel?.compactMode ?? true
+    readonly property bool compactMode: Config.options?.material?.controlPanel?.compactMode ?? true
     // zzz: el placa tiene esquinas redondeadas (panelRadius); el contenido debe
     // quedar dentro de la curva para no chocar contra las esquinas (antes el
     // rail y los labels llegaban hasta el borde y "chocaban"). Pad horizontal =

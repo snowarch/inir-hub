@@ -8,14 +8,14 @@ import QtQuick.Layouts
 
 BarWidgetSwitcher {
     id: root
-    property bool showDate: Config.options.bar.m3.verbose
+    property bool showDate: Config.options.material.bar.m3.verbose
     property var today: new Date()
     readonly property string dateTimeString: DateTime.time
     readonly property bool hasAmPm: dateTimeString.toLowerCase().includes("am") || dateTimeString.toLowerCase().includes("pm")
-    readonly property string _timeFontFamily: Config.options?.bar?.m3?.clock?.timeFontFamily ?? ""
-    readonly property int _timePixelSize: Config.options?.bar?.m3?.clock?.timePixelSize ?? 0
-    readonly property string _dateFontFamily: Config.options?.bar?.m3?.clock?.dateFontFamily ?? ""
-    readonly property int _datePixelSize: Config.options?.bar?.m3?.clock?.datePixelSize ?? 0
+    readonly property string _timeFontFamily: Config.options?.material?.bar?.m3?.clock?.timeFontFamily ?? ""
+    readonly property int _timePixelSize: Config.options?.material?.bar?.m3?.clock?.timePixelSize ?? 0
+    readonly property string _dateFontFamily: Config.options?.material?.bar?.m3?.clock?.dateFontFamily ?? ""
+    readonly property int _datePixelSize: Config.options?.material?.bar?.m3?.clock?.datePixelSize ?? 0
 
     Timer {
         interval: 60000
@@ -222,7 +222,7 @@ BarWidgetSwitcher {
     MouseArea {
         id: mouseArea
         anchors.fill: parent
-        readonly property bool clickForDetails: Config.options?.bar?.m3?.tooltips?.clickToShow ?? false
+        readonly property bool clickForDetails: Config.options?.material?.bar?.m3?.tooltips?.clickToShow ?? false
         hoverEnabled: true
         onClicked: mouse => {
             if (mouse.button === Qt.LeftButton && clickForDetails)

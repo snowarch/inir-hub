@@ -15,7 +15,7 @@ MouseArea {
     id: root
     required property SystemTrayItem item
     property bool targetMenuOpen: false
-    readonly property bool tintIcon: Config.options?.bar?.m3?.tray?.monochromeIcons ?? true
+    readonly property bool tintIcon: Config.options?.material?.bar?.m3?.tray?.monochromeIcons ?? true
 
     signal menuOpened(qsWindow: var)
     signal menuClosed()
@@ -56,13 +56,13 @@ MouseArea {
             anchor {
                 window: root.QsWindow.window
                 item: root
-                gravity: Config.options.bar.vertical
-                    ? (Config.options.bar.bottom ? Edges.Left : Edges.Right)
-                    : (Config.options.bar.bottom ? Edges.Top : Edges.Bottom)
-                edges: Config.options.bar.vertical
-                    ? (Config.options.bar.bottom ? Edges.Left : Edges.Right)
-                    : (Config.options.bar.bottom ? Edges.Top : Edges.Bottom)
-                adjustment: Config.options.bar.vertical
+                gravity: Config.options.material.bar.vertical
+                    ? (Config.options.material.bar.bottom ? Edges.Left : Edges.Right)
+                    : (Config.options.material.bar.bottom ? Edges.Top : Edges.Bottom)
+                edges: Config.options.material.bar.vertical
+                    ? (Config.options.material.bar.bottom ? Edges.Left : Edges.Right)
+                    : (Config.options.material.bar.bottom ? Edges.Top : Edges.Bottom)
+                adjustment: Config.options.material.bar.vertical
                     ? PopupAdjustment.SlideY
                     : PopupAdjustment.SlideX
             }
@@ -105,7 +105,7 @@ MouseArea {
         id: tooltip
         extraVisibleCondition: root.containsMouse
         alternativeVisibleCondition: extraVisibleCondition
-        anchorEdges: (!Config.options.bar.bottom && !Config.options.bar.vertical) ? Edges.Bottom : Edges.Top
+        anchorEdges: (!Config.options.material.bar.bottom && !Config.options.material.bar.vertical) ? Edges.Bottom : Edges.Top
     }
 
 }

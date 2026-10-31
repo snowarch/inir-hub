@@ -14,7 +14,7 @@ DashCard {
     // The greeting is the dashboard's compositional focus: one ink field per scene.
     inkField: true
 
-    readonly property string customSubtitle: Config.options?.dashboard?.subtitle ?? ""
+    readonly property string customSubtitle: Config.options?.material?.dashboard?.subtitle ?? ""
     readonly property bool editorial: Appearance.editorialEverywhere
 
     readonly property string greeting: {

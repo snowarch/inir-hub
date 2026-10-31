@@ -333,8 +333,8 @@ WSettingsPage {
             label: Translation.tr("Hide weather location")
             icon: "eye-off"
             description: Translation.tr("Hide the city/location name in the weather widget and taskbar button")
-            checked: Config.options?.bar?.weather?.hideLocation ?? false
-            onCheckedChanged: Config.setNestedValue("bar.weather.hideLocation", checked)
+            checked: Config.options?.weather?.hideLocation ?? false
+            onCheckedChanged: Config.setNestedValue("weather.hideLocation", checked)
         }
         
         WSettingsSwitch {
@@ -440,8 +440,8 @@ WSettingsPage {
             icon: "globe-search"
             description: Translation.tr("Leave empty to auto-detect from IP")
             placeholderText: Translation.tr("e.g. Buenos Aires, London, Tokyo")
-            text: Config.options?.bar?.weather?.city ?? ""
-            onTextEdited: newText => Config.setNestedValue("bar.weather.city", newText)
+            text: Config.options?.weather?.city ?? ""
+            onTextEdited: newText => Config.setNestedValue("weather.city", newText)
         }
         
         WSettingsTextField {
@@ -450,12 +450,12 @@ WSettingsPage {
             description: Translation.tr("Manual latitude (overrides city). e.g. -34.6037")
             placeholderText: Translation.tr("e.g. -34.6037")
             text: {
-                const v = Config.options?.bar?.weather?.manualLat ?? 0;
+                const v = Config.options?.weather?.manualLat ?? 0;
                 return v !== 0 ? String(v) : "";
             }
             onTextEdited: newText => {
                 const num = parseFloat(newText);
-                Config.setNestedValue("bar.weather.manualLat", isNaN(num) ? 0 : num);
+                Config.setNestedValue("weather.manualLat", isNaN(num) ? 0 : num);
             }
         }
         
@@ -465,12 +465,12 @@ WSettingsPage {
             description: Translation.tr("Manual longitude (overrides city). e.g. -58.3816")
             placeholderText: Translation.tr("e.g. -58.3816")
             text: {
-                const v = Config.options?.bar?.weather?.manualLon ?? 0;
+                const v = Config.options?.weather?.manualLon ?? 0;
                 return v !== 0 ? String(v) : "";
             }
             onTextEdited: newText => {
                 const num = parseFloat(newText);
-                Config.setNestedValue("bar.weather.manualLon", isNaN(num) ? 0 : num);
+                Config.setNestedValue("weather.manualLon", isNaN(num) ? 0 : num);
             }
         }
         
@@ -478,8 +478,8 @@ WSettingsPage {
             label: Translation.tr("Use GPS location")
             icon: "globe-search"
             description: Translation.tr("Uses GPS when no manual location is set (requires geoclue)")
-            checked: Config.options?.bar?.weather?.enableGPS ?? false
-            onCheckedChanged: Config.setNestedValue("bar.weather.enableGPS", checked)
+            checked: Config.options?.weather?.enableGPS ?? false
+            onCheckedChanged: Config.setNestedValue("weather.enableGPS", checked)
         }
         
         // Current detected location
@@ -494,8 +494,8 @@ WSettingsPage {
             label: Translation.tr("Use Fahrenheit")
             icon: "weather-sunny"
             description: Translation.tr("Display temperature in °F instead of °C")
-            checked: Config.options?.bar?.weather?.useUSCS ?? false
-            onCheckedChanged: Config.setNestedValue("bar.weather.useUSCS", checked)
+            checked: Config.options?.weather?.useUSCS ?? false
+            onCheckedChanged: Config.setNestedValue("weather.useUSCS", checked)
         }
         
         WSettingsSpinBox {
@@ -504,8 +504,8 @@ WSettingsPage {
             description: Translation.tr("How often to refresh weather data")
             suffix: " min"
             from: 5; to: 60; stepSize: 5
-            value: Config.options?.bar?.weather?.fetchInterval ?? 10
-            onValueChanged: Config.setNestedValue("bar.weather.fetchInterval", value)
+            value: Config.options?.weather?.fetchInterval ?? 10
+            onValueChanged: Config.setNestedValue("weather.fetchInterval", value)
         }
     }
     

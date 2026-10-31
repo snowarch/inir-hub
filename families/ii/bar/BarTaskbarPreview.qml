@@ -193,7 +193,7 @@ PopupWindow {
                         toplevel: modelData
                         live: root.visible
                         onWindowActivated: {
-                            if (!(Config.options?.dock?.keepPreviewOnClick ?? false))
+                            if (!(Config.options?.material?.dock?.keepPreviewOnClick ?? false))
                                 root.close()
                         }
                     }

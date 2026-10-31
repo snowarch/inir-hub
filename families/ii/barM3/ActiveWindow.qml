@@ -12,7 +12,7 @@ import QtQuick
 // come down from the group instead of from the layer.
 Item {
     id: root
-    readonly property bool isMaterial: Config.options.bar.m3.cornerStyle === 3
+    readonly property bool isMaterial: Config.options.material.bar.m3.cornerStyle === 3
     implicitWidth: stock.implicitWidth
     implicitHeight: stock.implicitHeight
 

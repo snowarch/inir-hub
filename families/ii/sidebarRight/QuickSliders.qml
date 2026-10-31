@@ -16,7 +16,7 @@ Rectangle {
     property var brightnessMonitor: screen ? Brightness.getMonitorForScreen(screen) : null
     onVisibleChanged: if (visible) root.brightnessMonitor?.refresh()
     property bool hasBrightnessMonitor: false
-    readonly property bool brightnessEnabled: Config.options?.sidebar?.quickSliders?.showBrightness ?? true
+    readonly property bool brightnessEnabled: Config.options?.material?.sidebar?.quickSliders?.showBrightness ?? true
     property real brightnessValue: 0.0
     property real volumeValue: 0.0
     property real sliderSpacing: 10
@@ -119,7 +119,7 @@ Rectangle {
             Layout.fillWidth: true
             Layout.fillHeight: true
             visible: active
-            active: Config.options?.sidebar?.quickSliders?.showVolume ?? true
+            active: Config.options?.material?.sidebar?.quickSliders?.showVolume ?? true
             sourceComponent: Appearance.zzzEverywhere ? zzzVolumeSlider : defaultVolumeSlider
         }
 
@@ -127,7 +127,7 @@ Rectangle {
             Layout.fillWidth: true
             Layout.fillHeight: true
             visible: active
-            active: Config.options?.sidebar?.quickSliders?.showMic ?? false
+            active: Config.options?.material?.sidebar?.quickSliders?.showMic ?? false
             sourceComponent: Appearance.zzzEverywhere ? zzzMicSlider : defaultMicSlider
         }
     }

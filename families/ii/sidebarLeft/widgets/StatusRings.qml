@@ -27,7 +27,7 @@ Item {
                    ResourceUsage.cpuUsage >= 0.7 ? (Appearance.zzzEverywhere ? Appearance.zzz.tertiary : Appearance.colors.colTertiary) :
                    Appearance.zzzEverywhere ? Appearance.zzz.accent : Appearance.angelEverywhere ? Appearance.angel.colPrimary : Appearance.colors.colPrimary
             tip: "CPU"
-            visible: Config.options?.sidebar?.widgets?.statusRings?.showCpu ?? true
+            visible: Config.options?.material?.sidebar?.widgets?.statusRings?.showCpu ?? true
         }
 
         Ring {
@@ -38,7 +38,7 @@ Item {
                    ResourceUsage.memoryUsedPercentage >= 0.7 ? (Appearance.zzzEverywhere ? Appearance.zzz.tertiary : Appearance.colors.colTertiary) :
                    Appearance.zzzEverywhere ? Appearance.zzz.accent : Appearance.angelEverywhere ? Appearance.angel.colPrimary : Appearance.colors.colPrimary
             tip: "RAM"
-            visible: Config.options?.sidebar?.widgets?.statusRings?.showRam ?? true
+            visible: Config.options?.material?.sidebar?.widgets?.statusRings?.showRam ?? true
         }
 
         Ring {
@@ -49,7 +49,7 @@ Item {
                    ResourceUsage.diskUsedPercentage >= 0.8 ? (Appearance.zzzEverywhere ? Appearance.zzz.tertiary : Appearance.colors.colTertiary) :
                    Appearance.zzzEverywhere ? Appearance.zzz.accent : Appearance.angelEverywhere ? Appearance.angel.colPrimary : Appearance.colors.colPrimary
             tip: "Disk"
-            visible: Config.options?.sidebar?.widgets?.statusRings?.showDisk ?? true
+            visible: Config.options?.material?.sidebar?.widgets?.statusRings?.showDisk ?? true
         }
 
         Ring {
@@ -59,7 +59,7 @@ Item {
             ringColor: ResourceUsage.maxTemp >= 80 ? (Appearance.zzzEverywhere ? Appearance.zzz.signal : Appearance.colors.colError) :
                    ResourceUsage.maxTemp >= 60 ? (Appearance.zzzEverywhere ? Appearance.zzz.tertiary : Appearance.colors.colTertiary) :
                    Appearance.zzzEverywhere ? Appearance.zzz.accent : Appearance.angelEverywhere ? Appearance.angel.colPrimary : Appearance.colors.colPrimary
-            visible: ResourceUsage.maxTemp > 0 && (Config.options?.sidebar?.widgets?.statusRings?.showTemp ?? true)
+            visible: ResourceUsage.maxTemp > 0 && (Config.options?.material?.sidebar?.widgets?.statusRings?.showTemp ?? true)
             tip: Translation.tr("Temperature")
         }
 
@@ -71,7 +71,7 @@ Item {
                    Battery.isCharging ? (Appearance.zzzEverywhere ? Appearance.zzz.accent : Appearance.angelEverywhere ? Appearance.angel.colPrimary : Appearance.colors.colPrimary) :
                    Battery.percentage < 0.3 ? (Appearance.zzzEverywhere ? Appearance.zzz.tertiary : Appearance.colors.colTertiary) :
                    Appearance.zzzEverywhere ? Appearance.zzz.accent : Appearance.angelEverywhere ? Appearance.angel.colPrimary : Appearance.colors.colPrimary
-            visible: Battery.available && (Config.options?.sidebar?.widgets?.statusRings?.showBattery ?? true)
+            visible: Battery.available && (Config.options?.material?.sidebar?.widgets?.statusRings?.showBattery ?? true)
             tip: Battery.isCharging ? Translation.tr("Charging") : Translation.tr("Battery")
         }
     }

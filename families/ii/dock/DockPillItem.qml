@@ -27,7 +27,7 @@ Item {
     property bool vertical: false
     property real countDotWidth: 10
     property real countDotHeight: 4
-    property int  maxDots: Config.options?.dock?.maxIndicatorDots ?? 5
+    property int  maxDots: Config.options?.material?.dock?.maxIndicatorDots ?? 5
 
     // Standard rounding - not a full circle
     readonly property real pillRadius: root.zzzStyle ? Appearance.zzz.controlRadius
@@ -66,8 +66,8 @@ Item {
     // Shows one dot per open window (up to maxDots). The focused window's dot is wider
     // and uses the accent color; others are dimmed.
     // Config options — hoisted for reuse across repeater and fallback
-    property bool smartIndicator: Config.options?.dock?.smartIndicator !== false
-    property bool showAllDots: Config.options?.dock?.showAllWindowDots !== false
+    property bool smartIndicator: Config.options?.material?.dock?.smartIndicator !== false
+    property bool showAllDots: Config.options?.material?.dock?.showAllWindowDots !== false
 
     Row {
         id: indicatorRow

@@ -121,11 +121,11 @@ Rectangle {
 
     readonly property var enabledWidgets: {
         root.configVersion // Force dependency
-        return Config.options?.sidebar?.right?.enabledWidgets ?? ["calendar", "todo", "notepad", "calculator", "sysmon", "weather", "timer"]
+        return Config.options?.material?.sidebar?.right?.enabledWidgets ?? ["calendar", "todo", "notepad", "calculator", "sysmon", "weather", "timer"]
     }
 
     property var tabs: allTabs.filter(tab => {
-        if (tab.type === "screentime" && !(Config.options?.sidebar?.screenTime?.enable ?? false))
+        if (tab.type === "screentime" && !(Config.options?.screenTime?.enable ?? false))
             return false
         return enabledWidgets.includes(tab.type)
     })

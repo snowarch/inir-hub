@@ -85,7 +85,7 @@ Item {
                         : Appearance.auroraEverywhere ? Appearance.aurora.colSubSurfaceHover : (Appearance.colors.colTertiaryContainerHover ?? Appearance.colors.colTertiaryContainer)
                     colRipple: Appearance.inirEverywhere ? Appearance.inir.colLayer1Active
                         : Appearance.auroraEverywhere ? Appearance.aurora.colSubSurfaceActive : (Appearance.colors.colTertiaryContainerActive ?? Appearance.colors.colTertiaryContainer)
-                    opacity: GameMode.active && (Config.options?.sidebar?.widgets?.glance?.showGameMode ?? true) ? 1 : 0
+                    opacity: GameMode.active && (Config.options?.material?.sidebar?.widgets?.glance?.showGameMode ?? true) ? 1 : 0
                     visible: opacity > 0
                     scale: opacity
                     Behavior on opacity { enabled: Appearance.animationsEnabled; NumberAnimation { duration: Appearance.animation.elementMoveFast.duration; easing.type: Appearance.animation.elementMoveFast.type; easing.bezierCurve: Appearance.animation.elementMoveFast.bezierCurve } }
@@ -118,7 +118,7 @@ Item {
                         : Appearance.auroraEverywhere ? Appearance.aurora.colSubSurfaceHover : Appearance.colors.colPrimaryContainerHover
                     colRipple: Appearance.zzzEverywhere ? Appearance.colors.colPrimaryActive : Appearance.inirEverywhere ? Appearance.inir.colLayer1Active
                         : Appearance.auroraEverywhere ? Appearance.aurora.colSubSurfaceActive : Appearance.colors.colPrimaryContainerActive
-                    opacity: Notifications.silent && (Config.options?.sidebar?.widgets?.glance?.showDnd ?? true) ? 1 : 0
+                    opacity: Notifications.silent && (Config.options?.material?.sidebar?.widgets?.glance?.showDnd ?? true) ? 1 : 0
                     visible: opacity > 0
                     scale: opacity
                     Behavior on opacity { enabled: Appearance.animationsEnabled; NumberAnimation { duration: Appearance.animation.elementMoveFast.duration; easing.type: Appearance.animation.elementMoveFast.type; easing.bezierCurve: Appearance.animation.elementMoveFast.bezierCurve } }
@@ -146,7 +146,7 @@ Item {
                 Item {
                     implicitWidth: volumeBtn.implicitWidth
                     implicitHeight: volumeBtn.implicitHeight
-                    opacity: Audio.sink !== null && (Config.options?.sidebar?.widgets?.glance?.showVolume ?? true) ? 1 : 0
+                    opacity: Audio.sink !== null && (Config.options?.material?.sidebar?.widgets?.glance?.showVolume ?? true) ? 1 : 0
                     visible: opacity > 0
                     Behavior on opacity { enabled: Appearance.animationsEnabled; NumberAnimation { duration: Appearance.animation.elementMoveFast.duration; easing.type: Appearance.animation.elementMoveFast.type; easing.bezierCurve: Appearance.animation.elementMoveFast.bezierCurve } }
 

@@ -23,8 +23,8 @@ Item {
     property bool vertical: false
     // Bar position: "top", "bottom", "left", "right"
     property string barPosition: {
-        if (vertical) return (Config.options?.bar?.bottom ?? false) ? "right" : "left"
-        return (Config.options?.bar?.bottom ?? false) ? "bottom" : "top"
+        if (vertical) return (Config.options?.material?.bar?.bottom ?? false) ? "right" : "left"
+        return (Config.options?.material?.bar?.bottom ?? false) ? "bottom" : "top"
     }
     // Maximum height for vertical mode (-1 = no limit, 0+ = cap)
     property real maximumHeight: -1
@@ -104,7 +104,7 @@ Item {
         })
     }
 
-    readonly property bool separatePinnedFromRunning: Config.options?.dock?.separatePinnedFromRunning ?? true
+    readonly property bool separatePinnedFromRunning: Config.options?.material?.dock?.separatePinnedFromRunning ?? true
     onSeparatePinnedFromRunningChanged: rebuildDockItems()
 
     property var _cachedIgnoredRegexes: []
@@ -113,7 +113,7 @@ Item {
     property var _lastIgnoredRegexStrings: null
 
     function _getIgnoredRegexes(): list<var> {
-        const ignoredRegexStrings = Config.options?.dock?.ignoredAppRegexes ?? [];
+        const ignoredRegexStrings = Config.options?.apps?.ignoredRegexes ?? [];
         if (JSON.stringify(ignoredRegexStrings) !== JSON.stringify(_lastIgnoredRegexStrings)) {
             const systemIgnored = ["^$", "^portal$", "^x-run-dialog$", "^kdialog$", "^xembedsniproxy$", "^org.freedesktop.impl.portal.*"];
             const allIgnored = ignoredRegexStrings.concat(systemIgnored);
@@ -167,7 +167,7 @@ Item {
         : String(ToplevelManager.activeToplevel?.appId ?? "").toLowerCase()
 
     function _doRebuildDockItems(): void {
-        const pinnedApps = Config.options?.dock?.pinnedApps ?? [];
+        const pinnedApps = Config.options?.apps?.pinned ?? [];
         const ignoredRegexes = _getIgnoredRegexes();
         const separate = root.separatePinnedFromRunning;
         const focusedId = root.focusedAppId;
@@ -355,9 +355,9 @@ Item {
         function onSortedToplevelsChanged() { root.rebuildDockItems() }
     }
     Connections {
-        target: Config.options?.dock
-        function onPinnedAppsChanged() { root.rebuildDockItems() }
-        function onIgnoredAppRegexesChanged() { root.rebuildDockItems() }
+        target: Config.options?.apps
+        function onPinnedChanged() { root.rebuildDockItems() }
+        function onIgnoredRegexesChanged() { root.rebuildDockItems() }
     }
     Connections {
         target: Config.options?.windows
@@ -381,7 +381,7 @@ Item {
     signal closeAllContextMenus()
 
     function showPreviewPopup(appEntry: var, button: Item): void {
-        if (Config.options?.dock?.hoverPreview === false) return
+        if (Config.options?.material?.dock?.hoverPreview === false) return
         previewPopup.show(appEntry, button)
     }
 

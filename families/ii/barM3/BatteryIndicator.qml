@@ -9,7 +9,7 @@ import QtQuick.Layouts
 MouseArea {
     id: root
     property bool vertical: false
-    property bool isMaterial: Config.options.bar.m3.cornerStyle === 3
+    property bool isMaterial: Config.options.material.bar.m3.cornerStyle === 3
     readonly property var chargeState: Battery.chargeState
     readonly property bool isCharging: Battery.isCharging
     readonly property bool isPluggedIn: Battery.isPluggedIn
@@ -22,7 +22,7 @@ MouseArea {
     implicitWidth:  !Battery.available ? 0 : vertical ? Appearance.sizes.verticalBarWidth : batteryProgress.valueBarWidth + 8
     implicitHeight: !Battery.available ? 0 : vertical ? batteryProgress.valueBarWidth + 8 : Appearance.sizes.barHeight
 
-    readonly property bool clickForDetails: Config.options?.bar?.m3?.tooltips?.clickToShow ?? false
+    readonly property bool clickForDetails: Config.options?.material?.bar?.m3?.tooltips?.clickToShow ?? false
     hoverEnabled: true
 
     onClicked: mouse => {

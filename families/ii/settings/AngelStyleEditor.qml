@@ -204,18 +204,18 @@ ColumnLayout {
             if (preset[section] !== undefined && typeof preset[section] === "object") {
                 const sectionData = preset[section]
                 for (const key of Object.keys(sectionData)) {
-                    Config.setNestedValue("appearance.angel." + section + "." + key, sectionData[key])
+                    Config.setNestedValue("material.style.angel." + section + "." + key, sectionData[key])
                 }
             }
         }
         if (preset.colorStrength !== undefined) {
-            Config.setNestedValue("appearance.angel.colorStrength", preset.colorStrength)
+            Config.setNestedValue("material.style.angel.colorStrength", preset.colorStrength)
         }
     }
 
     // ─── Snapshot current config (clean, no metadata) ───
     function _snapshotCurrent() {
-        const current = Config.options?.appearance?.angel ?? {}
+        const current = Config.options?.material?.style?.angel ?? {}
         const clean = {}
         for (const key of root._sectionKeys) {
             if (current[key] !== undefined) {
@@ -228,11 +228,11 @@ ColumnLayout {
 
     // ─── Save/Load quick custom preset ───
     function _saveCustom(): void {
-        Config.setNestedValue("appearance.angel.customPreset", JSON.stringify(root._snapshotCurrent()))
+        Config.setNestedValue("material.style.angel.customPreset", JSON.stringify(root._snapshotCurrent()))
     }
 
     function _loadCustom(): void {
-        const raw = Config.options?.appearance?.angel?.customPreset ?? ""
+        const raw = Config.options?.material?.style?.angel?.customPreset ?? ""
         if (raw === "") return
         try { root._applyPreset(JSON.parse(raw)) }
         catch(e) { console.warn("[AngelEditor] Failed to load custom preset:", e) }
@@ -240,7 +240,7 @@ ColumnLayout {
 
     // ─── Named profiles (stored as JSON map in config) ───
     function _getProfiles() {
-        const raw = Config.options?.appearance?.angel?.profiles ?? ""
+        const raw = Config.options?.material?.style?.angel?.profiles ?? ""
         if (raw === "") return {}
         try { return JSON.parse(raw) }
         catch(e) { return {} }
@@ -250,7 +250,7 @@ ColumnLayout {
         if (!name || name.length === 0) return
         const profiles = root._getProfiles()
         profiles[name] = root._snapshotCurrent()
-        Config.setNestedValue("appearance.angel.profiles", JSON.stringify(profiles))
+        Config.setNestedValue("material.style.angel.profiles", JSON.stringify(profiles))
     }
 
     function _loadProfile(name): void {
@@ -261,11 +261,11 @@ ColumnLayout {
     function _deleteProfile(name): void {
         const profiles = root._getProfiles()
         delete profiles[name]
-        Config.setNestedValue("appearance.angel.profiles", JSON.stringify(profiles))
+        Config.setNestedValue("material.style.angel.profiles", JSON.stringify(profiles))
     }
 
     property var _profileNames: {
-        const raw = Config.options?.appearance?.angel?.profiles ?? ""
+        const raw = Config.options?.material?.style?.angel?.profiles ?? ""
         if (raw === "") return []
         try { return Object.keys(JSON.parse(raw)) }
         catch(e) { return [] }
@@ -457,7 +457,7 @@ ColumnLayout {
                 buttonRadius: Appearance.angelEverywhere ? Appearance.angel.roundingSmall : Appearance.rounding.small
                 colBackground: Appearance.angelEverywhere ? Appearance.angel.colGlassCard : Appearance.colors.colLayer2
                 colBackgroundHover: Appearance.angelEverywhere ? Appearance.angel.colGlassCardHover : Appearance.colors.colLayer2Hover
-                enabled: (Config.options?.appearance?.angel?.customPreset ?? "") !== ""
+                enabled: (Config.options?.material?.style?.angel?.customPreset ?? "") !== ""
                 opacity: enabled ? 1.0 : 0.4
                 onClicked: root._loadCustom()
 
@@ -632,7 +632,7 @@ ColumnLayout {
             description: Translation.tr("Multiplier for accent tint intensity across all angel surfaces (0.5 = subtle, 1 = default, 2 = vivid)")
             configValue: Appearance.angel.colorStrength
             from: 0.0; to: 2.0; stepSize: 0.05
-            configPath: "appearance.angel.colorStrength"
+            configPath: "material.style.angel.colorStrength"
         }
     }
 
@@ -647,7 +647,7 @@ ColumnLayout {
             icon: "blur_on"
             description: Translation.tr("How strongly the background is blurred behind glass panels")
             configValue: Appearance.angel.blurIntensity
-            configPath: "appearance.angel.blur.intensity"
+            configPath: "material.style.angel.blur.intensity"
         }
 
         SliderRow {
@@ -655,7 +655,7 @@ ColumnLayout {
             icon: "palette"
             description: Translation.tr("Color saturation of the blurred glass layer")
             configValue: Appearance.angel.blurSaturation
-            configPath: "appearance.angel.blur.saturation"
+            configPath: "material.style.angel.blur.saturation"
         }
 
         SliderRow {
@@ -663,7 +663,7 @@ ColumnLayout {
             icon: "layers"
             description: Translation.tr("Color tint overlay on top of the blur (higher = more transparent tint)")
             configValue: Appearance.angel.overlayOpacity
-            configPath: "appearance.angel.blur.overlayOpacity"
+            configPath: "material.style.angel.blur.overlayOpacity"
         }
 
         SliderRow {
@@ -671,7 +671,7 @@ ColumnLayout {
             icon: "grain"
             description: Translation.tr("Subtle noise texture over glass surfaces for organic feel")
             configValue: Appearance.angel.noiseOpacity
-            configPath: "appearance.angel.blur.noiseOpacity"
+            configPath: "material.style.angel.blur.noiseOpacity"
         }
 
         SliderRow {
@@ -679,7 +679,7 @@ ColumnLayout {
             icon: "vignette"
             description: Translation.tr("Edge darkening on glass surfaces for depth")
             configValue: Appearance.angel.vignetteStrength
-            configPath: "appearance.angel.blur.vignetteStrength"
+            configPath: "material.style.angel.blur.vignetteStrength"
         }
     }
 
@@ -703,7 +703,7 @@ ColumnLayout {
             icon: "dock_to_bottom"
             description: Translation.tr("Bar, dock, sidebar backgrounds")
             configValue: Appearance.angel.panelTransparentize
-            configPath: "appearance.angel.transparency.panel"
+            configPath: "material.style.angel.transparency.panel"
         }
 
         SliderRow {
@@ -711,7 +711,7 @@ ColumnLayout {
             icon: "crop_square"
             description: Translation.tr("Settings cards, notification cards, internal containers")
             configValue: Appearance.angel.cardTransparentize
-            configPath: "appearance.angel.transparency.card"
+            configPath: "material.style.angel.transparency.card"
         }
 
         SliderRow {
@@ -719,7 +719,7 @@ ColumnLayout {
             icon: "open_in_new"
             description: Translation.tr("Context menus, dropdown overlays")
             configValue: Appearance.angel.popupTransparentize
-            configPath: "appearance.angel.transparency.popup"
+            configPath: "material.style.angel.transparency.popup"
         }
 
         SliderRow {
@@ -727,7 +727,7 @@ ColumnLayout {
             icon: "chat_bubble"
             description: Translation.tr("Hover tooltips — lower values improve readability")
             configValue: Appearance.angel.tooltipTransparentize
-            configPath: "appearance.angel.transparency.tooltip"
+            configPath: "material.style.angel.transparency.tooltip"
         }
     }
 
@@ -751,7 +751,7 @@ ColumnLayout {
             icon: "swap_horiz"
             configValue: Appearance.angel.escalonadoOffsetX
             from: 0; to: 20
-            configPath: "appearance.angel.escalonado.offsetX"
+            configPath: "material.style.angel.escalonado.offsetX"
         }
 
         SpinRow {
@@ -759,7 +759,7 @@ ColumnLayout {
             icon: "swap_vert"
             configValue: Appearance.angel.escalonadoOffsetY
             from: 0; to: 20
-            configPath: "appearance.angel.escalonado.offsetY"
+            configPath: "material.style.angel.escalonado.offsetY"
         }
 
         SpinRow {
@@ -767,7 +767,7 @@ ColumnLayout {
             icon: "open_with"
             configValue: Appearance.angel.escalonadoHoverOffsetX
             from: 0; to: 30
-            configPath: "appearance.angel.escalonado.hoverOffsetX"
+            configPath: "material.style.angel.escalonado.hoverOffsetX"
         }
 
         SpinRow {
@@ -775,28 +775,28 @@ ColumnLayout {
             icon: "open_with"
             configValue: Appearance.angel.escalonadoHoverOffsetY
             from: 0; to: 30
-            configPath: "appearance.angel.escalonado.hoverOffsetY"
+            configPath: "material.style.angel.escalonado.hoverOffsetY"
         }
 
         SliderRow {
             label: Translation.tr("Fill opacity")
             icon: "opacity"
             configValue: Appearance.angel.escalonadoOpacity
-            configPath: "appearance.angel.escalonado.opacity"
+            configPath: "material.style.angel.escalonado.opacity"
         }
 
         SliderRow {
             label: Translation.tr("Border opacity")
             icon: "border_style"
             configValue: Appearance.angel.escalonadoBorderOpacity
-            configPath: "appearance.angel.escalonado.borderOpacity"
+            configPath: "material.style.angel.escalonado.borderOpacity"
         }
 
         SliderRow {
             label: Translation.tr("Hover fill opacity")
             icon: "mouse"
             configValue: Appearance.angel.escalonadoHoverOpacity
-            configPath: "appearance.angel.escalonado.hoverOpacity"
+            configPath: "material.style.angel.escalonado.hoverOpacity"
         }
     }
 
@@ -820,7 +820,7 @@ ColumnLayout {
             icon: "swap_horiz"
             configValue: Appearance.angel.shadowOffsetX
             from: 0; to: 20
-            configPath: "appearance.angel.escalonadoShadow.offsetX"
+            configPath: "material.style.angel.escalonadoShadow.offsetX"
         }
 
         SpinRow {
@@ -828,7 +828,7 @@ ColumnLayout {
             icon: "swap_vert"
             configValue: Appearance.angel.shadowOffsetY
             from: 0; to: 20
-            configPath: "appearance.angel.escalonadoShadow.offsetY"
+            configPath: "material.style.angel.escalonadoShadow.offsetY"
         }
 
         SpinRow {
@@ -836,7 +836,7 @@ ColumnLayout {
             icon: "open_with"
             configValue: Appearance.angel.shadowHoverOffsetX
             from: 0; to: 30
-            configPath: "appearance.angel.escalonadoShadow.hoverOffsetX"
+            configPath: "material.style.angel.escalonadoShadow.hoverOffsetX"
         }
 
         SpinRow {
@@ -844,49 +844,49 @@ ColumnLayout {
             icon: "open_with"
             configValue: Appearance.angel.shadowHoverOffsetY
             from: 0; to: 30
-            configPath: "appearance.angel.escalonadoShadow.hoverOffsetY"
+            configPath: "material.style.angel.escalonadoShadow.hoverOffsetY"
         }
 
         SliderRow {
             label: Translation.tr("Fill opacity")
             icon: "opacity"
             configValue: Appearance.angel.shadowOpacity
-            configPath: "appearance.angel.escalonadoShadow.opacity"
+            configPath: "material.style.angel.escalonadoShadow.opacity"
         }
 
         SliderRow {
             label: Translation.tr("Border opacity")
             icon: "border_style"
             configValue: Appearance.angel.shadowBorderOpacity
-            configPath: "appearance.angel.escalonadoShadow.borderOpacity"
+            configPath: "material.style.angel.escalonadoShadow.borderOpacity"
         }
 
         SliderRow {
             label: Translation.tr("Hover fill opacity")
             icon: "mouse"
             configValue: Appearance.angel.shadowHoverOpacity
-            configPath: "appearance.angel.escalonadoShadow.hoverOpacity"
+            configPath: "material.style.angel.escalonadoShadow.hoverOpacity"
         }
 
         ConfigSwitch {
             Layout.fillWidth: true
             text: Translation.tr("Glass blur on shadow")
             checked: Appearance.angel.shadowGlass
-            onCheckedChanged: Config.setNestedValue("appearance.angel.escalonadoShadow.glass", checked)
+            onCheckedChanged: Config.setNestedValue("material.style.angel.escalonadoShadow.glass", checked)
         }
 
         SliderRow {
             label: Translation.tr("Shadow glass blur")
             icon: "blur_on"
             configValue: Appearance.angel.shadowGlassBlur
-            configPath: "appearance.angel.escalonadoShadow.glassBlur"
+            configPath: "material.style.angel.escalonadoShadow.glassBlur"
         }
 
         SliderRow {
             label: Translation.tr("Shadow glass overlay")
             icon: "layers"
             configValue: Appearance.angel.shadowGlassOverlay
-            configPath: "appearance.angel.escalonadoShadow.glassOverlay"
+            configPath: "material.style.angel.escalonadoShadow.glassOverlay"
         }
     }
 
@@ -902,7 +902,7 @@ ColumnLayout {
             description: Translation.tr("Thickness of gradient border lines")
             configValue: Appearance.angel.borderWidth
             from: 0.0; to: 5.0; stepSize: 0.5
-            configPath: "appearance.angel.border.width"
+            configPath: "material.style.angel.border.width"
         }
 
         SliderRow {
@@ -910,28 +910,28 @@ ColumnLayout {
             icon: "border_all"
             description: Translation.tr("How much of each edge the border covers")
             configValue: Appearance.angel.borderCoverage
-            configPath: "appearance.angel.border.coverage"
+            configPath: "material.style.angel.border.coverage"
         }
 
         SliderRow {
             label: Translation.tr("Border opacity")
             icon: "opacity"
             configValue: Appearance.angel.borderOpacity
-            configPath: "appearance.angel.border.opacity"
+            configPath: "material.style.angel.border.opacity"
         }
 
         SliderRow {
             label: Translation.tr("Border hover opacity")
             icon: "mouse"
             configValue: Appearance.angel.borderHoverOpacity
-            configPath: "appearance.angel.border.hoverOpacity"
+            configPath: "material.style.angel.border.hoverOpacity"
         }
 
         SliderRow {
             label: Translation.tr("Border active opacity")
             icon: "touch_app"
             configValue: Appearance.angel.borderActiveOpacity
-            configPath: "appearance.angel.border.activeOpacity"
+            configPath: "material.style.angel.border.activeOpacity"
         }
 
         SpinRow {
@@ -939,7 +939,7 @@ ColumnLayout {
             icon: "vertical_align_top"
             configValue: Appearance.angel.accentBarHeight
             from: 0; to: 10
-            configPath: "appearance.angel.border.accentBarHeight"
+            configPath: "material.style.angel.border.accentBarHeight"
         }
 
         SpinRow {
@@ -947,7 +947,7 @@ ColumnLayout {
             icon: "align_horizontal_left"
             configValue: Appearance.angel.accentBarWidth
             from: 0; to: 10
-            configPath: "appearance.angel.border.accentBarWidth"
+            configPath: "material.style.angel.border.accentBarWidth"
         }
 
         SpinRow {
@@ -955,14 +955,14 @@ ColumnLayout {
             icon: "wb_twilight"
             configValue: Appearance.angel.insetGlowHeight
             from: 0; to: 5
-            configPath: "appearance.angel.border.insetGlowHeight"
+            configPath: "material.style.angel.border.insetGlowHeight"
         }
 
         SliderRow {
             label: Translation.tr("Inset glow opacity")
             icon: "flare"
             configValue: Appearance.angel.insetGlowOpacity
-            configPath: "appearance.angel.border.insetGlowOpacity"
+            configPath: "material.style.angel.border.insetGlowOpacity"
         }
     }
 
@@ -978,14 +978,14 @@ ColumnLayout {
             description: Translation.tr("Bar, dock, sidebar outer border")
             configValue: Appearance.angel.panelBorderWidth
             from: 0; to: 3
-            configPath: "appearance.angel.surface.panelBorderWidth"
+            configPath: "material.style.angel.surface.panelBorderWidth"
         }
 
         SliderRow {
             label: Translation.tr("Panel border opacity")
             icon: "opacity"
             configValue: Appearance.angel.panelBorderOpacity
-            configPath: "appearance.angel.surface.panelBorderOpacity"
+            configPath: "material.style.angel.surface.panelBorderOpacity"
         }
 
         SpinRow {
@@ -994,14 +994,14 @@ ColumnLayout {
             description: Translation.tr("Inner card/container border")
             configValue: Appearance.angel.cardBorderWidth
             from: 0; to: 3
-            configPath: "appearance.angel.surface.cardBorderWidth"
+            configPath: "material.style.angel.surface.cardBorderWidth"
         }
 
         SliderRow {
             label: Translation.tr("Card border opacity")
             icon: "opacity"
             configValue: Appearance.angel.cardBorderOpacity
-            configPath: "appearance.angel.surface.cardBorderOpacity"
+            configPath: "material.style.angel.surface.cardBorderOpacity"
         }
     }
 
@@ -1015,14 +1015,14 @@ ColumnLayout {
             label: Translation.tr("Glow opacity")
             icon: "flare"
             configValue: Appearance.angel.glowOpacity
-            configPath: "appearance.angel.glow.opacity"
+            configPath: "material.style.angel.glow.opacity"
         }
 
         SliderRow {
             label: Translation.tr("Strong glow opacity")
             icon: "auto_awesome"
             configValue: Appearance.angel.glowStrongOpacity
-            configPath: "appearance.angel.glow.strongOpacity"
+            configPath: "material.style.angel.glow.strongOpacity"
         }
     }
 
@@ -1038,7 +1038,7 @@ ColumnLayout {
             description: Translation.tr("Buttons, badges, small elements")
             configValue: Appearance.angel.roundingSmall
             from: 0; to: 30
-            configPath: "appearance.angel.rounding.small"
+            configPath: "material.style.angel.rounding.small"
         }
 
         SpinRow {
@@ -1047,7 +1047,7 @@ ColumnLayout {
             description: Translation.tr("Cards, popups, tooltips")
             configValue: Appearance.angel.roundingNormal
             from: 0; to: 40
-            configPath: "appearance.angel.rounding.normal"
+            configPath: "material.style.angel.rounding.normal"
         }
 
         SpinRow {
@@ -1056,7 +1056,7 @@ ColumnLayout {
             description: Translation.tr("Panels, dialogs, large containers")
             configValue: Appearance.angel.roundingLarge
             from: 0; to: 50
-            configPath: "appearance.angel.rounding.large"
+            configPath: "material.style.angel.rounding.large"
         }
     }
 }

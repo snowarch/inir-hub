@@ -12,8 +12,8 @@ import Quickshell.Services.UPower
 
 Item {
     id: root
-    property bool vertical: Config.options.bar.vertical
-    property bool isMaterial: Config.options.bar.m3.cornerStyle === 3
+    property bool vertical: Config.options.material.bar.vertical
+    property bool isMaterial: Config.options.material.bar.m3.cornerStyle === 3
 
     implicitWidth: isMaterial && !root.vertical ? flow.implicitWidth : root.vertical ? Appearance.sizes.verticalBarWidth - 14 : flow.implicitWidth + 4
     implicitHeight: isMaterial && root.vertical ? flow.implicitHeight: isMaterial ? 32 : root.vertical ? flow.implicitHeight + 4 : Appearance.sizes.barHeight
@@ -25,7 +25,7 @@ Item {
         spacing: isMaterial ? 2 : 4
 
         Loader {
-            active: Config.options.bar.m3.utilButtons.showScreenSnip
+            active: Config.options.material.bar.m3.utilButtons.showScreenSnip
             visible: active
             sourceComponent: isMaterial ? screenSnipM3 : legacyScreenSnip
         }
@@ -53,7 +53,7 @@ Item {
         }
 
         Loader {
-            active: Config.options.bar.m3.utilButtons.showColorPicker
+            active: Config.options.material.bar.m3.utilButtons.showColorPicker
             visible: active
             sourceComponent: isMaterial ? colorPickerM3 : legacyColorPicker
         }
@@ -79,7 +79,7 @@ Item {
         }
 
         Loader {
-            active: Config.options.bar.m3.utilButtons.showScreenRecord
+            active: Config.options.material.bar.m3.utilButtons.showScreenRecord
             visible: active
             sourceComponent: isMaterial ? screenRecordM3 : legacyScreenRecord
         }
@@ -162,7 +162,7 @@ Item {
         }
 
         Loader {
-            active: Config.options.bar.m3.utilButtons.showKeyboardToggle
+            active: Config.options.material.bar.m3.utilButtons.showKeyboardToggle
             visible: active
             sourceComponent: isMaterial ? keyboardM3 : legacyKeyboard
         }
@@ -188,7 +188,7 @@ Item {
         }
 
         Loader {
-            active: Config.options.bar.m3.utilButtons.showWallpaperToggle
+            active: Config.options.material.bar.m3.utilButtons.showWallpaperToggle
             visible: active
             sourceComponent: isMaterial ? wallpaperM3 : legacyWallpaper
         }
@@ -214,7 +214,7 @@ Item {
         }
 
         Loader {
-            active: Config.options.bar.m3.utilButtons.showMicToggle
+            active: Config.options.material.bar.m3.utilButtons.showMicToggle
             visible: active
             sourceComponent: isMaterial ? micM3 : legacyMic
         }
@@ -241,7 +241,7 @@ Item {
         }
 
         Loader {
-            active: Config.options.bar.m3.utilButtons.showDarkModeToggle
+            active: Config.options.material.bar.m3.utilButtons.showDarkModeToggle
             visible: active
             sourceComponent: isMaterial ? darkModeM3 : legacyDarkMode
         }
@@ -268,7 +268,7 @@ Item {
         }
 
         Loader {
-            active: Config.options.bar.m3.utilButtons.showPerformanceProfileToggle && PowerProfilePersistence.available
+            active: Config.options.material.bar.m3.utilButtons.showPerformanceProfileToggle && PowerProfilePersistence.available
             visible: active
             sourceComponent: isMaterial ? perfM3 : legacyPerf
         }

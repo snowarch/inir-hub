@@ -28,7 +28,7 @@ Item {
     property string targetMonitor: ""
 
     readonly property var options: Config.options?.iris?.wallpaper ?? ({})
-    readonly property bool onlineEnabled: Config.options?.sidebar?.wallhaven?.enable ?? true
+    readonly property bool onlineEnabled: Config.options?.wallhaven?.enable ?? true
     readonly property bool playMotion: (root.options?.motion ?? true) && root.open
 
     // Sources
@@ -613,7 +613,7 @@ Item {
             : root.ratio === "screen" ? { mode: "auto", width: screen?.width ?? 1920, height: screen?.height ?? 1080, ratioCode: "", aspect: (screen?.width ?? 16) / Math.max(1, screen?.height ?? 9) }
             : { mode: "any", ratios: root.ratio === "wide" ? "landscape" : root.ratio === "portrait" ? "portrait" : "" }
         if (root.colour.length > 0) fit.colors = root.colour
-        Wallhaven.makeRequest(asked, false, live ? 36 : (Config.options?.sidebar?.wallhaven?.limit ?? 24), page,
+        Wallhaven.makeRequest(asked, false, live ? 36 : (Config.options?.wallhaven?.limit ?? 24), page,
             live || root.colour.length > 0 || root.pivotLabel.length > 0 ? "111" : (option.category ?? "111"), undefined, root.provider, fit,
             live ? undefined : root.onlineSorting)
     }

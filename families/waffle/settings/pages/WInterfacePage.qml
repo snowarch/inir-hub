@@ -425,14 +425,14 @@ WSettingsPage {
         WSettingsDropdown {
             label: Translation.tr("Popup position")
             icon: "panel-left-expand"
-            currentValue: Config.options?.notifications?.position ?? "bottomRight"
+            currentValue: Config.options?.waffles?.notifications?.position ?? "bottomRight"
             options: [
                 { value: "topLeft", displayName: Translation.tr("Top Left") },
                 { value: "topRight", displayName: Translation.tr("Top Right") },
                 { value: "bottomLeft", displayName: Translation.tr("Bottom Left") },
                 { value: "bottomRight", displayName: Translation.tr("Bottom Right") }
             ]
-            onSelected: newValue => Config.setNestedValue("notifications.position", newValue)
+            onSelected: newValue => Config.setNestedValue("waffles.notifications.position", newValue)
         }
         
         WSettingsSwitch {
@@ -661,31 +661,31 @@ WSettingsPage {
             label: Translation.tr("Enable blur")
             icon: "eye"
             description: Translation.tr("Blur background on lock screen")
-            checked: Config.options?.lock?.blur?.enable ?? true
-            onCheckedChanged: Config.setNestedValue("lock.blur.enable", checked)
+            checked: Config.options?.waffles?.lock?.blur?.enable ?? true
+            onCheckedChanged: Config.setNestedValue("waffles.lock.blur.enable", checked)
         }
         
         WSettingsSpinBox {
-            visible: Config.options?.lock?.blur?.enable ?? true
+            visible: Config.options?.waffles?.lock?.blur?.enable ?? true
             label: Translation.tr("Blur radius")
             icon: "eyedropper"
             from: 0; to: 200; stepSize: 10
-            value: Config.options?.lock?.blur?.radius ?? 100
-            onValueChanged: Config.setNestedValue("lock.blur.radius", value)
+            value: Config.options?.waffles?.lock?.blur?.radius ?? 100
+            onValueChanged: Config.setNestedValue("waffles.lock.blur.radius", value)
         }
         
         WSettingsSwitch {
             label: Translation.tr("Center clock")
             icon: "panel-left-contract"
-            checked: Config.options?.lock?.centerClock ?? true
-            onCheckedChanged: Config.setNestedValue("lock.centerClock", checked)
+            checked: Config.options?.waffles?.lock?.centerClock ?? true
+            onCheckedChanged: Config.setNestedValue("waffles.lock.centerClock", checked)
         }
         
         WSettingsSwitch {
             label: Translation.tr("Show 'Locked' text")
             icon: "lock-closed"
-            checked: Config.options?.lock?.showLockedText ?? true
-            onCheckedChanged: Config.setNestedValue("lock.showLockedText", checked)
+            checked: Config.options?.waffles?.lock?.showLockedText ?? true
+            onCheckedChanged: Config.setNestedValue("waffles.lock.showLockedText", checked)
         }
     }
 
@@ -696,35 +696,35 @@ WSettingsPage {
         icon: "alert"
         description: Translation.tr("Display recent notifications on the lock screen")
         toggle: true
-        checked: Config.options?.lock?.notifications?.enable ?? false
-        onToggled: on => Config.setNestedValue("lock.notifications.enable", on)
+        checked: Config.options?.waffles?.lock?.notifications?.enable ?? false
+        onToggled: on => Config.setNestedValue("waffles.lock.notifications.enable", on)
 
         WSettingsSwitch {
             label: Translation.tr("Show notification body")
             icon: "eye"
             description: Translation.tr("Display message content. Disable for privacy.")
-            checked: Config.options?.lock?.notifications?.showBody ?? true
-            onCheckedChanged: Config.setNestedValue("lock.notifications.showBody", checked)
+            checked: Config.options?.waffles?.lock?.notifications?.showBody ?? true
+            onCheckedChanged: Config.setNestedValue("waffles.lock.notifications.showBody", checked)
         }
         WSettingsSpinBox {
             label: Translation.tr("Max notifications shown")
             icon: "list"
             from: 1; to: 10; stepSize: 1
-            value: Config.options?.lock?.notifications?.maxCount ?? 3
-            onValueChanged: Config.setNestedValue("lock.notifications.maxCount", value)
+            value: Config.options?.waffles?.lock?.notifications?.maxCount ?? 3
+            onValueChanged: Config.setNestedValue("waffles.lock.notifications.maxCount", value)
         }
         WSettingsDropdown {
             label: Translation.tr("Notification position")
             icon: "panel-left-expand"
             description: Translation.tr("Where notifications appear on the lock screen")
-            currentValue: Config.options?.lock?.notifications?.position ?? "auto"
+            currentValue: Config.options?.waffles?.lock?.notifications?.position ?? "auto"
             options: [
                 { value: "auto", displayName: Translation.tr("Auto") },
                 { value: "center", displayName: Translation.tr("Center") },
                 { value: "left", displayName: Translation.tr("Left") },
                 { value: "right", displayName: Translation.tr("Right") }
             ]
-            onSelected: newValue => Config.setNestedValue("lock.notifications.position", newValue)
+            onSelected: newValue => Config.setNestedValue("waffles.lock.notifications.position", newValue)
         }
     }
 
@@ -733,54 +733,54 @@ WSettingsPage {
             label: Translation.tr("Clock style")
             icon: "arrow-clockwise"
             description: Translation.tr("Visual style for the lock screen clock")
-            currentValue: Config.options?.lock?.clock?.style ?? "default"
+            currentValue: Config.options?.waffles?.lock?.clock?.style ?? "default"
             options: [
                 { value: "default", displayName: Translation.tr("Default") },
                 { value: "minimal", displayName: Translation.tr("Minimal") },
                 { value: "analog", displayName: Translation.tr("Analog") }
             ]
-            onSelected: newValue => Config.setNestedValue("lock.clock.style", newValue)
+            onSelected: newValue => Config.setNestedValue("waffles.lock.clock.style", newValue)
         }
 
         WSettingsDropdown {
             label: Translation.tr("Clock position")
             icon: "pin"
             description: Translation.tr("Where the clock appears on the lock screen")
-            currentValue: Config.options?.lock?.clock?.position ?? "center"
+            currentValue: Config.options?.waffles?.lock?.clock?.position ?? "center"
             options: [
                 { value: "center", displayName: Translation.tr("Center") },
                 { value: "topLeft", displayName: Translation.tr("Top Left") },
                 { value: "bottomLeft", displayName: Translation.tr("Bottom Left") }
             ]
-            onSelected: newValue => Config.setNestedValue("lock.clock.position", newValue)
+            onSelected: newValue => Config.setNestedValue("waffles.lock.clock.position", newValue)
         }
 
         WSettingsSwitch {
             label: Translation.tr("Show status indicators")
             icon: "info"
             description: Translation.tr("Show WiFi, Bluetooth, volume and battery on the lock screen")
-            checked: Config.options?.lock?.status?.enable ?? true
-            onCheckedChanged: Config.setNestedValue("lock.status.enable", checked)
+            checked: Config.options?.waffles?.lock?.status?.enable ?? true
+            onCheckedChanged: Config.setNestedValue("waffles.lock.status.enable", checked)
         }
 
         WSettingsSwitch {
             label: Translation.tr("Dim wallpaper")
             icon: "dark-theme"
             description: Translation.tr("Apply a dark overlay to the wallpaper for better contrast")
-            checked: Config.options?.lock?.dim?.enable ?? false
-            onCheckedChanged: Config.setNestedValue("lock.dim.enable", checked)
+            checked: Config.options?.waffles?.lock?.dim?.enable ?? false
+            onCheckedChanged: Config.setNestedValue("waffles.lock.dim.enable", checked)
         }
 
         WSettingsSlider {
-            visible: Config.options?.lock?.dim?.enable ?? false
+            visible: Config.options?.waffles?.lock?.dim?.enable ?? false
             label: Translation.tr("Dim amount")
             icon: "brightness-high"
             description: Translation.tr("How much to dim the wallpaper")
             from: 10
             to: 80
             stepSize: 5
-            value: Math.round((Config.options?.lock?.dim?.opacity ?? 0.3) * 100)
-            onMoved: Config.setNestedValue("lock.dim.opacity", value / 100)
+            value: Math.round((Config.options?.waffles?.lock?.dim?.opacity ?? 0.3) * 100)
+            onMoved: Config.setNestedValue("waffles.lock.dim.opacity", value / 100)
             suffix: "%"
         }
 

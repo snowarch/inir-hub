@@ -26,11 +26,11 @@ Item {
     property bool vertical: false
     property string dockPosition: "bottom"
     readonly property string surfaceDialect: Appearance.surfaceDialectFor(
-        Config.options?.dock?.style === "island" ? "island" : "")
+        Config.options?.material?.dock?.style === "island" ? "island" : "")
     readonly property bool zzzStyle: surfaceDialect === "zzz"
     readonly property bool inirStyle: surfaceDialect === "inir"
-    readonly property bool pillStyle: Config.options?.dock?.style === "pill" && !zzzStyle
-    readonly property bool macosStyle: Config.options?.dock?.style === "macos" && !zzzStyle
+    readonly property bool pillStyle: Config.options?.material?.dock?.style === "pill" && !zzzStyle
+    readonly property bool macosStyle: Config.options?.material?.dock?.style === "macos" && !zzzStyle
 
     // Propagated hovered index for neighbor magnify in macOS style
     property int macHoveredIndex: -1
@@ -66,7 +66,7 @@ Item {
     // Function to show the new preview popup (Waffle-style)
     function showPreviewPopup(appEntry: var, button: Item): void {
         // Respect hoverPreview setting
-        if (Config.options?.dock?.hoverPreview === false || contextMenuOpen || dragActive)
+        if (Config.options?.material?.dock?.hoverPreview === false || contextMenuOpen || dragActive)
             return
         dockPreviewPopup.show(appEntry, button)
     }
@@ -127,7 +127,7 @@ Item {
     implicitHeight: listView.contentHeight
 
     // ─── Drag & Drop State ───────────────────────────────────────────────
-    readonly property bool dragEnabled: Config.options?.dock?.enableDragReorder ?? true
+    readonly property bool dragEnabled: Config.options?.material?.dock?.enableDragReorder ?? true
     property bool dragActive: false
     property int dragIndex: -1           // Index of item being dragged in dockItems
     property int dropTargetIndex: -1     // Index where the item would be dropped
@@ -308,7 +308,7 @@ Item {
 
         const fromIsRunning = (fromItem.toplevels?.length ?? 0) > 0
         const toIsRunning = (toItem.toplevels?.length ?? 0) > 0
-        let pinnedApps = [...(Config.options?.dock?.pinnedApps ?? [])]
+        let pinnedApps = [...(Config.options?.apps?.pinned ?? [])]
 
         const fromIsPinned = fromItem.pinned
         const toIsPinned = toItem.pinned
@@ -339,14 +339,14 @@ Item {
             if (realFromIdx >= 0 && realToIdx >= 0) {
                 const [moved] = pinnedApps.splice(realFromIdx, 1)
                 pinnedApps.splice(realToIdx, 0, moved)
-                Config.setNestedValue("dock.pinnedApps", pinnedApps)
+                Config.setNestedValue("apps.pinned", pinnedApps)
             }
         } else if (!fromIsPinned && toIsPinned) {
             // Dragging a running (unpinned) app to pinned section → auto-pin at position
             const realToIdx = pinnedApps.findIndex(p => p.toLowerCase() === toAppId.toLowerCase())
             const insertIdx = toIdx < fromIdx ? realToIdx : realToIdx + 1
             pinnedApps.splice(insertIdx, 0, fromAppId)
-            Config.setNestedValue("dock.pinnedApps", pinnedApps)
+            Config.setNestedValue("apps.pinned", pinnedApps)
         } else if (fromIsPinned && !toIsPinned) {
             // Dragging a pinned app to running section → keep it pinned but move to end
             // (no-op for now, pinned order only affects pinned section)
@@ -369,7 +369,7 @@ Item {
     property var _runningAppOrder: []
 
     // Direct reactive binding to Config - will automatically trigger when Config changes
-    readonly property bool separatePinnedFromRunning: Config.options?.dock?.separatePinnedFromRunning ?? true
+    readonly property bool separatePinnedFromRunning: Config.options?.material?.dock?.separatePinnedFromRunning ?? true
     onSeparatePinnedFromRunningChanged: {
         root.rebuildDockItems()
     }
@@ -381,7 +381,7 @@ Item {
     property var _lastIgnoredRegexStrings: null
 
     function _getIgnoredRegexes(): list<var> {
-        const ignoredRegexStrings = Config.options?.dock?.ignoredAppRegexes ?? [];
+        const ignoredRegexStrings = Config.options?.apps?.ignoredRegexes ?? [];
         // Check if we need to recompile
         if (JSON.stringify(ignoredRegexStrings) !== JSON.stringify(_lastIgnoredRegexStrings)) {
             const systemIgnored = ["^$", "^portal$", "^x-run-dialog$", "^kdialog$", "^xembedsniproxy$", "^org.freedesktop.impl.portal.*"];
@@ -438,7 +438,7 @@ Item {
     }
 
     function _doRebuildDockItems() {
-        const pinnedApps = Config.options?.dock?.pinnedApps ?? [];
+        const pinnedApps = Config.options?.apps?.pinned ?? [];
         const ignoredRegexes = _getIgnoredRegexes();
         const separatePinnedFromRunning = root.separatePinnedFromRunning;
 
@@ -662,12 +662,12 @@ Item {
     }
 
     Connections {
-        target: Config.options?.dock
+        target: Config.options?.apps
         enabled: root.enabled
-        function onPinnedAppsChanged() {
+        function onPinnedChanged() {
             root.rebuildDockItems()
         }
-        function onIgnoredAppRegexesChanged() {
+        function onIgnoredRegexesChanged() {
             root.rebuildDockItems()
         }
     }

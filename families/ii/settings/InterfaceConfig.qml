@@ -264,17 +264,17 @@ ContentPage {
         icon: "filter_b_and_w"
         title: Translation.tr("Visual Effects")
 
-        readonly property var _desat: Config.options?.appearance?.desaturation ?? ({})
+        readonly property var _desat: Config.options?.material?.style?.desaturation ?? ({})
         function _setDesat(key: string, val): void {
-            Config.setNestedValue("appearance.desaturation." + key, val)
+            Config.setNestedValue("material.style.desaturation." + key, val)
         }
 
         SettingsGroup {
             SettingsSwitch {
                 buttonIcon: "filter_b_and_w"
                 text: Translation.tr("Desaturation effect")
-                checked: Boolean(Config.options?.appearance?.desaturation?.enable)
-                onCheckedChanged: Config.setNestedValue("appearance.desaturation.enable", checked)
+                checked: Boolean(Config.options?.material?.style?.desaturation?.enable)
+                onCheckedChanged: Config.setNestedValue("material.style.desaturation.enable", checked)
                 StyledToolTip {
                     text: Translation.tr("Apply a grayscale/dimmed effect to shell components")
                 }
@@ -283,17 +283,17 @@ ContentPage {
             SettingsDivider {}
 
             ConfigRow {
-                enabled: Boolean(Config.options?.appearance?.desaturation?.enable)
+                enabled: Boolean(Config.options?.material?.style?.desaturation?.enable)
                 uniform: true
                 ConfigSpinBox {
                     icon: "invert_colors"
                     text: Translation.tr("Saturation")
                     unit: "%"
-                    value: Math.round((Config.options?.appearance?.desaturation?.saturation ?? -0.7) * -100)
+                    value: Math.round((Config.options?.material?.style?.desaturation?.saturation ?? -0.7) * -100)
                     from: 0
                     to: 100
                     stepSize: 10
-                    onValueModified: Config.setNestedValue("appearance.desaturation.saturation", -value / 100)
+                    onValueModified: Config.setNestedValue("material.style.desaturation.saturation", -value / 100)
                     StyledToolTip {
                         text: Translation.tr("Amount of color to remove (0 = normal, 100 = grayscale)")
                     }
@@ -302,11 +302,11 @@ ContentPage {
                     icon: "brightness_6"
                     text: Translation.tr("Dim")
                     unit: "%"
-                    value: Math.round((Config.options?.appearance?.desaturation?.brightness ?? -0.15) * -100)
+                    value: Math.round((Config.options?.material?.style?.desaturation?.brightness ?? -0.15) * -100)
                     from: 0
                     to: 50
                     stepSize: 5
-                    onValueModified: Config.setNestedValue("appearance.desaturation.brightness", -value / 100)
+                    onValueModified: Config.setNestedValue("material.style.desaturation.brightness", -value / 100)
                     StyledToolTip {
                         text: Translation.tr("Amount of brightness reduction (0 = normal)")
                     }
@@ -325,72 +325,72 @@ ContentPage {
                 StyledText {
                     text: Translation.tr("Apply to")
                     font.pixelSize: Appearance.font.pixelSize.small
-                    color: Boolean(Config.options?.appearance?.desaturation?.enable)
+                    color: Boolean(Config.options?.material?.style?.desaturation?.enable)
                         ? Appearance.colors.colOnSurface
                         : Appearance.colors.colSubtext
                 }
 
                 ButtonGroup {
-                    enabled: Boolean(Config.options?.appearance?.desaturation?.enable)
+                    enabled: Boolean(Config.options?.material?.style?.desaturation?.enable)
                     uniformCellSizes: true
                     spacing: 0
 
                     SelectionGroupButton {
                         leftmost: true
                         buttonText: Translation.tr("All")
-                        toggled: (Config.options?.appearance?.desaturation?.scope ?? "all") === "all"
-                        onClicked: Config.setNestedValue("appearance.desaturation.scope", "all")
+                        toggled: (Config.options?.material?.style?.desaturation?.scope ?? "all") === "all"
+                        onClicked: Config.setNestedValue("material.style.desaturation.scope", "all")
                     }
                     SelectionGroupButton {
                         buttonText: Translation.tr("Panels only")
-                        toggled: (Config.options?.appearance?.desaturation?.scope ?? "all") === "panels"
-                        onClicked: Config.setNestedValue("appearance.desaturation.scope", "panels")
+                        toggled: (Config.options?.material?.style?.desaturation?.scope ?? "all") === "panels"
+                        onClicked: Config.setNestedValue("material.style.desaturation.scope", "panels")
                     }
                     SelectionGroupButton {
                         rightmost: true
                         buttonText: Translation.tr("Custom")
-                        toggled: (Config.options?.appearance?.desaturation?.scope ?? "all") === "custom"
-                        onClicked: Config.setNestedValue("appearance.desaturation.scope", "custom")
+                        toggled: (Config.options?.material?.style?.desaturation?.scope ?? "all") === "custom"
+                        onClicked: Config.setNestedValue("material.style.desaturation.scope", "custom")
                     }
                 }
             }
 
             // Custom scope toggles
             ColumnLayout {
-                visible: (Config.options?.appearance?.desaturation?.scope ?? "all") === "custom"
-                enabled: Boolean(Config.options?.appearance?.desaturation?.enable)
+                visible: (Config.options?.material?.style?.desaturation?.scope ?? "all") === "custom"
+                enabled: Boolean(Config.options?.material?.style?.desaturation?.enable)
                 Layout.fillWidth: true
                 spacing: 0
 
                 SettingsSwitch {
                     buttonIcon: "toolbar"
                     text: Translation.tr("Bar")
-                    checked: Config.options?.appearance?.desaturation?.bar ?? true
-                    onCheckedChanged: Config.setNestedValue("appearance.desaturation.bar", checked)
+                    checked: Config.options?.material?.style?.desaturation?.bar ?? true
+                    onCheckedChanged: Config.setNestedValue("material.style.desaturation.bar", checked)
                 }
                 SettingsSwitch {
                     buttonIcon: "dock_to_bottom"
                     text: Translation.tr("Dock")
-                    checked: Config.options?.appearance?.desaturation?.dock ?? true
-                    onCheckedChanged: Config.setNestedValue("appearance.desaturation.dock", checked)
+                    checked: Config.options?.material?.style?.desaturation?.dock ?? true
+                    onCheckedChanged: Config.setNestedValue("material.style.desaturation.dock", checked)
                 }
                 SettingsSwitch {
                     buttonIcon: "view_sidebar"
                     text: Translation.tr("Sidebars")
-                    checked: Config.options?.appearance?.desaturation?.sidebars ?? true
-                    onCheckedChanged: Config.setNestedValue("appearance.desaturation.sidebars", checked)
+                    checked: Config.options?.material?.style?.desaturation?.sidebars ?? true
+                    onCheckedChanged: Config.setNestedValue("material.style.desaturation.sidebars", checked)
                 }
                 SettingsSwitch {
                     buttonIcon: "layers"
                     text: Translation.tr("Overlays")
-                    checked: Config.options?.appearance?.desaturation?.overlays ?? true
-                    onCheckedChanged: Config.setNestedValue("appearance.desaturation.overlays", checked)
+                    checked: Config.options?.material?.style?.desaturation?.overlays ?? true
+                    onCheckedChanged: Config.setNestedValue("material.style.desaturation.overlays", checked)
                 }
                 SettingsSwitch {
                     buttonIcon: "picture_in_picture"
                     text: Translation.tr("Popups")
-                    checked: Config.options?.appearance?.desaturation?.popups ?? true
-                    onCheckedChanged: Config.setNestedValue("appearance.desaturation.popups", checked)
+                    checked: Config.options?.material?.style?.desaturation?.popups ?? true
+                    onCheckedChanged: Config.setNestedValue("material.style.desaturation.popups", checked)
                 }
             }
         }
@@ -399,7 +399,7 @@ ContentPage {
     }
 
     SettingsTaskLoader {
-        requested: root.activeSection === "tools" && root.isIiActive && !(Config.options?.settingsUi?.easyMode ?? false)
+        requested: root.activeSection === "tools" && root.isIiActive && !(Config.options?.material?.settingsUi?.easyMode ?? false)
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "tools"
@@ -612,9 +612,9 @@ ContentPage {
             ConfigSwitch {
                 buttonIcon: "pinch"
                 text: Translation.tr("Scale on hover")
-                checked: Config.options?.notifications?.scaleOnHover ?? false
+                checked: Config.options?.material?.notifications?.scaleOnHover ?? false
                 onCheckedChanged: {
-                    Config.setNestedValue("notifications.scaleOnHover", checked)
+                    Config.setNestedValue("material.notifications.scaleOnHover", checked)
                 }
                 StyledToolTip {
                     text: Translation.tr("Slightly enlarge notifications when the mouse hovers over them")
@@ -676,12 +676,12 @@ ContentPage {
             ConfigSpinBox {
                 icon: "vertical_align_top"
                 text: Translation.tr("Margin (px)")
-                value: Config.options?.notifications?.edgeMargin ?? 4
+                value: Config.options?.material?.notifications?.edgeMargin ?? 4
                 from: 0
                 to: 100
                 stepSize: 1
                 onValueModified: {
-                    Config.setNestedValue("notifications.edgeMargin", value)
+                    Config.setNestedValue("material.notifications.edgeMargin", value)
                 }
                 StyledToolTip {
                     text: Translation.tr("Spacing between notifications and the screen edge/anchor")
@@ -704,9 +704,9 @@ ContentPage {
                 title: Translation.tr("Anchor")
 
                 ConfigSelectionArray {
-                    currentValue: Config.options?.notifications?.position ?? "topRight"
+                    currentValue: Config.options?.material?.notifications?.position ?? "topRight"
                     onSelected: newValue => {
-                        Config.setNestedValue("notifications.position", newValue)
+                        Config.setNestedValue("material.notifications.position", newValue)
                     }
                     options: [
                         { displayName: Translation.tr("Top Right"), icon: "north_east", value: "topRight" },
@@ -734,8 +734,8 @@ ContentPage {
             SettingsSwitch {
                 buttonIcon: "density_medium"
                 text: Translation.tr("Compact cards")
-                checked: Config.options?.controlPanel?.compactMode ?? true
-                onCheckedChanged: Config.setNestedValue("controlPanel.compactMode", checked)
+                checked: Config.options?.material?.controlPanel?.compactMode ?? true
+                onCheckedChanged: Config.setNestedValue("material.controlPanel.compactMode", checked)
                 StyledToolTip {
                     text: Translation.tr("Use tighter spacing and shorter cards in the quick settings panel")
                 }
@@ -744,8 +744,8 @@ ContentPage {
             SettingsSwitch {
                 buttonIcon: "wallpaper"
                 text: Translation.tr("Show wallpaper card")
-                checked: Config.options?.controlPanel?.showWallpaperSection ?? true
-                onCheckedChanged: Config.setNestedValue("controlPanel.showWallpaperSection", checked)
+                checked: Config.options?.material?.controlPanel?.showWallpaperSection ?? true
+                onCheckedChanged: Config.setNestedValue("material.controlPanel.showWallpaperSection", checked)
                 StyledToolTip {
                     text: Translation.tr("Show the wallpaper preview card in the quick settings panel")
                 }
@@ -754,9 +754,9 @@ ContentPage {
             SettingsSwitch {
                 buttonIcon: "palette"
                 text: Translation.tr("Show wallpaper scheme buttons")
-                enabled: Config.options?.controlPanel?.showWallpaperSection ?? true
-                checked: Config.options?.controlPanel?.showWallpaperSchemeChips ?? false
-                onCheckedChanged: Config.setNestedValue("controlPanel.showWallpaperSchemeChips", checked)
+                enabled: Config.options?.material?.controlPanel?.showWallpaperSection ?? true
+                checked: Config.options?.material?.controlPanel?.showWallpaperSchemeChips ?? false
+                onCheckedChanged: Config.setNestedValue("material.controlPanel.showWallpaperSchemeChips", checked)
                 StyledToolTip {
                     text: Translation.tr("Show the scheme variant buttons under the wallpaper preview")
                 }
@@ -768,44 +768,44 @@ ContentPage {
                 SettingsSwitch {
                     buttonIcon: "music_note"
                     text: Translation.tr("Media")
-                    checked: Config.options?.controlPanel?.showMediaSection ?? true
-                    onCheckedChanged: Config.setNestedValue("controlPanel.showMediaSection", checked)
+                    checked: Config.options?.material?.controlPanel?.showMediaSection ?? true
+                    onCheckedChanged: Config.setNestedValue("material.controlPanel.showMediaSection", checked)
                 }
 
                 SettingsSwitch {
                     buttonIcon: "partly_cloudy_day"
                     text: Translation.tr("Weather")
-                    checked: Config.options?.controlPanel?.showWeatherSection ?? true
-                    onCheckedChanged: Config.setNestedValue("controlPanel.showWeatherSection", checked)
+                    checked: Config.options?.material?.controlPanel?.showWeatherSection ?? true
+                    onCheckedChanged: Config.setNestedValue("material.controlPanel.showWeatherSection", checked)
                 }
 
                 SettingsSwitch {
                     buttonIcon: "monitoring"
                     text: Translation.tr("System status")
-                    checked: Config.options?.controlPanel?.showSystemSection ?? true
-                    onCheckedChanged: Config.setNestedValue("controlPanel.showSystemSection", checked)
+                    checked: Config.options?.material?.controlPanel?.showSystemSection ?? true
+                    onCheckedChanged: Config.setNestedValue("material.controlPanel.showSystemSection", checked)
                 }
 
                 SettingsSwitch {
                     buttonIcon: "tune"
                     text: Translation.tr("Sliders")
-                    checked: Config.options?.controlPanel?.showSlidersSection ?? true
-                    onCheckedChanged: Config.setNestedValue("controlPanel.showSlidersSection", checked)
+                    checked: Config.options?.material?.controlPanel?.showSlidersSection ?? true
+                    onCheckedChanged: Config.setNestedValue("material.controlPanel.showSlidersSection", checked)
                 }
 
                 SettingsSwitch {
                     buttonIcon: "apps"
                     text: Translation.tr("Quick actions")
-                    checked: Config.options?.controlPanel?.showQuickActionsSection ?? true
-                    onCheckedChanged: Config.setNestedValue("controlPanel.showQuickActionsSection", checked)
+                    checked: Config.options?.material?.controlPanel?.showQuickActionsSection ?? true
+                    onCheckedChanged: Config.setNestedValue("material.controlPanel.showQuickActionsSection", checked)
                 }
             }
 
             SettingsSwitch {
                 buttonIcon: "memory"
                 text: Translation.tr("Keep control panel loaded")
-                checked: Config.options?.controlPanel?.keepLoaded ?? false
-                onCheckedChanged: Config.setNestedValue("controlPanel.keepLoaded", checked)
+                checked: Config.options?.material?.controlPanel?.keepLoaded ?? false
+                onCheckedChanged: Config.setNestedValue("material.controlPanel.keepLoaded", checked)
                 StyledToolTip {
                     text: Translation.tr("Keep the quick settings panel in memory to reduce opening delay")
                 }
@@ -816,7 +816,7 @@ ContentPage {
     }
 
     SettingsTaskLoader {
-        requested: root.activeSection === "widgets" && root.isIiActive && !(Config.options?.settingsUi?.easyMode ?? false)
+        requested: root.activeSection === "widgets" && root.isIiActive && !(Config.options?.material?.settingsUi?.easyMode ?? false)
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "widgets"
@@ -832,44 +832,44 @@ ContentPage {
                 SettingsSwitch {
                     buttonIcon: "music_note"
                     text: Translation.tr("Media player")
-                    checked: Config.options?.sidebar?.widgets?.media ?? true
-                    onCheckedChanged: Config.setNestedValue("sidebar.widgets.media", checked)
+                    checked: Config.options?.material?.sidebar?.widgets?.media ?? true
+                    onCheckedChanged: Config.setNestedValue("material.sidebar.widgets.media", checked)
                 }
 
                 SettingsSwitch {
                     buttonIcon: "calendar_today"
                     text: Translation.tr("Week strip")
-                    checked: Config.options?.sidebar?.widgets?.week ?? true
-                    onCheckedChanged: Config.setNestedValue("sidebar.widgets.week", checked)
+                    checked: Config.options?.material?.sidebar?.widgets?.week ?? true
+                    onCheckedChanged: Config.setNestedValue("material.sidebar.widgets.week", checked)
                 }
 
                 SettingsSwitch {
                     buttonIcon: "partly_cloudy_day"
                     text: Translation.tr("Context card (Weather/Timer)")
-                    checked: Config.options?.sidebar?.widgets?.context ?? true
-                    onCheckedChanged: Config.setNestedValue("sidebar.widgets.context", checked)
+                    checked: Config.options?.material?.sidebar?.widgets?.context ?? true
+                    onCheckedChanged: Config.setNestedValue("material.sidebar.widgets.context", checked)
                 }
 
                 SettingsSwitch {
                     buttonIcon: "cloud"
                     text: Translation.tr("Show weather in context card")
-                    checked: Config.options?.sidebar?.widgets?.contextShowWeather ?? true
-                    onCheckedChanged: Config.setNestedValue("sidebar.widgets.contextShowWeather", checked)
-                    enabled: Config.options?.sidebar?.widgets?.context ?? true
+                    checked: Config.options?.material?.sidebar?.widgets?.contextShowWeather ?? true
+                    onCheckedChanged: Config.setNestedValue("material.sidebar.widgets.contextShowWeather", checked)
+                    enabled: Config.options?.material?.sidebar?.widgets?.context ?? true
                 }
 
                 SettingsSwitch {
                     buttonIcon: "edit_note"
                     text: Translation.tr("Quick note")
-                    checked: Config.options?.sidebar?.widgets?.note ?? true
-                    onCheckedChanged: Config.setNestedValue("sidebar.widgets.note", checked)
+                    checked: Config.options?.material?.sidebar?.widgets?.note ?? true
+                    onCheckedChanged: Config.setNestedValue("material.sidebar.widgets.note", checked)
                 }
 
                 SettingsSwitch {
                     buttonIcon: "apps"
                     text: Translation.tr("Quick launch")
-                    checked: Config.options?.sidebar?.widgets?.launch ?? true
-                    onCheckedChanged: Config.setNestedValue("sidebar.widgets.launch", checked)
+                    checked: Config.options?.material?.sidebar?.widgets?.launch ?? true
+                    onCheckedChanged: Config.setNestedValue("material.sidebar.widgets.launch", checked)
                 }
 
                 // Quick launch apps editor
@@ -879,9 +879,9 @@ ContentPage {
                     Layout.leftMargin: 16
                     Layout.topMargin: 2
                     spacing: 2
-                    visible: Config.options?.sidebar?.widgets?.launch ?? true
+                    visible: Config.options?.material?.sidebar?.widgets?.launch ?? true
 
-                    property var shortcuts: Config.options?.sidebar?.widgets?.quickLaunch ?? [
+                    property var shortcuts: Config.options?.material?.sidebar?.widgets?.quickLaunch ?? [
                         { icon: "folder", name: "Files", cmd: "/usr/bin/nautilus" },
                         { icon: "terminal", name: "Terminal", cmd: "/usr/bin/kitty" },
                         { icon: "web", name: "Browser", cmd: "/usr/bin/firefox" },
@@ -902,7 +902,7 @@ ContentPage {
                             if (idx >= 0 && idx < quickLaunchEditor.shortcuts.length) {
                                 const newShortcuts = JSON.parse(JSON.stringify(quickLaunchEditor.shortcuts))
                                 newShortcuts[idx][key] = val
-                                Config.setNestedValue("sidebar.widgets.quickLaunch", newShortcuts)
+                                Config.setNestedValue("material.sidebar.widgets.quickLaunch", newShortcuts)
                             }
                         }
                     }
@@ -916,12 +916,12 @@ ContentPage {
 
                     function removeShortcut(index) {
                         const newShortcuts = shortcuts.filter((_, i) => i !== index)
-                        Config.setNestedValue("sidebar.widgets.quickLaunch", newShortcuts)
+                        Config.setNestedValue("material.sidebar.widgets.quickLaunch", newShortcuts)
                     }
 
                     function addShortcut() {
                         const newShortcuts = [...shortcuts, { icon: "apps", name: "", cmd: "" }]
-                        Config.setNestedValue("sidebar.widgets.quickLaunch", newShortcuts)
+                        Config.setNestedValue("material.sidebar.widgets.quickLaunch", newShortcuts)
                     }
 
                     Repeater {
@@ -1078,36 +1078,36 @@ ContentPage {
                 SettingsSwitch {
                     buttonIcon: "toggle_on"
                     text: Translation.tr("Controls")
-                    checked: Config.options?.sidebar?.widgets?.controls ?? true
-                    onCheckedChanged: Config.setNestedValue("sidebar.widgets.controls", checked)
+                    checked: Config.options?.material?.sidebar?.widgets?.controls ?? true
+                    onCheckedChanged: Config.setNestedValue("material.sidebar.widgets.controls", checked)
                 }
 
                 SettingsSwitch {
                     buttonIcon: "monitoring"
                     text: Translation.tr("System status")
-                    checked: Config.options?.sidebar?.widgets?.status ?? true
-                    onCheckedChanged: Config.setNestedValue("sidebar.widgets.status", checked)
+                    checked: Config.options?.material?.sidebar?.widgets?.status ?? true
+                    onCheckedChanged: Config.setNestedValue("material.sidebar.widgets.status", checked)
                 }
 
                 SettingsSwitch {
                     buttonIcon: "currency_bitcoin"
                     text: Translation.tr("Crypto prices")
-                    checked: Config.options?.sidebar?.widgets?.crypto ?? false
-                    onCheckedChanged: Config.setNestedValue("sidebar.widgets.crypto", checked)
+                    checked: Config.options?.material?.sidebar?.widgets?.crypto ?? false
+                    onCheckedChanged: Config.setNestedValue("material.sidebar.widgets.crypto", checked)
                 }
 
                 SettingsSwitch {
                     buttonIcon: "wallpaper"
                     text: Translation.tr("Wallpaper picker")
-                    checked: Config.options?.sidebar?.widgets?.wallpaper ?? false
-                    onCheckedChanged: Config.setNestedValue("sidebar.widgets.wallpaper", checked)
+                    checked: Config.options?.material?.sidebar?.widgets?.wallpaper ?? false
+                    onCheckedChanged: Config.setNestedValue("material.sidebar.widgets.wallpaper", checked)
                 }
 
                 SettingsSwitch {
                     buttonIcon: "schedule"
                     text: Translation.tr("World Clock")
-                    checked: Config.options?.sidebar?.widgets?.worldClock ?? true
-                    onCheckedChanged: Config.setNestedValue("sidebar.widgets.worldClock", checked)
+                    checked: Config.options?.material?.sidebar?.widgets?.worldClock ?? true
+                    onCheckedChanged: Config.setNestedValue("material.sidebar.widgets.worldClock", checked)
                 }
             }
 
@@ -1118,11 +1118,11 @@ ContentPage {
                     icon: "format_line_spacing"
                     text: Translation.tr("Widget spacing")
                     unit: "px"
-                    value: Config.options?.sidebar?.widgets?.spacing ?? 8
+                    value: Config.options?.material?.sidebar?.widgets?.spacing ?? 8
                     from: 0
                     to: 24
                     stepSize: 2
-                    onValueModified: Config.setNestedValue("sidebar.widgets.spacing", value)
+                    onValueModified: Config.setNestedValue("material.sidebar.widgets.spacing", value)
                     StyledToolTip {
                         text: Translation.tr("Space between widgets in pixels")
                     }
@@ -1139,7 +1139,7 @@ ContentPage {
                 id: cryptoSection
                 title: Translation.tr("Crypto Widget")
                 tooltip: Translation.tr("Configure cryptocurrencies to track")
-                visible: Config.options?.sidebar?.widgets?.crypto ?? false
+                visible: Config.options?.material?.sidebar?.widgets?.crypto ?? false
 
                 readonly property var popularCoins: [
                     "bitcoin", "ethereum", "solana", "cardano", "dogecoin", "ripple",
@@ -1150,32 +1150,32 @@ ContentPage {
                 function addCoin(coinId) {
                     const id = coinId.toLowerCase().trim()
                     if (!id) return
-                    const current = Config.options?.sidebar?.widgets?.crypto_settings?.coins ?? []
+                    const current = Config.options?.material?.sidebar?.widgets?.crypto_settings?.coins ?? []
                     if (current.includes(id)) return
-                    Config.setNestedValue("sidebar.widgets.crypto_settings.coins", [...current, id])
+                    Config.setNestedValue("material.sidebar.widgets.crypto_settings.coins", [...current, id])
                     coinInput.text = ""
                     coinPopup.close()
                 }
 
                 function removeCoin(coinId) {
-                    const current = Config.options?.sidebar?.widgets?.crypto_settings?.coins ?? []
-                    Config.setNestedValue("sidebar.widgets.crypto_settings.coins", current.filter(c => c !== coinId))
+                    const current = Config.options?.material?.sidebar?.widgets?.crypto_settings?.coins ?? []
+                    Config.setNestedValue("material.sidebar.widgets.crypto_settings.coins", current.filter(c => c !== coinId))
                 }
 
                 function filteredCoins() {
                     const q = coinInput.text.toLowerCase().trim()
-                    const current = Config.options?.sidebar?.widgets?.crypto_settings?.coins ?? []
+                    const current = Config.options?.material?.sidebar?.widgets?.crypto_settings?.coins ?? []
                     return popularCoins.filter(c => !current.includes(c) && c.includes(q))
                 }
 
                 ConfigSpinBox {
                     icon: "schedule"
                     text: Translation.tr("Refresh interval (seconds)")
-                    value: Config.options?.sidebar?.widgets?.crypto_settings?.refreshInterval ?? 60
+                    value: Config.options?.material?.sidebar?.widgets?.crypto_settings?.refreshInterval ?? 60
                     from: 30
                     to: 300
                     stepSize: 30
-                    onValueModified: Config.setNestedValue("sidebar.widgets.crypto_settings.refreshInterval", value)
+                    onValueModified: Config.setNestedValue("material.sidebar.widgets.crypto_settings.refreshInterval", value)
                 }
 
                 // Coin input with autocomplete
@@ -1268,10 +1268,10 @@ ContentPage {
                 Flow {
                     Layout.fillWidth: true
                     spacing: 6
-                    visible: (Config.options?.sidebar?.widgets?.crypto_settings?.coins ?? []).length > 0
+                    visible: (Config.options?.material?.sidebar?.widgets?.crypto_settings?.coins ?? []).length > 0
 
                     Repeater {
-                        model: Config.options?.sidebar?.widgets?.crypto_settings?.coins ?? []
+                        model: Config.options?.material?.sidebar?.widgets?.crypto_settings?.coins ?? []
 
                         InputChip {
                             required property string modelData
@@ -1287,7 +1287,7 @@ ContentPage {
                 id: worldClockSection
                 title: Translation.tr("World Clock Widget")
                 tooltip: Translation.tr("Configure timezones and display options")
-                visible: Config.options?.sidebar?.widgets?.worldClock ?? true
+                visible: Config.options?.material?.sidebar?.widgets?.worldClock ?? true
 
                 // Curated IANA timezone list with approximate standard GMT offset (minutes).
                 // Offsets are for sorting/preview hints in the picker — the widget itself
@@ -1382,31 +1382,31 @@ ContentPage {
                 function addTimezone(tz) {
                     const id = tz.trim()
                     if (!id) return
-                    const current = Config.options?.sidebar?.widgets?.worldClock_settings?.timezones ?? []
+                    const current = Config.options?.material?.sidebar?.widgets?.worldClock_settings?.timezones ?? []
                     if (current.includes(id)) return
-                    Config.setNestedValue("sidebar.widgets.worldClock_settings.timezones", [...current, id])
+                    Config.setNestedValue("material.sidebar.widgets.worldClock_settings.timezones", [...current, id])
                     tzInput.text = ""
                     tzPopup.close()
                 }
 
                 function removeTimezone(tz) {
-                    const current = Config.options?.sidebar?.widgets?.worldClock_settings?.timezones ?? []
-                    Config.setNestedValue("sidebar.widgets.worldClock_settings.timezones", current.filter(t => t !== tz))
+                    const current = Config.options?.material?.sidebar?.widgets?.worldClock_settings?.timezones ?? []
+                    Config.setNestedValue("material.sidebar.widgets.worldClock_settings.timezones", current.filter(t => t !== tz))
                 }
 
                 function moveTimezone(index, direction) {
-                    const current = (Config.options?.sidebar?.widgets?.worldClock_settings?.timezones ?? []).slice()
+                    const current = (Config.options?.material?.sidebar?.widgets?.worldClock_settings?.timezones ?? []).slice()
                     const target = index + direction
                     if (target < 0 || target >= current.length) return
                     const tmp = current[index]
                     current[index] = current[target]
                     current[target] = tmp
-                    Config.setNestedValue("sidebar.widgets.worldClock_settings.timezones", current)
+                    Config.setNestedValue("material.sidebar.widgets.worldClock_settings.timezones", current)
                 }
 
                 function filteredTimezones() {
                     const q = tzInput.text.toLowerCase().trim().replace(/ /g, "_")
-                    const current = Config.options?.sidebar?.widgets?.worldClock_settings?.timezones ?? []
+                    const current = Config.options?.material?.sidebar?.widgets?.worldClock_settings?.timezones ?? []
                     return timezoneCatalog
                         .filter(e => !current.includes(e.tz) && e.tz.toLowerCase().includes(q))
                         .slice(0, 10)
@@ -1454,16 +1454,16 @@ ContentPage {
                 function adoptSuggestions() {
                     const sugg = suggestedTimezones()
                     if (sugg.length > 0)
-                        Config.setNestedValue("sidebar.widgets.worldClock_settings.timezones", sugg)
+                        Config.setNestedValue("material.sidebar.widgets.worldClock_settings.timezones", sugg)
                 }
 
                 // ── Live time fetch for added timezones (chips/rows) ──────
                 property var liveTimes: ({})
 
                 function refreshLiveTimes() {
-                    const tzs = Config.options?.sidebar?.widgets?.worldClock_settings?.timezones ?? []
+                    const tzs = Config.options?.material?.sidebar?.widgets?.worldClock_settings?.timezones ?? []
                     if (tzs.length === 0) { liveTimes = ({}); return }
-                    const fmt = (Config.options?.sidebar?.widgets?.worldClock_settings?.use24Hour ?? true) ? "%H:%M" : "%I:%M %p"
+                    const fmt = (Config.options?.material?.sidebar?.widgets?.worldClock_settings?.use24Hour ?? true) ? "%H:%M" : "%I:%M %p"
                     let script = ""
                     for (let i = 0; i < tzs.length; i++)
                         script += `printf '%s|%s\\n' "${tzs[i]}" "$(TZ='${tzs[i]}' date '+${fmt}|%:z')"\n`
@@ -1513,8 +1513,8 @@ ContentPage {
                 SettingsSwitch {
                     buttonIcon: "schedule"
                     text: Translation.tr("24-hour format")
-                    checked: Config.options?.sidebar?.widgets?.worldClock_settings?.use24Hour ?? true
-                    onCheckedChanged: Config.setNestedValue("sidebar.widgets.worldClock_settings.use24Hour", checked)
+                    checked: Config.options?.material?.sidebar?.widgets?.worldClock_settings?.use24Hour ?? true
+                    onCheckedChanged: Config.setNestedValue("material.sidebar.widgets.worldClock_settings.use24Hour", checked)
                     StyledToolTip {
                         text: Translation.tr("Toggle between 24-hour and 12-hour AM/PM time")
                     }
@@ -1523,8 +1523,8 @@ ContentPage {
                 SettingsSwitch {
                     buttonIcon: "timer"
                     text: Translation.tr("Show seconds")
-                    checked: Config.options?.sidebar?.widgets?.worldClock_settings?.showSeconds ?? false
-                    onCheckedChanged: Config.setNestedValue("sidebar.widgets.worldClock_settings.showSeconds", checked)
+                    checked: Config.options?.material?.sidebar?.widgets?.worldClock_settings?.showSeconds ?? false
+                    onCheckedChanged: Config.setNestedValue("material.sidebar.widgets.worldClock_settings.showSeconds", checked)
                     StyledToolTip {
                         text: Translation.tr("Updates every second while the sidebar is open (slightly higher CPU)")
                     }
@@ -1533,8 +1533,8 @@ ContentPage {
                 SettingsSwitch {
                     buttonIcon: "today"
                     text: Translation.tr("Show date & GMT offset")
-                    checked: Config.options?.sidebar?.widgets?.worldClock_settings?.showDate ?? true
-                    onCheckedChanged: Config.setNestedValue("sidebar.widgets.worldClock_settings.showDate", checked)
+                    checked: Config.options?.material?.sidebar?.widgets?.worldClock_settings?.showDate ?? true
+                    onCheckedChanged: Config.setNestedValue("material.sidebar.widgets.worldClock_settings.showDate", checked)
                     StyledToolTip {
                         text: Translation.tr("Display the weekday, date and UTC offset under each city")
                     }
@@ -1543,8 +1543,8 @@ ContentPage {
                 SettingsSwitch {
                     buttonIcon: "my_location"
                     text: Translation.tr("Highlight local timezone")
-                    checked: Config.options?.sidebar?.widgets?.worldClock_settings?.highlightLocal ?? true
-                    onCheckedChanged: Config.setNestedValue("sidebar.widgets.worldClock_settings.highlightLocal", checked)
+                    checked: Config.options?.material?.sidebar?.widgets?.worldClock_settings?.highlightLocal ?? true
+                    onCheckedChanged: Config.setNestedValue("material.sidebar.widgets.worldClock_settings.highlightLocal", checked)
                     StyledToolTip {
                         text: Translation.tr("Pin your local timezone to the top and accent it")
                     }
@@ -1684,17 +1684,17 @@ ContentPage {
                     Layout.fillWidth: true
                     Layout.topMargin: 2
                     spacing: 4
-                    visible: (Config.options?.sidebar?.widgets?.worldClock_settings?.timezones ?? []).length > 0
+                    visible: (Config.options?.material?.sidebar?.widgets?.worldClock_settings?.timezones ?? []).length > 0
 
                     Repeater {
-                        model: Config.options?.sidebar?.widgets?.worldClock_settings?.timezones ?? []
+                        model: Config.options?.material?.sidebar?.widgets?.worldClock_settings?.timezones ?? []
 
                         delegate: Rectangle {
                             id: tzRowItem
                             required property string modelData
                             required property int index
                             readonly property var live: worldClockSection.liveTimes[modelData] ?? null
-                            readonly property int total: (Config.options?.sidebar?.widgets?.worldClock_settings?.timezones ?? []).length
+                            readonly property int total: (Config.options?.material?.sidebar?.widgets?.worldClock_settings?.timezones ?? []).length
 
                             Layout.fillWidth: true
                             implicitHeight: 44
@@ -1827,7 +1827,7 @@ ContentPage {
                 // so they can be individually removed/reordered/edited.
                 Rectangle {
                     Layout.fillWidth: true
-                    visible: (Config.options?.sidebar?.widgets?.worldClock_settings?.timezones ?? []).length === 0
+                    visible: (Config.options?.material?.sidebar?.widgets?.worldClock_settings?.timezones ?? []).length === 0
                     implicitHeight: emptyCol.implicitHeight + 20
                     radius: Appearance.inirEverywhere ? Appearance.inir.roundingSmall : Appearance.rounding.small
                     color: Appearance.inirEverywhere ? Appearance.inir.colLayer2 : Appearance.colors.colLayer2
@@ -1905,24 +1905,24 @@ ContentPage {
             ContentSubsection {
                 title: Translation.tr("Wallpaper Picker")
                 tooltip: Translation.tr("Quick wallpaper selection widget")
-                visible: Config.options?.sidebar?.widgets?.wallpaper ?? false
+                visible: Config.options?.material?.sidebar?.widgets?.wallpaper ?? false
 
                 ConfigSpinBox {
                     icon: "photo_size_select_large"
                     text: Translation.tr("Thumbnail size")
                     unit: "px"
-                    value: Config.options?.sidebar?.widgets?.quickWallpaper?.itemSize ?? 56
+                    value: Config.options?.material?.sidebar?.widgets?.quickWallpaper?.itemSize ?? 56
                     from: 40
                     to: 80
                     stepSize: 4
-                    onValueModified: Config.setNestedValue("sidebar.widgets.quickWallpaper.itemSize", value)
+                    onValueModified: Config.setNestedValue("material.sidebar.widgets.quickWallpaper.itemSize", value)
                 }
 
                 SettingsSwitch {
                     buttonIcon: "title"
                     text: Translation.tr("Show header")
-                    checked: Config.options?.sidebar?.widgets?.quickWallpaper?.showHeader ?? true
-                    onCheckedChanged: Config.setNestedValue("sidebar.widgets.quickWallpaper.showHeader", checked)
+                    checked: Config.options?.material?.sidebar?.widgets?.quickWallpaper?.showHeader ?? true
+                    onCheckedChanged: Config.setNestedValue("material.sidebar.widgets.quickWallpaper.showHeader", checked)
                 }
 
                 NoticeBox {
@@ -1939,22 +1939,22 @@ ContentPage {
                 SettingsSwitch {
                     buttonIcon: "volume_up"
                     text: Translation.tr("Volume button")
-                    checked: Config.options?.sidebar?.widgets?.glance?.showVolume ?? true
-                    onCheckedChanged: Config.setNestedValue("sidebar.widgets.glance.showVolume", checked)
+                    checked: Config.options?.material?.sidebar?.widgets?.glance?.showVolume ?? true
+                    onCheckedChanged: Config.setNestedValue("material.sidebar.widgets.glance.showVolume", checked)
                 }
 
                 SettingsSwitch {
                     buttonIcon: "sports_esports"
                     text: Translation.tr("Game mode indicator")
-                    checked: Config.options?.sidebar?.widgets?.glance?.showGameMode ?? true
-                    onCheckedChanged: Config.setNestedValue("sidebar.widgets.glance.showGameMode", checked)
+                    checked: Config.options?.material?.sidebar?.widgets?.glance?.showGameMode ?? true
+                    onCheckedChanged: Config.setNestedValue("material.sidebar.widgets.glance.showGameMode", checked)
                 }
 
                 SettingsSwitch {
                     buttonIcon: "do_not_disturb_on"
                     text: Translation.tr("Do not disturb indicator")
-                    checked: Config.options?.sidebar?.widgets?.glance?.showDnd ?? true
-                    onCheckedChanged: Config.setNestedValue("sidebar.widgets.glance.showDnd", checked)
+                    checked: Config.options?.material?.sidebar?.widgets?.glance?.showDnd ?? true
+                    onCheckedChanged: Config.setNestedValue("material.sidebar.widgets.glance.showDnd", checked)
                 }
             }
 
@@ -1965,36 +1965,36 @@ ContentPage {
                 SettingsSwitch {
                     buttonIcon: "memory"
                     text: Translation.tr("CPU usage")
-                    checked: Config.options?.sidebar?.widgets?.statusRings?.showCpu ?? true
-                    onCheckedChanged: Config.setNestedValue("sidebar.widgets.statusRings.showCpu", checked)
+                    checked: Config.options?.material?.sidebar?.widgets?.statusRings?.showCpu ?? true
+                    onCheckedChanged: Config.setNestedValue("material.sidebar.widgets.statusRings.showCpu", checked)
                 }
 
                 SettingsSwitch {
                     buttonIcon: "memory_alt"
                     text: Translation.tr("RAM usage")
-                    checked: Config.options?.sidebar?.widgets?.statusRings?.showRam ?? true
-                    onCheckedChanged: Config.setNestedValue("sidebar.widgets.statusRings.showRam", checked)
+                    checked: Config.options?.material?.sidebar?.widgets?.statusRings?.showRam ?? true
+                    onCheckedChanged: Config.setNestedValue("material.sidebar.widgets.statusRings.showRam", checked)
                 }
 
                 SettingsSwitch {
                     buttonIcon: "hard_drive"
                     text: Translation.tr("Disk usage")
-                    checked: Config.options?.sidebar?.widgets?.statusRings?.showDisk ?? true
-                    onCheckedChanged: Config.setNestedValue("sidebar.widgets.statusRings.showDisk", checked)
+                    checked: Config.options?.material?.sidebar?.widgets?.statusRings?.showDisk ?? true
+                    onCheckedChanged: Config.setNestedValue("material.sidebar.widgets.statusRings.showDisk", checked)
                 }
 
                 SettingsSwitch {
                     buttonIcon: "thermostat"
                     text: Translation.tr("Temperature")
-                    checked: Config.options?.sidebar?.widgets?.statusRings?.showTemp ?? true
-                    onCheckedChanged: Config.setNestedValue("sidebar.widgets.statusRings.showTemp", checked)
+                    checked: Config.options?.material?.sidebar?.widgets?.statusRings?.showTemp ?? true
+                    onCheckedChanged: Config.setNestedValue("material.sidebar.widgets.statusRings.showTemp", checked)
                 }
 
                 SettingsSwitch {
                     buttonIcon: "battery_full"
                     text: Translation.tr("Battery")
-                    checked: Config.options?.sidebar?.widgets?.statusRings?.showBattery ?? true
-                    onCheckedChanged: Config.setNestedValue("sidebar.widgets.statusRings.showBattery", checked)
+                    checked: Config.options?.material?.sidebar?.widgets?.statusRings?.showBattery ?? true
+                    onCheckedChanged: Config.setNestedValue("material.sidebar.widgets.statusRings.showBattery", checked)
                 }
             }
 
@@ -2007,29 +2007,29 @@ ContentPage {
                 SettingsSwitch {
                     buttonIcon: "dark_mode"
                     text: Translation.tr("Dark mode")
-                    checked: Config.options?.sidebar?.widgets?.controlsCard?.showDarkMode ?? true
-                    onCheckedChanged: Config.setNestedValue("sidebar.widgets.controlsCard.showDarkMode", checked)
+                    checked: Config.options?.material?.sidebar?.widgets?.controlsCard?.showDarkMode ?? true
+                    onCheckedChanged: Config.setNestedValue("material.sidebar.widgets.controlsCard.showDarkMode", checked)
                 }
 
                 SettingsSwitch {
                     buttonIcon: "do_not_disturb_on"
                     text: Translation.tr("Do not disturb")
-                    checked: Config.options?.sidebar?.widgets?.controlsCard?.showDnd ?? true
-                    onCheckedChanged: Config.setNestedValue("sidebar.widgets.controlsCard.showDnd", checked)
+                    checked: Config.options?.material?.sidebar?.widgets?.controlsCard?.showDnd ?? true
+                    onCheckedChanged: Config.setNestedValue("material.sidebar.widgets.controlsCard.showDnd", checked)
                 }
 
                 SettingsSwitch {
                     buttonIcon: "nightlight"
                     text: Translation.tr("Night light")
-                    checked: Config.options?.sidebar?.widgets?.controlsCard?.showNightLight ?? true
-                    onCheckedChanged: Config.setNestedValue("sidebar.widgets.controlsCard.showNightLight", checked)
+                    checked: Config.options?.material?.sidebar?.widgets?.controlsCard?.showNightLight ?? true
+                    onCheckedChanged: Config.setNestedValue("material.sidebar.widgets.controlsCard.showNightLight", checked)
                 }
 
                 SettingsSwitch {
                     buttonIcon: "sports_esports"
                     text: Translation.tr("Game mode")
-                    checked: Config.options?.sidebar?.widgets?.controlsCard?.showGameMode ?? true
-                    onCheckedChanged: Config.setNestedValue("sidebar.widgets.controlsCard.showGameMode", checked)
+                    checked: Config.options?.material?.sidebar?.widgets?.controlsCard?.showGameMode ?? true
+                    onCheckedChanged: Config.setNestedValue("material.sidebar.widgets.controlsCard.showGameMode", checked)
                 }
 
                 ContentSubsectionLabel { text: Translation.tr("Actions") }
@@ -2037,29 +2037,29 @@ ContentPage {
                 SettingsSwitch {
                     buttonIcon: "wifi"
                     text: Translation.tr("Network")
-                    checked: Config.options?.sidebar?.widgets?.controlsCard?.showNetwork ?? true
-                    onCheckedChanged: Config.setNestedValue("sidebar.widgets.controlsCard.showNetwork", checked)
+                    checked: Config.options?.material?.sidebar?.widgets?.controlsCard?.showNetwork ?? true
+                    onCheckedChanged: Config.setNestedValue("material.sidebar.widgets.controlsCard.showNetwork", checked)
                 }
 
                 SettingsSwitch {
                     buttonIcon: "bluetooth"
                     text: Translation.tr("Bluetooth")
-                    checked: Config.options?.sidebar?.widgets?.controlsCard?.showBluetooth ?? true
-                    onCheckedChanged: Config.setNestedValue("sidebar.widgets.controlsCard.showBluetooth", checked)
+                    checked: Config.options?.material?.sidebar?.widgets?.controlsCard?.showBluetooth ?? true
+                    onCheckedChanged: Config.setNestedValue("material.sidebar.widgets.controlsCard.showBluetooth", checked)
                 }
 
                 SettingsSwitch {
                     buttonIcon: "settings"
                     text: Translation.tr("Settings")
-                    checked: Config.options?.sidebar?.widgets?.controlsCard?.showSettings ?? true
-                    onCheckedChanged: Config.setNestedValue("sidebar.widgets.controlsCard.showSettings", checked)
+                    checked: Config.options?.material?.sidebar?.widgets?.controlsCard?.showSettings ?? true
+                    onCheckedChanged: Config.setNestedValue("material.sidebar.widgets.controlsCard.showSettings", checked)
                 }
 
                 SettingsSwitch {
                     buttonIcon: "lock"
                     text: Translation.tr("Lock")
-                    checked: Config.options?.sidebar?.widgets?.controlsCard?.showLock ?? true
-                    onCheckedChanged: Config.setNestedValue("sidebar.widgets.controlsCard.showLock", checked)
+                    checked: Config.options?.material?.sidebar?.widgets?.controlsCard?.showLock ?? true
+                    onCheckedChanged: Config.setNestedValue("material.sidebar.widgets.controlsCard.showLock", checked)
                 }
             }
         }
@@ -2068,7 +2068,7 @@ ContentPage {
     }
 
     SettingsTaskLoader {
-        requested: root.activeSection === "overview" && root.isIiActive && !(Config.options?.settingsUi?.easyMode ?? false)
+        requested: root.activeSection === "overview" && root.isIiActive && !(Config.options?.material?.settingsUi?.easyMode ?? false)
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "overview"

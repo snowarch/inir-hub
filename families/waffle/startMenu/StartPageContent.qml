@@ -15,7 +15,7 @@ WPanelPageColumn {
 
     signal allAppsClicked()
     
-    property list<string> pinnedApps: Config.options.dock?.pinnedApps ?? []
+    property list<string> pinnedApps: Config.options?.apps?.pinned ?? []
     property var recentApps: getRecentApps()
 
     WPanelSeparator {}

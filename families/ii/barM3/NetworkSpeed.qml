@@ -20,7 +20,7 @@ MouseArea {
     implicitWidth: vertical ? 36 : speedColumn.implicitWidth + 8
     implicitHeight: vertical ? speedColumn.implicitHeight + 6 : 32
 
-    readonly property bool clickForDetails: Config.options?.bar?.m3?.tooltips?.clickToShow ?? false
+    readonly property bool clickForDetails: Config.options?.material?.bar?.m3?.tooltips?.clickToShow ?? false
     hoverEnabled: true
 
     onClicked: mouse => {

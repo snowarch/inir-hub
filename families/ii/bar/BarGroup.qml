@@ -40,10 +40,10 @@ Item {
     // bare chips (no surface of their own) don't pad like a capsule.
     property real padding: islandStyle && !bare ? 12
         : Appearance.regaliaEverywhere && !bare ? Appearance.regalia.tilePadding : 8
-    readonly property bool cardStyleEverywhere: (Config.options?.dock?.cardStyle ?? false) && (Config.options?.sidebar?.cardStyle ?? false) && (Config.options?.bar?.cornerStyle === 3)
+    readonly property bool cardStyleEverywhere: (Config.options?.material?.dock?.cardStyle ?? false) && (Config.options?.material?.sidebar?.cardStyle ?? false) && (Config.options?.material?.bar?.cornerStyle === 3)
     // Islands bar appearance: each group is its own floating surface.
     // Works in both horizontal and vertical bar modes.
-    readonly property bool islandStyle: (Config.options?.bar?.appearanceStyle ?? "classic") === "islands"
+    readonly property bool islandStyle: (Config.options?.material?.bar?.appearanceStyle ?? "classic") === "islands"
     // Bare: no surface of its own — for groups that live INSIDE another island
     // (e.g. the weather chip in an edge island) so cards never nest.
     property bool bare: false
@@ -101,7 +101,7 @@ Item {
         visible: !root.islandStyle && !root.bare
         cardStyle: root.cardStyleEverywhere
         borderless: Appearance.regaliaEverywhere ? false
-            : !root.islandStyle && (Config.options?.bar?.borderless ?? false)
+            : !root.islandStyle && (Config.options?.material?.bar?.borderless ?? false)
         radiusOverride: Appearance.regaliaEverywhere ? Appearance.regalia.roundSmall : -1
         elevation: Appearance.regaliaEverywhere ? 2 : 1
         editorialGlassMaterial: Appearance.editorialEverywhere && Appearance.editorial.glassActive
@@ -115,7 +115,7 @@ Item {
     // wallpaper) does not apply here.
     BarIslandSurface {
         id: islandSurface
-        readonly property int inset: Config.options?.bar?.islands?.inset ?? 4
+        readonly property int inset: Config.options?.material?.bar?.islands?.inset ?? 4
         anchors {
             fill: parent
             topMargin: root.vertical ? 0 : inset

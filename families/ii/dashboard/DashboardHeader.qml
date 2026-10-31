@@ -16,7 +16,7 @@ RowLayout {
 
     readonly property bool inirEverywhere: Appearance.inirEverywhere
     readonly property bool auroraEverywhere: Appearance.auroraEverywhere
-    readonly property bool showPowerButtons: Config.options?.dashboard?.showPowerButtons ?? true
+    readonly property bool showPowerButtons: Config.options?.material?.dashboard?.showPowerButtons ?? true
     readonly property color colText: Appearance.angelEverywhere ? Appearance.angel.colText
         : inirEverywhere ? Appearance.inir.colText
         : Appearance.editorialEverywhere ? Appearance.editorial.ink

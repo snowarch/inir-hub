@@ -10,7 +10,7 @@ Item {
     property bool vertical: false
     property int currentIndex: 0
     property int totalCount: 0
-    property bool isMaterial: Config.options.bar.m3.cornerStyle === 3
+    property bool isMaterial: Config.options.material.bar.m3.cornerStyle === 3
     property bool paintMaterialPill: false
     property real padding: (root.isMaterial && !root.paintMaterialPill) ? 0 : 5
     property color bgColor: M3Palette.primaryContainer
@@ -24,7 +24,7 @@ Item {
     ]
 
     readonly property real fullRadius: height / 2
-    readonly property real midRadius: Config.options.bar.m3.cornerStyle === 2 ? Appearance.rounding.unsharpenmore + 2 : Appearance.rounding.unsharpenmore
+    readonly property real midRadius: Config.options.material.bar.m3.cornerStyle === 2 ? Appearance.rounding.unsharpenmore + 2 : Appearance.rounding.unsharpenmore
     property real startRadius: {
         if (totalCount <= 1) return fullRadius;
         if (currentIndex === 0) return fullRadius;
@@ -57,25 +57,25 @@ Item {
             leftMargin: root.vertical ? 4 : 0
             rightMargin: root.vertical ? 4 : 0
         }
-        color: !(Config.options?.bar?.m3?.showBackground ?? true)
+        color: !(Config.options?.material?.bar?.m3?.showBackground ?? true)
             ? "transparent"
             : (root.isMaterial && !root.paintMaterialPill)
                 ? "transparent"
                 : (root.isMaterial && root.paintMaterialPill)
                     ? root.bgColor
-                    : (Config.options?.bar.m3.borderless === "transparent"
+                    : (Config.options?.material?.bar.m3.borderless === "transparent"
                         ? "transparent"
-                        : Config.options.bar.m3.cornerStyle === 2
+                        : Config.options.material.bar.m3.cornerStyle === 2
                         ? M3Palette.surface
                         : M3Palette.surfaceContainerLow)
         border.width: root.isMaterial && root.paintMaterialPill
-            && (Config.options?.bar?.m3?.borderless ?? "pills") === "separated" ? 1 : 0
+            && (Config.options?.material?.bar?.m3?.borderless ?? "pills") === "separated" ? 1 : 0
         border.color: M3Palette.outlineVariant
 
-        topLeftRadius: (root.isMaterial && root.paintMaterialPill) ? root.fullRadius : (Config.options?.bar.m3.borderless === "separated" ? root.fullRadius : root.startRadius)
-        bottomLeftRadius: (root.isMaterial && root.paintMaterialPill) ? root.fullRadius : (Config.options?.bar.m3.borderless === "separated" ? root.fullRadius : root.vertical ? root.endRadius : root.startRadius)
-        topRightRadius: (root.isMaterial && root.paintMaterialPill) ? root.fullRadius : (Config.options?.bar.m3.borderless === "separated" ? root.fullRadius : root.vertical ? root.startRadius : root.endRadius)
-        bottomRightRadius: (root.isMaterial && root.paintMaterialPill) ? root.fullRadius : (Config.options?.bar.m3.borderless === "separated" ? root.fullRadius : root.endRadius)
+        topLeftRadius: (root.isMaterial && root.paintMaterialPill) ? root.fullRadius : (Config.options?.material?.bar.m3.borderless === "separated" ? root.fullRadius : root.startRadius)
+        bottomLeftRadius: (root.isMaterial && root.paintMaterialPill) ? root.fullRadius : (Config.options?.material?.bar.m3.borderless === "separated" ? root.fullRadius : root.vertical ? root.endRadius : root.startRadius)
+        topRightRadius: (root.isMaterial && root.paintMaterialPill) ? root.fullRadius : (Config.options?.material?.bar.m3.borderless === "separated" ? root.fullRadius : root.vertical ? root.startRadius : root.endRadius)
+        bottomRightRadius: (root.isMaterial && root.paintMaterialPill) ? root.fullRadius : (Config.options?.material?.bar.m3.borderless === "separated" ? root.fullRadius : root.endRadius)
 
         EditorialPaperStack {
             anchors.fill: parent

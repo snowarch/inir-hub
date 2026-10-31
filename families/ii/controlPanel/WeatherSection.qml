@@ -8,7 +8,7 @@ import qs.modules.common.functions
 
 PanelSurface {
     id: root
-    islandSkin: (Config.options?.controlPanel?.style ?? "panel") === "island"
+    islandSkin: (Config.options?.material?.controlPanel?.style ?? "panel") === "island"
     Layout.fillWidth: true
     implicitHeight: (Weather.enabled && Weather.data.temp && !Weather.data.temp.startsWith("--")) ? contentLayout.implicitHeight + 16 : 0
     visible: implicitHeight > 0
@@ -17,11 +17,11 @@ PanelSurface {
         enabled: Appearance.animationsEnabled
         NumberAnimation { duration: Appearance.animation.elementResize.duration; easing.type: Appearance.animation.elementResize.type; easing.bezierCurve: Appearance.animation.elementResize.bezierCurve }
     }
-    readonly property bool compactMode: Config.options?.controlPanel?.compactMode ?? true
+    readonly property bool compactMode: Config.options?.material?.controlPanel?.compactMode ?? true
     
     readonly property bool inirEverywhere: Appearance.inirEverywhere
     readonly property bool auroraEverywhere: Appearance.auroraEverywhere
-    readonly property bool hideLocation: Config.options?.bar?.weather?.hideLocation ?? false
+    readonly property bool hideLocation: Config.options?.weather?.hideLocation ?? false
     readonly property string weatherDescription: Weather.describeWeather(Weather.data?.wCode ?? "113")
     readonly property string locationText: Weather.visibleCity
     readonly property string secondaryText: locationText || root.weatherDescription
@@ -80,7 +80,7 @@ PanelSurface {
                     : root.inirEverywhere ? Appearance.inir.colLayer2Hover
                     : root.auroraEverywhere ? Appearance.aurora.colSubSurfaceHover
                     : Appearance.colors.colLayer2Hover
-                onClicked: Config.setNestedValue("bar.weather.hideLocation", !root.hideLocation)
+                onClicked: Config.setNestedValue("weather.hideLocation", !root.hideLocation)
                 contentItem: MaterialSymbol {
                     anchors.centerIn: parent
                     text: root.hideLocation ? "visibility_off" : "visibility"

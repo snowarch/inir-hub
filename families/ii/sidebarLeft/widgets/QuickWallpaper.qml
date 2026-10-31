@@ -20,7 +20,7 @@ Item {
     readonly property real itemSpacing: 8
     readonly property real itemWidth: 130
     readonly property real itemHeight: 78  // ~16:10 aspect
-    readonly property bool showHeader: Config.options?.sidebar?.widgets?.quickWallpaper?.showHeader ?? true
+    readonly property bool showHeader: Config.options?.material?.sidebar?.widgets?.quickWallpaper?.showHeader ?? true
     readonly property string wallpapersPath: Directories.wallpapersPath
     
     property var wallpapersList: []

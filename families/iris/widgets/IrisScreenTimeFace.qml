@@ -97,7 +97,7 @@ IrisWidgetFace {
         FaceChoice {
             icon: "toggle_on"
             label: Translation.tr("Turn on")
-            onClicked: Config.setNestedValue("sidebar.screenTime.enable", true)
+            onClicked: Config.setNestedValue("screenTime.enable", true)
         }
     }
 

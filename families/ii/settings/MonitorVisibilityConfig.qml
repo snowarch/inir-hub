@@ -47,9 +47,9 @@ ContentPage {
     }
 
     readonly property var iiSurfaces: [
-        { title: Translation.tr("Bar"), description: Translation.tr("Top workspace bar, or the vertical bar when that mode is enabled"), icon: "web_asset", path: "bar.screenList" },
-        { title: Translation.tr("Dock"), description: Translation.tr("Application dock and its hover reveal area"), icon: "call_to_action", path: "dock.screenList" },
-        { title: Translation.tr("Sidebars"), description: Translation.tr("Feature and system sidebars on each screen edge"), icon: "side_navigation", path: "sidebar.screenList" },
+        { title: Translation.tr("Bar"), description: Translation.tr("Top workspace bar, or the vertical bar when that mode is enabled"), icon: "web_asset", path: "material.bar.screenList" },
+        { title: Translation.tr("Dock"), description: Translation.tr("Application dock and its hover reveal area"), icon: "call_to_action", path: "material.dock.screenList" },
+        { title: Translation.tr("Sidebars"), description: Translation.tr("Feature and system sidebars on each screen edge"), icon: "side_navigation", path: "material.sidebar.screenList" },
         { title: Translation.tr("Media controls"), description: Translation.tr("Floating player popup opened from the bar or IPC"), selectionLabel: Translation.tr("Enabled outputs"), icon: "music_note", path: "media.screenList" }
     ]
     readonly property var irisSurfaces: [

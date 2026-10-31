@@ -104,14 +104,14 @@ ColumnLayout {
             if (preset[section] !== undefined && typeof preset[section] === "object") {
                 const sectionData = preset[section]
                 for (const key of Object.keys(sectionData)) {
-                    Config.setNestedValue("appearance.aurora." + section + "." + key, sectionData[key])
+                    Config.setNestedValue("material.style.aurora." + section + "." + key, sectionData[key])
                 }
             }
         }
     }
 
     function _snapshotCurrent() {
-        const current = Config.options?.appearance?.aurora ?? {}
+        const current = Config.options?.material?.style?.aurora ?? {}
         const clean = {}
         for (const key of root._sectionKeys) {
             if (current[key] !== undefined) {
@@ -122,11 +122,11 @@ ColumnLayout {
     }
 
     function _saveCustom(): void {
-        Config.setNestedValue("appearance.aurora.customPreset", JSON.stringify(root._snapshotCurrent()))
+        Config.setNestedValue("material.style.aurora.customPreset", JSON.stringify(root._snapshotCurrent()))
     }
 
     function _loadCustom(): void {
-        const raw = Config.options?.appearance?.aurora?.customPreset ?? ""
+        const raw = Config.options?.material?.style?.aurora?.customPreset ?? ""
         if (raw === "") return
         try { root._applyPreset(JSON.parse(raw)) }
         catch(e) { console.warn("[AuroraEditor] Failed to load custom preset:", e) }
@@ -302,7 +302,7 @@ ColumnLayout {
                 buttonRadius: Appearance.rounding.small
                 colBackground: Appearance.aurora.colSubSurface
                 colBackgroundHover: Appearance.aurora.colSubSurfaceHover
-                enabled: (Config.options?.appearance?.aurora?.customPreset ?? "") !== ""
+                enabled: (Config.options?.material?.style?.aurora?.customPreset ?? "") !== ""
                 opacity: enabled ? 1.0 : 0.4
                 onClicked: root._loadCustom()
 
@@ -363,7 +363,7 @@ ColumnLayout {
             icon: "palette"
             description: Translation.tr("How much of the wallpaper's color the glass lets through. Lower is calmer on vivid wallpapers.")
             configValue: Appearance.aurora.wallpaperColor
-            configPath: "appearance.aurora.wallpaperColor"
+            configPath: "material.style.aurora.wallpaperColor"
         }
 
         SliderRow {
@@ -371,7 +371,7 @@ ColumnLayout {
             icon: "dock_to_bottom"
             description: Translation.tr("Bar, sidebar, main panel backgrounds")
             configValue: Appearance.aurora.overlayTransparentize
-            configPath: "appearance.aurora.transparency.overlay"
+            configPath: "material.style.aurora.transparency.overlay"
         }
 
         SliderRow {
@@ -379,7 +379,7 @@ ColumnLayout {
             icon: "crop_square"
             description: Translation.tr("Settings cards, groups, internal containers")
             configValue: Appearance.aurora.subSurfaceTransparentize
-            configPath: "appearance.aurora.transparency.subSurface"
+            configPath: "material.style.aurora.transparency.subSurface"
         }
 
         SliderRow {
@@ -387,7 +387,7 @@ ColumnLayout {
             icon: "open_in_new"
             description: Translation.tr("Context menus, dropdown overlays")
             configValue: Appearance.aurora.popupTransparentize
-            configPath: "appearance.aurora.transparency.popup"
+            configPath: "material.style.aurora.transparency.popup"
         }
 
         SliderRow {
@@ -395,7 +395,7 @@ ColumnLayout {
             icon: "chat_bubble"
             description: Translation.tr("Hover tooltips — lower values improve readability")
             configValue: Appearance.aurora.tooltipTransparentize
-            configPath: "appearance.aurora.transparency.tooltip"
+            configPath: "material.style.aurora.transparency.tooltip"
         }
 
         SliderRow {
@@ -403,7 +403,7 @@ ColumnLayout {
             icon: "layers"
             description: Translation.tr("General layer glass — affects all surface backgrounds (Layer 1/2/3)")
             configValue: Appearance.aurora.layerTransparentize
-            configPath: "appearance.aurora.transparency.layer"
+            configPath: "material.style.aurora.transparency.layer"
         }
     }
 }

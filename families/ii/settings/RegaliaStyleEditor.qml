@@ -13,11 +13,11 @@ ColumnLayout {
 
     function applyGlassPreset(blur, tintTransparency, materialStrength, saturation): void {
         Config.setNestedValues({
-            "appearance.regalia.glass": true,
-            "appearance.regalia.glassBlur": blur,
-            "appearance.regalia.glassTintTransparency": tintTransparency,
-            "appearance.regalia.glassSurfaceOpacity": materialStrength,
-            "appearance.regalia.glassSaturation": saturation
+            "material.style.regalia.glass": true,
+            "material.style.regalia.glassBlur": blur,
+            "material.style.regalia.glassTintTransparency": tintTransparency,
+            "material.style.regalia.glassSurfaceOpacity": materialStrength,
+            "material.style.regalia.glassSaturation": saturation
         })
     }
 
@@ -147,8 +147,8 @@ ColumnLayout {
         ConfigSwitch {
             buttonIcon: "blur_on"
             text: Translation.tr("Wallpaper glass")
-            checked: Config.options?.appearance?.regalia?.glass ?? true
-            onCheckedChanged: Config.setNestedValue("appearance.regalia.glass", checked)
+            checked: Config.options?.material?.style?.regalia?.glass ?? true
+            onCheckedChanged: Config.setNestedValue("material.style.regalia.glass", checked)
             StyledToolTip {
                 text: Translation.tr("Use the wallpaper as a blurred backdrop for large Regalia surfaces. Internal controls remain opaque.")
             }
@@ -201,8 +201,8 @@ ColumnLayout {
             from: 0.15
             to: 1.0
             stepSize: 0.01
-            value: Config.options?.appearance?.regalia?.glassBlur ?? 0.72
-            configPath: "appearance.regalia.glassBlur"
+            value: Config.options?.material?.style?.regalia?.glassBlur ?? 0.72
+            configPath: "material.style.regalia.glassBlur"
         }
 
         SliderRow {
@@ -212,8 +212,8 @@ ColumnLayout {
             from: 0.20
             to: 0.80
             stepSize: 0.01
-            value: Config.options?.appearance?.regalia?.glassTintTransparency ?? 0.52
-            configPath: "appearance.regalia.glassTintTransparency"
+            value: Config.options?.material?.style?.regalia?.glassTintTransparency ?? 0.52
+            configPath: "material.style.regalia.glassTintTransparency"
         }
 
         SliderRow {
@@ -223,8 +223,8 @@ ColumnLayout {
             from: 0.0
             to: 1.0
             stepSize: 0.01
-            value: Config.options?.appearance?.regalia?.glassSurfaceOpacity ?? 0.60
-            configPath: "appearance.regalia.glassSurfaceOpacity"
+            value: Config.options?.material?.style?.regalia?.glassSurfaceOpacity ?? 0.60
+            configPath: "material.style.regalia.glassSurfaceOpacity"
         }
 
         SliderRow {
@@ -234,8 +234,8 @@ ColumnLayout {
             from: 0.0
             to: 0.60
             stepSize: 0.01
-            value: Config.options?.appearance?.regalia?.glassSaturation ?? 0.12
-            configPath: "appearance.regalia.glassSaturation"
+            value: Config.options?.material?.style?.regalia?.glassSaturation ?? 0.12
+            configPath: "material.style.regalia.glassSaturation"
         }
     }
 
@@ -249,8 +249,8 @@ ColumnLayout {
             from: 0.80
             to: 1.20
             stepSize: 0.05
-            value: Config.options?.appearance?.regalia?.radiusScale ?? 1.0
-            configPath: "appearance.regalia.radiusScale"
+            value: Config.options?.material?.style?.regalia?.radiusScale ?? 1.0
+            configPath: "material.style.regalia.radiusScale"
         }
     }
 
@@ -262,12 +262,12 @@ ColumnLayout {
         colBackground: Appearance.regalia.controlPlate
         colBackgroundHover: Appearance.regalia.controlPlateHover
         onClicked: Config.setNestedValues({
-            "appearance.regalia.glass": true,
-            "appearance.regalia.glassBlur": 0.72,
-            "appearance.regalia.glassTintTransparency": 0.52,
-            "appearance.regalia.glassSurfaceOpacity": 0.60,
-            "appearance.regalia.glassSaturation": 0.12,
-            "appearance.regalia.radiusScale": 1.0
+            "material.style.regalia.glass": true,
+            "material.style.regalia.glassBlur": 0.72,
+            "material.style.regalia.glassTintTransparency": 0.52,
+            "material.style.regalia.glassSurfaceOpacity": 0.60,
+            "material.style.regalia.glassSaturation": 0.12,
+            "material.style.regalia.radiusScale": 1.0
         })
 
         contentItem: RowLayout {

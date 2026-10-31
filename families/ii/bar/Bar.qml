@@ -15,14 +15,14 @@ import qs.modules.common.functions
 
 Scope {
     id: bar
-    property bool showBarBackground: Config.options?.bar?.showBackground ?? true
+    property bool showBarBackground: Config.options?.material?.bar?.showBackground ?? true
     // Note: Vignette effect moved to Backdrop.qml (backdrop wallpaper layer)
 
     // Global style and bar appearance decide which surfaces, decorators and insets
     // the bar window is built with, and several of them are Loaders that only
     // evaluate at creation. Rebuilding the window is what moving the bar and moving
     // it back used to do by hand — do it here instead.
-    readonly property string rebuildKey: `${Config.options?.appearance?.globalStyle ?? "material"}_${Config.options?.bar?.appearanceStyle ?? "classic"}`
+    readonly property string rebuildKey: `${Config.options?.material?.style?.globalStyle ?? "material"}_${Config.options?.material?.bar?.appearanceStyle ?? "classic"}`
     property bool rebuilding: false
     onRebuildKeyChanged: {
         bar.rebuilding = true;
@@ -39,7 +39,7 @@ Scope {
         // For each monitor
         model: {
             const screens = Quickshell.screens;
-            const list = Config.options?.bar?.screenList ?? [];
+            const list = Config.options?.material?.bar?.screenList ?? [];
             if (!list || list.length === 0)
                 return screens;
             const matchedScreens = screens.filter(screen => {
@@ -61,9 +61,9 @@ Scope {
                 visible: true
                 readonly property bool zzzDetachedRounded: Appearance.zzzEverywhere
                     && Appearance.zzz.round
-                    && ((Config.options?.bar?.appearanceStyle ?? "classic") === "classic")
+                    && ((Config.options?.material?.bar?.appearanceStyle ?? "classic") === "classic")
                     && bar.showBarBackground
-                    && (((Config.options?.bar?.cornerStyle ?? 0) === 1) || ((Config.options?.bar?.cornerStyle ?? 0) === 3))
+                    && (((Config.options?.material?.bar?.cornerStyle ?? 0) === 1) || ((Config.options?.material?.bar?.cornerStyle ?? 0) === 3))
                 readonly property real panelSurfaceHeight: zzzDetachedRounded
                     ? (Appearance.sizes.baseBarHeight + Appearance.sizes.elevationMargin * 2)
                     : Appearance.sizes.barHeight
@@ -71,8 +71,8 @@ Scope {
                 // Hug corners belong to the classic bar surface. Islands, scenic,
                 // frame and pill draw their own, so the decorators must go with it.
                 readonly property bool hugCorners: bar.showBarBackground
-                    && (Config.options?.bar?.cornerStyle ?? 0) === 0
-                    && (Config.options?.bar?.appearanceStyle ?? "classic") === "classic"
+                    && (Config.options?.material?.bar?.cornerStyle ?? 0) === 0
+                    && (Config.options?.material?.bar?.appearanceStyle ?? "classic") === "classic"
                     && !Appearance.zzzEverywhere
                 readonly property real roundDecoratorAllowance: (!zzzDetachedRounded && hugCorners)
                     ? Appearance.rounding.screenRounding : 0
@@ -90,7 +90,7 @@ Scope {
 
                 Timer {
                     id: showBarTimer
-                    interval: (Config?.options.bar.autoHide.showWhenPressingSuper.delay ?? 100)
+                    interval: (Config?.options.material.bar.autoHide.showWhenPressingSuper.delay ?? 100)
                     repeat: false
                     onTriggered: {
                         barRoot.superShow = true
@@ -99,7 +99,7 @@ Scope {
                 Connections {
                     target: GlobalStates
                     function onSuperDownChanged() {
-                        if (!Config?.options.bar.autoHide.showWhenPressingSuper.enable) return;
+                        if (!Config?.options.material.bar.autoHide.showWhenPressingSuper.enable) return;
                         if (GlobalStates.superDown) showBarTimer.restart();
                         else {
                             showBarTimer.stop();
@@ -108,8 +108,8 @@ Scope {
                     }
                 }
                 property bool superShow: false
-                readonly property bool autoHideEnabled: Config.options?.bar?.autoHide?.enable ?? false
-                readonly property bool pushWindowsWhenShown: Config.options?.bar?.autoHide?.pushWindows ?? false
+                readonly property bool autoHideEnabled: Config.options?.material?.bar?.autoHide?.enable ?? false
+                readonly property bool pushWindowsWhenShown: Config.options?.material?.bar?.autoHide?.pushWindows ?? false
                 readonly property bool overviewOwnsEdge: GlobalStates.overviewOpen
                     || (CompositorService.isNiri && NiriService.inOverview)
                 readonly property string outputName: barRoot.screen?.name ?? ""
@@ -130,16 +130,16 @@ Scope {
                 property bool mustShow: pointerShow || superShow || ShellEditSession.active || interactionHold
                 property bool reservationActive: false
                 readonly property real autoHideHoverWidth: autoHideEnabled
-                    ? Math.max(1, Config.options?.bar?.autoHide?.hoverRegionWidth ?? 2) : 0
+                    ? Math.max(1, Config.options?.material?.bar?.autoHide?.hoverRegionWidth ?? 2) : 0
                 // Organic Spectrum paints beyond the bar surface, like the Media
                 // widget's edge aura. Give the layer surface transparent render
                 // headroom without changing the compositor reservation or input
                 // region: exclusiveZone and hoverMaskRegion still describe only
                 // the actual bar.
                 readonly property real organicAuraAllowance:
-                    (Config.options?.bar?.visualizer?.enable ?? false)
-                        && (Config.options?.bar?.visualizer?.type ?? "bars") === "organic"
-                        && (Config.options?.bar?.visualizer?.organicFit ?? "auto") === "aura"
+                    (Config.options?.material?.bar?.visualizer?.enable ?? false)
+                        && (Config.options?.material?.bar?.visualizer?.type ?? "bars") === "organic"
+                        && (Config.options?.material?.bar?.visualizer?.organicFit ?? "auto") === "aura"
                     ? Math.ceil(barRoot.panelSurfaceHeight * 1.75) : 0
                 exclusionMode: ExclusionMode.Ignore
                 exclusiveZone: GlobalStates.coverflowSelectorOpen ? 0
@@ -163,7 +163,7 @@ Scope {
                     Region {
                         intersection: Intersection.Subtract
                         x: 0
-                        y: (Config.options?.bar?.bottom ?? false)
+                        y: (Config.options?.material?.bar?.bottom ?? false)
                             ? barRoot.height - barRoot.autoHideHoverWidth : 0
                         width: barRoot.edgeCornerReserve(true)
                         height: barRoot.autoHideHoverWidth
@@ -171,7 +171,7 @@ Scope {
                     Region {
                         intersection: Intersection.Subtract
                         x: barRoot.width - barRoot.edgeCornerReserve(false)
-                        y: (Config.options?.bar?.bottom ?? false)
+                        y: (Config.options?.material?.bar?.bottom ?? false)
                             ? barRoot.height - barRoot.autoHideHoverWidth : 0
                         width: barRoot.edgeCornerReserve(false)
                         height: barRoot.autoHideHoverWidth
@@ -180,7 +180,7 @@ Scope {
                 color: "transparent"
 
                 function edgeCornerName(left: bool): string {
-                    const bottom = Config.options?.bar?.bottom ?? false
+                    const bottom = Config.options?.material?.bar?.bottom ?? false
                     return bottom ? (left ? "bottomLeft" : "bottomRight")
                         : (left ? "topLeft" : "topRight")
                 }
@@ -198,10 +198,10 @@ Scope {
                     if (orbitEnabled && String(Config.options?.orbit?.hotCorner ?? "topRight") === corner)
                         reserve = Math.max(reserve, Config.options?.orbit?.hotCornerSize ?? 12)
 
-                    const sidebarCornerEnabled = Config.options?.sidebar?.cornerOpen?.enable ?? false
-                    const sidebarCornerBottom = Config.options?.sidebar?.cornerOpen?.bottom ?? false
-                    if (sidebarCornerEnabled && sidebarCornerBottom === (Config.options?.bar?.bottom ?? false))
-                        reserve = Math.max(reserve, Config.options?.sidebar?.cornerOpen?.cornerRegionWidth ?? 20)
+                    const sidebarCornerEnabled = Config.options?.material?.sidebar?.cornerOpen?.enable ?? false
+                    const sidebarCornerBottom = Config.options?.material?.sidebar?.cornerOpen?.bottom ?? false
+                    if (sidebarCornerEnabled && sidebarCornerBottom === (Config.options?.material?.bar?.bottom ?? false))
+                        reserve = Math.max(reserve, Config.options?.material?.sidebar?.cornerOpen?.cornerRegionWidth ?? 20)
                     return reserve
                 }
 
@@ -325,8 +325,8 @@ Scope {
                 }
 
                 anchors {
-                    top: !(Config.options?.bar?.bottom ?? false)
-                    bottom: (Config.options?.bar?.bottom ?? false)
+                    top: !(Config.options?.material?.bar?.bottom ?? false)
+                    bottom: (Config.options?.material?.bar?.bottom ?? false)
                     left: true
                     right: true
                 }
@@ -363,7 +363,7 @@ Scope {
                             left: parent.left
                             top: parent.top
                             bottom: undefined
-                            topMargin: ((Config?.options.bar.autoHide.enable && !mustShow) || GlobalStates.coverflowSelectorOpen || !GlobalStates.shellEntryReady) ? -(barRoot.panelSurfaceHeight + barRoot.islandShadowAllowance) : 0
+                            topMargin: ((Config?.options.material.bar.autoHide.enable && !mustShow) || GlobalStates.coverflowSelectorOpen || !GlobalStates.shellEntryReady) ? -(barRoot.panelSurfaceHeight + barRoot.islandShadowAllowance) : 0
                             bottomMargin: barRoot.bottomDeadPixelWorkaround ? -1 : 0
                             rightMargin: barRoot.rightDeadPixelWorkaround ? -1 : 0
                         }
@@ -378,7 +378,7 @@ Scope {
 
                         states: State {
                             name: "bottom"
-                            when: (Config.options?.bar?.bottom ?? false)
+                            when: (Config.options?.material?.bar?.bottom ?? false)
                             AnchorChanges {
                                 target: barContent
                                 anchors {
@@ -391,7 +391,7 @@ Scope {
                             PropertyChanges {
                                 target: barContent
                                 anchors.topMargin: 0
-                                anchors.bottomMargin: ((Config?.options.bar.autoHide.enable && !mustShow) || GlobalStates.coverflowSelectorOpen || !GlobalStates.shellEntryReady) ? -(barRoot.panelSurfaceHeight + barRoot.islandShadowAllowance) : 0
+                                anchors.bottomMargin: ((Config?.options.material.bar.autoHide.enable && !mustShow) || GlobalStates.coverflowSelectorOpen || !GlobalStates.shellEntryReady) ? -(barRoot.panelSurfaceHeight + barRoot.islandShadowAllowance) : 0
                             }
                         }
                     }
@@ -403,7 +403,7 @@ Scope {
                         active: ShellEditSession.blocksNormalActions(surfaceId)
                         selected: ShellEditSession.selectedSurfaceId === surfaceId
                         lifted: ShellEditSession.liftedSurfaceId === surfaceId
-                        slotHint: (Config.options?.bar?.bottom ?? false) ? "bottom" : "top"
+                        slotHint: (Config.options?.material?.bar?.bottom ?? false) ? "bottom" : "top"
                         screenWidth: barRoot.screen?.width ?? 0
                         screenHeight: barRoot.screen?.height ?? 0
                         onDragStarted: surface => ShellEditSession.beginDrag(surface)
@@ -436,7 +436,7 @@ Scope {
 
                         states: State {
                             name: "bottom"
-                            when: (Config.options?.bar?.bottom ?? false)
+                            when: (Config.options?.material?.bar?.bottom ?? false)
                             AnchorChanges {
                                 target: roundDecorators
                                 anchors {
@@ -454,7 +454,7 @@ Scope {
                             
                             readonly property bool isAurora: Appearance.auroraEverywhere
                             readonly property bool isInir: Appearance.inirEverywhere
-                            readonly property bool isBottom: Config.options?.bar?.bottom ?? false
+                            readonly property bool isBottom: Config.options?.material?.bar?.bottom ?? false
                             readonly property color solidColor: showBarBackground 
                                 ? (isInir ? Appearance.inir.colLayer0 
                                     : isAurora ? Appearance.aurora.colPopupSurface
@@ -615,10 +615,10 @@ Scope {
                     anchors {
                         left: parent.left
                         right: parent.right
-                        top: (Config.options?.bar?.bottom ?? false) ? undefined : parent.top
-                        bottom: (Config.options?.bar?.bottom ?? false) ? parent.bottom : undefined
+                        top: (Config.options?.material?.bar?.bottom ?? false) ? undefined : parent.top
+                        bottom: (Config.options?.material?.bar?.bottom ?? false) ? parent.bottom : undefined
                     }
-                    height: Config.options?.bar?.autoHide?.hoverRegionWidth ?? 2
+                    height: Config.options?.material?.bar?.autoHide?.hoverRegionWidth ?? 2
                 }
             }
         }

@@ -18,7 +18,7 @@ Singleton {
     property string iconsPath: `${Directories.assetsPath}/icons/fluent`
     property bool dark: Appearance.m3colors.darkmode
     property bool auroraEverywhere: {
-        const style = Config.options?.appearance?.globalStyle ?? "material"
+        const style = Config.options?.material?.style?.globalStyle ?? "material"
         return style === "aurora" || style === "angel"
     }
     readonly property bool cookieEverywhere: Appearance.cookieEverywhere
@@ -43,7 +43,7 @@ Singleton {
     // "Display scaling" slider in Interface settings also affects waffle fonts.
     readonly property real fontScale: (Config.options?.waffles?.theming?.font?.scale ?? 1.0) * Appearance.fontSizeScale
 
-    readonly property bool transparencyEnabled: Config.options?.appearance?.transparency?.enable ?? false
+    readonly property bool transparencyEnabled: Config.options?.material?.style?.transparency?.enable ?? false
     // When glass mode is active, ensure surfaces have enough transparency
     // so the glass/blur effect is visible beneath the dark base colors
     property real backgroundTransparency: root.auroraEverywhere

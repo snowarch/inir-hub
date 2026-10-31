@@ -74,7 +74,7 @@ Item {
         active: root.vertical
         visible: active
         anchors.centerIn: parent
-        sourceComponent: Config.options.bar.m3.resources.style === "filled" ? filledStyle : outlineStyle
+        sourceComponent: Config.options.material.bar.m3.resources.style === "filled" ? filledStyle : outlineStyle
     }
 
     RowLayout {
@@ -88,12 +88,12 @@ Item {
             Layout.alignment: Qt.AlignVCenter
             active: !root.vertical
             visible: active
-            sourceComponent: Config.options.bar.m3.resources.style === "filled" ? filledStyle : outlineStyle
+            sourceComponent: Config.options.material.bar.m3.resources.style === "filled" ? filledStyle : outlineStyle
         }
 
         Item {
             Layout.alignment: Qt.AlignVCenter
-            visible: Config.options.bar.m3.resources.showValue
+            visible: Config.options.material.bar.m3.resources.showValue
             implicitWidth: visible ? fullPercentageTextMetrics.width : 0
             implicitHeight: percentageText.implicitHeight
             TextMetrics {

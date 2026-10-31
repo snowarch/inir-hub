@@ -606,7 +606,7 @@ ContentPage {
                     onClicked: {
                         root._endDrag()
                         root.editingGroup = -1
-                        Config.setNestedValue("settingsUi.categories", "")
+                        Config.setNestedValue("material.settingsUi.categories", "")
                     }
                 }
             }

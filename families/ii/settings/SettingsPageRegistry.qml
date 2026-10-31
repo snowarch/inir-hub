@@ -278,7 +278,7 @@ Singleton {
     // Hidden pages leave the nav but search still reaches them.
     readonly property var _arrangement: {
         const fallback = ({ groups: defaultCategories, hidden: [] })
-        const raw = Config.options?.settingsUi?.categories ?? ""
+        const raw = Config.options?.material?.settingsUi?.categories ?? ""
         if (!raw || raw.length === 0) return fallback
         let saved
         try {

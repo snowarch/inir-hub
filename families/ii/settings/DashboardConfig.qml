@@ -58,35 +58,35 @@ ContentPage {
             ConfigSwitch {
                 text: Translation.tr("Enable dashboard")
                 description: Translation.tr("Centered hub with clock, notifications, media, weather and more")
-                checked: Config.options?.dashboard?.enable ?? true
-                onCheckedChanged: Config.setNestedValue("dashboard.enable", checked)
+                checked: Config.options?.material?.dashboard?.enable ?? true
+                onCheckedChanged: Config.setNestedValue("material.dashboard.enable", checked)
             }
             ConfigSwitch {
                 text: Translation.tr("Show header")
                 description: Translation.tr("Uptime chip and quick action buttons at the top")
-                checked: Config.options?.dashboard?.showHeader ?? true
-                onCheckedChanged: Config.setNestedValue("dashboard.showHeader", checked)
+                checked: Config.options?.material?.dashboard?.showHeader ?? true
+                onCheckedChanged: Config.setNestedValue("material.dashboard.showHeader", checked)
             }
             ConfigSwitch {
                 text: Translation.tr("Show power buttons")
                 description: Translation.tr("Lock and session buttons in the header")
-                enabled: Config.options?.dashboard?.showHeader ?? true
-                checked: Config.options?.dashboard?.showPowerButtons ?? true
-                onCheckedChanged: Config.setNestedValue("dashboard.showPowerButtons", checked)
+                enabled: Config.options?.material?.dashboard?.showHeader ?? true
+                checked: Config.options?.material?.dashboard?.showPowerButtons ?? true
+                onCheckedChanged: Config.setNestedValue("material.dashboard.showPowerButtons", checked)
             }
             ConfigSwitch {
                 text: Translation.tr("Keep loaded in memory")
                 description: Translation.tr("Faster opening at the cost of RAM")
-                checked: Config.options?.dashboard?.keepLoaded ?? false
-                onCheckedChanged: Config.setNestedValue("dashboard.keepLoaded", checked)
+                checked: Config.options?.material?.dashboard?.keepLoaded ?? false
+                onCheckedChanged: Config.setNestedValue("material.dashboard.keepLoaded", checked)
             }
             ConfigSpinBox {
                 text: Translation.tr("Panel width (% of screen)")
-                value: Math.round((Config.options?.dashboard?.widthRatio ?? 0.62) * 100)
+                value: Math.round((Config.options?.material?.dashboard?.widthRatio ?? 0.62) * 100)
                 from: 40
                 to: 90
                 stepSize: 2
-                onValueModified: Config.setNestedValue("dashboard.widthRatio", value / 100)
+                onValueModified: Config.setNestedValue("material.dashboard.widthRatio", value / 100)
             }
         }
 
@@ -95,10 +95,10 @@ ContentPage {
             MaterialTextField {
                 Layout.fillWidth: true
                 placeholderText: Translation.tr("Custom phrase under the greeting (optional)")
-                text: Config.options?.dashboard?.subtitle ?? ""
+                text: Config.options?.material?.dashboard?.subtitle ?? ""
                 onTextChanged: {
                     Qt.callLater(() => {
-                        Config.setNestedValue("dashboard.subtitle", text)
+                        Config.setNestedValue("material.dashboard.subtitle", text)
                     });
                 }
             }
@@ -109,10 +109,10 @@ ContentPage {
             MaterialTextField {
                 Layout.fillWidth: true
                 placeholderText: Translation.tr("e.g. octocat")
-                text: Config.options?.dashboard?.github?.username ?? ""
+                text: Config.options?.material?.dashboard?.github?.username ?? ""
                 onTextChanged: {
                     Qt.callLater(() => {
-                        Config.setNestedValue("dashboard.github.username", text)
+                        Config.setNestedValue("material.dashboard.github.username", text)
                     });
                 }
             }
@@ -160,8 +160,8 @@ ContentPage {
             ContentSubsection {
                 title: Translation.tr("Density")
                 ConfigSelectionArray {
-                    currentValue: Config.options?.dashboard?.appearance?.density ?? "comfortable"
-                    onSelected: newValue => Config.setNestedValue("dashboard.appearance.density", newValue)
+                    currentValue: Config.options?.material?.dashboard?.appearance?.density ?? "comfortable"
+                    onSelected: newValue => Config.setNestedValue("material.dashboard.appearance.density", newValue)
                     options: [
                         { displayName: Translation.tr("Comfortable"), icon: "expand", value: "comfortable" },
                         { displayName: Translation.tr("Compact"), icon: "compress", value: "compact" }
@@ -170,17 +170,17 @@ ContentPage {
             }
             ConfigSpinBox {
                 text: Translation.tr("Card opacity (%)")
-                value: Math.round((Config.options?.dashboard?.appearance?.cardOpacity ?? 1) * 100)
+                value: Math.round((Config.options?.material?.dashboard?.appearance?.cardOpacity ?? 1) * 100)
                 from: 30
                 to: 100
                 stepSize: 5
-                onValueModified: Config.setNestedValue("dashboard.appearance.cardOpacity", value / 100)
+                onValueModified: Config.setNestedValue("material.dashboard.appearance.cardOpacity", value / 100)
             }
             ConfigSwitch {
                 text: Translation.tr("Show card titles")
                 description: Translation.tr("Icon and name header on each widget card")
-                checked: Config.options?.dashboard?.appearance?.showCardTitles ?? true
-                onCheckedChanged: Config.setNestedValue("dashboard.appearance.showCardTitles", checked)
+                checked: Config.options?.material?.dashboard?.appearance?.showCardTitles ?? true
+                onCheckedChanged: Config.setNestedValue("material.dashboard.appearance.showCardTitles", checked)
             }
         }
     }

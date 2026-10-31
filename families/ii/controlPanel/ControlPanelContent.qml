@@ -18,14 +18,14 @@ Item {
     id: root
     property int screenWidth: 1920
     property int screenHeight: 1080
-    readonly property bool compactMode: Config.options?.controlPanel?.compactMode ?? true
-    readonly property bool islandStyle: (Config.options?.controlPanel?.style ?? "panel") === "island"
-    readonly property bool showMediaSection: Config.options?.controlPanel?.showMediaSection ?? true
-    readonly property bool showWeatherSection: Config.options?.controlPanel?.showWeatherSection ?? true
-    readonly property bool showWallpaperSection: Config.options?.controlPanel?.showWallpaperSection ?? true
-    readonly property bool showSystemSection: Config.options?.controlPanel?.showSystemSection ?? true
-    readonly property bool showSlidersSection: Config.options?.controlPanel?.showSlidersSection ?? true
-    readonly property bool showQuickActionsSection: Config.options?.controlPanel?.showQuickActionsSection ?? true
+    readonly property bool compactMode: Config.options?.material?.controlPanel?.compactMode ?? true
+    readonly property bool islandStyle: (Config.options?.material?.controlPanel?.style ?? "panel") === "island"
+    readonly property bool showMediaSection: Config.options?.material?.controlPanel?.showMediaSection ?? true
+    readonly property bool showWeatherSection: Config.options?.material?.controlPanel?.showWeatherSection ?? true
+    readonly property bool showWallpaperSection: Config.options?.material?.controlPanel?.showWallpaperSection ?? true
+    readonly property bool showSystemSection: Config.options?.material?.controlPanel?.showSystemSection ?? true
+    readonly property bool showSlidersSection: Config.options?.material?.controlPanel?.showSlidersSection ?? true
+    readonly property bool showQuickActionsSection: Config.options?.material?.controlPanel?.showQuickActionsSection ?? true
     
     implicitHeight: background.implicitHeight
 
@@ -106,7 +106,7 @@ Item {
             enabled: Appearance.animationsEnabled
             ColorAnimation { duration: Appearance.animation.elementMoveFast.duration; easing.type: Appearance.animation.elementMoveFast.type; easing.bezierCurve: Appearance.animation.elementMoveFast.bezierCurve }
         }
-        radius: root.islandStyle ? (Config.options?.appearance?.island?.radius ?? 18)
+        radius: root.islandStyle ? (Config.options?.material?.style?.island?.radius ?? 18)
             : root.zzzEverywhere ? 0
             : root.regaliaEverywhere ? Appearance.regalia.panelRadius
             : root.editorial ? Appearance.editorial.radius

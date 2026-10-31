@@ -16,7 +16,7 @@ import qs.modules.ii.sidebarRight.todo
 
 /**
  * Dashboard hub composition. Three widget columns driven by
- * Config.options.dashboard.layout.{left,center,right} — same modular pattern
+ * Config.options.material.dashboard.layout.{left,center,right} — same modular pattern
  * as bar.layout: the arrays are the source of truth, any widget id can live
  * in any column, empty columns collapse.
  */
@@ -29,7 +29,7 @@ Item {
     readonly property bool angelEverywhere: Appearance.angelEverywhere
     readonly property bool auroraEverywhere: Appearance.auroraEverywhere
     readonly property bool zzzEverywhere: Appearance.zzzEverywhere
-    readonly property bool showHeader: Config.options?.dashboard?.showHeader ?? true
+    readonly property bool showHeader: Config.options?.material?.dashboard?.showHeader ?? true
 
     // ═══ Modular widget registry ═══════════════════════════════════════
     readonly property var _widgetMap: ({
@@ -91,7 +91,7 @@ Item {
     function _column(name, fallback) {
         // Respect a stored column even when empty (user cleared it in edit mode);
         // fall back only when the key is absent entirely.
-        const a = Config.options?.dashboard?.layout?.[name]
+        const a = Config.options?.material?.dashboard?.layout?.[name]
         return (a && a.length >= 0) ? a : fallback
     }
 
@@ -150,12 +150,12 @@ Item {
         if (dst.indexOf(id) !== -1) return
         const idx = (atIndex === undefined || atIndex < 0) ? dst.length : Math.max(0, Math.min(atIndex, dst.length))
         dst.splice(idx, 0, id)
-        Config.setNestedValue("dashboard.layout." + toZone, dst)
+        Config.setNestedValue("material.dashboard.layout." + toZone, dst)
     }
     function _removeFrom(zone, idx) {
         const arr = root._zoneItems(zone).slice()
         arr.splice(idx, 1)
-        Config.setNestedValue("dashboard.layout." + zone, arr)
+        Config.setNestedValue("material.dashboard.layout." + zone, arr)
     }
     function _dropMove(srcZone, srcIdx, srcId, dstZone, dstIdx) {
         if (srcZone === root.availableZone) { root._addToZone(srcId, dstZone, dstIdx); return }
@@ -163,23 +163,23 @@ Item {
             const arr = root._zoneItems(srcZone).slice()
             const [m] = arr.splice(srcIdx, 1)
             arr.splice(Math.max(0, Math.min(dstIdx, arr.length)), 0, m)
-            Config.setNestedValue("dashboard.layout." + srcZone, arr)
+            Config.setNestedValue("material.dashboard.layout." + srcZone, arr)
         } else {
             const src = root._zoneItems(srcZone).slice()
             const dst = root._zoneItems(dstZone).slice()
             const [m] = src.splice(srcIdx, 1)
             dst.splice(Math.max(0, Math.min(dstIdx, dst.length)), 0, m)
             let u = {}
-            u["dashboard.layout." + srcZone] = src
-            u["dashboard.layout." + dstZone] = dst
+            u["material.dashboard.layout." + srcZone] = src
+            u["material.dashboard.layout." + dstZone] = dst
             Config.setNestedValues(u)
         }
     }
     function _resetLayout() {
         Config.setNestedValues({
-            "dashboard.layout.left": root._defaults.left,
-            "dashboard.layout.center": root._defaults.center,
-            "dashboard.layout.right": root._defaults.right
+            "material.dashboard.layout.left": root._defaults.left,
+            "material.dashboard.layout.center": root._defaults.center,
+            "material.dashboard.layout.right": root._defaults.right
         })
     }
 
@@ -401,7 +401,7 @@ Item {
         }
 
         ColumnLayout {
-            readonly property bool compact: (Config.options?.dashboard?.appearance?.density ?? "comfortable") === "compact"
+            readonly property bool compact: (Config.options?.material?.dashboard?.appearance?.density ?? "comfortable") === "compact"
             anchors.fill: parent
             anchors.margins: compact ? 12 : 16
             spacing: compact ? 8 : 12

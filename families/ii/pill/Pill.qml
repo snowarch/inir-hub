@@ -41,11 +41,11 @@ Item {
      * trigger sits in the open, no hover dance needed. Semantically identical
      * to being hovered forever, so the rest face simply never shows.
      */
-    readonly property bool barMode: Config.options?.bar?.pill?.barMode ?? false
+    readonly property bool barMode: Config.options?.material?.bar?.pill?.barMode ?? false
     readonly property bool expanded: surfaceOpen || held || hoverLatch || trayMenuOpen || barMode
 
     readonly property bool hasMedia: PillPlayers.has
-    readonly property string mediaAccess: (Config.options?.bar?.pill?.mediaAccess ?? "row") === "bud" ? "bud" : "row"
+    readonly property string mediaAccess: (Config.options?.material?.bar?.pill?.mediaAccess ?? "row") === "bud" ? "bud" : "row"
     readonly property string mediaPopupMode: Config.options?.media?.popupMode ?? "dock"
     property real mediaVolumeFeedback: -1
     property real mediaVolumeFeedbackWidth: 0
@@ -67,11 +67,11 @@ Item {
     signal trayMenuRequested(var item, real anchorX, real anchorY)
     property bool trayMenuOpen: false
 
-    readonly property real restW: Math.max(160, Config.options?.bar?.pill?.restWidth ?? 176) * s
-    readonly property real restH: Math.max(38, Config.options?.bar?.pill?.restHeight ?? 44) * s
+    readonly property real restW: Math.max(160, Config.options?.material?.bar?.pill?.restWidth ?? 176) * s
+    readonly property real restH: Math.max(38, Config.options?.material?.bar?.pill?.restHeight ?? 44) * s
     readonly property real hoverPad: 24 * s
     readonly property real hoverW: hoverRow.implicitWidth + 2 * hoverPad
-    readonly property real hoverH: Math.max(58, Config.options?.bar?.pill?.expandedHeight ?? 66) * s
+    readonly property real hoverH: Math.max(58, Config.options?.material?.bar?.pill?.expandedHeight ?? 66) * s
     readonly property real gameH: 34 * s
     readonly property real gameW: barWindow ? barWindow.width : 1920
     /**
@@ -106,21 +106,21 @@ Item {
      * triggers are the pill's own furniture; these two are additions on top of
      * the stock hover row, so each can be switched off from Settings → Bar.
      */
-    readonly property bool sysmonEnabled: Config.options?.bar?.pill?.surfaces?.sysmon ?? true
-    readonly property bool clipboardEnabled: Config.options?.bar?.pill?.surfaces?.clipboard ?? true
-    readonly property bool glanceEnabled: Config.options?.bar?.pill?.surfaces?.glance ?? true
-    readonly property bool launcherEnabled: Config.options?.bar?.pill?.surfaces?.launcher ?? true
-    readonly property bool recorderEnabled: Config.options?.bar?.pill?.surfaces?.recorder ?? false
+    readonly property bool sysmonEnabled: Config.options?.material?.bar?.pill?.surfaces?.sysmon ?? true
+    readonly property bool clipboardEnabled: Config.options?.material?.bar?.pill?.surfaces?.clipboard ?? true
+    readonly property bool glanceEnabled: Config.options?.material?.bar?.pill?.surfaces?.glance ?? true
+    readonly property bool launcherEnabled: Config.options?.material?.bar?.pill?.surfaces?.launcher ?? true
+    readonly property bool recorderEnabled: Config.options?.material?.bar?.pill?.surfaces?.recorder ?? false
 
     /**
      * Hover-row furniture gates. Each stock module in the expanded row can be
      * switched off individually; surface-bound icons follow surfaces.* above.
      */
-    readonly property var hoverModules: Config.options?.bar?.pill?.modules
+    readonly property var hoverModules: Config.options?.material?.bar?.pill?.modules
 
     // Icon size for the pill's furniture, snapped to whole pixels so the vector
     // glyphs rasterise crisp. Hit areas grow with it.
-    readonly property real iconPx: Math.round(Math.max(17, Config.options?.bar?.pill?.iconSize ?? 19) * s)
+    readonly property real iconPx: Math.round(Math.max(17, Config.options?.material?.bar?.pill?.iconSize ?? 19) * s)
 
     // Toasts off hands notifications back to the standalone popup panel
     // (ShellIiPanelsImpl re-enables it), so nothing goes silent.
@@ -135,10 +135,10 @@ Item {
 
     readonly property bool toastOutputEnabled: pill.outputEnabled(Config.options?.notifications?.screenList ?? [])
     readonly property bool osdOutputEnabled: pill.outputEnabled(Config.options?.osd?.screenList ?? [])
-    readonly property bool toastActive: (Config.options?.bar?.pill?.toasts ?? true)
+    readonly property bool toastActive: (Config.options?.material?.bar?.pill?.toasts ?? true)
         && pill.toastOutputEnabled && PillNotifs.popups.length > 0
     readonly property bool osdActive: pill.osdOutputEnabled && osd.flashing
-    readonly property bool compactAnnounces: Config.options?.bar?.pill?.compactAnnounces ?? false
+    readonly property bool compactAnnounces: Config.options?.material?.bar?.pill?.compactAnnounces ?? false
 
     /**
      * Latch-once lazy load. Every surface sleeps in an inactive Loader until its
@@ -583,7 +583,7 @@ Item {
         // Surface forms (caret, anchors) are functional and always allowed; the
         // free-roaming hover bead is the part users may switch off.
         form: pill.ameSurface ? pill.ameSurface.ameForm
-            : (pill.mode === "hover" && pill.hoverSoulGate && (Config.options?.bar?.pill?.soul?.enable ?? true) ? "soul" : "off")
+            : (pill.mode === "hover" && pill.hoverSoulGate && (Config.options?.material?.bar?.pill?.soul?.enable ?? true) ? "soul" : "off")
         point: pill.ameSurface
             ? Qt.point(pill.ameSurface.x + pill.ameSurface.amePoint.x,
                        pill.ameSurface.y + pill.ameSurface.amePoint.y)
@@ -866,7 +866,7 @@ Item {
             // every glyph on a half pixel and smear the strokes.
             x: Math.round((parent.width - width) / 2)
             y: Math.round((parent.height - height) / 2)
-            spacing: Math.round(Math.max(20, Config.options?.bar?.pill?.rowSpacing ?? 24) * pill.s)
+            spacing: Math.round(Math.max(20, Config.options?.material?.bar?.pill?.rowSpacing ?? 24) * pill.s)
 
             PillWorkspaces {
                 id: ws
@@ -942,7 +942,7 @@ Item {
             Row {
                 id: statusRow
                 anchors.verticalCenter: parent.verticalCenter
-                spacing: Math.round(Math.max(12, Config.options?.bar?.pill?.iconSpacing ?? 14) * pill.s)
+                spacing: Math.round(Math.max(12, Config.options?.material?.bar?.pill?.iconSpacing ?? 14) * pill.s)
 
                 Row {
                     id: weatherGlance
@@ -1025,7 +1025,7 @@ Item {
                     id: batteryIcon
                     anchors.verticalCenter: parent.verticalCenter
                     visible: (pill.hoverModules?.battery ?? true) && Battery.available
-                    readonly property string displayMode: Config.options?.bar?.pill?.batteryDisplay ?? "both"
+                    readonly property string displayMode: Config.options?.material?.bar?.pill?.batteryDisplay ?? "both"
                     readonly property bool showIcon: displayMode !== "percentage"
                     readonly property bool showPercentage: displayMode !== "icon"
                     width: batteryRow.implicitWidth

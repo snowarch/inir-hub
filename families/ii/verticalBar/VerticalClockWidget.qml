@@ -7,7 +7,7 @@ import qs.modules.ii.bar as Bar
 
 Item {
     id: root
-    property bool borderless: Config.options.bar.borderless
+    property bool borderless: Config.options.material.bar.borderless
     implicitHeight: clockColumn.implicitHeight
     implicitWidth: Appearance.sizes.verticalBarWidth
 

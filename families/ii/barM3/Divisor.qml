@@ -5,12 +5,12 @@ import qs.modules.common.widgets
 
 Item {
     id: root
-    property bool vertical: Config.options.bar.vertical
+    property bool vertical: Config.options.material.bar.vertical
     property real btnSize: 40
     property real btnSpacing: 2
-    property bool isMaterial: Config.options.bar.m3.cornerStyle === 3
-    property string style: Config.options.bar.m3.divider.style // "rect" - "dot" - "space"
-    property int dividerSpacing: Config.options.bar.m3.divider.spacing
+    property bool isMaterial: Config.options.material.bar.m3.cornerStyle === 3
+    property string style: Config.options.material.bar.m3.divider.style // "rect" - "dot" - "space"
+    property int dividerSpacing: Config.options.material.bar.m3.divider.spacing
 
     width:  vertical ? btnSize : (root.style === "space" ? root.dividerSpacing : (1 + btnSpacing * 3))
     height: vertical ? (root.style === "space" ? root.dividerSpacing : (1 + btnSpacing * 3)) : btnSize

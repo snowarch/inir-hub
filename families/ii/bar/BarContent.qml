@@ -58,14 +58,14 @@ Item { // Bar content region
         // For bar bottom: anchor at top edge (y = 0), popupAbove makes it appear above
         const mapped = mouseArea.mapToItem(root, clickX, clickY)
         barContextMenuAnchor.x = mapped.x
-        barContextMenuAnchor.y = (Config.options?.bar?.bottom ?? false) ? 0 : root.height
+        barContextMenuAnchor.y = (Config.options?.material?.bar?.bottom ?? false) ? 0 : root.height
         barContextMenu.requestOpen()
     }
 
     ContextMenu {
         id: barContextMenu
         anchorItem: barContextMenuAnchor
-        popupAbove: Config.options?.bar?.bottom ?? false
+        popupAbove: Config.options?.material?.bar?.bottom ?? false
         closeOnFocusLost: true
         closeOnHoverLost: true
 
@@ -89,7 +89,7 @@ Item { // Bar content region
             },
         ]
     }
-    readonly property bool taskbarEnabled: Config.options?.bar?.modules?.taskbar ?? false
+    readonly property bool taskbarEnabled: Config.options?.material?.bar?.modules?.taskbar ?? false
 
     // Compact mode is a physical-output fallback, not a response to where the
     // user arranged modules. The host-compression path below already prevents
@@ -174,7 +174,7 @@ Item { // Bar content region
         const mirrored = own > 0 ? Math.min(raw, own + root.centerPillMirrorSlack) : raw
         return Math.min(mirrored, maxWidth)
     }
-    readonly property bool cardStyleEverywhere: (Config.options?.dock?.cardStyle ?? false) && (Config.options?.sidebar?.cardStyle ?? false) && (Config.options?.bar?.cornerStyle === 3)
+    readonly property bool cardStyleEverywhere: (Config.options?.material?.dock?.cardStyle ?? false) && (Config.options?.material?.sidebar?.cardStyle ?? false) && (Config.options?.material?.bar?.cornerStyle === 3)
     readonly property bool zzzEverywhere: root.surfaceDialect === "zzz"
     readonly property color separatorColor: root.zzzEverywhere ? Appearance.zzz.hairlineStrong : Appearance.colors.colOutlineVariant
 
@@ -215,17 +215,17 @@ Item { // Bar content region
     //   islands — no bar surface; every section floats as its own island
     //   scenic  — gradient scrim fading into the wallpaper, content on top
     //   frame   — outlined floating frame, transparent inside
-    readonly property string barAppearance: Config.options?.bar?.appearanceStyle ?? "classic"
+    readonly property string barAppearance: Config.options?.material?.bar?.appearanceStyle ?? "classic"
     readonly property string surfaceDialect: Appearance.surfaceDialectFor(
         root.barAppearance === "islands" ? "island" : "")
     readonly property bool isIslands: root.surfaceDialect === "island"
     // Island geometry knobs (bar.islands.*): vertical breathing room and the
     // horizontal capsule padding the edge islands wrap their content with.
-    readonly property int islandInset: Config.options?.bar?.islands?.inset ?? 4
-    readonly property int islandPad: Config.options?.bar?.islands?.padding ?? 12
+    readonly property int islandInset: Config.options?.material?.bar?.islands?.inset ?? 4
+    readonly property int islandPad: Config.options?.material?.bar?.islands?.padding ?? 12
     readonly property real islandShadowAllowance: root.isIslands
         && Appearance.effectsEnabled
-        && (Config.options?.appearance?.island?.shadow ?? true)
+        && (Config.options?.material?.style?.island?.shadow ?? true)
         ? Appearance.sizes.elevationMargin : 0
     readonly property real islandOuterInset: root.isIslands
         ? Math.max(Appearance.sizes.hyprlandGapsOut, root.islandShadowAllowance)
@@ -238,7 +238,7 @@ Item { // Bar content region
     readonly property string nativeBlurTopology: root.isIslands
         ? Appearance.blurTopology.islandsUnion
         : root.barAppearance === "classic"
-            && (Config.options?.bar?.cornerStyle ?? 0) !== 0
+            && (Config.options?.material?.bar?.cornerStyle ?? 0) !== 0
             && (!root.zzzEverywhere || Appearance.zzz.round)
             ? Appearance.blurTopology.roundedRectangle
             : Appearance.blurTopology.unsupported
@@ -246,7 +246,7 @@ Item { // Bar content region
     readonly property bool nativeBlurActive: Appearance.useCompositorBlur(
             root.isIslands ? "islands" : "bar", root.nativeBlurTopology)
         && root.nativeBlurAllowed
-        && (Config.options?.bar?.showBackground ?? true)
+        && (Config.options?.material?.bar?.showBackground ?? true)
         && !root.gameModeMinimal
     readonly property Item nativeBlurLeftIsland: leftEdgeIsland
     readonly property Item nativeBlurCenterIsland: middleCenterGroup.islandSurface
@@ -256,17 +256,17 @@ Item { // Bar content region
     readonly property bool zzzDetachedRounded: root.zzzEverywhere
         && Appearance.zzz.round
         && root.barAppearance === "classic"
-        && (Config.options?.bar?.showBackground ?? true)
-        && (((Config.options?.bar?.cornerStyle ?? 0) === 1) || ((Config.options?.bar?.cornerStyle ?? 0) === 3))
-    readonly property string leftAction: Config.options?.bar?.leftScrollAction ?? "brightness"
-    readonly property string rightAction: Config.options?.bar?.rightScrollAction ?? "volume"
+        && (Config.options?.material?.bar?.showBackground ?? true)
+        && (((Config.options?.material?.bar?.cornerStyle ?? 0) === 1) || ((Config.options?.material?.bar?.cornerStyle ?? 0) === 3))
+    readonly property string leftAction: Config.options?.material?.bar?.leftScrollAction ?? "brightness"
+    readonly property string rightAction: Config.options?.material?.bar?.rightScrollAction ?? "volume"
     readonly property bool barSpectrumAudioPlaying: MprisController.isPlaying || YtMusic.isPlaying
     readonly property bool barSpectrumOutputEnabled:
-        (Config.options?.bar?.visualizer?.multiMonitorMode ?? "primary") === "all"
+        (Config.options?.material?.bar?.visualizer?.multiMonitorMode ?? "primary") === "all"
         || Quickshell.screens.length <= 1
         || String(root.screen?.name ?? "") === String(GlobalStates.primaryScreen?.name ?? "")
-    readonly property bool barSpectrumConfigured: (Config.options?.bar?.visualizer?.enable ?? false)
-        && (root.isIslands || (Config.options?.bar?.showBackground ?? true))
+    readonly property bool barSpectrumConfigured: (Config.options?.material?.bar?.visualizer?.enable ?? false)
+        && (root.isIslands || (Config.options?.material?.bar?.showBackground ?? true))
         && root.barSpectrumOutputEnabled
         && !Appearance.gameModeMinimal
         && root.visible
@@ -275,23 +275,23 @@ Item { // Bar content region
     readonly property bool barSpectrumVisible: root.barSpectrumConfigured
         && barCavaProcess.audioSignalActive
     readonly property real barSpectrumFillRatio: Math.max(0.1,
-        Math.min(1, Config.options?.bar?.visualizer?.height ?? 0.6))
+        Math.min(1, Config.options?.material?.bar?.visualizer?.height ?? 0.6))
     readonly property real barSpectrumOpacity: Math.max(0,
-        Math.min(1, Config.options?.bar?.visualizer?.opacity ?? 0.35))
-    readonly property string barSpectrumType: Config.options?.bar?.visualizer?.type ?? "bars"
-    readonly property string barSpectrumBarsOrigin: Config.options?.bar?.visualizer?.barsOrigin ?? "bottom"
-    readonly property real barSpectrumDensity: Math.max(4, Config.options?.bar?.visualizer?.density ?? 12)
-    readonly property real barSpectrumGap: Math.max(0, Config.options?.bar?.visualizer?.gap ?? 2)
-    readonly property int barSpectrumSmoothing: Math.max(0, Config.options?.bar?.visualizer?.smoothing ?? 2)
-    readonly property string barSpectrumWaveMode: Config.options?.bar?.visualizer?.waveMode ?? "fill"
-    readonly property real barSpectrumLineWidth: Math.max(1, Config.options?.bar?.visualizer?.lineWidth ?? 2)
-    readonly property real barSpectrumEdgeInset: Math.max(6, Config.options?.bar?.visualizer?.edgeInset ?? 6)
+        Math.min(1, Config.options?.material?.bar?.visualizer?.opacity ?? 0.35))
+    readonly property string barSpectrumType: Config.options?.material?.bar?.visualizer?.type ?? "bars"
+    readonly property string barSpectrumBarsOrigin: Config.options?.material?.bar?.visualizer?.barsOrigin ?? "bottom"
+    readonly property real barSpectrumDensity: Math.max(4, Config.options?.material?.bar?.visualizer?.density ?? 12)
+    readonly property real barSpectrumGap: Math.max(0, Config.options?.material?.bar?.visualizer?.gap ?? 2)
+    readonly property int barSpectrumSmoothing: Math.max(0, Config.options?.material?.bar?.visualizer?.smoothing ?? 2)
+    readonly property string barSpectrumWaveMode: Config.options?.material?.bar?.visualizer?.waveMode ?? "fill"
+    readonly property real barSpectrumLineWidth: Math.max(1, Config.options?.material?.bar?.visualizer?.lineWidth ?? 2)
+    readonly property real barSpectrumEdgeInset: Math.max(6, Config.options?.material?.bar?.visualizer?.edgeInset ?? 6)
     readonly property real barSpectrumEdgeSoftness: Math.max(0,
-        Math.min(1, (Config.options?.bar?.visualizer?.edgeSoftness ?? 36) / 100))
-    readonly property string barSpectrumFrequencyProfile: Config.options?.bar?.visualizer?.frequencyProfile ?? "flat"
+        Math.min(1, (Config.options?.material?.bar?.visualizer?.edgeSoftness ?? 36) / 100))
+    readonly property string barSpectrumFrequencyProfile: Config.options?.material?.bar?.visualizer?.frequencyProfile ?? "flat"
     readonly property real barSpectrumAccentStrength: Math.max(0,
-        Math.min(1, (Config.options?.bar?.visualizer?.accentStrength ?? 70) / 100))
-    readonly property string barSpectrumOrganicFit: Config.options?.bar?.visualizer?.organicFit ?? "auto"
+        Math.min(1, (Config.options?.material?.bar?.visualizer?.accentStrength ?? 70) / 100))
+    readonly property string barSpectrumOrganicFit: Config.options?.material?.bar?.visualizer?.organicFit ?? "auto"
     readonly property real barSpectrumOrganicLayoutScale: {
         if (root.barSpectrumOrganicFit === "aura") return 1
         if (root.barSpectrumOrganicFit === "contained") return 0.72
@@ -302,17 +302,17 @@ Item { // Bar content region
         return 0.88
     }
     readonly property real barSpectrumOrganicSensitivity: Math.max(0, Math.min(1,
-        (Config.options?.bar?.visualizer?.organicSensitivity ?? 42) / 100)) * barSpectrumOrganicLayoutScale
+        (Config.options?.material?.bar?.visualizer?.organicSensitivity ?? 42) / 100)) * barSpectrumOrganicLayoutScale
     readonly property real barSpectrumOrganicPulse: Math.max(0, Math.min(1,
-        (Config.options?.bar?.visualizer?.organicPulse ?? 55) / 100)) * barSpectrumOrganicLayoutScale
+        (Config.options?.material?.bar?.visualizer?.organicPulse ?? 55) / 100)) * barSpectrumOrganicLayoutScale
     readonly property real barSpectrumOrganicMotionSpeed: Math.max(0.25, Math.min(1.5,
-        (Config.options?.bar?.visualizer?.organicMotionSpeed ?? 80) / 100))
+        (Config.options?.material?.bar?.visualizer?.organicMotionSpeed ?? 80) / 100))
     readonly property real barSpectrumOrganicIdleMotion: Math.max(0, Math.min(1,
-        (Config.options?.bar?.visualizer?.organicIdleMotion ?? 0) / 100))
+        (Config.options?.material?.bar?.visualizer?.organicIdleMotion ?? 0) / 100))
     readonly property real barSpectrumOrganicGlow: Math.max(0, Math.min(1,
-        (Config.options?.bar?.visualizer?.organicGlow ?? 25) / 100)) * barSpectrumOrganicLayoutScale
+        (Config.options?.material?.bar?.visualizer?.organicGlow ?? 25) / 100)) * barSpectrumOrganicLayoutScale
     readonly property real barSpectrumOrganicBaseRadius: Math.max(0, Math.min(1,
-        (Config.options?.bar?.visualizer?.organicBaseRadius ?? 36) / 100))
+        (Config.options?.material?.bar?.visualizer?.organicBaseRadius ?? 36) / 100))
     readonly property bool barSpectrumOrganicEdgeAura: root.barSpectrumOrganicFit === "aura"
     readonly property color barSpectrumColor: root.inirEverywhere ? Appearance.inir.colPrimary
         : root.zzzEverywhere ? Appearance.zzz.accent
@@ -333,7 +333,7 @@ Item { // Bar content region
             else Audio.decrementVolume();
         } else if (action === "workspace") {
             let up = isUp;
-            if (Config.options?.bar?.workspaces?.invertScroll ?? false) up = !up;
+            if (Config.options?.material?.bar?.workspaces?.invertScroll ?? false) up = !up;
 
             if (CompositorService.isNiri) {
                 if (up) NiriService.focusWorkspaceUp();
@@ -469,17 +469,17 @@ Item { // Bar content region
     // natural content; the `center` zone stays screen-centered regardless of
     // which modules it contains; side pills grow outward and clamp so they
     // never collide with the edge sections.
-    // Visibility still comes from Config.options.bar.modules.*; the arrays only
+    // Visibility still comes from Config.options.material.bar.modules.*; the arrays only
     // define order/zone. Falls back to the classic layout until migrated.
-    readonly property bool _layoutMigrated: Config.options?.bar?.layout?.migrated === true
-    readonly property real _spacerMinimumWidth: Math.max(0, Config.options?.bar?.layout?.spacerWidth ?? 0) * Appearance.fontSizeScale
+    readonly property bool _layoutMigrated: Config.options?.material?.bar?.layout?.migrated === true
+    readonly property real _spacerMinimumWidth: Math.max(0, Config.options?.material?.bar?.layout?.spacerWidth ?? 0) * Appearance.fontSizeScale
     readonly property bool _layoutContainsActiveWindow: ["left", "centerLeft", "center", "centerRight", "right"]
         .some(zoneName => {
-            const ids = Config.options?.bar?.layout?.[zoneName] ?? []
+            const ids = Config.options?.material?.bar?.layout?.[zoneName] ?? []
             return ids.includes("activeWindow")
         })
     function _zone(name, fallback) {
-        const a = Config.options?.bar?.layout?.[name]
+        const a = Config.options?.material?.bar?.layout?.[name]
         const ids = (root._layoutMigrated && a && a.length >= 0) ? Array.from(a) : Array.from(fallback)
         // `taskbar` used to be exposed as a relocatable id even though the
         // renderer never owned a standalone taskbar component: taskbar replaces
@@ -496,7 +496,7 @@ Item { // Bar content region
     readonly property var _centerRightIds: root._zone("centerRight", ["clock", "utilButtons", "battery"])
     readonly property var _rightIds:       root._zone("right",       ["rightSidebarButton", "tray", "timer", "shellUpdate", "spacer", "weather"])
 
-    function _moduleVisible(id) { return Config.options?.bar?.modules?.[id] ?? true }
+    function _moduleVisible(id) { return Config.options?.material?.bar?.modules?.[id] ?? true }
 
     /**
      * Latch-free layout visibility. Reading `item.visible` from a host Loader
@@ -514,9 +514,9 @@ Item { // Bar content region
         if (id === "activeWindow")
             return root.taskbarEnabled || root.useShortenedForm === 0;
         if (id === "media") return root.useShortenedForm < 2;
-        if (id === "utilButtons") return (Config.options?.bar?.verbose ?? true) && root.useShortenedForm === 0;
+        if (id === "utilButtons") return (Config.options?.material?.bar?.verbose ?? true) && root.useShortenedForm === 0;
         if (id === "battery") return root.useShortenedForm < 2 && Battery.available;
-        if (id === "weather") return Config.options?.bar?.weather?.enable ?? false;
+        if (id === "weather") return Config.options?.weather?.enable ?? false;
         return true;
     }
 
@@ -551,7 +551,7 @@ Item { // Bar content region
     // activeWindow/taskbar fill the edge section; resources fills only on the
     // tightest screens. Centre pills size tightly to content, so clock does NOT
     // fill; media fills only up to its natural width, which lets it shrink first.
-    readonly property string _spacerMode: Config.options?.bar?.layout?.spacerMode ?? "auto"
+    readonly property string _spacerMode: Config.options?.material?.bar?.layout?.spacerMode ?? "auto"
     function _fillWidth(id, zone) {
         if (id === "spacer") {
             // Centre groups are content-sized by contract. Even an explicit
@@ -626,13 +626,13 @@ Item { // Bar content region
         id: clockModuleComponent
         ClockWidget {
             visible: root._moduleVisible("clock")
-            showDate: ((Config.options?.bar?.verbose ?? true) && root.useShortenedForm < 2)
+            showDate: ((Config.options?.material?.bar?.verbose ?? true) && root.useShortenedForm < 2)
         }
     }
     Component {
         id: utilButtonsModuleComponent
         UtilButtons {
-            visible: root._moduleVisible("utilButtons") && ((Config.options?.bar?.verbose ?? true) && root.useShortenedForm === 0)
+            visible: root._moduleVisible("utilButtons") && ((Config.options?.material?.bar?.verbose ?? true) && root.useShortenedForm === 0)
             Layout.alignment: Qt.AlignVCenter
         }
     }
@@ -719,9 +719,9 @@ Item { // Bar content region
             && !root.inirEverywhere
             && (root.angelEverywhere || root.surfaceDialect !== "aurora")
             && !Appearance.gameModeMinimal
-            && (Config.options?.bar?.showBackground ?? true)
-            && (root.angelEverywhere || (((Config.options?.bar?.cornerStyle ?? 0) === 1 || (Config.options?.bar?.cornerStyle ?? 0) === 3)
-            && (Config.options?.bar?.floatStyleShadow ?? true)))
+            && (Config.options?.material?.bar?.showBackground ?? true)
+            && (root.angelEverywhere || (((Config.options?.material?.bar?.cornerStyle ?? 0) === 1 || (Config.options?.material?.bar?.cornerStyle ?? 0) === 3)
+            && (Config.options?.material?.bar?.floatStyleShadow ?? true)))
         anchors.fill: barBackground
         sourceComponent: StyledRectangularShadow {
             anchors.fill: undefined // The loader's anchors act on this, and this should not have any anchor
@@ -742,11 +742,11 @@ Item { // Bar content region
             && !root.isFrame && !root.isScenic
         readonly property bool editorialBackdropReady: editorialGlassActive
             && (root.nativeBlurActive || blurredWallpaper.status === Image.Ready)
-        readonly property int cornerStyle: Config.options?.bar?.cornerStyle ?? 0
+        readonly property int cornerStyle: Config.options?.material?.bar?.cornerStyle ?? 0
         readonly property bool zzzGlassActive: root.zzzEverywhere
             && root.barAppearance === "classic"
             && Appearance.effectsEnabled
-            && (Config.options?.appearance?.zzz?.glass ?? true)
+            && (Config.options?.material?.style?.zzz?.glass ?? true)
         // Float (1) and Card (3) are floating; Aurora makes everything floating except Hug and Rect.
         // Frame appearance always floats; scenic hugs the edge by definition.
         readonly property bool floatingStyle: root.zzzDetachedRounded
@@ -760,11 +760,11 @@ Item { // Bar content region
         }
         readonly property real barMargin: root.zzzDetachedRounded ? Appearance.sizes.elevationMargin
             : floatingStyle ? Appearance.sizes.hyprlandGapsOut : 0
-        readonly property bool isBottom: Config.options?.bar?.bottom ?? false
+        readonly property bool isBottom: Config.options?.material?.bar?.bottom ?? false
 
         readonly property QtObject blendedColors: root.blendedColors
 
-        visible: (Config.options?.bar?.showBackground ?? true) && !gameModeMinimal && !root.isIslands
+        visible: (Config.options?.material?.bar?.showBackground ?? true) && !gameModeMinimal && !root.isIslands
         // User-configurable background opacity (lets you make the bar translucent
         // without changing the global style). Applied as Item.opacity so border,
         // blurredWallpaper, inset glow and partial borders all fade together.
@@ -772,7 +772,7 @@ Item { // Bar content region
         // Regalia is an opaque physical-material style. Preserve the user's
         // persisted opacity for every other style instead of rewriting config.
         opacity: root.regaliaEverywhere && root.barAppearance === "classic"
-            ? 1 : Math.max(0, Math.min(1, Config.options?.bar?.opacity ?? 1))
+            ? 1 : Math.max(0, Math.min(1, Config.options?.material?.bar?.opacity ?? 1))
         Behavior on opacity {
             enabled: Appearance.animationsEnabled
             animation: NumberAnimation { duration: Appearance.animation.elementMoveFast.duration; easing.type: Appearance.animation.elementMoveFast.type; easing.bezierCurve: Appearance.animation.elementMoveFast.bezierCurve }
@@ -869,7 +869,7 @@ Item { // Bar content region
                 return 0
             }
             // Custom rounding override (-1 means use theme default)
-            const customRounding = Config.options?.bar?.customRounding ?? -1
+            const customRounding = Config.options?.material?.bar?.customRounding ?? -1
             if (customRounding >= 0) {
                 return customRounding
             }
@@ -1168,7 +1168,7 @@ Item { // Bar content region
         // ScrollHint as overlay - at the inner edge of the margin space
         ScrollHint {
             id: leftScrollHint
-            reveal: barLeftSideMouseArea.hovered && (Config.options?.bar?.showScrollHints ?? true) && root.leftAction !== "none"
+            reveal: barLeftSideMouseArea.hovered && (Config.options?.material?.bar?.showScrollHints ?? true) && root.leftAction !== "none"
             icon: root.getScrollIcon(root.leftAction)
             tooltipText: root.getScrollTooltip(root.leftAction)
             side: "left"
@@ -1295,7 +1295,7 @@ Item { // Bar content region
 
         VerticalBarSeparator {
             id: leftSeparator
-            visible: (Config.options?.bar.borderless ?? false) && !root.isIslands && !leftCenterGroup.empty && !middleCenterGroup.empty
+            visible: (Config.options?.material?.bar.borderless ?? false) && !root.isIslands && !leftCenterGroup.empty && !middleCenterGroup.empty
             anchors.verticalCenter: parent.verticalCenter
             anchors.right: middleCenterGroup.left
             anchors.rightMargin: 4
@@ -1331,7 +1331,7 @@ Item { // Bar content region
             spectrumOrganicBaseRadius: root.barSpectrumOrganicBaseRadius
             spectrumDomain: root
             anchors.verticalCenter: parent.verticalCenter
-            anchors.right: (Config.options?.bar.borderless ?? false) ? leftSeparator.left : middleCenterGroup.left
+            anchors.right: (Config.options?.material?.bar.borderless ?? false) ? leftSeparator.left : middleCenterGroup.left
             anchors.rightMargin: (root.isIslands ? 8 : 4) * root.hostScale
             // Collapse to nothing when this zone has no visible modules;
             // otherwise take the symmetric target width. Modules elide/clip.
@@ -1362,7 +1362,7 @@ Item { // Bar content region
 
         VerticalBarSeparator {
             id: rightSeparator
-            visible: (Config.options?.bar.borderless ?? false) && !root.isIslands && !rightCenterGroupPill.empty && !middleCenterGroup.empty
+            visible: (Config.options?.material?.bar.borderless ?? false) && !root.isIslands && !rightCenterGroupPill.empty && !middleCenterGroup.empty
             anchors.verticalCenter: parent.verticalCenter
             anchors.left: middleCenterGroup.right
             anchors.leftMargin: 4
@@ -1372,7 +1372,7 @@ Item { // Bar content region
         Item {
             id: rightCenterGroup
             anchors.verticalCenter: parent.verticalCenter
-            anchors.left: (Config.options?.bar.borderless ?? false) ? rightSeparator.right : middleCenterGroup.right
+            anchors.left: (Config.options?.material?.bar.borderless ?? false) ? rightSeparator.right : middleCenterGroup.right
             anchors.leftMargin: (root.isIslands ? 8 : 4) * root.hostScale
             implicitWidth: rightCenterGroupPill.empty ? 0 : rightCenterGroupPill.width
             implicitHeight: rightCenterGroupPill.height
@@ -1521,7 +1521,7 @@ Item { // Bar content region
         // ScrollHint as overlay - at the inner edge of the margin space
         ScrollHint {
             id: rightScrollHint
-            reveal: barRightSideMouseArea.hovered && (Config.options?.bar?.showScrollHints ?? true) && root.rightAction !== "none"
+            reveal: barRightSideMouseArea.hovered && (Config.options?.material?.bar?.showScrollHints ?? true) && root.rightAction !== "none"
             icon: root.getScrollIcon(root.rightAction)
             tooltipText: root.getScrollTooltip(root.rightAction)
             side: "right"
@@ -1602,13 +1602,13 @@ Item { // Bar content region
             visible: root._moduleVisible("sysTray") && root.useShortenedForm === 0
             Layout.fillWidth: false
             Layout.fillHeight: true
-            invertSide: Config.options?.bar?.bottom ?? false
+            invertSide: Config.options?.material?.bar?.bottom ?? false
         }
     }
     Component {
         id: weatherComponent
         Loader {
-            active: root._moduleVisible("weather") && (Config.options?.bar?.weather?.enable ?? false)
+            active: root._moduleVisible("weather") && (Config.options?.weather?.enable ?? false)
             visible: active
             sourceComponent: BarGroup {
                 // Inside an edge island the weather is a bare chip — its own

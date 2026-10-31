@@ -13,17 +13,17 @@ Scope {
     property bool _presentedOpen: false
     readonly property real screenWidth: panelRoot.screen?.width ?? 1920
     readonly property real screenHeight: panelRoot.screen?.height ?? 1080
-    readonly property var dockConfig: Config.options?.dock ?? ({})
+    readonly property var dockConfig: Config.options?.material?.dock ?? ({})
     readonly property bool dockEnabled: dockConfig?.enable ?? false
     readonly property real safePadding: Math.max(
         Appearance.sizes.hyprlandGapsOut * 2,
         Math.round(Math.min(screenWidth, screenHeight) * 0.02)
     )
     readonly property real topReservedSpace: safePadding
-        + (!(Config.options?.bar?.bottom ?? false) ? Appearance.sizes.baseBarHeight + Appearance.sizes.hyprlandGapsOut * 2 : 0)
+        + (!(Config.options?.material?.bar?.bottom ?? false) ? Appearance.sizes.baseBarHeight + Appearance.sizes.hyprlandGapsOut * 2 : 0)
         + ((dockEnabled && dockConfig?.position === "top") ? ((dockConfig?.height ?? 60) + safePadding) : 0)
     readonly property real bottomReservedSpace: safePadding
-        + ((Config.options?.bar?.bottom ?? false) ? Appearance.sizes.baseBarHeight + Appearance.sizes.hyprlandGapsOut * 2 : 0)
+        + ((Config.options?.material?.bar?.bottom ?? false) ? Appearance.sizes.baseBarHeight + Appearance.sizes.hyprlandGapsOut * 2 : 0)
         + ((dockEnabled && dockConfig?.position === "bottom") ? ((dockConfig?.height ?? 60) + safePadding) : 0)
     readonly property real leftReservedSpace: safePadding
         + ((dockEnabled && dockConfig?.position === "left") ? ((dockConfig?.width ?? dockConfig?.height ?? 60) + safePadding) : 0)
@@ -124,7 +124,7 @@ Scope {
 
         Loader {
             id: contentLoader
-            active: GlobalStates.controlPanelOpen || (Config?.options?.controlPanel?.keepLoaded ?? false)
+            active: GlobalStates.controlPanelOpen || (Config?.options?.material?.controlPanel?.keepLoaded ?? false)
 
             // Shell desaturation effect
             layer.enabled: Appearance.shouldDesaturate("overlays") && contentLoader.visible
@@ -242,7 +242,7 @@ Scope {
             anchors {
                 horizontalCenter: safeBounds.horizontalCenter
                 verticalCenter: safeBounds.verticalCenter
-                verticalCenterOffset: (Config.options?.bar?.bottom ?? false) ? -root.panelVerticalOffset : root.panelVerticalOffset
+                verticalCenterOffset: (Config.options?.material?.bar?.bottom ?? false) ? -root.panelVerticalOffset : root.panelVerticalOffset
             }
             
             width: root.panelWidth

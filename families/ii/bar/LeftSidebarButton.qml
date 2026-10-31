@@ -12,7 +12,7 @@ RippleButton {
     cookieMorphing: true
 
     property bool showPing: false
-    readonly property string iconName: Config.options?.bar?.topLeftIcon ?? "distro"
+    readonly property string iconName: Config.options?.material?.bar?.topLeftIcon ?? "distro"
     // "avatar" wears the user's picture; with none found it falls back to the distro logo.
     property int avatarIndex: 0
     readonly property string avatarSource: root.iconName === "avatar" ? Directories.avatarSourceAt(root.avatarIndex) : ""

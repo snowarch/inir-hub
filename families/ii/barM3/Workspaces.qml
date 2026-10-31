@@ -10,7 +10,7 @@ import QtQuick
 // this folder's BarGroup, so the M3 grouping remains intact.
 Item {
     id: root
-    property bool vertical: Config.options.bar.vertical
+    property bool vertical: Config.options.material.bar.vertical
 
     implicitWidth: stock.implicitWidth
     implicitHeight: stock.implicitHeight
@@ -20,13 +20,13 @@ Item {
         anchors.fill: parent
         vertical: root.vertical
         syncGlobalWorkspaceConfig: false
-        showAppIcons: Config.options.bar.m3.workspaces.showAppIcons
-        alwaysShowNumbers: Config.options.bar.m3.workspaces.alwaysShowNumbers
-        useNerdFont: Config.options.bar.m3.workspaces.useNerdFont
-        monochromeIcons: Config.options.bar.m3.workspaces.monochromeIcons
-        indicatorStyle: Config.options.bar.m3.workspaces.indicatorStyle
-        numberMap: Config.options.bar.m3.workspaces.numberMap
-        forceMaterialStyle: Config.options.bar.m3.cornerStyle === 3
+        showAppIcons: Config.options.material.bar.m3.workspaces.showAppIcons
+        alwaysShowNumbers: Config.options.material.bar.m3.workspaces.alwaysShowNumbers
+        useNerdFont: Config.options.material.bar.m3.workspaces.useNerdFont
+        monochromeIcons: Config.options.material.bar.m3.workspaces.monochromeIcons
+        indicatorStyle: Config.options.material.bar.m3.workspaces.indicatorStyle
+        numberMap: Config.options.material.bar.m3.workspaces.numberMap
+        forceMaterialStyle: Config.options.material.bar.m3.cornerStyle === 3
             && (Appearance.globalStyle === "material" || Appearance.editorialEverywhere)
     }
 }

@@ -24,17 +24,17 @@ Scope {
     // with hover-reveal (a pinned dock can never hide). Let hover-reveal win
     // so the dock actually hides when the user asks it to; pinnedOnStartup
     // only applies when reveal mode is "Empty workspace".
-    property bool pinned: (Config.options?.dock?.pinnedOnStartup ?? false)
-        && !(Config.options?.dock?.hoverToReveal ?? false)
-    readonly property string position: Config.options?.dock?.position ?? "bottom"
+    property bool pinned: (Config.options?.material?.dock?.pinnedOnStartup ?? false)
+        && !(Config.options?.material?.dock?.hoverToReveal ?? false)
+    readonly property string position: Config.options?.material?.dock?.position ?? "bottom"
     readonly property bool isVertical: root.position === "left" || root.position === "right"
     readonly property bool isTop: root.position === "top"
     readonly property bool isLeft: root.position === "left"
-    readonly property bool isPillStyle:   Config.options?.dock?.style === "pill"
-    readonly property bool isMacosStyle:  Config.options?.dock?.style === "macos"
-    readonly property bool isIslandStyle: Config.options?.dock?.style === "island"
-    readonly property bool isM3Style:     Config.options?.dock?.style === "m3"
-    readonly property bool isPanelStyle:  Config.options?.dock?.style === "panel"
+    readonly property bool isPillStyle:   Config.options?.material?.dock?.style === "pill"
+    readonly property bool isMacosStyle:  Config.options?.material?.dock?.style === "macos"
+    readonly property bool isIslandStyle: Config.options?.material?.dock?.style === "island"
+    readonly property bool isM3Style:     Config.options?.material?.dock?.style === "m3"
+    readonly property bool isPanelStyle:  Config.options?.material?.dock?.style === "panel"
     // Island is a complete Ricelin material. Pill and macOS are layout modes
     // that still inherit the selected global worldview (except ZZZ, whose shelf
     // intentionally wins as before).
@@ -44,14 +44,14 @@ Scope {
     readonly property bool regaliaEverywhere: !root.isM3Style && root.surfaceDialect === "regalia"
 
     // Track bar position to force dock recreation when bar changes
-    readonly property bool barIsVertical: Config.options?.bar?.bottom !== undefined
+    readonly property bool barIsVertical: Config.options?.material?.bar?.bottom !== undefined
     // Key to force panel recreation when dock OR bar position changes
     property string _positionKey: `${root.position}_${barIsVertical}`
 
     Variants {
         model: {
             const screens = Quickshell.screens;
-            const list = Config.options?.dock?.screenList ?? [];
+            const list = Config.options?.material?.dock?.screenList ?? [];
             if (!list || list.length === 0)
                 return screens;
             const matchedScreens = screens.filter(screen => {
@@ -90,7 +90,7 @@ Scope {
                 // Shows on a rest at the edge, not on a pass; stays a moment after the pointer slips off.
                 EdgeReveal {
                     id: dockEdge
-                    hovered: (Config.options?.dock?.hoverToReveal ?? false) && dockMouseArea.containsMouse
+                    hovered: (Config.options?.material?.dock?.hoverToReveal ?? false) && dockMouseArea.containsMouse
                 }
                 property bool reveal: !GlobalStates.coverflowSelectorOpen
                     && !(GlobalStates.wallpaperLauncherOpen && root.position === "bottom")
@@ -98,7 +98,7 @@ Scope {
                     && (ShellEditSession.active || root.pinned
                         || dockEdge.revealed
                         || (dockApps?.requestDockShow || dockAppsVertical?.requestDockShow)
-                        || (Config.options?.dock?.showOnDesktop !== false
+                        || (Config.options?.material?.dock?.showOnDesktop !== false
                             && !ToplevelManager.activeToplevel?.activated))
 
                 // Shell edit resize previews locally and persists once on release.
@@ -106,10 +106,10 @@ Scope {
                 property real _editResizeBaseline: -1
                 readonly property real dockHeight: editThicknessPreview >= 0
                     ? editThicknessPreview
-                    : (Config.options?.dock?.height ?? 70)
+                    : (Config.options?.material?.dock?.height ?? 70)
 
                 function beginDockResize(): void {
-                    const baseline = Config.options?.dock?.height ?? 70
+                    const baseline = Config.options?.material?.dock?.height ?? 70
                     if (!ShellEditSession.beginGesture("iiDock", "resize-thickness",
                             { thickness: baseline }))
                         return
@@ -179,7 +179,7 @@ Scope {
                     dockRoot.nativeBlurTopology)
                 readonly property bool nativeBlurActive: Appearance.useCompositorBlur(
                         root.isIslandStyle ? "islands" : "dock", dockRoot.nativeBlurTopology)
-                    && (Config.options?.dock?.showBackground ?? true)
+                    && (Config.options?.material?.dock?.showBackground ?? true)
                     && !Appearance.gameModeMinimal
                 readonly property Item nativeBlurItem: root.isMacosStyle ? macBackground
                     : root.isIslandStyle ? dockIslandBackground : dockVisualBackground
@@ -196,13 +196,13 @@ Scope {
                 // Where the dock rests when the desktop shows, for arranging widgets beside it (DesktopArrange.bodies):
                 // worked out from its place on the edge, not where it is now (hidden, it waits past the edge). Never
                 // written while arranging, when the dock is away.
-                readonly property bool showsOnDesktop: root.pinned || Config.options?.dock?.showOnDesktop !== false
+                readonly property bool showsOnDesktop: root.pinned || Config.options?.material?.dock?.showOnDesktop !== false
                 function publishBody(): void {
                     const name = dockRoot.screen?.name ?? ""
                     if (name.length === 0 || GlobalStates.widgetEditMode)
                         return
                     const item = dockRoot.nativeBlurItem
-                    if (!dockRoot.showsOnDesktop || !item || !(Config.options?.dock?.showBackground ?? true)) {
+                    if (!dockRoot.showsOnDesktop || !item || !(Config.options?.material?.dock?.showBackground ?? true)) {
                         DesktopArrange.setBodies(name, "dock", [])
                         return
                     }
@@ -247,8 +247,8 @@ Scope {
                         verticalCenter: root.isVertical ? parent.verticalCenter : undefined
                     }
 
-                    property real hideOffset: dockRoot.reveal ? 0 : Config.options?.dock?.hoverToReveal ? (dockRoot.implicitHeight - (Config.options?.dock?.hoverRegionHeight ?? 5)) : (dockRoot.implicitHeight + 1)
-                    property real hideOffsetV: dockRoot.reveal ? 0 : Config.options?.dock?.hoverToReveal ? (dockRoot.implicitWidth - (Config.options?.dock?.hoverRegionHeight ?? 5)) : (dockRoot.implicitWidth + 1)
+                    property real hideOffset: dockRoot.reveal ? 0 : Config.options?.material?.dock?.hoverToReveal ? (dockRoot.implicitHeight - (Config.options?.material?.dock?.hoverRegionHeight ?? 5)) : (dockRoot.implicitHeight + 1)
+                    property real hideOffsetV: dockRoot.reveal ? 0 : Config.options?.material?.dock?.hoverToReveal ? (dockRoot.implicitWidth - (Config.options?.material?.dock?.hoverRegionHeight ?? 5)) : (dockRoot.implicitWidth + 1)
                     
                     // Positive margins push content off-screen
                     anchors.topMargin: root.position === "bottom" ? hideOffset : 0
@@ -313,7 +313,7 @@ Scope {
 
                             StyledRectangularShadow {
                                 target: dockVisualBackground
-                                visible: (Config.options?.dock?.showBackground ?? true) && !Appearance.gameModeMinimal && !root.zzzEverywhere && !root.isPillStyle && !root.isMacosStyle && !root.isIslandStyle
+                                visible: (Config.options?.material?.dock?.showBackground ?? true) && !Appearance.gameModeMinimal && !root.zzzEverywhere && !root.isPillStyle && !root.isMacosStyle && !root.isIslandStyle
                             }
 
                             // Island style carries its own surface (gradient card,
@@ -326,21 +326,21 @@ Scope {
                                 anchors.bottomMargin: root.position === "bottom" ? Appearance.sizes.hyprlandGapsOut : (root.isVertical ? 0 : Appearance.sizes.elevationMargin)
                                 anchors.leftMargin: root.isLeft ? Appearance.sizes.hyprlandGapsOut : (root.isVertical ? Appearance.sizes.elevationMargin : 0)
                                 anchors.rightMargin: root.position === "right" ? Appearance.sizes.hyprlandGapsOut : (root.isVertical ? Appearance.sizes.elevationMargin : 0)
-                                visible: (Config.options?.dock?.showBackground ?? true) && root.isIslandStyle
+                                visible: (Config.options?.material?.dock?.showBackground ?? true) && root.isIslandStyle
                                 glassEnabled: true
                                 nativeBlurActive: dockRoot.nativeBlurActive
                                 screen: dockRoot.screen
                                 // Docked panels round a touch harder than the bar;
                                 // still follows the shared island skin knob.
-                                radius: (Config.options?.appearance?.island?.radius ?? 18) + 4
+                                radius: (Config.options?.material?.style?.island?.radius ?? 18) + 4
                             }
 
                                 Rectangle {
                                     id: dockVisualBackground
-                                    property bool cardStyle: Config.options?.dock?.cardStyle ?? false
+                                    property bool cardStyle: Config.options?.material?.dock?.cardStyle ?? false
                                     readonly property bool zzzGlassActive: root.zzzEverywhere
                                         && Appearance.effectsEnabled
-                                        && (Config.options?.appearance?.zzz?.glass ?? true)
+                                        && (Config.options?.material?.style?.zzz?.glass ?? true)
                                     readonly property bool regaliaEverywhere: !root.isM3Style && root.surfaceDialect === "regalia"
                                     readonly property bool angelEverywhere: !root.isM3Style && root.surfaceDialect === "angel"
                                     readonly property bool auroraEverywhere: !root.isM3Style && (root.surfaceDialect === "aurora" || angelEverywhere)
@@ -381,7 +381,7 @@ Scope {
                                 // Island is an explicit opt-in to the Ricelin dialect,
                                 // so it replaces the zzz surface too (same rule as the
                                 // islands bar).
-                                visible: (Config.options?.dock?.showBackground ?? true) && !gameModeMinimal && ((root.zzzEverywhere && !root.isIslandStyle) || (!root.isPillStyle && !root.isMacosStyle && !root.isIslandStyle))
+                                visible: (Config.options?.material?.dock?.showBackground ?? true) && !gameModeMinimal && ((root.zzzEverywhere && !root.isIslandStyle) || (!root.isPillStyle && !root.isMacosStyle && !root.isIslandStyle))
                                 // ZZZ: the visible shelf is the chamfered ZzzPlate below.
                                 color: dockVisualBackground.editorialGlassActive
                                     ? (!dockVisualBackground.editorialBackdropReady ? Appearance.editorial.rail
@@ -550,7 +550,7 @@ Scope {
                              // macOS unified shelf background — visible only in macOS style
                                DockMacBackground {
                                    id: macBackground
-                                   visible: (Config.options?.dock?.showBackground ?? true)
+                                   visible: (Config.options?.material?.dock?.showBackground ?? true)
                                             && root.isMacosStyle && !root.zzzEverywhere && !Appearance.gameModeMinimal
                                    anchors.fill: parent
                                    anchors.topMargin:    root.isTop     ? Appearance.sizes.hyprlandGapsOut : (root.isVertical ? 0 : Appearance.sizes.elevationMargin)
@@ -648,7 +648,7 @@ Scope {
                         active: ShellEditSession.blocksNormalActions(surfaceId)
                         selected: ShellEditSession.selectedSurfaceId === surfaceId
                         lifted: ShellEditSession.liftedSurfaceId === surfaceId
-                        slotHint: Config.options?.dock?.position ?? "bottom"
+                        slotHint: Config.options?.material?.dock?.position ?? "bottom"
                         screenWidth: dockRoot.screen?.width ?? 0
                         screenHeight: dockRoot.screen?.height ?? 0
                         onDragStarted: surface => ShellEditSession.beginDrag(surface)

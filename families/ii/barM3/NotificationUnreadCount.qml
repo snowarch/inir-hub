@@ -11,8 +11,8 @@ import qs.modules.common.m3
 Item {
     id: root
     property bool embeddedInSystemIcons: false
-    readonly property bool isMaterial: Config.options.bar.m3.cornerStyle === 3
-    readonly property bool showUnreadCount: Config.options.bar.m3.indicators.notifications.showUnreadCount
+    readonly property bool isMaterial: Config.options.material.bar.m3.cornerStyle === 3
+    readonly property bool showUnreadCount: Config.options.material.bar.m3.indicators.notifications.showUnreadCount
     readonly property string iconName: Notifications.silent ? "notifications_paused" : "notifications"
 
     implicitWidth: root.embeddedInSystemIcons ? embeddedSymbol.implicitWidth : 32

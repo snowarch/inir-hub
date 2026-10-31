@@ -9,7 +9,7 @@ import qs.modules.common.pill
 IslandPanel {
     id: root
 
-    property bool barShadow: Config.options?.appearance?.island?.shadow ?? true
+    property bool barShadow: Config.options?.material?.style?.island?.shadow ?? true
     property bool compactShadow: true
     readonly property real shadowShapeRadius: Math.max(0,
         Math.min(root.radius, root.width / 2, root.height / 2))

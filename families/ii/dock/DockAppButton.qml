@@ -18,7 +18,7 @@ DockButton {
     property var appListRoot
     property int listIndex: -1       // set by the DockApps delegate (required property int index)
     property int lastFocused: -1
-    property real iconSize: Config.options?.dock?.iconSize ?? 35
+    property real iconSize: Config.options?.material?.dock?.iconSize ?? 35
     property real countDotWidth: 10
     property real countDotHeight: 4
     // Toplevels come from the dock-wide reactive map so window-list
@@ -93,15 +93,15 @@ DockButton {
     }
     property bool hasWindows: toplevels.length > 0
     surfaceDialect: Appearance.surfaceDialectFor(
-        Config.options?.dock?.style === "island" ? "island" : "")
-    property bool pillStyle: Config.options?.dock?.style === "pill" && !root.zzzStyle
+        Config.options?.material?.dock?.style === "island" ? "island" : "")
+    property bool pillStyle: Config.options?.material?.dock?.style === "pill" && !root.zzzStyle
     property bool islandStyle: root.surfaceDialect === "island"
-    property bool macosStyle: Config.options?.dock?.style === "macos" && !root.zzzStyle
+    property bool macosStyle: Config.options?.material?.dock?.style === "macos" && !root.zzzStyle
     // Lucid's dock: an icon swells and lifts under the pointer.
-    property bool m3Style: Config.options?.dock?.style === "m3" && !root.zzzStyle
+    property bool m3Style: Config.options?.material?.dock?.style === "m3" && !root.zzzStyle
 
     readonly property int notificationCount: {
-        if (root.isSeparator || (Config.options?.dock?.notificationBadge ?? true) === false)
+        if (root.isSeparator || (Config.options?.material?.dock?.notificationBadge ?? true) === false)
             return 0
         return Notifications.countForApp([
             appToplevel?.originalAppId ?? appToplevel?.appId,
@@ -117,7 +117,7 @@ DockButton {
     property alias hoverTimer: hoverDelayTimer
     Timer {
         id: hoverDelayTimer
-        interval: Config.options?.dock?.hoverPreviewDelay ?? 400
+        interval: Config.options?.material?.dock?.hoverPreviewDelay ?? 400
         onTriggered: {
             if (root.hasWindows && root.buttonHovered
                     && !(root.appListRoot?.contextMenuOpen ?? false)
@@ -187,7 +187,7 @@ DockButton {
         menu: root.appTrayItem?.menu ?? null
     }
 
-    readonly property real dockHeight: Config.options?.dock?.height ?? 70
+    readonly property real dockHeight: Config.options?.material?.dock?.height ?? 70
     readonly property real separatorSize: dockHeight - 50
 
     implicitWidth: isSeparator ? (vertical ? separatorSize : 8) : (vertical ? 50 : (implicitHeight - topInset - bottomInset))
@@ -310,7 +310,7 @@ DockButton {
                 appListRoot.lastHoveredButton = root
                 appListRoot.buttonHovered = true
                 // Start hover timer for preview
-                if (Config.options?.dock?.hoverPreview !== false) {
+                if (Config.options?.material?.dock?.hoverPreview !== false) {
                     hoverDelayTimer.restart()
                 }
             } else {
@@ -597,7 +597,7 @@ DockButton {
               // Cache the item into an FBO layer if shaders are present AND animating.
               // This completely eliminates the horrific 100% CPU/GPU spike when macOS
               // hover magnify continually rescales the Desaturate and ColorOverlay shaders.
-              layer.enabled: root.macosStyle && (Config.options?.dock?.monochromeIcons ?? false)
+              layer.enabled: root.macosStyle && (Config.options?.material?.dock?.monochromeIcons ?? false)
               layer.smooth: true
 
               // macOS magnify: scale around the bottom centre so icons grow upward.
@@ -706,7 +706,7 @@ DockButton {
             }
 
             Loader {
-                active: Config.options?.dock?.monochromeIcons ?? false
+                active: Config.options?.material?.dock?.monochromeIcons ?? false
                 anchors.fill: iconImageLoader
                 sourceComponent: Item {
                     Desaturate {
@@ -777,9 +777,9 @@ DockButton {
                 }
 
                 // Config options
-                property bool smartIndicator: Config.options?.dock?.smartIndicator !== false
-                property bool showAllDots: Config.options?.dock?.showAllWindowDots !== false
-                property int maxDots: Config.options?.dock?.maxIndicatorDots ?? 5
+                property bool smartIndicator: Config.options?.material?.dock?.smartIndicator !== false
+                property bool showAllDots: Config.options?.material?.dock?.showAllWindowDots !== false
+                property int maxDots: Config.options?.material?.dock?.maxIndicatorDots ?? 5
 
                 sourceComponent: Row {
                     spacing: 3
@@ -787,8 +787,8 @@ DockButton {
                     Repeater {
                         // Show dots for all windows if enabled, otherwise just for active apps
                         model: {
-                            const showAll = Config.options?.dock?.showAllWindowDots !== false;
-                            const max = Config.options?.dock?.maxIndicatorDots ?? 5;
+                            const showAll = Config.options?.material?.dock?.showAllWindowDots !== false;
+                            const max = Config.options?.material?.dock?.maxIndicatorDots ?? 5;
                             if (root.appIsActive || showAll) {
                                 return Math.min(toplevels.length, max);
                             }
@@ -798,7 +798,7 @@ DockButton {
                         delegate: Rectangle {
                             required property int index
 
-                            property bool smartMode: Config.options?.dock?.smartIndicator !== false
+                            property bool smartMode: Config.options?.material?.dock?.smartIndicator !== false
 
                             // Determine if this indicator corresponds to the focused window
                             property bool isFocusedWindow: {
@@ -850,7 +850,7 @@ DockButton {
 
                     // Fallback: single indicator when showAllDots is off and app is inactive
                     Rectangle {
-                        opacity: (!root.appIsActive && root.hasWindows && Config.options?.dock?.showAllWindowDots === false) ? 1 : 0
+                        opacity: (!root.appIsActive && root.hasWindows && Config.options?.material?.dock?.showAllWindowDots === false) ? 1 : 0
                         visible: opacity > 0
                         width: (root.zzzStyle || root.islandStyle) ? 5 : (root.angelStyle ? 6 : 5)
                         height: (root.zzzStyle || root.islandStyle) ? 3 : (root.angelStyle ? 2 : 5)

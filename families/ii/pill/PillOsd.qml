@@ -34,7 +34,7 @@ Item {
     property var pendingSubject: null
     readonly property var subject: pendingSubject ? pendingSubject : PillPlayers.active
     readonly property bool mediaFeedbackEnabled: root.outputAllowed
-        && (Config.options?.bar?.pill?.osd ?? true)
+        && (Config.options?.material?.bar?.pill?.osd ?? true)
         && (Config.options?.osd?.mediaEnabled ?? true)
     readonly property bool trackAllowed: (Config.options?.osd?.mediaEnabled ?? true)
         && !root.trackSuppressed
@@ -125,7 +125,7 @@ Item {
     function flash(which, intentionalTrack = false) {
         // OSD face switched off: the standalone OnScreenDisplay panel owns the
         // flashes instead (ShellIiPanelsImpl hands it back when this key is false).
-        if (!(Config.options?.bar?.pill?.osd ?? true))
+        if (!(Config.options?.material?.bar?.pill?.osd ?? true))
             return false;
         if (which === "track" && !(Config.options?.osd?.mediaEnabled ?? true))
             return false;

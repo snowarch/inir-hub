@@ -11,10 +11,10 @@ import Quickshell
 
 PanelSurface {
     id: root
-    islandSkin: (Config.options?.controlPanel?.style ?? "panel") === "island"
+    islandSkin: (Config.options?.material?.controlPanel?.style ?? "panel") === "island"
     Layout.fillWidth: true
     implicitHeight: wallpaperLayout.implicitHeight + 16
-    readonly property bool showSchemeChips: Config.options?.controlPanel?.showWallpaperSchemeChips ?? false
+    readonly property bool showSchemeChips: Config.options?.material?.controlPanel?.showWallpaperSchemeChips ?? false
     
     readonly property bool inirEverywhere: Appearance.inirEverywhere
     readonly property bool auroraEverywhere: Appearance.auroraEverywhere

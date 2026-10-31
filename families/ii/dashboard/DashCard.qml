@@ -19,9 +19,9 @@ Rectangle {
     default property alias content: inner.data
 
     // Appearance knobs (Settings › Dashboard › Appearance)
-    readonly property bool compact: (Config.options?.dashboard?.appearance?.density ?? "comfortable") === "compact"
-    readonly property real cardOpacity: Math.max(0.3, Math.min(1, Config.options?.dashboard?.appearance?.cardOpacity ?? 1))
-    readonly property bool showTitle: Config.options?.dashboard?.appearance?.showCardTitles ?? true
+    readonly property bool compact: (Config.options?.material?.dashboard?.appearance?.density ?? "comfortable") === "compact"
+    readonly property real cardOpacity: Math.max(0.3, Math.min(1, Config.options?.material?.dashboard?.appearance?.cardOpacity ?? 1))
+    readonly property bool showTitle: Config.options?.material?.dashboard?.appearance?.showCardTitles ?? true
     readonly property real pad: editorialEverywhere ? Math.round(14 * Appearance.editorial.spacing) : (compact ? 8 : 12)
 
     readonly property bool inirEverywhere: Appearance.inirEverywhere

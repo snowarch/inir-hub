@@ -11,7 +11,7 @@ Scope {
     id: root
 
     readonly property var targetScreens: {
-        const list = Config.options?.sidebar?.screenList ?? []
+        const list = Config.options?.material?.sidebar?.screenList ?? []
         const screens = Quickshell.screens
         if (!list || list.length === 0)
             return screens

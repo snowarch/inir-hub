@@ -56,7 +56,7 @@ RippleButton {
     // Custom watch site from config, or 9anime as default
     function getWatchUrl() {
         const title = root.anime?.title ?? ""
-        const customSite = Config.options?.sidebar?.animeSchedule?.watchSite ?? ""
+        const customSite = Config.options?.animeSchedule?.watchSite ?? ""
         if (customSite) {
             return customSite.replace("%s", encodeURIComponent(title))
         }

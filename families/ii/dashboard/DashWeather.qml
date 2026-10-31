@@ -7,7 +7,7 @@ import qs.modules.common.functions
 
 /**
  * Weather card: current conditions plus a short daily forecast.
- * Relies on the Weather service (enabled via bar.weather.enable).
+ * Relies on the Weather service (enabled via weather.enable).
  */
 DashCard {
     id: root

@@ -19,7 +19,7 @@ QtObject {
     }
 
     function save(snapshot): void {
-        Config.setNestedValue("settingsUi.categories", JSON.stringify(snapshot))
+        Config.setNestedValue("material.settingsUi.categories", JSON.stringify(snapshot))
     }
 
     function removePage(snapshot, categoryIndex: int, pageIndex: int, pageIdx: int): int {
@@ -155,6 +155,6 @@ QtObject {
     }
 
     function reset(): void {
-        Config.setNestedValue("settingsUi.categories", "")
+        Config.setNestedValue("material.settingsUi.categories", "")
     }
 }

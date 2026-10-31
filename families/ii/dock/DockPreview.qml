@@ -16,7 +16,7 @@ PopupWindow {
     required property bool dockHovered
     property var appEntry
     property Item anchorItem
-    property string dockPosition: Config.options?.dock?.position ?? "bottom"
+    property string dockPosition: Config.options?.material?.dock?.position ?? "bottom"
 
     readonly property bool isBottom: dockPosition === "bottom"
     readonly property bool isTop: dockPosition === "top"
@@ -254,7 +254,7 @@ PopupWindow {
                         toplevel: modelData?.toplevel ?? null
                         live: root.visible
                         onWindowActivated: {
-                            if (!(Config.options?.dock?.keepPreviewOnClick ?? false))
+                            if (!(Config.options?.material?.dock?.keepPreviewOnClick ?? false))
                                 root.close()
                         }
                         onWindowCloseClicked: {

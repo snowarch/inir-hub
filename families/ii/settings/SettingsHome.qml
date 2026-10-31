@@ -334,14 +334,14 @@ ColumnLayout {
                 StyledText {
                     Layout.fillWidth: true
                     Layout.topMargin: -8
-                    text: root.styles.find(style => style.value === (Config.options?.appearance?.globalStyle ?? "material"))?.line ?? ""
+                    text: root.styles.find(style => style.value === (Config.options?.material?.style?.globalStyle ?? "material"))?.line ?? ""
                     font.pixelSize: SettingsMaterialPreset.supportingSize
                     color: SettingsMaterialPreset.supportingColor
                 }
                 ConfigSelectionArray {
                     Layout.fillWidth: true
                     enableSettingsSearch: false
-                    currentValue: Config.options?.appearance?.globalStyle ?? "material"
+                    currentValue: Config.options?.material?.style?.globalStyle ?? "material"
                     onSelected: value => ThemeService.setGlobalStyle(value)
                     options: root.styles.map(style => ({ displayName: style.name, value: style.value }))
                 }

@@ -317,8 +317,8 @@ Scope {
                 ? WlrLayer.Top
                 : WlrLayer.Overlay
             anchors {
-                top: root.topNotice ? true : !(Config.options?.bar?.bottom ?? false)
-                bottom: root.topNotice ? false : Config.options?.bar?.bottom ?? false
+                top: root.topNotice ? true : !(Config.options?.material?.bar?.bottom ?? false)
+                bottom: root.topNotice ? false : Config.options?.material?.bar?.bottom ?? false
             }
             mask: Region {
                 item: osdValuesWrapper
@@ -339,7 +339,7 @@ Scope {
                 anchors.horizontalCenter: parent.horizontalCenter
 
                 readonly property bool entersFromTop: root.topNotice
-                    || !(Config.options?.bar?.bottom ?? false)
+                    || !(Config.options?.material?.bar?.bottom ?? false)
                 property real openProgress: root._visualOpen ? 1 : 0
                 transformOrigin: entersFromTop ? Item.Top : Item.Bottom
                 scale: 0.94 + 0.06 * openProgress

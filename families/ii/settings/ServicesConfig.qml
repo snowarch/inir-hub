@@ -868,7 +868,7 @@ ContentPage {
                     colBackgroundHover: Appearance.colors.colLayer1Hover
                     colRipple: Appearance.colors.colLayer1Active
                     onClicked: {
-                        if (Config.options?.settingsUi?.overlayMode ?? false) {
+                        if (Config.options?.material?.settingsUi?.overlayMode ?? false) {
                             // Overlay mode: settings runs inside the main shell process — direct call works
                             ShellUpdates.openOverlay()
                         } else {
@@ -1012,31 +1012,31 @@ ContentPage {
             SettingsSwitch {
                 buttonIcon: "toggle_on"
                 text: Translation.tr("Enable weather service")
-                checked: Config.options?.bar?.weather?.enable ?? false
-                onCheckedChanged: Config.setNestedValue("bar.weather.enable", checked)
+                checked: Config.options?.weather?.enable ?? false
+                onCheckedChanged: Config.setNestedValue("weather.enable", checked)
             }
 
             SettingsSwitch {
                 buttonIcon: "view_timeline"
                 text: Translation.tr("Show in top bar")
-                checked: Config.options?.bar?.modules?.weather ?? false
-                onCheckedChanged: Config.setNestedValue("bar.modules.weather", checked)
-                enabled: Config.options?.bar?.weather?.enable ?? false
+                checked: Config.options?.material?.bar?.modules?.weather ?? false
+                onCheckedChanged: Config.setNestedValue("material.bar.modules.weather", checked)
+                enabled: Config.options?.weather?.enable ?? false
             }
 
             SettingsSwitch {
                 buttonIcon: "visibility_off"
                 text: Translation.tr("Hide weather location")
-                checked: Config.options?.bar?.weather?.hideLocation ?? false
-                onCheckedChanged: Config.setNestedValue("bar.weather.hideLocation", checked)
-                enabled: Config.options?.bar?.weather?.enable ?? false
+                checked: Config.options?.weather?.hideLocation ?? false
+                onCheckedChanged: Config.setNestedValue("weather.hideLocation", checked)
+                enabled: Config.options?.weather?.enable ?? false
             }
 
             // Manual location
             ColumnLayout {
                 Layout.fillWidth: true
                 spacing: 4
-                enabled: Config.options?.bar?.weather?.enable ?? false
+                enabled: Config.options?.weather?.enable ?? false
 
                 StyledText {
                     text: Translation.tr("City (leave empty to auto-detect)")
@@ -1051,21 +1051,21 @@ ContentPage {
                     font.pixelSize: Appearance.font.pixelSize.small
                     color: Appearance.colors.colOnSurface
                     placeholderTextColor: Appearance.colors.colSubtext
-                    text: Config.options?.bar?.weather?.city ?? ""
+                    text: Config.options?.weather?.city ?? ""
                     background: Rectangle {
                         color: Appearance.colors.colLayer1
                         radius: Appearance.rounding.small
                         border.width: weatherCityInput.activeFocus ? 2 : 1
                         border.color: weatherCityInput.activeFocus ? Appearance.colors.colPrimary : Appearance.colors.colLayer0Border
                     }
-                    onTextEdited: Config.setNestedValue("bar.weather.city", text)
+                    onTextEdited: Config.setNestedValue("weather.city", text)
                 }
             }
 
             ColumnLayout {
                 Layout.fillWidth: true
                 spacing: 4
-                enabled: Config.options?.bar?.weather?.enable ?? false
+                enabled: Config.options?.weather?.enable ?? false
 
                 StyledText {
                     text: Translation.tr("Manual coordinates (optional, overrides city)")
@@ -1085,7 +1085,7 @@ ContentPage {
                         color: Appearance.colors.colOnSurface
                         placeholderTextColor: Appearance.colors.colSubtext
                         text: {
-                            const v = Config.options?.bar?.weather?.manualLat ?? 0;
+                            const v = Config.options?.weather?.manualLat ?? 0;
                             return v !== 0 ? String(v) : "";
                         }
                         background: Rectangle {
@@ -1096,7 +1096,7 @@ ContentPage {
                         }
                         onTextEdited: {
                             const num = parseFloat(text);
-                            Config.setNestedValue("bar.weather.manualLat", isNaN(num) ? 0 : num);
+                            Config.setNestedValue("weather.manualLat", isNaN(num) ? 0 : num);
                         }
                     }
 
@@ -1108,7 +1108,7 @@ ContentPage {
                         color: Appearance.colors.colOnSurface
                         placeholderTextColor: Appearance.colors.colSubtext
                         text: {
-                            const v = Config.options?.bar?.weather?.manualLon ?? 0;
+                            const v = Config.options?.weather?.manualLon ?? 0;
                             return v !== 0 ? String(v) : "";
                         }
                         background: Rectangle {
@@ -1119,7 +1119,7 @@ ContentPage {
                         }
                         onTextEdited: {
                             const num = parseFloat(text);
-                            Config.setNestedValue("bar.weather.manualLon", isNaN(num) ? 0 : num);
+                            Config.setNestedValue("weather.manualLon", isNaN(num) ? 0 : num);
                         }
                     }
                 }
@@ -1128,9 +1128,9 @@ ContentPage {
             SettingsSwitch {
                 buttonIcon: "my_location"
                 text: Translation.tr("Use GPS location (requires geoclue)")
-                checked: Config.options?.bar?.weather?.enableGPS ?? false
-                onCheckedChanged: Config.setNestedValue("bar.weather.enableGPS", checked)
-                enabled: Config.options?.bar?.weather?.enable ?? false
+                checked: Config.options?.weather?.enableGPS ?? false
+                onCheckedChanged: Config.setNestedValue("weather.enableGPS", checked)
+                enabled: Config.options?.weather?.enable ?? false
                 StyledToolTip {
                     text: Translation.tr("Uses GPS when no manual location is set")
                 }
@@ -1139,7 +1139,7 @@ ContentPage {
             // Current detected location display
             StyledText {
                 Layout.fillWidth: true
-                visible: (Config.options?.bar?.weather?.enable ?? false) && Weather.location.valid
+                visible: (Config.options?.weather?.enable ?? false) && Weather.location.valid
                 text: Translation.tr("Current location:") + " " + (Weather.location.name || (Weather.location.lat + ", " + Weather.location.lon))
                 color: Appearance.colors.colOnSurfaceVariant
                 font.pixelSize: Appearance.font.pixelSize.small
@@ -1150,20 +1150,20 @@ ContentPage {
             SettingsSwitch {
                 buttonIcon: "thermometer"
                 text: Translation.tr("Use Fahrenheit (°F)")
-                checked: Config.options?.bar?.weather?.useUSCS ?? false
-                onCheckedChanged: Config.setNestedValue("bar.weather.useUSCS", checked)
-                enabled: Config.options?.bar?.weather?.enable ?? false
+                checked: Config.options?.weather?.useUSCS ?? false
+                onCheckedChanged: Config.setNestedValue("weather.useUSCS", checked)
+                enabled: Config.options?.weather?.enable ?? false
             }
 
             ConfigSpinBox {
                 icon: "update"
                 text: Translation.tr("Update interval (minutes)")
-                value: Config.options?.bar?.weather?.fetchInterval ?? 10
+                value: Config.options?.weather?.fetchInterval ?? 10
                 from: 5
                 to: 60
                 stepSize: 5
-                onValueModified: Config.setNestedValue("bar.weather.fetchInterval", value)
-                enabled: Config.options?.bar?.weather?.enable ?? false
+                onValueModified: Config.setNestedValue("weather.fetchInterval", value)
+                enabled: Config.options?.weather?.enable ?? false
             }
         }
     }

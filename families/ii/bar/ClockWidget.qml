@@ -7,12 +7,12 @@ import QtQuick.Layouts
 
 Item {
     id: root
-    property bool borderless: Config.options?.bar?.borderless ?? false
-    property bool showDate: Config.options?.bar?.verbose ?? true
-    readonly property string _timeFontFamily: Config.options?.bar?.clock?.timeFontFamily ?? ""
-    readonly property int _timePixelSize: Config.options?.bar?.clock?.timePixelSize ?? 0
-    readonly property string _dateFontFamily: Config.options?.bar?.clock?.dateFontFamily ?? ""
-    readonly property int _datePixelSize: Config.options?.bar?.clock?.datePixelSize ?? 0
+    property bool borderless: Config.options?.material?.bar?.borderless ?? false
+    property bool showDate: Config.options?.material?.bar?.verbose ?? true
+    readonly property string _timeFontFamily: Config.options?.material?.bar?.clock?.timeFontFamily ?? ""
+    readonly property int _timePixelSize: Config.options?.material?.bar?.clock?.timePixelSize ?? 0
+    readonly property string _dateFontFamily: Config.options?.material?.bar?.clock?.dateFontFamily ?? ""
+    readonly property int _datePixelSize: Config.options?.material?.bar?.clock?.datePixelSize ?? 0
     implicitWidth: rowLayout.implicitWidth
     implicitHeight: Appearance.sizes.barHeight
 

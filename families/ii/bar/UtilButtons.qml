@@ -12,7 +12,7 @@ import Quickshell.Services.UPower
 
 Item {
     id: root
-    property bool borderless: Config.options?.bar?.borderless ?? false
+    property bool borderless: Config.options?.material?.bar?.borderless ?? false
     readonly property color neutralIconColor: Appearance.zzzEverywhere ? Appearance.zzz.ink
         : Appearance.inirEverywhere ? Appearance.inir.colText : Appearance.colors.colOnLayer2
     readonly property color dangerIconColor: Appearance.zzzEverywhere ? Appearance.zzz.signal
@@ -30,7 +30,7 @@ Item {
         anchors.centerIn: parent
 
         Loader {
-            active: Config.options?.bar?.utilButtons?.showScreenSnip ?? true
+            active: Config.options?.material?.bar?.utilButtons?.showScreenSnip ?? true
             visible: active
             sourceComponent: CircleUtilButton {
                 Layout.alignment: Qt.AlignVCenter
@@ -46,7 +46,7 @@ Item {
         }
 
         Loader {
-            active: Config.options?.bar?.utilButtons?.showScreenRecord ?? false
+            active: Config.options?.material?.bar?.utilButtons?.showScreenRecord ?? false
             visible: active
             sourceComponent: Item {
                 id: recordButtonWrapper
@@ -119,7 +119,7 @@ Item {
         }
 
         Loader {
-            active: Config.options?.bar?.utilButtons?.showColorPicker ?? false
+            active: Config.options?.material?.bar?.utilButtons?.showColorPicker ?? false
             visible: active
             sourceComponent: CircleUtilButton {
                 Layout.alignment: Qt.AlignVCenter
@@ -135,7 +135,7 @@ Item {
         }
 
         Loader {
-            active: Config.options?.bar?.utilButtons?.showNotepad ?? true
+            active: Config.options?.material?.bar?.utilButtons?.showNotepad ?? true
             visible: active
             sourceComponent: CircleUtilButton {
                 Layout.alignment: Qt.AlignVCenter
@@ -154,7 +154,7 @@ Item {
         }
 
         Loader {
-            active: Config.options?.bar?.utilButtons?.showKeyboardToggle ?? true
+            active: Config.options?.material?.bar?.utilButtons?.showKeyboardToggle ?? true
             visible: active
             sourceComponent: CircleUtilButton {
                 Layout.alignment: Qt.AlignVCenter
@@ -171,7 +171,7 @@ Item {
 
         // Keyboard layout switch (Niri only)
         Loader {
-            active: (Config.options?.bar?.utilButtons?.showKeyboardLayoutSwitch ?? false)
+            active: (Config.options?.material?.bar?.utilButtons?.showKeyboardLayoutSwitch ?? false)
                     && CompositorService.isNiri
                     && NiriService.hasMultipleKeyboardLayouts
             visible: active
@@ -194,7 +194,7 @@ Item {
 
         Loader {
             readonly property bool micInUse: Privacy.micActive || (Audio?.micBeingAccessed ?? false)
-            active: (Config.options?.bar?.utilButtons?.showMicToggle ?? false) || micInUse
+            active: (Config.options?.material?.bar?.utilButtons?.showMicToggle ?? false) || micInUse
             visible: active
             sourceComponent: CircleUtilButton {
                 id: micButton
@@ -256,7 +256,7 @@ Item {
         // Screen casting toggle (PR #29 by levpr1c)
         // Toggles Niri dynamic casting to configured output
         Loader {
-            active: (Config.options?.bar?.utilButtons?.showScreenCast ?? false)
+            active: (Config.options?.material?.bar?.utilButtons?.showScreenCast ?? false)
                     && CompositorService.isNiri
             visible: active
             sourceComponent: CircleUtilButton {
@@ -266,7 +266,7 @@ Item {
                 readonly property bool isCasting: Persistent.states.screenCast.active
 
                 onClicked: {
-                    const output = Config.options?.bar?.utilButtons?.screenCastOutput ?? "HDMI-A-1"
+                    const output = Config.options?.material?.bar?.utilButtons?.screenCastOutput ?? "HDMI-A-1"
 
                     if (isCasting) {
                         Quickshell.execDetached(["niri", "msg", "action", "clear-dynamic-cast-target"])
@@ -325,7 +325,7 @@ Item {
         }
 
         Loader {
-            active: Config.options?.bar?.utilButtons?.showDarkModeToggle ?? true
+            active: Config.options?.material?.bar?.utilButtons?.showDarkModeToggle ?? true
             visible: active
             sourceComponent: CircleUtilButton {
                 Layout.alignment: Qt.AlignVCenter
@@ -343,7 +343,7 @@ Item {
         }
 
         Loader {
-            active: (Config.options?.bar?.utilButtons?.showPerformanceProfileToggle ?? false) && PowerProfilePersistence.available
+            active: (Config.options?.material?.bar?.utilButtons?.showPerformanceProfileToggle ?? false) && PowerProfilePersistence.available
             visible: active
             sourceComponent: CircleUtilButton {
                 Layout.alignment: Qt.AlignVCenter

@@ -1173,8 +1173,8 @@ ContentPage {
             SettingsSwitch {
                 buttonIcon: "school"
                 text: Translation.tr("Easy mode (essentials only)")
-                checked: Config.options?.settingsUi?.easyMode ?? false
-                onCheckedChanged: Config.setNestedValue("settingsUi.easyMode", checked)
+                checked: Config.options?.material?.settingsUi?.easyMode ?? false
+                onCheckedChanged: Config.setNestedValue("material.settingsUi.easyMode", checked)
                 StyledToolTip {
                     text: Translation.tr("Show a curated set of essential settings and hide the more advanced pages and sections. Turn this off to see every page again.")
                 }
@@ -1183,7 +1183,7 @@ ContentPage {
             SettingsSwitch {
                 buttonIcon: "layers"
                 text: Translation.tr("Overlay mode (live preview)")
-                checked: Config.options?.settingsUi?.overlayMode ?? false
+                checked: Config.options?.material?.settingsUi?.overlayMode ?? false
                 autoToggle: false
                 onToggledByUser: enabled => {
                     const action = enabled ? "openOverlayAt" : "openWindowAt"
@@ -1199,16 +1199,16 @@ ContentPage {
 
             ContentSubsection {
                 title: Translation.tr("Overlay appearance")
-                visible: Config.options?.settingsUi?.overlayMode ?? false
+                visible: Config.options?.material?.settingsUi?.overlayMode ?? false
 
                 ConfigSpinBox {
                     icon: "blur_on"
                     text: Translation.tr("Backdrop blur (%)")
-                    value: Config.options?.settingsUi?.overlayAppearance?.backdropBlur ?? 0
+                    value: Config.options?.material?.settingsUi?.overlayAppearance?.backdropBlur ?? 0
                     from: 0
                     to: 100
                     stepSize: 10
-                    onValueModified: Config.setNestedValue("settingsUi.overlayAppearance.backdropBlur", value)
+                    onValueModified: Config.setNestedValue("material.settingsUi.overlayAppearance.backdropBlur", value)
                     StyledToolTip {
                         text: Translation.tr("Blur the wallpaper behind the Settings overlay while it is open, using the same glass the rest of the shell paints. 0 turns it off and costs nothing.")
                     }
@@ -1217,11 +1217,11 @@ ContentPage {
                 ConfigSpinBox {
                     icon: "water"
                     text: Translation.tr("Background dim (%)")
-                    value: Config.options?.settingsUi?.overlayAppearance?.scrimDim ?? 35
+                    value: Config.options?.material?.settingsUi?.overlayAppearance?.scrimDim ?? 35
                     from: 0
                     to: 80
                     stepSize: 5
-                    onValueModified: Config.setNestedValue("settingsUi.overlayAppearance.scrimDim", value)
+                    onValueModified: Config.setNestedValue("material.settingsUi.overlayAppearance.scrimDim", value)
                     StyledToolTip {
                         text: Translation.tr("How dark the backdrop behind the Settings panel should be (0 = transparent, 80 = very dark)")
                     }
@@ -1235,11 +1235,11 @@ ContentPage {
                 ConfigSpinBox {
                     icon: "opacity"
                     text: Translation.tr("Panel background opacity (%)")
-                    value: Math.round((Config.options?.settingsUi?.overlayAppearance?.backgroundOpacity ?? 1.0) * 100)
+                    value: Math.round((Config.options?.material?.settingsUi?.overlayAppearance?.backgroundOpacity ?? 1.0) * 100)
                     from: 60
                     to: 100
                     stepSize: 5
-                    onValueModified: Config.setNestedValue("settingsUi.overlayAppearance.backgroundOpacity", value / 100)
+                    onValueModified: Config.setNestedValue("material.settingsUi.overlayAppearance.backgroundOpacity", value / 100)
                     StyledToolTip {
                         text: Translation.tr("Opacity of the Settings panel background. Lower values let the shell show through; with a glass style it thins the frosted tint instead.")
                     }

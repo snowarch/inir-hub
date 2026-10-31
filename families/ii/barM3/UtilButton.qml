@@ -15,7 +15,7 @@ Item {
     property bool isActive: false
     property bool forceHovered: false
     property string toolTipText: ""
-    property bool isMaterial: Config.options.bar.m3.cornerStyle === 3
+    property bool isMaterial: Config.options.material.bar.m3.cornerStyle === 3
 
     implicitWidth: vertical ? 26 : (hovered ? 54 : 26)
     implicitHeight: vertical ? (hovered ? 54 : 26) : 26
@@ -77,6 +77,6 @@ Item {
         text: root.toolTipText
         extraVisibleCondition: root.toolTipText.length > 0 && mouseArea.containsMouse
         alternativeVisibleCondition: extraVisibleCondition
-        anchorEdges: Config.options?.bar?.bottom ?? false ? Edges.Top : Edges.Bottom
+        anchorEdges: Config.options?.material?.bar?.bottom ?? false ? Edges.Top : Edges.Bottom
     }
 }

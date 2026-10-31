@@ -44,7 +44,7 @@ Item {
     // Signal to close all tray menus before opening a new one
     signal closeAllTrayMenus()
 
-    property bool smartTray: Config.options.bar.tray.filterPassive
+    property bool smartTray: Config.options.material.bar.tray.filterPassive
     
     // Filter out invalid items (null or missing id)
     function isValidItem(item) {
@@ -56,7 +56,7 @@ Item {
         const id = (i.id || "").toLowerCase();
         const title = (i.title || "").toLowerCase();
         const isSpotify = id.indexOf("spotify") !== -1 || title.indexOf("spotify") !== -1;
-        return (Config.options?.bar?.tray?.pinnedItems ?? []).includes(i.id)
+        return (Config.options?.material?.bar?.tray?.pinnedItems ?? []).includes(i.id)
                 && (!smartTray || i.status !== Status.Passive || isSpotify);
     })
     property list<var> itemsNotInUserList: SystemTray.items.values.filter(i => {
@@ -64,11 +64,11 @@ Item {
         const id = (i.id || "").toLowerCase();
         const title = (i.title || "").toLowerCase();
         const isSpotify = id.indexOf("spotify") !== -1 || title.indexOf("spotify") !== -1;
-        return !(Config.options?.bar?.tray?.pinnedItems ?? []).includes(i.id)
+        return !(Config.options?.material?.bar?.tray?.pinnedItems ?? []).includes(i.id)
                 && (!smartTray || i.status !== Status.Passive || isSpotify);
     })
 
-    property bool invertPins: Config.options?.bar?.tray?.invertPinnedItems ?? false
+    property bool invertPins: Config.options?.material?.bar?.tray?.invertPinnedItems ?? false
     property list<var> pinnedItems: invertPins ? itemsNotInUserList : itemsInUserList
     property list<var> unpinnedItems: invertPins ? itemsInUserList : itemsNotInUserList
     onUnpinnedItemsChanged: {

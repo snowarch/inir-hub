@@ -37,7 +37,7 @@ BodyRectangle {
 
         // Screen Time entry point
         WBorderlessButton {
-            visible: Config.options?.sidebar?.screenTime?.enable ?? false
+            visible: Config.options?.screenTime?.enable ?? false
             Layout.fillWidth: true
             Layout.leftMargin: Looks.dp(8)
             Layout.rightMargin: Looks.dp(8)

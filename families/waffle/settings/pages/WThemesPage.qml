@@ -567,10 +567,10 @@ WSettingsPage {
         title: Translation.tr("Global Style")
         icon: "eyedropper"
 
-        readonly property bool cardsEverywhere: (Config.options?.dock?.cardStyle ?? false) && (Config.options?.sidebar?.cardStyle ?? false) && (Config.options?.bar?.cornerStyle === 3)
+        readonly property bool cardsEverywhere: (Config.options?.material?.dock?.cardStyle ?? false) && (Config.options?.material?.sidebar?.cardStyle ?? false) && (Config.options?.material?.bar?.cornerStyle === 3)
 
         readonly property string derivedStyle: cardsEverywhere ? "cards" : "material"
-        readonly property string currentStyle: (Config.options?.appearance?.globalStyle ?? "").length > 0 ? Config.options?.appearance?.globalStyle ?? "material" : derivedStyle
+        readonly property string currentStyle: (Config.options?.material?.style?.globalStyle ?? "").length > 0 ? Config.options?.material?.style?.globalStyle ?? "material" : derivedStyle
 
         WSettingsDropdown {
             label: Translation.tr("Style")
@@ -908,8 +908,8 @@ WSettingsPage {
             label: Translation.tr("Transparency")
             icon: "eye"
             description: Translation.tr("Enable transparent UI elements")
-            checked: Config.options?.appearance?.transparency?.enable ?? false
-            onCheckedChanged: Config.setNestedValue("appearance.transparency.enable", checked)
+            checked: Config.options?.material?.style?.transparency?.enable ?? false
+            onCheckedChanged: Config.setNestedValue("material.style.transparency.enable", checked)
         }
     }
 

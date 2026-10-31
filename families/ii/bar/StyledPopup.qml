@@ -53,10 +53,10 @@ LazyLoader {
             onHoveredChanged: root.popupHovered = hovered
         }
 
-        anchors.left: !(Config.options?.bar?.vertical ?? false) || ((Config.options?.bar?.vertical ?? false) && !(Config.options?.bar?.bottom ?? false))
-        anchors.right: (Config.options?.bar?.vertical ?? false) && (Config.options?.bar?.bottom ?? false)
-        anchors.top: (Config.options?.bar?.vertical ?? false) || (!(Config.options?.bar?.vertical ?? false) && !(Config.options?.bar?.bottom ?? false))
-        anchors.bottom: !(Config.options?.bar?.vertical ?? false) && (Config.options?.bar?.bottom ?? false)
+        anchors.left: !(Config.options?.material?.bar?.vertical ?? false) || ((Config.options?.material?.bar?.vertical ?? false) && !(Config.options?.material?.bar?.bottom ?? false))
+        anchors.right: (Config.options?.material?.bar?.vertical ?? false) && (Config.options?.material?.bar?.bottom ?? false)
+        anchors.top: (Config.options?.material?.bar?.vertical ?? false) || (!(Config.options?.material?.bar?.vertical ?? false) && !(Config.options?.material?.bar?.bottom ?? false))
+        anchors.bottom: !(Config.options?.material?.bar?.vertical ?? false) && (Config.options?.material?.bar?.bottom ?? false)
 
         implicitWidth: popupBackground.implicitWidth + Appearance.sizes.elevationMargin * 2 + root.popupBackgroundMargin
         implicitHeight: popupBackground.implicitHeight + Appearance.sizes.elevationMargin * 2 + root.popupBackgroundMargin
@@ -95,12 +95,12 @@ LazyLoader {
         exclusiveZone: 0
         margins {
             left: {
-                if (!(Config.options?.bar?.vertical ?? false))
+                if (!(Config.options?.material?.bar?.vertical ?? false))
                     return popupWindow.centeredLeft
                 return Appearance.sizes.verticalBarWidth
             }
             top: {
-                if (!(Config.options?.bar?.vertical ?? false)) return Appearance.sizes.barHeight;
+                if (!(Config.options?.material?.bar?.vertical ?? false)) return Appearance.sizes.barHeight;
                 return popupWindow.centeredTop
             }
             right: Appearance.sizes.verticalBarWidth
@@ -122,7 +122,7 @@ LazyLoader {
 
             opacity: _shown ? 1 : 0
             scale: _shown ? 1.0 : 0.88
-            transformOrigin: (Config.options?.bar?.bottom ?? false) ? Item.Bottom : Item.Top
+            transformOrigin: (Config.options?.material?.bar?.bottom ?? false) ? Item.Bottom : Item.Top
 
             Behavior on opacity {
                 enabled: Appearance.animationsEnabled

@@ -15,7 +15,7 @@ ContentPage {
     settingsPageIndex: 21
     settingsPageName: Translation.tr("Ricelin")
 
-    readonly property bool pillActive: (Config.options?.bar?.appearanceStyle ?? "classic") === "pill"
+    readonly property bool pillActive: (Config.options?.material?.bar?.appearanceStyle ?? "classic") === "pill"
 
 
     SettingsCardSection {
@@ -30,7 +30,7 @@ ContentPage {
                 checked: root.pillActive
                 onCheckedChanged: {
                     if (checked !== root.pillActive)
-                        Config.setNestedValue("bar.appearanceStyle", checked ? "pill" : "classic");
+                        Config.setNestedValue("material.bar.appearanceStyle", checked ? "pill" : "classic");
                 }
                 StyledToolTip {
                     text: Translation.tr("Replaces the standard top bar with Ricelin's morphing Pill surface.")

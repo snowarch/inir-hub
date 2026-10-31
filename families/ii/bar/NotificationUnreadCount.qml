@@ -5,7 +5,7 @@ import qs.modules.common.widgets
 
 MaterialSymbol {
     id: root
-    readonly property bool showUnreadCount: Config.options.bar.indicators.notifications.showUnreadCount
+    readonly property bool showUnreadCount: Config.options.material.bar.indicators.notifications.showUnreadCount
     text: Notifications.silent ? "notifications_paused" : "notifications"
     iconSize: Appearance.font.pixelSize.larger
     color: rightSidebarButton.colText

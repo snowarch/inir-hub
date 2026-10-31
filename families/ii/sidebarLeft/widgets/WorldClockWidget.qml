@@ -14,11 +14,11 @@ Item {
     implicitHeight: card.implicitHeight + Appearance.sizes.elevationMargin
 
     // ── Settings ──────────────────────────────────────────────────────
-    readonly property var configTimezones: Config.options?.sidebar?.widgets?.worldClock_settings?.timezones ?? []
-    readonly property bool showSeconds: Config.options?.sidebar?.widgets?.worldClock_settings?.showSeconds ?? false
-    readonly property bool use24Hour: Config.options?.sidebar?.widgets?.worldClock_settings?.use24Hour ?? true
-    readonly property bool showDate: Config.options?.sidebar?.widgets?.worldClock_settings?.showDate ?? true
-    readonly property bool highlightLocal: Config.options?.sidebar?.widgets?.worldClock_settings?.highlightLocal ?? true
+    readonly property var configTimezones: Config.options?.material?.sidebar?.widgets?.worldClock_settings?.timezones ?? []
+    readonly property bool showSeconds: Config.options?.material?.sidebar?.widgets?.worldClock_settings?.showSeconds ?? false
+    readonly property bool use24Hour: Config.options?.material?.sidebar?.widgets?.worldClock_settings?.use24Hour ?? true
+    readonly property bool showDate: Config.options?.material?.sidebar?.widgets?.worldClock_settings?.showDate ?? true
+    readonly property bool highlightLocal: Config.options?.material?.sidebar?.widgets?.worldClock_settings?.highlightLocal ?? true
 
     // ── Runtime state ─────────────────────────────────────────────────
     property string systemTz: ""

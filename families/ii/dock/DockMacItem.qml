@@ -28,7 +28,7 @@ Item {
     property int  neighborDistance: 99   // 0=self, 1=adjacent, 2=next-to-adjacent, 99=none
     property int  windowCount:      1
     property int  focusedWindowIndex: 0
-    property int  maxDots: Config.options?.dock?.maxIndicatorDots ?? 5
+    property int  maxDots: Config.options?.material?.dock?.maxIndicatorDots ?? 5
 
     // Effective hover: true if button hovered OR its preview is visible
     readonly property bool effectiveHovered: buttonHovered || previewVisible
@@ -117,8 +117,8 @@ Item {
         }
 
         // Config options — same as panel mode
-        property bool smartIndicator: Config.options?.dock?.smartIndicator !== false
-        property bool showAllDots: Config.options?.dock?.showAllWindowDots !== false
+        property bool smartIndicator: Config.options?.material?.dock?.smartIndicator !== false
+        property bool showAllDots: Config.options?.material?.dock?.showAllWindowDots !== false
 
         Repeater {
             model: {

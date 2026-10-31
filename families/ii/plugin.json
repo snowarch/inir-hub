@@ -1,11 +1,18 @@
 {
   "id": "ii",
   "kind": "family",
+  "configKey": "material",
+  "settings": {
+    "settingsOverlay": {
+      "key": "material.settingsUi.overlayMode",
+      "fallback": false
+    }
+  },
   "name": "Material",
   "summary": "Material 3 Expressive panels, bars, docks and widgets in nine global styles.",
   "tagline": "Modular bars, sidebars and Material controls.",
   "icon": "dashboard",
-  "version": "2.33.6",
+  "version": "2.34.0",
   "provides": "modules/ii",
   "parts": {
     "critical": "critical/ShellIiCriticalPanels.qml",
@@ -13,7 +20,8 @@
     "editStage": "edit/MaterialEditStage.qml",
     "widgetOutfit": "edit/MaterialWidgetOutfit.qml",
     "settingsApp": "settings/MaterialSettingsApp.qml",
-    "settingsHost": "settings/SettingsHost.qml"
+    "settingsHost": "settings/SettingsHost.qml",
+    "config": "MaterialConfigSchema.qml"
   },
   "enabledPanels": [
     "iiBar",

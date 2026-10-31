@@ -10,7 +10,7 @@ import qs.services
 // ZZZ style editor — surfaces the ZZZ personality axis: silhouette variant.
 // Square = sharp console plates with cut-corner chamfers (classic ZZZ).
 // Round = softer anime UI — pill controls, rounded panels, no chamfer.
-// Bound to `appearance.zzz.shape`. Geometry flips shell-wide reactively
+// Bound to `material.style.zzz.shape`. Geometry flips shell-wide reactively
 // (every radius/cutCorner consumer reads Appearance.zzz.* which depends on it).
 ColumnLayout {
     id: root
@@ -84,9 +84,9 @@ ColumnLayout {
 
     ConfigSelectionArray {
         Layout.fillWidth: true
-        currentValue: Config.options?.appearance?.zzz?.shape ?? "square"
+        currentValue: Config.options?.material?.style?.zzz?.shape ?? "square"
         onSelected: (newValue) => {
-            Config.setNestedValue("appearance.zzz.shape", newValue)
+            Config.setNestedValue("material.style.zzz.shape", newValue)
         }
         options: [
             { displayName: Translation.tr("Square"), icon: "square", value: "square" },
@@ -105,8 +105,8 @@ ColumnLayout {
     ConfigSwitch {
         Layout.fillWidth: true
         text: Translation.tr("Wallpaper glass")
-        checked: Config.options?.appearance?.zzz?.glass ?? true
-        onCheckedChanged: Config.setNestedValue("appearance.zzz.glass", checked)
+        checked: Config.options?.material?.style?.zzz?.glass ?? true
+        onCheckedChanged: Config.setNestedValue("material.style.zzz.glass", checked)
     }
 
     StyledText {
@@ -135,38 +135,38 @@ ColumnLayout {
         ConfigSwitch {
             Layout.fillWidth: true
             text: Translation.tr("Diagonal burst")
-            checked: Config.options?.appearance?.zzz?.backdrop?.burst ?? true
-            onCheckedChanged: Config.setNestedValue("appearance.zzz.backdrop.burst", checked)
+            checked: Config.options?.material?.style?.zzz?.backdrop?.burst ?? true
+            onCheckedChanged: Config.setNestedValue("material.style.zzz.backdrop.burst", checked)
         }
 
         ConfigSwitch {
             Layout.fillWidth: true
             text: Translation.tr("Ghost wordmark")
-            checked: Config.options?.appearance?.zzz?.backdrop?.ghost ?? true
-            onCheckedChanged: Config.setNestedValue("appearance.zzz.backdrop.ghost", checked)
+            checked: Config.options?.material?.style?.zzz?.backdrop?.ghost ?? true
+            onCheckedChanged: Config.setNestedValue("material.style.zzz.backdrop.ghost", checked)
         }
 
         ConfigSwitch {
             Layout.fillWidth: true
             text: Translation.tr("Technical grid")
-            checked: Config.options?.appearance?.zzz?.backdrop?.grid ?? true
-            onCheckedChanged: Config.setNestedValue("appearance.zzz.backdrop.grid", checked)
+            checked: Config.options?.material?.style?.zzz?.backdrop?.grid ?? true
+            onCheckedChanged: Config.setNestedValue("material.style.zzz.backdrop.grid", checked)
         }
 
         ConfigSwitch {
             Layout.fillWidth: true
             text: Translation.tr("Scan ticks")
-            checked: Config.options?.appearance?.zzz?.backdrop?.ticks ?? true
-            onCheckedChanged: Config.setNestedValue("appearance.zzz.backdrop.ticks", checked)
+            checked: Config.options?.material?.style?.zzz?.backdrop?.ticks ?? true
+            onCheckedChanged: Config.setNestedValue("material.style.zzz.backdrop.ticks", checked)
         }
 
         SliderRow {
             label: Translation.tr("Diagonal size")
             icon: "open_in_full"
             description: Translation.tr("Size of the diagonal burst slashes (100% = default).")
-            configValue: Config.options?.appearance?.zzz?.backdrop?.burstSize ?? 1.0
+            configValue: Config.options?.material?.style?.zzz?.backdrop?.burstSize ?? 1.0
             from: 0.3; to: 2.0; stepSize: 0.05
-            configPath: "appearance.zzz.backdrop.burstSize"
+            configPath: "material.style.zzz.backdrop.burstSize"
         }
     }
 }

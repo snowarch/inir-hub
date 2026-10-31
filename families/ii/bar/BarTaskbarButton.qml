@@ -154,7 +154,7 @@ RippleButton {
     // Hover preview
     Timer {
         id: hoverDelayTimer
-        interval: Config.options?.dock?.hoverPreviewDelay ?? 400
+        interval: Config.options?.material?.dock?.hoverPreviewDelay ?? 400
         onTriggered: {
             if (root.hasWindows && root.buttonHovered) {
                 root.taskbarRoot?.showPreviewPopup(root.appEntry, root)
@@ -167,7 +167,7 @@ RippleButton {
             if (buttonHovered) {
                 taskbarRoot.lastHoveredButton = root
                 taskbarRoot.buttonHovered = true
-                if (Config.options?.dock?.hoverPreview !== false) {
+                if (Config.options?.material?.dock?.hoverPreview !== false) {
                     hoverDelayTimer.restart()
                 }
             } else {
@@ -367,7 +367,7 @@ RippleButton {
 
             // Monochrome overlay
             Loader {
-                active: Config.options?.dock?.monochromeIcons ?? false
+                active: Config.options?.material?.dock?.monochromeIcons ?? false
                 anchors.fill: iconLoader
                 sourceComponent: Item {
                     Desaturate {
@@ -407,8 +407,8 @@ RippleButton {
 
                     Repeater {
                         model: {
-                            const showAll = Config.options?.dock?.showAllWindowDots !== false;
-                            const max = Config.options?.dock?.maxIndicatorDots ?? 5;
+                            const showAll = Config.options?.material?.dock?.showAllWindowDots !== false;
+                            const max = Config.options?.material?.dock?.maxIndicatorDots ?? 5;
                             if (root.appIsActive || showAll) {
                                 return Math.min(root.toplevels.length, max);
                             }
@@ -461,7 +461,7 @@ RippleButton {
 
                     // Fallback single dot
                     Rectangle {
-                        opacity: (!root.appIsActive && root.hasWindows && Config.options?.dock?.showAllWindowDots === false) ? 1 : 0
+                        opacity: (!root.appIsActive && root.hasWindows && Config.options?.material?.dock?.showAllWindowDots === false) ? 1 : 0
                         visible: opacity > 0
                         width: root.vertical ? 2 : 3
                         height: root.vertical ? 3 : 2

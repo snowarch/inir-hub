@@ -11,8 +11,8 @@ import qs.modules.common.m3
 RippleButton {
     id: root
 
-    property bool vertical: Config.options?.bar?.vertical ?? false
-    property bool isMaterial: (Config.options?.bar?.m3?.cornerStyle ?? 0) === 3
+    property bool vertical: Config.options?.material?.bar?.vertical ?? false
+    property bool isMaterial: (Config.options?.material?.bar?.m3?.cornerStyle ?? 0) === 3
     readonly property string screenName: root.QsWindow.window?.screen?.name ?? ""
 
     implicitWidth: 32
@@ -33,7 +33,7 @@ RippleButton {
         anchors.centerIn: parent
         text: root.toggled ? "right_panel_close" : "right_panel_open"
         iconSize: root.vertical ? 22 : 20
-        color: (Config.options?.bar?.m3?.cornerStyle ?? 0) !== 3
+        color: (Config.options?.material?.bar?.m3?.cornerStyle ?? 0) !== 3
             ? Appearance.colors.colPrimary
             : root.toggled
                 ? M3Palette.pillInk("sidebarToggle")

@@ -37,7 +37,7 @@ Item {
     property int currentPage: 0
     property bool navEditMode: false
     property bool _navigationInitialized: false
-    readonly property bool easyMode: Config.options?.settingsUi?.easyMode ?? false
+    readonly property bool easyMode: Config.options?.material?.settingsUi?.easyMode ?? false
     readonly property var currentMeta: root.pages[root.currentPage] ?? ({})
 
     // The nav: groups of the person's arrangement (Settings › Arrange), easy mode keeps the essentials.

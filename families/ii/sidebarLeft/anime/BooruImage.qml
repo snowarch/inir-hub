@@ -266,7 +266,7 @@ Button {
                         Quickshell.execDetached(["/usr/bin/bash", "-c", 
                             `mkdir -p '${targetPath}' && curl '${root.imageData.file_url}' -o '${localPath}' && notify-send '${Translation.tr("Download complete")}' '${localPath}' -a 'Shell'`
                         ])
-                        if (Config.options?.sidebar?.openFolderOnDownload ?? false)
+                        if (Config.options?.material?.sidebar?.openFolderOnDownload ?? false)
                             ShellExec.execDetachedArgs(["xdg-open", targetPath], "Open image")
                     }
                 },

@@ -230,8 +230,8 @@ ContentPage {
                 && !Appearance.angelEverywhere && !Appearance.auroraEverywhere
                 && !Appearance.inirEverywhere
                 && (Config.options?.background?.widgets?.style ?? "panel") === "island"
-                && (Config.options?.appearance?.island?.glass ?? true)
-                && (Config.options?.appearance?.island?.opacity ?? 1) < 0.999))
+                && (Config.options?.material?.style?.island?.glass ?? true)
+                && (Config.options?.material?.style?.island?.opacity ?? 1) < 0.999))
 
     function _setJapaneseValue(key: string, value: var, group: string): void {
         root.writePaths(JapanesePresets.setValue(root._japanesePath, key, value, group));

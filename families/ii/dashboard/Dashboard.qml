@@ -19,12 +19,12 @@ Scope {
     )
     readonly property real barReservedSpace: Appearance.sizes.baseBarHeight + Appearance.sizes.hyprlandGapsOut * 2
     readonly property real topReservedSpace: safePadding
-        + (!(Config.options?.bar?.bottom ?? false) ? barReservedSpace : 0)
+        + (!(Config.options?.material?.bar?.bottom ?? false) ? barReservedSpace : 0)
     readonly property real bottomReservedSpace: safePadding
-        + ((Config.options?.bar?.bottom ?? false) ? barReservedSpace : 0)
+        + ((Config.options?.material?.bar?.bottom ?? false) ? barReservedSpace : 0)
     readonly property real availablePanelHeight: Math.max(360, screenHeight - topReservedSpace - bottomReservedSpace)
     readonly property real availablePanelWidth: Math.max(480, screenWidth - safePadding * 2)
-    readonly property real widthRatio: Math.min(0.9, Math.max(0.4, Config.options?.dashboard?.widthRatio ?? 0.62))
+    readonly property real widthRatio: Math.min(0.9, Math.max(0.4, Config.options?.material?.dashboard?.widthRatio ?? 0.62))
     readonly property real panelWidth: Math.round(Math.min(availablePanelWidth, screenWidth * widthRatio))
     readonly property real panelHeight: Math.round(Math.min(availablePanelHeight, 860))
 
@@ -99,7 +99,7 @@ Scope {
 
         Loader {
             id: contentLoader
-            active: GlobalStates.dashboardOpen || (Config.options?.dashboard?.keepLoaded ?? false)
+            active: GlobalStates.dashboardOpen || (Config.options?.material?.dashboard?.keepLoaded ?? false)
 
             // Shell desaturation effect
             layer.enabled: Appearance.shouldDesaturate("overlays") && contentLoader.visible

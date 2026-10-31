@@ -14,12 +14,12 @@ import Quickshell.Wayland
 
 Item {
     id: root
-    property bool borderless: Config.options?.bar?.borderless ?? false
+    property bool borderless: Config.options?.material?.bar?.borderless ?? false
     readonly property MprisPlayer activePlayer: MprisController.activePlayer
     readonly property string cleanedTitle: StringUtils.cleanMusicTitle(MprisController.titleOf(activePlayer)) || Translation.tr("No media")
     readonly property string fullTrackText: `${cleanedTitle}${MprisController.artistOf(activePlayer) ? ' • ' + MprisController.artistOf(activePlayer) : ''}`
     readonly property string popupMode: Config.options?.media?.popupMode ?? "dock"
-    readonly property bool showVerboseLabel: Config.options?.bar?.verbose ?? true
+    readonly property bool showVerboseLabel: Config.options?.material?.bar?.verbose ?? true
     readonly property bool hasTrackMetadata: (MprisController.titleOf(activePlayer)?.length ?? 0) > 0
         || (MprisController.artistOf(activePlayer)?.length ?? 0) > 0
     readonly property bool lockMediaWidth: showVerboseLabel && hasTrackMetadata
@@ -31,7 +31,7 @@ Item {
     // The bar's centerSideModuleWidth binding already accounts for this, but
     // a stable natural width prevents track-length changes from resizing the
     // center pill every time metadata changes.
-    readonly property real maxMediaWidth: Math.max(120, Config.options?.bar?.media?.maxWidth ?? 220) * Appearance.fontSizeScale
+    readonly property real maxMediaWidth: Math.max(120, Config.options?.material?.bar?.media?.maxWidth ?? 220) * Appearance.fontSizeScale
     implicitWidth: lockMediaWidth
         ? maxMediaWidth
         : Math.min(rowLayout.implicitWidth + rowLayout.spacing * 2, maxMediaWidth)
@@ -85,8 +85,8 @@ Item {
             anchor {
                 window: root.QsWindow.window
                 item: root
-                edges: (Config.options?.bar?.bottom ?? false) ? Edges.Top : Edges.Bottom
-                gravity: (Config.options?.bar?.bottom ?? false) ? Edges.Top : Edges.Bottom
+                edges: (Config.options?.material?.bar?.bottom ?? false) ? Edges.Top : Edges.Bottom
+                gravity: (Config.options?.material?.bar?.bottom ?? false) ? Edges.Top : Edges.Bottom
             }
             implicitWidth: popupContent.width + 16
             implicitHeight: popupContent.height + 16
@@ -178,8 +178,8 @@ Item {
             anchor {
                 window: root.QsWindow.window
                 item: root
-                edges: Config.options.bar.bottom ? Edges.Top : Edges.Bottom
-                gravity: Config.options.bar.bottom ? Edges.Top : Edges.Bottom
+                edges: Config.options.material.bar.bottom ? Edges.Top : Edges.Bottom
+                gravity: Config.options.material.bar.bottom ? Edges.Top : Edges.Bottom
             }
             implicitWidth: mediaPopupContent.width + Appearance.sizes.elevationMargin * 2
             implicitHeight: mediaPopupContent.height + Appearance.sizes.elevationMargin * 2
@@ -210,7 +210,7 @@ Item {
 
                 opacity: presented ? 1 : 0
                 scale: presented ? 1 : 0.975
-                transformOrigin: Config.options.bar.bottom ? Item.Bottom : Item.Top
+                transformOrigin: Config.options.material.bar.bottom ? Item.Bottom : Item.Top
 
                 Behavior on opacity {
                     enabled: Appearance.animationsEnabled

@@ -97,11 +97,11 @@ Item {
 
     readonly property var _bannerModes: ["wallpaper", "custom", "solid", "none"]
     readonly property string _bannerMode: {
-        const raw = Config.options?.sidebar?.right?.headerBanner ?? "wallpaper"
+        const raw = Config.options?.material?.sidebar?.right?.headerBanner ?? "wallpaper"
         if (raw === "gradient") return "solid"
         return root._bannerModes.includes(raw) ? raw : "wallpaper"
     }
-    readonly property string _customRaw: (Config.options?.sidebar?.right?.headerBannerPath ?? "").trim()
+    readonly property string _customRaw: (Config.options?.material?.sidebar?.right?.headerBannerPath ?? "").trim()
     readonly property string _customSource: root._customRaw.length === 0 ? ""
         : (root._customRaw.startsWith("file://") ? root._customRaw : "file://" + root._customRaw)
 
@@ -152,7 +152,7 @@ Item {
     // concentric minimum where the card nests into the panel's top corner.
     readonly property real _profileRadius: root._zzz ? Appearance.zzz.cardRadius
         : root._cookie ? Appearance.rounding.normal
-        : root._island ? (Config.options?.appearance?.island?.radius ?? 18)
+        : root._island ? (Config.options?.material?.style?.island?.radius ?? 18)
         : root._angel ? Appearance.angel.roundingLarge
         : root._inir ? Appearance.inir.roundingLarge
         : root._editorial ? Appearance.editorial.radius
@@ -539,7 +539,7 @@ Item {
                     text: Translation.tr("Compact layout"),
                     iconName: "view_sidebar",
                     monochromeIcon: true,
-                    action: () => Config.setNestedValue("sidebar.layout", "compact")
+                    action: () => Config.setNestedValue("material.sidebar.layout", "compact")
                 }
             ]
         }

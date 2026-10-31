@@ -29,9 +29,9 @@ ContentPage {
             SettingsSwitch {
                 buttonIcon: "dock_to_bottom"
                 text: Translation.tr("Enable")
-                checked: Config.options.dock.enable
+                checked: Config.options.material.dock.enable
                 onCheckedChanged: {
-                    Config.setNestedValue("dock.enable", checked);
+                    Config.setNestedValue("material.dock.enable", checked);
                 }
             }
 
@@ -40,9 +40,9 @@ ContentPage {
                 tooltip: Translation.tr("How the dock surface is drawn.")
 
                 ConfigSelectionArray {
-                    currentValue: Config.options?.dock?.style ?? "panel"
+                    currentValue: Config.options?.material?.dock?.style ?? "panel"
                     onSelected: newValue => {
-                        Config.setNestedValue("dock.style", newValue)
+                        Config.setNestedValue("material.dock.style", newValue)
                     }
                     options: [
                         { displayName: Translation.tr("Panel"),  icon: "dock_to_bottom", value: "panel"  },
@@ -59,9 +59,9 @@ ContentPage {
                 title: Translation.tr("Dock position")
 
                 ConfigSelectionArray {
-                    currentValue: Config.options?.dock?.position ?? "bottom"
+                    currentValue: Config.options?.material?.dock?.position ?? "bottom"
                     onSelected: newValue => {
-                        Config.setNestedValue('dock.position', newValue);
+                        Config.setNestedValue('material.dock.position', newValue);
                     }
                     options: [
                         { displayName: Translation.tr("Top"), icon: "arrow_upward", value: "top" },
@@ -77,9 +77,9 @@ ContentPage {
                 tooltip: Translation.tr("When the dock shows. Hover hides it until you reach the screen edge; Empty workspace keeps it visible on an empty desktop.")
 
                 ConfigSelectionArray {
-                    currentValue: Config.options?.dock?.hoverToReveal ?? true
+                    currentValue: Config.options?.material?.dock?.hoverToReveal ?? true
                     onSelected: newValue => {
-                        Config.setNestedValue('dock.hoverToReveal', newValue);
+                        Config.setNestedValue('material.dock.hoverToReveal', newValue);
                     }
                     options: [
                         { displayName: Translation.tr("Hover"), icon: "highlight_mouse_cursor", value: true },
@@ -93,9 +93,9 @@ ContentPage {
             SettingsSwitch {
                 buttonIcon: "desktop_windows"
                 text: Translation.tr("Show on desktop")
-                enabled: !(Config.options?.dock?.hoverToReveal ?? true)
-                checked: Config.options?.dock?.showOnDesktop ?? true
-                onCheckedChanged: Config.setNestedValue('dock.showOnDesktop', checked)
+                enabled: !(Config.options?.material?.dock?.hoverToReveal ?? true)
+                checked: Config.options?.material?.dock?.showOnDesktop ?? true
+                onCheckedChanged: Config.setNestedValue('material.dock.showOnDesktop', checked)
                 StyledToolTip {
                     text: Translation.tr("Show dock when no window is focused (Empty workspace mode only)")
                 }
@@ -103,10 +103,10 @@ ContentPage {
             SettingsSwitch {
                 buttonIcon: "keep"
                 text: Translation.tr("Pinned on startup")
-                enabled: !(Config.options?.dock?.hoverToReveal ?? true)
-                checked: Config.options.dock.pinnedOnStartup
+                enabled: !(Config.options?.material?.dock?.hoverToReveal ?? true)
+                checked: Config.options.material.dock.pinnedOnStartup
                 onCheckedChanged: {
-                    Config.setNestedValue("dock.pinnedOnStartup", checked);
+                    Config.setNestedValue("material.dock.pinnedOnStartup", checked);
                 }
                 StyledToolTip {
                     text: Translation.tr("Keep dock visible at all times (Empty workspace mode only)")
@@ -116,9 +116,9 @@ ContentPage {
             SettingsSwitch {
                 buttonIcon: "colors"
                 text: Translation.tr("Tint app icons")
-                checked: Config.options.dock.monochromeIcons
+                checked: Config.options.material.dock.monochromeIcons
                 onCheckedChanged: {
-                    Config.setNestedValue("dock.monochromeIcons", checked);
+                    Config.setNestedValue("material.dock.monochromeIcons", checked);
                 }
                 StyledToolTip {
                     text: Translation.tr("Apply accent color tint to dock app icons")
@@ -127,8 +127,8 @@ ContentPage {
             SettingsSwitch {
                 buttonIcon: "widgets"
                 text: Translation.tr("Show dock background")
-                checked: Config.options.dock.showBackground
-                onCheckedChanged: Config.setNestedValue("dock.showBackground", checked)
+                checked: Config.options.material.dock.showBackground
+                onCheckedChanged: Config.setNestedValue("material.dock.showBackground", checked)
                 StyledToolTip {
                     text: Translation.tr("Show a background behind the dock")
                 }
@@ -137,8 +137,8 @@ ContentPage {
             SettingsSwitch {
                 buttonIcon: "splitscreen"
                 text: Translation.tr("Separate pinned from running")
-                checked: Config.options?.dock?.separatePinnedFromRunning ?? true
-                onCheckedChanged: Config.setNestedValue('dock.separatePinnedFromRunning', checked)
+                checked: Config.options?.material?.dock?.separatePinnedFromRunning ?? true
+                onCheckedChanged: Config.setNestedValue('material.dock.separatePinnedFromRunning', checked)
                 StyledToolTip {
                     text: Translation.tr("Show pinned-only apps on the left, running apps on the right with a separator")
                 }
@@ -147,8 +147,8 @@ ContentPage {
             SettingsSwitch {
                 buttonIcon: "notifications"
                 text: Translation.tr("Notification badges")
-                checked: Config.options?.dock?.notificationBadge ?? true
-                onCheckedChanged: Config.setNestedValue('dock.notificationBadge', checked)
+                checked: Config.options?.material?.dock?.notificationBadge ?? true
+                onCheckedChanged: Config.setNestedValue('material.dock.notificationBadge', checked)
                 StyledToolTip {
                     text: Translation.tr("Show the number of pending notifications on each app icon")
                 }
@@ -157,8 +157,8 @@ ContentPage {
             SettingsSwitch {
                 buttonIcon: "drag_indicator"
                 text: Translation.tr("Drag to reorder")
-                checked: Config.options?.dock?.enableDragReorder ?? true
-                onCheckedChanged: Config.setNestedValue('dock.enableDragReorder', checked)
+                checked: Config.options?.material?.dock?.enableDragReorder ?? true
+                onCheckedChanged: Config.setNestedValue('material.dock.enableDragReorder', checked)
                 StyledToolTip {
                     text: Translation.tr("Long-press and drag dock icons to reorder pinned apps")
                 }
@@ -170,9 +170,9 @@ ContentPage {
                 SettingsSwitch {
                     buttonIcon: "branding_watermark"
                     text: Translation.tr("Use Card style")
-                    checked: Config.options.dock?.cardStyle ?? false
+                    checked: Config.options.material.dock?.cardStyle ?? false
                     onCheckedChanged: {
-                        Config.setNestedValue("dock.cardStyle", checked);
+                        Config.setNestedValue("material.dock.cardStyle", checked);
                     }
                     StyledToolTip {
                         text: Translation.tr("Use the new Card style (lighter background, specific rounding) generic to settings")
@@ -182,12 +182,12 @@ ContentPage {
                 ConfigSpinBox {
                     icon: "height"
                     text: Translation.tr("Dock height (px)")
-                    value: Config.options.dock.height ?? 60
+                    value: Config.options.material.dock.height ?? 60
                     from: 40
                     to: 100
                     stepSize: 5
                     onValueModified: {
-                        Config.setNestedValue("dock.height", value);
+                        Config.setNestedValue("material.dock.height", value);
                     }
                     StyledToolTip {
                         text: Translation.tr("Height of the dock container")
@@ -197,12 +197,12 @@ ContentPage {
                 ConfigSpinBox {
                     icon: "aspect_ratio"
                     text: Translation.tr("Icon size (px)")
-                    value: Config.options.dock.iconSize ?? 35
+                    value: Config.options.material.dock.iconSize ?? 35
                     from: 20
                     to: 60
                     stepSize: 5
                     onValueModified: {
-                        Config.setNestedValue("dock.iconSize", value);
+                        Config.setNestedValue("material.dock.iconSize", value);
                     }
                     StyledToolTip {
                         text: Translation.tr("Size of application icons in the dock")
@@ -211,7 +211,7 @@ ContentPage {
 
                 ConfigSpinBox {
                     icon: {
-                        const pos = Config.options?.dock?.position ?? "bottom"
+                        const pos = Config.options?.material?.dock?.position ?? "bottom"
                         switch (pos) {
                             case "top": return "vertical_align_top"
                             case "left": return "align_horizontal_left"
@@ -220,13 +220,13 @@ ContentPage {
                         }
                     }
                     text: Translation.tr("Hover reveal region size (px)")
-                    value: Config.options.dock.hoverRegionHeight ?? 2
+                    value: Config.options.material.dock.hoverRegionHeight ?? 2
                     from: 1
                     to: 20
                     stepSize: 1
-                    enabled: Config.options.dock.hoverToReveal
+                    enabled: Config.options.material.dock.hoverToReveal
                     onValueModified: {
-                        Config.setNestedValue("dock.hoverRegionHeight", value);
+                        Config.setNestedValue("material.dock.hoverRegionHeight", value);
                     }
                     StyledToolTip {
                         text: Translation.tr("Size of the invisible area at screen edge that triggers dock reveal")
@@ -240,9 +240,9 @@ ContentPage {
                 SettingsSwitch {
                     buttonIcon: "my_location"
                     text: Translation.tr("Smart indicator (highlight focused window)")
-                    checked: Config.options.dock.smartIndicator !== false
+                    checked: Config.options.material.dock.smartIndicator !== false
                     onCheckedChanged: {
-                        Config.setNestedValue("dock.smartIndicator", checked);
+                        Config.setNestedValue("material.dock.smartIndicator", checked);
                     }
                     StyledToolTip {
                         text: Translation.tr("When multiple windows of the same app are open, highlight which one is focused")
@@ -252,9 +252,9 @@ ContentPage {
                 SettingsSwitch {
                     buttonIcon: "more_horiz"
                     text: Translation.tr("Show dots for inactive apps")
-                    checked: Config.options.dock.showAllWindowDots !== false
+                    checked: Config.options.material.dock.showAllWindowDots !== false
                     onCheckedChanged: {
-                        Config.setNestedValue("dock.showAllWindowDots", checked);
+                        Config.setNestedValue("material.dock.showAllWindowDots", checked);
                     }
                     StyledToolTip {
                         text: Translation.tr("Show a dot per window even for apps that aren't currently focused")
@@ -264,12 +264,12 @@ ContentPage {
                 ConfigSpinBox {
                     icon: "filter_5"
                     text: Translation.tr("Maximum indicator dots")
-                    value: Config.options.dock.maxIndicatorDots ?? 5
+                    value: Config.options.material.dock.maxIndicatorDots ?? 5
                     from: 1
                     to: 10
                     stepSize: 1
                     onValueModified: {
-                        Config.setNestedValue("dock.maxIndicatorDots", value);
+                        Config.setNestedValue("material.dock.maxIndicatorDots", value);
                     }
                     StyledToolTip {
                         text: Translation.tr("Limit the number of open window dots shown below an app icon")
@@ -283,9 +283,9 @@ ContentPage {
                 SettingsSwitch {
                     buttonIcon: "preview"
                     text: Translation.tr("Show preview on hover")
-                    checked: Config.options.dock.hoverPreview !== false
+                    checked: Config.options.material.dock.hoverPreview !== false
                     onCheckedChanged: {
-                        Config.setNestedValue("dock.hoverPreview", checked);
+                        Config.setNestedValue("material.dock.hoverPreview", checked);
                     }
                     StyledToolTip {
                         text: Translation.tr("Display a live preview of windows when hovering over dock icons")
@@ -295,13 +295,13 @@ ContentPage {
                 ConfigSpinBox {
                     icon: "timer"
                     text: Translation.tr("Hover delay (ms)")
-                    value: Config.options.dock.hoverPreviewDelay ?? 400
+                    value: Config.options.material.dock.hoverPreviewDelay ?? 400
                     from: 0
                     to: 1000
                     stepSize: 50
-                    enabled: Config.options.dock.hoverPreview !== false
+                    enabled: Config.options.material.dock.hoverPreview !== false
                     onValueModified: {
-                        Config.setNestedValue("dock.hoverPreviewDelay", value);
+                        Config.setNestedValue("material.dock.hoverPreviewDelay", value);
                     }
                     StyledToolTip {
                         text: Translation.tr("Time to wait before showing window preview")
@@ -311,10 +311,10 @@ ContentPage {
                 SettingsSwitch {
                     buttonIcon: "keep"
                     text: Translation.tr("Keep preview on click")
-                    enabled: Config.options.dock.hoverPreview !== false
-                    checked: Config.options?.dock?.keepPreviewOnClick ?? false
+                    enabled: Config.options.material.dock.hoverPreview !== false
+                    checked: Config.options?.material?.dock?.keepPreviewOnClick ?? false
                     onCheckedChanged: {
-                        Config.setNestedValue("dock.keepPreviewOnClick", checked)
+                        Config.setNestedValue("material.dock.keepPreviewOnClick", checked)
                     }
                     StyledToolTip {
                         text: Translation.tr("Keeps the preview open while you click through windows.")

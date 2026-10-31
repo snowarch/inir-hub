@@ -11,14 +11,14 @@ import QtQuick.Layouts
 MouseArea {
     id: root
     property bool hovered: false
-    property bool vertical: Config.options.bar.vertical
-    property bool isMaterial: Config.options.bar.m3.cornerStyle === 3
+    property bool vertical: Config.options.material.bar.vertical
+    property bool isMaterial: Config.options.material.bar.m3.cornerStyle === 3
 
     implicitWidth: vertical ? 32 : (contentLoader.item?.implicitWidth ?? 0)
     implicitHeight: vertical ? (contentLoader.item?.implicitHeight ?? 0) : Appearance.sizes.barHeight
 
     acceptedButtons: Qt.LeftButton | Qt.RightButton
-    readonly property bool clickForDetails: Config.options?.bar?.m3?.tooltips?.clickToShow ?? false
+    readonly property bool clickForDetails: Config.options?.material?.bar?.m3?.tooltips?.clickToShow ?? false
     hoverEnabled: true
 
     onClicked: mouse => {

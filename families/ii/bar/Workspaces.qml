@@ -15,7 +15,7 @@ import Qt5Compat.GraphicalEffects
 Item {
     id: root
     property bool vertical: false
-    property bool borderless: Config.options?.bar?.borderless ?? false
+    property bool borderless: Config.options?.material?.bar?.borderless ?? false
     readonly property HyprlandMonitor monitor: CompositorService.isHyprland ? Hyprland.monitorFor(root.QsWindow.window?.screen) : null
     readonly property Toplevel activeWindow: ToplevelManager.activeToplevel
 
@@ -33,8 +33,8 @@ Item {
     readonly property color workspaceThemePrimary: root.forceMaterialStyle ? Appearance.m3colors.m3primary : Appearance.colors.colPrimary
     readonly property color workspaceThemeIndicator: root.useZzzStyle ? Appearance.zzz.accentSoft
         : root.useAngelStyle ? Appearance.angel.colPrimary : root.workspaceThemePrimary
-    readonly property bool automaticIndicatorColor: Config.options?.bar?.workspaces?.automaticIndicatorColor ?? true
-    readonly property string configuredIndicatorColor: Config.options?.bar?.workspaces?.indicatorColor ?? ""
+    readonly property bool automaticIndicatorColor: Config.options?.material?.bar?.workspaces?.automaticIndicatorColor ?? true
+    readonly property string configuredIndicatorColor: Config.options?.material?.bar?.workspaces?.indicatorColor ?? ""
     readonly property color workspaceIndicatorColor: {
         if (root.automaticIndicatorColor || root.configuredIndicatorColor.length === 0)
             return root.workspaceThemeIndicator
@@ -89,7 +89,7 @@ Item {
             root.updateWorkspaceOccupied()
             return
         }
-        const config = Config.options?.bar?.workspaces
+        const config = Config.options?.material?.bar?.workspaces
         root.showAppIcons = typeof config?.showAppIcons === "boolean" ? config.showAppIcons : true
         root.alwaysShowNumbers = typeof config?.alwaysShowNumbers === "boolean" ? config.alwaysShowNumbers : false
         root.useNerdFont = typeof config?.useNerdFont === "boolean" ? config.useNerdFont : false
@@ -220,7 +220,7 @@ Item {
     property bool showNumbers: false
     Timer {
         id: showNumbersTimer
-        interval: (Config?.options.bar.autoHide.showWhenPressingSuper.delay ?? 100)
+        interval: (Config?.options.material.bar.autoHide.showWhenPressingSuper.delay ?? 100)
         repeat: false
         onTriggered: {
             root.showNumbers = true
@@ -229,7 +229,7 @@ Item {
     Connections {
         target: GlobalStates
         function onSuperDownChanged() {
-            if (!Config?.options.bar.autoHide.showWhenPressingSuper.enable) return;
+            if (!Config?.options.material.bar.autoHide.showWhenPressingSuper.enable) return;
             if (GlobalStates.superDown) showNumbersTimer.restart();
             else {
                 showNumbersTimer.stop();

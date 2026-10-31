@@ -215,7 +215,7 @@ Scope {
             if (mode === "pin") {
                 TaskbarApps.togglePin(appId)
                 const lower = appId.toLowerCase()
-                return (Config.options?.dock?.pinnedApps ?? []).some(p => String(p).toLowerCase() === lower) ? "pinned" : "unpinned"
+                return (Config.options?.apps?.pinned ?? []).some(p => String(p).toLowerCase() === lower) ? "pinned" : "unpinned"
             }
             if (mode !== "windows" && mode !== "menu") return "Unknown mode: windows, menu, pin or close"
             IrisState.dockMenuRequest = { appId: appId, mode: mode }

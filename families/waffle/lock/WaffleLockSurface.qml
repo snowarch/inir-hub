@@ -35,17 +35,17 @@ MouseArea {
     readonly property color textShadowColor: Looks.colors.shadow
     readonly property real clockFontSize: 96 * Looks.fontScale
     readonly property real dateFontSize: 20 * Looks.fontScale
-    readonly property real blurRadius: Config.options?.lock?.blur?.radius ?? 64
-    readonly property bool blurEnabled: Config.options?.lock?.blur?.enable ?? true
+    readonly property real blurRadius: Config.options?.waffles?.lock?.blur?.radius ?? 64
+    readonly property bool blurEnabled: Config.options?.waffles?.lock?.blur?.enable ?? true
 
     readonly property bool effectsSafe: !CompositorService.isNiri
     readonly property bool enableAnimation: Config.options?.lock?.enableAnimation ?? false
 
     // Widget visibility
-    readonly property bool showWeather: Config.options?.lock?.widgets?.weather ?? true
-    readonly property bool showMedia: Config.options?.lock?.widgets?.media ?? true
-    readonly property bool showPowerButtons: Config.options?.lock?.widgets?.powerButtons ?? true
-    readonly property bool showHintText: Config.options?.lock?.widgets?.hintText ?? true
+    readonly property bool showWeather: Config.options?.waffles?.lock?.widgets?.weather ?? true
+    readonly property bool showMedia: Config.options?.waffles?.lock?.widgets?.media ?? true
+    readonly property bool showPowerButtons: Config.options?.waffles?.lock?.widgets?.powerButtons ?? true
+    readonly property bool showHintText: Config.options?.waffles?.lock?.widgets?.hintText ?? true
 
     function safeLockNotificationImage(source): string {
         const value = String(source ?? "")
@@ -209,7 +209,7 @@ MouseArea {
     Rectangle {
         anchors.fill: parent
         color: "#000000"
-        opacity: (Config.options?.lock?.dim?.enable ?? false) ? (Config.options?.lock?.dim?.opacity ?? 0.3) : 0
+        opacity: (Config.options?.waffles?.lock?.dim?.enable ?? false) ? (Config.options?.waffles?.lock?.dim?.opacity ?? 0.3) : 0
         z: 0
 
         Behavior on opacity {
@@ -237,9 +237,9 @@ MouseArea {
         }
         
         // Config-driven clock properties
-        readonly property string clockStyle: Config.options?.lock?.clock?.style ?? "default"
-        readonly property string clockPosition: Config.options?.lock?.clock?.position ?? "center"
-        readonly property bool statusEnabled: Config.options?.lock?.status?.enable ?? true
+        readonly property string clockStyle: Config.options?.waffles?.lock?.clock?.style ?? "default"
+        readonly property string clockPosition: Config.options?.waffles?.lock?.clock?.position ?? "center"
+        readonly property bool statusEnabled: Config.options?.waffles?.lock?.status?.enable ?? true
 
         // Status row - compact indicators at top
         Loader {
@@ -723,11 +723,11 @@ MouseArea {
         // Lock screen notifications - grouped by app, read-only
         Loader {
             id: waffleLockNotificationsLoader
-            readonly property bool lockNotifEnabled: Config.options?.lock?.notifications?.enable ?? false
-            readonly property int lockNotifMaxCount: Config.options?.lock?.notifications?.maxCount ?? 3
-            readonly property bool lockNotifShowBody: Config.options?.lock?.notifications?.showBody ?? true
+            readonly property bool lockNotifEnabled: Config.options?.waffles?.lock?.notifications?.enable ?? false
+            readonly property int lockNotifMaxCount: Config.options?.waffles?.lock?.notifications?.maxCount ?? 3
+            readonly property bool lockNotifShowBody: Config.options?.waffles?.lock?.notifications?.showBody ?? true
             readonly property string lockNotifPosition: {
-                const pos = Config.options?.lock?.notifications?.position ?? "auto"
+                const pos = Config.options?.waffles?.lock?.notifications?.position ?? "auto"
                 return pos === "auto" ? "right" : pos
             }
             active: lockNotifEnabled && Notifications.list.length > 0

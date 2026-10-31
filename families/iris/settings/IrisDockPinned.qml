@@ -15,7 +15,7 @@ Item {
 
     property var spec: ({})
     readonly property real d: IrisStyle.settingsDensity
-    readonly property var pinned: (Config.options?.dock?.pinnedApps ?? []).map(String)
+    readonly property var pinned: (Config.options?.apps?.pinned ?? []).map(String)
     readonly property real rowHeight: Math.round(52 * root.d)
     property int dragFrom: -1
     property int dragTo: -1
@@ -40,13 +40,13 @@ Item {
         const next = root.pinned.slice()
         const moved = next.splice(from, 1)[0]
         next.splice(to, 0, moved)
-        Config.setNestedValue("dock.pinnedApps", next)
+        Config.setNestedValue("apps.pinned", next)
         root.refocus(moved)
     }
     function unpin(id: string): void {
         const at = root.pinned.indexOf(id)
         const rest = root.pinned.filter(value => value !== id)
-        Config.setNestedValue("dock.pinnedApps", rest)
+        Config.setNestedValue("apps.pinned", rest)
         if (root.keyed === id) root.refocus(rest[Math.min(at, rest.length - 1)] ?? "")
     }
     function refocus(id: string): void {

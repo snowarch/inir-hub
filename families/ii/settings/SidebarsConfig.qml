@@ -73,7 +73,7 @@ ContentPage {
     }
 
     SettingsTaskLoader {
-        requested: root.isIiActive && !(Config.options?.settingsUi?.easyMode ?? false) && root.activeSection === "general"
+        requested: root.isIiActive && !(Config.options?.material?.settingsUi?.easyMode ?? false) && root.activeSection === "general"
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "general"
@@ -86,9 +86,9 @@ ContentPage {
                 title: Translation.tr("Style")
 
                 ConfigSelectionArray {
-                    currentValue: Config.options?.sidebar?.style ?? "panel"
+                    currentValue: Config.options?.material?.sidebar?.style ?? "panel"
                     onSelected: newValue => {
-                        Config.setNestedValue("sidebar.style", newValue);
+                        Config.setNestedValue("material.sidebar.style", newValue);
                     }
                     options: [
                         { displayName: Translation.tr("Panel"), icon: "side_navigation", value: "panel" },
@@ -110,9 +110,9 @@ ContentPage {
                     enabled: Appearance.globalStyle === "material"
                         || Appearance.globalStyle === "inir"
                         || Appearance.editorialEverywhere
-                    checked: Config.options.sidebar?.cardStyle ?? false
+                    checked: Config.options.material.sidebar?.cardStyle ?? false
                     onCheckedChanged: {
-                        Config.setNestedValue("sidebar.cardStyle", checked);
+                        Config.setNestedValue("material.sidebar.cardStyle", checked);
                     }
                     StyledToolTip {
                         text: (Appearance.globalStyle === "material"
@@ -126,8 +126,8 @@ ContentPage {
                 SettingsSwitch {
                     buttonIcon: "unfold_less"
                     text: Translation.tr("Collapse notifications when empty")
-                    checked: Config.options.sidebar?.collapseEmptyNotifications ?? false
-                    onCheckedChanged: Config.setNestedValue("sidebar.collapseEmptyNotifications", checked)
+                    checked: Config.options.material.sidebar?.collapseEmptyNotifications ?? false
+                    onCheckedChanged: Config.setNestedValue("material.sidebar.collapseEmptyNotifications", checked)
                     StyledToolTip {
                         text: Translation.tr("Shrink the right sidebar when there are no notifications")
                     }
@@ -136,8 +136,8 @@ ContentPage {
                 SettingsSwitch {
                     buttonIcon: "fit_screen"
                     text: Translation.tr("Fit left sidebar to widgets")
-                    checked: Config.options.sidebar?.collapseWidgetsTab ?? false
-                    onCheckedChanged: Config.setNestedValue("sidebar.collapseWidgetsTab", checked)
+                    checked: Config.options.material.sidebar?.collapseWidgetsTab ?? false
+                    onCheckedChanged: Config.setNestedValue("material.sidebar.collapseWidgetsTab", checked)
                     StyledToolTip {
                         text: Translation.tr("Shrink the left sidebar to its content on the Widgets tab instead of full height")
                     }
@@ -158,8 +158,8 @@ ContentPage {
             SettingsSwitch {
                 buttonIcon: "animation"
                 text: Translation.tr("Instant sidebar opening")
-                checked: Config.options.sidebar?.instantOpen ?? false
-                onCheckedChanged: Config.setNestedValue("sidebar.instantOpen", checked)
+                checked: Config.options.material.sidebar?.instantOpen ?? false
+                onCheckedChanged: Config.setNestedValue("material.sidebar.instantOpen", checked)
                 StyledToolTip {
                     text: Translation.tr("Skips the slide animation to reduce stutter under load.")
                 }
@@ -167,12 +167,12 @@ ContentPage {
 
             // seven choices read at a glance as chips, like Dock style; a menu hid six of them
             ContentSubsection {
-                visible: !(Config.options?.sidebar?.instantOpen ?? false)
+                visible: !(Config.options?.material?.sidebar?.instantOpen ?? false)
                 title: Translation.tr("Sidebar animation")
 
                 ConfigSelectionArray {
-                    currentValue: Config.options?.sidebar?.animationType ?? "slide"
-                    onSelected: newValue => Config.setNestedValue("sidebar.animationType", newValue)
+                    currentValue: Config.options?.material?.sidebar?.animationType ?? "slide"
+                    onSelected: newValue => Config.setNestedValue("material.sidebar.animationType", newValue)
                     options: [
                         { displayName: Translation.tr("Slide"), icon: "swipe_right", value: "slide" },
                         { displayName: Translation.tr("Fade"), icon: "gradient", value: "fade" },
@@ -188,8 +188,8 @@ ContentPage {
             SettingsSwitch {
                 buttonIcon: "folder_open"
                 text: Translation.tr("Open folder after wallpaper download")
-                checked: Config.options.sidebar?.openFolderOnDownload ?? false
-                onCheckedChanged: Config.setNestedValue("sidebar.openFolderOnDownload", checked)
+                checked: Config.options.material.sidebar?.openFolderOnDownload ?? false
+                onCheckedChanged: Config.setNestedValue("material.sidebar.openFolderOnDownload", checked)
                 StyledToolTip {
                     text: Translation.tr("Open file manager when downloading wallpapers from Wallhaven or Booru")
                 }
@@ -212,7 +212,7 @@ ContentPage {
     }
 
     SettingsTaskLoader {
-        requested: root.isIiActive && !(Config.options?.settingsUi?.easyMode ?? false) && root.activeSection === "left"
+        requested: root.isIiActive && !(Config.options?.material?.settingsUi?.easyMode ?? false) && root.activeSection === "left"
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "left"
@@ -228,8 +228,8 @@ ContentPage {
                 SettingsSwitch {
                     buttonIcon: "widgets"
                     text: Translation.tr("Widgets")
-                    checked: Config.options.sidebar?.widgets?.enable ?? true
-                    onCheckedChanged: Config.setNestedValue("sidebar.widgets.enable", checked)
+                    checked: Config.options.material.sidebar?.widgets?.enable ?? true
+                    onCheckedChanged: Config.setNestedValue("material.sidebar.widgets.enable", checked)
                     StyledToolTip {
                         text: Translation.tr("Dashboard with clock, weather, media controls and quick actions")
                     }
@@ -253,8 +253,8 @@ ContentPage {
                 SettingsSwitch {
                     buttonIcon: "translate"
                     text: Translation.tr("Translator")
-                    checked: Config.options.sidebar?.translator?.enable ?? false
-                    onCheckedChanged: Config.setNestedValue("sidebar.translator.enable", checked)
+                    checked: Config.options?.translator?.enable ?? false
+                    onCheckedChanged: Config.setNestedValue("translator.enable", checked)
                     StyledToolTip {
                         text: Translation.tr("Translate text between languages")
                     }
@@ -278,8 +278,8 @@ ContentPage {
                 SettingsSwitch {
                     buttonIcon: "image"
                     text: Translation.tr("Wallhaven")
-                    checked: Config.options.sidebar?.wallhaven?.enable ?? true
-                    onCheckedChanged: Config.setNestedValue("sidebar.wallhaven.enable", checked)
+                    checked: Config.options?.wallhaven?.enable ?? true
+                    onCheckedChanged: Config.setNestedValue("wallhaven.enable", checked)
                     StyledToolTip {
                         text: Translation.tr("Browse and download wallpapers from Wallhaven")
                     }
@@ -288,8 +288,8 @@ ContentPage {
                 SettingsSwitch {
                     buttonIcon: "newspaper"
                     text: Translation.tr("News")
-                    checked: Config.options.sidebar?.news?.enable ?? true
-                    onCheckedChanged: Config.setNestedValue("sidebar.news.enable", checked)
+                    checked: Config.options?.news?.enable ?? true
+                    onCheckedChanged: Config.setNestedValue("news.enable", checked)
                     StyledToolTip {
                         text: Translation.tr("Local and topic headlines from Google News")
                     }
@@ -298,8 +298,8 @@ ContentPage {
                 SettingsSwitch {
                     buttonIcon: "calendar_month"
                     text: Translation.tr("Anime Schedule")
-                    checked: Config.options.sidebar?.animeSchedule?.enable ?? false
-                    onCheckedChanged: Config.setNestedValue("sidebar.animeSchedule.enable", checked)
+                    checked: Config.options?.animeSchedule?.enable ?? false
+                    onCheckedChanged: Config.setNestedValue("animeSchedule.enable", checked)
                     StyledToolTip {
                         text: Translation.tr("View anime airing schedule, seasonal and top anime")
                     }
@@ -308,8 +308,8 @@ ContentPage {
                 SettingsSwitch {
                     buttonIcon: "build"
                     text: Translation.tr("Tools")
-                    checked: Config.options.sidebar?.tools?.enable ?? false
-                    onCheckedChanged: Config.setNestedValue("sidebar.tools.enable", checked)
+                    checked: Config.options.material.sidebar?.tools?.enable ?? false
+                    onCheckedChanged: Config.setNestedValue("material.sidebar.tools.enable", checked)
                     StyledToolTip {
                         text: Translation.tr("Niri debug options and quick actions")
                     }
@@ -318,8 +318,8 @@ ContentPage {
                 SettingsSwitch {
                     buttonIcon: "store"
                     text: Translation.tr("Software")
-                    checked: Config.options.sidebar?.software?.enable ?? false
-                    onCheckedChanged: Config.setNestedValue("sidebar.software.enable", checked)
+                    checked: Config.options.material.sidebar?.software?.enable ?? false
+                    onCheckedChanged: Config.setNestedValue("material.sidebar.software.enable", checked)
                     StyledToolTip {
                         text: Translation.tr("Browse and install curated companion apps")
                     }
@@ -328,8 +328,8 @@ ContentPage {
                 SettingsSwitch {
                     buttonIcon: "library_music"
                     text: Translation.tr("YT Music")
-                    checked: Config.options.sidebar?.ytmusic?.enable ?? false
-                    onCheckedChanged: Config.setNestedValue("sidebar.ytmusic.enable", checked)
+                    checked: Config.options?.ytmusic?.enable ?? false
+                    onCheckedChanged: Config.setNestedValue("ytmusic.enable", checked)
                     StyledToolTip {
                         text: Translation.tr("Search and play music from YouTube using yt-dlp")
                     }
@@ -340,8 +340,8 @@ ContentPage {
                     visible: SystemInfo.runtimeHas(["webengine"])
                     buttonIcon: "extension"
                     text: Translation.tr("Web Apps")
-                    checked: Config.options?.sidebar?.plugins?.enable ?? false
-                    onCheckedChanged: Config.setNestedValue("sidebar.plugins.enable", checked)
+                    checked: Config.options?.material?.sidebar?.plugins?.enable ?? false
+                    onCheckedChanged: Config.setNestedValue("material.sidebar.plugins.enable", checked)
                     StyledToolTip {
                         text: Translation.tr("Embed web apps like Discord, YouTube Music and more in the sidebar")
                     }
@@ -354,7 +354,7 @@ ContentPage {
     }
 
     SettingsTaskLoader {
-        requested: root.isIiActive && !(Config.options?.settingsUi?.easyMode ?? false) && root.activeSection === "right"
+        requested: root.isIiActive && !(Config.options?.material?.settingsUi?.easyMode ?? false) && root.activeSection === "right"
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "right"
@@ -369,9 +369,9 @@ ContentPage {
 
                 ConfigSelectionArray {
                     Layout.fillWidth: false
-                    currentValue: Config.options?.sidebar?.right?.headerStyle ?? "profile"
+                    currentValue: Config.options?.material?.sidebar?.right?.headerStyle ?? "profile"
                     onSelected: newValue => {
-                        Config.setNestedValue("sidebar.right.headerStyle", newValue);
+                        Config.setNestedValue("material.sidebar.right.headerStyle", newValue);
                     }
                     options: [
                         { displayName: Translation.tr("Profile card"), icon: "account_box", value: "profile" },
@@ -380,14 +380,14 @@ ContentPage {
                 }
 
                 ContentSubsectionLabel {
-                    visible: (Config.options?.sidebar?.right?.headerStyle ?? "profile") === "profile"
+                    visible: (Config.options?.material?.sidebar?.right?.headerStyle ?? "profile") === "profile"
                     text: Translation.tr("Profile picture")
                 }
 
                 RowLayout {
                     Layout.fillWidth: true
                     spacing: 8
-                    visible: (Config.options?.sidebar?.right?.headerStyle ?? "profile") === "profile"
+                    visible: (Config.options?.material?.sidebar?.right?.headerStyle ?? "profile") === "profile"
 
                     Rectangle {
                         Layout.preferredWidth: 40
@@ -483,16 +483,16 @@ ContentPage {
                 }
 
                 ContentSubsectionLabel {
-                    visible: (Config.options?.sidebar?.right?.headerStyle ?? "profile") === "profile"
+                    visible: (Config.options?.material?.sidebar?.right?.headerStyle ?? "profile") === "profile"
                     text: Translation.tr("Banner")
                 }
 
                 ConfigSelectionArray {
                     Layout.fillWidth: false
-                    visible: (Config.options?.sidebar?.right?.headerStyle ?? "profile") === "profile"
-                    currentValue: Config.options?.sidebar?.right?.headerBanner ?? "wallpaper"
+                    visible: (Config.options?.material?.sidebar?.right?.headerStyle ?? "profile") === "profile"
+                    currentValue: Config.options?.material?.sidebar?.right?.headerBanner ?? "wallpaper"
                     onSelected: newValue => {
-                        Config.setNestedValue("sidebar.right.headerBanner", newValue);
+                        Config.setNestedValue("material.sidebar.right.headerBanner", newValue);
                     }
                     options: [
                         { displayName: Translation.tr("Wallpaper"), icon: "wallpaper", value: "wallpaper" },
@@ -505,13 +505,13 @@ ContentPage {
                 RowLayout {
                     Layout.fillWidth: true
                     spacing: 8
-                    visible: (Config.options?.sidebar?.right?.headerStyle ?? "profile") === "profile"
-                        && (Config.options?.sidebar?.right?.headerBanner ?? "wallpaper") === "custom"
+                    visible: (Config.options?.material?.sidebar?.right?.headerStyle ?? "profile") === "profile"
+                        && (Config.options?.material?.sidebar?.right?.headerBanner ?? "wallpaper") === "custom"
 
                     StyledText {
                         Layout.fillWidth: true
-                        text: (Config.options?.sidebar?.right?.headerBannerPath ?? "").length > 0
-                            ? Directories.shortHomePath(Config.options.sidebar.right.headerBannerPath)
+                        text: (Config.options?.material?.sidebar?.right?.headerBannerPath ?? "").length > 0
+                            ? Directories.shortHomePath(Config.options.material.sidebar.right.headerBannerPath)
                             : Translation.tr("No media selected")
                         font.pixelSize: Appearance.font.pixelSize.small
                         color: Appearance.colors.colSubtext
@@ -534,7 +534,7 @@ ContentPage {
                         Translation.tr("Images and animations") + " (*.png *.jpg *.jpeg *.webp *.bmp *.avif *.gif *.mp4 *.webm *.mkv *.avi *.mov)",
                         Translation.tr("All files") + " (*)"
                     ]
-                    onAccepted: Config.setNestedValue("sidebar.right.headerBannerPath",
+                    onAccepted: Config.setNestedValue("material.sidebar.right.headerBannerPath",
                         FileUtils.trimFileProtocol(String(selectedFile)))
                 }
 
@@ -553,22 +553,22 @@ ContentPage {
                 readonly property var defaults: ["calendar", "todo", "notepad", "calculator", "sysmon", "weather", "timer"]
 
                 function isEnabled(widgetId) {
-                    return (Config.options?.sidebar?.right?.enabledWidgets ?? defaults).includes(widgetId)
+                    return (Config.options?.material?.sidebar?.right?.enabledWidgets ?? defaults).includes(widgetId)
                 }
 
                 function setWidget(widgetId, active) {
                     _log(`[RightSidebar] setWidget(${widgetId}, ${active})`)
-                    let current = [...(Config.options?.sidebar?.right?.enabledWidgets ?? defaults)]
+                    let current = [...(Config.options?.material?.sidebar?.right?.enabledWidgets ?? defaults)]
                     _log(`[RightSidebar] Current widgets:`, JSON.stringify(current))
 
                     if (active && !current.includes(widgetId)) {
                         current.push(widgetId)
                         _log(`[RightSidebar] Adding ${widgetId}, new array:`, JSON.stringify(current))
-                        Config.setNestedValue("sidebar.right.enabledWidgets", current)
+                        Config.setNestedValue("material.sidebar.right.enabledWidgets", current)
                     } else if (!active && current.includes(widgetId)) {
                         current.splice(current.indexOf(widgetId), 1)
                         _log(`[RightSidebar] Removing ${widgetId}, new array:`, JSON.stringify(current))
-                        Config.setNestedValue("sidebar.right.enabledWidgets", current)
+                        Config.setNestedValue("material.sidebar.right.enabledWidgets", current)
                     } else {
                         _log(`[RightSidebar] No change needed`)
                     }
@@ -653,7 +653,7 @@ ContentPage {
                     Component.onCompleted: checked = rightSidebarWidgets.isEnabled("screentime")
                     onClicked: {
                         rightSidebarWidgets.setWidget("screentime", checked)
-                        Config.setNestedValue("sidebar.screenTime.enable", checked)
+                        Config.setNestedValue("screenTime.enable", checked)
                     }
                 }
             }
@@ -663,9 +663,9 @@ ContentPage {
 
                 ConfigSelectionArray {
                     Layout.fillWidth: false
-                    currentValue: Config.options.sidebar.quickToggles.style
+                    currentValue: Config.options.material.sidebar.quickToggles.style
                     onSelected: newValue => {
-                        Config.setNestedValue("sidebar.quickToggles.style", newValue);
+                        Config.setNestedValue("material.sidebar.quickToggles.style", newValue);
                     }
                     options: [
                         { displayName: Translation.tr("Classic"), icon: "password_2", value: "classic" },
@@ -674,15 +674,15 @@ ContentPage {
                 }
 
                 ConfigSpinBox {
-                    enabled: Config.options.sidebar.quickToggles.style === "android"
+                    enabled: Config.options.material.sidebar.quickToggles.style === "android"
                     icon: "splitscreen_left"
                     text: Translation.tr("Columns")
-                    value: Config.options.sidebar.quickToggles.android.columns
+                    value: Config.options.material.sidebar.quickToggles.android.columns
                     from: 1
                     to: 8
                     stepSize: 1
                     onValueModified: {
-                        Config.setNestedValue("sidebar.quickToggles.android.columns", value);
+                        Config.setNestedValue("material.sidebar.quickToggles.android.columns", value);
                     }
                     StyledToolTip {
                         text: Translation.tr("Number of columns for the Android-style quick settings grid")
@@ -697,9 +697,9 @@ ContentPage {
                 SettingsSwitch {
                     buttonIcon: "check"
                     text: Translation.tr("Enable")
-                    checked: Config.options.sidebar.quickSliders.enable
+                    checked: Config.options.material.sidebar.quickSliders.enable
                     onCheckedChanged: {
-                        Config.setNestedValue("sidebar.quickSliders.enable", checked);
+                        Config.setNestedValue("material.sidebar.quickSliders.enable", checked);
                     }
                     StyledToolTip {
                         text: Translation.tr("Show volume/brightness/mic sliders in the sidebar")
@@ -709,10 +709,10 @@ ContentPage {
                 SettingsSwitch {
                     buttonIcon: "brightness_6"
                     text: Translation.tr("Brightness")
-                    enabled: Config.options.sidebar.quickSliders.enable
-                    checked: Config.options.sidebar.quickSliders.showBrightness
+                    enabled: Config.options.material.sidebar.quickSliders.enable
+                    checked: Config.options.material.sidebar.quickSliders.showBrightness
                     onCheckedChanged: {
-                        Config.setNestedValue("sidebar.quickSliders.showBrightness", checked);
+                        Config.setNestedValue("material.sidebar.quickSliders.showBrightness", checked);
                     }
                     StyledToolTip {
                         text: Translation.tr("Show brightness slider")
@@ -722,10 +722,10 @@ ContentPage {
                 SettingsSwitch {
                     buttonIcon: "volume_up"
                     text: Translation.tr("Volume")
-                    enabled: Config.options.sidebar.quickSliders.enable
-                    checked: Config.options.sidebar.quickSliders.showVolume
+                    enabled: Config.options.material.sidebar.quickSliders.enable
+                    checked: Config.options.material.sidebar.quickSliders.showVolume
                     onCheckedChanged: {
-                        Config.setNestedValue("sidebar.quickSliders.showVolume", checked);
+                        Config.setNestedValue("material.sidebar.quickSliders.showVolume", checked);
                     }
                     StyledToolTip {
                         text: Translation.tr("Show volume slider")
@@ -735,10 +735,10 @@ ContentPage {
                 SettingsSwitch {
                     buttonIcon: "mic"
                     text: Translation.tr("Microphone")
-                    enabled: Config.options.sidebar.quickSliders.enable
-                    checked: Config.options.sidebar.quickSliders.showMic
+                    enabled: Config.options.material.sidebar.quickSliders.enable
+                    checked: Config.options.material.sidebar.quickSliders.showMic
                     onCheckedChanged: {
-                        Config.setNestedValue("sidebar.quickSliders.showMic", checked);
+                        Config.setNestedValue("material.sidebar.quickSliders.showMic", checked);
                     }
                     StyledToolTip {
                         text: Translation.tr("Show microphone input level slider")
@@ -752,7 +752,7 @@ ContentPage {
     }
 
     SettingsTaskLoader {
-        requested: root.isIiActive && !(Config.options?.settingsUi?.easyMode ?? false) && root.activeSection === "media"
+        requested: root.isIiActive && !(Config.options?.material?.settingsUi?.easyMode ?? false) && root.activeSection === "media"
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "media"
@@ -764,13 +764,13 @@ ContentPage {
             ContentSubsection {
                 title: Translation.tr("YT Music")
                 tooltip: Translation.tr("Control how next-track notifications behave")
-                visible: Config.options.sidebar?.ytmusic?.enable ?? false
+                visible: Config.options?.ytmusic?.enable ?? false
 
                 SettingsSwitch {
                     buttonIcon: "music_note"
                     text: Translation.tr("Up Next notifications")
-                    checked: Config.options.sidebar?.ytmusic?.upNextNotifications ?? true
-                    onCheckedChanged: Config.setNestedValue("sidebar.ytmusic.upNextNotifications", checked)
+                    checked: Config.options?.ytmusic?.upNextNotifications ?? true
+                    onCheckedChanged: Config.setNestedValue("ytmusic.upNextNotifications", checked)
                     StyledToolTip {
                         text: Translation.tr("Show a desktop notification with the upcoming track when playback auto-advances")
                     }
@@ -779,9 +779,9 @@ ContentPage {
                 SettingsSwitch {
                     buttonIcon: "sports_esports"
                     text: Translation.tr("Mute while fullscreen or GameMode")
-                    enabled: Config.options.sidebar?.ytmusic?.upNextNotifications ?? true
-                    checked: Config.options.sidebar?.ytmusic?.suppressUpNextInFullscreen ?? true
-                    onCheckedChanged: Config.setNestedValue("sidebar.ytmusic.suppressUpNextInFullscreen", checked)
+                    enabled: Config.options?.ytmusic?.upNextNotifications ?? true
+                    checked: Config.options?.ytmusic?.suppressUpNextInFullscreen ?? true
+                    onCheckedChanged: Config.setNestedValue("ytmusic.suppressUpNextInFullscreen", checked)
                     StyledToolTip {
                         text: Translation.tr("Suppress Up Next notifications when a fullscreen app is active or GameMode is enabled")
                     }
@@ -793,8 +793,8 @@ ContentPage {
                         { displayName: Translation.tr("Medium (≤128 kbps)"), icon: "graphic_eq", value: "medium" },
                         { displayName: Translation.tr("Low"), icon: "data_saver_on", value: "low" }
                     ]
-                    currentValue: Config.options.sidebar?.ytmusic?.audioQuality ?? "best"
-                    onSelected: (newValue) => Config.setNestedValue("sidebar.ytmusic.audioQuality", newValue)
+                    currentValue: Config.options?.ytmusic?.audioQuality ?? "best"
+                    onSelected: (newValue) => Config.setNestedValue("ytmusic.audioQuality", newValue)
                     StyledToolTip {
                         text: Translation.tr("Audio quality for playback — lower quality uses less bandwidth")
                     }
@@ -803,8 +803,8 @@ ContentPage {
                 SettingsSwitch {
                     buttonIcon: "graphic_eq"
                     text: Translation.tr("Normalize loudness")
-                    checked: Config.options.sidebar?.ytmusic?.normalizeVolume ?? true
-                    onCheckedChanged: Config.setNestedValue("sidebar.ytmusic.normalizeVolume", checked)
+                    checked: Config.options?.ytmusic?.normalizeVolume ?? true
+                    onCheckedChanged: Config.setNestedValue("ytmusic.normalizeVolume", checked)
                     StyledToolTip {
                         text: Translation.tr("Even out volume across tracks (EBU R128, like YouTube Music). Disable for the unprocessed stream.")
                     }
@@ -814,13 +814,13 @@ ContentPage {
 
             ContentSubsection {
                 title: Translation.tr("Anime Schedule")
-                visible: Config.options.sidebar?.animeSchedule?.enable ?? false
+                visible: Config.options?.animeSchedule?.enable ?? false
 
                 SettingsSwitch {
                     buttonIcon: "visibility_off"
                     text: Translation.tr("Show NSFW")
-                    checked: Config.options.sidebar?.animeSchedule?.showNsfw ?? false
-                    onCheckedChanged: Config.setNestedValue("sidebar.animeSchedule.showNsfw", checked)
+                    checked: Config.options?.animeSchedule?.showNsfw ?? false
+                    onCheckedChanged: Config.setNestedValue("animeSchedule.showNsfw", checked)
                     StyledToolTip {
                         text: Translation.tr("Include adult-rated anime in results")
                     }
@@ -849,7 +849,7 @@ ContentPage {
                         MaterialTextField {
                             Layout.fillWidth: true
                             placeholderText: "https://9animetv.to/search?keyword=%s"
-                            text: Config.options.sidebar?.animeSchedule?.watchSite ?? ""
+                            text: Config.options?.animeSchedule?.watchSite ?? ""
                             font.pixelSize: Appearance.font.pixelSize.smaller
                             color: Appearance.colors.colOnSurface
                             placeholderTextColor: Appearance.colors.colSubtext
@@ -859,7 +859,7 @@ ContentPage {
                                 border.width: parent.activeFocus ? 2 : 1
                                 border.color: parent.activeFocus ? Appearance.colors.colPrimary : Appearance.colors.colLayer0Border
                             }
-                            onTextEdited: Config.setNestedValue("sidebar.animeSchedule.watchSite", text)
+                            onTextEdited: Config.setNestedValue("animeSchedule.watchSite", text)
 
                             StyledToolTip {
                                 text: Translation.tr("Custom streaming site URL. Use %s for search query.")
@@ -889,16 +889,16 @@ ContentPage {
                     MaterialTextField {
                         Layout.fillWidth: true
                         placeholderText: Translation.tr("User ID")
-                        text: Config.options?.sidebar?.booru?.gelbooru?.userId ?? ""
-                        onEditingFinished: Config.setNestedValue("sidebar.booru.gelbooru.userId", text.trim())
+                        text: Config.options?.booru?.gelbooru?.userId ?? ""
+                        onEditingFinished: Config.setNestedValue("booru.gelbooru.userId", text.trim())
                     }
 
                     MaterialTextField {
                         Layout.fillWidth: true
                         placeholderText: Translation.tr("API key")
                         echoMode: TextInput.Password
-                        text: Config.options?.sidebar?.booru?.gelbooru?.apiKey ?? ""
-                        onEditingFinished: Config.setNestedValue("sidebar.booru.gelbooru.apiKey", text.trim())
+                        text: Config.options?.booru?.gelbooru?.apiKey ?? ""
+                        onEditingFinished: Config.setNestedValue("booru.gelbooru.apiKey", text.trim())
                     }
                 }
             }
@@ -913,8 +913,8 @@ ContentPage {
                 MaterialTextField {
                     Layout.fillWidth: true
                     placeholderText: Directories.wallpapersPath
-                    text: Config.options?.sidebar?.booru?.downloadPath?.sfw ?? ""
-                    onEditingFinished: Config.setNestedValue("sidebar.booru.downloadPath.sfw", text)
+                    text: Config.options?.booru?.downloadPath?.sfw ?? ""
+                    onEditingFinished: Config.setNestedValue("booru.downloadPath.sfw", text)
                 }
 
                 ContentSubsectionLabel {
@@ -923,24 +923,24 @@ ContentPage {
                 MaterialTextField {
                     Layout.fillWidth: true
                     placeholderText: Directories.wallpapersPath + "/pepper"
-                    text: Config.options?.sidebar?.booru?.downloadPath?.nsfw ?? ""
-                    onEditingFinished: Config.setNestedValue("sidebar.booru.downloadPath.nsfw", text)
+                    text: Config.options?.booru?.downloadPath?.nsfw ?? ""
+                    onEditingFinished: Config.setNestedValue("booru.downloadPath.nsfw", text)
                 }
             }
 
 
             ContentSubsection {
                 title: Translation.tr("Wallhaven")
-                visible: Config.options.sidebar?.wallhaven?.enable ?? true
+                visible: Config.options?.wallhaven?.enable ?? true
 
                 ConfigSpinBox {
                     icon: "format_list_numbered"
                     text: Translation.tr("Results per page")
-                    value: Config.options.sidebar?.wallhaven?.limit ?? 24
+                    value: Config.options?.wallhaven?.limit ?? 24
                     from: 12
                     to: 72
                     stepSize: 4
-                    onValueModified: Config.setNestedValue("sidebar.wallhaven.limit", value)
+                    onValueModified: Config.setNestedValue("wallhaven.limit", value)
                     StyledToolTip {
                         text: Translation.tr("Number of wallpapers to fetch per request")
                     }
@@ -968,14 +968,14 @@ ContentPage {
                         color: Appearance.colors.colOnSurface
                         placeholderTextColor: Appearance.colors.colSubtext
                         echoMode: TextInput.Password
-                        text: Config.options.sidebar?.wallhaven?.apiKey ?? ""
+                        text: Config.options?.wallhaven?.apiKey ?? ""
                         background: Rectangle {
                             color: Appearance.colors.colLayer1
                             radius: Appearance.rounding.small
                             border.width: wallhavenApiInput.activeFocus ? 2 : 1
                             border.color: wallhavenApiInput.activeFocus ? Appearance.colors.colPrimary : Appearance.colors.colLayer0Border
                         }
-                        onTextChanged: Config.setNestedValue("sidebar.wallhaven.apiKey", text)
+                        onTextChanged: Config.setNestedValue("wallhaven.apiKey", text)
                     }
                 }
             }
@@ -986,7 +986,7 @@ ContentPage {
     }
 
     SettingsTaskLoader {
-        requested: root.isIiActive && !(Config.options?.settingsUi?.easyMode ?? false) && root.activeSection === "open"
+        requested: root.isIiActive && !(Config.options?.material?.settingsUi?.easyMode ?? false) && root.activeSection === "open"
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "open"
@@ -1004,19 +1004,19 @@ ContentPage {
                     SettingsSwitch {
                         buttonIcon: "dock_to_left"
                         text: Translation.tr("Hover screen edges")
-                        checked: Config.options?.sidebar?.edgeOpen?.enable ?? false
-                        onCheckedChanged: Config.setNestedValue("sidebar.edgeOpen.enable", checked)
+                        checked: Config.options?.material?.sidebar?.edgeOpen?.enable ?? false
+                        onCheckedChanged: Config.setNestedValue("material.sidebar.edgeOpen.enable", checked)
                     }
                     ConfigSpinBox {
                         icon: "width"
                         text: Translation.tr("Trigger width (px)")
-                        value: Config.options?.sidebar?.edgeOpen?.regionWidth ?? 2
+                        value: Config.options?.material?.sidebar?.edgeOpen?.regionWidth ?? 2
                         from: 1
                         to: 12
                         stepSize: 1
-                        enabled: Config.options?.sidebar?.edgeOpen?.enable ?? false
+                        enabled: Config.options?.material?.sidebar?.edgeOpen?.enable ?? false
                         opacity: enabled ? 1 : 0.5
-                        onValueModified: Config.setNestedValue("sidebar.edgeOpen.regionWidth", value)
+                        onValueModified: Config.setNestedValue("material.sidebar.edgeOpen.regionWidth", value)
                     }
                 }
             }
@@ -1030,9 +1030,9 @@ ContentPage {
                     SettingsSwitch {
                         buttonIcon: "check"
                         text: Translation.tr("Enable")
-                        checked: Config.options.sidebar.cornerOpen.enable
+                        checked: Config.options.material.sidebar.cornerOpen.enable
                         onCheckedChanged: {
-                            Config.setNestedValue("sidebar.cornerOpen.enable", checked);
+                            Config.setNestedValue("material.sidebar.cornerOpen.enable", checked);
                         }
                         StyledToolTip {
                             text: Translation.tr("Allow opening sidebars by interacting with screen corners")
@@ -1042,9 +1042,9 @@ ContentPage {
                 SettingsSwitch {
                     buttonIcon: "highlight_mouse_cursor"
                     text: Translation.tr("Hover to trigger")
-                    checked: Config.options.sidebar.cornerOpen.clickless
+                    checked: Config.options.material.sidebar.cornerOpen.clickless
                     onCheckedChanged: {
-                        Config.setNestedValue("sidebar.cornerOpen.clickless", checked);
+                        Config.setNestedValue("material.sidebar.cornerOpen.clickless", checked);
                     }
 
                     StyledToolTip {
@@ -1053,11 +1053,11 @@ ContentPage {
                 }
                 ConfigRow {
                     SettingsSwitch {
-                        enabled: !Config.options.sidebar.cornerOpen.clickless
+                        enabled: !Config.options.material.sidebar.cornerOpen.clickless
                         text: Translation.tr("Force hover open at absolute corner")
-                        checked: Config.options.sidebar.cornerOpen.clicklessCornerEnd
+                        checked: Config.options.material.sidebar.cornerOpen.clicklessCornerEnd
                         onCheckedChanged: {
-                            Config.setNestedValue("sidebar.cornerOpen.clicklessCornerEnd", checked);
+                            Config.setNestedValue("material.sidebar.cornerOpen.clicklessCornerEnd", checked);
                         }
 
                         StyledToolTip {
@@ -1068,12 +1068,12 @@ ContentPage {
                         icon: "arrow_cool_down"
                         text: Translation.tr("with vertical offset")
                         unit: "px"
-                        value: Config.options.sidebar.cornerOpen.clicklessCornerVerticalOffset
+                        value: Config.options.material.sidebar.cornerOpen.clicklessCornerVerticalOffset
                         from: 0
                         to: 20
                         stepSize: 1
                         onValueModified: {
-                            Config.setNestedValue("sidebar.cornerOpen.clicklessCornerVerticalOffset", value);
+                            Config.setNestedValue("material.sidebar.cornerOpen.clicklessCornerVerticalOffset", value);
                         }
                         StyledToolTip {
                             text: Translation.tr("Why this is cool:\nFor non-0 values, it won't trigger when you reach the\nscreen corner along the horizontal edge, but it will when\nyou do along the vertical edge")
@@ -1086,9 +1086,9 @@ ContentPage {
                     SettingsSwitch {
                         buttonIcon: "vertical_align_bottom"
                         text: Translation.tr("Place at bottom")
-                        checked: Config.options.sidebar.cornerOpen.bottom
+                        checked: Config.options.material.sidebar.cornerOpen.bottom
                         onCheckedChanged: {
-                            Config.setNestedValue("sidebar.cornerOpen.bottom", checked);
+                            Config.setNestedValue("material.sidebar.cornerOpen.bottom", checked);
                         }
 
                         StyledToolTip {
@@ -1098,9 +1098,9 @@ ContentPage {
                     SettingsSwitch {
                         buttonIcon: "unfold_more_double"
                         text: Translation.tr("Value scroll")
-                        checked: Config.options.sidebar.cornerOpen.valueScroll
+                        checked: Config.options.material.sidebar.cornerOpen.valueScroll
                         onCheckedChanged: {
-                            Config.setNestedValue("sidebar.cornerOpen.valueScroll", checked);
+                            Config.setNestedValue("material.sidebar.cornerOpen.valueScroll", checked);
                         }
 
                         StyledToolTip {
@@ -1111,9 +1111,9 @@ ContentPage {
                 SettingsSwitch {
                     buttonIcon: "visibility"
                     text: Translation.tr("Visualize region")
-                    checked: Config.options.sidebar.cornerOpen.visualize
+                    checked: Config.options.material.sidebar.cornerOpen.visualize
                     onCheckedChanged: {
-                        Config.setNestedValue("sidebar.cornerOpen.visualize", checked);
+                        Config.setNestedValue("material.sidebar.cornerOpen.visualize", checked);
                     }
                     StyledToolTip {
                         text: Translation.tr("Show a colored overlay indicating the corner trigger areas (debug)")
@@ -1124,12 +1124,12 @@ ContentPage {
                         icon: "arrow_range"
                         text: Translation.tr("Region width")
                         unit: "px"
-                        value: Config.options.sidebar.cornerOpen.cornerRegionWidth
+                        value: Config.options.material.sidebar.cornerOpen.cornerRegionWidth
                         from: 1
                         to: 300
                         stepSize: 1
                         onValueModified: {
-                            Config.setNestedValue("sidebar.cornerOpen.cornerRegionWidth", value);
+                            Config.setNestedValue("material.sidebar.cornerOpen.cornerRegionWidth", value);
                         }
                         StyledToolTip {
                             text: Translation.tr("Horizontal size of the active corner area")
@@ -1139,12 +1139,12 @@ ContentPage {
                         icon: "height"
                         text: Translation.tr("Region height")
                         unit: "px"
-                        value: Config.options.sidebar.cornerOpen.cornerRegionHeight
+                        value: Config.options.material.sidebar.cornerOpen.cornerRegionHeight
                         from: 1
                         to: 300
                         stepSize: 1
                         onValueModified: {
-                            Config.setNestedValue("sidebar.cornerOpen.cornerRegionHeight", value);
+                            Config.setNestedValue("material.sidebar.cornerOpen.cornerRegionHeight", value);
                         }
                         StyledToolTip {
                             text: Translation.tr("Vertical size of the active corner area")

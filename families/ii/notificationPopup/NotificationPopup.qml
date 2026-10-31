@@ -13,7 +13,7 @@ Scope {
     property var excludedScreenNames: []
 
     // Position from config: topRight, topLeft, bottomRight, bottomLeft
-    readonly property string position: Config.options?.notifications?.position ?? "topRight"
+    readonly property string position: Config.options?.material?.notifications?.position ?? "topRight"
     readonly property bool isTop: position.startsWith("top")
     readonly property bool isLeft: position.endsWith("Left")
     readonly property var targetScreens: {
@@ -88,7 +88,7 @@ Scope {
                 // This prevents content clipping while the window catches up to new content size
                 implicitHeight: Math.min(listview.contentHeight + edgeMargin * 2 + heightBuffer, screen?.height * 0.8 ?? 600)
 
-                readonly property int edgeMargin: Config.options?.notifications?.edgeMargin ?? 4
+                readonly property int edgeMargin: Config.options?.material?.notifications?.edgeMargin ?? 4
                 // Extra buffer so content isn't clipped during async Wayland resize
                 readonly property int heightBuffer: 16
 

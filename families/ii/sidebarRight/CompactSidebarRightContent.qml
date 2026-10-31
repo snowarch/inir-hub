@@ -93,7 +93,7 @@ Item {
     
     // Controls section order from config
     readonly property var defaultSectionOrder: ["sliders", "toggles", "devices", "media", "quickActions"]
-    property var controlsSectionOrder: Config.options?.sidebar?.right?.controlsSectionOrder ?? defaultSectionOrder
+    property var controlsSectionOrder: Config.options?.material?.sidebar?.right?.controlsSectionOrder ?? defaultSectionOrder
     
     function moveSectionUp(index: int): void {
         if (index <= 0) return
@@ -102,7 +102,7 @@ Item {
         order[index - 1] = order[index]
         order[index] = temp
         root.controlsSectionOrder = order
-        Config.setNestedValue("sidebar.right.controlsSectionOrder", order)
+        Config.setNestedValue("material.sidebar.right.controlsSectionOrder", order)
     }
     
     function moveSectionDown(index: int): void {
@@ -112,7 +112,7 @@ Item {
         order[index + 1] = order[index]
         order[index] = temp
         root.controlsSectionOrder = order
-        Config.setNestedValue("sidebar.right.controlsSectionOrder", order)
+        Config.setNestedValue("material.sidebar.right.controlsSectionOrder", order)
     }
 
     // Active section index — persisted
@@ -705,7 +705,7 @@ Item {
 
     readonly property var widgetSections: {
         root.configVersion // Force dependency
-        const enabled = Config.options?.sidebar?.right?.enabledWidgets ?? ["calendar", "todo", "notepad", "calculator", "sysmon", "weather", "timer"]
+        const enabled = Config.options?.material?.sidebar?.right?.enabledWidgets ?? ["calendar", "todo", "notepad", "calculator", "sysmon", "weather", "timer"]
         const all = [
             {id: "calendar",   icon: "calendar_month", label: Translation.tr("Calendar"),   component: calendarComponent},
             {id: "events",     icon: "event_upcoming", label: Translation.tr("Events"),     component: eventsComponent},
@@ -718,7 +718,7 @@ Item {
             {id: "screentime", icon: "av_timer",      label: Translation.tr("Screen Time"), component: screenTimeComponent},
         ]
         return all.filter(w => {
-            if (w.id === "screentime" && !(Config.options?.sidebar?.screenTime?.enable ?? false))
+            if (w.id === "screentime" && !(Config.options?.screenTime?.enable ?? false))
                 return false
             return enabled.includes(w.id)
         })
@@ -792,11 +792,11 @@ Item {
         id: bg
         anchors.fill: parent
 
-        property bool cardStyle: Config.options?.sidebar?.cardStyle ?? false
+        property bool cardStyle: Config.options?.material?.sidebar?.cardStyle ?? false
         // Resolve one owner for the complete surface. Explicit Ricelin islands
         // override the global worldview; otherwise the selected global style owns it.
         readonly property string surfaceDialect: Appearance.surfaceDialectFor(
-            (Config.options?.sidebar?.style ?? "panel") === "island" ? "island" : "")
+            (Config.options?.material?.sidebar?.style ?? "panel") === "island" ? "island" : "")
         readonly property bool islandStyle: surfaceDialect === "island"
         readonly property bool zzzEverywhere: surfaceDialect === "zzz"
         readonly property bool angelEverywhere: surfaceDialect === "angel"
@@ -875,7 +875,7 @@ Item {
             ColorAnimation { duration: Appearance.animation.elementMoveFast.duration; easing.type: Appearance.animation.elementMoveFast.type; easing.bezierCurve: Appearance.animation.elementMoveFast.bezierCurve }
         }
 
-        radius: islandStyle ? (Config.options?.appearance?.island?.radius ?? 18)
+        radius: islandStyle ? (Config.options?.material?.style?.island?.radius ?? 18)
               : zzzEverywhere ? Appearance.zzz.panelRadius
               : angelEverywhere  ? Appearance.angel.roundingNormal
               : inirEverywhere   ? (cardStyle ? Appearance.inir.roundingLarge : Appearance.inir.roundingNormal)
@@ -1355,7 +1355,7 @@ Item {
                                 anchors.fill: parent
                                 hoverEnabled: true
                                 cursorShape: Qt.PointingHandCursor
-                                onClicked: Config.setNestedValue("sidebar.layout", "default")
+                                onClicked: Config.setNestedValue("material.sidebar.layout", "default")
                             }
                             BubbleToolTip {
                                 visible: layoutMA.containsMouse
@@ -1483,7 +1483,7 @@ Item {
                         actionTooltip: root.layoutEditMode ? Translation.tr("Done editing") : Translation.tr("Reorder sections")
                         onActionClicked: root.layoutEditMode = !root.layoutEditMode
                         // Quick toggles edit (only for android style)
-                        showSecondaryAction: (Config.options?.sidebar?.quickToggles?.style ?? "classic") === "android"
+                        showSecondaryAction: (Config.options?.material?.sidebar?.quickToggles?.style ?? "classic") === "android"
                         secondaryActionIcon: root.editMode ? "check" : "edit"
                         secondaryActionTooltip: Translation.tr("Edit quick toggles")
                         onSecondaryActionClicked: root.editMode = !root.editMode
@@ -1567,7 +1567,7 @@ Item {
                             Loader {
                                 Layout.fillWidth: true
                                 active: sectionDelegate.modelData === "sliders"
-                                visible: active && (Config.options?.sidebar?.quickSliders?.enable && (Config.options?.sidebar?.quickSliders?.showMic || Config.options?.sidebar?.quickSliders?.showVolume || Config.options?.sidebar?.quickSliders?.showBrightness))
+                                visible: active && (Config.options?.material?.sidebar?.quickSliders?.enable && (Config.options?.material?.sidebar?.quickSliders?.showMic || Config.options?.material?.sidebar?.quickSliders?.showVolume || Config.options?.material?.sidebar?.quickSliders?.showBrightness))
                                 sourceComponent: QuickSliders {
                                     verticalPadding: controlsRoot.controlsInnerPadding
                                     horizontalPadding: controlsRoot.controlsAreaPadding
@@ -1610,7 +1610,7 @@ Item {
                                         id: compactClassicQuickPanelLoader
                                         Layout.fillWidth: true
                                         Layout.leftMargin: 0; Layout.rightMargin: 0
-                                        active: (Config.options?.sidebar?.quickToggles?.style ?? "classic") === "classic"
+                                        active: (Config.options?.material?.sidebar?.quickToggles?.style ?? "classic") === "classic"
                                         sourceComponent: ClassicQuickPanel {
                                             compactMode: true
                                             compactItemSlotWidth: Math.max(44, Math.min(50, Math.round(controlsFlickable.width / 7)))
@@ -1631,7 +1631,7 @@ Item {
                                         id: compactAndroidQuickPanelLoader
                                         Layout.fillWidth: true
                                         Layout.leftMargin: 0; Layout.rightMargin: 0
-                                        active: (Config.options?.sidebar?.quickToggles?.style ?? "classic") === "android"
+                                        active: (Config.options?.material?.sidebar?.quickToggles?.style ?? "classic") === "android"
                                         sourceComponent: AndroidQuickPanel { editMode: root.editMode }
                                         Connections {
                                             target: compactAndroidQuickPanelLoader.item

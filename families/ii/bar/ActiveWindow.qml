@@ -99,7 +99,7 @@ Item {
         titleText.visible ? titleText.implicitWidth : 0
     )
 
-    readonly property bool showTitle: Config.options?.bar?.activeWindow?.showTitle ?? true
+    readonly property bool showTitle: Config.options?.material?.bar?.activeWindow?.showTitle ?? true
 
     property color titleColor: Appearance.inirEverywhere ? Appearance.inir.colText : Appearance.colors.colOnLayer0
     property color appNameColor: Appearance.regaliaEverywhere ? Appearance.regalia.onMuted

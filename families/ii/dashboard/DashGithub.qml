@@ -13,7 +13,7 @@ import qs.modules.common.functions
 DashCard {
     id: root
 
-    readonly property string username: Config.options?.dashboard?.github?.username ?? ""
+    readonly property string username: Config.options?.material?.dashboard?.github?.username ?? ""
     property var weeks: [] // [[level 0–4 per day] per week]
     property int total: -1
     property double _lastFetch: 0

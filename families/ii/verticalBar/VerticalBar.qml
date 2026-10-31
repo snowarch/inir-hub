@@ -17,13 +17,13 @@ import qs.modules.common.functions
 
 Scope {
     id: bar
-    property bool showBarBackground: Config.options?.bar?.showBackground ?? true
+    property bool showBarBackground: Config.options?.material?.bar?.showBackground ?? true
 
     Variants {
         // For each monitor
         model: {
             const screens = Quickshell.screens;
-            const list = Config.options?.bar?.screenList ?? [];
+            const list = Config.options?.material?.bar?.screenList ?? [];
             if (!list || list.length === 0)
                 return screens;
             const matchedScreens = screens.filter(screen => {
@@ -47,7 +47,7 @@ Scope {
                 
                 Timer {
                     id: showBarTimer
-                    interval: (Config?.options.bar.autoHide.showWhenPressingSuper.delay ?? 100)
+                    interval: (Config?.options.material.bar.autoHide.showWhenPressingSuper.delay ?? 100)
                     repeat: false
                     onTriggered: {
                         barRoot.superShow = true
@@ -56,7 +56,7 @@ Scope {
                 Connections {
                     target: GlobalStates
                     function onSuperDownChanged() {
-                        if (!Config?.options.bar.autoHide.showWhenPressingSuper.enable) return;
+                        if (!Config?.options.material.bar.autoHide.showWhenPressingSuper.enable) return;
                         if (GlobalStates.superDown) showBarTimer.restart();
                         else {
                             showBarTimer.stop();
@@ -71,14 +71,14 @@ Scope {
                 // the desktop-facing side. The explicit exclusiveZone below is
                 // deliberately unchanged so Organic never relayouts windows.
                 readonly property real organicAuraAllowance:
-                    (Config.options?.bar?.visualizer?.enable ?? false)
-                        && (Config.options?.bar?.visualizer?.type ?? "bars") === "organic"
-                        && (Config.options?.bar?.visualizer?.organicFit ?? "auto") === "aura"
+                    (Config.options?.material?.bar?.visualizer?.enable ?? false)
+                        && (Config.options?.material?.bar?.visualizer?.type ?? "bars") === "organic"
+                        && (Config.options?.material?.bar?.visualizer?.organicFit ?? "auto") === "aura"
                     ? Math.ceil(Appearance.sizes.verticalBarWidth * 1.75) : 0
                 exclusionMode: ExclusionMode.Ignore
                 exclusiveZone:
-                    (GlobalStates.coverflowSelectorOpen || (Config?.options.bar.autoHide.enable && (!mustShow || !Config?.options.bar.autoHide.pushWindows))) ? 0 :
-                    Appearance.sizes.baseVerticalBarWidth + ((Config.options?.bar?.cornerStyle ?? 0) === 1 ? Appearance.sizes.hyprlandGapsOut : 0)
+                    (GlobalStates.coverflowSelectorOpen || (Config?.options.material.bar.autoHide.enable && (!mustShow || !Config?.options.material.bar.autoHide.pushWindows))) ? 0 :
+                    Appearance.sizes.baseVerticalBarWidth + ((Config.options?.material?.bar?.cornerStyle ?? 0) === 1 ? Appearance.sizes.hyprlandGapsOut : 0)
                 WlrLayershell.namespace: "quickshell:verticalBar"
                 // Default Top layer ON PURPOSE: fullscreen surfaces render
                 // above Top, so videos/games naturally cover the bar. Overlay
@@ -98,8 +98,8 @@ Scope {
                 }
 
                 anchors {
-                    left: !(Config.options?.bar?.bottom ?? false)
-                    right: (Config.options?.bar?.bottom ?? false)
+                    left: !(Config.options?.material?.bar?.bottom ?? false)
+                    right: (Config.options?.material?.bar?.bottom ?? false)
                     top: true
                     bottom: true
                 }
@@ -115,8 +115,8 @@ Scope {
                         id: hoverMaskRegion
                         anchors {
                             fill: barContent
-                            leftMargin: -(Config.options?.bar?.autoHide?.hoverRegionWidth ?? 2)
-                            rightMargin: -(Config.options?.bar?.autoHide?.hoverRegionWidth ?? 2)
+                            leftMargin: -(Config.options?.material?.bar?.autoHide?.hoverRegionWidth ?? 2)
+                            rightMargin: -(Config.options?.material?.bar?.autoHide?.hoverRegionWidth ?? 2)
                         }
                     }
 
@@ -129,7 +129,7 @@ Scope {
                             bottom: parent.bottom
                             left: parent.left
                             right: undefined
-                            leftMargin: ((Config?.options.bar.autoHide.enable && !mustShow) || GlobalStates.coverflowSelectorOpen || !GlobalStates.shellEntryReady) ? -Appearance.sizes.verticalBarWidth : 0
+                            leftMargin: ((Config?.options.material.bar.autoHide.enable && !mustShow) || GlobalStates.coverflowSelectorOpen || !GlobalStates.shellEntryReady) ? -Appearance.sizes.verticalBarWidth : 0
                             rightMargin: 0
                         }
                         Behavior on anchors.leftMargin {
@@ -141,7 +141,7 @@ Scope {
 
                         states: State {
                             name: "right"
-                            when: (Config.options?.bar?.bottom ?? false)
+                            when: (Config.options?.material?.bar?.bottom ?? false)
                             AnchorChanges {
                                 target: barContent
                                 anchors {
@@ -154,7 +154,7 @@ Scope {
                             PropertyChanges {
                                 target: barContent
                                 anchors.topMargin: 0
-                                anchors.rightMargin: ((Config?.options.bar.autoHide.enable && !mustShow) || GlobalStates.coverflowSelectorOpen || !GlobalStates.shellEntryReady) ? -Appearance.sizes.verticalBarWidth : 0
+                                anchors.rightMargin: ((Config?.options.material.bar.autoHide.enable && !mustShow) || GlobalStates.coverflowSelectorOpen || !GlobalStates.shellEntryReady) ? -Appearance.sizes.verticalBarWidth : 0
                             }
                         }
                     }
@@ -166,7 +166,7 @@ Scope {
                         active: ShellEditSession.blocksNormalActions(surfaceId)
                         selected: ShellEditSession.selectedSurfaceId === surfaceId
                         lifted: ShellEditSession.liftedSurfaceId === surfaceId
-                        slotHint: (Config.options?.bar?.bottom ?? false) ? "right" : "left"
+                        slotHint: (Config.options?.material?.bar?.bottom ?? false) ? "right" : "left"
                         screenWidth: barRoot.screen?.width ?? 0
                         screenHeight: barRoot.screen?.height ?? 0
                         onDragStarted: surface => ShellEditSession.beginDrag(surface)
@@ -195,12 +195,12 @@ Scope {
                             right: undefined
                         }
                         width: Appearance.rounding.screenRounding
-                        active: showBarBackground && (Config.options?.bar?.cornerStyle ?? 0) === 0 && !Appearance.zzzEverywhere
-                            && !(Config.options?.bar?.appearanceStyle === "islands")
+                        active: showBarBackground && (Config.options?.material?.bar?.cornerStyle ?? 0) === 0 && !Appearance.zzzEverywhere
+                            && !(Config.options?.material?.bar?.appearanceStyle === "islands")
 
                         states: State {
                             name: "right"
-                            when: (Config.options?.bar?.bottom ?? false)
+                            when: (Config.options?.material?.bar?.bottom ?? false)
                             AnchorChanges {
                                 target: roundDecorators
                                 anchors {
@@ -218,7 +218,7 @@ Scope {
 
                             readonly property bool isInir: Appearance.inirEverywhere
                             readonly property bool isAurora: Appearance.auroraEverywhere
-                            readonly property bool isRight: Config.options?.bar?.bottom ?? false
+                            readonly property bool isRight: Config.options?.material?.bar?.bottom ?? false
                             // Color must match the bar background color exactly
                             readonly property color solidColor: showBarBackground
                                 ? (isInir ? Appearance.inir.colLayer0

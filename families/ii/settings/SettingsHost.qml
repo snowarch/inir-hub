@@ -10,7 +10,7 @@ import qs.modules.common
 Scope {
     id: root
 
-    readonly property bool overlay: Config.options?.settingsUi?.overlayMode ?? false
+    readonly property bool overlay: Config.options?.material?.settingsUi?.overlayMode ?? false
 
     Binding {
         target: GlobalStates

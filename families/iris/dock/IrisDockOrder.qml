@@ -43,7 +43,7 @@ Singleton {
 
     function isPinned(appId: string): bool {
         const lower = appId.toLowerCase()
-        return (Config.options?.dock?.pinnedApps ?? []).some(p => String(p).toLowerCase() === lower)
+        return (Config.options?.apps?.pinned ?? []).some(p => String(p).toLowerCase() === lower)
     }
 
     function drop(appId: string, ids: var): bool {
@@ -56,7 +56,7 @@ Singleton {
         const toPinned = split >= 0 ? at < split : (wasPinned && (!root.groupOpen || !running))
 
         if (toPinned) {
-            const pinned = Array.from(Config.options?.dock?.pinnedApps ?? [])
+            const pinned = Array.from(Config.options?.apps?.pinned ?? [])
             const own = pinned.find(p => String(p).toLowerCase() === appId) ?? (AppSearch.lookupDesktopEntry(appId)?.id || appId)
             const rest = pinned.filter(p => String(p).toLowerCase() !== appId)
             rest.splice(root.insertAt(rest.map(p => String(p).toLowerCase()), ids.slice(0, split >= 0 ? split : ids.length), at), 0, own)

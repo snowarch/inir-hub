@@ -45,10 +45,10 @@ Scope {
     property string _screenName: ""
     readonly property bool fullscreenCovered: root._screenName.length > 0
         && GameMode.hasFullscreenOnOutput(root._screenName)
-    readonly property bool edgeOpenEnabled: (Config.options?.sidebar?.edgeOpen?.enable ?? false)
+    readonly property bool edgeOpenEnabled: (Config.options?.material?.sidebar?.edgeOpen?.enable ?? false)
         && !root.fullscreenCovered && !GlobalStates.screenLocked
     readonly property int edgeOpenWidth: Math.max(1,
-        Config.options?.sidebar?.edgeOpen?.regionWidth ?? 2)
+        Config.options?.material?.sidebar?.edgeOpen?.regionWidth ?? 2)
     property bool edgeRevealTransient: false
     readonly property bool roleHoldOpen: root.featureRole
         && GlobalStates.sidebarLeftHoldOpen
@@ -84,8 +84,8 @@ Scope {
         return Math.max(root.reportedMinimumHeight,
             Math.min(root.availableContentHeight, requested))
     }
-    readonly property bool instantOpen: Config.options?.sidebar?.instantOpen ?? false
-    readonly property string animationType: Config.options?.sidebar?.animationType ?? "slide"
+    readonly property bool instantOpen: Config.options?.material?.sidebar?.instantOpen ?? false
+    readonly property string animationType: Config.options?.material?.sidebar?.animationType ?? "slide"
 
     property bool pluginViewActive: false
     property real widthPreview: -1
@@ -462,7 +462,7 @@ Scope {
         Item {
             id: systemContentStack
             readonly property bool isCompact:
-                (Config.options?.sidebar?.layout ?? "default") === "compact"
+                (Config.options?.material?.sidebar?.layout ?? "default") === "compact"
             readonly property var activeContentItem: isCompact
                 ? compactSystemLoader.item : defaultSystemLoader.item
             readonly property real preferredContentHeight:

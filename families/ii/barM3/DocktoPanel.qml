@@ -23,8 +23,8 @@ Item {
     readonly property real slotSize: root.vertical
         ? Appearance.sizes.baseVerticalBarWidth
         : Appearance.sizes.baseBarHeight
-    readonly property real cfgIconSize: Config.options?.bar?.m3?.dockToPanel?.iconSize ?? 0
-    readonly property real cfgBtnSize: Config.options?.bar?.m3?.dockToPanel?.buttonSize ?? 0
+    readonly property real cfgIconSize: Config.options?.material?.bar?.m3?.dockToPanel?.iconSize ?? 0
+    readonly property real cfgBtnSize: Config.options?.material?.bar?.m3?.dockToPanel?.buttonSize ?? 0
     readonly property real naturalIconSize: Math.round(root.slotSize * 0.68)
     readonly property real naturalButtonSize: Math.round(root.slotSize * 0.86)
     readonly property real requestedIconSize: root.cfgIconSize > 0
@@ -35,11 +35,11 @@ Item {
         : root.naturalButtonSize
     property real btnSize: Math.max(root.requestedButtonSize, root.requestedIconSize + 6)
     property real iconSize: Math.min(root.requestedIconSize, root.btnSize - 6)
-    property real btnSpacing: Math.max(0, Config.options?.bar?.m3?.dockToPanel?.buttonSpacing ?? 2)
+    property real btnSpacing: Math.max(0, Config.options?.material?.bar?.m3?.dockToPanel?.buttonSpacing ?? 2)
     property real buttonPadding: Math.max(3, Math.round(root.btnSize * 0.1))
-    property bool vertical:    Config.options.bar.vertical
-    property bool isMaterial:  Config.options.bar.m3.cornerStyle === 3
-    property var pinnedApps: Config.options?.dock.pinnedApps ?? []
+    property bool vertical:    Config.options.material.bar.vertical
+    property bool isMaterial:  Config.options.material.bar.m3.cornerStyle === 3
+    property var pinnedApps: Config.options?.apps?.pinned ?? []
     property var activeUnpinned: TaskbarApps.apps.filter(
         a => !a.pinned && a.appId !== "SEPARATOR" && a.toplevels.length > 0
     )
@@ -110,7 +110,7 @@ Item {
     function commitOrder() {
         // Upstream assigned the list directly, which under iNiR's Config is
         // session-only: the new order was lost on the next restart.
-        Config.setNestedValue("dock.pinnedApps", _workOrder.slice())
+        Config.setNestedValue("apps.pinned", _workOrder.slice())
     }
 
     Rectangle {
@@ -200,9 +200,9 @@ Item {
                             id: pinnedMenu
                             anchorItem: pinnedButton
                             anchorHovered: pinnedButton.hovered
-                            popupAbove: Config.options?.bar?.bottom ?? false
+                            popupAbove: Config.options?.material?.bar?.bottom ?? false
                             popupSide: root.vertical
-                                ? ((Config.options?.bar?.bottom ?? false) ? Edges.Left : Edges.Right)
+                                ? ((Config.options?.material?.bar?.bottom ?? false) ? Edges.Left : Edges.Right)
                                 : 0
                             closeOnHoverLost: false
                             model: [
@@ -251,7 +251,7 @@ Item {
                             }
 
                             Loader {
-                                active: Config.options.dock.monochromeIcons
+                                active: Config.options.material.dock.monochromeIcons
                                 anchors.fill: pinnedIcon
                                 sourceComponent: Item {
                                     Desaturate {
@@ -410,9 +410,9 @@ Item {
                             id: activeMenu
                             anchorItem: activeButton
                             anchorHovered: activeButton.hovered
-                            popupAbove: Config.options?.bar?.bottom ?? false
+                            popupAbove: Config.options?.material?.bar?.bottom ?? false
                             popupSide: root.vertical
-                                ? ((Config.options?.bar?.bottom ?? false) ? Edges.Left : Edges.Right)
+                                ? ((Config.options?.material?.bar?.bottom ?? false) ? Edges.Left : Edges.Right)
                                 : 0
                             closeOnHoverLost: false
                             model: [
@@ -459,7 +459,7 @@ Item {
                             }
 
                             Loader {
-                                active: Config.options.dock.monochromeIcons
+                                active: Config.options.material.dock.monochromeIcons
                                 anchors.fill: activeIcon
                                 sourceComponent: Item {
                                     Desaturate {

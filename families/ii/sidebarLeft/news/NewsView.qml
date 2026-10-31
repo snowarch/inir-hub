@@ -34,8 +34,8 @@ Item {
         return result
     }
 
-    readonly property string configMode: Config.options?.sidebar?.news?.mode ?? "local"
-    readonly property string configTopic: Config.options?.sidebar?.news?.topic ?? "WORLD"
+    readonly property string configMode: Config.options?.news?.mode ?? "local"
+    readonly property string configTopic: Config.options?.news?.topic ?? "WORLD"
     readonly property int currentBoardIndex: {
         for (let i = 0; i < boards.length; i++) {
             if (boards[i].key === configMode && (configMode !== "topic" || boards[i].topic === configTopic))
@@ -107,8 +107,8 @@ Item {
 
                         onClicked: {
                             Config.setNestedValues({
-                                "sidebar.news.mode": modelData.key,
-                                "sidebar.news.topic": modelData.key === "topic" ? modelData.topic : root.configTopic
+                                "news.mode": modelData.key,
+                                "news.topic": modelData.key === "topic" ? modelData.topic : root.configTopic
                             })
                             NewsService.fetch(modelData.key, modelData.topic)
                         }

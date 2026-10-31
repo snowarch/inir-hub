@@ -77,7 +77,7 @@ ColumnLayout {
         // list<string> from QML is array-LIKE (has .length / indices) but NOT a
         // real Array, so Array.isArray() is false for it — never use it here, it
         // would always fall through to defaults. `.length >= 0` is the guard.
-        const a = Config.options?.dashboard?.layout?.[name]
+        const a = Config.options?.material?.dashboard?.layout?.[name]
         return (a && a.length >= 0) ? a : (root._defaults[name] ?? [])
     }
     function _placed() {
@@ -94,12 +94,12 @@ ColumnLayout {
         if (dst.indexOf(id) !== -1) return
         const idx = (atIndex === undefined || atIndex < 0) ? dst.length : Math.max(0, Math.min(atIndex, dst.length))
         dst.splice(idx, 0, id)
-        Config.setNestedValue("dashboard.layout." + toZone, dst)
+        Config.setNestedValue("material.dashboard.layout." + toZone, dst)
     }
     function _remove(zone, idx) {
         const arr = root._getZone(zone).slice()
         arr.splice(idx, 1)
-        Config.setNestedValue("dashboard.layout." + zone, arr)
+        Config.setNestedValue("material.dashboard.layout." + zone, arr)
     }
     function _dropMove(srcZone, srcIdx, srcId, dstZone, dstIdx) {
         if (srcZone === root.availableZone) { root._addToZone(srcId, dstZone, dstIdx); return }
@@ -109,23 +109,23 @@ ColumnLayout {
             const arr = root._getZone(srcZone).slice()
             const [m] = arr.splice(srcIdx, 1)
             arr.splice(Math.max(0, Math.min(dstIdx, arr.length)), 0, m)
-            Config.setNestedValue("dashboard.layout." + srcZone, arr)
+            Config.setNestedValue("material.dashboard.layout." + srcZone, arr)
         } else {
             const src = root._getZone(srcZone).slice()
             const dst = root._getZone(dstZone).slice()
             const [m] = src.splice(srcIdx, 1)
             dst.splice(Math.max(0, Math.min(dstIdx, dst.length)), 0, m)
             let u = {}
-            u["dashboard.layout." + srcZone] = src
-            u["dashboard.layout." + dstZone] = dst
+            u["material.dashboard.layout." + srcZone] = src
+            u["material.dashboard.layout." + dstZone] = dst
             Config.setNestedValues(u)
         }
     }
     function _resetToDefaults() {
         Config.setNestedValues({
-            "dashboard.layout.left": root._defaults.left,
-            "dashboard.layout.center": root._defaults.center,
-            "dashboard.layout.right": root._defaults.right
+            "material.dashboard.layout.left": root._defaults.left,
+            "material.dashboard.layout.center": root._defaults.center,
+            "material.dashboard.layout.right": root._defaults.right
         })
     }
 

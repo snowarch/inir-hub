@@ -17,8 +17,8 @@ Item {
     property bool showSeparator: true
     property bool showOverflowMenu: true
     property var activeMenu: null
-    readonly property bool isOnLeft: Config.options.bar.m3.layouts.leftLayout.includes("sysTray")
-    readonly property bool isMaterial: Config.options.bar.m3.cornerStyle === 3
+    readonly property bool isOnLeft: Config.options.material.bar.m3.layouts.leftLayout.includes("sysTray")
+    readonly property bool isMaterial: Config.options.material.bar.m3.cornerStyle === 3
 
     visible: SystemTray.items.values.length > 0
     implicitWidth: vertical ? Appearance.sizes.verticalBarWidth : (isMaterial ? pill.implicitWidth - 4 : gridLayout.implicitWidth)
@@ -97,7 +97,7 @@ Item {
             contentItem: MaterialSymbol {
                 anchors.centerIn: parent
                 iconSize: Appearance.font.pixelSize.larger
-                text: Config.options.bar.bottom ? "keyboard_control_key" : "expand_more"
+                text: Config.options.material.bar.bottom ? "keyboard_control_key" : "expand_more"
                 horizontalAlignment: Text.AlignHCenter
                 color: root.isMaterial ? M3Palette.pillInk("sysTray") : Appearance.colors.colOnLayer2
                 rotation: (root.trayOverflowOpen ? 180 : 0) - (90 * root.vertical) + (180 * root.invertSide)

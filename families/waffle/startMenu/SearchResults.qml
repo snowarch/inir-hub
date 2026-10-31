@@ -185,7 +185,7 @@ RowLayout {
                 model: {
                     const isAppEntry = resultPreview.entry?.type === Translation.tr("App");
                     const appId = isAppEntry ? (resultPreview.entry?.id ?? "") : "";
-                    const pinned = isAppEntry ? (Config.options.dock?.pinnedApps?.includes(appId) ?? false) : false;
+                    const pinned = isAppEntry ? (Config.options?.apps?.pinned?.includes(appId) ?? false) : false;
                     var result = [
                         ({
                             name: resultPreview.entry?.verb ?? Translation.tr("Open"),

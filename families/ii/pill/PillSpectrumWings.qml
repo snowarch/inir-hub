@@ -46,60 +46,60 @@ Item {
     }
 
     readonly property real wingLength: Math.max(60,
-        Config.options?.bar?.visualizer?.pillWingLength ?? 180) * root.s
+        Config.options?.material?.bar?.visualizer?.pillWingLength ?? 180) * root.s
     readonly property real wingGap: Math.max(0,
-        Config.options?.bar?.visualizer?.pillWingGap ?? 12) * root.s
+        Config.options?.material?.bar?.visualizer?.pillWingGap ?? 12) * root.s
     readonly property string wingMode: {
-        const configured = Config.options?.bar?.visualizer?.pillWingMode ?? "bounded"
+        const configured = Config.options?.material?.bar?.visualizer?.pillWingMode ?? "bounded"
         return ["bounded", "screen", "bleed"].includes(configured) ? configured : "bounded"
     }
     readonly property real screenPadding: Math.max(0,
-        Config.options?.bar?.visualizer?.pillScreenPadding ?? 24) * root.s
+        Config.options?.material?.bar?.visualizer?.pillScreenPadding ?? 24) * root.s
     readonly property real underlap: Math.max(0,
-        Config.options?.bar?.visualizer?.pillUnderlap ?? 28) * root.s
+        Config.options?.material?.bar?.visualizer?.pillUnderlap ?? 28) * root.s
     readonly property real effectiveUnderlap: Math.min(root.underlap,
         Math.max(0, (root.pillItem?.width ?? 0) / 2))
     readonly property real outerOpacity: 1 - Math.max(0, Math.min(100,
-        Config.options?.bar?.visualizer?.pillEdgeFade ?? 92)) / 100
+        Config.options?.material?.bar?.visualizer?.pillEdgeFade ?? 92)) / 100
     readonly property real wingHeight: Math.max(24 * root.s,
         Math.min(58 * root.s, root.pillItem?.height ?? 38 * root.s))
-    readonly property string visualizerType: Config.options?.bar?.visualizer?.type ?? "bars"
-    readonly property string barsOrigin: Config.options?.bar?.visualizer?.barsOrigin ?? "mirror"
+    readonly property string visualizerType: Config.options?.material?.bar?.visualizer?.type ?? "bars"
+    readonly property string barsOrigin: Config.options?.material?.bar?.visualizer?.barsOrigin ?? "mirror"
     readonly property real density: Math.max(4,
-        Config.options?.bar?.visualizer?.density ?? 12) * root.s
+        Config.options?.material?.bar?.visualizer?.density ?? 12) * root.s
     readonly property real gap: Math.max(0,
-        Config.options?.bar?.visualizer?.gap ?? 2) * root.s
+        Config.options?.material?.bar?.visualizer?.gap ?? 2) * root.s
     readonly property int smoothing: Math.max(0,
-        Config.options?.bar?.visualizer?.smoothing ?? 2)
-    readonly property string waveMode: Config.options?.bar?.visualizer?.waveMode ?? "ribbon"
+        Config.options?.material?.bar?.visualizer?.smoothing ?? 2)
+    readonly property string waveMode: Config.options?.material?.bar?.visualizer?.waveMode ?? "ribbon"
     readonly property real lineWidth: Math.max(1,
-        Config.options?.bar?.visualizer?.lineWidth ?? 2) * root.s
+        Config.options?.material?.bar?.visualizer?.lineWidth ?? 2) * root.s
     readonly property real edgeInset: Math.max(6,
-        Config.options?.bar?.visualizer?.edgeInset ?? 6) * root.s
+        Config.options?.material?.bar?.visualizer?.edgeInset ?? 6) * root.s
     readonly property real fillRatio: Math.max(0.1,
-        Math.min(1, Config.options?.bar?.visualizer?.height ?? 0.6))
+        Math.min(1, Config.options?.material?.bar?.visualizer?.height ?? 0.6))
     readonly property real spectrumOpacity: Math.max(0,
-        Math.min(1, Config.options?.bar?.visualizer?.opacity ?? 0.35))
+        Math.min(1, Config.options?.material?.bar?.visualizer?.opacity ?? 0.35))
     readonly property real edgeSoftness: Math.max(0,
-        Math.min(1, (Config.options?.bar?.visualizer?.edgeSoftness ?? 36) / 100))
-    readonly property string frequencyProfile: Config.options?.bar?.visualizer?.frequencyProfile ?? "flat"
+        Math.min(1, (Config.options?.material?.bar?.visualizer?.edgeSoftness ?? 36) / 100))
+    readonly property string frequencyProfile: Config.options?.material?.bar?.visualizer?.frequencyProfile ?? "flat"
     readonly property real accentStrength: Math.max(0,
-        Math.min(1, (Config.options?.bar?.visualizer?.accentStrength ?? 70) / 100))
-    readonly property string organicFit: Config.options?.bar?.visualizer?.organicFit ?? "auto"
+        Math.min(1, (Config.options?.material?.bar?.visualizer?.accentStrength ?? 70) / 100))
+    readonly property string organicFit: Config.options?.material?.bar?.visualizer?.organicFit ?? "auto"
     readonly property real organicFitScale: organicFit === "aura" ? 1
         : organicFit === "contained" ? 0.72 : 0.82
     readonly property real organicSensitivity: Math.max(0, Math.min(1,
-        (Config.options?.bar?.visualizer?.organicSensitivity ?? 42) / 100)) * organicFitScale
+        (Config.options?.material?.bar?.visualizer?.organicSensitivity ?? 42) / 100)) * organicFitScale
     readonly property real organicPulse: Math.max(0, Math.min(1,
-        (Config.options?.bar?.visualizer?.organicPulse ?? 55) / 100)) * organicFitScale
+        (Config.options?.material?.bar?.visualizer?.organicPulse ?? 55) / 100)) * organicFitScale
     readonly property real organicMotionSpeed: Math.max(0.25, Math.min(1.5,
-        (Config.options?.bar?.visualizer?.organicMotionSpeed ?? 80) / 100))
+        (Config.options?.material?.bar?.visualizer?.organicMotionSpeed ?? 80) / 100))
     readonly property real organicIdleMotion: Math.max(0, Math.min(1,
-        (Config.options?.bar?.visualizer?.organicIdleMotion ?? 0) / 100))
+        (Config.options?.material?.bar?.visualizer?.organicIdleMotion ?? 0) / 100))
     readonly property real organicGlow: Math.max(0, Math.min(1,
-        (Config.options?.bar?.visualizer?.organicGlow ?? 25) / 100)) * organicFitScale
+        (Config.options?.material?.bar?.visualizer?.organicGlow ?? 25) / 100)) * organicFitScale
     readonly property real organicBaseRadius: Math.max(0, Math.min(1,
-        (Config.options?.bar?.visualizer?.organicBaseRadius ?? 36) / 100))
+        (Config.options?.material?.bar?.visualizer?.organicBaseRadius ?? 36) / 100))
     readonly property real outerTaper: Math.max(24 * root.s,
         Math.min(96 * root.s, root.wingHeight * (1.35 + root.edgeSoftness)))
 

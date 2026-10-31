@@ -65,14 +65,14 @@ LazyLoader {
             root.popupHovered = false
     }
 
-    readonly property bool barVertical: Config.options?.bar?.vertical ?? false
+    readonly property bool barVertical: Config.options?.material?.bar?.vertical ?? false
     readonly property string barEdge: {
         if (!root.barVertical)
-            return (Config.options?.bar?.bottom ?? false) ? "bottom" : "top"
-        return (Config.options?.bar?.bottom ?? false) ? "right" : "left"
+            return (Config.options?.material?.bar?.bottom ?? false) ? "bottom" : "top"
+        return (Config.options?.material?.bar?.bottom ?? false) ? "right" : "left"
     }
-    readonly property real m3OuterGap: (Config.options?.bar?.m3?.cornerStyle ?? 0) === 3
-        ? (Config.options?.bar?.m3?.gapsOut ?? 0)
+    readonly property real m3OuterGap: (Config.options?.material?.bar?.m3?.cornerStyle ?? 0) === 3
+        ? (Config.options?.material?.bar?.m3?.gapsOut ?? 0)
         : 0
     readonly property real barThickness: root.barVertical
         ? Appearance.sizes.verticalBarWidth + root.m3OuterGap

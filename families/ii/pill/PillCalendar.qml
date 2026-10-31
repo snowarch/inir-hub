@@ -284,7 +284,7 @@ PillSurface {
 
                 /**
                  * IP geolocation only ever resolves to the ISP city, so the town
-                 * is editable in place: tap to type, which sets bar.weather.city
+                 * is editable in place: tap to type, which sets weather.city
                  * and re-geocodes through Open-Meteo for the exact spot. Blank it
                  * to fall back to auto IP detection.
                  */

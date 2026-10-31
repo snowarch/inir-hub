@@ -41,7 +41,7 @@ ColumnLayout {
     ]
 
     function value(key: string, fallback): var {
-        const current = Config.options?.appearance?.editorial?.[key]
+        const current = Config.options?.material?.style?.editorial?.[key]
         return current === undefined ? fallback : current
     }
 
@@ -89,30 +89,30 @@ ColumnLayout {
 
     function applyValues(values): void {
         Config.setNestedValues({
-            "appearance.editorial.paperStack": values.paperStack ?? false,
-            "appearance.editorial.paperDepth": values.paperDepth ?? 3,
-            "appearance.editorial.glass": values.glass ?? false,
-            "appearance.editorial.glassOpacity": values.glassOpacity ?? 0.72,
-            "appearance.editorial.glassBlur": values.glassBlur ?? 0.85,
-            "appearance.editorial.sidebarGlassBackground": values.sidebarGlassBackground ?? true,
-            "appearance.editorial.paperMode": values.paperMode ?? "theme",
-            "appearance.editorial.paperTone": values.paperTone ?? "neutral",
-            "appearance.editorial.paperTint": values.paperTint ?? 0.35,
-            "appearance.editorial.paperColor": values.paperColor ?? "#b8c4b0",
-            "appearance.editorial.accentRole": values.accentRole ?? "primary",
-            "appearance.editorial.accentColor": values.accentColor ?? "#b5a0c8",
-            "appearance.editorial.labelWeight": values.labelWeight ?? 600,
-            "appearance.editorial.metadataTracking": values.metadataTracking ?? 0.8,
-            "appearance.editorial.titleWeight": values.titleWeight ?? (values.typography === "reading" ? 600 : 650),
-            "appearance.editorial.titleTracking": values.titleTracking ?? (values.typography === "reading" ? 0 : -0.6),
-            "appearance.editorial.typography": values.typography,
-            "appearance.editorial.titleScale": values.titleScale,
-            "appearance.editorial.warmth": values.warmth,
-            "appearance.editorial.accentStrength": values.accentStrength,
-            "appearance.editorial.spacing": values.spacing,
-            "appearance.editorial.radiusScale": values.radiusScale,
-            "appearance.editorial.ornaments": values.ornaments,
-            "appearance.editorial.motionScale": values.motionScale
+            "material.style.editorial.paperStack": values.paperStack ?? false,
+            "material.style.editorial.paperDepth": values.paperDepth ?? 3,
+            "material.style.editorial.glass": values.glass ?? false,
+            "material.style.editorial.glassOpacity": values.glassOpacity ?? 0.72,
+            "material.style.editorial.glassBlur": values.glassBlur ?? 0.85,
+            "material.style.editorial.sidebarGlassBackground": values.sidebarGlassBackground ?? true,
+            "material.style.editorial.paperMode": values.paperMode ?? "theme",
+            "material.style.editorial.paperTone": values.paperTone ?? "neutral",
+            "material.style.editorial.paperTint": values.paperTint ?? 0.35,
+            "material.style.editorial.paperColor": values.paperColor ?? "#b8c4b0",
+            "material.style.editorial.accentRole": values.accentRole ?? "primary",
+            "material.style.editorial.accentColor": values.accentColor ?? "#b5a0c8",
+            "material.style.editorial.labelWeight": values.labelWeight ?? 600,
+            "material.style.editorial.metadataTracking": values.metadataTracking ?? 0.8,
+            "material.style.editorial.titleWeight": values.titleWeight ?? (values.typography === "reading" ? 600 : 650),
+            "material.style.editorial.titleTracking": values.titleTracking ?? (values.typography === "reading" ? 0 : -0.6),
+            "material.style.editorial.typography": values.typography,
+            "material.style.editorial.titleScale": values.titleScale,
+            "material.style.editorial.warmth": values.warmth,
+            "material.style.editorial.accentStrength": values.accentStrength,
+            "material.style.editorial.spacing": values.spacing,
+            "material.style.editorial.radiusScale": values.radiusScale,
+            "material.style.editorial.ornaments": values.ornaments,
+            "material.style.editorial.motionScale": values.motionScale
         })
     }
 
@@ -418,7 +418,7 @@ ColumnLayout {
                         { displayName: Translation.tr("Light paper"), value: "light" },
                         { displayName: Translation.tr("Charcoal"), value: "dark" }
                     ]
-                    onSelected: value => Config.setNestedValue("appearance.editorial.paperMode", value)
+                    onSelected: value => Config.setNestedValue("material.style.editorial.paperMode", value)
                 }
 
                 ConfigSelectionArray {
@@ -430,14 +430,14 @@ ColumnLayout {
                         { displayName: Translation.tr("Tertiary"), value: "tertiary" },
                         { displayName: Translation.tr("Custom"), value: "custom" }
                     ]
-                    onSelected: value => Config.setNestedValue("appearance.editorial.paperTone", value)
+                    onSelected: value => Config.setNestedValue("material.style.editorial.paperTone", value)
                 }
 
                 ColorPickerRow {
                     visible: Appearance.editorial.paperTone === "custom"
                     label: Translation.tr("Paper pigment")
                     colorKey: "paperColor"
-                    configPath: "appearance.editorial.paperColor"
+                    configPath: "material.style.editorial.paperColor"
                 }
 
                 SliderRow {
@@ -445,7 +445,7 @@ ColumnLayout {
                     label: Translation.tr("Paper tint")
                     description: Translation.tr("Color depth of paper and the inverse focal cards.")
                     value: Appearance.editorial.paperTint
-                    configPath: "appearance.editorial.paperTint"
+                    configPath: "material.style.editorial.paperTint"
                 }
 
                 SliderRow {
@@ -453,7 +453,7 @@ ColumnLayout {
                     description: Translation.tr("Warms the sheet without replacing its selected pigment.")
                     from: 0; to: 1; stepSize: 0.05
                     value: Number(root.value("warmth", 0.55))
-                    configPath: "appearance.editorial.warmth"
+                    configPath: "material.style.editorial.warmth"
                 }
 
                 ConfigSwitch {
@@ -461,7 +461,7 @@ ColumnLayout {
                     text: Translation.tr("Second paper layer")
                     description: Translation.tr("A restrained backing sheet beneath major surfaces; compact controls stay flat.")
                     checked: Appearance.editorial.paperStack
-                    onToggledByUser: checked => Config.setNestedValue("appearance.editorial.paperStack", checked)
+                    onToggledByUser: checked => Config.setNestedValue("material.style.editorial.paperStack", checked)
                 }
 
                 SliderRow {
@@ -470,7 +470,7 @@ ColumnLayout {
                     description: Translation.tr("Maximum offset inside the host geometry.")
                     from: 2; to: 6; stepSize: 1; suffix: " px"
                     value: Appearance.editorial.paperDepth
-                    configPath: "appearance.editorial.paperDepth"
+                    configPath: "material.style.editorial.paperDepth"
                 }
             }
 
@@ -487,7 +487,7 @@ ColumnLayout {
                     text: Translation.tr("Glass background")
                     description: Translation.tr("Frost wallpaper beneath Editorial paper without changing host geometry.")
                     checked: Appearance.editorial.glass
-                    onToggledByUser: checked => Config.setNestedValue("appearance.editorial.glass", checked)
+                    onToggledByUser: checked => Config.setNestedValue("material.style.editorial.glass", checked)
                 }
 
                 StyledText {
@@ -506,7 +506,7 @@ ColumnLayout {
                         { displayName: Translation.tr("Leading card"), icon: "crop_portrait", value: "leading" },
                         { displayName: Translation.tr("Full sidebar"), icon: "view_sidebar", value: "full" }
                     ]
-                    onSelected: value => Config.setNestedValue("appearance.editorial.sidebarGlassBackground", value === "full")
+                    onSelected: value => Config.setNestedValue("material.style.editorial.sidebarGlassBackground", value === "full")
                 }
 
                 SliderRow {
@@ -515,7 +515,7 @@ ColumnLayout {
                     description: Translation.tr("How much paper remains above the blurred wallpaper.")
                     from: 0.55; to: 0.9; stepSize: 0.05
                     value: Appearance.editorial.glassOpacity
-                    configPath: "appearance.editorial.glassOpacity"
+                    configPath: "material.style.editorial.glassOpacity"
                 }
 
                 SliderRow {
@@ -524,7 +524,7 @@ ColumnLayout {
                     description: Translation.tr("Softens wallpaper detail while preserving the Editorial silhouette.")
                     from: 0.25; to: 1; stepSize: 0.05
                     value: Appearance.editorial.glassBlur
-                    configPath: "appearance.editorial.glassBlur"
+                    configPath: "material.style.editorial.glassBlur"
                 }
             }
         }
@@ -555,7 +555,7 @@ ColumnLayout {
                         { displayName: Translation.tr("Poster sans"), icon: "text_fields", value: "poster" },
                         { displayName: Translation.tr("Reading serif"), icon: "auto_stories", value: "reading" }
                     ]
-                    onSelected: value => Config.setNestedValue("appearance.editorial.typography", value)
+                    onSelected: value => Config.setNestedValue("material.style.editorial.typography", value)
                 }
 
                 SliderRow {
@@ -563,14 +563,14 @@ ColumnLayout {
                     description: Translation.tr("Scales display headings without moving their targets.")
                     from: 0.8; to: 1.3; stepSize: 0.05; suffix: "×"
                     value: Number(root.value("titleScale", 1.0))
-                    configPath: "appearance.editorial.titleScale"
+                    configPath: "material.style.editorial.titleScale"
                 }
 
                 SliderRow {
                     label: Translation.tr("Headline weight")
                     from: 400; to: 900; stepSize: 50
                     value: Appearance.editorial.titleWeight
-                    configPath: "appearance.editorial.titleWeight"
+                    configPath: "material.style.editorial.titleWeight"
                 }
 
                 SliderRow {
@@ -578,7 +578,7 @@ ColumnLayout {
                     description: Translation.tr("Weight of control labels and small headings.")
                     from: 400; to: 700; stepSize: 50
                     value: Appearance.editorial.labelWeight
-                    configPath: "appearance.editorial.labelWeight"
+                    configPath: "material.style.editorial.labelWeight"
                     commitOnRelease: true
                 }
 
@@ -587,7 +587,7 @@ ColumnLayout {
                     description: Translation.tr("Spacing for short uppercase labels.")
                     from: 0; to: 1.5; stepSize: 0.1
                     value: Appearance.editorial.metadataTracking
-                    configPath: "appearance.editorial.metadataTracking"
+                    configPath: "material.style.editorial.metadataTracking"
                     commitOnRelease: true
                 }
 
@@ -595,7 +595,7 @@ ColumnLayout {
                     label: Translation.tr("Headline tracking")
                     from: -1.5; to: 1.5; stepSize: 0.1; suffix: " px"
                     value: Appearance.editorial.titleTracking
-                    configPath: "appearance.editorial.titleTracking"
+                    configPath: "material.style.editorial.titleTracking"
                 }
             }
 
@@ -615,14 +615,14 @@ ColumnLayout {
                         { displayName: Translation.tr("Tertiary"), value: "tertiary" },
                         { displayName: Translation.tr("Custom"), value: "custom" }
                     ]
-                    onSelected: value => Config.setNestedValue("appearance.editorial.accentRole", value)
+                    onSelected: value => Config.setNestedValue("material.style.editorial.accentRole", value)
                 }
 
                 ColorPickerRow {
                     visible: Appearance.editorial.accentRole === "custom"
                     label: Translation.tr("Accent pigment")
                     colorKey: "accentColor"
-                    configPath: "appearance.editorial.accentColor"
+                    configPath: "material.style.editorial.accentColor"
                 }
 
                 SliderRow {
@@ -630,7 +630,7 @@ ColumnLayout {
                     description: Translation.tr("Moves from neutral ink to richer theme-colored highlights and tonal fields.")
                     from: 0; to: 1; stepSize: 0.05
                     value: Appearance.editorial.accentStrength
-                    configPath: "appearance.editorial.accentStrength"
+                    configPath: "material.style.editorial.accentStrength"
                 }
 
                 RowLayout {
@@ -683,7 +683,7 @@ ColumnLayout {
                 description: Translation.tr("Opens or tightens Editorial gutters and section rhythm.")
                 from: 0.8; to: 1.2; stepSize: 0.05; suffix: "×"
                 value: Number(root.value("spacing", 1.0))
-                configPath: "appearance.editorial.spacing"
+                configPath: "material.style.editorial.spacing"
                 commitOnRelease: true
             }
 
@@ -693,7 +693,7 @@ ColumnLayout {
                 description: Translation.tr("Scales Editorial surface and compact-control corners together.")
                 from: 0.5; to: 1.5; stepSize: 0.05; suffix: "×"
                 value: Number(root.value("radiusScale", 1.0))
-                configPath: "appearance.editorial.radiusScale"
+                configPath: "material.style.editorial.radiusScale"
             }
 
             SliderRow {
@@ -702,7 +702,7 @@ ColumnLayout {
                 description: Translation.tr("Uses existing shell animation owners; reduced motion still wins.")
                 from: 0.6; to: 1.4; stepSize: 0.05; suffix: "×"
                 value: Number(root.value("motionScale", 1.0))
-                configPath: "appearance.editorial.motionScale"
+                configPath: "material.style.editorial.motionScale"
             }
 
             ConfigSwitch {
@@ -711,7 +711,7 @@ ColumnLayout {
                 text: Translation.tr("Flower accents")
                 description: Translation.tr("Use the Flower as a contextual signature, not as decoration on every surface.")
                 checked: Boolean(root.value("ornaments", true))
-                onToggledByUser: checked => Config.setNestedValue("appearance.editorial.ornaments", checked)
+                onToggledByUser: checked => Config.setNestedValue("material.style.editorial.ornaments", checked)
             }
         }
     }

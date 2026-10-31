@@ -11,8 +11,8 @@ import qs.modules.common.m3
 RippleButton {
     id: root
     property bool showPing: false
-    property bool vertical: Config.options.bar.vertical
-    property bool isMaterial: Config.options.bar.m3.cornerStyle === 3
+    property bool vertical: Config.options.material.bar.vertical
+    property bool isMaterial: Config.options.material.bar.m3.cornerStyle === 3
     property real buttonPadding: 5
 
     implicitWidth: 32
@@ -61,11 +61,11 @@ RippleButton {
         height: root.isMaterial ? (root.vertical ? 24 : 22) : 19.5
         // Config.options.custom.distroIcon/colorizeIcon do not exist in iNiR;
         // ported to the same source iNiR's own LeftSidebarButton uses.
-        source: (Config.options?.bar?.topLeftIcon ?? "distro") === "distro"
+        source: (Config.options?.material?.bar?.topLeftIcon ?? "distro") === "distro"
             ? SystemInfo.distroIcon
-            : `${Config.options?.bar?.topLeftIcon ?? "distro"}-symbolic`
+            : `${Config.options?.material?.bar?.topLeftIcon ?? "distro"}-symbolic`
         colorize: true
-        color: (Config.options?.bar?.m3?.cornerStyle ?? 0) !== 3
+        color: (Config.options?.material?.bar?.m3?.cornerStyle ?? 0) !== 3
             ? Appearance.colors.colPrimary
             : root.toggled
                 ? M3Palette.pillInk("sidebarToggle")

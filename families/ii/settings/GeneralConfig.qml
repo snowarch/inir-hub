@@ -329,7 +329,7 @@ ContentPage {
     }
 
     SettingsTaskLoader {
-        requested: root.activeSection === "safety" && !(Config.options?.settingsUi?.easyMode ?? false)
+        requested: root.activeSection === "safety" && !(Config.options?.material?.settingsUi?.easyMode ?? false)
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "safety"
@@ -678,7 +678,7 @@ ContentPage {
     }
 
     SettingsTaskLoader {
-        requested: root.activeSection === "input" && !(Config.options?.settingsUi?.easyMode ?? false)
+        requested: root.activeSection === "input" && !(Config.options?.material?.settingsUi?.easyMode ?? false)
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "input"
@@ -705,7 +705,7 @@ ContentPage {
     }
 
     SettingsTaskLoader {
-        requested: root.activeSection === "safety" && !(Config.options?.settingsUi?.easyMode ?? false)
+        requested: root.activeSection === "safety" && !(Config.options?.material?.settingsUi?.easyMode ?? false)
         sourceComponent: Component {
     SettingsCardSection {
         settingsTaskSection: "safety"
@@ -881,9 +881,9 @@ ContentPage {
                 SettingsSwitch {
                     buttonIcon: "notifications"
                     text: Translation.tr('Show notifications on lock screen')
-                    checked: Config.options?.lock?.notifications?.enable ?? false
+                    checked: Config.options?.material?.lock?.notifications?.enable ?? false
                     onCheckedChanged: {
-                        Config.setNestedValue("lock.notifications.enable", checked);
+                        Config.setNestedValue("material.lock.notifications.enable", checked);
                     }
                     StyledToolTip {
                         text: Translation.tr("Display recent notifications on the lock screen clock view")
@@ -891,12 +891,12 @@ ContentPage {
                 }
 
                 SettingsSwitch {
-                    visible: Config.options?.lock?.notifications?.enable ?? false
+                    visible: Config.options?.material?.lock?.notifications?.enable ?? false
                     buttonIcon: "visibility"
                     text: Translation.tr('Show notification body text')
-                    checked: Config.options?.lock?.notifications?.showBody ?? true
+                    checked: Config.options?.material?.lock?.notifications?.showBody ?? true
                     onCheckedChanged: {
-                        Config.setNestedValue("lock.notifications.showBody", checked);
+                        Config.setNestedValue("material.lock.notifications.showBody", checked);
                     }
                     StyledToolTip {
                         text: Translation.tr("Display the message content of notifications. Disable for privacy.")
@@ -904,15 +904,15 @@ ContentPage {
                 }
 
                 ConfigSpinBox {
-                    visible: Config.options?.lock?.notifications?.enable ?? false
+                    visible: Config.options?.material?.lock?.notifications?.enable ?? false
                     icon: "format_list_numbered"
                     text: Translation.tr("Max notifications shown")
-                    value: Config.options?.lock?.notifications?.maxCount ?? 3
+                    value: Config.options?.material?.lock?.notifications?.maxCount ?? 3
                     from: 1
                     to: 10
                     stepSize: 1
                     onValueModified: {
-                        Config.setNestedValue("lock.notifications.maxCount", value);
+                        Config.setNestedValue("material.lock.notifications.maxCount", value);
                     }
                     StyledToolTip {
                         text: Translation.tr("Maximum number of notifications to display on the lock screen")
@@ -921,19 +921,19 @@ ContentPage {
             }
 
             ContentSubsection {
-                visible: Config.options?.lock?.notifications?.enable ?? false
+                visible: Config.options?.material?.lock?.notifications?.enable ?? false
                 title: Translation.tr("Notification position")
                 tooltip: Translation.tr("Auto centres on Material, right-aligns on Waffle.")
 
                 ConfigSelectionArray {
-                    currentValue: Config.options?.lock?.notifications?.position ?? "auto"
+                    currentValue: Config.options?.material?.lock?.notifications?.position ?? "auto"
                     options: [
                         { displayName: Translation.tr("Auto"), value: "auto" },
                         { displayName: Translation.tr("Center"), value: "center" },
                         { displayName: Translation.tr("Left"), value: "left" },
                         { displayName: Translation.tr("Right"), value: "right" }
                     ]
-                    onSelected: (newValue) => Config.setNestedValue("lock.notifications.position", newValue)
+                    onSelected: (newValue) => Config.setNestedValue("material.lock.notifications.position", newValue)
                 }
             }
 
@@ -942,13 +942,13 @@ ContentPage {
                 tooltip: Translation.tr("Visual style for the lock screen clock")
 
                 ConfigSelectionArray {
-                    currentValue: Config.options?.lock?.clock?.style ?? "default"
+                    currentValue: Config.options?.material?.lock?.clock?.style ?? "default"
                     options: [
                         { displayName: Translation.tr("Default"), value: "default" },
                         { displayName: Translation.tr("Minimal"), value: "minimal" },
                         { displayName: Translation.tr("Analog"), value: "analog" }
                     ]
-                    onSelected: (newValue) => Config.setNestedValue("lock.clock.style", newValue)
+                    onSelected: (newValue) => Config.setNestedValue("material.lock.clock.style", newValue)
                 }
             }
 
@@ -957,13 +957,13 @@ ContentPage {
                 tooltip: Translation.tr("Where the clock appears on the lock screen")
 
                 ConfigSelectionArray {
-                    currentValue: Config.options?.lock?.clock?.position ?? "center"
+                    currentValue: Config.options?.material?.lock?.clock?.position ?? "center"
                     options: [
                         { displayName: Translation.tr("Center"), value: "center" },
                         { displayName: Translation.tr("Top Left"), value: "topLeft" },
                         { displayName: Translation.tr("Bottom Left"), value: "bottomLeft" }
                     ]
-                    onSelected: (newValue) => Config.setNestedValue("lock.clock.position", newValue)
+                    onSelected: (newValue) => Config.setNestedValue("material.lock.clock.position", newValue)
                 }
             }
 
@@ -973,9 +973,9 @@ ContentPage {
                 SettingsSwitch {
                     buttonIcon: "info"
                     text: Translation.tr('Show status indicators')
-                    checked: Config.options?.lock?.status?.enable ?? true
+                    checked: Config.options?.material?.lock?.status?.enable ?? true
                     onCheckedChanged: {
-                        Config.setNestedValue("lock.status.enable", checked);
+                        Config.setNestedValue("material.lock.status.enable", checked);
                     }
                     StyledToolTip {
                         text: Translation.tr("Show WiFi, Bluetooth, volume and battery indicators on the lock screen")
@@ -985,9 +985,9 @@ ContentPage {
                 SettingsSwitch {
                     buttonIcon: "brightness_6"
                     text: Translation.tr('Dim wallpaper')
-                    checked: Config.options?.lock?.dim?.enable ?? false
+                    checked: Config.options?.material?.lock?.dim?.enable ?? false
                     onCheckedChanged: {
-                        Config.setNestedValue("lock.dim.enable", checked);
+                        Config.setNestedValue("material.lock.dim.enable", checked);
                     }
                     StyledToolTip {
                         text: Translation.tr("Apply a dark overlay to the wallpaper for better contrast on the lock screen")
@@ -995,15 +995,15 @@ ContentPage {
                 }
 
                 ConfigSpinBox {
-                    visible: Config.options?.lock?.dim?.enable ?? false
+                    visible: Config.options?.material?.lock?.dim?.enable ?? false
                     text: Translation.tr("Dim amount")
                     unit: "%"
                     icon: "opacity"
-                    value: Math.round((Config.options?.lock?.dim?.opacity ?? 0.3) * 100)
+                    value: Math.round((Config.options?.material?.lock?.dim?.opacity ?? 0.3) * 100)
                     from: 10
                     to: 80
                     stepSize: 5
-                    onValueModified: Config.setNestedValue("lock.dim.opacity", value / 100)
+                    onValueModified: Config.setNestedValue("material.lock.dim.opacity", value / 100)
                     StyledToolTip {
                         text: Translation.tr("How much to dim the wallpaper (percentage)")
                     }
@@ -1012,9 +1012,9 @@ ContentPage {
                 SettingsSwitch {
                     buttonIcon: "center_focus_weak"
                     text: Translation.tr('Center clock')
-                    checked: Config.options?.lock?.centerClock ?? false
+                    checked: Config.options?.material?.lock?.centerClock ?? false
                     onCheckedChanged: {
-                        Config.setNestedValue("lock.centerClock", checked);
+                        Config.setNestedValue("material.lock.centerClock", checked);
                     }
                     StyledToolTip {
                         text: Translation.tr("Align the lock screen clock to the center instead of following layout rules")
@@ -1024,9 +1024,9 @@ ContentPage {
                 SettingsSwitch {
                     buttonIcon: "info"
                     text: Translation.tr('Show "Locked" text')
-                    checked: Config.options?.lock?.showLockedText ?? true
+                    checked: Config.options?.material?.lock?.showLockedText ?? true
                     onCheckedChanged: {
-                        Config.setNestedValue("lock.showLockedText", checked);
+                        Config.setNestedValue("material.lock.showLockedText", checked);
                     }
                     StyledToolTip {
                         text: Translation.tr("Display a 'Locked' label on the lock screen")
@@ -1036,9 +1036,9 @@ ContentPage {
                 SettingsSwitch {
                     buttonIcon: "shapes"
                     text: Translation.tr('Use varying shapes for password characters')
-                    checked: Config.options?.lock?.materialShapeChars ?? false
+                    checked: Config.options?.material?.lock?.materialShapeChars ?? false
                     onCheckedChanged: {
-                        Config.setNestedValue("lock.materialShapeChars", checked);
+                        Config.setNestedValue("material.lock.materialShapeChars", checked);
                     }
                     StyledToolTip {
                         text: Translation.tr("Show different geometric shapes instead of bullets for password input")
@@ -1062,29 +1062,29 @@ ContentPage {
                 SettingsSwitch {
                     buttonIcon: "thermostat"
                     text: Translation.tr("Weather")
-                    checked: Config.options?.lock?.widgets?.weather ?? true
-                    onCheckedChanged: Config.setNestedValue("lock.widgets.weather", checked)
+                    checked: Config.options?.material?.lock?.widgets?.weather ?? true
+                    onCheckedChanged: Config.setNestedValue("material.lock.widgets.weather", checked)
                 }
 
                 SettingsSwitch {
                     buttonIcon: "music_note"
                     text: Translation.tr("Media player")
-                    checked: Config.options?.lock?.widgets?.media ?? true
-                    onCheckedChanged: Config.setNestedValue("lock.widgets.media", checked)
+                    checked: Config.options?.material?.lock?.widgets?.media ?? true
+                    onCheckedChanged: Config.setNestedValue("material.lock.widgets.media", checked)
                 }
 
                 SettingsSwitch {
                     buttonIcon: "power_settings_new"
                     text: Translation.tr("Power buttons")
-                    checked: Config.options?.lock?.widgets?.powerButtons ?? true
-                    onCheckedChanged: Config.setNestedValue("lock.widgets.powerButtons", checked)
+                    checked: Config.options?.material?.lock?.widgets?.powerButtons ?? true
+                    onCheckedChanged: Config.setNestedValue("material.lock.widgets.powerButtons", checked)
                 }
 
                 SettingsSwitch {
                     buttonIcon: "touch_app"
                     text: Translation.tr("Unlock hint text")
-                    checked: Config.options?.lock?.widgets?.hintText ?? true
-                    onCheckedChanged: Config.setNestedValue("lock.widgets.hintText", checked)
+                    checked: Config.options?.material?.lock?.widgets?.hintText ?? true
+                    onCheckedChanged: Config.setNestedValue("material.lock.widgets.hintText", checked)
                 }
             }
             ContentSubsection {
@@ -1093,9 +1093,9 @@ ContentPage {
                 SettingsSwitch {
                     buttonIcon: "blur_on"
                     text: Translation.tr('Enable blur')
-                    checked: Config.options?.lock?.blur?.enable ?? true
+                    checked: Config.options?.material?.lock?.blur?.enable ?? true
                     onCheckedChanged: {
-                        Config.setNestedValue("lock.blur.enable", checked);
+                        Config.setNestedValue("material.lock.blur.enable", checked);
                     }
                     StyledToolTip {
                         text: Translation.tr("Apply blur effect to the lock screen background")
@@ -1106,12 +1106,12 @@ ContentPage {
                     icon: "blur_linear"
                     text: Translation.tr("Blur radius")
                     unit: "px"
-                    value: Config.options?.lock?.blur?.radius ?? 100
+                    value: Config.options?.material?.lock?.blur?.radius ?? 100
                     from: 0
                     to: 200
                     stepSize: 10
                     onValueModified: {
-                        Config.setNestedValue("lock.blur.radius", value);
+                        Config.setNestedValue("material.lock.blur.radius", value);
                     }
                     StyledToolTip {
                         text: Translation.tr("Intensity of the blur effect")
@@ -1121,12 +1121,12 @@ ContentPage {
                 ConfigSpinBox {
                     icon: "loupe"
                     text: Translation.tr("Extra wallpaper zoom (%)")
-                    value: (Config.options?.lock?.blur?.extraZoom ?? 1.1) * 100
+                    value: (Config.options?.material?.lock?.blur?.extraZoom ?? 1.1) * 100
                     from: 1
                     to: 150
                     stepSize: 2
                     onValueModified: {
-                        Config.setNestedValue("lock.blur.extraZoom", value / 100);
+                        Config.setNestedValue("material.lock.blur.extraZoom", value / 100);
                     }
                     StyledToolTip {
                         text: Translation.tr("Zoom level for the background wallpaper when blur is enabled")

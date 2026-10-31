@@ -18,12 +18,12 @@ Item {
     width: parent.width
     property var screen: root.QsWindow.window?.screen
     readonly property real barPadding: 0
-    readonly property bool isMaterial: Config.options.bar.m3.cornerStyle === 3
+    readonly property bool isMaterial: Config.options.material.bar.m3.cornerStyle === 3
     readonly property real centerPillX: centerPill.x
     readonly property real centerPillWidth: centerPill.width
     readonly property real sectionOuterMargin: root.isMaterial
-        ? (Config.options?.bar?.m3?.gapsOut ?? 5)
-        : (Config.options?.bar?.m3?.cornerStyle === 1 ? 4 : 10)
+        ? (Config.options?.material?.bar?.m3?.gapsOut ?? 5)
+        : (Config.options?.material?.bar?.m3?.cornerStyle === 1 ? 4 : 10)
     readonly property real leftHostDemand: root.isMaterial
         ? leftMaterialPill.implicitWidth : leftRow.implicitWidth
     readonly property real centerHostDemand: root.isMaterial
@@ -59,7 +59,7 @@ Item {
 
     readonly property bool trayHasItems: SystemTray.items.values.length > 0
     readonly property bool spectrumOutputEnabled:
-        (Config.options?.bar?.visualizer?.multiMonitorMode ?? "primary") === "all"
+        (Config.options?.material?.bar?.visualizer?.multiMonitorMode ?? "primary") === "all"
         || Quickshell.screens.length <= 1
         || String(root.screen?.name ?? "") === String(GlobalStates.primaryScreen?.name ?? "")
 
@@ -74,9 +74,9 @@ Item {
         return filtered
     }
 
-    readonly property var effectiveLeftLayout:   filterLayout(Config.options.bar.m3.layouts.leftLayout)
-    readonly property var effectiveMiddleLayout: filterLayout(Config.options.bar.m3.layouts.middleLayout)
-    readonly property var effectiveRightLayout:  filterLayout(Config.options.bar.m3.layouts.rightLayout)
+    readonly property var effectiveLeftLayout:   filterLayout(Config.options.material.bar.m3.layouts.leftLayout)
+    readonly property var effectiveMiddleLayout: filterLayout(Config.options.material.bar.m3.layouts.middleLayout)
+    readonly property var effectiveRightLayout:  filterLayout(Config.options.material.bar.m3.layouts.rightLayout)
 
     function getWidgetUrl(name) {
         if (!name) return "";
@@ -93,49 +93,49 @@ Item {
     // on each side of the centre, and a per-widget process would have spawned
     // one subprocess per instance for the exact same spectrum.
     readonly property bool wantsVisualizer: root.spectrumOutputEnabled
-        && ((Config.options?.bar?.m3?.layouts?.leftLayout ?? []).includes("visualizer")
-            || (Config.options?.bar?.m3?.layouts?.middleLayout ?? []).includes("visualizer")
-            || (Config.options?.bar?.m3?.layouts?.rightLayout ?? []).includes("visualizer"))
-    readonly property bool wantsBackgroundVisualizer: (Config.options?.bar?.visualizer?.enable ?? false)
-        && (Config.options?.bar?.m3?.showBackground ?? true)
+        && ((Config.options?.material?.bar?.m3?.layouts?.leftLayout ?? []).includes("visualizer")
+            || (Config.options?.material?.bar?.m3?.layouts?.middleLayout ?? []).includes("visualizer")
+            || (Config.options?.material?.bar?.m3?.layouts?.rightLayout ?? []).includes("visualizer"))
+    readonly property bool wantsBackgroundVisualizer: (Config.options?.material?.bar?.visualizer?.enable ?? false)
+        && (Config.options?.material?.bar?.m3?.showBackground ?? true)
         && root.spectrumOutputEnabled
         && root.visible
     readonly property bool audioPlaying: MprisController.isPlaying || YtMusic.isPlaying
     readonly property real spectrumFillRatio: Math.max(0.1,
-        Math.min(1, Config.options?.bar?.visualizer?.height ?? 0.6))
+        Math.min(1, Config.options?.material?.bar?.visualizer?.height ?? 0.6))
     readonly property real spectrumOpacity: Math.max(0,
-        Math.min(1, Config.options?.bar?.visualizer?.opacity ?? 0.35))
-    readonly property string spectrumType: Config.options?.bar?.visualizer?.type ?? "bars"
-    readonly property string spectrumBarsOrigin: Config.options?.bar?.visualizer?.barsOrigin ?? "bottom"
-    readonly property real spectrumDensity: Math.max(4, Config.options?.bar?.visualizer?.density ?? 12)
-    readonly property real spectrumGap: Math.max(0, Config.options?.bar?.visualizer?.gap ?? 2)
-    readonly property int spectrumSmoothing: Math.max(0, Config.options?.bar?.visualizer?.smoothing ?? 2)
-    readonly property string spectrumWaveMode: Config.options?.bar?.visualizer?.waveMode ?? "fill"
-    readonly property real spectrumLineWidth: Math.max(1, Config.options?.bar?.visualizer?.lineWidth ?? 2)
-    readonly property real spectrumEdgeInset: Math.max(6, Config.options?.bar?.visualizer?.edgeInset ?? 6)
+        Math.min(1, Config.options?.material?.bar?.visualizer?.opacity ?? 0.35))
+    readonly property string spectrumType: Config.options?.material?.bar?.visualizer?.type ?? "bars"
+    readonly property string spectrumBarsOrigin: Config.options?.material?.bar?.visualizer?.barsOrigin ?? "bottom"
+    readonly property real spectrumDensity: Math.max(4, Config.options?.material?.bar?.visualizer?.density ?? 12)
+    readonly property real spectrumGap: Math.max(0, Config.options?.material?.bar?.visualizer?.gap ?? 2)
+    readonly property int spectrumSmoothing: Math.max(0, Config.options?.material?.bar?.visualizer?.smoothing ?? 2)
+    readonly property string spectrumWaveMode: Config.options?.material?.bar?.visualizer?.waveMode ?? "fill"
+    readonly property real spectrumLineWidth: Math.max(1, Config.options?.material?.bar?.visualizer?.lineWidth ?? 2)
+    readonly property real spectrumEdgeInset: Math.max(6, Config.options?.material?.bar?.visualizer?.edgeInset ?? 6)
     readonly property real spectrumEdgeSoftness: Math.max(0,
-        Math.min(1, (Config.options?.bar?.visualizer?.edgeSoftness ?? 36) / 100))
-    readonly property string spectrumFrequencyProfile: Config.options?.bar?.visualizer?.frequencyProfile ?? "flat"
+        Math.min(1, (Config.options?.material?.bar?.visualizer?.edgeSoftness ?? 36) / 100))
+    readonly property string spectrumFrequencyProfile: Config.options?.material?.bar?.visualizer?.frequencyProfile ?? "flat"
     readonly property real spectrumAccentStrength: Math.max(0,
-        Math.min(1, (Config.options?.bar?.visualizer?.accentStrength ?? 70) / 100))
-    readonly property string spectrumOrganicFit: Config.options?.bar?.visualizer?.organicFit ?? "auto"
+        Math.min(1, (Config.options?.material?.bar?.visualizer?.accentStrength ?? 70) / 100))
+    readonly property string spectrumOrganicFit: Config.options?.material?.bar?.visualizer?.organicFit ?? "auto"
     readonly property real spectrumOrganicLayoutScale: spectrumOrganicFit === "aura" ? 1
         : spectrumOrganicFit === "contained" ? 0.72 : 0.68
     readonly property real spectrumOrganicSensitivity: Math.max(0, Math.min(1,
-        (Config.options?.bar?.visualizer?.organicSensitivity ?? 42) / 100)) * spectrumOrganicLayoutScale
+        (Config.options?.material?.bar?.visualizer?.organicSensitivity ?? 42) / 100)) * spectrumOrganicLayoutScale
     readonly property real spectrumOrganicPulse: Math.max(0, Math.min(1,
-        (Config.options?.bar?.visualizer?.organicPulse ?? 55) / 100)) * spectrumOrganicLayoutScale
+        (Config.options?.material?.bar?.visualizer?.organicPulse ?? 55) / 100)) * spectrumOrganicLayoutScale
     readonly property real spectrumOrganicMotionSpeed: Math.max(0.25, Math.min(1.5,
-        (Config.options?.bar?.visualizer?.organicMotionSpeed ?? 80) / 100))
+        (Config.options?.material?.bar?.visualizer?.organicMotionSpeed ?? 80) / 100))
     readonly property real spectrumOrganicIdleMotion: Math.max(0, Math.min(1,
-        (Config.options?.bar?.visualizer?.organicIdleMotion ?? 0) / 100))
+        (Config.options?.material?.bar?.visualizer?.organicIdleMotion ?? 0) / 100))
     readonly property real spectrumOrganicGlow: Math.max(0, Math.min(1,
-        (Config.options?.bar?.visualizer?.organicGlow ?? 25) / 100)) * spectrumOrganicLayoutScale
+        (Config.options?.material?.bar?.visualizer?.organicGlow ?? 25) / 100)) * spectrumOrganicLayoutScale
     readonly property real spectrumOrganicBaseRadius: Math.max(0, Math.min(1,
-        (Config.options?.bar?.visualizer?.organicBaseRadius ?? 36) / 100))
+        (Config.options?.material?.bar?.visualizer?.organicBaseRadius ?? 36) / 100))
     readonly property bool spectrumOrganicEdgeAura: spectrumOrganicFit === "aura"
     readonly property bool materialSpectrum: root.isMaterial
-        && (Config.options?.bar?.m3?.borderless ?? "pills") !== "transparent"
+        && (Config.options?.material?.bar?.m3?.borderless ?? "pills") !== "transparent"
 
     function spectrumStartRatio(item): real {
         if (!item || !(root.width > 0))
@@ -205,10 +205,10 @@ Item {
     }
 
     function shouldPaintMaterialPill(name) {
-        if (Config.options?.bar?.m3?.cornerStyle !== 3) return false
-        if (!(Config.options?.bar?.m3?.showBackground ?? true)) return false
+        if (Config.options?.material?.bar?.m3?.cornerStyle !== 3) return false
+        if (!(Config.options?.material?.bar?.m3?.showBackground ?? true)) return false
 
-        const groupStyle = Config.options?.bar?.m3?.borderless ?? "pills"
+        const groupStyle = Config.options?.material?.bar?.m3?.borderless ?? "pills"
         if (groupStyle === "transparent") return false
         if (groupStyle === "separated") return name !== "divisor"
 
@@ -256,15 +256,15 @@ Item {
 
     function materialSectionSegments(repeater, surface): var {
         const segments = []
-        if ((Config.options?.bar?.m3?.borderless ?? "pills") === "separated")
+        if ((Config.options?.material?.bar?.m3?.borderless ?? "pills") === "separated")
             root.appendRepeaterSegments(segments, repeater, surface)
         return segments
     }
 
     // Edge scroll: the M3 bar honours the same keys as the classic bar, so
     // brightness and volume stay where the user learned them.
-    readonly property string leftAction: Config.options?.bar?.leftScrollAction ?? "brightness"
-    readonly property string rightAction: Config.options?.bar?.rightScrollAction ?? "volume"
+    readonly property string leftAction: Config.options?.material?.bar?.leftScrollAction ?? "brightness"
+    readonly property string rightAction: Config.options?.material?.bar?.rightScrollAction ?? "volume"
 
     function performScrollAction(action: string, isUp: bool): void {
         if (action === "brightness") {
@@ -274,7 +274,7 @@ Item {
             else Audio.decrementVolume();
         } else if (action === "workspace") {
             let up = isUp;
-            if (Config.options?.bar?.workspaces?.invertScroll ?? false) up = !up;
+            if (Config.options?.material?.bar?.workspaces?.invertScroll ?? false) up = !up;
 
             if (CompositorService.isNiri) {
                 if (up) NiriService.focusWorkspaceUp();
@@ -307,11 +307,11 @@ Item {
     Rectangle {
         id: barBackground
         anchors.fill: parent
-        anchors.margins: Config.options.bar.m3.cornerStyle === 1 ? Config.options.bar.m3.gapsOut : 0
-        color: (!centerOnly && Config.options.bar.m3.showBackground && Config.options.bar.m3.cornerStyle !== 2 && !root.isMaterial)
+        anchors.margins: Config.options.material.bar.m3.cornerStyle === 1 ? Config.options.material.bar.m3.gapsOut : 0
+        color: (!centerOnly && Config.options.material.bar.m3.showBackground && Config.options.material.bar.m3.cornerStyle !== 2 && !root.isMaterial)
             ? Appearance.colors.colLayer0 : "transparent"
-        radius: Config.options.bar.m3.cornerStyle === 1 ? Appearance.rounding.windowRounding : 0
-        border.width: (!centerOnly && Config.options.bar.m3.cornerStyle === 1) ? 1 : 0
+        radius: Config.options.material.bar.m3.cornerStyle === 1 ? Appearance.rounding.windowRounding : 0
+        border.width: (!centerOnly && Config.options.material.bar.m3.cornerStyle === 1) ? 1 : 0
         border.color: Appearance.colors.colLayer0Border
 
         SurfaceSpectrum {
@@ -333,20 +333,20 @@ Item {
 
     Rectangle {
         id: centerPill
-        visible: centerOnly && Config.options.bar.m3.showBackground && Config.options.bar.m3.cornerStyle !== 2
+        visible: centerOnly && Config.options.material.bar.m3.showBackground && Config.options.material.bar.m3.cornerStyle !== 2
         anchors.verticalCenter: parent.verticalCenter
         anchors.horizontalCenter: parent.horizontalCenter
         width: middleRow.implicitWidth + 10
-        height: parent.height - (Config.options.bar.m3.cornerStyle === 1 ? Config.options.bar.m3.gapsOut * 2 : 0)
+        height: parent.height - (Config.options.material.bar.m3.cornerStyle === 1 ? Config.options.material.bar.m3.gapsOut * 2 : 0)
         color: Appearance.colors.colLayer0
-        radius: Config.options.bar.m3.cornerStyle === 1 ? Appearance.rounding.windowRounding : 0
-        border.width: Config.options.bar.m3.cornerStyle === 1 ? 1 : 0
+        radius: Config.options.material.bar.m3.cornerStyle === 1 ? Appearance.rounding.windowRounding : 0
+        border.width: Config.options.material.bar.m3.cornerStyle === 1 ? 1 : 0
         border.color: Appearance.colors.colLayer0Border
 
-        bottomLeftRadius:  Config.options.bar.m3.cornerStyle === 0 && !Config.options.bar.bottom ? Appearance.rounding.screenRounding : radius
-        bottomRightRadius: Config.options.bar.m3.cornerStyle === 0 && !Config.options.bar.bottom ? Appearance.rounding.screenRounding : radius
-        topLeftRadius:     Config.options.bar.m3.cornerStyle === 0 && Config.options.bar.bottom  ? Appearance.rounding.screenRounding : radius
-        topRightRadius:    Config.options.bar.m3.cornerStyle === 0 && Config.options.bar.bottom  ? Appearance.rounding.screenRounding : radius
+        bottomLeftRadius:  Config.options.material.bar.m3.cornerStyle === 0 && !Config.options.material.bar.bottom ? Appearance.rounding.screenRounding : radius
+        bottomRightRadius: Config.options.material.bar.m3.cornerStyle === 0 && !Config.options.material.bar.bottom ? Appearance.rounding.screenRounding : radius
+        topLeftRadius:     Config.options.material.bar.m3.cornerStyle === 0 && Config.options.material.bar.bottom  ? Appearance.rounding.screenRounding : radius
+        topRightRadius:    Config.options.material.bar.m3.cornerStyle === 0 && Config.options.material.bar.bottom  ? Appearance.rounding.screenRounding : radius
 
         SurfaceSpectrum {
             anchors.fill: parent
@@ -379,7 +379,7 @@ Item {
 
             ScrollHint {
                 reveal: barLeftScrollArea.hovered
-                    && (Config.options?.bar?.showScrollHints ?? true)
+                    && (Config.options?.material?.bar?.showScrollHints ?? true)
                     && root.leftAction !== "none"
                 icon: root.getScrollIcon(root.leftAction)
                 tooltipText: root.getScrollTooltip(root.leftAction)
@@ -404,7 +404,7 @@ Item {
 
             ScrollHint {
                 reveal: barRightScrollArea.hovered
-                    && (Config.options?.bar?.showScrollHints ?? true)
+                    && (Config.options?.material?.bar?.showScrollHints ?? true)
                     && root.rightAction !== "none"
                 icon: root.getScrollIcon(root.rightAction)
                 tooltipText: root.getScrollTooltip(root.rightAction)
@@ -436,8 +436,8 @@ Item {
                 width: root.layoutCompressionActive ? parent.width : implicitWidth
                 clip: root.layoutCompressionActive
                 radius: Appearance.rounding.full
-                color: (Config.options?.bar?.m3?.showBackground ?? true)
-                    && (Config.options?.bar?.m3?.borderless ?? "pills") === "pills"
+                color: (Config.options?.material?.bar?.m3?.showBackground ?? true)
+                    && (Config.options?.material?.bar?.m3?.borderless ?? "pills") === "pills"
                     ? Appearance.colors.colLayer0 : "transparent"
 
                 SurfaceSpectrum {
@@ -495,7 +495,7 @@ Item {
                 id: leftRow
                 visible: !root.isMaterial
                 anchors.fill: parent
-                spacing: Config.options.bar.m3.borderless === "transparent" ? -7 : 2
+                spacing: Config.options.material.bar.m3.borderless === "transparent" ? -7 : 2
 
                 Repeater {
                     model: root.effectiveLeftLayout
@@ -523,7 +523,7 @@ Item {
                     id: leftNoGroupDelegate
                     Loader {
                         Layout.fillHeight: false
-                        Layout.topMargin: Config.options.bar.bottom ? -5 : 3
+                        Layout.topMargin: Config.options.material.bar.bottom ? -5 : 3
                         Layout.alignment: Qt.AlignVCenter
                         source: root.getWidgetUrl(modelData)
                         onLoaded: {
@@ -554,8 +554,8 @@ Item {
                 width: root.layoutCompressionActive ? parent.width : implicitWidth
                 clip: root.layoutCompressionActive
                 radius: Appearance.rounding.full
-                color: (Config.options?.bar?.m3?.showBackground ?? true)
-                    && (Config.options?.bar?.m3?.borderless ?? "pills") === "pills"
+                color: (Config.options?.material?.bar?.m3?.showBackground ?? true)
+                    && (Config.options?.material?.bar?.m3?.borderless ?? "pills") === "pills"
                     ? Appearance.colors.colLayer0 : "transparent"
 
                 SurfaceSpectrum {
@@ -613,7 +613,7 @@ Item {
                 id: middleRow
                 visible: !root.isMaterial
                 anchors.fill: parent
-                spacing: Config.options.bar.m3.borderless === "transparent" ? -7 : 2
+                spacing: Config.options.material.bar.m3.borderless === "transparent" ? -7 : 2
 
                 Repeater {
                     model: root.effectiveMiddleLayout
@@ -641,7 +641,7 @@ Item {
                     id: middleNoGroupDelegate
                     Loader {
                         Layout.fillHeight: false
-                        Layout.topMargin: Config.options.bar.bottom ? -5 : 3
+                        Layout.topMargin: Config.options.material.bar.bottom ? -5 : 3
                         source: root.getWidgetUrl(modelData)
                         onLoaded: {
                             if (item)
@@ -672,8 +672,8 @@ Item {
                 width: root.layoutCompressionActive ? parent.width : implicitWidth
                 clip: root.layoutCompressionActive
                 radius: Appearance.rounding.full
-                color: (Config.options?.bar?.m3?.showBackground ?? true)
-                    && (Config.options?.bar?.m3?.borderless ?? "pills") === "pills"
+                color: (Config.options?.material?.bar?.m3?.showBackground ?? true)
+                    && (Config.options?.material?.bar?.m3?.borderless ?? "pills") === "pills"
                     ? Appearance.colors.colLayer0 : "transparent"
 
                 SurfaceSpectrum {
@@ -731,7 +731,7 @@ Item {
                 id: rightRow
                 visible: !root.isMaterial
                 anchors.fill: parent
-                spacing: Config.options.bar.m3.borderless === "transparent" ? -7 : 2
+                spacing: Config.options.material.bar.m3.borderless === "transparent" ? -7 : 2
 
                 Repeater {
                     model: root.effectiveRightLayout
@@ -759,7 +759,7 @@ Item {
                     id: rightNoGroupDelegate
                     Loader {
                         Layout.fillHeight: false
-                        Layout.topMargin: Config.options.bar.bottom ? -5 : 3
+                        Layout.topMargin: Config.options.material.bar.bottom ? -5 : 3
                         source: root.getWidgetUrl(modelData)
                         onLoaded: {
                             if (item)

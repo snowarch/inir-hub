@@ -46,8 +46,8 @@ Item {
 
     // User-facing knobs: visual style of the bead and a size multiplier
     // (bar.pill.soul.*). The enable gate lives in the pill's form binding.
-    readonly property string beadStyle: Config.options?.bar?.pill?.soul?.style ?? "orb"
-    readonly property real beadSize: Config.options?.bar?.pill?.soul?.size ?? 1
+    readonly property string beadStyle: Config.options?.material?.bar?.pill?.soul?.style ?? "orb"
+    readonly property real beadSize: Config.options?.material?.bar?.pill?.soul?.size ?? 1
 
     readonly property real restR: 5 * s * beadSize
     readonly property real heatScale: 1 - 0.4 * heat
