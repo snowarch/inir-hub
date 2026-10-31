@@ -65,7 +65,7 @@ ColumnLayout {
     readonly property real scaleMin: 60
     readonly property real scaleMax: 160
     readonly property real scaleValue: Math.round(root.widget.scaleFactor * 100)
-    readonly property var zones: root.widget._snapZones ?? []
+    readonly property var zones: root.widget.placement.zones
     readonly property var zoneGlyphs: ({ topLeft: "north_west", topCenter: "north", topRight: "north_east",
         centerLeft: "west", center: "filter_center_focus", centerRight: "east",
         bottomLeft: "south_west", bottomCenter: "south", bottomRight: "south_east" })
@@ -861,7 +861,7 @@ ColumnLayout {
                             color: zone.chosen ? IrisStyle.accent : IrisStyle.textSecondary
                         }
                         HoverHandler { id: zoneHover; cursorShape: Qt.PointingHandCursor }
-                        TapHandler { onTapped: root.widget.snapToZone(zone.modelData) }
+                        TapHandler { onTapped: root.widget.placement.snapToZone(zone.modelData) }
                         Accessible.role: Accessible.RadioButton
                         Accessible.name: zone.modelData
                         Accessible.checked: zone.chosen

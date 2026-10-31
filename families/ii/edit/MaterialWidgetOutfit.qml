@@ -127,8 +127,8 @@ Item {
     // ── Room round the widget, in this item's pixels ──
     readonly property real topNow: root.overlay ? (root.parent?.y ?? 0) + root.y : (root.widget?.y ?? 0)
     readonly property real leftNow: root.overlay ? (root.parent?.x ?? 0) + root.x : (root.widget?.x ?? 0)
-    readonly property real roomTop: root.overlay ? root.room.y : (root.widget?._safeTop ?? 0)
-    readonly property real roomBottom: root.overlay ? root.room.y + root.room.height : (root.widget?._safeBottom ?? 1080)
+    readonly property real roomTop: root.overlay ? root.room.y : (root.widget?.placement.safeTop ?? 0)
+    readonly property real roomBottom: root.overlay ? root.room.y + root.room.height : (root.widget?.placement.safeBottom ?? 1080)
     readonly property real roomLeft: root.overlay ? root.room.x : 0
     readonly property real roomRight: root.overlay ? root.room.x + root.room.width : (root.widget?.scaledScreenWidth ?? 1920)
     function inside(x: real, w: real): real {
