@@ -3,6 +3,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import qs.modules.common
 import qs.modules.common.functions
+import qs.modules.common.widgets
 import qs.modules.shared.background.widgets
 
 // Desktop widgets in Material: what each global style changes on them.
@@ -36,6 +37,38 @@ WidgetLook {
         if (selected && Appearance.regaliaEverywhere) return Appearance.regalia.primaryPlate
         return selected ? (hovered ? Appearance.colors.colPrimaryHover : Appearance.colors.colPrimary)
             : ColorUtils.applyAlpha(Appearance.colors.colOnLayer2, hovered ? 0.1 : 0.055)
+    }
+
+    glassPlates: Appearance.auroraEverywhere && !Appearance.inirEverywhere && !Appearance.zzzEverywhere
+    clipInset: Appearance.angelEverywhere || Appearance.inirEverywhere ? 4 : 0
+    softDepth: !Appearance.zzzEverywhere
+    tileDepth: !Appearance.zzzEverywhere && !Appearance.inirEverywhere && !Appearance.regaliaEverywhere
+    flatFaces: Appearance.zzzEverywhere
+    tagHover: Appearance.zzzEverywhere ? Appearance.colors.colLayer1Hover : Appearance.colors.colSecondaryContainerHover
+    onAccentContainer: Appearance.zzzEverywhere ? Appearance.zzz.onAccent : Appearance.colors.colOnPrimaryContainer
+    ornaments: !look.editorial || Appearance.editorial.ornaments
+    serifFamily: look.editorial ? Appearance.editorial.serifFamily : "serif"
+    cardInset: look.editorial ? Appearance.editorial.inset : 20
+    pillRing: Appearance.zzzEverywhere ? Appearance.zzz.hairlineStrong
+        : Appearance.inirEverywhere ? Appearance.inir.colBorder : Appearance.angel.colCardBorder
+    pillRingWidth: Appearance.zzzEverywhere ? Appearance.zzz.borderThick
+        : Appearance.inirEverywhere || Appearance.angelEverywhere ? 1 : 0
+    readonly property Component regaliaTile: Component {
+        RegaliaPlate {
+            radius: parent?.plateRadius ?? 0
+            fillColor: parent?.plateFill ?? "transparent"
+            inset: Appearance.regalia.surfaceInset
+            elevated: true
+        }
+    }
+    tilePlate: Appearance.regaliaEverywhere ? look.regaliaTile : null
+    function emphasisWeight(weight: int): int { return look.editorial ? Appearance.editorial.titleWeight : weight }
+    function labelTracking(pixelSize: real): real { return Appearance.zzzEverywhere ? Appearance.zzz.tracking : pixelSize * 0.08 }
+    // Aurora's and Angel's glass is a tint over the blurred wallpaper: light glass over a dark one is mid grey (2.3:1 with light ink).
+    function glassOver(backdrop: color): color {
+        if (!look.glassPlates) return Appearance.colors.colLayer0
+        return ColorUtils.mix(Appearance.colors.colLayer0Base, backdrop,
+            1 - (Appearance.angelEverywhere ? Appearance.angel.overlayOpacity : Appearance.aurora.popupTransparentize))
     }
 
     function blurAvailable(widget: var): bool {
