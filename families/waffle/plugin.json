@@ -68,6 +68,10 @@
     "font": {
       "key": "waffles.theming.font.family",
       "fallback": "Noto Sans"
+    },
+    "globalStyle": {
+      "key": "material.style",
+      "when": "waffles.theming.styleFromMaterial"
     }
   },
   "devDestinations": [

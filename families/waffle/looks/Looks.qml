@@ -18,9 +18,10 @@ Singleton {
     property string iconsPath: `${Directories.assetsPath}/icons/fluent`
     property bool dark: Appearance.m3colors.darkmode
     // Waffle wears Material's global style only while the person keeps "Take style from Material" on
-    // (waffles.theming.styleFromMaterial, on by default): every Waffle surface asks these, never Appearance's flags.
+    // (waffles.theming.styleFromMaterial, on by default). Appearance resolves it for the active family (plugin.json
+    // settings.globalStyle `when`); Waffle surfaces ask these, never Appearance's flags.
     readonly property bool styleFromMaterial: Config.options?.waffles?.theming?.styleFromMaterial ?? true
-    readonly property string materialStyle: root.styleFromMaterial ? Appearance.globalStyle : "material"
+    readonly property string materialStyle: Appearance.globalStyle
     readonly property bool auroraEverywhere: root.materialStyle === "aurora" || root.materialStyle === "angel"
     readonly property bool angelEverywhere: root.materialStyle === "angel"
     readonly property bool inirEverywhere: root.materialStyle === "inir"
@@ -46,7 +47,7 @@ Singleton {
     // "Display scaling" slider in Interface settings also affects waffle fonts.
     readonly property real fontScale: (Config.options?.waffles?.theming?.font?.scale ?? 1.0) * Appearance.fontSizeScale
 
-    readonly property bool transparencyEnabled: root.styleFromMaterial && (Config.options?.material?.style?.transparency?.enable ?? false)
+    readonly property bool transparencyEnabled: Appearance.styleConfig?.transparency?.enable ?? false
     // When glass mode is active, ensure surfaces have enough transparency
     // so the glass/blur effect is visible beneath the dark base colors
     property real backgroundTransparency: root.auroraEverywhere
