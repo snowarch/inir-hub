@@ -840,7 +840,7 @@ QtObject {
     }
 
     readonly property var behaviour: [
-        { section: "appearance", group: "Look", label: "Design", description: "What iRiS is made of: its shapes, type, controls and motion.", path: "iris.appearance.design", kind: "choice", cards: "design", fallback: "iris", get choices() { return IrisDesign.catalogue }, keywords: ["design", "style", "airisu", "iris", "jdm", "japanese", "look", "skin", "diseño", "estilo"] },
+        { section: "appearance", group: "Design", label: "Design", description: "What iRiS is made of: its shapes, type, controls and motion.", path: "iris.appearance.design", kind: "choice", cards: "design", fallback: "iris", get choices() { return IrisDesign.catalogue }, keywords: ["design", "style", "airisu", "iris", "jdm", "japanese", "look", "skin", "diseño", "estilo"] },
         { section: "bar", group: "Layout", label: "Composition", description: "How the Island holds media and controls.", path: "iris.bar.composition", kind: "choice", fallback: "cluster", choices: [{label:"Unified",value:"unified",glyph:"crop_7_5",detail:"Unified keeps media and controls inside the one Island."},{label:"Cluster",value:"cluster",glyph:"bubble_chart",detail:"Cluster splits media and controls into bubbles beside the clock."}] },
         { section: "bar", group: "Visibility", label: "Automatically hide", description: "The Island tucks into its edge and comes back when you rest the pointer there.", path: "iris.bar.autoHide", kind: "switch", fallback: false },
         { section: "bar", group: "Visibility", label: "Stay visible on empty workspaces", description: "When auto-hide is on, keep the Island visible on workspaces with no windows.", path: "iris.bar.revealOnEmpty", visibleWhen: "iris.bar.autoHide", kind: "switch", fallback: true },
@@ -1499,7 +1499,7 @@ QtObject {
         "Focus · left": "dock_to_left", "Frame": "crop_free", "Frame response": "graphic_eq", "Frame music": "border_outer", "Edge wave": "waves", "Frame finish": "flare", "Prefixes": "keyboard_command_key", "Name song": "music_cast", "System readings": "monitor_heart", "Fullscreen": "fullscreen", "Game mode": "sports_esports",
         "Glass": "blur_on", "Highlight": "highlight", "Icons": "emoji_symbols", "Interaction": "ads_click", "Joining": "join_inner",
         "Language": "language", "Layout": "view_quilt", "Light": "light_mode", "Live wallpapers": "motion_photos_on",
-        "Desktop menu": "menu_open", "Look": "visibility", "Material": "layers", "Material per surface": "layers", "Corners per surface": "rounded_corner", "Colour theme": "palette", "Signal": "radio_button_checked", "Day and night": "routine", "Scheme": "contrast", "Dark look": "dark_mode", "Ink look": "ink_pen", "Light look": "light_mode", "Menus": "menu", "Motion": "animation", "New iNiR": "rocket_launch",
+        "Desktop menu": "menu_open", "Look": "visibility", "Design": "design_services", "Material": "layers", "Material per surface": "layers", "Corners per surface": "rounded_corner", "Colour theme": "palette", "Signal": "radio_button_checked", "Day and night": "routine", "Scheme": "contrast", "Dark look": "dark_mode", "Ink look": "ink_pen", "Light look": "light_mode", "Menus": "menu", "Motion": "animation", "New iNiR": "rocket_launch",
         "Night Light": "nightlight", "Notifications": "notifications", "Now playing": "music_note", "On the contour": "border_outer",
         "Opening bodies": "open_in_full", "Overview backdrop": "grid_view", "Pages": "view_carousel", "Per surface": "tune",
         "Panel look": "dock_to_right", "Placement": "location_on", "Player": "music_note", "Player page": "album", "Previews": "preview",
@@ -1581,6 +1581,7 @@ QtObject {
         get "Login Screen"() { return IrisStyle.identity.indigo },
         get "Wallpaper tint"() { return IrisStyle.identity.teal },
         get "Look"() { return IrisStyle.identity.purple },
+        get "Design"() { return IrisStyle.identity.purple },
         get "Material"() { return IrisStyle.identity.indigo },
         get "Material per surface"() { return IrisStyle.identity.indigo },
         get "Menus"() { return IrisStyle.identity.gray },
@@ -1735,7 +1736,7 @@ QtObject {
     readonly property var groupOrder: ({
         controlCenter: ["Control Center", "Hotspot", "VPN"],
         general: ["Every day", "Date & time", "Language", "At login", "Apps", "Performance", "Settings window", "Shell family"],
-        appearance: ["Look", "Material", "Glass", "Texture", "Edges", "Light", "Shape", "Corners per surface",
+        appearance: ["Design", "Material", "Glass", "Texture", "Edges", "Light", "Shape", "Corners per surface",
             "Frame", "Text", "Faces", "Icons", "Material per surface", "Menus", "Settings", "Badges", "Customize", "Previews", "Themes"],
         colour: ["Scheme", "Signal", "Accent", "Highlight", "Colour theme", "Day and night", "App colours", "Dark look", "Ink look", "Light look", "Wallpaper tint"],
         bar: ["Notch", "Layout", "Shape", "At rest", "Resting Island", "Bar", "Pages", "Desktop page", "Player page", "Interaction", "Visibility", "Connections"],

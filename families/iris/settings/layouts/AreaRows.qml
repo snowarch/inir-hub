@@ -68,9 +68,10 @@ ColumnLayout {
         }
         // Every area reads as Home (his 10-30): its lead group open, every other group a tile that says what it holds
         // and opens under the tiles, one at a time. Home leads with Every day, General's other pages are all tiles;
-        // the rest lead with their first group. Nothing waits behind Fine-tune any more but a group's own ranges.
+        // the rest lead with their first group; Style leads with none, its Design a card like every other (his 10-31).
+        // Nothing waits behind Fine-tune any more but a group's own ranges.
         // A column of Drawer (foldHome off) or an area of two groups keeps them open, its all-fine-tuning groups folded.
-        const lead = groups.find(group => group.key === "Every day") ?? (rows.section === "general" ? null : groups[0])
+        const lead = groups.find(group => group.key === "Every day") ?? (["general", "appearance"].includes(rows.section) ? null : groups[0])
         const others = groups.filter(group => group !== lead && group.rows.length > 0)
         const tiles = flat && rows.foldHome && others.length >= 2
         const home = tiles && rows.section === "general"

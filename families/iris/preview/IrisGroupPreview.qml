@@ -109,7 +109,7 @@ ClippingRectangle {
             "bar/Shape": "islandEdge", "bar/Layout": "islandEdge", "bar/Bar": "barZones",
             "appearance/Light": "light", "appearance/Shape": "shapes", "appearance/Corners per surface": "surfaces", "appearance/Glass": "glass", "appearance/Edges": "glass",
             "appearance/Menus": "menus", "appearance/Settings": "settings",
-            "appearance/Texture": "texture", "appearance/Material": "material", "appearance/Material per surface": "surfaces", "appearance/Look": "fusion",
+            "appearance/Texture": "texture", "appearance/Material": "material", "appearance/Material per surface": "surfaces", "appearance/Design": "fusion",
             "appearance/Adaptive": "fusion",
             "appearance/Faces": "typography", "appearance/Text": "typography", "appearance/Frame": "frame",
             "colour/Colour theme": "palette", "colour/Scheme": "palette", "colour/Accent": "palette", "colour/Highlight": "highlight",

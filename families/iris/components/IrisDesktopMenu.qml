@@ -146,12 +146,19 @@ Loader {
             const p = item.mapToItem(null, 0, 0)
             return Qt.rect(o.x + p.x, o.y + p.y, root.opensToward.length > 0 ? item.width : 1, root.opensToward.length > 0 ? item.height : 1)
         }
-        // The room a menu has: inside the frame when it is on and clear of the Island, the Dock and attached pieces, so
-        // it never lies over the shell's own bodies; with nothing at an edge, the screen's edge.
-        readonly property real roomLeft: IrisFrame.safeInset("left") + popup.edge
-        readonly property real roomRight: popup.width - IrisFrame.safeInset("right") - popup.edge
-        readonly property real roomTop: IrisFrame.safeInset("top") + popup.edge
-        readonly property real roomBottom: popup.height - IrisFrame.safeInset("bottom") - popup.edge
+        // A menu from a piece or a capsule is placed as every body that opens from one (IrisFrame.place, as the Control
+        // Center and the cards): the theme's air from what opened it, inside the frame, flipping where the screen says.
+        readonly property bool fromEdge: ["up", "down", "left", "right"].includes(root.opensToward)
+        readonly property var placement: popup.fromEdge
+            ? IrisFrame.place(popup.target, menu.width, menu.height, popup.width, popup.height, menu.baseRadius, [], IrisFrame.bodyAir) : null
+        readonly property string toward: popup.placement
+            ? (popup.placement.sideways ? (popup.placement.towardsLeft ? "left" : "right") : (popup.placement.towardsUp ? "up" : "down"))
+            : root.opensToward
+        // At the pointer: the frame's air at the sides, and clear of the Island and the Dock above and below.
+        readonly property real roomLeft: IrisFrame.band + IrisFrame.musicReach("left") + IrisFrame.bodyMargin
+        readonly property real roomRight: popup.width - IrisFrame.band - IrisFrame.musicReach("right") - IrisFrame.bodyMargin
+        readonly property real roomTop: IrisFrame.safeInset("top") + IrisFrame.bodyMargin
+        readonly property real roomBottom: popup.height - IrisFrame.safeInset("bottom") - IrisFrame.bodyMargin
         function clampX(x: real): real { return Math.round(Math.max(popup.roomLeft, Math.min(popup.roomRight - menu.width, x))) }
         function clampY(y: real): real { return Math.round(Math.max(popup.roomTop, Math.min(popup.roomBottom - menu.height, y))) }
         readonly property bool flipX: root.opensToward.length === 0 && popup.target.x + menu.width > popup.roomRight
@@ -262,36 +269,41 @@ Loader {
             MouseArea { anchors.fill: parent; acceptedButtons: Qt.AllButtons; z: -1 }
             open: popup.placed
             readonly property real seed: Math.round(28 * root.d)
-            origin: ({ x: root.opensToward === "left" ? menu.x + menu.width - menu.seed
-                    : root.opensToward === "right" ? menu.x
-                    : root.opensToward.length > 0 ? Math.max(menu.x, Math.min(menu.x + menu.width - menu.seed, popup.target.x + popup.target.width / 2 - menu.seed / 2))
+            origin: ({ x: popup.toward === "left" ? menu.x + menu.width - menu.seed
+                    : popup.toward === "right" ? menu.x
+                    : popup.toward.length > 0 ? Math.max(menu.x, Math.min(menu.x + menu.width - menu.seed, popup.target.x + popup.target.width / 2 - menu.seed / 2))
                     : popup.flipX ? menu.x + menu.width - menu.seed : menu.x,
-                y: root.opensToward === "up" ? menu.y + menu.height - menu.seed
-                    : root.opensToward === "down" ? menu.y
-                    : root.opensToward.length > 0 ? Math.max(menu.y, Math.min(menu.y + menu.height - menu.seed, popup.target.y + popup.target.height / 2 - menu.seed / 2))
+                y: popup.toward === "up" ? menu.y + menu.height - menu.seed
+                    : popup.toward === "down" ? menu.y
+                    : popup.toward.length > 0 ? Math.max(menu.y, Math.min(menu.y + menu.height - menu.seed, popup.target.y + popup.target.height / 2 - menu.seed / 2))
                     : popup.flipY ? menu.y + menu.height - menu.seed : menu.y,
                 width: menu.seed, height: menu.seed, radius: menu.seed / 2 })
             contentReady: column.implicitHeight > 0
-            // Auto follows the family's curves and, framed, nests in the frame's inner corner by the gap it keeps.
-            radius: IrisStyle.surfaceRadius("menus", Math.max(root.compact ? IrisStyle.radiusTile : IrisStyle.radiusCard,
-                IrisFrame.framed && !IrisStyle.fieldChamfer ? IrisStyle.concentric(IrisFrame.cornerRadius, popup.edge, 0) : 0))
+            readonly property real baseRadius: IrisStyle.surfaceRadius("menus", root.compact ? IrisStyle.radiusTile : IrisStyle.radiusCard)
+            // Near a frame corner or the fillet it opens from, its corner nests in that curve by the air between them.
+            radius: popup.placement && !IrisStyle.fieldChamfer
+                ? IrisFrame.nestRadius({ x: menu.x, y: menu.y, width: menu.width, height: menu.height }, menu.baseRadius,
+                    popup.target, IrisStyle.fuse, popup.width, popup.height)
+                : menu.baseRadius
             light: IrisStyle.surfaceLight("menus", IrisStyle.wallpaperLight)
-            lightFrom: root.opensToward === "up" ? "bottom" : root.opensToward === "left" ? "right" : root.opensToward === "right" ? "left" : "top"
-            x: root.opensToward === "over" ? popup.clampX(popup.target.x + root.overTextX - root.pad - popup.textInset)
-                : root.opensToward === "left" ? popup.clampX(popup.target.x - menu.width - popup.gap)
-                : root.opensToward === "right" ? popup.clampX(popup.target.x + popup.target.width + popup.gap)
-                : root.opensToward.length > 0 ? popup.clampX(popup.target.x + popup.target.width / 2 - menu.width / 2)
+            lightFrom: popup.toward === "up" ? "bottom" : popup.toward === "left" ? "right" : popup.toward === "right" ? "left" : "top"
+            x: popup.placement ? Math.round(popup.placement.x)
+                : popup.toward === "over" ? popup.clampX(popup.target.x + root.overTextX - root.pad - popup.textInset)
+                : popup.toward === "left" ? popup.clampX(popup.target.x - menu.width - popup.gap)
+                : popup.toward === "right" ? popup.clampX(popup.target.x + popup.target.width + popup.gap)
+                : popup.toward.length > 0 ? popup.clampX(popup.target.x + popup.target.width / 2 - menu.width / 2)
                 : popup.clampX(popup.flipX ? popup.target.x - menu.width : popup.target.x)
-            y: root.opensToward === "over" ? popup.clampY(popup.target.y + popup.target.height / 2 - popup.overTop - root.rowHeight / 2)
-                : root.opensToward === "up" ? popup.clampY(popup.target.y - menu.height - popup.gap)
-                : root.opensToward === "down" ? popup.clampY(popup.target.y + popup.target.height + popup.gap)
-                : root.opensToward.length > 0 ? popup.clampY(popup.target.y + popup.target.height / 2 - menu.height / 2)
+            y: popup.placement ? Math.round(popup.placement.y)
+                : popup.toward === "over" ? popup.clampY(popup.target.y + popup.target.height / 2 - popup.overTop - root.rowHeight / 2)
+                : popup.toward === "up" ? popup.clampY(popup.target.y - menu.height - popup.gap)
+                : popup.toward === "down" ? popup.clampY(popup.target.y + popup.target.height + popup.gap)
+                : popup.toward.length > 0 ? popup.clampY(popup.target.y + popup.target.height / 2 - menu.height / 2)
                 : popup.clampY(popup.flipY ? popup.target.y - menu.height : popup.target.y)
             // Long labels (a file name, a tray item) elide inside the cap instead of stretching the menu.
             // Over a pop-up button it is at least as wide as the button, so the button never shows past it.
             width: Math.round(Math.min((root.compact ? 300 : 360) * root.d,
                 Math.max((root.compact ? 176 : 236) * root.d, column.implicitWidth + 2 * root.pad,
-                    root.opensToward === "over" ? popup.target.width - root.overTextX + root.pad + popup.textInset : 0)))
+                    popup.toward === "over" ? popup.target.width - root.overTextX + root.pad + popup.textInset : 0)))
             height: Math.round(column.implicitHeight + 2 * root.pad)
             onClosed: if (!menu.open) root.active = false
 
