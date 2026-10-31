@@ -120,7 +120,7 @@ Item {
                 id: content
                 width: scroller.width
                 active: root.held !== null
-                sourceComponent: root.held?._effectivePopover ?? null
+                sourceComponent: root.held?.sheetPages ?? null
             }
         }
     }

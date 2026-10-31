@@ -19,8 +19,8 @@ import qs.services
 import qs.modules.common
 import qs.modules.common.functions
 import qs.modules.common.widgets
-import qs.modules.background.widgets
-import qs.modules.background.widgets.instrument
+import qs.modules.shared.background.widgets
+import qs.modules.shared.background.widgets.instrument
 import "shellline.js" as ShellLine
 
 AbstractBackgroundWidget {

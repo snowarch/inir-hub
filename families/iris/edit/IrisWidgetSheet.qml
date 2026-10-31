@@ -28,6 +28,15 @@ Item {
             .map(spec => Object.assign({}, spec, { group: "" }))
     }
     Component {
+        id: irisControls
+        IrisWidgetControls {
+            widget: root.held
+            plateRadius: IrisStyle.concentric(IrisStyle.radiusPlate, root.pad, IrisStyle.radiusChip)
+            plateCut: IrisStyle.nestedCut(IrisStyle.chamferCut, root.pad)
+            optionRows: root.rows.length > 0 ? rowsComponent : null
+        }
+    }
+    Component {
         id: rowsComponent
         IrisEditRows { specs: root.rows }
     }
@@ -114,12 +123,7 @@ Item {
                 id: content
                 width: scroller.width
                 active: root.held !== null
-                sourceComponent: IrisWidgetControls {
-                    widget: root.held
-                    plateRadius: IrisStyle.concentric(IrisStyle.radiusPlate, root.pad, IrisStyle.radiusChip)
-                    plateCut: IrisStyle.nestedCut(IrisStyle.chamferCut, root.pad)
-                    optionRows: root.rows.length > 0 ? rowsComponent : null
-                }
+                sourceComponent: root.held?.irisFaced ? irisControls : root.held?.sheetPages ?? null
             }
         }
     }
