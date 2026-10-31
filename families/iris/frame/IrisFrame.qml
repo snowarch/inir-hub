@@ -218,10 +218,24 @@ QtObject {
         const ob = origin.obstacle ?? origin
         const cx = origin.x + origin.width / 2
         const cy = origin.y + origin.height / 2
-        let left = root.bodyMargin + root.band + root.musicReach("left")
-        let right = screenWidth - width - root.bodyMargin - root.band - root.musicReach("right")
-        let top = root.bodyMargin + root.band + root.musicReach("top")
-        let bottom = screenHeight - height - root.bodyMargin - root.band - root.musicReach("bottom")
+        // The theme's air from the frame's inner edge on every side (past the music it carries), `air` from what opened
+        // the body (negative welds it on). A piece on an edge is drawn as a strip deeper than the item it sits in, so
+        // the body keeps its air from that strip, not the item: on a thin edge the item alone left it pressed under the piece.
+        const wall = side => root.band + root.musicReach(side)
+        let left = wall("left") + root.bodyAir
+        let right = screenWidth - width - wall("right") - root.bodyAir
+        let top = wall("top") + root.bodyAir
+        let bottom = screenHeight - height - wall("bottom") - root.bodyAir
+        const strip = side => root.piecesAttached && root.pieceEdges.includes(side) ? root.pieceDepthOn(side) : 0
+        const sitsOn = side => side === "left" ? ob.x - wall("left") <= strip("left") + 1
+            : side === "right" ? screenWidth - wall("right") - ob.x - ob.width <= strip("right") + 1
+            : side === "top" ? ob.y - wall("top") <= strip("top") + 1
+            : screenHeight - wall("bottom") - ob.y - ob.height <= strip("bottom") + 1
+        const reach = side => sitsOn(side) ? wall(side) + strip(side) : 0
+        const near = {
+            left: Math.max(ob.x + ob.width, reach("left")), right: Math.min(ob.x, reach("right") > 0 ? screenWidth - reach("right") : ob.x),
+            top: Math.max(ob.y + ob.height, reach("top")), bottom: Math.min(ob.y, reach("bottom") > 0 ? screenHeight - reach("bottom") : ob.y)
+        }
         for (const b of (avoid ?? [])) {
             if (!b || b.width <= 0 || b.height <= 0) continue
             const fullHeight = b.y <= root.bodyMargin + 1
@@ -251,11 +265,11 @@ QtObject {
         }
         const candidate = side => {
             if (side) {
-                const rawX = towardsLeft ? ob.x - width - air : ob.x + ob.width + air
+                const rawX = towardsLeft ? near.right - width - air : near.left + air
                 return { sideways: true, towardsLeft: towardsLeft, towardsUp: towardsUp,
                     x: clamp(rawX, left, right), y: clamp(along(cy, height, top, bottom), top, bottom) }
             }
-            const rawY = towardsUp ? ob.y - height - air : ob.y + ob.height + air
+            const rawY = towardsUp ? near.bottom - height - air : near.top + air
             return { sideways: false, towardsLeft: towardsLeft, towardsUp: towardsUp,
                 x: clamp(along(cx, width, left, right), left, right), y: clamp(rawY, top, bottom) }
         }
