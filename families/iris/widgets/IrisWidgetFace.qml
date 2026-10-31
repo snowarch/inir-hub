@@ -330,20 +330,25 @@ Item {
             y: Math.round(root.slide * root.height * 0.5)
             opacity: 1 - Math.pow(Math.min(1, Math.abs(root.slide)), 1.5)
 
+            // What casts the text's shadow: the face that shows. A copy renders its source hidden or not, so under a
+            // Design the stock body (Apple's Day: sunrise, the sun's path) cast a ghost behind AIRISU's print, white on
+            // a light wallpaper and black on a dark one. A Design's print casts it only bare: on its own plate the
+            // plate's outline would cast one too.
+            readonly property Item shadowed: root.designed ? (root.clear ? designPrint : null) : body
             ShaderEffectSource {
                 id: bodyCopy
-                anchors.fill: body
-                sourceItem: root.textShadow > 0.05 ? body : null
+                anchors.fill: slider.shadowed ?? body
+                sourceItem: root.textShadow > 0.05 ? slider.shadowed : null
                 hideSource: false
                 visible: false
             }
             // The shadow comes from a copy behind the body: a layered body would resample its text.
             MultiEffect {
-                x: body.x
-                y: body.y + 1
-                width: body.width
-                height: body.height
-                visible: root.textShadow > 0.05
+                x: bodyCopy.x
+                y: bodyCopy.y + 1
+                width: bodyCopy.width
+                height: bodyCopy.height
+                visible: root.textShadow > 0.05 && slider.shadowed !== null
                 source: bodyCopy
                 brightness: root.lightBackdrop ? 1 : -1
                 colorization: IrisStyle.glow > 0 && !root.lightBackdrop ? 1 : 0
@@ -355,6 +360,7 @@ Item {
             }
 
             Loader {
+                id: designPrint
                 anchors.fill: parent
                 active: root.designed
                 source: root.designFace
