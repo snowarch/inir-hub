@@ -42,6 +42,10 @@ Item {
     property string requestedSection: ""
     property bool placed: false
     readonly property real d: IrisStyle.settingsDensity
+    // One air between the window's edge and every pane it holds (the sidebar, the page) and one radius keeping them
+    // concentric with the window: the two panes once read 8 and ~15 and ended out of line at the bottom.
+    readonly property int paneInset: Math.round(8 * root.d)
+    readonly property real paneRadius: Math.max(IrisStyle.radiusTile, frame.radius - root.paneInset)
     // Past this a label sits too far from its control to aim at.
     readonly property real rowsMost: Math.round(880 * root.d)
     // A section about hardware this machine lacks is not offered (Battery on a desktop); `inir battery simulate` brings it back.
@@ -869,14 +873,14 @@ Item {
                 id: sidebar
                 // A pane of its own floating inside the window (macOS 26): inset on three sides, concentric with the
                 // window's corners, its edge a hairline all round instead of a rule between it and the page.
-                readonly property int inset: Math.round(8 * root.d)
+                readonly property int inset: root.paneInset
                 readonly property int pad: IrisStyle.concentricPad(sidebar.radius, 10 * root.d)
                 x: sidebar.inset
                 y: sidebar.inset
                 height: parent.height - 2 * sidebar.inset
                 width: sidebarSlot.width - sidebar.inset
                 clip: true
-                radius: IrisStyle.fieldChamfer ? 0 : Math.max(IrisStyle.radiusTile, frame.radius - sidebar.inset)
+                radius: IrisStyle.fieldChamfer ? 0 : root.paneRadius
                 color: IrisStyle.fieldChamfer ? "transparent" : IrisStyle.readingSidebar
                 border.width: IrisStyle.fieldChamfer ? 0 : 1
                 border.color: IrisStyle.hairline
@@ -1297,12 +1301,12 @@ Item {
 
                     Rectangle {
                         id: detailPane
-                        readonly property real inset: root.split ? IrisStyle.concentricPad(frame.radius, 14 * root.d) : 0
+                        readonly property real inset: root.split ? root.paneInset : 0
                         x: 0
                         y: root.split ? Math.round(4 * root.d) : 0
                         width: pageArea.width - detailPane.x - detailPane.inset
                         height: pageArea.height - detailPane.y - detailPane.inset
-                        radius: root.split ? Math.max(IrisStyle.radiusTile, frame.radius - detailPane.inset) : 0
+                        radius: root.split ? root.paneRadius : 0
                         color: root.split ? IrisStyle.readingCard : "transparent"
 
                         Item {
