@@ -107,19 +107,34 @@ Item {
             color: IrisStyle.readingCard
             border.width: 1
             border.color: IrisStyle.hairline
+            // The caption under the stage, never a chip on it: on the stage it sat on the login's password and the
+            // motion's boxes.
             IrisGroupPreview {
                 id: stage
                 anchors.fill: parent
                 anchors.margins: page.u(12)
+                anchors.bottomMargin: stage.caption.length > 0 ? stageCaption.height + page.u(18) : page.u(12)
                 radius: Math.max(IrisStyle.radiusRow, IrisStyle.radiusSheet - page.u(12))
                 standIn: true
-                captionOutside: false
+                captionOutside: true
                 playing: page.live
                 // Home leads with the welcome over its rows, so its rows get the width.
                 section: page.area === "general" ? "" : page.area
                 niriValue: (section, key) => IrisNiri.value(IrisOptions.settings.find(spec => spec.niri === section && spec.key === key) ?? { niri: section, key: key })
                 niriRevision: IrisNiri.revision
                 group: page.stageGroup
+            }
+            IrisText {
+                id: stageCaption
+                visible: stage.caption.length > 0
+                x: page.u(16)
+                width: parent.width - 2 * x
+                anchors.bottom: parent.bottom
+                anchors.bottomMargin: page.u(10)
+                elide: Text.ElideRight
+                text: stage.caption
+                color: IrisStyle.muted
+                font.pixelSize: IrisStyle.typeMeta
             }
         }
 

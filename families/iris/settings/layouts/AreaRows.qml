@@ -349,6 +349,7 @@ ColumnLayout {
                             }
                             function act(): void { rows.openGroup = group.open ? "" : group.key }
                             Layout.fillWidth: true
+                            Layout.fillHeight: true
                             Layout.preferredWidth: 1
                             implicitHeight: Math.max(Math.round(64 * rows?.d), groupWords.implicitHeight + Math.round(24 * rows?.d))
                             activeFocusOnTab: true
@@ -399,12 +400,16 @@ ColumnLayout {
                                         font.weight: IrisStyle.weight(Font.DemiBold)
                                         elide: Text.ElideRight
                                     }
+                                    // Two lines before an ellipsis, and a narrow tile (Pocket) says only its first
+                                    // value: one row cut "Same wallpaper as the deskto".
                                     IrisText {
                                         width: parent.width
                                         visible: group.glance.length > 0
-                                        text: group.glance
+                                        text: groupWords.width < Math.round(180 * rows?.d) ? group.glance.split(" · ")[0] : group.glance
                                         color: IrisStyle.textSecondary
                                         font.pixelSize: IrisStyle.typeMeta
+                                        wrapMode: Text.WordWrap
+                                        maximumLineCount: 2
                                         elide: Text.ElideRight
                                     }
                                 }
