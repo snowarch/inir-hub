@@ -38,8 +38,12 @@ Flickable {
     readonly property bool wide: root.columnWidth >= Math.round(600 * root.d)
     readonly property int gap: Math.round(10 * root.d)
     readonly property int bandColumns: root.columnWidth >= Math.round(720 * root.d) ? 3 : 2
-    readonly property var featured: root.browsing ? Hub.sorted(Hub.items.filter(item => item.featured === true && Hub.fits(item, "iris")
-        && item.compatible !== false && !item.blocked), "popular").slice(0, root.bandColumns) : []
+    // A band of one only repeats the list's first row: it shows once it holds two.
+    readonly property var featured: {
+        const picks = root.browsing ? Hub.sorted(Hub.items.filter(item => item.featured === true && Hub.fits(item, "iris")
+            && item.compatible !== false && !item.blocked), "popular").slice(0, root.bandColumns) : []
+        return picks.length >= 2 ? picks : []
+    }
     readonly property int columns: Math.max(2, Math.floor((root.columnWidth + root.gap) / (Math.round(200 * root.d) + root.gap)))
     readonly property real tileWidth: Math.floor((root.columnWidth - (root.columns - 1) * root.gap) / root.columns)
     readonly property int listInset: Math.round(4 * root.d)

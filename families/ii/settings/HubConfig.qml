@@ -41,8 +41,12 @@ ContentPage {
     readonly property bool wideRows: root.usable >= 640
     // Three only on a wide page: at a third of ~860 px a summary had 133 px and was cut in the inir style's mono.
     readonly property int bandColumns: root.usable >= 1080 ? 3 : 2
-    readonly property var featured: root.browsing ? Hub.sorted(Hub.items.filter(item => item.featured === true && Hub.fits(item, root.family)
-        && item.compatible !== false && !item.blocked), "popular").slice(0, root.bandColumns) : []
+    // A band of one only repeats the list's first row: it shows once it holds two.
+    readonly property var featured: {
+        const picks = root.browsing ? Hub.sorted(Hub.items.filter(item => item.featured === true && Hub.fits(item, root.family)
+            && item.compatible !== false && !item.blocked), "popular").slice(0, root.bandColumns) : []
+        return picks.length >= 2 ? picks : []
+    }
     readonly property int gap: 12
     readonly property int columns: Math.max(2, Math.min(5, Math.floor((root.usable + root.gap) / (196 + root.gap))))
     readonly property real tileWidth: Math.floor((root.usable - (root.columns - 1) * root.gap) / root.columns)
