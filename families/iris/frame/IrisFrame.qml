@@ -291,6 +291,13 @@ QtObject {
             x: primary.x, y: primary.y }
     }
 
+    // A body's four radii: its `radius` wherever its `corners` ({ tl, tr, bl, br }) leave one out, as a Rectangle reads its
+    // own. The field, its blur twins and the morph's clip all read a body's corners through this.
+    function cornersOf(body: var): var {
+        const r = Number(body?.radius ?? 0), c = body?.corners
+        return c ? { tl: Number(c.tl ?? r), tr: Number(c.tr ?? r), bl: Number(c.bl ?? r), br: Number(c.br ?? r) }
+            : { tl: r, tr: r, bl: r, br: r }
+    }
     // The fillet a body melted into a wall draws there: the field's polynomial smooth union of two perpendicular edges
     // bulges k/4 along the diagonal, which is a circular fillet of radius k / (4·(1 − 1/√2)).
     function filletRadius(fuse: real): real { return fuse / (4 * (1 - Math.SQRT1_2)) }
@@ -298,8 +305,11 @@ QtObject {
         return root.joinOn(side) === "notch"
             ? IrisStyle.edgeFuseFor(pieceSize, Number(root.bubbles?.notchCurve ?? 100)) : IrisStyle.fuse
     }
-    function nestRadius(rect: var, radius: real, origin: var, originFuse: real, screenWidth: real, screenHeight: real): real {
-        if (!rect || rect.width <= 0 || rect.height <= 0) return radius
+    // How each corner of a body near the frame nests ({ tl, tr, bl, br }): the corner that faces the frame's own corner, or
+    // the fillet of the piece it opens from, takes that curve less the air between them; the others keep `radius`.
+    function nestRadius(rect: var, radius: real, origin: var, originFuse: real, screenWidth: real, screenHeight: real): var {
+        const own = { tl: radius, tr: radius, bl: radius, br: radius }
+        if (!rect || rect.width <= 0 || rect.height <= 0) return own
         const reach = Math.max(root.bodyAir, root.bodyMargin) + 2 * root.d
         const floor = Math.round(6 * root.d)
         const gap = { left: rect.x - root.band, right: screenWidth - root.band - rect.x - rect.width,
@@ -308,18 +318,19 @@ QtObject {
         const touches = (r, wall) => r && (wall === "left" ? r.x - root.band
             : wall === "right" ? screenWidth - root.band - r.x - r.width
             : wall === "top" ? r.y - root.band : screenHeight - root.band - r.y - r.height) <= 1.5
-        const nests = []
+        const nests = { tl: [], tr: [], bl: [], br: [] }
+        const corner = (end, side) => nests[(end === "top" ? "t" : "b") + (side === "left" ? "l" : "r")]
         for (const side of ["left", "right"]) {
             for (const end of ["top", "bottom"]) {
                 if (gap[side] > reach) continue
                 if (root.framed && gap[end] <= reach) {
-                    nests.push(root.cornerRadius - (gap[side] + gap[end]) / 2)
+                    corner(end, side).push(root.cornerRadius - (gap[side] + gap[end]) / 2)
                     continue
                 }
                 if (o && touches(o, side) && o.width > 0) {
                     const between = end === "top" ? rect.y - (o.y + o.height) : o.y - (rect.y + rect.height)
                     if (between >= -1 && between <= reach)
-                        nests.push(root.filletRadius(originFuse) - (gap[side] + between) / 2)
+                        corner(end, side).push(root.filletRadius(originFuse) - (gap[side] + between) / 2)
                 }
             }
         }
@@ -328,14 +339,17 @@ QtObject {
                 if (gap[end] > reach || !o || !touches(o, end) || o.height <= 0) continue
                 const between = side === "left" ? rect.x - (o.x + o.width) : o.x - (rect.x + rect.width)
                 if (between >= -1 && between <= reach)
-                    nests.push(root.filletRadius(originFuse) - (gap[end] + between) / 2)
+                    corner(end, side).push(root.filletRadius(originFuse) - (gap[end] + between) / 2)
             }
         }
-        if (nests.length === 0) return radius
         // Or nothing: a corner much tighter than the body would square a sheet off to the floor; it keeps its own radius and floats.
-        const nested = Math.min(...nests)
-        if (nested < Math.max(floor * 2, radius * 0.4)) return radius
-        return Math.round(Math.min(Math.min(rect.width, rect.height) / 2, nested))
+        const settle = list => {
+            if (list.length === 0) return radius
+            const nested = Math.min(...list)
+            if (nested < Math.max(floor * 2, radius * 0.4)) return radius
+            return Math.round(Math.min(Math.min(rect.width, rect.height) / 2, nested))
+        }
+        return { tl: settle(nests.tl), tr: settle(nests.tr), bl: settle(nests.bl), br: settle(nests.br) }
     }
 
     function reserve(edge: string, chassisPresent: bool): real {

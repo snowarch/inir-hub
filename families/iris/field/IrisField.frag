@@ -22,8 +22,8 @@
 //
 // Shapes are packed four scalars at a time because a uniform array of structs is
 // not portable across the backends Qt targets: `shapeN` is (centre.x, centre.y,
-// half.x, half.y) in screen pixels, `radiiA..C` their corner radii and
-// `paintsA..C` which of them bring their own material.
+// half.x, half.y) in screen pixels, `cornersN` its corner radii (upper left, upper
+// right, lower right, lower left) and `paintsA..E` which of them bring their own material.
 layout(location = 0) in vec2 qt_TexCoord0;
 layout(location = 0) out vec4 fragColor;
 layout(std140, binding = 0) uniform buf {
@@ -48,7 +48,11 @@ layout(std140, binding = 0) uniform buf {
     vec4 shape8; vec4 shape9; vec4 shape10; vec4 shape11;
     vec4 shape12; vec4 shape13; vec4 shape14; vec4 shape15;
     vec4 shape16; vec4 shape17; vec4 shape18; vec4 shape19;
-    vec4 radiiA; vec4 radiiB; vec4 radiiC; vec4 radiiD; vec4 radiiE;
+    vec4 corners0; vec4 corners1; vec4 corners2; vec4 corners3;
+    vec4 corners4; vec4 corners5; vec4 corners6; vec4 corners7;
+    vec4 corners8; vec4 corners9; vec4 corners10; vec4 corners11;
+    vec4 corners12; vec4 corners13; vec4 corners14; vec4 corners15;
+    vec4 corners16; vec4 corners17; vec4 corners18; vec4 corners19;
     // Which bodies paint themselves. Kept in the block because the QML side
     // still needs the flag (a body that paints itself brings its own shadow);
     // the union does not treat them differently any more.
@@ -201,8 +205,13 @@ float kiriBox(vec2 p, vec2 centre, vec2 halfSize, float radius) {
     return dist - e;
 }
 
-// A body's radius lane is its radius under both corners; 0 under Kiri takes the Design's own (options.z is its cut).
-float bodyBox(vec2 p, vec2 centre, vec2 halfSize, float radius) {
+// A body has a radius per corner (upper left, upper right, lower right, lower left): a menu nests the one corner that
+// faces the frame's or a fillet's curve and keeps its own at the other three. Each quadrant is the box with its own
+// corner's radius all round, which is that corner exactly: a squircle's reach and a cut stop at the body's half, and
+// the straight runs between them read no radius. 0 under Kiri takes the Design's own (options.z is its cut).
+float bodyBox(vec2 p, vec2 centre, vec2 halfSize, vec4 corners) {
+    vec2 d = p - centre;
+    float radius = d.y < 0.0 ? (d.x < 0.0 ? corners.x : corners.y) : (d.x < 0.0 ? corners.w : corners.z);
     if (u.options.y < 0.5)
         return squircleBox(p, centre, halfSize, radius);
     return kiriBox(p, centre, halfSize, radius > 0.5 ? radius : u.options.z / KIRI_CUT);
@@ -253,6 +262,18 @@ vec4 shapeAt(int i) {
         return i == 12 ? u.shape12 : i == 13 ? u.shape13 : i == 14 ? u.shape14 : u.shape15;
     }
     return i == 16 ? u.shape16 : i == 17 ? u.shape17 : i == 18 ? u.shape18 : u.shape19;
+}
+
+vec4 cornersAt(int i) {
+    if (i < 8) {
+        if (i < 4) return i == 0 ? u.corners0 : i == 1 ? u.corners1 : i == 2 ? u.corners2 : u.corners3;
+        return i == 4 ? u.corners4 : i == 5 ? u.corners5 : i == 6 ? u.corners6 : u.corners7;
+    }
+    if (i < 16) {
+        if (i < 12) return i == 8 ? u.corners8 : i == 9 ? u.corners9 : i == 10 ? u.corners10 : u.corners11;
+        return i == 12 ? u.corners12 : i == 13 ? u.corners13 : i == 14 ? u.corners14 : u.corners15;
+    }
+    return i == 16 ? u.corners16 : i == 17 ? u.corners17 : i == 18 ? u.corners18 : u.corners19;
 }
 
 float blockValue(int block, int slot, vec4 a, vec4 b, vec4 c, vec4 d, vec4 e) {
@@ -420,8 +441,7 @@ void main() {
             continue;
         int block = i / 4;
         int slot = i - block * 4;
-        float radius = blockValue(block, slot, u.radiiA, u.radiiB, u.radiiC, u.radiiD, u.radiiE);
-        bodies[i] = bodyBox(p, s.xy, s.zw, radius);
+        bodies[i] = bodyBox(p, s.xy, s.zw, cornersAt(i));
         united = min(united, bodies[i]);
         float m = blockValue(block, slot, u.glassA, u.glassB, u.glassC, u.glassD, u.glassE);
         if (m > 1.5)
@@ -492,7 +512,8 @@ void main() {
                 && blockValue(block, slot, u.alsoA, u.alsoB, u.alsoC, u.alsoD, u.alsoE) > -0.5)
                 continue;
             vec4 s = shapeAt(i);
-            float r = min(blockValue(block, slot, u.radiiA, u.radiiB, u.radiiC, u.radiiD, u.radiiE), min(s.z, s.w));
+            vec4 corners = cornersAt(i);
+            float r = min(max(max(corners.x, corners.y), max(corners.z, corners.w)), min(s.z, s.w));
             float under = u.field.z + 2.0;
             vec2 a = s.xy - s.zw;
             vec2 b = s.xy + s.zw;
@@ -613,8 +634,7 @@ void main() {
                     vec4 s = shapeAt(i);
                     int block = i / 4;
                     int slot = i - block * 4;
-                    float radius = blockValue(block, slot, u.radiiA, u.radiiB, u.radiiC, u.radiiD, u.radiiE);
-                    bodiesQ[i] = bodyBox(q, s.xy, s.zw, max(radius, bevel));
+                    bodiesQ[i] = bodyBox(q, s.xy, s.zw, max(cornersAt(i), vec4(bevel)));
                     unitedQ = min(unitedQ, bodiesQ[i]);
                 }
                 for (int i = 0; i < 20; ++i) {
@@ -868,7 +888,7 @@ void main() {
             if (blockValue(block, slot, u.paintsA, u.paintsB, u.paintsC, u.paintsD, u.paintsE) > 0.5)
                 continue;
             vec4 s = shapeAt(i);
-            casters[i] = bodyBox(ps, s.xy, s.zw, blockValue(block, slot, u.radiiA, u.radiiB, u.radiiC, u.radiiD, u.radiiE));
+            casters[i] = bodyBox(ps, s.xy, s.zw, cornersAt(i));
             alone = min(alone, casters[i]);
         }
         for (int i = 0; i < 20; ++i) {

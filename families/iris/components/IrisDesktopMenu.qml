@@ -280,11 +280,14 @@ Loader {
                 width: menu.seed, height: menu.seed, radius: menu.seed / 2 })
             contentReady: column.implicitHeight > 0
             readonly property real baseRadius: IrisStyle.surfaceRadius("menus", root.compact ? IrisStyle.radiusTile : IrisStyle.radiusCard)
-            // Near a frame corner or the fillet it opens from, its corner nests in that curve by the air between them.
-            radius: popup.placement && !IrisStyle.fieldChamfer
+            radius: menu.baseRadius
+            readonly property var cornerRadii: IrisFrame.cornersOf({ radius: menu.radius, corners: menu.corners })
+            // Near a frame corner or the fillet it opens from, the corner that faces that curve nests in it by the air
+            // between them; the other three keep the menu's own.
+            corners: popup.placement && !IrisStyle.fieldChamfer
                 ? IrisFrame.nestRadius({ x: menu.x, y: menu.y, width: menu.width, height: menu.height }, menu.baseRadius,
                     popup.target, IrisStyle.fuse, popup.width, popup.height)
-                : menu.baseRadius
+                : null
             light: IrisStyle.surfaceLight("menus", IrisStyle.wallpaperLight)
             lightFrom: popup.toward === "up" ? "bottom" : popup.toward === "left" ? "right" : popup.toward === "right" ? "left" : "top"
             x: popup.placement ? Math.round(popup.placement.x)
@@ -320,6 +323,12 @@ Loader {
                         id: row
                         required property var modelData
                         required property int index
+                        // The first row's upper corners and the last row's lower ones sit a pad inside the menu's own:
+                        // concentric with them, so a nested corner's plate nests too.
+                        function nestedAt(which: string, floor: real): real {
+                            const edge = which[0] === "t" ? row.index === 0 : row.index === root.shown.length - 1
+                            return IrisStyle.concentric(edge ? menu.cornerRadii[which] : menu.radius, root.pad, floor)
+                        }
                         Layout.fillWidth: true
                         sourceComponent: row.modelData?.type === "separator" ? separatorComponent
                             : row.modelData?.type === "header" ? headerComponent
@@ -422,6 +431,10 @@ Loader {
                                 ClippingRectangle {
                                     anchors.fill: parent
                                     radius: IrisStyle.fieldChamfer ? 0 : IrisStyle.concentric(menu.radius, root.pad, IrisStyle.radiusMicro)
+                                    topLeftRadius: IrisStyle.fieldChamfer ? 0 : row.nestedAt("tl", IrisStyle.radiusMicro)
+                                    topRightRadius: IrisStyle.fieldChamfer ? 0 : row.nestedAt("tr", IrisStyle.radiusMicro)
+                                    bottomLeftRadius: IrisStyle.fieldChamfer ? 0 : row.nestedAt("bl", IrisStyle.radiusMicro)
+                                    bottomRightRadius: IrisStyle.fieldChamfer ? 0 : row.nestedAt("br", IrisStyle.radiusMicro)
                                     color: IrisStyle.fillQuiet
                                     layer.enabled: IrisStyle.fieldChamfer
                                     layer.effect: MultiEffect {
@@ -572,6 +585,10 @@ Loader {
                                     visible: !menuItem.skinned
                                     anchors.fill: parent
                                     radius: IrisStyle.plateSelection ? 0 : IrisStyle.concentric(menu.radius, root.pad, IrisStyle.radiusChip)
+                                    topLeftRadius: IrisStyle.plateSelection ? 0 : row.nestedAt("tl", IrisStyle.radiusChip)
+                                    topRightRadius: IrisStyle.plateSelection ? 0 : row.nestedAt("tr", IrisStyle.radiusChip)
+                                    bottomLeftRadius: IrisStyle.plateSelection ? 0 : row.nestedAt("bl", IrisStyle.radiusChip)
+                                    bottomRightRadius: IrisStyle.plateSelection ? 0 : row.nestedAt("br", IrisStyle.radiusChip)
                                     color: menuItem.plate ? IrisStyle.selectionFill : menuItem.danger
                                         ? (menuItem.lit ? IrisStyle.tintFill(IrisStyle.danger) : ColorUtils.applyAlpha(IrisStyle.danger, 0))
                                         : (menuItem.lit ? IrisStyle.tintFill(IrisStyle.accent) : ColorUtils.applyAlpha(IrisStyle.accent, 0))

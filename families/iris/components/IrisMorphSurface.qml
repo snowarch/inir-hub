@@ -21,6 +21,9 @@ Item {
     property Item originItem: null
     property real originItemRadius: 0
     property real radius: IrisStyle.radius
+    // A radius per corner ({ tl, tr, bl, br }; null, or a corner left out: `radius`): a body near the frame or a fillet
+    // nests the corner that faces that curve (IrisFrame.nestRadius) and keeps `radius` at the others.
+    property var corners: null
     property color color: IrisStyle.surface
     property color light: "transparent"
     // How awake the glass is: 1 in front, 0 in a window that lost the focus. Unfocused, glass loses energy instead of
@@ -71,7 +74,7 @@ Item {
         const r = chassis.radius
         const glass = root.glass ? IrisStyle.surfaceGlass(root.motionSurface) : "solid"
         const body = { x: at.x + root.windowOffset.x, y: at.y + root.windowOffset.y, width: chassis.width, height: chassis.height, radius: r,
-            id: join.id ?? root.chassisKey, joins: join.joins ?? "", fuse: join.fuse ?? 0, paints: true,
+            corners: chassis.corners, id: join.id ?? root.chassisKey, joins: join.joins ?? "", fuse: join.fuse ?? 0, paints: true,
             glass: glass, frost: root.frost }
         if (join.grow === "top") { body.y -= r; body.height += r }
         else if (join.grow === "bottom") body.height += r
@@ -95,7 +98,7 @@ Item {
     readonly property var bodyRect: {
         void (chassis.x + chassis.y + chassis.width + chassis.height + chassis.radius + root.x + root.y)
         return { x: root.x + chassis.x, y: root.y + chassis.y,
-            width: chassis.width, height: chassis.height, radius: chassis.radius }
+            width: chassis.width, height: chassis.height, radius: chassis.radius, corners: chassis.corners }
     }
     readonly property bool settled: root.presentation >= 1
     // Nothing throws when a surface opens and stays invisible (the gallery's body came up with no content after a
@@ -128,7 +131,7 @@ Item {
         if (!root.blurWhileReceding && !root.open) return []
         void (root.x + root.y + chassis.x + chassis.y + chassis.width + chassis.height + chassis.radius + (root.parent?.x ?? 0) + (root.parent?.y ?? 0))
         const at = chassis.mapToItem(null, 0, 0)
-        return [{ x: at.x, y: at.y, width: chassis.width, height: chassis.height, radius: chassis.radius }]
+        return [{ x: at.x, y: at.y, width: chassis.width, height: chassis.height, radius: chassis.radius, corners: chassis.corners }]
     }
     signal closed()
     // Settles in place: it arrives at 95 % of itself on its own centre, never from its origin, and
@@ -288,6 +291,12 @@ Item {
     Component.onCompleted: armLater.restart()
 
     function lerp(a: real, b: real): real { return a + (b - a) * Math.min(1, root.presentation) }
+    // A corner on its way from the origin's radius to `target`, never past the body's half.
+    function morphRadius(target: real, w: real, h: real): real {
+        return Math.min(w / 2, h / 2, root.absorbs
+            ? root.lerp(Math.min(Math.min(root.start.width, root.start.height) / 2, root.fromRadius * root.originShare), target)
+            : root.lerp(root.fromRadius, target))
+    }
     readonly property bool pullsAcross: Math.abs(root.width / 2 - root.start.x - root.start.width / 2)
         >= Math.abs(root.height / 2 - root.start.y - root.start.height / 2)
     readonly property real lagging: {
@@ -357,13 +366,20 @@ Item {
             - root.swellY * root.anchorY / Math.max(1, root.height)) - root.y
         width: Math.round(root.lerpX(root.start.width, root.width) + root.swellX)
         height: Math.round(root.lerpY(root.start.height, root.height) + root.swellY)
-        radius: Math.min(width / 2, height / 2, root.absorbs
-            ? root.lerp(Math.min(Math.min(root.start.width, root.start.height) / 2, root.fromRadius * root.originShare), root.radius)
-            : root.lerp(root.fromRadius, root.radius))
+        radius: root.morphRadius(root.radius, width, height)
+        // Each corner morphs to its own; the body the field draws carries them (`chassisBodies`, `bodyRect`).
+        readonly property var corners: {
+            const c = IrisFrame.cornersOf({ radius: root.radius, corners: root.corners })
+            const w = chassis.width, h = chassis.height
+            return { tl: root.morphRadius(c.tl, w, h), tr: root.morphRadius(c.tr, w, h),
+                bl: root.morphRadius(c.bl, w, h), br: root.morphRadius(c.br, w, h) }
+        }
         // Kiri cuts the upper-right and lower-left corners: the content's clip rounds them by an arc that stays inside the
         // cut (IrisStyle.kiriClip), so nothing it holds (a light wash, a row) shows past the field's edge.
-        topRightRadius: IrisStyle.fieldChamfer ? IrisStyle.kiriClip(chassis.radius, width, height) : chassis.radius
-        bottomLeftRadius: IrisStyle.fieldChamfer ? IrisStyle.kiriClip(chassis.radius, width, height) : chassis.radius
+        topLeftRadius: chassis.corners.tl
+        topRightRadius: IrisStyle.fieldChamfer ? IrisStyle.kiriClip(chassis.corners.tr, width, height) : chassis.corners.tr
+        bottomLeftRadius: IrisStyle.fieldChamfer ? IrisStyle.kiriClip(chassis.corners.bl, width, height) : chassis.corners.bl
+        bottomRightRadius: chassis.corners.br
         color: root.material === "field" ? IrisStyle.bodyClip
             : root.material === "compositor" ? root.energised(IrisStyle.placeSurface) : root.color
         // Visible from the request: forceActiveFocus() is ignored on invisible subtrees.

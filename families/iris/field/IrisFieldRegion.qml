@@ -4,6 +4,7 @@ import Quickshell
 FieldRegion {
     required property var owner
     bodies: owner.nativeBodies
+    cornerRadii: owner.nativeCorners
     framed: owner.framed
     joinsFrame: owner.joinsFrame
     windowWidth: owner.windowWidth

@@ -13,7 +13,7 @@ Region {
     property var shapes: []
     // qs-rs rasterises the field itself on every build (FieldRegion, IrisFieldRegion.qml): exact on every frame, with the
     // music's wave in the band, so nothing below runs there. Quickshell walks it here.
-    readonly property bool nativeRaster: SystemInfo.runtimeHas(["field-region"])
+    readonly property bool nativeRaster: SystemInfo.runtimeHas(["field-region", "field-corners"])
     property var nativeRegion: null
     property vector4d edgeWave: Qt.vector4d(0, 0, 0, 0)
     property real waveClock: 0
@@ -28,6 +28,16 @@ Region {
             const joins = !s.joins ? [] : Array.isArray(s.joins) ? s.joins : [s.joins]
             out.push(s.x, s.y, s.width, s.height, Number(s.radius ?? 0),
                 Number(s.fuse ?? IrisStyle.fuse), slot(joins[0]), slot(joins[1]))
+        }
+        return out
+    }
+    // Four radii a body (upper left, upper right, lower right, lower left), as FieldRegion's cornerRadii reads them.
+    readonly property var nativeCorners: {
+        if (!root.nativeRaster) return []
+        const out = []
+        for (const s of root.shapes ?? []) {
+            const c = IrisFrame.cornersOf(s)
+            out.push(c.tl, c.tr, c.br, c.bl)
         }
         return out
     }
@@ -63,6 +73,11 @@ Region {
     }
     function bodyKey(s: var): string {
         return Object.keys(s).filter(k => typeof s[k] !== "object").map(k => k + ":" + root.valueKey(s[k])).join(",")
+            + root.cornersKey(s)
+    }
+    function cornersKey(s: var): string {
+        const c = s.corners
+        return c ? ",corners:" + [c.tl, c.tr, c.bl, c.br].map(v => root.valueKey(Number(v ?? -1))).join("/") : ""
     }
     onShapesChanged: {
         if (root.nativeRaster) return
@@ -167,8 +182,9 @@ Region {
         const acrossLo = rows ? s.y : s.x, acrossLen = rows ? s.height : s.width
         const alongLo = rows ? s.x : s.y, alongLen = rows ? s.width : s.height
         const limit = rows ? root.windowWidth : root.windowHeight
-        const r = Math.min(Number(s.radius ?? 0), s.width / 2, s.height / 2)
-        const curve = root.squircles(s) ? Math.min(r * root.squircleReach, Math.min(s.width, s.height) / 2) : 0
+        const m = Math.min(s.width, s.height) / 2, c = IrisFrame.cornersOf(s)
+        // The corners a line runs into at its two ends, by the half of the body it crosses.
+        const ends = nearLo => rows ? (nearLo ? [c.tl, c.tr] : [c.bl, c.br]) : (nearLo ? [c.tl, c.bl] : [c.tr, c.br])
         const test = (along, across) => rows ? inside(along, across) : inside(across, along)
         // The last pixel centre from `from` (inside) toward `to` that the union holds: 4 px strides, then 1 px.
         const walk = (from, to, across) => {
@@ -189,11 +205,12 @@ Region {
             if (n < band || n >= size - band) return null
             const across = n + 0.5
             if (!test(mid, across)) return null
-            const off = Math.max(0, Math.min(across - acrossLo, acrossLo + acrossLen - across))
-            const inset = curve > 0 ? root.squircleInset(off, curve) : off >= r ? 0 : r - Math.sqrt(Math.max(0, r * r - (r - off) ** 2))
-            const edgeA = Math.min(mid, Math.floor(alongLo + inset + i) + 1.5), edgeB = Math.max(mid, Math.ceil(alongLo + alongLen - inset - i) - 1.5)
-            return [Math.max(0, Math.floor(walk(test(edgeA, across) ? edgeA : mid, Math.max(0.5, Math.ceil(alongLo + inset) - reach - 0.5), across))),
-                Math.min(limit - 1, Math.floor(walk(test(edgeB, across) ? edgeB : mid, Math.min(limit - 0.5, Math.floor(alongLo + alongLen - inset) + reach + 0.5), across)))]
+            const offLo = across - acrossLo, offHi = acrossLo + acrossLen - across
+            const off = Math.max(0, Math.min(offLo, offHi)), corner = ends(offLo <= offHi)
+            const insetA = root.cornerInset(off, corner[0], m, 0), insetB = root.cornerInset(off, corner[1], m, 0)
+            const edgeA = Math.min(mid, Math.floor(alongLo + insetA + i) + 1.5), edgeB = Math.max(mid, Math.ceil(alongLo + alongLen - insetB - i) - 1.5)
+            return [Math.max(0, Math.floor(walk(test(edgeA, across) ? edgeA : mid, Math.max(0.5, Math.ceil(alongLo + insetA) - reach - 0.5), across))),
+                Math.min(limit - 1, Math.floor(walk(test(edgeB, across) ? edgeB : mid, Math.min(limit - 0.5, Math.floor(alongLo + alongLen - insetB) + reach + 0.5), across)))]
         }
         const same = (p, q) => p === q || (p !== null && q !== null && p[0] === q[0] && p[1] === q[1])
         // Every fourth line, then each line between two that differ: the union is smooth, so between two equal
@@ -227,7 +244,7 @@ Region {
     function joinRuns(s: var, t: var, exact: bool, out: var, cache: var, kept: var): void {
         const k = Math.max(0, Number(s.fuse ?? 0))
         if (k < 0.5) return
-        const g = b => b.x + "," + b.y + "," + b.width + "," + b.height + "," + (b.radius ?? 0)
+        const g = b => b.x + "," + b.y + "," + b.width + "," + b.height + "," + (b.radius ?? 0) + root.cornersKey(b)
         const key = g(s) + "," + k + "," + IrisStyle.fieldChamfer + "|" + (t === null ? "frame:" + g(root.memo.frame) + "," + root.windowWidth + "," + root.windowHeight
             : g(t)) + "|" + root.framed + "," + root.band
         // A still body keeps its exact runs while another one moves; only a moving one is walked coarse.
@@ -242,11 +259,13 @@ Region {
         // Plain numbers in closures: this runs ~10k times a build, and a QML property read per call made it 15 ms.
         // The field's squircleBox: walked on circular corners, the blur held a sliver outside every large shoulder and
         // missed one inside a join's (12 px past an open Island's lower corners, 36 short of a resting Island's join).
+        // A body with corners that differ is read as the field reads it: each quadrant the box with its own corner all round.
         const reachK = root.squircleReach
-        const box = b => {
-            const hx = b.width / 2, hy = b.height / 2, m = hx < hy ? hx : hy
-            const r = Math.min(Number(b.radius ?? 0), m)
-            const cx = b.x + hx, cy = b.y + hy
+        const quadrants = (cx, cy, c, tl, tr, bl, br) => c.tl === c.tr && c.tl === c.bl && c.tl === c.br ? tl
+            : (x, y) => (y < cy ? (x < cx ? tl : tr) : (x < cx ? bl : br))(x, y)
+        const corner = (hx, hy, cx, cy, radius) => {
+            const m = hx < hy ? hx : hy
+            const r = Math.min(radius, m)
             if (r < 0.5 || r >= m - 0.5) {
                 const ex = hx - r, ey = hy - r
                 return (x, y) => {
@@ -267,13 +286,16 @@ Region {
                 return (l - reach) / Math.sqrt(gx * gx + gy * gy)
             }
         }
+        const box = b => {
+            const hx = b.width / 2, hy = b.height / 2, cx = b.x + hx, cy = b.y + hy, c = IrisFrame.cornersOf(b)
+            const tl = corner(hx, hy, cx, cy, c.tl)
+            return quadrants(cx, cy, c, tl, corner(hx, hy, cx, cy, c.tr), corner(hx, hy, cx, cy, c.bl), corner(hx, hy, cx, cy, c.br))
+        }
         // A Kiri Design draws its bodies round at the upper left and lower right and cut with eased ends at the other two
         // (IrisField.frag kiriBox), and keeps its fillets at most twice its cut deep (smoothUnion).
         const blade = root.chamfer
-        const kiri = (b, rad) => {
-            const hx = b.width / 2, hy = b.height / 2, cx = b.x + hx, cy = b.y + hy
-            const r = Math.min(rad > 0.5 ? rad : blade / 1.5, 0.56 * Math.min(hx, hy))
-            const round = box({ x: b.x, y: b.y, width: b.width, height: b.height, radius: r })
+        const cut = (hx, hy, cx, cy, r) => {
+            const round = corner(hx, hy, cx, cy, r)
             if (r < 0.5) return round
             const e = 0.55 * r, sx = hx - e, sy = hy - e, l = hx + hy - 1.5 * r - e * Math.SQRT2
             const ax = sx, ay = l - sx, bx = l - sy, by = sy, abx = bx - ax, aby = by - ay, ab2 = abx * abx + aby * aby
@@ -290,9 +312,14 @@ Region {
                 return d - e
             }
         }
-        const own = blade > 0 ? kiri(s, Number(s.radius ?? 0)) : box(s)
-        const joined = blade > 0 ? (t === null ? kiri(root.memo.frame, Number(root.memo.frame.radius ?? 0)) : kiri(t, Number(t.radius ?? 0)))
-            : box(t === null ? root.memo.frame : t)
+        const kiri = b => {
+            const hx = b.width / 2, hy = b.height / 2, cx = b.x + hx, cy = b.y + hy, c = IrisFrame.cornersOf(b)
+            const fit = rad => Math.min(rad > 0.5 ? rad : blade / 1.5, 0.56 * Math.min(hx, hy))
+            const round = r => corner(hx, hy, cx, cy, r)
+            return quadrants(cx, cy, c, round(fit(c.tl)), cut(hx, hy, cx, cy, fit(c.tr)), cut(hx, hy, cx, cy, fit(c.bl)), round(fit(c.br)))
+        }
+        const own = blade > 0 ? kiri(s) : box(s)
+        const joined = blade > 0 ? kiri(t === null ? root.memo.frame : t) : box(t === null ? root.memo.frame : t)
         const sign = t === null ? -1 : 1, limit = -root.inset, kk = blade > 0 ? Math.min(k, 2 * blade) : k
         const inside = (x, y) => {
             const a = sign * joined(x, y), b = own(x, y)
@@ -309,22 +336,23 @@ Region {
     // for the straight middle, one per row of the corners (every third row while it moves, the narrowest of the three).
     function kiriRows(s: var, cut: real, exact: bool, out: var): void {
         const i = root.inset
-        const m = Math.min(s.width, s.height) / 2
-        const rad = Number(s.radius ?? 0) > 0.5 ? Number(s.radius) : cut / 1.5
-        const r = Math.min(rad, 0.56 * m)
-        const reach = Math.min(r * root.squircleReach, m) - i
-        const c = 1.5 * r - i * (2 - Math.SQRT2), e = Math.max(0, 0.55 * r - i)
+        const m = Math.min(s.width, s.height) / 2, corners = IrisFrame.cornersOf(s)
+        const fit = rad => Math.min(rad > 0.5 ? rad : cut / 1.5, 0.56 * m)
+        const tl = fit(corners.tl), tr = fit(corners.tr), bl = fit(corners.bl), br = fit(corners.br)
+        const reach = r => Math.min(r * root.squircleReach, m) - i
+        const leg = r => 1.5 * r - i * (2 - Math.SQRT2), ease = r => Math.max(0, 0.55 * r - i)
+        const reachTl = reach(tl), reachBr = reach(br), legTr = leg(tr), easeTr = ease(tr), legBl = leg(bl), easeBl = ease(bl)
         const top = root.lo(s.y + i), bottom = root.hi(s.y + s.height - i)
         const left = root.lo(s.x + i), right = root.hi(s.x + s.width - i)
         if (bottom <= top || right <= left) return
         const span = n => {
             const cy = n + 0.5
             const a = cy - s.y - i, b = s.y + s.height - i - cy
-            const kl = Math.max(root.squircleInset(a, reach), root.kiriCutInset(b, c, e))
-            const kr = Math.max(root.kiriCutInset(a, c, e), root.squircleInset(b, reach))
+            const kl = Math.max(root.squircleInset(a, reachTl), root.kiriCutInset(b, legBl, easeBl))
+            const kr = Math.max(root.kiriCutInset(a, legTr, easeTr), root.squircleInset(b, reachBr))
             return [Math.max(left, root.hi(s.x + i + kl)), Math.min(right, root.lo(s.x + s.width - i - kr))]
         }
-        const step = exact || r < 0.5 ? 1 : 3
+        const step = exact || Math.min(tl, tr, bl, br) < 0.5 ? 1 : 3
         let open = null
         const flush = () => {
             if (open && open.b > open.a) out.push({ x: open.a, y: open.from, width: open.b - open.a, height: open.to - open.from })
@@ -358,10 +386,21 @@ Region {
     // its rows, as a cut body is: one rect for the square middle, one per row of the corners (every third row while it
     // moves, the narrowest of the three). Capsules and discs keep their round Rect, as the shader keeps their arcs.
     readonly property real squircleReach: 1.8409
-    function squircles(s: var): bool {
-        const m = Math.min(s.width, s.height) / 2
-        const r = Math.min(Number(s.radius ?? 0), m)
-        return r >= 0.5 && r < m - 0.5
+    // A body is walked as rows when a corner of it is a squircle, or when its corners differ (a round Rect has one radius).
+    function byRows(s: var): bool {
+        const m = Math.min(s.width, s.height) / 2, c = IrisFrame.cornersOf(s)
+        const curved = r => Math.min(r, m) >= 0.5 && Math.min(r, m) < m - 0.5
+        return curved(c.tl) || curved(c.tr) || curved(c.bl) || curved(c.br) || c.tl !== c.tr || c.tl !== c.bl || c.tl !== c.br
+    }
+    // How far in from its side a corner of radius `r` stands at `t` from its top or bottom edge, on a body whose shorter
+    // half is `m` and an outline shrunk by `i`: the field's squircle, or the circle it keeps (capsule ends, tiny radii).
+    function cornerInset(t: real, r: real, m: real, i: real): real {
+        const q = Math.min(r, m)
+        if (q >= 0.5 && q < m - 0.5) return root.squircleInset(t, Math.min(q * root.squircleReach, m) - i)
+        const c = Math.max(0, q - i)
+        if (t >= c) return 0
+        const v = c - Math.max(0, t)
+        return c - Math.sqrt(Math.max(0, c * c - v * v))
     }
     // How far in from the side a squircle corner of `reach` stands at `t` from its top or bottom edge.
     function squircleInset(t: real, reach: real): real {
@@ -371,15 +410,16 @@ Region {
     }
     function squircled(s: var, exact: bool, out: var): void {
         const i = root.inset
-        const m = Math.min(s.width, s.height) / 2
-        const reach = Math.min(Number(s.radius ?? 0) * root.squircleReach, m) - i
+        const m = Math.min(s.width, s.height) / 2, c = IrisFrame.cornersOf(s)
         const top = root.lo(s.y + i), bottom = root.hi(s.y + s.height - i)
         const left = root.lo(s.x + i), right = root.hi(s.x + s.width - i)
         if (bottom <= top || right <= left) return
         const span = n => {
             const cy = n + 0.5
-            const k = root.squircleInset(Math.min(cy - s.y - i, s.y + s.height - i - cy), reach)
-            return [Math.max(left, root.hi(s.x + i + k)), Math.min(right, root.lo(s.x + s.width - i - k))]
+            const a = cy - s.y - i, b = s.y + s.height - i - cy
+            const kl = Math.max(root.cornerInset(a, c.tl, m, i), root.cornerInset(b, c.bl, m, i))
+            const kr = Math.max(root.cornerInset(a, c.tr, m, i), root.cornerInset(b, c.br, m, i))
+            return [Math.max(left, root.hi(s.x + i + kl)), Math.min(right, root.lo(s.x + s.width - i - kr))]
         }
         const step = exact ? 1 : 3
         let open = null
@@ -453,7 +493,7 @@ Region {
         for (const s of list) {
             const i = root.inset
             const mine = exact || stillOf[root.bodyKey(s)]
-            if (cut > 0 || root.squircles(s)) {
+            if (cut > 0 || root.byRows(s)) {
                 const key = root.bodyKey(s) + "," + cut
                 let rows = mine ? rowsCache[key] : null
                 if (!rows) {
@@ -463,7 +503,7 @@ Region {
                 }
                 if (mine) rowsKept[key] = rows
                 for (const q of rows) runs.push(q)
-            } else out.push({ x: s.x + i, y: s.y + i, width: s.width - 2 * i, height: s.height - 2 * i, radius: Math.max(0, Number(s.radius ?? 0) - i) })
+            } else out.push({ x: s.x + i, y: s.y + i, width: s.width - 2 * i, height: s.height - 2 * i, radius: Math.max(0, IrisFrame.cornersOf(s).tl - i) })
             const joins = !s.joins ? [] : Array.isArray(s.joins) ? s.joins : [s.joins]
             for (const id of joins) {
                 if (id === "frame") {

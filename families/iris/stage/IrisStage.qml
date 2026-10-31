@@ -1457,10 +1457,10 @@ Item {
         const rect = root.rects[root.allSlots.indexOf(slot)]
         return rect ? { rect: { x: rect.x, y: rect.y, width: rect.size, height: rect.size }, side: IrisFrame.edgeOf(root.placeName(slot)) } : null
     }
-    readonly property real cardRadius: root.cardPlacement && !IrisStyle.cardJoins
+    readonly property var cardCorners: root.cardPlacement && !IrisStyle.cardJoins
         ? IrisFrame.nestRadius({ x: root.cardPlacement.x, y: root.cardPlacement.y, width: card.width, height: card.height },
             root.cardBaseRadius, root.cardNest?.rect ?? null, root.edgeFuseOn(root.cardNest?.side ?? ""), root.width, root.height)
-        : root.cardBaseRadius
+        : null
     readonly property var cardPlacement: root.cardAnchor && !root.cardHangs
         ? IrisFrame.place(root.cardOrigin, card.width, card.height, root.width, root.height, root.cardBaseRadius,
             root.cardAvoidRects, !root.cardFromSatellite && IrisStyle.cardJoins
@@ -1503,7 +1503,8 @@ Item {
         color: IrisStyle.bodySurface
         fieldBacked: true
         contentReady: cardContent.contentHeight > 0
-        radius: root.cardRadius
+        radius: root.cardBaseRadius
+        corners: root.cardCorners
         origin: root.cardAnchor
         light: IrisStyle.surfaceLight("cards", cardContent.light)
         lightFrom: !root.cardAnchor ? "top"
@@ -1593,6 +1594,10 @@ Item {
         ClippingRectangle {
             anchors.fill: parent
             radius: card.radius
+            topLeftRadius: card.bodyRect.corners.tl
+            topRightRadius: card.bodyRect.corners.tr
+            bottomLeftRadius: card.bodyRect.corners.bl
+            bottomRightRadius: card.bodyRect.corners.br
             color: "transparent"
 
             Flickable {

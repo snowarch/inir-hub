@@ -118,10 +118,11 @@ Item {
         color: IrisStyle.bodySurface
         fieldBacked: true
         contentReady: contents.contentHeight > 0
-        radius: root.placement && !IrisStyle.cardJoins
+        radius: root.baseRadius
+        corners: root.placement && !IrisStyle.cardJoins
             ? IrisFrame.nestRadius({ x: root.placement.x, y: root.placement.y, width: panel.width, height: panel.height },
                 root.baseRadius, root.origin?.obstacle ?? root.origin, Number(root.origin?.nestFuse ?? IrisStyle.fuse), root.width, root.height)
-            : root.baseRadius
+            : null
         origin: root.fromPiece ? root.origin : null
         onClosed: if (IrisState.morphOwner === "stage" && !GlobalStates.settingsOverlayOpen) IrisState.morphOwner = ""
         light: IrisStyle.surfaceLight("controlCenter", IrisStyle.wallpaperLight)

@@ -164,7 +164,7 @@ Item {
             const index = {}
             for (let i = 0; i < n; i++)
                 if (list[i]?.id) index[list[i].id] = i
-            const geometry = [], radius = [], fuse = [], join = [], also = [], paints = [], glass = []
+            const geometry = [], corners = [], fuse = [], join = [], also = [], paints = [], glass = []
             const slot = (s, which) => {
                 const names = !s || !s.joins ? [] : Array.isArray(s.joins) ? s.joins : [s.joins]
                 const name = names[which]
@@ -176,7 +176,8 @@ Item {
             for (let i = 0; i < root.capacity; i++) {
                 const s = list[i]
                 geometry.push(s ? Qt.vector4d(s.x + s.width / 2, s.y + s.height / 2, s.width / 2, s.height / 2) : zero)
-                radius.push(!s ? 0 : Number(s.radius ?? 0))
+                const c = s ? IrisFrame.cornersOf(s) : null
+                corners.push(c ? Qt.vector4d(c.tl, c.tr, c.br, c.bl) : zero)
                 fuse.push(s ? Number(s.fuse ?? root.smoothing) : 0)
                 join.push(slot(s, 0))
                 also.push(slot(s, 1))
@@ -191,7 +192,7 @@ Item {
                     out.push(Qt.vector4d(values[b * 4], values[b * 4 + 1], values[b * 4 + 2], values[b * 4 + 3]))
                 return out
             }
-            return { geometry: geometry, radius: blocks(radius), fuse: blocks(fuse), join: blocks(join), also: blocks(also),
+            return { geometry: geometry, corners: corners, fuse: blocks(fuse), join: blocks(join), also: blocks(also),
                 paints: blocks(paints), glass: blocks(glass) }
         }
         readonly property vector4d viewport: Qt.vector4d(pass.x, pass.y,
@@ -254,11 +255,26 @@ Item {
         readonly property vector4d shape17: pass.packed.geometry[17]
         readonly property vector4d shape18: pass.packed.geometry[18]
         readonly property vector4d shape19: pass.packed.geometry[19]
-        readonly property vector4d radiiA: pass.packed.radius[0]
-        readonly property vector4d radiiB: pass.packed.radius[1]
-        readonly property vector4d radiiC: pass.packed.radius[2]
-        readonly property vector4d radiiD: pass.packed.radius[3]
-        readonly property vector4d radiiE: pass.packed.radius[4]
+        readonly property vector4d corners0: pass.packed.corners[0]
+        readonly property vector4d corners1: pass.packed.corners[1]
+        readonly property vector4d corners2: pass.packed.corners[2]
+        readonly property vector4d corners3: pass.packed.corners[3]
+        readonly property vector4d corners4: pass.packed.corners[4]
+        readonly property vector4d corners5: pass.packed.corners[5]
+        readonly property vector4d corners6: pass.packed.corners[6]
+        readonly property vector4d corners7: pass.packed.corners[7]
+        readonly property vector4d corners8: pass.packed.corners[8]
+        readonly property vector4d corners9: pass.packed.corners[9]
+        readonly property vector4d corners10: pass.packed.corners[10]
+        readonly property vector4d corners11: pass.packed.corners[11]
+        readonly property vector4d corners12: pass.packed.corners[12]
+        readonly property vector4d corners13: pass.packed.corners[13]
+        readonly property vector4d corners14: pass.packed.corners[14]
+        readonly property vector4d corners15: pass.packed.corners[15]
+        readonly property vector4d corners16: pass.packed.corners[16]
+        readonly property vector4d corners17: pass.packed.corners[17]
+        readonly property vector4d corners18: pass.packed.corners[18]
+        readonly property vector4d corners19: pass.packed.corners[19]
         readonly property vector4d fuseA: pass.packed.fuse[0]
         readonly property vector4d fuseB: pass.packed.fuse[1]
         readonly property vector4d fuseC: pass.packed.fuse[2]
