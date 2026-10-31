@@ -58,7 +58,7 @@ ColumnLayout {
         return px <= 0 ? -1 : px
     }
     readonly property real opacityMin: 20
-    readonly property int opacityValue: Math.round(root.widget.irisSurfaceOpacity * 100)
+    readonly property int opacityValue: Math.round(root.widget.look.surfaceOpacity(root.widget) * 100)
     function opacityFrom(value: real): int {
         return Math.round((root.opacityMin + value * (100 - root.opacityMin)) / 5) * 5
     }
@@ -73,7 +73,7 @@ ColumnLayout {
     function materialColor(value: string): color {
         const material = value === "auto" ? root.sharedMaterial : value
         if (material === "tinted")
-            return root.widget.irisTintedPlate
+            return root.widget.look.tintedPlate
         if (material === "solid")
             return IrisStyle.surface
         return ColorUtils.applyAlpha(IrisStyle.surface, IrisStyle.materialVeil[material] ?? 1)
@@ -402,7 +402,7 @@ ColumnLayout {
             Layout.fillWidth: true
             implicitHeight: Math.round(40 * root.d)
             radius: root.plateRadius
-            readonly property bool on: root.widget.irisMaterial !== "clear"
+            readonly property bool on: root.widget.look.material(root.widget) !== "clear"
             readonly property color stuff: plateHover.hovered ? IrisStyle.fillHover : IrisStyle.fillQuiet
             color: IrisStyle.fieldChamfer ? "transparent" : plateRow.stuff
             Behavior on color { ColorAnimation { duration: IrisStyle.feedbackDuration; easing.type: IrisStyle.feedbackEasing } }

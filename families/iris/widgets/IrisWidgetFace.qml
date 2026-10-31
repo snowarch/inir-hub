@@ -52,11 +52,11 @@ Item {
     // behind windows each tick redraws the whole desktop window for nobody (rules/background.md).
     readonly property bool moving: root.live && root.widget.motionActive
 
-    readonly property string material: root.widget.irisMaterial
+    readonly property string material: root.widget.look.material(root.widget)
     readonly property bool glass: root.material === "glass"
     readonly property bool clear: root.material === "clear"
     readonly property bool opaque: !root.glass && !root.clear
-    readonly property real strength: root.widget.irisSurfaceOpacity
+    readonly property real strength: root.widget.look.surfaceOpacity(root.widget)
     // Glass and transparent faces over a light region turn over: frost and near-black ink instead of
     // a veil darkened until the glass is gone. An opaque plate keeps its own polarity.
     // In the light scheme a plate is light, so its ink is the dark one; a bare widget still follows the wallpaper.
@@ -105,9 +105,9 @@ Item {
     function inked(seed: color): color { return root.nothing ? root.ink : seed }
     // A heading in the highlight; under Nothing it is ink, so the signal is left for the face's one live value.
     readonly property color heading: root.nothing ? root.ink : root.highlight
-    readonly property color accent: root.nothing ? root.ink : root.stockInk ? stockLoader.item.accent : root.mark(root.widget.irisAccent)
-    readonly property color highlight: root.nothing ? root.signal : root.stockInk ? stockLoader.item.ink : root.mark(root.widget.irisAccent3)
-    readonly property color accent2: root.nothing ? root.inkSecondary : root.stockInk ? stockLoader.item.accent2 : root.mark(root.widget.irisAccent2)
+    readonly property color accent: root.nothing ? root.ink : root.stockInk ? stockLoader.item.accent : root.mark(root.widget.look.accent)
+    readonly property color highlight: root.nothing ? root.signal : root.stockInk ? stockLoader.item.ink : root.mark(root.widget.look.accent3)
+    readonly property color accent2: root.nothing ? root.inkSecondary : root.stockInk ? stockLoader.item.accent2 : root.mark(root.widget.look.accent2)
     readonly property color warm: root.nothing ? root.ink : root.mark(IrisStyle.secondaryAccent)
     readonly property color danger: root.nothing ? root.signal : root.mark(IrisStyle.danger)
     readonly property color ink: root.stockInk ? stockLoader.item.ink : root.paper ? IrisStyle.text : root.lightBackdrop ? IrisStyle.inkOnLight : IrisStyle.light ? IrisStyle.inkOnDark : IrisStyle.text
@@ -126,13 +126,13 @@ Item {
     readonly property string fontLabel: IrisStyle.fontLabel
     // Outline: Auto follows the shell's outline and leaves Transparent bare. Arranging draws its own selection outline
     // around the widget, so the widget's own stays as set (forced on while arranging, it read as the outline changing).
-    readonly property bool rimShown: root.widget.irisOutline === "always"
-        || (root.widget.irisOutline === "auto" && (!root.clear || root.widget.irisRim))
+    readonly property bool rimShown: root.widget.look.outline(root.widget) === "always"
+        || (root.widget.look.outline(root.widget) === "auto" && (!root.clear || root.widget.look.rim))
     readonly property bool glassEdge: (root.glass || IrisStyle.edgeLit) && !root.lightBackdrop
         && (IrisStyle.glassEdgeLight > 0 || IrisStyle.glassEdgeLine > 0)
     readonly property bool flatRim: root.rimShown && !root.glassEdge
-        && !(root.glass && !root.lightBackdrop && root.widget.irisOutline === "auto")
-    readonly property color plateColor: ColorUtils.applyAlpha(root.opaque ? root.widget.irisPlate
+        && !(root.glass && !root.lightBackdrop && root.widget.look.outline(root.widget) === "auto")
+    readonly property color plateColor: ColorUtils.applyAlpha(root.opaque ? root.widget.look.plate(root.widget)
         : root.lightBackdrop && !root.paper ? IrisStyle.frost : IrisStyle.surface, root.veil)
     readonly property color knockout: root.opaque ? root.plateColor : root.lightBackdrop && !root.paper ? IrisStyle.frost : IrisStyle.surface
 

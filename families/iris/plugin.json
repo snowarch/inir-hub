@@ -41,6 +41,7 @@
     "control.segmented": "components/IrisSegmented.qml",
     "cutPlate": "components/IrisCutPlate.qml",
     "widget.sizeGrip": "widgets/IrisSizeGrip.qml",
+    "widgetLook": "widgets/IrisWidgetLook.qml",
     "designFace": "widgets/IrisDesignFace.qml",
     "mediaCard": "components/IrisMediaCard.qml",
     "artwork": "components/IrisArtwork.qml",
