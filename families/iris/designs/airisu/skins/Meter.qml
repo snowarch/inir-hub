@@ -30,12 +30,9 @@ Item {
     readonly property bool stacked: !root.vertical && root.height >= Math.round(44 * Airisu.d)
     readonly property real span: root.vertical ? root.height : root.width
 
+    // Upright too it keeps Kiri's corners: one shape for every piece, never turned with the meter.
     ALacquer {
         anchors.fill: parent
-        cutTopRight: !root.vertical
-        cutBottomLeft: !root.vertical
-        cutTopLeft: root.vertical
-        cutBottomRight: root.vertical
         lacquer: root.hovered && !root.held && root.available ? Airisu.step(root.panel, Airisu.hoverStep) : root.panel
     }
 

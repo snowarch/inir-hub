@@ -707,7 +707,7 @@ Item {
                                 anchors.centerIn: parent
                                 width: root.vertical ? Math.round(root.iconSize * 0.56) : Math.max(1, Math.round(IrisStyle.density))
                                 height: root.vertical ? Math.max(1, Math.round(IrisStyle.density)) : Math.round(root.iconSize * 0.56)
-                                radius: IrisStyle.fieldChamfer ? 0 : width / 2
+                                radius: IrisStyle.fieldChamfer ? IrisStyle.capsule(Math.min(width, height)) : width / 2
                                 color: IrisStyle.borderStrong
                             }
 

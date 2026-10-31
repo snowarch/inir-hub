@@ -18,7 +18,7 @@ Region {
     property vector4d edgeWave: Qt.vector4d(0, 0, 0, 0)
     property real waveClock: 0
     readonly property real chamfer: IrisStyle.fieldChamfer ? IrisStyle.chamferCut : 0
-    // Eight numbers a body, as FieldRegion reads them; the fuse and the cut mask as IrisField packs them.
+    // Eight numbers a body, as FieldRegion reads them; the fuse and the radius as IrisField packs them.
     readonly property var nativeBodies: {
         if (!root.nativeRaster) return []
         const list = root.shapes ?? [], out = [], index = {}
@@ -26,7 +26,7 @@ Region {
         const slot = name => !name ? 0 : name === "frame" ? -1 : index[name] === undefined ? 0 : index[name] + 1
         for (const s of list) {
             const joins = !s.joins ? [] : Array.isArray(s.joins) ? s.joins : [s.joins]
-            out.push(s.x, s.y, s.width, s.height, root.chamfer > 0 ? root.cutMaskOf(s) : Number(s.radius ?? 0),
+            out.push(s.x, s.y, s.width, s.height, Number(s.radius ?? 0),
                 Number(s.fuse ?? IrisStyle.fuse), slot(joins[0]), slot(joins[1]))
         }
         return out
@@ -267,61 +267,64 @@ Region {
                 return (l - reach) / Math.sqrt(gx * gx + gy * gy)
             }
         }
-        // A chamfered Design draws square boxes cut at 45° and joins them with a gusset whose legs are the blade's
-        // (IrisField.frag cutBox, smoothUnion): measured the round way, the blur filled a fillet the field never drew.
-        const blade = IrisStyle.fieldChamfer ? IrisStyle.chamferCut : 0
-        const cutBox = (b, c, mask) => {
-            const hx = b.width / 2, hy = b.height / 2, cx = b.x + hx, cy = b.y + hy, cc = Math.min(c, hx, hy)
+        // A Kiri Design draws its bodies round at the upper left and lower right and cut with eased ends at the other two
+        // (IrisField.frag kiriBox), and keeps its fillets at most twice its cut deep (smoothUnion).
+        const blade = root.chamfer
+        const kiri = (b, rad) => {
+            const hx = b.width / 2, hy = b.height / 2, cx = b.x + hx, cy = b.y + hy
+            const r = Math.min(rad > 0.5 ? rad : blade / 1.5, 0.56 * Math.min(hx, hy))
+            const round = box({ x: b.x, y: b.y, width: b.width, height: b.height, radius: r })
+            if (r < 0.5) return round
+            const e = 0.55 * r, sx = hx - e, sy = hy - e, l = hx + hy - 1.5 * r - e * Math.SQRT2
+            const ax = sx, ay = l - sx, bx = l - sy, by = sy, abx = bx - ax, aby = by - ay, ab2 = abx * abx + aby * aby
             return (x, y) => {
-                const dx = x - cx, dy = y - cy, qx = Math.abs(dx) - hx, qy = Math.abs(dy) - hy
-                const ox = qx > 0 ? qx : 0, oy = qy > 0 ? qy : 0
-                let d = Math.sqrt(ox * ox + oy * oy) + Math.min(qx > qy ? qx : qy, 0)
-                const cuts = mask === 0 ? dx * dy < 0 : mask === -1 ? dy < 0 : mask === -2 ? dy > 0 : mask === -3 ? dx < 0 : dx > 0
-                if (cc > 0.5 && cuts) d = Math.max(d, (Math.abs(dx) + Math.abs(dy) - (hx + hy - cc)) * 0.70710678)
-                return d
+                const dx = x - cx, dy = y - cy
+                if (dx * dy >= 0) return round(x, y)
+                const qx = Math.abs(dx), qy = Math.abs(dy)
+                const inside = Math.max(qx - sx, qy - sy, (qx + qy - l) * 0.70710678)
+                if (inside <= 0) return inside - e
+                const t = Math.max(0, Math.min(1, ((qx - ax) * abx + (qy - ay) * aby) / ab2))
+                let d = Math.hypot(qx - ax - abx * t, qy - ay - aby * t)
+                d = Math.min(d, qy <= ay ? Math.abs(qx - sx) : Math.hypot(qx - ax, qy - ay))
+                d = Math.min(d, qx <= bx ? Math.abs(qy - sy) : Math.hypot(qx - bx, qy - by))
+                return d - e
             }
         }
-        const own = blade > 0 ? cutBox(s, blade, root.cutMaskOf(s)) : box(s)
-        const joined = blade > 0 ? (t === null ? cutBox(root.memo.frame, Number(root.memo.frame.radius ?? 0), 0) : cutBox(t, blade, root.cutMaskOf(t)))
+        const own = blade > 0 ? kiri(s, Number(s.radius ?? 0)) : box(s)
+        const joined = blade > 0 ? (t === null ? kiri(root.memo.frame, Number(root.memo.frame.radius ?? 0)) : kiri(t, Number(t.radius ?? 0)))
             : box(t === null ? root.memo.frame : t)
-        const sign = t === null ? -1 : 1, limit = -root.inset, gusset = Math.min(k, 2 * blade)
-        const inside = blade > 0
-            ? (x, y) => { const a = sign * joined(x, y), b = own(x, y); return Math.min(Math.min(a, b), (a + b - gusset * 0.5) * 0.70710678) < limit }
-            : (x, y) => {
-                const a = sign * joined(x, y), b = own(x, y)
-                const h = Math.max(0, Math.min(1, 0.5 + 0.5 * (b - a) / k))
-                return b + (a - b) * h - k * h * (1 - h) < limit
-            }
+        const sign = t === null ? -1 : 1, limit = -root.inset, kk = blade > 0 ? Math.min(k, 2 * blade) : k
+        const inside = (x, y) => {
+            const a = sign * joined(x, y), b = own(x, y)
+            if (kk <= 0.001) return Math.min(a, b) < limit
+            const h = Math.max(0, Math.min(1, 0.5 + 0.5 * (b - a) / kk))
+            return b + (a - b) * h - kk * h * (1 - h) < limit
+        }
         root.lines(s, inside, true, 2 * k, exact, mine)
         root.lines(s, inside, false, 2 * k, exact, mine)
         for (const q of mine) out.push(q)
     }
-    // A chamfered Design's body (IrisField.frag `bodyBox`: the upper-right and lower-left corners cut at 45°) is blurred as
-    // the rows its cut leaves, by the same centre rule moved in half a pixel along the cut's normal: one rect for the
-    // square middle, one per row of each cut (every third row while it moves, taking the narrowest of the three), so no
-    // blurred corner shows past the blade.
-    function chamfered(s: var, cut: real, exact: bool, out: var): void {
+    // A Kiri Design's body (IrisField.frag kiriBox) is blurred as its rows, as a squircle body is: the shape shrunk by the
+    // centre rule's half pixel, the upper-left and lower-right corners its squircle, the other two the eased cut. One rect
+    // for the straight middle, one per row of the corners (every third row while it moves, the narrowest of the three).
+    function kiriRows(s: var, cut: real, exact: bool, out: var): void {
         const i = root.inset
-        // The corners the blade takes (IrisField.frag cutsCorner): the Design's pair, or the two a welded body shows.
-        const mask = root.cutMaskOf(s)
-        const ul = mask === -1 || mask === -3, ur = mask === 0 || mask === -1 || mask === -4
-        const ll = mask === 0 || mask === -2 || mask === -3, lr = mask === -2 || mask === -4
-        const c = Math.min(cut, s.width / 2, s.height / 2)
+        const m = Math.min(s.width, s.height) / 2
+        const rad = Number(s.radius ?? 0) > 0.5 ? Number(s.radius) : cut / 1.5
+        const r = Math.min(rad, 0.56 * m)
+        const reach = Math.min(r * root.squircleReach, m) - i
+        const c = 1.5 * r - i * (2 - Math.SQRT2), e = Math.max(0, 0.55 * r - i)
         const top = root.lo(s.y + i), bottom = root.hi(s.y + s.height - i)
         const left = root.lo(s.x + i), right = root.hi(s.x + s.width - i)
         if (bottom <= top || right <= left) return
-        const reach = c + i * Math.SQRT2
         const span = n => {
             const cy = n + 0.5
-            let a = left, b = right
-            const fromTop = cy - s.y, fromBottom = s.y + s.height - cy
-            if (fromTop < reach && ur) b = Math.min(b, root.lo(s.x + s.width - reach + fromTop))
-            if (fromTop < reach && ul) a = Math.max(a, root.hi(s.x + reach - fromTop))
-            if (fromBottom < reach && ll) a = Math.max(a, root.hi(s.x + reach - fromBottom))
-            if (fromBottom < reach && lr) b = Math.min(b, root.lo(s.x + s.width - reach + fromBottom))
-            return [a, b]
+            const a = cy - s.y - i, b = s.y + s.height - i - cy
+            const kl = Math.max(root.squircleInset(a, reach), root.kiriCutInset(b, c, e))
+            const kr = Math.max(root.kiriCutInset(a, c, e), root.squircleInset(b, reach))
+            return [Math.max(left, root.hi(s.x + i + kl)), Math.min(right, root.lo(s.x + s.width - i - kr))]
         }
-        const step = exact || c <= 0.5 ? 1 : 3
+        const step = exact || r < 0.5 ? 1 : 3
         let open = null
         const flush = () => {
             if (open && open.b > open.a) out.push({ x: open.a, y: open.from, width: open.b - open.a, height: open.to - open.from })
@@ -330,15 +333,25 @@ Region {
         for (let n = top; n < bottom; n += step) {
             const end = Math.min(bottom, n + step)
             let a = left, b = right
-            for (let m = n; m < end; m++) {
-                const q = span(m)
-                a = Math.max(a, q[0])
-                b = Math.min(b, q[1])
+            for (let q = n; q < end; q++) {
+                const row = span(q)
+                a = Math.max(a, row[0])
+                b = Math.min(b, row[1])
             }
             if (open && open.a === a && open.b === b) open.to = end
             else { flush(); open = { a: a, b: b, from: n, to: end } }
         }
         flush()
+    }
+    // How far in from its side a Kiri cut of leg `c` with ends eased by `e` stands at `t` from its top or bottom edge:
+    // the arc round the first join, the 45° line, the arc into the side.
+    function kiriCutInset(t: real, c: real, e: real): real {
+        const k = Math.SQRT2 - 1, reach = c + e * k
+        if (t >= reach) return 0
+        if (t < 0) return 1e6
+        if (t >= reach - e * Math.SQRT1_2) return e - Math.sqrt(Math.max(0, e * e - (reach - t) * (reach - t)))
+        if (t >= e - e * Math.SQRT1_2) return c - t
+        return reach - Math.sqrt(Math.max(0, e * e - (e - t) * (e - t)))
     }
     // A round Design's large corner is a squircle (IrisField.frag squircleBox): the quartic over SQUIRCLE_REACH times the
     // radius. A round Rect region blurred up to 0.85 px past its shoulder (at a radius of 30), so the body is blurred as
@@ -387,17 +400,6 @@ Region {
         }
         flush()
     }
-    // IrisField.cutMask, for the same window: which corners a welded body's blade takes (0 the Design's pair).
-    function cutMaskOf(s: var): int {
-        const list = !s.joins ? [] : Array.isArray(s.joins) ? s.joins : [s.joins]
-        if (!root.framed || !list.includes("frame")) return 0
-        const reach = root.band + 2
-        if (s.y + s.height >= root.windowHeight - reach) return -1
-        if (s.y <= reach) return -2
-        if (s.x + s.width >= root.windowWidth - reach) return -3
-        if (s.x <= reach) return -4
-        return 0
-    }
     // Bodies and runs live in pools of child regions, grown on demand and emptied when unused. Ninety-six bound
     // pieces re-read the whole table on every build, a moving body's every frame, for the handful a scene uses.
     readonly property Component pieceComponent: Component { Piece {} }
@@ -445,18 +447,18 @@ Region {
         const rowsCache = root.memo.rows ?? {}, rowsKept = {}
         const b = root.band
         root.memo.frame = { x: b, y: b, width: root.windowWidth - 2 * b, height: root.windowHeight - 2 * b, radius: root.cornerRadius }
-        const cut = IrisStyle.fieldChamfer ? IrisStyle.chamferCut : 0
+        const cut = root.chamfer
         const stillOf = {}
         for (const s of list) stillOf[root.bodyKey(s)] = still(s)
         for (const s of list) {
             const i = root.inset
             const mine = exact || stillOf[root.bodyKey(s)]
             if (cut > 0 || root.squircles(s)) {
-                const key = root.bodyKey(s) + "," + cut + "," + root.cutMaskOf(s)
+                const key = root.bodyKey(s) + "," + cut
                 let rows = mine ? rowsCache[key] : null
                 if (!rows) {
                     rows = []
-                    if (cut > 0) root.chamfered(s, cut, mine, rows)
+                    if (cut > 0) root.kiriRows(s, cut, mine, rows)
                     else root.squircled(s, mine, rows)
                 }
                 if (mine) rowsKept[key] = rows
@@ -479,27 +481,35 @@ Region {
 
 
 
-    // A chamfered Design's frame opening (IrisField.frag frameBox) is square at the upper-left and lower-right and cut at
-    // the other two by a blade the size the round corner would have been. A round hole here blurred a curved patch into
-    // the square corners, past any band, and left the band's blades unblurred. The blades' rows are held half a pixel
-    // inside the drawn edge along its normal, as a cut body's are.
+    // A Kiri Design's frame opening (IrisField.frag frameBox) is round at the upper left and lower right and cut with eased
+    // ends at the other two, the corner the frame's radius. The hole cut from the region is square, and the band's rows
+    // inside it are put back at all four corners, held half a pixel inside the drawn edge (along the cut's normal).
     function frameCuts(runs: var): void {
         if (root.framed && !IrisStyle.fieldChamfer) { root.frameShoulders(runs); return }
-        if (!root.framed || !IrisStyle.fieldChamfer) return
+        if (!root.framed) return
         const edge = root.hi(root.band - root.inset)
-        const x0 = edge, y0 = edge
         const x1 = Math.round(root.windowWidth) - edge, y1 = Math.round(root.windowHeight) - edge
-        const c = Math.min(root.cornerRadius, (x1 - x0) / 2, (y1 - y0) / 2)
-        const lean = root.inset * Math.SQRT2
-        for (let n = y0; n < y0 + Math.ceil(c); n++) {
-            const reach = c - (n + 0.5 - y0) - lean
-            const a = root.hi(x1 - reach)
-            if (reach > 0 && a < x1) runs.push({ x: a, y: n, width: x1 - a, height: 1 })
-        }
-        for (let n = y1 - Math.ceil(c); n < y1; n++) {
-            const reach = c - (y1 - n - 0.5) - lean
-            const b = root.lo(x0 + reach)
-            if (reach > 0 && b > x0) runs.push({ x: x0, y: n, width: b - x0, height: 1 })
+        const m = Math.min(root.windowWidth - 2 * root.band, root.windowHeight - 2 * root.band) / 2
+        const r = Math.min(root.cornerRadius, 0.56 * m), c = 1.5 * r, e = 0.55 * r
+        const reach = Math.min(r * root.squircleReach, m)
+        const band = root.band, far = root.windowHeight - band
+        const deep = Math.ceil(Math.max(reach, c + e))
+        for (let n = edge; n < edge + deep; n++) {
+            for (const top of [true, false]) {
+                const row = top ? n : y1 - 1 - (n - edge)
+                const t = top ? row + 0.5 - band : far - (row + 0.5)
+                const round = root.squircleInset(t, reach) - root.inset
+                const cutIn = root.kiriCutInset(t, c, e) - root.inset * Math.SQRT2
+                const kl = top ? round : cutIn, kr = top ? cutIn : round
+                if (kl > 0) {
+                    const a = root.hi(band + kl)
+                    if (a > edge) runs.push({ x: edge, y: row, width: a - edge, height: 1 })
+                }
+                if (kr > 0) {
+                    const b = root.lo(root.windowWidth - band - kr)
+                    if (b < x1) runs.push({ x: b, y: row, width: x1 - b, height: 1 })
+                }
+            }
         }
     }
 
@@ -550,8 +560,8 @@ Region {
             y: edge
             width: Math.max(0, root.windowWidth - 2 * edge)
             height: Math.max(0, root.windowHeight - 2 * edge)
-            // Concentric with the frame's inner corner: the hole is grown by the pixel rounding of its edge. A chamfered
-            // Design's opening is square, its two blades put back as rows (frameCuts).
+            // Concentric with the frame's inner corner: the hole is grown by the pixel rounding of its edge. A Kiri
+            // Design's opening is square, its four corners put back as rows (frameCuts).
             radius: IrisStyle.fieldChamfer ? 0 : Math.round(root.cornerRadius + root.band - edge)
         }
     }

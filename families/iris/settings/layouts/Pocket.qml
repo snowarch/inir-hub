@@ -282,7 +282,9 @@ Item {
             width: root.u(30)
             height: width
             radius: IrisStyle.fieldChamfer ? 0 : root.u(9)
-            color: Qt.rgba(key.tint.r, key.tint.g, key.tint.b, IrisStyle.light ? 0.16 : 0.2)
+            readonly property color wash: Qt.rgba(key.tint.r, key.tint.g, key.tint.b, IrisStyle.light ? 0.16 : 0.2)
+            color: IrisStyle.fieldChamfer ? "transparent" : wash
+            IrisCutPlate { anchors.fill: parent; visible: IrisStyle.fieldChamfer; color: tile.wash }
             MaterialSymbol {
                 anchors.centerIn: parent
                 text: String(key.entry.icon ?? "settings")

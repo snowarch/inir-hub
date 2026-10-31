@@ -492,7 +492,7 @@ Loader {
                                             readonly property bool lit: popup.isStop(row.index, 0) || heroButtonHover.hovered
                                             Layout.preferredWidth: Math.round(28 * root.d)
                                             Layout.preferredHeight: Layout.preferredWidth
-                                            radius: IrisStyle.fieldChamfer ? 0 : width / 2
+                                            radius: IrisStyle.fieldChamfer ? IrisStyle.capsule(width) : width / 2
                                             color: heroButton.lit ? IrisStyle.onSceneFill : IrisStyle.sceneVeil
                                             scale: heroButtonTap.pressed ? IrisStyle.pressScale(0.9) : 1
                                             Behavior on color { ColorAnimation { duration: IrisStyle.feedbackDuration; easing.type: IrisStyle.feedbackEasing } }

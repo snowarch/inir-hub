@@ -442,8 +442,7 @@ ColumnLayout {
                     Layout.topMargin: Math.round(18 * rows?.d)
                     implicitHeight: moreTune.implicitHeight
                     radius: IrisStyle.radiusTile
-                    color: IrisStyle.fieldChamfer ? "transparent" : (rows?.groupFill ?? "transparent")
-                    IrisCutPlate { anchors.fill: parent; visible: IrisStyle.fieldChamfer && (rows?.groupFill.a ?? 0) > 0; color: rows?.groupFill ?? "transparent" }
+                    color: rows?.groupFill ?? "transparent"
                     FineTune {
                         id: moreTune
                         width: parent.width

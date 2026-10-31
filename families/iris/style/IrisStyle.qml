@@ -168,11 +168,12 @@ QtObject {
         const own = String(root.appearance?.surfaces?.cards?.grabber ?? "auto")
         return own === "auto" ? Boolean(root.cardDesign.grabber ?? false) : own === "on"
     }
-    readonly property int radius: Math.round(Math.max(16, Math.min(40, Number(root.appearance?.expandedRadius ?? 28))) * root.density)
-    readonly property int radiusSmall: root.fieldChamfer ? 0 : Math.max(4, Math.round(root.radius * 0.58))
-    // A capsule's (or a disc's) corner: half its side, or square inside a chamfered Design, where a pill or a dot under
+    readonly property int radius: Math.round(Math.max(16, Math.min(40, Number(root.appearance?.expandedRadius ?? 28))) * root.density
+        * (root.fieldChamfer ? root.kiriScale : 1))
+    readonly property int radiusSmall: Math.max(root.fieldChamfer ? 3 : 4, Math.round(root.radius * 0.58))
+    // A capsule's (or a disc's) corner: half its side, or a Kiri tile's inside a Kiri Design, where a pill or a dot under
     // the pointer would be the one round thing among cut plates.
-    function capsule(side: real): real { return root.fieldChamfer ? 0 : root.look === "synth" ? Math.min(side / 2, root.synthKeyRadius * 1.6) : side / 2 }
+    function capsule(side: real): real { return root.fieldChamfer ? Math.round(Math.min(side / 2, side * 0.22)) : root.look === "synth" ? Math.min(side / 2, root.synthKeyRadius * 1.6) : side / 2 }
     readonly property int spaceSmall: Math.max(4, Math.round(6 * root.density))
 
     readonly property var presets: ({
@@ -1146,8 +1147,8 @@ QtObject {
     readonly property real shapeScale: root.preset.shape * root.tweak("shape", 0.3, 1.6)
     // Large containers stop growing well before a pill, so content keeps a concentric margin.
     function corner(px: real): int {
-        // Inside a chamfered silhouette every plate is square: the cut is the only corner (concentric or nothing).
-        if (root.fieldChamfer) return 0
+        // Kiri's corners are tighter than iRiS's and ignore the Style's shape: a panel 14, a card 8, a row 5 at density 1.
+        if (root.fieldChamfer) return Math.max(2, Math.round(px * root.kiriScale * root.density))
         const cap = px >= 18 ? 1.3 : px >= 10 ? 1.4 : 1.6
         return Math.max(2, Math.round(px * Math.min(root.shapeScale, cap) * root.lookCorner * root.density))
     }
@@ -1156,9 +1157,8 @@ QtObject {
     }
     // A plate inset `inset` inside a body of radius `outer` rounds by what is left, so the gap stays even round the
     // curve (a fixed radius there pinched or flared it); `floor` is its corner when that would vanish (HIG: concentric
-    // with a fallback). Under a chamfer every plate is square and the cut nests instead (`nestedCut`).
+    // with a fallback). Under Kiri the round corners nest the same and the cut nests by `nestedCut`.
     function concentric(outer: real, inset: real, floor: real): int {
-        if (root.fieldChamfer) return 0
         return Math.max(Math.round(floor), Math.round(outer - inset))
     }
     // A 45° cut inset `inset` inside a cut of `outer`: the parallel edge, so the band between them is as wide on the
@@ -1207,9 +1207,70 @@ QtObject {
         return half
     }
     function pieceRadius(size: real): real { return root.profileRadius(root.pieceShape, size) }
-    // A Design that cuts corners (DESIGNS.md `field.corner: "chamfer"`): the field cuts two opposite corners of every
-    // body at 45° by `chamferCut` and squares the other two; the plates inside go square (`corner`).
+    // A Design that cuts corners (`field.corner: "chamfer"`, AIRISU): Kiri, his pick of 10-31. Every body and cut plate
+    // keeps its upper-left and lower-right corners round and cuts the upper-right and lower-left at 45° with both ends of
+    // the cut eased (IrisField.frag kiriBox); plain plates round by Kiri's tighter scale (`corner`).
     readonly property bool fieldChamfer: IrisDesign.fieldCorner === "chamfer"
+    readonly property real kiriScale: 0.47
+    // A cut piece is given by its cut (plates nest by it, `nestedCut`): its radius is cut / kiriCut, its ease kiriEase of
+    // the radius, and all three give way together past kiriFit of the piece's shorter half.
+    readonly property real kiriCut: 1.5
+    readonly property real kiriEase: 0.55
+    readonly property real kiriFit: 0.84
+    // The radius of a clip's cut corners on a Kiri body of radius `radius`: the arc that stays inside the body's cut
+    // (an arc's nearest point to its corner is 0.586 of its radius along each side of the diagonal, so it clears a cut of
+    // leg c past 1.71 c), never past the piece's half.
+    function kiriClip(radius: real, w: real, h: real): real {
+        const r = Math.min(radius > 0.5 ? radius : root.chamferCut / root.kiriCut, 0.56 * Math.min(w, h) / 2)
+        return Math.ceil(Math.min(w / 2, h / 2, 1.71 * root.kiriCut * r))
+    }
+    // The Kiri outline of a w x h piece with cut `cut`, laid `inset` inside its box (half a stroke), as a closed convex
+    // polygon for a Shape, clockwise from the upper left. `corners` [upper left, upper right, lower right, lower left]:
+    // 0 square (where a piece abuts another), 1 round, 2 cut; Kiri's own [1, 2, 1, 2] when left out. Arcs are sampled
+    // every ~2 px, well under a pixel of error at these radii.
+    function kiriOutline(w: real, h: real, cut: real, inset: real, corners: var): var {
+        const kinds = corners ?? [1, 2, 1, 2]
+        const c0 = Math.max(0, Math.min(cut, root.kiriFit * Math.min(w, h) / 2))
+        const s = Math.max(0, inset ?? 0)
+        const r = Math.max(0, c0 / root.kiriCut - s), e = Math.max(0, c0 / root.kiriCut * root.kiriEase - s)
+        const c = Math.max(0, c0 - s * (2 - Math.SQRT2))
+        const k = Math.SQRT2 - 1
+        const out = []
+        const arc = (cx, cy, rad, from, to) => {
+            if (rad < 0.25) { out.push(Qt.point(cx, cy)); return }
+            while (to < from) to += 2 * Math.PI
+            const n = Math.max(1, Math.ceil((to - from) * rad / 2))
+            for (let i = 0; i <= n; i++) {
+                const a = from + (to - from) * i / n
+                out.push(Qt.point(cx + rad * Math.cos(a), cy + rad * Math.sin(a)))
+            }
+        }
+        const at = (x, y) => Math.atan2(y, x)
+        // Each corner: its point, the edge coming in and the one going out (clockwise), their inward normals.
+        const pts = [[s, s], [w - s, s], [w - s, h - s], [s, h - s]]
+        const ins = [[0, -1], [1, 0], [0, 1], [-1, 0]]
+        for (let i = 0; i < 4; i++) {
+            const p = pts[i], di = ins[i], dout = ins[(i + 1) % 4]
+            const ni = [-di[1], di[0]], no = [-dout[1], dout[0]]
+            if (kinds[i] === 1 && r > 0.25) {
+                arc(p[0] + r * (ni[0] + no[0]), p[1] + r * (ni[1] + no[1]), r, at(-ni[0], -ni[1]), at(-no[0], -no[1]))
+            } else if (kinds[i] === 2 && c > 0.25) {
+                const mid = at(-(ni[0] + no[0]), -(ni[1] + no[1]))
+                const v1 = [p[0] - c * di[0], p[1] - c * di[1]], v2 = [p[0] + c * dout[0], p[1] + c * dout[1]]
+                const c1 = [v1[0] - e * k * di[0] + e * ni[0], v1[1] - e * k * di[1] + e * ni[1]]
+                const c2 = [v2[0] + e * k * dout[0] + e * no[0], v2[1] + e * k * dout[1] + e * no[1]]
+                if (e > 0.25) {
+                    arc(c1[0], c1[1], e, at(-ni[0], -ni[1]), mid)
+                    arc(c2[0], c2[1], e, mid, at(-no[0], -no[1]))
+                } else {
+                    out.push(Qt.point(v1[0], v1[1]))
+                    out.push(Qt.point(v2[0], v2[1]))
+                }
+            } else out.push(Qt.point(p[0], p[1]))
+        }
+        out.push(out[0])
+        return out
+    }
     // The active Design's traits (IrisDesign.traits), as primitives the surfaces bind to.
     // Settings › Style › Icons. The Glyph pack is Folio's index everywhere: the glyph alone, no plate.
     readonly property var iconOptions: root.appearance?.icons ?? ({})
@@ -1250,7 +1311,8 @@ QtObject {
     readonly property color rowSelectionInk: root.invertSelection ? root.accent : root.selectionInk
     // A list's place as a part number: 01, 02… (indexed Designs).
     function indexLabel(i: int): string { return (i + 1 < 10 ? "0" : "") + (i + 1) }
-    readonly property int chamferCut: Math.round(10 * root.density)
+    // Kiri's cut on a card-sized piece (its radius 8): the cut a plate wears unless it nests inside another.
+    readonly property int chamferCut: Math.round(12 * root.density)
     // Auto is what the Island and the Dock always did: a capsule when melted into the edge, the bubbles' shape when floating.
     // Linked, both take the bubbles' shape whatever their own choice.
     readonly property bool linkShapes: Boolean(root.theme?.linkShapes ?? false)
@@ -1269,7 +1331,7 @@ QtObject {
         if (root.islandOpenCorners > 0) return root.islandOpenCorners
         return shape === "square" ? base * 0.45 : shape === "squircle" ? base * 0.75 : base
     }
-    function iconRadius(size: real): int { return root.fieldChamfer ? 0
+    function iconRadius(size: real): int { return root.fieldChamfer ? Math.round(size * 0.18)
         : root.iconShape === "round" ? Math.round(size / 2) : root.iconShape === "square" ? Math.round(size * 0.12)
         : Math.round(size * (root.look === "synth" ? 0.14 : root.look === "gel" ? 0.32 : 0.26) * Math.min(1.2, root.shapeScale)) }
     // The tile pack's plates: the black and the white a plate can wear, the glyph carrying the colour.

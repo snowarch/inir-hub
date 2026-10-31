@@ -125,12 +125,12 @@ Item {
         property real progress: 0
         property color tint: root.ink
         property real stroke: Math.max(2, (root.edgeRings ? 2 : 2.5) * root.d)
-        // The cut outline, inset by half the stroke: upper left → right → cut → down → cut → left → up.
-        readonly property real cut: Math.min(IrisStyle.chamferCut, ring.width / 4)
+        // The bubble's own Kiri outline, inset by the ring's margin and half its stroke so it runs parallel to the body.
+        readonly property real margin: Math.max(0, (root.width - ring.width) / 2)
         readonly property var outline: {
-            const h = ring.stroke / 2, w = ring.width - h, b = ring.height - h, c = ring.cut
-            return [Qt.point(h, h), Qt.point(w - c, h), Qt.point(w, h + c), Qt.point(w, b),
-                Qt.point(h + c, b), Qt.point(h, b - c), Qt.point(h, h)]
+            const m = ring.margin, side = ring.width + 2 * m
+            return IrisStyle.kiriOutline(side, ring.height + 2 * m, IrisStyle.kiriCut * IrisStyle.capsule(side), m + ring.stroke / 2)
+                .map(p => Qt.point(p.x - m, p.y - m))
         }
         function traced(progress: real): var {
             const pts = ring.outline
@@ -378,7 +378,7 @@ Item {
                     visible: root.dotted && root.timerKind !== "stopwatch"
                     anchors.fill: parent
                     anchors.margins: 2 * root.d + root.platedInset
-                    cut: root.edgeRings ? Math.min(IrisStyle.chamferCut, width / 4) : 0
+                    cut: root.edgeRings ? IrisStyle.nestedCut(IrisStyle.kiriCut * IrisStyle.capsule(root.width), (root.width - width) / 2) : 0
                     opacity: root.coverHidden ? 0 : 1
                     Behavior on opacity { NumberAnimation { duration: IrisStyle.duration(120); easing.type: IrisStyle.feedbackEasing } }
                     fillColor: root.dotted ? root.ink : root.highlight
@@ -420,7 +420,7 @@ Item {
                     visible: root.dotted && root.kind === "task"
                     anchors.fill: parent
                     anchors.margins: 2 * root.d + root.platedInset
-                    cut: root.edgeRings ? Math.min(IrisStyle.chamferCut, width / 4) : 0
+                    cut: root.edgeRings ? IrisStyle.nestedCut(IrisStyle.kiriCut * IrisStyle.capsule(root.width), (root.width - width) / 2) : 0
                     fillColor: root.ink
                     emptyColor: IrisStyle.unlit(root.ink)
                     value: Math.max(0, Number(root.task?.progress ?? 0))

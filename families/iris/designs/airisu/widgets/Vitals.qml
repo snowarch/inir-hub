@@ -87,9 +87,11 @@ Item {
                 height: stripes.each
                 ALacquer {
                     anchors.fill: parent
-                    cut: Math.min(Airisu.chamfer, Math.round(stripe.height / 4))
-                    cutTopRight: stripe.index === 0
-                    cutBottomLeft: stripe.index === root.channels.length - 1
+                    // The stack is one Kiri body sliced: the first stripe carries its top corners, the last its foot.
+                    readonly property bool first: stripe.index === 0
+                    readonly property bool last: stripe.index === root.channels.length - 1
+                    cut: Airisu.chamfer
+                    corners: [first ? 1 : 0, first ? 2 : 0, last ? 1 : 0, last ? 2 : 0]
                     lacquer: stripe.sunk
                     coat: stripe.fill
                     share: stripe.value

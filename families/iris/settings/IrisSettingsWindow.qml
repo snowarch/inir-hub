@@ -16,7 +16,7 @@ FloatingWindow {
     // Blur turns this window see-through while it is open. Quickshell keeps the alpha it was shown with (an opaque
     // window stays opaque, black where the body leaves it clear), so it is always made with alpha.
     surfaceFormat: ({ opaque: false })
-    color: body.frame.material === "compositor" ? "transparent" : IrisStyle.surface
+    color: body.frame.material === "compositor" || body.windowField ? "transparent" : IrisStyle.surface
     implicitWidth: Math.round(1180 * IrisStyle.density)
     implicitHeight: Math.round(820 * IrisStyle.density)
     minimumSize: Qt.size(Math.round(560 * IrisStyle.density), Math.round(420 * IrisStyle.density))

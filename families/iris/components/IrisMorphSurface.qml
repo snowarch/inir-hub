@@ -42,7 +42,10 @@ Item {
     // A surface in a window of its own draws its silhouette with a field of its own: the SDF edge
     // every other body has, instead of a ClippingRectangle's harder one. Compositor blur keeps its pane.
     property bool ownField: false
-    readonly property bool drawsOwnField: root.ownField && !root.fieldBacked && (!IrisStyle.glassCompositor || root.compositorBlurred)
+    // Under a Kiri Design (AIRISU) every surface draws its body with its own field: a ClippingRectangle can only round,
+    // and its painted tint or glass pane stood past the cut (his 10-31).
+    readonly property bool drawsOwnField: !root.fieldBacked
+        && (IrisStyle.fieldChamfer || root.ownField && (!IrisStyle.glassCompositor || root.compositorBlurred))
     // A Place that meets the frame hands its body to the chassis of its output (`fieldBacked`): the frame's
     // field draws it with the join, the shadow and the blur, and this window only carries the content.
     // `chassisJoin` adds what the body joins ({ id, joins, fuse }), an `edge` body to join past the screen
@@ -357,6 +360,10 @@ Item {
         radius: Math.min(width / 2, height / 2, root.absorbs
             ? root.lerp(Math.min(Math.min(root.start.width, root.start.height) / 2, root.fromRadius * root.originShare), root.radius)
             : root.lerp(root.fromRadius, root.radius))
+        // Kiri cuts the upper-right and lower-left corners: the content's clip rounds them by an arc that stays inside the
+        // cut (IrisStyle.kiriClip), so nothing it holds (a light wash, a row) shows past the field's edge.
+        topRightRadius: IrisStyle.fieldChamfer ? IrisStyle.kiriClip(chassis.radius, width, height) : chassis.radius
+        bottomLeftRadius: IrisStyle.fieldChamfer ? IrisStyle.kiriClip(chassis.radius, width, height) : chassis.radius
         color: root.material === "field" ? IrisStyle.bodyClip
             : root.material === "compositor" ? root.energised(IrisStyle.placeSurface) : root.color
         // Visible from the request: forceActiveFocus() is ignored on invisible subtrees.

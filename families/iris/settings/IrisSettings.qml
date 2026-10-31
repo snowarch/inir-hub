@@ -757,8 +757,11 @@ Item {
     MouseArea { anchors.fill: parent; enabled: !root.windowed; onClicked: GlobalStates.settingsOverlayOpen = false }
 
 
-    // A textured material (Afterglow's bevel, Light leak's lit rim) must follow the corners Niri clips the window to.
-    readonly property bool windowField: root.windowed && IrisStyle.textured
+    // A textured material (Afterglow's bevel, Light leak's lit rim) must follow the corners Niri clips the window to, and a
+    // Kiri Design (AIRISU) draws its own body in the window: its cut corners are the field's, its blur the cut rows, where
+    // Niri's clip alone rounded all four and blurred past the cut (his 10-31). The round pair takes Niri's radius, so its
+    // squircle stays inside the clip.
+    readonly property bool windowField: root.windowed && (IrisStyle.textured || IrisStyle.fieldChamfer)
     onWindowFieldChanged: if (root.windowField) IrisNiri.reload(["window-rules"])
     // In a window Niri owns the shape, the corners and the open motion: the body fills it, already open.
     IrisMorphSurface {
@@ -874,9 +877,10 @@ Item {
                 width: sidebarSlot.width - sidebar.inset
                 clip: true
                 radius: IrisStyle.fieldChamfer ? 0 : Math.max(IrisStyle.radiusTile, frame.radius - sidebar.inset)
-                color: IrisStyle.readingSidebar
-                border.width: 1
+                color: IrisStyle.fieldChamfer ? "transparent" : IrisStyle.readingSidebar
+                border.width: IrisStyle.fieldChamfer ? 0 : 1
                 border.color: IrisStyle.hairline
+                IrisCutPlate { anchors.fill: parent; visible: IrisStyle.fieldChamfer; cutLength: IrisStyle.nestedCut(IrisStyle.chamferCut, sidebar.inset); color: IrisStyle.readingSidebar; stroke: IrisStyle.hairline; strokeWidth: 1 }
                 Rectangle {
                     visible: false
                     anchors.right: parent.right

@@ -1,8 +1,10 @@
 import QtQuick
 import QtQuick.Shapes
+import qs.modules.iris.style
 
 // A die (型抜き, SYSTEM.md §2 law 2): the closed set of shapes AIRISU cuts, built from straight lines and compass arcs on
-// the module. `kind` "rect" · "chamfer" (45° off the upper right and lower left, a body's and a seal's die) · "tab" (an
+// the module. `kind` "rect" · "chamfer" (Kiri: the upper right and lower left cut at 45° with eased ends, the other two
+// round, a body's and a seal's die, IrisStyle.kiriOutline) · "tab" (an
 // index tab standing on the top edge: `tabX`, `tabWidth`, `tabHeight`) · "ticket" (half moons punched in both sides at
 // `notchY`). A stroke is laid inside the die so a 1 px rule lands on a whole pixel; `dashed` draws an inactive die.
 // `texture` fills the die with a texture provider of the die's own size (a frosted piece of the scene) instead of `fill`.
@@ -27,11 +29,28 @@ Item {
     readonly property real t: root.rise + root.s
     readonly property real r: root.width - root.s
     readonly property real b: root.height - root.s
-    readonly property real c: root.kind === "chamfer" ? Math.min(root.cut, (root.b - root.t) / 2, (root.r - root.l) / 2) : 0
+    readonly property real c: 0
     readonly property real n: root.kind === "ticket" ? Math.min(root.notchRadius, (root.b - root.t) / 3) : 0
 
     Shape {
         anchors.fill: parent
+        visible: root.kind === "chamfer"
+        preferredRendererType: Shape.CurveRenderer
+        ShapePath {
+            fillColor: root.fill
+            fillItem: root.texture
+            strokeColor: root.strokeWidth > 0 ? root.stroke : "transparent"
+            strokeWidth: root.strokeWidth
+            strokeStyle: root.dashed ? ShapePath.DashLine : ShapePath.SolidLine
+            dashPattern: [2, 2]
+            joinStyle: ShapePath.RoundJoin
+            capStyle: ShapePath.FlatCap
+            PathPolyline { path: root.kind === "chamfer" ? IrisStyle.kiriOutline(root.width, root.height, root.cut, root.s) : [] }
+        }
+    }
+    Shape {
+        anchors.fill: parent
+        visible: root.kind !== "chamfer"
         preferredRendererType: Shape.CurveRenderer
         ShapePath {
             fillColor: root.fill

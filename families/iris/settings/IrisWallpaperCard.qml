@@ -418,7 +418,7 @@ ClippingRectangle {
         // A Design that cuts its bodies (AIRISU) squares the plate over the art and reads it in mono capitals.
         Rectangle {
             anchors.fill: parent
-            radius: IrisStyle.fieldChamfer ? 0 : height / 2
+            radius: IrisStyle.fieldChamfer ? IrisStyle.capsule(height) : height / 2
             color: glass.containsMouse ? IrisStyle.onSceneFillHover : IrisStyle.onSceneFill
             scale: glass.pressed ? IrisStyle.pressScale(0.94) : 1
             Behavior on color { ColorAnimation { duration: IrisStyle.duration(110); easing.type: IrisStyle.feedbackEasing } }

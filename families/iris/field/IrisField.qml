@@ -49,18 +49,6 @@ Item {
         if (root.framed && root.weldedToFrame(shape, depth ?? 0)) return root.frameGlass
         return root.ownGlass(shape)
     }
-    // A chamfered Design cuts a body welded to the frame on the two corners it shows (IrisField.frag cutsCorner): the
-    // Design's own pair (upper-right, lower-left) left one shoulder square and one cut. IrisBlurRegion.cutMaskOf mirrors it.
-    function cutMask(s: var): int {
-        const list = !s.joins ? [] : Array.isArray(s.joins) ? s.joins : [s.joins]
-        if (!root.framed || !list.includes("frame")) return 0
-        const reach = IrisFrame.band + 2
-        if (s.y + s.height >= root.height - reach) return -1
-        if (s.y <= reach) return -2
-        if (s.x + s.width >= root.width - reach) return -3
-        if (s.x <= reach) return -4
-        return 0
-    }
     function weldedToFrame(shape: var, depth: int): bool {
         const list = !shape.joins ? [] : Array.isArray(shape.joins) ? shape.joins : [shape.joins]
         if (list.includes("frame")) return true
@@ -172,7 +160,6 @@ Item {
         readonly property var packed: {
             const list = root.shapes ?? []
             const n = Math.min(list.length, root.capacity)
-            const chamfer = IrisStyle.fieldChamfer
             const zero = Qt.vector4d(0, 0, 0, 0)
             const index = {}
             for (let i = 0; i < n; i++)
@@ -189,7 +176,7 @@ Item {
             for (let i = 0; i < root.capacity; i++) {
                 const s = list[i]
                 geometry.push(s ? Qt.vector4d(s.x + s.width / 2, s.y + s.height / 2, s.width / 2, s.height / 2) : zero)
-                radius.push(!s ? 0 : chamfer ? root.cutMask(s) : Number(s.radius ?? 0))
+                radius.push(!s ? 0 : Number(s.radius ?? 0))
                 fuse.push(s ? Number(s.fuse ?? root.smoothing) : 0)
                 join.push(slot(s, 0))
                 also.push(slot(s, 1))

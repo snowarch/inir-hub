@@ -1,8 +1,10 @@
 import QtQuick
 import QtQuick.Shapes
 import qs.modules.common.functions
+import qs.modules.iris.style
 
-// A panel of coloured lacquer (色漆), AIRISU's one surface: cut by the Design's die (45° off two opposite corners) and
+// A panel of coloured lacquer (色漆), AIRISU's one surface: cut by the Design's die (Kiri: two corners round, the other
+// two cut at 45° with eased ends, IrisStyle.kiriOutline) and
 // painted, like a livery, with a second coat whose edge runs at the same 45°. `share` is how far the coat has come from
 // the start side, 0 to 1, and it carries data: a level, the part of a song played, the part of the hour gone. When the
 // lacquer's colour changes it is not faded: the new colour is laid across the panel from the start side along the same
@@ -21,6 +23,12 @@ Item {
     property bool cutBottomLeft: true
     property bool cutTopLeft: false
     property bool cutBottomRight: false
+    // The corners it does not cut are round, as every Kiri piece's; a piece that abuts another (a stripe in a stack)
+    // squares them instead.
+    property bool roundCorners: true
+    // Each corner by hand, [tl, tr, br, bl] as kiriOutline takes them (0 square, 1 round, 2 cut), over the flags above:
+    // a piece cut from a larger body (a stripe of a stack) keeps only the body's own corners.
+    property var corners: null
     property bool moving: Airisu.moving
     // How a change of share moves: a detent for a level, nothing for a clock that is only read.
     property int travel: Airisu.snap
@@ -33,14 +41,12 @@ Item {
     readonly property real h: Math.max(0, root.height)
     readonly property real c: Math.max(0, Math.min(root.cut, root.w / 2, root.h / 2))
 
-    // The die as a convex polygon, clockwise from the top left.
+    // The die as a convex polygon, clockwise from the top left (open: `closed` shuts it).
     readonly property var die: {
-        const w = root.w, h = root.h, c = root.c
-        const p = []
-        if (root.cutTopLeft) { p.push(Qt.point(0, c)); p.push(Qt.point(c, 0)) } else p.push(Qt.point(0, 0))
-        if (root.cutTopRight) { p.push(Qt.point(w - c, 0)); p.push(Qt.point(w, c)) } else p.push(Qt.point(w, 0))
-        if (root.cutBottomRight) { p.push(Qt.point(w, h - c)); p.push(Qt.point(w - c, h)) } else p.push(Qt.point(w, h))
-        if (root.cutBottomLeft) { p.push(Qt.point(c, h)); p.push(Qt.point(0, h - c)) } else p.push(Qt.point(0, h))
+        const rest = root.roundCorners ? 1 : 0
+        const p = IrisStyle.kiriOutline(root.w, root.h, root.cut, 0, root.corners ?? [root.cutTopLeft ? 2 : rest,
+            root.cutTopRight ? 2 : rest, root.cutBottomRight ? 2 : rest, root.cutBottomLeft ? 2 : rest])
+        p.pop()
         return p
     }
     // The part of a polygon on the near side of a 45° cut that has come `s` of the way across (it leans forward, its

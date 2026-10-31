@@ -14,7 +14,7 @@ Rectangle {
 
     implicitWidth: row.implicitWidth + Math.round(20 * IrisStyle.density)
     implicitHeight: Math.round(34 * IrisStyle.density)
-    radius: IrisStyle.fieldChamfer ? 0 : height / 2
+    radius: IrisStyle.fieldChamfer ? IrisStyle.capsule(height) : height / 2
     color: root.selected ? IrisStyle.selectionFill
         : hover.hovered ? IrisStyle.fillHover : IrisStyle.fillQuiet
     border.width: root.selected && !IrisStyle.plateSelection ? 1 : 0

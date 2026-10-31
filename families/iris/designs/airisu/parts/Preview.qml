@@ -10,19 +10,13 @@ Rectangle {
     color: "#0b0b0c" // iris-literal: 漆黒, AIRISU's own pigment in its picture
 
     component Plate: Shape {
+        id: plate
         property real cut: 3 * root.u
-        property bool leftCut: true
         preferredRendererType: Shape.CurveRenderer
         ShapePath {
             fillColor: "#141416" // iris-literal: 墨
             strokeColor: "transparent"
-            startX: 0; startY: 0
-            PathLine { x: width; y: 0 }
-            PathLine { x: width; y: height - (leftCut ? 0 : cut) }
-            PathLine { x: width - (leftCut ? 0 : cut); y: height }
-            PathLine { x: leftCut ? cut : 0; y: height }
-            PathLine { x: 0; y: height - (leftCut ? cut : 0) }
-            PathLine { x: 0; y: 0 }
+            PathPolyline { path: IrisStyle.kiriOutline(plate.width, plate.height, plate.cut, 0) }
         }
     }
     // The bar: workspaces left, the wedge with the chevrons in the middle, the clock right.
@@ -32,11 +26,11 @@ Rectangle {
         model: 3
         Rectangle { required property int index; x: (17 + index * 6) * root.u; y: 8.5 * root.u; width: 2 * root.u; height: width; radius: width / 2; color: "#5a5a5e" } // iris-literal: an idle workspace
     }
-    Plate { x: (root.width - width) / 2; y: 4 * root.u; width: 70 * root.u; height: 11 * root.u; leftCut: false }
+    Plate { x: (root.width - width) / 2; y: 4 * root.u; width: 70 * root.u; height: 11 * root.u }
     Text { x: root.width / 2 - 30 * root.u; y: 5.6 * root.u; text: "❯❯"; color: "#e5341b"; font.pixelSize: 6 * root.u; font.weight: Font.Black } // iris-literal: 朱
     Rectangle { x: root.width / 2 - 18 * root.u; y: 9.2 * root.u; width: 44 * root.u; height: Math.max(1, 0.8 * root.u); color: "#2a2b2e" } // iris-literal: 鉄
     Rectangle { x: root.width / 2 - 18 * root.u; y: 9.2 * root.u; width: 20 * root.u; height: Math.max(1, 0.8 * root.u); color: "#e9e6df" } // iris-literal: 胡粉
-    Plate { x: root.width - width - 4 * root.u; y: 4 * root.u; width: 34 * root.u; height: 11 * root.u; leftCut: false }
+    Plate { x: root.width - width - 4 * root.u; y: 4 * root.u; width: 34 * root.u; height: 11 * root.u }
     Text {
         anchors.right: parent.right; anchors.rightMargin: 7 * root.u; y: 5.2 * root.u
         text: "23:59"; color: "#e9e6df"; font.family: IrisStyle.fontDot; font.weight: Font.Normal; font.pixelSize: 6.6 * root.u // iris-literal: 胡粉

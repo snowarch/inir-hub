@@ -69,11 +69,20 @@ MouseArea {
     Rectangle {
         anchors.fill: parent
         radius: IrisStyle.fieldChamfer ? 0 : root.plated ? IrisStyle.pieceRadius(height) : height / 2
-        color: root.open || root.pressed ? IrisStyle.fillActive
+        readonly property color fill: root.open || root.pressed ? IrisStyle.fillActive
             : root.containsMouse ? IrisStyle.fillHover
             : root.plated ? IrisStyle.plateFillFor(IrisStyle.controlPlate) : ColorUtils.applyAlpha(IrisStyle.fillHover, 0)
-        border.width: root.activeFocus ? 1 : 0
+        color: IrisStyle.fieldChamfer ? "transparent" : fill
+        border.width: root.activeFocus && !IrisStyle.fieldChamfer ? 1 : 0
         border.color: IrisStyle.tintBorder(IrisStyle.accent)
+        IrisCutPlate {
+            anchors.fill: parent
+            visible: IrisStyle.fieldChamfer
+            cutLength: Math.min(IrisStyle.chamferCut, Math.round(parent.height * 0.36))
+            color: parent.fill
+            stroke: IrisStyle.tintBorder(IrisStyle.accent)
+            strokeWidth: root.activeFocus ? 1 : 0
+        }
         Behavior on color { ColorAnimation { duration: IrisStyle.duration(110); easing.type: IrisStyle.feedbackEasing } }
         IrisGlassPlate {
             anchors.fill: parent

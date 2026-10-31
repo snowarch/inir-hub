@@ -21,7 +21,7 @@ ScrollBar {
             anchors.top: parent.top
             anchors.bottom: parent.bottom
             width: Math.round((root.engaged ? 8 : 5) * root.d)
-            radius: IrisStyle.fieldChamfer ? 0 : width / 2
+            radius: IrisStyle.fieldChamfer ? IrisStyle.capsule(width) : width / 2
             color: root.engaged ? IrisStyle.muted : IrisStyle.textTertiary
             Behavior on width { NumberAnimation { duration: IrisStyle.duration(140); easing.type: IrisStyle.feedbackEasing } }
         }

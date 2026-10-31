@@ -19,6 +19,8 @@ Item {
     property int cut: Airisu.cutFor(root.height)
     property bool cutTopRight: true
     property bool cutBottomLeft: true
+    // A key cut from a larger piece (a box of a segmented row) keeps only that piece's corners (ALacquer.corners).
+    property var corners: null
     // What lies under a quiet key, so its under plate is a print of that.
     property color under: Airisu.ground
     readonly property color stock: root.lacquer.a > 0 ? root.lacquer : root.under
@@ -41,6 +43,7 @@ Item {
             cut: root.cut
             cutTopRight: root.cutTopRight
             cutBottomLeft: root.cutBottomLeft
+            corners: root.corners
             lacquer: root.coat
         }
     }
@@ -54,6 +57,7 @@ Item {
             cut: root.cut
             cutTopRight: root.cutTopRight
             cutBottomLeft: root.cutBottomLeft
+            corners: root.corners
             // Pressed, the top plate is printed solid, so the under plate shows only where it has moved off it.
             lacquer: root.down && root.lacquer.a > 0 ? Airisu.solid(root.lacquer) : root.lacquer
             coat: root.lift

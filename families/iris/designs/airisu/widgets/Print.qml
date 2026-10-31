@@ -64,9 +64,10 @@ Item {
         anchors.right: parent.right
         anchors.bottom: parent.bottom
         height: root.dp(root.large ? 48 : 40)
+        // A slice of the print's foot: it keeps the body's two lower corners and squares the ones inside it.
         ALacquer {
             anchors.fill: parent
-            cutTopRight: false
+            corners: [0, 0, 1, 2]
             lacquer: ColorUtils.applyAlpha(stock.lacquer, 0.92) // iris-literal: the band lets the print breathe through
             coat: stock.coat
         }

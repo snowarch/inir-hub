@@ -1,6 +1,7 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
+import QtQuick.Effects
 import QtQuick.Layouts
 import Quickshell
 import Quickshell.Widgets
@@ -24,7 +25,9 @@ ColumnLayout {
     readonly property real gap: Math.round(8 * page.d)
     readonly property real tileWidth: Math.floor((page.width - page.gap * (page.columns - 1)) / page.columns)
     readonly property real tileHeight: Math.round(page.tileWidth * 0.78)
-    readonly property real tileRadius: IrisStyle.fieldChamfer ? 0 : IrisStyle.concentric(IrisStyle.radiusCard, page.gap, IrisStyle.radiusRow)
+    readonly property real tileRadius: IrisStyle.concentric(IrisStyle.radiusCard, page.gap, IrisStyle.radiusRow)
+    // Under Kiri a tile is the Design's piece: a cut plate, its picture masked by the same die.
+    readonly property bool cutTiles: IrisStyle.fieldChamfer
     property string justCopied: ""
 
     spacing: Math.round(12 * page.d)
@@ -70,24 +73,45 @@ ColumnLayout {
                     height: page.tileHeight
                     Component.onCompleted: Shelf.want(tile.item)
 
+                    readonly property color plateColor: tap.pressed ? IrisStyle.fillActive : hover.hovered ? IrisStyle.fillHover : IrisStyle.fillQuiet
                     Rectangle {
                         id: plate
                         anchors.fill: parent
+                        visible: !page.cutTiles
                         radius: page.tileRadius
-                        color: tap.pressed ? IrisStyle.fillActive : hover.hovered ? IrisStyle.fillHover : IrisStyle.fillQuiet
+                        color: tile.plateColor
                         Behavior on color { ColorAnimation { duration: IrisStyle.feedbackDuration; easing.type: IrisStyle.feedbackEasing } }
+                    }
+                    IrisCutPlate {
+                        anchors.fill: parent
+                        visible: page.cutTiles
+                        color: tile.plateColor
                     }
                     ClippingRectangle {
                         anchors.fill: parent
                         visible: tile.item.kind === "image"
-                        radius: page.tileRadius
+                        radius: page.cutTiles ? 0 : page.tileRadius
                         color: "transparent"
+                        layer.enabled: page.cutTiles && visible
+                        layer.effect: MultiEffect {
+                            maskEnabled: true
+                            maskSource: tileDie
+                            maskThresholdMin: 0.5
+                            maskSpreadAtMin: 1
+                        }
                         IrisImage {
                             anchors.fill: parent
                             source: tile.thumb
                             fillMode: Image.PreserveAspectCrop
                             asynchronous: true
                         }
+                    }
+                    IrisCutPlate {
+                        id: tileDie
+                        anchors.fill: parent
+                        visible: false
+                        layer.enabled: page.cutTiles && tile.item.kind === "image"
+                        color: "black"
                     }
                     IrisText {
                         visible: tile.item.kind === "text"
@@ -130,7 +154,7 @@ ColumnLayout {
                     }
 
                     // Pinned stays past the history's length: its pin shows at rest, in the foot (on top it sat over the text).
-                    Rectangle {
+                    Item {
                         id: pinMark
                         visible: tile.item.pinned && !keys.shown
                         anchors.right: parent.right
@@ -138,19 +162,18 @@ ColumnLayout {
                         anchors.margins: Math.round(6 * page.d)
                         width: Math.round(20 * page.d)
                         height: width
-                        radius: IrisStyle.fieldChamfer ? 0 : width / 2
-                        color: IrisStyle.accent
+                        Piece { anchors.fill: parent; fill: IrisStyle.accent }
                         MaterialSymbol { anchors.centerIn: parent; text: "keep"; fill: 1; iconSize: Math.round(13 * page.d); color: IrisStyle.inkOnAccent }
                     }
 
                     // Copied: a check over the tile for a moment.
-                    Rectangle {
+                    Item {
                         anchors.fill: parent
-                        radius: page.tileRadius
-                        color: Qt.alpha(IrisStyle.accent, 0.85)
                         opacity: tile.copiedNow ? 1 : 0
                         visible: opacity > 0
                         Behavior on opacity { NumberAnimation { duration: IrisStyle.duration(160); easing.type: IrisStyle.feedbackEasing } }
+                        Rectangle { anchors.fill: parent; visible: !page.cutTiles; radius: page.tileRadius; color: Qt.alpha(IrisStyle.accent, 0.85) }
+                        IrisCutPlate { anchors.fill: parent; visible: page.cutTiles; color: Qt.alpha(IrisStyle.accent, 0.85) }
                         MaterialSymbol { anchors.centerIn: parent; text: "check"; iconSize: Math.round(26 * page.d); color: IrisStyle.inkOnAccent }
                     }
 
@@ -250,7 +273,29 @@ ColumnLayout {
         }
     }
 
-    component CornerKey: Rectangle {
+    // A small piece: a disc, or under Kiri the Design's piece cut by its size.
+    component Piece: Item {
+        id: piece
+        property color fill
+        property color edge: "transparent"
+        Rectangle {
+            anchors.fill: parent
+            visible: !page.cutTiles
+            radius: width / 2
+            color: piece.fill
+            border.width: piece.edge.a > 0 ? 1 : 0
+            border.color: piece.edge
+        }
+        IrisCutPlate {
+            anchors.fill: parent
+            visible: page.cutTiles
+            cutLength: Math.round(piece.width * 0.36)
+            color: piece.fill
+            stroke: piece.edge
+            strokeWidth: piece.edge.a > 0 ? 1 : 0
+        }
+    }
+    component CornerKey: Item {
         id: key
         property string glyph: ""
         property string name: ""
@@ -259,10 +304,11 @@ ColumnLayout {
         signal activated()
         width: Math.round(22 * page.d)
         height: width
-        radius: IrisStyle.fieldChamfer ? 0 : width / 2
-        color: key.lit ? IrisStyle.accent : keyHover.hovered ? IrisStyle.surfaceHigh : IrisStyle.surface
-        border.width: key.lit ? 0 : 1
-        border.color: IrisStyle.hairline
+        Piece {
+            anchors.fill: parent
+            fill: key.lit ? IrisStyle.accent : keyHover.hovered ? IrisStyle.surfaceHigh : IrisStyle.surface
+            edge: key.lit ? "transparent" : IrisStyle.hairline
+        }
         MaterialSymbol {
             anchors.centerIn: parent
             text: key.glyph

@@ -1213,7 +1213,8 @@ Item {
                             height: scene.height - y - Math.round(7 * root.d)
                             radius: IrisStyle.fieldChamfer ? 0 : Math.max(Math.round(4 * root.d), scene.radius - Math.round(6 * root.d))
                             // Fills are the ink at a low alpha over the paper, as on every surface.
-                            color: IrisStyle.fill
+                            color: IrisStyle.fieldChamfer ? "transparent" : IrisStyle.fill
+                            IrisCutPlate { anchors.fill: parent; visible: IrisStyle.fieldChamfer; cutLength: IrisStyle.nestedCut(IrisStyle.chamferCut, Math.round(6 * root.d)); color: IrisStyle.fill }
                             Column {
                                 x: Math.round(8 * root.d)
                                 anchors.verticalCenter: parent.verticalCenter

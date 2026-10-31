@@ -86,7 +86,7 @@ layout(std140, binding = 0) uniform buf {
     // field in a small window (a menu) samples the wallpaper glass at the right place.
     vec4 scene;
     // x: 1 when another window paints the band, so this field draws only the bodies and their joins.
-    // y: the Design's corner (0 round, 1 chamfer: DESIGNS.md, `field.corner`); z: the most a chamfer cuts, in pixels.
+    // y: the Design's corner (0 round, 1 Kiri: `field.corner`); z: Kiri's own cut, in pixels (IrisStyle.chamferCut).
     vec4 options;
     // Left, top, right, bottom of an inner rectangle nothing reaches: its pixels skip the whole pass.
     vec4 quiet;
@@ -166,43 +166,54 @@ float squircleBox(vec2 p, vec2 centre, vec2 halfSize, float radius) {
     return (l - reach) / length(gradient);
 }
 
-// A body's own outline. Round is the squircle box. Chamfer (a Design's `field.corner`) cuts the upper-right and
-// lower-left corners at 45° by `options.z` (never more than half the body) and keeps the other two square: a sticker cut
-// with a blade. The cut is a half-plane intersected with the square box, so joins, rims and shadows that read the
-// distance follow it like any other edge.
-// Which corners the blade takes: 0 the Design's pair (upper-right and lower-left); a body welded to the frame cuts the
-// two corners it shows instead (-1 the upper pair, -2 the lower, -3 the left, -4 the right), so it stands symmetric on
-// its edge. Under a chamfered Design a body's radius lane carries this code (IrisField.qml radiusBlock).
-bool cutsCorner(vec2 d, float mask) {
-    if (mask > -0.5) return d.x * d.y < 0.0;
-    if (mask > -1.5) return d.y < 0.0;
-    if (mask > -2.5) return d.y > 0.0;
-    if (mask > -3.5) return d.x < 0.0;
-    return d.x > 0.0;
-}
+// A body's own outline. Round is the squircle box. Kiri (a Design's `field.corner: "chamfer"`, AIRISU since 10-31) keeps
+// the upper-left and lower-right corners round (the same squircle) and cuts the upper-right and lower-left at 45° by
+// KIRI_CUT times the radius, both ends of the cut eased by KIRI_EASE times it, so the blade's line runs into the sides
+// instead of breaking off them (the square corners and hard points before read as cardboard). The radius gives way on a
+// small body (KIRI_FIT of its shorter half), so a strip keeps a straight run between its round corner and its cut. A
+// body welded to the frame wears the same pair: the corners it shows are one round, one cut, as every other piece.
+// IrisBlurRegion (kiriRows, kiriDistance) and qs-rs FieldRegion draw the same outline; IrisStyle.kiriOutline cuts plates.
+const float KIRI_CUT = 1.5;
+const float KIRI_EASE = 0.55;
+const float KIRI_FIT = 0.56;
 
-float cutBox(vec2 p, vec2 centre, vec2 halfSize, float cut, float mask) {
+// The rounded cut quadrant is the shrunk wedge (inside the sides by the ease, the cut moved in along its normal by the
+// same) grown back by the ease: an exact distance, so joins, rims and shadows that read it follow the eased edge.
+float kiriBox(vec2 p, vec2 centre, vec2 halfSize, float radius) {
     vec2 d = p - centre;
-    vec2 q = abs(d) - halfSize;
-    float box = length(max(q, 0.0)) + min(max(q.x, q.y), 0.0);
-    cut = min(cut, min(halfSize.x, halfSize.y));
-    if (cut > 0.5 && cutsCorner(d, mask))
-        box = max(box, (abs(d.x) + abs(d.y) - (halfSize.x + halfSize.y - cut)) * 0.70710678);
-    return box;
+    float r = min(radius, KIRI_FIT * min(halfSize.x, halfSize.y));
+    if (d.x * d.y >= 0.0 || r < 0.5)
+        return squircleBox(p, centre, halfSize, r);
+    float e = KIRI_EASE * r;
+    vec2 q = abs(d);
+    vec2 s = halfSize - e;
+    float l = halfSize.x + halfSize.y - KIRI_CUT * r - e * 1.41421356;
+    float inside = max(max(q.x - s.x, q.y - s.y), (q.x + q.y - l) * 0.70710678);
+    if (inside <= 0.0)
+        return inside - e;
+    vec2 a = vec2(s.x, l - s.x);
+    vec2 b = vec2(l - s.y, s.y);
+    vec2 ab = b - a;
+    float t = clamp(dot(q - a, ab) / dot(ab, ab), 0.0, 1.0);
+    float dist = length(q - a - ab * t);
+    dist = min(dist, q.y <= a.y ? abs(q.x - s.x) : length(q - a));
+    dist = min(dist, q.x <= b.x ? abs(q.y - s.y) : length(q - b));
+    return dist - e;
 }
 
+// A body's radius lane is its radius under both corners; 0 under Kiri takes the Design's own (options.z is its cut).
 float bodyBox(vec2 p, vec2 centre, vec2 halfSize, float radius) {
     if (u.options.y < 0.5)
         return squircleBox(p, centre, halfSize, radius);
-    return cutBox(p, centre, halfSize, u.options.z, radius < -0.5 ? radius : 0.0);
+    return kiriBox(p, centre, halfSize, radius > 0.5 ? radius : u.options.z / KIRI_CUT);
 }
 
-// The screen's opening inside the frame band: the same blade, its cut the size the round corner would have been, so a
-// chamfered Design never shows a round corner around its bodies.
+// The screen's opening inside the frame band wears the same corners, so a Kiri Design never shows a plain round hole
+// around its bodies.
 float frameBox(vec2 p, vec2 centre, vec2 halfSize, float radius) {
     if (u.options.y < 0.5)
         return squircleBox(p, centre, halfSize, radius);
-    return cutBox(p, centre, halfSize, radius, 0.0);
+    return kiriBox(p, centre, halfSize, radius);
 }
 
 // The chrome bevel's environment by elevation e: -1 ground, 0 horizon, 1 sky.
@@ -220,15 +231,14 @@ float bayer4(vec2 p) {
 }
 
 // Polynomial smooth minimum: the join is a fillet `k` pixels deep, which is what
-// makes two bodies read as one that swelled rather than two that overlap. A chamfered Design joins with a straight
-// 45° cut instead (the chamfer minimum): its bodies meet like two plates welded with a gusset, never like liquid.
+// makes two bodies read as one that swelled rather than two that overlap. A Kiri Design keeps its shoulders tight: the
+// fillet at most twice its cut deep, so a weld reads as a lacquered joint and not as liquid (iRiS's 56 px shoulder beside
+// 18 px corners read as two languages).
 float smoothUnion(float a, float b, float k) {
+    if (u.options.y >= 0.5)
+        k = min(k, 2.0 * u.options.z);
     if (k <= 0.001)
         return min(a, b);
-    // The gusset's legs are the blade's: every 45° edge on screen is one length (a 56 px shoulder beside 10 px cuts
-    // read as points that did not belong together).
-    if (u.options.y >= 0.5)
-        return min(min(a, b), (a + b - min(k, 2.0 * u.options.z) * 0.5) * 0.70710678);
     float h = clamp(0.5 + 0.5 * (b - a) / k, 0.0, 1.0);
     return mix(b, a, h) - k * h * (1.0 - h);
 }
@@ -482,8 +492,7 @@ void main() {
                 && blockValue(block, slot, u.alsoA, u.alsoB, u.alsoC, u.alsoD, u.alsoE) > -0.5)
                 continue;
             vec4 s = shapeAt(i);
-            // A chamfered Design's radius lane is a cut code, not a radius: its corners are straight.
-            float r = u.options.y >= 0.5 ? 0.0 : min(blockValue(block, slot, u.radiiA, u.radiiB, u.radiiC, u.radiiD, u.radiiE), min(s.z, s.w));
+            float r = min(blockValue(block, slot, u.radiiA, u.radiiB, u.radiiC, u.radiiD, u.radiiE), min(s.z, s.w));
             float under = u.field.z + 2.0;
             vec2 a = s.xy - s.zw;
             vec2 b = s.xy + s.zw;

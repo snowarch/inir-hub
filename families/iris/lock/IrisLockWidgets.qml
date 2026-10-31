@@ -26,6 +26,7 @@ import qs.modules.shared.background.widgets.userCard
 import qs.modules.shared.background.widgets.newsTicker
 import qs.modules.iris.widgets
 import qs.modules.iris.style
+import qs.modules.iris.components
 import qs.modules.iris.state
 
 Item {
@@ -75,8 +76,16 @@ Item {
             : Math.round((root.selectedItem?.widgetCardRadius ?? IrisStyle.radiusPlate) * (root.selectedItem?.scaleFactor ?? 1))
         radius: IrisStyle.fieldChamfer ? 0 : faceRadius + pad
         color: "transparent"
-        border.width: Math.max(1, Math.round(1.5 * d))
+        border.width: IrisStyle.fieldChamfer ? 0 : Math.max(1, Math.round(1.5 * d))
         border.color: IrisStyle.accentOnMedia
+        // Under Kiri the ring is the widget's own die grown by the gap, its cut parallel to the widget's.
+        IrisCutPlate {
+            anchors.fill: parent
+            visible: IrisStyle.fieldChamfer
+            cutLength: IrisStyle.chamferCut + Math.round(parent.pad * (2 - Math.SQRT2))
+            stroke: IrisStyle.accentOnMedia
+            strokeWidth: Math.max(1, Math.round(1.5 * parent.d))
+        }
     }
 
     Repeater {

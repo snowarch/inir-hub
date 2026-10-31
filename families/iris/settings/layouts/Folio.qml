@@ -59,7 +59,9 @@ Item {
         width: Math.min(root.u(root.compact ? 280 : 320) * index.textGrowth, Math.max(root.u(root.compact ? 216 : 244) * index.textGrowth, Math.ceil(index.widest) + root.u(92)))
         height: root.height - 2 * root.u(8)
         radius: IrisStyle.fieldChamfer ? 0 : Math.max(root.u(12), IrisStyle.radiusPanel - root.u(8))
-        color: IrisStyle.glassy ? IrisStyle.readingSidebar : Qt.rgba(IrisStyle.text.r, IrisStyle.text.g, IrisStyle.text.b, IrisStyle.light ? 0.03 : 0.035) // iris-literal: the index sits a step off the sheet
+        readonly property color paper: IrisStyle.glassy ? IrisStyle.readingSidebar : Qt.rgba(IrisStyle.text.r, IrisStyle.text.g, IrisStyle.text.b, IrisStyle.light ? 0.03 : 0.035) // iris-literal: the index sits a step off the sheet
+        color: IrisStyle.fieldChamfer ? "transparent" : paper
+        IrisCutPlate { anchors.fill: parent; visible: IrisStyle.fieldChamfer; cutLength: IrisStyle.nestedCut(IrisStyle.chamferCut, root.u(8)); color: parent.paper }
         Flickable {
             id: indexFlick
             anchors.fill: parent

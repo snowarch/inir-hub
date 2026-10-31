@@ -89,8 +89,9 @@ Item {
     }
     readonly property bool notch: root.options?.notch ?? false
     // A Design draws the Island's faces and its page nav itself (DESIGNS.md › Island); the engine keeps the modes,
-    // events, pages, pieces and geometry. A Design whose pages "hang" opens them as a second body under the strip,
-    // apart from it by a seam, instead of growing the strip into the page.
+    // events, pages, pieces and geometry. A Design whose pages "hang" (AIRISU) opens them as a second body under the
+    // strip, welded to it: the page grows out of the strip's foot and the two meet in tight concave shoulders, one body
+    // of lacquer (his pick of 10-31, Kiri), where a seam between them read as two boxes.
     // Three designs of the Island (10-25): the engine's own (Halo), Ledger and Tiles, which skin its face, its page
     // buttons and its desktop page. A shell Design (AIRISU) that skins a part keeps it.
     readonly property string design: ["ledger", "tiles", "dial", "marquee", "duo"].includes(String(root.options?.design ?? "halo")) ? String(root.options.design) : "halo"
@@ -105,7 +106,7 @@ Item {
     // A face may take only some modes (`modes`); the engine draws the others.
     readonly property bool faceTakes: root.faceUrl.length > 0 && (!designFace.item?.modes || designFace.item.modes.includes(root.compactMode))
     readonly property bool pagesHang: IrisDesign.trait("pages") === "hang" && !root.fullWidth && !root.vertical
-    readonly property real seam: root.pagesHang ? Math.round(3 * root.d) : 0
+    readonly property real seam: 0
     readonly property string pagePlate: {
         const value = String(root.options?.navFrame ?? "auto")
         return ["none", "veil", "glass", "solid"].includes(value) ? value : IrisStyle.controlPlate
@@ -1539,9 +1540,11 @@ Item {
             const sink = grown ? 0 : root.fullWidth && !floating ? Math.min(extension.radius, root.compactHeight) : 0
             out.push({ x: page.x - (root.vertical && !root.rightEdge ? sink : 0), y: page.y - (!root.vertical && !root.bottomEdge ? sink : 0),
                 width: extension.width + (root.vertical ? sink : 0), height: extension.height + (root.vertical ? 0 : sink),
-                radius: extension.radius, paints: true, fuse: grown ? IrisStyle.fuseEdge : IrisStyle.fuseDeep,
+                radius: extension.radius, paints: true,
+                fuse: root.pagesHang ? 2 * IrisStyle.chamferCut : grown ? IrisStyle.fuseEdge : IrisStyle.fuseDeep,
                 // Inline, the page is the chassis rectangle itself: a smooth union of two equal shapes swells the contour by fuse / 4.
-                joins: !extension.anchoredShape || floating || root.pagesHang ? "" : grown && root.clearStrip ? (IrisFrame.framed ? "frame" : "edge")
+                joins: root.pagesHang && !floating ? (root.clearStrip ? "islandnotch" : "island")
+                    : !extension.anchoredShape || floating ? "" : grown && root.clearStrip ? (IrisFrame.framed ? "frame" : "edge")
                     : root.clearStrip ? "islandnotch" : "island" })
         }
         if (badgePill.visible) {

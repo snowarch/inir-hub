@@ -5,8 +5,8 @@ import qs.modules.common.functions
 import qs.modules.iris.style
 
 // IrisDotStrip bent round a bubble (Nothing's Glyph ring): dots clockwise from twelve o'clock, filled = value, the
-// fill spreads dot by dot (12 ms apart), indeterminate is one dot running round. `cut` lays them along a chamfered
-// square instead (AIRISU's bubbles), from its upper left corner.
+// fill spreads dot by dot (12 ms apart), indeterminate is one dot running round. `cut` lays them along a Kiri
+// outline instead (AIRISU's bubbles), from its upper left corner.
 Item {
     id: root
 
@@ -36,9 +36,7 @@ Item {
             }
             return out
         }
-        const c = Math.min(root.cut, w / 3)
-        const path = [Qt.point(h, h), Qt.point(h + w - c, h), Qt.point(h + w, h + c), Qt.point(h + w, h + ht),
-            Qt.point(h + c, h + ht), Qt.point(h, h + ht - c), Qt.point(h, h)]
+        const path = IrisStyle.kiriOutline(root.width, root.height, root.cut, h)
         let total = 0
         for (let i = 1; i < path.length; i++) total += Math.hypot(path[i].x - path[i - 1].x, path[i].y - path[i - 1].y)
         for (let i = 0; i < n; i++) {

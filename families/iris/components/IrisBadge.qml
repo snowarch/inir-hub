@@ -17,8 +17,8 @@ Rectangle {
     implicitWidth: Math.max(root.size, label.implicitWidth + root.size * 0.7)
     height: root.implicitHeight
     width: root.implicitWidth
-    // A Design that cuts its bodies (AIRISU) makes the count a square sticker: no ring, the number in its wide face.
-    radius: IrisStyle.fieldChamfer ? 0 : height / 2
+    // A Design that cuts its bodies (AIRISU) makes the count a sticker with its round corner: no ring, the number in its wide face.
+    radius: IrisStyle.fieldChamfer ? IrisStyle.capsule(height) : height / 2
     color: root.skinned ? "transparent" : IrisStyle.badge
     border.width: root.skinned || IrisStyle.fieldChamfer ? 0 : Math.max(1, root.size * 0.07)
     border.color: IrisStyle.bodySurface
