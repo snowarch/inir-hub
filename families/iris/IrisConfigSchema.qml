@@ -144,7 +144,8 @@ JsonObject {
             property string style: "iris" // "iris", "tile" or "glyph" (the glyph alone, as Folio's index)
             property string plate: "black" // "black", "white", "tint" or "surface"
             property string shape: "auto" // a plate's corners: "auto" (the look's), "round" or "square"
-            property string ink: "ink" // the Glyph pack's colour: "ink" or "tint" (each area's own)
+            property string colour: "auto" // "auto" (plates in the area's colour, a glyph alone in ink), "area", "accent" or "mono"
+            property string glyphs: "rounded" // the glyph set: "rounded", "standard" (Material Symbols Outlined) or "sharp"
             property string fill: "auto" // "auto", "filled" or "outlined"
             property string weight: "regular" // "light", "regular" or "bold"
         }
