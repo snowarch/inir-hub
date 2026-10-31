@@ -91,6 +91,9 @@ WidgetLook {
     function resetValues(widget: var): var {
         return widget.hasFamilyFace ? { "iris.material": "auto", "iris.design": "auto", "iris.opacity": -1 } : ({})
     }
+    // Transparent has no plate, whatever the switch says.
+    function plateHidden(read: var): bool { return String(read("iris.material", "auto")) === "clear" }
+    function plateShown(read: var): var { return look.plateHidden(read) ? { "iris.material": "auto" } : ({}) }
     // Widgets that keep their own material or opacity, and the verbs over the shared one.
     readonly property var ownSurfaces: DesktopWidgetDesign.scan(["iris.material", "iris.opacity"],
         (key, value) => key === "iris.opacity" ? Number(value) >= 20 : look.materials.includes(String(value)))

@@ -169,5 +169,39 @@
       "lightweight",
       "layout"
     ]
+  },
+  "widgetOptions": {
+    "clock": [
+      {"key":"iris.face","label":"Face","type":"choice","default":"analog","when":"face","choices":[["analog","Analog","schedule"],["digital","Digital","timer_10"]]},
+      {"key":"iris.seconds","label":"Second hand","type":"switch","default":true,"when":["face",{"iris.face":"analog"}]},
+      {"key":"iris.week","label":"Week strip","type":"switch","default":true,"when":["face",{"not":{"sizeClass":"small"}}]}
+    ],
+    "mediaControls": [
+      {"key":"iris.lyrics","label":"Synced lyrics","type":"switch","default":true,"when":"face"},
+      {"key":"iris.rest","label":"Rest when paused","type":"switch","default":true,"when":"face"}
+    ],
+    "systemMonitor": [
+      {"key":"iris.lead","label":"Main","type":"choice","default":"auto","when":"face","choices":[["auto","Auto"],["cpu","Processor","memory"],["mem","Memory","memory_alt"],["gpu","Graphics","developer_board"],["temp","CPU heat","thermostat"],["gpuTemp","GPU heat","thermostat"]],"keywords":["lead","main","first","big"]}
+    ],
+    "controls": [
+      {"key":"iris.tile.wifi","label":"Wi-Fi","type":"switch","default":true,"tune":false,"keywords":["keys","tiles","toggle"]},
+      {"key":"iris.tile.bluetooth","label":"Bluetooth","type":"switch","default":true,"tune":false,"keywords":["keys","tiles","toggle"]},
+      {"key":"iris.tile.focus","label":"Focus","type":"switch","default":true,"tune":false,"keywords":["keys","tiles","toggle"]},
+      {"key":"iris.tile.nightLight","label":"Night light","type":"switch","default":true,"tune":false,"keywords":["keys","tiles","toggle"]},
+      {"key":"iris.tile.awake","label":"Keep awake","type":"switch","default":true,"tune":false,"keywords":["keys","tiles","toggle"]},
+      {"key":"iris.tile.gameMode","label":"Game mode","type":"switch","default":true,"tune":false,"keywords":["keys","tiles","toggle"]},
+      {"key":"iris.tile.mic","label":"Microphone","type":"switch","default":true,"tune":false,"keywords":["keys","tiles","toggle"]},
+      {"key":"iris.tile.darkMode","label":"Dark mode","type":"switch","default":true,"tune":false,"keywords":["keys","tiles","toggle"]},
+      {"key":"iris.sliders","label":"Volume and brightness","type":"switch","default":true,"when":{"not":{"sizeClass":"small"}},"tune":false}
+    ],
+    "palette": [
+      {"key":"iris.source","label":"Colours from","type":"choice","default":"wallpaper","choices":[["wallpaper","Wallpaper"],["music","Music"],["random","Random"]]}
+    ],
+    "weather": [
+      {"key":"iris.details","label":"Details","type":"switch","default":true,"when":["face",{"sizeClass":"large"}],"keywords":["humidity","wind","uv","air"]}
+    ],
+    "*": [
+      {"key":"iris.material","label":"Material","type":"choice","default":"auto","tune":true,"when":["face",{"showBackground":{"is":true,"otherwise":true}}],"choices":[["auto","Same as every widget"],["glass","Glass"],["clear","Transparent"],["solid","Solid"],["tinted","Tinted"]],"keywords":["glass","transparent","background","plate","fondo","vidrio"]}
+    ]
   }
 }
