@@ -43,19 +43,19 @@ WidgetLook {
 
     function material(widget: var): string {
         // the widget's Background switch, the same one every family's edit mode turns off for all
-        if (!widget.showBackground) return "clear"
-        const own = String(widget._readConfigKey("iris.material") ?? "auto")
+        if (widget && !widget.showBackground) return "clear"
+        const own = String(widget?._readConfigKey("iris.material") ?? "auto")
         const shared = String(look.options.material ?? "glass")
         return look.materials.includes(own) ? own : look.materials.includes(shared) ? shared : "glass"
     }
     function plate(widget: var): color { return look.material(widget) === "tinted" ? look.tintedPlate : IrisStyle.surface }
     function outline(widget: var): string {
-        if (!widget.showBorder) return "none"
+        if (widget && !widget.showBorder) return "none"
         const value = String(look.options.outline ?? "auto")
         return ["auto", "always", "none"].includes(value) ? value : "auto"
     }
     function surfaceOpacity(widget: var): real {
-        const own = Number(widget._readConfigKey("iris.opacity") ?? -1)
+        const own = Number(widget?._readConfigKey("iris.opacity") ?? -1)
         const value = own >= 20 ? own : Number(look.options.opacity ?? 100)
         return Math.max(0, Math.min(100, Number.isFinite(value) ? value : 100)) / 100
     }

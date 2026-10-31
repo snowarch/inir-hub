@@ -1,2 +1,3 @@
 module qs.modules.ii.widgets
 MaterialWidgetLook 1.0 MaterialWidgetLook.qml
+MaterialWidgetPlate 1.0 MaterialWidgetPlate.qml

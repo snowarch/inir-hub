@@ -94,22 +94,10 @@ AbstractBackgroundWidget {
     // The plate every built-in widget sits on: the user's design, opacity, outline, blur and corners.
     WidgetSurface {
         anchors.fill: parent
-        irisPresentation: root.widgetIris
-        regionBrightness: root.regionBrightness
+        widget: root
         shown: !root.instrument && (root.backgroundOpacity > 0 || root.borderWidth > 0 || root.effectiveBlur)
-        surfaceRadius: root.cornerRadiusOverride >= 0 ? root.cornerRadiusOverride : root.widgetCardRadius
-        surfaceOpacity: root.backgroundOpacity
-        surfaceBorderWidth: root.borderWidth
-        surfaceBorderOpacity: root.borderOpacity
         surfaceColor: root.widgetInk
-        colorMode: root.colorMode
         surfaceAccent: root.widgetAccent3
-        surfaceFill: root.widgetPlateColor
-        surfaceUseBlur: root.effectiveBlur
-        screenX: root.x
-        screenY: root.y
-        screenWidth: root.scaledScreenWidth
-        screenHeight: root.scaledScreenHeight
     }
 
     // ── Shape ────────────────────────────────────────────────

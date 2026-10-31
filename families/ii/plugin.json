@@ -40,6 +40,7 @@
     "widgetOutfit": "edit/MaterialWidgetOutfit.qml",
     "widget.sizeGrip": "edit/MaterialSizeGrip.qml",
     "widgetLook": "widgets/MaterialWidgetLook.qml",
+    "widgetPlate": "widgets/MaterialWidgetPlate.qml",
     "settingsApp": "settings/MaterialSettingsApp.qml",
     "settingsHost": "settings/SettingsHost.qml",
     "config": "MaterialConfigSchema.qml",
