@@ -32,9 +32,6 @@ Item {
     readonly property real welcomeChoiceRadius: Looks.settings.radiusLarge
     readonly property real welcomeCardRadius: Looks.settings.radiusLarge
 
-    // one look: Appearance is the wallpaper and light or dark; the starting profiles set Material's pieces
-    readonly property bool welcomeStyles: false
-    readonly property bool welcomeProfiles: false
     readonly property var placementRows: [
         { label: Translation.tr("Taskbar"), key: "waffles.bar.bottom", fallback: true, options: [
             { displayName: Translation.tr("Bottom"), icon: "vertical_align_bottom", value: true },

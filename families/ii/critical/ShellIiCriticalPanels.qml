@@ -23,6 +23,7 @@ Item {
             && extraCondition
     }
 
+    MaterialVerbs {}
     CriticalPanelLoader { identifier: "iiBackground"; component: Background { family: "ii" } }
     CriticalPanelLoader { identifier: "iiBar"; extraCondition: !root.barVertical && root.barStock; source: "../bar/Bar.qml" }
     CriticalPanelLoader { identifier: "iiBar"; extraCondition: !root.barVertical && root.barPill && !GlobalStates.widgetEditMode; source: "../pill/PillBar.qml" }

@@ -17,6 +17,13 @@
     },
     "globalStyle": {
       "key": "material.style"
+    },
+    "sidebarScreens": {
+      "key": "material.sidebar.screenList"
+    },
+    "barMediaWidth": {
+      "key": "material.bar.media.maxWidth",
+      "fallback": 220
     }
   },
   "name": "Material",
@@ -33,7 +40,8 @@
     "settingsApp": "settings/MaterialSettingsApp.qml",
     "settingsHost": "settings/SettingsHost.qml",
     "config": "MaterialConfigSchema.qml",
-    "layout": "MaterialLayout.qml"
+    "layout": "MaterialLayout.qml",
+    "welcome": "welcome/MaterialWelcome.qml"
   },
   "enabledPanels": [
     "iiBar",

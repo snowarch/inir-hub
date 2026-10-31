@@ -1,0 +1,3 @@
+module qs.modules.ii.welcome
+MaterialWelcome 1.0 MaterialWelcome.qml
+MaterialWelcomeSidebars 1.0 MaterialWelcomeSidebars.qml

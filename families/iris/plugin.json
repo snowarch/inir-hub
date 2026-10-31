@@ -61,7 +61,6 @@
     "lazyServices": true,
     "verbs": true,
     "mediaFeedback": true,
-    "sidebarsAnyScreen": true,
     "appsPalette": true,
     "liveJobs": true,
     "cameraWatch": true,
