@@ -4,6 +4,7 @@ import QtQuick
 import QtQuick.Layouts
 import Quickshell
 import qs
+import qs.modules.shared.background.widgets
 import qs.services
 import qs.modules.common.widgets
 import qs.modules.iris.style
