@@ -1,5 +1,6 @@
 pragma ComponentBehavior: Bound
 import QtQuick
+import Quickshell.Widgets
 import qs
 import qs.services
 import qs.modules.common
@@ -42,8 +43,8 @@ Item {
             visible: root.live
             anchors.verticalCenter: parent.verticalCenter
             width: Math.round(10 * root.d)
-            height: Math.round(root.bead * 0.42)
-            color: IrisStyle.fillQuiet
+            height: Math.round(3 * root.d)
+            color: IrisStyle.fillActive
         }
         Rectangle {
             visible: root.live
@@ -56,12 +57,26 @@ Item {
                 id: liveRow
                 anchors.centerIn: parent
                 spacing: Math.round(6 * root.d)
-                Rectangle {
+                ClippingRectangle {
                     anchors.verticalCenter: parent.verticalCenter
                     width: Math.round(root.bead - 8 * root.d); height: width; radius: width / 2
-                    clip: true
                     color: IrisStyle.fillActive
-                    Image { anchors.fill: parent; source: String(root.player?.trackArtUrl ?? ""); fillMode: Image.PreserveAspectCrop; sourceSize.width: 64; sourceSize.height: 64; asynchronous: true }
+                    MaterialSymbol {
+                        anchors.centerIn: parent
+                        visible: cover.status !== Image.Ready
+                        text: "music_note"
+                        iconSize: Math.round(parent.width * 0.6)
+                        color: IrisStyle.text
+                    }
+                    Image {
+                        id: cover
+                        anchors.fill: parent
+                        source: String(root.player?.trackArtUrl ?? "")
+                        fillMode: Image.PreserveAspectCrop
+                        sourceSize.width: width * 2
+                        sourceSize.height: height * 2
+                        asynchronous: true
+                    }
                 }
                 MaterialSymbol {
                     anchors.verticalCenter: parent.verticalCenter
