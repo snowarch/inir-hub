@@ -11,24 +11,14 @@ import qs.modules.iris.style
 // steps beside it. Shown sections lead in their order; the rest follow, quiet, one switch away.
 Rectangle {
     id: root
-    required property string side
-    // The group's fill: a reading card in Settings, the panel's quiet fill inside the panel itself.
-    property color plate: IrisStyle.readingCard
+    property string side: root.spec?.side ?? "left"
+    // Settings' row hands its spec here; the row's plate is then the only one.
+    property var spec: null
+    // The group's fill: none in a Settings row, the panel's quiet fill inside the panel itself.
+    property color plate: "transparent"
     readonly property real d: IrisStyle.density
-    readonly property var sections: Config.options?.iris?.sidebars?.[root.side]?.sections
-        ?? (root.side === "left" ? ["media", "tasks", "notes"] : ["calendar", "weather", "notifications"])
-    // Getters: a list that feeds Settings holds no live colour.
-    readonly property var catalog: [
-        { id: "media", label: "Now playing", icon: "music_note", get tint() { return IrisStyle.identity.pink } },
-        { id: "tasks", label: "Tasks", icon: "check_circle", get tint() { return IrisStyle.identity.green } },
-        { id: "notes", label: "Notes", icon: "edit_note", get tint() { return IrisStyle.identity.yellow } },
-        { id: "calendar", label: "Calendar", icon: "calendar_month", get tint() { return IrisStyle.identity.red } },
-        { id: "weather", label: "Weather", icon: "partly_cloudy_day", get tint() { return IrisStyle.identity.sky } },
-        { id: "notifications", label: "Notifications", icon: "notifications", get tint() { return IrisStyle.identity.orange } },
-        { id: "focus", label: "Focus timer", icon: "timer", get tint() { return IrisStyle.identity.indigo } },
-        { id: "mixer", label: "Sound mixer", icon: "graphic_eq", get tint() { return IrisStyle.identity.purple } },
-        { id: "system", label: "System", icon: "monitor_heart", get tint() { return IrisStyle.identity.teal } }
-    ]
+    readonly property var sections: Config.options?.iris?.sidebars?.[root.side]?.sections ?? []
+    readonly property var catalog: IrisSidebarSections.catalog
     property var order: []
     function syncOrder(): void {
         const kept = root.order.filter(id => root.sections.includes(id))

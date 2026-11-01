@@ -105,6 +105,7 @@ ClippingRectangle {
                 keyboard: "keyboard", battery: "battery", gaming: "gaming", anime: "anime", sources: "sources", system: "hub" })[section] ?? ""
         const key = section + "/" + group
         return ({
+            "sidebars/Focus": "panels", "sidebars/Today": "panels", "sidebars/Panel look": "panels",
             "bar/Visibility": "islandReserve", "bar/Interaction": "islandInteraction",
             "bar/Shape": "islandEdge", "bar/Layout": "islandEdge", "bar/Bar": "barZones",
             "appearance/Light": "light", "appearance/Shape": "shapes", "appearance/Corners per surface": "surfaces", "appearance/Glass": "glass", "appearance/Edges": "glass",

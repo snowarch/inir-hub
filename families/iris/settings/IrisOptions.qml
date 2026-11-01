@@ -1089,14 +1089,22 @@ QtObject {
         { section: "sound", group: "Volume", label: "Largest jump", tune: true, description: "The most one change can raise the volume.", path: "audio.protection.maxAllowedIncrease", visibleWhen: "audio.protection.enable", kind: "range", fallback: 10, min: 2, max: 50, step: 2, unit: " %", keywords: ["earbang", "volume", "step"] },
         { section: "sound", group: "Volume", label: "Volume limit", tune: true, description: "Above 100 % amplifies the sound and can distort it; 153 % is as far as the system mixer goes.", path: "audio.protection.maxAllowed", visibleWhen: "audio.protection.enable", kind: "range", fallback: 100, min: 50, max: 154, step: 2, unit: " %", keywords: ["earbang", "volume", "limit", "boost", "amplify", "over 100", "150"] },
     ].concat(...["left", "right"].map(side => [
-        { section: "sidebars", group: side === "left" ? "Focus · left" : "Today · right", label: "Enable panel", path: "iris.sidebars." + side + ".enable", kind: "switch", fallback:true },
-        { section: "sidebars", group: side === "left" ? "Focus · left" : "Today · right", label: "Width", path: "iris.sidebars." + side + ".width", kind: "range", fallback:380,min:300,max:600,step:10,unit:" px" },
-        { section: "sidebars", group: side === "left" ? "Focus · left" : "Today · right", label: "Maximum height", description: "Panels hug their sections and grow up to this.", path: "iris.sidebars." + side + ".height", kind: "range", fallback:88,min:45,max:100,unit:" %" },
-        { section: "sidebars", group: side === "left" ? "Focus · left" : "Today · right", label: "Alignment", path: "iris.sidebars." + side + ".alignment", kind: "choice", fallback:"center", choices:[{label:"Top",value:"top"},{label:"Center",value:"center"},{label:"Bottom",value:"bottom"}] },
-        { section: "sidebars", group: side === "left" ? "Focus · left" : "Today · right", label: "Attach to the screen edge", tune: true, description: "Melts the panel into its edge, like a notch.", path: "iris.sidebars." + side + ".notch", kind: "switch", fallback:false, keywords: ["attach", "join", "frame", "edge", "notch", "float", "pegar"] },
-        { section: "sidebars", group: side === "left" ? "Focus · left" : "Today · right", label: "Reveal on hover", tune: true, description: side === "left" ? "Rest the pointer at the left edge to peek; click inside to keep it." : "Rest the pointer at the right edge to peek; click inside to keep it.", path: "iris.sidebars." + side + ".hoverReveal", kind: "switch", fallback:false },
-        { section: "sidebars", group: side === "left" ? "Focus · left" : "Today · right", label: "Keep open", tune: true, description: "Stay visible while working in other windows.", path: "iris.sidebars." + side + ".pinned", kind: "switch", fallback:false },
-        { section: "sidebars", group: side === "left" ? "Focus · left" : "Today · right", label: "Reserve space for windows", description: "Keep tiled windows clear while this panel is kept open.", path: "iris.sidebars." + side + ".reserveSpace", visibleWhen: "iris.sidebars." + side + ".pinned", kind: "switch", fallback:true, keywords: ["reserve", "space", "windows", "exclusive", "margin", "espacio", "reservar"] }
+        { section: "sidebars", group: side === "left" ? "Focus" : "Today", label: "Enable panel", path: "iris.sidebars." + side + ".enable", kind: "switch", fallback:true,
+            glance: on => {
+                const count = (Config.options?.iris?.sidebars?.[side]?.sections ?? []).length
+                return !on ? Translation.tr("Off") : count === 1 ? Translation.tr("One section") : Translation.tr("%1 sections").arg(count)
+            } },
+        { section: "sidebars", group: side === "left" ? "Focus" : "Today", label: "Sections", kind: "list", bare: true, side: side, view: Qt.resolvedUrl("../sidebar/IrisSidebarEditor.qml"),
+            visibleWhen: "iris.sidebars." + side + ".enable", summary: false, keywords: ["sections", "cards", "order", "secciones", "tasks", "notes", "calendar", "weather", "mixer"] },
+        { section: "sidebars", group: side === "left" ? "Focus" : "Today", label: "Width", path: "iris.sidebars." + side + ".width", kind: "range", fallback:380,min:300,max:600,step:10,unit:" px" },
+        { section: "sidebars", group: side === "left" ? "Focus" : "Today", label: "Maximum height", description: "Panels hug their sections and grow up to this.", path: "iris.sidebars." + side + ".height", kind: "range", fallback:88,min:45,max:100,unit:" %" },
+        { section: "sidebars", group: side === "left" ? "Focus" : "Today", label: "Alignment", path: "iris.sidebars." + side + ".alignment", kind: "choice", fallback:"center", choices:[{label:"Top",value:"top"},{label:"Center",value:"center"},{label:"Bottom",value:"bottom"}] },
+        { section: "sidebars", group: side === "left" ? "Focus" : "Today", label: "Attach to the screen edge", tune: true, description: "Melts the panel into its edge, like a notch.", path: "iris.sidebars." + side + ".notch", kind: "switch", fallback:false, keywords: ["attach", "join", "frame", "edge", "notch", "float", "pegar"] },
+        { section: "sidebars", group: side === "left" ? "Focus" : "Today", label: "Reveal on hover", description: side === "left" ? "Rest the pointer at the left edge to peek; click inside to keep it." : "Rest the pointer at the right edge to peek; click inside to keep it.", path: "iris.sidebars." + side + ".hoverReveal", kind: "switch", fallback:false },
+        { section: "sidebars", group: side === "left" ? "Focus" : "Today", label: "Keep open", description: "Stay visible while working in other windows.", path: "iris.sidebars." + side + ".pinned", kind: "switch", fallback:false },
+        { section: "sidebars", group: side === "left" ? "Focus" : "Today", label: "Reserve space for windows", description: "Keep tiled windows clear while this panel is kept open.", path: "iris.sidebars." + side + ".reserveSpace", visibleWhen: "iris.sidebars." + side + ".pinned", kind: "switch", fallback:true, keywords: ["reserve", "space", "windows", "exclusive", "margin", "espacio", "reservar"] },
+        { section: "sidebars", group: side === "left" ? "Focus" : "Today", label: side === "left" ? "Open Focus" : "Open Today", kind: "action", button: "Open", tune: true,
+            run: () => { GlobalStates.settingsOverlayOpen = false; if (side === "left") GlobalStates.openSidebarLeft(""); else GlobalStates.openSidebarRight("") } }
     ])))
 
     readonly property var idleChoices: [
@@ -1409,7 +1417,7 @@ QtObject {
         { id: "desktop", cluster: 1, title: "Desktop", subtitle: "Widgets and the desktop menu", icon: "widgets", get tint() { return root.areaTint(this) }, tip: "Right-click the desktop to edit widgets." },
         { id: "widgets", cluster: 1, title: "Widgets", subtitle: "Every widget's own options, and how they arrange", icon: "dashboard_customize", get tint() { return root.areaTint(this) }, tip: "Carry a widget near another and it lines up; hold Alt to place it freely." },
         { id: "windows", cluster: 1, title: "Windows", subtitle: "Gaps, borders, corners and how Niri moves them", icon: "select_window", get tint() { return root.areaTint(this) }, tip: "Niri draws these; they change right away and live in your Niri config." },
-        { id: "sidebars", cluster: 1, title: "Side Panels", subtitle: "Focus and Today, arranged around your workflow", icon: "dock_to_right", get tint() { return root.areaTint(this) }, tip: "Ctrl+E customizes a panel; Keep open makes room beside windows." },
+        { id: "sidebars", cluster: 1, tilesOnly: true, title: "Side Panels", subtitle: "Focus and Today, arranged around your workflow", icon: "dock_to_right", get tint() { return root.areaTint(this) }, tip: "Ctrl+E customizes a panel; Keep open makes room beside windows." },
         { id: "controlCenter", cluster: 1, title: "Control Center", subtitle: "What it carries and how it looks", icon: "toggle_on", get tint() { return root.areaTint(this) }, tip: "Arrange it in place from the button beside the lock in its header." },
         { id: "spotlight", cluster: 2, title: "Spotlight", subtitle: "Search apps, files, the clipboard and more", icon: "search", get tint() { return root.areaTint(this) }, tip: "Prefixes: ; clipboard, = calculator, / actions." },
         { id: "orbit", cluster: 2, title: "Orbit", subtitle: "Every workspace and window, and the way to any of them", icon: "workspaces", get tint() { return root.areaTint(this) }, tip: "Type to light up where a window is; ↵ takes you to it. Bind inir orbit toggle." },
@@ -1496,17 +1504,17 @@ QtObject {
         "Colour layer": "palette", "Comfort": "visibility", "Continue": "play_circle", "Control Center": "tune",
         "Curve": "show_chart", "Date & time": "calendar_clock", "Desktop page": "dashboard", "Do Not Disturb": "do_not_disturb_on",
         "Extra bubbles": "add_circle", "Faces": "font_download", "Feedback": "campaign", "Floating": "flight",
-        "Focus · left": "dock_to_left", "Frame": "crop_free", "Frame response": "graphic_eq", "Frame music": "border_outer", "Edge wave": "waves", "Frame finish": "flare", "Prefixes": "keyboard_command_key", "Name song": "music_cast", "System readings": "monitor_heart", "Fullscreen": "fullscreen", "Game mode": "sports_esports",
+        "Focus": "dock_to_left", "Frame": "crop_free", "Frame response": "graphic_eq", "Frame music": "border_outer", "Edge wave": "waves", "Frame finish": "flare", "Prefixes": "keyboard_command_key", "Name song": "music_cast", "System readings": "monitor_heart", "Fullscreen": "fullscreen", "Game mode": "sports_esports",
         "Glass": "blur_on", "Highlight": "highlight", "Icons": "emoji_symbols", "Interaction": "ads_click", "Joining": "join_inner",
         "Language": "language", "Layout": "view_quilt", "Light": "light_mode", "Live wallpapers": "motion_photos_on",
         "Desktop menu": "menu_open", "Look": "visibility", "Design": "design_services", "Material": "layers", "Material per surface": "layers", "Corners per surface": "rounded_corner", "Colour theme": "palette", "Signal": "radio_button_checked", "Day and night": "routine", "Scheme": "contrast", "Dark look": "dark_mode", "Ink look": "ink_pen", "Light look": "light_mode", "Menus": "menu", "Motion": "animation", "New iNiR": "rocket_launch",
         "Night Light": "nightlight", "Notifications": "notifications", "Now playing": "music_note", "On the contour": "border_outer",
         "Opening bodies": "open_in_full", "Overview backdrop": "grid_view", "Pages": "view_carousel", "Per surface": "tune",
-        "Panel look": "dock_to_right", "Placement": "location_on", "Player": "music_note", "Player page": "album", "Previews": "preview",
+        "Panel look": "format_paint", "Placement": "location_on", "Player": "music_note", "Player page": "album", "Previews": "preview",
         "Resting Island": "pill", "Scene": "landscape", "Security": "key", "Settings": "settings", "Shape": "rounded_corner",
         "Sign in": "person", "Login screen": "login", "Login Screen": "login", "Wallpaper tint": "format_color_fill", "Size": "straighten", "Sound": "volume_up", "Spotlight": "search",
         "Orbit": "workspaces", "Shelf": "shelves", "Hot corner": "north_east",
-        "Status": "signal_cellular_alt", "Style per surface": "motion_mode", "Suspend": "bedtime", "Text": "text_fields", "Timing": "timer", "Today · right": "dock_to_right",
+        "Status": "signal_cellular_alt", "Style per surface": "motion_mode", "Suspend": "bedtime", "Text": "text_fields", "Timing": "timer", "Today": "dock_to_right",
         "Touch": "touch_app", "Tray": "inventory_2", "Type": "text_fields", "Updates": "system_update_alt", "Visibility": "visibility",
         "Volume": "volume_up", "VPN": "vpn_lock", "Wallpaper": "wallpaper", "Wallpaper gallery": "photo_library",
         "Warnings": "battery_alert", "Weather": "partly_cloudy_day", "When idle": "hourglass_empty", "Widgets": "widgets",

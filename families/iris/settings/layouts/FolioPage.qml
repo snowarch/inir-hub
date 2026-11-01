@@ -178,7 +178,9 @@ Item {
 
     // ── The group being read: the head that has reached the upper fifth (at the foot, the last one in view).
     property string reading: ""
-    readonly property string stageGroup: page.reading.length > 0 && stage.stage.sceneFor(page.area, page.reading).length > 0 ? page.reading : ""
+    // Peers answer for the one open; any other page for the group being read.
+    readonly property string stageWanted: rows.peers ? rows.openGroup : page.reading
+    readonly property string stageGroup: page.stageWanted.length > 0 && stage.stage.sceneFor(page.area, page.stageWanted).length > 0 ? page.stageWanted : ""
     Timer { id: spyPace; interval: 90; onTriggered: page.spy() }
     function spy(): void {
         const targets = rows.targets()

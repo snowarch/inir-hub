@@ -71,7 +71,9 @@ ColumnLayout {
         // the rest lead with their first group; Style leads with none, its Design a card like every other (his 10-31).
         // Nothing waits behind Fine-tune any more but a group's own ranges.
         // A column of Drawer (foldHome off) or an area of two groups keeps them open, its all-fine-tuning groups folded.
-        const lead = groups.find(group => group.key === "Every day") ?? (["general", "appearance"].includes(rows.section) ? null : groups[0])
+        // An area of peers (the side panels) leads with no group either: its tiles are the switch between them, the first open.
+        const peers = rows.peers
+        const lead = groups.find(group => group.key === "Every day") ?? (peers || ["general", "appearance"].includes(rows.section) ? null : groups[0])
         const others = groups.filter(group => group !== lead && group.rows.length > 0)
         const tiles = flat && rows.foldHome && others.length >= 2
         const home = tiles && rows.section === "general"
@@ -97,6 +99,10 @@ ColumnLayout {
             // A group opens under its tile, which already names it.
             for (const group of rest) out.push({ title: group.title, caption: tiles ? "" : group.title, key: group.key, rows: group.rows, flat: true, rest: true })
         }
+        if (peers && tiles && resting && !rows.peerOpened) {
+            rows.peerOpened = true
+            rows.openGroup = rest[0].key
+        }
         rows.groupTiles = tiles && resting
         rows.blocks = out
         rows.stale = false
@@ -114,6 +120,8 @@ ColumnLayout {
     // Groups as tiles (every area but Drawer's columns); one opens under them at a time.
     property bool groupTiles: false
     property string openGroup: ""
+    readonly property bool peers: IrisOptions.sectionById(rows.section)?.tilesOnly === true
+    property bool peerOpened: false
     function opensRest(key: string): bool {
         return rows.groupTiles ? (rows.host?.tuneAll ?? false) || rows.openGroup === key : rows.moreOpen
     }
@@ -151,7 +159,12 @@ ColumnLayout {
     Timer { id: revealSoon; interval: 120; onTriggered: if (rows.revealing) rows.reveal(rows.revealing) }
     // A tile's options come into view the frame after they are laid out (his 10-30: he had to scroll for them).
     property Item opening: null
-    function showOpened(item: Item): void { rows.opening = item; bringSoon.restart() }
+    function showOpened(item: Item): void {
+        // Peers' tiles are the switch between them: they stay in view.
+        if (rows.peers) return
+        rows.opening = item
+        bringSoon.restart()
+    }
     Timer { id: bringSoon; interval: 60; onTriggered: if (rows.opening) rows.bring(rows.opening) }
 
     // What the page shows, in order, by group key: the page's wheel and its stage read these.
@@ -353,7 +366,8 @@ ColumnLayout {
                                     if (said.length >= 2) break
                                     const value = IrisOptions.currentValue(spec)
                                     const choice = (spec.choices ?? []).find(entry => String(entry.value) === String(value))
-                                    const word = spec.kind === "switch" ? ((spec.invert ? !value : Boolean(value)) ? Translation.tr(String(spec.label ?? "")) : "")
+                                    const word = spec.glance ? spec.glance(value)
+                                        : spec.kind === "switch" ? ((spec.invert ? !value : Boolean(value)) ? Translation.tr(String(spec.label ?? "")) : "")
                                         : choice ? Translation.tr(String(choice.label ?? ""))
                                         : spec.kind === "range" ? IrisOptions.rangeText(spec, value)
                                         : spec.kind === "text" && String(value ?? "").length > 0 && String(value).length <= 24 ? String(value) : ""
@@ -675,7 +689,7 @@ ColumnLayout {
     }
     // After the groups, once they all stand: what the area opens or edits beyond its values.
     ColumnLayout {
-        visible: rows.extras && rows.builtUpTo >= rows.blocks.length && extraLinks.links.length + panelEditors.count > 0
+        visible: rows.extras && rows.builtUpTo >= rows.blocks.length && extraLinks.links.length > 0
         Layout.fillWidth: true
         Layout.topMargin: Math.round(18 * rows.d)
         spacing: Math.round(18 * rows.d)
@@ -687,10 +701,6 @@ ColumnLayout {
             tinted: rows.section === "general"
             links: {
                 if (!rows.extras) return []
-                if (rows.section === "sidebars") return [
-                    { label: Translation.tr("Open Focus"), icon: "dock_to_left", tint: IrisStyle.identity.green, action: () => { GlobalStates.settingsOverlayOpen = false; GlobalStates.openSidebarLeft("") } },
-                    { label: Translation.tr("Open Today"), icon: "dock_to_right", tint: IrisStyle.identity.orange, action: () => { GlobalStates.settingsOverlayOpen = false; GlobalStates.openSidebarRight("") } }
-                ]
                 if (rows.section === "desktop") return [
                     { label: Translation.tr("Edit desktop widgets"), icon: "edit", tint: IrisStyle.identity.yellow, action: () => { GlobalStates.settingsOverlayOpen = false; GlobalStates.setWidgetEditMode(true) } }
                 ]
@@ -702,25 +712,6 @@ ColumnLayout {
                     action: () => extraLinks.host.go({ section: "general", group: "", advancedPage: extraLinks.host.pageIndexOf(link.key) })
                 }))
                 return []
-            }
-        }
-        Repeater {
-            id: panelEditors
-            model: rows.extras && rows.section === "sidebars" ? ["left", "right"] : []
-            ColumnLayout {
-                id: panelEditor
-                required property string modelData
-                Layout.fillWidth: true
-                spacing: Math.round(6 * rows.d)
-                IrisText {
-                    Layout.leftMargin: Math.round(16 * rows.d)
-                    text: panelEditor.modelData === "left" ? Translation.tr("Focus sections") : Translation.tr("Today sections")
-                    color: IrisStyle.text
-                    font.family: IrisStyle.fontTitle
-                    font.pixelSize: IrisStyle.typeBody
-                    font.weight: IrisStyle.weight(Font.DemiBold)
-                }
-                IrisSidebarEditor { Layout.fillWidth: true; side: panelEditor.modelData }
             }
         }
     }
