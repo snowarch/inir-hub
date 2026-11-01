@@ -55,6 +55,8 @@ The Dock is set under iRiS Settings › Dock:
 - Wallpaper › Wallpaper gallery › Picker: Gallery is iRiS's own, out of the Island; Grid, Coverflow and Launcher open Material's pickers instead, from the same shortcut, piece or Island button.
 - Wallpaper › Wallpaper gallery › Live wallpaper downloads: Best takes the 4K file when there is one, Light takes HD.
 - Desktop widgets rest a little inside the frame (or the screen edge without one) and settle into its corners with the same gap; under AIRISU a widget in a cut corner steps along the cut so the two run parallel.
+- Arranging the desktop, a widget's sheet has three pages: Widget (what it shows), Look (background, corners, ink) and Arrange (scale, position, lock). The background key on the widget's capsule and Look › Surface are the same switch: None takes the plate off, Glass, Solid and Tinted say what it is made of, and Shared follows Style › Widgets.
+- Side Panels: pick Focus or Today and the page shows that panel's sections, width, height and look, with the panel itself on the stage. Sections are a list you reorder right there.
 - Desktop › Widgets › Lume on every widget: every widget's text reads as if the wallpaper behind it were bright and busy.
 - Spotlight: type `/` to list iRiS's own switches, including Frame Music and Edge Music.
 
