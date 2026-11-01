@@ -44,13 +44,7 @@ Item {
     readonly property real gap: 4 * root.hair
     readonly property color ringInk: root.ink ? IrisStyle.text : IrisStyle.accent
 
-    readonly property string name: {
-        const key = String(root.widget?.configEntryName ?? "")
-        const entry = IrisFaceData.galleryEntries.concat(IrisFaceData.otherEntries).find(e => e.key === key)
-        if (entry) return entry.label
-        const words = key.split(".").pop().replace(/([A-Z])/g, " $1").toLowerCase().trim()
-        return words.charAt(0).toUpperCase() + words.slice(1)
-    }
+    readonly property string name: root.widget?.displayName ?? ""
     readonly property var sizes: root.widget?.sizeChoices ?? []
     readonly property bool sized: (root.widget?.familyFaced ?? false) && root.sizes.length > 1
     readonly property string size: root.widget?.sizeClass ?? ""
@@ -321,6 +315,15 @@ Item {
                         font.capitalization: root.ink ? Font.AllUppercase : Font.MixedCase
                     }
                 }
+            }
+            // The plate, one tap from the widget: the same switch as its Look page and the shelf's "every background".
+            IrisIconButton {
+                visible: !root.locked && (root.widget?.plateOffered ?? false)
+                implicitWidth: Math.round(28 * root.d)
+                implicitHeight: Math.round(28 * root.d)
+                materialIcon: root.widget?.showBackground ? "layers" : "layers_clear"
+                Accessible.name: root.widget?.showBackground ? Translation.tr("Hide background") : Translation.tr("Show background")
+                onClicked: root.widget.setPlate(!root.widget.showBackground)
             }
             IrisIconButton {
                 visible: !root.locked

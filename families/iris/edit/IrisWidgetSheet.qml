@@ -20,25 +20,21 @@ Item {
     property rect avoid: Qt.rect(0, 0, 0, 0)
 
     readonly property real d: IrisStyle.density
-    // Everything Settings offers for this widget, minus what the sheet already draws (size, Look, Arrange).
-    readonly property var rows: {
-        const key = String(root.held?.configEntryName ?? "")
-        const drawn = ["sizeClass", "iris.design", "iris.material", "widgetScale", "placementStrategy", "locked"]
-        return DesktopWidgetOptions.widgetRows.filter(spec => spec.widget === key && !spec.widgetEnable && !drawn.includes(spec.key))
-            .map(spec => Object.assign({}, spec, { group: "" }))
-    }
     Component {
         id: irisControls
         IrisWidgetControls {
             widget: root.held
             plateRadius: IrisStyle.concentric(IrisStyle.radiusPlate, root.pad, IrisStyle.radiusChip)
             plateCut: IrisStyle.nestedCut(IrisStyle.chamferCut, root.pad)
-            optionRows: root.rows.length > 0 ? rowsComponent : null
+            optionRows: rowsComponent
         }
     }
     Component {
         id: rowsComponent
-        IrisEditRows { specs: root.rows }
+        IrisEditRows {
+            plateRadius: IrisStyle.concentric(IrisStyle.radiusPlate, root.pad, IrisStyle.radiusChip)
+            plateCut: IrisStyle.nestedCut(IrisStyle.chamferCut, root.pad)
+        }
     }
     Component.onCompleted: DesktopEditStage.setSheetHost(root.outputName, true)
     Component.onDestruction: DesktopEditStage.setSheetHost(root.outputName, false)
@@ -123,7 +119,7 @@ Item {
                 id: content
                 width: scroller.width
                 active: root.held !== null
-                sourceComponent: root.held?.familyFaced ? irisControls : root.held?.sheetPages ?? null
+                sourceComponent: irisControls
             }
         }
     }

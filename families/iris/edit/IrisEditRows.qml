@@ -17,6 +17,9 @@ ColumnLayout {
     property var specs: []
     // A group's title wears the colour of the area it belongs to; neutral where there is none.
     property color tint: IrisStyle.label
+    // The plate under the rows, nested in whatever holds it.
+    property real plateRadius: IrisStyle.radiusTile
+    property real plateCut: IrisStyle.chamferCut
     readonly property real d: IrisStyle.density
     readonly property var groups: {
         Config.revision
@@ -54,8 +57,14 @@ ColumnLayout {
             Rectangle {
                 Layout.fillWidth: true
                 implicitHeight: plate.implicitHeight
-                radius: IrisStyle.radiusTile
-                color: IrisStyle.surfaceHigh
+                radius: root.plateRadius
+                color: IrisStyle.fieldChamfer ? "transparent" : IrisStyle.surfaceHigh
+                IrisCutPlate {
+                    anchors.fill: parent
+                    visible: IrisStyle.fieldChamfer
+                    cutLength: root.plateCut
+                    color: IrisStyle.surfaceHigh
+                }
                 ColumnLayout {
                     id: plate
                     anchors.left: parent.left

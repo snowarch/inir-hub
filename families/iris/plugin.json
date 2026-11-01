@@ -201,7 +201,7 @@
       {"key":"iris.details","label":"Details","type":"switch","default":true,"when":["face",{"sizeClass":"large"}],"keywords":["humidity","wind","uv","air"]}
     ],
     "*": [
-      {"key":"iris.material","label":"Material","type":"choice","default":"auto","tune":true,"when":["face",{"showBackground":{"is":true,"otherwise":true}}],"choices":[["auto","Same as every widget"],["glass","Glass"],["clear","Transparent"],["solid","Solid"],["tinted","Tinted"]],"keywords":["glass","transparent","background","plate","fondo","vidrio"]}
+      {"key":"iris.material","label":"Material","type":"choice","default":"auto","page":"look","tune":true,"when":["face",{"showBackground":true}],"choices":[["auto","Same as every widget"],["glass","Glass"],["solid","Solid"],["tinted","Tinted"]],"keywords":["glass","transparent","background","plate","fondo","vidrio"]}
     ]
   }
 }

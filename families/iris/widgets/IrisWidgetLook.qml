@@ -51,7 +51,7 @@ WidgetLook {
     function chipInk(selected: bool): color { return selected ? IrisStyle.text : IrisStyle.textSecondary }
     function chipGlyphInk(selected: bool): color { return selected ? IrisStyle.accent : look.chipInk(selected) }
     function chipFill(selected: bool, hovered: bool): color {
-        return selected ? IrisStyle.tintFill(IrisStyle.accent) : hovered ? IrisStyle.fillHover : IrisStyle.fillQuiet
+        return selected ? IrisStyle.tintFill(IrisStyle.accent) : hovered ? IrisStyle.fillHover : IrisStyle.fill
     }
 
     // Widgets keep the black Island material but can borrow the wallpaper: its generated hues are lifted into a range
@@ -67,14 +67,15 @@ WidgetLook {
     readonly property color accent3: look.palette[2]
     readonly property color tintedPlate: ColorUtils.mix(IrisStyle.surface, look.accent, 0.82)
     readonly property bool rim: Boolean(look.options.rim ?? false)
-    readonly property var materials: ["glass", "clear", "solid", "tinted"]
+    readonly property var materials: ["glass", "solid", "tinted"]
+    readonly property string sharedMaterial: String(look.options.material ?? "glass")
 
+    // The widget's own switch wins; left alone it follows the shared material, where Transparent means no plate.
+    function plateByDefault(widget: var): bool { return !widget.bare && look.sharedMaterial !== "clear" }
     function material(widget: var): string {
-        // the widget's Background switch, the same one every family's edit mode turns off for all
         if (widget && !widget.showBackground) return "clear"
         const own = String(widget?._readConfigKey("iris.material") ?? "auto")
-        const shared = String(look.options.material ?? "glass")
-        return look.materials.includes(own) ? own : look.materials.includes(shared) ? shared : "glass"
+        return look.materials.includes(own) ? own : look.materials.includes(look.sharedMaterial) ? look.sharedMaterial : "glass"
     }
     function plate(widget: var): color { return look.material(widget) === "tinted" ? look.tintedPlate : IrisStyle.surface }
     function outline(widget: var): string {
@@ -91,9 +92,6 @@ WidgetLook {
     function resetValues(widget: var): var {
         return widget.hasFamilyFace ? { "iris.material": "auto", "iris.design": "auto", "iris.opacity": -1 } : ({})
     }
-    // Transparent has no plate, whatever the switch says.
-    function plateHidden(read: var): bool { return String(read("iris.material", "auto")) === "clear" }
-    function plateShown(read: var): var { return look.plateHidden(read) ? { "iris.material": "auto" } : ({}) }
     // Widgets that keep their own material or opacity, and the verbs over the shared one.
     readonly property var ownSurfaces: DesktopWidgetDesign.scan(["iris.material", "iris.opacity"],
         (key, value) => key === "iris.opacity" ? Number(value) >= 20 : look.materials.includes(String(value)))
@@ -105,13 +103,14 @@ WidgetLook {
         return "matched " + count
     }
     function materialAction(action: string): string {
-        const now = String(look.options.material ?? "glass")
+        const now = look.sharedMaterial
         if (action === "match") return look.matchSurfaces()
         if (action === "status") return now + " · " + look.ownSurfaceCount + " widgets with their own material or opacity"
         if (action === "toggle" || action === "clear" || action === "glass") {
-            const next = action !== "toggle" ? action : now === "clear" ? "glass" : "clear"
-            Config.setNestedValue("iris.widgets.material", next)
-            return next
+            const show = action === "toggle" ? DesktopWidgetOptions.everyState("showBackground") === "false" : action === "glass"
+            if (action === "glass" && now === "clear") Config.setNestedValue("iris.widgets.material", "glass")
+            DesktopWidgetOptions.setEvery("showBackground", show)
+            return show ? "glass" : "clear"
         }
         return "Use status, match, toggle, clear or glass"
     }

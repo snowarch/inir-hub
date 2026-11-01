@@ -307,6 +307,14 @@ Item {
             Item { width: 2; height: 1 }
             Key {
                 anchors.verticalCenter: parent.verticalCenter
+                visible: !root.locked && (root.widget?.plateOffered ?? false)
+                glyph: root.widget?.showBackground ? "layers" : "layers_clear"
+                selected: root.widget?.showBackground ?? false
+                Accessible.name: selected ? Translation.tr("Hide background") : Translation.tr("Show background")
+                onClicked: root.widget.setPlate(!root.widget.showBackground)
+            }
+            Key {
+                anchors.verticalCenter: parent.verticalCenter
                 visible: !root.locked
                 glyph: "tune"
                 selected: (root.widget?.quickControlsOpen ?? false) && root.widget?.quickTab !== root.widget?._arrangeTab

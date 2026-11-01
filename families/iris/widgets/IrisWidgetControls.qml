@@ -5,6 +5,7 @@ import QtQuick.Effects
 import QtQuick.Layouts
 import Quickshell
 import Quickshell.Widgets
+import qs.modules.shared.background.widgets
 import qs.services
 import qs.modules.common
 import qs.modules.common.functions
@@ -28,29 +29,41 @@ ColumnLayout {
     property real plateRadius: IrisStyle.radiusRow
     // Under a chamfered Design the plates take the cut instead, nested in the sheet's (`IrisStyle.nestedCut`).
     property real plateCut: IrisStyle.chamferCut
-    // The widget's own Settings rows, given by a host that can draw them (the edit sheet); else its short list.
+    // Draws a list of rows, given by a host that can (the edit sheet). `IrisEditRows`-shaped: a `specs` property.
     property Component optionRows: null
+    // The keys this sheet draws itself; every other row of the widget comes from the manifest, on its page.
+    readonly property var drawn: ["sizeClass", DesktopWidgetDesign.spec.key, "widgetScale", "placementStrategy", "locked"]
+        .concat(root.widget.familyFaced ? ["showBackground", "iris.material"] : [])
+        .concat(root.widget.ownControlKeys)
+    readonly property var widgetRows: root.optionRows ? DesktopWidgetOptions.sheetRows(root.widget.configEntryName, "widget", root.drawn)
+        .map(spec => Object.assign({}, spec, { group: "" })) : []
+    readonly property var lookRows: root.optionRows ? DesktopWidgetOptions.sheetRows(root.widget.configEntryName, "look", root.drawn)
+        .map(spec => Object.assign({}, spec, { group: "" })) : []
+    readonly property bool faced: root.widget.familyFaced
+    readonly property bool plated: root.widget.showBackground
     readonly property var pages: [
         { value: "widget", label: Translation.tr("Widget") },
         { value: "look", label: Translation.tr("Look") },
         { value: "arrange", label: Translation.tr("Arrange") }
     ].concat(root.widget.stacked ? [{ value: "stack", label: Translation.tr("Stack") }] : [])
     readonly property string page: root.pages.some(entry => entry.value === root.widget._quickTab) ? root.widget._quickTab : "widget"
-    readonly property string title: {
-        const words = String(root.widget.configEntryName).split(".").pop().replace(/([A-Z])/g, " $1").toLowerCase()
-        return words.charAt(0).toUpperCase() + words.slice(1)
-    }
     readonly property string wallpaperUrl: WallpaperListener.wallpaperUrlForScreen(root.QsWindow?.window?.screen ?? null)
     readonly property string ownMaterial: String(root.widget._readConfigKey("iris.material") ?? "auto")
     readonly property string sharedMaterial: String(Config.options?.iris?.widgets?.material ?? "glass")
+    // What stands behind the widget, one row: no plate at all, the one every widget shares (from Settings), or its own.
     readonly property var materials: [
-        // The material every widget shares (from Settings): a word short enough for its swatch in every language.
+        { value: "none", label: Translation.tr("None") },
         { value: "auto", label: Translation.tr("Shared") },
         { value: "glass", label: Translation.tr("Glass") },
-        { value: "clear", label: Translation.tr("Transparent") },
         { value: "solid", label: Translation.tr("Solid") },
         { value: "tinted", label: Translation.tr("Tinted") }
-    ]
+    ].filter(entry => entry.value !== "auto" || root.sharedMaterial !== "clear")
+    readonly property string surface: !root.plated ? "none"
+        : ["glass", "solid", "tinted"].includes(root.ownMaterial) ? root.ownMaterial
+        : root.sharedMaterial === "clear" ? "glass" : "auto"
+    function pickSurface(value: string): void {
+        root.widget._setOutputValues(value === "none" ? { showBackground: false } : { showBackground: true, "iris.material": value })
+    }
     readonly property real cornerMax: 40
     readonly property int cornerValue: Number(root.widget.cornerRadiusOverride)
     function cornerFrom(value: real): int {
@@ -71,7 +84,7 @@ ColumnLayout {
         bottomLeft: "south_west", bottomCenter: "south", bottomRight: "south_east" })
 
     function materialColor(value: string): color {
-        const material = value === "auto" ? root.sharedMaterial : value
+        const material = value === "none" ? "clear" : value === "auto" ? root.sharedMaterial : value
         if (material === "tinted")
             return root.widget.look.tintedPlate
         if (material === "solid")
@@ -89,7 +102,59 @@ ColumnLayout {
         font.weight: IrisStyle.weight(Font.DemiBold)
     }
 
-    // One pick drawn as what it gives: the room it takes, the design it wears.
+    // A size, drawn as the room it takes on the grid.
+    component SizeKey: Rectangle {
+        id: sizeKey
+        required property string size
+        readonly property bool chosen: root.widget.sizeClass === sizeKey.size
+        readonly property real cell: Math.round(6 * root.d)
+        Layout.fillWidth: true
+        Layout.preferredWidth: 1
+        Layout.maximumWidth: Number.POSITIVE_INFINITY
+        implicitHeight: Math.round(44 * root.d)
+        radius: root.plateRadius
+        readonly property color stuff: sizeKey.chosen ? IrisStyle.tintFill(IrisStyle.accent)
+            : sizeHover.hovered ? IrisStyle.fillHover : IrisStyle.fillQuiet
+        color: IrisStyle.fieldChamfer ? "transparent" : sizeKey.stuff
+        border.width: sizeKey.chosen && !IrisStyle.fieldChamfer ? 1 : 0
+        border.color: IrisStyle.tintBorder(IrisStyle.accent)
+        scale: sizeTap.pressed ? IrisStyle.pressScale(0.96) : 1
+        Behavior on color { ColorAnimation { duration: IrisStyle.feedbackDuration; easing.type: IrisStyle.feedbackEasing } }
+        Behavior on scale { NumberAnimation { duration: IrisStyle.feedbackDuration; easing.type: IrisStyle.feedbackEasing } }
+        IrisCutPlate {
+            anchors.fill: parent
+            visible: IrisStyle.fieldChamfer
+            cutLength: root.plateCut
+            color: sizeKey.stuff
+            stroke: IrisStyle.tintBorder(IrisStyle.accent)
+            strokeWidth: sizeKey.chosen ? 1 : 0
+        }
+        Row {
+            anchors.centerIn: parent
+            spacing: Math.round(8 * root.d)
+            Rectangle {
+                anchors.verticalCenter: parent.verticalCenter
+                width: sizeKey.size === "small" ? sizeKey.cell * 2 : sizeKey.cell * 4
+                height: sizeKey.size === "large" ? sizeKey.cell * 4 : sizeKey.cell * 2
+                radius: IrisStyle.fieldChamfer ? 0 : IrisStyle.radiusMicro
+                color: sizeKey.chosen ? IrisStyle.accent : IrisStyle.textTertiary
+            }
+            IrisText {
+                anchors.verticalCenter: parent.verticalCenter
+                text: root.widget.sizeLabels[sizeKey.size] ?? sizeKey.size
+                color: sizeKey.chosen ? IrisStyle.text : IrisStyle.textSecondary
+                font.pixelSize: IrisStyle.typeMeta
+                font.weight: sizeKey.chosen ? IrisStyle.weight(Font.DemiBold) : IrisStyle.weight(Font.Normal)
+            }
+        }
+        HoverHandler { id: sizeHover; cursorShape: Qt.PointingHandCursor }
+        TapHandler { id: sizeTap; gesturePolicy: TapHandler.WithinBounds; onTapped: root.widget.commitSize(sizeKey.size) }
+        Accessible.role: Accessible.RadioButton
+        Accessible.name: root.widget.sizeLabels[sizeKey.size] ?? sizeKey.size
+        Accessible.checked: sizeKey.chosen
+    }
+
+    // One pick drawn as what it gives: the design it wears.
     component ChoiceTile: Rectangle {
         id: tile
         property bool chosen: false
@@ -367,7 +432,7 @@ ColumnLayout {
         }
         IrisText {
             Layout.fillWidth: true
-            text: Translation.tr(root.title)
+            text: root.widget.displayName
             font.family: IrisStyle.fontTitle
             font.pixelSize: IrisStyle.typeTitle
             font.weight: IrisStyle.weight(Font.DemiBold)
@@ -395,190 +460,61 @@ ColumnLayout {
         Layout.fillWidth: true
         spacing: Math.round(14 * root.d)
 
-        // One tap takes this widget's plate away (Transparent) and brings it back.
-        Rectangle {
-            id: plateRow
-            visible: root.widget.familyFaced
+        RowLayout {
+            visible: root.widget.sizeChoices.length > 1
             Layout.fillWidth: true
-            implicitHeight: Math.round(40 * root.d)
-            radius: root.plateRadius
-            readonly property bool on: root.widget.look.material(root.widget) !== "clear"
-            readonly property color stuff: plateHover.hovered ? IrisStyle.fillHover : IrisStyle.fillQuiet
-            color: IrisStyle.fieldChamfer ? "transparent" : plateRow.stuff
-            Behavior on color { ColorAnimation { duration: IrisStyle.feedbackDuration; easing.type: IrisStyle.feedbackEasing } }
-            IrisCutPlate { anchors.fill: parent; visible: IrisStyle.fieldChamfer; cutLength: root.plateCut; color: plateRow.stuff }
-            function flip(): void {
-                const shared = String(Config.options?.iris?.widgets?.material ?? "glass")
-                root.widget.setFamilyOption("material", plateRow.on ? "clear" : shared === "clear" ? "glass" : "auto")
-            }
-            MaterialSymbol {
-                id: plateGlyph
-                anchors.left: parent.left
-                anchors.leftMargin: Math.round(12 * root.d)
-                anchors.verticalCenter: parent.verticalCenter
-                text: plateRow.on ? "layers" : "layers_clear"
-                iconSize: Math.round(18 * root.d)
-                color: plateRow.on ? IrisStyle.text : IrisStyle.textSecondary
-            }
-            IrisText {
-                anchors.left: plateGlyph.right
-                anchors.leftMargin: Math.round(10 * root.d)
-                anchors.right: plateSwitch.left
-                anchors.rightMargin: Math.round(10 * root.d)
-                anchors.verticalCenter: parent.verticalCenter
-                text: Translation.tr("Background")
-                font.pixelSize: IrisStyle.typeLabel
-                elide: Text.ElideRight
-            }
-            Item {
-                anchors.left: parent.left
-                anchors.right: plateSwitch.left
-                anchors.top: parent.top
-                anchors.bottom: parent.bottom
-                HoverHandler { id: plateHover; cursorShape: Qt.PointingHandCursor }
-                TapHandler { onTapped: plateRow.flip() }
-            }
-            IrisSwitch {
-                id: plateSwitch
-                anchors.right: parent.right
-                anchors.rightMargin: Math.round(10 * root.d)
-                anchors.verticalCenter: parent.verticalCenter
-                on: plateRow.on
-                name: Translation.tr("Background")
-                onToggled: plateRow.flip()
+            spacing: Math.round(6 * root.d)
+            Repeater {
+                model: root.widget.sizeChoices
+                SizeKey {
+                    required property string modelData
+                    size: modelData
+                }
             }
         }
 
         ColumnLayout {
-            visible: root.widget.sizeChoices.length > 1
             Layout.fillWidth: true
             spacing: Math.round(8 * root.d)
 
-            Caption { text: Translation.tr("Size") }
-
             RowLayout {
                 Layout.fillWidth: true
-                spacing: Math.round(8 * root.d)
-
-                Repeater {
-                    model: root.widget.sizeChoices
-
-                    ChoiceTile {
-                        id: sizeTile
-                        required property string modelData
-                        readonly property real cell: Math.round(14 * root.d)
-                        chosen: root.widget.sizeClass === sizeTile.modelData
-                        label: root.widget.sizeLabels[sizeTile.modelData] ?? sizeTile.modelData
-                        onPicked: root.widget.commitSize(sizeTile.modelData)
-                        Rectangle {
-                            anchors.centerIn: parent
-                            width: sizeTile.modelData === "small" ? sizeTile.cell : sizeTile.cell * 2 + 2
-                            height: sizeTile.modelData === "large" ? sizeTile.cell * 2 + 2 : sizeTile.cell
-                            radius: IrisStyle.radiusMicro
-                            color: sizeTile.chosen ? IrisStyle.accent : IrisStyle.fillActive
-                        }
-                    }
+                Caption { text: Translation.tr("Scale") }
+                IrisText {
+                    text: (scaleScrubber.dragValue >= 0
+                        ? Math.round(root.scaleMin + scaleScrubber.dragValue * (root.scaleMax - root.scaleMin))
+                        : root.scaleValue) + "%"
+                    color: IrisStyle.textSecondary
+                    font.family: IrisStyle.fontNumbers
+                    font.features: ({ "tnum": 1 })
+                    font.pixelSize: IrisStyle.typeMeta
                 }
+            }
+            IrisScrubber {
+                id: scaleScrubber
+                Layout.fillWidth: true
+                knob: true
+                fillColor: IrisStyle.accent
+                stepSize: 5 / (root.scaleMax - root.scaleMin)
+                value: (root.scaleValue - root.scaleMin) / (root.scaleMax - root.scaleMin)
+                onMoved: value => root.widget.previewScale(Math.round((root.scaleMin + value * (root.scaleMax - root.scaleMin)) / 5) * 5)
+                onSeekRequested: value => root.widget.commitIrisScale(Math.round((root.scaleMin + value * (root.scaleMax - root.scaleMin)) / 5) * 5)
             }
         }
 
         Loader {
-            active: root.optionRows !== null
+            active: root.widget.ownControls !== null
+            visible: active
+            Layout.fillWidth: true
+            sourceComponent: root.widget.ownControls
+        }
+
+        Loader {
+            active: root.optionRows !== null && root.widgetRows.length > 0
             visible: active
             Layout.fillWidth: true
             sourceComponent: root.optionRows
-        }
-
-        Repeater {
-            model: root.optionRows === null ? root.widget.familyOptions : []
-
-            ColumnLayout {
-                id: option
-                required property var modelData
-                readonly property var value: option.modelData.raw
-                    ? root.widget._readConfigKey(option.modelData.key) ?? option.modelData.fallback
-                    : root.widget.familyOption(option.modelData.key, option.modelData.fallback)
-                function store(value: var): void {
-                    if (option.modelData.raw)
-                        root.widget._setOutputValue(option.modelData.key, value)
-                    else
-                        root.widget.setFamilyOption(option.modelData.key, value)
-                }
-                readonly property var picks: option.modelData.choices ?? []
-                readonly property bool choice: option.picks.length > 0
-                Layout.fillWidth: true
-                spacing: Math.round(6 * root.d)
-
-                Caption {
-                    visible: option.choice
-                    text: option.modelData.label
-                }
-                RowLayout {
-                    visible: option.choice
-                    Layout.fillWidth: true
-                    spacing: Math.round(4 * root.d)
-                    Repeater {
-                        model: option.picks
-                        FaceChoice {
-                            required property var modelData
-                            Layout.fillWidth: true
-                            Layout.preferredWidth: 1
-                            icon: modelData.icon ?? ""
-                            label: modelData.label
-                            selected: option.value === modelData.value
-                            onClicked: option.store(modelData.value)
-                        }
-                    }
-                }
-                Rectangle {
-                    id: optionPlate
-                    visible: !option.choice
-                    Layout.fillWidth: true
-                    implicitHeight: Math.round(40 * root.d)
-                    radius: root.plateRadius
-                    readonly property color stuff: optionHover.hovered ? IrisStyle.fillHover : IrisStyle.fillQuiet
-                    color: IrisStyle.fieldChamfer ? "transparent" : optionPlate.stuff
-                    Behavior on color { ColorAnimation { duration: IrisStyle.feedbackDuration; easing.type: IrisStyle.feedbackEasing } }
-                    IrisCutPlate { anchors.fill: parent; visible: IrisStyle.fieldChamfer; cutLength: root.plateCut; color: optionPlate.stuff }
-
-                    MaterialSymbol {
-                        id: optionGlyph
-                        anchors.left: parent.left
-                        anchors.leftMargin: Math.round(12 * root.d)
-                        anchors.verticalCenter: parent.verticalCenter
-                        text: option.modelData.icon ?? ""
-                        iconSize: Math.round(18 * root.d)
-                        color: Boolean(option.value) ? IrisStyle.text : IrisStyle.textSecondary
-                    }
-                    IrisText {
-                        anchors.left: optionGlyph.right
-                        anchors.leftMargin: Math.round(10 * root.d)
-                        anchors.right: optionSwitch.left
-                        anchors.rightMargin: Math.round(10 * root.d)
-                        anchors.verticalCenter: parent.verticalCenter
-                        text: option.modelData.label
-                        font.pixelSize: IrisStyle.typeLabel
-                        elide: Text.ElideRight
-                    }
-                    Item {
-                        anchors.left: parent.left
-                        anchors.right: optionSwitch.left
-                        anchors.top: parent.top
-                        anchors.bottom: parent.bottom
-                        HoverHandler { id: optionHover; cursorShape: Qt.PointingHandCursor }
-                        TapHandler { onTapped: option.store(!Boolean(option.value)) }
-                    }
-                    IrisSwitch {
-                        id: optionSwitch
-                        anchors.right: parent.right
-                        anchors.rightMargin: Math.round(10 * root.d)
-                        anchors.verticalCenter: parent.verticalCenter
-                        on: Boolean(option.value)
-                        name: option.modelData.label
-                        onToggled: option.store(!Boolean(option.value))
-                    }
-                }
-            }
+            onLoaded: item.specs = Qt.binding(() => root.widgetRows)
         }
     }
 
@@ -635,14 +571,15 @@ ColumnLayout {
         }
 
         ColumnLayout {
+            visible: root.faced
             Layout.fillWidth: true
             spacing: Math.round(8 * root.d)
 
             RowLayout {
                 Layout.fillWidth: true
-                Caption { text: Translation.tr("Material") }
+                Caption { text: Translation.tr("Background") }
                 IrisText {
-                    visible: root.ownMaterial === "auto" || !root.materials.some(entry => entry.value === root.ownMaterial)
+                    visible: root.surface === "auto"
                     text: (root.materials.find(entry => entry.value === root.sharedMaterial)?.label ?? "") + " · " + Translation.tr("from Settings")
                     color: IrisStyle.textTertiary
                     font.pixelSize: IrisStyle.typeMeta
@@ -659,9 +596,9 @@ ColumnLayout {
                     ColumnLayout {
                         id: swatch
                         required property var modelData
-                        readonly property bool chosen: root.ownMaterial === swatch.modelData.value
-                            || (swatch.modelData.value === "auto" && !root.materials.some(entry => entry.value === root.ownMaterial))
-                        readonly property string shown: swatch.modelData.value === "auto" ? root.sharedMaterial : swatch.modelData.value
+                        readonly property bool chosen: root.surface === swatch.modelData.value
+                        readonly property string shown: swatch.modelData.value === "none" ? "clear"
+                            : swatch.modelData.value === "auto" ? root.sharedMaterial : swatch.modelData.value
                         Layout.fillWidth: true
                         Layout.preferredWidth: 1
                         Layout.maximumWidth: Number.POSITIVE_INFINITY
@@ -729,13 +666,25 @@ ColumnLayout {
                         }
                         // The swatch and its name are one key (a tap on the name did nothing).
                         HoverHandler { cursorShape: Qt.PointingHandCursor }
-                        TapHandler { onTapped: root.widget._setOutputValue("iris.material", swatch.modelData.value) }
+                        TapHandler { onTapped: root.pickSurface(swatch.modelData.value) }
                     }
                 }
             }
         }
 
+        Loader {
+            active: root.optionRows !== null && root.lookRows.length > 0
+            visible: active
+            Layout.fillWidth: true
+            sourceComponent: root.optionRows
+            onLoaded: item.specs = Qt.binding(() => root.lookRows)
+        }
+
         ColumnLayout {
+            // Stays while there's no plate, dimmed: picking a background never moves the sheet under the pointer.
+            visible: root.faced
+            enabled: root.plated
+            opacity: root.plated ? 1 : 0.42
             Layout.fillWidth: true
             spacing: Math.round(8 * root.d)
 
@@ -766,6 +715,9 @@ ColumnLayout {
         }
 
         ColumnLayout {
+            visible: root.faced
+            enabled: root.plated
+            opacity: root.plated ? 1 : 0.42
             Layout.fillWidth: true
             spacing: Math.round(8 * root.d)
 
@@ -794,35 +746,6 @@ ColumnLayout {
                     root.widget.commitValue("iris.opacity",
                         chosen === Math.round(Number(Config.options?.iris?.widgets?.opacity ?? 100)) ? -1 : chosen)
                 }
-            }
-        }
-
-        ColumnLayout {
-            Layout.fillWidth: true
-            spacing: Math.round(8 * root.d)
-
-            RowLayout {
-                Layout.fillWidth: true
-                Caption { text: Translation.tr("Scale") }
-                IrisText {
-                    text: (scaleScrubber.dragValue >= 0
-                        ? Math.round(root.scaleMin + scaleScrubber.dragValue * (root.scaleMax - root.scaleMin))
-                        : root.scaleValue) + "%"
-                    color: IrisStyle.textSecondary
-                    font.family: IrisStyle.fontNumbers
-                    font.features: ({ "tnum": 1 })
-                    font.pixelSize: IrisStyle.typeMeta
-                }
-            }
-            IrisScrubber {
-                id: scaleScrubber
-                Layout.fillWidth: true
-                knob: true
-                fillColor: IrisStyle.accent
-                stepSize: 5 / (root.scaleMax - root.scaleMin)
-                value: (root.scaleValue - root.scaleMin) / (root.scaleMax - root.scaleMin)
-                onMoved: value => root.widget.previewScale(Math.round((root.scaleMin + value * (root.scaleMax - root.scaleMin)) / 5) * 5)
-                onSeekRequested: value => root.widget.commitIrisScale(Math.round((root.scaleMin + value * (root.scaleMax - root.scaleMin)) / 5) * 5)
             }
         }
     }
