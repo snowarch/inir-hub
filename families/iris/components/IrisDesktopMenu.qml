@@ -561,7 +561,7 @@ Loader {
                                 readonly property bool danger: row.modelData?.danger === true
                                 readonly property bool tinted: String(row.modelData?.tint ?? "").length > 0
                                 readonly property color tint: menuItem.tinted ? IrisStyle.identityColor(row.modelData.tint) : IrisStyle.accent
-                                implicitWidth: itemRow.implicitWidth + Math.round(24 * root.d)
+                                implicitWidth: rowSkin.item?.implicitWidth ?? itemRow.implicitWidth + Math.round(24 * root.d)
                                 implicitHeight: root.rowHeight
                                 enabled: menuItem.usable
                                 opacity: menuItem.usable || menuItem.skinned ? 1 : 0.4

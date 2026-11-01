@@ -1287,7 +1287,12 @@ QtObject {
         return root.iconColour === "accent" ? root.accent : root.iconColour === "mono" ? root.identity.gray : area
     }
     // The glyph set every glyph of the shell is drawn from while iRiS is worn (FamilyStyle.glyphFont).
-    readonly property string glyphFont: ({ standard: "Material Symbols Outlined", sharp: "Material Symbols Sharp" })[String(root.iconOptions.glyphs ?? "rounded")] ?? ""
+    // A set this machine lacks stays Rounded: an update brings no fonts, and a missing face prints each glyph's name.
+    readonly property var glyphFonts: ({ standard: "Material Symbols Outlined", sharp: "Material Symbols Sharp" })
+    readonly property string glyphFont: {
+        const font = root.glyphFonts[String(root.iconOptions.glyphs ?? "rounded")] ?? ""
+        return font.length > 0 && Qt.fontFamilies().includes(font) ? font : ""
+    }
     readonly property string iconShape: String(root.iconOptions.shape ?? "auto")
     readonly property int iconWeight: ({ light: Font.Light, bold: Font.DemiBold })[String(root.iconOptions.weight ?? "regular")] ?? Font.Normal
     // A glyph's fill: what the surface would draw, unless the person fixed one.

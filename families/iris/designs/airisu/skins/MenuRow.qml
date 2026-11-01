@@ -25,7 +25,17 @@ Item {
     readonly property int glyphSize: Math.round((root.compact ? 15 : 17) * root.d)
     readonly property color ink: root.usable ? Airisu.ink : Airisu.inkThird
     readonly property int shift: root.pressed ? Airisu.nudge : 0
-    implicitWidth: row.implicitWidth + Airisu.u(6)
+    // What the row asks of its menu: the words at their boldest, so lighting one never resizes it.
+    implicitWidth: Airisu.u(5) + (root.code > 0 ? Airisu.u(2) + row.spacing : 0) + (root.marked ? root.glyphSize + row.spacing : 0)
+        + Math.ceil(labelRoom.advanceWidth) + (tail.width > 0 ? tail.width + row.spacing : 0)
+    TextMetrics {
+        id: labelRoom
+        font.family: label.font.family
+        font.pixelSize: label.font.pixelSize
+        font.letterSpacing: label.font.letterSpacing
+        font.weight: Font.DemiBold
+        text: label.text
+    }
 
     ALacquer {
         anchors.fill: parent
