@@ -1217,6 +1217,45 @@ QtObject {
     readonly property real kiriCut: 1.5
     readonly property real kiriEase: 0.55
     readonly property real kiriFit: 0.84
+    // Which corners Kiri cuts on a field body, as a mask (1 upper-left, 2 upper-right, 4 lower-right, 8 lower-left; 0 is
+    // the Design's own diagonal, 2 + 8). A free body wears the diagonal. A body standing on an edge of its room (the
+    // Dock, the Island and what hangs from it, a side column), directly or through the bodies it joins, cuts the two
+    // corners it shows alike and keeps its shoulders round, so a centred body reads symmetric (his 10-31: one shoulder
+    // round and one cut read as unfinished); in a corner of the room only the corner facing the room is cut.
+    function kiriMaskOf(shape: var, shapes: var, w: real, h: real, band: real): int {
+        if (!root.fieldChamfer || !shape || !root.kiriAnchored(shape, shapes, 0)) return 0
+        const reach = band + 2
+        let top = shape.y <= reach, bottom = shape.y + shape.height >= h - reach
+        let left = shape.x <= reach, right = shape.x + shape.width >= w - reach
+        if (top && bottom) { top = false; bottom = false }
+        if (left && right) { left = false; right = false }
+        if (!top && !bottom && !left && !right) {
+            // Hung from another body (an open Island's page): the edge it is nearest to.
+            const gaps = [shape.y, h - shape.y - shape.height, shape.x, w - shape.x - shape.width]
+            const near = gaps.indexOf(Math.min(gaps[0], gaps[1], gaps[2], gaps[3]))
+            top = near === 0; bottom = near === 1; left = near === 2; right = near === 3
+        }
+        return top ? (left ? 4 : right ? 8 : 12) : bottom ? (left ? 2 : right ? 1 : 3) : left ? 6 : right ? 9 : 0
+    }
+    function kiriAnchored(shape: var, shapes: var, depth: int): bool {
+        const list = !shape.joins ? [] : Array.isArray(shape.joins) ? shape.joins : [shape.joins]
+        if (list.some(name => /^(frame|edge|dockEdge|top|bottom|left|right)$|^(pieceEdge|panelEdge):/.test(String(name)))) return true
+        if (depth >= 4) return false
+        return list.some(name => {
+            const other = (shapes ?? []).find(candidate => candidate?.id === name)
+            return other ? root.kiriAnchored(other, shapes, depth + 1) : false
+        })
+    }
+    // A body's four radii as the field reads them: under Kiri a cut corner travels negative, so the shader and qs-rs
+    // FieldRegion take the mask from the sign and no second table has to stay in step. A radius of 0 (the Design's own)
+    // keeps a sign through 0.25, under the half pixel that means none.
+    function kiriCuts(mask: int): int { return mask > 0 ? mask : 10 }
+    function fieldCorners(c: var, mask: int): var {
+        if (!root.fieldChamfer) return c
+        const cuts = root.kiriCuts(mask), lane = (r, bit) => (cuts & bit) ? -Math.max(0.25, r) : r
+        return { tl: lane(c.tl, 1), tr: lane(c.tr, 2), br: lane(c.br, 4), bl: lane(c.bl, 8) }
+    }
+
     // The radius of a clip's cut corners on a Kiri body of radius `radius`: the arc that stays inside the body's cut
     // (an arc's nearest point to its corner is 0.586 of its radius along each side of the diagonal, so it clears a cut of
     // leg c past 1.71 c), never past the piece's half.

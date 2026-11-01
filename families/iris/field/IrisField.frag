@@ -175,7 +175,7 @@ float squircleBox(vec2 p, vec2 centre, vec2 halfSize, float radius) {
 // KIRI_CUT times the radius, both ends of the cut eased by KIRI_EASE times it, so the blade's line runs into the sides
 // instead of breaking off them (the square corners and hard points before read as cardboard). The radius gives way on a
 // small body (KIRI_FIT of its shorter half), so a strip keeps a straight run between its round corner and its cut. A
-// body welded to the frame wears the same pair: the corners it shows are one round, one cut, as every other piece.
+// body standing on an edge cuts the two corners it shows alike and keeps its shoulders round (IrisStyle.kiriMaskOf).
 // IrisBlurRegion (kiriRows, kiriDistance) and qs-rs FieldRegion draw the same outline; IrisStyle.kiriOutline cuts plates.
 const float KIRI_CUT = 1.5;
 const float KIRI_EASE = 0.55;
@@ -183,10 +183,10 @@ const float KIRI_FIT = 0.56;
 
 // The rounded cut quadrant is the shrunk wedge (inside the sides by the ease, the cut moved in along its normal by the
 // same) grown back by the ease: an exact distance, so joins, rims and shadows that read it follow the eased edge.
-float kiriBox(vec2 p, vec2 centre, vec2 halfSize, float radius) {
+float kiriBox(vec2 p, vec2 centre, vec2 halfSize, float radius, bool cut) {
     vec2 d = p - centre;
     float r = min(radius, KIRI_FIT * min(halfSize.x, halfSize.y));
-    if (d.x * d.y >= 0.0 || r < 0.5)
+    if (!cut || r < 0.5)
         return squircleBox(p, centre, halfSize, r);
     float e = KIRI_EASE * r;
     vec2 q = abs(d);
@@ -208,13 +208,15 @@ float kiriBox(vec2 p, vec2 centre, vec2 halfSize, float radius) {
 // A body has a radius per corner (upper left, upper right, lower right, lower left): a menu nests the one corner that
 // faces the frame's or a fillet's curve and keeps its own at the other three. Each quadrant is the box with its own
 // corner's radius all round, which is that corner exactly: a squircle's reach and a cut stop at the body's half, and
-// the straight runs between them read no radius. 0 under Kiri takes the Design's own (options.z is its cut).
+// the straight runs between them read no radius. 0 under Kiri takes the Design's own (options.z is its cut). Its sign
+// says which way a corner goes under Kiri, negative is cut (IrisStyle.fieldCorners, the only writer).
 float bodyBox(vec2 p, vec2 centre, vec2 halfSize, vec4 corners) {
     vec2 d = p - centre;
-    float radius = d.y < 0.0 ? (d.x < 0.0 ? corners.x : corners.y) : (d.x < 0.0 ? corners.w : corners.z);
+    float lane = d.y < 0.0 ? (d.x < 0.0 ? corners.x : corners.y) : (d.x < 0.0 ? corners.w : corners.z);
+    float radius = abs(lane);
     if (u.options.y < 0.5)
         return squircleBox(p, centre, halfSize, radius);
-    return kiriBox(p, centre, halfSize, radius > 0.5 ? radius : u.options.z / KIRI_CUT);
+    return kiriBox(p, centre, halfSize, radius > 0.5 ? radius : u.options.z / KIRI_CUT, lane < 0.0);
 }
 
 // The screen's opening inside the frame band wears the same corners, so a Kiri Design never shows a plain round hole
@@ -222,7 +224,8 @@ float bodyBox(vec2 p, vec2 centre, vec2 halfSize, vec4 corners) {
 float frameBox(vec2 p, vec2 centre, vec2 halfSize, float radius) {
     if (u.options.y < 0.5)
         return squircleBox(p, centre, halfSize, radius);
-    return kiriBox(p, centre, halfSize, radius);
+    vec2 d = p - centre;
+    return kiriBox(p, centre, halfSize, radius, d.x * d.y < 0.0);
 }
 
 // The chrome bevel's environment by elevation e: -1 ground, 0 horizon, 1 sky.
@@ -512,7 +515,7 @@ void main() {
                 && blockValue(block, slot, u.alsoA, u.alsoB, u.alsoC, u.alsoD, u.alsoE) > -0.5)
                 continue;
             vec4 s = shapeAt(i);
-            vec4 corners = cornersAt(i);
+            vec4 corners = abs(cornersAt(i));
             float r = min(max(max(corners.x, corners.y), max(corners.z, corners.w)), min(s.z, s.w));
             float under = u.field.z + 2.0;
             vec2 a = s.xy - s.zw;
@@ -634,7 +637,9 @@ void main() {
                     vec4 s = shapeAt(i);
                     int block = i / 4;
                     int slot = i - block * 4;
-                    bodiesQ[i] = bodyBox(q, s.xy, s.zw, max(cornersAt(i), vec4(bevel)));
+                    vec4 lanes = cornersAt(i);
+                    vec4 raised = max(abs(lanes), vec4(bevel));
+                    bodiesQ[i] = bodyBox(q, s.xy, s.zw, mix(raised, -raised, lessThan(lanes, vec4(0.0))));
                     unitedQ = min(unitedQ, bodiesQ[i]);
                 }
                 for (int i = 0; i < 20; ++i) {

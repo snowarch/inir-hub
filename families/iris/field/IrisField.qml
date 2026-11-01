@@ -176,7 +176,7 @@ Item {
             for (let i = 0; i < root.capacity; i++) {
                 const s = list[i]
                 geometry.push(s ? Qt.vector4d(s.x + s.width / 2, s.y + s.height / 2, s.width / 2, s.height / 2) : zero)
-                const c = s ? IrisFrame.cornersOf(s) : null
+                const c = s ? IrisStyle.fieldCorners(IrisFrame.cornersOf(s), IrisStyle.kiriMaskOf(s, list, root.width, root.height, root.framed ? root.band : 0)) : null
                 corners.push(c ? Qt.vector4d(c.tl, c.tr, c.br, c.bl) : zero)
                 fuse.push(s ? Number(s.fuse ?? root.smoothing) : 0)
                 join.push(slot(s, 0))

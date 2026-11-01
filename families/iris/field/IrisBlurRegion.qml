@@ -36,10 +36,14 @@ Region {
         if (!root.nativeRaster) return []
         const out = []
         for (const s of root.shapes ?? []) {
-            const c = IrisFrame.cornersOf(s)
+            const c = IrisStyle.fieldCorners(IrisFrame.cornersOf(s), root.maskOf(s))
             out.push(c.tl, c.tr, c.br, c.bl)
         }
         return out
+    }
+    // Kiri's corners for a body of this table (IrisStyle.kiriMaskOf): the ones the field cuts.
+    function maskOf(s: var): int {
+        return IrisStyle.kiriMaskOf(s, root.shapes, root.windowWidth, root.windowHeight, root.framed ? root.band : 0)
     }
     property bool framed: false
     property bool joinsFrame: root.framed
@@ -244,7 +248,7 @@ Region {
     function joinRuns(s: var, t: var, exact: bool, out: var, cache: var, kept: var): void {
         const k = Math.max(0, Number(s.fuse ?? 0))
         if (k < 0.5) return
-        const g = b => b.x + "," + b.y + "," + b.width + "," + b.height + "," + (b.radius ?? 0) + root.cornersKey(b)
+        const g = b => b.x + "," + b.y + "," + b.width + "," + b.height + "," + (b.radius ?? 0) + root.cornersKey(b) + "," + root.maskOf(b)
         const key = g(s) + "," + k + "," + IrisStyle.fieldChamfer + "|" + (t === null ? "frame:" + g(root.memo.frame) + "," + root.windowWidth + "," + root.windowHeight
             : g(t)) + "|" + root.framed + "," + root.band
         // A still body keeps its exact runs while another one moves; only a moving one is walked coarse.
@@ -291,8 +295,8 @@ Region {
             const tl = corner(hx, hy, cx, cy, c.tl)
             return quadrants(cx, cy, c, tl, corner(hx, hy, cx, cy, c.tr), corner(hx, hy, cx, cy, c.bl), corner(hx, hy, cx, cy, c.br))
         }
-        // A Kiri Design draws its bodies round at the upper left and lower right and cut with eased ends at the other two
-        // (IrisField.frag kiriBox), and keeps its fillets at most twice its cut deep (smoothUnion).
+        // A Kiri Design draws each corner round or cut with eased ends (IrisField.frag kiriBox, IrisStyle.kiriMaskOf), and
+        // keeps its fillets at most twice its cut deep (smoothUnion).
         const blade = root.chamfer
         const cut = (hx, hy, cx, cy, r) => {
             const round = corner(hx, hy, cx, cy, r)
@@ -300,9 +304,7 @@ Region {
             const e = 0.55 * r, sx = hx - e, sy = hy - e, l = hx + hy - 1.5 * r - e * Math.SQRT2
             const ax = sx, ay = l - sx, bx = l - sy, by = sy, abx = bx - ax, aby = by - ay, ab2 = abx * abx + aby * aby
             return (x, y) => {
-                const dx = x - cx, dy = y - cy
-                if (dx * dy >= 0) return round(x, y)
-                const qx = Math.abs(dx), qy = Math.abs(dy)
+                const qx = Math.abs(x - cx), qy = Math.abs(y - cy)
                 const inside = Math.max(qx - sx, qy - sy, (qx + qy - l) * 0.70710678)
                 if (inside <= 0) return inside - e
                 const t = Math.max(0, Math.min(1, ((qx - ax) * abx + (qy - ay) * aby) / ab2))
@@ -315,8 +317,10 @@ Region {
         const kiri = b => {
             const hx = b.width / 2, hy = b.height / 2, cx = b.x + hx, cy = b.y + hy, c = IrisFrame.cornersOf(b)
             const fit = rad => Math.min(rad > 0.5 ? rad : blade / 1.5, 0.56 * Math.min(hx, hy))
-            const round = r => corner(hx, hy, cx, cy, r)
-            return quadrants(cx, cy, c, round(fit(c.tl)), cut(hx, hy, cx, cy, fit(c.tr)), cut(hx, hy, cx, cy, fit(c.bl)), round(fit(c.br)))
+            const cuts = IrisStyle.kiriCuts(root.maskOf(b))
+            const at = (r, bit) => (cuts & bit) ? cut(hx, hy, cx, cy, fit(r)) : corner(hx, hy, cx, cy, fit(r))
+            const tl = at(c.tl, 1), tr = at(c.tr, 2), br = at(c.br, 4), bl = at(c.bl, 8)
+            return (x, y) => (y < cy ? (x < cx ? tl : tr) : (x < cx ? bl : br))(x, y)
         }
         const own = blade > 0 ? kiri(s) : box(s)
         const joined = blade > 0 ? kiri(t === null ? root.memo.frame : t) : box(t === null ? root.memo.frame : t)
@@ -332,7 +336,7 @@ Region {
         for (const q of mine) out.push(q)
     }
     // A Kiri Design's body (IrisField.frag kiriBox) is blurred as its rows, as a squircle body is: the shape shrunk by the
-    // centre rule's half pixel, the upper-left and lower-right corners its squircle, the other two the eased cut. One rect
+    // centre rule's half pixel, each corner its squircle or its eased cut (IrisStyle.kiriMaskOf). One rect
     // for the straight middle, one per row of the corners (every third row while it moves, the narrowest of the three).
     function kiriRows(s: var, cut: real, exact: bool, out: var): void {
         const i = root.inset
@@ -341,15 +345,16 @@ Region {
         const tl = fit(corners.tl), tr = fit(corners.tr), bl = fit(corners.bl), br = fit(corners.br)
         const reach = r => Math.min(r * root.squircleReach, m) - i
         const leg = r => 1.5 * r - i * (2 - Math.SQRT2), ease = r => Math.max(0, 0.55 * r - i)
-        const reachTl = reach(tl), reachBr = reach(br), legTr = leg(tr), easeTr = ease(tr), legBl = leg(bl), easeBl = ease(bl)
+        const cuts = IrisStyle.kiriCuts(root.maskOf(s))
+        const inset = (bit, r, t) => (cuts & bit) ? root.kiriCutInset(t, leg(r), ease(r)) : root.squircleInset(t, reach(r))
         const top = root.lo(s.y + i), bottom = root.hi(s.y + s.height - i)
         const left = root.lo(s.x + i), right = root.hi(s.x + s.width - i)
         if (bottom <= top || right <= left) return
         const span = n => {
             const cy = n + 0.5
             const a = cy - s.y - i, b = s.y + s.height - i - cy
-            const kl = Math.max(root.squircleInset(a, reachTl), root.kiriCutInset(b, legBl, easeBl))
-            const kr = Math.max(root.kiriCutInset(a, legTr, easeTr), root.squircleInset(b, reachBr))
+            const kl = Math.max(inset(1, tl, a), inset(8, bl, b))
+            const kr = Math.max(inset(2, tr, a), inset(4, br, b))
             return [Math.max(left, root.hi(s.x + i + kl)), Math.min(right, root.lo(s.x + s.width - i - kr))]
         }
         const step = exact || Math.min(tl, tr, bl, br) < 0.5 ? 1 : 3
@@ -494,7 +499,7 @@ Region {
             const i = root.inset
             const mine = exact || stillOf[root.bodyKey(s)]
             if (cut > 0 || root.byRows(s)) {
-                const key = root.bodyKey(s) + "," + cut
+                const key = root.bodyKey(s) + "," + cut + "," + root.maskOf(s)
                 let rows = mine ? rowsCache[key] : null
                 if (!rows) {
                     rows = []
