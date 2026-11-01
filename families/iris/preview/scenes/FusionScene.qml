@@ -42,7 +42,7 @@ PreviewScene {
         y: fuseRoot.card.y + IrisStyle.concentricPad(IrisStyle.radiusSheet, 14 * fuseRoot.d)
         spacing: Math.round(8 * fuseRoot.d)
         Rectangle { width: Math.round(120 * fuseRoot.d); height: Math.round(10 * fuseRoot.d); radius: IrisStyle.radiusMicro; color: IrisStyle.fillHover }
-        Rectangle { width: Math.round(170 * fuseRoot.d); height: Math.round(10 * fuseRoot.d); radius: IrisStyle.radiusMicro; color: IrisStyle.fill }
+        Rectangle { width: Math.round(170 * fuseRoot.d); height: Math.round(10 * fuseRoot.d); radius: IrisStyle.radiusMicro; color: IrisStyle.fillActive }
         Row {
             spacing: Math.round(8 * fuseRoot.d)
             Repeater { model: 3; Rectangle { required property int index; width: Math.round(46 * fuseRoot.d); height: Math.round(34 * fuseRoot.d); radius: IrisStyle.radiusTile; color: IrisStyle.fillQuiet } }

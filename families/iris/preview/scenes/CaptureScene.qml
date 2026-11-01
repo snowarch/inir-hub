@@ -35,19 +35,7 @@ PreviewScene {
         width: Math.round(captureRoot.width * 0.5)
         height: Math.round(captureRoot.height * 0.62)
         radius: IrisStyle.radiusPlate
-        Row {
-            x: Math.round(14 * captureRoot.d); y: Math.round(12 * captureRoot.d)
-            spacing: Math.round(6 * captureRoot.d)
-            Repeater { model: 3; Rectangle { width: Math.round(8 * captureRoot.d); height: width; radius: width / 2; color: IrisStyle.fillStrong } }
-        }
-        Column {
-            x: Math.round(16 * captureRoot.d); y: Math.round(40 * captureRoot.d)
-            spacing: Math.round(10 * captureRoot.d)
-            Repeater {
-                model: [0.8, 0.62, 0.7, 0.45]
-                Rectangle { required property real modelData; width: big.width * modelData; height: Math.round(7 * captureRoot.d); radius: height / 2; color: IrisStyle.fill }
-            }
-        }
+        WindowPage { anchors.fill: parent }
     }
     Plate {
         id: small

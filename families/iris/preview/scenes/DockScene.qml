@@ -105,13 +105,7 @@ PreviewScene {
         Behavior on y { NumberAnimation { duration: IrisStyle.moveDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: IrisStyle.moveCurve } }
         Behavior on width { NumberAnimation { duration: IrisStyle.moveDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: IrisStyle.moveCurve } }
         Behavior on height { NumberAnimation { duration: IrisStyle.moveDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: IrisStyle.moveCurve } }
-        Row {
-            x: Math.round(12 * dockRoot.d); y: Math.round(11 * dockRoot.d)
-            spacing: Math.round(6 * dockRoot.d)
-            Repeater { model: 3; Rectangle { required property int index; width: Math.round(10 * dockRoot.d); height: width; radius: width / 2; color: IrisStyle.fillStrong } }
-        }
-        Rectangle { x: Math.round(12 * dockRoot.d); y: Math.round(38 * dockRoot.d); width: parent.width * 0.4; height: Math.round(9 * dockRoot.d); radius: height / 2; color: IrisStyle.fill }
-        Rectangle { x: Math.round(12 * dockRoot.d); y: Math.round(56 * dockRoot.d); width: parent.width * 0.62; height: Math.round(9 * dockRoot.d); radius: height / 2; color: IrisStyle.fillQuiet }
+        WindowPage { anchors.fill: parent }
         Rectangle {
             visible: dockRoot.reserve
             x: dockRoot.edge === "right" ? parent.width - 1 : 0

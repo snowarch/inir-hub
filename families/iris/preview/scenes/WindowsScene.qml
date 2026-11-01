@@ -69,28 +69,9 @@ PreviewScene {
                 color: IrisStyle.surfaceOpaque
                 border.width: winRoot.border ? winRoot.borderWidth : 0
                 border.color: column.modelData.focused ? winRoot.borderOn : winRoot.borderOff
-                Column {
-                    x: Math.round(14 * winRoot.d) + (winRoot.border ? winRoot.borderWidth : 0)
-                    y: Math.round(14 * winRoot.d) + (winRoot.border ? winRoot.borderWidth : 0)
-                    width: parent.width - 2 * x
-                    spacing: Math.round(8 * winRoot.d)
-                    Row {
-                        spacing: Math.round(6 * winRoot.d)
-                        Repeater {
-                            model: 3
-                            Rectangle { width: Math.round(8 * winRoot.d); height: width; radius: width / 2; color: IrisStyle.fillStrong }
-                        }
-                    }
-                    Repeater {
-                        model: [0.82, 0.64, 0.74, 0.4]
-                        Rectangle {
-                            required property real modelData
-                            width: Math.round(parent.width * modelData)
-                            height: Math.round(6 * winRoot.d)
-                            radius: IrisStyle.capsule(height)
-                            color: IrisStyle.fill
-                        }
-                    }
+                WindowPage {
+                    anchors.fill: parent
+                    inset: winRoot.border ? winRoot.borderWidth : 0
                 }
             }
         }

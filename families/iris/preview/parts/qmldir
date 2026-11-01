@@ -7,6 +7,7 @@ IslandPill 1.0 IslandPill.qml
 Level 1.0 Level.qml
 Pointer 1.0 Pointer.qml
 BlockRow 1.0 BlockRow.qml
+WindowPage 1.0 WindowPage.qml
 Loop 1.0 Loop.qml
 LitPlate 1.0 LitPlate.qml
 LitBody 1.0 LitBody.qml

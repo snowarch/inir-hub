@@ -35,8 +35,15 @@ PreviewScene {
     // tiles read as broken. The notifications row comes back only with every row shown.
     readonly property int shownRows: {
         const free = ccRoot.height - ccPlate.y - ccTitle.height - Math.round(48 * ccRoot.d) + ccGrid.gap
-        return Math.max(1, Math.min(ccRoot.packed.rows, Math.floor(free / (ccGrid.unit + ccGrid.gap))))
+        return Math.max(ccRoot.leastRows, Math.min(ccRoot.packed.rows, Math.floor(free / (ccGrid.unit + ccGrid.gap))))
     }
+    // Pieces span rows: a frame cut to whole rows may hold no whole piece, and the plate stood empty. The first piece
+    // that ends decides the least it shows, and the frame scales to hold that.
+    readonly property int leastRows: Math.max(1, Math.min(ccRoot.packed.rows, ...ccRoot.ids.map(id => {
+        const spot = ccRoot.packed.placed[id]
+        return spot ? spot.row + spot.h : ccRoot.packed.rows
+    })))
+    lowest: ccPlate.y + ccTitle.height + Math.round(48 * ccRoot.d) + ccRoot.leastRows * ccGrid.unit + (ccRoot.leastRows - 1) * ccGrid.gap
     readonly property bool trimmed: ccRoot.shownRows < ccRoot.packed.rows
     IslandPill {
         id: ccIsland

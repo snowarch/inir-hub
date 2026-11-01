@@ -39,20 +39,10 @@ PreviewScene {
         color: displayRoot.soften ? IrisStyle.surfaceHighestOpaque : IrisStyle.onMedia
         opacity: 0.35 + 0.65 * displayRoot.t
         Behavior on color { ColorAnimation { duration: IrisStyle.duration(260); easing.type: IrisStyle.feedbackEasing } }
-        Column {
-            x: Math.round(18 * displayRoot.d); y: Math.round(18 * displayRoot.d)
-            spacing: Math.round(10 * displayRoot.d)
-            Repeater {
-                model: [0.7, 0.5, 0.62]
-                Rectangle {
-                    required property real modelData
-                    width: flash.width * modelData
-                    height: Math.round(7 * displayRoot.d)
-                    radius: height / 2
-                    color: displayRoot.soften ? IrisStyle.fill : IrisStyle.surfaceHighOpaque
-                    opacity: displayRoot.soften ? 1 : 0.18
-                }
-            }
+        WindowPage {
+            anchors.fill: parent
+            ink: displayRoot.soften ? IrisStyle.fillActive : IrisStyle.surfaceHighOpaque
+            inkOpacity: displayRoot.soften ? 1 : 0.2
         }
     }
     // The warm layer over the whole screen.
@@ -60,6 +50,62 @@ PreviewScene {
         anchors.fill: parent
         color: IrisStyle.identity.orange
         opacity: 0.38 * displayRoot.tint
+    }
+    // By hand it has no day to follow: the scale from daylight to the warmest with the set temperature on it, on one
+    // plate like the rest of what floats over the wallpaper. Off, the value waits dimmed on its scale.
+    Rectangle {
+        id: warmthScale
+        visible: !displayRoot.scheduled
+        anchors.horizontalCenter: parent.horizontalCenter
+        y: flash.y + flash.height + Math.round(14 * displayRoot.d)
+        width: flash.width
+        height: Math.round(36 * displayRoot.d)
+        radius: IrisStyle.capsule(height)
+        color: IrisStyle.surfaceOpaque
+        border.width: 1
+        border.color: IrisStyle.hairlineStrong
+        IrisText {
+            id: kelvinText
+            anchors.right: parent.right
+            anchors.rightMargin: Math.round(16 * displayRoot.d)
+            anchors.verticalCenter: parent.verticalCenter
+            text: Math.round(displayRoot.kelvin) + " K"
+            color: displayRoot.night ? IrisStyle.text : IrisStyle.textSecondary
+            font.family: IrisStyle.fontNumbers
+            font.features: ({ "tnum": 1 })
+            font.pixelSize: IrisStyle.typeMeta
+            font.weight: IrisStyle.figureWeight
+        }
+        Item {
+            id: warmthRun
+            anchors.left: parent.left
+            anchors.leftMargin: Math.round(16 * displayRoot.d)
+            anchors.right: kelvinText.left
+            anchors.rightMargin: Math.round(14 * displayRoot.d)
+            anchors.verticalCenter: parent.verticalCenter
+            height: Math.round(14 * displayRoot.d)
+            opacity: displayRoot.night ? 1 : 0.45
+            Rectangle {
+                anchors.verticalCenter: parent.verticalCenter
+                width: parent.width
+                height: Math.round(6 * displayRoot.d)
+                radius: IrisStyle.capsule(height)
+                gradient: Gradient {
+                    orientation: Gradient.Horizontal
+                    GradientStop { position: 0; color: IrisStyle.onMedia }
+                    GradientStop { position: 1; color: IrisStyle.identity.orange }
+                }
+            }
+            Rectangle {
+                x: (warmthRun.width - width) * displayRoot.warmth
+                width: parent.height
+                height: width
+                radius: width / 2
+                color: IrisStyle.onMedia
+                border.width: 1
+                border.color: IrisStyle.hairlineStrong
+            }
+        }
     }
     // The day's arc: the sun goes down to the moon, the warmth follows it.
     Item {
