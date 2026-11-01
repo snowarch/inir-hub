@@ -12,7 +12,7 @@ IrisWidgetFace {
     designFace: IrisDesign.skin("widgetTodo")
 
     property bool adding: false
-    readonly property int capacity: root.small ? 3 : root.medium ? 4 : 8
+    readonly property int capacity: root.small ? 3 : root.medium ? 4 : 7
     readonly property var entries: {
         const pending = root.widget.taskEntries.filter(entry => !entry.done)
         const done = root.widget.showCompleted ? root.widget.taskEntries.filter(entry => entry.done) : []
@@ -38,11 +38,11 @@ IrisWidgetFace {
     component Task: RowLayout {
         id: task
         required property var modelData
-        spacing: root.dp(9)
+        spacing: root.dp(root.large ? 12 : 9)
         HoverHandler { id: taskHover }
         Rectangle {
-            Layout.preferredWidth: root.dp(18)
-            Layout.preferredHeight: root.dp(18)
+            Layout.preferredWidth: root.dp(root.large ? 22 : 18)
+            Layout.preferredHeight: root.dp(root.large ? 22 : 18)
             radius: IrisStyle.capsule(width)
             color: task.modelData.done ? root.accent : "transparent"
             border.width: task.modelData.done ? 0 : Math.max(1.5, root.dp(1.6))
@@ -69,7 +69,7 @@ IrisWidgetFace {
             Layout.fillWidth: true
             text: task.modelData.content
             color: task.modelData.done ? root.inkTertiary : root.ink
-            size: 13
+            size: root.large ? 16 : 13
             font.strikeout: task.modelData.done
         }
         MaterialSymbol {
@@ -86,7 +86,7 @@ IrisWidgetFace {
 
     component Tasks: ColumnLayout {
         id: tasks
-        spacing: root.dp(7)
+        spacing: root.dp(root.large ? 14 : 7)
         Connections {
             target: root
             function onAddingChanged(): void {

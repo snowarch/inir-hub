@@ -107,9 +107,8 @@ WidgetLook {
                 : Appearance.inirEverywhere ? Appearance.inir.colLayer1
                 : Appearance.auroraEverywhere ? Appearance.aurora.colSubSurface
                 : c.colLayer1
-            set.onContainer = Appearance.zzzEverywhere ? Appearance.zzz.onBg
-                : Appearance.cookieEverywhere ? Appearance.cookie.onColor
-                : c.colOnLayer1
+            // colOnLayer1 is on-surface-variant, already the quiet tone: as the main ink every figure on a plate went grey.
+            set.onContainer = Appearance.zzzEverywhere ? Appearance.zzz.onBg : c.colOnSurface
         }
         return set
     }
