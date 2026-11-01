@@ -2,7 +2,6 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import Quickshell
 import QtQuick.Controls
-import Quickshell.Widgets
 import qs
 import qs.services
 import qs.modules.common
@@ -21,11 +20,13 @@ Item {
 
     readonly property real d: Number(page.host?.d ?? IrisStyle.settingsDensity)
     function u(n: real): int { return Math.round(n * page.d) }
+    // The plates' line every layout shares (IrisSettings owns it).
+    readonly property int pad: Number(page.host?.plateInset ?? page.u(16))
     readonly property var entry: IrisOptions.sectionById(page.area) ?? ({})
     // The page in front: only then do writes reach its rows and its stage plays.
     readonly property bool live: page.visible && (page.area === String(page.host?.section ?? "") || page.area === "general")
     readonly property bool whole: rows.whole
-    readonly property bool staged: page.area !== "general" && stage.available
+    readonly property bool staged: page.area !== "general" && stage.staged
 
     // The title and the stage hold still at the top and the groups scroll under them: the stage shows what a row
     // changes while that row is in reach (his 10-30: it scrolled away with the title).
@@ -34,8 +35,8 @@ Item {
     readonly property real fold: Math.max(0, Math.min(1, flick.contentY / page.u(72)))
     Column {
         id: head
-        x: page.u(16)
-        width: page.width - 2 * page.u(16)
+        x: page.pad
+        width: page.width - 2 * page.pad
         spacing: page.u(12)
         Column {
             width: parent.width
@@ -66,36 +67,16 @@ Item {
                 font.pixelSize: IrisStyle.typeBody
             }
         }
-        ClippingRectangle {
-            visible: page.staged
+        StagePlate {
+            id: stage
             width: parent.width
-            height: page.staged ? Math.round(Math.min(page.u(230), width * 0.56)) : 0
-            radius: IrisStyle.radiusSheet
-            color: IrisStyle.readingCard
-            IrisGroupPreview {
-                id: stage
-                anchors.fill: parent
-                anchors.margins: page.u(10)
-                radius: Math.max(IrisStyle.radiusRow, IrisStyle.radiusSheet - page.u(10))
-                standIn: true
-                captionOutside: true
-                playing: page.live && page.staged
-                section: page.area === "general" ? "" : page.area
-                niriValue: (section, key) => IrisNiri.value(IrisOptions.settings.find(spec => spec.niri === section && spec.key === key) ?? { niri: section, key: key })
-                niriRevision: IrisNiri.revision
-                group: page.stageGroup
-            }
-        }
-        IrisText {
-            visible: page.staged && stage.caption.length > 0
-            x: page.u(4)
-            width: parent.width - x
-            wrapMode: Text.WordWrap
-            maximumLineCount: 2
-            elide: Text.ElideRight
-            text: stage.caption
-            color: IrisStyle.muted
-            font.pixelSize: IrisStyle.typeMeta
+            height: implicitHeight
+            host: page.host
+            ratio: 0.56
+            most: page.u(230)
+            area: page.area === "general" ? "" : page.area
+            group: page.stageGroup
+            playing: page.live && page.staged
         }
         // What can be done to the area (rehearse, customize, restore) as capsules under its stage.
         Flow {
@@ -143,8 +124,8 @@ Item {
 
         Column {
             id: column
-            x: page.u(16)
-            width: page.width - 2 * page.u(16)
+            x: page.pad
+            width: page.width - 2 * page.pad
             spacing: page.u(12)
             AreaRows {
                 id: rows
@@ -166,7 +147,7 @@ Item {
 
     // ── The group being read: the head that has reached the upper fifth, for the stage to point at.
     property string reading: ""
-    readonly property string stageGroup: page.reading.length > 0 && stage.sceneFor(page.area, page.reading).length > 0 ? page.reading : ""
+    readonly property string stageGroup: page.reading.length > 0 && stage.stage.sceneFor(page.area, page.reading).length > 0 ? page.reading : ""
     Timer { id: spyPace; interval: 90; onTriggered: page.spy() }
     function spy(): void {
         const targets = rows.targets()

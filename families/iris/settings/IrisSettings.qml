@@ -42,10 +42,24 @@ Item {
     property string requestedSection: ""
     property bool placed: false
     readonly property real d: IrisStyle.settingsDensity
-    // One air between the window's edge and every pane it holds (the sidebar, the page) and one radius keeping them
-    // concentric with the window: the two panes once read 8 and ~15 and ended out of line at the bottom.
+    // The page's geometry, one owner for every layout (Classic, Folio, Drawer, Pocket): each reads these and none
+    // keeps its own. They once read 8, 12, 14, 16, 20 and 28 from the window's edge and ended out of line (his 10-31).
+    // A pane (sidebar, index, sheet) stands one air off the window's edges and off its neighbour, concentric with the
+    // window: under Kiri its cut runs parallel to the frame's.
     readonly property int paneInset: Math.round(8 * root.d)
-    readonly property real paneRadius: Math.max(IrisStyle.radiusTile, frame.radius - root.paneInset)
+    readonly property int paneRadius: IrisStyle.concentric(frame.radius, root.paneInset, IrisStyle.radiusTile)
+    readonly property int paneCut: IrisStyle.nestedCut(IrisStyle.chamferCut, root.paneInset)
+    // What a pane's words keep from its edge (the sidebar's list, the index's keys).
+    readonly property int panePad: IrisStyle.concentricPad(root.paneRadius, 10 * root.d)
+    // Form and stage plates on a sheet: concentric with it, so they round as `radiusTile` a sheet's pad in.
+    readonly property int plateRadius: IrisStyle.radiusTile
+    readonly property int plateCut: IrisStyle.nestedCut(root.paneCut, root.sheetPad)
+    readonly property int sheetPad: Math.max(Math.round(4 * root.d), root.paneRadius - root.plateRadius)
+    // Where the plates stand from the window's side and the head's keys end: the same line top to bottom. A layout
+    // with no sheet (Pocket, or solid) keeps its plates there too.
+    readonly property int plateInset: root.paneInset + root.sheetPad
+    // The head's keys sit on the line of the sidebar's search (its centre), in every layout.
+    readonly property int headLine: root.paneInset + root.panePad + Math.round(16 * root.d)
     // Past this a label sits too far from its control to aim at.
     readonly property real rowsMost: Math.round(880 * root.d)
     // A section about hardware this machine lacks is not offered (Battery on a desktop); `inir battery simulate` brings it back.
@@ -874,7 +888,7 @@ Item {
                 // A pane of its own floating inside the window (macOS 26): inset on three sides, concentric with the
                 // window's corners, its edge a hairline all round instead of a rule between it and the page.
                 readonly property int inset: root.paneInset
-                readonly property int pad: IrisStyle.concentricPad(sidebar.radius, 10 * root.d)
+                readonly property int pad: root.panePad
                 x: sidebar.inset
                 y: sidebar.inset
                 height: parent.height - 2 * sidebar.inset
@@ -884,7 +898,7 @@ Item {
                 color: IrisStyle.fieldChamfer ? "transparent" : IrisStyle.readingSidebar
                 border.width: IrisStyle.fieldChamfer ? 0 : 1
                 border.color: IrisStyle.hairline
-                IrisCutPlate { anchors.fill: parent; visible: IrisStyle.fieldChamfer; cutLength: IrisStyle.nestedCut(IrisStyle.chamferCut, sidebar.inset); color: IrisStyle.readingSidebar; stroke: IrisStyle.hairline; strokeWidth: 1 }
+                IrisCutPlate { anchors.fill: parent; visible: IrisStyle.fieldChamfer; cutLength: root.paneCut; color: IrisStyle.readingSidebar; stroke: IrisStyle.hairline; strokeWidth: 1 }
                 Rectangle {
                     visible: false
                     anchors.right: parent.right
@@ -1130,9 +1144,11 @@ Item {
                 RowLayout {
                     id: headRow
                     Layout.fillWidth: true
-                    Layout.leftMargin: 20 * root.d
-                    Layout.rightMargin: IrisStyle.concentricPad(frame.radius, 14 * root.d)
-                    Layout.topMargin: IrisStyle.concentricPad(frame.radius, 14 * root.d)
+                    // The back key over the plates' edge, the close key over their right edge, the keys on the sidebar
+                    // search's line.
+                    Layout.leftMargin: root.plateInset
+                    Layout.rightMargin: root.plateInset
+                    Layout.topMargin: root.headLine - Math.round(26 * root.d)
                     Layout.preferredHeight: Math.round(52 * root.d)
                     spacing: 4 * root.d
                     // What the name and the actions share: the row less every fixed control in it. Measured from the
@@ -1267,9 +1283,9 @@ Item {
 
                 Rectangle {
                     Layout.fillWidth: true
-                    Layout.leftMargin: 20 * root.d
-                    Layout.rightMargin: IrisStyle.concentricPad(frame.radius, 14 * root.d)
-                    Layout.bottomMargin: 8 * root.d
+                    Layout.leftMargin: root.plateInset
+                    Layout.rightMargin: root.plateInset
+                    Layout.bottomMargin: root.paneInset
                     visible: IrisNiri.pending !== null
                     implicitHeight: Math.round(48 * root.d)
                     radius: IrisStyle.radiusTile
@@ -1299,15 +1315,11 @@ Item {
 
 
 
-                    Rectangle {
+                    // Classic's page: the area's sheet (FolioPage) one air off the sidebar and the window, as the
+                    // sidebar stands off it. A layout's scene takes the body into its own slot.
+                    Item {
                         id: detailPane
-                        readonly property real inset: root.split ? root.paneInset : 0
-                        x: 0
-                        y: root.split ? Math.round(4 * root.d) : 0
-                        width: pageArea.width - detailPane.x - detailPane.inset
-                        height: pageArea.height - detailPane.y - detailPane.inset
-                        radius: root.split ? root.paneRadius : 0
-                        color: root.split ? IrisStyle.readingCard : "transparent"
+                        anchors.fill: parent
 
                         Item {
                             id: detailBody
@@ -1319,8 +1331,9 @@ Item {
                             Layouts.AreaPool {
                                 id: classicPool
                                 anchors.fill: parent
-                                anchors.leftMargin: Math.round(12 * root.d)
-                                anchors.rightMargin: Math.round(12 * root.d)
+                                anchors.leftMargin: root.paneInset
+                                anchors.rightMargin: root.paneInset
+                                anchors.bottomMargin: root.paneInset
                                 visible: !root.sceneDrawn
                                 // A search or a shared page borrows the body; the area under it stays as it was.
                                 current: root.sceneDrawn ? "" : root.classicRows ? root.section : classicPool.shown
@@ -1356,7 +1369,7 @@ Item {
                                 id: settingsFlick
                                 anchors.fill: parent
                                 // The pane's corners stay its own: the last rows stop short of the curve.
-                                anchors.bottomMargin: root.split ? Math.round(detailPane.radius / 2) : 0
+                                anchors.bottomMargin: root.split ? Math.round(root.paneRadius / 2) : 0
                                 // Rows pass under the pinned head, never over it.
                                 clip: root.split || root.sceneDrawn
                                 // and soften into the air under it instead of ending on a cut (IrisScrollEdge), and so does the
@@ -1439,10 +1452,11 @@ Item {
                     Loader {
                         id: pageHost
                         parent: root.sceneDrawn ? root.scene.rowsSlot : pageArea
-                        x: root.sceneDrawn ? 0 : root.pageInPane ? detailPane.x + Math.round(4 * root.d) : Math.round(12 * root.d)
-                        y: root.sceneDrawn ? 0 : root.pageInPane ? detailPane.y + Math.round(detailPane.radius / 3) : 0
-                        width: root.sceneDrawn ? parent.width : root.pageInPane ? detailPane.width - Math.round(8 * root.d) : pageArea.width - Math.round(24 * root.d)
-                        height: root.sceneDrawn ? parent.height : root.pageInPane ? detailPane.height - Math.round(2 * detailPane.radius / 3) : pageArea.height
+                        // Classic's shared pages stand where its sheet stands.
+                        x: root.sceneDrawn ? 0 : root.paneInset
+                        y: 0
+                        width: root.sceneDrawn ? parent.width : pageArea.width - 2 * root.paneInset
+                        height: root.sceneDrawn ? parent.height : pageArea.height - root.paneInset
                         visible: root.advancedPage >= 0
                         active: visible
                         source: String(root.pages[root.advancedPage]?.component ?? "")

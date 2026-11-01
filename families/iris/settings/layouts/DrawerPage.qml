@@ -2,7 +2,6 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import Quickshell
 import QtQuick.Controls
-import Quickshell.Widgets
 import qs
 import qs.services
 import qs.modules.common
@@ -29,6 +28,8 @@ Item {
     // ── The plate: the area's name, its sentence and its stage; Home's is the welcome.
     Column {
         id: plate
+        // The words and the stage on the plates' line, under the head's search (IrisSettings owns it).
+        x: Number(page.host?.sheetPad ?? page.u(8))
         // Home's welcome needs a little more than a stage to say who and how long up.
         width: Math.round(page.home ? Math.max(page.u(380), Math.min(page.u(440), page.width * 0.26))
             : Math.max(page.u(280), Math.min(page.u(360), page.width * 0.22)))
@@ -62,28 +63,19 @@ Item {
             width: parent.width
             sourceComponent: IrisWallpaperCard { width: plate.width; screen: page.QsWindow.window?.screen ?? GlobalStates.focusedScreen }
         }
-        ClippingRectangle {
+        StagePlate {
             id: stagePlate
-            readonly property bool staged: !page.home && stage.available
-            visible: stagePlate.staged
+            readonly property bool shows: !page.home && stagePlate.staged
+            visible: stagePlate.shows
             width: parent.width
+            height: stagePlate.shows ? implicitHeight : 0
+            host: page.host
+            ratio: 0.6
             // What the drawer leaves under the words: the stage never pushes the actions out of the plate.
-            height: stagePlate.staged ? Math.round(Math.max(page.u(110), Math.min(width * 0.6, page.height - y - page.u(56)))) : 0
-            radius: IrisStyle.radiusSheet
-            color: IrisStyle.readingCard
-            IrisGroupPreview {
-                id: stage
-                anchors.fill: parent
-                anchors.margins: page.u(10)
-                radius: Math.max(IrisStyle.radiusRow, IrisStyle.radiusSheet - page.u(10))
-                standIn: true
-                captionOutside: true
-                playing: page.live && stagePlate.staged
-                section: page.home ? "" : page.area
-                niriValue: (section, key) => IrisNiri.value(IrisOptions.settings.find(spec => spec.niri === section && spec.key === key) ?? { niri: section, key: key })
-                niriRevision: IrisNiri.revision
-                group: ""
-            }
+            most: page.height - stagePlate.y - page.u(56)
+            area: page.home ? "" : page.area
+            group: ""
+            playing: page.live && stagePlate.shows
         }
         Flow {
             width: parent.width
@@ -164,16 +156,17 @@ Item {
 
     Rectangle {
         id: cols
-        x: plate.width + page.u(32)
+        x: plate.x + plate.width + page.u(24)
         width: page.width - x
         height: page.height
-        radius: IrisStyle.radiusSheet
-        color: IrisStyle.glassy ? IrisStyle.readingSidebar : "transparent"
+        radius: Number(page.host?.paneRadius ?? IrisStyle.radiusSheet)
+        color: IrisStyle.glassy && !IrisStyle.fieldChamfer ? IrisStyle.readingSidebar : "transparent"
+        IrisCutPlate { anchors.fill: parent; visible: IrisStyle.glassy && IrisStyle.fieldChamfer; cutLength: Number(page.host?.paneCut ?? IrisStyle.chamferCut); color: IrisStyle.readingSidebar }
         Flickable {
             IrisScrollFeel {}
             id: flick
             anchors.fill: parent
-            anchors.margins: IrisStyle.glassy ? page.u(8) : 0
+            anchors.margins: IrisStyle.glassy ? Number(page.host?.sheetPad ?? page.u(8)) : 0
             contentHeight: columnRow.implicitHeight + page.u(16)
             clip: true
             ScrollBar.vertical: IrisScrollBar {}

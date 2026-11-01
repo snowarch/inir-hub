@@ -42,7 +42,10 @@ Item {
     readonly property bool paged: Number(root.host?.advancedPage ?? -1) >= 0
     readonly property var noteCounts: root.host?.noteCounts ?? ({})
     readonly property color signal: IrisStyle["signal"] ?? IrisStyle.danger
-    readonly property real pad: root.u(20)
+    // The geometry every layout shares (IrisSettings owns it): the body one air off the window, the head's keys on
+    // the plates' line.
+    readonly property int inset: Number(root.host?.paneInset ?? root.u(8))
+    readonly property int pad: Number(root.host?.plateInset ?? root.u(16))
     // Home, then each kind of area; a kind holding the open area spells its areas out, the rest stay one glyph.
     readonly property var shelves: {
         const out = root.sections.filter(entry => entry.id === "general").map(entry => ({ entry: entry, areas: [entry], cluster: -1 }))
@@ -89,7 +92,8 @@ Item {
     RowLayout {
         id: head
         x: root.pad
-        y: root.u(root.windowed ? 14 : 22)
+        // On the line every layout's head keys share, under the grip over the desktop.
+        y: Math.max(Number(root.host?.headLine ?? root.u(34)) - Math.round(height / 2), root.windowed ? 0 : root.u(22))
         width: root.width - 2 * root.pad
         height: root.u(40)
         spacing: root.u(10)
@@ -207,10 +211,10 @@ Item {
     // ── The body: an area of the pool, or a search's results and a shared page on their own sheet.
     Item {
         id: body
-        x: root.pad
+        x: root.inset
         y: keyFlick.y + keyFlick.height + root.u(16)
-        width: root.width - 2 * root.pad
-        height: root.height - y - root.u(14)
+        width: root.width - 2 * root.inset
+        height: root.height - y - root.inset
 
         AreaPool {
             id: pool
@@ -230,12 +234,13 @@ Item {
         Rectangle {
             visible: root.searching || root.paged
             anchors.fill: parent
-            radius: IrisStyle.radiusSheet
-            color: IrisStyle.glassy ? IrisStyle.readingSidebar : "transparent"
+            radius: Number(root.host?.paneRadius ?? IrisStyle.radiusSheet)
+            color: IrisStyle.glassy && !IrisStyle.fieldChamfer ? IrisStyle.readingSidebar : "transparent"
+            IrisCutPlate { anchors.fill: parent; visible: IrisStyle.glassy && IrisStyle.fieldChamfer; cutLength: Number(root.host?.paneCut ?? IrisStyle.chamferCut); color: IrisStyle.readingSidebar }
             Item {
                 id: rowsSlot
                 anchors.fill: parent
-                anchors.margins: IrisStyle.glassy ? root.u(6) : 0
+                anchors.margins: IrisStyle.glassy ? Number(root.host?.sheetPad ?? root.u(8)) : 0
             }
         }
     }

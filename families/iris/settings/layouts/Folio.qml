@@ -23,6 +23,9 @@ Item {
     property Item host
     readonly property real d: Number(root.host?.d ?? 1)
     function u(n: real): int { return Math.round(n * root.d) }
+    // The geometry every layout shares (IrisSettings owns it).
+    readonly property int inset: Number(root.host?.paneInset ?? root.u(8))
+    readonly property int sheetPad: Number(root.host?.sheetPad ?? root.u(8))
 
     readonly property alias searchSlot: searchSlot
     readonly property alias rowsSlot: rowsSlot
@@ -46,8 +49,8 @@ Item {
     // ── The index.
     Rectangle {
         id: index
-        x: root.u(8)
-        y: root.u(8)
+        x: root.inset
+        y: root.inset
         // As wide as the longest area name in its open weight (a translation runs longer), within a third more; both
         // bounds grow with the text scale.
         readonly property real widest: {
@@ -57,16 +60,16 @@ Item {
         FontMetrics { id: indexType; font.family: IrisStyle.fontRead; font.pixelSize: IrisStyle.typeBody; font.weight: IrisStyle.weight(Font.DemiBold) }
         readonly property real textGrowth: Math.max(1, IrisStyle.typeScale)
         width: Math.min(root.u(root.compact ? 280 : 320) * index.textGrowth, Math.max(root.u(root.compact ? 216 : 244) * index.textGrowth, Math.ceil(index.widest) + root.u(92)))
-        height: root.height - 2 * root.u(8)
-        radius: IrisStyle.fieldChamfer ? 0 : Math.max(root.u(12), IrisStyle.radiusPanel - root.u(8))
+        height: root.height - 2 * root.inset
+        radius: IrisStyle.fieldChamfer ? 0 : Number(root.host?.paneRadius ?? IrisStyle.radiusSheet)
         readonly property color paper: IrisStyle.glassy ? IrisStyle.readingSidebar : Qt.rgba(IrisStyle.text.r, IrisStyle.text.g, IrisStyle.text.b, IrisStyle.light ? 0.03 : 0.035) // iris-literal: the index sits a step off the sheet
         color: IrisStyle.fieldChamfer ? "transparent" : paper
-        IrisCutPlate { anchors.fill: parent; visible: IrisStyle.fieldChamfer; cutLength: IrisStyle.nestedCut(IrisStyle.chamferCut, root.u(8)); color: parent.paper }
+        IrisCutPlate { anchors.fill: parent; visible: IrisStyle.fieldChamfer; cutLength: Number(root.host?.paneCut ?? IrisStyle.chamferCut); color: parent.paper }
         Flickable {
             IrisScrollFeel {}
             id: indexFlick
             anchors.fill: parent
-            anchors.margins: root.u(10)
+            anchors.margins: Number(root.host?.panePad ?? root.u(10))
             contentHeight: indexColumn.implicitHeight
             clip: true
             // The open area's capsule: one pill that slides from key to key; each key's ink follows how much of the pill
@@ -189,18 +192,21 @@ Item {
         }
     }
 
-    // ── The page: the area, a page of the pool.
+    // ── The page: the area, a page of the pool. Its sheet stands one air off the index and the window, as the index
+    // stands off the window; the head and the title keep to the plates' line inside it.
     Item {
         id: page
-        x: index.x + index.width + root.u(root.compact ? 20 : 28)
+        x: index.x + index.width + root.inset
         y: 0
-        width: root.width - x - root.u(root.compact ? 20 : 28)
+        width: root.width - x - root.inset
         height: root.height
 
         RowLayout {
             id: head
-            y: root.u(16)
-            width: page.width
+            // On the plates' line, the keys on the index's first key.
+            x: IrisStyle.glassy ? root.sheetPad : 0
+            y: Number(root.host?.headLine ?? root.u(38)) - Math.round(height / 2)
+            width: page.width - 2 * x
             height: root.u(38)
             spacing: root.u(10)
             Item { id: searchSlot; Layout.preferredWidth: root.u(root.compact ? 240 : 320) * Math.max(1, IrisStyle.typeScale); Layout.preferredHeight: root.u(36) }
@@ -218,7 +224,7 @@ Item {
             id: body
             y: head.y + head.height + root.u(18)
             width: page.width
-            height: page.height - y - root.u(16)
+            height: page.height - y - root.inset
 
             AreaPool {
                 id: pool
@@ -241,14 +247,15 @@ Item {
             Rectangle {
                 visible: root.searching || root.paged
                 anchors.fill: parent
-                radius: IrisStyle.radiusSheet
-                color: IrisStyle.glassy ? IrisStyle.readingSidebar : "transparent"
+                radius: Number(root.host?.paneRadius ?? IrisStyle.radiusSheet)
+                color: IrisStyle.glassy && !IrisStyle.fieldChamfer ? IrisStyle.readingSidebar : "transparent"
+                IrisCutPlate { anchors.fill: parent; visible: IrisStyle.glassy && IrisStyle.fieldChamfer; cutLength: Number(root.host?.paneCut ?? IrisStyle.chamferCut); color: IrisStyle.readingSidebar }
                 Item {
                     id: rowsSlot
                     anchors.fill: parent
-                    anchors.leftMargin: IrisStyle.glassy ? root.u(6) : 0
-                    anchors.rightMargin: IrisStyle.glassy ? root.u(6) : 0
-                    anchors.topMargin: IrisStyle.glassy ? root.u(6) : 0
+                    anchors.leftMargin: IrisStyle.glassy ? root.sheetPad : 0
+                    anchors.rightMargin: IrisStyle.glassy ? root.sheetPad : 0
+                    anchors.topMargin: IrisStyle.glassy ? root.sheetPad : 0
                 }
             }
         }

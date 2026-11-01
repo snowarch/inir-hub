@@ -40,7 +40,8 @@ Item {
     readonly property bool paged: Number(root.host?.advancedPage ?? -1) >= 0
     readonly property var noteCounts: root.host?.noteCounts ?? ({})
     readonly property color signal: IrisStyle["signal"] ?? IrisStyle.danger
-    readonly property real pad: root.u(16)
+    // One column on the plates' line every layout shares, its bar's keys on their head line (IrisSettings owns both).
+    readonly property int pad: Number(root.host?.plateInset ?? root.u(16))
     // A window twice a column wide keeps Home beside the area, as a tablet's settings do.
     readonly property bool split: root.width >= root.u(860)
 
@@ -70,7 +71,7 @@ Item {
     RowLayout {
         id: bar
         x: root.pad
-        y: root.u(14)
+        y: Number(root.host?.headLine ?? root.u(33)) - Math.round(height / 2)
         width: root.width - 2 * root.pad
         height: root.u(38)
         spacing: root.u(8)

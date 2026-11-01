@@ -3,7 +3,6 @@ import QtQuick
 import Quickshell
 import QtQuick.Controls
 import QtQuick.Effects
-import Quickshell.Widgets
 import qs
 import qs.services
 import qs.modules.common
@@ -27,6 +26,11 @@ Item {
 
     readonly property real d: Number(page.host?.d ?? IrisStyle.settingsDensity)
     function u(n: real): int { return Math.round(n * page.d) }
+    // The geometry every layout shares (IrisSettings owns it).
+    readonly property int paneRadius: Number(page.host?.paneRadius ?? IrisStyle.radiusSheet)
+    readonly property int paneCut: Number(page.host?.paneCut ?? IrisStyle.chamferCut)
+    readonly property int sheetPad: Number(page.host?.sheetPad ?? page.u(8))
+    readonly property int plateRadius: Number(page.host?.plateRadius ?? IrisStyle.radiusTile)
     readonly property var entry: IrisOptions.sectionById(page.area) ?? ({})
     // The page in front: only then do writes reach its rows and its stage plays.
     readonly property bool live: page.visible && page.area === String(page.host?.section ?? "")
@@ -37,7 +41,9 @@ Item {
     Column {
         id: title
         visible: page.titled
-        width: page.width - (titleActions.visible ? titleActions.width + page.u(16) : 0)
+        // On the plates' line.
+        x: areaBox.pad
+        width: page.width - 2 * areaBox.pad - (titleActions.visible ? titleActions.width + page.u(16) : 0)
         spacing: page.u(4)
         IrisText {
             width: parent.width
@@ -63,6 +69,7 @@ Item {
         id: titleActions
         visible: page.titled && page.actions && actionsRepeater.count > 0
         anchors.right: parent.right
+        anchors.rightMargin: areaBox.pad
         y: page.u(4)
         spacing: page.u(6)
         Repeater {
@@ -95,74 +102,42 @@ Item {
         y: page.titled ? title.height + page.u(18) : 0
         width: page.width
         height: page.height - y
-        readonly property bool staged: stage.available
+        // Plates stand a sheet's pad in from its edge, concentric with it; in solid there is no sheet and they take its edge.
+        readonly property int pad: IrisStyle.glassy ? page.sheetPad : 0
 
-        ClippingRectangle {
-            id: plate
-            parent: bannerSlot
-            visible: areaBox.staged
-            width: bannerSlot.width
-            height: bannerSlot.height
-            radius: IrisStyle.radiusSheet
-            color: IrisStyle.readingCard
-            border.width: 1
-            border.color: IrisStyle.hairline
-            // The caption under the stage, never a chip on it: on the stage it sat on the login's password and the
-            // motion's boxes.
-            IrisGroupPreview {
-                id: stage
-                anchors.fill: parent
-                anchors.margins: page.u(12)
-                anchors.bottomMargin: stage.caption.length > 0 ? stageCaption.height + page.u(18) : page.u(12)
-                radius: Math.max(IrisStyle.radiusRow, IrisStyle.radiusSheet - page.u(12))
-                standIn: true
-                captionOutside: true
-                playing: page.live
-                // Home leads with the welcome over its rows, so its rows get the width.
-                section: page.area === "general" ? "" : page.area
-                niriValue: (section, key) => IrisNiri.value(IrisOptions.settings.find(spec => spec.niri === section && spec.key === key) ?? { niri: section, key: key })
-                niriRevision: IrisNiri.revision
-                group: page.stageGroup
-            }
-            IrisText {
-                id: stageCaption
-                visible: stage.caption.length > 0
-                x: page.u(16)
-                width: parent.width - 2 * x
-                anchors.bottom: parent.bottom
-                anchors.bottomMargin: page.u(10)
-                elide: Text.ElideRight
-                text: stage.caption
-                color: IrisStyle.muted
-                font.pixelSize: IrisStyle.typeMeta
-            }
-        }
-
-        // The groups' sheet: rows on the body in solid, on a reading fill over glass (never glass on glass).
+        // The groups' sheet: rows on the body in solid, on a reading fill over glass (never glass on glass); a pane
+        // concentric with the window, as the sidebar and the index beside it.
         Rectangle {
             id: sheet
-            x: 0
-            width: areaBox.width - x
+            width: areaBox.width
             height: areaBox.height
-            radius: IrisStyle.radiusSheet
-            color: IrisStyle.glassy ? IrisStyle.readingSidebar : "transparent"
-            // Classic's stage stays over the sheet while its rows scroll under it: a change is seen where it happens
-            // (his 10-30: the band scrolled away with the first rows).
-            Item {
-                id: bannerSlot
-                x: flick.x
-                y: IrisStyle.glassy ? page.u(6) : 0
-                width: flick.width - page.u(8)
-                height: areaBox.staged ? Math.round(Math.min(width * 0.3, page.u(260), sheet.height * 0.34)) : 0
+            radius: page.paneRadius
+            color: IrisStyle.glassy && !IrisStyle.fieldChamfer ? IrisStyle.readingSidebar : "transparent"
+            IrisCutPlate { anchors.fill: parent; visible: IrisStyle.glassy && IrisStyle.fieldChamfer; cutLength: page.paneCut; color: IrisStyle.readingSidebar }
+            // The stage stays over the sheet while its rows scroll under it: a change is seen where it happens (his
+            // 10-30: the band scrolled away with the first rows).
+            StagePlate {
+                id: stage
+                host: page.host
+                x: areaBox.pad
+                y: areaBox.pad
+                width: sheet.width - 2 * areaBox.pad
+                height: implicitHeight
+                ratio: 0.3
+                most: Math.min(page.u(260), sheet.height * 0.34)
+                // Home leads with the welcome over its rows, so its rows get the width.
+                area: page.area === "general" ? "" : page.area
+                group: page.stageGroup
+                playing: page.live
             }
             Flickable {
                 IrisScrollFeel {}
                 id: flick
                 anchors.fill: parent
-                anchors.leftMargin: IrisStyle.glassy ? page.u(6) : 0
-                anchors.rightMargin: IrisStyle.glassy ? page.u(6) : 0
-                anchors.topMargin: (IrisStyle.glassy ? page.u(6) : 0) + (bannerSlot.height > 0 ? bannerSlot.height + page.u(10) : 0)
-                contentHeight: rows.y + rows.implicitHeight + page.u(24)
+                anchors.leftMargin: areaBox.pad
+                anchors.rightMargin: areaBox.pad
+                anchors.topMargin: areaBox.pad + (stage.staged ? stage.height + page.u(12) : 0)
+                contentHeight: rows.implicitHeight + page.u(24)
                 clip: true
                 ScrollBar.vertical: IrisScrollBar {}
                 onContentYChanged: spyPace.restart()
@@ -177,8 +152,7 @@ Item {
                 }
                 AreaRows {
                     id: rows
-                    y: bannerSlot.height > 0 ? page.u(4) : 0
-                    width: flick.width - page.u(8)
+                    width: flick.width
                     section: page.area
                     host: page.host
                     voice: "folio"
@@ -197,14 +171,14 @@ Item {
                 flick: flick
                 anchors.fill: flick
                 reach: page.u(28)
-                radius: IrisStyle.glassy ? Math.max(0, sheet.radius - page.u(6)) : 0
+                radius: areaBox.pad > 0 ? page.plateRadius : 0
             }
         }
     }
 
     // ── The group being read: the head that has reached the upper fifth (at the foot, the last one in view).
     property string reading: ""
-    readonly property string stageGroup: page.reading.length > 0 && stage.sceneFor(page.area, page.reading).length > 0 ? page.reading : ""
+    readonly property string stageGroup: page.reading.length > 0 && stage.stage.sceneFor(page.area, page.reading).length > 0 ? page.reading : ""
     Timer { id: spyPace; interval: 90; onTriggered: page.spy() }
     function spy(): void {
         const targets = rows.targets()
