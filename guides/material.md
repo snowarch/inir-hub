@@ -14,12 +14,12 @@ box, it looks broken beside them. Use what the shell gives you:
 | Piece | Import | What it is for |
 | --- | --- | --- |
 | `MaterialShape` | `qs.modules.common.widgets` | 35 Material 3 shapes (cookies, bursts, clovers, gems). Change `shape` and it morphs with a spring. Hold your glyph or figure in one. |
-| `DesktopWidgetShapes.shapeForName()` | `qs.modules.background.widgets` | The shape names the user picks from, so your setting matches the built-ins' |
-| `WidgetShapePicker` | `qs.modules.background.widgets` | The shape grid for your quick controls |
+| `DesktopWidgetShapes.shapeForName()` | `qs.modules.shared.background.widgets` | The shape names the user picks from, so your setting matches the built-ins' |
+| `WidgetShapePicker` | `qs.modules.shared.background.widgets` | The shape grid for your quick controls |
 | `StyledProgressBar { wavy: true }` | `qs.modules.common.widgets` | The Material 3 wavy bar, for a bounded value (a wait, a percentage). Keep `animateWave: false` on the desktop. |
-| `WidgetSurface` | `qs.modules.background.widgets` | The plate every built-in sits on: the user's opacity, outline, blur and corners reach your widget through it |
-| `InstrumentLabel`, `InstrumentField`, `InstrumentScale` | `qs.modules.background.widgets.instrument` | The iNstrument look: monospace eyebrow, labelled fields, a measured scale |
-| `WidgetQuickSection`, `WidgetQuickChoices`, `WidgetQuickToggle`, `WidgetQuickSlider` | `qs.modules.background.widgets` | Quick controls in edit mode, in `editPopoverContent` |
+| `WidgetSurface` | `qs.modules.shared.background.widgets` | The plate every built-in sits on: the user's opacity, outline, blur and corners reach your widget through it |
+| `InstrumentLabel`, `InstrumentField`, `InstrumentScale` | `qs.modules.shared.background.widgets.instrument` | The iNstrument look: monospace eyebrow, labelled fields, a measured scale |
+| `WidgetQuickSection`, `WidgetQuickChoices`, `WidgetQuickToggle`, `WidgetQuickSlider` | `qs.modules.shared.background.widgets` | Quick controls in edit mode, in `ownControls` |
 | `MaterialSymbol` | `qs.modules.common.widgets` | Icons. `fill: 1` for a solid glyph. |
 
 ## Two looks, and the user's design

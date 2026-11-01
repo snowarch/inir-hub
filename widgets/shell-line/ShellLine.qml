@@ -362,7 +362,7 @@ AbstractBackgroundWidget {
     }
 
     // ── Quick controls (edit mode) ───────────────────────────
-    editPopoverContent: Component {
+    ownControls: Component {
         ColumnLayout {
             spacing: 14
             WidgetQuickSection {
