@@ -2833,7 +2833,7 @@ ContentPage {
             WidgetResetButton {
                 configPath: "background.widgets.worldClock"
                 defaults: ({
-                    placementStrategy: "free", ,
+                    placementStrategy: "free",
                     dim: 0, widgetScale: 100, widgetOpacity: 100, showBackground: true,
                     useBlur: false, showBorder: true, backgroundOpacity: 0.16,
                     borderWidth: 1, borderOpacity: 0.20, cornerRadius: -1,
@@ -2919,7 +2919,7 @@ ContentPage {
                     WidgetResetButton {
                         configPath: "background.widgets.monthCalendar"
                         defaults: ({
-                            placementStrategy: "free", ,
+                            placementStrategy: "free",
                             weekStart: 1, showAdjacentDays: true, style: "card", instrumentRule: true,
                             widgetScale: 100,
                             widgetOpacity: 100, showBackground: true, useBlur: false,
@@ -3020,7 +3020,6 @@ ContentPage {
                 defaults: ({
                     placementStrategy: "free", maxEvents: 5, showDate: true, showTime: true,
                     showLocation: false, groupByDay: true, style: "card",
-                    ,
                     dim: 0, widgetScale: 100, widgetOpacity: 100, showBackground: true,
                     useBlur: false, showBorder: true, backgroundOpacity: 0.10,
                     borderWidth: 1, borderOpacity: 0.12, cornerRadius: -1,
@@ -3102,7 +3101,7 @@ ContentPage {
             WidgetResetButton {
                 configPath: "background.widgets.dateBadge"
                 defaults: ({
-                    placementStrategy: "free", ,
+                    placementStrategy: "free",
                     style: "ticket", showYear: true, showWeekday: true, showOrdinal: true,
                     instrumentMarks: true, dim: 0, widgetScale: 100, widgetOpacity: 100, showBackground: true,
                     useBlur: false, showBorder: true, backgroundOpacity: 0.16,
@@ -3198,7 +3197,7 @@ ContentPage {
                     WidgetResetButton {
                         configPath: "background.widgets.dayProgress"
                         defaults: ({
-                            placementStrategy: "free", ,
+                            placementStrategy: "free",
                             dim: 0, widgetScale: 100, widgetOpacity: 100, showBackground: false,
                             style: "ring", comet: true, showIcon: true, showDate: true, hourLabels: true, fontScale: 100,
                             useBlur: false, showBorder: false, backgroundOpacity: 0,
@@ -3378,7 +3377,7 @@ ContentPage {
                     style: "row",
                     showSince: true,
                     showBreakdown: true,
-                    placementStrategy: "free", ,
+                    placementStrategy: "free",
                     dim: 0, widgetScale: 100, widgetOpacity: 100, showBackground: true,
                     useBlur: false, showBorder: true, backgroundOpacity: 0.16,
                     borderWidth: 1, borderOpacity: 0.20, cornerRadius: -1,
@@ -4978,7 +4977,7 @@ ContentPage {
             WidgetResetButton {
                 configPath: "background.widgets.newsTicker"
                 defaults: ({
-                    placementStrategy: "free", ,
+                    placementStrategy: "free",
                     style: "card", showMeta: true,
                     dim: 0, widgetScale: 100, widgetOpacity: 100, showBackground: true,
                     useBlur: false, showBorder: true, backgroundOpacity: 0.16,
@@ -5151,7 +5150,7 @@ ContentPage {
                     WidgetResetButton {
                         configPath: "background.widgets.todo"
                         defaults: ({
-                            placementStrategy: "free", ,
+                            placementStrategy: "free",
                             style: "card", instrumentRules: true, showCompleted: true,
                             widgetScale: 100, widgetOpacity: 100, showBackground: true,
                             useBlur: false, showBorder: true, backgroundOpacity: 0.14,
@@ -5233,7 +5232,7 @@ ContentPage {
             WidgetResetButton {
                 configPath: "background.widgets.userCard"
                 defaults: ({
-                    placementStrategy: "free", ,
+                    placementStrategy: "free",
                     style: "card", showAvatar: true, showWeather: true, showHostname: true,
                     dim: 0, widgetScale: 100, widgetOpacity: 100, showBackground: true,
                     useBlur: false, showBorder: true, backgroundOpacity: 0.16,
@@ -5663,7 +5662,7 @@ ContentPage {
                 configPath: "background.widgets.imageConverter"
                 defaults: ({
                     enable: false, locked: false, placementStrategy: "free",
-                    selectedFormat: "webp", ,
+                    selectedFormat: "webp",
                     widgetScale: 100, widgetOpacity: 100, colorMode: "auto", dim: 0,
                     showBackground: true, useBlur: false, showBorder: true,
                     backgroundOpacity: 0.22, borderWidth: 1, borderOpacity: 0.22,
@@ -6055,7 +6054,7 @@ ContentPage {
             WidgetResetButton {
                 configPath: "background.widgets.shape"
                 defaults: ({
-                    placementStrategy: "free", ,
+                    placementStrategy: "free",
                     dim: 0, widgetScale: 100, widgetOpacity: 100, shape: "Flower", treatment: "flat", outline: false, angle: 0, strokeWidth: 3, showBackground: false,
                     useBlur: false, showBorder: false, backgroundOpacity: 0,
                     borderWidth: 0, borderOpacity: 0.20, cornerRadius: -1,
@@ -6591,7 +6590,7 @@ ContentPage {
                     }
                     WidgetResetButton {
                         configPath: "background.widgets.editorial"
-                        defaults: ({ placementStrategy: "free", ,
+                        defaults: ({ placementStrategy: "free",
                             title: "Make room for wonder.", caption: "A LITTLE EVERY DAY", footer: "YOUR OWN PERSPECTIVE",
                             style: "poster", showAccent: true, widgetScale: 100, widgetOpacity: 100,
                             colorMode: "auto", dim: 0, locked: false, showBackground: false, showBorder: false,
