@@ -116,7 +116,12 @@ Item {
         onFinished: root._under = root._top
     }
 
-    function glazed(c: color): color { return root.texture ? Qt.rgba(c.r, c.g, c.b, c.a * root.glaze) : c }
+    // Over a picture `glaze` alone says how much shows: a lacquer that is see-through on a body is laid whole here.
+    function glazed(c: color): color {
+        if (!root.texture || c.a === 0) return c
+        const whole = Airisu.solid(c)
+        return Qt.rgba(whole.r, whole.g, whole.b, root.glaze)
+    }
     // Where the coat runs the whole height over a lacquer that can be seen through, the lacquer stops at the coat's edge
     // instead of lying under it (two see-through coats would darken where both are).
     readonly property bool coated: root.shown > 0.001 && root.coat.a > 0
