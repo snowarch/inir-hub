@@ -46,7 +46,8 @@ Item {
         maskSpreadAtMin: 1
         visible: cover.status === Image.Ready
     }
-    readonly property bool bare: root.source.length === 0 || cover.status === Image.Error || cover.status === Image.Null
+    // Anything but a cover ready to draw shows the stand-in: a cover loading (or never arriving) left an empty disc (11-02).
+    readonly property bool bare: cover.status !== Image.Ready
     IconImage {
         anchors.centerIn: parent
         visible: root.bare && root.appIcon.length > 0

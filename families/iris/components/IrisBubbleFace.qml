@@ -329,6 +329,7 @@ Item {
                     width: parent.width - 12 * root.d - 2 * root.platedInset
                     height: width
                     source: MediaArtwork.displaySource
+                    appIcon: IrisPieces.musicAppIcon
                     circular: !root.edgeRings
                     radius: root.edgeRings ? IrisStyle.pieceRadius(width) : width / 2
                 }
