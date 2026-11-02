@@ -1,11 +1,13 @@
 # Fastfetch
 
-A quiet fastfetch: the small logo, eleven lines, and your wallpaper's accent on the icons, the logo and your name.
+A quiet fastfetch: no logo, eleven lines, and your wallpaper's accent on the icons and your name.
 The colours follow every theme change in iNiR, light or dark.
 
 ## Changing what it shows
 
-Everything is in `~/.config/fastfetch/config.jsonc`, in the `modules` list: one line each, top to bottom.
+In Settings › Hub › Fastfetch, under What it shows: each chip is a line, click to show or hide it.
+
+By hand, everything is in `~/.config/fastfetch/config.jsonc`, in the `modules` list: one line each, top to bottom.
 
 - Hide a line: put `//` in front of it.
 - Show one of the extras (host, theme, icons, font, cursor, swap, display, battery, ip, what's playing): take its `//` away.

@@ -710,6 +710,31 @@ WSettingsPage {
                             onClicked: Qt.openUrlExternally(Hub.reportUrl(page.item))
                         }
                     }
+                    // A plugin's own choices (plugin.json `choices`), read as its page opens; a button flips one.
+                    WText {
+                        readonly property string plugin: Hub.choicesTitle(page.item).length > 0 ? page.item.id : ""
+                        visible: plugin.length > 0
+                        Layout.topMargin: Looks.dp(14)
+                        text: Hub.choicesTitle(page.item)
+                        font.pixelSize: Looks.font.pixelSize.normal
+                        onPluginChanged: if (plugin.length > 0) Hub.readChoices(plugin)
+                        Component.onCompleted: if (plugin.length > 0) Hub.readChoices(plugin)
+                    }
+                    Flow {
+                        Layout.fillWidth: true
+                        visible: Hub.choicesTitle(page.item).length > 0
+                        spacing: Looks.dp(6)
+                        Repeater {
+                            model: Hub.choices[page.item?.id ?? ""] ?? []
+                            delegate: WBorderedButton {
+                                required property var modelData
+                                text: modelData.label
+                                checkable: false
+                                checked: modelData.on
+                                onClicked: Hub.toggleChoice(page.item.id, modelData.id)
+                            }
+                        }
+                    }
                 }
             }
         }

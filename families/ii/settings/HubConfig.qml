@@ -1057,6 +1057,31 @@ ContentPage {
             }
         }
 
+        // A plugin's own choices (plugin.json `choices`), read as its page opens; a chip flips one.
+        StyledText {
+            readonly property string plugin: Hub.choicesTitle(page.item).length > 0 ? page.item.id : ""
+            visible: plugin.length > 0
+            text: Hub.choicesTitle(page.item)
+            color: Appearance.colors.colSubtext
+            font.pixelSize: Appearance.font.pixelSize.small
+            onPluginChanged: if (plugin.length > 0) Hub.readChoices(plugin)
+            Component.onCompleted: if (plugin.length > 0) Hub.readChoices(plugin)
+        }
+        Flow {
+            Layout.fillWidth: true
+            visible: Hub.choicesTitle(page.item).length > 0
+            spacing: 6
+            Repeater {
+                model: Hub.choices[page.item?.id ?? ""] ?? []
+                delegate: FilterChip {
+                    required property var modelData
+                    text: modelData.label
+                    selected: modelData.on
+                    onClicked: Hub.toggleChoice(page.item.id, modelData.id)
+                }
+            }
+        }
+
         // Its picture, capped: a page about a clock is not a poster of it.
         Preview {
             Layout.preferredWidth: Math.min(page.width, 640)

@@ -918,6 +918,32 @@ Flickable {
                         onClicked: Hub.remove(page.item.id)
                     }
                 }
+                // A plugin's own choices (plugin.json `choices`), read as its page opens; a chip flips one.
+                IrisText {
+                    readonly property string plugin: Hub.choicesTitle(page.item).length > 0 ? page.item.id : ""
+                    visible: plugin.length > 0
+                    Layout.topMargin: Math.round(16 * root.d)
+                    text: Hub.choicesTitle(page.item)
+                    color: IrisStyle.textSecondary
+                    font.pixelSize: IrisStyle.typeLabel
+                    onPluginChanged: if (plugin.length > 0) Hub.readChoices(plugin)
+                    Component.onCompleted: if (plugin.length > 0) Hub.readChoices(plugin)
+                }
+                Flow {
+                    Layout.fillWidth: true
+                    Layout.topMargin: Math.round(6 * root.d)
+                    visible: Hub.choicesTitle(page.item).length > 0
+                    spacing: Math.round(6 * root.d)
+                    Repeater {
+                        model: Hub.choices[page.item?.id ?? ""] ?? []
+                        delegate: IrisChip {
+                            required property var modelData
+                            label: modelData.label
+                            selected: modelData.on
+                            onClicked: Hub.toggleChoice(page.item.id, modelData.id)
+                        }
+                    }
+                }
             }
         }
 
