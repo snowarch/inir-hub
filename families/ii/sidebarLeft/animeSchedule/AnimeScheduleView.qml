@@ -17,7 +17,7 @@ Item {
     property string selectedDay: "today"
     
     readonly property var daysList: ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]
-    readonly property string todayName: Qt.formatDate(DateTime.clock.date, "dddd").toLowerCase()
+    readonly property string todayName: Qt.locale("C").toString(DateTime.clock.date, "dddd").toLowerCase()
     
     onFocusChanged: (focus) => {
         if (focus) {

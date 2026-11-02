@@ -45,7 +45,7 @@ DashCard {
         const diff = Math.round((day - today) / 86400000)
         if (diff === 0) return Translation.tr("Today")
         if (diff === 1) return Translation.tr("Tomorrow")
-        return Qt.formatDate(day, "ddd d MMM")
+        return Translation.locale.toString(day, "ddd d MMM")
     }
 
     readonly property string _todayKey: Qt.formatDate(DateTime.clock.date, "yyyy-MM-dd")

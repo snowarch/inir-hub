@@ -448,7 +448,7 @@ MouseArea {
                 Text {
                     id: dateText
                     Layout.alignment: lockView.clockPosition === "center" ? Qt.AlignHCenter : Qt.AlignLeft
-                    text: Qt.formatDate(new Date(), "dddd, MMMM d")
+                    text: Translation.locale.toString(new Date(), "dddd, MMMM d")
                     font.pixelSize: lockView.clockStyle === "minimal" ? Math.round(14 * Looks.fontScale) : root.dateFontSize
                     font.weight: Looks.font.weight.regular
                     font.family: Looks.font.family.ui
@@ -466,7 +466,7 @@ MouseArea {
                         interval: 60000
                         running: true
                         repeat: true
-                        onTriggered: dateText.text = Qt.formatDate(new Date(), "dddd, MMMM d")
+                        onTriggered: dateText.text = Translation.locale.toString(new Date(), "dddd, MMMM d")
                     }
                 }
             }
@@ -494,7 +494,7 @@ MouseArea {
                             top: wCookieClock.bottom
                             topMargin: 16
                         }
-                        text: Qt.formatDate(new Date(), "dddd, MMMM d")
+                        text: Translation.locale.toString(new Date(), "dddd, MMMM d")
                         font.pixelSize: Math.round(14 * Looks.fontScale)
                         font.weight: Looks.font.weight.regular
                         font.family: Looks.font.family.ui
@@ -508,7 +508,7 @@ MouseArea {
 
                         Timer {
                             interval: 60000; running: true; repeat: true
-                            onTriggered: wDateAnalog.text = Qt.formatDate(new Date(), "dddd, MMMM d")
+                            onTriggered: wDateAnalog.text = Translation.locale.toString(new Date(), "dddd, MMMM d")
                         }
                     }
                 }

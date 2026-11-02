@@ -67,7 +67,7 @@ PreviewScene {
             }
             IrisText {
                 anchors.horizontalCenter: parent.horizontalCenter
-                text: Qt.formatDate(generalRoot.now, "dddd d MMMM")
+                text: Translation.locale.toString(generalRoot.now, "dddd d MMMM")
                 color: IrisStyle.textSecondary
                 font.pixelSize: Math.round((IrisStyle.typeLabel) / Math.max(1, IrisStyle.typeScale))
             }

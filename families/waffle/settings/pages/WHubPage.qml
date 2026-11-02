@@ -88,7 +88,7 @@ WSettingsPage {
         if (!date)
             return ""
         const day = new Date(date + "T12:00:00")
-        return Qt.formatDate(day, day.getFullYear() === new Date().getFullYear() ? "d MMM" : "MMM yyyy")
+        return Translation.locale.toString(day, day.getFullYear() === new Date().getFullYear() ? "d MMM" : "MMM yyyy")
     }
 
     // ── Search, filters, state ────────────────────────────────────────

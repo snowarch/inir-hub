@@ -772,7 +772,7 @@ Loader {
                         hoverEnabled: true
                         cursorShape: Qt.PointingHandCursor
                         Accessible.role: Accessible.Button
-                        Accessible.name: Qt.formatDate(day.date, "dddd, d MMMM yyyy")
+                        Accessible.name: Translation.locale.toString(day.date, "dddd, d MMMM yyyy")
                         onClicked: calendar.selectedDate = day.date
                         Rectangle {
                             anchors.centerIn: parent

@@ -52,7 +52,7 @@ Rectangle {
             spacing: 2
 
             StyledText {
-                text: Qt.formatDateTime(root._currentDate, "dddd")
+                text: Translation.locale.toString(root._currentDate, "dddd")
                 font.pixelSize: Appearance.font.pixelSize.small
                 font.weight: Appearance.editorialEverywhere ? Appearance.editorial.titleWeight : Font.Medium
                 color: Appearance.editorialEverywhere ? Appearance.editorial.paperOnInk : Appearance.angelEverywhere ? Appearance.angel.colPrimary
@@ -62,7 +62,7 @@ Rectangle {
             }
 
             StyledText {
-                text: Qt.formatDateTime(root._currentDate, "MMMM d, yyyy")
+                text: Translation.locale.toString(root._currentDate, "MMMM d, yyyy")
                 font.pixelSize: Appearance.font.pixelSize.larger
                 font.weight: Appearance.editorialEverywhere ? Appearance.editorial.titleWeight : Font.Medium
                 color: Appearance.editorialEverywhere ? Appearance.editorial.paperOnInk : Appearance.angelEverywhere ? Appearance.angel.colText

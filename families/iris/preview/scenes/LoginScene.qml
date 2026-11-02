@@ -603,7 +603,7 @@ PreviewScene {
                 }
                 IrisText {
                     anchors.horizontalCenter: parent.horizontalCenter
-                    text: Qt.formatDate(login.now, "dddd, d MMMM")
+                    text: Translation.locale.toString(login.now, "dddd, d MMMM")
                     color: classic.ink
                     font.family: "Roboto"
                     font.pixelSize: login.type(22)
