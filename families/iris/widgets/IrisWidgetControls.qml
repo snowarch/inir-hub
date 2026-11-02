@@ -90,11 +90,13 @@ ColumnLayout {
         return ColorUtils.applyAlpha(IrisStyle.surface, IrisStyle.materialVeil[material] ?? 1)
     }
 
-    // One width, and as tall as its tallest page, measured: the pages turn in a StackLayout, which is as tall as the largest
-    // of them, so the sheet never resizes under the pointer (his 11-02: it jumped on every tab), leaves no room under a
-    // short page and cuts no long one (a guessed 46 px per row did both).
-    readonly property real resolvedWidth: Math.round(440 * root.d)
+    // A popover's measures: one width, as tall as the page in view (`pageHeight`), placed for the tallest (`restingHeight`)
+    // so its head never moves under the pointer while the body glides between pages. His 11-02: a sheet that jumped on
+    // every tab, then one held at its tallest page that left an empty box under Widget.
+    readonly property real resolvedWidth: Math.round(360 * root.d)
     readonly property real restingHeight: Math.ceil(root.implicitHeight)
+    readonly property real pageHeight: Math.ceil(root.implicitHeight - pageStack.implicitHeight
+        + (pageStack.children[pageStack.currentIndex]?.implicitHeight ?? 0))
     spacing: Math.round(14 * root.d)
 
     component Caption: IrisText {
@@ -441,6 +443,7 @@ ColumnLayout {
     }
 
     StackLayout {
+        id: pageStack
         Layout.fillWidth: true
         Layout.fillHeight: false
         currentIndex: Math.max(0, ["widget", "stack", "look", "arrange"].indexOf(root.page))

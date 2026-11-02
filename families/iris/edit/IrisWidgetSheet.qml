@@ -63,10 +63,17 @@ Item {
     }
     readonly property real pad: Math.round(12 * root.d)
     readonly property real gap: Math.round(14 * root.d)
-    readonly property real fullWidth: Math.round((content.item?.resolvedWidth ?? 440 * root.d) + 2 * root.pad)
+    readonly property real fullWidth: Math.round((content.item?.resolvedWidth ?? 360 * root.d) + 2 * root.pad)
     readonly property real roomBottom: root.avoid.height > 0 ? root.avoid.y - root.gap : root.height - root.gap
-    readonly property real fullHeight: Math.min(Math.round((content.item?.restingHeight ?? 0) + 2 * root.pad),
+    // Placed for its tallest page, drawn as tall as the page in view: the head stays put, the foot glides.
+    readonly property real placeHeight: Math.min(Math.round((content.item?.restingHeight ?? 0) + 2 * root.pad),
         root.roomBottom - root.gap)
+    readonly property real pageTarget: Math.min(Math.round((content.item?.pageHeight ?? 0) + 2 * root.pad), root.placeHeight)
+    property real fullHeight: root.pageTarget
+    Behavior on fullHeight {
+        enabled: root.open && root.presentation > 0.98
+        NumberAnimation { duration: IrisStyle.morphDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: IrisStyle.morphCurve }
+    }
     // Beside the widget on the side with room (right first), level with its top; above the shelf if neither fits. The side
     // is chosen when it opens and kept while it fits: a widget that grows or is carried no longer flips it from side to
     // side, and when it must change it glides there (his 11-02: the controls jumped about).
@@ -98,7 +105,7 @@ Item {
         NumberAnimation { duration: IrisStyle.duration(260); easing.type: Easing.BezierSpline; easing.bezierCurve: IrisStyle.moveCurve }
     }
     readonly property real restX: root.sideX + root.sideShift
-    readonly property real restY: Math.max(root.gap, Math.min(root.roomBottom - root.fullHeight, root.seen.y))
+    readonly property real restY: Math.max(root.gap, Math.min(root.roomBottom - root.placeHeight, root.seen.y))
     // It grows from the widget's near edge: at 0 it is a sliver against that edge.
     readonly property real g: Math.max(0, Math.min(1, root.presentation))
     readonly property real originX: root.side === "right" ? root.seen.x + root.seen.width
@@ -108,7 +115,7 @@ Item {
     readonly property real bodyX: Math.round(root.side === "left" ? root.originX - (root.originX - root.restX - root.fullWidth) * root.g - root.bodyWidth
         : root.side === "right" ? root.originX + (root.restX - root.originX) * root.g
         : root.restX + (root.fullWidth - root.bodyWidth) / 2)
-    readonly property real bodyY: Math.round(root.restY + (root.fullHeight - root.bodyHeight) / 2)
+    readonly property real bodyY: Math.round(root.restY + (root.fullHeight - root.bodyHeight) / 2 * (1 - root.g))
     readonly property real bodyRadius: Math.min(IrisStyle.radiusPlate, root.bodyHeight / 2)
 
     readonly property rect hitRect: root.shown ? Qt.rect(root.bodyX, root.bodyY, root.bodyWidth, root.bodyHeight) : Qt.rect(0, 0, 0, 0)
@@ -134,7 +141,7 @@ Item {
             y: root.pad
             width: root.fullWidth - 2 * root.pad
             height: root.fullHeight - 2 * root.pad
-            contentHeight: content.item?.implicitHeight ?? 0
+            contentHeight: content.item?.pageHeight ?? 0
             interactive: contentHeight > height
             clip: true
             opacity: IrisStyle.contentAt(root.presentation)
