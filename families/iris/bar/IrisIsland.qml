@@ -2185,43 +2185,6 @@ Item {
                 Item { Layout.fillWidth: true }
             }
 
-            // Halo: the sun's path under the time, a shallow arc from sunrise to sunset with the sun on it where it is
-            // now (the Sunrise widget's reading, at the Island's size). Night dims the arc and sets the sun down at its
-            // end. It moves with Weather's minute, never between.
-            Item {
-                id: sunPath
-                readonly property real progress: Weather.sunProgress
-                readonly property bool day: Weather.sunState === "day"
-                // At night the sun is under the horizon: Halo is the time alone.
-                visible: root.design === "halo" && sunPath.day && clockRow.visible && !root.vertical && clusterClock.width > 0
-                opacity: clockRow.opacity
-                x: clockRow.x + clusterClock.x + Math.round(clusterClock.width * 0.08)
-                y: clockRow.y + clusterClock.y + clusterClock.height + Math.round(1 * root.d)
-                width: Math.round(clusterClock.width * 0.84)
-                height: Math.round(6 * root.d)
-                Shape {
-                    anchors.fill: parent
-                    preferredRendererType: Shape.CurveRenderer
-                    ShapePath {
-                        strokeWidth: Math.max(1, IrisStyle.devicePx)
-                        strokeColor: sunPath.day ? IrisStyle.hairlineStrong : IrisStyle.hairline
-                        fillColor: "transparent"
-                        capStyle: ShapePath.RoundCap
-                        startX: 0; startY: sunPath.height
-                        PathQuad { x: sunPath.width; y: sunPath.height; controlX: sunPath.width / 2; controlY: -sunPath.height }
-                    }
-                }
-                Rectangle {
-                    readonly property real size: Math.round(5 * root.d)
-                    readonly property real t: sunPath.progress
-                    // On the quad above: x runs straight across, y = h - 4h·t(1-t).
-                    x: Math.round(sunPath.width * t - size / 2)
-                    y: Math.round(sunPath.height - 4 * sunPath.height * t * (1 - t) - size / 2)
-                    width: size; height: size; radius: size / 2
-                    color: sunPath.day ? root.clockAccent : IrisStyle.textTertiary
-                }
-            }
-
             CompactRow {
                 id: eventRow
                 mode: "event"
@@ -2607,9 +2570,13 @@ Item {
             Component {
                 id: engineArtBackdrop
                 IrisMediaBackdrop {
+                    // Welded, the chassis runs from the screen edge: the cover stays off the band (or the inset the
+                    // notch grows from) and comes in under the page's first row, so the frame's material carries the join.
+                    readonly property bool welded: root.notchness > 0.01 || (extension.anchoredShape && !(root.zoned && !root.vertical && !root.fromHeart))
                     source: MediaArtwork.displaySource
-                    edgeTop: !root.anchored && chassis.topInset > 0 ? (chassis.topInset + root.fillet + 4 * root.d) / 0.45 : 0
-                    edgeBottom: !root.anchored && chassis.bottomInset > 0 ? (chassis.bottomInset + root.fillet + 4 * root.d) / 0.45 : 0
+                    fadeEdge: welded ? root.edge : ""
+                    fadeClear: Math.max(IrisFrame.framed ? IrisFrame.band : 0, chassis.edgeInset)
+                    fadeLength: Math.round(44 * root.d)
                 }
             }
         }
@@ -3036,6 +3003,34 @@ Item {
                 weight: IrisStyle.figureWeight
                 color: root.event.tint
             }
+        }
+    }
+
+    // Halo: the sun as a bead on the Island's own rim, from one end of its foot at sunrise to the other at sunset (his
+    // pick A "Horizon" of 11-02: the arc under the time read as a smudge). It sits across the rim, outside the clip, and
+    // moves with Weather's minute, never between. Night: the time alone.
+    Rectangle {
+        id: sunBead
+        readonly property real t: Math.max(0, Math.min(1, Weather.sunProgress))
+        readonly property real corner: Math.min(chassis.radius, chassis.width / 2)
+        readonly property real core: Math.round(6 * root.d)
+        readonly property real halo: Math.max(2, Math.round(2.5 * root.d))
+        visible: root.design === "halo" && Weather.sunState === "day" && !root.vertical && !root.zoned
+            && clusterClock.width > 0 && opacity > 0.01
+        opacity: compactLayer.opacity * clockRow.opacity
+        width: sunBead.core + 2 * sunBead.halo
+        height: width
+        radius: width / 2
+        // Along the straight of the foot: the corners never carry it.
+        x: Math.round(chassis.x + sunBead.corner * 0.8 + (chassis.width - 1.6 * sunBead.corner) * sunBead.t - width / 2)
+        y: Math.round((root.bottomEdge ? chassis.y : chassis.y + chassis.height) - height / 2)
+        color: ColorUtils.applyAlpha(root.clockAccent, 0.22)
+        Rectangle {
+            anchors.centerIn: parent
+            width: sunBead.core
+            height: width
+            radius: width / 2
+            color: root.clockAccent
         }
     }
 }
