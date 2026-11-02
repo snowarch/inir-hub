@@ -205,8 +205,10 @@ PreviewScene {
     }
 
     Caption {
-        glyph: tex.lit ? "flare" : IrisStyle.leak ? "camera_roll" : "crop_square"
+        glyph: tex.lit ? "flare" : IrisStyle.leak ? "camera_roll" : IrisStyle.streak ? "auto_awesome_motion" : "crop_square"
         text: tex.lit ? Translation.tr("Afterglow") + " · " + tex.gradeLabel
-            : IrisStyle.leak ? Translation.tr("Light leak") + " · " + tex.leakLabel : Translation.tr("Solid")
+            : IrisStyle.leak ? Translation.tr("Light leak") + " · " + tex.leakLabel
+            : IrisStyle.streak ? Translation.tr("Light streak") + " · " + Translation.tr(({ aurora: "Aurora", colours: "Your colours", wallpaper: "Wallpaper" })[IrisStyle.streakColours])
+            : Translation.tr("Solid")
     }
 }

@@ -56,4 +56,20 @@ PanelSurface {
             base: IrisStyle.surface
         }
     }
+    // Light streak: the aurora and the streak of the field's bodies, laid over the surface's fill.
+    Loader {
+        anchors.fill: parent
+        z: -1
+        active: IrisStyle.streak && !root.quiet
+        sourceComponent: IrisStreakPlate {
+            at: {
+                void (root.x + root.y + root.width + root.height + (root.parent?.x ?? 0) + (root.parent?.y ?? 0))
+                return root.mapToItem(null, 0, 0)
+            }
+            output: Qt.size(root.QsWindow.window?.screen?.width ?? root.width, root.QsWindow.window?.screen?.height ?? root.height)
+            corners: Qt.vector4d(root.notchTop ? 0 : root.radius, root.notchTop ? 0 : root.radius,
+                root.notchBottom ? 0 : root.radius, root.notchBottom ? 0 : root.radius)
+            base: IrisStyle.surface
+        }
+    }
 }

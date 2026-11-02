@@ -140,6 +140,18 @@ layout(std140, binding = 0) uniform buf {
     // 0 for none; y: how much of the picture shows, 0..1; z: the picture's width over its height; w: how far past the
     // band's inner line it takes to come in, in pixels (0: it runs into the band).
     vec4 artLane;
+    // Light streak (IrisStyle.streakMix): x on, y aurora, z light, w trails; each hue's w is where its curtain hangs
+    // across the output, 0..1.
+    vec4 streakMix;
+    vec4 streakHue0; vec4 streakHue1; vec4 streakHue2;
+    // xy: the light's place on the output, under the Island (px); z: one device pixel; w: how far the light falls past a
+    // silhouette (IrisStyle.streakReach).
+    vec4 streakSource;
+    // What each body moved over the last frames (centre xy, half size zw): a long exposure of its lit edge.
+    vec4 trail0; vec4 trail1; vec4 trail2; vec4 trail3; vec4 trail4; 
+    vec4 trail5; vec4 trail6; vec4 trail7; vec4 trail8; vec4 trail9; 
+    vec4 trail10; vec4 trail11; vec4 trail12; vec4 trail13; vec4 trail14; 
+    vec4 trail15; vec4 trail16; vec4 trail17; vec4 trail18; vec4 trail19;
 } u;
 layout(binding = 1) uniform sampler2D backdrop;
 // The wallpaper before the blur: glass materialises from it to `backdrop` as its frost rises.
@@ -233,6 +245,50 @@ vec4 cornersAt(int i) {
         return i == 12 ? u.corners12 : i == 13 ? u.corners13 : i == 14 ? u.corners14 : u.corners15;
     }
     return i == 16 ? u.corners16 : i == 17 ? u.corners17 : i == 18 ? u.corners18 : u.corners19;
+}
+
+vec4 trailAt(int i) {
+    if (i == 0) return u.trail0;
+    if (i == 1) return u.trail1;
+    if (i == 2) return u.trail2;
+    if (i == 3) return u.trail3;
+    if (i == 4) return u.trail4;
+    if (i == 5) return u.trail5;
+    if (i == 6) return u.trail6;
+    if (i == 7) return u.trail7;
+    if (i == 8) return u.trail8;
+    if (i == 9) return u.trail9;
+    if (i == 10) return u.trail10;
+    if (i == 11) return u.trail11;
+    if (i == 12) return u.trail12;
+    if (i == 13) return u.trail13;
+    if (i == 14) return u.trail14;
+    if (i == 15) return u.trail15;
+    if (i == 16) return u.trail16;
+    if (i == 17) return u.trail17;
+    if (i == 18) return u.trail18;
+    return u.trail19;
+}
+
+// Light streak's aurora: three curtains of the person's colours hang across the output, each where its hue says, its
+// fold swaying down the screen and fine rays running along it. Static. Returns the hue at q; glow is how much curtain
+// is there. IrisStreakPlate.frag keeps a copy: change both.
+vec3 streakCurtains(vec2 q, vec2 size, out float glow) {
+    vec3 sum = vec3(0.0);
+    float weight = 0.0;
+    for (int k = 0; k < 3; ++k) {
+        vec4 h = k == 0 ? u.streakHue0 : (k == 1 ? u.streakHue1 : u.streakHue2);
+        float fk = float(k);
+        float down = q.y / size.y;
+        float sway = 0.07 * sin(down * 3.4 + fk * 2.1) + 0.025 * sin(down * 9.0 - fk * 1.7);
+        float x = (q.x / size.x - h.w - sway) / 0.2;
+        float rays = 0.74 + 0.26 * sin(q.x * 0.031 + fk * 1.3 + 2.2 * sin(q.y * 0.0037 + fk));
+        float c = exp(-x * x) * rays;
+        sum += h.rgb * c;
+        weight += c;
+    }
+    glow = clamp(weight, 0.0, 1.0);
+    return sum / max(weight, 1e-3);
 }
 
 float blockValue(int block, int slot, vec4 a, vec4 b, vec4 c, vec4 d, vec4 e) {
@@ -487,6 +543,14 @@ void main() {
                     unitedN = min(unitedN, smoothUnion(other, bodiesN[i], kq));
             }
         }
+    } else if (u.streakMix.x > 0.5) {
+        // Light streak's light past a silhouette faces the light by a softened field: the nearest body's normal jumps
+        // where two bodies are equally near (between two bubbles) and cut the fall into straight-edged strips.
+        float soft = 0.35 * max(1.0, u.streakSource.w);
+        unitedN = frameDistance;
+        for (int i = 0; i < 20; ++i)
+            if (bodies[i] < FAR)
+                unitedN = smoothUnion(unitedN, bodies[i], soft);
     }
 
     if (united > FAR) {
@@ -498,7 +562,7 @@ void main() {
     // with it by a smooth minimum just k/4 deep along that line, and the bevel and the burn drew it as a crease across
     // the body. For the depth alone that seam is filled: the silhouette stays as it is, the inside whole.
     float inner = united;
-    if ((u.glowMix.x > 0.5 || u.leakMix.x > 0.5) && u.field.y > 0.5 && united < 0.0) {
+    if ((u.glowMix.x > 0.5 || u.leakMix.x > 0.5 || u.streakMix.x > 0.5) && u.field.y > 0.5 && united < 0.0) {
         vec2 lo = frameCentre - frameHalf - u.scene.xy;
         vec2 hi = frameCentre + frameHalf - u.scene.xy;
         float deeper = united;
@@ -828,6 +892,98 @@ void main() {
                     * max(0.0, 1.0 + grain * (0.6 + 1.4 * tail) * dust);
                 colour += halo * (1.0 - coverage) * u.qt_Opacity;
             }
+        }
+    }
+    // Light streak: iRiS as a long exposure. The light hangs under the Island: every edge that faces it carries a streak
+    // (a hot core on its first device pixel, a fall a few pixels in, a little light past it), hottest by the Island and
+    // thinning away from it. Inside, the person's colours hang as aurora curtains, strongest near the edges and quiet
+    // deep in, where text sits, held under the luminance its ink reads on. A body in motion leaves its trail.
+    if (u.streakMix.x > 0.5) {
+        float reach = max(1.0, u.streakSource.w);
+        float glow;
+        vec3 hue = streakCurtains(frameP, size, glow);
+        if (united < reach) {
+            const vec3 lumaW = vec3(0.2126, 0.7152, 0.0722);
+            float px = max(u.streakSource.z, 0.05);
+            vec2 toward = u.streakSource.xy - frameP;
+            float dist = length(toward);
+            float diag = length(size);
+            float slope = length(unitedSlope);
+            vec2 outward = unitedSlope / max(slope, 1e-4);
+            // Two lights. The lamp under the Island is the brightest thing on screen and falls off fast; its sky is Apple's top
+            // edge, a thin even light on every edge turned toward the Island, so the Dock and a panel over the lamp keep a horizon.
+            vec2 sky = u.streakSource.xy - size * 0.5;
+            float lamp = smoothstep(0.0, 0.85, dot(outward, toward / max(dist, 1e-3)));
+            float skyward = smoothstep(0.2, 0.95, dot(outward, sky / max(length(sky), 1e-3)));
+            float facing = max(lamp, 0.6 * skyward);
+            float away = smoothstep(0.1, -0.7, max(dot(outward, toward / max(dist, 1e-3)), dot(outward, sky / max(length(sky), 1e-3))));
+            float taper = 0.2 + 0.8 * exp(-dist / (0.2 * diag));
+            float depth = max(0.0, -inner / clamp(slope, 0.5, 1.0));
+            float lightAmt = u.streakMix.z * (lamp * taper + 0.42 * skyward);
+            float auroraAmt = u.streakMix.y * (0.35 + 0.65 * glow) * taper;
+            if (alpha > 1e-4) {
+                vec3 base = colour / alpha;
+                float baseLum = dot(base * base, lumaW);
+                bool paper = baseLum > 0.25;
+                // The edge glows in the curtain's colour, as edge-lit glass does: strongest on the side that faces the
+                // light, a few pixels in, then quiet where text sits.
+                float rim = exp(-depth / (reach * 0.22)) * (0.3 + 0.7 * facing);
+                float deep = exp(-depth / (reach * 1.2)) * 0.25 * glow;
+                vec3 m = paper
+                    ? mix(base, base * mix(vec3(1.0), hue * 1.35, 0.55), min(1.0, auroraAmt * (rim * 0.8 + deep)))
+                    : base + hue * auroraAmt * (rim * 1.1 + deep * 0.35);
+                // Apple's depth: the edge away from the light darkens as the facing one brightens.
+                m *= 1.0 - 0.35 * away * u.streakMix.z * exp(-depth / (reach * 0.08));
+                if (!paper) {
+                    float lum = dot(m * m, lumaW);
+                    float cap = max(baseLum, 0.2 * lum / (lum + 0.2));
+                    m *= sqrt(min(1.0, cap / max(lum, 1e-5)));
+                } else {
+                    float lum = dot(m * m, lumaW);
+                    m = mix(m, vec3(1.0), max(0.0, 0.26 - lum) / max(1.0 - lum, 1e-3));
+                }
+                colour = clamp(m, 0.0, 1.0) * alpha;
+            }
+            // The horizon: one hot device pixel on every edge that faces the light.
+            // A streak: two and a half pixels by the Island, one far from it.
+            float core = (1.0 - smoothstep(0.6 * px, (1.0 + 1.9 * taper) * px, depth)) * coverage * u.qt_Opacity;
+            float hot = clamp(core * lightAmt * 1.7, 0.0, 1.0);
+            colour = mix(hue, vec3(1.0), 0.65) * hot + colour * (1.0 - hot);
+            alpha = hot + alpha * (1.0 - hot);
+            // The aurora rises off the horizon onto what is behind: a tight bright fall and a long soft one, in the
+            // curtain's colour, ending before the pass does.
+            if (united > -0.7) {
+                float past = max(united, 0.0);
+                float window = 1.0 - smoothstep(0.6 * reach, reach, past);
+                float rise = exp(-past / (reach * 0.06)) * 0.45 + exp(-past / (reach * 0.4)) * 0.55;
+                vec2 softOut = normalSlope / max(length(normalSlope), 1e-4);
+                float softFacing = smoothstep(0.0, 0.85, dot(softOut, toward / max(dist, 1e-3)));
+                float lit = (u.streakMix.z * 1.15 + auroraAmt * 1.1) * softFacing * taper * (0.7 + 1.3 * exp(-dist / (0.12 * diag))) * rise * window * (1.0 - coverage) * u.qt_Opacity;
+                colour += mix(hue, vec3(1.0), 0.15 * exp(-past / (reach * 0.05))) * lit;
+                alpha += lit * 0.12;
+            }
+        }
+        if (u.streakMix.w > 0.001 && united > -0.7) {
+            float smear = 0.0;
+            for (int i = 0; i < 20; ++i) {
+                if (bodies[i] > FAR)
+                    continue;
+                vec4 tr = trailAt(i);
+                float moved = abs(tr.x) + abs(tr.y) + abs(tr.z) + abs(tr.w);
+                if (moved < 0.5)
+                    continue;
+                vec4 s = shapeAt(i);
+                vec4 corners = cornersAt(i);
+                float soft = max(1.5, moved / 10.0);
+                for (int k = 1; k <= 6; ++k) {
+                    float t = float(k) / 6.0;
+                    float d = bodyBox(p, s.xy - tr.xy * t, max(s.zw - tr.zw * t, vec2(0.5)), corners);
+                    smear = max(smear, (1.0 - smoothstep(-soft, soft, d)) * (1.0 - t));
+                }
+            }
+            smear *= (1.0 - coverage) * u.streakMix.w * u.qt_Opacity;
+            colour += mix(hue, vec3(1.0), 0.3) * smear * 0.6;
+            alpha += smear * 0.22;
         }
     }
     // Glass has a cut edge that catches the light from above, like Liquid Glass: bright where it faces up, a faint

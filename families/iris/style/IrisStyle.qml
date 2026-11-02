@@ -529,17 +529,18 @@ QtObject {
     // What a plain body is made of (Style › Texture, his 11-02: Material's global styles on one engine, every Design the
     // same; "solid" is Ricelin's card, the factory's). `top` and `foot` how far its tint leans to the light up there and
     // down here, `edge` the lit top or the hairline, `sheen` the lit top's strength, `tint` the glass's thickness, `cast`
-    // its shadow. Afterglow and Light leak light themselves.
+    // its shadow. Afterglow and Light leak light themselves; Light streak keeps a plain body under its own light.
     readonly property var bodyRecipes: ({
         solid: { top: 0.2, foot: 0.06, edge: "light", sheen: 1, tint: 1, cast: 1 },
         aurora: { top: 0.09, foot: 0.09, edge: "line", sheen: 0.5, tint: 0.72, cast: 0.6 },
         angel: { top: 0.14, foot: 0.03, edge: "light", sheen: 2.2, tint: 0.84, cast: 0.5 },
         regalia: { top: 0.13, foot: 0.13, edge: "line", sheen: 1, tint: 1.6, cast: 1.2 },
-        flat: { top: 0.05, foot: 0.05, edge: "line", sheen: 1, tint: 1, cast: 0.4 }
+        flat: { top: 0.05, foot: 0.05, edge: "line", sheen: 1, tint: 1, cast: 0.4 },
+        streak: { top: 0.12, foot: 0.04, edge: "light", sheen: 0.4, tint: 0.9, cast: 0.8 }
     })
     readonly property var bodyRecipe: root.bodyRecipes[String(root.appearance?.texture ?? "solid")] ?? root.bodyRecipes.solid
     function bodyLean(ink: color, amount: real): vector4d {
-        return root.textured ? Qt.vector4d(0, 0, 0, 0) : Qt.vector4d(ink.r, ink.g, ink.b, amount)
+        return root.selfLit ? Qt.vector4d(0, 0, 0, 0) : Qt.vector4d(ink.r, ink.g, ink.b, amount)
     }
     readonly property vector4d bodyTop: root.bodyLean(root.light ? "#ffffff" : root.text, root.bodyRecipe.top * (root.light ? 3 : 1))
     readonly property vector4d bodyFoot: root.bodyLean(root.text, root.bodyRecipe.foot * (root.light ? 0.6 : 1))
@@ -586,7 +587,55 @@ QtObject {
     // (IrisLeakWallpaper), so all of it is one exposure.
     readonly property bool leak: String(root.appearance?.texture ?? "solid") === "leak"
     // The field draws the material with a texture: groups and fills go sheer so it shows through them.
-    readonly property bool textured: root.afterglow || root.leak
+    // Light streak (Style › Texture, his 11-02: "Apple + light streak aurora + original"): iRiS taken as a long
+    // exposure. The Island is the light: the edges that face it carry a streak (a hot one-pixel core, a soft fall,
+    // tapering away from it), your three colours hang inside the material as aurora curtains, strongest near the edges
+    // and quiet where text sits, and a body that moves leaves a trail of its lit edge. Nothing moves at rest.
+    readonly property bool streak: String(root.appearance?.texture ?? "solid") === "streak"
+    readonly property var streakOptions: root.appearance?.streak ?? ({})
+    function streakPercent(name: string, fallback: real): real {
+        const value = Number(root.streakOptions?.[name] ?? fallback)
+        return Math.max(0, Math.min(100, isNaN(value) ? fallback : value)) / 100
+    }
+    readonly property real streakAurora: root.streakPercent("aurora", 55)
+    readonly property real streakLight: root.streakPercent("light", 75)
+    readonly property real streakTrails: root.streakPercent("trails", 60)
+    // The curtains' colours. "aurora": the accent and its two neighbours on the wheel, as a real aurora runs green to
+    // violet; "wallpaper": the same from the wallpaper's colour; "colours": accent, wallpaper and highlight as they are
+    // (a warm wallpaper gives three warm curtains).
+    readonly property string streakColours: ["aurora", "colours", "wallpaper"].includes(String(root.streakOptions?.colours ?? "")) ? root.streakOptions.colours : "aurora"
+    function streakNeighbours(c: color): var {
+        const h = c.hslHue < 0 ? 0.6 : c.hslHue
+        const s = Math.max(0.62, c.hslSaturation)
+        return [Qt.hsla(h, s, 0.58, 1), Qt.hsla((h + 0.15) % 1, s, 0.6, 1), Qt.hsla((h + 0.83) % 1, s, 0.6, 1)]
+    }
+    readonly property var streakHues: {
+        if (root.streakColours === "wallpaper")
+            return root.streakNeighbours(Qt.color(root.vividHighlight(Appearance.wallpaperDominantColor, root.baseAccent)))
+        if (root.streakColours === "colours")
+            return [root.vivid(root.baseAccent, true), Qt.color(root.vividHighlight(Appearance.wallpaperDominantColor, root.baseAccent)),
+                root.vivid(root.baseSecondaryAccent, true)]
+        return root.streakNeighbours(Qt.color(root.vivid(root.baseAccent, true)))
+    }
+    // w: where each curtain hangs across the output, 0..1.
+    readonly property vector4d streakMix: Qt.vector4d(root.streak ? 1 : 0, root.streakAurora, root.streakLight, root.streakTrails)
+    readonly property vector4d streakHue0: root.colourVector(root.streakHues[0], 0.2)
+    readonly property vector4d streakHue1: root.colourVector(root.streakHues[1], 0.52)
+    readonly property vector4d streakHue2: root.colourVector(root.streakHues[2], 0.82)
+    // The light hangs under the Island, a sixth of the output's short side in from its edge: the field and every plate
+    // read it here. x, y on the output; z one device pixel; w the fall's reach.
+    function streakLightOn(output: size, islandEdge: string): vector4d {
+        const w = Math.max(1, output.width), h = Math.max(1, output.height)
+        const inset = 0.16 * Math.min(w, h)
+        const x = islandEdge === "left" ? inset : islandEdge === "right" ? w - inset : w / 2
+        const y = islandEdge === "bottom" ? h - inset : islandEdge === "left" || islandEdge === "right" ? h / 2 : inset
+        return Qt.vector4d(x, y, root.devicePx, root.streakReach)
+    }
+    // How far past a silhouette the streak's fall reaches.
+    readonly property real streakReach: root.streak && root.streakLight + root.streakAurora > 0 ? Math.round(64 * root.density) : 0
+    readonly property bool textured: root.afterglow || root.leak || root.streak
+    // A texture that paints its own body light, so the plain body's lean and lit top step aside.
+    readonly property bool selfLit: root.afterglow || root.leak
     readonly property var leakOptions: root.appearance?.leak ?? ({})
     function leakPercent(name: string, fallback: real): real {
         const value = Number(root.leakOptions?.[name] ?? fallback)

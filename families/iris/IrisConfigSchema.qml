@@ -78,7 +78,7 @@ JsonObject {
         property bool materialForApps: true // with the wallpaper colour theme, terminals and apps sit on the shell's material
         property bool accentForApps: true // with the wallpaper colour theme, apps take the shell's own accent when it has one
         property string controlPlate: "none" // rows of round controls: "none", "veil", "glass" or "solid" (IrisControlPlate)
-        // What the material is drawn as: "solid" (Ricelin's card), "aurora", "angel", "regalia", "flat", "afterglow" or "leak".
+        // What the material is drawn as: "solid" (Ricelin's card), "aurora", "angel", "regalia", "flat", "afterglow", "leak" or "streak".
         property string texture: "solid"
         property int factoryLook: 1 // the factory look a file was moved to (ConfigMigrations.js)
         // Afterglow: grade "dusk", "cyber", "fog", "acid" or "wallpaper"; the rest 0..100 %; wallpaper grades the desktop too.
@@ -89,6 +89,15 @@ JsonObject {
             property int bloom: 50
             property int signal: 35
             property bool wallpaper: true
+        }
+        // Light streak: aurora (the curtains), light (the streak on the edges facing the Island) and trails (what a moving
+        // body leaves), 0..100 %; colours "aurora" (the accent and its neighbours), "colours" (accent, wallpaper, highlight) or "wallpaper" (its colour
+        // and neighbours).
+        property JsonObject streak: JsonObject {
+            property int aurora: 55
+            property int light: 75
+            property int trails: 60
+            property string colours: "aurora"
         }
         // Light leak: grade "prism", "ember", "orchid", "polaroid", "accent" or "wallpaper"; shape "lens", "burn",
         // "orbs" or "beam"; x/y move the light (-50..50 % of the output); the rest 0..100 %; wallpaper is how

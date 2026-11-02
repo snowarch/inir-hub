@@ -5,7 +5,7 @@ import qs.modules.iris.style
 // desktop widget, a plate on the wall. Laid over the body's own colour, its radius the body's.
 Rectangle {
     id: root
-    visible: !IrisStyle.textured
+    visible: !IrisStyle.selfLit
     color: "transparent"
     gradient: Gradient {
         GradientStop { position: 0; color: Qt.rgba(IrisStyle.bodyTop.x, IrisStyle.bodyTop.y, IrisStyle.bodyTop.z, IrisStyle.bodyTop.w) }

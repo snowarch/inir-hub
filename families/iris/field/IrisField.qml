@@ -24,7 +24,7 @@ Item {
     readonly property real shadowFall: Math.round(3 * IrisStyle.density)
     readonly property real shadowBlur: Math.round(16 * IrisStyle.density)
     readonly property bool casts: IrisStyle.shadow.a > 0.004
-    readonly property real reach: root.smoothing + 2 + IrisStyle.afterglowReach + IrisStyle.leakReach
+    readonly property real reach: root.smoothing + 2 + IrisStyle.afterglowReach + IrisStyle.leakReach + IrisStyle.streakReach
         + (root.casts ? root.shadowFall + 1.5 * root.shadowBlur : 0)
     property bool compositorAllowed: false
     // A field that does not cover its output: its window's position on the output and the output's size.
@@ -108,7 +108,7 @@ Item {
         const wave = Math.max(root.edgeWave.x, root.edgeWave.y, root.edgeWave.z, root.edgeWave.w, 0)
         const edge = root.band + wave + root.frameMusicLightWidth + root.reach + 16
         let left = edge, top = edge, right = root.width - edge, bottom = root.height - edge
-        const margin = root.reach + 32
+        const margin = root.reach + 32 + root.trailSpan
         for (const s of root.shapes ?? []) {
             const x0 = s.x - margin, y0 = s.y - margin
             const x1 = s.x + s.width + margin, y1 = s.y + s.height + margin
@@ -134,16 +134,63 @@ Item {
         let right = -Infinity;
         let bottom = -Infinity;
         for (const s of list) {
-            left = Math.min(left, s.x - root.reach)
-            top = Math.min(top, s.y - root.reach)
-            right = Math.max(right, s.x + s.width + root.reach)
-            bottom = Math.max(bottom, s.y + s.height + root.reach)
+            const r = root.reach + root.trailSpan
+            left = Math.min(left, s.x - r)
+            top = Math.min(top, s.y - r)
+            right = Math.max(right, s.x + s.width + r)
+            bottom = Math.max(bottom, s.y + s.height + r)
         }
         const x = Math.max(0, Math.floor(left));
         const y = Math.max(0, Math.floor(top))
         return Qt.rect(x, y, Math.ceil(Math.min(root.width, right)) - x,
             Math.ceil(Math.min(root.height, bottom)) - y)
     }
+
+    // Light streak's trails: what each body (by its id) moved since the field last drew, stretched to the trail's length,
+    // and zero once nothing has moved for a few frames. Only while Trails is on; nothing runs at rest.
+    readonly property bool trailing: IrisStyle.streak && IrisStyle.streakTrails > 0
+    property var trails: []
+    property real trailSpan: 0
+    property var _seen: ({})
+    function trace() {
+        if (!root.trailing) {
+            if (root.trailSpan > 0) { root.trails = []; root.trailSpan = 0 }
+            root._seen = {}
+            return
+        }
+        const list = root.shapes ?? []
+        const seen = {}
+        const out = []
+        let span = 0
+        for (let i = 0; i < root.capacity; i++) {
+            const s = list[i]
+            let t = Qt.vector4d(0, 0, 0, 0)
+            if (s && s.id) {
+                const g = [s.x + s.width / 2, s.y + s.height / 2, s.width / 2, s.height / 2]
+                const was = root._seen[s.id]
+                // A jump is a body taking another's place, not motion.
+                if (was && Math.abs(g[0] - was[0]) + Math.abs(g[1] - was[1]) < 300) {
+                    const d = g.map((v, k) => Math.max(-180, Math.min(180, (v - was[k]) * 5)))
+                    t = Qt.vector4d(d[0], d[1], d[2], d[3])
+                    span = Math.max(span, Math.abs(d[0]) + Math.abs(d[2]), Math.abs(d[1]) + Math.abs(d[3]))
+                }
+                seen[s.id] = g
+            }
+            out.push(t)
+        }
+        root._seen = seen
+        if (span > 0 || root.trailSpan > 0) {
+            root.trails = out
+            root.trailSpan = span
+        }
+        if (span > 0) trailStill.restart()
+    }
+    Timer {
+        id: trailStill
+        interval: 60
+        onTriggered: { root.trails = []; root.trailSpan = 0 }
+    }
+    onTrailingChanged: root.trace()
 
     ShaderEffect {
         id: pass
@@ -207,6 +254,7 @@ Item {
                 artLane: worn ? Qt.vector4d(artAt + 1, Math.max(0, Math.min(1, Number(worn.artShow ?? 1))),
                     worn.art.width / Math.max(1, worn.art.height), Math.max(0, Number(worn.artRise ?? 0))) : zero }
         }
+        onPackedChanged: if (root.trailing) root.trace()
         readonly property vector4d viewport: Qt.vector4d(pass.x, pass.y,
             Math.max(1, pass.width), Math.max(1, pass.height))
         readonly property vector2d screen: Qt.vector2d(Math.max(1, root.width), Math.max(1, root.height))
@@ -222,7 +270,7 @@ Item {
         readonly property color sheen: root.sheen
         readonly property vector4d bodyTop: IrisStyle.bodyTop
         readonly property vector4d bodyFoot: IrisStyle.bodyFoot
-        readonly property vector4d edgeGlass: IrisStyle.afterglow ? Qt.vector4d(0, 0, 1, 0)
+        readonly property vector4d edgeGlass: IrisStyle.afterglow || IrisStyle.streak ? Qt.vector4d(0, 0, 1, 0)
             : Qt.vector4d(IrisStyle.glassEdgeLight, IrisStyle.glassEdgeLine, IrisStyle.edgeWidth, IrisStyle.edgeLit ? 1 : 0)
         // z: one device pixel in the field's units; both edges are drawn that many pixels wide.
         readonly property vector4d edge: Qt.vector4d(root.rimWidth, root.rim.a > 0 ? 1 : 0, IrisStyle.devicePx, 0)
@@ -231,6 +279,31 @@ Item {
         readonly property vector4d glowLight: IrisStyle.afterglowLight
         readonly property vector4d glowBloom: IrisStyle.afterglowBloomInk
         readonly property vector4d glowShape: IrisStyle.afterglowShape
+        readonly property vector4d streakMix: IrisStyle.streakMix
+        readonly property vector4d streakHue0: IrisStyle.streakHue0
+        readonly property vector4d streakHue1: IrisStyle.streakHue1
+        readonly property vector4d streakHue2: IrisStyle.streakHue2
+        readonly property vector4d streakSource: IrisStyle.streakLightOn(Qt.size(pass.scene.z, pass.scene.w), IrisFrame.islandEdge)
+        readonly property vector4d trail0: root.trails[0] ?? Qt.vector4d(0, 0, 0, 0)
+        readonly property vector4d trail1: root.trails[1] ?? Qt.vector4d(0, 0, 0, 0)
+        readonly property vector4d trail2: root.trails[2] ?? Qt.vector4d(0, 0, 0, 0)
+        readonly property vector4d trail3: root.trails[3] ?? Qt.vector4d(0, 0, 0, 0)
+        readonly property vector4d trail4: root.trails[4] ?? Qt.vector4d(0, 0, 0, 0)
+        readonly property vector4d trail5: root.trails[5] ?? Qt.vector4d(0, 0, 0, 0)
+        readonly property vector4d trail6: root.trails[6] ?? Qt.vector4d(0, 0, 0, 0)
+        readonly property vector4d trail7: root.trails[7] ?? Qt.vector4d(0, 0, 0, 0)
+        readonly property vector4d trail8: root.trails[8] ?? Qt.vector4d(0, 0, 0, 0)
+        readonly property vector4d trail9: root.trails[9] ?? Qt.vector4d(0, 0, 0, 0)
+        readonly property vector4d trail10: root.trails[10] ?? Qt.vector4d(0, 0, 0, 0)
+        readonly property vector4d trail11: root.trails[11] ?? Qt.vector4d(0, 0, 0, 0)
+        readonly property vector4d trail12: root.trails[12] ?? Qt.vector4d(0, 0, 0, 0)
+        readonly property vector4d trail13: root.trails[13] ?? Qt.vector4d(0, 0, 0, 0)
+        readonly property vector4d trail14: root.trails[14] ?? Qt.vector4d(0, 0, 0, 0)
+        readonly property vector4d trail15: root.trails[15] ?? Qt.vector4d(0, 0, 0, 0)
+        readonly property vector4d trail16: root.trails[16] ?? Qt.vector4d(0, 0, 0, 0)
+        readonly property vector4d trail17: root.trails[17] ?? Qt.vector4d(0, 0, 0, 0)
+        readonly property vector4d trail18: root.trails[18] ?? Qt.vector4d(0, 0, 0, 0)
+        readonly property vector4d trail19: root.trails[19] ?? Qt.vector4d(0, 0, 0, 0)
         readonly property vector4d leakMix: IrisStyle.leakMix
         readonly property vector4d leakGrain: IrisStyle.leakFilm
         readonly property vector4d leakShape: IrisStyle.leakBody

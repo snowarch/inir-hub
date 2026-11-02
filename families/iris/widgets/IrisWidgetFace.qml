@@ -283,7 +283,7 @@ Item {
     }
     IrisBodyLight {
         anchors.fill: parent
-        visible: !IrisStyle.textured && root.plated && !root.clear
+        visible: !IrisStyle.selfLit && root.plated && !root.clear
         radius: root.radius
     }
 
@@ -294,6 +294,20 @@ Item {
         active: IrisStyle.leak && root.plated && !root.clear && !root.ownPlate
         sourceComponent: IrisLeakPlate {
             strength: IrisStyle.leakWidgets
+            at: {
+                void (root.widget.x + root.widget.y + (root.widget.parent?.x ?? 0) + (root.widget.parent?.y ?? 0) + root.width + root.height)
+                return root.mapToItem(null, 0, 0)
+            }
+            output: Qt.size(root.widget.screenWidth, root.widget.screenHeight)
+            radius: root.radius
+            base: root.plateColor
+        }
+    }
+    // Light streak: the field's aurora and streak laid over the plate.
+    Loader {
+        anchors.fill: parent
+        active: IrisStyle.streak && root.plated && !root.clear && !root.ownPlate
+        sourceComponent: IrisStreakPlate {
             at: {
                 void (root.widget.x + root.widget.y + (root.widget.parent?.x ?? 0) + (root.widget.parent?.y ?? 0) + root.width + root.height)
                 return root.mapToItem(null, 0, 0)
