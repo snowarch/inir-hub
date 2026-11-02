@@ -2,6 +2,7 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Dialogs
+import QtQuick.Effects
 import QtQuick.Layouts
 import QtQuick.Shapes
 import Quickshell
@@ -1849,6 +1850,39 @@ Item {
             }
         }
 
+        // Halo: the sun as light inside the Island's foot (his 11-02 14:05: the bead read as a dot nobody understood, a
+        // bar under it as a smudge). It lives in the body's own clip, so its only edge is the Island's: the foot glows
+        // where the sun stands, from one end at sunrise to the other at sunset, warm near the ends of the day, whitest
+        // at noon. Weather's minute moves it, never between; night leaves the time alone.
+        Item {
+            id: sunLight
+            readonly property real t: Math.max(0, Math.min(1, Weather.sunProgress))
+            readonly property real corner: Math.min(chassis.radius, chassis.width / 2)
+            // How high the sun is: 0 at the horizon, 1 at noon.
+            readonly property real height_: Math.sin(Math.PI * sunLight.t)
+            // iris-literal: the low sun's amber, tinted into the clock colour toward the ends of the day.
+            readonly property color lamp: Qt.tint(Qt.tint(root.clockAccent, Qt.rgba(1, 1, 1, 0.38 * sunLight.height_)),
+                Qt.rgba(1, 0.66, 0.35, 0.5 * (1 - sunLight.height_)))
+            visible: root.design === "halo" && (Config.options?.iris?.bar?.sunLight ?? true) && Weather.sunState === "day" && !root.vertical && !root.zoned
+                && clusterClock.width > 0 && opacity > 0.01
+            opacity: compactLayer.opacity * clockRow.opacity
+            // A small core under a wide blur: a bloom with no flat top, so no end of it can be read as a shape.
+            width: Math.round(16 * root.d)
+            height: 0
+            // Along the straight of the foot: the corners never carry it.
+            x: Math.round(sunLight.corner * 0.7 + (chassis.width - 1.4 * sunLight.corner) * sunLight.t - width / 2)
+            y: root.bottomEdge ? 0 : chassis.height
+            RectangularShadow {
+                anchors.centerIn: parent
+                width: parent.width
+                height: Math.round(6 * root.d)
+                radius: height / 2
+                blur: Math.round(30 * root.d)
+                color: Qt.alpha(sunLight.lamp, 0.7 + 0.2 * sunLight.height_)
+                cached: true
+            }
+        }
+
         Item {
             id: compactLayer
             x: root.vertical ? (root.rightEdge ? chassis.width - chassis.rightInset - width : chassis.leftInset) : 0
@@ -3016,34 +3050,6 @@ Item {
                 weight: IrisStyle.figureWeight
                 color: root.event.tint
             }
-        }
-    }
-
-    // Halo: the sun as a bead on the Island's own rim, from one end of its foot at sunrise to the other at sunset (his
-    // pick A "Horizon" of 11-02: the arc under the time read as a smudge). It sits across the rim, outside the clip, and
-    // moves with Weather's minute, never between. Night: the time alone.
-    Rectangle {
-        id: sunBead
-        readonly property real t: Math.max(0, Math.min(1, Weather.sunProgress))
-        readonly property real corner: Math.min(chassis.radius, chassis.width / 2)
-        readonly property real core: Math.round(6 * root.d)
-        readonly property real halo: Math.max(2, Math.round(2.5 * root.d))
-        visible: root.design === "halo" && Weather.sunState === "day" && !root.vertical && !root.zoned
-            && clusterClock.width > 0 && opacity > 0.01
-        opacity: compactLayer.opacity * clockRow.opacity
-        width: sunBead.core + 2 * sunBead.halo
-        height: width
-        radius: width / 2
-        // Along the straight of the foot: the corners never carry it.
-        x: Math.round(chassis.x + sunBead.corner * 0.8 + (chassis.width - 1.6 * sunBead.corner) * sunBead.t - width / 2)
-        y: Math.round((root.bottomEdge ? chassis.y : chassis.y + chassis.height) - height / 2)
-        color: ColorUtils.applyAlpha(root.clockAccent, 0.22) // iris-literal: the sun bead's halo, its own accent
-        Rectangle {
-            anchors.centerIn: parent
-            width: sunBead.core
-            height: width
-            radius: width / 2
-            color: root.clockAccent
         }
     }
 }
