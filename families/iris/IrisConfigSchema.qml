@@ -283,7 +283,7 @@ JsonObject {
         // tray, tools, focus, today, controls, settings).
         property int pageWidth: 440
         property list<string> navItems: ["media", "activity", "desktop", "shelf", "weather", "calendar", "vitals", "tray", "tools", "focus", "today", "controls", "settings"]
-        property string design: "halo" // the Island's design: "halo", "sky", "approach", "flex", "regulator" or "board"
+        property string design: "halo" // the Island's design: "halo", "ledger" or "tiles"
         property string blockStyle: "plain" // desktop page blocks: "plain" on the Island's black or "grouped" on quiet plates
         property string scrollAction: "volume" // "volume", "brightness" or "none"
         property string desktopBanner: "wallpaper" // Island Desktop page header: "wallpaper" or "none"

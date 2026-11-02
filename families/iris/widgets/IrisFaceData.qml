@@ -97,22 +97,6 @@ Singleton {
         const allDay = ahead.find(event => event.allDay && root.eventDate(event).getTime() <= at)
         return { title: allDay ? root.eventTitle(allDay) : "", running: false, start: 0, end: 0, left: 0, when: "" }
     }
-    // The timed events touching the `reach` minutes after `at`, soonest first.
-    function agenda(at: real, reach: int): var {
-        const seen = {}
-        const out = []
-        const here = new Date(at)
-        for (const event of root.upcomingEvents(here, 2).concat(Array.from(CalendarSync.getEventsForDate(here) ?? []))) {
-            if (event.allDay) continue
-            const start = root.eventDate(event).getTime()
-            const end = event.endDate ? new Date(event.endDate).getTime() : start + 1800000
-            const key = root.eventTitle(event) + start
-            if (end <= at || start >= at + reach * 60000 || seen[key]) continue
-            seen[key] = true
-            out.push({ title: root.eventTitle(event), start: start, end: end })
-        }
-        return out.sort((a, b) => a.start - b.start)
-    }
     function spanWords(minutes: int): string {
         return minutes < 60 ? Translation.tr("%1 min").arg(minutes)
             : minutes % 60 === 0 ? Translation.tr("%1 h").arg(minutes / 60)
