@@ -449,6 +449,46 @@ void main() {
         }
     }
 
+    // Afterglow's normal comes from the joined field with every corner at least the bevel (a tighter corner creased the
+    // bevel along its diagonal), measured once here and differentiated by the GPU below. Four more evaluations of the
+    // whole field per pixel near every edge doubled the chassis's frame (11-02, nest on llvmpipe: 33 -> 66 ms).
+    float unitedN = united;
+    if (u.glowMix.x > 0.5) {
+        float bevelN = max(1.0, u.glowShape.x);
+        float frameN = FAR * 10.0;
+        if (u.field.y > 0.5)
+            frameN = -squircleBox(frameP, frameCentre, frameHalf, max(u.field.w, bevelN));
+        unitedN = frameN;
+        float bodiesN[20];
+        for (int i = 0; i < 20; ++i) {
+            bodiesN[i] = FAR * 10.0;
+            if (bodies[i] > FAR)
+                continue;
+            vec4 s = shapeAt(i);
+            bodiesN[i] = bodyBox(p, s.xy, s.zw, max(cornersAt(i), vec4(bevelN)));
+            unitedN = min(unitedN, bodiesN[i]);
+        }
+        for (int i = 0; i < 20; ++i) {
+            if (bodiesN[i] > FAR)
+                continue;
+            int block = i / 4;
+            int slot = i - block * 4;
+            float kq = max(0.0, blockValue(block, slot, u.fuseA, u.fuseB, u.fuseC, u.fuseD, u.fuseE));
+            float join = blockValue(block, slot, u.joinA, u.joinB, u.joinC, u.joinD, u.joinE);
+            float also = blockValue(block, slot, u.alsoA, u.alsoB, u.alsoC, u.alsoD, u.alsoE);
+            if (join < -0.5 || join > 0.5) {
+                float other = join < 0.0 ? frameN : bodiesN[int(join + 0.5) - 1];
+                if (other < FAR)
+                    unitedN = min(unitedN, smoothUnion(other, bodiesN[i], kq));
+            }
+            if (also < -0.5 || also > 0.5) {
+                float other = also < 0.0 ? frameN : bodiesN[int(also + 0.5) - 1];
+                if (other < FAR)
+                    unitedN = min(unitedN, smoothUnion(other, bodiesN[i], kq));
+            }
+        }
+    }
+
     if (united > FAR) {
         fragColor = vec4(0.0);
         return;
@@ -502,6 +542,7 @@ void main() {
     // The gradient in the item's own space (y down on every backend): screen derivatives run y up on OpenGL.
     vec2 dp = vec2(dFdx(p.x), dFdy(p.y));
     vec2 unitedSlope = vec2(dFdx(united), dFdy(united)) / vec2(abs(dp.x) > 1e-6 ? dp.x : 1.0, abs(dp.y) > 1e-6 ? dp.y : 1.0);
+    vec2 normalSlope = vec2(dFdx(unitedN), dFdy(unitedN)) / vec2(abs(dp.x) > 1e-6 ? dp.x : 1.0, abs(dp.y) > 1e-6 ? dp.y : 1.0);
     // One pixel of coverage, so the contour stays crisp at any scale.
     float coverage = 1.0 - smoothstep(-0.7, 0.7, united);
     if (u.options.x > 0.5 && u.field.y > 0.5)
@@ -617,53 +658,8 @@ void main() {
         }
         float lip = weightSum > 0.0 ? lipSum / weightSum : bevel;
         float gouraud = weightSum > 0.0 ? gouraudSum / weightSum : 0.6;
-        // Normals from the joined field (central differences): per-body normals break at welds. Corners tighter than the
-        // bevel are rounded for the normal only, or a box's gradient creases along its diagonal. Costly: near edges only.
-        vec2 grad = vec2(0.0, -1.0);
-        if (abs(united) < bevel + 3.5 * radiusBloom + 2.0) {
-            grad = vec2(0.0);
-            for (int k = 0; k < 4; ++k) {
-                vec2 o = k == 0 ? vec2(1.0, 0.0) : k == 1 ? vec2(-1.0, 0.0) : k == 2 ? vec2(0.0, 1.0) : vec2(0.0, -1.0);
-                vec2 q = p + o;
-                float frameQ = FAR * 10.0;
-                float unitedQ = FAR * 10.0;
-                if (u.field.y > 0.5) {
-                    frameQ = -squircleBox(q + u.scene.xy, frameCentre, frameHalf, max(u.field.w, bevel));
-                    unitedQ = frameQ;
-                }
-                float bodiesQ[20];
-                for (int i = 0; i < 20; ++i) {
-                    bodiesQ[i] = FAR * 10.0;
-                    if (bodies[i] > FAR)
-                        continue;
-                    vec4 s = shapeAt(i);
-                    int block = i / 4;
-                    int slot = i - block * 4;
-                    bodiesQ[i] = bodyBox(q, s.xy, s.zw, max(cornersAt(i), vec4(bevel)));
-                    unitedQ = min(unitedQ, bodiesQ[i]);
-                }
-                for (int i = 0; i < 20; ++i) {
-                    if (bodiesQ[i] > FAR)
-                        continue;
-                    int block = i / 4;
-                    int slot = i - block * 4;
-                    float kq = max(0.0, blockValue(block, slot, u.fuseA, u.fuseB, u.fuseC, u.fuseD, u.fuseE));
-                    float join = blockValue(block, slot, u.joinA, u.joinB, u.joinC, u.joinD, u.joinE);
-                    float also = blockValue(block, slot, u.alsoA, u.alsoB, u.alsoC, u.alsoD, u.alsoE);
-                    if (join < -0.5 || join > 0.5) {
-                        float other = join < 0.0 ? frameQ : bodiesQ[int(join + 0.5) - 1];
-                        if (other < FAR)
-                            unitedQ = min(unitedQ, smoothUnion(other, bodiesQ[i], kq));
-                    }
-                    if (also < -0.5 || also > 0.5) {
-                        float other = also < 0.0 ? frameQ : bodiesQ[int(also + 0.5) - 1];
-                        if (other < FAR)
-                            unitedQ = min(unitedQ, smoothUnion(other, bodiesQ[i], kq));
-                    }
-                }
-                grad += o * unitedQ * 0.5;
-            }
-        }
+        // Normals from the joined field (per-body normals break at welds), near edges only; the rest faces up.
+        vec2 grad = abs(united) < bevel + 3.5 * radiusBloom + 2.0 ? normalSlope : vec2(0.0, -1.0);
         float slopeLength = length(grad);
         vec2 n = grad / max(slopeLength, 1e-4);
         float facing = dot(n, vec2(-0.42, -0.91));

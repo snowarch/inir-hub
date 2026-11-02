@@ -154,6 +154,11 @@ Item {
         height: root.bounds.height
         fragmentShader: Qt.resolvedUrl("IrisField.frag.qsb")
         blending: true
+        // Kept as a texture: a frame the chassis draws for its content alone (a bubble's live number, the clock) copies it
+        // instead of running the field over the output again. The pass reruns only when a uniform or a texture it reads
+        // changes. At rest that was ~1 full-field frame a second, twice as dear under Afterglow (11-02). Only the chassis:
+        // its size is the output's; a floating field's bounds follow its bodies and would reallocate the layer per frame.
+        layer.enabled: root.framed
 
         // Every per-body uniform in one pass over the table. A moving body rewrites `shapes` every frame, and as ~55
         // bindings (one per uniform, each with its own closures and lookups) that pass cost several times the work.
