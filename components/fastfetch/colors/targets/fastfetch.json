@@ -1,0 +1,8 @@
+{
+  "id": "fastfetch",
+  "label": "Fastfetch",
+  "module": "fastfetch.sh",
+  "category": "terminal",
+  "inputs": ["palette.json"],
+  "description": "Keep fastfetch's colour lines (marked inir:) on the theme's palette; the person's module list is never touched."
+}

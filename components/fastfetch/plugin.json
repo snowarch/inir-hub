@@ -1,0 +1,9 @@
+{
+    "id": "fastfetch",
+    "kind": "component",
+    "name": "Fastfetch",
+    "summary": "A quiet fastfetch in your iNiR colours, edited by commenting lines",
+    "icon": "terminal",
+    "version": "1.0.0",
+    "provides": "modules/fastfetch"
+}

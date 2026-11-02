@@ -1,0 +1,22 @@
+{
+    "$schema": "../../schema/hub.schema.json",
+    "version": "1.0.0",
+    "summary": "A quiet fastfetch in your iNiR colours, edited by commenting lines",
+    "description": "Small logo, eleven lines, accent from your wallpaper on every theme change. What it shows is one line each in ~/.config/fastfetch/config.jsonc: put // in front to hide it, take it away to show it. An existing config is kept as config.jsonc.before-inir.",
+    "authors": [
+        "snowarch"
+    ],
+    "license": "MIT",
+    "tags": [
+        "terminal",
+        "fastfetch",
+        "colours"
+    ],
+    "permissions": [
+        "process",
+        "files"
+    ],
+    "minInir": "2.33.0",
+    "provides": "modules/fastfetch",
+    "preview": "preview.webp"
+}

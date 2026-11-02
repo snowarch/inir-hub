@@ -1,0 +1,59 @@
+// iNiR fastfetch. What it shows is the "modules" list below: one line each, top to bottom.
+//
+//   hide a line    put // in front of it       show it    take the // away
+//   reorder        move the line               a gap      "break",
+//
+// Lines marked "inir:" take your wallpaper's colours on every theme change; nothing else here is touched.
+// Everything fastfetch knows: fastfetch --list-modules.  Your previous config, if you had one: config.jsonc.before-inir
+{
+  "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json",
+  "logo": {
+    "type": "small",
+    "padding": { "top": 1, "left": 1, "right": 3 },
+    "color": {
+      "1": "38;2;247;123;60",   // inir:primary
+      "2": "38;2;218;139;102"   // inir:tertiary
+    }
+  },
+  "display": {
+    "separator": "  ",
+    "brightColor": false,
+    "key": { "width": 12 },
+    "size": { "ndigits": 1 },
+    "color": {
+      "keys": "38;2;247;123;60",        // inir:primary
+      "title": "38;2;218;139;102",      // inir:tertiary
+      "separator": "38;2;161;158;152"   // inir:on_surface_variant
+    }
+  },
+  "modules": [
+    { "type": "title",        "key": " ", "format": "{#1}{#keys}{user-name}{#0}{#separator} on {#1}{#title}{host-name}" },
+    "break",
+    { "type": "os",           "key": "{#keys}{icon}  {#separator}os",      "format": "{name}" },
+    { "type": "kernel",       "key": "{#keys}{icon}  {#separator}kernel",  "format": "{release}" },
+    { "type": "wm",           "key": "{#keys}{icon}  {#separator}wm",      "format": "{pretty-name}" },
+    // { "type": "de",        "key": "{#keys}{icon}  {#separator}de",      "format": "{pretty-name}" },
+    { "type": "shell",        "key": "{#keys}{icon}  {#separator}shell",   "format": "{pretty-name}" },
+    { "type": "terminal",     "key": "{#keys}{icon}  {#separator}term",    "format": "{pretty-name}" },
+    // { "type": "terminalfont", "key": "{#keys}{icon}  {#separator}font", "format": "{name}" },
+    { "type": "packages",     "key": "{#keys}{icon}  {#separator}pkgs",    "format": "{all}" },
+    { "type": "uptime",       "key": "{#keys}{icon}  {#separator}uptime",  "format": "{?days}{days}d {?}{hours}h {minutes}m" },
+    // { "type": "theme",     "key": "{#keys}{icon}  {#separator}theme",   "format": "{theme1}" },
+    // { "type": "icons",     "key": "{#keys}{icon}  {#separator}icons",   "format": "{icons1}" },
+    // { "type": "font",      "key": "{#keys}{icon}  {#separator}font",    "format": "{font1}" },
+    // { "type": "cursor",    "key": "{#keys}{icon}  {#separator}cursor",  "format": "{theme}" },
+    "break",
+    // { "type": "host",      "key": "{#keys}{icon}  {#separator}host",    "format": "{name}" },
+    { "type": "cpu",          "key": "{#keys}{icon}  {#separator}cpu",     "format": "{name}" },
+    { "type": "gpu",          "key": "{#keys}{icon}  {#separator}gpu",     "format": "{name}" },
+    { "type": "memory",       "key": "{#keys}{icon}  {#separator}memory",  "format": "{used} / {total}" },
+    // { "type": "swap",      "key": "{#keys}{icon}  {#separator}swap",    "format": "{used} / {total}" },
+    { "type": "disk",         "key": "{#keys}{icon}  {#separator}disk",    "format": "{size-used} / {size-total}", "folders": "/" },
+    // { "type": "display",   "key": "{#keys}{icon}  {#separator}display", "format": "{width}x{height} @ {refresh-rate} Hz" },
+    // { "type": "battery",   "key": "{#keys}{icon}  {#separator}battery", "format": "{capacity} {status}" },
+    // { "type": "localip",   "key": "{#keys}{icon}  {#separator}ip",      "format": "{ipv4}" },
+    // { "type": "media",     "key": "{#keys}{icon}  {#separator}playing", "format": "{artist} - {title}" },
+    "break",
+    { "type": "colors",       "symbol": "circle" },
+  ]
+}
