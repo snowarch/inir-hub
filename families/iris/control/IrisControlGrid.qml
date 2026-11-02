@@ -429,8 +429,10 @@ Item {
         property real size: Math.round(46 * root.d)
         implicitWidth: discButton.size
         implicitHeight: discButton.size
-        buttonRadius: IrisStyle.capsule(height)
-        buttonRadiusPressed: IrisStyle.capsule(height)
+        // Control shape names every switch, the platter's too: tiles and discs never mix.
+        readonly property real shape: IrisControlOptions.roundControls ? IrisStyle.capsule(height) : IrisStyle.formOf(discButton.size)
+        buttonRadius: discButton.shape
+        buttonRadiusPressed: discButton.shape
         colBackground: discButton.skinned ? "transparent" : discButton.control.lit ? discButton.control.tint : IrisStyle.fill
         colBackgroundHover: discButton.skinned || !discButton.control.ready ? discButton.colBackground
             : discButton.control.lit ? ColorUtils.mix(discButton.control.tint, IrisStyle.text, 0.85) : IrisStyle.fillHover
