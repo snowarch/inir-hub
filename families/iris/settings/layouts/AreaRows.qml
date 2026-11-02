@@ -580,7 +580,7 @@ ColumnLayout {
                                         width: parent.width
                                         visible: tile.words.length > 0
                                         text: tile.words
-                                        color: tile.on ? IrisStyle.secondaryOf(IrisStyle.inkOnLookPlate) : IrisStyle.textSecondary
+                                        color: tile.on ? IrisStyle.secondaryOfIrisStyle.inkOnLookPlate : IrisStyle.textSecondary
                                         font.pixelSize: IrisStyle.typeMeta
                                         elide: Text.ElideRight
                                     }
@@ -650,8 +650,7 @@ ColumnLayout {
                             Layout.fillWidth: true
                             implicitHeight: partRows.implicitHeight
                             radius: IrisStyle.radiusTile
-                            color: IrisStyle.fieldChamfer ? "transparent" : (rows?.groupFill ?? "transparent")
-                            IrisCutPlate { anchors.fill: parent; visible: IrisStyle.fieldChamfer && (rows?.groupFill.a ?? 0) > 0; color: rows?.groupFill ?? "transparent" }
+                            color: (rows?.groupFill ?? "transparent")
                             ColumnLayout {
                                 id: partRows
                                 anchors.left: parent.left

@@ -168,12 +168,10 @@ QtObject {
         const own = String(root.appearance?.surfaces?.cards?.grabber ?? "auto")
         return own === "auto" ? Boolean(root.cardDesign.grabber ?? false) : own === "on"
     }
-    readonly property int radius: Math.round(Math.max(16, Math.min(40, Number(root.appearance?.expandedRadius ?? 28))) * root.density
-        * (root.fieldChamfer ? root.kiriScale : 1))
-    readonly property int radiusSmall: Math.max(root.fieldChamfer ? 3 : 4, Math.round(root.radius * 0.58))
-    // A capsule's (or a disc's) corner: half its side, or a Kiri tile's inside a Kiri Design, where a pill or a dot under
-    // the pointer would be the one round thing among cut plates.
-    function capsule(side: real): real { return root.fieldChamfer ? Math.round(Math.min(side / 2, side * 0.22)) : root.look === "synth" ? Math.min(side / 2, root.synthKeyRadius * 1.6) : side / 2 }
+    readonly property int radius: Math.round(Math.max(16, Math.min(40, Number(root.appearance?.expandedRadius ?? 22))) * root.density)
+    readonly property int radiusSmall: Math.max(4, Math.round(root.radius * 0.58))
+    // A capsule's (or a disc's) corner: half its side.
+    function capsule(side: real): real { return root.look === "synth" ? Math.min(side / 2, root.synthKeyRadius * 1.6) : side / 2 }
     readonly property int spaceSmall: Math.max(4, Math.round(6 * root.density))
 
     readonly property var presets: ({
@@ -189,8 +187,8 @@ QtObject {
             subtext: "#b0b0b5", muted: "#909095", hairline: "#2a2a2c", hairlineStrong: "#505052" },
         contrast: { fill: 1.6, shape: 1.0, textStrong: 0.94, textSecondary: 0.8, textTertiary: 0.6,
             subtext: "#d1d1d6", muted: "#aeaeb2", hairline: "#3a3a3c", hairlineStrong: "#6c6c70" },
-        // AIRISU's (concept › Mapa A): fills a step up, no curve at all (the chamfer is the only corner), bone ink.
-        night: { fill: 1.15, shape: 0.0, textStrong: 0.90, textSecondary: 0.66, textTertiary: 0.44,
+        // AIRISU's: fills a step up, bone ink. Its forms are everyone's (the ladder below).
+        night: { fill: 1.15, shape: 1.0, textStrong: 0.90, textSecondary: 0.66, textTertiary: 0.44,
             subtext: "#b8b5ae", muted: "#8c8a85", hairline: "#2a2b2e", hairlineStrong: "#48484a" }
     })
     // A Design that brings its own preset wears it whatever the Style row says (it is part of what the Design is).
@@ -340,7 +338,7 @@ QtObject {
     readonly property real lookCorner: ({ synth: 0.42, gel: 1.3 })[root.look] ?? 1
     // How a plate (a group, a tile, a card) is made: a fill (Apple), a hairline (Nothing), an opaque key panel on its
     // drop edge (Synth), a gloss under a light cap (Gel). IrisPlate draws it.
-    readonly property string plateStyle: root.fieldChamfer ? "flat" : String(root.trait("plate") ?? "flat")
+    readonly property string plateStyle: String(root.trait("plate") ?? "flat")
     readonly property string marksStyle: String(root.trait("marks") ?? "tile")
     readonly property color plateEdge: root.plateStyle === "line" ? ColorUtils.applyAlpha(root.text, root.light ? 0.2 : 0.18)
         : root.plateStyle === "gloss" ? Qt.rgba(1, 1, 1, root.light ? 0.7 : 0.1) : Qt.color("transparent") // iris-literal: gel's lit rim
@@ -464,7 +462,7 @@ QtObject {
     readonly property real glassBlurAmount: Math.max(0, Math.min(1, Number(root.glassOptions?.blur ?? 100) / 100))
     // Solved at the panel's 7:1 so secondary ink still reads on the worst part; the chosen tint is a floor.
     readonly property real wallpaperGlassTint: {
-        const chosen = Math.max(0.12, Math.min(0.96, Number(root.glassOptions?.tint ?? 58) / 100))
+        const chosen = Math.max(0.12, Math.min(0.96, root.bodyRecipe.tint * Number(root.glassOptions?.tint ?? 58) / 100))
         const needed = IrisMood.sampled ? root.legibleVeil("panel", IrisMood.luminance, IrisMood.contrast * 0.5, 1) : 0
         return Math.max(chosen, Math.min(0.9, needed))
     }
@@ -485,6 +483,23 @@ QtObject {
     readonly property color bodyClip: Qt.rgba(0, 0, 0, 0.004)
     readonly property color placeSurface: root.glassy ? ColorUtils.applyAlpha(root.surfaceOpaque, root.glassTint) : root.surface
     readonly property real glassLip: 0
+    // What a plain body is made of (Style › Texture, his 11-02: Material's global styles on one engine, every Design the
+    // same; "solid" is Ricelin's card, the factory's). `top` and `foot` how far its tint leans to the light up there and
+    // down here, `edge` the lit top or the hairline, `sheen` the lit top's strength, `tint` the glass's thickness, `cast`
+    // its shadow. Afterglow and Light leak light themselves.
+    readonly property var bodyRecipes: ({
+        solid: { top: 0.2, foot: 0.06, edge: "light", sheen: 1, tint: 1, cast: 1 },
+        aurora: { top: 0.09, foot: 0.09, edge: "line", sheen: 0.5, tint: 0.72, cast: 0.6 },
+        angel: { top: 0.14, foot: 0.03, edge: "light", sheen: 2.2, tint: 0.84, cast: 0.5 },
+        regalia: { top: 0.13, foot: 0.13, edge: "line", sheen: 1, tint: 1.6, cast: 1.2 },
+        flat: { top: 0.05, foot: 0.05, edge: "line", sheen: 1, tint: 1, cast: 0.4 }
+    })
+    readonly property var bodyRecipe: root.bodyRecipes[String(root.appearance?.texture ?? "solid")] ?? root.bodyRecipes.solid
+    function bodyLean(ink: color, amount: real): vector4d {
+        return root.textured ? Qt.vector4d(0, 0, 0, 0) : Qt.vector4d(ink.r, ink.g, ink.b, amount)
+    }
+    readonly property vector4d bodyTop: root.bodyLean(root.light ? "#ffffff" : root.text, root.bodyRecipe.top * (root.light ? 3 : 1))
+    readonly property vector4d bodyFoot: root.bodyLean(root.text, root.bodyRecipe.foot * (root.light ? 0.6 : 1))
     readonly property bool afterglow: String(root.appearance?.texture ?? "solid") === "afterglow"
     readonly property var afterglowOptions: root.appearance?.afterglow ?? ({})
     function afterglowPercent(name: string, fallback: real): real {
@@ -653,8 +668,8 @@ QtObject {
     readonly property vector4d leakHue1: root.leakSource(1, "hue")
     readonly property vector4d leakHue2: root.leakSource(2, "hue")
     // The cut edge of Blur glass (IrisField.frag): lit where it faces up, a line elsewhere.
-    readonly property real glassEdgeLight: Math.max(0, Math.min(1, Number(root.glassOptions?.edgeLight ?? 34) / 100))
-    readonly property real glassEdgeLine: Math.max(0, Math.min(0.6, Number(root.glassOptions?.edgeLine ?? 10) / 100))
+    readonly property real glassEdgeLight: Math.max(0, Math.min(1, root.bodyRecipe.sheen * Number(root.glassOptions?.edgeLight ?? 14) / 100))
+    readonly property real glassEdgeLine: Math.max(0, Math.min(0.6, Number(root.glassOptions?.edgeLine ?? 0) / 100))
     readonly property color glassEdgeColour: {
         const name = String(root.glassOptions?.edgeColour ?? "scene")
         if (name === "white") return Qt.rgba(1, 1, 1, 1)
@@ -922,12 +937,11 @@ QtObject {
     readonly property color borderStrong: ColorUtils.applyAlpha(root.text, Math.min(0.6, 0.28 * root.preset.fill * root.tweak("lines", 0, 2)))
     readonly property string rimTint: String(root.theme?.rimTint ?? "neutral")
     // Glass keeps its lit edge whatever this is: without it glass vanishes over a dark desktop.
-    readonly property string edgeStyle: !(root.theme?.rim ?? true) || root.afterglow ? "none"
-        : String(root.theme?.edges ?? "line") === "light" ? "light" : "line"
+    readonly property string edgeStyle: root.afterglow ? "none" : !root.textured && root.bodyRecipe.edge === "light" ? "light"
+        : !(root.theme?.rim ?? true) ? "none" : String(root.theme?.edges ?? "line") === "light" ? "light" : "line"
     readonly property bool edgeLit: root.edgeStyle === "light" && (root.glassEdgeLight > 0 || root.glassEdgeLine > 0)
     // Bodies (Island, Dock, bubbles, panels) wear the look's edge: Nothing's hairline, Synth's machined edge, Gel's lit rim.
-    readonly property color rim: root.fieldChamfer ? root.lineRim
-        : root.look === "nothing" ? ColorUtils.applyAlpha(root.text, root.light ? 0.24 : 0.2)
+    readonly property color rim: root.look === "nothing" ? ColorUtils.applyAlpha(root.text, root.light ? 0.24 : 0.2)
         : root.look === "synth" ? root.synthKeyEdge
         : root.look === "gel" ? Qt.rgba(1, 1, 1, root.light ? 0.8 : 0.32) // iris-literal: gel's lit rim
         : root.lineRim
@@ -1008,7 +1022,7 @@ QtObject {
     }
     readonly property real shadowThrough: root.glassy ? 0.4 : 1
     readonly property real shadowLight: root.ink ? 0.5 : root.light ? 0.55 : 1
-    readonly property color shadow: root.glowing(Math.min(0.9, 0.55 * root.tweak("shadow", 0, 1.6)) * root.shadowThrough * root.shadowLight)
+    readonly property color shadow: root.glowing(Math.min(0.9, 0.55 * root.bodyRecipe.cast * root.tweak("shadow", 0, 1.6)) * root.shadowThrough * root.shadowLight)
     readonly property color onMedia: "#ffffff"
     readonly property color onMediaSecondary: ColorUtils.applyAlpha(root.onMedia, 0.72)
     // The visualizer's one look (Now Playing › Visualizer): its drawing, how many bands, and whose colour.
@@ -1147,8 +1161,6 @@ QtObject {
     readonly property real shapeScale: root.preset.shape * root.tweak("shape", 0.3, 1.6)
     // Large containers stop growing well before a pill, so content keeps a concentric margin.
     function corner(px: real): int {
-        // Kiri's corners are tighter than iRiS's and ignore the Style's shape: a panel 14, a card 8, a row 5 at density 1.
-        if (root.fieldChamfer) return Math.max(2, Math.round(px * root.kiriScale * root.density))
         const cap = px >= 18 ? 1.3 : px >= 10 ? 1.4 : 1.6
         return Math.max(2, Math.round(px * Math.min(root.shapeScale, cap) * root.lookCorner * root.density))
     }
@@ -1157,23 +1169,51 @@ QtObject {
     }
     // A plate inset `inset` inside a body of radius `outer` rounds by what is left, so the gap stays even round the
     // curve (a fixed radius there pinched or flared it); `floor` is its corner when that would vanish (HIG: concentric
-    // with a fallback). Under Kiri the round corners nest the same and the cut nests by `nestedCut`.
+    // with a fallback).
     function concentric(outer: real, inset: real, floor: real): int {
         return Math.max(Math.round(floor), Math.round(outer - inset))
     }
-    // A 45° cut inset `inset` inside a cut of `outer`: the parallel edge, so the band between them is as wide on the
-    // diagonal as along the sides (outer − inset·(2 − √2)).
-    function nestedCut(outer: real, inset: real): int {
-        return Math.max(2, Math.round(outer - inset * (2 - Math.SQRT2)))
-    }
-    readonly property int radiusPanel: root.corner(30)   // Control Center, Settings frame
-    readonly property int radiusSheet: root.corner(26)   // Spotlight, media card, wallpaper picker
-    readonly property int radiusPlate: root.corner(22)   // widget and lock plates, dialogs, blocks
+    // The one ladder of forms (11-02, his pick: Ricelin's), for every Design: a surface asks for its role and nothing
+    // else, so a hover, a key, a clip, a blur and a morph all follow from it. A body or a sheet is an open body, a plate
+    // or a card its card, a tile the piece on a card, a row or a chip what sits on a tile.
+    readonly property int radiusPanel: root.corner(22)   // Control Center, Settings frame
+    readonly property int radiusSheet: root.corner(22)   // Spotlight, media card, wallpaper picker
+    readonly property int radiusPlate: root.corner(18)   // widget and lock plates, dialogs, blocks
     readonly property int radiusCard: root.corner(18)    // side-panel sections, menus
-    readonly property int radiusTile: root.corner(14)    // grouped cards, tiles, results
-    readonly property int radiusRow: root.corner(10)     // list rows, menu items, small buttons
+    readonly property int radiusTile: root.corner(13)    // grouped cards, tiles, results
+    readonly property int radiusRow: root.corner(7)      // list rows, menu items, small buttons
     readonly property int radiusChip: root.corner(7)     // chips, thumbnails, small marks
     readonly property int radiusMicro: root.corner(4)    // bars inside skeletons, swatches
+    // The rung of a piece that knows only its size: what a Design's own panel or key asks for.
+    function formOf(side: real): int {
+        return side >= 96 * root.density ? root.radiusCard : side >= 40 * root.density ? root.radiusTile : root.radiusChip
+    }
+    // The outline of a w x h piece of radius `radius`, laid `inset` inside its box (half a stroke), as a closed convex
+    // polygon for a Shape, clockwise from the upper left, for what cuts a polygon further (a coat, a blade). `corners`
+    // [upper left, upper right, lower right, lower left]: 0 square (where a piece abuts another), 1 round. Arcs are
+    // sampled every ~2 px, well under a pixel of error at these radii.
+    function outline(w: real, h: real, radius: real, inset: real, corners: var): var {
+        const kinds = corners ?? [1, 1, 1, 1]
+        const s = Math.max(0, inset ?? 0)
+        const r = Math.max(0, Math.min(radius, Math.min(w, h) / 2) - s)
+        const out = []
+        const round = (cx, cy, from, x, y) => {
+            const n = Math.max(1, Math.ceil(0.5 * Math.PI * r / 2))
+            for (let i = 0; i <= n; i++) {
+                const a = from + 0.5 * Math.PI * i / n
+                out.push(Qt.point(cx + r * Math.cos(a), cy + r * Math.sin(a)))
+            }
+        }
+        const pts = [[s, s, s + r, s + r, Math.PI], [w - s, s, w - s - r, s + r, 1.5 * Math.PI],
+            [w - s, h - s, w - s - r, h - s - r, 0], [s, h - s, s + r, h - s - r, 0.5 * Math.PI]]
+        for (let i = 0; i < 4; i++) {
+            const c = pts[i]
+            if (kinds[i] === 0 || r < 0.25) out.push(Qt.point(c[0], c[1]))
+            else round(c[2], c[3], c[4])
+        }
+        out.push(out[0])
+        return out
+    }
     readonly property real meltDepth: {
         const t = root.tweak("melt", 0, 2)
         return t <= 1 ? t : 1 + (t - 1) * 0.5
@@ -1207,109 +1247,6 @@ QtObject {
         return half
     }
     function pieceRadius(size: real): real { return root.profileRadius(root.pieceShape, size) }
-    // A Design that cuts corners (`field.corner: "chamfer"`, AIRISU): Kiri, his pick of 10-31. Every body and cut plate
-    // keeps its upper-left and lower-right corners round and cuts the upper-right and lower-left at 45° with both ends of
-    // the cut eased (IrisField.frag kiriBox); plain plates round by Kiri's tighter scale (`corner`).
-    readonly property bool fieldChamfer: IrisDesign.fieldCorner === "chamfer"
-    readonly property real kiriScale: 0.47
-    // A cut piece is given by its cut (plates nest by it, `nestedCut`): its radius is cut / kiriCut, its ease kiriEase of
-    // the radius, and all three give way together past kiriFit of the piece's shorter half.
-    readonly property real kiriCut: 1.5
-    readonly property real kiriEase: 0.55
-    readonly property real kiriFit: 0.84
-    // Which corners Kiri cuts on a field body, as a mask (1 upper-left, 2 upper-right, 4 lower-right, 8 lower-left; 0 is
-    // the Design's own diagonal, 2 + 8). A free body wears the diagonal. A body standing on an edge of its room (the
-    // Dock, the Island and what hangs from it, a side column), directly or through the bodies it joins, cuts the two
-    // corners it shows alike and keeps its shoulders round, so a centred body reads symmetric (his 10-31: one shoulder
-    // round and one cut read as unfinished); in a corner of the room only the corner facing the room is cut.
-    function kiriMaskOf(shape: var, shapes: var, w: real, h: real, band: real): int {
-        if (!root.fieldChamfer || !shape || !root.kiriAnchored(shape, shapes, 0)) return 0
-        const reach = band + 2
-        let top = shape.y <= reach, bottom = shape.y + shape.height >= h - reach
-        let left = shape.x <= reach, right = shape.x + shape.width >= w - reach
-        if (top && bottom) { top = false; bottom = false }
-        if (left && right) { left = false; right = false }
-        if (!top && !bottom && !left && !right) {
-            // Hung from another body (an open Island's page): the edge it is nearest to.
-            const gaps = [shape.y, h - shape.y - shape.height, shape.x, w - shape.x - shape.width]
-            const near = gaps.indexOf(Math.min(gaps[0], gaps[1], gaps[2], gaps[3]))
-            top = near === 0; bottom = near === 1; left = near === 2; right = near === 3
-        }
-        return top ? (left ? 4 : right ? 8 : 12) : bottom ? (left ? 2 : right ? 1 : 3) : left ? 6 : right ? 9 : 0
-    }
-    function kiriAnchored(shape: var, shapes: var, depth: int): bool {
-        const list = !shape.joins ? [] : Array.isArray(shape.joins) ? shape.joins : [shape.joins]
-        if (list.some(name => /^(frame|edge|dockEdge|top|bottom|left|right)$|^(pieceEdge|panelEdge):/.test(String(name)))) return true
-        if (depth >= 4) return false
-        return list.some(name => {
-            const other = (shapes ?? []).find(candidate => candidate?.id === name)
-            return other ? root.kiriAnchored(other, shapes, depth + 1) : false
-        })
-    }
-    // A body's four radii as the field reads them: under Kiri a cut corner travels negative, so the shader and qs-rs
-    // FieldRegion take the mask from the sign and no second table has to stay in step. A radius of 0 (the Design's own)
-    // keeps a sign through 0.25, under the half pixel that means none.
-    function kiriCuts(mask: int): int { return mask > 0 ? mask : 10 }
-    function fieldCorners(c: var, mask: int): var {
-        if (!root.fieldChamfer) return c
-        const cuts = root.kiriCuts(mask), lane = (r, bit) => (cuts & bit) ? -Math.max(0.25, r) : r
-        return { tl: lane(c.tl, 1), tr: lane(c.tr, 2), br: lane(c.br, 4), bl: lane(c.bl, 8) }
-    }
-
-    // The radius of a clip's cut corners on a Kiri body of radius `radius`: the arc that stays inside the body's cut
-    // (an arc's nearest point to its corner is 0.586 of its radius along each side of the diagonal, so it clears a cut of
-    // leg c past 1.71 c), never past the piece's half.
-    function kiriClip(radius: real, w: real, h: real): real {
-        const r = Math.min(radius > 0.5 ? radius : root.chamferCut / root.kiriCut, 0.56 * Math.min(w, h) / 2)
-        return Math.ceil(Math.min(w / 2, h / 2, 1.71 * root.kiriCut * r))
-    }
-    // The Kiri outline of a w x h piece with cut `cut`, laid `inset` inside its box (half a stroke), as a closed convex
-    // polygon for a Shape, clockwise from the upper left. `corners` [upper left, upper right, lower right, lower left]:
-    // 0 square (where a piece abuts another), 1 round, 2 cut; Kiri's own [1, 2, 1, 2] when left out. Arcs are sampled
-    // every ~2 px, well under a pixel of error at these radii.
-    function kiriOutline(w: real, h: real, cut: real, inset: real, corners: var): var {
-        const kinds = corners ?? [1, 2, 1, 2]
-        const c0 = Math.max(0, Math.min(cut, root.kiriFit * Math.min(w, h) / 2))
-        const s = Math.max(0, inset ?? 0)
-        const r = Math.max(0, c0 / root.kiriCut - s), e = Math.max(0, c0 / root.kiriCut * root.kiriEase - s)
-        const c = Math.max(0, c0 - s * (2 - Math.SQRT2))
-        const k = Math.SQRT2 - 1
-        const out = []
-        const arc = (cx, cy, rad, from, to) => {
-            if (rad < 0.25) { out.push(Qt.point(cx, cy)); return }
-            while (to < from) to += 2 * Math.PI
-            const n = Math.max(1, Math.ceil((to - from) * rad / 2))
-            for (let i = 0; i <= n; i++) {
-                const a = from + (to - from) * i / n
-                out.push(Qt.point(cx + rad * Math.cos(a), cy + rad * Math.sin(a)))
-            }
-        }
-        const at = (x, y) => Math.atan2(y, x)
-        // Each corner: its point, the edge coming in and the one going out (clockwise), their inward normals.
-        const pts = [[s, s], [w - s, s], [w - s, h - s], [s, h - s]]
-        const ins = [[0, -1], [1, 0], [0, 1], [-1, 0]]
-        for (let i = 0; i < 4; i++) {
-            const p = pts[i], di = ins[i], dout = ins[(i + 1) % 4]
-            const ni = [-di[1], di[0]], no = [-dout[1], dout[0]]
-            if (kinds[i] === 1 && r > 0.25) {
-                arc(p[0] + r * (ni[0] + no[0]), p[1] + r * (ni[1] + no[1]), r, at(-ni[0], -ni[1]), at(-no[0], -no[1]))
-            } else if (kinds[i] === 2 && c > 0.25) {
-                const mid = at(-(ni[0] + no[0]), -(ni[1] + no[1]))
-                const v1 = [p[0] - c * di[0], p[1] - c * di[1]], v2 = [p[0] + c * dout[0], p[1] + c * dout[1]]
-                const c1 = [v1[0] - e * k * di[0] + e * ni[0], v1[1] - e * k * di[1] + e * ni[1]]
-                const c2 = [v2[0] + e * k * dout[0] + e * no[0], v2[1] + e * k * dout[1] + e * no[1]]
-                if (e > 0.25) {
-                    arc(c1[0], c1[1], e, at(-ni[0], -ni[1]), mid)
-                    arc(c2[0], c2[1], e, mid, at(-no[0], -no[1]))
-                } else {
-                    out.push(Qt.point(v1[0], v1[1]))
-                    out.push(Qt.point(v2[0], v2[1]))
-                }
-            } else out.push(Qt.point(p[0], p[1]))
-        }
-        out.push(out[0])
-        return out
-    }
     // The active Design's traits (IrisDesign.traits), as primitives the surfaces bind to.
     // Settings › Style › Icons: the plate (iRiS's tinted squircle, an app-icon tile, or none), the colour icons carry,
     // the glyph set, shape, fill and weight. They reach icons only: a cover, a poster or a hover plate is a tile.
@@ -1366,8 +1303,6 @@ QtObject {
     readonly property color rowSelectionInk: root.invertSelection ? root.accent : root.selectionInk
     // A list's place as a part number: 01, 02… (indexed Designs).
     function indexLabel(i: int): string { return (i + 1 < 10 ? "0" : "") + (i + 1) }
-    // Kiri's cut on a card-sized piece (its radius 8): the cut a plate wears unless it nests inside another.
-    readonly property int chamferCut: Math.round(12 * root.density)
     // Auto is what the Island and the Dock always did: a capsule when melted into the edge, the bubbles' shape when floating.
     // Linked, both take the bubbles' shape whatever their own choice.
     readonly property bool linkShapes: Boolean(root.theme?.linkShapes ?? false)
@@ -1387,11 +1322,9 @@ QtObject {
         return shape === "square" ? base * 0.45 : shape === "squircle" ? base * 0.75 : base
     }
     // A small piece's own corner (a cover, a poster, a workspace tile, the Dock's hover plate): the family's shape.
-    function tileRadius(size: real): int { return root.fieldChamfer ? Math.round(size * 0.18)
-        : Math.round(size * (root.look === "synth" ? 0.14 : root.look === "gel" ? 0.32 : 0.26) * Math.min(1.2, root.shapeScale)) }
+    function tileRadius(size: real): int { return Math.round(size * (root.look === "synth" ? 0.14 : root.look === "gel" ? 0.32 : 0.26) * Math.min(1.2, root.shapeScale)) }
     // An icon plate's corner: the icon shape when one is chosen, else the tile's.
-    function iconRadius(size: real): int { return root.fieldChamfer ? root.tileRadius(size)
-        : root.iconShape === "round" ? Math.round(size / 2) : root.iconShape === "square" ? Math.round(size * 0.12)
+    function iconRadius(size: real): int { return root.iconShape === "round" ? Math.round(size / 2) : root.iconShape === "square" ? Math.round(size * 0.12)
         : root.tileRadius(size) }
     // The tile pack's plates: the black and the white a plate can wear, the glyph carrying the colour.
     readonly property color plateBlackTop: root.toned("#2e2e34")

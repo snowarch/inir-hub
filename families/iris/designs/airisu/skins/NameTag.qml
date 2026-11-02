@@ -19,7 +19,6 @@ Item {
 
     ALacquer {
         anchors.fill: parent
-        cut: Airisu.cutFor(height)
         lacquer: Airisu.sheet
         moving: false
     }

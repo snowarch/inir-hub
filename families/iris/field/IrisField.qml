@@ -176,7 +176,7 @@ Item {
             for (let i = 0; i < root.capacity; i++) {
                 const s = list[i]
                 geometry.push(s ? Qt.vector4d(s.x + s.width / 2, s.y + s.height / 2, s.width / 2, s.height / 2) : zero)
-                const c = s ? IrisStyle.fieldCorners(IrisFrame.cornersOf(s), IrisStyle.kiriMaskOf(s, list, root.width, root.height, root.framed ? root.band : 0)) : null
+                const c = s ? IrisFrame.cornersOf(s) : null
                 corners.push(c ? Qt.vector4d(c.tl, c.tr, c.br, c.bl) : zero)
                 fuse.push(s ? Number(s.fuse ?? root.smoothing) : 0)
                 join.push(slot(s, 0))
@@ -204,10 +204,12 @@ Item {
         readonly property vector4d field: Qt.vector4d(root.smoothing, root.framed ? 1 : 0,
             root.band, root.cornerRadius)
         readonly property color tint: root.tint
-        readonly property vector4d options: Qt.vector4d(0, IrisStyle.fieldChamfer ? 1 : 0, IrisStyle.chamferCut, 0)
+        readonly property vector4d options: Qt.vector4d(0, 0, 0, 0)
         readonly property vector4d quiet: root.quietRect
         readonly property color rim: root.rim
         readonly property color sheen: root.sheen
+        readonly property vector4d bodyTop: IrisStyle.bodyTop
+        readonly property vector4d bodyFoot: IrisStyle.bodyFoot
         readonly property vector4d edgeGlass: IrisStyle.afterglow ? Qt.vector4d(0, 0, 1, 0)
             : Qt.vector4d(IrisStyle.glassEdgeLight, IrisStyle.glassEdgeLine, IrisStyle.edgeWidth, IrisStyle.edgeLit ? 1 : 0)
         // z: one device pixel in the field's units; both edges are drawn that many pixels wide.

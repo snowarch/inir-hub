@@ -160,8 +160,7 @@ Item {
         width: page.width - x
         height: page.height
         radius: Number(page.host?.paneRadius ?? IrisStyle.radiusSheet)
-        color: IrisStyle.glassy && !IrisStyle.fieldChamfer ? IrisStyle.readingSidebar : "transparent"
-        IrisCutPlate { anchors.fill: parent; visible: IrisStyle.glassy && IrisStyle.fieldChamfer; cutLength: Number(page.host?.paneCut ?? IrisStyle.chamferCut); color: IrisStyle.readingSidebar }
+        color: IrisStyle.glassy ? IrisStyle.readingSidebar : "transparent"
         Flickable {
             IrisScrollFeel {}
             id: flick

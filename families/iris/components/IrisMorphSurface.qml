@@ -45,10 +45,8 @@ Item {
     // A surface in a window of its own draws its silhouette with a field of its own: the SDF edge
     // every other body has, instead of a ClippingRectangle's harder one. Compositor blur keeps its pane.
     property bool ownField: false
-    // Under a Kiri Design (AIRISU) every surface draws its body with its own field: a ClippingRectangle can only round,
-    // and its painted tint or glass pane stood past the cut (his 10-31).
     readonly property bool drawsOwnField: !root.fieldBacked
-        && (IrisStyle.fieldChamfer || root.ownField && (!IrisStyle.glassCompositor || root.compositorBlurred))
+        && root.ownField && (!IrisStyle.glassCompositor || root.compositorBlurred)
     // A Place that meets the frame hands its body to the chassis of its output (`fieldBacked`): the frame's
     // field draws it with the join, the shadow and the blur, and this window only carries the content.
     // `chassisJoin` adds what the body joins ({ id, joins, fuse }), an `edge` body to join past the screen
@@ -374,11 +372,9 @@ Item {
             return { tl: root.morphRadius(c.tl, w, h), tr: root.morphRadius(c.tr, w, h),
                 bl: root.morphRadius(c.bl, w, h), br: root.morphRadius(c.br, w, h) }
         }
-        // Kiri cuts the upper-right and lower-left corners: the content's clip rounds them by an arc that stays inside the
-        // cut (IrisStyle.kiriClip), so nothing it holds (a light wash, a row) shows past the field's edge.
         topLeftRadius: chassis.corners.tl
-        topRightRadius: IrisStyle.fieldChamfer ? IrisStyle.kiriClip(chassis.corners.tr, width, height) : chassis.corners.tr
-        bottomLeftRadius: IrisStyle.fieldChamfer ? IrisStyle.kiriClip(chassis.corners.bl, width, height) : chassis.corners.bl
+        topRightRadius: chassis.corners.tr
+        bottomLeftRadius: chassis.corners.bl
         bottomRightRadius: chassis.corners.br
         color: root.material === "field" ? IrisStyle.bodyClip
             : root.material === "compositor" ? root.energised(IrisStyle.placeSurface) : root.color

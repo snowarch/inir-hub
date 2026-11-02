@@ -11,7 +11,6 @@ FieldRegion {
     windowHeight: owner.windowHeight
     band: owner.band
     cornerRadius: owner.cornerRadius
-    chamfer: owner.chamfer
     inset: owner.inset
     wave: owner.edgeWave
     waveClock: owner.waveClock

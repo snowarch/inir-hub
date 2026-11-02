@@ -22,7 +22,6 @@ Item {
 
     ALacquer {
         anchors.fill: parent
-        cut: Airisu.cutFor(root.height)
         lacquer: root.face
         moving: false
     }

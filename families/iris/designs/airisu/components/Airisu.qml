@@ -35,15 +35,15 @@ QtObject {
     readonly property color tame: ColorUtils.mix(IrisStyle.accentFill, IrisStyle.textSecondary, 0.35) // iris-literal: the seal at rest
     // The neutral of the ladder: the scheme's own black (or its plain paper).
     readonly property color base: IrisStyle.materialSwatch("black")
-    readonly property color raised: root.solid(IrisStyle.surfaceHigh)
-    readonly property color iron: root.solid(IrisStyle.surfaceHighest)
+    readonly property color raised: IrisStyle.surfaceHigh
+    readonly property color iron: IrisStyle.surfaceHighest
     // How much of a pigment each rung carries: a panel breathes it, a widget's coat holds a little more, the canvas less.
     readonly property real lacquerLoad: 0.07 // iris-literal: pigment in a panel's lacquer
     readonly property real stockLoad: 0.1    // iris-literal: pigment in a widget's lacquer
     // A panel: the raised rung (sumi at night, the next paper by day) with a breath of its subject.
     function lacquerOf(pigment: color): color { return ColorUtils.mix(pigment, root.raised, root.lacquerLoad) }
     // A desktop widget: the same rung as an object on the wall, holding a little more of its pigment.
-    function stockOf(pigment: color): color { return ColorUtils.mix(pigment, root.raised, root.stockLoad) }
+    function stockOf(pigment: color): color { return ColorUtils.mix(pigment, root.solid(root.raised), root.stockLoad) }
     // An object made of the lacquer itself (a dial): the canvas rung, whatever the scheme.
     function deepOf(pigment: color): color {
         return ColorUtils.mix(pigment, IrisStyle.light ? root.solid(IrisStyle.bodySurface) : root.base, 0.06) // iris-literal: canvas with a breath
@@ -150,8 +150,6 @@ QtObject {
     function u(n: real): int { return Math.round(n * 4 * root.d) }
 
     // ── Dies (型抜き): a closed set, one per kind of object.
-    readonly property int chamfer: IrisStyle.chamferCut               // a body's 45° cut, the field's own
-    function cutFor(h: real): int { return Math.max(2, Math.min(2 * root.m, Math.round(h / 4))) }
 
     // ── Strokes.
     // Counted in screen pixels, like IrisStyle.edgeWidth: a logical pixel at 1.5x printed every rule as a smeared band.

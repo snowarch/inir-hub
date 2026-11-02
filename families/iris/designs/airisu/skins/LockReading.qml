@@ -41,7 +41,6 @@ Item {
             ALacquer {
                 anchors.fill: parent
                 visible: root.kind === "keyboard"
-                cut: Airisu.cutFor(height)
                 lacquer: IrisStyle.mediaScrim
             }
             AText {

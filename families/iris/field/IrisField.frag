@@ -90,12 +90,15 @@ layout(std140, binding = 0) uniform buf {
     // field in a small window (a menu) samples the wallpaper glass at the right place.
     vec4 scene;
     // x: 1 when another window paints the band, so this field draws only the bodies and their joins.
-    // y: the Design's corner (0 round, 1 Kiri: `field.corner`); z: Kiri's own cut, in pixels (IrisStyle.chamferCut).
     vec4 options;
     // Left, top, right, bottom of an inner rectangle nothing reaches: its pixels skip the whole pass.
     vec4 quiet;
     // The colour that lights the cut edge of blurred glass (IrisStyle.glassEdgeColour).
     vec4 sheen;
+    // A body's light (IrisStyle.bodyTop, bodyFoot): lit from above, as Ricelin's card. rgb: what its tint leans to at the
+    // top and at the foot, a: how far. Both 0 for a texture that lights itself.
+    vec4 bodyTop;
+    vec4 bodyFoot;
     // x: light where the edge faces up, y: the line elsewhere, z: its width in pixels, w: 1 when solid bodies wear it too.
     vec4 edgeGlass;
     // Afterglow (IrisStyle.afterglow*). x: on, y: chrome, z: bloom, w: signal, each 0..1.
@@ -170,62 +173,13 @@ float squircleBox(vec2 p, vec2 centre, vec2 halfSize, float radius) {
     return (l - reach) / length(gradient);
 }
 
-// A body's own outline. Round is the squircle box. Kiri (a Design's `field.corner: "chamfer"`, AIRISU since 10-31) keeps
-// the upper-left and lower-right corners round (the same squircle) and cuts the upper-right and lower-left at 45° by
-// KIRI_CUT times the radius, both ends of the cut eased by KIRI_EASE times it, so the blade's line runs into the sides
-// instead of breaking off them (the square corners and hard points before read as cardboard). The radius gives way on a
-// small body (KIRI_FIT of its shorter half), so a strip keeps a straight run between its round corner and its cut. A
-// body standing on an edge cuts the two corners it shows alike and keeps its shoulders round (IrisStyle.kiriMaskOf).
-// IrisBlurRegion (kiriRows, kiriDistance) and qs-rs FieldRegion draw the same outline; IrisStyle.kiriOutline cuts plates.
-const float KIRI_CUT = 1.5;
-const float KIRI_EASE = 0.55;
-const float KIRI_FIT = 0.56;
-
-// The rounded cut quadrant is the shrunk wedge (inside the sides by the ease, the cut moved in along its normal by the
-// same) grown back by the ease: an exact distance, so joins, rims and shadows that read it follow the eased edge.
-float kiriBox(vec2 p, vec2 centre, vec2 halfSize, float radius, bool cut) {
-    vec2 d = p - centre;
-    float r = min(radius, KIRI_FIT * min(halfSize.x, halfSize.y));
-    if (!cut || r < 0.5)
-        return squircleBox(p, centre, halfSize, r);
-    float e = KIRI_EASE * r;
-    vec2 q = abs(d);
-    vec2 s = halfSize - e;
-    float l = halfSize.x + halfSize.y - KIRI_CUT * r - e * 1.41421356;
-    float inside = max(max(q.x - s.x, q.y - s.y), (q.x + q.y - l) * 0.70710678);
-    if (inside <= 0.0)
-        return inside - e;
-    vec2 a = vec2(s.x, l - s.x);
-    vec2 b = vec2(l - s.y, s.y);
-    vec2 ab = b - a;
-    float t = clamp(dot(q - a, ab) / dot(ab, ab), 0.0, 1.0);
-    float dist = length(q - a - ab * t);
-    dist = min(dist, q.y <= a.y ? abs(q.x - s.x) : length(q - a));
-    dist = min(dist, q.x <= b.x ? abs(q.y - s.y) : length(q - b));
-    return dist - e;
-}
-
 // A body has a radius per corner (upper left, upper right, lower right, lower left): a menu nests the one corner that
 // faces the frame's or a fillet's curve and keeps its own at the other three. Each quadrant is the box with its own
-// corner's radius all round, which is that corner exactly: a squircle's reach and a cut stop at the body's half, and
-// the straight runs between them read no radius. 0 under Kiri takes the Design's own (options.z is its cut). Its sign
-// says which way a corner goes under Kiri, negative is cut (IrisStyle.fieldCorners, the only writer).
+// corner's radius all round, which is that corner exactly: a squircle's reach stops at the body's half, and the straight
+// runs between them read no radius.
 float bodyBox(vec2 p, vec2 centre, vec2 halfSize, vec4 corners) {
     vec2 d = p - centre;
-    float lane = d.y < 0.0 ? (d.x < 0.0 ? corners.x : corners.y) : (d.x < 0.0 ? corners.w : corners.z);
-    float radius = abs(lane);
-    if (u.options.y < 0.5)
-        return squircleBox(p, centre, halfSize, radius);
-    return kiriBox(p, centre, halfSize, radius > 0.5 ? radius : u.options.z / KIRI_CUT, lane < 0.0);
-}
-
-// The screen's opening inside the frame band wears the same corners, so a Kiri Design never shows a plain round hole
-// around its bodies.
-float frameBox(vec2 p, vec2 centre, vec2 halfSize, float radius) {
-    if (u.options.y < 0.5)
-        return squircleBox(p, centre, halfSize, radius);
-    vec2 d = p - centre;
-    return kiriBox(p, centre, halfSize, radius, d.x * d.y < 0.0);
+    return squircleBox(p, centre, halfSize, d.y < 0.0 ? (d.x < 0.0 ? corners.x : corners.y) : (d.x < 0.0 ? corners.w : corners.z));
 }
 
 // The chrome bevel's environment by elevation e: -1 ground, 0 horizon, 1 sky.
@@ -243,12 +197,8 @@ float bayer4(vec2 p) {
 }
 
 // Polynomial smooth minimum: the join is a fillet `k` pixels deep, which is what
-// makes two bodies read as one that swelled rather than two that overlap. A Kiri Design keeps its shoulders tight: the
-// fillet at most twice its cut deep, so a weld reads as a lacquered joint and not as liquid (iRiS's 56 px shoulder beside
-// 18 px corners read as two languages).
+// makes two bodies read as one that swelled rather than two that overlap.
 float smoothUnion(float a, float b, float k) {
-    if (u.options.y >= 0.5)
-        k = min(k, 2.0 * u.options.z);
     if (k <= 0.001)
         return min(a, b);
     float h = clamp(0.5 + 0.5 * (b - a) / k, 0.0, 1.0);
@@ -415,7 +365,7 @@ void main() {
         vec2 hi = size - vec2(u.field.z + u.edgeWave.z * alongY, u.field.z + u.edgeWave.w * alongX);
         frameCentre = (lo + hi) * 0.5;
         frameHalf = max((hi - lo) * 0.5, vec2(0.0));
-        frameDistance = -frameBox(frameP, frameCentre, frameHalf, u.field.w);
+        frameDistance = -squircleBox(frameP, frameCentre, frameHalf, u.field.w);
         united = frameDistance;
     }
     float frameClusterDistance = frameDistance;
@@ -515,7 +465,7 @@ void main() {
                 && blockValue(block, slot, u.alsoA, u.alsoB, u.alsoC, u.alsoD, u.alsoE) > -0.5)
                 continue;
             vec4 s = shapeAt(i);
-            vec4 corners = abs(cornersAt(i));
+            vec4 corners = cornersAt(i);
             float r = min(max(max(corners.x, corners.y), max(corners.z, corners.w)), min(s.z, s.w));
             float under = u.field.z + 2.0;
             vec2 a = s.xy - s.zw;
@@ -550,8 +500,30 @@ void main() {
     float coverage = 1.0 - smoothstep(-0.7, 0.7, united);
     if (u.options.x > 0.5 && u.field.y > 0.5)
         coverage *= smoothstep(-0.7, 0.7, frameDistance);
+    // Each body runs top to foot across itself; the band runs across the output, so a body welded to its top edge starts
+    // where the band stands and one welded to its foot ends there. Blended by nearness, so a weld shades, never steps.
+    vec3 paint = u.tint.rgb;
+    bool bodyLit = u.bodyTop.a + u.bodyFoot.a > 0.001;
+    if (bodyLit && united < 1.0) {
+        float along = 0.0;
+        float nearness = 0.0;
+        if (u.field.y > 0.5) {
+            float w = exp(-clamp(frameDistance - united, 0.0, 60.0) / 12.0);
+            along += w * clamp(frameP.y / size.y, 0.0, 1.0);
+            nearness += w;
+        }
+        for (int i = 0; i < 20; ++i) {
+            if (bodies[i] > FAR)
+                continue;
+            vec4 s = shapeAt(i);
+            float w = exp(-clamp(bodies[i] - united, 0.0, 60.0) / 12.0);
+            along += w * clamp((p.y - s.y + s.w) / max(2.0 * s.w, 1.0), 0.0, 1.0);
+            nearness += w;
+        }
+        paint = mix(mix(u.tint.rgb, u.bodyTop.rgb, u.bodyTop.a), mix(u.tint.rgb, u.bodyFoot.rgb, u.bodyFoot.a), along / max(nearness, 1e-4));
+    }
     float fillAlpha = coverage * u.tint.a * u.qt_Opacity;
-    vec3 colour = u.tint.rgb * fillAlpha;
+    vec3 colour = paint * fillAlpha;
     float alpha = fillAlpha;
     vec3 share = anyGlass ? weights / max(1e-4, weights.x + weights.y + weights.z) : vec3(1.0, 0.0, 0.0);
     float frosting = weights.y + weights.z > 1e-4 ? clamp(frostSum / (weights.y + weights.z), 0.0, 1.0) : 1.0;
@@ -573,9 +545,9 @@ void main() {
         behind = mix(texture(clearBackdrop, sceneAt).rgb, behind, frosting);
     if (share.x < 0.999) {
         float a = coverage * u.qt_Opacity;
-        vec4 solid = vec4(u.tint.rgb, 1.0) * u.tint.a;
-        vec4 glassy = vec4(mix(behind, u.tint.rgb, frostTint), 1.0);
-        vec4 blurred = vec4(u.tint.rgb * frostTint, frostTint);
+        vec4 solid = vec4(paint, 1.0) * u.tint.a;
+        vec4 glassy = vec4(mix(behind, paint, frostTint), 1.0);
+        vec4 blurred = vec4(paint * frostTint, frostTint);
         vec4 mixed = (solid * share.x + glassy * share.y + blurred * share.z) * a;
         colour = mixed.rgb;
         alpha = mixed.a;
@@ -626,7 +598,7 @@ void main() {
                 float frameQ = FAR * 10.0;
                 float unitedQ = FAR * 10.0;
                 if (u.field.y > 0.5) {
-                    frameQ = -frameBox(q + u.scene.xy, frameCentre, frameHalf, max(u.field.w, bevel));
+                    frameQ = -squircleBox(q + u.scene.xy, frameCentre, frameHalf, max(u.field.w, bevel));
                     unitedQ = frameQ;
                 }
                 float bodiesQ[20];
@@ -637,9 +609,7 @@ void main() {
                     vec4 s = shapeAt(i);
                     int block = i / 4;
                     int slot = i - block * 4;
-                    vec4 lanes = cornersAt(i);
-                    vec4 raised = max(abs(lanes), vec4(bevel));
-                    bodiesQ[i] = bodyBox(q, s.xy, s.zw, mix(raised, -raised, lessThan(lanes, vec4(0.0))));
+                    bodiesQ[i] = bodyBox(q, s.xy, s.zw, max(cornersAt(i), vec4(bevel)));
                     unitedQ = min(unitedQ, bodiesQ[i]);
                 }
                 for (int i = 0; i < 20; ++i) {
@@ -880,7 +850,7 @@ void main() {
         vec2 ps = p - vec2(0.0, u.shadeShape.x);
         float frameShade = FAR * 10.0;
         if (u.field.y > 0.5)
-            frameShade = -frameBox(ps + u.scene.xy, frameCentre, frameHalf, u.field.w);
+            frameShade = -squircleBox(ps + u.scene.xy, frameCentre, frameHalf, u.field.w);
         float alone = FAR * 10.0;
         float withFrame = FAR * 10.0;
         float casters[20];
@@ -923,9 +893,9 @@ void main() {
         colour += u.shade.rgb * reachHere;
         alpha += shadowAlpha;
     }
-    // Wallpaper glass is a half-resolution blur stretched over the body: eight bits of it band. A dither under one level
-    // breaks the bands (a shadow's ramp is short enough not to need it).
-    float ramp = share.y * coverage;
+    // Wallpaper glass is a half-resolution blur stretched over the body and a lit body is a long, shallow ramp: eight bits
+    // of either band. A dither under one level breaks the bands (a shadow's ramp is short enough not to need it).
+    float ramp = (bodyLit ? 1.0 : share.y) * coverage;
     if (ramp > 0.0)
         colour = max(colour + (ign(floor(frameP)) - 0.5) * (1.0 / 255.0) * ramp, vec3(0.0));
     fragColor = vec4(colour, alpha);

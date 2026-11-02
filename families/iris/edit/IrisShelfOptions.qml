@@ -122,10 +122,9 @@ Flickable {
         default property alias control: holder.data
         property bool tappable: false
         signal tapped()
-        radius: IrisStyle.fieldChamfer ? 0 : Math.min(IrisStyle.radiusTile, height / 2)
+        radius: Math.min(IrisStyle.radiusTile, height / 2)
         readonly property color fill: plateHover.hovered ? IrisStyle.fillActive : IrisStyle.fillQuiet
-        color: IrisStyle.fieldChamfer ? "transparent" : plate.fill
-        IrisCutPlate { anchors.fill: parent; visible: IrisStyle.fieldChamfer; color: plate.fill }
+        color: plate.fill
         Behavior on color { ColorAnimation { duration: IrisStyle.duration(110); easing.type: IrisStyle.feedbackEasing } }
         HoverHandler { id: plateHover }
         MouseArea {

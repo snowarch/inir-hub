@@ -31,17 +31,10 @@ MouseArea {
         }
         return Translation.tr("%1 and %2").arg(all[0]).arg(Translation.tr("%1 more").arg(all.length - 1))
     }
-    IrisCutPlate {
-        anchors.fill: plate
-        visible: IrisStyle.fieldChamfer
-        cutLength: IrisStyle.nestedCut(IrisStyle.chamferCut, plate.anchors.margins)
-        color: plate.color
-    }
     Rectangle {
         id: plate
         anchors.fill: parent
         anchors.margins: Math.round(4 * tune.d)
-        visible: !IrisStyle.fieldChamfer
         radius: IrisStyle.concentric(IrisStyle.radiusTile, plate.anchors.margins, IrisStyle.radiusRow)
         color: tune.pressed ? IrisStyle.fillActive : tune.containsMouse ? IrisStyle.fillQuiet : "transparent"
         Behavior on color { ColorAnimation { duration: IrisStyle.duration(110); easing.type: IrisStyle.feedbackEasing } }

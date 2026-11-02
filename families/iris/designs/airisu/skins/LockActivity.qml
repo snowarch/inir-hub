@@ -28,7 +28,6 @@ Item {
         height: width
         ALacquer {
             anchors.fill: parent
-            cut: Airisu.cutFor(height)
             lacquer: root.lacquer
         }
         MaterialSymbol {

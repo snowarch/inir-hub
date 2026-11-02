@@ -90,8 +90,7 @@ Item {
     readonly property bool notch: root.options?.notch ?? false
     // A Design draws the Island's faces and its page nav itself (DESIGNS.md › Island); the engine keeps the modes,
     // events, pages, pieces and geometry. A Design whose pages "hang" (AIRISU) opens them as a second body under the
-    // strip, welded to it: the page grows out of the strip's foot and the two meet in tight concave shoulders, one body
-    // of lacquer (his pick of 10-31, Kiri), where a seam between them read as two boxes.
+    // strip, welded to it: the page grows out of the strip's foot, one body.
     // Three designs of the Island (10-25): the engine's own (Halo), Ledger and Tiles, which skin its face, its page
     // buttons and its desktop page. A shell Design (AIRISU) that skins a part keeps it.
     readonly property string design: ["ledger", "tiles", "dial", "marquee", "duo"].includes(String(root.options?.design ?? "halo")) ? String(root.options.design) : "halo"
@@ -1541,7 +1540,7 @@ Item {
             out.push({ x: page.x - (root.vertical && !root.rightEdge ? sink : 0), y: page.y - (!root.vertical && !root.bottomEdge ? sink : 0),
                 width: extension.width + (root.vertical ? sink : 0), height: extension.height + (root.vertical ? 0 : sink),
                 radius: extension.radius, paints: true,
-                fuse: root.pagesHang ? 2 * IrisStyle.chamferCut : grown ? IrisStyle.fuseEdge : IrisStyle.fuseDeep,
+                fuse: grown ? IrisStyle.fuseEdge : IrisStyle.fuseDeep,
                 // Inline, the page is the chassis rectangle itself: a smooth union of two equal shapes swells the contour by fuse / 4.
                 joins: root.pagesHang && !floating ? (root.clearStrip ? "islandnotch" : "island")
                     : !extension.anchoredShape || floating ? "" : grown && root.clearStrip ? (IrisFrame.framed ? "frame" : "edge")
@@ -1728,7 +1727,7 @@ Item {
             chassis.openHeightHeld = chassis.openHeightLive
         readonly property real openHeightTarget: root.inlineExpanded || chassis.openHeightHeld <= 0
             ? chassis.openHeightLive : chassis.openHeightHeld
-        readonly property real openRadius: IrisStyle.openedRadius(IrisStyle.barShape, Math.max(IrisStyle.radius, 30 * root.d))
+        readonly property real openRadius: IrisStyle.openedRadius(IrisStyle.barShape, IrisStyle.radiusPanel)
         readonly property alias restW: restWidthSpring.value
         readonly property alias openW: openWidthSpring.value
         readonly property alias openH: openHeightSpring.value
@@ -1761,9 +1760,7 @@ Item {
         height: root.vertical ? Math.round(chassis.lerp(chassis.restW, chassis.openH)) : chassis.bodyHeight + chassis.topInset + chassis.bottomInset + chassis.swellInset
         // Opaque: a transparent ClippingRectangle past the screen edge stops painting its children.
         color: IrisStyle.bodyClip
-        // A chamfered Design's body is the field's die (square corners and two 45° cuts): a round clip would bite the
-        // square corners of what it holds, so it clips square and the content keeps its own cut.
-        radius: IrisDesign.fieldCorner === "chamfer" ? 0 : Math.min((root.vertical ? Math.min(chassis.across, chassis.height) : chassis.width) / 2, chassis.restRadius
+        radius: Math.min((root.vertical ? Math.min(chassis.across, chassis.height) : chassis.width) / 2, chassis.restRadius
             + (chassis.openRadius - chassis.restRadius) * Math.min(1, chassis.presentation))
 
         HoverHandler {
@@ -2549,7 +2546,7 @@ Item {
             ? (details.item?.implicitHeight ?? 0) + root.padding * 2
             : root.compactHeight
         readonly property real targetRadius: root.extensionRole === "page"
-            ? IrisStyle.openedRadius(IrisStyle.barShape, Math.max(IrisStyle.radius, 30 * root.d)) : root.meltedCorner
+            ? IrisStyle.openedRadius(IrisStyle.barShape, IrisStyle.radiusPanel) : root.meltedCorner
         readonly property alias presentation: extensionSpring.value
         IrisSpring { id: extensionSpring; surface: "island"; to: root.extensionOpen ? 1 : 0; minimum: 0 }
         readonly property real reach: Math.round((root.vertical ? extension.targetWidth : extension.targetHeight) * extension.presentation)

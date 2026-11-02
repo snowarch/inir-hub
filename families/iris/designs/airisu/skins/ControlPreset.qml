@@ -60,7 +60,6 @@ Item {
                     ALacquer {
                         visible: (place.switchPlace && !(place.round && place.single)) || place.kind === "platter" || place.kind === "media"
                         anchors.fill: parent
-                        cut: Airisu.cutFor(Math.min(width, height))
                         lacquer: place.kind === "media" ? Airisu.lacquerOf(Airisu.pigment("music")) : Airisu.slot
                         moving: false
                     }

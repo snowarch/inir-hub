@@ -125,11 +125,11 @@ Item {
         property real progress: 0
         property color tint: root.ink
         property real stroke: Math.max(2, (root.edgeRings ? 2 : 2.5) * root.d)
-        // The bubble's own Kiri outline, inset by the ring's margin and half its stroke so it runs parallel to the body.
+        // The bubble's own outline, inset by the ring's margin and half its stroke so it runs parallel to the body.
         readonly property real margin: Math.max(0, (root.width - ring.width) / 2)
         readonly property var outline: {
             const m = ring.margin, side = ring.width + 2 * m
-            return IrisStyle.kiriOutline(side, ring.height + 2 * m, IrisStyle.kiriCut * IrisStyle.capsule(side), m + ring.stroke / 2)
+            return IrisStyle.outline(side, ring.height + 2 * m, IrisStyle.pieceRadius(side), m + ring.stroke / 2)
                 .map(p => Qt.point(p.x - m, p.y - m))
         }
         function traced(progress: real): var {
@@ -223,17 +223,11 @@ Item {
         : root.hovered ? IrisStyle.fillHoverOf(root.ink)
         : ColorUtils.applyAlpha(root.ink, 0)
     Rectangle {
-        visible: (root.plated || root.bodyless) && !IrisStyle.fieldChamfer
+        visible: (root.plated || root.bodyless)
         anchors.fill: parent
         radius: root.inline ? height / 2 : IrisStyle.pieceRadius(width)
         color: root.plateColor
         Behavior on color { ColorAnimation { duration: IrisStyle.duration(120); easing.type: IrisStyle.feedbackEasing } }
-    }
-    // In a chamfered Design the plate under the pointer is cut like the piece it lights.
-    IrisCutPlate {
-        visible: (root.plated || root.bodyless) && IrisStyle.fieldChamfer
-        anchors.fill: parent
-        color: root.plateColor
     }
     Rectangle {
         anchors.fill: parent
@@ -317,7 +311,7 @@ Item {
                     anchors.fill: parent
                     anchors.margins: 3 * root.d + root.platedInset
                     circular: !root.edgeRings
-                    radius: root.edgeRings ? 0 : width / 2
+                    radius: root.edgeRings ? IrisStyle.pieceRadius(width) : width / 2
                     decodeSize: Math.round(64 * root.d)
                     source: WallpaperListener.wallpaperUrlForScreen(Quickshell.screens.find(screen => screen.name === root.screenName) ?? null)
                 }
@@ -336,12 +330,12 @@ Item {
                     height: width
                     source: MediaArtwork.displaySource
                     circular: !root.edgeRings
-                    radius: root.edgeRings ? 0 : width / 2
+                    radius: root.edgeRings ? IrisStyle.pieceRadius(width) : width / 2
                 }
                 Rectangle {
                     visible: root.kind === "media" && opacity > 0
                     anchors.fill: cover
-                    radius: root.edgeRings ? 0 : width / 2
+                    radius: root.edgeRings ? IrisStyle.pieceRadius(width) : width / 2
                     color: IrisStyle.veilStrong
                     opacity: !root.playing && !root.coverHidden ? 1 : 0
                     Behavior on opacity { NumberAnimation { duration: IrisStyle.duration(140); easing.type: IrisStyle.feedbackEasing } }
@@ -378,7 +372,7 @@ Item {
                     visible: root.dotted && root.timerKind !== "stopwatch"
                     anchors.fill: parent
                     anchors.margins: 2 * root.d + root.platedInset
-                    cut: root.edgeRings ? IrisStyle.nestedCut(IrisStyle.kiriCut * IrisStyle.capsule(root.width), (root.width - width) / 2) : 0
+                    outlineRadius: root.edgeRings ? IrisStyle.concentric(IrisStyle.pieceRadius(root.width), (root.width - width) / 2, 2) : 0
                     opacity: root.coverHidden ? 0 : 1
                     Behavior on opacity { NumberAnimation { duration: IrisStyle.duration(120); easing.type: IrisStyle.feedbackEasing } }
                     fillColor: root.dotted ? root.ink : root.highlight
@@ -420,7 +414,7 @@ Item {
                     visible: root.dotted && root.kind === "task"
                     anchors.fill: parent
                     anchors.margins: 2 * root.d + root.platedInset
-                    cut: root.edgeRings ? IrisStyle.nestedCut(IrisStyle.kiriCut * IrisStyle.capsule(root.width), (root.width - width) / 2) : 0
+                    outlineRadius: root.edgeRings ? IrisStyle.concentric(IrisStyle.pieceRadius(root.width), (root.width - width) / 2, 2) : 0
                     fillColor: root.ink
                     emptyColor: IrisStyle.unlit(root.ink)
                     value: Math.max(0, Number(root.task?.progress ?? 0))

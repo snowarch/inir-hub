@@ -78,7 +78,9 @@ JsonObject {
         property bool materialForApps: true // with the wallpaper colour theme, terminals and apps sit on the shell's material
         property bool accentForApps: true // with the wallpaper colour theme, apps take the shell's own accent when it has one
         property string controlPlate: "none" // rows of round controls: "none", "veil", "glass" or "solid" (IrisControlPlate)
-        property string texture: "solid" // what the material is drawn as: "solid", "afterglow" or "leak" (IrisField.frag)
+        // What the material is drawn as: "solid" (Ricelin's card), "aurora", "angel", "regalia", "flat", "afterglow" or "leak".
+        property string texture: "solid"
+        property int factoryLook: 1 // the factory look a file was moved to (ConfigMigrations.js)
         // Afterglow: grade "dusk", "cyber", "fog" or "wallpaper"; the rest 0..100 %; wallpaper grades the desktop too.
         property JsonObject afterglow: JsonObject {
             property string grade: "dusk"
@@ -149,7 +151,7 @@ JsonObject {
             property string fill: "auto" // "auto", "filled" or "outlined"
             property string weight: "regular" // "light", "regular" or "bold"
         }
-        property int expandedRadius: 28
+        property int expandedRadius: 22
         property int motionDuration: 220
         property string fontFamily: "" // Empty = Geist (bundled)
         property string titleFontFamily: "" // Empty = Geist (bundled)
@@ -189,7 +191,7 @@ JsonObject {
             property int text: 100      // iRiS type size
             property string weight: "regular" // iRiS type weight: "light", "regular" or "bold"
             property bool rim: true     // the hairline around the field's silhouette
-            property string edges: "line" // the edge every body wears: "line" (the hairline) or "light" (lit from above like glass); rim false turns it off
+            property string edges: "light" // the edge every body wears: "line" (the hairline) or "light" (lit from above like glass); rim false turns it off
             property string rimTint: "neutral" // that hairline's ink: "neutral", "accent" or "highlight"
             property int rimWidth: 1    // the width of every body's edge, line or lit glass: 1-3 device pixels
             property int glow: 0        // how much shadows take the accent colour, 0-100
@@ -226,12 +228,12 @@ JsonObject {
         // "iris" draws the primitives as they are; a Theme may choose another when it is applied.
         property string design: "iris"
         property JsonObject glass: JsonObject {
-            property string mode: "off" // "off", "wallpaper" (the output's wallpaper, blurred) or "compositor" (Niri blurs what is below)
+            property string mode: "compositor" // "off", "wallpaper" (the output's wallpaper, blurred) or "compositor" (Niri blurs what is below)
             property int tint: 58       // how much of the material stays over the glass, 0-100
             property int blur: 100      // wallpaper glass blur, % of the maximum
             // The cut edge of Blur glass: light where it faces up, a line elsewhere (%) and colour ("scene" = the wallpaper's light, "white", "accent", "highlight").
-            property int edgeLight: 34
-            property int edgeLine: 10
+            property int edgeLight: 14
+            property int edgeLine: 0
             property string edgeColour: "scene"
         }
         // Per surface: its own corners (0 = the family's) and its light

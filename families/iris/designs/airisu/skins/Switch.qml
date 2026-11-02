@@ -19,7 +19,7 @@ Item {
     readonly property bool reversed: root.host?.reversed ?? false
     readonly property int inset: Math.max(2, Math.round(2 * Airisu.d))
     readonly property int run: root.pressed && root.available ? Airisu.nudge : 0
-    readonly property int cut: Math.max(2, Math.round(root.height / 4))
+    readonly property int radius: IrisStyle.formOf(root.height)
     readonly property color rule: root.reversed ? IrisStyle.selectionDetail : Airisu.inkThird
     // Signal: on is the inverted plate (ink under the I), as every chosen thing; the seal is kept for what is live.
     readonly property color plate: root.on ? (root.reversed ? IrisStyle.selectionLabel : Airisu.chosen)
@@ -31,8 +31,8 @@ Item {
 
     ADie {
         anchors.fill: parent
-        kind: "chamfer"
-        cut: root.cut
+        kind: "round"
+        radius: root.radius
         stroke: root.available && root.hovered ? Airisu.ink : root.rule
         strokeWidth: Airisu.hair
         dashed: !root.available
@@ -44,7 +44,7 @@ Item {
         y: plate.y - root.run
         width: plate.width
         height: plate.height
-        cut: plate.cut
+        radius: plate.radius
         lacquer: Airisu.underPlate(root.plate)
     }
     ALacquer {
@@ -54,7 +54,7 @@ Item {
         x: (root.on ? root.width - root.inset - width : root.inset) + root.run
         y: root.inset + root.run
         Behavior on x { enabled: Airisu.moving; NumberAnimation { duration: Airisu.detent; easing.type: Easing.BezierSpline; easing.bezierCurve: Airisu.curve } }
-        cut: Math.max(2, root.cut - root.inset)
+        radius: IrisStyle.concentric(root.radius, root.inset, 2)
         lacquer: root.available ? root.plate : Airisu.dim
     }
     // O and I, drawn on the module: a compass ring and a bar of the same stroke.

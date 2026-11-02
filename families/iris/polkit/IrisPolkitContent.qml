@@ -58,7 +58,7 @@ Item {
         scale: 1.08 - 0.08 * root.shown
         width: Math.min(320 * root.d, parent.width - 40)
         implicitHeight: body.implicitHeight + 40 * root.d
-        radius: IrisStyle.fieldChamfer ? 0 : IrisStyle.radiusPlate
+        radius: IrisStyle.radiusPlate
         raised: true
         // A Design that cuts the dialog its own way (IrisDesign part `authPlate`) draws its plate.
         quiet: authPlate.active
@@ -148,9 +148,9 @@ Item {
                 // A plate Design cuts the field square on its fillet, the seal underlining the focus.
                 // A plate Design writes on a ruled line, as on a form: the rule in ink, in the seal while it has the keys.
                 background: Rectangle {
-                    radius: IrisStyle.plateSelection ? 0 : height / 2
+                    radius: height / 2
                     color: IrisStyle.plateSelection ? "transparent" : (input.activeFocus ? IrisStyle.fill : IrisStyle.fillQuiet)
-                    border.width: IrisStyle.plateSelection ? 0 : input.activeFocus ? Math.max(1, Math.round(1.5 * root.d)) : 0
+                    border.width: input.activeFocus ? Math.max(1, Math.round(1.5 * root.d)) : 0
                     border.color: IrisStyle.tintBorder(IrisStyle.accent)
                     Behavior on color { ColorAnimation { duration: IrisStyle.duration(120); easing.type: IrisStyle.feedbackEasing } }
                     Rectangle {

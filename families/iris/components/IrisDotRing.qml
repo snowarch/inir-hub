@@ -5,8 +5,7 @@ import qs.modules.common.functions
 import qs.modules.iris.style
 
 // IrisDotStrip bent round a bubble (Nothing's Glyph ring): dots clockwise from twelve o'clock, filled = value, the
-// fill spreads dot by dot (12 ms apart), indeterminate is one dot running round. `cut` lays them along a Kiri
-// outline instead (AIRISU's bubbles), from its upper left corner.
+// fill spreads dot by dot (12 ms apart), indeterminate is one dot running round. `outlineRadius` lays them along a piece's rounded outline.
 Item {
     id: root
 
@@ -14,7 +13,7 @@ Item {
     property bool indeterminate: false
     property int count: 16
     property real dotSize: Math.max(2, Math.round(3 * IrisStyle.density))
-    property real cut: 0
+    property real outlineRadius: 0
     property color fillColor: IrisStyle.text
     property color emptyColor: IrisStyle.dotEmpty
 
@@ -29,14 +28,14 @@ Item {
         const n = Math.max(3, root.count), h = root.dotSize / 2
         const w = root.width - root.dotSize, ht = root.height - root.dotSize
         const out = []
-        if (root.cut <= 0) {
+        if (root.outlineRadius <= 0) {
             for (let i = 0; i < n; i++) {
                 const a = -Math.PI / 2 + 2 * Math.PI * i / n
                 out.push(Qt.point(h + w / 2 + Math.cos(a) * w / 2, h + ht / 2 + Math.sin(a) * ht / 2))
             }
             return out
         }
-        const path = IrisStyle.kiriOutline(root.width, root.height, root.cut, h)
+        const path = IrisStyle.outline(root.width, root.height, root.outlineRadius, h)
         let total = 0
         for (let i = 1; i < path.length; i++) total += Math.hypot(path[i].x - path[i - 1].x, path[i].y - path[i - 1].y)
         for (let i = 0; i < n; i++) {

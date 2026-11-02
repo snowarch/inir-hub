@@ -1,8 +1,8 @@
 import QtQuick
 
-// AIRISU (designs/airisu/SYSTEM.md): coloured lacquer (色漆). Every surface is a panel cut by one die (45° off two
-// opposite corners) and lacquered in the pigment of its subject; what it measures is a second coat whose edge runs at the
-// same 45°, a change of subject repaints it along that cut. Its
+// AIRISU (designs/airisu/SYSTEM.md): coloured lacquer (色漆). Every surface has the shell's one form and is lacquered in
+// the pigment of its subject; what it measures is a second coat whose edge runs at 45°, a change of subject repaints it
+// along that edge. Its
 // values are the curated Theme `airisu` and the solver's `airisu` palette; its anatomy is the parts below, which draw
 // the engine's own state and keep every Settings row's meaning.
 QtObject {
@@ -93,14 +93,12 @@ QtObject {
     })
     // What a primitive needs to hold this Design's skin, and how a surface's body holds a scene.
     readonly property var surfaces: ({ switch: { width: 48, height: 26 }, banners: { width: 380, margin: 24 } })
-    // Every body is cut with a blade (IrisField.frag bodyBox): 45° off two opposite corners, gussets where bodies meet.
-    readonly property var field: ({ corner: "chamfer" })
     readonly property string preset: "night"
-    // Signal: the same three voices as iRiS (Geist, Geist Mono, Archivo SemiExpanded). AIRISU differs in cut, lacquer and detents.
+    // Signal: the same three voices as iRiS (Geist, Geist Mono, Archivo SemiExpanded). AIRISU differs in colour, lacquer and detents.
     readonly property var fonts: ({})
     readonly property var motion: ({ morph: "tuned", duration: 220 })
     // How it reads: glyphs without tinted plates; the chosen row lacquered in the accent; lists that can be typed
-    // numbered; Island pages hang under the strip as a panel of their own; a level runs along a piece's cut edge; the
+    // numbered; Island pages hang under the strip as a panel of their own; a level runs along a piece's edge; the
     // pointer lays an opaque coat where a surface has no key of its own; a side panel's sections are headed by their
     // line colour.
     readonly property var traits: ({ marks: "glyph", selection: "plate", index: true,

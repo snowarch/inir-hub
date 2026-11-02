@@ -19,7 +19,6 @@ Item {
     ALacquer {
         id: plate
         anchors.fill: parent
-        cut: Airisu.cutFor(height)
         lacquer: Airisu.sheet
         coat: Airisu.tape
         head: true
@@ -30,8 +29,8 @@ Item {
     ADie {
         visible: root.error
         anchors.fill: parent
-        kind: "chamfer"
-        cut: plate.c
+        kind: "round"
+        radius: plate.radius
         stroke: Airisu.tape
         strokeWidth: Airisu.hair
     }
@@ -67,9 +66,9 @@ Item {
         }
     }
     Rectangle {
-        x: Airisu.cutFor(root.height)
+        x: plate.radius
         y: root.height - height
-        width: Math.round((root.width - x) * root.remaining)
+        width: Math.round((root.width - 2 * x) * root.remaining)
         height: Airisu.strong
         color: root.error ? Airisu.tape : Airisu.seal
         antialiasing: false

@@ -50,7 +50,6 @@ Item {
             anchors.verticalCenter: parent.verticalCenter
             width: Math.max(Airisu.u(4), key.implicitWidth + Airisu.u(2))
             height: Airisu.u(4)
-            cut: Airisu.cutFor(height)
             lacquer: Airisu.slot
             moving: false
             AText {

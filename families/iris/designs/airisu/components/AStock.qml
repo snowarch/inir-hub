@@ -1,10 +1,11 @@
 import QtQuick
 import qs
 import qs.modules.common.functions
+import qs.modules.iris.components
 import qs.modules.iris.style
 
 
-// What a desktop widget is made of: a panel of coloured lacquer cut with the bodies' die, coloured with the pigment of what the
+// What a desktop widget is made of: a panel of coloured lacquer, coloured with the pigment of what the
 // widget shows (Settings › Widgets › Material: Tinted lacquers it in the widget's first accent instead), as opaque as
 // Opacity says; Glass is the clear lacquer, Transparent sets the type straight on the wall in Lume's ink. The
 // widget may lay its second coat on it (`share`). While arranging, a bare widget shows its die dashed so it can be found.
@@ -16,6 +17,7 @@ Item {
     property real band: 0
     property int travel: 0
 
+    readonly property real radius: root.face?.radius ?? IrisStyle.radiusCard
     readonly property bool bare: root.face?.clear ?? false
     readonly property color pigment: (root.face?.material ?? "solid") === "tinted"
         ? (root.face?.accent ?? Airisu.pigment(root.subject)) : Airisu.pigment(root.subject)
@@ -38,6 +40,7 @@ Item {
     ALacquer {
         anchors.fill: parent
         visible: !root.bare && (root.face?.plated ?? true)
+        radius: root.radius
         moving: root.face?.moving ?? false
         texture: root.frost
         glaze: IrisStyle.light ? 0.8 : 0.72 // iris-literal: how much of the blurred wall the clear lacquer lets through
@@ -47,11 +50,16 @@ Item {
         band: root.band
         travel: root.travel
     }
+    IrisBodyLight {
+        anchors.fill: parent
+        visible: !IrisStyle.textured && !root.bare && (root.face?.plated ?? true)
+        radius: root.radius
+    }
     ADie {
         anchors.fill: parent
         visible: root.bare && GlobalStates.widgetEditMode
-        kind: "chamfer"
-        cut: Airisu.chamfer
+        kind: "round"
+        radius: root.radius
         stroke: root.inkThird
         strokeWidth: Airisu.hair
         dashed: true

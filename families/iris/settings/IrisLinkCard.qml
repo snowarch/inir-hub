@@ -15,8 +15,7 @@ Rectangle {
     Layout.fillWidth: true
     implicitHeight: linkColumn.implicitHeight
     radius: IrisStyle.radiusTile
-    color: IrisStyle.fieldChamfer ? "transparent" : IrisStyle.readingCard
-    IrisCutPlate { anchors.fill: parent; visible: IrisStyle.fieldChamfer; color: IrisStyle.readingCard }
+    color: IrisStyle.readingCard
 
     Column {
         id: linkColumn

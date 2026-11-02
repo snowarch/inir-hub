@@ -40,7 +40,6 @@ Item {
     ALacquer {
         anchors.fill: parent
         visible: root.pressed
-        cut: Airisu.cutFor(height)
         lacquer: Airisu.underPlate(Airisu.ground)
         moving: false
     }

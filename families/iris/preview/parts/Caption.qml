@@ -22,7 +22,6 @@ Rectangle {
     // A plate Design (AIRISU) labels the scene as a part: a die-cut tag, the words in mono capitals.
     readonly property bool tagged: IrisStyle.plateSelection
     color: caption.tagged ? "transparent" : IrisStyle.sceneVeilStrong
-    IrisCutPlate { anchors.fill: parent; visible: caption.tagged; color: IrisStyle.sceneVeilStrong; cutLength: Math.round(caption.height / 3) }
     visible: caption.text.length > 0 && !(caption.preview?.compact ?? false) && !(caption.preview?.captionOutside ?? false)
     // Only the scene on show speaks: while one group's scene hands over to the next, both are alive and both would write.
     Binding { target: caption.preview; property: "caption"; value: caption.text; when: caption.preview !== null && caption.preview.sceneItem === caption.parent }

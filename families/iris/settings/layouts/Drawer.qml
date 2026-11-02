@@ -235,8 +235,7 @@ Item {
             visible: root.searching || root.paged
             anchors.fill: parent
             radius: Number(root.host?.paneRadius ?? IrisStyle.radiusSheet)
-            color: IrisStyle.glassy && !IrisStyle.fieldChamfer ? IrisStyle.readingSidebar : "transparent"
-            IrisCutPlate { anchors.fill: parent; visible: IrisStyle.glassy && IrisStyle.fieldChamfer; cutLength: Number(root.host?.paneCut ?? IrisStyle.chamferCut); color: IrisStyle.readingSidebar }
+            color: IrisStyle.glassy ? IrisStyle.readingSidebar : "transparent"
             Item {
                 id: rowsSlot
                 anchors.fill: parent

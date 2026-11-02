@@ -61,10 +61,9 @@ Item {
         readonly property real textGrowth: Math.max(1, IrisStyle.typeScale)
         width: Math.min(root.u(root.compact ? 280 : 320) * index.textGrowth, Math.max(root.u(root.compact ? 216 : 244) * index.textGrowth, Math.ceil(index.widest) + root.u(92)))
         height: root.height - 2 * root.inset
-        radius: IrisStyle.fieldChamfer ? 0 : Number(root.host?.paneRadius ?? IrisStyle.radiusSheet)
+        radius: Number(root.host?.paneRadius ?? IrisStyle.radiusSheet)
         readonly property color paper: IrisStyle.glassy ? IrisStyle.readingSidebar : Qt.rgba(IrisStyle.text.r, IrisStyle.text.g, IrisStyle.text.b, IrisStyle.light ? 0.03 : 0.035) // iris-literal: the index sits a step off the sheet
-        color: IrisStyle.fieldChamfer ? "transparent" : paper
-        IrisCutPlate { anchors.fill: parent; visible: IrisStyle.fieldChamfer; cutLength: Number(root.host?.paneCut ?? IrisStyle.chamferCut); color: parent.paper }
+        color: paper
         Flickable {
             IrisScrollFeel {}
             id: indexFlick
@@ -248,8 +247,7 @@ Item {
                 visible: root.searching || root.paged
                 anchors.fill: parent
                 radius: Number(root.host?.paneRadius ?? IrisStyle.radiusSheet)
-                color: IrisStyle.glassy && !IrisStyle.fieldChamfer ? IrisStyle.readingSidebar : "transparent"
-                IrisCutPlate { anchors.fill: parent; visible: IrisStyle.glassy && IrisStyle.fieldChamfer; cutLength: Number(root.host?.paneCut ?? IrisStyle.chamferCut); color: IrisStyle.readingSidebar }
+                color: IrisStyle.glassy ? IrisStyle.readingSidebar : "transparent"
                 Item {
                     id: rowsSlot
                     anchors.fill: parent

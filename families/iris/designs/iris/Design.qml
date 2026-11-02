@@ -7,5 +7,4 @@ QtObject {
     readonly property string theme: "iris"
     readonly property string palette: "" // the person's own Style (iris, washi, Material)
     readonly property var parts: ({})
-    readonly property var field: ({ corner: "round" })
 }

@@ -30,7 +30,7 @@ Item {
     readonly property int foot: root.critical ? 0 : Math.max(2, Math.round(3 * root.d))
     readonly property int stubHeight: Airisu.u(8)
     readonly property bool stubbed: root.actions.length > 0
-    readonly property int cut: Airisu.cutFor(root.height)
+    readonly property int radius: IrisStyle.formOf(root.height)
     implicitHeight: root.head + root.pad + words.implicitHeight + root.pad + (root.stubbed ? root.stubHeight : 0) + root.foot
 
     property real now: Date.now()
@@ -47,21 +47,22 @@ Item {
 
     ALacquer {
         anchors.fill: parent
-        cut: root.cut
+        radius: root.radius
         lacquer: root.lacquer
         moving: false
     }
     ADie {
         visible: root.critical
         anchors.fill: parent
-        kind: "chamfer"
-        cut: root.cut
+        kind: "round"
+        radius: root.radius
         stroke: Airisu.tape
         strokeWidth: Airisu.hair
     }
     Rectangle {
         visible: root.critical
-        width: parent.width - root.cut
+        x: root.radius
+        width: parent.width - 2 * root.radius
         height: root.head
         color: Airisu.tape
         antialiasing: false
@@ -209,9 +210,9 @@ Item {
 
     Rectangle {
         visible: root.foot > 0
-        x: root.cut
+        x: root.radius
         y: parent.height - root.foot
-        width: parent.width - root.cut
+        width: parent.width - 2 * root.radius
         height: root.foot
         color: reading.semantic?.tint ?? IrisStyle.identity.gray
         antialiasing: false

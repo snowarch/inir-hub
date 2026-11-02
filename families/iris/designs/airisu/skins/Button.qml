@@ -44,8 +44,8 @@ Item {
         y: root.shift
         width: parent.width
         height: parent.height
-        kind: "chamfer"
-        cut: key.cut
+        kind: "round"
+        radius: key.radius
         stroke: root.available ? Airisu.inkSecondOn(root.under) : Airisu.inkThirdOn(root.under)
         strokeWidth: Airisu.hair
         dashed: !root.available

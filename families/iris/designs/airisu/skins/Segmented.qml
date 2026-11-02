@@ -27,11 +27,11 @@ Item {
         if (!root.host) return 0
         return i <= 0 ? 0 : i >= root.options.length ? root.width : root.host.slotX(i)
     }
-    // The form is one Kiri piece ruled into boxes: the first box carries its left corners, the last its right ones.
-    readonly property int cut: Airisu.cutFor(root.height)
+    // One piece ruled into boxes: the first box carries its left corners, the last its right ones.
+    readonly property int radius: IrisStyle.formOf(root.height)
     function cornersOf(i: int): var {
         const last = root.options.length - 1
-        return [i === 0 ? 1 : 0, i === last ? 2 : 0, i === last ? 1 : 0, i === 0 ? 2 : 0]
+        return [i === 0 ? 1 : 0, i === last ? 1 : 0, i === last ? 1 : 0, i === 0 ? 1 : 0]
     }
 
     ALacquer {
@@ -41,14 +41,14 @@ Item {
         height: root.height
         Behavior on x { enabled: Airisu.moving; NumberAnimation { duration: Airisu.detent; easing.type: Easing.BezierSpline; easing.bezierCurve: Airisu.curve } }
         Behavior on width { enabled: Airisu.moving; NumberAnimation { duration: Airisu.detent; easing.type: Easing.BezierSpline; easing.bezierCurve: Airisu.curve } }
-        cut: root.cut
+        radius: root.radius
         corners: root.cornersOf(Math.max(0, root.chosen))
         lacquer: root.available ? Airisu.chosen : Airisu.cell
     }
     ADie {
         anchors.fill: parent
-        kind: "chamfer"
-        cut: root.cut
+        kind: "round"
+        radius: root.radius
         stroke: root.rule
         strokeWidth: Airisu.hair
         dashed: !root.available
@@ -82,7 +82,7 @@ Item {
 
             AKey {
                 anchors.fill: parent
-                cut: root.cut
+                radius: root.radius
                 corners: root.cornersOf(box.index)
                 lacquer: "transparent"
                 coat: root.pressedIndex === box.index ? Airisu.slotPress : Airisu.slotCoat

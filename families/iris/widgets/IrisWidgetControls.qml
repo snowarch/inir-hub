@@ -27,8 +27,6 @@ ColumnLayout {
     readonly property real d: IrisStyle.density
     // The corner of its plates: the sheet that hosts it sets it, so they stay concentric with that sheet (DI29).
     property real plateRadius: IrisStyle.radiusRow
-    // Under a chamfered Design the plates take the cut instead, nested in the sheet's (`IrisStyle.nestedCut`).
-    property real plateCut: IrisStyle.chamferCut
     // Draws a list of rows, given by a host that can (the edit sheet). `IrisEditRows`-shaped: a `specs` property.
     property Component optionRows: null
     // The keys this sheet draws itself; every other row of the widget comes from the manifest, on its page.
@@ -115,20 +113,12 @@ ColumnLayout {
         radius: root.plateRadius
         readonly property color stuff: sizeKey.chosen ? IrisStyle.tintFill(IrisStyle.accent)
             : sizeHover.hovered ? IrisStyle.fillHover : IrisStyle.fillQuiet
-        color: IrisStyle.fieldChamfer ? "transparent" : sizeKey.stuff
-        border.width: sizeKey.chosen && !IrisStyle.fieldChamfer ? 1 : 0
+        color: sizeKey.stuff
+        border.width: sizeKey.chosen ? 1 : 0
         border.color: IrisStyle.tintBorder(IrisStyle.accent)
         scale: sizeTap.pressed ? IrisStyle.pressScale(0.96) : 1
         Behavior on color { ColorAnimation { duration: IrisStyle.feedbackDuration; easing.type: IrisStyle.feedbackEasing } }
         Behavior on scale { NumberAnimation { duration: IrisStyle.feedbackDuration; easing.type: IrisStyle.feedbackEasing } }
-        IrisCutPlate {
-            anchors.fill: parent
-            visible: IrisStyle.fieldChamfer
-            cutLength: root.plateCut
-            color: sizeKey.stuff
-            stroke: IrisStyle.tintBorder(IrisStyle.accent)
-            strokeWidth: sizeKey.chosen ? 1 : 0
-        }
         Row {
             anchors.centerIn: parent
             spacing: Math.round(8 * root.d)
@@ -136,7 +126,7 @@ ColumnLayout {
                 anchors.verticalCenter: parent.verticalCenter
                 width: sizeKey.size === "small" ? sizeKey.cell * 2 : sizeKey.cell * 4
                 height: sizeKey.size === "large" ? sizeKey.cell * 4 : sizeKey.cell * 2
-                radius: IrisStyle.fieldChamfer ? 0 : IrisStyle.radiusMicro
+                radius: IrisStyle.radiusMicro
                 color: sizeKey.chosen ? IrisStyle.accent : IrisStyle.textTertiary
             }
             IrisText {
@@ -168,20 +158,12 @@ ColumnLayout {
         radius: root.plateRadius
         readonly property color stuff: tile.chosen ? IrisStyle.tintFill(IrisStyle.accent)
             : tileHover.hovered ? IrisStyle.fillHover : IrisStyle.fillQuiet
-        color: IrisStyle.fieldChamfer ? "transparent" : tile.stuff
-        border.width: tile.chosen && !IrisStyle.fieldChamfer ? 1 : 0
+        color: tile.stuff
+        border.width: tile.chosen ? 1 : 0
         border.color: IrisStyle.tintBorder(IrisStyle.accent)
         scale: tileTap.pressed ? IrisStyle.pressScale(0.96) : 1
         Behavior on color { ColorAnimation { duration: IrisStyle.feedbackDuration; easing.type: IrisStyle.feedbackEasing } }
         Behavior on scale { NumberAnimation { duration: IrisStyle.feedbackDuration; easing.type: IrisStyle.feedbackEasing } }
-        IrisCutPlate {
-            anchors.fill: parent
-            visible: IrisStyle.fieldChamfer
-            cutLength: root.plateCut
-            color: tile.stuff
-            stroke: IrisStyle.tintBorder(IrisStyle.accent)
-            strokeWidth: tile.chosen ? 1 : 0
-        }
         Item {
             id: markBox
             anchors.horizontalCenter: parent.horizontalCenter
@@ -379,9 +361,8 @@ ColumnLayout {
         radius: root.plateRadius
         readonly property color stuff: actionTap.pressed ? (action.danger ? IrisStyle.tintFillHover(IrisStyle.danger) : IrisStyle.fillActive)
             : actionHover.hovered ? (action.danger ? IrisStyle.tintFill(IrisStyle.danger) : IrisStyle.fillHover) : "transparent"
-        color: IrisStyle.fieldChamfer ? "transparent" : action.stuff
+        color: action.stuff
         Behavior on color { ColorAnimation { duration: IrisStyle.feedbackDuration; easing.type: IrisStyle.feedbackEasing } }
-        IrisCutPlate { anchors.fill: parent; visible: IrisStyle.fieldChamfer; cutLength: root.plateCut; color: action.stuff }
 
         MaterialSymbol {
             id: actionGlyph

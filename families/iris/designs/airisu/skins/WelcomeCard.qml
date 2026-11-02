@@ -42,7 +42,7 @@ Item {
         width: root.plateW
         height: root.plateH
         lacquer: Airisu.shade
-        cut: Airisu.chamfer
+        radius: IrisStyle.radiusCard
     }
     Item {
         id: plate
@@ -74,8 +74,8 @@ Item {
         visible: false
         width: root.plateW
         height: root.plateH
-        kind: "chamfer"
-        cut: Airisu.chamfer
+        kind: "round"
+        radius: IrisStyle.radiusCard
         fill: "white"
         layer.enabled: true
     }
@@ -196,8 +196,7 @@ Item {
             }
             ADie {
                 anchors.fill: parent
-                kind: "chamfer"
-                cut: Airisu.cutFor(root.cellH)
+                kind: "round"
                 stroke: all.containsMouse ? Airisu.ink : Airisu.inkThird
                 strokeWidth: Airisu.hair
             }
@@ -224,8 +223,7 @@ Item {
         visible: false
         width: root.cellW
         height: root.cellH
-        kind: "chamfer"
-        cut: Airisu.cutFor(root.cellH)
+        kind: "round"
         fill: "white"
         layer.enabled: true
     }
@@ -259,8 +257,8 @@ Item {
         ADie {
             visible: !key.sealed
             anchors.fill: parent
-            kind: "chamfer"
-            cut: keyFace.cut
+            kind: "round"
+            radius: keyFace.radius
             stroke: key.containsMouse ? Airisu.ink : Airisu.inkThird
             strokeWidth: Airisu.hair
         }

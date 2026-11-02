@@ -53,13 +53,11 @@ Item {
         anchors.fill: parent
         opacity: root.shown ? 1 : 0
         Behavior on opacity { NumberAnimation { duration: IrisStyle.duration(140); easing.type: IrisStyle.feedbackEasing } }
-        Rectangle { anchors.fill: parent; visible: !IrisStyle.fieldChamfer; radius: root.bodyRadius; color: scrim.ink }
-        IrisCutPlate { anchors.fill: parent; visible: IrisStyle.fieldChamfer; color: scrim.ink }
+        Rectangle { anchors.fill: parent; radius: root.bodyRadius; color: scrim.ink }
         MouseArea { anchors.fill: parent; onClicked: root.close(); onWheel: wheel => wheel.accepted = true }
     }
 
     RectangularShadow {
-        visible: !IrisStyle.fieldChamfer
         anchors.fill: sheet
         radius: sheet.radius
         blur: root.u(40)
@@ -74,10 +72,9 @@ Item {
         height: Math.min(body.implicitHeight + 2 * sheet.pad, root.height - root.u(80))
         anchors.centerIn: parent
         radius: root.u(24)
-        color: IrisStyle.fieldChamfer ? "transparent" : IrisStyle.surfaceOpaque
-        border.width: IrisStyle.fieldChamfer ? 0 : 1
+        color: IrisStyle.surfaceOpaque
+        border.width: 1
         border.color: IrisStyle.hairline
-        IrisCutPlate { anchors.fill: parent; visible: IrisStyle.fieldChamfer; color: IrisStyle.surfaceOpaque; stroke: IrisStyle.hairline; strokeWidth: 1 }
         opacity: root.shown ? 1 : 0
         scale: root.shown ? 1 : 0.97
         Behavior on opacity { NumberAnimation { duration: IrisStyle.duration(140); easing.type: IrisStyle.feedbackEasing } }
@@ -128,9 +125,8 @@ Item {
                 Rectangle {
                     width: parent.width
                     height: pinnedColumn.implicitHeight
-                    radius: IrisStyle.fieldChamfer ? 0 : root.u(16)
-                    color: IrisStyle.fieldChamfer ? "transparent" : IrisStyle.fillQuiet
-                    IrisCutPlate { anchors.fill: parent; visible: IrisStyle.fieldChamfer; color: IrisStyle.fillQuiet }
+                    radius: root.u(16)
+                    color: IrisStyle.fillQuiet
                     Column {
                         id: pinnedColumn
                         width: parent.width
@@ -233,9 +229,8 @@ Item {
         Rectangle {
             anchors.fill: parent
             anchors.margins: line.u(3)
-            radius: IrisStyle.fieldChamfer ? 0 : line.u(12)
-            color: IrisStyle.fieldChamfer ? "transparent" : line.containsMouse ? IrisStyle.fillHover : "transparent"
-            IrisCutPlate { anchors.fill: parent; visible: IrisStyle.fieldChamfer && line.containsMouse; color: IrisStyle.fillHover }
+            radius: line.u(12)
+            color: line.containsMouse ? IrisStyle.fillHover : "transparent"
             Behavior on color { ColorAnimation { duration: IrisStyle.duration(110); easing.type: IrisStyle.feedbackEasing } }
         }
         Rectangle {
@@ -251,7 +246,7 @@ Item {
             anchors.verticalCenter: parent.verticalCenter
             width: line.u(28)
             height: width
-            radius: IrisStyle.fieldChamfer ? Math.round(width * 0.18) : line.u(8)
+            radius: line.u(8)
             gradient: Gradient {
                 GradientStop { position: 0; color: IrisStyle.tileTop(line.entry?.tint ?? IrisStyle.identity.gray) }
                 GradientStop { position: 1; color: line.entry?.tint ?? IrisStyle.identity.gray }

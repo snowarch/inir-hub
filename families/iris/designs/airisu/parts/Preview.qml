@@ -11,12 +11,11 @@ Rectangle {
 
     component Plate: Shape {
         id: plate
-        property real cut: 3 * root.u
         preferredRendererType: Shape.CurveRenderer
         ShapePath {
             fillColor: "#141416" // iris-literal: 墨
             strokeColor: "transparent"
-            PathPolyline { path: IrisStyle.kiriOutline(plate.width, plate.height, plate.cut, 0) }
+            PathPolyline { path: IrisStyle.outline(plate.width, plate.height, 3 * root.u, 0) }
         }
     }
     // The bar: workspaces left, the wedge with the chevrons in the middle, the clock right.

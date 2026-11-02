@@ -36,7 +36,7 @@ Item {
         y: key.y
         width: key.width
         height: key.height
-        cut: key.cut
+        radius: key.radius
         lacquer: "transparent"
         coat: Airisu.seal
         share: 0

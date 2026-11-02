@@ -137,7 +137,6 @@ Item {
             y: Math.round((parent.height - height) / 2) + root.run
             width: parent.key
             height: parent.key
-            cut: Airisu.cutFor(height)
             // Off, the key is sunk into the strip; on, its lacquer is laid in it.
             lacquer: root.lit && root.ready ? root.lacquer : Airisu.slot
             MaterialSymbol {

@@ -34,9 +34,8 @@ Rectangle {
     implicitHeight: Math.max(Math.round(96 * card.d), Math.ceil(words.implicitHeight + 32 * card.d))
     radius: IrisStyle.radiusTile
     readonly property color plate: card.on ? IrisStyle.tintFill(IrisStyle.identity.green) : IrisStyle.readingCard
-    color: IrisStyle.fieldChamfer ? "transparent" : card.plate
+    color: card.plate
     Behavior on color { ColorAnimation { duration: IrisStyle.duration(220); easing.type: IrisStyle.feedbackEasing } }
-    IrisCutPlate { anchors.fill: parent; visible: IrisStyle.fieldChamfer; color: card.plate }
 
     RowLayout {
         anchors.fill: parent

@@ -4,7 +4,7 @@ import QtQuick
 import qs.modules.iris.style
 
 // A plate (a group of rows, a tile, a card) in the look that is worn: Apple's fill, Nothing's hairline, Synth's opaque
-// panel standing on its drop edge, Gel's gloss under a light cap, Kiri's cut piece under a Design that cuts (AIRISU).
+// panel standing on its drop edge, Gel's gloss under a light cap.
 // Set colour, radius and border as on a Rectangle.
 Item {
     id: root
@@ -15,12 +15,11 @@ Item {
     readonly property string style: IrisStyle.plateStyle
     // A plate that is chosen or open keeps the look's make but not its cap: the tint is the state.
     property bool lit: false
-    readonly property bool cut: IrisStyle.fieldChamfer
 
     // Synth: the panel stands on its edge, darker, two pixels under it.
     Rectangle {
         z: -1
-        visible: root.style === "key" && root.color.a > 0 && !root.cut
+        visible: root.style === "key" && root.color.a > 0
         width: root.width
         height: root.height
         y: Math.round(2 * IrisStyle.density)
@@ -30,22 +29,14 @@ Item {
     Rectangle {
         id: face
         anchors.fill: parent
-        visible: !root.cut
         radius: root.radius
         color: root.color
         border.width: IrisStyle.plateEdge.a > 0 && root.color.a > 0 ? 1 : 0
         border.color: IrisStyle.plateEdge
     }
-    IrisCutPlate {
-        anchors.fill: parent
-        visible: root.cut && (root.color.a > 0 || face.border.width > 0)
-        color: root.color
-        stroke: face.border.color
-        strokeWidth: face.border.width
-    }
     // Gel: a light cap over the upper half, inside the plate's own curve.
     Rectangle {
-        visible: root.style === "gloss" && root.color.a > 0 && !root.cut
+        visible: root.style === "gloss" && root.color.a > 0
         x: 1
         y: 1
         width: root.width - 2

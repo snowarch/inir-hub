@@ -18,8 +18,7 @@ Item {
 
     ADie {
         anchors.fill: parent
-        kind: "chamfer"
-        cut: Airisu.cutFor(root.height)
+        kind: "round"
         fill: Airisu.sheet
         stroke: root.focused || root.hovered ? Airisu.ink : Airisu.inkThird
         strokeWidth: Airisu.hair

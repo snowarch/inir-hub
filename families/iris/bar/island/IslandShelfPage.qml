@@ -1,7 +1,6 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
-import QtQuick.Effects
 import QtQuick.Layouts
 import Quickshell
 import Quickshell.Widgets
@@ -26,8 +25,6 @@ ColumnLayout {
     readonly property real tileWidth: Math.floor((page.width - page.gap * (page.columns - 1)) / page.columns)
     readonly property real tileHeight: Math.round(page.tileWidth * 0.78)
     readonly property real tileRadius: IrisStyle.concentric(IrisStyle.radiusCard, page.gap, IrisStyle.radiusRow)
-    // Under Kiri a tile is the Design's piece: a cut plate, its picture masked by the same die.
-    readonly property bool cutTiles: IrisStyle.fieldChamfer
     property string justCopied: ""
 
     spacing: Math.round(12 * page.d)
@@ -77,41 +74,21 @@ ColumnLayout {
                     Rectangle {
                         id: plate
                         anchors.fill: parent
-                        visible: !page.cutTiles
                         radius: page.tileRadius
                         color: tile.plateColor
                         Behavior on color { ColorAnimation { duration: IrisStyle.feedbackDuration; easing.type: IrisStyle.feedbackEasing } }
                     }
-                    IrisCutPlate {
-                        anchors.fill: parent
-                        visible: page.cutTiles
-                        color: tile.plateColor
-                    }
                     ClippingRectangle {
                         anchors.fill: parent
                         visible: tile.item.kind === "image"
-                        radius: page.cutTiles ? 0 : page.tileRadius
+                        radius: page.tileRadius
                         color: "transparent"
-                        layer.enabled: page.cutTiles && visible
-                        layer.effect: MultiEffect {
-                            maskEnabled: true
-                            maskSource: tileDie
-                            maskThresholdMin: 0.5
-                            maskSpreadAtMin: 1
-                        }
                         IrisImage {
                             anchors.fill: parent
                             source: tile.thumb
                             fillMode: Image.PreserveAspectCrop
                             asynchronous: true
                         }
-                    }
-                    IrisCutPlate {
-                        id: tileDie
-                        anchors.fill: parent
-                        visible: false
-                        layer.enabled: page.cutTiles && tile.item.kind === "image"
-                        color: "black"
                     }
                     IrisText {
                         visible: tile.item.kind === "text"
@@ -172,8 +149,7 @@ ColumnLayout {
                         opacity: tile.copiedNow ? 1 : 0
                         visible: opacity > 0
                         Behavior on opacity { NumberAnimation { duration: IrisStyle.duration(160); easing.type: IrisStyle.feedbackEasing } }
-                        Rectangle { anchors.fill: parent; visible: !page.cutTiles; radius: page.tileRadius; color: Qt.alpha(IrisStyle.accent, 0.85) }
-                        IrisCutPlate { anchors.fill: parent; visible: page.cutTiles; color: Qt.alpha(IrisStyle.accent, 0.85) }
+                        Rectangle { anchors.fill: parent; radius: page.tileRadius; color: Qt.alpha(IrisStyle.accent, 0.85) }
                         MaterialSymbol { anchors.centerIn: parent; text: "check"; iconSize: Math.round(26 * page.d); color: IrisStyle.inkOnAccent }
                     }
 
@@ -273,26 +249,17 @@ ColumnLayout {
         }
     }
 
-    // A small piece: a disc, or under Kiri the Design's piece cut by its size.
+    // A small piece: a disc.
     component Piece: Item {
         id: piece
         property color fill
         property color edge: "transparent"
         Rectangle {
             anchors.fill: parent
-            visible: !page.cutTiles
             radius: width / 2
             color: piece.fill
             border.width: piece.edge.a > 0 ? 1 : 0
             border.color: piece.edge
-        }
-        IrisCutPlate {
-            anchors.fill: parent
-            visible: page.cutTiles
-            cutLength: Math.round(piece.width * 0.36)
-            color: piece.fill
-            stroke: piece.edge
-            strokeWidth: piece.edge.a > 0 ? 1 : 0
         }
     }
     component CornerKey: Item {

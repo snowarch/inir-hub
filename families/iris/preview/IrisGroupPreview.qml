@@ -222,7 +222,7 @@ ClippingRectangle {
         radius: root.radius
         color: "transparent"
         // A chamfered Design cuts the frame with its own die; this rule would run on through the cut corners.
-        border.width: IrisStyle.fieldChamfer ? 0 : 1
+        border.width: 1
         border.color: IrisStyle.border
     }
 

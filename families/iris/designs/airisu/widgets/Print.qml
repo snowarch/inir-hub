@@ -67,7 +67,7 @@ Item {
         // A slice of the print's foot: it keeps the body's two lower corners and squares the ones inside it.
         ALacquer {
             anchors.fill: parent
-            corners: [0, 0, 1, 2]
+            corners: [0, 0, 1, 1]
             lacquer: ColorUtils.applyAlpha(stock.lacquer, 0.92) // iris-literal: the band lets the print breathe through
             coat: stock.coat
         }
@@ -112,8 +112,7 @@ Item {
                 y: nextPlate.shift
                 width: parent.width
                 height: parent.height
-                kind: "chamfer"
-                cut: Airisu.cutFor(height)
+                kind: "round"
                 stroke: stock.inkThird
                 strokeWidth: Airisu.hair
             }
@@ -159,8 +158,8 @@ Item {
     ADie {
         anchors.fill: parent
         visible: root.dropping
-        kind: "chamfer"
-        cut: Airisu.chamfer
+        kind: "round"
+        radius: IrisStyle.radiusCard
         stroke: Airisu.seal
         strokeWidth: Airisu.strong
     }

@@ -33,10 +33,11 @@ The Dock is set under iRiS Settings › Dock:
 ## Look, colour and themes
 
 - Style › Material: the surface under every iRiS panel. Black, Graphite, Midnight, Wallpaper or Theme.
+- Style › Texture: how every body is drawn, in iRiS and AIRISU alike. Ricelin is a card lit from above, Aurora thin and translucent, Angel a bright glass edge, Regalia a solid tile, Flat a plain plate; Afterglow and Light leak bring their own light.
 - Colour › Look: Apple, Nothing OS, Synth or Gel.
 - Colour › Scheme: Auto, Dark mode, Ink or Light mode. Ink sits between dark and light, like paper and ink.
 - Colour › Colour theme: Catppuccin, Rosé Pine, Tokyo Night, Nord and more. Match the shell also gives iRiS the theme's accent, highlight and material.
-- Style › Design: iRiS or AIRISU. AIRISU is the same shell in lacquer, with one shape on every piece: top-left and bottom-right round, top-right and bottom-left cut at 45°. The Island, Dock, panels, Settings (over the desktop or as a window), widgets and the frame all wear it, and the blur stops exactly at the cut. Its Island is parted by a 45° blade: the hour keeps the left, and what is going on (the day, a song, a timer, a task) takes the right on a second lacquer; a notice, a level or a recording takes the whole strip.
+- Style › Design: iRiS or AIRISU. AIRISU is the same shell in lacquer: same forms and texture as iRiS, its own colour, type and motion. Its Island is parted by a 45° blade: the hour keeps the left, and what is going on (the day, a song, a timer, a task) takes the right on a second lacquer; a notice, a level or a recording takes the whole strip.
 - Style › Themes: curated looks for the whole family. Use Customize, Themes, Save current to keep the look you have as your own theme.
 - Customize: right-click the desktop and pick Customize iRiS. The Island grows a capsule with Themes, Look and Pieces, plus undo, redo and Done.
 - Style › Customize opens: On the shell, which edits in place, or Studio, a side panel with search.
@@ -54,7 +55,7 @@ The Dock is set under iRiS Settings › Dock:
 
 - Wallpaper › Wallpaper gallery › Picker: Gallery is iRiS's own, out of the Island; Grid, Coverflow and Launcher open Material's pickers instead, from the same shortcut, piece or Island button.
 - Wallpaper › Wallpaper gallery › Live wallpaper downloads: Best takes the 4K file when there is one, Light takes HD.
-- Desktop widgets rest a little inside the frame (or the screen edge without one) and settle into its corners with the same gap; under AIRISU a widget in a cut corner steps along the cut so the two run parallel.
+- Desktop widgets rest a little inside the frame (or the screen edge without one) and settle into its corners with the same gap.
 - Four widgets have a second way to read in their sheet, under Face: the Clock's Hour (the time as large as the plate lets it, over the day as one line with sunrise and sunset), the Calendar's Week (today and the days ahead as columns, events where they fall), Vitals' Bars (every reading a meter, the highest leads) and Screen Time's Ribbon (the 24 hours, each coloured by the app that held it).
 - Arranging the desktop, a widget's sheet has three pages: Widget (what it shows), Look (background, corners, ink) and Arrange (scale, position, lock). The background key on the widget's capsule and Look › Surface are the same switch: None takes the plate off, Glass, Solid and Tinted say what it is made of, and Shared follows Style › Widgets.
 - Side Panels: pick Focus or Today and the page shows that panel's sections, width, height and look, with the panel itself on the stage. Sections are a list you reorder right there.

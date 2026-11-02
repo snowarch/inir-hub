@@ -40,7 +40,6 @@ Item {
     ALacquer {
         anchors.fill: parent
         anchors.leftMargin: -Airisu.u(1)
-        cut: Airisu.cutFor(height)
         lacquer: root.hovered ? Airisu.step(Airisu.ground, Airisu.hoverStep) : "transparent"
         moving: false
     }

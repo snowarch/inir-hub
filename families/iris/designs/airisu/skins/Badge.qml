@@ -12,7 +12,6 @@ Item {
 
     ALacquer {
         anchors.fill: parent
-        cut: Math.max(2, Math.round(root.height / 4))
         lacquer: root.face
         moving: false
     }

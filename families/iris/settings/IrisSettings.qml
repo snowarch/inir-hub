@@ -44,16 +44,13 @@ Item {
     readonly property real d: IrisStyle.settingsDensity
     // The page's geometry, one owner for every layout (Classic, Folio, Drawer, Pocket): each reads these and none
     // keeps its own. They once read 8, 12, 14, 16, 20 and 28 from the window's edge and ended out of line (his 10-31).
-    // A pane (sidebar, index, sheet) stands one air off the window's edges and off its neighbour, concentric with the
-    // window: under Kiri its cut runs parallel to the frame's.
+    // A pane (sidebar, index, sheet) stands one air off the window's edges and off its neighbour, concentric with the window.
     readonly property int paneInset: Math.round(8 * root.d)
     readonly property int paneRadius: IrisStyle.concentric(frame.radius, root.paneInset, IrisStyle.radiusTile)
-    readonly property int paneCut: IrisStyle.nestedCut(IrisStyle.chamferCut, root.paneInset)
     // What a pane's words keep from its edge (the sidebar's list, the index's keys).
     readonly property int panePad: IrisStyle.concentricPad(root.paneRadius, 10 * root.d)
     // Form and stage plates on a sheet: concentric with it, so they round as `radiusTile` a sheet's pad in.
     readonly property int plateRadius: IrisStyle.radiusTile
-    readonly property int plateCut: IrisStyle.nestedCut(root.paneCut, root.sheetPad)
     readonly property int sheetPad: Math.max(Math.round(4 * root.d), root.paneRadius - root.plateRadius)
     // Where the plates stand from the window's side and the head's keys end: the same line top to bottom. A layout
     // with no sheet (Pocket, or solid) keeps its plates there too.
@@ -775,11 +772,9 @@ Item {
     MouseArea { anchors.fill: parent; enabled: !root.windowed; onClicked: GlobalStates.settingsOverlayOpen = false }
 
 
-    // A textured material (Afterglow's bevel, Light leak's lit rim) must follow the corners Niri clips the window to, and a
-    // Kiri Design (AIRISU) draws its own body in the window: its cut corners are the field's, its blur the cut rows, where
-    // Niri's clip alone rounded all four and blurred past the cut (his 10-31). The round pair takes Niri's radius, so its
-    // squircle stays inside the clip.
-    readonly property bool windowField: root.windowed && (IrisStyle.textured || IrisStyle.fieldChamfer)
+    // A textured material (Afterglow's bevel, Light leak's lit rim) must follow the corners Niri clips the window to: its
+    // radius is Niri's, so the squircle stays inside the clip.
+    readonly property bool windowField: root.windowed && IrisStyle.textured
     onWindowFieldChanged: if (root.windowField) IrisNiri.reload(["window-rules"])
     // In a window Niri owns the shape, the corners and the open motion: the body fills it, already open.
     IrisMorphSurface {
@@ -894,11 +889,10 @@ Item {
                 height: parent.height - 2 * sidebar.inset
                 width: sidebarSlot.width - sidebar.inset
                 clip: true
-                radius: IrisStyle.fieldChamfer ? 0 : root.paneRadius
-                color: IrisStyle.fieldChamfer ? "transparent" : IrisStyle.readingSidebar
-                border.width: IrisStyle.fieldChamfer ? 0 : 1
+                radius: root.paneRadius
+                color: IrisStyle.readingSidebar
+                border.width: 1
                 border.color: IrisStyle.hairline
-                IrisCutPlate { anchors.fill: parent; visible: IrisStyle.fieldChamfer; cutLength: root.paneCut; color: IrisStyle.readingSidebar; stroke: IrisStyle.hairline; strokeWidth: 1 }
                 Rectangle {
                     visible: false
                     anchors.right: parent.right
@@ -1038,7 +1032,7 @@ Item {
                             width: sidebarColumn.width
                             y: travelWash.row ? sidebarColumn.y + travelWash.row.y + travelWash.row.washY : 0
                             height: travelWash.row ? travelWash.row.rowHeight : 0
-                            radius: IrisStyle.plateSelection ? 0 : travelWash.row ? travelWash.row.washRadius : 0
+                            radius: travelWash.row ? travelWash.row.washRadius : 0
                             // A plate-selection Design (AIRISU) puts where you are on the solid plate of the accent.
                             readonly property color wash: IrisStyle.tintFillHover(travelWash.row?.own ?? IrisStyle.accent)
                             color: IrisStyle.plateSelection ? IrisStyle.selectionFill : "transparent"
@@ -1614,7 +1608,7 @@ Item {
             height: sectionRow.rowHeight
             // Concentric with the mark it holds; where you are is a wash of the area's colour, as light as a hover, never a
             // solid block heavier than the buttons around it.
-            radius: IrisStyle.plateSelection ? 0 : sectionRow.washRadius
+            radius: sectionRow.washRadius
             color: sectionRow.selected && !sectionRow.travels ? (IrisStyle.plateSelection ? IrisStyle.selectionFill : "transparent")
                 : sectionRow.selected ? "transparent"
                 : sectionRow.containsMouse ? IrisStyle.fillQuiet : "transparent"
@@ -1664,7 +1658,7 @@ Item {
                 text: Translation.tr(sectionRow.modelData.title)
                 // Where you are takes the area's colour, lifted to read on the wash; on a plate (AIRISU) the plate's ink.
                 color: sectionRow.selected && IrisStyle.plateSelection ? IrisStyle.selectionLabel
-                    : sectionRow.selected ? root.tintInk(sectionRow.own) : IrisStyle.text
+                    : sectionRow.selected ? root.tintInksectionRow.own : IrisStyle.text
                 Behavior on color { ColorAnimation { duration: IrisStyle.duration(140); easing.type: IrisStyle.feedbackEasing } }
                 font.weight: IrisStyle.weight(sectionRow.selected ? Font.Bold : Font.DemiBold)
                 elide: Text.ElideRight
@@ -1804,8 +1798,7 @@ Item {
                     radius: IrisStyle.radiusTile
                     // A search or a shared page groups its rows on the same form plates as an area's page (10-29).
                     color: root.sceneDrawn && root.scene.groupFill !== undefined ? root.scene.groupFill
-                        : IrisStyle.fieldChamfer ? "transparent" : IrisStyle.formPlate
-                    IrisCutPlate { anchors.fill: parent; visible: !root.split && IrisStyle.fieldChamfer; color: IrisStyle.readingCard }
+                        : IrisStyle.formPlate
                     ColumnLayout {
                         id: groupRows
                         anchors.left: parent.left

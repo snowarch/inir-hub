@@ -707,7 +707,7 @@ Item {
                                 anchors.centerIn: parent
                                 width: root.vertical ? Math.round(root.iconSize * 0.56) : Math.max(1, Math.round(IrisStyle.density))
                                 height: root.vertical ? Math.max(1, Math.round(IrisStyle.density)) : Math.round(root.iconSize * 0.56)
-                                radius: IrisStyle.fieldChamfer ? IrisStyle.capsule(Math.min(width, height)) : width / 2
+                                radius: width / 2
                                 color: IrisStyle.borderStrong
                             }
 
@@ -947,7 +947,7 @@ Item {
                                             width: root.vertical ? indicator.dot : Math.round(indicator.along)
                                             // A plate Design (AIRISU) cuts them square and lights the focused window in the seal:
                                             // the only live thing in the dock.
-                                            radius: IrisStyle.plateSelection ? 0 : Math.min(width, height) / 2
+                                            radius: Math.min(width, height) / 2
                                             color: indicators.minimizedOnly ? "transparent"
                                                 : indicators.urgent ? IrisStyle.secondaryAccent
                                                 : indicator.lead ? (IrisStyle.plateSelection ? IrisStyle.accentFill : IrisStyle.text)
@@ -1091,7 +1091,7 @@ Item {
                 Behavior on opacity { NumberAnimation { duration: IrisStyle.duration(120); easing.type: IrisStyle.feedbackEasing } }
                 width: tagSkin.active ? (tagSkin.item?.implicitWidth ?? 0) : labelText.implicitWidth + 22 * root.d
                 height: Math.round(28 * root.d)
-                radius: IrisStyle.plateSelection ? 0 : height / 2
+                radius: height / 2
                 // A Design that labels the slot its own way (IrisDesign part `nameTag`) draws the whole tag; it reads
                 // `label`, `windowCount` and which side the Dock is on (`facing`).
                 quiet: tagSkin.active

@@ -19,7 +19,6 @@ ColumnLayout {
     property color tint: IrisStyle.label
     // The plate under the rows, nested in whatever holds it.
     property real plateRadius: IrisStyle.radiusTile
-    property real plateCut: IrisStyle.chamferCut
     readonly property real d: IrisStyle.density
     readonly property var groups: {
         Config.revision
@@ -58,13 +57,7 @@ ColumnLayout {
                 Layout.fillWidth: true
                 implicitHeight: plate.implicitHeight
                 radius: root.plateRadius
-                color: IrisStyle.fieldChamfer ? "transparent" : IrisStyle.surfaceHigh
-                IrisCutPlate {
-                    anchors.fill: parent
-                    visible: IrisStyle.fieldChamfer
-                    cutLength: root.plateCut
-                    color: IrisStyle.surfaceHigh
-                }
+                color: IrisStyle.surfaceHigh
                 ColumnLayout {
                     id: plate
                     anchors.left: parent.left

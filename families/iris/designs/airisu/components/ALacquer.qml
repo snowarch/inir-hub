@@ -3,9 +3,8 @@ import QtQuick.Shapes
 import qs.modules.common.functions
 import qs.modules.iris.style
 
-// A panel of coloured lacquer (色漆), AIRISU's one surface: cut by the Design's die (Kiri: two corners round, the other
-// two cut at 45° with eased ends, IrisStyle.kiriOutline) and
-// painted, like a livery, with a second coat whose edge runs at the same 45°. `share` is how far the coat has come from
+// A panel of coloured lacquer (色漆), AIRISU's one surface: of the shell's one form (IrisStyle's ladder) and painted,
+// like a livery, with a second coat whose edge runs at the same 45°. `share` is how far the coat has come from
 // the start side, 0 to 1, and it carries data: a level, the part of a song played, the part of the hour gone. When the
 // lacquer's colour changes it is not faded: the new colour is laid across the panel from the start side along the same
 // cut, so a surface that changes subject reads as one being repainted.
@@ -18,16 +17,10 @@ Item {
     // along the top instead.
     property real band: 0
     property bool head: false
-    property int cut: Airisu.chamfer
-    property bool cutTopRight: true
-    property bool cutBottomLeft: true
-    property bool cutTopLeft: false
-    property bool cutBottomRight: false
-    // The corners it does not cut are round, as every Kiri piece's; a piece that abuts another (a stripe in a stack)
-    // squares them instead.
-    property bool roundCorners: true
-    // Each corner by hand, [tl, tr, br, bl] as kiriOutline takes them (0 square, 1 round, 2 cut), over the flags above:
-    // a piece cut from a larger body (a stripe of a stack) keeps only the body's own corners.
+    // Its corners: a role's rung, or the rung of its size when it names none.
+    property real radius: IrisStyle.formOf(Math.min(root.width, root.height))
+    // Each corner by hand, [tl, tr, br, bl] (0 square, 1 round): a piece of a larger body (a stripe of a stack) keeps only
+    // the body's own corners.
     property var corners: null
     property bool moving: Airisu.moving
     // How a change of share moves: a detent for a level, nothing for a clock that is only read.
@@ -39,13 +32,10 @@ Item {
 
     readonly property real w: Math.max(0, root.width)
     readonly property real h: Math.max(0, root.height)
-    readonly property real c: Math.max(0, Math.min(root.cut, root.w / 2, root.h / 2))
 
-    // The die as a convex polygon, clockwise from the top left (open: `closed` shuts it).
+    // The form as a convex polygon, clockwise from the top left (open: `closed` shuts it).
     readonly property var die: {
-        const rest = root.roundCorners ? 1 : 0
-        const p = IrisStyle.kiriOutline(root.w, root.h, root.cut, 0, root.corners ?? [root.cutTopLeft ? 2 : rest,
-            root.cutTopRight ? 2 : rest, root.cutBottomRight ? 2 : rest, root.cutBottomLeft ? 2 : rest])
+        const p = IrisStyle.outline(root.w, root.h, root.radius, 0, root.corners)
         p.pop()
         return p
     }

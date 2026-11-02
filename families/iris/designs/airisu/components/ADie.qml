@@ -2,10 +2,8 @@ import QtQuick
 import QtQuick.Shapes
 import qs.modules.iris.style
 
-// A die (型抜き, SYSTEM.md §2 law 2): the closed set of shapes AIRISU cuts, built from straight lines and compass arcs on
-// the module. `kind` "rect" · "chamfer" (Kiri: the upper right and lower left cut at 45° with eased ends, the other two
-// round, a body's and a seal's die, IrisStyle.kiriOutline) · "tab" (an
-// index tab standing on the top edge: `tabX`, `tabWidth`, `tabHeight`) · "ticket" (half moons punched in both sides at
+// A die (型抜き): the closed set of shapes AIRISU rules, built from straight lines and compass arcs on the module. `kind`
+// "rect" · "round" (the shell's one form, IrisStyle.outline) · "tab" (an index tab standing on the top edge: `tabX`, `tabWidth`, `tabHeight`) · "ticket" (half moons punched in both sides at
 // `notchY`). A stroke is laid inside the die so a 1 px rule lands on a whole pixel; `dashed` draws an inactive die.
 // `texture` fills the die with a texture provider of the die's own size (a frosted piece of the scene) instead of `fill`.
 Item {
@@ -15,7 +13,7 @@ Item {
     property color stroke: "transparent"
     property real strokeWidth: 0
     property bool dashed: false
-    property real cut: Airisu.cutFor(root.height)
+    property real radius: IrisStyle.formOf(Math.min(root.width, root.height))
     property real tabX: 0
     property real tabWidth: 3 * Airisu.m
     property real tabHeight: Airisu.m
@@ -29,12 +27,11 @@ Item {
     readonly property real t: root.rise + root.s
     readonly property real r: root.width - root.s
     readonly property real b: root.height - root.s
-    readonly property real c: 0
     readonly property real n: root.kind === "ticket" ? Math.min(root.notchRadius, (root.b - root.t) / 3) : 0
 
     Shape {
         anchors.fill: parent
-        visible: root.kind === "chamfer"
+        visible: root.kind === "round"
         preferredRendererType: Shape.CurveRenderer
         ShapePath {
             fillColor: root.fill
@@ -45,12 +42,12 @@ Item {
             dashPattern: [2, 2]
             joinStyle: ShapePath.RoundJoin
             capStyle: ShapePath.FlatCap
-            PathPolyline { path: root.kind === "chamfer" ? IrisStyle.kiriOutline(root.width, root.height, root.cut, root.s) : [] }
+            PathPolyline { path: root.kind === "round" ? IrisStyle.outline(root.width, root.height, root.radius, root.s) : [] }
         }
     }
     Shape {
         anchors.fill: parent
-        visible: root.kind !== "chamfer"
+        visible: root.kind !== "round"
         preferredRendererType: Shape.CurveRenderer
         ShapePath {
             fillColor: root.fill
@@ -67,21 +64,19 @@ Item {
             PathLine { x: root.kind === "tab" ? root.l + root.tabX : root.l; y: root.kind === "tab" ? root.s : root.t }
             PathLine { x: root.kind === "tab" ? root.l + root.tabX + root.tabWidth : root.l; y: root.kind === "tab" ? root.s : root.t }
             PathLine { x: root.kind === "tab" ? root.l + root.tabX + root.tabWidth : root.l; y: root.t }
-            PathLine { x: root.r - root.c; y: root.t }
-            PathLine { x: root.r; y: root.t + root.c }
+            PathLine { x: root.r; y: root.t }
             // The ticket's half moon on the right side, punched inward.
-            PathLine { x: root.r; y: root.kind === "ticket" ? root.notchY - root.n : root.t + root.c }
+            PathLine { x: root.r; y: root.kind === "ticket" ? root.notchY - root.n : root.t }
             PathArc {
-                x: root.r; y: root.kind === "ticket" ? root.notchY + root.n : root.t + root.c
+                x: root.r; y: root.kind === "ticket" ? root.notchY + root.n : root.t
                 radiusX: root.n; radiusY: root.n
                 direction: PathArc.Counterclockwise
             }
             PathLine { x: root.r; y: root.b }
-            PathLine { x: root.l + root.c; y: root.b }
-            PathLine { x: root.l; y: root.b - root.c }
-            PathLine { x: root.l; y: root.kind === "ticket" ? root.notchY + root.n : root.b - root.c }
+            PathLine { x: root.l; y: root.b }
+            PathLine { x: root.l; y: root.kind === "ticket" ? root.notchY + root.n : root.b }
             PathArc {
-                x: root.l; y: root.kind === "ticket" ? root.notchY - root.n : root.b - root.c
+                x: root.l; y: root.kind === "ticket" ? root.notchY - root.n : root.b
                 radiusX: root.n; radiusY: root.n
                 direction: PathArc.Counterclockwise
             }

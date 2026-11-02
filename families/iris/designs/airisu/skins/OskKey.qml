@@ -14,7 +14,6 @@ Item {
         visible: !root.empty
         anchors.fill: parent
         anchors.margins: Math.max(1, Math.round(Airisu.d))
-        cut: Airisu.cutFor(height)
         lacquer: root.held ? Airisu.chosen : Airisu.cell
         hovered: root.host?.hovered ?? false
         pressed: root.host?.down ?? false

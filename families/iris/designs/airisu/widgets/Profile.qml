@@ -114,8 +114,7 @@ Item {
                     y: plate.shift
                     width: parent.width
                     height: parent.height
-                    kind: "chamfer"
-                    cut: Airisu.cutFor(height)
+                    kind: "round"
                     stroke: key.modelData.ends ? Airisu.tape : stock.inkThird
                     strokeWidth: Airisu.hair
                 }

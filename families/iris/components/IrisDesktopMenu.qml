@@ -1,7 +1,6 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
-import QtQuick.Effects
 import QtQuick.Layouts
 import Quickshell
 import Quickshell.Wayland
@@ -284,7 +283,7 @@ Loader {
             readonly property var cornerRadii: IrisFrame.cornersOf({ radius: menu.radius, corners: menu.corners })
             // Near a frame corner or the fillet it opens from, the corner that faces that curve nests in it by the air
             // between them; the other three keep the menu's own.
-            corners: popup.placement && !IrisStyle.fieldChamfer
+            corners: popup.placement
                 ? IrisFrame.nestRadius({ x: menu.x, y: menu.y, width: menu.width, height: menu.height }, menu.baseRadius,
                     popup.target, IrisStyle.fuse, popup.width, popup.height)
                 : null
@@ -418,31 +417,14 @@ Loader {
                                 Accessible.name: row.modelData?.text ?? ""
                                 onContainsMouseChanged: if (containsMouse) popup.focusStop(row.index, -1)
                                 onClicked: popup.choose(row.modelData)
-                                // Under a chamfer the picture sits in the menu's cut corner: it is cut by the parallel edge
-                                // (`nestedCut`), so the band round it stays as wide on the diagonal as along the sides.
-                                IrisCutPlate {
-                                    id: heroDie
-                                    anchors.fill: parent
-                                    visible: false
-                                    layer.enabled: IrisStyle.fieldChamfer
-                                    cutLength: IrisStyle.nestedCut(IrisStyle.chamferCut, root.pad)
-                                    color: "white" // iris-literal: a mask, never shown
-                                }
                                 ClippingRectangle {
                                     anchors.fill: parent
-                                    radius: IrisStyle.fieldChamfer ? 0 : IrisStyle.concentric(menu.radius, root.pad, IrisStyle.radiusMicro)
-                                    topLeftRadius: IrisStyle.fieldChamfer ? 0 : row.nestedAt("tl", IrisStyle.radiusMicro)
-                                    topRightRadius: IrisStyle.fieldChamfer ? 0 : row.nestedAt("tr", IrisStyle.radiusMicro)
-                                    bottomLeftRadius: IrisStyle.fieldChamfer ? 0 : row.nestedAt("bl", IrisStyle.radiusMicro)
-                                    bottomRightRadius: IrisStyle.fieldChamfer ? 0 : row.nestedAt("br", IrisStyle.radiusMicro)
+                                    radius: IrisStyle.concentric(menu.radius, root.pad, IrisStyle.radiusMicro)
+                                    topLeftRadius: row.nestedAt("tl", IrisStyle.radiusMicro)
+                                    topRightRadius: row.nestedAt("tr", IrisStyle.radiusMicro)
+                                    bottomLeftRadius: row.nestedAt("bl", IrisStyle.radiusMicro)
+                                    bottomRightRadius: row.nestedAt("br", IrisStyle.radiusMicro)
                                     color: IrisStyle.fillQuiet
-                                    layer.enabled: IrisStyle.fieldChamfer
-                                    layer.effect: MultiEffect {
-                                        maskEnabled: true
-                                        maskSource: heroDie
-                                        maskThresholdMin: 0.5
-                                        maskSpreadAtMin: 1
-                                    }
                                     scale: hero.pressed ? IrisStyle.pressScale(0.98) : 1
                                     Behavior on scale { NumberAnimation { duration: IrisStyle.feedbackDuration; easing.type: IrisStyle.feedbackEasing } }
                                     IrisWallpaperView {
@@ -471,17 +453,6 @@ Loader {
                                         }
                                     }
                                     // A plate Design labels the picture with a die-cut tag laid on it instead of a scrim.
-                                    IrisCutPlate {
-                                        visible: IrisStyle.plateSelection
-                                        x: Math.round(6 * root.d)
-                                        anchors.bottom: parent.bottom
-                                        anchors.bottomMargin: Math.round(6 * root.d)
-                                        width: heroWords.implicitWidth + Math.round(16 * root.d)
-                                        height: heroWords.implicitHeight + Math.round(10 * root.d)
-                                        // It sits in the picture's cut corner, so it takes the parallel edge too.
-                                        cutLength: IrisStyle.nestedCut(heroDie.cutLength, x)
-                                        color: hero.lit ? IrisStyle.sceneVeil : IrisStyle.sceneVeilStrong
-                                    }
                                     RowLayout {
                                         anchors.left: parent.left
                                         anchors.right: parent.right
@@ -526,7 +497,7 @@ Loader {
                                             readonly property bool lit: popup.isStop(row.index, 0) || heroButtonHover.hovered
                                             Layout.preferredWidth: Math.round(28 * root.d)
                                             Layout.preferredHeight: Layout.preferredWidth
-                                            radius: IrisStyle.fieldChamfer ? IrisStyle.capsule(width) : width / 2
+                                            radius: width / 2
                                             color: heroButton.lit ? IrisStyle.onSceneFill : IrisStyle.sceneVeil
                                             scale: heroButtonTap.pressed ? IrisStyle.pressScale(0.9) : 1
                                             Behavior on color { ColorAnimation { duration: IrisStyle.feedbackDuration; easing.type: IrisStyle.feedbackEasing } }
@@ -584,11 +555,11 @@ Loader {
                                 Rectangle {
                                     visible: !menuItem.skinned
                                     anchors.fill: parent
-                                    radius: IrisStyle.plateSelection ? 0 : IrisStyle.concentric(menu.radius, root.pad, IrisStyle.radiusChip)
-                                    topLeftRadius: IrisStyle.plateSelection ? 0 : row.nestedAt("tl", IrisStyle.radiusChip)
-                                    topRightRadius: IrisStyle.plateSelection ? 0 : row.nestedAt("tr", IrisStyle.radiusChip)
-                                    bottomLeftRadius: IrisStyle.plateSelection ? 0 : row.nestedAt("bl", IrisStyle.radiusChip)
-                                    bottomRightRadius: IrisStyle.plateSelection ? 0 : row.nestedAt("br", IrisStyle.radiusChip)
+                                    radius: IrisStyle.concentric(menu.radius, root.pad, IrisStyle.radiusChip)
+                                    topLeftRadius: row.nestedAt("tl", IrisStyle.radiusChip)
+                                    topRightRadius: row.nestedAt("tr", IrisStyle.radiusChip)
+                                    bottomLeftRadius: row.nestedAt("bl", IrisStyle.radiusChip)
+                                    bottomRightRadius: row.nestedAt("br", IrisStyle.radiusChip)
                                     color: menuItem.plate ? IrisStyle.selectionFill : menuItem.danger
                                         ? (menuItem.lit ? IrisStyle.tintFill(IrisStyle.danger) : ColorUtils.applyAlpha(IrisStyle.danger, 0))
                                         : (menuItem.lit ? IrisStyle.tintFill(IrisStyle.accent) : ColorUtils.applyAlpha(IrisStyle.accent, 0))

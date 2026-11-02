@@ -21,17 +21,10 @@ MouseArea {
     onClicked: root.entry.action()
 
     // Concentric with the card it lies in; cut like it under a chamfer.
-    IrisCutPlate {
-        anchors.fill: plate
-        visible: IrisStyle.fieldChamfer
-        cutLength: IrisStyle.nestedCut(IrisStyle.chamferCut, plate.anchors.margins)
-        color: plate.color
-    }
     Rectangle {
         id: plate
         anchors.fill: parent
         anchors.margins: 3 * IrisStyle.settingsDensity
-        visible: !IrisStyle.fieldChamfer
         radius: IrisStyle.concentric(IrisStyle.radiusTile, plate.anchors.margins, IrisStyle.radiusRow)
         color: root.containsMouse ? IrisStyle.fillQuiet : "transparent"
         Behavior on color {

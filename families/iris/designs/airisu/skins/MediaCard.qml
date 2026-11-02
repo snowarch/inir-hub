@@ -54,7 +54,7 @@ Item {
         visible: !root.overMedia
         anchors.fill: parent
         anchors.margins: Airisu.kiss
-        cut: Math.max(2, Airisu.chamfer - Airisu.kiss)
+        radius: IrisStyle.concentric(IrisStyle.radiusCard, Airisu.kiss, IrisStyle.radiusTile)
         lacquer: root.panel
     }
 

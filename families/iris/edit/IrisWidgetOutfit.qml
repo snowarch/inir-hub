@@ -33,7 +33,6 @@ Item {
     readonly property bool hovered: (root.widget?.editHovered ?? false) && !root.selected
     readonly property bool carried: root.widget?.isDragging ?? false
     readonly property bool locked: root.widget?.locked ?? false
-    readonly property bool cut: IrisStyle.fieldChamfer
     readonly property bool ink: IrisStyle.nothingAt("widgets")
     // The card shrinks the desktop: the outfit's type and keys keep their true size on screen.
     readonly property var card: DesktopEditStage.cardFor(root.widget?.outputName ?? "", root.widget?.scaledScreenWidth ?? 0,
@@ -54,11 +53,11 @@ Item {
         root.widget.commitSize(root.sizes[(i + 1) % root.sizes.length])
     }
 
-    // ── The ring, or AIRISU's crop marks ──
+    // ── The ring ──
     property real lit: root.selected ? 1 : root.hovered ? 0.55 : 0
     Behavior on lit { NumberAnimation { duration: 110; easing.type: IrisStyle.feedbackEasing } }
     Rectangle {
-        visible: root.dressed && !root.cut && root.lit > 0.01
+        visible: root.dressed && root.lit > 0.01
         anchors.fill: parent
         anchors.margins: -root.gap
         radius: root.cardRadius + root.gap
@@ -67,24 +66,6 @@ Item {
         border.color: root.selected ? root.ringInk : IrisStyle.hairlineStrong
         opacity: root.lit
         antialiasing: true
-    }
-    Repeater {
-        model: root.cut && root.dressed ? 4 : 0
-        delegate: Item {
-            id: mark
-            required property int index
-            readonly property bool east: mark.index % 2 === 1
-            readonly property bool south: mark.index >= 2
-            readonly property real arm: 12 * root.hair
-            readonly property real thick: 2 * root.hair
-            x: mark.east ? root.width + root.gap - mark.arm : -root.gap
-            y: mark.south ? root.height + root.gap - mark.arm : -root.gap
-            width: mark.arm
-            height: mark.arm
-            opacity: root.lit
-            Rectangle { y: mark.south ? mark.arm - mark.thick : 0; width: mark.arm; height: mark.thick; color: root.selected ? root.ringInk : IrisStyle.text }
-            Rectangle { x: mark.east ? mark.arm - mark.thick : 0; width: mark.thick; height: mark.arm; color: root.selected ? root.ringInk : IrisStyle.text }
-        }
     }
 
     // ── Lifted while carried ──
@@ -95,7 +76,7 @@ Item {
         y: 10 * root.hair
         width: root.width
         height: root.height
-        radius: root.cut ? 0 : root.cardRadius
+        radius: root.cardRadius
         blur: 30 * root.hair
         spread: -6 * root.hair
         color: ColorUtils.applyAlpha(IrisStyle.shadow, Math.min(1, IrisStyle.shadow.a * 1.4))
@@ -141,26 +122,12 @@ Item {
 
         Rectangle {
             anchors.fill: parent
-            visible: !root.cut
             radius: height / 2
             color: IrisStyle.surfaceOpaque
             border.width: IrisStyle.devicePx
             border.color: IrisStyle.hairlineStrong
         }
         // AIRISU: a seal box, its cut parallel to the widget's.
-        Shape {
-            anchors.fill: parent
-            visible: root.cut
-            preferredRendererType: Shape.CurveRenderer
-            ShapePath {
-                strokeWidth: -1
-                fillColor: root.selected ? IrisStyle.accent : IrisStyle.surfaceOpaque
-                PathSvg {
-                    readonly property real c: Math.round(tag.height / 4)
-                    path: `M 0 0 L ${tag.width - c} 0 L ${tag.width} ${c} L ${tag.width} ${tag.height} L ${c} ${tag.height} L 0 ${tag.height - c} Z`
-                }
-            }
-        }
         Row {
             id: tagRow
             anchors.centerIn: parent
@@ -175,24 +142,24 @@ Item {
             StyledText {
                 anchors.verticalCenter: parent.verticalCenter
                 text: root.name
-                color: root.cut && root.selected ? IrisStyle.inkOnAccent : IrisStyle.text
-                font.family: root.ink || root.cut ? IrisStyle.fontLabel : IrisStyle.fontMain
-                font.pixelSize: root.ink || root.cut ? Math.round(10 * root.d) : IrisStyle.typeFootnote
-                font.weight: root.ink || root.cut ? IrisStyle.weight(Font.Medium) : IrisStyle.weight(Font.DemiBold)
-                font.capitalization: root.ink || root.cut ? Font.AllUppercase : Font.MixedCase
-                font.letterSpacing: root.ink || root.cut ? 0.8 * root.d : 0
+                color: IrisStyle.text
+                font.family: root.ink ? IrisStyle.fontLabel : IrisStyle.fontMain
+                font.pixelSize: root.ink ? Math.round(10 * root.d) : IrisStyle.typeFootnote
+                font.weight: root.ink ? IrisStyle.weight(Font.Medium) : IrisStyle.weight(Font.DemiBold)
+                font.capitalization: root.ink ? Font.AllUppercase : Font.MixedCase
+                font.letterSpacing: root.ink ? 0.8 * root.d : 0
             }
             // Chosen, the size key says it.
             StyledText {
                 visible: root.sizeName.length > 0 && !root.selected
                 anchors.verticalCenter: parent.verticalCenter
                 text: root.sizeName
-                color: root.cut && root.selected ? IrisStyle.inkOnAccent : IrisStyle.textSecondary
-                font.family: root.ink || root.cut ? IrisStyle.fontLabel : IrisStyle.fontMain
-                font.pixelSize: root.ink || root.cut ? Math.round(10 * root.d) : IrisStyle.typeFootnote
+                color: IrisStyle.textSecondary
+                font.family: root.ink ? IrisStyle.fontLabel : IrisStyle.fontMain
+                font.pixelSize: root.ink ? Math.round(10 * root.d) : IrisStyle.typeFootnote
                 font.weight: IrisStyle.weight(Font.Medium)
-                font.capitalization: root.ink || root.cut ? Font.AllUppercase : Font.MixedCase
-                font.letterSpacing: root.ink || root.cut ? 0.8 * root.d : 0
+                font.capitalization: root.ink ? Font.AllUppercase : Font.MixedCase
+                font.letterSpacing: root.ink ? 0.8 * root.d : 0
             }
         }
     }
@@ -228,7 +195,7 @@ Item {
 
         Rectangle {
             anchors.fill: parent
-            radius: root.cut ? 0 : height / 2
+            radius: height / 2
             color: IrisStyle.surfaceOpaque
             border.width: IrisStyle.devicePx
             border.color: IrisStyle.hairlineStrong
@@ -298,7 +265,7 @@ Item {
                                 readonly property bool filled: root.size === "large" || index === 0 || (root.size === "medium" && index === 1)
                                 width: Math.round(5 * root.d)
                                 height: width
-                                radius: root.cut ? 0 : Math.round(1.5 * root.d)
+                                radius: IrisStyle.radiusMicro
                                 color: IrisStyle.text
                                 opacity: filled ? 1 : 0.28
                                 Behavior on opacity { NumberAnimation { duration: 110; easing.type: IrisStyle.feedbackEasing } }

@@ -20,7 +20,7 @@ import "../components"
 // with the time cut in its ink, leaning like a livery number. Whatever runs (the hour, the song, the timer, a task, a
 // level) is the second coat, its 45° edge travelling across the strip; a change of subject repaints the strip along the
 // same cut instead of fading.
-// Kiri's own face (his 10-31 "dale un aspecto original", C of the 11-01 sheet): the strip is parted by the die's 45°. The
+// Its own face (his 10-31 "dale un aspecto original", C of the 11-01 sheet; the one blade AIRISU keeps): the strip is parted at 45°. The
 // hour keeps the left of the blade whatever happens; what is going on takes the right, on a second lacquer of its pigment,
 // and the blade is the mark no other look has. A notice, a level and a recording still take the whole strip: those must
 // be seen from across the room.
@@ -104,8 +104,7 @@ Item {
         : root.mode === "task" ? Math.max(0, Number(root.island?.task?.progress ?? 0))
         : root.mode === "feedback" && root.levelStyle !== "minimal" ? (root.island?.feedbackValue ?? 0) : 0
 
-    // The panel keeps only the cuts its body shows: welded to the band (the notch) the body hangs square from it and only
-    // its far corner is cut, so the panel is cut there alone and stays concentric with it; floating, both.
+    // Welded to the band (the notch) the body hangs square from it: the panel rounds only the far corners.
     readonly property bool welded: root.island?.notch ?? false
     readonly property bool atFoot: root.island?.bottomEdge ?? false
     readonly property int kiss: Math.max(2, Math.round(3 * root.d))
@@ -127,12 +126,8 @@ Item {
         id: panel
         anchors.fill: parent
         anchors.margins: root.kiss
-        cut: Math.max(2, Airisu.chamfer - root.kiss)
-        // Welded it shows two corners and cuts both alike, as the body does (IrisStyle.kiriMaskOf).
-        cutTopRight: !root.welded || root.atFoot
-        cutBottomLeft: !root.welded || !root.atFoot
-        cutTopLeft: root.welded && root.atFoot
-        cutBottomRight: root.welded && !root.atFoot
+        radius: IrisStyle.concentric(Math.min(root.width, root.height) / 2, root.kiss, IrisStyle.radiusChip)
+        corners: root.welded ? (root.atFoot ? [1, 1, 0, 0] : [0, 0, 1, 1]) : null
         lacquer: root.surface
         coat: root.coatColour
         // At rest the hour is a hairline of its pigment, read at a glance and never louder than the time.

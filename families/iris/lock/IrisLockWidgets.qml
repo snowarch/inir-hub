@@ -75,18 +75,11 @@ Item {
         // Round the widget it rings, grown by the gap (IrisWidgetFace's corner), so the two stay parallel.
         readonly property real faceRadius: (root.selectedItem?.cornerRadiusOverride ?? -1) >= 0 ? root.selectedItem.cornerRadiusOverride
             : Math.round((root.selectedItem?.widgetCardRadius ?? IrisStyle.radiusPlate) * (root.selectedItem?.scaleFactor ?? 1))
-        radius: IrisStyle.fieldChamfer ? 0 : faceRadius + pad
+        radius: faceRadius + pad
         color: "transparent"
-        border.width: IrisStyle.fieldChamfer ? 0 : Math.max(1, Math.round(1.5 * d))
+        border.width: Math.max(1, Math.round(1.5 * d))
         border.color: IrisStyle.accentOnMedia
         // Under Kiri the ring is the widget's own die grown by the gap, its cut parallel to the widget's.
-        IrisCutPlate {
-            anchors.fill: parent
-            visible: IrisStyle.fieldChamfer
-            cutLength: IrisStyle.chamferCut + Math.round(parent.pad * (2 - Math.SQRT2))
-            stroke: IrisStyle.accentOnMedia
-            strokeWidth: Math.max(1, Math.round(1.5 * parent.d))
-        }
     }
 
     Repeater {

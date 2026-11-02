@@ -148,7 +148,7 @@ Item {
     // A shadow under glass shows through it: the body darkens toward its middle and its top edge reads as a glow.
     RectangularShadow {
         anchors.fill: parent
-        visible: root.opaque && root.plated && !root.ownPlate
+        visible: root.opaque && root.plated
         radius: root.radius
         blur: root.dp(28)
         spread: -root.dp(4)
@@ -280,6 +280,11 @@ Item {
         border.color: root.lightBackdrop ? root.hairline : root.clear || IrisStyle.rim.a === 0 ? IrisStyle.clearRim : IrisStyle.rim
         Behavior on color { ColorAnimation { duration: IrisStyle.revealDuration; easing.type: IrisStyle.feedbackEasing } }
         Behavior on border.width { NumberAnimation { duration: IrisStyle.revealDuration; easing.type: IrisStyle.feedbackEasing } }
+    }
+    IrisBodyLight {
+        anchors.fill: parent
+        visible: !IrisStyle.textured && root.plated && !root.clear
+        radius: root.radius
     }
 
     // Light leak: the plate is film exposed by the shell's one light, as the field's bodies are. It replaces the plate's

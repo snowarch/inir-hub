@@ -70,22 +70,22 @@ Item {
         id: panel
         anchors.fill: parent
         anchors.margins: root.kiss
-        cut: Math.max(2, Airisu.chamfer - root.kiss)
+        radius: IrisStyle.concentric(IrisStyle.radiusCard, root.kiss, IrisStyle.radiusTile)
         lacquer: root.opened ? root.panel : Airisu.ground
     }
     ADie {
         visible: root.cautioned
         anchors.fill: panel
-        kind: "chamfer"
-        cut: panel.cut
+        kind: "round"
+        radius: panel.radius
         stroke: Airisu.tape
         strokeWidth: Airisu.hair
     }
     Rectangle {
         visible: root.cautioned
-        x: panel.x
+        x: panel.x + panel.radius
         y: panel.y
-        width: panel.width - panel.cut
+        width: panel.width - 2 * panel.radius
         height: root.tape
         color: Airisu.tape
         antialiasing: false
@@ -190,7 +190,6 @@ Item {
             Layout.alignment: Qt.AlignVCenter
             implicitWidth: Airisu.u(9)
             implicitHeight: Airisu.u(9)
-            cut: Airisu.cutFor(Airisu.u(9))
             lacquer: Airisu.slot
             moving: false
             MaterialSymbol {
@@ -206,7 +205,6 @@ Item {
             Layout.alignment: Qt.AlignVCenter
             implicitWidth: Math.max(Airisu.u(9), Math.min(Airisu.u(18), legend.implicitWidth + Airisu.u(4)))
             implicitHeight: Airisu.u(9)
-            cut: Airisu.cutFor(Airisu.u(9))
             lacquer: Airisu.slot
             moving: false
             AText {

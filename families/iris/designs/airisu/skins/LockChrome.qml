@@ -20,8 +20,7 @@ Item {
         anchors.fill: parent
         anchors.margins: -Airisu.u(2)
         visible: root.arranging && (root.hovered || root.picked)
-        kind: "chamfer"
-        cut: Airisu.cutFor(height)
+        kind: "round"
         stroke: root.picked ? Airisu.chosenOnMedia : IrisStyle.onMedia
         strokeWidth: root.picked ? Airisu.strong : Airisu.hair
     }

@@ -29,7 +29,7 @@ Item {
     // The binding strip, a print deeper than the page, cut by the page's die.
     ALacquer {
         anchors.fill: parent
-        cut: Airisu.chamfer
+        radius: IrisStyle.radiusCard
         lacquer: "transparent"
         coat: Airisu.underPlate(stock.lacquer)
         head: true

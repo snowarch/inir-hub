@@ -28,7 +28,6 @@ Item {
     function u(n: real): int { return Math.round(n * page.d) }
     // The geometry every layout shares (IrisSettings owns it).
     readonly property int paneRadius: Number(page.host?.paneRadius ?? IrisStyle.radiusSheet)
-    readonly property int paneCut: Number(page.host?.paneCut ?? IrisStyle.chamferCut)
     readonly property int sheetPad: Number(page.host?.sheetPad ?? page.u(8))
     readonly property int plateRadius: Number(page.host?.plateRadius ?? IrisStyle.radiusTile)
     readonly property var entry: IrisOptions.sectionById(page.area) ?? ({})
@@ -112,8 +111,7 @@ Item {
             width: areaBox.width
             height: areaBox.height
             radius: page.paneRadius
-            color: IrisStyle.glassy && !IrisStyle.fieldChamfer ? IrisStyle.readingSidebar : "transparent"
-            IrisCutPlate { anchors.fill: parent; visible: IrisStyle.glassy && IrisStyle.fieldChamfer; cutLength: page.paneCut; color: IrisStyle.readingSidebar }
+            color: IrisStyle.glassy ? IrisStyle.readingSidebar : "transparent"
             // The stage stays over the sheet while its rows scroll under it: a change is seen where it happens (his
             // 10-30: the band scrolled away with the first rows).
             StagePlate {

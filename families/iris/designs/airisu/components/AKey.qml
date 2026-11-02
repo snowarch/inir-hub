@@ -16,10 +16,8 @@ Item {
     property bool pressed: false
     property bool keyed: false
     property bool available: true
-    property int cut: Airisu.cutFor(root.height)
-    property bool cutTopRight: true
-    property bool cutBottomLeft: true
-    // A key cut from a larger piece (a box of a segmented row) keeps only that piece's corners (ALacquer.corners).
+    property real radius: IrisStyle.formOf(Math.min(root.width, root.height))
+    // A key out of a larger piece (a box of a segmented row) keeps only that piece's corners (ALacquer.corners).
     property var corners: null
     // What lies under a quiet key, so its under plate is a print of that.
     property color under: Airisu.ground
@@ -40,9 +38,7 @@ Item {
         anchors.fill: parent
         active: root.down
         sourceComponent: ALacquer {
-            cut: root.cut
-            cutTopRight: root.cutTopRight
-            cutBottomLeft: root.cutBottomLeft
+            radius: root.radius
             corners: root.corners
             lacquer: root.coat
         }
@@ -54,9 +50,7 @@ Item {
         height: root.height
         active: root.lacquer.a > 0 || root.down || (root.available && root.hovered)
         sourceComponent: ALacquer {
-            cut: root.cut
-            cutTopRight: root.cutTopRight
-            cutBottomLeft: root.cutBottomLeft
+            radius: root.radius
             corners: root.corners
             // Pressed, the top plate is printed solid, so the under plate shows only where it has moved off it.
             lacquer: root.down && root.lacquer.a > 0 ? Airisu.solid(root.lacquer) : root.lacquer

@@ -120,7 +120,6 @@ Item {
             }
             ALacquer {
                 anchors.fill: parent
-                cut: Airisu.cutFor(photo.height)
                 lacquer: photo.ready ? "transparent" : IrisStyle.mediaScrim
                 texture: photo.ready ? likeness : null
                 glaze: 0
@@ -310,7 +309,7 @@ Item {
                         property bool deep: false
                         anchors.fill: parent
                         visible: root.working
-                        cut: unlockKey.cut
+                        radius: unlockKey.radius
                         lacquer: checking.deep ? Airisu.step(Airisu.sealOnMedia, Airisu.pressStep) : Airisu.sealOnMedia
                         Timer {
                             interval: Airisu.tear + Airisu.snap

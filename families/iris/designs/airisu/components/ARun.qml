@@ -14,7 +14,6 @@ ALacquer {
     property color pigment: Airisu.seal
     // A caller's own slot (over a picture); the pointer then leaves it as it is.
     property color slot: "transparent"
-    cut: Math.max(2, Math.round(root.height / 3))
     lacquer: root.slot.a > 0 ? root.slot : (root.hovered || root.keyed) && root.available && !root.held ? Airisu.slotLifted : Airisu.slot
     coat: root.available ? root.pigment : Airisu.inkThird
     share: root.value

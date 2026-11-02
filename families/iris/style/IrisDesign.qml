@@ -20,8 +20,6 @@ Singleton {
     property QtObject manifest: null
     readonly property var parts: root.manifest?.parts ?? ({})
     readonly property string name: String(root.manifest?.name ?? "iRiS")
-    // How the field cuts a body's corners (IrisField.frag bodyBox): "round" or "chamfer".
-    readonly property string fieldCorner: String(root.manifest?.field?.corner ?? "round")
     // The solver language the Design paints with (inir-accel's washi), or "" to keep the person's Style.
     readonly property string palette: String(root.manifest?.palette ?? "")
     // What the Design wears whatever the person's rows say: its preset, its type, its camera.

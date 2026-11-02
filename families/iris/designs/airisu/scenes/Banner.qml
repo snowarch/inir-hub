@@ -93,32 +93,32 @@ Item {
         y: root.kiss
         width: root.width - 2 * root.kiss
         height: root.height - 2 * root.kiss
-        readonly property int cut: Math.max(2, Airisu.chamfer - root.kiss)
+        readonly property int radius: IrisStyle.concentric(IrisStyle.radiusCard, root.kiss, IrisStyle.radiusTile)
         readonly property real perforation: root.head + root.pad + slip.height + root.pad
 
         ALacquer {
             anchors.fill: parent
-            cut: ticket.cut
+            radius: ticket.radius
             lacquer: root.landed ? root.lacquer : "transparent"
         }
         ADie {
             visible: !root.landed || root.critical
             anchors.fill: parent
-            kind: "chamfer"
-            cut: ticket.cut
+            kind: "round"
+            radius: ticket.radius
             stroke: root.critical ? root.caution : root.ink
             strokeWidth: Airisu.hair
         }
 
-        // The head: the time left in shu, or a critical one's band of yamabuki. It runs from the cut back to the start.
+        // The head: the time left in shu, or a critical one's band of yamabuki, between the corners.
         Rectangle {
-            x: 0
+            x: ticket.radius
             y: 0
             height: root.head
             // A notice that never times out has no run, unless the pointer holds it.
-            width: root.critical ? parent.width - ticket.cut
-                : root.clock ? Math.round((parent.width - ticket.cut) * (1 - root.torn))
-                : root.hovered ? parent.width - ticket.cut : 0
+            width: root.critical ? parent.width - 2 * ticket.radius
+                : root.clock ? Math.round((parent.width - 2 * ticket.radius) * (1 - root.torn))
+                : root.hovered ? parent.width - 2 * ticket.radius : 0
             color: root.critical ? root.caution : Airisu.seal
             antialiasing: false
         }
@@ -307,9 +307,9 @@ Item {
         // The line colour along the foot.
         Rectangle {
             visible: root.foot > 0
-            x: ticket.cut
+            x: ticket.radius
             y: parent.height - root.foot
-            width: parent.width - ticket.cut
+            width: parent.width - 2 * ticket.radius
             height: root.foot
             color: root.line
             antialiasing: false

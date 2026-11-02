@@ -34,7 +34,7 @@ Item {
     ADie {
         anchors.fill: parent
         visible: root.empty
-        kind: "chamfer"
+        kind: "round"
         stroke: root.tone
         strokeWidth: Airisu.hair
         dashed: true

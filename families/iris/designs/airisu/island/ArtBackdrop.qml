@@ -15,7 +15,7 @@ Item {
     ALacquer {
         anchors.fill: parent
         anchors.margins: root.kiss
-        cut: Math.max(0, Airisu.chamfer - root.kiss)
+        radius: IrisStyle.concentric(IrisStyle.radiusCard, root.kiss, IrisStyle.radiusTile)
         lacquer: Airisu.lacquerOf(root.pigment)
     }
 }

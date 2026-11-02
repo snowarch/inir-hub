@@ -35,19 +35,10 @@ Item {
 
     Rectangle {
         anchors.fill: parent
-        visible: !IrisStyle.fieldChamfer
         radius: root.radius
         color: IrisStyle.readingCard
         border.width: 1
         border.color: IrisStyle.hairline
-    }
-    IrisCutPlate {
-        anchors.fill: parent
-        visible: IrisStyle.fieldChamfer
-        cutLength: Number(root.host?.plateCut ?? IrisStyle.chamferCut)
-        color: IrisStyle.readingCard
-        stroke: IrisStyle.hairline
-        strokeWidth: 1
     }
     IrisGroupPreview {
         id: stage

@@ -15,16 +15,8 @@ Rectangle {
     radius: IrisStyle.capsule(height)
     // A plate Design (AIRISU) cuts it as a tag with its die.
     color: IrisStyle.plateSelection ? "transparent" : IrisStyle.sceneVeilStrong
-    border.width: IrisStyle.plateSelection ? 0 : 1
+    border.width: 1
     border.color: IrisStyle.border
-    IrisCutPlate {
-        anchors.fill: parent
-        visible: IrisStyle.plateSelection
-        color: IrisStyle.sceneVeilStrong
-        stroke: IrisStyle.border
-        strokeWidth: 1
-        cutLength: Math.round(off.height / 3)
-    }
     RowLayout {
         id: offRow
         anchors.centerIn: parent

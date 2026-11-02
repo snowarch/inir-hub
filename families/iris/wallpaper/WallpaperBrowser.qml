@@ -304,17 +304,10 @@ Item {
                 Rectangle {
                     anchors.fill: parent
                     anchors.margins: Math.round(2 * root.d)
-                    radius: IrisStyle.fieldChamfer ? 0 : root.innerRadius + Math.round(4 * root.d)
+                    radius: root.innerRadius + Math.round(4 * root.d)
                     color: "transparent"
-                    border.width: IrisStyle.fieldChamfer ? 0 : Math.max(2, Math.round(2.5 * root.d))
+                    border.width: Math.max(2, Math.round(2.5 * root.d))
                     border.color: IrisStyle.accent
-                    IrisCutPlate {
-                        anchors.fill: parent
-                        visible: IrisStyle.fieldChamfer
-                        cutLength: IrisStyle.chamferCut + Math.round(4 * root.d * (2 - Math.SQRT2))
-                        stroke: IrisStyle.accent
-                        strokeWidth: Math.max(2, Math.round(2.5 * root.d))
-                    }
                 }
             }
             delegate: MouseArea {

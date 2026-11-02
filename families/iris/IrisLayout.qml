@@ -29,16 +29,6 @@ QtObject {
         return bandWidth() + breath()
     }
 
-    // Kiri cuts the frame's top-right and bottom-left: a widget docked there steps out along the diagonal until its own
-    // cut runs parallel to the frame's, a breath away. Each corner is the least sum of its two gaps in the room.
-    function frameCorners(): var {
-        if (!IrisStyle.fieldChamfer || bandWidth() <= 0)
-            return null
-        const radius = Math.round(Number(Config.options?.iris?.surround?.radius ?? 22) * density())
-        const keep = Math.round(IrisStyle.kiriCut * radius - IrisStyle.chamferCut - (2 - Math.SQRT2) * breath())
-        return keep > 0 ? [0, keep, 0, keep] : null
-    }
-
     function desktopInsets(outputName: string, result: var): var {
         const iris = Config.options?.iris ?? {}
         const density = root.density()

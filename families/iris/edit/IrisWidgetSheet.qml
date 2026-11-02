@@ -25,7 +25,6 @@ Item {
         IrisWidgetControls {
             widget: root.held
             plateRadius: IrisStyle.concentric(IrisStyle.radiusPlate, root.pad, IrisStyle.radiusChip)
-            plateCut: IrisStyle.nestedCut(IrisStyle.chamferCut, root.pad)
             optionRows: rowsComponent
         }
     }
@@ -33,7 +32,6 @@ Item {
         id: rowsComponent
         IrisEditRows {
             plateRadius: IrisStyle.concentric(IrisStyle.radiusPlate, root.pad, IrisStyle.radiusChip)
-            plateCut: IrisStyle.nestedCut(IrisStyle.chamferCut, root.pad)
         }
     }
     Component.onCompleted: DesktopEditStage.setSheetHost(root.outputName, true)
