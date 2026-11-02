@@ -2,7 +2,6 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Layouts
-import QtQuick.Shapes
 import qs
 import qs.services
 import qs.modules.common
@@ -20,10 +19,10 @@ import "../components"
 // with the time cut in its ink, leaning like a livery number. Whatever runs (the hour, the song, the timer, a task, a
 // level) is the second coat, its 45° edge travelling across the strip; a change of subject repaints the strip along the
 // same cut instead of fading.
-// Its own face (his 10-31 "dale un aspecto original", C of the 11-01 sheet; the one blade AIRISU keeps): the strip is parted at 45°. The
-// hour keeps the left of the blade whatever happens; what is going on takes the right, on a second lacquer of its pigment,
-// and the blade is the mark no other look has. A notice, a level and a recording still take the whole strip: those must
-// be seen from across the room.
+// At rest the day is a seal (印, his pick A "Hanko" of 11-02): the weekday's kanji over the date, stamped in the seal's
+// pigment beside the leaning hour, the weather as ruby after it. The blade and the minute hairline left (his 11-02: "la
+// diagonal y la línea de abajo no"). A notice, a level and a recording take the whole strip: those must be seen from
+// across the room.
 Item {
     id: root
     property var island: null
@@ -32,26 +31,12 @@ Item {
     readonly property real h: root.island?.compactHeight ?? 42
     readonly property real pad: Math.round(14 * root.d)
     // What the engine sizes the strip from: the current mode's own content, without the strip's breathing.
-    readonly property real contentWidth: (root.rows[root.mode]?.implicitWidth ?? 0) + (root.parted ? root.subjectX : root.pad) + root.pad
-        - Math.round(29 * root.d)
+    readonly property real contentWidth: (root.rows[root.mode]?.implicitWidth ?? 0) + 2 * root.pad - Math.round(29 * root.d)
     readonly property var rows: ({ idle: idle, clock: idle, media: media, record: record, timer: timer, task: task,
         event: event, feedback: level })
     readonly property real figure: Math.round(IrisStyle.typeHeadline * (root.island?.clockScale ?? 1))
     // A strip tall enough stacks a second line under the first; a slim one keeps everything on one line.
     readonly property bool stacks: root.h >= Math.round(34 * root.d)
-
-    // ── The blade: where the strip is parted, measured at its foot; the cut leans a strip's height to the right.
-    readonly property bool parted: root.mode === "media" || root.mode === "timer" || root.mode === "task"
-        || (root.resting && idle.gloss.length > 0)
-    readonly property real bladeX: root.pad + hour.implicitWidth + Math.round(4 * root.d)
-    // A mark or a cover sits at the strip's middle, so it nests closer to the lean than a line set at the top.
-    readonly property real subjectX: root.bladeX + (root.resting ? panel.h + Math.round(2 * root.d) : Math.round(panel.h * 0.86))
-    // The blade, its plate and the hour leave by the same detent as the row they part from.
-    property real partedShown: root.parted ? 1 : 0
-    Behavior on partedShown { enabled: Airisu.moving; NumberAnimation { duration: Airisu.detent } }
-    // Rests quiet; the seal is spent on what is live.
-    readonly property color bladeColour: root.resting ? Airisu.tame : Airisu.seal
-    readonly property color plateColour: root.resting ? Airisu.raised : Airisu.stockOf(root.pigment)
 
     // ── What the strip is lacquered with, mode by mode.
     readonly property color eventTint: root.island?.event?.tint ?? IrisStyle.accentFill
@@ -91,14 +76,14 @@ Item {
         return sample ? Lume.stack(sample.color, IrisStyle.bodyTint) : Airisu.solid(root.surface)
     }
     // Type over a coat that runs the whole height takes the ink that reads on both coats.
-    readonly property color ink: root.run > 0 && root.fills ? Airisu.inkOver(root.surface, root.coatColour) : Airisu.inkOn(root.parted ? root.plateColour : root.surface)
-    readonly property color inkSecond: ColorUtils.mix(root.ink, root.parted ? root.plateColour : root.surface, 0.74) // iris-literal: second tone on lacquer
-    readonly property color inkThird: ColorUtils.mix(root.ink, root.parted ? root.plateColour : root.surface, 0.52)  // iris-literal: third tone on lacquer
+    readonly property color ink: root.run > 0 && root.fills ? Airisu.inkOver(root.surface, root.coatColour) : Airisu.inkOn(root.surface)
+    readonly property color inkSecond: ColorUtils.mix(root.ink, root.surface, 0.74) // iris-literal: second tone on lacquer
+    readonly property color inkThird: ColorUtils.mix(root.ink, root.surface, 0.52)  // iris-literal: third tone on lacquer
 
     // What runs, as the second coat: how far, and whether it is moving now.
     readonly property string levelStyle: root.island?.levelStyle ?? "capsule"
     readonly property bool resting: root.mode === "idle" || root.mode === "clock"
-    readonly property real run: root.resting ? DateTime.clock.date.getMinutes() / 60
+    readonly property real run: root.resting ? 0
         : root.mode === "media" ? (root.island?.trackProgress ?? 0)
         : root.mode === "timer" ? (root.island?.timerProgress ?? 0)
         : root.mode === "task" ? Math.max(0, Number(root.island?.task?.progress ?? 0))
@@ -108,20 +93,6 @@ Item {
     readonly property bool welded: root.island?.notch ?? false
     readonly property bool atFoot: root.island?.bottomEdge ?? false
     readonly property int kiss: Math.max(2, Math.round(3 * root.d))
-    // Under the panel, so the foot's band of what runs reads across both lacquers.
-    Shape {
-        anchors.fill: panel
-        opacity: root.partedShown
-        visible: opacity > 0
-        preferredRendererType: Shape.CurveRenderer
-        ShapePath {
-            fillColor: root.plateColour
-            strokeColor: "transparent"
-            strokeWidth: 0
-            PathPolyline { path: panel.closed(panel.clip(panel.die, p => root.bladeX + (panel.h - p.y) - p.x)) }
-            Behavior on fillColor { enabled: Airisu.moving; ColorAnimation { duration: Airisu.snap } }
-        }
-    }
     ALacquer {
         id: panel
         anchors.fill: parent
@@ -130,35 +101,55 @@ Item {
         corners: root.welded ? (root.atFoot ? [1, 1, 0, 0] : [0, 0, 1, 1]) : null
         lacquer: root.surface
         coat: root.coatColour
-        // At rest the hour is a hairline of its pigment, read at a glance and never louder than the time.
+        // At rest nothing runs along the foot: the seal says the day, the hour says itself.
         band: root.taped ? Math.max(3, Math.round(panel.height * 0.1)) : root.fills ? 0 : root.barLevel ? Math.max(3, Math.round(panel.height * 0.22))
-            : root.resting ? Math.max(2, Math.round(panel.height * 0.06)) : Math.max(2, Math.round(panel.height * 0.09))
+            : root.resting ? 0 : Math.max(2, Math.round(panel.height * 0.09))
         share: root.taped ? 1 : root.run
         // A level follows the hand; a song and a timer step once a second (a pixel or two, no animation to pay for).
         travel: root.mode === "feedback" ? Airisu.detent : root.mode === "task" ? Airisu.snap : 0
     }
 
-    Rectangle {
-        opacity: root.partedShown
-        visible: opacity > 0
-        x: panel.x + root.bladeX + panel.h / 2 - width / 2
-        y: panel.y + panel.h / 2 - height / 2
-        width: Math.max(2, Math.round(2 * root.d))
-        height: Math.ceil(panel.h * Math.SQRT2)
-        rotation: 45
-        antialiasing: true
-        color: root.bladeColour
-        Behavior on color { enabled: Airisu.moving; ColorAnimation { duration: Airisu.snap } }
-    }
-
-    // The time in the figures' face.
+    // The time in the figures' face, its separator in the seal's ink.
     component Time: AText {
         property real figureSize: root.figure
+        readonly property string said: String(DateTime.timeDisplay)
+        readonly property int colon: said.indexOf(":")
         voice: "figure"
         lean: Airisu.lean
         size: figureSize
         color: root.ink
-        text: String(DateTime.timeDisplay)
+        textFormat: Text.StyledText
+        text: colon < 0 ? said : said.slice(0, colon) + "<font color=\"" + Airisu.sealText + "\">:</font>" + said.slice(colon + 1)
+    }
+
+    // The day as a seal (印): the weekday's kanji over the date, in the seal's pigment, square as a hanko is.
+    component Seal: Rectangle {
+        id: seal
+        readonly property date day: DateTime.clock.date
+        Layout.alignment: Qt.AlignVCenter
+        implicitWidth: Math.round(root.h * 0.7)
+        implicitHeight: implicitWidth
+        radius: IrisStyle.radiusMicro
+        color: Airisu.seal
+        Column {
+            anchors.centerIn: parent
+            spacing: Math.round(-2 * root.d)
+            AText {
+                anchors.horizontalCenter: parent.horizontalCenter
+                voice: "kana"
+                size: Math.round(seal.height * 0.4)
+                color: Airisu.inkOnSeal
+                text: "日月火水木金土"[seal.day.getDay()]
+            }
+            AText {
+                anchors.horizontalCenter: parent.horizontalCenter
+                size: Math.round(seal.height * 0.36)
+                font.weight: Font.Bold
+                font.features: ({ "tnum": 1 })
+                color: Airisu.inkOnSeal
+                text: String(seal.day.getDate())
+            }
+        }
     }
 
     // What goes with the subject is ruby (ルビ), set small over it the way furigana sits over its word; a slim strip
@@ -189,7 +180,7 @@ Item {
         property int leave: Airisu.detent
         readonly property bool current: root.rows[root.mode] === face
         anchors.fill: parent
-        anchors.leftMargin: root.parted ? root.subjectX : root.pad
+        anchors.leftMargin: root.pad
         anchors.rightMargin: root.pad
         spacing: Airisu.u(2.5)
         opacity: face.current ? 1 : 0
@@ -197,49 +188,34 @@ Item {
         Behavior on opacity { enabled: Airisu.moving; NumberAnimation { duration: face.current ? face.enter : face.leave; easing.type: Easing.BezierSpline; easing.bezierCurve: Airisu.curve } }
     }
 
-    // Left of the blade the hour never moves, and stays while the right changes subject.
-    Time {
-        id: hour
-        x: panel.x + root.pad - root.kiss
-        anchors.verticalCenter: parent.verticalCenter
-        opacity: root.partedShown
-        visible: opacity > 0
-        color: Airisu.inkOn(root.surface)
-    }
-
-    // The clock, by the style Settings asks for: the time alone, or parted from the date or the weather.
+    // The clock, by the style Settings asks for: the time alone, with the day's seal, or after the weather.
     Face {
         id: idle
         readonly property string style: root.island?.clockStyle ?? "time"
-        readonly property string gloss: idle.style === "dateTime"
-            ? Translation.locale.toString(DateTime.clock.date, "ddd d").replace(/\./g, "")
-            : idle.style === "weather" ? String(Weather.data?.temp ?? "") : ""
-        Item { Layout.fillWidth: !root.parted; visible: !root.parted }
+        readonly property string temp: String(Weather.data?.temp ?? "")
+        readonly property bool hasTemp: Weather.enabled && idle.temp.length > 0 && !idle.temp.startsWith("--")
+        Item { Layout.fillWidth: true }
+        Seal { visible: idle.style === "dateTime" }
         MaterialSymbol {
-            visible: idle.style === "weather" && idle.gloss.length > 0
+            visible: idle.style === "weather" && idle.hasTemp
             Layout.alignment: Qt.AlignVCenter
             text: Icons.getWeatherIcon(Weather.data?.wCode, Weather.isNightNow()) ?? "cloud"
             iconSize: Math.round(16 * root.d)
             fill: 1
             color: root.inkSecond
         }
-        // Past the blade the day leads and the weather is its ruby (ルビ), under it where the strip stacks.
-        Column {
+        Ruby {
+            visible: idle.style === "weather" && idle.hasTemp
             Layout.alignment: Qt.AlignVCenter
-            spacing: Math.round(-1 * root.d)
-            AText {
-                text: idle.gloss
-                size: IrisStyle.typeLabel
-                font.weight: Font.Bold
-                color: root.ink
-            }
-            Ruby {
-                readonly property string temp: String(Weather.data?.temp ?? "")
-                visible: idle.style === "dateTime" && root.stacks && Weather.enabled && temp.length > 0 && !temp.startsWith("--")
-                text: temp
-            }
+            text: idle.temp
         }
-        Time { visible: !root.parted }
+        Time { Layout.alignment: Qt.AlignVCenter }
+        // After the hour, the weather as its ruby: the datum that goes with it, never louder.
+        Ruby {
+            visible: idle.style === "dateTime" && idle.hasTemp
+            Layout.alignment: Qt.AlignVCenter
+            text: idle.temp.replace(/[CF]$/, "")
+        }
         PrivacyMarks { Layout.alignment: Qt.AlignVCenter; ink: root.ink }
         Item { Layout.fillWidth: true }
     }
