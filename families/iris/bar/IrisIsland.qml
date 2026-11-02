@@ -91,12 +91,11 @@ Item {
     // A Design draws the Island's faces and its page nav itself (DESIGNS.md › Island); the engine keeps the modes,
     // events, pages, pieces and geometry. A Design whose pages "hang" (AIRISU) opens them as a second body under the
     // strip, welded to it: the page grows out of the strip's foot, one body.
-    // Three designs of the Island (10-25): the engine's own (Halo), Ledger and Tiles, which skin its face, its page
-    // buttons and its desktop page. A shell Design (AIRISU) that skins a part keeps it.
-    readonly property string design: ["ledger", "tiles", "dial", "marquee", "duo"].includes(String(root.options?.design ?? "halo")) ? String(root.options.design) : "halo"
-    // What each design draws of its own; the engine draws the rest (Dial, Marquee and Duo keep Halo's pages).
-    readonly property var designParts: ({ ledger: ["Face.qml", "Nav.qml", "Desktop.qml"], tiles: ["Face.qml", "Nav.qml", "Desktop.qml"],
-        dial: ["Face.qml"], marquee: ["Face.qml"], duo: ["Face.qml"] })
+    // Designs of the Island: the engine's own (Halo) and faces drawn from one fact of the day. A shell Design (AIRISU)
+    // that skins a part keeps it.
+    readonly property string design: ["sky", "approach", "flex", "regulator", "board"].includes(String(root.options?.design ?? "halo")) ? String(root.options.design) : "halo"
+    // What each design draws of its own; the engine draws the rest.
+    readonly property var designParts: ({ sky: ["Face.qml"], approach: ["Face.qml"], flex: ["Face.qml"], regulator: ["Face.qml"], board: ["Face.qml"] })
     function skinOf(own: string, file: string): string {
         return own.length > 0 || !(root.designParts[root.design] ?? []).includes(file) ? own : Qt.resolvedUrl("island/designs/" + root.design + "/" + file)
     }
