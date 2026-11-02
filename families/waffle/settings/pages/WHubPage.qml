@@ -660,6 +660,7 @@ WSettingsPage {
                     }
                     WText {
                         Layout.fillWidth: true
+                        visible: Array.from(page.item?.authors ?? []).length > 0
                         text: Translation.tr("By %1").arg(Array.from(page.item?.authors ?? []).join(", "))
                         font.pixelSize: Looks.font.pixelSize.normal
                         color: Looks.colors.subfg
@@ -796,10 +797,10 @@ WSettingsPage {
         }
 
         WSettingsCard {
-            title: Array.from(page.item?.permissions ?? []).length > 0 ? Translation.tr("What it can do") : Translation.tr("Nothing beyond the shell")
+            title: Hub.reachTitle(page.item)
             icon: "shield"
             description: Array.from(page.item?.permissions ?? []).length === 0
-                ? Translation.tr("It only draws inside the shell: it runs no commands, reaches no websites and reads no files of yours.") : ""
+                ? Hub.reachText(page.item) : ""
             Repeater {
                 model: Array.from(page.item?.permissions ?? [])
                 delegate: WSettingsRow {

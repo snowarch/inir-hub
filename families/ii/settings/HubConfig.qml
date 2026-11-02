@@ -1228,11 +1228,11 @@ ContentPage {
                         text: root.whereOf(page.item)
                     }
                     InfoLine {
-                        glyph: page.permissions.length > 0 ? "shield" : "verified_user"
-                        title: page.permissions.length > 0 ? Translation.tr("What it can do") : Translation.tr("Nothing beyond the shell")
+                        glyph: page.item?.orphan ? "help" : page.permissions.length > 0 ? "shield" : "verified_user"
+                        title: Hub.reachTitle(page.item)
                         text: page.permissions.length > 0 ? page.permissions.map(permission => Translation.tr(Hub.permissionText[permission] ?? permission)).join("\n")
-                            : Translation.tr("It only draws inside the shell: it runs no commands, reaches no websites and reads no files of yours.")
-                        tint: page.permissions.length > 0 ? Appearance.colors.colTertiary : Appearance.colors.colPrimary
+                            : Hub.reachText(page.item)
+                        tint: page.permissions.length > 0 || page.item?.orphan ? Appearance.colors.colTertiary : Appearance.colors.colPrimary
                     }
                     InfoLine {
                         glyph: "public"

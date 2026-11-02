@@ -893,6 +893,7 @@ Flickable {
                     Layout.fillWidth: true
                     role: IrisText.Meta
                     elide: Text.ElideRight
+                    visible: Array.from(page.item?.authors ?? []).length > 0
                     text: Translation.tr("By %1").arg(Array.from(page.item?.authors ?? []).join(", "))
                 }
                 IrisText {
@@ -1026,7 +1027,7 @@ Flickable {
             lineHeight: 1.2
         }
 
-        Heading { text: page.permissions.length > 0 ? Translation.tr("What it can do") : Translation.tr("Nothing beyond the shell") }
+        Heading { text: Hub.reachTitle(page.item) }
         Rectangle {
             Layout.fillWidth: true
             implicitHeight: permissionColumn.implicitHeight + Math.round(16 * root.d)
@@ -1046,7 +1047,7 @@ Flickable {
                     color: IrisStyle.textSecondary
                     font.pixelSize: IrisStyle.typeLabel
                     wrapMode: Text.WordWrap
-                    text: Translation.tr("It only draws inside the shell: it runs no commands, reaches no websites and reads no files of yours.")
+                    text: Hub.reachText(page.item)
                 }
                 Repeater {
                     model: page.permissions
