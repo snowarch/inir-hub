@@ -172,15 +172,22 @@
   },
   "widgetOptions": {
     "clock": [
-      {"key":"iris.face","label":"Face","type":"choice","default":"analog","when":"face","choices":[["analog","Analog","schedule"],["digital","Digital","timer_10"]]},
+      {"key":"iris.face","label":"Face","type":"choice","default":"analog","when":"face","choices":[["analog","Analog","schedule"],["digital","Digital","timer_10"],["hour","Hour","wb_twilight"]]},
       {"key":"iris.seconds","label":"Second hand","type":"switch","default":true,"when":["face",{"iris.face":"analog"}]},
-      {"key":"iris.week","label":"Week strip","type":"switch","default":true,"when":["face",{"not":{"sizeClass":"small"}}]}
+      {"key":"iris.week","label":"Week strip","type":"switch","default":true,"when":["face",{"iris.face":["analog","digital"]},{"not":{"sizeClass":"small"}}]}
     ],
     "mediaControls": [
       {"key":"iris.lyrics","label":"Synced lyrics","type":"switch","default":true,"when":"face"},
       {"key":"iris.rest","label":"Rest when paused","type":"switch","default":true,"when":"face"}
     ],
+    "monthCalendar": [
+      {"key":"iris.face","label":"Face","type":"choice","default":"month","when":"face","choices":[["month","Month","calendar_view_month"],["week","Week","view_week"]]}
+    ],
+    "screenTime": [
+      {"key":"iris.face","label":"Face","type":"choice","default":"curve","when":"face","choices":[["curve","Curve","monitoring"],["ribbon","Ribbon","view_column"]]}
+    ],
     "systemMonitor": [
+      {"key":"iris.face","label":"Face","type":"choice","default":"trend","when":"face","choices":[["trend","Trend","show_chart"],["bars","Bars","bar_chart"]]},
       {"key":"iris.lead","label":"Main","type":"choice","default":"auto","when":"face","choices":[["auto","Auto"],["cpu","Processor","memory"],["mem","Memory","memory_alt"],["gpu","Graphics","developer_board"],["temp","CPU heat","thermostat"],["gpuTemp","GPU heat","thermostat"]],"keywords":["lead","main","first","big"]}
     ],
     "controls": [

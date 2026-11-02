@@ -16,8 +16,8 @@ IrisWidgetFace {
     designFace: IrisDesign.skin("widgetDay")
 
     readonly property real fraction: root.widget.dayFraction
-    readonly property real sunriseAt: root.dayShare(Weather.data?.sunrise)
-    readonly property real sunsetAt: root.dayShare(Weather.data?.sunset)
+    readonly property real sunriseAt: IrisFaceData.dayShare(Weather.data?.sunrise)
+    readonly property real sunsetAt: IrisFaceData.dayShare(Weather.data?.sunset)
     readonly property bool sunKnown: root.sunriseAt >= 0 && root.sunsetAt > root.sunriseAt
     readonly property real sunrise: root.sunKnown ? root.sunriseAt : 6 / 24
     readonly property real sunset: root.sunKnown ? root.sunsetAt : 19 / 24
@@ -36,11 +36,6 @@ IrisWidgetFace {
     // Without sun times the figure is the time left: the path still shows where the day is.
     readonly property string figure: root.sunKnown ? root.next.time : root.span(Math.max(0, Math.round((1 - root.fraction) * 1440)))
     readonly property string figureName: root.sunKnown ? root.next.name : Translation.tr("Until midnight")
-
-    function dayShare(text: var): real {
-        const minutes = Weather._timeToMinutes(text)
-        return minutes < 0 ? -1 : minutes / 1440
-    }
 
     readonly property var figureParts: IrisFaceData.timeParts(root.figure)
 

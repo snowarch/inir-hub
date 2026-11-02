@@ -12,7 +12,8 @@ import qs.modules.iris.pieces
 
 IrisWidgetFace {
     id: root
-    designFace: IrisDesign.skin("widgetScreenTime")
+    readonly property bool ribbonStyle: String(root.widget.familyOption("face", "curve")) === "ribbon"
+    designFace: root.ribbonStyle ? "" : IrisDesign.skin("widgetScreenTime")
 
     property int revision: 0
     readonly property bool on: ScreenTime.enabled
@@ -130,9 +131,180 @@ IrisWidgetFace {
         }
     }
 
+    // Ribbon: the day as one strip of 24 hours, each hour the colour of the app that held it, an unbroken run where one
+    // app held on. It shows what the curve can't: which part of the day went where.
+    readonly property var ribbonTints: [root.inked(IrisStyle.identity.indigo), root.inked(IrisStyle.identity.orange),
+        root.inked(IrisStyle.identity.pink), root.inked(IrisStyle.identity.teal)]
+    function ribbonTint(rank: int): color {
+        return rank < root.ribbonTints.length ? root.ribbonTints[rank] : root.inkTertiary
+    }
+    readonly property var ribbonRuns: {
+        if (!root.ribbonStyle)
+            return []
+        const data = root.today?.apps ?? {}
+        const keys = root.apps.map(app => app.id)
+        const runs = []
+        for (let hour = 0; hour < 24; ++hour) {
+            let rank = -1, most = 0
+            for (let i = 0; i < keys.length; ++i) {
+                const seconds = Number(data[keys[i]]?.hourly?.[hour] ?? 0)
+                if (seconds > most) { most = seconds; rank = i }
+            }
+            if (rank < 0)
+                continue
+            rank = Math.min(rank, root.ribbonTints.length)
+            const share = Math.min(1, Number(root.hourly[hour]) / 3600)
+            const last = runs[runs.length - 1]
+            if (last && last.rank === rank && last.to === hour) {
+                last.to = hour + 1
+                last.used += share
+            } else {
+                runs.push({ rank: rank, from: hour, to: hour + 1, used: share })
+            }
+        }
+        return runs
+    }
+
+    Loader {
+        anchors.fill: parent
+        active: root.on && !root.idle && root.ribbonStyle
+        sourceComponent: Component { RibbonView {} }
+    }
+
+    component RibbonView: ColumnLayout {
+        spacing: root.dp(root.large ? 12 : 8)
+        RowLayout {
+            Layout.fillHeight: false
+            Layout.fillWidth: true
+            spacing: root.dp(10)
+            FaceFigure {
+                face: root
+                Layout.alignment: Qt.AlignBaseline
+                text: root.shortDuration(root.total)
+                size: root.small ? 30 : root.large ? 52 : 38
+            }
+            FaceText {
+                face: root
+                visible: !root.small && ScreenTime.currentAppName.length > 0
+                Layout.fillWidth: true
+                Layout.alignment: Qt.AlignBaseline
+                horizontalAlignment: Text.AlignRight
+                text: Translation.tr("Now: %1").arg(ScreenTime.currentAppName)
+                color: root.inkTertiary
+                size: 12
+            }
+        }
+        ColumnLayout {
+            Layout.fillHeight: true
+            Layout.fillWidth: true
+            spacing: root.dp(3)
+            Item {
+                id: ribbon
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                Rectangle {
+                    anchors.fill: parent
+                    radius: root.dp(6)
+                    color: root.fillQuiet
+                }
+                Repeater {
+                    model: root.ribbonRuns
+                    Rectangle {
+                        required property var modelData
+                        x: Math.round(ribbon.width * modelData.from / 24)
+                        width: Math.round(ribbon.width * modelData.to / 24) - x - Math.max(1, root.dp(1))
+                        height: ribbon.height
+                        radius: root.dp(4)
+                        color: root.ribbonTint(modelData.rank)
+                        // An hour barely touched stays a shade of its app, not a full block.
+                        opacity: 0.4 + 0.6 * modelData.used / (modelData.to - modelData.from)
+                    }
+                }
+                // Now: what lies past it has not happened.
+                Rectangle {
+                    x: Math.round(ribbon.width * root.nowAt)
+                    y: -root.dp(2)
+                    width: Math.max(1, root.dp(1.5))
+                    height: ribbon.height + root.dp(4)
+                    color: root.ink
+                }
+            }
+            FaceHours { face: root; visible: !root.small; Layout.fillWidth: true }
+        }
+        Repeater {
+            model: root.small ? root.topApps.slice(0, 1) : []
+            AppKey {
+                required property var modelData
+                required property int index
+                app: modelData
+                rank: index
+            }
+        }
+        Flow {
+            visible: root.medium
+            Layout.fillWidth: true
+            spacing: root.dp(12)
+            Repeater {
+                model: root.medium ? root.apps.slice(0, 3) : []
+                AppKey {
+                    required property var modelData
+                    required property int index
+                    app: modelData
+                    rank: index
+                }
+            }
+        }
+        Column {
+            visible: root.large
+            Layout.fillHeight: false
+            Layout.fillWidth: true
+            spacing: root.dp(9)
+            Repeater {
+                model: root.large ? root.topApps : []
+                RowLayout {
+                    id: appRow
+                    required property var modelData
+                    required property int index
+                    width: parent.width
+                    spacing: root.dp(8)
+                    AppIcon { app: appRow.modelData }
+                    AppKey { app: appRow.modelData; rank: appRow.index; Layout.fillWidth: true }
+                    FaceText {
+                        face: root
+                        text: root.shortDuration(appRow.modelData.seconds)
+                        color: root.inkSecondary
+                        size: 12.5
+                        font.family: root.fontNumbers
+                    }
+                }
+            }
+        }
+    }
+
+    // An app's colour on the ribbon, beside its name.
+    component AppKey: Row {
+        id: key
+        required property var app
+        required property int rank
+        spacing: root.dp(6)
+        Rectangle {
+            anchors.verticalCenter: parent.verticalCenter
+            width: root.dp(9)
+            height: width
+            radius: root.dp(3)
+            color: root.ribbonTint(key.rank)
+        }
+        FaceText {
+            face: root
+            text: key.app?.name ?? ""
+            color: root.inkSecondary
+            size: 12.5
+        }
+    }
+
     ColumnLayout {
         anchors.fill: parent
-        visible: root.on && !root.idle
+        visible: root.on && !root.idle && !root.ribbonStyle
         spacing: root.dp(root.small ? 2 : 6)
 
         FaceHeader {

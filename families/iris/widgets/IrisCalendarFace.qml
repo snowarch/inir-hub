@@ -8,7 +8,8 @@ import qs.modules.iris.style
 
 IrisWidgetFace {
     id: root
-    designFace: IrisDesign.skin("widgetCalendar")
+    readonly property bool weekStyle: String(root.widget.familyOption("face", "month")) === "week"
+    designFace: root.weekStyle ? "" : IrisDesign.skin("widgetCalendar")
 
     readonly property var today: DateTime.clock.date
     readonly property var viewing: root.widget.viewingDate
@@ -196,13 +197,159 @@ IrisWidgetFace {
     }
 
     MonthGrid {
-        visible: root.small
+        visible: root.small && !root.weekStyle
         anchors.fill: parent
         picks: false
     }
 
+    Loader {
+        anchors.fill: parent
+        active: root.weekStyle
+        sourceComponent: Component { WeekView {} }
+    }
+
+    // The Week: today and the days ahead as columns, each day's events where they fall between morning and midnight, so a
+    // full afternoon is seen before it is read. It rolls from today: on a Sunday a Monday-to-Sunday week is all past, and
+    // a person looks here for what comes. Small keeps three days; large lists what comes under them.
+    component WeekView: ColumnLayout {
+        id: week
+        spacing: root.dp(root.small ? 0 : 8)
+        readonly property string dayKey: Qt.formatDate(root.today, "yyyyMMdd")
+        // Rebuilt when the day turns, not on every minute of the clock.
+        readonly property var days: {
+            void week.dayKey
+            const start = new Date()
+            return Array.from({ length: root.small ? 3 : 7 }, (_, i) => new Date(start.getFullYear(), start.getMonth(), start.getDate() + i))
+        }
+
+        RowLayout {
+            visible: !root.small
+            Layout.fillHeight: false
+            Layout.fillWidth: true
+            spacing: root.dp(10)
+            MonthHead { size: root.large ? 15 : 13 }
+            // Large lists the events under the week; on medium this line is all there is of them.
+            FaceText {
+                face: root
+                visible: root.medium
+                Layout.fillWidth: true
+                horizontalAlignment: Text.AlignRight
+                text: root.nextEvent ? IrisFaceData.eventTitle(root.nextEvent) + " · " + IrisFaceData.eventWhen(root.nextEvent, root.today) : root.emptyLine
+                color: root.nextEvent ? root.inkSecondary : root.inkTertiary
+                size: 12
+            }
+        }
+        RowLayout {
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+            spacing: root.dp(4)
+            Repeater {
+                model: week.days
+                DayColumn {
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+                    Layout.preferredWidth: 1
+                }
+            }
+        }
+        Column {
+            visible: root.large
+            Layout.fillHeight: false
+            Layout.fillWidth: true
+            spacing: root.dp(8)
+            Repeater {
+                model: root.large ? root.shownEvents.slice(0, 3) : []
+                EventLine {
+                    required property var modelData
+                    width: parent.width
+                    event: modelData
+                }
+            }
+            FaceText {
+                face: root
+                visible: root.shownEvents.length === 0
+                width: parent.width
+                text: root.emptyLine
+                color: root.inkTertiary
+                size: 12.5
+            }
+        }
+    }
+
+    component DayColumn: Rectangle {
+        id: column
+        required property var modelData
+        readonly property bool isToday: root.sameDay(column.modelData, root.today)
+        readonly property bool isPicked: root.sameDay(column.modelData, root.picked)
+        readonly property var events: root.eventsOn(column.modelData)
+        radius: root.dp(8)
+        color: column.isPicked ? root.fillActive : column.isToday || press.containsMouse ? root.fill : root.fillQuiet
+        // The day's reach: most plans start after breakfast, and six hours of empty morning cost the evening its room.
+        readonly property real firstHour: 6
+        readonly property real hours: 24 - column.firstHour
+
+        Column {
+            id: dayHead
+            y: root.dp(root.large ? 8 : 6)
+            width: parent.width
+            FaceText {
+                face: root
+                width: parent.width
+                horizontalAlignment: Text.AlignHCenter
+                text: Translation.locale.toString(column.modelData, "ddd").replace(/\./g, "").slice(0, 2)
+                color: column.isToday ? root.heading : root.inkTertiary
+                size: 10.5
+                weight: Font.DemiBold
+            }
+            FaceFigure {
+                face: root
+                width: parent.width
+                horizontalAlignment: Text.AlignHCenter
+                text: column.modelData.getDate()
+                size: root.large ? 18 : 16
+                tone: column.isToday ? root.accent : root.ink
+                rolls: false
+            }
+        }
+        Item {
+            id: span
+            x: root.dp(4)
+            y: dayHead.y + dayHead.height + root.dp(4)
+            width: parent.width - 2 * x
+            height: parent.height - y - root.dp(5)
+            clip: true
+            Repeater {
+                model: column.events
+                Rectangle {
+                    id: block
+                    required property var modelData
+                    readonly property date starts: IrisFaceData.eventDate(block.modelData)
+                    readonly property real hour: block.starts.getHours() + block.starts.getMinutes() / 60
+                    readonly property real length: {
+                        const ends = new Date(block.modelData?.endDate ?? 0).getTime()
+                        const hours = (ends - block.starts.getTime()) / 3600000
+                        return hours > 0 && hours < 24 ? hours : 1
+                    }
+                    readonly property bool allDay: Boolean(block.modelData?.allDay)
+                    y: block.allDay ? 0 : Math.round(span.height * Math.max(0, block.hour - column.firstHour) / column.hours)
+                    width: span.width
+                    height: block.allDay ? root.dp(5) : Math.max(root.dp(6), Math.round(span.height * block.length / column.hours))
+                    radius: root.dp(3)
+                    color: IrisFaceData.eventTint(block.modelData, root.accent)
+                }
+            }
+        }
+        MouseArea {
+            id: press
+            anchors.fill: parent
+            hoverEnabled: true
+            cursorShape: Qt.PointingHandCursor
+            onClicked: root.picked = column.isPicked ? null : column.modelData
+        }
+    }
+
     Item {
-        visible: root.medium
+        visible: root.medium && !root.weekStyle
         anchors.fill: parent
 
         Column {
@@ -252,7 +399,7 @@ IrisWidgetFace {
 
     Item {
         id: largeFace
-        visible: root.large
+        visible: root.large && !root.weekStyle
         anchors.fill: parent
         // As many of the coming events (up to three) as leave the month a comfortable row per week: the month leads.
         readonly property real eventH: largeProbe.implicitHeight

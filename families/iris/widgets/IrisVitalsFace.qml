@@ -10,7 +10,8 @@ import qs.modules.iris.style
 IrisWidgetFace {
     id: root
     // A Design may print its own vitals (AIRISU's chart recorder).
-    designFace: IrisDesign.skin("widgetVitals")
+    readonly property bool barsStyle: String(root.widget.familyOption("face", "trend")) === "bars"
+    designFace: root.barsStyle ? "" : IrisDesign.skin("widgetVitals")
 
     readonly property var resources: Array.from(root.widget._resourceModel ?? [])
     readonly property var loads: root.resources.filter(entry => ["cpu", "mem", "gpu"].includes(entry.key))
@@ -18,8 +19,9 @@ IrisWidgetFace {
     readonly property bool hasDisk: root.resources.some(entry => entry.key === "disk")
     // the one picked in the widget's options, else the first load
     readonly property string leadKey: String(root.widget.familyOption("lead", "auto"))
+    readonly property var highest: root.resources.reduce((top, entry) => !top || root.level(entry.key) > root.level(top.key) ? entry : top, null)
     readonly property var leadEntry: root.resources.find(entry => entry.key === root.leadKey)
-        ?? root.loads[0] ?? root.heats[0] ?? root.resources[0] ?? null
+        ?? (root.barsStyle ? root.highest : null) ?? root.loads[0] ?? root.heats[0] ?? root.resources[0] ?? null
     readonly property var rest: root.resources.filter(entry => entry !== root.leadEntry)
     readonly property bool leadTrends: root.leadEntry !== null && root.leadEntry.key !== "disk"
 
@@ -224,7 +226,7 @@ IrisWidgetFace {
 
     // Small: the lead reading over its trend, the next one beside its name at the foot.
     ColumnLayout {
-        visible: root.small && root.leadEntry !== null
+        visible: root.small && root.leadEntry !== null && !root.barsStyle
         anchors.fill: parent
         spacing: root.dp(2)
         FaceHeader {
@@ -256,8 +258,122 @@ IrisWidgetFace {
 
     // Medium: the lead and its trend on the left, the rest as facts; large: the lead's trend across the face, then the
     // rest, each load with its own trend.
+    Loader {
+        anchors.fill: parent
+        active: root.barsStyle && root.leadEntry !== null
+        sourceComponent: Component { BarsView {} }
+    }
+
+    // Bars: every reading a meter side by side, so the one that is high is seen before any number is read; that one (or
+    // the one picked as Main) leads as the figure and its meter alone wears the accent.
+    component BarsView: Item {
+        id: bars
+        readonly property real gap: root.dp(root.medium ? 18 : 12)
+        readonly property real meterWidth: root.medium ? Math.round(bars.width * 0.6) : bars.width
+        // Beside the meters on medium, over them otherwise.
+        Column {
+            id: lead
+            x: root.medium ? meters.width + bars.gap : 0
+            y: root.medium ? Math.round((bars.height - lead.height) / 2) : 0
+            width: bars.width - x
+            spacing: root.dp(1)
+            Row {
+                spacing: root.dp(2)
+                FaceFigure {
+                    id: leadFigure
+                    face: root
+                    text: root.figure(root.leadEntry?.key ?? "")
+                    size: root.small ? 34 : root.large ? 64 : 46
+                    tone: root.tint(root.leadEntry?.key ?? "")
+                    // A reading that changes every few seconds would never stop rolling.
+                    rolls: false
+                }
+                FaceText {
+                    face: root
+                    anchors.baseline: leadFigure.baseline
+                    text: root.unit(root.leadEntry?.key ?? "")
+                    color: root.inkSecondary
+                    size: root.small ? 14 : 16
+                    weight: Font.DemiBold
+                }
+            }
+            FaceText {
+                face: root
+                width: parent.width
+                text: root.leadEntry ? root.name(root.leadEntry) : ""
+                color: root.inkSecondary
+                size: root.small ? 12 : 13.5
+                weight: Font.DemiBold
+            }
+        }
+        Item {
+            id: meters
+            y: root.medium ? 0 : lead.height + bars.gap
+            width: bars.meterWidth
+            height: bars.height - y
+            readonly property int count: Math.max(1, root.resources.length)
+            readonly property real slot: Math.round((meters.width - (meters.count - 1) * root.dp(6)) / meters.count)
+            Repeater {
+                model: root.resources
+                Item {
+                    id: meter
+                    required property var modelData
+                    required property int index
+                    readonly property string key: meter.modelData.key
+                    readonly property bool leads: meter.key === root.leadEntry?.key
+                    x: meter.index * (meters.slot + root.dp(6))
+                    width: meters.slot
+                    height: meters.height
+                    // Small has only the meters: the figure says the one that counts, and a name under each would not fit.
+                    FaceText {
+                        id: value
+                        face: root
+                        visible: !root.small
+                        width: parent.width
+                        horizontalAlignment: Text.AlignHCenter
+                        text: root.figure(meter.key)
+                        color: meter.leads ? root.ink : root.inkSecondary
+                        size: 11.5
+                        weight: Font.DemiBold
+                        font.family: root.fontNumbers
+                        font.features: ({ "tnum": 1 })
+                    }
+                    FaceText {
+                        id: label
+                        face: root
+                        visible: !root.small
+                        y: parent.height - height
+                        width: parent.width
+                        horizontalAlignment: Text.AlignHCenter
+                        // The engine calls the heats CPU and GPU too: the degree tells them from the loads.
+                        text: meter.key === "temp" || meter.key === "gpuTemp" ? meter.modelData.label + "°" : meter.modelData.label
+                        color: root.inkTertiary
+                        size: 10.5
+                        weight: Font.Medium
+                        elide: Text.ElideNone
+                    }
+                    Rectangle {
+                        id: track
+                        y: root.small ? 0 : value.height + root.dp(4)
+                        width: parent.width
+                        height: parent.height - y - (root.small ? 0 : label.height + root.dp(4))
+                        radius: root.dp(6)
+                        color: root.fillQuiet
+                        Rectangle {
+                            y: parent.height - height
+                            width: parent.width
+                            height: Math.max(root.dp(4), Math.round(parent.height * root.level(meter.key)))
+                            radius: parent.radius
+                            color: meter.leads || root.level(meter.key) >= 0.85 ? root.tint(meter.key) : root.fillActive
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     GridLayout {
-        visible: !root.small && root.leadEntry !== null
+        visible: !root.small && root.leadEntry !== null && !root.barsStyle
         anchors.fill: parent
         columns: root.medium ? 2 : 1
         columnSpacing: root.dp(18)

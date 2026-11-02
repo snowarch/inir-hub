@@ -51,6 +51,12 @@ Singleton {
         return value.length > 0 ? value.charAt(0).toUpperCase() + value.slice(1) : value
     }
 
+    // Where a "6:52 AM" falls in the day, 0 to 1; -1 when the weather has not said.
+    function dayShare(text: var): real {
+        const minutes = Weather._timeToMinutes(text)
+        return minutes < 0 ? -1 : minutes / 1440
+    }
+
     function eventDate(event: var): var {
         return new Date(event?.dateTime ?? event?.startDate ?? 0)
     }
