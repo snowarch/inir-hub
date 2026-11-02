@@ -148,8 +148,9 @@ Loader {
         // A menu from a piece or a capsule is placed as every body that opens from one (IrisFrame.place, as the Control
         // Center and the cards): the theme's air from what opened it, inside the frame, flipping where the screen says.
         readonly property bool fromEdge: ["up", "down", "left", "right"].includes(root.opensToward)
+        readonly property var besides: popup.fromEdge ? IrisFrame.besides(popup.screen?.name ?? "", popup.target, true) : []
         readonly property var placement: popup.fromEdge
-            ? IrisFrame.place(popup.target, menu.width, menu.height, popup.width, popup.height, menu.baseRadius, [], IrisFrame.bodyAir) : null
+            ? IrisFrame.place(popup.target, menu.width, menu.height, popup.width, popup.height, menu.baseRadius, popup.besides, IrisFrame.bodyAir) : null
         readonly property string toward: popup.placement
             ? (popup.placement.sideways ? (popup.placement.towardsLeft ? "left" : "right") : (popup.placement.towardsUp ? "up" : "down"))
             : root.opensToward
@@ -285,7 +286,7 @@ Loader {
             // between them; the other three keep the menu's own.
             corners: popup.placement
                 ? IrisFrame.nestRadius({ x: menu.x, y: menu.y, width: menu.width, height: menu.height }, menu.baseRadius,
-                    popup.target, IrisStyle.fuse, popup.width, popup.height)
+                    popup.target, IrisStyle.fuse, popup.width, popup.height, popup.besides)
                 : null
             light: IrisStyle.surfaceLight("menus", IrisStyle.wallpaperLight)
             lightFrom: popup.toward === "up" ? "bottom" : popup.toward === "left" ? "right" : popup.toward === "right" ? "left" : "top"

@@ -53,6 +53,33 @@ QtObject {
         const first = root.overlayPlaces.find(p => p.screen === screen)
         return first !== undefined && first.key === key
     }
+    // What stands on each output: the lines of bubbles, the Island, the Dock, the side panels. The stage publishes it, so
+    // every body that opens (a card, the Control Center, a menu) keeps off it and curves around it the same way.
+    property var surfaces: ({})
+    function publishSurfaces(screen: string, list: var): void {
+        const next = Object.assign({}, root.surfaces)
+        next[screen] = list
+        root.surfaces = next
+    }
+    // The bodies open right now (a card, the Control Center): only what opens over them, a menu, keeps off these. They live
+    // apart from `surfaces` because their own placement reads that.
+    property var openBodies: ({})
+    function publishOpen(key: string, screen: string, rect: var): void {
+        const next = Object.assign({}, root.openBodies)
+        if (rect) next[key] = Object.assign({}, rect, { screen: screen })
+        else delete next[key]
+        root.openBodies = next
+    }
+    // Less the one the opener stands on, read by the line itself (`core`), since lines run out into a corner they share.
+    function besides(screen: string, origin: var, overOpen: bool): var {
+        const cx = Number(origin?.x ?? 0) + Number(origin?.width ?? 0) / 2
+        const cy = Number(origin?.y ?? 0) + Number(origin?.height ?? 0) / 2
+        const open = overOpen ? Object.keys(root.openBodies).map(key => root.openBodies[key]).filter(b => b.screen === screen) : []
+        return (root.surfaces[screen] ?? []).concat(open).filter(s => {
+            const c = s.core ?? s
+            return !(cx >= c.x && cx <= c.x + c.width && cy >= c.y && cy <= c.y + c.height)
+        })
+    }
     function placeShapesOn(screen: string): var {
         const out = []
         for (const key in root.placeBodies) {
@@ -282,8 +309,28 @@ QtObject {
             for (const b of (avoid ?? [])) if (b && b.width > 0 && b.height > 0) sum += overlap(a, b)
             return sum
         }
-        const primary = candidate(sideways)
-        const alternate = candidate(!sideways)
+        // Landing on something: slide along the opener, which keeps the two side by side, and only then step away from it.
+        const fits = a => a.x >= left - 0.5 && a.x <= right + 0.5 && a.y >= top - 0.5 && a.y <= bottom + 0.5
+        const clear = a => {
+            let at = a
+            for (let pass = 0; pass < 6; pass++) {
+                const b = (avoid ?? []).find(o => o && o.width > 0 && o.height > 0 && overlap(at, o) > 0)
+                if (!b) break
+                const ys = [{ y: b.y + b.height + root.bodyAir }, { y: b.y - height - root.bodyAir }]
+                const xs = [{ x: b.x + b.width + root.bodyAir }, { x: b.x - width - root.bodyAir }]
+                let next = null
+                for (const moves of at.sideways ? [ys, xs] : [xs, ys]) {
+                    const reachable = moves.map(move => Object.assign({}, at, move)).filter(fits)
+                        .sort((p, q) => Math.hypot(p.x - at.x, p.y - at.y) - Math.hypot(q.x - at.x, q.y - at.y))
+                    if (reachable.length > 0) { next = reachable[0]; break }
+                }
+                if (!next) break
+                at = next
+            }
+            return at
+        }
+        const primary = clear(candidate(sideways))
+        const alternate = clear(candidate(!sideways))
         if (score(alternate) + 1 < score(primary)) return alternate
         if (primary.sideways) {
             return { sideways: true, towardsLeft: towardsLeft, towardsUp: towardsUp,
@@ -308,15 +355,16 @@ QtObject {
             ? IrisStyle.edgeFuseFor(pieceSize, Number(root.bubbles?.notchCurve ?? 100)) : IrisStyle.fuse
     }
     // How each corner of a body near the frame nests ({ tl, tr, bl, br }): the corner that faces the frame's own corner, or
-    // the fillet of the piece it opens from, takes that curve less the air between them; the others keep `radius`.
-    function nestRadius(rect: var, radius: real, origin: var, originFuse: real, screenWidth: real, screenHeight: real): var {
+    // the fillet of what stands on the wall beside it (its opener or any surface in `beside`), takes that curve less the air
+    // between them; the others keep `radius`.
+    function nestRadius(rect: var, radius: real, origin: var, originFuse: real, screenWidth: real, screenHeight: real, beside: var): var {
         const own = { tl: radius, tr: radius, bl: radius, br: radius }
         if (!rect || rect.width <= 0 || rect.height <= 0) return own
         const reach = Math.max(root.bodyAir, root.bodyMargin) + 2 * root.d
         const floor = Math.round(6 * root.d)
         const gap = { left: rect.x - root.band, right: screenWidth - root.band - rect.x - rect.width,
             top: rect.y - root.band, bottom: screenHeight - root.band - rect.y - rect.height }
-        const o = origin?.obstacle ?? origin
+        const stands = [origin?.obstacle ?? origin].concat(beside ?? []).filter(s => !!s)
         const touches = (r, wall) => r && (wall === "left" ? r.x - root.band
             : wall === "right" ? screenWidth - root.band - r.x - r.width
             : wall === "top" ? r.y - root.band : screenHeight - root.band - r.y - r.height) <= 1.5
@@ -329,19 +377,36 @@ QtObject {
                     corner(end, side).push(root.cornerRadius - (gap[side] + gap[end]) / 2)
                     continue
                 }
-                if (o && touches(o, side) && o.width > 0) {
+                for (const o of stands) {
+                    if (!touches(o, side) || o.width <= 0) continue
                     const between = end === "top" ? rect.y - (o.y + o.height) : o.y - (rect.y + rect.height)
                     if (between >= -1 && between <= reach)
-                        corner(end, side).push(root.filletRadius(originFuse) - (gap[side] + between) / 2)
+                        corner(end, side).push(root.filletRadius(o.fuse ?? originFuse) - (gap[side] + between) / 2)
                 }
             }
         }
         for (const end of ["top", "bottom"]) {
             for (const side of ["left", "right"]) {
-                if (gap[end] > reach || !o || !touches(o, end) || o.height <= 0) continue
-                const between = side === "left" ? rect.x - (o.x + o.width) : o.x - (rect.x + rect.width)
-                if (between >= -1 && between <= reach)
-                    corner(end, side).push(root.filletRadius(originFuse) - (gap[end] + between) / 2)
+                if (gap[end] > reach) continue
+                for (const o of stands) {
+                    if (!touches(o, end) || o.height <= 0) continue
+                    const between = side === "left" ? rect.x - (o.x + o.width) : o.x - (rect.x + rect.width)
+                    if (between >= -1 && between <= reach)
+                        corner(end, side).push(root.filletRadius(o.fuse ?? originFuse) - (gap[end] + between) / 2)
+                }
+            }
+        }
+        // In the elbow of two lines that meet in a corner: the fillet they make, whichever walls they stand on.
+        const onRow = o => o.x < rect.x + rect.width + reach && o.x + o.width > rect.x - reach
+        const onColumn = o => o.y < rect.y + rect.height + reach && o.y + o.height > rect.y - reach
+        for (const end of ["top", "bottom"]) {
+            for (const side of ["left", "right"]) {
+                const across = o => end === "top" ? rect.y - (o.y + o.height) : o.y - (rect.y + rect.height)
+                const along = o => side === "left" ? rect.x - (o.x + o.width) : o.x - (rect.x + rect.width)
+                const row = stands.find(o => onRow(o) && across(o) >= -1 && across(o) <= reach)
+                const column = stands.find(o => onColumn(o) && along(o) >= -1 && along(o) <= reach)
+                if (row && column && row !== column)
+                    corner(end, side).push(root.filletRadius(row.fuse ?? originFuse) - (across(row) + along(column)) / 2)
             }
         }
         // Or nothing: a corner much tighter than the body would square a sheet off to the floor; it keeps its own radius and floats.

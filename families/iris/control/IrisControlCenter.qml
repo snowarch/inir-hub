@@ -55,33 +55,13 @@ Item {
     onMorphOpenChanged: if (root.morphOpen) root.origin = Qt.binding(() => IrisState.morphOrigin)
         else root.origin = root.origin
     readonly property bool fromPiece: root.origin?.owner === "stage" && String(root.origin?.fieldId ?? "").length > 0
-    readonly property var placementOrigin: root.fromPiece && root.origin
-        ? Object.assign({}, root.origin, { obstacle: null }) : root.origin
-    readonly property var avoidRects: {
-        const out = []
-        if (root.islandBody && root.islandBody.width > 0 && root.islandBody.height > 0)
-            out.push({ x: root.islandBody.x, y: root.islandBody.y, width: root.islandBody.width, height: root.islandBody.height })
-        const dock = IrisState.dockBody?.[root.screenName] ?? []
-        for (const shape of (Array.isArray(dock) ? dock : []))
-            if (shape?.id === "dock") out.push({ x: shape.x, y: shape.y, width: shape.width, height: shape.height })
-        const sidebars = Config.options?.iris?.sidebars ?? ({})
-        if (GlobalStates.sidebarLeftOpen && GlobalStates.sidebarLeftPresentationOutput === root.screenName) {
-            const o = sidebars?.left ?? ({})
-            const width = Math.max(300, Math.min(600, Number(o?.width ?? 380))) * IrisStyle.density
-            out.push({ x: 0, y: 0, width: IrisFrame.band + width + ((o?.notch ?? false) ? 0 : 12 * IrisStyle.density), height: root.height })
-        }
-        if (GlobalStates.sidebarRightOpen && GlobalStates.sidebarRightPresentationOutput === root.screenName) {
-            const o = sidebars?.right ?? ({})
-            const width = Math.max(300, Math.min(600, Number(o?.width ?? 380))) * IrisStyle.density
-            const depth = IrisFrame.band + width + ((o?.notch ?? false) ? 0 : 12 * IrisStyle.density)
-            out.push({ x: root.width - depth, y: 0, width: depth, height: root.height })
-        }
-        return out
-    }
+    readonly property var besides: root.fromPiece ? IrisFrame.besides(root.screenName, root.origin, false) : []
+    readonly property var rest: root.morphOpen ? ({ x: panel.x, y: panel.y, width: panel.width, height: panel.height }) : null
+    onRestChanged: IrisFrame.publishOpen("control:" + root.screenName, root.screenName, root.rest)
     readonly property real baseRadius: IrisStyle.surfaceRadius("controlCenter", IrisStyle.radiusPanel)
     readonly property var placement: root.fromPiece
-        ? IrisFrame.place(root.placementOrigin, panel.width, panel.height, root.width, root.height, root.baseRadius,
-            root.avoidRects, IrisStyle.cardJoins ? -IrisStyle.weld : Math.max(IrisFrame.bodyAir, IrisStyle.cardGap)) : null
+        ? IrisFrame.place(root.origin, panel.width, panel.height, root.width, root.height, root.baseRadius,
+            root.besides, IrisStyle.cardJoins ? -IrisStyle.weld : Math.max(IrisFrame.bodyAir, IrisStyle.cardGap)) : null
     // The active Design may hold its own scene in this body (DESIGNS.md › Composiciones); the body stays this file's.
     readonly property string scene: IrisDesign.skin("controlCenter")
     readonly property real panelWidth: root.scene.length > 0 ? Math.min(root.width - 16, Number(IrisDesign.surface("controlCenter", "width", 360)) * IrisStyle.density)
@@ -123,7 +103,7 @@ Item {
         radius: root.baseRadius
         corners: root.placement && !IrisStyle.cardJoins
             ? IrisFrame.nestRadius({ x: root.placement.x, y: root.placement.y, width: panel.width, height: panel.height },
-                root.baseRadius, root.origin?.obstacle ?? root.origin, Number(root.origin?.nestFuse ?? IrisStyle.fuse), root.width, root.height)
+                root.baseRadius, root.origin?.obstacle ?? root.origin, Number(root.origin?.nestFuse ?? IrisStyle.fuse), root.width, root.height, root.besides)
             : null
         origin: root.fromPiece ? root.origin : null
         onClosed: if (IrisState.morphOwner === "stage" && !GlobalStates.settingsOverlayOpen) IrisState.morphOwner = ""

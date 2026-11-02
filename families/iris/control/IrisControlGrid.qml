@@ -444,7 +444,7 @@ Item {
         Accessible.checked: discButton.control.lit
         onClicked: discButton.control.activate()
         altAction: () => { if (discButton.control.ready) root.togglePicker(discButton.control.expands) }
-        HoverHandler { enabled: !root.editing; onHoveredChanged: discButton.control.hover(hovered) }
+        onButtonHoveredChanged: if (!root.editing) discButton.control.hover(buttonHovered)
         MaterialSymbol {
             visible: !root.designed
             anchors.centerIn: parent
@@ -517,7 +517,7 @@ Item {
                 else faceState.activate()
             }
             altAction: () => { if (faceState.ready) root.togglePicker(faceState.expands) }
-            HoverHandler { enabled: !root.editing; onHoveredChanged: faceState.hover(hovered) }
+            onButtonHoveredChanged: if (!root.editing) faceState.hover(buttonHovered)
         }
 
         ColumnLayout {

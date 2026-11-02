@@ -646,7 +646,8 @@ Item {
             const across = IrisFrame.vertical(wall)
             const lo = across ? shape.y : shape.x
             const hi = lo + (across ? shape.height : shape.width)
-            const corner = wall === "top" || wall === "left" ? 0 : across ? root.height : root.width
+            // Along that wall the corner is at the end the zone's first word names: `right-top` runs up to the top wall's right end.
+            const corner = words[0] === "top" || words[0] === "left" ? 0 : across ? root.height : root.width
             if (span.lo < Math.max(hi, corner) + root.size && span.hi > Math.min(lo, corner) - root.size) return shape
         }
         const inset = IrisFrame.framed ? IrisFrame.band : 0
@@ -655,16 +656,81 @@ Item {
         else if (wall === "right") grown.width = root.width - inset - grown.x
         else if (wall === "top") { grown.height += grown.y - inset; grown.y = inset }
         else grown.height = root.height - inset - grown.y
-        return grown
+        return Object.assign(grown, { runsTo: wall })
     }
+    // Its free end stays round past the last bubble: that bubble stands at the line's whole depth, so one bubble in a corner
+    // draws the contour two do, instead of a lump the wall's curve eats.
+    function runFree(shape: var): var {
+        const wall = shape.runsTo ?? ""
+        if (wall.length === 0) return shape
+        const run = Math.round(Math.min(shape.width, shape.height) / 2)
+        const out = Object.assign({}, shape)
+        if (wall === "bottom") { out.y -= run; out.height += run }
+        else if (wall === "top") out.height += run
+        else if (wall === "right") { out.x -= run; out.width += run }
+        else out.width += run
+        return out
+    }
+    // A line lying wholly inside another that shares its corner (a bubble on the bottom wall under a column on the side)
+    // draws nothing of its own: two bodies there lean into each other, one reads as one surface.
+    function holds(outer: var, inner: var): bool {
+        return inner.x >= outer.x - 1.5 && inner.y >= outer.y - 1.5
+            && inner.x + inner.width <= outer.x + outer.width + 1.5 && inner.y + inner.height <= outer.y + outer.height + 1.5
+    }
+    // The surface a slot stands on, as the field draws it: its line (or itself, alone) run out to the corner it starts from.
+    function surfaceOf(slot: string): var {
+        const plate = root.plateFor(slot)
+        if (plate) return root.runFree(root.towardCorner({ x: plate.x, y: plate.y, width: plate.width, height: plate.height }, plate.zone))
+        const rect = root.rects[root.allSlots.indexOf(slot)]
+        return rect ? root.runFree(root.towardCorner({ x: rect.x, y: rect.y, width: rect.size, height: rect.size }, root.placeName(slot))) : null
+    }
+    // Everything on this output a body must keep off (IrisFrame.surfaces): one list, whoever opens the body.
+    readonly property var standing: {
+        const out = []
+        const seen = {}
+        for (let i = 0; i < root.allSlots.length; i++) {
+            const slot = root.allSlots[i]
+            if (!root.rects[i]) continue
+            const key = root.plateFor(slot) ? "plate:" + root.plateKey(slot) : slot
+            if (seen[key]) continue
+            seen[key] = true
+            const shape = root.surfaceOf(slot)
+            if (!shape) continue
+            const plate = root.plateFor(slot)
+            const rect = root.rects[i]
+            out.push(Object.assign(shape, { fuse: root.edgeFuseOn(IrisFrame.edgeOf(root.placeName(slot))),
+                core: plate ?? { x: rect.x, y: rect.y, width: rect.size, height: rect.size } }))
+        }
+        const island = root.island
+        if (island && island.width > 0 && island.height > 0)
+            out.push({ x: island.x, y: island.y, width: island.width, height: island.height })
+        const dock = IrisState.dockBody?.[root.screenName] ?? []
+        for (const shape of (Array.isArray(dock) ? dock : []))
+            if (shape?.id === "dock") out.push({ x: shape.x, y: shape.y, width: shape.width, height: shape.height })
+        const sidebars = Config.options?.iris?.sidebars ?? ({})
+        if (GlobalStates.sidebarLeftOpen && GlobalStates.sidebarLeftPresentationOutput === root.screenName) {
+            const o = sidebars?.left ?? ({})
+            const width = Math.max(300, Math.min(600, Number(o?.width ?? 380))) * root.d
+            out.push({ x: 0, y: 0, width: IrisFrame.band + width + ((o?.notch ?? false) ? 0 : 12 * root.d), height: root.height })
+        }
+        if (GlobalStates.sidebarRightOpen && GlobalStates.sidebarRightPresentationOutput === root.screenName) {
+            const o = sidebars?.right ?? ({})
+            const width = Math.max(300, Math.min(600, Number(o?.width ?? 380))) * root.d
+            const depth = IrisFrame.band + width + ((o?.notch ?? false) ? 0 : 12 * root.d)
+            out.push({ x: root.width - depth, y: 0, width: depth, height: root.height })
+        }
+        return out
+    }
+    onStandingChanged: IrisFrame.publishSurfaces(root.screenName, root.standing)
     readonly property var fieldShapes: {
         void (card.x + card.y + card.width + card.height + card.progress)
         const out = []
         const sides = []
+        const lines = []
         for (const plate of root.plates) {
-            out.push(root.meltInto(root.towardCorner({ x: plate.x, y: plate.y, width: plate.width, height: plate.height,
+            lines.push({ shape: root.towardCorner({ x: plate.x, y: plate.y, width: plate.width, height: plate.height,
                 radius: IrisStyle.pieceRadius(Math.min(plate.width, plate.height)), id: "plate:" + plate.zone }, plate.zone),
-                plate.side ?? IrisFrame.edgeOf(plate.zone), sides))
+                side: plate.side ?? IrisFrame.edgeOf(plate.zone) })
         }
         for (let i = 0; i < root.allSlots.length; i++) {
             const slot = root.allSlots[i]
@@ -672,10 +738,14 @@ Item {
             if (!rect || root.plateFor(slot)) continue
             const carriedSlot = root.ownerSlot(slot)
             if (root.drag?.slot === carriedSlot || (landing.running && landing.slot === carriedSlot)) continue
-            out.push(root.meltInto(root.towardCorner({ x: rect.x, y: rect.y, width: rect.size, height: rect.size,
+            lines.push({ shape: root.towardCorner({ x: rect.x, y: rect.y, width: rect.size, height: rect.size,
                 radius: IrisStyle.pieceRadius(rect.size), id: "piece:" + slot }, root.placeName(slot)),
-                IrisFrame.edgeOf(root.placeName(slot)), sides))
+                side: IrisFrame.edgeOf(root.placeName(slot)) })
         }
+        lines.forEach((line, i) => {
+            const held = lines.some((other, j) => i !== j && root.holds(other.shape, line.shape) && (j < i || !root.holds(line.shape, other.shape)))
+            if (!held) out.push(root.meltInto(root.runFree(line.shape), line.side, sides))
+        })
         for (const side of sides) out.unshift(root.edgeBody(side))
         if (carried.shown && !root.carryingIsland) {
             const size = root.size * carried.scale
@@ -827,7 +897,7 @@ Item {
         Config.setNestedValues(updates)
     }
 
-    Component.onCompleted: { root.land(); root.publishAbsorbed(); bodiesSettle.restart() }
+    Component.onCompleted: { root.land(); root.publishAbsorbed(); bodiesSettle.restart(); IrisFrame.publishSurfaces(root.screenName, root.standing) }
     Connections {
         target: IrisState
         function onBubbleDragChanged(): void { root.land() }
@@ -1162,12 +1232,13 @@ Item {
     function publishOrigin(slot: string, rect: var): void {
         const zone = root.plateKey(slot)
         const plate = root.absorption.bySlot[slot] ? null : root.plateAt(zone)
+        const stands = root.absorption.bySlot[slot] ? null : root.surfaceOf(slot)
         const inDock = String(rect?.source ?? "").startsWith("dock-")
         IrisState.morphOwner = "stage"
         IrisState.morphOrigin = { x: rect.x, y: rect.y, width: rect.size, height: rect.size,
             radius: IrisStyle.pieceRadius(rect.size), screen: root.screenName, owner: "stage",
             fieldId: inDock ? "dock" : plate ? "plate:" + zone : "piece:" + slot,
-            obstacle: plate ? { x: plate.x, y: plate.y, width: plate.width, height: plate.height } : null,
+            obstacle: stands,
             nestFuse: root.edgeFuseOn(plate ? (plate.side ?? IrisFrame.edgeOf(plate.zone)) : IrisFrame.edgeOf(root.placeName(slot))) }
     }
     function activate(slot: string, kind: string, rect: var): void {
@@ -1452,57 +1523,28 @@ Item {
             return Object.assign({}, a, { obstacle: { x: x, y: y,
                 width: Math.max(a.x + a.width, g.x + g.width) - x, height: Math.max(a.y + a.height, g.y + g.height) - y } })
         }
-        const plate = a && root.cardNest && root.cardNest.rect !== undefined && root.plateFor(root.cardSource.slice(6))
-        if (plate) return Object.assign({}, a, { obstacle: { x: plate.x, y: plate.y, width: plate.width, height: plate.height } })
+        if (a && root.cardNest) return Object.assign({}, a, { obstacle: root.cardNest.rect })
         return a
     }
-    readonly property var cardAvoidRects: {
-        const out = []
-        const openerSlot = root.cardFloats ? root.cardSource.slice(6) : ""
-        const openerZone = openerSlot.length > 0 ? root.placeName(openerSlot) : ""
-        for (const plate of root.plates)
-            if (plate.zone !== openerZone) out.push({ x: plate.x, y: plate.y, width: plate.width, height: plate.height })
-        for (let i = 0; i < root.allSlots.length; i++) {
-            const rect = root.rects[i]
-            if (rect && root.allSlots[i] !== openerSlot)
-                out.push({ x: rect.x, y: rect.y, width: rect.size, height: rect.size })
-        }
-        const island = root.island
-        if (island && island.width > 0 && island.height > 0)
-            out.push({ x: island.x, y: island.y, width: island.width, height: island.height })
-        const dock = IrisState.dockBody?.[root.screenName] ?? []
-        for (const shape of (Array.isArray(dock) ? dock : []))
-            if (shape?.id === "dock") out.push({ x: shape.x, y: shape.y, width: shape.width, height: shape.height })
-        const sidebars = Config.options?.iris?.sidebars ?? ({})
-        if (GlobalStates.sidebarLeftOpen && GlobalStates.sidebarLeftPresentationOutput === root.screenName) {
-            const o = sidebars?.left ?? ({})
-            const width = Math.max(300, Math.min(600, Number(o?.width ?? 380))) * root.d
-            out.push({ x: 0, y: 0, width: IrisFrame.band + width + ((o?.notch ?? false) ? 0 : 12 * root.d), height: root.height })
-        }
-        if (GlobalStates.sidebarRightOpen && GlobalStates.sidebarRightPresentationOutput === root.screenName) {
-            const o = sidebars?.right ?? ({})
-            const width = Math.max(300, Math.min(600, Number(o?.width ?? 380))) * root.d
-            const depth = IrisFrame.band + width + ((o?.notch ?? false) ? 0 : 12 * root.d)
-            out.push({ x: root.width - depth, y: 0, width: depth, height: root.height })
-        }
-        return out
-    }
+    readonly property var cardBesides: root.cardAnchor ? IrisFrame.besides(root.screenName, root.cardOrigin, false) : []
+    readonly property var cardRest: root.cardOpen && root.cardPlacement
+        ? ({ x: root.cardPlacement.x, y: root.cardPlacement.y, width: card.width, height: card.height }) : null
+    onCardRestChanged: IrisFrame.publishOpen("card:" + root.screenName, root.screenName, root.cardRest)
     readonly property real cardBaseRadius: IrisStyle.surfaceRadius("cards", IrisStyle.radiusSheet)
     readonly property var cardNest: {
         const slot = root.cardFloats ? root.cardSource.slice(6) : ""
         if (slot.length === 0) return null
         const plate = root.plateFor(slot)
-        if (plate) return { rect: plate, side: plate.side ?? IrisFrame.edgeOf(plate.zone) }
-        const rect = root.rects[root.allSlots.indexOf(slot)]
-        return rect ? { rect: { x: rect.x, y: rect.y, width: rect.size, height: rect.size }, side: IrisFrame.edgeOf(root.placeName(slot)) } : null
+        const stands = root.surfaceOf(slot)
+        return stands ? { rect: stands, side: plate ? (plate.side ?? IrisFrame.edgeOf(plate.zone)) : IrisFrame.edgeOf(root.placeName(slot)) } : null
     }
     readonly property var cardCorners: root.cardPlacement && !IrisStyle.cardJoins
         ? IrisFrame.nestRadius({ x: root.cardPlacement.x, y: root.cardPlacement.y, width: card.width, height: card.height },
-            root.cardBaseRadius, root.cardNest?.rect ?? null, root.edgeFuseOn(root.cardNest?.side ?? ""), root.width, root.height)
+            root.cardBaseRadius, root.cardNest?.rect ?? null, root.edgeFuseOn(root.cardNest?.side ?? ""), root.width, root.height, root.cardBesides)
         : null
     readonly property var cardPlacement: root.cardAnchor && !root.cardHangs
         ? IrisFrame.place(root.cardOrigin, card.width, card.height, root.width, root.height, root.cardBaseRadius,
-            root.cardAvoidRects, !root.cardFromSatellite && IrisStyle.cardJoins
+            root.cardBesides, !root.cardFromSatellite && IrisStyle.cardJoins
                 ? -IrisStyle.weld : Math.max(IrisFrame.bodyAir, IrisStyle.cardGap)) : null
     readonly property string cardOriginId: {
         if (root.cardHangs || root.cardFromIslandPiece) return "island"
