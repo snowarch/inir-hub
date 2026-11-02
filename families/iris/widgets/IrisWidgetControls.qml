@@ -90,7 +90,7 @@ ColumnLayout {
         return ColorUtils.applyAlpha(IrisStyle.surface, IrisStyle.materialVeil[material] ?? 1)
     }
 
-    readonly property real resolvedWidth: Math.round(336 * root.d)
+    readonly property real resolvedWidth: Math.round((Math.max(root.widgetRows.length, root.lookRows.length) > 6 ? 600 : 336) * root.d)
     spacing: Math.round(14 * root.d)
 
     component Caption: IrisText {

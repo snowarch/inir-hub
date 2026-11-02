@@ -58,19 +58,23 @@ ColumnLayout {
                 implicitHeight: plate.implicitHeight
                 radius: root.plateRadius
                 color: IrisStyle.surfaceHigh
-                ColumnLayout {
+                GridLayout {
                     id: plate
                     anchors.left: parent.left
                     anchors.right: parent.right
-                    spacing: 0
+                    // Many options lie in two columns: one tall strip ran the height of the screen.
+                    columns: root.specs.length > 6 && group.modelData.rows.length > 1 ? 2 : 1
+                    rowSpacing: 0
+                    columnSpacing: 0
                     Repeater {
                         model: ScriptModel { objectProp: "modelKey"; values: group.modelData.rows }
                         IrisSetting {
                             required property var modelData
                             required property int index
                             Layout.fillWidth: true
+                            Layout.preferredWidth: plate.width / plate.columns
                             spec: modelData
-                            last: index === group.modelData.rows.length - 1
+                            last: index >= group.modelData.rows.length - plate.columns
                         }
                     }
                 }
