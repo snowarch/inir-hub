@@ -99,14 +99,25 @@ Item {
         property real startY: 0
         property string startSize: ""
 
+        // A drawing that takes any box (a Material widget, `freeAllowed`) follows the pointer; an iRiS face steps
+        // through its S, M and L.
+        readonly property bool free: root.widget.freeAllowed
+        property real startWidth: 0
+        property real startHeight: 0
         onPressed: mouse => {
             const point = area.mapToItem(root.widget.parent, mouse.x, mouse.y)
             area.startX = point.x
             area.startY = point.y
             area.startSize = root.widget.sizeClass
+            area.startWidth = root.widget.width
+            area.startHeight = root.widget.height
             root.reachWidth = root.widget.width
             root.reachHeight = root.widget.height
             GlobalStates.selectDesktopWidget(root.widget.editInstanceKey)
+            if (area.free) {
+                root.widget.beginFreeSize()
+                return
+            }
             root.widget._resizePreviewValues = ({ "sizeClass": area.startSize })
             root.widget._sizing = true
         }
@@ -114,6 +125,12 @@ Item {
             if (!area.pressed)
                 return
             const point = area.mapToItem(root.widget.parent, mouse.x, mouse.y)
+            if (area.free) {
+                root.reachWidth = area.startWidth + point.x - area.startX
+                root.reachHeight = area.startHeight + point.y - area.startY
+                root.widget.previewFreeSize(root.reachWidth, root.reachHeight)
+                return
+            }
             const start = root.sizeOf(area.startSize)
             root.reachWidth = start.width + point.x - area.startX
             root.reachHeight = start.height + point.y - area.startY
@@ -121,7 +138,7 @@ Item {
             if (size !== root.widget.sizeClass)
                 root.widget._resizePreviewValues = ({ "sizeClass": size })
         }
-        onReleased: root.widget.commitSize(root.widget.sizeClass)
-        onCanceled: root.widget.commitSize(area.startSize)
+        onReleased: area.free ? root.widget.commitFreeSize() : root.widget.commitSize(root.widget.sizeClass)
+        onCanceled: area.free ? root.widget.cancelFreeSize() : root.widget.commitSize(area.startSize)
     }
 }

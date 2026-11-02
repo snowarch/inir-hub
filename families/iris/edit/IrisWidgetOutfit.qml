@@ -45,7 +45,8 @@ Item {
 
     readonly property string name: root.widget?.displayName ?? ""
     readonly property var sizes: root.widget?.sizeChoices ?? []
-    readonly property bool sized: (root.widget?.familyFaced ?? false) && root.sizes.length > 1
+    // Every widget with more than one size steps through them here, an iRiS face or a Material drawing alike.
+    readonly property bool sized: root.sizes.length > 1
     readonly property string size: root.widget?.sizeClass ?? ""
     readonly property string sizeName: root.sized ? (root.widget?.sizeLabels?.[root.size] ?? "") : ""
     function nextSize(): void {
@@ -92,16 +93,42 @@ Item {
     readonly property real roomRight: root.overlay ? root.room.x + root.room.width : (root.widget?.scaledScreenWidth ?? 1920)
     readonly property real keysHeight: keys.height * root.hair
     readonly property real keysWidth: keys.width * root.hair
-    // Above the widget, else below it, else inside its top edge.
-    readonly property string keysAt: root.topNow - root.keysHeight - 2 * root.gap >= root.roomTop ? "above"
-        : root.topNow + root.height + 2 * root.gap + root.keysHeight <= root.roomBottom ? "below" : "inside"
-    readonly property bool keysAbove: root.keysAt === "above"
     readonly property bool tagBelow: root.topNow + root.height + 2 * root.gap + tag.height * root.hair <= root.roomBottom
-    // Right-aligned with the widget, slid back inside the room at either side.
+    // Slid back inside the room at either side.
     function inside(x: real, w: real): real {
         return Math.max(root.roomLeft + 2 * root.gap, Math.min(root.roomRight - 2 * root.gap - w, x))
     }
-    readonly property real keysX: root.inside(root.leftNow + root.width - root.keysWidth, root.keysWidth) - root.leftNow
+    // Where the keys stand: right-aligned over the widget on a side chosen when it is chosen or set down, kept while it
+    // has room (above, else below, else inside its top), and held still while the pointer is on them, so a size picked
+    // there never slides the capsule from under it (his 11-02: they jumped about and overlapped).
+    property string keysAt: "above"
+    function wantedAt(): string {
+        return root.topNow - root.keysHeight - 2 * root.gap >= root.roomTop ? "above"
+            : root.topNow + root.height + 2 * root.gap + root.keysHeight <= root.roomBottom ? "below" : "inside"
+    }
+    function chooseAt(): void { root.keysAt = root.wantedAt() }
+    readonly property bool sideLost: root.keysAt === "above" ? root.topNow - root.keysHeight - 2 * root.gap < root.roomTop
+        : root.keysAt === "below" ? root.topNow + root.height + 2 * root.gap + root.keysHeight > root.roomBottom
+        : root.wantedAt() !== "inside"
+    onSideLostChanged: if (root.sideLost) Qt.callLater(root.chooseAt)
+    onSelectedChanged: if (root.selected) Qt.callLater(root.chooseAt)
+    onWidgetChanged: Qt.callLater(root.chooseAt)
+    onCarriedChanged: if (!root.carried) Qt.callLater(root.chooseAt)
+    readonly property real liveRight: root.inside(root.leftNow + root.width - root.keysWidth, root.keysWidth) + root.keysWidth
+    readonly property real liveTop: root.keysAt === "above" ? root.topNow - 2 * root.gap - root.keysHeight
+        : root.keysAt === "below" ? root.topNow + root.height + 2 * root.gap : root.topNow + 2 * root.gap
+    readonly property bool holding: keysHover.hovered && root.selected
+    property real heldRight: 0
+    property real heldTop: 0
+    onHoldingChanged: if (root.holding) { root.heldRight = root.liveRight; root.heldTop = root.liveTop }
+    // Held, unless the widget grows into them.
+    readonly property bool held: root.holding && root.keysAt !== "inside"
+        && !(root.heldRight - root.keysWidth < root.leftNow + root.width + root.gap && root.heldRight > root.leftNow - root.gap
+            && root.heldTop < root.topNow + root.height + root.gap && root.heldTop + root.keysHeight > root.topNow - root.gap)
+    readonly property real keysRight: root.held ? root.heldRight : root.liveRight
+    readonly property real keysTop: root.held ? root.heldTop : root.liveTop
+    // The sheet holds every key the capsule has: while it is open the capsule steps back, never two sets on screen.
+    readonly property bool sheetOpen: root.widget?.quickControlsOpen ?? false
 
     // ── Its name ──
     Item {
@@ -168,11 +195,14 @@ Item {
     IrisSpring {
         id: emerge
         surface: "panels"
-        to: root.dressed && root.selected && !root.carried ? 1 : 0
+        to: root.dressed && root.selected && !root.carried && !root.sheetOpen ? 1 : 0
         intent: "auto"
         minimum: 0
     }
     readonly property Item keysItem: keys
+    TextMetrics { id: smallName; font: sizeLabel.font; text: root.widget?.sizeLabels?.small ?? "" }
+    TextMetrics { id: mediumName; font: sizeLabel.font; text: root.widget?.sizeLabels?.medium ?? "" }
+    TextMetrics { id: largeName; font: sizeLabel.font; text: root.widget?.sizeLabels?.large ?? "" }
     // One opaque capsule: loose glass keys vanished on a dark wallpaper and went grey on a light one (his 10-30 capture).
     Item {
         id: keys
@@ -184,15 +214,14 @@ Item {
         height: implicitHeight
         scale: root.hair * (0.6 + 0.4 * keys.out)
         transformOrigin: root.keysAt === "below" ? Item.TopRight : Item.BottomRight
-        // The capsule is scaled about its right edge: place that edge.
-        x: root.keysX + root.keysWidth - keys.width
-        y: root.keysAt === "above" ? -2 * root.gap - keys.height
-            : root.keysAt === "below" ? root.height + 2 * root.gap
-            : 2 * root.gap + root.keysHeight - keys.height
+        // The capsule is scaled about its right edge and the edge facing the widget: place those edges.
+        x: root.keysRight - root.leftNow - keys.width
+        y: root.keysAt === "below" ? root.keysTop - root.topNow : root.keysTop + root.keysHeight - root.topNow - keys.height
         opacity: IrisStyle.contentAt(keys.out)
         visible: keys.out > 0.01
-        enabled: root.selected
+        enabled: root.selected && !root.sheetOpen
 
+        HoverHandler { id: keysHover }
         Rectangle {
             anchors.fill: parent
             radius: height / 2
@@ -273,7 +302,13 @@ Item {
                         }
                     }
                     StyledText {
+                        id: sizeLabel
                         anchors.verticalCenter: parent.verticalCenter
+                        // As wide as the widest size name: cycling sizes never resizes the capsule under the pointer.
+                        width: Math.ceil(Math.max(root.sizes.includes("small") ? smallName.advanceWidth : 0,
+                            root.sizes.includes("medium") ? mediumName.advanceWidth : 0,
+                            root.sizes.includes("large") ? largeName.advanceWidth : 0))
+                        horizontalAlignment: Text.AlignLeft
                         text: root.sizeName
                         color: IrisStyle.text
                         font.family: root.ink ? IrisStyle.fontLabel : IrisStyle.fontMain

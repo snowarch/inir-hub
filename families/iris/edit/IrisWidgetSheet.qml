@@ -67,12 +67,37 @@ Item {
     readonly property real roomBottom: root.avoid.height > 0 ? root.avoid.y - root.gap : root.height - root.gap
     readonly property real fullHeight: Math.min(Math.round((content.item?.implicitHeight ?? 0) + 2 * root.pad),
         root.roomBottom - root.gap)
-    // Beside the widget on the side with room (right first), level with its top; above the shelf if neither fits.
-    readonly property string side: root.seen.x + root.seen.width + root.gap + root.fullWidth <= root.width - root.gap ? "right"
-        : root.seen.x - root.gap - root.fullWidth >= root.gap ? "left" : "over"
-    readonly property real restX: root.side === "right" ? root.seen.x + root.seen.width + root.gap
+    // Beside the widget on the side with room (right first), level with its top; above the shelf if neither fits. The side
+    // is chosen when it opens and kept while it fits: a widget that grows or is carried no longer flips it from side to
+    // side, and when it must change it glides there (his 11-02: the controls jumped about).
+    function fits(side: string): bool {
+        return side === "right" ? root.seen.x + root.seen.width + root.gap + root.fullWidth <= root.width - root.gap
+            : side === "left" ? root.seen.x - root.gap - root.fullWidth >= root.gap : true
+    }
+    property string side: "right"
+    // From where it stands now to the new side: the shift starts at the distance and springs to nothing.
+    function chooseSide(glide: bool): void {
+        const before = root.restX
+        root.side = root.fits("right") ? "right" : root.fits("left") ? "left" : "over"
+        slide.enabled = false
+        root.sideShift = glide ? before - root.sideX : 0
+        slide.enabled = true
+        root.sideShift = 0
+    }
+    readonly property bool sideLost: root.side === "over" ? root.fits("right") || root.fits("left") : !root.fits(root.side)
+    onSideLostChanged: if (root.sideLost && root.shown) Qt.callLater(root.chooseSide, true)
+    onOpenChanged: if (root.open) root.chooseSide(false)
+    onHeldChanged: if (root.open) root.chooseSide(false)
+    readonly property real sideX: root.side === "right" ? root.seen.x + root.seen.width + root.gap
         : root.side === "left" ? root.seen.x - root.gap - root.fullWidth
         : Math.max(root.gap, Math.min(root.width - root.gap - root.fullWidth, root.seen.x + (root.seen.width - root.fullWidth) / 2))
+    // Glides only when the side changes; it rides the widget it belongs to as that one moves.
+    property real sideShift: 0
+    Behavior on sideShift {
+        id: slide
+        NumberAnimation { duration: IrisStyle.duration(260); easing.type: Easing.BezierSpline; easing.bezierCurve: IrisStyle.moveCurve }
+    }
+    readonly property real restX: root.sideX + root.sideShift
     readonly property real restY: Math.max(root.gap, Math.min(root.roomBottom - root.fullHeight, root.seen.y))
     // It grows from the widget's near edge: at 0 it is a sliver against that edge.
     readonly property real g: Math.max(0, Math.min(1, root.presentation))

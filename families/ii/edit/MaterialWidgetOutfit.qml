@@ -62,7 +62,7 @@ Item {
 
     // Free size (10-25): the right and bottom edges take any size, S, M or L puts the class back. Drawn in the edit
     // window, where the card's neighbours and the deselect area can't take the press.
-    readonly property bool grips: root.overlay && root.selected && !root.locked && !root.carried && (root.widget?.sized ?? false) && Plugins.flag(Plugins.active, "widgetFreeSize")
+    readonly property bool grips: root.overlay && root.selected && !root.locked && !root.carried && (root.widget?.sized ?? false) && (root.widget?.freeAllowed ?? false)
     readonly property Item rightGripItem: rightGrip
     readonly property Item bottomGripItem: bottomGrip
     // The grip's whole box takes the press (it is the edit window's input region); the pill is what shows.
