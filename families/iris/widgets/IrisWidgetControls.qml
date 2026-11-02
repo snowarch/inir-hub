@@ -90,11 +90,11 @@ ColumnLayout {
         return ColorUtils.applyAlpha(IrisStyle.surface, IrisStyle.materialVeil[material] ?? 1)
     }
 
-    // One size on every page and for every widget of a kind: pages turn inside it and scroll, so the sheet never resizes
-    // or moves under the pointer (his 11-02: it jumped on every tab, and a wide card held two controls).
+    // One width, and as tall as its tallest page, measured: the pages turn in a StackLayout, which is as tall as the largest
+    // of them, so the sheet never resizes under the pointer (his 11-02: it jumped on every tab), leaves no room under a
+    // short page and cuts no long one (a guessed 46 px per row did both).
     readonly property real resolvedWidth: Math.round(440 * root.d)
-    readonly property int mostRows: Math.max(root.widgetRows.length, root.lookRows.length)
-    readonly property real restingHeight: Math.round(Math.min(400, 216 + Math.ceil(root.mostRows / (root.mostRows > 6 ? 2 : 1)) * 46) * root.d)
+    readonly property real restingHeight: Math.ceil(root.implicitHeight)
     spacing: Math.round(14 * root.d)
 
     component Caption: IrisText {
@@ -440,9 +440,15 @@ ColumnLayout {
         onPicked: value => root.widget._quickTab = value
     }
 
-    ColumnLayout {
-        visible: root.page === "widget"
+    StackLayout {
         Layout.fillWidth: true
+        Layout.fillHeight: false
+        currentIndex: Math.max(0, ["widget", "stack", "look", "arrange"].indexOf(root.page))
+
+    ColumnLayout {
+        Layout.fillWidth: true
+        Layout.fillHeight: false
+        Layout.alignment: Qt.AlignTop
         spacing: Math.round(14 * root.d)
 
         RowLayout {
@@ -503,16 +509,23 @@ ColumnLayout {
         }
     }
 
-    IrisStackControls {
-        visible: root.page === "stack"
-        widget: root.widget
-        rowRadius: root.plateRadius
-        part: "manage"
+    // Built only for a widget in a stack: the sheet measures every page, and an empty one counts nothing.
+    Loader {
+        Layout.fillWidth: true
+        Layout.fillHeight: false
+        Layout.alignment: Qt.AlignTop
+        active: root.widget.stacked
+        sourceComponent: IrisStackControls {
+            widget: root.widget
+            rowRadius: root.plateRadius
+            part: "manage"
+        }
     }
 
     ColumnLayout {
-        visible: root.page === "look"
         Layout.fillWidth: true
+        Layout.fillHeight: false
+        Layout.alignment: Qt.AlignTop
         spacing: Math.round(14 * root.d)
 
         ColumnLayout {
@@ -736,8 +749,9 @@ ColumnLayout {
     }
 
     ColumnLayout {
-        visible: root.page === "arrange"
         Layout.fillWidth: true
+        Layout.fillHeight: false
+        Layout.alignment: Qt.AlignTop
         spacing: Math.round(10 * root.d)
 
         Caption { text: Translation.tr("Position") }
@@ -841,5 +855,6 @@ ColumnLayout {
                 }
             }
         }
+    }
     }
 }
