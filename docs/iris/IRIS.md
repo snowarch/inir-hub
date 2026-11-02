@@ -36,12 +36,12 @@ The Dock is set under iRiS Settings › Dock:
 - Style › Texture: how every body is drawn, in iRiS and AIRISU alike. Ricelin is a card lit from above, Aurora thin and translucent, Angel a bright glass edge, Regalia a solid tile, Flat a plain plate; Afterglow, Light leak and Light streak bring their own light. Light streak lights everything from under the Island: a hot line on every edge that faces it, your colours rising off those edges like an aurora (Aurora, Your colours or Wallpaper), and a trail behind whatever moves; Light, Aurora and Trails set how much of each.
 - Colour › Look: Apple, Nothing OS, Synth or Gel.
 - Colour › Scheme: Auto, Dark mode, Ink or Light mode. Ink sits between dark and light, like paper and ink.
-- Colour › Colour theme: Catppuccin, Rosé Pine, Tokyo Night, Nord and more. Match the shell also gives iRiS the theme's accent, highlight and material.
+- Style › Colour theme: Catppuccin, Rosé Pine, Tokyo Night, Nord and more. Match the shell also gives iRiS the theme's accent, highlight and material.
 - Style › Design: iRiS or AIRISU. AIRISU is the same shell in lacquer: same forms and texture as iRiS, its own colour, type and motion. At rest its Island stamps the day as a seal (the weekday's kanji over the date) beside the leaning hour, the weather small after it; a song, a timer or a task takes the strip in turn, and a notice, a level or a recording lacquers the whole strip.
-- Style › Themes: curated looks for the whole family. Use Customize, Themes, Save current to keep the look you have as your own theme.
+- Style › Presets: the first thing on Style. Every curated look as a little widget of itself (its plate, its accent, its type, its colours as a strip); one click puts the whole look on, Undo takes it back. Colour lives on Style too now, in its own band under the presets, then Material, Shape and type, More. Use Customize, Themes, Save current to keep the look you have as your own theme.
 - Customize: right-click the desktop and pick Customize iRiS. The Island grows a capsule with Themes, Look and Pieces, plus undo, redo and Done.
 - Style › Customize opens: On the shell, which edits in place, or Studio, a side panel with search.
-- Style › Icons › Colour: Areas (what Auto gives plates) colours by family. Each sidebar group has its own band: Appearance violets, Island to Control Center blues, Spotlight to Anime greens, Notifications to Login warm, Home and the foot grey. Accent paints every icon your accent; Mono keeps them grey.
+- Style › Icons: iRiS draws every mark as its widgets head themselves, the glyph alone in its area's colour; Icon pack brings back plates (iRiS) or app tiles. Icons › Colour: Areas colours by family. Each sidebar group has its own band: Appearance violets, Island to Control Center blues, Spotlight to Anime greens, Notifications to Login warm, Home and the foot grey. Accent paints every icon your accent; Mono keeps them grey.
 - Home › Every day: the Edit button on its title picks which settings Home pins.
 - Lists in Settings give a little at their ends, with a mouse wheel too, and spring back.
 

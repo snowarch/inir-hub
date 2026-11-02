@@ -672,6 +672,16 @@ Item {
             visible: active
             sourceComponent: IrisWidgetGallery {}
         }
+
+        // Style's presets, by URL: the cards live with Customize (edit), which already reads this module.
+        Loader {
+            Layout.fillWidth: true
+            Layout.topMargin: Math.round(6 * root.d)
+            opacity: root.controlOpacity
+            active: root.spec.kind === "themes"
+            visible: active
+            source: active ? Qt.resolvedUrl("../edit/IrisPresetGallery.qml") : ""
+        }
     }
 
     Rectangle {

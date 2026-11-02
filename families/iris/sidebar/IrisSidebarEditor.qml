@@ -81,7 +81,7 @@ Rectangle {
                     horizontalAlignment: Text.AlignHCenter
                     text: row.modelData.icon
                     iconSize: Math.round(19 * root.d)
-                    color: IrisStyle.plainMarks ? IrisStyle.textSecondary : row.modelData.tint
+                    color: IrisStyle.iconColour === "mono" ? IrisStyle.textSecondary : IrisStyle.iconHue(row.modelData.tint)
                     opacity: row.shown ? 1 : 0.4
                     Behavior on opacity { NumberAnimation { duration: IrisStyle.duration(140); easing.type: IrisStyle.feedbackEasing } }
                 }

@@ -117,7 +117,7 @@ Loader {
                     MaterialSymbol {
                         anchors.centerIn: parent
                         text: section.glyph
-                        fill: IrisStyle.iconFill(IrisStyle.plainMarks ? 0 : 1)
+                        fill: IrisStyle.iconFill(IrisStyle.lineMarks ? 0 : 1)
                         glyphWeight: IrisStyle.iconWeight
                         iconSize: Math.round((IrisStyle.plainMarks ? 18 : 15) * root.d)
                         color: !IrisStyle.plainMarks ? IrisStyle.onTint : IrisStyle.iconColour === "mono" ? IrisStyle.secondaryOf(section.ink) : IrisStyle.iconHue(section.tint)

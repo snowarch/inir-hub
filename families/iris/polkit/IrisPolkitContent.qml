@@ -100,7 +100,7 @@ Item {
                 implicitHeight: implicitWidth
                 // A glyph-mark Design (AIRISU) shows the key alone, in the seal, on no disc.
                 radius: IrisStyle.capsule(width)
-                color: IrisStyle.plainMarks ? "transparent" : IrisStyle.tintFill(IrisStyle.accent)
+                color: IrisStyle.lineMarks ? "transparent" : IrisStyle.tintFill(IrisStyle.accent)
                 MaterialSymbol {
                     anchors.centerIn: parent
                     text: root.service.batteryChargeLimitRequest ? "battery_charging_full" : "lock"

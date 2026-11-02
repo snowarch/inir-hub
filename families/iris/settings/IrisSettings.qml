@@ -644,6 +644,7 @@ Item {
             root.requestedGroup = ""
         }
         root.followMovedGroup()
+        root.requestedSection = IrisOptions.retiredAreas[root.requestedSection] ?? root.requestedSection
         // The place is worked out first and set once: every write to section or advancedPage rebuilds the page, and
         // setting "general" on the way to the asked section built General's page on each request.
         const own = root.pageIndexOf(key)
@@ -1568,7 +1569,7 @@ Item {
         // Where you are speaks one colour, the area's own: its glyph fills, the wash under it takes a tint of it and so
         // does its name, a step heavier (DI49i: the chosen row reads at a glance, not only by its wash).
         readonly property color tint: IrisOptions.sectionById(sectionRow.modelData.id).tint
-        readonly property color own: IrisStyle.iconColour === "area" && !IrisStyle.plainMarks ? sectionRow.tint : IrisStyle.accent
+        readonly property color own: IrisStyle.iconColour === "area" ? sectionRow.tint : IrisStyle.accent
         readonly property real washRadius: Math.min(sectionRow.rowHeight / 2, IrisStyle.tileRadius(sectionMark.width) + sectionMark.x)
         onSelectedChanged: if (sectionRow.selected && sectionRow.travels) root.travelRow = sectionRow
         Component.onCompleted: if (sectionRow.selected && sectionRow.travels) root.travelRow = sectionRow
@@ -1740,7 +1741,7 @@ Item {
                     anchors.verticalCenter: parent.verticalCenter
                     text: group.modelData.title
                     // A Design whose marks are plain glyphs tells a section by its words, never by a hue of its own.
-                    color: resultSection.containsMouse ? IrisStyle.text : IrisStyle.plainMarks ? IrisStyle.label : (resultSection.section.tint ?? IrisStyle.label)
+                    color: resultSection.containsMouse ? IrisStyle.text : IrisStyle.iconColour === "mono" ? IrisStyle.label : IrisStyle.iconHue(resultSection.section.tint ?? IrisStyle.label)
                     font.family: IrisStyle.fontTitle
                     font.pixelSize: IrisStyle.typeMeta
                     font.weight: IrisStyle.weight(Font.DemiBold)

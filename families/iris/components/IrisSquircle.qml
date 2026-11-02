@@ -88,7 +88,7 @@ Rectangle {
     MaterialSymbol {
         anchors.centerIn: parent
         text: root.glyph
-        fill: IrisStyle.iconFill(root.keyed ? 0 : root.plain ? (root.reversed ? 1 : 0) : 1)
+        fill: IrisStyle.iconFill(root.keyed ? 0 : root.plain ? (root.reversed || !IrisStyle.lineMarks ? 1 : 0) : 1)
         glyphWeight: IrisStyle.iconWeight
         iconSize: Math.round(root.width * (root.plain ? Math.min(0.82, root.glyphShare + 0.14) : root.keyed ? root.glyphShare * 0.8 : root.glyphShare))
         color: root.ink

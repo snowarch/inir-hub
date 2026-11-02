@@ -1346,12 +1346,16 @@ QtObject {
     // Settings › Style › Icons: the plate (iRiS's tinted squircle, an app-icon tile, or none), the colour icons carry,
     // the glyph set, shape, fill and weight. They reach icons only: a cover, a poster or a hover plate is a tile.
     readonly property var iconOptions: root.appearance?.icons ?? ({})
-    readonly property bool glyphPack: String(root.iconOptions.style ?? "iris") === "glyph"
-    readonly property bool plainMarks: root.trait("marks") === "glyph" || root.mono || root.glyphPack
-    // Auto is each pack's own: plates in the area's colour, a glyph alone in the ink.
+    // iRiS draws a mark as its widgets head themselves (his 11-02: the widgets are the look): the glyph alone, filled, in
+    // its area's colour. A plate behind it is the person's pick (Icons › Icon pack: iRiS, Tiles).
+    readonly property bool glyphPack: String(root.iconOptions.style ?? "glyph") === "glyph"
+    // A line voice (Nothing, a Design whose marks are glyphs) draws its marks in ink and its buttons as hairlines.
+    readonly property bool lineMarks: root.trait("marks") === "glyph" || root.mono
+    readonly property bool plainMarks: root.lineMarks || root.glyphPack
+    // Auto: each area's colour, and the ink in a line voice.
     readonly property string iconColour: {
         const wanted = String(root.iconOptions.colour ?? "auto")
-        return ["area", "accent", "mono"].includes(wanted) ? wanted : root.plainMarks ? "mono" : "area"
+        return ["area", "accent", "mono"].includes(wanted) ? wanted : root.lineMarks ? "mono" : "area"
     }
     // The colour an icon of an area wears: its own, the accent for every area, or a grey plate (mono).
     function iconHue(area: color): color {
@@ -1367,6 +1371,7 @@ QtObject {
     readonly property string iconShape: String(root.iconOptions.shape ?? "auto")
     readonly property int iconWeight: ({ light: Font.Light, bold: Font.DemiBold })[String(root.iconOptions.weight ?? "regular")] ?? Font.Normal
     // A glyph's fill: what the surface would draw, unless the person fixed one.
+    // Auto: a glyph alone is filled as a widget's head is, outlined in a line voice.
     function iconFill(auto: real): real {
         const wanted = String(root.iconOptions.fill ?? "auto")
         return wanted === "filled" ? 1 : wanted === "outlined" ? 0 : auto

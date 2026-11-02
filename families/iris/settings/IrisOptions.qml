@@ -516,11 +516,11 @@ QtObject {
         { target: "material", group: "Shape", label: "Dock shape", mirror: true, visibleWhen: "!iris.appearance.theme.linkShapes", path: "iris.dock.shape", kind: "choice", fallback: "auto", choices: [{label:"Auto",value:"auto",glyph:"auto_awesome"},{label:"Round",value:"round",glyph:"circle"},{label:"Squircle",value:"squircle",glyph:"rounded_corner"},{label:"Square",value:"square",glyph:"square"}], keywords: ["square", "squared", "boxy", "rectangle", "sharp", "round", "rounded", "capsule", "pill", "circle", "squircle", "corners", "radius", "curves", "cuadrado", "cuadrada", "redondo", "redonda", "esquinas", "curvas", "forma"] },
         { target: "material", group: "Shape", label: "Fusion", description: "How deeply shapes melt where they meet.", path: "iris.appearance.theme.melt", kind: "range", fallback: 0, min: 0, max: 200, step: 5, unit: " %" },
         { target: "material", group: "Shape", label: "Spacing", description: "Padding, gaps and control sizes.", path: "iris.appearance.density", kind: "range", fallback: 1, min: 0.8, max: 1.35, step: 0.05, unit: "×" },
-        { target: "material", group: "Icons", label: "Icon pack", description: "How iRiS draws its icons.", path: "iris.appearance.icons.style", kind: "choice", fallback: "iris", choices: [{label:"iRiS",value:"iris",glyph:"apps",detail:"On a plate."},{label:"Tiles",value:"tile",glyph:"gradient",detail:"On an app-icon tile."},{label:"Glyph",value:"glyph",glyph:"category",detail:"The glyph alone, as Folio's index."}], keywords: ["icons", "glyphs", "symbols", "material symbols", "pack", "tile", "tiles", "plate", "gradient", "depth", "app icon", "glyph", "plain", "no plate", "folio", "iconos", "glifos", "paquete", "degradado", "placa", "sin placa"] },
+        { target: "material", group: "Icons", label: "Icon pack", description: "How iRiS draws its icons.", path: "iris.appearance.icons.style", kind: "choice", fallback: "glyph", choices: [{label:"Glyph",value:"glyph",glyph:"category",detail:"The glyph alone in its colour, as the widgets."},{label:"iRiS",value:"iris",glyph:"apps",detail:"On a plate."},{label:"Tiles",value:"tile",glyph:"gradient",detail:"On an app-icon tile."}], keywords: ["icons", "glyphs", "symbols", "material symbols", "pack", "tile", "tiles", "plate", "gradient", "depth", "app icon", "glyph", "plain", "no plate", "folio", "iconos", "glifos", "paquete", "degradado", "placa", "sin placa"] },
         { target: "material", group: "Icons", label: "Shape", description: "The corners of every icon plate.", path: "iris.appearance.icons.shape", kind: "choice", fallback: "auto", showIf: () => !IrisStyle.plainMarks, choices: [{label:"Auto",value:"auto",glyph:"auto_awesome"},{label:"Round",value:"round",glyph:"circle"},{label:"Square",value:"square",glyph:"square"}], keywords: ["shape", "corners", "round", "circle", "square", "squircle", "icon", "forma", "esquinas", "redondo", "cuadrado"] },
-        { target: "material", group: "Icons", label: "Colour", description: "Auto paints plates in each area's colour and leaves a glyph alone in ink.", path: "iris.appearance.icons.colour", kind: "choice", fallback: "auto", choices: [{label:"Auto",value:"auto",glyph:"auto_awesome"},{label:"Areas",value:"area",glyph:"palette"},{label:"Accent",value:"accent",get swatch() { return IrisStyle.accent }},{label:"Mono",value:"mono",get swatch() { return IrisStyle.identity.gray }}], keywords: ["colour", "color", "tint", "mono", "monochrome", "grey", "gray", "accent", "ink", "colorful", "color de iconos", "monocromo", "gris"] },
+        { target: "material", group: "Icons", label: "Colour", description: "Auto gives each area its colour; a line look (Nothing) draws them in ink.", path: "iris.appearance.icons.colour", kind: "choice", fallback: "auto", choices: [{label:"Auto",value:"auto",glyph:"auto_awesome"},{label:"Areas",value:"area",glyph:"palette"},{label:"Accent",value:"accent",get swatch() { return IrisStyle.accent }},{label:"Mono",value:"mono",get swatch() { return IrisStyle.identity.gray }}], keywords: ["colour", "color", "tint", "mono", "monochrome", "grey", "gray", "accent", "ink", "colorful", "color de iconos", "monocromo", "gris"] },
         { target: "material", group: "Icons", label: "Glyphs", description: "The set every glyph is drawn from.", path: "iris.appearance.icons.glyphs", kind: "choice", fallback: "rounded", choices: [{label:"Rounded",value:"rounded"},{label:"Standard",value:"standard"},{label:"Sharp",value:"sharp"}].filter(choice => !IrisStyle.glyphFonts[choice.value] || Qt.fontFamilies().includes(IrisStyle.glyphFonts[choice.value])), keywords: ["glyphs", "iconography", "icon set", "icon font", "symbols", "sharp", "rounded", "outlined", "iconografía", "símbolos", "redondeados", "rectos"] },
-        { target: "material", group: "Icons", label: "Fill", description: "Auto fills glyphs on plates and outlines them alone.", path: "iris.appearance.icons.fill", kind: "choice", fallback: "auto", choices: [{label:"Auto",value:"auto"},{label:"Filled",value:"filled"},{label:"Outlined",value:"outlined"}], keywords: ["fill", "filled", "outline", "outlined", "solid", "line", "relleno", "contorno"] },
+        { target: "material", group: "Icons", label: "Fill", description: "Auto fills them, as the widgets do; a line look outlines them.", path: "iris.appearance.icons.fill", kind: "choice", fallback: "auto", choices: [{label:"Auto",value:"auto"},{label:"Filled",value:"filled"},{label:"Outlined",value:"outlined"}], keywords: ["fill", "filled", "outline", "outlined", "solid", "line", "relleno", "contorno"] },
         { target: "material", group: "Icons", label: "Weight", description: "How heavy every glyph's line is.", path: "iris.appearance.icons.weight", kind: "choice", fallback: "regular", choices: [{label:"Light",value:"light"},{label:"Regular",value:"regular"},{label:"Bold",value:"bold"}], keywords: ["weight", "thin", "light", "bold", "heavy", "stroke", "line", "grosor", "fino", "negrita"] },
         { target: "material", group: "Icons", label: "Plate", description: "The plate behind icons.", path: "iris.appearance.icons.plate", kind: "choice", fallback: "black", visibleWhen: "iris.appearance.icons.style=tile", choices: [{label:"Black",value:"black",get swatch() { return IrisStyle.plateBlackBase }},{label:"White",value:"white",get swatch() { return IrisStyle.plateWhiteBase }},{label:"Tint",value:"tint",get swatch() { return IrisStyle.identity.lavender }},{label:"Surface",value:"surface",get swatch() { return IrisStyle.surfaceHighestOpaque }}], keywords: ["plate", "background", "behind", "black", "white", "light", "dark", "tile", "icon", "placa", "fondo", "negro", "blanco", "claro", "oscuro"] },
         { target: "material", group: "Frame", label: "Close the shell around the screen", description: "A black band around the screen with rounded inner corners.", path: "iris.surround.enable", kind: "switch", fallback: true },
@@ -996,8 +996,8 @@ QtObject {
         { section: "desktop", group: "Overview backdrop", label: "Blur", path: "background.backdrop.blurRadius", kind: "range", fallback:40,min:0,max:100,unit:" px" },
         { section: "desktop", group: "Overview backdrop", label: "Dim", path: "background.backdrop.dim", kind: "range", fallback:40,min:0,max:100,unit:" %" },
         { tune: true, section: "desktop", group: "Overview backdrop", label: "Vignette", path: "background.backdrop.vignetteEnabled", kind: "switch", fallback:false },
-        { section: "appearance", group: "Themes", label: "Browse themes", description: "Whole redesigns of iRiS and the ones you saved, in Customize: try one, Undo takes it back.", kind: "action", button: "Open", run: () => { GlobalStates.settingsOverlayOpen = false; IrisState.openCustomize("themes") }, keywords: ["theme", "themes", "preset", "redesign", "share", "studio", "temas"] },
-        { section: "appearance", group: "Themes", label: "Take only their colours", tune: true, description: "Themes change your colours only, not shapes, layout or motion.", path: "iris.appearance.themeColoursOnly", kind: "switch", fallback: false, keywords: ["theme", "colours", "colors", "palette", "only", "tema", "colores"] },
+        { section: "appearance", group: "Presets", label: "Pick a look", description: "One tap sets the whole look; Undo takes it back. The tiles below fine-tune it.", kind: "themes", keywords: ["preset", "presets", "theme", "themes", "look", "style", "redesign", "aesthetic", "estetica", "tema", "temas", "preajuste"] },
+        { section: "appearance", group: "Presets", label: "Take only their colours", tune: true, description: "Themes change your colours only, not shapes, layout or motion.", path: "iris.appearance.themeColoursOnly", kind: "switch", fallback: false, keywords: ["theme", "colours", "colors", "palette", "only", "tema", "colores"] },
         { section: "appearance", group: "Customize", label: "Customize opens", description: "On the shell edits in place; Studio is a side panel with search.", path: "iris.appearance.customize", kind: "choice", tune: true, fallback: "shell", choices: [{ label: "On the shell", value: "shell", glyph: "touch_app" }, { label: "Studio", value: "studio", glyph: "view_sidebar" }], keywords: ["studio", "customize", "editor", "panel", "look"] },
         { section: "appearance", group: "Previews", label: "Animated previews", description: "Live scenes in Settings and Customize.", path: "iris.appearance.previews", kind: "switch", tune: true, fallback: true },
         { section: "spotlight", group: "Spotlight", label: "Spotlight", path: "iris.modules.palette", kind: "switch", fallback:true },
@@ -1433,8 +1433,7 @@ QtObject {
     readonly property var sections: [
         // Home is General (10-25, he: two pages, the useful one not where Settings opens): what he pinned over the shell's own.
         { id: "general", cluster: -1, title: "Home", subtitle: "What you change every day", icon: "home", get tint() { return root.areaTint(this) }, tip: "Settings that shape the whole shell, whichever surface shows them." },
-        { id: "appearance", cluster: 0, title: "Style", subtitle: "Look, material, shape and type", icon: "style", get tint() { return root.areaTint(this) }, tip: "Customize edits the same values live, on top of your desktop." },
-        { id: "colour", cluster: 0, title: "Colour", subtitle: "Light or dark, accent, highlight and your apps", icon: "palette", get tint() { return root.areaTint(this) }, tip: "Colour can come from your wallpaper, from a theme, or be one you pick." },
+        { id: "appearance", cluster: 0, title: "Style", subtitle: "Presets, colour, material, shape and type", icon: "style", get tint() { return root.areaTint(this) }, tip: "A preset sets the whole look in one tap; every tile under it fine-tunes one part." },
         { id: "wallpaper", cluster: 0, title: "Wallpaper", subtitle: "Shuffle, live wallpapers, the gallery and the overview", icon: "wallpaper", get tint() { return root.areaTint(this) }, tip: "Next wallpaper in the desktop menu changes it once; Shuffle keeps changing it." },
         { id: "motion", cluster: 0, title: "Motion", subtitle: "How every shape grows, moves and settles", icon: "animation", get tint() { return root.areaTint(this) }, tip: "Shorter durations feel snappier; the curve stays the same." },
         { id: "bar", cluster: 1, title: "Island", subtitle: "Composition, size and how the Island responds", icon: "pill", get tint() { return root.areaTint(this) }, tip: "Rest on the Island to peek, click to keep it, scroll for volume." },
@@ -1464,7 +1463,7 @@ QtObject {
     // The sidebar's groups (DI49g, 2026-10-21): each names the areas under it, which the sidebar lists directly; a
     // category's id still opens its first area (`inir iris settings look`).
     readonly property var categories: [
-        { id: "look", cluster: 0, title: "Appearance", icon: "style", get tint() { return root.sectionById(this.sections[0]).tint }, sections: ["appearance", "colour", "wallpaper", "motion"] },
+        { id: "look", cluster: 0, title: "Appearance", icon: "style", get tint() { return root.sectionById(this.sections[0]).tint }, sections: ["appearance", "wallpaper", "motion"] },
         { id: "islandDock", cluster: 1, title: "Island & Dock", icon: "pill", get tint() { return root.sectionById(this.sections[0]).tint }, sections: ["bar", "dock", "bubbles"] },
         { id: "desk", cluster: 1, title: "Desktop & Widgets", icon: "widgets", get tint() { return root.sectionById(this.sections[0]).tint }, sections: ["desktop", "widgets"] },
         { id: "panels", cluster: 1, title: "Windows & Panels", icon: "select_window", get tint() { return root.sectionById(this.sections[0]).tint }, sections: ["windows", "sidebars", "controlCenter"] },
@@ -1516,14 +1515,17 @@ QtObject {
         if (area.tip) return Translation.tr(area.tip)
         return area.tipOf.length > 0 ? Translation.tr(root.sectionById(area.tipOf).tip ?? "") : ""
     }
+    // Areas folded into another (his 11-02: the whole look in one place): old links, IPC and Customize land there.
+    readonly property var retiredAreas: ({ colour: "appearance" })
     function sectionById(id: string): var {
+        id = root.retiredAreas[id] ?? id
         return root.sections.find(section => section.id === id) ?? root.sections[0]
     }
     readonly property var groupGlyphs: ({
         "Shell family": "swap_horiz", "Notch": "vertical_align_top",
         "Wallpaper shuffle": "shuffle", "Transition": "transition_fade", "Library": "photo_library",
         "Behind windows": "blur_on", "Japanese lookup": "translate", "Parallax": "3d_rotation", "Scaling": "aspect_ratio", "Recording": "screen_record", "Snip": "screenshot_region",
-        "Accent": "palette", "Visualizer": "graphic_eq", "Customize": "brush", "Themes": "style", "Settings window": "settings_applications", "Activity": "timer", "Adaptive": "auto_awesome", "App colours": "format_paint", "Airing": "live_tv", "Alert sounds": "music_note",
+        "Accent": "palette", "Visualizer": "graphic_eq", "Customize": "brush", "Themes": "style", "Presets": "auto_awesome_mosaic", "Settings window": "settings_applications", "Activity": "timer", "Adaptive": "auto_awesome", "App colours": "format_paint", "Airing": "live_tv", "Alert sounds": "music_note",
         "At a glance": "visibility", "At rest": "schedule", "Badges": "notifications_unread", "Banners": "notifications",
         "Bar": "width_full", "Behaviour": "touch_app", "Bubble": "bubble_chart", "Calendar": "calendar_month",
         "Card contents": "view_agenda", "Cards": "web_asset", "Charge limit": "battery_charging_80", "Clipboard": "content_paste", "Connections": "cable", "Clock": "schedule",
@@ -1620,12 +1622,22 @@ QtObject {
         return out
     }
     // The order a section's groups are listed in: what someone came to change first, the rest as they were declared.
+    // Style's tiles in bands under a name (his 11-02: "no se sabe qué se está cambiando"): what the colour is, what the
+    // bodies are made of, their shape and type, and what few people touch. A group no band names goes in the last.
+    readonly property var groupBands: ({
+        appearance: [
+            { title: "Colour", glyph: "palette", groups: ["Scheme", "Accent", "Highlight", "Signal", "Look", "Colour theme", "Day and night", "App colours", "Wallpaper tint", "Dark look", "Ink look", "Light look"] },
+            { title: "Material", glyph: "layers", groups: ["Design", "Material", "Glass", "Texture", "Light", "Edges"] },
+            { title: "Shape and type", glyph: "rounded_corner", groups: ["Shape", "Corners per surface", "Frame", "Text", "Faces", "Icons"] },
+            { title: "More", glyph: "tune", groups: [] }
+        ]
+    })
     readonly property var groupOrder: ({
         controlCenter: ["Control Center", "Hotspot", "VPN"],
         general: ["Every day", "Date & time", "Language", "At login", "Apps", "Performance", "Settings window", "Shell family"],
-        appearance: ["Design", "Material", "Glass", "Texture", "Edges", "Light", "Shape", "Corners per surface",
-            "Frame", "Text", "Faces", "Icons", "Material per surface", "Menus", "Settings", "Badges", "Customize", "Previews", "Themes"],
-        colour: ["Scheme", "Look", "Signal", "Accent", "Highlight", "Colour theme", "Day and night", "App colours", "Dark look", "Ink look", "Light look", "Wallpaper tint"],
+        appearance: ["Presets", "Scheme", "Accent", "Highlight", "Signal", "Look", "Colour theme", "Day and night", "App colours", "Wallpaper tint",
+            "Dark look", "Ink look", "Light look", "Design", "Material", "Glass", "Texture", "Light", "Edges", "Shape", "Corners per surface",
+            "Frame", "Text", "Faces", "Icons", "Material per surface", "Menus", "Settings", "Badges", "Customize", "Previews", "Adaptive"],
         bar: ["Notch", "Layout", "Shape", "At rest", "Resting Island", "Bar", "Pages", "Desktop page", "Player page", "Interaction", "Visibility", "Connections"],
         bubbles: ["Size", "Behaviour", "On the contour", "Floating", "Opening bodies", "Cards", "Card contents", "Joining", "Tray"],
         dock: ["Notch", "Look", "Icons", "Visibility"],
@@ -1667,7 +1679,6 @@ QtObject {
         return out
     }
     readonly property var movedGroups: ({
-        appearance: { to: "colour", groups: ["Colour theme", "Day and night", "Scheme", "Look", "Signal", "Accent", "Highlight", "App colours", "Dark look", "Ink look", "Light look", "Wallpaper tint"] },
         desktop: { to: "wallpaper", groups: ["Wallpaper shuffle", "Scaling", "Live wallpapers", "Wallpaper gallery", "Behind windows", "Parallax", "Overview backdrop"] }
     })
     function placed(spec: var): var {

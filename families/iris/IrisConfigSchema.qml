@@ -80,7 +80,7 @@ JsonObject {
         property string controlPlate: "none" // rows of round controls: "none", "veil", "glass" or "solid" (IrisControlPlate)
         // What the material is drawn as: "solid" (Ricelin's card), "aurora", "angel", "regalia", "flat", "afterglow", "leak" or "streak".
         property string texture: "solid"
-        property int factoryLook: 1 // the factory look a file was moved to (ConfigMigrations.js)
+        property int factoryLook: 2 // the factory look a file was moved to (ConfigMigrations.js)
         // Afterglow: grade "dusk", "cyber", "fog", "acid" or "wallpaper"; the rest 0..100 %; wallpaper grades the desktop too.
         property JsonObject afterglow: JsonObject {
             property string grade: "dusk"
@@ -152,10 +152,10 @@ JsonObject {
         // or "tile" (the app-icon look: a plate with the glyph in a gradient of
         // its own colour). `plate` picks that plate's colour.
         property JsonObject icons: JsonObject {
-            property string style: "iris" // "iris", "tile" or "glyph" (the glyph alone, as Folio's index)
+            property string style: "glyph" // "glyph" (the glyph alone in its colour, as the widgets head themselves), "iris" (on a plate) or "tile"
             property string plate: "black" // "black", "white", "tint" or "surface"
             property string shape: "auto" // a plate's corners: "auto" (the look's), "round" or "square"
-            property string colour: "auto" // "auto" (plates in the area's colour, a glyph alone in ink), "area", "accent" or "mono"
+            property string colour: "auto" // "auto" (each area's colour, the ink in a line voice), "area", "accent" or "mono"
             property string glyphs: "rounded" // the glyph set: "rounded", "standard" (Material Symbols Outlined) or "sharp"
             property string fill: "auto" // "auto", "filled" or "outlined"
             property string weight: "regular" // "light", "regular" or "bold"

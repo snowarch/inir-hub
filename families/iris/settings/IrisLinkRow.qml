@@ -43,7 +43,7 @@ MouseArea {
         horizontalAlignment: Text.AlignHCenter
         text: root.entry.icon ?? "chevron_right"
         iconSize: Math.round(19 * IrisStyle.settingsDensity)
-        color: !root.tinted || IrisStyle.plainMarks ? IrisStyle.textSecondary : (root.entry.tint ?? IrisStyle.identity.gray)
+        color: !root.tinted || IrisStyle.iconColour === "mono" ? IrisStyle.textSecondary : (root.entry.tint ?? IrisStyle.identity.gray)
     }
     IrisText {
         id: label

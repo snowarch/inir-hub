@@ -804,15 +804,15 @@ Item {
                                             Layout.preferredWidth: Math.max(20 * stage.d, keyText.implicitWidth + 8 * stage.d)
                                             Layout.preferredHeight: Math.round(20 * stage.d)
                                             radius: IrisStyle.radiusMicro
-                                            color: IrisStyle.plainMarks ? "transparent" : hint.buttonHovered ? IrisStyle.tintFillHover(IrisStyle.accent) : IrisStyle.fill
-                                            border.width: IrisStyle.plainMarks ? Math.max(1, Math.round(stage.d)) : 0
+                                            color: IrisStyle.lineMarks ? "transparent" : hint.buttonHovered ? IrisStyle.tintFillHover(IrisStyle.accent) : IrisStyle.fill
+                                            border.width: IrisStyle.lineMarks ? Math.max(1, Math.round(stage.d)) : 0
                                             border.color: hint.buttonHovered ? IrisStyle.text : IrisStyle.textTertiary
                                             Behavior on color { ColorAnimation { duration: IrisStyle.duration(110); easing.type: IrisStyle.feedbackEasing } }
                                             IrisText {
                                                 id: keyText
                                                 anchors.centerIn: parent
                                                 text: hint.modelData.key
-                                                color: hint.buttonHovered ? (IrisStyle.plainMarks ? IrisStyle.text : IrisStyle.accent) : IrisStyle.subtext
+                                                color: hint.buttonHovered ? (IrisStyle.lineMarks ? IrisStyle.text : IrisStyle.accent) : IrisStyle.subtext
                                                 font.family: Appearance.font.family.monospace
                                                 font.pixelSize: IrisStyle.typeMeta
                                                 font.weight: IrisStyle.weight(Font.Bold)
@@ -1119,7 +1119,7 @@ Item {
                                                         textFormat: emphasise || result.mathHit ? Text.StyledText : Text.PlainText
                                                         color: result.selected ? IrisStyle.rowSelectionLabel : IrisStyle.text
                                                         // A Design of plain marks keeps its caution colour for caution: the sign is set in the ink.
-                                                        readonly property color equals: !IrisStyle.plainMarks ? IrisStyle.secondaryAccent
+                                                        readonly property color equals: !IrisStyle.lineMarks ? IrisStyle.secondaryAccent
                                                             : result.selected ? IrisStyle.rowSelectionDetail : IrisStyle.textTertiary
                                                         text: result.clipImage ? Translation.tr("Image")
                                                             : result.mathHit
@@ -1196,8 +1196,8 @@ Item {
                                                     Layout.preferredWidth: Math.round(24 * stage.d)
                                                     Layout.preferredHeight: Math.round(20 * stage.d)
                                                     radius: IrisStyle.radiusChip
-                                                    color: IrisStyle.plainMarks ? "transparent" : IrisStyle.fill
-                                                    border.width: IrisStyle.plainMarks ? Math.max(1, Math.round(stage.d)) : 0
+                                                    color: IrisStyle.lineMarks ? "transparent" : IrisStyle.fill
+                                                    border.width: IrisStyle.lineMarks ? Math.max(1, Math.round(stage.d)) : 0
                                                     border.color: IrisStyle.rowSelectionLabel
                                                     MaterialSymbol {
                                                         anchors.centerIn: parent

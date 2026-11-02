@@ -73,7 +73,8 @@ ColumnLayout {
         // A column of Drawer (foldHome off) or an area of two groups keeps them open, its all-fine-tuning groups folded.
         // An area of peers (the side panels) leads with no group either: its tiles are the switch between them, the first open.
         const peers = rows.peers
-        const lead = groups.find(group => group.key === "Every day") ?? (peers || ["general", "appearance"].includes(rows.section) ? null : groups[0])
+        // Style leads with its presets: the whole look in one tap, every tile under them one part of it (his 11-02).
+        const lead = groups.find(group => group.key === "Every day" || group.key === "Presets") ?? (peers || ["general", "appearance"].includes(rows.section) ? null : groups[0])
         const others = groups.filter(group => group !== lead && group.rows.length > 0)
         const tiles = flat && rows.foldHome && others.length >= 2
         const home = tiles && rows.section === "general"
@@ -94,10 +95,19 @@ ColumnLayout {
             }
         }
         if (resting) {
-            out.push({ title: "\u200bmore", caption: home ? Translation.tr("General") : "", key: "", rows: [], flat: true, more: true, names: rest.map(group => group.title),
-                groups: tiles ? rest.map(group => ({ key: group.key, title: group.title, rows: group.rows })) : [] })
-            // A group opens under its tile, which already names it.
-            for (const group of rest) out.push({ title: group.title, caption: tiles ? "" : group.title, key: group.key, rows: group.rows, flat: true, rest: true })
+            // An area with bands (Style) shows its tiles under the name of what they change, each band opening under itself.
+            const bands = tiles ? (IrisOptions.groupBands[rows.section] ?? []) : []
+            const banded = new Set([].concat(...bands.map(band => band.groups)))
+            const sets = bands.length === 0 ? [{ title: home ? "General" : "", glyph: "", groups: rest }]
+                : bands.map(band => ({ title: band.title, glyph: band.glyph ?? "", groups: band.groups.length > 0
+                    ? rest.filter(group => band.groups.includes(group.key)).sort((a, b) => band.groups.indexOf(a.key) - band.groups.indexOf(b.key))
+                    : rest.filter(group => !banded.has(group.key)) })).filter(set => set.groups.length > 0)
+            for (const set of sets) {
+                out.push({ title: "\u200bmore" + set.title, caption: set.title.length > 0 ? Translation.tr(set.title) : "", glyph: set.glyph, key: "", rows: [], flat: true, more: true, names: set.groups.map(group => group.title),
+                    groups: tiles ? set.groups.map(group => ({ key: group.key, title: group.title, rows: group.rows })) : [] })
+                // A group opens under its tile, which already names it.
+                for (const group of set.groups) out.push({ title: group.title, caption: tiles ? "" : group.title, key: group.key, rows: group.rows, flat: true, rest: true })
+            }
         }
         if (peers && tiles && resting && !rows.peerOpened) {
             rows.peerOpened = true
@@ -296,7 +306,8 @@ ColumnLayout {
                     readonly property bool lone: block.loneSwitch || block.namedSwitch
                     readonly property real switchHeight: headSwitch.implicitHeight
                     readonly property bool reading: rows?.reading === block.key
-                    readonly property string glyph: IrisOptions.groupGlyphs[block.key] ?? IrisOptions.sectionById(rows?.section)?.icon ?? "settings"
+                    readonly property string glyph: String(block.modelData.glyph ?? "") || (IrisOptions.groupGlyphs[block.key] ?? IrisOptions.sectionById(rows?.section)?.icon ?? "settings")
+                    readonly property color tint: IrisOptions.groupTint(String(rows?.section ?? ""), block.index)
                     visible: block.modelData.flat && head.title.length > 0
                     Layout.fillWidth: true
                     Layout.leftMargin: Math.round(16 * rows?.d)
@@ -305,16 +316,13 @@ ColumnLayout {
                     Layout.bottomMargin: Math.round(2 * rows?.d)
                     implicitHeight: headSkin.active ? (headSkin.item?.implicitHeight ?? 0) : plainHead.implicitHeight
                     IrisSkin { id: headSkin; part: "groupHeader"; host: head; voice: rows?.voice }
-                    IrisText {
+                    IrisGroupTitle {
                         id: plainHead
                         visible: !headSkin.active
-                        width: parent.width - (head.lone ? headSwitch.width + Math.round(12 * rows?.d) : headAction.visible ? headAction.width + Math.round(12 * rows?.d) : 0)
+                        maxWidth: parent.width - (head.lone ? headSwitch.width + Math.round(12 * rows?.d) : headAction.visible ? headAction.width + Math.round(12 * rows?.d) : 0)
                         text: head.title
-                        color: IrisStyle.text
-                        font.family: IrisStyle.fontTitle
-                        font.pixelSize: IrisStyle.typeHeadline
-                        font.weight: IrisStyle.weight(Font.Bold)
-                        elide: Text.ElideRight
+                        glyph: head.glyph
+                        tint: head.tint
                     }
                     // Home's Customize sits on the head's line, quiet, beside the pins it edits.
                     IrisChip {
@@ -379,7 +387,7 @@ ColumnLayout {
                             Layout.fillWidth: true
                             Layout.fillHeight: true
                             Layout.preferredWidth: 1
-                            implicitHeight: Math.max(Math.round(64 * rows?.d), groupWords.implicitHeight + Math.round(24 * rows?.d))
+                            implicitHeight: Math.round(13 * rows?.d) + Math.round(18 * rows?.d) + Math.round(6 * rows?.d) + groupWords.implicitHeight + Math.round(14 * rows?.d)
                             activeFocusOnTab: true
                             Accessible.role: Accessible.Button
                             Accessible.name: Translation.tr(String(group.modelData.title ?? ""))
@@ -388,6 +396,7 @@ ColumnLayout {
                             Keys.onReturnPressed: group.act()
 
                             IrisPlate {
+                                id: groupPlate
                                 anchors.fill: parent
                                 radius: IrisStyle.radiusTile
                                 // Open: a wash of its own colour, as the sidebar marks where you are (his 10-30: an
@@ -403,54 +412,58 @@ ColumnLayout {
                                     opacity: groupArea.containsMouse || groupArea.pressed || group.activeFocus ? 1 : 0
                                     Behavior on opacity { NumberAnimation { duration: IrisStyle.duration(110); easing.type: IrisStyle.feedbackEasing } }
                                 }
-                                IrisSquircle {
-                                    id: groupMark
-                                    x: Math.round(12 * rows?.d)
-                                    anchors.verticalCenter: parent.verticalCenter
-                                    width: Math.round(32 * rows?.d)
-                                    height: width
-                                    tint: group.tint
-                                    glyph: IrisOptions.groupGlyphs[group.key] ?? "settings"
-                                }
-                                Column {
-                                    id: groupWords
-                                    anchors.left: groupMark.right
-                                    anchors.leftMargin: Math.round(10 * rows?.d)
-                                    anchors.right: groupChevron.left
-                                    anchors.rightMargin: Math.round(6 * rows?.d)
-                                    anchors.verticalCenter: parent.verticalCenter
-                                    spacing: Math.round(1 * rows?.d)
+                                // A widget's Small face (his 11-02: the widgets are the look): the group named small in
+                                // its colour beside its glyph, what it holds now big in the ink under it.
+                                readonly property color voice: IrisStyle.iconColour === "mono" ? IrisStyle.textSecondary : IrisStyle.iconHue(group.tint)
+                                Row {
+                                    id: groupHead
+                                    x: Math.round(14 * rows?.d)
+                                    y: Math.round(13 * rows?.d)
+                                    width: parent.width - 2 * x
+                                    spacing: Math.round(6 * rows?.d)
+                                    IrisSquircle {
+                                        id: groupMark
+                                        anchors.verticalCenter: parent.verticalCenter
+                                        width: Math.round(18 * rows?.d)
+                                        height: width
+                                        tint: group.tint
+                                        glyph: IrisOptions.groupGlyphs[group.key] ?? "settings"
+                                    }
                                     IrisText {
-                                        width: parent.width
+                                        anchors.verticalCenter: parent.verticalCenter
+                                        width: groupHead.width - groupMark.width - groupHead.spacing
                                         text: Translation.tr(String(group.modelData.title ?? ""))
-                                        color: IrisStyle.text
-                                        font.pixelSize: IrisStyle.typeBody
+                                        color: groupPlate.voice
+                                        font.pixelSize: IrisStyle.typeMeta
                                         font.weight: IrisStyle.weight(Font.DemiBold)
                                         elide: Text.ElideRight
                                     }
-                                    // Two lines before an ellipsis, and a narrow tile (Pocket) says only its first
-                                    // value: one row cut "Same wallpaper as the deskto".
+                                }
+                                Column {
+                                    id: groupWords
+                                    x: groupHead.x
+                                    anchors.top: groupHead.bottom
+                                    anchors.topMargin: Math.round(6 * rows?.d)
+                                    width: groupHead.width
+                                    spacing: Math.round(1 * rows?.d)
+                                    readonly property var said: group.glance.split(" · ")
                                     IrisText {
                                         width: parent.width
-                                        visible: group.glance.length > 0
-                                        text: groupWords.width < Math.round(180 * rows?.d) ? group.glance.split(" · ")[0] : group.glance
-                                        color: IrisStyle.textSecondary
-                                        font.pixelSize: IrisStyle.typeMeta
-                                        wrapMode: Text.WordWrap
-                                        maximumLineCount: 2
+                                        text: group.glance.length > 0 ? groupWords.said[0] : Translation.tr("Open")
+                                        color: group.glance.length > 0 ? IrisStyle.text : IrisStyle.textTertiary
+                                        font.family: IrisStyle.fontTitle
+                                        font.pixelSize: IrisStyle.typeHeadline
+                                        font.weight: IrisStyle.weight(Font.Bold)
                                         elide: Text.ElideRight
                                     }
-                                }
-                                MaterialSymbol {
-                                    id: groupChevron
-                                    anchors.right: parent.right
-                                    anchors.rightMargin: Math.round(12 * rows?.d)
-                                    anchors.verticalCenter: parent.verticalCenter
-                                    text: "expand_more"
-                                    iconSize: Math.round(18 * rows?.d)
-                                    color: group.open || groupArea.containsMouse ? IrisStyle.text : IrisStyle.textTertiary
-                                    rotation: group.open ? 180 : 0
-                                    Behavior on rotation { NumberAnimation { duration: IrisStyle.duration(180); easing.type: Easing.OutCubic } }
+                                    IrisText {
+                                        width: parent.width
+                                        visible: groupWords.said.length > 1 && groupWords.width >= Math.round(150 * rows?.d)
+                                        text: groupWords.said.slice(1).join(" · ")
+                                        color: IrisStyle.textTertiary
+                                        font.pixelSize: IrisStyle.typeFootnote
+                                        elide: Text.ElideRight
+                                    }
                                 }
                             }
                             MouseArea {
@@ -521,7 +534,7 @@ ColumnLayout {
                             }
                             Layout.fillWidth: true
                             Layout.preferredWidth: 1
-                            implicitHeight: Math.max(Math.round(60 * rows?.d), tileWords.implicitHeight + Math.round(24 * rows?.d))
+                            implicitHeight: Math.round(13 * rows?.d) + Math.round(18 * rows?.d) + Math.round(6 * rows?.d) + tileWords.implicitHeight + Math.round(14 * rows?.d)
                             activeFocusOnTab: true
                             Accessible.role: tile.toggles ? Accessible.CheckBox : Accessible.Button
                             Accessible.name: Translation.tr(String(tile.spec.label ?? ""))
@@ -551,46 +564,54 @@ ColumnLayout {
                                     opacity: tileArea.containsMouse || tileArea.pressed || tile.activeFocus ? 1 : 0
                                     Behavior on opacity { NumberAnimation { duration: IrisStyle.duration(110); easing.type: IrisStyle.feedbackEasing } }
                                 }
-                                IrisSquircle {
-                                    id: tileMark
-                                    x: Math.round(12 * rows?.d)
-                                    anchors.verticalCenter: parent.verticalCenter
-                                    width: Math.round(32 * rows?.d)
-                                    height: width
-                                    tint: tile.on ? IrisStyle.inkOnLookPlate : tile.accentTile ? IrisStyle.accent : (tile.area?.tint ?? IrisStyle.identity.gray)
-                                    glyph: tile.accentTile ? "palette" : tile.glyph
-                                }
-                                Column {
-                                    id: tileWords
-                                    anchors.left: tileMark.right
-                                    anchors.leftMargin: Math.round(10 * rows?.d)
-                                    anchors.right: tileChevron.visible ? tileChevron.left : parent.right
-                                    anchors.rightMargin: Math.round(tileChevron.visible ? 6 : 12) * (rows?.d ?? 1)
-                                    anchors.verticalCenter: parent.verticalCenter
-                                    spacing: Math.round(1 * rows?.d)
+                                // Home's pins wear a Small widget's face as the group tiles do: the name small in its
+                                // colour beside its glyph, the state big in the ink; a switch's plate lights when on.
+                                readonly property color voice: tile.on ? IrisStyle.inkOnLookPlate
+                                    : IrisStyle.iconColour === "mono" ? IrisStyle.textSecondary
+                                    : IrisStyle.iconHue(tile.accentTile ? IrisStyle.accent : (tile.area?.tint ?? IrisStyle.identity.gray))
+                                Row {
+                                    id: tileHead
+                                    x: Math.round(14 * rows?.d)
+                                    y: Math.round(13 * rows?.d)
+                                    width: parent.width - 2 * x - (tileChevron.visible ? tileChevron.width : 0)
+                                    spacing: Math.round(6 * rows?.d)
+                                    IrisSquircle {
+                                        id: tileMark
+                                        anchors.verticalCenter: parent.verticalCenter
+                                        width: Math.round(18 * rows?.d)
+                                        height: width
+                                        tint: tile.on ? IrisStyle.inkOnLookPlate : tile.accentTile ? IrisStyle.accent : (tile.area?.tint ?? IrisStyle.identity.gray)
+                                        glyph: tile.accentTile ? "palette" : tile.glyph
+                                    }
                                     IrisText {
-                                        width: parent.width
+                                        anchors.verticalCenter: parent.verticalCenter
+                                        width: tileHead.width - tileMark.width - tileHead.spacing
                                         text: Translation.tr(String(tile.spec.label ?? ""))
-                                        color: tile.on ? IrisStyle.inkOnLookPlate : IrisStyle.text
-                                        font.pixelSize: IrisStyle.typeBody
+                                        color: tilePlate.voice
+                                        font.pixelSize: IrisStyle.typeMeta
                                         font.weight: IrisStyle.weight(Font.DemiBold)
                                         elide: Text.ElideRight
                                     }
-                                    IrisText {
-                                        width: parent.width
-                                        visible: tile.words.length > 0
-                                        text: tile.words
-                                        color: tile.on ? IrisStyle.secondaryOf(IrisStyle.inkOnLookPlate) : IrisStyle.textSecondary
-                                        font.pixelSize: IrisStyle.typeMeta
-                                        elide: Text.ElideRight
-                                    }
+                                }
+                                IrisText {
+                                    id: tileWords
+                                    x: tileHead.x
+                                    anchors.top: tileHead.bottom
+                                    anchors.topMargin: Math.round(6 * rows?.d)
+                                    width: parent.width - 2 * x
+                                    text: tile.words.length > 0 ? tile.words : Translation.tr("Open")
+                                    color: tile.on ? IrisStyle.inkOnLookPlate : tile.words.length > 0 ? IrisStyle.text : IrisStyle.textTertiary
+                                    font.family: IrisStyle.fontTitle
+                                    font.pixelSize: IrisStyle.typeHeadline
+                                    font.weight: IrisStyle.weight(Font.Bold)
+                                    elide: Text.ElideRight
                                 }
                                 MaterialSymbol {
                                     id: tileChevron
                                     visible: !tile.toggles
                                     anchors.right: parent.right
-                                    anchors.rightMargin: Math.round(12 * rows?.d)
-                                    anchors.verticalCenter: parent.verticalCenter
+                                    anchors.rightMargin: Math.round(10 * rows?.d)
+                                    y: Math.round(11 * rows?.d)
                                     text: "expand_more"
                                     iconSize: Math.round(18 * rows?.d)
                                     color: tile.open || tileArea.containsMouse ? IrisStyle.text : IrisStyle.textTertiary

@@ -111,7 +111,7 @@ PreviewScene {
                                 text: card.entry.icon ?? ""
                                 fill: 1
                                 iconSize: Math.round(14 * panelRoot.d)
-                                color: IrisStyle.plainMarks ? IrisStyle.text : IrisStyle.onTint
+                                color: !IrisStyle.plainMarks ? IrisStyle.onTint : IrisStyle.iconColour === "mono" ? IrisStyle.text : IrisStyle.iconHue(card.entry.tint ?? IrisStyle.accent)
                             }
                         }
                         IrisText {
