@@ -3,116 +3,140 @@ import QtQuick
 import qs
 import qs.services
 import qs.modules.common
-import qs.modules.common.functions
 import qs.modules.common.widgets
 import qs.modules.iris.style
 import qs.modules.iris.components
+import qs.modules.iris.widgets
 
-// Tiles · Mosaic: the time laid in tiles, one per figure, like the pieces of a board game, and the day on two lit tiles
-// after it. A figure that changes turns its tile over; nothing else moves. Only the resting clock; the engine draws the rest.
+// Tiles · Pair: hour and minutes as two halves of one bar, the hour lit, a hair between them; a figure rolls over when it
+// changes. The day sits beside them as a small date stamp.
 Item {
     id: root
     property var island: null
     readonly property var modes: ["idle", "clock"]
     readonly property real d: IrisStyle.density
     readonly property real h: root.island?.compactHeight ?? 42
-    readonly property real contentWidth: row.implicitWidth
     readonly property date now: DateTime.clock.date
-    readonly property real tile: Math.round(root.h - 14 * root.d)
-    readonly property var parts: {
-        const raw = String(DateTime.timeDisplay ?? "").trim()
-        const period = raw.match(/\s*([^\d:.\s]+)$/)
-        const pieces = (period ? raw.slice(0, period.index) : raw).split(/[:.]/)
-        return { hours: String(pieces[0] ?? ""), minutes: String(pieces[1] ?? ""), period: period ? period[1] : "" }
-    }
     readonly property color mark: root.island?.clockAccent ?? IrisStyle.accent
+    readonly property int minute: Math.floor(root.now.getTime() / 60000)
+    readonly property real figure: root.island?.figureSize ?? IrisStyle.typeHeadline
+    readonly property string face: root.island?.nothingLook ? IrisStyle.fontDot : IrisStyle.figureFace(root.figure)
+    readonly property real contentWidth: row.implicitWidth
+
+    readonly property var parts: IrisFaceData.clockParts(DateTime.timeDisplay)
+    // A slim strip gives the tiles the height and the day one line.
+    readonly property bool stacks: root.h >= Math.round(34 * root.d)
+    readonly property real tileH: Math.round(root.h - (root.stacks ? 12 : 6) * root.d)
+    readonly property real tileW: Math.round(root.figure * 1.7)
+    readonly property color lit: root.island?.nothingLook ? IrisStyle.text : root.mark
+    readonly property int outer: Math.min(IrisStyle.radiusTile, Math.round(root.tileH * 0.42))
+
+    // The figure on a tile: the new one rolls up as the old one leaves.
+    component Roller: Item {
+        id: roller
+        property string value
+        property color ink
+        property string shown: value
+        property string leaving: ""
+        property real at: 1
+        implicitWidth: incoming.implicitWidth
+        implicitHeight: incoming.implicitHeight
+        clip: true
+        onValueChanged: {
+            if (!IrisStyle.motionEnabled) { shown = value; at = 1; return }
+            leaving = shown
+            shown = value
+            turn.restart()
+        }
+        NumberAnimation { id: turn; target: roller; property: "at"; from: 0; to: 1; duration: IrisStyle.duration(360); easing.type: Easing.OutCubic }
+        IrisText {
+            visible: roller.at < 1
+            y: -roller.at * roller.height
+            text: roller.leaving
+            font: incoming.font
+            color: roller.ink
+        }
+        IrisText {
+            id: incoming
+            y: (1 - roller.at) * roller.height
+            text: roller.shown
+            font.pixelSize: root.figure
+            font.family: root.face
+            font.weight: IrisStyle.weight(Font.Bold)
+            font.features: ({ "tnum": 1 })
+            color: roller.ink
+        }
+    }
 
     Row {
         id: row
         anchors.centerIn: parent
-        spacing: Math.round(3 * root.d)
-
-        Repeater {
-            model: root.parts.hours.split("")
-            Piece { required property string modelData; figure: modelData }
-        }
-        // The separator is two pegs between the groups, in the accent.
-        Column {
+        spacing: Math.round(10 * root.d)
+        Row {
             anchors.verticalCenter: parent.verticalCenter
-            leftPadding: Math.round(2 * root.d)
-            rightPadding: Math.round(2 * root.d)
-            spacing: Math.round(root.tile * 0.2)
-            Repeater {
-                model: 2
-                Rectangle { width: Math.round(3.5 * root.d); height: width; radius: width / 2; color: root.mark }
-            }
-        }
-        Repeater {
-            model: root.parts.minutes.split("")
-            Piece { required property string modelData; figure: modelData }
-        }
-        IrisText {
-            visible: root.parts.period.length > 0
-            anchors.verticalCenter: parent.verticalCenter
-            leftPadding: Math.round(3 * root.d)
-            text: root.parts.period
-            font.pixelSize: Math.round(10 * root.d)
-            font.weight: IrisStyle.weight(Font.Bold)
-            color: IrisStyle.subtext
-        }
-        Item { width: Math.round(6 * root.d); height: 1 }
-        Repeater {
-            model: Translation.locale.toString(root.now, "dd").split("")
-            Piece { required property string modelData; figure: modelData; small: true; lit: true }
-        }
-    }
-
-    // One tile: a lit plate (lighter at its top, as every iRiS body) with its figure; a new figure turns it over.
-    component Piece: Item {
-        id: piece
-        property string figure: ""
-        property bool small: false
-        property bool lit: false
-        property string shown: ""
-        anchors.verticalCenter: parent?.verticalCenter
-        width: Math.round((piece.small ? 0.82 : 1) * root.tile * 0.74)
-        height: Math.round((piece.small ? 0.82 : 1) * root.tile)
-        Component.onCompleted: piece.shown = piece.figure
-        onFigureChanged: {
-            if (!IrisStyle.motionEnabled || piece.shown.length === 0) { piece.shown = piece.figure; return }
-            turnOver.restart()
-        }
-        SequentialAnimation {
-            id: turnOver
-            NumberAnimation { target: turn; property: "angle"; to: 90; duration: IrisStyle.duration(140); easing.type: Easing.InQuad }
-            ScriptAction { script: piece.shown = piece.figure }
-            NumberAnimation { target: turn; property: "angle"; from: -90; to: 0; duration: IrisStyle.duration(200); easing.type: Easing.OutCubic }
-        }
-        transform: Rotation { id: turn; origin.x: piece.width / 2; origin.y: piece.height / 2; axis { x: 1; y: 0; z: 0 } }
-        Rectangle {
-            anchors.fill: parent
-            radius: IrisStyle.tileRadius(piece.width)
-            color: piece.lit ? IrisStyle.tintFill(root.mark) : IrisStyle.fillQuiet
-            border.width: 1
-            border.color: piece.lit ? ColorUtils.applyAlpha(root.mark, 0.35) : IrisStyle.hairline
+            spacing: Math.max(1, Math.round(2 * root.d))
             Rectangle {
-                anchors.left: parent.left
-                anchors.right: parent.right
-                anchors.top: parent.top
-                anchors.margins: parent.radius * 0.6
-                anchors.topMargin: 1
-                height: 1
-                color: ColorUtils.applyAlpha(IrisStyle.text, 0.12)
+                width: root.tileW
+                height: root.tileH
+                color: root.lit
+                topLeftRadius: root.outer
+                bottomLeftRadius: root.outer
+                topRightRadius: IrisStyle.radiusMicro
+                bottomRightRadius: IrisStyle.radiusMicro
+                Roller {
+                    anchors.centerIn: parent
+                    value: root.parts.hours
+                    ink: IrisStyle.onTintFor(root.lit)
+                }
+            }
+            Rectangle {
+                width: Math.max(root.tileW, minutes.width + Math.round(16 * root.d))
+                height: root.tileH
+                color: IrisStyle.fillQuiet
+                topLeftRadius: IrisStyle.radiusMicro
+                bottomLeftRadius: IrisStyle.radiusMicro
+                topRightRadius: root.outer
+                bottomRightRadius: root.outer
+                Row {
+                    id: minutes
+                    anchors.centerIn: parent
+                    spacing: Math.round(2 * root.d)
+                    Roller {
+                        anchors.verticalCenter: parent.verticalCenter
+                        value: root.parts.minutes
+                        ink: IrisStyle.text
+                    }
+                    IrisText {
+                        visible: root.parts.period.length > 0
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: root.parts.period
+                        font.pixelSize: IrisStyle.typeCaption
+                        font.weight: IrisStyle.weight(Font.Bold)
+                        color: IrisStyle.textSecondary
+                    }
+                }
             }
         }
-        IrisText {
-            anchors.centerIn: parent
-            text: piece.shown
-            font.pixelSize: Math.round(piece.height * 0.62)
-            font.family: root.island?.nothingLook ? IrisStyle.fontDot : IrisStyle.fontNumbers
-            font.weight: IrisStyle.weight(Font.Bold)
-            font.features: ({ "tnum": 1 })
-            color: piece.lit ? root.mark : IrisStyle.text
+        Grid {
+            anchors.verticalCenter: parent.verticalCenter
+            columns: root.stacks ? 1 : 2
+            columnSpacing: Math.round(4 * root.d)
+            horizontalItemAlignment: Grid.AlignHCenter
+            verticalItemAlignment: Grid.AlignVCenter
+            IrisText {
+                text: Translation.locale.toString(root.now, "ddd").replace(/\./g, "")
+                font.pixelSize: IrisStyle.typeCaption
+                font.weight: IrisStyle.weight(Font.DemiBold)
+                color: IrisStyle.textSecondary
+            }
+            IrisText {
+                text: Translation.locale.toString(root.now, "d")
+                font.pixelSize: IrisStyle.typeLabel
+                font.family: root.face
+                font.weight: IrisStyle.weight(Font.Bold)
+                font.features: ({ "tnum": 1 })
+                color: IrisStyle.text
+            }
         }
     }
 }

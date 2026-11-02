@@ -3037,7 +3037,7 @@ Item {
         // Along the straight of the foot: the corners never carry it.
         x: Math.round(chassis.x + sunBead.corner * 0.8 + (chassis.width - 1.6 * sunBead.corner) * sunBead.t - width / 2)
         y: Math.round((root.bottomEdge ? chassis.y : chassis.y + chassis.height) - height / 2)
-        color: ColorUtils.applyAlpha(root.clockAccent, 0.22)
+        color: ColorUtils.applyAlpha(root.clockAccent, 0.22) // iris-literal: the sun bead's halo, its own accent
         Rectangle {
             anchors.centerIn: parent
             width: sunBead.core

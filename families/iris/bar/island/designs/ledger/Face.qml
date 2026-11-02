@@ -3,136 +3,80 @@ import QtQuick
 import qs
 import qs.services
 import qs.modules.common
+import qs.modules.common.widgets
 import qs.modules.iris.style
 import qs.modules.iris.components
 import qs.modules.iris.widgets
 
-// Ledger · Entry: the time and what comes next, dotted leaders between them. The distance is real: a dot for every
-// quarter of an hour left, so the Island tightens as the event nears; while it runs the dots take the accent and count
-// down to its end. Nothing ahead, the entry is the day. Only the resting clock; the engine draws media, timers, notices
-// and levels.
+// Ledger · Agenda: the time, then what is next in plain words. The rule between them fills through the last hour before
+// an event and empties as a running one ends. Nothing ahead, the entry is the day.
 Item {
     id: root
     property var island: null
     readonly property var modes: ["idle", "clock"]
     readonly property real d: IrisStyle.density
     readonly property real h: root.island?.compactHeight ?? 42
-    // A slim strip keeps the entry on the time's line.
-    readonly property bool stacks: root.h >= Math.round(34 * root.d)
-    readonly property real contentWidth: row.implicitWidth
     readonly property date now: DateTime.clock.date
     readonly property color mark: root.island?.clockAccent ?? IrisStyle.accent
     readonly property int minute: Math.floor(root.now.getTime() / 60000)
-    readonly property real nameRoom: Math.round(132 * root.d)
+    readonly property real figure: root.island?.figureSize ?? IrisStyle.typeHeadline
+    readonly property string face: root.island?.nothingLook ? IrisStyle.fontDot : IrisStyle.figureFace(root.figure)
+    readonly property real contentWidth: row.implicitWidth
 
-    readonly property int maxDots: 12
-    readonly property int minutesPerDot: 15
-    // Past this the day says more than a far-off hour.
-    readonly property int reachMinutes: 720
-
-    function dotsTo(ms: real): int {
-        return Math.min(root.maxDots, Math.max(1, Math.ceil(ms / 60000 / root.minutesPerDot)))
-    }
-
-    readonly property var entry: {
-        const at = root.minute * 60000
-        const here = new Date(at)
-        const running = Array.from(CalendarSync.getEventsForDate(here) ?? []).find(event => !event.allDay && event.endDate
-            && new Date(event.startDate).getTime() <= at && at < new Date(event.endDate).getTime())
-        if (running) {
-            const end = new Date(running.endDate)
-            return { title: IrisFaceData.eventTitle(running), dots: root.dotsTo(end.getTime() - at), live: true,
-                gloss: Translation.tr("until %1").arg(IrisFaceData.clockText(end)) }
-        }
-        const ahead = IrisFaceData.upcomingEvents(here, 1)
-        const next = ahead.find(event => {
-            const left = IrisFaceData.eventDate(event).getTime() - at
-            return !event.allDay && left > 0 && left <= root.reachMinutes * 60000
-        })
-        if (next) {
-            const start = IrisFaceData.eventDate(next)
-            return { title: IrisFaceData.eventTitle(next), dots: root.dotsTo(start.getTime() - at), live: false,
-                gloss: IrisFaceData.clockText(start) }
-        }
-        const allDay = ahead.find(event => event.allDay && IrisFaceData.eventDate(event).getTime() <= at)
-        return { title: allDay ? IrisFaceData.eventTitle(allDay) : "", dots: 3, live: false, gloss: "" }
-    }
+    // A slim strip keeps the entry on the time's line.
+    readonly property bool stacks: root.h >= Math.round(34 * root.d)
+    readonly property var entry: IrisFaceData.nextEntry(root.minute * 60000, 720)
     readonly property bool named: root.entry.title.length > 0
-    readonly property string dayDate: Translation.locale.toString(root.now, "d MMM").replace(/\.$/, "")
+    readonly property bool close: root.named && (root.entry.running || (root.entry.left > 0 && root.entry.left <= 30))
+    readonly property real share: root.entry.running ? root.entry.left / Math.max(1, (root.entry.end - root.entry.start) / 60000)
+        : root.named && root.entry.left > 0 ? Math.max(0, 1 - root.entry.left / 60) : 0
+    readonly property string lead: root.named ? root.entry.title : Translation.locale.toString(root.now, "dddd")
+    readonly property string gloss: root.entry.when || Translation.locale.toString(root.now, "d MMMM")
 
     Row {
         id: row
         anchors.centerIn: parent
-        spacing: Math.round(9 * root.d)
-
+        spacing: Math.round(10 * root.d)
         IrisClock {
-            id: clock
             anchors.verticalCenter: parent.verticalCenter
-            pixelSize: root.island?.figureSize ?? IrisStyle.typeHeadline
-            family: root.island?.nothingLook ? IrisStyle.fontDot : IrisStyle.figureFace(pixelSize)
+            pixelSize: root.figure
+            family: root.face
             separatorColor: root.mark
         }
-
-        // Leaders stand on the figures' baseline, as on a printed page.
-        Row {
+        Rectangle {
             anchors.verticalCenter: parent.verticalCenter
-            anchors.verticalCenterOffset: Math.round(clock.pixelSize * 0.32)
-            spacing: Math.round(4 * root.d)
-            Repeater {
-                model: root.maxDots
-                Rectangle {
-                    required property int index
-                    visible: index < root.entry.dots
-                    width: Math.max(2, Math.round(2 * root.d))
-                    height: width
-                    radius: width / 2
-                    color: root.entry.live ? root.mark : IrisStyle.textTertiary
-                }
+            width: Math.max(2, Math.round(2 * root.d))
+            height: Math.round(root.h * 0.54)
+            radius: width / 2
+            color: IrisStyle.textTertiary
+            Rectangle {
+                anchors.bottom: parent.bottom
+                width: parent.width
+                height: Math.round(parent.height * root.share)
+                radius: width / 2
+                color: root.mark
+                Behavior on height { enabled: IrisStyle.motionEnabled; NumberAnimation { duration: IrisStyle.duration(420); easing.type: Easing.OutCubic } }
             }
         }
-
-        Column {
-            visible: root.stacks
+        Grid {
             anchors.verticalCenter: parent.verticalCenter
+            columns: root.stacks ? 1 : 2
+            columnSpacing: Math.round(6 * root.d)
+            verticalItemAlignment: Grid.AlignVCenter
             IrisText {
-                width: Math.min(implicitWidth, root.nameRoom)
-                text: root.named ? root.entry.title : Translation.locale.toString(root.now, "dddd").toUpperCase()
+                width: Math.min(implicitWidth, Math.round(150 * root.d))
+                text: root.lead
                 elide: Text.ElideRight
-                font.pixelSize: Math.round((root.named ? 12 : 9) * root.d)
-                font.weight: IrisStyle.weight(root.named ? Font.DemiBold : Font.Bold)
-                font.letterSpacing: root.named ? 0 : 1.1
-                color: root.named ? IrisStyle.text : root.mark
-            }
-            IrisText {
-                text: root.entry.gloss || root.dayDate
-                font.pixelSize: Math.round((root.named ? 10 : 12) * root.d)
-                font.weight: IrisStyle.weight(Font.Medium)
-                font.features: ({ "tnum": 1 })
-                color: IrisStyle.subtext
-            }
-        }
-        Row {
-            visible: !root.stacks
-            anchors.verticalCenter: parent.verticalCenter
-            spacing: Math.round(6 * root.d)
-            IrisText {
-                anchors.verticalCenter: parent.verticalCenter
-                width: Math.min(implicitWidth, root.nameRoom)
-                text: root.named ? root.entry.title : Translation.locale.toString(root.now, "ddd d").replace(/\./g, "").toUpperCase()
-                elide: Text.ElideRight
-                font.pixelSize: Math.round(11 * root.d)
+                font.pixelSize: root.stacks ? IrisStyle.typeMeta : IrisStyle.typeFootnote
                 font.weight: IrisStyle.weight(Font.DemiBold)
-                font.letterSpacing: root.named ? 0 : 0.8
-                color: root.named ? IrisStyle.text : IrisStyle.subtext
+                color: IrisStyle.text
             }
             IrisText {
-                visible: root.entry.gloss.length > 0
-                anchors.verticalCenter: parent.verticalCenter
-                text: root.entry.gloss
-                font.pixelSize: Math.round(10 * root.d)
+                text: root.gloss
+                font.pixelSize: IrisStyle.typeCaption
                 font.weight: IrisStyle.weight(Font.Medium)
                 font.features: ({ "tnum": 1 })
-                color: IrisStyle.subtext
+                color: root.close ? root.mark : IrisStyle.textSecondary
             }
         }
     }

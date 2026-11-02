@@ -4,6 +4,7 @@ import QtQuick
 import qs.services
 import qs.modules.common.functions
 import qs.modules.iris.style
+import qs.modules.iris.widgets
 
 Row {
     id: root
@@ -18,18 +19,7 @@ Row {
     // AM/PM beside Dot digits reads in the Label voice, not as more dots.
     property string minorFamily: root.family
 
-    readonly property var parts: {
-        const raw = String(root.text ?? "").trim()
-        const period = raw.match(/\s*([^\d:.\s]+)$/)
-        const figure = period ? raw.slice(0, period.index) : raw
-        const pieces = figure.split(/[:.]/)
-        return {
-            hours: pieces[0] ?? "",
-            minutes: pieces[1] ?? "",
-            seconds: pieces[2] ?? "",
-            period: period ? period[1] : ""
-        }
-    }
+    readonly property var parts: IrisFaceData.clockParts(root.text)
 
     spacing: 0
     transform: IrisDesign.figureLean !== 0 ? [lean] : []

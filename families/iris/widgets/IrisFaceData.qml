@@ -72,6 +72,37 @@ Singleton {
             .sort((a, b) => root.eventDate(a) - root.eventDate(b))
     }
 
+    // What the calendar has next at `at` (ms): the event running, else the next timed one within `reach` minutes, else
+    // today's all-day one. `when` says it in words; title empty means nothing ahead.
+    function nextEntry(at: real, reach: int): var {
+        const here = new Date(at)
+        const running = Array.from(CalendarSync.getEventsForDate(here) ?? []).find(event => !event.allDay && event.endDate
+            && new Date(event.startDate).getTime() <= at && at < new Date(event.endDate).getTime())
+        if (running) {
+            const end = new Date(running.endDate).getTime()
+            return { title: root.eventTitle(running), running: true, start: new Date(running.startDate).getTime(), end: end,
+                left: Math.ceil((end - at) / 60000), when: Translation.tr("%1 left").arg(root.spanWords(Math.ceil((end - at) / 60000))) }
+        }
+        const ahead = root.upcomingEvents(here, 1)
+        const next = ahead.find(event => {
+            const left = root.eventDate(event).getTime() - at
+            return !event.allDay && left > 0 && left <= reach * 60000
+        })
+        if (next) {
+            const start = root.eventDate(next).getTime()
+            const left = Math.ceil((start - at) / 60000)
+            return { title: root.eventTitle(next), running: false, start: start, end: start + 1800000, left: left,
+                when: left < 180 ? Translation.tr("in %1").arg(root.spanWords(left)) : root.clockText(new Date(start)) }
+        }
+        const allDay = ahead.find(event => event.allDay && root.eventDate(event).getTime() <= at)
+        return { title: allDay ? root.eventTitle(allDay) : "", running: false, start: 0, end: 0, left: 0, when: "" }
+    }
+    function spanWords(minutes: int): string {
+        return minutes < 60 ? Translation.tr("%1 min").arg(minutes)
+            : minutes % 60 === 0 ? Translation.tr("%1 h").arg(minutes / 60)
+            : Translation.tr("%1 h %2 min").arg(Math.floor(minutes / 60)).arg(minutes % 60)
+    }
+
     function hasEvents(date: var): bool {
         return (Events.getEventsForDate(date) ?? []).length > 0
             || (CalendarSync.getEventsForDate(date) ?? []).length > 0
@@ -111,6 +142,13 @@ Singleton {
     // A time as the shell writes it (12 or 24 h).
     function clockText(when: var): string {
         return Translation.locale.toString(when, String(Config.options?.time?.format ?? "hh:mm").replace(/:ss/, ""))
+    }
+    // Any locale's clock in its parts: "08:12", "8.12", "8:12:05 PM", "8:12 a. m.".
+    function clockParts(text: var): var {
+        const raw = String(text ?? "").trim()
+        const match = raw.match(/^(\d{1,2})[:.](\d{2})(?:[:.](\d{2}))?\s*(.*)$/)
+        return match ? { hours: match[1], minutes: match[2], seconds: match[3] ?? "", period: match[4] }
+            : { hours: raw, minutes: "", seconds: "", period: "" }
     }
     // "06:02 AM" reads as "6:02" with its AM a step down, like a unit.
     function timeParts(text: string): var {
