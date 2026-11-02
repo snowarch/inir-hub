@@ -1487,20 +1487,34 @@ Item {
         // Welded into a corner, the body runs on past the side wall so only its inner corners round.
         const pastSide = root.cornerSide.length > 0 ? Math.ceil(chassis.radius * melt) : 0
         if (root.pods) {
-            const podJoin = melt <= 0.01 ? [] : [IrisFrame.framed ? "frame" : "edge"]
-            const podFuse = Math.round(28 * root.d)
-            const rise = Math.round(5 * root.d)
-            for (const [id, area] of [["podStart", barZones.startArea], ["podEnd", barZones.endArea]]) {
+            // Pods: the shelf's start and end become the frame's corners and its heart the Island's notch. Welded, an outer
+            // pod runs from the side wall (off the screen without a frame), so the frame's corner turns into it and only
+            // its inner end rounds, with the notch's shoulders; floating, the three are bodies on one line.
+            const r = chassis.radius
+            const outer = r * (1 - melt)
+            const fuse = IrisStyle.fuse + (IrisStyle.fuseEdge - IrisStyle.fuse) * melt
+            const welded = melt <= 0.01 ? [] : [edgeJoin]
+            const span = root.Window.window?.width ?? body.x + body.width
+            const wall = IrisFrame.framed ? bandInset : -Math.ceil(r)
+            const air = Math.round(29 * root.d * root.breathing / 2)
+            // The corners on the welded edge are hidden in it; `far` is the one corner left round on a pod.
+            const corners = (far) => root.bottomEdge
+                ? { tl: far === "left" ? r : outer, tr: far === "right" ? r : outer, bl: outer, br: outer }
+                : { tl: outer, tr: outer, bl: far === "left" ? r : outer, br: far === "right" ? r : outer }
+            for (const [id, area, start] of [["podStart", barZones.startArea, true], ["podEnd", barZones.endArea, false]]) {
                 if (area.width < 1) continue
                 const at = barZones.mapToItem(null, area.x, 0)
-                const tall = body.height - 2 * rise
-                out.push({ x: at.x - Math.round(6 * root.d), y: body.y + rise, width: area.width + Math.round(12 * root.d), height: tall,
-                    radius: tall / 2, paints: true, fuse: podFuse, id: id, joins: podJoin.concat(["island"]) })
+                const left = start ? at.x - air + (wall - at.x + air) * melt : at.x - air
+                const right = start ? at.x + area.width + air : at.x + area.width + air + (span - wall - at.x - area.width - air) * melt
+                out.push({ x: left, y: body.y, width: right - left, height: body.height, radius: r,
+                    corners: melt > 0.01 ? corners(start ? "right" : "left") : null,
+                    paints: true, fuse: fuse, id: id, joins: welded.concat(["island"]) })
             }
             if (root.heartShown && root.heartLength > 1) {
                 const at = chassis.mapToItem(null, barZones.heartAlong, 0)
-                out.push({ x: at.x, y: body.y, width: root.heartLength, height: body.height, radius: body.height / 2,
-                    paints: true, fuse: podFuse, id: "island", joins: podJoin.concat(["podStart", "podEnd"]) })
+                out.push({ x: at.x, y: body.y, width: root.heartLength, height: body.height, radius: r,
+                    corners: melt > 0.01 ? (root.bottomEdge ? { tl: r, tr: r, bl: outer, br: outer } : { tl: outer, tr: outer, bl: r, br: r }) : null,
+                    paints: true, fuse: fuse, id: "island", joins: welded })
             }
         }
         if (!root.clearStrip && !root.pods) out.push({ x: spanX - (root.cornerSide === "left" ? pastSide : 0),
