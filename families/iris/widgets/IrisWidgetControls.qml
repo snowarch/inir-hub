@@ -90,7 +90,11 @@ ColumnLayout {
         return ColorUtils.applyAlpha(IrisStyle.surface, IrisStyle.materialVeil[material] ?? 1)
     }
 
-    readonly property real resolvedWidth: Math.round((Math.max(root.widgetRows.length, root.lookRows.length) > 6 ? 600 : 336) * root.d)
+    // One size on every page and for every widget of a kind: pages turn inside it and scroll, so the sheet never resizes
+    // or moves under the pointer (his 11-02: it jumped on every tab, and a wide card held two controls).
+    readonly property real resolvedWidth: Math.round(440 * root.d)
+    readonly property int mostRows: Math.max(root.widgetRows.length, root.lookRows.length)
+    readonly property real restingHeight: Math.round(Math.min(400, 216 + Math.ceil(root.mostRows / (root.mostRows > 6 ? 2 : 1)) * 46) * root.d)
     spacing: Math.round(14 * root.d)
 
     component Caption: IrisText {

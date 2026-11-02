@@ -63,9 +63,9 @@ Item {
     }
     readonly property real pad: Math.round(12 * root.d)
     readonly property real gap: Math.round(14 * root.d)
-    readonly property real fullWidth: Math.round((content.item?.resolvedWidth ?? 336 * root.d) + 2 * root.pad)
+    readonly property real fullWidth: Math.round((content.item?.resolvedWidth ?? 440 * root.d) + 2 * root.pad)
     readonly property real roomBottom: root.avoid.height > 0 ? root.avoid.y - root.gap : root.height - root.gap
-    readonly property real fullHeight: Math.min(Math.round((content.item?.implicitHeight ?? 0) + 2 * root.pad),
+    readonly property real fullHeight: Math.min(Math.round((content.item?.restingHeight ?? 0) + 2 * root.pad),
         root.roomBottom - root.gap)
     // Beside the widget on the side with room (right first), level with its top; above the shelf if neither fits. The side
     // is chosen when it opens and kept while it fits: a widget that grows or is carried no longer flips it from side to
