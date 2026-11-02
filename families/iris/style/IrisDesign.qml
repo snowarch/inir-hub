@@ -64,6 +64,11 @@ Singleton {
         case "iris.appearance.titleFontFamily": return root.font("title").length > 0
         case "iris.appearance.numbersFontFamily": return root.font("numbers").length > 0
         case "iris.appearance.morph": return root.morph.length > 0
+        // A Design that draws the resting Island (AIRISU's seal and hour) decides its design and the time's accent; a
+        // bar across the edge still shows the engine's clock in its zones.
+        case "iris.bar.design": return root.skin("islandFace").length > 0
+        case "iris.bar.clockAccent": return root.skin("islandFace").length > 0
+            && !["full", "menubar", "pods"].includes(String(Config.options?.iris?.bar?.layout ?? "island"))
         }
         return false
     }
