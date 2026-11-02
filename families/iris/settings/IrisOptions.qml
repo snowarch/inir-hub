@@ -376,7 +376,7 @@ QtObject {
         return { name: name, kind: kind }
     }
     function glassNote(): string {
-        const mode = String(Config.getNestedValue("iris.appearance.glass.mode", "compositor"))
+        const mode = String(Config.getNestedValue("iris.appearance.glass.mode", "wallpaper"))
         return mode === "off" && IrisStyle.glassy ? Translation.tr("Off here, but Lume frost is on for the %1 scheme, so surfaces are frost anyway.").arg(root.schemeName(IrisStyle.scheme)) : ""
     }
     // Adaptive works by nudging fills, lines, corners, shadows and light a few tens of percent: this says what it is doing now.
@@ -494,7 +494,7 @@ QtObject {
             keywords: ["backdrop", "wallpaper", "background", "darkroom", "texture", "fondo", "luz", "textura"] },
         { target: "material", group: "Texture", part: "Wallpaper", label: "Expose the wallpaper", description: "How far your wallpaper is printed in the light: faded, sunk into the dark away from it, live ones and the lock included. Glass blurs it as printed.", path: "iris.appearance.leak.wallpaper", visibleWhen: "iris.appearance.texture=leak", kind: "range", fallback: 50, min: 0, max: 100, step: 5, unit: " %", zeroLabel: "Off", keywords: ["wallpaper", "background", "desktop", "expose", "print", "fondo", "exponer"] },
         { target: "material", group: "Texture", part: "Wallpaper", label: "Develop", description: "A new wallpaper rises out of a milky ground, as a Polaroid does.", path: "iris.appearance.leak.develop", visibleWhen: "iris.appearance.texture=leak", kind: "switch", fallback: true, keywords: ["develop", "polaroid", "fade in", "instant", "animation", "revelar", "animacion"] },
-        { target: "material", group: "Glass", label: "Glass", description: "Glass blurs the wallpaper.", path: "iris.appearance.glass.mode", kind: "choice", fallback: "compositor", choices: [{label:"Off",value:"off",glyph:"crop_square"},{label:"Glass",value:"wallpaper",glyph:"blur_on"},{label:"Blur (beta)",value:"compositor",glyph:"lens_blur"}] , note: () => root.glassNote() },
+        { target: "material", group: "Glass", label: "Glass", description: "Glass blurs the wallpaper.", path: "iris.appearance.glass.mode", kind: "choice", fallback: "wallpaper", choices: [{label:"Off",value:"off",glyph:"crop_square"},{label:"Glass",value:"wallpaper",glyph:"blur_on"},{label:"Blur (beta)",value:"compositor",glyph:"lens_blur"}] , note: () => root.glassNote() },
         { target: "material", group: "Glass", label: "Tint", showIf: () => IrisStyle.glassy, description: "How much material covers the glass.", path: "iris.appearance.glass.tint", kind: "range", fallback: 58, min: 12, max: 96, step: 2, unit: " %" },
         { target: "material", group: "Glass", label: "Frost", description: "How blurred the wallpaper is behind the glass, on iRiS and on glass widgets.", path: "iris.appearance.glass.blur", showIf: () => IrisStyle.glassWallpaper || root.widgetGlass, kind: "range", fallback: 100, min: 20, max: 100, step: 5, unit: " %" },
         { target: "material", group: "Glass", niri: "blur", key: "enabled", label: "Niri blur", description: "Blur asks Niri to blur what is behind iRiS.", visibleWhen: "iris.appearance.glass.mode=compositor", showIf: () => IrisCompositorBlur.available, kind: "switch", fallback: true, keywords: ["niri", "blur", "compositor", "desenfoque"] },

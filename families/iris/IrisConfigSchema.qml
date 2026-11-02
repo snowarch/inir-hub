@@ -248,7 +248,7 @@ JsonObject {
         // "iris" draws the primitives as they are; a Theme may choose another when it is applied.
         property string design: "iris"
         property JsonObject glass: JsonObject {
-            property string mode: "compositor" // "off", "wallpaper" (the output's wallpaper, blurred) or "compositor" (Niri blurs what is below)
+            property string mode: "wallpaper" // "off", "wallpaper" (the output's wallpaper, blurred) or "compositor" (Niri blurs what is below)
             property int tint: 58       // how much of the material stays over the glass, 0-100
             property int blur: 100      // wallpaper glass blur, % of the maximum
             // The cut edge of Blur glass: light where it faces up, a line elsewhere (%) and colour ("scene" = the wallpaper's light, "white", "accent", "highlight").

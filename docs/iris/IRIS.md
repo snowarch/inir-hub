@@ -27,7 +27,7 @@ The Dock is set under iRiS Settings › Dock:
 
 - Visibility: Show dock, Automatically hide, Reserve space for windows, Stay visible on empty workspaces.
 - Look › Screen edge: Auto puts it on the edge opposite the Island, or pick Top, Bottom, Left or Right.
-- Look › Material: iRiS, Solid, Glass or Blur (beta). Blur needs Niri 26.04 or later.
+- Look › Material: iRiS, Solid, Glass or Blur (beta). Glass, the factory pick, blurs your wallpaper and costs little; Blur needs Niri 26.04 or later and asks Niri to blur whatever is behind on every frame, which weaker GPUs feel.
 - Apps: Pinned apps, Open apps and Drag to reorder. Drag an icon along the Dock to reorder it; **Esc** while dragging puts it back.
 
 ## Look, colour and themes
