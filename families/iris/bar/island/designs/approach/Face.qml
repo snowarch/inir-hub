@@ -85,7 +85,7 @@ Item {
                     readonly property bool first: block.index === 0
                     readonly property var next: root.blocks[block.index + 1] ?? null
                     readonly property real room: (block.next ? (block.next.start - root.minute * 60000) / 60000 * root.perMinute : root.track)
-                        - block.x - block.width - Math.round(9 * root.d)
+                        - block.x - block.width - Math.round(6 * root.d)
                     x: Math.round(Math.max(0, block.away) * root.perMinute) + 2
                     // Each minute it comes a little closer, gliding, never a jump.
                     Behavior on x { enabled: IrisStyle.motionEnabled; SmoothedAnimation { duration: IrisStyle.duration(420); velocity: -1 } }
@@ -101,7 +101,9 @@ Item {
                         visible: label.fits || block.room >= Math.round(28 * root.d)
                         x: label.fits ? Math.round(6 * root.d) : block.width + Math.round(5 * root.d)
                         anchors.verticalCenter: parent.verticalCenter
-                        width: Math.min(implicitWidth, label.fits ? block.width - Math.round(12 * root.d) : block.room)
+                        // On a quiet block the same ink reads past its end; on a lit one the name stays inside.
+                        width: Math.min(implicitWidth, !label.fits ? block.room
+                            : block.running || block.first ? block.width - Math.round(12 * root.d) : block.width - Math.round(6 * root.d) + block.room)
                         text: block.modelData.title
                         elide: Text.ElideRight
                         font.pixelSize: IrisStyle.typeFootnote
