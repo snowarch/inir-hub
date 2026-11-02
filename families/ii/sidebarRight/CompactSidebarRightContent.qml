@@ -1129,6 +1129,8 @@ Item {
 
                             readonly property bool isActive: root.activeSection === navItem.index
                             readonly property bool isNotifications: navItem.modelData.id === "notifications"
+                            // The badge's text reads this: inside it, names resolve on the model's data first (`root`, `String` were undefined).
+                            readonly property int badgeCount: navItem.isNotifications ? root.notificationCount : 0
 
                             // Button background (active highlight provided by navIndicator behind)
                             Rectangle {
@@ -1197,7 +1199,7 @@ Item {
                                     StyledText {
                                         id: badgeLabel
                                         anchors.centerIn: parent
-                                        text: root.notificationCount > 99 ? "99+" : root.notificationCount.toString()
+                                        text: navItem.badgeCount > 99 ? "99+" : navItem.badgeCount.toString()
                                         font.pixelSize: 9
                                         font.weight: Font.Bold
                                         font.family: Appearance.font.family.numbers
