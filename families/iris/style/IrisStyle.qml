@@ -1319,9 +1319,10 @@ QtObject {
     readonly property int fuseEdge: Math.max(8, Math.round(56 * root.density * root.islandBandScale
         * Math.max(0.2, Math.min(2, Number(root.options?.bar?.notchCurve ?? 100) / 100))))
     readonly property int weld: Math.max(2, Math.round(3 * root.density))
-    function edgeFuseFor(size: real, curve: real): int {
-        const scale = Math.max(32, Math.min(64, size / root.density)) / 42
-        return Math.max(8, Math.round(56 * root.density * scale * Math.max(0.2, Math.min(2, curve / 100))))
+    // A line of bubbles melted into a wall: the fillet's radius is the line's own round, so its end is one S of two equal
+    // arcs (the cap around the last bubble, then the wall); Bubbles › Notch curve softens or tightens it.
+    function edgeFuseFor(thickness: real, curve: real): int {
+        return Math.max(8, Math.round(root.pieceRadius(thickness) * 4 * (1 - Math.SQRT1_2) * Math.max(0.2, Math.min(2, curve / 100))))
     }
     readonly property string pieceShape: String(root.theme?.pieceShape ?? "circle")
     readonly property string controlPlate: {

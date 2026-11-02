@@ -168,6 +168,10 @@ Item {
         const rightOf = edgeSide => g && side === "right" ? right : root.width - Math.max(edgeOn("right"), edgeOn(edgeSide))
         const cornerLeftOf = edgeSide => along && along.lo < leftOf(edgeSide) + half ? Math.max(leftOf(edgeSide), along.hi + gapBeside) : leftOf(edgeSide)
         const cornerRightOf = edgeSide => along && along.hi > rightOf(edgeSide) - half ? Math.min(rightOf(edgeSide), along.lo - gapBeside) : rightOf(edgeSide)
+        // A side line starts a bubble's step clear of its corner only when the top or bottom line there holds it; alone, the
+        // corner is its own (read from the places people set: what the Island absorbs depends on these points).
+        const taken = zone => root.allSlots.some(slot => root.baseKindOf(slot).length > 0 && root.configuredPlace(slot) === zone)
+        const clear = zone => taken(zone) ? root.size + root.looseGap : 0
         const at = {
             "top-left": { x: side === "top" ? cornerLeftOf("top") : leftOf("top"), y: top },
             "top-right": { x: side === "top" ? cornerRightOf("top") : rightOf("top"), y: top },
@@ -175,11 +179,10 @@ Item {
             "right": { x: right, y: root.height / 2 },
             "bottom-left": { x: side === "bottom" ? cornerLeftOf("bottom") : leftOf("bottom"), y: bottom },
             "bottom-right": { x: side === "bottom" ? cornerRightOf("bottom") : rightOf("bottom"), y: bottom },
-            // Down or up a side wall from its corner, a bubble's step clear of the corner the top or bottom line takes.
-            "left-top": { x: left, y: top + root.size + root.looseGap },
-            "left-bottom": { x: left, y: bottom - root.size - root.looseGap },
-            "right-top": { x: right, y: top + root.size + root.looseGap },
-            "right-bottom": { x: right, y: bottom - root.size - root.looseGap }
+            "left-top": { x: left, y: top + clear("top-left") },
+            "left-bottom": { x: left, y: bottom - clear("bottom-left") },
+            "right-top": { x: right, y: top + clear("top-right") },
+            "right-bottom": { x: right, y: bottom - clear("bottom-right") }
         }
         return IrisPieces.zones.map(zone => ({ zone: zone, x: at[zone].x, y: at[zone].y }))
     }
@@ -596,7 +599,7 @@ Item {
     }
     readonly property real edgeFuse: root.edgeFuseOn("")
     function edgeFuseOn(side: string): real {
-        return IrisFrame.joinOn(side) === "notch" ? IrisStyle.edgeFuseFor(root.size, Number(root.options?.notchCurve ?? 100)) : IrisStyle.fuse
+        return IrisFrame.joinOn(side) === "notch" ? IrisStyle.edgeFuseFor(root.size + 2 * root.barPad, Number(root.options?.notchCurve ?? 100)) : IrisStyle.fuse
     }
     function meltInto(shape: var, side: string, sides: var): var {
         if (!root.attached || side.length === 0) return Object.assign(shape, { fuse: IrisStyle.fuse, joins: "" })
@@ -635,7 +638,7 @@ Item {
     // into both, so the contour is one from the curve to the farthest bubble (`iris.bubbles.fromCorner`). Never into a
     // wall the Island or the Dock holds.
     readonly property bool fromCorner: root.attached && (root.options?.fromCorner ?? true)
-    function towardCorner(shape: var, zone: string): var {
+    function towardCorner(shape: var, zone: string, lone: bool): var {
         if (!root.fromCorner || !IrisPieces.cornerZones.includes(zone)) return shape
         const words = zone.split("-")
         const wall = IrisFrame.vertical(words[0]) ? words[1] : words[1] === "left" ? "left" : "right"
@@ -652,24 +655,21 @@ Item {
         }
         const inset = IrisFrame.framed ? IrisFrame.band : 0
         const grown = Object.assign({}, shape)
+        // A bubble alone there is a line of one: a line's depth and round, so its corner draws the contour a line does.
+        if (lone) {
+            const hx = root.stacks(zone) ? root.acrossHalf(zone) : root.size / 2 + root.barPad
+            const hy = root.stacks(zone) ? root.size / 2 + root.barPad : root.acrossHalf(zone)
+            grown.x = Math.round(shape.x + shape.width / 2 - hx)
+            grown.y = Math.round(shape.y + shape.height / 2 - hy)
+            grown.width = Math.round(2 * hx)
+            grown.height = Math.round(2 * hy)
+            grown.radius = IrisStyle.pieceRadius(Math.min(grown.width, grown.height))
+        }
         if (wall === "left") { grown.width += grown.x - inset; grown.x = inset }
         else if (wall === "right") grown.width = root.width - inset - grown.x
         else if (wall === "top") { grown.height += grown.y - inset; grown.y = inset }
         else grown.height = root.height - inset - grown.y
         return Object.assign(grown, { runsTo: wall })
-    }
-    // Its free end stays round past the last bubble: that bubble stands at the line's whole depth, so one bubble in a corner
-    // draws the contour two do, instead of a lump the wall's curve eats.
-    function runFree(shape: var): var {
-        const wall = shape.runsTo ?? ""
-        if (wall.length === 0) return shape
-        const run = Math.round(Math.min(shape.width, shape.height) / 2)
-        const out = Object.assign({}, shape)
-        if (wall === "bottom") { out.y -= run; out.height += run }
-        else if (wall === "top") out.height += run
-        else if (wall === "right") { out.x -= run; out.width += run }
-        else out.width += run
-        return out
     }
     // A line lying wholly inside another that shares its corner (a bubble on the bottom wall under a column on the side)
     // draws nothing of its own: two bodies there lean into each other, one reads as one surface.
@@ -680,9 +680,9 @@ Item {
     // The surface a slot stands on, as the field draws it: its line (or itself, alone) run out to the corner it starts from.
     function surfaceOf(slot: string): var {
         const plate = root.plateFor(slot)
-        if (plate) return root.runFree(root.towardCorner({ x: plate.x, y: plate.y, width: plate.width, height: plate.height }, plate.zone))
+        if (plate) return root.towardCorner({ x: plate.x, y: plate.y, width: plate.width, height: plate.height }, plate.zone, false)
         const rect = root.rects[root.allSlots.indexOf(slot)]
-        return rect ? root.runFree(root.towardCorner({ x: rect.x, y: rect.y, width: rect.size, height: rect.size }, root.placeName(slot))) : null
+        return rect ? root.towardCorner({ x: rect.x, y: rect.y, width: rect.size, height: rect.size }, root.placeName(slot), true) : null
     }
     // Everything on this output a body must keep off (IrisFrame.surfaces): one list, whoever opens the body.
     readonly property var standing: {
@@ -729,7 +729,7 @@ Item {
         const lines = []
         for (const plate of root.plates) {
             lines.push({ shape: root.towardCorner({ x: plate.x, y: plate.y, width: plate.width, height: plate.height,
-                radius: IrisStyle.pieceRadius(Math.min(plate.width, plate.height)), id: "plate:" + plate.zone }, plate.zone),
+                radius: IrisStyle.pieceRadius(Math.min(plate.width, plate.height)), id: "plate:" + plate.zone }, plate.zone, false),
                 side: plate.side ?? IrisFrame.edgeOf(plate.zone) })
         }
         for (let i = 0; i < root.allSlots.length; i++) {
@@ -739,12 +739,12 @@ Item {
             const carriedSlot = root.ownerSlot(slot)
             if (root.drag?.slot === carriedSlot || (landing.running && landing.slot === carriedSlot)) continue
             lines.push({ shape: root.towardCorner({ x: rect.x, y: rect.y, width: rect.size, height: rect.size,
-                radius: IrisStyle.pieceRadius(rect.size), id: "piece:" + slot }, root.placeName(slot)),
+                radius: IrisStyle.pieceRadius(rect.size), id: "piece:" + slot }, root.placeName(slot), true),
                 side: IrisFrame.edgeOf(root.placeName(slot)) })
         }
         lines.forEach((line, i) => {
             const held = lines.some((other, j) => i !== j && root.holds(other.shape, line.shape) && (j < i || !root.holds(line.shape, other.shape)))
-            if (!held) out.push(root.meltInto(root.runFree(line.shape), line.side, sides))
+            if (!held) out.push(root.meltInto(line.shape, line.side, sides))
         })
         for (const side of sides) out.unshift(root.edgeBody(side))
         if (carried.shown && !root.carryingIsland) {

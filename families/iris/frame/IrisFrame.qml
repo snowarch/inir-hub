@@ -350,10 +350,6 @@ QtObject {
     // The fillet a body melted into a wall draws there: the field's polynomial smooth union of two perpendicular edges
     // bulges k/4 along the diagonal, which is a circular fillet of radius k / (4·(1 − 1/√2)).
     function filletRadius(fuse: real): real { return fuse / (4 * (1 - Math.SQRT1_2)) }
-    function meltFuse(side: string, pieceSize: real): real {
-        return root.joinOn(side) === "notch"
-            ? IrisStyle.edgeFuseFor(pieceSize, Number(root.bubbles?.notchCurve ?? 100)) : IrisStyle.fuse
-    }
     // How each corner of a body near the frame nests ({ tl, tr, bl, br }): the corner that faces the frame's own corner, or
     // the fillet of what stands on the wall beside it (its opener or any surface in `beside`), takes that curve less the air
     // between them; the others keep `radius`.
