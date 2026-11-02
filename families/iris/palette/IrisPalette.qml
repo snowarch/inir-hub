@@ -23,7 +23,7 @@ import qs.modules.iris.state
 // from are one surface: drawn and moved in the same frame.
 Item {
     id: root
-    // The place a look is worn by (`iris.appearance.nothingOn.spotlight`).
+    // The place a look is worn by (`iris.appearance.places.spotlight`).
     readonly property string irisPlace: "spotlight"
 
     property var screen: null

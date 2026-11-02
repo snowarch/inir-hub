@@ -96,7 +96,7 @@ Rectangle {
         active: root.synth
         anchors.fill: parent
         sourceComponent: Item {
-            readonly property real edge: Math.round(3 * root.d)
+            readonly property real edge: Math.round(IrisStyle.synthDepthBase * root.d)
             Rectangle {
                 y: parent.edge
                 width: parent.width

@@ -22,7 +22,7 @@ Item {
         visible: root.style === "key" && root.color.a > 0
         width: root.width
         height: root.height
-        y: Math.round(2 * IrisStyle.density)
+        y: Math.round(IrisStyle.synthDepthBase * 2 / 3 * IrisStyle.density)
         radius: root.radius
         color: IrisStyle.synthKeyEdge
     }

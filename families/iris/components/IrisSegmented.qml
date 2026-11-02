@@ -218,7 +218,7 @@ Rectangle {
                 anchors.leftMargin: segment.index > 0 ? Math.round(3 * root.d) : 0
                 anchors.rightMargin: segment.index < root.count - 1 ? Math.round(3 * root.d) : 0
                 sourceComponent: Item {
-                    readonly property real edge: Math.round(3 * root.d)
+                    readonly property real edge: Math.round(IrisStyle.synthDepthBase * root.d)
                     Rectangle {
                         y: parent.edge
                         width: parent.width

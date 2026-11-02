@@ -51,7 +51,7 @@ Rectangle {
         visible: root.keyed
         width: parent.width
         height: parent.height
-        y: Math.max(1, Math.round(parent.height * 0.07))
+        y: Math.round(parent.height * 0.07 * IrisStyle.synthDepthBase / 3)
         radius: root.radius
         color: IrisStyle.synthKeyEdge
     }

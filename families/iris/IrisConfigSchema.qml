@@ -81,7 +81,7 @@ JsonObject {
         // What the material is drawn as: "solid" (Ricelin's card), "aurora", "angel", "regalia", "flat", "afterglow" or "leak".
         property string texture: "solid"
         property int factoryLook: 1 // the factory look a file was moved to (ConfigMigrations.js)
-        // Afterglow: grade "dusk", "cyber", "fog" or "wallpaper"; the rest 0..100 %; wallpaper grades the desktop too.
+        // Afterglow: grade "dusk", "cyber", "fog", "acid" or "wallpaper"; the rest 0..100 %; wallpaper grades the desktop too.
         property JsonObject afterglow: JsonObject {
             property string grade: "dusk"
             property int atmosphere: 60
@@ -158,19 +158,30 @@ JsonObject {
         property string numbersFontFamily: "" // Empty = Archivo SemiExpanded (bundled; the figure voice)
         // The one colour of Signal (live, needs you, errors): "nothing" (#D71921), "wallpaper" or a #rrggbb.
         property string signal: "nothing"
-        // apple: the accent marks what is chosen; nothing: ink body, one signal colour; synth: keys and faders; gel: glossy accent
+        // The look iRiS speaks (DESIGN.md "Layers", L4): "apple" (the accent marks what is chosen), "nothing" (ink body,
+        // one signal), "synth" (keys and faders) or "gel" (glossy capsules).
         property string look: "apple"
-        // Where a look other than Apple is worn; a place turned off keeps Apple's controls and type.
-        property JsonObject nothingOn: JsonObject {
-            property bool island: true
-            property bool dock: true
-            property bool settings: true
-            property bool spotlight: true
-            property bool orbit: true
-            property bool lock: true
-            property bool widgets: true
-            property bool notifications: true
-            property bool osd: true
+        // L5: what each place wears: "" is iRiS's look, or a look of its own.
+        property JsonObject places: JsonObject {
+            property string island: ""
+            property string dock: ""
+            property string control: ""
+            property string settings: ""
+            property string spotlight: ""
+            property string orbit: ""
+            property string lock: ""
+            property string widgets: ""
+            property string notifications: ""
+            property string osd: ""
+        }
+        // Each look's own make. Colours come from "accent", "highlight", "signal" or "classic" (the look's own lamp).
+        property JsonObject looks: JsonObject {
+            // chosen: "ink" (the inverted plate) or "signal"
+            property JsonObject nothing: JsonObject { property string chosen: "ink" }
+            // keys light, levels run; depth is the keys' drop edge in px (0..6); mono sets labels lowercase in Geist Mono
+            property JsonObject synth: JsonObject { property string keys: "accent"; property string levels: "highlight"; property int depth: 3; property bool mono: true }
+            // body is the gel's colour; gloss the light cap (0..100 %); round sets figures and titles in Rubik
+            property JsonObject gel: JsonObject { property string body: "accent"; property int gloss: 60; property bool round: true }
         }
         property real density: 1.0
         property bool motion: true

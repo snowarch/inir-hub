@@ -106,10 +106,12 @@ Item {
     readonly property real controlWidth: Math.round(Math.min((root.voice.length > 0 ? 400 : 300) * root.d, Math.max(200 * root.d, layout.width * 0.43)))
     FontMetrics {
         id: choiceMetrics
-        font.family: IrisStyle.fontMain
-        font.pixelSize: IrisStyle.typeMeta
+        // Measured in the face the segments print in: Synth's keys run mono, a step smaller, with a gap between keys.
+        font.family: root.keyed ? IrisStyle.fontSynthLabel : IrisStyle.fontMain
+        font.pixelSize: root.keyed ? IrisStyle.typeFootnote : IrisStyle.typeMeta
         font.weight: IrisStyle.weight(Font.DemiBold)
     }
+    readonly property bool keyed: IrisStyle.lookOf(root) === "synth"
     FontMetrics {
         id: figureMetrics
         font.family: IrisStyle.fontNumbers
@@ -125,7 +127,7 @@ Item {
     // Every segment hugs its name (no layout voices the track any more: its skin left an implicit width of 0, and every
     // choice fell under its row at the full width, 10-29).
     readonly property real choiceHug: root.spec.kind !== "choice" || root.choices.length === 0 ? 0
-        : Math.ceil(root.choices.reduce((sum, choice) => sum + choiceMetrics.advanceWidth(Translation.tr(String(choice.label ?? ""))) + 24 * root.d, 0) + 6 * root.d)
+        : Math.ceil(root.choices.reduce((sum, choice) => sum + choiceMetrics.advanceWidth(Translation.tr(String(choice.label ?? ""))) + (root.keyed ? 30 : 24) * root.d, 0) + 6 * root.d)
     readonly property real voicedNatural: root.voicedChoice ? root.choiceHug : 0
     readonly property bool inlineChoice: root.voicedChoice ? root.voicedNatural > 0 && root.voicedNatural <= root.controlWidth
         : root.spec.kind === "choice" && root.roomy && root.choices.length >= 2 && root.choices.length <= 4

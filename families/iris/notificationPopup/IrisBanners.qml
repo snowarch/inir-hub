@@ -17,7 +17,7 @@ import qs.modules.iris.state
 
 Item {
     id: root
-    // The place a look is worn by (`iris.appearance.nothingOn.notifications`).
+    // The place a look is worn by (`iris.appearance.places.notifications`).
     readonly property string irisPlace: "notifications"
     property var screenData: null
     readonly property string screenName: root.screenData?.name ?? ""

@@ -233,8 +233,8 @@ QtObject {
     readonly property string fontMain: IrisDesign.font("text") || root.face("iris.appearance.fontFamily", root.appearance?.fontFamily)
     // A look sets titles in its own face unless the person chose one: Synth's label mono, Gel's round Rubik.
     readonly property string fontTitle: IrisDesign.font("title")
-        || (String(root.appearance?.titleFontFamily ?? "").length === 0 && root.look === "synth" ? "Geist Mono" // iris-literal: Synth's label face
-            : String(root.appearance?.titleFontFamily ?? "").length === 0 && root.look === "gel" ? "Rubik" // iris-literal: Gel's face
+        || (String(root.appearance?.titleFontFamily ?? "").length === 0 && root.look === "synth" && root.synthMono ? "Geist Mono" // iris-literal: Synth's label face
+            : String(root.appearance?.titleFontFamily ?? "").length === 0 && root.look === "gel" && root.gelRound ? "Rubik" // iris-literal: Gel's face
             : root.face("iris.appearance.titleFontFamily", root.appearance?.titleFontFamily))
     // 220 font.weight bindings hang off this one. Read straight through `theme`, it is recomputed
     // every time Config is reloaded — which is every write of any key — and drags all 220 with it,
@@ -298,35 +298,59 @@ QtObject {
     readonly property var washi: IrisWashi.palette(root.scheme)
     readonly property var washiDark: IrisWashi.palette("dark")
     readonly property var washiLight: IrisWashi.palette("light")
-    // Signal (DESIGN.md S1): the body is monochrome, ink on paper with no hue, and colour means one thing. A colour theme
-    // the person follows, the anime layer and the Midnight material are choices of colour and keep theirs.
-    // Only the Nothing look (iris.appearance.look); Apple, the standard, keeps the accent on what is chosen.
-    readonly property string look: String(root.appearance?.look ?? "apple")
-    readonly property bool mono: root.look === "nothing" && !root.followsTheme && !root.animeEnabled
-    // Nothing is a layer worn by place (DESIGN.md "Two looks"): a surface names its place with `irisPlace` on its root
-    // item and every control under it asks once. Apple, the default, never walks: `mono` is false first.
-    readonly property var nothingOn: root.appearance?.nothingOn ?? ({})
-    function nothingAt(place: string): bool { return root.mono && (place.length === 0 || root.nothingOn?.[place] !== false) }
+    // The look (DESIGN.md "Layers", L4) is the dialect iRiS speaks: Apple (the accent marks what is chosen), Nothing
+    // (ink body, one signal), Synth (keys and faders), Gel (glossy capsules). Every look takes its colour from L1 (accent,
+    // highlight, signal), never from a literal of its own, so the person's colours reach every look. A colour theme the
+    // person follows and the anime layer are choices of colour: under them Nothing speaks Apple.
+    readonly property var lookIds: ["apple", "nothing", "synth", "gel"]
+    function lookAllowed(look: string): string {
+        if (!root.lookIds.includes(look)) return "apple"
+        return look === "nothing" && (root.followsTheme || root.animeEnabled) ? "apple" : look
+    }
+    readonly property string look: root.lookAllowed(String(root.appearance?.look ?? "apple"))
+    readonly property bool mono: root.look === "nothing"
+    // L5: a place (a surface's root names it with `irisPlace`) wears iRiS's look or one of its own. The look of the
+    // bodies (corners, plates, selection, voices) is iRiS's; a place's own look reaches the controls drawn in it.
+    readonly property var places: root.appearance?.places ?? ({})
+    readonly property var placeNames: ["island", "dock", "control", "settings", "spotlight", "orbit", "lock", "widgets", "notifications", "osd"]
+    function wornAt(place: string): string {
+        const own = String(root.places?.[place] ?? "")
+        return place.length > 0 && own.length > 0 ? root.lookAllowed(own) : root.look
+    }
+    readonly property bool placesDiffer: root.placeNames.some(place => root.wornAt(place) !== root.look)
+    // Every look in use somewhere: Settings shows a look's own options only while something wears it.
+    readonly property var looksWorn: root.lookIds.filter(look => look === root.look || root.placeNames.some(place => root.wornAt(place) === look))
+    function nothingAt(place: string): bool { return root.wornAt(place) === "nothing" }
     function placeOf(item): string {
         for (let p = item; p; p = p.parent)
             if (typeof p.irisPlace === "string") return p.irisPlace
         return ""
     }
-    function wearsNothing(item): bool { return root.mono && root.nothingAt(root.placeOf(item)) }
-    // Synth and Gel are worn by place the same way (`nothingOn` holds the places for any look); `lookOf` names the
-    // look a control draws, and Apple returns before any walk.
-    function lookAt(place: string): bool { return root.look !== "apple" && (place.length === 0 || root.nothingOn?.[place] !== false) }
-    function lookOf(item): string {
-        if (root.look === "apple") return "apple"
-        if (root.look === "nothing") return root.wearsNothing(item) ? "nothing" : "apple"
-        return root.lookAt(root.placeOf(item)) ? root.look : "apple"
+    // The look a control draws; with every place on iRiS's look it never walks.
+    function lookOf(item): string { return root.placesDiffer ? root.wornAt(root.placeOf(item)) : root.look }
+    function wearsNothing(item): bool { return root.lookOf(item) === "nothing" }
+    // Each look's own make (Settings › Colour › Look), read once here.
+    readonly property var lookOptions: root.appearance?.looks ?? ({})
+    readonly property var synthOptions: root.lookOptions?.synth ?? ({})
+    readonly property var gelOptions: root.lookOptions?.gel ?? ({})
+    readonly property var nothingOptions: root.lookOptions?.nothing ?? ({})
+    // Where a look's colour comes from: the person's accent, highlight or signal; "classic" is the look's own lamp.
+    function lookColour(source: string, classic: color): color {
+        if (source === "classic") return classic
+        if (source === "signal") return root.signal
+        if (source === "highlight") return root.vivid(root.baseSecondaryAccent, true)
+        return root.vivid(root.baseAccent, true)
     }
+    // A lamp needs a hue: a grey accent or highlight lights in the signal.
+    function lamp(c: color): color { return c.hslSaturation < 0.08 ? root.signal : c }
+    readonly property bool synthMono: root.synthOptions?.mono ?? true
     // Each look is a whole dialect of iRiS, worn by every surface through the tokens below and not by its controls alone
     // (his 10-30: "que todo iris se transforme con cada elección"): corners, plates, marks, voices, the chosen thing and
     // the bodies' edge. The traits are the Designs' own (IrisDesign.trait); a Design keeps the ones it sets.
     readonly property var lookTraits: ({
         nothing: { marks: "glyph", selection: "plate", captions: "mono", plate: "line" },
-        synth: { marks: "key", selection: "plate", captions: "mono", titles: "lower", plate: "key" },
+        synth: root.synthMono ? { marks: "key", selection: "plate", captions: "mono", titles: "lower", plate: "key" }
+            : { marks: "key", selection: "plate", plate: "key" },
         gel: { marks: "gloss", selection: "plate", plate: "gloss" }
     })[root.look] ?? ({})
     function trait(name: string): var {
@@ -341,39 +365,58 @@ QtObject {
     readonly property string plateStyle: String(root.trait("plate") ?? "flat")
     readonly property string marksStyle: String(root.trait("marks") ?? "tile")
     readonly property color plateEdge: root.plateStyle === "line" ? ColorUtils.applyAlpha(root.text, root.light ? 0.2 : 0.18)
-        : root.plateStyle === "gloss" ? Qt.rgba(1, 1, 1, root.light ? 0.7 : 0.1) : Qt.color("transparent") // iris-literal: gel's lit rim
+        : root.plateStyle === "gloss" ? Qt.rgba(1, 1, 1, (root.light ? 0.7 : 0.1) * root.gelGloss / 0.6) : Qt.color("transparent") // iris-literal: gel's lit rim
     readonly property color synthPanel: ColorUtils.mix(root.text, root.surfaceOpaque, root.light ? 0.05 : 0.07)
-    // The chosen thing in a look that marks it with a plate: Synth's orange key, Gel's glossy accent, the accent plate.
-    readonly property color lookPlate: root.look === "synth" ? root.synthOn : root.look === "gel" ? root.gelBody : root.accentFill
-    readonly property color inkOnLookPlate: root.look === "synth" ? root.inkOnSynthOn : root.look === "gel" ? root.inkOnGel : root.inkOnAccentFill
+    // The chosen thing in a look that marks it with a plate: Synth's lit key, Gel's glossy body, the accent plate.
+    // `plateOfLook` answers for any look, so a place wearing its own (the Control Center's lit tiles) asks with its look.
+    function plateOfLook(look: string): color {
+        return look === "synth" ? root.synthOn : look === "gel" ? root.gelBody
+            : look === "nothing" && !root.mono ? (root.nothingSignal ? root.signal : root.text) : root.accentFill
+    }
+    function inkOnPlateOfLook(look: string): color {
+        return look === "synth" ? root.inkOnSynthOn : look === "gel" ? root.inkOnGel
+            : look === "nothing" && !root.mono ? (root.nothingSignal ? root.inkOnSignal : root.paper) : root.inkOnAccentFill
+    }
+    readonly property color lookPlate: root.plateOfLook(root.look)
+    readonly property color inkOnLookPlate: root.inkOnPlateOfLook(root.look)
     // Synth: an instrument panel. A switch is a key that sinks and lights its LED, a level a fader over ticks, a choice
-    // a row of keys; each kind keeps its colour: orange is on and the one act, blue a level.
-    readonly property color synthOn: "#ff5b00" // iris-literal: Synth's orange
-    readonly property color synthLevel: "#0096ff" // iris-literal: Synth's blue
+    // a row of keys. Keys light in the person's accent and levels run in the highlight unless they pick the classic
+    // lamps (Teenage Engineering's orange and blue).
+    readonly property color synthOn: root.lamp(root.lookColour(String(root.synthOptions?.keys ?? "accent"), "#ff5b00")) // iris-literal: Synth's classic orange
+    readonly property color synthLevel: root.lamp(root.lookColour(String(root.synthOptions?.levels ?? "highlight"), "#0096ff")) // iris-literal: Synth's classic blue
     readonly property color synthKey: ColorUtils.mix(root.text, root.surfaceOpaque, root.light ? 0.12 : 0.15)
     readonly property color synthKeyEdge: ColorUtils.mix("#000000", root.surfaceOpaque, root.light ? 0.2 : 0.5)
     readonly property color synthCap: root.light ? "#ffffff" : "#ecebe6" // iris-literal: a fader's cap, a chosen key
     readonly property color synthInkOnCap: "#1d1d1b" // iris-literal: the ink printed on a cap
     readonly property color synthLedOff: ColorUtils.mix(root.text, root.surfaceOpaque, 0.28)
     readonly property color inkOnSynthOn: root.onTintFor(root.synthOn)
-    // A key's corner and a fader cap's: machined, never a capsule.
+    // How far a key stands on its drop edge (0 lays the keys flat on the panel).
+    readonly property real synthDepthBase: Math.max(0, Math.min(6, Number(root.synthOptions?.depth ?? 3)))
+    readonly property int synthDepth: Math.round(root.synthDepthBase * root.density)
     readonly property int synthKeyRadius: Math.round(5 * root.density)
     readonly property int synthCapRadius: Math.round(3 * root.density)
-    readonly property string fontSynthLabel: "Geist Mono"
+    readonly property string fontSynthLabel: root.synthMono ? "Geist Mono" : root.fontMain // iris-literal: Synth's label face
     readonly property string fontSynthFigure: "Inter Display"
-    // Gel: glossy capsules filled with the accent, a light cap over their upper half; figures in Rubik.
-    // The person's hue, saturated and held mid-tone so the gel reads as gel over a pastel accent; a grey accent takes blue.
-    readonly property color gelBody: root.appleAccent.hslSaturation < 0.08 ? "#3d7cf0" // iris-literal: Gel over a grey accent
-        : Qt.hsla(root.appleAccent.hslHue, Math.max(0.62, root.appleAccent.hslSaturation), Math.min(0.56, Math.max(0.44, root.appleAccent.hslLightness)), 1)
+    // Gel: glossy capsules of the person's colour, a light cap over their upper half. The source is held mid-tone so
+    // the gel reads as gel over a pastel accent; a grey one stays grey, Aqua's graphite.
+    readonly property color gelSource: root.lookColour(String(root.gelOptions?.body ?? "accent"), root.baseAccent)
+    readonly property color gelBody: root.gelSource.hslSaturation < 0.08
+        ? Qt.hsla(0, 0, Math.min(0.56, Math.max(0.42, root.gelSource.hslLightness)), 1)
+        : Qt.hsla(root.gelSource.hslHue, Math.max(0.62, root.gelSource.hslSaturation), Math.min(0.56, Math.max(0.44, root.gelSource.hslLightness)), 1)
     readonly property color gelTop: Qt.lighter(root.gelBody, 1.5)
     readonly property color gelBottom: Qt.darker(root.gelBody, 1.3)
     readonly property color inkOnGel: root.onTintFor(root.gelBody)
-    // The light over a gel's upper half, and the pearl of a knob.
-    readonly property color gelShineTop: Qt.rgba(1, 1, 1, 0.6)
-    readonly property color gelShineBottom: Qt.rgba(1, 1, 1, 0.04)
+    // The light over a gel's upper half (0 is a plain candy, 1 a mirror cap), and the pearl of a knob.
+    readonly property real gelGloss: Math.max(0, Math.min(100, Number(root.gelOptions?.gloss ?? 60))) / 100
+    readonly property color gelShineTop: Qt.rgba(1, 1, 1, root.gelGloss)
+    readonly property color gelShineBottom: Qt.rgba(1, 1, 1, 0.07 * root.gelGloss)
     readonly property color gelPearlTop: "#ffffff" // iris-literal: Gel's pearl knob
     readonly property color gelPearlBottom: "#d9e4ee" // iris-literal: the pearl's lower shade
-    readonly property string fontGel: "Rubik"
+    readonly property bool gelRound: root.gelOptions?.round ?? true
+    readonly property string fontGel: root.gelRound ? "Rubik" : root.fontMain // iris-literal: Gel's face
+    // Nothing marks the chosen thing with the inverted plate (ink) or the signal colour.
+    readonly property bool nothingSignal: String(root.nothingOptions?.chosen ?? "ink") === "signal"
+    readonly property bool signalChosen: root.mono && root.nothingSignal
     readonly property bool neutralBody: root.mono && !["midnight", "wallpaper", "theme"].includes(root.materialName)
     readonly property var neutralRoles: ["surface", "surfaceHigh", "surfaceHighest", "text", "textSecondary", "textTertiary", "fillInk"]
     // The same light, no hue: a warm paper or a wallpaper-tinted black reads as its grey.
@@ -391,7 +434,7 @@ QtObject {
     // own vivid colour, or a hex the person picked.
     readonly property color signalRed: "#d71921" // iris-literal: Nothing's red
     // iris-literal: the signal colours Settings offers beside Nothing's red and the wallpaper's.
-    readonly property var signalSwatches: ({ orange: "#ff8a00", blue: "#2f7bf6", green: "#36c46b", pink: "#ff4fa3" })
+    readonly property var signalSwatches: ({ orange: "#ff8a00", blue: "#2f7bf6", green: "#36c46b", pink: "#ff4fa3", acid: "#c6ff1a" })
     readonly property string signalChoice: String(root.appearance?.signal ?? "nothing")
     readonly property color signal: root.signalChoice === "ink" ? root.text
         : root.signalChoice === "wallpaper"
@@ -510,9 +553,11 @@ QtObject {
     readonly property var afterglowGrades: ({
         dusk: { label: "Dusk", shadow: "#0f4a42", light: "#ffbe73", bloom: "#ff9442" },
         cyber: { label: "Cyber", shadow: "#0d2f66", light: "#cfefff", bloom: "#55c8ff" },
-        fog: { label: "Fog", shadow: "#33402a", light: "#e6efc4", bloom: "#bcd98c" }
+        fog: { label: "Fog", shadow: "#33402a", light: "#e6efc4", bloom: "#bcd98c" },
+        // Acid: a fluorescent lime key over violet blacks, the vibrating pair of a rave flyer.
+        acid: { label: "Acid", shadow: "#2a0f57", light: "#ecff9e", bloom: "#b8ff1f" }
     })
-    readonly property string afterglowGrade: ["dusk", "cyber", "fog", "wallpaper"].includes(String(root.afterglowOptions?.grade ?? ""))
+    readonly property string afterglowGrade: ["dusk", "cyber", "fog", "acid", "wallpaper"].includes(String(root.afterglowOptions?.grade ?? ""))
         ? root.afterglowOptions.grade : "dusk"
     function afterglowColours(grade: string): var {
         if (grade !== "wallpaper") return root.afterglowGrades[grade] ?? root.afterglowGrades.dusk
@@ -782,12 +827,12 @@ QtObject {
     // Under Signal the accent is the ink itself: what was an accent mark reads as ink, and an accent fill with its
     // own ink on it turns into the inverted plate (ink fill, paper word), Nothing's "chosen".
     readonly property color accent: root.animeEnabled
-        ? root.animeAccent(root.baseAccent, root.animePaletteName, root.animeStrength) : root.mono ? root.text : root.baseAccent
+        ? root.animeAccent(root.baseAccent, root.animePaletteName, root.animeStrength) : root.signalChosen ? root.signalInk : root.mono ? root.text : root.baseAccent
     // The person's accent as Apple draws it, also where Nothing's ink took `accent` (a place that keeps Apple).
     readonly property color appleAccent: root.animeEnabled || !root.mono ? root.accent : root.baseAccent
     readonly property color appleAccentFill: !root.mono ? root.accentFill : root.washi?.accentFill ? Qt.color(root.washi.accentFill) : root.baseAccent
     readonly property color appleInkOnAccentFill: !root.mono ? root.inkOnAccentFill : root.washi?.onAccentFill ? Qt.color(root.washi.onAccentFill) : root.role("onAccent", "#101318")
-    readonly property color inkOnAccent: root.animeEnabled || IrisDesign.current === "iris" && !root.mono ? root.onTintFor(root.accent) : root.mono ? root.paper : root.role("onAccent", "#101318")
+    readonly property color inkOnAccent: root.animeEnabled || root.signalChosen || IrisDesign.current === "iris" && !root.mono ? root.onTintFor(root.accent) : root.mono ? root.paper : root.role("onAccent", "#101318")
     // Colour over imagery (the lock, artwork veils), which stays dark in every scheme: the night palette's roles.
     readonly property color mediaInk: root.neutral(Qt.color(root.washiDark?.text ?? "#f2f2f0"))
     readonly property color accentOnMedia: root.animeEnabled ? Lume.mark(root.accent, 0.35, 0, false, 3)
@@ -863,8 +908,8 @@ QtObject {
     // A filled alert (a badge): the shu pigment with its own ink; `danger` stays the red that reads as text.
     // The accent as a filled shape (a seal, a lit plate): the solver's pigment, which a Design palette keeps exact
     // (AIRISU's vermilion hanko) where the accent that is text has to move to read.
-    readonly property color accentFill: root.mono || !root.washi?.accentFill ? root.accent : root.vivid(Qt.color(root.washi.accentFill), true)
-    readonly property color inkOnAccentFill: root.mono || !root.washi?.onAccentFill ? root.inkOnAccent
+    readonly property color accentFill: root.signalChosen ? root.signal : root.mono || !root.washi?.accentFill ? root.accent : root.vivid(Qt.color(root.washi.accentFill), true)
+    readonly property color inkOnAccentFill: root.signalChosen ? root.inkOnSignal : root.mono || !root.washi?.onAccentFill ? root.inkOnAccent
         : IrisDesign.current === "iris" ? root.onTintFor(root.accentFill) : Qt.color(root.washi.onAccentFill)
     readonly property color dangerFill: root.mono ? root.signal : root.role("dangerFill", "#e57766")
     readonly property color inkOnDangerFill: root.mono ? root.inkOnSignal : root.role("onDangerFill", "#22110d")

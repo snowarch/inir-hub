@@ -26,7 +26,7 @@ PreviewScene {
     readonly property real naturalWidth: Math.round(420 * tex.d)
     readonly property real naturalHeight: Math.round(210 * tex.d)
     readonly property bool lit: IrisStyle.afterglow
-    readonly property string gradeLabel: Translation.tr(({ dusk: "Dusk", cyber: "Cyber", fog: "Fog", wallpaper: "Wallpaper" })[IrisStyle.afterglowGrade] ?? "Dusk")
+    readonly property string gradeLabel: Translation.tr(IrisStyle.afterglowGrades[IrisStyle.afterglowGrade]?.label ?? "Wallpaper")
     readonly property string leakLabel: Translation.tr(({ prism: "Prism", ember: "Ember", orchid: "Orchid", polaroid: "Polaroid", accent: "Accent", wallpaper: "Wallpaper" })[IrisStyle.leakGrade] ?? "Prism")
         + " · " + Translation.tr(({ lens: "Lens", burn: "Burn", orbs: "Orbs", beam: "Beam" })[IrisStyle.leakShapeName] ?? "Lens")
 

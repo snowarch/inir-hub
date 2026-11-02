@@ -15,6 +15,8 @@ import qs.modules.iris.state
 
 Item {
     id: root
+    // The place a look is worn by (`iris.appearance.places.control`).
+    readonly property string irisPlace: "control"
 
     property var screenData: null
     readonly property string screenName: root.screenData?.name ?? ""

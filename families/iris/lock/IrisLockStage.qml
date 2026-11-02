@@ -17,7 +17,7 @@ import qs.modules.iris.state
 
 Item {
     id: root
-    // The place a look is worn by (`iris.appearance.nothingOn.lock`).
+    // The place a look is worn by (`iris.appearance.places.lock`).
     readonly property string irisPlace: "lock"
     // A block the person resized is drawn scaled; native glyphs smear under a transform, curves do not.
     function renderFor(block: string): int {

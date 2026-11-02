@@ -103,7 +103,7 @@ RippleButton {
         height: root.height
         sourceComponent: Item {
             Rectangle {
-                y: Math.round(3 * IrisStyle.density)
+                y: IrisStyle.synthDepth
                 width: parent.width
                 height: parent.height
                 radius: root.buttonEffectiveRadius

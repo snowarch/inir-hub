@@ -128,8 +128,8 @@ QtObject {
         }
         return root.lookTint
     }
-    // What is on wears the look's colour unless the person gave each control its own: Synth lights orange, Gel its gel.
-    readonly property color lookTint: IrisStyle.look === "synth" ? IrisStyle.synthOn : IrisStyle.look === "gel" ? IrisStyle.gelBody : IrisStyle.accent
+    // What is on wears the plate of the look the Control Center wears unless the person gave each control its own.
+    readonly property color lookTint: IrisStyle.plateOfLook(IrisStyle.wornAt("control"))
     readonly property real libraryWidth: 312
     readonly property real editorExtra: root.libraryWidth + 21
 

@@ -15,7 +15,7 @@ import qs.modules.iris.style
 
 Item {
     id: root
-    // The place a look is worn by (`iris.appearance.nothingOn.widgets`).
+    // The place a look is worn by (`iris.appearance.places.widgets`).
     readonly property string irisPlace: "widgets"
 
     required property var widget

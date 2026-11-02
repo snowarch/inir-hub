@@ -18,7 +18,7 @@ import qs.modules.iris.state
 
 Item {
     id: root
-    // The place a look is worn by (`iris.appearance.nothingOn.dock`).
+    // The place a look is worn by (`iris.appearance.places.dock`).
     readonly property string irisPlace: "dock"
     property var screen: null
     anchors.fill: parent

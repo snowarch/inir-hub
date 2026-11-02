@@ -25,7 +25,7 @@ import qs.modules.iris.state
 
 Item {
     id: root
-    // The place a look is worn by (`iris.appearance.nothingOn.settings`).
+    // The place a look is worn by (`iris.appearance.places.settings`).
     readonly property string irisPlace: "settings"
     // Hosted by IrisSettingsOverlay (a layer over the desktop) or IrisSettingsWindow (a Niri window).
     property bool windowed: false
