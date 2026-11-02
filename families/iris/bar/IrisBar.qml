@@ -1266,6 +1266,8 @@ Scope {
                         .concat(Array.isArray(dockBody) ? dockBody : [])
                         .concat(banners.fieldShapes)
                         .concat(IrisFrame.placeShapesOn(barWindow.screen?.name ?? ""))
+                        // One source that fails gives a hole, never the whole field: its own error is already in the log.
+                        .filter(shape => shape)
                     const bodies = hung.filter(shape => shape.joins === "island")
                     const island = barWindow.islandTucked ? [] : (islandLoader.item?.fieldShapes ?? []).map(shape => {
                         if (!shape.satellite) return shape
