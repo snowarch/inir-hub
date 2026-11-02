@@ -15,14 +15,27 @@ import qs.modules.iris.style
 QtObject {
     id: root
 
-    readonly property var zones: ["top-left", "top-right", "left", "right", "bottom-left", "bottom-right"]
+    readonly property var zones: ["top-left", "top-right", "left", "right", "bottom-left", "bottom-right",
+        "left-top", "left-bottom", "right-top", "right-bottom"]
+    // The corners: a line there runs out of the frame's curve, along the top or bottom edge or down and up a side wall.
+    readonly property var cornerZones: ["top-left", "top-right", "bottom-left", "bottom-right", "left-top", "left-bottom", "right-top", "right-bottom"]
     function zoneChoices(withIsland: bool): var {
         const labels = { "top-left": "Top left", "top-right": "Top right", "left": "Left",
-            "right": "Right", "bottom-left": "Bottom left", "bottom-right": "Bottom right" }
+            "right": "Right", "bottom-left": "Bottom left", "bottom-right": "Bottom right",
+            "left-top": "Down from top left", "left-bottom": "Up from bottom left",
+            "right-top": "Down from top right", "right-bottom": "Up from bottom right" }
         const choices = withIsland ? [{ label: "Island", value: "island" }] : []
         for (const zone of root.zones) choices.push({ label: labels[zone], value: zone })
         choices.push({ label: "Free", value: "free" })
         return choices
+    }
+
+    // Where a zone sits on the output, as fractions: the place pickers draw their marks there.
+    function zoneAnchor(zone: string): point {
+        const words = zone.split("-")
+        const x = words.includes("left") ? 0 : words.includes("right") ? 1 : 0.5
+        const y = words[0] === "top" ? 0 : words[0] === "bottom" ? 1 : words[1] === "top" ? 0.25 : words[1] === "bottom" ? 0.75 : 0.5
+        return Qt.point(x, y)
     }
 
     readonly property var slots: [

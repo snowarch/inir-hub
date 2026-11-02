@@ -595,6 +595,8 @@ JsonObject {
         // Island's shoulders), "weld" (they touch it) or "gap" (the Island's margin).
         property string join: "notch"
         property int notchCurve: 100 // depth of those shoulders, % of the Island's
+        // A line in a corner runs out of the frame's curve as one contour, however far along the edge it reaches.
+        property bool fromCorner: true
         // An edge carrying bubbles takes its space from the desktop, like
         // the Island's edge does, so nothing is covered by them.
         property bool reserve: true

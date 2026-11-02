@@ -175,7 +175,8 @@ Scope {
         }
         /// Place an Island bubble (`left`, `right`, `utility`) or an extra bubble (`weather`, `notifications`,
         /// `controls`, `sound`, `mic`, `tools`, `media`, `visualizer`, `tray`): a zone (`top-left`, `top-right`,
-        /// `left`, `right`, `bottom-left`, `bottom-right`), `edge:<top|bottom|left|right>` with an optional
+        /// `left`, `right`, `bottom-left`, `bottom-right`, or down and up a side from its corner: `left-top`,
+        /// `left-bottom`, `right-top`, `right-bottom`), `edge:<top|bottom|left|right>` with an optional
         /// `:<fraction>` along that edge (e.g. `edge:top:0.3`), `x,y` fractions of the output, `island` (slots) or
         /// `off` (extras)
         function bubble(slot: string, place: string): string {

@@ -188,6 +188,8 @@ QtObject {
         if (place === "top-left" || place === "top-right") return "top"
         if (place === "bottom-left" || place === "bottom-right") return "bottom"
         if (place === "left" || place === "right") return place
+        if (place === "left-top" || place === "left-bottom") return "left"
+        if (place === "right-top" || place === "right-bottom") return "right"
         return ""
     }
     readonly property var pieceEdges: {

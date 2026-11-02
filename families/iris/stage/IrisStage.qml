@@ -174,7 +174,12 @@ Item {
             "left": { x: left, y: root.height / 2 },
             "right": { x: right, y: root.height / 2 },
             "bottom-left": { x: side === "bottom" ? cornerLeftOf("bottom") : leftOf("bottom"), y: bottom },
-            "bottom-right": { x: side === "bottom" ? cornerRightOf("bottom") : rightOf("bottom"), y: bottom }
+            "bottom-right": { x: side === "bottom" ? cornerRightOf("bottom") : rightOf("bottom"), y: bottom },
+            // Down or up a side wall from its corner, a bubble's step clear of the corner the top or bottom line takes.
+            "left-top": { x: left, y: top + root.size + root.looseGap },
+            "left-bottom": { x: left, y: bottom - root.size - root.looseGap },
+            "right-top": { x: right, y: top + root.size + root.looseGap },
+            "right-bottom": { x: right, y: bottom - root.size - root.looseGap }
         }
         return IrisPieces.zones.map(zone => ({ zone: zone, x: at[zone].x, y: at[zone].y }))
     }
@@ -219,7 +224,7 @@ Item {
         return out
     }
     function lineOf(zone: string): var { return root.lines[zone] ?? [] }
-    function stacks(zone: string): bool { return zone === "left" || zone === "right" }
+    function stacks(zone: string): bool { return IrisFrame.vertical(IrisFrame.edgeOf(zone)) }
     readonly property real edgeLine: (root.attached ? IrisFrame.pieceInset : root.margin) + root.size / 2
     function edgePoint(side: string, fx: real, fy: real): point {
         const lo = root.edgeLine + Math.max(IrisFrame.cornerRadius, root.size / 2)
@@ -380,11 +385,14 @@ Item {
         const step = root.size + (bar ? root.barGap : root.looseGap)
         const inset = bar ? root.barPad : 0
         const across = root.onIslandRow(zone) ? 0 : inset
-        const x = found.x + (zone.endsWith("left") ? 1 : -1) * (root.stacks(zone) ? across : inset)
+        const words = zone.split("-")
+        const x = found.x + (words.includes("left") ? 1 : -1) * (root.stacks(zone) ? across : inset)
         const y = zone.startsWith("top") ? found.y + across
             : zone.startsWith("bottom") ? found.y - across : found.y
-        if (root.stacks(zone)) return Qt.point(x, y + (index - (line.length - 1) / 2) * step)
-        return Qt.point(x + (zone.endsWith("left") ? index : -index) * step, y)
+        // The middle of a side centres its line; a line from a corner runs away from it.
+        if (root.stacks(zone)) return Qt.point(x, words.length < 2 ? y + (index - (line.length - 1) / 2) * step
+            : y + (words[1] === "top" ? index : -index) * step)
+        return Qt.point(x + (words.includes("left") ? index : -index) * step, y)
     }
     function trayLinePoint(slot: string): point {
         const base = root.linePoint(root.trayOwner, root.trayPlace, [root.trayOwner])
@@ -623,13 +631,39 @@ Item {
         if (side === "left") return { x: -deep - 1, y: -2 * k, width: deep, height: root.height + 4 * k, radius: 0, paints: true, fuse: 0, id: "pieceEdge:left" }
         return { x: root.width + 1, y: -2 * k, width: deep, height: root.height + 4 * k, radius: 0, paints: true, fuse: 0, id: "pieceEdge:right" }
     }
+    // A line in a corner runs out of the frame's curve: its body reaches the corner's other wall, where meltInto welds it
+    // into both, so the contour is one from the curve to the farthest bubble (`iris.bubbles.fromCorner`). Never into a
+    // wall the Island or the Dock holds.
+    readonly property bool fromCorner: root.attached && (root.options?.fromCorner ?? true)
+    function towardCorner(shape: var, zone: string): var {
+        if (!root.fromCorner || !IrisPieces.cornerZones.includes(zone)) return shape
+        const words = zone.split("-")
+        const wall = IrisFrame.vertical(words[0]) ? words[1] : words[1] === "left" ? "left" : "right"
+        // The Island or the Dock on that wall keeps its stretch of it: the line reaches the corner only clear of them.
+        const owner = root.ownerOf(wall)
+        if (owner.length > 0) {
+            const span = root.ownerSpan(owner, wall)
+            const across = IrisFrame.vertical(wall)
+            const lo = across ? shape.y : shape.x
+            const hi = lo + (across ? shape.height : shape.width)
+            const corner = wall === "top" || wall === "left" ? 0 : across ? root.height : root.width
+            if (span.lo < Math.max(hi, corner) + root.size && span.hi > Math.min(lo, corner) - root.size) return shape
+        }
+        const inset = IrisFrame.framed ? IrisFrame.band : 0
+        const grown = Object.assign({}, shape)
+        if (wall === "left") { grown.width += grown.x - inset; grown.x = inset }
+        else if (wall === "right") grown.width = root.width - inset - grown.x
+        else if (wall === "top") { grown.height += grown.y - inset; grown.y = inset }
+        else grown.height = root.height - inset - grown.y
+        return grown
+    }
     readonly property var fieldShapes: {
         void (card.x + card.y + card.width + card.height + card.progress)
         const out = []
         const sides = []
         for (const plate of root.plates) {
-            out.push(root.meltInto({ x: plate.x, y: plate.y, width: plate.width, height: plate.height,
-                radius: IrisStyle.pieceRadius(Math.min(plate.width, plate.height)), id: "plate:" + plate.zone },
+            out.push(root.meltInto(root.towardCorner({ x: plate.x, y: plate.y, width: plate.width, height: plate.height,
+                radius: IrisStyle.pieceRadius(Math.min(plate.width, plate.height)), id: "plate:" + plate.zone }, plate.zone),
                 plate.side ?? IrisFrame.edgeOf(plate.zone), sides))
         }
         for (let i = 0; i < root.allSlots.length; i++) {
@@ -638,8 +672,9 @@ Item {
             if (!rect || root.plateFor(slot)) continue
             const carriedSlot = root.ownerSlot(slot)
             if (root.drag?.slot === carriedSlot || (landing.running && landing.slot === carriedSlot)) continue
-            out.push(root.meltInto({ x: rect.x, y: rect.y, width: rect.size, height: rect.size, radius: IrisStyle.pieceRadius(rect.size),
-                id: "piece:" + slot }, IrisFrame.edgeOf(root.placeName(slot)), sides))
+            out.push(root.meltInto(root.towardCorner({ x: rect.x, y: rect.y, width: rect.size, height: rect.size,
+                radius: IrisStyle.pieceRadius(rect.size), id: "piece:" + slot }, root.placeName(slot)),
+                IrisFrame.edgeOf(root.placeName(slot)), sides))
         }
         for (const side of sides) out.unshift(root.edgeBody(side))
         if (carried.shown && !root.carryingIsland) {
@@ -871,6 +906,10 @@ Item {
     ZonePlate { zone: IrisPieces.zones[3] }
     ZonePlate { zone: IrisPieces.zones[4] }
     ZonePlate { zone: IrisPieces.zones[5] }
+    ZonePlate { zone: IrisPieces.zones[6] }
+    ZonePlate { zone: IrisPieces.zones[7] }
+    ZonePlate { zone: IrisPieces.zones[8] }
+    ZonePlate { zone: IrisPieces.zones[9] }
     ZonePlate { zone: "tray" }
 
     component FloatingBubble: Item {

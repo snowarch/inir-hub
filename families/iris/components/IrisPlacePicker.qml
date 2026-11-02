@@ -81,8 +81,8 @@ Rectangle {
             id: marker
             required property string modelData
             readonly property bool selected: root.place === marker.modelData
-            readonly property real px: marker.modelData.endsWith("left") ? 0 : 1
-            readonly property real py: marker.modelData.startsWith("top") ? 0 : marker.modelData.startsWith("bottom") ? 1 : 0.5
+            readonly property real px: IrisPieces.zoneAnchor(marker.modelData).x
+            readonly property real py: IrisPieces.zoneAnchor(marker.modelData).y
             width: Math.round(18 * root.d)
             height: width
             x: Math.round(root.inset + marker.px * (root.width - root.inset * 2) - width / 2)
