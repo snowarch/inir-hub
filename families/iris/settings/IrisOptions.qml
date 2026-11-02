@@ -996,7 +996,8 @@ QtObject {
         { section: "desktop", group: "Overview backdrop", label: "Blur", path: "background.backdrop.blurRadius", kind: "range", fallback:40,min:0,max:100,unit:" px" },
         { section: "desktop", group: "Overview backdrop", label: "Dim", path: "background.backdrop.dim", kind: "range", fallback:40,min:0,max:100,unit:" %" },
         { tune: true, section: "desktop", group: "Overview backdrop", label: "Vignette", path: "background.backdrop.vignetteEnabled", kind: "switch", fallback:false },
-        { section: "appearance", group: "Presets", label: "Pick a look", description: "One tap sets the whole look; Undo takes it back. The tiles below fine-tune it.", kind: "themes", keywords: ["preset", "presets", "theme", "themes", "look", "style", "redesign", "aesthetic", "estetica", "tema", "temas", "preajuste"] },
+        { section: "appearance", group: "Presets", label: "Pick a look", description: "One tap sets the whole look; Undo takes it back. The tiles below fine-tune it.", kind: "themes",
+            glance: () => !IrisThemes.find(IrisThemes.activeId) ? Translation.tr("Custom") : String(IrisThemes.find(IrisThemes.activeId).name) + (IrisThemes.modified ? " · " + Translation.tr("Modified") : ""), keywords: ["preset", "presets", "theme", "themes", "look", "style", "redesign", "aesthetic", "estetica", "tema", "temas", "preajuste"] },
         { section: "appearance", group: "Presets", label: "Take only their colours", tune: true, description: "Themes change your colours only, not shapes, layout or motion.", path: "iris.appearance.themeColoursOnly", kind: "switch", fallback: false, keywords: ["theme", "colours", "colors", "palette", "only", "tema", "colores"] },
         { section: "appearance", group: "Customize", label: "Customize opens", description: "On the shell edits in place; Studio is a side panel with search.", path: "iris.appearance.customize", kind: "choice", tune: true, fallback: "shell", choices: [{ label: "On the shell", value: "shell", glyph: "touch_app" }, { label: "Studio", value: "studio", glyph: "view_sidebar" }], keywords: ["studio", "customize", "editor", "panel", "look"] },
         { section: "appearance", group: "Previews", label: "Animated previews", description: "Live scenes in Settings and Customize.", path: "iris.appearance.previews", kind: "switch", tune: true, fallback: true },
@@ -1626,8 +1627,10 @@ QtObject {
     // bodies are made of, their shape and type, and what few people touch. A group no band names goes in the last.
     readonly property var groupBands: ({
         appearance: [
-            { title: "Colour", glyph: "palette", groups: ["Scheme", "Accent", "Highlight", "Signal", "Look", "Colour theme", "Day and night", "App colours", "Wallpaper tint", "Dark look", "Ink look", "Light look"] },
-            { title: "Material", glyph: "layers", groups: ["Design", "Material", "Glass", "Texture", "Light", "Edges"] },
+            // The three picks that change everything at once, one short row: a preset, the Design, the look's dialect.
+            { title: "Whole look", glyph: "auto_awesome_mosaic", groups: ["Presets", "Design", "Look"] },
+            { title: "Colour", glyph: "palette", groups: ["Scheme", "Accent", "Highlight", "Signal", "Colour theme", "Day and night", "App colours", "Wallpaper tint", "Dark look", "Ink look", "Light look"] },
+            { title: "Material", glyph: "layers", groups: ["Material", "Glass", "Texture", "Light", "Edges"] },
             { title: "Shape and type", glyph: "rounded_corner", groups: ["Shape", "Corners per surface", "Frame", "Text", "Faces", "Icons"] },
             { title: "More", glyph: "tune", groups: [] }
         ]

@@ -73,8 +73,9 @@ ColumnLayout {
         // A column of Drawer (foldHome off) or an area of two groups keeps them open, its all-fine-tuning groups folded.
         // An area of peers (the side panels) leads with no group either: its tiles are the switch between them, the first open.
         const peers = rows.peers
-        // Style leads with its presets: the whole look in one tap, every tile under them one part of it (his 11-02).
-        const lead = groups.find(group => group.key === "Every day" || group.key === "Presets") ?? (peers || ["general", "appearance"].includes(rows.section) ? null : groups[0])
+        // Style leads with no group: people arrive with one thing in mind, so every tile is in sight at once and the
+        // presets are one of them, opening under it (his 11-02 13:47).
+        const lead = groups.find(group => group.key === "Every day") ?? (peers || ["general", "appearance"].includes(rows.section) ? null : groups[0])
         const others = groups.filter(group => group !== lead && group.rows.length > 0)
         const tiles = flat && rows.foldHome && others.length >= 2
         const home = tiles && rows.section === "general"
