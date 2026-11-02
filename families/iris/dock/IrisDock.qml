@@ -722,6 +722,9 @@ Item {
                                     ? t.niriWindowId !== undefined && t.niriWindowId === (NiriService.activeWindow?.id ?? -1)
                                     : t.activated)
                                 property real lift: 0
+                                // The slot whose menu is open keeps its hover: the icon stays up and the menu,
+                                // anchored to it, never drops when the pointer leaves for the menu.
+                                readonly property bool held: window.menuOpen && window.menuApp?.appId === entry.modelData.appId
                                 readonly property string pieceId: IrisPieces.appPieceId(entry.modelData.appId)
                                 readonly property bool carried: IrisState.bubbleDrag?.slot === appSlot.pieceId
                                 Binding {
@@ -775,7 +778,7 @@ Item {
 
                                 HoverPlate {
                                     lift: appSlot.lift + appIcon.hoverLift
-                                    lit: appButton.hovered || appButton.down
+                                    lit: appButton.hovered || appButton.down || appSlot.held
                                     skinned: appButton.skinned
                                 }
                                 IrisButton {
@@ -846,7 +849,7 @@ Item {
                                     }
                                     SmartAppIcon {
                                         id: appIcon
-                                        property real hoverLift: !root.magnify && appButton.hovered && !appButton.skinned ? 2 * root.d : 0
+                                        property real hoverLift: !root.magnify && (appButton.hovered || appSlot.held) && !appButton.skinned ? 2 * root.d : 0
                                         Behavior on hoverLift { NumberAnimation { duration: IrisStyle.duration(120); easing.type: IrisStyle.feedbackEasing } }
                                         width: iconSize
                                         height: iconSize
