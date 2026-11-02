@@ -76,7 +76,6 @@ Item {
     ADie {
         visible: root.cautioned
         anchors.fill: panel
-        kind: "round"
         radius: panel.radius
         stroke: Airisu.tape
         strokeWidth: Airisu.hair

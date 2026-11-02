@@ -54,7 +54,6 @@ Item {
     ADie {
         visible: root.critical
         anchors.fill: parent
-        kind: "round"
         radius: root.radius
         stroke: Airisu.tape
         strokeWidth: Airisu.hair

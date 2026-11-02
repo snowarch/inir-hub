@@ -4,7 +4,7 @@ import qs.modules.iris.style
 import qs.modules.iris.components
 
 // The record as it sits in a Japanese shop: the cover with its 帯 obi, the band wrapped round its left edge in music's
-// pigment, the artist set up it. Square; `cover` is the artwork itself, so a surface can fly it (the Island's cover
+// pigment, the artist set up it. `cover` is the artwork itself, so a surface can fly it (the Island's cover
 // flight). A round cover is a disc and carries no obi. With no picture the sleeve is an empty slot: its die dashed, the
 // note in the slot's quiet tone.
 Item {
@@ -19,6 +19,7 @@ Item {
     property color tone: Airisu.inkThird
     readonly property alias cover: art
     readonly property real d: Airisu.d
+    readonly property real corner: IrisStyle.formOf(root.width)
     implicitWidth: Math.round(132 * root.d)
     implicitHeight: root.width
 
@@ -29,12 +30,11 @@ Item {
         visible: !root.empty
         source: root.source
         circular: root.circular
-        radius: root.circular ? width / 2 : 0
+        radius: root.circular ? width / 2 : root.corner
     }
     ADie {
         anchors.fill: parent
         visible: root.empty
-        kind: "round"
         stroke: root.tone
         strokeWidth: Airisu.hair
         dashed: true
@@ -51,6 +51,9 @@ Item {
         visible: !root.circular && !root.empty && root.artist.length > 0
         width: Math.round(root.width * 0.16)
         height: root.height
+        topLeftRadius: root.corner
+        bottomLeftRadius: root.corner
+        antialiasing: true
         color: root.obi
         AText {
             // Rotated about its own centre to read bottom to top, from the foot of the band.

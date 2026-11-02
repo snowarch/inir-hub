@@ -112,7 +112,6 @@ Item {
                 y: nextPlate.shift
                 width: parent.width
                 height: parent.height
-                kind: "round"
                 stroke: stock.inkThird
                 strokeWidth: Airisu.hair
             }
@@ -158,7 +157,6 @@ Item {
     ADie {
         anchors.fill: parent
         visible: root.dropping
-        kind: "round"
         radius: IrisStyle.radiusCard
         stroke: Airisu.seal
         strokeWidth: Airisu.strong

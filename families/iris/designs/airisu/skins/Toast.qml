@@ -29,7 +29,6 @@ Item {
     ADie {
         visible: root.error
         anchors.fill: parent
-        kind: "round"
         radius: plate.radius
         stroke: Airisu.tape
         strokeWidth: Airisu.hair

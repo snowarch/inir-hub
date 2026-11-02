@@ -95,6 +95,7 @@ Item {
                         y: x
                         width: Math.max(4, Math.round(Math.min(place.height * 0.5, 10 * root.d)))
                         height: width
+                        radius: IrisStyle.radiusMicro
                         color: Airisu.vivid(Airisu.pigment("music"))
                     }
                     // Levels: a run each, laid to 60 %.

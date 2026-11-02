@@ -47,7 +47,6 @@ Item {
     }
     ADie {
         anchors.fill: parent
-        kind: "round"
         radius: root.radius
         stroke: root.rule
         strokeWidth: Airisu.hair

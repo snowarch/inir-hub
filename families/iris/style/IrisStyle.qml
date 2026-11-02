@@ -1186,7 +1186,8 @@ QtObject {
     readonly property int radiusMicro: root.corner(4)    // bars inside skeletons, swatches
     // The rung of a piece that knows only its size: what a Design's own panel or key asks for.
     function formOf(side: real): int {
-        return side >= 96 * root.density ? root.radiusCard : side >= 40 * root.density ? root.radiusTile : root.radiusChip
+        return side >= 96 * root.density ? root.radiusCard : side >= 40 * root.density ? root.radiusTile
+            : side >= 20 * root.density ? root.radiusChip : root.radiusMicro
     }
     // The outline of a w x h piece of radius `radius`, laid `inset` inside its box (half a stroke), as a closed convex
     // polygon for a Shape, clockwise from the upper left, for what cuts a polygon further (a coat, a blade). `corners`

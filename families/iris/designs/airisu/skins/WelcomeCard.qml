@@ -74,7 +74,6 @@ Item {
         visible: false
         width: root.plateW
         height: root.plateH
-        kind: "round"
         radius: IrisStyle.radiusCard
         fill: "white"
         layer.enabled: true
@@ -196,7 +195,6 @@ Item {
             }
             ADie {
                 anchors.fill: parent
-                kind: "round"
                 stroke: all.containsMouse ? Airisu.ink : Airisu.inkThird
                 strokeWidth: Airisu.hair
             }
@@ -223,7 +221,6 @@ Item {
         visible: false
         width: root.cellW
         height: root.cellH
-        kind: "round"
         fill: "white"
         layer.enabled: true
     }
@@ -257,7 +254,6 @@ Item {
         ADie {
             visible: !key.sealed
             anchors.fill: parent
-            kind: "round"
             radius: keyFace.radius
             stroke: key.containsMouse ? Airisu.ink : Airisu.inkThird
             strokeWidth: Airisu.hair

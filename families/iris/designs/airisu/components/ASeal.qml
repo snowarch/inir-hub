@@ -1,8 +1,9 @@
 import QtQuick
+import qs.modules.iris.style
 
 // The seal box (印): AIRISU's sign that something is on. An empty box ruled in the third ink waits; when the thing is on,
-// the box is ruled in the seal and stamped, its square of shu pressed in from the middle in one snap, the way a hanko
-// lands. It is the logo's red square, so a lit control carries the mark of the shell itself.
+// the box is ruled in the seal and stamped, its stamp of shu pressed in from the middle in one snap, the way a hanko
+// lands. It is the logo's red, so a lit control carries the mark of the shell itself.
 Item {
     id: root
     property bool stamped: false
@@ -20,12 +21,13 @@ Item {
         enabled: Airisu.moving && !root.driven
         NumberAnimation { duration: Airisu.snap; easing.type: Easing.BezierSpline; easing.bezierCurve: Airisu.curve }
     }
+    readonly property real radius: IrisStyle.formOf(Math.min(root.width, root.height))
     Rectangle {
         anchors.fill: parent
+        radius: root.radius
         color: "transparent"
         border.width: Airisu.hair
         border.color: !root.available ? root.rule : root.stamped ? root.seal : root.rule
-        antialiasing: false
     }
     Rectangle {
         readonly property real inset: Math.max(2, Math.round(root.width * 0.2))
@@ -35,7 +37,7 @@ Item {
         y: Math.round((root.height - side) / 2)
         width: Math.round(side)
         height: Math.round(side)
+        radius: IrisStyle.concentric(root.radius, inset, 1)
         color: root.available ? root.seal : root.rule
-        antialiasing: false
     }
 }

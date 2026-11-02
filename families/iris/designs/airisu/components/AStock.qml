@@ -58,7 +58,6 @@ Item {
     ADie {
         anchors.fill: parent
         visible: root.bare && GlobalStates.widgetEditMode
-        kind: "round"
         radius: root.radius
         stroke: root.inkThird
         strokeWidth: Airisu.hair

@@ -18,7 +18,6 @@ Item {
 
     ADie {
         anchors.fill: parent
-        kind: "round"
         fill: Airisu.sheet
         stroke: root.focused || root.hovered ? Airisu.ink : Airisu.inkThird
         strokeWidth: Airisu.hair

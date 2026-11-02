@@ -44,8 +44,8 @@ Item {
             height: width
             x: parent.width - Math.round(width * 0.8)
             y: parent.height - Math.round(width * 0.8)
+            radius: IrisStyle.formOf(width)
             color: Airisu.seal
-            antialiasing: false
         }
     }
     Column {
@@ -114,7 +114,6 @@ Item {
                     y: plate.shift
                     width: parent.width
                     height: parent.height
-                    kind: "round"
                     stroke: key.modelData.ends ? Airisu.tape : stock.inkThird
                     strokeWidth: Airisu.hair
                 }

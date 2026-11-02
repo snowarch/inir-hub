@@ -104,7 +104,6 @@ Item {
         ADie {
             visible: !root.landed || root.critical
             anchors.fill: parent
-            kind: "round"
             radius: ticket.radius
             stroke: root.critical ? root.caution : root.ink
             strokeWidth: Airisu.hair

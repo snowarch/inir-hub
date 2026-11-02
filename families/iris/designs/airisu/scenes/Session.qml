@@ -130,13 +130,11 @@ Item {
                         duration: Airisu.snap
                     }
 
-                    // The ticket: punched with a half moon at both sides where its stub is torn off.
+                    // The ticket: a line of perforation where its stub is torn off.
                     readonly property real perforation: root.pad + Airisu.u(7)
                     ADie {
                         anchors.fill: parent
-                        kind: "ticket"
-                        notchY: ticket.perforation
-                        notchRadius: Airisu.u(1.5)
+                        radius: IrisStyle.radiusCard
                         fill: ticket.laid ? ticket.face : "transparent"
                     }
                     Row {
@@ -170,6 +168,7 @@ Item {
                     }
                     AMarks {
                         anchors.fill: parent
+                        radius: IrisStyle.radiusCard
                         shown: ticket.keyed
                         color: Airisu.seal
                     }

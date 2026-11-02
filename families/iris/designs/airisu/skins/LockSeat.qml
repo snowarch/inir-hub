@@ -17,7 +17,6 @@ Item {
     ADie {
         anchors.fill: parent
         visible: !root.hot
-        kind: "round"
         stroke: IrisStyle.onMediaTertiary
         strokeWidth: Airisu.hair
     }

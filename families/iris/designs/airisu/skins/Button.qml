@@ -18,12 +18,15 @@ Item {
     readonly property string text: String(root.host?.text ?? "")
     // What a quiet key's coat is laid on, when the caller sits it on a coloured panel (`skinData.under`).
     readonly property color under: root.host?.skinData?.under ?? Airisu.ground
-    readonly property bool tag: !root.quiet && (!root.available || !(root.emphasized || root.selected))
-    readonly property color lacquer: !root.available || root.tag ? "transparent"
+    // A button as large as a tile is a tile: a key of the body's next coat, never a ruled outline that size.
+    readonly property bool tile: root.height >= Airisu.u(16)
+    readonly property bool tag: !root.tile && !root.quiet && (!root.available || !(root.emphasized || root.selected))
+    readonly property color lacquer: root.tile && !root.emphasized && !root.selected ? Airisu.groundRaised
+        : !root.available || root.tag ? "transparent"
         : root.emphasized ? (root.danger ? Airisu.danger : Airisu.chosen) // Signal: the main action is inverted, the seal stays for what is live
         : root.selected ? IrisStyle.selectionFill : "transparent"
     readonly property color ink: !root.available ? Airisu.inkThirdOn(root.under)
-        : root.emphasized || root.selected ? Airisu.inkOn(root.lacquer)
+        : root.tile || root.emphasized || root.selected ? Airisu.inkOn(root.lacquer)
         : root.danger ? Airisu.danger : Airisu.inkOn(root.under)
     // How far a press carries the content; the host moves its own by it.
     readonly property int shift: key.shift
@@ -44,7 +47,6 @@ Item {
         y: root.shift
         width: parent.width
         height: parent.height
-        kind: "round"
         radius: key.radius
         stroke: root.available ? Airisu.inkSecondOn(root.under) : Airisu.inkThirdOn(root.under)
         strokeWidth: Airisu.hair

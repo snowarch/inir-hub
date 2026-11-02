@@ -62,19 +62,23 @@ Item {
     component Cover: Item {
         id: cover
         property bool obiShown: true
+        readonly property real corner: IrisStyle.formOf(Math.min(cover.width, cover.height))
         IrisArtwork {
             id: art
             anchors.fill: parent
             source: root.media?.displayedArtFilePath ?? ""
             appIcon: root.host?.emptyIcon ?? ""
             circular: root.round
-            radius: circular ? width / 2 : 0
+            radius: circular ? width / 2 : cover.corner
         }
         Rectangle {
             id: band
             visible: cover.obiShown && !root.round && root.hasPlayer
             width: Math.max(Airisu.u(3), Math.round(cover.width * 0.17))
             height: cover.height
+            topLeftRadius: cover.corner
+            bottomLeftRadius: cover.corner
+            antialiasing: true
             color: root.obi
             AText {
                 // Up the band, bottom to top.

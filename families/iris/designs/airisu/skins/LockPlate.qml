@@ -29,14 +29,12 @@ Item {
     ADie {
         anchors.fill: parent
         visible: root.frosted
-        kind: "round"
         radius: root.radius
         texture: piece
     }
     ADie {
         anchors.fill: parent
         visible: root.material !== "none" || (root.host?.outline ?? false)
-        kind: "round"
         radius: root.radius
         fill: root.material === "glass" ? IrisStyle.mediaGlass : root.material === "tint" ? IrisStyle.mediaScrim : "transparent"
         stroke: root.material === "none" ? IrisStyle.onMediaFill : IrisStyle.mediaHairline

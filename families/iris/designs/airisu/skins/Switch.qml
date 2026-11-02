@@ -31,7 +31,6 @@ Item {
 
     ADie {
         anchors.fill: parent
-        kind: "round"
         radius: root.radius
         stroke: root.available && root.hovered ? Airisu.ink : root.rule
         strokeWidth: Airisu.hair
@@ -92,6 +91,7 @@ Item {
     }
     AMarks {
         anchors.fill: parent
+        radius: root.radius
         shown: root.keyed
         color: Airisu.seal
     }

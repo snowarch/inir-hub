@@ -45,7 +45,6 @@ Item {
             y: x
             width: parent.width
             height: parent.height
-            kind: "round"
             fill: plate.pigment
             stroke: hover.hovered ? plate.onPlate : "transparent"
             strokeWidth: hover.hovered ? Airisu.hair : 0
@@ -108,7 +107,6 @@ Item {
             y: kp.shift
             width: parent.width
             height: parent.height
-            kind: "round"
             stroke: stock.inkThird
             strokeWidth: Airisu.hair
         }

@@ -61,6 +61,7 @@ Item {
     }
     AMarks {
         anchors.fill: parent
+        radius: root.radius
         shown: root.keyed
         color: root.flag
     }

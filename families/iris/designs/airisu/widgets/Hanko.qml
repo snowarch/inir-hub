@@ -75,8 +75,8 @@ Item {
         y: root.pad + root.room - height
         width: Math.round(root.px(root.small ? 34 : 44))
         height: Math.max(width, sealWords.implicitHeight + root.dp(8))
+        radius: IrisStyle.formOf(width)
         color: Airisu.seal
-        antialiasing: false
         Column {
             id: sealWords
             anchors.centerIn: parent

@@ -102,17 +102,17 @@ Item {
                     height: parent.height - dayName.height - root.dp(6)
                     Rectangle {
                         anchors.fill: parent
+                        radius: IrisStyle.radiusMicro
                         color: "transparent"
                         border.width: Airisu.hair
                         border.color: stock.inkThird
-                        antialiasing: false
                     }
                     Rectangle {
                         anchors.bottom: parent.bottom
                         width: parent.width
                         height: Math.round(parent.height * dayColumn.modelData.share)
+                        radius: IrisStyle.radiusMicro
                         color: dayColumn.modelData.today ? stock.vivid : Qt.alpha(stock.inkThird, 0.4)
-                        antialiasing: false
                     }
                 }
                 AText {
