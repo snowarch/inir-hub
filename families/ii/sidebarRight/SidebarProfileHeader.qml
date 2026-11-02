@@ -8,6 +8,7 @@ import qs.services
 import qs.modules.common
 import qs.modules.common.functions
 import qs.modules.common.widgets
+import qs.modules.ii.kit
 
 /**
  * Profile-card header for the right sidebar's system section.

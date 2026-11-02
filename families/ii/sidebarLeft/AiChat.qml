@@ -4,6 +4,7 @@ import qs.services.ai
 import qs.services.deferred
 import qs.modules.common
 import qs.modules.common.widgets
+import qs.modules.ii.kit
 import qs.modules.common.functions
 import qs.modules.ii.sidebarLeft.aiChat
 import QtQuick

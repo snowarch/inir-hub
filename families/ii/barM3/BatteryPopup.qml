@@ -1,6 +1,7 @@
 import qs.modules.ii.barM3
 import qs.modules.common
 import qs.modules.common.widgets
+import qs.modules.ii.kit
 import qs.services
 import QtQuick
 import QtQuick.Layouts

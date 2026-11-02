@@ -11,7 +11,7 @@ In iNiR, open the Hub:
 | Family | Where |
 | --- | --- |
 | Material | Settings › Hub |
-| iRiS | Settings › More Settings › Community Hub |
+| iRiS | Settings › Community Hub |
 | Waffle | Settings › Hub |
 
 Or from a terminal:
@@ -37,6 +37,7 @@ An install puts the item where iNiR already reads it (your widgets, themes and s
 | Colour theme | [`themes/`](themes) | Material and Waffle, and the apps iNiR themes |
 | iRiS theme | [`iris-themes/`](iris-themes) | A whole iRiS look: material, colour, shape, motion |
 | Web app | [`webapps/`](webapps) | A tab in Material's left sidebar |
+| Component | [`components/`](components) | Extras that plug into the shell, like the `fastfetch` look |
 
 ## Make something
 

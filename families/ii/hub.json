@@ -1,6 +1,6 @@
 {
     "$schema": "../../schema/hub.schema.json",
-    "version": "2.34.0",
+    "version": "2.34.1",
     "summary": "Material 3 Expressive panels, bars, docks and widgets in nine global styles.",
     "authors": [
         "snowarch"
@@ -21,8 +21,10 @@
         "google.com",
         "jogruber.de",
         "konachan.net",
+        "m3.material.io",
         "openai.com",
         "vcrdb.net",
+        "www.apache.org",
         "wallhaven.cc",
         "wikimedia.org",
         "yande.re",

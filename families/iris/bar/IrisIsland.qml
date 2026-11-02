@@ -1861,8 +1861,8 @@ Item {
             // How high the sun is: 0 at the horizon, 1 at noon.
             readonly property real height_: Math.sin(Math.PI * sunLight.t)
             // iris-literal: the low sun's amber, tinted into the clock colour toward the ends of the day.
-            readonly property color lamp: Qt.tint(Qt.tint(root.clockAccent, Qt.rgba(1, 1, 1, 0.38 * sunLight.height_)),
-                Qt.rgba(1, 0.66, 0.35, 0.5 * (1 - sunLight.height_)))
+            readonly property color lamp: Qt.tint(Qt.tint(root.clockAccent, Qt.rgba(1, 1, 1, 0.38 * sunLight.height_)), // iris-literal: sunlight itself, not a surface of the look
+                Qt.rgba(1, 0.66, 0.35, 0.5 * (1 - sunLight.height_))) // iris-literal: the low sun is amber on every look
             visible: root.design === "halo" && (Config.options?.iris?.bar?.sunLight ?? true) && Weather.sunState === "day" && !root.vertical && !root.zoned
                 && clusterClock.width > 0 && opacity > 0.01
             opacity: compactLayer.opacity * clockRow.opacity

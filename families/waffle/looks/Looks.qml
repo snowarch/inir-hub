@@ -15,7 +15,7 @@ Singleton {
     property QtObject settings
     property QtObject font
     property QtObject transition
-    property string iconsPath: `${Directories.assetsPath}/icons/fluent`
+    property string iconsPath: Quickshell.shellPath("modules/waffle/assets/icons/fluent")
     property bool dark: Appearance.m3colors.darkmode
     // Waffle wears Material's global style only while the person keeps "Take style from Material" on
     // (waffles.theming.styleFromMaterial, on by default). Appearance resolves it for the active family (plugin.json

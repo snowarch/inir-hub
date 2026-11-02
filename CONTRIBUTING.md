@@ -157,3 +157,7 @@ A maintainer reads every pull request. What gets looked at:
 - the preview is real.
 
 The item stays yours. You are listed as its author, and later changes come as pull requests that raise its version. An item that breaks on a new iNiR and is not fixed may be hidden until it is.
+
+## Translations
+
+The key is the English text you pass to `Translation.tr()`. A plugin that lives in `modules/<id>` can keep its own strings in `translations/<locale>.json`, one file per language: the shell reads them while the plugin is installed, and a language you don't ship simply shows English. A file holds `"English text": "translated text"` and nothing else.

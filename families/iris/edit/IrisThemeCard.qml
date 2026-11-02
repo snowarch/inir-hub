@@ -30,7 +30,7 @@ MouseArea {
         const c = card.look.surface
         return 0.2126 * c.r + 0.7152 * c.g + 0.0722 * c.b > 0.55
     }
-    readonly property color ink: card.lightPlate ? "#16161a" : "#f4f4f6"
+    readonly property color ink: card.lightPlate ? "#16161a" : "#f4f4f6" // iris-literal: ink over the theme this card shows, not the worn one
     readonly property string glyph: card.tags.includes("glass") ? "water_drop"
         : card.tags.includes("mono") || card.tags.includes("brutalist") ? "terminal"
         : card.tags.includes("anime") ? "auto_awesome"

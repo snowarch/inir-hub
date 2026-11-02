@@ -36,7 +36,7 @@ Singleton {
     }
 
     function pathForName(iconName) {
-        return Quickshell.shellPath(`assets/icons/fluent/${iconName}.svg`);
+        return Quickshell.shellPath(`modules/waffle/assets/icons/fluent/${iconName}.svg`);
     }
 
     function wifiIconForStrength(strength) {

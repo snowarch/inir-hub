@@ -5,6 +5,7 @@ import qs.services
 import qs.modules.common
 import qs.modules.common.models
 import qs.modules.common.widgets
+import qs.modules.ii.kit
 import qs.modules.common.functions
 import qs.modules.ii.pill
 import qs.modules.ii.sidebarLeft.animeSchedule

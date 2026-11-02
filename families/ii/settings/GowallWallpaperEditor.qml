@@ -9,6 +9,7 @@ import qs.services
 import qs.services.deferred
 import qs.modules.common
 import qs.modules.common.widgets
+import qs.modules.ii.kit
 import qs.modules.common.functions
 
 ColumnLayout {

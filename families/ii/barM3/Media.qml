@@ -2,6 +2,7 @@ pragma ComponentBehavior: Bound
 import qs.modules.ii.barM3
 import qs.modules.common
 import qs.modules.common.widgets
+import qs.modules.ii.kit
 import qs.modules.common.functions
 import qs.modules.shared.mediaControls
 import qs.services

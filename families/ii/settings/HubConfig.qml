@@ -9,6 +9,7 @@ import qs
 import qs.services
 import qs.modules.common
 import qs.modules.common.widgets
+import qs.modules.ii.kit
 import qs.modules.common.functions
 
 // The community hub in Material Settings, built to browse hundreds: one toolbar (search, order, list or grid),

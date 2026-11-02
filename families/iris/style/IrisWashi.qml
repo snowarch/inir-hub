@@ -83,7 +83,7 @@ Singleton {
     function run(): void {
         if (root.data?.request === root.requestJson && root.data?.version === root.version) return
         if (solver.running) { root.again = true; return }
-        solver.command = ["/usr/bin/bash", Quickshell.shellPath("scripts/colors/washi.sh"), "--request", root.requestJson, "--out", root.cachePath]
+        solver.command = [Quickshell.shellPath("scripts/lib/accel-run"), "washi", "--request", root.requestJson, "--out", root.cachePath]
         solver.running = true
     }
     // A slider's steps settle into one solve.

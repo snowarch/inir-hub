@@ -227,7 +227,7 @@ WSettingsPage {
 
         WSettingsDropdown {
             label: Translation.tr("Voice")
-            // `chat` is not in assets/icons/fluent — it rendered blank.
+            // `chat` is not in Waffle's fluent icons — it rendered blank.
             icon: "speaker"
             description: Translation.tr("Adaptive follows her mood; fixed modes keep one conversational register")
             currentValue: Config.options?.mascot?.personality?.voiceMode ?? "adaptive"

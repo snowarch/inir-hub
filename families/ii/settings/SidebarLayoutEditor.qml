@@ -6,6 +6,7 @@ import QtQuick.Layouts
 import Quickshell
 import qs.modules.common
 import qs.modules.common.widgets
+import qs.modules.ii.kit
 import qs.services
 
 ColumnLayout {

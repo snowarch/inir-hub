@@ -1,6 +1,7 @@
 import qs
 import qs.modules.common
 import qs.modules.common.widgets
+import qs.modules.ii.kit
 import qs.services
 import QtQuick
 import Quickshell.Io
