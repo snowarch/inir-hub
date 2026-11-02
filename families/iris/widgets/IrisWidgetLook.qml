@@ -14,8 +14,9 @@ WidgetLook {
     readonly property var options: Config.options?.iris?.widgets ?? ({})
 
     // Glass turns to frost over a bright wallpaper only when asked; off, the scheme keeps its own ink and accents and
-    // Lume's shadow carries them: bare faces turned black over every light patch against that switch (10-31).
-    adaptsToWallpaper: Boolean(Config.getNestedValue("iris.widgets.brightWallpapers", false))
+    // Lume's shadow carries them: bare faces turned black over every light patch against that switch (10-31). The switch
+    // speaks of bright wallpapers: a light scheme's dark ink over a dark one has nothing to read on, so it follows it.
+    adaptsToWallpaper: IrisStyle.light || Boolean(Config.getNestedValue("iris.widgets.brightWallpapers", false))
     schemeInk: !look.adaptsToWallpaper
     legibleAlways: Boolean(look.options.legibleAlways ?? false)
     shadowsBare: true

@@ -88,12 +88,13 @@ Item {
     readonly property real readSpread: root.widget.legibleAlways ? Math.max(0.24, root.widget.regionBrightnessSpread) : root.widget.regionBrightnessSpread
 
     // One palette: the widget's data colours and the shell's status colours. Only a face that is not paper and sits over a
-    // light region (a transparent face, or forced dark ink) solves them again, against what Lume read behind it.
-    readonly property bool resolvesMarks: root.lightBackdrop && !root.paper
+    // light region (a transparent face, or forced dark ink), or a light scheme's bare face over a dark one (its accents are
+    // deep for paper), solves them again, against what Lume read behind it.
+    readonly property bool resolvesMarks: root.lightBackdrop ? !root.paper : IrisStyle.light && root.clear
     readonly property real seenLevel: root.clear ? root.widget.regionBrightness
         : root.widget.regionBrightness * (1 - root.veil) + Math.pow(ColorUtils.relativeLuminance(IrisStyle.frost), 1 / 2.2) * root.veil
     function mark(seed: color): color {
-        return root.resolvesMarks ? Lume.mark(seed, root.seenLevel, root.clear ? root.readSpread : 0, true, 3) : seed
+        return root.resolvesMarks ? Lume.mark(seed, root.seenLevel, root.clear ? root.readSpread : 0, root.lightBackdrop, 3) : seed
     }
     // A Design's stock brings its own pigments for the data.
     readonly property bool stockInk: root.stocked && !root.clear && stockLoader.item !== null
