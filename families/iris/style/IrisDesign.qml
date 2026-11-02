@@ -25,6 +25,7 @@ Singleton {
     // What the Design wears whatever the person's rows say: its preset, its type, its camera.
     readonly property string preset: String(root.manifest?.preset ?? "")
     readonly property var fonts: root.manifest?.fonts ?? ({})
+    readonly property real figureLean: Number(root.manifest?.figureLean ?? 0)
     function font(role: string): string { return String(root.fonts?.[role] ?? "") }
     readonly property string morph: String(root.manifest?.motion?.morph ?? "")
     // How the Design reads, as traits any surface can honour (DESIGNS.md › rasgos): marks "glyph" (no tinted squircles),

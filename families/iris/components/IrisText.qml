@@ -59,5 +59,12 @@ StyledText {
     height: root.wrapMode === Text.NoWrap ? Math.ceil(root.implicitHeight) : root.implicitHeight
     Layout.preferredWidth: Math.ceil(implicitWidth)
     Layout.preferredHeight: root.wrapMode === Text.NoWrap ? Math.ceil(root.implicitHeight) : -1
-    transform: Translate { x: Math.round(root.x) - root.x; y: Math.round(root.y) - root.y }
+    // A Design's figures may lean; everything else lands on whole pixels.
+    readonly property bool leans: IrisDesign.figureLean !== 0 && (root.role === IrisText.Metric || root.role === IrisText.Dot)
+    transform: root.leans ? [leaning] : [snap]
+    Translate { id: snap; x: Math.round(root.x) - root.x; y: Math.round(root.y) - root.y }
+    Matrix4x4 {
+        id: leaning
+        matrix: Qt.matrix4x4(1, -IrisDesign.figureLean, 0, IrisDesign.figureLean * root.height / 2, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)
+    }
 }

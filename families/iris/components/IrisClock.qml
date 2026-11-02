@@ -32,6 +32,11 @@ Row {
     }
 
     spacing: 0
+    transform: IrisDesign.figureLean !== 0 ? [lean] : []
+    Matrix4x4 {
+        id: lean
+        matrix: Qt.matrix4x4(1, -IrisDesign.figureLean, 0, IrisDesign.figureLean * root.height / 2, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)
+    }
 
     component Figure: Text {
         id: figure

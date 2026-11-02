@@ -1658,7 +1658,7 @@ Item {
                 text: Translation.tr(sectionRow.modelData.title)
                 // Where you are takes the area's colour, lifted to read on the wash; on a plate (AIRISU) the plate's ink.
                 color: sectionRow.selected && IrisStyle.plateSelection ? IrisStyle.selectionLabel
-                    : sectionRow.selected ? root.tintInksectionRow.own : IrisStyle.text
+                    : sectionRow.selected ? root.tintInk(sectionRow.own) : IrisStyle.text
                 Behavior on color { ColorAnimation { duration: IrisStyle.duration(140); easing.type: IrisStyle.feedbackEasing } }
                 font.weight: IrisStyle.weight(sectionRow.selected ? Font.Bold : Font.DemiBold)
                 elide: Text.ElideRight

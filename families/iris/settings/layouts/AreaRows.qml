@@ -580,7 +580,7 @@ ColumnLayout {
                                         width: parent.width
                                         visible: tile.words.length > 0
                                         text: tile.words
-                                        color: tile.on ? IrisStyle.secondaryOfIrisStyle.inkOnLookPlate : IrisStyle.textSecondary
+                                        color: tile.on ? IrisStyle.secondaryOf(IrisStyle.inkOnLookPlate) : IrisStyle.textSecondary
                                         font.pixelSize: IrisStyle.typeMeta
                                         elide: Text.ElideRight
                                     }
