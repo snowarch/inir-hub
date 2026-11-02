@@ -1539,7 +1539,11 @@ Item {
             const sink = grown ? 0 : root.fullWidth && !floating ? Math.min(extension.radius, root.compactHeight) : 0
             out.push({ x: page.x - (root.vertical && !root.rightEdge ? sink : 0), y: page.y - (!root.vertical && !root.bottomEdge ? sink : 0),
                 width: extension.width + (root.vertical ? sink : 0), height: extension.height + (root.vertical ? 0 : sink),
-                radius: extension.radius, paints: true,
+                radius: extension.radius, paints: true, id: "islandPage",
+                // The player's cover is this body's material (IrisField's art lane): it fills the shoulders and melts
+                // into the strip or the band it is welded to.
+                art: artBackdrop.item && artBackdrop.opacity > 0 ? artBackdrop : null, artShow: artBackdrop.opacity,
+                artRise: Math.round(44 * root.d),
                 fuse: grown ? IrisStyle.fuseEdge : IrisStyle.fuseDeep,
                 // Inline, the page is the chassis rectangle itself: a smooth union of two equal shapes swells the contour by fuse / 4.
                 joins: root.pagesHang && !floating ? (root.clearStrip ? "islandnotch" : "island")
@@ -2561,7 +2565,10 @@ Item {
                 && (Config.options?.iris?.player?.artworkBackground ?? true) && !IrisStyle.glassy
                 && MediaArtwork.displaySource.length > 0
             opacity: details.opacity * artBackdrop.shown
+            // Never drawn here: the field paints it as the page body's material, so the cover follows the silhouette.
+            visible: false
             layer.enabled: true
+            layer.smooth: true
             // A Design may lay the record under its page its own way (`islandArtBackdrop`); the setting still decides whether.
             readonly property string designUrl: IrisDesign.skin("islandArtBackdrop")
             source: artBackdrop.designUrl
@@ -2569,15 +2576,7 @@ Item {
             onLoaded: if (artBackdrop.designUrl.length > 0 && "island" in item) item.island = root
             Component {
                 id: engineArtBackdrop
-                IrisMediaBackdrop {
-                    // Welded, the chassis runs from the screen edge: the cover stays off the band (or the inset the
-                    // notch grows from) and comes in under the page's first row, so the frame's material carries the join.
-                    readonly property bool welded: root.notchness > 0.01 || (extension.anchoredShape && !(root.zoned && !root.vertical && !root.fromHeart))
-                    source: MediaArtwork.displaySource
-                    fadeEdge: welded ? root.edge : ""
-                    fadeClear: Math.max(IrisFrame.framed ? IrisFrame.band : 0, chassis.edgeInset)
-                    fadeLength: Math.round(44 * root.d)
-                }
+                IrisMediaBackdrop { source: MediaArtwork.displaySource }
             }
         }
         Loader {

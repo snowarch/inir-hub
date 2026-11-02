@@ -165,6 +165,9 @@ Item {
             for (let i = 0; i < n; i++)
                 if (list[i]?.id) index[list[i].id] = i
             const geometry = [], corners = [], fuse = [], join = [], also = [], paints = [], glass = []
+            // The first body that wears a picture (`art`: a layered item or a ShaderEffectSource, `artShow` 0..1,
+            // `artRise`: pixels past the band's inner line it takes to come in).
+            let artAt = -1
             const slot = (s, which) => {
                 const names = !s || !s.joins ? [] : Array.isArray(s.joins) ? s.joins : [s.joins]
                 const name = names[which]
@@ -175,6 +178,7 @@ Item {
             }
             for (let i = 0; i < root.capacity; i++) {
                 const s = list[i]
+                if (artAt < 0 && i < n && s?.art) artAt = i
                 geometry.push(s ? Qt.vector4d(s.x + s.width / 2, s.y + s.height / 2, s.width / 2, s.height / 2) : zero)
                 const c = s ? IrisFrame.cornersOf(s) : null
                 corners.push(c ? Qt.vector4d(c.tl, c.tr, c.br, c.bl) : zero)
@@ -192,8 +196,11 @@ Item {
                     out.push(Qt.vector4d(values[b * 4], values[b * 4 + 1], values[b * 4 + 2], values[b * 4 + 3]))
                 return out
             }
+            const worn = artAt >= 0 ? list[artAt] : null
             return { geometry: geometry, corners: corners, fuse: blocks(fuse), join: blocks(join), also: blocks(also),
-                paints: blocks(paints), glass: blocks(glass) }
+                paints: blocks(paints), glass: blocks(glass), art: worn?.art ?? null,
+                artLane: worn ? Qt.vector4d(artAt + 1, Math.max(0, Math.min(1, Number(worn.artShow ?? 1))),
+                    worn.art.width / Math.max(1, worn.art.height), Math.max(0, Number(worn.artRise ?? 0))) : zero }
         }
         readonly property vector4d viewport: Qt.vector4d(pass.x, pass.y,
             Math.max(1, pass.width), Math.max(1, pass.height))
@@ -314,5 +321,7 @@ Item {
         readonly property vector4d shadeShape: Qt.vector4d(root.shadowFall, root.shadowBlur, root.casts ? 1 : 0, 0)
         readonly property Item backdrop: pass.backdropReady ? root.backdropSource.texture : noBackdrop
         readonly property Item clearBackdrop: pass.backdropReady ? (root.backdropSource.clearTexture ?? root.backdropSource.texture) : noBackdrop
+        readonly property vector4d artLane: pass.packed.artLane
+        readonly property Item art: pass.packed.art ?? noBackdrop
     }
 }

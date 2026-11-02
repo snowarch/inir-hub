@@ -136,10 +136,16 @@ layout(std140, binding = 0) uniform buf {
     vec4 leakAt0; vec4 leakAt1; vec4 leakAt2;
     vec4 leakForm0; vec4 leakForm1; vec4 leakForm2;
     vec4 leakHue0; vec4 leakHue1; vec4 leakHue2;
+    // A body that wears a picture as its material (the Island's player wears its cover). x: that body's index + 1,
+    // 0 for none; y: how much of the picture shows, 0..1; z: the picture's width over its height; w: how far past the
+    // band's inner line it takes to come in, in pixels (0: it runs into the band).
+    vec4 artLane;
 } u;
 layout(binding = 1) uniform sampler2D backdrop;
 // The wallpaper before the blur: glass materialises from it to `backdrop` as its frost rises.
 layout(binding = 2) uniform sampler2D clearBackdrop;
+// The picture `artLane` names, premultiplied.
+layout(binding = 3) uniform sampler2D art;
 
 const float FAR = 1e8;
 
@@ -504,9 +510,12 @@ void main() {
     // where the band stands and one welded to its foot ends there. Blended by nearness, so a weld shades, never steps.
     vec3 paint = u.tint.rgb;
     bool bodyLit = u.bodyTop.a + u.bodyFoot.a > 0.001;
-    if (bodyLit && united < 1.0) {
+    int artAt = int(u.artLane.x + 0.5) - 1;
+    bool wearsArt = artAt >= 0 && artAt < 20 && u.artLane.y > 0.001;
+    if ((bodyLit || wearsArt) && united < 1.0) {
         float along = 0.0;
         float nearness = 0.0;
+        float artNear = 0.0;
         if (u.field.y > 0.5) {
             float w = exp(-clamp(frameDistance - united, 0.0, 60.0) / 12.0);
             along += w * clamp(frameP.y / size.y, 0.0, 1.0);
@@ -519,8 +528,29 @@ void main() {
             float w = exp(-clamp(bodies[i] - united, 0.0, 60.0) / 12.0);
             along += w * clamp((p.y - s.y + s.w) / max(2.0 * s.w, 1.0), 0.0, 1.0);
             nearness += w;
+            if (i == artAt)
+                artNear = w;
         }
-        paint = mix(mix(u.tint.rgb, u.bodyTop.rgb, u.bodyTop.a), mix(u.tint.rgb, u.bodyFoot.rgb, u.bodyFoot.a), along / max(nearness, 1e-4));
+        if (bodyLit)
+            paint = mix(mix(u.tint.rgb, u.bodyTop.rgb, u.bodyTop.a), mix(u.tint.rgb, u.bodyFoot.rgb, u.bodyFoot.a), along / max(nearness, 1e-4));
+        // The picture is the body's material, not a rectangle laid inside it: it fills the silhouette the field draws,
+        // shoulders and fillets included, and gives way to what the body is welded to by the same nearness the light
+        // uses, so a player melts into the band and the strip instead of ending on a straight line inside a curve.
+        if (wearsArt && artNear > 0.0) {
+            vec4 s = shapeAt(artAt);
+            vec2 box = max(2.0 * s.zw, vec2(1.0));
+            float aspect = max(u.artLane.z, 1e-3);
+            vec2 cover = box.x / box.y > aspect ? vec2(box.x, box.x / aspect) : vec2(box.y * aspect, box.y);
+            // An explicit level: implicit derivatives are undefined in a branch that differs between neighbours.
+            vec4 picture = textureLod(art, clamp((p - s.xy) / cover + 0.5, 0.0, 1.0), 0.0);
+            // Welded to the frame the band keeps its own material and the picture rises out of it, by the distance to
+            // the band, so the shoulders and the fillets shade with it.
+            float risen = u.field.y > 0.5 && u.artLane.w > 0.0 ? smoothstep(0.0, u.artLane.w, frameDistance) : 1.0;
+            // Inside its own body the picture owns the pixel even where another body overlaps it (the strip a grown
+            // page swallows); past its edge it shares by nearness.
+            float owned = max(artNear / max(nearness, 1e-4), 1.0 - smoothstep(-12.0, 0.0, bodies[artAt]));
+            paint = mix(paint, picture.rgb + paint * (1.0 - picture.a), u.artLane.y * risen * owned);
+        }
     }
     float fillAlpha = coverage * u.tint.a * u.qt_Opacity;
     vec3 colour = paint * fillAlpha;
