@@ -34,7 +34,7 @@ MouseArea {
     cursorShape: root.lifted ? Qt.ClosedHandCursor : Qt.PointingHandCursor
 
     function toScreen(x: real, y: real): point {
-        const p = root.mapToItem(null, x, y)
+        const p = root.mapToItem(root.QsWindow.contentItem, x, y)
         return Qt.point(p.x, p.y + root.screenOffsetY)
     }
     function publish(released: bool): void {

@@ -307,14 +307,17 @@ Item {
     property real pageOriginY: -1
 
     property real screenOffsetY: 0
+    // Geometry is read in the window's own space (QsWindow.contentItem), never the scene: the edit card and the arrival
+    // transform that item, and a scene point kept their scale once they dropped (11-02: after edit mode the Island and
+    // its bubbles stayed drawn where the card had them).
     function chassisBody(): var {
-        const p = chassis.mapToItem(null, chassis.leftInset, chassis.topInset)
+        const p = chassis.mapToItem(root.QsWindow.contentItem, chassis.leftInset, chassis.topInset)
         return { x: p.x, y: p.y, width: root.vertical ? chassis.across : chassis.width,
             height: root.vertical ? chassis.height : chassis.bodyHeight }
     }
     function partRect(part): var {
         if (part === chassis) return root.chassisBody()
-        const p = part.mapToItem(null, 0, 0)
+        const p = part.mapToItem(root.QsWindow.contentItem, 0, 0)
         return { x: p.x, y: p.y, width: part.width * part.scale, height: part.height * part.scale }
     }
     function publishOrigin(part): void {
@@ -1033,7 +1036,7 @@ Item {
             if (!IrisPieces.extraIds.includes(String(kind))) continue
             const item = root.pieceItem(String(kind))
             if (!item || !item.visible || item.width <= 0) continue
-            const at = item.mapToItem(null, 0, 0)
+            const at = item.mapToItem(root.QsWindow.contentItem, 0, 0)
             const size = Math.min(item.width, item.height)
             out.push({ id: "piece:extra-" + kind, x: at.x + (item.width - size) / 2, y: at.y + (item.height - size) / 2,
                 width: size, height: size, radius: IrisStyle.pieceRadius(size) })
@@ -1504,7 +1507,7 @@ Item {
                 : { tl: outer, tr: outer, bl: far === "left" ? r : outer, br: far === "right" ? r : outer }
             for (const [id, area, start] of [["podStart", barZones.startArea, true], ["podEnd", barZones.endArea, false]]) {
                 if (area.width < 1) continue
-                const at = barZones.mapToItem(null, area.x, 0)
+                const at = barZones.mapToItem(root.QsWindow.contentItem, area.x, 0)
                 const left = start ? at.x - air + (wall - at.x + air) * melt : at.x - air
                 const right = start ? at.x + area.width + air : at.x + area.width + air + (span - wall - at.x - area.width - air) * melt
                 out.push({ x: left, y: body.y, width: right - left, height: body.height, radius: r,
@@ -1512,7 +1515,7 @@ Item {
                     paints: true, fuse: fuse, id: id, joins: welded.concat(["island"]) })
             }
             if (root.heartShown && root.heartLength > 1) {
-                const at = chassis.mapToItem(null, barZones.heartAlong, 0)
+                const at = chassis.mapToItem(root.QsWindow.contentItem, barZones.heartAlong, 0)
                 out.push({ x: at.x, y: body.y, width: root.heartLength, height: body.height, radius: r,
                     corners: melt > 0.01 ? (root.bottomEdge ? { tl: r, tr: r, bl: outer, br: outer } : { tl: outer, tr: outer, bl: r, br: r }) : null,
                     paints: true, fuse: fuse, id: "island", joins: welded })
@@ -1526,14 +1529,14 @@ Item {
             joins: melt <= 0.01 ? "" : IrisFrame.framed ? "frame" : pastSide > 0 ? ["edge", "edgeSide"] : "edge" })
         // On its side, the heart of a full bar swells inward out of the bar: the same gesture as a menu bar's notch.
         if (root.vertical && root.zoned && root.notch && root.heartShown && compactColumn.height > 1) {
-            const at = compactColumn.mapToItem(null, 0, 0)
+            const at = compactColumn.mapToItem(root.QsWindow.contentItem, 0, 0)
             const wide = body.width + root.heartSwell
             out.push({ x: root.rightEdge ? body.x - root.heartSwell : body.x, y: at.y, width: wide, height: compactColumn.height,
                 radius: wide / 2, paints: true, fuse: IrisStyle.fuseEdge, id: "islandheart", joins: "island" })
         }
         // Across the top or bottom the heart of a full bar swells out of it the same way.
         if (root.swellsHeart && root.heartLength > 1) {
-            const at = chassis.mapToItem(null, barZones.heartAlong, 0)
+            const at = chassis.mapToItem(root.QsWindow.contentItem, barZones.heartAlong, 0)
             const tall = body.height + root.heartSwell
             // Its far corners round like the Island it is; the shoulders where it leaves the shelf are concave, as wide as
             // the rise is deep, so shelf and Island read as one piece.
@@ -1542,13 +1545,13 @@ Item {
                 paints: true, fuse: Math.round(root.heartSwell * 1.1 + 6 * root.d), id: "islandheart", joins: "island" })
         }
         if (root.menubar && root.heartShown && root.heartLength > 1) {
-            const at = chassis.mapToItem(null, barZones.heartAlong, 0)
+            const at = chassis.mapToItem(root.QsWindow.contentItem, barZones.heartAlong, 0)
             out.push({ x: at.x, y: body.y, width: root.heartLength, height: body.height, radius: root.meltedCorner,
                 paints: true, fuse: root.clearStrip ? IrisStyle.fuseEdge : Math.round(32 * root.d), id: "islandnotch",
                 joins: root.clearStrip ? edgeJoin : "island" })
         }
         if (extension.visible && extension.width > 1 && extension.height > 1) {
-            const page = extension.mapToItem(null, 0, 0)
+            const page = extension.mapToItem(root.QsWindow.contentItem, 0, 0)
             const floating = root.zoned && !root.vertical && !root.fromHeart
             const grown = root.grownPage
             const sink = grown ? 0 : root.fullWidth && !floating ? Math.min(extension.radius, root.compactHeight) : 0
@@ -1566,14 +1569,14 @@ Item {
                     : root.clearStrip ? "islandnotch" : "island" })
         }
         if (badgePill.visible) {
-            const at = badgePill.mapToItem(null, (badgePill.width - badgePill.bodyWidth) / 2, 0)
+            const at = badgePill.mapToItem(root.QsWindow.contentItem, (badgePill.width - badgePill.bodyWidth) / 2, 0)
             out.push({ x: at.x, y: at.y, width: badgePill.bodyWidth, height: badgePill.height, radius: badgePill.height / 2,
                 paints: false, id: "badge", joins: "island", fuse: IrisStyle.fuseDeep * (1 - badgePill.reveal) })
         }
         for (const satellite of [leftSatellite, rightSatellite, auxiliarySatellite]) {
             if (!satellite.visible || satellite.emerge <= 0.01) continue
             const size = satellite.width * satellite.scale
-            const centre = satellite.mapToItem(null, satellite.width / 2, satellite.height / 2)
+            const centre = satellite.mapToItem(root.QsWindow.contentItem, satellite.width / 2, satellite.height / 2)
             // A drop that pinches off the Island on its way out and stands apart at rest: melted in for good it read
             // as a belly on the Island (10-25).
             const joined = IrisStyle.fuse * (1 - IrisStyle.ramp(satellite.emerge, 0.45, 0.5))
@@ -1725,7 +1728,7 @@ Item {
         target: root.Window.window
         enabled: IrisMotionMeter.watching("island") && root.focusedOutput
         function onAfterAnimating(): void {
-            const at = chassis.mapToItem(null, 0, 0)
+            const at = chassis.mapToItem(root.QsWindow.contentItem, 0, 0)
             const source = { settles: true, presentation: chassis.presentation, open: root.inlineExpanded }
             IrisMotionMeter.sample({ source: source, presentation: chassis.presentation,
                 rect: { x: at.x, y: at.y, width: chassis.width, height: chassis.height },
@@ -2497,7 +2500,7 @@ Item {
                     property bool carrying: false
                     property point pressAt: Qt.point(0, 0)
                     function publish(mouse, released: bool): void {
-                        const p = compactPress.mapToItem(null, mouse.x, mouse.y)
+                        const p = compactPress.mapToItem(root.QsWindow.contentItem, mouse.x, mouse.y)
                         IrisState.bubbleDrag = {
                             slot: "island", kind: "island", screen: root.targetScreen?.name ?? "",
                             x: p.x, y: p.y + root.screenOffsetY,

@@ -992,7 +992,7 @@ Item {
                             slotIndex: (root.showLauncher ? 1 : 0) + root.entries.length + 1 + pieceSlot.index
                             readonly property string label: Translation.tr(IrisPieces.labelOf(pieceSlot.modelData.kind))
                             function rect(): var {
-                                const p = pieceFace.mapToItem(null, 0, 0)
+                                const p = pieceFace.mapToItem(root.QsWindow.contentItem, 0, 0)
                                 const size = pieceFace.width * pieceFace.scale
                                 return { x: p.x, y: p.y, size: size, source: "dock-" + pieceSlot.modelData.slot }
                             }
