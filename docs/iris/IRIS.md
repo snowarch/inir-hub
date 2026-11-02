@@ -36,7 +36,7 @@ The Dock is set under iRiS Settings › Dock:
 - Colour › Look: Apple, Nothing OS, Synth or Gel.
 - Colour › Scheme: Auto, Dark mode, Ink or Light mode. Ink sits between dark and light, like paper and ink.
 - Colour › Colour theme: Catppuccin, Rosé Pine, Tokyo Night, Nord and more. Match the shell also gives iRiS the theme's accent, highlight and material.
-- Style › Design: iRiS or AIRISU. AIRISU is the same shell in lacquer, with one shape on every piece: top-left and bottom-right round, top-right and bottom-left cut at 45°. The Island, Dock, panels, Settings (over the desktop or as a window), widgets and the frame all wear it, and the blur stops exactly at the cut.
+- Style › Design: iRiS or AIRISU. AIRISU is the same shell in lacquer, with one shape on every piece: top-left and bottom-right round, top-right and bottom-left cut at 45°. The Island, Dock, panels, Settings (over the desktop or as a window), widgets and the frame all wear it, and the blur stops exactly at the cut. Its Island is parted by a 45° blade: the hour keeps the left, and what is going on (the day, a song, a timer, a task) takes the right on a second lacquer; a notice, a level or a recording takes the whole strip.
 - Style › Themes: curated looks for the whole family. Use Customize, Themes, Save current to keep the look you have as your own theme.
 - Customize: right-click the desktop and pick Customize iRiS. The Island grows a capsule with Themes, Look and Pieces, plus undo, redo and Done.
 - Style › Customize opens: On the shell, which edits in place, or Studio, a side panel with search.
