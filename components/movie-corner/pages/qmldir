@@ -1,0 +1,10 @@
+MovieCorner 1.0 MovieCorner.qml
+MovieCornerData 1.0 MovieCornerData.qml
+MovieDetail 1.0 MovieDetail.qml
+MovieEpisodes 1.0 MovieEpisodes.qml
+MovieGrid 1.0 MovieGrid.qml
+MovieHome 1.0 MovieHome.qml
+MoviePoster 1.0 MoviePoster.qml
+MovieRow 1.0 MovieRow.qml
+MovieSettings 1.0 MovieSettings.qml
+MovieWatchSheet 1.0 MovieWatchSheet.qml

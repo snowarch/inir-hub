@@ -1,0 +1,2 @@
+singleton CornerState 1.0 CornerState.qml
+singleton CornerWatch 1.0 CornerWatch.qml

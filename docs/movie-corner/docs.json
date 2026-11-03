@@ -1,0 +1,14 @@
+{
+	"id": "movie-corner",
+	"edit": "https://github.com/snowarch/inir-hub/edit/main/docs/movie-corner/",
+	"order": 11,
+	"groups": [
+		{
+			"label": "Components",
+			"pages": [
+				"MOVIE-CORNER"
+			]
+		}
+	],
+	"preview": {"steps": [["ipc", "movie-corner", "go", "movies"]]}
+}

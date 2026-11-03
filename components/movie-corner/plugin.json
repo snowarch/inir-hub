@@ -1,0 +1,14 @@
+{
+    "id": "movie-corner",
+    "kind": "component",
+    "name": "Movie Corner",
+    "summary": "Find any film or series and watch it in your language, in mpv.",
+    "icon": "movie",
+    "version": "1.0.0",
+    "parts": {
+        "panel": "Panel.qml"
+    },
+    "families": [
+        "iris"
+    ]
+}
