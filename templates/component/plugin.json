@@ -1,0 +1,12 @@
+{
+    "id": "__ID__",
+    "kind": "component",
+    "name": "__NAME__",
+    "summary": "What it adds, in one line",
+    "icon": "extension",
+    "version": "1.0.0",
+    "parts": {
+        "panel": "Panel.qml"
+    },
+    "families": []
+}
