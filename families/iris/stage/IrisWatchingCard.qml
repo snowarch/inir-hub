@@ -48,6 +48,13 @@ ColumnLayout {
             Accessible.name: Translation.tr("Stop")
             onClicked: AnimeWatch.cancel()
         }
+        // Not from inside the Corner, where this card is embedded.
+        IrisIconButton {
+            visible: !IrisState.animeCornerOpen
+            materialIcon: "open_in_full"
+            Accessible.name: Translation.tr("Open the Anime Corner")
+            onClicked: { continuing.closeRequested(); IrisState.animeCornerOpen = true }
+        }
         IrisIconButton {
             visible: !AnimeWatch.busy
             materialIcon: "refresh"
