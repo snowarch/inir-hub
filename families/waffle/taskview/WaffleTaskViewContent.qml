@@ -139,10 +139,9 @@ Item {
     }
     
     function renameWorkspace(wsIdx: int, newName: string): void {
-        const currentNames = Config.options?.waffles?.workspaceNames ?? {}
-        const updatedNames = Object.assign({}, currentNames)
-        updatedNames[wsIdx.toString()] = newName
-        Config.setNestedValue("waffles.workspaceNames", updatedNames)
+        const names = Array.from(Config.options?.waffles?.taskView?.names ?? []).filter(entry => entry?.workspace !== wsIdx)
+        names.push({ workspace: wsIdx, name: newName })
+        Config.setNestedValue("waffles.taskView.names", names)
         refreshCache()
     }
     

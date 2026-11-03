@@ -115,9 +115,9 @@ Item {
 
     readonly property string workspaceName: {
         if (root.isLastEmpty) return Translation.tr("New desktop")
-        const customNames = Config.options?.waffles?.workspaceNames ?? {}
         const idx = workspace?.idx ?? (workspaceIndex + 1)
-        return customNames[idx.toString()] ?? Translation.tr("Desktop") + " " + idx
+        const named = Array.from(Config.options?.waffles?.taskView?.names ?? []).find(entry => entry?.workspace === idx)
+        return named?.name || Translation.tr("Desktop") + " " + idx
     }
 
     property bool isEditing: false

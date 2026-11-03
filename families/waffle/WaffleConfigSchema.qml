@@ -217,12 +217,10 @@ JsonObject {
         property bool showSession: true
         property bool showColorScheme: true
     }
-    property JsonObject workspaceNames: JsonObject {
-        // Custom workspace names, keyed by workspace index (1-based)
-        // Example: "1": "Main", "2": "Work", "3": "Gaming"
-    }
     property JsonObject taskView: JsonObject {
         property string mode: "centered" // "carousel" or "centered"
         property bool closeOnSelect: false // Close TaskView when clicking a window
+        // Desktops renamed in Task View: [{ "workspace": 1, "name": "Main" }]. A list, as a typed object kept no name.
+        property list<var> names: []
     }
 }
