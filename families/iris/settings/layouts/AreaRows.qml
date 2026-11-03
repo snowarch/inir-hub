@@ -308,7 +308,7 @@ ColumnLayout {
                     readonly property real switchHeight: headSwitch.implicitHeight
                     readonly property bool reading: rows?.reading === block.key
                     readonly property string glyph: String(block.modelData.glyph ?? "") || (IrisOptions.groupGlyphs[block.key] ?? IrisOptions.sectionById(rows?.section)?.icon ?? "settings")
-                    readonly property color tint: IrisOptions.groupTint(String(rows?.section ?? ""), block.index)
+                    readonly property color tint: IrisOptions.groupHue(String(rows?.section ?? ""), block.index, block.key)
                     visible: block.modelData.flat && head.title.length > 0
                     Layout.fillWidth: true
                     Layout.leftMargin: Math.round(16 * rows?.d)
@@ -348,131 +348,255 @@ ColumnLayout {
                     }
                 }
 
-                // The area's other groups as tiles, each saying what it holds now; one opens under them.
-                GridLayout {
-                    id: groupGrid
+                // The area's other groups, each saying what it holds now; one opens under them. Current draws them as
+                // tiles; Original (v2.33) as one grouped list on a single plate, the same Repeater with a second face.
+                Item {
+                    id: groupDeck
                     visible: (block.modelData.groups ?? []).length > 0
                     Layout.fillWidth: true
                     Layout.topMargin: block.caption.length > 0 ? 0 : Math.round(14 * rows?.d)
-                    readonly property real gap: Math.round(8 * rows?.d)
-                    columns: Math.max(2, Math.floor((width + gap) / (Math.round(232 * rows?.d) * Math.max(1, IrisStyle.typeScale) + gap)))
-                    columnSpacing: gap
-                    rowSpacing: gap
-                    Repeater {
-                        model: ScriptModel { objectProp: "key"; values: block.modelData.groups ?? [] }
-                        Item {
-                            id: group
-                            required property var modelData
-                            required property int index
-                            readonly property string key: String(group.modelData.key ?? "")
-                            readonly property bool open: rows?.openGroup === group.key
-                            readonly property color tint: IrisOptions.groupTint(String(rows?.section ?? ""), group.index)
-                            // What it holds now, in words: its first rows' values, a switch by its name while on ("24-hour", "Low power").
-                            readonly property string glance: {
-                                Config.revision
-                                const said = []
-                                for (const spec of group.modelData.rows ?? []) {
-                                    if (said.length >= 2) break
-                                    const value = IrisOptions.currentValue(spec)
-                                    const choice = (spec.choices ?? []).find(entry => String(entry.value) === String(value))
-                                    const word = spec.glance ? spec.glance(value)
-                                        : spec.kind === "switch" ? ((spec.invert ? !value : Boolean(value)) ? Translation.tr(String(spec.label ?? "")) : "")
-                                        : choice ? Translation.tr(String(choice.label ?? ""))
-                                        : spec.kind === "range" ? IrisOptions.rangeText(spec, value)
-                                        : spec.kind === "text" && String(value ?? "").length > 0 && String(value).length <= 24 ? String(value) : ""
-                                    if (word.length > 0) said.push(word)
+                    implicitHeight: groupGrid.implicitHeight
+                    IrisPlate {
+                        anchors.fill: parent
+                        visible: groupGrid.groupList
+                        radius: IrisStyle.radiusTile
+                        color: rows?.groupFill ?? "transparent"
+                    }
+                    // The list's hover plate glides to the row under the pointer instead of blinking on each.
+                    Rectangle {
+                        id: listHover
+                        readonly property real inset: Math.round(3 * (rows?.d ?? 1))
+                        visible: groupGrid.groupList
+                        x: listHover.inset
+                        y: (groupGrid.hovered?.y ?? 0) + listHover.inset
+                        width: parent.width - 2 * listHover.inset
+                        height: groupGrid.listRow - 2 * listHover.inset
+                        radius: IrisStyle.concentric(IrisStyle.radiusTile, listHover.inset, IrisStyle.radiusRow)
+                        color: groupGrid.hovered?.pressed ? IrisStyle.fillActive : IrisStyle.fillQuiet
+                        opacity: groupGrid.hovered !== null ? 1 : 0
+                        Behavior on y { enabled: listHover.opacity > 0; SmoothedAnimation { duration: IrisStyle.duration(140); velocity: -1 } }
+                        Behavior on opacity { NumberAnimation { duration: IrisStyle.duration(110); easing.type: IrisStyle.feedbackEasing } }
+                    }
+                    GridLayout {
+                        id: groupGrid
+                        width: parent.width
+                        readonly property real gap: Math.round(8 * rows?.d)
+                        readonly property bool groupList: IrisStyle.settingsOriginal
+                        readonly property int groupCount: (block.modelData.groups ?? []).length
+                        readonly property real listRow: Math.round(46 * rows?.d * Math.max(1, IrisStyle.typeScale))
+                        // The row under the pointer (Original), for the gliding hover plate.
+                        property var hovered: null
+                        columns: groupGrid.groupList ? 1 : Math.max(2, Math.floor((width + gap) / (Math.round(232 * rows?.d) * Math.max(1, IrisStyle.typeScale) + gap)))
+                        columnSpacing: groupGrid.groupList ? 0 : gap
+                        rowSpacing: groupGrid.groupList ? 0 : gap
+                        Repeater {
+                            model: ScriptModel { objectProp: "key"; values: block.modelData.groups ?? [] }
+                            Item {
+                                id: group
+                                required property var modelData
+                                required property int index
+                                readonly property string key: String(group.modelData.key ?? "")
+                                readonly property bool open: rows?.openGroup === group.key
+                                readonly property color tint: IrisOptions.groupHue(String(rows?.section ?? ""), group.index, group.key)
+                                readonly property bool listed: groupGrid.groupList
+                                readonly property bool pressed: groupArea.pressed
+                                readonly property bool modified: {
+                                    Config.revision
+                                    return group.listed && (group.modelData.rows ?? []).some(spec => IrisOptions.modified(spec))
                                 }
-                                return said.join(" · ")
-                            }
-                            function act(): void { rows.openGroup = group.open ? "" : group.key }
-                            Layout.fillWidth: true
-                            Layout.fillHeight: true
-                            Layout.preferredWidth: 1
-                            implicitHeight: Math.round(13 * rows?.d) + Math.round(18 * rows?.d) + Math.round(6 * rows?.d) + groupWords.implicitHeight + Math.round(14 * rows?.d)
-                            activeFocusOnTab: true
-                            Accessible.role: Accessible.Button
-                            Accessible.name: Translation.tr(String(group.modelData.title ?? ""))
-                            Accessible.description: group.glance
-                            Keys.onSpacePressed: group.act()
-                            Keys.onReturnPressed: group.act()
+                                // What it holds now, in words: its first rows' values, a switch by its name while on ("24-hour", "Low power").
+                                readonly property string glance: {
+                                    Config.revision
+                                    const said = []
+                                    for (const spec of group.modelData.rows ?? []) {
+                                        if (said.length >= 2) break
+                                        const value = IrisOptions.currentValue(spec)
+                                        const choice = (spec.choices ?? []).find(entry => String(entry.value) === String(value))
+                                        const word = spec.glance ? spec.glance(value)
+                                            : spec.kind === "switch" ? ((spec.invert ? !value : Boolean(value)) ? Translation.tr(String(spec.label ?? "")) : "")
+                                            : choice ? Translation.tr(String(choice.label ?? ""))
+                                            : spec.kind === "range" ? IrisOptions.rangeText(spec, value)
+                                            : spec.kind === "text" && String(value ?? "").length > 0 && String(value).length <= 24 ? String(value) : ""
+                                        if (word.length > 0) said.push(word)
+                                    }
+                                    return said.join(" · ")
+                                }
+                                function act(): void { rows.openGroup = group.open ? "" : group.key }
+                                Layout.fillWidth: true
+                                Layout.fillHeight: !group.listed
+                                Layout.preferredWidth: 1
+                                implicitHeight: group.listed ? groupGrid.listRow
+                                    : Math.round(13 * rows?.d) + Math.round(18 * rows?.d) + Math.round(6 * rows?.d) + groupWords.implicitHeight + Math.round(14 * rows?.d)
+                                activeFocusOnTab: true
+                                Accessible.role: Accessible.Button
+                                Accessible.name: Translation.tr(String(group.modelData.title ?? ""))
+                                Accessible.description: group.glance
+                                Keys.onSpacePressed: group.act()
+                                Keys.onReturnPressed: group.act()
 
-                            IrisPlate {
-                                id: groupPlate
-                                anchors.fill: parent
-                                radius: IrisStyle.radiusTile
-                                // Open: a wash of its own colour, as the sidebar marks where you are (his 10-30: an
-                                // outline is no way to say it).
-                                color: group.open ? IrisStyle.tintFillHover(group.tint) : (rows?.groupFill ?? "transparent")
-                                scale: groupArea.pressed ? IrisStyle.pressScale(0.97) : 1
-                                Behavior on color { ColorAnimation { duration: IrisStyle.duration(110); easing.type: IrisStyle.feedbackEasing } }
-                                Behavior on scale { NumberAnimation { duration: IrisStyle.feedbackDuration; easing.type: IrisStyle.feedbackEasing } }
-                                Rectangle {
+                                IrisPlate {
+                                    id: groupPlate
+                                    visible: !group.listed
                                     anchors.fill: parent
-                                    radius: parent.radius
-                                    color: groupArea.pressed ? IrisStyle.fillActive : IrisStyle.fillQuiet
-                                    opacity: groupArea.containsMouse || groupArea.pressed || group.activeFocus ? 1 : 0
-                                    Behavior on opacity { NumberAnimation { duration: IrisStyle.duration(110); easing.type: IrisStyle.feedbackEasing } }
+                                    radius: IrisStyle.radiusTile
+                                    // Open: a wash of its own colour, as the sidebar marks where you are (his 10-30: an
+                                    // outline is no way to say it).
+                                    color: group.open ? IrisStyle.tintFillHover(group.tint) : (rows?.groupFill ?? "transparent")
+                                    scale: groupArea.pressed ? IrisStyle.pressScale(0.97) : 1
+                                    Behavior on color { ColorAnimation { duration: IrisStyle.duration(110); easing.type: IrisStyle.feedbackEasing } }
+                                    Behavior on scale { NumberAnimation { duration: IrisStyle.feedbackDuration; easing.type: IrisStyle.feedbackEasing } }
+                                    Rectangle {
+                                        anchors.fill: parent
+                                        radius: parent.radius
+                                        color: groupArea.pressed ? IrisStyle.fillActive : IrisStyle.fillQuiet
+                                        opacity: groupArea.containsMouse || groupArea.pressed || group.activeFocus ? 1 : 0
+                                        Behavior on opacity { NumberAnimation { duration: IrisStyle.duration(110); easing.type: IrisStyle.feedbackEasing } }
+                                    }
+                                    // A widget's Small face (his 11-02: the widgets are the look): the group named small in
+                                    // its colour beside its glyph, what it holds now big in the ink under it.
+                                    readonly property color voice: IrisStyle.iconColour === "mono" ? IrisStyle.textSecondary : IrisStyle.iconHue(group.tint)
+                                    Row {
+                                        id: groupHead
+                                        x: Math.round(14 * rows?.d)
+                                        y: Math.round(13 * rows?.d)
+                                        width: parent.width - 2 * x
+                                        spacing: Math.round(6 * rows?.d)
+                                        IrisSquircle {
+                                            plain: IrisStyle.settingsPlainMarks
+                                            id: groupMark
+                                            anchors.verticalCenter: parent.verticalCenter
+                                            width: Math.round(18 * rows?.d)
+                                            height: width
+                                            tint: group.tint
+                                            glyph: IrisOptions.groupGlyphs[group.key] ?? "settings"
+                                        }
+                                        IrisText {
+                                            anchors.verticalCenter: parent.verticalCenter
+                                            width: groupHead.width - groupMark.width - groupHead.spacing
+                                            text: Translation.tr(String(group.modelData.title ?? ""))
+                                            color: groupPlate.voice
+                                            font.pixelSize: IrisStyle.typeMeta
+                                            font.weight: IrisStyle.weight(Font.DemiBold)
+                                            elide: Text.ElideRight
+                                        }
+                                    }
+                                    Column {
+                                        id: groupWords
+                                        x: groupHead.x
+                                        anchors.top: groupHead.bottom
+                                        anchors.topMargin: Math.round(6 * rows?.d)
+                                        width: groupHead.width
+                                        spacing: Math.round(1 * rows?.d)
+                                        readonly property var said: group.glance.split(" · ")
+                                        IrisText {
+                                            width: parent.width
+                                            text: group.glance.length > 0 ? groupWords.said[0] : Translation.tr("Open")
+                                            color: group.glance.length > 0 ? IrisStyle.text : IrisStyle.textTertiary
+                                            font.family: IrisStyle.fontTitle
+                                            font.pixelSize: IrisStyle.typeHeadline
+                                            font.weight: IrisStyle.weight(Font.Bold)
+                                            elide: Text.ElideRight
+                                        }
+                                        IrisText {
+                                            width: parent.width
+                                            visible: groupWords.said.length > 1 && groupWords.width >= Math.round(150 * rows?.d)
+                                            text: groupWords.said.slice(1).join(" · ")
+                                            color: IrisStyle.textTertiary
+                                            font.pixelSize: IrisStyle.typeFootnote
+                                            elide: Text.ElideRight
+                                        }
+                                    }
                                 }
-                                // A widget's Small face (his 11-02: the widgets are the look): the group named small in
-                                // its colour beside its glyph, what it holds now big in the ink under it.
-                                readonly property color voice: IrisStyle.iconColour === "mono" ? IrisStyle.textSecondary : IrisStyle.iconHue(group.tint)
-                                Row {
-                                    id: groupHead
-                                    x: Math.round(14 * rows?.d)
-                                    y: Math.round(13 * rows?.d)
-                                    width: parent.width - 2 * x
-                                    spacing: Math.round(6 * rows?.d)
+                                // Original's face: a v2.33 list row. Plated mark, the name, what it holds at the right in muted ink,
+                                // a changed dot, a chevron that turns down while its rows stand open under the list.
+                                Item {
+                                    id: listFace
+                                    visible: group.listed
+                                    anchors.fill: parent
+                                    readonly property real d: rows?.d ?? 1
+                                    Rectangle {
+                                        visible: group.open
+                                        anchors.fill: parent
+                                        anchors.margins: listHover.inset
+                                        radius: listHover.radius
+                                        color: IrisStyle.tintFillHover(group.tint)
+                                    }
                                     IrisSquircle {
-                                        id: groupMark
+                                        id: listMark
+                                        plain: IrisStyle.settingsPlainMarks
+                                        anchors.left: parent.left
+                                        anchors.leftMargin: Math.round(14 * listFace.d)
                                         anchors.verticalCenter: parent.verticalCenter
-                                        width: Math.round(18 * rows?.d)
+                                        width: Math.round(26 * listFace.d)
                                         height: width
                                         tint: group.tint
                                         glyph: IrisOptions.groupGlyphs[group.key] ?? "settings"
                                     }
                                     IrisText {
+                                        id: listTitle
+                                        anchors.left: listMark.right
+                                        anchors.leftMargin: Math.round(12 * listFace.d)
                                         anchors.verticalCenter: parent.verticalCenter
-                                        width: groupHead.width - groupMark.width - groupHead.spacing
+                                        width: Math.ceil(Math.min(implicitWidth, parent.width * 0.42))
                                         text: Translation.tr(String(group.modelData.title ?? ""))
-                                        color: groupPlate.voice
-                                        font.pixelSize: IrisStyle.typeMeta
-                                        font.weight: IrisStyle.weight(Font.DemiBold)
-                                        elide: Text.ElideRight
-                                    }
-                                }
-                                Column {
-                                    id: groupWords
-                                    x: groupHead.x
-                                    anchors.top: groupHead.bottom
-                                    anchors.topMargin: Math.round(6 * rows?.d)
-                                    width: groupHead.width
-                                    spacing: Math.round(1 * rows?.d)
-                                    readonly property var said: group.glance.split(" · ")
-                                    IrisText {
-                                        width: parent.width
-                                        text: group.glance.length > 0 ? groupWords.said[0] : Translation.tr("Open")
-                                        color: group.glance.length > 0 ? IrisStyle.text : IrisStyle.textTertiary
-                                        font.family: IrisStyle.fontTitle
-                                        font.pixelSize: IrisStyle.typeHeadline
-                                        font.weight: IrisStyle.weight(Font.Bold)
+                                        font.pixelSize: IrisStyle.typeLabel
+                                        font.weight: IrisStyle.weight(group.open ? Font.DemiBold : Font.Medium)
                                         elide: Text.ElideRight
                                     }
                                     IrisText {
-                                        width: parent.width
-                                        visible: groupWords.said.length > 1 && groupWords.width >= Math.round(150 * rows?.d)
-                                        text: groupWords.said.slice(1).join(" · ")
+                                        anchors.left: listTitle.right
+                                        anchors.leftMargin: Math.round(16 * listFace.d)
+                                        anchors.right: listDot.left
+                                        anchors.rightMargin: Math.round(8 * listFace.d)
+                                        anchors.verticalCenter: parent.verticalCenter
+                                        horizontalAlignment: Text.AlignRight
+                                        text: group.glance
+                                        color: IrisStyle.muted
+                                        font.pixelSize: IrisStyle.typeLabel
+                                        elide: Text.ElideRight
+                                    }
+                                    Rectangle {
+                                        id: listDot
+                                        anchors.right: listChevron.left
+                                        anchors.rightMargin: group.modified ? Math.round(8 * listFace.d) : 0
+                                        anchors.verticalCenter: parent.verticalCenter
+                                        width: group.modified ? Math.round(6 * listFace.d) : 0
+                                        height: width
+                                        radius: width / 2
+                                        color: IrisStyle.accent
+                                    }
+                                    MaterialSymbol {
+                                        id: listChevron
+                                        anchors.right: parent.right
+                                        anchors.rightMargin: Math.round(12 * listFace.d)
+                                        anchors.verticalCenter: parent.verticalCenter
+                                        text: "chevron_right"
+                                        iconSize: Math.round(18 * listFace.d)
                                         color: IrisStyle.textTertiary
-                                        font.pixelSize: IrisStyle.typeFootnote
-                                        elide: Text.ElideRight
+                                        rotation: group.open ? 90 : 0
+                                        Behavior on rotation { RotationAnimator { duration: IrisStyle.duration(180); easing.type: IrisStyle.feedbackEasing } }
+                                    }
+                                    Rectangle {
+                                        visible: group.index < groupGrid.groupCount - 1
+                                        anchors.left: listTitle.left
+                                        anchors.right: parent.right
+                                        anchors.bottom: parent.bottom
+                                        height: 1
+                                        color: IrisStyle.hairline
                                     }
                                 }
-                            }
-                            MouseArea {
-                                id: groupArea
-                                anchors.fill: parent
-                                hoverEnabled: true
-                                cursorShape: Qt.PointingHandCursor
-                                onClicked: group.act()
+                                MouseArea {
+                                    id: groupArea
+                                    anchors.fill: parent
+                                    hoverEnabled: true
+                                    cursorShape: Qt.PointingHandCursor
+                                    onClicked: group.act()
+                                    onContainsMouseChanged: {
+                                        if (groupArea.containsMouse) groupGrid.hovered = group
+                                        else if (groupGrid.hovered === group) groupGrid.hovered = null
+                                    }
+                                }
+                                Component.onDestruction: if (groupGrid.hovered === group) groupGrid.hovered = null
                             }
                         }
                     }
@@ -577,6 +701,7 @@ ColumnLayout {
                                     width: parent.width - 2 * x - (tileChevron.visible ? tileChevron.width : 0)
                                     spacing: Math.round(6 * rows?.d)
                                     IrisSquircle {
+                                        plain: IrisStyle.settingsPlainMarks
                                         id: tileMark
                                         anchors.verticalCenter: parent.verticalCenter
                                         width: Math.round(18 * rows?.d)

@@ -1264,6 +1264,15 @@ Item {
                         voice: ""
                         compact: true
                     }
+                    // The design key: one press between today's Settings and v2.33's, every page and option kept.
+                    IrisIconButton {
+                        objectName: "settingsDesignKey"
+                        visible: !root.sceneDesigned && IrisDesign.skin("settingsPage").length === 0
+                        materialIcon: "history"
+                        selected: IrisStyle.settingsOriginal
+                        onClicked: Config.setNestedValue("iris.appearance.settingsOriginal", !IrisStyle.settingsOriginal)
+                        Accessible.name: IrisStyle.settingsOriginal ? Translation.tr("Use the current design") : Translation.tr("Use the original design (v2.33)")
+                    }
                     IrisIconButton {
                         materialIcon: root.windowed ? "layers" : "web_asset"
                         onClicked: root.switchHost()
@@ -1576,7 +1585,8 @@ Item {
         Component.onDestruction: if (root.travelRow === sectionRow) root.travelRow = null
         readonly property bool dimmed: root.searching && !root.matchedSections.has(sectionRow.modelData.id)
         readonly property real rowHeight: Math.round(26 * sectionRow.d * Math.max(1, IrisStyle.typeScale))
-        readonly property string caption: sectionRow.clusterStart ? Translation.tr(String(sectionRow.modelData.caption ?? "")) : ""
+        // Original (v2.33) names no cluster: the air between them is the grouping.
+        readonly property string caption: sectionRow.clusterStart && !IrisStyle.settingsOriginal ? Translation.tr(String(sectionRow.modelData.caption ?? "")) : ""
         readonly property real washY: sectionRow.caption.length > 0 ? Math.round(9 * sectionRow.d) + captionText.implicitHeight + Math.round(2 * sectionRow.d)
             : sectionRow.clusterStart ? Math.round(8 * sectionRow.d) : 0
         width: parent ? parent.width : 0
@@ -1634,6 +1644,7 @@ Item {
                 width: Math.round(22 * sectionRow.d)
                 height: width
                 IrisSquircle {
+                    plain: IrisStyle.settingsPlainMarks
                     visible: !sectionMark.numbered
                     anchors.fill: parent
                     tint: sectionRow.tint
@@ -1731,6 +1742,7 @@ Item {
                 id: resultCaption
                 spacing: 8 * root.d
                 IrisSquircle {
+                    plain: IrisStyle.settingsPlainMarks
                     anchors.verticalCenter: parent.verticalCenter
                     width: Math.round(18 * root.d)
                     height: width

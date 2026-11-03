@@ -36,6 +36,7 @@ MouseArea {
     // coloured squares is every settings app, and the colour alone already tells the links apart.
     MaterialSymbol {
         id: mark
+        visible: !plateMark.visible
         anchors.left: parent.left
         anchors.leftMargin: 14 * IrisStyle.settingsDensity
         anchors.verticalCenter: parent.verticalCenter
@@ -44,6 +45,17 @@ MouseArea {
         text: root.entry.icon ?? "chevron_right"
         iconSize: Math.round(19 * IrisStyle.settingsDensity)
         color: !root.tinted || IrisStyle.iconColour === "mono" ? IrisStyle.textSecondary : (root.entry.tint ?? IrisStyle.identity.gray)
+    }
+    // Original (v2.33): the link opens on its plated mark, as that Settings drew every row.
+    IrisSquircle {
+        id: plateMark
+        visible: IrisStyle.settingsOriginal && root.tinted
+        plain: IrisStyle.settingsPlainMarks
+        anchors.centerIn: mark
+        width: Math.round(26 * IrisStyle.settingsDensity)
+        height: width
+        tint: root.entry.tint ?? IrisStyle.identity.gray
+        glyph: root.entry.icon ?? "chevron_right"
     }
     IrisText {
         id: label

@@ -44,6 +44,7 @@ Rectangle {
         spacing: 16 * card.d
 
         IrisSquircle {
+            plain: IrisStyle.settingsPlainMarks
             implicitWidth: Math.round(52 * card.d)
             implicitHeight: implicitWidth
             tint: card.on ? IrisStyle.identity.green : IrisStyle.identity.purple

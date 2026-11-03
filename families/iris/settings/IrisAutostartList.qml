@@ -213,6 +213,7 @@ ColumnLayout {
                 visible: piece.modelData.icon.length > 0 && icon.status === Image.Ready
             }
             IrisSquircle {
+                plain: IrisStyle.settingsPlainMarks
                 anchors.fill: parent
                 visible: !icon.visible
                 tint: piece.modelData.command ? IrisStyle.identity.gray : IrisStyle.identity.blue

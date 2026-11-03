@@ -239,6 +239,9 @@ JsonObject {
         property string settingsHost: "overlay"
         // How iRiS Settings lays its page: "folio", "deck" or "console" (a Design with its own page keeps it).
         property string settingsLayout: "classic"
+        // iRiS Settings drawn as v2.33 drew it over every page of today: plated marks, an area's groups in one list, a
+        // sidebar without captions.
+        property bool settingsOriginal: false
         // What iRiS Settings' Home holds, in order: rows by path, nightLight and gameMode for the live switches.
         property list<string> settingsHome: ["iris.appearance.scheme", "iris.appearance.accent", "iris.appearance.look", "iris.appearance.glass.mode", "notifications.silent", "nightLight", "gameMode"]
         // Looks saved from iRiS Studio: [{ name, values: { "iris.…": value } }].

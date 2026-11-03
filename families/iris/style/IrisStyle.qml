@@ -1357,6 +1357,11 @@ QtObject {
     // A line voice (Nothing, a Design whose marks are glyphs) draws its marks in ink and its buttons as hairlines.
     readonly property bool lineMarks: root.trait("marks") === "glyph" || root.mono
     readonly property bool plainMarks: root.lineMarks || root.glyphPack
+    // Settings › Settings window › Original design: today's pages as v2.33 drew them (plated marks, an area's groups in
+    // one list, a sidebar without captions); a Design that draws its own page keeps it.
+    readonly property bool settingsOriginal: root.appearance?.settingsOriginal === true && IrisDesign.skin("settingsPage").length === 0
+    // Settings' marks: in Original a plate whatever the icon pack, unless a line voice draws glyphs.
+    readonly property bool settingsPlainMarks: root.settingsOriginal ? root.lineMarks : root.plainMarks
     // Auto: each area's colour, and the ink in a line voice.
     readonly property string iconColour: {
         const wanted = String(root.iconOptions.colour ?? "auto")

@@ -34,7 +34,8 @@ Rectangle {
         : IrisStyle.plateBlackBase
 
     // A Design whose marks are glyphs alone (AIRISU) draws no plate: the glyph in its line weight, in the ink.
-    readonly property bool plain: IrisStyle.plainMarks
+    // Settings binds its own (IrisStyle.settingsPlainMarks): its Original design plates every mark.
+    property bool plain: IrisStyle.plainMarks
     // Synth: a keycap on its drop edge, the glyph printed in ink and the area's colour as its LED. Gel: a gem of the
     // colour under a light cap.
     readonly property bool keyed: !root.plain && IrisStyle.marksStyle === "key"

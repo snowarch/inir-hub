@@ -295,6 +295,7 @@ Flickable {
                     Behavior on color { ColorAnimation { duration: IrisStyle.duration(110); easing.type: IrisStyle.feedbackEasing } }
                 }
                 IrisSquircle {
+                    plain: IrisStyle.settingsPlainMarks
                     id: mark
                     anchors.left: parent.left
                     anchors.leftMargin: 14 * root.d
