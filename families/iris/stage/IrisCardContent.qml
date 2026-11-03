@@ -917,11 +917,6 @@ Item {
                     : AnimeService.lastError.length > 0 && !AnimeService.loading ? Translation.tr("AniList didn't answer (´・ω・`)")
                     : Translation.tr("Nothing scheduled yet")
                 IrisIconButton {
-                    materialIcon: "open_in_full"
-                    Accessible.name: Translation.tr("Open the Anime Corner")
-                    onClicked: { root.close(); IrisState.animeCornerOpen = true }
-                }
-                IrisIconButton {
                     enabled: Network.online
                     materialIcon: "refresh"
                     Accessible.name: Translation.tr("Check again")

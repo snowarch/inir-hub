@@ -77,8 +77,6 @@ Singleton {
     // An answer decided before ani-cli asks: skipping from the Island quits the
     // player, and the question that follows is answered with where to go.
     property string _autoAnswer: ""
-    // This run was started with its episode (play()), so ani-cli never asks for one.
-    property bool _episodeGiven: false
 
     // idle -> searching (ani-cli is asking which show or episode) -> launching (an
     // episode is resolving, no player yet) -> playing -> between (the player closed,
@@ -266,8 +264,7 @@ Singleton {
     function choose(value: string): void {
         if (!root.pick || !root.running) return
         const action = root.betweenEpisodes ? String(value) : ""
-        // With the episode given (-e), picking the show is what plays it.
-        const plays = root.pickingEpisode || root.pickingQuality || (root.pickingShow && root._episodeGiven)
+        const plays = root.pickingEpisode || root.pickingQuality
             || action === "next" || action === "replay" || action === "previous"
         root.pick = null
         ShellExec.writeFileViaShell(root.runDir + "/response", String(value) + "\n")
@@ -326,35 +323,6 @@ Singleton {
         }
     }
 
-    // The history entry of a show known by these titles (AniList's romaji, English, native), or null.
-    function entryFor(titles: var): var {
-        const keys = (titles ?? []).map(title => root.progressKey({ title: title })).filter(key => key.length > 0)
-        return keys.length > 0 ? (root.shows.find(entry => keys.includes(root.progressKey(entry))) ?? null) : null
-    }
-
-    // One episode of a show as the Anime Corner's grid shows it: seen, how far in, never started.
-    function episodeState(entry: var, episode: string): var {
-        const saved = entry ? (root.progress?.[root.progressKey(entry)]?.[String(episode)] ?? null) : null
-        const duration = Number(saved?.duration) || 0
-        return { seen: saved !== null && root._finished(saved),
-            progress: saved && duration > 0 ? Math.max(0, Math.min(1, (Number(saved.seconds) || 0) / duration)) : 0 }
-    }
-
-    // A chosen episode, from the Anime Corner. A show in the history is played under its history title, checked like
-    // a resume; any other goes through ani-cli's own search (its menu here picks the show), so nothing is expected.
-    function play(entry: var, title: string, episode: string): void {
-        const name = String(entry?.title ?? title ?? "").trim()
-        const wanted = String(episode ?? "").trim()
-        if (!root.canTarget || root.busy || name.length === 0 || wanted.length === 0) return
-        root.query = name
-        root.session = entry ? { key: root.progressKey(entry), title: name, episode: wanted } : null
-        root._start(["-e", wanted, name], entry ? name : "")
-        root._episodeGiven = true
-        root.phase = entry ? "launching" : "searching"
-        // A search with one result plays at once, unasked: listen from the start (choose() listens again after a pick).
-        mpv.begin(root.runDir + "/mpv.sock", root.runDir + "/reject")
-    }
-
     function targetEpisodeOf(entry: var): string {
         return root.stateOf(entry).episode
     }
@@ -376,7 +344,6 @@ Singleton {
         root._pid = 0
         root._cancelled = false
         root._autoAnswer = ""
-        root._episodeGiven = false
         const flags = []
         if (root.audio === "dub") flags.push("--dub")
         if (root.skipIntro && root.hasAniSkip) flags.push("--skip")

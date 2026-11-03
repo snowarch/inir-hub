@@ -2,7 +2,6 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import Quickshell
-import Quickshell.Io
 import qs
 import qs.services
 import qs.modules.common
@@ -14,8 +13,6 @@ import qs.modules.iris.style
 import qs.modules.iris.pieces
 import qs.modules.iris.settings
 import qs.modules.iris.studio
-import qs.modules.iris.animeCorner
-import qs.modules.iris.corner
 import qs.modules.iris.lock
 import qs.modules.iris.sidebar
 import qs.modules.iris.orbit
@@ -146,42 +143,6 @@ Item {
         open: IrisState.studioOpen
         closeGraceMs: IrisStyle.settleDuration + 120
         component: IrisStudio {}
-    }
-
-    // The Anime Corner opens where Settings does: over the desktop or in a window (iris.appearance.settingsHost).
-    OnDemandPanelLoader {
-        identifier: "irisAnimeCorner"
-        requireEnabledPanel: false
-        open: IrisState.animeCornerOpen
-        extraCondition: !root.settingsWindowed
-        closeGraceMs: IrisStyle.settleDuration + 120
-        component: IrisCornerOverlay { namespace: "quickshell:iris-anime"; open: IrisState.animeCornerOpen; body: IrisAnimeCorner {} }
-    }
-    OnDemandPanelLoader {
-        identifier: "irisAnimeCornerWindow"
-        requireEnabledPanel: false
-        open: IrisState.animeCornerOpen
-        extraCondition: root.settingsWindowed
-        closeGraceMs: 0
-        component: IrisCornerWindow {
-            title: "iNiR Anime Corner"
-            open: IrisState.animeCornerOpen
-            onCloseRequested: IrisState.animeCornerOpen = false
-            body: IrisAnimeCorner { windowed: true }
-        }
-    }
-    IpcHandler {
-        target: "irisAnime"
-        /// Open or close the Anime Corner
-        function toggle(): void { IrisState.animeCornerOpen = !IrisState.animeCornerOpen }
-        /// Open the Anime Corner
-        function open(): void { IrisState.animeCornerOpen = true }
-        /// Close the Anime Corner
-        function close(): void { IrisState.animeCornerOpen = false }
-        /// Open the Anime Corner searching for a show
-        function search(text: string): void { IrisState.animeCornerQuery = text; IrisState.animeCornerOpen = true }
-        /// Open the Anime Corner on a place: home, continue, following, popular, trending, top, season, calendar, genre:<name> or anime:<AniList id>
-        function go(place: string): void { IrisState.animeCornerPlace = place; IrisState.animeCornerOpen = true }
     }
 
     OnDemandPanelLoader {
