@@ -22,6 +22,9 @@ jobs:
         with:
           go-version: "1.26"
       - name: The inir command (its hub verbs check and build the catalogue)
+        # straight from GitHub: the module proxy can serve the commit before a new rule for a few minutes
+        env:
+          GOPROXY: direct
         run: go install github.com/snowarch/inir-cli/cmd/inir@main
       - name: The reviewer's card for each changed item
         if: always() && github.event_name == 'pull_request'
