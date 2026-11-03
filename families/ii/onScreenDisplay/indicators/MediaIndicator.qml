@@ -5,6 +5,7 @@ import qs.modules.common.functions
 import qs.modules.shared.mediaControls.components
 import qs.services
 import QtQuick
+import Quickshell
 import QtQuick.Layouts
 
 Item {
