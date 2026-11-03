@@ -306,7 +306,8 @@ Loader {
             // Over a pop-up button it is at least as wide as the button, so the button never shows past it.
             width: Math.round(Math.min((root.compact ? 300 : 360) * root.d,
                 Math.max((root.compact ? 176 : 236) * root.d, column.implicitWidth + 2 * root.pad,
-                    popup.toward === "over" ? popup.target.width - root.overTextX + root.pad + popup.textInset : 0)))
+                    // The ask, not popup.toward: that one reads this width back through the placement, and only the ask says "over".
+                    root.opensToward === "over" ? popup.target.width - root.overTextX + root.pad + popup.textInset : 0)))
             height: Math.round(column.implicitHeight + 2 * root.pad)
             onClosed: if (!menu.open) root.active = false
 
