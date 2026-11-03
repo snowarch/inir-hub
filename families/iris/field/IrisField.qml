@@ -200,7 +200,7 @@ Item {
         width: root.bounds.width
         height: root.bounds.height
         // One shader per texture: every look in one pass cost every Intel laptop its frames (IrisField.frag).
-        fragmentShader: Qt.resolvedUrl("IrisField" + (IrisStyle.afterglow ? "Glow" : IrisStyle.leak ? "Leak" : IrisStyle.streak ? "Streak" : "") + ".frag.qsb")
+        fragmentShader: Qt.resolvedUrl("IrisField" + (IrisStyle.afterglow ? "Glow" : IrisStyle.leak ? "Leak" : IrisStyle.streak ? "Streak" : "Plain") + ".frag.qsb")
         blending: true
         // Kept as a texture: a frame the chassis draws for its content alone (a bubble's live number, the clock) copies it
         // instead of running the field over the output again. The pass reruns only when a uniform or a texture it reads
