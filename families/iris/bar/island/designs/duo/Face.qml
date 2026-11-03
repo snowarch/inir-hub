@@ -42,7 +42,7 @@ Item {
     readonly property color skyTop: root.overcast && !root.night ? Qt.tint(root.skies[root.hour][0], "#99808a98") : root.skies[root.hour][0] // iris-literal: cloud over a painted sky
     readonly property color skyFoot: root.overcast && !root.night ? Qt.tint(root.skies[root.hour][1], "#99c4c9d0") : root.skies[root.hour][1] // iris-literal: cloud over a painted sky
     readonly property string temperature: Weather.enabled && !String(Weather.data?.temp ?? "--").startsWith("--")
-        ? String(Weather.data?.temp ?? "").replace(/[^\d-]/g, "") + "°" : ""
+        ? (String(Weather.data?.temp ?? "").match(/-?\d+(?:[.,]\d+)?/) ?? [""])[0] + "°" : ""
     readonly property real daylight: Math.max(0, Math.min(1, (root.at - root.rise) / Math.max(0.01, root.fall - root.rise)))
 
     Row {

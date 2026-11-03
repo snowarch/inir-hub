@@ -32,7 +32,7 @@ Item {
         if (root.entry.title.length > 0) list.push({ glyph: "event", text: root.entry.title, note: root.entry.when })
         if (root.weatherReady)
             list.push({ glyph: Icons.getWeatherIcon(Weather.data?.wCode, night) ?? "cloud",
-                text: String(Weather.data?.temp ?? "").replace(/[^\d-]/g, "") + "°", note: String(Weather.data?.description ?? "") })
+                text: (String(Weather.data?.temp ?? "").match(/-?\d+(?:[.,]\d+)?/) ?? [""])[0] + "°", note: String(Weather.data?.description ?? "") })
         const sun = IrisFaceData.dayShare(night ? Weather.data?.sunrise : Weather.data?.sunset)
         if (sun >= 0) {
             const at = new Date(now)
