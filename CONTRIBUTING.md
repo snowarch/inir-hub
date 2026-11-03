@@ -1,44 +1,93 @@
 # Contributing
 
-Anything in the Hub installs with one command and removes cleanly. To keep it that way, every item follows the same shape, and CI checks it.
+Most items here are written with an AI assistant, so this page is written for it as much as for you. Give your
+assistant this file and what you want to make. It works in a loop: write, run `inir hub check`, fix what it prints, and
+stop only when it prints `nothing to fix`. CI runs the same check on your pull request, with the same messages, so
+an item that passes on your machine passes there, and one that doesn't comes back to you to fix.
+
+## What to make
+
+| You want | Make | Folder |
+| --- | --- | --- |
+| A widget for the Material desktop, the iRiS Island or Waffle's Widgets panel | a widget | `widgets/<id>/` |
+| Colours for Material, Waffle and the apps iNiR themes | a colour theme | `themes/<id>/` |
+| A whole iRiS look: material, colour, shape, motion | an iRiS theme | `iris-themes/<id>/` |
+| A website as a tab in Material's sidebar | a web app | `webapps/<id>/` |
+| Something the shell runs or sets up with no panel of its own (like `fastfetch`) | a component | `components/<id>/` |
+| A fix or a feature in Material, iRiS or Waffle: a page, a panel, a card, a Place | a change to that family | `families/ii/`, `families/iris/`, `families/waffle/` |
+
+A component can't add a panel, a window or an IPC target yet: the shell loads those only from a family. A feature that
+needs one is a change to its family, made under [the family rules](#changing-a-family).
 
 ## The path
 
-1. Fork this repository and start from a template:
+1. Fork this repository. For a new item, start from its template (the id is the folder name: 3 to 48 characters,
+   lowercase letters, digits and dashes, and what people type in `inir hub install`):
 
    ```sh
-   inir hub new widget my-clock --author your-github-handle
+   inir hub new widget my-clock --author your-github-handle    # or theme, iris-theme, webapp
    ```
 
-   Kinds: `widget`, `theme`, `iris-theme`, `webapp`. The id is the folder name: 3 to 48 characters, lowercase letters, digits and dashes. It is also what people type in `inir hub install`.
+   For a family, work in its folder.
 
-2. Make it, add a preview, and validate:
+2. Read before writing. A new item: the example of its kind (`widgets/countdown`, `widgets/shell-line`,
+   `themes/tidepool`, `iris-themes/moss-garden`, `webapps/excalidraw`). A family: the code beside what you change, and
+   the parts it already has for it. Use those parts (import them, pass them what they need); never copy one and edit
+   the copy, or the shell ends up with two of the same thing that drift apart.
+
+3. Check, and repeat until it prints `nothing to fix`:
 
    ```sh
-   inir hub validate widgets/my-clock
+   inir hub check
    ```
 
-3. Try it installed, the way people will get it:
+4. Try it running, the way people will get it:
 
    ```sh
-   inir hub build
-   INIR_HUB_SOURCES=$PWD/dist inir hub install my-clock
-   inir logs --issues            # nothing new from your item
-   INIR_HUB_SOURCES=$PWD/dist inir hub remove my-clock
+   # an item
+   inir hub build && INIR_HUB_SOURCES=$PWD/dist inir hub install my-clock
+   # a family: put your copy in place of the installed one, then restart the shell
+   inir hub link families/iris && inir restart
    ```
 
-4. Send it. With `gh` logged in, this checks it once more, commits it on its own branch, pushes to your fork and opens
+   Open what you made or changed and go through every state: empty, loading, failed, full, light and dark, small and
+   large scale. `inir logs --issues` must show nothing new from it. Then go back: `INIR_HUB_SOURCES=$PWD/dist inir hub
+   remove my-clock`, or for a family `inir hub link ~/.local/share/inir/plugins/iris && inir restart`.
+
+5. Send it. With `gh` logged in this checks it once more, commits it on its own branch, pushes to your fork and opens
    the pull request with the reviewer's card as its body (`--dry-run` shows the steps first):
 
    ```sh
    inir hub submit widgets/my-clock
    ```
 
-   Without `gh`: commit only your item's folder on a branch, push it and open the pull request yourself. `dist/` is
-   built by CI; leave it out.
+   Without `gh`: commit your item's folder on a branch, push it and open the pull request yourself.
 
-Once it is merged, the item gets a thread in Discussions > Reviews. People vote there (a thumbs up or down on the first
-post, or `inir hub rate my-clock up`) and say what works; its downloads are counted from the packages release.
+Once it is merged, the item gets a thread in Discussions › Reviews. People vote there (a thumbs up or down on the first
+post, or `inir hub rate my-clock up`) and say what works; its downloads are counted from the packages release. It
+reaches people within the hour: inir.space/hub rebuilds from `main`, and `inir hub update` (or a family through
+`inir update`) brings it.
+
+## What `inir hub check` holds you to
+
+It reads what your branch changed since `origin/main` (`--base REF` for another branch), committed or not.
+
+| Rule | Why |
+| --- | --- |
+| One item per pull request: its folder, and its page under `docs/<id>/`, nothing else. | A pull request can't break what it doesn't touch. `dist/`, `schema/`, `tools/`, workflows and other items stay as they are on `main`. |
+| The item validates (`inir hub validate <folder>`): its files, listing, preview and permissions. | What the Hub shows and installs comes from these. |
+| A changed item raises its `version`, in `hub.json` and the native file alike. | Installed copies update only when the version moves, and a published version never changes its contents. |
+| Every `IpcHandler` has a `///` comment right above it (one line on what the target is for), and every function in it has one too. | `inir help` and the IPC reference on inir.space are built from them. |
+| A language the item ships holds every string its `en_US.json` holds. | A language you don't ship shows English; one that is half there mixes two languages on one screen. |
+| The lines you add take colours from the family's tokens: no `"#rrggbb"`, no `Qt.rgba(0.2, …)` with numbers. | The person's theme and light or dark scheme reach only what reads the tokens. |
+| In a file that draws with `IrisStyle`, no alpha of its own: no `ColorUtils.applyAlpha(x, 0.4)`. | iRiS has a token for every fill, ink and veil; its looks and Designs restyle them. |
+| No fixed font sizes (`font.pixelSize: 14`). | The person's scale reaches only the family's type tokens. |
+| No `Qt5Compat.GraphicalEffects`. | It isn't on every distro iNiR runs on; `QtQuick.Effects` (`MultiEffect`) is. |
+| Every QML file parses with Qt 6.12, the Qt iNiR runs on (CI). | A file that doesn't parse fails on every desktop that installed it, the moment someone opens it. |
+
+A literal that is the point (a flag's own red, a gradient's fade) ends its line with why: `// literal: the flag's red`,
+or in iRiS `// iris-literal: the banner's fade`. Token files themselves (a family's `style/` or `looks/` folder) are
+where literals belong.
 
 ## Every item
 
@@ -50,12 +99,13 @@ An item is a folder with the file iNiR itself reads, plus `hub.json` for the lis
 | Colour theme | `themes/<id>/` | `theme.json` | `~/.config/inir/themes/<id>.json` |
 | iRiS theme | `iris-themes/<id>/` | `theme.json` | `~/.config/inir/iris/themes/<id>.json` |
 | Web app | `webapps/<id>/` | `manifest.json` | `~/.config/inir/plugins/<id>/` |
+| Family, component | `families/<id>/`, `components/<id>/` | `plugin.json` and its QML | `~/.local/share/inir/plugins/<id>/`, linked at its `provides` |
 
 `hub.json`:
 
 | Field | |
 | --- | --- |
-| `version` | `x.y.z`. Raise it with every change; CI compares it with `main`. For widgets and web apps it matches the version in the native file. |
+| `version` | `x.y.z`. Raise it with every change. For widgets, web apps, families and components it matches the version in the native file. |
 | `summary` | What the card says, 8 to 80 characters: two lines on the smallest card. Say what it does, not what it is. |
 | `description` | Optional, up to 600 characters. Widgets and themes take it from their own file. |
 | `authors` | GitHub handles. |
@@ -65,13 +115,15 @@ An item is a folder with the file iNiR itself reads, plus `hub.json` for the lis
 | `minInir` | The oldest iNiR it works on, if it needs something recent. |
 | `preview` | The screenshot file. Optional for themes. |
 
-`README.md` in the folder is the item's page on GitHub: what it does, how to set it up, what each setting means. It is not installed.
+`README.md` in the folder is the item's page on GitHub: what it does, how to set it up, what each setting means. It is
+not installed.
 
 ## Widgets
 
 One widget can have three faces. Give it the ones you can make well; the Hub says where it shows.
 
-**Start with [the Material guide](guides/material.md).** It shows the shapes, bars, looks and states the built-in widgets use, and what a widget needs to sit beside them.
+**Start with [the Material guide](guides/material.md).** It shows the shapes, bars, looks and states the built-in
+widgets use, and what a widget needs to sit beside them.
 
 | Face | `widget.json` | Draws with | Look at |
 | --- | --- | --- | --- |
@@ -81,38 +133,90 @@ One widget can have three faces. Give it the ones you can make well; the Hub say
 
 What makes a widget belong:
 
-- **Each face uses its family's own tokens.** No hex colours, no hand-picked font sizes: the user's theme, scale and light or dark scheme must reach your widget. A Material face reads `root.widgetInk` for ink, so it stays readable on any wallpaper.
-- **Shared logic lives in one `.js` file** that every face imports, like `countdown.js`. Faces only lay things out, so they never disagree.
-- **Settings are `configKeys`** in `widget.json`. iNiR draws the controls; faces read them with `root._readConfigKey(key)` (desktop) or `CustomWidgets.getConfigValue("<id>", key, fallback)` (Island and Waffle).
+- **Each face uses its family's own tokens.** A Material face reads `root.widgetInk` for ink, `root.widgetInkMuted` and
+  `root.widgetInkSubtle` for quieter text, and `root.widgetAccent…` for colour, so it stays readable on any wallpaper.
+- **Shared logic lives in one `.js` file** that every face imports, like `countdown.js`. Faces only lay things out, so
+  they never disagree.
+- **Settings are `configKeys`** in `widget.json`. iNiR draws the controls; faces read them with
+  `root._readConfigKey(key)` (desktop) or `CustomWidgets.getConfigValue("<id>", key, fallback)` (Island and Waffle).
 - **The desktop face's `configEntryName` is `"custom.<id>"`.** That is where its position and settings are saved.
-- **It costs nothing while nobody looks.** Clocks tick by the minute when minutes are enough (`SystemClock.Minutes`); timers and processes run only while `visible` (and `motionActive` on the desktop, after a first run).
-- **Every state has words.** Empty, loading and failed each show something useful, never a blank card. `shell-line` shows what a failing command printed.
+- **It costs nothing while nobody looks.** Clocks tick by the minute when minutes are enough (`SystemClock.Minutes`);
+  timers and processes run only while `visible` (and `motionActive` on the desktop, after a first run).
+- **Every state has words.** Empty, loading and failed each show something useful, never a blank card. `shell-line`
+  shows what a failing command printed.
 
 ## Colour themes
 
-`theme.json` is a Material palette: `name`, `description`, `author`, `darkmode`, and every `m3…` colour as `#rrggbb`. The template lists the ones iNiR needs. Applying it colours Material and Waffle and every app iNiR themes, and it lands in Settings › Themes beside the user's own.
+`theme.json` is a Material palette: `name`, `description`, `author`, `darkmode`, and every `m3…` colour as `#rrggbb`.
+The template lists the ones iNiR needs. Applying it colours Material and Waffle and every app iNiR themes, and it lands
+in Settings › Themes beside the user's own.
 
-The Hub draws your theme as a small Material desktop wearing it: bar, media card, toggles and notification, all in your colours. A real screenshot is welcome too: set `preview`.
+The Hub draws your theme as a small Material desktop wearing it: bar, media card, toggles and notification, all in your
+colours. A real screenshot is welcome too: set `preview`.
 
 ## iRiS themes
 
-An iRiS theme is a whole look: material, glass, colour, shape, type and motion. Make it in iRiS (Settings, or Customize on the Island), then:
+An iRiS theme is a whole look: material, glass, colour, shape, type and motion. Make it in iRiS (Settings, or Customize
+on the Island), then:
 
 ```sh
 inir iris theme export        # the look on screen, as a theme file
 ```
 
-Put that in `theme.json`, set `"id"` to your folder name and keep only the `values` your theme is about. iRiS's own theme ids (`frost`, `afterglow`, `sakura`…) are taken.
+Put that in `theme.json`, set `"id"` to your folder name and keep only the `values` your theme is about. iRiS's own
+theme ids (`frost`, `afterglow`, `sakura`…) are taken.
 
 The Hub draws a card from your accent, highlight and shape. A real screenshot says more: set `preview`.
 
 ## Web apps
 
-`manifest.json`: `id` (the folder name), `name`, `url` (https only), `icon` (a [Material Symbols](https://fonts.google.com/icons) name), `version`, `display: "tab"`. It opens as a tab in Material's left sidebar, signed in as you, with the site's own storage.
+`manifest.json`: `id` (the folder name), `name`, `url` (https only), `icon` (a
+[Material Symbols](https://fonts.google.com/icons) name), `version`, `display: "tab"`. It opens as a tab in Material's
+left sidebar, signed in as you, with the site's own storage.
 
 A web app that ships scripts to run inside the page declares `inject`.
 
-## Families, components and Designs
+## Changing a family
+
+Material (`ii`), iRiS and Waffle are the shell itself: whatever merges here reaches everyone who uses that family on
+their next `inir update`. A change to one keeps everything `inir hub check` holds, and:
+
+- **It is one change.** One fix or one feature per pull request, described in a sentence. Raise the family's version in
+  `hub.json` and `plugin.json`.
+- **It draws with the family.** iRiS: `IrisStyle.*` tokens and the `Iris*` parts in `components/`, `style/`, `frame/`.
+  Material: `Appearance.*` and the kit in `kit/`. Waffle: `Looks.*` and the `W*` parts. Read how the surface beside
+  yours is built and build yours the same way.
+- **It reuses what is there.** If your feature needs something a part of the family already does (a layout, a size, a
+  list, a search field), import that part, or move the shared piece into its own file that both use, in the same pull
+  request. A second copy of the same logic is sent back.
+- **Its state has one home.** State the family keeps goes in its state singleton (`state/IrisState.qml` in iRiS);
+  settings go in its config schema with a default, and in its Settings page if people should change them.
+- **Every string is translated.** Wrap what people read in `Translation.tr("English text")`. Add each new key to
+  `translations/en_US.json` and translate it in every other file in that folder: the three families ship all 18
+  languages (`ar_SA de_DE en_US es_419 fr_FR he_HE hi_IN id_ID it_IT ja_JP kl_GL ko_KR pt_BR ru_RU tr_TR uk_UA vi_VN
+  zh_CN`). Keep `%1` placeholders and the meaning; a proper name (AniList, ani-cli) stays as it is.
+- **A new IPC target is documented** with `///` above it and above each function, and a ```` ```kdl ```` fence in the
+  comment when a keybind for it makes sense:
+
+  ```qml
+  /// The Anime Corner: find any show on AniList and watch it with ani-cli.
+  ///
+  /// ```kdl
+  /// Mod+A { spawn "inir" "irisAnime" "toggle"; }
+  /// ```
+  IpcHandler {
+      target: "irisAnime"
+      /// Open or close it
+      function toggle(): void { … }
+  }
+  ```
+
+- **It is quiet at rest.** Nothing fetched, polled or animated while it is closed or hidden; a timer or a `Process`
+  runs only while what it feeds is on screen.
+- **It has its page.** What people see changed is described in the family's docs, `docs/<id>/` (the same pull request).
+- **It was tried running** (step 4 above) in the family's every look it touches. Say which in the pull request.
+
+## Families, components and Designs: the files
 
 These are shell code: `plugin.json` names the parts the base loads, and `hub.json` says where it links in the shell
 (`provides`, like `modules/iris`). Every folder that holds types carries a `qmldir` listing all of them. Stock
@@ -122,9 +226,12 @@ Quickshell reads those instead of scanning your plugin at every start, and trust
 ## Previews
 
 - A real screenshot of the item running. No mockups.
-- Widgets: `inir background widgetSnapshot custom.<id> shot.png` at 200 %, then `inir hub preview widgets/<id> --wallpaper <image> --shot shot.png` frames it the way every card is framed.
-- Anything else (a web app, a family, a component): a screenshot of the screen with it open, then `inir hub preview <folder> --shot screenshot.png` crops it to fill the card.
-- 1280×800 (16:10), the size of every card in the Hub and on inir.space; `inir hub validate` holds it and `inir hub preview` makes exactly that. WebP (or PNG or JPEG), under 700 KB.
+- Widgets: `inir background widgetSnapshot custom.<id> shot.png` at 200 %, then `inir hub preview widgets/<id>
+  --wallpaper <image> --shot shot.png` frames it the way every card is framed.
+- Anything else (a web app, a family, a component): a screenshot of the screen with it open, then `inir hub preview
+  <folder> --shot screenshot.png` crops it to fill the card.
+- 1280×800 (16:10), the size of every card in the Hub and on inir.space; `inir hub validate` holds it and `inir hub
+  preview` makes exactly that. WebP (or PNG or JPEG), under 700 KB.
 - The item large enough to read when the card is small. Crop around it.
 - A wallpaper that leaves it readable, and nothing private: no messages, notifications, names, places or file paths.
 
@@ -137,7 +244,8 @@ Quickshell reads those instead of scanning your plugin at every start, and trust
 | `files` | reads or writes files outside its folder (`FileView`, `FolderListModel`) |
 | `inject` | (web apps) runs scripts inside the site it opens |
 
-CI greps for these. Code that does something its `hub.json` does not declare fails; a permission nothing uses is a warning. The Hub shows them on the card and before install.
+CI greps for these. Code that does something its `hub.json` does not declare fails; a permission nothing uses is a
+warning. The Hub shows them on the card and before install.
 
 Never accepted, whatever it declares:
 
@@ -148,16 +256,22 @@ Never accepted, whatever it declares:
 
 ## Review
 
-A maintainer reads every pull request. What gets looked at:
+`inir hub check` and CI hold the rules above; a maintainer reads what no check can:
 
 - it does what the summary says, in each family it claims;
-- it looks like it belongs there: the family's tokens and parts, sizes on the family's grid;
-- it is quiet at idle;
+- it looks like it belongs there: the family's parts, sizes on the family's grid, every state worded;
+- it reuses the family instead of copying it, and is quiet at idle;
 - the permissions are honest and the license allows sharing;
 - the preview is real.
 
-The item stays yours. You are listed as its author, and later changes come as pull requests that raise its version. An item that breaks on a new iNiR and is not fixed may be hidden until it is.
+A pull request that needs changes gets them listed, and its author makes them on the same branch: push again and CI
+runs again. The item stays yours. You are listed as its author, and later changes come as pull requests that raise its
+version. An item that breaks on a new iNiR and is not fixed may be hidden until it is.
 
 ## Translations
 
-The key is the English text you pass to `Translation.tr()`. A plugin that lives in `modules/<id>` can keep its own strings in `translations/<locale>.json`, one file per language: the shell reads them while the plugin is installed, and a language you don't ship simply shows English. A file holds `"English text": "translated text"` and nothing else.
+The key is the English text you pass to `Translation.tr()`. A plugin that lives in `modules/<id>` keeps its own strings
+in `translations/<locale>.json`, one file per language, each holding `"English text": "translated text"` and nothing
+else; `en_US.json` lists every key. The shell reads them while the plugin is installed. Ship only the languages you can
+translate whole: one you leave out shows English. A change to a family adds its strings to every language the family
+ships.

@@ -1,8 +1,9 @@
 name: Publish
 
-# The catalogue is served from inir.space/hub: inir-site's deploy builds it from this repo on every deploy (and
-# daily). A merge here asks it to deploy now when the SITE_DISPATCH_TOKEN secret (a token that can dispatch to
-# snowarch/inir-site) is set; without it the next daily build picks the change up.
+# The catalogue is served from inir.space/hub: inir-site's deploy builds it from this repo. Its deploy looks at this
+# repo's main every 20 minutes and builds when main moved, so a merge reaches people with no token at all. With the
+# SITE_DISPATCH_TOKEN secret (a fine-grained token on snowarch/inir-site with Contents: read and write) a merge asks
+# for the deploy at once; a token that stopped working fails this run instead of passing in silence.
 on:
   push:
     branches: [main]
@@ -19,5 +20,9 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.SITE_DISPATCH_TOKEN }}
         run: |
-          if [ -z "$GH_TOKEN" ]; then echo "no SITE_DISPATCH_TOKEN: the daily site build publishes this"; exit 0; fi
+          if [ -z "$GH_TOKEN" ]; then
+            echo "::notice::No SITE_DISPATCH_TOKEN: inir.space's deploy picks this commit up on its next look (every 20 minutes)."
+            exit 0
+          fi
           gh api repos/snowarch/inir-site/dispatches -f event_type=hub-updated
+          echo "inir.space is deploying ${GITHUB_SHA::7}"

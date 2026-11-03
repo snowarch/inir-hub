@@ -1,5 +1,8 @@
 name: Check
 
+# What a pull request must pass before a maintainer reads it, and what main must keep. `inir hub check` runs the same
+# rules on the author's machine (CONTRIBUTING.md): an item that passes there passes here. Every step reports even
+# when one before it failed, so one run lists everything to fix.
 on:
   pull_request:
   push:
@@ -26,10 +29,29 @@ jobs:
           dirs=$(git diff --name-only "origin/${{ github.base_ref }}...HEAD" | cut -d/ -f1-2 | sort -u |
             while read -r d; do [ -f "$d/hub.json" ] && echo "$d"; done)
           [ -z "$dirs" ] || inir hub audit --markdown $dirs >> "$GITHUB_STEP_SUMMARY" || true
+      - name: The pull request (one item, version raised, IPC documented, every language whole, tokens)
+        if: ${{ !cancelled() && github.event_name == 'pull_request' }}
+        run: inir hub check --base "origin/${{ github.base_ref }}"
+      # The Qt iNiR runs on: qs-rs bundles 6.12.0 (qs-rs release.yml QT_VERSION); keep this pin in step with it. A file
+      # that does not parse fails only when someone opens it, on every desktop that installed it.
+      - uses: actions/setup-python@v5
+        if: ${{ !cancelled() }}
+        with:
+          python-version: "3.13"
+      - name: Every QML file parses
+        if: ${{ !cancelled() }}
+        run: |
+          pip install --quiet --no-deps "PySide6-Essentials==6.12.0" "shiboken6==6.12.0"
+          broken=$(find families components designs widgets templates -name '*.qml' -print0 2>/dev/null |
+            xargs -0 -n 60 -P 4 pyside6-qmllint --bare 2>&1 | grep -a '\[syntax\]' | sort -u || true)
+          if [ -n "$broken" ]; then
+            echo "$broken" | sed -E 's/^Warning: ([^:]+):([0-9]+):[0-9]+: (.*)$/::error file=\1,line=\2::\3/'
+            exit 1
+          fi
+          echo "every QML file parses"
       - name: Validate every item
+        if: ${{ !cancelled() }}
         run: inir hub validate
-      - name: Changed items raise their version
-        if: github.event_name == 'pull_request'
-        run: inir hub bumps --base "origin/${{ github.base_ref }}"
       - name: Build
+        if: ${{ !cancelled() }}
         run: inir hub build --out "$RUNNER_TEMP/dist"

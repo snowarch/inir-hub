@@ -41,19 +41,20 @@ An install puts the item where iNiR already reads it (your widgets, themes and s
 
 ## Make something
 
-[CONTRIBUTING.md](CONTRIBUTING.md) has the whole path, and [the Material guide](guides/material.md) shows how a widget earns its place beside the built-in ones. The short one:
+[CONTRIBUTING.md](CONTRIBUTING.md) has the whole path, and [the Material guide](guides/material.md) shows how a widget earns its place beside the built-in ones. Making it with an AI assistant? Give it CONTRIBUTING.md: it is written for it too. The short one:
 
 ```sh
 inir hub new widget my-clock --author your-github-handle
-inir hub validate widgets/my-clock
+inir hub check                # until it prints: nothing to fix
 inir hub build && INIR_HUB_SOURCES=$PWD/dist inir hub install my-clock
+inir hub submit widgets/my-clock
 ```
 
-Then open a pull request. The examples here (`countdown`, `shell-line`, `tidepool`, `moss-garden`, `excalidraw`) are written to be copied.
+CI runs the same `inir hub check` on the pull request. The examples here (`countdown`, `shell-line`, `tidepool`, `moss-garden`, `excalidraw`) are written to be copied.
 
 ## Trust
 
-Every item arrives by pull request and is read before it merges. CI validates it, checks that what the code does matches the permissions it declares, and builds the packages from this repository; iNiR checks each package's sha256 before installing it. That is a review, not a guarantee: read what you install, especially anything that runs commands.
+Every item arrives by pull request and is read before it merges. CI checks that it changes only itself, validates it, checks that what the code does matches the permissions it declares, and builds the packages from this repository; iNiR checks each package's sha256 before installing it. That is a review, not a guarantee: read what you install, especially anything that runs commands.
 
 Found something that misbehaves? [Report it](https://github.com/snowarch/inir-hub/issues/new?template=report.yml).
 
