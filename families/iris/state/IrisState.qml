@@ -136,6 +136,12 @@ Singleton {
         GlobalStates.wallpaperSelectorOpen = false
         GlobalStates.wallpaperLauncherOpen = false
     }
+    // The Anime Corner (animeCorner/): the Airing and Continue shows as rows of posters, a Place of its own.
+    property bool animeCornerOpen: false
+    // A search for the Corner to type as it opens (IPC); taken and cleared by the Corner.
+    property string animeCornerQuery: ""
+    // A place for it to open on (IPC): a sidebar place, "genre:<name>" or "anime:<AniList id>"; taken and cleared too.
+    property string animeCornerPlace: ""
     // Whether any output's Island is expanded, published for `inir iris status`.
     property bool islandExpanded: false
     property string islandShape: ""

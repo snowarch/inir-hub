@@ -1,0 +1,7 @@
+module qs.modules.iris.corner
+IrisCornerBody 1.0 IrisCornerBody.qml
+IrisCornerNav 1.0 IrisCornerNav.qml
+IrisCornerOverlay 1.0 IrisCornerOverlay.qml
+IrisCornerSearch 1.0 IrisCornerSearch.qml
+IrisCornerTiles 1.0 IrisCornerTiles.qml
+IrisCornerWindow 1.0 IrisCornerWindow.qml
