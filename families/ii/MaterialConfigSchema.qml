@@ -662,6 +662,9 @@ JsonObject {
     property JsonObject settingsUi: JsonObject {
         property bool overlayMode: true // true = layer shell overlay (live preview), false = separate window
         property bool easyMode: false   // false = full Settings UI; Easy mode remains an explicit opt-in
+        // "expressive": Android 16 tiles, the wide nav pane. "classic": v2.33's window (a header with who you are, the
+        // search and the actions; the slim rail; every section one card). Same pages and options either way.
+        property string design: "expressive"
         // JSON-encoded [{label, pages:[int]}] — custom nav arrangement; "" = registry defaults.
         // String on purpose: property var inside JsonObject crashes the VME.
         property string categories: ""

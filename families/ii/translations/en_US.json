@@ -3226,5 +3226,9 @@
   "Everything drawn as an island wears these: bar islands, panels and widgets. Each keeps its own shape.": "Everything drawn as an island wears these: bar islands, panels and widgets. Each keeps its own shape.",
   "Try a change, or put every Orbit setting back.": "Try a change, or put every Orbit setting back.",
   "Focus · left": "Focus · left",
-  "Today · right": "Today · right"
+  "Today · right": "Today · right",
+  "Use the new design": "Use the new design",
+  "Use the classic design (v2.33)": "Use the classic design (v2.33)",
+  "Show every setting": "Show every setting",
+  "Classic is the Settings window of v2.33: a header with the search, a slim list of pages and every section in its own card. Every page and option is in both.": "Classic is the Settings window of v2.33: a header with the search, a slim list of pages and every section in its own card. Every page and option is in both."
 }

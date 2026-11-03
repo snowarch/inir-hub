@@ -40,10 +40,10 @@ Item {
     Rectangle {
         anchors.fill: parent
         visible: root.tileActive
-        color: SettingsMaterialPreset.tileColor
-        topLeftRadius: root.tileTop ? SettingsMaterialPreset.tileOuterRadius : SettingsMaterialPreset.tileInnerRadius
+        color: SettingsMaterialPreset.rowColor
+        topLeftRadius: root.tileTop ? SettingsMaterialPreset.rowOuterRadius : SettingsMaterialPreset.rowInnerRadius
         topRightRadius: topLeftRadius
-        bottomLeftRadius: root.tileBottom ? SettingsMaterialPreset.tileOuterRadius : SettingsMaterialPreset.tileInnerRadius
+        bottomLeftRadius: root.tileBottom ? SettingsMaterialPreset.rowOuterRadius : SettingsMaterialPreset.rowInnerRadius
         bottomRightRadius: bottomLeftRadius
     }
 
@@ -58,7 +58,7 @@ Item {
         }
         columns: root._menuRow ? 2 : 1
         columnSpacing: SettingsMaterialPreset.tilePaddingX
-        rowSpacing: root.tileActive ? 12 : SettingsMaterialPreset.tileGap
+        rowSpacing: root.tileActive ? 12 : SettingsMaterialPreset.rowGap
 
         ColumnLayout {
             readonly property string settingsTileRole: "caption"
@@ -93,7 +93,7 @@ Item {
             Layout.fillWidth: !root._menuRow
             Layout.preferredWidth: root._menuRow ? Math.round(240 * Appearance.fontSizeScale) : -1
             Layout.alignment: Qt.AlignVCenter
-            spacing: SettingsMaterialPreset.tileGap
+            spacing: SettingsMaterialPreset.rowGap
         }
     }
 }

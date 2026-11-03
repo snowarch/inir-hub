@@ -5,6 +5,7 @@ import qs.modules.common.widgets
 
 // A section of a Settings page: its name in the accent, then its settings as segmented tiles. Never folded: what a
 // page holds is seen by scrolling, not by opening boxes (folding hid settings people then searched for).
+// Classic (SettingsMaterialPreset.classic, v2.33's look): one bordered card holding its icon, its title and its rows.
 Item {
     id: root
 
@@ -20,8 +21,10 @@ Item {
     property int settingsSearchOptionId: -1
 
     Layout.fillWidth: true
-    implicitHeight: column.implicitHeight
-    implicitWidth: column.implicitWidth
+    readonly property bool classic: SettingsMaterialPreset.classic
+    readonly property int inset: root.classic ? SettingsMaterialPreset.cardPadding : 0
+    implicitHeight: column.implicitHeight + root.inset * 2
+    implicitWidth: column.implicitWidth + root.inset * 2
 
     // blocks the tile layout found loose in this section (SettingsMaterialPreset.layoutTiles): their tiles are here
     property var _blocks: []
@@ -83,6 +86,16 @@ Item {
         }
     }
 
+    Rectangle {
+        id: card
+        visible: root.classic
+        anchors.fill: parent
+        radius: SettingsMaterialPreset.cardRadius
+        color: SettingsMaterialPreset.cardColor
+        border.width: SettingsMaterialPreset.cardBorderWidth
+        border.color: SettingsMaterialPreset.cardBorderColor
+    }
+
     Repeater {
         model: root._blocks
         delegate: Rectangle {
@@ -103,14 +116,14 @@ Item {
             readonly property real blockY: blockTile.block ? blockTile.chainY(blockTile.block) : 0
             readonly property real topY: blockTile.caption && blockTile.caption.visible ? blockTile.chainY(blockTile.caption) : blockTile.blockY
             visible: blockTile.block !== null && blockTile.block.visible
-            x: 0
+            x: column.x
             y: column.y + sectionContent.y + blockTile.topY - SettingsMaterialPreset.tilePaddingY
-            width: root.width
+            width: column.width
             height: blockTile.blockY - blockTile.topY + (blockTile.block ? blockTile.block.height : 0) + SettingsMaterialPreset.tilePaddingY * 2
-            color: SettingsMaterialPreset.tileColor
-            topLeftRadius: blockTile.modelData.tileTop ? SettingsMaterialPreset.tileOuterRadius : SettingsMaterialPreset.tileInnerRadius
+            color: SettingsMaterialPreset.rowColor
+            topLeftRadius: blockTile.modelData.tileTop ? SettingsMaterialPreset.rowOuterRadius : SettingsMaterialPreset.rowInnerRadius
             topRightRadius: topLeftRadius
-            bottomLeftRadius: blockTile.modelData.tileBottom ? SettingsMaterialPreset.tileOuterRadius : SettingsMaterialPreset.tileInnerRadius
+            bottomLeftRadius: blockTile.modelData.tileBottom ? SettingsMaterialPreset.rowOuterRadius : SettingsMaterialPreset.rowInnerRadius
             bottomRightRadius: bottomLeftRadius
         }
     }
@@ -119,10 +132,39 @@ Item {
         id: column
         anchors.left: parent.left
         anchors.right: parent.right
-        spacing: 8
+        anchors.top: parent.top
+        anchors.margins: root.inset
+        spacing: root.classic ? 4 : 8
+
+        // classic: the v2.33 header, its icon in the accent beside the title
+        RowLayout {
+            visible: root.classic && root.title.length > 0
+            Layout.fillWidth: true
+            Layout.leftMargin: SettingsMaterialPreset.tilePaddingX
+            Layout.rightMargin: SettingsMaterialPreset.tilePaddingX
+            Layout.topMargin: 6
+            Layout.bottomMargin: 2
+            spacing: 10
+            MaterialSymbol {
+                visible: root.icon.length > 0
+                text: root.icon
+                iconSize: Appearance.font.pixelSize.larger
+                color: SettingsMaterialPreset.iconExpandedColor
+            }
+            StyledText {
+                Layout.fillWidth: true
+                text: Appearance.zzzEverywhere ? root.title.toUpperCase() : root.title
+                wrapMode: Text.Wrap
+                font.family: Appearance.editorialEverywhere ? Appearance.font.family.title : Appearance.font.family.main
+                font.pixelSize: Appearance.font.pixelSize.normal
+                font.weight: Font.DemiBold
+                color: SettingsMaterialPreset.cardTitleColor
+                Accessible.role: Accessible.Heading
+            }
+        }
 
         StyledText {
-            visible: root.title.length > 0
+            visible: !root.classic && root.title.length > 0
             Layout.fillWidth: true
             Layout.leftMargin: SettingsMaterialPreset.tilePaddingX
             Layout.rightMargin: SettingsMaterialPreset.tilePaddingX

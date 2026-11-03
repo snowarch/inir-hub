@@ -3226,5 +3226,9 @@
   "Everything drawn as an island wears these: bar islands, panels and widgets. Each keeps its own shape.": "所有以岛屿形式绘制的元素都使用这些设置：栏上的岛屿、面板和小组件。各自保留自己的形状。",
   "Try a change, or put every Orbit setting back.": "试试改动，或把 Orbit 的所有设置恢复默认。",
   "Focus · left": "专注 · 左",
-  "Today · right": "今天 · 右"
+  "Today · right": "今天 · 右",
+  "Use the new design": "使用新设计",
+  "Use the classic design (v2.33)": "使用经典设计 (v2.33)",
+  "Show every setting": "显示所有设置",
+  "Classic is the Settings window of v2.33: a header with the search, a slim list of pages and every section in its own card. Every page and option is in both.": "经典是 v2.33 的设置窗口：带搜索的标题栏、窄的页面列表，每个部分都在自己的卡片里。两种设计包含相同的页面和选项。"
 }

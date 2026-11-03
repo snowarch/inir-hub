@@ -3226,5 +3226,9 @@
   "Everything drawn as an island wears these: bar islands, panels and widgets. Each keeps its own shape.": "아일랜드로 그려지는 모든 것이 이것을 입습니다: 바 아일랜드, 패널, 위젯. 각자 자기 모양은 유지합니다.",
   "Try a change, or put every Orbit setting back.": "변경을 시험해 보거나 Orbit 설정을 모두 기본값으로 되돌립니다.",
   "Focus · left": "포커스 · 왼쪽",
-  "Today · right": "오늘 · 오른쪽"
+  "Today · right": "오늘 · 오른쪽",
+  "Use the new design": "새 디자인 사용",
+  "Use the classic design (v2.33)": "클래식 디자인 사용 (v2.33)",
+  "Show every setting": "모든 설정 보기",
+  "Classic is the Settings window of v2.33: a header with the search, a slim list of pages and every section in its own card. Every page and option is in both.": "클래식은 v2.33의 설정 창입니다. 검색이 있는 헤더, 좁은 페이지 목록, 각 섹션은 자체 카드에 들어 있습니다. 모든 페이지와 옵션은 두 디자인 모두에 있습니다."
 }

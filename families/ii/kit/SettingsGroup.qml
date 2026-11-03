@@ -10,5 +10,5 @@ ColumnLayout {
     readonly property string settingsTileRole: "group"
 
     Layout.fillWidth: true
-    spacing: SettingsMaterialPreset.tileGap
+    spacing: SettingsMaterialPreset.rowGap
 }

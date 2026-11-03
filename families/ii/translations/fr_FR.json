@@ -3226,5 +3226,9 @@
   "Everything drawn as an island wears these: bar islands, panels and widgets. Each keeps its own shape.": "Tout ce qui est dessiné en îlot les porte : îlots de la barre, panneaux et widgets. Chacun garde sa propre forme.",
   "Try a change, or put every Orbit setting back.": "Essaie un changement, ou remets tous les réglages d'Orbit d'origine.",
   "Focus · left": "Focus · gauche",
-  "Today · right": "Aujourd'hui · droite"
+  "Today · right": "Aujourd'hui · droite",
+  "Use the new design": "Utiliser le nouveau design",
+  "Use the classic design (v2.33)": "Utiliser le design classique (v2.33)",
+  "Show every setting": "Afficher tous les réglages",
+  "Classic is the Settings window of v2.33: a header with the search, a slim list of pages and every section in its own card. Every page and option is in both.": "Classique est la fenêtre de Paramètres de la v2.33 : un en-tête avec la recherche, une liste étroite de pages et chaque section dans sa propre carte. Toutes les pages et options sont dans les deux."
 }

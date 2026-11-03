@@ -1170,6 +1170,20 @@ ContentPage {
         icon: "web_asset"
         title: Translation.tr("Settings UI")
 
+        // The same switch sits in each design's own chrome; here it is found by search ("classic", "design").
+        ContentSubsection {
+            title: Translation.tr("Design")
+            tooltip: Translation.tr("Classic is the Settings window of v2.33: a header with the search, a slim list of pages and every section in its own card. Every page and option is in both.")
+            ConfigSelectionArray {
+                currentValue: Config.options?.material?.settingsUi?.design ?? "expressive"
+                onSelected: newValue => Config.setNestedValue("material.settingsUi.design", newValue)
+                options: [
+                    { displayName: Translation.tr("Expressive"), icon: "view_agenda", value: "expressive" },
+                    { displayName: Translation.tr("Classic"), icon: "history", value: "classic" }
+                ]
+            }
+        }
+
         SettingsGroup {
             SettingsSwitch {
                 buttonIcon: "school"

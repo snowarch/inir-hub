@@ -25,8 +25,8 @@ Everything here is set in **Settings**, which opens with **Super+,**.
 
 ## Where things are in Settings
 
-The sidebar groups the pages. **Edit navigation** in the header, or **Settings › Arrange**, reorders or hides them;
-hidden pages stay in search.
+The sidebar groups the pages. The pencil at the top of the list (**Arrange** at its foot in the classic design), or
+**Settings › Arrange**, reorders or hides them; hidden pages stay in search.
 
 | Group | Pages |
 | --- | --- |
@@ -36,8 +36,14 @@ hidden pages stay in search.
 | System | System (audio, battery, language), AI, Services, Tools, Compositor, Monitors, Advanced, Autostart |
 | Reference | Shortcuts, About |
 
-Easy mode shows only the essential pages and sections. The button in the Settings header switches between Easy and
-Advanced.
+Easy mode shows only the essential pages and sections: **Modules › Interface › Settings UI**, or the tune button in the
+classic header.
+
+Settings comes in two designs with the same pages and options. **Expressive** (the default) gives each setting its own
+tile beside a wide list of pages; **Classic** is the window of v2.33: a header with your picture, the search and the
+actions, a slim list of pages, and every section in its own card. The history button switches between them, at the top
+of the page list in Expressive and in the header in Classic; **Modules › Interface › Settings UI › Design** holds the same
+choice.
 
 ## Its looks
 

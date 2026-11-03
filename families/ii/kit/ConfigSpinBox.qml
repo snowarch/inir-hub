@@ -106,10 +106,10 @@ Item {
 
     Rectangle {
         anchors.fill: parent
-        color: SettingsMaterialPreset.tileColor
-        topLeftRadius: root.tileTop ? SettingsMaterialPreset.tileOuterRadius : SettingsMaterialPreset.tileInnerRadius
+        color: SettingsMaterialPreset.rowColor
+        topLeftRadius: root.tileTop ? SettingsMaterialPreset.rowOuterRadius : SettingsMaterialPreset.rowInnerRadius
         topRightRadius: topLeftRadius
-        bottomLeftRadius: root.tileBottom ? SettingsMaterialPreset.tileOuterRadius : SettingsMaterialPreset.tileInnerRadius
+        bottomLeftRadius: root.tileBottom ? SettingsMaterialPreset.rowOuterRadius : SettingsMaterialPreset.rowInnerRadius
         bottomRightRadius: bottomLeftRadius
     }
 

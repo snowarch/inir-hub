@@ -3226,5 +3226,9 @@
   "Everything drawn as an island wears these: bar islands, panels and widgets. Each keeps its own shape.": "Всё, что рисуется островом, носит эти настройки: острова панели, панели и виджеты. Форма у каждого своя.",
   "Try a change, or put every Orbit setting back.": "Попробуйте изменение или верните все настройки Orbit по умолчанию.",
   "Focus · left": "Фокус · слева",
-  "Today · right": "Сегодня · справа"
+  "Today · right": "Сегодня · справа",
+  "Use the new design": "Новый дизайн",
+  "Use the classic design (v2.33)": "Классический дизайн (v2.33)",
+  "Show every setting": "Показать все настройки",
+  "Classic is the Settings window of v2.33: a header with the search, a slim list of pages and every section in its own card. Every page and option is in both.": "Классический — это окно настроек v2.33: заголовок с поиском, узкий список страниц и каждый раздел в своей карточке. Все страницы и параметры есть в обоих."
 }

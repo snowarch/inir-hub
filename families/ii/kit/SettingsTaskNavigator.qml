@@ -211,7 +211,7 @@ ColumnLayout {
     // button group (what was here) made them look like.
     Item {
         id: tabs
-        visible: root.options.length > 0
+        visible: root.options.length > 0 && !SettingsMaterialPreset.classic
         Layout.fillWidth: true
         implicitHeight: 48
 
@@ -302,6 +302,19 @@ ColumnLayout {
             height: 1
             color: Appearance.colors.colOutlineVariant
             z: -1
+        }
+    }
+
+    // Classic (v2.33): the parts as a row of chips with their icons.
+    Loader {
+        active: SettingsMaterialPreset.classic && root.options.length > 0
+        visible: active
+        Layout.fillWidth: true
+        sourceComponent: ConfigSelectionArray {
+            enableSettingsSearch: false
+            currentValue: root.currentValue
+            options: root.options
+            onSelected: value => root.selected(value)
         }
     }
 }

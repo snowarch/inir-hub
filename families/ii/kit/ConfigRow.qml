@@ -9,7 +9,7 @@ GridLayout {
     id: root
 
     property bool uniform: false
-    property real spacing: SettingsMaterialPreset.tileGap
+    property real spacing: SettingsMaterialPreset.rowGap
     property real minimumCellWidth: 280 * Appearance.fontSizeScale
 
     Layout.fillWidth: true

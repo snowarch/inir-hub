@@ -3226,5 +3226,9 @@
   "Everything drawn as an island wears these: bar islands, panels and widgets. Each keeps its own shape.": "Semua yang digambar sebagai pulau memakai ini: pulau bilah, panel, dan widget. Masing-masing tetap dengan bentuknya.",
   "Try a change, or put every Orbit setting back.": "Coba perubahan, atau kembalikan semua pengaturan Orbit ke bawaan.",
   "Focus · left": "Fokus · kiri",
-  "Today · right": "Hari ini · kanan"
+  "Today · right": "Hari ini · kanan",
+  "Use the new design": "Pakai desain baru",
+  "Use the classic design (v2.33)": "Pakai desain klasik (v2.33)",
+  "Show every setting": "Tampilkan semua pengaturan",
+  "Classic is the Settings window of v2.33: a header with the search, a slim list of pages and every section in its own card. Every page and option is in both.": "Klasik adalah jendela Pengaturan v2.33: header dengan pencarian, daftar halaman yang ramping, dan setiap bagian di kartunya sendiri. Semua halaman dan opsi ada di keduanya."
 }

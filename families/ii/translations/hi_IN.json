@@ -3226,5 +3226,9 @@
   "Everything drawn as an island wears these: bar islands, panels and widgets. Each keeps its own shape.": "आइलैंड के रूप में बनी हर चीज़ इन्हें पहनती है: बार आइलैंड, पैनल और विजेट। हर एक अपना आकार रखता है।",
   "Try a change, or put every Orbit setting back.": "कोई बदलाव आज़माएँ, या Orbit की सभी सेटिंग्स वापस डिफ़ॉल्ट पर लाएँ।",
   "Focus · left": "फ़ोकस · बाएँ",
-  "Today · right": "आज · दाएँ"
+  "Today · right": "आज · दाएँ",
+  "Use the new design": "नया डिज़ाइन इस्तेमाल करें",
+  "Use the classic design (v2.33)": "क्लासिक डिज़ाइन इस्तेमाल करें (v2.33)",
+  "Show every setting": "सभी सेटिंग्स दिखाएँ",
+  "Classic is the Settings window of v2.33: a header with the search, a slim list of pages and every section in its own card. Every page and option is in both.": "क्लासिक v2.33 की सेटिंग्स विंडो है: खोज वाला हेडर, पन्नों की पतली सूची और हर सेक्शन अपने कार्ड में। हर पन्ना और विकल्प दोनों में है।"
 }

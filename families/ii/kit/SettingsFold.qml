@@ -26,11 +26,11 @@ RippleButton {
     rightPadding: SettingsMaterialPreset.tilePaddingX
     topPadding: SettingsMaterialPreset.tilePaddingY
     bottomPadding: SettingsMaterialPreset.tilePaddingY
-    buttonRadiusTop: root.tileTop ? SettingsMaterialPreset.tileOuterRadius : SettingsMaterialPreset.tileInnerRadius
-    buttonRadiusBottom: root.tileBottom ? SettingsMaterialPreset.tileOuterRadius : SettingsMaterialPreset.tileInnerRadius
-    colBackground: SettingsMaterialPreset.tileColor
-    colBackgroundHover: SettingsMaterialPreset.tileHoverColor
-    colRipple: SettingsMaterialPreset.tilePressColor
+    buttonRadiusTop: root.tileTop ? SettingsMaterialPreset.rowOuterRadius : SettingsMaterialPreset.rowInnerRadius
+    buttonRadiusBottom: root.tileBottom ? SettingsMaterialPreset.rowOuterRadius : SettingsMaterialPreset.rowInnerRadius
+    colBackground: SettingsMaterialPreset.rowColor
+    colBackgroundHover: SettingsMaterialPreset.rowHoverColor
+    colRipple: SettingsMaterialPreset.rowPressColor
     pressScaleEnabled: false
     focusRingInward: true
     Accessible.name: root.text

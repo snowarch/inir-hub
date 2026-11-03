@@ -5,6 +5,7 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import Quickshell
+import Quickshell.Widgets
 import qs.services
 import qs.modules.common
 import qs.modules.common.widgets
@@ -14,7 +15,8 @@ import qs.modules.ii.settings
 
 // Material Settings, whole: the nav pane, the page, search and where a result lands. The overlay and the window
 // only host it. Android 16's two-pane Settings made ours: every page keeps one colour and one place in the list, so
-// after a week the eye finds it before reading.
+// after a week the eye finds it before reading. Classic (`material.settingsUi.design`) is v2.33's window over the same
+// pages and the same logic: a header with who you are, the search and the actions; the slim rail; the page on its panel.
 Item {
     id: root
 
@@ -40,6 +42,17 @@ Item {
     property bool _navigationInitialized: false
     readonly property bool easyMode: Config.options?.material?.settingsUi?.easyMode ?? false
     readonly property var currentMeta: root.pages[root.currentPage] ?? ({})
+
+    // ── Design: one lever in both chromes, the kit follows through SettingsMaterialPreset ──
+    readonly property bool classic: (Config.options?.material?.settingsUi?.design ?? "expressive") === "classic"
+    Binding {
+        target: SettingsMaterialPreset
+        property: "classic"
+        value: root.classic
+    }
+    function setClassic(on: bool): void {
+        Config.setNestedValue("material.settingsUi.design", on ? "classic" : "expressive")
+    }
 
     // The nav: groups of the person's arrangement (Settings › Arrange), easy mode keeps the essentials.
     readonly property var navGroups: {
@@ -446,482 +459,829 @@ Item {
         }
     }
 
-    RowLayout {
+    // classic: the rail's foot, as in v2.33: arrange it, and the other way to open Settings
+    component RailAction: RippleButton {
+        id: railAction
+        property string symbol: ""
+        property string label: ""
+        Layout.fillWidth: true
+        implicitHeight: Math.round(34 * Appearance.fontSizeScale)
+        buttonRadius: height / 2
+        pressScaleEnabled: false
+        colBackground: "transparent"
+        colBackgroundHover: SettingsMaterialPreset.headerHoverColor
+        colBackgroundToggled: Appearance.colors.colPrimaryContainer
+        colBackgroundToggledHover: CF.ColorUtils.mix(Appearance.colors.colPrimaryContainer, Appearance.colors.colOnPrimaryContainer, 0.92)
+        colRipple: SettingsMaterialPreset.tilePressColor
+        Accessible.name: railAction.label
+        contentItem: RowLayout {
+            spacing: 10
+            // the button's own padding plus this lands the glyph on the page rows' column
+            MaterialSymbol {
+                Layout.leftMargin: 2
+                text: railAction.symbol
+                iconSize: 18
+                color: railAction.toggled ? Appearance.colors.colOnPrimaryContainer : SettingsMaterialPreset.supportingColor
+            }
+            StyledText {
+                Layout.fillWidth: true
+                text: railAction.label
+                font.pixelSize: SettingsMaterialPreset.labelSize
+                color: railAction.toggled ? Appearance.colors.colOnPrimaryContainer : SettingsMaterialPreset.supportingColor
+                elide: Text.ElideRight
+            }
+        }
+    }
+
+    // Search: the fastest way to any setting, so it sits first and takes Ctrl+F. One field, placed by the design:
+    // the top of the nav pane, or the middle of the classic header.
+    states: State {
+        when: root.classic
+        ParentChange { target: searchBox; parent: classicSearchSlot }
+    }
+
+    Rectangle {
+        id: searchBox
+        parent: navSearchSlot
         anchors.fill: parent
-        spacing: 0
+        radius: height / 2
+        color: searchField.activeFocus ? SettingsMaterialPreset.controlHoverColor : SettingsMaterialPreset.controlColor
+        border.width: searchField.activeFocus ? 2 : 0
+        border.color: SettingsMaterialPreset.subheaderColor
+        // The key hint is the first thing to go when the words would run into it (a large text scale).
+        readonly property bool hintFits: 14 + 20 + 10 + searchHint.implicitWidth + 12 + keyHintChip.implicitWidth + 6 + 8 <= searchBox.width
 
-        // ── Nav pane ──
-        Item {
-            id: navPane
-            Layout.fillHeight: true
-            Layout.preferredWidth: root.navEditMode ? 340 : 280
+        MouseArea {
+            anchors.fill: parent
+            cursorShape: Qt.IBeamCursor
+            onClicked: searchField.forceActiveFocus()
+        }
 
-            ColumnLayout {
-                anchors.fill: parent
-                anchors.leftMargin: 12
-                anchors.rightMargin: 8
-                anchors.topMargin: 14
-                spacing: 10
-
-                RowLayout {
-                    Layout.fillWidth: true
-                    Layout.leftMargin: 12
-                    spacing: 4
-                    StyledText {
-                        Layout.fillWidth: true
-                        text: Translation.tr("Settings")
-                        font.family: Appearance.font.family.title
-                        font.pixelSize: Math.round(22 * Appearance.fontSizeScale)
-                        color: SettingsMaterialPreset.labelColor
-                        elide: Text.ElideRight
-                    }
-                    IconAction {
-                        symbol: root.navEditMode ? "done" : "edit"
-                        tip: root.navEditMode ? Translation.tr("Done arranging") : Translation.tr("Arrange this list")
-                        toggled: root.navEditMode
-                        colBackgroundToggled: Appearance.colors.colSecondaryContainer
-                        onClicked: root.navEditMode = !root.navEditMode
-                    }
-                    // Both ways stay in reach: the window goes back over the desktop from the same place.
-                    IconAction {
-                        objectName: "settingsHostSwitch"
-                        symbol: root.windowed ? "layers" : "open_in_new"
-                        tip: root.windowed ? Translation.tr("Open over the desktop") : Translation.tr("Open as a window")
-                        onClicked: root.windowed ? root.overlayRequested(root.currentPage) : root.windowRequested(root.currentPage)
-                    }
-                }
-
-                // Search: the fastest way to any setting, so it sits first and takes Ctrl+F.
-                Rectangle {
-                    id: searchBox
-                    Layout.fillWidth: true
-                    implicitHeight: 44
-                    radius: height / 2
-                    color: searchField.activeFocus ? SettingsMaterialPreset.controlHoverColor : SettingsMaterialPreset.controlColor
-                    border.width: searchField.activeFocus ? 2 : 0
-                    border.color: SettingsMaterialPreset.subheaderColor
-                    // The key hint is the first thing to go when the words would run into it (a large text scale).
-                    readonly property bool hintFits: 14 + 20 + 10 + searchHint.implicitWidth + 12 + keyHintChip.implicitWidth + 6 + 8 <= searchBox.width
-
-                    MouseArea {
-                        anchors.fill: parent
-                        cursorShape: Qt.IBeamCursor
-                        onClicked: searchField.forceActiveFocus()
-                    }
-
-                    RowLayout {
-                        anchors.fill: parent
-                        anchors.leftMargin: 14
-                        anchors.rightMargin: 6
-                        spacing: 10
-                        MaterialSymbol {
-                            text: "search"
-                            iconSize: 20
-                            color: SettingsMaterialPreset.supportingColor
-                        }
-                        Item {
-                            Layout.fillWidth: true
-                            Layout.fillHeight: true
-                            StyledTextInput {
-                                id: searchField
-                                anchors.left: parent.left
-                                anchors.right: parent.right
-                                anchors.verticalCenter: parent.verticalCenter
-                                font.pixelSize: SettingsMaterialPreset.labelSize
-                                color: SettingsMaterialPreset.labelColor
-                                clip: true
-                                onTextChanged: root.searchText = text
-                                Keys.onPressed: event => {
-                                    if (event.key === Qt.Key_Down) {
-                                        root.selectedResult = Math.min(root.selectedResult + 1, root.searchResults.length - 1)
-                                        event.accepted = true
-                                    } else if (event.key === Qt.Key_Up) {
-                                        root.selectedResult = Math.max(root.selectedResult - 1, 0)
-                                        event.accepted = true
-                                    } else if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) {
-                                        if (root.searchResults.length > 0)
-                                            root.openSearchResult(root.searchResults[root.selectedResult])
-                                        event.accepted = true
-                                    }
-                                }
-                            }
-                            StyledText {
-                                id: searchHint
-                                anchors.verticalCenter: parent.verticalCenter
-                                width: parent.width
-                                elide: Text.ElideRight
-                                visible: searchField.text.length === 0
-                                text: Translation.tr("Search settings")
-                                font.pixelSize: SettingsMaterialPreset.labelSize
-                                color: SettingsMaterialPreset.supportingColor
-                            }
-                        }
-                        Rectangle {
-                            id: keyHintChip
-                            visible: searchField.text.length === 0 && !searchField.activeFocus && searchBox.hintFits
-                            implicitWidth: keyHint.implicitWidth + 14
-                            implicitHeight: keyHint.implicitHeight + 6
-                            radius: 6
-                            color: "transparent"
-                            border.width: 1
-                            border.color: Appearance.colors.colOutlineVariant
-                            Layout.rightMargin: 6
-                            StyledText {
-                                id: keyHint
-                                anchors.centerIn: parent
-                                text: "Ctrl F"
-                                font.pixelSize: Math.round(12 * Appearance.fontSizeScale)
-                                color: SettingsMaterialPreset.supportingColor
-                            }
-                        }
-                        IconAction {
-                            visible: searchField.text.length > 0
-                            symbol: "close"
-                            tip: Translation.tr("Clear the search")
-                            onClicked: {
-                                searchField.text = ""
-                                searchField.forceActiveFocus()
-                            }
-                        }
-                    }
-                }
-
-                // The list: each group of the arrangement is one segmented run.
-                Flickable {
-                    id: navFlick
-                    visible: !root.navEditMode
-                    Layout.fillWidth: true
-                    Layout.fillHeight: true
-                    contentHeight: navColumn.implicitHeight + 16
+        RowLayout {
+            anchors.fill: parent
+            anchors.leftMargin: 14
+            anchors.rightMargin: 6
+            spacing: 10
+            MaterialSymbol {
+                text: "search"
+                iconSize: 20
+                color: SettingsMaterialPreset.supportingColor
+            }
+            Item {
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                StyledTextInput {
+                    id: searchField
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    anchors.verticalCenter: parent.verticalCenter
+                    font.pixelSize: SettingsMaterialPreset.labelSize
+                    color: SettingsMaterialPreset.labelColor
                     clip: true
-                    boundsBehavior: Flickable.StopAtBounds
-                    ScrollBar.vertical: StyledScrollBar {}
-                    // The rail is one Tab stop (thirty stood between the search and the page): the open page wears the
-                    // ring, ↑ ↓ open the page above or below.
-                    activeFocusOnTab: true
-                    Accessible.role: Accessible.List
-                    Accessible.name: Translation.tr("Pages")
-                    Keys.onUpPressed: root.stepNav(false)
-                    Keys.onDownPressed: root.stepNav(true)
-
-                    ColumnLayout {
-                        id: navColumn
-                        width: navFlick.width - 4
-                        spacing: 0
-
-                        Repeater {
-                            model: root.navGroups
-                            delegate: ColumnLayout {
-                                id: navGroup
-                                required property var modelData
-                                required property int index
-                                Layout.fillWidth: true
-                                spacing: SettingsMaterialPreset.tileGap
-
-                                StyledText {
-                                    Layout.fillWidth: true
-                                    Layout.leftMargin: 16
-                                    Layout.topMargin: navGroup.index === 0 ? 2 : 14
-                                    Layout.bottomMargin: 4
-                                    text: navGroup.modelData.label
-                                    font.pixelSize: Math.round(12 * Appearance.fontSizeScale)
-                                    font.weight: Font.Medium
-                                    color: SettingsMaterialPreset.supportingColor
-                                    elide: Text.ElideRight
-                                }
-
-                                Repeater {
-                                    model: navGroup.modelData.pages
-                                    delegate: RippleButton {
-                                        id: navItem
-                                        required property var modelData
-                                        required property int index
-                                        readonly property bool current: root.currentPage === navItem.modelData.realIndex
-                                        readonly property bool first: navItem.index === 0
-                                        readonly property bool last: navItem.index === navGroup.modelData.pages.length - 1
-                                        Layout.fillWidth: true
-                                        implicitHeight: 42
-                                        pressScaleEnabled: false
-                                        focusRingInward: true
-                                        // the chosen page morphs fully round (M3 Expressive's selected list item)
-                                        buttonRadiusTop: navItem.current ? 21 : navItem.first ? SettingsMaterialPreset.tileOuterRadius : SettingsMaterialPreset.tileInnerRadius
-                                        buttonRadiusBottom: navItem.current ? 21 : navItem.last ? SettingsMaterialPreset.tileOuterRadius : SettingsMaterialPreset.tileInnerRadius
-                                        toggled: navItem.current
-                                        colBackground: SettingsMaterialPreset.tileColor
-                                        colBackgroundHover: SettingsMaterialPreset.tileHoverColor
-                                        colBackgroundToggled: Appearance.colors.colSecondaryContainer
-                                        colBackgroundToggledHover: CF.ColorUtils.mix(Appearance.colors.colSecondaryContainer, Appearance.colors.colOnSecondaryContainer, 0.92)
-                                        colRipple: SettingsMaterialPreset.tilePressColor
-                                        colRippleToggled: CF.ColorUtils.mix(Appearance.colors.colSecondaryContainer, Appearance.colors.colOnSecondaryContainer, 0.88)
-                                        onClicked: {
-                                            root.currentPage = navItem.modelData.realIndex
-                                            if (root.searchText.length > 0) {
-                                                searchField.text = ""
-                                                root.searchText = ""
-                                            }
-                                        }
-                                        Accessible.role: Accessible.PageTab
-                                        Accessible.name: navItem.modelData.name
-                                        focusPolicy: Qt.NoFocus
-                                        focusRingShown: navFlick.activeFocus && navItem.current
-                                        onFocusRingShownChanged: if (navItem.focusRingShown) Qt.callLater(root.followFocus, navItem)
-
-                                        contentItem: RowLayout {
-                                            spacing: 12
-                                            PageBadge {
-                                                Layout.leftMargin: 6
-                                                size: 28
-                                                pageKey: navItem.modelData.key
-                                                icon: navItem.modelData.icon
-                                                iconRotation: navItem.modelData.iconRotation ?? 0
-                                            }
-                                            StyledText {
-                                                Layout.fillWidth: true
-                                                text: navItem.modelData.name
-                                                font.pixelSize: SettingsMaterialPreset.labelSize
-                                                font.weight: navItem.current ? Font.Medium : Font.Normal
-                                                color: navItem.current ? Appearance.colors.colOnSecondaryContainer : SettingsMaterialPreset.labelColor
-                                                elide: Text.ElideRight
-                                            }
-                                        }
-                                    }
-                                }
-                            }
+                    onTextChanged: root.searchText = text
+                    Keys.onPressed: event => {
+                        if (event.key === Qt.Key_Down) {
+                            root.selectedResult = Math.min(root.selectedResult + 1, root.searchResults.length - 1)
+                            event.accepted = true
+                        } else if (event.key === Qt.Key_Up) {
+                            root.selectedResult = Math.max(root.selectedResult - 1, 0)
+                            event.accepted = true
+                        } else if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) {
+                            if (root.searchResults.length > 0)
+                                root.openSearchResult(root.searchResults[root.selectedResult])
+                            event.accepted = true
                         }
                     }
                 }
-
-                Loader {
-                    id: navEditLoader
-                    Layout.fillWidth: true
-                    Layout.fillHeight: true
-                    Layout.bottomMargin: 8
-                    active: root.navEditMode
-                    visible: active
-                    sourceComponent: SettingsNavEditPane {
-                        currentPage: root.currentPage
-                        onPageActivated: pageIndex => root.currentPage = pageIndex
-                        onPageHidden: pageIndex => {
-                            if (root.currentPage === pageIndex)
-                                Qt.callLater(() => root.currentPage = root.navPageOrder[0] ?? 0)
-                        }
-                        onDoneRequested: root.navEditMode = false
-                    }
+                StyledText {
+                    id: searchHint
+                    anchors.verticalCenter: parent.verticalCenter
+                    width: parent.width
+                    elide: Text.ElideRight
+                    visible: searchField.text.length === 0
+                    text: Translation.tr("Search settings")
+                    font.pixelSize: SettingsMaterialPreset.labelSize
+                    color: SettingsMaterialPreset.supportingColor
+                }
+            }
+            // the shortcut as the kit's keycaps, the keys a hand looks for
+            Row {
+                id: keyHintChip
+                visible: searchField.text.length === 0 && !searchField.activeFocus && searchBox.hintFits
+                spacing: 3
+                Layout.rightMargin: 6
+                KeyboardKey { key: "Ctrl" }
+                KeyboardKey { key: "F" }
+            }
+            IconAction {
+                visible: searchField.text.length > 0
+                symbol: "close"
+                tip: Translation.tr("Clear the search")
+                onClicked: {
+                    searchField.text = ""
+                    searchField.forceActiveFocus()
                 }
             }
         }
+    }
 
-        // ── The page ──
+    ColumnLayout {
+        anchors.fill: parent
+        anchors.margins: root.classic ? 8 : 0
+        spacing: root.classic ? 8 : 0
+
+        // ── Classic header: who you are, the search, the actions (v2.33) ──
         Item {
-            id: contentPane
+            id: classicHeader
+            visible: root.classic
             Layout.fillWidth: true
-            Layout.fillHeight: true
-            clip: true
+            Layout.preferredHeight: root.classic ? 52 : 0
+            Layout.leftMargin: 12
+            Layout.rightMargin: 6
 
-            Item {
-                id: pageHeader
+            RowLayout {
+                id: identity
                 anchors.left: parent.left
-                anchors.right: parent.right
-                anchors.top: parent.top
-                height: headerColumn.implicitHeight + 24
+                anchors.verticalCenter: parent.verticalCenter
+                width: 210
+                spacing: 9
 
-                ColumnLayout {
-                    id: headerColumn
-                    anchors.left: parent.left
-                    anchors.right: parent.right
-                    anchors.top: parent.top
-                    anchors.leftMargin: 32
-                    anchors.rightMargin: 64
-                    anchors.topMargin: 20
-                    spacing: 2
-
-                    StyledText {
-                        Layout.fillWidth: true
-                        text: root.searchText.length > 0 ? Translation.tr("Search") : (root.currentMeta.name ?? "")
-                        font.family: Appearance.font.family.title
-                        font.pixelSize: Math.round(28 * Appearance.fontSizeScale)
-                        color: SettingsMaterialPreset.labelColor
-                        elide: Text.ElideRight
+                Item {
+                    id: avatar
+                    implicitWidth: 36
+                    implicitHeight: 36
+                    Accessible.role: Accessible.Button
+                    Accessible.name: Translation.tr("Profile picture")
+                    HoverHandler {
+                        id: avatarHover
+                        cursorShape: Qt.PointingHandCursor
                     }
-                    StyledText {
-                        Layout.fillWidth: true
-                        text: root.searchText.length > 0
-                            ? (root.searchResults.length > 0
-                                ? Translation.tr("%1 settings match \"%2\"").arg(root.searchResults.length).arg(root.searchText.trim())
-                                : Translation.tr("Nothing matches \"%1\"").arg(root.searchText.trim()))
-                            : (root.currentMeta.desc ?? "")
-                        font.pixelSize: SettingsMaterialPreset.supportingSize
-                        color: SettingsMaterialPreset.supportingColor
-                        elide: Text.ElideRight
+                    TapHandler {
+                        gesturePolicy: TapHandler.WithinBounds
+                        onTapped: root.openSearchResult(SettingsPageRegistry.searchIndex().find(entry => entry.label === "Profile picture"
+                            || entry.label === Translation.tr("Profile picture")))
+                    }
+                    Rectangle {
+                        anchors.fill: parent
+                        radius: width / 2
+                        color: Appearance.colors.colSecondaryContainer
+                    }
+                    ClippingRectangle {
+                        anchors.centerIn: parent
+                        width: 32
+                        height: 32
+                        radius: 16
+                        color: "transparent"
+                        Image {
+                            id: avatarImage
+                            anchors.fill: parent
+                            // the next path when one fails: the same order the control panel walks
+                            property int pathIndex: 0
+                            readonly property string primary: Directories.userAvatarSourcePrimary
+                            onPrimaryChanged: pathIndex = 0
+                            source: Directories.avatarSourceAt(pathIndex)
+                            fillMode: Image.PreserveAspectCrop
+                            asynchronous: true
+                            sourceSize.width: 64
+                            sourceSize.height: 64
+                            visible: status === Image.Ready
+                            onStatusChanged: if (status === Image.Error && pathIndex + 1 < Directories.userAvatarPaths.length) pathIndex++
+                        }
+                    }
+                    MaterialSymbol {
+                        anchors.centerIn: parent
+                        visible: avatarImage.status !== Image.Ready
+                        text: "person"
+                        iconSize: 18
+                        color: Appearance.colors.colOnSecondaryContainer
+                    }
+                    Rectangle {
+                        anchors.right: parent.right
+                        anchors.bottom: parent.bottom
+                        anchors.rightMargin: -3
+                        anchors.bottomMargin: -3
+                        width: 18
+                        height: 18
+                        radius: width / 2
+                        color: Appearance.colors.colPrimaryContainer
+                        // cut out of the picture by the window's own colour
+                        border.width: 2
+                        border.color: SettingsMaterialPreset.windowColor
+                        opacity: avatarHover.hovered ? 1 : 0
+                        visible: opacity > 0
+                        Behavior on opacity { enabled: Appearance.animationsEnabled; NumberAnimation { duration: Appearance.animation.elementMoveFast.duration } }
+                        MaterialSymbol {
+                            anchors.centerIn: parent
+                            text: "edit"
+                            iconSize: 10
+                            color: Appearance.colors.colOnPrimaryContainer
+                        }
                     }
                 }
 
+                ColumnLayout {
+                    Layout.fillWidth: true
+                    spacing: 0
+                    StyledText {
+                        Layout.fillWidth: true
+                        text: Translation.tr("Settings")
+                        color: SettingsMaterialPreset.labelColor
+                        font.family: Appearance.font.family.title
+                        font.pixelSize: Appearance.font.pixelSize.title
+                        font.variableAxes: Appearance.font.variableAxes.title
+                        elide: Text.ElideRight
+                    }
+                    StyledText {
+                        Layout.fillWidth: true
+                        text: SystemInfo.displayName || SystemInfo.username
+                        color: SettingsMaterialPreset.supportingColor
+                        font.pixelSize: Appearance.font.pixelSize.small
+                        elide: Text.ElideRight
+                    }
+                }
+            }
+
+            RowLayout {
+                id: classicActions
+                anchors.right: parent.right
+                anchors.verticalCenter: parent.verticalCenter
+                spacing: 4
+                IconAction {
+                    objectName: "settingsDesignSwitch"
+                    symbol: "history"
+                    toggled: true
+                    colBackgroundToggled: Appearance.colors.colSecondaryContainer
+                    tip: Translation.tr("Use the new design")
+                    onClicked: root.setClassic(false)
+                }
+                IconAction {
+                    symbol: root.easyMode ? "school" : "tune"
+                    toggled: root.easyMode
+                    colBackgroundToggled: Appearance.colors.colSecondaryContainer
+                    tip: root.easyMode ? Translation.tr("Show every setting") : Translation.tr("Easy mode (essentials only)")
+                    onClicked: Config.setNestedValue("material.settingsUi.easyMode", !root.easyMode)
+                }
+                IconAction {
+                    symbol: "lock"
+                    tip: Translation.tr("Lock")
+                    onClicked: Quickshell.execDetached([Quickshell.shellPath("scripts/inir"), "lock", "activate"])
+                }
                 IconAction {
                     visible: !root.windowed
-                    anchors.right: parent.right
-                    anchors.top: parent.top
-                    anchors.rightMargin: 16
-                    anchors.topMargin: 16
                     symbol: "close"
                     tip: Translation.tr("Close (Esc)")
                     onClicked: root.closeRequested()
                 }
             }
 
-            SettingsPageHost {
-                id: pagesHost
-                visible: root.searchText.length === 0
-                anchors.top: pageHeader.bottom
-                anchors.left: parent.left
-                anchors.right: parent.right
-                anchors.bottom: parent.bottom
-                anchors.leftMargin: 8
-                pages: root.pages
-                requestedIndex: root.currentPage
-                loadEnabled: Config.ready && root.active
+            // centred in the header while the sides leave it room, as v2.33 placed it
+            Item {
+                id: classicSearchSlot
+                readonly property real side: Math.max(identity.width, classicActions.implicitWidth) + 12
+                width: Math.max(200, Math.min(480, classicHeader.width - 2 * side))
+                height: 40
+                anchors.verticalCenter: parent.verticalCenter
+                x: (classicHeader.width - width) / 2
             }
+        }
 
-            SettingsPageLoadingOverlay {
-                anchors.fill: pagesHost
-                visible: pagesHost.visible
-                loading: pagesHost.loading
-                text: Translation.tr("Loading page…")
-                z: 15
-            }
+        RowLayout {
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+            spacing: root.classic ? 8 : 0
 
-            // Results take the page's place while there is a query: what was typed, where each lands.
-            ListView {
-                id: resultsList
-                visible: root.searchText.length > 0
-                anchors.top: pageHeader.bottom
-                anchors.left: parent.left
-                anchors.bottom: parent.bottom
-                anchors.leftMargin: 32
-                width: Math.min(parent.width - 64, SettingsMaterialPreset.pageMaxWidth)
-                clip: true
-                spacing: SettingsMaterialPreset.tileGap
-                model: root.searchResults
-                currentIndex: root.selectedResult
-                boundsBehavior: Flickable.StopAtBounds
-                ScrollBar.vertical: StyledScrollBar {}
-                onCurrentIndexChanged: positionViewAtIndex(currentIndex, ListView.Contain)
+            // ── Nav pane ──
+            Item {
+                id: navPane
+                Layout.fillHeight: true
+                Layout.preferredWidth: root.classic ? (root.navEditMode ? 228 : 180) : (root.navEditMode ? 340 : 280)
 
-                delegate: RippleButton {
-                    id: result
-                    required property var modelData
-                    required property int index
-                    readonly property var page: root.pages[result.modelData.pageIndex] ?? ({})
-                    width: resultsList.width
-                    implicitHeight: 56
-                    pressScaleEnabled: false
-                    focusRingInward: true
-                    buttonRadiusTop: result.index === 0 ? SettingsMaterialPreset.tileOuterRadius : SettingsMaterialPreset.tileInnerRadius
-                    buttonRadiusBottom: result.index === resultsList.count - 1 ? SettingsMaterialPreset.tileOuterRadius : SettingsMaterialPreset.tileInnerRadius
-                    toggled: result.index === root.selectedResult
-                    colBackground: SettingsMaterialPreset.tileColor
-                    colBackgroundHover: SettingsMaterialPreset.tileHoverColor
-                    colBackgroundToggled: Appearance.colors.colSecondaryContainer
-                    colBackgroundToggledHover: Appearance.colors.colSecondaryContainer
-                    colRipple: SettingsMaterialPreset.tilePressColor
-                    onClicked: root.openSearchResult(result.modelData)
-                    onHoveredChanged: if (hovered) root.selectedResult = result.index
+                ColumnLayout {
+                    anchors.fill: parent
+                    anchors.leftMargin: root.classic ? 4 : 12
+                    anchors.rightMargin: root.classic ? 4 : 8
+                    anchors.topMargin: root.classic ? 4 : 14
+                    anchors.bottomMargin: root.classic ? 4 : 0
+                    spacing: root.classic ? 4 : 10
 
-                    contentItem: RowLayout {
-                        spacing: 16
-                        PageBadge {
-                            Layout.leftMargin: 16
-                            pageKey: result.page.key ?? ""
-                            icon: result.page.icon ?? "settings"
-                            iconRotation: result.page.iconRotation ?? 0
-                            size: 32
-                        }
-                        ColumnLayout {
+                    RowLayout {
+                        visible: !root.classic
+                        Layout.fillWidth: true
+                        Layout.leftMargin: 12
+                        spacing: 4
+                        StyledText {
                             Layout.fillWidth: true
-                            spacing: 2
-                            StyledText {
-                                Layout.fillWidth: true
-                                text: result.modelData.label || result.modelData.section || result.page.name || ""
-                                font.pixelSize: SettingsMaterialPreset.labelSize
-                                color: result.toggled ? Appearance.colors.colOnSecondaryContainer : SettingsMaterialPreset.labelColor
-                                elide: Text.ElideRight
-                            }
-                            StyledText {
-                                Layout.fillWidth: true
-                                // where it lands, outermost first
-                                text: [result.page.name, result.modelData.section !== result.modelData.label ? result.modelData.section : ""]
-                                    .filter(s => s && String(s).length > 0).join("  ›  ")
-                                font.pixelSize: SettingsMaterialPreset.supportingSize
-                                color: SettingsMaterialPreset.supportingColor
-                                elide: Text.ElideRight
+                            text: Translation.tr("Settings")
+                            font.family: Appearance.font.family.title
+                            font.pixelSize: Math.round(22 * Appearance.fontSizeScale)
+                            color: SettingsMaterialPreset.labelColor
+                            elide: Text.ElideRight
+                        }
+                        IconAction {
+                            objectName: "settingsDesignSwitch"
+                            symbol: "history"
+                            tip: Translation.tr("Use the classic design (v2.33)")
+                            onClicked: root.setClassic(true)
+                        }
+                        IconAction {
+                            symbol: root.navEditMode ? "done" : "edit"
+                            tip: root.navEditMode ? Translation.tr("Done arranging") : Translation.tr("Arrange this list")
+                            toggled: root.navEditMode
+                            colBackgroundToggled: Appearance.colors.colSecondaryContainer
+                            onClicked: root.navEditMode = !root.navEditMode
+                        }
+                        // Both ways stay in reach: the window goes back over the desktop from the same place.
+                        IconAction {
+                            objectName: "settingsHostSwitch"
+                            symbol: root.windowed ? "layers" : "open_in_new"
+                            tip: root.windowed ? Translation.tr("Open over the desktop") : Translation.tr("Open as a window")
+                            onClicked: root.windowed ? root.overlayRequested(root.currentPage) : root.windowRequested(root.currentPage)
+                        }
+                    }
+
+                    Item {
+                        id: navSearchSlot
+                        visible: !root.classic
+                        Layout.fillWidth: true
+                        implicitHeight: 44
+                    }
+
+                    // The list: each group of the arrangement is one segmented run.
+                    Flickable {
+                        id: navFlick
+                        visible: !root.navEditMode
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
+                        contentHeight: navColumn.implicitHeight + 16
+                        clip: true
+                        boundsBehavior: Flickable.StopAtBounds
+                        ScrollBar.vertical: StyledScrollBar {}
+                        // The rail is one Tab stop (thirty stood between the search and the page): the open page wears the
+                        // ring, ↑ ↓ open the page above or below.
+                        activeFocusOnTab: true
+                        Accessible.role: Accessible.List
+                        Accessible.name: Translation.tr("Pages")
+                        Keys.onUpPressed: root.stepNav(false)
+                        Keys.onDownPressed: root.stepNav(true)
+
+                        // classic: the open page's pill travels to it on a spring, as v2.33's did
+                        Rectangle {
+                            id: classicIndicator
+                            property Item target: null
+                            readonly property real targetY: target ? target.y + target.parent.y : 0
+                            visible: root.classic && target !== null
+                            z: -1
+                            x: 0
+                            width: navColumn.width
+                            height: target ? target.height : 0
+                            radius: height / 2
+                            color: Appearance.angelEverywhere ? Appearance.angel.colGlassCard
+                                : Appearance.inirEverywhere ? Appearance.inir.colLayer1Hover
+                                : Appearance.colors.colPrimaryContainer
+                            y: classicIndicator.targetY
+                            Behavior on y {
+                                enabled: Appearance.animationsEnabled && classicIndicator.visible
+                                SpringAnimation { spring: 4.5; damping: 0.32; epsilon: 0.25 }
                             }
                         }
-                        MaterialSymbol {
-                            Layout.rightMargin: 16
-                            visible: result.toggled
-                            text: "keyboard_return"
-                            iconSize: 20
-                            color: Appearance.colors.colOnSecondaryContainer
+
+                        ColumnLayout {
+                            id: navColumn
+                            width: navFlick.width - 4
+                            spacing: 0
+
+                            Repeater {
+                                model: root.navGroups
+                                delegate: ColumnLayout {
+                                    id: navGroup
+                                    required property var modelData
+                                    required property int index
+                                    Layout.fillWidth: true
+                                    spacing: root.classic ? 0 : SettingsMaterialPreset.tileGap
+
+                                    // classic: v2.33's caption, capitals in the accent
+                                    StyledText {
+                                        Layout.fillWidth: true
+                                        Layout.leftMargin: root.classic ? 12 : 16
+                                        Layout.topMargin: navGroup.index === 0 ? 2 : (root.classic ? 12 : 14)
+                                        Layout.bottomMargin: 4
+                                        text: navGroup.modelData.label
+                                        font.pixelSize: root.classic ? Appearance.font.pixelSize.smaller : Math.round(12 * Appearance.fontSizeScale)
+                                        font.weight: root.classic ? Font.DemiBold : Font.Medium
+                                        font.capitalization: root.classic ? Font.AllUppercase : Font.MixedCase
+                                        font.letterSpacing: root.classic ? 1.1 : 0
+                                        color: root.classic ? SettingsMaterialPreset.subheaderColor : SettingsMaterialPreset.supportingColor
+                                        opacity: root.classic ? 0.85 : 1
+                                        elide: Text.ElideRight
+                                    }
+
+                                    Repeater {
+                                        model: navGroup.modelData.pages
+                                        delegate: RippleButton {
+                                            id: navItem
+                                            required property var modelData
+                                            required property int index
+                                            readonly property bool current: root.currentPage === navItem.modelData.realIndex
+                                            readonly property bool first: navItem.index === 0
+                                            readonly property bool last: navItem.index === navGroup.modelData.pages.length - 1
+                                            Layout.fillWidth: true
+                                            implicitHeight: root.classic ? Math.round(34 * Appearance.fontSizeScale) : 42
+                                            pressScaleEnabled: false
+                                            focusRingInward: true
+                                            // the chosen page morphs fully round (M3 Expressive's selected list item); classic: a pill
+                                            buttonRadiusTop: root.classic ? height / 2 : navItem.current ? 21 : navItem.first ? SettingsMaterialPreset.tileOuterRadius : SettingsMaterialPreset.tileInnerRadius
+                                            buttonRadiusBottom: root.classic ? height / 2 : navItem.current ? 21 : navItem.last ? SettingsMaterialPreset.tileOuterRadius : SettingsMaterialPreset.tileInnerRadius
+                                            toggled: navItem.current
+                                            // classic: the travelling pill is the selection, the button only hovers
+                                            colBackground: root.classic ? "transparent" : SettingsMaterialPreset.tileColor
+                                            colBackgroundHover: root.classic ? SettingsMaterialPreset.headerHoverColor : SettingsMaterialPreset.tileHoverColor
+                                            colBackgroundToggled: root.classic ? "transparent" : Appearance.colors.colSecondaryContainer
+                                            colBackgroundToggledHover: root.classic ? CF.ColorUtils.transparentize(SettingsMaterialPreset.headerHoverColor, 0.5)
+                                                : CF.ColorUtils.mix(Appearance.colors.colSecondaryContainer, Appearance.colors.colOnSecondaryContainer, 0.92)
+                                            colRipple: SettingsMaterialPreset.tilePressColor
+                                            colRippleToggled: CF.ColorUtils.mix(Appearance.colors.colSecondaryContainer, Appearance.colors.colOnSecondaryContainer, 0.88)
+                                            onCurrentChanged: if (navItem.current) classicIndicator.target = navItem
+                                            Component.onCompleted: if (navItem.current) classicIndicator.target = navItem
+                                            Component.onDestruction: if (classicIndicator.target === navItem) classicIndicator.target = null
+                                            onClicked: {
+                                                root.currentPage = navItem.modelData.realIndex
+                                                if (root.searchText.length > 0) {
+                                                    searchField.text = ""
+                                                    root.searchText = ""
+                                                }
+                                            }
+                                            Accessible.role: Accessible.PageTab
+                                            Accessible.name: navItem.modelData.name
+                                            focusPolicy: Qt.NoFocus
+                                            focusRingShown: navFlick.activeFocus && navItem.current
+                                            onFocusRingShownChanged: if (navItem.focusRingShown) Qt.callLater(root.followFocus, navItem)
+
+                                            contentItem: RowLayout {
+                                                spacing: root.classic ? 10 : 12
+                                                PageBadge {
+                                                    visible: !root.classic
+                                                    Layout.leftMargin: 6
+                                                    size: 28
+                                                    pageKey: navItem.modelData.key
+                                                    icon: navItem.modelData.icon
+                                                    iconRotation: navItem.modelData.iconRotation ?? 0
+                                                }
+                                                // classic: a line icon, the accent while open
+                                                MaterialSymbol {
+                                                    visible: root.classic
+                                                    Layout.leftMargin: 2
+                                                    text: navItem.modelData.icon ?? ""
+                                                    iconSize: 18
+                                                    rotation: navItem.modelData.iconRotation ?? 0
+                                                    color: navItem.current ? SettingsMaterialPreset.subheaderColor : SettingsMaterialPreset.supportingColor
+                                                }
+                                                StyledText {
+                                                    Layout.fillWidth: true
+                                                    text: navItem.modelData.name
+                                                    font.pixelSize: SettingsMaterialPreset.labelSize
+                                                    font.weight: navItem.current ? Font.Medium : Font.Normal
+                                                    color: root.classic ? (navItem.current ? SettingsMaterialPreset.labelColor : SettingsMaterialPreset.supportingColor)
+                                                        : navItem.current ? Appearance.colors.colOnSecondaryContainer : SettingsMaterialPreset.labelColor
+                                                    elide: Text.ElideRight
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
                         }
+                    }
+
+                    Loader {
+                        id: navEditLoader
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
+                        Layout.bottomMargin: 8
+                        active: root.navEditMode
+                        visible: active
+                        sourceComponent: SettingsNavEditPane {
+                            currentPage: root.currentPage
+                            onPageActivated: pageIndex => root.currentPage = pageIndex
+                            onPageHidden: pageIndex => {
+                                if (root.currentPage === pageIndex)
+                                    Qt.callLater(() => root.currentPage = root.navPageOrder[0] ?? 0)
+                            }
+                            onDoneRequested: root.navEditMode = false
+                        }
+                    }
+
+                    RailAction {
+                        visible: root.classic
+                        symbol: root.navEditMode ? "done" : "edit"
+                        label: root.navEditMode ? Translation.tr("Done") : Translation.tr("Arrange")
+                        toggled: root.navEditMode
+                        onClicked: root.navEditMode = !root.navEditMode
+                        StyledToolTip { text: root.navEditMode ? Translation.tr("Done arranging") : Translation.tr("Arrange this list") }
+                    }
+                    RailAction {
+                        visible: root.classic
+                        objectName: "settingsHostSwitch"
+                        symbol: root.windowed ? "layers" : "open_in_new"
+                        label: root.windowed ? Translation.tr("Overlay") : Translation.tr("Window")
+                        onClicked: root.windowed ? root.overlayRequested(root.currentPage) : root.windowRequested(root.currentPage)
                     }
                 }
             }
 
-            ColumnLayout {
-                visible: root.searchText.length > 0 && root.searchResults.length === 0 && !searchDebounce.running
-                anchors.top: pageHeader.bottom
-                anchors.left: parent.left
-                anchors.leftMargin: 32
-                anchors.topMargin: 20
-                spacing: 8
-                MaterialSymbol {
-                    text: "search_off"
-                    iconSize: 40
-                    color: SettingsMaterialPreset.supportingColor
-                }
-                StyledText {
-                    text: Translation.tr("Try a shorter word, or what the setting changes: \"blur\", \"clock\", \"dock\".")
-                    font.pixelSize: SettingsMaterialPreset.supportingSize
-                    color: SettingsMaterialPreset.supportingColor
-                }
-            }
+            // ── The page ──
+            Item {
+                id: contentPane
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                clip: true
 
-            // Where a search result landed: a ring that fades on its own.
-            Rectangle {
-                id: landedRing
-                property Item target: null
-                function show(item: Item): void {
-                    landedRing.target = item
-                    landedFade.restart()
+                // classic: the page sits on its own panel, as v2.33's did
+                Rectangle {
+                    anchors.fill: parent
+                    visible: root.classic
+                    color: Appearance.angelEverywhere ? Appearance.angel.colGlassCard
+                        : Appearance.auroraEverywhere ? Appearance.aurora.colSubSurface
+                        : Appearance.zzzEverywhere ? Appearance.zzz.bg2
+                        : Appearance.inirEverywhere ? Appearance.inir.colLayer1
+                        : Appearance.colors.colSurfaceContainerLow
+                    radius: Appearance.angelEverywhere ? Appearance.angel.roundingNormal
+                        : Appearance.inirEverywhere ? Appearance.inir.roundingNormal
+                        : Math.max(4, SettingsMaterialPreset.windowRadius - 8)
+                    border.width: Appearance.angelEverywhere ? Appearance.angel.cardBorderWidth
+                        : Appearance.zzzEverywhere ? Appearance.zzz.borderThick
+                        : Appearance.inirEverywhere ? 1 : 0
+                    border.color: Appearance.angelEverywhere ? Appearance.angel.colCardBorder
+                        : Appearance.zzzEverywhere ? Appearance.zzz.hairline
+                        : Appearance.inirEverywhere ? Appearance.inir.colBorderSubtle
+                        : "transparent"
                 }
-                // mapToItem doesn't follow a scroll or a late layout: re-read each frame of its two seconds.
-                property point at: Qt.point(0, 0)
-                FrameAnimation {
-                    running: landedRing.visible
-                    onTriggered: {
-                        // The page can be swapped for a fresh copy after landing: find the row again there.
-                        if (!root._landed(landedRing.target) && root._reland())
-                            return
-                        if (landedRing.target)
-                            landedRing.at = landedRing.target.mapToItem(contentPane, 0, 0)
+
+                Item {
+                    id: pageHeader
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    anchors.top: parent.top
+                    height: root.classic ? 48 : headerColumn.implicitHeight + 24
+
+                    // classic: icon chip, name and its line in one row over a hairline
+                    RowLayout {
+                        id: classicHeaderRow
+                        visible: root.classic
+                        anchors.fill: parent
+                        anchors.leftMargin: 20
+                        anchors.rightMargin: 20
+                        spacing: 10
+                        MaterialShapeWrappedMaterialSymbol {
+                            text: root.searchText.length > 0 ? "search" : (root.currentMeta.icon ?? "")
+                            iconSize: 15
+                            Layout.alignment: Qt.AlignVCenter
+                        }
+                        StyledText {
+                            text: root.searchText.length > 0 ? Translation.tr("Search") : (root.currentMeta.name ?? "")
+                            font.family: Appearance.font.family.title
+                            font.pixelSize: Appearance.font.pixelSize.normal
+                            font.weight: Font.DemiBold
+                            color: SettingsMaterialPreset.labelColor
+                        }
+                        StyledText {
+                            Layout.fillWidth: true
+                            text: headerLine.text
+                            font.pixelSize: Appearance.font.pixelSize.small
+                            color: SettingsMaterialPreset.supportingColor
+                            elide: Text.ElideRight
+                        }
+                    }
+                    Connections {
+                        target: root
+                        function onCurrentPageChanged() { if (root.classic && Appearance.animationsEnabled) classicHeaderSwap.restart() }
+                    }
+                    SequentialAnimation {
+                        id: classicHeaderSwap
+                        OpacityAnimator { target: classicHeaderRow; from: 1; to: 0; duration: Appearance.animation.elementMoveFast.duration / 2 }
+                        OpacityAnimator { target: classicHeaderRow; from: 0; to: 1; duration: Appearance.animation.elementMoveFast.duration }
+                    }
+                    Rectangle {
+                        visible: root.classic
+                        anchors.bottom: parent.bottom
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        anchors.leftMargin: 16
+                        anchors.rightMargin: 16
+                        height: 1
+                        color: SettingsMaterialPreset.ruleColor
+                    }
+
+                    ColumnLayout {
+                        id: headerColumn
+                        visible: !root.classic
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        anchors.top: parent.top
+                        anchors.leftMargin: 32
+                        anchors.rightMargin: 64
+                        anchors.topMargin: 20
+                        spacing: 2
+
+                        StyledText {
+                            Layout.fillWidth: true
+                            text: root.searchText.length > 0 ? Translation.tr("Search") : (root.currentMeta.name ?? "")
+                            font.family: Appearance.font.family.title
+                            font.pixelSize: Math.round(28 * Appearance.fontSizeScale)
+                            color: SettingsMaterialPreset.labelColor
+                            elide: Text.ElideRight
+                        }
+                        StyledText {
+                            id: headerLine
+                            Layout.fillWidth: true
+                            text: root.searchText.length > 0
+                                ? (root.searchResults.length > 0
+                                    ? Translation.tr("%1 settings match \"%2\"").arg(root.searchResults.length).arg(root.searchText.trim())
+                                    : Translation.tr("Nothing matches \"%1\"").arg(root.searchText.trim()))
+                                : (root.currentMeta.desc ?? "")
+                            font.pixelSize: SettingsMaterialPreset.supportingSize
+                            color: SettingsMaterialPreset.supportingColor
+                            elide: Text.ElideRight
+                        }
+                    }
+
+                    IconAction {
+                        visible: !root.windowed && !root.classic
+                        anchors.right: parent.right
+                        anchors.top: parent.top
+                        anchors.rightMargin: 16
+                        anchors.topMargin: 16
+                        symbol: "close"
+                        tip: Translation.tr("Close (Esc)")
+                        onClicked: root.closeRequested()
                     }
                 }
-                onTargetChanged: if (target) at = target.mapToItem(contentPane, 0, 0)
-                visible: target !== null && opacity > 0
-                x: at.x - 3
-                y: at.y - 3
-                width: target ? target.width + 6 : 0
-                height: target ? target.height + 6 : 0
-                radius: SettingsMaterialPreset.tileOuterRadius + 3
-                color: "transparent"
-                border.width: 3
-                border.color: SettingsMaterialPreset.subheaderColor
-                opacity: 0
-                SequentialAnimation {
-                    id: landedFade
-                    NumberAnimation { target: landedRing; property: "opacity"; to: 1; duration: 120 }
-                    PauseAnimation { duration: 1400 }
-                    NumberAnimation { target: landedRing; property: "opacity"; to: 0; duration: 600 }
-                    ScriptAction { script: { landedRing.target = null; root.searchTargetControl = null } }
+
+                SettingsPageHost {
+                    id: pagesHost
+                    visible: root.searchText.length === 0
+                    anchors.top: pageHeader.bottom
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    anchors.bottom: parent.bottom
+                    anchors.leftMargin: root.classic ? 0 : 8
+                    pages: root.pages
+                    requestedIndex: root.currentPage
+                    loadEnabled: Config.ready && root.active
+                }
+
+                SettingsPageLoadingOverlay {
+                    anchors.fill: pagesHost
+                    visible: pagesHost.visible
+                    loading: pagesHost.loading
+                    text: Translation.tr("Loading page…")
+                    z: 15
+                }
+
+                // Results take the page's place while there is a query: what was typed, where each lands.
+                ListView {
+                    id: resultsList
+                    visible: root.searchText.length > 0
+                    anchors.top: pageHeader.bottom
+                    anchors.left: parent.left
+                    anchors.bottom: parent.bottom
+                    anchors.leftMargin: root.classic ? 16 : 32
+                    anchors.topMargin: root.classic ? 12 : 0
+                    width: Math.min(parent.width - (root.classic ? 32 : 64), SettingsMaterialPreset.pageMaxWidth)
+                    clip: true
+                    spacing: root.classic ? 2 : SettingsMaterialPreset.tileGap
+                    model: root.searchResults
+                    currentIndex: root.selectedResult
+                    boundsBehavior: Flickable.StopAtBounds
+                    ScrollBar.vertical: StyledScrollBar {}
+                    onCurrentIndexChanged: positionViewAtIndex(currentIndex, ListView.Contain)
+
+                    delegate: RippleButton {
+                        id: result
+                        required property var modelData
+                        required property int index
+                        readonly property var page: root.pages[result.modelData.pageIndex] ?? ({})
+                        width: resultsList.width
+                        implicitHeight: 56
+                        pressScaleEnabled: false
+                        focusRingInward: true
+                        buttonRadiusTop: result.index === 0 ? SettingsMaterialPreset.tileOuterRadius : SettingsMaterialPreset.tileInnerRadius
+                        buttonRadiusBottom: result.index === resultsList.count - 1 ? SettingsMaterialPreset.tileOuterRadius : SettingsMaterialPreset.tileInnerRadius
+                        toggled: result.index === root.selectedResult
+                        colBackground: SettingsMaterialPreset.tileColor
+                        colBackgroundHover: SettingsMaterialPreset.tileHoverColor
+                        colBackgroundToggled: Appearance.colors.colSecondaryContainer
+                        colBackgroundToggledHover: Appearance.colors.colSecondaryContainer
+                        colRipple: SettingsMaterialPreset.tilePressColor
+                        onClicked: root.openSearchResult(result.modelData)
+                        onHoveredChanged: if (hovered) root.selectedResult = result.index
+
+                        contentItem: RowLayout {
+                            spacing: 16
+                            PageBadge {
+                                visible: !root.classic
+                                Layout.leftMargin: 16
+                                pageKey: result.page.key ?? ""
+                                icon: result.page.icon ?? "settings"
+                                iconRotation: result.page.iconRotation ?? 0
+                                size: 32
+                            }
+                            // classic: the page's line icon, as its rail shows it
+                            MaterialSymbol {
+                                visible: root.classic
+                                Layout.leftMargin: 16
+                                text: result.page.icon ?? "settings"
+                                iconSize: 20
+                                rotation: result.page.iconRotation ?? 0
+                                color: result.toggled ? Appearance.colors.colOnSecondaryContainer : SettingsMaterialPreset.subheaderColor
+                            }
+                            ColumnLayout {
+                                Layout.fillWidth: true
+                                spacing: 2
+                                StyledText {
+                                    Layout.fillWidth: true
+                                    text: result.modelData.label || result.modelData.section || result.page.name || ""
+                                    font.pixelSize: SettingsMaterialPreset.labelSize
+                                    color: result.toggled ? Appearance.colors.colOnSecondaryContainer : SettingsMaterialPreset.labelColor
+                                    elide: Text.ElideRight
+                                }
+                                StyledText {
+                                    Layout.fillWidth: true
+                                    // where it lands, outermost first
+                                    text: [result.page.name, result.modelData.section !== result.modelData.label ? result.modelData.section : ""]
+                                        .filter(s => s && String(s).length > 0).join("  ›  ")
+                                    font.pixelSize: SettingsMaterialPreset.supportingSize
+                                    color: SettingsMaterialPreset.supportingColor
+                                    elide: Text.ElideRight
+                                }
+                            }
+                            MaterialSymbol {
+                                Layout.rightMargin: 16
+                                visible: result.toggled
+                                text: "keyboard_return"
+                                iconSize: 20
+                                color: Appearance.colors.colOnSecondaryContainer
+                            }
+                        }
+                    }
+                }
+
+                ColumnLayout {
+                    visible: root.searchText.length > 0 && root.searchResults.length === 0 && !searchDebounce.running
+                    anchors.top: pageHeader.bottom
+                    anchors.left: parent.left
+                    anchors.leftMargin: 32
+                    anchors.topMargin: 20
+                    spacing: 8
+                    MaterialSymbol {
+                        text: "search_off"
+                        iconSize: 40
+                        color: SettingsMaterialPreset.supportingColor
+                    }
+                    StyledText {
+                        text: Translation.tr("Try a shorter word, or what the setting changes: \"blur\", \"clock\", \"dock\".")
+                        font.pixelSize: SettingsMaterialPreset.supportingSize
+                        color: SettingsMaterialPreset.supportingColor
+                    }
+                }
+
+                // Where a search result landed: a ring that fades on its own.
+                Rectangle {
+                    id: landedRing
+                    property Item target: null
+                    function show(item: Item): void {
+                        landedRing.target = item
+                        landedFade.restart()
+                    }
+                    // mapToItem doesn't follow a scroll or a late layout: re-read each frame of its two seconds.
+                    property point at: Qt.point(0, 0)
+                    FrameAnimation {
+                        running: landedRing.visible
+                        onTriggered: {
+                            // The page can be swapped for a fresh copy after landing: find the row again there.
+                            if (!root._landed(landedRing.target) && root._reland())
+                                return
+                            if (landedRing.target)
+                                landedRing.at = landedRing.target.mapToItem(contentPane, 0, 0)
+                        }
+                    }
+                    onTargetChanged: if (target) at = target.mapToItem(contentPane, 0, 0)
+                    visible: target !== null && opacity > 0
+                    x: at.x - 3
+                    y: at.y - 3
+                    width: target ? target.width + 6 : 0
+                    height: target ? target.height + 6 : 0
+                    radius: SettingsMaterialPreset.tileOuterRadius + 3
+                    color: "transparent"
+                    border.width: 3
+                    border.color: SettingsMaterialPreset.subheaderColor
+                    opacity: 0
+                    SequentialAnimation {
+                        id: landedFade
+                        NumberAnimation { target: landedRing; property: "opacity"; to: 1; duration: 120 }
+                        PauseAnimation { duration: 1400 }
+                        NumberAnimation { target: landedRing; property: "opacity"; to: 0; duration: 600 }
+                        ScriptAction { script: { landedRing.target = null; root.searchTargetControl = null } }
+                    }
                 }
             }
         }
