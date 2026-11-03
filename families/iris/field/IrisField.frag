@@ -20,10 +20,17 @@
 // not per pixel — four small passes measured five times the CPU of a single
 // large one, on the same bodies.
 //
-// Shapes are packed four scalars at a time because a uniform array of structs is
-// not portable across the backends Qt targets: `shapeN` is (centre.x, centre.y,
-// half.x, half.y) in screen pixels, `cornersN` its corner radii (upper left, upper
-// right, lower right, lower left) and `paintsA..E` which of them bring their own material.
+// Shapes are one vec4 each because a ShaderEffect maps no uniform array: `shapeN` is
+// (centre.x, centre.y, half.x, half.y) in screen pixels, `cornersN` its corner radii
+// (upper left, upper right, lower right, lower left), `linkN` how it meets the others.
+//
+// Four shaders come out of this file (`field-bench.py build`): the plain one, and with
+// FIELD_GLOW, FIELD_LEAK or FIELD_STREAK the texture that lights its bodies. IrisField.qml
+// picks by IrisStyle's texture. Every look in one shader was 36000 instructions on Tiger
+// Lake: SIMD8 only, 323 spills, the lag of every Intel laptop (testers, 11-02). What holds
+// it down: no per-pixel array of the bodies (each element is registers for the whole
+// pass), one walk over them bounded by how many there are, a far body rejected by two
+// comparisons. `field-bench.py intel` reads what the compiler makes of it.
 layout(location = 0) in vec2 qt_TexCoord0;
 layout(location = 0) out vec4 fragColor;
 layout(std140, binding = 0) uniform buf {
@@ -53,28 +60,24 @@ layout(std140, binding = 0) uniform buf {
     vec4 corners8; vec4 corners9; vec4 corners10; vec4 corners11;
     vec4 corners12; vec4 corners13; vec4 corners14; vec4 corners15;
     vec4 corners16; vec4 corners17; vec4 corners18; vec4 corners19;
-    // Which bodies paint themselves. Kept in the block because the QML side
-    // still needs the flag (a body that paints itself brings its own shadow);
-    // the union does not treat them differently any more.
-    vec4 paintsA; vec4 paintsB; vec4 paintsC; vec4 paintsD; vec4 paintsE;
-    // How deep each body's own joins are. A body that is an extension of what
-    // opened it melts generously; a satellite beside the Island keeps a crisp
-    // edge. The pair takes the depth of whichever body is folded in later, which
-    // is the one that arrived — the thing that grew is what decides how it meets
-    // what it grew from.
-    vec4 fuseA; vec4 fuseB; vec4 fuseC; vec4 fuseD; vec4 fuseE;
-    // Whom each body melts into: 0 nothing, -1 the frame, n the shape at n - 1.
-    // A body melts only into what it grew from. Folding every body into the
-    // union of everything before it made a panel melt into the satellites
-    // beside its origin, and a morph that sticks to whatever is near is a
-    // simulation of one.
-    vec4 joinA; vec4 joinB; vec4 joinC; vec4 joinD; vec4 joinE;
-    // A second body it belongs to, same encoding: a satellite grows out of the
-    // Island and rests on the edge, and melts into both.
-    vec4 alsoA; vec4 alsoB; vec4 alsoC; vec4 alsoD; vec4 alsoE;
-    // Each body's material: 0 solid, 1 glass over the blurred wallpaper, 2 glass
-    // the compositor blurs from behind.
-    vec4 glassA; vec4 glassB; vec4 glassC; vec4 glassD; vec4 glassE;
+    // How each body meets the rest.
+    // x: how deep its joins are. A body that is an extension of what opened it melts
+    // generously; a satellite beside the Island keeps a crisp edge. The pair takes the depth
+    // of whichever body is folded in later, which is the one that arrived: the thing that
+    // grew is what decides how it meets what it grew from.
+    // y: whom it melts into: 0 nothing, -1 the frame, n the shape at n - 1. A body melts only
+    // into what it grew from. Folding every body into the union of everything before it made
+    // a panel melt into the satellites beside its origin, and a morph that sticks to whatever
+    // is near is a simulation of one.
+    // z: a second body it belongs to, same encoding: a satellite grows out of the Island and
+    // rests on the edge, and melts into both.
+    // w: its material: 0 solid, 1 glass over the blurred wallpaper, 2 glass the compositor
+    // blurs from behind. 4 more when it paints itself: such a body brings its own shadow.
+    vec4 link0; vec4 link1; vec4 link2; vec4 link3;
+    vec4 link4; vec4 link5; vec4 link6; vec4 link7;
+    vec4 link8; vec4 link9; vec4 link10; vec4 link11;
+    vec4 link12; vec4 link13; vec4 link14; vec4 link15;
+    vec4 link16; vec4 link17; vec4 link18; vec4 link19;
     // x: 1 once the blurred wallpaper is ready. y: the frame's material, same
     // encoding. z: how much of the tint stays over glass. w: the glass edge light.
     vec4 glass;
@@ -89,10 +92,10 @@ layout(std140, binding = 0) uniform buf {
     // Where this field's window sits on its output (x, y) and the output's size (z, w), so a
     // field in a small window (a menu) samples the wallpaper glass at the right place.
     vec4 scene;
-    // x: 1 when another window paints the band, so this field draws only the bodies and their joins.
-    vec4 options;
     // Left, top, right, bottom of an inner rectangle nothing reaches: its pixels skip the whole pass.
     vec4 quiet;
+    // x: how many bodies the table holds. y: how far past a silhouette anything draws, in pixels. z: 1 with any glass.
+    vec4 extent;
     // The colour that lights the cut edge of blurred glass (IrisStyle.glassEdgeColour).
     vec4 sheen;
     // A body's light (IrisStyle.bodyTop, bodyFoot): lit from above, as Ricelin's card. rgb: what its tint leans to at the
@@ -200,6 +203,7 @@ float bodyBox(vec2 p, vec2 centre, vec2 halfSize, vec4 corners) {
     return squircleBox(p, centre, halfSize, d.y < 0.0 ? (d.x < 0.0 ? corners.x : corners.y) : (d.x < 0.0 ? corners.w : corners.z));
 }
 
+#ifdef FIELD_GLOW
 // The chrome bevel's environment by elevation e: -1 ground, 0 horizon, 1 sky.
 vec3 chromeAt(float e, vec3 sky, vec3 hot, vec3 ground, vec3 deep) {
     vec3 c = e > 0.0 ? mix(hot, sky, smoothstep(0.0, 0.75, e)) : mix(ground, deep, smoothstep(0.0, 0.55, -e));
@@ -213,6 +217,7 @@ float bayer4(vec2 p) {
         : k == 8 ? 3.0 : k == 9 ? 11.0 : k == 10 ? 1.0 : k == 11 ? 9.0 : k == 12 ? 15.0 : k == 13 ? 7.0 : k == 14 ? 13.0 : 5.0;
     return m / 16.0 - 0.5;
 }
+#endif
 
 // Polynomial smooth minimum: the join is a fillet `k` pixels deep, which is what
 // makes two bodies read as one that swelled rather than two that overlap.
@@ -247,6 +252,35 @@ vec4 cornersAt(int i) {
     return i == 16 ? u.corners16 : i == 17 ? u.corners17 : i == 18 ? u.corners18 : u.corners19;
 }
 
+vec4 linkAt(int i) {
+    if (i < 8) {
+        if (i < 4) return i == 0 ? u.link0 : i == 1 ? u.link1 : i == 2 ? u.link2 : u.link3;
+        return i == 4 ? u.link4 : i == 5 ? u.link5 : i == 6 ? u.link6 : u.link7;
+    }
+    if (i < 16) {
+        if (i < 12) return i == 8 ? u.link8 : i == 9 ? u.link9 : i == 10 ? u.link10 : u.link11;
+        return i == 12 ? u.link12 : i == 13 ? u.link13 : i == 14 ? u.link14 : u.link15;
+    }
+    return i == 16 ? u.link16 : i == 17 ? u.link17 : i == 18 ? u.link18 : u.link19;
+}
+
+// What a join names at p: the frame, or the body at `name - 1`; FAR when it isn't there.
+float joinedAt(float name, vec2 p, float frame) {
+    if (name < 0.0)
+        return frame;
+    int j = int(name + 0.5) - 1;
+    vec4 s = shapeAt(j);
+    return s.z > 0.0 && s.w > 0.0 ? bodyBox(p, s.xy, s.zw, cornersAt(j)) : FAR * 10.0;
+}
+
+// A body's say in what a point takes from the bodies around it, by how near it is. Only how they compare counts: it falls
+// by e every 12 px, so one 60 px further off than the nearest is nothing. Measured from zero so the walk needn't know the
+// final silhouette to add it up; clamped where a float still holds the sum of twenty.
+float nearnessOf(float d) {
+    return exp(-clamp(d, -700.0, 700.0) / 12.0);
+}
+
+#ifdef FIELD_STREAK
 vec4 trailAt(int i) {
     if (i == 0) return u.trail0;
     if (i == 1) return u.trail1;
@@ -290,11 +324,7 @@ vec3 streakCurtains(vec2 q, vec2 size, out float glow) {
     glow = clamp(weight, 0.0, 1.0);
     return sum / max(weight, 1e-3);
 }
-
-float blockValue(int block, int slot, vec4 a, vec4 b, vec4 c, vec4 d, vec4 e) {
-    vec4 v = block == 0 ? a : block == 1 ? b : block == 2 ? c : block == 3 ? d : e;
-    return slot == 0 ? v.x : slot == 1 ? v.y : slot == 2 ? v.z : v.w;
-}
+#endif
 
 // How much of a Gaussian-blurred edge reaches a point `x` sigmas outside it: 0.5 erfc(x / sqrt 2), with erf from an
 // exp-only tanh (GLSL ES 1.00 has no tanh).
@@ -311,6 +341,7 @@ float ign(vec2 p) {
     return fract(52.9829189 * fract(dot(p, vec2(0.06711056, 0.00583715))));
 }
 
+#ifdef FIELD_LEAK
 // Light leak. IrisLeakWallpaper.frag and IrisLeakPlate.frag keep copies of leakHash, leakNoise, leakRamp and
 // leakLight, and IrisLeakPlate.frag of the bodies' film below: change all three.
 float leakHash(vec2 p) {
@@ -399,6 +430,7 @@ vec3 leakLight(vec2 at, vec2 size, float scatter, out vec3 wash, out vec2 toward
     // Its core runs to the grade's own white: the colour lives where the light fades, as on film.
     return mix(hue * exposed, u.leakCore.rgb * exposed, 0.6 * smoothstep(0.5, 1.0, exposed));
 }
+#endif
 
 void main() {
     vec2 p = u.viewport.xy + qt_TexCoord0 * max(u.viewport.zw, vec2(1.0));
@@ -417,18 +449,33 @@ void main() {
     // Sample the frame in output coordinates so their joins stay aligned.
     vec2 frameP = p + u.scene.xy;
     vec2 size = max(u.scene.zw, vec2(1.0));
-    vec2 frameCentre = size * 0.5;
-    vec2 frameHalf = size * 0.5;
+    // The band one shadow's fall lower.
+    float frameCast = FAR * 10.0;
+#ifdef FIELD_GLOW
+    // Afterglow's normal comes from the joined field with every corner at least the bevel (a tighter corner creased the
+    // bevel along its diagonal).
+    float bevel = max(1.0, u.glowShape.x);
+    float frameN = FAR * 10.0;
+#endif
     if (u.field.y > 0.5) {
-        float t = u.waveClock.x;
-        float alongY = 0.60 + 0.24 * sin(frameP.y * 0.011 + t) + 0.16 * sin(frameP.y * 0.027 - t * 1.4);
-        float alongX = 0.60 + 0.24 * sin(frameP.x * 0.009 - t) + 0.16 * sin(frameP.x * 0.023 + t * 1.2);
-        vec2 lo = vec2(u.field.z + u.edgeWave.x * alongY, u.field.z + u.edgeWave.y * alongX);
-        vec2 hi = size - vec2(u.field.z + u.edgeWave.z * alongY, u.field.z + u.edgeWave.w * alongX);
-        frameCentre = (lo + hi) * 0.5;
-        frameHalf = max((hi - lo) * 0.5, vec2(0.0));
+        vec2 lo = vec2(u.field.z);
+        vec2 hi = size - vec2(u.field.z);
+        // Four sines a pixel, only while music swells the band.
+        if (u.edgeWave != vec4(0.0)) {
+            float t = u.waveClock.x;
+            float alongY = 0.60 + 0.24 * sin(frameP.y * 0.011 + t) + 0.16 * sin(frameP.y * 0.027 - t * 1.4);
+            float alongX = 0.60 + 0.24 * sin(frameP.x * 0.009 - t) + 0.16 * sin(frameP.x * 0.023 + t * 1.2);
+            lo += vec2(u.edgeWave.x * alongY, u.edgeWave.y * alongX);
+            hi -= vec2(u.edgeWave.z * alongY, u.edgeWave.w * alongX);
+        }
+        vec2 frameCentre = (lo + hi) * 0.5;
+        vec2 frameHalf = max((hi - lo) * 0.5, vec2(0.0));
         frameDistance = -squircleBox(frameP, frameCentre, frameHalf, u.field.w);
         united = frameDistance;
+        frameCast = -squircleBox(frameP - vec2(0.0, u.shadeShape.x), frameCentre, frameHalf, u.field.w);
+#ifdef FIELD_GLOW
+        frameN = -squircleBox(frameP, frameCentre, frameHalf, max(u.field.w, bevel));
+#endif
     }
     float frameClusterDistance = frameDistance;
 
@@ -438,143 +485,154 @@ void main() {
     // How far the glass under this pixel has materialised: glass comes in by its blur, not by fading. A body still
     // arriving carries it in its material's fraction (1 - 0.4 * (1 - frost)); everything else is fully frosted.
     float frostSum = 0.0;
-    // Every material solid (the default) skips twenty exponentials a pixel: the branch is uniform.
-    bool anyGlass = u.glass.y > 0.5 || dot(u.glassA + u.glassB + u.glassC + u.glassD + u.glassE, vec4(1.0)) > 0.5;
+    bool anyGlass = u.extent.z > 0.5;
     if (anyGlass && u.field.y > 0.5) {
         float w = exp(-clamp(frameDistance, -40.0, 40.0) / 2.0);
         weights += w * vec3(u.glass.y < 0.5 ? 1.0 : 0.0, u.glass.y > 0.5 && u.glass.y < 1.5 ? 1.0 : 0.0, u.glass.y > 1.5 ? 1.0 : 0.0);
         frostSum += u.glass.y > 0.5 ? w : 0.0;
     }
-    float bodies[20];
+    // Each body runs top to foot across itself; the band runs across the output, so a body welded to its top edge starts
+    // where the band stands and one welded to its foot ends there. Blended by nearness, so a weld shades, never steps.
+    bool bodyLit = u.bodyTop.a + u.bodyFoot.a > 0.001;
+    int artAt = int(u.artLane.x + 0.5) - 1;
+    bool wearsArt = artAt >= 0 && artAt < 20 && u.artLane.y > 0.001;
+    bool leans = bodyLit || wearsArt;
+    float along = 0.0;
+    float nearness = 0.0;
+    float artNear = 0.0;
+    float artDistance = FAR * 10.0;
+    if (leans && u.field.y > 0.5 && frameDistance < 61.0) {
+        float w = nearnessOf(frameDistance);
+        along += w * clamp(frameP.y / size.y, 0.0, 1.0);
+        nearness += w;
+    }
+#ifdef FIELD_GLOW
+    // Its light is blended by nearness so a join shades from one body into the other instead of creasing. The frame and
+    // the bodies welded to it are one chassis lit across the output: a Dock lit from its own top met the dark band at its
+    // shoulders as a second object. A floating body is lit across itself.
+    float unitedN = frameN;
+    float gouraudSum = 0.0;
+    float lipSum = 0.0;
+    float weightSum = 0.0;
+    vec2 across = clamp(frameP / size, 0.0, 1.0);
+    float chassisLight = mix(mix(1.0, 0.82, across.x), mix(0.34, 0.22, across.x), across.y);
+    if (u.field.y > 0.5) {
+        float w = nearnessOf(frameDistance);
+        gouraudSum += w * chassisLight;
+        lipSum += w * bevel;
+        weightSum += w;
+    }
+#endif
+#ifdef FIELD_STREAK
+    // Light streak's light past a silhouette faces the light by a softened field: the nearest body's normal jumps where
+    // two bodies are equally near (between two bubbles) and cut the fall into straight-edged strips.
+    float soft = 0.35 * max(1.0, u.streakSource.w);
+    float unitedN = frameDistance;
+#endif
     // What the compositor's blur region holds (IrisBlurRegion): the compositor-glass bodies and their joins with
     // each other; the band and its joins only while the frame is compositor glass too.
     float held = FAR * 10.0;
-    for (int i = 0; i < 20; ++i) {
+    // The shadow's silhouette, one fall lower: the bodies that don't paint themselves and their joins; `withFrame` those
+    // grown out of the frame, joined with it. Deep inside a body it is worked out by nobody: nothing casts on what is opaque.
+    bool shadowed = u.shadeShape.z > 0.5 && u.shade.a > 0.0;
+    vec2 ps = p - vec2(0.0, u.shadeShape.x);
+    float alone = FAR * 10.0;
+    float withFrame = FAR * 10.0;
+    // Nothing draws past `extent.y` and nearness stops at 60: a body further off than that is two comparisons.
+    float cull = u.extent.y + 64.0;
+    int count = int(u.extent.x + 0.5);
+    for (int i = 0; i < count; ++i) {
         vec4 s = shapeAt(i);
-        bodies[i] = FAR * 10.0;
-        if (s.z <= 0.0 || s.w <= 0.0)
+        vec2 past = abs(p - s.xy) - s.zw;
+        if (s.z <= 0.0 || s.w <= 0.0 || max(past.x, past.y) > cull)
             continue;
-        int block = i / 4;
-        int slot = i - block * 4;
-        bodies[i] = bodyBox(p, s.xy, s.zw, cornersAt(i));
-        united = min(united, bodies[i]);
-        float m = blockValue(block, slot, u.glassA, u.glassB, u.glassC, u.glassD, u.glassE);
+        vec4 link = linkAt(i);
+        vec4 corners = cornersAt(i);
+        float d = bodyBox(p, s.xy, s.zw, corners);
+        float k = max(0.0, link.x);
+        bool casts = link.w < 3.0;
+        float m = casts ? link.w : link.w - 4.0;
+        united = min(united, d);
         if (m > 1.5)
-            held = min(held, bodies[i]);
+            held = min(held, d);
+        casts = casts && shadowed;
+        float dCast = casts && d > -u.shadeShape.x - 2.0 ? bodyBox(ps, s.xy, s.zw, corners) : d;
+        if (casts)
+            alone = min(alone, dCast);
         if (anyGlass) {
-            float w = exp(-clamp(bodies[i], -40.0, 40.0) / 2.0);
+            float w = exp(-clamp(d, -40.0, 40.0) / 2.0);
             weights += w * vec3(m < 0.5 ? 1.0 : 0.0, m > 0.5 && m < 1.5 ? 1.0 : 0.0, m > 1.5 ? 1.0 : 0.0);
             frostSum += m > 0.5 ? w * clamp(1.0 - (floor(m + 0.5) - m) / 0.4, 0.0, 1.0) : 0.0;
         }
-    }
-    // The joins, each only between a body and the one it belongs to. A smooth
-    // union is never above the plain one, so taking the minimum adds the fillet
-    // there and nowhere else.
-    for (int i = 0; i < 20; ++i) {
-        if (bodies[i] > FAR)
-            continue;
-        int block = i / 4;
-        int slot = i - block * 4;
-        float k = max(0.0, blockValue(block, slot, u.fuseA, u.fuseB, u.fuseC, u.fuseD, u.fuseE));
-        float join = blockValue(block, slot, u.joinA, u.joinB, u.joinC, u.joinD, u.joinE);
-        float also = blockValue(block, slot, u.alsoA, u.alsoB, u.alsoC, u.alsoD, u.alsoE);
-        bool blurred = blockValue(block, slot, u.glassA, u.glassB, u.glassC, u.glassD, u.glassE) > 1.5;
-        if (join < -0.5 || join > 0.5) {
-            int j = int(join + 0.5) - 1;
-            float other = join < 0.0 ? frameDistance : bodies[j];
-            if (other < FAR) {
-                float fused = smoothUnion(other, bodies[i], k);
-                united = min(united, fused);
-                if (join < 0.0)
-                    frameClusterDistance = min(frameClusterDistance, fused);
-                else if (blurred && blockValue(j / 4, j - (j / 4) * 4, u.glassA, u.glassB, u.glassC, u.glassD, u.glassE) > 1.5)
-                    held = min(held, fused);
+        if (leans && d < 61.0) {
+            float w = nearnessOf(d);
+            along += w * clamp((p.y - s.y + s.w) / max(2.0 * s.w, 1.0), 0.0, 1.0);
+            nearness += w;
+            if (i == artAt) {
+                artNear = w;
+                artDistance = d;
             }
         }
-        if (also < -0.5 || also > 0.5) {
-            int j = int(also + 0.5) - 1;
-            float other = also < 0.0 ? frameDistance : bodies[j];
-            if (other < FAR) {
-                float fused = smoothUnion(other, bodies[i], k);
-                united = min(united, fused);
-                if (also < 0.0)
-                    frameClusterDistance = min(frameClusterDistance, fused);
-                else if (blurred && blockValue(j / 4, j - (j / 4) * 4, u.glassA, u.glassB, u.glassC, u.glassD, u.glassE) > 1.5)
+#ifdef FIELD_GLOW
+        float dN = bodyBox(p, s.xy, s.zw, max(corners, vec4(bevel)));
+        unitedN = min(unitedN, dN);
+        {
+            bool welded = u.field.y > 0.5 && (link.y < -0.5 || link.z < -0.5);
+            float w = nearnessOf(d);
+            vec2 t = clamp((p - s.xy + s.zw) / max(2.0 * s.zw, vec2(1.0)), 0.0, 1.0);
+            gouraudSum += w * (welded ? chassisLight : mix(mix(1.0, 0.82, t.x), mix(0.34, 0.22, t.x), t.y));
+            // A small body wears a lip in proportion, never a panel's; blended like the light, so it never steps at a weld.
+            lipSum += w * min(bevel, max(2.0, 0.3 * min(s.z, s.w)));
+            weightSum += w;
+        }
+#endif
+#ifdef FIELD_STREAK
+        unitedN = smoothUnion(unitedN, d, soft);
+#endif
+        // The joins, each only between a body and the one it belongs to. A smooth union is never above the plain one, so
+        // taking the minimum adds the fillet there and nowhere else.
+        for (int n = 0; n < 2; ++n) {
+            float name = n == 0 ? link.y : link.z;
+            if (name > -0.5 && name < 0.5)
+                continue;
+            float other = joinedAt(name, p, frameDistance);
+            if (other > FAR)
+                continue;
+            float fused = smoothUnion(other, d, k);
+            united = min(united, fused);
+#ifdef FIELD_GLOW
+            unitedN = min(unitedN, smoothUnion(name < 0.0 ? frameN : other, dN, k));
+#endif
+            if (name < 0.0) {
+                frameClusterDistance = min(frameClusterDistance, fused);
+                if (casts)
+                    withFrame = min(withFrame, smoothUnion(frameCast, dCast, k));
+            } else {
+                float mate = linkAt(int(name + 0.5) - 1).w;
+                if (m > 1.5 && (mate < 3.0 ? mate : mate - 4.0) > 1.5)
                     held = min(held, fused);
+                if (casts && mate < 3.0)
+                    alone = min(alone, smoothUnion(joinedAt(name, ps, frameDistance), dCast, k));
             }
         }
     }
 
-    // Afterglow's normal comes from the joined field with every corner at least the bevel (a tighter corner creased the
-    // bevel along its diagonal), measured once here and differentiated by the GPU below. Four more evaluations of the
-    // whole field per pixel near every edge doubled the chassis's frame (11-02, nest on llvmpipe: 33 -> 66 ms).
-    float unitedN = united;
-    if (u.glowMix.x > 0.5) {
-        float bevelN = max(1.0, u.glowShape.x);
-        float frameN = FAR * 10.0;
-        if (u.field.y > 0.5)
-            frameN = -squircleBox(frameP, frameCentre, frameHalf, max(u.field.w, bevelN));
-        unitedN = frameN;
-        float bodiesN[20];
-        for (int i = 0; i < 20; ++i) {
-            bodiesN[i] = FAR * 10.0;
-            if (bodies[i] > FAR)
-                continue;
-            vec4 s = shapeAt(i);
-            bodiesN[i] = bodyBox(p, s.xy, s.zw, max(cornersAt(i), vec4(bevelN)));
-            unitedN = min(unitedN, bodiesN[i]);
-        }
-        for (int i = 0; i < 20; ++i) {
-            if (bodiesN[i] > FAR)
-                continue;
-            int block = i / 4;
-            int slot = i - block * 4;
-            float kq = max(0.0, blockValue(block, slot, u.fuseA, u.fuseB, u.fuseC, u.fuseD, u.fuseE));
-            float join = blockValue(block, slot, u.joinA, u.joinB, u.joinC, u.joinD, u.joinE);
-            float also = blockValue(block, slot, u.alsoA, u.alsoB, u.alsoC, u.alsoD, u.alsoE);
-            if (join < -0.5 || join > 0.5) {
-                float other = join < 0.0 ? frameN : bodiesN[int(join + 0.5) - 1];
-                if (other < FAR)
-                    unitedN = min(unitedN, smoothUnion(other, bodiesN[i], kq));
-            }
-            if (also < -0.5 || also > 0.5) {
-                float other = also < 0.0 ? frameN : bodiesN[int(also + 0.5) - 1];
-                if (other < FAR)
-                    unitedN = min(unitedN, smoothUnion(other, bodiesN[i], kq));
-            }
-        }
-    } else if (u.streakMix.x > 0.5) {
-        // Light streak's light past a silhouette faces the light by a softened field: the nearest body's normal jumps
-        // where two bodies are equally near (between two bubbles) and cut the fall into straight-edged strips.
-        float soft = 0.35 * max(1.0, u.streakSource.w);
-        unitedN = frameDistance;
-        for (int i = 0; i < 20; ++i)
-            if (bodies[i] < FAR)
-                unitedN = smoothUnion(unitedN, bodies[i], soft);
-    }
-
-    if (united > FAR) {
-        fragColor = vec4(0.0);
-        return;
-    }
     // How deep a point sits in the material, for what a texture draws inside it (Afterglow's bevel and bloom, Light leak's
     // burn). A body welded to the frame that only meets the band's inner line (the Island at rest, the widget bar) unites
     // with it by a smooth minimum just k/4 deep along that line, and the bevel and the burn drew it as a crease across
     // the body. For the depth alone that seam is filled: the silhouette stays as it is, the inside whole.
+#if defined(FIELD_GLOW) || defined(FIELD_LEAK) || defined(FIELD_STREAK)
     float inner = united;
-    if ((u.glowMix.x > 0.5 || u.leakMix.x > 0.5 || u.streakMix.x > 0.5) && u.field.y > 0.5 && united < 0.0) {
-        vec2 lo = frameCentre - frameHalf - u.scene.xy;
-        vec2 hi = frameCentre + frameHalf - u.scene.xy;
+    if (u.field.y > 0.5 && united < 0.0) {
+        // The band at rest: what is welded to it stays there while music swells it.
+        vec2 lo = vec2(u.field.z) - u.scene.xy;
+        vec2 hi = size - vec2(u.field.z) - u.scene.xy;
         float deeper = united;
-        for (int i = 0; i < 20; ++i) {
-            if (bodies[i] > FAR)
-                continue;
-            int block = i / 4;
-            int slot = i - block * 4;
-            if (blockValue(block, slot, u.joinA, u.joinB, u.joinC, u.joinD, u.joinE) > -0.5
-                && blockValue(block, slot, u.alsoA, u.alsoB, u.alsoC, u.alsoD, u.alsoE) > -0.5)
-                continue;
+        for (int i = 0; i < count; ++i) {
             vec4 s = shapeAt(i);
+            vec4 link = linkAt(i);
+            if (s.z <= 0.0 || s.w <= 0.0 || (link.y > -0.5 && link.z > -0.5))
+                continue;
             vec4 corners = cornersAt(i);
             float r = min(max(max(corners.x, corners.y), max(corners.z, corners.w)), min(s.z, s.w));
             float under = u.field.z + 2.0;
@@ -583,7 +641,7 @@ void main() {
             // A strip over the run of each side that meets the band, from a radius inside the body to past the band. It runs
             // on into the corners as far as their curve stays within the crease's depth of the band (k/4): beyond that the
             // lobe a rounded corner leaves at the weld keeps its own edge.
-            float k = max(0.0, blockValue(block, slot, u.fuseA, u.fuseB, u.fuseC, u.fuseD, u.fuseE));
+            float k = max(0.0, link.x);
             float c = min(r, 0.25 * k + 1.5);
             float e = sqrt(max(0.0, r * r - (r - c) * (r - c)));
             vec2 run = min(s.zw, s.zw - r + e);
@@ -602,40 +660,23 @@ void main() {
         }
         inner = mix(united, deeper, smoothstep(2.0, 5.0, united - deeper));
     }
+#endif
     // Derivatives at the top level: inside a branch that differs between neighbours they are undefined.
     // The gradient in the item's own space (y down on every backend): screen derivatives run y up on OpenGL.
     vec2 dp = vec2(dFdx(p.x), dFdy(p.y));
-    vec2 unitedSlope = vec2(dFdx(united), dFdy(united)) / vec2(abs(dp.x) > 1e-6 ? dp.x : 1.0, abs(dp.y) > 1e-6 ? dp.y : 1.0);
-    vec2 normalSlope = vec2(dFdx(unitedN), dFdy(unitedN)) / vec2(abs(dp.x) > 1e-6 ? dp.x : 1.0, abs(dp.y) > 1e-6 ? dp.y : 1.0);
+    dp = vec2(abs(dp.x) > 1e-6 ? dp.x : 1.0, abs(dp.y) > 1e-6 ? dp.y : 1.0);
+    vec2 unitedSlope = vec2(dFdx(united), dFdy(united)) / dp;
+#if defined(FIELD_GLOW) || defined(FIELD_STREAK)
+    vec2 normalSlope = vec2(dFdx(unitedN), dFdy(unitedN)) / dp;
+#endif
+    if (united > u.extent.y) {
+        fragColor = vec4(0.0);
+        return;
+    }
     // One pixel of coverage, so the contour stays crisp at any scale.
     float coverage = 1.0 - smoothstep(-0.7, 0.7, united);
-    if (u.options.x > 0.5 && u.field.y > 0.5)
-        coverage *= smoothstep(-0.7, 0.7, frameDistance);
-    // Each body runs top to foot across itself; the band runs across the output, so a body welded to its top edge starts
-    // where the band stands and one welded to its foot ends there. Blended by nearness, so a weld shades, never steps.
     vec3 paint = u.tint.rgb;
-    bool bodyLit = u.bodyTop.a + u.bodyFoot.a > 0.001;
-    int artAt = int(u.artLane.x + 0.5) - 1;
-    bool wearsArt = artAt >= 0 && artAt < 20 && u.artLane.y > 0.001;
-    if ((bodyLit || wearsArt) && united < 1.0) {
-        float along = 0.0;
-        float nearness = 0.0;
-        float artNear = 0.0;
-        if (u.field.y > 0.5) {
-            float w = exp(-clamp(frameDistance - united, 0.0, 60.0) / 12.0);
-            along += w * clamp(frameP.y / size.y, 0.0, 1.0);
-            nearness += w;
-        }
-        for (int i = 0; i < 20; ++i) {
-            if (bodies[i] > FAR)
-                continue;
-            vec4 s = shapeAt(i);
-            float w = exp(-clamp(bodies[i] - united, 0.0, 60.0) / 12.0);
-            along += w * clamp((p.y - s.y + s.w) / max(2.0 * s.w, 1.0), 0.0, 1.0);
-            nearness += w;
-            if (i == artAt)
-                artNear = w;
-        }
+    if (leans && united < 1.0) {
         if (bodyLit)
             paint = mix(mix(u.tint.rgb, u.bodyTop.rgb, u.bodyTop.a), mix(u.tint.rgb, u.bodyFoot.rgb, u.bodyFoot.a), along / max(nearness, 1e-4));
         // The picture is the body's material, not a rectangle laid inside it: it fills the silhouette the field draws,
@@ -653,7 +694,7 @@ void main() {
             float risen = u.field.y > 0.5 && u.artLane.w > 0.0 ? smoothstep(0.0, u.artLane.w, frameDistance) : 1.0;
             // Inside its own body the picture owns the pixel even where another body overlaps it (the strip a grown
             // page swallows); past its edge it shares by nearness.
-            float owned = max(artNear / max(nearness, 1e-4), 1.0 - smoothstep(-12.0, 0.0, bodies[artAt]));
+            float owned = max(artNear / max(nearness, 1e-4), 1.0 - smoothstep(-12.0, 0.0, artDistance));
             paint = mix(paint, picture.rgb + paint * (1.0 - picture.a), u.artLane.y * risen * owned);
         }
     }
@@ -687,39 +728,20 @@ void main() {
         colour = mixed.rgb;
         alpha = mixed.a;
     }
-    if (u.glowMix.x > 0.5) {
+    // Where nothing opaque covers it. Worked out here, so the silhouette's distances are gone before a texture needs the
+    // registers. A body grown out of the frame casts its fillet with the band less the band's own share, so the shoulders
+    // cast and the band does not.
+    float thrown = 0.0;
+    if (shadowed && (coverage < 1.0 || share.z > 0.0)) {
+        float sigma = max(1.0, u.shadeShape.y * 0.5);
+        thrown = alone < FAR ? blurredEdge(alone / sigma) : 0.0;
+        if (withFrame < FAR)
+            thrown = max(thrown, max(0.0, blurredEdge(withFrame / sigma) - blurredEdge(frameCast / sigma)));
+    }
+#ifdef FIELD_GLOW
+    {
         bool paper = u.glowShadow.a > 0.5;
-        float bevel = max(1.0, u.glowShape.x);
         float radiusBloom = max(1.0, u.glowBloom.a);
-        // Blended by nearness so a join shades from one body into the other instead of creasing. The frame and the
-        // bodies welded to it are one chassis lit across the output: a Dock lit from its own top met the dark band at
-        // its shoulders as a second object. A floating body is lit across itself.
-        float gouraudSum = 0.0;
-        float lipSum = 0.0;
-        float weightSum = 0.0;
-        vec2 across = clamp(frameP / size, 0.0, 1.0);
-        float chassisLight = mix(mix(1.0, 0.82, across.x), mix(0.34, 0.22, across.x), across.y);
-        if (u.field.y > 0.5) {
-            float w = exp(-clamp(frameDistance - united, 0.0, 60.0) / 12.0);
-            gouraudSum += w * chassisLight;
-            lipSum += w * bevel;
-            weightSum += w;
-        }
-        for (int i = 0; i < 20; ++i) {
-            if (bodies[i] > FAR)
-                continue;
-            vec4 s = shapeAt(i);
-            int block = i / 4;
-            int slot = i - block * 4;
-            bool welded = u.field.y > 0.5 && (blockValue(block, slot, u.joinA, u.joinB, u.joinC, u.joinD, u.joinE) < -0.5
-                || blockValue(block, slot, u.alsoA, u.alsoB, u.alsoC, u.alsoD, u.alsoE) < -0.5);
-            float w = exp(-clamp(bodies[i] - united, 0.0, 60.0) / 12.0);
-            vec2 t = clamp((p - s.xy + s.zw) / max(2.0 * s.zw, vec2(1.0)), 0.0, 1.0);
-            gouraudSum += w * (welded ? chassisLight : mix(mix(1.0, 0.82, t.x), mix(0.34, 0.22, t.x), t.y));
-            // A small body wears a lip in proportion, never a panel's; blended like the light, so it never steps at a weld.
-            lipSum += w * min(bevel, max(2.0, 0.3 * min(s.z, s.w)));
-            weightSum += w;
-        }
         float lip = weightSum > 0.0 ? lipSum / weightSum : bevel;
         float gouraud = weightSum > 0.0 ? gouraudSum / weightSum : 0.6;
         // Normals from the joined field (per-body normals break at welds), near edges only; the rest faces up.
@@ -779,11 +801,13 @@ void main() {
         colour += bayer4(frameP) * (1.5 / 255.0) * alpha;
         colour = max(colour, vec3(0.0));
     }
+#endif
     // Light leak: every body is film exposed by one light per output: a grain gradient of the grade inside (photo paper
     // on a paper scheme), the edge that faces the light burnt and split, a halation spilling past the silhouette whose
     // tail breaks into grain. Glass keeps its frost and the light scatters in it. Nothing here depends on which body a
     // pixel belongs to, so the band, the Dock and a bubble are one material through every weld.
-    if (u.leakMix.x > 0.5) {
+#ifdef FIELD_LEAK
+    {
         float reach = max(1.0, u.leakGrain.w);
         if (united < 4.0 * reach) {
             bool paper = u.leakStop0.a > 0.5;
@@ -894,11 +918,13 @@ void main() {
             }
         }
     }
+#endif
     // Light streak: iRiS as a long exposure. The light hangs under the Island: every edge that faces it carries a streak
     // (a hot core on its first device pixel, a fall a few pixels in, a little light past it), hottest by the Island and
     // thinning away from it. Inside, the person's colours hang as aurora curtains, strongest near the edges and quiet
     // deep in, where text sits, held under the luminance its ink reads on. A body in motion leaves its trail.
-    if (u.streakMix.x > 0.5) {
+#ifdef FIELD_STREAK
+    {
         float reach = max(1.0, u.streakSource.w);
         float glow;
         vec3 hue = streakCurtains(frameP, size, glow);
@@ -965,19 +991,19 @@ void main() {
         }
         if (u.streakMix.w > 0.001 && united > -0.7) {
             float smear = 0.0;
-            for (int i = 0; i < 20; ++i) {
-                if (bodies[i] > FAR)
-                    continue;
+            for (int i = 0; i < count; ++i) {
+                vec4 s = shapeAt(i);
                 vec4 tr = trailAt(i);
                 float moved = abs(tr.x) + abs(tr.y) + abs(tr.z) + abs(tr.w);
-                if (moved < 0.5)
+                if (s.z <= 0.0 || s.w <= 0.0 || moved < 0.5)
                     continue;
-                vec4 s = shapeAt(i);
+                // A trail is soft past any corner's shape: one radius for the whole body, six times over.
                 vec4 corners = cornersAt(i);
+                float r = max(max(corners.x, corners.y), max(corners.z, corners.w));
                 float soft = max(1.5, moved / 10.0);
                 for (int k = 1; k <= 6; ++k) {
                     float t = float(k) / 6.0;
-                    float d = bodyBox(p, s.xy - tr.xy * t, max(s.zw - tr.zw * t, vec2(0.5)), corners);
+                    float d = roundedBox(p, s.xy - tr.xy * t, max(s.zw - tr.zw * t, vec2(0.5)), r);
                     smear = max(smear, (1.0 - smoothstep(-soft, soft, d)) * (1.0 - t));
                 }
             }
@@ -986,6 +1012,7 @@ void main() {
             alpha += smear * 0.22;
         }
     }
+#endif
     // Glass has a cut edge that catches the light from above, like Liquid Glass: bright where it faces up, a faint
     // line elsewhere, in the scene's own light. Without it wallpaper glass over a dimmed desktop has no edge at
     // all, and compositor blur's 1-bit edge (a wl_region, no AA in Niri) reads as a step instead of glass.
@@ -1024,56 +1051,12 @@ void main() {
         colour = u.frameInk.rgb * lightAlpha + colour * (1.0 - lightAlpha);
         alpha = lightAlpha + alpha * (1.0 - lightAlpha);
     }
-    float shadowAlpha = 0.0;
-    if (u.shadeShape.z > 0.5 && u.shade.a > 0.0) {
-        // The casters' silhouette one offset lower: bodies that do not paint themselves, the joins between them, and
-        // for a body grown out of the frame its fillet with the band less the band's own share, so the shoulders cast
-        // and the band does not.
-        vec2 ps = p - vec2(0.0, u.shadeShape.x);
-        float frameShade = FAR * 10.0;
-        if (u.field.y > 0.5)
-            frameShade = -squircleBox(ps + u.scene.xy, frameCentre, frameHalf, u.field.w);
-        float alone = FAR * 10.0;
-        float withFrame = FAR * 10.0;
-        float casters[20];
-        for (int i = 0; i < 20; ++i) {
-            casters[i] = FAR * 10.0;
-            if (bodies[i] > FAR)
-                continue;
-            int block = i / 4;
-            int slot = i - block * 4;
-            if (blockValue(block, slot, u.paintsA, u.paintsB, u.paintsC, u.paintsD, u.paintsE) > 0.5)
-                continue;
-            vec4 s = shapeAt(i);
-            casters[i] = bodyBox(ps, s.xy, s.zw, cornersAt(i));
-            alone = min(alone, casters[i]);
-        }
-        for (int i = 0; i < 20; ++i) {
-            if (casters[i] > FAR)
-                continue;
-            int block = i / 4;
-            int slot = i - block * 4;
-            float k = max(0.0, blockValue(block, slot, u.fuseA, u.fuseB, u.fuseC, u.fuseD, u.fuseE));
-            float join = blockValue(block, slot, u.joinA, u.joinB, u.joinC, u.joinD, u.joinE);
-            float also = blockValue(block, slot, u.alsoA, u.alsoB, u.alsoC, u.alsoD, u.alsoE);
-            if (join < -0.5 && frameShade < FAR)
-                withFrame = min(withFrame, smoothUnion(frameShade, casters[i], k));
-            else if (join > 0.5 && casters[int(join + 0.5) - 1] < FAR)
-                alone = min(alone, smoothUnion(casters[int(join + 0.5) - 1], casters[i], k));
-            if (also < -0.5 && frameShade < FAR)
-                withFrame = min(withFrame, smoothUnion(frameShade, casters[i], k));
-            else if (also > 0.5 && casters[int(also + 0.5) - 1] < FAR)
-                alone = min(alone, smoothUnion(casters[int(also + 0.5) - 1], casters[i], k));
-        }
-        float sigma = max(1.0, u.shadeShape.y * 0.5);
-        float thrown = alone < FAR ? blurredEdge(alone / sigma) : 0.0;
-        if (withFrame < FAR)
-            thrown = max(thrown, max(0.0, blurredEdge(withFrame / sigma) - blurredEdge(frameShade / sigma)));
-        // Under glass the body shows what is behind it: the shadow stays outside, never a grey film inside.
-        float reachHere = thrown * u.qt_Opacity * (1.0 - coverage * (share.y + share.z)) * (1.0 - alpha);
-        shadowAlpha = u.shade.a * reachHere;
+    // Under glass the body shows what is behind it: the shadow stays outside, never a grey film inside.
+    float room = (1.0 - coverage * (share.y + share.z)) * (1.0 - alpha);
+    if (room > 0.001) {
+        float reachHere = thrown * u.qt_Opacity * room;
         colour += u.shade.rgb * reachHere;
-        alpha += shadowAlpha;
+        alpha += u.shade.a * reachHere;
     }
     // Wallpaper glass is a half-resolution blur stretched over the body and a lit body is a long, shallow ramp: eight bits
     // of either band. A dither under one level breaks the bands (a shadow's ramp is short enough not to need it).

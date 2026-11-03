@@ -199,7 +199,8 @@ Item {
         y: root.bounds.y
         width: root.bounds.width
         height: root.bounds.height
-        fragmentShader: Qt.resolvedUrl("IrisField.frag.qsb")
+        // One shader per texture: every look in one pass cost every Intel laptop its frames (IrisField.frag).
+        fragmentShader: Qt.resolvedUrl("IrisField" + (IrisStyle.afterglow ? "Glow" : IrisStyle.leak ? "Leak" : IrisStyle.streak ? "Streak" : "") + ".frag.qsb")
         blending: true
         // Kept as a texture: a frame the chassis draws for its content alone (a bubble's live number, the clock) copies it
         // instead of running the field over the output again. The pass reruns only when a uniform or a texture it reads
@@ -216,7 +217,8 @@ Item {
             const index = {}
             for (let i = 0; i < n; i++)
                 if (list[i]?.id) index[list[i].id] = i
-            const geometry = [], corners = [], fuse = [], join = [], also = [], paints = [], glass = []
+            const geometry = [], corners = [], link = []
+            let glassy = false
             // The first body that wears a picture (`art`: a layered item or a ShaderEffectSource, `artShow` 0..1,
             // `artRise`: pixels past the band's inner line it takes to come in).
             let artAt = -1
@@ -234,23 +236,14 @@ Item {
                 geometry.push(s ? Qt.vector4d(s.x + s.width / 2, s.y + s.height / 2, s.width / 2, s.height / 2) : zero)
                 const c = s ? IrisFrame.cornersOf(s) : null
                 corners.push(c ? Qt.vector4d(c.tl, c.tr, c.br, c.bl) : zero)
-                fuse.push(s ? Number(s.fuse ?? root.smoothing) : 0)
-                join.push(slot(s, 0))
-                also.push(slot(s, 1))
-                paints.push(s && s.paints ? 1 : 0)
                 // A glass body still materialising carries its frost in the fraction: 1 - 0.4 * (1 - frost).
                 const g = root.glassOf(s)
-                glass.push(g > 0 && s.frost !== undefined ? g - 0.4 * (1 - Math.max(0, Math.min(1, Number(s.frost)))) : g)
-            }
-            const blocks = values => {
-                const out = []
-                for (let b = 0; b < root.capacity / 4; b++)
-                    out.push(Qt.vector4d(values[b * 4], values[b * 4 + 1], values[b * 4 + 2], values[b * 4 + 3]))
-                return out
+                const material = g > 0 && s.frost !== undefined ? g - 0.4 * (1 - Math.max(0, Math.min(1, Number(s.frost)))) : g
+                glassy = glassy || material > 0
+                link.push(s ? Qt.vector4d(Number(s.fuse ?? root.smoothing), slot(s, 0), slot(s, 1), material + (s.paints ? 4 : 0)) : zero)
             }
             const worn = artAt >= 0 ? list[artAt] : null
-            return { geometry: geometry, corners: corners, fuse: blocks(fuse), join: blocks(join), also: blocks(also),
-                paints: blocks(paints), glass: blocks(glass), art: worn?.art ?? null,
+            return { count: n, geometry: geometry, corners: corners, link: link, glassy: glassy, art: worn?.art ?? null,
                 artLane: worn ? Qt.vector4d(artAt + 1, Math.max(0, Math.min(1, Number(worn.artShow ?? 1))),
                     worn.art.width / Math.max(1, worn.art.height), Math.max(0, Number(worn.artRise ?? 0))) : zero }
         }
@@ -264,8 +257,9 @@ Item {
         readonly property vector4d field: Qt.vector4d(root.smoothing, root.framed ? 1 : 0,
             root.band, root.cornerRadius)
         readonly property color tint: root.tint
-        readonly property vector4d options: Qt.vector4d(0, 0, 0, 0)
         readonly property vector4d quiet: root.quietRect
+        readonly property vector4d extent: Qt.vector4d(pass.packed.count, root.reach + 32 + root.trailSpan + root.frameMusicLightWidth,
+            pass.packed.glassy || (root.framed && root.frameGlass > 0) ? 1 : 0, 0)
         readonly property color rim: root.rim
         readonly property color sheen: root.sheen
         readonly property vector4d bodyTop: IrisStyle.bodyTop
@@ -362,31 +356,26 @@ Item {
         readonly property vector4d corners17: pass.packed.corners[17]
         readonly property vector4d corners18: pass.packed.corners[18]
         readonly property vector4d corners19: pass.packed.corners[19]
-        readonly property vector4d fuseA: pass.packed.fuse[0]
-        readonly property vector4d fuseB: pass.packed.fuse[1]
-        readonly property vector4d fuseC: pass.packed.fuse[2]
-        readonly property vector4d fuseD: pass.packed.fuse[3]
-        readonly property vector4d fuseE: pass.packed.fuse[4]
-        readonly property vector4d joinA: pass.packed.join[0]
-        readonly property vector4d alsoA: pass.packed.also[0]
-        readonly property vector4d joinB: pass.packed.join[1]
-        readonly property vector4d alsoB: pass.packed.also[1]
-        readonly property vector4d joinC: pass.packed.join[2]
-        readonly property vector4d alsoC: pass.packed.also[2]
-        readonly property vector4d joinD: pass.packed.join[3]
-        readonly property vector4d alsoD: pass.packed.also[3]
-        readonly property vector4d joinE: pass.packed.join[4]
-        readonly property vector4d alsoE: pass.packed.also[4]
-        readonly property vector4d paintsA: pass.packed.paints[0]
-        readonly property vector4d paintsB: pass.packed.paints[1]
-        readonly property vector4d paintsC: pass.packed.paints[2]
-        readonly property vector4d paintsD: pass.packed.paints[3]
-        readonly property vector4d paintsE: pass.packed.paints[4]
-        readonly property vector4d glassA: pass.packed.glass[0]
-        readonly property vector4d glassB: pass.packed.glass[1]
-        readonly property vector4d glassC: pass.packed.glass[2]
-        readonly property vector4d glassD: pass.packed.glass[3]
-        readonly property vector4d glassE: pass.packed.glass[4]
+        readonly property vector4d link0: pass.packed.link[0]
+        readonly property vector4d link1: pass.packed.link[1]
+        readonly property vector4d link2: pass.packed.link[2]
+        readonly property vector4d link3: pass.packed.link[3]
+        readonly property vector4d link4: pass.packed.link[4]
+        readonly property vector4d link5: pass.packed.link[5]
+        readonly property vector4d link6: pass.packed.link[6]
+        readonly property vector4d link7: pass.packed.link[7]
+        readonly property vector4d link8: pass.packed.link[8]
+        readonly property vector4d link9: pass.packed.link[9]
+        readonly property vector4d link10: pass.packed.link[10]
+        readonly property vector4d link11: pass.packed.link[11]
+        readonly property vector4d link12: pass.packed.link[12]
+        readonly property vector4d link13: pass.packed.link[13]
+        readonly property vector4d link14: pass.packed.link[14]
+        readonly property vector4d link15: pass.packed.link[15]
+        readonly property vector4d link16: pass.packed.link[16]
+        readonly property vector4d link17: pass.packed.link[17]
+        readonly property vector4d link18: pass.packed.link[18]
+        readonly property vector4d link19: pass.packed.link[19]
         readonly property bool backdropReady: root.backdropSource?.ready ?? false
         readonly property vector4d glass: Qt.vector4d(pass.backdropReady ? 1 : 0, root.framed ? root.frameGlass : 0,
             IrisStyle.glassTint, IrisStyle.glassLip)
