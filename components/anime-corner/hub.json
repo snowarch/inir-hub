@@ -1,0 +1,49 @@
+{
+    "$schema": "../../schema/hub.schema.json",
+    "version": "1.0.0",
+    "summary": "Find any anime on AniList and watch it in your language, in mpv.",
+    "description": "A corner of iRiS to browse AniList by season, genre, popularity and your own AniList or MyAnimeList list, then watch an episode in mpv: Japanese with subtitles in your language or a dub from the sites that have it, with the source and quality to pick, online subtitles from OpenSubtitles or SubDL, and new-episode alerts.",
+    "authors": [
+        "xsteban1410"
+    ],
+    "license": "MIT",
+    "tags": [
+        "anime",
+        "anilist",
+        "myanimelist",
+        "mpv",
+        "subtitles",
+        "iris"
+    ],
+    "permissions": [
+        "process",
+        "network",
+        "files"
+    ],
+    "hosts": [
+        "anilibria.top",
+        "anilist.co",
+        "anime-sama.to",
+        "animeav1.com",
+        "animesdigital.org",
+        "aniworld.to",
+        "api.myanimelist.net",
+        "api.opensubtitles.com",
+        "api.subdl.com",
+        "dl.subdl.com",
+        "graphql.anilist.co",
+        "henaojara.com",
+        "jkanime.net",
+        "myanimelist.net",
+        "ok.ru",
+        "streamtape.com",
+        "w1.anime4up.rest",
+        "watchanimeworld.one",
+        "www.animeworld.ac",
+        "www.mp4upload.com",
+        "www.yourupload.com"
+    ],
+    "minInir": "2.33.0",
+    "provides": "modules/anime-corner",
+    "preview": "preview.webp"
+}

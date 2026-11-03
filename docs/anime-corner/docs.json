@@ -1,0 +1,14 @@
+{
+	"id": "anime-corner",
+	"edit": "https://github.com/snowarch/inir-hub/edit/main/docs/anime-corner/",
+	"order": 10,
+	"groups": [
+		{
+			"label": "Components",
+			"pages": [
+				"ANIME-CORNER"
+			]
+		}
+	],
+	"preview": {"steps": [["ipc", "anime-corner", "go", "popular"]]}
+}
