@@ -38,6 +38,10 @@ Every item lives in its own folder and its own lane. Nothing outside a family ca
 
 ## The path
 
+0. Every step runs the `inir` command, version 0.2.1 or newer (`inir cli version`). An iNiR install has it after
+   `inir update`; anywhere else, take the binary from [its releases](https://github.com/snowarch/inir-cli/releases)
+   or `go install github.com/snowarch/inir-cli/cmd/inir@latest`. An older one has no `inir hub check`.
+
 1. Fork this repository. For a new item, start from its template (the id is the folder name: 3 to 48 characters,
    lowercase letters, digits and dashes, and what people type in `inir hub install`):
 
