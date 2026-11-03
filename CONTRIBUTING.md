@@ -13,11 +13,28 @@ an item that passes on your machine passes there, and one that doesn't comes bac
 | Colours for Material, Waffle and the apps iNiR themes | a colour theme | `themes/<id>/` |
 | A whole iRiS look: material, colour, shape, motion | an iRiS theme | `iris-themes/<id>/` |
 | A website as a tab in Material's sidebar | a web app | `webapps/<id>/` |
+| A feature of its own for the desktop: a panel, a corner, a tool, with a keybind (like an anime finder) | a component | `components/<id>/` |
 | Something the shell runs or sets up with no panel of its own (like `fastfetch`) | a component | `components/<id>/` |
-| A fix or a feature in Material, iRiS or Waffle: a page, a panel, a card, a Place | a change to that family | `families/ii/`, `families/iris/`, `families/waffle/` |
+| A fix to Material, iRiS or Waffle | an issue | [open one](https://github.com/snowarch/inir-hub/issues) |
 
-A component can't add a panel, a window or an IPC target yet: the shell loads those only from a family. A feature that
-needs one is a change to its family, made under [the family rules](#changing-a-family).
+Material (`ii`), iRiS and Waffle are the desktops every iNiR install gets. Their maintainers change them; a pull request
+from outside that touches `families/` is refused by CI. What you want to add to one is a component worn with it
+([Adding to a family](#adding-to-a-family)): it sits beside the family, so the family people installed stays exactly
+as it was, and removing your component takes all of it away.
+
+## What an item may touch
+
+Every item lives in its own folder and its own lane. Nothing outside a family can:
+
+- **change a family, the base or another item.** A pull request changes one item's folder (and `docs/<id>/`).
+- **land inside the shell's folders.** A plugin installs to `modules/<id>` (`"provides": "modules/<id>"`), never
+  inside a family or the base's `common`, `shared` or `background`, and its id is its own across the whole hub.
+- **write the person's settings.** `config.json` is theirs and the families'. A widget's options are its
+  `widget.json` `"options"`; a component keeps its own in `Directories.pluginFile("<id>")`
+  (`~/.config/inir/plugins/<id>.json`), so removing it leaves their settings as they were.
+- **answer for someone else's IPC.** Its `IpcHandler` targets start with its id (`my-corner`, `myCornerSearch`).
+
+`inir hub check` and CI hold every one of these.
 
 ## The path
 
@@ -25,15 +42,13 @@ needs one is a change to its family, made under [the family rules](#changing-a-f
    lowercase letters, digits and dashes, and what people type in `inir hub install`):
 
    ```sh
-   inir hub new widget my-clock --author your-github-handle    # or theme, iris-theme, webapp
+   inir hub new widget my-clock --author your-github-handle    # or component, theme, iris-theme, webapp
    ```
 
-   For a family, work in its folder.
-
-2. Read before writing. A new item: the example of its kind (`widgets/countdown`, `widgets/shell-line`,
-   `themes/tidepool`, `iris-themes/moss-garden`, `webapps/excalidraw`). A family: the code beside what you change, and
-   the parts it already has for it. Use those parts (import them, pass them what they need); never copy one and edit
-   the copy, or the shell ends up with two of the same thing that drift apart.
+2. Read before writing: the example of its kind (`widgets/countdown`, `widgets/shell-line`, `components/fastfetch`,
+   `themes/tidepool`, `iris-themes/moss-garden`, `webapps/excalidraw`) and the template `inir hub new` gave you. Use
+   the shell's parts (import them, pass them what they need); never copy one out of a family and edit the copy, or
+   the shell ends up with two of the same thing that drift apart.
 
 3. Check, and repeat until it prints `nothing to fix`:
 
@@ -44,15 +59,14 @@ needs one is a change to its family, made under [the family rules](#changing-a-f
 4. Try it running, the way people will get it:
 
    ```sh
-   # an item
    inir hub build && INIR_HUB_SOURCES=$PWD/dist inir hub install my-clock
-   # a family: put your copy in place of the installed one, then restart the shell
-   inir hub link families/iris && inir restart
+   # a component's panel is loaded at start: restart the shell once after installing it
+   inir restart
    ```
 
-   Open what you made or changed and go through every state: empty, loading, failed, full, light and dark, small and
-   large scale. `inir logs --issues` must show nothing new from it. Then go back: `INIR_HUB_SOURCES=$PWD/dist inir hub
-   remove my-clock`, or for a family `inir hub link ~/.local/share/inir/plugins/iris && inir restart`.
+   Open what you made and go through every state: empty, loading, failed, full, light and dark, small and large scale,
+   in every family it is worn with. `inir logs --issues` must show nothing new from it. Then go back:
+   `INIR_HUB_SOURCES=$PWD/dist inir hub remove my-clock`.
 
 5. Send it. With `gh` logged in this checks it once more, commits it on its own branch, pushes to your fork and opens
    the pull request with the reviewer's card as its body (`--dry-run` shows the steps first):
@@ -75,6 +89,11 @@ It reads what your branch changed since `origin/main` (`--base REF` for another 
 | Rule | Why |
 | --- | --- |
 | One item per pull request: its folder, and its page under `docs/<id>/`, nothing else. | A pull request can't break what it doesn't touch. `dist/`, `schema/`, `tools/`, workflows and other items stay as they are on `main`. |
+| No change to `families/` (maintainers only). | The families are the desktop every install gets: what you add to one is a component worn with it. |
+| A new item's id is free in the whole hub, and not `common`, `shared` or `background`. | People install by id, and a plugin lands at `modules/<id>`. |
+| A plugin's `"provides"` is `modules/<id>`; every file `plugin.json` names in `"parts"` exists; `"families"` lists family ids. | The base loads parts by those names; a missing one is a surface that silently never appears. |
+| Outside a family, no `Config.setNestedValue(…)` or `Config.options.x = …`. | The person's settings are theirs: removing your item must leave them as they were. |
+| Outside a family, every `IpcHandler` target starts with the item's id. | So it can never answer for the shell or another plugin. |
 | The item validates (`inir hub validate <folder>`): its files, listing, preview and permissions. | What the Hub shows and installs comes from these. |
 | A changed item raises its `version`, in `hub.json` and the native file alike. | Installed copies update only when the version moves, and a published version never changes its contents. |
 | Every `IpcHandler` has a `///` comment right above it (one line on what the target is for), and every function in it has one too. | `inir help` and the IPC reference on inir.space are built from them. |
@@ -176,10 +195,28 @@ left sidebar, signed in as you, with the site's own storage.
 
 A web app that ships scripts to run inside the page declares `inject`.
 
+## Adding to a family
+
+A feature for Material, iRiS or Waffle is a component worn with it. `inir hub new component my-corner` gives you one:
+
+- **`plugin.json`** names its surface in `"parts": {"panel": "Panel.qml"}` and the families it is worn with in
+  `"families": ["iris"]` (leave the list empty for every family). The shell loads the panel once the family's own
+  panels are up, while one of those families is active, and keeps it while the shell runs.
+- **`Panel.qml`** holds its windows and its `IpcHandler` (target: its id). A window exists only while it is open:
+  nothing runs, polls or animates while it is closed.
+- **It draws with the family it is worn with.** Worn with iRiS only: `import qs.modules.iris.style` and draw with
+  `IrisStyle.*` and the `Iris*` parts, the way iRiS's own surfaces do. Worn with every family: the shell's kit
+  (`qs.modules.common`: `Appearance.*`, `StyledText`, `MaterialSymbol`, `RippleButton`).
+- **Its options live in its file**, a `FileView` with a `JsonAdapter` on `Directories.pluginFile("<id>")`, as the
+  template does.
+- **People open it** with `inir <id> toggle`, bound to a key in niri's config; the README says which call does what.
+- **Every string is translated**, its IPC documented, its page in `docs/<id>/`: the rules of
+  [changing a family](#changing-a-family) below hold for a component too.
+
 ## Changing a family
 
-Material (`ii`), iRiS and Waffle are the shell itself: whatever merges here reaches everyone who uses that family on
-their next `inir update`. A change to one keeps everything `inir hub check` holds, and:
+For maintainers. Material (`ii`), iRiS and Waffle are the shell itself: whatever merges here reaches everyone who uses
+that family on their next `inir update`. A change to one keeps everything `inir hub check` holds, and:
 
 - **It is one change.** One fix or one feature per pull request, described in a sentence. Raise the family's version in
   `hub.json` and `plugin.json`.

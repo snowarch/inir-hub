@@ -33,9 +33,12 @@ jobs:
           dirs=$(git diff --name-only "origin/${{ github.base_ref }}...HEAD" | cut -d/ -f1-2 | sort -u |
             while read -r d; do [ -f "$d/hub.json" ] && echo "$d"; done)
           [ -z "$dirs" ] || inir hub audit --markdown $dirs >> "$GITHUB_STEP_SUMMARY" || true
-      - name: The pull request (one item, version raised, IPC documented, every language whole, tokens)
+      - name: The pull request (one item, its own lane, version raised, IPC documented, every language whole, tokens)
         if: ${{ !cancelled() && github.event_name == 'pull_request' }}
-        run: inir hub check --base "origin/${{ github.base_ref }}"
+        # Families change only from the people who keep the hub; everyone else adds a component worn with one.
+        env:
+          MAINTAINER: ${{ contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.pull_request.author_association) && '--maintainer' || '' }}
+        run: inir hub check --base "origin/${{ github.base_ref }}" $MAINTAINER
       # The Qt iNiR runs on: qs-rs bundles 6.12.0 (qs-rs release.yml QT_VERSION); keep this pin in step with it. A file
       # that does not parse fails only when someone opens it, on every desktop that installed it.
       - uses: actions/setup-python@v5
