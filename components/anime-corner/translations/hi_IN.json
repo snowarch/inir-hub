@@ -220,5 +220,9 @@
   "The subtitle search failed": "सबटाइटल खोज विफल रही",
   "Checking anime sources": "एनीमे स्रोत जाँचे जा रहे हैं",
   "Every site is tried on one show; this takes about half a minute.": "हर साइट को एक शो पर आज़माया जाता है; इसमें लगभग आधा मिनट लगता है।",
-  "Anime sources: %1 of %2 play": "एनीमे स्रोत: %2 में से %1 चलते हैं"
+  "Anime sources: %1 of %2 play": "एनीमे स्रोत: %2 में से %1 चलते हैं",
+  "Movie Corner": "Movie Corner",
+  "In the app launcher": "ऐप लॉन्चर में",
+  "An entry named Anime Corner in the launcher's search, so it can be pinned to the Dock too.": "लॉन्चर की खोज में Anime Corner नाम की एंट्री, ताकि इसे Dock पर भी पिन किया जा सके।",
+  "Anime in your language, in mpv": "आपकी भाषा में एनीमे, mpv में"
 }

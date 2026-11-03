@@ -220,5 +220,9 @@
   "The subtitle search failed": "Tìm phụ đề thất bại",
   "Checking anime sources": "Đang kiểm tra nguồn anime",
   "Every site is tried on one show; this takes about half a minute.": "Mỗi trang được thử trên một bộ; mất khoảng nửa phút.",
-  "Anime sources: %1 of %2 play": "Nguồn anime: %1 trên %2 phát được"
+  "Anime sources: %1 of %2 play": "Nguồn anime: %1 trên %2 phát được",
+  "Movie Corner": "Movie Corner",
+  "In the app launcher": "Trong trình khởi chạy ứng dụng",
+  "An entry named Anime Corner in the launcher's search, so it can be pinned to the Dock too.": "Một mục tên Anime Corner trong tìm kiếm của trình khởi chạy, để ghim vào Dock.",
+  "Anime in your language, in mpv": "Anime bằng ngôn ngữ của bạn, trong mpv"
 }

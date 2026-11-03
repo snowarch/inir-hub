@@ -5,6 +5,8 @@ mpv. It is a corner of iRiS: Settings' body and layout, over the desktop or in a
 
 - Open it: `inir anime-corner toggle` (bind it to a key in niri's config, e.g. `Mod+A { spawn "inir" "anime-corner" "toggle"; }`).
   An `inir` that does not know plugin targets yet takes `qs -c inir ipc call anime-corner toggle`.
+- Or from the app launcher: Settings › The Corner › *In the app launcher* (on by default) adds an Anime Corner entry.
+- With the Movie Corner installed, the sidebar has a row that opens it.
 - Worn with: iRiS. Needs `python3` and `mpv`; `ani-skip` skips openings; `ani-cli` adds English sources.
 - Its options live in `~/.config/inir/plugins/anime-corner.json`; keys and tokens in your system keyring.
 - Needs an iNiR base with component panels (the 2.34 update).

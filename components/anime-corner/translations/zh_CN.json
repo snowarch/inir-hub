@@ -220,5 +220,9 @@
   "The subtitle search failed": "字幕搜索失败",
   "Checking anime sources": "正在检查动漫来源",
   "Every site is tried on one show; this takes about half a minute.": "每个站点用一部作品测试，大约需要半分钟。",
-  "Anime sources: %1 of %2 play": "动漫来源：%2 个中 %1 个可播放"
+  "Anime sources: %1 of %2 play": "动漫来源：%2 个中 %1 个可播放",
+  "Movie Corner": "Movie Corner",
+  "In the app launcher": "在应用启动器中",
+  "An entry named Anime Corner in the launcher's search, so it can be pinned to the Dock too.": "在启动器搜索中加入名为 Anime Corner 的条目，也可固定到 Dock。",
+  "Anime in your language, in mpv": "用你的语言看动画，在 mpv 中"
 }

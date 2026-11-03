@@ -220,5 +220,9 @@
   "The subtitle search failed": "Altyazı araması başarısız oldu",
   "Checking anime sources": "Anime kaynakları denetleniyor",
   "Every site is tried on one show; this takes about half a minute.": "Her site bir dizide deneniyor; yaklaşık yarım dakika sürer.",
-  "Anime sources: %1 of %2 play": "Anime kaynakları: %1 / %2 oynatıyor"
+  "Anime sources: %1 of %2 play": "Anime kaynakları: %1 / %2 oynatıyor",
+  "Movie Corner": "Movie Corner",
+  "In the app launcher": "Uygulama başlatıcısında",
+  "An entry named Anime Corner in the launcher's search, so it can be pinned to the Dock too.": "Başlatıcı aramasında Anime Corner adlı bir giriş; Dock'a da sabitlenebilir.",
+  "Anime in your language, in mpv": "Kendi dilinde anime, mpv'de"
 }

@@ -220,5 +220,9 @@
   "The subtitle search failed": "Oqaasertaliussanik ujarlerneq iluatsinngilaq",
   "Checking anime sources": "Anime-mut pissarsiffiit misissorneqarput",
   "Every site is tried on one show; this takes about half a minute.": "Nittartakkat tamarmik anime ataaseq atorlugu misilinneqarput; minutsip affaa missaa atorneqassaaq.",
-  "Anime sources: %1 of %2 play": "Anime-mut pissarsiffiit: %1 / %2 play-gunnarput"
+  "Anime sources: %1 of %2 play": "Anime-mut pissarsiffiit: %1 / %2 play-gunnarput",
+  "Movie Corner": "Movie Corner",
+  "In the app launcher": "Qinnuteqarfiup aallartitsiviani",
+  "An entry named Anime Corner in the launcher's search, so it can be pinned to the Dock too.": "Anime Corner-imik taaguuteqartoq aallartitsiviup ujaasinerani, Dock-imut aamma ikkussinnaasoq.",
+  "Anime in your language, in mpv": "Anime oqaatsitsinni, mpv-mi"
 }

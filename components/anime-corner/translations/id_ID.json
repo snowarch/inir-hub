@@ -220,5 +220,9 @@
   "The subtitle search failed": "Pencarian subtitle gagal",
   "Checking anime sources": "Memeriksa sumber anime",
   "Every site is tried on one show; this takes about half a minute.": "Setiap situs dicoba pada satu judul; butuh sekitar setengah menit.",
-  "Anime sources: %1 of %2 play": "Sumber anime: %1 dari %2 bisa diputar"
+  "Anime sources: %1 of %2 play": "Sumber anime: %1 dari %2 bisa diputar",
+  "Movie Corner": "Movie Corner",
+  "In the app launcher": "Di peluncur aplikasi",
+  "An entry named Anime Corner in the launcher's search, so it can be pinned to the Dock too.": "Entri bernama Anime Corner di pencarian peluncur, agar bisa disematkan ke Dock juga.",
+  "Anime in your language, in mpv": "Anime dalam bahasamu, di mpv"
 }

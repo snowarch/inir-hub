@@ -8,6 +8,10 @@ mpv. It opens with Settings' body and layout, over the desktop or in a window of
 - `inir anime-corner toggle`, bound to a key in niri's config: `Mod+A { spawn "inir" "anime-corner" "toggle"; }`.
 - `inir anime-corner go <place>` opens it on home, continue, mylist, following, popular, trending, top, season,
   calendar, genres, settings, `genre:<name>` or `anime:<AniList id>`; `search <text>` opens it searching.
+- Settings › The Corner › **In the app launcher** (on by default) adds an Anime Corner entry to the launcher's search,
+  which can then be pinned to the Dock. Turning it off removes the entry; if the Corner is removed first, the entry
+  deletes itself the next time it is clicked.
+- With the Movie Corner installed, its sidebar has a row that opens it.
 
 ## Browse
 

@@ -220,5 +220,9 @@
   "The subtitle search failed": "자막 검색에 실패했습니다",
   "Checking anime sources": "애니메이션 소스 확인 중",
   "Every site is tried on one show; this takes about half a minute.": "각 사이트를 작품 하나로 시험합니다. 30초 정도 걸립니다.",
-  "Anime sources: %1 of %2 play": "애니메이션 소스: %2개 중 %1개 재생 가능"
+  "Anime sources: %1 of %2 play": "애니메이션 소스: %2개 중 %1개 재생 가능",
+  "Movie Corner": "Movie Corner",
+  "In the app launcher": "앱 런처에 표시",
+  "An entry named Anime Corner in the launcher's search, so it can be pinned to the Dock too.": "런처 검색에 Anime Corner 항목을 넣어 Dock에도 고정할 수 있게 합니다.",
+  "Anime in your language, in mpv": "내 언어로 보는 애니메이션, mpv에서"
 }

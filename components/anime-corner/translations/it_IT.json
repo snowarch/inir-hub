@@ -220,5 +220,9 @@
   "The subtitle search failed": "La ricerca dei sottotitoli non è riuscita",
   "Checking anime sources": "Controllo delle fonti anime",
   "Every site is tried on one show; this takes about half a minute.": "Ogni sito viene provato su una serie; ci vuole circa mezzo minuto.",
-  "Anime sources: %1 of %2 play": "Fonti anime: %1 su %2 riproducono"
+  "Anime sources: %1 of %2 play": "Fonti anime: %1 su %2 riproducono",
+  "Movie Corner": "Movie Corner",
+  "In the app launcher": "Nel launcher delle app",
+  "An entry named Anime Corner in the launcher's search, so it can be pinned to the Dock too.": "Una voce Anime Corner nella ricerca del launcher, da fissare anche al Dock.",
+  "Anime in your language, in mpv": "Anime nella tua lingua, in mpv"
 }

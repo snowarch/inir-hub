@@ -53,7 +53,8 @@ Item {
         ] },
         { title: "The Corner", rows: [
             root.row({ label: "New episode alerts", description: "A notification when a show you follow, or one you are watching on your list, airs a new episode. Its Watch button opens the show.", option: "notify", kind: "switch", fallback: false }),
-            root.row({ label: "Open in a window", description: "A window of its own instead of over the desktop.", option: "windowed", kind: "switch", fallback: false })
+            root.row({ label: "Open in a window", description: "A window of its own instead of over the desktop.", option: "windowed", kind: "switch", fallback: false }),
+            root.row({ label: "In the app launcher", description: "An entry named Anime Corner in the launcher's search, so it can be pinned to the Dock too.", option: "launcher", kind: "switch", fallback: true })
         ] }
     ]
 

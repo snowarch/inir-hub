@@ -5,6 +5,7 @@ import Quickshell
 import Quickshell.Io
 import qs.services
 import qs.modules.common
+import qs.modules.common.functions
 import qs.modules.iris.style
 import qs.modules.iris.pieces
 import "corner"
@@ -44,6 +45,38 @@ Scope {
             onCloseRequested: CornerState.open = false
             body: AnimeCorner { windowed: true }
         }
+    }
+
+    // The launcher entry (Settings › The Corner › In the app launcher). It asks the shell to open the Corner; once the
+    // Corner is removed, the entry deletes itself the next time it is clicked.
+    readonly property string entryPath: (Quickshell.env("XDG_DATA_HOME") || Quickshell.env("HOME") + "/.local/share") + "/applications/inir-anime-corner.desktop"
+    readonly property string home: Quickshell.shellPath("modules/anime-corner")
+    readonly property bool safePaths: /^[A-Za-z0-9._\/-]+$/.test(root.entryPath + root.home)
+    readonly property string entry: [
+        "[Desktop Entry]",
+        "Type=Application",
+        "Name=Anime Corner",
+        "Comment=" + Translation.tr("Anime in your language, in mpv"),
+        "Icon=video-x-generic",
+        "Categories=AudioVideo;Video;",
+        "Keywords=anime;anilist;myanimelist;episode;series;",
+        // Desktop-entry quoting: \\" reaches sh as ", \\$ as $.
+        'Exec=sh -c "if [ -d \\\\"\\\\$1\\\\" ]; then exec qs -c inir ipc call anime-corner toggle; else rm -f -- \\\\"\\\\$2\\\\"; fi" sh ' + root.home + " " + root.entryPath,
+        ""
+    ].join("\n")
+    readonly property bool wantEntry: CornerState.ready && CornerState.options.launcher && root.safePaths
+    onWantEntryChanged: root.syncEntry()
+    onEntryChanged: if (root.wantEntry) root.syncEntry()
+    function syncEntry(): void {
+        if (!CornerState.ready) return
+        if (root.wantEntry) entryFile.setText(root.entry)
+        else ShellExec.execDetachedArgs(["rm", "-f", "--", root.entryPath], "Anime Corner launcher entry")
+    }
+    FileView {
+        id: entryFile
+        path: root.entryPath
+        blockLoading: false
+        printErrors: false
     }
 
     // New-episode alerts, only when turned on: every half hour, what aired among the shows you follow and the ones

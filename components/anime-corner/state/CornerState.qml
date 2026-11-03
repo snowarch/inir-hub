@@ -51,6 +51,8 @@ Singleton {
             // The Corner's layout and host, like Settings' (classic, folio, pocket, drawer; overlay or window).
             property string layout: ""
             property bool windowed: false
+            // An entry in the app launcher (and so the Dock) that opens the Corner.
+            property bool launcher: true
         }
     }
 }

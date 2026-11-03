@@ -50,7 +50,12 @@ IrisCornerBody {
         }
     }
     onWatchOpenChanged: CornerWatch.holdError = root.watchOpen
-    onPicked: id => { root.place = id; root.nav.search.clear() }
+    onPicked: id => {
+        // The Movie Corner is its own component: asked to open over this one.
+        if (id === "movies") { CornerState.open = false; Quickshell.execDetached(["qs", "-c", "inir", "ipc", "call", "movie-corner", "open"]); return }
+        root.place = id
+        root.nav.search.clear()
+    }
     onSearched: text => root.query = text
     places: [
         { id: "home", title: "Home", icon: "home", tint: IrisStyle.identity.pink },
@@ -64,7 +69,8 @@ IrisCornerBody {
         { id: "calendar", title: "Calendar", icon: "calendar_month", tint: IrisStyle.identity.blue },
         { id: "genres", title: "Genres", icon: "category", tint: IrisStyle.identity.purple },
         { id: "settings", title: "Settings", icon: "settings", tint: IrisStyle.identity.gray, caption: "Corner" }
-    ]
+    ].concat(root.hasMovies ? [{ id: "movies", title: "Movie Corner", icon: "movie", tint: IrisStyle.identity.yellow }] : [])
+    readonly property bool hasMovies: Plugins.has("movie-corner")
     badges: ({ continue: root.watching.length, following: IrisPieces.animeFollowing.length,
         mylist: CornerAccounts.shows.filter(s => s.listStatus === "CURRENT").length })
 
