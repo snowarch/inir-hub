@@ -39,7 +39,6 @@
     "control.switch": "components/IrisSwitch.qml",
     "control.scrubber": "components/IrisScrubber.qml",
     "control.segmented": "components/IrisSegmented.qml",
-    "cutPlate": "components/IrisCutPlate.qml",
     "widget.sizeGrip": "widgets/IrisSizeGrip.qml",
     "widgetLook": "widgets/IrisWidgetLook.qml",
     "widgetPlate": "widgets/IrisWidgetPlate.qml",
