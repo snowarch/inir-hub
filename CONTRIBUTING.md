@@ -277,9 +277,9 @@ Quickshell reads those instead of scanning your plugin at every start, and trust
 
 | Permission | Declare it when the code |
 | --- | --- |
-| `process` | runs commands (`Process`, `execDetached`, `sh -c`) |
+| `process` | runs commands (`Process`, `execDetached`, `sh -c`, any `.sh`, `.py` or `.fish` file) |
 | `network` | talks to the internet (`XMLHttpRequest`, `curl`, `fetch`, `WebSocket`) |
-| `files` | reads or writes files outside its folder (`FileView`, `FolderListModel`) |
+| `files` | reads or writes files outside its folder (`FileView`, `FolderListModel`; in a script, `>` to a file, `cp`, `mv`, `rm`, `ln`, `tee`, `touch`, `mkdir`, `sed -i`, Python's `open(..., "w")`, `os` and `shutil`) |
 | `inject` | (web apps) runs scripts inside the site it opens |
 
 CI greps for these. Code that does something its `hub.json` does not declare fails; a permission nothing uses is a
