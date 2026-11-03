@@ -123,12 +123,12 @@ JsonObject {
             property bool develop: true
         }
         // Per scheme: tone lifts or dims the material (-30..30), colour is how strong accents read (0..100 %),
-        // widgets is how colourful the desktop widgets read (40..160 %), lume makes bodies frost the wallpaper
-        // shows through instead of solid; warmth (0..100) is how much washi fibre the paper (or Dark's ink night) carries.
+        // widgets is how colourful the desktop widgets read (40..160 %); warmth (0..100) is how much washi fibre the paper
+        // (or Dark's ink night) carries.
         property JsonObject tune: JsonObject {
-            property JsonObject dark: JsonObject { property int tone: 0; property int warmth: 20; property int colour: 100; property int widgets: 100; property bool lume: false }
-            property JsonObject ink: JsonObject { property int tone: 0; property int warmth: 50; property int colour: 100; property int widgets: 100; property bool lume: true }
-            property JsonObject light: JsonObject { property int tone: -8; property int warmth: 38; property int colour: 85; property int widgets: 110; property bool lume: true }
+            property JsonObject dark: JsonObject { property int tone: 0; property int warmth: 20; property int colour: 100; property int widgets: 100 }
+            property JsonObject ink: JsonObject { property int tone: 0; property int warmth: 50; property int colour: 100; property int widgets: 100 }
+            property JsonObject light: JsonObject { property int tone: -8; property int warmth: 38; property int colour: 85; property int widgets: 110 }
         }
         property string highlight: "orange" // "orange", "yellow", "red", "pink", "green", "accent" or "wallpaper"
         property JsonObject anime: JsonObject {

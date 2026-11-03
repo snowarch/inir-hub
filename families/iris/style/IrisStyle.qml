@@ -283,7 +283,6 @@ QtObject {
     // What the person tuned for the scheme in use, as primitives so a config write that changes none does not re-run bindings.
     // Tone, colour strength and widget colour are solved into the palette (IrisWashi); these remain for what is not colour.
     readonly property int tone: Math.max(-30, Math.min(30, Number(root.tuneOptions?.[root.scheme]?.tone ?? 0)))
-    readonly property bool lumeOn: Boolean(root.tuneOptions?.[root.scheme]?.lume ?? (root.scheme !== "dark"))
     // How colourful the desktop widgets read in this scheme, 40..160 %: their data colours (solved) and their glass.
     readonly property real widgetColour: Math.max(40, Math.min(160, Number(root.tuneOptions?.[root.scheme]?.widgets ?? (root.ink ? 120 : root.light ? 110 : 100)))) / 100
     function toned(c: color): color {
@@ -493,10 +492,9 @@ QtObject {
     readonly property color bodySurface: root.surfaceOpaque
 
     readonly property var glassOptions: root.appearance?.glass ?? ({})
-    // Lume: with it on for the scheme, bodies are frost the wallpaper shows through, as thick as reading needs, unless the
-    // person keeps them solid. A Glass mode they chose stands.
+    // Off is off, whatever Lume does for the scheme: the factory is glass, so "off" here was picked by the person.
     readonly property string glassRequested: ["wallpaper", "compositor"].includes(String(root.glassOptions?.mode ?? ""))
-        ? root.glassOptions.mode : root.lumeOn ? "wallpaper" : "off"
+        ? root.glassOptions.mode : "off"
     readonly property bool glassy: root.glassRequested !== "off" && Appearance.effectsEnabled
     readonly property bool menuCompact: String(root.appearance?.surfaces?.menus?.density ?? "compact") === "compact"
     readonly property bool glassCompositor: root.glassy && root.glassRequested === "compositor" && Appearance.compositorBlurActive

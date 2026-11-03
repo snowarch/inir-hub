@@ -16,7 +16,7 @@ import qs.modules.iris.preview
 import qs.modules.iris.components as Iris
 
 Flickable {
-    IrisScrollFeel {}
+    Iris.IrisScrollFeel {}
     readonly property var root: WelcomeHost.wizard
     id: irisStartFlickable
     width: root.stepWidth
