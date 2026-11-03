@@ -137,5 +137,5 @@ size before you commit it.
 - [ ] A label 50 % longer and the longest real value stay inside the card
 - [ ] 100 % and 200 % scale
 - [ ] Quick controls change what they say
-- [ ] `inir hub validate widgets/<id>` passes
+- [ ] `inir hub check` prints `nothing to fix`
 - [ ] The preview reads at card size

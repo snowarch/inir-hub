@@ -1,13 +1,12 @@
-<!-- One item per pull request. -->
+<!-- One item per pull request: its folder, and its page under docs/<id>/. CONTRIBUTING.md has the whole path. -->
 
 **Item:** `kind/id`
 
 **What it does:**
 
-**Tried on:** iNiR version, family (Material / iRiS / Waffle)
+**Tried on:** iNiR version, family (Material / iRiS / Waffle), the looks and states you went through
 
-- [ ] `inir hub validate <folder>` passes
-- [ ] installed from a local build with `inir hub install`, and removed again
+- [ ] `inir hub check` prints `nothing to fix`
+- [ ] tried running the way people get it (`inir hub install` from a local build, or `inir hub link` for a family), and `inir logs --issues` shows nothing new
 - [ ] the preview is a real screenshot with nothing private in it
-- [ ] the version went up (for changes to an existing item)
 - [ ] it is mine to share under the license in `hub.json`
