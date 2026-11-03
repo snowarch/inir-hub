@@ -526,12 +526,13 @@ ColumnLayout {
                                 }
 
                                 Rectangle {
-                                    implicitWidth: 50
+                                    implicitWidth: Math.max(50, previewCancelLabel.implicitWidth + 16)
                                     implicitHeight: 20
                                     radius: Appearance.rounding.verysmall
                                     color: Appearance.m3colors.m3secondaryContainer
 
                                     StyledText {
+                                        id: previewCancelLabel
                                         anchors.centerIn: parent
                                         text: Translation.tr("Cancel")
                                         font.pixelSize: Appearance.font.pixelSize.smallest
@@ -739,10 +740,11 @@ ColumnLayout {
                 }
 
                 StyledText {
+                    id: saturationLabel
                     text: Translation.tr("Saturation")
                     font.pixelSize: Appearance.font.pixelSize.smaller
                     color: Appearance.colors.colSubtext
-                    Layout.preferredWidth: 70
+                    Layout.preferredWidth: Math.max(70, saturationLabel.implicitWidth, brightnessLabel.implicitWidth, temperatureLabel.implicitWidth)
                 }
 
                 StyledSlider {
@@ -779,10 +781,11 @@ ColumnLayout {
                 }
 
                 StyledText {
+                    id: brightnessLabel
                     text: Translation.tr("Brightness")
                     font.pixelSize: Appearance.font.pixelSize.smaller
                     color: Appearance.colors.colSubtext
-                    Layout.preferredWidth: 70
+                    Layout.preferredWidth: Math.max(70, saturationLabel.implicitWidth, brightnessLabel.implicitWidth, temperatureLabel.implicitWidth)
                 }
 
                 StyledSlider {
@@ -819,10 +822,11 @@ ColumnLayout {
                 }
 
                 StyledText {
+                    id: temperatureLabel
                     text: Translation.tr("Temperature")
                     font.pixelSize: Appearance.font.pixelSize.smaller
                     color: Appearance.colors.colSubtext
-                    Layout.preferredWidth: 70
+                    Layout.preferredWidth: Math.max(70, saturationLabel.implicitWidth, brightnessLabel.implicitWidth, temperatureLabel.implicitWidth)
                 }
 
                 StyledSlider {

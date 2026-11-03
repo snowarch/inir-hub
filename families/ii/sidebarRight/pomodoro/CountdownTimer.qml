@@ -315,7 +315,7 @@ Item {
 
             RippleButton {
                 Layout.preferredHeight: 35
-                Layout.preferredWidth: 90
+                Layout.preferredWidth: Math.max(90, contentItem.implicitWidth + 32)
                 onClicked: TimerService.resetCountdown()
                 enabled: TimerService.countdownSecondsLeft < TimerService.countdownDuration || TimerService.countdownRunning
                 colBackground: Appearance.angelEverywhere ? Appearance.angel.colGlassCard

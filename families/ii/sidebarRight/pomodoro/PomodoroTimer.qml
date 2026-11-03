@@ -271,7 +271,7 @@ Item {
 
                 RippleButton {
                     implicitHeight: 35
-                    implicitWidth: 90
+                    implicitWidth: Math.max(90, contentItem.implicitWidth + 32)
 
                     onClicked: TimerService.resetPomodoro()
                     enabled: (TimerService.pomodoroSecondsLeft < TimerService.pomodoroLapDuration) || TimerService.pomodoroCycle > 0 || TimerService.pomodoroBreak

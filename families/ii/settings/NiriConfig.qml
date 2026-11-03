@@ -1138,7 +1138,7 @@ ContentPage {
                     spacing: 8
 
                     RippleButton {
-                        implicitWidth: 80
+                        implicitWidth: Math.max(80, contentItem.implicitWidth + 32)
                         implicitHeight: 36
                         buttonRadius: SettingsMaterialPreset.groupRadius
                         colBackground: Appearance.colors.colLayer1
@@ -1153,7 +1153,7 @@ ContentPage {
                     }
 
                     RippleButton {
-                        implicitWidth: 120
+                        implicitWidth: Math.max(120, contentItem.implicitWidth + 32)
                         implicitHeight: 36
                         buttonRadius: SettingsMaterialPreset.groupRadius
                         colBackground: Appearance.colors.colPrimary
@@ -1263,7 +1263,7 @@ ContentPage {
 
                     RippleButton {
                         visible: !root.validationData.valid || root.hasAnyProcessError
-                        implicitWidth: 80
+                        implicitWidth: Math.max(80, contentItem.implicitWidth + 32)
                         implicitHeight: 36
                         buttonRadius: SettingsMaterialPreset.groupRadius
                         colBackground: Appearance.colors.colPrimary
@@ -1280,7 +1280,7 @@ ContentPage {
 
                     RippleButton {
                         visible: root.lastActionError.length > 0
-                        implicitWidth: 80
+                        implicitWidth: Math.max(80, contentItem.implicitWidth + 32)
                         implicitHeight: 36
                         buttonRadius: SettingsMaterialPreset.groupRadius
                         colBackground: Appearance.colors.colLayer1
@@ -3315,7 +3315,7 @@ ContentPage {
 
                 RippleButton {
                     visible: root.niriConfigDir.length > 0
-                    implicitWidth: 140
+                    implicitWidth: Math.max(140, contentItem.implicitWidth + 32)
                     implicitHeight: 36
                     buttonRadius: SettingsMaterialPreset.groupRadius
                     colBackground: Appearance.colors.colLayer2
@@ -3332,7 +3332,7 @@ ContentPage {
 
                 RippleButton {
                     visible: root.niriConfigPath.length > 0
-                    implicitWidth: 120
+                    implicitWidth: Math.max(120, contentItem.implicitWidth + 32)
                     implicitHeight: 36
                     buttonRadius: SettingsMaterialPreset.groupRadius
                     colBackground: Appearance.colors.colLayer2

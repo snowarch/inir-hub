@@ -387,7 +387,7 @@ WSettingsPage {
                 Item { Layout.fillWidth: true }
 
                 WButton {
-                    implicitWidth: 90
+                    implicitWidth: Math.max(90, contentItem.implicitWidth + 24)
                     implicitHeight: 32
                     onClicked: providersCard.closeForm()
                     contentItem: WText {
