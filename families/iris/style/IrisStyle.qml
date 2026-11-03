@@ -201,25 +201,31 @@ QtObject {
             .concat(["Light", "Regular", "Medium", "SemiBold", "Bold"].map(weight => `inter/InterDisplay-${weight}`))
             .concat(["Light", "Regular", "Medium", "SemiBold", "Bold", "ExtraBold", "Black"].map(weight => `rubik/Rubik-${weight}`))
             .concat(["Light", "Regular", "Medium", "SemiBold", "Bold"].map(weight => `montserrat/Montserrat-${weight}`))
-            .concat(["Regular", "Medium", "SemiBold", "Bold"].map(weight => `archivo/Archivo-${weight}`))
-            .concat(["Medium", "SemiBold", "Bold", "ExtraBold"].map(weight => `archivo/ArchivoSemiExpanded-${weight}`))
+            .map(face => Quickshell.shellPath(`assets/fonts/${face}.ttf`))
+            .concat(["Regular", "Medium", "SemiBold", "Bold"].map(weight => root.ownFace(`archivo/Archivo-${weight}`)))
+            .concat(["Medium", "Bold", "ExtraBold"].map(weight => root.ownFace(`archivo/ArchivoSemiExpanded-${weight}`)))
         delegate: FontLoader {
             required property string modelData
-            source: Quickshell.shellPath(`assets/fonts/${modelData}.ttf`)
+            source: modelData
         }
+    }
+    // Archivo and Geist are iRiS's own faces and ship with it (assets/fonts); Inter, Rubik and Montserrat are the base's.
+    function ownFace(face: string): url {
+        return Qt.resolvedUrl(`../assets/fonts/${face}.ttf`)
     }
     // One family in three voices (DESIGN.md S2): Geist to read, Geist Mono for labels, Archivo SemiExpanded for the
     // one number (no dot or pixel faces: 10-23, his order). Loaded from the shell itself, so it does not wait on
     // fontconfig; a missing file falls back to the bundled Inter and the system mono instead of a blank face.
-    readonly property FontLoader geistRead: FontLoader { source: Quickshell.shellPath("assets/fonts/geist/Geist.ttf") }
-    readonly property FontLoader geistMono: FontLoader { source: Quickshell.shellPath("assets/fonts/geist/GeistMono.ttf") }
+    readonly property FontLoader geistRead: FontLoader { source: root.ownFace("geist/Geist") }
+    readonly property FontLoader geistMono: FontLoader { source: root.ownFace("geist/GeistMono") }
+    readonly property FontLoader archivoFigures: FontLoader { source: root.ownFace("archivo/ArchivoSemiExpanded-SemiBold") }
     function loadedFace(loader: FontLoader, fallback: string): string {
         return loader.status === FontLoader.Ready && loader.name.length > 0 ? loader.name : fallback
     }
     readonly property string faceText: root.loadedFace(root.geistRead, "Inter")
     readonly property string faceTitle: root.faceText
     readonly property string faceLabel: root.loadedFace(root.geistMono, "JetBrainsMono Nerd Font")
-    readonly property string faceFigures: Qt.fontFamilies().includes("Archivo SemiExpanded") ? "Archivo SemiExpanded" : root.faceText
+    readonly property string faceFigures: root.loadedFace(root.archivoFigures, root.faceText)
     readonly property var defaultFaces: ({
         "iris.appearance.fontFamily": root.faceText,
         "iris.appearance.titleFontFamily": root.faceTitle,

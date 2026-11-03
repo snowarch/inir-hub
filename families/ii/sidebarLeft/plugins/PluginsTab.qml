@@ -92,7 +92,7 @@ Item {
     // ─── Processes ───────────────────────────────────────────────────
     Process {
         id: scanProcess
-        command: [Quickshell.shellPath("scripts/lib/accel-run"), "scan-plugins", "--defaults", Quickshell.shellPath("defaults/plugins")]
+        command: [Quickshell.shellPath("scripts/lib/accel-run"), "scan-plugins", "--defaults", FileUtils.trimFileProtocol(Qt.resolvedUrl("defaults"))]
         stdout: SplitParser {
             onRead: data => root._parsePluginList(data)
         }

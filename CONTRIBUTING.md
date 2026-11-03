@@ -142,7 +142,8 @@ not installed.
 One widget can have three faces. Give it the ones you can make well; the Hub says where it shows.
 
 **Start with [the Material guide](guides/material.md).** It shows the shapes, bars, looks and states the built-in
-widgets use, and what a widget needs to sit beside them.
+widgets use, and what a widget needs to sit beside them. Every property and service a widget can read is in
+[guides/widgets.md](guides/widgets.md), the Island face in [guides/iris-widgets.md](guides/iris-widgets.md).
 
 | Face | `widget.json` | Draws with | Look at |
 | --- | --- | --- | --- |

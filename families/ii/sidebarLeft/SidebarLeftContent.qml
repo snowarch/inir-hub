@@ -171,7 +171,7 @@ Item {
 
     Process {
         id: restoreProcess
-        command: [Quickshell.shellPath("scripts/lib/accel-run"), "scan-plugins", "--defaults", Quickshell.shellPath("defaults/plugins")]
+        command: [Quickshell.shellPath("scripts/lib/accel-run"), "scan-plugins", "--defaults", FileUtils.trimFileProtocol(Qt.resolvedUrl("plugins/defaults"))]
         stdout: StdioCollector {
             onStreamFinished: {
                 try {
