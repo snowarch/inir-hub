@@ -58,7 +58,10 @@ Flickable {
         return Math.ceil(choices.length * (widest + Math.round(26 * root.d)) + 6)
     }
     // Each tile as wide as its name and its control, laid in two rows that stay even: the next goes on the shorter one.
+    // The one measure of a tile: its plate draws the control at the width given here, so the two never disagree (a
+    // control measured again on its own, after the face had loaded, covered its name: "Color" under its choices, 11-03).
     readonly property var placed: {
+        nameMetrics.font; choiceMetrics.font
         const rows = [0, 0], out = []
         const lay = (w, item) => {
             const r = rows[0] <= rows[1] ? 0 : 1
@@ -72,9 +75,9 @@ Flickable {
             const said = Math.min(Math.round(200 * root.d), Math.ceil(nameMetrics.advanceWidth(name)) + Math.round(6 * root.d))
             const control = kind === "switch" ? root.switchWidth
                 : kind === "range" ? root.scrubWidth + Math.round(44 * root.d) : root.choiceTrack(spec)
-            lay(Math.ceil(root.inner + said + Math.round(12 * root.d) + control + root.inner * 0.75), { spec: spec, kind: kind, name: name })
+            lay(Math.ceil(root.inner + said + Math.round(12 * root.d) + control + root.inner * 0.75), { spec: spec, kind: kind, name: name, control: control })
         }
-        lay(Math.round(118 * root.d), { spec: null, kind: "more", name: "" })
+        lay(Math.round(118 * root.d), { spec: null, kind: "more", name: "", control: Math.round(18 * root.d) })
         return out
     }
 
@@ -105,9 +108,11 @@ Flickable {
                 height: root.unit
                 sourceComponent: cell.modelData.kind === "switch" ? switchTile : cell.modelData.kind === "range" ? rangeTile
                     : cell.modelData.kind === "choice" ? choiceTile : moreTile
+                // Bound, not copied: a tile kept across a change of page or language takes its new option with it.
                 onLoaded: {
-                    cell.item.spec = cell.modelData.spec
-                    if (cell.modelData.kind !== "more") cell.item.name = cell.modelData.name
+                    cell.item.spec = Qt.binding(() => cell.modelData.spec)
+                    cell.item.controlWidth = Qt.binding(() => cell.modelData.control)
+                    if (cell.modelData.kind !== "more") cell.item.name = Qt.binding(() => cell.modelData.name)
                 }
             }
         }
@@ -159,7 +164,6 @@ Flickable {
         Plate {
             property var spec: null
             name: Translation.tr("More")
-            controlWidth: Math.round(18 * root.d)
             tappable: true
             onTapped: GlobalStates.openSettingsAt("iris", root.group.length > 0 ? root.section + "/" + root.group : root.section)
             MaterialSymbol {
@@ -176,7 +180,6 @@ Flickable {
         Plate {
             id: sw
             readonly property bool lit: { Config.revision; const v = !!IrisOptions.currentValue(sw.spec ?? {}); return sw.spec?.invert ? !v : v }
-            controlWidth: root.switchWidth
             tappable: true
             onTapped: IrisOptions.commit(sw.spec, sw.spec.invert ? sw.lit : !sw.lit)
             IrisSwitch {
@@ -198,7 +201,6 @@ Flickable {
             readonly property real step: Number(range.spec?.step ?? 1)
             property real dragged: NaN
             readonly property real value: { Config.revision; return Number.isFinite(range.dragged) ? range.dragged : Number(IrisOptions.currentValue(range.spec ?? {})) }
-            controlWidth: root.scrubWidth + Math.round(44 * root.d)
             function snap(raw: real): real {
                 const snapped = range.lo + Math.round((raw - range.lo) / range.step) * range.step
                 return Number(Math.max(range.lo, Math.min(range.hi, snapped)).toFixed(4))
@@ -239,7 +241,6 @@ Flickable {
             id: choice
             readonly property var options: IrisOptions.choicesOf(choice.spec ?? {})
             readonly property var now: { Config.revision; return IrisOptions.currentValue(choice.spec ?? {}) }
-            controlWidth: root.choiceTrack(choice.spec ?? {})
             IrisSegmented {
                 anchors.verticalCenter: parent.verticalCenter
                 width: parent.width
