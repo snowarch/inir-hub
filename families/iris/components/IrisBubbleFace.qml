@@ -224,9 +224,14 @@ Item {
     readonly property color plateColor: root.pressed || root.open ? IrisStyle.fillActiveOf(root.ink)
         : root.hovered ? IrisStyle.fillHoverOf(root.ink)
         : ColorUtils.applyAlpha(root.ink, 0)
+    // In a bar the cell is the touch target; the plate keeps to the marks' own box, like the bar's other plates.
     Rectangle {
         visible: (root.plated || root.bodyless)
         anchors.fill: parent
+        anchors.topMargin: root.contentInset
+        anchors.bottomMargin: root.contentInset
+        anchors.leftMargin: root.inline ? 0 : root.contentInset
+        anchors.rightMargin: root.inline ? 0 : root.contentInset
         radius: root.inline ? height / 2 : IrisStyle.pieceRadius(width)
         color: root.plateColor
         Behavior on color { ColorAnimation { duration: IrisStyle.duration(120); easing.type: IrisStyle.feedbackEasing } }

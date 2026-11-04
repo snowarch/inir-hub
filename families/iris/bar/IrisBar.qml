@@ -1038,8 +1038,20 @@ Scope {
                     function inside(item: Item, x: real, y: real): bool {
                         return item.width > 0 && x >= item.x && x < item.x + item.width && y >= item.y && y < item.y + item.height
                     }
+                    // Across the whole edge (menu bar, shelf) the Island's input spans the screen at the page's height: there
+                    // only its strip and the open body count, so a press beside the page closes it as anywhere else.
+                    function onIsland(x: real, y: real): bool {
+                        if (!inside(islandInput, x, y)) return false
+                        const island = islandLoader.item
+                        const body = island?.chassisItem ?? null
+                        if (!body || islandLoader.width <= body.width + 1) return true
+                        if (y < islandLoader.y + Number(island.stripHeight ?? 0)) return true
+                        const at = body.mapToItem(islandInput.parent, 0, 0)
+                        return x >= at.x && x < at.x + body.width && y >= at.y && y < at.y + body.height
+                    }
                     onPressed: mouse => {
-                        if ([islandInput, extensionInput, menuStartInput, menuEndInput].some(item => inside(item, mouse.x, mouse.y))) return
+                        if (onIsland(mouse.x, mouse.y)) return
+                        if ([extensionInput, menuStartInput, menuEndInput].some(item => inside(item, mouse.x, mouse.y))) return
                         islandLoader.item.expanded = false
                     }
                 }
