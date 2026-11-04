@@ -71,7 +71,7 @@ Item {
     property bool lane: false
     // A bar cell is its touch target; what it draws keeps the size of the bar's other marks.
     property real contentInset: 0
-    readonly property bool inline: root.lane && ["notifications", "weather", "calendar", "updates"].includes(root.kind)
+    readonly property bool inline: root.lane && ["notifications", "weather", "calendar", "updates", "vitals"].includes(root.kind)
     readonly property real laneWidth: root.inline ? Math.max(root.height, (faceLoader.item?.implicitWidth ?? 0) + 2 * Math.round(8 * root.d)) : root.height
     // What this piece opened (its card, its page, the Control Center) is showing: the plate stays lit, as a menu bar item does.
     property bool open: false
@@ -107,6 +107,8 @@ Item {
     // Faces that stack a mark over a figure size both from the cell, so in a small cell (the frame's column) the stack
     // keeps clear of the rounded corners the hover plate draws.
     readonly property bool compactCell: Math.min(root.width, root.height) < 30 * root.d
+    readonly property real vitalsLoad: root.kind === "vitals" ? Math.max(0, Math.min(1, ResourceUsage.cpuUsage)) : 0
+    readonly property color vitalsState: root.vitalsLoad > 0.85 ? root.dangerInk : root.vitalsLoad > 0.6 ? root.highlight : root.faceAccent
     readonly property real stackGlyph: (root.compactCell ? 11 : 13) * root.d
     readonly property real figureSize: root.compactCell ? IrisStyle.typeCaption : IrisStyle.typeMeta
     readonly property real platedInset: 3 * root.d * root.absorb
@@ -838,9 +840,8 @@ Item {
                     visible: root.kind === "vitals"
                     anchors.centerIn: parent
                     spacing: 0
-                    readonly property real load: root.kind === "vitals" ? Math.max(0, Math.min(1, ResourceUsage.cpuUsage)) : 0
-                    readonly property color state: vitalsFace.load > 0.85 ? root.dangerInk
-                        : vitalsFace.load > 0.6 ? root.highlight : root.faceAccent
+                    readonly property real load: root.vitalsLoad
+                    readonly property color state: root.vitalsState
                     GaugeMark {
                         anchors.horizontalCenter: parent.horizontalCenter
                         implicitWidth: Math.round((root.compactCell ? 15 : 18) * root.d)
@@ -1151,8 +1152,15 @@ Item {
                     spacing: Math.round(6 * root.d)
                     readonly property int count: root.kind === "notifications" ? (Notifications.list?.length ?? 0)
                         : root.kind === "updates" ? Updates.count : 0
+                    GaugeMark {
+                        visible: root.kind === "vitals"
+                        anchors.verticalCenter: parent.verticalCenter
+                        implicitWidth: Math.round(16 * root.d)
+                        tint: root.vitalsState
+                        progress: root.vitalsLoad
+                    }
                     Glyph {
-                        visible: root.kind !== "calendar"
+                        visible: root.kind !== "calendar" && root.kind !== "vitals"
                         anchors.verticalCenter: parent.verticalCenter
                         text: root.kind === "notifications" ? IrisPieces.glyphOf("notifications", inlineFace.count > 0 ? "notifications_active" : "")
                             : root.kind === "weather" ? (Icons.getWeatherIcon(Weather.data?.wCode, Weather.isNightNow()) ?? "cloud")
@@ -1171,11 +1179,13 @@ Item {
                     FaceText {
                         readonly property string figure: root.kind === "weather" ? inlineBodyItem.degrees
                             : root.kind === "calendar" ? String(DateTime.clock.date.getDate())
+                            : root.kind === "vitals" ? Math.round(root.vitalsLoad * 100) + "%"
                             : inlineFace.count > 99 ? "99+" : inlineFace.count > 0 ? String(inlineFace.count) : ""
                         visible: figure.length > 0
                         anchors.verticalCenter: parent.verticalCenter
                         text: figure
-                        color: root.kind === "notifications" ? root.alertInk : root.kind === "calendar" ? root.highlight : root.ink
+                        color: root.kind === "notifications" ? root.alertInk : root.kind === "calendar" ? root.highlight
+                            : root.kind === "vitals" && root.vitalsLoad > 0.6 ? root.vitalsState : root.ink
                         font.family: IrisStyle.fontNumbers
                         font.features: ({ "tnum": 1 })
                         font.pixelSize: IrisStyle.typeLabel
