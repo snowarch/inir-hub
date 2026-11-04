@@ -1250,6 +1250,9 @@ Item {
         // Read at launch: a closing page is unloaded before the copy lands.
         property real fromRadius: 0
         property real fromPixelSize: 0
+        // How much the source and the target are scaled by what holds them (a page still settling in).
+        property real fromScale: 1
+        property real toScale: 1
         property bool active: false
         readonly property bool flying: flight.active && flight.t < 1
         z: 10
@@ -1268,6 +1271,15 @@ Item {
         function hides(item: Item): bool {
             return flight.flying && (item === flight.from || item === flight.to)
         }
+        // The target moves while its page settles in: read where it is each frame, so the copy lands on it and the
+        // real one shows exactly there.
+        function track(): void {
+            if (!flight.to) return
+            const target = flight.rectOf(flight.to)
+            flight.toRect = target
+            flight.toScale = target.width / Math.max(1, flight.to.width)
+        }
+        onTChanged: if (flight.flying) flight.track()
         function launch(source: Item, target: Item): void {
             if (!source || !target || IrisStyle.duration(240) <= 0) { flight.stop(); return }
             const midway = flight.flying
@@ -1275,10 +1287,11 @@ Item {
             flight.fromRect = midway ? Qt.rect(flight.x, flight.y, flight.width, flight.height) : flight.rectOf(source)
             flight.fromRadius = midway ? mix(flight.fromRadius, flight.to?.radius ?? flight.fromRadius) : (source.radius ?? 0)
             flight.fromPixelSize = midway ? mix(flight.fromPixelSize, flight.to?.pixelSize ?? flight.fromPixelSize) : (source.pixelSize ?? 0)
+            flight.fromScale = midway ? mix(flight.fromScale, flight.toScale) : flight.fromRect.width / Math.max(1, source.width)
             flight.from = source
             flight.active = true
             flight.to = target
-            flight.toRect = flight.rectOf(target)
+            flight.track()
             travel.restart()
         }
         function stop(): void {
@@ -1677,9 +1690,10 @@ Item {
     Flight {
         id: clockFlight
         IrisClock {
-            readonly property real fromSize: Math.max(1, clockFlight.fromPixelSize)
-            readonly property real toSize: Math.max(1, clockFlight.to?.pixelSize ?? clockFlight.fromPixelSize)
-            pixelSize: Math.max(fromSize, toSize)
+            // Sizes as drawn; the face is set once at the larger one and only scaled while it flies.
+            readonly property real fromSize: Math.max(1, clockFlight.fromPixelSize * clockFlight.fromScale)
+            readonly property real toSize: Math.max(1, (clockFlight.to?.pixelSize ?? clockFlight.fromPixelSize) * clockFlight.toScale)
+            pixelSize: Math.max(1, clockFlight.fromPixelSize, clockFlight.to?.pixelSize ?? 0)
             transformOrigin: Item.TopLeft
             scale: (fromSize + (toSize - fromSize) * clockFlight.t) / pixelSize
         }
