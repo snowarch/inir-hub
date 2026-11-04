@@ -12,9 +12,9 @@ file before writing anything. Claude Code loads it through `CLAUDE.md`; any othe
    an issue, not a pull request; a feature for one of them is a component worn with it.
 2. **Start from the template:** `inir hub new <kind> <id> --author <github-handle>`. The id is the folder name.
 3. **Read before writing:** the template it gave you, the example of the kind (`widgets/countdown`,
-   `components/fastfetch`, `themes/tidepool`, `iris-themes/moss-garden`, `webapps/excalidraw`), and the rules for the
-   files you touch in `.claude/rules/` (`hub-items.md` always; then `hub-qml.md`, `hub-components.md`,
-   `hub-widgets.md`, `hub-themes.md`, `hub-webapps.md`, `hub-scripts.md` as they apply). They are plain Markdown:
+   `components/fastfetch`, `designs/airisu`, `themes/tidepool`, `iris-themes/moss-garden`, `webapps/excalidraw`), and the
+   rules for the files you touch in `.claude/rules/` (`hub-items.md` always; then `hub-qml.md`, `hub-components.md`,
+   `hub-designs.md`, `hub-widgets.md`, `hub-themes.md`, `hub-webapps.md`, `hub-scripts.md` as they apply). They are plain Markdown:
    read them even if your tool does not load them by itself.
 4. **Loop on the check** until it prints `nothing to fix`: `inir hub check`. CI runs the same check on the pull
    request, from inir-cli's main branch; if yours passes and CI does not, take the newest
@@ -42,7 +42,8 @@ Each of these is held by `inir hub check` and CI, or by review where no machine 
   the person to ask for it in an issue.
 - **Import a family's inside.** Items import the base (`qs`, `qs.services`, `qs.modules.common` and its `widgets`,
   `functions`) and only what a family offers: `qs.modules.iris.style`, `qs.modules.iris.components`,
-  `qs.modules.iris.frame`, `qs.modules.waffle.looks`, `qs.modules.ii.kit`. Everything else (`iris.state`,
+  `qs.modules.iris.frame`, `qs.modules.waffle.looks`, `qs.modules.ii.kit` (a Design's Island face also
+  `qs.modules.iris.bar.island`). Everything else (`iris.state`,
   `iris.pieces`, `iris.settings`, `iris.field`, a family's bar or panels) changes with every release of that family,
   and the item then stops loading for everyone.
 - **Write the person's settings or a family's state.** No `Config.setNestedValue(…)`, no `Config.options.x = …`, no

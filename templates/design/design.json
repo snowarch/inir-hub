@@ -1,0 +1,15 @@
+{
+    "$schema": "../../families/iris/designs/design.schema.json",
+    "tokens": {
+        "shape": {
+            "ladder": { "panel": 14, "sheet": 14, "plate": 12, "card": 12, "tile": 8, "row": 5, "chip": 5, "micro": 3 }
+        },
+        "material": {
+            "edge": "line",
+            "shadow": 0.6
+        },
+        "motion": {
+            "morph": "glide"
+        }
+    }
+}

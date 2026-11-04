@@ -1,0 +1,13 @@
+{
+	"id": "airisu",
+	"edit": "https://github.com/snowarch/inir-hub/edit/main/docs/airisu/",
+	"order": 4,
+	"groups": [
+		{
+			"label": "Designs",
+			"pages": [
+				"AIRISU"
+			]
+		}
+	]
+}

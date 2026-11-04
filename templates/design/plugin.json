@@ -1,0 +1,13 @@
+{
+    "id": "__ID__",
+    "kind": "design",
+    "name": "__NAME__",
+    "summary": "What iRiS becomes, in one line",
+    "icon": "brush",
+    "version": "1.0.0",
+    "families": ["iris"],
+    "provides": "modules/__ID__",
+    "parts": {
+        "preview": "parts/Preview.qml"
+    }
+}

@@ -16,6 +16,7 @@ QML, helpers and each kind so they never break the shell.
 | A widget for the Material desktop, the iRiS Island or Waffle's Widgets panel | a widget | `widgets/<id>/` |
 | Colours for Material, Waffle and the apps iNiR themes | a colour theme | `themes/<id>/` |
 | A whole iRiS look: material, colour, shape, motion | an iRiS theme | `iris-themes/<id>/` |
+| Another iRiS: its own colour, type, shapes, edges, motion and Island face over iRiS's components (like AIRISU) | a Design | `designs/<id>/` |
 | A website as a tab in Material's sidebar | a web app | `webapps/<id>/` |
 | A feature of its own for the desktop: a panel, a corner, a tool, with a keybind (like an anime finder) | a component | `components/<id>/` |
 | Something the shell runs or sets up with no panel of its own (like `fastfetch`) | a component | `components/<id>/` |
@@ -122,11 +123,12 @@ It reads what your branch changed since `origin/main` (`--base REF` for another 
 | In a file that draws with `IrisStyle`, no alpha of its own: no `ColorUtils.applyAlpha(x, 0.4)`. | iRiS has a token for every fill, ink and veil; its looks and Designs restyle them. |
 | No fixed font sizes (`font.pixelSize: 14`). | The person's scale reaches only the family's type tokens. |
 | No `Qt5Compat.GraphicalEffects`. | It isn't on every distro iNiR runs on; `QtQuick.Effects` (`MultiEffect`) is. |
-| Outside a family, imports of a family only from what it offers items (`iris.style`, `iris.components`, `iris.frame`, `waffle.looks`, `ii.kit`). | The rest of a family changes with its releases; an item that imports it stops loading on every desktop that installed it. |
+| Outside a family, imports of a family only from what it offers items (`iris.style`, `iris.components`, `iris.frame`, `waffle.looks`, `ii.kit`; a Design's Island face also `iris.bar.island`). | The rest of a family changes with its releases; an item that imports it stops loading on every desktop that installed it. |
 | No file that is mostly another file of the hub. | Two copies drift apart, and the shell ends up with two of one thing. |
 | Never `qs`, `quickshell` or `qs -c inir …` started from an item. | The shell runs on its own runtime; `inir <target> <function>` reaches it on every install. |
 | At most 600 lines in a file the branch adds or changes, outside families. | A file that does one job can be read, reviewed and fixed. |
 | From outside, at most 2500 lines of code in one pull request (translations and docs not counted). | Nobody can review more whole, and what nobody read reaches every desktop that installs it. Send the smallest version that works, then one addition per pull request. |
+| A Design's `design.json` holds only values iRiS reads, in the forms its schema allows (`families/iris/designs/design.schema.json`); the colours it fixes read (text 7:1 on its paper, secondary text 4.5:1, an accent 3:1, ink on a fill 4.5:1); its `parts` are at most `preview`, `islandFace` and `insignia`; it ships no shader. | iRiS reads a Design, never runs one: one set of components serves every Design, and a value it doesn't read would silently do nothing. |
 | Every QML file parses with Qt 6.12, the Qt iNiR runs on (CI). | A file that doesn't parse fails on every desktop that installed it, the moment someone opens it. |
 
 A literal that is the point (a flag's own red, a gradient's fade) ends its line with why: `// literal: the flag's red`,
@@ -144,6 +146,7 @@ An item is a folder with the file iNiR itself reads, plus `hub.json` for the lis
 | iRiS theme | `iris-themes/<id>/` | `theme.json` | `~/.config/inir/iris/themes/<id>.json` |
 | Web app | `webapps/<id>/` | `manifest.json` | `~/.config/inir/plugins/<id>/` |
 | Family, component | `families/<id>/`, `components/<id>/` | `plugin.json` and its QML | `~/.local/share/inir/plugins/<id>/`, linked at its `provides` |
+| Design | `designs/<id>/` | `plugin.json`, `design.json` and at most three parts | `~/.local/share/inir/plugins/<id>/`, linked at its `provides` |
 
 `hub.json`:
 
