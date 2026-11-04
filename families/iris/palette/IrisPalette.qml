@@ -631,7 +631,8 @@ Item {
                             Layout.leftMargin: 16 * stage.d
                             Layout.rightMargin: 16 * stage.d
                             Layout.topMargin: 6 * stage.d
-                            readonly property real tileWidth: width / 8
+                            // The row spans the sheet from five apps up; fewer sit in its middle at that width.
+                            readonly property real tileWidth: width / Math.max(5, Math.min(8, root.suggestions.length))
                             // Icon, dot and the name; a second line only while one of the names needs it.
                             // Recounted by the tiles: a binding over itemAt() never hears a label wrap.
                             property bool wraps: false
@@ -642,20 +643,11 @@ Item {
                                 tiles.wraps = wraps
                             }
                             Timer { id: recountLater; interval: 0; onTriggered: tiles.recount() }
-                            implicitHeight: Math.round((tiles.wraps ? 104 : 92) * stage.d)
-
-                            Rectangle {
-                                visible: root.suggestions.length > 0
-                                x: Math.min(root.selectedIndex, root.suggestions.length - 1) * tiles.tileWidth + 2 * stage.d
-                                width: tiles.tileWidth - 4 * stage.d
-                                height: tiles.height
-                                radius: IrisStyle.concentric(surface.radius, 18 * stage.d, IrisStyle.radiusRow)
-                                color: IrisStyle.rowSelectionFill
-                                Behavior on x { NumberAnimation { duration: IrisStyle.duration(120); easing.type: IrisStyle.feedbackEasing } }
-                            }
+                            implicitHeight: Math.round((tiles.wraps ? 108 : 92) * stage.d)
 
                             Row {
-                                anchors.fill: parent
+                                x: Math.round((tiles.width - width) / 2)
+                                height: tiles.height
                                 Repeater {
                                     id: tileRepeater
                                     onItemAdded: tiles.recount()
@@ -689,6 +681,17 @@ Item {
                                             root.executeSelected()
                                         }
 
+                                        // The chosen app's plate holds its own icon and name, whatever its neighbours' names take.
+                                        Rectangle {
+                                            anchors.horizontalCenter: parent.horizontalCenter
+                                            y: Math.round(4 * stage.d)
+                                            width: Math.min(tile.width - 4 * stage.d, Math.round(96 * stage.d))
+                                            height: Math.round(tileLabel.y + tileLabel.contentHeight + 8 * stage.d) - y
+                                            radius: IrisStyle.concentric(surface.radius, 18 * stage.d, IrisStyle.radiusRow)
+                                            color: IrisStyle.rowSelectionFill
+                                            opacity: tile.chosen ? 1 : 0
+                                            Behavior on opacity { NumberAnimation { duration: IrisStyle.duration(120); easing.type: IrisStyle.feedbackEasing } }
+                                        }
                                         SmartAppIcon {
                                             id: tileIcon
                                             anchors.horizontalCenter: parent.horizontalCenter
