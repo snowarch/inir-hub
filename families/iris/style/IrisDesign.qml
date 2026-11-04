@@ -49,9 +49,15 @@ Singleton {
         watchChanges: true
         printErrors: false
         onFileChanged: this.reload()
+        // The tokens and the folder they came from are taken together once the file is in: its path moves first,
+        // and a binding over both read one Design's fonts in the next one's folder mid-switch.
+        onLoaded: root.read = ({ dir: path.slice(0, path.lastIndexOf("/")), tokens: root.parse(text(), root.current) })
+        onLoadFailed: root.read = ({ dir: "", tokens: ({}) })
+        onPathChanged: if (path.length === 0) root.read = ({ dir: "", tokens: ({}) })
     }
     readonly property var base: root.parse(root.baseFile.text(), "iris")
-    readonly property var own: root.custom ? root.parse(root.ownFile.text(), root.current) : ({})
+    property var read: ({ dir: "", tokens: ({}) })
+    readonly property var own: root.custom ? root.read.tokens : ({})
 
     function at(tree: var, path: string): var {
         let node = tree
@@ -122,8 +128,8 @@ Singleton {
     function trait(name: string): var { return root.traits?.[name] }
 
     // The faces a Design brings, loaded from its folder.
-    readonly property var fontFiles: !root.custom ? [] : Array.from(root.ownToken("type.files") ?? [])
-        .map(file => Quickshell.shellPath(`${root.plugin?.provides ?? ""}/${file}`))
+    readonly property var fontFiles: !root.custom || root.read.dir.length === 0 ? [] : Array.from(root.at(root.read.tokens, "type.files") ?? [])
+        .map(file => `${root.read.dir}/${file}`)
     readonly property Instantiator fontLoaders: Instantiator {
         model: root.fontFiles
         delegate: FontLoader {
@@ -143,7 +149,8 @@ Singleton {
     readonly property var catalogue: root.known.map(id => ({
         value: id,
         label: id === "iris" ? "iRiS" : String(Plugins.manifests[id]?.name ?? id),
-        preview: id === "iris" ? Qt.resolvedUrl("../designs/iris/parts/Preview.qml").toString() : Plugins.part(id, "preview")
+        preview: id === "iris" ? Qt.resolvedUrl("../designs/iris/parts/Preview.qml").toString() : Plugins.part(id, "preview"),
+        folder: id === "iris" ? "" : Quickshell.shellPath(String(Plugins.manifests[id]?.provides ?? `modules/${id}`))
     }))
 
     // The rows a worn Design decides for itself: Settings leaves them out, and they apply again under another Design.

@@ -430,6 +430,8 @@ QtObject {
     readonly property bool signalChosen: root.mono && root.nothingSignal
     readonly property bool neutralBody: root.mono && !["midnight", "wallpaper", "theme"].includes(root.materialName)
     readonly property var neutralRoles: ["surface", "surfaceHigh", "surfaceHighest", "text", "textSecondary", "textTertiary", "fillInk"]
+    // A Design's fixed roles are what it is (a blueprint's blue paper): Nothing's grey leaves them as they are.
+    readonly property var fixedRoles: IrisDesign.roles(root.scheme) ?? ({})
     // The same light, no hue: a warm paper or a wallpaper-tinted black reads as its grey.
     function neutral(c: color): color {
         const v = Math.pow(ColorUtils.relativeLuminance(c), 1 / 2.2)
@@ -437,7 +439,7 @@ QtObject {
     }
     function role(name: string, fallback: string): color {
         const c = Qt.color(root.washi?.[name] ?? fallback)
-        return root.neutralBody && root.neutralRoles.includes(name) ? root.neutral(c) : c
+        return root.neutralBody && root.neutralRoles.includes(name) && root.fixedRoles[name] === undefined ? root.neutral(c) : c
     }
     // The paper under inverted ink: what a chosen segment's label, an on tile's glyph and a primary button's word wear.
     readonly property color paper: root.surfaceOpaque
