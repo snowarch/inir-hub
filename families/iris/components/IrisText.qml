@@ -62,6 +62,7 @@ StyledText {
     // A Design's figures may lean; everything else lands on whole pixels.
     readonly property bool leans: IrisDesign.figureLean !== 0 && (root.role === IrisText.Metric || root.role === IrisText.Dot)
     transform: root.leans ? [leaning] : [snap]
+    renderType: root.leans ? IrisStyle.leanGlyphs : Text.NativeRendering
     Translate { id: snap; x: Math.round(root.x) - root.x; y: Math.round(root.y) - root.y }
     Matrix4x4 {
         id: leaning

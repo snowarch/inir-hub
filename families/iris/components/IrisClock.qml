@@ -23,6 +23,7 @@ Row {
 
     spacing: 0
     transform: IrisDesign.figureLean !== 0 ? [lean] : []
+    readonly property int glyphs: IrisDesign.figureLean !== 0 ? IrisStyle.leanGlyphs : Text.NativeRendering
     Matrix4x4 {
         id: lean
         matrix: Qt.matrix4x4(1, -IrisDesign.figureLean, 0, IrisDesign.figureLean * root.height / 2, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1)
@@ -38,7 +39,7 @@ Row {
         font.features: ({ "tnum": 1 })
         font.letterSpacing: Math.round(-root.pixelSize * 0.02)
         color: root.color
-        renderType: Text.NativeRendering
+        renderType: root.glyphs
     }
 
     component Minor: Text {
@@ -50,10 +51,11 @@ Row {
         font.weight: root.minorFamily === IrisStyle.fontDot ? IrisStyle.figureWeight : IrisStyle.weight(Font.DemiBold)
         font.features: ({ "tnum": 1 })
         color: IrisStyle.secondaryOf(root.color)
-        renderType: Text.NativeRendering
+        renderType: root.glyphs
     }
 
     component Count: IrisNumber {
+        renderType: root.glyphs
         family: root.family
         pixelSize: root.pixelSize
         weight: root.weight

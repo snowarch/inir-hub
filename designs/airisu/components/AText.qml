@@ -29,7 +29,7 @@ Text {
     font.features: root.v === "figure" || root.v === "data" ? { "tnum": 1 } : ({})
     elide: Text.ElideRight
     maximumLineCount: 1
-    renderType: root.lean !== 0 ? Text.CurveRendering : Text.NativeRendering
+    renderType: root.lean !== 0 ? IrisStyle.leanGlyphs : Text.NativeRendering
     transform: root.lean !== 0 ? [shear] : []
     Matrix4x4 {
         id: shear

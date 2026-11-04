@@ -255,6 +255,9 @@ QtObject {
         return steps[Math.max(0, Math.min(steps.length - 1, at + root.weightShift))]
     }
     readonly property int figureWeight: ({ light: Font.Light, regular: Font.Normal })[IrisDesign.worn("type.figureWeight", root.appearance?.figureWeight)] ?? Font.Bold
+    // How a Design's leaning figures are drawn: native glyphs are rasterised upright and step once sheared, curves thin
+    // out at bar sizes; distance fields are made to be transformed.
+    readonly property int leanGlyphs: Text.QtRendering
     // The Figure voice (was Dot): clock digits, a widget's one number, area titles. The Figures row picks it.
     readonly property string fontDot: IrisDesign.font("dot") || root.face("iris.appearance.numbersFontFamily", root.appearance?.numbersFontFamily)
     // Small figures (a count, a percentage in a row) read in the Read voice with tabular digits, unless the person
