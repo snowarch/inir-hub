@@ -14,6 +14,11 @@ iRiS is the Island family. One Island sits on a screen edge and grows into whate
   - **Full width** spans the whole edge as a bar.
   - **Menu bar** makes a thin strip with the Island hanging from it as a notch. Its strip is Transparent or Band (Menu bar strip).
 - Island shape (Settings › Island › Shape › Island shape): Auto, Round, Squircle or Square.
+- Island design (Settings › Island › Layout › Island design) sets how the resting Island looks. Besides Halo, Ledger, Tiles, Dial, Marquee and Duo:
+  - **Headline**: the time tall and condensed like a poster, beside the place, the sky and the temperature.
+  - **Rings**: three rings for the day gone, the battery (the week on a desktop) and the month, beside the time.
+  - **Aura**: the Island ringed in the colours of the spectrum; they turn once when the pointer is over it.
+  - **Status**: a phone's status bar: the time, the signal as bars and the battery with its figure.
 - Live activities look like a phone's Dynamic Island:
   - **Music** opens into a player with the cover, the song and its artist, the time on both sides of the bar and large play controls.
   - **Timers** show an orange ring that empties as the time runs; open, they have round pause and close buttons, and a pomodoro shows each focus and break as a segment.

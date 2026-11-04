@@ -94,10 +94,11 @@ Item {
     // strip, welded to it: the page grows out of the strip's foot, one body.
     // Three designs of the Island (10-25): the engine's own (Halo), Ledger and Tiles, which skin its face, its page
     // buttons and its desktop page. A shell Design (AIRISU) that skins a part keeps it.
-    readonly property string design: ["ledger", "tiles", "dial", "marquee", "duo"].includes(String(root.options?.design ?? "halo")) ? String(root.options.design) : "halo"
+    readonly property string design: ["ledger", "tiles", "dial", "marquee", "duo", "headline", "rings", "aura", "status"].includes(String(root.options?.design ?? "halo")) ? String(root.options.design) : "halo"
     // What each design draws of its own; the engine draws the rest (Dial, Marquee and Duo keep Halo's pages).
     readonly property var designParts: ({ ledger: ["Face.qml", "Nav.qml", "Desktop.qml"], tiles: ["Face.qml", "Nav.qml", "Desktop.qml"],
-        dial: ["Face.qml"], marquee: ["Face.qml"], duo: ["Face.qml"] })
+        dial: ["Face.qml"], marquee: ["Face.qml"], duo: ["Face.qml"], headline: ["Face.qml"], rings: ["Face.qml"], aura: ["Face.qml"],
+        status: ["Face.qml"] })
     function skinOf(own: string, file: string): string {
         return own.length > 0 || !(root.designParts[root.design] ?? []).includes(file) ? own : Qt.resolvedUrl("island/designs/" + root.design + "/" + file)
     }
