@@ -2225,7 +2225,8 @@
   "Reply": "Responder",
   "Send": "Enviar",
   "The time as a poster, tall and condensed, beside the place and the sky.": "La hora como un póster, alta y condensada, junto al lugar y el cielo.",
-  "Three rings: the day gone, the battery, the month.": "Tres anillos: el día que pasó, la batería, el mes.",
   "The Island ringed in the spectrum, the time inside.": "La Isla rodeada por el espectro, con la hora adentro.",
-  "A phone's status bar: the time, the signal and the battery.": "La barra de estado de un teléfono: la hora, la señal y la batería."
+  "Design and modes": "Diseño y modos",
+  "Three rings: the day gone, the battery or the week, the month.": "Tres anillos: el día que pasó, la batería o la semana, el mes.",
+  "A status bar: the time, the connection and the battery, or on a desktop the weather.": "Una barra de estado: la hora, la conexión y la batería, o en una PC de escritorio el clima."
 }

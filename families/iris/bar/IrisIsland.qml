@@ -164,7 +164,8 @@ Item {
         if (root.recording) list.push("record")
         if (root.timerKind.length > 0) list.push("timer")
         for (const job of root.tasks.slice(0, 2)) list.push("task")
-        if (Privacy.micActive) list.push("mic")
+        if (Privacy.cameraActive) list.push("camera")
+        if (Privacy.micActive && !Privacy.cameraActive) list.push("mic")
         if (root.hasMedia) list.push("media")
         return list
     }
@@ -174,7 +175,7 @@ Item {
     readonly property bool privacyLive: Privacy.anyActive
     // A Cluster Island is the clock with the song beside it; a live activity (recording, a timer, a job) takes the
     // Island itself, as on a phone, and what comes after it detaches into the left bubble.
-    readonly property string islandActivity: IrisStyle.cluster && ["record", "timer", "task", "mic"].includes(root.primary) ? root.primary : ""
+    readonly property string islandActivity: IrisStyle.cluster && ["record", "timer", "task", "mic", "camera"].includes(root.primary) ? root.primary : ""
     readonly property string leftKind: root.islandActivity.length > 0 ? root.secondary : root.primary === "idle" ? "" : root.primary
     // Where a tap on the Island goes: what it shows, who is using the mic or screen, else the desktop page.
     readonly property string tapPage: IrisStyle.cluster
@@ -197,7 +198,7 @@ Item {
     Timer {
         interval: 1000
         repeat: true
-        running: root.micLive && root.compactMode === "mic"
+        running: root.micLive && (root.compactMode === "mic" || root.compactMode === "camera")
         onTriggered: root.now = Date.now()
         onRunningChanged: root.now = Date.now()
     }
@@ -465,10 +466,12 @@ Item {
     readonly property color eventInk: root.event.failed || (root.nothingLook && Qt.colorEqual(root.event.tint, IrisStyle.danger))
         ? IrisStyle.signalInk : root.nothingLook ? IrisStyle.text : root.event.tint
     readonly property bool eventIsBattery: String(root.event.icon).startsWith("battery") && root.event.value >= 0
+    property string eventImage: ""
     function showEvent(icon: string, tint: color, title: string, detail: string, value: real, kind = ""): void {
         if (!root.eventsEnabled || !eventsWarm.ready || root.expanded || root.fullscreenCovered
             || root.targetScreen?.name !== GlobalStates.focusedScreen?.name) return
-        root.event = { icon: icon, tint: tint, title: title, detail: detail, value: value, kind: kind, failed: false }
+        root.event = { icon: icon, tint: tint, title: title, detail: detail, value: value, kind: kind, failed: false, image: root.eventImage }
+        root.eventImage = ""
         eventTimer.restart()
     }
     // A job that ends says so in the compact Island: its strip fills and a pulse runs through it, or it fails in signal.
@@ -542,7 +545,8 @@ Item {
                 : ({ network: IrisStyle.identity.blue, internet: IrisStyle.identity.teal, bluetooth: IrisStyle.identity.blue, usb: IrisStyle.identity.sky,
                      power: IrisStyle.success, audio: IrisStyle.accent, displays: IrisStyle.identity.indigo,
                      drives: IrisStyle.identity.orange })[event.kind] ?? IrisStyle.accent
-            root.showEvent(event.icon, tint, event.title, event.detail, event.value >= 0 ? event.value / 100 : -1)
+            root.showEvent(event.icon, tint, event.title, event.detail, event.value >= 0 ? event.value / 100 : -1,
+                event.kind === "power" && event.tone === "on" ? "charge" : "")
         }
     }
     Connections {
@@ -567,6 +571,30 @@ Item {
                     : Translation.tr("Focus"),
                 root.durationText(TimerService.pomodoroLapDuration), -1)
         }
+    }
+    // Unlocked: a face drawn in green, as a phone's Face ID says it knew you.
+    Connections {
+        target: root.eventsEnabled ? GlobalStates : null
+        function onScreenLockedChanged(): void {
+            if (!GlobalStates.screenLocked) unlockLater.restart()
+        }
+    }
+    Timer { id: unlockLater; interval: 450; onTriggered: root.showEvent("face", IrisStyle.identity.green, Translation.tr("Unlocked"), "", -1, "unlock") }
+    // The sound muted from anywhere: the red Silent pill.
+    readonly property bool sinkMuted: Audio.sink?.audio?.muted ?? false
+    onSinkMutedChanged: if (root.sinkMuted && !root.feedback) root.showEvent("notifications_off", IrisStyle.danger, Translation.tr("Silent"), "", -1, "silent")
+    // A screenshot just taken: its picture as a card at the end; a tap opens it.
+    readonly property var latestShot: Shelf.items.find(item => item.origin === "shot") ?? null
+    property string shownShot: ""
+    onLatestShotChanged: {
+        const shot = root.latestShot
+        if (!shot || shot.path === root.shownShot) return
+        const fresh = Date.now() - Number(shot.at ?? 0) < 15000
+        const first = root.shownShot.length === 0
+        root.shownShot = shot.path
+        if (!fresh || first && !eventsWarm.ready) return
+        root.eventImage = "file://" + shot.path
+        root.showEvent("screenshot_region", IrisStyle.identity.blue, Translation.tr("Screenshot saved"), String(shot.name ?? ""), -1, "shot")
     }
     property int lastRecordingSeconds: 0
     onRecordingChanged: {
@@ -728,7 +756,7 @@ Item {
     readonly property bool compactSizeClass: root.compactMode === "feedback" || root.compactMode === "event"
     readonly property bool spanning: root.fullWidth
     readonly property var compactRows: ({ idle: idleRow, media: mediaRow, record: recordRow,
-        timer: timerRow, task: taskRow, mic: micRow, clock: clockRow, event: eventRow, feedback: feedbackRow })
+        timer: timerRow, task: taskRow, mic: micRow, camera: cameraRow, clock: clockRow, event: eventRow, feedback: feedbackRow })
     readonly property real compactContentWidth: root.vertical ? compactColumn.implicitHeight
         : root.faceTakes ? (designFace.item?.contentWidth ?? 0)
         : root.compactRows[root.compactMode]?.implicitWidth ?? 0
@@ -1938,6 +1966,42 @@ Item {
             // 95 ms frame near the end of every close.
             visible: opacity > 0 || root.expanded || chassis.presentation > 0.002
 
+            component FaceMark: Item {
+                id: faceMark
+                property color tint: IrisStyle.identity.green
+                property bool live: false
+                scale: faceMark.live ? 1 : 0.55
+                opacity: faceMark.live ? 1 : 0
+                Behavior on scale { NumberAnimation { duration: IrisStyle.duration(520); easing.type: Easing.OutBack; easing.overshoot: 2.2 } }
+                Behavior on opacity { NumberAnimation { duration: IrisStyle.duration(200) } }
+                Shape {
+                    anchors.fill: parent
+                    preferredRendererType: Shape.CurveRenderer
+                    readonly property real w: width
+                    readonly property real k: width * 0.3
+                    readonly property real r: width * 0.16
+                    ShapePath {
+                        strokeColor: faceMark.tint
+                        strokeWidth: Math.max(1.6, faceMark.width * 0.075)
+                        fillColor: "transparent"
+                        capStyle: ShapePath.RoundCap
+                        joinStyle: ShapePath.RoundJoin
+                        PathSvg {
+                            readonly property real w: faceMark.width
+                            readonly property real k: faceMark.width * 0.28
+                            readonly property real r: faceMark.width * 0.16
+                            path: `M 0 ${k} L 0 ${r} Q 0 0 ${r} 0 L ${k} 0 `
+                                + `M ${w - k} 0 L ${w - r} 0 Q ${w} 0 ${w} ${r} L ${w} ${k} `
+                                + `M ${w} ${w - k} L ${w} ${w - r} Q ${w} ${w} ${w - r} ${w} L ${w - k} ${w} `
+                                + `M ${k} ${w} L ${r} ${w} Q 0 ${w} 0 ${w - r} L 0 ${w - k} `
+                                + `M ${w * 0.36} ${w * 0.34} L ${w * 0.36} ${w * 0.44} `
+                                + `M ${w * 0.64} ${w * 0.34} L ${w * 0.64} ${w * 0.44} `
+                                + `M ${w * 0.5} ${w * 0.36} L ${w * 0.5} ${w * 0.56} L ${w * 0.45} ${w * 0.56} `
+                                + `M ${w * 0.34} ${w * 0.68} Q ${w * 0.5} ${w * 0.8} ${w * 0.66} ${w * 0.68}`
+                        }
+                    }
+                }
+            }
             component CompactRow: RowLayout {
                 id: compactRow
                 property string mode: ""
@@ -2291,6 +2355,38 @@ Item {
                 }
             }
 
+            // The camera on: FaceTime's green tile with the camera, the app, how long it has been on.
+            CompactRow {
+                id: cameraRow
+                mode: "camera"
+                Rectangle {
+                    Layout.alignment: Qt.AlignVCenter
+                    Layout.preferredWidth: root.compactHeight - Math.round(14 * root.d)
+                    Layout.preferredHeight: Layout.preferredWidth
+                    radius: Math.round(width * 0.28)
+                    color: IrisStyle.identity.green
+                    Glyph { anchors.centerIn: parent; text: "videocam"; iconSize: 16 * root.d; color: IrisStyle.onTintFor(IrisStyle.identity.green) }
+                }
+                IrisText {
+                    Layout.fillWidth: true
+                    Layout.alignment: Qt.AlignVCenter
+                    text: String((Privacy.cameraApps ?? [])[0] ?? Translation.tr("Camera"))
+                    color: IrisStyle.textSecondary
+                    font.pixelSize: IrisStyle.typeLabel
+                    font.weight: IrisStyle.weight(Font.Medium)
+                    elide: Text.ElideRight
+                }
+                Tabular {
+                    visible: root.micLive
+                    Layout.alignment: Qt.AlignVCenter
+                    text: root.micElapsed
+                    color: IrisStyle.identity.green
+                    font.pixelSize: IrisStyle.typeBody * root.clockScale
+                    font.weight: IrisStyle.weight(Font.DemiBold)
+                }
+                RecordDot { Layout.alignment: Qt.AlignVCenter; color: IrisStyle.identity.green }
+            }
+
             CompactRow {
                 id: clockRow
                 mode: "clock"
@@ -2332,7 +2428,47 @@ Item {
                 id: eventRow
                 mode: "event"
                 anchors.leftMargin: 6 * root.d
+                // Face ID: corner brackets, two eyes and a smile drawn in green, sprung in.
+                Item {
+                    visible: root.event.kind === "unlock"
+                    Layout.alignment: Qt.AlignVCenter
+                    Layout.preferredWidth: root.compactHeight - Math.round(12 * root.d)
+                    Layout.preferredHeight: Layout.preferredWidth
+                    FaceMark { anchors.fill: parent; tint: IrisStyle.identity.green; live: root.eventShown && root.event.kind === "unlock" }
+                }
+                // Silent: Apple's red capsule with the struck bell.
                 Rectangle {
+                    visible: root.event.kind === "silent"
+                    Layout.alignment: Qt.AlignVCenter
+                    Layout.preferredWidth: Math.round(46 * root.d)
+                    Layout.preferredHeight: root.compactHeight - Math.round(14 * root.d)
+                    radius: height / 2
+                    color: IrisStyle.danger
+                    Glyph { anchors.centerIn: parent; text: "notifications_off"; iconSize: 16 * root.d; color: IrisStyle.onTintFor(IrisStyle.danger) }
+                }
+                // Charging: the battery stood upright, filled to its level, the bolt inside.
+                Rectangle {
+                    visible: root.event.kind === "charge"
+                    Layout.alignment: Qt.AlignVCenter
+                    Layout.leftMargin: 6 * root.d
+                    Layout.rightMargin: 4 * root.d
+                    Layout.preferredWidth: Math.round(15 * root.d)
+                    Layout.preferredHeight: root.compactHeight - Math.round(14 * root.d)
+                    radius: Math.round(4 * root.d)
+                    color: IrisStyle.trackOf(IrisStyle.identity.green)
+                    clip: true
+                    Rectangle {
+                        anchors.bottom: parent.bottom
+                        width: parent.width
+                        height: parent.height * Math.max(0.12, root.event.value)
+                        radius: parent.radius
+                        color: IrisStyle.identity.green
+                        Behavior on height { NumberAnimation { duration: IrisStyle.duration(700); easing.type: Easing.OutCubic } }
+                    }
+                    Glyph { anchors.centerIn: parent; text: "bolt"; iconSize: 12 * root.d; color: IrisStyle.onTintFor(IrisStyle.identity.green) }
+                }
+                Rectangle {
+                    visible: !["unlock", "silent", "charge"].includes(root.event.kind)
                     Layout.preferredWidth: root.compactHeight - Math.round(12 * root.d)
                     Layout.preferredHeight: Layout.preferredWidth
                     radius: IrisStyle.capsule(width)
@@ -2358,6 +2494,7 @@ Item {
                     spacing: -1 * root.d
                     IrisText {
                         Layout.fillWidth: true
+                        visible: root.event.kind !== "silent"
                         text: root.event.title
                         font.pixelSize: IrisStyle.typeLabel
                         font.weight: IrisStyle.weight(Font.DemiBold)
@@ -2372,6 +2509,31 @@ Item {
                         elide: Text.ElideRight
                     }
                 }
+                IrisText {
+                    visible: root.event.kind === "silent"
+                    Layout.alignment: Qt.AlignVCenter
+                    text: root.event.title
+                    color: IrisStyle.danger
+                    font.pixelSize: IrisStyle.typeBody
+                    font.weight: IrisStyle.weight(Font.DemiBold)
+                }
+                // The picture itself as a card at the end (Apple's "Recording saved").
+                ClippingRectangle {
+                    id: shotCard
+                    visible: root.event.kind === "shot" && String(root.event.image ?? "").length > 0
+                    Layout.alignment: Qt.AlignVCenter
+                    Layout.preferredHeight: root.compactHeight - Math.round(10 * root.d)
+                    Layout.preferredWidth: Math.round(Layout.preferredHeight * 1.5)
+                    radius: Math.round(7 * root.d)
+                    color: IrisStyle.fill
+                    IrisImage {
+                        anchors.fill: parent
+                        decodeWidth: Math.round(shotCard.width * 2)
+                        decodeHeight: Math.round(shotCard.height * 2)
+                        source: shotCard.visible ? String(root.event.image ?? "") : ""
+                        fillMode: Image.PreserveAspectCrop
+                    }
+                }
                 // A switch says its state at the end in its colour (Apple's "Do Not Disturb  On").
                 IrisText {
                     visible: root.event.kind === "status"
@@ -2383,7 +2545,7 @@ Item {
                 }
                 // A battery shows its level and itself at the end ("Low Battery  20% ▭").
                 IrisBatteryMark {
-                    visible: !root.nothingLook && root.eventIsBattery
+                    visible: !root.nothingLook && root.eventIsBattery && root.event.kind !== "charge"
                     Layout.alignment: Qt.AlignVCenter
                     markHeight: Math.round(13 * root.d)
                     level: Math.max(0, root.event.value)
@@ -2647,6 +2809,10 @@ Item {
                     if (IrisState.edit) {
                         IrisState.editSelection = ""
                         IrisState.editTarget = "island"
+                        return
+                    }
+                    if (root.eventShown && root.event.kind === "shot" && String(root.event.image ?? "").length > 0) {
+                        Qt.openUrlExternally(root.event.image)
                         return
                     }
                     if (root.pinned) root.expanded = false

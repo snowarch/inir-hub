@@ -93,7 +93,7 @@ Item {
         && root.choices.every(choice => choice.swatch !== undefined || ["wallpaper", "accent", "custom", "theme"].includes(choice.value))
         && root.choices.some(choice => choice.swatch !== undefined)
     readonly property bool tiled: root.spec.kind === "choice" && root.spec.tiles === true && root.choices.length > 0
-    readonly property bool carded: root.spec.kind === "choice" && (root.spec.cards === "material" || root.spec.cards === "design") && root.choices.length > 0
+    readonly property bool carded: root.spec.kind === "choice" && (root.spec.cards === "material" || root.spec.cards === "design" || root.spec.cards === "island") && root.choices.length > 0
     // Designs are thumbnails in the answer column while they fit there; a long catalogue takes the row under the text.
     readonly property real designThumb: Math.round(140 * root.d)
     readonly property real designRow: (root.choices.length + 1) * root.designThumb + root.choices.length * Math.round(10 * root.d)
@@ -594,7 +594,7 @@ Item {
             Layout.fillWidth: true
             active: root.carded && !root.designInline
             visible: active
-            sourceComponent: root.spec.cards === "design" ? designCardsComponent : materialCardsComponent
+            sourceComponent: root.spec.cards === "design" ? designCardsComponent : root.spec.cards === "island" ? islandCardsComponent : materialCardsComponent
         }
 
         Loader {
@@ -1034,6 +1034,123 @@ Item {
 
     // A Design is shown as itself: each draws its own picture (designs/<id>/parts/Preview.qml), large, side by side, so
     // the choice reads as two products and not as two words.
+    Component {
+        id: islandCardsComponent
+        // Every Island design alive in a small Island of its own hanging from a strip of screen, its name and what it
+        // shows under it; the one worn is filled in the accent. A tap wears it.
+        Item {
+            id: faces
+            readonly property real gap: Math.round(10 * root.d)
+            readonly property int columns: width >= 640 * root.d ? 3 : width >= 400 * root.d ? 2 : 1
+            readonly property real cardWidth: Math.floor((width - (faces.columns - 1) * faces.gap) / faces.columns)
+            readonly property real cardHeight: Math.round(138 * root.d)
+            implicitHeight: Math.ceil(root.choices.length / faces.columns) * (faces.cardHeight + faces.gap) - faces.gap
+            // What a face reads of the Island, at a preview's size.
+            QtObject {
+                id: sample
+                readonly property real compactHeight: Math.round(36 * root.d)
+                readonly property color clockAccent: IrisStyle.clockAccent
+                readonly property real figureSize: IrisStyle.typeHeadline
+                readonly property bool nothingLook: IrisStyle.nothingAt("island")
+                readonly property bool zoned: false
+                readonly property bool vertical: false
+            }
+            Component {
+                id: haloFace
+                Item {
+                    readonly property real contentWidth: haloClock.implicitWidth + Math.round(22 * root.d)
+                    IrisClock {
+                        id: haloClock
+                        anchors.centerIn: parent
+                        family: IrisStyle.figureFace(pixelSize)
+                        minorFamily: family
+                        pixelSize: IrisStyle.typeHeadline
+                        separatorColor: IrisStyle.clockAccent
+                    }
+                }
+            }
+            Repeater {
+                model: root.choices
+                Item {
+                    id: faceCard
+                    required property var modelData
+                    required property int index
+                    readonly property bool selected: root.value === faceCard.modelData.value
+                    x: (faceCard.index % faces.columns) * (faces.cardWidth + faces.gap)
+                    y: Math.floor(faceCard.index / faces.columns) * (faces.cardHeight + faces.gap)
+                    width: faces.cardWidth
+                    height: faces.cardHeight
+                    scale: faceTap.pressed ? IrisStyle.pressScale(0.98) : 1
+                    Behavior on scale { NumberAnimation { duration: IrisStyle.feedbackDuration; easing.type: IrisStyle.feedbackEasing } }
+                    Accessible.role: Accessible.RadioButton
+                    Accessible.name: Translation.tr(root.spec.label) + ": " + Translation.tr(faceCard.modelData.label)
+                    Accessible.checked: faceCard.selected
+                    Rectangle {
+                        anchors.fill: parent
+                        radius: IrisStyle.radiusTile
+                        color: faceCard.selected ? IrisStyle.tintFill(IrisStyle.accent) : faceHover.hovered ? IrisStyle.fill : IrisStyle.fillQuiet
+                        Behavior on color { ColorAnimation { duration: IrisStyle.duration(110); easing.type: IrisStyle.feedbackEasing } }
+                    }
+                    ClippingRectangle {
+                        id: screen
+                        x: Math.round(7 * root.d)
+                        y: Math.round(7 * root.d)
+                        width: parent.width - 2 * x
+                        height: Math.round(66 * root.d)
+                        radius: IrisStyle.concentric(IrisStyle.radiusTile, x, IrisStyle.radiusRow)
+                        color: IrisStyle.surfaceHighOpaque
+                        Rectangle {
+                            id: body
+                            readonly property real want: (faceLoader.item?.contentWidth ?? 120 * root.d) + Math.round(26 * root.d)
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            y: Math.round(10 * root.d)
+                            width: Math.min(screen.width - Math.round(16 * root.d), body.want)
+                            height: sample.compactHeight
+                            radius: height / 2
+                            color: IrisStyle.bodySurface
+                            clip: true
+                            Loader {
+                                id: faceLoader
+                                anchors.fill: parent
+                                asynchronous: true
+                                sourceComponent: faceCard.modelData.value === "halo" ? haloFace : null
+                                source: faceCard.modelData.value === "halo" ? ""
+                                    : Qt.resolvedUrl("../bar/island/designs/" + faceCard.modelData.value + "/Face.qml")
+                                onLoaded: if (item && item.island !== undefined) item.island = sample
+                            }
+                        }
+                    }
+                    Column {
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        anchors.top: screen.bottom
+                        anchors.margins: Math.round(10 * root.d)
+                        anchors.topMargin: Math.round(8 * root.d)
+                        spacing: Math.round(1 * root.d)
+                        IrisText {
+                            width: parent.width
+                            text: Translation.tr(faceCard.modelData.label)
+                            color: faceCard.selected ? IrisStyle.accent : IrisStyle.text
+                            font.pixelSize: IrisStyle.typeLabel
+                            font.weight: IrisStyle.weight(Font.DemiBold)
+                            elide: Text.ElideRight
+                        }
+                        IrisText {
+                            width: parent.width
+                            text: Translation.tr(String(faceCard.modelData.detail ?? ""))
+                            color: IrisStyle.textTertiary
+                            font.pixelSize: IrisStyle.typeFootnote
+                            wrapMode: Text.WordWrap
+                            maximumLineCount: 2
+                            elide: Text.ElideRight
+                        }
+                    }
+                    HoverHandler { id: faceHover; cursorShape: Qt.PointingHandCursor }
+                    TapHandler { id: faceTap; onTapped: root.commit(faceCard.modelData.value) }
+                }
+            }
+        }
+    }
     Component {
         id: designCardsComponent
 

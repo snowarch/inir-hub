@@ -2225,7 +2225,8 @@
   "Reply": "Akiguk",
   "Send": "Nassiuguk",
   "The time as a poster, tall and condensed, beside the place and the sky.": "Piffissaq plakatitut, portusoq amitsorlu, sumiiffiup qilammullu eqqaani.",
-  "Three rings: the day gone, the battery, the month.": "Ammaluit pingasut: ullup qaangiuttup, batteriip, qaammatip.",
   "The Island ringed in the spectrum, the time inside.": "Qeqertaq qalipaatinik avatangiiserlugu, piffissaq iluani.",
-  "A phone's status bar: the time, the signal and the battery.": "Oqarasuaatip killiffianik takutitsisua: piffissaq, aallakaatitsineq batterilu."
+  "Design and modes": "Ilusilersuut aaqqissuussinerillu",
+  "Three rings: the day gone, the battery or the week, the month.": "Ammaluit pingasut: ullup qaangiuttup, batteriip sapaatip-akunneraluunniit, qaammatip.",
+  "A status bar: the time, the connection and the battery, or on a desktop the weather.": "Killiffimmik takutitsisoq: piffissaq, attaveqarneq batterilu, qarasaasiamiluunniit sila."
 }

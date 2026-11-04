@@ -2225,7 +2225,8 @@
   "Reply": "返信",
   "Send": "送信",
   "The time as a poster, tall and condensed, beside the place and the sky.": "ポスターのように縦長で細いフォントの時刻と、場所と空模様。",
-  "Three rings: the day gone, the battery, the month.": "3つのリング：今日の経過、バッテリー、今月。",
   "The Island ringed in the spectrum, the time inside.": "スペクトルに縁取られたアイランドと、その中の時刻。",
-  "A phone's status bar: the time, the signal and the battery.": "スマートフォンのステータスバー：時刻、電波、バッテリー。"
+  "Design and modes": "デザインとモード",
+  "Three rings: the day gone, the battery or the week, the month.": "3つのリング：今日の経過、バッテリーまたは今週、今月。",
+  "A status bar: the time, the connection and the battery, or on a desktop the weather.": "ステータスバー：時刻、接続、バッテリー。デスクトップでは天気。"
 }
