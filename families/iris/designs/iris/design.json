@@ -1,0 +1,42 @@
+{
+    "$schema": "../design.schema.json",
+    "tokens": {
+        "colour": {
+            "language": "",
+            "preset": "",
+            "schemes": ["dark", "ink", "light"],
+            "roles": {}
+        },
+        "type": {
+            "text": "Geist",
+            "title": "Geist",
+            "numbers": "",
+            "dot": "Archivo SemiExpanded",
+            "mono": "Geist Mono",
+            "figureLean": 0,
+            "figureWeight": "bold",
+            "files": []
+        },
+        "shape": {
+            "ladder": { "panel": 22, "sheet": 22, "plate": 18, "card": 18, "tile": 13, "row": 7, "chip": 7, "micro": 4 },
+            "piece": "circle",
+            "tile": 0.26
+        },
+        "material": {
+            "glass": "allow",
+            "texture": "solid",
+            "edge": "",
+            "edgeWidth": 0,
+            "shadow": 1,
+            "plates": { "black": ["#2e2e34", "#18181b"], "white": ["#f8f8fb", "#e6e6ec"] }
+        },
+        "motion": {
+            "morph": "",
+            "duration": 0
+        },
+        "look": {
+            "look": "apple",
+            "traits": {}
+        }
+    }
+}

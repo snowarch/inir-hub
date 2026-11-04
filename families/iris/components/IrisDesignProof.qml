@@ -60,7 +60,7 @@ PanelWindow {
     // model only: nothing here reaches a service.
     readonly property real minute: 60000
     readonly property var scenes: [
-        { part: "banner", name: "banner", w: Number(IrisDesign.surface("banners", "width", 380)),
+        { part: "banner", name: "banner", w: (380),
             states: [{ name: "rest", look: ({}) }, { name: "pointer", look: ({ hovered: true }) }],
             samples: [
                 { name: "actions", look: ({ notification: ({ notificationId: -1, appName: "Discord", appIcon: "discord", image: "",
@@ -326,8 +326,8 @@ PanelWindow {
                                 id: host
                                 x: Math.round(12 * root.d)
                                 anchors.verticalCenter: parent.verticalCenter
-                                width: Math.round((row.modelData.w > 0 ? row.modelData.w : Number(IrisDesign.surface("switch", "width", 76))) * root.d)
-                                height: Math.round((row.modelData.h > 0 ? row.modelData.h : Number(IrisDesign.surface("switch", "height", 26))) * root.d)
+                                width: Math.round((row.modelData.w > 0 ? row.modelData.w : (76)) * root.d)
+                                height: Math.round((row.modelData.h > 0 ? row.modelData.h : (26)) * root.d)
                                 Component.onCompleted: {
                                     for (const key in row.modelData.look) host[key] = row.modelData.look[key]
                                     for (const key in cell.modelData.look) host[key] = cell.modelData.look[key]

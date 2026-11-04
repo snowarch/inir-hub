@@ -29,7 +29,7 @@ Singleton {
         language: IrisDesign.palette.length > 0 ? IrisDesign.palette : String(root.appearance?.language ?? "iris"),
         variant: String(root.appearance?.variant ?? "tonalSpot"),
         material: root.followsTheme ? "theme" : String(root.appearance?.theme?.surface ?? "black"),
-        glass: ["wallpaper", "compositor"].includes(String(root.appearance?.glass?.mode ?? "off")),
+        glass: !IrisDesign.refusesGlass && ["wallpaper", "compositor"].includes(String(root.appearance?.glass?.mode ?? "off")),
         inkStyle: String(root.appearance?.inkStyle ?? "washi"),
         darkStyle: String(root.appearance?.darkStyle ?? "style"),
         accent: root.followsTheme ? "theme" : String(root.appearance?.accent ?? "blue"),
@@ -75,7 +75,20 @@ Singleton {
     // The last answer, or a fresh install's palette until the first one lands.
     property var data: root.parse(root.cache.text()) ?? root.parse(root.fallback.text())
     function palette(scheme: string): var {
-        return root.data?.schemes?.[scheme] ?? root.data?.schemes?.dark ?? ({})
+        const solved = root.data?.schemes?.[scheme] ?? root.data?.schemes?.dark ?? ({})
+        const fixed = IrisDesign.roles(scheme)
+        return fixed ? root.wear(solved, fixed) : solved
+    }
+    // A Design's fixed meaning colours over the solve: its paper is every material's, its accent and highlight every
+    // choice's, so no row of the person's reaches past them.
+    function wear(solved: var, fixed: var): var {
+        const out = Object.assign({}, solved, fixed)
+        const every = (table, colour) => Object.keys(table ?? {}).reduce((all, key) => { all[key] = colour; return all }, ({}))
+        if (fixed.surface) { out.materials = every(solved.materials, fixed.surface); out.papers = every(solved.papers, fixed.surface) }
+        if (fixed.accent) out.accents = every(solved.accents, fixed.accent)
+        if (fixed.highlight) out.highlights = every(solved.highlights, fixed.highlight)
+        if (fixed.text && !fixed.fillInk) out.fillInk = fixed.text
+        return out
     }
 
     property bool again: false

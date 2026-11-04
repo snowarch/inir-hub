@@ -1,4 +1,4 @@
-module airisu
+module qs.modules.airisu.components
 singleton Airisu 1.0 Airisu.qml
 AText 1.0 AText.qml
 ALacquer 1.0 ALacquer.qml

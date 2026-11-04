@@ -5,8 +5,9 @@
   "summary": "One living body: the Island, the chassis and Apple-grade motion.",
   "tagline": "Island, pieces and a Dock on any edge.",
   "icon": "visibility",
-  "version": "2.33.30",
+  "version": "2.33.31",
   "provides": "modules/iris",
+  "wears": ["iris.appearance.design"],
   "parts": {
     "critical": "critical/ShellIrisCriticalPanels.qml",
     "panels": "ShellIrisPanelsImpl.qml",

@@ -46,8 +46,8 @@ Item {
     // A Design that draws its own banner says where they gather and how wide they are; they no longer grow out of the Island.
     readonly property string scene: IrisDesign.skin("banner")
     readonly property bool designed: root.scene.length > 0
-    readonly property real designMargin: Number(IrisDesign.surface("banners", "margin", 24)) * root.d
-    readonly property real popupWidth: root.designed ? Number(IrisDesign.surface("banners", "width", 400)) * root.d + 16 : Math.min(Math.max(260, root.width - 2 * IrisFrame.band - 16),
+    readonly property real designMargin: (24) * root.d
+    readonly property real popupWidth: root.designed ? (400) * root.d + 16 : Math.min(Math.max(260, root.width - 2 * IrisFrame.band - 16),
         Math.max(340, Number(root.options?.width ?? 380) * root.d) + 16)
     readonly property var island: IrisState.islandGeometry?.[root.screenName] ?? null
     readonly property real bubbleSize: Math.round(44 * root.d)

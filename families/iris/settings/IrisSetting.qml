@@ -1,6 +1,7 @@
 pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Layouts
+import qs
 import Quickshell.Widgets
 import qs.services
 import qs.modules.common
@@ -95,7 +96,7 @@ Item {
     readonly property bool carded: root.spec.kind === "choice" && (root.spec.cards === "material" || root.spec.cards === "design") && root.choices.length > 0
     // Designs are thumbnails in the answer column while they fit there; a long catalogue takes the row under the text.
     readonly property real designThumb: Math.round(140 * root.d)
-    readonly property real designRow: root.choices.length * root.designThumb + (root.choices.length - 1) * Math.round(10 * root.d)
+    readonly property real designRow: (root.choices.length + 1) * root.designThumb + root.choices.length * Math.round(10 * root.d)
     readonly property bool designInline: root.carded && root.spec.cards === "design" && root.roomy && root.designRow <= root.controlWidth
     // Every control that fits answers in one right-hand column, the same width on every row, so a page reads as names on
     // the left and answers on the right. What needs more room (pictures, four or more choices, galleries) sits under the
@@ -1042,8 +1043,10 @@ Item {
             id: designs
             readonly property real gap: Math.round(10 * root.d)
             // Thumbnails, not posters: spread over the row they ate a third of Style (his 10-30).
+            // The installed Designs, then one card that opens the Hub on its Designs.
+            readonly property int cards: root.choices.length + 1
             readonly property real cardWidth: Math.min(Math.round(216 * root.d),
-                Math.floor((width - (root.choices.length - 1) * designs.gap) / Math.max(1, root.choices.length)))
+                Math.floor((width - (designs.cards - 1) * designs.gap) / Math.max(1, designs.cards)))
             implicitHeight: Math.round(designs.cardWidth * 0.56)
 
             Repeater {
@@ -1104,6 +1107,50 @@ Item {
                     }
                     HoverHandler { id: designHover; cursorShape: Qt.PointingHandCursor }
                     TapHandler { id: designTap; onTapped: root.commit(designCard.modelData.value) }
+                }
+            }
+            Item {
+                id: moreCard
+                x: root.choices.length * (designs.cardWidth + designs.gap)
+                width: designs.cardWidth
+                height: Math.round(moreCard.width * 0.56)
+                scale: moreTap.pressed ? IrisStyle.pressScale(0.98) : 1
+                Behavior on scale { NumberAnimation { duration: IrisStyle.feedbackDuration; easing.type: IrisStyle.feedbackEasing } }
+                Accessible.role: Accessible.Button
+                Accessible.name: Translation.tr("More Designs in the Hub")
+                Rectangle {
+                    anchors.fill: parent
+                    radius: IrisStyle.radiusTile
+                    color: moreHover.hovered ? IrisStyle.fill : IrisStyle.fillQuiet
+                    Behavior on color { ColorAnimation { duration: IrisStyle.duration(110); easing.type: IrisStyle.feedbackEasing } }
+                }
+                Column {
+                    anchors.centerIn: parent
+                    width: parent.width - Math.round(16 * root.d)
+                    spacing: Math.round(4 * root.d)
+                    MaterialSymbol {
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        text: "add"
+                        iconSize: Math.round(Math.min(26 * root.d, designs.cardWidth * 0.16))
+                        color: IrisStyle.accent
+                    }
+                    IrisText {
+                        width: parent.width
+                        horizontalAlignment: Text.AlignHCenter
+                        text: Translation.tr("More in the Hub")
+                        color: IrisStyle.textSecondary
+                        font.pixelSize: IrisStyle.typeMeta
+                        wrapMode: Text.WordWrap
+                        maximumLineCount: 2
+                    }
+                }
+                HoverHandler { id: moreHover; cursorShape: Qt.PointingHandCursor }
+                TapHandler {
+                    id: moreTap
+                    onTapped: {
+                        Hub.requestedKind = "design"
+                        GlobalStates.openSettingsAt("hub", "")
+                    }
                 }
             }
         }

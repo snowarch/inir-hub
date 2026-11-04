@@ -1,0 +1,19 @@
+{
+    "$schema": "../../families/iris/designs/design.schema.json",
+    "tokens": {
+        "colour": {
+            "language": "airisu",
+            "preset": "night"
+        },
+        "type": {
+            "title": "Archivo SemiExpanded",
+            "numbers": "Archivo SemiExpanded",
+            "figureLean": 0.2,
+            "files": ["assets/fonts/AirisuKana-Bold.otf"]
+        },
+        "motion": {
+            "morph": "tuned",
+            "duration": 220
+        }
+    }
+}

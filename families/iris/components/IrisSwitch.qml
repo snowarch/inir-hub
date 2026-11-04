@@ -27,8 +27,8 @@ Rectangle {
     readonly property bool synth: root.look === "synth" && !root.skinned
     readonly property bool gel: root.look === "gel" && !root.skinned
 
-    implicitWidth: Math.round((skin.item?.wantWidth ?? (root.skinned ? Number(IrisDesign.surface("switch", "width", 76)) : root.nothing ? 38 : root.synth ? 44 : root.gel ? 46 : 40)) * root.d)
-    implicitHeight: Math.round((skin.item?.wantHeight ?? (root.skinned ? Number(IrisDesign.surface("switch", "height", 26)) : root.nothing ? 22 : root.synth ? 28 : root.gel ? 26 : 24)) * root.d)
+    implicitWidth: Math.round((skin.item?.wantWidth ?? (root.skinned ? (76) : root.nothing ? 38 : root.synth ? 44 : root.gel ? 46 : 40)) * root.d)
+    implicitHeight: Math.round((skin.item?.wantHeight ?? (root.skinned ? (26) : root.nothing ? 22 : root.synth ? 28 : root.gel ? 26 : 24)) * root.d)
     // The knob rides a spring and everything else follows it, so a quick double toggle turns back mid-way.
     IrisSpring {
         id: travel

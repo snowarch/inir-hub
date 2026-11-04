@@ -222,10 +222,11 @@ QtObject {
     function loadedFace(loader: FontLoader, fallback: string): string {
         return loader.status === FontLoader.Ready && loader.name.length > 0 ? loader.name : fallback
     }
-    readonly property string faceText: root.loadedFace(root.geistRead, "Inter")
-    readonly property string faceTitle: root.faceText
-    readonly property string faceLabel: root.loadedFace(root.geistMono, "JetBrainsMono Nerd Font")
-    readonly property string faceFigures: root.loadedFace(root.archivoFigures, root.faceText)
+    // iRiS's own faces are its Design's (designs/iris/design.json); the loaders above only bring the files.
+    readonly property string faceText: IrisDesign.baseFont("text") || root.loadedFace(root.geistRead, "Inter")
+    readonly property string faceTitle: IrisDesign.baseFont("title") || root.faceText
+    readonly property string faceLabel: IrisDesign.baseFont("mono") || root.loadedFace(root.geistMono, "JetBrainsMono Nerd Font")
+    readonly property string faceFigures: IrisDesign.baseFont("dot") || root.loadedFace(root.archivoFigures, root.faceText)
     readonly property var defaultFaces: ({
         "iris.appearance.fontFamily": root.faceText,
         "iris.appearance.titleFontFamily": root.faceTitle,
@@ -253,13 +254,13 @@ QtObject {
         const at = steps.reduce((best, w, i) => Math.abs(w - base) < Math.abs(steps[best] - base) ? i : best, 0)
         return steps[Math.max(0, Math.min(steps.length - 1, at + root.weightShift))]
     }
-    readonly property int figureWeight: ({ light: Font.Light, regular: Font.Normal })[root.appearance?.figureWeight ?? "bold"] ?? Font.Bold
+    readonly property int figureWeight: ({ light: Font.Light, regular: Font.Normal })[IrisDesign.worn("type.figureWeight", root.appearance?.figureWeight)] ?? Font.Bold
     // The Figure voice (was Dot): clock digits, a widget's one number, area titles. The Figures row picks it.
     readonly property string fontDot: IrisDesign.font("dot") || root.face("iris.appearance.numbersFontFamily", root.appearance?.numbersFontFamily)
     // Small figures (a count, a percentage in a row) read in the Read voice with tabular digits, unless the person
     // chose a face of their own for figures; past 22 px a figure takes the Dot voice (`figureFace`).
     readonly property string fontNumbers: IrisDesign.font("numbers")
-        || (String(root.appearance?.numbersFontFamily ?? "").length > 0 ? root.fontDot : root.fontMain)
+        || (String(root.appearance?.numbersFontFamily ?? "").length > 0 ? root.fontDot : IrisDesign.baseFont("numbers") || root.fontMain)
     // The figure face is Nothing's; Apple sets every figure in the numbers face, bold and tabular.
     function figureFace(px: real): string { return px >= 22 && root.mono ? root.fontDot : root.fontNumbers }
     // A figure in the look a control wears: Synth's thin display face, Gel's round one, else the numbers face.
@@ -278,8 +279,10 @@ QtObject {
     // The colour theme in use, when the person chose one that is not the wallpaper's: it is what the apps wear.
     readonly property string colourTheme: String(ThemeService.currentTheme ?? "auto")
     // Auto: the system's dark or light, and Ink when the apps wear the Ink theme.
-    readonly property string scheme: ["dark", "ink", "light"].includes(root.schemeChoice) ? root.schemeChoice
+    readonly property string schemeWanted: ["dark", "ink", "light"].includes(root.schemeChoice) ? root.schemeChoice
         : root.colourTheme === "iris-ink" ? "ink" : Appearance.m3colors.darkmode ? "dark" : "light"
+    // A Design drawn for some schemes only (paper, a night cockpit) shows its first where the person's isn't one of them.
+    readonly property string scheme: IrisDesign.schemes.includes(root.schemeWanted) ? root.schemeWanted : IrisDesign.schemes[0]
     // With a colour theme chosen and the shell asked to match it, the accent, the highlight and the material are the theme's.
     readonly property bool followsTheme: root.colourTheme !== "auto" && Boolean(root.appearance?.followTheme ?? true)
     // A paper scheme: the material is light and the ink dark.
@@ -312,7 +315,7 @@ QtObject {
         if (!root.lookIds.includes(look)) return "apple"
         return look === "nothing" && (root.followsTheme || root.animeEnabled) ? "apple" : look
     }
-    readonly property string look: root.lookAllowed(String(root.appearance?.look ?? "apple"))
+    readonly property string look: root.lookAllowed(String(IrisDesign.worn("look.look", root.appearance?.look)))
     readonly property bool mono: root.look === "nothing"
     // L5: a place (a surface's root names it with `irisPlace`) wears iRiS's look or one of its own. The look of the
     // bodies (corners, plates, selection, voices) is iRiS's; a place's own look reaches the controls drawn in it.
@@ -501,7 +504,7 @@ QtObject {
     // Off is off, whatever Lume does for the scheme: the factory is glass, so "off" here was picked by the person.
     readonly property string glassRequested: ["wallpaper", "compositor"].includes(String(root.glassOptions?.mode ?? ""))
         ? root.glassOptions.mode : "off"
-    readonly property bool glassy: root.glassRequested !== "off" && Appearance.effectsEnabled
+    readonly property bool glassy: root.glassRequested !== "off" && Appearance.effectsEnabled && !IrisDesign.refusesGlass
     readonly property bool menuCompact: String(root.appearance?.surfaces?.menus?.density ?? "compact") === "compact"
     readonly property bool glassCompositor: root.glassy && root.glassRequested === "compositor" && Appearance.compositorBlurActive
         && IrisCompositorBlur.usable
@@ -542,13 +545,14 @@ QtObject {
         flat: { top: 0.05, foot: 0.05, edge: "line", sheen: 1, tint: 1, cast: 0.4 },
         streak: { top: 0.12, foot: 0.04, edge: "light", sheen: 0.4, tint: 0.9, cast: 0.8 }
     })
-    readonly property var bodyRecipe: root.bodyRecipes[String(root.appearance?.texture ?? "solid")] ?? root.bodyRecipes.solid
+    readonly property string textureName: String(IrisDesign.worn("material.texture", root.appearance?.texture))
+    readonly property var bodyRecipe: root.bodyRecipes[root.textureName] ?? root.bodyRecipes.solid
     function bodyLean(ink: color, amount: real): vector4d {
         return root.selfLit ? Qt.vector4d(0, 0, 0, 0) : Qt.vector4d(ink.r, ink.g, ink.b, amount)
     }
     readonly property vector4d bodyTop: root.bodyLean(root.light ? "#ffffff" : root.text, root.bodyRecipe.top * (root.light ? 3 : 1))
     readonly property vector4d bodyFoot: root.bodyLean(root.text, root.bodyRecipe.foot * (root.light ? 0.6 : 1))
-    readonly property bool afterglow: String(root.appearance?.texture ?? "solid") === "afterglow"
+    readonly property bool afterglow: root.textureName === "afterglow"
     readonly property var afterglowOptions: root.appearance?.afterglow ?? ({})
     function afterglowPercent(name: string, fallback: real): real {
         const value = Number(root.afterglowOptions?.[name] ?? fallback)
@@ -589,13 +593,13 @@ QtObject {
     // Light leak (DESIGN §0.3): analog light on film. One light per output exposes the bodies (a grain gradient of the
     // grade inside, a burn on the rim it enters by), the plates the field does not draw (IrisLeakPlate) and the wallpaper
     // (IrisLeakWallpaper), so all of it is one exposure.
-    readonly property bool leak: String(root.appearance?.texture ?? "solid") === "leak"
+    readonly property bool leak: root.textureName === "leak"
     // The field draws the material with a texture: groups and fills go sheer so it shows through them.
     // Light streak (Style › Texture, his 11-02: "Apple + light streak aurora + original"): iRiS taken as a long
     // exposure. The Island is the light: the edges that face it carry a streak (a hot one-pixel core, a soft fall,
     // tapering away from it), your three colours hang inside the material as aurora curtains, strongest near the edges
     // and quiet where text sits, and a body that moves leaves a trail of its lit edge. Nothing moves at rest.
-    readonly property bool streak: String(root.appearance?.texture ?? "solid") === "streak"
+    readonly property bool streak: root.textureName === "streak"
     readonly property var streakOptions: root.appearance?.streak ?? ({})
     function streakPercent(name: string, fallback: real): real {
         const value = Number(root.streakOptions?.[name] ?? fallback)
@@ -1035,7 +1039,8 @@ QtObject {
     readonly property color borderStrong: ColorUtils.applyAlpha(root.text, Math.min(0.6, 0.28 * root.preset.fill * root.tweak("lines", 0, 2)))
     readonly property string rimTint: String(root.theme?.rimTint ?? "neutral")
     // Glass keeps its lit edge whatever this is: without it glass vanishes over a dark desktop.
-    readonly property string edgeStyle: root.afterglow ? "none" : !root.textured && root.bodyRecipe.edge === "light" ? "light"
+    readonly property string edgeStyle: root.afterglow ? "none" : IrisDesign.edge.length > 0 ? IrisDesign.edge
+        : !root.textured && root.bodyRecipe.edge === "light" ? "light"
         : !(root.theme?.rim ?? true) ? "none" : String(root.theme?.edges ?? "line") === "light" ? "light" : "line"
     readonly property bool edgeLit: root.edgeStyle === "light" && (root.glassEdgeLight > 0 || root.glassEdgeLine > 0)
     // Bodies (Island, Dock, bubbles, panels) wear the look's edge: Nothing's hairline, Synth's machined edge, Gel's lit rim.
@@ -1050,7 +1055,7 @@ QtObject {
     // One edge width for every body, the line and the lit glass edge alike, counted in device pixels: 1 is the sharpest
     // line the screen can draw at any scale (a logical pixel at 1.5x was a smeared 1.5 px band). Two knobs used to
     // disagree: the line at 1 px, the glass edge at 2.
-    readonly property int edgeWidth: Math.max(1, Math.min(3, Math.round(Number(root.theme?.rimWidth ?? 1))))
+    readonly property int edgeWidth: Math.max(1, Math.min(3, Math.round(IrisDesign.edgeWidth > 0 ? IrisDesign.edgeWidth : Number(root.theme?.rimWidth ?? 1))))
     // One device pixel in logical pixels, on the densest screen (a finer line on the others beats a blurred one there).
     readonly property real deviceRatio: Math.max(1, ...(Quickshell.screens ?? []).map(s => Number(s?.devicePixelRatio ?? 1) || 1))
     readonly property real devicePx: 1 / root.deviceRatio
@@ -1120,7 +1125,7 @@ QtObject {
     }
     readonly property real shadowThrough: root.glassy ? 0.4 : 1
     readonly property real shadowLight: root.ink ? 0.5 : root.light ? 0.55 : 1
-    readonly property color shadow: root.glowing(Math.min(0.9, 0.55 * root.bodyRecipe.cast * root.tweak("shadow", 0, 1.6)) * root.shadowThrough * root.shadowLight)
+    readonly property color shadow: root.glowing(Math.min(0.9, 0.55 * root.bodyRecipe.cast * IrisDesign.shadow * root.tweak("shadow", 0, 1.6)) * root.shadowThrough * root.shadowLight)
     readonly property color onMedia: "#ffffff"
     readonly property color onMediaSecondary: ColorUtils.applyAlpha(root.onMedia, 0.72)
     // The visualizer's one look (Now Playing › Visualizer): its drawing, how many bands, and whose colour.
@@ -1151,12 +1156,12 @@ QtObject {
     readonly property color mediaScrim: Qt.rgba(0, 0, 0, 0.34)
     readonly property color mediaGlass: Qt.rgba(0, 0, 0, 0.16)
     readonly property color mediaHairline: ColorUtils.applyAlpha(root.onMedia, 0.16)
-    readonly property color plateShadow: root.glowing(Math.min(0.9, 0.36 * root.tweak("shadow", 0, 1.6)) * root.shadowLight)
+    readonly property color plateShadow: root.glowing(Math.min(0.9, 0.36 * IrisDesign.shadow * root.tweak("shadow", 0, 1.6)) * root.shadowLight)
     // A grey sky is no light: it only greyed the face. On paper the wash is half as strong, a tint and not a film.
     // On paper a face's colour is a faint pigment wash, never a lamp behind it.
     function skyWash(light: color): color { return ColorUtils.applyAlpha(light, light.hslSaturation < 0.15 ? 0 : root.light ? 0.1 : 0.46) }
     function skyWashFade(light: color): color { return ColorUtils.applyAlpha(light, 0.05) }
-    readonly property color glassShadow: Qt.rgba(0, 0, 0, Math.min(0.6, 0.22 * root.tweak("shadow", 0, 1.6)) * root.shadowLight)
+    readonly property color glassShadow: Qt.rgba(0, 0, 0, Math.min(0.6, 0.22 * IrisDesign.shadow * root.tweak("shadow", 0, 1.6)) * root.shadowLight)
     readonly property real glassBlur: 1
     readonly property real glassWash: 0.55
     readonly property color clearRim: ColorUtils.applyAlpha(root.text, 0.07)
@@ -1274,14 +1279,15 @@ QtObject {
     // The one ladder of forms (11-02, his pick: Ricelin's), for every Design: a surface asks for its role and nothing
     // else, so a hover, a key, a clip, a blur and a morph all follow from it. A body or a sheet is an open body, a plate
     // or a card its card, a tile the piece on a card, a row or a chip what sits on a tile.
-    readonly property int radiusPanel: root.corner(22)   // Control Center, Settings frame
-    readonly property int radiusSheet: root.corner(22)   // Spotlight, media card, wallpaper picker
-    readonly property int radiusPlate: root.corner(18)   // widget and lock plates, dialogs, blocks
-    readonly property int radiusCard: root.corner(18)    // side-panel sections, menus
-    readonly property int radiusTile: root.corner(13)    // grouped cards, tiles, results
-    readonly property int radiusRow: root.corner(7)      // list rows, menu items, small buttons
-    readonly property int radiusChip: root.corner(7)     // chips, thumbnails, small marks
-    readonly property int radiusMicro: root.corner(4)    // bars inside skeletons, swatches
+    // The rungs are the worn Design's (shape.ladder in its design.json; iRiS's own is Ricelin's).
+    readonly property int radiusPanel: root.corner(IrisDesign.rung("panel"))   // Control Center, Settings frame
+    readonly property int radiusSheet: root.corner(IrisDesign.rung("sheet"))   // Spotlight, media card, wallpaper picker
+    readonly property int radiusPlate: root.corner(IrisDesign.rung("plate"))   // widget and lock plates, dialogs, blocks
+    readonly property int radiusCard: root.corner(IrisDesign.rung("card"))     // side-panel sections, menus
+    readonly property int radiusTile: root.corner(IrisDesign.rung("tile"))     // grouped cards, tiles, results
+    readonly property int radiusRow: root.corner(IrisDesign.rung("row"))       // list rows, menu items, small buttons
+    readonly property int radiusChip: root.corner(IrisDesign.rung("chip"))     // chips, thumbnails, small marks
+    readonly property int radiusMicro: root.corner(IrisDesign.rung("micro"))   // bars inside skeletons, swatches
     // The rung of a piece that knows only its size: what a Design's own panel or key asks for.
     function formOf(side: real): int {
         return side >= 96 * root.density ? root.radiusCard : side >= 40 * root.density ? root.radiusTile
@@ -1328,7 +1334,7 @@ QtObject {
     function edgeFuseFor(thickness: real, curve: real): int {
         return Math.max(8, Math.round(root.pieceRadius(thickness) * 4 * (1 - Math.SQRT1_2) * Math.max(0.2, Math.min(2, curve / 100))))
     }
-    readonly property string pieceShape: String(root.theme?.pieceShape ?? "circle")
+    readonly property string pieceShape: String(IrisDesign.worn("shape.piece", root.theme?.pieceShape))
     readonly property string controlPlate: {
         const value = String(root.appearance?.controlPlate ?? "none")
         return ["veil", "glass", "solid"].includes(value) ? value : "none"
@@ -1432,15 +1438,15 @@ QtObject {
         return shape === "square" ? base * 0.45 : shape === "squircle" ? base * 0.75 : base
     }
     // A small piece's own corner (a cover, a poster, a workspace tile, the Dock's hover plate): the family's shape.
-    function tileRadius(size: real): int { return Math.round(size * (root.look === "synth" ? 0.14 : root.look === "gel" ? 0.32 : 0.26) * Math.min(1.2, root.shapeScale)) }
+    function tileRadius(size: real): int { return Math.round(size * (root.look === "synth" ? 0.14 : root.look === "gel" ? 0.32 : IrisDesign.tileShare) * Math.min(1.2, root.shapeScale)) }
     // An icon plate's corner: the icon shape when one is chosen, else the tile's.
     function iconRadius(size: real): int { return root.iconShape === "round" ? Math.round(size / 2) : root.iconShape === "square" ? Math.round(size * 0.12)
         : root.tileRadius(size) }
     // The tile pack's plates: the black and the white a plate can wear, the glyph carrying the colour.
-    readonly property color plateBlackTop: root.toned("#2e2e34")
-    readonly property color plateBlackBase: root.toned("#18181b")
-    readonly property color plateWhiteTop: root.toned("#f8f8fb")
-    readonly property color plateWhiteBase: root.toned("#e6e6ec")
+    readonly property color plateBlackTop: root.toned(IrisDesign.plate("black", 0))
+    readonly property color plateBlackBase: root.toned(IrisDesign.plate("black", 1))
+    readonly property color plateWhiteTop: root.toned(IrisDesign.plate("white", 0))
+    readonly property color plateWhiteBase: root.toned(IrisDesign.plate("white", 1))
 
 
     readonly property bool motionEnabled: (root.appearance?.motion ?? true) && Appearance.animationsEnabled

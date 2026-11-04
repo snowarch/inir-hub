@@ -64,12 +64,12 @@ Item {
             root.besides, IrisStyle.cardJoins ? -IrisStyle.weld : Math.max(IrisFrame.bodyAir, IrisStyle.cardGap)) : null
     // The active Design may hold its own scene in this body (DESIGNS.md › Composiciones); the body stays this file's.
     readonly property string scene: IrisDesign.skin("controlCenter")
-    readonly property real panelWidth: root.scene.length > 0 ? Math.min(root.width - 16, Number(IrisDesign.surface("controlCenter", "width", 360)) * IrisStyle.density)
+    readonly property real panelWidth: root.scene.length > 0 ? Math.min(root.width - 16, (360) * IrisStyle.density)
         : Math.min(root.width - 16, (Math.max(320, Number(root.options?.width ?? 360))
         + (IrisState.controlEdit ? IrisControlOptions.editorExtra : 0)) * IrisStyle.density)
-    readonly property real contentPadding: root.scene.length > 0 ? Number(IrisDesign.surface("controlCenter", "padding", 16)) * IrisStyle.density : IrisStyle.concentricPad(IrisStyle.surfaceRadius("controlCenter", IrisStyle.radiusPanel), 16 * IrisStyle.density)
+    readonly property real contentPadding: root.scene.length > 0 ? (16) * IrisStyle.density : IrisStyle.concentricPad(IrisStyle.surfaceRadius("controlCenter", IrisStyle.radiusPanel), 16 * IrisStyle.density)
     // How far the body hangs from the Island: welded into it in iRiS, apart from it when a Design says so.
-    readonly property real hang: root.scene.length > 0 ? Number(IrisDesign.surface("controlCenter", "gap", -IrisStyle.weld / IrisStyle.density)) * IrisStyle.density : -IrisStyle.weld
+    readonly property real hang: root.scene.length > 0 ? (-IrisStyle.weld / IrisStyle.density) * IrisStyle.density : -IrisStyle.weld
     readonly property real edge: Math.round(8 * IrisStyle.density) + IrisFrame.band
     readonly property real edgeLeft: Math.round(8 * IrisStyle.density) + IrisFrame.safeInset("left")
     readonly property real edgeRight: Math.round(8 * IrisStyle.density) + IrisFrame.safeInset("right")

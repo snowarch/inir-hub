@@ -184,8 +184,8 @@ QtObject {
     readonly property string textFace: IrisStyle.fontRead
     readonly property string dataFace: IrisStyle.fontLabel
     readonly property string kanaFace: "Airisu Kana"
-    // The Japanese layer: a subset of Noto Sans CJK JP Bold renamed so it never shadows the system's (OFL, assets/).
-    readonly property FontLoader kana: FontLoader { source: Qt.resolvedUrl("../assets/fonts/AirisuKana-Bold.otf") }
+    // The Japanese layer: a subset of Noto Sans CJK JP Bold renamed so it never shadows the system's (OFL, assets/),
+    // loaded with the Design (design.json › type.files).
 
     // ── Time: a machine with detents, not springs. One curve.
     readonly property bool moving: IrisStyle.motionEnabled

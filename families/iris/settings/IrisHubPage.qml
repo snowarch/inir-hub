@@ -51,7 +51,7 @@ Flickable {
     readonly property int rowRadius: IrisStyle.concentric(IrisStyle.radiusTile, root.listInset, Math.round(4 * root.d))
 
     readonly property var permissionGlyphs: ({ process: "terminal", network: "public", files: "folder_open", inject: "code" })
-    readonly property var kindGlyphs: ({ widget: "widgets", theme: "palette", "iris-theme": "style", webapp: "language", family: "dashboard" })
+    readonly property var kindGlyphs: ({ widget: "widgets", theme: "palette", "iris-theme": "style", webapp: "language", component: "extension", design: "brush", family: "dashboard" })
 
     clip: true
     contentHeight: pageColumn.implicitHeight + Math.round(40 * root.d)
@@ -59,6 +59,8 @@ Flickable {
 
     Component.onCompleted: {
         Hub.ensureLoaded()
+        if (Hub.requestedKind.length > 0)
+            root.kind = Hub.takeKind()
         if (Hub.requestedId.length > 0)
             root.openId = Hub.takeRequest()
     }
@@ -67,6 +69,12 @@ Flickable {
         function onRequestedIdChanged(): void {
             if (Hub.requestedId.length > 0)
                 root.openId = Hub.takeRequest()
+        }
+        function onRequestedKindChanged(): void {
+            if (Hub.requestedKind.length > 0) {
+                root.openId = ""
+                root.kind = Hub.takeKind()
+            }
         }
     }
     onOpenIdChanged: root.contentY = 0

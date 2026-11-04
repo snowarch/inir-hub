@@ -236,7 +236,9 @@ Singleton {
         Config.setNestedValue("iris.appearance.saved", [])
     }
 
+    // A look worn over a Design (its values name one) is offered while that Design is installed.
     readonly property var all: root.curated.concat(root.user)
+        .filter(theme => IrisDesign.known.includes(String(theme?.values?.["iris.appearance.design"] ?? "iris")))
 
     function swatch(theme: var): var {
         const v = root.resolved(theme?.values ?? {})
@@ -461,7 +463,7 @@ Singleton {
                 "iris.appearance.titleFontFamily": "Gabarito", "iris.appearance.fontFamily": "Rubik", "iris.bubbles.scale": 115, "iris.bar.padding": 115,
                 "iris.bar.clockStyle": "weather", "iris.bar.height": 46, "iris.surround.thickness": 12, "iris.surround.radius": 32, "iris.widgets.material": "tinted", "iris.widgets.radius": 28,
                 "iris.widgets.tint": "system", "iris.dock.iconSize": 46, "iris.dock.magnification": false, "iris.controlCenter.controls": "round" }) },
-        // AIRISU (modules/iris/AIRISU.md): the Japanese look around tuning, stickers and seals, not racing. Lacquer
+        // AIRISU (the hub's designs/airisu): the Japanese look around tuning, stickers and seals, not racing. Lacquer
         // black, a vermilion seal for what is live, kerria amber for the glanced detail, wide Archivo figures.
         { id: "airisu", name: "AIRISU", author: "iNiR", tags: ["japanese", "sticker", "sharp", "vermilion"],
             values: root.values({ "iris.appearance.design": "airisu",

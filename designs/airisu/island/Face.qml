@@ -11,7 +11,6 @@ import qs.modules.common.functions
 import qs.modules.iris.style
 import qs.modules.iris.components
 import qs.modules.iris.bar.island
-import qs.modules.iris.edit
 import "../components"
 
 // AIRISU's Island face. The engine (IrisIsland) decides the mode, the events, the levels, the clock style and the size;

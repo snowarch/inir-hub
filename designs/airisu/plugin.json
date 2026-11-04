@@ -1,0 +1,15 @@
+{
+    "id": "airisu",
+    "kind": "design",
+    "name": "AIRISU",
+    "summary": "iRiS in lacquer: urushi black, a vermilion seal, leaning figures",
+    "icon": "brush",
+    "version": "1.0.0",
+    "families": ["iris"],
+    "provides": "modules/airisu",
+    "parts": {
+        "islandFace": "island/Face.qml",
+        "insignia": "parts/Insignia.qml",
+        "preview": "parts/Preview.qml"
+    }
+}
