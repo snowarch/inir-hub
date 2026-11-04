@@ -1,0 +1,14 @@
+{
+    "id": "media-corner",
+    "kind": "component",
+    "name": "Media Corner",
+    "summary": "Browse anime, films and series and see where they stream",
+    "icon": "movie",
+    "version": "1.0.0",
+    "parts": {
+        "panel": "Panel.qml"
+    },
+    "families": [
+        "iris"
+    ]
+}

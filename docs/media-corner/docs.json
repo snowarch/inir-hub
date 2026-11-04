@@ -1,0 +1,13 @@
+{
+	"id": "media-corner",
+	"edit": "https://github.com/snowarch/inir-hub/edit/main/docs/media-corner/",
+	"order": 5,
+	"groups": [
+		{
+			"label": "Components",
+			"pages": [
+				"MEDIA-CORNER"
+			]
+		}
+	]
+}
