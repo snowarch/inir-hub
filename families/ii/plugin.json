@@ -37,7 +37,7 @@
   "summary": "Material 3 Expressive panels, bars, docks and widgets in nine global styles.",
   "tagline": "Modular bars, sidebars and Material controls.",
   "icon": "dashboard",
-  "version": "2.35.1",
+  "version": "2.35.2",
   "provides": "modules/ii",
   "parts": {
     "critical": "critical/ShellIiCriticalPanels.qml",

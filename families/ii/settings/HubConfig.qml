@@ -53,7 +53,7 @@ ContentPage {
     readonly property real tileWidth: Math.floor((root.usable - (root.columns - 1) * root.gap) / root.columns)
 
     readonly property var permissionGlyphs: ({ process: "terminal", network: "public", files: "folder_open", inject: "code" })
-    readonly property var kindGlyphs: ({ widget: "widgets", theme: "palette", "iris-theme": "style", webapp: "language", family: "dashboard" })
+    readonly property var kindGlyphs: ({ widget: "widgets", theme: "palette", "iris-theme": "style", webapp: "language", component: "extension", design: "brush", family: "dashboard" })
     readonly property var familyNames: ({ material: "Material", iris: "iRiS", waffle: "Waffle" })
 
     onKindChanged: root.shownCount = root.pageSize

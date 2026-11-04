@@ -39,7 +39,7 @@ WSettingsPage {
     readonly property bool customCards: Config.options?.waffles?.widgetsPanel?.showCustom ?? true
 
     readonly property var permissionGlyphs: ({ process: "terminal", network: "globe-search", files: "folder", inject: "wand" })
-    readonly property var kindGlyphs: ({ widget: "widgets", theme: "paint-bucket", "iris-theme": "wand", webapp: "globe-search" })
+    readonly property var kindGlyphs: ({ widget: "widgets", theme: "paint-bucket", "iris-theme": "wand", webapp: "globe-search", component: "apps", design: "wand" })
 
     Component.onCompleted: Hub.ensureLoaded()
     onOpenIdChanged: root.contentY = 0
