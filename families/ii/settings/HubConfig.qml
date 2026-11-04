@@ -364,6 +364,7 @@ ContentPage {
 
     MaterialPlaceholderMessage {
         Layout.fillWidth: true
+        Layout.alignment: Qt.AlignHCenter
         Layout.topMargin: 24
         shown: Hub.loaded && root.opened === null && root.shown.length === 0
         visible: shown
