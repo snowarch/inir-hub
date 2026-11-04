@@ -14,6 +14,13 @@ iRiS is the Island family. One Island sits on a screen edge and grows into whate
   - **Full width** spans the whole edge as a bar.
   - **Menu bar** makes a thin strip with the Island hanging from it as a notch. Its strip is Transparent or Band (Menu bar strip).
 - Island shape (Settings › Island › Shape › Island shape): Auto, Round, Squircle or Square.
+- Live activities look like a phone's Dynamic Island:
+  - **Music** opens into a player with the cover, the song and its artist, the time on both sides of the bar and large play controls.
+  - **Timers** show an orange ring that empties as the time runs; open, they have round pause and close buttons, and a pomodoro shows each focus and break as a segment.
+  - **Downloads and tasks** show a ring with their percentage.
+- The Weather page shows the temperature large, the place and the sky, and the next hours on a bar and as coloured columns by how warm each hour is.
+- The Vitals page shows processor, memory, heat and disk as four rings, and the processor over the last minute as a chart.
+- When an app starts using the microphone, the edges of the screen glow in colour for three seconds.
 
 <!-- preview shot=iris-layout -->
 

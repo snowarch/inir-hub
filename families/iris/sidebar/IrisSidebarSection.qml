@@ -991,16 +991,171 @@ Loader {
                 font.pixelSize: IrisStyle.typeLabel
                 elide: Text.ElideRight
             }
+            // The hour as a home-screen weather widget sets it: the temperature as one tall condensed figure, the
+            // place in spaced capitals over the sky in heavy condensed capitals, the sky's glyph at the end; then the
+            // next hours on one capsule with the low and the high where they fall, and each hour as a bar in the
+            // colour of how warm it is.
             RowLayout {
+                id: weatherHero
+                readonly property var hours: Array.from(Weather.data.hourly ?? [])
+                readonly property var temps: weatherHero.hours.map(hour => parseInt(String(hour.temp)))
+                    .map(value => isNaN(value) ? 0 : value)
+                readonly property real low: weatherHero.temps.length > 0 ? Math.min(...weatherHero.temps) : 0
+                readonly property real high: weatherHero.temps.length > 0 ? Math.max(...weatherHero.temps) : 0
                 visible: Weather.enabled && weather.hasData
                 Layout.fillWidth: true
+                spacing: 12 * root.d
+                Text {
+                    Layout.alignment: Qt.AlignVCenter
+                    text: String(Math.round(parseFloat(String(Weather.data.temp))))
+                    color: IrisStyle.text
+                    font.family: "Google Sans Flex" // iris-literal: the condensed figure needs a width axis
+                    font.variableAxes: ({ "wdth": 25, "wght": 760, "opsz": 144 })
+                    font.pixelSize: Math.round(88 * root.d)
+                    font.features: ({ "tnum": 1 })
+                    lineHeight: 0.8
+                    renderType: Text.QtRendering
+                }
                 ColumnLayout {
                     Layout.fillWidth: true
+                    Layout.alignment: Qt.AlignVCenter
                     spacing: 0
-                    IrisText { text: Weather.data.temp; color: IrisStyle.text; font.family: IrisStyle.fontDot; font.features: ({ "tnum": 1 }); font.pixelSize: IrisStyle.typeHero; font.weight: IrisStyle.figureWeight}
-                    IrisText { Layout.fillWidth: true; text: Weather.data.description; color: IrisStyle.textSecondary; font.pixelSize: IrisStyle.typeLabel; wrapMode: Text.WordWrap }
+                    IrisText {
+                        Layout.fillWidth: true
+                        visible: text.length > 0
+                        text: (Weather.showVisibleCity ? Weather.visibleCity : "").toUpperCase()
+                        color: IrisStyle.textTertiary
+                        font.pixelSize: IrisStyle.typeMeta
+                        font.weight: IrisStyle.weight(Font.Medium)
+                        font.letterSpacing: 1.6 * root.d
+                        elide: Text.ElideRight
+                    }
+                    Text {
+                        Layout.fillWidth: true
+                        text: String(Weather.data.description).toUpperCase()
+                        color: IrisStyle.text
+                        font.family: "Google Sans Flex" // iris-literal: the condensed figure needs a width axis
+                        font.variableAxes: ({ "wdth": 38, "wght": 780, "opsz": 48 })
+                        font.pixelSize: Math.round(30 * root.d)
+                        lineHeight: 0.88
+                        wrapMode: Text.WordWrap
+                        maximumLineCount: 2
+                        elide: Text.ElideRight
+                        renderType: Text.QtRendering
+                    }
                 }
-                MaterialSymbol { text: Icons.getWeatherIcon(Weather.data.wCode, Weather.isNightNow()) ?? "cloud"; fill: 1; iconSize: 46 * root.d; color: weather.night ? IrisStyle.identity.lavender : IrisStyle.secondaryAccent }
+                MaterialSymbol {
+                    Layout.alignment: Qt.AlignVCenter
+                    text: Icons.getWeatherIcon(Weather.data.wCode, Weather.isNightNow()) ?? "cloud"
+                    fill: 1
+                    iconSize: 64 * root.d
+                    color: weather.condition.length > 0 ? IrisStyle.skyLight(weather.condition) : IrisStyle.text
+                }
+            }
+            Item {
+                id: dayBar
+                readonly property int count: weatherHero.hours.length
+                readonly property real slot: dayBar.width / Math.max(1, dayBar.count)
+                function centerOf(index: int): real { return (index + 0.5) * dayBar.slot }
+                function hourOf(index: int): int { return parseInt(String(weatherHero.hours[index]?.label ?? "").split(":")[0]) }
+                function warmth(value: real): color {
+                    return value < 5 ? IrisStyle.identity.blue : value < 12 ? IrisStyle.identity.teal
+                        : value < 18 ? IrisStyle.identity.green : value < 24 ? IrisStyle.identity.yellow
+                        : value < 30 ? IrisStyle.identity.orange : value < 35 ? IrisStyle.identity.red : IrisStyle.identity.purple
+                }
+                visible: Weather.enabled && weather.hasData && dayBar.count > 1
+                Layout.fillWidth: true
+                Layout.topMargin: 6 * root.d
+                implicitHeight: capsule.height + bars.height + labels.height + 14 * root.d
+                Rectangle {
+                    id: capsule
+                    width: parent.width
+                    height: Math.round(38 * root.d)
+                    radius: height / 2
+                    color: IrisStyle.fillHover
+                    clip: true
+                    MaterialSymbol {
+                        x: dayBar.centerOf(0) - width / 2
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: weather.night ? "bedtime" : "contrast"
+                        fill: 1
+                        iconSize: 17 * root.d
+                        color: IrisStyle.text
+                    }
+                    // Midnight, where the day turns.
+                    Repeater {
+                        model: dayBar.count
+                        Rectangle {
+                            required property int index
+                            visible: index > 0 && dayBar.hourOf(index) === 0
+                            x: index * dayBar.slot - width / 2
+                            width: Math.round(5 * root.d)
+                            height: parent.height
+                            color: IrisStyle.textStrong
+                        }
+                    }
+                    Repeater {
+                        model: dayBar.count
+                        Text {
+                            required property int index
+                            readonly property real value: weatherHero.temps[index] ?? 0
+                            readonly property int lowAt: weatherHero.temps.indexOf(weatherHero.low)
+                            readonly property int highAt: weatherHero.temps.lastIndexOf(weatherHero.high)
+                            visible: index > 0 && (index === lowAt || index === highAt) && weatherHero.low !== weatherHero.high
+                            x: dayBar.centerOf(index) - width / 2
+                            anchors.verticalCenter: parent.verticalCenter
+                            text: String(value)
+                            color: IrisStyle.text
+                            font.family: "Google Sans Flex" // iris-literal: the condensed figure needs a width axis
+                            font.variableAxes: ({ "wdth": 25, "wght": 720, "opsz": 36 })
+                            font.pixelSize: Math.round(26 * root.d)
+                            renderType: Text.QtRendering
+                        }
+                    }
+                }
+                Item {
+                    id: bars
+                    anchors.top: capsule.bottom
+                    anchors.topMargin: 10 * root.d
+                    width: parent.width
+                    height: Math.round(46 * root.d)
+                    Repeater {
+                        model: dayBar.count
+                        Rectangle {
+                            required property int index
+                            readonly property real value: weatherHero.temps[index] ?? 0
+                            readonly property real share: weatherHero.high > weatherHero.low
+                                ? (value - weatherHero.low) / (weatherHero.high - weatherHero.low) : 0.5
+                            width: Math.round(Math.min(14 * root.d, dayBar.slot * 0.42))
+                            height: Math.max(width, bars.height * (0.22 + 0.78 * share))
+                            x: dayBar.centerOf(index) - width / 2
+                            y: bars.height - height
+                            radius: width / 2
+                            color: dayBar.warmth(value)
+                            opacity: index === 0 ? 1 : 0.92
+                            Behavior on height { NumberAnimation { duration: IrisStyle.duration(420); easing.type: Easing.OutCubic } }
+                        }
+                    }
+                }
+                Item {
+                    id: labels
+                    anchors.top: bars.bottom
+                    anchors.topMargin: 4 * root.d
+                    width: parent.width
+                    height: Math.round(16 * root.d)
+                    Repeater {
+                        model: dayBar.count
+                        IrisText {
+                            required property int index
+                            x: dayBar.centerOf(index) - width / 2
+                            text: index === 0 ? Translation.tr("Now").toUpperCase() : String(dayBar.hourOf(index))
+                            color: IrisStyle.textTertiary
+                            font.pixelSize: IrisStyle.typeFootnote
+                            font.weight: IrisStyle.weight(Font.Medium)
+                            font.features: ({ "tnum": 1 })
+                        }
+                    }
+                }
             }
             RowLayout {
                 visible: Weather.enabled && weather.hasData

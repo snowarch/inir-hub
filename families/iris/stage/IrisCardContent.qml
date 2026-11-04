@@ -2,6 +2,7 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Layouts
+import QtQuick.Shapes
 import Quickshell
 import Quickshell.Services.SystemTray
 import Quickshell.Bluetooth
@@ -409,51 +410,141 @@ Item {
                 title: Translation.tr("Vitals")
                 detail: Translation.tr("What this machine is doing")
             }
-            Repeater {
-                model: [
-                    { label: Translation.tr("Processor"), glyph: "memory", level: ResourceUsage.cpuUsage, value: Math.round(ResourceUsage.cpuUsage * 100), unit: "%", warn: 0.85 },
-                    { label: Translation.tr("Memory"), glyph: "memory_alt", level: ResourceUsage.memoryUsedPercentage, value: Math.round(ResourceUsage.memoryUsedPercentage * 100), unit: "%", warn: 0.85 },
-                    { label: Translation.tr("Heat"), glyph: "device_thermostat", level: ResourceUsage.tempPercentage, value: ResourceUsage.maxTemp, unit: "°", warn: ResourceUsage.tempWarningThreshold / 100 },
-                    { label: Translation.tr("Disk"), glyph: "hard_drive", level: ResourceUsage.diskUsedPercentage, value: Math.round(ResourceUsage.diskUsedPercentage * 100), unit: "%", warn: 0.9 }
+            // Four open rings, staggered like a streak's (the Apple Watch way): each its glyph inside, its reading under
+            // it in its colour; a reading past its warning turns the ring red.
+            Item {
+                id: rings
+                readonly property var vitals: [
+                    { label: Translation.tr("Processor"), glyph: "memory", level: ResourceUsage.cpuUsage, value: Math.round(ResourceUsage.cpuUsage * 100), unit: "%", warn: 0.85, tint: IrisStyle.identity.green },
+                    { label: Translation.tr("Memory"), glyph: "memory_alt", level: ResourceUsage.memoryUsedPercentage, value: Math.round(ResourceUsage.memoryUsedPercentage * 100), unit: "%", warn: 0.85, tint: IrisStyle.identity.yellow },
+                    { label: Translation.tr("Heat"), glyph: "device_thermostat", level: ResourceUsage.tempPercentage, value: ResourceUsage.maxTemp, unit: "°", warn: ResourceUsage.tempWarningThreshold / 100, tint: IrisStyle.identity.orange },
+                    { label: Translation.tr("Disk"), glyph: "hard_drive", level: ResourceUsage.diskUsedPercentage, value: Math.round(ResourceUsage.diskUsedPercentage * 100), unit: "%", warn: 0.9, tint: IrisStyle.identity.blue }
                 ]
-                RowLayout {
-                    id: vital
-                    required property var modelData
-                    readonly property real level: Math.max(0, Math.min(1, Number(vital.modelData.level) || 0))
-                    readonly property color tint: vital.level >= vital.modelData.warn ? IrisStyle.danger : IrisStyle.accent
-                    Layout.fillWidth: true
-                    spacing: 10 * root.d
-                    Accessible.name: vital.modelData.label + ", " + vital.modelData.value + vital.modelData.unit
+                readonly property real size: Math.round(58 * root.d)
+                readonly property real drop: Math.round(26 * root.d)
+                Layout.fillWidth: true
+                implicitHeight: rings.size + rings.drop + Math.round(20 * root.d)
+                Repeater {
+                    model: rings.vitals
                     Item {
-                        Layout.preferredWidth: Math.round(30 * root.d)
-                        Layout.preferredHeight: Layout.preferredWidth
+                        id: vital
+                        required property var modelData
+                        required property int index
+                        readonly property real level: Math.max(0, Math.min(1, Number(vital.modelData.level) || 0))
+                        readonly property color tint: vital.level >= vital.modelData.warn ? IrisStyle.danger : vital.modelData.tint
+                        readonly property real step: (rings.width - rings.size) / Math.max(1, rings.vitals.length - 1)
+                        x: Math.round(vital.index * vital.step)
+                        y: vital.index % 2 === 1 ? rings.drop : 0
+                        width: rings.size
+                        height: rings.size + Math.round(20 * root.d)
+                        Accessible.name: vital.modelData.label + ", " + vital.modelData.value + vital.modelData.unit
                         ProgressRing {
-                            anchors.fill: parent
-                            stroke: Math.max(2, 2.4 * root.d)
+                            width: rings.size
+                            height: rings.size
+                            sweep: 270
+                            stroke: Math.max(4, 7 * root.d)
                             tint: vital.tint
                             progress: vital.level
                             Behavior on progress { NumberAnimation { duration: IrisStyle.morphDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: IrisStyle.moveCurve } }
+                            MaterialSymbol {
+                                anchors.centerIn: parent
+                                text: vital.modelData.glyph
+                                fill: 1
+                                iconSize: Math.round(22 * root.d)
+                                color: vital.tint
+                            }
                         }
-                        MaterialSymbol {
-                            anchors.centerIn: parent
-                            text: vital.modelData.glyph
-                            fill: 1
-                            iconSize: Math.round(13 * root.d)
+                        Tabular {
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            y: rings.size - Math.round(8 * root.d)
+                            text: vital.modelData.value + vital.modelData.unit
                             color: vital.tint
+                            font.pixelSize: IrisStyle.typeMeta
+                            font.weight: IrisStyle.weight(Font.Bold)
                         }
                     }
-                    IrisText {
-                        Layout.fillWidth: true
-                        text: vital.modelData.label
-                        elide: Text.ElideRight
-                    }
-                    Metric {
-                        value: vital.modelData.value
-                        unit: vital.modelData.unit
-                        pixelSize: IrisStyle.typeHeadline
-                        weight: IrisStyle.figureWeight
-                        // A reading is ink; its tint stays on the glyph beside its name.
+                }
+            }
+            // The processor over the last minute as a market chart: the figure, how far it moved, the line over its
+            // own glow, the average dashed under it.
+            Item {
+                id: chart
+                readonly property var history: Array.from(ResourceUsage.cpuUsageHistory ?? [])
+                readonly property real now: Math.round(ResourceUsage.cpuUsage * 100)
+                readonly property real before: chart.history.length > 1 ? Math.round(chart.history[0] * 100) : chart.now
+                readonly property real average: chart.history.length > 0 ? chart.history.reduce((a, b) => a + b, 0) / chart.history.length : 0
+                readonly property color ink: chart.now >= chart.before ? IrisStyle.identity.green : IrisStyle.identity.red
+                visible: chart.history.length > 2
+                Layout.fillWidth: true
+                Layout.topMargin: 4 * root.d
+                implicitHeight: Math.round(112 * root.d)
+                RowLayout {
+                    id: chartHead
+                    width: parent.width
+                    spacing: 8 * root.d
+                    Tabular {
+                        text: chart.now + "%"
                         color: IrisStyle.text
+                        font.pixelSize: IrisStyle.typeHero
+                        font.weight: IrisStyle.weight(Font.Medium)
+                    }
+                    ColumnLayout {
+                        Layout.alignment: Qt.AlignVCenter
+                        spacing: 0
+                        Tabular {
+                            text: (chart.now >= chart.before ? "+" : "") + (chart.now - chart.before) + "%"
+                            color: chart.ink
+                            font.pixelSize: IrisStyle.typeFootnote
+                            font.weight: IrisStyle.weight(Font.DemiBold)
+                        }
+                        IrisText {
+                            text: Translation.tr("Processor")
+                            color: IrisStyle.textTertiary
+                            font.pixelSize: IrisStyle.typeFootnote
+                        }
+                    }
+                    Item { Layout.fillWidth: true }
+                }
+                Shape {
+                    id: line
+                    anchors.top: chartHead.bottom
+                    anchors.topMargin: 4 * root.d
+                    width: parent.width
+                    height: parent.height - chartHead.height - 4 * root.d
+                    preferredRendererType: Shape.CurveRenderer
+                    function px(i: int): real { return i / Math.max(1, chart.history.length - 1) * line.width }
+                    function py(v: real): real { return line.height * (1 - Math.max(0, Math.min(1, v))) * 0.9 + 2 }
+                    readonly property string trace: {
+                        let d = ""
+                        for (let i = 0; i < chart.history.length; i++)
+                            d += (i === 0 ? "M " : " L ") + line.px(i) + " " + line.py(chart.history[i])
+                        return d
+                    }
+                    ShapePath {
+                        strokeColor: "transparent"
+                        fillGradient: LinearGradient {
+                            x1: 0; y1: 0; x2: 0; y2: line.height
+                            GradientStop { position: 0; color: IrisStyle.trackOf(chart.ink) }
+                            GradientStop { position: 1; color: ColorUtils.applyAlpha(chart.ink, 0) } // iris-literal: the glow fades to nothing in its own hue
+                        }
+                        PathSvg { path: line.trace.length > 0 ? line.trace + " L " + line.width + " " + line.height + " L 0 " + line.height + " Z" : "" }
+                    }
+                    ShapePath {
+                        strokeColor: IrisStyle.textTertiary
+                        strokeWidth: Math.max(1, 1.5 * root.d)
+                        strokeStyle: ShapePath.DashLine
+                        dashPattern: [3, 3]
+                        fillColor: "transparent"
+                        PathMove { x: 0; y: line.py(chart.average) }
+                        PathLine { x: line.width; y: line.py(chart.average) }
+                    }
+                    ShapePath {
+                        strokeColor: chart.ink
+                        strokeWidth: Math.max(2, 2.5 * root.d)
+                        fillColor: "transparent"
+                        joinStyle: ShapePath.RoundJoin
+                        capStyle: ShapePath.RoundCap
+                        PathSvg { path: line.trace }
                     }
                 }
             }

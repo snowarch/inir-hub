@@ -15,6 +15,9 @@ Item {
     property real progress: 0
     property color tint: IrisStyle.text
     property real stroke: Math.max(2, 2.5 * IrisStyle.density)
+    // Under 360 the ring opens at the bottom: a gauge (an activity ring of a streak).
+    property real sweep: 360
+    readonly property real startAt: ring.sweep >= 360 ? -90 : 90 + (360 - ring.sweep) / 2
     readonly property real radius: Math.max(0, Math.min(ring.width, ring.height) / 2 - ring.stroke / 2)
     readonly property real level: Math.max(0, Math.min(1, ring.progress))
 
@@ -28,13 +31,14 @@ Item {
             strokeColor: IrisStyle.tintFill(ring.tint)
             strokeWidth: ring.stroke
             fillColor: "transparent"
+            capStyle: ring.sweep >= 360 ? ShapePath.FlatCap : ShapePath.RoundCap
             PathAngleArc {
                 centerX: ring.width / 2
                 centerY: ring.height / 2
                 radiusX: ring.radius
                 radiusY: ring.radius
-                startAngle: 0
-                sweepAngle: 360
+                startAngle: ring.startAt
+                sweepAngle: ring.sweep
             }
         }
         ShapePath {
@@ -47,8 +51,8 @@ Item {
                 centerY: ring.height / 2
                 radiusX: ring.radius
                 radiusY: ring.radius
-                startAngle: -90
-                sweepAngle: 360 * ring.level
+                startAngle: ring.startAt
+                sweepAngle: ring.sweep * ring.level
             }
         }
     }

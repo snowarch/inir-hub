@@ -20,6 +20,7 @@ import qs.modules.iris.osk
 import qs.modules.shared.background
 import qs.modules.shared.lock
 import qs.modules.iris.state
+import qs.modules.iris.frame
 
 Item {
     id: root
@@ -97,6 +98,23 @@ Item {
     LazyLoader {
         active: IrisGate.official && (Config.options?.iris?.orbit?.enable ?? false) && (Config.options?.iris?.orbit?.hotCorner ?? true)
         component: IrisOrbitCorner {}
+    }
+
+    // The spectrum around the screens for a moment when something starts listening through the microphone.
+    LazyLoader {
+        id: edgeGlow
+        property bool lit: false
+        active: IrisGate.official && edgeGlow.lit && !GameMode.active
+        component: IrisEdgeGlow {}
+        property Connections listens: Connections {
+            target: Privacy
+            function onMicActiveChanged(): void {
+                if (!Privacy.micActive) return
+                edgeGlow.lit = true
+                edgeGlowHold.restart()
+            }
+        }
+        property Timer hold: Timer { id: edgeGlowHold; interval: 3300; onTriggered: edgeGlow.lit = false }
     }
 
     LazyLoader {

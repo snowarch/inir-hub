@@ -542,12 +542,12 @@ Item {
         target: root.eventsEnabled ? TimerService : null
         function onCountdownRunningChanged(): void {
             if (!TimerService.countdownRunning && TimerService.countdownSecondsLeft <= 0)
-                root.showEvent("alarm", IrisStyle.secondaryAccent, Translation.tr("Time's up"),
+                root.showEvent("alarm", IrisStyle.identity.orange, Translation.tr("Time's up"),
                     Translation.tr("%1 timer").arg(root.durationText(TimerService.countdownDuration)), -1)
         }
         function onPomodoroBreakChanged(): void {
             if (!TimerService.pomodoroRunning) return
-            root.showEvent(TimerService.pomodoroBreak ? "coffee" : "self_improvement", IrisStyle.secondaryAccent,
+            root.showEvent(TimerService.pomodoroBreak ? "coffee" : "self_improvement", IrisStyle.identity.orange,
                 TimerService.pomodoroBreak ? (TimerService.pomodoroLongBreak ? Translation.tr("Long break") : Translation.tr("Break"))
                     : Translation.tr("Focus"),
                 root.durationText(TimerService.pomodoroLapDuration), -1)
@@ -2032,13 +2032,6 @@ Item {
                         }
                     }
                 }
-                Tabular {
-                    visible: !root.nothingLook
-                    text: DateTime.timeDisplay
-                    color: IrisStyle.textSecondary
-                    font.pixelSize: root.zoned ? IrisStyle.typeLabel : IrisStyle.typeMeta
-                    font.weight: IrisStyle.weight(Font.Medium)
-                }
                 IrisVisualizer {
                     visible: !root.nothingLook
                     running: visible && root.playing && root.compactMode === "media" && !root.visualExpanded
@@ -2101,12 +2094,26 @@ Item {
                 id: timerRow
                 mode: "timer"
                 // A running timer is live: its dot is the signal. Paused, the dot gives way to the pause bars.
-                Glyph {
+                // Apple's timer: a ring that empties as the time runs, the pause bars inside it once paused.
+                Item {
                     visible: !root.nothingLook
                     Layout.alignment: Qt.AlignVCenter
-                    text: root.timerPaused ? "pause" : root.timerGlyph
-                    iconSize: 17 * root.d
-                    color: IrisStyle.secondaryAccent
+                    implicitWidth: Math.round(22 * root.d)
+                    implicitHeight: implicitWidth
+                    ProgressRing {
+                        anchors.fill: parent
+                        stroke: Math.max(2.5, 3 * root.d)
+                        tint: root.timerPaused ? IrisStyle.textSecondary : IrisStyle.identity.orange
+                        progress: root.timerKind === "stopwatch" ? 1 : Math.max(0, 1 - root.timerProgress)
+                        Behavior on progress { NumberAnimation { duration: IrisStyle.duration(900); easing.type: Easing.Linear } }
+                    }
+                    Glyph {
+                        anchors.centerIn: parent
+                        visible: root.timerPaused || root.timerKind === "stopwatch"
+                        text: root.timerPaused ? "pause" : root.timerGlyph
+                        iconSize: 11 * root.d
+                        color: root.timerPaused ? IrisStyle.textSecondary : IrisStyle.identity.orange
+                    }
                 }
                 Item {
                     visible: root.nothingLook
@@ -2163,7 +2170,7 @@ Item {
                     Layout.alignment: Qt.AlignVCenter
                     text: root.clockText(root.timerSeconds)
                     countDown: root.timerKind !== "stopwatch"
-                    color: root.timerPaused ? IrisStyle.textSecondary : IrisStyle.secondaryAccent
+                    color: root.timerPaused ? IrisStyle.textSecondary : IrisStyle.identity.orange
                     pixelSize: IrisStyle.typeHeadline * root.clockScale
                     weight: IrisStyle.figureWeight
                 }
@@ -2213,6 +2220,17 @@ Item {
                     color: root.taskTint
                     pixelSize: IrisStyle.typeHeadline * root.clockScale
                     weight: IrisStyle.figureWeight
+                }
+                // How far it is, as Apple's AirDrop ring beside the figure.
+                ProgressRing {
+                    visible: !root.nothingLook && taskRow.progress >= 0
+                    Layout.alignment: Qt.AlignVCenter
+                    Layout.preferredWidth: Math.round(20 * root.d)
+                    Layout.preferredHeight: Layout.preferredWidth
+                    stroke: Math.max(2.5, 3 * root.d)
+                    tint: root.taskTint
+                    progress: Math.max(0, taskRow.progress)
+                    Behavior on progress { NumberAnimation { duration: IrisStyle.duration(320); easing.type: Easing.OutCubic } }
                 }
                 PrivacyMarks { Layout.alignment: Qt.AlignVCenter; spelled: false }
             }
