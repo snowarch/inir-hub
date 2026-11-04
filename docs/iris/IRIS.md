@@ -21,6 +21,12 @@ iRiS is the Island family. One Island sits on a screen edge and grows into whate
 - The Weather page shows the temperature large, the place and the sky, and the next hours on a bar and as coloured columns by how warm each hour is.
 - The Vitals page shows processor, memory, heat and disk as four rings, and the processor over the last minute as a chart.
 - When an app starts using the microphone, the edges of the screen glow in colour for three seconds.
+- While an app uses the microphone (a call), the Island shows a green handset, how long the call has run and the sound moving.
+- Notifications open from the Island as a phone's do: the picture or app round at the start, the app small over the title. Two answers that refuse and take (a call, an invite) are a red and a green button; other answers are capsules, the last one filled. Apps that take a written answer show **Reply**: type and press Enter.
+- Notices end with their state: Do not disturb says **On** or **Off** in colour, a low battery shows its level and the battery itself.
+- With more than one player, dots under the controls switch between them; a swipe on the cover or the wheel sideways does too, and a click on the cover brings the app forward.
+- The Bluetooth card shows the charge of every connected device as a gauge with its name.
+- The calendar shows the next thing today on a coloured band with how long until it, and each entry with its colour and how far off it is.
 
 <!-- preview shot=iris-layout -->
 

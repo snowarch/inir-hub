@@ -832,30 +832,94 @@ Loader {
                 }
             }
             EmptyLabel { visible: calendar.entries.length === 0 && !calendar.composing; text: Translation.tr("Nothing scheduled for this day.") }
+            // A departures board: the next thing today on a band in the accent with how long until it, then each
+            // entry with its colour, its name and, today, how far off it is.
+            Rectangle {
+                id: nextBand
+                readonly property var next: calendar.todayEntries.find(entry => !entry.allDay
+                    && new Date(entry.dateTime ?? entry.startDate) >= DateTime.clock.date) ?? null
+                readonly property int minutes: nextBand.next
+                    ? Math.max(0, Math.round((new Date(nextBand.next.dateTime ?? nextBand.next.startDate) - DateTime.clock.date) / 60000)) : 0
+                visible: nextBand.next !== null && calendar.selectedDate.toDateString() === DateTime.clock.date.toDateString()
+                Layout.fillWidth: true
+                implicitHeight: Math.round(44 * root.d)
+                radius: height / 2
+                color: IrisStyle.accent
+                RowLayout {
+                    anchors.fill: parent
+                    anchors.leftMargin: 16 * root.d
+                    anchors.rightMargin: 16 * root.d
+                    spacing: 10 * root.d
+                    MaterialSymbol { text: "schedule"; fill: 1; iconSize: Math.round(18 * root.d); color: IrisStyle.onTintFor(IrisStyle.accent) }
+                    IrisText {
+                        Layout.fillWidth: true
+                        text: nextBand.next?.title ?? ""
+                        color: IrisStyle.onTintFor(IrisStyle.accent)
+                        font.pixelSize: IrisStyle.typeBody
+                        font.weight: IrisStyle.weight(Font.DemiBold)
+                        elide: Text.ElideRight
+                    }
+                    IrisText {
+                        text: nextBand.minutes < 60 ? Translation.tr("%1m").arg(nextBand.minutes)
+                            : Translation.tr("%1h").arg(Math.floor(nextBand.minutes / 60)) + " " + Translation.tr("%1m").arg(nextBand.minutes % 60)
+                        color: IrisStyle.onTintFor(IrisStyle.accent)
+                        font.family: IrisStyle.fontNumbers
+                        font.pixelSize: IrisStyle.typeBody
+                        font.weight: IrisStyle.weight(Font.Bold)
+                        font.features: ({ "tnum": 1 })
+                    }
+                }
+            }
             Repeater {
                 model: calendar.entries
-                RowLayout {
+                MouseArea {
                     id: entryRow
                     required property var modelData
                     readonly property bool local: entryRow.modelData.dateTime !== undefined && entryRow.modelData.id !== undefined
+                    readonly property date at: new Date(entryRow.modelData.dateTime ?? entryRow.modelData.startDate)
+                    readonly property int minutes: Math.round((entryRow.at - DateTime.clock.date) / 60000)
+                    readonly property bool soon: !entryRow.modelData.allDay && entryRow.minutes >= 0 && entryRow.minutes < 600
+                        && entryRow.at.toDateString() === DateTime.clock.date.toDateString()
+                    readonly property color ink: entryRow.modelData.color || IrisStyle.secondaryAccent
                     Layout.fillWidth: true
-                    spacing: 10 * root.d
-                    IrisText {
-                        Layout.preferredWidth: Math.round(44 * root.d)
-                        text: calendar.timeOf(entryRow.modelData)
-                        color: IrisStyle.subtext
-                        font.family: IrisStyle.fontNumbers
-                        font.pixelSize: IrisStyle.typeMeta
-                        font.weight: IrisStyle.weight(Font.DemiBold)
-                    }
-                    Rectangle { implicitWidth: 3 * root.d; implicitHeight: Math.round(20 * root.d); radius: width / 2; color: entryRow.modelData.color || IrisStyle.secondaryAccent }
-                    IrisText { Layout.fillWidth: true; text: entryRow.modelData.title ?? ""; elide: Text.ElideRight; font.weight: IrisStyle.weight(Font.Medium) }
-                    IrisIconButton {
-                        visible: entryRow.local
-                        materialIcon: "close"
-                        iconSize: Math.round(15 * root.d)
-                        Accessible.name: Translation.tr("Remove event")
-                        onClicked: Events.removeEvent(entryRow.modelData.id)
+                    implicitHeight: entryLine.implicitHeight + 8 * root.d
+                    hoverEnabled: true
+                    opacity: !entryRow.modelData.allDay && entryRow.minutes < 0 ? 0.55 : 1
+                    RowLayout {
+                        id: entryLine
+                        anchors.verticalCenter: parent.verticalCenter
+                        width: parent.width
+                        spacing: 10 * root.d
+                        Rectangle {
+                            implicitWidth: Math.round(26 * root.d)
+                            implicitHeight: implicitWidth
+                            radius: width / 2
+                            color: IrisStyle.tintFill(entryRow.ink)
+                            MaterialSymbol { anchors.centerIn: parent; text: entryRow.modelData.allDay ? "event" : "schedule"; fill: 1; iconSize: Math.round(15 * root.d); color: entryRow.ink }
+                        }
+                        IrisText {
+                            Layout.fillWidth: true
+                            text: entryRow.modelData.title ?? ""
+                            elide: Text.ElideRight
+                            font.pixelSize: IrisStyle.typeBody
+                            font.weight: IrisStyle.weight(Font.Medium)
+                        }
+                        IrisText {
+                            text: entryRow.soon ? (entryRow.minutes < 60 ? Translation.tr("%1m").arg(entryRow.minutes)
+                                : Translation.tr("%1h").arg(Math.floor(entryRow.minutes / 60))) : calendar.timeOf(entryRow.modelData)
+                            color: entryRow.soon ? IrisStyle.text : IrisStyle.subtext
+                            font.family: IrisStyle.fontNumbers
+                            font.pixelSize: IrisStyle.typeBody
+                            font.weight: IrisStyle.weight(Font.DemiBold)
+                            font.features: ({ "tnum": 1 })
+                        }
+                        IrisIconButton {
+                            visible: entryRow.local && entryRow.containsMouse
+                            materialIcon: "close"
+                            iconSize: Math.round(15 * root.d)
+                            Accessible.name: Translation.tr("Remove event")
+                            onClicked: Events.removeEvent(entryRow.modelData.id)
+                        }
                     }
                 }
             }

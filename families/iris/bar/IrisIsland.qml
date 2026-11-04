@@ -163,6 +163,7 @@ Item {
         if (root.recording) list.push("record")
         if (root.timerKind.length > 0) list.push("timer")
         for (const job of root.tasks.slice(0, 2)) list.push("task")
+        if (Privacy.micActive) list.push("mic")
         if (root.hasMedia) list.push("media")
         return list
     }
@@ -172,7 +173,7 @@ Item {
     readonly property bool privacyLive: Privacy.anyActive
     // A Cluster Island is the clock with the song beside it; a live activity (recording, a timer, a job) takes the
     // Island itself, as on a phone, and what comes after it detaches into the left bubble.
-    readonly property string islandActivity: IrisStyle.cluster && ["record", "timer", "task"].includes(root.primary) ? root.primary : ""
+    readonly property string islandActivity: IrisStyle.cluster && ["record", "timer", "task", "mic"].includes(root.primary) ? root.primary : ""
     readonly property string leftKind: root.islandActivity.length > 0 ? root.secondary : root.primary === "idle" ? "" : root.primary
     // Where a tap on the Island goes: what it shows, who is using the mic or screen, else the desktop page.
     readonly property string tapPage: IrisStyle.cluster
@@ -188,6 +189,19 @@ Item {
         onTriggered: root.now = Date.now()
         onRunningChanged: root.now = Date.now()
     }
+    // A call, as a phone shows one: since when something has been listening through the microphone.
+    property real micSince: 0
+    readonly property bool micLive: Privacy.micActive
+    onMicLiveChanged: root.micSince = root.micLive ? Date.now() : 0
+    Timer {
+        interval: 1000
+        repeat: true
+        running: root.micLive && root.compactMode === "mic"
+        onTriggered: root.now = Date.now()
+        onRunningChanged: root.now = Date.now()
+    }
+    readonly property string micElapsed: root.micSince > 0 ? root.clockText(Math.max(0, Math.floor((root.now - root.micSince) / 1000))) : "0:00"
+    readonly property string micApp: String((Privacy.micApps ?? [])[0] ?? "")
     function elapsedOf(job): string {
         return root.clockText(Math.max(0, Math.floor((root.now - Number(job?.started ?? root.now)) / 1000)))
     }
@@ -450,10 +464,10 @@ Item {
     readonly property color eventInk: root.event.failed || (root.nothingLook && Qt.colorEqual(root.event.tint, IrisStyle.danger))
         ? IrisStyle.signalInk : root.nothingLook ? IrisStyle.text : root.event.tint
     readonly property bool eventIsBattery: String(root.event.icon).startsWith("battery") && root.event.value >= 0
-    function showEvent(icon: string, tint: color, title: string, detail: string, value: real): void {
+    function showEvent(icon: string, tint: color, title: string, detail: string, value: real, kind = ""): void {
         if (!root.eventsEnabled || !eventsWarm.ready || root.expanded || root.fullscreenCovered
             || root.targetScreen?.name !== GlobalStates.focusedScreen?.name) return
-        root.event = { icon: icon, tint: tint, title: title, detail: detail, value: value, kind: "", failed: false }
+        root.event = { icon: icon, tint: tint, title: title, detail: detail, value: value, kind: kind, failed: false }
         eventTimer.restart()
     }
     // A job that ends says so in the compact Island: its strip fills and a pulse runs through it, or it fails in signal.
@@ -534,8 +548,8 @@ Item {
         target: root.eventsEnabled ? Notifications : null
         function onSilentChanged(): void {
             root.showEvent(Notifications.silent ? "do_not_disturb_on" : "notifications_active",
-                Notifications.silent ? IrisStyle.identity.lavender : IrisStyle.text, Translation.tr("Do not disturb"),
-                Notifications.silent ? Translation.tr("On") : Translation.tr("Off"), -1)
+                Notifications.silent ? IrisStyle.identity.indigo : IrisStyle.textSecondary, Translation.tr("Do not disturb"),
+                Notifications.silent ? Translation.tr("On") : Translation.tr("Off"), -1, "status")
         }
     }
     Connections {
@@ -713,7 +727,7 @@ Item {
     readonly property bool compactSizeClass: root.compactMode === "feedback" || root.compactMode === "event"
     readonly property bool spanning: root.fullWidth
     readonly property var compactRows: ({ idle: idleRow, media: mediaRow, record: recordRow,
-        timer: timerRow, task: taskRow, clock: clockRow, event: eventRow, feedback: feedbackRow })
+        timer: timerRow, task: taskRow, mic: micRow, clock: clockRow, event: eventRow, feedback: feedbackRow })
     readonly property real compactContentWidth: root.vertical ? compactColumn.implicitHeight
         : root.faceTakes ? (designFace.item?.contentWidth ?? 0)
         : root.compactRows[root.compactMode]?.implicitWidth ?? 0
@@ -2079,6 +2093,13 @@ Item {
                     pixelSize: root.figureSize
                     color: IrisStyle.text
                 }
+                IrisVisualizer {
+                    visible: !root.nothingLook && RecorderStatus.effectiveAudioMode !== "none"
+                    Layout.alignment: Qt.AlignVCenter
+                    running: visible && root.compactMode === "record" && !root.visualExpanded
+                    tint: IrisStyle.danger
+                    barHeight: 14 * root.d
+                }
                 IrisNumber {
                     visible: !root.nothingLook
                     Layout.alignment: Qt.AlignVCenter
@@ -2235,6 +2256,40 @@ Item {
                 PrivacyMarks { Layout.alignment: Qt.AlignVCenter; spelled: false }
             }
 
+            // A call: the green handset and how long it has run at the start, the sound moving in green at the end.
+            CompactRow {
+                id: micRow
+                mode: "mic"
+                Glyph {
+                    Layout.alignment: Qt.AlignVCenter
+                    text: /discord|zoom|teams|meet|skype|telegram|whatsapp|signal|slack|call/i.test(root.micApp) ? "call" : "mic"
+                    iconSize: 17 * root.d
+                    color: IrisStyle.identity.green
+                }
+                Tabular {
+                    Layout.alignment: Qt.AlignVCenter
+                    text: root.micElapsed
+                    color: IrisStyle.identity.green
+                    font.pixelSize: IrisStyle.typeBody * root.clockScale
+                    font.weight: IrisStyle.weight(Font.DemiBold)
+                }
+                IrisText {
+                    Layout.fillWidth: true
+                    Layout.alignment: Qt.AlignVCenter
+                    text: root.micApp
+                    color: IrisStyle.textSecondary
+                    font.pixelSize: IrisStyle.typeLabel
+                    font.weight: IrisStyle.weight(Font.Medium)
+                    elide: Text.ElideRight
+                }
+                IrisVisualizer {
+                    Layout.alignment: Qt.AlignVCenter
+                    running: visible && root.compactMode === "mic" && !root.visualExpanded
+                    tint: IrisStyle.identity.green
+                    barHeight: 15 * root.d
+                }
+            }
+
             CompactRow {
                 id: clockRow
                 mode: "clock"
@@ -2309,12 +2364,30 @@ Item {
                     }
                     IrisText {
                         Layout.fillWidth: true
-                        visible: text.length > 0
+                        visible: text.length > 0 && root.event.kind !== "status"
                         text: root.event.detail
                         color: IrisStyle.muted
                         font.pixelSize: IrisStyle.typeFootnote
                         elide: Text.ElideRight
                     }
+                }
+                // A switch says its state at the end in its colour (Apple's "Do Not Disturb  On").
+                IrisText {
+                    visible: root.event.kind === "status"
+                    Layout.alignment: Qt.AlignVCenter
+                    text: root.event.detail
+                    color: root.eventInk
+                    font.pixelSize: IrisStyle.typeBody
+                    font.weight: IrisStyle.weight(Font.DemiBold)
+                }
+                // A battery shows its level and itself at the end ("Low Battery  20% ▭").
+                IrisBatteryMark {
+                    visible: !root.nothingLook && root.eventIsBattery
+                    Layout.alignment: Qt.AlignVCenter
+                    markHeight: Math.round(13 * root.d)
+                    level: Math.max(0, root.event.value)
+                    tint: root.eventInk
+                    frame: IrisStyle.trackOf(root.eventInk)
                 }
                 // A level as dots; a job that ends fills them and sends one pulse through (S6).
                 Metric {
@@ -2327,7 +2400,7 @@ Item {
                     color: root.eventInk
                 }
                 ProgressRing {
-                    visible: !root.nothingLook && root.event.value >= 0
+                    visible: !root.nothingLook && root.event.value >= 0 && !root.eventIsBattery
                     Layout.preferredWidth: Math.round(20 * root.d)
                     Layout.preferredHeight: Layout.preferredWidth
                     progress: Math.max(0, root.event.value)

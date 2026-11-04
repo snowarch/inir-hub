@@ -43,6 +43,12 @@ GridLayout {
     }
 
     readonly property bool anime: AnimeWatch.ownsPlayer(page.island.player)
+    readonly property var players: (MprisController.displayPlayers ?? []).filter(p => p)
+    function stepPlayer(step: int): void {
+        const at = page.players.indexOf(page.island.player)
+        if (page.players.length < 2 || at < 0) return
+        MprisController.setActivePlayer(page.players[(at + step + page.players.length) % page.players.length])
+    }
     readonly property var otherPlayers: (MprisController.displayPlayers ?? []).filter(p => p && p !== page.island.player)
     readonly property var streams: {
         const groups = []
@@ -73,6 +79,19 @@ GridLayout {
             source: MediaArtwork.displaySource
             circular: Config.options?.iris?.player?.roundCover ?? false
             radius: circular ? width / 2 : Math.round(13 * IrisStyle.density)
+            // The cover brings its app forward; a swipe across it or the wheel sideways moves to another player.
+            TapHandler {
+                onTapped: if (page.island.player?.canRaise) page.island.player.raise()
+            }
+            DragHandler {
+                target: null
+                yAxis.enabled: false
+                onActiveChanged: if (!active && Math.abs(translation.x) > 24 * IrisStyle.density) page.stepPlayer(translation.x < 0 ? 1 : -1)
+            }
+            WheelHandler {
+                orientation: Qt.Horizontal
+                onWheel: event => { if (Math.abs(event.angleDelta.x) >= 60) page.stepPlayer(event.angleDelta.x < 0 ? 1 : -1) }
+            }
         }
         ColumnLayout {
             Layout.fillWidth: true
@@ -189,6 +208,34 @@ GridLayout {
                 }
             }
             Item { Layout.fillWidth: true }
+        }
+        // One dot per player, the one playing here drawn long; a dot, the wheel sideways or a swipe on the cover moves
+        // to another.
+        Row {
+            Layout.alignment: Qt.AlignHCenter
+            visible: page.players.length > 1
+            spacing: 6 * IrisStyle.density
+            Repeater {
+                model: page.players
+                MouseArea {
+                    id: dot
+                    required property var modelData
+                    readonly property bool here: dot.modelData === page.island.player
+                    width: dot.here ? Math.round(18 * IrisStyle.density) : Math.round(7 * IrisStyle.density)
+                    height: Math.round(7 * IrisStyle.density)
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    Accessible.role: Accessible.Button
+                    Accessible.name: String(dot.modelData?.identity ?? "")
+                    onClicked: MprisController.setActivePlayer(dot.modelData)
+                    Behavior on width { NumberAnimation { duration: IrisStyle.duration(260); easing.type: Easing.OutCubic } }
+                    Rectangle {
+                        anchors.fill: parent
+                        radius: height / 2
+                        color: dot.here ? IrisStyle.text : dot.containsMouse ? IrisStyle.textSecondary : IrisStyle.textTertiary
+                    }
+                }
+            }
         }
         ColumnLayout {
             Layout.fillWidth: true

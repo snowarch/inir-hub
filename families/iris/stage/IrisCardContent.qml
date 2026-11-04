@@ -390,6 +390,68 @@ Item {
                     onClicked: if (Bluetooth.defaultAdapter) Bluetooth.defaultAdapter.enabled = !Bluetooth.defaultAdapter.enabled
                 }
             }
+            // What is connected and has a battery, as a headset's controllers show theirs: an open gauge each, the
+            // device inside it, its charge in figures under it, red once it runs low.
+            RowLayout {
+                id: charges
+                readonly property var devices: (Bluetooth.devices?.values ?? []).filter(device => device?.connected && device?.batteryAvailable).slice(0, 4)
+                function glyphOf(icon: string): string {
+                    return /headset|headphone|audio-card|earbud/i.test(icon) ? "headphones"
+                        : /mouse/i.test(icon) ? "mouse" : /keyboard/i.test(icon) ? "keyboard"
+                        : /phone/i.test(icon) ? "smartphone" : /gaming|joystick|gamepad/i.test(icon) ? "sports_esports"
+                        : /watch/i.test(icon) ? "watch" : /speaker/i.test(icon) ? "speaker" : "bluetooth"
+                }
+                visible: charges.devices.length > 0
+                Layout.fillWidth: true
+                Layout.topMargin: 2 * root.d
+                spacing: 8 * root.d
+                Repeater {
+                    model: charges.devices
+                    ColumnLayout {
+                        id: charge
+                        required property var modelData
+                        readonly property real level: Math.max(0, Math.min(1, Number(charge.modelData.battery) || 0))
+                        readonly property color tint: charge.level <= 0.2 ? IrisStyle.danger : IrisStyle.identity.purple
+                        Layout.fillWidth: true
+                        spacing: 2 * root.d
+                        Accessible.name: String(charge.modelData.name ?? "") + ", " + Math.round(charge.level * 100) + "%"
+                        ProgressRing {
+                            Layout.alignment: Qt.AlignHCenter
+                            Layout.preferredWidth: Math.round(66 * root.d)
+                            Layout.preferredHeight: Layout.preferredWidth
+                            sweep: 270
+                            stroke: Math.max(4, 6 * root.d)
+                            tint: charge.tint
+                            progress: charge.level
+                            Behavior on progress { NumberAnimation { duration: IrisStyle.morphDuration; easing.type: Easing.OutCubic } }
+                            MaterialSymbol {
+                                anchors.centerIn: parent
+                                text: charges.glyphOf(String(charge.modelData.icon ?? ""))
+                                fill: 1
+                                iconSize: Math.round(26 * root.d)
+                                color: IrisStyle.text
+                            }
+                        }
+                        Metric {
+                            Layout.alignment: Qt.AlignHCenter
+                            Layout.topMargin: -12 * root.d
+                            value: Math.round(charge.level * 100)
+                            unit: "%"
+                            pixelSize: IrisStyle.typeHeadline
+                            weight: IrisStyle.figureWeight
+                            color: IrisStyle.text
+                        }
+                        IrisText {
+                            Layout.fillWidth: true
+                            horizontalAlignment: Text.AlignHCenter
+                            text: String(charge.modelData.name ?? "")
+                            color: IrisStyle.textTertiary
+                            font.pixelSize: IrisStyle.typeFootnote
+                            elide: Text.ElideRight
+                        }
+                    }
+                }
+            }
             IrisBluetoothList {
                 rowRadius: root.listRadius
                 Layout.fillWidth: true

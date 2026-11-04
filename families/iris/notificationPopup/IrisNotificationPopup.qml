@@ -41,6 +41,9 @@ PanelWindow {
     exclusionMode: ExclusionMode.Ignore
     WlrLayershell.layer: WlrLayer.Overlay
     WlrLayershell.namespace: "quickshell:iris-notifications"
+    // Keys only while a banner takes a typed reply.
+    property string replyingTo: ""
+    WlrLayershell.keyboardFocus: root.replyingTo.length > 0 ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
     anchors {
         top: true
         left: true
@@ -138,10 +141,28 @@ PanelWindow {
             readonly property var actions: (banner.notification?.actions ?? []).filter(action => action.identifier !== "default")
             readonly property bool critical: ["2", "critical"].includes(String(banner.notification?.urgency ?? "").toLowerCase()) // the enum's number, as a string
             readonly property bool hovered: bannerHover.hovered
+            // Two answers, one to refuse and one to take (a call, an invite): Apple's red and green discs.
+            readonly property var declineAction: banner.actions.length === 2
+                ? banner.actions.find(action => /decline|reject|deny|hang|refuse|ignore|cancel|dismiss|no$|rechaz/i.test(String(action.text ?? "") + " " + action.identifier)) ?? null : null
+            readonly property var acceptAction: banner.declineAction ? banner.actions.find(action => action !== banner.declineAction) ?? null : null
+            readonly property bool callStyle: banner.declineAction !== null && banner.acceptAction !== null
+            readonly property bool canReply: Boolean(banner.notification?.canReply)
+            readonly property bool replying: root.replyingTo === String(banner.notification?.notificationId ?? "-")
+            readonly property string avatar: String(banner.notification?.image ?? "")
+            function answer(action): void {
+                Notifications.attemptInvokeAction(banner.notification.notificationId, action.identifier)
+            }
+            function sendReply(): void {
+                if (Notifications.replyTo(banner.notification.notificationId, replyInput.text)) {
+                    replyInput.text = ""
+                    root.replyingTo = ""
+                    Notifications.timeoutNotification(banner.notification.notificationId)
+                }
+            }
             width: popupColumn.width
             height: plate.height
 
-            onHoveredChanged: if (banner.hovered) Notifications.cancelTimeout(banner.notification.notificationId)
+            onHoveredChanged: if (banner.hovered || banner.replying) Notifications.cancelTimeout(banner.notification.notificationId)
             HoverHandler { id: bannerHover }
 
             property real appear: 0
@@ -151,7 +172,10 @@ PanelWindow {
                 root.publishBlur(banner.blurKey, banner.blurShape)
                 banner.appear = 1
             }
-            Component.onDestruction: root.publishBlur(banner.blurKey, null)
+            Component.onDestruction: {
+                root.publishBlur(banner.blurKey, null)
+                if (banner.replying) root.replyingTo = ""
+            }
             readonly property var blurShape: {
                 if (!root.visible || !IrisStyle.glassCompositor || plate.opacity < 0.999) return null
                 return { x: popupColumn.x + banner.x + plate.x, y: popupColumn.y + banner.y + plate.y,
@@ -230,7 +254,8 @@ PanelWindow {
                 y: Math.round(banner.meltsIntoIsland ? plate.islandLift * (1 - banner.bloom) : (1 - banner.bloom) * -18 * root.d)
                 opacity: Math.min(1, banner.bloom * 3)
                     * (1 - Math.min(1, Math.abs(banner.swipe) / (banner.width * 0.6)))
-                radius: Math.min(height / 2, root.bubbleSize / 2 + (Math.round(22 * root.d) - root.bubbleSize / 2) * banner.bloom)
+                // Apple's Island: a capsule while it is one line, a deep round once it holds more.
+                radius: Math.min(height / 2, root.bubbleSize / 2 + (Math.round(30 * root.d) - root.bubbleSize / 2) * banner.bloom)
                 color: IrisStyle.bodyClip
                 border.width: banner.critical ? 1 : 0
                 border.color: banner.critical ? IrisStyle.tintBorder(IrisStyle.danger)
@@ -245,104 +270,174 @@ PanelWindow {
                     onTapped: root.activate(banner.notification)
                 }
 
-                RowLayout {
+                ColumnLayout {
                     id: content
-                    x: 14 * root.d
+                    x: 12 * root.d
                     y: 12 * root.d
-                    width: banner.width - 26 * root.d
-                    spacing: 12 * root.d
+                    width: banner.width - 24 * root.d
+                    spacing: 10 * root.d
 
-                    IrisNotificationIcon {
-                        Layout.alignment: Qt.AlignTop
-                        Layout.topMargin: 2 * root.d
-                        transform: Translate {
-                            x: ((root.bubbleSize - 38 * root.d) / 2 - 14 * root.d) * (1 - banner.bloom)
-                            y: ((root.bubbleSize - 38 * root.d) / 2 - 14 * root.d) * (1 - banner.bloom)
-                        }
-                        size: Math.round(38 * root.d)
-                        appName: String(banner.notification?.appName ?? "")
-                        appIcon: String(banner.notification?.appIcon ?? "")
-                        image: String(banner.notification?.image ?? "")
-                        summary: String(banner.notification?.summary ?? "")
-                        critical: banner.critical
-                    }
-
-                    ColumnLayout {
+                    RowLayout {
                         Layout.fillWidth: true
-                        spacing: 1
-                        opacity: IrisStyle.contentAt(banner.bloom)
+                        spacing: 12 * root.d
 
-                        RowLayout {
+                        IrisNotificationIcon {
+                            Layout.alignment: Qt.AlignVCenter
+                            transform: Translate {
+                                x: ((root.bubbleSize - 44 * root.d) / 2 - 12 * root.d) * (1 - banner.bloom)
+                                y: ((root.bubbleSize - 44 * root.d) / 2 - 12 * root.d) * (1 - banner.bloom)
+                            }
+                            size: Math.round(44 * root.d)
+                            appName: String(banner.notification?.appName ?? "")
+                            appIcon: String(banner.notification?.appIcon ?? "")
+                            image: banner.avatar
+                            summary: String(banner.notification?.summary ?? "")
+                            critical: banner.critical
+                        }
+
+                        ColumnLayout {
                             Layout.fillWidth: true
-                            spacing: 8 * root.d
+                            Layout.alignment: Qt.AlignVCenter
+                            spacing: 0
+                            opacity: IrisStyle.contentAt(banner.bloom)
+                            // The app small over the name, as a phone's call: "mobile", then who.
+                            RowLayout {
+                                Layout.fillWidth: true
+                                spacing: 8 * root.d
+                                IrisText {
+                                    Layout.fillWidth: true
+                                    text: String(banner.notification?.appName ?? "")
+                                    visible: text.length > 0 && text !== String(banner.notification?.summary ?? "")
+                                    color: IrisStyle.textTertiary
+                                    font.pixelSize: IrisStyle.typeFootnote
+                                    font.weight: IrisStyle.weight(Font.Medium)
+                                    elide: Text.ElideRight
+                                }
+                                IrisText {
+                                    text: {
+                                        void root.now
+                                        const seconds = Math.max(0, Math.floor((root.now - Number(banner.notification?.time ?? root.now)) / 1000))
+                                        return seconds < 60 ? Translation.tr("now")
+                                            : seconds < 3600 ? Translation.tr("%1m").arg(Math.floor(seconds / 60))
+                                            : Translation.tr("%1h").arg(Math.floor(seconds / 3600))
+                                    }
+                                    color: IrisStyle.textTertiary
+                                    font.pixelSize: IrisStyle.typeFootnote
+                                    font.weight: IrisStyle.weight(Font.Medium)
+                                    font.features: ({ "tnum": 1 })
+                                }
+                            }
                             IrisText {
                                 Layout.fillWidth: true
                                 text: String(banner.notification?.summary || banner.notification?.appName || "")
-                                font.pixelSize: IrisStyle.typeLabel
+                                font.pixelSize: IrisStyle.typeBody
                                 font.weight: IrisStyle.weight(Font.DemiBold)
                                 elide: Text.ElideRight
                             }
                             IrisText {
-                                text: {
-                                    void root.now
-                                    const seconds = Math.max(0, Math.floor((root.now - Number(banner.notification?.time ?? root.now)) / 1000))
-                                    return seconds < 60 ? Translation.tr("now")
-                                        : seconds < 3600 ? Translation.tr("%1m").arg(Math.floor(seconds / 60))
-                                        : Translation.tr("%1h").arg(Math.floor(seconds / 3600))
-                                }
-                                color: IrisStyle.textTertiary
-                                font.pixelSize: IrisStyle.typeMeta
-                                font.weight: IrisStyle.weight(Font.Medium)
-                                font.features: ({ "tnum": 1 })
+                                Layout.fillWidth: true
+                                visible: text.length > 0
+                                text: String(banner.notification?.body ?? "").replace(/<[^>]*>/g, "")
+                                color: IrisStyle.textSecondary
+                                font.pixelSize: banner.callStyle ? IrisStyle.typeMeta : IrisStyle.typeLabel
+                                wrapMode: Text.Wrap
+                                maximumLineCount: banner.hovered || banner.replying ? 8 : banner.callStyle ? 1 : 2
+                                elide: Text.ElideRight
                             }
-                        }
-                        IrisText {
-                            Layout.fillWidth: true
-                            visible: text.length > 0
-                            text: String(banner.notification?.body ?? "").replace(/<[^>]*>/g, "")
-                            color: IrisStyle.textSecondary
-                            font.pixelSize: IrisStyle.typeLabel
-                            wrapMode: Text.Wrap
-                            maximumLineCount: banner.hovered ? 8 : 2
-                            elide: Text.ElideRight
-                        }
-                        IrisText {
-                            Layout.fillWidth: true
-                            visible: text.length > 0 && text !== String(banner.notification?.summary ?? "")
-                            text: String(banner.notification?.appName ?? "")
-                            color: IrisStyle.textTertiary
-                            font.pixelSize: IrisStyle.typeFootnote
-                            font.weight: IrisStyle.weight(Font.Medium)
-                            elide: Text.ElideRight
                         }
 
-                        Flow {
+                        // Refuse and take as two discs at the end, red and green.
+                        Row {
+                            visible: banner.callStyle
+                            Layout.alignment: Qt.AlignVCenter
+                            spacing: 10 * root.d
+                            opacity: IrisStyle.contentAt(banner.bloom)
+                            Disc {
+                                tint: IrisStyle.identity.red
+                                glyph: /call|answer|llamad/i.test(String(banner.acceptAction?.text ?? "")) ? "call_end" : "close"
+                                label: String(banner.declineAction?.text ?? "")
+                                onClicked: banner.answer(banner.declineAction)
+                            }
+                            Disc {
+                                tint: IrisStyle.identity.green
+                                glyph: /call|answer|llamad/i.test(String(banner.acceptAction?.text ?? "")) ? "call" : "check"
+                                label: String(banner.acceptAction?.text ?? "")
+                                onClicked: banner.answer(banner.acceptAction)
+                            }
+                        }
+                    }
+
+                    // The answers as capsules, the last one filled (Apple's "Buy"); Reply opens a field in place.
+                    Flow {
+                        Layout.fillWidth: true
+                        Layout.leftMargin: 56 * root.d
+                        visible: !banner.callStyle && !banner.replying && (banner.actions.length > 0 || banner.canReply)
+                        spacing: 6 * root.d
+                        opacity: IrisStyle.contentAt(banner.bloom)
+                        Repeater {
+                            model: banner.callStyle ? [] : banner.actions
+                            Capsule {
+                                required property var modelData
+                                required property int index
+                                label: String(modelData.text ?? "")
+                                main: index === banner.actions.length - 1 && !banner.canReply
+                                onClicked: banner.answer(modelData)
+                            }
+                        }
+                        Capsule {
+                            visible: banner.canReply
+                            glyph: "reply"
+                            label: Translation.tr("Reply")
+                            main: true
+                            onClicked: {
+                                root.replyingTo = String(banner.notification.notificationId)
+                                Notifications.cancelTimeout(banner.notification.notificationId)
+                                replyInput.forceActiveFocus()
+                            }
+                        }
+                    }
+
+                    RowLayout {
+                        Layout.fillWidth: true
+                        visible: banner.replying
+                        spacing: 8 * root.d
+                        Rectangle {
                             Layout.fillWidth: true
-                            Layout.topMargin: 8 * root.d
-                            visible: banner.actions.length > 0
-                            spacing: 6 * root.d
-                            Repeater {
-                                model: banner.actions
-                                IrisButton {
-                                    id: actionButton
-                                    required property var modelData
-                                    implicitHeight: Math.round(28 * root.d)
-                                    implicitWidth: actionLabel.implicitWidth + 24 * root.d
-                                    buttonRadius: IrisStyle.capsule(height)
-                                    buttonRadiusPressed: IrisStyle.capsule(height)
-                                    colBackground: IrisStyle.fill
-                                    colBackgroundHover: IrisStyle.fillHover
-                                    Accessible.name: String(actionButton.modelData.text ?? "")
-                                    onClicked: Notifications.attemptInvokeAction(banner.notification.notificationId, actionButton.modelData.identifier)
-                                    IrisText {
-                                        id: actionLabel
-                                        anchors.centerIn: parent
-                                        text: String(actionButton.modelData.text ?? "")
-                                        font.pixelSize: IrisStyle.typeMeta
-                                        font.weight: IrisStyle.weight(Font.Medium)
-                                    }
+                            implicitHeight: Math.round(38 * root.d)
+                            radius: height / 2
+                            color: IrisStyle.fill
+                            border.width: 1
+                            border.color: replyInput.activeFocus ? IrisStyle.tintBorder(IrisStyle.accent) : IrisStyle.hairline
+                            TextInput {
+                                id: replyInput
+                                anchors.fill: parent
+                                anchors.leftMargin: 16 * root.d
+                                anchors.rightMargin: 16 * root.d
+                                verticalAlignment: TextInput.AlignVCenter
+                                color: IrisStyle.text
+                                selectionColor: IrisStyle.tintFillHover(IrisStyle.accent)
+                                font.family: IrisStyle.fontMain
+                                font.pixelSize: IrisStyle.typeBody
+                                clip: true
+                                onAccepted: banner.sendReply()
+                                Keys.onEscapePressed: root.replyingTo = ""
+                                IrisText {
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    visible: replyInput.text.length === 0
+                                    text: banner.notification?.replyHint || Translation.tr("Reply")
+                                    color: IrisStyle.textTertiary
+                                    font.pixelSize: IrisStyle.typeBody
                                 }
                             }
+                        }
+                        Disc {
+                            size: Math.round(38 * root.d)
+                            tint: IrisStyle.accent
+                            glyph: "arrow_upward"
+                            label: Translation.tr("Send")
+                            enabled: replyInput.text.trim().length > 0
+                            opacity: enabled ? 1 : 0.4
+                            onClicked: banner.sendReply()
                         }
                     }
                 }
@@ -379,4 +474,67 @@ PanelWindow {
         }
     }
 
+    component Disc: MouseArea {
+        id: disc
+        property color tint: IrisStyle.accent
+        property string glyph: ""
+        property string label: ""
+        property real size: Math.round(40 * root.d)
+        width: disc.size
+        height: disc.size
+        implicitWidth: disc.size
+        implicitHeight: disc.size
+        hoverEnabled: true
+        cursorShape: Qt.PointingHandCursor
+        Accessible.role: Accessible.Button
+        Accessible.name: disc.label
+        scale: disc.pressed ? IrisStyle.pressScale(0.9) : 1
+        Behavior on scale { NumberAnimation { duration: IrisStyle.duration(disc.pressed ? 80 : 200); easing.type: IrisStyle.feedbackEasing } }
+        Rectangle {
+            anchors.fill: parent
+            radius: width / 2
+            color: disc.tint
+            Rectangle { anchors.fill: parent; radius: width / 2; color: IrisStyle.text; opacity: disc.containsMouse ? 0.12 : 0 }
+        }
+        MaterialSymbol {
+            anchors.centerIn: parent
+            text: disc.glyph
+            fill: 1
+            iconSize: Math.round(disc.size * 0.5)
+            color: IrisStyle.onTintFor(disc.tint)
+        }
+    }
+    component Capsule: IrisButton {
+        id: capsule
+        property string glyph: ""
+        property bool main: false
+        property string label: ""
+        implicitHeight: Math.round(32 * root.d)
+        implicitWidth: capsuleRow.implicitWidth + 28 * root.d
+        buttonRadius: IrisStyle.capsule(height)
+        buttonRadiusPressed: IrisStyle.capsule(height)
+        colBackground: capsule.main ? IrisStyle.accent : IrisStyle.fill
+        colBackgroundHover: capsule.main ? IrisStyle.accent : IrisStyle.fillHover
+        Accessible.name: capsule.label
+        Row {
+            id: capsuleRow
+            anchors.centerIn: parent
+            spacing: 5 * root.d
+            MaterialSymbol {
+                visible: capsule.glyph.length > 0
+                anchors.verticalCenter: parent.verticalCenter
+                text: capsule.glyph
+                fill: 1
+                iconSize: Math.round(16 * root.d)
+                color: capsule.main ? IrisStyle.onTintFor(IrisStyle.accent) : IrisStyle.text
+            }
+            IrisText {
+                anchors.verticalCenter: parent.verticalCenter
+                text: capsule.label
+                color: capsule.main ? IrisStyle.onTintFor(IrisStyle.accent) : IrisStyle.text
+                font.pixelSize: IrisStyle.typeLabel
+                font.weight: IrisStyle.weight(Font.DemiBold)
+            }
+        }
+    }
 }
