@@ -18,6 +18,8 @@
                     "additionalProperties": false,
                     "properties": {
                         "language": { "description": "The solver's language (inir-accel's washi): iris, washi, airisu or material:<variant>; empty keeps the person's.", "type": "string", "pattern": "^(|iris|washi|airisu|material:[a-zA-Z]+)$" },
+                        "accent": { "description": "The accent it always wears: \"design\" is its language's own pigment (a language with a wheel: airisu); empty keeps the person's accent, solved in its language.", "type": "string", "enum": ["", "design"] },
+                        "highlight": { "description": "The highlight it always wears: \"design\" is its language's own pigment (a language with a wheel: airisu); empty keeps the person's highlight, solved in its language.", "type": "string", "enum": ["", "design"] },
                         "preset": { "description": "The ink ladder: how strong fills and text steps read.", "type": "string", "enum": ["", "iris", "soft", "crisp", "round", "angular", "contrast", "night"] },
                         "schemes": { "description": "The schemes it draws, first one preferred; a scheme it leaves out shows its first.", "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "string", "enum": ["dark", "ink", "light"] } },
                         "roles": {

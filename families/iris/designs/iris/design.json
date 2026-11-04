@@ -3,6 +3,8 @@
     "tokens": {
         "colour": {
             "language": "",
+            "accent": "",
+            "highlight": "",
             "preset": "",
             "schemes": ["dark", "ink", "light"],
             "roles": {}

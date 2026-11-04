@@ -3,6 +3,8 @@
     "tokens": {
         "colour": {
             "language": "airisu",
+            "accent": "design",
+            "highlight": "design",
             "preset": "night"
         },
         "type": {

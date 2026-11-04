@@ -85,6 +85,12 @@ Singleton {
 
     // What the surfaces read, as primitives (one change of Design re-runs each binding once).
     readonly property string palette: String(root.ownToken("colour.language") ?? "")
+    // The accent or highlight a surface paints with: the Design's own pigment when it names one (colour.accent,
+    // colour.highlight), else the person's choice, or the colour theme's while they follow one.
+    function colourChoice(role: string, person: string, followsTheme: bool): string {
+        const own = String(root.ownToken(`colour.${role}`) ?? "")
+        return own.length > 0 ? own : followsTheme ? "theme" : person
+    }
     readonly property string preset: String(root.ownToken("colour.preset") ?? "")
     readonly property var schemes: Array.from(root.token("colour.schemes") ?? ["dark", "ink", "light"])
     function roles(scheme: string): var { return root.ownToken(`colour.roles.${scheme}`) ?? null }
@@ -168,8 +174,8 @@ Singleton {
         case "iris.appearance.motionDuration": return root.motionDuration > 0
         case "iris.appearance.glass.mode": return root.refusesGlass
         case "iris.appearance.scheme": return Array.from(root.ownToken("colour.schemes") ?? []).length === 1
-        case "iris.appearance.accent": return root.fixedRole("accent")
-        case "iris.appearance.highlight": return root.fixedRole("highlight")
+        case "iris.appearance.accent": return root.fixedRole("accent") || String(root.ownToken("colour.accent") ?? "").length > 0
+        case "iris.appearance.highlight": return root.fixedRole("highlight") || String(root.ownToken("colour.highlight") ?? "").length > 0
         case "iris.appearance.theme.surface": return root.fixedRole("surface")
         // A Design that draws the resting Island decides its design and the time's accent; a bar across the edge still
         // shows the engine's clock in its zones.

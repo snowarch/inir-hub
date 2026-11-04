@@ -32,9 +32,9 @@ Singleton {
         glass: !IrisDesign.refusesGlass && ["wallpaper", "compositor"].includes(String(root.appearance?.glass?.mode ?? "off")),
         inkStyle: String(root.appearance?.inkStyle ?? "washi"),
         darkStyle: String(root.appearance?.darkStyle ?? "style"),
-        accent: root.followsTheme ? "theme" : String(root.appearance?.accent ?? "blue"),
+        accent: IrisDesign.colourChoice("accent", String(root.appearance?.accent ?? "blue"), root.followsTheme),
         accentHue: Number(root.appearance?.theme?.accentHue ?? 212),
-        highlight: root.followsTheme ? "theme" : String(root.appearance?.highlight ?? "orange"),
+        highlight: IrisDesign.colourChoice("highlight", String(root.appearance?.highlight ?? "orange"), root.followsTheme),
         highlightHue: Number(root.appearance?.theme?.highlightHue ?? 32),
         vibrance: Math.max(0, Math.min(100, Number(Config.options?.iris?.widgets?.vibrance ?? 85))) / 100,
         tune: ["dark", "ink", "light"].reduce((out, name) => {

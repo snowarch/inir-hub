@@ -876,7 +876,9 @@ QtObject {
     }
     readonly property bool animeHighlightOn: Boolean(root.animeLayer?.highlight ?? false)
     // The accent: actions, selection, links, live marks. 4.5:1 on every ground, and on paper a fill under white ink.
-    readonly property color baseAccent: root.vivid(root.accentFrom(root.followsTheme ? "theme" : String(root.appearance?.accent ?? "blue"), root.appearance?.theme?.accentHue ?? 212), false)
+    readonly property string accentChoice: IrisDesign.colourChoice("accent", String(root.appearance?.accent ?? "blue"), root.followsTheme)
+    readonly property string highlightChoice: IrisDesign.colourChoice("highlight", String(root.appearance?.highlight ?? "orange"), root.followsTheme)
+    readonly property color baseAccent: root.vivid(root.accentFrom(root.accentChoice, root.appearance?.theme?.accentHue ?? 212), false)
     // The person's hue at the strength Apple gives an accent (systemBlue's), not the solver's pastel: #accbeb next to
     // #dfe7ef ink made a chosen word, a lit switch and a thumb read as the rest (his 10-30). A grey accent stays grey;
     // a Design with its own palette (AIRISU's vermilion) keeps it exact.
@@ -906,7 +908,7 @@ QtObject {
     readonly property color accentContainer: root.mono ? root.text : root.role("accentContainer", "#1f3a5f")
     readonly property color inkOnAccentContainer: root.mono ? root.paper : root.role("onAccentContainer", "#d6e3ff")
     // The highlight: the glanced detail (a clock separator, a day number, a timer). A figure: 3:1 on every ground.
-    readonly property color baseSecondaryAccent: root.highlightFrom(root.followsTheme ? "theme" : String(root.appearance?.highlight ?? "orange"), root.appearance?.theme?.highlightHue ?? 32, root.baseAccent)
+    readonly property color baseSecondaryAccent: root.highlightFrom(root.highlightChoice, root.appearance?.theme?.highlightHue ?? 32, root.baseAccent)
     readonly property color secondaryAccent: {
         if (root.mono && !(root.animeEnabled && root.animeHighlightOn)) return root.text
         const base = root.baseSecondaryAccent
@@ -918,8 +920,8 @@ QtObject {
     readonly property color clockAccent: ({ accent: root.accent, plain: root.text })[String(root.options?.bar?.clockAccent ?? "highlight")]
         ?? root.secondaryAccent
     // A wallpaper or theme accent already is the apps' palette.
-    readonly property bool appsShareAccent: !root.followsTheme && Boolean(root.appearance?.accentForApps ?? true)
-        && !["theme", "wallpaper"].includes(String(root.appearance?.accent ?? "blue"))
+    readonly property bool appsShareAccent: Boolean(root.appearance?.accentForApps ?? true)
+        && !["theme", "wallpaper"].includes(root.accentChoice)
     readonly property color appsAccent: root.baseAccent
     readonly property string auraName: ["off", "subtle", "vivid"].includes(root.appearance?.aura ?? "")
         ? root.appearance.aura : "subtle"
@@ -1694,7 +1696,7 @@ QtObject {
         for (const key in bodies) out[key] = bodies[key].toString()
         return {
             scheme: root.scheme, material: root.materialName, glass: root.glassy ? (root.glassCompositor ? "compositor" : "wallpaper") : "off",
-            texture: root.afterglow ? "afterglow:" + root.afterglowGrade : root.leak ? "leak:" + root.leakGrade + "/" + root.leakShapeName : "solid", accent: String(root.appearance?.accent ?? "blue"),
+            texture: root.afterglow ? "afterglow:" + root.afterglowGrade : root.leak ? "leak:" + root.leakGrade + "/" + root.leakShapeName : "solid", accent: root.accentChoice,
             preset: root.presetName, glassTint: Math.round(root.glassTint * 100) / 100, bodies: out, fails: fails, contrast: contrast,
             tokens: { surface: root.surfaceOpaque.toString(), surfaceHigh: root.surfaceHigh.toString(), accent: root.accent.toString(),
                 highlight: root.secondaryAccent.toString(), text: root.text.toString(), textSecondary: root.textSecondary.toString(),
