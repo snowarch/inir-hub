@@ -56,11 +56,11 @@ Scope {
         "Type=Application",
         "Name=Movie Corner",
         "Comment=" + Translation.tr("Films and series in your language, in mpv"),
-        "Icon=video-x-generic",
+        "Icon=" + root.home + "/icons/movie-corner.svg",
         "Categories=AudioVideo;Video;",
         "Keywords=movie;film;series;tv;cinema;",
         // Desktop-entry quoting: \\" reaches sh as ", \\$ as $.
-        'Exec=sh -c "if [ -d \\\\"\\\\$1\\\\" ]; then exec qs -c inir ipc call movie-corner toggle; else rm -f -- \\\\"\\\\$2\\\\"; fi" sh ' + root.home + " " + root.entryPath,
+        'Exec=sh -c "if [ -d \\\\"\\\\$1\\\\" ]; then exec inir movie-corner toggle; else rm -f -- \\\\"\\\\$2\\\\"; fi" sh ' + root.home + " " + root.entryPath,
         ""
     ].join("\n")
     readonly property bool wantEntry: CornerState.ready && CornerState.options.launcher && root.safePaths
@@ -81,7 +81,7 @@ Scope {
     /// The Movie Corner: find any film or series and watch it in your language.
     ///
     /// ```kdl
-    /// Mod+M { spawn "qs" "-c" "inir" "ipc" "call" "movie-corner" "toggle"; }
+    /// Mod+M { spawn "inir" "movie-corner" "toggle"; }
     /// ```
     IpcHandler {
         target: "movie-corner"

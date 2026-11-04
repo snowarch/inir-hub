@@ -58,6 +58,8 @@ Singleton {
             property bool windowed: false
             // An entry in the app launcher (and so the Dock) that opens the Corner.
             property bool launcher: true
+            // The Stremio add-ons the person added, as JSON text ([{url, name, types, audio}]).
+            property string addons: "[]"
             property var following: []
         }
     }

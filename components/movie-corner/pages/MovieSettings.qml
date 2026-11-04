@@ -57,14 +57,17 @@ Item {
                     { label: "Hebrew", value: "he" },
                     { label: "Dutch", value: "nl" }
                 ] }),
-            root.row({ label: "Source", description: "Ask shows every site that has it, with its picture and subtitles. A site plays first when it has it; when it doesn't, the best other one does.", option: "source", kind: "choice", fallback: "ask",
+            root.row({ label: "Source", description: "Ask shows every source that has it, with its picture and subtitles. A source plays first when it has it; when it doesn't, the best other one does.", option: "source", kind: "choice", fallback: "ask",
                 choices: [
                     { label: "Ask every time", value: "ask" },
-                    { label: "Best available", value: "auto" },
-                    { label: "vidsrc.buzz", value: "vidsrc" },
-                    { label: "MagisTV24", value: "magistv" }
-                ] }),
-            root.row({ label: "Check the sources", description: "Tries every site now on one well-known film and says which ones play.", kind: "action", button: "Check", run: () => CornerWatch.checkSources() })
+                    { label: "Best available", value: "auto" }
+                ].concat(CornerWatch.sources_.map(s => ({ label: String(s.name || s.id), value: String(s.id) }))) })
+        ] },
+        { title: "Sources", rows: [
+            root.row({ label: "Your sources", description: "The Corner comes with none. Add a Stremio add-on by its address, or put source files (Python, see the Corner's README) in the sources folder.", kind: "list", view: Qt.resolvedUrl("MovieSourcesList.qml"), summary: false }),
+            root.row({ label: "Check the sources", description: "Tries every source now on one well-known film and says which ones play.", kind: "action", button: "Check", run: () => CornerWatch.checkSources() }),
+            root.row({ label: "TMDB key", description: "Your free API key or read access token from themoviedb.org › Settings › API: a title's page then says where it streams officially. Kept in your system keyring, never in a settings file.", kind: "text", secret: true, placeholder: "Paste your API key",
+                state: () => { CornerWatch.loadKeys(); return CornerWatch.secretOf("tmdb") }, set: value => CornerWatch.setKey("tmdb", String(value ?? "")) })
         ] },
         { title: "The Corner", rows: [
             root.row({ label: "In the app launcher", description: "An entry named Movie Corner in the launcher's search, so it can be pinned to the Dock too.", option: "launcher", kind: "switch", fallback: true }),

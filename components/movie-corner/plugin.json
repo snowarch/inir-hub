@@ -2,9 +2,9 @@
     "id": "movie-corner",
     "kind": "component",
     "name": "Movie Corner",
-    "summary": "Find any film or series and watch it in your language, in mpv.",
+    "summary": "Browse films and series, see where they stream, and watch from your own sources.",
     "icon": "movie",
-    "version": "1.0.0",
+    "version": "1.1.2",
     "parts": {
         "panel": "Panel.qml"
     },

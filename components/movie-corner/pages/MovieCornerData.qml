@@ -24,7 +24,8 @@ QtObject {
         root._waiting[path] = [callback]
         const xhr = new XMLHttpRequest()
         xhr.onreadystatechange = () => {
-            if (xhr.readyState !== XMLHttpRequest.DONE) return
+            // The Corner closed while it was out: nothing is left to tell.
+            if (xhr.readyState !== XMLHttpRequest.DONE || !root) return
             let value = null, error = ""
             if (xhr.status === 200) {
                 try { value = shape(JSON.parse(xhr.responseText)) } catch (e) { error = "bad reply" }
@@ -87,6 +88,38 @@ QtObject {
             show.seasons = Array.from(new Set(episodes.map(e => e.season)))
             return show
         }, callback)
+    }
+
+    // Where a title streams in a country, from TMDB (data by JustWatch), with the person's own TMDB key: v3 API key
+    // or v4 read token. callback({ link, services: [{ name, logo }] } or null). Never asked without a key.
+    function whereToWatch(kind: string, tmdb: int, key: string, region: string, callback): void {
+        if (!(tmdb > 0) || key.length === 0 || !/^[A-Z]{2}$/.test(region)) { callback(null); return }
+        const path = `/3/${kind === "series" ? "tv" : "movie"}/${tmdb}/watch/providers`
+        const hit = root._cache["tmdb:" + path + region]
+        if (hit && Date.now() - hit.at < root.cacheMs) { callback(hit.value); return }
+        const xhr = new XMLHttpRequest()
+        xhr.onreadystatechange = () => {
+            // The Corner closed while it was out: nothing is left to tell.
+            if (xhr.readyState !== XMLHttpRequest.DONE || !root) return
+            let value = null
+            if (xhr.status === 200) {
+                try {
+                    const here = JSON.parse(xhr.responseText)?.results?.[region]
+                    const seen = new Set()
+                    const services = ["flatrate", "free", "ads", "rent", "buy"].flatMap(kind => Array.from(here?.[kind] ?? []))
+                        .filter(p => p && !seen.has(p.provider_id) && seen.add(p.provider_id))
+                        .map(p => ({ name: String(p.provider_name ?? ""), logo: /^\/[\w.-]+$/.test(String(p.logo_path ?? "")) ? "https://image.tmdb.org/t/p/w92" + p.logo_path : "" }))
+                    const link = String(here?.link ?? "")
+                    value = here && /^https:\/\/www\.themoviedb\.org\//.test(link) ? { link, services: services.slice(0, 5) } : null
+                } catch (e) { value = null }
+                root._cache["tmdb:" + path + region] = { at: Date.now(), value }
+            }
+            callback(value)
+        }
+        const v4 = key.length > 40
+        xhr.open("GET", "https://api.themoviedb.org" + path + (v4 ? "" : "?api_key=" + encodeURIComponent(key)))
+        if (v4) xhr.setRequestHeader("Authorization", "Bearer " + key)
+        xhr.send()
     }
 
     function forget(): void { root._cache = {} }

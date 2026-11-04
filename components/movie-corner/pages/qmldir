@@ -7,4 +7,5 @@ MovieHome 1.0 MovieHome.qml
 MoviePoster 1.0 MoviePoster.qml
 MovieRow 1.0 MovieRow.qml
 MovieSettings 1.0 MovieSettings.qml
+MovieSourcesList 1.0 MovieSourcesList.qml
 MovieWatchSheet 1.0 MovieWatchSheet.qml

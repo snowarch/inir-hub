@@ -1,8 +1,8 @@
 {
   "$schema": "../../schema/hub.schema.json",
-  "version": "1.0.0",
-  "summary": "Find any film or series and watch it in your language, in mpv.",
-  "description": "A corner of iRiS to browse films and series from Cinemeta by popularity, rating, year and genre, follow them and pick up where you were, then watch in mpv: the original audio with subtitles in your language, or Latin American or Spain Spanish dubs, with the source and picture to pick.",
+  "version": "1.1.2",
+  "summary": "Browse films and series, see where they stream, and watch from your own sources.",
+  "description": "A corner of iRiS to browse Cinemeta's films and series by popularity, rating, year and genre, and follow them. A title's page says where it streams officially (TMDB, with your own key); Watch plays in mpv from the sources you add yourself (a Stremio add-on by its address, or a source file), with OpenSubtitles filling a missing language, and resumes where you stopped. It comes with no video sources.",
   "authors": [
     "xsteban1410"
   ],
@@ -13,7 +13,7 @@
     "cinemeta",
     "mpv",
     "subtitles",
-    "iris"
+    "stremio"
   ],
   "permissions": [
     "process",
@@ -21,17 +21,13 @@
     "files"
   ],
   "hosts": [
-    "fastream.to",
-    "magistv24.com",
-    "ok.ru",
+    "api.themoviedb.org",
+    "image.tmdb.org",
     "opensubtitles-v3.strem.io",
-    "streamtape.com",
     "subs5.strem.io",
     "v3-cinemeta.strem.io",
-    "vidsrc.buzz",
     "www.imdb.com",
-    "www.mp4upload.com",
-    "www.yourupload.com",
+    "www.themoviedb.org",
     "www.youtube.com"
   ],
   "minInir": "2.33.0",

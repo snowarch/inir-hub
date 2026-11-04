@@ -36,7 +36,19 @@ Flickable {
     // The synopsis opens at five lines.
     property bool readMore: false
 
+    // Where it streams officially, with the person's TMDB key; null without one or when TMDB doesn't know.
+    property var where: null
+    function _askWhere(): void {
+        const id = String(root.s.id ?? "")
+        const region = String(Qt.locale().name.split("_")[1] ?? "").toUpperCase()
+        root.store.whereToWatch(String(root.s.kind ?? "movie"), Number(root.s.tmdb ?? 0), CornerWatch.secretOf("tmdb"), region,
+            value => { if (String(root.s.id ?? "") === id) root.where = value })
+    }
+    onFullChanged: if (root.full) root._askWhere()
+    Connections { target: CornerWatch; function onKeysReadyChanged(): void { if (root.full) root._askWhere() } }
     onShowChanged: {
+        root.where = null
+        CornerWatch.loadKeys()
         root.full = null
         root.readMore = false
         root.contentY = 0
@@ -158,6 +170,7 @@ Flickable {
                     // Where you were, when you have been here; else the start.
                     IrisButton {
                         emphasized: true
+                        visible: CornerWatch.hasSources || !CornerWatch.sourcesKnown
                         enabled: CornerWatch.canStart && String(root.s.id ?? "").length > 0
                         text: root.next ? (root.series ? Translation.tr("Continue · S%1 E%2").arg(root.next.season).arg(root.next.episode) : Translation.tr("Continue"))
                             : Translation.tr("Watch")
@@ -176,6 +189,17 @@ Flickable {
                         enabled: String(root.s.id ?? "").length > 0
                         onClicked: CornerState.toggleFollow(root.s)
                     }
+                    // Where it streams officially (TMDB, data by JustWatch): each opens TMDB's page with the links.
+                    Repeater {
+                        model: Array.from(root.where?.services ?? [])
+                        IrisChip {
+                            required property var modelData
+                            glyph: "play_circle"
+                            label: String(modelData.name)
+                            Accessible.description: Translation.tr("Watch it on %1").arg(String(modelData.name))
+                            onClicked: Qt.openUrlExternally(String(root.where.link))
+                        }
+                    }
                     IrisChip {
                         glyph: "movie"
                         label: Translation.tr("Trailer")
@@ -190,6 +214,19 @@ Flickable {
                     }
                 }
             }
+        }
+
+        IrisText {
+            Layout.fillWidth: true
+            visible: text.length > 0
+            text: Array.from(root.where?.services ?? []).length > 0 ? Translation.tr("Where to watch: data by JustWatch, through TMDB")
+                : CornerWatch.sourcesKnown && !CornerWatch.hasSources
+                    ? (CornerWatch.secretOf("tmdb").length > 0 ? Translation.tr("No sources yet: add one in the Corner's Settings › Sources")
+                        : Translation.tr("No sources yet: add one in the Corner's Settings › Sources, or your TMDB key there to see where it streams"))
+                : ""
+            color: IrisStyle.muted
+            font.pixelSize: IrisStyle.typeFootnote
+            wrapMode: Text.WordWrap
         }
 
         // The facts, in one line each.

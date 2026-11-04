@@ -70,7 +70,7 @@ Singleton {
     function labelOf(entry: var): string {
         return entry.kind === "series" ? Translation.tr("%1 · S%2 E%3").arg(entry.title).arg(entry.season).arg(entry.episode) : String(entry.title)
     }
-    function siteName(id: string): string { return ({ vidsrc: "vidsrc.buzz", magistv: "MagisTV24" })[id] ?? id }
+    function siteName(id: string): string { return String(root.sources_.find(s => s.id === id)?.name ?? id) }
 
     // Watch a film, or an episode of a series ({ season, episode } in `entry`).
     function watch(entry: var): void {
@@ -100,7 +100,9 @@ Singleton {
         if (root.phase !== "finding") return
         if (root.sources.length === 0) {
             root.phase = "idle"
-            root.error = Network.online ? Translation.tr("No site has this in %1 right now").arg(root.languageName(root.audio)) : Network.offlineReason
+            root.error = !Network.online ? Network.offlineReason
+                : root.sourcesKnown && !root.hasSources ? Translation.tr("No sources yet: add one in the Corner's Settings › Sources")
+                : Translation.tr("No site has this in %1 right now").arg(root.languageName(root.audio))
             return
         }
         if (root.source !== "ask" || root.sources.length === 1) root.play(root.sources[0])
@@ -267,6 +269,10 @@ Singleton {
             id: doctorOut
             onStreamFinished: {
                 const rows = doctorOut.text.trim().split("\n").map(line => { try { return JSON.parse(line) } catch (e) { return null } }).filter(row => row !== null)
+                if (rows.some(row => row.none)) {
+                    Notifications.send(Translation.tr("No film sources yet"), Translation.tr("Add a source file or a Stremio add-on in the Corner's Settings › Sources."), "normal", 10000)
+                    return
+                }
                 const ok = rows.filter(row => row.ok).length
                 Notifications.send(Translation.tr("Film sources: %1 of %2 play").arg(ok).arg(rows.length),
                     rows.map(row => "%1 · %2: %3".arg(row.name).arg(root.languageName(row.audio)).arg(row.ok ? (row.height > 0 ? row.height + "p" : "OK") : Translation.tr("not playing"))).join("\n"),
@@ -274,6 +280,129 @@ Singleton {
             }
         }
         onExited: root.checking = false
+    }
+
+    // The person's sources, as the engine loads them: files in the sources folder and the Stremio add-ons saved here.
+    // The Corner ships none. (`sources` is taken by what a title's search found, hence `sources_`.)
+    property var sources_: []
+    property var sourceErrors: []
+    property string sourcesFolder: ""
+    property bool sourcesKnown: false
+    readonly property bool hasSources: root.sources_.length > 0
+    property bool _reloadSources: false
+    function loadSources(): void {
+        if (lister.running) root._reloadSources = true
+        else lister.running = true
+    }
+    Connections {
+        target: CornerState
+        function onOpenChanged(): void { if (CornerState.open) root.loadSources() }
+    }
+    Process {
+        id: lister
+        command: ["python3", root.engine, "list"]
+        stdout: StdioCollector {
+            id: listerOut
+            onStreamFinished: {
+                try {
+                    const found = JSON.parse(listerOut.text)
+                    root.sources_ = Array.from(found.sources ?? []).filter(s => s && typeof s.id === "string")
+                    root.sourceErrors = Array.from(found.files ?? []).filter(f => f && String(f.error ?? "").length > 0)
+                    root.sourcesFolder = String(found.folder ?? "")
+                } catch (e) {
+                    root.sources_ = []
+                }
+                root.sourcesKnown = true
+            }
+        }
+        onExited: if (root._reloadSources) { root._reloadSources = false; lister.running = true }
+    }
+    function openSourcesFolder(): void {
+        if (root.sourcesFolder.length === 0) return
+        ShellExec.execDetachedArgs(["sh", "-c", 'mkdir -p -- "$1" && exec xdg-open "$1"', "sh", root.sourcesFolder], "Open film sources folder")
+    }
+
+    // Stremio add-ons: the engine reads the manifest first, then the Corner keeps it in its file. An add-on plays in
+    // the audio language set when it was added.
+    readonly property var addons: {
+        try {
+            const listed = JSON.parse(String(CornerState.options.addons || "[]"))
+            return Array.isArray(listed) ? listed.filter(a => a && typeof a.url === "string") : []
+        } catch (e) {
+            return []
+        }
+    }
+    property string addonNote: ""
+    readonly property bool addonChecking: addonProcess.running
+    function addAddon(url: string): void {
+        const address = String(url ?? "").trim()
+        if (address.length === 0 || addonProcess.running) return
+        root.addonNote = ""
+        addonProcess.command = ["python3", root.engine, "addon", address]
+        addonProcess.running = true
+    }
+    function removeAddon(url: string): void {
+        CornerState.set("addons", JSON.stringify(root.addons.filter(a => a.url !== url)))
+        root.loadSources()
+    }
+    function _addonError(said: string): string {
+        if (said.indexOf("Not an add-on address") === 0) return Translation.tr("That is not an add-on address: it starts with https:// and ends in /manifest.json")
+        if (said.indexOf("It doesn't answer") === 0) return Translation.tr("The add-on does not answer")
+        if (said.indexOf("It sends no add-on manifest") === 0) return Translation.tr("That address is not a Stremio add-on")
+        if (said.indexOf("It lists no streams") === 0) return Translation.tr("That add-on has no streams")
+        if (said.indexOf("It doesn't find films") === 0) return Translation.tr("That add-on does not find films (it needs IMDb ids)")
+        return Translation.tr("The add-on could not be checked")
+    }
+    Process {
+        id: addonProcess
+        stdout: StdioCollector {
+            id: addonOut
+            onStreamFinished: {
+                let reply = null
+                try { reply = JSON.parse(addonOut.text) } catch (e) { reply = null }
+                if (!reply || !reply.ok) {
+                    root.addonNote = root._addonError(String(reply?.error ?? ""))
+                    return
+                }
+                if (root.addons.some(a => a.url === reply.url)) {
+                    root.addonNote = Translation.tr("%1 is already added").arg(reply.name || reply.url)
+                    return
+                }
+                CornerState.set("addons", JSON.stringify(root.addons.concat([{ url: String(reply.url), name: String(reply.name ?? ""),
+                    types: Array.from(reply.types ?? []), audio: root.audio }])))
+                root.addonNote = Translation.tr("Added %1").arg(reply.name || reply.url)
+                root.loadSources()
+            }
+        }
+    }
+
+    // The TMDB key (for where a title streams) lives in the system keyring through the shell's KeyringStorage, never in
+    // a settings file. Nothing is written before the keyring has been read: a write replaces the whole entry.
+    readonly property bool keysReady: KeyringStorage.loaded
+    readonly property var _keys: KeyringStorage.keyringData?.movieCorner ?? ({})
+    property var _pendingKeys: ({})
+    function loadKeys(): void { if (!KeyringStorage.loaded) KeyringStorage.fetchKeyringData() }
+    function secretOf(service: string): string { return String(root._keys?.[service] ?? "") }
+    function setKey(service: string, value: string): void {
+        if (service !== "tmdb") return
+        const clean = String(value ?? "").trim()
+        if (!KeyringStorage.loaded) {
+            const pending = Object.assign({}, root._pendingKeys)
+            pending[service] = clean
+            root._pendingKeys = pending
+            KeyringStorage.fetchKeyringData()
+            return
+        }
+        if (root.secretOf(service) !== clean) KeyringStorage.setNestedField(["movieCorner", service], clean)
+    }
+    Connections {
+        target: KeyringStorage
+        function onLoadedChanged(): void {
+            if (!KeyringStorage.loaded) return
+            const pending = root._pendingKeys
+            root._pendingKeys = ({})
+            for (const service of Object.keys(pending)) root.setKey(service, pending[service])
+        }
     }
 
     FileView {

@@ -4,6 +4,8 @@
           [--audio original|es-419|es-ES] [--subs <code>|""] [--source ask|auto|<site>]
   doctor [site...]   tries each site live on one well-known film and says which ones play
   languages          every audio language and the sites that have it
+  list               the sources folder, each file and add-on loaded and what failed
+  addon <url>        checks a Stremio add-on's manifest address before it is saved
 """
 
 import argparse
@@ -130,11 +132,14 @@ def sources(argv):
 def doctor(argv):
     """Each site, each language it claims, on the probe film: ok when a stream answers."""
     rows = []
+    if not providers.ALL:
+        say({"none": True})
+        return 1
     for site in providers.ALL:
         if argv and site.id not in argv:
             continue
         for audio in site.audios:
-            subs = "es" if site.id == "magistv" and audio == "original" else ""
+            subs = site.probe_subs if audio == "original" else ""
             try:
                 found = find(PROBE, audio, subs, site.id)
             except Exception:  # a site's breakage is its own row
