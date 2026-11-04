@@ -359,15 +359,13 @@ readonly property int myVal: Config.getNestedValue("background.widgets.custom.my
 readonly property var myVal: CustomWidgets.getConfigValue("my-widget", "myVal", 42)
 ```
 
-### Writing (ONLY way that persists)
+### Writing
 ```qml
-Config.setNestedValue("background.widgets.custom.my-widget.myVal", 42)
-
-// Or via helper:
 CustomWidgets.setConfigValue("my-widget", "myVal", 42)
 ```
 
-**Never** assign directly to Config.options — it won't persist.
+A widget writes only its own entry, through this helper. `Config.setNestedValue(...)` and `Config.options.x = ...`
+are the families' (they change the person's settings), and `inir hub check` refuses them in a widget.
 
 ---
 

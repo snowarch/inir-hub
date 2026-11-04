@@ -41,7 +41,7 @@ An install puts the item where iNiR already reads it (your widgets, themes and s
 
 ## Make something
 
-[CONTRIBUTING.md](CONTRIBUTING.md) has the whole path. For widgets, [the Material guide](guides/material.md) shows how one earns its place beside the built-in ones, and [guides/widgets.md](guides/widgets.md) lists everything a widget can read. Making it with an AI assistant? Give it CONTRIBUTING.md: it is written for it too. The short one:
+[CONTRIBUTING.md](CONTRIBUTING.md) has the whole path. For widgets, [the Material guide](guides/material.md) shows how one earns its place beside the built-in ones, and [guides/widgets.md](guides/widgets.md) lists everything a widget can read. Making it with an AI assistant? Open it in a clone of this repository: it reads [AGENTS.md](AGENTS.md) by itself (Claude Code also `CLAUDE.md`, the `hub-item` skill and `.claude/rules/`), which keep it from breaking the shell. The short one:
 
 ```sh
 inir hub new widget my-clock --author your-github-handle
@@ -50,7 +50,7 @@ inir hub build && INIR_HUB_SOURCES=$PWD/dist inir hub install my-clock
 inir hub submit widgets/my-clock
 ```
 
-CI runs the same `inir hub check` on the pull request. The examples here (`countdown`, `shell-line`, `tidepool`, `moss-garden`, `excalidraw`) are written to be copied.
+CI runs the same `inir hub check` on the pull request. The examples here (`countdown`, `shell-line`, `tidepool`, `moss-garden`, `excalidraw`) show the shape each kind takes; start from the template `inir hub new` writes, never from a copy of another item (the check refuses copies).
 
 ## Trust
 

@@ -5,6 +5,10 @@ assistant this file and what you want to make. It works in a loop: write, run `i
 stop only when it prints `nothing to fix`. CI runs the same check on your pull request, with the same messages, so
 an item that passes on your machine passes there, and one that doesn't comes back to you to fix.
 
+Working in this repository, an assistant finds its instructions by itself: `AGENTS.md` (any agent), `CLAUDE.md`, the
+`hub-item` skill and the rules in `.claude/rules/` (Claude Code). They hold what this page holds, plus how to write
+QML, helpers and each kind so they never break the shell.
+
 ## What to make
 
 | You want | Make | Folder |
@@ -33,6 +37,16 @@ Every item lives in its own folder and its own lane. Nothing outside a family ca
   `widget.json` `"options"`; a component keeps its own in `Directories.pluginFile("<id>")`
   (`~/.config/inir/plugins/<id>.json`), so removing it leaves their settings as they were.
 - **answer for someone else's IPC.** Its `IpcHandler` targets start with its id (`my-corner`, `myCornerSearch`).
+- **reach inside a family.** It imports the base (`qs`, `qs.services`, `qs.modules.common`) and only what a family
+  offers items: `qs.modules.iris.style`, `qs.modules.iris.components`, `qs.modules.iris.frame`,
+  `qs.modules.waffle.looks`, `qs.modules.ii.kit`. The rest of a family (`iris.state`, `iris.pieces`,
+  `iris.settings`, `iris.field`…) changes with each of its releases, and an item that imports it stops loading for
+  everyone. A family's own data (its follows, its lists) is never changed from outside.
+- **carry a copy.** A file that is mostly another file of the hub (a family's surface, another item's code) drifts
+  from its original the day either changes. Import the part, or ask in an issue for it to be offered; two items that
+  share most of their code are one item.
+- **start the shell's binary.** Never `qs`, `quickshell` or `qs -c inir ipc call`: the shell runs on its own runtime.
+  Reach it, or another item, with `inir <target> <function>`.
 
 `inir hub check` and CI hold every one of these.
 
@@ -40,7 +54,9 @@ Every item lives in its own folder and its own lane. Nothing outside a family ca
 
 0. Every step runs the `inir` command, version 0.2.1 or newer (`inir cli version`). An iNiR install has it after
    `inir update`; anywhere else, take the binary from [its releases](https://github.com/snowarch/inir-cli/releases)
-   or `go install github.com/snowarch/inir-cli/cmd/inir@latest`. An older one has no `inir hub check`.
+   or `go install github.com/snowarch/inir-cli/cmd/inir@latest`. An older one has no `inir hub check`. CI runs the
+   check from inir-cli's `main` branch: if yours passes and CI doesn't, take the newest with
+   `go install github.com/snowarch/inir-cli/cmd/inir@main`.
 
 1. Fork this repository. For a new item, start from its template (the id is the folder name: 3 to 48 characters,
    lowercase letters, digits and dashes, and what people type in `inir hub install`):
@@ -106,6 +122,11 @@ It reads what your branch changed since `origin/main` (`--base REF` for another 
 | In a file that draws with `IrisStyle`, no alpha of its own: no `ColorUtils.applyAlpha(x, 0.4)`. | iRiS has a token for every fill, ink and veil; its looks and Designs restyle them. |
 | No fixed font sizes (`font.pixelSize: 14`). | The person's scale reaches only the family's type tokens. |
 | No `Qt5Compat.GraphicalEffects`. | It isn't on every distro iNiR runs on; `QtQuick.Effects` (`MultiEffect`) is. |
+| Outside a family, imports of a family only from what it offers items (`iris.style`, `iris.components`, `iris.frame`, `waffle.looks`, `ii.kit`). | The rest of a family changes with its releases; an item that imports it stops loading on every desktop that installed it. |
+| No file that is mostly another file of the hub. | Two copies drift apart, and the shell ends up with two of one thing. |
+| Never `qs`, `quickshell` or `qs -c inir …` started from an item. | The shell runs on its own runtime; `inir <target> <function>` reaches it on every install. |
+| At most 600 lines in a file the branch adds or changes, outside families. | A file that does one job can be read, reviewed and fixed. |
+| From outside, at most 2500 lines of code in one pull request (translations and docs not counted). | Nobody can review more whole, and what nobody read reaches every desktop that installs it. Send the smallest version that works, then one addition per pull request. |
 | Every QML file parses with Qt 6.12, the Qt iNiR runs on (CI). | A file that doesn't parse fails on every desktop that installed it, the moment someone opens it. |
 
 A literal that is the point (a flag's own red, a gradient's fade) ends its line with why: `// literal: the flag's red`,
@@ -294,7 +315,11 @@ Never accepted, whatever it declares:
 - piping a download into a shell, `eval()`, `Qt.createQmlObject()`
 - loading QML from the internet
 - decoding hidden content (`atob`, `base64 -d`)
+- installing anything (`pip`, `npm`, a package manager) or `sudo`; Python helpers use the standard library only
+- secrets in the repository: API keys, tokens, client secrets (the person enters their own, kept in the item's file)
 - anything that collects data the person did not ask it to
+- content the source has no right to give: streaming or download sites without the rights to what they host, DRM
+  circumvention. The hub is public; one takedown removes it for everyone
 
 ## Review
 
