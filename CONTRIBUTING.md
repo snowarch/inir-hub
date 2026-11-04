@@ -52,9 +52,9 @@ Every item lives in its own folder and its own lane. Nothing outside a family ca
 
 ## The path
 
-0. Every step runs the `inir` command, version 0.2.1 or newer (`inir cli version`). An iNiR install has it after
-   `inir update`; anywhere else, take the binary from [its releases](https://github.com/snowarch/inir-cli/releases)
-   or `go install github.com/snowarch/inir-cli/cmd/inir@latest`. An older one has no `inir hub check`. CI runs the
+0. Every step runs the `inir` command, version 0.2.2 or newer (`inir cli version`). The one an iNiR install carries
+   may be older: take the binary from [its releases](https://github.com/snowarch/inir-cli/releases) or
+   `go install github.com/snowarch/inir-cli/cmd/inir@latest`. An older one checks less than CI does. CI runs the
    check from inir-cli's `main` branch: if yours passes and CI doesn't, take the newest with
    `go install github.com/snowarch/inir-cli/cmd/inir@main`.
 
