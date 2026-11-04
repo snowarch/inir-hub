@@ -547,6 +547,7 @@ Singleton {
 
     function _explain(said: string, session: var, asked: string): string {
         const episode = session ? String(session.episode) : ""
+        if (said.indexOf("No sources yet") >= 0) return Translation.tr("No sources yet: add one in the Corner's Settings › Sources")
         if (said.indexOf("No results found") >= 0) return Translation.tr("Nothing found for “%1”").arg(asked)
         if (said.indexOf("Invalid anime selection") >= 0 && session)
             return Translation.tr("Could not find %1 again").arg(session.title)
@@ -839,12 +840,110 @@ Singleton {
             id: doctorCollector
             onStreamFinished: {
                 const rows = doctorCollector.text.trim().split("\n").filter(line => line.trim().length > 0)
+                if (rows.length === 1 && rows[0].indexOf("No sources yet") === 0) {
+                    Notifications.send(Translation.tr("No anime sources yet"), Translation.tr("Add a source file or a Stremio add-on in the Corner's Settings › Sources."), "normal", 10000)
+                    return
+                }
                 const ok = rows.filter(line => / OK /.test(line)).length
                 Notifications.send(Translation.tr("Anime sources: %1 of %2 play").arg(ok).arg(rows.length),
                     rows.map(line => line.replace(/\s+[\d.]+s\s+/, "  ")).join("\n"), ok === rows.length ? "low" : "normal", 20000)
             }
         }
         onExited: root.checkingSources = false
+    }
+
+    // The person's sources, as the engine loads them: files in the sources folder and the Stremio add-ons saved here.
+    // The Corner ships none; until one is added, only the official links in a show's page play anything.
+    property var sources: []
+    property var sourceErrors: []
+    property string sourcesFolder: ""
+    property bool sourcesKnown: false
+    readonly property bool hasSources: root.sources.length > 0
+    function loadSources(): void {
+        if (sourcesProcess.running) root._reloadSources = true
+        else sourcesProcess.running = true
+    }
+    property bool _reloadSources: false
+    Connections {
+        target: CornerState
+        function onOpenChanged(): void { if (CornerState.open) root.loadSources() }
+    }
+    Process {
+        id: sourcesProcess
+        command: ["python3", root.engine, "sources"]
+        stdout: StdioCollector {
+            id: sourcesOut
+            onStreamFinished: {
+                try {
+                    const found = JSON.parse(sourcesOut.text)
+                    root.sources = Array.from(found.sources ?? []).filter(s => s && typeof s.id === "string")
+                    root.sourceErrors = Array.from(found.files ?? []).filter(f => f && String(f.error ?? "").length > 0)
+                    root.sourcesFolder = String(found.folder ?? "")
+                } catch (e) {
+                    root.sources = []
+                }
+                root.sourcesKnown = true
+            }
+        }
+        onExited: if (root._reloadSources) { root._reloadSources = false; sourcesProcess.running = true }
+    }
+    function openSourcesFolder(): void {
+        if (root.sourcesFolder.length === 0) return
+        ShellExec.execDetachedArgs(["sh", "-c", 'mkdir -p -- "$1" && exec xdg-open "$1"', "sh", root.sourcesFolder], "Open anime sources folder")
+    }
+
+    // Stremio add-ons: the engine reads the manifest first, then the Corner keeps it in its file. An add-on plays in
+    // the Watch language set when it was added.
+    readonly property var addons: {
+        try {
+            const listed = JSON.parse(String(CornerState.options.addons || "[]"))
+            return Array.isArray(listed) ? listed.filter(a => a && typeof a.url === "string") : []
+        } catch (e) {
+            return []
+        }
+    }
+    property string addonNote: ""
+    readonly property bool addonChecking: addonProcess.running
+    function addAddon(url: string): void {
+        const address = String(url ?? "").trim()
+        if (address.length === 0 || addonProcess.running) return
+        root.addonNote = ""
+        addonProcess.command = ["python3", root.engine, "addon", address]
+        addonProcess.running = true
+    }
+    function _addonError(said: string): string {
+        if (said.indexOf("Not an add-on address") === 0) return Translation.tr("That is not an add-on address: it starts with https:// and ends in /manifest.json")
+        if (said.indexOf("It doesn't answer") === 0) return Translation.tr("The add-on does not answer")
+        if (said.indexOf("It sends no add-on manifest") === 0) return Translation.tr("That address is not a Stremio add-on")
+        if (said.indexOf("It lists no streams") === 0) return Translation.tr("That add-on has no streams")
+        if (said.indexOf("It doesn't find anime") === 0) return Translation.tr("That add-on does not find anime (it needs Kitsu ids)")
+        return Translation.tr("The add-on could not be checked")
+    }
+    function removeAddon(url: string): void {
+        CornerState.set("addons", JSON.stringify(root.addons.filter(a => a.url !== url)))
+        root.loadSources()
+    }
+    Process {
+        id: addonProcess
+        stdout: StdioCollector {
+            id: addonOut
+            onStreamFinished: {
+                let reply = null
+                try { reply = JSON.parse(addonOut.text) } catch (e) { reply = null }
+                if (!reply || !reply.ok) {
+                    root.addonNote = root._addonError(String(reply?.error ?? ""))
+                    return
+                }
+                if (root.addons.some(a => a.url === reply.url)) {
+                    root.addonNote = Translation.tr("%1 is already added").arg(reply.name || reply.url)
+                    return
+                }
+                CornerState.set("addons", JSON.stringify(root.addons.concat([{ url: String(reply.url), name: String(reply.name ?? ""),
+                    types: Array.from(reply.types ?? []), audio: root.audio, subs: root.subs }])))
+                root.addonNote = Translation.tr("Added %1").arg(reply.name || reply.url)
+                root.loadSources()
+            }
+        }
     }
 
     Process {

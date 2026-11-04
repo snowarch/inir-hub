@@ -45,6 +45,9 @@ def _check(provider):
 
 def run(names):
     chosen = [providers.BY_ID[n] for n in names if n in providers.BY_ID] or providers.ALL
+    if not chosen:
+        print("No sources yet: add a file to the sources folder or a Stremio add-on in the Corner's settings")
+        return 1
     with concurrent.futures.ThreadPoolExecutor(max_workers=6) as pool:
         rows = list(pool.map(_check, chosen))
     for pid, verdict, seconds in rows:

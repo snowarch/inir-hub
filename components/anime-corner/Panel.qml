@@ -57,11 +57,11 @@ Scope {
         "Type=Application",
         "Name=Anime Corner",
         "Comment=" + Translation.tr("Anime in your language, in mpv"),
-        "Icon=video-x-generic",
+        "Icon=" + root.home + "/icons/anime-corner.svg",
         "Categories=AudioVideo;Video;",
         "Keywords=anime;anilist;myanimelist;episode;series;",
         // Desktop-entry quoting: \\" reaches sh as ", \\$ as $.
-        'Exec=sh -c "if [ -d \\\\"\\\\$1\\\\" ]; then exec qs -c inir ipc call anime-corner toggle; else rm -f -- \\\\"\\\\$2\\\\"; fi" sh ' + root.home + " " + root.entryPath,
+        'Exec=sh -c "if [ -d \\\\"\\\\$1\\\\" ]; then exec inir anime-corner toggle; else rm -f -- \\\\"\\\\$2\\\\"; fi" sh ' + root.home + " " + root.entryPath,
         ""
     ].join("\n")
     readonly property bool wantEntry: CornerState.ready && CornerState.options.launcher && root.safePaths

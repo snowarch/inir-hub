@@ -2,9 +2,9 @@
     "id": "anime-corner",
     "kind": "component",
     "name": "Anime Corner",
-    "summary": "Find any anime on AniList and watch it in your language, in mpv.",
+    "summary": "Browse AniList, see where anime streams, and watch from your own sources.",
     "icon": "live_tv",
-    "version": "1.0.0",
+    "version": "1.1.1",
     "parts": {
         "panel": "Panel.qml"
     },

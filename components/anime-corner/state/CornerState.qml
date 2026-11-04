@@ -46,6 +46,9 @@ Singleton {
             property string malClientId: ""
             property string anilistUser: ""
             property string malUser: ""
+            // The Stremio add-ons the person added, as JSON text ([{url, name, types, audio, subs}]): a var list in a
+            // JsonAdapter is what iNiR's own Config avoids.
+            property string addons: "[]"
             property bool syncProgress: true
             property bool notify: false
             // The Corner's layout and host, like Settings' (classic, folio, pocket, drawer; overlay or window).

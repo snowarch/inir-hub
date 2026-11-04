@@ -9,37 +9,14 @@ import urllib.request
 sys.dont_write_bytecode = True
 sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)))
 
-from inir_anime import accounts, engine, hosts, net, providers, subs  # noqa: E402
-from inir_anime.unpack import unpack  # noqa: E402
-
-
-class Unpack(unittest.TestCase):
-    def test_words_are_swapped_by_their_radix_number(self):
-        packed = "}('0 1(\"2://3.4/5.6\")',36,7,'var|f|https|ok|ru|video|m3u8'.split('|'),0,{}))"
-        self.assertEqual(unpack(packed), 'var f("https://ok.ru/video.m3u8")')
-
-    def test_empty_slot_keeps_the_token(self):
-        self.assertEqual(unpack("}('0 1',36,2,'|word'.split('|'),0,{}))"), "0 word")
-
-    def test_nothing_packed_is_nothing(self):
-        self.assertEqual(unpack("<html>plain</html>"), "")
+from inir_anime import accounts, addons, engine, hosts, net, providers, sources, subs  # noqa: E402
 
 
 class Hosts(unittest.TestCase):
-    def test_streamtape_link_is_read_not_run(self):
-        page = """document.getElementById('robotlink').innerHTML = '//streamtape.com/get_video?id=AB' + ('xyz&expires=1&token=t').substring(3);"""
-        original = net.text
-        net.text = lambda *a, **k: page
-        try:
-            stream = hosts.streamtape("https://streamtape.com/e/AB/", None)
-        finally:
-            net.text = original
-        self.assertEqual(stream.url, "https://streamtape.com/get_video?id=AB&expires=1&token=t&stream=1")
-
     def test_only_https(self):
-        self.assertEqual(net.https("//ok.ru/c"), "https://ok.ru/c")
-        self.assertEqual(net.https("http://ok.ru/c"), "https://ok.ru/c")
-        for bad in ("file:///srv/notes.txt", "ftp://ok.ru/c", "javascript:x", ""):
+        self.assertEqual(net.https("//video.example.com/c"), "https://video.example.com/c")
+        self.assertEqual(net.https("http://video.example.com/c"), "https://video.example.com/c")
+        for bad in ("file:///srv/notes.txt", "ftp://video.example.com/c", "javascript:x", ""):
             with self.assertRaises(net.Failed):
                 net.https(bad)
         self.assertIsNone(hosts.resolve("file:///srv/notes.txt"))
@@ -49,7 +26,7 @@ class Redirects(unittest.TestCase):
     def test_credentials_stay_on_their_host(self):
         handler = net._SameHost()
         request = urllib.request.Request("https://graphql.anilist.co/x", headers={"Authorization": "Bearer secret", "Api-Key": "k"})
-        moved = handler.redirect_request(request, None, 302, "Found", {}, "https://animeav1.com/y")
+        moved = handler.redirect_request(request, None, 302, "Found", {}, "https://example.com/y")
         self.assertNotIn("Authorization", moved.headers)
         self.assertNotIn("Api-key", moved.headers)
 
@@ -62,14 +39,17 @@ class Redirects(unittest.TestCase):
 
 class Player(unittest.TestCase):
     def test_site_link_is_never_an_option(self):
-        stream = hosts.Stream("--script=hook.lua", "https://ok.ru/")
-        args = engine.player_args({"id": "animeav1"}, stream, "Show", "1", False, None, "es-419")
+        stream = hosts.Stream("--script=hook.lua", "https://video.example.com/")
+        args = engine.player_args({"id": "some-site"}, stream, "Show", "1", False, None, "es-419")
         self.assertEqual(args[-2:], ["--", "--script=hook.lua"])
         self.assertIn("--ytdl=no", args)
 
     def test_multi_audio_picks_the_dub(self):
-        stream = hosts.Stream("https://ok.ru/master.m3u8", "https://ok.ru/")
-        args = engine.player_args({"id": "watchanimeworld"}, stream, "Show", "2", False, None, "hi")
+        class Multi(providers.Provider):
+            id, audio_tracks = "multi", {"hi": "hin"}
+        providers.add([Multi()])
+        stream = hosts.Stream("https://video.example.com/master.m3u8", "https://video.example.com/")
+        args = engine.player_args({"id": "multi"}, stream, "Show", "2", False, None, "hi")
         self.assertIn("--alang=hin", args)
         self.assertIn("--force-media-title=Show Episode 2", args)
 
@@ -83,6 +63,9 @@ class Arguments(unittest.TestCase):
         def fake(audio, subs, source, quality, meta, query):
             seen.update(audio=audio, subs=subs, source=source, query=query)
             raise Stop()
+        class Latino(providers.Provider):
+            id, offers = "latino", (("es-419", ""),)
+        providers.add([Latino()])
         engine.Run = fake
         try:
             with self.assertRaises(Stop):
@@ -117,10 +100,10 @@ class History(unittest.TestCase):
             path = os.path.join(folder, "ani-hsts")
             with open(path, "w") as handle:
                 handle.write("3\tsomeid\tOther Show\n2\tav1-frieren\tSousou no Frieren\n")
-            engine.history("aniworld", "frieren", "Sousou no Frieren", "4")
+            engine.history("mysite", "frieren", "Sousou no Frieren", "4")
             with open(path) as handle:
                 lines = handle.read().splitlines()
-            self.assertEqual(lines, ["3\tsomeid\tOther Show", "4\tinir-aniworld-frieren\tSousou no Frieren"])
+            self.assertEqual(lines, ["3\tsomeid\tOther Show", "4\tinir-mysite-frieren\tSousou no Frieren"])
             self.assertEqual(os.listdir(folder), ["ani-hsts"])
 
 
@@ -191,6 +174,98 @@ class MalLogin(unittest.TestCase):
             accounts._mal_exchange = exchange
         self.assertEqual(result["code"], "good")
         self.assertEqual(result["verifier"], query["code_challenge"][0])
+
+
+class Sources(unittest.TestCase):
+    """The person's files: one that breaks never stops the rest, and a file can't stand in for Python's own."""
+
+    FILES = {
+        "_shared.py": "from inir_anime.sdk import Stream\nHOSTS = [('cdn.example.com', lambda url, ref: Stream(url + '#read', ref))]\n",
+        "good.py": "import _shared\nfrom inir_anime.sdk import Provider\n"
+                   "class Good(Provider):\n    id, name, offers = 'good', 'Good', (('es-419', ''),)\nSOURCES = [Good()]\n",
+        "broken.py": "SOURCES = [1 / 0]\n",
+        "empty.py": "x = 1\n",
+        "json.py": "SOURCES = []\n",
+    }
+
+    def test_loads_what_works_and_says_what_doesnt(self):
+        with tempfile.TemporaryDirectory() as folder:
+            for name, body in self.FILES.items():
+                with open(os.path.join(folder, name), "w") as handle:
+                    handle.write(body)
+            saved = list(providers.ALL), dict(providers.BY_ID), list(hosts.HOSTS)
+            os.environ["XDG_CONFIG_HOME"] = folder  # no add-ons saved there
+            try:
+                rows = {row["file"]: row for row in sources.load(folder)}
+                self.assertEqual(rows["good.py"]["sources"], ["good"])
+                self.assertIn("ZeroDivisionError", rows["broken.py"]["error"])
+                self.assertEqual(rows["empty.py"]["error"], "no SOURCES in it")
+                self.assertIn("rename", rows["json.py"]["error"])
+                self.assertNotIn("_shared.py", rows)
+                self.assertIn(providers.BY_ID["good"], providers.offering("es-419", ""))
+                self.assertTrue(hosts.resolve("https://cdn.example.com/v.m3u8").url.endswith("#read"))
+            finally:
+                providers.ALL[:], hosts.HOSTS[:] = saved[0], saved[2]
+                providers.BY_ID.clear()
+                providers.BY_ID.update(saved[1])
+                sources.LOADED.clear()
+
+
+class Addons(unittest.TestCase):
+    def _with(self, replies, work):
+        original = net.jsonof
+        net.jsonof = lambda url, **kw: replies[url]
+        try:
+            return work()
+        finally:
+            net.jsonof = original
+
+    def test_only_manifest_addresses_over_https(self):
+        self.assertEqual(addons.base_of("https://addon.example.com/x/manifest.json"), "https://addon.example.com/x")
+        for bad in ("http://addon.example.com/manifest.json", "https://addon.example.com/", "file:///manifest.json",
+                    "https://a.example.com/manifest.json?x=1", ""):
+            self.assertIsNone(addons.base_of(bad), bad)
+
+    def test_check_wants_streams_by_kitsu_id(self):
+        url = "https://addon.example.com/manifest.json"
+        good = {url: {"name": "Mine", "resources": ["stream"], "types": ["anime"], "idPrefixes": ["kitsu"]}}
+        self.assertEqual(self._with(good, lambda: addons.check(url))["name"], "Mine")
+        imdb = {url: {"name": "Films", "resources": [{"name": "stream"}], "idPrefixes": ["tt"]}}
+        self.assertFalse(self._with(imdb, lambda: addons.check(url))["ok"])
+        catalog = {url: {"name": "List", "resources": ["catalog"]}}
+        self.assertFalse(self._with(catalog, lambda: addons.check(url))["ok"])
+
+    def test_streams_keep_https_links_only(self):
+        base = "https://addon.example.com"
+        reply = {base + "/stream/anime/kitsu:7:3.json": {"streams": [
+            {"name": "Mine", "title": "1080p\nmore", "url": "https://cdn.example.com/3.m3u8",
+             "behaviorHints": {"proxyHeaders": {"request": {"Referer": "https://cdn.example.com/"}}}},
+            {"name": "Torrent", "infoHash": "abc"},
+            {"name": "Page", "externalUrl": "https://example.com/watch"},
+            {"name": "Plain", "url": "http://cdn.example.com/3.mp4"},
+        ]}}
+        addon = addons.Addon("addon-mine", "Mine", base, ["anime"], "ja", "")
+        show = providers.Show(addon, "7", "Show", "ja", "", 1, {"count": 12, "movie": False})
+        found = self._with(reply, lambda: addon.servers(show, "3"))
+        self.assertEqual([(n, s.url, s.referer) for n, s in found],
+                         [("Mine · 1080p", "https://cdn.example.com/3.m3u8", "https://cdn.example.com/")])
+        self.assertEqual(addon.episodes(show)[-1], "12")
+
+    def test_kitsu_id_from_anilist(self):
+        query = "filter%5BexternalSite%5D=anilist%2Fanime&filter%5BexternalId%5D=154587&include=item"
+        reply = {addons.KITSU + "/mappings?" + query: {"included": [
+            {"type": "anime", "id": "46474", "attributes": {"episodeCount": 28, "subtype": "TV", "canonicalTitle": "Frieren"}}]}}
+        self.assertEqual(self._with(reply, lambda: addons.kitsu_of({"anilistId": 154587})), ("46474", 28, False, "Frieren"))
+
+    def test_saved_addons_get_stable_ids(self):
+        with tempfile.TemporaryDirectory() as folder:
+            path = os.path.join(folder, "anime-corner.json")
+            with open(path, "w") as handle:
+                handle.write('{"addons": [{"url": "https://a.example.com/manifest.json", "name": "My Add-on", "audio": "es-419"},'
+                             '{"url": "https://b.example.com/manifest.json", "name": "My Add-on"}, {"url": "nope"}]}')
+            found = addons.saved(path)
+        self.assertEqual([a.id for a in found], ["addon-my-add-on", "addon-my-add-on-2"])
+        self.assertEqual(found[0].offers, (("es-419", ""),))
 
 
 if __name__ == "__main__":

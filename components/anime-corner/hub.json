@@ -1,8 +1,8 @@
 {
     "$schema": "../../schema/hub.schema.json",
-    "version": "1.0.0",
-    "summary": "Find any anime on AniList and watch it in your language, in mpv.",
-    "description": "A corner of iRiS to browse AniList by season, genre, popularity and your own AniList or MyAnimeList list, then watch an episode in mpv: Japanese with subtitles in your language or a dub from the sites that have it, with the source and quality to pick, online subtitles from OpenSubtitles or SubDL, and new-episode alerts.",
+    "version": "1.1.1",
+    "summary": "Browse AniList, see where anime streams, and watch from your own sources.",
+    "description": "A corner of iRiS to browse AniList by season, genre, popularity and your own AniList or MyAnimeList list. A show's page links to where it streams officially; Watch plays in mpv from the sources you add yourself (a Stremio add-on by its address, or a source file), with the source and quality to pick, online subtitles from OpenSubtitles or SubDL, and new-episode alerts. It comes with no video sources.",
     "authors": [
         "xsteban1410"
     ],
@@ -13,7 +13,7 @@
         "myanimelist",
         "mpv",
         "subtitles",
-        "iris"
+        "stremio"
     ],
     "permissions": [
         "process",
@@ -21,27 +21,14 @@
         "files"
     ],
     "hosts": [
-        "anilibria.top",
         "anilist.co",
-        "anime-sama.to",
-        "animeav1.com",
-        "animesdigital.org",
-        "aniworld.to",
         "api.myanimelist.net",
         "api.opensubtitles.com",
         "api.subdl.com",
         "dl.subdl.com",
         "graphql.anilist.co",
-        "henaojara.com",
-        "jkanime.net",
-        "myanimelist.net",
-        "ok.ru",
-        "streamtape.com",
-        "w1.anime4up.rest",
-        "watchanimeworld.one",
-        "www.animeworld.ac",
-        "www.mp4upload.com",
-        "www.yourupload.com"
+        "kitsu.app",
+        "myanimelist.net"
     ],
     "minInir": "2.33.0",
     "provides": "modules/anime-corner",

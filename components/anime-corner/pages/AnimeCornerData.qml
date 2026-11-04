@@ -115,6 +115,7 @@ QtObject {
             query ($id: Int, $language: StaffLanguage) {
                 Media(id: $id, type: ANIME) {
                     ${root.mediaFields}
+                    externalLinks { site url type }
                     recommendations(perPage: 12, sort: RATING_DESC) { nodes { mediaRecommendation { ${root.mediaFields} } } }
                     relations { edges { relationType(version: 2) node { type ${root.mediaFields} } } }
                     characters(perPage: 16, sort: [ROLE, RELEVANCE, ID]) { edges { role node { name { full } image { medium } }
@@ -125,6 +126,9 @@ QtObject {
             const m = data?.Media
             if (!m) return null
             const show = root.normalize(m)
+            // Where it streams officially (Crunchyroll, Netflix…): AniList's own links, opened in the browser.
+            show.streaming = (m.externalLinks ?? []).filter(l => l?.type === "STREAMING" && /^https:\/\//.test(String(l.url ?? "")))
+                .map(l => ({ site: String(l.site ?? ""), url: String(l.url) }))
             show.recommendations = (m.recommendations?.nodes ?? []).map(n => n.mediaRecommendation)
                 .filter(r => r && (root.adult === null || !r.isAdult)).map(r => root.normalize(r))
             // Sequels first, then the rest of the family; manga and novels stay on AniList.

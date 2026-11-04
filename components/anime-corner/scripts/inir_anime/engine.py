@@ -135,7 +135,7 @@ class Cache:
         if entry.get("none"):
             return self.NONE if time.time() - float(entry.get("at", 0)) < self.DAY else None
         return providers.Show(provider, str(entry.get("key")), str(entry.get("title")), audio, subs, season,
-                              {k: v for k, v in (entry.get("extra") or {}).items() if k in ("kind",)})
+                              {k: v for k, v in (entry.get("extra") or {}).items() if k in provider.keep})
 
     def titles(self, query):
         import time
@@ -158,7 +158,7 @@ class Cache:
         import time
         self.data[self._key(show.provider.id, show.audio, show.subs, show.season, title)] = {
             "key": show.key, "title": show.title, "at": time.time(),
-            "extra": {k: v for k, v in show.extra.items() if k in ("kind",)}}
+            "extra": {k: v for k, v in show.extra.items() if k in show.provider.keep}}
         self._save()
 
     def _save(self):
@@ -205,8 +205,13 @@ class Run:
             return []
         if known:
             return [(1.0, known)]
-        seasons_inside = provider.id in ("aniworld", "animesama", "watchanimeworld")
-        wanted = [base_title(t) for t in self.titles] if seasons_inside else self.titles
+        wanted = [base_title(t) for t in self.titles] if provider.seasons_inside else self.titles
+        try:
+            found = provider.by_id(self.meta, self.audio, self.subs, self.season)
+        except Exception:  # a source's lookup breaking is its own empty answer
+            found = []
+        if found is not None:
+            return [(1.0, s) for s in found]
         found = []
         for title in list(dict.fromkeys(wanted))[:3]:
             try:
@@ -345,8 +350,9 @@ def player_args(label, stream, title, episode, skip, mal_id, audio):
             "--force-media-title=%s Episode %s" % (title, episode)]
     if stream.kind == "hls":
         args.append("--demuxer-lavf-o=extension_picky=0")
-    track = providers.WatchAnimeWorld.TRACK.get(audio)
-    if label["id"] == "watchanimeworld" and track:
+    provider = providers.BY_ID.get(label["id"])
+    track = provider.audio_tracks.get(audio) if provider else None
+    if track:
         args.append("--alang=" + track)
     if stream.sub_url:
         args.append("--sub-file=" + stream.sub_url)
@@ -399,6 +405,8 @@ def main(argv):
     if source == ANICLI or (english and not own):
         anicli((["--dub"] if audio == "en" else []) + (["--skip"] if skip else [])
                + (["-q", quality] if quality != "best" else []) + (["-e", episode] if episode else []) + words)
+    if not providers.ALL and not english:
+        die("No sources yet")
     if not own:
         die("No source plays %s audio%s" % (audio, " with %s subtitles" % subs if subs else ""))
 

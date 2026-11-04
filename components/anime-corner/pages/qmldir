@@ -9,5 +9,6 @@ AnimeHome 1.0 AnimeHome.qml
 AnimePoster 1.0 AnimePoster.qml
 AnimeRow 1.0 AnimeRow.qml
 AnimeSettings 1.0 AnimeSettings.qml
+AnimeSourcesList 1.0 AnimeSourcesList.qml
 AnimeSubtitleFinder 1.0 AnimeSubtitleFinder.qml
 AnimeWatchSheet 1.0 AnimeWatchSheet.qml

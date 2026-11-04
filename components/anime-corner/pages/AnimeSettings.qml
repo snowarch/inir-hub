@@ -32,10 +32,15 @@ Item {
             root.row({ label: "Subtitles", description: "With Japanese audio, the language of the subtitles in the picture. Automatic follows iNiR's language where a site has it, else English.", option: "subs", kind: "choice", fallback: "auto",
                 showIf: () => root.opt("audio", "ja") === "ja",
                 choices: [{label:"Automatic",value:"auto"},{label:"English",value:"en"},{label:"Spanish",value:"es"},{label:"Brazilian Portuguese",value:"pt-BR"},{label:"French",value:"fr"},{label:"German",value:"de"},{label:"Italian",value:"it"},{label:"Arabic",value:"ar"}] }),
-            root.row({ label: "Source", description: "Ask shows every site that has the episode, with its quality and subtitles. A site plays first when it has the episode; when it doesn't, the best other one does.", option: "source", kind: "choice", fallback: "ask",
-                choices: [{label:"Ask every time",value:"ask"},{label:"Best available",value:"auto"},{label:"AnimeAV1",value:"animeav1"},{label:"Henaojara",value:"henaojara"},{label:"JKAnime",value:"jkanime"},{label:"AniWorld",value:"aniworld"},{label:"AnimeWorld",value:"animeworld"},{label:"Animes Digital",value:"animesdigital"},{label:"Anime-Sama",value:"animesama"},{label:"AniLiberty",value:"aniliberty"},{label:"Anime4up",value:"anime4up"},{label:"WatchAnimeWorld",value:"watchanimeworld"},{label:"ani-cli",value:"anicli"}] }),
-            root.row({ label: "Check the sources", description: "Tries every site now on one well-known show and says which ones play.", kind: "action", button: "Check", run: () => CornerWatch.checkSources() }),
+            root.row({ label: "Source", description: "Ask shows every source that has the episode, with its quality and subtitles. A source plays first when it has the episode; when it doesn't, the best other one does.", option: "source", kind: "choice", fallback: "ask",
+                choices: [{label:"Ask every time",value:"ask"},{label:"Best available",value:"auto"}]
+                    .concat(CornerWatch.sources.map(s => ({ label: String(s.name || s.id), value: String(s.id) })))
+                    .concat([{label:"ani-cli",value:"anicli"}]) }),
             root.row({ label: "Quality, subtitle look and intros", description: "Shared with iRiS's Continue bubble, in Settings › Anime.", kind: "action", button: "Open", run: () => { CornerState.open = false; GlobalStates.openSettingsAt("iris", "anime") } })
+        ] },
+        { title: "Sources", rows: [
+            root.row({ label: "Your sources", description: "The Corner comes with none. Add a Stremio add-on by its address, or put source files (Python, see the Corner's README) in the sources folder.", kind: "list", view: Qt.resolvedUrl("AnimeSourcesList.qml"), summary: false }),
+            root.row({ label: "Check the sources", description: "Tries every source now on one well-known show and says which ones play.", kind: "action", button: "Check", run: () => CornerWatch.checkSources() })
         ] },
         { title: "Subtitles online", rows: [
             root.row({ label: "OpenSubtitles key", description: "Your free API key from opensubtitles.com › Profile › API consumers. Kept in your system keyring, never in a settings file.", kind: "text", secret: true, placeholder: "Paste your API key",

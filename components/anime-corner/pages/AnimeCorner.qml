@@ -52,7 +52,7 @@ IrisCornerBody {
     onWatchOpenChanged: CornerWatch.holdError = root.watchOpen
     onPicked: id => {
         // The Movie Corner is its own component: asked to open over this one.
-        if (id === "movies") { CornerState.open = false; Quickshell.execDetached(["qs", "-c", "inir", "ipc", "call", "movie-corner", "open"]); return }
+        if (id === "movies") { CornerState.open = false; Quickshell.execDetached(["inir", "movie-corner", "open"]); return }
         root.place = id
         root.nav.search.clear()
     }

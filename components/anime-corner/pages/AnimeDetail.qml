@@ -169,6 +169,7 @@ Flickable {
                     // Where you were, when you have been here; else ani-cli's search.
                     IrisButton {
                         emphasized: true
+                        visible: CornerWatch.hasSources || !CornerWatch.sourcesKnown || ["en", ""].includes(CornerWatch.audio === "ja" ? CornerWatch.subs : CornerWatch.audio)
                         enabled: CornerWatch.canTarget && CornerWatch.canStart && (root.watch !== null || root.watchTitle.length > 0)
                         text: root.resumeEpisode.length > 0 ? Translation.tr("Continue · Ep %1").arg(root.resumeEpisode) : Translation.tr("Watch")
                         onClicked: {
@@ -189,6 +190,17 @@ Flickable {
                         enabled: Number(root.s.id ?? 0) > 0
                         onClicked: IrisPieces.animeToggleFollow(Number(root.s.id))
                     }
+                    // Where it streams officially, from AniList: opens the service in the browser.
+                    Repeater {
+                        model: Array.from(root.s.streaming ?? []).slice(0, 4)
+                        IrisChip {
+                            required property var modelData
+                            glyph: "play_circle"
+                            label: String(modelData.site)
+                            Accessible.description: Translation.tr("Watch it on %1").arg(String(modelData.site))
+                            onClicked: Qt.openUrlExternally(String(modelData.url))
+                        }
+                    }
                     IrisChip {
                         glyph: "open_in_new"
                         label: Translation.tr("AniList")
@@ -197,6 +209,18 @@ Flickable {
                     }
                 }
             }
+        }
+
+        // No sources: where to add one, under the official links.
+        IrisText {
+            Layout.fillWidth: true
+            visible: CornerWatch.sourcesKnown && !CornerWatch.hasSources
+            text: Array.from(root.s.streaming ?? []).length > 0
+                ? Translation.tr("Watch it on the services above, or add your own source in the Corner's Settings › Sources")
+                : Translation.tr("No sources yet: add one in the Corner's Settings › Sources")
+            color: IrisStyle.muted
+            font.pixelSize: IrisStyle.typeFootnote
+            wrapMode: Text.WordWrap
         }
 
         // No ani-cli: say so where the button would have worked.
