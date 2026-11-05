@@ -1146,6 +1146,8 @@ ColumnLayout {
         }
         Item {
             id: line
+            // Above the line's area: its switch takes its own click (a click on it opened the island instead, 11-04); the rest falls through.
+            z: 1
             width: island.width
             height: island.compact
             scale: plate.scale
