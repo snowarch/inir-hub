@@ -94,7 +94,7 @@ The Dock is set under iRiS Settings › Dock:
 
 ## Settings
 
-Open Settings with Super+,. It appears over the desktop or as a window: the button beside the close button switches, as does Home › Settings window › Opens as. The layout is Classic, Folio, Pocket or Drawer, from the switch in Settings' head or Home › Settings window › Layout. The history key beside that switch, or Home › Settings window › Original design, draws Settings as it looked in v2.33 (marks on coloured plates, each area's groups in one list, a sidebar without captions) with every page and option of today still in it; press it again to come back. Drawer's head has a key for Home, one for each kind of area (Appearance, Island & Dock and so on) and one each for Sources and the Community Hub; the kind you are in spells out its areas by name. Every layout shows an area as one page, each control in its own row, with a live preview where the area has one. Rows people rarely touch wait behind Fine-tune at the foot of their group, and groups that are all fine-tuning (corners or material per surface, say) wait together behind one Fine-tune at the foot of the area.
+Open Settings with Super+,. It appears over the desktop or as a window: the button beside the close button switches, as does Home › Settings window › Opens as. The layout is Classic, Folio, Pocket or Drawer, from the switch in Settings' head or Home › Settings window › Layout. The history key beside that switch, or Home › Settings window › Original design, draws Settings as it looked in v2.33 (marks on coloured plates, each area's groups in one list, a sidebar without captions) with every page and option of today still in it; press it again to come back. Drawer's head has a key for Home, one for each kind of area (Appearance, Island & Dock and so on) and one each for Sources and the Community Hub; the kind you are in spells out its areas by name. Every layout shows an area as one page: its groups open, each control in its own row, with a live preview where the area has one. Rows people rarely touch wait behind Fine-tune at the foot of their group, and groups that are all fine-tuning (corners or material per surface, say) wait together behind one Fine-tune at the foot of the area.
 
 The sidebar lists these areas, in this order:
 
@@ -108,14 +108,5 @@ The sidebar lists these areas, in this order:
 - Display, Keyboard & Mouse, Battery, Gaming & Fullscreen
 - Lock Screen, Login Screen
 - Sources, Community Hub
-
-Classic is built from small Islands, like the one at the top of your screen:
-
-- The Island at the head names the area you are in. Click it, press Ctrl+F or start typing anywhere and it grows into the search, with the number of matching options at its end; Esc takes it back.
-- Every change you make shows there for a few seconds: what changed, its new value and Undo. Restore defaults is one change, so its Undo brings every row back. A display change waits there for Keep or Revert.
-- Each area shows all its groups open. An Island floating at the foot of the page lists them: the one you are reading is lit, and a click takes you to another. Home, Style and Side Panels keep their tiles.
-- Dragging a slider shows its value in a small Island over the knob.
-- In a narrow window the sidebar becomes a rail of area icons; point at one and the Island at the head says its name.
-- Back and forward share one capsule at the left, there only when there is somewhere to go; the layout, design, window and close keys share one at the right.
 
 Ctrl+F searches every option. Ctrl+Up and Ctrl+Down move between areas. Back and forward are the mouse side buttons, Alt+Left and Alt+Right, or Ctrl+[ and Ctrl+].

@@ -186,12 +186,7 @@ Item {
     readonly property real sidebarNeed: root.sceneDrawn ? Number(root.scene.need ?? 0) : sidebarLayout.implicitHeight + 2 * sidebar.pad + Math.round(4 * root.d)
     // The sidebar keeps its width on every section: it never narrows to a rail (2026-10-15). It is as wide as the longest
     // area name prints bold (the one you are on), within a third of the window: a translated name never elides.
-    // A narrow window gives the page the room: the areas stand as a rail of their marks, the Island at the head names
-    // the one under the pointer (his 11-04: use every space there is).
-    readonly property bool rail: !root.sceneDrawn && frame.width > 0 && frame.width < Math.round(1040 * root.d)
-    property string peekSection: ""
-    readonly property real sidebarFull: root.rail ? Math.round(64 * root.d)
-        : Math.round(Math.min(Math.max(272 * root.d, root.longestArea + 88 * root.d), frame.width * 0.3))
+    readonly property real sidebarFull: Math.round(Math.min(Math.max(272 * root.d, root.longestArea + 88 * root.d), frame.width * 0.3))
     // Reads the metrics' font so it measures again once the font's bindings land (first measured at the default weight).
     readonly property real longestArea: areaMetrics.font.pixelSize > 0 ? root.sections.reduce((widest, section) => Math.max(widest,
         areaMetrics.advanceWidth(Translation.tr(String(section.title ?? "")))), 0) : 0
@@ -493,7 +488,7 @@ Item {
     }
     // What a Design's page offers at its foot, and its name for the page: the toolbar's, as this layout reads them.
     readonly property var pageActions: [rehearseAction, customizeAction, restoreAction].filter(action => action.shown)
-    readonly property string titleText: headIsland.title
+    readonly property string titleText: pageTitle.text
     function close(): void { GlobalStates.settingsOverlayOpen = false }
     readonly property var editTargets: ({ bar: "island", player: "bodies", bubbles: "pieces", dock: "dock", appearance: "material", colour: "colour",
         motion: "motion", desktop: "desktop", sidebars: "places", spotlight: "places", controlCenter: "bodies" })
@@ -712,8 +707,6 @@ Item {
             if (IrisOptions.homeEditing) IrisOptions.homeEditing = false
             else if (IrisOptions.openList.length > 0) IrisOptions.openList = ""
             else if (root.searching) searchField.text = ""
-            // An empty search gives the keys back and the Island goes back to rest.
-            else if (searchField.activeFocus) root.forceActiveFocus()
             else if (root.group.length > 0 && !root.split) root.leaveGroup()
             else if (root.advancedPage >= 0 && !root.pageInPane) root.go({ section: root.section, group: "", advancedPage: -1 })
             else if (!root.windowed) GlobalStates.settingsOverlayOpen = false
@@ -921,25 +914,28 @@ Item {
                     width: sidebar.width - 2 * sidebar.pad
                     spacing: 0
 
-                    // One search field: in the Island at the head, or in a layout's own slot.
+                    Item {
+                        id: sideSearchSlot
+                        visible: !root.sceneDrawn
+                        Layout.fillWidth: true
+                        Layout.bottomMargin: 6 * root.d
+                        implicitHeight: Math.round(32 * root.d)
+                    }
+                    // One search field: in the sidebar when there is one, in the header otherwise.
                     Rectangle {
                         id: searchPlate
                         // What a Design's skin draws the field from; the input, its keys and its focus stay here.
                         readonly property bool focused: searchField.activeFocus
                         readonly property bool hovered: searchHover.hovered
                         readonly property bool skinned: searchSkin.active
-                        // In the Island it takes the Island's ink and no plate of its own.
-                        readonly property bool islanded: !root.sceneDrawn
-                        readonly property color ink: searchPlate.islanded ? headIsland.ink : IrisStyle.text
-                        readonly property color inkSoft: searchPlate.islanded ? headIsland.inkSoft : IrisStyle.muted
-                        parent: root.sceneDrawn ? root.scene.searchSlot : headIsland.searchSlot
+                        parent: root.sceneDrawn ? root.scene.searchSlot : sideSearchSlot
                         anchors.left: parent.left
                         anchors.top: parent.top
                         anchors.bottom: parent.bottom
                         width: parent.width
                         radius: Math.min(height / 2, Math.max(IrisStyle.radiusRow, frame.radius - sidebar.pad))
-                        color: searchPlate.skinned || searchPlate.islanded ? "transparent" : searchField.activeFocus ? IrisStyle.fill : IrisStyle.fillQuiet
-                        border.width: searchField.activeFocus && !searchPlate.skinned && !searchPlate.islanded ? 1 : 0
+                        color: searchPlate.skinned ? "transparent" : searchField.activeFocus ? IrisStyle.fill : IrisStyle.fillQuiet
+                        border.width: searchField.activeFocus && !searchPlate.skinned ? 1 : 0
                         border.color: IrisStyle.tintBorder(IrisStyle.accent)
                         HoverHandler { id: searchHover; cursorShape: Qt.IBeamCursor }
                         TapHandler { onTapped: searchField.forceActiveFocus() }
@@ -951,17 +947,17 @@ Item {
                             anchors.verticalCenter: parent.verticalCenter
                             text: "search"
                             iconSize: Math.round(16 * root.d)
-                            color: searchSkin.item?.glyphColour ?? searchPlate.inkSoft
+                            color: searchSkin.item?.glyphColour ?? IrisStyle.muted
                         }
                         TextInput {
                             cursorDelegate: TextCursor { accent: IrisStyle.accent }
                             id: searchField
                             anchors.left: searchGlyph.right
                             anchors.leftMargin: 6 * root.d
-                            anchors.right: searchCount.visible ? searchCount.left : clearSearch.left
+                            anchors.right: clearSearch.left
                             anchors.rightMargin: 4 * root.d
                             anchors.verticalCenter: parent.verticalCenter
-                            color: searchPlate.ink
+                            color: IrisStyle.text
                             selectionColor: searchSkin.item?.selectionColour ?? IrisStyle.accentContainer
                             selectedTextColor: searchSkin.item?.selectedTextColour ?? IrisStyle.inkOnAccentContainer
                             font.family: IrisStyle.fontMain
@@ -984,21 +980,9 @@ Item {
                                 elide: Text.ElideRight
                                 visible: searchField.text.length === 0
                                 text: String(root.scene?.searchHint ?? "") || Translation.tr("Search settings")
-                                color: searchSkin.item?.placeholderColour ?? searchPlate.inkSoft
+                                color: searchSkin.item?.placeholderColour ?? IrisStyle.muted
                                 font.pixelSize: searchField.font.pixelSize
                             }
-                        }
-                        IrisText {
-                            id: searchCount
-                            anchors.right: clearSearch.left
-                            anchors.rightMargin: Math.round(8 * root.d)
-                            anchors.verticalCenter: parent.verticalCenter
-                            visible: searchPlate.islanded && root.searching
-                            text: String(root.matches.length)
-                            color: searchPlate.inkSoft
-                            font.pixelSize: IrisStyle.typeMeta
-                            font.weight: IrisStyle.weight(Font.Medium)
-                            font.features: { "tnum": 1 }
                         }
                         MaterialSymbol {
                             id: clearSearch
@@ -1010,8 +994,8 @@ Item {
                             text: "cancel"
                             fill: 1
                             iconSize: Math.round(15 * root.d)
-                            color: searchPlate.inkSoft
-                            MouseArea { anchors.fill: parent; anchors.margins: -4; cursorShape: Qt.PointingHandCursor; onClicked: { searchField.text = ""; searchField.focus = false } }
+                            color: IrisStyle.muted
+                            MouseArea { anchors.fill: parent; anchors.margins: -4; cursorShape: Qt.PointingHandCursor; onClicked: searchField.text = "" }
                         }
                     }
 
@@ -1040,50 +1024,41 @@ Item {
 
                         // Where you are travels from row to row on the morph curve (the gallery's ring does the same) instead of
                         // fading out on one row and in on the next. Under the rows; the footer keeps its own wash.
-                        // Where you are is a capsule that travels from row to row the way the Island moves: the edge
-                        // going first leads and the other follows, so it stretches on the way and settles round (his
-                        // 11-04: everything is a Dynamic Island). Under the rows; the footer keeps its own wash.
                         Rectangle {
                             id: travelWash
                             readonly property Item row: root.travelRow
                             readonly property bool shown: travelWash.row !== null && travelWash.row.selected
                             property bool travels: false
-                            property real rise: 0
-                            property real fall: 0
-                            property bool down: true
-                            function aim(): void {
-                                const row = travelWash.row
-                                if (!row) return
-                                const top = sidebarColumn.y + row.y + row.washY
-                                travelWash.down = top >= travelWash.rise
-                                travelWash.rise = top
-                                travelWash.fall = top + row.rowHeight
-                            }
-                            onRowChanged: travelWash.aim()
-                            Connections {
-                                target: travelWash.row
-                                function onYChanged(): void { travelWash.aim() }
-                                function onRowHeightChanged(): void { travelWash.aim() }
-                            }
-                            x: root.rail ? sidebarColumn.x + Math.round((sidebarColumn.width - width) / 2) : sidebarColumn.x
-                            width: root.rail ? (travelWash.row?.rowHeight ?? 0) : sidebarColumn.width
-                            y: travelWash.rise
-                            height: Math.max(0, travelWash.fall - travelWash.rise)
-                            radius: IrisStyle.capsule(travelWash.row ? travelWash.row.rowHeight : height)
-                            readonly property color own: travelWash.row?.own ?? IrisStyle.accent
+                            x: sidebarColumn.x
+                            width: sidebarColumn.width
+                            y: travelWash.row ? sidebarColumn.y + travelWash.row.y + travelWash.row.washY : 0
+                            height: travelWash.row ? travelWash.row.rowHeight : 0
+                            radius: travelWash.row ? travelWash.row.washRadius : 0
                             // A plate-selection Design (AIRISU) puts where you are on the solid plate of the accent.
-                            color: IrisStyle.plateSelection ? IrisStyle.selectionFill : IrisStyle.tintFillHover(travelWash.own)
+                            readonly property color wash: IrisStyle.tintFillHover(travelWash.row?.own ?? IrisStyle.accent)
+                            color: IrisStyle.plateSelection ? IrisStyle.selectionFill : "transparent"
                             opacity: travelWash.shown ? 1 : 0
+                            // Where you are fades in from the left, strongest at the right (his 10-30): a flat block of tint read as a heavy bar (his 10-30).
+                            Rectangle {
+                                anchors.fill: parent
+                                visible: !IrisStyle.plateSelection
+                                radius: parent.radius
+                                gradient: Gradient {
+                                    orientation: Gradient.Horizontal
+                                    GradientStop { position: 0; color: ColorUtils.applyAlpha(travelWash.wash, 0) }
+                                    GradientStop { position: 1; color: travelWash.wash }
+                                }
+                            }
                             // It lands where it first appears and travels from then on. Moving the selection hides it for a
                             // moment (the old row lets go before the new one takes it): only a hide that lasts stops the travel.
                             onShownChanged: if (travelWash.shown) { washDisarm.stop(); if (!travelWash.travels) washArm.restart() }
                                 else washDisarm.restart()
                             Timer { id: washArm; interval: 0; onTriggered: travelWash.travels = IrisStyle.motionEnabled }
                             Timer { id: washDisarm; interval: 150; onTriggered: if (!travelWash.shown) travelWash.travels = false }
-                            Behavior on rise { enabled: travelWash.travels; NumberAnimation { duration: IrisStyle.duration(travelWash.down ? 340 : 210); easing.type: Easing.OutCubic } }
-                            Behavior on fall { enabled: travelWash.travels; NumberAnimation { duration: IrisStyle.duration(travelWash.down ? 210 : 340); easing.type: Easing.OutCubic } }
+                            Behavior on y { enabled: travelWash.travels; NumberAnimation { duration: IrisStyle.morphDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: IrisStyle.morphCurve } }
+                            Behavior on height { enabled: travelWash.travels; NumberAnimation { duration: IrisStyle.morphDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: IrisStyle.morphCurve } }
                             Behavior on opacity { NumberAnimation { duration: IrisStyle.duration(110); easing.type: IrisStyle.feedbackEasing } }
-                            Behavior on color { ColorAnimation { duration: IrisStyle.duration(160); easing.type: IrisStyle.feedbackEasing } }
+                            Behavior on color { ColorAnimation { duration: IrisStyle.duration(110); easing.type: IrisStyle.feedbackEasing } }
                         }
 
                         // Where you are stays in the list: a section opened from search, a link or the CLI below the fold
@@ -1164,66 +1139,73 @@ Item {
                 RowLayout {
                     id: headRow
                     Layout.fillWidth: true
-                    // The keys over the plates' edges; the Island between them, where the page's name was.
+                    // The back key over the plates' edge, the close key over their right edge, the keys on the sidebar
+                    // search's line.
                     Layout.leftMargin: root.plateInset
                     Layout.rightMargin: root.plateInset
                     Layout.topMargin: root.headLine - Math.round(26 * root.d)
-                    // Its own height only: a layout child fills by default, and the Island's slot (filling the row) let
-                    // the head take half the window and leave the page none (his 11-04 capture).
-                    Layout.fillHeight: false
                     Layout.preferredHeight: Math.round(52 * root.d)
-                    Layout.maximumHeight: Math.round(52 * root.d)
-                    spacing: Math.round(8 * root.d)
-                    // What the Island and the actions share: the row less every fixed control in it. Measured from the
-                    // row, never from the Island or the actions, whose widths move with the folding (that loop froze the shell).
+                    spacing: 4 * root.d
+                    // What the name and the actions share: the row less every fixed control in it. Measured from the
+                    // row, never from the name or the actions, whose widths move with the folding (that loop froze the shell).
                     readonly property real sharedRoom: {
                         let fixed = 0
                         for (const child of headRow.children)
-                            if (child.visible && child !== islandSlot && child !== toolbarActions) fixed += child.width + headRow.spacing
+                            if (child.visible && child !== titleColumn && child !== toolbarActions) fixed += child.width + headRow.spacing
                         return headRow.width - fixed - headRow.spacing - 6 * root.d
                     }
-                    // Back and forward: one capsule, there only while there is somewhere to go.
-                    Islet {
-                        id: navIslet
-                        visible: root.backStack.length > 0 || root.forwardStack.length > 0
-                        deep: false
-                        lifted: false
-                        wantWidth: navRow.implicitWidth + Math.round(4 * root.d)
-                        wantHeight: Math.round(32 * root.d)
-                        Row {
-                            id: navRow
-                            anchors.centerIn: parent
-                            IrisIconButton {
-                                materialIcon: "chevron_left"
-                                enabled: root.backStack.length > 0
-                                opacity: enabled ? 1 : 0.35
-                                onClicked: root.goBack()
-                                Accessible.name: Translation.tr("Back")
-                            }
-                            IrisIconButton {
-                                materialIcon: "chevron_right"
-                                enabled: root.forwardStack.length > 0
-                                opacity: enabled ? 1 : 0.35
-                                onClicked: root.goForward()
-                                Accessible.name: Translation.tr("Forward")
-                            }
+                    IrisIconButton {
+                        materialIcon: "chevron_left"
+                        enabled: root.backStack.length > 0
+                        opacity: enabled ? 1 : 0.35
+                        onClicked: root.goBack()
+                        Accessible.name: Translation.tr("Back")
+                    }
+                    IrisIconButton {
+                        materialIcon: "chevron_right"
+                        enabled: root.forwardStack.length > 0
+                        opacity: enabled ? 1 : 0.35
+                        onClicked: root.goForward()
+                        Accessible.name: Translation.tr("Forward")
+                    }
+                    ColumnLayout {
+                        id: titleColumn
+                        Layout.fillWidth: true
+                        Layout.leftMargin: 6 * root.d
+                        spacing: 0
+                        IrisText {
+                            id: pageTitle
+                            Layout.fillWidth: true
+                            text: root.searching ? Translation.tr("Results for “%1”").arg(root.query)
+                                : root.advancedPage >= 0 ? root.pageTitle(root.advancedPage)
+                                : root.openGroup.length > 0 ? root.openGroup
+                                : Translation.tr(root.currentSection.title)
+                            font.family: IrisStyle.fontTitle
+                            font.pixelSize: IrisStyle.lowerTitles ? IrisStyle.typeDisplay : IrisStyle.typeTitleLarge
+                            font.weight: IrisStyle.lowerTitles ? IrisStyle.weight(Font.ExtraBold) : IrisStyle.weight(Font.Bold)
+                            font.capitalization: IrisStyle.lowerTitles && !root.searching ? Font.AllLowercase : Font.MixedCase
+                            font.letterSpacing: IrisStyle.lowerTitles ? -Math.round(IrisStyle.typeDisplay * 0.03) : 0
+                            elide: Text.ElideRight
+                        }
+                        IrisText {
+                            Layout.fillWidth: true
+                            visible: !root.searching && root.advancedPage < 0
+                                && root.openGroup.length > 0 && root.openGroup !== Translation.tr(root.currentSection.title)
+                            text: Translation.tr(root.currentSection.title)
+                            color: IrisStyle.muted
+                            font.pixelSize: IrisStyle.typeMeta
+                            elide: Text.ElideRight
                         }
                     }
-                    Item {
-                        id: islandSlot
-                        Layout.fillWidth: true
-                        Layout.fillHeight: true
-                        HeadIsland { id: headIsland; room: islandSlot.width }
-                    }
-                    // The actions keep their words while the Island still reads whole beside them (up to 260·d of
+                    // The actions keep their words while the page's name still reads whole beside them (up to 260·d of
                     // it); measured in the language on screen, never a fixed window width.
                     RowLayout {
                         id: toolbarActions
                         spacing: 4 * root.d
-                        // Fold one at a time, the least used first, only as many as the Island needs.
+                        // Fold one at a time, the least used first, only as many as the name needs.
                         readonly property var foldOrder: [restoreAction, customizeAction, rehearseAction].filter(action => action.shown)
                         readonly property var folded: {
-                            const room = headRow.sharedRoom - Math.min(headIsland.restWidth, 260 * root.d)
+                            const room = headRow.sharedRoom - Math.min(pageTitle.implicitWidth, 260 * root.d)
                             let need = toolbarActions.foldOrder.reduce((sum, action) => sum + action.fullWidth, 0)
                                 + Math.max(0, toolbarActions.foldOrder.length - 1) * spacing
                             const out = []
@@ -1272,48 +1254,60 @@ Item {
                         shown: !root.searching && root.advancedPage < 0 && modified
                         glyph: "restart_alt"
                         label: Translation.tr("Restore defaults")
-                        // One change for the Island: its Undo brings every row back.
-                        onClicked: IrisOptions.commitAll(resettable, resettable.map(spec => spec.fallback), Translation.tr("Restored defaults"))
+                        onClicked: resettable.forEach(spec => IrisOptions.commit(spec, spec.fallback))
                     }
                     }
-                    // The window's own keys: the layouts, the design key, where it opens, close. One capsule.
-                    Islet {
-                        id: windowIslet
-                        deep: false
-                        lifted: false
-                        wantWidth: windowKeys.implicitWidth + Math.round(4 * root.d)
-                        wantHeight: Math.round(32 * root.d)
-                        Row {
-                            id: windowKeys
-                            anchors.centerIn: parent
-                            // Classic's way back to the layouts.
-                            Layouts.LayoutSwitch {
-                                anchors.verticalCenter: parent.verticalCenter
-                                visible: !root.sceneDesigned
-                                host: root
-                                voice: ""
-                                compact: true
-                            }
-                            // The design key: one press between today's Settings and v2.33's, every page and option kept.
-                            IrisIconButton {
-                                objectName: "settingsDesignKey"
-                                visible: !root.sceneDesigned && IrisDesign.skin("settingsPage").length === 0
-                                materialIcon: "history"
-                                selected: IrisStyle.settingsOriginal
-                                onClicked: Config.setNestedValue("iris.appearance.settingsOriginal", !IrisStyle.settingsOriginal)
-                                Accessible.name: IrisStyle.settingsOriginal ? Translation.tr("Use the current design") : Translation.tr("Use the original design (v2.33)")
-                            }
-                            IrisIconButton {
-                                materialIcon: root.windowed ? "layers" : "web_asset"
-                                onClicked: root.switchHost()
-                                Accessible.name: root.windowed ? Translation.tr("Open over the desktop") : Translation.tr("Open as a window")
-                            }
-                            IrisIconButton {
-                                materialIcon: "close"
-                                onClicked: GlobalStates.settingsOverlayOpen = false
-                                Accessible.name: Translation.tr("Close settings")
-                            }
+                    // Classic's way back to the layouts.
+                    Layouts.LayoutSwitch {
+                        visible: !root.sceneDesigned
+                        host: root
+                        voice: ""
+                        compact: true
+                    }
+                    // The design key: one press between today's Settings and v2.33's, every page and option kept.
+                    IrisIconButton {
+                        objectName: "settingsDesignKey"
+                        visible: !root.sceneDesigned && IrisDesign.skin("settingsPage").length === 0
+                        materialIcon: "history"
+                        selected: IrisStyle.settingsOriginal
+                        onClicked: Config.setNestedValue("iris.appearance.settingsOriginal", !IrisStyle.settingsOriginal)
+                        Accessible.name: IrisStyle.settingsOriginal ? Translation.tr("Use the current design") : Translation.tr("Use the original design (v2.33)")
+                    }
+                    IrisIconButton {
+                        materialIcon: root.windowed ? "layers" : "web_asset"
+                        onClicked: root.switchHost()
+                        Accessible.name: root.windowed ? Translation.tr("Open over the desktop") : Translation.tr("Open as a window")
+                    }
+                    IrisIconButton {
+                        materialIcon: "close"
+                        onClicked: GlobalStates.settingsOverlayOpen = false
+                        Accessible.name: Translation.tr("Close settings")
+                    }
+                }
+
+                Rectangle {
+                    Layout.fillWidth: true
+                    Layout.leftMargin: root.plateInset
+                    Layout.rightMargin: root.plateInset
+                    Layout.bottomMargin: root.paneInset
+                    visible: IrisNiri.pending !== null
+                    implicitHeight: Math.round(48 * root.d)
+                    radius: IrisStyle.radiusTile
+                    color: IrisStyle.tintFill(IrisStyle.accent)
+                    RowLayout {
+                        anchors.fill: parent
+                        anchors.leftMargin: 16 * root.d
+                        anchors.rightMargin: 8 * root.d
+                        spacing: 8 * root.d
+                        MaterialSymbol { text: "monitor"; iconSize: Math.round(18 * root.d); color: IrisStyle.accent }
+                        IrisText {
+                            Layout.fillWidth: true
+                            text: Translation.tr("Keep this display setting? It goes back in %1 s.").arg(IrisNiri.secondsLeft)
+                            font.pixelSize: IrisStyle.typeLabel
+                            elide: Text.ElideRight
                         }
+                        IrisButton { text: Translation.tr("Revert"); quiet: true; buttonRadius: height / 2; onClicked: IrisNiri.revertDisplay() }
+                        IrisButton { text: Translation.tr("Keep"); emphasized: true; buttonRadius: height / 2; onClicked: IrisNiri.keepDisplay() }
                     }
                 }
 
@@ -1350,7 +1344,7 @@ Item {
                                 hidden: !root.classicRows
                                 settled: root.bodySettled
                                 urlFor: id => Qt.resolvedUrl("layouts/FolioPage.qml")
-                                propsFor: id => ({ host: root, titled: false, actions: false, openAll: true })
+                                propsFor: id => ({ host: root, titled: false, actions: false })
                                 property string wanted: ""
                                 // A jump waits for its own area only: leaving first drops it.
                                 onCurrentChanged: classicPool.wanted = ""
@@ -1471,126 +1465,6 @@ Item {
                         active: visible
                         source: String(root.pages[root.advancedPage]?.component ?? "")
                     }
-
-                    // ── The page's index: an Island floating over its foot with every group of the area. The one being
-                    // read wears the capsule, which stretches along the way like the sidebar's; a tap glides there.
-                    Islet {
-                        id: indexIsland
-                        readonly property Item page: classicPool.shownItem
-                        readonly property var entries: indexIsland.page?.groupIndex ?? []
-                        readonly property string reading: String(indexIsland.page?.reading ?? "")
-                        readonly property int readingAt: Math.max(0, indexIsland.entries.findIndex(entry => entry.key === indexIsland.reading))
-                        readonly property bool wanted: !root.sceneDrawn && root.classicRows && !root.searching && (indexIsland.page?.indexed ?? false)
-                        z: 3
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        anchors.bottom: parent.bottom
-                        anchors.bottomMargin: root.paneInset + Math.round(12 * root.d)
-                        wantHeight: indexIsland.wanted ? Math.round(36 * root.d) : 0
-                        wantWidth: indexIsland.wanted ? Math.min(pageArea.width - Math.round(64 * root.d), indexChips.implicitWidth + Math.round(8 * root.d)) : 0
-                        visible: indexIsland.width > 1 && indexIsland.height > 1
-                        opacity: indexIsland.wanted ? 1 : 0
-                        Behavior on opacity { NumberAnimation { duration: IrisStyle.duration(160); easing.type: IrisStyle.feedbackEasing } }
-                        Flickable {
-                            id: indexFlick
-                            anchors.fill: parent
-                            anchors.margins: Math.round(4 * root.d)
-                            contentWidth: indexChips.implicitWidth
-                            contentHeight: height
-                            flickableDirection: Flickable.HorizontalFlick
-                            interactive: contentWidth > width
-                            boundsBehavior: Flickable.StopAtBounds
-                            clip: true
-                            // The chip being read stays in sight, with one chip of air.
-                            function follow(): void {
-                                const chip = indexChipsRepeater.itemAt(indexIsland.readingAt)
-                                if (!chip || indexFlick.contentWidth <= indexFlick.width) return
-                                const air = Math.round(24 * root.d)
-                                const to = chip.x < indexFlick.contentX + air ? chip.x - air
-                                    : chip.x + chip.width > indexFlick.contentX + indexFlick.width - air ? chip.x + chip.width + air - indexFlick.width
-                                    : indexFlick.contentX
-                                indexGlide.to = Math.max(0, Math.min(indexFlick.contentWidth - indexFlick.width, to))
-                                if (Math.abs(indexGlide.to - indexFlick.contentX) > 0.5) indexGlide.restart()
-                            }
-                            NumberAnimation { id: indexGlide; target: indexFlick; property: "contentX"; duration: IrisStyle.duration(280); easing.type: Easing.OutCubic }
-                            Connections {
-                                target: indexIsland
-                                function onReadingAtChanged(): void { indexPill.aim(); indexFlick.follow() }
-                                function onEntriesChanged(): void { indexPill.aim() }
-                            }
-                            Rectangle {
-                                id: indexPill
-                                property real from: 0
-                                property real till: 0
-                                property bool forward: true
-                                property bool travels: false
-                                function aim(): void {
-                                    const chip = indexChipsRepeater.itemAt(indexIsland.readingAt)
-                                    if (!chip) return
-                                    indexPill.forward = chip.x >= indexPill.from
-                                    indexPill.from = chip.x
-                                    indexPill.till = chip.x + chip.width
-                                    indexPill.travels = IrisStyle.motionEnabled
-                                }
-                                x: indexPill.from
-                                width: Math.max(0, indexPill.till - indexPill.from)
-                                height: indexFlick.height
-                                radius: IrisStyle.capsule(height)
-                                color: IrisStyle.islandRaise
-                                Behavior on from { enabled: indexPill.travels; NumberAnimation { duration: IrisStyle.duration(indexPill.forward ? 320 : 200); easing.type: Easing.OutCubic } }
-                                Behavior on till { enabled: indexPill.travels; NumberAnimation { duration: IrisStyle.duration(indexPill.forward ? 200 : 320); easing.type: Easing.OutCubic } }
-                            }
-                            Row {
-                                id: indexChips
-                                height: indexFlick.height
-                                onImplicitWidthChanged: indexPill.aim()
-                                Repeater {
-                                    id: indexChipsRepeater
-                                    model: indexIsland.entries
-                                    delegate: Item {
-                                        id: chip
-                                        required property var modelData
-                                        required property int index
-                                        readonly property bool here: chip.index === indexIsland.readingAt
-                                        readonly property color tint: {
-                                            return IrisStyle.islandTint(IrisOptions.groupHue(root.section, chip.modelData.at, chip.modelData.key))
-                                        }
-                                        width: chipRow.implicitWidth + Math.round(22 * root.d)
-                                        height: indexChips.height
-                                        Row {
-                                            id: chipRow
-                                            anchors.centerIn: parent
-                                            spacing: Math.round(6 * root.d)
-                                            MaterialSymbol {
-                                                anchors.verticalCenter: parent.verticalCenter
-                                                text: IrisOptions.groupGlyphs[chip.modelData.key] ?? root.currentSection?.icon ?? "settings"
-                                                iconSize: Math.round(13 * root.d)
-                                                fill: 1
-                                                color: chip.tint
-                                                opacity: chip.here || chipArea.containsMouse ? 1 : 0.7
-                                            }
-                                            IrisText {
-                                                anchors.verticalCenter: parent.verticalCenter
-                                                text: Translation.tr(chip.modelData.key)
-                                                color: chip.here || chipArea.containsMouse ? indexIsland.ink : indexIsland.inkSoft
-                                                font.pixelSize: IrisStyle.typeMeta
-                                                font.weight: IrisStyle.weight(chip.here ? Font.DemiBold : Font.Medium)
-                                                Behavior on color { ColorAnimation { duration: IrisStyle.duration(120) } }
-                                            }
-                                        }
-                                        MouseArea {
-                                            id: chipArea
-                                            anchors.fill: parent
-                                            hoverEnabled: true
-                                            cursorShape: Qt.PointingHandCursor
-                                            onClicked: indexIsland.page?.showGroup(chip.modelData.key)
-                                        }
-                                        Accessible.role: Accessible.Button
-                                        Accessible.name: Translation.tr(chip.modelData.key)
-                                    }
-                                }
-                            }
-                        }
-                    }
                 }
             }
         }
@@ -1643,242 +1517,6 @@ Item {
         font.pixelSize: IrisStyle.monoCaptions ? IrisStyle.typeMeta : IrisStyle.typeLabel
         font.weight: IrisStyle.weight(Font.Medium)
     }
-    // The Island as a piece of Settings (his 11-04: everything is a Dynamic Island): a capsule that springs, on the
-    // Island's own motion, to the size its content asks for. Deep is the Island's black (it says something live); a
-    // plain one is a quiet capsule that holds keys.
-    component Islet: Item {
-        id: islet
-        property real wantWidth: 0
-        property real wantHeight: Math.round(36 * root.d)
-        property bool deep: true
-        property bool lifted: true
-        default property alias content: isletBody.data
-        readonly property color ink: islet.deep ? IrisStyle.islandInk : IrisStyle.text
-        readonly property color inkSoft: islet.deep ? IrisStyle.islandInkSoft : IrisStyle.muted
-        readonly property color fill: !islet.deep ? (IrisStyle.controlPlated ? IrisStyle.plateFillFor(IrisStyle.controlPlate) : IrisStyle.fillQuiet)
-            : IrisStyle.islandDeep
-        implicitWidth: Math.max(0, isletWidth.value)
-        implicitHeight: Math.max(0, isletHeight.value)
-        width: implicitWidth
-        height: implicitHeight
-        IrisSpring { id: isletWidth; surface: "island"; intent: "move"; to: islet.wantWidth; minimum: 0; epsilon: 0.25; animate: IrisStyle.motionEnabled }
-        IrisSpring { id: isletHeight; surface: "island"; intent: "move"; to: islet.wantHeight; minimum: 0; epsilon: 0.25; animate: IrisStyle.motionEnabled }
-        RectangularShadow {
-            visible: islet.lifted && islet.deep
-            anchors.fill: isletPlate
-            radius: isletPlate.radius
-            offset.y: Math.round(3 * root.d)
-            blur: Math.round(16 * root.d)
-            color: IrisStyle.islandShadow
-        }
-        Rectangle {
-            id: isletPlate
-            anchors.fill: parent
-            radius: IrisStyle.capsule(height)
-            color: islet.fill
-            // On a dark sheet the black needs its edge.
-            border.width: islet.deep && !IrisStyle.light ? 1 : 0
-            border.color: IrisStyle.islandEdge
-        }
-        Item { id: isletBody; anchors.fill: parent; clip: true }
-    }
-
-    // A key inside the Island, in its own ink: Undo, Keep, Revert.
-    component IslandKey: Rectangle {
-        id: key
-        property string label: ""
-        property bool strong: false
-        property color ink: IrisStyle.text
-        signal pressed()
-        implicitWidth: keyText.implicitWidth + Math.round(22 * root.d)
-        implicitHeight: Math.round(26 * root.d)
-        radius: height / 2
-        color: key.strong ? IrisStyle.accent : keyArea.containsMouse ? IrisStyle.islandRaiseHover : IrisStyle.islandRaise
-        scale: keyArea.pressed ? IrisStyle.pressScale(0.95) : 1
-        Behavior on scale { NumberAnimation { duration: IrisStyle.duration(100); easing.type: IrisStyle.feedbackEasing } }
-        Behavior on color { ColorAnimation { duration: IrisStyle.duration(110) } }
-        IrisText {
-            id: keyText
-            anchors.centerIn: parent
-            text: key.label
-            color: key.strong ? IrisStyle.onTint : key.ink
-            font.pixelSize: IrisStyle.typeMeta
-            font.weight: IrisStyle.weight(Font.DemiBold)
-        }
-        MouseArea { id: keyArea; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: key.pressed() }
-        Accessible.role: Accessible.Button
-        Accessible.name: key.label
-    }
-
-    // ── The Island at the head: where you are at rest, the search while you type, what you just changed with its Undo,
-    // the display question. One capsule reshaping between them, its words fading as it does.
-    component HeadIsland: Islet {
-        id: island
-        property real room: 0
-        property alias searchSlot: islandSearch
-        anchors.centerIn: parent
-        readonly property string title: root.searching ? Translation.tr("Results for “%1”").arg(root.query)
-            : root.advancedPage >= 0 ? root.pageTitle(root.advancedPage)
-            : root.openGroup.length > 0 ? root.openGroup
-            : Translation.tr(root.currentSection.title)
-        readonly property bool typing: searchField.text.length > 0
-        // The change on show: set when Settings writes one, gone after a read's while, held under the pointer.
-        property var change: null
-        // An empty field with the keys still reads as the search, unless a change has something to say.
-        readonly property string mode: IrisNiri.pending !== null ? "display" : island.typing ? "search"
-            : island.change !== null ? "change" : searchField.activeFocus ? "search" : "rest"
-        // The rail's area under the pointer, named here (rest only).
-        readonly property var peek: root.peekSection.length > 0 && root.peekSection !== root.section ? IrisOptions.sectionById(root.peekSection) : null
-        readonly property var shownArea: island.peek ?? root.currentSection
-        Connections {
-            target: IrisOptions
-            function onLastChangeChanged(): void {
-                const next = IrisOptions.lastChange
-                island.change = next && (root.windowed || GlobalStates.settingsOverlayOpen) ? next : null
-                if (island.change) changeLife.restart()
-            }
-        }
-        Timer { id: changeLife; interval: 3800; onTriggered: if (islandHover.hovered) restart(); else island.change = null }
-        HoverHandler { id: islandHover }
-        readonly property int pad: Math.round(14 * root.d)
-        readonly property real restWidth: restRow.implicitWidth + 2 * island.pad
-        readonly property color areaTint: {
-            return IrisStyle.islandTint(island.shownArea?.tint ?? IrisStyle.accent)
-        }
-        readonly property var changed: island.change?.specs?.[0] ?? null
-        readonly property color changeTint: {
-            return IrisStyle.islandTint(island.changed ? (IrisOptions.sectionById(String(island.changed.section ?? root.section))?.tint ?? IrisStyle.accent) : IrisStyle.accent)
-        }
-        wantHeight: Math.round((island.mode === "rest" ? 36 : 40) * root.d)
-        wantWidth: Math.min(island.room, island.mode === "search" ? Math.max(island.restWidth, Math.round(520 * root.d))
-            : island.mode === "change" ? changeRow.implicitWidth + island.pad + Math.round(7 * root.d)
-            : island.mode === "display" ? displayRow.implicitWidth + island.pad + Math.round(7 * root.d)
-            : island.restWidth)
-
-        // At rest: the area's mark in its colour and the page's name; a tap searches.
-        Row {
-            id: restRow
-            anchors.centerIn: parent
-            spacing: Math.round(8 * root.d)
-            opacity: island.mode === "rest" ? 1 : 0
-            visible: opacity > 0.01
-            Behavior on opacity { NumberAnimation { duration: IrisStyle.duration(150); easing.type: IrisStyle.feedbackEasing } }
-            Rectangle {
-                anchors.verticalCenter: parent.verticalCenter
-                width: Math.round(22 * root.d)
-                height: width
-                radius: width / 2
-                color: IrisStyle.islandWash(island.areaTint)
-                MaterialSymbol {
-                    anchors.centerIn: parent
-                    text: String(island.shownArea?.icon ?? "settings")
-                    iconSize: Math.round(14 * root.d)
-                    fill: 1
-                    color: island.areaTint
-                }
-            }
-            IrisText {
-                anchors.verticalCenter: parent.verticalCenter
-                width: Math.min(implicitWidth, Math.max(80 * root.d, island.room - 110 * root.d))
-                text: island.peek ? Translation.tr(String(island.peek.title ?? "")) : island.title
-                color: island.peek ? island.inkSoft : island.ink
-                font.family: IrisStyle.fontTitle
-                font.pixelSize: IrisStyle.typeLabel
-                font.weight: IrisStyle.weight(Font.DemiBold)
-                elide: Text.ElideRight
-            }
-            MaterialSymbol {
-                anchors.verticalCenter: parent.verticalCenter
-                text: "search"
-                iconSize: Math.round(15 * root.d)
-                color: island.inkSoft
-            }
-        }
-        // Searching: the field itself (searchPlate lands here), the capsule grown wide for it.
-        Item {
-            id: islandSearch
-            anchors.fill: parent
-            anchors.leftMargin: Math.round(6 * root.d)
-            anchors.rightMargin: Math.round(6 * root.d)
-            // Kept visible at rest so typing anywhere can still give it the keys; only drawn while searching.
-            opacity: island.mode === "search" ? 1 : 0
-            Behavior on opacity { NumberAnimation { duration: IrisStyle.duration(150); easing.type: IrisStyle.feedbackEasing } }
-        }
-        // A change: what moved, its new value in its area's colour, and Undo.
-        Row {
-            id: changeRow
-            anchors.verticalCenter: parent.verticalCenter
-            anchors.right: parent.right
-            anchors.rightMargin: Math.round(7 * root.d)
-            spacing: Math.round(8 * root.d)
-            opacity: island.mode === "change" ? 1 : 0
-            visible: opacity > 0.01
-            Behavior on opacity { NumberAnimation { duration: IrisStyle.duration(150); easing.type: IrisStyle.feedbackEasing } }
-            Rectangle {
-                anchors.verticalCenter: parent.verticalCenter
-                width: Math.round(24 * root.d)
-                height: width
-                radius: width / 2
-                color: IrisStyle.islandWash(island.changeTint)
-                MaterialSymbol {
-                    anchors.centerIn: parent
-                    text: (island.change?.specs?.length ?? 0) > 1 ? "restart_alt"
-                        : String(IrisOptions.groupGlyphs[String(island.changed?.group ?? "")] ?? IrisOptions.sectionById(String(island.changed?.section ?? root.section))?.icon ?? "tune")
-                    iconSize: Math.round(14 * root.d)
-                    fill: 1
-                    color: island.changeTint
-                }
-            }
-            IrisText {
-                anchors.verticalCenter: parent.verticalCenter
-                width: Math.min(implicitWidth, Math.max(60 * root.d, island.room * 0.5))
-                text: String(island.change?.title ?? "").length > 0 ? island.change.title : Translation.tr(String(island.changed?.label ?? ""))
-                color: island.ink
-                font.pixelSize: IrisStyle.typeLabel
-                font.weight: IrisStyle.weight(Font.DemiBold)
-                elide: Text.ElideRight
-            }
-            IrisText {
-                anchors.verticalCenter: parent.verticalCenter
-                visible: text.length > 0
-                width: Math.min(implicitWidth, Math.max(40 * root.d, island.room * 0.25))
-                text: island.change && island.change.after !== undefined && island.changed ? IrisOptions.valueText(island.changed, island.change.after) : ""
-                color: island.changeTint
-                font.pixelSize: IrisStyle.typeLabel
-                font.weight: IrisStyle.weight(Font.Medium)
-                elide: Text.ElideRight
-            }
-            IslandKey {
-                anchors.verticalCenter: parent.verticalCenter
-                label: Translation.tr("Undo")
-                ink: island.ink
-                onPressed: { IrisOptions.undoLast(); island.change = null }
-            }
-        }
-        // A display change waiting for its word.
-        Row {
-            id: displayRow
-            anchors.verticalCenter: parent.verticalCenter
-            anchors.right: parent.right
-            anchors.rightMargin: Math.round(7 * root.d)
-            spacing: Math.round(8 * root.d)
-            opacity: island.mode === "display" ? 1 : 0
-            visible: opacity > 0.01
-            Behavior on opacity { NumberAnimation { duration: IrisStyle.duration(150); easing.type: IrisStyle.feedbackEasing } }
-            MaterialSymbol { anchors.verticalCenter: parent.verticalCenter; text: "monitor"; iconSize: Math.round(17 * root.d); fill: 1; color: island.areaTint }
-            IrisText {
-                anchors.verticalCenter: parent.verticalCenter
-                width: Math.min(implicitWidth, Math.max(80 * root.d, island.room - 190 * root.d))
-                text: Translation.tr("Keep this display setting? It goes back in %1 s.").arg(IrisNiri.secondsLeft)
-                color: island.ink
-                font.pixelSize: IrisStyle.typeLabel
-                elide: Text.ElideRight
-            }
-            IslandKey { anchors.verticalCenter: parent.verticalCenter; label: Translation.tr("Revert"); ink: island.ink; onPressed: IrisNiri.revertDisplay() }
-            IslandKey { anchors.verticalCenter: parent.verticalCenter; label: Translation.tr("Keep"); strong: true; ink: island.ink; onPressed: IrisNiri.keepDisplay() }
-        }
-    }
-
     component ToolbarAction: IrisButton {
         id: action
         property string glyph: ""
@@ -1941,17 +1579,14 @@ Item {
         // does its name, a step heavier (DI49i: the chosen row reads at a glance, not only by its wash).
         readonly property color tint: IrisOptions.sectionById(sectionRow.modelData.id).tint
         readonly property color own: IrisStyle.iconColour === "area" ? sectionRow.tint : IrisStyle.accent
-        // Every plate of the list is a capsule, as the one that travels.
-        readonly property real washRadius: IrisStyle.capsule(sectionRow.rowHeight)
+        readonly property real washRadius: Math.min(sectionRow.rowHeight / 2, IrisStyle.tileRadius(sectionMark.width) + sectionMark.x)
         onSelectedChanged: if (sectionRow.selected && sectionRow.travels) root.travelRow = sectionRow
         Component.onCompleted: if (sectionRow.selected && sectionRow.travels) root.travelRow = sectionRow
         Component.onDestruction: if (root.travelRow === sectionRow) root.travelRow = null
         readonly property bool dimmed: root.searching && !root.matchedSections.has(sectionRow.modelData.id)
-        readonly property real rowHeight: Math.round((root.rail ? 34 : 26) * sectionRow.d * Math.max(1, IrisStyle.typeScale))
-        // Original (v2.33) names no cluster: the air between them is the grouping; so does the rail.
-        readonly property string caption: sectionRow.clusterStart && !IrisStyle.settingsOriginal && !root.rail ? Translation.tr(String(sectionRow.modelData.caption ?? "")) : ""
-        onContainsMouseChanged: if (root.rail) root.peekSection = sectionRow.containsMouse ? sectionRow.modelData.id
-            : root.peekSection === sectionRow.modelData.id ? "" : root.peekSection
+        readonly property real rowHeight: Math.round(26 * sectionRow.d * Math.max(1, IrisStyle.typeScale))
+        // Original (v2.33) names no cluster: the air between them is the grouping.
+        readonly property string caption: sectionRow.clusterStart && !IrisStyle.settingsOriginal ? Translation.tr(String(sectionRow.modelData.caption ?? "")) : ""
         readonly property real washY: sectionRow.caption.length > 0 ? Math.round(9 * sectionRow.d) + captionText.implicitHeight + Math.round(2 * sectionRow.d)
             : sectionRow.clusterStart ? Math.round(8 * sectionRow.d) : 0
         width: parent ? parent.width : 0
@@ -1978,9 +1613,9 @@ Item {
         }
         Rectangle {
             id: rowPlate
-            x: root.rail ? Math.round((parent.width - width) / 2) : 0
+            anchors.left: parent.left
             y: sectionRow.washY
-            width: root.rail ? sectionRow.rowHeight : parent.width
+            width: parent.width
             height: sectionRow.rowHeight
             // Concentric with the mark it holds; where you are is a wash of the area's colour, as light as a hover, never a
             // solid block heavier than the buttons around it.
@@ -1993,16 +1628,20 @@ Item {
                 anchors.fill: parent
                 visible: sectionRow.selected && !sectionRow.travels && !IrisStyle.plateSelection
                 radius: parent.radius
-                color: IrisStyle.tintFillHover(sectionRow.own)
+                gradient: Gradient {
+                    orientation: Gradient.Horizontal
+                    GradientStop { position: 0; color: ColorUtils.applyAlpha(IrisStyle.tintFillHover(sectionRow.own), 0) }
+                    GradientStop { position: 1; color: IrisStyle.tintFillHover(sectionRow.own) }
+                }
             }
             // Vivid tiles: the colour is how the eye finds an area, whatever material sits behind.
             Item {
                 id: sectionMark
                 // An indexed Design numbers the areas instead (a parts catalogue).
                 readonly property bool numbered: IrisStyle.indexed
-                x: root.rail ? Math.round((parent.width - width) / 2) : Math.round(5 * sectionRow.d)
+                x: Math.round(5 * sectionRow.d)
                 anchors.verticalCenter: parent.verticalCenter
-                width: Math.round((root.rail ? 24 : 22) * sectionRow.d)
+                width: Math.round(22 * sectionRow.d)
                 height: width
                 IrisSquircle {
                     plain: IrisStyle.settingsPlainMarks
@@ -2024,7 +1663,6 @@ Item {
                 font.weight: IrisStyle.weight(Font.Medium)
             }
             IrisText {
-                visible: !root.rail
                 x: sectionMark.x + sectionMark.width + Math.round(10 * sectionRow.d)
                 width: sectionRow.width - x - Math.round(8 * sectionRow.d)
                 anchors.verticalCenter: parent.verticalCenter
