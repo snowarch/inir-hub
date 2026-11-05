@@ -102,18 +102,18 @@ Item {
     // has room (above, else below, else inside its top), and held still while the pointer is on them, so a size picked
     // there never slides the capsule from under it (his 11-02: they jumped about and overlapped).
     property string keysAt: "above"
-    function wantedAt(): string {
-        return root.topNow - root.keysHeight - 2 * root.gap >= root.roomTop ? "above"
-            : root.topNow + root.height + 2 * root.gap + root.keysHeight <= root.roomBottom ? "below" : "inside"
-    }
-    function chooseAt(): void { root.keysAt = root.wantedAt() }
+    // Chosen on the next turn by a timer the outfit owns: Qt.callLater outlived the outfit when its Loader dropped it
+    // and ran in a dead context ("wantedAt is not a function").
+    readonly property string wantedAt: root.topNow - root.keysHeight - 2 * root.gap >= root.roomTop ? "above"
+        : root.topNow + root.height + 2 * root.gap + root.keysHeight <= root.roomBottom ? "below" : "inside"
+    Timer { id: choose; interval: 0; onTriggered: root.keysAt = root.wantedAt }
     readonly property bool sideLost: root.keysAt === "above" ? root.topNow - root.keysHeight - 2 * root.gap < root.roomTop
         : root.keysAt === "below" ? root.topNow + root.height + 2 * root.gap + root.keysHeight > root.roomBottom
-        : root.wantedAt() !== "inside"
-    onSideLostChanged: if (root.sideLost) Qt.callLater(root.chooseAt)
-    onSelectedChanged: if (root.selected) Qt.callLater(root.chooseAt)
-    onWidgetChanged: Qt.callLater(root.chooseAt)
-    onCarriedChanged: if (!root.carried) Qt.callLater(root.chooseAt)
+        : root.wantedAt !== "inside"
+    onSideLostChanged: if (root.sideLost) choose.restart()
+    onSelectedChanged: if (root.selected) choose.restart()
+    onWidgetChanged: choose.restart()
+    onCarriedChanged: if (!root.carried) choose.restart()
     readonly property real liveRight: root.inside(root.leftNow + root.width - root.keysWidth, root.keysWidth) + root.keysWidth
     readonly property real liveTop: root.keysAt === "above" ? root.topNow - 2 * root.gap - root.keysHeight
         : root.keysAt === "below" ? root.topNow + root.height + 2 * root.gap : root.topNow + 2 * root.gap

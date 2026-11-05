@@ -60,7 +60,7 @@ Singleton {
             const own = pinned.find(p => String(p).toLowerCase() === appId) ?? (AppSearch.lookupDesktopEntry(appId)?.id || appId)
             const rest = pinned.filter(p => String(p).toLowerCase() !== appId)
             rest.splice(root.insertAt(rest.map(p => String(p).toLowerCase()), ids.slice(0, split >= 0 ? split : ids.length), at), 0, own)
-            if (JSON.stringify(rest) !== JSON.stringify(pinned)) Config.setNestedValue(["dock", "pinnedApps"], rest)
+            if (JSON.stringify(rest) !== JSON.stringify(pinned)) Config.setNestedValue(["apps", "pinned"], rest)
             return true
         }
         if (!running) return false
