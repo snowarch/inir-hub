@@ -283,8 +283,8 @@ Item {
                 elide: Text.ElideRight
                 wrapMode: Text.NoWrap
                 text: !Network.online ? Network.offlineReason
-                    : root.configMode === "local" && NewsService.localCity.length > 0
-                    ? NewsService.localCity
+                    : root.configMode === "local" && NewsService.localCityShown.length > 0
+                    ? NewsService.localCityShown
                     : root.boards[root.currentBoardIndex].label
                 font.pixelSize: Appearance.font.pixelSize.smaller
                 color: Appearance.colMetadataText

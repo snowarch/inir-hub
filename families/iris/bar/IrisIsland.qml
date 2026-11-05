@@ -17,6 +17,7 @@ import qs.modules.common.functions
 import qs.modules.common.widgets
 import qs.modules.shared.mediaControls.components
 import qs.modules.iris.style
+import qs.modules.iris.widgets as IrisFaces
 import qs.modules.iris.components
 import qs.modules.iris.frame
 import qs.modules.iris.pieces
@@ -94,11 +95,9 @@ Item {
     // strip, welded to it: the page grows out of the strip's foot, one body.
     // Three designs of the Island (10-25): the engine's own (Halo), Ledger and Tiles, which skin its face, its page
     // buttons and its desktop page. A shell Design (AIRISU) that skins a part keeps it.
-    readonly property string design: ["ledger", "tiles", "dial", "marquee", "duo", "headline", "rings", "aura", "status"].includes(String(root.options?.design ?? "halo")) ? String(root.options.design) : "halo"
+    readonly property string design: String(root.options?.design ?? "halo") in IrisStyle.islandDesignParts ? String(root.options.design) : "halo"
     // What each design draws of its own; the engine draws the rest (Dial, Marquee and Duo keep Halo's pages).
-    readonly property var designParts: ({ ledger: ["Face.qml", "Nav.qml", "Desktop.qml"], tiles: ["Face.qml", "Nav.qml", "Desktop.qml"],
-        dial: ["Face.qml"], marquee: ["Face.qml"], duo: ["Face.qml"], headline: ["Face.qml"], rings: ["Face.qml"], aura: ["Face.qml"],
-        status: ["Face.qml"] })
+    readonly property var designParts: IrisStyle.islandDesignParts
     function skinOf(own: string, file: string): string {
         return own.length > 0 || !(root.designParts[root.design] ?? []).includes(file) ? own : Qt.resolvedUrl("island/designs/" + root.design + "/" + file)
     }
@@ -546,7 +545,7 @@ Item {
                      power: IrisStyle.success, audio: IrisStyle.accent, displays: IrisStyle.identity.indigo,
                      drives: IrisStyle.identity.orange })[event.kind] ?? IrisStyle.accent
             root.showEvent(event.icon, tint, event.title, event.detail, event.value >= 0 ? event.value / 100 : -1,
-                event.kind === "power" && event.tone === "on" ? "charge" : "")
+                event.kind === "power" && event.tone === "on" ? "charge" : event.kind === "bluetooth" && event.tone === "on" ? "accessory" : "")
         }
     }
     Connections {
@@ -580,6 +579,41 @@ Item {
         }
     }
     Timer { id: unlockLater; interval: 450; onTriggered: root.showEvent("face", IrisStyle.identity.green, Translation.tr("Unlocked"), "", -1, "unlock") }
+    // An event about to start, as a phone's calendar activity: its name, how soon, a ring closing on the start.
+    // Said at 10, 5 and 1 minute, once each.
+    property string eventSaid: ""
+    Timer {
+        interval: 30000
+        repeat: true
+        running: root.eventsEnabled && root.focusedOutput
+        onTriggered: {
+            const entry = IrisFaces.IrisFaceData.nextEntry(Date.now(), 11)
+            if (entry.running || entry.title.length === 0 || entry.start <= 0) return
+            const mark = [10, 5, 1].find(at => entry.left <= at && entry.left > at - 1)
+            const key = entry.start + ":" + mark
+            if (mark === undefined || root.eventSaid === key) return
+            root.eventSaid = key
+            root.showEvent("event", IrisStyle.danger, entry.title,
+                entry.left <= 1 ? Translation.tr("Starting now") : Translation.tr("In %1 min").arg(entry.left), 1 - entry.left / 10, "soon")
+        }
+    }
+    // Rain on its way (Apple Weather's next hour): the first wet slot after a dry now, said once per slot.
+    property string rainSaid: ""
+    readonly property var wetGlyphs: ["rainy", "thunderstorm", "weather_hail", "weather_snowy", "cloudy_snowing", "rainy_light", "rainy_heavy"]
+    Connections {
+        target: root.eventsEnabled && Weather.enabled ? Weather : null
+        function onDataChanged(): void {
+            const glyphOf = code => Icons.getWeatherIcon(code, false) ?? ""
+            if (root.wetGlyphs.includes(glyphOf(Weather.data?.wCode))) return
+            const slots = Array.from(Weather.data?.hourly ?? []).slice(1, 4)
+            const wet = slots.find(slot => root.wetGlyphs.includes(glyphOf(slot.code)))
+            if (!wet || root.rainSaid === String(wet.label)) return
+            root.rainSaid = String(wet.label)
+            const snow = /snow/.test(glyphOf(wet.code))
+            root.showEvent(glyphOf(wet.code), IrisStyle.identity.sky, snow ? Translation.tr("Snow soon") : Translation.tr("Rain soon"),
+                Translation.tr("Around %1").arg(String(wet.label).slice(0, 5)), -1)
+        }
+    }
     // The sound muted from anywhere: the red Silent pill.
     readonly property bool sinkMuted: Audio.sink?.audio?.muted ?? false
     onSinkMutedChanged: if (root.sinkMuted && !root.feedback) root.showEvent("notifications_off", IrisStyle.danger, Translation.tr("Silent"), "", -1, "silent")
@@ -693,7 +727,38 @@ Item {
     readonly property real padding: Math.round(20 * root.d)
     readonly property bool editingDesktop: GlobalStates.widgetEditMode
         && root.targetScreen?.name === GlobalStates.focusedScreen?.name
-    readonly property string compactMode: root.feedback && !root.anchored ? "feedback"
+    // A file held over the Island (AirDrop's radar): what it carries, and the Shelf it lands on if it waits there.
+    property bool dropHover: false
+    property int dropCount: 0
+    property bool dropFiles: true
+    Timer {
+        id: dropSpring
+        interval: 1100
+        onTriggered: if (root.dropHover) { root.dropHover = false; root.openPage("shelf", true) }
+    }
+    Connections {
+        target: IrisState
+        function onDropRehearsalChanged(): void {
+            const sim = IrisState.dropRehearsal
+            if (!sim || !root.focusedOutput || root.expanded) return
+            root.dropFiles = true
+            root.dropCount = sim.count
+            root.dropHover = true
+            dropRehearsalEnd.restart()
+        }
+    }
+    Timer {
+        id: dropRehearsalEnd
+        interval: 1600
+        onTriggered: {
+            root.dropHover = false
+            const sim = IrisState.dropRehearsal
+            if (sim?.keep) root.showEvent("check", IrisStyle.accent, Translation.tr("On the Shelf"),
+                sim.count === 1 ? Translation.tr("1 file") : Translation.tr("%1 files").arg(sim.count), 1, "kept")
+        }
+    }
+    readonly property string compactMode: root.dropHover && !root.anchored && !root.expanded ? "drop"
+        : root.feedback && !root.anchored ? "feedback"
         : root.eventShown && !root.anchored ? "event"
         : IrisStyle.cluster && !root.zoned ? (root.islandActivity.length > 0 ? root.islandActivity : "clock") : root.primary
     readonly property string layout: String(root.options?.layout ?? "island")
@@ -753,16 +818,17 @@ Item {
     // ready spends the first frames of the morph inside that build.
     readonly property bool pageReady: !root.expanded || details.status === Loader.Ready
     readonly property bool inlineExpanded: root.visualExpanded && root.inlinePages && root.pageReady
-    readonly property bool compactSizeClass: root.compactMode === "feedback" || root.compactMode === "event"
+    readonly property bool compactSizeClass: root.compactMode === "feedback" || root.compactMode === "event" || root.compactMode === "drop"
     readonly property bool spanning: root.fullWidth
     readonly property var compactRows: ({ idle: idleRow, media: mediaRow, record: recordRow,
-        timer: timerRow, task: taskRow, mic: micRow, camera: cameraRow, clock: clockRow, event: eventRow, feedback: feedbackRow })
+        timer: timerRow, task: taskRow, mic: micRow, camera: cameraRow, clock: clockRow, event: eventRow, feedback: feedbackRow,
+        drop: dropRow })
     readonly property real compactContentWidth: root.vertical ? compactColumn.implicitHeight
         : root.faceTakes ? (designFace.item?.contentWidth ?? 0)
         : root.compactRows[root.compactMode]?.implicitWidth ?? 0
     readonly property real compactFloor: root.compactHeight * 2.1
     readonly property real compactCeiling: Math.min(root.availableWidth,
-        (root.compactMode === "media" ? 380 : root.compactMode === "event" ? 330 : 320) * root.d)
+        (root.compactMode === "media" ? 380 : root.compactMode === "event" || root.compactMode === "drop" ? 340 : 320) * root.d)
     // The ceiling holds the Island's own content; the pieces it carries come on top of it, or they would be
     // squeezed over the clock.
     readonly property real compactTargetWidth: root.spanning ? root.fullChassisWidth
@@ -1860,16 +1926,27 @@ Item {
             enabled: Config.options?.shelf?.enable ?? true
             // Only what the shelf keeps (local files, words): anything else passes on untouched.
             onEntered: drag => {
-                const files = drag.hasUrls && drag.urls.some(url => String(url).startsWith("file://"))
-                if (!files && !(drag.hasText && drag.text.trim().length > 0)) { drag.accepted = false; return }
+                const urls = drag.hasUrls ? drag.urls.filter(url => String(url).startsWith("file://")) : []
+                if (urls.length === 0 && !(drag.hasText && drag.text.trim().length > 0)) { drag.accepted = false; return }
                 drag.accept(Qt.CopyAction)
-                root.openPage("shelf", true)
+                root.dropFiles = urls.length > 0
+                root.dropCount = Math.max(1, urls.length)
+                if (root.expanded) return
+                root.dropHover = true
+                dropSpring.restart()
             }
+            onExited: { root.dropHover = false; dropSpring.stop() }
             onDropped: drop => {
+                root.dropHover = false
+                dropSpring.stop()
                 // A link from a browser carries no file: its words are kept instead.
                 const kept = (drop.hasUrls ? Shelf.keepUrls(drop.urls) : 0) || (drop.hasText && Shelf.keepText(drop.text) ? 1 : 0)
-                if (kept > 0) drop.accept(Qt.CopyAction)
-                else drop.accepted = false
+                if (kept > 0) {
+                    drop.accept(Qt.CopyAction)
+                    if (!root.expanded)
+                        root.showEvent("check", IrisStyle.accent, Translation.tr("On the Shelf"),
+                            root.dropFiles ? (kept === 1 ? Translation.tr("1 file") : Translation.tr("%1 files").arg(kept)) : Translation.tr("Text"), 1, "kept")
+                } else drop.accepted = false
             }
         }
 
@@ -2467,8 +2544,26 @@ Item {
                     }
                     Glyph { anchors.centerIn: parent; text: "bolt"; iconSize: 12 * root.d; color: IrisStyle.onTintFor(IrisStyle.identity.green) }
                 }
+                // An accessory stands as itself, large and bare, as AirPods do on a phone.
+                Glyph {
+                    visible: root.event.kind === "accessory"
+                    Layout.alignment: Qt.AlignVCenter
+                    Layout.leftMargin: 2 * root.d
+                    text: root.eventGlyph
+                    iconSize: Math.round(root.compactHeight * 0.56)
+                    color: IrisStyle.text
+                }
+                // Kept: the radar it was dropped on, still.
+                DropRadar {
+                    visible: root.event.kind === "kept"
+                    Layout.alignment: Qt.AlignVCenter
+                    Layout.preferredWidth: root.compactHeight - Math.round(12 * root.d)
+                    Layout.preferredHeight: Layout.preferredWidth
+                    tint: root.eventInk
+                    live: false
+                }
                 Rectangle {
-                    visible: !["unlock", "silent", "charge"].includes(root.event.kind)
+                    visible: !["unlock", "silent", "charge", "accessory", "kept"].includes(root.event.kind)
                     Layout.preferredWidth: root.compactHeight - Math.round(12 * root.d)
                     Layout.preferredHeight: Layout.preferredWidth
                     radius: IrisStyle.capsule(width)
@@ -2494,6 +2589,14 @@ Item {
                     spacing: -1 * root.d
                     IrisText {
                         Layout.fillWidth: true
+                        visible: root.event.kind === "accessory" && root.event.detail.length > 0
+                        text: root.event.detail
+                        color: IrisStyle.muted
+                        font.pixelSize: IrisStyle.typeFootnote
+                        elide: Text.ElideRight
+                    }
+                    IrisText {
+                        Layout.fillWidth: true
                         visible: root.event.kind !== "silent"
                         text: root.event.title
                         font.pixelSize: IrisStyle.typeLabel
@@ -2502,7 +2605,7 @@ Item {
                     }
                     IrisText {
                         Layout.fillWidth: true
-                        visible: text.length > 0 && root.event.kind !== "status"
+                        visible: text.length > 0 && root.event.kind !== "status" && root.event.kind !== "accessory"
                         text: root.event.detail
                         color: IrisStyle.muted
                         font.pixelSize: IrisStyle.typeFootnote
@@ -2554,7 +2657,7 @@ Item {
                 }
                 // A level as dots; a job that ends fills them and sends one pulse through (S6).
                 Metric {
-                    visible: !root.nothingLook && root.event.value >= 0 && root.event.kind !== "done"
+                    visible: !root.nothingLook && root.event.value >= 0 && !["done", "accessory", "kept", "soon"].includes(root.event.kind)
                     Layout.alignment: Qt.AlignVCenter
                     value: Math.round(root.event.value * 100)
                     unit: "%"
@@ -2563,11 +2666,49 @@ Item {
                     color: root.eventInk
                 }
                 ProgressRing {
-                    visible: !root.nothingLook && root.event.value >= 0 && !root.eventIsBattery
+                    visible: !root.nothingLook && root.event.value >= 0 && !root.eventIsBattery && !["accessory", "kept"].includes(root.event.kind)
                     Layout.preferredWidth: Math.round(20 * root.d)
                     Layout.preferredHeight: Layout.preferredWidth
                     progress: Math.max(0, root.event.value)
                     tint: root.eventInk
+                }
+                // The accessory's charge as Apple rings it: green, its figure inside; red when low. The kept drop
+                // closes its ring around a tick.
+                Item {
+                    visible: !root.nothingLook && root.event.value >= 0 && ["accessory", "kept"].includes(root.event.kind)
+                    Layout.alignment: Qt.AlignVCenter
+                    Layout.preferredWidth: root.compactHeight - Math.round(12 * root.d)
+                    Layout.preferredHeight: Layout.preferredWidth
+                    readonly property color ink: root.event.kind === "kept" ? root.eventInk
+                        : root.event.value <= 0.2 ? IrisStyle.danger : IrisStyle.success
+                    ProgressRing {
+                        id: endRing
+                        anchors.fill: parent
+                        stroke: Math.max(2.5, 3 * root.d)
+                        tint: parent.ink
+                        progress: 0
+                        Binding on progress { when: root.eventShown; value: Math.max(0, root.event.value) }
+                        Behavior on progress { NumberAnimation { duration: IrisStyle.duration(520); easing.type: Easing.OutCubic } }
+                    }
+                    Tabular {
+                        visible: root.event.kind === "accessory"
+                        anchors.centerIn: parent
+                        text: Math.round(root.event.value * 100)
+                        color: IrisStyle.text
+                        font.pixelSize: Math.round(parent.height * 0.36)
+                        font.weight: IrisStyle.weight(Font.DemiBold)
+                    }
+                    Glyph {
+                        visible: root.event.kind === "kept"
+                        anchors.centerIn: parent
+                        text: "check"
+                        iconSize: Math.round(parent.height * 0.62)
+                        color: parent.ink
+                        scale: endRing.progress >= 0.98 ? 1 : 0.4
+                        opacity: endRing.progress >= 0.98 ? 1 : 0
+                        Behavior on scale { NumberAnimation { duration: IrisStyle.duration(260); easing.type: Easing.OutBack } }
+                        Behavior on opacity { NumberAnimation { duration: IrisStyle.duration(160) } }
+                    }
                 }
                 IrisDotStrip {
                     id: eventStrip
@@ -2580,7 +2721,7 @@ Item {
                     fillColor: root.eventInk
                 }
                 IrisLabel {
-                    visible: root.nothingLook && root.event.value >= 0 && root.event.kind !== "done"
+                    visible: root.nothingLook && root.event.value >= 0 && !["done", "soon"].includes(root.event.kind)
                     Layout.alignment: Qt.AlignVCenter
                     text: Math.round(root.event.value * 100) + "%"
                     color: IrisStyle.text
@@ -2589,6 +2730,52 @@ Item {
                 Connections {
                     target: root
                     function onEventChanged(): void { if (root.event.kind === "done" && !root.event.failed) donePulse.restart() }
+                }
+            }
+
+            // AirDrop's radar: rings run out from what you hold, the Shelf named as where it lands, an empty ring
+            // waiting at the end. Held there a moment, the Shelf opens under it.
+            CompactRow {
+                id: dropRow
+                mode: "drop"
+                anchors.leftMargin: 6 * root.d
+                DropRadar {
+                    Layout.alignment: Qt.AlignVCenter
+                    Layout.preferredWidth: root.compactHeight - Math.round(8 * root.d)
+                    Layout.preferredHeight: Layout.preferredWidth
+                    tint: root.nothingLook ? IrisStyle.text : IrisStyle.accent
+                    live: root.compactMode === "drop"
+                }
+                ColumnLayout {
+                    Layout.fillWidth: true
+                    spacing: -1 * root.d
+                    IrisText {
+                        Layout.fillWidth: true
+                        text: Translation.tr("Shelf")
+                        font.pixelSize: IrisStyle.typeLabel
+                        font.weight: IrisStyle.weight(Font.DemiBold)
+                        elide: Text.ElideRight
+                    }
+                    IrisText {
+                        Layout.fillWidth: true
+                        text: !root.dropFiles ? Translation.tr("Let go to keep the text")
+                            : root.dropCount === 1 ? Translation.tr("Let go to keep 1 file") : Translation.tr("Let go to keep %1 files").arg(root.dropCount)
+                        color: IrisStyle.muted
+                        font.pixelSize: IrisStyle.typeFootnote
+                        elide: Text.ElideRight
+                    }
+                }
+                ProgressRing {
+                    Layout.alignment: Qt.AlignVCenter
+                    Layout.preferredWidth: root.compactHeight - Math.round(14 * root.d)
+                    Layout.preferredHeight: Layout.preferredWidth
+                    stroke: Math.max(2.5, 3 * root.d)
+                    tint: root.nothingLook ? IrisStyle.text : IrisStyle.accent
+                    progress: 0.22
+                    RotationAnimation on rotation {
+                        running: root.compactMode === "drop" && IrisStyle.motionEnabled
+                        from: 0; to: 360; duration: 2400; loops: Animation.Infinite
+                    }
                 }
             }
 

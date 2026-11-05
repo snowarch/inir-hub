@@ -15,7 +15,7 @@ IrisWidgetFace {
     readonly property string glyph: Icons.getWeatherIcon(Weather.data?.wCode, Weather.isNightNow()) ?? "cloud"
     readonly property color sky: IrisStyle.skyLight(root.glyph)
     // The town, not its province: "Avellaneda, Bueno…" told less than "Avellaneda". Large has the room for both.
-    readonly property string city: root.widget.showLocation && Weather.showVisibleCity
+    readonly property string city: Weather.showVisibleCity
         ? (root.large ? Weather.visibleCity : String(Weather.visibleCity).split(",")[0].trim()) : ""
     readonly property string condition: IrisFaceData.capitalized(String(Weather.data?.description ?? ""))
     readonly property string range: {
@@ -48,6 +48,15 @@ IrisWidgetFace {
     }
 
     light: root.ready ? root.sky : "transparent"
+
+    // Poster (his 11-04 reference): the forecast set as a poster sets it, one tall condensed figure, the place in spaced
+    // capitals over the sky in heavy condensed capitals, and the coming hours as one capsule.
+    readonly property bool poster: String(root.widget.familyOption("face", "classic")) === "poster"
+    readonly property string condensed: "Google Sans Flex" // iris-literal: the poster figure needs a width axis
+    readonly property string figure: {
+        const value = parseFloat(String(Weather.data?.temp ?? ""))
+        return Number.isFinite(value) ? String(Math.round(value)) : "--"
+    }
 
     component Now: ColumnLayout {
         spacing: 0
@@ -241,7 +250,7 @@ IrisWidgetFace {
     }
 
     ColumnLayout {
-        visible: root.ready && root.small
+        visible: root.ready && root.small && !root.poster
         anchors.fill: parent
         spacing: 0
         Now { Layout.fillHeight: false; Layout.fillWidth: true }
@@ -250,7 +259,7 @@ IrisWidgetFace {
     }
 
     ColumnLayout {
-        visible: root.ready && root.medium
+        visible: root.ready && root.medium && !root.poster
         anchors.fill: parent
         spacing: 0
         RowLayout {
@@ -271,7 +280,7 @@ IrisWidgetFace {
     }
 
     ColumnLayout {
-        visible: root.ready && root.large
+        visible: root.ready && root.large && !root.poster
         anchors.fill: parent
         spacing: root.dp(10)
 
@@ -385,5 +394,214 @@ IrisWidgetFace {
                 }
             }
         }
+    }
+
+    // The hours as one capsule, as the poster's timeline: now at its start (the sun, or the moon after dark), a dark
+    // seam where the day turns, the low and the high written into it where they fall, the hours under it.
+    component Timeline: ColumnLayout {
+        id: line
+        readonly property var temps: root.hours.map(hour => parseFloat(String(hour.temp)))
+        readonly property var known: line.temps.filter(Number.isFinite)
+        readonly property int low: line.known.length > 1 ? line.temps.indexOf(Math.min(...line.known)) : -1
+        readonly property int high: line.known.length > 1 ? line.temps.indexOf(Math.max(...line.known)) : -1
+        readonly property int n: Math.max(1, root.hours.length)
+        function hourOf(slot: var): int { return parseInt(String(slot?.label ?? "0").slice(0, 2), 10) }
+        function at(i: int): real { return (i + 0.5) / line.n }
+        function label(i: int): string {
+            if (i === 0) return Translation.tr("Now").toUpperCase()
+            const hour = line.hourOf(root.hours[i])
+            return Translation.locale.timeFormat(Locale.ShortFormat).indexOf("AP") >= 0 || Translation.locale.timeFormat(Locale.ShortFormat).indexOf("ap") >= 0
+                ? (hour % 12 === 0 ? 12 : hour % 12) + (hour === 0 ? "A" : hour === 12 ? "P" : "")
+                : String(hour)
+        }
+        spacing: root.dp(5)
+        Rectangle {
+            id: track
+            Layout.fillWidth: true
+            implicitHeight: root.dp(root.small ? 26 : 34)
+            radius: IrisStyle.capsule(height)
+            color: root.fill
+            clip: true
+            // night hours sit a step darker, so the evening reads before any figure
+            Repeater {
+                model: root.hours
+                Rectangle {
+                    required property var modelData
+                    required property int index
+                    visible: Boolean(modelData.isNight)
+                    x: track.width * index / line.n
+                    width: Math.ceil(track.width / line.n)
+                    height: track.height
+                    color: root.fillQuiet
+                }
+            }
+            Repeater {
+                model: root.hours
+                Rectangle {
+                    required property var modelData
+                    required property int index
+                    visible: index > 0 && line.hourOf(modelData) < line.hourOf(root.hours[index - 1])
+                    x: Math.round(track.width * index / line.n - width / 2)
+                    width: root.dp(5)
+                    height: track.height
+                    color: root.ink
+                    opacity: 0.85
+                }
+            }
+            MaterialSymbol {
+                x: Math.round(track.width * line.at(0) - width / 2)
+                anchors.verticalCenter: parent.verticalCenter
+                text: Weather.isNightNow() ? "contrast" : "wb_sunny"
+                fill: 1
+                iconSize: Math.round(track.height * 0.52)
+                color: root.ink
+            }
+            Repeater {
+                model: [line.low, line.high].filter(i => i > 0)
+                Text {
+                    required property int modelData
+                    x: Math.round(Math.max(track.height * 0.4, Math.min(track.width - width - track.height * 0.4, track.width * line.at(modelData) - width / 2)))
+                    anchors.verticalCenter: parent.verticalCenter
+                    text: String(Math.round(line.temps[modelData]))
+                    color: root.ink
+                    font.family: root.condensed
+                    font.variableAxes: ({ "wdth": 25, "wght": 780, "opsz": 36 })
+                    font.pixelSize: Math.round(track.height * 0.78)
+                    renderType: Text.QtRendering
+                }
+            }
+        }
+        Item {
+            Layout.fillWidth: true
+            implicitHeight: root.px(12)
+            Repeater {
+                model: root.hours
+                Text {
+                    required property int index
+                    visible: !root.small || index % 2 === 0
+                    x: Math.round(Math.max(0, Math.min(parent.width - width, parent.width * line.at(index) - width / 2)))
+                    text: line.label(index)
+                    color: root.inkTertiary
+                    font.family: root.condensed
+                    font.variableAxes: ({ "wdth": 62, "wght": 560, "opsz": 14 })
+                    font.pixelSize: root.px(11)
+                    font.letterSpacing: root.dp(0.6)
+                    renderType: Text.QtRendering
+                }
+            }
+        }
+    }
+
+    ColumnLayout {
+        visible: root.ready && root.poster
+        anchors.fill: parent
+        spacing: root.dp(root.small ? 6 : 12)
+        RowLayout {
+            Layout.fillWidth: true
+            Layout.fillHeight: root.small
+            spacing: root.dp(root.small ? 8 : 12)
+            Text {
+                id: posterFigure
+                Layout.alignment: Qt.AlignTop
+                text: root.figure
+                color: root.ink
+                font.family: root.condensed
+                font.variableAxes: ({ "wdth": 25, "wght": 820, "opsz": 144 })
+                font.pixelSize: Math.round(root.px(root.small ? 66 : root.large ? 96 : 84))
+                lineHeight: 0.78
+                renderType: Text.QtRendering
+                font.features: ({ "tnum": 1 })
+            }
+            ColumnLayout {
+                Layout.alignment: Qt.AlignTop
+                Layout.topMargin: root.dp(4)
+                Layout.fillWidth: true
+                spacing: root.dp(2)
+                FaceText {
+                    face: root
+                    Layout.fillWidth: true
+                    visible: root.city.length > 0
+                    text: root.city.split(",")[0].trim().toUpperCase()
+                    color: root.inkSecondary
+                    size: root.small ? 9.5 : 11
+                    weight: Font.Medium
+                    font.letterSpacing: root.dp(2.2)
+                }
+                Text {
+                    Layout.fillWidth: true
+                    text: (root.readout.length > 0 ? root.readout : root.condition).toUpperCase()
+                    color: root.ink
+                    wrapMode: Text.WordWrap
+                    maximumLineCount: 2
+                    elide: Text.ElideRight
+                    font.family: root.condensed
+                    font.variableAxes: ({ "wdth": 30, "wght": 780, "opsz": 48 })
+                    font.pixelSize: root.px(root.small ? 17 : root.large ? 30 : 26)
+                    lineHeight: 0.9
+                    renderType: Text.QtRendering
+                }
+            }
+            MaterialSymbol {
+                visible: !root.small
+                Layout.alignment: Qt.AlignTop
+                text: root.glyph
+                fill: 1
+                iconSize: Math.round(posterFigure.height * 0.86)
+                color: root.nothing ? root.ink : root.sky
+            }
+        }
+        Timeline {
+            Layout.fillWidth: true
+            visible: root.hours.length > 1
+        }
+        // Large carries the week under it the same way: each day a condensed line, its span a capsule.
+        Repeater {
+            model: root.large ? root.days : []
+            RowLayout {
+                id: posterDay
+                required property var modelData
+                readonly property real span: Math.max(1, root.weekHigh - root.weekLow)
+                Layout.fillWidth: true
+                spacing: root.dp(10)
+                Text {
+                    Layout.preferredWidth: root.contentWidth * 0.22
+                    text: String(posterDay.modelData.dayName ?? "").toUpperCase()
+                    color: root.inkSecondary
+                    font.family: root.condensed
+                    font.variableAxes: ({ "wdth": 40, "wght": 700, "opsz": 24 })
+                    font.pixelSize: root.px(17)
+                    renderType: Text.QtRendering
+                }
+                MaterialSymbol {
+                    text: Icons.getWeatherIcon(posterDay.modelData.code, false) ?? "cloud"
+                    fill: 1
+                    iconSize: root.px(17)
+                    color: root.nothing ? root.ink : IrisStyle.skyLight(text)
+                }
+                Rectangle {
+                    Layout.fillWidth: true
+                    implicitHeight: root.dp(6)
+                    radius: IrisStyle.capsule(height)
+                    color: root.fill
+                    Rectangle {
+                        x: parent.width * (Number(posterDay.modelData.loVal) - root.weekLow) / posterDay.span
+                        width: Math.max(parent.height, parent.width * (Number(posterDay.modelData.hiVal) - Number(posterDay.modelData.loVal)) / posterDay.span)
+                        height: parent.height
+                        radius: parent.radius
+                        color: root.ink
+                    }
+                }
+                Text {
+                    text: Math.round(Number(posterDay.modelData.loVal)) + " " + Math.round(Number(posterDay.modelData.hiVal))
+                    color: root.ink
+                    font.family: root.condensed
+                    font.variableAxes: ({ "wdth": 30, "wght": 760, "opsz": 24 })
+                    font.pixelSize: root.px(18)
+                    font.features: ({ "tnum": 1 })
+                    renderType: Text.QtRendering
+                }
+            }
+        }
+        Item { Layout.fillHeight: !root.small }
     }
 }

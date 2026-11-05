@@ -15,3 +15,5 @@ IslandCompactColumn 1.0 IslandCompactColumn.qml
 LevelFace 1.0 LevelFace.qml
 PrivacyMarks 1.0 PrivacyMarks.qml
 IslandShelfPage 1.0 IslandShelfPage.qml
+DropRadar 1.0 DropRadar.qml
+IslandLiveGrid 1.0 IslandLiveGrid.qml

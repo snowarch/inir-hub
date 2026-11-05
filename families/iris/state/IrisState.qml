@@ -92,6 +92,8 @@ Singleton {
     // A bubble being carried: { slot, kind, screen, x, y (screen-local centre),
     // size, released }. The bubble layer draws it and resolves the drop.
     property var bubbleDrag: null
+    // A file held over the Island without a hand (irisDev dropSim): { count, keep, at }.
+    property var dropRehearsal: null
     // Per output name: what each bubble slot shows ({ left, right, utility }) and
     // the resting Island's screen-local geometry, published by each Island.
     property var bubbleKinds: ({})

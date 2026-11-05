@@ -205,7 +205,8 @@
       {"key":"iris.source","label":"Colours from","type":"choice","default":"wallpaper","choices":[["wallpaper","Wallpaper"],["music","Music"],["random","Random"]]}
     ],
     "weather": [
-      {"key":"iris.details","label":"Details","type":"switch","default":true,"when":["face",{"sizeClass":"large"}],"keywords":["humidity","wind","uv","air"]}
+      {"key": "iris.face", "label": "Face", "type": "choice", "default": "classic", "when": "face", "choices": [["classic", "Classic", "partly_cloudy_day"], ["poster", "Poster", "format_size"]], "keywords": ["poster", "big", "condensed", "headline", "cartel"]},
+      {"key":"iris.details","label":"Details","type":"switch","default":true,"when":["face",{"sizeClass":"large"},{"iris.face":"classic"}],"keywords":["humidity","wind","uv","air"]}
     ],
     "*": [
       {"key":"iris.material","label":"Material","type":"choice","default":"auto","page":"look","tune":true,"when":["face",{"showBackground":true}],"choices":[["auto","Same as every widget"],["glass","Glass"],["solid","Solid"],["tinted","Tinted"]],"keywords":["glass","transparent","background","plate","fondo","vidrio"]}

@@ -55,6 +55,12 @@ Item {
             dropRelease.restart()
             return "dropped:" + slot + "@" + x + "," + y
         }
+        /// Hold files over the focused output's Island for 1.6 s (how many, default 3), then let go so the Shelf
+        /// keeps nothing: `keep` shows the notice a real drop gives
+        function dropSim(count: string, keep: string): string {
+            IrisState.dropRehearsal = { count: Math.max(1, Number(count) || 3), keep: keep === "keep", at: Date.now() }
+            return "holding:" + IrisState.dropRehearsal.count
+        }
         /// Slide a Dock icon (app id) along the Dock by the given pixels over 1 s
         function dockSlide(appId: string, pixels: string): string {
             if (!GlobalStates.focusedScreen) return "error:no-screen"

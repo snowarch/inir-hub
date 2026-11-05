@@ -275,8 +275,15 @@ ColumnLayout {
     }
 
 
+    // Two or more things at once: a tile each, as Apple's Island grid (IslandLiveGrid); the list below is for one.
+    IslandLiveGrid {
+        id: liveGrid
+        island: page.island
+        visible: liveGrid.useful
+        Layout.fillWidth: true
+    }
     Block {
-        visible: page.island.recording
+        visible: page.island.recording && !liveGrid.useful
         first: true
         live: true
         tint: IrisStyle.danger
@@ -304,7 +311,7 @@ ColumnLayout {
         readonly property bool pomodoro: page.island.timerKind === "pomodoro"
         readonly property int cycles: Math.max(1, Number(TimerService.cyclesBeforeLongBreak) || 4)
         readonly property int cycle: Math.max(0, Number(TimerService.pomodoroCycle) || 0) % timerBlock.cycles
-        visible: page.timing
+        visible: page.timing && !liveGrid.useful
         first: !page.island.recording
         live: !page.island.timerPaused
         tint: IrisStyle.identity.orange
@@ -371,7 +378,7 @@ ColumnLayout {
     }
 
     Repeater {
-        model: page.jobs
+        model: liveGrid.useful ? [] : page.jobs
         Block {
             id: job
             required property var modelData
@@ -431,7 +438,7 @@ ColumnLayout {
         Rectangle {
             visible: page.island.recording || page.timing || page.jobs.length > 0
             Layout.fillWidth: true
-            Layout.topMargin: Math.round(4 * page.d)
+            Layout.topMargin: Math.round(liveGrid.useful ? 12 : 4) * page.d
             Layout.bottomMargin: Math.round(4 * page.d)
             implicitHeight: 1
             color: IrisStyle.hairline
