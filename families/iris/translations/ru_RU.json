@@ -2230,5 +2230,6 @@
   "Three rings: the day gone, the battery or the week, the month.": "Три кольца: прошедшая часть дня, батарея или неделя, месяц.",
   "A status bar: the time, the connection and the battery, or on a desktop the weather.": "Строка состояния: время, подключение и батарея, а на настольном ПК погода.",
   "Language & time": "Язык и время",
-  "Apps & login": "Приложения и вход"
+  "Apps & login": "Приложения и вход",
+  "%1 pinned": "Закреплено: %1"
 }

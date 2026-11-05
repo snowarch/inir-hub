@@ -2230,5 +2230,6 @@
   "Three rings: the day gone, the battery or the week, the month.": "三个圆环：已过去的一天、电池或本周、本月。",
   "A status bar: the time, the connection and the battery, or on a desktop the weather.": "状态栏：时间、连接和电池，台式机上显示天气。",
   "Language & time": "语言与时间",
-  "Apps & login": "应用与登录"
+  "Apps & login": "应用与登录",
+  "%1 pinned": "已固定 %1 个"
 }

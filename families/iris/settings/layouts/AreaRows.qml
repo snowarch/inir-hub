@@ -1062,13 +1062,20 @@ ColumnLayout {
         readonly property var said: {
             Config.revision
             if (island.toggles) return [island.on ? Translation.tr("On") : Translation.tr("Off")]
-            if (island.pin) { const one = island.word(island.first); return one.length > 0 ? [one] : [] }
+            // A value named like its island says it is on (Glass read "Glass"); the same word twice is said once.
+            const say = spec => { const one = island.word(spec); return one.length > 0 && one.toLowerCase() === island.title.toLowerCase() ? Translation.tr("On") : one }
+            if (island.pin) { const one = say(island.first); return one.length > 0 ? [one] : [] }
             const out = []
-            for (const spec of island.specs.slice(island.namedSwitch ? 1 : 0)) {
-                if (out.length >= 2) break
-                if (IrisOptions.foldsAway(spec)) continue
-                const one = island.word(spec)
-                if (one.length > 0) out.push(one)
+            const specs = island.specs.slice(island.namedSwitch ? 1 : 0)
+            // The rows it shows first; when they say nothing (an off switch, a list), a value from its fine-tune ones.
+            for (const tuned of [false, true]) {
+                for (const spec of specs) {
+                    if (out.length >= 2) break
+                    if (IrisOptions.foldsAway(spec) !== tuned || (tuned && spec.kind === "switch")) continue
+                    const one = say(spec)
+                    if (one.length > 0 && !out.includes(one)) out.push(one)
+                }
+                if (out.length > 0) break
             }
             return out
         }
@@ -1193,7 +1200,8 @@ ColumnLayout {
             // answers that do not fit say the first; one that does not fit is left to the open island (never cut).
             IrisText {
                 id: glance
-                readonly property real room: line.width - (dot.visible ? dot.x + dot.width : name.x + name.implicitWidth) - line.pad - Math.round(20 * island.d)
+                // From the name's natural width, never its laid-out one: that one waits on this text (a binding loop).
+                readonly property real room: line.width - name.x - name.implicitWidth - (dot.visible ? dot.width + Math.round(8 * island.d) : 0) - line.pad - Math.round(20 * island.d)
                 readonly property string both: island.said.join(" · ")
                 visible: !island.switchShown
                 anchors.right: parent.right

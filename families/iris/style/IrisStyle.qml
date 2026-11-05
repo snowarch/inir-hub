@@ -1258,7 +1258,7 @@ QtObject {
     readonly property color islandPlate: root.plateStyle === "key" ? root.synthPanel
         : root.ink ? root.formPlate
         : root.light ? (root.glassy ? Qt.rgba(1, 1, 1, 0.84) : root.liftOver(root.surfaceHigh, root.surfaceOpaque)) // iris-literal: a light island's plate
-        : root.glassy ? Qt.rgba(1, 1, 1, 0.075) : ColorUtils.mix(root.surfaceOpaque, Qt.rgba(1, 1, 1, 1), 0.075) // iris-literal: a dark island's lift
+        : root.glassy ? Qt.rgba(1, 1, 1, 0.075) : ColorUtils.mix(Qt.rgba(1, 1, 1, 1), root.surfaceOpaque, 0.075) // iris-literal: a dark island's lift (mix weighs its first colour: the other order was 92 % white with glass off)
     readonly property color islandShadow: root.light && !root.ink ? Qt.rgba(0, 0, 0, 0.07) : "transparent" // iris-literal: a light island's shadow
     readonly property color readingSidebar: root.glassy
         ? ColorUtils.applyAlpha(root.surfaceOpaque, Math.max(root.wallpaperVeil, root.placePlate)) : root.readingCard
