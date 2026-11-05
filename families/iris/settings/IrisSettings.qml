@@ -603,7 +603,7 @@ Item {
         advanced: () => "colour/App colours",
         monitors: () => "display/Screens",
         themes: () => "colour/Colour theme",
-        autostart: () => "general/At login",
+        autostart: () => "general/Apps & login",
         services: () => "sources/Calendar",
         orbit: () => "orbit",
         dock: () => "dock",
