@@ -103,7 +103,43 @@ QtObject {
     }
     // The gallery's own rows mean nothing while one of Material's pickers opens instead.
     function ownGallery(): bool { return String(Config.options?.iris?.wallpaper?.picker ?? "iris") !== "material" }
-    function commit(spec: var, next: var): void { root.write(spec, next) }
+    // What Settings changed last, for the Island in its head to say and take back (act first, Undo after). A batch
+    // (Restore defaults) is one change holding every row it touched.
+    property var lastChange: null
+    readonly property var undoKinds: ["switch", "choice", "range", "hue"]
+    function held(value: var): var { return value !== null && typeof value === "object" ? JSON.parse(JSON.stringify(value)) : value }
+    function commit(spec: var, next: var): void {
+        const tracked = root.undoKinds.includes(String(spec.kind ?? ""))
+        const before = tracked ? root.held(root.currentValue(spec)) : undefined
+        root.write(spec, next)
+        if (tracked && before !== undefined && JSON.stringify(before) !== JSON.stringify(next))
+            root.lastChange = { specs: [spec], befores: [before], after: root.held(next), title: "", at: Date.now() }
+    }
+    function commitAll(specs: var, values: var, title: string): void {
+        const touched = [], befores = []
+        specs.forEach((spec, index) => {
+            const before = root.held(root.currentValue(spec))
+            if (JSON.stringify(before) === JSON.stringify(values[index])) return
+            touched.push(spec); befores.push(before)
+            root.write(spec, values[index])
+        })
+        if (touched.length > 0) root.lastChange = { specs: touched, befores: befores, after: undefined, title: title, at: Date.now() }
+    }
+    function undoLast(): void {
+        const change = root.lastChange
+        if (!change) return
+        root.lastChange = null
+        change.specs.forEach((spec, index) => root.write(spec, change.befores[index]))
+    }
+    // A value in the words a row shows it with: On, 40%, the choice's name.
+    function valueText(spec: var, value: var): string {
+        if (value === undefined || value === null) return ""
+        if (spec.kind === "switch") return Translation.tr(value ? "On" : "Off")
+        if (spec.kind === "range") return Translation.tr(root.rangeText(spec, value))
+        const choice = root.choicesOf(spec).find(entry => String(entry.value) === String(value))
+        if (choice) return Translation.tr(String(choice.label))
+        return typeof value === "string" || typeof value === "number" ? String(value) : ""
+    }
     function write(spec: var, next: var): void {
         // A family switch goes through the shell's transition, never a bare config write.
         if (spec.path === "panelFamily") Quickshell.execDetached([Quickshell.shellPath("scripts/inir"), "panelFamily", "set", String(next)])

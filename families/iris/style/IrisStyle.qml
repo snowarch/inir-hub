@@ -899,6 +899,17 @@ QtObject {
     readonly property color inkOnAccent: root.animeEnabled || root.signalChosen || IrisDesign.current === "iris" && !root.mono ? root.onTintFor(root.accent) : root.mono ? root.paper : root.role("onAccent", "#101318")
     // Colour over imagery (the lock, artwork veils), which stays dark in every scheme: the night palette's roles.
     readonly property color mediaInk: root.neutral(Qt.color(root.washiDark?.text ?? "#f2f2f0"))
+    // ── The Island's deep ink, for every piece that is an Island (Settings' islets, a slider's value): black in every
+    // scheme, as the Dynamic Island is, with the light ink on it (his 11-04: everything is a Dynamic Island).
+    readonly property color islandDeep: root.light ? ColorUtils.mix(root.text, "#000000", 0.5) : ColorUtils.mix(root.surfaceOpaque, "#000000", 0.3) // iris-literal: the Island's black
+    readonly property color islandInk: root.light ? root.surfaceOpaque : root.text
+    readonly property color islandInkSoft: ColorUtils.applyAlpha(root.islandInk, 0.6) // iris-literal: secondary ink on the black
+    readonly property color islandRaise: ColorUtils.applyAlpha(root.islandInk, 0.15) // iris-literal: a key or the lit chip on the black
+    readonly property color islandRaiseHover: ColorUtils.applyAlpha(root.islandInk, 0.24) // iris-literal: the same under the pointer
+    readonly property color islandEdge: root.light ? "transparent" : ColorUtils.applyAlpha(root.islandInk, 0.07) // iris-literal: the black's edge on a dark sheet
+    readonly property color islandShadow: Qt.rgba(0, 0, 0, root.light ? 0.2 : 0.36) // iris-literal: the lift under the black
+    function islandTint(tint: color): color { return root.light ? Qt.lighter(tint, 1.4) : tint }
+    function islandWash(tint: color): color { return ColorUtils.applyAlpha(root.islandTint(tint), 0.22) } // iris-literal: a mark's disc on the black
     readonly property color accentOnMedia: root.animeEnabled ? Lume.mark(root.accent, 0.35, 0, false, 3)
         : root.mono ? root.mediaInk : Qt.color(root.washiDark?.accent ?? "#a8c7fa")
     readonly property color highlightOnMedia: root.mono ? root.mediaInk : Qt.color(root.washiDark?.highlight ?? "#ff9f0a")
@@ -1033,6 +1044,8 @@ QtObject {
     function arcInk(tint: color, length: real, stroke: real): color { return ColorUtils.applyAlpha(tint, tint.a * Math.max(0, Math.min(1, length / Math.max(1, stroke)))) }
     function tintFillHover(tint: color): color { return ColorUtils.applyAlpha(tint, root.fillAlpha(0.2)) }
     function tintBorder(tint: color): color { return ColorUtils.applyAlpha(tint, 0.7) }
+    // A selection capsule's own edge: a breath of its colour, so the capsule reads on glass without a ring.
+    function tintEdge(tint: color): color { return ColorUtils.applyAlpha(tint, root.light ? 0.22 : 0.18) } // iris-literal: the edge's share of the tint
 
     function textLevel(level: real): real { return Math.min(1, level * root.tweak("contrast", 0.6, 1.5)) }
     function inkLevel(level: real, glassFloor: real): real { return Math.max(root.textLevel(level), root.glassy ? glassFloor : 0) }

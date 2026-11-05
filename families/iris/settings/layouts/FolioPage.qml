@@ -23,6 +23,16 @@ Item {
     // Classic names the area in its own head and holds the area's actions there.
     property bool titled: true
     property bool actions: true
+    // Every group open at once, found through the Island index over the page (Classic, his 11-04: tiles hid what people
+    // came for). Home, Style and the side panels keep their tiles: they are where you choose, not lists to read.
+    property bool openAll: false
+    readonly property bool tiled: !page.openAll || ["general", "appearance"].includes(page.area)
+        || IrisOptions.sectionById(page.area)?.tilesOnly === true
+    // The groups in page order, for the index: what a head names, never a tile band or a group resting under one.
+    readonly property var groupIndex: rows.blocks.map((block, at) => ({ key: String(block.key ?? ""), at: at, block: block }))
+        .filter(entry => !entry.block.more && !entry.block.rest && entry.key.length > 0)
+        .map(entry => ({ key: entry.key, at: entry.at }))
+    readonly property bool indexed: !page.tiled && page.groupIndex.length >= 3
 
     readonly property real d: Number(page.host?.d ?? IrisStyle.settingsDensity)
     function u(n: real): int { return Math.round(n * page.d) }
@@ -135,7 +145,8 @@ Item {
                 anchors.leftMargin: areaBox.pad
                 anchors.rightMargin: areaBox.pad
                 anchors.topMargin: areaBox.pad + (stage.staged ? stage.height + page.u(12) : 0)
-                contentHeight: rows.implicitHeight + page.u(24)
+                // Room under the last group for the index floating over the page's foot.
+                contentHeight: rows.implicitHeight + page.u(page.indexed ? 76 : 24)
                 clip: true
                 ScrollBar.vertical: IrisScrollBar {}
                 onContentYChanged: spyPace.restart()
@@ -159,6 +170,7 @@ Item {
                     // grouped like a form: each group a plate, its rows a hairline apart (the rows floated on the
                     // body and a page read as loose text, 10-29)
                     groupFill: IrisStyle.formPlate
+                    foldHome: page.tiled
                     reading: page.reading
                     onReveal: row => page.reveal(row)
                     onBring: item => page.bring(item)

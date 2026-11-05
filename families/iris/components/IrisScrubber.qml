@@ -169,6 +169,34 @@ Item {
             color: IrisStyle.synthLevel
         }
     }
+    // Dragging, the value rides over the knob in a small Island: it grows out of the knob and goes back into it.
+    Rectangle {
+        id: valueIslet
+        readonly property bool shown: root.dragging && root.range !== null && root.knob && !skin.active
+        readonly property real centre: root.laneStart + root.shownValue * root.laneLength
+        z: 5
+        visible: valueIslet.opacity > 0.02
+        width: valueIsletText.implicitWidth + Math.round(18 * IrisStyle.density)
+        height: Math.round(24 * IrisStyle.density)
+        radius: IrisStyle.capsule(height)
+        x: Math.round(valueIslet.centre - width / 2)
+        y: Math.round(-height - 7 * IrisStyle.density)
+        transformOrigin: Item.Bottom
+        scale: valueIslet.shown ? 1 : 0.35
+        opacity: valueIslet.shown ? 1 : 0
+        Behavior on scale { NumberAnimation { duration: IrisStyle.duration(valueIslet.shown ? 240 : 140); easing.type: valueIslet.shown ? Easing.OutBack : Easing.InCubic; easing.overshoot: 1.7 } }
+        Behavior on opacity { NumberAnimation { duration: IrisStyle.duration(120); easing.type: IrisStyle.feedbackEasing } }
+        Behavior on width { NumberAnimation { duration: IrisStyle.duration(90); easing.type: Easing.OutCubic } }
+        color: IrisStyle.islandDeep
+        border.width: IrisStyle.light ? 0 : 1
+        border.color: IrisStyle.islandEdge
+        IrisLabel {
+            id: valueIsletText
+            anchors.centerIn: parent
+            text: String(root.range?.text ?? "")
+            color: IrisStyle.islandInk
+        }
+    }
     IrisDotStrip {
         id: track
         visible: !skin.active && root.nothing
