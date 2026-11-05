@@ -1251,6 +1251,15 @@ QtObject {
     readonly property color formPlate: root.plateStyle === "key" ? root.synthPanel : !root.glassy ? root.readingCard
         : root.ink ? ColorUtils.applyAlpha(ColorUtils.mix(Qt.rgba(1, 1, 1, 1), root.surfaceOpaque, 0.32), 0.82) // iris-literal: paper lift
         : root.light ? Qt.rgba(1, 1, 1, 0.66) : Qt.rgba(1, 1, 1, 0.055) // iris-literal: white veils of a form's plate
+    // A Settings group as an island (his 11-04 22:30, Dynamic Island). The sheet under it is already the Island's black
+    // in dark (glass at his 96 % tint read black on black, nest 11-04), so an island lifts off it as iOS's dark cells do
+    // off black; in a light scheme it is a Live Activity's light plate (HIG: the Lock Screen presentation follows the
+    // appearance) on a soft shadow. Either way the rows on it keep the scheme's ink. Synth's panel keeps its make.
+    readonly property color islandPlate: root.plateStyle === "key" ? root.synthPanel
+        : root.ink ? root.formPlate
+        : root.light ? (root.glassy ? Qt.rgba(1, 1, 1, 0.84) : root.liftOver(root.surfaceHigh, root.surfaceOpaque)) // iris-literal: a light island's plate
+        : root.glassy ? Qt.rgba(1, 1, 1, 0.075) : ColorUtils.mix(root.surfaceOpaque, Qt.rgba(1, 1, 1, 1), 0.075) // iris-literal: a dark island's lift
+    readonly property color islandShadow: root.light && !root.ink ? Qt.rgba(0, 0, 0, 0.07) : "transparent" // iris-literal: a light island's shadow
     readonly property color readingSidebar: root.glassy
         ? ColorUtils.applyAlpha(root.surfaceOpaque, Math.max(root.wallpaperVeil, root.placePlate)) : root.readingCard
 

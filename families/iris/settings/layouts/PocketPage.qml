@@ -148,7 +148,9 @@ Item {
     // ── The group being read: the head that has reached the upper fifth, for the stage to point at.
     property string reading: ""
     // Peers answer for the one open; any other page for the group being read.
-    readonly property string stageWanted: rows.peers ? rows.openGroup : page.reading
+    // An open island answers for the stage, as peers do; otherwise the group being read.
+    readonly property string stageWanted: rows.peers || (rows.islands && rows.openGroup.length > 0 && !rows.openGroup.startsWith("pin:"))
+        ? rows.openGroup : page.reading
     readonly property string stageGroup: page.stageWanted.length > 0 && stage.stage.sceneFor(page.area, page.stageWanted).length > 0 ? page.stageWanted : ""
     Timer { id: spyPace; interval: 90; onTriggered: page.spy() }
     function spy(): void {
@@ -178,6 +180,8 @@ Item {
         // Asked while the rows still build, the group may not be there yet, or the glide is held short by a content
         // height that is still growing: the page stayed at its top (10-29, as in Drawer).
         if (target) {
+            // An island asked for opens where it stands.
+            if (rows.islands) rows.openRest(wanted)
             const y = target.item.mapToItem(flick.contentItem, 0, 0).y - page.u(8)
             page.glideTo(y)
             if (y <= flick.contentHeight - flick.height + 1) return

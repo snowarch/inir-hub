@@ -177,7 +177,9 @@ Item {
     // ── The group being read: the head that has reached the upper fifth (at the foot, the last one in view).
     property string reading: ""
     // Peers answer for the one open; any other page for the group being read.
-    readonly property string stageWanted: rows.peers ? rows.openGroup : page.reading
+    // An open island answers for the stage, as peers do; otherwise the group being read.
+    readonly property string stageWanted: rows.peers || (rows.islands && rows.openGroup.length > 0 && !rows.openGroup.startsWith("pin:"))
+        ? rows.openGroup : page.reading
     readonly property string stageGroup: page.stageWanted.length > 0 && stage.stage.sceneFor(page.area, page.stageWanted).length > 0 ? page.stageWanted : ""
     Timer { id: spyPace; interval: 90; onTriggered: page.spy() }
     function spy(): void {
@@ -202,6 +204,8 @@ Item {
         const target = rows.targets().find(entry => entry.key === wanted || entry.key.toLowerCase() === lower
             || Translation.tr(entry.key).toLowerCase() === lower)
         if (target) {
+            // An island asked for opens where it stands.
+            if (rows.islands) rows.openRest(wanted)
             page.waiting = ""
             page.glideTo(target.item.mapToItem(flick.contentItem, 0, 0).y - page.u(8))
         } else if (rows.openRest(wanted)) {

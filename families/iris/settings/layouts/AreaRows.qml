@@ -79,6 +79,42 @@ ColumnLayout {
         const others = groups.filter(group => group !== lead && group.rows.length > 0)
         const tiles = flat && rows.foldHome && others.length >= 2
         const home = tiles && rows.section === "general"
+        // Every group an island (his 11-04 22:30, Dynamic Island): compact, it says what it holds now; one at a time
+        // grows in place into its rows, the rest flow round it. The daily answer leads open; Home's pins are islands too.
+        // Original (v2.33) keeps its list; Drawer's columns (foldHome off) keep their groups open.
+        if (tiles && !IrisStyle.settingsOriginal) {
+            const out = []
+            const deckOf = list => list.map(group => ({ key: group.key, title: group.title, rows: group.rows, at: groups.indexOf(group), pin: false }))
+            const everyDay = groups.find(group => group.key === "Every day")
+            if (everyDay) {
+                const pins = everyDay.rows.filter(spec => spec.kind !== "action").map(spec => ({
+                    key: "pin:" + String(spec.modelKey ?? spec.path ?? spec.label ?? ""), title: String(spec.label ?? ""),
+                    rows: [spec], spec: spec, at: groups.indexOf(everyDay), pin: true }))
+                out.push({ title: everyDay.title, caption: everyDay.title, key: everyDay.key, rows: everyDay.rows, flat: true, deck: pins })
+            }
+            const rest = groups.filter(group => group !== everyDay && group.rows.length > 0)
+            const bands = IrisOptions.groupBands[rows.section] ?? []
+            const banded = new Set([].concat(...bands.map(band => band.groups)))
+            const sets = bands.length === 0 ? [{ title: home ? "General" : "", glyph: "", groups: rest }]
+                : bands.map(band => ({ title: band.title, glyph: band.glyph ?? "", groups: band.groups.length > 0
+                    ? rest.filter(group => band.groups.includes(group.key)).sort((a, b) => band.groups.indexOf(a.key) - band.groups.indexOf(b.key))
+                    : rest.filter(group => !banded.has(group.key)) })).filter(set => set.groups.length > 0)
+            for (const set of sets)
+                out.push({ title: "​island" + set.title, caption: set.title.length > 0 ? Translation.tr(set.title) : "", glyph: set.glyph,
+                    key: "", rows: [], flat: true, deck: deckOf(set.groups) })
+            // The lead stands open once per visit; peers always hold one open (they are the switch between panels).
+            if (!rows.leadOpened) {
+                rows.leadOpened = true
+                const leadKey = peers ? String(rest[0]?.key ?? "") : lead && lead !== everyDay ? lead.key : ""
+                if (rows.openGroup.length === 0 && leadKey.length > 0) rows.openGroup = leadKey
+            }
+            rows.islands = true
+            rows.groupTiles = true
+            rows.blocks = out
+            rows.stale = false
+            return
+        }
+        rows.islands = false
         const rest = tiles ? others : groups.filter(group => group.rows.length > 0 && group.rows.every(spec => IrisOptions.foldsAway(spec)))
         const resting = rest.length > 0 && (tiles || rest.length < groups.length)
         const shown = resting ? groups.filter(group => !rest.includes(group)) : groups
@@ -133,12 +169,29 @@ ColumnLayout {
     property string openGroup: ""
     readonly property bool peers: IrisOptions.sectionById(rows.section)?.tilesOnly === true
     property bool peerOpened: false
+    // The page's groups are islands (refresh); the lead opens once per visit.
+    property bool islands: false
+    property bool leadOpened: false
+    // An island opened by hand is brought whole into view once it has grown (a lead opened on arrival is not).
+    property bool islandsBring: false
+    readonly property var islandList: [].concat(...rows.blocks.map(block => block.deck ?? []))
+    function islandNamed(wanted: string): var {
+        const lower = wanted.toLowerCase()
+        return rows.islandList.find(entry => !entry.pin && (entry.key === wanted || entry.key.toLowerCase() === lower
+            || Translation.tr(entry.key).toLowerCase() === lower)) ?? null
+    }
     function opensRest(key: string): bool {
         return rows.groupTiles ? (rows.host?.tuneAll ?? false) || rows.openGroup === key : rows.moreOpen
     }
     // A link or a search asks for a resting group: its tile opens it, or the area's Fine-tune does. False when the
     // area holds no such group.
     function openRest(wanted: string): bool {
+        if (rows.islands) {
+            const island = rows.islandNamed(wanted)
+            if (!island) return false
+            rows.openGroup = island.key
+            return true
+        }
         const lower = wanted.toLowerCase()
         const block = rows.blocks.find(entry => entry.rest && (entry.key === wanted || entry.key.toLowerCase() === lower
             || Translation.tr(entry.key).toLowerCase() === lower))
@@ -150,12 +203,16 @@ ColumnLayout {
     // A search landing on a row there opens it first.
     readonly property bool landsInMore: {
         const landing = String(rows.host?.landingPath ?? "")
-        return landing.length > 0 && rows.blocks.some(block => block.rest && block.rows.some(spec => String(spec.path ?? "") === landing))
+        if (landing.length === 0) return false
+        if (rows.islands) return rows.islandList.some(entry => !entry.pin && entry.rows.some(spec => String(spec.path ?? "") === landing))
+        return rows.blocks.some(block => block.rest && block.rows.some(spec => String(spec.path ?? "") === landing))
     }
     onLandsInMoreChanged: {
         if (!rows.landsInMore) return
         const landing = String(rows.host?.landingPath ?? "")
-        if (rows.groupTiles)
+        if (rows.islands)
+            rows.openGroup = String(rows.islandList.find(entry => !entry.pin && entry.rows.some(spec => String(spec.path ?? "") === landing))?.key ?? "")
+        else if (rows.groupTiles)
             rows.openGroup = String(rows.blocks.find(block => block.rest && block.rows.some(spec => String(spec.path ?? "") === landing))?.key ?? "")
         else if (!rows.moreOpen)
             rows.fold("more")
@@ -183,7 +240,10 @@ ColumnLayout {
         const out = []
         for (let i = 0; i < blockRepeater.count; i++) {
             const block = blockRepeater.itemAt(i)?.item
-            if (block && block.visible) out.push({ key: String(block.modelData.key ?? ""), item: block })
+            if (!block || !block.visible) continue
+            // A deck answers for each of its islands, so a jump lands on (and opens) the group asked for.
+            if (block.decked) { for (const island of block.islandItems()) out.push({ key: island.key, item: island }) }
+            else out.push({ key: String(block.modelData.key ?? ""), item: block })
         }
         return out
     }
@@ -267,6 +327,13 @@ ColumnLayout {
 
                 readonly property string key: String(block.modelData.key ?? "")
                 readonly property string caption: String(block.modelData.caption ?? "")
+                // A deck of islands (refresh's island path): its head names the band, the islands hold the groups.
+                readonly property bool decked: Array.isArray(block.modelData.deck)
+                function islandItems(): var {
+                    const out = []
+                    for (let i = 0; i < islandRepeater.count; i++) { const island = islandRepeater.itemAt(i); if (island && !island.pin) out.push(island) }
+                    return out
+                }
                 readonly property string tuneKey: rows?.section + "/" + block.key
                 readonly property var tuned: block.modelData.rows?.filter(spec => IrisOptions.foldsAway(spec))
                 // Under the area's Fine-tune a group is already the fine-tuning: its rows stand open.
@@ -623,9 +690,78 @@ ColumnLayout {
                         }
                     }
                 }
+                // The groups as islands: compact in columns, saying what each holds; the open one spans the page in its
+                // place and the others flow round it, the whole deck moving as one (one curve, one duration).
+                Item {
+                    id: deck
+                    visible: block.decked
+                    Layout.fillWidth: true
+                    Layout.topMargin: block.caption.length > 0 ? Math.round(2 * rows?.d) : 0
+                    implicitHeight: deck.plan.height
+                    readonly property real gap: Math.round(8 * rows?.d)
+                    readonly property real compact: Math.round(50 * rows?.d * Math.max(1, IrisStyle.typeScale))
+                    // Open, an island's corners settle where a card's would (a capsule closed: half its height).
+                    readonly property real radius: Math.max(IrisStyle.radiusTile, IrisStyle.corner(26))
+                    readonly property int columns: Math.max(1, Math.min(3, Math.floor((deck.width + deck.gap) / (Math.round(340 * rows?.d) * Math.max(1, IrisStyle.typeScale) + deck.gap))))
+                    // Geometry eases only while an island opens or closes; a resize or a page build lands at once.
+                    property bool morphing: false
+                    property bool growing: false
+                    function morph(growing: bool): void {
+                        if (!IrisStyle.motionEnabled) return
+                        deck.growing = growing
+                        deck.morphing = true
+                        morphClock.restart()
+                    }
+                    Timer { id: morphClock; interval: Math.max(IrisStyle.emergeDuration, IrisStyle.recedeDuration) + 80; onTriggered: deck.morphing = false }
+                    Connections {
+                        target: block.decked ? rows : null
+                        function onOpenGroupChanged(): void { deck.morph(rows.openGroup.length > 0) }
+                    }
+                    readonly property int duration: deck.growing ? IrisStyle.emergeDuration : IrisStyle.recedeDuration
+                    readonly property var curve: deck.growing ? IrisStyle.emergeCurve : IrisStyle.recedeCurve
+                    // Lines of compact islands share the width; an open island takes a line of its own where it stands,
+                    // and a line it cut short spreads its islands across the page (no hole beside the open one).
+                    // The open island's height, written by the island itself (read from the model, never from the
+                    // Repeater's items: an incubating block has them late and the plan never saw them).
+                    property real openWanted: deck.compact
+                    readonly property var plan: {
+                        const entries = block.decked ? block.modelData.deck : []
+                        const openKey = String(rows?.openGroup ?? "")
+                        const boxes = []
+                        let line = []
+                        let y = 0
+                        const flush = () => {
+                            if (line.length === 0) return
+                            const w = (deck.width - deck.gap * (line.length - 1)) / line.length
+                            line.forEach((at, k) => { boxes[at] = { x: Math.round(k * (w + deck.gap)), y: y, w: Math.round(w), h: deck.compact } })
+                            y += deck.compact + deck.gap
+                            line = []
+                        }
+                        for (let i = 0; i < entries.length; i++) {
+                            if (String(entries[i].key) === openKey) {
+                                flush()
+                                boxes[i] = { x: 0, y: y, w: deck.width, h: deck.openWanted }
+                                y += deck.openWanted + deck.gap
+                            } else {
+                                line.push(i)
+                                if (line.length >= deck.columns) flush()
+                            }
+                        }
+                        flush()
+                        return { boxes: boxes, height: Math.max(0, y - deck.gap) }
+                    }
+                    Repeater {
+                        id: islandRepeater
+                        model: ScriptModel { objectProp: "key"; values: block.decked ? block.modelData.deck : [] }
+                        Island {
+                            deckItem: deck
+                            owner: rows
+                        }
+                    }
+                }
                 GridLayout {
                     id: tileGrid
-                    visible: block.tiled
+                    visible: block.tiled && !block.decked
                     Layout.fillWidth: true
                     readonly property real gap: Math.round(8 * rows?.d)
                     columns: Math.max(2, Math.floor((width + gap) / (Math.round(208 * rows?.d) * Math.max(1, IrisStyle.typeScale) + gap)))
@@ -635,7 +771,7 @@ ColumnLayout {
                     onOpenedChanged: if (tileGrid.opened.length > 0) rows.showOpened(openedTile)
                     readonly property var openedSpec: block.shownRows.find(spec => String(spec.modelKey ?? spec.path ?? "") === tileGrid.opened) ?? null
                     Repeater {
-                        model: ScriptModel { objectProp: "modelKey"; values: block.tiled ? block.shownRows.filter(spec => spec.kind !== "action") : [] }
+                        model: ScriptModel { objectProp: "modelKey"; values: block.tiled && !block.decked ? block.shownRows.filter(spec => spec.kind !== "action") : [] }
                         Item {
                             id: tile
                             required property var modelData
@@ -758,7 +894,7 @@ ColumnLayout {
                 // The value a tile opened, as its own row, under the tiles.
                 Loader {
                     id: openedTile
-                    active: block.tiled && tileGrid.openedSpec !== null
+                    active: block.tiled && !block.decked && tileGrid.openedSpec !== null
                     visible: active
                     Layout.fillWidth: true
                     sourceComponent: IrisPlate {
@@ -775,7 +911,7 @@ ColumnLayout {
                     }
                 }
                 Repeater {
-                    model: ScriptModel { values: block.loneSwitch || block.modelData.more || block.tiled ? [] : block.parts }
+                    model: ScriptModel { values: block.loneSwitch || block.modelData.more || block.tiled || block.decked ? [] : block.parts }
                     ColumnLayout {
                         id: part
                         required property string modelData
@@ -858,6 +994,367 @@ ColumnLayout {
                     action: () => extraLinks.host.go({ section: "general", group: "", advancedPage: extraLinks.host.pageIndexOf(link.key) })
                 }))
                 return []
+            }
+        }
+    }
+
+    function revealLater(row: Item): void { rows.revealing = row; revealSoon.restart() }
+
+    // ── An island: a group (or one of Home's pins) as the Dynamic Island draws a Live Activity. Compact it is one line,
+    // its mark snug in the capsule's end, the name in the ink and what it holds now bold in its colour (HIG: bold colour
+    // on the black, information split leading and trailing); open it grows in place into its rows on the same plate,
+    // the line keeping its place (HIG: the expanded presentation is an enlarged compact one), its corners settling
+    // from a capsule to a card. A switch group is its switch: a tap flips it, nothing opens.
+    component Island: Item {
+        id: island
+        required property var modelData
+        required property int index
+        property Item deckItem
+        property Item owner
+        readonly property real d: island.owner?.d ?? 1
+        readonly property string key: String(island.modelData.key ?? "")
+        readonly property bool pin: island.modelData.pin === true
+        readonly property var specs: island.modelData.rows ?? []
+        readonly property var first: island.specs[0] ?? null
+        readonly property bool open: String(island.owner?.openGroup ?? "") === island.key
+        readonly property string title: Translation.tr(String(island.modelData.title ?? ""))
+        // What answers on the island's own line.
+        readonly property bool loneSwitch: !island.pin && island.specs.length === 1 && island.first?.kind === "switch"
+        readonly property bool namedSwitch: {
+            if (island.pin || island.specs.length < 2 || island.first?.kind !== "switch" || String(island.first?.description ?? "").length > 0) return false
+            const label = String(island.first?.label ?? "")
+            return Translation.tr(label).toLowerCase() === island.title.toLowerCase() || /^Enable\b/.test(label)
+        }
+        readonly property bool pinSwitch: island.pin && island.first?.kind === "switch"
+        readonly property bool toggles: island.loneSwitch || island.pinSwitch
+        readonly property var switchSpec: island.loneSwitch || island.namedSwitch || island.pinSwitch ? island.first : null
+        // A group's own on/off is a switch on its line; Home's pins say it in a word, as the Island's own Focus does.
+        readonly property bool switchShown: island.loneSwitch || island.namedSwitch
+        readonly property bool on: {
+            Config.revision
+            if (!island.switchSpec) return false
+            const value = IrisOptions.currentValue(island.switchSpec)
+            return island.switchSpec.invert ? !value : Boolean(value)
+        }
+        readonly property var area: island.pin ? IrisOptions.sectionById(String(island.first?.origin?.section ?? "")) : null
+        readonly property bool accentPin: island.pin && String(island.first?.path ?? "") === "iris.appearance.accent"
+        readonly property color tint: island.accentPin ? IrisStyle.accent
+            : island.pin ? (island.area?.tint ?? IrisStyle.identity.gray)
+            : IrisOptions.groupHue(String(island.owner?.section ?? ""), Number(island.modelData.at ?? island.index), island.key)
+        readonly property color hue: IrisStyle.iconColour === "mono" ? IrisStyle.text : IrisStyle.iconHue(island.tint)
+        readonly property string glyph: {
+            if (!island.pin) return IrisOptions.groupGlyphs[island.key] ?? IrisOptions.sectionById(String(island.owner?.section ?? ""))?.icon ?? "settings"
+            if (island.accentPin) return "palette"
+            const value = IrisOptions.currentValue(island.first)
+            const choice = (island.first?.choices ?? []).find(entry => String(entry.value) === String(value))
+            return String(choice?.glyph ?? island.first?.glyph ?? IrisOptions.groupGlyphs[String(island.first?.origin?.group ?? "")] ?? island.area?.icon ?? "settings")
+        }
+        // What it holds now, in words: a pin its value; a group its first two answers, a switch by its name while on.
+        function word(spec: var): string {
+            const value = IrisOptions.currentValue(spec)
+            const choice = (spec.choices ?? []).find(entry => String(entry.value) === String(value))
+            return spec.glance ? String(spec.glance(value) ?? "")
+                : spec.kind === "switch" ? ((spec.invert ? !value : Boolean(value)) ? Translation.tr(String(spec.label ?? "")) : "")
+                : choice ? Translation.tr(String(choice.label ?? ""))
+                : spec.kind === "range" ? IrisOptions.rangeText(spec, value)
+                : spec.kind === "text" && String(value ?? "").length > 0 && String(value).length <= 24 ? String(value) : ""
+        }
+        readonly property var said: {
+            Config.revision
+            if (island.toggles) return [island.on ? Translation.tr("On") : Translation.tr("Off")]
+            if (island.pin) { const one = island.word(island.first); return one.length > 0 ? [one] : [] }
+            const out = []
+            for (const spec of island.specs.slice(island.namedSwitch ? 1 : 0)) {
+                if (out.length >= 2) break
+                if (IrisOptions.foldsAway(spec)) continue
+                const one = island.word(spec)
+                if (one.length > 0) out.push(one)
+            }
+            return out
+        }
+        readonly property bool modified: { Config.revision; return island.specs.some(spec => IrisOptions.modified(spec)) }
+        // The open island's height: its line and its rows.
+        readonly property real compact: island.deckItem?.compact ?? 50
+        readonly property real inset: Math.round(6 * island.d)
+        readonly property real wanted: island.compact + (body.item ? body.item.implicitHeight + Math.round(10 * island.d) : 0)
+        Binding { when: island.open; target: island.deckItem; property: "openWanted"; value: island.wanted }
+        // Its rows stay while it closes, so they leave with the body instead of before it.
+        property bool closing: false
+        onOpenChanged: if (!island.open) { island.closing = true; closeClock.restart() } else bringClock.restart()
+        Timer { id: closeClock; interval: (island.deckItem?.duration ?? 200) + 40; onTriggered: island.closing = false }
+        Timer { id: bringClock; interval: (island.deckItem?.duration ?? 200) + 30; onTriggered: if (island.open && island.owner?.islandsBring) island.owner.bring(island) }
+        function act(): void {
+            if (island.toggles) { IrisOptions.commit(island.switchSpec, island.switchSpec.invert ? island.on : !island.on); return }
+            if (island.owner?.peers && island.open) return
+            island.owner.islandsBring = true
+            island.owner.openGroup = island.open ? "" : island.key
+        }
+
+        readonly property var box: island.deckItem?.plan.boxes[island.index] ?? null
+        x: island.box?.x ?? 0
+        y: island.box?.y ?? 0
+        width: island.box?.w ?? 0
+        height: island.box?.h ?? island.compact
+        z: island.open || island.closing ? 1 : 0
+        Behavior on x { enabled: island.deckItem?.morphing ?? false; NumberAnimation { duration: island.deckItem.duration; easing.type: Easing.BezierSpline; easing.bezierCurve: island.deckItem.curve } }
+        Behavior on y { enabled: island.deckItem?.morphing ?? false; NumberAnimation { duration: island.deckItem.duration; easing.type: Easing.BezierSpline; easing.bezierCurve: island.deckItem.curve } }
+        Behavior on width { enabled: island.deckItem?.morphing ?? false; NumberAnimation { duration: island.deckItem.duration; easing.type: Easing.BezierSpline; easing.bezierCurve: island.deckItem.curve } }
+        Behavior on height { enabled: island.deckItem?.morphing ?? false; NumberAnimation { duration: island.deckItem.duration; easing.type: Easing.BezierSpline; easing.bezierCurve: island.deckItem.curve } }
+
+        activeFocusOnTab: true
+        Accessible.role: island.toggles ? Accessible.CheckBox : Accessible.Button
+        Accessible.name: island.title
+        Accessible.description: island.said.join(", ")
+        Accessible.checkable: island.toggles
+        Accessible.checked: island.on
+        Keys.onSpacePressed: island.act()
+        Keys.onReturnPressed: island.act()
+
+        readonly property real radius: Math.min(island.height / 2, island.deckItem?.radius ?? 26)
+        IrisBodyShadow {
+            visible: IrisStyle.islandShadow.a > 0
+            anchors.fill: plate
+            radius: plate.radius
+            offset.y: Math.round(3 * island.d)
+            blur: Math.round(16 * island.d)
+            spread: 0
+            color: IrisStyle.islandShadow
+        }
+        IrisPlate {
+            id: plate
+            anchors.fill: parent
+            radius: island.radius
+            color: IrisStyle.islandPlate
+            lit: island.open
+            scale: lineArea.pressed && !island.open ? IrisStyle.pressScale(0.97) : 1
+            Behavior on scale { NumberAnimation { duration: IrisStyle.feedbackDuration; easing.type: IrisStyle.feedbackEasing } }
+        }
+        // Hover lifts the line under the pointer; open, only its line answers it (the rows have their own).
+        Rectangle {
+            x: plate.x
+            y: plate.y
+            width: plate.width
+            height: island.open ? island.compact : plate.height
+            topLeftRadius: island.radius
+            topRightRadius: island.radius
+            bottomLeftRadius: island.open ? 0 : island.radius
+            bottomRightRadius: island.open ? 0 : island.radius
+            scale: plate.scale
+            color: lineArea.pressed ? IrisStyle.fillActive : IrisStyle.fillQuiet
+            opacity: lineArea.containsMouse || lineArea.pressed || island.activeFocus ? 1 : 0
+            Behavior on opacity { NumberAnimation { duration: IrisStyle.duration(110); easing.type: IrisStyle.feedbackEasing } }
+        }
+        Item {
+            id: line
+            width: island.width
+            height: island.compact
+            scale: plate.scale
+            // The mark sits in the capsule's end with even air round it (HIG: concentric, snug).
+            readonly property real markSize: Math.round(22 * island.d)
+            readonly property real pad: Math.round((island.compact - line.markSize) / 2)
+            readonly property real tail: island.switchShown ? lineSwitch.width : island.open ? closeKey.width : glance.width
+            IrisSquircle {
+                id: mark
+                x: line.pad
+                anchors.verticalCenter: parent.verticalCenter
+                width: line.markSize
+                height: width
+                plain: IrisStyle.settingsPlainMarks && !(island.pinSwitch && island.on)
+                tint: island.tint
+                glyph: island.glyph
+            }
+            IrisText {
+                id: name
+                anchors.left: mark.right
+                anchors.leftMargin: Math.round(10 * island.d)
+                anchors.verticalCenter: parent.verticalCenter
+                width: Math.min(implicitWidth, line.width - x - line.pad - line.tail - Math.round(16 * island.d) - (dot.visible ? dot.width + Math.round(8 * island.d) : 0))
+                text: island.title
+                color: IrisStyle.text
+                font.pixelSize: IrisStyle.typeBody
+                font.weight: IrisStyle.weight(Font.DemiBold)
+                elide: Text.ElideRight
+            }
+            // Changed from its factory value: the page's one dot.
+            Rectangle {
+                id: dot
+                visible: island.modified
+                anchors.left: name.right
+                anchors.leftMargin: Math.round(8 * island.d)
+                anchors.verticalCenter: parent.verticalCenter
+                width: Math.round(6 * island.d)
+                height: width
+                radius: width / 2
+                color: IrisStyle.accent
+            }
+            // What it holds now, trailing and bold in its colour; it gives way to the rows when the island opens. Two
+            // answers that do not fit say the first; one that does not fit is left to the open island (never cut).
+            IrisText {
+                id: glance
+                readonly property real room: line.width - (dot.visible ? dot.x + dot.width : name.x + name.implicitWidth) - line.pad - Math.round(20 * island.d)
+                readonly property string both: island.said.join(" · ")
+                visible: !island.switchShown
+                anchors.right: parent.right
+                anchors.rightMargin: line.pad + Math.round(2 * island.d)
+                anchors.verticalCenter: parent.verticalCenter
+                // Compact says little (HIG): two answers only while both are short.
+                text: glance.both.length <= 24 && glanceMetrics.advanceWidth(glance.both) <= glance.room ? glance.both
+                    : island.said.length > 0 && glanceMetrics.advanceWidth(island.said[0]) <= glance.room ? island.said[0] : ""
+                color: island.toggles && !island.on ? IrisStyle.textTertiary : island.hue
+                font.pixelSize: IrisStyle.typeBody
+                font.weight: IrisStyle.weight(Font.Bold)
+                opacity: island.open ? 0 : 1
+                Behavior on opacity { NumberAnimation { duration: IrisStyle.duration(island.open ? 90 : 160); easing.type: IrisStyle.feedbackEasing } }
+                FontMetrics { id: glanceMetrics; font: glance.font }
+            }
+            IrisSwitch {
+                id: lineSwitch
+                visible: island.switchShown
+                anchors.right: parent.right
+                anchors.rightMargin: line.pad
+                anchors.verticalCenter: parent.verticalCenter
+                on: island.on
+                name: island.title
+                onToggled: IrisOptions.commit(island.switchSpec, island.switchSpec.invert ? on : !on)
+            }
+            // Open, the line's end closes it again, as the Island's own cancel key: a round key in the plate's quiet fill.
+            Rectangle {
+                id: closeKey
+                visible: !island.switchShown && !island.toggles
+                opacity: island.open ? 1 : 0
+                anchors.right: parent.right
+                anchors.rightMargin: line.pad - Math.round(2 * island.d)
+                anchors.verticalCenter: parent.verticalCenter
+                width: Math.round(26 * island.d)
+                height: width
+                radius: width / 2
+                color: lineArea.containsMouse ? IrisStyle.fillHover : IrisStyle.fillQuiet
+                Behavior on opacity { NumberAnimation { duration: IrisStyle.duration(island.open ? 200 : 90); easing.type: IrisStyle.feedbackEasing } }
+                MaterialSymbol {
+                    anchors.centerIn: parent
+                    text: "keyboard_arrow_up"
+                    iconSize: Math.round(18 * island.d)
+                    color: IrisStyle.textSecondary
+                }
+            }
+        }
+        MouseArea {
+            id: lineArea
+            width: island.width
+            height: island.compact
+            hoverEnabled: true
+            cursorShape: island.owner?.peers && island.open ? Qt.ArrowCursor : Qt.PointingHandCursor
+            onClicked: island.act()
+        }
+        // The rows, laid out once at the page's width (an open island always spans it) and revealed by the body as it
+        // grows, a beat after it starts.
+        Item {
+            anchors.fill: parent
+            clip: true
+            Loader {
+                id: body
+                x: island.inset
+                y: island.compact - Math.round(4 * island.d)
+                width: (island.deckItem?.width ?? island.width) - 2 * island.inset
+                active: island.open || island.closing
+                opacity: island.open && body.status === Loader.Ready ? 1 : 0
+                Behavior on opacity {
+                    SequentialAnimation {
+                        PauseAnimation { duration: island.open ? Math.round((island.deckItem?.duration ?? 200) * 0.28) : 0 }
+                        NumberAnimation { duration: IrisStyle.duration(island.open ? 180 : 90); easing.type: IrisStyle.feedbackEasing }
+                    }
+                }
+                sourceComponent: island.pin ? pinRows : groupRows
+            }
+        }
+        Component {
+            id: pinRows
+            IrisSetting { spec: island.first; voice: island.owner?.voice ?? ""; last: true }
+        }
+        Component {
+            id: groupRows
+            GroupBody { group: island.modelData; owner: island.owner; skipFirst: island.namedSwitch; heading: island.title }
+        }
+    }
+
+    // ── An open island's rows: its parts (each in an inset container when there are several, HIG), the fine-tuning
+    // folded under them when there is enough of it to fold.
+    component GroupBody: ColumnLayout {
+        id: body
+        required property var group
+        property Item owner
+        property bool skipFirst: false
+        property string heading: ""
+        readonly property real d: body.owner?.d ?? 1
+        spacing: Math.round(8 * body.d)
+        readonly property string key: String(body.group?.key ?? "")
+        readonly property string tuneKey: String(body.owner?.section ?? "") + "/" + body.key
+        readonly property var all: (body.group?.rows ?? []).slice(body.skipFirst ? 1 : 0)
+        readonly property var tuned: body.all.filter(spec => IrisOptions.foldsAway(spec))
+        // A group that is all fine-tuning is already the fold: its rows stand open.
+        readonly property bool tunes: body.tuned.length >= 2 && body.tuned.length < body.all.length
+        readonly property bool tuneOpen: body.tunes && ((body.owner?.host?.tuneAll ?? false) || (body.owner?.unfolded[body.tuneKey] ?? false))
+        readonly property var shownRows: body.tunes && !body.tuneOpen ? body.all.filter(spec => !body.tuned.includes(spec)) : body.all
+        readonly property string landing: String(body.owner?.host?.landingPath ?? "")
+        readonly property bool landsInFold: body.landing.length > 0 && body.tuned.some(spec => String(spec.path ?? "") === body.landing)
+        onLandsInFoldChanged: if (body.landsInFold && !body.tuneOpen) body.owner?.fold(body.tuneKey)
+        Component.onCompleted: if (body.landsInFold && !body.tuneOpen) body.owner?.fold(body.tuneKey)
+        readonly property var parts: body.shownRows.length === 0 ? [""] : [...new Set(body.shownRows.map(spec => String(spec.part ?? "")))]
+        Repeater {
+            model: ScriptModel { values: body.parts }
+            ColumnLayout {
+                id: part
+                required property string modelData
+                required property int index
+                readonly property var specs: body.shownRows.filter(spec => String(spec.part ?? "") === part.modelData)
+                readonly property bool lastPart: part.index === body.parts.length - 1
+                readonly property bool boxed: body.parts.length > 1
+                Layout.fillWidth: true
+                spacing: Math.round(4 * body.d)
+                IrisText {
+                    visible: text.length > 0
+                    Layout.leftMargin: Math.round(12 * body.d)
+                    Layout.topMargin: part.index > 0 ? Math.round(4 * body.d) : 0
+                    text: part.modelData.length > 0 ? Translation.tr(part.modelData) : ""
+                    color: IrisStyle.subtext
+                    font.pixelSize: IrisStyle.typeMeta
+                    font.weight: IrisStyle.weight(Font.DemiBold)
+                }
+                Rectangle {
+                    Layout.fillWidth: true
+                    implicitHeight: partRows.implicitHeight
+                    radius: IrisStyle.radiusTile
+                    color: part.boxed ? IrisStyle.fillQuiet : "transparent"
+                    ColumnLayout {
+                        id: partRows
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        spacing: 0
+                        Repeater {
+                            model: ScriptModel { objectProp: "modelKey"; values: part.specs }
+                            IrisSetting {
+                                id: row
+                                required property var modelData
+                                required property int index
+                                Layout.fillWidth: true
+                                spec: row.modelData
+                                voice: body.owner?.voice ?? ""
+                                heading: part.index === 0 && row.index === 0 ? body.heading : ""
+                                last: row.index === part.specs.length - 1 && !(part.lastPart && body.tunes)
+                                landing: body.landing.length > 0 && String(row.modelData.path ?? "") === body.landing
+                                onLandingChanged: if (row.landing) body.owner?.revealLater(row)
+                                Component.onCompleted: if (row.landing) body.owner?.revealLater(row)
+                            }
+                        }
+                        FineTune {
+                            visible: part.lastPart && body.tunes
+                            Layout.fillWidth: true
+                            open: body.tuneOpen
+                            names: body.tuned.map(spec => Translation.tr(String(spec.label ?? "")))
+                            onClicked: body.owner?.fold(body.tuneKey)
+                        }
+                    }
+                }
             }
         }
     }
