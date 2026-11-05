@@ -1168,7 +1168,11 @@ Item {
                     Layout.leftMargin: root.plateInset
                     Layout.rightMargin: root.plateInset
                     Layout.topMargin: root.headLine - Math.round(26 * root.d)
+                    // Its own height only: a layout child fills by default, and the Island's slot (filling the row) let
+                    // the head take half the window and leave the page none (his 11-04 capture).
+                    Layout.fillHeight: false
                     Layout.preferredHeight: Math.round(52 * root.d)
+                    Layout.maximumHeight: Math.round(52 * root.d)
                     spacing: Math.round(8 * root.d)
                     // What the Island and the actions share: the row less every fixed control in it. Measured from the
                     // row, never from the Island or the actions, whose widths move with the folding (that loop froze the shell).
