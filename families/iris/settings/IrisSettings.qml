@@ -1073,8 +1073,6 @@ Item {
                             readonly property color own: travelWash.row?.own ?? IrisStyle.accent
                             // A plate-selection Design (AIRISU) puts where you are on the solid plate of the accent.
                             color: IrisStyle.plateSelection ? IrisStyle.selectionFill : IrisStyle.tintFillHover(travelWash.own)
-                            border.width: IrisStyle.plateSelection ? 0 : 1
-                            border.color: IrisStyle.tintEdge(travelWash.own)
                             opacity: travelWash.shown ? 1 : 0
                             // It lands where it first appears and travels from then on. Moving the selection hides it for a
                             // moment (the old row lets go before the new one takes it): only a hide that lasts stops the travel.
@@ -1992,8 +1990,6 @@ Item {
                 visible: sectionRow.selected && !sectionRow.travels && !IrisStyle.plateSelection
                 radius: parent.radius
                 color: IrisStyle.tintFillHover(sectionRow.own)
-                border.width: 1
-                border.color: IrisStyle.tintEdge(sectionRow.own)
             }
             // Vivid tiles: the colour is how the eye finds an area, whatever material sits behind.
             Item {

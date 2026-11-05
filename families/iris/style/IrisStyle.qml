@@ -1044,8 +1044,6 @@ QtObject {
     function arcInk(tint: color, length: real, stroke: real): color { return ColorUtils.applyAlpha(tint, tint.a * Math.max(0, Math.min(1, length / Math.max(1, stroke)))) }
     function tintFillHover(tint: color): color { return ColorUtils.applyAlpha(tint, root.fillAlpha(0.2)) }
     function tintBorder(tint: color): color { return ColorUtils.applyAlpha(tint, 0.7) }
-    // A selection capsule's own edge: a breath of its colour, so the capsule reads on glass without a ring.
-    function tintEdge(tint: color): color { return ColorUtils.applyAlpha(tint, root.light ? 0.22 : 0.18) } // iris-literal: the edge's share of the tint
 
     function textLevel(level: real): real { return Math.min(1, level * root.tweak("contrast", 0.6, 1.5)) }
     function inkLevel(level: real, glassFloor: real): real { return Math.max(root.textLevel(level), root.glassy ? glassFloor : 0) }
