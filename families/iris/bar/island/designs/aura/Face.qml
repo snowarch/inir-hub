@@ -9,7 +9,8 @@ import qs.modules.iris.style
 import qs.modules.iris.components
 
 // Aura: the Island ringed in the spectrum, as a phone's edge lights when its assistant listens; the time in the
-// middle. The colours stand still at rest and turn once round while the pointer is over the Island.
+// middle. The colours stand still at rest and turn once round while the pointer is over the Island. The colours and
+// the turn are the person's (iris.bar.faces.aura).
 Item {
     id: root
     property var island: null
@@ -19,11 +20,22 @@ Item {
     readonly property real contentWidth: clock.implicitWidth + Math.round(26 * root.d)
     readonly property real line: Math.max(1.5, Math.round(2 * root.d))
     property real turn: 30
+    readonly property var options: Config.options?.iris?.bar?.faces?.aura ?? ({})
+    // Five stops round the ring; the sixth closes it on the first.
+    readonly property var palette: {
+        const id = IrisStyle.identity
+        switch (String(root.options.colours ?? "spectrum")) {
+        case "accent": return [IrisStyle.accent, IrisStyle.secondaryAccent, IrisStyle.accent, IrisStyle.secondaryAccent, IrisStyle.accent]
+        case "sunset": return [id.orange, id.red, id.pink, id.purple, id.yellow]
+        case "ocean": return [id.teal, id.sky, id.blue, id.indigo, id.green]
+        default: return [id.blue, id.purple, id.pink, id.orange, id.green]
+        }
+    }
     readonly property bool hovered: aura.hovered
 
     HoverHandler { id: aura }
     NumberAnimation on turn {
-        running: root.hovered && IrisStyle.motionEnabled
+        running: root.hovered && IrisStyle.motionEnabled && root.options.turns !== false
         from: root.turn
         to: root.turn + 360
         duration: 2400
@@ -48,12 +60,12 @@ Item {
                     centerX: ring.width / 2
                     centerY: ring.height / 2
                     angle: root.turn
-                    GradientStop { position: 0.0; color: IrisStyle.identity.blue }
-                    GradientStop { position: 0.2; color: IrisStyle.identity.purple }
-                    GradientStop { position: 0.4; color: IrisStyle.identity.pink }
-                    GradientStop { position: 0.6; color: IrisStyle.identity.orange }
-                    GradientStop { position: 0.8; color: IrisStyle.identity.green }
-                    GradientStop { position: 1.0; color: IrisStyle.identity.blue }
+                    GradientStop { position: 0.0; color: root.palette[0] }
+                    GradientStop { position: 0.2; color: root.palette[1] }
+                    GradientStop { position: 0.4; color: root.palette[2] }
+                    GradientStop { position: 0.6; color: root.palette[3] }
+                    GradientStop { position: 0.8; color: root.palette[4] }
+                    GradientStop { position: 1.0; color: root.palette[0] }
                 }
                 PathRectangle { x: ring.gap; y: ring.gap; width: ring.width - 2 * ring.gap; height: ring.height - 2 * ring.gap; radius: (ring.height - 2 * ring.gap) / 2 }
                 PathRectangle {

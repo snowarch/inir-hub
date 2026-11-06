@@ -25,7 +25,9 @@ Item {
 
     // A slim strip keeps the entry on the time's line.
     readonly property bool stacks: root.h >= Math.round(34 * root.d)
-    readonly property var entry: IrisFaceData.nextEntry(root.minute * 60000, 720)
+    // How far ahead it looks for the next event (iris.bar.faces.ledger.ahead, minutes): 3, 12 or 24 hours.
+    readonly property int ahead: [180, 720, 1440].includes(Number(Config.options?.iris?.bar?.faces?.ledger?.ahead)) ? Number(Config.options.iris.bar.faces.ledger.ahead) : 720
+    readonly property var entry: IrisFaceData.nextEntry(root.minute * 60000, root.ahead)
     readonly property bool named: root.entry.title.length > 0
     readonly property bool close: root.named && (root.entry.running || (root.entry.left > 0 && root.entry.left <= 30))
     readonly property real share: root.entry.running ? root.entry.left / Math.max(1, (root.entry.end - root.entry.start) / 60000)

@@ -10,7 +10,8 @@ import Quickshell.Bluetooth
 
 // Status: a status bar in one capsule, the time at the start. At the end, what this machine has: the connection (a
 // cable, Wi-Fi's bars, or none), the sound when it is off, then the battery as a lit capsule with its figure; with no
-// battery, the charge of a headset that has one, else the weather, else the day.
+// battery, the charge of a headset that has one, else the weather, else the day. What the capsule carries and which
+// marks show are the person's (iris.bar.faces.status); a choice that has nothing to say falls back to that order.
 Item {
     id: root
     property var island: null
@@ -23,8 +24,15 @@ Item {
     readonly property int bars: Math.max(1, Math.min(4, Math.ceil(Number(Network.networkStrength) / 25)))
     readonly property var headset: (Bluetooth.devices?.values ?? []).find(device => device?.connected && device?.batteryAvailable) ?? null
     readonly property bool sky: Weather.enabled && Weather.hasData
+    readonly property var options: Config.options?.iris?.bar?.faces?.status ?? ({})
+    readonly property string wanted: String(root.options.carry ?? "auto")
     // What the capsule carries: "battery", "headset", "sky" or "day".
-    readonly property string carry: Battery.available ? "battery" : root.headset ? "headset" : root.sky ? "sky" : "day"
+    readonly property string carry: root.wanted === "battery" && Battery.available ? "battery"
+        : root.wanted === "headset" && root.headset ? "headset"
+        : root.wanted === "sky" && root.sky ? "sky"
+        : root.wanted === "day" ? "day"
+        : Battery.available ? "battery" : root.headset ? "headset" : root.sky ? "sky" : "day"
+    readonly property bool linkShown: root.options.connection !== false
     readonly property real level: root.carry === "battery" ? Battery.percentage : root.carry === "headset" ? Number(root.headset.battery) : 0
     readonly property color pill: root.carry === "battery" && Battery.isLow && !Battery.isCharging ? IrisStyle.danger
         : root.carry === "headset" && root.level <= 0.2 ? IrisStyle.danger
@@ -53,7 +61,7 @@ Item {
         anchors.verticalCenter: parent.verticalCenter
         spacing: Math.round(8 * root.d)
         MaterialSymbol {
-            visible: Audio.sink?.audio?.muted ?? false
+            visible: root.options.sound !== false && (Audio.sink?.audio?.muted ?? false)
             anchors.verticalCenter: parent.verticalCenter
             text: "volume_off"
             fill: 1
@@ -62,7 +70,7 @@ Item {
         }
         // A cable is its port; Wi-Fi rises in four bars lit to its strength; nothing, the struck mark.
         MaterialSymbol {
-            visible: !root.wireless
+            visible: root.linkShown && !root.wireless
             anchors.verticalCenter: parent.verticalCenter
             text: root.cable ? "settings_ethernet" : "signal_disconnected"
             fill: 1
@@ -70,7 +78,7 @@ Item {
             color: root.cable ? IrisStyle.text : IrisStyle.textTertiary
         }
         Row {
-            visible: root.wireless
+            visible: root.linkShown && root.wireless
             anchors.verticalCenter: parent.verticalCenter
             spacing: Math.max(1, Math.round(1.5 * root.d))
             Repeater {

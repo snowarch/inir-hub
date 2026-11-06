@@ -78,6 +78,14 @@ ClippingRectangle {
     readonly property color clockAccent: String(root.bar?.clockAccent ?? "highlight") === "accent" ? IrisStyle.accent
         : String(root.bar?.clockAccent ?? "highlight") === "plain" ? IrisStyle.text : IrisStyle.secondaryAccent
     readonly property string clockStyle: String(IrisStyle.structuralValue("bar.clockStyle", "dateTime"))
+    // The face the Island wears (a Design's, else the design's own); Halo is the engine's clock below. A stand-in clock
+    // kept Halo's time under every design, so a Face option changed nothing here (11-06).
+    readonly property string faceUrl: {
+        const own = IrisDesign.skin("islandFace")
+        if (own.length > 0) return own
+        const design = String(root.bar?.design ?? "halo")
+        return (IrisStyle.islandDesignParts[design] ?? []).includes("Face.qml") ? Qt.resolvedUrl("../bar/island/designs/" + design + "/Face.qml") : ""
+    }
 
     readonly property string layout: String(root.bar?.layout ?? "island")
     readonly property var island: {
@@ -358,8 +366,29 @@ ClippingRectangle {
                     }
                 }
 
+                // What a face reads of the Island, at the Island's own size here.
+                QtObject {
+                    id: faceSample
+                    readonly property real compactHeight: root.island.height
+                    readonly property color clockAccent: root.clockAccent
+                    readonly property real figureSize: IrisStyle.typeHeadline * root.clockScale
+                    readonly property bool nothingLook: IrisStyle.nothingAt("island")
+                    readonly property bool zoned: false
+                    readonly property bool vertical: false
+                }
+                Loader {
+                    id: wornFace
+                    active: !root.island.vertical && root.faceUrl.length > 0
+                    asynchronous: true
+                    source: wornFace.active ? root.faceUrl : ""
+                    anchors.centerIn: parent
+                    width: Math.min(islandBox.width, Number(wornFace.item?.contentWidth ?? 0))
+                    height: islandBox.height
+                    onLoaded: if (item && item.island !== undefined) item.island = faceSample
+                }
+
                 RowLayout {
-                    visible: !root.island.vertical
+                    visible: !root.island.vertical && !(wornFace.status === Loader.Ready)
                     anchors.centerIn: parent
                     spacing: Math.round(6 * root.d)
                     DateMark {

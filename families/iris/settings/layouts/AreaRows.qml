@@ -370,7 +370,7 @@ ColumnLayout {
                 // The head, in the layout's voice (IrisSkin groupHeader), holding a lone switch on its line.
                 Item {
                     id: head
-                    readonly property string title: block.caption
+                    readonly property string title: block.loneSwitch ? Translation.tr(String(block.shownRows[0]?.label ?? "")) : block.caption
                     readonly property bool lone: block.loneSwitch || block.namedSwitch
                     readonly property real switchHeight: headSwitch.implicitHeight
                     readonly property bool reading: rows?.reading === block.key
@@ -1016,7 +1016,6 @@ ColumnLayout {
         readonly property bool pin: island.modelData.pin === true
         readonly property var specs: island.modelData.rows ?? []
         readonly property var first: island.specs[0] ?? null
-        readonly property bool open: String(island.owner?.openGroup ?? "") === island.key
         readonly property string title: Translation.tr(String(island.modelData.title ?? ""))
         // What answers on the island's own line.
         readonly property bool loneSwitch: !island.pin && island.specs.length === 1 && island.first?.kind === "switch"
@@ -1027,9 +1026,15 @@ ColumnLayout {
         }
         readonly property bool pinSwitch: island.pin && island.first?.kind === "switch"
         readonly property bool toggles: island.loneSwitch || island.pinSwitch
+        // A group that is its switch flips, it never opens: left open when its other rows went (a design that
+        // offers one option), it showed the switch twice.
+        readonly property bool open: !island.toggles && String(island.owner?.openGroup ?? "") === island.key
         readonly property var switchSpec: island.loneSwitch || island.namedSwitch || island.pinSwitch ? island.first : null
         // A group's own on/off is a switch on its line; Home's pins say it in a word, as the Island's own Focus does.
         readonly property bool switchShown: island.loneSwitch || island.namedSwitch
+        // A group that is one switch says what the switch does ("Closing" read as a bare on/off for "Confirm before
+        // closing windows"; Halo's Face group as turning the face off).
+        readonly property string lineName: island.loneSwitch ? Translation.tr(String(island.first?.label ?? "")) : island.title
         readonly property bool on: {
             Config.revision
             if (!island.switchSpec) return false
@@ -1116,7 +1121,7 @@ ColumnLayout {
 
         activeFocusOnTab: true
         Accessible.role: island.toggles ? Accessible.CheckBox : Accessible.Button
-        Accessible.name: island.title
+        Accessible.name: island.lineName
         Accessible.description: island.said.join(", ")
         Accessible.checkable: island.toggles
         Accessible.checked: island.on
@@ -1184,10 +1189,14 @@ ColumnLayout {
                 anchors.leftMargin: Math.round(10 * island.d)
                 anchors.verticalCenter: parent.verticalCenter
                 width: Math.min(implicitWidth, line.width - x - line.pad - line.tail - Math.round(16 * island.d) - (dot.visible ? dot.width + Math.round(8 * island.d) : 0))
-                text: island.title
+                text: island.lineName
                 color: IrisStyle.text
                 font.pixelSize: IrisStyle.typeBody
                 font.weight: IrisStyle.weight(Font.DemiBold)
+                // A switch's name is a sentence: it takes a second line before it is cut.
+                wrapMode: island.loneSwitch ? Text.WordWrap : Text.NoWrap
+                maximumLineCount: island.loneSwitch ? 2 : 1
+                lineHeight: island.loneSwitch ? 0.92 : 1
                 elide: Text.ElideRight
             }
             // Changed from its factory value: the page's one dot.
@@ -1230,7 +1239,7 @@ ColumnLayout {
                 anchors.rightMargin: line.pad
                 anchors.verticalCenter: parent.verticalCenter
                 on: island.on
-                name: island.title
+                name: island.lineName
                 onToggled: IrisOptions.commit(island.switchSpec, island.switchSpec.invert ? on : !on)
             }
             // Open, the line's end closes it again, as the Island's own cancel key: a round key in the plate's quiet fill.

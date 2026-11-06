@@ -9,7 +9,8 @@ import qs.modules.iris.components
 import qs.modules.iris.widgets
 
 // Tiles · Pair: hour and minutes as two halves of one bar, the hour lit, a hair between them; a figure rolls over when it
-// changes. The day sits beside them as a small date stamp.
+// changes. The day sits beside them as a small date stamp. Which tile is lit and the stamp are the person's
+// (iris.bar.faces.tiles).
 Item {
     id: root
     property var island: null
@@ -29,6 +30,10 @@ Item {
     readonly property real tileH: Math.round(root.h - (root.stacks ? 12 : 6) * root.d)
     readonly property real tileW: Math.round(root.figure * 1.7)
     readonly property color lit: root.island?.nothingLook ? IrisStyle.text : root.mark
+    readonly property var options: Config.options?.iris?.bar?.faces?.tiles ?? ({})
+    readonly property string lights: ["hour", "minutes", "both"].includes(String(root.options.lit)) ? String(root.options.lit) : "hour"
+    readonly property bool hourLit: root.lights !== "minutes"
+    readonly property bool minutesLit: root.lights !== "hour"
     readonly property int outer: Math.min(IrisStyle.radiusTile, Math.round(root.tileH * 0.42))
 
     // The figure on a tile: the new one rolls up as the old one leaves.
@@ -78,7 +83,7 @@ Item {
             Rectangle {
                 width: root.tileW
                 height: root.tileH
-                color: root.lit
+                color: root.hourLit ? root.lit : IrisStyle.fillQuiet
                 topLeftRadius: root.outer
                 bottomLeftRadius: root.outer
                 topRightRadius: IrisStyle.radiusMicro
@@ -86,13 +91,13 @@ Item {
                 Roller {
                     anchors.centerIn: parent
                     value: root.parts.hours
-                    ink: IrisStyle.onTintFor(root.lit)
+                    ink: root.hourLit ? IrisStyle.onTintFor(root.lit) : IrisStyle.text
                 }
             }
             Rectangle {
                 width: Math.max(root.tileW, minutes.width + Math.round(16 * root.d))
                 height: root.tileH
-                color: IrisStyle.fillQuiet
+                color: root.minutesLit ? root.lit : IrisStyle.fillQuiet
                 topLeftRadius: IrisStyle.radiusMicro
                 bottomLeftRadius: IrisStyle.radiusMicro
                 topRightRadius: root.outer
@@ -104,7 +109,7 @@ Item {
                     Roller {
                         anchors.verticalCenter: parent.verticalCenter
                         value: root.parts.minutes
-                        ink: IrisStyle.text
+                        ink: root.minutesLit ? IrisStyle.onTintFor(root.lit) : IrisStyle.text
                     }
                     IrisText {
                         visible: root.parts.period.length > 0
@@ -112,12 +117,13 @@ Item {
                         text: root.parts.period
                         font.pixelSize: IrisStyle.typeCaption
                         font.weight: IrisStyle.weight(Font.Bold)
-                        color: IrisStyle.textSecondary
+                        color: root.minutesLit ? IrisStyle.onTintFor(root.lit) : IrisStyle.textSecondary
                     }
                 }
             }
         }
         Grid {
+            visible: root.options.day !== false
             anchors.verticalCenter: parent.verticalCenter
             columns: root.stacks ? 1 : 2
             columnSpacing: Math.round(4 * root.d)

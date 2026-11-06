@@ -9,6 +9,7 @@ import qs.modules.iris.components
 
 // Headline: the time as a poster sets it, one tall condensed figure; beside it the place in spaced capitals over the
 // sky in heavy condensed capitals, then the temperature in the clock's accent. Without weather, the day and the date.
+// The person may keep the day and the date over the sky, and drop the temperature (iris.bar.faces.headline).
 Item {
     id: root
     property var island: null
@@ -16,7 +17,8 @@ Item {
     readonly property real d: IrisStyle.density
     readonly property real h: root.island?.compactHeight ?? 42
     readonly property date now: DateTime.clock.date
-    readonly property bool sky: Weather.enabled && Weather.hasData
+    readonly property var options: Config.options?.iris?.bar?.faces?.headline ?? ({})
+    readonly property bool sky: root.options.beside !== "date" && Weather.enabled && Weather.hasData
     readonly property bool roomy: root.h >= Math.round(34 * root.d)
     readonly property color mark: root.island?.clockAccent ?? IrisStyle.accent
     readonly property real contentWidth: row.implicitWidth
@@ -58,7 +60,7 @@ Item {
             }
         }
         Text {
-            visible: root.sky
+            visible: root.sky && root.options.temperature !== false
             anchors.verticalCenter: parent.verticalCenter
             text: Math.round(parseFloat(String(Weather.data.temp))) + "°"
             color: root.mark

@@ -355,6 +355,47 @@ JsonObject {
             property bool media: true
             property bool micGlow: true // the screen's edges glow once when an app starts listening
         }
+        // Each Island design's own options (Settings › Island › Face), read by its Face.qml.
+        property JsonObject faces: JsonObject {
+            property JsonObject ledger: JsonObject {
+                property int ahead: 720 // minutes it looks ahead for the next event: 180, 720 or 1440
+            }
+            property JsonObject tiles: JsonObject {
+                property string lit: "hour" // "hour", "minutes" or "both"
+                property bool day: true
+            }
+            property JsonObject dial: JsonObject {
+                property string marks: "hours" // "hours", "quarters" or "none"
+                property string beside: "day" // "day", "time" or "none"
+            }
+            property JsonObject marquee: JsonObject {
+                property bool events: true
+                property bool weather: true
+                property bool sun: true
+            }
+            property JsonObject duo: JsonObject {
+                property bool temperature: true
+            }
+            property JsonObject headline: JsonObject {
+                property string beside: "sky" // "sky" or "date"
+                property bool temperature: true
+            }
+            property JsonObject rings: JsonObject {
+                // Each ring: "day", "week", "month", "year" or "battery"
+                property string outer: "day"
+                property string middle: "battery"
+                property string inner: "month"
+            }
+            property JsonObject aura: JsonObject {
+                property string colours: "spectrum" // "spectrum", "accent", "sunset" or "ocean"
+                property bool turns: true
+            }
+            property JsonObject status: JsonObject {
+                property string carry: "auto" // "auto", "battery", "headset", "sky" or "day"
+                property bool connection: true
+                property bool sound: true
+            }
+        }
         property string trailing: "controls" // Cluster trailing bubble: "controls", "notifications", "weather", "sound", "mic" or "none"
         property int height: 42
         property int margin: 8

@@ -8,8 +8,9 @@ import qs.modules.iris.style
 import qs.modules.iris.components
 import qs.modules.iris.bar.island
 
-// Rings: three rings nested as a watch's activity rings, outside in: how much of the day has gone (red), the battery
-// or, on a desktop, the week (green), the month (blue); the time and the day beside them. They move once a minute.
+// Rings: three rings nested as a watch's activity rings, outside in red, green and blue; each counts what the person
+// picks (iris.bar.faces.rings): the day gone, the week, the month, the year or the battery (the week on a desktop).
+// The time and the day beside them. They move once a minute.
 Item {
     id: root
     property var island: null
@@ -21,13 +22,30 @@ Item {
     readonly property real week: (((root.now.getDay() + 6) % 7) + root.day) / 7
     readonly property int monthDays: new Date(root.now.getFullYear(), root.now.getMonth() + 1, 0).getDate()
     readonly property real month: (root.now.getDate() - 1 + root.day) / root.monthDays
+    readonly property int yearDays: new Date(root.now.getFullYear(), 1, 29).getMonth() === 1 ? 366 : 365
+    readonly property real year: (Math.round((new Date(root.now.getFullYear(), root.now.getMonth(), root.now.getDate()) - new Date(root.now.getFullYear(), 0, 1)) / 86400000) + root.day) / root.yearDays
+    readonly property var options: Config.options?.iris?.bar?.faces?.rings ?? ({})
+    readonly property var counts: ["day", "week", "month", "year", "battery"]
+    function pick(key: string, fallback: string): string { return root.counts.includes(String(root.options[key])) ? String(root.options[key]) : fallback }
+    function share(kind: string): real {
+        switch (kind) {
+        case "week": return root.week
+        case "month": return root.month
+        case "year": return root.year
+        case "battery": return Battery.available ? Battery.percentage : root.week
+        default: return root.day
+        }
+    }
+    function ring(kind: string, tint: color): var {
+        return { value: root.share(kind), tint: kind === "battery" && Battery.available && Battery.isLow && !Battery.isCharging ? IrisStyle.danger : tint }
+    }
     readonly property real size: Math.round(root.h - 10 * root.d)
     readonly property real band: Math.max(2.5, Math.round(root.size * 0.12))
     readonly property real contentWidth: row.implicitWidth
     readonly property var levels: [
-        { value: root.day, tint: IrisStyle.identity.red },
-        { value: Battery.available ? Battery.percentage : root.week, tint: Battery.available && Battery.isLow ? IrisStyle.danger : IrisStyle.identity.green },
-        { value: root.month, tint: IrisStyle.identity.sky }
+        root.ring(root.pick("outer", "day"), IrisStyle.identity.red),
+        root.ring(root.pick("middle", "battery"), IrisStyle.identity.green),
+        root.ring(root.pick("inner", "month"), IrisStyle.identity.sky)
     ]
 
     Row {

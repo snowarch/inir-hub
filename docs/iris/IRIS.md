@@ -19,6 +19,17 @@ iRiS is the Island family. One Island sits on a screen edge and grows into whate
   - **Rings**: three rings for the day gone, the battery (the week on a desktop) and the month, beside the time.
   - **Aura**: the Island ringed in the colours of the spectrum; they turn once when the pointer is over it.
   - **Status**: a status bar: the time, the connection (cable, Wi-Fi bars or none), a red mark when the sound is off, and the battery with its figure. Without a battery it shows a connected headset's charge, else the weather, else the day.
+- Settings › Island › Face holds the options of the design you wear, and only those:
+  - **Ledger**: how far ahead it looks for the next event (3, 12 or 24 hours).
+  - **Tiles**: which tile is lit (the hour, the minutes or both) and whether the day sits beside them.
+  - **Dial**: the marks round the watch (every hour, quarters or none) and what sits beside it (the day, the time in figures or nothing).
+  - **Marquee**: whether the next event, the weather and the sunrise or sunset take their turn; the date always stays.
+  - **Duo**: whether the temperature shows in the window's corner.
+  - **Headline**: the place and the sky, or the day and the date, beside the time; and the temperature at the end.
+  - **Rings**: what each ring counts: the day, the week, the month, the year or the battery.
+  - **Aura**: its colours (Spectrum, your accent, Sunset or Ocean) and whether they turn under the pointer.
+  - **Status**: what its capsule carries (Auto, the battery, a headset, the sky or the day), the connection mark and the red sound-off mark.
+  - **Halo**: Sunlight, its glow where the sun stands.
 - Live activities look like a phone's Dynamic Island:
   - **Music** opens into a player with the cover, the song and its artist, the time on both sides of the bar and large play controls.
   - **Timers** show an orange ring that empties as the time runs; open, they have round pause and close buttons, and a pomodoro shows each focus and break as a segment.
