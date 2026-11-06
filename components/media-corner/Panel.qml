@@ -16,6 +16,7 @@ Scope {
     readonly property bool windowed: CornerState.options.windowed
     // Built when it opens; kept until its closing motion ends.
     property bool resident: CornerState.open
+    onResidentChanged: if (!root.resident) CornerState.dropCallers()
     Timer {
         id: grace
         interval: IrisStyle.settleDuration + 120
@@ -31,11 +32,11 @@ Scope {
 
     LazyLoader {
         active: root.resident && !root.windowed
-        IrisCornerOverlay { namespace: "quickshell:media-corner"; open: CornerState.open; body: MediaCorner {} }
+        CornerOverlay { open: CornerState.open; body: MediaCorner {} }
     }
     LazyLoader {
-        active: CornerState.open && root.windowed
-        IrisCornerWindow {
+        active: root.resident && root.windowed
+        CornerWindow {
             title: "iNiR Media Corner"
             open: CornerState.open
             onCloseRequested: CornerState.open = false
@@ -58,10 +59,10 @@ Scope {
         function close(): void { CornerState.open = false }
         /// Open it searching anime, films and series
         function search(text: string): void {
-            CornerState.query = text
+            CornerState.search(text)
             CornerState.open = true
         }
-        /// Open it on a place: home, anime:airing|trending|top|season|genres, movie:movies|series|top|years|genres, anime:<AniList id> or title:<movie|series>:<IMDb id>
-        function go(place: string): void { CornerState.place = place; CornerState.open = true }
+        /// Open it on a place: home, anime:popular|airing|trending|top|season|genres, movie:movies|series|top|years|genres, anime:<AniList id> or title:<movie|series>:<IMDb id>
+        function go(place: string): void { CornerState.go(place); CornerState.open = true }
     }
 }

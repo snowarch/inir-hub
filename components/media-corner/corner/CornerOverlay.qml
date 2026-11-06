@@ -3,16 +3,14 @@ import QtQuick
 import Quickshell
 import Quickshell.Wayland
 import qs
-import qs.modules.common
 import qs.modules.iris.frame
 import qs.modules.iris.components
 
-// A Corner over the desktop, as Settings' overlay host (settings/IrisSettingsOverlay.qml): on the output in focus, the
-// whole screen listening while it is open so a click outside closes it. `body` is the Corner (an IrisCornerBody).
+// The Corner over the desktop: on the output in focus, the whole screen listening while it is open so a click outside
+// closes it. `body` is the Corner (a CornerBody).
 PanelWindow {
     id: root
     property bool open: false
-    property string namespace: "quickshell:media-corner"
     required property Item body
     readonly property Item frame: root.body?.frame ?? null
     onBodyChanged: if (root.body) { root.body.parent = root.contentItem; root.body.anchors.fill = root.contentItem }
@@ -27,9 +25,9 @@ PanelWindow {
     anchors { left: true; right: true; top: true; bottom: true }
     margins { left: IrisFrame.band; right: IrisFrame.band; top: IrisFrame.band; bottom: IrisFrame.band }
     exclusionMode: ExclusionMode.Ignore
-    WlrLayershell.namespace: root.namespace
+    WlrLayershell.namespace: "quickshell:media-corner"
     WlrLayershell.layer: WlrLayer.Overlay
-    WlrLayershell.keyboardFocus: root.open ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
+    WlrLayershell.keyboardFocus: root.open ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
     // Open, the whole screen listens so a click outside closes it; closing, only the body still drawn does.
     mask: root.open ? null : bodyRegion
     Region { id: bodyRegion; item: root.frame }

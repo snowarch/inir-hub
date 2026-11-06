@@ -1,25 +1,32 @@
 pragma ComponentBehavior: Bound
 import QtQuick
-import qs.services
 import qs.modules.common
 import qs.modules.common.widgets
 import qs.modules.iris.style
 import qs.modules.iris.components
+import "../state"
 
-// A Corner's search plate: what you type is asked once typing pauses (300 ms) or on Return; ✕ and Escape clear it.
+// The search plate: what you type is asked once typing pauses (300 ms) or on Return; ✕ and Escape clear it.
 Rectangle {
     id: root
     property string hint: ""
     property real outerRadius: 0
     property int pad: Math.round(10 * root.d)
-    readonly property string query: field.text.trim()
-    readonly property bool focused: field.activeFocus
     readonly property real d: IrisStyle.density
-    signal searched(string text)
+    // Return: a narrow window pushes the page only then, so typing keeps the field in view.
+    signal submitted()
 
     function focusField(): void { field.forceActiveFocus(); field.selectAll() }
-    function clear(): void { field.text = "" }
-    function type(text: string): void { field.text = text; delay.stop(); root.searched(root.query) }
+    function clear(): void { field.text = ""; delay.stop(); CornerState.search("") }
+
+    Connections {
+        target: CornerState
+        function onQueryChanged(): void {
+            if (field.text.trim() === CornerState.query) return
+            field.text = CornerState.query
+            delay.stop()
+        }
+    }
 
     implicitHeight: Math.round(32 * root.d)
     radius: Math.min(height / 2, Math.max(IrisStyle.radiusRow, root.outerRadius - root.pad))
@@ -40,6 +47,7 @@ Rectangle {
     }
     TextInput {
         id: field
+        text: CornerState.query
         cursorDelegate: TextCursor { accent: IrisStyle.accent }
         anchors.left: glyph.right
         anchors.leftMargin: 6 * root.d
@@ -52,10 +60,12 @@ Rectangle {
         font.family: IrisStyle.fontMain
         font.pixelSize: IrisStyle.typeLabel
         clip: true
-        onTextChanged: delay.restart()
-        Keys.onReturnPressed: { delay.stop(); root.searched(root.query) }
-        Keys.onEscapePressed: event => { if (text.length > 0) text = ""; else event.accepted = false }
-        Timer { id: delay; interval: 300; onTriggered: root.searched(root.query) }
+        onTextChanged: if (text.trim() !== CornerState.query) delay.restart()
+        Keys.onReturnPressed: { delay.stop(); CornerState.search(text.trim()); root.submitted() }
+        // The Corner's Escape steps back: with text here, the key clears it first.
+        Keys.onShortcutOverride: event => { event.accepted = event.key === Qt.Key_Escape && text.length > 0 }
+        Keys.onEscapePressed: root.clear()
+        Timer { id: delay; interval: 300; onTriggered: CornerState.search(field.text.trim()) }
         IrisText {
             anchors.verticalCenter: parent.verticalCenter
             width: parent.width
@@ -77,6 +87,6 @@ Rectangle {
         fill: 1
         iconSize: Math.round(15 * root.d)
         color: IrisStyle.muted
-        MouseArea { anchors.fill: parent; anchors.margins: -4; cursorShape: Qt.PointingHandCursor; onClicked: field.text = "" }
+        MouseArea { anchors.fill: parent; anchors.margins: -4; cursorShape: Qt.PointingHandCursor; onClicked: root.clear() }
     }
 }

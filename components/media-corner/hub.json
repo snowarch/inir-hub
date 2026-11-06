@@ -23,7 +23,10 @@
         "v3-cinemeta.strem.io",
         "images.metahub.space",
         "www.imdb.com",
-        "www.youtube.com"
+        "www.youtube.com",
+        "cinemeta-catalogs.strem.io",
+        "live.metahub.space",
+        "m.media-amazon.com"
     ],
     "minInir": "2.33.0",
     "provides": "modules/media-corner",

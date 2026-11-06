@@ -1,23 +1,18 @@
 pragma ComponentBehavior: Bound
 import QtQuick
 import Quickshell
-import qs
 import qs.services
-import qs.modules.common
 import qs.modules.iris.style
 
-// A Corner in a window, as Settings' window host (settings/IrisSettingsWindow.qml): Niri owns its shape and motion,
-// the body fills it. Closing the window closes the Corner.
+// The Corner in a window: Niri owns its shape and motion, the body fills it. Closing the window closes the Corner.
 FloatingWindow {
     id: root
     property bool open: false
     required property Item body
     signal closeRequested()
-    readonly property Item frame: root.body?.frame ?? null
     onBodyChanged: if (root.body) { root.body.parent = root.contentItem; root.body.anchors.fill = root.contentItem }
     visible: root.open
-    surfaceFormat: ({ opaque: false })
-    color: root.frame?.material === "compositor" ? "transparent" : IrisStyle.surface
+    color: IrisStyle.surface
     implicitWidth: Math.round(1180 * IrisStyle.density)
     implicitHeight: Math.round(820 * IrisStyle.density)
     minimumSize: Qt.size(Math.round(420 * IrisStyle.density), Math.round(420 * IrisStyle.density))
@@ -31,5 +26,4 @@ FloatingWindow {
         NiriService.focusWindow(root.niriWindow.id)
     }
     onVisibleChanged: if (!root.visible) root.focusedOnce = false
-
 }
