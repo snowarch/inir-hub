@@ -31,8 +31,25 @@ Item {
     property bool _ready: false
     Component.onCompleted: { root._previous = root.text; Qt.callLater(() => root._ready = true) }
 
-    implicitWidth: Math.ceil(digits.implicitWidth)
-    implicitHeight: Math.ceil(probe.implicitHeight)
+    // Nothing OS's dot matrix (Settings › Colour › Look › Figures) for a figure it can spell, at the Dot sizes.
+    readonly property bool matrixed: root.nothing && IrisStyle.nothingDots && root.pixelSize >= IrisStyle.typeDotS && matrix.covers(root.text)
+
+    implicitWidth: Math.ceil(root.matrixed ? matrix.implicitWidth : digits.implicitWidth)
+    implicitHeight: Math.ceil(root.matrixed ? matrix.implicitHeight : probe.implicitHeight)
+
+    IrisDotMatrix {
+        id: matrix
+        visible: root.matrixed
+        text: root.matrixed ? root.text : ""
+        // The matrix stands as tall as the face's capitals, so it sits where the figure did.
+        pixelSize: Math.round(Math.max(IrisStyle.typeDotS, root.pixelSize) * 0.74)
+        color: root.color
+        x: root.horizontalAlignment === Text.AlignRight ? root.width - width
+            : root.horizontalAlignment === Text.AlignHCenter ? Math.round((root.width - width) / 2) : 0
+        y: Math.round((root.height - height) / 2)
+        width: implicitWidth
+        height: implicitHeight
+    }
 
     Text {
         id: probe
@@ -44,6 +61,7 @@ Item {
 
     Row {
         id: digits
+        visible: !root.matrixed
         x: root.horizontalAlignment === Text.AlignRight ? root.width - width
             : root.horizontalAlignment === Text.AlignHCenter ? Math.round((root.width - width) / 2) : 0
         height: root.height

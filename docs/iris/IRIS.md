@@ -10,14 +10,18 @@ iRiS is the Island family. One Island sits on a screen edge and grows into whate
 - It opens into pages for music, activity, the shelf, the desktop and more.
 - Island layout (Settings › Island › Layout › Island layout):
   - **Island** keeps it in the middle of the edge.
-  - **Left** and **Right** hug one end.
-  - **Full width** spans the whole edge as a bar.
+  - **Corner left** and **Corner right** dock it in one corner, melted into both walls.
+  - **Shelf** spans the whole edge, the Island rising from it.
+  - **Pods** sets three bodies on one line that melt where they meet.
   - **Menu bar** makes a thin strip with the Island hanging from it as a notch. Its strip is Transparent or Band (Menu bar strip).
+  - The Island design you wear shows in every layout. While a song plays, its cover and its moving bars sit at the design's sides and the design stays in the middle; paused, the cover dims and stays.
 - Island shape (Settings › Island › Shape › Island shape): Auto, Round, Squircle or Square.
 - Island design (Settings › Island › Design and modes) sets how the resting Island looks: each design is shown alive in a small Island before you pick it. Composition and Island layout live in the same group. Besides Halo, Ledger, Tiles, Dial, Marquee and Duo:
   - **Headline**: the time tall and condensed like a poster, beside the place, the sky and the temperature.
   - **Rings**: three rings for the day gone, the battery (the week on a desktop) and the month, beside the time.
   - **Aura**: the Island ringed in the colours of the spectrum; they turn once when the pointer is over it.
+  - **Comet**: one light runs round the rim with its tail fading behind it. Where its head stands counts the hour, the day or the battery, read clockwise from the top. It moves once a minute and runs a lap while the pointer is over the Island.
+  - **Lumen**: the rim lit from below in two colours, like a lamp under glass, with a little of the light pooled at its foot. The light says something: the battery (its colour, and how far up the sides it climbs as it charges) or the hour's sky. Under the pointer it climbs the whole rim.
   - **Status**: a status bar: the time, the connection (cable, Wi-Fi bars or none), a red mark when the sound is off, and the battery with its figure. Without a battery it shows a connected headset's charge, else the weather, else the day.
   - **Forecast**: the time, then the next hours the way a weather app lays them out: now first, each hour its sky in colour and its temperature. It moves on once an hour. Without weather it shows the day.
   - **World**: the time here and in another city: a small watch with a light face by day and a dark one by night, the city's name over its time, how many hours apart it is, and a +1 when it is already tomorrow there.
@@ -29,7 +33,9 @@ iRiS is the Island family. One Island sits on a screen edge and grows into whate
   - **Duo**: whether the temperature shows in the window's corner.
   - **Headline**: the place and the sky, or the day and the date, beside the time; and the temperature at the end.
   - **Rings**: what each ring counts: the day, the week, the month, the year or the battery.
-  - **Aura**: its colours (Spectrum, your accent, Sunset or Ocean) and whether they turn under the pointer.
+  - **Aura**: its colours (Spectrum, your accent, the day's sky, the wallpaper, Sunset, Ocean or Mint) and whether they turn under the pointer.
+  - **Comet**: what its head counts (the hour, the day or the battery), a Tail behind it or the whole Track lit, the same colours as Aura, and the lap under the pointer.
+  - **Lumen**: what its light tells (the battery, the sky or one of Aura's colours) and the light at its foot.
   - **Status**: what its capsule carries (Auto, the battery, a headset, the sky or the day), the connection mark and the red sound-off mark.
   - **Forecast**: how many hours it shows (2, 3 or 4, now included; a narrow Island shows fewer), each hour's name, and the sky in colour or in grey.
   - **World**: the city (50 to pick from, searchable), a second city beside it, the hours apart and the small watch. Short of room the hours apart step out first, then the watches, then the second city, so no name or time is ever cut.
@@ -55,6 +61,7 @@ iRiS is the Island family. One Island sits on a screen edge and grows into whate
 - With more than one player, dots under the controls switch between them; a swipe on the cover or the wheel sideways does too, and a click on the cover brings the app forward.
 - The Bluetooth card shows the charge of every connected device as a gauge with its name.
 - The calendar shows the next thing today on a coloured band with how long until it, and each entry with its colour and how far off it is.
+- The Desktop page has a **Workspaces** block (Settings › Island › Desktop page › Blocks): this screen's workspaces as cards, each with its windows' icons, its name and what holds it. A tap goes there, the key on a card brings the focused window to it, and the round key at the end opens the overview. More cards than fit scroll sideways.
 
 <!-- preview shot=iris-layout -->
 
@@ -97,7 +104,15 @@ The Dock is set under iRiS Settings › Dock:
 - Wallpaper › Wallpaper gallery › Picker: Gallery is iRiS's own, out of the Island; Grid, Coverflow and Launcher open Material's pickers instead, from the same shortcut, piece or Island button.
 - Wallpaper › Wallpaper gallery › Live wallpaper downloads: Best takes the 4K file when there is one, Light takes HD.
 - Desktop widgets rest a little inside the frame (or the screen edge without one) and settle into its corners with the same gap.
-- Four widgets have a second way to read in their sheet, under Face: the Clock's Hour (the time as large as the plate lets it, over the day as one line with sunrise and sunset), the Calendar's Week (today and the days ahead as columns, events where they fall), Vitals' Bars (every reading a meter, the highest leads) and Screen Time's Ribbon (the 24 hours, each coloured by the app that held it).
+- Widgets have a second way to read in their sheet, under Face:
+  - **Clock**: Hour (the time as large as the plate lets it, over the day as one line with sunrise and sunset) or Greeting (the time, the date, and a word for the part of the day with the temperature beside it).
+  - **Calendar**: Week (today and the days ahead as columns, events where they fall).
+  - **Vitals**: Bars (every reading a meter, the highest leads).
+  - **Screen Time**: Ribbon (the 24 hours, each coloured by the app that held it).
+  - **Weather**: Week (now beside its sky, then the coming days as columns, each its sky and its high over its low; today on its own plate).
+  - **Battery**: Cells (the charge as a battery of cells, the one filling breathes while it charges; other devices under it with their own small cells).
+  - **Now Playing** (medium and large): Card (the player's name and the hour on top; a card with the cover beside the line being sung, or the song's bars without lyrics; then the title, the artist, the timeline and the keys, play in the song's colour).
+- Under Colour › Look › Nothing OS, **Figures** draws large numbers as Nothing's dot matrix (the default) or in Archivo's wide figures.
 - Arranging the desktop, a widget's sheet has three pages: Widget (what it shows), Look (background, corners, ink) and Arrange (scale, position, lock). The background key on the widget's capsule and Look › Surface are the same switch: None takes the plate off, Glass, Solid and Tinted say what it is made of, and Shared follows Style › Widgets.
 - Side Panels: pick Focus or Today and the page shows that panel's sections, width, height and look, with the panel itself on the stage. Sections are a list you reorder right there.
 - Desktop › Widgets › Lume on every widget: every widget's text reads as if the wallpaper behind it were bright and busy.

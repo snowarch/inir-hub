@@ -64,6 +64,7 @@ IrisBodyLight 1.0 IrisBodyLight.qml
 IrisLabel 1.0 IrisLabel.qml
 IrisDotText 1.0 IrisDotText.qml
 IrisDotStrip 1.0 IrisDotStrip.qml
+IrisDotMatrix 1.0 IrisDotMatrix.qml
 IrisDotRing 1.0 IrisDotRing.qml
 IrisDotGrid 1.0 IrisDotGrid.qml
 IrisTile 1.0 IrisTile.qml

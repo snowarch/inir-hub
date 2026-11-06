@@ -207,6 +207,7 @@ ColumnLayout {
     readonly property real bannerBlur: page.bannerPart("desktopBannerBlur", 0)
     function blockAvailable(kind: string): bool {
         if (kind === "context") return page.focusedWindow !== null || page.workspaces.length > 1
+        if (kind === "workspaces") return page.workspaces.length > 0
         if (kind === "modules") return page.customModules.length > 0
         if (kind === "forecast") return page.weatherReady && page.hours.length > 1
         if (kind === "agenda") return page.nextEvent !== null || page.pendingTasks > 0
@@ -626,7 +627,8 @@ ColumnLayout {
                 }
             }
             Row {
-                visible: page.workspaces.length > 1
+                // The Workspaces block says them already when it shows.
+                visible: page.workspaces.length > 1 && page.rowOf("workspaces") < 0
                 spacing: 2 * IrisStyle.density
                 Repeater {
                     model: page.workspaces
@@ -833,6 +835,22 @@ ColumnLayout {
                 Accessible.name: Translation.tr("Open Today")
                 onClicked: { page.island.expanded = false; GlobalStates.sidebarRightOpen = true }
             }
+        }
+    }
+
+    DesktopBlock {
+        kind: "workspaces"
+        row: page.rowOf("workspaces")
+        gap: page.spacing
+        contentHeight: workspacesStrip.implicitHeight
+        IslandWorkspaces {
+            id: workspacesStrip
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.rightMargin: page.island.studio ? page.island.studioHandlesWidth : 0
+            enabled: !page.island.studio
+            workspaces: page.workspaces
+            plateRadius: page.plateRadius
         }
     }
 

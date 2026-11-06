@@ -17,7 +17,9 @@ IrisWidgetFace {
     readonly property var player: MprisController.activePlayer
     // What a Design's face (`widgetNowPlaying`) reads: the engine's playback, positions and lyrics stay here.
     readonly property alias playback: media
-    designFace: IrisDesign.skin("widgetNowPlaying")
+    // Card (his 11-06 reference) on medium and large: its own face over the same playback; the Design's print steps aside.
+    readonly property bool cardStyle: !root.small && String(root.widget.familyOption("face", "classic")) === "card"
+    designFace: root.cardStyle ? "" : IrisDesign.skin("widgetNowPlaying")
     readonly property bool hasPlayer: root.player !== null && root.player !== undefined
     readonly property bool playing: root.hasPlayer && media.effectiveIsPlaying
     readonly property bool restsWhenPaused: Boolean(root.widget.familyOption("rest", false))
@@ -25,11 +27,11 @@ IrisWidgetFace {
     readonly property string art: root.hasPlayer ? media.displayedArtFilePath : ""
     readonly property color artLight: IrisStyle.vividHighlight(media.colorQuantizer?.colors?.[0] ?? root.accent, root.accent)
     readonly property real progress: media.effectiveLength > 0 ? Math.min(1, media.effectivePosition / media.effectiveLength) : 0
-    readonly property bool lyricsWanted: root.large && root.live && root.hasPlayer
+    readonly property bool lyricsWanted: (root.large || root.cardStyle) && root.live && root.hasPlayer
         && Boolean(root.widget.familyOption("lyrics", true))
     readonly property bool lyricsReady: root.lyricsWanted && LyricsService.status === "ok" && LyricsService.lyricsLines.length > 0
     // Large without lyrics wears the cover whole: beside the title it left a 180 px hole where the lines go.
-    readonly property bool coverLarge: root.large && !root.resting && !root.lyricsReady && root.art.length > 0
+    readonly property bool coverLarge: root.large && !root.cardStyle && !root.resting && !root.lyricsReady && root.art.length > 0
     readonly property string source: {
         const identity = String(root.player?.identity || String(root.player?.desktopEntry ?? "").split(".").pop() || "")
         return identity.length > 0 ? identity.charAt(0).toUpperCase() + identity.slice(1) : Translation.tr("Music")
@@ -460,7 +462,7 @@ IrisWidgetFace {
     // the ends and the keys on its centre.
     RowLayout {
         anchors.fill: parent
-        visible: !root.resting && root.medium
+        visible: !root.resting && root.medium && !root.cardStyle
         spacing: root.dp(14)
 
         Item {
@@ -520,7 +522,7 @@ IrisWidgetFace {
 
     ColumnLayout {
         anchors.fill: parent
-        visible: !root.resting && root.large && !root.coverLarge
+        visible: !root.resting && root.large && !root.coverLarge && !root.cardStyle
         spacing: root.dp(12)
 
         RowLayout {
@@ -676,5 +678,11 @@ IrisWidgetFace {
                 overMedia: true
             }
         }
+    }
+
+    Loader {
+        anchors.fill: parent
+        active: root.cardStyle && !root.resting
+        sourceComponent: Component { NowPlayingCard { face: root; media: media } }
     }
 }

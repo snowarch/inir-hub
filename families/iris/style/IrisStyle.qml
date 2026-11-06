@@ -74,7 +74,26 @@ QtObject {
     // Island to load them and by Settings to offer only the rows that still act under the worn design.
     readonly property var islandDesignParts: ({ ledger: ["Face.qml", "Nav.qml", "Desktop.qml"], tiles: ["Face.qml", "Nav.qml", "Desktop.qml"],
         dial: ["Face.qml"], marquee: ["Face.qml"], duo: ["Face.qml"], headline: ["Face.qml"], rings: ["Face.qml"], aura: ["Face.qml"],
-        status: ["Face.qml"], forecast: ["Face.qml"], world: ["Face.qml"] })
+        status: ["Face.qml"], forecast: ["Face.qml"], world: ["Face.qml"], comet: ["Face.qml"], lumen: ["Face.qml"] })
+    // The light the edge designs (Aura, Comet, Lumen) draw with: five stops of one palette (Settings › Island › Face ›
+    // Colours). "day" follows the hour's sky: night, dawn, day, dusk.
+    function islandLight(name: string, hour: int): var {
+        const id = root.identity
+        switch (name) {
+        case "accent": return [root.accent, root.secondaryAccent, root.accent, root.secondaryAccent, root.accent]
+        case "sunset": return [id.orange, id.red, id.pink, id.purple, id.yellow]
+        case "ocean": return [id.teal, id.sky, id.blue, id.indigo, id.green]
+        case "mint": return [id.green, id.teal, id.pink, id.orange, id.green]
+        case "wallpaper": return [root.wallpaperLight, root.accent, root.secondaryAccent, root.wallpaperLight, root.accent]
+        case "day":
+            if (hour < 5 || hour >= 21) return [id.indigo, id.blue, id.purple, id.indigo, id.blue]
+            if (hour < 9) return [id.pink, id.orange, id.yellow, id.pink, id.purple]
+            if (hour < 17) return [id.sky, id.blue, id.teal, id.sky, id.green]
+            return [id.orange, id.red, id.purple, id.pink, id.orange]
+        default: return [id.blue, id.purple, id.pink, id.orange, id.green]
+        }
+    }
+    readonly property var islandLightChoices: ["spectrum", "accent", "day", "wallpaper", "sunset", "ocean", "mint"]
     // The live activities that may take the Island, first to last (Settings › Island › Live activities › Order). A
     // saved order missing a kind (an older file, a hand edit) keeps it, after the ones it names.
     readonly property var islandActivityKinds: ["record", "timer", "task", "camera", "call", "media"]
@@ -354,6 +373,8 @@ QtObject {
     function wearsNothing(item): bool { return root.lookOf(item) === "nothing" }
     // Each look's own make (Settings › Colour › Look), read once here.
     readonly property var lookOptions: root.appearance?.looks ?? ({})
+    // Nothing's large figures: Nothing OS's dot matrix (IrisDotMatrix) or Archivo SemiExpanded.
+    readonly property bool nothingDots: String(root.lookOptions?.nothing?.figures ?? "dots") === "dots"
     readonly property var synthOptions: root.lookOptions?.synth ?? ({})
     readonly property var gelOptions: root.lookOptions?.gel ?? ({})
     readonly property var nothingOptions: root.lookOptions?.nothing ?? ({})

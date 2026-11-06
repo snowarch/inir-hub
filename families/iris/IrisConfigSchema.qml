@@ -186,7 +186,8 @@ JsonObject {
         // Each look's own make. Colours come from "accent", "highlight", "signal" or "classic" (the look's own lamp).
         property JsonObject looks: JsonObject {
             // chosen: "ink" (the inverted plate) or "signal"
-            property JsonObject nothing: JsonObject { property string chosen: "ink" }
+            // chosen marks the chosen segment; figures sets large figures as Nothing OS's dot matrix ("dots") or in Archivo
+            property JsonObject nothing: JsonObject { property string chosen: "ink"; property string figures: "dots" }
             // keys light, levels run; depth is the keys' drop edge in px (0..6); mono sets labels lowercase in Geist Mono
             property JsonObject synth: JsonObject { property string keys: "accent"; property string levels: "highlight"; property int depth: 3; property bool mono: true }
             // body is the gel's colour; gloss the light cap (0..100 %); round sets figures and titles in Rubik
@@ -318,7 +319,7 @@ JsonObject {
         property string navFrame: "auto" // the open Island's page buttons: "auto" (Appearance › Button rows), "none", "veil", "glass" or "solid"
         // Island Desktop page blocks under the hero, in order:
         // "profile", "context", "vitals", "modules".
-        property list<string> desktopBlocks: ["profile", "context", "forecast", "agenda", "modules"]
+        property list<string> desktopBlocks: ["profile", "context", "workspaces", "forecast", "agenda", "modules"]
         property list<string> mediaBlocks: ["player", "timeline", "transport", "players", "levels"]
         property string clockStyle: "dateTime" // resting clock: "time", "dateTime" or "weather"
         property string auxiliary: "tray" // "tray", "tools", "sound", "mic" or "none"
@@ -388,8 +389,18 @@ JsonObject {
                 property string inner: "month"
             }
             property JsonObject aura: JsonObject {
-                property string colours: "spectrum" // "spectrum", "accent", "sunset" or "ocean"
+                property string colours: "spectrum" // IrisStyle.islandLightChoices
                 property bool turns: true
+            }
+            property JsonObject comet: JsonObject {
+                property string counts: "hour" // "hour", "day" or "battery"
+                property string trail: "tail" // "tail" or "track"
+                property string colours: "spectrum" // IrisStyle.islandLightChoices
+                property bool laps: true
+            }
+            property JsonObject lumen: JsonObject {
+                property string light: "battery" // "battery", "sky" or one of IrisStyle.islandLightChoices
+                property bool pool: true
             }
             property JsonObject status: JsonObject {
                 property string carry: "auto" // "auto", "battery", "headset", "sky" or "day"

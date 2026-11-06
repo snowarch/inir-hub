@@ -54,11 +54,11 @@ Item {
     readonly property color clockAccent: IrisStyle.clockAccent
     readonly property real satelliteScale: Math.max(0.7, Math.min(1, Number(root.options?.satelliteScale ?? 100) / 100))
 
-    readonly property var desktopBlockKinds: ["profile", "context", "forecast", "agenda", "vitals", "modules"]
+    readonly property var desktopBlockKinds: ["profile", "context", "workspaces", "forecast", "agenda", "vitals", "modules"]
     readonly property var desktopBlocks: Array.from(root.options?.desktopBlocks ?? root.desktopBlockKinds)
         .filter(kind => root.desktopBlockKinds.includes(kind))
     function desktopBlockLabel(kind: string): string {
-        return ({ profile: Translation.tr("Profile"), context: Translation.tr("Current app"),
+        return ({ profile: Translation.tr("Profile"), context: Translation.tr("Current app"), workspaces: Translation.tr("Workspaces"),
             forecast: Translation.tr("Forecast"), agenda: Translation.tr("Up next"),
             vitals: Translation.tr("Vitals"), modules: Translation.tr("Modules") })[kind] ?? kind
     }
@@ -68,7 +68,7 @@ Item {
         Config.setNestedValue("iris.bar.desktopBlocks", next)
     }
     function desktopBlockGlyph(kind: string): string {
-        return ({ profile: "account_circle", context: "select_window", forecast: "partly_cloudy_day",
+        return ({ profile: "account_circle", context: "select_window", workspaces: "view_carousel", forecast: "partly_cloudy_day",
             agenda: "event_upcoming", vitals: "monitor_heart", modules: "widgets" })[kind] ?? "add"
     }
     function moveDesktopBlock(kind: string, step: int): void {
@@ -104,8 +104,17 @@ Item {
     }
     readonly property string faceUrl: root.vertical ? "" : root.skinOf(IrisDesign.skin("islandFace"), "Face.qml")
     readonly property string navUrl: root.skinOf(IrisDesign.skin("islandNav"), "Nav.qml")
-    // A face may take only some modes (`modes`); the engine draws the others.
-    readonly property bool faceTakes: root.faceUrl.length > 0 && (!designFace.item?.modes || designFace.item.modes.includes(root.compactMode))
+    // A face may take only some modes (`modes`); the engine draws the others. A song is the one activity that does not
+    // take a face's Island (Unified, Corner, Shelf, Pods, Menu bar): it rides at the face's sides, its cover leading and
+    // its visualizer trailing, and a tap still opens the player.
+    readonly property bool faceWings: root.faceUrl.length > 0 && !root.vertical && root.compactMode === "media"
+        && Array.isArray(designFace.item?.modes) && !designFace.item.modes.includes("media")
+    readonly property bool faceTakes: root.faceUrl.length > 0 && (root.faceWings || !designFace.item?.modes || designFace.item.modes.includes(root.compactMode))
+    readonly property real wingCoverSize: Math.round((root.zoned ? 28 : 24) * root.d)
+    readonly property real wingBox: Math.max(root.wingCoverSize, root.nothingLook ? root.stripWidth(4) : wingVisualizer.implicitWidth)
+    // Each side's share of the Island the song takes; the face keeps the middle.
+    readonly property real wingSlot: root.faceWings ? root.wingBox + Math.round(4 * root.d) : 0
+    readonly property real wingLead: Math.round(Math.min(14.5 * root.d * root.breathing, (root.compactHeight - root.wingCoverSize) / 2))
     readonly property bool pagesHang: IrisDesign.trait("pages") === "hang" && !root.fullWidth && !root.vertical
     readonly property real seam: 0
     readonly property string pagePlate: {
@@ -867,16 +876,17 @@ Item {
         timer: timerRow, task: taskRow, mic: micRow, camera: cameraRow, clock: clockRow, event: eventRow, feedback: feedbackRow,
         drop: dropRow })
     readonly property real compactContentWidth: root.vertical ? compactColumn.implicitHeight
-        : root.faceTakes ? (designFace.item?.contentWidth ?? 0)
+        : root.faceTakes ? (designFace.item?.contentWidth ?? 0) + 2 * root.wingSlot
         : root.compactRows[root.compactMode]?.implicitWidth ?? 0
     readonly property real compactFloor: root.compactHeight * 2.1
     // A larger clock (Settings › Island › Size) takes a wider resting Island with it, so a face keeps its extras.
     readonly property real idleCeiling: Math.round(320 * root.d * Math.max(1, root.clockScale))
-    readonly property real compactCeiling: Math.min(root.availableWidth, root.compactMode === "media" ? 380 * root.d
+    readonly property real compactCeiling: Math.min(root.availableWidth, root.faceWings ? root.idleCeiling + 2 * root.wingSlot
+        : root.compactMode === "media" ? 380 * root.d
         : root.compactMode === "event" || root.compactMode === "drop" ? 340 * root.d : root.idleCeiling)
     // The room a Design's face has at rest: the idle ceiling, less the Island's breathing and the pieces it carries.
     // A face that would pass it gives up its extras first (designs/*/Face.qml), so the Island never cuts it.
-    readonly property real faceRoom: Math.max(0, Math.min(root.idleCeiling, root.availableWidth - root.barPieceReserve)
+    readonly property real faceRoom: Math.max(0, Math.min(root.idleCeiling, root.availableWidth - root.barPieceReserve - 2 * root.wingSlot)
         - Math.round(29 * root.d * root.breathing))
     // The ceiling holds the Island's own content; the pieces it carries come on top of it, or they would be
     // squeezed over the clock.
@@ -1268,7 +1278,7 @@ Item {
     property Item heroClock: null
     readonly property Item restingCover: IrisStyle.cluster && leftSatellite.shown
         ? (root.primary === "media" ? leftSatellite.artwork : null)
-        : (root.compactMode === "media" && !root.vertical ? compactCover : null)
+        : (root.compactMode === "media" && !root.vertical ? (root.faceWings ? wingCover : compactCover) : null)
     readonly property Item restingClock: root.vertical ? null : root.compactMode === "clock" ? clusterClock
         : root.compactMode === "idle" ? idleClock : null
     function flyParts(): void {
@@ -2817,14 +2827,59 @@ Item {
                 source: root.faceUrl
                 readonly property real laidWidth: root.zoned ? root.heartTarget : root.compactTargetWidth
                 readonly property real swellShift: Math.round(chassis.swellInset / 2 - root.bandLift) * (root.bottomEdge ? -1 : 1)
-                x: (root.zoned ? Math.round(barZones.heartAlong + (root.heartLength - designFace.laidWidth) / 2)
+                // The face's box in the heart; a face that draws on the body's edge (`edge`, Aura) keeps all of it
+                // under the song's wings, any other is laid between them.
+                readonly property real boxX: (root.zoned ? Math.round(barZones.heartAlong + (root.heartLength - designFace.laidWidth) / 2)
                     : Math.round((parent.width - designFace.laidWidth) / 2)) + (root.piecesAtStart ? root.barPieceReserve : 0)
+                readonly property real boxWidth: Math.max(0, designFace.laidWidth - root.barPieceReserve)
+                readonly property real inset: designFace.item?.edge === true ? 0 : root.wingSlot
+                x: designFace.boxX + designFace.inset
                 y: designFace.swellShift
-                width: Math.max(0, designFace.laidWidth - root.barPieceReserve)
+                width: Math.max(0, designFace.boxWidth - 2 * designFace.inset)
                 height: parent.height
                 opacity: root.heartShown && root.faceTakes ? root.heartUncovered : 0
                 visible: opacity > 0
                 onLoaded: item.island = root
+            }
+            // The song at a face's sides (faceWings): its cover, then its visualizer, or under Nothing where it is.
+            IrisArtwork {
+                id: wingCover
+                x: designFace.boxX + root.wingLead
+                y: Math.round((parent.height - height) / 2) + designFace.swellShift
+                width: root.wingCoverSize
+                height: root.wingCoverSize
+                source: root.faceWings ? MediaArtwork.displaySource : ""
+                circular: Config.options?.iris?.player?.roundCover ?? false
+                radius: circular ? width / 2 : 6 * root.d
+                opacity: (root.faceWings && root.heartShown ? (root.playing ? 1 : 0.6) : 0) * root.heartUncovered * (coverFlight.hides(wingCover) ? 0 : 1)
+                visible: opacity > 0
+                Behavior on opacity { NumberAnimation { duration: IrisStyle.duration(140); easing.type: IrisStyle.feedbackEasing } }
+            }
+            Item {
+                id: wingTrail
+                x: designFace.boxX + designFace.boxWidth - root.wingLead - root.wingBox
+                y: designFace.swellShift
+                width: root.wingBox
+                height: parent.height
+                opacity: (root.faceWings && root.heartShown ? 1 : 0) * root.heartUncovered
+                visible: opacity > 0
+                Behavior on opacity { NumberAnimation { duration: IrisStyle.duration(140); easing.type: IrisStyle.feedbackEasing } }
+                IrisVisualizer {
+                    id: wingVisualizer
+                    anchors.centerIn: parent
+                    visible: !root.nothingLook
+                    running: wingTrail.visible && visible && root.playing && !root.visualExpanded
+                    tint: IrisStyle.visualizerTint(root.artTint)
+                    barHeight: (root.zoned ? 18 : 15) * root.d
+                }
+                IrisDotStrip {
+                    anchors.centerIn: parent
+                    visible: root.nothingLook
+                    width: root.stripWidth(4)
+                    count: 4
+                    value: root.trackProgress
+                    fillColor: root.playing ? IrisStyle.text : IrisStyle.textSecondary
+                }
             }
 
             Grid {

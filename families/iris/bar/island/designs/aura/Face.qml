@@ -15,6 +15,8 @@ Item {
     id: root
     property var island: null
     readonly property var modes: ["idle", "clock"]
+    // The ring is the body's edge: a song's wings ride inside it (IrisIsland.faceWings).
+    readonly property bool edge: true
     readonly property real d: IrisStyle.density
     readonly property real h: root.island?.compactHeight ?? 42
     readonly property real contentWidth: clock.implicitWidth + Math.round(26 * root.d)
@@ -22,15 +24,7 @@ Item {
     property real turn: 30
     readonly property var options: Config.options?.iris?.bar?.faces?.aura ?? ({})
     // Five stops round the ring; the sixth closes it on the first.
-    readonly property var palette: {
-        const id = IrisStyle.identity
-        switch (String(root.options.colours ?? "spectrum")) {
-        case "accent": return [IrisStyle.accent, IrisStyle.secondaryAccent, IrisStyle.accent, IrisStyle.secondaryAccent, IrisStyle.accent]
-        case "sunset": return [id.orange, id.red, id.pink, id.purple, id.yellow]
-        case "ocean": return [id.teal, id.sky, id.blue, id.indigo, id.green]
-        default: return [id.blue, id.purple, id.pink, id.orange, id.green]
-        }
-    }
+    readonly property var palette: IrisStyle.islandLight(String(root.options.colours ?? "spectrum"), DateTime.clock.date.getHours())
     readonly property bool hovered: aura.hovered
 
     HoverHandler { id: aura }

@@ -9,7 +9,9 @@ import qs.modules.iris.style
 
 IrisWidgetFace {
     id: root
-    designFace: IrisDesign.skin("widgetWeather")
+    // A second reading (Poster, Week) draws its own face; the Design's print steps aside for it.
+    readonly property string faceChoice: String(root.widget.familyOption("face", "classic"))
+    designFace: root.faceChoice === "classic" ? IrisDesign.skin("widgetWeather") : ""
 
     readonly property bool ready: Weather.enabled && !String(Weather.data?.temp ?? "--").startsWith("--")
     readonly property string glyph: Icons.getWeatherIcon(Weather.data?.wCode, Weather.isNightNow()) ?? "cloud"
@@ -51,7 +53,8 @@ IrisWidgetFace {
 
     // Poster (his 11-04 reference): the forecast set as a poster sets it, one tall condensed figure, the place in spaced
     // capitals over the sky in heavy condensed capitals, and the coming hours as one capsule.
-    readonly property bool poster: String(root.widget.familyOption("face", "classic")) === "poster"
+    readonly property bool poster: root.faceChoice === "poster"
+    readonly property bool weekStyle: root.faceChoice === "week"
     readonly property string condensed: "Google Sans Flex" // iris-literal: the poster figure needs a width axis
     readonly property string figure: {
         const value = parseFloat(String(Weather.data?.temp ?? ""))
@@ -250,7 +253,7 @@ IrisWidgetFace {
     }
 
     ColumnLayout {
-        visible: root.ready && root.small && !root.poster
+        visible: root.ready && root.small && !root.poster && !root.weekStyle
         anchors.fill: parent
         spacing: 0
         Now { Layout.fillHeight: false; Layout.fillWidth: true }
@@ -259,7 +262,7 @@ IrisWidgetFace {
     }
 
     ColumnLayout {
-        visible: root.ready && root.medium && !root.poster
+        visible: root.ready && root.medium && !root.poster && !root.weekStyle
         anchors.fill: parent
         spacing: 0
         RowLayout {
@@ -280,7 +283,7 @@ IrisWidgetFace {
     }
 
     ColumnLayout {
-        visible: root.ready && root.large && !root.poster
+        visible: root.ready && root.large && !root.poster && !root.weekStyle
         anchors.fill: parent
         spacing: root.dp(10)
 
@@ -603,5 +606,11 @@ IrisWidgetFace {
             }
         }
         Item { Layout.fillHeight: !root.small }
+    }
+
+    Loader {
+        anchors.fill: parent
+        active: root.ready && root.weekStyle
+        sourceComponent: Component { WeatherWeek { face: root } }
     }
 }

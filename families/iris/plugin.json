@@ -5,7 +5,7 @@
   "summary": "One living body: the Island, the chassis and Apple-grade motion.",
   "tagline": "Island, pieces and a Dock on any edge.",
   "icon": "visibility",
-  "version": "2.33.42",
+  "version": "2.33.43",
   "provides": "modules/iris",
   "wears": ["iris.appearance.design"],
   "parts": {
@@ -172,11 +172,12 @@
   },
   "widgetOptions": {
     "clock": [
-      {"key":"iris.face","label":"Face","type":"choice","default":"analog","when":"face","choices":[["analog","Analog","schedule"],["digital","Digital","timer_10"],["hour","Hour","wb_twilight"]]},
+      {"key":"iris.face","label":"Face","type":"choice","default":"analog","when":"face","choices":[["analog","Analog","schedule"],["digital","Digital","timer_10"],["hour","Hour","wb_twilight"],["greeting","Greeting","waving_hand"]]},
       {"key":"iris.seconds","label":"Second hand","type":"switch","default":true,"when":["face",{"iris.face":"analog"}]},
-      {"key":"iris.week","label":"Week strip","type":"switch","default":true,"when":["face",{"iris.face":["analog","digital"]},{"not":{"sizeClass":"small"}}]}
+      {"key":"iris.week","label":"Week strip","type":"switch","default":true,"when":["face",{"iris.face":["analog","digital","greeting"]},{"not":{"sizeClass":"small"}}]}
     ],
     "mediaControls": [
+      {"key":"iris.face","label":"Face","type":"choice","default":"classic","when":["face",{"not":{"sizeClass":"small"}}],"choices":[["classic","Classic","album"],["card","Card","featured_play_list"]],"keywords":["player","lyrics","card","spotify"]},
       {"key":"iris.lyrics","label":"Synced lyrics","type":"switch","default":true,"when":"face"},
       {"key":"iris.rest","label":"Rest when paused","type":"switch","default":true,"when":"face"}
     ],
@@ -205,8 +206,11 @@
       {"key":"iris.source","label":"Colours from","type":"choice","default":"wallpaper","choices":[["wallpaper","Wallpaper"],["music","Music"],["random","Random"]]}
     ],
     "weather": [
-      {"key": "iris.face", "label": "Face", "type": "choice", "default": "classic", "when": "face", "choices": [["classic", "Classic", "partly_cloudy_day"], ["poster", "Poster", "format_size"]], "keywords": ["poster", "big", "condensed", "headline", "cartel"]},
+      {"key": "iris.face", "label": "Face", "type": "choice", "default": "classic", "when": "face", "choices": [["classic", "Classic", "partly_cloudy_day"], ["poster", "Poster", "format_size"], ["week", "Week", "date_range"]], "keywords": ["poster", "big", "condensed", "headline", "cartel"]},
       {"key":"iris.details","label":"Details","type":"switch","default":true,"when":["face",{"sizeClass":"large"},{"iris.face":"classic"}],"keywords":["humidity","wind","uv","air"]}
+    ],
+    "battery": [
+      {"key":"iris.face","label":"Face","type":"choice","default":"classic","when":"face","choices":[["classic","Classic","battery_full"],["cells","Cells","battery_5_bar"]],"keywords":["cells","bars","battery"]}
     ],
     "*": [
       {"key":"iris.material","label":"Material","type":"choice","default":"auto","page":"look","tune":true,"when":["face",{"showBackground":true}],"choices":[["auto","Same as every widget"],["glass","Glass"],["solid","Solid"],["tinted","Tinted"]],"keywords":["glass","transparent","background","plate","fondo","vidrio"]}

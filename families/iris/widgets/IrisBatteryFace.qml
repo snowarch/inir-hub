@@ -9,7 +9,9 @@ import qs.modules.iris.style
 
 IrisWidgetFace {
     id: root
-    designFace: IrisDesign.skin("widgetBattery")
+    // Cells: the battery drawn as one, its charge the figure above it (his 11-06 references). The Design's print steps aside.
+    readonly property bool cellsStyle: String(root.widget.familyOption("face", "classic")) === "cells"
+    designFace: root.cellsStyle ? "" : IrisDesign.skin("widgetBattery")
 
     readonly property var glyphs: ({
         mouse: "mouse", keyboard: "keyboard", headset: "headset_mic", headphones: "headphones",
@@ -98,7 +100,7 @@ IrisWidgetFace {
     }
 
     ColumnLayout {
-        visible: root.devices.length === 1 && root.small
+        visible: root.devices.length === 1 && root.small && !root.cellsStyle
         anchors.fill: parent
         spacing: 0
         FaceHeader {
@@ -136,7 +138,7 @@ IrisWidgetFace {
     }
 
     ColumnLayout {
-        visible: !root.large && (root.devices.length > 1 || (root.devices.length === 1 && !root.small))
+        visible: !root.large && !root.cellsStyle && (root.devices.length > 1 || (root.devices.length === 1 && !root.small))
         anchors.centerIn: parent
         spacing: root.dp(10)
         Repeater {
@@ -153,6 +155,135 @@ IrisWidgetFace {
                         device: modelData
                         diameter: root.diameter
                         Layout.preferredWidth: root.cellWidth
+                    }
+                }
+            }
+        }
+    }
+
+    // Cells: the first device leads, its charge the figure and the battery under it; the others are rows with a small
+    // battery each (beside the lead on a wide face, under it on a large one).
+    readonly property var lead: root.devices[0] ?? null
+    readonly property var others: root.small ? [] : root.devices.slice(1, root.large ? 5 : 4)
+    function stateWord(device: var): string {
+        return !device ? "" : device.charging ? Translation.tr("Charging")
+            : device.level >= 0.995 ? Translation.tr("Fully charged") : device.low ? Translation.tr("Low") : ""
+    }
+    GridLayout {
+        visible: root.cellsStyle && root.lead !== null
+        anchors.fill: parent
+        flow: root.medium ? GridLayout.LeftToRight : GridLayout.TopToBottom
+        columns: root.medium ? 2 : 1
+        rows: root.medium ? 1 : 2
+        columnSpacing: root.dp(18)
+        rowSpacing: root.dp(14)
+        ColumnLayout {
+            Layout.fillWidth: true
+            Layout.fillHeight: !root.large || root.others.length === 0
+            Layout.preferredWidth: root.medium && root.others.length > 0 ? root.contentWidth * 0.52 : -1
+            spacing: root.dp(2)
+            FaceHeader {
+                face: root
+                Layout.fillWidth: true
+                glyph: root.lead?.glyph ?? "battery_full"
+                text: root.lead?.name ?? ""
+                tint: root.inkSecondary
+            }
+            Item { Layout.fillHeight: true }
+            RowLayout {
+                Layout.fillHeight: false
+                spacing: root.dp(4)
+                MaterialSymbol {
+                    visible: root.lead?.charging ?? false
+                    Layout.alignment: Qt.AlignVCenter
+                    text: "bolt"
+                    fill: 1
+                    iconSize: root.px(root.small ? 24 : 30)
+                    color: root.warm
+                }
+                FaceFigure {
+                    id: cellsFigure
+                    face: root
+                    text: Math.round((root.lead?.level ?? 0) * 100)
+                    size: root.small ? 44 : root.large ? 64 : 54
+                    tone: (root.lead?.low ?? false) && !(root.lead?.charging ?? false) ? root.danger : root.ink
+                }
+                FaceText {
+                    face: root
+                    Layout.alignment: Qt.AlignBaseline
+                    text: "%"
+                    size: root.small ? 18 : 22
+                    color: root.inkSecondary
+                }
+            }
+            FaceText {
+                face: root
+                Layout.fillWidth: true
+                visible: text.length > 0 && !root.small
+                text: root.widget.timeLabel.length > 0 ? root.widget.timeLabel : root.stateWord(root.lead)
+                color: root.inkSecondary
+                size: 12.5
+            }
+            FaceCells {
+                face: root
+                Layout.fillWidth: true
+                Layout.topMargin: root.dp(8)
+                Layout.preferredHeight: root.dp(root.small ? 30 : 36)
+                level: root.lead?.level ?? 0
+                charging: root.lead?.charging ?? false
+                low: root.lead?.low ?? false
+                count: root.small ? 5 : 8
+            }
+        }
+        ColumnLayout {
+            visible: root.others.length > 0
+            Layout.fillWidth: true
+            Layout.fillHeight: false
+            Layout.alignment: root.large ? Qt.AlignTop : Qt.AlignVCenter
+            spacing: root.dp(root.large ? 12 : 9)
+            Rectangle {
+                visible: root.large
+                Layout.fillWidth: true
+                Layout.preferredHeight: 1
+                color: root.hairline
+            }
+            Repeater {
+                model: root.cellsStyle ? root.others : []
+                RowLayout {
+                    id: other
+                    required property var modelData
+                    Layout.fillWidth: true
+                    Layout.fillHeight: false
+                    spacing: root.dp(8)
+                    MaterialSymbol {
+                        text: other.modelData.charging ? "bolt" : other.modelData.glyph
+                        fill: 1
+                        iconSize: root.px(16)
+                        color: other.modelData.charging ? root.warm : root.inkSecondary
+                    }
+                    FaceText {
+                        face: root
+                        Layout.fillWidth: true
+                        text: other.modelData.name
+                        size: 12.5
+                        weight: Font.DemiBold
+                    }
+                    FaceCells {
+                        face: root
+                        Layout.preferredWidth: root.dp(40)
+                        Layout.preferredHeight: root.dp(16)
+                        level: other.modelData.level
+                        charging: other.modelData.charging
+                        low: other.modelData.low
+                        count: 4
+                    }
+                    FaceFigure {
+                        face: root
+                        Layout.preferredWidth: root.dp(34)
+                        horizontalAlignment: Text.AlignRight
+                        text: Math.round(other.modelData.level * 100)
+                        size: 15
+                        tone: other.modelData.low && !other.modelData.charging ? root.danger : root.ink
                     }
                 }
             }
@@ -190,7 +321,7 @@ IrisWidgetFace {
 
     // Large: one row per device, its glyph on its colour, the name and what it is doing, the charge leading.
     ColumnLayout {
-        visible: root.large && root.devices.length > 0
+        visible: root.large && !root.cellsStyle && root.devices.length > 0
         anchors.fill: parent
         spacing: 0
         FaceHeader {
@@ -202,7 +333,7 @@ IrisWidgetFace {
             tint: root.inked(IrisStyle.identity.green)
         }
         Repeater {
-            model: root.large ? root.devices : []
+            model: root.large && !root.cellsStyle ? root.devices : []
             ColumnLayout {
                 id: device
                 required property var modelData
