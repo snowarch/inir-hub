@@ -130,7 +130,8 @@ Item {
                     duration: 1800
                     loops: Animation.Infinite
                     running: view.face.moving
-                    paused: !view.spinning
+                    // Paused only once it runs: Qt refuses a pause before the start (it warns).
+                    paused: running && !view.spinning
                 }
             }
             // The reflection: two soft wedges of light across the grooves, fixed while the record turns.
