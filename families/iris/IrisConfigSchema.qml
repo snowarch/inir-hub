@@ -345,6 +345,16 @@ JsonObject {
             property bool niri: true
             property bool soundGuard: true
         }
+        // Each live activity that may take the Island (Settings › Island › Live activities); the privacy dot shows either way.
+        property JsonObject activities: JsonObject {
+            property bool record: true
+            property bool timer: true
+            property bool task: true
+            property bool camera: true
+            property bool call: true
+            property bool media: true
+            property bool micGlow: true // the screen's edges glow once when an app starts listening
+        }
         property string trailing: "controls" // Cluster trailing bubble: "controls", "notifications", "weather", "sound", "mic" or "none"
         property int height: 42
         property int margin: 8

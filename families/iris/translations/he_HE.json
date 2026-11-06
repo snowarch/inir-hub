@@ -2282,5 +2282,16 @@
   "Screenshot saved": "צילום המסך נשמר",
   "Let go to keep the text": "שחרר כדי לשמור את הטקסט",
   "Let go to keep 1 file": "שחרר כדי לשמור קובץ אחד",
-  "Let go to keep %1 files": "שחרר כדי לשמור %1 קבצים"
+  "Let go to keep %1 files": "שחרר כדי לשמור %1 קבצים",
+  "Downloads and tasks": "הורדות ומשימות",
+  "Calls": "שיחות",
+  "Microphone glow": "זוהר המיקרופון",
+  "How long it has run, with a red dot.": "כמה זמן זה רץ, עם נקודה אדומה.",
+  "A timer, a stopwatch or a focus session, with its ring.": "טיימר, סטופר או סשן ריכוז, עם הטבעת שלו.",
+  "A job's progress as a ring.": "ההתקדמות של משימה כטבעת.",
+  "A green camera tile with the app while the camera is on. The privacy dot shows either way.": "אריח מצלמה ירוק עם האפליקציה כל עוד המצלמה פועלת. נקודת הפרטיות מופיעה בכל מקרה.",
+  "While an app listens through the microphone: a green handset and how long it has run. The privacy dot shows either way.": "כל עוד אפליקציה מאזינה דרך המיקרופון: שפופרת ירוקה וכמה זמן זה נמשך. נקודת הפרטיות מופיעה בכל מקרה.",
+  "The song takes the Island while it plays, or the bubble beside it.": "השיר תופס את האיילנד בזמן שהוא מתנגן, או את הבועה לידו.",
+  "The screen's edges glow for a moment when an app starts listening.": "קצוות המסך זוהרים לרגע כשאפליקציה מתחילה להאזין.",
+  "All on": "הכול פעיל"
 }

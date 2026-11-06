@@ -159,14 +159,19 @@ Item {
     readonly property color taskTint: root.nothingLook ? IrisStyle.text : IrisStyle.identityColor(String(root.task?.tint ?? "lavender"))
     // Priority, as Live Activities: what records you, then what counts down, then jobs, then the song. The first is
     // the compact Island; the second detaches as the minimal bubble; the expanded page lists them all.
+    // Each kind takes the Island only while its switch is on (Settings › Island › Live activities); the privacy dot
+    // shows either way. A video call with the camera tile off shows as a call.
+    readonly property var acts: root.options?.activities ?? ({})
+    readonly property bool cameraTile: Privacy.cameraActive && root.acts.camera !== false
     readonly property var activities: {
         const list = []
-        if (root.recording) list.push("record")
-        if (root.timerKind.length > 0) list.push("timer")
-        for (const job of root.tasks.slice(0, 2)) list.push("task")
-        if (Privacy.cameraActive) list.push("camera")
-        if (Privacy.micActive && !Privacy.cameraActive) list.push("mic")
-        if (root.hasMedia) list.push("media")
+        if (root.recording && root.acts.record !== false) list.push("record")
+        if (root.timerKind.length > 0 && root.acts.timer !== false) list.push("timer")
+        if (root.acts.task !== false)
+            for (const job of root.tasks.slice(0, 2)) list.push("task")
+        if (root.cameraTile) list.push("camera")
+        if (Privacy.micActive && !root.cameraTile && root.acts.call !== false) list.push("mic")
+        if (root.hasMedia && root.acts.media !== false) list.push("media")
         return list
     }
     readonly property string primary: root.activities[0] ?? "idle"

@@ -2282,5 +2282,16 @@
   "Screenshot saved": "Ekran görüntüsü kaydedildi",
   "Let go to keep the text": "Metni tutmak için bırakın",
   "Let go to keep 1 file": "1 dosyayı tutmak için bırakın",
-  "Let go to keep %1 files": "%1 dosyayı tutmak için bırakın"
+  "Let go to keep %1 files": "%1 dosyayı tutmak için bırakın",
+  "Downloads and tasks": "İndirmeler ve görevler",
+  "Calls": "Aramalar",
+  "Microphone glow": "Mikrofon parıltısı",
+  "How long it has run, with a red dot.": "Ne kadar süredir sürdüğü, kırmızı bir noktayla.",
+  "A timer, a stopwatch or a focus session, with its ring.": "Bir zamanlayıcı, kronometre ya da odak oturumu, halkasıyla.",
+  "A job's progress as a ring.": "Bir işin ilerlemesi halka olarak.",
+  "A green camera tile with the app while the camera is on. The privacy dot shows either way.": "Kamera açıkken uygulamayla birlikte yeşil bir kamera kutucuğu. Gizlilik noktası her durumda görünür.",
+  "While an app listens through the microphone: a green handset and how long it has run. The privacy dot shows either way.": "Bir uygulama mikrofondan dinlerken: yeşil bir ahize ve ne kadar süredir sürdüğü. Gizlilik noktası her durumda görünür.",
+  "The song takes the Island while it plays, or the bubble beside it.": "Şarkı çalarken Ada'yı ya da yanındaki baloncuğu kaplar.",
+  "The screen's edges glow for a moment when an app starts listening.": "Bir uygulama dinlemeye başladığında ekranın kenarları bir anlığına parlar.",
+  "All on": "Hepsi açık"
 }

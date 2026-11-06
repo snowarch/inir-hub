@@ -23,6 +23,7 @@ iRiS is the Island family. One Island sits on a screen edge and grows into whate
   - **Music** opens into a player with the cover, the song and its artist, the time on both sides of the bar and large play controls.
   - **Timers** show an orange ring that empties as the time runs; open, they have round pause and close buttons, and a pomodoro shows each focus and break as a segment.
   - **Downloads and tasks** show a ring with their percentage.
+  - Settings › Island › Live activities has a switch for each kind that may take the Island: screen recording, timers, downloads and tasks, camera, calls and music. With **Camera** or **Calls** off, the privacy dot still shows while an app uses them. **Microphone glow** turns off the glow on the screen's edges when an app starts listening.
 - The Weather page shows the temperature large, the place and the sky, and the next hours on a bar and as coloured columns by how warm each hour is.
 - The Vitals page shows processor, memory, heat and disk as four rings, and the processor over the last minute as a chart.
 - Notices: the Island says by itself what just happened, for a moment (Settings › Island › Notices):

@@ -2282,5 +2282,16 @@
   "Screenshot saved": "Screenshot saved",
   "Let go to keep the text": "Let go to keep the text",
   "Let go to keep 1 file": "Let go to keep 1 file",
-  "Let go to keep %1 files": "Let go to keep %1 files"
+  "Let go to keep %1 files": "Let go to keep %1 files",
+  "Downloads and tasks": "Downloads and tasks",
+  "Calls": "Calls",
+  "Microphone glow": "Microphone glow",
+  "How long it has run, with a red dot.": "How long it has run, with a red dot.",
+  "A timer, a stopwatch or a focus session, with its ring.": "A timer, a stopwatch or a focus session, with its ring.",
+  "A job's progress as a ring.": "A job's progress as a ring.",
+  "A green camera tile with the app while the camera is on. The privacy dot shows either way.": "A green camera tile with the app while the camera is on. The privacy dot shows either way.",
+  "While an app listens through the microphone: a green handset and how long it has run. The privacy dot shows either way.": "While an app listens through the microphone: a green handset and how long it has run. The privacy dot shows either way.",
+  "The song takes the Island while it plays, or the bubble beside it.": "The song takes the Island while it plays, or the bubble beside it.",
+  "The screen's edges glow for a moment when an app starts listening.": "The screen's edges glow for a moment when an app starts listening.",
+  "All on": "All on"
 }

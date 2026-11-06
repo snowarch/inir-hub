@@ -2282,5 +2282,16 @@
   "Screenshot saved": "حُفظت لقطة الشاشة",
   "Let go to keep the text": "أفلت للاحتفاظ بالنص",
   "Let go to keep 1 file": "أفلت للاحتفاظ بملف واحد",
-  "Let go to keep %1 files": "أفلت للاحتفاظ بـ %1 ملفات"
+  "Let go to keep %1 files": "أفلت للاحتفاظ بـ %1 ملفات",
+  "Downloads and tasks": "التنزيلات والمهام",
+  "Calls": "المكالمات",
+  "Microphone glow": "توهج الميكروفون",
+  "How long it has run, with a red dot.": "كم مضى عليه، مع نقطة حمراء.",
+  "A timer, a stopwatch or a focus session, with its ring.": "مؤقت أو ساعة إيقاف أو جلسة تركيز، مع حلقتها.",
+  "A job's progress as a ring.": "تقدم المهمة كحلقة.",
+  "A green camera tile with the app while the camera is on. The privacy dot shows either way.": "مربع كاميرا أخضر مع التطبيق ما دامت الكاميرا تعمل. نقطة الخصوصية تظهر في الحالتين.",
+  "While an app listens through the microphone: a green handset and how long it has run. The privacy dot shows either way.": "ما دام تطبيق يستمع عبر الميكروفون: سماعة خضراء وكم مضى. نقطة الخصوصية تظهر في الحالتين.",
+  "The song takes the Island while it plays, or the bubble beside it.": "تشغل الأغنية الجزيرة أثناء تشغيلها، أو الفقاعة المجاورة.",
+  "The screen's edges glow for a moment when an app starts listening.": "تتوهج حواف الشاشة للحظة عندما يبدأ تطبيق بالاستماع.",
+  "All on": "الكل مفعّل"
 }

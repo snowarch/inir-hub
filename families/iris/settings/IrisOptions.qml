@@ -1062,6 +1062,13 @@ QtObject {
         { section: "bar", group: "Visibility", label: "Automatically hide", description: "The Island tucks into its edge and comes back when you rest the pointer there.", path: "iris.bar.autoHide", kind: "switch", fallback: false },
         { section: "bar", group: "Visibility", label: "Stay visible on empty workspaces", description: "When auto-hide is on, keep the Island visible on workspaces with no windows.", path: "iris.bar.revealOnEmpty", visibleWhen: "iris.bar.autoHide", kind: "switch", fallback: true },
         { section: "bar", group: "Visibility", label: "Reserve space for windows", tune: true, description: "Bubbles on the same edge reserve their own room.", path: "iris.bar.reserveSpace", visibleWhen: "!iris.bar.autoHide", kind: "switch", fallback:true, keywords: ["reserve", "space", "windows", "exclusive", "margin", "espacio", "reservar"] },
+        { section: "bar", group: "Live activities", label: "Screen recording", description: "How long it has run, with a red dot.", path: "iris.bar.activities.record", kind: "switch", fallback: true, keywords: ["recording", "record", "screen", "live activity", "dynamic island", "grabación"] },
+        { section: "bar", group: "Live activities", label: "Timers", description: "A timer, a stopwatch or a focus session, with its ring.", path: "iris.bar.activities.timer", kind: "switch", fallback: true, keywords: ["timer", "pomodoro", "stopwatch", "focus", "temporizador"] },
+        { section: "bar", group: "Live activities", label: "Downloads and tasks", description: "A job's progress as a ring.", path: "iris.bar.activities.task", kind: "switch", fallback: true, keywords: ["download", "task", "progress", "job", "descarga"] },
+        { section: "bar", group: "Live activities", label: "Camera", description: "A green camera tile with the app while the camera is on. The privacy dot shows either way.", path: "iris.bar.activities.camera", kind: "switch", fallback: true, keywords: ["camera", "webcam", "privacy", "cámara"] },
+        { section: "bar", group: "Live activities", label: "Calls", description: "While an app listens through the microphone: a green handset and how long it has run. The privacy dot shows either way.", path: "iris.bar.activities.call", kind: "switch", fallback: true, keywords: ["call", "microphone", "mic", "meeting", "llamada"] },
+        { section: "bar", group: "Live activities", label: "Music", description: "The song takes the Island while it plays, or the bubble beside it.", path: "iris.bar.activities.media", kind: "switch", fallback: true, keywords: ["music", "song", "player", "media", "now playing", "música"] },
+        { section: "bar", group: "Live activities", label: "Microphone glow", description: "The screen's edges glow for a moment when an app starts listening.", path: "iris.bar.activities.micGlow", kind: "switch", tune: true, fallback: true, keywords: ["glow", "microphone", "edges", "privacy", "brillo"] },
         { section: "bar", group: "Notices", label: "System events", description: "The Island says by itself what just happened, for a moment: a connection, a timer, a screenshot, Do Not Disturb.", path: "iris.bar.events", kind: "switch", fallback: true, keywords: ["events", "notices", "alerts", "toast", "popup", "osd", "dynamic island", "avisos"] },
         { section: "bar", group: "Notices", label: "Size", description: "How a notice shows in the Island.", path: "iris.bar.notices.style", visibleWhen: "iris.bar.events", kind: "choice", fallback: "compact", set: next => root.writeAndShow("iris.bar.notices.style", next, "accessory"),
             choices: [{label:"Compact",value:"compact",glyph:"short_text",detail:"A line in the resting Island."},{label:"Large",value:"large",glyph:"crop_landscape",detail:"The Island grows into a card, as a phone's alerts do. On a side edge it keeps the line."}],
@@ -1736,6 +1743,8 @@ QtObject {
         id = root.retiredAreas[id] ?? id
         return root.sections.find(section => section.id === id) ?? root.sections[0]
     }
+    // Groups that are a set of kinds: folded, they say how many are on ("5 of 7"), not the first one's name.
+    readonly property var countedGroups: ["Live activities"]
     readonly property var groupGlyphs: ({
         "Shell family": "swap_horiz", "Shell": "swap_horiz", "Language & time": "language", "Apps & login": "rocket_launch", "Notch": "vertical_align_top",
         "Wallpaper shuffle": "shuffle", "Transition": "transition_fade", "Library": "photo_library",
@@ -1743,7 +1752,7 @@ QtObject {
         "Accent": "palette", "Visualizer": "graphic_eq", "Customize": "brush", "Themes": "style", "Presets": "auto_awesome_mosaic", "Settings window": "settings_applications", "Activity": "timer", "Adaptive": "auto_awesome", "App colours": "format_paint", "Airing": "live_tv", "Alert sounds": "music_note",
         "At a glance": "visibility", "At rest": "schedule", "Badges": "notifications_unread", "Banners": "notifications",
         "Bar": "width_full", "Behaviour": "touch_app", "Bubble": "bubble_chart", "Calendar": "calendar_month",
-        "Card contents": "view_agenda", "Cards": "web_asset", "Charge limit": "battery_charging_80", "Clipboard": "content_paste", "Connections": "cable", "Notices": "notifications_active", "Clock": "schedule",
+        "Card contents": "view_agenda", "Cards": "web_asset", "Charge limit": "battery_charging_80", "Clipboard": "content_paste", "Connections": "cable", "Notices": "notifications_active", "Live activities": "stream", "Clock": "schedule",
         "Colour layer": "palette", "Comfort": "visibility", "Continue": "play_circle", "Control Center": "tune",
         "Curve": "show_chart", "Date & time": "calendar_clock", "Desktop page": "dashboard", "Do Not Disturb": "do_not_disturb_on",
         "Extra bubbles": "add_circle", "Faces": "font_download", "Feedback": "campaign", "Floating": "flight",
@@ -1835,6 +1844,7 @@ QtObject {
         get "Interaction"() { return IrisStyle.identity.green },
         get "Connections"() { return IrisStyle.identity.blue },
         get "Notices"() { return IrisStyle.identity.orange },
+        get "Live activities"() { return IrisStyle.identity.green },
         get "Japanese lookup"() { return IrisStyle.identity.purple },
         get "Joining"() { return IrisStyle.identity.teal },
         get "Keyboard"() { return IrisStyle.identity.gray },
@@ -1991,7 +2001,7 @@ QtObject {
         appearance: ["Presets", "Scheme", "Accent", "Highlight", "Signal", "Look", "Colour theme", "Day and night", "App colours", "Wallpaper tint",
             "Dark look", "Ink look", "Light look", "Design", "Material", "Glass", "Texture", "Light", "Edges", "Shape", "Corners per surface",
             "Frame", "Text", "Faces", "Icons", "Material per surface", "Menus", "Settings", "Badges", "Customize", "Previews", "Adaptive"],
-        bar: ["Design and modes", "Notch", "Layout", "Shape", "At rest", "Resting Island", "Bar", "Pages", "Desktop page", "Player page", "Interaction", "Visibility", "Notices", "Connections"],
+        bar: ["Design and modes", "Notch", "Layout", "Shape", "At rest", "Resting Island", "Bar", "Pages", "Desktop page", "Player page", "Interaction", "Visibility", "Live activities", "Notices", "Connections"],
         bubbles: ["Size", "Behaviour", "On the contour", "Floating", "Opening bodies", "Cards", "Card contents", "Joining", "Tray"],
         dock: ["Notch", "Look", "Icons", "Visibility"],
         desktop: ["Widgets", "Desktop menu"],

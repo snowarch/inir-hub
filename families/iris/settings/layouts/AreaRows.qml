@@ -1065,6 +1065,12 @@ ColumnLayout {
             // A value named like its island says it is on (Glass read "Glass"); the same word twice is said once.
             const say = spec => { const one = island.word(spec); return one.length > 0 && one.toLowerCase() === island.title.toLowerCase() ? Translation.tr("On") : one }
             if (island.pin) { const one = say(island.first); return one.length > 0 ? [one] : [] }
+            // A group that is a set of kinds says how many are on; the first one's name read as if it were the only one.
+            if (IrisOptions.countedGroups.includes(island.key)) {
+                const switches = island.specs.filter(spec => spec.kind === "switch")
+                const on = switches.filter(spec => { const value = IrisOptions.currentValue(spec); return spec.invert ? !value : Boolean(value) }).length
+                return [on === switches.length ? Translation.tr("All on") : on === 0 ? Translation.tr("Off") : Translation.tr("%1 of %2").arg(on).arg(switches.length)]
+            }
             const out = []
             const specs = island.specs.slice(island.namedSwitch ? 1 : 0)
             // The rows it shows first; when they say nothing (an off switch, a list), a value from its fine-tune ones.

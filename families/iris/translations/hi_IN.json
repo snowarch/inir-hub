@@ -2282,5 +2282,16 @@
   "Screenshot saved": "स्क्रीनशॉट सहेजा गया",
   "Let go to keep the text": "टेक्स्ट रखने के लिए छोड़ें",
   "Let go to keep 1 file": "1 फ़ाइल रखने के लिए छोड़ें",
-  "Let go to keep %1 files": "%1 फ़ाइलें रखने के लिए छोड़ें"
+  "Let go to keep %1 files": "%1 फ़ाइलें रखने के लिए छोड़ें",
+  "Downloads and tasks": "डाउनलोड और काम",
+  "Calls": "कॉल",
+  "Microphone glow": "माइक्रोफ़ोन की चमक",
+  "How long it has run, with a red dot.": "कितनी देर से चल रही है, एक लाल बिंदु के साथ।",
+  "A timer, a stopwatch or a focus session, with its ring.": "एक टाइमर, स्टॉपवॉच या फ़ोकस सत्र, उसकी अंगूठी के साथ।",
+  "A job's progress as a ring.": "किसी काम की प्रगति एक अंगूठी के रूप में।",
+  "A green camera tile with the app while the camera is on. The privacy dot shows either way.": "कैमरा चालू रहने तक ऐप के साथ एक हरी कैमरा टाइल। निजता बिंदु हर हाल में दिखता है।",
+  "While an app listens through the microphone: a green handset and how long it has run. The privacy dot shows either way.": "जब कोई ऐप माइक्रोफ़ोन से सुन रहा हो: एक हरा हैंडसेट और कितनी देर से। निजता बिंदु हर हाल में दिखता है।",
+  "The song takes the Island while it plays, or the bubble beside it.": "गाना बजते समय द्वीप पर, या बगल के बुलबुले में रहता है।",
+  "The screen's edges glow for a moment when an app starts listening.": "जब कोई ऐप सुनना शुरू करता है, स्क्रीन के किनारे एक पल चमकते हैं।",
+  "All on": "सभी चालू"
 }

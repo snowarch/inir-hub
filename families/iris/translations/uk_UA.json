@@ -2282,5 +2282,16 @@
   "Screenshot saved": "Знімок екрана збережено",
   "Let go to keep the text": "Відпустіть, щоб зберегти текст",
   "Let go to keep 1 file": "Відпустіть, щоб зберегти 1 файл",
-  "Let go to keep %1 files": "Відпустіть, щоб зберегти файли: %1"
+  "Let go to keep %1 files": "Відпустіть, щоб зберегти файли: %1",
+  "Downloads and tasks": "Завантаження й завдання",
+  "Calls": "Дзвінки",
+  "Microphone glow": "Сяйво мікрофона",
+  "How long it has run, with a red dot.": "Скільки вже триває, з червоною крапкою.",
+  "A timer, a stopwatch or a focus session, with its ring.": "Таймер, секундомір або сеанс фокусу зі своїм кільцем.",
+  "A job's progress as a ring.": "Перебіг завдання у вигляді кільця.",
+  "A green camera tile with the app while the camera is on. The privacy dot shows either way.": "Зелена плитка камери із застосунком, поки камера ввімкнена. Крапка приватності видна в будь-якому разі.",
+  "While an app listens through the microphone: a green handset and how long it has run. The privacy dot shows either way.": "Поки застосунок слухає через мікрофон: зелена слухавка і скільки це триває. Крапка приватності видна в будь-якому разі.",
+  "The song takes the Island while it plays, or the bubble beside it.": "Пісня займає Острів, поки грає, або бульбашку поруч.",
+  "The screen's edges glow for a moment when an app starts listening.": "Краї екрана на мить світяться, коли застосунок починає слухати.",
+  "All on": "Усі ввімкнено"
 }

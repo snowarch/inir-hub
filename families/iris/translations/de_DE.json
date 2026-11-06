@@ -2282,5 +2282,16 @@
   "Screenshot saved": "Bildschirmfoto gespeichert",
   "Let go to keep the text": "Loslassen, um den Text zu behalten",
   "Let go to keep 1 file": "Loslassen, um 1 Datei zu behalten",
-  "Let go to keep %1 files": "Loslassen, um %1 Dateien zu behalten"
+  "Let go to keep %1 files": "Loslassen, um %1 Dateien zu behalten",
+  "Downloads and tasks": "Downloads und Aufgaben",
+  "Calls": "Anrufe",
+  "Microphone glow": "Mikrofon-Leuchten",
+  "How long it has run, with a red dot.": "Wie lange sie schon läuft, mit einem roten Punkt.",
+  "A timer, a stopwatch or a focus session, with its ring.": "Ein Timer, eine Stoppuhr oder eine Fokus-Sitzung, mit ihrem Ring.",
+  "A job's progress as a ring.": "Der Fortschritt einer Aufgabe als Ring.",
+  "A green camera tile with the app while the camera is on. The privacy dot shows either way.": "Eine grüne Kamera-Kachel mit der App, solange die Kamera an ist. Der Datenschutzpunkt erscheint so oder so.",
+  "While an app listens through the microphone: a green handset and how long it has run. The privacy dot shows either way.": "Solange eine App über das Mikrofon zuhört: ein grüner Hörer und wie lange es schon läuft. Der Datenschutzpunkt erscheint so oder so.",
+  "The song takes the Island while it plays, or the bubble beside it.": "Das Lied nimmt die Insel ein, solange es spielt, oder die Blase daneben.",
+  "The screen's edges glow for a moment when an app starts listening.": "Die Ränder des Bildschirms leuchten kurz auf, wenn eine App zu hören beginnt.",
+  "All on": "Alle an"
 }

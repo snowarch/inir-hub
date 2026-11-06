@@ -2282,5 +2282,16 @@
   "Screenshot saved": "Снимок экрана сохранён",
   "Let go to keep the text": "Отпустите, чтобы сохранить текст",
   "Let go to keep 1 file": "Отпустите, чтобы сохранить 1 файл",
-  "Let go to keep %1 files": "Отпустите, чтобы сохранить файлы: %1"
+  "Let go to keep %1 files": "Отпустите, чтобы сохранить файлы: %1",
+  "Downloads and tasks": "Загрузки и задачи",
+  "Calls": "Звонки",
+  "Microphone glow": "Свечение микрофона",
+  "How long it has run, with a red dot.": "Сколько уже идёт, с красной точкой.",
+  "A timer, a stopwatch or a focus session, with its ring.": "Таймер, секундомер или сеанс фокуса со своим кольцом.",
+  "A job's progress as a ring.": "Ход задачи в виде кольца.",
+  "A green camera tile with the app while the camera is on. The privacy dot shows either way.": "Зелёная плитка камеры с приложением, пока камера включена. Точка конфиденциальности видна в любом случае.",
+  "While an app listens through the microphone: a green handset and how long it has run. The privacy dot shows either way.": "Пока приложение слушает через микрофон: зелёная трубка и сколько это длится. Точка конфиденциальности видна в любом случае.",
+  "The song takes the Island while it plays, or the bubble beside it.": "Песня занимает Остров, пока играет, или пузырь рядом.",
+  "The screen's edges glow for a moment when an app starts listening.": "Края экрана на мгновение светятся, когда приложение начинает слушать.",
+  "All on": "Все включены"
 }

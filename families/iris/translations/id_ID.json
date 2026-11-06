@@ -2282,5 +2282,16 @@
   "Screenshot saved": "Tangkapan layar disimpan",
   "Let go to keep the text": "Lepaskan untuk menyimpan teks",
   "Let go to keep 1 file": "Lepaskan untuk menyimpan 1 berkas",
-  "Let go to keep %1 files": "Lepaskan untuk menyimpan %1 berkas"
+  "Let go to keep %1 files": "Lepaskan untuk menyimpan %1 berkas",
+  "Downloads and tasks": "Unduhan dan tugas",
+  "Calls": "Panggilan",
+  "Microphone glow": "Kilau mikrofon",
+  "How long it has run, with a red dot.": "Sudah berapa lama berjalan, dengan titik merah.",
+  "A timer, a stopwatch or a focus session, with its ring.": "Timer, stopwatch, atau sesi fokus, dengan cincinnya.",
+  "A job's progress as a ring.": "Kemajuan tugas sebagai cincin.",
+  "A green camera tile with the app while the camera is on. The privacy dot shows either way.": "Kotak kamera hijau beserta aplikasinya selama kamera menyala. Titik privasi tetap tampil.",
+  "While an app listens through the microphone: a green handset and how long it has run. The privacy dot shows either way.": "Selama aplikasi mendengar lewat mikrofon: gagang telepon hijau dan sudah berapa lama. Titik privasi tetap tampil.",
+  "The song takes the Island while it plays, or the bubble beside it.": "Lagu mengisi Pulau selama diputar, atau gelembung di sebelahnya.",
+  "The screen's edges glow for a moment when an app starts listening.": "Tepi layar berkilau sesaat saat aplikasi mulai mendengar.",
+  "All on": "Semua aktif"
 }

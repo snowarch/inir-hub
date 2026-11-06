@@ -2282,5 +2282,16 @@
   "Screenshot saved": "截图已保存",
   "Let go to keep the text": "松开以保存文字",
   "Let go to keep 1 file": "松开以保存 1 个文件",
-  "Let go to keep %1 files": "松开以保存 %1 个文件"
+  "Let go to keep %1 files": "松开以保存 %1 个文件",
+  "Downloads and tasks": "下载和任务",
+  "Calls": "通话",
+  "Microphone glow": "麦克风光晕",
+  "How long it has run, with a red dot.": "已进行多久，带一个红点。",
+  "A timer, a stopwatch or a focus session, with its ring.": "计时器、秒表或专注时段，带它的圆环。",
+  "A job's progress as a ring.": "任务进度显示为圆环。",
+  "A green camera tile with the app while the camera is on. The privacy dot shows either way.": "摄像头开启时，显示绿色摄像头方块和应用。隐私圆点无论如何都会显示。",
+  "While an app listens through the microphone: a green handset and how long it has run. The privacy dot shows either way.": "应用通过麦克风收听时：绿色听筒和已进行的时长。隐私圆点无论如何都会显示。",
+  "The song takes the Island while it plays, or the bubble beside it.": "歌曲播放时占据岛屿，或旁边的气泡。",
+  "The screen's edges glow for a moment when an app starts listening.": "应用开始收听时，屏幕边缘会短暂发光。",
+  "All on": "全部开启"
 }

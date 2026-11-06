@@ -2282,5 +2282,16 @@
   "Screenshot saved": "스크린샷 저장됨",
   "Let go to keep the text": "놓으면 텍스트를 보관합니다",
   "Let go to keep 1 file": "놓으면 파일 1개를 보관합니다",
-  "Let go to keep %1 files": "놓으면 파일 %1개를 보관합니다"
+  "Let go to keep %1 files": "놓으면 파일 %1개를 보관합니다",
+  "Downloads and tasks": "다운로드 및 작업",
+  "Calls": "통화",
+  "Microphone glow": "마이크 빛",
+  "How long it has run, with a red dot.": "얼마나 진행됐는지, 빨간 점과 함께.",
+  "A timer, a stopwatch or a focus session, with its ring.": "타이머, 스톱워치 또는 집중 세션과 그 링.",
+  "A job's progress as a ring.": "작업 진행률을 링으로.",
+  "A green camera tile with the app while the camera is on. The privacy dot shows either way.": "카메라가 켜져 있는 동안 앱과 함께 초록색 카메라 타일. 개인정보 점은 어느 쪽이든 표시됩니다.",
+  "While an app listens through the microphone: a green handset and how long it has run. The privacy dot shows either way.": "앱이 마이크로 듣는 동안: 초록색 수화기와 경과 시간. 개인정보 점은 어느 쪽이든 표시됩니다.",
+  "The song takes the Island while it plays, or the bubble beside it.": "재생 중인 노래가 아일랜드나 옆의 버블에 표시됩니다.",
+  "The screen's edges glow for a moment when an app starts listening.": "앱이 듣기 시작하면 화면 가장자리가 잠깐 빛납니다.",
+  "All on": "모두 켜짐"
 }

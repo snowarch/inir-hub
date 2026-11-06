@@ -2282,5 +2282,16 @@
   "Screenshot saved": "Đã lưu ảnh chụp màn hình",
   "Let go to keep the text": "Thả ra để giữ văn bản",
   "Let go to keep 1 file": "Thả ra để giữ 1 tệp",
-  "Let go to keep %1 files": "Thả ra để giữ %1 tệp"
+  "Let go to keep %1 files": "Thả ra để giữ %1 tệp",
+  "Downloads and tasks": "Tải xuống và tác vụ",
+  "Calls": "Cuộc gọi",
+  "Microphone glow": "Viền sáng micrô",
+  "How long it has run, with a red dot.": "Đã chạy bao lâu, với một chấm đỏ.",
+  "A timer, a stopwatch or a focus session, with its ring.": "Bộ hẹn giờ, đồng hồ bấm giờ hoặc phiên tập trung, với vòng của nó.",
+  "A job's progress as a ring.": "Tiến độ của một việc dưới dạng vòng tròn.",
+  "A green camera tile with the app while the camera is on. The privacy dot shows either way.": "Một ô camera màu xanh lá kèm ứng dụng khi camera đang bật. Chấm quyền riêng tư vẫn hiện.",
+  "While an app listens through the microphone: a green handset and how long it has run. The privacy dot shows either way.": "Khi một ứng dụng nghe qua micrô: một ống nghe xanh lá và đã bao lâu. Chấm quyền riêng tư vẫn hiện.",
+  "The song takes the Island while it plays, or the bubble beside it.": "Bài hát chiếm Đảo khi đang phát, hoặc bong bóng bên cạnh.",
+  "The screen's edges glow for a moment when an app starts listening.": "Các cạnh màn hình sáng lên một lúc khi một ứng dụng bắt đầu nghe.",
+  "All on": "Bật tất cả"
 }

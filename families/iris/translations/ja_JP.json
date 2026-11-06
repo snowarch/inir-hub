@@ -2282,5 +2282,16 @@
   "Screenshot saved": "スクリーンショットを保存しました",
   "Let go to keep the text": "離すとテキストを保存",
   "Let go to keep 1 file": "離すと 1 個のファイルを保存",
-  "Let go to keep %1 files": "離すと %1 個のファイルを保存"
+  "Let go to keep %1 files": "離すと %1 個のファイルを保存",
+  "Downloads and tasks": "ダウンロードとタスク",
+  "Calls": "通話",
+  "Microphone glow": "マイクの光",
+  "How long it has run, with a red dot.": "経過時間と赤い点。",
+  "A timer, a stopwatch or a focus session, with its ring.": "タイマー、ストップウォッチ、集中セッションとそのリング。",
+  "A job's progress as a ring.": "ジョブの進み具合をリングで。",
+  "A green camera tile with the app while the camera is on. The privacy dot shows either way.": "カメラがオンの間、アプリと緑のカメラタイル。プライバシーの点はどちらでも表示されます。",
+  "While an app listens through the microphone: a green handset and how long it has run. The privacy dot shows either way.": "アプリがマイクで聞いている間：緑の受話器と経過時間。プライバシーの点はどちらでも表示されます。",
+  "The song takes the Island while it plays, or the bubble beside it.": "再生中の曲がアイランド、または横のバブルに表示されます。",
+  "The screen's edges glow for a moment when an app starts listening.": "アプリが聞き始めると、画面の端が一瞬光ります。",
+  "All on": "すべてオン"
 }
