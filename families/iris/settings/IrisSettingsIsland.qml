@@ -118,7 +118,8 @@ Item {
     // recede one (critically damped: it settles without a bounce). Set together so the curve is picked before it moves.
     readonly property int compactHeight: root.u(44)
     readonly property int expandedHeight: root.u(118)
-    readonly property real wantedW: root.mode === "display" ? Math.min(root.room - root.u(32), root.u(452))
+    // The question is never cut: a long language widens the island up to the room it has.
+    readonly property real wantedW: root.mode === "display" ? Math.min(root.room - root.u(32), Math.max(root.u(452), displayFace.needs))
         : root.mode === "told" ? Math.min(root.room - root.u(32), compactFace.implicitWidth)
         : root.compactHeight
     readonly property real wantedH: root.mode === "display" ? root.expandedHeight : root.compactHeight
@@ -216,11 +217,11 @@ Item {
                 anchors.fill: parent
                 SequentialAnimation {
                     id: swap
-                    NumberAnimation { target: words; property: "opacity"; to: 0.15; duration: IrisStyle.duration(70); easing.type: Easing.InCubic }
+                    NumberAnimation { target: words; property: "opacity"; to: 0.15; duration: IrisStyle.duration(70); easing.type: Easing.BezierSpline; easing.bezierCurve: IrisStyle.recedeCurve }
                     PropertyAction { target: words; property: "y"; value: root.u(5) }
                     ParallelAnimation {
                         NumberAnimation { target: words; property: "opacity"; to: 1; duration: IrisStyle.duration(180); easing.type: IrisStyle.feedbackEasing }
-                        NumberAnimation { target: words; property: "y"; to: 0; duration: IrisStyle.duration(220); easing.type: Easing.OutBack; easing.overshoot: 1.4 }
+                        NumberAnimation { target: words; property: "y"; to: 0; duration: IrisStyle.duration(220); easing.type: Easing.BezierSpline; easing.bezierCurve: IrisStyle.moveCurve }
                     }
                 }
                 // The mark: the colour itself when the value is one (Accent, Signal), else the row's own glyph.
@@ -329,7 +330,9 @@ Item {
         Item {
             id: displayFace
             readonly property int pad: root.u(14)
-            width: Math.min(root.room - root.u(32), root.u(452))
+            // Mark, the question, the ring: what the face needs to say it whole.
+            readonly property real needs: 2 * displayFace.pad + root.u(36 + 12 + 12 + 36) + Math.ceil(question.implicitWidth)
+            width: Math.min(root.room - root.u(32), Math.max(root.u(452), displayFace.needs))
             height: root.expandedHeight
             anchors.horizontalCenter: parent.horizontalCenter
             opacity: root.mode === "display" ? 1 : 0
@@ -358,6 +361,7 @@ Item {
                 anchors.verticalCenter: displayMark.verticalCenter
                 spacing: root.u(1)
                 IrisText {
+                    id: question
                     width: parent.width
                     text: Translation.tr("Keep this display setting?")
                     color: IrisStyle.liveIslandInk
@@ -405,7 +409,8 @@ Item {
                 height: width
                 readonly property real stroke: Math.max(2, root.u(3))
                 property real level: root.pending ? IrisNiri.secondsLeft / Math.max(1, IrisNiri.revertAfter) : 1
-                Behavior on level { NumberAnimation { duration: 1000; easing.type: Easing.Linear } }
+                // The ring steps with the figure it rings, each second a short settle, as a watch's seconds hand.
+                Behavior on level { NumberAnimation { duration: IrisStyle.duration(360); easing.type: Easing.BezierSpline; easing.bezierCurve: IrisStyle.moveCurve } }
                 Shape {
                     anchors.fill: parent
                     preferredRendererType: Shape.CurveRenderer
