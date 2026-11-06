@@ -192,6 +192,7 @@
       {"key":"iris.lead","label":"Main","type":"choice","default":"auto","when":"face","choices":[["auto","Auto"],["cpu","Processor","memory"],["mem","Memory","memory_alt"],["gpu","Graphics","developer_board"],["temp","CPU heat","thermostat"],["gpuTemp","GPU heat","thermostat"]],"keywords":["lead","main","first","big"]}
     ],
     "controls": [
+      {"key":"iris.face","label":"Face","type":"choice","default":"tiles","when":["face",{"not":{"sizeClass":"small"}}],"choices":[["tiles","Tiles","view_agenda"],["discs","Discs","radio_button_checked"]],"keywords":["round","circles","nothing","toggles"]},
       {"key":"iris.tile.wifi","label":"Wi-Fi","type":"switch","default":true,"tune":false,"keywords":["keys","tiles","toggle"]},
       {"key":"iris.tile.bluetooth","label":"Bluetooth","type":"switch","default":true,"tune":false,"keywords":["keys","tiles","toggle"]},
       {"key":"iris.tile.focus","label":"Focus","type":"switch","default":true,"tune":false,"keywords":["keys","tiles","toggle"]},
@@ -211,6 +212,9 @@
     ],
     "battery": [
       {"key":"iris.face","label":"Face","type":"choice","default":"classic","when":"face","choices":[["classic","Classic","battery_full"],["cells","Cells","battery_5_bar"]],"keywords":["cells","bars","battery"]}
+    ],
+    "todo": [
+      {"key":"iris.face","label":"Face","type":"choice","default":"list","when":"face","choices":[["list","List","checklist"],["progress","Progress","linear_scale"]],"keywords":["progress","done","segments","tasks"]}
     ],
     "worldClock": [
       {"key":"iris.face","label":"Face","type":"choice","default":"classic","when":"face","choices":[["classic","Classic","public"],["offset","Offset","more_time"]],"keywords":["offset","difference","hours","zones"]}

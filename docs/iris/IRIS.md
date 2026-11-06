@@ -113,6 +113,8 @@ The Dock is set under iRiS Settings › Dock:
   - **Screen Time**: Ribbon (the 24 hours, each coloured by the app that held it).
   - **Weather**: Week (now beside its sky, then the coming days as columns, each its sky and its high over its low; today on its own plate).
   - **Battery**: Cells (the charge as a battery of cells, the one filling breathes while it charges; other devices under it with their own small cells).
+  - **Controls** (medium and large): Discs (round keys four a row, each its name under it, lit in its colour when on; ink under Nothing).
+  - **Tasks**: Progress (what is done out of all of it as the figure, and a segment per task that fills as you tick it; past twelve tasks one bar).
   - **World clock**: Offset (one city leads with how far its clock stands from yours as the figure, its time and day under it, and a ruler of the 24 hours around your now with the city's time as far along as it runs ahead or behind; tap for the next city, and on large tap any city in the list).
   - **Now Playing** (medium and large): Card (the player's name and the hour on top; a card with the cover beside the line being sung, or the song's bars without lyrics; then the title, the artist, the timeline and the keys, play in the song's colour); or Vinyl: the cover is the sleeve and the record rides behind it, sliding half out and turning while the song plays, its label the cover, and slipping back in when you pause.
 - Under Colour › Look › Nothing OS, **Figures** draws large numbers as Nothing's dot matrix (the default) or in Archivo's wide figures.
