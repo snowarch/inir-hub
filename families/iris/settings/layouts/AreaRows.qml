@@ -100,7 +100,7 @@ ColumnLayout {
                     ? rest.filter(group => band.groups.includes(group.key)).sort((a, b) => band.groups.indexOf(a.key) - band.groups.indexOf(b.key))
                     : rest.filter(group => !banded.has(group.key)) })).filter(set => set.groups.length > 0)
             for (const set of sets)
-                out.push({ title: "​island" + set.title, caption: set.title.length > 0 ? Translation.tr(set.title) : "", glyph: set.glyph,
+                out.push({ title: "\u200Bisland" + set.title, caption: set.title.length > 0 ? Translation.tr(set.title) : "", glyph: set.glyph,
                     key: "", rows: [], flat: true, deck: deckOf(set.groups) })
             // The lead stands open once per visit; peers always hold one open (they are the switch between panels).
             if (!rows.leadOpened) {
