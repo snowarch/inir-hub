@@ -61,6 +61,12 @@ Item {
             IrisState.dropRehearsal = { count: Math.max(1, Number(count) || 3), keep: keep === "keep", at: Date.now() }
             return "holding:" + IrisState.dropRehearsal.count
         }
+        /// Show a sample Island notice of a kind (accessory, battery, charge, focus, silent, unlock, upcoming, rain,
+        /// timers, recording, shelf, jobs), in the size and for the time Settings chose
+        function notice(kind: string): string {
+            IrisState.noticeSample = { kind: kind.length > 0 ? kind : "accessory", at: Date.now() }
+            return "notice:" + IrisState.noticeSample.kind
+        }
         /// Slide a Dock icon (app id) along the Dock by the given pixels over 1 s
         function dockSlide(appId: string, pixels: string): string {
             if (!GlobalStates.focusedScreen) return "error:no-screen"

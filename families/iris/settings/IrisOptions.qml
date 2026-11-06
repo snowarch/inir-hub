@@ -283,6 +283,17 @@ QtObject {
         const choice = root.choicesOf(spec).find(entry => String(entry.value) === String(value))
         return choice?.swatch ?? null
     }
+    // A notice option written, then shown on the Island as it now is (Settings shows, it does not describe).
+    function writeAndShow(path: string, next: var, sample: string): void {
+        Config.setNestedValue(path, next)
+        if (sample.length > 0) Qt.callLater(() => IrisState.noticeSample = { kind: sample, at: Date.now() })
+    }
+    property int sampleIndex: 0
+    readonly property var sampleKinds: ["accessory", "charge", "upcoming", "focus", "unlock", "shelf", "battery", "timers"]
+    function showNextSample(): void {
+        IrisState.noticeSample = { kind: root.sampleKinds[root.sampleIndex % root.sampleKinds.length], at: Date.now() }
+        root.sampleIndex++
+    }
     function write(spec: var, next: var): void {
         // A family switch goes through the shell's transition, never a bare config write.
         if (spec.path === "panelFamily") Quickshell.execDetached([Quickshell.shellPath("scripts/inir"), "panelFamily", "set", String(next)])
@@ -1051,7 +1062,28 @@ QtObject {
         { section: "bar", group: "Visibility", label: "Automatically hide", description: "The Island tucks into its edge and comes back when you rest the pointer there.", path: "iris.bar.autoHide", kind: "switch", fallback: false },
         { section: "bar", group: "Visibility", label: "Stay visible on empty workspaces", description: "When auto-hide is on, keep the Island visible on workspaces with no windows.", path: "iris.bar.revealOnEmpty", visibleWhen: "iris.bar.autoHide", kind: "switch", fallback: true },
         { section: "bar", group: "Visibility", label: "Reserve space for windows", tune: true, description: "Bubbles on the same edge reserve their own room.", path: "iris.bar.reserveSpace", visibleWhen: "!iris.bar.autoHide", kind: "switch", fallback:true, keywords: ["reserve", "space", "windows", "exclusive", "margin", "espacio", "reservar"] },
-        { section: "bar", group: "Interaction", label: "System events", description: "Connections, Do Not Disturb, Caps Lock and finished timers or recordings appear in the Island for a moment.", path: "iris.bar.events", kind: "switch", fallback: true },
+        { section: "bar", group: "Notices", label: "System events", description: "The Island says by itself what just happened, for a moment: a connection, a timer, a screenshot, Do Not Disturb.", path: "iris.bar.events", kind: "switch", fallback: true, keywords: ["events", "notices", "alerts", "toast", "popup", "osd", "dynamic island", "avisos"] },
+        { section: "bar", group: "Notices", label: "Size", description: "How a notice shows in the Island.", path: "iris.bar.notices.style", visibleWhen: "iris.bar.events", kind: "choice", fallback: "compact", set: next => root.writeAndShow("iris.bar.notices.style", next, "accessory"),
+            choices: [{label:"Compact",value:"compact",glyph:"short_text",detail:"A line in the resting Island."},{label:"Large",value:"large",glyph:"crop_landscape",detail:"The Island grows into a card, as a phone's alerts do. On a side edge it keeps the line."}],
+            keywords: ["large", "big", "expanded", "card", "alert", "compact", "size", "grande", "tamaño"] },
+        { section: "bar", group: "Notices", label: "Stays for", description: "How long a notice holds the Island.", path: "iris.bar.notices.seconds", visibleWhen: "iris.bar.events", kind: "range", fallback: 2.5, min: 1.5, max: 8, step: 0.5, unit: " s", set: next => root.writeAndShow("iris.bar.notices.seconds", next, "accessory"), keywords: ["duration", "time", "seconds", "long", "duración"] },
+        { section: "bar", group: "Notices", label: "See one", description: "The Island shows a notice in the size and for the time chosen here.", kind: "action", button: "Show", visibleWhen: "iris.bar.events", run: () => root.showNextSample(), keywords: ["preview", "sample", "test", "try"] },
+        { section: "bar", group: "Notices", label: "Unlocked", description: "A face drawn in green as the screen unlocks.", path: "iris.bar.notices.unlock", visibleWhen: "iris.bar.events", kind: "switch", tune: true, fallback: true, set: next => root.writeAndShow("iris.bar.notices.unlock", next, next ? "unlock" : ""), keywords: ["unlock", "face", "login"] },
+        { section: "bar", group: "Notices", label: "Silent", description: "The sound muted from anywhere.", path: "iris.bar.notices.silent", visibleWhen: "iris.bar.events", kind: "switch", tune: true, fallback: true, set: next => root.writeAndShow("iris.bar.notices.silent", next, next ? "silent" : ""), keywords: ["mute", "muted", "silent", "sound"] },
+        { section: "bar", group: "Notices", label: "Do not disturb", description: "Turned on or off.", path: "iris.bar.notices.focus", visibleWhen: "iris.bar.events", kind: "switch", tune: true, fallback: true, set: next => root.writeAndShow("iris.bar.notices.focus", next, next ? "focus" : ""), keywords: ["dnd", "do not disturb", "focus", "quiet"] },
+        { section: "bar", group: "Notices", label: "Low battery", description: "When it runs low and nothing charges it.", path: "iris.bar.notices.battery", visibleWhen: "iris.bar.events", kind: "switch", tune: true, fallback: true, set: next => root.writeAndShow("iris.bar.notices.battery", next, next ? "battery" : ""), keywords: ["battery", "low", "charge"] },
+        { section: "bar", group: "Notices", label: "Screenshots", description: "The picture itself; a tap opens it.", path: "iris.bar.notices.screenshot", visibleWhen: "iris.bar.events", kind: "switch", tune: true, fallback: true, set: next => root.writeAndShow("iris.bar.notices.screenshot", next, next ? "screenshot" : ""), keywords: ["screenshot", "capture", "picture"] },
+        { section: "bar", group: "Notices", label: "Recordings", description: "A recording saved, with its length.", path: "iris.bar.notices.recording", visibleWhen: "iris.bar.events", kind: "switch", tune: true, fallback: true, set: next => root.writeAndShow("iris.bar.notices.recording", next, next ? "recording" : ""), keywords: ["recording", "screen record", "video"] },
+        { section: "bar", group: "Notices", label: "Upcoming events", description: "A calendar event about to start, with a ring closing on it.", path: "iris.bar.notices.upcoming", visibleWhen: "iris.bar.events", kind: "switch", tune: true, fallback: true, set: next => root.writeAndShow("iris.bar.notices.upcoming", next, next ? "upcoming" : ""), keywords: ["calendar", "event", "meeting", "agenda", "reminder"] },
+        { section: "bar", group: "Notices", label: "First said", description: "How long before an event starts the Island first says it.", path: "iris.bar.notices.upcomingLead", visibleWhen: "iris.bar.notices.upcoming", showIf: () => Boolean(Config.options?.iris?.bar?.events ?? true), kind: "choice", tune: true, fallback: 10,
+            choices: [{label:"10 min",value:10},{label:"5 min",value:5},{label:"1 min",value:1}], keywords: ["minutes", "before", "reminder", "lead"] },
+        { section: "bar", group: "Notices", label: "Rain and snow", description: "Rain or snow on its way in the next hours.", path: "iris.bar.notices.rain", visibleWhen: "iris.bar.events", kind: "switch", tune: true, fallback: true, set: next => root.writeAndShow("iris.bar.notices.rain", next, next ? "rain" : ""), keywords: ["weather", "rain", "snow", "forecast"] },
+        { section: "bar", group: "Notices", label: "Timers", description: "A timer that ends, and each focus or break.", path: "iris.bar.notices.timers", visibleWhen: "iris.bar.events", kind: "switch", tune: true, fallback: true, set: next => root.writeAndShow("iris.bar.notices.timers", next, next ? "timers" : ""), keywords: ["timer", "pomodoro", "alarm", "countdown", "focus", "break"] },
+        { section: "bar", group: "Notices", label: "Finished jobs", description: "Downloads, copies and updates that end or fail.", path: "iris.bar.notices.jobs", visibleWhen: "iris.bar.events", kind: "switch", tune: true, fallback: true, set: next => root.writeAndShow("iris.bar.notices.jobs", next, next ? "jobs" : ""), keywords: ["download", "copy", "update", "job", "task", "progress", "done"] },
+        { section: "bar", group: "Notices", label: "Shelf", description: "Files and text kept on the Shelf.", path: "iris.bar.notices.shelf", visibleWhen: "iris.bar.events", kind: "switch", tune: true, fallback: true, set: next => root.writeAndShow("iris.bar.notices.shelf", next, next ? "shelf" : ""), keywords: ["shelf", "drop", "files"] },
+        { section: "bar", group: "Notices", label: "Game mode", description: "Turned on or off.", path: "iris.bar.notices.gameMode", visibleWhen: "iris.bar.events", kind: "switch", tune: true, fallback: true, set: next => root.writeAndShow("iris.bar.notices.gameMode", next, next ? "gameMode" : ""), keywords: ["game", "gaming", "game mode"] },
+        { section: "bar", group: "Notices", label: "Niri config", description: "An error in Niri's config, and when it is fixed.", path: "iris.bar.notices.niri", visibleWhen: "iris.bar.events", kind: "switch", tune: true, fallback: true, set: next => root.writeAndShow("iris.bar.notices.niri", next, next ? "niri" : ""), keywords: ["niri", "config", "error", "kdl"] },
+        { section: "bar", group: "Notices", label: "Loud jumps held back", description: "When a sudden jump in volume is stopped.", path: "iris.bar.notices.soundGuard", visibleWhen: "iris.bar.events", kind: "switch", tune: true, fallback: true, set: next => root.writeAndShow("iris.bar.notices.soundGuard", next, next ? "soundGuard" : ""), keywords: ["volume", "loud", "protection", "ears"] },
         { section: "bar", group: "Connections", label: "Connection notices", description: "A moment in the Island when something is plugged in, connected, unplugged or lost.", path: "osd.connections.enable", kind: "switch", fallback: true, keywords: ["connection", "connected", "disconnected", "plug", "unplug", "device", "notice", "toast", "popup", "wifi", "bluetooth", "usb", "charger", "offline"] },
         { section: "bar", group: "Connections", label: "Network", description: "Wi-Fi or a cable connected and dropped.", path: "osd.connections.network", visibleWhen: "osd.connections.enable", kind: "switch", tune: true, fallback: true, keywords: ["wifi", "ethernet", "cable"] },
         { section: "bar", group: "Connections", label: "Internet", description: "Lost and back online.", path: "osd.connections.internet", visibleWhen: "osd.connections.enable", kind: "switch", tune: true, fallback: true, keywords: ["offline", "online", "internet"] },
@@ -1061,7 +1093,7 @@ QtObject {
         { section: "bar", group: "Connections", label: "Sound output", description: "Headphones or speakers take over the sound.", path: "osd.connections.audio", visibleWhen: "osd.connections.enable", kind: "switch", tune: true, fallback: true, keywords: ["headphones", "speaker", "output", "sound"] },
         { section: "bar", group: "Connections", label: "Displays", description: "A monitor plugged in or removed.", path: "osd.connections.displays", visibleWhen: "osd.connections.enable", kind: "switch", tune: true, fallback: true, keywords: ["monitor", "display", "screen", "hdmi"] },
         { section: "bar", group: "Connections", label: "Drives and memory cards", description: "Pendrives, external disks and SD cards, with their name and size.", path: "osd.connections.drives", visibleWhen: "osd.connections.enable", kind: "switch", tune: true, fallback: true, keywords: ["usb", "pendrive", "drive", "disk", "sd", "memory card", "external"] },
-        { section: "bar", group: "Interaction", label: "Caps Lock badge", description: "A small pill drops out of the Island when Caps Lock turns on or off.", path: "keyboardIndicators.popup.caps", visibleWhen: "iris.bar.events", tune: true, kind: "switch", fallback: true },
+        { section: "bar", group: "Notices", label: "Caps Lock badge", description: "A small pill drops out of the Island when Caps Lock turns on or off.", path: "keyboardIndicators.popup.caps", visibleWhen: "iris.bar.events", tune: true, kind: "switch", fallback: true },
         { section: "bar", group: "Interaction", label: "Expand on hover", description: "The pointer has to rest on the Island; passing over it does nothing. A full-width Island always opens on a click instead.", path: "iris.bar.hoverExpand", kind: "switch", fallback:true },
         { section: "bar", group: "Interaction", label: "Hover delay", path: "iris.bar.hoverDelay", kind: "range", fallback:300,min:120,max:800,step:20,unit:" ms" },
         { section: "bar", group: "Interaction", label: "Scroll on the Island", description: "On the resting Island: Shift swaps volume and brightness; Ctrl adjusts the microphone.", path: "iris.bar.scrollAction", kind: "choice", tune: true, fallback: "volume", choices: [{label:"Volume",value:"volume"},{label:"Brightness",value:"brightness"},{label:"Off",value:"none"}] },
@@ -1711,7 +1743,7 @@ QtObject {
         "Accent": "palette", "Visualizer": "graphic_eq", "Customize": "brush", "Themes": "style", "Presets": "auto_awesome_mosaic", "Settings window": "settings_applications", "Activity": "timer", "Adaptive": "auto_awesome", "App colours": "format_paint", "Airing": "live_tv", "Alert sounds": "music_note",
         "At a glance": "visibility", "At rest": "schedule", "Badges": "notifications_unread", "Banners": "notifications",
         "Bar": "width_full", "Behaviour": "touch_app", "Bubble": "bubble_chart", "Calendar": "calendar_month",
-        "Card contents": "view_agenda", "Cards": "web_asset", "Charge limit": "battery_charging_80", "Clipboard": "content_paste", "Connections": "cable", "Clock": "schedule",
+        "Card contents": "view_agenda", "Cards": "web_asset", "Charge limit": "battery_charging_80", "Clipboard": "content_paste", "Connections": "cable", "Notices": "notifications_active", "Clock": "schedule",
         "Colour layer": "palette", "Comfort": "visibility", "Continue": "play_circle", "Control Center": "tune",
         "Curve": "show_chart", "Date & time": "calendar_clock", "Desktop page": "dashboard", "Do Not Disturb": "do_not_disturb_on",
         "Extra bubbles": "add_circle", "Faces": "font_download", "Feedback": "campaign", "Floating": "flight",
@@ -1802,6 +1834,7 @@ QtObject {
         get "Icons"() { return IrisStyle.identity.yellow },
         get "Interaction"() { return IrisStyle.identity.green },
         get "Connections"() { return IrisStyle.identity.blue },
+        get "Notices"() { return IrisStyle.identity.orange },
         get "Japanese lookup"() { return IrisStyle.identity.purple },
         get "Joining"() { return IrisStyle.identity.teal },
         get "Keyboard"() { return IrisStyle.identity.gray },
@@ -1958,7 +1991,7 @@ QtObject {
         appearance: ["Presets", "Scheme", "Accent", "Highlight", "Signal", "Look", "Colour theme", "Day and night", "App colours", "Wallpaper tint",
             "Dark look", "Ink look", "Light look", "Design", "Material", "Glass", "Texture", "Light", "Edges", "Shape", "Corners per surface",
             "Frame", "Text", "Faces", "Icons", "Material per surface", "Menus", "Settings", "Badges", "Customize", "Previews", "Adaptive"],
-        bar: ["Design and modes", "Notch", "Layout", "Shape", "At rest", "Resting Island", "Bar", "Pages", "Desktop page", "Player page", "Interaction", "Visibility", "Connections"],
+        bar: ["Design and modes", "Notch", "Layout", "Shape", "At rest", "Resting Island", "Bar", "Pages", "Desktop page", "Player page", "Interaction", "Visibility", "Notices", "Connections"],
         bubbles: ["Size", "Behaviour", "On the contour", "Floating", "Opening bodies", "Cards", "Card contents", "Joining", "Tray"],
         dock: ["Notch", "Look", "Icons", "Visibility"],
         desktop: ["Widgets", "Desktop menu"],

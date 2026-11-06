@@ -25,11 +25,15 @@ iRiS is the Island family. One Island sits on a screen edge and grows into whate
   - **Downloads and tasks** show a ring with their percentage.
 - The Weather page shows the temperature large, the place and the sky, and the next hours on a bar and as coloured columns by how warm each hour is.
 - The Vitals page shows processor, memory, heat and disk as four rings, and the processor over the last minute as a chart.
-- New Island notices: a face drawn in green when you unlock, a red Silent pill when the sound is muted, the battery stood upright filling when you plug in, and a screenshot as a card you can click to open. While the camera is on, the Island shows a green camera tile with the app.
+- Notices: the Island says by itself what just happened, for a moment (Settings › Island › Notices):
+  - **Size**: **Compact** is a line in the resting Island (on a full-width bar or a menu bar it hangs under the strip); **Large** grows the Island into a card, as a phone's alerts do. On a side edge it stays a line.
+  - **Stays for** sets how long a notice holds the Island, from 1.5 to 8 seconds. **See one** shows a notice with what you chose, and every switch shows its own notice as you turn it on.
+  - Under **Fine-tune** each kind has its switch: unlock (a face drawn in green), Silent (a red pill when the sound is muted from anywhere), Do not disturb, low battery, screenshots (the picture itself; a click opens it), recordings with their length, upcoming events (a ring closing on the event, first said 10, 5 or 1 minute before), rain and snow on the way, timers and each focus or break, finished downloads, copies and updates, what you keep on the Shelf, an error in Niri's config, and loud jumps in volume held back.
+  - A percentage shows only for a level (a headset's charge, the battery); an event or a finished job shows its ring.
+- While the camera is on, the Island shows a green camera tile with the app.
 - When an app starts using the microphone, the edges of the screen glow in colour for three seconds.
 - While an app uses the microphone (a call), the Island shows a green handset, how long the call has run and the sound moving.
 - Notifications open from the Island as a phone's do: the picture or app round at the start, the app small over the title. Two answers that refuse and take (a call, an invite) are a red and a green button; other answers are capsules, the last one filled. Apps that take a written answer show **Reply**: type and press Enter.
-- Notices end with their state: Do not disturb says **On** or **Off** in colour, a low battery shows its level and the battery itself.
 - With more than one player, dots under the controls switch between them; a swipe on the cover or the wheel sideways does too, and a click on the cover brings the app forward.
 - The Bluetooth card shows the charge of every connected device as a gauge with its name.
 - The calendar shows the next thing today on a coloured band with how long until it, and each entry with its colour and how far off it is.

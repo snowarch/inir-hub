@@ -325,6 +325,26 @@ JsonObject {
         property string piecesSide: "end" // Which end of the resting Island carries its own pieces: "end" or "start"
         property bool scrollBubbles: true // The scroll action also works over the bubbles beside the Island
         property bool events: true // Charger, Bluetooth, Do Not Disturb and keyboard events in the Island
+        // Each notice the Island says by itself, how long it stays and how large it shows.
+        property JsonObject notices: JsonObject {
+            property string style: "compact" // "compact": a line in the resting Island; "large": a card (floating Island only)
+            property real seconds: 2.5 // 1.5 to 8
+            property bool unlock: true
+            property bool silent: true
+            property bool focus: true // Do Not Disturb turned on or off
+            property bool battery: true
+            property bool screenshot: true
+            property bool recording: true
+            property bool upcoming: true
+            property int upcomingLead: 10 // minutes before an event it is first said: 10, 5 or 1
+            property bool rain: true
+            property bool timers: true
+            property bool jobs: true
+            property bool shelf: true
+            property bool gameMode: true
+            property bool niri: true
+            property bool soundGuard: true
+        }
         property string trailing: "controls" // Cluster trailing bubble: "controls", "notifications", "weather", "sound", "mic" or "none"
         property int height: 42
         property int margin: 8

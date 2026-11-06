@@ -94,6 +94,8 @@ Singleton {
     property var bubbleDrag: null
     // A file held over the Island without a hand (irisDev dropSim): { count, keep, at }.
     property var dropRehearsal: null
+    // A notice Settings asks the Island to show as a sample: { kind, at }.
+    property var noticeSample: null
     // Per output name: what each bubble slot shows ({ left, right, utility }) and
     // the resting Island's screen-local geometry, published by each Island.
     property var bubbleKinds: ({})

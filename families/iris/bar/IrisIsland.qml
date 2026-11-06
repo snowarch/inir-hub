@@ -18,6 +18,7 @@ import qs.modules.common.widgets
 import qs.modules.shared.mediaControls.components
 import qs.modules.iris.style
 import qs.modules.iris.widgets as IrisFaces
+import "island/NoticeSamples.js" as NoticeSamples
 import qs.modules.iris.components
 import qs.modules.iris.frame
 import qs.modules.iris.pieces
@@ -457,6 +458,22 @@ Item {
     }
 
     readonly property bool eventsEnabled: root.options?.events ?? true
+    // iris.bar.notices: which moments the Island says by itself, for how long, and how large.
+    readonly property var notices: root.options?.notices ?? ({})
+    function noticeOn(kind: string): bool { return root.eventsEnabled && root.notices?.[kind] !== false }
+    readonly property int noticeMs: Math.round(1000 * Math.max(1.5, Math.min(8, Number(root.notices?.seconds ?? 2.5))))
+    // Large: the Island grows into a card, as a phone's alerts do; a full bar hangs the card under its strip. A side
+    // edge keeps the line (a card does not stand upright).
+    readonly property bool noticeSized: String(root.notices?.style ?? "compact") === "large" && !root.vertical
+    readonly property bool noticeLarge: root.noticeSized && root.eventShown && !root.feedback && !root.dropHover
+    // The floating Island's own body grows; on a bar the hanging body does.
+    readonly property bool noticeGrows: root.noticeLarge && !root.anchored
+    IrisSpring { id: noticeSpring; surface: "island"; intent: "move"; to: root.noticeGrows ? 1 : 0; minimum: 0; epsilon: 0.002 }
+    readonly property real noticeOpen: noticeSpring.value
+    // The card owns its measure (IslandNoticeCard): the bodies only grow to it.
+    readonly property real noticeHeight: noticeCard.cardHeight
+    readonly property real noticeRadius: noticeCard.cardRadius
+    readonly property real noticeWidth: noticeCard.cardWidth
     property var event: ({ icon: "", tint: IrisStyle.text, title: "", detail: "", value: -1, kind: "", failed: false })
     readonly property bool eventShown: eventTimer.running && !root.expanded && !root.feedback
     // A battery notice draws the battery itself, filled to its level, instead of a font glyph.
@@ -483,7 +500,20 @@ Item {
             detail: String(activity?.detail ?? "").length > 0 ? String(activity.detail) : failed ? Translation.tr("Failed") : Translation.tr("Done") }
         eventTimer.restart()
     }
-    Timer { id: eventTimer; interval: 2600; onTriggered: root.clearOsdRequests() }
+    Timer { id: eventTimer; interval: root.noticeMs; onTriggered: root.clearOsdRequests() }
+    // A sample asked for by Settings (or `inir irisDev notice KIND`): shown whatever is switched off, so a person sees
+    // the size and the time they chose. Each kind uses the words a real one says.
+    Connections {
+        target: IrisState
+        function onNoticeSampleChanged(): void {
+            const kind = String(IrisState.noticeSample?.kind ?? "")
+            if (kind.length === 0 || !root.focusedOutput || root.expanded || root.fullscreenCovered) return
+            const screen = root.targetScreen?.name ?? ""
+            root.event = NoticeSamples.of(kind, Translation, IrisStyle, root.nothingLook,
+                Wallpapers.stillUrlFor(Wallpapers.internalPreviewFor(screen, Wallpapers.desktopWallpaperPath(screen))))
+            eventTimer.restart()
+        }
+    }
     // The Island answers these requests, so it owns clearing them: a flag left
     // set is never seen again by the OSD fallback on another output.
     function clearOsdRequests(): void {
@@ -494,7 +524,7 @@ Item {
         GlobalStates.osdKeyboardLayoutOpen = false
     }
     Connections {
-        target: GameMode
+        target: root.noticeOn("gameMode") ? GameMode : null
         function onManuallyActivatedChanged(): void {
             root.showEvent("sports_esports", GameMode.manuallyActivated ? IrisStyle.identity.green : IrisStyle.textSecondary,
                 GameMode.manuallyActivated ? Translation.tr("Game mode on") : Translation.tr("Game mode off"),
@@ -505,6 +535,7 @@ Item {
     Connections {
         target: CompositorService.isNiri ? NiriService : null
         function onConfigLoadFinished(ok: bool, error: string): void {
+            if (!root.noticeOn("niri")) { root.niriConfigBroken = !ok; return }
             if (!ok) {
                 const line = String(error ?? "").split("\n").map(part => part.trim()).find(part => part.length > 0) ?? ""
                 root.showEvent("error", IrisStyle.danger, Translation.tr("Niri config has an error"),
@@ -517,7 +548,7 @@ Item {
         }
     }
     Connections {
-        target: LiveActivities
+        target: root.noticeOn("jobs") ? LiveActivities : null
         function onFinished(activity: var): void { root.showDone(activity) }
     }
     property var badge: ({ icon: "", tint: IrisStyle.text, text: "" })
@@ -530,7 +561,7 @@ Item {
     Timer { id: badgeTimer; interval: 1600; onTriggered: root.clearOsdRequests() }
     Timer { id: eventsWarm; property bool ready: false; interval: 4000; running: true; onTriggered: ready = true }
     Connections {
-        target: root.eventsEnabled && Battery.available ? Battery : null
+        target: root.noticeOn("battery") && Battery.available ? Battery : null
         function onIsLowAndNotChargingChanged(): void {
             if (Battery.isLowAndNotCharging)
                 root.showEvent("battery_alert", IrisStyle.danger, Translation.tr("Low battery"), Translation.tr("Plug in soon"), Battery.percentage)
@@ -549,7 +580,7 @@ Item {
         }
     }
     Connections {
-        target: root.eventsEnabled ? Notifications : null
+        target: root.noticeOn("focus") ? Notifications : null
         function onSilentChanged(): void {
             root.showEvent(Notifications.silent ? "do_not_disturb_on" : "notifications_active",
                 Notifications.silent ? IrisStyle.identity.indigo : IrisStyle.textSecondary, Translation.tr("Do not disturb"),
@@ -557,7 +588,7 @@ Item {
         }
     }
     Connections {
-        target: root.eventsEnabled ? TimerService : null
+        target: root.noticeOn("timers") ? TimerService : null
         function onCountdownRunningChanged(): void {
             if (!TimerService.countdownRunning && TimerService.countdownSecondsLeft <= 0)
                 root.showEvent("alarm", IrisStyle.identity.orange, Translation.tr("Time's up"),
@@ -573,35 +604,36 @@ Item {
     }
     // Unlocked: a face drawn in green, as a phone's Face ID says it knew you.
     Connections {
-        target: root.eventsEnabled ? GlobalStates : null
+        target: root.noticeOn("unlock") ? GlobalStates : null
         function onScreenLockedChanged(): void {
             if (!GlobalStates.screenLocked) unlockLater.restart()
         }
     }
     Timer { id: unlockLater; interval: 450; onTriggered: root.showEvent("face", IrisStyle.identity.green, Translation.tr("Unlocked"), "", -1, "unlock") }
     // An event about to start, as a phone's calendar activity: its name, how soon, a ring closing on the start.
-    // Said at 10, 5 and 1 minute, once each.
+    // Said at the lead chosen (10, 5 or 1 minute) and at each shorter mark, once each.
     property string eventSaid: ""
+    readonly property int upcomingLead: [10, 5, 1].includes(Number(root.notices?.upcomingLead)) ? Number(root.notices.upcomingLead) : 10
     Timer {
         interval: 30000
         repeat: true
-        running: root.eventsEnabled && root.focusedOutput
+        running: root.noticeOn("upcoming") && root.focusedOutput
         onTriggered: {
             const entry = IrisFaces.IrisFaceData.nextEntry(Date.now(), 11)
             if (entry.running || entry.title.length === 0 || entry.start <= 0) return
-            const mark = [10, 5, 1].find(at => entry.left <= at && entry.left > at - 1)
+            const mark = [10, 5, 1].filter(at => at <= root.upcomingLead).find(at => entry.left <= at && entry.left > at - 1)
             const key = entry.start + ":" + mark
             if (mark === undefined || root.eventSaid === key) return
             root.eventSaid = key
             root.showEvent("event", IrisStyle.danger, entry.title,
-                entry.left <= 1 ? Translation.tr("Starting now") : Translation.tr("In %1 min").arg(entry.left), 1 - entry.left / 10, "soon")
+                entry.left <= 1 ? Translation.tr("Starting now") : Translation.tr("In %1 min").arg(entry.left), 1 - entry.left / root.upcomingLead, "soon")
         }
     }
     // Rain on its way (Apple Weather's next hour): the first wet slot after a dry now, said once per slot.
     property string rainSaid: ""
     readonly property var wetGlyphs: ["rainy", "thunderstorm", "weather_hail", "weather_snowy", "cloudy_snowing", "rainy_light", "rainy_heavy"]
     Connections {
-        target: root.eventsEnabled && Weather.enabled ? Weather : null
+        target: root.noticeOn("rain") && Weather.enabled ? Weather : null
         function onDataChanged(): void {
             const glyphOf = code => Icons.getWeatherIcon(code, false) ?? ""
             if (root.wetGlyphs.includes(glyphOf(Weather.data?.wCode))) return
@@ -616,7 +648,7 @@ Item {
     }
     // The sound muted from anywhere: the red Silent pill.
     readonly property bool sinkMuted: Audio.sink?.audio?.muted ?? false
-    onSinkMutedChanged: if (root.sinkMuted && !root.feedback) root.showEvent("notifications_off", IrisStyle.danger, Translation.tr("Silent"), "", -1, "silent")
+    onSinkMutedChanged: if (root.sinkMuted && !root.feedback && root.noticeOn("silent")) root.showEvent("notifications_off", IrisStyle.danger, Translation.tr("Silent"), "", -1, "silent")
     // A screenshot just taken: its picture as a card at the end; a tap opens it.
     readonly property var latestShot: Shelf.items.find(item => item.origin === "shot") ?? null
     property string shownShot: ""
@@ -626,14 +658,14 @@ Item {
         const fresh = Date.now() - Number(shot.at ?? 0) < 15000
         const first = root.shownShot.length === 0
         root.shownShot = shot.path
-        if (!fresh || first && !eventsWarm.ready) return
+        if (!fresh || first && !eventsWarm.ready || !root.noticeOn("screenshot")) return
         root.eventImage = "file://" + shot.path
         root.showEvent("screenshot_region", IrisStyle.identity.blue, Translation.tr("Screenshot saved"), String(shot.name ?? ""), -1, "shot")
     }
     property int lastRecordingSeconds: 0
     onRecordingChanged: {
         if (root.recording) root.lastRecordingSeconds = 0
-        else if (root.eventsEnabled && root.lastRecordingSeconds > 0)
+        else if (root.noticeOn("recording") && root.lastRecordingSeconds > 0)
             root.showEvent("stop_circle", IrisStyle.danger, Translation.tr("Recording saved"), root.clockText(root.lastRecordingSeconds), -1)
     }
     Connections {
@@ -643,7 +675,7 @@ Item {
         }
     }
     Connections {
-        target: root.eventsEnabled ? Audio : null
+        target: root.noticeOn("soundGuard") ? Audio : null
         function onSinkProtectionTriggered(reason: string): void {
             root.showEvent("volume_off", IrisStyle.danger, Translation.tr("Volume held back"), reason, -1)
         }
@@ -753,13 +785,13 @@ Item {
         onTriggered: {
             root.dropHover = false
             const sim = IrisState.dropRehearsal
-            if (sim?.keep) root.showEvent("check", IrisStyle.accent, Translation.tr("On the Shelf"),
+            if (sim?.keep && root.noticeOn("shelf")) root.showEvent("check", IrisStyle.accent, Translation.tr("On the Shelf"),
                 sim.count === 1 ? Translation.tr("1 file") : Translation.tr("%1 files").arg(sim.count), 1, "kept")
         }
     }
     readonly property string compactMode: root.dropHover && !root.anchored && !root.expanded ? "drop"
         : root.feedback && !root.anchored ? "feedback"
-        : root.eventShown && !root.anchored ? "event"
+        : root.eventShown && !root.anchored ? (root.noticeGrows ? "notice" : "event")
         : IrisStyle.cluster && !root.zoned ? (root.islandActivity.length > 0 ? root.islandActivity : "clock") : root.primary
     readonly property string layout: String(root.options?.layout ?? "island")
     // Menu bar: a thin strip across the edge with the heart hanging from its middle as a notch.
@@ -818,7 +850,7 @@ Item {
     // ready spends the first frames of the morph inside that build.
     readonly property bool pageReady: !root.expanded || details.status === Loader.Ready
     readonly property bool inlineExpanded: root.visualExpanded && root.inlinePages && root.pageReady
-    readonly property bool compactSizeClass: root.compactMode === "feedback" || root.compactMode === "event" || root.compactMode === "drop"
+    readonly property bool compactSizeClass: ["feedback", "event", "notice", "drop"].includes(root.compactMode)
     readonly property bool spanning: root.fullWidth
     readonly property var compactRows: ({ idle: idleRow, media: mediaRow, record: recordRow,
         timer: timerRow, task: taskRow, mic: micRow, camera: cameraRow, clock: clockRow, event: eventRow, feedback: feedbackRow,
@@ -832,6 +864,7 @@ Item {
     // The ceiling holds the Island's own content; the pieces it carries come on top of it, or they would be
     // squeezed over the clock.
     readonly property real compactTargetWidth: root.spanning ? root.fullChassisWidth
+        : root.compactMode === "notice" ? root.noticeWidth
         : Math.max(root.compactFloor, Math.min(root.availableWidth, Math.min(root.compactCeiling,
             root.compactContentWidth + Math.round(29 * root.d * root.breathing)) + root.barPieceReserve))
     readonly property real chassisTargetWidth: root.inlineExpanded ? root.expandedWidth : root.compactTargetWidth
@@ -966,6 +999,7 @@ Item {
     // grows, so a collapsing Island does not hand the compositor a region a frame.
     readonly property bool morphing: (chassis.presentation > 0.002 && chassis.presentation < 0.998)
         || (extension.presentation > 0.002 && extension.presentation < 0.998)
+        || (root.noticeOpen > 0.002 && root.noticeOpen < 0.998)
     readonly property real inputWidthLive: root.vertical ? Math.max(root.implicitWidth, root.inlineExpanded ? root.expandedWidth : 0)
         : Math.max(root.implicitWidth, root.chassisTargetWidth + 2 * Math.max(root.sideReserveTarget, root.fillet))
     readonly property real inputHeightLive: root.vertical ? Math.max(root.implicitHeight,
@@ -1863,8 +1897,10 @@ Item {
         id: chassis
         // ClippingRectangle does not re-mask when per-corner radii change live.
         readonly property real restWidth: root.compactTargetWidth
-        readonly property real restHeight: root.compactHeight
-        readonly property real restRadius: IrisStyle.profileRadius(IrisStyle.bodyProfile(IrisStyle.barShape, root.notch), root.compactHeight)
+        // A large notice grows the resting body into its card on the same scalar: height, corners and content.
+        readonly property real restHeight: root.compactHeight + (root.noticeHeight - root.compactHeight) * root.noticeOpen
+        readonly property real compactRadius: IrisStyle.profileRadius(IrisStyle.bodyProfile(IrisStyle.barShape, root.notch), root.compactHeight)
+        readonly property real restRadius: chassis.compactRadius + (root.noticeRadius - chassis.compactRadius) * root.noticeOpen
         readonly property real openWidthTarget: root.expandedWidth
         readonly property real openHeightLive: (details.item?.implicitHeight ?? 0) + root.padding * 2
         property real openHeightHeld: 0
@@ -1882,7 +1918,8 @@ Item {
         readonly property alias presentation: chassisSpring.value
         IrisSpring { id: chassisSpring; surface: "island"; to: root.inlineExpanded ? 1 : 0; minimum: 0 }
         function lerp(a: real, b: real): real { return a + (b - a) * chassis.presentation }
-        readonly property real bodyHeightTarget: root.inlineExpanded ? chassis.openHeightTarget : chassis.restHeight
+        readonly property real bodyHeightTarget: root.inlineExpanded ? chassis.openHeightTarget
+            : root.noticeGrows ? root.noticeHeight : chassis.restHeight
         readonly property real bodyHeight: Math.round(chassis.lerp(chassis.restHeight, chassis.openH))
         // Whole pixels: the chassis draws its content through a texture and a half-pixel offset softens it.
         readonly property real edgeInset: Math.ceil(chassis.radius * root.notchness)
@@ -1943,7 +1980,7 @@ Item {
                 const kept = (drop.hasUrls ? Shelf.keepUrls(drop.urls) : 0) || (drop.hasText && Shelf.keepText(drop.text) ? 1 : 0)
                 if (kept > 0) {
                     drop.accept(Qt.CopyAction)
-                    if (!root.expanded)
+                    if (!root.expanded && root.noticeOn("shelf"))
                         root.showEvent("check", IrisStyle.accent, Translation.tr("On the Shelf"),
                             root.dropFiles ? (kept === 1 ? Translation.tr("1 file") : Translation.tr("%1 files").arg(kept)) : Translation.tr("Text"), 1, "kept")
                 } else drop.accepted = false
@@ -2043,42 +2080,6 @@ Item {
             // 95 ms frame near the end of every close.
             visible: opacity > 0 || root.expanded || chassis.presentation > 0.002
 
-            component FaceMark: Item {
-                id: faceMark
-                property color tint: IrisStyle.identity.green
-                property bool live: false
-                scale: faceMark.live ? 1 : 0.55
-                opacity: faceMark.live ? 1 : 0
-                Behavior on scale { NumberAnimation { duration: IrisStyle.duration(520); easing.type: Easing.OutBack; easing.overshoot: 2.2 } }
-                Behavior on opacity { NumberAnimation { duration: IrisStyle.duration(200); easing.type: IrisStyle.feedbackEasing } }
-                Shape {
-                    anchors.fill: parent
-                    preferredRendererType: Shape.CurveRenderer
-                    readonly property real w: width
-                    readonly property real k: width * 0.3
-                    readonly property real r: width * 0.16
-                    ShapePath {
-                        strokeColor: faceMark.tint
-                        strokeWidth: Math.max(1.6, faceMark.width * 0.075)
-                        fillColor: "transparent"
-                        capStyle: ShapePath.RoundCap
-                        joinStyle: ShapePath.RoundJoin
-                        PathSvg {
-                            readonly property real w: faceMark.width
-                            readonly property real k: faceMark.width * 0.28
-                            readonly property real r: faceMark.width * 0.16
-                            path: `M 0 ${k} L 0 ${r} Q 0 0 ${r} 0 L ${k} 0 `
-                                + `M ${w - k} 0 L ${w - r} 0 Q ${w} 0 ${w} ${r} L ${w} ${k} `
-                                + `M ${w} ${w - k} L ${w} ${w - r} Q ${w} ${w} ${w - r} ${w} L ${w - k} ${w} `
-                                + `M ${k} ${w} L ${r} ${w} Q 0 ${w} 0 ${w - r} L 0 ${w - k} `
-                                + `M ${w * 0.36} ${w * 0.34} L ${w * 0.36} ${w * 0.44} `
-                                + `M ${w * 0.64} ${w * 0.34} L ${w * 0.64} ${w * 0.44} `
-                                + `M ${w * 0.5} ${w * 0.36} L ${w * 0.5} ${w * 0.56} L ${w * 0.45} ${w * 0.56} `
-                                + `M ${w * 0.34} ${w * 0.68} Q ${w * 0.5} ${w * 0.8} ${w * 0.66} ${w * 0.68}`
-                        }
-                    }
-                }
-            }
             component CompactRow: RowLayout {
                 id: compactRow
                 property string mode: ""
@@ -2818,7 +2819,9 @@ Item {
                 y: !root.vertical ? Math.round((parent.height - height) / 2)
                     : root.piecesAtStart ? Math.round(12 * root.d) : parent.height - height - Math.round(12 * root.d)
                 spacing: root.barPieceGap
-                visible: root.barPieces.length > 0 && !root.inlineExpanded && !root.zoned
+                // The pieces step aside while a large notice holds the body.
+                opacity: 1 - IrisStyle.contentAt(root.noticeOpen)
+                visible: root.barPieces.length > 0 && !root.inlineExpanded && !root.zoned && opacity > 0.002
                 Repeater {
                     model: root.barPieces
                     delegate: Item {
@@ -2937,10 +2940,12 @@ Item {
 
             MouseArea {
                 id: compactPress
+                // A large notice is taller than the resting line: the whole card answers a tap.
+                readonly property real noticeReach: root.vertical ? 0 : Math.max(0, chassis.bodyHeight - root.compactHeight)
                 x: root.zoned && !root.vertical ? Math.round(barZones.heartAlong) : 0
-                y: root.zoned && root.vertical ? Math.round(barZones.heartAlong) : 0
+                y: root.zoned && root.vertical ? Math.round(barZones.heartAlong) : root.bottomEdge ? -compactPress.noticeReach : 0
                 width: root.zoned && !root.vertical ? Math.round(root.heartLength) : parent.width
-                height: root.zoned && root.vertical ? Math.round(root.heartLength) : parent.height
+                height: root.zoned && root.vertical ? Math.round(root.heartLength) : parent.height + compactPress.noticeReach
                 enabled: !root.inlineExpanded && (!root.zoned || root.heartShown)
                 acceptedButtons: Qt.LeftButton | Qt.MiddleButton
                 cursorShape: islandGrip.carrying ? Qt.ClosedHandCursor
@@ -3013,17 +3018,35 @@ Item {
             }
         }
 
+        IslandNoticeCard {
+            id: noticeCard
+            event: root.event
+            reveal: root.noticeOpen
+            live: root.noticeLarge
+            band: root.compactHeight
+            notch: root.notch
+            maxWidth: root.availableWidth
+            nothingLook: root.nothingLook
+            dim: root.paintNudge * (1 - root.spotlightYield)
+            x: 0
+            y: root.bottomEdge ? chassis.height - chassis.bottomInset - height : chassis.topInset
+            width: chassis.width
+            height: chassis.bodyHeight
+        }
+
     }
 
     ClippingRectangle {
         id: extension
+        readonly property bool carded: root.extensionRole === "event" && root.noticeSized
         readonly property real targetWidth: root.extensionRole === "page" ? root.expandedWidth
-            : Math.round(320 * root.d)
+            : extension.carded ? root.noticeWidth : Math.round(320 * root.d)
         readonly property real targetHeight: root.extensionRole === "page"
             ? (details.item?.implicitHeight ?? 0) + root.padding * 2
-            : root.compactHeight
+            : extension.carded ? root.noticeHeight : root.compactHeight
         readonly property real targetRadius: root.extensionRole === "page"
-            ? IrisStyle.openedRadius(IrisStyle.barShape, IrisStyle.radiusPanel) : root.meltedCorner
+            ? IrisStyle.openedRadius(IrisStyle.barShape, IrisStyle.radiusPanel)
+            : extension.carded ? root.noticeRadius : root.meltedCorner
         readonly property alias presentation: extensionSpring.value
         IrisSpring { id: extensionSpring; surface: "island"; to: root.extensionOpen ? 1 : 0; minimum: 0 }
         readonly property real reach: Math.round((root.vertical ? extension.targetWidth : extension.targetHeight) * extension.presentation)
@@ -3454,64 +3477,18 @@ Item {
                 barFill: IrisStyle.text
             }
         }
-        RowLayout {
-            id: hudEventRow
+        // A notice hung under the strip: the card when Large, else the line.
+        IslandNoticeCard {
             anchors.fill: parent
-            anchors.leftMargin: 6 * root.d
-            anchors.rightMargin: 14 * root.d
-            spacing: 9 * root.d
-            opacity: extension.anchoredShape && root.extensionRole === "event" && root.extensionOpen ? 1 : 0
-            visible: opacity > 0
-            Behavior on opacity { NumberAnimation { duration: IrisStyle.duration(110); easing.type: IrisStyle.feedbackEasing } }
-            Rectangle {
-                Layout.preferredWidth: root.compactHeight - Math.round(12 * root.d)
-                Layout.preferredHeight: Layout.preferredWidth
-                radius: IrisStyle.capsule(width)
-                color: IrisStyle.tintFill(root.event.tint)
-                Glyph {
-                    visible: !root.eventIsBattery
-                    anchors.centerIn: parent
-                    text: root.eventGlyph
-                    iconSize: 16 * root.d
-                    color: root.event.tint
-                }
-                IrisBatteryMark {
-                    visible: root.eventIsBattery
-                    anchors.centerIn: parent
-                    markHeight: Math.round(9 * root.d)
-                    level: Math.max(0, root.event.value)
-                    tint: root.event.tint
-                    frame: IrisStyle.trackOf(root.event.tint)
-                }
-            }
-            ColumnLayout {
-                Layout.fillWidth: true
-                spacing: -1 * root.d
-                IrisText {
-                    Layout.fillWidth: true
-                    text: root.event.title
-                    font.pixelSize: IrisStyle.typeLabel
-                    font.weight: IrisStyle.weight(Font.DemiBold)
-                    elide: Text.ElideRight
-                }
-                IrisText {
-                    Layout.fillWidth: true
-                    visible: text.length > 0
-                    text: root.event.detail
-                    color: IrisStyle.muted
-                    font.pixelSize: IrisStyle.typeFootnote
-                    elide: Text.ElideRight
-                }
-            }
-            Metric {
-                visible: root.event.value >= 0
-                Layout.alignment: Qt.AlignVCenter
-                value: Math.round(root.event.value * 100)
-                unit: "%"
-                pixelSize: IrisStyle.typeBody
-                weight: IrisStyle.figureWeight
-                color: root.event.tint
-            }
+            event: root.event
+            reveal: extension.anchoredShape && root.extensionRole === "event" ? extension.presentation : 0
+            live: root.noticeLarge
+            compact: !extension.carded
+            band: root.compactHeight
+            notch: root.notch
+            maxWidth: root.availableWidth
+            nothingLook: root.nothingLook
+            dim: root.paintNudge
         }
     }
 }

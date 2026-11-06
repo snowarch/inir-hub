@@ -16,6 +16,7 @@ import qs.modules.iris.bar.island
 import qs.modules.iris.field as Field
 import qs.modules.iris.state
 import qs.modules.iris.preview.parts
+import "../bar/island/NoticeSamples.js" as NoticeSamples
 
 ClippingRectangle {
     id: root
@@ -102,6 +103,48 @@ ClippingRectangle {
             bottomEdge: edge === "bottom", auxiliarySlot: 2, fullWidth: full }
     }
     readonly property string islandEdge: String(root.island.edge ?? "top")
+
+    // A notice Settings asks to see plays here too, at its size and for its time: the live Island sits under
+    // Settings' window. Only a scene that asks listens, and the card exists only while one plays.
+    property bool notices: false
+    readonly property var noticeOptions: root.bar?.notices ?? ({})
+    property var noticeEvent: null
+    property bool noticeUp: false
+    Connections {
+        target: root.notices ? IrisState : null
+        function onNoticeSampleChanged(): void {
+            const kind = String(IrisState.noticeSample?.kind ?? "")
+            if (kind.length === 0 || root.island.vertical) return
+            root.noticeEvent = NoticeSamples.of(kind, Translation, IrisStyle, IrisStyle.nothingAt("island"), canvasWallpaper.stillUrl)
+            root.noticeUp = true
+            noticeHold.restart()
+        }
+    }
+    Timer {
+        id: noticeHold
+        interval: Math.round(1000 * Math.max(1.5, Math.min(8, Number(root.noticeOptions?.seconds ?? 2.5))))
+        onTriggered: root.noticeUp = false
+    }
+    IrisSpring { id: noticeSpring; surface: "island"; intent: "move"; to: root.noticeUp ? 1 : 0; minimum: 0; epsilon: 0.002 }
+    readonly property real noticeOpen: noticeLoader.item ? noticeSpring.value : 0
+    // A bar hangs the notice under its strip; the floating Island grows into it.
+    readonly property bool noticeHung: Boolean(root.island.fullWidth) || root.menubar
+    readonly property var noticeBody: {
+        const c = noticeLoader.item
+        if (!c || root.noticeOpen <= 0.002) return null
+        const g = root.island, p = root.noticeOpen, bottom = root.islandEdge === "bottom"
+        const w = c.cardWidth, h = c.cardHeight, cx = g.x + g.width / 2
+        if (root.noticeHung) {
+            const gap = Math.round(6 * root.d), seed = Math.round(40 * root.d)
+            const lw = seed + (w - seed) * p, lh = Math.max(1, h * p)
+            return { x: Math.round(cx - lw / 2), y: bottom ? g.y - gap - lh : g.y + g.height + gap,
+                width: lw, height: lh, radius: Math.min(lh / 2, seed / 2 + (c.cardRadius - seed / 2) * p), card: c }
+        }
+        const rest = IrisStyle.profileRadius(IrisStyle.bodyProfile(IrisStyle.barShape, root.notch), Math.min(g.width, g.height))
+        const lw = g.width + (w - g.width) * p, lh = g.height + (h - g.height) * p
+        return { x: Math.round(cx - lw / 2), y: bottom ? g.y + g.height - lh : g.y,
+            width: lw, height: lh, radius: rest + (c.cardRadius - rest) * p, card: c }
+    }
     readonly property var kinds: IrisState.bubbleKinds?.[root.screenName] ?? ({})
 
     function satelliteRect(slot: string): var {
@@ -248,6 +291,14 @@ ClippingRectangle {
                         fuse: root.dockNotch ? IrisStyle.fuseEdge : IrisStyle.fuse, id: "dock",
                         joins: !root.dockNotch ? "" : root.framed ? "frame" : "dockEdge" })
                 }
+                const nb = root.noticeBody
+                if (nb && root.noticeHung)
+                    out.push({ x: nb.x, y: nb.y, width: nb.width, height: nb.height, radius: nb.radius,
+                        fuse: IrisStyle.fuse, id: "notice", joins: "island" })
+                else if (nb) {
+                    const body = out.find(shape => shape.id === "island")
+                    if (body) Object.assign(body, { x: nb.x, y: nb.y, width: nb.width, height: nb.height, radius: nb.radius })
+                }
                 return out.map(shape => root.scaled(shape))
             }
         }
@@ -269,6 +320,7 @@ ClippingRectangle {
                 y: root.island.y
                 width: root.island.width
                 height: root.island.height
+                opacity: root.noticeHung ? 1 : 1 - IrisStyle.contentAt(root.noticeOpen)
 
                 IslandStackedClock {
                     visible: root.island.vertical
@@ -333,6 +385,32 @@ ClippingRectangle {
                         Layout.alignment: Qt.AlignVCenter
                         pixelSize: IrisStyle.typeHeadline * root.clockScale
                         separatorColor: root.clockAccent
+                    }
+                }
+            }
+
+            Item {
+                visible: root.noticeBody !== null
+                x: root.noticeBody?.x ?? 0
+                y: root.noticeBody?.y ?? 0
+                width: root.noticeBody?.width ?? 0
+                height: root.noticeBody?.height ?? 0
+                clip: true
+                Loader {
+                    id: noticeLoader
+                    active: root.notices && root.noticeEvent !== null && (root.noticeUp || noticeSpring.value > 0.002)
+                    anchors.centerIn: parent
+                    width: item?.cardWidth ?? 0
+                    height: item?.cardHeight ?? 0
+                    sourceComponent: IslandNoticeCard {
+                        event: root.noticeEvent
+                        reveal: root.noticeOpen
+                        live: root.noticeUp
+                        compact: String(root.noticeOptions?.style ?? "compact") !== "large"
+                        band: IrisFrame.islandBand
+                        notch: root.notch
+                        maxWidth: root.screenW - 2 * (IrisFrame.band + IrisFrame.islandMargin)
+                        nothingLook: IrisStyle.nothingAt("island")
                     }
                 }
             }

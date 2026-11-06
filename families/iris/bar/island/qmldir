@@ -17,3 +17,5 @@ PrivacyMarks 1.0 PrivacyMarks.qml
 IslandShelfPage 1.0 IslandShelfPage.qml
 DropRadar 1.0 DropRadar.qml
 IslandLiveGrid 1.0 IslandLiveGrid.qml
+FaceMark 1.0 FaceMark.qml
+IslandNoticeCard 1.0 IslandNoticeCard.qml
