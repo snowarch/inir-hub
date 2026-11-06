@@ -19,6 +19,9 @@ Item {
     readonly property bool gel: root.look === "gel" && !skin.active
     property color fillColor: root.nothing ? IrisStyle.text : IrisStyle.fillStrong
     property color trackColor: IrisStyle.fill
+    // The Apple bar at rest and under the pointer; Synth and Gel keep their own.
+    property real thickness: 4
+    property real engagedThickness: 9
     signal seekRequested(real value)
     signal moved(real value)
     property bool knob: false
@@ -71,7 +74,7 @@ Item {
         anchors.left: parent.left
         anchors.verticalCenter: parent.verticalCenter
         width: root.width - root.valueRoom
-        height: Math.round((root.synth ? (root.engaged ? 4 : 3) : root.gel ? (root.engaged ? 10 : 7) : root.engaged ? 9 : 4) * IrisStyle.density)
+        height: Math.round((root.synth ? (root.engaged ? 4 : 3) : root.gel ? (root.engaged ? 10 : 7) : root.engaged ? root.engagedThickness : root.thickness) * IrisStyle.density)
         readonly property real corner: root.synth ? Math.round(IrisStyle.density) : IrisStyle.capsule(height)
         Behavior on height { NumberAnimation { duration: IrisStyle.duration(120); easing.type: IrisStyle.feedbackEasing } }
         Repeater {

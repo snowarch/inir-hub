@@ -105,16 +105,22 @@ Item {
     readonly property string faceUrl: root.vertical ? "" : root.skinOf(IrisDesign.skin("islandFace"), "Face.qml")
     readonly property string navUrl: root.skinOf(IrisDesign.skin("islandNav"), "Nav.qml")
     // A face may take only some modes (`modes`); the engine draws the others. A song is the one activity that does not
-    // take a face's Island (Unified, Corner, Shelf, Pods, Menu bar): it rides at the face's sides, its cover leading and
-    // its visualizer trailing, and a tap still opens the player.
+    // take the Island's face (Unified, Corner, Shelf, Pods, Menu bar): it rides at the face's sides as Apple's compact
+    // Dynamic Island does, its cover leading and its music moving at the trailing end, and a tap still opens the
+    // player. Halo's face is the engine's resting row, so it wears the same wings (haloWings).
     readonly property bool faceWings: root.faceUrl.length > 0 && !root.vertical && root.compactMode === "media"
         && Array.isArray(designFace.item?.modes) && !designFace.item.modes.includes("media")
+    readonly property bool haloWings: root.faceUrl.length === 0 && !root.vertical && root.compactMode === "media"
+    readonly property bool songWings: root.faceWings || root.haloWings
     readonly property bool faceTakes: root.faceUrl.length > 0 && (root.faceWings || !designFace.item?.modes || designFace.item.modes.includes(root.compactMode))
-    readonly property real wingCoverSize: Math.round((root.zoned ? 28 : 24) * root.d)
+    // Apple's measures, as shares of the pill's height: the cover 0.63, the music 0.4 tall, a quarter in from the ends.
+    readonly property real wingCoverSize: Math.round(root.compactHeight * 0.63)
     readonly property real wingBox: Math.max(root.wingCoverSize, root.nothingLook ? root.stripWidth(4) : wingVisualizer.implicitWidth)
-    // Each side's share of the Island the song takes; the face keeps the middle.
-    readonly property real wingSlot: root.faceWings ? root.wingBox + Math.round(4 * root.d) : 0
-    readonly property real wingLead: Math.round(Math.min(14.5 * root.d * root.breathing, (root.compactHeight - root.wingCoverSize) / 2))
+    // Each side's share of the Island the song takes (its inset, the wing and a step clear of it); the face keeps the
+    // middle with its own breathing, so the song stands as far from the face as from the Island's ends.
+    readonly property real wingSlot: root.songWings ? root.wingLead + root.wingBox + Math.round(6 * root.d) : 0
+    readonly property real wingLead: Math.round(Math.max((root.compactHeight - root.wingCoverSize) / 2,
+        Math.min(14.5 * root.d * root.breathing, root.compactHeight / 4)))
     readonly property bool pagesHang: IrisDesign.trait("pages") === "hang" && !root.fullWidth && !root.vertical
     readonly property real seam: 0
     readonly property string pagePlate: {
@@ -872,17 +878,16 @@ Item {
     readonly property bool inlineExpanded: root.visualExpanded && root.inlinePages && root.pageReady
     readonly property bool compactSizeClass: ["feedback", "event", "notice", "drop"].includes(root.compactMode)
     readonly property bool spanning: root.fullWidth
-    readonly property var compactRows: ({ idle: idleRow, media: mediaRow, record: recordRow,
+    readonly property var compactRows: ({ idle: idleRow, media: idleRow, record: recordRow,
         timer: timerRow, task: taskRow, mic: micRow, camera: cameraRow, clock: clockRow, event: eventRow, feedback: feedbackRow,
         drop: dropRow })
     readonly property real compactContentWidth: root.vertical ? compactColumn.implicitHeight
         : root.faceTakes ? (designFace.item?.contentWidth ?? 0) + 2 * root.wingSlot
-        : root.compactRows[root.compactMode]?.implicitWidth ?? 0
+        : (root.compactRows[root.compactMode]?.implicitWidth ?? 0) + 2 * root.wingSlot
     readonly property real compactFloor: root.compactHeight * 2.1
     // A larger clock (Settings › Island › Size) takes a wider resting Island with it, so a face keeps its extras.
     readonly property real idleCeiling: Math.round(320 * root.d * Math.max(1, root.clockScale))
-    readonly property real compactCeiling: Math.min(root.availableWidth, root.faceWings ? root.idleCeiling + 2 * root.wingSlot
-        : root.compactMode === "media" ? 380 * root.d
+    readonly property real compactCeiling: Math.min(root.availableWidth, root.songWings ? root.idleCeiling + 2 * root.wingSlot
         : root.compactMode === "event" || root.compactMode === "drop" ? 340 * root.d : root.idleCeiling)
     // The room a Design's face has at rest: the idle ceiling, less the Island's breathing and the pieces it carries.
     // A face that would pass it gives up its extras first (designs/*/Face.qml), so the Island never cuts it.
@@ -1278,9 +1283,9 @@ Item {
     property Item heroClock: null
     readonly property Item restingCover: IrisStyle.cluster && leftSatellite.shown
         ? (root.primary === "media" ? leftSatellite.artwork : null)
-        : (root.compactMode === "media" && !root.vertical ? (root.faceWings ? wingCover : compactCover) : null)
+        : (root.compactMode === "media" && !root.vertical ? wingCover : null)
     readonly property Item restingClock: root.vertical ? null : root.compactMode === "clock" ? clusterClock
-        : root.compactMode === "idle" ? idleClock : null
+        : root.compactMode === "idle" || root.haloWings ? idleClock : null
     function flyParts(): void {
         // Only the arrival flies: closing, the part rides the shape home, and a
         // copy crossing a page that is still opaque read as a second design.
@@ -2111,7 +2116,8 @@ Item {
                 id: compactRow
                 property string mode: ""
                 property real lead: 0
-                readonly property bool current: root.compactMode === compactRow.mode
+                readonly property bool current: root.compactMode === compactRow.mode || (compactRow.mode === "idle" && root.haloWings)
+                readonly property real wing: compactRow.mode === "idle" ? root.wingSlot : 0
                 property real laidWidth: 0
                 // Laid at the width of its own size class: relaying the row out per
                 // frame so it rides the shape measured 2.4x the cost of every morph.
@@ -2125,11 +2131,11 @@ Item {
                 anchors.topMargin: compactRow.swellShift
                 anchors.bottomMargin: -compactRow.swellShift
                 x: (root.zoned ? Math.round(barZones.heartAlong + (root.heartLength - compactRow.laidWidth) / 2)
-                    : Math.round((parent.width - compactRow.laidWidth) / 2)) + compactRow.leadMargin
+                    : Math.round((parent.width - compactRow.laidWidth) / 2)) + compactRow.leadMargin + compactRow.wing
                     + (root.piecesAtStart ? root.barPieceReserve : 0)
-                width: Math.max(0, compactRow.laidWidth - compactRow.leadMargin - 15 * root.d - root.barPieceReserve)
+                width: Math.max(0, compactRow.laidWidth - compactRow.leadMargin - 15 * root.d - root.barPieceReserve - 2 * compactRow.wing)
                 spacing: 9 * root.d
-                opacity: (root.compactMode === compactRow.mode && root.heartShown && !root.vertical && !root.faceTakes ? 1 : 0) * root.heartUncovered
+                opacity: (compactRow.current && root.heartShown && !root.vertical && !root.faceTakes ? 1 : 0) * root.heartUncovered
                 scale: root.zoned && compactPress.pressed ? IrisStyle.pressScale(0.93) : 1
                 Behavior on scale { NumberAnimation { duration: IrisStyle.duration(compactPress.pressed ? 80 : 200); easing.type: IrisStyle.feedbackEasing } }
                 visible: opacity > 0
@@ -2169,69 +2175,6 @@ Item {
                     opacity: clockFlight.hides(idleClock) ? 0 : 1
                 }
                 PrivacyMarks { Layout.alignment: Qt.AlignVCenter; spelled: true }
-            }
-
-            CompactRow {
-                id: mediaRow
-                mode: "media"
-                lead: (root.zoned ? 28 : 24) * root.d
-                IrisArtwork {
-                    id: compactCover
-                    opacity: coverFlight.hides(compactCover) ? 0 : 1
-                    Layout.preferredWidth: (root.zoned ? 28 : 24) * root.d
-                    Layout.preferredHeight: (root.zoned ? 28 : 24) * root.d
-                    source: MediaArtwork.displaySource
-                    circular: Config.options?.iris?.player?.roundCover ?? false
-                    radius: circular ? width / 2 : 6 * root.d
-                }
-                ColumnLayout {
-                    Layout.fillWidth: true
-                    spacing: (root.zoned ? 1.5 : 3) * root.d
-                    IrisText {
-                        Layout.fillWidth: true
-                        text: root.title
-                        font.pixelSize: root.zoned ? IrisStyle.typeBody : IrisStyle.typeLabel
-                        font.weight: IrisStyle.weight(Font.DemiBold)
-                        elide: Text.ElideRight
-                    }
-                    IrisText {
-                        Layout.fillWidth: true
-                        visible: root.zoned && text.length > 0
-                        text: root.ytMusic ? YtMusic.currentArtist : String(MprisController.artistOf(root.player) ?? "")
-                        color: IrisStyle.textSecondary
-                        font.pixelSize: IrisStyle.typeFootnote
-                        elide: Text.ElideRight
-                    }
-                    Rectangle {
-                        Layout.fillWidth: true
-                        visible: !root.nothingLook && root.effectiveLength > 0
-                        implicitHeight: (root.zoned ? 3 : 2.5) * root.d
-                        radius: IrisStyle.capsule(height)
-                        color: IrisStyle.fillHover
-                        Rectangle {
-                            height: parent.height
-                            radius: parent.radius
-                            color: root.artTint
-                            width: parent.width * root.trackProgress
-                        }
-                    }
-                }
-                IrisVisualizer {
-                    visible: !root.nothingLook
-                    running: visible && root.playing && root.compactMode === "media" && !root.visualExpanded
-                    tint: IrisStyle.visualizerTint(root.artTint)
-                    barHeight: (root.zoned ? 18 : 15) * root.d
-                }
-                // Where the song is, as six dots; quiet while paused.
-                IrisDotStrip {
-                    visible: root.nothingLook && root.effectiveLength > 0
-                    Layout.alignment: Qt.AlignVCenter
-                    Layout.preferredWidth: root.stripWidth(6)
-                    count: 6
-                    value: root.trackProgress
-                    fillColor: root.playing ? IrisStyle.text : IrisStyle.textSecondary
-                }
-                PrivacyMarks { Layout.alignment: Qt.AlignVCenter; spelled: false }
             }
 
             CompactRow {
@@ -2841,17 +2784,17 @@ Item {
                 visible: opacity > 0
                 onLoaded: item.island = root
             }
-            // The song at a face's sides (faceWings): its cover, then its visualizer, or under Nothing where it is.
+            // The song at a face's sides (songWings): its cover, then its visualizer, or under Nothing where it is.
             IrisArtwork {
                 id: wingCover
                 x: designFace.boxX + root.wingLead
                 y: Math.round((parent.height - height) / 2) + designFace.swellShift
                 width: root.wingCoverSize
                 height: root.wingCoverSize
-                source: root.faceWings ? MediaArtwork.displaySource : ""
+                source: root.songWings ? MediaArtwork.displaySource : ""
                 circular: Config.options?.iris?.player?.roundCover ?? false
-                radius: circular ? width / 2 : 6 * root.d
-                opacity: (root.faceWings && root.heartShown ? (root.playing ? 1 : 0.6) : 0) * root.heartUncovered * (coverFlight.hides(wingCover) ? 0 : 1)
+                radius: circular ? width / 2 : Math.round(width * 0.2)
+                opacity: (root.songWings && root.heartShown ? (root.playing ? 1 : 0.6) : 0) * root.heartUncovered * (coverFlight.hides(wingCover) ? 0 : 1)
                 visible: opacity > 0
                 Behavior on opacity { NumberAnimation { duration: IrisStyle.duration(140); easing.type: IrisStyle.feedbackEasing } }
             }
@@ -2861,7 +2804,7 @@ Item {
                 y: designFace.swellShift
                 width: root.wingBox
                 height: parent.height
-                opacity: (root.faceWings && root.heartShown ? 1 : 0) * root.heartUncovered
+                opacity: (root.songWings && root.heartShown ? 1 : 0) * root.heartUncovered
                 visible: opacity > 0
                 Behavior on opacity { NumberAnimation { duration: IrisStyle.duration(140); easing.type: IrisStyle.feedbackEasing } }
                 IrisVisualizer {
@@ -2870,7 +2813,7 @@ Item {
                     visible: !root.nothingLook
                     running: wingTrail.visible && visible && root.playing && !root.visualExpanded
                     tint: IrisStyle.visualizerTint(root.artTint)
-                    barHeight: (root.zoned ? 18 : 15) * root.d
+                    barHeight: Math.round(root.compactHeight * 0.4)
                 }
                 IrisDotStrip {
                     anchors.centerIn: parent

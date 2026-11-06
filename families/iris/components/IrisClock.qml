@@ -103,12 +103,19 @@ Row {
             color: IrisStyle.secondaryOf(root.color)
         }
     }
+    // The period sits on the figures' baseline, or on the dot matrix's foot; one per case, since switching one item's
+    // anchor between baseline and bottom set both for a moment.
     Minor {
-        visible: root.parts.period.length > 0
+        visible: root.parts.period.length > 0 && !root.matrixed
         text: root.parts.period
         leftPadding: Math.round(root.pixelSize * 0.16)
-        anchors.baseline: root.matrixed ? undefined : hoursText.baseline
-        anchors.bottom: root.matrixed ? matrix.bottom : undefined
+        anchors.baseline: hoursText.baseline
+    }
+    Minor {
+        visible: root.parts.period.length > 0 && root.matrixed
+        text: root.parts.period
+        leftPadding: Math.round(root.pixelSize * 0.16)
+        anchors.bottom: matrix.bottom
     }
 
     Accessible.role: Accessible.StaticText

@@ -1190,6 +1190,13 @@ QtObject {
         return root.visualizerColour === "accent" ? root.accent : root.visualizerColour === "highlight" ? root.secondaryAccent
             : root.visualizerColour === "ink" ? root.text : art
     }
+    // What a sound device is, read from its own name: earbuds, headphones, a screen's speakers or a speaker.
+    function soundDeviceGlyph(node, input: bool): string {
+        if (input) return "mic"
+        const name = String(node?.name ?? "") + " " + String(node?.description ?? "")
+        return /airpod|buds/i.test(name) ? "earbuds" : /head|bluez/i.test(name) ? "headphones"
+            : /hdmi|displayport/i.test(name) ? "tv" : "speaker"
+    }
     readonly property color onMediaTertiary: ColorUtils.applyAlpha(root.onMedia, 0.56)
     readonly property color onMediaFill: ColorUtils.applyAlpha(root.onMedia, 0.2)
     readonly property color onMediaFillHover: ColorUtils.applyAlpha(root.onMedia, 0.3)

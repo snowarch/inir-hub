@@ -375,10 +375,9 @@ Item {
                 : ctl.moduleId === "antiFlashbang" ? flashModel : null
         }
         readonly property bool recording: ctl.moduleId === "record" && RecorderStatus.isRecording
-        readonly property bool headphones: /head|bluez|airpod|buds/i.test(String(Audio.defaultSink?.name ?? "") + String(Audio.defaultSink?.description ?? ""))
         readonly property string label: Translation.tr(IrisControlOptions.labelOf(ctl.moduleId))
         readonly property string glyph: ctl.moduleId === "record" ? (ctl.recording ? "stop_circle" : "radio_button_checked")
-            : ctl.moduleId === "devices" ? (ctl.headphones ? "headphones" : "speaker")
+            : ctl.moduleId === "devices" ? IrisStyle.soundDeviceGlyph(Audio.defaultSink, false)
             : String(ctl.model?.icon ?? IrisControlOptions.glyphOf(ctl.moduleId))
         readonly property string detail: ctl.moduleId === "devices" ? Audio.friendlyDeviceName(Audio.defaultSink)
             : ctl.moduleId === "record" ? (ctl.recording ? Translation.tr("Recording") : Translation.tr("With sound"))

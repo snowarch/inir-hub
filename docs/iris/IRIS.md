@@ -14,7 +14,7 @@ iRiS is the Island family. One Island sits on a screen edge and grows into whate
   - **Shelf** spans the whole edge, the Island rising from it.
   - **Pods** sets three bodies on one line that melt where they meet.
   - **Menu bar** makes a thin strip with the Island hanging from it as a notch. Its strip is Transparent or Band (Menu bar strip).
-  - The Island design you wear shows in every layout. While a song plays, its cover and its moving bars sit at the design's sides and the design stays in the middle; paused, the cover dims and stays.
+  - The Island design you wear shows in every layout, Halo included. While a song plays, its cover and its moving bars sit at the design's sides, as on Apple's Dynamic Island, and the design stays in the middle; paused, the cover dims and stays.
 - Island shape (Settings › Island › Shape › Island shape): Auto, Round, Squircle or Square.
 - Island design (Settings › Island › Design and modes) sets how the resting Island looks: each design is shown alive in a small Island before you pick it. Composition and Island layout live in the same group. Besides Halo, Ledger, Tiles, Dial, Marquee and Duo:
   - **Headline**: the time tall and condensed like a poster, beside the place, the sky and the temperature.
@@ -45,7 +45,7 @@ iRiS is the Island family. One Island sits on a screen edge and grows into whate
   - **World**: the city (50 to pick from, searchable), a second city beside it, the hours apart and the small watch. Short of room the hours apart step out first, then the watches, then the second city, so no name or time is ever cut.
   - **Halo**: Sunlight, its glow where the sun stands.
 - Live activities look like a phone's Dynamic Island:
-  - **Music** opens into a player with the cover, the song and its artist, the time on both sides of the bar and large play controls.
+  - **Music** opens into a player with the cover, the song and its artist (a long name slides through instead of being cut), the time on both sides of the bar and large play controls. The mark at the right of the controls is where the sound goes (earbuds, headphones, a screen, or the output picker for speakers); click it for the Sound card and its devices. It is not there when the computer has no sound output.
   - **Timers** show an orange ring that empties as the time runs; open, they have round pause and close buttons, and a pomodoro shows each focus and break as a segment.
   - **Downloads and tasks** show a ring with their percentage.
   - Settings › Island › Live activities has a switch for each kind that may take the Island: screen recording, timers, downloads and tasks, camera, calls and music. With **Camera** or **Calls** off, the privacy dot still shows while an app uses them. **Microphone glow** turns off the glow on the screen's edges when an app starts listening.

@@ -55,7 +55,7 @@ ColumnLayout {
                     Layout.preferredWidth: Math.round(24 * root.d)
                     horizontalAlignment: Text.AlignHCenter
                     text: root.input ? "mic"
-                        : /head|bluez|airpod|buds/i.test(String(deviceRow.modelData?.name ?? "") + String(deviceRow.modelData?.description ?? "")) ? "headphones" : "speaker"
+                        : IrisStyle.soundDeviceGlyph(deviceRow.modelData, false)
                     iconSize: Math.round(20 * root.d)
                     color: deviceRow.chosen ? IrisStyle.accent : IrisStyle.muted
                 }
