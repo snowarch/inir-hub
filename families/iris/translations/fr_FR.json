@@ -2231,5 +2231,16 @@
   "A status bar: the time, the connection and the battery, or on a desktop the weather.": "Une barre d'état : l'heure, la connexion et la batterie, ou sur un ordinateur fixe la météo.",
   "Language & time": "Langue et heure",
   "Apps & login": "Apps et connexion",
-  "%1 pinned": "%1 épinglées"
+  "%1 pinned": "%1 épinglées",
+  "Defaults restored": "Valeurs par défaut restaurées",
+  "Pinned to Home": "Épinglé à l'Accueil",
+  "Removed from Home": "Retiré de l'Accueil",
+  "%1 chosen": "%1 choisis",
+  "Keep this display setting?": "Garder ce réglage d'affichage ?",
+  "Variable refresh rate": "Taux de rafraîchissement variable",
+  "Show my city": "Afficher ma ville",
+  "Off, no surface prints where you are: the Island, the lock screen, sidebars, widgets. For streams and screen sharing.": "Désactivé, aucune surface n'affiche où vous êtes : ni l'Île, ni l'écran de verrouillage, ni les barres latérales, ni les widgets. Pour les streams et le partage d'écran.",
+  "Back as they were": "Comme avant",
+  "Deleted": "Supprimé",
+  "Restored": "Restauré"
 }

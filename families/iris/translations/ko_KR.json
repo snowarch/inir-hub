@@ -2231,5 +2231,16 @@
   "A status bar: the time, the connection and the battery, or on a desktop the weather.": "상태 표시줄: 시간, 연결, 배터리. 데스크톱에서는 날씨.",
   "Language & time": "언어 및 시간",
   "Apps & login": "앱 및 로그인",
-  "%1 pinned": "%1개 고정됨"
+  "%1 pinned": "%1개 고정됨",
+  "Defaults restored": "기본값으로 복원됨",
+  "Pinned to Home": "홈에 고정됨",
+  "Removed from Home": "홈에서 제거됨",
+  "%1 chosen": "%1개 선택됨",
+  "Keep this display setting?": "이 디스플레이 설정을 유지할까요?",
+  "Variable refresh rate": "가변 재생률",
+  "Show my city": "내 도시 표시",
+  "Off, no surface prints where you are: the Island, the lock screen, sidebars, widgets. For streams and screen sharing.": "끄면 아일랜드, 잠금 화면, 사이드바, 위젯 어디에도 위치를 표시하지 않습니다. 방송과 화면 공유용입니다.",
+  "Back as they were": "이전 상태로",
+  "Deleted": "삭제됨",
+  "Restored": "복원됨"
 }

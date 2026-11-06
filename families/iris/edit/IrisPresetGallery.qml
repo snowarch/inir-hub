@@ -24,9 +24,12 @@ GridLayout {
             Layout.preferredWidth: (root.width - (root.columns - 1) * root.columnSpacing) / root.columns
             Layout.alignment: Qt.AlignTop
             theme: modelData
+            settingsHistory: true
             onShareRequested: {
                 Quickshell.clipboardText = IrisThemes.exportText(modelData)
-                IrisEditHistory.say(Translation.tr("Copied “%1”, paste it anywhere to share it").arg(modelData.name))
+                // Edit's notice shows only in Customize: in Settings the island says it.
+                IrisOptions.note({ glyph: "ios_share", name: String(modelData.name), say: Translation.tr("Copied. Paste it anywhere."),
+                    swatch: String(IrisThemes.swatch(modelData).accent), row: IrisOptions.settings.find(spec => spec.kind === "themes") ?? null })
             }
         }
     }

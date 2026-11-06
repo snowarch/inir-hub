@@ -67,7 +67,8 @@ Item {
     readonly property bool livePath: !root.spec.niri && !root.spec.bundle && String(root.spec.path ?? "").length > 0
         && !/^iris\.appearance\.tune\.|^iris\.widgets\.vibrance$|^appearance\./.test(String(root.spec.path))
     function previewDrag(): void {
-        if (Number.isFinite(root.dragValue) && root.livePath) Config.previewNestedValue(root.spec.path, root.dragValue)
+        // The island's Undo goes back to the value before the drag, not to one of its steps.
+        if (Number.isFinite(root.dragValue) && root.livePath) { IrisOptions.hold(root.spec); Config.previewNestedValue(root.spec.path, root.dragValue) }
     }
     function flushDrag(): void {
         if (!Number.isFinite(root.dragValue)) return
@@ -160,6 +161,11 @@ Item {
 
     implicitHeight: Math.max(Math.round(50 * root.d), layout.implicitHeight + Math.round(22 * root.d))
     enabled: !root.locked
+
+    // Any row goes to Home and back with a right click (a long press on touch); the Settings island says so and
+    // takes it back. Asked on the click, not per row: the candidates are every row of Settings.
+    TapHandler { acceptedButtons: Qt.RightButton; onTapped: IrisOptions.togglePin(root.spec) }
+    TapHandler { acceptedDevices: PointerDevice.TouchScreen; onLongPressed: IrisOptions.togglePin(root.spec) }
 
     // Arrived at from a search: the glow is built for its one pass, then let go.
     Loader {
@@ -1790,7 +1796,7 @@ Item {
             property real dragHue: NaN
             readonly property real shownHue: Number.isFinite(hue.dragHue) ? hue.dragHue : Number(root.value ?? 0)
             readonly property real fraction: Math.max(0, Math.min(1, hue.shownHue / 359))
-            function preview(): void { if (Number.isFinite(hue.dragHue)) Config.previewNestedValue(root.spec.path, hue.dragHue) }
+            function preview(): void { if (Number.isFinite(hue.dragHue)) { IrisOptions.hold(root.spec); Config.previewNestedValue(root.spec.path, hue.dragHue) } }
             function settle(): void {
                 huePreview.stop()
                 // A tap on the hue already chosen writes nothing; a drag that moved writes once.

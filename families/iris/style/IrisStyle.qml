@@ -1260,6 +1260,17 @@ QtObject {
         : root.light ? (root.glassy ? Qt.rgba(1, 1, 1, 0.84) : root.liftOver(root.surfaceHigh, root.surfaceOpaque)) // iris-literal: a light island's plate
         : root.glassy ? Qt.rgba(1, 1, 1, 0.075) : ColorUtils.mix(Qt.rgba(1, 1, 1, 1), root.surfaceOpaque, 0.075) // iris-literal: a dark island's lift (mix weighs its first colour: the other order was 92 % white with glass off)
     readonly property color islandShadow: root.light && !root.ink ? Qt.rgba(0, 0, 0, 0.07) : "transparent" // iris-literal: a light island's shadow
+    // The Settings island (what a change did and its Undo, a display change waiting for Keep): the Dynamic Island's own
+    // black in both schemes, the one live object over the sheet; on a dark sheet it stands a step off the sheet's black
+    // so its silhouette reads without a line. Its ink is the Island's white whatever the scheme.
+    readonly property color liveIsland: root.light ? Qt.rgba(0.024, 0.024, 0.03, 1) : ColorUtils.mix(Qt.rgba(1, 1, 1, 1), root.surfaceOpaque, 0.12) // iris-literal: the Island's black
+    readonly property color liveIslandInk: Qt.rgba(1, 1, 1, 0.96) // iris-literal: the Island's white
+    readonly property color liveIslandQuiet: Qt.rgba(1, 1, 1, 0.58) // iris-literal: its second line
+    readonly property color liveIslandKey: Qt.rgba(1, 1, 1, 0.13) // iris-literal: a key on the black
+    readonly property color liveIslandKeyHover: Qt.rgba(1, 1, 1, 0.21) // iris-literal: a key on the black, hovered
+    readonly property color liveIslandShadow: Qt.rgba(0, 0, 0, root.light ? 0.22 : 0.42) // iris-literal: its lift off the sheet
+    // A value on the black in its own colour, bright enough to read there in either scheme (HIG: bold colour on black).
+    function liveIslandHue(tint: color): color { return root.vividHighlight(tint, root.liveIslandInk) }
     readonly property color readingSidebar: root.glassy
         ? ColorUtils.applyAlpha(root.surfaceOpaque, Math.max(root.wallpaperVeil, root.placePlate)) : root.readingCard
 

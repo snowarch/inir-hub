@@ -2231,5 +2231,16 @@
   "A status bar: the time, the connection and the battery, or on a desktop the weather.": "Рядок стану: час, з'єднання та батарея, а на настільному ПК погода.",
   "Language & time": "Мова і час",
   "Apps & login": "Застосунки та вхід",
-  "%1 pinned": "Закріплено: %1"
+  "%1 pinned": "Закріплено: %1",
+  "Defaults restored": "Типові значення відновлено",
+  "Pinned to Home": "Закріплено на домашній сторінці",
+  "Removed from Home": "Прибрано з домашньої сторінки",
+  "%1 chosen": "Вибрано: %1",
+  "Keep this display setting?": "Зберегти це налаштування екрана?",
+  "Variable refresh rate": "Змінна частота оновлення",
+  "Show my city": "Показувати моє місто",
+  "Off, no surface prints where you are: the Island, the lock screen, sidebars, widgets. For streams and screen sharing.": "Якщо вимкнено, жодна поверхня не показує, де ви: ні Острів, ні екран блокування, ні бічні панелі, ні віджети. Для стрімів і демонстрації екрана.",
+  "Back as they were": "Як було",
+  "Deleted": "Видалено",
+  "Restored": "Відновлено"
 }

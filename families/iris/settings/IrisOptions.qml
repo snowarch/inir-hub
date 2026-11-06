@@ -103,7 +103,186 @@ QtObject {
     }
     // The gallery's own rows mean nothing while one of Material's pickers opens instead.
     function ownGallery(): bool { return String(Config.options?.iris?.wallpaper?.picker ?? "iris") !== "material" }
-    function commit(spec: var, next: var): void { root.write(spec, next) }
+    // ── What a change did, and the way back (the Settings island). Every change made in Settings goes on this visit's
+    // history: the island says it with an Undo, Ctrl+Z puts the value before it back and Ctrl+Shift+Z brings it again.
+    // A burst on one row (wheel notches, digits, a drag's steps) is one change. A family switch keeps the shell's own
+    // transition and a display change its Keep or Revert, so neither goes on it.
+    property var history: []
+    property var ahead: []
+    // What the island says now: an entry of the history and how it got there ("change", "undone", "redone").
+    property var told: null
+    property int toldStamp: 0
+    // The value a row held before a drag started previewing it in memory (Config.previewNestedValue), by row.
+    property var held: ({})
+    readonly property bool canUndo: root.history.length > 0
+    readonly property bool canRedo: root.ahead.length > 0
+    function rowKey(spec: var): string {
+        return String(spec.path ?? (spec.niri !== undefined ? spec.niri + ":" + spec.key : spec.piece ?? spec.id ?? spec.label ?? ""))
+    }
+    function undoable(spec: var): bool {
+        return spec.path !== "panelFamily" && spec.niri !== "display" && spec.kind !== "action"
+    }
+    function hold(spec: var): void {
+        const key = root.rowKey(spec)
+        if (!(key in root.held)) root.held[key] = root.plain(root.currentValue(spec))
+    }
+    function remember(entry: var): void {
+        root.history = root.history.concat([entry]).slice(-40)
+        root.ahead = []
+        root.tell(entry, "change")
+    }
+    function tell(entry: var, how: string): void {
+        root.told = Object.assign({}, entry, { how: how })
+        root.toldStamp++
+    }
+    function forget(): void {
+        root.history = []
+        root.ahead = []
+        root.told = null
+        root.held = ({})
+    }
+    function commit(spec: var, next: var): void {
+        const key = root.rowKey(spec)
+        if (!root.undoable(spec)) { delete root.held[key]; root.write(spec, next); return }
+        const before = key in root.held ? root.held[key] : root.plain(root.currentValue(spec))
+        delete root.held[key]
+        root.write(spec, next)
+        const after = root.plain(next)
+        // A bundle reads back as the choice it now matches; one it matched none of has no way back.
+        if (spec.bundle && !spec.keyed && String(before ?? "").length === 0) return
+        const last = root.history[root.history.length - 1]
+        const now = Date.now()
+        if (last && last.kind === "change" && last.key === key && now - last.at < 2500) {
+            const merged = Object.assign({}, last, { at: now, steps: [{ spec: spec, before: last.steps[0].before, after: after }] })
+            const rest = root.history.slice(0, -1)
+            // Back where the burst began: nothing changed.
+            if (root.same(merged.steps[0].before, after)) { root.history = rest; root.told = null; root.toldStamp++; return }
+            root.history = rest.concat([merged])
+            root.ahead = []
+            root.tell(merged, "change")
+            return
+        }
+        if (root.same(before, after)) return
+        root.remember({ kind: "change", key: key, at: now, steps: [{ spec: spec, before: before, after: after }] })
+    }
+    // Restore defaults: every changed row of the page back to its factory value at once, as one change with one Undo.
+    function restore(specs: var): void {
+        const steps = specs.filter(spec => root.modified(spec)).map(spec => ({ spec: spec, before: root.plain(root.currentValue(spec)), after: root.plain(spec.fallback) }))
+        if (steps.length === 0) return
+        root.apply(steps, "after")
+        root.remember({ kind: "restore", key: "", at: Date.now(), steps: steps })
+    }
+    // A preset worn from Settings: the whole look (or only its colours) is one change with one Undo, said by its name.
+    function wearTheme(theme: var): void {
+        if (!theme) return
+        const designRow = root.settings.find(spec => spec.widgetDesign) ?? null
+        const rows = [{ path: "iris.appearance.themeId", fallback: "iris" }].concat(IrisThemes.paths)
+            .map(entry => entry.path === "iris.widgets.design" && designRow ? designRow : entry)
+        const read = () => rows.map(spec => root.plain(spec.widgetDesign ? root.currentValue(spec) : Config.getNestedValue(spec.path, spec.fallback)))
+        // The one it replaces is named only when it was worn as it is (a modified or colours-only one has no name).
+        const was = IrisThemes.active && !IrisThemes.modified && !IrisThemes.coloursOnly ? IrisThemes.active : null
+        const before = read()
+        IrisThemes.choose(theme)
+        const after = read()
+        const steps = rows.map((spec, index) => ({ spec: spec, before: before[index], after: after[index] }))
+            .filter(step => !root.same(step.before, step.after))
+        if (steps.length === 0) return
+        const row = root.settings.find(spec => spec.kind === "themes") ?? null
+        root.remember({ kind: "theme", key: "theme", at: Date.now(), row: row, steps: steps,
+            say: String(theme.name ?? ""), swatch: String(IrisThemes.swatch(theme).accent),
+            sayBefore: was ? String(was.name ?? "") : "", swatchBefore: was ? String(IrisThemes.swatch(was).accent) : "" })
+    }
+    // A theme of the person's deleted from Settings: its file goes at once and Undo writes it back.
+    function dropTheme(theme: var): void {
+        if (!theme?.user) return
+        const kept = IrisThemes.parse(IrisThemes.exportText(theme), String(theme.id))
+        if (!kept) return
+        IrisThemes.remove(kept.id)
+        root.remember({ kind: "dropTheme", key: "theme:" + kept.id, at: Date.now(), row: root.settings.find(spec => spec.kind === "themes") ?? null,
+            steps: [], glyph: "delete", name: String(theme.name ?? ""), say: Translation.tr("Deleted"), sayBefore: Translation.tr("Restored"),
+            swatch: String(IrisThemes.swatch(theme).accent), back: () => IrisThemes.write(kept), again: () => IrisThemes.remove(kept.id) })
+    }
+    // Said on the island with nothing to take back (a theme copied to share): { glyph, name, say, swatch, row }.
+    function note(words: var): void {
+        root.tell(Object.assign({ kind: "note", key: "note", at: Date.now(), steps: [] }, words), "change")
+    }
+    // A plain key is written with the others in one revision (each its own write rebuilt every row of the page once
+    // per key); a row with its own way to write takes it.
+    function apply(steps: var, side: string): void {
+        const batch = ({})
+        let plainCount = 0
+        for (const step of steps) {
+            const spec = step.spec
+            const bare = spec.path && spec.path !== "panelFamily" && spec.path !== "iris.bar.pieces" && !spec.widget && !spec.widgetDesign && !spec.niri
+                && spec.kind !== "icon" && !spec.set && !spec.flags && !spec.bundle && !spec.numeric && !/^iris\.bubbles\.extras\./.test(String(spec.path))
+            if (bare) { batch[spec.path] = step[side]; plainCount++; if (spec.regen) root.regenerate.restart() }
+            else root.write(spec, step[side])
+        }
+        if (plainCount > 0) Config.setNestedValues(batch)
+    }
+    function undo(): bool {
+        const entry = root.history[root.history.length - 1]
+        if (!entry) return false
+        root.history = root.history.slice(0, -1)
+        if (entry.back) entry.back()
+        else root.apply(entry.steps.slice().reverse(), "before")
+        root.ahead = root.ahead.concat([entry])
+        root.tell(entry, "undone")
+        return true
+    }
+    function redo(): bool {
+        const entry = root.ahead[root.ahead.length - 1]
+        if (!entry) return false
+        root.ahead = root.ahead.slice(0, -1)
+        if (entry.again) entry.again()
+        else root.apply(entry.steps, "after")
+        root.history = root.history.concat([entry])
+        root.tell(entry, "redone")
+        return true
+    }
+    // ── Home's pins from any row: right-click or press and hold a row, "Pin to Home"; the island takes it back.
+    readonly property var homeSpec: ({ path: "iris.appearance.settingsHome", kind: "list", label: "Home" })
+    function homeList(): var {
+        return Array.from(Config.options?.iris?.appearance?.settingsHome ?? root.homeDefault).map(entry => String(entry))
+    }
+    function pinValue(spec: var): string {
+        const value = String(spec.id ?? spec.path ?? "")
+        return value.length > 0 && root.homeCandidates.some(entry => entry.value === value) ? value : ""
+    }
+    function onHome(spec: var): bool {
+        const value = root.pinValue(spec)
+        return value.length > 0 && root.homeList().includes(value)
+    }
+    function togglePin(spec: var): void {
+        const value = root.pinValue(spec)
+        if (value.length === 0) return
+        const before = root.homeList()
+        const pinning = !before.includes(value)
+        const after = pinning ? before.concat([value]) : before.filter(entry => entry !== value)
+        Config.setNestedValue(root.homeSpec.path, after)
+        root.remember({ kind: pinning ? "pin" : "unpin", key: "home:" + value, at: Date.now(), row: spec, steps: [{ spec: root.homeSpec, before: before, after: after }] })
+    }
+    // A value in words, as a row says it: a switch On or Off, a choice its name, a range its figure.
+    function say(spec: var, value: var): string {
+        if (spec.kind === "switch" || spec.kind === "toggle") return (spec.invert ? !value : Boolean(value)) ? Translation.tr("On") : Translation.tr("Off")
+        if (spec.kind === "range" || spec.kind === "level") return Number.isFinite(Number(value)) ? root.rangeText(spec, value) : ""
+        const choice = root.choicesOf(spec).find(entry => String(entry.value) === String(value))
+        if (choice) return Translation.tr(String(choice.label ?? ""))
+        if (Array.isArray(value)) return Translation.tr("%1 chosen").arg(value.length)
+        if (spec.kind === "text" || spec.kind === "hue") return String(value ?? "").length > 0 && String(value).length <= 22 ? String(value) : ""
+        return ""
+    }
+    // A switch heading its group is named by the group ("Day and night: On", not "A theme for each: On").
+    function leads(spec: var): bool {
+        if (spec.kind !== "switch" || !spec.group || spec.mirror) return false
+        const first = root.settings.find(entry => entry.section === spec.section && entry.group === spec.group && !entry.mirror)
+        return !!first && first.path === spec.path
+    }
+    // The swatch a choice draws, when it is a colour (Accent, Signal).
+    function swatchOf(spec: var, value: var): var {
+        const choice = root.choicesOf(spec).find(entry => String(entry.value) === String(value))
+        return choice?.swatch ?? null
+    }
     function write(spec: var, next: var): void {
         // A family switch goes through the shell's transition, never a bare config write.
         if (spec.path === "panelFamily") Quickshell.execDetached([Quickshell.shellPath("scripts/inir"), "panelFamily", "set", String(next)])
@@ -429,7 +608,9 @@ QtObject {
         { target: "material", group: "Colour theme", label: "Colour theme", description: "The palette your shell and apps wear.", path: "appearance.theme", kind: "choice", tiles: true, fallback: "auto", choices: root.colourThemeChoices, note: () => root.themeNote(), keywords: ["palette", "catppuccin", "nord", "gruvbox", "dracula", "rose pine", "tokyo night", "everforest", "kanagawa", "theme", "apps", "terminal", "colours", "colors", "tema", "paleta", "ink"] },
         { target: "material", group: "Colour theme", label: "Match the shell", description: "The shell takes the theme's accent, highlight and material too.", path: "iris.appearance.followTheme", visibleWhen: "!appearance.theme=auto", kind: "switch", fallback: true, keywords: ["sync", "match", "follow", "apps", "shell", "accent", "sincronizar"] },
         { target: "material", group: "Colour theme", label: "Softer colours", description: "Takes the glare off a theme's brightest colours.", path: "appearance.softenColors", visibleWhen: "!appearance.theme=auto", kind: "switch", fallback: true, tune: true, keywords: ["soften", "soft", "muted", "pastel", "glare", "saturation", "suave", "suavizar"] },
-        { target: "material", group: "Day and night", label: "A theme for each", tune: true, description: "One theme by day, another at night, switched on the hour you set.", path: "appearance.themeSchedule.enabled", kind: "switch", fallback: false, keywords: ["schedule", "day", "night", "time", "evening", "morning", "automatic", "horario", "día", "noche"] },
+        { target: "material", group: "Day and night", label: "A theme for each", tune: true, description: "One theme by day, another at night, switched on the hour you set.", path: "appearance.themeSchedule.enabled", kind: "switch", fallback: false,
+            // The tile says the hours it keeps, not the switch's name.
+            glance: on => on ? String(Config.options?.appearance?.themeSchedule?.dayStart ?? "06:00") + "–" + String(Config.options?.appearance?.themeSchedule?.nightStart ?? "18:00") : "", keywords: ["schedule", "day", "night", "time", "evening", "morning", "automatic", "horario", "día", "noche"] },
         { target: "material", group: "Day and night", label: "Hours", kind: "list", view: Qt.resolvedUrl("IrisThemeClock.qml"), summary: false, visibleWhen: "appearance.themeSchedule.enabled", keywords: ["hours", "time", "sunrise", "sunset", "clock", "dial", "horas", "reloj"] },
         { target: "material", group: "Scheme", label: "Scheme", description: "Ink sits between dark and light: paper and ink, easier on the eyes.", path: "iris.appearance.scheme", kind: "choice", fallback: "auto", choices: [{label:"Auto",value:"auto",glyph:"auto_awesome"},{label:"Dark mode",value:"dark",glyph:"dark_mode"},{label:"Ink",value:"ink",glyph:"ink_pen"},{label:"Light mode",value:"light",glyph:"light_mode"}], keywords: ["light", "dark", "ink", "sumi", "washi", "paper", "japanese", "day", "night", "mode", "theme", "bright", "white", "black", "claro", "oscuro", "tinta", "modo"] , note: () => root.schemeNote() },
         { target: "material", group: "Scheme", label: "Light or dark from the wallpaper", description: "With Auto, bright wallpapers pick light and dark ones pick dark.", path: "appearance.wallpaperTheming.autoDarkLightMode", visibleWhen: "iris.appearance.scheme=auto", kind: "switch", fallback: false, keywords: ["auto", "brightness", "night", "day", "wallpaper", "luminance", "claro", "oscuro"] },

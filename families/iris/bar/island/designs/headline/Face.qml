@@ -25,7 +25,7 @@ Item {
     Row {
         id: row
         anchors.centerIn: parent
-        spacing: Math.round(9 * root.d)
+        spacing: Math.round(10 * root.d)
         Text {
             anchors.verticalCenter: parent.verticalCenter
             text: DateTime.timeDisplay

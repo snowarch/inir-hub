@@ -30,32 +30,41 @@ IrisWidgetFace {
     readonly property string shellName: String(Quickshell.env("SHELL") ?? "").split("/").pop() || "sh"
     readonly property string desktopName: IrisFaceData.capitalized(String(SystemInfo.desktopEnvironment || "Wayland").split(":")[0].toLowerCase())
 
-    // Lock, Settings and the session as one row of capsules across the face, like a contact's call keys.
+    // Lock, Settings and the session as one row of capsules across the face, like a contact's call keys. Each key is as
+    // wide as its word; when the three words don't fit (German's "Einstellungen"), all three are glyphs, never one alone.
     component Actions: RowLayout {
+        id: actions
         spacing: root.dp(8)
+        readonly property bool roomy: lockKey.wordedWidth + settingsKey.wordedWidth + sessionKey.wordedWidth + 2 * actions.spacing <= actions.width
         FaceAction {
+            id: lockKey
             face: root
             Layout.fillWidth: true
+            Layout.preferredWidth: actions.roomy ? lockKey.wordedWidth : 1
             Layout.preferredHeight: root.dp(34)
-            worded: true
+            worded: actions.roomy
             glyph: "lock"
             name: Translation.tr("Lock")
             onActivated: root.widget.lockScreen()
         }
         FaceAction {
+            id: settingsKey
             face: root
             Layout.fillWidth: true
+            Layout.preferredWidth: actions.roomy ? settingsKey.wordedWidth : 1
             Layout.preferredHeight: root.dp(34)
-            worded: true
+            worded: actions.roomy
             glyph: "settings"
             name: Translation.tr("Settings")
             onActivated: GlobalStates.openSettings()
         }
         FaceAction {
+            id: sessionKey
             face: root
             Layout.fillWidth: true
+            Layout.preferredWidth: actions.roomy ? sessionKey.wordedWidth : 1
             Layout.preferredHeight: root.dp(34)
-            worded: true
+            worded: actions.roomy
             glyph: "power_settings_new"
             name: Translation.tr("Session")
             danger: true

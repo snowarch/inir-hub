@@ -2231,5 +2231,16 @@
   "A status bar: the time, the connection and the battery, or on a desktop the weather.": "Строка состояния: время, подключение и батарея, а на настольном ПК погода.",
   "Language & time": "Язык и время",
   "Apps & login": "Приложения и вход",
-  "%1 pinned": "Закреплено: %1"
+  "%1 pinned": "Закреплено: %1",
+  "Defaults restored": "Значения по умолчанию восстановлены",
+  "Pinned to Home": "Закреплено на главной",
+  "Removed from Home": "Убрано с главной",
+  "%1 chosen": "Выбрано: %1",
+  "Keep this display setting?": "Сохранить эту настройку экрана?",
+  "Variable refresh rate": "Переменная частота обновления",
+  "Show my city": "Показывать мой город",
+  "Off, no surface prints where you are: the Island, the lock screen, sidebars, widgets. For streams and screen sharing.": "Если выключено, ни одна поверхность не показывает, где вы: ни Остров, ни экран блокировки, ни боковые панели, ни виджеты. Для стримов и демонстрации экрана.",
+  "Back as they were": "Как было",
+  "Deleted": "Удалено",
+  "Restored": "Восстановлено"
 }

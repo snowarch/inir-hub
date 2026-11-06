@@ -2231,5 +2231,16 @@
   "A status bar: the time, the connection and the battery, or on a desktop the weather.": "Bilah status: jam, koneksi, dan baterai, atau cuaca di desktop.",
   "Language & time": "Bahasa & waktu",
   "Apps & login": "Aplikasi & masuk",
-  "%1 pinned": "%1 disematkan"
+  "%1 pinned": "%1 disematkan",
+  "Defaults restored": "Bawaan dipulihkan",
+  "Pinned to Home": "Disematkan ke Beranda",
+  "Removed from Home": "Dihapus dari Beranda",
+  "%1 chosen": "%1 dipilih",
+  "Keep this display setting?": "Simpan pengaturan layar ini?",
+  "Variable refresh rate": "Laju penyegaran variabel",
+  "Show my city": "Tampilkan kota saya",
+  "Off, no surface prints where you are: the Island, the lock screen, sidebars, widgets. For streams and screen sharing.": "Mati, tidak ada permukaan yang menampilkan lokasi Anda: Island, layar kunci, bilah samping, widget. Untuk siaran dan berbagi layar.",
+  "Back as they were": "Kembali seperti semula",
+  "Deleted": "Dihapus",
+  "Restored": "Dipulihkan"
 }

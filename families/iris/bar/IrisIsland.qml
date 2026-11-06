@@ -2050,7 +2050,7 @@ Item {
                 scale: faceMark.live ? 1 : 0.55
                 opacity: faceMark.live ? 1 : 0
                 Behavior on scale { NumberAnimation { duration: IrisStyle.duration(520); easing.type: Easing.OutBack; easing.overshoot: 2.2 } }
-                Behavior on opacity { NumberAnimation { duration: IrisStyle.duration(200) } }
+                Behavior on opacity { NumberAnimation { duration: IrisStyle.duration(200); easing.type: IrisStyle.feedbackEasing } }
                 Shape {
                     anchors.fill: parent
                     preferredRendererType: Shape.CurveRenderer
@@ -2531,7 +2531,7 @@ Item {
                     Layout.rightMargin: 4 * root.d
                     Layout.preferredWidth: Math.round(15 * root.d)
                     Layout.preferredHeight: root.compactHeight - Math.round(14 * root.d)
-                    radius: Math.round(4 * root.d)
+                    radius: Math.round(4 * root.d) // iris-literal: the battery drawn as the device, its own corners
                     color: IrisStyle.trackOf(IrisStyle.identity.green)
                     clip: true
                     Rectangle {
@@ -2627,7 +2627,7 @@ Item {
                     Layout.alignment: Qt.AlignVCenter
                     Layout.preferredHeight: root.compactHeight - Math.round(10 * root.d)
                     Layout.preferredWidth: Math.round(Layout.preferredHeight * 1.5)
-                    radius: Math.round(7 * root.d)
+                    radius: IrisStyle.radiusChip
                     color: IrisStyle.fill
                     IrisImage {
                         anchors.fill: parent
@@ -2707,7 +2707,7 @@ Item {
                         scale: endRing.progress >= 0.98 ? 1 : 0.4
                         opacity: endRing.progress >= 0.98 ? 1 : 0
                         Behavior on scale { NumberAnimation { duration: IrisStyle.duration(260); easing.type: Easing.OutBack } }
-                        Behavior on opacity { NumberAnimation { duration: IrisStyle.duration(160) } }
+                        Behavior on opacity { NumberAnimation { duration: IrisStyle.duration(160); easing.type: IrisStyle.feedbackEasing } }
                     }
                 }
                 IrisDotStrip {

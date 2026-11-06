@@ -2231,5 +2231,16 @@
   "A status bar: the time, the connection and the battery, or on a desktop the weather.": "Bir durum çubuğu: saat, bağlantı ve pil; masaüstünde hava durumu.",
   "Language & time": "Dil ve saat",
   "Apps & login": "Uygulamalar ve oturum açma",
-  "%1 pinned": "%1 sabitlendi"
+  "%1 pinned": "%1 sabitlendi",
+  "Defaults restored": "Varsayılanlar geri yüklendi",
+  "Pinned to Home": "Ana Sayfa'ya sabitlendi",
+  "Removed from Home": "Ana Sayfa'dan kaldırıldı",
+  "%1 chosen": "%1 seçili",
+  "Keep this display setting?": "Bu ekran ayarı tutulsun mu?",
+  "Variable refresh rate": "Değişken yenileme hızı",
+  "Show my city": "Şehrimi göster",
+  "Off, no surface prints where you are: the Island, the lock screen, sidebars, widgets. For streams and screen sharing.": "Kapalıyken hiçbir yüzey nerede olduğunu göstermez: Ada, kilit ekranı, kenar çubukları, widget'lar. Yayınlar ve ekran paylaşımı için.",
+  "Back as they were": "Eskisi gibi",
+  "Deleted": "Silindi",
+  "Restored": "Geri yüklendi"
 }

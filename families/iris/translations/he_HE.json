@@ -2231,5 +2231,16 @@
   "A status bar: the time, the connection and the battery, or on a desktop the weather.": "שורת מצב: השעה, החיבור והסוללה, או במחשב שולחני מזג האוויר.",
   "Language & time": "שפה ושעה",
   "Apps & login": "אפליקציות והתחברות",
-  "%1 pinned": "%1 מוצמדות"
+  "%1 pinned": "%1 מוצמדות",
+  "Defaults restored": "ברירות המחדל שוחזרו",
+  "Pinned to Home": "הוצמד לבית",
+  "Removed from Home": "הוסר מהבית",
+  "%1 chosen": "%1 נבחרו",
+  "Keep this display setting?": "להשאיר את הגדרת התצוגה הזו?",
+  "Variable refresh rate": "קצב רענון משתנה",
+  "Show my city": "הצג את העיר שלי",
+  "Off, no surface prints where you are: the Island, the lock screen, sidebars, widgets. For streams and screen sharing.": "כשכבוי, אף משטח לא מציג איפה אתה: האי, מסך הנעילה, הסרגלים הצדדיים, הווידג׳טים. לשידורים ולשיתוף מסך.",
+  "Back as they were": "חזרו כפי שהיו",
+  "Deleted": "נמחק",
+  "Restored": "שוחזר"
 }

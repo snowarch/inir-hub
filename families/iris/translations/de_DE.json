@@ -2231,5 +2231,16 @@
   "A status bar: the time, the connection and the battery, or on a desktop the weather.": "Eine Statusleiste: Uhrzeit, Verbindung und Akku, am Desktop-PC das Wetter.",
   "Language & time": "Sprache & Zeit",
   "Apps & login": "Apps & Anmeldung",
-  "%1 pinned": "%1 angeheftet"
+  "%1 pinned": "%1 angeheftet",
+  "Defaults restored": "Standardwerte wiederhergestellt",
+  "Pinned to Home": "An Start angeheftet",
+  "Removed from Home": "Von Start entfernt",
+  "%1 chosen": "%1 ausgewählt",
+  "Keep this display setting?": "Diese Anzeigeeinstellung behalten?",
+  "Variable refresh rate": "Variable Bildwiederholrate",
+  "Show my city": "Meine Stadt zeigen",
+  "Off, no surface prints where you are: the Island, the lock screen, sidebars, widgets. For streams and screen sharing.": "Aus zeigt keine Oberfläche, wo du bist: weder die Insel noch der Sperrbildschirm, die Seitenleisten oder Widgets. Für Streams und Bildschirmfreigabe.",
+  "Back as they were": "Wie zuvor",
+  "Deleted": "Gelöscht",
+  "Restored": "Wiederhergestellt"
 }

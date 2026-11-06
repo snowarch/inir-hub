@@ -683,6 +683,8 @@ Item {
         function onSettingsOverlayRequestedKeyChanged(): void { Qt.callLater(root.applyRequest) }
         function onSettingsOverlayOpenChanged(): void {
             if (!GlobalStates.settingsOverlayOpen) return
+            // A visit's history starts with it: an Undo never reaches back into a change made days ago.
+            IrisOptions.forget()
             IrisNiri.ensure()
             IrisOptions.settle()
             root.applyRequest()
@@ -713,6 +715,9 @@ Item {
         }
     }
     Shortcut { sequence: "Ctrl+F"; enabled: GlobalStates.settingsOverlayOpen; onActivated: searchField.forceActiveFocus() }
+    // The history of this visit: a field with focus keeps its own Ctrl+Z (it takes the shortcut first).
+    Shortcut { sequences: ["Ctrl+Z"]; enabled: GlobalStates.settingsOverlayOpen && IrisOptions.canUndo; onActivated: IrisOptions.undo() }
+    Shortcut { sequences: ["Ctrl+Shift+Z", "Ctrl+Y"]; enabled: GlobalStates.settingsOverlayOpen && IrisOptions.canRedo; onActivated: IrisOptions.redo() }
     // Typing anywhere on the page searches: a letter no control takes reaches the page and goes to the field.
     // ↑ and ↓ walk the sidebar's areas when nothing on the page holds the keys (DI49a: they did nothing).
     // From a control on the page they go to the control above or below instead, as in a list of preferences: jumping to
@@ -1254,7 +1259,8 @@ Item {
                         shown: !root.searching && root.advancedPage < 0 && modified
                         glyph: "restart_alt"
                         label: Translation.tr("Restore defaults")
-                        onClicked: resettable.forEach(spec => IrisOptions.commit(spec, spec.fallback))
+                        // Act first, one Undo on the island for the lot (no confirm).
+                        onClicked: IrisOptions.restore(resettable)
                     }
                     }
                     // Classic's way back to the layouts.
@@ -1282,32 +1288,6 @@ Item {
                         materialIcon: "close"
                         onClicked: GlobalStates.settingsOverlayOpen = false
                         Accessible.name: Translation.tr("Close settings")
-                    }
-                }
-
-                Rectangle {
-                    Layout.fillWidth: true
-                    Layout.leftMargin: root.plateInset
-                    Layout.rightMargin: root.plateInset
-                    Layout.bottomMargin: root.paneInset
-                    visible: IrisNiri.pending !== null
-                    implicitHeight: Math.round(48 * root.d)
-                    radius: IrisStyle.radiusTile
-                    color: IrisStyle.tintFill(IrisStyle.accent)
-                    RowLayout {
-                        anchors.fill: parent
-                        anchors.leftMargin: 16 * root.d
-                        anchors.rightMargin: 8 * root.d
-                        spacing: 8 * root.d
-                        MaterialSymbol { text: "monitor"; iconSize: Math.round(18 * root.d); color: IrisStyle.accent }
-                        IrisText {
-                            Layout.fillWidth: true
-                            text: Translation.tr("Keep this display setting? It goes back in %1 s.").arg(IrisNiri.secondsLeft)
-                            font.pixelSize: IrisStyle.typeLabel
-                            elide: Text.ElideRight
-                        }
-                        IrisButton { text: Translation.tr("Revert"); quiet: true; buttonRadius: height / 2; onClicked: IrisNiri.revertDisplay() }
-                        IrisButton { text: Translation.tr("Keep"); emphasized: true; buttonRadius: height / 2; onClicked: IrisNiri.keepDisplay() }
                     }
                 }
 
@@ -1504,6 +1484,18 @@ Item {
             target: homeEditorHost.item
             function onVisibleChanged() { homeEditorHost.fading = homeEditorHost.item.visible }
         }
+    }
+
+    // What a change just did and the way back, a display change waiting for Keep: the Settings island at the body's
+    // foot, over the rows in every layout (IrisSettingsIsland).
+    IrisSettingsIsland {
+        id: liveIsland
+        d: root.d
+        room: frame.width
+        allowed: frame.open && !IrisOptions.homeEditing && !root.switching
+        x: Math.round(frame.x + (frame.width - width) / 2)
+        y: Math.round(frame.y + frame.height - height - Math.max(Math.round(16 * root.d), frame.radius * 0.6))
+        z: 20
     }
 
     // The toolbar's actions: one anatomy, a quiet capsule with its glyph. None of them is the page's answer, so none

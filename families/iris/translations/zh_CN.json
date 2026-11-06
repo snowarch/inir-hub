@@ -2231,5 +2231,16 @@
   "A status bar: the time, the connection and the battery, or on a desktop the weather.": "状态栏：时间、连接和电池，台式机上显示天气。",
   "Language & time": "语言与时间",
   "Apps & login": "应用与登录",
-  "%1 pinned": "已固定 %1 个"
+  "%1 pinned": "已固定 %1 个",
+  "Defaults restored": "已恢复默认设置",
+  "Pinned to Home": "已固定到首页",
+  "Removed from Home": "已从首页移除",
+  "%1 chosen": "已选 %1 项",
+  "Keep this display setting?": "保留此显示设置？",
+  "Variable refresh rate": "可变刷新率",
+  "Show my city": "显示我的城市",
+  "Off, no surface prints where you are: the Island, the lock screen, sidebars, widgets. For streams and screen sharing.": "关闭后，任何界面都不显示你的位置：灵动岛、锁屏、侧边栏、小组件。适合直播和屏幕共享。",
+  "Back as they were": "已恢复原样",
+  "Deleted": "已删除",
+  "Restored": "已恢复"
 }

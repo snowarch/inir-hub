@@ -2231,5 +2231,16 @@
   "A status bar: the time, the connection and the battery, or on a desktop the weather.": "شريط الحالة: الوقت والاتصال والبطارية، أو الطقس على الحاسوب المكتبي.",
   "Language & time": "اللغة والوقت",
   "Apps & login": "التطبيقات وتسجيل الدخول",
-  "%1 pinned": "%1 مثبتة"
+  "%1 pinned": "%1 مثبتة",
+  "Defaults restored": "تمت استعادة الإعدادات الافتراضية",
+  "Pinned to Home": "مثبّت في الرئيسية",
+  "Removed from Home": "أُزيل من الرئيسية",
+  "%1 chosen": "%1 مختارة",
+  "Keep this display setting?": "الاحتفاظ بإعداد العرض هذا؟",
+  "Variable refresh rate": "معدل تحديث متغير",
+  "Show my city": "إظهار مدينتي",
+  "Off, no surface prints where you are: the Island, the lock screen, sidebars, widgets. For streams and screen sharing.": "عند إيقافه، لا يعرض أي سطح مكانك: الجزيرة وشاشة القفل والأشرطة الجانبية والأدوات. للبث ومشاركة الشاشة.",
+  "Back as they were": "عادت كما كانت",
+  "Deleted": "حُذف",
+  "Restored": "استُعيد"
 }

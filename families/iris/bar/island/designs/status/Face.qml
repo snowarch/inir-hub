@@ -103,7 +103,7 @@ Item {
                 color: root.pill
                 Row {
                     anchors.centerIn: parent
-                    spacing: Math.round(1 * root.d)
+                    spacing: Math.round(2 * root.d)
                     MaterialSymbol {
                         visible: root.carry === "battery" && Battery.isCharging
                         anchors.verticalCenter: parent.verticalCenter

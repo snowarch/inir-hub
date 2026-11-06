@@ -2231,5 +2231,16 @@
   "A status bar: the time, the connection and the battery, or on a desktop the weather.": "A status bar: the time, the connection and the battery, or on a desktop the weather.",
   "Language & time": "Language & time",
   "Apps & login": "Apps & login",
-  "%1 pinned": "%1 pinned"
+  "%1 pinned": "%1 pinned",
+  "Defaults restored": "Defaults restored",
+  "Pinned to Home": "Pinned to Home",
+  "Removed from Home": "Removed from Home",
+  "%1 chosen": "%1 chosen",
+  "Keep this display setting?": "Keep this display setting?",
+  "Variable refresh rate": "Variable refresh rate",
+  "Show my city": "Show my city",
+  "Off, no surface prints where you are: the Island, the lock screen, sidebars, widgets. For streams and screen sharing.": "Off, no surface prints where you are: the Island, the lock screen, sidebars, widgets. For streams and screen sharing.",
+  "Back as they were": "Back as they were",
+  "Deleted": "Deleted",
+  "Restored": "Restored"
 }

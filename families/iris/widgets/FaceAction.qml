@@ -14,8 +14,9 @@ Rectangle {
     property bool danger: false
     // Its name beside the glyph whenever the key is wide enough to hold both.
     property bool worded: false
-    readonly property bool namesItself: root.worded && root.name.length > 0
-        && keyGlyph.implicitWidth + keyRow.spacing + keyName.implicitWidth + root.face.dp(20) <= root.width
+    // How wide the key is with its name, so a row can give each key its own word's room.
+    readonly property real wordedWidth: keyGlyph.implicitWidth + keyRow.spacing + keyName.implicitWidth + root.face.dp(20)
+    readonly property bool namesItself: root.worded && root.name.length > 0 && root.wordedWidth <= root.width + 0.5
     signal activated()
 
     implicitWidth: root.face.dp(32)

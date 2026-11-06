@@ -8,6 +8,7 @@ import qs
 import qs.services
 import qs.modules.common
 import qs.modules.common.widgets
+import qs.modules.common.functions
 import qs.modules.iris.style
 import qs.modules.iris.components
 import qs.modules.shared.mediaControls.components
@@ -49,14 +50,14 @@ GridLayout {
         implicitHeight: grid.pillHeight
         radius: IrisStyle.capsule(height)
         color: pillTap.hovered ? IrisStyle.fillHover : IrisStyle.fill
-        Behavior on color { ColorAnimation { duration: IrisStyle.duration(110) } }
+        Behavior on color { ColorAnimation { duration: IrisStyle.duration(110); easing.type: IrisStyle.feedbackEasing } }
         HoverHandler { id: pillTap; cursorShape: Qt.PointingHandCursor }
         TapHandler { onTapped: pill.tapped() }
         RowLayout {
             anchors.fill: parent
             anchors.leftMargin: Math.round(8 * grid.d)
             anchors.rightMargin: Math.round(8 * grid.d)
-            spacing: Math.round(9 * grid.d)
+            spacing: Math.round(10 * grid.d)
             Item {
                 id: leadSlot
                 Layout.preferredWidth: grid.pillHeight - Math.round(16 * grid.d)
@@ -252,7 +253,7 @@ GridLayout {
         implicitHeight: songColumn.implicitHeight + Math.round(24 * grid.d)
         radius: Math.round(22 * grid.d)
         color: songHover.hovered ? IrisStyle.fillHover : IrisStyle.fill
-        Behavior on color { ColorAnimation { duration: IrisStyle.duration(110) } }
+        Behavior on color { ColorAnimation { duration: IrisStyle.duration(110); easing.type: IrisStyle.feedbackEasing } }
         HoverHandler { id: songHover }
         TapHandler { onTapped: grid.island.page = "media" }
         PlayerBase {
