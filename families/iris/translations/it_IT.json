@@ -2401,5 +2401,7 @@
   "Karachi": "Karachi",
   "Jakarta": "Giacarta",
   "Ho Chi Minh City": "Città di Ho Chi Minh",
-  "Manila": "Manila"
+  "Manila": "Manila",
+  "When several run at once, the first takes the Island and the next waits in the bubble beside it.": "Quando ne sono attive diverse, la prima occupa l'Isola e la successiva attende nella bolla accanto.",
+  "The Island's height, clock size and breathing room, set together.": "Altezza dell'Isola, dimensione dell'orologio e respiro, regolati insieme."
 }

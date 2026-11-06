@@ -115,7 +115,7 @@ Item {
         font.features: ({ "tnum": 1 })
     }
     function cellWidth(cell: var, named: bool): real {
-        const sky = root.glyphSize + Math.round(3 * root.d) + Math.ceil(tempMetrics.advanceWidth(String(cell.temp)))
+        const sky = root.glyphSize + Math.round(2 * root.d) + Math.ceil(tempMetrics.advanceWidth(String(cell.temp)))
         if (!named)
             return sky
         const label = Math.ceil(labelMetrics.advanceWidth(String(cell.label)))
@@ -197,7 +197,7 @@ Item {
                         color: cell.index === 0 ? IrisStyle.text : IrisStyle.textTertiary
                     }
                     Row {
-                        spacing: Math.round(3 * root.d)
+                        spacing: Math.round(2 * root.d)
                         MaterialSymbol {
                             anchors.verticalCenter: parent.verticalCenter
                             text: cell.modelData.glyph

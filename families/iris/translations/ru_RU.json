@@ -2401,5 +2401,7 @@
   "Karachi": "Карачи",
   "Jakarta": "Джакарта",
   "Ho Chi Minh City": "Хошимин",
-  "Manila": "Манила"
+  "Manila": "Манила",
+  "When several run at once, the first takes the Island and the next waits in the bubble beside it.": "Если идёт несколько сразу, первая занимает Остров, а следующая ждёт в пузыре рядом.",
+  "The Island's height, clock size and breathing room, set together.": "Высота Острова, размер часов и отступы вокруг — вместе."
 }

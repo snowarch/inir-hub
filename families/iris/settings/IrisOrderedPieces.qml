@@ -16,6 +16,8 @@ import qs.modules.iris.style
 //   spec.current()  the ids in use, read the way the panel reads them (aliases and old configs resolved)
 //   spec.choices    { value, label, glyph, description, category }, every id the list can hold
 //   spec.groups     { id, label } in the order the picker shows them; spec.limit caps how many it carries
+//   spec.fixed      every choice always stays: the list only orders them (no ×, no Add); spec.off(id) greys one
+//                   switched off elsewhere, still in its place
 ColumnLayout {
     id: root
 
@@ -26,7 +28,8 @@ ColumnLayout {
     readonly property int limit: Number(root.spec.limit ?? 0)
     readonly property bool full: root.limit > 0 && root.picked.length >= root.limit
     readonly property var rest: root.choices.filter(choice => !root.picked.includes(String(choice.value)))
-    readonly property real rowHeight: Math.round(56 * root.d)
+    readonly property bool fixed: root.spec.fixed === true
+    readonly property real rowHeight: Math.round((root.fixed ? 48 : 56) * root.d)
     property bool adding: false
     property int dragFrom: -1
     property int dragTo: -1
@@ -88,6 +91,7 @@ ColumnLayout {
                 required property int index
                 readonly property var choice: root.choiceOf(row.modelData)
                 readonly property bool dragged: root.dragFrom === row.index
+                readonly property bool off: root.spec.off?.(row.modelData) === true
                 property real dragY: 0
 
                 width: list.width
@@ -108,7 +112,7 @@ ColumnLayout {
                     if ((event.modifiers & Qt.AltModifier) && (event.key === Qt.Key_Up || event.key === Qt.Key_Down)) {
                         root.move(row.index, row.index + (event.key === Qt.Key_Up ? -1 : 1))
                         event.accepted = true
-                    } else if (event.key === Qt.Key_Delete) {
+                    } else if (event.key === Qt.Key_Delete && !root.fixed) {
                         root.remove(row.modelData)
                         event.accepted = true
                     }
@@ -149,18 +153,19 @@ ColumnLayout {
                     horizontalAlignment: Text.AlignHCenter
                     text: String(row.choice.glyph ?? "radio_button_unchecked")
                     iconSize: Math.round(22 * root.d)
-                    color: IrisStyle.accent
+                    color: row.off ? IrisStyle.muted : IrisStyle.accent
                 }
                 Column {
                     anchors.left: glyph.right
                     anchors.leftMargin: Math.round(12 * root.d)
-                    anchors.right: remove.left
+                    anchors.right: root.fixed ? offWord.left : remove.left
                     anchors.rightMargin: Math.round(12 * root.d)
                     anchors.verticalCenter: parent.verticalCenter
                     spacing: Math.round(2 * root.d)
                     IrisText {
                         width: parent.width
                         text: Translation.tr(String(row.choice.label))
+                        color: row.off ? IrisStyle.muted : IrisStyle.text
                         font.pixelSize: IrisStyle.typeBody
                         elide: Text.ElideRight
                     }
@@ -176,7 +181,7 @@ ColumnLayout {
 
                 MouseArea {
                     anchors.left: parent.left
-                    anchors.right: remove.left
+                    anchors.right: root.fixed ? parent.right : remove.left
                     anchors.top: parent.top
                     anchors.bottom: parent.bottom
                     cursorShape: pressed ? Qt.ClosedHandCursor : Qt.OpenHandCursor
@@ -204,8 +209,21 @@ ColumnLayout {
                     onCanceled: { root.dragFrom = -1; root.dragTo = -1 }
                 }
 
+                // Switched off where it is chosen: it keeps its place, so turning it back on finds it there.
+                IrisText {
+                    id: offWord
+                    anchors.right: parent.right
+                    anchors.rightMargin: Math.round(12 * root.d)
+                    anchors.verticalCenter: parent.verticalCenter
+                    visible: root.fixed && row.off
+                    width: visible ? implicitWidth : 0
+                    text: Translation.tr("Off")
+                    color: IrisStyle.muted
+                    font.pixelSize: IrisStyle.typeMeta
+                }
                 IrisIconButton {
                     id: remove
+                    visible: !root.fixed
                     anchors.right: parent.right
                     anchors.verticalCenter: parent.verticalCenter
                     materialIcon: "close"
@@ -218,7 +236,7 @@ ColumnLayout {
 
     // The way in to the rest: a quiet row that opens them in place, or says why it cannot.
     IrisButton {
-        visible: root.rest.length > 0
+        visible: root.rest.length > 0 && !root.fixed
         Layout.fillWidth: true
         implicitHeight: Math.round(48 * root.d)
         quiet: true

@@ -2401,5 +2401,7 @@
   "Karachi": "Karaçi",
   "Jakarta": "Cakarta",
   "Ho Chi Minh City": "Ho Chi Minh Kenti",
-  "Manila": "Manila"
+  "Manila": "Manila",
+  "When several run at once, the first takes the Island and the next waits in the bubble beside it.": "Aynı anda birkaç tane çalışırken ilki Ada'yı kaplar, sonraki yanındaki baloncukta bekler.",
+  "The Island's height, clock size and breathing room, set together.": "Ada'nın yüksekliği, saat boyutu ve çevresindeki boşluk birlikte."
 }

@@ -354,6 +354,7 @@ JsonObject {
             property bool call: true
             property bool media: true
             property bool micGlow: true // the screen's edges glow once when an app starts listening
+            property list<string> order: ["record", "timer", "task", "camera", "call", "media"] // which takes the Island first
         }
         // Each Island design's own options (Settings › Island › Face), read by its Face.qml.
         property JsonObject faces: JsonObject {

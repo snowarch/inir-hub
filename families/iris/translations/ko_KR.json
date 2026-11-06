@@ -2401,5 +2401,7 @@
   "Karachi": "카라치",
   "Jakarta": "자카르타",
   "Ho Chi Minh City": "호찌민",
-  "Manila": "마닐라"
+  "Manila": "마닐라",
+  "When several run at once, the first takes the Island and the next waits in the bubble beside it.": "여러 개가 동시에 실행되면 첫 번째가 아일랜드를 차지하고 다음은 옆 버블에서 기다립니다.",
+  "The Island's height, clock size and breathing room, set together.": "아일랜드의 높이, 시계 크기, 주변 여백을 함께 설정합니다."
 }

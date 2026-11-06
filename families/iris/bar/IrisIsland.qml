@@ -157,21 +157,24 @@ Item {
     readonly property var tasks: LiveActivities.active.slice().sort((a, b) => b.started - a.started)
     readonly property var task: root.tasks[0] ?? null
     readonly property color taskTint: root.nothingLook ? IrisStyle.text : IrisStyle.identityColor(String(root.task?.tint ?? "lavender"))
-    // Priority, as Live Activities: what records you, then what counts down, then jobs, then the song. The first is
-    // the compact Island; the second detaches as the minimal bubble; the expanded page lists them all.
-    // Each kind takes the Island only while its switch is on (Settings › Island › Live activities); the privacy dot
-    // shows either way. A video call with the camera tile off shows as a call.
+    // Priority, as Live Activities, in the person's order (factory: what records you, then what counts down, then
+    // jobs, the camera, a call, the song). The first is the compact Island; the second detaches as the minimal bubble;
+    // the expanded page lists them all. Each kind takes the Island only while its switch is on (Settings › Island ›
+    // Live activities); the privacy dot shows either way. A video call with the camera tile off shows as a call.
     readonly property var acts: root.options?.activities ?? ({})
     readonly property bool cameraTile: Privacy.cameraActive && root.acts.camera !== false
+    readonly property var activityOrder: IrisStyle.islandActivityOrder(root.acts.order)
     readonly property var activities: {
         const list = []
-        if (root.recording && root.acts.record !== false) list.push("record")
-        if (root.timerKind.length > 0 && root.acts.timer !== false) list.push("timer")
-        if (root.acts.task !== false)
-            for (const job of root.tasks.slice(0, 2)) list.push("task")
-        if (root.cameraTile) list.push("camera")
-        if (Privacy.micActive && !root.cameraTile && root.acts.call !== false) list.push("mic")
-        if (root.hasMedia && root.acts.media !== false) list.push("media")
+        for (const kind of root.activityOrder) {
+            if (root.acts[kind] === false) continue
+            if (kind === "record" && root.recording) list.push("record")
+            else if (kind === "timer" && root.timerKind.length > 0) list.push("timer")
+            else if (kind === "task") for (const job of root.tasks.slice(0, 2)) list.push("task")
+            else if (kind === "camera" && root.cameraTile) list.push("camera")
+            else if (kind === "call" && Privacy.micActive && !root.cameraTile) list.push("mic")
+            else if (kind === "media" && root.hasMedia) list.push("media")
+        }
         return list
     }
     readonly property string primary: root.activities[0] ?? "idle"
@@ -180,8 +183,11 @@ Item {
     readonly property bool privacyLive: Privacy.anyActive
     // A Cluster Island is the clock with the song beside it; a live activity (recording, a timer, a job) takes the
     // Island itself, as on a phone, and what comes after it detaches into the left bubble.
-    readonly property string islandActivity: IrisStyle.cluster && ["record", "timer", "task", "mic", "camera"].includes(root.primary) ? root.primary : ""
-    readonly property string leftKind: root.islandActivity.length > 0 ? root.secondary : root.primary === "idle" ? "" : root.primary
+    // The song never takes a Cluster Island: the first activity that is not it does, wherever the song stands.
+    readonly property int islandActivityAt: IrisStyle.cluster ? root.activities.findIndex(kind => kind !== "media") : -1
+    readonly property string islandActivity: root.islandActivityAt >= 0 ? root.activities[root.islandActivityAt] : ""
+    readonly property string leftKind: root.islandActivityAt >= 0 ? (root.activities.find((kind, at) => at !== root.islandActivityAt) ?? "")
+        : root.primary === "idle" ? "" : root.primary
     // Where a tap on the Island goes: what it shows, who is using the mic or screen, else the desktop page.
     readonly property string tapPage: IrisStyle.cluster
         ? (root.islandActivity.length > 0 || root.privacyLive ? "activity" : "desktop") : root.pageFor(root.primary)
@@ -864,7 +870,8 @@ Item {
         : root.faceTakes ? (designFace.item?.contentWidth ?? 0)
         : root.compactRows[root.compactMode]?.implicitWidth ?? 0
     readonly property real compactFloor: root.compactHeight * 2.1
-    readonly property real idleCeiling: Math.round(320 * root.d)
+    // A larger clock (Settings › Island › Size) takes a wider resting Island with it, so a face keeps its extras.
+    readonly property real idleCeiling: Math.round(320 * root.d * Math.max(1, root.clockScale))
     readonly property real compactCeiling: Math.min(root.availableWidth, root.compactMode === "media" ? 380 * root.d
         : root.compactMode === "event" || root.compactMode === "drop" ? 340 * root.d : root.idleCeiling)
     // The room a Design's face has at rest: the idle ceiling, less the Island's breathing and the pieces it carries.

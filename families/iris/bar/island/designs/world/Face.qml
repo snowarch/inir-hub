@@ -94,7 +94,7 @@ Item {
         readonly property string time: city.known ? IrisFaceData.clockText(city.at) : "--:--"
         readonly property string apartText: city.known ? root.gap(city.shift) : ""
         readonly property bool apartShown: root.showApart && city.apartText.length > 0
-        spacing: Math.round(7 * root.d)
+        spacing: Math.round(6 * root.d)
 
         // Its width with or without each extra, from what each text measures alone (never from the row it lays out).
         function need(apart: bool, watch: bool): real {
@@ -170,7 +170,7 @@ Item {
             verticalItemAlignment: Grid.AlignVCenter
             Row {
                 id: nameRow
-                spacing: Math.round(5 * root.d)
+                spacing: Math.round(4 * root.d)
                 IrisText {
                     id: nameText
                     text: city.name
@@ -190,7 +190,7 @@ Item {
             }
             Row {
                 id: timeRow
-                spacing: Math.round(3 * root.d)
+                spacing: Math.round(4 * root.d)
                 IrisText {
                     id: cityTime
                     text: city.time
