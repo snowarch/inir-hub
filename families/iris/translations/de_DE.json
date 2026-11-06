@@ -2434,5 +2434,9 @@
   "The right side fills over the last hour before an event and stays lit while it runs.": "Die rechte Seite füllt sich in der letzten Stunde vor einem Termin und bleibt an, solange er läuft.",
   "Charge in figures": "Ladung in Zahlen",
   "While charging, the percentage beside the time.": "Beim Laden der Prozentwert neben der Uhrzeit.",
-  "Vinyl": "Vinyl"
+  "Vinyl": "Vinyl",
+  "Offset": "Versatz",
+  "Here": "Hier",
+  "Same time": "Gleiche Zeit",
+  "Next city": "Nächste Stadt"
 }

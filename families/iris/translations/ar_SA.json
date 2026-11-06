@@ -2434,5 +2434,9 @@
   "The right side fills over the last hour before an event and stays lit while it runs.": "يمتلئ الجانب الأيمن خلال الساعة الأخيرة قبل الحدث ويبقى مضاءً أثناءه.",
   "Charge in figures": "الشحن بالأرقام",
   "While charging, the percentage beside the time.": "أثناء الشحن، النسبة المئوية بجانب الوقت.",
-  "Vinyl": "أسطوانة"
+  "Vinyl": "أسطوانة",
+  "Offset": "الفارق",
+  "Here": "هنا",
+  "Same time": "التوقيت نفسه",
+  "Next city": "المدينة التالية"
 }

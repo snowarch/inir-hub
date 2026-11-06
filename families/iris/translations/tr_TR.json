@@ -2434,5 +2434,9 @@
   "The right side fills over the last hour before an event and stays lit while it runs.": "Sağ taraf bir etkinlikten önceki son saatte dolar ve etkinlik sürdükçe yanık kalır.",
   "Charge in figures": "Şarj rakamla",
   "While charging, the percentage beside the time.": "Şarj olurken saatin yanında yüzde.",
-  "Vinyl": "Plak"
+  "Vinyl": "Plak",
+  "Offset": "Fark",
+  "Here": "Burada",
+  "Same time": "Aynı saat",
+  "Next city": "Sonraki şehir"
 }

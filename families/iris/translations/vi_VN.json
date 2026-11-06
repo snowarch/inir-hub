@@ -2434,5 +2434,9 @@
   "The right side fills over the last hour before an event and stays lit while it runs.": "Bên phải đầy dần trong giờ cuối trước sự kiện và sáng suốt khi sự kiện diễn ra.",
   "Charge in figures": "Mức sạc bằng số",
   "While charging, the percentage beside the time.": "Khi đang sạc, phần trăm cạnh giờ.",
-  "Vinyl": "Đĩa than"
+  "Vinyl": "Đĩa than",
+  "Offset": "Chênh lệch",
+  "Here": "Tại đây",
+  "Same time": "Cùng giờ",
+  "Next city": "Thành phố tiếp theo"
 }

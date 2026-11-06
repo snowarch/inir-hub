@@ -2434,5 +2434,9 @@
   "The right side fills over the last hour before an event and stays lit while it runs.": "Il lato destro si riempie nell'ultima ora prima di un evento e resta acceso mentre è in corso.",
   "Charge in figures": "Carica in cifre",
   "While charging, the percentage beside the time.": "Durante la ricarica, la percentuale accanto all'ora.",
-  "Vinyl": "Vinile"
+  "Vinyl": "Vinile",
+  "Offset": "Differenza",
+  "Here": "Qui",
+  "Same time": "Stessa ora",
+  "Next city": "Città successiva"
 }

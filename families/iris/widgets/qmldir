@@ -18,6 +18,7 @@ ClockGreeting 1.0 ClockGreeting.qml
 WeatherWeek 1.0 WeatherWeek.qml
 NowPlayingCard 1.0 NowPlayingCard.qml
 NowPlayingVinyl 1.0 NowPlayingVinyl.qml
+WorldClockOffset 1.0 WorldClockOffset.qml
 IrisClockFace 1.0 IrisClockFace.qml
 IrisCalendarFace 1.0 IrisCalendarFace.qml
 FaceAvatar 1.0 FaceAvatar.qml

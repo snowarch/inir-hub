@@ -2434,5 +2434,9 @@
   "The right side fills over the last hour before an event and stays lit while it runs.": "किसी इवेंट से पहले के आख़िरी घंटे में दायाँ किनारा भरता है और इवेंट चलने तक जलता रहता है।",
   "Charge in figures": "चार्ज अंकों में",
   "While charging, the percentage beside the time.": "चार्ज होते समय, समय के पास प्रतिशत।",
-  "Vinyl": "विनाइल"
+  "Vinyl": "विनाइल",
+  "Offset": "अंतर",
+  "Here": "यहाँ",
+  "Same time": "एक ही समय",
+  "Next city": "अगला शहर"
 }

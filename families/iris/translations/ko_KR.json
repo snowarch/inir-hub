@@ -2434,5 +2434,9 @@
   "The right side fills over the last hour before an event and stays lit while it runs.": "일정 전 마지막 한 시간 동안 오른쪽이 차오르고, 일정이 진행되는 동안 켜져 있습니다.",
   "Charge in figures": "충전량 숫자로",
   "While charging, the percentage beside the time.": "충전 중에는 시간 옆에 퍼센트를 표시합니다.",
-  "Vinyl": "LP"
+  "Vinyl": "LP",
+  "Offset": "시차",
+  "Here": "여기",
+  "Same time": "같은 시간",
+  "Next city": "다음 도시"
 }

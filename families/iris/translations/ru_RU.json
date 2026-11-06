@@ -2434,5 +2434,9 @@
   "The right side fills over the last hour before an event and stays lit while it runs.": "Правая сторона наполняется за последний час до события и горит, пока оно идёт.",
   "Charge in figures": "Заряд цифрами",
   "While charging, the percentage beside the time.": "Во время зарядки — процент рядом со временем.",
-  "Vinyl": "Винил"
+  "Vinyl": "Винил",
+  "Offset": "Разница",
+  "Here": "Здесь",
+  "Same time": "То же время",
+  "Next city": "Следующий город"
 }

@@ -2434,5 +2434,9 @@
   "The right side fills over the last hour before an event and stays lit while it runs.": "日程开始前的最后一小时，右侧逐渐亮满，日程进行中保持亮起。",
   "Charge in figures": "以数字显示充电",
   "While charging, the percentage beside the time.": "充电时在时间旁显示百分比。",
-  "Vinyl": "黑胶"
+  "Vinyl": "黑胶",
+  "Offset": "时差",
+  "Here": "此地",
+  "Same time": "同一时间",
+  "Next city": "下一个城市"
 }

@@ -212,6 +212,9 @@
     "battery": [
       {"key":"iris.face","label":"Face","type":"choice","default":"classic","when":"face","choices":[["classic","Classic","battery_full"],["cells","Cells","battery_5_bar"]],"keywords":["cells","bars","battery"]}
     ],
+    "worldClock": [
+      {"key":"iris.face","label":"Face","type":"choice","default":"classic","when":"face","choices":[["classic","Classic","public"],["offset","Offset","more_time"]],"keywords":["offset","difference","hours","zones"]}
+    ],
     "*": [
       {"key":"iris.material","label":"Material","type":"choice","default":"auto","page":"look","tune":true,"when":["face",{"showBackground":true}],"choices":[["auto","Same as every widget"],["glass","Glass"],["solid","Solid"],["tinted","Tinted"]],"keywords":["glass","transparent","background","plate","fondo","vidrio"]}
     ]

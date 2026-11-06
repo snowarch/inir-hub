@@ -2434,5 +2434,9 @@
   "The right side fills over the last hour before an event and stays lit while it runs.": "הצד הימני מתמלא בשעה האחרונה לפני אירוע ונשאר דולק כל עוד הוא נמשך.",
   "Charge in figures": "טעינה במספרים",
   "While charging, the percentage beside the time.": "בזמן טעינה, האחוז לצד השעה.",
-  "Vinyl": "תקליט"
+  "Vinyl": "תקליט",
+  "Offset": "הפרש",
+  "Here": "כאן",
+  "Same time": "אותה שעה",
+  "Next city": "העיר הבאה"
 }

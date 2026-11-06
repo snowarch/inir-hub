@@ -2434,5 +2434,9 @@
   "The right side fills over the last hour before an event and stays lit while it runs.": "予定の前の1時間で右側が満ちていき、予定の間は灯ったままです。",
   "Charge in figures": "充電を数字で",
   "While charging, the percentage beside the time.": "充電中は時刻の横にパーセントを表示します。",
-  "Vinyl": "レコード"
+  "Vinyl": "レコード",
+  "Offset": "時差",
+  "Here": "現在地",
+  "Same time": "時差なし",
+  "Next city": "次の都市"
 }

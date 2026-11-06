@@ -2434,5 +2434,9 @@
   "The right side fills over the last hour before an event and stays lit while it runs.": "The right side fills over the last hour before an event and stays lit while it runs.",
   "Charge in figures": "Charge in figures",
   "While charging, the percentage beside the time.": "While charging, the percentage beside the time.",
-  "Vinyl": "Vinyl"
+  "Vinyl": "Vinyl",
+  "Offset": "Offset",
+  "Here": "Here",
+  "Same time": "Same time",
+  "Next city": "Next city"
 }
