@@ -19,6 +19,8 @@ iRiS is the Island family. One Island sits on a screen edge and grows into whate
   - **Rings**: three rings for the day gone, the battery (the week on a desktop) and the month, beside the time.
   - **Aura**: the Island ringed in the colours of the spectrum; they turn once when the pointer is over it.
   - **Status**: a status bar: the time, the connection (cable, Wi-Fi bars or none), a red mark when the sound is off, and the battery with its figure. Without a battery it shows a connected headset's charge, else the weather, else the day.
+  - **Forecast**: the time, then the next hours the way a weather app lays them out: now first, each hour its sky in colour and its temperature. It moves on once an hour. Without weather it shows the day.
+  - **World**: the time here and in another city: a small watch with a light face by day and a dark one by night, the city's name over its time, how many hours apart it is, and a +1 when it is already tomorrow there.
 - Settings › Island › Face holds the options of the design you wear, and only those:
   - **Ledger**: how far ahead it looks for the next event (3, 12 or 24 hours).
   - **Tiles**: which tile is lit (the hour, the minutes or both) and whether the day sits beside them.
@@ -29,6 +31,8 @@ iRiS is the Island family. One Island sits on a screen edge and grows into whate
   - **Rings**: what each ring counts: the day, the week, the month, the year or the battery.
   - **Aura**: its colours (Spectrum, your accent, Sunset or Ocean) and whether they turn under the pointer.
   - **Status**: what its capsule carries (Auto, the battery, a headset, the sky or the day), the connection mark and the red sound-off mark.
+  - **Forecast**: how many hours it shows (2, 3 or 4, now included; a narrow Island shows fewer), each hour's name, and the sky in colour or in grey.
+  - **World**: the city (50 to pick from, searchable), a second city beside it, the hours apart and the small watch. Short of room the hours apart step out first, then the watches, then the second city, so no name or time is ever cut.
   - **Halo**: Sunlight, its glow where the sun stands.
 - Live activities look like a phone's Dynamic Island:
   - **Music** opens into a player with the cover, the song and its artist, the time on both sides of the bar and large play controls.

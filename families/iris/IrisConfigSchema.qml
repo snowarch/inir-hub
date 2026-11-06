@@ -395,6 +395,17 @@ JsonObject {
                 property bool connection: true
                 property bool sound: true
             }
+            property JsonObject forecast: JsonObject {
+                property int hours: 3 // cells, now included: 2, 3 or 4
+                property bool labels: true
+                property bool colour: true
+            }
+            property JsonObject world: JsonObject {
+                property string zone: "Asia/Tokyo" // an IANA zone (IrisFaceData.cities offers 33)
+                property string second: "none" // a second zone, or "none"
+                property bool apart: true
+                property bool watch: true
+            }
         }
         property string trailing: "controls" // Cluster trailing bubble: "controls", "notifications", "weather", "sound", "mic" or "none"
         property int height: 42

@@ -370,6 +370,7 @@ ClippingRectangle {
                 QtObject {
                     id: faceSample
                     readonly property real compactHeight: root.island.height
+                    readonly property real faceRoom: Math.max(0, root.island.width - Math.round(24 * root.d))
                     readonly property color clockAccent: root.clockAccent
                     readonly property real figureSize: IrisStyle.typeHeadline * root.clockScale
                     readonly property bool nothingLook: IrisStyle.nothingAt("island")

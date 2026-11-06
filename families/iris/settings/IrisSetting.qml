@@ -1055,6 +1055,8 @@ Item {
             QtObject {
                 id: sample
                 readonly property real compactHeight: Math.round(36 * root.d)
+                // The card's small Island: the screen strip less its margins and the body's own padding.
+                readonly property real faceRoom: Math.max(0, faces.cardWidth - Math.round(56 * root.d))
                 readonly property color clockAccent: IrisStyle.clockAccent
                 readonly property real figureSize: IrisStyle.typeHeadline
                 readonly property bool nothingLook: IrisStyle.nothingAt("island")

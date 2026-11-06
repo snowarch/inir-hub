@@ -74,7 +74,7 @@ QtObject {
     // Island to load them and by Settings to offer only the rows that still act under the worn design.
     readonly property var islandDesignParts: ({ ledger: ["Face.qml", "Nav.qml", "Desktop.qml"], tiles: ["Face.qml", "Nav.qml", "Desktop.qml"],
         dial: ["Face.qml"], marquee: ["Face.qml"], duo: ["Face.qml"], headline: ["Face.qml"], rings: ["Face.qml"], aura: ["Face.qml"],
-        status: ["Face.qml"] })
+        status: ["Face.qml"], forecast: ["Face.qml"], world: ["Face.qml"] })
 
     readonly property real density: Math.max(0.8, Math.min(1.35, Number(root.appearance?.density ?? 1.0)))
     // How a Settings row offers a list too long for a segmented control: "inline" opens it in place under the row as a

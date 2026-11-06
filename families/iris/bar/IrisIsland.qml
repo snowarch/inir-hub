@@ -864,8 +864,13 @@ Item {
         : root.faceTakes ? (designFace.item?.contentWidth ?? 0)
         : root.compactRows[root.compactMode]?.implicitWidth ?? 0
     readonly property real compactFloor: root.compactHeight * 2.1
-    readonly property real compactCeiling: Math.min(root.availableWidth,
-        (root.compactMode === "media" ? 380 : root.compactMode === "event" || root.compactMode === "drop" ? 340 : 320) * root.d)
+    readonly property real idleCeiling: Math.round(320 * root.d)
+    readonly property real compactCeiling: Math.min(root.availableWidth, root.compactMode === "media" ? 380 * root.d
+        : root.compactMode === "event" || root.compactMode === "drop" ? 340 * root.d : root.idleCeiling)
+    // The room a Design's face has at rest: the idle ceiling, less the Island's breathing and the pieces it carries.
+    // A face that would pass it gives up its extras first (designs/*/Face.qml), so the Island never cuts it.
+    readonly property real faceRoom: Math.max(0, Math.min(root.idleCeiling, root.availableWidth - root.barPieceReserve)
+        - Math.round(29 * root.d * root.breathing))
     // The ceiling holds the Island's own content; the pieces it carries come on top of it, or they would be
     // squeezed over the clock.
     readonly property real compactTargetWidth: root.spanning ? root.fullChassisWidth
