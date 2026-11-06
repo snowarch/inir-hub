@@ -2424,5 +2424,15 @@
   "Tap one to go there": "Ketuk salah satu untuk ke sana",
   "How large numbers read: the dot matrix of Nothing OS, or Archivo's wide figures.": "Cara angka besar tampil: matriks titik Nothing OS atau angka lebar Archivo.",
   "Each digit a matrix of round dots.": "Setiap digit berupa matriks titik bulat.",
-  "Wide, bold figures.": "Angka lebar dan tebal."
+  "Wide, bold figures.": "Angka lebar dan tebal.",
+  "Lamps in the rim, as on a Nothing Phone: the battery along the foot, notifications and the next event up the sides.": "Lampu di tepinya, seperti di Nothing Phone: baterai di sepanjang dasar, notifikasi dan acara berikutnya di sisi.",
+  "Foot": "Dasar",
+  "What the lamp along the foot counts: the battery's charge, or the hour gone.": "Yang dihitung lampu di dasar: isi baterai, atau jam yang sudah lewat.",
+  "Notifications lamp": "Lampu notifikasi",
+  "The left side lights a third for each notification waiting, up to three.": "Sisi kiri menyala sepertiga untuk tiap notifikasi yang menunggu, hingga tiga.",
+  "Event lamp": "Lampu acara",
+  "The right side fills over the last hour before an event and stays lit while it runs.": "Sisi kanan terisi selama jam terakhir sebelum acara dan tetap menyala selama acara berlangsung.",
+  "Charge in figures": "Isi daya dalam angka",
+  "While charging, the percentage beside the time.": "Saat mengisi daya, persentasenya di samping jam.",
+  "Vinyl": "Piringan hitam"
 }

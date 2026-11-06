@@ -2424,5 +2424,15 @@
   "Tap one to go there": "Нажмите, чтобы перейти",
   "How large numbers read: the dot matrix of Nothing OS, or Archivo's wide figures.": "Как выглядят крупные цифры: точечная матрица Nothing OS или широкие цифры Archivo.",
   "Each digit a matrix of round dots.": "Каждая цифра — матрица из круглых точек.",
-  "Wide, bold figures.": "Широкие жирные цифры."
+  "Wide, bold figures.": "Широкие жирные цифры.",
+  "Lamps in the rim, as on a Nothing Phone: the battery along the foot, notifications and the next event up the sides.": "Лампы в ободке, как на Nothing Phone: заряд вдоль нижнего края, уведомления и ближайшее событие по бокам.",
+  "Foot": "Нижний край",
+  "What the lamp along the foot counts: the battery's charge, or the hour gone.": "Что считает нижняя лампа: заряд батареи или прошедшую часть часа.",
+  "Notifications lamp": "Лампа уведомлений",
+  "The left side lights a third for each notification waiting, up to three.": "Левая сторона загорается на треть за каждое ждущее уведомление, до трёх.",
+  "Event lamp": "Лампа событий",
+  "The right side fills over the last hour before an event and stays lit while it runs.": "Правая сторона наполняется за последний час до события и горит, пока оно идёт.",
+  "Charge in figures": "Заряд цифрами",
+  "While charging, the percentage beside the time.": "Во время зарядки — процент рядом со временем.",
+  "Vinyl": "Винил"
 }

@@ -2424,5 +2424,15 @@
   "Tap one to go there": "Gitmek için birine dokun",
   "How large numbers read: the dot matrix of Nothing OS, or Archivo's wide figures.": "Büyük rakamların görünümü: Nothing OS’un nokta matrisi ya da Archivo’nun geniş rakamları.",
   "Each digit a matrix of round dots.": "Her rakam yuvarlak noktalardan bir matris.",
-  "Wide, bold figures.": "Geniş, kalın rakamlar."
+  "Wide, bold figures.": "Geniş, kalın rakamlar.",
+  "Lamps in the rim, as on a Nothing Phone: the battery along the foot, notifications and the next event up the sides.": "Nothing Phone'daki gibi kenarda lambalar: tabanda pil, yanlarda bildirimler ve sıradaki etkinlik.",
+  "Foot": "Taban",
+  "What the lamp along the foot counts: the battery's charge, or the hour gone.": "Tabandaki lambanın saydığı: pil şarjı ya da saatin geçen kısmı.",
+  "Notifications lamp": "Bildirim lambası",
+  "The left side lights a third for each notification waiting, up to three.": "Bekleyen her bildirim için sol taraf üçte bir yanar, en fazla üç.",
+  "Event lamp": "Etkinlik lambası",
+  "The right side fills over the last hour before an event and stays lit while it runs.": "Sağ taraf bir etkinlikten önceki son saatte dolar ve etkinlik sürdükçe yanık kalır.",
+  "Charge in figures": "Şarj rakamla",
+  "While charging, the percentage beside the time.": "Şarj olurken saatin yanında yüzde.",
+  "Vinyl": "Plak"
 }

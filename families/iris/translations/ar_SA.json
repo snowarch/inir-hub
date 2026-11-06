@@ -2424,5 +2424,15 @@
   "Tap one to go there": "انقر على واحدة للانتقال إليها",
   "How large numbers read: the dot matrix of Nothing OS, or Archivo's wide figures.": "كيف تظهر الأرقام الكبيرة: مصفوفة النقاط في Nothing OS أو أرقام Archivo العريضة.",
   "Each digit a matrix of round dots.": "كل رقم مصفوفة من نقاط مستديرة.",
-  "Wide, bold figures.": "أرقام عريضة وسميكة."
+  "Wide, bold figures.": "أرقام عريضة وسميكة.",
+  "Lamps in the rim, as on a Nothing Phone: the battery along the foot, notifications and the next event up the sides.": "مصابيح في الحافة كما في هاتف Nothing: البطارية على طول القاعدة، والإشعارات والحدث التالي على الجانبين.",
+  "Foot": "القاعدة",
+  "What the lamp along the foot counts: the battery's charge, or the hour gone.": "ما يعدّه المصباح على طول القاعدة: شحن البطارية أو ما مضى من الساعة.",
+  "Notifications lamp": "مصباح الإشعارات",
+  "The left side lights a third for each notification waiting, up to three.": "يضيء الجانب الأيسر ثلثًا لكل إشعار ينتظر، حتى ثلاثة.",
+  "Event lamp": "مصباح الأحداث",
+  "The right side fills over the last hour before an event and stays lit while it runs.": "يمتلئ الجانب الأيمن خلال الساعة الأخيرة قبل الحدث ويبقى مضاءً أثناءه.",
+  "Charge in figures": "الشحن بالأرقام",
+  "While charging, the percentage beside the time.": "أثناء الشحن، النسبة المئوية بجانب الوقت.",
+  "Vinyl": "أسطوانة"
 }

@@ -2424,5 +2424,15 @@
   "Tap one to go there": "הקש על אחד כדי לעבור אליו",
   "How large numbers read: the dot matrix of Nothing OS, or Archivo's wide figures.": "איך נראים מספרים גדולים: מטריצת הנקודות של Nothing OS או הספרות הרחבות של Archivo.",
   "Each digit a matrix of round dots.": "כל ספרה היא מטריצה של נקודות עגולות.",
-  "Wide, bold figures.": "ספרות רחבות ומודגשות."
+  "Wide, bold figures.": "ספרות רחבות ומודגשות.",
+  "Lamps in the rim, as on a Nothing Phone: the battery along the foot, notifications and the next event up the sides.": "נורות בשפה, כמו בטלפון Nothing: הסוללה לאורך הבסיס, ההתראות והאירוע הבא בצדדים.",
+  "Foot": "בסיס",
+  "What the lamp along the foot counts: the battery's charge, or the hour gone.": "מה שהנורה לאורך הבסיס סופרת: טעינת הסוללה או מה שעבר מהשעה.",
+  "Notifications lamp": "נורת התראות",
+  "The left side lights a third for each notification waiting, up to three.": "הצד השמאלי נדלק בשליש לכל התראה שממתינה, עד שלוש.",
+  "Event lamp": "נורת אירועים",
+  "The right side fills over the last hour before an event and stays lit while it runs.": "הצד הימני מתמלא בשעה האחרונה לפני אירוע ונשאר דולק כל עוד הוא נמשך.",
+  "Charge in figures": "טעינה במספרים",
+  "While charging, the percentage beside the time.": "בזמן טעינה, האחוז לצד השעה.",
+  "Vinyl": "תקליט"
 }

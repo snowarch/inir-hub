@@ -402,6 +402,12 @@ JsonObject {
                 property string light: "battery" // "battery", "sky" or one of IrisStyle.islandLightChoices
                 property bool pool: true
             }
+            property JsonObject glyph: JsonObject {
+                property string foot: "battery" // "battery" or "hour"
+                property bool notifications: true
+                property bool events: true
+                property bool figure: true
+            }
             property JsonObject status: JsonObject {
                 property string carry: "auto" // "auto", "battery", "headset", "sky" or "day"
                 property bool connection: true

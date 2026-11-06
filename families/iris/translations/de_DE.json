@@ -2424,5 +2424,15 @@
   "Tap one to go there": "Tippe auf eine, um hinzuwechseln",
   "How large numbers read: the dot matrix of Nothing OS, or Archivo's wide figures.": "Wie große Zahlen aussehen: die Punktmatrix von Nothing OS oder die breiten Ziffern von Archivo.",
   "Each digit a matrix of round dots.": "Jede Ziffer eine Matrix aus runden Punkten.",
-  "Wide, bold figures.": "Breite, fette Ziffern."
+  "Wide, bold figures.": "Breite, fette Ziffern.",
+  "Lamps in the rim, as on a Nothing Phone: the battery along the foot, notifications and the next event up the sides.": "Lampen im Rand wie bei einem Nothing Phone: der Akku entlang der Unterkante, Mitteilungen und der nächste Termin an den Seiten.",
+  "Foot": "Unterkante",
+  "What the lamp along the foot counts: the battery's charge, or the hour gone.": "Was die Lampe an der Unterkante zählt: die Akkuladung oder die vergangene Stunde.",
+  "Notifications lamp": "Mitteilungslampe",
+  "The left side lights a third for each notification waiting, up to three.": "Die linke Seite leuchtet ein Drittel für jede wartende Mitteilung, bis zu drei.",
+  "Event lamp": "Terminlampe",
+  "The right side fills over the last hour before an event and stays lit while it runs.": "Die rechte Seite füllt sich in der letzten Stunde vor einem Termin und bleibt an, solange er läuft.",
+  "Charge in figures": "Ladung in Zahlen",
+  "While charging, the percentage beside the time.": "Beim Laden der Prozentwert neben der Uhrzeit.",
+  "Vinyl": "Vinyl"
 }

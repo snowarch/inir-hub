@@ -2424,5 +2424,15 @@
   "Tap one to go there": "点按一个即可前往",
   "How large numbers read: the dot matrix of Nothing OS, or Archivo's wide figures.": "大号数字的样式：Nothing OS 的点阵，或 Archivo 的宽体数字。",
   "Each digit a matrix of round dots.": "每个数字都由圆点阵列组成。",
-  "Wide, bold figures.": "宽而粗的数字。"
+  "Wide, bold figures.": "宽而粗的数字。",
+  "Lamps in the rim, as on a Nothing Phone: the battery along the foot, notifications and the next event up the sides.": "像 Nothing Phone 那样嵌在边缘的灯带：底边是电量，两侧是通知和下一个日程。",
+  "Foot": "底边",
+  "What the lamp along the foot counts: the battery's charge, or the hour gone.": "底边灯带显示什么：电池电量，或这一小时已过去的部分。",
+  "Notifications lamp": "通知灯",
+  "The left side lights a third for each notification waiting, up to three.": "每有一条未读通知，左侧就亮起三分之一，最多三条。",
+  "Event lamp": "日程灯",
+  "The right side fills over the last hour before an event and stays lit while it runs.": "日程开始前的最后一小时，右侧逐渐亮满，日程进行中保持亮起。",
+  "Charge in figures": "以数字显示充电",
+  "While charging, the percentage beside the time.": "充电时在时间旁显示百分比。",
+  "Vinyl": "黑胶"
 }

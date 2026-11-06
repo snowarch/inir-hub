@@ -1,12 +1,12 @@
 pragma ComponentBehavior: Bound
 import QtQuick
-import QtQuick.Shapes
 import qs
 import qs.services
 import qs.modules.common
 import qs.modules.common.widgets
 import qs.modules.iris.style
 import qs.modules.iris.components
+import qs.modules.iris.bar.island
 
 // Comet: one light runs round the Island's rim with its tail fading behind it, and where its head stands counts the
 // hour, the day or the battery, read clockwise from the top. Track lights the whole way gone instead of a tail. The
@@ -68,47 +68,26 @@ Item {
         PropertyAction { target: root; property: "lap"; value: 0 }
     }
 
-    Repeater {
-        model: [{ inset: 0, alpha: 0.3, width: 5 }, { inset: 1.5, alpha: 1, width: 1 }]
-        Shape {
-            id: rim
-            required property var modelData
-            readonly property real gap: Math.round(rim.modelData.inset * root.d)
-            readonly property real thick: root.line * rim.modelData.width
-            readonly property real headAngle: root.angleOf(root.pointAt(root.at, rim.width, rim.height), rim.width, rim.height)
-            // How far the light reaches behind the head, as a share of the turn: a fifth of the rim, or back to the top.
-            readonly property real reach: {
-                const back = root.track ? Qt.point(rim.width / 2, 0) : root.pointAt(root.at - 0.2, rim.width, rim.height)
-                const span = (root.angleOf(back, rim.width, rim.height) - rim.headAngle + 360) % 360 / 360
-                return Math.max(0.004, Math.min(0.996, span))
-            }
-            readonly property color dim: root.track ? Qt.alpha(IrisStyle.text, 0.12) : "transparent"
-            anchors.fill: parent
-            anchors.margins: Math.round(2 * root.d)
-            opacity: rim.modelData.alpha
-            preferredRendererType: Shape.CurveRenderer
-            ShapePath {
-                strokeColor: "transparent"
-                fillRule: ShapePath.OddEvenFill
-                fillGradient: ConicalGradient {
-                    centerX: rim.width / 2
-                    centerY: rim.height / 2
-                    angle: rim.headAngle
-                    GradientStop { position: 0.0; color: root.head }
-                    GradientStop { position: root.track ? rim.reach - 0.002 : rim.reach * 0.4; color: root.track ? root.palette[2] : Qt.alpha(root.palette[1], 0.75) }
-                    GradientStop { position: rim.reach; color: root.track ? rim.dim : Qt.alpha(root.palette[2], 0) }
-                    GradientStop { position: 1.0; color: rim.dim }
-                }
-                PathRectangle { x: rim.gap; y: rim.gap; width: rim.width - 2 * rim.gap; height: rim.height - 2 * rim.gap; radius: (rim.height - 2 * rim.gap) / 2 }
-                PathRectangle {
-                    x: rim.gap + rim.thick
-                    y: rim.gap + rim.thick
-                    width: Math.max(0, rim.width - 2 * (rim.gap + rim.thick))
-                    height: Math.max(0, rim.height - 2 * (rim.gap + rim.thick))
-                    radius: Math.max(0, (rim.height - 2 * (rim.gap + rim.thick)) / 2)
-                }
-            }
-        }
+    // The rim's own box (IslandRim draws inside a 2 dp margin): where the head stands on it, and how far round the
+    // light reaches behind it, a fifth of the rim or back to the top.
+    readonly property real rimWidth: root.width - 2 * Math.round(2 * root.d)
+    readonly property real rimHeight: root.height - 2 * Math.round(2 * root.d)
+    readonly property real headAngle: root.angleOf(root.pointAt(root.at, root.rimWidth, root.rimHeight), root.rimWidth, root.rimHeight)
+    readonly property real reach: {
+        const back = root.track ? Qt.point(root.rimWidth / 2, 0) : root.pointAt(root.at - 0.2, root.rimWidth, root.rimHeight)
+        const span = (root.angleOf(back, root.rimWidth, root.rimHeight) - root.headAngle + 360) % 360 / 360
+        return Math.max(0.004, Math.min(0.996, span))
+    }
+    readonly property color dim: root.track ? Qt.alpha(IrisStyle.text, 0.12) : "transparent"
+
+    IslandRim {
+        anchors.fill: parent
+        line: root.line
+        angle: root.headAngle
+        stops: [[0, root.head],
+            [root.track ? root.reach - 0.002 : root.reach * 0.4, root.track ? root.palette[2] : Qt.alpha(root.palette[1], 0.75)],
+            [root.reach, root.track ? root.dim : Qt.alpha(root.palette[2], 0)],
+            [1, root.dim]]
     }
     // The head: a bead of light on the rim, with its glow.
     Item {

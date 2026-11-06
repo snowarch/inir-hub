@@ -1,16 +1,16 @@
 pragma ComponentBehavior: Bound
 import QtQuick
-import QtQuick.Shapes
 import qs
 import qs.services
 import qs.modules.common
 import qs.modules.common.widgets
 import qs.modules.iris.style
 import qs.modules.iris.components
+import qs.modules.iris.bar.island
 
 // Lumen: the Island's rim lit from below in two colours, as a lamp under glass, and a little of that light pooled at
 // its foot. The light says something: the battery (its colour, and how far up the sides it climbs), the hour's sky,
-// or a palette. Under the pointer it climbs the whole rim (iris.bar.faces.lumen).
+// or a palette. Under the pointer, and once when the charger goes in, it climbs the whole rim (iris.bar.faces.lumen).
 Item {
     id: root
     property var island: null
@@ -40,9 +40,14 @@ Item {
     // How far up the sides the light climbs, as a share of the turn from the foot (half reaches the top): the battery's
     // charge when it tells the battery.
     readonly property real rest: root.light === "battery" ? 0.12 + 0.3 * root.level : 0.34
-    readonly property real reach: hover.hovered ? 0.5 : root.rest
-    property real shownReach: root.reach
-    Behavior on shownReach { NumberAnimation { duration: IrisStyle.duration(420); easing.type: Easing.OutCubic } }
+    readonly property real reach: hover.hovered || surge.running ? 0.5 : root.rest
+    // The light climbs on a spring, so a pointer that leaves mid-climb turns it back from where it stands.
+    IrisSpring { id: reachSpring; surface: "island"; intent: "move"; to: root.reach; minimum: 0 }
+    readonly property real shownReach: reachSpring.value
+    // Plugged in, the light runs up the whole rim once and settles at the charge: the charger took.
+    readonly property bool charging: Battery.isCharging
+    onChargingChanged: if (root.charging && root.light === "battery" && IrisStyle.motionEnabled) surge.restart()
+    PauseAnimation { id: surge; duration: IrisStyle.duration(900) }
     readonly property color foot: Qt.tint(root.pair[0], Qt.alpha(root.pair[1], 0.5))
 
     HoverHandler { id: hover }
@@ -59,42 +64,15 @@ Item {
             GradientStop { position: 1.0; color: Qt.alpha(root.foot, 0.24) }
         }
     }
-    Repeater {
-        model: [{ inset: 0, alpha: 0.32, width: 5 }, { inset: 1.5, alpha: 1, width: 1 }]
-        Shape {
-            id: rim
-            required property var modelData
-            readonly property real gap: Math.round(rim.modelData.inset * root.d)
-            readonly property real thick: root.line * rim.modelData.width
-            anchors.fill: parent
-            anchors.margins: Math.round(2 * root.d)
-            opacity: rim.modelData.alpha
-            preferredRendererType: Shape.CurveRenderer
-            ShapePath {
-                strokeColor: "transparent"
-                fillRule: ShapePath.OddEvenFill
-                // From the foot (270 degrees) round by the right side, the top, the left side and home.
-                fillGradient: ConicalGradient {
-                    centerX: rim.width / 2
-                    centerY: rim.height / 2
-                    angle: 270
-                    GradientStop { position: 0.0; color: root.foot }
-                    GradientStop { position: Math.max(0.01, root.shownReach * 0.55); color: Qt.alpha(root.pair[1], 0.85) }
-                    GradientStop { position: Math.min(0.499, root.shownReach); color: Qt.alpha(root.pair[1], 0) }
-                    GradientStop { position: Math.max(0.501, 1 - root.shownReach); color: Qt.alpha(root.pair[0], 0) }
-                    GradientStop { position: Math.min(0.99, 1 - root.shownReach * 0.55); color: Qt.alpha(root.pair[0], 0.85) }
-                    GradientStop { position: 1.0; color: root.foot }
-                }
-                PathRectangle { x: rim.gap; y: rim.gap; width: rim.width - 2 * rim.gap; height: rim.height - 2 * rim.gap; radius: (rim.height - 2 * rim.gap) / 2 }
-                PathRectangle {
-                    x: rim.gap + rim.thick
-                    y: rim.gap + rim.thick
-                    width: Math.max(0, rim.width - 2 * (rim.gap + rim.thick))
-                    height: Math.max(0, rim.height - 2 * (rim.gap + rim.thick))
-                    radius: Math.max(0, (rim.height - 2 * (rim.gap + rim.thick)) / 2)
-                }
-            }
-        }
+    IslandRim {
+        anchors.fill: parent
+        line: root.line
+        halo: 0.32
+        // From the foot (270 degrees) round by the right side, the top, the left side and home.
+        angle: 270
+        stops: [[0, root.foot], [Math.max(0.01, root.shownReach * 0.55), Qt.alpha(root.pair[1], 0.85)],
+            [Math.min(0.499, root.shownReach), Qt.alpha(root.pair[1], 0)], [Math.max(0.501, 1 - root.shownReach), Qt.alpha(root.pair[0], 0)],
+            [Math.min(0.99, 1 - root.shownReach * 0.55), Qt.alpha(root.pair[0], 0.85)], [1, root.foot]]
     }
     IrisClock {
         id: clock

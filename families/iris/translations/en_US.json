@@ -2424,5 +2424,15 @@
   "Tap one to go there": "Tap one to go there",
   "How large numbers read: the dot matrix of Nothing OS, or Archivo's wide figures.": "How large numbers read: the dot matrix of Nothing OS, or Archivo's wide figures.",
   "Each digit a matrix of round dots.": "Each digit a matrix of round dots.",
-  "Wide, bold figures.": "Wide, bold figures."
+  "Wide, bold figures.": "Wide, bold figures.",
+  "Lamps in the rim, as on a Nothing Phone: the battery along the foot, notifications and the next event up the sides.": "Lamps in the rim, as on a Nothing Phone: the battery along the foot, notifications and the next event up the sides.",
+  "Foot": "Foot",
+  "What the lamp along the foot counts: the battery's charge, or the hour gone.": "What the lamp along the foot counts: the battery's charge, or the hour gone.",
+  "Notifications lamp": "Notifications lamp",
+  "The left side lights a third for each notification waiting, up to three.": "The left side lights a third for each notification waiting, up to three.",
+  "Event lamp": "Event lamp",
+  "The right side fills over the last hour before an event and stays lit while it runs.": "The right side fills over the last hour before an event and stays lit while it runs.",
+  "Charge in figures": "Charge in figures",
+  "While charging, the percentage beside the time.": "While charging, the percentage beside the time.",
+  "Vinyl": "Vinyl"
 }

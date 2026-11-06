@@ -2424,5 +2424,15 @@
   "Tap one to go there": "하나를 탭하면 그곳으로 이동",
   "How large numbers read: the dot matrix of Nothing OS, or Archivo's wide figures.": "큰 숫자의 모양: Nothing OS의 도트 매트릭스 또는 Archivo의 넓은 숫자.",
   "Each digit a matrix of round dots.": "숫자마다 둥근 점의 매트릭스.",
-  "Wide, bold figures.": "넓고 굵은 숫자."
+  "Wide, bold figures.": "넓고 굵은 숫자.",
+  "Lamps in the rim, as on a Nothing Phone: the battery along the foot, notifications and the next event up the sides.": "Nothing Phone처럼 테두리에 켜지는 램프: 아래쪽은 배터리, 양옆은 알림과 다음 일정.",
+  "Foot": "아래쪽",
+  "What the lamp along the foot counts: the battery's charge, or the hour gone.": "아래쪽 램프가 세는 것: 배터리 충전량 또는 지난 시간.",
+  "Notifications lamp": "알림 램프",
+  "The left side lights a third for each notification waiting, up to three.": "기다리는 알림 하나마다 왼쪽이 3분의 1씩 켜집니다(최대 셋).",
+  "Event lamp": "일정 램프",
+  "The right side fills over the last hour before an event and stays lit while it runs.": "일정 전 마지막 한 시간 동안 오른쪽이 차오르고, 일정이 진행되는 동안 켜져 있습니다.",
+  "Charge in figures": "충전량 숫자로",
+  "While charging, the percentage beside the time.": "충전 중에는 시간 옆에 퍼센트를 표시합니다.",
+  "Vinyl": "LP"
 }

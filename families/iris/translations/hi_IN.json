@@ -2424,5 +2424,15 @@
   "Tap one to go there": "वहाँ जाने के लिए किसी एक पर टैप करें",
   "How large numbers read: the dot matrix of Nothing OS, or Archivo's wide figures.": "बड़े अंक कैसे दिखें: Nothing OS का डॉट मैट्रिक्स या Archivo के चौड़े अंक।",
   "Each digit a matrix of round dots.": "हर अंक गोल बिंदुओं का एक मैट्रिक्स।",
-  "Wide, bold figures.": "चौड़े, मोटे अंक।"
+  "Wide, bold figures.": "चौड़े, मोटे अंक।",
+  "Lamps in the rim, as on a Nothing Phone: the battery along the foot, notifications and the next event up the sides.": "किनारे में लैंप, जैसे Nothing Phone पर: नीचे बैटरी, किनारों पर सूचनाएँ और अगला इवेंट।",
+  "Foot": "निचला किनारा",
+  "What the lamp along the foot counts: the battery's charge, or the hour gone.": "नीचे का लैंप क्या गिनता है: बैटरी का चार्ज या घंटे का बीता हिस्सा।",
+  "Notifications lamp": "सूचना लैंप",
+  "The left side lights a third for each notification waiting, up to three.": "हर प्रतीक्षारत सूचना के लिए बायाँ किनारा एक-तिहाई जलता है, तीन तक।",
+  "Event lamp": "इवेंट लैंप",
+  "The right side fills over the last hour before an event and stays lit while it runs.": "किसी इवेंट से पहले के आख़िरी घंटे में दायाँ किनारा भरता है और इवेंट चलने तक जलता रहता है।",
+  "Charge in figures": "चार्ज अंकों में",
+  "While charging, the percentage beside the time.": "चार्ज होते समय, समय के पास प्रतिशत।",
+  "Vinyl": "विनाइल"
 }

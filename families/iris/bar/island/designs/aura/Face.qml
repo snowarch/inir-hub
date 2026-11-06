@@ -1,12 +1,12 @@
 pragma ComponentBehavior: Bound
 import QtQuick
-import QtQuick.Shapes
 import qs
 import qs.services
 import qs.modules.common
 import qs.modules.common.widgets
 import qs.modules.iris.style
 import qs.modules.iris.components
+import qs.modules.iris.bar.island
 
 // Aura: the Island ringed in the spectrum, as a phone's edge lights when its assistant listens; the time in the
 // middle. The colours stand still at rest and turn once round while the pointer is over the Island. The colours and
@@ -36,41 +36,12 @@ Item {
         loops: 1
     }
 
-    Repeater {
-        model: [{ inset: 0, alpha: 0.28, width: 5 }, { inset: 1.5, alpha: 1, width: 1 }]
-        Shape {
-            id: ring
-            required property var modelData
-            readonly property real gap: Math.round(ring.modelData.inset * root.d)
-            readonly property real thick: root.line * ring.modelData.width
-            anchors.fill: parent
-            anchors.margins: Math.round(2 * root.d)
-            opacity: ring.modelData.alpha
-            preferredRendererType: Shape.CurveRenderer
-            ShapePath {
-                strokeColor: "transparent"
-                fillRule: ShapePath.OddEvenFill
-                fillGradient: ConicalGradient {
-                    centerX: ring.width / 2
-                    centerY: ring.height / 2
-                    angle: root.turn
-                    GradientStop { position: 0.0; color: root.palette[0] }
-                    GradientStop { position: 0.2; color: root.palette[1] }
-                    GradientStop { position: 0.4; color: root.palette[2] }
-                    GradientStop { position: 0.6; color: root.palette[3] }
-                    GradientStop { position: 0.8; color: root.palette[4] }
-                    GradientStop { position: 1.0; color: root.palette[0] }
-                }
-                PathRectangle { x: ring.gap; y: ring.gap; width: ring.width - 2 * ring.gap; height: ring.height - 2 * ring.gap; radius: (ring.height - 2 * ring.gap) / 2 }
-                PathRectangle {
-                    x: ring.gap + ring.thick
-                    y: ring.gap + ring.thick
-                    width: Math.max(0, ring.width - 2 * (ring.gap + ring.thick))
-                    height: Math.max(0, ring.height - 2 * (ring.gap + ring.thick))
-                    radius: Math.max(0, (ring.height - 2 * (ring.gap + ring.thick)) / 2)
-                }
-            }
-        }
+    IslandRim {
+        anchors.fill: parent
+        line: root.line
+        halo: 0.28
+        angle: root.turn
+        stops: [[0, root.palette[0]], [0.2, root.palette[1]], [0.4, root.palette[2]], [0.6, root.palette[3]], [0.8, root.palette[4]], [1, root.palette[0]]]
     }
     IrisClock {
         id: clock

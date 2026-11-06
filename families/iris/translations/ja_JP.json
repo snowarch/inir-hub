@@ -2424,5 +2424,15 @@
   "Tap one to go there": "タップしてそこへ移動",
   "How large numbers read: the dot matrix of Nothing OS, or Archivo's wide figures.": "大きな数字の見え方：Nothing OS のドットマトリクス、または Archivo の幅広い数字。",
   "Each digit a matrix of round dots.": "数字ひとつひとつが丸いドットのマトリクス。",
-  "Wide, bold figures.": "幅広く太い数字。"
+  "Wide, bold figures.": "幅広く太い数字。",
+  "Lamps in the rim, as on a Nothing Phone: the battery along the foot, notifications and the next event up the sides.": "Nothing Phone のように縁に灯るランプ。下辺にバッテリー、両側に通知と次の予定。",
+  "Foot": "下辺",
+  "What the lamp along the foot counts: the battery's charge, or the hour gone.": "下辺のランプが数えるもの：バッテリー残量、またはこの1時間の経過。",
+  "Notifications lamp": "通知ランプ",
+  "The left side lights a third for each notification waiting, up to three.": "未読の通知1件ごとに左側が3分の1ずつ灯ります（最大3件）。",
+  "Event lamp": "予定ランプ",
+  "The right side fills over the last hour before an event and stays lit while it runs.": "予定の前の1時間で右側が満ちていき、予定の間は灯ったままです。",
+  "Charge in figures": "充電を数字で",
+  "While charging, the percentage beside the time.": "充電中は時刻の横にパーセントを表示します。",
+  "Vinyl": "レコード"
 }
