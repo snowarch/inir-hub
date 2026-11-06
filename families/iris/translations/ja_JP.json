@@ -2438,5 +2438,8 @@
   "Offset": "時差",
   "Here": "現在地",
   "Same time": "時差なし",
-  "Next city": "次の都市"
+  "Next city": "次の都市",
+  "Water": "水位",
+  "The Island holds water up to the battery's charge, the hour or the day; it rolls when the charger goes in.": "アイランドにバッテリー残量、時、日の分だけ水がたまり、充電器をつなぐと波打ちます。",
+  "What the water stands at: the battery's charge, the hour gone or the day gone.": "水位が示すもの：バッテリー残量、この1時間の経過、または1日の経過。"
 }

@@ -2438,5 +2438,8 @@
   "Offset": "Décalage",
   "Here": "Ici",
   "Same time": "Même heure",
-  "Next city": "Ville suivante"
+  "Next city": "Ville suivante",
+  "Water": "Eau",
+  "The Island holds water up to the battery's charge, the hour or the day; it rolls when the charger goes in.": "L'Île se remplit d'eau jusqu'à la charge de la batterie, l'heure ou le jour ; elle ondule quand on branche le chargeur.",
+  "What the water stands at: the battery's charge, the hour gone or the day gone.": "Le niveau de l'eau : la charge de la batterie, l'heure écoulée ou la journée écoulée."
 }

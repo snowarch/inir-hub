@@ -408,6 +408,10 @@ JsonObject {
                 property bool events: true
                 property bool figure: true
             }
+            property JsonObject tide: JsonObject {
+                property string fill: "battery" // "battery", "hour" or "day"
+                property bool figure: true
+            }
             property JsonObject status: JsonObject {
                 property string carry: "auto" // "auto", "battery", "headset", "sky" or "day"
                 property bool connection: true

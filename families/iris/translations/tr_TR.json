@@ -2438,5 +2438,8 @@
   "Offset": "Fark",
   "Here": "Burada",
   "Same time": "Aynı saat",
-  "Next city": "Sonraki şehir"
+  "Next city": "Sonraki şehir",
+  "Water": "Su",
+  "The Island holds water up to the battery's charge, the hour or the day; it rolls when the charger goes in.": "Ada pil şarjı, saat ya da gün kadar suyla dolar; şarj aleti takılınca dalgalanır.",
+  "What the water stands at: the battery's charge, the hour gone or the day gone.": "Suyun seviyesi: pil şarjı, geçen saat ya da geçen gün."
 }

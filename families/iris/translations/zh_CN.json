@@ -2438,5 +2438,8 @@
   "Offset": "时差",
   "Here": "此地",
   "Same time": "同一时间",
-  "Next city": "下一个城市"
+  "Next city": "下一个城市",
+  "Water": "水位",
+  "The Island holds water up to the battery's charge, the hour or the day; it rolls when the charger goes in.": "灵动岛盛着水，水位是电量、这一小时或这一天；插上充电器时水面荡漾。",
+  "What the water stands at: the battery's charge, the hour gone or the day gone.": "水位代表什么：电池电量、这一小时已过的部分或这一天已过的部分。"
 }

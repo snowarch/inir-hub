@@ -2438,5 +2438,8 @@
   "Offset": "الفارق",
   "Here": "هنا",
   "Same time": "التوقيت نفسه",
-  "Next city": "المدينة التالية"
+  "Next city": "المدينة التالية",
+  "Water": "الماء",
+  "The Island holds water up to the battery's charge, the hour or the day; it rolls when the charger goes in.": "تمتلئ الجزيرة بالماء حتى شحن البطارية أو الساعة أو اليوم، ويتموّج عند توصيل الشاحن.",
+  "What the water stands at: the battery's charge, the hour gone or the day gone.": "ما يبلغه مستوى الماء: شحن البطارية أو ما مضى من الساعة أو من اليوم."
 }

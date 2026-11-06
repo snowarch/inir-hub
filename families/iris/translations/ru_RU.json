@@ -2438,5 +2438,8 @@
   "Offset": "Разница",
   "Here": "Здесь",
   "Same time": "То же время",
-  "Next city": "Следующий город"
+  "Next city": "Следующий город",
+  "Water": "Вода",
+  "The Island holds water up to the battery's charge, the hour or the day; it rolls when the charger goes in.": "Остров наполняется водой до уровня заряда, часа или дня; она колышется, когда подключаешь зарядку.",
+  "What the water stands at: the battery's charge, the hour gone or the day gone.": "До чего поднимается вода: заряд батареи, прошедший час или прошедший день."
 }

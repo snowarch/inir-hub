@@ -74,7 +74,7 @@ QtObject {
     // Island to load them and by Settings to offer only the rows that still act under the worn design.
     readonly property var islandDesignParts: ({ ledger: ["Face.qml", "Nav.qml", "Desktop.qml"], tiles: ["Face.qml", "Nav.qml", "Desktop.qml"],
         dial: ["Face.qml"], marquee: ["Face.qml"], duo: ["Face.qml"], headline: ["Face.qml"], rings: ["Face.qml"], aura: ["Face.qml"],
-        status: ["Face.qml"], forecast: ["Face.qml"], world: ["Face.qml"], comet: ["Face.qml"], lumen: ["Face.qml"], glyph: ["Face.qml"] })
+        status: ["Face.qml"], forecast: ["Face.qml"], world: ["Face.qml"], comet: ["Face.qml"], lumen: ["Face.qml"], glyph: ["Face.qml"], tide: ["Face.qml"] })
     // The light the edge designs (Aura, Comet, Lumen) draw with: five stops of one palette (Settings › Island › Face ›
     // Colours). "day" follows the hour's sky: night, dawn, day, dusk.
     function islandLight(name: string, hour: int): var {

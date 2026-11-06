@@ -2438,5 +2438,8 @@
   "Offset": "시차",
   "Here": "여기",
   "Same time": "같은 시간",
-  "Next city": "다음 도시"
+  "Next city": "다음 도시",
+  "Water": "물",
+  "The Island holds water up to the battery's charge, the hour or the day; it rolls when the charger goes in.": "아일랜드에 배터리 잔량, 시간 또는 하루만큼 물이 차오르고, 충전기를 꽂으면 출렁입니다.",
+  "What the water stands at: the battery's charge, the hour gone or the day gone.": "물이 차오르는 기준: 배터리 잔량, 지난 시간 또는 지난 하루."
 }

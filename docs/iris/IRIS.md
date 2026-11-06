@@ -23,6 +23,7 @@ iRiS is the Island family. One Island sits on a screen edge and grows into whate
   - **Comet**: one light runs round the rim with its tail fading behind it. Where its head stands counts the hour, the day or the battery, read clockwise from the top. It moves once a minute and runs a lap while the pointer is over the Island.
   - **Lumen**: the rim lit from below in two colours, like a lamp under glass, with a little of the light pooled at its foot. The light says something: the battery (its colour, and how far up the sides it climbs as it charges) or the hour's sky. Under the pointer, and once when the charger goes in, it climbs the whole rim.
   - **Glyph**: lamps set into the rim, as on the back of a Nothing Phone, each read by how far it is lit: the battery along the foot (the hour on a machine without one), the notifications waiting up the left side, the next event closing in over its last hour up the right. Plugged in, the foot counts up to the charge and the percentage rides beside the time.
+  - **Tide**: the Island holds water up to the battery's charge (or the hour gone, or the day gone), the time over it. Still at rest; when the charger goes in it rises from empty and rolls, under the pointer it sloshes. Low, the water turns the danger colour; charging, green.
   - **Status**: a status bar: the time, the connection (cable, Wi-Fi bars or none), a red mark when the sound is off, and the battery with its figure. Without a battery it shows a connected headset's charge, else the weather, else the day.
   - **Forecast**: the time, then the next hours the way a weather app lays them out: now first, each hour its sky in colour and its temperature. It moves on once an hour. Without weather it shows the day.
   - **World**: the time here and in another city: a small watch with a light face by day and a dark one by night, the city's name over its time, how many hours apart it is, and a +1 when it is already tomorrow there.
@@ -38,6 +39,7 @@ iRiS is the Island family. One Island sits on a screen edge and grows into whate
   - **Comet**: what its head counts (the hour, the day or the battery), a Tail behind it or the whole Track lit, the same colours as Aura, and the lap under the pointer.
   - **Lumen**: what its light tells (the battery, the sky or one of Aura's colours) and the light at its foot.
   - **Glyph**: what the foot counts (the battery or the hour), the notifications and event lamps, and the charge in figures.
+  - **Tide**: what the water stands at (the battery, the hour or the day) and the charge in figures.
   - **Status**: what its capsule carries (Auto, the battery, a headset, the sky or the day), the connection mark and the red sound-off mark.
   - **Forecast**: how many hours it shows (2, 3 or 4, now included; a narrow Island shows fewer), each hour's name, and the sky in colour or in grey.
   - **World**: the city (50 to pick from, searchable), a second city beside it, the hours apart and the small watch. Short of room the hours apart step out first, then the watches, then the second city, so no name or time is ever cut.
