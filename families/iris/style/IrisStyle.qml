@@ -544,7 +544,7 @@ QtObject {
         ? root.glassOptions.mode : "off"
     readonly property bool glassy: root.glassRequested !== "off" && Appearance.effectsEnabled && !IrisDesign.refusesGlass
     readonly property bool menuCompact: String(root.appearance?.surfaces?.menus?.density ?? "compact") === "compact"
-    readonly property bool glassCompositor: root.glassy && root.glassRequested === "compositor" && Appearance.compositorBlurActive
+    readonly property bool glassCompositor: root.glassy && root.glassRequested === "compositor" && IrisCompositorBlur.active
         && IrisCompositorBlur.usable
     readonly property bool glassWallpaper: root.glassy && !root.glassCompositor
     readonly property real glassBlurAmount: Math.max(0, Math.min(1, Number(root.glassOptions?.blur ?? 100) / 100))

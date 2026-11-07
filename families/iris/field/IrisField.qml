@@ -59,7 +59,7 @@ Item {
     function ownGlass(shape: var): int {
         const g = shape.glass
         if (g === undefined || g === null || g === "inherit") return root.glassCode
-        if (g === "compositor") return Appearance.compositorBlurActive && root.compositorAllowed ? 2 : 1
+        if (g === "compositor") return IrisCompositorBlur.active && root.compositorAllowed ? 2 : 1
         if (g === "wallpaper" || g === true) return 1
         return 0
     }

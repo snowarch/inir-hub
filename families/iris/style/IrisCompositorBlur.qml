@@ -17,6 +17,11 @@ Singleton {
     property real saturation: 1.5
     property var elsewhere: []
     readonly property bool usable: root.available && root.enabled
+    // Whether the compositor blurs behind the shell at all: Niri 26.04+ through the background-effect regions each
+    // surface publishes, Umbriel through the layer rule written below (it has no background-effect protocol).
+    readonly property bool active: CompositorService.isUmbriel
+        ? Appearance.effectsEnabled && (Config.options?.performance?.compositorBlur ?? true)
+        : Appearance.compositorBlurActive
 
     function reload(): void {
         if (CompositorService.niriNative && !reader.running) reader.running = true
