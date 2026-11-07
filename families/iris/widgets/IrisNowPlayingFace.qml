@@ -18,8 +18,10 @@ IrisWidgetFace {
     // What a Design's face (`widgetNowPlaying`) reads: the engine's playback, positions and lyrics stay here.
     readonly property alias playback: media
     // Prism and Vinyl (his 11-06 references) on medium and large: their own faces over the same playback; the Design's
-    // print steps aside for them. Prism draws its own body, at rest too.
-    readonly property string faceChoice: root.small ? "classic" : String(root.widget.familyOption("face", "classic"))
+    // print steps aside for them. Prism draws its own body, at rest too. Worn as every widget's design (`widgetPrism`
+    // in plugin.json is this face), Prism takes every size.
+    readonly property bool prismWorn: root.widget.familyFaceDesign === "prism"
+    readonly property string faceChoice: root.prismWorn ? "prism" : root.small ? "classic" : String(root.widget.familyOption("face", "classic"))
     readonly property bool prismStyle: root.faceChoice === "prism"
     readonly property bool ownStyle: root.prismStyle || root.faceChoice === "vinyl"
     ownBody: root.prismStyle
@@ -392,7 +394,7 @@ IrisWidgetFace {
 
     Item {
         anchors.fill: parent
-        visible: !root.resting && root.small
+        visible: !root.resting && root.small && !root.ownStyle
 
         ClippingRectangle {
             anchors.fill: parent

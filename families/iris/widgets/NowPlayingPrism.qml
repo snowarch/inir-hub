@@ -13,13 +13,15 @@ import qs.modules.iris.components
 // folder holds the cover, what is happening and the lines being sung (the song's bars without them); under it the
 // title, the artist, the timeline and the keys, play on the song's colour. A beam of white light crosses the glass and
 // breaks into its colours on the pane while the song plays. Medium keeps the folder and the pane and sets the song in
-// the pane, the timeline and the keys under it. The face draws its own body (`ownBody`): no plate under it.
+// the pane, the timeline and the keys under it; small sets the title and artist in the pane and the keys under it, the
+// hour alone on the flap. The body is PrismBody, the folder every Prism face stands on (`widgets/prism/`): no plate.
 Item {
     id: view
     required property var face
     required property var media
 
     readonly property bool wide: view.face.medium
+    readonly property bool compact: view.face.small
     readonly property bool label: view.face.nothing ?? false
     readonly property color songLight: view.label ? view.face.signal : view.face.artLight
     function dp(value: real): real { return view.face.dp(value) }
@@ -58,70 +60,57 @@ Item {
         return split ? [split[1], split[2].replace(/[.\s]/g, "").toUpperCase()] : [text, ""]
     }
 
-    // The folder, in dp of the grid's box (368 x 368 large, 368 x 176 medium); the reference's proportions.
-    readonly property real tabRight: view.dp(view.wide ? 196 : 214)
-    readonly property real flapTop: view.dp(view.wide ? 14 : 29)
-    readonly property real flapRight: view.width - view.dp(view.wide ? 30 : 26)
-    readonly property real paneTop: view.dp(view.wide ? 42 : 79)
-    readonly property real paneBottom: view.dp(view.wide ? 120 : 200)
-    readonly property real paneRadius: view.dp(view.wide ? 14 : 16)
+    // The folder, in dp of the grid's box (368 x 368 large, 368 x 176 medium, 176 x 176 small); the reference's
+    // proportions, small keeping medium's rhythm.
+    function pick(small: real, medium: real, large: real): real { return view.dp(view.compact ? small : view.wide ? medium : large) }
+    readonly property real tabRight: view.pick(98, 196, 214)
+    readonly property real lean: view.pick(22, 22, 40)
+    readonly property real flapTop: view.pick(12, 14, 29)
+    readonly property real flapRight: view.width - view.pick(14, 30, 26)
+    readonly property real paneTop: view.pick(44, 42, 79)
+    readonly property real paneBottom: view.pick(112, 120, 200)
+    readonly property real paneRadius: view.pick(13, 14, 16)
     readonly property real headY: Math.round(view.paneTop * 0.52)
-    readonly property real coverSide: view.paneBottom - view.paneTop - 2 * view.dp(view.wide ? 8 : 11)
-    readonly property real coverX: view.dp(view.wide ? 18 : 42)
-    readonly property real textX: view.coverX + view.coverSide + view.dp(view.wide ? 14 : 18)
-    readonly property real textRight: view.width - view.dp(view.wide ? 18 : 24)
-    readonly property real sideInset: view.dp(view.wide ? 22 : 40)
+    readonly property real coverSide: view.paneBottom - view.paneTop - 2 * view.pick(8, 8, 11)
+    readonly property real coverX: view.pick(10, 18, 42)
+    readonly property real textX: view.coverX + view.coverSide + view.pick(10, 14, 18)
+    readonly property real textRight: view.width - view.pick(12, 18, 24)
+    readonly property real sideInset: view.pick(16, 22, 40)
 
     // Light passes while the song plays; paused, the glass keeps a little of it.
     property real lightPass: view.face.playing ? 1 : 0.3
     Behavior on lightPass { NumberAnimation { duration: 700; easing.type: Easing.OutCubic } }
 
-    Item {
-        id: noFrost
-        visible: false
-        width: 1
-        height: 1
-        layer.enabled: true
-    }
-
-    ShaderEffect {
+    PrismBody {
         id: glass
-        readonly property real room: view.dp(40)
-        x: -glass.room
-        y: -glass.room
-        width: view.width + 2 * glass.room
-        height: view.height + 2 * glass.room
-        fragmentShader: Qt.resolvedUrl("NowPlayingPrism.frag.qsb")
-        readonly property bool light: view.face.lightBackdrop
-        // Background off: the folder stays (it is the face) as smoked glass light enough to read through, no shadow.
-        readonly property color body: view.face.clear
-            ? ColorUtils.applyAlpha(glass.light ? IrisStyle.frost : IrisStyle.surface, glass.light ? 0.72 : 0.62) : view.face.plateColor // iris-literal: background off keeps the folder (it is the face) as smoked glass
-        readonly property vector4d frame: Qt.vector4d(view.width, view.height, glass.room, glass.room)
-        readonly property vector4d folder: Qt.vector4d(view.flapRight, view.tabRight, view.flapTop,
-            1 / Math.max(0.5, Screen.devicePixelRatio))
-        readonly property vector4d radii: Qt.vector4d(view.face.radius, view.dp(view.wide ? 20 : 26),
-            view.dp(view.wide ? 22 : 30), view.paneRadius)
-        readonly property vector4d pane: Qt.vector4d(0, view.paneTop, view.width, view.paneBottom)
+        anchors.fill: parent
+        face: view.face
+        tabRight: view.tabRight
+        lean: view.lean
+        tabRadius: view.pick(16, 20, 26)
+        flapTop: view.flapTop
+        flapRight: view.flapRight
+        flapRadius: view.pick(18, 22, 30)
+        paneTop: view.paneTop
+        paneBottom: view.paneBottom
+        paneRadius: view.paneRadius
         // The cover is the prism: the white beam climbs from the folder's left edge to it, past every line of text,
         // and its spectrum leaves the cover's right side toward the upper right.
-        readonly property point prism: Qt.point(art.x + art.width / 2, art.y + art.height / 2)
-        readonly property vector4d beam: view.wide
-            ? Qt.vector4d(-view.width * 0.2, view.height * 1.15, glass.prism.x, glass.prism.y)
-            : Qt.vector4d(-view.width * 0.16, view.height * 0.9, glass.prism.x, glass.prism.y)
-        readonly property vector4d fan: Qt.vector4d(view.wide ? -0.4 : -0.46, view.wide ? 0.28 : 0.3, view.lightPass,
-            view.label ? 1 : 0)
-        readonly property vector4d tone: Qt.vector4d(glass.body.r, glass.body.g, glass.body.b, glass.body.a)
-        readonly property vector4d shelf: Qt.vector4d(view.songLight.r, view.songLight.g, view.songLight.b, view.dp(14))
-        readonly property vector4d look: Qt.vector4d(glass.light ? 1 : 0, view.face.frost !== null ? 1 : 0,
-            glass.light ? 0.022 : 0.04, view.face.clear ? 0 : 1)
-        readonly property Item frost: view.face.frost ?? noFrost
+        prism: Qt.point(art.x + art.width / 2, art.y + art.height / 2)
+        entry: view.compact ? Qt.point(-view.width * 0.3, view.height * 1.05)
+            : view.wide ? Qt.point(-view.width * 0.2, view.height * 1.15) : Qt.point(-view.width * 0.16, view.height * 0.9)
+        fanAngle: view.compact ? -0.55 : view.wide ? -0.4 : -0.46
+        fanSpread: view.compact ? 0.34 : view.wide ? 0.28 : 0.3
+        lightPass: view.lightPass
+        shelf: view.songLight
+        white: view.label
     }
 
     // ── the tab: the player's mark and name ──
     Item {
         id: mark
-        readonly property real side: view.dp(view.wide ? 24 : 34)
-        x: view.dp(view.wide ? 22 : 54)
+        readonly property real side: view.pick(20, 24, 34)
+        x: view.pick(14, 22, 54)
         y: Math.round(view.headY - mark.side / 2)
         width: mark.side
         height: mark.side
@@ -151,31 +140,32 @@ Item {
     }
     FaceText {
         face: view.face
-        x: mark.x + mark.width + view.dp(view.wide ? 8 : 9)
+        x: mark.x + mark.width + view.pick(6, 8, 9)
         y: Math.round(view.headY - height / 2)
-        width: view.tabRight - x - view.dp(14)
+        width: glass.edgeAt(y) - x - view.dp(10)
         text: view.label ? view.head.toUpperCase() : view.head
         color: view.label ? view.face.ink : view.songLight
-        size: view.label ? (view.wide ? 12 : 14) : (view.wide ? 16 : 21)
+        size: view.label ? (view.compact ? 10.5 : view.wide ? 12 : 14) : (view.compact ? 13 : view.wide ? 16 : 21)
         weight: Font.Bold
         font.family: view.label ? view.face.fontLabel : view.face.fontMain
-        font.letterSpacing: view.label ? view.face.px(12) * 0.08 : -view.face.px(view.wide ? 16 : 21) * 0.02
+        font.letterSpacing: view.label ? view.face.px(12) * 0.08 : -view.face.px(view.compact ? 13 : view.wide ? 16 : 21) * 0.02
         fontSizeMode: Text.HorizontalFit
-        minimumPixelSize: view.face.px(12)
+        minimumPixelSize: view.face.px(view.compact ? 10 : 12)
     }
 
     // ── the flap: the hour ──
     Row {
         id: hourRow
-        x: Math.round((view.tabRight + view.flapRight) / 2 + view.dp(view.wide ? 6 : 8) - width / 2)
-        y: Math.round((view.flapTop + view.paneTop) / 2 - hourFigure.height / 2)
+        readonly property real centerY: (view.flapTop + view.paneTop) / 2
+        x: Math.round((glass.edgeAt(hourRow.centerY) + view.flapRight) / 2 + view.dp(4) - width / 2)
+        y: Math.round(hourRow.centerY - hourFigure.height / 2)
         spacing: view.dp(1)
         FaceText {
             id: hourFigure
             face: view.face
             text: view.hour[0]
             color: view.face.onFill(view.songLight)
-            size: view.wide ? 13 : 17
+            size: view.compact ? 12 : view.wide ? 13 : 17
             weight: Font.Bold
             font.family: view.face.fontNumbers
             font.features: ({ "tnum": 1 })
@@ -186,7 +176,7 @@ Item {
             y: Math.round(hourFigure.height * 0.06)
             text: view.hour[1]
             color: view.face.onFill(view.songLight)
-            size: view.wide ? 7.5 : 9
+            size: view.compact ? 7 : view.wide ? 7.5 : 9
             weight: Font.Bold
         }
     }
@@ -203,12 +193,12 @@ Item {
             visible: view.cover.length > 0
             source: view.cover
             circular: false
-            radius: view.dp(view.wide ? 7 : 8)
+            radius: view.pick(7, 7, 8)
         }
         Rectangle {
             anchors.fill: parent
             visible: view.cover.length === 0
-            radius: view.dp(view.wide ? 7 : 8)
+            radius: view.pick(7, 7, 8)
             color: IrisStyle.tintFill(view.face.inked(IrisStyle.identity.pink))
             MaterialSymbol {
                 anchors.centerIn: parent
@@ -234,7 +224,7 @@ Item {
     FaceText {
         id: stateLine
         face: view.face
-        visible: view.stateWord.length > 0
+        visible: view.stateWord.length > 0 && !view.compact
         x: view.textX
         y: Math.round(view.stateY - height / 2)
         width: (output.visible ? output.x - view.dp(8) : view.textRight) - x
@@ -249,7 +239,7 @@ Item {
     Rectangle {
         id: output
         readonly property string device: IrisStyle.soundDeviceGlyph(Audio.defaultSink, false)
-        visible: !view.resting && Audio.defaultSink !== null && Audio.defaultSink !== undefined
+        visible: !view.resting && !view.compact && Audio.defaultSink !== null && Audio.defaultSink !== undefined
         width: view.dp(view.wide ? 18 : 20)
         height: width
         x: view.textRight - width
@@ -284,7 +274,7 @@ Item {
     Item {
         id: lines
         readonly property real pitch: view.face.px(21)
-        visible: !view.wide && !view.resting && view.face.lyricsReady
+        visible: view.face.large && !view.resting && view.face.lyricsReady
         x: view.textX
         y: view.paneTop + view.dp(36)
         width: view.textRight - view.textX
@@ -312,7 +302,7 @@ Item {
     readonly property string album: String(view.face.player?.trackAlbum ?? "")
     IrisVisualizer {
         id: bars
-        visible: !view.wide && !lines.visible && view.known && !view.remembered
+        visible: view.face.large && !lines.visible && view.known && !view.remembered
         x: view.textX
         y: Math.round(view.linesCenter - height / 2)
         running: visible && view.face.playing && view.face.moving
@@ -332,7 +322,7 @@ Item {
     }
     FaceText {
         face: view.face
-        visible: view.remembered && text.length > 0
+        visible: view.remembered && text.length > 0 && !view.compact
         // where the lines are on large, the timeline's place on medium
         x: view.wide ? view.sideInset : view.textX
         y: Math.round((view.wide ? view.paneBottom + view.dp(28) : view.linesCenter) - height / 2)
@@ -355,13 +345,14 @@ Item {
     readonly property bool songMoving: view.face.moving && (songHover.hovered || songPass.running)
     IrisMarquee {
         id: titleLine
-        x: view.wide ? view.textX : view.sideInset
-        y: Math.round((view.wide ? view.paneTop + view.dp(39) : view.paneBottom + view.dp(23)) - height / 2)
-        width: view.wide ? view.textRight - view.textX : view.width - 2 * view.sideInset
-        horizontalAlignment: view.wide ? Text.AlignLeft : Text.AlignHCenter
+        readonly property bool inPane: view.wide || view.compact
+        x: titleLine.inPane ? view.textX : view.sideInset
+        y: Math.round((view.compact ? view.paneTop + view.dp(25) : view.wide ? view.paneTop + view.dp(39) : view.paneBottom + view.dp(23)) - height / 2)
+        width: titleLine.inPane ? view.textRight - view.textX : view.width - 2 * view.sideInset
+        horizontalAlignment: titleLine.inPane ? Text.AlignLeft : Text.AlignHCenter
         text: view.title
         color: view.known ? view.face.ink : view.face.inkSecondary
-        pixelSize: view.face.px(view.wide ? 15 : 18)
+        pixelSize: view.face.px(view.compact ? 13 : view.wide ? 15 : 18)
         weight: Font.Bold
         running: view.songMoving
     }
@@ -369,25 +360,25 @@ Item {
         id: artistLine
         visible: view.artist.length > 0
         x: titleLine.x
-        y: Math.round((view.wide ? view.paneTop + view.dp(58) : view.paneBottom + view.dp(45)) - height / 2)
+        y: Math.round((view.compact ? view.paneTop + view.dp(43) : view.wide ? view.paneTop + view.dp(58) : view.paneBottom + view.dp(45)) - height / 2)
         width: titleLine.width
         horizontalAlignment: titleLine.horizontalAlignment
         text: view.artist
         color: view.known ? view.face.inkSecondary : view.face.inkTertiary
-        pixelSize: view.face.px(view.wide ? 12.5 : 15.5)
+        pixelSize: view.face.px(view.compact ? 11.5 : view.wide ? 12.5 : 15.5)
         running: view.songMoving
     }
 
     // ── the timeline: elapsed and length under a line of the song's colour with its knob ──
-    readonly property real keysCenter: view.wide ? view.paneBottom + view.dp(28) : view.paneBottom + view.dp(116)
-    readonly property real playSide: view.dp(view.wide ? 36 : 44)
-    readonly property real keyGap: view.dp(view.wide ? 40 : 77)
+    readonly property real keysCenter: view.paneBottom + view.pick(38, 28, 116)
+    readonly property real playSide: view.pick(34, 36, 44)
+    readonly property real keyGap: view.pick(44, 40, 77)
     readonly property real keysX: view.wide ? view.width - view.dp(26) - view.dp(14) - view.keyGap : Math.round(view.width / 2)
     Item {
         id: timeline
         visible: view.timed
         x: view.sideInset
-        y: Math.round((view.wide ? view.paneBottom + view.dp(19) : view.paneBottom + view.dp(66)) - height / 2)
+        y: Math.round(view.paneBottom + view.pick(12, 19, 66) - height / 2)
         width: (view.wide ? view.keysX - view.keyGap - view.dp(28) : view.width - view.sideInset) - x
         height: view.dp(10)
         Rectangle {
@@ -406,7 +397,7 @@ Item {
         Rectangle {
             x: Math.round(parent.width * view.face.progress - width / 2)
             anchors.verticalCenter: parent.verticalCenter
-            width: view.dp(view.wide ? 9 : 10)
+            width: view.pick(8, 9, 10)
             height: width
             radius: width / 2
             color: view.songLight
@@ -414,7 +405,7 @@ Item {
     }
     FaceText {
         face: view.face
-        visible: view.timed
+        visible: view.timed && !view.compact
         x: timeline.x
         y: Math.round(timeline.y + timeline.height / 2 + view.dp(view.wide ? 13 : 17) - height / 2)
         text: StringUtils.friendlyTimeForSeconds(view.media.effectivePosition)
@@ -425,7 +416,7 @@ Item {
     }
     FaceText {
         face: view.face
-        visible: view.timed
+        visible: view.timed && !view.compact
         x: timeline.x + timeline.width - width
         y: Math.round(timeline.y + timeline.height / 2 + view.dp(view.wide ? 13 : 17) - height / 2)
         text: StringUtils.friendlyTimeForSeconds(view.media.effectiveLength)

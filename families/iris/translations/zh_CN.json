@@ -2460,5 +2460,13 @@
   "What it does": "作用",
   "Open Prism": "打开 棱镜",
   "The Settings iRiS opens by default: every page in one panel, what it holds over a beam of light.": "iRiS 默认打开的设置：每一页都在一个面板里，内容衬在一束光上。",
-  "v2.33": "v2.33"
+  "v2.33": "v2.33",
+  "%1 days left in %2": "%2 年还剩 %1 天",
+  "1 day left in %1": "%1 年还剩 1 天",
+  "Each widget a folder of frosted glass with a lit flap.": "每个小组件都是一只带发光翻盖的磨砂玻璃文件夹。",
+  "Sunrise and sunset come with the weather": "日出和日落随天气一起显示",
+  "Week %1": "第 %1 周",
+  "%1 on": "%1 项已开启",
+  "Everything is off": "全部已关闭",
+  "No colours yet": "暂无颜色"
 }

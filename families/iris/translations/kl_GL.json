@@ -2460,5 +2460,13 @@
   "What it does": "Suliassaa",
   "Open Prism": "Prisma-i ammaruk",
   "The Settings iRiS opens by default: every page in one panel, what it holds over a beam of light.": "Aaqqiissutit iRiS-ip aallaqqaasiutitut ammartagai: quppersagaq tamarmi paneelimi ataatsimi, imarisaa qaammatip qinngorneranut.",
-  "v2.33": "v2.33"
+  "v2.33": "v2.33",
+  "%1 days left in %2": "%2-mi ulluni %1 sulili",
+  "1 day left in %1": "%1-mi ulloq 1 sulili",
+  "Each widget a folder of frosted glass with a lit flap.": "Widget tamarmi igalaamineq sermersuusaq qaammasoq.",
+  "Sunrise and sunset come with the weather": "Seqinerup nuinera tarrinneralu silamit pissarput",
+  "Week %1": "Sapaatip akunnera %1",
+  "%1 on": "%1 ikumatut",
+  "Everything is off": "Tamarmik ikumanngillat",
+  "No colours yet": "Qalipaatit suli peqanngillat"
 }

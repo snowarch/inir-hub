@@ -1,16 +1,18 @@
 #version 440
-// Prism, the Now Playing face's body (NowPlayingPrism.qml): a folder of frosted glass. Its dark tab carries the player;
-// beside it a shorter flap lit in the song's colour holds the hour; a clearer pane of glass laid across the whole width
-// holds the song; the folder's foot runs under it. One beam of white light enters low on the left, breaks on the pane
-// into its spectrum and fans out to the upper right, seen diffused through the frost (more through the pane than through
-// the body). Grain on the glass, a rim lit from above, the folder's shadow on the desktop and the pane's on the folder.
-// Static: it draws again only when a value changes.
+// Prism, a widget's body (PrismBody.qml): a folder of frosted glass. Its dark tab carries the name; its right edge leans
+// as a folder's tab does, rounded at the shoulder and flaring into the pane at its foot. Beside it, under that edge, a
+// shorter flap lit in the widget's colour holds one fact; a clearer pane of glass laid across the whole width holds what
+// the widget is about; the folder's foot runs under it. One beam of white light enters low on the left, breaks on the
+// pane into its spectrum and fans out to the upper right, seen diffused through the frost (more through the pane than
+// through the body). Grain on the glass, a rim lit from above, the folder's shadow on the desktop, the pane's on the
+// folder and the tab's on the flap. Static: it draws again only when a value changes.
 layout(location = 0) in vec2 qt_TexCoord0;
 layout(location = 0) out vec4 fragColor;
 layout(std140, binding = 0) uniform buf {
     mat4 qt_Matrix;
     float qt_Opacity;
-    // xy: the face's size; zw: how far this item reaches past the face on each side (shadow and glow room).
+    // xy: the face's size; z: how far this item reaches past the face on each side (shadow and glow room); w: how far
+    // the tab's edge leans across the header.
     vec4 frame;
     // x: the lit flap's right edge; y: the tab's right edge; z: the flap's top; w: one device pixel in item units.
     vec4 folder;
@@ -43,21 +45,34 @@ float box(vec2 p, vec4 rect, vec4 r) {
     return min(max(q.x, q.y), 0.0) + length(max(q, 0.0)) - radius;
 }
 
-// The union with a fillet: where the tab steps down to the shelf the edge turns in a smooth S, as a folder's does.
+// The union with a fillet: where two edges meet they turn in a smooth curve, as a folder's do.
 float smoothUnion(float a, float b, float k) {
     float h = clamp(0.5 + 0.5 * (b - a) / k, 0.0, 1.0);
     return mix(b, a, h) - k * h * (1.0 - h);
+}
+float smoothMax(float a, float b, float k) { return -smoothUnion(-a, -b, k); }
+
+// The tab's leaning edge: positive right of the line from (tabRight - lean / 2, 0) to (tabRight + lean / 2, pane top).
+float slant(vec2 p) {
+    vec2 a = vec2(u.folder.y - 0.5 * u.frame.w, 0.0);
+    vec2 d = normalize(vec2(u.frame.w, max(u.pane.y, 1.0)));
+    return dot(p - a, vec2(d.y, -d.x));
 }
 
 // x: the folder's outline; y: the dark tab; z: the lit flap.
 vec3 metrics(vec2 p) {
     vec2 size = u.frame.xy;
     float R = u.radii.x;
-    float tabD = box(p, vec4(0.0, 0.0, u.folder.y, size.y), vec4(R, u.radii.y, R, R));
-    float flapD = box(p, vec4(u.folder.y - R, u.folder.z, u.folder.x, size.y), vec4(R, u.radii.z, R, R));
+    float whole = box(p, vec4(0.0, 0.0, size.x, size.y), vec4(R));
+    // The tab: the body left of the leaning edge, its shoulder rounded, and below the pane's top all of it, the
+    // edge flaring into that line.
+    float tabD = smoothMax(whole, slant(p), u.radii.y);
+    tabD = smoothUnion(tabD, max(u.pane.y - p.y, whole), u.radii.y * 0.7);
+    // The flap reaches under the tab, so only its top and right edge show.
+    float flapD = box(p, vec4(u.folder.y - u.frame.w - R, u.folder.z, u.folder.x, size.y), vec4(R, u.radii.z, R, R));
     // The foot under the pane, the whole width (its top is hidden by the pane).
     float footD = box(p, vec4(0.0, 0.5 * (u.pane.y + u.pane.w), size.x, size.y), vec4(R));
-    return vec3(min(smoothUnion(tabD, flapD, u.radii.y * 0.6), footD), tabD, flapD);
+    return vec3(min(smoothUnion(tabD, flapD, u.radii.y * 0.45), footD), tabD, flapD);
 }
 
 // The beam's seven colours (a prism's spectrum is the same in every theme and scheme).
@@ -120,7 +135,7 @@ vec4 over(vec4 top, vec4 under) { return top + under * (1.0 - top.a); }
 
 void main() {
     vec2 size = u.frame.xy;
-    vec2 p = qt_TexCoord0 * (size + 2.0 * u.frame.zw) - u.frame.zw;
+    vec2 p = qt_TexCoord0 * (size + 2.0 * u.frame.zz) - u.frame.zz;
     float px = max(u.folder.w, 0.25);
     bool paper = u.look.x > 0.5;
 
@@ -133,8 +148,9 @@ void main() {
     float aa = px * 0.75;
     float inBody = 1.0 - smoothstep(-aa, aa, body);
     float inPane = 1.0 - smoothstep(-aa, aa, paneD);
-    // The lit flap: inside it and out of the tab (the tab's foot curves over its top), above the foot.
-    float lit = inBody * smoothstep(-aa, aa, tab) * (1.0 - smoothstep(-aa, aa, flap)) * step(p.y, u.pane.w);
+    // The lit flap: the body out of the tab (the fillet where the flap meets the tab's edge is the flap's).
+    float lit = inBody * smoothstep(-aa, aa, tab);
+    float edge = slant(p);
 
     vec4 col = vec4(0.0);
 
@@ -143,13 +159,13 @@ void main() {
     float spread = 0.06 * size.y;
     float shadowD = min(metrics(p - vec2(0.0, lift)).x, box(p - vec2(0.0, lift), u.pane, vec4(u.radii.w)));
     // The lit flap throws light, not shadow, where it stands above the pane.
-    float flapSide = smoothstep(u.folder.y - u.radii.y, u.folder.y + u.radii.y, p.x) * (1.0 - smoothstep(u.pane.y - spread, u.pane.y, p.y));
+    float flapSide = smoothstep(-u.radii.y, u.radii.y, edge) * (1.0 - smoothstep(u.pane.y - spread, u.pane.y, p.y));
     float shade = (1.0 - smoothstep(-spread, spread * 1.6, shadowD)) * u.look.w * (paper ? 0.45 : 1.0) * (1.0 - 0.85 * flapSide);
     col = vec4(0.0, 0.0, 0.0, shade * (1.0 - inBody) * (1.0 - inPane));
 
     // The flap's glow on the desktop above and right of it, never over the tab.
     float glow = exp(-max(flap, 0.0) / max(u.shelf.a, 1.0)) * smoothstep(0.0, 4.0 * px, body)
-        * smoothstep(u.folder.y - u.radii.y, u.folder.y + u.radii.y, p.x) * step(p.y, u.pane.y) * (1.0 - inPane);
+        * smoothstep(-u.radii.y, u.radii.y, edge) * step(p.y, u.pane.y) * (1.0 - inPane);
     vec3 glowRgb = u.shelf.rgb * glow * (paper ? 0.6 : 0.85);
     col = over(vec4(glowRgb, glow * (paper ? 0.55 : 0.4)), col);
 
@@ -162,7 +178,9 @@ void main() {
     vec4 bodyCol = glass;
     bodyCol.rgb *= 1.0 - paneShade * (paper ? 0.08 : 0.32);
     // The flap: the song's colour, a little brighter toward its top, where the light comes from.
+    // The tab lies over it and darkens it a little along its edge.
     vec3 shelfRgb = u.shelf.rgb * (1.0 + 0.1 * smoothstep(u.pane.y, u.folder.z, p.y));
+    shelfRgb *= 1.0 - (paper ? 0.1 : 0.22) * exp(-max(tab, 0.0) / (0.05 * size.y));
     bodyCol = mix(bodyCol, vec4(shelfRgb, 1.0), lit);
 
     // The pane: the same glass, frosted further and lifted (Figma's 16 % white radial fill).

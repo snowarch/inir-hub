@@ -10,6 +10,7 @@ FaceBlank 1.0 FaceBlank.qml
 singleton IrisFaceData 1.0 IrisFaceData.qml
 FaceDial 1.0 FaceDial.qml
 FaceArea 1.0 FaceArea.qml
+FaceSunPath 1.0 FaceSunPath.qml
 FaceHours 1.0 FaceHours.qml
 FaceFact 1.0 FaceFact.qml
 FaceAside 1.0 FaceAside.qml
@@ -17,6 +18,7 @@ FaceCells 1.0 FaceCells.qml
 ClockGreeting 1.0 ClockGreeting.qml
 WeatherWeek 1.0 WeatherWeek.qml
 NowPlayingPrism 1.0 NowPlayingPrism.qml
+PrismBody 1.0 PrismBody.qml
 NowPlayingVinyl 1.0 NowPlayingVinyl.qml
 WorldClockOffset 1.0 WorldClockOffset.qml
 IrisClockFace 1.0 IrisClockFace.qml

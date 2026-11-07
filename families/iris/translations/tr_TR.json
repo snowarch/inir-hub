@@ -2460,5 +2460,13 @@
   "What it does": "Ne yapar",
   "Open Prism": "Prizma'yı aç",
   "The Settings iRiS opens by default: every page in one panel, what it holds over a beam of light.": "iRiS'in varsayılan olarak açtığı Ayarlar: her sayfa tek bir panelde, içeriği bir ışık huzmesinin üzerinde.",
-  "v2.33": "v2.33"
+  "v2.33": "v2.33",
+  "%1 days left in %2": "%2 yılında %1 gün kaldı",
+  "1 day left in %1": "%1 yılında 1 gün kaldı",
+  "Each widget a folder of frosted glass with a lit flap.": "Her widget, ışıklı kapaklı buzlu camdan bir dosya.",
+  "Sunrise and sunset come with the weather": "Gün doğumu ve batımı hava durumuyla gelir",
+  "Week %1": "%1. hafta",
+  "%1 on": "%1 açık",
+  "Everything is off": "Her şey kapalı",
+  "No colours yet": "Henüz renk yok"
 }

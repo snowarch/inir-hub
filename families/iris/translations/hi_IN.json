@@ -2460,5 +2460,13 @@
   "What it does": "यह क्या करती है",
   "Open Prism": "प्रिज़्म खोलें",
   "The Settings iRiS opens by default: every page in one panel, what it holds over a beam of light.": "वे सेटिंग्स जो iRiS डिफ़ॉल्ट रूप से खोलता है: हर पेज एक पैनल में, उसकी सामग्री रोशनी की किरण पर।",
-  "v2.33": "v2.33"
+  "v2.33": "v2.33",
+  "%1 days left in %2": "%2 में %1 दिन बाकी",
+  "1 day left in %1": "%1 में 1 दिन बाकी",
+  "Each widget a folder of frosted glass with a lit flap.": "हर विजेट फ्रॉस्टेड ग्लास का एक फ़ोल्डर, जिसका फ्लैप रोशन है।",
+  "Sunrise and sunset come with the weather": "सूर्योदय और सूर्यास्त मौसम के साथ आते हैं",
+  "Week %1": "सप्ताह %1",
+  "%1 on": "%1 चालू",
+  "Everything is off": "सब कुछ बंद है",
+  "No colours yet": "अभी कोई रंग नहीं"
 }

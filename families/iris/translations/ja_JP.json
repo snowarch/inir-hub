@@ -2460,5 +2460,13 @@
   "What it does": "内容",
   "Open Prism": "プリズムを開く",
   "The Settings iRiS opens by default: every page in one panel, what it holds over a beam of light.": "iRiS が標準で開く設定：すべてのページを一枚のパネルに、その内容を光の筋の上に。",
-  "v2.33": "v2.33"
+  "v2.33": "v2.33",
+  "%1 days left in %2": "%2年は残り%1日",
+  "1 day left in %1": "%1年は残り1日",
+  "Each widget a folder of frosted glass with a lit flap.": "ウィジェットごとに、光るフラップ付きのすりガラスのフォルダ。",
+  "Sunrise and sunset come with the weather": "日の出と日の入りは天気と一緒に届きます",
+  "Week %1": "第%1週",
+  "%1 on": "%1 個オン",
+  "Everything is off": "すべてオフ",
+  "No colours yet": "まだ色がありません"
 }

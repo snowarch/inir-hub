@@ -2460,5 +2460,13 @@
   "What it does": "Cosa fa",
   "Open Prism": "Apri Prisma",
   "The Settings iRiS opens by default: every page in one panel, what it holds over a beam of light.": "Le Impostazioni che iRiS apre di default: ogni pagina in un pannello, ciò che contiene su un fascio di luce.",
-  "v2.33": "v2.33"
+  "v2.33": "v2.33",
+  "%1 days left in %2": "Mancano %1 giorni al %2",
+  "1 day left in %1": "Manca 1 giorno al %1",
+  "Each widget a folder of frosted glass with a lit flap.": "Ogni widget una cartella di vetro smerigliato con una linguetta illuminata.",
+  "Sunrise and sunset come with the weather": "Alba e tramonto arrivano con il meteo",
+  "Week %1": "Settimana %1",
+  "%1 on": "%1 attivi",
+  "Everything is off": "Tutto è spento",
+  "No colours yet": "Ancora nessun colore"
 }

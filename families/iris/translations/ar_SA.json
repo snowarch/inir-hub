@@ -2460,5 +2460,13 @@
   "What it does": "ما يفعله",
   "Open Prism": "افتح منشور",
   "The Settings iRiS opens by default: every page in one panel, what it holds over a beam of light.": "الإعدادات التي يفتحها iRiS افتراضيًا: كل صفحة في لوحة واحدة، ومحتواها فوق شعاع من الضوء.",
-  "v2.33": "v2.33"
+  "v2.33": "v2.33",
+  "%1 days left in %2": "بقي %1 يومًا في %2",
+  "1 day left in %1": "بقي يوم واحد في %1",
+  "Each widget a folder of frosted glass with a lit flap.": "كل أداة ملف من زجاج مصنفر بلسان مضيء.",
+  "Sunrise and sunset come with the weather": "يأتي الشروق والغروب مع الطقس",
+  "Week %1": "الأسبوع %1",
+  "%1 on": "%1 مفعّل",
+  "Everything is off": "كل شيء متوقف",
+  "No colours yet": "لا ألوان بعد"
 }

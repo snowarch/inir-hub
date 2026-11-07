@@ -2460,5 +2460,13 @@
   "What it does": "Що робить",
   "Open Prism": "Відкрити Призма",
   "The Settings iRiS opens by default: every page in one panel, what it holds over a beam of light.": "Налаштування, які iRiS відкриває типово: кожна сторінка в одній панелі, її вміст на тлі променя світла.",
-  "v2.33": "v2.33"
+  "v2.33": "v2.33",
+  "%1 days left in %2": "До кінця %2 залишилося днів: %1",
+  "1 day left in %1": "До кінця %1 залишився 1 день",
+  "Each widget a folder of frosted glass with a lit flap.": "Кожен віджет — тека з матового скла зі світним клапаном.",
+  "Sunrise and sunset come with the weather": "Схід і захід сонця приходять разом із погодою",
+  "Week %1": "Тиждень %1",
+  "%1 on": "Увімкнено: %1",
+  "Everything is off": "Усе вимкнено",
+  "No colours yet": "Кольорів поки немає"
 }

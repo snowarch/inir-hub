@@ -2460,5 +2460,13 @@
   "What it does": "Chức năng",
   "Open Prism": "Mở Lăng kính",
   "The Settings iRiS opens by default: every page in one panel, what it holds over a beam of light.": "Cài đặt mà iRiS mở mặc định: mọi trang trong một bảng, nội dung đặt trên một chùm sáng.",
-  "v2.33": "v2.33"
+  "v2.33": "v2.33",
+  "%1 days left in %2": "Còn %1 ngày trong năm %2",
+  "1 day left in %1": "Còn 1 ngày trong năm %1",
+  "Each widget a folder of frosted glass with a lit flap.": "Mỗi widget là một bìa kính mờ với nắp gập phát sáng.",
+  "Sunrise and sunset come with the weather": "Giờ mặt trời mọc và lặn đến cùng thời tiết",
+  "Week %1": "Tuần %1",
+  "%1 on": "%1 đang bật",
+  "Everything is off": "Mọi thứ đều tắt",
+  "No colours yet": "Chưa có màu nào"
 }
