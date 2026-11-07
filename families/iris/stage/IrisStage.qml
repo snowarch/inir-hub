@@ -147,14 +147,14 @@ Item {
     // (what a drop is measured against), and `zones`, which also counts the place it is about to land on, so a corner
     // line it starts already pushes the side line there one step along while it is carried.
     // What the Island and the Dock absorb is read from the places as set (`configZones`): carrying a bubble never moves them.
-    function placeTaken(zone: string, except: string): bool {
-        return root.allSlots.some(slot => slot !== except && root.baseKindOf(slot).length > 0 && root.configuredPlace(slot) === zone)
+    function placeCount(zone: string, except: string): int {
+        return root.allSlots.filter(slot => slot !== except && root.baseKindOf(slot).length > 0 && root.configuredPlace(slot) === zone).length
     }
-    readonly property var configZones: root.zoneTable(zone => root.placeTaken(zone, ""))
-    readonly property var baseZones: root.lifted.length === 0 ? root.configZones : root.zoneTable(zone => root.placeTaken(zone, root.lifted))
+    readonly property var configZones: root.zoneTable(zone => root.placeCount(zone, ""))
+    readonly property var baseZones: root.lifted.length === 0 ? root.configZones : root.zoneTable(zone => root.placeCount(zone, root.lifted))
     readonly property var zones: root.previewZone.length === 0 ? root.baseZones
-        : root.zoneTable(zone => zone === root.previewZone || root.placeTaken(zone, root.lifted))
-    function zoneTable(taken: var): var {
+        : root.zoneTable(zone => (zone === root.previewZone ? 1 : 0) + root.placeCount(zone, root.lifted))
+    function zoneTable(count: var): var {
         const half = root.size / 2
         const edgeOn = wall => (root.attached ? IrisFrame.pieceInsetOn(wall) : root.margin + IrisFrame.wallOn(wall) - IrisFrame.band) + half
         const g = root.island
@@ -180,8 +180,15 @@ Item {
         const cornerLeftOf = edgeSide => along && along.lo < leftOf(edgeSide) + half ? Math.max(leftOf(edgeSide), along.hi + gapBeside) : leftOf(edgeSide)
         const cornerRightOf = edgeSide => along && along.hi > rightOf(edgeSide) - half ? Math.min(rightOf(edgeSide), along.lo - gapBeside) : rightOf(edgeSide)
         // A side line starts a bubble's step clear of its corner only when the top or bottom line there holds it; alone, the
-        // corner is its own (read from the places people set: what the Island absorbs depends on these points).
-        const clear = zone => taken(zone) ? root.size + root.looseGap : 0
+        // corner is its own (read from the places people set: what the Island absorbs depends on these points). Then it
+        // carries that line on round the corner: its bubbles stand on the corner bubble's axis, one line step after it,
+        // so the two read as one body with the frame (his 11-07 "pancita": two bodies side by side bulged where they met).
+        const pad = zone => root.barred && count(zone) > 1 ? root.barPad : 0
+        // Floating, the side line keeps a gap's air from the corner line's body instead.
+        const bodyHalf = zone => root.barred && count(zone) > 1 ? root.acrossHalf(zone) : root.size / 2
+        const clear = zone => count(zone) === 0 ? 0 : (root.onIslandRow(zone) ? 0 : pad(zone)) + (root.barred && root.attached
+            ? root.size + root.barGap : bodyHalf(zone) + root.looseGap + pad(zone.split("-")[1] + "-" + zone.split("-")[0]) + root.size / 2)
+        const armX = (corner, base, inward) => count(corner) > 0 ? base + inward * (pad(corner) - pad(corner.split("-")[1] + "-" + corner.split("-")[0])) : base
         const at = {
             "top-left": { x: side === "top" ? cornerLeftOf("top") : leftOf("top"), y: top },
             "top-right": { x: side === "top" ? cornerRightOf("top") : rightOf("top"), y: top },
@@ -189,10 +196,10 @@ Item {
             "right": { x: right, y: root.height / 2 },
             "bottom-left": { x: side === "bottom" ? cornerLeftOf("bottom") : leftOf("bottom"), y: bottom },
             "bottom-right": { x: side === "bottom" ? cornerRightOf("bottom") : rightOf("bottom"), y: bottom },
-            "left-top": { x: left, y: top + clear("top-left") },
-            "left-bottom": { x: left, y: bottom - clear("bottom-left") },
-            "right-top": { x: right, y: top + clear("top-right") },
-            "right-bottom": { x: right, y: bottom - clear("bottom-right") }
+            "left-top": { x: armX("top-left", left, 1), y: top + clear("top-left") },
+            "left-bottom": { x: armX("bottom-left", left, 1), y: bottom - clear("bottom-left") },
+            "right-top": { x: armX("top-right", right, -1), y: top + clear("top-right") },
+            "right-bottom": { x: armX("bottom-right", right, -1), y: bottom - clear("bottom-right") }
         }
         return IrisPieces.zones.map(zone => ({ zone: zone, x: at[zone].x, y: at[zone].y }))
     }
@@ -271,7 +278,15 @@ Item {
     function dropPoint(zone: string, index: int): point {
         const line = (root.baseLines[zone] ?? []).slice()
         line.splice(Math.min(index, line.length), 0, root.dropId)
-        return root.linePoint(root.dropId, zone, line, root.baseZones)
+        return root.linePoint(root.dropId, zone, line, root.dropTables[zone] ?? root.baseZones)
+    }
+    // Each line measured with the carried bubble already in it: a line that grows to two takes its pad, and the side line
+    // carried on from a corner keeps the corner bubble's axis, so a ring stands where the bubble comes to rest.
+    readonly property var dropTables: {
+        const out = {}
+        if (!root.dragging) return out
+        for (const z of root.baseZones) out[z.zone] = root.zoneTable(zone => (zone === z.zone ? 1 : 0) + root.placeCount(zone, root.lifted))
+        return out
     }
     function lineOf(zone: string): var { return root.lines[zone] ?? [] }
     function stacks(zone: string): bool { return IrisFrame.vertical(IrisFrame.edgeOf(zone)) }
@@ -724,6 +739,47 @@ Item {
         return inner.x >= outer.x - 1.5 && inner.y >= outer.y - 1.5
             && inner.x + inner.width <= outer.x + outer.width + 1.5 && inner.y + inner.height <= outer.y + outer.height + 1.5
     }
+    // Two bodies on one axis, as wide as each other and touching (a corner's bubble and the side line carried on from it),
+    // are one body: drawn as two, the smooth union bulges where their edges run side by side (his 11-07 "pancita").
+    // `alias` names the body each joined one became, for a card that grows out of it.
+    function joinRuns(lines: var): var {
+        // Measured inside the frame: what stands past its inner edge melts into the wall either way.
+        const inset = root.attached && IrisFrame.framed ? IrisFrame.band : 0
+        const inside = shape => {
+            const x = Math.max(inset, shape.x), y = Math.max(inset, shape.y)
+            return Object.assign({}, shape, { x: x, y: y, width: Math.min(root.width - inset, shape.x + shape.width) - x,
+                height: Math.min(root.height - inset, shape.y + shape.height) - y })
+        }
+        const joins = root.barred || root.attached
+        const out = lines.map(line => ({ shape: joins ? inside(line.shape) : line.shape, side: line.side, ids: [line.shape.id] }))
+        const near = 3
+        const reach = root.looseGap + near
+        const run = (a, b, along) => {
+            const lo = along ? "y" : "x", span = along ? "height" : "width"
+            const at = along ? "x" : "y", wide = along ? "width" : "height"
+            return Math.abs(a[at] - b[at]) <= near && Math.abs(a[at] + a[wide] - b[at] - b[wide]) <= near
+                && Math.max(a[lo], b[lo]) - Math.min(a[lo] + a[span], b[lo] + b[span]) <= reach
+        }
+        // Floating unclustered bubbles stand apart by choice (`iris.bubbles.cluster` off); on the frame they are one body anyway.
+        for (let joined = joins; joined;) {
+            joined = false
+            for (let i = 0; i < out.length && !joined; i++) for (let j = i + 1; j < out.length && !joined; j++) {
+                const a = out[i].shape, b = out[j].shape
+                if (!run(a, b, true) && !run(a, b, false)) continue
+                const x = Math.min(a.x, b.x), y = Math.min(a.y, b.y)
+                const width = Math.max(a.x + a.width, b.x + b.width) - x, height = Math.max(a.y + a.height, b.y + b.height) - y
+                const keep = a.width * a.height >= b.width * b.height ? out[i] : out[j]
+                out[i] = { shape: Object.assign({}, keep.shape, { x: x, y: y, width: width, height: height,
+                    radius: IrisStyle.pieceRadius(Math.min(width, height)), id: keep.shape.id }),
+                    side: keep.side, ids: out[i].ids.concat(out[j].ids) }
+                out.splice(j, 1)
+                joined = true
+            }
+        }
+        const alias = {}
+        for (const line of out) for (const id of line.ids) alias[id] = line.shape.id
+        return { lines: out, alias: alias }
+    }
     // The surface a slot stands on, as the field draws it: its line (or itself, alone) run out to the corner it starts from.
     function surfaceOf(slot: string): var {
         const plate = root.plateFor(slot)
@@ -794,9 +850,12 @@ Item {
                 radius: IrisStyle.pieceRadius(rect.size), id: "piece:" + slot }, root.placeName(slot), true),
                 side: IrisFrame.edgeOf(root.placeName(slot)) })
         }
-        lines.forEach((line, i) => {
-            const held = lines.some((other, j) => i !== j && root.holds(other.shape, line.shape) && (j < i || !root.holds(line.shape, other.shape)))
-            if (!held) out.push(root.meltInto(line.shape, line.side, sides))
+        const runs = root.joinRuns(lines)
+        const alias = runs.alias
+        runs.lines.forEach((line, i) => {
+            const holder = runs.lines.find((other, j) => i !== j && root.holds(other.shape, line.shape) && (j < i || !root.holds(line.shape, other.shape)))
+            if (holder) { for (const id in alias) if (alias[id] === line.shape.id) alias[id] = holder.shape.id }
+            else out.push(root.meltInto(line.shape, line.side, sides))
         })
         for (const side of sides) out.unshift(root.edgeBody(side))
         if (carried.shown && !root.carryingIsland) {
@@ -812,7 +871,7 @@ Item {
                     ? IrisStyle.ramp(card.progress, 0.08, 0.3) : 0
                 out.push({ x: body.x, y: body.y, width: body.width, height: body.height,
                     radius: body.radius, paints: true, fuse: Math.round(IrisStyle.fuseDeep * joinRise), id: "card", glass: IrisStyle.surfaceGlass("cards"),
-                    joins: joinRise > 0 ? root.cardOriginId : "" })
+                    joins: joinRise > 0 ? (alias[root.cardOriginId] ?? root.cardOriginId) : "" })
             }
         }
         return out
