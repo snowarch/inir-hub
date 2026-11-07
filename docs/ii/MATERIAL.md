@@ -55,6 +55,11 @@ follow the wallpaper or a colour theme: [Colours and themes](THEMING_PRESETS.md)
 
 - Move everything around by hand: **Settings › Shell Layout**.
 - Desktop widgets and their grid: **Settings › Widgets**.
+  While you arrange widgets (from the desktop's menu), a selected widget shows grips on its right and bottom
+  edges. A month, the upcoming list, notes, to-dos, vitals, uptime, the day's progress, the date, the ticker, the
+  visualizer, a picture, a shape and the editorial cards take any width and height there and lay themselves out in it,
+  as in v2.33; letting go picks the size (S, M or L) whose layout fits the box. Every other widget grows or shrinks
+  whole. S, M or L in its bar puts the plain size back. iRiS's own widget faces keep their three sizes.
 - Blur, glass and animations: **Settings › Effects**. See [Optimization](OPTIMIZATION.md).
 - Notifications, Alt+Tab and the floating tools (**Super+G**): **Settings › Panels**.
   In Alt+Tab, Tab and the arrows move the pick and the window switches when you let go of Alt or press Enter; Esc
