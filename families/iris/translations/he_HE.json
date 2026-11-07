@@ -2493,5 +2493,11 @@
   "%1 cores · %2 GHz": "%1 ליבות · %2 GHz",
   "avg %1%": "ממוצע %1%",
   "Warns at %1°": "התראה ב־%1°",
-  "%1 GB free": "%1 GB פנויים"
+  "%1 GB free": "%1 GB פנויים",
+  "Rail width": "רוחב הסרגל",
+  "How wide the rail stands inside the frame; its icons grow with it.": "כמה רחב הסרגל בתוך המסגרת; הסמלים גדלים איתו.",
+  "Rail apps": "יישומי הסרגל",
+  "Top lines them up under the launcher like a browser's tabs; Centre holds them in the middle like a Dock.": "למעלה מסדר אותם מתחת למפעיל כמו לשוניות דפדפן; מרכז מחזיק אותם באמצע כמו Dock.",
+  "Rail buttons": "כפתורי הסרגל",
+  "The + that pins apps and the gear that opens Settings.": "ה־+ שמצמיד יישומים וגלגל השיניים שפותח את ההגדרות."
 }

@@ -2493,5 +2493,11 @@
   "%1 cores · %2 GHz": "%1 コア · %2 GHz",
   "avg %1%": "平均 %1%",
   "Warns at %1°": "%1°で警告",
-  "%1 GB free": "空き %1 GB"
+  "%1 GB free": "空き %1 GB",
+  "Rail width": "レールの幅",
+  "How wide the rail stands inside the frame; its icons grow with it.": "フレーム内のレールの幅。アイコンも一緒に大きくなります。",
+  "Rail apps": "レールのアプリ",
+  "Top lines them up under the launcher like a browser's tabs; Centre holds them in the middle like a Dock.": "上はブラウザのタブのようにランチャーの下に並べ、中央はDockのように真ん中に置きます。",
+  "Rail buttons": "レールのボタン",
+  "The + that pins apps and the gear that opens Settings.": "アプリを固定する＋と、設定を開く歯車。"
 }

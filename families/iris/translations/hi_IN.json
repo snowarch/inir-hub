@@ -2493,5 +2493,11 @@
   "%1 cores · %2 GHz": "%1 कोर · %2 GHz",
   "avg %1%": "औसत %1%",
   "Warns at %1°": "%1° पर चेतावनी",
-  "%1 GB free": "%1 GB खाली"
+  "%1 GB free": "%1 GB खाली",
+  "Rail width": "रेल की चौड़ाई",
+  "How wide the rail stands inside the frame; its icons grow with it.": "फ़्रेम के भीतर रेल कितनी चौड़ी है; उसके आइकन साथ बढ़ते हैं।",
+  "Rail apps": "रेल के ऐप",
+  "Top lines them up under the launcher like a browser's tabs; Centre holds them in the middle like a Dock.": "ऊपर उन्हें लॉन्चर के नीचे ब्राउज़र टैब की तरह रखता है; बीच में Dock की तरह बीच में रखता है।",
+  "Rail buttons": "रेल के बटन",
+  "The + that pins apps and the gear that opens Settings.": "ऐप पिन करने वाला + और सेटिंग्स खोलने वाला गियर।"
 }

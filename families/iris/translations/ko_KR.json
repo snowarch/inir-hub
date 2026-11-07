@@ -2493,5 +2493,11 @@
   "%1 cores · %2 GHz": "%1코어 · %2 GHz",
   "avg %1%": "평균 %1%",
   "Warns at %1°": "%1°에서 경고",
-  "%1 GB free": "%1GB 남음"
+  "%1 GB free": "%1GB 남음",
+  "Rail width": "레일 너비",
+  "How wide the rail stands inside the frame; its icons grow with it.": "프레임 안에서 레일이 차지하는 너비. 아이콘도 함께 커집니다.",
+  "Rail apps": "레일 앱",
+  "Top lines them up under the launcher like a browser's tabs; Centre holds them in the middle like a Dock.": "위쪽은 브라우저 탭처럼 런처 아래에 정렬하고, 가운데는 Dock처럼 중앙에 둡니다.",
+  "Rail buttons": "레일 버튼",
+  "The + that pins apps and the gear that opens Settings.": "앱을 고정하는 +와 설정을 여는 톱니바퀴."
 }

@@ -179,7 +179,10 @@ QtObject {
     readonly property real islandVisualDepth: root.islandAutoHide ? 0 : root.islandBand + root.islandMargin
     readonly property real islandDepth: (root.bar?.reserveSpace ?? true) && !root.islandAutoHide
         ? root.islandVisualDepth : 0
-    readonly property real dockIcon: Math.max(28, Math.min(64, Number(root.dock?.iconSize ?? 40))) * root.d
+    // The rail keeps its own size (iris.surround.railSize): a sidebar reads slimmer than a Dock.
+    readonly property real railIcon: Math.max(22, Math.min(54, Number(root.surround?.railSize ?? 46) - 18)) * root.d
+    readonly property real dockIcon: root.rail ? root.railIcon
+        : Math.max(28, Math.min(64, Number(root.dock?.iconSize ?? 40))) * root.d
     readonly property real dockBand: root.dockIcon + 18 * root.d
     readonly property real dockMargin: root.rail || Boolean(root.dock?.notch ?? false) ? 0 : 10 * root.d
     readonly property real dockVisualDepth: root.rail ? root.dockBand

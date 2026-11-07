@@ -2493,5 +2493,11 @@
   "%1 cores · %2 GHz": "%1 ядер · %2 ГГц",
   "avg %1%": "сред. %1%",
   "Warns at %1°": "Предупреждение при %1°",
-  "%1 GB free": "Свободно %1 ГБ"
+  "%1 GB free": "Свободно %1 ГБ",
+  "Rail width": "Ширина панели",
+  "How wide the rail stands inside the frame; its icons grow with it.": "Насколько широка панель внутри рамки; значки растут вместе с ней.",
+  "Rail apps": "Приложения панели",
+  "Top lines them up under the launcher like a browser's tabs; Centre holds them in the middle like a Dock.": "Сверху выстраивает их под запуском, как вкладки браузера; По центру держит их посередине, как Dock.",
+  "Rail buttons": "Кнопки панели",
+  "The + that pins apps and the gear that opens Settings.": "+, закрепляющий приложения, и шестерёнка, открывающая настройки."
 }

@@ -155,8 +155,8 @@ Loader {
             ? (popup.placement.sideways ? (popup.placement.towardsLeft ? "left" : "right") : (popup.placement.towardsUp ? "up" : "down"))
             : root.opensToward
         // At the pointer: the frame's air at the sides, and clear of the Island and the Dock above and below.
-        readonly property real roomLeft: IrisFrame.band + IrisFrame.musicReach("left") + IrisFrame.bodyMargin
-        readonly property real roomRight: popup.width - IrisFrame.band - IrisFrame.musicReach("right") - IrisFrame.bodyMargin
+        readonly property real roomLeft: IrisFrame.wallOn("left") + IrisFrame.musicReach("left") + IrisFrame.bodyMargin
+        readonly property real roomRight: popup.width - IrisFrame.wallOn("right") - IrisFrame.musicReach("right") - IrisFrame.bodyMargin
         readonly property real roomTop: IrisFrame.safeInset("top") + IrisFrame.bodyMargin
         readonly property real roomBottom: popup.height - IrisFrame.safeInset("bottom") - IrisFrame.bodyMargin
         function clampX(x: real): real { return Math.round(Math.max(popup.roomLeft, Math.min(popup.roomRight - menu.width, x))) }

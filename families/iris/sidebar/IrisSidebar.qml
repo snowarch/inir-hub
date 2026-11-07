@@ -208,7 +208,7 @@ PanelWindow {
             enabled: frame.settled && root.sectionMorphs === 0
             NumberAnimation { duration: IrisStyle.morphDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: IrisStyle.morphCurve }
         }
-        origin: ({ x: root.left ? 0 : root.width - Math.max(2, IrisFrame.band), y: frame.y,
+        origin: ({ x: root.left ? IrisFrame.wallOn("left") - Math.max(2, IrisFrame.band) : root.width - IrisFrame.wallOn("right"), y: frame.y,
             width: Math.max(2, IrisFrame.band), height: frame.height, radius: Math.max(1, IrisFrame.band / 2) })
         MouseArea { anchors.fill: parent }
         HoverHandler { id: frameHover; onHoveredChanged: if (hovered) root.engaged = true }

@@ -2493,5 +2493,11 @@
   "%1 cores · %2 GHz": "%1 çekirdek · %2 GHz",
   "avg %1%": "ort. %1%",
   "Warns at %1°": "%1° üstünde uyarır",
-  "%1 GB free": "%1 GB boş"
+  "%1 GB free": "%1 GB boş",
+  "Rail width": "Ray genişliği",
+  "How wide the rail stands inside the frame; its icons grow with it.": "Rayın çerçeve içinde ne kadar geniş durduğu; simgeleri onunla büyür.",
+  "Rail apps": "Ray uygulamaları",
+  "Top lines them up under the launcher like a browser's tabs; Centre holds them in the middle like a Dock.": "Üst, onları bir tarayıcının sekmeleri gibi başlatıcının altına dizer; Orta, bir Dock gibi ortada tutar.",
+  "Rail buttons": "Ray düğmeleri",
+  "The + that pins apps and the gear that opens Settings.": "Uygulama sabitleyen + ve Ayarlar'ı açan dişli."
 }

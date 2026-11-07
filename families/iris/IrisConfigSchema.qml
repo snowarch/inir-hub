@@ -769,6 +769,11 @@ JsonObject {
         // "none" | "left" | "right": the frame grows wide on that side and the Dock lives in it, top to bottom, like a
         // browser's sidebar (.claude/ref/iris-frame). Ignored on the Island's own edge.
         property string rail: "none"
+        // The rail's own measures: railSize its width inside the frame (px, icons are that less 18), railApps where
+        // the apps sit ("top" like a browser's tabs, "centre" like a vertical Dock), railButtons the "+" and the gear.
+        property int railSize: 46
+        property string railApps: "top"
+        property bool railButtons: true
         // The frame's own light over whatever material it wears: "plain" or "holo" (the screen an eclipse, the frame its
         // spectral rim, .claude/ref/iris-holo); holoLight 0..100 %, holoHalo how far its halo reaches over the screen 0..100 %.
         property string style: "plain"

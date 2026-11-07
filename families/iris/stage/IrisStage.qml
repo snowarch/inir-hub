@@ -755,15 +755,20 @@ Item {
         for (const shape of (Array.isArray(dock) ? dock : []))
             if (shape?.id === "dock") out.push({ x: shape.x, y: shape.y, width: shape.width, height: shape.height })
         const sidebars = Config.options?.iris?.sidebars ?? ({})
-        if (GlobalStates.sidebarLeftOpen && GlobalStates.sidebarLeftPresentationOutput === root.screenName) {
+        // A side panel stands past whatever holds its wall (the band, the rail, the Dock); a panel switched off holds nothing.
+        if (GlobalStates.sidebarLeftOpen && GlobalStates.sidebarLeftPresentationOutput === root.screenName
+                && (sidebars?.left?.enable ?? true)) {
             const o = sidebars?.left ?? ({})
             const width = Math.max(300, Math.min(600, Number(o?.width ?? 380))) * root.d
-            out.push({ x: 0, y: 0, width: IrisFrame.band + width + ((o?.notch ?? false) ? 0 : 12 * root.d), height: root.height })
+            const notch = (o?.notch ?? false) && IrisFrame.inset("left") <= IrisFrame.band
+            out.push({ x: 0, y: 0, width: IrisFrame.inset("left") + width + (notch ? 0 : 12 * root.d), height: root.height })
         }
-        if (GlobalStates.sidebarRightOpen && GlobalStates.sidebarRightPresentationOutput === root.screenName) {
+        if (GlobalStates.sidebarRightOpen && GlobalStates.sidebarRightPresentationOutput === root.screenName
+                && (sidebars?.right?.enable ?? true)) {
             const o = sidebars?.right ?? ({})
             const width = Math.max(300, Math.min(600, Number(o?.width ?? 380))) * root.d
-            const depth = IrisFrame.band + width + ((o?.notch ?? false) ? 0 : 12 * root.d)
+            const notch = (o?.notch ?? false) && IrisFrame.inset("right") <= IrisFrame.band
+            const depth = IrisFrame.inset("right") + width + (notch ? 0 : 12 * root.d)
             out.push({ x: root.width - depth, y: 0, width: depth, height: root.height })
         }
         return out

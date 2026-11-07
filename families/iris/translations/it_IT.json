@@ -2493,5 +2493,11 @@
   "%1 cores · %2 GHz": "%1 core · %2 GHz",
   "avg %1%": "media %1%",
   "Warns at %1°": "Avvisa a %1°",
-  "%1 GB free": "%1 GB liberi"
+  "%1 GB free": "%1 GB liberi",
+  "Rail width": "Larghezza della barra",
+  "How wide the rail stands inside the frame; its icons grow with it.": "Quanto è larga la barra nella cornice; le icone crescono con essa.",
+  "Rail apps": "App della barra",
+  "Top lines them up under the launcher like a browser's tabs; Centre holds them in the middle like a Dock.": "In alto le allinea sotto il launcher come le schede di un browser; Centro le tiene al centro come un Dock.",
+  "Rail buttons": "Pulsanti della barra",
+  "The + that pins apps and the gear that opens Settings.": "Il + che fissa le app e l'ingranaggio che apre le Impostazioni."
 }

@@ -2493,5 +2493,11 @@
   "%1 cores · %2 GHz": "%1 núcleos · %2 GHz",
   "avg %1%": "prom. %1%",
   "Warns at %1°": "Avisa a %1°",
-  "%1 GB free": "%1 GB libres"
+  "%1 GB free": "%1 GB libres",
+  "Rail width": "Ancho del riel",
+  "How wide the rail stands inside the frame; its icons grow with it.": "Qué tan ancho es el riel dentro del marco; sus íconos crecen con él.",
+  "Rail apps": "Apps del riel",
+  "Top lines them up under the launcher like a browser's tabs; Centre holds them in the middle like a Dock.": "Arriba las alinea bajo el lanzador como las pestañas de un navegador; Centro las deja en el medio como un Dock.",
+  "Rail buttons": "Botones del riel",
+  "The + that pins apps and the gear that opens Settings.": "El + que fija apps y el engranaje que abre Ajustes."
 }

@@ -153,7 +153,9 @@ Item {
     readonly property bool vertical: root.edge === "left" || root.edge === "right"
     readonly property real gap: Math.round(8 * root.d)
     readonly property real lo: IrisFrame.band + Math.round(12 * root.d)
-    function clampX(x: real, w: real): real { return Math.round(Math.max(root.lo, Math.min(root.width - root.lo - w, x))) }
+    readonly property real loLeft: IrisFrame.wallOn("left") + Math.round(12 * root.d)
+    readonly property real loRight: IrisFrame.wallOn("right") + Math.round(12 * root.d)
+    function clampX(x: real, w: real): real { return Math.round(Math.max(root.loLeft, Math.min(root.width - root.loRight - w, x))) }
     function clampY(y: real, h: real): real { return Math.round(Math.max(root.lo, Math.min(root.height - root.lo - h, y))) }
 
     readonly property real capsuleW: Math.round(capsuleRow.implicitWidth + 12 * root.d)

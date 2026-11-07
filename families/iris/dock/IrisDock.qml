@@ -25,7 +25,8 @@ Item {
     readonly property bool showLauncher: Config.options?.iris?.dock?.launcher ?? true
     readonly property var options: Config.options?.iris?.dock ?? ({})
     readonly property real d: IrisStyle.density
-    readonly property real iconSize: Math.max(28, Math.min(64, Number(root.options?.iconSize ?? 40))) * root.d
+    readonly property real iconSize: root.rail ? IrisFrame.railIcon
+        : Math.max(28, Math.min(64, Number(root.options?.iconSize ?? 40))) * root.d
     readonly property string edge: IrisFrame.dockEdge
     readonly property bool atTop: root.edge === "top"
     readonly property bool atBottom: root.edge === "bottom"
@@ -203,6 +204,8 @@ Item {
     readonly property real slotWidth: root.iconSize + 10 * root.d
     // Where the rail's first slot and its gear stand from the screen's ends: past the frame's line, a breath in.
     readonly property real railHead: Math.round(IrisFrame.band + 8 * root.d)
+    readonly property bool railCentred: String(IrisFrame.surround?.railApps ?? "top") === "centre"
+    readonly property bool railButtons: IrisFrame.surround?.railButtons ?? true
     readonly property real plateSize: Math.round(root.iconSize + 6 * root.d)
     readonly property real separatorWidth: 13 * root.d
     readonly property real slotSpacing: 2 * root.d
@@ -281,13 +284,13 @@ Item {
             readonly property real menuLeftClear: {
                 if (!GlobalStates.sidebarLeftOpen || GlobalStates.sidebarLeftPresentationOutput !== (root.screen?.name ?? "")) return 12
                 const o = Config.options?.iris?.sidebars?.left ?? ({})
-                return IrisFrame.band + Math.max(300, Math.min(600, Number(o?.width ?? 380))) * root.d
+                return IrisFrame.inset("left") + Math.max(300, Math.min(600, Number(o?.width ?? 380))) * root.d
                     + ((o?.notch ?? false) ? 0 : 12 * root.d) + 12
             }
             readonly property real menuRightClear: {
                 if (!GlobalStates.sidebarRightOpen || GlobalStates.sidebarRightPresentationOutput !== (root.screen?.name ?? "")) return 12
                 const o = Config.options?.iris?.sidebars?.right ?? ({})
-                return IrisFrame.band + Math.max(300, Math.min(600, Number(o?.width ?? 380))) * root.d
+                return IrisFrame.inset("right") + Math.max(300, Math.min(600, Number(o?.width ?? 380))) * root.d
                     + ((o?.notch ?? false) ? 0 : 12 * root.d) + 12
             }
             function captureMenuAnchor(icon: Item): void {
@@ -554,9 +557,14 @@ Item {
                         xAxis.enabled: root.vertical
                         yAxis.enabled: !root.vertical
                         property real startSize: 40
-                        property IrisConfigDrag write: IrisConfigDrag { path: "iris.dock.iconSize" }
+                        // On the rail the grip sizes the rail (its width, icons + 18), never the Dock's own icons.
+                        readonly property string sizeKey: root.rail ? "iris.surround.railSize" : "iris.dock.iconSize"
+                        readonly property real lo: root.rail ? 40 : 28
+                        readonly property real hi: root.rail ? 72 : 64
+                        property IrisConfigDrag write: IrisConfigDrag { path: dockResizeDrag.sizeKey }
                         onActiveChanged: {
-                            if (active) dockResizeDrag.startSize = Number(Config.options?.iris?.dock?.iconSize ?? 40)
+                            if (active) dockResizeDrag.startSize = root.rail ? Number(IrisFrame.surround?.railSize ?? 46)
+                                : Number(Config.options?.iris?.dock?.iconSize ?? 40)
                             else dockResizeDrag.write.flush()
                         }
                         onTranslationChanged: {
@@ -564,7 +572,7 @@ Item {
                             const outward = root.vertical ? (root.atLeft ? translation.x : -translation.x)
                                 : (root.atTop ? translation.y : -translation.y)
                             const delta = outward / Math.max(0.01, root.d)
-                            dockResizeDrag.write.push(Math.round(Math.max(28, Math.min(64, dockResizeDrag.startSize + delta))))
+                            dockResizeDrag.write.push(Math.round(Math.max(dockResizeDrag.lo, Math.min(dockResizeDrag.hi, dockResizeDrag.startSize + delta))))
                         }
                     }
                 }
@@ -589,8 +597,14 @@ Item {
                     columns: root.vertical ? 1 : Math.max(1, root.entries.length + (root.showLauncher ? 1 : 0)
                         + (root.pieces.length > 0 ? root.pieces.length + 1 : 0))
                     flow: root.vertical ? Grid.TopToBottom : Grid.LeftToRight
-                    x: root.vertical ? (root.atLeft ? Math.round(4 * root.d) : parent.width - width - Math.round(4 * root.d)) : dock.padding
-                    y: root.rail ? root.railHead : root.vertical ? dock.padding : (root.atTop ? Math.round(4 * root.d) : parent.height - height - Math.round(4 * root.d))
+                    // On the rail each plate centres on all you see of it, frame band included, as a sidebar's marks do
+                    // (the window stands on the screen's edge; a plate sits 4·d from its slot's outer side).
+                    x: root.rail ? Math.round(root.atLeft
+                            ? IrisFrame.wallOn("left") / 2 - dock.x - 4 * root.d - root.plateSize / 2
+                            : window.width - IrisFrame.wallOn("right") / 2 - dock.x - width + 4 * root.d + root.plateSize / 2)
+                        : root.vertical ? (root.atLeft ? Math.round(4 * root.d) : parent.width - width - Math.round(4 * root.d)) : dock.padding
+                    y: root.rail ? (root.railCentred ? Math.max(root.railHead, Math.round((dock.height - height) / 2)) : root.railHead)
+                        : root.vertical ? dock.padding : (root.atTop ? Math.round(4 * root.d) : parent.height - height - Math.round(4 * root.d))
                     spacing: root.slotSpacing
                     move: Transition {
                         enabled: root.slideApp.length > 0 && IrisStyle.motionEnabled
@@ -1610,7 +1624,8 @@ Item {
         property string glyph: ""
         property string label: ""
         signal activated()
-        visible: root.rail && !IrisState.edit
+        readonly property real glyphSize: Math.round(Math.max(16 * root.d, root.iconSize * 0.6))
+        visible: root.rail && root.railButtons && !IrisState.edit
         x: appRow.x
         width: root.thickness
         height: root.slotWidth
@@ -1618,12 +1633,12 @@ Item {
         MaterialSymbol {
             x: root.edgeX(parent.width, width, 4 * root.d + (root.plateSize - width) / 2)
             y: (parent.height - height) / 2
-            width: root.plateSize * 0.5
+            width: railButton.glyphSize
             height: width
             horizontalAlignment: Text.AlignHCenter
             verticalAlignment: Text.AlignVCenter
             text: railButton.glyph
-            iconSize: Math.round(root.iconSize * 0.5)
+            iconSize: railButton.glyphSize
             color: railArea.containsMouse ? IrisStyle.text : IrisStyle.textSecondary
             scale: railArea.pressed ? IrisStyle.pressScale(0.9) : 1
             Behavior on color { ColorAnimation { duration: IrisStyle.duration(120); easing.type: IrisStyle.feedbackEasing } }

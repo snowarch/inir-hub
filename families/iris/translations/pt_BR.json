@@ -2493,5 +2493,11 @@
   "%1 cores · %2 GHz": "%1 núcleos · %2 GHz",
   "avg %1%": "méd. %1%",
   "Warns at %1°": "Avisa em %1°",
-  "%1 GB free": "%1 GB livres"
+  "%1 GB free": "%1 GB livres",
+  "Rail width": "Largura do trilho",
+  "How wide the rail stands inside the frame; its icons grow with it.": "Quão largo o trilho fica dentro da moldura; os ícones crescem com ele.",
+  "Rail apps": "Apps do trilho",
+  "Top lines them up under the launcher like a browser's tabs; Centre holds them in the middle like a Dock.": "Topo as alinha sob o lançador como as abas de um navegador; Centro as mantém no meio como um Dock.",
+  "Rail buttons": "Botões do trilho",
+  "The + that pins apps and the gear that opens Settings.": "O + que fixa apps e a engrenagem que abre as Configurações."
 }

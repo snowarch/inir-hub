@@ -2493,5 +2493,11 @@
   "%1 cores · %2 GHz": "%1 inti · %2 GHz",
   "avg %1%": "rata-rata %1%",
   "Warns at %1°": "Peringatan di %1°",
-  "%1 GB free": "%1 GB kosong"
+  "%1 GB free": "%1 GB kosong",
+  "Rail width": "Lebar rel",
+  "How wide the rail stands inside the frame; its icons grow with it.": "Seberapa lebar rel di dalam bingkai; ikonnya ikut membesar.",
+  "Rail apps": "Aplikasi rel",
+  "Top lines them up under the launcher like a browser's tabs; Centre holds them in the middle like a Dock.": "Atas menjajarkannya di bawah peluncur seperti tab peramban; Tengah menahannya di tengah seperti Dock.",
+  "Rail buttons": "Tombol rel",
+  "The + that pins apps and the gear that opens Settings.": "Tanda + untuk menyematkan aplikasi dan roda gigi yang membuka Pengaturan."
 }

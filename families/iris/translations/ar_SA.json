@@ -2493,5 +2493,11 @@
   "%1 cores · %2 GHz": "%1 نواة · %2 غيغاهرتز",
   "avg %1%": "المتوسط %1%",
   "Warns at %1°": "تحذير عند %1°",
-  "%1 GB free": "%1 غيغابايت متاحة"
+  "%1 GB free": "%1 غيغابايت متاحة",
+  "Rail width": "عرض الشريط",
+  "How wide the rail stands inside the frame; its icons grow with it.": "مدى عرض الشريط داخل الإطار؛ تكبر أيقوناته معه.",
+  "Rail apps": "تطبيقات الشريط",
+  "Top lines them up under the launcher like a browser's tabs; Centre holds them in the middle like a Dock.": "أعلى يصفّها تحت المشغّل مثل علامات تبويب المتصفح؛ الوسط يبقيها في المنتصف مثل Dock.",
+  "Rail buttons": "أزرار الشريط",
+  "The + that pins apps and the gear that opens Settings.": "زر + لتثبيت التطبيقات والترس الذي يفتح الإعدادات."
 }

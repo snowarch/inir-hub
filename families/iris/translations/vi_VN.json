@@ -2493,5 +2493,11 @@
   "%1 cores · %2 GHz": "%1 lõi · %2 GHz",
   "avg %1%": "TB %1%",
   "Warns at %1°": "Cảnh báo ở %1°",
-  "%1 GB free": "Còn trống %1 GB"
+  "%1 GB free": "Còn trống %1 GB",
+  "Rail width": "Độ rộng thanh ray",
+  "How wide the rail stands inside the frame; its icons grow with it.": "Thanh ray rộng bao nhiêu trong khung; biểu tượng lớn theo.",
+  "Rail apps": "Ứng dụng trên ray",
+  "Top lines them up under the launcher like a browser's tabs; Centre holds them in the middle like a Dock.": "Trên xếp chúng dưới trình khởi chạy như các thẻ trình duyệt; Giữa giữ chúng ở giữa như một Dock.",
+  "Rail buttons": "Nút trên ray",
+  "The + that pins apps and the gear that opens Settings.": "Dấu + để ghim ứng dụng và bánh răng mở Cài đặt."
 }

@@ -2493,5 +2493,11 @@
   "%1 cores · %2 GHz": "%1 Kerne · %2 GHz",
   "avg %1%": "Ø %1%",
   "Warns at %1°": "Warnt bei %1°",
-  "%1 GB free": "%1 GB frei"
+  "%1 GB free": "%1 GB frei",
+  "Rail width": "Leistenbreite",
+  "How wide the rail stands inside the frame; its icons grow with it.": "Wie breit die Leiste im Rahmen steht; ihre Symbole wachsen mit.",
+  "Rail apps": "Apps der Leiste",
+  "Top lines them up under the launcher like a browser's tabs; Centre holds them in the middle like a Dock.": "Oben reiht sie unter dem Starter auf wie die Tabs eines Browsers; Mitte hält sie in der Mitte wie ein Dock.",
+  "Rail buttons": "Leistentasten",
+  "The + that pins apps and the gear that opens Settings.": "Das +, das Apps anheftet, und das Zahnrad, das die Einstellungen öffnet."
 }

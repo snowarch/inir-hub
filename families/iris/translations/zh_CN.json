@@ -2493,5 +2493,11 @@
   "%1 cores · %2 GHz": "%1 核 · %2 GHz",
   "avg %1%": "平均 %1%",
   "Warns at %1°": "%1° 时警告",
-  "%1 GB free": "可用 %1 GB"
+  "%1 GB free": "可用 %1 GB",
+  "Rail width": "侧栏宽度",
+  "How wide the rail stands inside the frame; its icons grow with it.": "侧栏在边框内的宽度；图标随之变大。",
+  "Rail apps": "侧栏应用",
+  "Top lines them up under the launcher like a browser's tabs; Centre holds them in the middle like a Dock.": "顶部会像浏览器标签一样排在启动器下方；居中会像 Dock 一样放在中间。",
+  "Rail buttons": "侧栏按钮",
+  "The + that pins apps and the gear that opens Settings.": "用于固定应用的 + 和打开设置的齿轮。"
 }
