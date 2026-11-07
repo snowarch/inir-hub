@@ -23,7 +23,11 @@ Singleton {
     // Prism's dress per area: a shorter name where the sidebar wants one, its mark and tint, and the rows the hero says.
     readonly property var dress: ({
         general: { name: "Home", glyph: "home", tint: "blue", lead: ["panelFamily", "time.format"] },
-        appearance: { name: "Style", glyph: "palette", tint: "violet", lead: ["iris.appearance.look", "iris.appearance.scheme"] },
+        appearance: { name: "Style", glyph: "style", tint: "violet", lead: ["iris.appearance.look", "iris.appearance.design"] },
+        colour: { name: "Colour", glyph: "palette", tint: "pink", lead: ["iris.appearance.scheme", "iris.appearance.accent"] },
+        surfaces: { name: "Surfaces", glyph: "layers", tint: "teal", lead: ["iris.appearance.theme.surface", "iris.appearance.glass.mode"] },
+        typeIcons: { name: "Type & icons", glyph: "text_fields", tint: "orange", lead: ["iris.appearance.theme.text", "iris.appearance.icons.style"] },
+        appColours: { name: "App colours", glyph: "format_paint", tint: "blue", lead: ["iris.appearance.accentForApps", "appearance.wallpaperTheming.enableAppsAndShell"] },
         wallpaper: { glyph: "wallpaper", tint: "teal", lead: ["iris.wallpaper.layout", "iris.wallpaper.sort"] },
         motion: { glyph: "animation", tint: "pink", lead: ["iris.appearance.morph", "iris.appearance.theme.curve"] },
         bar: { name: "Island", glyph: "smart_button", tint: "indigo", lead: ["iris.bar.design", "iris.bar.position"] },
@@ -53,6 +57,24 @@ Singleton {
         about: { name: "About", glyph: "info", tint: "grey", lead: [], view: "IrisAboutPage.qml", cluster: 4, after: "system" }
     })
 
+    // An area too long for one page is read as several (his 11-07: Style was "un chorizo", 126 rows in 31 groups): each
+    // chapter a page of its own, in the sidebar after the area; a group no chapter names stays on the area's first page.
+    readonly property var chapters: ({
+        appearance: [
+            { id: "appearance", groups: [] },
+            { id: "colour", groups: ["Scheme", "Accent", "Highlight", "Signal", "Colour theme", "Day and night", "Wallpaper tint", "Adaptive", "Dark look", "Ink look", "Light look"] },
+            { id: "surfaces", groups: ["Material", "Glass", "Texture", "Light", "Edges", "Shape", "Frame", "Material per surface", "Menus", "Settings"] },
+            { id: "typeIcons", groups: ["Text", "Faces", "Icons", "Badges"] },
+            { id: "appColours", groups: ["App colours"] }
+        ]
+    })
+    // The page a row of IrisOptions' `section`, group `group` lives on.
+    function pageOf(section: string, group: string): string {
+        const list = root.chapters[section]
+        if (!list) return section
+        return (list.find(chapter => chapter.groups.includes(group)) ?? list[0]).id
+    }
+
     // Every page: IrisOptions' areas in their order, each with Prism's dress, and Prism's own views where they belong.
     readonly property var pages: {
         const out = []
@@ -74,7 +96,7 @@ Singleton {
         }
         const extras = Object.keys(root.dress).filter(id => root.dress[id].after)
         for (const section of IrisOptions.sections) {
-            add(section.id, section)
+            for (const chapter of root.chapters[section.id] ?? [{ id: section.id }]) add(chapter.id, section)
             for (const id of extras.filter(id => root.dress[id].after === section.id)) add(id, null)
         }
         return out
@@ -114,7 +136,7 @@ Singleton {
                 key: [spec.section, spec.group, path, spec.label].join("|"),
                 spec: spec,
                 path: path,
-                page: String(spec.section ?? ""),
+                page: root.pageOf(String(spec.section ?? ""), String(spec.group ?? "")),
                 section: String(spec.group ?? ""),
                 part: String(spec.part ?? ""),
                 label: String(spec.label ?? ""),

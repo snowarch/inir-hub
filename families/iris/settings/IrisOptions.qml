@@ -104,15 +104,12 @@ QtObject {
     }
     // The gallery's own rows mean nothing while one of Material's pickers opens instead.
     function ownGallery(): bool { return String(Config.options?.iris?.wallpaper?.picker ?? "iris") !== "material" }
-    // ── What a change did, and the way back (the Settings island). Every change made in Settings goes on this visit's
-    // history: the island says it with an Undo, Ctrl+Z puts the value before it back and Ctrl+Shift+Z brings it again.
+    // ── The way back. Every change made in Settings goes on this visit's history, said nowhere (his 11-07: the island
+    // on every change was in the way): Ctrl+Z puts the value before it back and Ctrl+Shift+Z brings it again.
     // A burst on one row (wheel notches, digits, a drag's steps) is one change. A family switch keeps the shell's own
     // transition and a display change its Keep or Revert, so neither goes on it.
     property var history: []
     property var ahead: []
-    // What the island says now: an entry of the history and how it got there ("change", "undone", "redone").
-    property var told: null
-    property int toldStamp: 0
     // The value a row held before a drag started previewing it in memory (Config.previewNestedValue), by row.
     property var held: ({})
     readonly property bool canUndo: root.history.length > 0
@@ -130,16 +127,10 @@ QtObject {
     function remember(entry: var): void {
         root.history = root.history.concat([entry]).slice(-40)
         root.ahead = []
-        root.tell(entry, "change")
-    }
-    function tell(entry: var, how: string): void {
-        root.told = Object.assign({}, entry, { how: how })
-        root.toldStamp++
     }
     function forget(): void {
         root.history = []
         root.ahead = []
-        root.told = null
         root.held = ({})
     }
     function commit(spec: var, next: var): void {
@@ -157,10 +148,9 @@ QtObject {
             const merged = Object.assign({}, last, { at: now, steps: [{ spec: spec, before: last.steps[0].before, after: after }] })
             const rest = root.history.slice(0, -1)
             // Back where the burst began: nothing changed.
-            if (root.same(merged.steps[0].before, after)) { root.history = rest; root.told = null; root.toldStamp++; return }
+            if (root.same(merged.steps[0].before, after)) { root.history = rest; return }
             root.history = rest.concat([merged])
             root.ahead = []
-            root.tell(merged, "change")
             return
         }
         if (root.same(before, after)) return
@@ -203,10 +193,6 @@ QtObject {
             steps: [], glyph: "delete", name: String(theme.name ?? ""), say: Translation.tr("Deleted"), sayBefore: Translation.tr("Restored"),
             swatch: String(IrisThemes.swatch(theme).accent), back: () => IrisThemes.write(kept), again: () => IrisThemes.remove(kept.id) })
     }
-    // Said on the island with nothing to take back (a theme copied to share): { glyph, name, say, swatch, row }.
-    function note(words: var): void {
-        root.tell(Object.assign({ kind: "note", key: "note", at: Date.now(), steps: [] }, words), "change")
-    }
     // A plain key is written with the others in one revision (each its own write rebuilt every row of the page once
     // per key); a row with its own way to write takes it.
     function apply(steps: var, side: string): void {
@@ -228,7 +214,6 @@ QtObject {
         if (entry.back) entry.back()
         else root.apply(entry.steps.slice().reverse(), "before")
         root.ahead = root.ahead.concat([entry])
-        root.tell(entry, "undone")
         return true
     }
     function redo(): bool {
@@ -238,10 +223,9 @@ QtObject {
         if (entry.again) entry.again()
         else root.apply(entry.steps, "after")
         root.history = root.history.concat([entry])
-        root.tell(entry, "redone")
         return true
     }
-    // ── Home's pins from any row: right-click or press and hold a row, "Pin to Home"; the island takes it back.
+    // ── Home's pins from any row: right-click or press and hold a row, "Pin to Home"; Ctrl+Z takes it back.
     readonly property var homeSpec: ({ path: "iris.appearance.settingsHome", kind: "list", label: "Home" })
     function homeList(): var {
         return Array.from(Config.options?.iris?.appearance?.settingsHome ?? root.homeDefault).map(entry => String(entry))

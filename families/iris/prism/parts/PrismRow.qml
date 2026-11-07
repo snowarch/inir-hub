@@ -251,9 +251,11 @@ Item {
         opacity: root.locked ? 0.45 : 1
         anchors.top: line.bottom
         anchors.left: parent.left
-        // A gallery of faces takes the row's whole width; everything else sits under the row's name.
-        anchors.leftMargin: root.below === "faces" ? 0 : name.x
-        width: root.below === "faces" ? parent.width : parent.width - name.x - PrismTheme.dp(56)
+        // A gallery of faces or whole looks takes the row's whole width (twice the columns, half the scroll);
+        // everything else sits under the row's name.
+        readonly property bool full: root.below === "faces" || root.below === "themes"
+        anchors.leftMargin: slot.full ? 0 : name.x
+        width: slot.full ? parent.width : parent.width - name.x - PrismTheme.dp(56)
         height: item ? item.implicitHeight : 0
         sourceComponent: ({ pieces: piecesBelow, designs: designsBelow, faces: facesBelow, swatches: swatchesBelow, chips: chipsBelow,
             view: viewBelow, icon: iconBelow, curve: curveBelow, niriMotion: niriBelow, widgets: widgetsBelow, themes: themesBelow })[root.below] ?? null

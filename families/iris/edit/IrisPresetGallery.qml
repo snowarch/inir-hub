@@ -25,12 +25,7 @@ GridLayout {
             Layout.alignment: Qt.AlignTop
             theme: modelData
             settingsHistory: true
-            onShareRequested: {
-                Quickshell.clipboardText = IrisThemes.exportText(modelData)
-                // Edit's notice shows only in Customize: in Settings the island says it.
-                IrisOptions.note({ glyph: "ios_share", name: String(modelData.name), say: Translation.tr("Copied. Paste it anywhere."),
-                    swatch: String(IrisThemes.swatch(modelData).accent), row: IrisOptions.settings.find(spec => spec.kind === "themes") ?? null })
-            }
+            onShareRequested: Quickshell.clipboardText = IrisThemes.exportText(modelData)
         }
     }
 }

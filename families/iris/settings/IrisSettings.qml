@@ -1472,8 +1472,7 @@ Item {
         }
     }
 
-    // What a change just did and the way back, a display change waiting for Keep: the Settings island at the body's
-    // foot, over the rows in every layout (IrisSettingsIsland).
+    // A display change waiting for Keep, at the body's foot over the rows in every layout (IrisSettingsIsland).
     IrisSettingsIsland {
         id: liveIsland
         d: root.d

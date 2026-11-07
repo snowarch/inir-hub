@@ -17,10 +17,12 @@ QtObject {
         const alias = { home: "general", island: "bar", hub: "system" }
         const parts = section.split("/")
         const head = parts[0].split("|")[0]
-        const wanted = PrismModel.ids.includes(key) ? key : (alias[head] ?? head)
+        const group = String(parts[1] ?? "").split("|")[0]
+        // An area read as chapters opens on the chapter holding the group asked for.
+        const area = PrismModel.ids.includes(key) ? key : (alias[head] ?? head)
+        const wanted = group.length > 0 ? PrismModel.pageOf(area, group) : area
         if (PrismModel.ids.includes(wanted)) {
             PrismState.go(wanted)
-            const group = String(parts[1] ?? "").split("|")[0]
             if (group.length > 0) PrismState.pickGroup(wanted, group)
         }
         GlobalStates.settingsOverlayRequestedSection = ""
