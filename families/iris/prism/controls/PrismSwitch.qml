@@ -42,7 +42,7 @@ Item {
         radius: height / 2
         color: root.checked ? PrismTheme.accent : PrismTheme.paper
         Behavior on x { NumberAnimation { duration: PrismTheme.ms(260); easing.type: Easing.OutBack; easing.overshoot: 0.9 } }
-        Behavior on color { ColorAnimation { duration: PrismTheme.ms(180) } }
+        Behavior on color { ColorAnimation { duration: PrismTheme.ms(180); easing.type: Easing.OutCubic } }
         PrismText {
             anchors.centerIn: parent
             text: root.checked ? onMetrics.text : offMetrics.text

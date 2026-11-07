@@ -27,7 +27,7 @@ Item {
         anchors.fill: parent
         radius: height / 2
         color: root.background
-        Behavior on color { ColorAnimation { duration: PrismTheme.ms(120) } }
+        Behavior on color { ColorAnimation { duration: PrismTheme.ms(120); easing.type: Easing.OutCubic } }
     }
     Row {
         id: row

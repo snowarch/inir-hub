@@ -14,7 +14,7 @@ Rectangle {
     opacity: root.live ? 1 : 0
     visible: opacity > 0
     scale: root.live ? 1 : 0.94
-    Behavior on opacity { NumberAnimation { duration: PrismTheme.ms(200) } }
+    Behavior on opacity { NumberAnimation { duration: PrismTheme.ms(200); easing.type: Easing.OutCubic } }
     Behavior on scale { NumberAnimation { duration: PrismTheme.ms(260); easing.type: Easing.OutBack } }
 
     // It goes by itself after a while, never while the pointer rests on it; the change stays.

@@ -28,7 +28,7 @@ Item {
             : root.lit ? PrismTheme.accent
             : root.overArt ? Qt.rgba(1, 1, 1, area.pressed ? 0.22 : root.hovered ? 0.16 : root.smoked ? 0.1 : 0) // iris-literal: Prism's own fills and scrims, scheme-aware above
             : area.pressed ? PrismTheme.fillPress : root.hovered ? PrismTheme.fillHover : PrismTheme.fill
-        Behavior on color { ColorAnimation { duration: PrismTheme.ms(120) } }
+        Behavior on color { ColorAnimation { duration: PrismTheme.ms(120); easing.type: Easing.OutCubic } }
     }
     PrismGlyph {
         anchors.centerIn: parent

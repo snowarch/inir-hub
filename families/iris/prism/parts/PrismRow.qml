@@ -32,7 +32,7 @@ Item {
         anchors.rightMargin: -PrismTheme.dp(10)
         radius: PrismTheme.dp(12)
         color: root.flash ? Qt.alpha(PrismTheme.accent, 0.16) : root.hovered ? PrismTheme.fill : "transparent"
-        Behavior on color { ColorAnimation { duration: PrismTheme.ms(root.flash ? 120 : 600) } }
+        Behavior on color { ColorAnimation { duration: PrismTheme.ms(root.flash ? 120 : 600); easing.type: Easing.OutCubic } }
     }
 
     Item {

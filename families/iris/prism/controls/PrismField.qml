@@ -20,7 +20,7 @@ Item {
         anchors.fill: parent
         radius: height / 2
         color: input.activeFocus ? PrismTheme.fillPress : area.containsMouse ? PrismTheme.fillHover : PrismTheme.fill
-        Behavior on color { ColorAnimation { duration: PrismTheme.ms(120) } }
+        Behavior on color { ColorAnimation { duration: PrismTheme.ms(120); easing.type: Easing.OutCubic } }
     }
     PrismGlyph {
         id: icon

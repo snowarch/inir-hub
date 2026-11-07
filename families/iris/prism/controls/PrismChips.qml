@@ -22,7 +22,7 @@ Flow {
                 anchors.fill: parent
                 radius: height / 2
                 color: chip.chosen ? PrismTheme.solid : area.pressed ? PrismTheme.fillPress : area.containsMouse ? PrismTheme.fillHover : PrismTheme.fill
-                Behavior on color { ColorAnimation { duration: PrismTheme.ms(140) } }
+                Behavior on color { ColorAnimation { duration: PrismTheme.ms(140); easing.type: Easing.OutCubic } }
             }
             PrismText {
                 id: label
