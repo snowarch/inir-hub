@@ -1315,7 +1315,7 @@ Scope {
                     id: chassisField
                     anchors.fill: parent
                     compositorAllowed: !barWindow.carded
-                    renderScale: barWindow.carded ? barWindow.editCard.rest : 1
+                    renderScale: barWindow.carded ? (barWindow.editCard.rest ?? 1) : 1
                     resampled: barWindow.transformKind !== 0
                     providesBackdrop: true
                     edgeWave: framePulse.amplitudes
