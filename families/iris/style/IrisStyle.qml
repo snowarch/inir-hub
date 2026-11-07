@@ -572,7 +572,7 @@ QtObject {
     readonly property color placeSurface: root.glassy ? ColorUtils.applyAlpha(root.surfaceOpaque, root.glassTint) : root.surface
     readonly property real glassLip: 0
     // What a plain body is made of (Style › Texture, his 11-02: Material's global styles on one engine, every Design the
-    // same; "solid" is Ricelin's card, the factory's). `top` and `foot` how far its tint leans to the light up there and
+    // same; "flat" is the factory's since his 11-07, "solid" Ricelin's card). `top` and `foot` how far its tint leans to the light up there and
     // down here, `edge` the lit top or the hairline, `sheen` the lit top's strength, `tint` the glass's thickness, `cast`
     // its shadow. Afterglow and Light leak light themselves; Light streak keeps a plain body under its own light.
     readonly property var bodyRecipes: ({
@@ -584,7 +584,7 @@ QtObject {
         streak: { top: 0.12, foot: 0.04, edge: "light", sheen: 0.4, tint: 0.9, cast: 0.8 }
     })
     readonly property string textureName: String(IrisDesign.worn("material.texture", root.appearance?.texture))
-    readonly property var bodyRecipe: root.bodyRecipes[root.textureName] ?? root.bodyRecipes.solid
+    readonly property var bodyRecipe: root.bodyRecipes[root.textureName] ?? root.bodyRecipes.flat
     function bodyLean(ink: color, amount: real): vector4d {
         return root.selfLit ? Qt.vector4d(0, 0, 0, 0) : Qt.vector4d(ink.r, ink.g, ink.b, amount)
     }

@@ -79,7 +79,7 @@ JsonObject {
         property bool accentForApps: true // with the wallpaper colour theme, apps take the shell's own accent when it has one
         property string controlPlate: "none" // rows of round controls: "none", "veil", "glass" or "solid" (IrisControlPlate)
         // What the material is drawn as: "solid" (Ricelin's card), "aurora", "angel", "regalia", "flat", "afterglow", "leak" or "streak".
-        property string texture: "solid"
+        property string texture: "flat"
         property int factoryLook: 2 // the factory look a file was moved to (ConfigMigrations.js)
         // Afterglow: grade "dusk", "cyber", "fog", "acid" or "wallpaper"; the rest 0..100 %; wallpaper grades the desktop too.
         property JsonObject afterglow: JsonObject {

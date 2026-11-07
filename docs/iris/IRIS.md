@@ -85,7 +85,7 @@ The Dock is set under iRiS Settings › Dock:
 ## Look, colour and themes
 
 - Style › Material: the surface under every iRiS panel. Black, Graphite, Midnight, Wallpaper or Theme.
-- Style › Texture: how every body is drawn, in iRiS and AIRISU alike. Ricelin is a card lit from above, Aurora thin and translucent, Angel a bright glass edge, Regalia a solid tile, Flat a plain plate; Afterglow, Light leak and Light streak bring their own light. Light streak lights everything from under the Island: a hot line on every edge that faces it, your colours rising off those edges like an aurora (Aurora, Your colours or Wallpaper), and a trail behind whatever moves; Light, Aurora and Trails set how much of each.
+- Style › Texture: how every body is drawn, in iRiS and AIRISU alike. Flat, the default, is a plain plate; Ricelin a card lit from above, Aurora thin and translucent, Angel a bright glass edge, Regalia a solid tile; Afterglow, Light leak and Light streak bring their own light. Light streak lights everything from under the Island: a hot line on every edge that faces it, your colours rising off those edges like an aurora (Aurora, Your colours or Wallpaper), and a trail behind whatever moves; Light, Aurora and Trails set how much of each.
 - Colour › Look: Apple, Nothing OS, Synth or Gel.
 - Colour › Scheme: Auto, Dark mode, Ink or Light mode. Ink sits between dark and light, like paper and ink.
 - Style › Colour theme: Catppuccin, Rosé Pine, Tokyo Night, Nord and more. Match the shell also gives iRiS the theme's accent, highlight and material.

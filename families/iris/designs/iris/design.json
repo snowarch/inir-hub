@@ -26,7 +26,7 @@
         },
         "material": {
             "glass": "allow",
-            "texture": "solid",
+            "texture": "flat",
             "edge": "",
             "edgeWidth": 0,
             "shadow": 1,
