@@ -93,12 +93,14 @@ IrisWidgetFace {
         width: Math.max(0, folder.edgeAt(y) - x - root.pick(8, 10, 12))
         text: root.label ? root.tabText.toUpperCase() : root.tabText
         color: root.label ? root.ink : root.shelf
-        size: root.label ? root.type(10.5, 12, 14) : root.type(13, 16, 21)
+        size: root.label ? root.type(10, 12, 14) : root.type(13, 16, 21)
         weight: Font.Bold
         font.family: root.label ? root.fontLabel : root.fontMain
-        font.letterSpacing: root.label ? root.px(12) * 0.08 : -root.px(root.type(13, 16, 21)) * 0.02
+        // Caps take more room: a Nothing label spaces its letters only where the tab has the room for it, and shrinks
+        // before it would cut a word ("NOVEMBER" on a small tab).
+        font.letterSpacing: root.label ? (root.small ? root.px(10) * 0.03 : root.px(12) * 0.08) : -root.px(root.type(13, 16, 21)) * 0.02
         fontSizeMode: Text.HorizontalFit
-        minimumPixelSize: root.px(root.type(10, 12, 14))
+        minimumPixelSize: root.px(root.label ? root.type(7.5, 9, 11) : root.type(10, 12, 14))
     }
 
     // ── the flap: one fact, on the widget's colour ──

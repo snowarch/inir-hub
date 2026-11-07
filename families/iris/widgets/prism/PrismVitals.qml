@@ -73,7 +73,8 @@ PrismFolder {
         id: reading
         visible: root.leadEntry !== null
         x: root.inset
-        y: Math.round(root.paneMiddle - number.height / 2)
+        // Centred by the figure's caps, not its line: Nothing's figure face has a taller line and sank onto the foot.
+        y: Math.round(root.paneMiddle - number.baselineOffset + number.font.pixelSize * 0.36)
         spacing: root.dp(2)
         FaceFigure {
             id: number

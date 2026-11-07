@@ -104,7 +104,9 @@ PrismFolder {
             name: root.other.name
             parts: root.otherParts
         }
+        // Small has room for one turn of the day: the daylight goes (it collided with the sunrise).
         Fact {
+            visible: !root.small
             anchors.right: parent.right
             trailing: true
             name: Translation.tr("Daylight")
