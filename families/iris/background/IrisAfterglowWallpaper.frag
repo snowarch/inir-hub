@@ -35,7 +35,7 @@ void main() {
         float y = mix(luma(c), luma(smear), 0.3 * signal);
         vec2 chroma = vec2(smear.b - luma(smear), smear.r - luma(smear));
         vec2 own = vec2(c.b - luma(c), c.r - luma(c));
-        chroma = mix(own, chroma, signal) * (1.0 + 0.18 * signal);
+        chroma = mix(own, chroma, signal);
         float r = y + chroma.y;
         float b = y + chroma.x;
         c = vec3(r, (y - 0.299 * r - 0.114 * b) / 0.587, b);
@@ -53,14 +53,17 @@ void main() {
     vec3 spill = mix(soft, soft * u.glowBloom.rgb * 1.6, 0.35);
     c += spill * bright * bloom * 0.85 + soft * bloom * 0.1;
 
+    // A film grade (.claude/ref/iris-afterglow): the mid-tones lose colour, the shadows sink into one cold hue, only
+    // the lights keep the key's warmth. It never adds saturation: a boost read as an over-cooked filter (his 11-07).
     float l = clamp(luma(c), 0.0, 1.0);
     vec3 key = u.glowLight.rgb / max(max(u.glowLight.r, max(u.glowLight.g, u.glowLight.b)), 1e-3);
-    c += u.glowShadow.rgb * atmosphere * 0.32 * (1.0 - l) * (1.0 - l);
-    c *= mix(vec3(1.0), mix(vec3(1.0), key, atmosphere * 0.5), smoothstep(0.15, 0.9, l));
-    l = luma(c);
-    c = mix(vec3(l), c, 1.0 + 0.22 * atmosphere);
+    c = mix(vec3(l), c, 1.0 - 0.4 * atmosphere);
+    vec3 shadeHue = u.glowShadow.rgb / max(max(u.glowShadow.r, max(u.glowShadow.g, u.glowShadow.b)), 1e-3);
+    c = mix(c, vec3(l) * shadeHue, atmosphere * 0.45 * (1.0 - smoothstep(0.0, 0.55, l)));
+    c += u.glowShadow.rgb * atmosphere * 0.18 * (1.0 - l) * (1.0 - l);
+    c *= mix(vec3(1.0), mix(vec3(1.0), key, atmosphere * 0.45), smoothstep(0.45, 1.0, l));
     vec3 s = clamp(c, 0.0, 1.0);
-    c = mix(c, s * s * (3.0 - 2.0 * s), 0.22 * atmosphere);
+    c = mix(c, s * s * (3.0 - 2.0 * s), 0.08 * atmosphere);
 
     float line = 0.5 + 0.5 * cos(6.2831853 * (px.y + 0.5) / 3.0);
     c *= 1.0 - signal * 0.3 * (1.0 - line) * (1.0 - 0.55 * clamp(l, 0.0, 1.0));

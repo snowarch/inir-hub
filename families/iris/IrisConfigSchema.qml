@@ -84,10 +84,10 @@ JsonObject {
         // Afterglow: grade "dusk", "cyber", "fog", "acid" or "wallpaper"; the rest 0..100 %; wallpaper grades the desktop too.
         property JsonObject afterglow: JsonObject {
             property string grade: "dusk"
-            property int atmosphere: 60
-            property int chrome: 65
-            property int bloom: 50
-            property int signal: 35
+            property int atmosphere: 45
+            property int chrome: 35
+            property int bloom: 35
+            property int signal: 0
             property bool wallpaper: true
         }
         // Light streak: aurora (the curtains), light (the streak on the edges facing the Island) and trails (what a moving

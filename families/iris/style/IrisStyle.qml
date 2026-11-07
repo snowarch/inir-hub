@@ -618,10 +618,10 @@ QtObject {
             bloom: root.vividHighlight(seed, root.afterglowGrades.dusk.bloom) }
     }
     readonly property var afterglowPalette: root.afterglowColours(root.afterglowGrade)
-    readonly property real afterglowAtmosphere: root.afterglowPercent("atmosphere", 60)
-    readonly property real afterglowChrome: root.afterglowPercent("chrome", 65)
-    readonly property real afterglowBloom: root.afterglowPercent("bloom", 50)
-    readonly property real afterglowSignal: root.afterglowPercent("signal", 35)
+    readonly property real afterglowAtmosphere: root.afterglowPercent("atmosphere", 45)
+    readonly property real afterglowChrome: root.afterglowPercent("chrome", 35)
+    readonly property real afterglowBloom: root.afterglowPercent("bloom", 35)
+    readonly property real afterglowSignal: root.afterglowPercent("signal", 0)
     readonly property real afterglowBloomRadius: Math.round(9 * root.density)
     // How far past a silhouette the field draws: the bloom's tail.
     readonly property real afterglowReach: root.afterglow && !root.light && root.afterglowBloom > 0 ? 3.5 * root.afterglowBloomRadius : 0
