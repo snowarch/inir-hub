@@ -921,6 +921,50 @@ QtObject {
         if (IrisDesign.current !== "iris" || tint.hslSaturation < 0.12) return tint
         return Qt.hsla(tint.hslHue, Math.max(0.78, tint.hslSaturation), root.light ? (fill ? 0.5 : 0.42) : (fill ? 0.58 : 0.68), 1)
     }
+    // Prism's light (his 11-07: "los colores de prism deben de ser estéticos, el beam y el contorno, no colores fuertes ni
+    // simulados; todos los colores de la shell deben de salir de un lugar"): the one place the beam, its fan, a slab's rim
+    // and the spectrum on a widget's data take their colours from. A spectrum's order (violet to red) at one even lightness
+    // and a calm chroma in OKLCH, each band leaning to the person's accent: the band nearest its hue carries the most
+    // colour, the far side of the wheel the least, so the light reads as the theme's own and never as neon.
+    readonly property var prismStops: {
+        const seed = Qt.color(root.baseAccent)
+        const seedHue = root.oklchHue(seed)
+        const lightness = root.light ? 0.66 : 0.82
+        // iris-literal: OKLCH hues of a prism's bands, violet to red
+        return [305, 268, 225, 160, 105, 62, 25].map(hue => {
+            const near = 0.5 + 0.5 * Math.cos((hue - seedHue) * Math.PI / 180)
+            return root.oklch(lightness, (root.light ? 0.07 : 0.06) + 0.06 * near, hue)
+        })
+    }
+    // OKLCH to an sRGB colour, the chroma eased back until it fits the gamut.
+    function oklch(l: real, c: real, h: real): color {
+        const toSrgb = x => x <= 0.0031308 ? 12.92 * x : 1.055 * Math.pow(x, 1 / 2.4) - 0.055
+        for (let chroma = c; chroma >= 0; chroma -= 0.005) {
+            const a = chroma * Math.cos(h * Math.PI / 180), b = chroma * Math.sin(h * Math.PI / 180)
+            const l_ = Math.pow(l + 0.3963377774 * a + 0.2158037573 * b, 3)
+            const m_ = Math.pow(l - 0.1055613458 * a - 0.0638541728 * b, 3)
+            const s_ = Math.pow(l - 0.0894841775 * a - 1.2914855480 * b, 3)
+            const rgb = [4.0767416621 * l_ - 3.3077115913 * m_ + 0.2309699292 * s_,
+                -1.2684380046 * l_ + 2.6097574011 * m_ - 0.3413193965 * s_,
+                -0.0041960863 * l_ - 0.7034186147 * m_ + 1.7076147010 * s_]
+            if (rgb.every(v => v >= -0.0005 && v <= 1.0005) || chroma < 0.005) {
+                const [r, g, bl] = rgb.map(v => toSrgb(Math.max(0, Math.min(1, v))))
+                return Qt.rgba(r, g, bl, 1)
+            }
+        }
+        return Qt.rgba(l, l, l, 1)
+    }
+    // A colour's OKLCH hue in degrees.
+    function oklchHue(c: color): real {
+        const lin = x => x <= 0.04045 ? x / 12.92 : Math.pow((x + 0.055) / 1.055, 2.4)
+        const r = lin(c.r), g = lin(c.g), b = lin(c.b)
+        const l_ = Math.cbrt(0.4122214708 * r + 0.5363325363 * g + 0.0514459929 * b)
+        const m_ = Math.cbrt(0.2119034982 * r + 0.6806995451 * g + 0.1073969566 * b)
+        const s_ = Math.cbrt(0.0883024619 * r + 0.2817188376 * g + 0.6299787005 * b)
+        const a = 1.9779984951 * l_ - 2.4285922050 * m_ + 0.4505937099 * s_
+        const bb = 0.0259040371 * l_ + 0.7827717662 * m_ - 0.8086757660 * s_
+        return (Math.atan2(bb, a) * 180 / Math.PI + 360) % 360
+    }
     // Under Signal the accent is the ink itself: what was an accent mark reads as ink, and an accent fill with its
     // own ink on it turns into the inverted plate (ink fill, paper word), Nothing's "chosen".
     readonly property color accent: root.animeEnabled

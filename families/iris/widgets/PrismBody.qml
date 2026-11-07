@@ -3,7 +3,7 @@ import Quickshell
 import qs.modules.common.functions
 import qs.modules.iris.style
 
-// Prism's body (PrismBody.frag): the folder of frosted glass every Prism face stands on, drawn whole by one shader that
+// Prism's body (PrismGlass.frag): the folder of frosted glass every Prism face stands on, drawn whole by one shader that
 // reaches `room` past the face for its shadow. Nothing glows past its edge; the shadow on the desktop is the widget's
 // `iris.shadow` (0 to 100, off by factory: his 11-07). Every measure is in the face's pixels.
 Item {
@@ -57,11 +57,12 @@ Item {
         y: -body.room
         width: body.width + 2 * body.room
         height: body.height + 2 * body.room
-        fragmentShader: Qt.resolvedUrl("PrismBody.frag.qsb")
+        fragmentShader: Qt.resolvedUrl("PrismGlass.frag.qsb")
         readonly property bool light: body.face.lightBackdrop
-        // Background off: the folder stays (it is the face) as smoked glass light enough to read through, no shadow.
+        // Background off: the folder stays (it is the face) as smoked glass light enough to read through, no shadow; it
+        // follows the ink (white ink on dark glass in either scheme), never the scheme alone.
         readonly property color tint: body.face.clear
-            ? ColorUtils.applyAlpha(glass.light ? IrisStyle.frost : IrisStyle.surface, glass.light ? 0.72 : 0.62) : body.face.plateColor // iris-literal: background off keeps the folder (it is the face) as smoked glass
+            ? ColorUtils.applyAlpha(glass.light ? IrisStyle.frost : IrisStyle.darkSurfaceOpaque, glass.light ? 0.72 : 0.62) : body.face.plateColor // iris-literal: background off keeps the folder (it is the face) as smoked glass
         readonly property vector4d frame: Qt.vector4d(body.width, body.height, body.room, body.lean)
         readonly property vector4d folder: Qt.vector4d(body.flapRight, body.tabRight, body.flapTop,
             1 / Math.max(0.5, Screen.devicePixelRatio))
@@ -75,6 +76,15 @@ Item {
             glass.light ? 0.022 : 0.04, body.shadow)
         readonly property vector4d form: Qt.vector4d(body.slab ? 1 : 0, body.slabRadius, body.beamPass, 0)
         readonly property Item frost: body.face.frost ?? noFrost
+        // Prism's light, the shell's one source of it (IrisStyle.prismStops).
+        readonly property var stops: IrisStyle.prismStops
+        readonly property vector4d s0: Qt.vector4d(stops[0].r, stops[0].g, stops[0].b, 1)
+        readonly property vector4d s1: Qt.vector4d(stops[1].r, stops[1].g, stops[1].b, 1)
+        readonly property vector4d s2: Qt.vector4d(stops[2].r, stops[2].g, stops[2].b, 1)
+        readonly property vector4d s3: Qt.vector4d(stops[3].r, stops[3].g, stops[3].b, 1)
+        readonly property vector4d s4: Qt.vector4d(stops[4].r, stops[4].g, stops[4].b, 1)
+        readonly property vector4d s5: Qt.vector4d(stops[5].r, stops[5].g, stops[5].b, 1)
+        readonly property vector4d s6: Qt.vector4d(stops[6].r, stops[6].g, stops[6].b, 1)
     }
 
     // Where the tab's edge crosses height `y`: what sits in the tab ends before it, what sits on the flap after it.

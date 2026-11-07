@@ -36,6 +36,8 @@ layout(std140, binding = 0) uniform buf {
     // x: 0 the folder, 1 a slab (one piece of glass: no tab, flap or pane); y: the slab's corners; z: how much of the
     // beam a slab lets through (0 quiet: only its rim splits the light, near `beam.zw`); w: unused.
     vec4 form;
+    // The spectrum's stops, violet to red (IrisStyle.prismStops).
+    vec4 s0; vec4 s1; vec4 s2; vec4 s3; vec4 s4; vec4 s5; vec4 s6;
 } u;
 layout(binding = 1) uniform sampler2D frost;
 
@@ -90,18 +92,11 @@ vec3 metrics(vec2 p) {
     return vec3(min(smoothUnion(shapeD, flapD, u.radii.y * 0.45), footD), tabD, flapD);
 }
 
-// The beam's seven colours (a prism's spectrum is the same in every theme and scheme).
+// The spectrum's seven stops, violet to red, from IrisStyle.prismStops (the shell's one source of Prism's light).
 vec3 spectrum(float t) {
-    const vec3 c0 = vec3(0.835, 0.086, 0.992); // iris-literal: #D516FD, the spectrum's violet
-    const vec3 c1 = vec3(0.475, 0.267, 0.992); // iris-literal: #7944FD
-    const vec3 c2 = vec3(0.259, 0.537, 0.992); // iris-literal: #4289FD
-    const vec3 c3 = vec3(0.149, 0.878, 0.200); // iris-literal: #26E033
-    const vec3 c4 = vec3(0.996, 0.949, 0.239); // iris-literal: #FEF23D
-    const vec3 c5 = vec3(0.992, 0.412, 0.090); // iris-literal: #FD6917
-    const vec3 c6 = vec3(0.992, 0.078, 0.263); // iris-literal: #FD1443, the spectrum's red
     float x = clamp(t, 0.0, 1.0) * 6.0;
-    vec3 a = x < 1.0 ? c0 : x < 2.0 ? c1 : x < 3.0 ? c2 : x < 4.0 ? c3 : x < 5.0 ? c4 : c5;
-    vec3 b = x < 1.0 ? c1 : x < 2.0 ? c2 : x < 3.0 ? c3 : x < 4.0 ? c4 : x < 5.0 ? c5 : c6;
+    vec3 a = x < 1.0 ? u.s0.rgb : x < 2.0 ? u.s1.rgb : x < 3.0 ? u.s2.rgb : x < 4.0 ? u.s3.rgb : x < 5.0 ? u.s4.rgb : u.s5.rgb;
+    vec3 b = x < 1.0 ? u.s1.rgb : x < 2.0 ? u.s2.rgb : x < 3.0 ? u.s3.rgb : x < 4.0 ? u.s4.rgb : x < 5.0 ? u.s5.rgb : u.s6.rgb;
     return mix(a, b, smoothstep(0.0, 1.0, fract(x)));
 }
 
@@ -249,7 +244,7 @@ void main() {
         float a = atan(v.y, v.x);
         vec3 hue = u.fan.w > 0.5 ? vec3(1.0) : spectrum(0.5 + 0.5 * sin(a * 1.5 + u.fan.x));
         float glint = (1.0 - smoothstep(0.0, px * 1.4, abs(body + 0.7 * px))) * near * near * u.fan.z * 1.3;
-        col.rgb = mix(col.rgb, hue * col.a, clamp(glint * (paper ? 0.7 : 0.95), 0.0, 1.0));
+        col.rgb = mix(col.rgb, hue * col.a, clamp(glint * (paper ? 0.55 : 0.7), 0.0, 1.0));
         // and inside the glass, a breath of the same colour just behind the edge
         float haze = (1.0 - smoothstep(0.0, 0.07 * size.y, -body)) * inBody * near * near * u.fan.z;
         col.rgb += hue * haze * (paper ? 0.05 : 0.12) * col.a;
