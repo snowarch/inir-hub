@@ -138,7 +138,7 @@ Item {
             _log("[SidebarRight] Checking for existing settings window among", wins.length, "windows");
             for (let i = 0; i < wins.length; i++) {
                 const w = wins[i]
-                if (w.title === "Settings — iNiR" && w.app_id === "org.quickshell") {
+                if (w.title === "Settings — iNiR" && ["inir-settings", "org.quickshell"].includes(w.app_id)) {
                     _log("[SidebarRight] Found existing settings window, focusing it");
                     GlobalStates.sidebarRightOpen = false;
                     Qt.callLater(() => {
