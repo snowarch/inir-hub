@@ -1169,6 +1169,37 @@ ContentPage {
                     wrapMode: Text.WordWrap
                     lineHeight: 1.3
                 }
+                Subheader {
+                    Layout.leftMargin: 0
+                    Layout.topMargin: 8
+                    visible: Hub.changesOf(page.item).length > 0
+                    text: Hub.changesTitle(page.item)
+                }
+                Repeater {
+                    model: Hub.changesOf(page.item)
+                    delegate: ColumnLayout {
+                        id: release
+                        required property var modelData
+                        Layout.fillWidth: true
+                        spacing: 2
+                        StyledText {
+                            text: release.modelData.version
+                            font.pixelSize: Appearance.font.pixelSize.smaller
+                            color: Appearance.colors.colSubtext
+                        }
+                        Repeater {
+                            model: release.modelData.notes
+                            delegate: StyledText {
+                                required property string modelData
+                                Layout.fillWidth: true
+                                text: modelData
+                                font.pixelSize: Appearance.font.pixelSize.small
+                                color: SettingsMaterialPreset.labelColor
+                                wrapMode: Text.WordWrap
+                            }
+                        }
+                    }
+                }
                 Flow {
                     Layout.fillWidth: true
                     Layout.topMargin: 2

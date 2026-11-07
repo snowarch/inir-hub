@@ -751,6 +751,37 @@ WSettingsPage {
             lineHeight: 1.3
         }
 
+        WSettingsCard {
+            visible: Hub.changesOf(page.item).length > 0
+            title: Hub.changesTitle(page.item)
+            icon: "news"
+            Repeater {
+                model: Hub.changesOf(page.item)
+                delegate: ColumnLayout {
+                    id: release
+                    required property var modelData
+                    Layout.fillWidth: true
+                    Layout.margins: Looks.dp(4)
+                    spacing: Looks.dp(2)
+                    WText {
+                        text: release.modelData.version
+                        font.pixelSize: Looks.font.pixelSize.small
+                        color: Looks.colors.subfg
+                    }
+                    Repeater {
+                        model: release.modelData.notes
+                        delegate: WText {
+                            required property string modelData
+                            Layout.fillWidth: true
+                            text: modelData
+                            font.pixelSize: Looks.font.pixelSize.normal
+                            wrapMode: Text.WordWrap
+                        }
+                    }
+                }
+            }
+        }
+
         // Additional information, as the Store lays it out: label over value, three to a line.
         WSettingsCard {
             title: Translation.tr("About it")

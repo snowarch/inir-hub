@@ -19,7 +19,7 @@ QtObject {
         const head = parts[0].split("|")[0]
         const group = String(parts[1] ?? "").split("|")[0]
         // An area read as chapters opens on the chapter holding the group asked for.
-        const area = PrismModel.ids.includes(key) ? key : (alias[head] ?? head)
+        const area = PrismModel.ids.includes(key) ? key : (alias[key] ?? alias[head] ?? head)
         const wanted = group.length > 0 ? PrismModel.pageOf(area, group) : area
         if (PrismModel.ids.includes(wanted)) {
             PrismState.go(wanted)

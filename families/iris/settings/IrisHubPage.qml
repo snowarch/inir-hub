@@ -837,6 +837,7 @@ Flickable {
         property var item
         readonly property var permissions: Array.from(page.item?.permissions ?? [])
         readonly property var hosts: Array.from(page.item?.hosts ?? [])
+        readonly property var changes: Hub.changesOf(page.item)
         readonly property string pulledWhy: String(page.item?.installedBlocked || page.item?.blocked || "")
         spacing: Math.round(14 * root.d)
 
@@ -1033,6 +1034,50 @@ Flickable {
             font.pixelSize: IrisStyle.typeLabel
             wrapMode: Text.WordWrap
             lineHeight: 1.2
+        }
+
+        Heading {
+            visible: page.changes.length > 0
+            text: Hub.changesTitle(page.item)
+        }
+        Rectangle {
+            visible: page.changes.length > 0
+            Layout.fillWidth: true
+            implicitHeight: changesColumn.implicitHeight + Math.round(32 * root.d)
+            radius: IrisStyle.radiusTile
+            color: IrisStyle.readingCard
+            ColumnLayout {
+                id: changesColumn
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.top: parent.top
+                anchors.margins: Math.round(16 * root.d)
+                spacing: Math.round(14 * root.d)
+                Repeater {
+                    model: page.changes
+                    delegate: ColumnLayout {
+                        id: release
+                        required property var modelData
+                        Layout.fillWidth: true
+                        spacing: Math.round(4 * root.d)
+                        IrisText {
+                            role: IrisText.Meta
+                            font.pixelSize: IrisStyle.typeFootnote
+                            text: release.modelData.version
+                        }
+                        Repeater {
+                            model: release.modelData.notes
+                            delegate: IrisText {
+                                required property string modelData
+                                Layout.fillWidth: true
+                                font.pixelSize: IrisStyle.typeLabel
+                                wrapMode: Text.WordWrap
+                                text: modelData
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         Heading { text: Hub.reachTitle(page.item) }
