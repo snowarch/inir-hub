@@ -85,7 +85,7 @@ Column {
                 width: grid.tileWidth
                 height: PrismTheme.dp(52)
                 opacity: tile.offer ? (press.containsMouse ? 0.9 : 0.55) : 1
-                Behavior on opacity { NumberAnimation { duration: PrismTheme.ms(140) } }
+                Behavior on opacity { NumberAnimation { duration: PrismTheme.ms(140); easing.type: Easing.OutCubic } }
 
                 Rectangle {
                     anchors.fill: parent
@@ -95,7 +95,7 @@ Column {
                     border.width: 1
                     border.color: tile.on ? Qt.alpha(PrismTheme.ink, 0.1) : "transparent"
                     scale: press.pressed ? 0.97 : 1
-                    Behavior on color { ColorAnimation { duration: PrismTheme.ms(140) } }
+                    Behavior on color { ColorAnimation { duration: PrismTheme.ms(140); easing.type: Easing.OutCubic } }
                     Behavior on scale { NumberAnimation { duration: PrismTheme.ms(140); easing.type: Easing.OutCubic } }
                 }
                 // The state as a circle: white when on, the page's dark when off; a swatch wears its colour.
@@ -105,7 +105,7 @@ Column {
                     anchors.verticalCenter: parent.verticalCenter
                     width: PrismTheme.dp(36); height: width; radius: width / 2
                     color: tile.on ? PrismTheme.solid : PrismTheme.sunk
-                    Behavior on color { ColorAnimation { duration: PrismTheme.ms(180) } }
+                    Behavior on color { ColorAnimation { duration: PrismTheme.ms(180); easing.type: Easing.OutCubic } }
                     PrismGlyph {
                         anchors.centerIn: parent
                         text: tile.offer ? "add" : tile.modelData.glyph

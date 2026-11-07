@@ -40,7 +40,7 @@ Item {
         height: 1
         opacity: input.activeFocus ? 0.9 : 0
         Behavior on width { NumberAnimation { duration: PrismTheme.ms(260); easing.type: Easing.OutCubic } }
-        Behavior on opacity { NumberAnimation { duration: PrismTheme.ms(200) } }
+        Behavior on opacity { NumberAnimation { duration: PrismTheme.ms(200); easing.type: Easing.OutCubic } }
         gradient: Gradient {
             orientation: Gradient.Horizontal
             GradientStop { position: 0; color: "transparent" }

@@ -84,7 +84,7 @@ Flow {
                 anchors.fill: parent
                 radius: PrismTheme.dp(14)
                 color: card.chosen ? PrismTheme.solid : area.pressed ? PrismTheme.fillPress : area.containsMouse ? PrismTheme.fillHover : PrismTheme.fill
-                Behavior on color { ColorAnimation { duration: PrismTheme.ms(160) } }
+                Behavior on color { ColorAnimation { duration: PrismTheme.ms(160); easing.type: Easing.OutCubic } }
             }
             PrismSketch {
                 x: PrismTheme.dp(12)
