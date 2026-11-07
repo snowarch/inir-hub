@@ -21,6 +21,7 @@ Item {
     property bool open: false
 
     implicitHeight: line.height + (chips.visible ? chips.height + PrismTheme.dp(14) : 0)
+        + (designs.visible ? designs.height + PrismTheme.dp(16) : 0)
     Behavior on implicitHeight { NumberAnimation { duration: PrismTheme.ms(220); easing.type: Easing.OutCubic } }
     clip: true
 
@@ -107,7 +108,8 @@ Item {
                 anchors.right: parent.right
                 anchors.verticalCenter: parent.verticalCenter
                 sourceComponent: root.row.kind === "switch" ? switchKind : root.row.kind === "range" ? rangeKind
-                    : root.row.kind === "swatch" ? swatchKind : root.row.kind === "text" ? textKind : choiceKind
+                    : root.row.kind === "swatch" ? swatchKind : root.row.kind === "text" ? textKind
+                    : root.row.kind === "designs" ? nowKind : choiceKind
             }
         }
 
@@ -133,7 +135,7 @@ Item {
                 width: PrismTheme.dp(28); height: PrismTheme.dp(28)
                 text: "restart_alt"
                 iconSize: PrismTheme.dp(16)
-                visible: root.changed && root.row.path !== "panelFamily"
+                visible: root.changed && !PrismModel.virtual(root.row)
                 color: resetArea.containsMouse ? PrismTheme.ink : PrismTheme.ink3
                 opacity: root.hovered ? 1 : 0
                 MouseArea { id: resetArea; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: PrismModel.write(root.row, root.row.invert ? !root.row.def : root.row.def) }
@@ -154,6 +156,29 @@ Item {
         onPicked: value => { PrismModel.write(root.row, value); root.open = false }
     }
 
+    // Designs are drawn under the row; the row itself says the one in use.
+    PrismDesigns {
+        id: designs
+        visible: root.row.kind === "designs"
+        anchors.top: line.bottom
+        anchors.left: parent.left
+        anchors.leftMargin: name.x
+        anchors.right: parent.right
+        anchors.rightMargin: PrismTheme.dp(56)
+        choices: visible ? (root.row.choices ?? []) : []
+        current: root.value
+        onPicked: value => PrismModel.write(root.row, value)
+    }
+
+    Component {
+        id: nowKind
+        PrismText {
+            text: PrismModel.say(root.row, root.value)
+            color: PrismTheme.ink2
+            font.pixelSize: PrismTheme.body
+            font.weight: Font.DemiBold
+        }
+    }
     Component {
         id: switchKind
         PrismSwitch {

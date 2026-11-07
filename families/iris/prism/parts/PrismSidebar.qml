@@ -1,6 +1,8 @@
 import QtQuick
 import qs
 import qs.services
+import QtQuick.Effects
+import qs.modules.iris.components
 import qs.modules.iris.prism.core
 import qs.modules.iris.prism.controls
 
@@ -36,6 +38,13 @@ Item {
         contentHeight: column.implicitHeight + PrismTheme.dp(24)
         boundsBehavior: Flickable.StopAtBounds
         clip: true
+        layer.enabled: sideEdge.active
+        layer.effect: MultiEffect {
+            maskEnabled: true
+            maskSource: sideEdge.mask
+            maskThresholdMin: 0.5
+            maskSpreadAtMin: 1
+        }
 
         Column {
             id: column
@@ -174,5 +183,14 @@ Item {
                 onClicked: PrismState.classicVisit = true
             }
         }
+    }
+
+    // The page list fades where it meets the panel's edge; a blurred band would be masked away with it.
+    IrisScrollEdge {
+        id: sideEdge
+        flick: flick
+        anchors.fill: flick
+        blurs: false
+        reach: PrismTheme.dp(28)
     }
 }

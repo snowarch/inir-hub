@@ -130,12 +130,17 @@ Item {
         }
     }
 
+    // The pills keep clear of the card: when both words don't fit beside it (a long language), Restore defaults
+    // becomes its round glyph.
     Row {
+        id: pills
         x: PrismTheme.dp(28)
         anchors.bottom: parent.bottom
         anchors.bottomMargin: PrismTheme.dp(26)
         spacing: PrismTheme.dp(10)
+        readonly property bool roomy: action.implicitWidth + pills.spacing + restoreWords.implicitWidth <= art.card.x - pills.x - PrismTheme.dp(18)
         PrismPill {
+            id: action
             readonly property bool acts: Boolean(root.page?.show)
             tone: "art"
             glyph: acts ? "play_arrow" : "restart_alt"
@@ -144,9 +149,20 @@ Item {
             onClicked: acts ? PrismModel.runShow(root.page) : root.restore()
         }
         PrismPill {
-            visible: Boolean(root.page?.show)
+            id: restoreWords
+            visible: Boolean(root.page?.show) && pills.roomy
             tone: "dark"
             text: Translation.tr("Restore defaults")
+            enabled_: root.changed.length > 0
+            onClicked: root.restore()
+        }
+        PrismRound {
+            anchors.verticalCenter: parent.verticalCenter
+            visible: Boolean(root.page?.show) && !pills.roomy
+            overArt: true
+            smoked: true
+            implicitWidth: PrismTheme.dp(34)
+            glyph: "restart_alt"
             enabled_: root.changed.length > 0
             onClicked: root.restore()
         }

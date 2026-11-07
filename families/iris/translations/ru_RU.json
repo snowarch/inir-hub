@@ -2457,5 +2457,8 @@
   "See all": "Все",
   "Send a test": "Отправить тест",
   "Setting": "Настройка",
-  "What it does": "Что делает"
+  "What it does": "Что делает",
+  "Open Prism": "Открыть Призма",
+  "The Settings iRiS opens by default: every page in one panel, what it holds over a beam of light.": "Настройки, которые iRiS открывает по умолчанию: каждая страница в одной панели, её содержимое на фоне луча света.",
+  "v2.33": "v2.33"
 }

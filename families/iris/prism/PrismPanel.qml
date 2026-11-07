@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Effects
 import qs
 import qs.services
+import qs.modules.iris.components
 import qs.modules.iris.prism.core
 import qs.modules.iris.prism.controls
 import qs.modules.iris.prism.parts
@@ -78,6 +79,15 @@ Item {
             contentHeight: content.implicitHeight + PrismTheme.dp(40)
             boundsBehavior: Flickable.StopAtBounds
             clip: true
+            onContentYChanged: PrismState.scrolledAt = Date.now()
+            // Rows leaving the top soften into a blur and fade, and so does the foot while rows wait past it.
+            layer.enabled: centreEdge.active
+            layer.effect: MultiEffect {
+                maskEnabled: true
+                maskSource: centreEdge.mask
+                maskThresholdMin: 0.5
+                maskSpreadAtMin: 1
+            }
 
             Column {
                 id: content
@@ -170,6 +180,13 @@ Item {
                     }
                 }
             }
+        }
+
+        IrisScrollEdge {
+            id: centreEdge
+            flick: centre
+            anchors.fill: centre
+            reach: PrismTheme.dp(36)
         }
 
         PrismRail {

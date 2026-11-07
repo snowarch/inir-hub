@@ -76,8 +76,19 @@ Item {
             y: parent.height - height - PrismTheme.dp(8)
             radius: PrismTheme.dp(18)
             color: root.playing ? Qt.rgba(0.07, 0.07, 0.09, 0.42) : Qt.rgba(0.08, 0.08, 0.1, 0.72) // iris-literal: Prism's own ink over its art, the same in every scheme
-            border.width: 1
-            border.color: Qt.rgba(1, 1, 1, 0.1) // iris-literal: Prism's own ink over its art, the same in every scheme
+            // Glass catches light on its top edge only, brightest in the middle: a rim, never an outline.
+            Rectangle {
+                x: sheet.radius * 0.6
+                y: 0
+                width: sheet.width - x * 2
+                height: 1
+                gradient: Gradient {
+                    orientation: Gradient.Horizontal
+                    GradientStop { position: 0; color: "transparent" }
+                    GradientStop { position: 0.5; color: Qt.rgba(1, 1, 1, 0.26) } // iris-literal: Prism's own ink over its art, the same in every scheme
+                    GradientStop { position: 1; color: "transparent" }
+                }
+            }
         }
     }
     Rectangle { id: shape; anchors.fill: parent; radius: PrismTheme.dp(22); visible: false; layer.enabled: true }

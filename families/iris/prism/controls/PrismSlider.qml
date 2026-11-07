@@ -2,7 +2,7 @@ import QtQuick
 import qs.modules.iris.prism.core
 
 // A level as the reference's white-fill pill, lying down: the fill is the value, the glyph rides at its start and the
-// figure at the end. A drag previews; release commits. The wheel steps once a notch.
+// figure at the end. A drag previews; release commits. The wheel steps once a notch, once the hand aimed at it.
 Item {
     id: root
     property real value: 0
@@ -67,10 +67,24 @@ Item {
         preventStealing: true
         cursorShape: Qt.PointingHandCursor
         onPressed: mouse => { root.held = true; root.live = root.at(mouse.x); root.moved(root.live) }
-        onPositionChanged: mouse => { if (!pressed) return; const next = root.at(mouse.x); if (next !== root.live) { root.live = next; root.moved(next) } }
+        onContainsMouseChanged: area.lastScene = Qt.point(-1, -1)
+        onPositionChanged: mouse => {
+            // Rows scrolled under a still pointer leave its place on screen unchanged; only a hand moves it.
+            const scene = area.mapToItem(null, mouse.x, mouse.y)
+            if (area.lastScene.x >= 0 && Math.abs(scene.x - area.lastScene.x) + Math.abs(scene.y - area.lastScene.y) > 2) area.aimedAt = Date.now()
+            area.lastScene = scene
+            if (!pressed) return
+            const next = root.at(mouse.x)
+            if (next !== root.live) { root.live = next; root.moved(next) }
+        }
         onReleased: { root.held = false; root.committed(root.live) }
         onCanceled: { root.held = false; root.live = root.value }
+        // A wheel belongs to the page while the page scrolls under a still pointer: the level takes it only once the
+        // pointer was moved onto it after the last scroll (intent from the hand, not from where the rows landed).
+        property real aimedAt: 0
+        property point lastScene: Qt.point(-1, -1)
         onWheel: wheel => {
+            if (area.aimedAt <= PrismState.scrolledAt) { wheel.accepted = false; return }
             const notches = wheel.angleDelta.y !== 0 ? wheel.angleDelta.y / 120 : wheel.angleDelta.x / 120
             const next = root.snap(root.live + Math.sign(notches) * root.stepSize * Math.max(1, Math.round((root.to - root.from) / root.stepSize / 20)))
             if (next !== root.live) { root.live = next; root.committed(next) }

@@ -2457,5 +2457,8 @@
   "See all": "Alle anzeigen",
   "Send a test": "Test senden",
   "Setting": "Einstellung",
-  "What it does": "Was sie tut"
+  "What it does": "Was sie tut",
+  "Open Prism": "Prisma öffnen",
+  "The Settings iRiS opens by default: every page in one panel, what it holds over a beam of light.": "Die Einstellungen, die iRiS standardmäßig öffnet: jede Seite in einem Feld, ihr Inhalt über einem Lichtstrahl.",
+  "v2.33": "v2.33"
 }

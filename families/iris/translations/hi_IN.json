@@ -2457,5 +2457,8 @@
   "See all": "सब देखें",
   "Send a test": "टेस्ट भेजें",
   "Setting": "सेटिंग",
-  "What it does": "यह क्या करती है"
+  "What it does": "यह क्या करती है",
+  "Open Prism": "प्रिज़्म खोलें",
+  "The Settings iRiS opens by default: every page in one panel, what it holds over a beam of light.": "वे सेटिंग्स जो iRiS डिफ़ॉल्ट रूप से खोलता है: हर पेज एक पैनल में, उसकी सामग्री रोशनी की किरण पर।",
+  "v2.33": "v2.33"
 }

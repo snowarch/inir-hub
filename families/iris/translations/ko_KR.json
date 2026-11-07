@@ -2457,5 +2457,8 @@
   "See all": "모두 보기",
   "Send a test": "테스트 보내기",
   "Setting": "설정",
-  "What it does": "하는 일"
+  "What it does": "하는 일",
+  "Open Prism": "프리즘 열기",
+  "The Settings iRiS opens by default: every page in one panel, what it holds over a beam of light.": "iRiS가 기본으로 여는 설정: 모든 페이지를 한 패널에, 그 내용을 한 줄기 빛 위에.",
+  "v2.33": "v2.33"
 }

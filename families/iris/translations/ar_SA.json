@@ -2457,5 +2457,8 @@
   "See all": "عرض الكل",
   "Send a test": "إرسال اختبار",
   "Setting": "الإعداد",
-  "What it does": "ما يفعله"
+  "What it does": "ما يفعله",
+  "Open Prism": "افتح منشور",
+  "The Settings iRiS opens by default: every page in one panel, what it holds over a beam of light.": "الإعدادات التي يفتحها iRiS افتراضيًا: كل صفحة في لوحة واحدة، ومحتواها فوق شعاع من الضوء.",
+  "v2.33": "v2.33"
 }

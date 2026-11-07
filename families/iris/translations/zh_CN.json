@@ -2457,5 +2457,8 @@
   "See all": "查看全部",
   "Send a test": "发送测试",
   "Setting": "设置",
-  "What it does": "作用"
+  "What it does": "作用",
+  "Open Prism": "打开 棱镜",
+  "The Settings iRiS opens by default: every page in one panel, what it holds over a beam of light.": "iRiS 默认打开的设置：每一页都在一个面板里，内容衬在一束光上。",
+  "v2.33": "v2.33"
 }

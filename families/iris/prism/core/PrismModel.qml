@@ -36,7 +36,18 @@ Singleton {
     function inGroup(group: string): var { return root.pages.filter(page => page.group === group) }
     function rowsOf(id: string): var { return root.rows.filter(row => row.page === id && root.shown(row)) }
 
+    // Rows that stand for more than one key, or for a transition: never restored or listed as a change.
+    function virtual(row: var): bool { return row.path === "panelFamily" || row.path === "settingsDesign" }
+    // Which Settings opens: Prism, a classic layout, or the v2.33 design, as one choice over its three keys.
+    function settingsDesign(): string {
+        const _ = root.revision
+        if (String(Config.getNestedValue("iris.appearance.settingsPanel", "prism")) === "prism") return "prism"
+        if (Boolean(Config.getNestedValue("iris.appearance.settingsOriginal", false))) return "original"
+        return String(Config.getNestedValue("iris.appearance.settingsLayout", "classic"))
+    }
+
     function raw(row: var): var {
+        if (row.path === "settingsDesign") return root.settingsDesign()
         const _ = root.revision
         const value = Config.getNestedValue(row.path, row.def)
         return value === undefined || value === null ? row.def : value
@@ -61,7 +72,19 @@ Singleton {
         const next = root.stored(row, value)
         // A family switch goes through the shell's own transition, never a bare write.
         if (row.path === "panelFamily") Quickshell.execDetached([Quickshell.shellPath("scripts/inir"), "panelFamily", "set", String(next)])
+        else if (row.path === "settingsDesign") root.wearSettings(String(next))
         else Config.setNestedValue(row.path, next)
+    }
+    // Another design takes Prism's place at once, open on Home, where its own Settings window group leads back here.
+    function wearSettings(design: string): void {
+        if (design === "prism") {
+            Config.setNestedValues({ "iris.appearance.settingsPanel": "prism", "iris.appearance.settingsOriginal": false })
+            return
+        }
+        const updates = { "iris.appearance.settingsPanel": "classic", "iris.appearance.settingsOriginal": design === "original" }
+        if (design !== "original") updates["iris.appearance.settingsLayout"] = design
+        Config.setNestedValues(updates)
+        Qt.callLater(() => GlobalStates.openSettingsAt("iris", "general"))
     }
     // A drag shows its value on the desktop without writing it; release writes once.
     function preview(row: var, value: var): void { Config.previewNestedValue(row.path, root.stored(row, value)) }
@@ -71,8 +94,8 @@ Singleton {
         return JSON.stringify(a) === JSON.stringify(b)
     }
     function changed(row: var): bool { return !root.same(root.raw(row), row.def) }
-    function changedOf(id: string): var { return root.rows.filter(row => row.page === id && row.path !== "panelFamily" && root.changed(row)) }
-    readonly property var changes: root.rows.filter(row => row.path !== "panelFamily" && root.changed(row))
+    function changedOf(id: string): var { return root.rows.filter(row => row.page === id && !root.virtual(row) && root.changed(row)) }
+    readonly property var changes: root.rows.filter(row => !root.virtual(row) && root.changed(row))
 
     // Restore defaults: every changed row of a page at once, kept so one Undo puts them all back.
     property var undo: null

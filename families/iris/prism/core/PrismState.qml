@@ -17,6 +17,8 @@ Singleton {
     property bool wide: false
     // A request Prism has no page for opens the classic Settings once; cleared when Settings closes.
     property bool classicVisit: false
+    // When the page last scrolled: a wheel that lands on a level after it scrolls the page, not the level.
+    property real scrolledAt: 0
 
     readonly property bool canBack: root.back.length > 0
     readonly property bool canForward: root.forward.length > 0

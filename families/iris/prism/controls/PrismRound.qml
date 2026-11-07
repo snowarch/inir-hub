@@ -9,6 +9,8 @@ Item {
     property bool lit: false
     property bool enabled_: true
     property bool overArt: false
+    // Over art, a smoked disc at rest (the dark pill's twin) instead of a bare glyph.
+    property bool smoked: false
     property real glyphSize: PrismTheme.dp(18)
     signal clicked()
 
@@ -24,7 +26,7 @@ Item {
         radius: width / 2
         color: root.solid ? (root.overArt ? PrismTheme.paper : PrismTheme.solid)
             : root.lit ? PrismTheme.accent
-            : root.overArt ? Qt.rgba(1, 1, 1, area.pressed ? 0.22 : root.hovered ? 0.14 : 0) // iris-literal: Prism's own fills and scrims, scheme-aware above
+            : root.overArt ? Qt.rgba(1, 1, 1, area.pressed ? 0.22 : root.hovered ? 0.16 : root.smoked ? 0.1 : 0) // iris-literal: Prism's own fills and scrims, scheme-aware above
             : area.pressed ? PrismTheme.fillPress : root.hovered ? PrismTheme.fillHover : PrismTheme.fill
         Behavior on color { ColorAnimation { duration: PrismTheme.ms(120) } }
     }

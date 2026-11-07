@@ -2457,5 +2457,8 @@
   "See all": "すべて表示",
   "Send a test": "テストを送信",
   "Setting": "設定",
-  "What it does": "内容"
+  "What it does": "内容",
+  "Open Prism": "プリズムを開く",
+  "The Settings iRiS opens by default: every page in one panel, what it holds over a beam of light.": "iRiS が標準で開く設定：すべてのページを一枚のパネルに、その内容を光の筋の上に。",
+  "v2.33": "v2.33"
 }
