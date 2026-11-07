@@ -67,7 +67,7 @@ Item {
     readonly property var chassisBodies: {
         if (!root.visible || root.opacity <= 0 || !root.fieldBacked || root.chassisKey.length === 0 || !(root.armed || root.presentation > 0)) return []
         void (root.x + root.y + chassis.x + chassis.y + chassis.width + chassis.height + chassis.radius + (root.parent?.x ?? 0) + (root.parent?.y ?? 0) + root.frost)
-        const at = chassis.mapToItem(root.QsWindow.contentItem, 0, 0)
+        const at = chassis.mapToItem(root.QsWindow.window?.contentItem, 0, 0)
         const join = root.chassisJoin ?? {}
         const r = chassis.radius
         const glass = root.glass ? IrisStyle.surfaceGlass(root.motionSurface) : "solid"
@@ -128,7 +128,7 @@ Item {
         if (!root.visible || root.opacity <= 0 || !root.blurs || !(root.armed || root.presentation > 0) || root.emergence < 0.999) return []
         if (!root.blurWhileReceding && !root.open) return []
         void (root.x + root.y + chassis.x + chassis.y + chassis.width + chassis.height + chassis.radius + (root.parent?.x ?? 0) + (root.parent?.y ?? 0))
-        const at = chassis.mapToItem(root.QsWindow.contentItem, 0, 0)
+        const at = chassis.mapToItem(root.QsWindow.window?.contentItem, 0, 0)
         return [{ x: at.x, y: at.y, width: chassis.width, height: chassis.height, radius: chassis.radius, corners: chassis.corners }]
     }
     signal closed()
@@ -220,7 +220,7 @@ Item {
         enabled: IrisMotionMeter.watching(root.motionSurface) && (root.open || root.armed || root.presentation > 0)
         function onAfterAnimating(): void {
             const screen = root.QsWindow.window?.screen?.name ?? ""
-            const at = chassis.mapToItem(root.QsWindow.contentItem, 0, 0)
+            const at = chassis.mapToItem(root.QsWindow.window?.contentItem, 0, 0)
             const own = root.QsWindow.window
             const chassisWindow = IrisMotionMeter.chassisOf(screen)
             const bodyWindow = root.fieldBacked ? chassisWindow : own
@@ -346,7 +346,7 @@ Item {
             compositorAllowed: root.blurs
             sceneOrigin: {
                 void (root.x + root.y + (root.parent?.x ?? 0) + (root.parent?.y ?? 0))
-                const at = root.parent ? root.parent.mapToItem(root.QsWindow.contentItem, 0, 0) : Qt.point(0, 0)
+                const at = root.parent ? root.parent.mapToItem(root.QsWindow.window?.contentItem, 0, 0) : Qt.point(0, 0)
                 return Qt.point(root.windowOffset.x + at.x, root.windowOffset.y + at.y)
             }
             sceneSize: Qt.size(root.QsWindow.window?.screen?.width ?? 0, root.QsWindow.window?.screen?.height ?? 0)
@@ -388,7 +388,7 @@ Item {
             sourceComponent: IrisGlassPane {
                 sceneOffset: {
                     void (root.x + root.y + chassis.x + chassis.y + (root.parent?.x ?? 0) + (root.parent?.y ?? 0))
-                    return chassis.mapToItem(root.QsWindow.contentItem, 0, 0)
+                    return chassis.mapToItem(root.QsWindow.window?.contentItem, 0, 0)
                 }
                 windowOffset: root.windowOffset
                 live: root.presentation > 0
