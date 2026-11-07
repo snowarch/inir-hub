@@ -4,6 +4,7 @@ import qs.services
 import QtQuick.Effects
 import qs.modules.iris.components
 import qs.modules.iris.prism.core
+import qs.modules.iris.prism.model
 import qs.modules.iris.prism.controls
 
 // The left column: the window's lights, iRiS's mark, the search and the pages by group, then what the person pinned.
@@ -12,6 +13,8 @@ Item {
     signal closeRequested()
     signal growRequested()
     signal switchHost()
+    // A pinned row opens its page with the row lit.
+    signal reach(var row)
     property alias search: searchField
     // In a window the green light grows the window's column instead of the panel, and the host key reads "over the desktop".
     property bool windowed: false
@@ -148,8 +151,8 @@ Item {
                     required property string modelData
                     width: column.width
                     PrismText {
-                        topPadding: PrismTheme.dp(24)
-                        bottomPadding: PrismTheme.dp(8)
+                        topPadding: PrismTheme.dp(18)
+                        bottomPadding: PrismTheme.dp(6)
                         text: Translation.tr(group.modelData).toUpperCase()
                         color: PrismTheme.ink3
                         font.pixelSize: PrismTheme.caption
@@ -175,11 +178,11 @@ Item {
             Column {
                 id: pinned
                 width: column.width
-                readonly property var rows: PrismState.pins.map(path => PrismModel.find(path)).filter(row => row !== null)
+                readonly property var rows: PrismModel.pinnedRows()
                 visible: pinned.rows.length > 0
                 PrismText {
-                    topPadding: PrismTheme.dp(24)
-                    bottomPadding: PrismTheme.dp(8)
+                    topPadding: PrismTheme.dp(18)
+                    bottomPadding: PrismTheme.dp(6)
                     text: Translation.tr("Pinned").toUpperCase()
                     color: PrismTheme.ink3
                     font.pixelSize: PrismTheme.caption
@@ -195,20 +198,12 @@ Item {
                         glyph: modelData.glyph
                         text: Translation.tr(modelData.label)
                         trailing: "close"
-                        onClicked: PrismState.go(modelData.page)
-                        onTrailingClicked: PrismState.togglePin(modelData.path)
+                        onClicked: root.reach(modelData)
+                        onTrailingClicked: PrismModel.togglePin(modelData)
                     }
                 }
             }
 
-            // Everything Prism has no page for yet, in the classic Settings, for this visit.
-            PrismNavItem {
-                width: column.width
-                edge: column.width
-                glyph: "more_horiz"
-                text: Translation.tr("More settings")
-                onClicked: PrismState.classicVisit = true
-            }
         }
     }
 

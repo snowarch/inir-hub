@@ -1,0 +1,3 @@
+module qs.modules.iris.prism.model
+singleton PrismModel 1.0 PrismModel.qml
+singleton PrismCovers 1.0 PrismCovers.qml

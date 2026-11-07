@@ -5,6 +5,7 @@ import qs
 import qs.services
 import qs.modules.common
 import qs.modules.iris.prism.core
+import qs.modules.iris.prism.model
 import qs.modules.iris.prism.controls
 
 // The right column: who is signed in and the bell (Do Not Disturb), the settings changed from the factory profile

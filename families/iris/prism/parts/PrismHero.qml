@@ -1,6 +1,7 @@
 import QtQuick
 import qs.services
 import qs.modules.iris.prism.core
+import qs.modules.iris.prism.model
 import qs.modules.iris.prism.controls
 import qs.modules.iris.prism.fx
 
@@ -11,6 +12,8 @@ Item {
     property var page: null
     property int number: 1
     property int count: 0
+    // Rows Restore defaults would put back: none, and the pill is not drawn.
+    property int restorable: 0
     property var changed: []
     property var lead: []          // rows whose values make the title
     signal restore()
@@ -51,20 +54,23 @@ Item {
             font.pixelSize: PrismTheme.dp(8)
             font.weight: Font.Bold
         }
-        // The ruler: a tick per row of the page, the changed ones taller.
+        // The ruler: a tick per row of the page (a long page: one per few rows, as many as the cover holds with air
+        // between them), the share changed taller.
         Row {
             id: ruler
+            readonly property int ticks: Math.max(1, Math.min(root.count, Math.floor((parent.width - PrismTheme.dp(24)) / 4)))
+            readonly property int tall: root.count > 0 ? Math.ceil(root.changed.length * ruler.ticks / root.count) : 0
             x: PrismTheme.dp(12)
             y: parent.height * 0.5
-            spacing: Math.max(2, (parent.width - PrismTheme.dp(24) - root.count) / Math.max(1, root.count - 1))
+            spacing: Math.max(2, (parent.width - PrismTheme.dp(24) - ruler.ticks) / Math.max(1, ruler.ticks - 1))
             Repeater {
-                model: root.count
+                model: ruler.ticks
                 delegate: Rectangle {
                     required property int index
                     width: 1
-                    height: index < root.changed.length ? PrismTheme.dp(9) : PrismTheme.dp(4)
+                    height: index < ruler.tall ? PrismTheme.dp(9) : PrismTheme.dp(4)
                     anchors.bottom: parent.bottom
-                    color: Qt.rgba(0.08, 0.08, 0.1, index < root.changed.length ? 0.9 : 0.45) // iris-literal: Prism's own ink over its art, the same in every scheme
+                    color: Qt.rgba(0.08, 0.08, 0.1, index < ruler.tall ? 0.9 : 0.45) // iris-literal: Prism's own ink over its art, the same in every scheme
                 }
             }
         }
@@ -145,25 +151,23 @@ Item {
             tone: "art"
             glyph: acts ? "play_arrow" : "restart_alt"
             text: acts ? Translation.tr(root.page.show.label) : Translation.tr("Restore defaults")
-            enabled_: acts || root.changed.length > 0
+            visible: acts || root.restorable > 0
             onClicked: acts ? PrismModel.runShow(root.page) : root.restore()
         }
         PrismPill {
             id: restoreWords
-            visible: Boolean(root.page?.show) && pills.roomy
+            visible: Boolean(root.page?.show) && pills.roomy && root.restorable > 0
             tone: "dark"
             text: Translation.tr("Restore defaults")
-            enabled_: root.changed.length > 0
             onClicked: root.restore()
         }
         PrismRound {
             anchors.verticalCenter: parent.verticalCenter
-            visible: Boolean(root.page?.show) && !pills.roomy
+            visible: Boolean(root.page?.show) && !pills.roomy && root.restorable > 0
             overArt: true
             smoked: true
             implicitWidth: PrismTheme.dp(34)
             glyph: "restart_alt"
-            enabled_: root.changed.length > 0
             onClicked: root.restore()
         }
     }

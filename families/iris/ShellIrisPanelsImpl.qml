@@ -22,7 +22,6 @@ import qs.modules.shared.lock
 import qs.modules.iris.state
 import qs.modules.iris.frame
 import qs.modules.iris.prism
-import qs.modules.iris.prism.core
 
 Item {
     id: root
@@ -165,8 +164,8 @@ Item {
         component: IrisStudio {}
     }
 
-    // Prism, iRiS's Settings since 11-06; a page it has not got opens the classic Settings for that visit.
-    readonly property bool prismOn: (Config.options?.iris?.appearance?.settingsPanel ?? "prism") === "prism" && !PrismState.classicVisit
+    // Prism, iRiS's Settings since 11-06: every area of iRiS Settings is a page of it.
+    readonly property bool prismOn: (Config.options?.iris?.appearance?.settingsPanel ?? "prism") === "prism"
     OnDemandPanelLoader {
         identifier: "irisPrism"
         requireEnabledPanel: false
@@ -185,10 +184,6 @@ Item {
         keep: true
         closeGraceMs: 0
         component: PrismFloating {}
-    }
-    Connections {
-        target: GlobalStates
-        function onSettingsOverlayOpenChanged() { if (!GlobalStates.settingsOverlayOpen) PrismState.classicVisit = false }
     }
 
     OnDemandPanelLoader {

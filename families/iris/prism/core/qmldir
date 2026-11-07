@@ -1,4 +1,3 @@
 module qs.modules.iris.prism.core
 singleton PrismTheme 1.0 PrismTheme.qml
 singleton PrismState 1.0 PrismState.qml
-singleton PrismModel 1.0 PrismModel.qml

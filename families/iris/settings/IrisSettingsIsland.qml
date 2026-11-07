@@ -195,7 +195,7 @@ Item {
             readonly property int keyRoom: key.visible ? root.u(14) + Math.ceil(key.width) : 0
             implicitWidth: compactFace.pad + mark.width + root.u(10) + Math.ceil(compactName.implicitWidth) + root.u(8)
                 + Math.ceil(compactValue.implicitWidth) + compactFace.keyRoom + compactFace.endPad
-            // Short of room (a narrow Pocket, a long language) the key keeps its glyph and the name keeps its words.
+            // Short of room (a narrow window, a long language) the key keeps its glyph and the name keeps its words.
             readonly property int keyWide: Math.ceil(keyGlyph.width + keyRow.spacing + keyWords.implicitWidth) + root.u(24)
             readonly property bool keyNamed: compactFace.pad + mark.width + root.u(10) + Math.ceil(compactName.implicitWidth) + root.u(8)
                 + Math.ceil(compactValue.implicitWidth) + root.u(14) + compactFace.keyWide + compactFace.endPad <= root.room - root.u(32)

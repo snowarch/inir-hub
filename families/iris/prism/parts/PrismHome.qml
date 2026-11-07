@@ -5,6 +5,7 @@ import qs.services
 import qs.modules.common
 import qs.modules.iris.settings
 import qs.modules.iris.prism.core
+import qs.modules.iris.prism.model
 import qs.modules.iris.prism.controls
 
 // Home's own part: the settings people touch every day as tiles, in the grammar of the Apple widget set (a black or
@@ -44,7 +45,7 @@ Column {
         if (tile.live) { tile.live.set(!tile.live.state()); return }
         const row = tile.row
         if (row.kind === "switch") { PrismModel.write(row, !Boolean(PrismModel.read(row))); return }
-        const choices = row.choices ?? []
+        const choices = PrismModel.choicesOf(row)
         if ((row.kind === "choice" || row.kind === "swatch") && choices.length > 1) {
             const at = choices.findIndex(entry => PrismModel.same(entry.value, PrismModel.read(row)))
             PrismModel.write(row, choices[(at + 1) % choices.length].value)

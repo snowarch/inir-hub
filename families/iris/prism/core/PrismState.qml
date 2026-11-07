@@ -15,8 +15,8 @@ Singleton {
     property string query: ""
     // The green light: the panel takes the whole room instead of its resting size.
     property bool wide: false
-    // A request Prism has no page for opens the classic Settings once; cleared when Settings closes.
-    property bool classicVisit: false
+    // The group a long page shows, by page: a long page is read one group at a time.
+    property var groupOf: ({})
     // When the page last scrolled: a wheel that lands on a level after it scrolls the page, not the level.
     property real scrolledAt: 0
 
@@ -48,18 +48,11 @@ Singleton {
         root.back = []
         root.forward = []
         root.query = ""
-        root.classicVisit = false
+        root.groupOf = ({})
     }
-
-    // Pins: the rows the person keeps at hand, stored as the paths iRiS Settings already keeps for Home.
-    readonly property var pins: {
-        const _ = Config.revision
-        return Array.from(Config.getNestedValue("iris.appearance.settingsHome", []) ?? []).map(entry => String(entry))
-    }
-    function pinned(path: string): bool { return root.pins.includes(String(path)) }
-    function togglePin(path: string): void {
-        const key = String(path)
-        const next = root.pinned(key) ? root.pins.filter(entry => entry !== key) : root.pins.concat([key])
-        Config.setNestedValue("iris.appearance.settingsHome", next)
+    function pickGroup(page: string, group: string): void {
+        const next = Object.assign({}, root.groupOf)
+        next[page] = group
+        root.groupOf = next
     }
 }

@@ -2,13 +2,13 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import qs
 import qs.services
-import qs.modules.iris.prism.core
+import qs.modules.common
 import qs.modules.common.widgets
 import qs.modules.iris.style
 import qs.modules.iris.components
 
 // The layouts, one key each, in every layout's head: switching keeps the place and morphs the page. The last key wears
-// Prism instead, on the page Prism has for this area (Home when it has none).
+// Prism instead, on the page Prism has for this area.
 // A quiet word pill; `compact` leaves the glyphs alone.
 Rectangle {
     id: root
@@ -54,8 +54,9 @@ Rectangle {
                     }
                     const area = String(root.host?.section ?? "general")
                     const page = ({ home: "general", island: "bar" })[area] ?? area
-                    GlobalStates.settingsOverlayRequestedSection = PrismModel.ids.includes(page) ? page : "general"
-                    PrismModel.wearSettings("prism")
+                    // Prism has a page for every area, so it opens on the one shown here.
+                    GlobalStates.settingsOverlayRequestedSection = page
+                    Config.setNestedValues({ "iris.appearance.settingsPanel": "prism", "iris.appearance.settingsOriginal": false })
                 }
                 Rectangle {
                     anchors.fill: parent
