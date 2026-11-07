@@ -69,48 +69,23 @@ Item {
 
     implicitHeight: line.height + (slot.active ? slot.height + PrismTheme.dp(16) : 0)
     Behavior on implicitHeight { NumberAnimation { duration: PrismTheme.ms(220); easing.type: Easing.OutCubic } }
-    clip: true
-
     HoverHandler { id: hover }
-    // Hover is light, not a slab (his 11-07): a soft oval of the page's colour that rises behind the mark and dies out
-    // across the line before the control, on the row's line alone (the old plate stood 10 dp out, and the row's clip cut
-    // it into a square slab over the gallery under it too). A row that was just found flashes it in the accent.
-    Item {
-        id: wash
-        readonly property color colour: root.flash ? PrismTheme.accent : PrismTheme.tint(thumb.tint)
-        readonly property real strength: root.flash ? 0.42 : PrismTheme.light ? 0.24 : 0.32 // iris-literal: the wash's light behind the mark
-        // Two halves of one oval meeting under the mark: a short one that is gone by the row's left edge, a long one
-        // that is gone before the control. Both as tall as the line, so neither leaves an edge.
-        readonly property real centre: thumb.x + thumb.width / 2
-        readonly property real far: Math.max(PrismTheme.dp(120), root.width * 0.62)
-        readonly property real tall: line.height * 0.7
-        width: root.width
-        height: line.height
+    // Hover is the reference's chart row (his 11-07, after a square slab and then a glow he disliked): a quiet rounded
+    // plate in Prism's own fill that floats between the hairlines and stands a little past the row's sides, on the line
+    // alone (a gallery or chips under it stay clear), and the row's number lights up in ink. A row just found flashes
+    // the plate in the accent. The row no longer clips: only what is laid out under the line does (`fold`).
+    Rectangle {
+        id: plate
+        x: -PrismTheme.dp(10)
+        y: PrismTheme.dp(3)
+        width: root.width + PrismTheme.dp(20)
+        height: line.height - PrismTheme.dp(6)
+        radius: PrismTheme.dp(14)
+        color: root.flash ? Qt.alpha(PrismTheme.accent, 0.16) : PrismTheme.fill // iris-literal: the found row's flash
         opacity: root.flash || root.hovered ? 1 : 0
         visible: opacity > 0
-        Behavior on opacity { NumberAnimation { duration: PrismTheme.ms(root.flash ? 120 : root.hovered ? 180 : 520); easing.type: Easing.OutCubic } }
-        Repeater {
-            model: [{ x: 0, width: wash.centre, reach: wash.centre }, { x: wash.centre, width: wash.width - wash.centre, reach: wash.far }]
-            Item {
-                id: half
-                required property var modelData
-                x: half.modelData.x
-                width: half.modelData.width
-                height: wash.height
-                clip: true
-                PrismGlow {
-                    id: glow
-                    readonly property real reach: Math.max(1, half.modelData.reach)
-                    colour: wash.colour
-                    strength: wash.strength
-                    width: reach * 2
-                    height: reach * 2
-                    x: wash.centre - half.x - reach
-                    y: wash.height / 2 - reach
-                    transform: Scale { origin.x: glow.reach; origin.y: glow.reach; yScale: wash.tall / glow.reach }
-                }
-            }
-        }
+        Behavior on opacity { NumberAnimation { duration: PrismTheme.ms(root.flash ? 120 : root.hovered ? 140 : 420); easing.type: Easing.OutCubic } }
+        Behavior on color { ColorAnimation { duration: PrismTheme.ms(420); easing.type: Easing.OutCubic } }
     }
 
     Item {
@@ -125,7 +100,8 @@ Item {
             anchors.verticalCenter: parent.verticalCenter
             text: String(root.number).padStart(2, "0")
             figures: true
-            color: root.changed ? PrismTheme.accent : PrismTheme.ink3
+            color: root.changed ? PrismTheme.accent : root.hovered ? PrismTheme.ink : PrismTheme.ink3
+            Behavior on color { ColorAnimation { duration: PrismTheme.ms(160); easing.type: Easing.OutCubic } }
             font.pixelSize: PrismTheme.small
             font.weight: root.changed ? Font.Bold : Font.Normal
         }
@@ -276,21 +252,29 @@ Item {
     }
 
     // Under the line: the row's own room.
-    Loader {
-        id: slot
-        active: root.below.length > 0
-        enabled: !root.locked
-        opacity: root.locked ? 0.45 : 1
-        anchors.top: line.bottom
-        anchors.left: parent.left
-        // A gallery of faces or whole looks takes the row's whole width (twice the columns, half the scroll);
-        // everything else sits under the row's name.
-        readonly property bool full: root.below === "faces" || root.below === "themes"
-        anchors.leftMargin: slot.full ? 0 : name.x
-        width: slot.full ? parent.width : parent.width - name.x - PrismTheme.dp(56)
-        height: item ? item.implicitHeight : 0
-        sourceComponent: ({ pieces: piecesBelow, designs: designsBelow, faces: facesBelow, swatches: swatchesBelow, chips: chipsBelow,
-            view: viewBelow, icon: iconBelow, curve: curveBelow, niriMotion: niriBelow, widgets: widgetsBelow, themes: themesBelow })[root.below] ?? null
+    // What is laid out under the line folds open inside its own clip, so the row itself never clips its hover plate.
+    Item {
+        id: fold
+        y: line.height
+        width: root.width
+        height: Math.max(0, root.height - line.height)
+        clip: true
+        Loader {
+            id: slot
+            active: root.below.length > 0
+            enabled: !root.locked
+            opacity: root.locked ? 0.45 : 1
+            anchors.top: parent.top
+            anchors.left: parent.left
+            // A gallery of faces or whole looks takes the row's whole width (twice the columns, half the scroll);
+            // everything else sits under the row's name.
+            readonly property bool full: root.below === "faces" || root.below === "themes"
+            anchors.leftMargin: slot.full ? 0 : name.x
+            width: slot.full ? parent.width : parent.width - name.x - PrismTheme.dp(56)
+            height: item ? item.implicitHeight : 0
+            sourceComponent: ({ pieces: piecesBelow, designs: designsBelow, faces: facesBelow, swatches: swatchesBelow, chips: chipsBelow,
+                view: viewBelow, icon: iconBelow, curve: curveBelow, niriMotion: niriBelow, widgets: widgetsBelow, themes: themesBelow })[root.below] ?? null
+        }
     }
 
     // ── At the line's end.
