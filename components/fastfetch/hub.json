@@ -1,6 +1,11 @@
 {
     "$schema": "../../schema/hub.schema.json",
-    "version": "1.1.0",
+    "version": "1.1.1",
+    "changes": {
+        "1.1.1": [
+            "A new preview, made from a clean desktop"
+        ]
+    },
     "summary": "A quiet fastfetch in your iNiR colours; pick what it shows",
     "description": "No logo, eleven lines, the accent from your wallpaper on every theme change. Pick what it shows from its page here, or comment lines in ~/.config/fastfetch/config.jsonc. An existing config is kept as config.jsonc.before-inir.",
     "authors": [
