@@ -43,13 +43,23 @@ Item {
             color: parent.printInk
             font.pixelSize: PrismTheme.dp(8)
         }
-        PrismText {
+        // The page's group in the card's ink, lit by one square of the person's accent (an accent print on the silver
+        // card read at a glance only on dark accents).
+        Row {
             anchors.right: parent.right; anchors.rightMargin: PrismTheme.dp(12); y: PrismTheme.dp(10)
-            mono: true
-            text: Translation.tr(root.page?.group ?? "").toUpperCase()
-            color: PrismTheme.accent
-            font.pixelSize: PrismTheme.dp(8)
-            font.weight: Font.Bold
+            spacing: PrismTheme.dp(5)
+            Rectangle {
+                anchors.verticalCenter: parent.verticalCenter
+                width: PrismTheme.dp(5); height: width; radius: 1
+                color: PrismTheme.accent
+            }
+            PrismText {
+                mono: true
+                text: Translation.tr(root.page?.group ?? "").toUpperCase()
+                color: parent.parent.printInk
+                font.pixelSize: PrismTheme.dp(8)
+                font.weight: Font.Bold
+            }
         }
         // The ruler: a tick per row of the page, the changed ones taller.
         Row {
@@ -85,8 +95,8 @@ Item {
                     required property string modelData
                     mono: true
                     text: modelData
-                    color: Qt.rgba(0.08, 0.08, 0.1, 0.62) // iris-literal: Prism's own ink over its art, the same in every scheme
-                    font.pixelSize: PrismTheme.dp(7)
+                    color: Qt.rgba(0.08, 0.08, 0.1, 0.7) // iris-literal: Prism's own ink over its art, the same in every scheme
+                    font.pixelSize: PrismTheme.dp(8)
                 }
             }
         }
@@ -145,7 +155,8 @@ Item {
             tone: "art"
             glyph: acts ? "play_arrow" : "restart_alt"
             text: acts ? Translation.tr(root.page.show.label) : Translation.tr("Restore defaults")
-            enabled_: acts || root.changed.length > 0
+            // A page with no action of its own and nothing changed shows no pill: a dead control says nothing.
+            visible: acts || root.changed.length > 0
             onClicked: acts ? PrismModel.runShow(root.page) : root.restore()
         }
         PrismPill {

@@ -210,7 +210,6 @@ Item {
             spacing: root.u(10)
             Item { id: searchSlot; Layout.preferredWidth: root.u(root.compact ? 240 : 320) * Math.max(1, IrisStyle.typeScale); Layout.preferredHeight: root.u(36) }
             Item { Layout.fillWidth: true }
-            LayoutSwitch { host: root.host; voice: "folio"; compact: root.compact }
             RoundKey {
                 glyph: root.host?.windowed ? "layers" : "web_asset"
                 name: root.host?.windowed ? Translation.tr("Open over the desktop") : Translation.tr("Open as a window")

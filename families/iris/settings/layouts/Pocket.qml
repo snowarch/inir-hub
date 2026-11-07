@@ -136,7 +136,6 @@ Item {
                             font.weight: IrisStyle.weight(Font.Bold)
                             font.letterSpacing: -Math.round(root.u(30) * 0.01)
                         }
-                        LayoutSwitch { host: root.host; voice: "pocket"; compact: true }
                     }
                     AreaRows {
                         Layout.fillWidth: true

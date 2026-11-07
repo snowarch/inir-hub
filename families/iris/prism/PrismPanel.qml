@@ -200,6 +200,16 @@ Item {
             onReach: row => root.reach(row)
         }
 
+        // The Settings designs, hidden as a pill at the top of the page until aimed at.
+        PrismDesignsIsland {
+            anchors.horizontalCenter: centre.horizontalCenter
+            y: PrismTheme.dp(10)
+            z: 30
+            room: centre.width
+            current: "prism"
+            onPicked: design => PrismModel.wearSettings(design)
+        }
+
         PrismToast {
             anchors.horizontalCenter: centre.horizontalCenter
             anchors.bottom: parent.bottom

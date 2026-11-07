@@ -7,7 +7,7 @@ Item {
     id: root
     property var shapes: []
     property bool lit: false
-    readonly property color ink: root.lit ? PrismTheme.inkSolid : PrismTheme.ink
+    property color ink: root.lit ? PrismTheme.inkSolid : PrismTheme.ink
 
     Repeater {
         model: root.shapes

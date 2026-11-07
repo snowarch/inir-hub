@@ -22,6 +22,8 @@ import qs.modules.iris.preview
 import qs.modules.iris.settings.layouts as Layouts // in Quickshell's import graph: the page loads them by url
 import qs.modules.iris.widgets
 import qs.modules.iris.state
+import qs.modules.iris.prism.core
+import qs.modules.iris.prism.parts as Prism
 
 Item {
     id: root
@@ -1263,22 +1265,6 @@ Item {
                         onClicked: IrisOptions.restore(resettable)
                     }
                     }
-                    // Classic's way back to the layouts.
-                    Layouts.LayoutSwitch {
-                        visible: !root.sceneDesigned
-                        host: root
-                        voice: ""
-                        compact: true
-                    }
-                    // The design key: one press between today's Settings and v2.33's, every page and option kept.
-                    IrisIconButton {
-                        objectName: "settingsDesignKey"
-                        visible: !root.sceneDesigned && IrisDesign.skin("settingsPage").length === 0
-                        materialIcon: "history"
-                        selected: IrisStyle.settingsOriginal
-                        onClicked: Config.setNestedValue("iris.appearance.settingsOriginal", !IrisStyle.settingsOriginal)
-                        Accessible.name: IrisStyle.settingsOriginal ? Translation.tr("Use the current design") : Translation.tr("Use the original design (v2.33)")
-                    }
                     IrisIconButton {
                         materialIcon: root.windowed ? "layers" : "web_asset"
                         onClicked: root.switchHost()
@@ -1484,6 +1470,30 @@ Item {
             target: homeEditorHost.item
             function onVisibleChanged() { homeEditorHost.fading = homeEditorHost.item.visible }
         }
+    }
+
+    // The Settings designs, hidden as a pill at the top of every layout until aimed at (PrismDesignsIsland): one place
+    // to change how Settings looks, from Prism and back.
+    Prism.PrismDesignsIsland {
+        // A Design that draws its own Settings page keeps it.
+        visible: IrisDesign.skin("settingsPage").length === 0
+        room: frame.width
+        x: Math.round(frame.x + (frame.width - width) / 2)
+        y: Math.round(frame.y + Math.round(8 * root.d))
+        z: 21
+        current: IrisStyle.settingsOriginal ? "original" : root.chosenLayout
+        onPicked: design => root.wearDesign(design)
+    }
+    // A design picked on the island: Prism opens at this page when it has one; the layouts morph in place.
+    function wearDesign(design: string): void {
+        if (design === "prism") {
+            if (PrismModel.ids.includes(root.section)) PrismState.go(root.section)
+            PrismModel.wearSettings("prism")
+            return
+        }
+        Config.setNestedValues({ "iris.appearance.settingsPanel": "classic", "iris.appearance.settingsOriginal": design === "original" })
+        // v2.33 was the sidebar beside the page: its plates over Classic.
+        root.setLayout(design === "original" ? "classic" : design)
     }
 
     // What a change just did and the way back, a display change waiting for Keep: the Settings island at the body's

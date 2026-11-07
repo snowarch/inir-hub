@@ -75,16 +75,84 @@ Singleton {
         else if (row.path === "settingsDesign") root.wearSettings(String(next))
         else Config.setNestedValue(row.path, next)
     }
-    // Another design takes Prism's place at once, open on Home, where its own Settings window group leads back here.
+    // Each Settings design drawn small, its panes read off the design itself: sidebar, page, rail, sheet
+    // (PrismSketch draws them: Home's cards and the designs island).
+    readonly property var drawings: ({
+        prism: [
+            { x: 0, y: 0, w: 0.22, h: 1, a: 0.16, r: 0.04 },
+            { x: 0.26, y: 0.06, w: 0.46, h: 0.3, tone: "spectrum", r: 0.04 },
+            { x: 0.26, y: 0.44, w: 0.46, h: 0.08, a: 0.22, r: 0.02 },
+            { x: 0.26, y: 0.58, w: 0.46, h: 0.08, a: 0.22, r: 0.02 },
+            { x: 0.26, y: 0.72, w: 0.46, h: 0.08, a: 0.22, r: 0.02 },
+            { x: 0.76, y: 0, w: 0.24, h: 1, a: 0.1, r: 0.04 },
+            { x: 0.8, y: 0.08, w: 0.08, h: 0.12, tone: "accent", r: 0.04 }
+        ],
+        classic: [
+            { x: 0, y: 0, w: 0.28, h: 1, a: 0.14, r: 0.04 },
+            { x: 0.05, y: 0.1, w: 0.18, h: 0.06, a: 0.3, r: 0.02 },
+            { x: 0.05, y: 0.22, w: 0.14, h: 0.06, tone: "accent", r: 0.02 },
+            { x: 0.05, y: 0.34, w: 0.16, h: 0.06, a: 0.3, r: 0.02 },
+            { x: 0.34, y: 0.08, w: 0.3, h: 0.1, a: 0.4, r: 0.02 },
+            { x: 0.34, y: 0.28, w: 0.62, h: 0.14, a: 0.12, r: 0.03 },
+            { x: 0.34, y: 0.48, w: 0.62, h: 0.14, a: 0.12, r: 0.03 },
+            { x: 0.34, y: 0.68, w: 0.62, h: 0.14, a: 0.12, r: 0.03 }
+        ],
+        folio: [
+            { x: 0.22, y: 0.08, w: 0.56, h: 0.12, a: 0.4, r: 0.02 },
+            { x: 0.22, y: 0.3, w: 0.56, h: 0.05, a: 0.22, r: 0.02 },
+            { x: 0.22, y: 0.4, w: 0.5, h: 0.05, a: 0.22, r: 0.02 },
+            { x: 0.22, y: 0.5, w: 0.56, h: 0.05, a: 0.22, r: 0.02 },
+            { x: 0.22, y: 0.66, w: 0.56, h: 0.05, a: 0.22, r: 0.02 },
+            { x: 0.22, y: 0.76, w: 0.38, h: 0.05, tone: "accent", r: 0.02 }
+        ],
+        pocket: [
+            { x: 0.62, y: 0, w: 0.38, h: 1, a: 0.16, r: 0.05 },
+            { x: 0.67, y: 0.1, w: 0.28, h: 0.08, a: 0.4, r: 0.02 },
+            { x: 0.67, y: 0.28, w: 0.28, h: 0.1, a: 0.16, r: 0.03 },
+            { x: 0.67, y: 0.44, w: 0.28, h: 0.1, tone: "accent", r: 0.03 },
+            { x: 0.67, y: 0.6, w: 0.28, h: 0.1, a: 0.16, r: 0.03 },
+            { x: 0.06, y: 0.1, w: 0.4, h: 0.05, a: 0.08, r: 0.02 }
+        ],
+        drawer: [
+            { x: 0.04, y: 0.34, w: 0.92, h: 0.66, a: 0.16, r: 0.06 },
+            { x: 0.44, y: 0.4, w: 0.12, h: 0.03, a: 0.4, r: 0.02 },
+            { x: 0.1, y: 0.52, w: 0.24, h: 0.08, tone: "accent", r: 0.02 },
+            { x: 0.38, y: 0.52, w: 0.2, h: 0.08, a: 0.3, r: 0.02 },
+            { x: 0.62, y: 0.52, w: 0.2, h: 0.08, a: 0.3, r: 0.02 },
+            { x: 0.1, y: 0.7, w: 0.8, h: 0.1, a: 0.12, r: 0.03 }
+        ],
+        original: [
+            { x: 0, y: 0, w: 0.2, h: 1, a: 0.14, r: 0.04 },
+            { x: 0.05, y: 0.1, w: 0.1, h: 0.14, tone: "accent", r: 0.03 },
+            { x: 0.05, y: 0.32, w: 0.1, h: 0.14, a: 0.35, r: 0.03 },
+            { x: 0.05, y: 0.54, w: 0.1, h: 0.14, a: 0.35, r: 0.03 },
+            { x: 0.26, y: 0.08, w: 0.7, h: 0.84, a: 0.1, r: 0.04 },
+            { x: 0.3, y: 0.18, w: 0.5, h: 0.05, a: 0.3, r: 0.02 },
+            { x: 0.3, y: 0.34, w: 0.6, h: 0.05, a: 0.22, r: 0.02 },
+            { x: 0.3, y: 0.5, w: 0.6, h: 0.05, a: 0.22, r: 0.02 },
+            { x: 0.3, y: 0.66, w: 0.6, h: 0.05, a: 0.22, r: 0.02 }
+        ]
+    })
+
+    readonly property var designs: [
+        { value: "prism", label: "Prism" }, { value: "classic", label: "Classic" }, { value: "folio", label: "Folio" },
+        { value: "pocket", label: "Pocket" }, { value: "drawer", label: "Drawer" }, { value: "original", label: "v2.33" }
+    ]
+    function drawing(design: string): var { return root.drawings[design] ?? [] }
+    // Another design takes Prism's place at once, open at the page Prism stood on; the designs island at the top of
+    // every Settings window leads back here.
     function wearSettings(design: string): void {
         if (design === "prism") {
             Config.setNestedValues({ "iris.appearance.settingsPanel": "prism", "iris.appearance.settingsOriginal": false })
+            PrismState.classicVisit = false
             return
         }
         const updates = { "iris.appearance.settingsPanel": "classic", "iris.appearance.settingsOriginal": design === "original" }
-        if (design !== "original") updates["iris.appearance.settingsLayout"] = design
+        updates["iris.appearance.settingsLayout"] = design === "original" ? "classic" : design
         Config.setNestedValues(updates)
-        Qt.callLater(() => GlobalStates.openSettingsAt("iris", "general"))
+        // The classic Settings opens where Prism stood (Changes, Prism's own, opens on Home).
+        const at = root.ids.includes(PrismState.page) && PrismState.page !== "changes" ? PrismState.page : "general"
+        Qt.callLater(() => GlobalStates.openSettingsAt("iris", at))
     }
     // A drag shows its value on the desktop without writing it; release writes once.
     function preview(row: var, value: var): void { Config.previewNestedValue(row.path, root.stored(row, value)) }

@@ -99,7 +99,6 @@ Item {
         spacing: root.u(10)
         Item { id: searchSlot; Layout.preferredWidth: root.searchWidth; Layout.preferredHeight: root.u(36) }
         Item { id: keyGap; Layout.fillWidth: true; Layout.preferredHeight: root.u(40) }
-        LayoutSwitch { id: switcher; host: root.host; voice: "drawer"; compact: true }
         HeadKey {
             glyph: root.windowed ? "layers" : "web_asset"
             name: root.windowed ? Translation.tr("Open over the desktop") : Translation.tr("Open as a window")
@@ -130,7 +129,7 @@ Item {
         })
         return width + Math.max(0, keys - 1) * root.u(2) + rest
     }
-    readonly property real headFree: head.width - switcher.implicitWidth - 2 * root.u(36) - 4 * head.spacing
+    readonly property real headFree: head.width - 2 * root.u(36) - 4 * head.spacing
     // Measured for the widest area, so the search and the row's place hold still from one area to the next.
     readonly property real needSpelled: root.sections.reduce((most, entry) => Math.max(most, root.rowNeed(true, String(entry.id))), 0)
     readonly property real needTight: root.sections.reduce((most, entry) => Math.max(most, root.rowNeed(false, String(entry.id))), 0)
