@@ -95,7 +95,7 @@ Item {
         readonly property bool light: view.face.lightBackdrop
         // Background off: the folder stays (it is the face) as smoked glass light enough to read through, no shadow.
         readonly property color body: view.face.clear
-            ? ColorUtils.applyAlpha(glass.light ? IrisStyle.frost : IrisStyle.surface, glass.light ? 0.72 : 0.62) : view.face.plateColor
+            ? ColorUtils.applyAlpha(glass.light ? IrisStyle.frost : IrisStyle.surface, glass.light ? 0.72 : 0.62) : view.face.plateColor // iris-literal: background off keeps the folder (it is the face) as smoked glass
         readonly property vector4d frame: Qt.vector4d(view.width, view.height, glass.room, glass.room)
         readonly property vector4d folder: Qt.vector4d(view.flapRight, view.tabRight, view.flapTop,
             1 / Math.max(0.5, Screen.devicePixelRatio))
