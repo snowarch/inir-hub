@@ -1,11 +1,14 @@
 pragma ComponentBehavior: Bound
 import QtQuick
+import qs
 import qs.services
+import qs.modules.iris.prism.core
 import qs.modules.common.widgets
 import qs.modules.iris.style
 import qs.modules.iris.components
 
-// The layouts, one key each, in every layout's head: switching keeps the place and morphs the page.
+// The layouts, one key each, in every layout's head: switching keeps the place and morphs the page. The last key wears
+// Prism instead, on the page Prism has for this area (Home when it has none).
 // A quiet word pill; `compact` leaves the glyphs alone.
 Rectangle {
     id: root
@@ -15,7 +18,8 @@ Rectangle {
     readonly property real d: IrisStyle.settingsDensity
     readonly property var keys: [
         { id: "classic", glyph: "view_sidebar", name: Translation.tr("Classic") },
-        { id: "folio", glyph: "article", name: Translation.tr("Folio") }
+        { id: "folio", glyph: "article", name: Translation.tr("Folio") },
+        { id: "prism", glyph: "flare", name: Translation.tr("Prism") }
     ]
     implicitHeight: Math.round(36 * root.d)
     implicitWidth: keyRow.implicitWidth + 6
@@ -31,7 +35,7 @@ Rectangle {
         anchors.centerIn: parent
         spacing: 2
         Repeater {
-            model: root.keys.filter(entry => entry.id === "classic" || root.host?.layouts?.[entry.id] !== undefined)
+            model: root.keys.filter(entry => entry.id === "classic" || entry.id === "prism" || root.host?.layouts?.[entry.id] !== undefined)
             MouseArea {
                 id: key
                 required property var modelData
@@ -43,7 +47,16 @@ Rectangle {
                 Accessible.role: Accessible.PageTab
                 Accessible.name: key.modelData.name
                 Accessible.checked: key.on
-                onClicked: root.host.setLayout(key.modelData.id)
+                onClicked: {
+                    if (key.modelData.id !== "prism") {
+                        root.host.setLayout(key.modelData.id)
+                        return
+                    }
+                    const area = String(root.host?.section ?? "general")
+                    const page = ({ home: "general", island: "bar" })[area] ?? area
+                    GlobalStates.settingsOverlayRequestedSection = PrismModel.ids.includes(page) ? page : "general"
+                    PrismModel.wearSettings("prism")
+                }
                 Rectangle {
                     anchors.fill: parent
                     radius: IrisStyle.capsule(height)
