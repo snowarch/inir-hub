@@ -3131,7 +3131,7 @@ Item {
             onLoaded: if (artBackdrop.designUrl.length > 0 && "island" in item) item.island = root
             Component {
                 id: engineArtBackdrop
-                IrisMediaBackdrop { source: MediaArtwork.displaySource }
+                IrisMediaBackdrop { source: MediaArtwork.displaySource; strength: 0.9 }
             }
         }
         Loader {

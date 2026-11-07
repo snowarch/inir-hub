@@ -815,6 +815,7 @@
   "ep": "話",
   "Add widgets": "ウィジェットを追加",
   "Back 10 seconds": "10秒戻る",
+  "Ahead 10 seconds": "10秒進む",
   "How high subtitles sit; 100 is the bottom edge.": "字幕の高さ。100 が下端です。",
   "Less %1": "%1 を減らす",
   "Load a subtitle file": "字幕ファイルを読み込む",
