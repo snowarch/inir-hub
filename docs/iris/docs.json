@@ -10,7 +10,6 @@
 			]
 		}
 	],
-	"preview": {"steps": [["ipc", "iris", "page", "media"]]},
 	"shots": {
 		"iris-edge": {
 			"family": "iris",

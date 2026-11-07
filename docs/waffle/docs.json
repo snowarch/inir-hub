@@ -10,7 +10,6 @@
 			]
 		}
 	],
-	"preview": {"steps": [["ipc", "search", "open"]]},
 	"shots": {
 		"waffle-start": {
 			"family": "waffle",
