@@ -117,6 +117,7 @@ It reads what your branch changed since `origin/main` (`--base REF` for another 
 | Outside a family, every `IpcHandler` target starts with the item's id. | So it can never answer for the shell or another plugin. |
 | The item validates (`inir hub validate <folder>`): its files, listing, preview and permissions. | What the Hub shows and installs comes from these. |
 | A changed item raises its `version`, in `hub.json` and the native file alike. | Installed copies update only when the version moves, and a published version never changes its contents. |
+| Each raise says what changed, in `hub.json` › `changes`: `{"1.1.0": ["Clock face follows the wallpaper"]}`, a line people understand. | The Hub, the update notice and inir.space show it beside the update; a new preview alone needs no raise. |
 | Every `IpcHandler` has a `///` comment right above it (one line on what the target is for), and every function in it has one too. | `inir help` and the IPC reference on inir.space are built from them. |
 | A language the item ships holds every string its `en_US.json` holds. | A language you don't ship shows English; one that is half there mixes two languages on one screen. |
 | The lines you add take colours from the family's tokens: no `"#rrggbb"`, no `Qt.rgba(0.2, …)` with numbers. | The person's theme and light or dark scheme reach only what reads the tokens. |
@@ -153,6 +154,7 @@ An item is a folder with the file iNiR itself reads, plus `hub.json` for the lis
 | Field | |
 | --- | --- |
 | `version` | `x.y.z`. Raise it with every change. For widgets, web apps, families and components it matches the version in the native file. |
+| `changes` | Optional on a first version, required from the next: each version's notes, 1-6 lines of up to 140 characters, newest first in the Hub. |
 | `summary` | What the card says, 8 to 80 characters: two lines on the smallest card. Say what it does, not what it is. |
 | `description` | Optional, up to 600 characters. Widgets and themes take it from their own file. |
 | `authors` | GitHub handles. |

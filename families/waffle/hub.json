@@ -1,6 +1,11 @@
 {
     "$schema": "../../schema/hub.schema.json",
     "version": "2.34.7",
+    "changes": {
+        "2.34.7": [
+            "Start: every pinned and recommended icon the same size, names on one line"
+        ]
+    },
     "summary": "Windows 11 for people who want it: taskbar, Start, Action Center.",
     "authors": [
         "snowarch"
