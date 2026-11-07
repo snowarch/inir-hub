@@ -246,9 +246,12 @@ QtObject {
     function homeList(): var {
         return Array.from(Config.options?.iris?.appearance?.settingsHome ?? root.homeDefault).map(entry => String(entry))
     }
+    // What Home can hold, looked up per row: scanning the list for every row of every page cost Prism's sidebar 180 ms
+    // on each write (11-07).
+    readonly property var homeValues: root.homeCandidates.reduce((all, entry) => { all[entry.value] = true; return all }, ({}))
     function pinValue(spec: var): string {
         const value = String(spec.id ?? spec.path ?? "")
-        return value.length > 0 && root.homeCandidates.some(entry => entry.value === value) ? value : ""
+        return value.length > 0 && root.homeValues[value] === true ? value : ""
     }
     function onHome(spec: var): bool {
         const value = root.pinValue(spec)

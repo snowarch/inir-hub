@@ -20,12 +20,17 @@ WidgetShelf {
 
     property real bodyRadius: IrisStyle.radius
 
+    // The page someone asked for (Settings' Desktops row), taken once and cleared: cleared from a binding's own change
+    // it was a binding loop.
     Component.onCompleted: root.takeAsked()
-    readonly property string asked: GlobalStates.desktopShelfPage
-    onAskedChanged: root.takeAsked()
+    Connections {
+        target: GlobalStates
+        function onDesktopShelfPageChanged() { root.takeAsked() }
+    }
     function takeAsked(): void {
-        if (root.asked.length === 0 || !root.pages.some(entry => entry.value === root.asked)) return
-        root.goTo(root.asked)
+        const asked = GlobalStates.desktopShelfPage
+        if (asked.length === 0 || !root.pages.some(entry => entry.value === asked)) return
+        root.goTo(asked)
         GlobalStates.desktopShelfPage = ""
     }
 

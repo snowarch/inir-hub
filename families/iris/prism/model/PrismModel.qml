@@ -221,9 +221,18 @@ Singleton {
     function pinnable(row: var): bool { return !row.virtual && IrisOptions.pinValue(row.spec).length > 0 }
     function pinned(row: var): bool { const _ = root.revision; return !row.virtual && IrisOptions.onHome(row.spec) }
     function togglePin(row: var): void { if (root.pinnable(row)) IrisOptions.togglePin(row.spec) }
+    // Each row Home can hold, by its pin: built when the rows change, never on a write.
+    readonly property var pinIndex: {
+        const out = {}
+        for (const row of root.rows) {
+            const pin = row.virtual ? "" : IrisOptions.pinValue(row.spec)
+            if (pin.length > 0 && !(pin in out)) out[pin] = row
+        }
+        return out
+    }
     function pinnedRows(): var {
         const _ = root.revision
-        return IrisOptions.homeList().map(id => root.rows.find(row => !row.virtual && IrisOptions.pinValue(row.spec) === id)).filter(Boolean)
+        return IrisOptions.homeList().map(id => root.pinIndex[id]).filter(Boolean)
     }
 
     // Search: a row's name, what it does, its words and its page's name, in the person's language and in English.

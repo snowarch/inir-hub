@@ -64,9 +64,7 @@ Item {
     // previewed at all: each step would solve and recolour the whole shell, or rewrite Niri's config.
     property real dragValue: NaN
     readonly property var shownValue: Number.isFinite(root.dragValue) ? root.dragValue : root.value
-    // A widget's row writes through DesktopWidgetOptions (its keys may live in the screen's record, where Config has no
-    // place for them): it is written on release, never previewed through Config.
-    readonly property bool livePath: !root.spec.niri && !root.spec.bundle && !root.spec.widget && String(root.spec.path ?? "").length > 0
+    readonly property bool livePath: !root.spec.niri && !root.spec.bundle && String(root.spec.path ?? "").length > 0
         && !/^iris\.appearance\.tune\.|^iris\.widgets\.vibrance$|^appearance\./.test(String(root.spec.path))
     function previewDrag(): void {
         // The island's Undo goes back to the value before the drag, not to one of its steps.
