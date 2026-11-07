@@ -21,13 +21,17 @@ RippleButton {
     readonly property bool _zzz: Appearance.zzzEverywhere
     readonly property bool _m3: !Appearance.regaliaEverywhere && !_zzz && !Appearance.editorialEverywhere
     readonly property string _glyph: root.selected ? "check" : root.chipIcon
+    // No text: a square chip of its icon alone (an "add" chip at the end of a row).
+    readonly property bool _iconOnly: root.text.length === 0 && root._glyph.length > 0
     readonly property int _gap: Appearance.regaliaEverywhere ? Appearance.regalia.controlGap : 8
-    readonly property int _padStart: Appearance.regaliaEverywhere ? Appearance.regalia.controlPaddingHorizontal : root._glyph.length > 0 ? 8 : 16
-    readonly property int _padEnd: Appearance.regaliaEverywhere ? Appearance.regalia.controlPaddingHorizontal : 16
+    readonly property int _padStart: root._iconOnly ? Math.round((root.implicitHeight - glyph.implicitWidth) / 2)
+        : Appearance.regaliaEverywhere ? Appearance.regalia.controlPaddingHorizontal : root._glyph.length > 0 ? 8 : 16
+    readonly property int _padEnd: root._iconOnly ? root._padStart
+        : Appearance.regaliaEverywhere ? Appearance.regalia.controlPaddingHorizontal : 16
 
     // From the label's natural width, never from the row (the label narrows to fit the chip).
-    implicitWidth: Math.max(root.minimumWidth, root._padStart + label.implicitWidth
-        + (glyph.visible ? glyph.implicitWidth + root._gap : 0) + root._padEnd)
+    implicitWidth: Math.max(root.minimumWidth, root._padStart + (label.visible ? label.implicitWidth : 0)
+        + (glyph.visible ? glyph.implicitWidth + (label.visible ? root._gap : 0) : 0) + root._padEnd)
     implicitHeight: Appearance.regaliaEverywhere ? Appearance.regalia.compactControlHeight : 32
     buttonRadius: Appearance.regaliaEverywhere ? Appearance.regalia.controlRadius
         : root._zzz ? Appearance.zzz.controlRadius
@@ -84,7 +88,7 @@ RippleButton {
             id: chipRow
             x: Math.round(root._padStart + Math.max(0, root.width - root.implicitWidth) / 2) - root.leftPadding
             anchors.verticalCenter: parent.verticalCenter
-            spacing: glyph.visible ? root._gap : 0
+            spacing: glyph.visible && label.visible ? root._gap : 0
 
             MaterialSymbol {
                 id: glyph
@@ -104,6 +108,7 @@ RippleButton {
             StyledText {
                 id: label
                 anchors.verticalCenter: parent.verticalCenter
+                visible: !root._iconOnly
                 width: Math.min(implicitWidth, Math.max(0, root.width - root._padStart - root._padEnd
                     - (glyph.visible ? glyph.implicitWidth + root._gap : 0)))
                 elide: Text.ElideRight

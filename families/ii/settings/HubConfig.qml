@@ -132,7 +132,7 @@ ContentPage {
         return liked < 0 ? "–" : `${Math.round(liked * 100)}%`
     }
     function votesText(item: var): string {
-        return Hub.votes(item) > 0 ? Translation.tr("%1 of %2 people liked it").arg(item.votesUp ?? 0).arg(Hub.votes(item))
+        return Hub.votes(item) > 0 ? Translation.tr("%1 of %2 people liked it").arg(Hub.voteCount(item, "up")).arg(Hub.votes(item))
             : Translation.tr("No votes yet")
     }
     function dateText(date: string): string {
@@ -1074,7 +1074,8 @@ ContentPage {
             }
         }
 
-        // What people think of it, and the person's own say: a vote and any of the reactions, a tap to take back.
+        // What people think of it, and the person's own say: a vote, the reactions it has (a tap gives or takes back),
+        // and one small chip that opens a picker of any emoji, on hover or a tap.
         Flow {
             Layout.fillWidth: true
             spacing: 6
@@ -1089,14 +1090,16 @@ ContentPage {
             }
             Item { width: 8; height: 1 }
             Repeater {
-                model: Hub.reactions
+                model: Hub.reactionsOf(page.item)
                 delegate: FilterChip {
-                    required property string modelData
-                    readonly property int count: Hub.reactionCount(page.item, modelData)
-                    text: count > 0 ? `${modelData} ${Hub.countText(count)}` : modelData
-                    selected: Array.from(Hub.mine(page.item?.id ?? "").reactions ?? []).includes(modelData)
-                    onClicked: Hub.react(page.item.id, modelData)
+                    required property var modelData
+                    text: `${modelData.emoji} ${Hub.countText(modelData.count)}`
+                    selected: modelData.mine
+                    onClicked: Hub.react(page.item.id, modelData.emoji)
                 }
+            }
+            ReactionPicker {
+                item: page.item
             }
         }
 
@@ -1382,6 +1385,139 @@ ContentPage {
                 color: SettingsMaterialPreset.supportingColor
                 wrapMode: Text.WordWrap
             }
+        }
+    }
+
+    // The add-reaction chip and its picker: a search field and a grid of every emoji, the quick set first.
+    component ReactionPicker: FilterChip {
+        id: chip
+        required property var item
+        readonly property var given: Array.from(Hub.mine(chip.item?.id ?? "").reactions ?? [])
+        chipIcon: "add_reaction"
+        text: Hub.reactionsOf(chip.item).length === 0 ? Translation.tr("React") : ""
+        enabled: Hub.canReact(chip.item?.id ?? "")
+        selected: false
+        Accessible.name: Translation.tr("Add a reaction")
+        onClicked: picker.opened ? picker.close() : picker.open()
+
+        HoverHandler { id: chipHover }
+        // a short warm-up so a pointer passing by doesn't open it; leaving both closes it unless a search is typed
+        Timer {
+            running: chipHover.hovered && !picker.opened && chip.enabled
+            interval: 320
+            onTriggered: picker.open()
+        }
+        Timer {
+            running: picker.opened && !chipHover.hovered && !cardHover.hovered && search.text.length === 0
+            interval: 420
+            onTriggered: picker.close()
+        }
+
+        Popup {
+            id: picker
+            y: chip.height + 6
+            margins: 8
+            padding: 10
+            width: grid.cellWidth * 8 + 20
+            onOpened: {
+                search.text = ""
+                search.forceActiveFocus()
+            }
+
+            background: Rectangle {
+                color: Appearance.colors.colLayer2Base
+                radius: Appearance.rounding.normal
+                border.width: 1
+                border.color: Appearance.colors.colLayer0Border
+            }
+
+            contentItem: ColumnLayout {
+                spacing: 8
+                HoverHandler { id: cardHover }
+
+                Rectangle {
+                    Layout.fillWidth: true
+                    implicitHeight: 36
+                    radius: Appearance.rounding.full
+                    color: SettingsMaterialPreset.tileColor
+                    border.width: search.activeFocus ? 2 : 0
+                    border.color: Appearance.colors.colPrimary
+                    RowLayout {
+                        anchors.fill: parent
+                        anchors.leftMargin: 12
+                        anchors.rightMargin: 12
+                        spacing: 8
+                        MaterialSymbol {
+                            text: "search"
+                            iconSize: 18
+                            color: search.activeFocus ? Appearance.colors.colPrimary : SettingsMaterialPreset.supportingColor
+                        }
+                        StyledTextInput {
+                            id: search
+                            Layout.fillWidth: true
+                            font.pixelSize: Appearance.font.pixelSize.small
+                            color: SettingsMaterialPreset.labelColor
+                            clip: true
+                            Keys.onEscapePressed: picker.close()
+                            Keys.onReturnPressed: if (grid.count > 0) chip.pick(grid.model[0])
+                            Keys.onEnterPressed: if (grid.count > 0) chip.pick(grid.model[0])
+                            StyledText {
+                                anchors.verticalCenter: parent.verticalCenter
+                                width: parent.width
+                                visible: search.text.length === 0
+                                text: Translation.tr("Search emoji")
+                                font.pixelSize: Appearance.font.pixelSize.small
+                                color: SettingsMaterialPreset.supportingColor
+                                elide: Text.ElideRight
+                            }
+                        }
+                    }
+                }
+
+                GridView {
+                    id: grid
+                    Layout.fillWidth: true
+                    implicitHeight: cellHeight * 5
+                    clip: true
+                    cellWidth: 36
+                    cellHeight: 36
+                    boundsBehavior: Flickable.StopAtBounds
+                    model: picker.opened ? Hub.emojiSearch(search.text) : []
+                    delegate: RippleButton {
+                        id: cell
+                        required property string modelData
+                        readonly property bool given: chip.given.includes(cell.modelData)
+                        width: 34
+                        height: 34
+                        buttonRadius: Appearance.rounding.small
+                        colBackground: cell.given ? Appearance.colors.colSecondaryContainer : "transparent"
+                        colBackgroundHover: cell.given ? Appearance.colors.colSecondaryContainerHover : Appearance.colors.colLayer2Hover
+                        onClicked: chip.pick(cell.modelData)
+                        contentItem: StyledText {
+                            anchors.centerIn: parent
+                            text: cell.modelData
+                            font.pixelSize: 20
+                            horizontalAlignment: Text.AlignHCenter
+                            verticalAlignment: Text.AlignVCenter
+                        }
+                    }
+                    StyledText {
+                        anchors.centerIn: parent
+                        width: parent.width - 24
+                        visible: grid.count === 0 && search.text.length > 0
+                        horizontalAlignment: Text.AlignHCenter
+                        wrapMode: Text.Wrap
+                        text: Translation.tr("No emoji called “%1”").arg(search.text.trim())
+                        font.pixelSize: Appearance.font.pixelSize.small
+                        color: SettingsMaterialPreset.supportingColor
+                    }
+                }
+            }
+        }
+
+        function pick(emoji: string): void {
+            Hub.react(chip.item.id, emoji)
+            picker.close()
         }
     }
 }

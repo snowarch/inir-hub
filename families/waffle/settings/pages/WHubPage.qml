@@ -81,7 +81,7 @@ WSettingsPage {
         return liked < 0 ? "–" : (1 + 4 * liked).toFixed(1)
     }
     function votesText(item: var): string {
-        return Hub.votes(item) > 0 ? Translation.tr("%1 of %2 people liked it").arg(item.votesUp ?? 0).arg(Hub.votes(item))
+        return Hub.votes(item) > 0 ? Translation.tr("%1 of %2 people liked it").arg(Hub.voteCount(item, "up")).arg(Hub.votes(item))
             : Translation.tr("No votes yet")
     }
     function dateText(date: string): string {
@@ -376,6 +376,139 @@ WSettingsPage {
         font.pixelSize: Looks.font.pixelSize.normal
         border.width: pill.checked ? 0 : 1
         border.color: Looks.settings.stroke
+    }
+
+    // The add-reaction button and its flyout: a search box and a grid of every emoji, the quick set first.
+    component ReactionPicker: WBorderedButton {
+        id: chip
+        required property var item
+        readonly property var given: Array.from(Hub.mine(chip.item?.id ?? "").reactions ?? [])
+        readonly property bool bare: Hub.reactionsOf(chip.item).length > 0
+        checkable: false
+        enabled: Hub.canReact(chip.item?.id ?? "")
+        implicitWidth: chip.bare ? chip.implicitHeight : addRow.implicitWidth + chip.horizontalPadding * 2
+        Accessible.name: Translation.tr("Add a reaction")
+        onClicked: picker.opened ? picker.close() : picker.open()
+        contentItem: Item {
+            implicitWidth: addRow.implicitWidth
+            implicitHeight: lineHeight.implicitHeight
+            // as tall as the vote and reaction buttons beside it, which hold one line of text
+            WText {
+                id: lineHeight
+                visible: false
+                text: "👍 0"
+                font.pixelSize: Looks.font.pixelSize.large
+            }
+            Row {
+                id: addRow
+                anchors.centerIn: parent
+                spacing: Looks.dp(6)
+                FluentIcon {
+                    anchors.verticalCenter: parent.verticalCenter
+                    icon: "emoji-add"
+                    implicitSize: Looks.dp(16)
+                    color: Looks.colors.fg
+                }
+                WText {
+                    anchors.verticalCenter: parent.verticalCenter
+                    visible: !chip.bare
+                    text: Translation.tr("React")
+                    font.pixelSize: Looks.font.pixelSize.large
+                }
+            }
+        }
+
+        HoverHandler { id: chipHover }
+        // a short warm-up so a pointer passing by doesn't open it; leaving both closes it unless a search is typed
+        Timer {
+            running: chipHover.hovered && !picker.opened && chip.enabled
+            interval: 320
+            onTriggered: picker.open()
+        }
+        Timer {
+            running: picker.opened && !chipHover.hovered && !cardHover.hovered && search.text.length === 0
+            interval: 420
+            onTriggered: picker.close()
+        }
+
+        function pick(emoji: string): void {
+            Hub.react(chip.item.id, emoji)
+            picker.close()
+        }
+
+        Popup {
+            id: picker
+            y: chip.height + Looks.dp(4)
+            margins: 8
+            padding: Looks.dp(8)
+            width: grid.cellWidth * 8 + padding * 2
+            onOpened: {
+                search.text = ""
+                search.forceActiveFocus()
+            }
+
+            background: Rectangle {
+                // the flyout's own tone, opaque: the page behind must not read through it
+                readonly property color tone: Looks.colors.bg1Base
+                color: Qt.rgba(tone.r, tone.g, tone.b, 1)
+                radius: Looks.radius.large
+                border.width: 1
+                border.color: Looks.colors.bg2Border
+            }
+
+            contentItem: Column {
+                spacing: Looks.dp(8)
+                HoverHandler { id: cardHover }
+
+                WTextField {
+                    id: search
+                    width: parent.width
+                    placeholderText: Translation.tr("Search emoji")
+                    Keys.onEscapePressed: picker.close()
+                    Keys.onReturnPressed: if (grid.count > 0) chip.pick(grid.model[0])
+                    Keys.onEnterPressed: if (grid.count > 0) chip.pick(grid.model[0])
+                }
+
+                GridView {
+                    id: grid
+                    width: parent.width
+                    height: cellHeight * 5
+                    clip: true
+                    cellWidth: Looks.dp(36)
+                    cellHeight: cellWidth
+                    boundsBehavior: Flickable.StopAtBounds
+                    model: picker.opened ? Hub.emojiSearch(search.text) : []
+                    delegate: WButton {
+                        id: cell
+                        required property string modelData
+                        width: grid.cellWidth - Looks.dp(2)
+                        height: width
+                        checkable: false
+                        checked: chip.given.includes(cell.modelData)
+                        colBackgroundToggled: Looks.colors.popupSurfaceActive
+                        colBackgroundToggledHover: Looks.colors.popupSurfaceHover
+                        onClicked: chip.pick(cell.modelData)
+                        contentItem: Text {
+                            anchors.centerIn: parent
+                            text: cell.modelData
+                            font.pixelSize: Looks.dp(20)
+                            horizontalAlignment: Text.AlignHCenter
+                            verticalAlignment: Text.AlignVCenter
+                        }
+                    }
+                    WText {
+                        anchors.centerIn: parent
+                        width: parent.width - Looks.dp(24)
+                        visible: grid.count === 0 && search.text.length > 0
+                        horizontalAlignment: Text.AlignHCenter
+                        wrapMode: Text.Wrap
+                        text: Translation.tr("No emoji called “%1”").arg(search.text.trim())
+                        color: Looks.colors.subfg
+                        font.pixelSize: Looks.font.pixelSize.normal
+                    }
+                }
+            }
+        }
     }
 
     // The Store's rating and the download count, small, in the secondary ink.
@@ -721,23 +854,35 @@ WSettingsPage {
                             onClicked: Qt.openUrlExternally(Hub.reportUrl(page.item))
                         }
                     }
-                    // What people think of it, and the person's own say: a vote and any of the reactions, a tap to take back.
+                    // What people think of it, and the person's own say: a vote, the reactions it has (a tap gives or takes
+                    // back), and one small button that opens a picker of any emoji, on hover or a tap.
                     Flow {
                         Layout.fillWidth: true
                         Layout.topMargin: Looks.dp(12)
                         spacing: Looks.dp(6)
                         Repeater {
-                            model: [{ vote: "up", face: "👍" }, { vote: "down", face: "👎" }].concat(Hub.reactions.map(emoji => ({ emoji: emoji })))
+                            model: [{ vote: "up", face: "👍" }, { vote: "down", face: "👎" }]
                             delegate: WBorderedButton {
                                 required property var modelData
-                                readonly property int count: modelData.vote ? Hub.voteCount(page.item, modelData.vote) : Hub.reactionCount(page.item, modelData.emoji)
-                                readonly property string face: modelData.face ?? modelData.emoji
-                                text: modelData.vote || count > 0 ? `${face} ${Hub.countText(count)}` : face
+                                text: `${modelData.face} ${Hub.countText(Hub.voteCount(page.item, modelData.vote))}`
                                 checkable: false
-                                checked: modelData.vote ? Hub.mine(page.item?.id ?? "").vote === modelData.vote
-                                    : Array.from(Hub.mine(page.item?.id ?? "").reactions ?? []).includes(modelData.emoji)
-                                onClicked: modelData.vote ? Hub.vote(page.item.id, modelData.vote) : Hub.react(page.item.id, modelData.emoji)
+                                checked: Hub.mine(page.item?.id ?? "").vote === modelData.vote
+                                onClicked: Hub.vote(page.item.id, modelData.vote)
                             }
+                        }
+                        Item { width: Looks.dp(6); height: 1 }
+                        Repeater {
+                            model: Hub.reactionsOf(page.item)
+                            delegate: WBorderedButton {
+                                required property var modelData
+                                text: `${modelData.emoji} ${Hub.countText(modelData.count)}`
+                                checkable: false
+                                checked: modelData.mine
+                                onClicked: Hub.react(page.item.id, modelData.emoji)
+                            }
+                        }
+                        ReactionPicker {
+                            item: page.item
                         }
                     }
                     // A plugin's own choices (plugin.json `choices`), read as its page opens; a button flips one.

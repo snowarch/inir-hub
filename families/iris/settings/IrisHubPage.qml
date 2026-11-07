@@ -991,7 +991,7 @@ Flickable {
                 Repeater {
                     model: [
                         { figure: Hub.liked(page.item) >= 0 ? root.likedText(page.item) : "–", caption: Hub.votes(page.item) > 0
-                            ? Translation.tr("%1 of %2 people liked it").arg(page.item?.votesUp ?? 0).arg(Hub.votes(page.item)) : Translation.tr("No votes yet") },
+                            ? Translation.tr("%1 of %2 people liked it").arg(Hub.voteCount(page.item, "up")).arg(Hub.votes(page.item)) : Translation.tr("No votes yet") },
                         { figure: Number(page.item?.installs ?? 0) > 0 ? Hub.countText(page.item.installs) : "", caption: Translation.tr("Have it") },
                         { figure: page.item?.downloads !== undefined && !(Number(page.item?.installs ?? 0) > 0) ? Hub.countText(page.item.downloads) : "", caption: Translation.tr("Downloads") },
                         { figure: String(page.item?.version ?? ""), caption: page.item?.installed && page.item.installed !== page.item.version
@@ -1044,7 +1044,8 @@ Flickable {
             }
         }
 
-        // What people think of it, and the person's own say: a vote and any of the reactions, a tap to take back.
+        // What people think of it, and the person's own say: a vote, the reactions it has (a tap gives or takes back),
+        // and one small chip that opens a picker of any emoji, on hover or a tap.
         Flow {
             Layout.fillWidth: true
             spacing: Math.round(6 * root.d)
@@ -1061,14 +1062,16 @@ Flickable {
             }
             Item { width: Math.round(6 * root.d); height: 1 }
             Repeater {
-                model: Hub.reactions
+                model: Hub.reactionsOf(page.item)
                 delegate: IrisChip {
-                    required property string modelData
-                    readonly property int count: Hub.reactionCount(page.item, modelData)
-                    label: count > 0 ? `${modelData} ${Hub.countText(count)}` : modelData
-                    selected: Array.from(Hub.mine(page.item?.id ?? "").reactions ?? []).includes(modelData)
-                    onClicked: Hub.react(page.item.id, modelData)
+                    required property var modelData
+                    label: `${modelData.emoji} ${Hub.countText(modelData.count)}`
+                    selected: modelData.mine
+                    onClicked: Hub.react(page.item.id, modelData.emoji)
                 }
+            }
+            ReactionPicker {
+                item: page.item
             }
         }
 
@@ -1273,6 +1276,139 @@ Flickable {
                         height: 1
                         visible: infoRow.index < infoCard.rows.length - 1
                         color: IrisStyle.hairline
+                    }
+                }
+            }
+        }
+    }
+
+    // The add-reaction chip and its picker: a search field and a grid of every emoji, the quick set first.
+    component ReactionPicker: IrisChip {
+        id: chip
+        required property var item
+        readonly property var given: Array.from(Hub.mine(chip.item?.id ?? "").reactions ?? [])
+        glyph: "add_reaction"
+        label: Hub.reactionsOf(chip.item).length === 0 ? Translation.tr("React") : ""
+        enabled: Hub.canReact(chip.item?.id ?? "")
+        Accessible.name: Translation.tr("Add a reaction")
+        onClicked: picker.opened ? picker.close() : picker.open()
+
+        HoverHandler { id: chipHover }
+        // a short warm-up so a pointer passing by doesn't open it; leaving both closes it unless a search is typed
+        Timer {
+            running: chipHover.hovered && !picker.opened && chip.enabled
+            interval: 320
+            onTriggered: picker.open()
+        }
+        Timer {
+            running: picker.opened && !chipHover.hovered && !cardHover.hovered && search.text.length === 0
+            interval: 420
+            onTriggered: picker.close()
+        }
+
+        function pick(emoji: string): void {
+            Hub.react(chip.item.id, emoji)
+            picker.close()
+        }
+
+        Popup {
+            id: picker
+            y: chip.height + Math.round(6 * root.d)
+            margins: 8
+            padding: Math.round(10 * root.d)
+            width: grid.cellWidth * 8 + padding * 2
+            onOpened: {
+                search.text = ""
+                search.forceActiveFocus()
+            }
+
+            background: Rectangle {
+                color: IrisStyle.surfaceHighOpaque
+                radius: IrisStyle.radiusTile
+                border.width: 1
+                border.color: IrisStyle.hairlineStrong
+            }
+
+            contentItem: Column {
+                spacing: Math.round(8 * root.d)
+                HoverHandler { id: cardHover }
+
+                Rectangle {
+                    width: parent.width
+                    height: Math.round(32 * root.d)
+                    radius: IrisStyle.capsule(height)
+                    color: search.activeFocus ? IrisStyle.fill : IrisStyle.fillQuiet
+                    border.width: search.activeFocus ? 1 : 0
+                    border.color: IrisStyle.tintBorder(IrisStyle.accent)
+                    MaterialSymbol {
+                        id: searchMark
+                        anchors.left: parent.left
+                        anchors.leftMargin: Math.round(10 * root.d)
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: "search"
+                        iconSize: Math.round(16 * root.d)
+                        color: IrisStyle.muted
+                    }
+                    TextInput {
+                        id: search
+                        cursorDelegate: TextCursor { accent: IrisStyle.accent }
+                        anchors.left: searchMark.right
+                        anchors.leftMargin: Math.round(6 * root.d)
+                        anchors.right: parent.right
+                        anchors.rightMargin: Math.round(10 * root.d)
+                        anchors.verticalCenter: parent.verticalCenter
+                        color: IrisStyle.text
+                        selectionColor: IrisStyle.accentContainer
+                        selectedTextColor: IrisStyle.inkOnAccentContainer
+                        font.family: IrisStyle.fontMain
+                        font.pixelSize: IrisStyle.typeLabel
+                        clip: true
+                        Keys.onEscapePressed: picker.close()
+                        Keys.onReturnPressed: if (grid.count > 0) chip.pick(grid.model[0])
+                        Keys.onEnterPressed: if (grid.count > 0) chip.pick(grid.model[0])
+                        IrisText {
+                            anchors.verticalCenter: parent.verticalCenter
+                            visible: search.text.length === 0
+                            text: Translation.tr("Search emoji")
+                            color: IrisStyle.muted
+                            font.pixelSize: search.font.pixelSize
+                        }
+                    }
+                }
+
+                GridView {
+                    id: grid
+                    width: parent.width
+                    height: cellHeight * 5
+                    clip: true
+                    cellWidth: Math.round(36 * root.d)
+                    cellHeight: cellWidth
+                    boundsBehavior: Flickable.StopAtBounds
+                    model: picker.opened ? Hub.emojiSearch(search.text) : []
+                    delegate: IrisButton {
+                        id: cell
+                        required property string modelData
+                        width: grid.cellWidth - 2
+                        height: width
+                        buttonRadius: IrisStyle.pieceRadius(height)
+                        quiet: !cell.selected
+                        selected: chip.given.includes(cell.modelData)
+                        onClicked: chip.pick(cell.modelData)
+                        Text {
+                            anchors.centerIn: parent
+                            text: cell.modelData
+                            font.pixelSize: Math.round(20 * root.d)
+                        }
+                    }
+                    IrisText {
+                        anchors.centerIn: parent
+                        width: parent.width - 24
+                        visible: grid.count === 0 && search.text.length > 0
+                        horizontalAlignment: Text.AlignHCenter
+                        wrapMode: Text.Wrap
+                        text: Translation.tr("No emoji called “%1”").arg(search.text.trim())
+                        color: IrisStyle.muted
+                        font.pixelSize: IrisStyle.typeLabel
                     }
                 }
             }
