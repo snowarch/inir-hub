@@ -102,6 +102,10 @@ PrismFolder {
         curve: t => IrisFaceData.smooth(root.levels, t)
         tint: root.shelf
         guide: false
+        // A slab colours the load by its height: calm blue at the foot, through green and yellow, red at the top.
+        layer.enabled: !root.folded
+        layer.smooth: true
+        layer.effect: PrismSpectrum { mono: root.nothing; angle: -90; from: 0.3; to: 1 }
     }
     FaceText {
         visible: root.leadEntry === null

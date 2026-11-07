@@ -242,6 +242,7 @@
       {"key":"iris.face","label":"Face","type":"choice","default":"classic","when":["face",{"wears":"iris"}],"choices":[["classic","Classic","public"],["offset","Offset","more_time"]],"keywords":["offset","difference","hours","zones"]}
     ],
     "*": [
+      {"key":"iris.prism","label":"Prism","type":"choice","default":"quiet","page":"look","when":[{"wears":"prism"},{"not":{"widget":"mediaControls"}}],"choices":[["quiet","Quiet","crop_square"],["beam","Beam","flare"],["folder","Folder","folder"]],"keywords":["prism","light","beam","folder","glass","spectrum","luz"]},
       {"key":"iris.material","label":"Material","type":"choice","default":"auto","page":"look","tune":true,"when":["face",{"showBackground":true}],"choices":[["auto","Same as every widget"],["glass","Glass"],["solid","Solid"],["tinted","Tinted"]],"keywords":["glass","transparent","background","plate","fondo","vidrio"]}
     ]
   }

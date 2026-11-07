@@ -49,8 +49,8 @@ PrismFolder {
     // ── the flap: the app the day went to ──
     Row {
         visible: root.counting && root.leader !== null && !root.idle
-        readonly property real middle: Math.round((root.flapTop + root.paneTop) / 2)
-        x: Math.round((root.flapLeft + root.flapRight) / 2 + root.dp(3) - width / 2)
+        readonly property real middle: root.folded ? Math.round((root.flapTop + root.paneTop) / 2) : root.headY
+        x: root.folded ? Math.round((root.flapLeft + root.flapRight) / 2 + root.dp(3) - width / 2) : root.width - root.inset - width
         y: Math.round(middle - height / 2)
         spacing: root.dp(4)
         SmartAppIcon {
@@ -62,8 +62,8 @@ PrismFolder {
             anchors.verticalCenter: parent.verticalCenter
             face: root
             text: root.shortDuration(root.leader?.seconds ?? 0)
-            color: root.inkOnShelf
-            size: root.type(12, 13, 17)
+            color: root.folded ? root.inkOnShelf : root.shelf
+            size: root.folded ? root.type(12, 13, 17) : root.type(12, 13, 15)
             weight: Font.Bold
             font.family: root.fontNumbers
             font.features: ({ "tnum": 1 })
@@ -123,6 +123,10 @@ PrismFolder {
         y: root.footTop + root.pick(12, 10, 18)
         height: root.pick(26, 24, 44)
         readonly property real pitch: hours.width / 24
+        // A slab runs the day through the spectrum, midnight violet to the next midnight red; hours to come stay faint.
+        layer.enabled: !root.folded
+        layer.smooth: true
+        layer.effect: PrismSpectrum { mono: root.nothing }
         Repeater {
             model: hours.visible ? 24 : 0
             Rectangle {
@@ -134,7 +138,8 @@ PrismFolder {
                 height: Math.max(width, Math.round(hours.height * bar.level))
                 y: hours.height - height
                 radius: Math.min(width / 2, root.dp(2))
-                color: bar.index === root.hourNow ? root.shelf : bar.index > root.hourNow ? root.fill : root.fillActive
+                color: !root.folded ? (bar.index > root.hourNow ? root.fill : root.ink)
+                    : bar.index === root.hourNow ? root.shelf : bar.index > root.hourNow ? root.fill : root.fillActive
             }
         }
     }

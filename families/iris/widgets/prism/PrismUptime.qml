@@ -78,8 +78,12 @@ PrismFolder {
         height: root.pick(22, 22, 72)
         from: root.bootAt
         to: root.nowAt
-        tint: root.shelf
+        tint: root.folded ? root.shelf : root.ink
         curve: t => 0.8
+        // A slab: the time on runs through the spectrum, white where it began.
+        layer.enabled: !root.folded
+        layer.smooth: true
+        layer.effect: PrismSpectrum { mono: root.nothing; white: 0.18; from: 0.1; to: 0.9 }
     }
     Repeater {
         model: [0, 6, 12, 18, 24]

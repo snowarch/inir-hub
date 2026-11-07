@@ -31,6 +31,9 @@ layout(std140, binding = 0) uniform buf {
     vec4 shelf;
     // x: 1 on a light scheme (paper glass); y: 1 when frost is lent (glass material); z: grain; w: shadow strength.
     vec4 look;
+    // x: 0 the folder, 1 a slab (one piece of glass: no tab, flap or pane); y: the slab's corners; z: how much of the
+    // beam a slab lets through (0 quiet: only its rim splits the light, near `beam.zw`); w: unused.
+    vec4 form;
 } u;
 layout(binding = 1) uniform sampler2D frost;
 
@@ -63,6 +66,10 @@ float slant(vec2 p) {
 vec3 metrics(vec2 p) {
     vec2 size = u.frame.xy;
     float R = u.radii.x;
+    if (u.form.x > 0.5) {
+        // A slab: the whole is the body, nothing lit, nothing leaning.
+        return vec3(box(p, vec4(0.0, 0.0, size.x, size.y), vec4(u.form.y)), -1e4, 1e4);
+    }
     float whole = box(p, vec4(0.0, 0.0, size.x, size.y), vec4(R));
     // The tab: the body left of the leaning edge, its shoulder rounded, and below the pane's top all of it, the
     // edge flaring into that line.
@@ -148,7 +155,8 @@ void main() {
     float body = m.x;
     float tab = m.y;
     float flap = m.z;
-    float paneD = box(p, u.pane, vec4(u.radii.w));
+    bool slab = u.form.x > 0.5;
+    float paneD = slab ? 1e4 : box(p, u.pane, vec4(u.radii.w));
     float all = min(body, paneD);
     float aa = px * 0.75;
     float inBody = 1.0 - smoothstep(-aa, aa, body);
@@ -162,7 +170,8 @@ void main() {
     // The shadow of the whole, on the desktop.
     float lift = 0.022 * size.y;
     float spread = 0.06 * size.y;
-    float shadowD = min(metrics(p - vec2(0.0, lift)).x, box(p - vec2(0.0, lift), u.pane, vec4(u.radii.w)));
+    float shadowD = slab ? metrics(p - vec2(0.0, lift)).x
+        : min(metrics(p - vec2(0.0, lift)).x, box(p - vec2(0.0, lift), u.pane, vec4(u.radii.w)));
     // The lit flap throws light, not shadow, where it stands above the pane.
     float flapSide = smoothstep(-u.radii.y, u.radii.y, edge) * (1.0 - smoothstep(u.pane.y - spread, u.pane.y, p.y));
     float shade = (1.0 - smoothstep(-spread, spread * 1.6, shadowD)) * u.look.w * (paper ? 0.45 : 1.0) * (1.0 - 0.85 * flapSide);
@@ -179,7 +188,7 @@ void main() {
     vec4 glass = vec4(u.tone.rgb * u.tone.a, u.tone.a) + under * (1.0 - u.tone.a);
 
     // Body, with the pane's shadow on it.
-    float paneShade = 1.0 - smoothstep(-0.03 * size.y, 0.05 * size.y, box(p - vec2(0.0, 0.02 * size.y), u.pane, vec4(u.radii.w)));
+    float paneShade = slab ? 0.0 : 1.0 - smoothstep(-0.03 * size.y, 0.05 * size.y, box(p - vec2(0.0, 0.02 * size.y), u.pane, vec4(u.radii.w)));
     vec4 bodyCol = glass;
     bodyCol.rgb *= 1.0 - paneShade * (paper ? 0.08 : 0.32);
     // The flap: the song's colour, a little brighter toward its top, where the light comes from.
@@ -198,7 +207,7 @@ void main() {
     col = over(paneCol * inPane, col * (1.0 - inPane));
 
     // The light: through the body's frost, then the pane's thicker frost; not on the lit flap.
-    float through = max(inBody * (1.0 - lit), inPane) * u.fan.z;
+    float through = max(inBody * (1.0 - lit), inPane) * u.fan.z * (slab ? u.form.z : 1.0);
     if (through > 0.0) {
         float blurBody = 0.018 * size.y;
         float blurPane = 0.045 * size.y;
@@ -232,7 +241,22 @@ void main() {
     float fromTopPane = 0.3 + 0.7 * clamp(-nPane.y, 0.0, 1.0);
     float rimBody = lineBody * fromTopBody * (paper ? 0.55 : 0.2) * (1.0 - lit);
     float rimPane = linePane * fromTopPane * (paper ? 0.9 : 0.42);
+    if (slab) rimBody *= paper ? 1.0 : 1.6;
     col.rgb = mix(col.rgb, vec3(col.a), clamp(rimBody + rimPane, 0.0, 1.0));
+    // A slab's rim splits the light where it passes nearest the break: a short run of the spectrum along the edge,
+    // its colour turning with the angle around the break, gone a third of the way round.
+    if (slab && u.fan.z > 0.0) {
+        vec2 v = p - u.beam.zw;
+        float reach = 0.16 * size.y + 0.06 * size.x;
+        float near = exp(-length(v) / reach);
+        float a = atan(v.y, v.x);
+        vec3 hue = u.fan.w > 0.5 ? vec3(1.0) : spectrum(0.5 + 0.5 * sin(a * 1.5 + u.fan.x));
+        float glint = (1.0 - smoothstep(0.0, px * 1.4, abs(body + 0.7 * px))) * near * near * u.fan.z * 1.3;
+        col.rgb = mix(col.rgb, hue * col.a, clamp(glint * (paper ? 0.7 : 0.95), 0.0, 1.0));
+        // and inside the glass, a breath of the same colour just behind the edge
+        float haze = (1.0 - smoothstep(0.0, 0.07 * size.y, -body)) * inBody * near * near * u.fan.z;
+        col.rgb += hue * haze * (paper ? 0.05 : 0.12) * col.a;
+    }
     // On paper the lower edges take a hairline of shade instead, so the glass keeps its outline on white.
     if (paper) {
         float under2 = (lineBody * (1.0 - lit) + linePane) * clamp(nBody.y + nPane.y, 0.0, 1.0) * 0.12;

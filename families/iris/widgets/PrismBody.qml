@@ -31,6 +31,11 @@ Item {
     property color shelf: body.face.accent
     // Nothing: white light only.
     property bool white: body.face.nothing ?? false
+    // One piece of glass instead of the folder (Prism's quiet and beam looks): no tab, flap or pane; its corners, and how
+    // much of the beam it lets through (0: only its rim splits the light near `prism`).
+    property bool slab: false
+    property real slabRadius: body.face.radius
+    property real beamPass: 0
 
     readonly property real room: body.face.dp(40)
 
@@ -64,6 +69,7 @@ Item {
         readonly property vector4d shelf: Qt.vector4d(body.shelf.r, body.shelf.g, body.shelf.b, body.face.dp(14))
         readonly property vector4d look: Qt.vector4d(glass.light ? 1 : 0, body.face.frost !== null ? 1 : 0,
             glass.light ? 0.022 : 0.04, body.face.clear ? 0 : 1)
+        readonly property vector4d form: Qt.vector4d(body.slab ? 1 : 0, body.slabRadius, body.beamPass, 0)
         readonly property Item frost: body.face.frost ?? noFrost
     }
 

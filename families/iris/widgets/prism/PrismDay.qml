@@ -34,7 +34,7 @@ PrismFolder {
     flapText: root.figure.main
     flapSuffix: root.figure.suffix
     shelf: root.nothing ? root.signal : root.warm
-    prism: Qt.point(sky.x + sun.x + sun.width / 2, sky.y + sun.y + sun.height / 2)
+    prism: root.folded ? Qt.point(sun.x + sun.width / 2, sun.y + sun.height / 2) : Qt.point(sun.x + sun.width / 2, 0)
 
     // ── the pane: the sun's path, and the sun ──
     FaceSunPath {
@@ -44,18 +44,22 @@ PrismFolder {
         y: root.paneTop + root.pick(6, 6, 10)
         width: root.innerWidth
         height: root.paneBottom - root.pick(6, 6, 10) - y
-        Rectangle {
-            id: sun
-            readonly property real side: root.pick(10, 12, 16)
-            x: Math.round(root.fraction * sky.width - width / 2)
-            y: Math.round(sky.yAt(root.fraction) - height / 2)
-            width: sun.side
-            height: sun.side
-            radius: width / 2
-            color: root.daytime ? root.shelf : root.ink
-            border.width: root.dp(2)
-            border.color: root.plateColor
-        }
+        // A slab draws the day in the light split: dawn violet to dusk red along the path.
+        layer.enabled: !root.folded
+        layer.smooth: true
+        layer.effect: PrismSpectrum { mono: root.nothing; from: 0.05; to: 0.95; bright: 1.1 }
+    }
+    Rectangle {
+        id: sun
+        readonly property real side: root.pick(10, 12, 16)
+        x: Math.round(sky.x + root.fraction * sky.width - width / 2)
+        y: Math.round(sky.y + sky.yAt(root.fraction) - height / 2)
+        width: sun.side
+        height: sun.side
+        radius: width / 2
+        color: root.folded ? (root.daytime ? root.shelf : root.ink) : root.ink
+        border.width: root.dp(2)
+        border.color: root.plateColor
     }
 
     // ── the foot: the day's other turn, and how long the light lasts ──

@@ -79,6 +79,10 @@ PrismFolder {
         height: root.dp(root.large ? 6 : 5)
         y: root.small ? root.footTop + root.dp(22) : root.height - root.dp(56)
         spacing: root.dp(root.large ? 4 : 3)
+        // A slab spends the year through the spectrum: January violet to December red, the months to come faint.
+        layer.enabled: !root.folded
+        layer.smooth: true
+        layer.effect: PrismSpectrum { mono: root.nothing }
         Repeater {
             model: 12
             Rectangle {
@@ -87,13 +91,13 @@ PrismFolder {
                 width: (year.width - 11 * year.spacing) / 12
                 height: year.height
                 radius: height / 2
-                color: month.index < year.month ? root.fillActive : root.fill
+                color: month.index < year.month ? (root.folded ? root.fillActive : root.ink) : root.fill
                 Rectangle {
                     visible: month.index === year.month
                     width: Math.max(height, parent.width * year.monthShare)
                     height: parent.height
                     radius: height / 2
-                    color: root.shelf
+                    color: root.folded ? root.shelf : root.ink
                 }
             }
         }
