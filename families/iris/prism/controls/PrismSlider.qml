@@ -2,7 +2,8 @@ import QtQuick
 import qs.modules.iris.prism.core
 
 // A level as the reference's white-fill pill, lying down: the fill is the value, the glyph rides at its start and the
-// figure at the end. A drag previews; release commits. The wheel steps once a notch, once the hand aimed at it.
+// figure at the end. A drag previews; release commits. The wheel steps once a notch (fine wheels and touchpads add up
+// to one), previews each step and commits once when the burst stops, as a release would.
 Item {
     id: root
     property real value: 0
@@ -16,7 +17,19 @@ Item {
 
     property real live: root.value
     property bool held: false
-    onValueChanged: if (!root.held) root.live = root.value
+    // A wheel burst in progress: its steps are previews until it rests.
+    property bool wheeling: false
+    onValueChanged: if (!root.held && !root.wheeling) root.live = root.value
+
+    function settle(): void {
+        if (!root.wheeling) return
+        wheelRest.stop()
+        root.wheeling = false
+        area.wheelAcc = 0
+        if (area.wheelMoved) root.committed(root.live)
+        area.wheelMoved = false
+    }
+    Timer { id: wheelRest; interval: 280; onTriggered: root.settle() }
 
     readonly property real share: root.to > root.from ? Math.max(0, Math.min(1, (root.live - root.from) / (root.to - root.from))) : 0
     implicitWidth: PrismTheme.dp(220)
@@ -66,12 +79,12 @@ Item {
         hoverEnabled: true
         preventStealing: true
         cursorShape: Qt.PointingHandCursor
-        onPressed: mouse => { root.held = true; root.live = root.at(mouse.x); root.moved(root.live) }
-        onContainsMouseChanged: area.lastScene = Qt.point(-1, -1)
+        onPressed: mouse => { root.settle(); root.held = true; root.live = root.at(mouse.x); root.moved(root.live) }
+        onContainsMouseChanged: { area.lastScene = Qt.point(-1, -1); if (!area.containsMouse) root.settle() }
         onPositionChanged: mouse => {
             // Rows scrolled under a still pointer leave its place on screen unchanged; only a hand moves it.
             const scene = area.mapToItem(null, mouse.x, mouse.y)
-            if (area.lastScene.x >= 0 && Math.abs(scene.x - area.lastScene.x) + Math.abs(scene.y - area.lastScene.y) > 2) area.aimedAt = Date.now()
+            if (area.lastScene.x >= 0 && Math.abs(scene.x - area.lastScene.x) + Math.abs(scene.y - area.lastScene.y) > 4) area.aimedAt = Date.now()
             area.lastScene = scene
             if (!pressed) return
             const next = root.at(mouse.x)
@@ -79,15 +92,24 @@ Item {
         }
         onReleased: { root.held = false; root.committed(root.live) }
         onCanceled: { root.held = false; root.live = root.value }
-        // A wheel belongs to the page while the page scrolls under a still pointer: the level takes it only once the
-        // pointer was moved onto it after the last scroll (intent from the hand, not from where the rows landed).
+        // A wheel belongs to the page while the page scrolls: the level takes it only once the pointer was moved onto
+        // it after the last scroll (intent from the hand, not from where the rows landed), and never while the page is
+        // still moving (a hand's tremor mid-scroll is not aim). 120 is one notch (Qt's angleDelta, 1/8 degree).
         property real aimedAt: 0
         property point lastScene: Qt.point(-1, -1)
+        property real wheelAcc: 0
+        property bool wheelMoved: false
         onWheel: wheel => {
-            if (area.aimedAt <= PrismState.scrolledAt) { wheel.accepted = false; return }
-            const notches = wheel.angleDelta.y !== 0 ? wheel.angleDelta.y / 120 : wheel.angleDelta.x / 120
-            const next = root.snap(root.live + Math.sign(notches) * root.stepSize * Math.max(1, Math.round((root.to - root.from) / root.stepSize / 20)))
-            if (next !== root.live) { root.live = next; root.committed(next) }
+            if (!root.wheeling && (area.aimedAt <= PrismState.scrolledAt || Date.now() - PrismState.scrolledAt < 400)) { wheel.accepted = false; return }
+            const delta = wheel.angleDelta.y !== 0 ? wheel.angleDelta.y : wheel.angleDelta.x !== 0 ? wheel.angleDelta.x : wheel.pixelDelta.y * 4
+            area.wheelAcc += delta
+            const steps = Math.trunc(area.wheelAcc / 120)
+            root.wheeling = true
+            wheelRest.restart()
+            if (steps === 0) return
+            area.wheelAcc -= steps * 120
+            const next = root.snap(root.live + steps * root.stepSize * Math.max(1, Math.round((root.to - root.from) / root.stepSize / 20)))
+            if (next !== root.live) { root.live = next; area.wheelMoved = true; root.moved(next) }
         }
     }
 }

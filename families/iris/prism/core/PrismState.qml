@@ -13,6 +13,14 @@ Singleton {
     property var back: []
     property var forward: []
     property string query: ""
+    // The query the page answers. It trails the typing by a beat, so each key echoes at once and the results are built
+    // where the typing rests (a page of rows built on every key cost 40-90 ms a key); a cleared field answers at once.
+    property string asked: ""
+    onQueryChanged: {
+        if (root.query.trim().length === 0) { askLater.stop(); root.asked = "" }
+        else askLater.restart()
+    }
+    Timer { id: askLater; interval: 90; onTriggered: root.asked = root.query }
     // The green light: the panel takes the whole room instead of its resting size.
     property bool wide: false
     // The group a long page shows, by page: a long page is read one group at a time.
@@ -22,7 +30,7 @@ Singleton {
 
     readonly property bool canBack: root.back.length > 0
     readonly property bool canForward: root.forward.length > 0
-    readonly property bool searching: root.query.trim().length > 0
+    readonly property bool searching: root.asked.trim().length > 0
 
     function go(id: string): void {
         const next = String(id ?? "")

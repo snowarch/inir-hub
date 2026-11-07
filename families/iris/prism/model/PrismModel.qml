@@ -228,7 +228,19 @@ Singleton {
     function changedOf(id: string): var { return root.rows.filter(row => row.page === id && root.changed(row)) }
     // What Restore defaults would put back on a page (iRiS's own keys; shared ones stay as the person set them).
     function restorableOf(id: string): int { return root.rows.filter(row => row.page === id && root.restorable(row)).length }
-    readonly property var changes: { const _ = root.revision; return root.rows.filter(row => root.changed(row)) }
+    // What differs from the factory, for the rail and the Changes page. Reading it walks every row (~12 ms over 1695),
+    // so it is read only while Prism is on screen and once a burst of writes settles: as a binding it ran on every write
+    // anywhere in the shell, Prism closed or not, and on every wheel notch (11-07).
+    property bool watching: false
+    property var changes: []
+    function refreshChanges(): void { root.changes = root.rows.filter(row => root.changed(row)) }
+    onWatchingChanged: if (root.watching) root.refreshChanges()
+    onRowsChanged: if (root.watching) changesLater.restart()
+    Connections {
+        target: Config
+        function onRevisionChanged() { if (root.watching) changesLater.restart() }
+    }
+    Timer { id: changesLater; interval: 150; onTriggered: root.refreshChanges() }
     function restore(id: string): void { IrisOptions.restore(root.rows.filter(row => row.page === id && !root.virtual(row)).map(row => row.spec)) }
     function restoreRow(row: var): void { IrisOptions.restore([row.spec]) }
 
@@ -258,57 +270,94 @@ Singleton {
         return IrisOptions.homeList().map(id => root.pinIndex[id]).filter(Boolean)
     }
 
-    // Search: a row's name, what it does, its words and its page's name, in the person's language and in English.
+    // Search reads an index made once per set of rows and language: every row's words lowered, in the person's language
+    // and in English, and its page's name. Translating 1695 rows five times on every key cost 35-60 ms a key (11-07).
+    // The cache is a plain object so a search binding never depends on the cache it fills.
+    readonly property var lookup: ({})
+    function searchIndex(): var {
+        const key = Translation.languageCode
+        const catalogue = Translation.translations
+        const kept = root.lookup.index
+        if (kept && kept.rows === root.rows && kept.pages === root.pages && kept.key === key && kept.catalogue === catalogue) return kept
+        const both = text => (Translation.tr(text) + " " + text).toLowerCase()
+        const pageNames = {}
+        const pages = root.pages.map(page => {
+            pageNames[page.pageId] = both(String(page.name ?? ""))
+            return { page: page, name: pageNames[page.pageId] }
+        })
+        const groups = []
+        const groupAt = {}
+        const entries = root.rows.map((row, order) => {
+            const where = row.page + "|" + row.section
+            if (row.section.length > 0) {
+                if (!(where in groupAt)) { groupAt[where] = groups.length; groups.push({ page: row.page, section: row.section, title: both(row.section), rows: [] }) }
+                groups[groupAt[where]].rows.push(row)
+            }
+            return {
+                row: row,
+                order: order,
+                name: both(String(row.label ?? "")),
+                group: both(String(row.section ?? "")),
+                known: Array.from(row.keywords ?? []).join(" ").toLowerCase(),
+                detail: both(String(row.detail ?? "")),
+                page: pageNames[row.page] ?? "",
+                offers: Array.from(row.choices ?? []).map(choice => both(String(choice.label ?? ""))).join(" ")
+            }
+        })
+        root.lookup.index = { rows: root.rows, pages: root.pages, key: key, catalogue: catalogue, entries: entries, pageNames: pages, groups: groups }
+        return root.lookup.index
+    }
+    function wordsOf(query: string): var { return String(query ?? "").toLowerCase().trim().split(/\s+/).filter(word => word.length > 0) }
+
     // Rows by how close the words come to what the row is: its name first, then its group, the words it is known by,
     // what it says it does, its page, and last a choice it offers (a "Glass" choice of a widget's face came before the
-    // Glass group's own rows, 11-07). Every word must land somewhere.
+    // Glass group's own rows, 11-07). Every word must land somewhere. Only the best hits ask whether they are shown.
     function search(query: string): var {
-        const words = String(query ?? "").toLowerCase().trim().split(/\s+/).filter(word => word.length > 0)
+        const words = root.wordsOf(query)
         if (words.length === 0) return []
-        const both = text => (Translation.tr(text) + " " + text).toLowerCase()
         const starts = (text, word) => text.startsWith(word) || text.includes(" " + word)
-        return root.rows.filter(row => root.shown(row)).map((row, order) => {
-            const name = both(String(row.label ?? ""))
-            const group = both(String(row.section ?? ""))
-            const known = Array.from(row.keywords ?? []).join(" ").toLowerCase()
-            const detail = both(String(row.detail ?? ""))
-            const page = both(String(root.page(row.page)?.name ?? ""))
-            const offers = Array.from(row.choices ?? []).map(choice => both(String(choice.label ?? ""))).join(" ")
+        const hits = []
+        for (const entry of root.searchIndex().entries) {
             let score = 0
             for (const word of words) {
-                if (name.startsWith(word)) score += 10
-                else if (starts(name, word)) score += 8
-                else if (name.includes(word)) score += 5
-                else if (starts(group, word)) score += 4
-                else if (known.includes(word)) score += 3
-                else if (starts(detail, word)) score += 2
-                else if (page.includes(word) || group.includes(word) || detail.includes(word)) score += 1
-                else if (offers.includes(word)) score += 0.5
-                else return { row: row, score: -1, order: order }
+                if (entry.name.startsWith(word)) score += 10
+                else if (starts(entry.name, word)) score += 8
+                else if (entry.name.includes(word)) score += 5
+                else if (starts(entry.group, word)) score += 4
+                else if (entry.known.includes(word)) score += 3
+                else if (starts(entry.detail, word)) score += 2
+                else if (entry.page.includes(word) || entry.group.includes(word) || entry.detail.includes(word)) score += 1
+                else if (entry.offers.includes(word)) score += 0.5
+                else { score = -1; break }
             }
-            return { row: row, score: score, order: order }
-        }).filter(hit => hit.score > 0).sort((a, b) => b.score - a.score || a.order - b.order).slice(0, 40).map(hit => hit.row)
+            if (score > 0) hits.push({ row: entry.row, score: score, order: entry.order })
+        }
+        hits.sort((a, b) => b.score - a.score || a.order - b.order)
+        const out = []
+        for (const hit of hits) {
+            if (!root.shown(hit.row)) continue
+            out.push(hit.row)
+            if (out.length >= 40) break
+        }
+        return out
     }
 
     // Places a search reaches whole: a page or a group whose name holds every word, the page first. A hit opens it.
     function places(query: string): var {
-        const words = String(query ?? "").toLowerCase().trim().split(/\s+/).filter(word => word.length > 0)
+        const words = root.wordsOf(query)
         if (words.length === 0) return []
         const holds = text => words.every(word => text.includes(word))
+        const lookup = root.searchIndex()
         const out = []
-        for (const page of root.pages) {
-            const name = (Translation.tr(page.name) + " " + page.name).toLowerCase()
-            if (holds(name)) out.push({ page: page.pageId, group: "", name: page.name, glyph: page.glyph, tint: page.tint })
+        for (const entry of lookup.pageNames) {
+            const page = entry.page
+            if (holds(entry.name)) out.push({ page: page.pageId, group: "", name: page.name, glyph: page.glyph, tint: page.tint })
         }
-        const seen = {}
-        for (const row of root.rows) {
-            const key = row.page + "|" + row.section
-            if (seen[key] || row.section.length === 0 || !root.shown(row)) continue
-            seen[key] = true
-            const title = (Translation.tr(row.section) + " " + row.section).toLowerCase()
-            if (!holds(title)) continue
-            const page = root.page(row.page)
-            out.push({ page: row.page, group: row.section, name: row.section, glyph: String(IrisOptions.groupGlyphs[row.section] ?? page.glyph), tint: page.tint })
+        for (const group of lookup.groups) {
+            if (out.length >= 8) break
+            if (!holds(group.title) || !group.rows.some(row => root.shown(row))) continue
+            const page = root.page(group.page)
+            out.push({ page: group.page, group: group.section, name: group.section, glyph: String(IrisOptions.groupGlyphs[group.section] ?? page.glyph), tint: page.tint })
         }
         return out.slice(0, 8)
     }

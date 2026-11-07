@@ -1,7 +1,7 @@
 import QtQuick
+import Quickshell
 import qs
 import qs.services
-import QtQuick.Effects
 import qs.modules.iris.components
 import qs.modules.iris.prism.core
 import qs.modules.iris.prism.model
@@ -27,19 +27,26 @@ Item {
     property alias search: searchField
     // In a window the green light grows the window's column instead of the panel, and the host key reads "over the desktop".
     property bool windowed: false
+    // The body's corner radius: the column draws the body's left corners itself.
+    property real corner: 0
 
     Rectangle {
         anchors.fill: parent
         color: PrismTheme.rail
+        topLeftRadius: root.corner
+        bottomLeftRadius: root.corner
     }
-    // The haze the reference spills from its corner, in the person's accent.
+    // The haze the reference spills from its corner, in the person's accent, filling only the column's own shape.
     PrismGlow {
+        id: glow
         x: -width * 0.45
         y: -height * 0.42
         width: root.width * 2.2
         height: root.width * 2.2
         colour: PrismTheme.accent
         strength: PrismTheme.light ? 0.22 : 0.36
+        area: Qt.rect(-glow.x, -glow.y, glow.width + glow.x, Math.min(root.height, glow.height + glow.y))
+        corner: root.corner
     }
     Rectangle {
         anchors.right: parent.right
@@ -167,6 +174,11 @@ Item {
             onEdited: text => PrismState.query = text
             onCommitted: text => PrismState.query = text
             onEntered: text => { PrismState.query = text; root.searchEntered() }
+            // The search's index is made as the field takes focus, so the first key finds it ready.
+            Connections {
+                target: searchField.input
+                function onActiveFocusChanged() { if (searchField.input.activeFocus) PrismModel.searchIndex() }
+            }
         }
         Item { width: 1; height: PrismTheme.dp(4) }
     }
@@ -179,13 +191,6 @@ Item {
         contentHeight: column.implicitHeight + PrismTheme.dp(24)
         boundsBehavior: Flickable.StopAtBounds
         clip: true
-        layer.enabled: sideEdge.active
-        layer.effect: MultiEffect {
-            maskEnabled: true
-            maskSource: sideEdge.mask
-            maskThresholdMin: 0.5
-            maskSpreadAtMin: 1
-        }
 
         Column {
             id: column
@@ -245,7 +250,8 @@ Item {
                                     id: tocColumn
                                     width: parent.width
                                     Repeater {
-                                        model: entry.lists ? root.groups : []
+                                        // Keyed by title: a write refreshes the dots, never the entries.
+                                        model: ScriptModel { objectProp: "title"; values: entry.lists ? root.groups : [] }
                                         delegate: Item {
                                             id: chapter
                                             required property var modelData
@@ -318,7 +324,7 @@ Item {
                     font.letterSpacing: 0.6
                 }
                 Repeater {
-                    model: pinned.rows
+                    model: ScriptModel { objectProp: "key"; values: pinned.rows }
                     delegate: PrismNavItem {
                         required property var modelData
                         width: pinned.width
@@ -335,12 +341,13 @@ Item {
         }
     }
 
-    // The page list fades where it meets the panel's edge; a blurred band would be masked away with it.
+    // The page list fades into the column where it meets the panel's edge.
     IrisScrollEdge {
         id: sideEdge
         flick: flick
         anchors.fill: flick
         blurs: false
         reach: PrismTheme.dp(28)
+        veil: PrismTheme.rail
     }
 }

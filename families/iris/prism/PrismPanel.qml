@@ -1,5 +1,4 @@
 import QtQuick
-import QtQuick.Effects
 import Quickshell
 import qs
 import qs.services
@@ -35,7 +34,7 @@ Item {
 
     Keys.onPressed: event => {
         if (event.key === Qt.Key_Escape) {
-            if (PrismState.searching) PrismState.query = ""
+            if (PrismState.query.length > 0) PrismState.query = ""
             else root.closeRequested()
             event.accepted = true
         } else if (event.key === Qt.Key_F && (event.modifiers & Qt.ControlModifier)) {
@@ -130,7 +129,7 @@ Item {
     }
     // Enter in the search: the first place, else the first row.
     function takeFirstHit(): void {
-        if (!PrismState.searching) return
+        if (PrismState.query.trim().length === 0) return
         const places = PrismModel.places(PrismState.query)
         if (places.length > 0) { root.openPlace(places[0]); return }
         const hits = PrismModel.search(PrismState.query)
@@ -185,24 +184,25 @@ Item {
         }
     }
 
+    // The body's round corners are drawn by what stands in them (the sidebar's fill, its glow); the middle and the rail
+    // keep clear of them. A mask over the whole body rendered every frame of Prism twice, offscreen and again (11-07).
+    readonly property bool watching: root.active && root.visible
+    onWatchingChanged: PrismModel.watching = root.watching
+    Component.onCompleted: PrismModel.watching = root.watching
+    Component.onDestruction: PrismModel.watching = false
+
     Rectangle {
         id: body
         anchors.fill: parent
         radius: root.windowed ? 0 : PrismTheme.dp(28)
         color: PrismTheme.canvas
         clip: true
-        layer.enabled: true
-        layer.effect: MultiEffect {
-            maskEnabled: true
-            maskSource: bodyShape
-            maskThresholdMin: 0.5
-            maskSpreadAtMin: 1
-        }
 
         PrismSidebar {
             id: sidebar
             width: root.sideWidth
             height: parent.height
+            corner: body.radius
             windowed: root.windowed
             groups: root.sections.length > 1 ? root.groups : []
             currentGroup: root.currentGroup
@@ -226,14 +226,6 @@ Item {
             clip: true
             onContentYChanged: { PrismState.scrolledAt = Date.now(); root.spy() }
             onContentHeightChanged: root.spy()
-            // Rows leaving the top soften into a blur and fade, and so does the foot while rows wait past it.
-            layer.enabled: centreEdge.active
-            layer.effect: MultiEffect {
-                maskEnabled: true
-                maskSource: centreEdge.mask
-                maskThresholdMin: 0.5
-                maskSpreadAtMin: 1
-            }
 
             Column {
                 id: content
@@ -289,8 +281,23 @@ Item {
                     width: content.width
                     sourceComponent: Column {
                         width: content.width
-                        readonly property var hits: PrismState.searching ? PrismModel.search(PrismState.query) : PrismModel.changes
-                        readonly property var places: PrismState.searching ? PrismModel.places(PrismState.query) : []
+                        id: found
+                        readonly property var hits: PrismState.searching ? PrismModel.search(PrismState.asked) : PrismModel.changes
+                        readonly property var places: PrismState.searching ? PrismModel.places(PrismState.asked) : []
+                        // The rows that fill the screen come in the first frame, the rest a few a frame after it: forty
+                        // rows with their controls in one frame cost ~70 ms.
+                        // A new query starts over; a write in Changes keeps every row it had.
+                        property int built: 12
+                        readonly property string answering: PrismState.asked
+                        onAnsweringChanged: { found.built = 12; grow.restart() }
+                        onHitsChanged: if (found.built < found.hits.length) grow.restart()
+                        Component.onCompleted: if (found.built < found.hits.length) grow.restart()
+                        Timer {
+                            id: grow
+                            interval: 16
+                            repeat: true
+                            onTriggered: { found.built += 8; if (found.built >= found.hits.length) grow.stop() }
+                        }
                         PrismPlaces {
                             visible: parent.places.length > 0
                             width: parent.width
@@ -310,7 +317,7 @@ Item {
                             width: parent.width
                             eyebrow: PrismState.searching ? Translation.tr("Settings") : Translation.tr("From the factory profile")
                             title: Translation.tr("%1 found").arg(parent.hits.length)
-                            rows: parent.hits
+                            rows: found.hits.slice(0, found.built)
                             showPage: true
                             onReach: row => root.reach(row)
                         }
@@ -380,11 +387,14 @@ Item {
             }
         }
 
+        // Rows leaving the top soften into a blur and fade into the page, and so does the foot while rows wait past it.
         IrisScrollEdge {
             id: centreEdge
+            visible: centre.visible
             flick: centre
             anchors.fill: centre
             reach: PrismTheme.dp(36)
+            veil: PrismTheme.canvas
         }
 
         PrismRail {
@@ -421,10 +431,9 @@ Item {
             width: parent.width
             eyebrow: PrismState.searching ? Translation.tr("Search")
                 : root.changesView ? Translation.tr("Yours") : Translation.tr(root.page.group)
-            title: PrismState.searching ? "“" + PrismState.query.trim() + "”"
+            title: PrismState.searching ? "“" + PrismState.asked.trim() + "”"
                 : root.changesView ? Translation.tr("Changes") : Translation.tr(root.page.name)
         }
         Item { width: 1; height: PrismTheme.dp(18) }
     }
-    Rectangle { id: bodyShape; anchors.fill: parent; radius: body.radius; visible: false; layer.enabled: true }
 }

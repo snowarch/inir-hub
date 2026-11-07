@@ -1,4 +1,5 @@
 import QtQuick
+import Quickshell
 import qs.services
 import qs.modules.iris.prism.core
 import qs.modules.iris.prism.model
@@ -86,7 +87,7 @@ Item {
             anchors.bottom: parent.bottom
             anchors.bottomMargin: PrismTheme.dp(12)
             Repeater {
-                model: [String(root.page?.pageId ?? "").toUpperCase(), "NO." + root.number, Translation.tr("%1 changed").arg(root.changed.length).toUpperCase()]
+                model: ScriptModel { values: [String(root.page?.pageId ?? "").toUpperCase(), "NO." + root.number, Translation.tr("%1 changed").arg(root.changed.length).toUpperCase()] }
                 delegate: PrismText {
                     required property string modelData
                     mono: true

@@ -1,5 +1,6 @@
 pragma ComponentBehavior: Bound
 import QtQuick
+import Quickshell
 import qs
 import qs.services
 import qs.modules.common
@@ -77,7 +78,11 @@ Column {
         readonly property real tileWidth: Math.floor((width - (columns - 1) * spacing) / columns)
 
         Repeater {
-            model: root.tiles.concat(root.editing ? root.offered.map(tile => Object.assign({ offer: true }, tile)) : [])
+            // Keyed by id (an offer apart): a write rebuilds the tile list, the tiles stay.
+            model: ScriptModel {
+                objectProp: "key"
+                values: root.tiles.map(tile => Object.assign({ key: tile.id }, tile)).concat(root.editing ? root.offered.map(tile => Object.assign({ offer: true, key: "+" + tile.id }, tile)) : [])
+            }
             delegate: Item {
                 id: tile
                 required property var modelData

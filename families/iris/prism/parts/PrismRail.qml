@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Shapes
 import QtQuick.Effects
+import Quickshell
 import qs
 import qs.services
 import qs.modules.common
@@ -164,7 +165,8 @@ Item {
             id: list
             width: parent.width
             Repeater {
-                model: root.changes.slice(0, root.shown)
+                // Keyed: a write elsewhere keeps the rows that stayed instead of rebuilding the list.
+                model: ScriptModel { objectProp: "key"; values: root.changes.slice(0, root.shown) }
                 delegate: Item {
                     id: change
                     required property var modelData
