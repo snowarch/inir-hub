@@ -124,6 +124,18 @@ Item {
                 }
                 Item { visible: !PrismState.searching && !root.changesView; width: 1; height: PrismTheme.dp(34) }
 
+                // Home: the settings touched every day, as tiles that act.
+                Loader {
+                    active: !PrismState.searching && !root.changesView && root.page.pageId === "general"
+                    visible: active
+                    width: content.width
+                    sourceComponent: Column {
+                        width: content.width
+                        PrismHome { width: parent.width; onReach: row => root.reach(row) }
+                        Item { width: 1; height: PrismTheme.dp(40) }
+                    }
+                }
+
                 // A search, or every change: one chart whose rows say where they live.
                 Loader {
                     active: PrismState.searching || root.changesView
