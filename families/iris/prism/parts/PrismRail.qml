@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Shapes
 import QtQuick.Effects
 import qs
 import qs.services
@@ -24,11 +25,37 @@ Item {
 
         Item {
             width: parent.width
-            height: PrismTheme.dp(78)
+            height: PrismTheme.dp(92)
+            // The avatar sits in a ring of the spectrum, the light of the hero.
+            Shape {
+                anchors.centerIn: avatar
+                width: avatar.width + PrismTheme.dp(6)
+                height: width
+                preferredRendererType: Shape.CurveRenderer
+                ShapePath {
+                    strokeColor: "transparent"
+                    fillGradient: ConicalGradient {
+                        centerX: PrismTheme.dp(23) + PrismTheme.dp(3); centerY: centerX; angle: 90
+                        GradientStop { position: 0; color: PrismTheme.tint("red") }
+                        GradientStop { position: 0.25; color: PrismTheme.tint("orange") }
+                        GradientStop { position: 0.5; color: PrismTheme.tint("green") }
+                        GradientStop { position: 0.75; color: PrismTheme.tint("blue") }
+                        GradientStop { position: 1; color: PrismTheme.tint("red") }
+                    }
+                    PathAngleArc { centerX: PrismTheme.dp(26); centerY: PrismTheme.dp(26); radiusX: PrismTheme.dp(26); radiusY: radiusX; startAngle: 0; sweepAngle: 360 }
+                }
+            }
+            Rectangle {
+                anchors.centerIn: avatar
+                width: avatar.width + PrismTheme.dp(2)
+                height: width
+                radius: width / 2
+                color: PrismTheme.rail
+            }
             Item {
                 id: avatar
                 property int sourceIndex: 0
-                width: PrismTheme.dp(40)
+                width: PrismTheme.dp(46)
                 height: width
                 anchors.verticalCenter: parent.verticalCenter
                 Rectangle {
@@ -65,8 +92,32 @@ Item {
                 anchors.rightMargin: PrismTheme.dp(12)
                 anchors.verticalCenter: parent.verticalCenter
                 spacing: PrismTheme.dp(1)
-                PrismText { width: parent.width; text: SystemInfo.username; font.pixelSize: PrismTheme.row; font.weight: Font.DemiBold }
-                PrismText { width: parent.width; text: SystemInfo.hostname; color: PrismTheme.ink2; font.pixelSize: PrismTheme.small }
+                // The welcome: a greeting in time with the day over the name, then the day and the weather.
+                readonly property int hour: DateTime.clock.date.getHours()
+                PrismText {
+                    width: parent.width
+                    text: parent.hour >= 5 && parent.hour < 12 ? Translation.tr("Good morning")
+                        : parent.hour >= 12 && parent.hour < 19 ? Translation.tr("Good afternoon")
+                        : parent.hour >= 19 ? Translation.tr("Good evening") : Translation.tr("Good night")
+                    color: PrismTheme.ink2
+                    font.pixelSize: PrismTheme.caption
+                }
+                PrismText {
+                    width: parent.width
+                    text: SystemInfo.displayName || SystemInfo.username
+                    elide: Text.ElideRight
+                    font.pixelSize: PrismTheme.head
+                    font.weight: Font.Bold
+                    font.letterSpacing: -0.3
+                }
+                PrismText {
+                    width: parent.width
+                    text: Qt.locale().toString(DateTime.clock.date, "ddd d MMM")
+                        + (Weather.enabled && Weather.hasData ? "  ·  " + String(Weather.data?.temp ?? "") : "")
+                    elide: Text.ElideRight
+                    color: PrismTheme.ink3
+                    font.pixelSize: PrismTheme.caption
+                }
             }
             PrismRound {
                 id: bell
