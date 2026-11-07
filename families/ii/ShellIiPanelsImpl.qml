@@ -274,7 +274,6 @@ Item {
                 && GlobalStates.sidebarRightPresentationOutput === (modelData?.name ?? "")
             screen: modelData
             visible: leftPresented || rightPresented
-            updatesEnabled: leftPresented || rightPresented
             color: "transparent"
             exclusiveZone: 0
             WlrLayershell.namespace: "quickshell:dualSidebarBackdrop"

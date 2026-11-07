@@ -581,7 +581,6 @@ Scope {
         visible: root._nativeHostMapped && !GlobalStates.screenLocked
             && (!root.fullscreenCovered || root.presentationOpen
                 || sidebarContentLoader.animating)
-        updatesEnabled: sidebarRoot.visible && root._renderUpdatesNeeded
 
         anchors {
             top: true
@@ -722,6 +721,9 @@ Scope {
             onAnimatingChanged: root.reportRuntime()
 
             active: root._contentResident
+            // Closed, the content hides instead of the window pausing its updates: on qs-rs a window whose updates
+            // came back on could stay on its last (empty) frame, the sidebar open and never drawn (note 134).
+            visible: root._renderUpdatesNeeded
             width: Math.max(0, root.effectiveSidebarWidth
                 - Appearance.sizes.hyprlandGapsOut
                 - Appearance.sizes.elevationMargin)
