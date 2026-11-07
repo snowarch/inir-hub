@@ -46,7 +46,7 @@ Item {
     property real frameMusicLight: IrisFrame.musicLight
     property real frameMusicLightWidth: IrisFrame.musicLightWidth
     property real holoLight: IrisFrame.holoLight
-    property bool holoMarks: IrisFrame.holoMarks
+    property real holoHalo: IrisFrame.holoHalo
     property real holoSpill: IrisFrame.holoSpill
     // One matter (2026-10-15, the maintainer: the Dock on the frame "se ve separado del frame" once it is glass): a
     // body welded to the frame, directly or through the bodies it hangs from, is the frame's material wherever it is
@@ -394,7 +394,7 @@ Item {
         readonly property vector4d frameLight: Qt.vector4d(root.frameMusicAppearance, root.frameMusicLevel,
             root.frameMusicLight, root.frameMusicLightWidth)
         readonly property color frameInk: root.frameMusicInk
-        readonly property vector4d frameHolo: Qt.vector4d(root.holoLight, root.holoMarks ? 1 : 0, IrisStyle.light ? 1 : 0, IrisStyle.density)
+        readonly property vector4d frameHolo: Qt.vector4d(root.holoLight, root.holoHalo, IrisStyle.light ? 1 : 0, IrisStyle.density)
         readonly property color shade: IrisStyle.shadow
         readonly property vector4d shadeShape: Qt.vector4d(root.shadowFall, root.shadowBlur, root.casts ? 1 : 0, 0)
         readonly property Item backdrop: pass.backdropReady ? root.backdropSource.texture : noBackdrop

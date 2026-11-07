@@ -89,7 +89,7 @@ layout(std140, binding = 0) uniform buf {
     // z: light opacity; w: treatment width in screen pixels.
     vec4 frameLight;
     vec4 frameInk;
-    // Holo (Frame › Style): x its light 0..1 (0 off), y the print marks, z 1 on a light scheme, w the density.
+    // Holo (Frame › Style): x its light 0..1 (0 off), y the halo's reach 0..1, z 1 on a light scheme, w the density.
     vec4 frameHolo;
     // Where this field's window sits on its output (x, y) and the output's size (z, w), so a
     // field in a small window (a menu) samples the wallpaper glass at the right place.
@@ -435,36 +435,24 @@ vec3 leakLight(vec2 at, vec2 size, float scatter, out vec3 wash, out vec2 toward
 #endif
 
 // Holo, the frame's own light (.claude/ref/iris-holo): the screen is an eclipse's dark disc and the frame its rim, lit in
-// the spectrum a CD throws. The hue runs round the screen (hot at the top, blue at the waist, rose low) and is bent by
-// slow diagonal bands; the light sits on the band's inner line, splits red-deep and blue-near like a lens, falls off into
-// the band and spills a short halo over the screen; film grain over all of it. Static: it costs nothing at rest.
+// the spectrum a CD throws. The hue runs round the screen and is bent by slow diagonal bands; the light sits on the
+// band's inner line, splits warm-out and cool-in like a lens, fades into the band and breathes a soft halo over the
+// screen. Pastel and smooth like the refs: no grain, no marks. Static: it costs nothing at rest.
 vec3 holoRamp(float t) {
     float x = fract(t) * 6.0;
     float f = smoothstep(0.0, 1.0, fract(x));
-    vec3 s0 = vec3(1.00, 0.52, 0.22); // iris-literal: the eclipse's hot orange
-    vec3 s1 = vec3(1.00, 0.86, 0.50); // iris-literal: gold
-    vec3 s2 = vec3(0.36, 0.86, 1.00); // iris-literal: cyan
-    vec3 s3 = vec3(0.18, 0.36, 1.00); // iris-literal: the eclipse's blue
-    vec3 s4 = vec3(0.68, 0.46, 1.00); // iris-literal: violet
-    vec3 s5 = vec3(1.00, 0.52, 0.80); // iris-literal: rose
+    vec3 s0 = vec3(1.00, 0.62, 0.40); // iris-literal: the eclipse's warm orange
+    vec3 s1 = vec3(1.00, 0.88, 0.62); // iris-literal: gold
+    vec3 s2 = vec3(0.52, 0.88, 1.00); // iris-literal: cyan
+    vec3 s3 = vec3(0.40, 0.54, 1.00); // iris-literal: the eclipse's blue
+    vec3 s4 = vec3(0.74, 0.60, 1.00); // iris-literal: violet
+    vec3 s5 = vec3(1.00, 0.66, 0.86); // iris-literal: rose
     if (x < 1.0) return mix(s0, s1, f);
     if (x < 2.0) return mix(s1, s2, f);
     if (x < 3.0) return mix(s2, s3, f);
     if (x < 4.0) return mix(s3, s4, f);
     if (x < 5.0) return mix(s4, s5, f);
     return mix(s5, s0, f);
-}
-
-float holoHash(vec2 p) {
-    return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
-}
-
-// A print mark: a cross of two hairlines, `arm` long each way.
-float holoCross(vec2 p, vec2 at, float arm, float thick) {
-    vec2 d = abs(p - at);
-    float h = max(d.x - arm, d.y - thick);
-    float v = max(d.y - arm, d.x - thick);
-    return 1.0 - smoothstep(-0.5, 0.5, min(h, v));
 }
 
 void main() {
@@ -1095,61 +1083,33 @@ void main() {
         // The frame and the bodies welded to it; a floating body (a bubble beside the Island) keeps its own face.
         float framed = 1.0 - smoothstep(-0.7, 0.7, frameClusterDistance);
         vec2 q = (frameP - size * 0.5) / size.y;
-        float t = atan(q.x, -q.y) / 6.2831853 + 0.20 * sin(6.2831853 * (frameP.x * 0.6 + frameP.y) / size.y * 2.2);
+        float t = atan(q.x, -q.y) / 6.2831853 + 0.14 * sin(6.2831853 * (frameP.x * 0.6 + frameP.y) / size.y * 1.6);
         vec3 hue = holoRamp(t);
-        // The CD's slow streaks: some stretches of the rim burn, some rest.
-        float streak = 0.62 + 0.38 * sin(6.2831853 * ((frameP.x - frameP.y * 0.8) / size.y) * 1.35 + 1.7);
-        float w = clamp(band * 0.55, 3.0, 18.0);
-        vec3 split = vec3(exp(-pow((into - w * 0.55) / (w * 0.5), 2.0)),
-                          exp(-pow((into - w * 0.28) / (w * 0.45), 2.0)),
-                          exp(-pow((into - w * 0.08) / (w * 0.4), 2.0)));
-        float core = exp(-into * into / 1.8);
-        float grain = holoHash(floor(frameP)) - 0.5;
-        // The whole band glows, brightest at its inner line: a blurred spectrum, never a hairline on black.
-        vec3 inBand = hue * (0.38 + 0.62 * exp(-into / max(w, band * 0.8))) * 0.85 + split * mix(hue, vec3(1.0), 0.3) * 0.7;
-        inBand *= 1.6 * streak * (1.0 + grain * 0.55);
-        // The eclipse's halo over the screen: a tight bloom on the line and a wide soft one past it.
-        float halo = (0.55 * exp(-over / max(1.0, 2.5 * dens)) + 0.45 * exp(-over / max(1.0, 12.0 * dens))) * (1.0 - coverage);
+        // The CD's slow streaks: some stretches of the rim burn a little more, none goes dark.
+        float streak = 0.80 + 0.20 * sin(6.2831853 * ((frameP.x - frameP.y * 0.8) / size.y) * 1.1 + 1.7);
+        float w = clamp(band * 0.5, 3.0, 14.0);
+        vec3 split = vec3(exp(-pow((into - w * 0.50) / (w * 0.55), 2.0)),
+                          exp(-pow((into - w * 0.25) / (w * 0.50), 2.0)),
+                          exp(-pow((into - w * 0.06) / (w * 0.45), 2.0)));
+        float core = exp(-into * into / (2.2 * dens));
+        // The light lives on the inner line and fades into the band: a soft gradient, never a filled stripe.
+        vec3 inBand = hue * exp(-into / max(2.0, w * 1.4)) * 0.55 + split * mix(hue, vec3(1.0), 0.35) * 0.45;
+        inBand *= streak;
+        // The eclipse's halo over the screen, as far as the person sets it (Halo 0..1 -> 0..44 px at 1x).
+        float reach = max(0.5, u.frameHolo.y * 44.0 * dens);
+        float halo = u.frameHolo.y > 0.001 ? exp(-pow(over / reach, 1.35) * 2.2) * (1.0 - coverage) : 0.0;
         float strength = u.frameHolo.x * u.qt_Opacity;
         if (u.frameHolo.z < 0.5) {
-            // Night: light added to the band, a pearl line on its edge, the halo over the screen.
-            vec3 add = (inBand * framed + vec3(core) * mix(hue, vec3(1.0), 0.55) * 0.95 * framed
-                       + mix(hue, vec3(1.0), 0.15) * halo * 1.15 * streak * (1.0 + grain * 0.3)) * strength;
+            // Night: light added to the band, a pale line on its edge, the halo over the screen.
+            vec3 add = (inBand * framed + vec3(core) * mix(hue, vec3(1.0), 0.5) * 0.55 * framed
+                       + mix(hue, vec3(1.0), 0.2) * halo * 0.42 * streak) * strength;
             colour += add;
             alpha = min(1.0, alpha + max(add.r, max(add.g, add.b)) * (1.0 - alpha));
         } else {
-            // Day: the CD's back, pastel foil laid over the paper, a saturated line on its edge.
-            float a = clamp((dot(inBand, vec3(0.33)) * 0.7 * framed + core * 0.55 * framed + halo * 0.28 * streak) * strength, 0.0, 0.85);
-            vec3 foil = mix(hue, hue * 0.72, core);
+            // Day: the CD's back, pastel foil laid over the paper, a deeper line on its edge.
+            float a = clamp((dot(inBand, vec3(0.33)) * 0.6 * framed + core * 0.35 * framed + halo * 0.18 * streak) * strength, 0.0, 0.7);
+            vec3 foil = mix(hue, hue * 0.78, core);
             colour = foil * a + colour * (1.0 - a);
-            alpha = a + alpha * (1.0 - a);
-        }
-        // Print marks (the HOLO LIFE sheet): crosses at the corners, a run of three on the bottom and the right band, a
-        // hairline down the left. Only on the bare band: never under a body welded to it.
-        if (u.frameHolo.y > 0.5 && band >= 6.0 && framed > 0.5 && united >= frameDistance - 0.5) {
-            float mid = band * 0.5;
-            float arm = min(band * 0.3, 3.5 * dens);
-            float hw = 0.45 * dens;
-            float gap = 9.0 * dens;
-            float corner = max(u.field.w, 24.0 * dens) + 20.0 * dens;
-            float m = 0.0;
-            m = max(m, holoCross(frameP, vec2(corner, mid), arm, hw));
-            m = max(m, holoCross(frameP, vec2(size.x - corner, size.y - mid), arm, hw));
-            m = max(m, holoCross(frameP, vec2(mid, size.y - corner), arm, hw));
-            m = max(m, holoCross(frameP, vec2(size.x - mid, corner), arm, hw));
-            for (int i = 0; i < 3; i++) {
-                float k = float(i) * gap;
-                m = max(m, holoCross(frameP, vec2(size.x * 0.68 + k, size.y - mid), arm, hw));
-                m = max(m, holoCross(frameP, vec2(size.x * 0.68 + 4.0 * gap + k, size.y - mid), arm, hw));
-                m = max(m, holoCross(frameP, vec2(size.x - mid, size.y * 0.62 + k), arm, hw));
-            }
-            vec2 lineP = vec2(mid, size.y * 0.16);
-            float lineD = max(abs(frameP.x - lineP.x) - hw, abs(frameP.y - (lineP.y + 34.0 * dens)) - 34.0 * dens);
-            m = max(m, (1.0 - smoothstep(-0.5, 0.5, lineD)) * 0.8);
-            m = max(m, holoCross(frameP, lineP, arm, hw));
-            vec3 ink = u.frameHolo.z < 0.5 ? vec3(0.96) : vec3(0.06); // iris-literal: print ink, pearl at night, black by day
-            float a = m * 0.72 * u.qt_Opacity;
-            colour = ink * a + colour * (1.0 - a);
             alpha = a + alpha * (1.0 - a);
         }
     }

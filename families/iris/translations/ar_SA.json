@@ -2484,6 +2484,6 @@
   "Holo": "Holo",
   "Holo light": "ضوء Holo",
   "How brightly the spectral rim burns.": "مدى سطوع الحافة الطيفية.",
-  "Print marks": "علامات الطباعة",
-  "Small crosses and a hairline on the band, like a printer's sheet.": "صلبان صغيرة وخط رفيع على الشريط، كما في ورقة المطبعة."
+  "Holo halo": "هالة هولو",
+  "How far the light spills over the screen; 0 keeps it on the frame.": "إلى أي مدى ينسكب الضوء على الشاشة؛ 0 يبقيه على الإطار."
 }

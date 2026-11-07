@@ -764,10 +764,10 @@ JsonObject {
         property int thickness: 10
         property int radius: 22
         // The frame's own light over whatever material it wears: "plain" or "holo" (the screen an eclipse, the frame its
-        // spectral rim, .claude/ref/iris-holo); holoLight 0..100 %, holoMarks the print marks on the band.
+        // spectral rim, .claude/ref/iris-holo); holoLight 0..100 %, holoHalo how far its halo reaches over the screen 0..100 %.
         property string style: "plain"
-        property int holoLight: 70
-        property bool holoMarks: true
+        property int holoLight: 45
+        property int holoHalo: 40
     }
     property JsonObject controlCenter: JsonObject {
         property string opens: "island" // "island": the Island becomes the Control Center; "panel": a panel hangs from it
