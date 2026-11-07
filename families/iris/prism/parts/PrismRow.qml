@@ -72,13 +72,45 @@ Item {
     clip: true
 
     HoverHandler { id: hover }
-    Rectangle {
-        anchors.fill: parent
-        anchors.leftMargin: -PrismTheme.dp(10)
-        anchors.rightMargin: -PrismTheme.dp(10)
-        radius: PrismTheme.dp(12)
-        color: root.flash ? Qt.alpha(PrismTheme.accent, 0.16) : root.hovered ? PrismTheme.fill : "transparent"
-        Behavior on color { ColorAnimation { duration: PrismTheme.ms(root.flash ? 120 : 600); easing.type: Easing.OutCubic } }
+    // Hover is light, not a slab (his 11-07): a soft oval of the page's colour that rises behind the mark and dies out
+    // across the line before the control, on the row's line alone (the old plate stood 10 dp out, and the row's clip cut
+    // it into a square slab over the gallery under it too). A row that was just found flashes it in the accent.
+    Item {
+        id: wash
+        readonly property color colour: root.flash ? PrismTheme.accent : PrismTheme.tint(thumb.tint)
+        readonly property real strength: root.flash ? 0.42 : PrismTheme.light ? 0.24 : 0.32 // iris-literal: the wash's light behind the mark
+        // Two halves of one oval meeting under the mark: a short one that is gone by the row's left edge, a long one
+        // that is gone before the control. Both as tall as the line, so neither leaves an edge.
+        readonly property real centre: thumb.x + thumb.width / 2
+        readonly property real far: Math.max(PrismTheme.dp(120), root.width * 0.62)
+        readonly property real tall: line.height * 0.7
+        width: root.width
+        height: line.height
+        opacity: root.flash || root.hovered ? 1 : 0
+        visible: opacity > 0
+        Behavior on opacity { NumberAnimation { duration: PrismTheme.ms(root.flash ? 120 : root.hovered ? 180 : 520); easing.type: Easing.OutCubic } }
+        Repeater {
+            model: [{ x: 0, width: wash.centre, reach: wash.centre }, { x: wash.centre, width: wash.width - wash.centre, reach: wash.far }]
+            Item {
+                id: half
+                required property var modelData
+                x: half.modelData.x
+                width: half.modelData.width
+                height: wash.height
+                clip: true
+                PrismGlow {
+                    id: glow
+                    readonly property real reach: Math.max(1, half.modelData.reach)
+                    colour: wash.colour
+                    strength: wash.strength
+                    width: reach * 2
+                    height: reach * 2
+                    x: wash.centre - half.x - reach
+                    y: wash.height / 2 - reach
+                    transform: Scale { origin.x: glow.reach; origin.y: glow.reach; yScale: wash.tall / glow.reach }
+                }
+            }
+        }
     }
 
     Item {
