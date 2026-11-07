@@ -539,14 +539,18 @@ QtObject {
     readonly property color bodySurface: root.surfaceOpaque
 
     readonly property var glassOptions: root.appearance?.glass ?? ({})
-    // Off is off, whatever Lume does for the scheme: the factory is glass, so "off" here was picked by the person.
+    // Off is the flat plate, the factory's (his 11-07: flat and black, or Niri's blur; Niri's cost 7-8x its CPU in motion).
     readonly property string glassRequested: ["wallpaper", "compositor"].includes(String(root.glassOptions?.mode ?? ""))
         ? root.glassOptions.mode : "off"
-    readonly property bool glassy: root.glassRequested !== "off" && Appearance.effectsEnabled && !IrisDesign.refusesGlass
-    readonly property bool menuCompact: String(root.appearance?.surfaces?.menus?.density ?? "compact") === "compact"
-    readonly property bool glassCompositor: root.glassy && root.glassRequested === "compositor" && IrisCompositorBlur.active
+    // Blur is the compositor's or nothing (his 11-07): where Niri cannot blur, the body is the flat plate, never the
+    // wallpaper's glass standing in for it. Glass on the wallpaper is only ever the person's own pick.
+    readonly property bool compositorGlassReady: root.glassRequested === "compositor" && IrisCompositorBlur.active
         && IrisCompositorBlur.usable
-    readonly property bool glassWallpaper: root.glassy && !root.glassCompositor
+    readonly property bool glassy: Appearance.effectsEnabled && !IrisDesign.refusesGlass
+        && (root.glassRequested === "wallpaper" || root.compositorGlassReady)
+    readonly property bool menuCompact: String(root.appearance?.surfaces?.menus?.density ?? "compact") === "compact"
+    readonly property bool glassCompositor: root.glassy && root.compositorGlassReady
+    readonly property bool glassWallpaper: root.glassy && root.glassRequested === "wallpaper"
     readonly property real glassBlurAmount: Math.max(0, Math.min(1, Number(root.glassOptions?.blur ?? 100) / 100))
     // Solved at the panel's 7:1 so secondary ink still reads on the worst part; the chosen tint is a floor.
     readonly property real wallpaperGlassTint: {
@@ -580,7 +584,7 @@ QtObject {
         aurora: { top: 0.09, foot: 0.09, edge: "line", sheen: 0.5, tint: 0.72, cast: 0.6 },
         angel: { top: 0.14, foot: 0.03, edge: "light", sheen: 2.2, tint: 0.84, cast: 0.5 },
         regalia: { top: 0.13, foot: 0.13, edge: "line", sheen: 1, tint: 1.6, cast: 1.2 },
-        flat: { top: 0.05, foot: 0.05, edge: "line", sheen: 1, tint: 1, cast: 0.4 },
+        flat: { top: 0, foot: 0, edge: "line", sheen: 1, tint: 1, cast: 0.4 },
         streak: { top: 0.12, foot: 0.04, edge: "light", sheen: 0.4, tint: 0.9, cast: 0.8 }
     })
     readonly property string textureName: String(IrisDesign.worn("material.texture", root.appearance?.texture))
@@ -1320,8 +1324,11 @@ QtObject {
     readonly property color readingPlate: ColorUtils.applyAlpha(root.surfaceOpaque, root.placePlate)
     // On solid a reading surface is a fill too, the same colour on the bare body: as an opaque plate the sidebar hid the
     // body's lit edge and its light on one half of the window and kept them on the other.
+    // Flat at night is black (his 11-07): a reading surface is the black a breath lifted, as glass's white veil reads
+    // over its dark sheet, never iOS's #1c1c1e cell, which read as opaque grey slabs on the black body.
+    readonly property color flatLift: ColorUtils.mix(Qt.rgba(1, 1, 1, 1), root.surfaceOpaque, 0.06) // iris-literal: the black's lift, glass's veil without glass
     readonly property color readingCard: root.glassy ? Lume.stack(root.readingPlate, root.surfaceHigh)
-        : root.textured ? root.surfaceHigh : root.liftOver(root.surfaceHigh, root.surfaceOpaque)
+        : root.textured ? root.surfaceHigh : !root.light ? root.flatLift : root.liftOver(root.surfaceHigh, root.surfaceOpaque)
     // A group of Settings rows over the reading surface (a form's plate): a step out of it, lighter in both schemes,
     // as a grouped form sits over its pane (macOS Tahoe). readingCard alone left the groups a shade from the sheet.
     // On glass the reading sheet carries legibility and the plate is a veil of white over it (nearly opaque in light, a

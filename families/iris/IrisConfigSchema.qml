@@ -80,7 +80,7 @@ JsonObject {
         property string controlPlate: "none" // rows of round controls: "none", "veil", "glass" or "solid" (IrisControlPlate)
         // What the material is drawn as: "solid" (Ricelin's card), "aurora", "angel", "regalia", "flat", "afterglow", "leak" or "streak".
         property string texture: "flat"
-        property int factoryLook: 2 // the factory look a file was moved to (ConfigMigrations.js)
+        property int factoryLook: 4 // the factory look a file was moved to (ConfigMigrations.js)
         // Afterglow: grade "dusk", "cyber", "fog", "acid" or "wallpaper"; the rest 0..100 %; wallpaper grades the desktop too.
         property JsonObject afterglow: JsonObject {
             property string grade: "dusk"
@@ -254,7 +254,7 @@ JsonObject {
         // "iris" draws the primitives as they are; a Theme may choose another when it is applied.
         property string design: "iris"
         property JsonObject glass: JsonObject {
-            property string mode: "wallpaper" // "off", "wallpaper" (the output's wallpaper, blurred) or "compositor" (Niri blurs what is below)
+            property string mode: "off" // "off" (the flat plate, the factory's since his 11-07), "wallpaper" (the output's wallpaper, blurred) or "compositor" (Niri blurs what is below)
             property int tint: 58       // how much of the material stays over the glass, 0-100
             property int blur: 100      // wallpaper glass blur, % of the maximum
             // The cut edge of Blur glass: light where it faces up, a line elsewhere (%) and colour ("scene" = the wallpaper's light, "white", "accent", "highlight").
@@ -356,7 +356,7 @@ JsonObject {
             property bool camera: true
             property bool call: true
             property bool media: true
-            property bool micGlow: true // the screen's edges glow once when an app starts listening
+            property bool micGlow: false // the screen's edges glow once when an app starts listening (off from the factory, his 11-07: too much for every call)
             property list<string> order: ["record", "timer", "task", "camera", "call", "media"] // which takes the Island first
         }
         // Each Island design's own options (Settings › Island › Face), read by its Face.qml.

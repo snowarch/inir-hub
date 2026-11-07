@@ -48,7 +48,7 @@ iRiS is the Island family. One Island sits on a screen edge and grows into whate
   - **Music** opens into a player with the cover, the song and its artist (a long name slides through instead of being cut), the time on both sides of the bar and large play controls. The mark at the right of the controls is where the sound goes (earbuds, headphones, a screen, or the output picker for speakers); click it for the Sound card and its devices. It is not there when the computer has no sound output.
   - **Timers** show an orange ring that empties as the time runs; open, they have round pause and close buttons, and a pomodoro shows each focus and break as a segment.
   - **Downloads and tasks** show a ring with their percentage.
-  - Settings › Island › Live activities has a switch for each kind that may take the Island: screen recording, timers, downloads and tasks, camera, calls and music. With **Camera** or **Calls** off, the privacy dot still shows while an app uses them. **Microphone glow** turns off the glow on the screen's edges when an app starts listening.
+  - Settings › Island › Live activities has a switch for each kind that may take the Island: screen recording, timers, downloads and tasks, camera, calls and music. With **Camera** or **Calls** off, the privacy dot still shows while an app uses them. **Microphone glow** lights the screen's edges for a moment when an app starts listening; it is off from the start.
   - **Order** lists the same kinds first to last: drag one to move it. When several run at once, the first takes the Island and the next waits in the bubble beside it. A kind switched off keeps its place, greyed. Under Cluster the song stays in its bubble wherever it stands.
 - Settings › Island › Layout › **Size** sets the Island's height, clock size and breathing room together: **Compact**, **Regular** or **Large**. Height, Clock size and Breathing room still fine-tune each one; a larger clock widens the resting Island with it.
 - The Weather page shows the temperature large, the place and the sky, and the next hours on a bar and as coloured columns by how warm each hour is.
@@ -79,7 +79,7 @@ The Dock is set under iRiS Settings › Dock:
 
 - Visibility: Show dock, Automatically hide, Reserve space for windows, Stay visible on empty workspaces.
 - Look › Screen edge: Auto puts it on the edge opposite the Island, or pick Top, Bottom, Left or Right.
-- Look › Material: iRiS, Solid, Glass or Blur (beta). Glass, the factory pick, blurs your wallpaper and costs little; Blur needs Niri 26.04 or later and asks Niri to blur whatever is behind on every frame, which weaker GPUs feel.
+- Look › Material: iRiS, Solid, Glass or Blur (beta). The factory is flat: every panel is plain black (or paper in light mode), with cards a breath lighter than the panel. Glass blurs your wallpaper and costs little; Blur needs Niri 26.04 or later and asks Niri to blur whatever is behind on every frame, which weaker GPUs feel. Where Niri cannot blur, Blur stays flat.
 - Apps: Pinned apps, Open apps and Drag to reorder. Drag an icon along the Dock to reorder it; **Esc** while dragging puts it back.
 
 ## Look, colour and themes

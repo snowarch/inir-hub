@@ -30,7 +30,7 @@ Singleton {
 
     // Umbriel blurs layer surfaces by its own layer rules: the theme module writes the one compositor glass asks for
     // into the generated file Umbriel includes, so picking the mode is all it takes.
-    readonly property string glassMode: String(Config.options?.iris?.appearance?.glass?.mode ?? "wallpaper")
+    readonly property string glassMode: String(Config.options?.iris?.appearance?.glass?.mode ?? "off")
     onGlassModeChanged: if (CompositorService.isUmbriel && Config.ready && !umbrielRules.running) umbrielRules.running = true
     Process {
         id: umbrielRules

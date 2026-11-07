@@ -110,7 +110,7 @@ Item {
         property Connections listens: Connections {
             target: Privacy
             function onMicActiveChanged(): void {
-                if (!Privacy.micActive || Config.options?.iris?.bar?.activities?.micGlow === false) return
+                if (!Privacy.micActive || Config.options?.iris?.bar?.activities?.micGlow !== true) return
                 edgeGlow.lit = true
                 edgeGlowHold.restart()
             }
