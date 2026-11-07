@@ -9,19 +9,22 @@ import qs.modules.iris.prism.controls
 import qs.modules.iris.prism.fx
 
 // The reference's player card: the cover fills it and a frosted sheet holds the song, the scrubber and the transport.
-// With nothing playing the card shows the refraction instead and says so.
+// With nothing playing it folds to one quiet line at the column's foot and gives the room to the changes above:
+// the refraction is the hero's, said once.
 Item {
     id: root
     property bool active: true
     readonly property var player: MprisController.activePlayer
     readonly property bool playing: root.player !== null && media.effectiveTitle.length > 0
+    readonly property real idleHeight: PrismTheme.dp(64)
 
     PlayerBase { id: media; player: root.player; positionUpdatesActive: root.active && root.playing }
 
     Item {
         id: art
         anchors.fill: parent
-        layer.enabled: true
+        visible: root.playing
+        layer.enabled: root.playing
         layer.effect: MultiEffect {
             maskEnabled: true
             maskSource: shape
@@ -35,15 +38,6 @@ Item {
             source: media.displayedArtFilePath
             radius: 0
             decodeSize: Math.max(width, height)
-        }
-        PrismRefraction {
-            anchors.fill: parent
-            visible: !root.playing
-            cornerRadius: 0
-            card: Qt.rect(width * 0.3, height * 0.12, width * 0.4, width * 0.4)
-            cardRadius: PrismTheme.dp(12)
-            source: Qt.point(-0.05, 0.62)
-            prismAt: Qt.point(0.4, 0.3)
         }
         // The sheet: the cover under it blurred, darkened, with the song on top.
         ShaderEffectSource {
@@ -75,7 +69,7 @@ Item {
             height: Math.min(parent.height * 0.6, PrismTheme.dp(138))
             y: parent.height - height - PrismTheme.dp(8)
             radius: PrismTheme.dp(18)
-            color: root.playing ? Qt.rgba(0.07, 0.07, 0.09, 0.42) : Qt.rgba(0.08, 0.08, 0.1, 0.72) // iris-literal: Prism's own ink over its art, the same in every scheme
+            color: Qt.rgba(0.07, 0.07, 0.09, 0.42) // iris-literal: Prism's own ink over its art, the same in every scheme
             // Glass catches light on its top edge only, brightest in the middle: a rim, never an outline.
             Rectangle {
                 x: sheet.radius * 0.6
@@ -94,7 +88,45 @@ Item {
     Rectangle { id: shape; anchors.fill: parent; radius: PrismTheme.dp(22); visible: false; layer.enabled: true }
     Rectangle { id: sheetShape; width: sheet.width; height: sheet.height; radius: sheet.radius; visible: false; layer.enabled: true }
 
+    // Idle: a cover-sized note and the two lines, the size of a change row.
+    Rectangle {
+        visible: !root.playing
+        anchors.fill: parent
+        radius: PrismTheme.dp(18)
+        color: PrismTheme.fill
+        PrismThumb {
+            id: note
+            x: PrismTheme.dp(13)
+            anchors.verticalCenter: parent.verticalCenter
+            glyph: "music_note"
+            tint: "pink"
+            size: PrismTheme.dp(38)
+        }
+        Column {
+            anchors.left: note.right
+            anchors.leftMargin: PrismTheme.dp(12)
+            anchors.right: parent.right
+            anchors.rightMargin: PrismTheme.dp(13)
+            anchors.verticalCenter: parent.verticalCenter
+            spacing: PrismTheme.dp(2)
+            PrismText {
+                width: parent.width
+                text: Translation.tr("Nothing playing")
+                font.pixelSize: PrismTheme.body
+                font.weight: Font.DemiBold
+            }
+            PrismText {
+                width: parent.width
+                text: Translation.tr("Play some music")
+                elide: Text.ElideRight
+                color: PrismTheme.ink2
+                font.pixelSize: PrismTheme.small
+            }
+        }
+    }
+
     Column {
+        visible: root.playing
         x: sheet.x + PrismTheme.dp(14)
         y: sheet.y + PrismTheme.dp(14)
         width: sheet.width - PrismTheme.dp(28)
@@ -102,7 +134,7 @@ Item {
         PrismText {
             width: parent.width
             horizontalAlignment: Text.AlignHCenter
-            text: root.playing ? media.effectiveTitle : Translation.tr("Nothing playing")
+            text: media.effectiveTitle
             color: PrismTheme.paper
             font.pixelSize: PrismTheme.row
             font.weight: Font.DemiBold
@@ -110,7 +142,7 @@ Item {
         PrismText {
             width: parent.width
             horizontalAlignment: Text.AlignHCenter
-            text: root.playing ? media.effectiveArtist : Translation.tr("Play something and it shows here.")
+            text: media.effectiveArtist
             color: Qt.rgba(1, 1, 1, 0.6) // iris-literal: Prism's own ink over its art, the same in every scheme
             font.pixelSize: PrismTheme.small
         }

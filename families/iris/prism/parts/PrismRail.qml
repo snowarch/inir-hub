@@ -17,6 +17,10 @@ Item {
     signal reach(var row)
 
     readonly property var changes: PrismModel.changes
+    // Four changes beside a song; with nothing playing, as many as the column holds (the player folds to a line).
+    readonly property real rowHeight: PrismTheme.dp(54)
+    readonly property int shown: player.playing ? 4
+        : Math.max(4, Math.min(12, Math.floor((root.height - list.y - PrismTheme.dp(15 + 20 + 22) - player.idleHeight) / root.rowHeight)))
 
     Column {
         id: column
@@ -140,7 +144,7 @@ Item {
             eyebrow: Translation.tr("Yours")
             title: Translation.tr("Changes")
             titleSize: PrismTheme.head
-            link: root.changes.length > 4 ? Translation.tr("See all") : ""
+            link: root.changes.length > root.shown ? Translation.tr("See all") : ""
             onLinkClicked: root.seeAllChanges()
         }
         Item { width: 1; height: PrismTheme.dp(12) }
@@ -156,63 +160,67 @@ Item {
             wrapMode: Text.WordWrap
             maximumLineCount: 2
         }
-        Repeater {
-            model: root.changes.slice(0, 4)
-            delegate: Item {
-                id: change
-                required property var modelData
-                required property int index
-                width: column.width
-                height: PrismTheme.dp(54)
-                PrismThumb {
-                    id: thumb
-                    anchors.verticalCenter: parent.verticalCenter
-                    glyph: change.modelData.glyph
-                    tint: PrismModel.page(change.modelData.page).tint
-                    size: PrismTheme.dp(38)
-                }
-                Column {
-                    anchors.left: thumb.right
-                    anchors.leftMargin: PrismTheme.dp(12)
-                    anchors.right: rank.left
-                    anchors.rightMargin: PrismTheme.dp(8)
-                    anchors.verticalCenter: parent.verticalCenter
-                    spacing: PrismTheme.dp(2)
-                    PrismText {
-                        width: parent.width
-                        text: Translation.tr(change.modelData.label)
-                        font.pixelSize: PrismTheme.body
-                        font.weight: Font.DemiBold
-                        color: changeArea.containsMouse ? PrismTheme.accent : PrismTheme.ink
+        Column {
+            id: list
+            width: parent.width
+            Repeater {
+                model: root.changes.slice(0, root.shown)
+                delegate: Item {
+                    id: change
+                    required property var modelData
+                    required property int index
+                    width: column.width
+                    height: root.rowHeight
+                    PrismThumb {
+                        id: thumb
+                        anchors.verticalCenter: parent.verticalCenter
+                        glyph: change.modelData.glyph
+                        tint: PrismModel.page(change.modelData.page).tint
+                        size: PrismTheme.dp(38)
                     }
-                    Row {
-                        width: parent.width
-                        spacing: PrismTheme.dp(4)
-                        PrismGlyph { anchors.verticalCenter: parent.verticalCenter; text: PrismModel.page(change.modelData.page).glyph; iconSize: PrismTheme.dp(12); color: PrismTheme.ink3 }
+                    Column {
+                        anchors.left: thumb.right
+                        anchors.leftMargin: PrismTheme.dp(12)
+                        anchors.right: rank.left
+                        anchors.rightMargin: PrismTheme.dp(8)
+                        anchors.verticalCenter: parent.verticalCenter
+                        spacing: PrismTheme.dp(2)
                         PrismText {
-                            width: parent.width - PrismTheme.dp(16)
-                            anchors.verticalCenter: parent.verticalCenter
-                            text: PrismModel.sayNow(change.modelData)
-                            color: PrismTheme.ink2
-                            font.pixelSize: PrismTheme.small
+                            width: parent.width
+                            text: Translation.tr(change.modelData.label)
+                            font.pixelSize: PrismTheme.body
+                            font.weight: Font.DemiBold
+                            color: changeArea.containsMouse ? PrismTheme.accent : PrismTheme.ink
+                        }
+                        Row {
+                            width: parent.width
+                            spacing: PrismTheme.dp(4)
+                            PrismGlyph { anchors.verticalCenter: parent.verticalCenter; text: PrismModel.page(change.modelData.page).glyph; iconSize: PrismTheme.dp(12); color: PrismTheme.ink3 }
+                            PrismText {
+                                width: parent.width - PrismTheme.dp(16)
+                                anchors.verticalCenter: parent.verticalCenter
+                                text: PrismModel.sayNow(change.modelData)
+                                color: PrismTheme.ink2
+                                font.pixelSize: PrismTheme.small
+                            }
                         }
                     }
-                }
-                PrismText {
-                    id: rank
-                    anchors.right: parent.right
-                    anchors.verticalCenter: parent.verticalCenter
-                    text: String(change.index + 1).padStart(2, "0")
-                    figures: true
-                    color: PrismTheme.ink3
-                    font.pixelSize: PrismTheme.small
-                }
-                MouseArea {
-                    id: changeArea
-                    anchors.fill: parent
-                    hoverEnabled: true
-                    cursorShape: Qt.PointingHandCursor
-                    onClicked: root.reach(change.modelData)
+                    PrismText {
+                        id: rank
+                        anchors.right: parent.right
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: String(change.index + 1).padStart(2, "0")
+                        figures: true
+                        color: PrismTheme.ink3
+                        font.pixelSize: PrismTheme.small
+                    }
+                    MouseArea {
+                        id: changeArea
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: root.reach(change.modelData)
+                    }
                 }
             }
         }
@@ -221,12 +229,11 @@ Item {
     }
 
     PrismNowPlaying {
+        id: player
         x: column.x
         width: column.width
-        anchors.top: column.bottom
-        anchors.topMargin: PrismTheme.dp(20)
-        anchors.bottom: parent.bottom
-        anchors.bottomMargin: PrismTheme.dp(22)
+        y: player.playing ? column.y + column.height + PrismTheme.dp(20) : root.height - PrismTheme.dp(22) - player.idleHeight
+        height: player.playing ? root.height - PrismTheme.dp(22) - y : player.idleHeight
         active: root.active
     }
 }

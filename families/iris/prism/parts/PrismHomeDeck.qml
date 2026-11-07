@@ -18,11 +18,7 @@ Item {
     implicitHeight: root.stacked ? root.cardHeight * 2 + PrismTheme.dp(10) : root.cardHeight
 
     readonly property string wallPath: String(Wallpapers.effectiveWallpaperPath ?? "")
-    readonly property string wallName: {
-        const file = root.wallPath.split("/").pop() ?? ""
-        const bare = file.replace(/\.[^.]+$/, "").replace(/[_-]+/g, " ").trim()
-        return bare.length > 0 ? bare : Translation.tr("Your wallpaper")
-    }
+    readonly property string wallName: PrismModel.wallpaperName(root.wallPath)
     // The screen Settings stands on, or the first one: its brightness is the one people mean.
     readonly property var monitor: Brightness.monitors.find(entry => entry.screen?.name === NiriService.currentOutput) ?? Brightness.monitors[0] ?? null
     // A screen that answers with a level (a nested or virtual output reads "ready" with none).
@@ -69,7 +65,7 @@ Item {
             anchors.bottomMargin: PrismTheme.dp(18)
             spacing: PrismTheme.dp(2)
             PrismText {
-                text: Translation.tr("Wallpaper")
+                text: PrismModel.wallpaperKind(root.wallPath)
                 color: Qt.alpha(PrismTheme.paper, 0.7)
                 font.pixelSize: PrismTheme.small
             }
@@ -95,7 +91,7 @@ Item {
                 smoked: true
                 glyph: "photo_library"
                 Accessible.name: Translation.tr("Gallery")
-                onClicked: PrismState.go("wallpaper")
+                onClicked: PrismModel.openWallpaperGallery()
             }
             PrismRound {
                 overArt: true

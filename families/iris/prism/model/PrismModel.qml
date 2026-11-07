@@ -313,6 +313,47 @@ Singleton {
         return out.slice(0, 8)
     }
 
+    // The wallpaper as people call it: a name they gave it reads as one; a site's dump (ids, hashes, a row of tags)
+    // says its folder instead, else just "Wallpaper".
+    function wallpaperName(path: string): string {
+        const file = String(path ?? "").split("/").pop() ?? ""
+        const words = file.replace(/\.[^.]+$/, "").replace(/^(motionbgs|wallhaven|wallpaperflare|unsplash)[-_]/i, "")
+            .split(/[-_\s]+/).filter(word => word.length > 0)
+        const machine = words.length === 0 || words.length > 5 || words.some(word => /\d{4,}|^[0-9a-f]{12,}$/i.test(word))
+            || (words.length === 1 && /\d/.test(words[0]) && /^[a-z0-9]{4,}$/i.test(words[0]))
+        const title = list => list.map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(" ")
+        if (!machine) return title(words)
+        const parts = String(path ?? "").split("/")
+        const folder = parts.length > 1 ? parts[parts.length - 2] : ""
+        const generic = ["", "pictures", "wallpapers", "wallpaper", "walls", "downloads", "images", "backgrounds", "imágenes", "descargas"]
+        return generic.includes(folder.toLowerCase()) || /\d{4,}/.test(folder) ? Translation.tr("Your wallpaper") : title(folder.split(/[-_\s]+/).filter(word => word.length > 0))
+    }
+    function wallpaperKind(path: string): string {
+        const lower = String(path ?? "").toLowerCase()
+        return Wallpapers.isVideoFile(lower) ? Translation.tr("Live") : lower.endsWith(".gif") ? Translation.tr("Animated") : Translation.tr("Picture")
+    }
+    // The wallpapers to go back to in one press: the last ones set, then the folder's own, never the one worn.
+    function wallpaperChoices(most: int): var {
+        const worn = String(Wallpapers.effectiveWallpaperPath ?? "")
+        const folder = Array.from(Wallpapers.wallpapers ?? []).map(String)
+            .filter(path => Wallpapers.extensions.includes(path.split(".").pop().toLowerCase()))
+        const out = []
+        for (const path of Array.from(Wallpapers.recentWallpapers ?? []).map(String).concat(folder)) {
+            if (out.length >= most) break
+            if (path.length > 0 && path !== worn && !out.includes(path)) out.push(path)
+        }
+        return out
+    }
+    function wearWallpaper(path: string): void {
+        Wallpapers.applySelectionTarget(path, "main", Appearance.m3colors.darkmode, "")
+    }
+    // The gallery is a surface of its own: Settings steps aside for it.
+    function openWallpaperGallery(): void {
+        GlobalStates.wallpaperSelectorTargetMonitor = NiriService.currentOutput ?? ""
+        GlobalStates.settingsOverlayOpen = false
+        GlobalStates.wallpaperSelectorOpen = true
+    }
+
     function runShow(page: var): void {
         if (!page?.show) return
         GlobalStates.settingsOverlayOpen = false

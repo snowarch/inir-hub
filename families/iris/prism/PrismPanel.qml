@@ -244,7 +244,7 @@ Item {
                 PageTop { width: content.width }
 
                 PrismHero {
-                    visible: !PrismState.searching && !root.changesView
+                    visible: !PrismState.searching && !root.changesView && root.page.pageId !== "wallpaper"
                     width: content.width
                     page: root.page
                     number: PrismModel.index(root.page.pageId) + 1
@@ -253,6 +253,17 @@ Item {
                     restorable: PrismModel.restorableOf(root.page.pageId)
                     lead: root.page.lead.map(path => PrismModel.find(path)).filter(row => row !== null)
                     onRestore: PrismModel.restore(root.page.pageId)
+                }
+                // Wallpaper opens on the wallpaper itself: what is worn and the ones to go back to.
+                Loader {
+                    active: !PrismState.searching && !root.changesView && root.page.pageId === "wallpaper"
+                    visible: active
+                    width: content.width
+                    sourceComponent: PrismWallpaperHero {
+                        width: content.width
+                        restorable: PrismModel.restorableOf(root.page.pageId)
+                        onRestore: PrismModel.restore(root.page.pageId)
+                    }
                 }
                 Item { visible: !PrismState.searching && !root.changesView; width: 1; height: PrismTheme.dp(34) }
 

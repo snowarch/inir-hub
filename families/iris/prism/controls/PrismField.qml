@@ -78,6 +78,13 @@ Item {
         onAccepted: { root.entered(text); root.committed(text); focus = false }
         onActiveFocusChanged: if (!activeFocus && text !== root.text) root.committed(text)
         onTextEdited: root.edited(text)
+        // Escape empties the words first (a search ends); with nothing typed it lets go, and the panel hears it.
+        Keys.onEscapePressed: event => {
+            if (text.length === 0) { event.accepted = false; return }
+            text = ""
+            root.edited("")
+            root.committed("")
+        }
         PrismText {
             visible: input.text.length === 0
             anchors.verticalCenter: parent.verticalCenter
