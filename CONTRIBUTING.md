@@ -98,8 +98,8 @@ Every item lives in its own folder and its own lane. Nothing outside a family ca
 
    Without `gh`: commit your item's folder on a branch, push it and open the pull request yourself.
 
-Once it is merged, the item gets a thread in Discussions › Reviews. People vote there (a thumbs up or down on the first
-post, or `inir hub rate my-clock up`) and say what works; its downloads are counted from the packages release. It
+Once it is merged, people vote and react on its page in their shell's Hub; installs, votes and reactions are counted
+daily from what they publish, and downloads from the packages release. It
 reaches people within the hour: inir.space/hub rebuilds from `main`, and `inir hub update` (or a family through
 `inir update`) brings it.
 

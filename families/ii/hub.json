@@ -3,7 +3,8 @@
     "version": "2.35.5",
     "changes": {
         "2.35.5": [
-            "Hub items say what is new in their version"
+            "Hub items say what is new in their version",
+            "Vote and react on any hub item, and see how many people have it"
         ]
     },
     "summary": "Material 3 Expressive panels, bars, docks and widgets in nine global styles.",

@@ -484,6 +484,15 @@ ContentPage {
         title: Translation.tr("Sources")
 
         SettingsGroup {
+            SettingsSwitch {
+                buttonIcon: "groups"
+                text: Translation.tr("Count my votes and installs")
+                checked: Hub.sharing
+                onCheckedChanged: if (checked !== Hub.sharing) Hub.setSharing(checked)
+                StyledToolTip {
+                    text: Translation.tr("Without your name, from a key kept on this computer")
+                }
+            }
             StyledText {
                 Layout.fillWidth: true
                 text: Translation.tr("Everything in the official hub is reviewed before it is published. Other sources are not: add only the ones you trust.")
@@ -1038,6 +1047,12 @@ ContentPage {
                         text: Hub.countText(page.item?.downloads ?? 0)
                         tip: Translation.tr("%1 downloads").arg(Number(page.item?.downloads ?? 0).toLocaleString(Qt.locale(), "f", 0))
                     }
+                    Stat {
+                        visible: Number(page.item?.installs ?? 0) > 0
+                        glyph: "group"
+                        text: Hub.countText(page.item?.installs ?? 0)
+                        tip: Translation.tr("%1 have it").arg(Number(page.item?.installs ?? 0).toLocaleString(Qt.locale(), "f", 0))
+                    }
                 }
             }
             RippleButtonWithIcon {
@@ -1056,6 +1071,32 @@ ContentPage {
             ActionButton {
                 Layout.alignment: Qt.AlignVCenter
                 item: page.item
+            }
+        }
+
+        // What people think of it, and the person's own say: a vote and any of the reactions, a tap to take back.
+        Flow {
+            Layout.fillWidth: true
+            spacing: 6
+            Repeater {
+                model: [{ vote: "up", face: "👍" }, { vote: "down", face: "👎" }]
+                delegate: FilterChip {
+                    required property var modelData
+                    text: `${modelData.face} ${Hub.countText(Hub.voteCount(page.item, modelData.vote))}`
+                    selected: Hub.mine(page.item?.id ?? "").vote === modelData.vote
+                    onClicked: Hub.vote(page.item.id, modelData.vote)
+                }
+            }
+            Item { width: 8; height: 1 }
+            Repeater {
+                model: Hub.reactions
+                delegate: FilterChip {
+                    required property string modelData
+                    readonly property int count: Hub.reactionCount(page.item, modelData)
+                    text: count > 0 ? `${modelData} ${Hub.countText(count)}` : modelData
+                    selected: Array.from(Hub.mine(page.item?.id ?? "").reactions ?? []).includes(modelData)
+                    onClicked: Hub.react(page.item.id, modelData)
+                }
             }
         }
 
@@ -1224,12 +1265,6 @@ ContentPage {
                         materialIcon: "code"
                         mainText: Translation.tr("Source and setup guide")
                         onClicked: Qt.openUrlExternally(page.item.page)
-                    }
-                    LinkButton {
-                        visible: Hub.discussionUrl(page.item).length > 0
-                        materialIcon: "forum"
-                        mainText: Translation.tr("Reviews and votes")
-                        onClicked: Qt.openUrlExternally(Hub.discussionUrl(page.item))
                     }
                     LinkButton {
                         visible: Hub.reportUrl(page.item).length > 0

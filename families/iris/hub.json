@@ -3,7 +3,8 @@
     "version": "2.33.59",
     "changes": {
         "2.33.59": [
-            "Bubbles stacked in a corner or along its edge join as one smooth body, without a bulge each"
+            "Bubbles stacked in a corner or along its edge join as one smooth body, without a bulge each",
+            "Vote and react on any hub item, and see how many people have it"
         ],
         "2.33.58": [
             "The frame can grow a rail on the left or right, and the dock lives inside it",

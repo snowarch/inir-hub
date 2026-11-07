@@ -506,6 +506,25 @@ Flickable {
             wrapMode: Text.WordWrap
             text: Translation.tr("Everything in the official hub is reviewed before it is published. Other sources are not: add only the ones you trust.")
         }
+        Rectangle {
+            Layout.fillWidth: true
+            visible: root.opened === null && Hub.loaded
+            implicitHeight: shareRow.implicitHeight + Math.round(8 * root.d)
+            radius: IrisStyle.radiusTile
+            color: IrisStyle.readingCard
+            IrisControlRow {
+                id: shareRow
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.verticalCenter: parent.verticalCenter
+                anchors.margins: Math.round(4 * root.d)
+                glyph: "groups"
+                label: Translation.tr("Count my votes and installs")
+                detail: Translation.tr("Without your name, from a key kept on this computer")
+                on: Hub.sharing
+                onToggled: Hub.setSharing(!Hub.sharing)
+            }
+        }
     }
 
     // ── Pieces ────────────────────────────────────────────────────────
@@ -973,7 +992,8 @@ Flickable {
                     model: [
                         { figure: Hub.liked(page.item) >= 0 ? root.likedText(page.item) : "–", caption: Hub.votes(page.item) > 0
                             ? Translation.tr("%1 of %2 people liked it").arg(page.item?.votesUp ?? 0).arg(Hub.votes(page.item)) : Translation.tr("No votes yet") },
-                        { figure: page.item?.downloads !== undefined ? Hub.countText(page.item.downloads) : "", caption: Translation.tr("Downloads") },
+                        { figure: Number(page.item?.installs ?? 0) > 0 ? Hub.countText(page.item.installs) : "", caption: Translation.tr("Have it") },
+                        { figure: page.item?.downloads !== undefined && !(Number(page.item?.installs ?? 0) > 0) ? Hub.countText(page.item.downloads) : "", caption: Translation.tr("Downloads") },
                         { figure: String(page.item?.version ?? ""), caption: page.item?.installed && page.item.installed !== page.item.version
                             ? Translation.tr("You have %1").arg(page.item.installed) : Translation.tr("Version") },
                         { figure: root.dateText(page.item?.updated ?? ""), caption: Translation.tr("Updated") },
@@ -1020,6 +1040,34 @@ Flickable {
                             }
                         }
                     }
+                }
+            }
+        }
+
+        // What people think of it, and the person's own say: a vote and any of the reactions, a tap to take back.
+        Flow {
+            Layout.fillWidth: true
+            spacing: Math.round(6 * root.d)
+            Repeater {
+                model: ["up", "down"]
+                delegate: IrisChip {
+                    required property string modelData
+                    glyph: modelData === "up" ? "thumb_up" : "thumb_down"
+                    label: Hub.countText(Hub.voteCount(page.item, modelData))
+                    selected: Hub.mine(page.item?.id ?? "").vote === modelData
+                    Accessible.name: modelData === "up" ? Translation.tr("I like it") : Translation.tr("Not for me")
+                    onClicked: Hub.vote(page.item.id, modelData)
+                }
+            }
+            Item { width: Math.round(6 * root.d); height: 1 }
+            Repeater {
+                model: Hub.reactions
+                delegate: IrisChip {
+                    required property string modelData
+                    readonly property int count: Hub.reactionCount(page.item, modelData)
+                    label: count > 0 ? `${modelData} ${Hub.countText(count)}` : modelData
+                    selected: Array.from(Hub.mine(page.item?.id ?? "").reactions ?? []).includes(modelData)
+                    onClicked: Hub.react(page.item.id, modelData)
                 }
             }
         }
@@ -1133,12 +1181,6 @@ Flickable {
         Flow {
             Layout.fillWidth: true
             spacing: Math.round(6 * root.d)
-            IrisButton {
-                visible: Hub.discussionUrl(page.item).length > 0
-                quiet: true
-                text: Translation.tr("Reviews and votes")
-                onClicked: Qt.openUrlExternally(Hub.discussionUrl(page.item))
-            }
             IrisButton {
                 visible: String(page.item?.page ?? "").length > 0
                 quiet: true

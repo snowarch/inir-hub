@@ -4,7 +4,8 @@
     "changes": {
         "2.34.7": [
             "Start: every pinned and recommended icon the same size, names on one line",
-            "Hub items say what is new in their version"
+            "Hub items say what is new in their version",
+            "Vote and react on any hub item, and see how many people have it"
         ]
     },
     "summary": "Windows 11 for people who want it: taskbar, Start, Action Center.",

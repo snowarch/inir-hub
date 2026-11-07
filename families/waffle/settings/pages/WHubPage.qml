@@ -313,6 +313,14 @@ WSettingsPage {
         collapsible: true
         expanded: false
 
+        WSettingsSwitch {
+            label: Translation.tr("Count my votes and installs")
+            icon: "people"
+            description: Translation.tr("Without your name, from a key kept on this computer")
+            checked: Hub.sharing
+            onCheckedChanged: if (checked !== Hub.sharing) Hub.setSharing(checked)
+        }
+
         Repeater {
             model: Hub.sources
             delegate: WSettingsRow {
@@ -407,6 +415,13 @@ WSettingsPage {
                 text: Translation.tr("%1 downloads").arg(Number(stats.item?.downloads ?? 0).toLocaleString(Qt.locale(), "f", 0))
                 extraVisibleCondition: stats.brief && downloadsHover.hovered
             }
+        }
+        WText {
+            anchors.verticalCenter: parent.verticalCenter
+            visible: !stats.brief && Number(stats.item?.installs ?? 0) > 0
+            text: Translation.tr("%1 have it").arg(Hub.countText(stats.item?.installs ?? 0))
+            font.pixelSize: Looks.font.pixelSize.small
+            color: Looks.colors.subfg
         }
     }
 
@@ -693,11 +708,6 @@ WSettingsPage {
                             text: Translation.tr("See its files")
                             onClicked: Qt.openUrlExternally(page.item.page)
                         }
-                        WBorderedButton {
-                            visible: Hub.discussionUrl(page.item).length > 0
-                            text: Translation.tr("Reviews and votes")
-                            onClicked: Qt.openUrlExternally(Hub.discussionUrl(page.item))
-                        }
                         WBorderlessButton {
                             visible: Hub.reportUrl(page.item).length > 0
                             implicitHeight: Looks.dp(32)
@@ -709,6 +719,25 @@ WSettingsPage {
                                 verticalAlignment: Text.AlignVCenter
                             }
                             onClicked: Qt.openUrlExternally(Hub.reportUrl(page.item))
+                        }
+                    }
+                    // What people think of it, and the person's own say: a vote and any of the reactions, a tap to take back.
+                    Flow {
+                        Layout.fillWidth: true
+                        Layout.topMargin: Looks.dp(12)
+                        spacing: Looks.dp(6)
+                        Repeater {
+                            model: [{ vote: "up", face: "👍" }, { vote: "down", face: "👎" }].concat(Hub.reactions.map(emoji => ({ emoji: emoji })))
+                            delegate: WBorderedButton {
+                                required property var modelData
+                                readonly property int count: modelData.vote ? Hub.voteCount(page.item, modelData.vote) : Hub.reactionCount(page.item, modelData.emoji)
+                                readonly property string face: modelData.face ?? modelData.emoji
+                                text: modelData.vote || count > 0 ? `${face} ${Hub.countText(count)}` : face
+                                checkable: false
+                                checked: modelData.vote ? Hub.mine(page.item?.id ?? "").vote === modelData.vote
+                                    : Array.from(Hub.mine(page.item?.id ?? "").reactions ?? []).includes(modelData.emoji)
+                                onClicked: modelData.vote ? Hub.vote(page.item.id, modelData.vote) : Hub.react(page.item.id, modelData.emoji)
+                            }
                         }
                     }
                     // A plugin's own choices (plugin.json `choices`), read as its page opens; a button flips one.
