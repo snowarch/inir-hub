@@ -149,7 +149,8 @@ Singleton {
     }
     // A long page is read one group at a time, picked from a strip under the hero; a short one stacks its charts.
     function paged(sections: var): bool {
-        return sections.length > 6 || sections.reduce((sum, group) => sum + group.rows.length, 0) > 60
+        // Past about two screens of rows a page is read in parts; the group count alone never splits it.
+        return sections.reduce((sum, group) => sum + group.rows.length, 0) > 44
     }
 
     // ── Values: read, written and said through IrisOptions, so a change takes the same side effects and the same
@@ -236,25 +237,58 @@ Singleton {
     }
 
     // Search: a row's name, what it does, its words and its page's name, in the person's language and in English.
+    // Rows by how close the words come to what the row is: its name first, then its group, the words it is known by,
+    // what it says it does, its page, and last a choice it offers (a "Glass" choice of a widget's face came before the
+    // Glass group's own rows, 11-07). Every word must land somewhere.
     function search(query: string): var {
         const words = String(query ?? "").toLowerCase().trim().split(/\s+/).filter(word => word.length > 0)
         if (words.length === 0) return []
-        return root.rows.filter(row => root.shown(row)).map(row => {
-            const label = String(row.label ?? "")
-            const detail = String(row.detail ?? "")
-            const name = (Translation.tr(label) + " " + label).toLowerCase()
-            const rest = (Translation.tr(detail) + " " + detail + " " + Translation.tr(String(root.page(row.page)?.name ?? "")) + " "
-                + Translation.tr(String(row.section ?? "")) + " " + Array.from(row.keywords ?? []).join(" ") + " "
-                + Array.from(row.choices ?? []).map(choice => Translation.tr(String(choice.label ?? ""))).join(" ")).toLowerCase()
+        const both = text => (Translation.tr(text) + " " + text).toLowerCase()
+        const starts = (text, word) => text.startsWith(word) || text.includes(" " + word)
+        return root.rows.filter(row => root.shown(row)).map((row, order) => {
+            const name = both(String(row.label ?? ""))
+            const group = both(String(row.section ?? ""))
+            const known = Array.from(row.keywords ?? []).join(" ").toLowerCase()
+            const detail = both(String(row.detail ?? ""))
+            const page = both(String(root.page(row.page)?.name ?? ""))
+            const offers = Array.from(row.choices ?? []).map(choice => both(String(choice.label ?? ""))).join(" ")
             let score = 0
             for (const word of words) {
-                if (name.startsWith(word)) score += 6
-                else if (name.includes(word)) score += 4
-                else if (rest.includes(word)) score += 1
-                else return { row: row, score: -1 }
+                if (name.startsWith(word)) score += 10
+                else if (starts(name, word)) score += 8
+                else if (name.includes(word)) score += 5
+                else if (starts(group, word)) score += 4
+                else if (known.includes(word)) score += 3
+                else if (starts(detail, word)) score += 2
+                else if (page.includes(word) || group.includes(word) || detail.includes(word)) score += 1
+                else if (offers.includes(word)) score += 0.5
+                else return { row: row, score: -1, order: order }
             }
-            return { row: row, score: score }
-        }).filter(hit => hit.score > 0).sort((a, b) => b.score - a.score).slice(0, 40).map(hit => hit.row)
+            return { row: row, score: score, order: order }
+        }).filter(hit => hit.score > 0).sort((a, b) => b.score - a.score || a.order - b.order).slice(0, 40).map(hit => hit.row)
+    }
+
+    // Places a search reaches whole: a page or a group whose name holds every word, the page first. A hit opens it.
+    function places(query: string): var {
+        const words = String(query ?? "").toLowerCase().trim().split(/\s+/).filter(word => word.length > 0)
+        if (words.length === 0) return []
+        const holds = text => words.every(word => text.includes(word))
+        const out = []
+        for (const page of root.pages) {
+            const name = (Translation.tr(page.name) + " " + page.name).toLowerCase()
+            if (holds(name)) out.push({ page: page.pageId, group: "", name: page.name, glyph: page.glyph, tint: page.tint })
+        }
+        const seen = {}
+        for (const row of root.rows) {
+            const key = row.page + "|" + row.section
+            if (seen[key] || row.section.length === 0 || !root.shown(row)) continue
+            seen[key] = true
+            const title = (Translation.tr(row.section) + " " + row.section).toLowerCase()
+            if (!holds(title)) continue
+            const page = root.page(row.page)
+            out.push({ page: row.page, group: row.section, name: row.section, glyph: String(IrisOptions.groupGlyphs[row.section] ?? page.glyph), tint: page.tint })
+        }
+        return out.slice(0, 8)
     }
 
     function runShow(page: var): void {

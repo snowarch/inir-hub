@@ -2466,5 +2466,12 @@
   "%1 on": "%1 aktif",
   "Everything is off": "Semua mati",
   "No colours yet": "Belum ada warna",
-  "As a window": "Sebagai jendela"
+  "As a window": "Sebagai jendela",
+  "Go to": "Buka",
+  "Places": "Tempat",
+  "Page": "Halaman",
+  "Back to the start": "Kembali ke awal",
+  "Sound & light": "Suara & cahaya",
+  "No sound device or dimmable screen was found.": "Tidak ditemukan perangkat suara atau layar yang bisa diredupkan.",
+  "Your wallpaper": "Wallpaper kamu"
 }

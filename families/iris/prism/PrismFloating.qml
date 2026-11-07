@@ -12,7 +12,9 @@ FloatingWindow {
     id: root
     // Untranslated: niri's rule that opens Settings at two thirds of the screen matches this title (as the classic one).
     title: "iNiR Settings"
-    visible: GlobalStates.settingsOverlayOpen
+    // Shown while Settings is open. A Binding, not `visible:`: closed from outside (Niri's close-window), the window
+    // turns its own `visible` false, which would cut a plain binding and leave Settings unable to open again.
+    Binding { target: root; property: "visible"; value: GlobalStates.settingsOverlayOpen }
     color: PrismTheme.canvas
     implicitWidth: PrismTheme.dp(1280)
     implicitHeight: PrismTheme.dp(840)
@@ -36,10 +38,13 @@ FloatingWindow {
     }
     onVisibleChanged: if (!root.visible) root.focusedOnce = false
     Component.onDestruction: GlobalStates.settingsWindowBehind = false
+    // Asked for while open: a minimized window comes back from the dock's stash first, then takes focus.
     Connections {
         target: GlobalStates
         function onSettingsRaiseRequestChanged(): void {
-            if (root.niriWindow) NiriService.focusWindow(root.niriWindow.id)
+            if (!root.niriWindow) return
+            if (MinimizedWindows.isMinimized(root.niriWindow.id)) MinimizedWindows.restore(root.niriWindow.id)
+            NiriService.focusWindow(root.niriWindow.id)
         }
     }
 
@@ -52,6 +57,8 @@ FloatingWindow {
         active: GlobalStates.settingsOverlayOpen
         focus: true
         onCloseRequested: GlobalStates.settingsOverlayOpen = false
+        // The yellow light minimizes the window as any app's would; opening Settings again brings it back where it was.
+        onMinimizeRequested: if (!root.niriWindow || !MinimizedWindows.minimize(root.niriWindow.id)) GlobalStates.settingsOverlayOpen = false
         onGrowRequested: if (root.niriWindow) {
             NiriService.focusWindow(root.niriWindow.id)
             NiriService.maximizeColumn()

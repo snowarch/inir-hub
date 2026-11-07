@@ -9,6 +9,8 @@ Item {
     property string glyph: "circle"
     property string text: ""
     property bool current: false
+    // The accent bar at the sidebar's edge: on the open page, or on its open group when the page lists its groups.
+    property bool marked: root.current
     property string trailing: ""   // a glyph on the right, shown on hover (a pin's remove)
     property real edge: width      // where the sidebar ends, for the bar
     signal clicked()
@@ -39,7 +41,7 @@ Item {
         x: root.edge - width
         anchors.verticalCenter: parent.verticalCenter
         width: PrismTheme.dp(3)
-        height: root.current ? PrismTheme.dp(18) : 0
+        height: root.marked ? PrismTheme.dp(18) : 0
         radius: width / 2
         color: PrismTheme.accent
         Behavior on height { NumberAnimation { duration: PrismTheme.ms(220); easing.type: Easing.OutCubic } }

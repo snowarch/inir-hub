@@ -2466,5 +2466,12 @@
   "%1 on": "%1 פעילים",
   "Everything is off": "הכול כבוי",
   "No colours yet": "אין צבעים עדיין",
-  "As a window": "כחלון"
+  "As a window": "כחלון",
+  "Go to": "עבור אל",
+  "Places": "מקומות",
+  "Page": "עמוד",
+  "Back to the start": "חזרה להתחלה",
+  "Sound & light": "צליל ואור",
+  "No sound device or dimmable screen was found.": "לא נמצא התקן שמע או מסך עם בהירות מתכווננת.",
+  "Your wallpaper": "הרקע שלך"
 }

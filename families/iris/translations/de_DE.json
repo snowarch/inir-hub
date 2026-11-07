@@ -2466,5 +2466,12 @@
   "%1 on": "%1 an",
   "Everything is off": "Alles ist aus",
   "No colours yet": "Noch keine Farben",
-  "As a window": "Als Fenster"
+  "As a window": "Als Fenster",
+  "Go to": "Gehe zu",
+  "Places": "Orte",
+  "Page": "Seite",
+  "Back to the start": "Zurück zum Anfang",
+  "Sound & light": "Ton & Licht",
+  "No sound device or dimmable screen was found.": "Kein Audiogerät und kein dimmbarer Bildschirm gefunden.",
+  "Your wallpaper": "Dein Hintergrundbild"
 }

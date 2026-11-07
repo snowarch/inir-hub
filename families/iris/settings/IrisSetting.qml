@@ -147,7 +147,6 @@ Item {
     function toggleList(): void { IrisOptions.openList = root.listOpen ? "" : root.listKey }
     property real listProgress: root.listOpen ? 1 : 0
     Behavior on listProgress { NumberAnimation { duration: IrisStyle.duration(240); easing.type: Easing.BezierSpline; easing.bezierCurve: IrisStyle.morphCurve } }
-    Timer { id: listClose; interval: 160; onTriggered: if (root.listOpen) IrisOptions.openList = "" }
     readonly property bool inlineRange: root.spec.kind === "range" && root.roomy
     // A text answer sits in the column too: a prefix (`short`) in a small field, anything longer at the column's width.
     readonly property bool inlineText: root.spec.kind === "text" && root.roomy
@@ -2042,8 +2041,9 @@ Item {
             fontFor: root.spec.previewFont ? (choice => root.previewFace(choice)) : null
             extra: root.spec.installedFonts === true
                 ? [{ text: Translation.tr("Other font…"), glyph: "search", action: () => { IrisOptions.openList = ""; root.fontSearch = true } }] : []
-            // The pick lands, then the list folds back into its row.
-            onPicked: value => { root.commit(value); listClose.restart() }
+            // The pick lands and the list stays open under its row, so the next try is one press away (his 11-07: a
+            // list that folded back after each pick had to be opened again every time). Its row's head folds it.
+            onPicked: value => root.commit(value)
             onDismissed: IrisOptions.openList = ""
         }
     }

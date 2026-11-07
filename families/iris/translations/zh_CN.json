@@ -2466,5 +2466,12 @@
   "%1 on": "%1 项已开启",
   "Everything is off": "全部已关闭",
   "No colours yet": "暂无颜色",
-  "As a window": "作为窗口"
+  "As a window": "作为窗口",
+  "Go to": "前往",
+  "Places": "位置",
+  "Page": "页面",
+  "Back to the start": "回到开头",
+  "Sound & light": "声音与亮度",
+  "No sound device or dimmable screen was found.": "未找到声音设备或可调亮度的屏幕。",
+  "Your wallpaper": "你的壁纸"
 }

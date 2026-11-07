@@ -2466,5 +2466,12 @@
   "%1 on": "%1 activados",
   "Everything is off": "Todo está apagado",
   "No colours yet": "Todavía no hay colores",
-  "As a window": "Como ventana"
+  "As a window": "Como ventana",
+  "Go to": "Ir a",
+  "Places": "Lugares",
+  "Page": "Página",
+  "Back to the start": "Volver al inicio",
+  "Sound & light": "Sonido y luz",
+  "No sound device or dimmable screen was found.": "No se encontró un dispositivo de sonido ni una pantalla con brillo ajustable.",
+  "Your wallpaper": "Tu fondo de pantalla"
 }

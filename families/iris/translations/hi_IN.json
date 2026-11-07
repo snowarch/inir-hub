@@ -2466,5 +2466,12 @@
   "%1 on": "%1 चालू",
   "Everything is off": "सब कुछ बंद है",
   "No colours yet": "अभी कोई रंग नहीं",
-  "As a window": "विंडो के रूप में"
+  "As a window": "विंडो के रूप में",
+  "Go to": "यहाँ जाएँ",
+  "Places": "स्थान",
+  "Page": "पेज",
+  "Back to the start": "शुरुआत पर लौटें",
+  "Sound & light": "ध्वनि और रोशनी",
+  "No sound device or dimmable screen was found.": "कोई ध्वनि डिवाइस या मंद होने वाली स्क्रीन नहीं मिली।",
+  "Your wallpaper": "आपका वॉलपेपर"
 }

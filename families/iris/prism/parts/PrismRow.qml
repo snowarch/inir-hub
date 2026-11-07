@@ -21,6 +21,8 @@ Item {
     property real aboutWidth: PrismTheme.dp(220)
     property real controlWidth: PrismTheme.dp(280)
     property bool flash: false
+    // Search and Changes: a press on the row's name or its place opens it where it lives; the control still answers here.
+    signal openRequested()
 
     readonly property var spec: root.row.spec ?? ({})
     readonly property string kind: String(root.row.kind ?? "")
@@ -42,6 +44,7 @@ Item {
     readonly property string below: {
         if (root.listed) return "pieces"
         if (root.kind === "designs") return "designs"
+        if (root.kind === "choice" && root.spec.cards === "island" && root.choices.length > 0) return "faces"
         if (root.kind === "choice" && root.manySwatches) return "swatches"
         if (root.kind === "choice" && root.open && !root.swatched) return "chips"
         if (root.kind === "list" && root.spec.view) return "view"
@@ -57,6 +60,7 @@ Item {
         if (root.kind === "action") return "action"
         if (root.kind === "zone") return "zone"
         if (root.kind === "designs") return "now"
+        if (root.kind === "choice" && root.spec.cards === "island" && root.choices.length > 0) return "now"
         if (root.kind === "choice" && root.swatched && !root.manySwatches) return "swatches"
         if (root.kind === "choice" && root.choices.length > 0 && !root.manySwatches) return "choice"
         if (root.kind === "choice" || root.kind === "list" || root.listed) return "now"
@@ -93,6 +97,19 @@ Item {
             font.pixelSize: PrismTheme.small
             font.weight: root.changed ? Font.Bold : Font.Normal
         }
+        MouseArea {
+            id: placeArea
+            visible: root.showPage
+            anchors.left: parent.left
+            anchors.right: name.right
+            anchors.top: parent.top
+            anchors.bottom: parent.bottom
+            hoverEnabled: true
+            cursorShape: Qt.PointingHandCursor
+            Accessible.role: Accessible.Link
+            Accessible.name: Translation.tr("Open %1").arg(Translation.tr(root.row.label))
+            onClicked: root.openRequested()
+        }
         PrismThumb {
             id: thumb
             anchors.left: number.right
@@ -117,14 +134,38 @@ Item {
             }
             PrismText {
                 width: parent.width
-                visible: text.length > 0 && (root.showPage || !about.visible)
-                text: root.showPage ? Translation.tr(PrismModel.page(root.row.page).name) + " · " + Translation.tr(root.row.section)
-                    : Translation.tr(root.row.detail ?? "")
+                visible: text.length > 0 && !root.showPage && !about.visible
+                text: Translation.tr(root.row.detail ?? "")
                 color: PrismTheme.ink2
                 font.pixelSize: PrismTheme.small
                 wrapMode: Text.WordWrap
-                maximumLineCount: root.showPage ? 1 : 2
+                maximumLineCount: 2
                 elide: Text.ElideRight
+            }
+            // Where a found row lives, said as a path that goes there: the page, its group, an arrow on hover.
+            Row {
+                visible: root.showPage
+                width: parent.width
+                spacing: PrismTheme.dp(4)
+                PrismText {
+                    id: place
+                    width: Math.min(implicitWidth, parent.width - go.width - parent.spacing)
+                    anchors.verticalCenter: parent.verticalCenter
+                    text: Translation.tr(PrismModel.page(root.row.page).name) + (String(root.row.section ?? "").length > 0 ? "  ›  " + Translation.tr(root.row.section) : "")
+                    color: placeArea.containsMouse ? PrismTheme.ink : PrismTheme.ink2
+                    font.pixelSize: PrismTheme.small
+                    font.weight: placeArea.containsMouse ? Font.DemiBold : Font.Normal
+                    elide: Text.ElideRight
+                }
+                PrismGlyph {
+                    id: go
+                    anchors.verticalCenter: parent.verticalCenter
+                    text: "arrow_forward"
+                    iconSize: PrismTheme.dp(14)
+                    color: PrismTheme.ink
+                    opacity: placeArea.containsMouse ? 1 : 0
+                    Behavior on opacity { NumberAnimation { duration: PrismTheme.ms(160); easing.type: Easing.OutCubic } }
+                }
             }
             // Why the row says what it says now (a theme decides it, a key it follows).
             PrismText {
@@ -210,10 +251,11 @@ Item {
         opacity: root.locked ? 0.45 : 1
         anchors.top: line.bottom
         anchors.left: parent.left
-        anchors.leftMargin: name.x
-        width: parent.width - name.x - PrismTheme.dp(56)
+        // A gallery of faces takes the row's whole width; everything else sits under the row's name.
+        anchors.leftMargin: root.below === "faces" ? 0 : name.x
+        width: root.below === "faces" ? parent.width : parent.width - name.x - PrismTheme.dp(56)
         height: item ? item.implicitHeight : 0
-        sourceComponent: ({ pieces: piecesBelow, designs: designsBelow, swatches: swatchesBelow, chips: chipsBelow,
+        sourceComponent: ({ pieces: piecesBelow, designs: designsBelow, faces: facesBelow, swatches: swatchesBelow, chips: chipsBelow,
             view: viewBelow, icon: iconBelow, curve: curveBelow, niriMotion: niriBelow, widgets: widgetsBelow, themes: themesBelow })[root.below] ?? null
     }
 
@@ -348,6 +390,15 @@ Item {
         }
     }
     Component {
+        id: facesBelow
+        PrismIslandFaces {
+            width: slot.width
+            choices: root.choices
+            current: root.value
+            onPicked: value => PrismModel.write(root.row, value)
+        }
+    }
+    Component {
         id: swatchesBelow
         Flow {
             width: slot.width
@@ -364,11 +415,8 @@ Item {
             width: slot.width
             choices: root.choices
             current: root.value
-            onPicked: value => {
-                const host = root
-                host.open = false
-                PrismModel.write(host.row, value)
-            }
+            // The chips stay out after a pick, so the next try is one press away (his 11-07); the row's chevron folds them.
+            onPicked: value => PrismModel.write(root.row, value)
         }
     }
     Component {

@@ -11,6 +11,8 @@ Item {
     property alias input: input
     signal committed(string text)
     signal edited(string text)
+    // Enter, before the field lets go of focus: a search takes its first hit.
+    signal entered(string text)
 
     implicitWidth: PrismTheme.dp(200)
     implicitHeight: PrismTheme.dp(32)
@@ -73,7 +75,7 @@ Item {
         font.pixelSize: PrismTheme.small
         clip: true
         text: root.text
-        onAccepted: { root.committed(text); focus = false }
+        onAccepted: { root.entered(text); root.committed(text); focus = false }
         onActiveFocusChanged: if (!activeFocus && text !== root.text) root.committed(text)
         onTextEdited: root.edited(text)
         PrismText {

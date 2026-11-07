@@ -50,9 +50,12 @@ Singleton {
         root.query = ""
         root.groupOf = ({})
     }
+    // A group asked for (the sidebar's index, a search place, a request "section/group"): the page brings it to the top.
+    property int groupAsk: 0
     function pickGroup(page: string, group: string): void {
         const next = Object.assign({}, root.groupOf)
         next[page] = group
         root.groupOf = next
+        root.groupAsk++
     }
 }

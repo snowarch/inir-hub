@@ -2466,5 +2466,12 @@
   "%1 on": "%1 مفعّل",
   "Everything is off": "كل شيء متوقف",
   "No colours yet": "لا ألوان بعد",
-  "As a window": "كنافذة"
+  "As a window": "كنافذة",
+  "Go to": "انتقل إلى",
+  "Places": "الأماكن",
+  "Page": "صفحة",
+  "Back to the start": "العودة إلى البداية",
+  "Sound & light": "الصوت والإضاءة",
+  "No sound device or dimmable screen was found.": "لم يُعثر على جهاز صوت أو شاشة قابلة للتعتيم.",
+  "Your wallpaper": "خلفيتك"
 }

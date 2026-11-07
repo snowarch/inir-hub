@@ -8,13 +8,15 @@ Item {
     property string eyebrow: ""
     property string title: ""
     property string link: ""
+    // Said at the right when there is no link: a figure, never pressed.
+    property string note: ""
     property real titleSize: PrismTheme.title
     signal linkClicked()
 
     implicitHeight: column.implicitHeight
     Column {
         id: column
-        width: parent.width - (more.visible ? more.width + PrismTheme.dp(12) : 0)
+        width: parent.width - (more.visible ? more.width + PrismTheme.dp(12) : 0) - (figure.visible ? figure.width + PrismTheme.dp(12) : 0)
         spacing: PrismTheme.dp(2)
         PrismText {
             width: parent.width
@@ -48,5 +50,16 @@ Item {
             cursorShape: Qt.PointingHandCursor
             onClicked: root.linkClicked()
         }
+    }
+    PrismText {
+        id: figure
+        visible: root.link.length === 0 && root.note.length > 0
+        anchors.right: parent.right
+        anchors.bottom: column.bottom
+        anchors.bottomMargin: PrismTheme.dp(4)
+        text: root.note
+        figures: true
+        color: PrismTheme.ink3
+        font.pixelSize: PrismTheme.small
     }
 }

@@ -2466,5 +2466,12 @@
   "%1 on": "%1개 켜짐",
   "Everything is off": "모두 꺼짐",
   "No colours yet": "아직 색상 없음",
-  "As a window": "창으로"
+  "As a window": "창으로",
+  "Go to": "이동",
+  "Places": "위치",
+  "Page": "페이지",
+  "Back to the start": "처음으로",
+  "Sound & light": "소리 및 밝기",
+  "No sound device or dimmable screen was found.": "사운드 장치나 밝기를 조절할 수 있는 화면을 찾지 못했습니다.",
+  "Your wallpaper": "내 배경화면"
 }

@@ -2466,5 +2466,12 @@
   "%1 on": "%1 açık",
   "Everything is off": "Her şey kapalı",
   "No colours yet": "Henüz renk yok",
-  "As a window": "Pencere olarak"
+  "As a window": "Pencere olarak",
+  "Go to": "Git",
+  "Places": "Yerler",
+  "Page": "Sayfa",
+  "Back to the start": "Başa dön",
+  "Sound & light": "Ses ve ışık",
+  "No sound device or dimmable screen was found.": "Ses aygıtı veya parlaklığı ayarlanabilen ekran bulunamadı.",
+  "Your wallpaper": "Duvar kâğıdın"
 }

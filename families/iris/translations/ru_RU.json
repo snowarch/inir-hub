@@ -2466,5 +2466,12 @@
   "%1 on": "Включено: %1",
   "Everything is off": "Всё выключено",
   "No colours yet": "Цветов пока нет",
-  "As a window": "Окном"
+  "As a window": "Окном",
+  "Go to": "Перейти",
+  "Places": "Разделы",
+  "Page": "Страница",
+  "Back to the start": "В начало",
+  "Sound & light": "Звук и свет",
+  "No sound device or dimmable screen was found.": "Не найдено звуковое устройство или экран с регулируемой яркостью.",
+  "Your wallpaper": "Ваши обои"
 }

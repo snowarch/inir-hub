@@ -10,3 +10,7 @@ PrismThumb 1.0 PrismThumb.qml
 PrismRail 1.0 PrismRail.qml
 PrismNowPlaying 1.0 PrismNowPlaying.qml
 PrismHome 1.0 PrismHome.qml
+PrismPlaces 1.0 PrismPlaces.qml
+PrismNextGroup 1.0 PrismNextGroup.qml
+PrismIslandFaces 1.0 PrismIslandFaces.qml
+PrismHomeDeck 1.0 PrismHomeDeck.qml

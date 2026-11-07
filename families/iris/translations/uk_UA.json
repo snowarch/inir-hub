@@ -2466,5 +2466,12 @@
   "%1 on": "Увімкнено: %1",
   "Everything is off": "Усе вимкнено",
   "No colours yet": "Кольорів поки немає",
-  "As a window": "Вікном"
+  "As a window": "Вікном",
+  "Go to": "Перейти",
+  "Places": "Розділи",
+  "Page": "Сторінка",
+  "Back to the start": "На початок",
+  "Sound & light": "Звук і світло",
+  "No sound device or dimmable screen was found.": "Не знайдено звукового пристрою чи екрана з регульованою яскравістю.",
+  "Your wallpaper": "Ваші шпалери"
 }

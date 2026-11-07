@@ -22,6 +22,8 @@ Item {
     // between hosts reads "Over the desktop".
     property bool windowed: false
     signal closeRequested()
+    // The yellow light in a window: the window goes to the dock as any app's would.
+    signal minimizeRequested()
     // The green light in a window: its column takes the screen.
     signal growRequested()
 
@@ -56,17 +58,84 @@ Item {
     // A page iRiS draws as a view of its own (Community Hub, Keyboard shortcuts, About) fills the middle below its title.
     readonly property bool hosted: !PrismState.searching && !root.changesView && String(root.page.view ?? "").length > 0
     readonly property var sections: PrismState.searching || root.changesView || root.hosted ? [] : PrismModel.sectionsOf(root.page.pageId)
-    // A long page is read one group at a time, picked from the strip under the hero.
+    // A long page is read in parts of a screenful or two (whole groups, about 24 rows each); a short one stacks every
+    // group. Either way the sidebar's index under the page names each group and follows the reading, and a part ends
+    // on the next one (his 11-07: never looked for sideways, never one two-row group alone on a screen).
     readonly property bool paged: PrismModel.paged(root.sections)
+    readonly property var parts: {
+        if (!root.paged) return [root.sections]
+        const out = []
+        let part = [], rows = 0
+        for (const section of root.sections) {
+            const n = section.rows.length
+            if (part.length > 0 && rows + n > 28) { out.push(part); part = []; rows = 0 }
+            part.push(section)
+            rows += n
+            if (rows >= 20) { out.push(part); part = []; rows = 0 }
+        }
+        if (part.length > 0) out.push(part)
+        return out
+    }
     readonly property string group: {
         const chosen = String(PrismState.groupOf[root.page.pageId] ?? "")
         return root.sections.some(section => section.title === chosen) ? chosen : String(root.sections[0]?.title ?? "")
     }
-    readonly property var shownSections: root.paged ? root.sections.filter(section => section.title === root.group) : root.sections
+    readonly property int partIndex: Math.max(0, root.parts.findIndex(part => part.some(section => section.title === root.group)))
+    readonly property var shownSections: root.parts[root.partIndex] ?? []
+    // The index in the sidebar: every group, with a dot where something differs from the factory.
+    readonly property var groups: root.sections.map(section => ({ title: section.title, changed: section.rows.some(row => PrismModel.changed(row)) }))
+    // Where the reader stands: the group whose head has passed a third of the way down the page.
+    property string spyGroup: ""
+    readonly property string currentGroup: root.shownSections.some(section => section.title === root.spyGroup) ? root.spyGroup : String(root.shownSections[0]?.title ?? "")
+    function spy(): void {
+        if (sectionsRepeater.count === 0) return
+        const line = centre.contentY + centre.height * 0.3
+        let at = String(sectionsRepeater.itemAt(0)?.modelData?.title ?? "")
+        for (let i = 0; i < sectionsRepeater.count; ++i) {
+            const box = sectionsRepeater.itemAt(i)
+            if (box && box.visible && box.y + content.y <= line) at = String(box.modelData.title)
+        }
+        // The page's foot: the last group is where the reader stands, short as it may be.
+        if (centre.contentY >= centre.contentHeight - centre.height - 2)
+            at = String(sectionsRepeater.itemAt(sectionsRepeater.count - 1)?.modelData?.title ?? at)
+        root.spyGroup = at
+    }
+    function boxOf(title: string): var {
+        for (let i = 0; i < sectionsRepeater.count; ++i) {
+            const box = sectionsRepeater.itemAt(i)
+            if (box?.modelData?.title === title) return box
+        }
+        return null
+    }
+    // A group asked for: on screen it glides to its head; in another part of a long page that part opens first.
+    function showGroup(title: string): void {
+        const box = root.boxOf(title)
+        if (box) root.glide(box.y + content.y - PrismTheme.dp(12))
+        else if (root.paged) PrismState.pickGroup(root.page.pageId, title)
+    }
+    function glide(y: real): void {
+        glider.to = Math.max(0, Math.min(centre.contentHeight - centre.height, y))
+        glider.restart()
+    }
+    NumberAnimation { id: glider; target: centre; property: "contentY"; duration: PrismTheme.ms(360); easing.type: Easing.OutCubic }
     readonly property real sideWidth: PrismTheme.dp(232)
     readonly property real railWidth: root.width >= PrismTheme.dp(1080) ? PrismTheme.dp(300) : 0
 
     function focusSearch(): void { sidebar.search.input.forceActiveFocus() }
+    // A place a search found: its page, and its group when it names one.
+    function openPlace(place: var): void {
+        PrismState.query = ""
+        PrismState.go(place.page)
+        if (String(place.group ?? "").length > 0) PrismState.pickGroup(place.page, place.group)
+    }
+    // Enter in the search: the first place, else the first row.
+    function takeFirstHit(): void {
+        if (!PrismState.searching) return
+        const places = PrismModel.places(PrismState.query)
+        if (places.length > 0) { root.openPlace(places[0]); return }
+        const hits = PrismModel.search(PrismState.query)
+        if (hits.length > 0) root.reach(hits[0])
+    }
     // Reach a row: its page and group, its section unfolded, the row scrolled into view and lit once.
     function reach(row: var): void {
         if (!row) return
@@ -101,8 +170,19 @@ Item {
 
     Connections {
         target: PrismState
-        // A new area folds its fine-tune rows again; one changed while it was up stays open under the pointer.
-        function onPageChanged() { centre.contentY = 0; IrisOptions.settle() }
+        function onPageChanged() { glider.stop(); centre.contentY = 0; root.spyGroup = ""; IrisOptions.settle() }
+        // A search reads from its top: the best hits and the places they name come first.
+        function onQueryChanged() { glider.stop(); centre.contentY = 0 }
+        // A long page brings the head of its new group into sight; a stacked one glides to it once laid out.
+        function onGroupAskChanged() { groupLater.restart() }
+    }
+    Timer {
+        id: groupLater
+        interval: 40
+        onTriggered: {
+            if (root.flashPath.length > 0) return
+            root.showGroup(root.group)
+        }
     }
 
     Rectangle {
@@ -124,10 +204,15 @@ Item {
             width: root.sideWidth
             height: parent.height
             windowed: root.windowed
+            groups: root.sections.length > 1 ? root.groups : []
+            currentGroup: root.currentGroup
             onCloseRequested: root.closeRequested()
+            onMinimizeRequested: root.minimizeRequested()
             onGrowRequested: root.growRequested()
             onSwitchHost: root.switchHost()
             onReach: row => root.reach(row)
+            onPickGroup: title => root.showGroup(title)
+            onSearchEntered: root.takeFirstHit()
         }
 
         Flickable {
@@ -139,7 +224,8 @@ Item {
             contentHeight: content.implicitHeight + PrismTheme.dp(40)
             boundsBehavior: Flickable.StopAtBounds
             clip: true
-            onContentYChanged: PrismState.scrolledAt = Date.now()
+            onContentYChanged: { PrismState.scrolledAt = Date.now(); root.spy() }
+            onContentHeightChanged: root.spy()
             // Rows leaving the top soften into a blur and fade, and so does the foot while rows wait past it.
             layer.enabled: centreEdge.active
             layer.effect: MultiEffect {
@@ -177,12 +263,15 @@ Item {
                     width: content.width
                     sourceComponent: Column {
                         width: content.width
+                        PrismHomeDeck { width: parent.width }
+                        Item { width: 1; height: PrismTheme.dp(34) }
                         PrismHome { width: parent.width; onReach: row => root.reach(row) }
                         Item { width: 1; height: PrismTheme.dp(40) }
                     }
                 }
 
-                // A search, or every change: one chart whose rows say where they live.
+                // A search, or every change: the places it names (a page, a group) first, then one chart of rows that
+                // say where they live; a press on a place or a row's name goes there.
                 Loader {
                     active: PrismState.searching || root.changesView
                     visible: active
@@ -190,8 +279,16 @@ Item {
                     sourceComponent: Column {
                         width: content.width
                         readonly property var hits: PrismState.searching ? PrismModel.search(PrismState.query) : PrismModel.changes
+                        readonly property var places: PrismState.searching ? PrismModel.places(PrismState.query) : []
+                        PrismPlaces {
+                            visible: parent.places.length > 0
+                            width: parent.width
+                            places: parent.places
+                            onOpen: place => root.openPlace(place)
+                        }
+                        Item { visible: parent.places.length > 0; width: 1; height: PrismTheme.dp(30) }
                         PrismText {
-                            visible: parent.hits.length === 0
+                            visible: parent.hits.length === 0 && parent.places.length === 0
                             topPadding: PrismTheme.dp(12)
                             text: PrismState.searching ? Translation.tr("No setting matches that.") : Translation.tr("Everything is as it came.")
                             color: PrismTheme.ink2
@@ -204,27 +301,16 @@ Item {
                             title: Translation.tr("%1 found").arg(parent.hits.length)
                             rows: parent.hits
                             showPage: true
-                            tunes: false
-                            fold: 100
+                            onReach: row => root.reach(row)
                         }
                     }
                 }
 
-                // A long page's groups, one at a time: the strip names them all.
-                Column {
-                    visible: root.paged
-                    width: content.width
-                    PrismTabs {
-                        width: parent.width
-                        choices: root.sections.map(section => ({ label: section.title, value: section.title }))
-                        current: root.group
-                        onPicked: value => { PrismState.pickGroup(root.page.pageId, String(value)); centre.contentY = Math.min(centre.contentY, groupsAt.y) }
-                    }
-                    Item { id: groupsAt; width: 1; height: PrismTheme.dp(30) }
-                }
+                Item { id: groupsAt; width: 1; height: 0 }
 
                 // Groups keyed by title: a write rebuilds the list, never the groups on screen.
                 Repeater {
+                    id: sectionsRepeater
                     model: ScriptModel { objectProp: "title"; values: root.shownSections }
                     delegate: Column {
                         id: sectionBox
@@ -240,10 +326,23 @@ Item {
                             heads: sectionBox.index === 0
                             firstNumber: 1
                             flashPath: root.flashPath
-                            all: root.flashPath.length > 0 && sectionBox.modelData.rows.some(row => row.path === root.flashPath)
+                            note: root.paged ? String(root.sections.findIndex(section => section.title === sectionBox.modelData.title) + 1).padStart(2, "0") + " / " + String(root.sections.length).padStart(2, "0") : ""
                         }
                         Item { width: 1; height: PrismTheme.dp(36) }
                     }
+                }
+
+                // A long page's part ends on where to go next: the next part's first group large, the part before quiet.
+                PrismNextGroup {
+                    visible: root.paged && !PrismState.searching && !root.changesView && root.parts.length > 1
+                    width: content.width
+                    previous: root.partIndex > 0 ? String(root.parts[root.partIndex - 1][0].title) : ""
+                    next: root.partIndex < root.parts.length - 1 ? String(root.parts[root.partIndex + 1][0].title) : ""
+                    first: String(root.sections[0]?.title ?? "")
+                    then: root.partIndex < root.parts.length - 1 ? root.parts[root.partIndex + 1].slice(1).map(section => Translation.tr(section.title)) : []
+                    position: root.partIndex + 1
+                    count: root.parts.length
+                    onPick: title => root.showGroup(title)
                 }
             }
         }

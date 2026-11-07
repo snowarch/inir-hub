@@ -2466,5 +2466,12 @@
   "%1 on": "%1 activés",
   "Everything is off": "Tout est désactivé",
   "No colours yet": "Pas encore de couleurs",
-  "As a window": "En fenêtre"
+  "As a window": "En fenêtre",
+  "Go to": "Aller à",
+  "Places": "Emplacements",
+  "Page": "Page",
+  "Back to the start": "Retour au début",
+  "Sound & light": "Son et lumière",
+  "No sound device or dimmable screen was found.": "Aucun périphérique audio ni écran à luminosité réglable trouvé.",
+  "Your wallpaper": "Ton fond d’écran"
 }

@@ -2466,5 +2466,12 @@
   "%1 on": "%1 個オン",
   "Everything is off": "すべてオフ",
   "No colours yet": "まだ色がありません",
-  "As a window": "ウィンドウで"
+  "As a window": "ウィンドウで",
+  "Go to": "移動",
+  "Places": "場所",
+  "Page": "ページ",
+  "Back to the start": "最初に戻る",
+  "Sound & light": "サウンドと明るさ",
+  "No sound device or dimmable screen was found.": "サウンドデバイスも明るさを調整できる画面も見つかりません。",
+  "Your wallpaper": "あなたの壁紙"
 }
