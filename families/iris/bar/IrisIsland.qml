@@ -1637,7 +1637,13 @@ Item {
         compactColumn.y, compactColumn.height].join()
     property bool shapesDirty: false
     property int shapeRevision: 0
-    onShapeKeyChanged: root.shapesDirty = true
+    // A change with nothing animating and no blur to take (the edit card turns the blur off) asked for no frame, so the
+    // old shapes stayed drawn until something moved (his 11-07: an Island setting changed from the shelf left a ghost
+    // bubble). A frame is asked for now, and the flush runs in it.
+    onShapeKeyChanged: {
+        root.shapesDirty = true
+        root.Window.window?.update()
+    }
     function flushShapes(): void {
         if (!root.shapesDirty) return
         root.shapesDirty = false
