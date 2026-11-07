@@ -70,8 +70,9 @@ vec3 metrics(vec2 p) {
     tabD = smoothUnion(tabD, max(u.pane.y - p.y, whole), u.radii.y * 0.7);
     // The flap reaches under the tab, so only its top and right edge show.
     float flapD = box(p, vec4(u.folder.y - u.frame.w - R, u.folder.z, u.folder.x, size.y), vec4(R, u.radii.z, R, R));
-    // The foot under the pane, the whole width (its top is hidden by the pane).
-    float footD = box(p, vec4(0.0, 0.5 * (u.pane.y + u.pane.w), size.x, size.y), vec4(R));
+    // The foot under the pane, the whole width. Square where it meets the pane: a rounded top showed beside the pane's
+    // own corners as a second, crooked curve on both edges.
+    float footD = box(p, vec4(0.0, 0.5 * (u.pane.y + u.pane.w), size.x, size.y), vec4(0.0, 0.0, R, R));
     return vec3(min(smoothUnion(tabD, flapD, u.radii.y * 0.45), footD), tabD, flapD);
 }
 
