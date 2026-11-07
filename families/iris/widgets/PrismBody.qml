@@ -1,6 +1,5 @@
 import QtQuick
 import Quickshell
-import qs.modules.common.functions
 import qs.modules.iris.style
 
 // Prism's body (PrismGlass.frag): the folder of frosted glass every Prism face stands on, drawn whole by one shader that
@@ -58,11 +57,11 @@ Item {
         width: body.width + 2 * body.room
         height: body.height + 2 * body.room
         fragmentShader: Qt.resolvedUrl("PrismGlass.frag.qsb")
+        // Background off means no glass at all, as on every other widget (his 11-07: the shelf's "hide every background"
+        // left Prism's folders standing as smoked glass): the face's ink stands on the wallpaper with Lume's shadow.
+        visible: !body.face.clear
         readonly property bool light: body.face.lightBackdrop
-        // Background off: the folder stays (it is the face) as smoked glass light enough to read through, no shadow; it
-        // follows the ink (white ink on dark glass in either scheme), never the scheme alone.
-        readonly property color tint: body.face.clear
-            ? ColorUtils.applyAlpha(glass.light ? IrisStyle.frost : IrisStyle.darkSurfaceOpaque, glass.light ? 0.72 : 0.62) : body.face.plateColor // iris-literal: background off keeps the folder (it is the face) as smoked glass
+        readonly property color tint: body.face.plateColor
         readonly property vector4d frame: Qt.vector4d(body.width, body.height, body.room, body.lean)
         readonly property vector4d folder: Qt.vector4d(body.flapRight, body.tabRight, body.flapTop,
             1 / Math.max(0.5, Screen.devicePixelRatio))

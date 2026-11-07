@@ -13,20 +13,23 @@ import qs.modules.iris.prism.controls
 
 // A widget's rows from its manifest as lines of Prism's chart in the edit sheet (the host numbers them after its own):
 // a switch is the ON/OFF pill, a level the white-fill pill with its figure, a choice the segmented pill (past four, or
-// past its room, it folds and lays its chips under the line), words a field. A kind the chart has no control for
-// (a list of pieces) is drawn by Settings' own row.
+// past its room, it folds and lays its chips under the line, or hands them to `fold` where there is no room under it),
+// words a field, an action the whole line with its arrow. A kind the chart has no control for (a list of pieces) is
+// drawn by Settings' own row. A spec's `caption` is said under its name (the shelf names a group's first line so).
 ColumnLayout {
     id: root
 
     property var specs: []
     property int firstNumber: 1
+    // Set by a host with no room under a line (the edit shelf): a folded choice's chips open there instead.
+    property var fold: null
     readonly property var lines: {
         Config.revision
         const shown = root.specs.filter(spec => IrisOptions.shown(spec))
         return shown.map((spec, i) => Object.assign({ modelKey: String(spec.path ?? spec.label), number: root.firstNumber + i,
             last: i === shown.length - 1 }, spec))
     }
-    readonly property var drawn: ["switch", "choice", "range", "text"]
+    readonly property var drawn: ["switch", "choice", "range", "text", "action"]
     Layout.fillWidth: true
     spacing: 0
 
@@ -58,10 +61,15 @@ ColumnLayout {
                     property bool open: false
                     number: line.spec.number
                     label: Translation.tr(String(line.spec.label ?? ""))
+                    detail: line.spec.caption ? Translation.tr(String(line.spec.caption)) : ""
+                    tappable: line.spec.kind === "action"
+                    glyph: line.spec.kind === "action" ? "arrow_forward" : ""
+                    onTapped: line.spec.run?.()
                     changed: IrisOptions.modified(line.spec)
                     rule: !line.spec.last || line.open
                     Loader {
                         id: kind
+                        active: line.spec.kind !== "action"
                         sourceComponent: line.spec.kind === "switch" ? switchKind : line.spec.kind === "range" ? rangeKind
                             : line.spec.kind === "text" ? textKind : choiceKind
                     }
@@ -94,7 +102,10 @@ ColumnLayout {
                             room: PrismTheme.dp(196)
                             open: line.open
                             onPicked: value => IrisOptions.commit(line.spec, value)
-                            onToggleOpen: line.open = !line.open
+                            onToggleOpen: {
+                                if (root.fold) root.fold(line.spec)
+                                else line.open = !line.open
+                            }
                         }
                     }
                     Component {
