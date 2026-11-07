@@ -2441,5 +2441,21 @@
   "Next city": "अगला शहर",
   "Water": "पानी",
   "The Island holds water up to the battery's charge, the hour or the day; it rolls when the charger goes in.": "आइलैंड बैटरी के चार्ज, घंटे या दिन तक पानी से भरता है; चार्जर लगाने पर लहराता है।",
-  "What the water stands at: the battery's charge, the hour gone or the day gone.": "पानी कहाँ तक है: बैटरी का चार्ज, बीता घंटा या बीता दिन।"
+  "What the water stands at: the battery's charge, the hour gone or the day gone.": "पानी कहाँ तक है: बैटरी का चार्ज, बीता घंटा या बीता दिन।",
+  "%1 changed": "%1 बदले गए",
+  "%1 found": "%1 मिले",
+  "%1 settings back to their defaults": "%1 सेटिंग्स डिफ़ॉल्ट पर लौटीं",
+  "Changes": "बदलाव",
+  "Events": "घटनाएँ",
+  "Everything is as it came.": "सब कुछ वैसा ही है जैसा आया था।",
+  "Feel": "अनुभव",
+  "From the factory profile": "फ़ैक्टरी प्रोफ़ाइल से",
+  "Lock now": "अभी लॉक करें",
+  "More settings": "और सेटिंग्स",
+  "No setting matches that.": "कोई सेटिंग मेल नहीं खाती।",
+  "Play something and it shows here.": "कुछ चलाएँ, वह यहाँ दिखेगा।",
+  "See all": "सब देखें",
+  "Send a test": "टेस्ट भेजें",
+  "Setting": "सेटिंग",
+  "What it does": "यह क्या करती है"
 }

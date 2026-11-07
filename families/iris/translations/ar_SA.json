@@ -2441,5 +2441,21 @@
   "Next city": "المدينة التالية",
   "Water": "الماء",
   "The Island holds water up to the battery's charge, the hour or the day; it rolls when the charger goes in.": "تمتلئ الجزيرة بالماء حتى شحن البطارية أو الساعة أو اليوم، ويتموّج عند توصيل الشاحن.",
-  "What the water stands at: the battery's charge, the hour gone or the day gone.": "ما يبلغه مستوى الماء: شحن البطارية أو ما مضى من الساعة أو من اليوم."
+  "What the water stands at: the battery's charge, the hour gone or the day gone.": "ما يبلغه مستوى الماء: شحن البطارية أو ما مضى من الساعة أو من اليوم.",
+  "%1 changed": "تم تغيير %1",
+  "%1 found": "تم العثور على %1",
+  "%1 settings back to their defaults": "أُعيد %1 من الإعدادات إلى الافتراضي",
+  "Changes": "التغييرات",
+  "Events": "الأحداث",
+  "Everything is as it came.": "كل شيء كما جاء.",
+  "Feel": "الإحساس",
+  "From the factory profile": "مقارنة بملف المصنع",
+  "Lock now": "اقفل الآن",
+  "More settings": "إعدادات أخرى",
+  "No setting matches that.": "لا يوجد إعداد مطابق.",
+  "Play something and it shows here.": "شغّل شيئًا وسيظهر هنا.",
+  "See all": "عرض الكل",
+  "Send a test": "إرسال اختبار",
+  "Setting": "الإعداد",
+  "What it does": "ما يفعله"
 }

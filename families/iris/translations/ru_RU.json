@@ -2441,5 +2441,21 @@
   "Next city": "Следующий город",
   "Water": "Вода",
   "The Island holds water up to the battery's charge, the hour or the day; it rolls when the charger goes in.": "Остров наполняется водой до уровня заряда, часа или дня; она колышется, когда подключаешь зарядку.",
-  "What the water stands at: the battery's charge, the hour gone or the day gone.": "До чего поднимается вода: заряд батареи, прошедший час или прошедший день."
+  "What the water stands at: the battery's charge, the hour gone or the day gone.": "До чего поднимается вода: заряд батареи, прошедший час или прошедший день.",
+  "%1 changed": "Изменено: %1",
+  "%1 found": "Найдено: %1",
+  "%1 settings back to their defaults": "Настроек сброшено: %1",
+  "Changes": "Изменения",
+  "Events": "События",
+  "Everything is as it came.": "Всё как было изначально.",
+  "Feel": "Ощущение",
+  "From the factory profile": "Из заводского профиля",
+  "Lock now": "Заблокировать",
+  "More settings": "Другие настройки",
+  "No setting matches that.": "Ничего не найдено.",
+  "Play something and it shows here.": "Включите что-нибудь — оно появится здесь.",
+  "See all": "Все",
+  "Send a test": "Отправить тест",
+  "Setting": "Настройка",
+  "What it does": "Что делает"
 }

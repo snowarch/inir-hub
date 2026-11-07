@@ -21,6 +21,8 @@ import qs.modules.shared.background
 import qs.modules.shared.lock
 import qs.modules.iris.state
 import qs.modules.iris.frame
+import qs.modules.iris.prism
+import qs.modules.iris.prism.core
 
 Item {
     id: root
@@ -163,12 +165,28 @@ Item {
         component: IrisStudio {}
     }
 
+    // Prism, iRiS's Settings since 11-06; a page it has not got opens the classic Settings for that visit.
+    readonly property bool prismOn: (Config.options?.iris?.appearance?.settingsPanel ?? "prism") === "prism" && !PrismState.classicVisit
+    OnDemandPanelLoader {
+        identifier: "irisPrism"
+        requireEnabledPanel: false
+        open: GlobalStates.settingsOverlayOpen
+        extraCondition: root.prismOn
+        keep: true
+        closeGraceMs: 0
+        component: PrismWindow {}
+    }
+    Connections {
+        target: GlobalStates
+        function onSettingsOverlayOpenChanged() { if (!GlobalStates.settingsOverlayOpen) PrismState.classicVisit = false }
+    }
+
     OnDemandPanelLoader {
         identifier: "irisSettings"
         requireEnabledPanel: false
         open: GlobalStates.settingsOverlayOpen
         // Only the host in use is kept: switching hosts builds the other once.
-        extraCondition: !root.settingsWindowed
+        extraCondition: !root.prismOn && !root.settingsWindowed
         keep: true
         closeGraceMs: 0
         component: IrisSettingsOverlay {}
@@ -179,7 +197,7 @@ Item {
         identifier: "irisSettingsWindow"
         requireEnabledPanel: false
         open: GlobalStates.settingsOverlayOpen
-        extraCondition: root.settingsWindowed
+        extraCondition: !root.prismOn && root.settingsWindowed
         keep: true
         closeGraceMs: 0
         component: IrisSettingsWindow {}

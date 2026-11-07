@@ -237,6 +237,8 @@ JsonObject {
         property string customize: "shell"
         // Choosing a theme takes only its colours; its shapes, layout and motion stay as they are.
         property bool themeColoursOnly: false
+        // Which Settings iRiS opens: Prism (11-06) or the classic one.
+        property string settingsPanel: "prism"
         property string settingsHost: "overlay"
         // How iRiS Settings lays its page: "folio", "deck" or "console" (a Design with its own page keeps it).
         property string settingsLayout: "classic"

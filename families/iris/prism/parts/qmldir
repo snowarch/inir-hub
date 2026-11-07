@@ -1,0 +1,12 @@
+module qs.modules.iris.prism.parts
+PrismGlow 1.0 PrismGlow.qml
+PrismSidebar 1.0 PrismSidebar.qml
+PrismNavItem 1.0 PrismNavItem.qml
+PrismHeading 1.0 PrismHeading.qml
+PrismHero 1.0 PrismHero.qml
+PrismSection 1.0 PrismSection.qml
+PrismRow 1.0 PrismRow.qml
+PrismThumb 1.0 PrismThumb.qml
+PrismRail 1.0 PrismRail.qml
+PrismNowPlaying 1.0 PrismNowPlaying.qml
+PrismToast 1.0 PrismToast.qml

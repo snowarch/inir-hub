@@ -2441,5 +2441,21 @@
   "Next city": "다음 도시",
   "Water": "물",
   "The Island holds water up to the battery's charge, the hour or the day; it rolls when the charger goes in.": "아일랜드에 배터리 잔량, 시간 또는 하루만큼 물이 차오르고, 충전기를 꽂으면 출렁입니다.",
-  "What the water stands at: the battery's charge, the hour gone or the day gone.": "물이 차오르는 기준: 배터리 잔량, 지난 시간 또는 지난 하루."
+  "What the water stands at: the battery's charge, the hour gone or the day gone.": "물이 차오르는 기준: 배터리 잔량, 지난 시간 또는 지난 하루.",
+  "%1 changed": "%1개 변경됨",
+  "%1 found": "%1개 찾음",
+  "%1 settings back to their defaults": "설정 %1개를 기본값으로 되돌림",
+  "Changes": "변경 사항",
+  "Events": "이벤트",
+  "Everything is as it came.": "모두 처음 그대로입니다.",
+  "Feel": "느낌",
+  "From the factory profile": "공장 프로필 기준",
+  "Lock now": "지금 잠그기",
+  "More settings": "설정 더 보기",
+  "No setting matches that.": "일치하는 설정이 없습니다.",
+  "Play something and it shows here.": "무언가 재생하면 여기에 표시됩니다.",
+  "See all": "모두 보기",
+  "Send a test": "테스트 보내기",
+  "Setting": "설정",
+  "What it does": "하는 일"
 }

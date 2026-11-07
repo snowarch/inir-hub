@@ -2441,5 +2441,21 @@
   "Next city": "下一个城市",
   "Water": "水位",
   "The Island holds water up to the battery's charge, the hour or the day; it rolls when the charger goes in.": "灵动岛盛着水，水位是电量、这一小时或这一天；插上充电器时水面荡漾。",
-  "What the water stands at: the battery's charge, the hour gone or the day gone.": "水位代表什么：电池电量、这一小时已过的部分或这一天已过的部分。"
+  "What the water stands at: the battery's charge, the hour gone or the day gone.": "水位代表什么：电池电量、这一小时已过的部分或这一天已过的部分。",
+  "%1 changed": "已更改 %1 项",
+  "%1 found": "找到 %1 项",
+  "%1 settings back to their defaults": "%1 项设置已恢复默认",
+  "Changes": "更改",
+  "Events": "事件",
+  "Everything is as it came.": "一切都是初始状态。",
+  "Feel": "手感",
+  "From the factory profile": "相对出厂配置",
+  "Lock now": "立即锁定",
+  "More settings": "更多设置",
+  "No setting matches that.": "没有匹配的设置。",
+  "Play something and it shows here.": "播放点什么，它会显示在这里。",
+  "See all": "查看全部",
+  "Send a test": "发送测试",
+  "Setting": "设置",
+  "What it does": "作用"
 }

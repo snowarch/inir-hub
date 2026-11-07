@@ -2441,5 +2441,21 @@
   "Next city": "Sonraki şehir",
   "Water": "Su",
   "The Island holds water up to the battery's charge, the hour or the day; it rolls when the charger goes in.": "Ada pil şarjı, saat ya da gün kadar suyla dolar; şarj aleti takılınca dalgalanır.",
-  "What the water stands at: the battery's charge, the hour gone or the day gone.": "Suyun seviyesi: pil şarjı, geçen saat ya da geçen gün."
+  "What the water stands at: the battery's charge, the hour gone or the day gone.": "Suyun seviyesi: pil şarjı, geçen saat ya da geçen gün.",
+  "%1 changed": "%1 değişti",
+  "%1 found": "%1 bulundu",
+  "%1 settings back to their defaults": "%1 ayar varsayılana döndü",
+  "Changes": "Değişiklikler",
+  "Events": "Olaylar",
+  "Everything is as it came.": "Her şey geldiği gibi.",
+  "Feel": "His",
+  "From the factory profile": "Fabrika profilinden",
+  "Lock now": "Şimdi kilitle",
+  "More settings": "Diğer ayarlar",
+  "No setting matches that.": "Eşleşen ayar yok.",
+  "Play something and it shows here.": "Bir şey çal, burada görünsün.",
+  "See all": "Tümünü gör",
+  "Send a test": "Test gönder",
+  "Setting": "Ayar",
+  "What it does": "Ne yapar"
 }

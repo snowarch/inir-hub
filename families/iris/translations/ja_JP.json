@@ -2441,5 +2441,21 @@
   "Next city": "次の都市",
   "Water": "水位",
   "The Island holds water up to the battery's charge, the hour or the day; it rolls when the charger goes in.": "アイランドにバッテリー残量、時、日の分だけ水がたまり、充電器をつなぐと波打ちます。",
-  "What the water stands at: the battery's charge, the hour gone or the day gone.": "水位が示すもの：バッテリー残量、この1時間の経過、または1日の経過。"
+  "What the water stands at: the battery's charge, the hour gone or the day gone.": "水位が示すもの：バッテリー残量、この1時間の経過、または1日の経過。",
+  "%1 changed": "%1 件変更",
+  "%1 found": "%1 件",
+  "%1 settings back to their defaults": "%1 件の設定を初期値に戻しました",
+  "Changes": "変更",
+  "Events": "イベント",
+  "Everything is as it came.": "すべて初期状態です。",
+  "Feel": "感触",
+  "From the factory profile": "工場出荷時のプロファイルから",
+  "Lock now": "今すぐロック",
+  "More settings": "その他の設定",
+  "No setting matches that.": "一致する設定はありません。",
+  "Play something and it shows here.": "何か再生するとここに表示されます。",
+  "See all": "すべて表示",
+  "Send a test": "テストを送信",
+  "Setting": "設定",
+  "What it does": "内容"
 }

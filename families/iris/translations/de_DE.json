@@ -2441,5 +2441,21 @@
   "Next city": "Nächste Stadt",
   "Water": "Wasser",
   "The Island holds water up to the battery's charge, the hour or the day; it rolls when the charger goes in.": "Die Insel füllt sich mit Wasser bis zur Akkuladung, zur Stunde oder zum Tag; es wogt, wenn das Ladegerät eingesteckt wird.",
-  "What the water stands at: the battery's charge, the hour gone or the day gone.": "Wie hoch das Wasser steht: die Akkuladung, die vergangene Stunde oder der vergangene Tag."
+  "What the water stands at: the battery's charge, the hour gone or the day gone.": "Wie hoch das Wasser steht: die Akkuladung, die vergangene Stunde oder der vergangene Tag.",
+  "%1 changed": "%1 geändert",
+  "%1 found": "%1 gefunden",
+  "%1 settings back to their defaults": "%1 Einstellungen auf Standard zurückgesetzt",
+  "Changes": "Änderungen",
+  "Events": "Ereignisse",
+  "Everything is as it came.": "Alles ist wie ausgeliefert.",
+  "Feel": "Gefühl",
+  "From the factory profile": "Aus dem Werksprofil",
+  "Lock now": "Jetzt sperren",
+  "More settings": "Weitere Einstellungen",
+  "No setting matches that.": "Keine Einstellung passt.",
+  "Play something and it shows here.": "Spiel etwas ab, dann erscheint es hier.",
+  "See all": "Alle anzeigen",
+  "Send a test": "Test senden",
+  "Setting": "Einstellung",
+  "What it does": "Was sie tut"
 }
