@@ -236,6 +236,7 @@ ColumnLayout {
             readonly property real topBleed: page.island.padding + page.island.chassisItem.topInset + heroBleed.navBand
             // Always layered: toggling layers inside the chassis stops it painting.
             layer.enabled: true
+            layer.smooth: true
             layer.effect: MultiEffect {
                 maskEnabled: true
                 maskSource: heroFade
@@ -256,6 +257,7 @@ ColumnLayout {
                 anchors.fill: parent
                 // Always layered, like heroBleed: toggling layers inside the chassis stops it painting.
                 layer.enabled: true
+                layer.smooth: true
                 layer.effect: MultiEffect {
                     maskEnabled: sideJoin.active
                     maskSource: sideJoin

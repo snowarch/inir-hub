@@ -44,6 +44,7 @@ Item {
         anchors.fill: parent
         visible: root.moving
         layer.enabled: root.moving
+        layer.smooth: true
         layer.effect: MultiEffect {
             maskEnabled: true
             maskSource: edges

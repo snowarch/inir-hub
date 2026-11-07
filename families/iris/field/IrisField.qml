@@ -17,6 +17,10 @@ Item {
     property color sheen: IrisStyle.glassEdgeColour
     property real smoothing: IrisStyle.fuse
     property bool framed: IrisFrame.framed
+    // Drawn under a transform (the edit card, the arrival): the cached field is sampled smoothly, and at `renderScale`
+    // it is rendered at the size it is shown, so the card's resting picture lands texel on pixel instead of stepping.
+    property real renderScale: 1
+    property bool resampled: false
     property real band: IrisFrame.band
     property real cornerRadius: IrisFrame.cornerRadius
     readonly property int capacity: 20
@@ -207,6 +211,9 @@ Item {
         // changes. At rest that was ~1 full-field frame a second, twice as dear under Afterglow (11-02). Only the chassis:
         // its size is the output's; a floating field's bounds follow its bodies and would reallocate the layer per frame.
         layer.enabled: root.framed
+        layer.smooth: root.resampled
+        layer.textureSize: root.renderScale < 1 ? Qt.size(Math.round(pass.width * root.renderScale), Math.round(pass.height * root.renderScale))
+            : Qt.size(0, 0)
 
         // Every per-body uniform in one pass over the table. A moving body rewrites `shapes` every frame, and as ~55
         // bindings (one per uniform, each with its own closures and lookups) that pass cost several times the work.
@@ -267,7 +274,7 @@ Item {
         readonly property vector4d edgeGlass: IrisStyle.afterglow || IrisStyle.streak ? Qt.vector4d(0, 0, 1, 0)
             : Qt.vector4d(IrisStyle.glassEdgeLight, IrisStyle.glassEdgeLine, IrisStyle.edgeWidth, IrisStyle.edgeLit ? 1 : 0)
         // z: one device pixel in the field's units; both edges are drawn that many pixels wide.
-        readonly property vector4d edge: Qt.vector4d(root.rimWidth, root.rim.a > 0 ? 1 : 0, IrisStyle.devicePx, 0)
+        readonly property vector4d edge: Qt.vector4d(root.rimWidth, root.rim.a > 0 ? 1 : 0, IrisStyle.devicePx / Math.max(0.2, root.renderScale), 0)
         readonly property vector4d glowMix: IrisStyle.afterglowMix
         readonly property vector4d glowShadow: IrisStyle.afterglowShadow
         readonly property vector4d glowLight: IrisStyle.afterglowLight
