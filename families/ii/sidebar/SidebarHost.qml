@@ -102,12 +102,6 @@ Scope {
     property bool _contentResident: false
     property bool _nativeHostMapped: true
     property bool _resumeRearmPending: false
-    readonly property int contentIdleUnloadMs: {
-        const override = Number(Quickshell.env("INIR_SIDEBAR_IDLE_UNLOAD_MS"))
-        return Number.isFinite(override) && override >= 250
-            ? Math.round(override) : 300000
-    }
-
     onRoleOpenChanged: Qt.callLater(() => {
         if (!root.roleOpen)
             root.edgeRevealTransient = false
@@ -130,15 +124,14 @@ Scope {
     }
 
     onPresentationOpenChanged: {
+        // Once loaded, the content stays: unloading it after 5 idle minutes freed ~7k objects but no memory
+        // (RSS 1008 vs 1009 MB, 11-07) and made the next open a cold load a second click closed.
         if (root.presentationOpen) {
-            contentUnloadTimer.stop()
             root._contentResident = true
             renderSuspendTimer.stop()
             root._renderUpdatesNeeded = true
         } else {
             renderSuspendTimer.restart()
-            if (root._contentResident)
-                contentUnloadTimer.restart()
         }
     }
 
@@ -149,21 +142,6 @@ Scope {
         onTriggered: {
             if (!root.presentationOpen)
                 root._renderUpdatesNeeded = false
-        }
-    }
-
-    Timer {
-        id: contentUnloadTimer
-        interval: root.contentIdleUnloadMs
-        onTriggered: {
-            if (root.presentationOpen)
-                return
-            if (sidebarContentLoader.animating) {
-                restart()
-                return
-            }
-            root._contentResident = false
-            root.reportRuntime()
         }
     }
 
@@ -240,7 +218,6 @@ Scope {
             loaderStatus: sidebarContentLoader.status,
             contentReady: sidebarContentLoader.item !== null,
             contentResident: root._contentResident,
-            idleUnloadPending: contentUnloadTimer.running,
             animationType: root.animationType,
             animationRunning: sidebarContentLoader.animating,
             animationTranslateX: Math.round(sidebarContentLoader.animTranslateX),

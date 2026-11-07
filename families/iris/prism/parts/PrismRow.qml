@@ -393,7 +393,9 @@ Item {
         PrismPieces {
             width: slot.width
             choices: root.choices
-            picked: Array.isArray(root.value) ? root.value : []
+            // A config list reaches QML as a sequence, not an Array: Array.isArray read every one as empty, so no chip
+            // showed as on and a tap wrote a list of that one alone (his familyCycle went to Material only, 11-07).
+            picked: root.value && typeof root.value === "object" ? Array.from(root.value) : []
             ordered: !root.spec.flags
             onChanged: next => PrismModel.write(root.row, next)
         }

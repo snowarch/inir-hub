@@ -3,6 +3,7 @@
     "version": "2.33.60",
     "changes": {
         "2.33.60": [
+            "Prism Settings: rows that pick several pieces show which are on and in what order; a tap adds to the list instead of replacing it",
             "React with any emoji: one small pill opens a search, and votes and reactions show the moment people give them"
         ],
         "2.33.59": [

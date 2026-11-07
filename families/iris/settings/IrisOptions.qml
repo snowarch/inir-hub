@@ -254,9 +254,13 @@ QtObject {
     function say(spec: var, value: var): string {
         if (spec.kind === "switch" || spec.kind === "toggle") return (spec.invert ? !value : Boolean(value)) ? Translation.tr("On") : Translation.tr("Off")
         if (spec.kind === "range" || spec.kind === "level") return Number.isFinite(Number(value)) ? root.rangeText(spec, value) : ""
+        // A config list is a sequence, not an Array: one of a single piece says its name, more say how many.
+        if (value && typeof value === "object" && Number.isFinite(value.length)) {
+            const one = value.length === 1 ? root.choicesOf(spec).find(entry => String(entry.value) === String(value[0])) : null
+            return one ? Translation.tr(String(one.label ?? "")) : Translation.tr("%1 chosen").arg(value.length)
+        }
         const choice = root.choicesOf(spec).find(entry => String(entry.value) === String(value))
         if (choice) return Translation.tr(String(choice.label ?? ""))
-        if (Array.isArray(value)) return Translation.tr("%1 chosen").arg(value.length)
         if (spec.kind === "text" || spec.kind === "hue") return String(value ?? "").length > 0 && String(value).length <= 22 ? String(value) : ""
         return ""
     }

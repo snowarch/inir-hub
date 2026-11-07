@@ -3,6 +3,7 @@
     "version": "2.35.6",
     "changes": {
         "2.35.6": [
+            "Side panels open on the first click, also after a while unused",
             "React with any emoji: one small pill opens a search, and votes and reactions show the moment people give them"
         ],
         "2.35.5": [
