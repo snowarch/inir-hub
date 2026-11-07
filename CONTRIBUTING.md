@@ -328,7 +328,10 @@ Never accepted, whatever it declares:
 
 ## Review
 
-`inir hub check` and CI hold the rules above; a maintainer reads what no check can:
+A colour theme or an iRiS theme is data (nothing in it runs), so its pull request merges by itself once Check passes,
+when it changes that one theme and its `docs/<id>/` only. Everything else waits for a maintainer.
+
+`inir hub check` and CI hold the rules above; for code, a maintainer reads what no check can:
 
 - it does what the summary says, in each family it claims;
 - it looks like it belongs there: the family's parts, sizes on the family's grid, every state worded;

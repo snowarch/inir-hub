@@ -1,0 +1,50 @@
+name: Merge
+
+# Acceptance by risk. A pull request that only adds or changes a colour theme or an iRiS theme is data: nothing in it
+# runs on anyone's desktop, so once Check passes it merges by itself. Anything else (widgets, components, Designs,
+# web apps, families, the tools) waits for a maintainer. This never checks out the pull request's code: it reads
+# the list of changed files from the API.
+on:
+  workflow_run:
+    workflows: [Check]
+    types: [completed]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  data-only:
+    if: github.event.workflow_run.event == 'pull_request' && github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Merge a pull request that changes only one theme
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          SHA: ${{ github.event.workflow_run.head_sha }}
+          BRANCH: ${{ github.event.workflow_run.head_branch }}
+          OWNER: ${{ github.event.workflow_run.head_repository.owner.login }}
+        run: |
+          pr=$(gh api "repos/$REPO/pulls?state=open&head=$OWNER:$BRANCH" --jq ".[] | select(.head.sha == \"$SHA\") | .number" | head -1)
+          [ -n "$pr" ] || { echo "no open pull request at $SHA"; exit 0; }
+          files=$(gh api --paginate "repos/$REPO/pulls/$pr/files" --jq '.[].filename')
+          # One item of a data kind, plus its docs page at most.
+          items=$(echo "$files" | grep -v '^docs/' | cut -d/ -f1-2 | sort -u)
+          if [ "$(echo "$items" | wc -l)" != 1 ] || ! echo "$items" | grep -Eq '^(themes|iris-themes)/[a-z0-9-]+$'; then
+            echo "#$pr changes $(echo "$items" | tr '\n' ' '): a maintainer reads it"
+            exit 0
+          fi
+          id=${items#*/}
+          if [ -n "$(echo "$files" | grep '^docs/' | grep -v "^docs/$id/" || true)" ]; then
+            echo "#$pr touches another item's docs: a maintainer reads it"
+            exit 0
+          fi
+          gh pr merge "$pr" --repo "$REPO" --squash --match-head-commit "$SHA"
+          echo "#$pr merged: $items is data only and passed Check"
+      - name: Ask inir.space to deploy
+        # A merge made by this workflow's token starts no other workflow, so Publish would not run.
+        env:
+          GH_TOKEN: ${{ secrets.SITE_DISPATCH_TOKEN }}
+        run: |
+          [ -z "$GH_TOKEN" ] || gh api repos/snowarch/inir-site/dispatches -f event_type=hub-updated
