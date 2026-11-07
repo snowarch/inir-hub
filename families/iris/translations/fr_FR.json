@@ -2485,5 +2485,10 @@
   "Holo light": "Lumière holo",
   "How brightly the spectral rim burns.": "L'intensité du bord spectral.",
   "Holo halo": "Halo holo",
-  "How far the light spills over the screen; 0 keeps it on the frame.": "Jusqu'où la lumière déborde sur l'écran ; 0 la garde sur le cadre."
+  "How far the light spills over the screen; 0 keeps it on the frame.": "Jusqu'où la lumière déborde sur l'écran ; 0 la garde sur le cadre.",
+  "Repeat": "Répéter",
+  "%1 cores · %2 GHz": "%1 cœurs · %2 GHz",
+  "avg %1%": "moy. %1%",
+  "Warns at %1°": "Alerte à %1°",
+  "%1 GB free": "%1 Go libres"
 }

@@ -464,118 +464,66 @@ Item {
         id: vitalsCard
         ColumnLayout {
             id: vitalsBody
-            spacing: 10 * root.d
+            spacing: 12 * root.d
             ResourceUsageMonitor { target: vitalsBody; active: root.contentActive }
             CardHeader {
                 glyph: "monitoring"
                 tint: IrisStyle.identity.teal
                 title: Translation.tr("Vitals")
-                detail: Translation.tr("What this machine is doing")
+                detail: ResourceUsage.cpuFrequencyMhz > 0
+                    ? Translation.tr("%1 cores · %2 GHz").arg(ResourceUsage.cpuCoreUsage.length).arg((ResourceUsage.cpuFrequencyMhz / 1000).toFixed(1))
+                    : Translation.tr("What this machine is doing")
             }
-            // Four open rings, staggered like a streak's (the Apple Watch way): each its glyph inside, its reading under
-            // it in its colour; a reading past its warning turns the ring red.
-            Item {
-                id: rings
-                readonly property var vitals: [
-                    { label: Translation.tr("Processor"), glyph: "memory", level: ResourceUsage.cpuUsage, value: Math.round(ResourceUsage.cpuUsage * 100), unit: "%", warn: 0.85, tint: IrisStyle.identity.green },
-                    { label: Translation.tr("Memory"), glyph: "memory_alt", level: ResourceUsage.memoryUsedPercentage, value: Math.round(ResourceUsage.memoryUsedPercentage * 100), unit: "%", warn: 0.85, tint: IrisStyle.identity.yellow },
-                    { label: Translation.tr("Heat"), glyph: "device_thermostat", level: ResourceUsage.tempPercentage, value: ResourceUsage.maxTemp, unit: "°", warn: ResourceUsage.tempWarningThreshold / 100, tint: IrisStyle.identity.orange },
-                    { label: Translation.tr("Disk"), glyph: "hard_drive", level: ResourceUsage.diskUsedPercentage, value: Math.round(ResourceUsage.diskUsedPercentage * 100), unit: "%", warn: 0.9, tint: IrisStyle.identity.blue }
-                ]
-                readonly property real size: Math.round(58 * root.d)
-                readonly property real drop: Math.round(26 * root.d)
-                Layout.fillWidth: true
-                implicitHeight: rings.size + rings.drop + Math.round(20 * root.d)
-                Repeater {
-                    model: rings.vitals
-                    Item {
-                        id: vital
-                        required property var modelData
-                        required property int index
-                        readonly property real level: Math.max(0, Math.min(1, Number(vital.modelData.level) || 0))
-                        readonly property color tint: vital.level >= vital.modelData.warn ? IrisStyle.danger : vital.modelData.tint
-                        readonly property real step: (rings.width - rings.size) / Math.max(1, rings.vitals.length - 1)
-                        x: Math.round(vital.index * vital.step)
-                        y: vital.index % 2 === 1 ? rings.drop : 0
-                        width: rings.size
-                        height: rings.size + Math.round(20 * root.d)
-                        Accessible.name: vital.modelData.label + ", " + vital.modelData.value + vital.modelData.unit
-                        ProgressRing {
-                            width: rings.size
-                            height: rings.size
-                            sweep: 270
-                            stroke: Math.max(4, 7 * root.d)
-                            tint: vital.tint
-                            progress: vital.level
-                            Behavior on progress { NumberAnimation { duration: IrisStyle.morphDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: IrisStyle.moveCurve } }
-                            MaterialSymbol {
-                                anchors.centerIn: parent
-                                text: vital.modelData.glyph
-                                fill: 1
-                                iconSize: Math.round(22 * root.d)
-                                color: vital.tint
-                            }
-                        }
-                        Tabular {
-                            anchors.horizontalCenter: parent.horizontalCenter
-                            y: rings.size - Math.round(8 * root.d)
-                            text: vital.modelData.value + vital.modelData.unit
-                            color: vital.tint
-                            font.pixelSize: IrisStyle.typeMeta
-                            font.weight: IrisStyle.weight(Font.Bold)
-                        }
-                    }
-                }
-            }
-            // The processor over the last minute as a market chart: the figure, how far it moved, the line over its
-            // own glow, the average dashed under it.
+            // The processor over the last minute (Stats' and iStat's way): the figure large, its average beside it in
+            // grey, one line in one colour over its own glow, the average dashed. Red only past its warning.
             Item {
                 id: chart
                 readonly property var history: Array.from(ResourceUsage.cpuUsageHistory ?? [])
                 readonly property real now: Math.round(ResourceUsage.cpuUsage * 100)
-                readonly property real before: chart.history.length > 1 ? Math.round(chart.history[0] * 100) : chart.now
                 readonly property real average: chart.history.length > 0 ? chart.history.reduce((a, b) => a + b, 0) / chart.history.length : 0
-                readonly property color ink: chart.now >= chart.before ? IrisStyle.identity.green : IrisStyle.identity.red
-                visible: chart.history.length > 2
+                readonly property color ink: ResourceUsage.cpuUsage >= 0.85 ? IrisStyle.danger : IrisStyle.identity.teal
                 Layout.fillWidth: true
-                Layout.topMargin: 4 * root.d
-                implicitHeight: Math.round(112 * root.d)
+                implicitHeight: Math.round(104 * root.d)
                 RowLayout {
                     id: chartHead
                     width: parent.width
-                    spacing: 8 * root.d
+                    spacing: 10 * root.d
                     Tabular {
+                        Layout.alignment: Qt.AlignBaseline
                         text: chart.now + "%"
                         color: IrisStyle.text
-                        font.pixelSize: IrisStyle.typeHero
+                        font.pixelSize: IrisStyle.typeTitleLarge
+                        font.weight: IrisStyle.weight(Font.DemiBold)
+                    }
+                    IrisText {
+                        Layout.alignment: Qt.AlignBaseline
+                        text: Translation.tr("Processor")
+                        color: IrisStyle.textSecondary
+                        font.pixelSize: IrisStyle.typeMeta
                         font.weight: IrisStyle.weight(Font.Medium)
                     }
-                    ColumnLayout {
-                        Layout.alignment: Qt.AlignVCenter
-                        spacing: 0
-                        Tabular {
-                            text: (chart.now >= chart.before ? "+" : "") + (chart.now - chart.before) + "%"
-                            color: chart.ink
-                            font.pixelSize: IrisStyle.typeFootnote
-                            font.weight: IrisStyle.weight(Font.DemiBold)
-                        }
-                        IrisText {
-                            text: Translation.tr("Processor")
-                            color: IrisStyle.textTertiary
-                            font.pixelSize: IrisStyle.typeFootnote
-                        }
-                    }
                     Item { Layout.fillWidth: true }
+                    Tabular {
+                        Layout.alignment: Qt.AlignBaseline
+                        visible: chart.history.length > 2
+                        text: Translation.tr("avg %1%").arg(Math.round(chart.average * 100))
+                        color: IrisStyle.textTertiary
+                        font.pixelSize: IrisStyle.typeFootnote
+                        font.weight: IrisStyle.weight(Font.Medium)
+                    }
                 }
                 Shape {
                     id: line
+                    visible: chart.history.length > 2
                     anchors.top: chartHead.bottom
-                    anchors.topMargin: 4 * root.d
+                    anchors.topMargin: 6 * root.d
                     width: parent.width
-                    height: parent.height - chartHead.height - 4 * root.d
+                    height: parent.height - chartHead.height - 6 * root.d
                     preferredRendererType: Shape.CurveRenderer
                     function px(i: int): real { return i / Math.max(1, chart.history.length - 1) * line.width }
-                    function py(v: real): real { return line.height * (1 - Math.max(0, Math.min(1, v))) * 0.9 + 2 }
+                    // Scaled to the minute's own peak (never under a quarter), so a quiet machine still draws its shape.
+                    readonly property real ceiling: Math.max(0.25, Math.min(1, Math.max(...chart.history, 0) * 1.3))
+                    function py(v: real): real { return line.height * (1 - Math.max(0, Math.min(1, v / line.ceiling))) * 0.92 + 2 }
                     readonly property string trace: {
                         let d = ""
                         for (let i = 0; i < chart.history.length; i++)
@@ -593,20 +541,116 @@ Item {
                     }
                     ShapePath {
                         strokeColor: IrisStyle.textTertiary
-                        strokeWidth: Math.max(1, 1.5 * root.d)
+                        strokeWidth: Math.max(1, root.d)
                         strokeStyle: ShapePath.DashLine
-                        dashPattern: [3, 3]
+                        dashPattern: [2, 4]
                         fillColor: "transparent"
                         PathMove { x: 0; y: line.py(chart.average) }
                         PathLine { x: line.width; y: line.py(chart.average) }
                     }
                     ShapePath {
                         strokeColor: chart.ink
-                        strokeWidth: Math.max(2, 2.5 * root.d)
+                        strokeWidth: Math.max(2, 2 * root.d)
                         fillColor: "transparent"
                         joinStyle: ShapePath.RoundJoin
                         capStyle: ShapePath.RoundCap
                         PathSvg { path: line.trace }
+                    }
+                }
+            }
+            // The rest as four quiet tiles (Apple's Control Center grammar): the name small, the reading large, what it
+            // is out of under it, one thin bar in the vital's colour; past its warning the tile turns red.
+            GridLayout {
+                id: meters
+                readonly property bool gpu: ResourceUsage.gpuPollingAllowed && ResourceUsage.gpuDevicePath.length > 0
+                readonly property var vitals: [
+                    { label: Translation.tr("Memory"), glyph: "memory_alt", level: ResourceUsage.memoryUsedPercentage, value: Math.round(ResourceUsage.memoryUsedPercentage * 100), unit: "%",
+                        detail: ResourceUsage.kbToGbString(ResourceUsage.memoryUsed) + " / " + ResourceUsage.maxAvailableMemoryString, warn: 0.85, tint: IrisStyle.identity.yellow },
+                    { label: Translation.tr("Heat"), glyph: "device_thermostat", level: ResourceUsage.tempPercentage, value: ResourceUsage.maxTemp, unit: "°C",
+                        detail: Translation.tr("Warns at %1°").arg(ResourceUsage.tempWarningThreshold), warn: ResourceUsage.tempWarningThreshold / 100, tint: IrisStyle.identity.orange },
+                    { label: Translation.tr("Disk"), glyph: "hard_drive", level: ResourceUsage.diskUsedPercentage, value: Math.round(ResourceUsage.diskUsedPercentage * 100), unit: "%",
+                        detail: Translation.tr("%1 GB free").arg(Math.round((ResourceUsage.diskTotal - ResourceUsage.diskUsed) / 1e9)), warn: 0.9, tint: IrisStyle.identity.blue },
+                    meters.gpu
+                        ? { label: Translation.tr("Graphics"), glyph: "developer_board", level: ResourceUsage.gpuUsage, value: Math.round(ResourceUsage.gpuUsage * 100), unit: "%",
+                            detail: ResourceUsage.gpuTemp > 0 ? ResourceUsage.gpuTemp + "°C" : "", warn: 0.9, tint: IrisStyle.identity.purple }
+                        : { label: Translation.tr("Swap"), glyph: "swap_horiz", level: ResourceUsage.swapUsedPercentage, value: Math.round(ResourceUsage.swapUsedPercentage * 100), unit: "%",
+                            detail: ResourceUsage.kbToGbString(ResourceUsage.swapUsed) + " / " + ResourceUsage.maxAvailableSwapString, warn: 0.85, tint: IrisStyle.identity.purple }
+                ]
+                Layout.fillWidth: true
+                columns: 2
+                rowSpacing: 8 * root.d
+                columnSpacing: 8 * root.d
+                Repeater {
+                    model: meters.vitals
+                    Rectangle {
+                        id: meter
+                        required property var modelData
+                        readonly property real level: Math.max(0, Math.min(1, Number(meter.modelData.level) || 0))
+                        readonly property bool warned: meter.level >= meter.modelData.warn
+                        readonly property color tint: meter.warned ? IrisStyle.danger : meter.modelData.tint
+                        Layout.fillWidth: true
+                        Layout.preferredWidth: 1
+                        implicitHeight: meterBody.implicitHeight + Math.round(24 * root.d)
+                        radius: root.plateRadius
+                        color: meter.warned ? IrisStyle.tintFill(IrisStyle.danger) : IrisStyle.fillQuiet
+                        Accessible.name: meter.modelData.label + ", " + meter.modelData.value + meter.modelData.unit
+                        ColumnLayout {
+                            id: meterBody
+                            anchors.left: parent.left
+                            anchors.right: parent.right
+                            anchors.verticalCenter: parent.verticalCenter
+                            anchors.margins: Math.round(12 * root.d)
+                            spacing: Math.round(4 * root.d)
+                            RowLayout {
+                                spacing: Math.round(5 * root.d)
+                                MaterialSymbol {
+                                    text: meter.modelData.glyph
+                                    fill: 1
+                                    iconSize: Math.round(15 * root.d)
+                                    color: meter.tint
+                                }
+                                IrisText {
+                                    Layout.fillWidth: true
+                                    text: meter.modelData.label
+                                    color: IrisStyle.textSecondary
+                                    font.pixelSize: IrisStyle.typeFootnote
+                                    font.weight: IrisStyle.weight(Font.Medium)
+                                    elide: Text.ElideRight
+                                }
+                            }
+                            RowLayout {
+                                spacing: Math.round(6 * root.d)
+                                Tabular {
+                                    Layout.alignment: Qt.AlignBaseline
+                                    text: meter.modelData.value + meter.modelData.unit
+                                    color: IrisStyle.text
+                                    font.pixelSize: IrisStyle.typeHeadline
+                                    font.weight: IrisStyle.weight(Font.DemiBold)
+                                }
+                                IrisText {
+                                    Layout.alignment: Qt.AlignBaseline
+                                    Layout.fillWidth: true
+                                    text: meter.modelData.detail
+                                    color: IrisStyle.textTertiary
+                                    font.pixelSize: IrisStyle.typeCaption
+                                    elide: Text.ElideRight
+                                }
+                            }
+                            Rectangle {
+                                Layout.fillWidth: true
+                                Layout.topMargin: Math.round(2 * root.d)
+                                implicitHeight: Math.max(3, Math.round(4 * root.d))
+                                radius: height / 2
+                                color: IrisStyle.fill
+                                Rectangle {
+                                    height: parent.height
+                                    radius: parent.radius
+                                    width: Math.max(parent.height, parent.width * meter.level)
+                                    color: meter.tint
+                                    Behavior on width { NumberAnimation { duration: IrisStyle.morphDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: IrisStyle.moveCurve } }
+                                }
+                            }
+                        }
                     }
                 }
             }

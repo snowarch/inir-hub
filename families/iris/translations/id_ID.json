@@ -2485,5 +2485,10 @@
   "Holo light": "Cahaya holo",
   "How brightly the spectral rim burns.": "Seberapa terang tepi spektral menyala.",
   "Holo halo": "Halo holo",
-  "How far the light spills over the screen; 0 keeps it on the frame.": "Seberapa jauh cahaya meluber ke layar; 0 menahannya di bingkai."
+  "How far the light spills over the screen; 0 keeps it on the frame.": "Seberapa jauh cahaya meluber ke layar; 0 menahannya di bingkai.",
+  "Repeat": "Ulangi",
+  "%1 cores · %2 GHz": "%1 inti · %2 GHz",
+  "avg %1%": "rata-rata %1%",
+  "Warns at %1°": "Peringatan di %1°",
+  "%1 GB free": "%1 GB kosong"
 }

@@ -2485,5 +2485,10 @@
   "Holo light": "Ánh sáng holo",
   "How brightly the spectral rim burns.": "Viền quang phổ sáng đến mức nào.",
   "Holo halo": "Quầng holo",
-  "How far the light spills over the screen; 0 keeps it on the frame.": "Ánh sáng tràn ra màn hình xa đến đâu; 0 giữ nó trên khung."
+  "How far the light spills over the screen; 0 keeps it on the frame.": "Ánh sáng tràn ra màn hình xa đến đâu; 0 giữ nó trên khung.",
+  "Repeat": "Lặp lại",
+  "%1 cores · %2 GHz": "%1 lõi · %2 GHz",
+  "avg %1%": "TB %1%",
+  "Warns at %1°": "Cảnh báo ở %1°",
+  "%1 GB free": "Còn trống %1 GB"
 }

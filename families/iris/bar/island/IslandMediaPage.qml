@@ -8,6 +8,7 @@ import Quickshell
 import Quickshell.Io
 import Quickshell.Widgets
 import Quickshell.Services.SystemTray
+import Quickshell.Services.Mpris
 import qs
 import qs.services
 import qs.services.deferred
@@ -41,6 +42,20 @@ GridLayout {
         player: page.island.player
         positionUpdatesActive: page.current && page.island.visualExpanded
     }
+
+    // A track change publishes an empty length (and often an empty artist) for a moment: rows that depend on them are
+    // held through it, or the page shrinks and grows back and the Island jumps between two songs.
+    property bool timelineShown: media.effectiveLength > 0
+    readonly property bool timelineWanted: media.effectiveLength > 0
+    onTimelineWantedChanged: {
+        if (page.timelineWanted) { timelineHold.stop(); page.timelineShown = true }
+        else timelineHold.restart()
+    }
+    Timer { id: timelineHold; interval: 1500; onTriggered: page.timelineShown = page.timelineWanted }
+    readonly property var shownPlayer: page.island.player
+    readonly property bool canShuffle: !page.anime && (page.shownPlayer?.shuffleSupported ?? false) && (page.shownPlayer?.canControl ?? false)
+    readonly property bool canLoop: !page.anime && (page.shownPlayer?.loopSupported ?? false) && (page.shownPlayer?.canControl ?? false)
+    readonly property int loopState: page.shownPlayer?.loopState ?? MprisLoopState.None
 
     readonly property bool anime: AnimeWatch.ownsPlayer(page.island.player)
     readonly property var cardKinds: IrisPieces.cardIds
@@ -120,7 +135,6 @@ GridLayout {
             }
             IrisMarquee {
                 Layout.fillWidth: true
-                visible: text.length > 0
                 text: media.effectiveArtist
                 color: IrisStyle.textSecondary
                 pixelSize: IrisStyle.typeHeadline
@@ -133,7 +147,7 @@ GridLayout {
         Layout.row: Math.max(0, page.rowOf("timeline"))
         Layout.fillWidth: true
         Layout.topMargin: Math.round(6 * IrisStyle.density)
-        visible: page.rowOf("timeline") >= 0 && media.effectiveLength > 0
+        visible: page.rowOf("timeline") >= 0 && page.timelineShown
         spacing: Math.round(10 * IrisStyle.density)
         Tabular {
             Layout.minimumWidth: Math.round(30 * IrisStyle.density)
@@ -145,11 +159,11 @@ GridLayout {
         IrisScrubber {
             Layout.fillWidth: true
             Layout.alignment: Qt.AlignVCenter
-            thickness: 8
-            engagedThickness: 11
+            thickness: 5
+            engagedThickness: 9
             seekable: media.effectiveCanSeek
             value: media.effectiveLength > 0 ? media.effectivePosition / media.effectiveLength : 0
-            fillColor: page.island.nothingLook ? IrisStyle.text : IrisStyle.textSecondary
+            fillColor: IrisStyle.text
             trackColor: IrisStyle.fillHover
             onSeekRequested: next => media.seek(next * media.effectiveLength)
         }
@@ -169,70 +183,84 @@ GridLayout {
         Layout.fillWidth: true
         visible: page.rowOf("transport") >= 0
         spacing: 10 * IrisStyle.density
+        // Apple's expanded player: three glyphs on soft discs, the pause the one lit; shuffle and repeat at the two
+        // edges, lit in the cover's colour when on; the sound output in the corner. Each only where the player offers it.
         Item {
             Layout.fillWidth: true
             implicitHeight: transport.implicitHeight
+            GlyphButton {
+                anchors.left: parent.left
+                anchors.verticalCenter: parent.verticalCenter
+                visible: page.canShuffle
+                readonly property bool on: page.shownPlayer?.shuffle ?? false
+                glyph: "shuffle"
+                glyphSize: 19 * IrisStyle.density
+                glyphColor: on ? page.island.artTint : IrisStyle.textTertiary
+                implicitWidth: Math.round(34 * IrisStyle.density)
+                Accessible.name: Translation.tr("Shuffle")
+                onClicked: page.shownPlayer.shuffle = !on
+            }
             IrisControlPlate {
                 id: transport
                 anchors.centerIn: parent
                 material: page.island.pagePlate
-                controlHeight: 56 * IrisStyle.density
-                // Centres 84 px apart at 1x, as Apple spaces them.
+                controlHeight: 46 * IrisStyle.density
                 RowLayout {
-                spacing: transport.framed ? 6 * IrisStyle.density : 24 * IrisStyle.density
-            GlyphButton {
-                Layout.alignment: Qt.AlignVCenter
-                buttonRadius: transport.framed ? IrisStyle.pieceRadius(height) : height / 2
-                buttonRadiusPressed: buttonRadius
-                glyph: "fast_rewind"
-                glyphSize: 58 * IrisStyle.density
-                implicitWidth: 60 * IrisStyle.density
-                enabled: page.anime || media.effectiveCanGoPrevious
-                Accessible.name: page.anime ? Translation.tr("Previous episode") : Translation.tr("Previous track")
-                onClicked: page.anime ? AnimeWatch.skip("previous") : media.previous()
-            }
-            GlyphButton {
-                glyph: media.effectiveIsPlaying ? "pause" : "play_arrow"
-                glyphSize: 66 * IrisStyle.density
-                implicitWidth: 60 * IrisStyle.density
-                buttonRadius: transport.framed ? transport.controlRadius : height / 2
-                buttonRadiusPressed: buttonRadius
-                enabled: page.island.hasMedia
-                Accessible.name: media.effectiveIsPlaying ? Translation.tr("Pause") : Translation.tr("Play")
-                onClicked: media.togglePlaying()
-            }
-            GlyphButton {
-                Layout.alignment: Qt.AlignVCenter
-                buttonRadius: transport.framed ? IrisStyle.pieceRadius(height) : height / 2
-                buttonRadiusPressed: buttonRadius
-                glyph: "fast_forward"
-                glyphSize: 58 * IrisStyle.density
-                implicitWidth: 60 * IrisStyle.density
-                enabled: page.anime || media.effectiveCanGoNext
-                Accessible.name: page.anime ? Translation.tr("Next episode") : Translation.tr("Next track")
-                onClicked: page.anime ? AnimeWatch.skip("next") : media.next()
-            }
+                    spacing: transport.framed ? 6 * IrisStyle.density : 16 * IrisStyle.density
+                    TransportButton {
+                        glyph: "skip_previous"
+                        enabled: page.anime || media.effectiveCanGoPrevious
+                        Accessible.name: page.anime ? Translation.tr("Previous episode") : Translation.tr("Previous track")
+                        onClicked: page.anime ? AnimeWatch.skip("previous") : media.previous()
+                    }
+                    TransportButton {
+                        lead: true
+                        glyph: media.effectiveIsPlaying ? "pause" : "play_arrow"
+                        enabled: page.island.hasMedia
+                        Accessible.name: media.effectiveIsPlaying ? Translation.tr("Pause") : Translation.tr("Play")
+                        onClicked: media.togglePlaying()
+                    }
+                    TransportButton {
+                        glyph: "skip_next"
+                        enabled: page.anime || media.effectiveCanGoNext
+                        Accessible.name: page.anime ? Translation.tr("Next episode") : Translation.tr("Next track")
+                        onClicked: page.anime ? AnimeWatch.skip("next") : media.next()
+                    }
                 }
             }
-            // Where the sound goes, read from the real output; nothing
-            // when there is no output. A tap opens the sound card with its devices.
-            GlyphButton {
+            Row {
                 anchors.right: parent.right
                 anchors.verticalCenter: parent.verticalCenter
-                visible: Audio.defaultSink !== null && Audio.defaultSink !== undefined && page.cardKinds.includes("sound")
-                // A plain speaker shows Apple's output picker; earbuds, headphones and screens show themselves.
-                readonly property string device: IrisStyle.soundDeviceGlyph(Audio.defaultSink, false)
-                glyph: device === "speaker" ? "airplay" : device
-                glyphSize: 26 * IrisStyle.density
-                glyphColor: IrisStyle.textSecondary
-                implicitWidth: Math.round(40 * IrisStyle.density)
-                Accessible.name: Translation.tr("Sound output")
-                // The page folds away first, as Apple's picker takes the Island's place: whoever holds the sound
-                // piece (a floating bubble or the Island) then grows its card.
-                onClicked: {
-                    page.island.expanded = false
-                    IrisState.bubbleCardRequest = ""
-                    IrisState.bubbleCardRequest = "sound"
+                spacing: Math.round(2 * IrisStyle.density)
+                GlyphButton {
+                    visible: page.canLoop
+                    readonly property bool on: page.loopState !== MprisLoopState.None
+                    glyph: page.loopState === MprisLoopState.Track ? "repeat_one" : "repeat"
+                    glyphSize: 19 * IrisStyle.density
+                    glyphColor: on ? page.island.artTint : IrisStyle.textTertiary
+                    implicitWidth: Math.round(34 * IrisStyle.density)
+                    Accessible.name: Translation.tr("Repeat")
+                    onClicked: page.shownPlayer.loopState = page.loopState === MprisLoopState.None ? MprisLoopState.Playlist
+                        : page.loopState === MprisLoopState.Playlist ? MprisLoopState.Track : MprisLoopState.None
+                }
+                // Where the sound goes, read from the real output; nothing when there is no output. A tap opens the
+                // sound card with its devices.
+                GlyphButton {
+                    visible: Audio.defaultSink !== null && Audio.defaultSink !== undefined && page.cardKinds.includes("sound")
+                    // A plain speaker shows Apple's output picker; earbuds, headphones and screens show themselves.
+                    readonly property string device: IrisStyle.soundDeviceGlyph(Audio.defaultSink, false)
+                    glyph: device === "speaker" ? "airplay" : device
+                    glyphSize: 19 * IrisStyle.density
+                    glyphColor: IrisStyle.textTertiary
+                    implicitWidth: Math.round(34 * IrisStyle.density)
+                    Accessible.name: Translation.tr("Sound output")
+                    // The page folds away first, as Apple's picker takes the Island's place: whoever holds the sound
+                    // piece (a floating bubble or the Island) then grows its card.
+                    onClicked: {
+                        page.island.expanded = false
+                        IrisState.bubbleCardRequest = ""
+                        IrisState.bubbleCardRequest = "sound"
+                    }
                 }
             }
         }
@@ -432,6 +460,17 @@ GridLayout {
         currentFolder: "file://" + Directories.homePath
         nameFilters: [Translation.tr("Subtitles") + " (*.srt *.ass *.ssa *.vtt *.sub)", Translation.tr("All files") + " (*)"]
         onAccepted: AnimeWatch.addSubtitle(String(selectedFile))
+    }
+
+    component TransportButton: GlyphButton {
+        property bool lead: false
+        Layout.alignment: Qt.AlignVCenter
+        // The pause stands on a soft disc; the skips are bare until hovered.
+        colBackground: lead ? IrisStyle.fill : "transparent"
+        buttonRadius: transport.framed ? (lead ? transport.controlRadius : IrisStyle.pieceRadius(height)) : height / 2
+        buttonRadiusPressed: buttonRadius
+        glyphSize: (lead ? 28 : 24) * IrisStyle.density
+        implicitWidth: Math.round((lead ? 46 : 40) * IrisStyle.density)
     }
 
     component AnimeChip: MouseArea {

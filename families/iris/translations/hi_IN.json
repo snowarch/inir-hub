@@ -2485,5 +2485,10 @@
   "Holo light": "Holo रोशनी",
   "How brightly the spectral rim burns.": "स्पेक्ट्रल किनारा कितना चमकता है।",
   "Holo halo": "होलो आभा",
-  "How far the light spills over the screen; 0 keeps it on the frame.": "रोशनी स्क्रीन पर कितनी दूर तक फैलती है; 0 उसे फ़्रेम पर ही रखता है।"
+  "How far the light spills over the screen; 0 keeps it on the frame.": "रोशनी स्क्रीन पर कितनी दूर तक फैलती है; 0 उसे फ़्रेम पर ही रखता है।",
+  "Repeat": "दोहराएँ",
+  "%1 cores · %2 GHz": "%1 कोर · %2 GHz",
+  "avg %1%": "औसत %1%",
+  "Warns at %1°": "%1° पर चेतावनी",
+  "%1 GB free": "%1 GB खाली"
 }

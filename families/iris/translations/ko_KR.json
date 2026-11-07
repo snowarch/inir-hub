@@ -2485,5 +2485,10 @@
   "Holo light": "Holo 빛",
   "How brightly the spectral rim burns.": "스펙트럼 테두리의 밝기.",
   "Holo halo": "홀로 헤일로",
-  "How far the light spills over the screen; 0 keeps it on the frame.": "빛이 화면 위로 얼마나 번지는지. 0이면 프레임에만 머뭅니다."
+  "How far the light spills over the screen; 0 keeps it on the frame.": "빛이 화면 위로 얼마나 번지는지. 0이면 프레임에만 머뭅니다.",
+  "Repeat": "반복",
+  "%1 cores · %2 GHz": "%1코어 · %2 GHz",
+  "avg %1%": "평균 %1%",
+  "Warns at %1°": "%1°에서 경고",
+  "%1 GB free": "%1GB 남음"
 }

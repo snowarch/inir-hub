@@ -2485,5 +2485,10 @@
   "Holo light": "Holo 光",
   "How brightly the spectral rim burns.": "光谱边缘的亮度。",
   "Holo halo": "全息光晕",
-  "How far the light spills over the screen; 0 keeps it on the frame.": "光线向屏幕溢出的范围；0 时只留在边框上。"
+  "How far the light spills over the screen; 0 keeps it on the frame.": "光线向屏幕溢出的范围；0 时只留在边框上。",
+  "Repeat": "重复",
+  "%1 cores · %2 GHz": "%1 核 · %2 GHz",
+  "avg %1%": "平均 %1%",
+  "Warns at %1°": "%1° 时警告",
+  "%1 GB free": "可用 %1 GB"
 }

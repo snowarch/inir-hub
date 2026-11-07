@@ -2485,5 +2485,10 @@
   "Holo light": "Свет holo",
   "How brightly the spectral rim burns.": "Насколько ярко горит спектральный край.",
   "Holo halo": "Ореол голо",
-  "How far the light spills over the screen; 0 keeps it on the frame.": "Как далеко свет растекается по экрану; 0 оставляет его на рамке."
+  "How far the light spills over the screen; 0 keeps it on the frame.": "Как далеко свет растекается по экрану; 0 оставляет его на рамке.",
+  "Repeat": "Повтор",
+  "%1 cores · %2 GHz": "%1 ядер · %2 ГГц",
+  "avg %1%": "сред. %1%",
+  "Warns at %1°": "Предупреждение при %1°",
+  "%1 GB free": "Свободно %1 ГБ"
 }

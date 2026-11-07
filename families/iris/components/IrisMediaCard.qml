@@ -1,6 +1,7 @@
 pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Layouts
+import Quickshell.Services.Mpris
 import qs.services
 import qs.modules.common
 import qs.modules.common.functions
@@ -50,12 +51,24 @@ Item {
             if (len > 0) root.seenLength = len
         }
     }
+    // A track change publishes an empty length for a moment: held through it, or the card drops its timeline, shows
+    // "Live", shrinks and grows back between two songs.
+    property bool lengthKnown: media.effectiveLength > 0
+    readonly property bool lengthNow: media.effectiveLength > 0
+    onLengthNowChanged: {
+        if (root.lengthNow) { lengthHold.stop(); root.lengthKnown = true }
+        else lengthHold.restart()
+    }
+    Timer { id: lengthHold; interval: 1500; onTriggered: root.lengthKnown = root.lengthNow }
+    readonly property bool canShuffle: root.hasPlayer && (root.player?.shuffleSupported ?? false) && (root.player?.canControl ?? false)
+    readonly property bool canLoop: root.hasPlayer && (root.player?.loopSupported ?? false) && (root.player?.canControl ?? false)
+    readonly property int loopState: root.player?.loopState ?? MprisLoopState.None
     readonly property bool liveStream: root.hasPlayer
-        && (media.effectiveLength <= 0
+        && (!root.lengthKnown
             || (media.effectiveIsPlaying && !media.effectiveCanSeek)
             || root.grewSamples >= 2
             || root.atEndSamples >= 2)
-    readonly property bool hasTimeline: root.hasPlayer && !root.liveStream && media.effectiveLength > 0
+    readonly property bool hasTimeline: root.hasPlayer && !root.liveStream
     // Nothing playing: the card offers the music app you use most and opens it. Not on the lock, where nothing opens.
     property bool offersOpen: true
     readonly property bool offersMusic: root.offersOpen && !root.hasPlayer && IrisPieces.musicAppName.length > 0
@@ -113,34 +126,27 @@ Item {
                 IrisText { Layout.fillWidth: true; text: root.hasPlayer ? media.effectiveArtist : root.emptyDetail; role: IrisText.Meta; color: !root.hasPlayer && IrisPieces.musicLaunch === "failed" && root.offersOpen ? (root.overMedia ? IrisStyle.dangerOnMedia : IrisStyle.danger) : root.inkMeta; elide: Text.ElideRight }
             }
         }
-        IrisScrubber {
-            id: timeline
-            Layout.fillWidth: true
-            Layout.bottomMargin: -8 * IrisStyle.density
-            visible: root.hasTimeline
-            seekable: media.effectiveCanSeek
-            fillColor: root.tint
-            trackColor: IrisStyle.tintFill(root.tint)
-            value: media.effectiveLength > 0 ? Math.min(1, media.effectivePosition / media.effectiveLength) : 0
-            onSeekRequested: next => media.seek(next * media.effectiveLength)
-        }
+        // The time on one line, the bar between its two figures (Apple's expanded player).
         RowLayout {
             Layout.fillWidth: true
             visible: root.hasTimeline
-            IrisText {
-                text: StringUtils.friendlyTimeForSeconds(media.effectivePosition)
-                color: root.inkTertiary
-                font.pixelSize: IrisStyle.typeFootnote
-                font.family: IrisStyle.fontNumbers
-                font.features: ({ "tnum": 1 })
+            spacing: Math.round(10 * IrisStyle.density)
+            CardTime { text: StringUtils.friendlyTimeForSeconds(media.effectivePosition) }
+            IrisScrubber {
+                id: timeline
+                Layout.fillWidth: true
+                Layout.alignment: Qt.AlignVCenter
+                thickness: 5
+                engagedThickness: 9
+                seekable: media.effectiveCanSeek
+                fillColor: root.ink
+                trackColor: root.overMedia ? IrisStyle.onMediaFill : IrisStyle.fillHover
+                value: media.effectiveLength > 0 ? Math.min(1, media.effectivePosition / media.effectiveLength) : 0
+                onSeekRequested: next => media.seek(next * media.effectiveLength)
             }
-            Item { Layout.fillWidth: true }
-            IrisText {
-                text: StringUtils.friendlyTimeForSeconds(media.effectiveLength)
-                color: root.inkTertiary
-                font.pixelSize: IrisStyle.typeFootnote
-                font.family: IrisStyle.fontNumbers
-                font.features: ({ "tnum": 1 })
+            CardTime {
+                horizontalAlignment: Text.AlignRight
+                text: "\u2212" + StringUtils.friendlyTimeForSeconds(Math.max(0, media.effectiveLength - media.effectivePosition))
             }
         }
         RowLayout {
@@ -171,27 +177,40 @@ Item {
                 font.features: ({ "tnum": 1 })
             }
         }
-        RowLayout {
+        // Three glyphs, the pause on a soft disc; shuffle and repeat at the edges, lit in the card's tint when on.
+        Item {
             Layout.fillWidth: true
-            Layout.alignment: Qt.AlignHCenter
-            spacing: 0
-            Item { Layout.fillWidth: true }
+            implicitHeight: transport.implicitHeight
+            visible: root.hasPlayer
+            CardToggle {
+                anchors.left: parent.left
+                anchors.verticalCenter: parent.verticalCenter
+                visible: root.canShuffle
+                on: root.player?.shuffle ?? false
+                materialIcon: "shuffle"
+                Accessible.name: Translation.tr("Shuffle")
+                onClicked: root.player.shuffle = !on
+            }
             IrisControlPlate {
                 id: transport
-                controlHeight: Math.round(34 * IrisStyle.density)
+                anchors.centerIn: parent
+                controlHeight: Math.round(40 * IrisStyle.density)
                 RowLayout {
-                    spacing: Math.round(4 * IrisStyle.density)
-                    // On the plate each takes its concentric radius, bare the row radius.
+                    spacing: Math.round((transport.framed ? 4 : 12) * IrisStyle.density)
+                    // On the plate each takes its concentric radius, bare a full round.
                     Repeater {
                         model: ["previous", "toggle", "next"]
                         IrisIconButton {
                             required property string modelData
                             readonly property bool toggle: modelData === "toggle"
-                            buttonRadius: transport.framed ? transport.controlRadius : IrisStyle.radiusSmall
-                            buttonRadiusPressed: transport.framed ? transport.controlRadius : Math.max(IrisStyle.radiusMicro, IrisStyle.radiusSmall - Math.round(2 * IrisStyle.density))
+                            implicitWidth: Math.round((toggle ? 40 : 36) * IrisStyle.density)
+                            implicitHeight: implicitWidth
+                            buttonRadius: transport.framed ? transport.controlRadius : height / 2
+                            buttonRadiusPressed: buttonRadius
+                            colBackground: toggle ? (root.overMedia ? IrisStyle.onMediaFill : IrisStyle.fill) : "transparent"
                             foreground: root.ink
                             materialIcon: toggle ? (media.effectiveIsPlaying ? "pause" : "play_arrow") : modelData === "previous" ? "skip_previous" : "skip_next"
-                            iconSize: toggle ? Math.round(28 * IrisStyle.density) : Math.round(18 * IrisStyle.density)
+                            iconSize: toggle ? Math.round(24 * IrisStyle.density) : Math.round(21 * IrisStyle.density)
                             Accessible.name: toggle ? (media.effectiveIsPlaying ? Translation.tr("Pause") : Translation.tr("Play"))
                                 : modelData === "previous" ? Translation.tr("Previous track") : Translation.tr("Next track")
                             enabled: toggle ? root.hasPlayer : modelData === "previous" ? media.effectiveCanGoPrevious : media.effectiveCanGoNext
@@ -200,7 +219,16 @@ Item {
                     }
                 }
             }
-            Item { Layout.fillWidth: true }
+            CardToggle {
+                anchors.right: parent.right
+                anchors.verticalCenter: parent.verticalCenter
+                visible: root.canLoop
+                on: root.loopState !== MprisLoopState.None
+                materialIcon: root.loopState === MprisLoopState.Track ? "repeat_one" : "repeat"
+                Accessible.name: Translation.tr("Repeat")
+                onClicked: root.player.loopState = root.loopState === MprisLoopState.None ? MprisLoopState.Playlist
+                    : root.loopState === MprisLoopState.Playlist ? MprisLoopState.Track : MprisLoopState.None
+            }
         }
         IrisPlayerChips {
             id: playerChips
@@ -254,4 +282,21 @@ Item {
     }
 
     IrisSkin { id: cardSkin; part: "mediaCard"; host: root }
+
+    component CardTime: IrisText {
+        Layout.minimumWidth: Math.round(30 * IrisStyle.density)
+        color: root.inkTertiary
+        font.pixelSize: IrisStyle.typeFootnote
+        font.family: IrisStyle.fontNumbers
+        font.features: ({ "tnum": 1 })
+    }
+    component CardToggle: IrisIconButton {
+        property bool on: false
+        implicitWidth: Math.round(32 * IrisStyle.density)
+        implicitHeight: implicitWidth
+        buttonRadius: height / 2
+        buttonRadiusPressed: buttonRadius
+        iconSize: Math.round(17 * IrisStyle.density)
+        foreground: on ? root.tint : root.inkTertiary
+    }
 }

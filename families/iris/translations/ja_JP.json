@@ -2485,5 +2485,10 @@
   "Holo light": "Holo の光",
   "How brightly the spectral rim burns.": "スペクトルの縁の明るさ。",
   "Holo halo": "ホロのハロー",
-  "How far the light spills over the screen; 0 keeps it on the frame.": "光が画面にどこまで広がるか。0 でフレームだけに留まります。"
+  "How far the light spills over the screen; 0 keeps it on the frame.": "光が画面にどこまで広がるか。0 でフレームだけに留まります。",
+  "Repeat": "リピート",
+  "%1 cores · %2 GHz": "%1 コア · %2 GHz",
+  "avg %1%": "平均 %1%",
+  "Warns at %1°": "%1°で警告",
+  "%1 GB free": "空き %1 GB"
 }
