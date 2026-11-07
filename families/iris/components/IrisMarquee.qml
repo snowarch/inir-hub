@@ -13,18 +13,36 @@ Item {
     property int pixelSize: IrisStyle.typeBody
     property int weight: Font.Normal
     property bool running: true
+    // Where a line that fits sits in its box; a moving one always starts at the left.
+    property int horizontalAlignment: Text.AlignLeft
     readonly property bool overflows: first.implicitWidth > root.width + 0.5
     readonly property bool moving: root.overflows && IrisStyle.motionEnabled
     readonly property real gap: Math.round(root.pixelSize * 2.5)
     readonly property real fade: Math.round(root.pixelSize * 1.2)
     property real offset: 0
+    // One pass: the rest and the slide through, so a caller can run it once.
+    readonly property int passDuration: 2600 + Math.round((first.implicitWidth + root.gap) / (30 * IrisStyle.density) * 1000)
     implicitWidth: first.implicitWidth
-    implicitHeight: first.implicitHeight
+    implicitHeight: still.implicitHeight
     clip: true
 
+    // Still: the line elided in its box. Moving: two whole copies on a strip, never elided (one text switching
+    // between elided and whole mid-pass kept its cut layout and slid the "…" through).
+    IrisText {
+        id: still
+        visible: !root.moving
+        width: root.width
+        horizontalAlignment: root.horizontalAlignment
+        text: root.text
+        color: root.color
+        font: first.font
+        maximumLineCount: 1
+        elide: Text.ElideRight
+    }
     Item {
         id: strip
         anchors.fill: parent
+        visible: root.moving
         layer.enabled: root.moving
         layer.effect: MultiEffect {
             maskEnabled: true
@@ -35,20 +53,19 @@ Item {
         IrisText {
             id: first
             x: -root.offset
-            width: root.moving ? implicitWidth : root.width
             text: root.text
             color: root.color
             font.pixelSize: root.pixelSize
             font.weight: IrisStyle.weight(root.weight)
             maximumLineCount: 1
-            elide: root.moving ? Text.ElideNone : Text.ElideRight
+            elide: Text.ElideNone
         }
         IrisText {
             x: first.x + first.implicitWidth + root.gap
-            visible: root.moving
             text: root.text
             color: root.color
             font: first.font
+            elide: Text.ElideNone
         }
     }
     // The left edge fades only once the line has started to move: at rest the first letter stands clear.

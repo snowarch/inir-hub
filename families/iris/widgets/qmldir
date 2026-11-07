@@ -16,7 +16,7 @@ FaceAside 1.0 FaceAside.qml
 FaceCells 1.0 FaceCells.qml
 ClockGreeting 1.0 ClockGreeting.qml
 WeatherWeek 1.0 WeatherWeek.qml
-NowPlayingCard 1.0 NowPlayingCard.qml
+NowPlayingPrism 1.0 NowPlayingPrism.qml
 NowPlayingVinyl 1.0 NowPlayingVinyl.qml
 WorldClockOffset 1.0 WorldClockOffset.qml
 IrisClockFace 1.0 IrisClockFace.qml

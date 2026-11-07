@@ -28,7 +28,10 @@ Item {
     // glass and leak, and the face's ink is the stock's.
     readonly property string stockSkin: root.designed ? "" : IrisDesign.skin("widgetStock")
     readonly property bool stocked: root.stockSkin.length > 0
-    readonly property bool ownPlate: root.designed || root.stocked
+    // A face that draws its own body (Now Playing's Prism: a folder of glass, not a card): no plate, shadow or light
+    // under it; glass lends it the blurred wall as `frost`, as to a Design.
+    property bool ownBody: false
+    readonly property bool ownPlate: root.designed || root.stocked || root.ownBody
     // Content clears the corner (DI29): a chip in the corner keeps a concentric curve only while the padding is at least
     // the card's radius less the chip's (10), so a rounder card pushes its content in. A fixed 16 left the weather's
     // icon touching a 30 px corner.
@@ -148,7 +151,7 @@ Item {
     // A shadow under glass shows through it: the body darkens toward its middle and its top edge reads as a glow.
     RectangularShadow {
         anchors.fill: parent
-        visible: root.opaque && root.plated
+        visible: root.opaque && root.plated && !root.ownBody
         radius: root.radius
         blur: root.dp(28)
         spread: -root.dp(4)
@@ -283,7 +286,7 @@ Item {
     }
     IrisBodyLight {
         anchors.fill: parent
-        visible: !IrisStyle.selfLit && root.plated && !root.clear
+        visible: !IrisStyle.selfLit && root.plated && !root.clear && !root.ownBody
         radius: root.radius
     }
 
@@ -354,7 +357,7 @@ Item {
             // Design the stock body (Apple's Day: sunrise, the sun's path) cast a ghost behind AIRISU's print, white on
             // a light wallpaper and black on a dark one. A Design's print casts it only bare: on its own plate the
             // plate's outline would cast one too.
-            readonly property Item shadowed: root.designed ? (root.clear ? designPrint : null) : body
+            readonly property Item shadowed: root.designed ? (root.clear ? designPrint : null) : root.ownBody ? null : body
             ShaderEffectSource {
                 id: bodyCopy
                 anchors.fill: slider.shadowed ?? body

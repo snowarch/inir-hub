@@ -17,11 +17,14 @@ IrisWidgetFace {
     readonly property var player: MprisController.activePlayer
     // What a Design's face (`widgetNowPlaying`) reads: the engine's playback, positions and lyrics stay here.
     readonly property alias playback: media
-    // Card and Vinyl (his 11-06 references) on medium and large: their own faces over the same playback; the Design's
-    // print steps aside for them.
+    // Prism and Vinyl (his 11-06 references) on medium and large: their own faces over the same playback; the Design's
+    // print steps aside for them. Prism draws its own body, at rest too.
     readonly property string faceChoice: root.small ? "classic" : String(root.widget.familyOption("face", "classic"))
-    readonly property bool cardStyle: root.faceChoice === "card"
-    readonly property bool ownStyle: root.cardStyle || root.faceChoice === "vinyl"
+    readonly property bool prismStyle: root.faceChoice === "prism"
+    readonly property bool ownStyle: root.prismStyle || root.faceChoice === "vinyl"
+    ownBody: root.prismStyle
+    // What a face of its own reads at rest (the song paused, the one that played last).
+    readonly property alias restState: rest
     designFace: root.ownStyle ? "" : IrisDesign.skin("widgetNowPlaying")
     readonly property bool hasPlayer: root.player !== null && root.player !== undefined
     readonly property bool playing: root.hasPlayer && media.effectiveIsPlaying
@@ -30,7 +33,7 @@ IrisWidgetFace {
     readonly property string art: root.hasPlayer ? media.displayedArtFilePath : ""
     readonly property color artLight: IrisStyle.vividHighlight(media.colorQuantizer?.colors?.[0] ?? root.accent, root.accent)
     readonly property real progress: media.effectiveLength > 0 ? Math.min(1, media.effectivePosition / media.effectiveLength) : 0
-    readonly property bool lyricsWanted: (root.cardStyle || (root.large && !root.ownStyle)) && root.live && root.hasPlayer
+    readonly property bool lyricsWanted: root.large && (root.prismStyle || !root.ownStyle) && root.live && root.hasPlayer
         && Boolean(root.widget.familyOption("lyrics", true))
     readonly property bool lyricsReady: root.lyricsWanted && LyricsService.status === "ok" && LyricsService.lyricsLines.length > 0
     // Large without lyrics wears the cover whole: beside the title it left a 180 px hole where the lines go.
@@ -42,7 +45,7 @@ IrisWidgetFace {
 
     light: root.small || root.art.length === 0 ? "transparent"
         : root.artLight
-    padding: (root.small && root.art.length > 0 && !root.resting) || root.coverLarge ? 0 : root.edgePad
+    padding: (root.small && root.art.length > 0 && !root.resting) || root.coverLarge || root.prismStyle ? 0 : root.edgePad
 
     onLyricsWantedChanged: root.lyricsWanted ? LyricsService.subscribe(root) : LyricsService.unsubscribe(root)
     Component.onDestruction: if (root.lyricsWanted) LyricsService.unsubscribe(root)
@@ -206,7 +209,7 @@ IrisWidgetFace {
     Item {
         id: rest
         anchors.fill: parent
-        visible: root.resting
+        visible: root.resting && !root.prismStyle
         readonly property bool paused: root.hasPlayer
         readonly property var last: Persistent.states.lastPlayed
         // Only what a tap can bring back: a closed browser video stayed here and a tap did nothing (his 10-30).
@@ -685,8 +688,8 @@ IrisWidgetFace {
 
     Loader {
         anchors.fill: parent
-        active: root.cardStyle && !root.resting
-        sourceComponent: Component { NowPlayingCard { face: root; media: media } }
+        active: root.prismStyle
+        sourceComponent: Component { NowPlayingPrism { face: root; media: media } }
     }
     Loader {
         anchors.fill: parent

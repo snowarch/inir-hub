@@ -177,8 +177,8 @@
       {"key":"iris.week","label":"Week strip","type":"switch","default":true,"when":["face",{"iris.face":["analog","digital","greeting"]},{"not":{"sizeClass":"small"}}]}
     ],
     "mediaControls": [
-      {"key":"iris.face","label":"Face","type":"choice","default":"classic","when":["face",{"not":{"sizeClass":"small"}}],"choices":[["classic","Classic","music_note"],["card","Card","featured_play_list"],["vinyl","Vinyl","album"]],"keywords":["player","lyrics","card","spotify","vinyl","record"]},
-      {"key":"iris.lyrics","label":"Synced lyrics","type":"switch","default":true,"when":["face",{"iris.face":["classic","card"]}]},
+      {"key":"iris.face","label":"Face","type":"choice","default":"classic","when":["face",{"not":{"sizeClass":"small"}}],"choices":[["classic","Classic","music_note"],["prism","Prism","flare"],["vinyl","Vinyl","album"]],"keywords":["player","lyrics","prism","glass","refraction","spotify","vinyl","record"]},
+      {"key":"iris.lyrics","label":"Synced lyrics","type":"switch","default":true,"when":["face",{"iris.face":["classic","prism"]}]},
       {"key":"iris.rest","label":"Rest when paused","type":"switch","default":true,"when":"face"}
     ],
     "monthCalendar": [
