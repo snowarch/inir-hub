@@ -184,6 +184,7 @@ Item {
                 color: PrismTheme.ink2
                 font.pixelSize: PrismTheme.small
                 wrapMode: Text.WordWrap
+                maximumLineCount: 3
             }
         }
     }
