@@ -38,10 +38,12 @@ Scope {
             WlrLayershell.keyboardFocus: !desk.present ? WlrKeyboardFocus.None
                 : desk.seeding ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.OnDemand
             anchors { top: true; bottom: true; left: true; right: true }
-            BackgroundEffect.blurRegion: Region {
+            property Region glassBlurRegion: Region {
                 item: sheet.glassy && sheet.shown && Appearance.compositorBlurActive ? sheet.bodyItem : null
                 radius: Appearance.rounding.large
             }
+            // ext-background-effect regions only where the compositor takes them (Niri); Umbriel blurs by layer rules.
+            BackgroundEffect.blurRegion: CompositorService.blurRegions ? glassBlurRegion : null
             mask: Region {
                 item: headBody
                 Region { item: shelfBody }

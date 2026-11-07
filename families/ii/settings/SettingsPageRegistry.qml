@@ -120,6 +120,8 @@ Singleton {
             icon: "desktop_windows",
             desc: Translation.tr("Display, input, layout"),
             essential: false,
+            // It edits Niri's own config; under Umbriel its config.d files hold the same.
+            compositor: "niri",
             component: "modules/ii/settings/NiriConfig.qml"
         },
         {
@@ -309,7 +311,10 @@ Singleton {
     // A page about one family (`family`) leaves the nav while that family is not installed, and search finds it only
     // while that family is the one in use.
     function familyOf(index: int): string { return index >= 0 && index < pages.length ? String(pages[index].family ?? "") : "" }
-    function installed(index: int): bool { return root.familyOf(index).length === 0 || Plugins.has(root.familyOf(index)) }
+    function installed(index: int): bool {
+        if (index >= 0 && index < pages.length && pages[index].compositor === "niri" && !CompositorService.niriNative) return false
+        return root.familyOf(index).length === 0 || Plugins.has(root.familyOf(index))
+    }
     function searchable(index: int, activeFamily: string): bool {
         const family = root.familyOf(index)
         return family.length === 0 || family === activeFamily

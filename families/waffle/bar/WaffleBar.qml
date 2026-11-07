@@ -60,9 +60,11 @@ Scope {
                 implicitHeight: content.implicitHeight
                 implicitWidth: content.implicitWidth
 
-                BackgroundEffect.blurRegion: Region {
+                property Region nativeBlurRegion: Region {
                     item: content.nativeBlurActive ? content : null
                 }
+                // ext-background-effect regions only where the compositor takes them (Niri); Umbriel blurs by layer rules.
+                BackgroundEffect.blurRegion: CompositorService.blurRegions ? nativeBlurRegion : null
 
                 WaffleBarContent {
                     id: content

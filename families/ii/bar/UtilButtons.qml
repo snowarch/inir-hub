@@ -254,7 +254,7 @@ Item {
         }
 
         // Screen casting toggle (PR #29 by levpr1c)
-        // Toggles Niri dynamic casting to configured output
+        // Points the compositor's dynamic cast (Niri) or screencast target (Umbriel) at the configured output
         Loader {
             active: (Config.options?.material?.bar?.utilButtons?.showScreenCast ?? false)
                     && CompositorService.isNiri
@@ -269,10 +269,14 @@ Item {
                     const output = Config.options?.material?.bar?.utilButtons?.screenCastOutput ?? "HDMI-A-1"
 
                     if (isCasting) {
-                        Quickshell.execDetached(["niri", "msg", "action", "clear-dynamic-cast-target"])
+                        Quickshell.execDetached(CompositorService.isUmbriel
+                            ? ["umbriel", "msg", "screencast-clear"]
+                            : ["niri", "msg", "action", "clear-dynamic-cast-target"])
                         Persistent.states.screenCast.active = false
                     } else {
-                        Quickshell.execDetached(["niri", "msg", "action", "set-dynamic-cast-monitor", output])
+                        Quickshell.execDetached(CompositorService.isUmbriel
+                            ? ["umbriel", "msg", "screencast-set-output", output]
+                            : ["niri", "msg", "action", "set-dynamic-cast-monitor", output])
                         Persistent.states.screenCast.active = true
                     }
                 }

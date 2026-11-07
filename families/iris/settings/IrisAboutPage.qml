@@ -70,7 +70,7 @@ Flickable {
                 { label: Translation.tr("Branch"), value: ShellUpdates.localCommit.length > 0 ? ShellUpdates.currentBranch : "", highlight: ShellUpdates.isNonMainBranch },
                 { label: Translation.tr("Commit"), value: ShellUpdates.localCommit },
                 { label: Translation.tr("System"), value: SystemInfo.distroName },
-                { label: Translation.tr("Compositor"), value: CompositorService.isNiri ? "Niri" : SystemInfo.desktopEnvironment },
+                { label: Translation.tr("Compositor"), value: CompositorService.isUmbriel ? "Umbriel" : CompositorService.niriNative ? "Niri" : SystemInfo.desktopEnvironment },
                 { label: Translation.tr("Computer"), value: SystemInfo.hostname }
             ].filter(row => String(row.value ?? "").length > 0 && row.value !== "Unknown")
         }

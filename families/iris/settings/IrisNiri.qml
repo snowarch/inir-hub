@@ -12,7 +12,8 @@ Singleton {
     id: root
 
     readonly property string accelRun: Quickshell.shellPath("scripts/lib/accel-run")
-    readonly property bool available: CompositorService.isNiri
+    // Reads and writes Niri's own config: under Umbriel its rows are not offered (IrisOptions.shown).
+    readonly property bool available: CompositorService.niriNative
     property int revision: 0
     property var data: ({ input: {}, layout: {}, animations: {}, "window-rules": {} })
     property var outputs: []

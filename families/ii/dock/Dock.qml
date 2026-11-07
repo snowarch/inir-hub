@@ -185,10 +185,12 @@ Scope {
                 readonly property Item nativeBlurItem: root.isMacosStyle ? macBackground
                     : root.isIslandStyle ? dockIslandBackground : dockVisualBackground
 
-                BackgroundEffect.blurRegion: Region {
+                property Region nativeBlurRegion: Region {
                     item: dockRoot.nativeBlurActive ? dockRoot.nativeBlurItem : null
                     radius: dockRoot.nativeBlurItem?.radius ?? 0
                 }
+                // ext-background-effect regions only where the compositor takes them (Niri); Umbriel blurs by layer rules.
+                BackgroundEffect.blurRegion: CompositorService.blurRegions ? nativeBlurRegion : null
 
                 mask: Region {
                     item: dockMouseArea

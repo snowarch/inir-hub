@@ -292,7 +292,7 @@ Scope {
 
                 // Shaped compositor blur; Niri applies the request only inside the
                 // actual bar content rather than across the whole layer surface.
-                BackgroundEffect.blurRegion: Region {
+                property Region nativeBlurRegion: Region {
                     Region {
                         item: barContent.nativeBlurActive && !barContent.isIslands
                             ? barContent.backgroundItem : emptyMask
@@ -324,6 +324,8 @@ Scope {
                         radius: barContent.nativeBlurRightIsland?.radius ?? 0
                     }
                 }
+                // ext-background-effect regions only where the compositor takes them (Niri); Umbriel blurs by layer rules.
+                BackgroundEffect.blurRegion: CompositorService.blurRegions ? nativeBlurRegion : null
 
                 anchors {
                     top: !(Config.options?.material?.bar?.bottom ?? false)

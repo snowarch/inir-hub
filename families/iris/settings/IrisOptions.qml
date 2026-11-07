@@ -394,6 +394,8 @@ QtObject {
         const paths = spec.bundle ?? (spec.path ? [String(spec.path)] : [])
         if (paths.length > 0 && paths.every(path => IrisDesign.owns(path))) return false
         if (spec.showIf && !spec.showIf()) return false
+        // A row that edits Niri's config is Niri's: under Umbriel its config.d files hold the same.
+        if (spec.niri && !IrisNiri.available) return false
         const when = String(spec.visibleWhen ?? "")
         if (when.length === 0) return true
         const negated = when.startsWith("!")
@@ -1444,8 +1446,8 @@ QtObject {
         { section: "general", group: "Language & time", label: "Language", description: "Every label in the shell.", path: "language.ui", kind: "choice", fallback: "auto",
             choices: [{ label: "System", value: "auto" }].concat(Translation.allAvailableLanguages.map(code => ({ label: Translation.languageDisplayName(code), value: code }))),
             keywords: ["language", "idioma", "translation", "locale", "español", "spanish"] },
-        { section: "general", group: "Apps & login", label: "Starts with you", description: "Apps and commands Niri opens when you sign in.", kind: "list", view: Qt.resolvedUrl("IrisAutostartList.qml"), summary: false, keywords: ["autostart", "startup", "login", "boot", "launch", "spawn", "discord", "steam", "telegram", "inicio", "arranque"] },
-        { section: "general", group: "Apps & login", label: "Startup file", description: "The Niri file these lines live in, for the ones written by hand.", kind: "action", button: "Open", run: () => Quickshell.execDetached(["xdg-open", Autostart.startupFilePath]), showIf: () => Autostart.isNiri && Autostart.startupFilePath.length > 0, tune: true, keywords: ["startup", "niri", "config", "kdl", "file"] },
+        { section: "general", group: "Apps & login", label: "Starts with you", description: "Apps and commands your compositor opens when you sign in.", kind: "list", view: Qt.resolvedUrl("IrisAutostartList.qml"), summary: false, keywords: ["autostart", "startup", "login", "boot", "launch", "spawn", "discord", "steam", "telegram", "inicio", "arranque"] },
+        { section: "general", group: "Apps & login", label: "Startup file", description: "The compositor's file these lines live in, for the ones written by hand.", kind: "action", button: "Open", run: () => Quickshell.execDetached(["xdg-open", Autostart.startupFilePath]), showIf: () => Autostart.isNiri && Autostart.startupFilePath.length > 0, tune: true, keywords: ["startup", "niri", "config", "kdl", "file"] },
         { section: "general", group: "Apps & login", label: "Terminal", description: "Where Spotlight's commands, package installs and anime playback open.", path: "apps.terminal", kind: "text", placeholder: "kitty", fallback: "kitty", keywords: ["terminal", "kitty", "foot", "alacritty", "ghostty", "wezterm", "default apps"] },
         { section: "general", group: "Settings window", label: "Prism", description: "The Settings iRiS opens by default: every page in one panel, what it holds over a beam of light.", kind: "action", button: "Open Prism", run: () => { Config.setNestedValues({ "iris.appearance.settingsPanel": "prism", "iris.appearance.settingsOriginal": false }); PrismState.classicVisit = false }, keywords: ["prism", "settings", "new", "design", "layout", "back", "nuevo", "diseño", "volver"] },
         { section: "general", group: "Settings window", label: "Opens as", description: "Over the desktop previews every change on the screen behind it.", path: "iris.appearance.settingsHost", kind: "choice", tune: true, fallback: "overlay", choices: [{ label: "Over the desktop", value: "overlay", glyph: "layers" }, { label: "Window", value: "window", glyph: "web_asset" }], keywords: ["settings", "window", "overlay", "floating", "tile", "maximize"] },

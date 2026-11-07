@@ -553,6 +553,8 @@ ContentPage {
 
         SettingsGroup {
             ConfigSelectionArray {
+                // Niri's own switcher; under Umbriel Alt+Tab is iNiR's.
+                visible: CompositorService.niriNative
                 options: [
                     { displayName: Translation.tr("Niri's Recent Windows"), icon: "view_carousel", value: "niri" },
                     { displayName: Translation.tr("iNiR switcher"), icon: "keyboard_tab", value: "inir" }

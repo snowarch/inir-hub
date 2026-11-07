@@ -3,6 +3,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import Quickshell
 import Quickshell.Wayland
+import qs.services
 import qs.modules.iris.frame
 import qs.modules.iris.style
 
@@ -391,7 +392,7 @@ Scope {
                 pool.push(made)
             }
             const effect = strip.BackgroundEffect
-            const wanted = runs.length > 0
+            const wanted = runs.length > 0 && CompositorService.blurRegions
             if (strip.published) effect.blurRegion = null
             for (let n = 0; n < pool.length; n++) {
                 const q = runs[n] ?? null, r = pool[n]
@@ -412,7 +413,7 @@ Scope {
         // qs-rs maps a window with nothing to draw only on its first frame, which an empty strip never asked for: the
         // chassis gave up waiting, mapped first, and the strips that came later sat above it, blurring the band it paints.
         Component.onCompleted: strip.contentItem?.Window.window?.update()
-        Component.onDestruction: strip.BackgroundEffect.blurRegion = null
+        Component.onDestruction: if (CompositorService.blurRegions) strip.BackgroundEffect.blurRegion = null
     }
 
     Strip { id: leftStrip; edge: "left" }
