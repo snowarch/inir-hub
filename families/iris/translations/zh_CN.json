@@ -1519,7 +1519,6 @@
   "Prism": "棱镜",
   "Spill": "溢光",
   "Streaks": "条纹",
-  "The shape the light takes: a prismatic eye over a hot horizon, a burnt corner, grain-gradient orbs, or a beam under a stroke of light.": "光的形状：灼热地平线上的棱镜之眼、烧焦的角落、颗粒渐变光球，或一笔光线下的光束。",
   "The wallpaper's corners fall off as a lens's do; with Light only, the film's edge shows too.": "壁纸四角像镜头一样变暗；选择仅光时，还会露出胶片边框。",
   "Under the light: your wallpaper, exposed by it, or the darkroom and the light alone, as the textures it comes from.": "光之下：被光曝光的你的壁纸，或像其来源纹理那样，只有暗房和光。",
   "Up and down": "上下位置",
@@ -2475,5 +2474,8 @@
   "No sound device or dimmable screen was found.": "未找到声音设备或可调亮度的屏幕。",
   "Your wallpaper": "你的壁纸",
   "Surfaces": "表面",
-  "Type & icons": "字体与图标"
+  "Type & icons": "字体与图标",
+  "The shape the light takes: a haze from one corner over a band of colour, a prismatic eye over a hot horizon, a burnt corner, grain-gradient orbs, or a beam under a stroke of light.": "光的形状：从一角漫过色带的薄雾、灼热地平线上的棱镜之眼、烧焦的角落、颗粒渐变光球，或一笔光线下的光束。",
+  "Haze": "薄雾",
+  "Moss": "苔藓"
 }

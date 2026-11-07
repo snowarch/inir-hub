@@ -1519,7 +1519,6 @@
   "Prism": "프리즘",
   "Spill": "번짐",
   "Streaks": "줄무늬",
-  "The shape the light takes: a prismatic eye over a hot horizon, a burnt corner, grain-gradient orbs, or a beam under a stroke of light.": "빛의 모양: 뜨거운 지평선 위의 프리즘 눈, 그을린 모서리, 그레인 그라데이션 구체, 또는 빛줄기 아래의 빔.",
   "The wallpaper's corners fall off as a lens's do; with Light only, the film's edge shows too.": "바탕화면 모서리가 렌즈처럼 어두워집니다. 빛만에서는 필름 테두리도 보입니다.",
   "Under the light: your wallpaper, exposed by it, or the darkroom and the light alone, as the textures it comes from.": "빛 아래: 빛에 노출된 바탕화면, 또는 원래 텍스처처럼 암실과 빛만.",
   "Up and down": "위아래",
@@ -2475,5 +2474,8 @@
   "No sound device or dimmable screen was found.": "사운드 장치나 밝기를 조절할 수 있는 화면을 찾지 못했습니다.",
   "Your wallpaper": "내 배경화면",
   "Surfaces": "표면",
-  "Type & icons": "글꼴 및 아이콘"
+  "Type & icons": "글꼴 및 아이콘",
+  "The shape the light takes: a haze from one corner over a band of colour, a prismatic eye over a hot horizon, a burnt corner, grain-gradient orbs, or a beam under a stroke of light.": "빛의 모양: 한 모서리에서 색 띠 위로 번지는 헤이즈, 뜨거운 지평선 위의 프리즘 눈, 그을린 모서리, 그레인 그라데이션 구체, 또는 빛줄기 아래의 빔.",
+  "Haze": "헤이즈",
+  "Moss": "모스"
 }

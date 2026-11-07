@@ -1519,7 +1519,6 @@
   "Prism": "Prisma",
   "Spill": "Luberan",
   "Streaks": "Goresan",
-  "The shape the light takes: a prismatic eye over a hot horizon, a burnt corner, grain-gradient orbs, or a beam under a stroke of light.": "Bentuk cahaya: mata prismatik di atas cakrawala membara, sudut terbakar, bola gradien berbutir, atau berkas di bawah goresan cahaya.",
   "The wallpaper's corners fall off as a lens's do; with Light only, the film's edge shows too.": "Sudut wallpaper meredup seperti pada lensa; dengan Hanya cahaya, tepi film juga terlihat.",
   "Under the light: your wallpaper, exposed by it, or the darkroom and the light alone, as the textures it comes from.": "Di bawah cahaya: wallpaper Anda, terpajan olehnya, atau kamar gelap dan cahaya saja, seperti tekstur asalnya.",
   "Up and down": "Naik dan turun",
@@ -2475,5 +2474,8 @@
   "No sound device or dimmable screen was found.": "Tidak ditemukan perangkat suara atau layar yang bisa diredupkan.",
   "Your wallpaper": "Wallpaper kamu",
   "Surfaces": "Permukaan",
-  "Type & icons": "Huruf & ikon"
+  "Type & icons": "Huruf & ikon",
+  "The shape the light takes: a haze from one corner over a band of colour, a prismatic eye over a hot horizon, a burnt corner, grain-gradient orbs, or a beam under a stroke of light.": "Bentuk cahaya: kabut dari satu sudut di atas pita warna, mata prismatik di atas cakrawala membara, sudut terbakar, bola gradien berbutir, atau berkas di bawah goresan cahaya.",
+  "Haze": "Kabut",
+  "Moss": "Lumut"
 }

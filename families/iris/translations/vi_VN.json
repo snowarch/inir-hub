@@ -1519,7 +1519,6 @@
   "Prism": "Lăng kính",
   "Spill": "Tràn sáng",
   "Streaks": "Vệt",
-  "The shape the light takes: a prismatic eye over a hot horizon, a burnt corner, grain-gradient orbs, or a beam under a stroke of light.": "Hình dạng của ánh sáng: một con mắt lăng kính trên đường chân trời rực nóng, một góc bị cháy, các quả cầu chuyển màu có hạt, hoặc một chùm sáng dưới một nét sáng.",
   "The wallpaper's corners fall off as a lens's do; with Light only, the film's edge shows too.": "Các góc hình nền tối dần như ở ống kính; với Chỉ ánh sáng, viền phim cũng hiện ra.",
   "Under the light: your wallpaper, exposed by it, or the darkroom and the light alone, as the textures it comes from.": "Dưới ánh sáng: hình nền của bạn, được nó phơi sáng, hoặc buồng tối và chỉ ánh sáng, như các họa tiết nó bắt nguồn.",
   "Up and down": "Lên và xuống",
@@ -2475,5 +2474,8 @@
   "No sound device or dimmable screen was found.": "Không tìm thấy thiết bị âm thanh hay màn hình chỉnh được độ sáng.",
   "Your wallpaper": "Hình nền của bạn",
   "Surfaces": "Bề mặt",
-  "Type & icons": "Chữ và biểu tượng"
+  "Type & icons": "Chữ và biểu tượng",
+  "The shape the light takes: a haze from one corner over a band of colour, a prismatic eye over a hot horizon, a burnt corner, grain-gradient orbs, or a beam under a stroke of light.": "Hình dạng của ánh sáng: một làn sương mờ từ một góc trên dải màu, một con mắt lăng kính trên đường chân trời rực cháy, một góc bị cháy, những quả cầu chuyển sắc hạt, hoặc một chùm sáng dưới một nét sáng.",
+  "Haze": "Sương mờ",
+  "Moss": "Rêu"
 }

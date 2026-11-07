@@ -1519,7 +1519,6 @@
   "Prism": "Prisma",
   "Spill": "Überstrahlung",
   "Streaks": "Schlieren",
-  "The shape the light takes: a prismatic eye over a hot horizon, a burnt corner, grain-gradient orbs, or a beam under a stroke of light.": "Die Form des Lichts: ein prismatisches Auge über einem glühenden Horizont, eine verbrannte Ecke, körnige Verlaufskugeln oder ein Strahl unter einem Lichtstrich.",
   "The wallpaper's corners fall off as a lens's do; with Light only, the film's edge shows too.": "Die Ecken des Hintergrundbilds dunkeln ab wie bei einem Objektiv; mit Nur Licht zeigt sich auch der Filmrand.",
   "Under the light: your wallpaper, exposed by it, or the darkroom and the light alone, as the textures it comes from.": "Unter dem Licht: dein Hintergrundbild, von ihm belichtet, oder die Dunkelkammer und das Licht allein, wie in den Texturen, aus denen es stammt.",
   "Up and down": "Hoch und runter",
@@ -2475,5 +2474,8 @@
   "No sound device or dimmable screen was found.": "Kein Audiogerät und kein dimmbarer Bildschirm gefunden.",
   "Your wallpaper": "Dein Hintergrundbild",
   "Surfaces": "Oberflächen",
-  "Type & icons": "Schrift & Symbole"
+  "Type & icons": "Schrift & Symbole",
+  "The shape the light takes: a haze from one corner over a band of colour, a prismatic eye over a hot horizon, a burnt corner, grain-gradient orbs, or a beam under a stroke of light.": "Die Form des Lichts: ein Dunst aus einer Ecke über einem Farbband, ein prismatisches Auge über einem glühenden Horizont, eine verbrannte Ecke, Kugeln mit Körnungsverlauf oder ein Strahl unter einem Lichtstrich.",
+  "Haze": "Dunst",
+  "Moss": "Moos"
 }

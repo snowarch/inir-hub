@@ -1519,7 +1519,6 @@
   "Prism": "Prism",
   "Spill": "Spill",
   "Streaks": "Streaks",
-  "The shape the light takes: a prismatic eye over a hot horizon, a burnt corner, grain-gradient orbs, or a beam under a stroke of light.": "The shape the light takes: a prismatic eye over a hot horizon, a burnt corner, grain-gradient orbs, or a beam under a stroke of light.",
   "The wallpaper's corners fall off as a lens's do; with Light only, the film's edge shows too.": "The wallpaper's corners fall off as a lens's do; with Light only, the film's edge shows too.",
   "Under the light: your wallpaper, exposed by it, or the darkroom and the light alone, as the textures it comes from.": "Under the light: your wallpaper, exposed by it, or the darkroom and the light alone, as the textures it comes from.",
   "Up and down": "Up and down",
@@ -2475,5 +2474,8 @@
   "No sound device or dimmable screen was found.": "No sound device or dimmable screen was found.",
   "Your wallpaper": "Your wallpaper",
   "Surfaces": "Surfaces",
-  "Type & icons": "Type & icons"
+  "Type & icons": "Type & icons",
+  "The shape the light takes: a haze from one corner over a band of colour, a prismatic eye over a hot horizon, a burnt corner, grain-gradient orbs, or a beam under a stroke of light.": "The shape the light takes: a haze from one corner over a band of colour, a prismatic eye over a hot horizon, a burnt corner, grain-gradient orbs, or a beam under a stroke of light.",
+  "Haze": "Haze",
+  "Moss": "Moss"
 }

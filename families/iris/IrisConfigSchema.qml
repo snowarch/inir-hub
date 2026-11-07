@@ -99,25 +99,25 @@ JsonObject {
             property int trails: 60
             property string colours: "aurora"
         }
-        // Light leak: grade "prism", "ember", "orchid", "polaroid", "accent" or "wallpaper"; shape "lens", "burn",
-        // "orbs" or "beam"; x/y move the light (-50..50 % of the output); the rest 0..100 %; wallpaper is how
+        // Light leak: grade "haze", "tide", "moss", "prism", "ember", "orchid", "polaroid", "accent" or "wallpaper"; shape
+        // "haze", "lens", "burn", "orbs" or "beam"; x/y move the light (-50..50 % of the output); the rest 0..100 %; wallpaper is how
         // strongly the desktop is exposed (0 off), frame the screen edge's band, widgets the desktop widgets;
         // grainSize in px (1..4), dust 0..200 %, gate the lens's corners and film edge, develop the Polaroid rise.
         property JsonObject leak: JsonObject {
-            property string grade: "prism"
-            property string shape: "lens"
+            property string grade: "haze"
+            property string shape: "haze"
             property int x: 0
             property int y: 0
             property int light: 60
             property int frame: 100
             property int widgets: 100
-            property int spill: 55
-            property int prism: 50
+            property int spill: 35
+            property int prism: 15
             property int grain: 55
             property real grainSize: 1.6
-            property int streaks: 15
-            property int dust: 100
-            property bool gate: true
+            property int streaks: 0
+            property int dust: 0
+            property bool gate: false
             property int wallpaper: 50
             property string backdrop: "picture"
             property bool develop: true

@@ -1519,7 +1519,6 @@
   "Prism": "Prizma",
   "Spill": "Taşma",
   "Streaks": "Çizgiler",
-  "The shape the light takes: a prismatic eye over a hot horizon, a burnt corner, grain-gradient orbs, or a beam under a stroke of light.": "Işığın aldığı şekil: kızgın bir ufkun üzerinde prizmatik bir göz, yanmış bir köşe, grenli geçişli küreler ya da bir ışık darbesinin altında bir ışın.",
   "The wallpaper's corners fall off as a lens's do; with Light only, the film's edge shows too.": "Duvar kâğıdının köşeleri bir objektifteki gibi kararır; Yalnızca ışık ile filmin kenarı da görünür.",
   "Under the light: your wallpaper, exposed by it, or the darkroom and the light alone, as the textures it comes from.": "Işığın altında: onun pozladığı duvar kâğıdınız ya da karanlık oda ve yalnızca ışık, geldiği dokulardaki gibi.",
   "Up and down": "Yukarı ve aşağı",
@@ -2475,5 +2474,8 @@
   "No sound device or dimmable screen was found.": "Ses aygıtı veya parlaklığı ayarlanabilen ekran bulunamadı.",
   "Your wallpaper": "Duvar kâğıdın",
   "Surfaces": "Yüzeyler",
-  "Type & icons": "Yazı ve simgeler"
+  "Type & icons": "Yazı ve simgeler",
+  "The shape the light takes: a haze from one corner over a band of colour, a prismatic eye over a hot horizon, a burnt corner, grain-gradient orbs, or a beam under a stroke of light.": "Işığın aldığı şekil: bir köşeden bir renk şeridinin üzerine yayılan pus, kızgın bir ufkun üzerinde prizmatik bir göz, yanık bir köşe, grenli gradyan küreler ya da bir ışık darbesinin altında bir huzme.",
+  "Haze": "Pus",
+  "Moss": "Yosun"
 }

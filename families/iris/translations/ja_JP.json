@@ -1519,7 +1519,6 @@
   "Prism": "プリズム",
   "Spill": "あふれ",
   "Streaks": "スジ",
-  "The shape the light takes: a prismatic eye over a hot horizon, a burnt corner, grain-gradient orbs, or a beam under a stroke of light.": "光の形。灼熱の地平線に浮かぶプリズムの瞳、焼けた角、粒子グラデーションのオーブ、光のひと筆の下のビーム。",
   "The wallpaper's corners fall off as a lens's do; with Light only, the film's edge shows too.": "壁紙の四隅がレンズのように暗くなります。光のみでは、フィルムの縁も見えます。",
   "Under the light: your wallpaper, exposed by it, or the darkroom and the light alone, as the textures it comes from.": "光の下にあるもの。光に露光された壁紙か、元のテクスチャのように暗室と光だけか。",
   "Up and down": "上下",
@@ -2475,5 +2474,8 @@
   "No sound device or dimmable screen was found.": "サウンドデバイスも明るさを調整できる画面も見つかりません。",
   "Your wallpaper": "あなたの壁紙",
   "Surfaces": "サーフェス",
-  "Type & icons": "文字とアイコン"
+  "Type & icons": "文字とアイコン",
+  "The shape the light takes: a haze from one corner over a band of colour, a prismatic eye over a hot horizon, a burnt corner, grain-gradient orbs, or a beam under a stroke of light.": "光の形。片隅から色の帯へ広がるヘイズ、灼熱の地平線に浮かぶプリズムの瞳、焼けた角、粒子グラデーションのオーブ、光のひと筆の下のビーム。",
+  "Haze": "ヘイズ",
+  "Moss": "モス"
 }

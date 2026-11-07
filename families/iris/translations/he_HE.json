@@ -1519,7 +1519,6 @@
   "Prism": "מנסרה",
   "Spill": "גלישה",
   "Streaks": "פסים",
-  "The shape the light takes: a prismatic eye over a hot horizon, a burnt corner, grain-gradient orbs, or a beam under a stroke of light.": "הצורה שהאור מקבל: עין מנסרתית מעל אופק לוהט, פינה שרופה, כדורים במעבר גרעיני, או קרן מתחת למשיכת אור.",
   "The wallpaper's corners fall off as a lens's do; with Light only, the film's edge shows too.": "פינות הטפט מחשיכות כמו של עדשה; עם אור בלבד, גם שולי הפילם נראים.",
   "Under the light: your wallpaper, exposed by it, or the darkroom and the light alone, as the textures it comes from.": "מתחת לאור: הטפט שלכם, חשוף בו, או החדר החשוך והאור לבדו, כמו בטקסטורות שמהן הוא בא.",
   "Up and down": "למעלה ולמטה",
@@ -2475,5 +2474,8 @@
   "No sound device or dimmable screen was found.": "לא נמצא התקן שמע או מסך עם בהירות מתכווננת.",
   "Your wallpaper": "הרקע שלך",
   "Surfaces": "משטחים",
-  "Type & icons": "גופנים וסמלים"
+  "Type & icons": "גופנים וסמלים",
+  "The shape the light takes: a haze from one corner over a band of colour, a prismatic eye over a hot horizon, a burnt corner, grain-gradient orbs, or a beam under a stroke of light.": "הצורה שהאור מקבל: אובך מפינה מעל פס של צבע, עין מנסרתית מעל אופק לוהט, פינה שרופה, כדורים בדרגת גרעין, או קרן מתחת למשיכת אור.",
+  "Haze": "אובך",
+  "Moss": "טחב"
 }

@@ -1519,7 +1519,6 @@
   "Prism": "Prisma",
   "Spill": "Derrame",
   "Streaks": "Estrías",
-  "The shape the light takes: a prismatic eye over a hot horizon, a burnt corner, grain-gradient orbs, or a beam under a stroke of light.": "La forma que toma la luz: un ojo prismático sobre un horizonte ardiente, una esquina quemada, orbes de degradado granulado o un haz bajo un trazo de luz.",
   "The wallpaper's corners fall off as a lens's do; with Light only, the film's edge shows too.": "Las esquinas del fondo de pantalla se oscurecen como las de una lente; con Solo luz también se ve el borde de la película.",
   "Under the light: your wallpaper, exposed by it, or the darkroom and the light alone, as the textures it comes from.": "Bajo la luz: tu fondo de pantalla, expuesto por ella, o el cuarto oscuro y la luz sola, como en las texturas de las que viene.",
   "Up and down": "Arriba y abajo",
@@ -2475,5 +2474,8 @@
   "No sound device or dimmable screen was found.": "No se encontró un dispositivo de sonido ni una pantalla con brillo ajustable.",
   "Your wallpaper": "Tu fondo de pantalla",
   "Surfaces": "Superficies",
-  "Type & icons": "Tipografía e íconos"
+  "Type & icons": "Tipografía e íconos",
+  "The shape the light takes: a haze from one corner over a band of colour, a prismatic eye over a hot horizon, a burnt corner, grain-gradient orbs, or a beam under a stroke of light.": "La forma que toma la luz: una bruma desde una esquina sobre una franja de color, un ojo prismático sobre un horizonte ardiente, una esquina quemada, orbes de degradado con grano o un haz bajo un trazo de luz.",
+  "Haze": "Bruma",
+  "Moss": "Musgo"
 }

@@ -1519,7 +1519,6 @@
   "Prism": "منشور",
   "Spill": "فيض",
   "Streaks": "خطوط",
-  "The shape the light takes: a prismatic eye over a hot horizon, a burnt corner, grain-gradient orbs, or a beam under a stroke of light.": "الشكل الذي يتخذه الضوء: عين منشورية فوق أفق ملتهب، أو زاوية محترقة، أو كرات بتدرج محبب، أو شعاع تحت خط من الضوء.",
   "The wallpaper's corners fall off as a lens's do; with Light only, the film's edge shows too.": "تعتم زوايا الخلفية كما في العدسة؛ ومع الضوء فقط تظهر حافة الفيلم أيضًا.",
   "Under the light: your wallpaper, exposed by it, or the darkroom and the light alone, as the textures it comes from.": "تحت الضوء: خلفيتك وقد عرّضها، أو الغرفة المظلمة والضوء وحده، كما في الخامات التي جاء منها.",
   "Up and down": "لأعلى ولأسفل",
@@ -2475,5 +2474,8 @@
   "No sound device or dimmable screen was found.": "لم يُعثر على جهاز صوت أو شاشة قابلة للتعتيم.",
   "Your wallpaper": "خلفيتك",
   "Surfaces": "الأسطح",
-  "Type & icons": "الخطوط والأيقونات"
+  "Type & icons": "الخطوط والأيقونات",
+  "The shape the light takes: a haze from one corner over a band of colour, a prismatic eye over a hot horizon, a burnt corner, grain-gradient orbs, or a beam under a stroke of light.": "الشكل الذي يتخذه الضوء: ضباب من زاوية فوق شريط من اللون، أو عين منشورية فوق أفق ملتهب، أو زاوية محترقة، أو كرات بتدرّج حبيبي، أو حزمة تحت ضربة من الضوء.",
+  "Haze": "ضباب",
+  "Moss": "طحلب"
 }

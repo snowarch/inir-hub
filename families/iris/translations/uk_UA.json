@@ -1519,7 +1519,6 @@
   "Prism": "Призма",
   "Spill": "Ореол",
   "Streaks": "Смуги",
-  "The shape the light takes: a prismatic eye over a hot horizon, a burnt corner, grain-gradient orbs, or a beam under a stroke of light.": "Форма світла: призматичне око над розпеченим горизонтом, обпечений кут, сфери зернистого градієнта або промінь під штрихом світла.",
   "The wallpaper's corners fall off as a lens's do; with Light only, the film's edge shows too.": "Кути шпалер темнішають, як в об'єктива; у режимі «Лише світло» видно й край плівки.",
   "Under the light: your wallpaper, exposed by it, or the darkroom and the light alone, as the textures it comes from.": "Під світлом: ваші шпалери, засвічені ним, або темна кімната й саме світло, як у текстурах, з яких воно походить.",
   "Up and down": "Вгору й униз",
@@ -2475,5 +2474,8 @@
   "No sound device or dimmable screen was found.": "Не знайдено звукового пристрою чи екрана з регульованою яскравістю.",
   "Your wallpaper": "Ваші шпалери",
   "Surfaces": "Поверхні",
-  "Type & icons": "Шрифти та значки"
+  "Type & icons": "Шрифти та значки",
+  "The shape the light takes: a haze from one corner over a band of colour, a prismatic eye over a hot horizon, a burnt corner, grain-gradient orbs, or a beam under a stroke of light.": "Форма світла: серпанок із кута над смугою кольору, призматичне око над розпеченим горизонтом, обпалений кут, сфери із зернистим градієнтом або промінь під штрихом світла.",
+  "Haze": "Серпанок",
+  "Moss": "Мох"
 }

@@ -1519,7 +1519,6 @@
   "Prism": "Prisma-i",
   "Spill": "Kuuttoq",
   "Streaks": "Titarnerit",
-  "The shape the light takes: a prismatic eye over a hot horizon, a burnt corner, grain-gradient orbs, or a beam under a stroke of light.": "Qaamanerup ilusaa: isi prisma-tut sila kissartoq qulaani, teqeqqut ikuallasoq, kaajallaasut naqqap ikaarsaarnerinik, imaluunniit qaamanerup titarnerata ataani qaamaneq.",
   "The wallpaper's corners fall off as a lens's do; with Light only, the film's edge shows too.": "Tunuliaqutip teqeqqui lenseqartutut taarseqqasarput; Light only atorlugu film-ip killeqarfia aamma takuneqarsinnaasarpoq.",
   "Under the light: your wallpaper, exposed by it, or the darkroom and the light alone, as the textures it comes from.": "Qaamanerup ataani: tunuliaqutit, tassuuna saqqummiunneqartoq, imaluunniit taarsivik qaamanerlu kisimi, qaavisa ilusaattut tassannga pinngortut.",
   "Up and down": "Qummut ammullu",
@@ -2475,5 +2474,8 @@
   "No sound device or dimmable screen was found.": "Nipimut atortoqanngilaq aamma saqqummiut qaamassusaa allanngortinneqarsinnaasoq nassaarineqanngilaq.",
   "Your wallpaper": "Tunuliaqutaasit",
   "Surfaces": "Qaavi",
-  "Type & icons": "Allanneq ikonillu"
+  "Type & icons": "Allanneq ikonillu",
+  "The shape the light takes: a haze from one corner over a band of colour, a prismatic eye over a hot horizon, a burnt corner, grain-gradient orbs, or a beam under a stroke of light.": "Qaamanerup ilusaa: pujoorneq teqeqqumit qalipaatip qulaani, isi prisma-tut sila kissartoq qulaani, teqeqqoq ikuallasoq, kuuglit siorartut imaluunniit qaamaneq titartakkap ataani.",
+  "Haze": "Pujoorneq",
+  "Moss": "Ivik"
 }

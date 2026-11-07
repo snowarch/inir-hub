@@ -1519,7 +1519,6 @@
   "Prism": "प्रिज़्म",
   "Spill": "छलकन",
   "Streaks": "धारियाँ",
-  "The shape the light takes: a prismatic eye over a hot horizon, a burnt corner, grain-gradient orbs, or a beam under a stroke of light.": "रोशनी का आकार: तपते क्षितिज पर प्रिज़्मी आँख, जला हुआ कोना, दानेदार ग्रेडिएंट के गोले, या रोशनी की एक लकीर के नीचे बीम।",
   "The wallpaper's corners fall off as a lens's do; with Light only, the film's edge shows too.": "वॉलपेपर के कोने लेंस की तरह गहरे होते हैं; सिर्फ़ रोशनी में फ़िल्म का किनारा भी दिखता है।",
   "Under the light: your wallpaper, exposed by it, or the darkroom and the light alone, as the textures it comes from.": "रोशनी के नीचे: उससे एक्सपोज़ हुआ आपका वॉलपेपर, या जिन टेक्सचर से यह आया उनकी तरह डार्करूम और अकेली रोशनी।",
   "Up and down": "ऊपर-नीचे",
@@ -2475,5 +2474,8 @@
   "No sound device or dimmable screen was found.": "कोई ध्वनि डिवाइस या मंद होने वाली स्क्रीन नहीं मिली।",
   "Your wallpaper": "आपका वॉलपेपर",
   "Surfaces": "सतहें",
-  "Type & icons": "टाइप और आइकन"
+  "Type & icons": "टाइप और आइकन",
+  "The shape the light takes: a haze from one corner over a band of colour, a prismatic eye over a hot horizon, a burnt corner, grain-gradient orbs, or a beam under a stroke of light.": "रोशनी का आकार: एक कोने से रंग की पट्टी पर फैली धुंध, तपते क्षितिज पर प्रिज़्मी आँख, जला हुआ कोना, दानेदार ग्रेडिएंट के गोले, या रोशनी की एक लकीर के नीचे किरण।",
+  "Haze": "धुंध",
+  "Moss": "काई"
 }

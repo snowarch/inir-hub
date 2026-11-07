@@ -697,10 +697,14 @@ QtObject {
         prism: { label: "Prism", core: "#fff6ea", glow: "#b48cff", stops: ["#ff5a3c", "#ffcf6b", "#d8fbff", "#4f86ff", "#a35dff"] },
         ember: { label: "Ember", core: "#fff0d4", glow: "#ff9a3c", stops: ["#fff0d4", "#ffb25a", "#f2581f", "#a3241a", "#3d0f0f"] },
         orchid: { label: "Orchid", core: "#ffe6f5", glow: "#ff5fb8", stops: ["#ffd0ee", "#ff6cc4", "#e0369c", "#7a3dff", "#2b2bd0"] },
-        polaroid: { label: "Polaroid", core: "#fff4dc", glow: "#ff9e7a", stops: ["#fff4dc", "#ffbf78", "#ff6aa0", "#55cfff", "#3567e0"] }
+        polaroid: { label: "Polaroid", core: "#fff4dc", glow: "#ff9e7a", stops: ["#fff4dc", "#ffbf78", "#ff6aa0", "#55cfff", "#3567e0"] },
+        // The dusty grades of the grain gradients (.claude/ref/iris-leak): pale light, a muted middle, a coloured night.
+        haze: { label: "Haze", core: "#f2e4f1", glow: "#8f8ff0", stops: ["#e6c9e8", "#c3a5de", "#7b7ddc", "#4a4fb3", "#25264a"] },
+        tide: { label: "Tide", core: "#e6f3f6", glow: "#4ea6d6", stops: ["#cfe7ee", "#86c3dc", "#3a8fbd", "#1d5683", "#0c2138"] },
+        moss: { label: "Moss", core: "#eef7e6", glow: "#86c79c", stops: ["#d9efcc", "#a3d6ab", "#5aa184", "#2a6058", "#10292b"] }
     })
-    readonly property string leakGrade: ["prism", "ember", "orchid", "polaroid", "accent", "wallpaper"].includes(String(root.leakOptions?.grade ?? ""))
-        ? root.leakOptions.grade : "prism"
+    readonly property string leakGrade: ["prism", "ember", "orchid", "polaroid", "haze", "tide", "moss", "accent", "wallpaper"].includes(String(root.leakOptions?.grade ?? ""))
+        ? root.leakOptions.grade : "haze"
     function leakColours(grade: string): var {
         if (grade === "accent") {
             // The highlight's hue at the warm end, the accent's at the cool end, the arc between them pale in the middle:
@@ -740,10 +744,15 @@ QtObject {
             { at: [0.62, 0.18, 0.3, 0.22], form: [0, 0.45, 0, 0], hue: [0.55, 0.4, 0, 0] }],
         beam: [{ at: [0.8, 0.45, 0.06, 1.0], form: [0.05, 1.3, 0, 0], hue: [0.3, 0.1, 0, 0.5] },
             { at: [0.28, 0.09, 0.42, 0.05], form: [-0.06, 1.1, 0, 0], hue: [0.5, 0, 0, 0.45] },
-            { at: [0.22, 1.0, 0.6, 0.28], form: [0, 0.8, 0, 0], hue: [0.1, 0.5, 0, 0.25] }]
+            { at: [0.22, 1.0, 0.6, 0.28], form: [0, 0.8, 0, 0], hue: [0.1, 0.5, 0, 0.25] }],
+        // Haze: the grain gradient itself. A wide pale light from one corner, a band of the grade's middle running
+        // across under it, and the night left whole in the far corner.
+        haze: [{ at: [0.14, 0.1, 0.9, 0.58], form: [-0.35, 1.55, 0, 0], hue: [0.0, 0.35, 0, 0] },
+            { at: [0.58, 0.62, 1.1, 0.34], form: [-0.32, 1.3, 0, 0], hue: [0.62, 0.16, 0, 0] },
+            { at: [0.98, 0.95, 0.42, 0.3], form: [0.4, 0.3, 0, 0], hue: [0.62, 0.2, 0, 0] }]
     })
-    readonly property string leakShapeName: ["lens", "burn", "orbs", "beam"].includes(String(root.leakOptions?.shape ?? ""))
-        ? root.leakOptions.shape : "lens"
+    readonly property string leakShapeName: ["lens", "burn", "orbs", "beam", "haze"].includes(String(root.leakOptions?.shape ?? ""))
+        ? root.leakOptions.shape : "haze"
     readonly property var leakSources: root.leakShapes[root.leakShapeName]
     // Where the person moved the light (Light leak › Position, or a drag in its preview): the whole shape shifts, in
     // fractions of the output, so a preset keeps its composition.
@@ -762,10 +771,10 @@ QtObject {
             : Qt.vector4d(v[0], v[1], v[2], v[3])
     }
     readonly property real leakLight: root.leakPercent("light", 60)
-    readonly property real leakSpill: root.leakPercent("spill", 55)
-    readonly property real leakPrism: root.leakPercent("prism", 50)
+    readonly property real leakSpill: root.leakPercent("spill", 35)
+    readonly property real leakPrism: root.leakPercent("prism", 15)
     readonly property real leakGrain: root.leakPercent("grain", 55)
-    readonly property real leakStreaks: root.leakPercent("streaks", 15)
+    readonly property real leakStreaks: root.leakPercent("streaks", 0)
     readonly property real leakWallpaperAmount: root.leakPercent("wallpaper", 50)
     // How strongly the frame's band is exposed (blended into the bodies welded to it) and the desktop widgets' plates.
     readonly property real leakFrame: root.leakPercent("frame", 100)
@@ -777,10 +786,10 @@ QtObject {
         return Math.max(1, Math.min(4, isNaN(value) ? 1.6 : value))
     }
     readonly property real leakDust: {
-        const value = Number(root.leakOptions?.dust ?? 100)
-        return Math.max(0, Math.min(200, isNaN(value) ? 100 : value)) / 100
+        const value = Number(root.leakOptions?.dust ?? 0)
+        return Math.max(0, Math.min(200, isNaN(value) ? 0 : value)) / 100
     }
-    readonly property real leakGate: (root.leakOptions?.gate ?? true) ? 1 : 0
+    readonly property real leakGate: (root.leakOptions?.gate ?? false) ? 1 : 0
     readonly property bool leakDevelop: root.leakOptions?.develop ?? true
     // Picture: the wallpaper exposed by the leak. Light: the darkroom and the light alone, the texture itself.
     readonly property string leakBackdrop: String(root.leakOptions?.backdrop ?? "picture") === "light" ? "light" : "picture"
