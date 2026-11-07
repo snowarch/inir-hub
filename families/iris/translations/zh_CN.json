@@ -816,6 +816,8 @@
   "Add widgets": "添加小部件",
   "Back 10 seconds": "后退 10 秒",
   "Ahead 10 seconds": "快进 10 秒",
+  "Pin apps": "固定应用",
+  "The frame grows wide on one side and holds your Dock's apps, like a browser's sidebar.": "边框在一侧加宽，像浏览器侧边栏一样容纳 Dock 中的应用。",
   "How high subtitles sit; 100 is the bottom edge.": "字幕的高度；100 为底边。",
   "Less %1": "减少%1",
   "Load a subtitle file": "加载字幕文件",

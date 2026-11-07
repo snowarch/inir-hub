@@ -130,7 +130,21 @@ QtObject {
     }
     function vertical(edge: string): bool { return edge === "left" || edge === "right" }
     readonly property string islandEdge: root.edges.includes(String(root.bar?.position ?? "top")) ? String(root.bar.position) : "top"
+    // The rail (`iris.surround.rail`): the frame grows wide on one side and the Dock lives in it, top to bottom, like a
+    // browser's sidebar (.claude/ref/iris-frame). Never on the Island's own edge.
+    readonly property string railEdge: {
+        const wanted = String(root.surround?.rail ?? "none")
+        return root.framed && (root.dock?.enable ?? true) && (wanted === "left" || wanted === "right")
+            && wanted !== root.islandEdge ? wanted : ""
+    }
+    readonly property bool rail: root.railEdge.length > 0
+    // The rail meets the frame's top and bottom lines in a fillet as round as the frame's own corners.
+    readonly property real railFuse: Math.round(root.cornerRadius * 4 * (1 - Math.SQRT1_2))
+    // The frame's own wall on a side: its band, and on the rail's side the rail too. What rests in a corner beside the
+    // rail (a line of bubbles, a card) keeps off it as it keeps off the band.
+    function wallOn(side: string): real { return root.band + (root.rail && side === root.railEdge ? root.dockBand : 0) }
     readonly property string dockEdge: {
+        if (root.rail) return root.railEdge
         const wanted = String(root.dock?.position ?? "auto")
         return root.edges.includes(wanted) && wanted !== root.islandEdge ? wanted : root.opposite(root.islandEdge)
     }
@@ -167,18 +181,18 @@ QtObject {
         ? root.islandVisualDepth : 0
     readonly property real dockIcon: Math.max(28, Math.min(64, Number(root.dock?.iconSize ?? 40))) * root.d
     readonly property real dockBand: root.dockIcon + 18 * root.d
-    readonly property real dockMargin: Boolean(root.dock?.notch ?? false) ? 0 : 10 * root.d
-    readonly property real dockVisualDepth: (root.dock?.enable ?? true) && !(root.dock?.autoHide ?? false)
-        ? root.dockBand + root.dockMargin : 0
-    readonly property real dockDepth: (root.dock?.enable ?? true)
-        && (root.dock?.reserveSpace ?? true) && !(root.dock?.autoHide ?? false)
+    readonly property real dockMargin: root.rail || Boolean(root.dock?.notch ?? false) ? 0 : 10 * root.d
+    readonly property real dockVisualDepth: root.rail ? root.dockBand
+        : (root.dock?.enable ?? true) && !(root.dock?.autoHide ?? false) ? root.dockBand + root.dockMargin : 0
+    readonly property real dockDepth: root.rail ? root.dockBand
+        : (root.dock?.enable ?? true) && (root.dock?.reserveSpace ?? true) && !(root.dock?.autoHide ?? false)
         ? root.dockVisualDepth : 0
     // What an auto-hidden Island or Dock still shows on a workspace with no windows (revealOnEmpty).
     function emptyDepth(edge: string): real {
         let depth = 0
         if (edge === root.islandEdge && root.islandAutoHide && (root.bar?.revealOnEmpty ?? true))
             depth = root.islandBand + root.islandMargin
-        if (edge === root.dockEdge && (root.dock?.enable ?? true) && (root.dock?.autoHide ?? false)
+        if (edge === root.dockEdge && !root.rail && (root.dock?.enable ?? true) && (root.dock?.autoHide ?? false)
                 && (root.dock?.revealOnEmpty ?? true))
             depth = Math.max(depth, root.dockBand + root.dockMargin)
         return depth
@@ -208,7 +222,7 @@ QtObject {
     function pieceGapOn(side: string): real {
         return root.joinOn(side) === "gap" ? Math.max(root.islandMargin, Math.round(Number(root.bar?.margin ?? 8) * root.d), Math.round(8 * root.d)) : 0
     }
-    function pieceInsetOn(side: string): real { return root.band + root.pieceGapOn(side) }
+    function pieceInsetOn(side: string): real { return root.wallOn(side) + root.pieceGapOn(side) }
     function pieceDepthOn(side: string): real { return root.pieceGapOn(side) + root.pieceBand }
     // An announcement is never switched on: like Material's bar indicator it shows whenever its state is there.
     readonly property var announcements: ["shellUpdate"]
@@ -256,7 +270,7 @@ QtObject {
         // The theme's air from the frame's inner edge on every side (past the music it carries), `air` from what opened
         // the body (negative welds it on). A piece on an edge is drawn as a strip deeper than the item it sits in, so
         // the body keeps its air from that strip, not the item: on a thin edge the item alone left it pressed under the piece.
-        const wall = side => root.band + root.musicReach(side)
+        const wall = side => root.wallOn(side) + root.musicReach(side)
         let left = wall("left") + root.bodyAir
         let right = screenWidth - width - wall("right") - root.bodyAir
         let top = wall("top") + root.bodyAir

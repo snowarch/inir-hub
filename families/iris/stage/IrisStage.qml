@@ -145,7 +145,7 @@ Item {
     readonly property bool attached: IrisFrame.piecesAttached
     readonly property var zones: {
         const half = root.size / 2
-        const edgeOn = wall => (root.attached ? IrisFrame.pieceInsetOn(wall) : root.margin) + half
+        const edgeOn = wall => (root.attached ? IrisFrame.pieceInsetOn(wall) : root.margin + IrisFrame.wallOn(wall) - IrisFrame.band) + half
         const g = root.island
         const clearance = root.size / 2 + Math.round(10 * root.d)
         const side = g?.edge ?? (g?.bottomEdge ? "bottom" : "top")

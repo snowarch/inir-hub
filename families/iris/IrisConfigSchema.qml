@@ -763,6 +763,9 @@ JsonObject {
         property int musicLightWidth: 5 // 1-18 px, edge treatment width
         property int thickness: 10
         property int radius: 22
+        // "none" | "left" | "right": the frame grows wide on that side and the Dock lives in it, top to bottom, like a
+        // browser's sidebar (.claude/ref/iris-frame). Ignored on the Island's own edge.
+        property string rail: "none"
         // The frame's own light over whatever material it wears: "plain" or "holo" (the screen an eclipse, the frame its
         // spectral rim, .claude/ref/iris-holo); holoLight 0..100 %, holoHalo how far its halo reaches over the screen 0..100 %.
         property string style: "plain"

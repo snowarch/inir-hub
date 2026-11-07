@@ -816,6 +816,8 @@
   "Add widgets": "ウィジェットを追加",
   "Back 10 seconds": "10秒戻る",
   "Ahead 10 seconds": "10秒進む",
+  "Pin apps": "アプリを固定",
+  "The frame grows wide on one side and holds your Dock's apps, like a browser's sidebar.": "フレームの片側が広がり、ブラウザのサイドバーのように Dock のアプリを収めます。",
   "How high subtitles sit; 100 is the bottom edge.": "字幕の高さ。100 が下端です。",
   "Less %1": "%1 を減らす",
   "Load a subtitle file": "字幕ファイルを読み込む",

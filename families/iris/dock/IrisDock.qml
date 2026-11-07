@@ -45,10 +45,12 @@ Item {
             root.vertical ? item.height / 2 : (root.atTop ? item.height : 0))
         return Qt.point(Math.round(p.x), Math.round(p.y))
     }
-    readonly property bool notch: root.options?.notch ?? false
-    readonly property bool autoHide: root.options?.autoHide ?? true
-    readonly property bool reserveSpace: root.options?.reserveSpace ?? true
-    readonly property bool magnify: (root.options?.magnification ?? true) && IrisStyle.motionEnabled
+    // In the frame's rail the Dock is the wide side of the frame itself: always there, top to bottom, melted in.
+    readonly property bool rail: IrisFrame.rail
+    readonly property bool notch: root.rail || (root.options?.notch ?? false)
+    readonly property bool autoHide: !root.rail && (root.options?.autoHide ?? true)
+    readonly property bool reserveSpace: root.rail || (root.options?.reserveSpace ?? true)
+    readonly property bool magnify: !root.rail && (root.options?.magnification ?? true) && IrisStyle.motionEnabled
     readonly property bool badges: root.options?.badges ?? true
     readonly property bool revealOnEmpty: root.options?.revealOnEmpty ?? true
     readonly property var entries: {
@@ -199,6 +201,8 @@ Item {
         function onControlPanelOpenChanged(): void { if (GlobalStates.controlPanelOpen) root.seenAllAt = Date.now() }
     }
     readonly property real slotWidth: root.iconSize + 10 * root.d
+    // Where the rail's first slot and its gear stand from the screen's ends: past the frame's line, a breath in.
+    readonly property real railHead: Math.round(IrisFrame.band + 8 * root.d)
     readonly property real plateSize: Math.round(root.iconSize + 6 * root.d)
     readonly property real separatorWidth: 13 * root.d
     readonly property real slotSpacing: 2 * root.d
@@ -474,7 +478,8 @@ Item {
                     width: Math.round(dock.width + (root.vertical ? attached : 0)),
                     height: Math.round(dock.height + (root.vertical ? 0 : attached)),
                     radius: dock.radius, paints: true,
-                    fuse: root.notch ? Math.round(IrisStyle.fuseEdge * window.notchReveal) : IrisStyle.fuse,
+                    fuse: root.rail ? IrisFrame.railFuse
+                        : root.notch ? Math.round(IrisStyle.fuseEdge * window.notchReveal) : IrisStyle.fuse,
                     id: "dock", joins: !root.notch ? "" : IrisFrame.framed ? "frame" : "dockEdge", glass: window.bodyGlass
                 })
                 const menuBody = menu.bodyRect
@@ -514,13 +519,16 @@ Item {
                 readonly property real baseWidth: (window.baseCenters.length > 0
                     ? window.baseCenters[window.baseCenters.length - 1] + root.slotWidth / 2 : 0) + dock.padding * 2
                 width: root.vertical ? window.dockHeight : Math.min(window.width - 32, appRow.implicitWidth + dock.padding * 2)
-                height: root.vertical ? Math.min(window.height - 32, appRow.implicitHeight + dock.padding * 2) : window.dockHeight
+                height: root.rail ? window.height
+                    : root.vertical ? Math.min(window.height - 32, appRow.implicitHeight + dock.padding * 2) : window.dockHeight
                 x: root.vertical ? (root.atLeft ? window.edgeOffset : window.width - width - window.edgeOffset)
                     : Math.round((window.width - width) / 2)
-                y: root.vertical ? Math.round((window.height - height) / 2)
+                y: root.rail ? 0 : root.vertical ? Math.round((window.height - height) / 2)
                     : root.atTop ? window.edgeOffset : window.height - height - window.edgeOffset
-                readonly property real thickness: root.vertical ? width : height
-                radius: IrisStyle.profileRadius(IrisStyle.bodyProfile(IrisStyle.dockShape, root.notch), dock.thickness)
+                // Across the Dock on either axis; read from the band, not its own size, so a flip of edge
+                // (bottom to the rail) never loops through radius and padding.
+                readonly property real thickness: window.dockHeight
+                radius: root.rail ? 0 : IrisStyle.profileRadius(IrisStyle.bodyProfile(IrisStyle.dockShape, root.notch), dock.thickness)
                 quiet: true
                 opacity: window.revealed || window.edgeOffset > -window.dockHeight ? 1 : 0
 
@@ -561,13 +569,28 @@ Item {
                     }
                 }
 
+                // The rail's own two marks, as a browser's sidebar has them: "+" under the apps pins another,
+                // the gear at the foot opens iRiS Settings.
+                RailButton {
+                    y: appRow.y + appRow.height + root.slotSpacing
+                    glyph: "add"
+                    label: Translation.tr("Pin apps")
+                    onActivated: GlobalStates.openSettingsAt("iris", "dock/Apps")
+                }
+                RailButton {
+                    y: dock.height - root.railHead - height
+                    glyph: "settings"
+                    label: Translation.tr("Settings")
+                    onActivated: GlobalStates.openSettingsAt("iris", "")
+                }
+
                 Grid {
                     id: appRow
                     columns: root.vertical ? 1 : Math.max(1, root.entries.length + (root.showLauncher ? 1 : 0)
                         + (root.pieces.length > 0 ? root.pieces.length + 1 : 0))
                     flow: root.vertical ? Grid.TopToBottom : Grid.LeftToRight
                     x: root.vertical ? (root.atLeft ? Math.round(4 * root.d) : parent.width - width - Math.round(4 * root.d)) : dock.padding
-                    y: root.vertical ? dock.padding : (root.atTop ? Math.round(4 * root.d) : parent.height - height - Math.round(4 * root.d))
+                    y: root.rail ? root.railHead : root.vertical ? dock.padding : (root.atTop ? Math.round(4 * root.d) : parent.height - height - Math.round(4 * root.d))
                     spacing: root.slotSpacing
                     move: Transition {
                         enabled: root.slideApp.length > 0 && IrisStyle.motionEnabled
@@ -779,6 +802,7 @@ Item {
                                 HoverPlate {
                                     lift: appSlot.lift + appIcon.hoverLift
                                     lit: appButton.hovered || appButton.down || appSlot.held
+                                    chosen: root.rail && appSlot.focused
                                     skinned: appButton.skinned
                                 }
                                 IrisButton {
@@ -1581,12 +1605,49 @@ Item {
             }
         }
 
+    component RailButton: Item {
+        id: railButton
+        property string glyph: ""
+        property string label: ""
+        signal activated()
+        visible: root.rail && !IrisState.edit
+        x: appRow.x
+        width: root.thickness
+        height: root.slotWidth
+        HoverPlate { lit: railArea.containsMouse || railArea.pressed }
+        MaterialSymbol {
+            x: root.edgeX(parent.width, width, 4 * root.d + (root.plateSize - width) / 2)
+            y: (parent.height - height) / 2
+            width: root.plateSize * 0.5
+            height: width
+            horizontalAlignment: Text.AlignHCenter
+            verticalAlignment: Text.AlignVCenter
+            text: railButton.glyph
+            iconSize: Math.round(root.iconSize * 0.5)
+            color: railArea.containsMouse ? IrisStyle.text : IrisStyle.textSecondary
+            scale: railArea.pressed ? IrisStyle.pressScale(0.9) : 1
+            Behavior on color { ColorAnimation { duration: IrisStyle.duration(120); easing.type: IrisStyle.feedbackEasing } }
+        }
+        MouseArea {
+            id: railArea
+            anchors.fill: parent
+            hoverEnabled: true
+            cursorShape: Qt.PointingHandCursor
+            Accessible.role: Accessible.Button
+            Accessible.name: railButton.label
+            onClicked: railButton.activated()
+            onContainsMouseChanged: nameLabel.present(containsMouse ? railButton : null, railButton.label)
+        }
+    }
+
     // A slot's hover plate: a rounded square around the icon, the same radius on every corner, 4·d from the lane's
     // inner edge like the lane itself. The Dock's ends make room for it (dock.padding), so it never meets the curve.
     component HoverPlate: Rectangle {
         id: plate
         property real lift: 0
         property bool lit: false
+        // The rail marks the focused app as a browser's sidebar marks its open tab: on its plate at rest.
+        property bool chosen: false
         // A Design that draws the slot (dockSlot) answers the pointer without a plate.
         property bool skinned: false
         visible: !root.magnify && !plate.skinned
@@ -1595,7 +1656,8 @@ Item {
         radius: IrisStyle.tileRadius(plate.width)
         x: root.edgeX(parent.width, plate.width, 4 * root.d + plate.lift)
         y: root.edgeY(parent.height, plate.height, 4 * root.d + plate.lift)
-        color: plate.lit ? IrisStyle.fill : ColorUtils.applyAlpha(IrisStyle.text, 0)
+        color: plate.lit && plate.chosen ? IrisStyle.fillHover : plate.lit || plate.chosen ? IrisStyle.fill
+            : ColorUtils.applyAlpha(IrisStyle.text, 0)
         Behavior on color { ColorAnimation { duration: IrisStyle.duration(120); easing.type: IrisStyle.feedbackEasing } }
     }
 }
