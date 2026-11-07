@@ -143,7 +143,18 @@ Item {
     visible: root.occupied && !root.suppressed
 
     readonly property bool attached: IrisFrame.piecesAttached
-    readonly property var zones: {
+    // Where each place's line starts. Two tables: `baseZones` from the places people set, the carried bubble left out
+    // (what a drop is measured against), and `zones`, which also counts the place it is about to land on, so a corner
+    // line it starts already pushes the side line there one step along while it is carried.
+    // What the Island and the Dock absorb is read from the places as set (`configZones`): carrying a bubble never moves them.
+    function placeTaken(zone: string, except: string): bool {
+        return root.allSlots.some(slot => slot !== except && root.baseKindOf(slot).length > 0 && root.configuredPlace(slot) === zone)
+    }
+    readonly property var configZones: root.zoneTable(zone => root.placeTaken(zone, ""))
+    readonly property var baseZones: root.lifted.length === 0 ? root.configZones : root.zoneTable(zone => root.placeTaken(zone, root.lifted))
+    readonly property var zones: root.previewZone.length === 0 ? root.baseZones
+        : root.zoneTable(zone => zone === root.previewZone || root.placeTaken(zone, root.lifted))
+    function zoneTable(taken: var): var {
         const half = root.size / 2
         const edgeOn = wall => (root.attached ? IrisFrame.pieceInsetOn(wall) : root.margin + IrisFrame.wallOn(wall) - IrisFrame.band) + half
         const g = root.island
@@ -170,7 +181,6 @@ Item {
         const cornerRightOf = edgeSide => along && along.hi > rightOf(edgeSide) - half ? Math.min(rightOf(edgeSide), along.lo - gapBeside) : rightOf(edgeSide)
         // A side line starts a bubble's step clear of its corner only when the top or bottom line there holds it; alone, the
         // corner is its own (read from the places people set: what the Island absorbs depends on these points).
-        const taken = zone => root.allSlots.some(slot => root.baseKindOf(slot).length > 0 && root.configuredPlace(slot) === zone)
         const clear = zone => taken(zone) ? root.size + root.looseGap : 0
         const at = {
             "top-left": { x: side === "top" ? cornerLeftOf("top") : leftOf("top"), y: top },
@@ -216,15 +226,52 @@ Item {
         return Qt.point(Math.max(lo, Math.min(root.width - lo, x)), Math.max(lo, Math.min(root.height - lo, y)))
     }
     // Tables, rebuilt only when their inputs change: recomputed per call they cost O(n^3) per plate on every drag event.
-    readonly property var lines: {
+    // A line's order, nearest its anchor first, is what drops wrote (`iris.bubbles.order`); a line never dropped on keeps
+    // the pieces' own order, and a piece placed from Settings joins at its far end.
+    readonly property var lineOrder: Array.from(root.options?.order ?? [])
+    function ordered(zone: string, members: var): var {
+        const order = Array.from(root.lineOrder.find(entry => entry?.place === zone)?.slots ?? [])
+        if (order.length === 0) return members
+        const rank = slot => { const at = order.indexOf(slot); return at < 0 ? order.length + members.indexOf(slot) : at }
+        return members.slice().sort((a, b) => rank(a) - rank(b))
+    }
+    // A carried bubble leaves its line, which closes up, and the line it would land on opens a gap where it would fall:
+    // what shows while it is carried is where it lands.
+    readonly property string dropId: "drop:"
+    readonly property string lifted: root.drag && !root.carryingIsland && !root.isTrayApp(String(root.drag.slot))
+        && root.allSlots.includes(String(root.drag.slot)) ? String(root.drag.slot) : ""
+    readonly property string previewZone: root.lifted.length > 0 && (root.target?.index ?? -1) >= 0 ? String(root.target.zone) : ""
+    readonly property int previewIndex: root.previewZone.length > 0 ? root.target.index : -1
+    function lineZone(slot: string): string {
+        if (slot.length === 0 || slot !== root.lifted) return root.placeName(slot)
+        // Let go anywhere but a line, it is read from where it was just written.
+        return root.previewZone.length > 0 ? root.previewZone : root.drag?.released ? root.placeName(slot) : "lifted"
+    }
+    readonly property var baseLines: {
         const out = {}
         for (const slot of root.allSlots) {
-            if (root.kindOf(slot).length === 0) continue
+            if (root.kindOf(slot).length === 0 || slot === root.lifted) continue
             const zone = root.placeName(slot)
             if (!out[zone]) out[zone] = []
             out[zone].push(slot)
         }
+        for (const zone in out) if (!zone.startsWith("edge:")) out[zone] = root.ordered(zone, out[zone])
         return out
+    }
+    readonly property var lines: {
+        if (root.lifted.length === 0 || root.kindOf(root.lifted).length === 0) return root.baseLines
+        const out = Object.assign({}, root.baseLines)
+        const zone = root.lineZone(root.lifted)
+        const line = (out[zone] ?? []).slice()
+        line.splice(root.previewIndex < 0 ? line.length : Math.min(root.previewIndex, line.length), 0, root.lifted)
+        out[zone] = line
+        return out
+    }
+    // Where a bubble dropped into `zone` at `index` comes to rest, measured on the lines as they are without it.
+    function dropPoint(zone: string, index: int): point {
+        const line = (root.baseLines[zone] ?? []).slice()
+        line.splice(Math.min(index, line.length), 0, root.dropId)
+        return root.linePoint(root.dropId, zone, line, root.baseZones)
     }
     function lineOf(zone: string): var { return root.lines[zone] ?? [] }
     function stacks(zone: string): bool { return IrisFrame.vertical(IrisFrame.edgeOf(zone)) }
@@ -301,11 +348,11 @@ Item {
             if (owner.length === 0) continue
             const vertical = IrisFrame.vertical(side)
             const members = place.startsWith("edge:") ? [slot]
-                : owned.filter(other => root.configuredPlace(other) === place && root.baseKindOf(other).length > 0)
+                : root.ordered(place, owned.filter(other => root.configuredPlace(other) === place && root.baseKindOf(other).length > 0))
             let lo = Infinity
             let hi = -Infinity
             for (const member of members) {
-                const p = root.linePoint(member, place, members)
+                const p = root.linePoint(member, place, members, root.configZones)
                 lo = Math.min(lo, (vertical ? p.y : p.x) - half)
                 hi = Math.max(hi, (vertical ? p.y : p.x) + half)
             }
@@ -315,7 +362,7 @@ Item {
             if (root.isApp(slot)) continue
             if (owner === "island") {
                 // It joins the end of the bar it was nearest to.
-                const at = root.linePoint(slot, place, members)
+                const at = root.linePoint(slot, place, members, root.configZones)
                 const nearStart = IrisFrame.vertical(root.islandSideName) ? at.y < root.height / 2 : at.x < root.width / 2
                 if (root.isExtra(slot) && nearStart) islandStart.push(slot.slice(6))
                 if (root.isExtra(slot)) island.push(slot.slice(6))
@@ -373,12 +420,12 @@ Item {
         const thick = g.vertical ? Number(g.width ?? root.size) : Number(g.height ?? root.size)
         return Math.max(root.size / 2 + Math.round(2 * root.d), thick - Number(g.bubble ?? root.size) / 2)
     }
-    function linePoint(slot: string, zone: string, line: var): point {
+    function linePoint(slot: string, zone: string, line: var, table: var): point {
         if (zone.startsWith("edge:")) {
             const o = root.optionsFor(slot)
             return root.edgePoint(zone.slice(5), Number(o?.fx ?? 0.5), Number(o?.fy ?? 0.5))
         }
-        const found = root.zones.find(z => z.zone === zone)
+        const found = table.find(z => z.zone === zone)
         if (!found) {
             const o = root.optionsFor(slot)
             return root.clampPoint(Number(o?.fx ?? 0.5) * root.width, Number(o?.fy ?? 0.5) * root.height)
@@ -398,7 +445,7 @@ Item {
         return Qt.point(x + (words.includes("left") ? index : -index) * step, y)
     }
     function trayLinePoint(slot: string): point {
-        const base = root.linePoint(root.trayOwner, root.trayPlace, [root.trayOwner])
+        const base = root.linePoint(root.trayOwner, root.trayPlace, [root.trayOwner], root.zones)
         const count = root.trayAppSlots.length
         const step = root.size + (root.barred && count > 1 ? root.barGap : root.looseGap)
         const offset = (root.trayAppSlots.indexOf(slot) - (count - 1) / 2) * step
@@ -413,8 +460,8 @@ Item {
     }
     function rawPlaceOf(slot: string): point {
         if (root.isTrayApp(slot) && root.trayGrouped) return root.trayLinePoint(slot)
-        const zone = root.placeName(slot)
-        return root.linePoint(slot, zone, zone.startsWith("edge:") ? [slot] : root.lineOf(zone))
+        const zone = root.lineZone(slot)
+        return root.linePoint(slot, zone, zone.startsWith("edge:") ? [slot] : root.lineOf(zone), root.zones)
     }
     readonly property var rects: {
         const centres = root.allSlots.map(slot => root.placeName(slot) !== "island" && root.kindOf(slot).length > 0 ? root.placeOf(slot) : null)
@@ -540,7 +587,7 @@ Item {
     }
     function plateAt(zone: string): var { return root.plates.find(plate => plate.zone === zone) ?? null }
     function plateKey(slot: string): string {
-        return root.isTrayApp(slot) && root.trayGrouped ? "tray" : root.placeName(slot)
+        return root.isTrayApp(slot) && root.trayGrouped ? "tray" : root.lineZone(slot)
     }
     function plateFor(slot: string): var { return root.plateAt(root.plateKey(slot)) }
     function menuToward(slot: string): string {
@@ -831,11 +878,18 @@ Item {
             const centre = root.islandCentre()
             return { zone: "island", x: centre.x, y: centre.y }
         }
-        const snapping = root.options?.snap ?? true
+        const snapping = root.snapping
         let best = null
-        for (const z of snapping ? root.zones : []) {
-            const distance = Math.hypot(x - z.x, y - z.y)
-            if (distance < root.snapDistance && (!best || distance < best.distance)) best = { zone: z.zone, x: z.x, y: z.y, distance: distance }
+        // A line catches along all of it: each spot it could take (before its first bubble, between two, past its last) is
+        // a target, and the nearest one is where the bubble goes.
+        for (const z of snapping ? root.baseZones : []) {
+            const count = (root.baseLines[z.zone] ?? []).length
+            for (let index = 0; index <= count; index++) {
+                const at = root.dropPoint(z.zone, index)
+                const distance = Math.hypot(x - at.x, y - at.y)
+                if (distance < root.snapDistance && (!best || distance < best.distance))
+                    best = { zone: z.zone, index: index, x: at.x, y: at.y, distance: distance }
+            }
         }
         if (best) return best
         if (snapping) {
@@ -857,10 +911,19 @@ Item {
         const free = root.clampPoint(x, y)
         return { zone: "free", x: free.x, y: free.y }
     }
+    readonly property bool snapping: root.options?.snap ?? true
     readonly property var target: root.drag ? root.resolve(root.drag.x, root.drag.y) : null
 
     function writeEntry(slot: string, place): void {
         slot = root.ownerSlot(slot)
+        if ((place.index ?? -1) >= 0) {
+            const line = (root.baseLines[place.zone] ?? []).filter(other => other !== slot)
+            line.splice(Math.min(place.index, line.length), 0, slot)
+            const order = root.lineOrder.filter(entry => entry && entry.place !== place.zone)
+                .map(entry => ({ place: String(entry.place), slots: Array.from(entry.slots ?? []).map(String) }))
+            order.push({ place: place.zone, slots: line })
+            Config.setNestedValue("iris.bubbles.order", order)
+        }
         if (root.isApp(slot)) {
             const appId = IrisPieces.appIdOf(slot)
             if (place.zone === "island" || place.zone === "dock") IrisPieces.removeApp(appId)
@@ -1353,33 +1416,61 @@ Item {
         ]
     }
 
+    // The rings a carried bubble can land in: one per line, where the bubble would come to rest past its last bubble
+    // (never over one), and one where two lines start on the same spot (an empty corner). Off snapping, only the Island
+    // catches it. The ring under the bubble slides to the spot it would take in that line.
+    readonly property bool dragging: root.drag !== null
+    readonly property string carriedSlot: String(root.drag?.slot ?? "")
+    readonly property var hints: {
+        if (!root.dragging || root.carryingIsland) return []
+        const out = []
+        // A ring over a bubble already resting there (an empty corner line whose spot a side line holds) is left out:
+        // that line still catches there, and the ring shows once the bubble is over it.
+        const resting = []
+        for (const z of root.baseZones)
+            for (const slot of root.baseLines[z.zone] ?? []) resting.push(root.linePoint(slot, z.zone, root.baseLines[z.zone], root.baseZones))
+        const near = (list, at) => list.find(h => Math.hypot(h.x - at.x, h.y - at.y) < root.size * 0.75)
+        if (root.snapping) for (const z of root.baseZones) {
+            const at = root.dropPoint(z.zone, (root.baseLines[z.zone] ?? []).length)
+            if (near(resting, at)) continue
+            const same = near(out, at)
+            if (same) same.zones.push(z.zone)
+            else out.push({ zones: [z.zone], x: at.x, y: at.y })
+        }
+        if (root.island) {
+            const at = root.isExtra(root.carriedSlot) ? root.islandCentre() : root.slotCentre(root.carriedSlot)
+            out.push({ zones: ["island"], x: at.x, y: at.y })
+        }
+        return out
+    }
     Repeater {
-        model: !root.drag || root.carryingIsland ? []
-            : !root.island ? root.zones
-            : root.zones.concat([root.isExtra(root.drag.slot)
-                ? { zone: "island", x: root.islandCentre().x, y: root.islandCentre().y }
-                : { zone: "island", x: root.slotCentre(root.drag.slot).x, y: root.slotCentre(root.drag.slot).y }])
+        model: root.hints
         delegate: Rectangle {
             id: hint
             required property var modelData
-            readonly property bool active: root.target?.zone === hint.modelData.zone && !root.drag?.released
+            readonly property bool active: hint.modelData.zones.includes(String(root.target?.zone ?? "")) && !root.drag?.released
+            readonly property real cx: hint.active && hint.modelData.zones[0] !== "island" ? root.target.x : hint.modelData.x
+            readonly property real cy: hint.active && hint.modelData.zones[0] !== "island" ? root.target.y : hint.modelData.y
             width: root.size + 10 * root.d
             height: width
-            x: Math.round(hint.modelData.x - width / 2)
-            y: Math.round(hint.modelData.y - height / 2)
+            x: Math.round(hint.cx - width / 2)
+            y: Math.round(hint.cy - height / 2)
             radius: IrisStyle.pieceRadius(width)
             color: hint.active ? IrisStyle.tintFill(IrisStyle.accent) : IrisStyle.veilLight
             border.width: Math.max(1, Math.round(1.5 * root.d))
             border.color: hint.active ? IrisStyle.accent : IrisStyle.borderStrong
             scale: hint.active ? 1.08 : 1
             opacity: root.drag?.released ? 0 : 1
+            Behavior on x { NumberAnimation { duration: IrisStyle.duration(160); easing.type: IrisStyle.feedbackEasing } }
+            Behavior on y { NumberAnimation { duration: IrisStyle.duration(160); easing.type: IrisStyle.feedbackEasing } }
             Behavior on scale { NumberAnimation { duration: IrisStyle.duration(140); easing.type: IrisStyle.feedbackEasing } }
             Behavior on color { ColorAnimation { duration: IrisStyle.duration(120); easing.type: IrisStyle.feedbackEasing } }
             Behavior on opacity { NumberAnimation { duration: IrisStyle.duration(120); easing.type: IrisStyle.feedbackEasing } }
         }
     }
     Rectangle {
-        readonly property bool shown: (String(root.target?.zone ?? "").startsWith("edge:") || root.target?.zone === "dock")
+        readonly property bool shown: (String(root.target?.zone ?? "").startsWith("edge:") || root.target?.zone === "dock"
+                || ((root.target?.index ?? -1) >= 0 && !root.hints.some(hint => hint.zones.includes(String(root.target.zone)))))
             && !(root.drag?.released ?? true)
         width: root.size + 10 * root.d
         height: width

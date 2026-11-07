@@ -274,7 +274,7 @@
   "Drag it towards a corner": "גרור אותו לעבר פינה",
   "Drag to reorder, drag a corner to resize, − takes it out": "גרור כדי לסדר מחדש, גרור פינה כדי לשנות גודל, − מוציא אותו",
   "Drop here to take it out": "שחרר כאן כדי להוציא",
-  "Dropped near one, a bubble settles there; off, it stays where you let go.": "כששחררת ליד מקום, הבועה מתמקמת שם; כבוי, היא נשארת היכן ששחררת.",
+  "Dropped near a ring, a bubble joins that corner or edge in the spot you let it go; off, it stays where you let go.": "כששחררת ליד טבעת, הבועה מצטרפת לפינה או לקצה הזה במקום ששחררת אותה; כבוי, היא נשארת היכן ששחררת.",
   "Duration": "משך",
   "Dynamic Island": "Dynamic Island",
   "Each app's level under the sound card.": "העוצמה של כל אפליקציה מתחת לכרטיס הצליל.",

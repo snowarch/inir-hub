@@ -274,7 +274,7 @@
   "Drag it towards a corner": "Trascinalo verso un angolo",
   "Drag to reorder, drag a corner to resize, − takes it out": "Trascina per riordinare, trascina un angolo per ridimensionare, − lo toglie",
   "Drop here to take it out": "Rilascia qui per toglierlo",
-  "Dropped near one, a bubble settles there; off, it stays where you let go.": "Rilasciata vicino a un punto, una bolla si sistema lì; disattivato, resta dove la lasci.",
+  "Dropped near a ring, a bubble joins that corner or edge in the spot you let it go; off, it stays where you let go.": "Rilasciata vicino a un anello, una bolla si unisce a quell'angolo o bordo nel punto in cui la lasci; disattivato, resta dove la lasci.",
   "Duration": "Durata",
   "Dynamic Island": "Dynamic Island",
   "Each app's level under the sound card.": "Il livello di ogni app sotto la scheda audio.",

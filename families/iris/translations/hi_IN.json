@@ -274,7 +274,7 @@
   "Drag it towards a corner": "इसे किसी कोने की ओर खींचें",
   "Drag to reorder, drag a corner to resize, − takes it out": "क्रम बदलने के लिए खींचें, आकार बदलने के लिए कोना खींचें, − इसे निकालता है",
   "Drop here to take it out": "निकालने के लिए यहाँ छोड़ें",
-  "Dropped near one, a bubble settles there; off, it stays where you let go.": "किसी जगह के पास छोड़ने पर बबल वहीं जम जाता है; बंद होने पर जहाँ छोड़ें वहीं रहता है।",
+  "Dropped near a ring, a bubble joins that corner or edge in the spot you let it go; off, it stays where you let go.": "किसी रिंग के पास छोड़ने पर बबल उस कोने या किनारे में ठीक उसी जगह जुड़ जाता है जहाँ आप छोड़ें; बंद होने पर जहाँ छोड़ें वहीं रहता है।",
   "Duration": "अवधि",
   "Dynamic Island": "Dynamic Island",
   "Each app's level under the sound card.": "साउंड कार्ड के नीचे हर ऐप का स्तर।",

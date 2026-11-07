@@ -274,7 +274,7 @@
   "Drag it towards a corner": "角に向かってドラッグ",
   "Drag to reorder, drag a corner to resize, − takes it out": "ドラッグで並べ替え、角をドラッグでサイズ変更、− で外す",
   "Drop here to take it out": "ここにドロップして外す",
-  "Dropped near one, a bubble settles there; off, it stays where you let go.": "近くに置くとバブルはそこに収まります。オフでは離した場所に留まります。",
+  "Dropped near a ring, a bubble joins that corner or edge in the spot you let it go; off, it stays where you let go.": "リングの近くに置くと、バブルはその角や辺の離した位置に並びます。オフでは離した場所に留まります。",
   "Duration": "長さ",
   "Dynamic Island": "Dynamic Island",
   "Each app's level under the sound card.": "サウンドカードの下に各アプリのレベル。",

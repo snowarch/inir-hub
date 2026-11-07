@@ -274,7 +274,7 @@
   "Drag it towards a corner": "Faites-le glisser vers un coin",
   "Drag to reorder, drag a corner to resize, − takes it out": "Glisser pour réordonner, glisser un coin pour redimensionner, − le retire",
   "Drop here to take it out": "Déposez ici pour le retirer",
-  "Dropped near one, a bubble settles there; off, it stays where you let go.": "Déposée près d'un endroit, une bulle s'y installe ; désactivé, elle reste là où vous la lâchez.",
+  "Dropped near a ring, a bubble joins that corner or edge in the spot you let it go; off, it stays where you let go.": "Déposée près d'un anneau, une bulle rejoint ce coin ou ce bord à l'endroit où vous la lâchez ; désactivé, elle reste là où vous la lâchez.",
   "Duration": "Durée",
   "Dynamic Island": "Dynamic Island",
   "Each app's level under the sound card.": "Le niveau de chaque app sous la carte du son.",

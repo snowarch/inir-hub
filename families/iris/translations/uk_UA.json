@@ -274,7 +274,7 @@
   "Drag it towards a corner": "Перетягніть його до кута",
   "Drag to reorder, drag a corner to resize, − takes it out": "Перетягніть для порядку, кут — для розміру, − прибирає",
   "Drop here to take it out": "Відпустіть тут, щоб прибрати",
-  "Dropped near one, a bubble settles there; off, it stays where you let go.": "Відпущена біля місця, бульбашка стає туди; якщо вимкнено, лишається там, де ви її відпустили.",
+  "Dropped near a ring, a bubble joins that corner or edge in the spot you let it go; off, it stays where you let go.": "Відпущена біля кільця, бульбашка стає в цей кут чи край там, де ви її відпустили; якщо вимкнено, лишається там, де ви її відпустили.",
   "Duration": "Тривалість",
   "Dynamic Island": "Dynamic Island",
   "Each app's level under the sound card.": "Рівень кожного застосунку під карткою звуку.",

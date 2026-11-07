@@ -274,7 +274,7 @@
   "Drag it towards a corner": "모서리 쪽으로 끄세요",
   "Drag to reorder, drag a corner to resize, − takes it out": "끌어서 순서 변경, 모서리를 끌어 크기 변경, −로 빼기",
   "Drop here to take it out": "여기에 놓아 빼기",
-  "Dropped near one, a bubble settles there; off, it stays where you let go.": "근처에 놓으면 버블이 그 자리에 자리 잡고, 끄면 놓은 곳에 그대로 있습니다.",
+  "Dropped near a ring, a bubble joins that corner or edge in the spot you let it go; off, it stays where you let go.": "링 근처에 놓으면 버블이 그 모서리나 가장자리의 놓은 자리에 합류하고, 끄면 놓은 곳에 그대로 있습니다.",
   "Duration": "지속 시간",
   "Dynamic Island": "Dynamic Island",
   "Each app's level under the sound card.": "소리 카드 아래 각 앱의 레벨.",

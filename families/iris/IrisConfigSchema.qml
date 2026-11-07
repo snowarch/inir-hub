@@ -712,8 +712,11 @@ JsonObject {
         // Island page or panel it stands for, and level bubbles mute.
         property string opens: "card"
         property string design: "glass" // bubbles: "glass", "tint" or "outline"
-        // Dropped near a zone, a bubble snaps to it; off, it stays where it is let go.
+        // Dropped near a corner, an edge's middle or a line already there, a bubble joins that line in the spot it was
+        // let go; off, it stays where it is let go (the Island still takes it).
         property bool snap: true
+        // Each line's order, nearest its corner first, as drops left it: { place, slots: ["<slot>", ...] }.
+        property list<var> order: []
         // Bubbles sharing a zone rest on one plate and read as a small
         // bar; off, each one floats as its own disc.
         property bool cluster: true

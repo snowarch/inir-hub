@@ -274,7 +274,7 @@
   "Drag it towards a corner": "把它拖向一个角落",
   "Drag to reorder, drag a corner to resize, − takes it out": "拖动以重新排序，拖动角落以调整大小，− 将其移除",
   "Drop here to take it out": "拖到这里以移除",
-  "Dropped near one, a bubble settles there; off, it stays where you let go.": "放在某处附近时气泡会停靠在那里；关闭后，它停在你松手的位置。",
+  "Dropped near a ring, a bubble joins that corner or edge in the spot you let it go; off, it stays where you let go.": "放在圆环附近时，气泡会加入那个角或边，停在你松手的位置；关闭后，它停在你松手的位置。",
   "Duration": "时长",
   "Dynamic Island": "Dynamic Island",
   "Each app's level under the sound card.": "声音卡片下方每个应用的音量。",

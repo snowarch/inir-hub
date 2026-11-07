@@ -274,7 +274,7 @@
   "Drag it towards a corner": "اسحبه نحو زاوية",
   "Drag to reorder, drag a corner to resize, − takes it out": "اسحب لإعادة الترتيب، واسحب زاوية لتغيير الحجم، و− يزيله",
   "Drop here to take it out": "أفلت هنا لإزالته",
-  "Dropped near one, a bubble settles there; off, it stays where you let go.": "عند إفلاتها قرب مكان تستقر الفقاعة فيه؛ وعند الإيقاف تبقى حيث تتركها.",
+  "Dropped near a ring, a bubble joins that corner or edge in the spot you let it go; off, it stays where you let go.": "عند إفلاتها قرب حلقة تنضم الفقاعة إلى تلك الزاوية أو الحافة في الموضع الذي تتركها فيه؛ وعند الإيقاف تبقى حيث تتركها.",
   "Duration": "المدة",
   "Dynamic Island": "Dynamic Island",
   "Each app's level under the sound card.": "مستوى كل تطبيق تحت بطاقة الصوت.",
