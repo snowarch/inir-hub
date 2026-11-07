@@ -108,12 +108,24 @@ ColumnLayout {
                             value: Number(line.value)
                             glyph: String(line.spec.glyph ?? "")
                             label: IrisOptions.rangeText(line.spec, level.live)
+                            // A widget's own option is drawn by that widget from its in-memory preview: its keys may
+                            // live in the screen's record, where Config has no place for them (a Config preview of
+                            // iris.shadow threw on every step and the widget did not follow the drag).
+                            readonly property var drawer: {
+                                const widget = DesktopEditStage.inspected?.widget ?? null
+                                return line.spec.widget && widget?.configEntryName === line.spec.widget ? widget : null
+                            }
                             onMoved: value => {
                                 if (!line.livePath) return
                                 IrisOptions.hold(line.spec)
+                                if (line.spec.widget) { level.drawer?.previewValue(String(line.spec.key), value); return }
                                 Config.previewNestedValue(line.spec.path, value)
                             }
-                            onCommitted: value => IrisOptions.commit(line.spec, value)
+                            onCommitted: value => {
+                                const drawer = level.drawer
+                                IrisOptions.commit(line.spec, value)
+                                drawer?.settlePreview()
+                            }
                         }
                     }
                     Component {

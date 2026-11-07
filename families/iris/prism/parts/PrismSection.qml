@@ -1,4 +1,5 @@
 import QtQuick
+import Quickshell
 import qs.services
 import qs.modules.iris.settings
 import qs.modules.iris.prism.core
@@ -68,8 +69,11 @@ Column {
         Rectangle { anchors.bottom: parent.bottom; width: parent.width; height: 1; color: PrismTheme.line }
     }
 
+    // A write changes Config.revision and with it every row list; the model keys rows by `key` so a value changing
+    // keeps every row's delegate (a plain array rebuilt the whole page on each click, and a handler still running in
+    // a row that was gone read "root is not defined").
     Repeater {
-        model: root.shownRows
+        model: ScriptModel { objectProp: "key"; values: root.shownRows }
         delegate: Column {
             id: entry
             required property var modelData

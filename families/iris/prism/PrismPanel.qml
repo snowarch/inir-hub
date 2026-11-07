@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Effects
+import Quickshell
 import qs
 import qs.services
 import qs.modules.common
@@ -222,8 +223,9 @@ Item {
                     Item { id: groupsAt; width: 1; height: PrismTheme.dp(30) }
                 }
 
+                // Groups keyed by title: a write rebuilds the list, never the groups on screen.
                 Repeater {
-                    model: root.shownSections
+                    model: ScriptModel { objectProp: "title"; values: root.shownSections }
                     delegate: Column {
                         id: sectionBox
                         required property var modelData

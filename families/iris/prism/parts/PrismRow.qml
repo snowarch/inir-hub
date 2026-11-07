@@ -364,7 +364,11 @@ Item {
             width: slot.width
             choices: root.choices
             current: root.value
-            onPicked: value => { PrismModel.write(root.row, value); root.open = false }
+            onPicked: value => {
+                const host = root
+                host.open = false
+                PrismModel.write(host.row, value)
+            }
         }
     }
     Component {

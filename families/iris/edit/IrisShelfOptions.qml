@@ -217,7 +217,7 @@ Flickable {
                     const v = range.snap(range.lo + next * (range.hi - range.lo))
                     if (!slider.pressed) { IrisOptions.commit(range.spec, v); return }
                     range.dragged = v
-                    if (range.spec.path && !range.spec.set) Config.previewNestedValue(range.spec.path, v)
+                    if (range.spec.path && !range.spec.set && !range.spec.widget) Config.previewNestedValue(range.spec.path, v)
                 }
                 onPressedChanged: if (!slider.pressed && Number.isFinite(range.dragged)) {
                     const v = range.dragged

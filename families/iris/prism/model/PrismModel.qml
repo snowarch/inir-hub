@@ -85,7 +85,7 @@ Singleton {
     // that names it and the cover it wears. Home's "Every day" copies are Prism's tiles, not rows; Settings window's
     // three ways to pick a design are one row of drawn layouts here.
     readonly property var designRow: ({
-        path: "settingsDesign", label: "Layout", kind: "designs", glyph: "settings_applications", page: "general",
+        key: "general|Settings window|settingsDesign", path: "settingsDesign", label: "Layout", kind: "designs", glyph: "settings_applications", page: "general",
         section: "Settings window", detail: "How Settings lays out its areas.", virtual: true, spec: null, keywords: ["settings", "layout", "design", "prism", "classic", "folio", "original"],
         choices: [{ label: "Prism", value: "prism" }, { label: "Classic", value: "classic" }, { label: "Folio", value: "folio" }, { label: "v2.33", value: "original" }]
     })
@@ -108,9 +108,12 @@ Singleton {
                 if (!designPlaced) { out.push(root.designRow); designPlaced = true }
                 continue
             }
+            const path = String(spec.path ?? spec.modelKey)
             out.push({
+                // Who the row is across rebuilds: the page's delegates keep their row while values change around it.
+                key: [spec.section, spec.group, path, spec.label].join("|"),
                 spec: spec,
-                path: String(spec.path ?? spec.modelKey),
+                path: path,
                 page: String(spec.section ?? ""),
                 section: String(spec.group ?? ""),
                 part: String(spec.part ?? ""),
