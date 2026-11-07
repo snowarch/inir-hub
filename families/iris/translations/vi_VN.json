@@ -2026,7 +2026,6 @@
   "The face of the Night light bubble; it fills while the screen is warmed.": "Hình dạng của bong bóng Đèn ngủ; nó được tô đầy khi màn hình được làm ấm.",
   "The face of the Screenshot bubble.": "Hình dạng của bong bóng Chụp màn hình.",
   "The face of the Power bubble.": "Hình dạng của bong bóng Nguồn.",
-  "Drawer": "Ngăn kéo",
   "Raise settings": "Kéo cài đặt lên",
   "Lower settings": "Hạ cài đặt xuống",
   "Language, time, startup and the shell itself": "Ngôn ngữ, thời gian, khởi động và chính shell",
@@ -2109,8 +2108,6 @@
   "How Settings lays out its areas.": "Cách Cài đặt sắp xếp các khu vực.",
   "A sidebar of areas beside the page.": "Thanh bên các khu vực cạnh trang.",
   "Reads like a page.": "Đọc như một trang.",
-  "The areas in one column at the side of the screen.": "Các khu vực trong một cột ở cạnh màn hình.",
-  "Rises from the foot of the screen.": "Nhô lên từ chân màn hình.",
   "Wears your accent.": "Mang màu nhấn của bạn.",
   "Ink and one signal colour.": "Mực và một màu tín hiệu.",
   "Hardware keys and faders.": "Phím và fader phần cứng.",
@@ -2468,5 +2465,6 @@
   "Week %1": "Tuần %1",
   "%1 on": "%1 đang bật",
   "Everything is off": "Mọi thứ đều tắt",
-  "No colours yet": "Chưa có màu nào"
+  "No colours yet": "Chưa có màu nào",
+  "As a window": "Dạng cửa sổ"
 }

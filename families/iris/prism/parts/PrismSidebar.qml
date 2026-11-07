@@ -10,7 +10,11 @@ import qs.modules.iris.prism.controls
 Item {
     id: root
     signal closeRequested()
+    signal growRequested()
+    signal switchHost()
     property alias search: searchField
+    // In a window the green light grows the window's column instead of the panel, and the host key reads "over the desktop".
+    property bool windowed: false
 
     Rectangle {
         anchors.fill: parent
@@ -30,6 +34,28 @@ Item {
         width: 1
         height: parent.height
         color: PrismTheme.line
+    }
+
+    // Over the desktop or as a window: one key on the lights' line, the glyph says where it goes.
+    PrismRound {
+        id: hostKey
+        z: 2
+        x: root.width - width - PrismTheme.dp(14)
+        y: PrismTheme.dp(18) + PrismTheme.dp(6) - height / 2
+        implicitWidth: PrismTheme.dp(26)
+        glyphSize: PrismTheme.dp(15)
+        glyph: root.windowed ? "picture_in_picture_center" : "open_in_new"
+        onClicked: root.switchHost()
+        Accessible.name: root.windowed ? Translation.tr("Over the desktop") : Translation.tr("As a window")
+        PrismText {
+            visible: hostKey.hovered
+            anchors.right: parent.left
+            anchors.rightMargin: PrismTheme.dp(6)
+            anchors.verticalCenter: parent.verticalCenter
+            text: root.windowed ? Translation.tr("Over the desktop") : Translation.tr("As a window")
+            color: PrismTheme.ink2
+            font.pixelSize: PrismTheme.caption
+        }
     }
 
     Flickable {
@@ -52,12 +78,12 @@ Item {
             width: root.width - x
             spacing: 0
 
-            // The lights: red and yellow put Settings away, green gives it the whole room.
+            // The lights: red and yellow put Settings away, green gives it the whole room (a window: its column the screen).
             Row {
                 topPadding: PrismTheme.dp(18)
                 spacing: PrismTheme.dp(8)
                 Repeater {
-                    model: [{ c: "#ff5f57", g: "close" }, { c: "#febc2e", g: "remove" }, { c: "#28c840", g: PrismState.wide ? "close_fullscreen" : "open_in_full" }] // iris-literal: macOS window lights
+                    model: [{ c: "#ff5f57", g: "close" }, { c: "#febc2e", g: "remove" }, { c: "#28c840", g: root.windowed || !PrismState.wide ? "open_in_full" : "close_fullscreen" }] // iris-literal: macOS window lights
                     delegate: Rectangle {
                         id: light
                         required property var modelData
@@ -77,7 +103,8 @@ Item {
                             anchors.fill: parent
                             anchors.margins: -PrismTheme.dp(3)
                             cursorShape: Qt.PointingHandCursor
-                            onClicked: light.index === 2 ? (PrismState.wide = !PrismState.wide) : root.closeRequested()
+                            onClicked: light.index !== 2 ? root.closeRequested()
+                                : root.windowed ? root.growRequested() : (PrismState.wide = !PrismState.wide)
                         }
                     }
                 }

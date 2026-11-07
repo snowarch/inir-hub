@@ -2026,7 +2026,6 @@
   "The face of the Night light bubble; it fills while the screen is warmed.": "مظهر فقاعة الإضاءة الليلية؛ تمتلئ ما دامت الشاشة دافئة.",
   "The face of the Screenshot bubble.": "مظهر فقاعة لقطة الشاشة.",
   "The face of the Power bubble.": "مظهر فقاعة الطاقة.",
-  "Drawer": "الدرج",
   "Raise settings": "ارفع الإعدادات",
   "Lower settings": "اخفض الإعدادات",
   "Language, time, startup and the shell itself": "اللغة والوقت وبدء التشغيل والواجهة نفسها",
@@ -2109,8 +2108,6 @@
   "How Settings lays out its areas.": "كيف ترتّب الإعدادات أقسامها.",
   "A sidebar of areas beside the page.": "شريط جانبي للأقسام بجانب الصفحة.",
   "Reads like a page.": "تُقرأ كصفحة.",
-  "The areas in one column at the side of the screen.": "الأقسام في عمود واحد على جانب الشاشة.",
-  "Rises from the foot of the screen.": "يرتفع من أسفل الشاشة.",
   "Wears your accent.": "يرتدي لون التمييز الخاص بك.",
   "Ink and one signal colour.": "حبر ولون إشارة واحد.",
   "Hardware keys and faders.": "مفاتيح ومنزلقات عتادية.",
@@ -2468,5 +2465,6 @@
   "Week %1": "الأسبوع %1",
   "%1 on": "%1 مفعّل",
   "Everything is off": "كل شيء متوقف",
-  "No colours yet": "لا ألوان بعد"
+  "No colours yet": "لا ألوان بعد",
+  "As a window": "كنافذة"
 }

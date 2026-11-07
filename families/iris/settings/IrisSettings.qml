@@ -42,7 +42,7 @@ Item {
     property string requestedSection: ""
     property bool placed: false
     readonly property real d: IrisStyle.settingsDensity
-    // The page's geometry, one owner for every layout (Classic, Folio, Drawer, Pocket): each reads these and none
+    // The page's geometry, one owner for every layout (Classic, Folio): each reads these and none
     // keeps its own. They once read 8, 12, 14, 16, 20 and 28 from the window's edge and ended out of line (his 10-31).
     // A pane (sidebar, index, sheet) stands one air off the window's edges and off its neighbour, concentric with the window.
     readonly property int paneInset: Math.round(8 * root.d)
@@ -53,7 +53,7 @@ Item {
     readonly property int plateRadius: IrisStyle.radiusTile
     readonly property int sheetPad: Math.max(Math.round(4 * root.d), root.paneRadius - root.plateRadius)
     // Where the plates stand from the window's side and the head's keys end: the same line top to bottom. A layout
-    // with no sheet (Pocket, or solid) keeps its plates there too.
+    // with no sheet (solid) keeps its plates there too.
     readonly property int plateInset: root.paneInset + root.sheetPad
     // The head's keys sit on the line of the sidebar's search (its centre), in every layout.
     readonly property int headLine: root.paneInset + root.panePad + Math.round(16 * root.d)
@@ -87,9 +87,9 @@ Item {
     // A Design may lay the whole page out its own way (DESIGNS.md › Composiciones): its `settingsPage` draws the areas,
     // the head and the foot, and holds this file's search, scene, rows and shared pages in its slots. The model, the
     // history and every row stay here.
-    // iRiS lays the page in the layout chosen in Settings (Folio, Pocket, Drawer); a Design with its own page keeps it.
+    // iRiS lays the page in the layout chosen in Settings (Folio); a Design with its own page keeps it.
     // Only layouts whose page exists: a missing one would leave the body waiting for its scene forever.
-    readonly property var layouts: ({ folio: "Folio", pocket: "Pocket", drawer: "Drawer" })
+    readonly property var layouts: ({ folio: "Folio" })
     // Classic is the engine's own page (the sidebar and its pages, as before the layouts): no layout file.
     readonly property string chosenLayout: {
         const wanted = String(Config.options?.iris?.appearance?.settingsLayout ?? "classic")
@@ -169,8 +169,7 @@ Item {
     readonly property Item scene: pageScene.item
     readonly property bool sceneDrawn: root.scene !== null
     // Narrower than this a Design's page squeezes its sheet: the engine's page is used. Frame width, never the page's.
-    // Pocket is one column: it holds down to a phone's width.
-    readonly property bool sceneFits: frame.width >= Math.round((root.layout === "pocket" ? 360 : 960) * root.d)
+    readonly property bool sceneFits: frame.width >= Math.round(960 * root.d)
     // A Design that draws the page is known before its scene arrives: the engine's own chrome is then never built, and the
     // body waits for the scene instead of showing that chrome for the frames the scene takes to load.
     readonly property bool sceneDesigned: pageScene.url.length > 0
@@ -258,7 +257,7 @@ Item {
         const ids = new Set(root.matches.map(spec => spec.section))
         return ids
     }
-    // A layout that draws an area's rows on its own pages (Folio, Pocket, Drawer) gets nothing from here but a search or
+    // A layout that draws an area's rows on its own pages (Folio) gets nothing from here but a search or
     // a shared page: the engine reads no area for it, so a turn costs it nothing.
     readonly property bool layoutRows: ((root.scene?.drawsRows ?? false) || root.classicRows) && !root.searching && root.advancedPage < 0
     // Classic shows an area as Folio does (stage, its contents, the groups open with each control in its row), from
@@ -545,7 +544,7 @@ Item {
         onRunningChanged: if (running) tries = 0
         onTriggered: {
             // Opened by the request, the layout's page loads a moment after: asked before it stood, the group went to
-            // Classic's pool and Drawer stayed at its top (10-29, "appearance/Faces").
+            // Classic's pool stayed at its top (10-29, "appearance/Faces").
             if (!root.layoutStands && ++tries <= 40) return
             // A layout that draws its own rows knows its groups; the engine has none to match (the jump never came).
             if (root.layoutRows) {
@@ -809,34 +808,21 @@ Item {
             : root.windowed ? 0 : IrisStyle.surfaceRadius("settings", IrisStyle.radiusPanel)
         onClosed: IrisState.morphOwner = ""
         // Whole pixels: a body centred on a half pixel draws every line of its text soft.
-        // A layout's body sits in the room the Island and the Dock leave: Folio as a sheet in the middle of it, Pocket
-        // standing at its right edge as tall as it, Drawer risen from the screen's foot across it (over the Dock).
+        // A layout's body sits in the room the Island and the Dock leave: Folio as a sheet in the middle of it.
         readonly property bool laid: root.layout.length > 0 && !root.windowed
-        readonly property string place: frame.laid && (root.layout === "pocket" || root.layout === "drawer") ? root.layout : ""
-        readonly property int footGap: Math.round(14 * root.d)
-        readonly property real drawerRoom: parent.height - root.room.y - frame.footGap
         Behavior on x { enabled: root.switching; NumberAnimation { duration: IrisStyle.morphDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: IrisStyle.morphCurve } }
-        Behavior on y { enabled: root.switching || frame.place === "drawer"; NumberAnimation { duration: IrisStyle.morphDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: IrisStyle.morphCurve } }
+        Behavior on y { enabled: root.switching; NumberAnimation { duration: IrisStyle.morphDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: IrisStyle.morphCurve } }
         Behavior on width { enabled: root.switching; NumberAnimation { duration: IrisStyle.morphDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: IrisStyle.morphCurve } }
-        Behavior on height { enabled: root.switching || frame.place === "drawer"; NumberAnimation { duration: IrisStyle.morphDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: IrisStyle.morphCurve } }
+        Behavior on height { enabled: root.switching; NumberAnimation { duration: IrisStyle.morphDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: IrisStyle.morphCurve } }
         readonly property real goalX: root.windowed ? 0
-            : frame.place === "pocket" ? Math.round(root.room.x + root.room.width - width)
-            : frame.place === "drawer" ? Math.round(root.room.x)
             : Math.round(root.room.x + (root.room.width - width) / 2)
         readonly property real goalY: root.windowed ? 0
-            : frame.place === "pocket" ? Math.round(root.room.y)
-            : frame.place === "drawer" ? Math.round(parent.height - frame.footGap - height)
             : Math.round(root.room.y + (root.room.height - height) / 2)
         readonly property real goalW: root.windowed ? parent.width
-            : frame.place === "pocket" ? Math.round(Math.min(root.room.width, 500 * root.d))
-            : frame.place === "drawer" ? Math.round(root.room.width)
             : frame.laid ? Math.round(Math.min(root.room.width, 1480 * root.d))
             // The sidebar and the rows at their measure; Settings sits on the desktop, it does not replace it.
             : Math.round(Math.min(root.room.width, 1240 * root.d))
         readonly property real goalH: root.windowed ? parent.height
-            : frame.place === "pocket" ? Math.round(root.room.height)
-            // Drawer stands a little under half the screen; its grip raises it to the room's top.
-            : frame.place === "drawer" ? Math.round(root.scene?.tall ? frame.drawerRoom : Math.min(frame.drawerRoom, Math.max(440 * root.d, frame.drawerRoom * 0.46)))
             : frame.laid ? Math.round(Math.min(root.room.height, 900 * root.d))
             // As tall as the sidebar's list asks, inside the room the Island and the Dock leave (his 10-30: measured on
             // the screen it ran over both); a short room scrolls the list. Measured by the list alone, ten categories

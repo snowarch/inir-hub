@@ -2026,7 +2026,6 @@
   "The face of the Night light bubble; it fills while the screen is warmed.": "नाइट लाइट बबल का रूप; स्क्रीन के गर्म रहने तक यह भरा रहता है।",
   "The face of the Screenshot bubble.": "स्क्रीनशॉट बबल का रूप।",
   "The face of the Power bubble.": "पावर बबल का रूप।",
-  "Drawer": "दराज़",
   "Raise settings": "सेटिंग्स ऊपर उठाएँ",
   "Lower settings": "सेटिंग्स नीचे करें",
   "Language, time, startup and the shell itself": "भाषा, समय, स्टार्टअप और शेल ख़ुद",
@@ -2109,8 +2108,6 @@
   "How Settings lays out its areas.": "सेटिंग्स अपने हिस्से कैसे सजाती है।",
   "A sidebar of areas beside the page.": "पेज के बगल में हिस्सों की एक साइडबार।",
   "Reads like a page.": "एक पेज की तरह पढ़ा जाता है।",
-  "The areas in one column at the side of the screen.": "स्क्रीन के किनारे एक कॉलम में हिस्से।",
-  "Rises from the foot of the screen.": "स्क्रीन के निचले हिस्से से उठता है।",
   "Wears your accent.": "आपका एक्सेंट पहनता है।",
   "Ink and one signal colour.": "स्याही और एक संकेत रंग।",
   "Hardware keys and faders.": "हार्डवेयर कुंजियाँ और फ़ेडर।",
@@ -2468,5 +2465,6 @@
   "Week %1": "सप्ताह %1",
   "%1 on": "%1 चालू",
   "Everything is off": "सब कुछ बंद है",
-  "No colours yet": "अभी कोई रंग नहीं"
+  "No colours yet": "अभी कोई रंग नहीं",
+  "As a window": "विंडो के रूप में"
 }

@@ -2026,7 +2026,6 @@
   "The face of the Night light bubble; it fills while the screen is warmed.": "L'aspetto della bolla Luce notturna; si riempie finché lo schermo è più caldo.",
   "The face of the Screenshot bubble.": "L'aspetto della bolla Screenshot.",
   "The face of the Power bubble.": "L'aspetto della bolla Alimentazione.",
-  "Drawer": "Cassetto",
   "Raise settings": "Alza le impostazioni",
   "Lower settings": "Abbassa le impostazioni",
   "Language, time, startup and the shell itself": "Lingua, ora, avvio e la shell stessa",
@@ -2109,8 +2108,6 @@
   "How Settings lays out its areas.": "Come le Impostazioni dispongono le loro aree.",
   "A sidebar of areas beside the page.": "Una barra laterale di aree accanto alla pagina.",
   "Reads like a page.": "Si legge come una pagina.",
-  "The areas in one column at the side of the screen.": "Le aree in una colonna al lato dello schermo.",
-  "Rises from the foot of the screen.": "Sale dal fondo dello schermo.",
   "Wears your accent.": "Indossa il tuo accento.",
   "Ink and one signal colour.": "Inchiostro e un solo colore di segnale.",
   "Hardware keys and faders.": "Tasti e fader hardware.",
@@ -2468,5 +2465,6 @@
   "Week %1": "Settimana %1",
   "%1 on": "%1 attivi",
   "Everything is off": "Tutto è spento",
-  "No colours yet": "Ancora nessun colore"
+  "No colours yet": "Ancora nessun colore",
+  "As a window": "Come finestra"
 }

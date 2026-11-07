@@ -2026,7 +2026,6 @@
   "The face of the Night light bubble; it fills while the screen is warmed.": "夜間モードバブルの見た目。画面を暖色にしている間は塗りつぶされます。",
   "The face of the Screenshot bubble.": "スクリーンショットバブルの見た目。",
   "The face of the Power bubble.": "電源バブルの見た目。",
-  "Drawer": "ドロワー",
   "Raise settings": "設定を引き上げる",
   "Lower settings": "設定を下げる",
   "Language, time, startup and the shell itself": "言語、時刻、起動、そしてシェル自体",
@@ -2109,8 +2108,6 @@
   "How Settings lays out its areas.": "設定がエリアをどう並べるか。",
   "A sidebar of areas beside the page.": "ページの横にエリアのサイドバー。",
   "Reads like a page.": "ページのように読める。",
-  "The areas in one column at the side of the screen.": "画面の端に1列でエリア。",
-  "Rises from the foot of the screen.": "画面の下からせり上がる。",
   "Wears your accent.": "アクセントカラーをまとう。",
   "Ink and one signal colour.": "インクとひとつのシグナルカラー。",
   "Hardware keys and faders.": "ハードウェアのキーとフェーダー。",
@@ -2468,5 +2465,6 @@
   "Week %1": "第%1週",
   "%1 on": "%1 個オン",
   "Everything is off": "すべてオフ",
-  "No colours yet": "まだ色がありません"
+  "No colours yet": "まだ色がありません",
+  "As a window": "ウィンドウで"
 }

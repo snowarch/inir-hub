@@ -2026,7 +2026,6 @@
   "The face of the Night light bubble; it fills while the screen is warmed.": "Tampilan gelembung Lampu malam; terisi selama layar dihangatkan.",
   "The face of the Screenshot bubble.": "Tampilan gelembung Tangkapan layar.",
   "The face of the Power bubble.": "Tampilan gelembung Daya.",
-  "Drawer": "Laci",
   "Raise settings": "Naikkan pengaturan",
   "Lower settings": "Turunkan pengaturan",
   "Language, time, startup and the shell itself": "Bahasa, waktu, startup, dan shell itu sendiri",
@@ -2109,8 +2108,6 @@
   "How Settings lays out its areas.": "Cara Pengaturan menata areanya.",
   "A sidebar of areas beside the page.": "Bilah samping berisi area di samping halaman.",
   "Reads like a page.": "Dibaca seperti halaman.",
-  "The areas in one column at the side of the screen.": "Area dalam satu kolom di sisi layar.",
-  "Rises from the foot of the screen.": "Naik dari kaki layar.",
   "Wears your accent.": "Mengenakan aksenmu.",
   "Ink and one signal colour.": "Tinta dan satu warna sinyal.",
   "Hardware keys and faders.": "Tombol dan fader perangkat keras.",
@@ -2468,5 +2465,6 @@
   "Week %1": "Minggu %1",
   "%1 on": "%1 aktif",
   "Everything is off": "Semua mati",
-  "No colours yet": "Belum ada warna"
+  "No colours yet": "Belum ada warna",
+  "As a window": "Sebagai jendela"
 }

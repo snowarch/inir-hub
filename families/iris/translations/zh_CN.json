@@ -2026,7 +2026,6 @@
   "The face of the Night light bubble; it fills while the screen is warmed.": "夜灯气泡的外观；屏幕变暖时会填满。",
   "The face of the Screenshot bubble.": "截图气泡的外观。",
   "The face of the Power bubble.": "电源气泡的外观。",
-  "Drawer": "抽屉",
   "Raise settings": "升起设置",
   "Lower settings": "降下设置",
   "Language, time, startup and the shell itself": "语言、时间、启动以及 shell 本身",
@@ -2109,8 +2108,6 @@
   "How Settings lays out its areas.": "设置如何排列它的区域。",
   "A sidebar of areas beside the page.": "页面旁的区域侧边栏。",
   "Reads like a page.": "读起来像一页。",
-  "The areas in one column at the side of the screen.": "区域排成一列，在屏幕一侧。",
-  "Rises from the foot of the screen.": "从屏幕底部升起。",
   "Wears your accent.": "用你的强调色。",
   "Ink and one signal colour.": "墨色加一种信号色。",
   "Hardware keys and faders.": "硬件按键和推子。",
@@ -2468,5 +2465,6 @@
   "Week %1": "第 %1 周",
   "%1 on": "%1 项已开启",
   "Everything is off": "全部已关闭",
-  "No colours yet": "暂无颜色"
+  "No colours yet": "暂无颜色",
+  "As a window": "作为窗口"
 }

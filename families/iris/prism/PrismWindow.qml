@@ -28,39 +28,7 @@ PanelWindow {
 
     function close(): void { GlobalStates.settingsOverlayOpen = false }
 
-    // What the shell asked for: a page of Prism's own, or the classic Settings for one it has not.
-    function take(): void {
-        const key = String(GlobalStates.settingsOverlayRequestedKey ?? "")
-        const section = String(GlobalStates.settingsOverlayRequestedSection ?? "")
-        if (key.length === 0 && section.length === 0) return
-        const alias = { home: "general", island: "bar" }
-        const head = section.split("/")[0]
-        const wanted = PrismModel.ids.includes(key) ? key : (alias[head] ?? head)
-        if (section.length > 0 && !PrismModel.ids.includes(wanted)) {
-            // The classic Settings reads the same request when it loads.
-            PrismState.classicVisit = true
-            return
-        }
-        if (wanted.length > 0) PrismState.go(wanted)
-        GlobalStates.settingsOverlayRequestedSection = ""
-        GlobalStates.settingsOverlayRequestedPage = -1
-        GlobalStates.settingsOverlayRequestedKey = ""
-        GlobalStates.settingsOverlayCurrentPage = GlobalStates.settingsPageKeys.indexOf("iris")
-    }
-    Component.onCompleted: root.take()
-    Connections {
-        target: GlobalStates
-        function onSettingsOverlayRequestedKeyChanged() { root.take() }
-        function onSettingsOverlayOpenChanged() {
-            if (GlobalStates.settingsOverlayOpen) {
-                GlobalStates.settingsOverlayCurrentPage = GlobalStates.settingsPageKeys.indexOf("iris")
-                panel.forceActiveFocus()
-            } else {
-                PrismState.reset()
-                PrismModel.undo = null
-            }
-        }
-    }
+    PrismRequests { onOpened: panel.forceActiveFocus() }
 
     Item {
         id: shown
@@ -97,23 +65,6 @@ PanelWindow {
             focus: true
             onCloseRequested: root.close()
             MouseArea { anchors.fill: parent; z: -1; acceptedButtons: Qt.AllButtons }
-
-            Keys.onPressed: event => {
-                if (event.key === Qt.Key_Escape) {
-                    if (PrismState.searching) PrismState.query = ""
-                    else root.close()
-                    event.accepted = true
-                } else if (event.key === Qt.Key_F && (event.modifiers & Qt.ControlModifier)) {
-                    panel.focusSearch()
-                    event.accepted = true
-                } else if (event.key === Qt.Key_Left && (event.modifiers & Qt.AltModifier)) {
-                    PrismState.goBack()
-                    event.accepted = true
-                } else if (event.key === Qt.Key_Right && (event.modifiers & Qt.AltModifier)) {
-                    PrismState.goForward()
-                    event.accepted = true
-                }
-            }
         }
     }
 }

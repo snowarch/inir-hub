@@ -9,8 +9,8 @@ import qs.modules.iris.settings
 
 // An area's live stage as every layout shows it: a plate that rounds with the form plates beside it, the scene one
 // even mat inside (its corners concentric with the plate's), the caption under the scene on the same plate. A layout
-// gives only its room (`ratio`, `least`, `most`); the shape, the mat and the caption are the same in Classic, Folio,
-// Pocket and Drawer. A plain Rectangle: the scene clips itself, a ClippingRectangle here cost a second clip.
+// gives only its room (`ratio`, `least`, `most`); the shape, the mat and the caption are the same in Classic and
+// Folio. A plain Rectangle: the scene clips itself, a ClippingRectangle here cost a second clip.
 Item {
     id: root
     property Item host

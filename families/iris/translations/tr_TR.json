@@ -2026,7 +2026,6 @@
   "The face of the Night light bubble; it fills while the screen is warmed.": "Gece ışığı baloncuğunun görünümü; ekran ısıtıldığı sürece dolar.",
   "The face of the Screenshot bubble.": "Ekran görüntüsü baloncuğunun görünümü.",
   "The face of the Power bubble.": "Güç baloncuğunun görünümü.",
-  "Drawer": "Çekmece",
   "Raise settings": "Ayarları yükselt",
   "Lower settings": "Ayarları alçalt",
   "Language, time, startup and the shell itself": "Dil, saat, başlangıç ve kabuğun kendisi",
@@ -2109,8 +2108,6 @@
   "How Settings lays out its areas.": "Ayarlar'ın alanlarını nasıl dizdiği.",
   "A sidebar of areas beside the page.": "Sayfanın yanında alanlardan oluşan bir kenar çubuğu.",
   "Reads like a page.": "Bir sayfa gibi okunur.",
-  "The areas in one column at the side of the screen.": "Alanlar ekranın kenarında tek sütunda.",
-  "Rises from the foot of the screen.": "Ekranın dibinden yükselir.",
   "Wears your accent.": "Vurgu rengini taşır.",
   "Ink and one signal colour.": "Mürekkep ve tek bir sinyal rengi.",
   "Hardware keys and faders.": "Donanım tuşları ve fader'lar.",
@@ -2468,5 +2465,6 @@
   "Week %1": "%1. hafta",
   "%1 on": "%1 açık",
   "Everything is off": "Her şey kapalı",
-  "No colours yet": "Henüz renk yok"
+  "No colours yet": "Henüz renk yok",
+  "As a window": "Pencere olarak"
 }

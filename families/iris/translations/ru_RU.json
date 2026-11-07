@@ -2026,7 +2026,6 @@
   "The face of the Night light bubble; it fills while the screen is warmed.": "Вид пузыря «Ночной свет»; он заполняется, пока экран утеплён.",
   "The face of the Screenshot bubble.": "Вид пузыря «Снимок экрана».",
   "The face of the Power bubble.": "Вид пузыря «Питание».",
-  "Drawer": "Ящик",
   "Raise settings": "Поднять настройки",
   "Lower settings": "Опустить настройки",
   "Language, time, startup and the shell itself": "Язык, время, запуск и сама оболочка",
@@ -2109,8 +2108,6 @@
   "How Settings lays out its areas.": "Как Настройки раскладывают свои разделы.",
   "A sidebar of areas beside the page.": "Боковая панель разделов рядом со страницей.",
   "Reads like a page.": "Читается как страница.",
-  "The areas in one column at the side of the screen.": "Разделы одной колонкой сбоку экрана.",
-  "Rises from the foot of the screen.": "Поднимается от низа экрана.",
   "Wears your accent.": "Носит ваш акцент.",
   "Ink and one signal colour.": "Чернила и один сигнальный цвет.",
   "Hardware keys and faders.": "Аппаратные клавиши и фейдеры.",
@@ -2468,5 +2465,6 @@
   "Week %1": "Неделя %1",
   "%1 on": "Включено: %1",
   "Everything is off": "Всё выключено",
-  "No colours yet": "Цветов пока нет"
+  "No colours yet": "Цветов пока нет",
+  "As a window": "Окном"
 }

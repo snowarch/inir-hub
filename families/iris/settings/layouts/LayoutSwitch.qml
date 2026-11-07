@@ -15,9 +15,7 @@ Rectangle {
     readonly property real d: IrisStyle.settingsDensity
     readonly property var keys: [
         { id: "classic", glyph: "view_sidebar", name: Translation.tr("Classic") },
-        { id: "folio", glyph: "article", name: Translation.tr("Folio") },
-        { id: "pocket", glyph: "smartphone", name: Translation.tr("Pocket") },
-        { id: "drawer", glyph: "call_to_action", name: Translation.tr("Drawer") }
+        { id: "folio", glyph: "article", name: Translation.tr("Folio") }
     ]
     implicitHeight: Math.round(36 * root.d)
     implicitWidth: keyRow.implicitWidth + 6

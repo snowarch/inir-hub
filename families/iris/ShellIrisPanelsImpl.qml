@@ -171,10 +171,20 @@ Item {
         identifier: "irisPrism"
         requireEnabledPanel: false
         open: GlobalStates.settingsOverlayOpen
-        extraCondition: root.prismOn
+        extraCondition: root.prismOn && !root.settingsWindowed
         keep: true
         closeGraceMs: 0
         component: PrismWindow {}
+    }
+    // Prism as a window of its own; only the host in use is built.
+    OnDemandPanelLoader {
+        identifier: "irisPrismWindow"
+        requireEnabledPanel: false
+        open: GlobalStates.settingsOverlayOpen
+        extraCondition: root.prismOn && root.settingsWindowed
+        keep: true
+        closeGraceMs: 0
+        component: PrismFloating {}
     }
     Connections {
         target: GlobalStates

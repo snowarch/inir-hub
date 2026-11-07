@@ -2026,7 +2026,6 @@
   "The face of the Night light bubble; it fills while the screen is warmed.": "Вигляд бульбашки «Нічне світло»; вона заповнюється, поки екран утеплено.",
   "The face of the Screenshot bubble.": "Вигляд бульбашки «Знімок екрана».",
   "The face of the Power bubble.": "Вигляд бульбашки «Живлення».",
-  "Drawer": "Шухляда",
   "Raise settings": "Підняти налаштування",
   "Lower settings": "Опустити налаштування",
   "Language, time, startup and the shell itself": "Мова, час, запуск і сама оболонка",
@@ -2109,8 +2108,6 @@
   "How Settings lays out its areas.": "Як Налаштування розкладають свої розділи.",
   "A sidebar of areas beside the page.": "Бічна панель розділів поруч зі сторінкою.",
   "Reads like a page.": "Читається як сторінка.",
-  "The areas in one column at the side of the screen.": "Розділи однією колонкою збоку екрана.",
-  "Rises from the foot of the screen.": "Піднімається від низу екрана.",
   "Wears your accent.": "Носить ваш акцент.",
   "Ink and one signal colour.": "Чорнило й один сигнальний колір.",
   "Hardware keys and faders.": "Апаратні клавіші й фейдери.",
@@ -2468,5 +2465,6 @@
   "Week %1": "Тиждень %1",
   "%1 on": "Увімкнено: %1",
   "Everything is off": "Усе вимкнено",
-  "No colours yet": "Кольорів поки немає"
+  "No colours yet": "Кольорів поки немає",
+  "As a window": "Вікном"
 }

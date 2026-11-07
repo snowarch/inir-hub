@@ -2026,7 +2026,6 @@
   "The face of the Night light bubble; it fills while the screen is warmed.": "המראה של בועת 'תאורת לילה'; היא מתמלאת כל עוד המסך מחומם.",
   "The face of the Screenshot bubble.": "המראה של בועת 'צילום מסך'.",
   "The face of the Power bubble.": "המראה של בועת 'הפעלה'.",
-  "Drawer": "מגירה",
   "Raise settings": "הרם את ההגדרות",
   "Lower settings": "הנמך את ההגדרות",
   "Language, time, startup and the shell itself": "שפה, שעה, הפעלה והמעטפת עצמה",
@@ -2109,8 +2108,6 @@
   "How Settings lays out its areas.": "איך ההגדרות מסדרות את האזורים שלהן.",
   "A sidebar of areas beside the page.": "סרגל צד של אזורים ליד הדף.",
   "Reads like a page.": "נקרא כמו דף.",
-  "The areas in one column at the side of the screen.": "האזורים בעמודה אחת בצד המסך.",
-  "Rises from the foot of the screen.": "עולה מתחתית המסך.",
   "Wears your accent.": "לובש את צבע ההדגשה שלך.",
   "Ink and one signal colour.": "דיו וצבע אות אחד.",
   "Hardware keys and faders.": "מקשים ופיידרים של חומרה.",
@@ -2468,5 +2465,6 @@
   "Week %1": "שבוע %1",
   "%1 on": "%1 פעילים",
   "Everything is off": "הכול כבוי",
-  "No colours yet": "אין צבעים עדיין"
+  "No colours yet": "אין צבעים עדיין",
+  "As a window": "כחלון"
 }

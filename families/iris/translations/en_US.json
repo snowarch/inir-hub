@@ -2026,7 +2026,6 @@
   "The face of the Night light bubble; it fills while the screen is warmed.": "The face of the Night light bubble; it fills while the screen is warmed.",
   "The face of the Screenshot bubble.": "The face of the Screenshot bubble.",
   "The face of the Power bubble.": "The face of the Power bubble.",
-  "Drawer": "Drawer",
   "Raise settings": "Raise settings",
   "Lower settings": "Lower settings",
   "Language, time, startup and the shell itself": "Language, time, startup and the shell itself",
@@ -2109,8 +2108,6 @@
   "How Settings lays out its areas.": "How Settings lays out its areas.",
   "A sidebar of areas beside the page.": "A sidebar of areas beside the page.",
   "Reads like a page.": "Reads like a page.",
-  "The areas in one column at the side of the screen.": "The areas in one column at the side of the screen.",
-  "Rises from the foot of the screen.": "Rises from the foot of the screen.",
   "Wears your accent.": "Wears your accent.",
   "Ink and one signal colour.": "Ink and one signal colour.",
   "Hardware keys and faders.": "Hardware keys and faders.",
@@ -2468,5 +2465,6 @@
   "Week %1": "Week %1",
   "%1 on": "%1 on",
   "Everything is off": "Everything is off",
-  "No colours yet": "No colours yet"
+  "No colours yet": "No colours yet",
+  "As a window": "As a window"
 }

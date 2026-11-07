@@ -2026,7 +2026,6 @@
   "The face of the Night light bubble; it fills while the screen is warmed.": "야간 조명 버블의 모양. 화면이 따뜻하게 유지되는 동안 채워집니다.",
   "The face of the Screenshot bubble.": "스크린샷 버블의 모양.",
   "The face of the Power bubble.": "전원 버블의 모양.",
-  "Drawer": "서랍",
   "Raise settings": "설정 올리기",
   "Lower settings": "설정 내리기",
   "Language, time, startup and the shell itself": "언어, 시간, 시작 그리고 셸 자체",
@@ -2109,8 +2108,6 @@
   "How Settings lays out its areas.": "설정이 영역을 배치하는 방식.",
   "A sidebar of areas beside the page.": "페이지 옆 영역 사이드바.",
   "Reads like a page.": "페이지처럼 읽힙니다.",
-  "The areas in one column at the side of the screen.": "화면 옆쪽 한 열에 영역.",
-  "Rises from the foot of the screen.": "화면 아래에서 올라옵니다.",
   "Wears your accent.": "강조색을 입습니다.",
   "Ink and one signal colour.": "잉크와 하나의 신호색.",
   "Hardware keys and faders.": "하드웨어 키와 페이더.",
@@ -2468,5 +2465,6 @@
   "Week %1": "%1주차",
   "%1 on": "%1개 켜짐",
   "Everything is off": "모두 꺼짐",
-  "No colours yet": "아직 색상 없음"
+  "No colours yet": "아직 색상 없음",
+  "As a window": "창으로"
 }

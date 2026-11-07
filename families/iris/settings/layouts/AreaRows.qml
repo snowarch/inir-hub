@@ -20,7 +20,7 @@ ColumnLayout {
     property string voice: ""
     // The page shows: config writes reach the rows now; off screen they wait.
     property bool live: true
-    // Only these groups (keys), or every group but these: a layout that splits an area (Drawer's columns, Pocket's Home).
+    // Only these groups (keys), or every group but these: a layout that splits an area.
     property var only: null
     property var skip: []
     // Home's welcome over the first group; a layout that sets it elsewhere turns it off.

@@ -1,3 +1,5 @@
 module qs.modules.iris.prism
 PrismPanel 1.0 PrismPanel.qml
 PrismWindow 1.0 PrismWindow.qml
+PrismFloating 1.0 PrismFloating.qml
+PrismRequests 1.0 PrismRequests.qml

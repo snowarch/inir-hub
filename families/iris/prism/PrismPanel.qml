@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Effects
 import qs
 import qs.services
+import qs.modules.common
 import qs.modules.iris.components
 import qs.modules.iris.prism.core
 import qs.modules.iris.prism.controls
@@ -13,7 +14,35 @@ Item {
     id: root
     property bool active: true
     property string flashPath: ""
+    // Hosted as a window: square corners (the compositor rounds a window), the lights act on the window, the switch
+    // between hosts reads "Over the desktop".
+    property bool windowed: false
     signal closeRequested()
+    // The green light in a window: its column takes the screen.
+    signal growRequested()
+
+    // The other host opens on the page this one stands on.
+    function switchHost(): void {
+        GlobalStates.settingsOverlayRequestedKey = PrismState.page
+        Config.setNestedValue("iris.appearance.settingsHost", root.windowed ? "overlay" : "window")
+    }
+
+    Keys.onPressed: event => {
+        if (event.key === Qt.Key_Escape) {
+            if (PrismState.searching) PrismState.query = ""
+            else root.closeRequested()
+            event.accepted = true
+        } else if (event.key === Qt.Key_F && (event.modifiers & Qt.ControlModifier)) {
+            root.focusSearch()
+            event.accepted = true
+        } else if (event.key === Qt.Key_Left && (event.modifiers & Qt.AltModifier)) {
+            PrismState.goBack()
+            event.accepted = true
+        } else if (event.key === Qt.Key_Right && (event.modifiers & Qt.AltModifier)) {
+            PrismState.goForward()
+            event.accepted = true
+        }
+    }
 
     readonly property var page: PrismModel.page(PrismState.page)
     readonly property bool changesView: PrismState.page === "changes"
@@ -53,7 +82,7 @@ Item {
     Rectangle {
         id: body
         anchors.fill: parent
-        radius: PrismTheme.dp(28)
+        radius: root.windowed ? 0 : PrismTheme.dp(28)
         color: PrismTheme.canvas
         clip: true
         layer.enabled: true
@@ -68,7 +97,10 @@ Item {
             id: sidebar
             width: root.sideWidth
             height: parent.height
+            windowed: root.windowed
             onCloseRequested: root.closeRequested()
+            onGrowRequested: root.growRequested()
+            onSwitchHost: root.switchHost()
         }
 
         Flickable {

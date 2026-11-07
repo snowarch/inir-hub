@@ -2026,7 +2026,6 @@
   "The face of the Night light bubble; it fills while the screen is warmed.": "Night light-ip bubble-iata kiinaa; skærmi kissassarneqartillugu imaqalersarpoq.",
   "The face of the Screenshot bubble.": "Screenshot-ip bubble-iata kiinaa.",
   "The face of the Power bubble.": "Power-ip bubble-iata kiinaa.",
-  "Drawer": "Drawer",
   "Raise settings": "Settings qaffakkit",
   "Lower settings": "Settings appartikkit",
   "Language, time, startup and the shell itself": "Oqaatsit, piffissaq, aallartinneq shell-ilu nammineq",
@@ -2109,8 +2108,6 @@
   "How Settings lays out its areas.": "How Settings lays out its areas.",
   "A sidebar of areas beside the page.": "A sidebar of areas beside the page.",
   "Reads like a page.": "Reads like a page.",
-  "The areas in one column at the side of the screen.": "The areas in one column at the side of the screen.",
-  "Rises from the foot of the screen.": "Rises from the foot of the screen.",
   "Wears your accent.": "Wears your accent.",
   "Ink and one signal colour.": "Ink and one signal colour.",
   "Hardware keys and faders.": "Hardware keys and faders.",
@@ -2468,5 +2465,6 @@
   "Week %1": "Sapaatip akunnera %1",
   "%1 on": "%1 ikumatut",
   "Everything is off": "Tamarmik ikumanngillat",
-  "No colours yet": "Qalipaatit suli peqanngillat"
+  "No colours yet": "Qalipaatit suli peqanngillat",
+  "As a window": "Igalaatut"
 }
