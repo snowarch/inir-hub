@@ -2477,5 +2477,13 @@
   "Type & icons": "Type & icons",
   "The shape the light takes: a haze from one corner over a band of colour, a prismatic eye over a hot horizon, a burnt corner, grain-gradient orbs, or a beam under a stroke of light.": "The shape the light takes: a haze from one corner over a band of colour, a prismatic eye over a hot horizon, a burnt corner, grain-gradient orbs, or a beam under a stroke of light.",
   "Haze": "Haze",
-  "Moss": "Moss"
+  "Moss": "Moss",
+  "Frame light": "Frame light",
+  "Holo lights the frame like the back of a CD: a spectral rim with a halo over the screen, on any material.": "Holo lights the frame like the back of a CD: a spectral rim with a halo over the screen, on any material.",
+  "Plain": "Plain",
+  "Holo": "Holo",
+  "Holo light": "Holo light",
+  "How brightly the spectral rim burns.": "How brightly the spectral rim burns.",
+  "Print marks": "Print marks",
+  "Small crosses and a hairline on the band, like a printer's sheet.": "Small crosses and a hairline on the band, like a printer's sheet."
 }

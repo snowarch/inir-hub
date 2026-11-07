@@ -2477,5 +2477,13 @@
   "Type & icons": "Шрифты и значки",
   "The shape the light takes: a haze from one corner over a band of colour, a prismatic eye over a hot horizon, a burnt corner, grain-gradient orbs, or a beam under a stroke of light.": "Форма света: дымка из угла над полосой цвета, призматический глаз над раскалённым горизонтом, обожжённый угол, сферы с зернистым градиентом или луч под штрихом света.",
   "Haze": "Дымка",
-  "Moss": "Мох"
+  "Moss": "Мох",
+  "Frame light": "Свет рамки",
+  "Holo lights the frame like the back of a CD: a spectral rim with a halo over the screen, on any material.": "Holo подсвечивает рамку как обратную сторону CD: спектральный край с ореолом над экраном, на любом материале.",
+  "Plain": "Простой",
+  "Holo": "Holo",
+  "Holo light": "Свет holo",
+  "How brightly the spectral rim burns.": "Насколько ярко горит спектральный край.",
+  "Print marks": "Типографские метки",
+  "Small crosses and a hairline on the band, like a printer's sheet.": "Маленькие крестики и тонкая линия на полосе, как на печатном листе."
 }

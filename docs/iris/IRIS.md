@@ -80,6 +80,7 @@ The Dock is set under iRiS Settings › Dock:
 - Visibility: Show dock, Automatically hide, Reserve space for windows, Stay visible on empty workspaces.
 - Look › Screen edge: Auto puts it on the edge opposite the Island, or pick Top, Bottom, Left or Right.
 - Look › Material: iRiS, Solid, Glass or Blur (beta). The factory is flat: every panel is plain black (or paper in light mode), with cards a breath lighter than the panel. Glass blurs your wallpaper and costs little; Blur needs Niri 26.04 or later and asks Niri to blur whatever is behind on every frame, which weaker GPUs feel. Where Niri cannot blur, Blur stays flat.
+- Look › Material › Frame light: Plain or Holo. Holo lights the frame like the back of a CD: a spectral rim on the frame's inner line (hot at the top, blue at the sides, rose low), a soft halo over the screen's edge, film grain and small print marks on the band. It is light, not a material, so it works with Flat, Solid, Glass, Blur and every texture, dark or light. Holo light sets its brightness; Print marks turns the crosses off. It never moves, so it costs nothing at rest.
 - Apps: Pinned apps, Open apps and Drag to reorder. Drag an icon along the Dock to reorder it; **Esc** while dragging puts it back.
 
 ## Look, colour and themes

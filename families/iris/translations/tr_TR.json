@@ -2477,5 +2477,13 @@
   "Type & icons": "Yazı ve simgeler",
   "The shape the light takes: a haze from one corner over a band of colour, a prismatic eye over a hot horizon, a burnt corner, grain-gradient orbs, or a beam under a stroke of light.": "Işığın aldığı şekil: bir köşeden bir renk şeridinin üzerine yayılan pus, kızgın bir ufkun üzerinde prizmatik bir göz, yanık bir köşe, grenli gradyan küreler ya da bir ışık darbesinin altında bir huzme.",
   "Haze": "Pus",
-  "Moss": "Yosun"
+  "Moss": "Yosun",
+  "Frame light": "Çerçeve ışığı",
+  "Holo lights the frame like the back of a CD: a spectral rim with a halo over the screen, on any material.": "Holo çerçeveyi bir CD'nin arkası gibi aydınlatır: ekranın üzerine hale düşen tayfsal bir kenar, her malzemede.",
+  "Plain": "Sade",
+  "Holo": "Holo",
+  "Holo light": "Holo ışığı",
+  "How brightly the spectral rim burns.": "Tayfsal kenarın ne kadar parlak yandığı.",
+  "Print marks": "Baskı işaretleri",
+  "Small crosses and a hairline on the band, like a printer's sheet.": "Bantta küçük artılar ve ince bir çizgi, bir baskı tabakasındaki gibi."
 }

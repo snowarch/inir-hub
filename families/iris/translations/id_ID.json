@@ -2477,5 +2477,13 @@
   "Type & icons": "Huruf & ikon",
   "The shape the light takes: a haze from one corner over a band of colour, a prismatic eye over a hot horizon, a burnt corner, grain-gradient orbs, or a beam under a stroke of light.": "Bentuk cahaya: kabut dari satu sudut di atas pita warna, mata prismatik di atas cakrawala membara, sudut terbakar, bola gradien berbutir, atau berkas di bawah goresan cahaya.",
   "Haze": "Kabut",
-  "Moss": "Lumut"
+  "Moss": "Lumut",
+  "Frame light": "Cahaya bingkai",
+  "Holo lights the frame like the back of a CD: a spectral rim with a halo over the screen, on any material.": "Holo menerangi bingkai seperti sisi belakang CD: tepi spektral dengan halo di atas layar, pada material apa pun.",
+  "Plain": "Polos",
+  "Holo": "Holo",
+  "Holo light": "Cahaya holo",
+  "How brightly the spectral rim burns.": "Seberapa terang tepi spektral menyala.",
+  "Print marks": "Tanda cetak",
+  "Small crosses and a hairline on the band, like a printer's sheet.": "Silang kecil dan garis tipis pada pita, seperti pada lembar cetak."
 }

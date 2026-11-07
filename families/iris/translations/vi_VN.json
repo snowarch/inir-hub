@@ -2477,5 +2477,13 @@
   "Type & icons": "Chữ và biểu tượng",
   "The shape the light takes: a haze from one corner over a band of colour, a prismatic eye over a hot horizon, a burnt corner, grain-gradient orbs, or a beam under a stroke of light.": "Hình dạng của ánh sáng: một làn sương mờ từ một góc trên dải màu, một con mắt lăng kính trên đường chân trời rực cháy, một góc bị cháy, những quả cầu chuyển sắc hạt, hoặc một chùm sáng dưới một nét sáng.",
   "Haze": "Sương mờ",
-  "Moss": "Rêu"
+  "Moss": "Rêu",
+  "Frame light": "Ánh sáng khung",
+  "Holo lights the frame like the back of a CD: a spectral rim with a halo over the screen, on any material.": "Holo chiếu sáng khung như mặt sau đĩa CD: một viền quang phổ với quầng sáng trên màn hình, với mọi chất liệu.",
+  "Plain": "Trơn",
+  "Holo": "Holo",
+  "Holo light": "Ánh sáng holo",
+  "How brightly the spectral rim burns.": "Viền quang phổ sáng đến mức nào.",
+  "Print marks": "Dấu in",
+  "Small crosses and a hairline on the band, like a printer's sheet.": "Những dấu cộng nhỏ và một đường mảnh trên dải, như trên tờ in."
 }

@@ -2477,5 +2477,13 @@
   "Type & icons": "文字とアイコン",
   "The shape the light takes: a haze from one corner over a band of colour, a prismatic eye over a hot horizon, a burnt corner, grain-gradient orbs, or a beam under a stroke of light.": "光の形。片隅から色の帯へ広がるヘイズ、灼熱の地平線に浮かぶプリズムの瞳、焼けた角、粒子グラデーションのオーブ、光のひと筆の下のビーム。",
   "Haze": "ヘイズ",
-  "Moss": "モス"
+  "Moss": "モス",
+  "Frame light": "フレームの光",
+  "Holo lights the frame like the back of a CD: a spectral rim with a halo over the screen, on any material.": "Holo はフレームを CD の裏面のように照らします。画面にハローを落とすスペクトルの縁で、どの素材でも使えます。",
+  "Plain": "プレーン",
+  "Holo": "Holo",
+  "Holo light": "Holo の光",
+  "How brightly the spectral rim burns.": "スペクトルの縁の明るさ。",
+  "Print marks": "トンボ",
+  "Small crosses and a hairline on the band, like a printer's sheet.": "帯の上の小さな十字と細線。印刷用紙のように。"
 }

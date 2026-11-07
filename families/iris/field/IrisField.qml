@@ -45,6 +45,9 @@ Item {
     property color frameMusicInk: IrisFrame.musicInk
     property real frameMusicLight: IrisFrame.musicLight
     property real frameMusicLightWidth: IrisFrame.musicLightWidth
+    property real holoLight: IrisFrame.holoLight
+    property bool holoMarks: IrisFrame.holoMarks
+    property real holoSpill: IrisFrame.holoSpill
     // One matter (2026-10-15, the maintainer: the Dock on the frame "se ve separado del frame" once it is glass): a
     // body welded to the frame, directly or through the bodies it hangs from, is the frame's material wherever it is
     // joined; its own material is for when it floats. A glass body on a solid band read as two things fitted together.
@@ -110,7 +113,7 @@ Item {
     readonly property vector4d quietRect: {
         if (!root.framed) return Qt.vector4d(0, 0, 0, 0)
         const wave = Math.max(root.edgeWave.x, root.edgeWave.y, root.edgeWave.z, root.edgeWave.w, 0)
-        const edge = root.band + wave + root.frameMusicLightWidth + root.reach + 16
+        const edge = root.band + wave + root.frameMusicLightWidth + root.holoSpill + root.reach + 16
         let left = edge, top = edge, right = root.width - edge, bottom = root.height - edge
         const margin = root.reach + 32 + root.trailSpan
         for (const s of root.shapes ?? []) {
@@ -265,7 +268,7 @@ Item {
             root.band, root.cornerRadius)
         readonly property color tint: root.tint
         readonly property vector4d quiet: root.quietRect
-        readonly property vector4d extent: Qt.vector4d(pass.packed.count, root.reach + 32 + root.trailSpan + root.frameMusicLightWidth,
+        readonly property vector4d extent: Qt.vector4d(pass.packed.count, root.reach + 32 + root.trailSpan + root.frameMusicLightWidth + root.holoSpill,
             pass.packed.glassy || (root.framed && root.frameGlass > 0) ? 1 : 0, 0)
         readonly property color rim: root.rim
         readonly property color sheen: root.sheen
@@ -391,6 +394,7 @@ Item {
         readonly property vector4d frameLight: Qt.vector4d(root.frameMusicAppearance, root.frameMusicLevel,
             root.frameMusicLight, root.frameMusicLightWidth)
         readonly property color frameInk: root.frameMusicInk
+        readonly property vector4d frameHolo: Qt.vector4d(root.holoLight, root.holoMarks ? 1 : 0, IrisStyle.light ? 1 : 0, IrisStyle.density)
         readonly property color shade: IrisStyle.shadow
         readonly property vector4d shadeShape: Qt.vector4d(root.shadowFall, root.shadowBlur, root.casts ? 1 : 0, 0)
         readonly property Item backdrop: pass.backdropReady ? root.backdropSource.texture : noBackdrop

@@ -2477,5 +2477,13 @@
   "Type & icons": "Schrift & Symbole",
   "The shape the light takes: a haze from one corner over a band of colour, a prismatic eye over a hot horizon, a burnt corner, grain-gradient orbs, or a beam under a stroke of light.": "Die Form des Lichts: ein Dunst aus einer Ecke über einem Farbband, ein prismatisches Auge über einem glühenden Horizont, eine verbrannte Ecke, Kugeln mit Körnungsverlauf oder ein Strahl unter einem Lichtstrich.",
   "Haze": "Dunst",
-  "Moss": "Moos"
+  "Moss": "Moos",
+  "Frame light": "Rahmenlicht",
+  "Holo lights the frame like the back of a CD: a spectral rim with a halo over the screen, on any material.": "Holo beleuchtet den Rahmen wie die Rückseite einer CD: ein Spektralrand mit einem Schein über dem Bildschirm, auf jedem Material.",
+  "Plain": "Schlicht",
+  "Holo": "Holo",
+  "Holo light": "Holo-Licht",
+  "How brightly the spectral rim burns.": "Wie hell der Spektralrand leuchtet.",
+  "Print marks": "Druckmarken",
+  "Small crosses and a hairline on the band, like a printer's sheet.": "Kleine Kreuze und eine Haarlinie auf dem Band, wie auf einem Druckbogen."
 }

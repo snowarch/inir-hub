@@ -2477,5 +2477,13 @@
   "Type & icons": "글꼴 및 아이콘",
   "The shape the light takes: a haze from one corner over a band of colour, a prismatic eye over a hot horizon, a burnt corner, grain-gradient orbs, or a beam under a stroke of light.": "빛의 모양: 한 모서리에서 색 띠 위로 번지는 헤이즈, 뜨거운 지평선 위의 프리즘 눈, 그을린 모서리, 그레인 그라데이션 구체, 또는 빛줄기 아래의 빔.",
   "Haze": "헤이즈",
-  "Moss": "모스"
+  "Moss": "모스",
+  "Frame light": "프레임 빛",
+  "Holo lights the frame like the back of a CD: a spectral rim with a halo over the screen, on any material.": "Holo는 프레임을 CD 뒷면처럼 비춥니다. 화면 위로 후광이 번지는 스펙트럼 테두리이며, 어떤 재질에서도 작동합니다.",
+  "Plain": "기본",
+  "Holo": "Holo",
+  "Holo light": "Holo 빛",
+  "How brightly the spectral rim burns.": "스펙트럼 테두리의 밝기.",
+  "Print marks": "인쇄 표시",
+  "Small crosses and a hairline on the band, like a printer's sheet.": "띠 위의 작은 십자와 가는 선, 인쇄 용지처럼."
 }

@@ -2477,5 +2477,13 @@
   "Type & icons": "字体与图标",
   "The shape the light takes: a haze from one corner over a band of colour, a prismatic eye over a hot horizon, a burnt corner, grain-gradient orbs, or a beam under a stroke of light.": "光的形状：从一角漫过色带的薄雾、灼热地平线上的棱镜之眼、烧焦的角落、颗粒渐变光球，或一笔光线下的光束。",
   "Haze": "薄雾",
-  "Moss": "苔藓"
+  "Moss": "苔藓",
+  "Frame light": "边框光",
+  "Holo lights the frame like the back of a CD: a spectral rim with a halo over the screen, on any material.": "Holo 让边框像 CD 背面一样发光：一圈光谱边缘，并在屏幕上投下光晕，适用于任何材质。",
+  "Plain": "普通",
+  "Holo": "Holo",
+  "Holo light": "Holo 光",
+  "How brightly the spectral rim burns.": "光谱边缘的亮度。",
+  "Print marks": "印刷标记",
+  "Small crosses and a hairline on the band, like a printer's sheet.": "边带上的小十字和细线，如同印刷纸张。"
 }

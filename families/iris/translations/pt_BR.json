@@ -2477,5 +2477,13 @@
   "Type & icons": "Tipografia e ícones",
   "The shape the light takes: a haze from one corner over a band of colour, a prismatic eye over a hot horizon, a burnt corner, grain-gradient orbs, or a beam under a stroke of light.": "A forma da luz: uma névoa de um canto sobre uma faixa de cor, um olho prismático sobre um horizonte em brasa, um canto queimado, orbes em degradê granulado ou um feixe sob um traço de luz.",
   "Haze": "Névoa",
-  "Moss": "Musgo"
+  "Moss": "Musgo",
+  "Frame light": "Luz da moldura",
+  "Holo lights the frame like the back of a CD: a spectral rim with a halo over the screen, on any material.": "Holo ilumina a moldura como o verso de um CD: uma borda espectral com um halo sobre a tela, em qualquer material.",
+  "Plain": "Simples",
+  "Holo": "Holo",
+  "Holo light": "Luz holo",
+  "How brightly the spectral rim burns.": "Quanto a borda espectral brilha.",
+  "Print marks": "Marcas de impressão",
+  "Small crosses and a hairline on the band, like a printer's sheet.": "Pequenas cruzes e uma linha fina na faixa, como numa folha de gráfica."
 }

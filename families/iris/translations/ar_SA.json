@@ -2477,5 +2477,13 @@
   "Type & icons": "الخطوط والأيقونات",
   "The shape the light takes: a haze from one corner over a band of colour, a prismatic eye over a hot horizon, a burnt corner, grain-gradient orbs, or a beam under a stroke of light.": "الشكل الذي يتخذه الضوء: ضباب من زاوية فوق شريط من اللون، أو عين منشورية فوق أفق ملتهب، أو زاوية محترقة، أو كرات بتدرّج حبيبي، أو حزمة تحت ضربة من الضوء.",
   "Haze": "ضباب",
-  "Moss": "طحلب"
+  "Moss": "طحلب",
+  "Frame light": "ضوء الإطار",
+  "Holo lights the frame like the back of a CD: a spectral rim with a halo over the screen, on any material.": "يضيء Holo الإطار مثل ظهر قرص CD: حافة طيفية مع هالة فوق الشاشة، مع أي خامة.",
+  "Plain": "بسيط",
+  "Holo": "Holo",
+  "Holo light": "ضوء Holo",
+  "How brightly the spectral rim burns.": "مدى سطوع الحافة الطيفية.",
+  "Print marks": "علامات الطباعة",
+  "Small crosses and a hairline on the band, like a printer's sheet.": "صلبان صغيرة وخط رفيع على الشريط، كما في ورقة المطبعة."
 }

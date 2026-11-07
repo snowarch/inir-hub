@@ -113,6 +113,12 @@ QtObject {
     readonly property real musicLightWidth: Math.max(1, Math.min(18, Number(root.surround?.musicLightWidth ?? 5))) * root.d
 
     readonly property bool framed: Boolean(root.surround?.enable ?? false)
+    // Holo: the frame's own spectral light, drawn by the field over the band's material whatever it is (glass, solid, flat).
+    readonly property bool holo: root.framed && String(root.surround?.style ?? "plain") === "holo"
+    readonly property real holoLight: root.holo ? Math.max(0, Math.min(1, Number(root.surround?.holoLight ?? 70) / 100)) : 0
+    readonly property bool holoMarks: root.holo && Boolean(root.surround?.holoMarks ?? true)
+    // How far the rim's halo falls over the screen, like the eclipse's.
+    readonly property real holoSpill: root.holo ? Math.round(36 * root.d) : 0
     readonly property real band: root.framed
         ? Math.max(1, Math.round(Number(root.surround?.thickness ?? 10) * root.d)) : 0
     readonly property real cornerRadius: root.framed

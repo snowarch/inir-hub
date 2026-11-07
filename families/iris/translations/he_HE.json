@@ -2477,5 +2477,13 @@
   "Type & icons": "גופנים וסמלים",
   "The shape the light takes: a haze from one corner over a band of colour, a prismatic eye over a hot horizon, a burnt corner, grain-gradient orbs, or a beam under a stroke of light.": "הצורה שהאור מקבל: אובך מפינה מעל פס של צבע, עין מנסרתית מעל אופק לוהט, פינה שרופה, כדורים בדרגת גרעין, או קרן מתחת למשיכת אור.",
   "Haze": "אובך",
-  "Moss": "טחב"
+  "Moss": "טחב",
+  "Frame light": "אור המסגרת",
+  "Holo lights the frame like the back of a CD: a spectral rim with a halo over the screen, on any material.": "Holo מאיר את המסגרת כמו גב של תקליטור: שוליים ספקטרליים עם הילה מעל המסך, בכל חומר.",
+  "Plain": "פשוט",
+  "Holo": "Holo",
+  "Holo light": "אור Holo",
+  "How brightly the spectral rim burns.": "עד כמה השוליים הספקטרליים בוהקים.",
+  "Print marks": "סימני הדפסה",
+  "Small crosses and a hairline on the band, like a printer's sheet.": "צלבים קטנים וקו דק על הפס, כמו על גיליון דפוס."
 }
