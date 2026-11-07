@@ -4,7 +4,8 @@ import qs.modules.common.functions
 import qs.modules.iris.style
 
 // Prism's body (PrismBody.frag): the folder of frosted glass every Prism face stands on, drawn whole by one shader that
-// reaches `room` past the face for its shadow and glow. Every measure is in the face's pixels.
+// reaches `room` past the face for its shadow. Nothing glows past its edge; the shadow on the desktop is the widget's
+// `iris.shadow` (0 to 100, off by factory: his 11-07). Every measure is in the face's pixels.
 Item {
     id: body
     required property var face
@@ -38,6 +39,9 @@ Item {
     property real beamPass: 0
 
     readonly property real room: body.face.dp(40)
+    // The shadow on the desktop: the widget's own, none with the background off.
+    readonly property real shadow: body.face.clear ? 0
+        : Math.max(0, Math.min(1, Number(body.face.widget?.familyOption("shadow", 0) ?? 0) / 100))
 
     Item {
         id: noFrost
@@ -66,9 +70,9 @@ Item {
         readonly property vector4d beam: Qt.vector4d(body.entry.x, body.entry.y, body.prism.x, body.prism.y)
         readonly property vector4d fan: Qt.vector4d(body.fanAngle, body.fanSpread, body.lightPass, body.white ? 1 : 0)
         readonly property vector4d tone: Qt.vector4d(glass.tint.r, glass.tint.g, glass.tint.b, glass.tint.a)
-        readonly property vector4d shelf: Qt.vector4d(body.shelf.r, body.shelf.g, body.shelf.b, body.face.dp(14))
+        readonly property vector4d shelf: Qt.vector4d(body.shelf.r, body.shelf.g, body.shelf.b, 0)
         readonly property vector4d look: Qt.vector4d(glass.light ? 1 : 0, body.face.frost !== null ? 1 : 0,
-            glass.light ? 0.022 : 0.04, body.face.clear ? 0 : 1)
+            glass.light ? 0.022 : 0.04, body.shadow)
         readonly property vector4d form: Qt.vector4d(body.slab ? 1 : 0, body.slabRadius, body.beamPass, 0)
         readonly property Item frost: body.face.frost ?? noFrost
     }

@@ -4,8 +4,9 @@
 // shorter flap lit in the widget's colour holds one fact; a clearer pane of glass laid across the whole width holds what
 // the widget is about; the folder's foot runs under it. One beam of white light enters low on the left, breaks on the
 // pane into its spectrum and fans out to the upper right, seen diffused through the frost (more through the pane than
-// through the body). Grain on the glass, a rim lit from above, the folder's shadow on the desktop, the pane's on the
-// folder and the tab's on the flap. Static: it draws again only when a value changes.
+// through the body). Grain on the glass, a rim lit from above, the pane's shadow on the folder and the tab's on the flap.
+// The folder's shadow on the desktop is the person's (`look.w`, off by factory); nothing glows past its edge (his 11-07:
+// no light behind a widget). Static: it draws again only when a value changes.
 layout(location = 0) in vec2 qt_TexCoord0;
 layout(location = 0) out vec4 fragColor;
 layout(std140, binding = 0) uniform buf {
@@ -27,9 +28,10 @@ layout(std140, binding = 0) uniform buf {
     vec4 fan;
     // The body's own colour, not premultiplied.
     vec4 tone;
-    // The flap's colour (the song's), not premultiplied; a: how far it glows.
+    // The flap's colour (the song's), not premultiplied; a: unused (the flap once glowed on the desktop).
     vec4 shelf;
-    // x: 1 on a light scheme (paper glass); y: 1 when frost is lent (glass material); z: grain; w: shadow strength.
+    // x: 1 on a light scheme (paper glass); y: 1 when frost is lent (glass material); z: grain; w: the shadow's strength
+    // on the desktop (0 none, the factory; 1 full).
     vec4 look;
     // x: 0 the folder, 1 a slab (one piece of glass: no tab, flap or pane); y: the slab's corners; z: how much of the
     // beam a slab lets through (0 quiet: only its rim splits the light, near `beam.zw`); w: unused.
@@ -79,8 +81,9 @@ vec3 metrics(vec2 p) {
     // full-width body there poked out beside it as a sharp point on every card).
     float shapeD = smoothUnion(tabD, max(flare, p.x - u.folder.x + u.radii.z), u.radii.y * 0.7);
     tabD = smoothUnion(tabD, flare, u.radii.y * 0.7);
-    // The flap reaches under the tab, so only its top and right edge show.
-    float flapD = box(p, vec4(u.folder.y - u.frame.w - R, u.folder.z, u.folder.x, size.y), vec4(R, u.radii.z, R, R));
+    // The flap reaches under the tab, so only its top and right edge show. It ends under the pane: run down to the
+    // folder's foot, its edge met the outline's there and the fillet between them showed it as a lit sliver.
+    float flapD = box(p, vec4(u.folder.y - u.frame.w - R, u.folder.z, u.folder.x, max(u.pane.w, u.folder.z + 2.0 * R)), vec4(R, u.radii.z, R, R));
     // The foot under the pane, the whole width. Square where it meets the pane: a rounded top showed beside the pane's
     // own corners as a second, crooked curve on both edges.
     float footD = box(p, vec4(0.0, 0.5 * (u.pane.y + u.pane.w), size.x, size.y), vec4(0.0, 0.0, R, R));
@@ -167,7 +170,7 @@ void main() {
 
     vec4 col = vec4(0.0);
 
-    // The shadow of the whole, on the desktop.
+    // The shadow of the whole, on the desktop, as strong as the person set it.
     float lift = 0.022 * size.y;
     float spread = 0.06 * size.y;
     float shadowD = slab ? metrics(p - vec2(0.0, lift)).x
@@ -176,12 +179,6 @@ void main() {
     float flapSide = smoothstep(-u.radii.y, u.radii.y, edge) * (1.0 - smoothstep(u.pane.y - spread, u.pane.y, p.y));
     float shade = (1.0 - smoothstep(-spread, spread * 1.6, shadowD)) * u.look.w * (paper ? 0.45 : 1.0) * (1.0 - 0.85 * flapSide);
     col = vec4(0.0, 0.0, 0.0, shade * (1.0 - inBody) * (1.0 - inPane));
-
-    // The flap's glow on the desktop above and right of it, never over the tab.
-    float glow = exp(-max(flap, 0.0) / max(u.shelf.a, 1.0)) * smoothstep(0.0, 4.0 * px, body)
-        * smoothstep(-u.radii.y, u.radii.y, edge) * step(p.y, u.pane.y) * (1.0 - inPane);
-    vec3 glowRgb = u.shelf.rgb * glow * (paper ? 0.6 : 0.85);
-    col = over(vec4(glowRgb, glow * (paper ? 0.55 : 0.4)), col);
 
     // The glass's own colour over what the frost shows of the desktop.
     vec4 under = u.look.y > 0.5 ? texture(frost, clamp(p / size, 0.0, 1.0)) : vec4(0.0);

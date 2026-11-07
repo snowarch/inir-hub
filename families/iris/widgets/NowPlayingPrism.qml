@@ -50,7 +50,10 @@ Item {
         const own = String(entry?.icon ?? "")
         if (own.startsWith("/"))
             return own
-        const name = [own, view.entryId, view.head.toLowerCase()].find(icon => icon.length > 0 && AppSearch.iconExists(icon))
+        // The head names the player only when there is one; with none it is the word "Music", and a theme's icon of
+        // that name (a folder, a file type) stood in for a player's logo.
+        const source = view.face.hasPlayer || view.remembered ? view.head.toLowerCase() : ""
+        const name = [own, view.entryId, source].find(icon => icon.length > 0 && AppSearch.iconExists(icon))
         return name ? Quickshell.iconPath(name) : ""
     }
     // The hour as the reference sets it: the figures, and a 12-hour clock's AM/PM raised small beside them.

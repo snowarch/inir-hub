@@ -243,6 +243,7 @@
     ],
     "*": [
       {"key":"iris.prism","label":"Prism","type":"choice","default":"quiet","page":"look","when":[{"wears":"prism"},{"not":{"widget":"mediaControls"}}],"choices":[["quiet","Quiet","crop_square"],["beam","Beam","flare"],["folder","Folder","folder"]],"keywords":["prism","light","beam","folder","glass","spectrum","luz"]},
+      {"key":"iris.shadow","label":"Shadow","type":"range","default":0,"min":0,"max":100,"step":5,"unit":" %","page":"look","when":["face",{"showBackground":true},{"any":[{"wears":"prism"},{"iris.face":"prism"}]}],"keywords":["shadow","depth","lift","sombra"]},
       {"key":"iris.material","label":"Material","type":"choice","default":"auto","page":"look","tune":true,"when":["face",{"showBackground":true}],"choices":[["auto","Same as every widget"],["glass","Glass"],["solid","Solid"],["tinted","Tinted"]],"keywords":["glass","transparent","background","plate","fondo","vidrio"]}
     ]
   }
