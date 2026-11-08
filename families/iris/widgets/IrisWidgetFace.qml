@@ -436,6 +436,8 @@ Item {
         active: root.stacked
         z: 150
         anchors.right: parent.right
+        // A face drawn to its edge (Prism: no padding) has no gutter: its dots stand just outside, as a Smart Stack's.
+        anchors.rightMargin: root.padding > 0 ? 0 : -width
         anchors.verticalCenter: parent.verticalCenter
         visible: active && root.widget.stackShown
         sourceComponent: IrisStackDots { face: root }
