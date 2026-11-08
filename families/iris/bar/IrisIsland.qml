@@ -772,8 +772,12 @@ Item {
     readonly property real navSlot: Math.max(Math.round(30 * root.d), Math.min(Math.round(36 * root.d),
         Math.floor((Math.min(root.expandedRoom, root.pageBodyWidth) - 2 * root.padding - root.navFixed) / Math.max(1, root.navButtons))))
     readonly property real navWidth: root.navFixed + root.navButtons * root.navSlot
-    // Once per open, so the bubbles on its row can step aside (IrisStage.stepAside).
-    readonly property real openWidth: root.expanded && !root.vertical && !root.spanning ? root.expandedWidth : 0
+    // A moment the Island says by itself (a notice, an event, a level, a held drop) grows it for seconds: it is open,
+    // never its resting shape, so the plates and lines that take the Island's measure keep theirs (islandGeometry).
+    readonly property bool momentShown: !root.expanded && ["drop", "feedback", "event", "notice"].includes(root.compactMode)
+    // Once per open or moment, so the bubbles on its row can step aside (IrisStage.stepAside).
+    readonly property real openWidth: root.vertical || root.spanning ? 0
+        : root.expanded ? root.expandedWidth : root.momentShown ? root.compactTargetWidth : 0
     onOpenWidthChanged: {
         const name = root.targetScreen?.name ?? ""
         if (name.length === 0) return
@@ -1814,7 +1818,7 @@ Item {
         // shape that came back to where it was must not publish at all. Writing
         // this map rebuilds every piece, plate, hit rect and field shape on the
         // output: measured at one 87 ms frame, right as the Island settled.
-        if (name.length === 0 || root.expanded || root.morphing) return
+        if (name.length === 0 || root.expanded || root.momentShown || root.morphing) return
         const next = root.islandGeometry
         const key = JSON.stringify(next)
         if (key === root.publishedGeometry) return
@@ -1825,6 +1829,7 @@ Item {
     }
     onBubbleKindsChanged: root.publishBubbleKinds()
     onIslandGeometryChanged: geometrySettle.restart()
+    onMomentShownChanged: if (!root.momentShown) geometrySettle.restart()
     // Resting reshapes (width, notch, placement) change the geometry every frame; one fan-out per frame drops the output to ~14 fps.
     Timer { id: geometrySettle; interval: 60; onTriggered: root.publishIslandGeometry() }
     Component.onCompleted: { root.publishBubbleKinds(); root.publishIslandGeometry() }
