@@ -237,11 +237,12 @@ Item { // Bar content region
     // an explicit compositor request may use the proven union.
     readonly property string nativeBlurTopology: root.isIslands
         ? Appearance.blurTopology.islandsUnion
-        : root.barAppearance === "classic"
-            && (Config.options?.material?.bar?.cornerStyle ?? 0) !== 0
-            && (!root.zzzEverywhere || Appearance.zzz.round)
-            ? Appearance.blurTopology.roundedRectangle
-            : Appearance.blurTopology.unsupported
+        : root.barAppearance !== "classic" ? Appearance.blurTopology.unsupported
+        // Hug: the strip and its two concave corners, which Bar.qml publishes beside it.
+        : (Config.options?.material?.bar?.cornerStyle ?? 0) === 0
+            ? (root.zzzEverywhere ? Appearance.blurTopology.unsupported : Appearance.blurTopology.rectangle)
+        : !root.zzzEverywhere || Appearance.zzz.round ? Appearance.blurTopology.roundedRectangle
+        : Appearance.blurTopology.unsupported
     readonly property bool nativeBlurGeometryExact: Appearance.blurTopologyExact(root.nativeBlurTopology)
     readonly property bool nativeBlurActive: Appearance.useCompositorBlur(
             root.isIslands ? "islands" : "bar", root.nativeBlurTopology)

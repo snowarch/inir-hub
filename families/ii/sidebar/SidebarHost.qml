@@ -594,6 +594,57 @@ Scope {
             item: sidebarContentLoader
         }
 
+        // Compositor blur under the panel's own shape (its content names it as blurSurface). Read in window space
+        // with the open/close motion as dependencies: a Region follows only its item's own geometry, not a
+        // transform above it, so the blur would stay behind while the panel slides.
+        readonly property Item nativeBlurItem: {
+            const content = sidebarContentLoader.item?.roleContentItem ?? null
+            const surface = root.featureRole ? content : content?.activeContentItem
+            return sidebarContentLoader.visible && sidebarContentLoader.animOpacity > 0.5
+                ? (surface?.blurSurface ?? null) : null
+        }
+        readonly property rect nativeBlurRect: {
+            const item = sidebarRoot.nativeBlurItem
+            void sidebarContentLoader.animTranslateX
+            void sidebarContentLoader.animTranslateY
+            void sidebarContentLoader.animScale
+            void sidebarContentLoader.animScaleX
+            void sidebarContentLoader.clipWidth
+            void sidebarContentLoader.x
+            void sidebarContentLoader.y
+            void sidebarContentLoader.width
+            void sidebarContentLoader.height
+            void sidebarRoot.width
+            if (!item)
+                return Qt.rect(0, 0, 0, 0)
+            void item.x
+            void item.y
+            void item.width
+            void item.height
+            const a = item.mapToItem(null, 0, 0)
+            const b = item.mapToItem(null, item.width, item.height)
+            let x0 = Math.min(a.x, b.x), x1 = Math.max(a.x, b.x)
+            const y0 = Math.min(a.y, b.y), y1 = Math.max(a.y, b.y)
+            // The reveal motion clips the panel to the edge it grows from.
+            const viewport = sidebarContentLoader.useClip ? sidebarContentLoader : null
+            if (viewport) {
+                const v = viewport.mapToItem(null, 0, 0)
+                if (root.isLeftEdge) x1 = Math.min(x1, v.x + sidebarContentLoader.clipWidth)
+                else x0 = Math.max(x0, v.x + viewport.width - sidebarContentLoader.clipWidth)
+            }
+            return Qt.rect(Math.round(x0), Math.round(y0), Math.max(0, Math.round(x1 - x0)), Math.max(0, Math.round(y1 - y0)))
+        }
+        property Region nativeBlurRegion: Region {
+            x: sidebarRoot.nativeBlurRect.x
+            y: sidebarRoot.nativeBlurRect.y
+            width: sidebarRoot.nativeBlurRect.width
+            height: sidebarRoot.nativeBlurRect.height
+            radius: Math.round((sidebarRoot.nativeBlurItem?.radius ?? 0) * sidebarContentLoader.animScale)
+        }
+        // ext-background-effect regions only where the compositor takes them (Niri).
+        BackgroundEffect.blurRegion: CompositorService.blurRegions && sidebarRoot.nativeBlurItem
+            ? nativeBlurRegion : null
+
         Item {
             id: emptySidebarInputArea
             width: 0

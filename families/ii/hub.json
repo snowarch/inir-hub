@@ -1,6 +1,6 @@
 {
     "$schema": "../../schema/hub.schema.json",
-    "version": "2.35.6",
+    "version": "2.35.7",
     "changes": {
         "2.35.6": [
             "Side panels open on the first click, also after a while unused",

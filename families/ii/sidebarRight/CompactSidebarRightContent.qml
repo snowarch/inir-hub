@@ -50,6 +50,8 @@ import qs.modules.common.pill
 
 Item {
     id: root
+    // The shape SidebarHost asks Niri to blur under; only a fill that lets it through takes it.
+    readonly property Item blurSurface: bg.nativeBlurActive && bg.color.a < 0.999 ? bg : null
 
     // ── Public API (same as SidebarRightContent) ──────────────────
     property int sidebarWidth: Appearance.sizes.sidebarWidth
@@ -811,7 +813,11 @@ Item {
             const _d3 = Wallpapers.effectiveWallpaperUrl
             return WallpaperListener.wallpaperUrlForScreen(root.panelScreen)
         }
-        readonly property bool useWallpaperBackdrop: root.panelVisible
+        // Compositor blur (Settings › Effects › Panels): Niri blurs what is under this shape through the region
+        // SidebarHost publishes; dialects that draw their own material (islands, ZZZ) keep it.
+        readonly property bool nativeBlurActive: root.panelVisible && !gameModeMinimal && !islandStyle && !zzzEverywhere
+            && Appearance.useCompositorBlur("panels", Appearance.blurTopology.roundedRectangle)
+        readonly property bool useWallpaperBackdrop: root.panelVisible && !nativeBlurActive
             && auroraEverywhere
             && !inirEverywhere
             && !gameModeMinimal
@@ -859,7 +865,11 @@ Item {
         color: (gameModeMinimal || islandStyle) ? "transparent"
              : zzzEverywhere ? "transparent"
              : inirEverywhere   ? (cardStyle ? Appearance.inir.colLayer1 : Appearance.inir.colLayer0)
-             : auroraEverywhere ? ColorUtils.applyAlpha((blendedColors?.colLayer0 ?? Appearance.colors.colLayer0), 1)
+             : auroraEverywhere ? (nativeBlurActive
+                ? ColorUtils.transparentize((blendedColors?.colLayer0 ?? Appearance.colors.colLayer0),
+                    angelEverywhere ? Appearance.angel.compositorPanelTransparentize
+                        : Appearance.aurora.compositorOverlayTransparentize)
+                : ColorUtils.applyAlpha((blendedColors?.colLayer0 ?? Appearance.colors.colLayer0), 1))
              : (cardStyle ? Appearance.colors.colLayer1 : Appearance.colors.colLayer0)
 
         border.width: (gameModeMinimal || islandStyle) ? 0 : (zzzEverywhere ? 0 : (angelEverywhere ? Appearance.angel.panelBorderWidth : 1))
