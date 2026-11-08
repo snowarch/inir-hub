@@ -133,7 +133,7 @@ Item {
             }
             ColumnLayout {
                 Layout.fillWidth: true
-                spacing: Math.round(3 * IrisStyle.density)
+                spacing: Math.round(3 * IrisStyle.density) // iris-literal: title and artist sit tight, as Apple's player
                 IrisText { Layout.fillWidth: true; text: root.hasPlayer ? media.effectiveTitle : Translation.tr("Nothing playing"); color: root.ink; font.pixelSize: IrisStyle.typeHeadline; font.weight: IrisStyle.weight(Font.Bold); elide: Text.ElideRight }
                 IrisText { Layout.fillWidth: true; text: root.hasPlayer ? media.effectiveArtist : root.emptyDetail; color: !root.hasPlayer && IrisPieces.musicLaunch === "failed" && root.offersOpen ? (root.overMedia ? IrisStyle.dangerOnMedia : IrisStyle.danger) : root.inkSecondary; elide: Text.ElideRight }
             }

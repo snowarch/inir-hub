@@ -128,7 +128,7 @@ GridLayout {
         ColumnLayout {
             Layout.fillWidth: true
             Layout.alignment: Qt.AlignVCenter
-            spacing: Math.round(3 * IrisStyle.density)
+            spacing: Math.round(3 * IrisStyle.density) // iris-literal: title and artist sit tight, as Apple's player
             IrisMarquee {
                 Layout.fillWidth: true
                 text: media.effectiveTitle

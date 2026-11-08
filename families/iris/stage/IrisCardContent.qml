@@ -602,7 +602,7 @@ Item {
                             anchors.margins: Math.round(12 * root.d)
                             spacing: Math.round(4 * root.d)
                             RowLayout {
-                                spacing: Math.round(5 * root.d)
+                                spacing: Math.round(6 * root.d)
                                 MaterialSymbol {
                                     text: meter.modelData.glyph
                                     fill: 1
