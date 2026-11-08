@@ -441,16 +441,26 @@ Item {
         sourceComponent: IrisStackDots { face: root }
     }
 
-    // Wheel over a stack turns its page, one per gesture: a touchpad's tail is held off until the page has settled.
+    // Wheel over a stack turns its page, one per gesture. Each page has its own handler, so the page that arrives
+    // holds too: the tail of the gesture that brought it went on into it and turned one more (#324). The hold lasts
+    // until the wheel goes quiet, however long a touchpad's tail is.
     property real _wheel: 0
     Timer { id: wheelHold; interval: 360 }
     Timer { id: wheelReset; interval: 260; onTriggered: root._wheel = 0 }
+    readonly property bool _pageUp: root.stacked && root.widget.stackShown
+    on_PageUpChanged: {
+        root._wheel = 0
+        if (root._pageUp)
+            wheelHold.restart()
+    }
     WheelHandler {
-        enabled: root.stacked && root.widget.stackShown
+        enabled: root._pageUp
         acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
         onWheel: event => {
-            if (wheelHold.running)
+            if (wheelHold.running) {
+                wheelHold.restart()
                 return
+            }
             root._wheel += event.angleDelta.y
             wheelReset.restart()
             if (Math.abs(root._wheel) < 120)

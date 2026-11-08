@@ -1,6 +1,6 @@
 {
     "$schema": "../../schema/hub.schema.json",
-    "version": "2.33.62",
+    "version": "2.33.63",
     "changes": {
         "2.33.60": [
             "Prism Settings: rows that pick several pieces show which are on and in what order; a tap adds to the list instead of replacing it",
