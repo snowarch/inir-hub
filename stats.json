@@ -1,71 +1,80 @@
 {
- "generated": "2026-11-07T11:19:33Z",
+ "generated": "2026-11-08T11:31:14Z",
  "items": {
   "airisu": {
    "downloads": 0,
-   "up": 0,
+   "installs": 82,
+   "up": 2,
    "down": 0,
-   "discussion": ""
+   "reactions": {
+    "❤️": 1,
+    "🤯": 1,
+    "🫃": 2
+   }
   },
   "countdown": {
    "downloads": 1,
-   "up": 0,
-   "down": 0,
-   "discussion": ""
+   "installs": 8,
+   "up": 1,
+   "down": 0
   },
   "excalidraw": {
    "downloads": 1,
+   "installs": 10,
    "up": 0,
-   "down": 0,
-   "discussion": ""
+   "down": 0
   },
   "fastfetch": {
    "downloads": 1,
-   "up": 0,
-   "down": 0,
-   "discussion": ""
+   "installs": 81,
+   "up": 2,
+   "down": 0
   },
   "ii": {
    "downloads": 1,
+   "installs": 85,
    "up": 0,
-   "down": 0,
-   "discussion": ""
+   "down": 0
   },
   "iris": {
    "downloads": 1,
-   "up": 0,
+   "installs": 84,
+   "up": 1,
    "down": 0,
-   "discussion": ""
+   "reactions": {
+    "❤️": 1,
+    "🫃": 1
+   }
   },
   "moss-garden": {
    "downloads": 1,
+   "installs": 10,
    "up": 0,
-   "down": 0,
-   "discussion": ""
+   "down": 0
   },
   "paper-lantern": {
    "downloads": 1,
+   "installs": 4,
    "up": 0,
-   "down": 0,
-   "discussion": ""
+   "down": 0
   },
   "shell-line": {
    "downloads": 1,
+   "installs": 11,
    "up": 0,
-   "down": 0,
-   "discussion": ""
+   "down": 0
   },
   "tidepool": {
    "downloads": 1,
+   "installs": 11,
    "up": 0,
-   "down": 0,
-   "discussion": ""
+   "down": 0
   },
   "waffle": {
    "downloads": 1,
+   "installs": 78,
    "up": 0,
-   "down": 0,
-   "discussion": ""
+   "down": 0
   }
  }
 }
