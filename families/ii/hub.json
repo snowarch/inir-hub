@@ -1,7 +1,10 @@
 {
     "$schema": "../../schema/hub.schema.json",
-    "version": "2.35.7",
+    "version": "2.35.8",
     "changes": {
+        "2.35.8": [
+            "Runs on NixOS: every tool and app is found on your PATH, not only in /usr/bin"
+        ],
         "2.35.6": [
             "Side panels open on the first click, also after a while unused",
             "React with any emoji: one small pill opens a search, and votes and reactions show the moment people give them"

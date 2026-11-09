@@ -1834,8 +1834,8 @@ Item {
         if (CompositorService.isHyprland)
             Hyprland.dispatch("reload")
         else if (CompositorService.isNiri)
-            Quickshell.execDetached(["/usr/bin/niri", "msg", "action", "load-config-file"])
-        Quickshell.execDetached(["/usr/bin/bash", Quickshell.shellPath("scripts/restart-shell.sh")])
+            Quickshell.execDetached(["niri", "msg", "action", "load-config-file"])
+        Quickshell.execDetached(["bash", Quickshell.shellPath("scripts/restart-shell.sh")])
     }
 
     function doSettings() {
@@ -2169,7 +2169,7 @@ Item {
                 label: Translation.tr("Color Picker")
                 onClicked: {
                     GlobalStates.sidebarRightOpen = false
-                    Qt.callLater(() => ShellExec.execDetachedArgs(["/usr/bin/hyprpicker", "-a"], "Pick color"))
+                    Qt.callLater(() => ShellExec.execDetachedArgs(["hyprpicker", "-a"], "Pick color"))
                 }
             }
 

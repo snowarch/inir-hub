@@ -61,7 +61,7 @@ Item {
     // ── System timezone detection ─────────────────────────────────────
     Process {
         id: systemTzProcess
-        command: ["/usr/bin/readlink", "/etc/localtime"]
+        command: ["readlink", "/etc/localtime"]
         running: true
         stdout: StdioCollector {
             onStreamFinished: {
@@ -99,7 +99,7 @@ Item {
             const tz = tzs[i]
             script += `printf '%s|%s\\n' "${tz}" "$(TZ='${tz}' date '+${timeFmt}|%:z|%a %d %b|%j|%H')"\n`
         }
-        clockProcess.command = ["/usr/bin/bash", "-c", script]
+        clockProcess.command = ["bash", "-c", script]
         clockProcess.running = true
     }
 

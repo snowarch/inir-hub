@@ -885,10 +885,10 @@ ContentPage {
                     visible: Config.options?.material?.sidebar?.widgets?.launch ?? true
 
                     property var shortcuts: Config.options?.material?.sidebar?.widgets?.quickLaunch ?? [
-                        { icon: "folder", name: "Files", cmd: "/usr/bin/nautilus" },
-                        { icon: "terminal", name: "Terminal", cmd: "/usr/bin/kitty" },
-                        { icon: "web", name: "Browser", cmd: "/usr/bin/firefox" },
-                        { icon: "code", name: "Code", cmd: "/usr/bin/code" }
+                        { icon: "folder", name: "Files", cmd: "nautilus" },
+                        { icon: "terminal", name: "Terminal", cmd: "kitty" },
+                        { icon: "web", name: "Browser", cmd: "firefox" },
+                        { icon: "code", name: "Code", cmd: "code" }
                     ]
 
                     property int pendingIndex: -1
@@ -1422,7 +1422,7 @@ ContentPage {
 
                 Process {
                     id: sysTzProc
-                    command: ["/usr/bin/readlink", "/etc/localtime"]
+                    command: ["readlink", "/etc/localtime"]
                     running: root.activeSection === "widgets"
                     stdout: StdioCollector {
                         onStreamFinished: {
@@ -1470,7 +1470,7 @@ ContentPage {
                     let script = ""
                     for (let i = 0; i < tzs.length; i++)
                         script += `printf '%s|%s\\n' "${tzs[i]}" "$(TZ='${tzs[i]}' date '+${fmt}|%:z')"\n`
-                    liveTimeProc.command = ["/usr/bin/bash", "-c", script]
+                    liveTimeProc.command = ["bash", "-c", script]
                     liveTimeProc.running = true
                 }
 

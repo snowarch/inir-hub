@@ -498,22 +498,22 @@ JsonObject {
                 {
                     "icon": "folder",
                     "name": "Files",
-                    "cmd": "/usr/bin/nautilus"
+                    "cmd": "nautilus"
                 },
                 {
                     "icon": "terminal",
                     "name": "Terminal",
-                    "cmd": "/usr/bin/kitty"
+                    "cmd": "kitty"
                 },
                 {
                     "icon": "web",
                     "name": "Browser",
-                    "cmd": "/usr/bin/firefox"
+                    "cmd": "firefox"
                 },
                 {
                     "icon": "code",
                     "name": "Code",
-                    "cmd": "/usr/bin/code"
+                    "cmd": "code"
                 }
             ]
 

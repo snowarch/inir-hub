@@ -120,9 +120,9 @@ Item {
         if (CompositorService.isHyprland) {
             Hyprland.dispatch("reload");
         } else if (CompositorService.isNiri) {
-            Quickshell.execDetached(["/usr/bin/niri", "msg", "action", "load-config-file"]);
+            Quickshell.execDetached(["niri", "msg", "action", "load-config-file"]);
         }
-        Quickshell.execDetached(["/usr/bin/bash", Quickshell.shellPath("scripts/restart-shell.sh")]);
+        Quickshell.execDetached(["bash", Quickshell.shellPath("scripts/restart-shell.sh")]);
     }
 
     function openSettings(): void {

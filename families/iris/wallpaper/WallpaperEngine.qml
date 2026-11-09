@@ -813,7 +813,7 @@ Item {
         root.downloadingKey = entry.key
         download.total = 0
         download.received = 0
-        download.command = ["/usr/bin/bash", "-c", 'mkdir -p "$1" && [ -s "$2" ] && exit 0; '
+        download.command = ["bash", "-c", 'mkdir -p "$1" && [ -s "$2" ] && exit 0; '
             + 'echo "total $(curl -sIL -A "$4" "$3" | tr -d "\\r" | awk \'tolower($1)=="content-length:" { n = $2 } END { print n + 0 }\')"; '
             + 'curl -fsSL -A "$4" "$3" -o "$2.part" && mv "$2.part" "$2"',
             "_", folder, download.localPath, sharp ? entry.file4k : entry.file, Wallhaven.defaultUserAgent]

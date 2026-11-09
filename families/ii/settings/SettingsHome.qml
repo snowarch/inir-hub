@@ -39,7 +39,7 @@ ColumnLayout {
     Process {
         id: webWall
         property string script: ""
-        command: ["/usr/bin/bash", "-c", FileUtils.trimFileProtocol(webWall.script)]
+        command: ["bash", "-c", FileUtils.trimFileProtocol(webWall.script)]
     }
 
     // ── Wallpaper | mode, colour, style ──

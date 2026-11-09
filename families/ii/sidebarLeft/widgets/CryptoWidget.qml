@@ -117,7 +117,7 @@ Item {
     Process {
         id: priceProcess
         property string url: ""
-        command: ["/usr/bin/curl", "-s", "--max-time", "10", url]
+        command: ["curl", "-s", "--max-time", "10", url]
         stdout: StdioCollector {
             onStreamFinished: {
                 root.loading = false
@@ -165,7 +165,7 @@ Item {
         id: sparklineProcess
         property string coinId: ""
         property string url: ""
-        command: ["/usr/bin/curl", "-s", "--max-time", "10", url]
+        command: ["curl", "-s", "--max-time", "10", url]
         stdout: StdioCollector {
             onStreamFinished: {
                 if (text.length === 0) return

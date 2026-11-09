@@ -406,7 +406,7 @@ Item {
             if (!ctl.ready || root.editing) return
             if (ctl.moduleId === "devices") { root.picker = root.picker === "devices" ? "" : "devices"; return }
             if (ctl.moduleId === "record") {
-                const args = ["/usr/bin/bash", Directories.recordScriptPath]
+                const args = ["bash", Directories.recordScriptPath]
                 args.push(...(ctl.recording ? ["--stop"] : ["--fullscreen", "--sound"]))
                 Quickshell.execDetached(args)
                 RecorderStatus.scheduleQuickCheck()

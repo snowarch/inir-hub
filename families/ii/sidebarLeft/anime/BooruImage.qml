@@ -91,7 +91,7 @@ Button {
     Process {
         id: downloadProcess
         running: false
-        command: ["/usr/bin/bash", "-c", `mkdir -p '${root.previewDownloadPath}' && [ -f ${root.filePath} ] || curl -sSL '${root.imageData.preview_url ?? root.imageData.sample_url}' -o '${root.filePath}'`]
+        command: ["bash", "-c", `mkdir -p '${root.previewDownloadPath}' && [ -f ${root.filePath} ] || curl -sSL '${root.imageData.preview_url ?? root.imageData.sample_url}' -o '${root.filePath}'`]
         onExited: (exitCode, exitStatus) => {
             imageObject.source = `${previewDownloadPath}/${root.fileName}`
         }
@@ -263,7 +263,7 @@ Button {
                     action: () => {
                         const targetPath = root.imageData.is_nsfw ? root.nsfwPath : root.downloadPath;
                         const localPath = `${targetPath}/${root.fileName}`;
-                        Quickshell.execDetached(["/usr/bin/bash", "-c", 
+                        Quickshell.execDetached(["bash", "-c", 
                             `mkdir -p '${targetPath}' && curl '${root.imageData.file_url}' -o '${localPath}' && notify-send '${Translation.tr("Download complete")}' '${localPath}' -a 'Shell'`
                         ])
                         if (Config.options?.material?.sidebar?.openFolderOnDownload ?? false)
@@ -278,7 +278,7 @@ Button {
                         const targetPath = root.imageData.is_nsfw ? root.nsfwPath : root.downloadPath;
                         const localPath = `${targetPath}/${root.fileName}`;
                         const mode = Appearance.m3colors.darkmode ? "dark" : "light";
-                        Quickshell.execDetached(["/usr/bin/bash", "-c",
+                        Quickshell.execDetached(["bash", "-c",
                             `mkdir -p '${targetPath}' && curl -sSL '${root.imageData.file_url}' -o '${localPath}' && '${Directories.wallpaperSwitchScriptPath}' --image '${localPath}' --mode '${mode}'`
                         ])
                     }

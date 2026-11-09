@@ -64,7 +64,7 @@ Item {
     Process {
         id: translateProc
         command: [
-            "/usr/bin/trans",
+            "trans",
             "-no-theme",
             "-no-bidi",
             "-source",
@@ -88,7 +88,7 @@ Item {
 
     Process {
         id: getLanguagesProc
-        command: ["/usr/bin/trans", "-list-languages", "-no-bidi"]
+        command: ["trans", "-list-languages", "-no-bidi"]
         stdout: StdioCollector {
             id: langsCollector
             onStreamFinished: {

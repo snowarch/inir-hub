@@ -41,7 +41,7 @@ Item {
         if (!root.loaded || !root.ready || root.key === root.applied) return
         root.applied = root.key
         const body = JSON.stringify({ seed: root.seed, accent: root.accent, roles: JSON.parse(root.roles) })
-        Quickshell.execDetached(["/usr/bin/bash", "-c", 'mkdir -p "$(dirname "$1")" && printf \'%s\\n\' "$2" > "$1"',
+        Quickshell.execDetached(["bash", "-c", 'mkdir -p "$(dirname "$1")" && printf \'%s\\n\' "$2" > "$1"',
             "iris-surface", root.path, body])
         ThemeService.regenerateAutoTheme()
     }

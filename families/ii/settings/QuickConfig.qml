@@ -2350,7 +2350,7 @@ ContentPage {
                     buttonRadius: Appearance.zzzEverywhere ? Appearance.zzz.controlRadius : Appearance.rounding.small
                     materialIcon: "refresh"
                     mainText: Translation.tr("Reload shell")
-                    onClicked: Quickshell.execDetached(["/usr/bin/bash", Quickshell.shellPath("scripts/restart-shell.sh")])
+                    onClicked: Quickshell.execDetached(["bash", Quickshell.shellPath("scripts/restart-shell.sh")])
                 }
 
                 RippleButtonWithIcon {
