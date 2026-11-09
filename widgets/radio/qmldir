@@ -1,0 +1,3 @@
+singleton Radio 1.0 Radio.qml
+RadioBrowser 1.0 RadioBrowser.qml
+RadioPlayer 1.0 RadioPlayer.qml
