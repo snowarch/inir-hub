@@ -28,7 +28,7 @@
         "live.metahub.space",
         "m.media-amazon.com"
     ],
-    "minInir": "2.33.0",
+    "minInir": "3.0.0",
     "provides": "modules/media-corner",
     "preview": "preview.webp"
 }
