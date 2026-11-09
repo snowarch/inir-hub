@@ -9,7 +9,9 @@ file before writing anything. Claude Code loads it through `CLAUDE.md`; any othe
 ## How you work
 
 1. **Pick the kind** from the table in `CONTRIBUTING.md › What to make`. A fix to Material (`ii`), iRiS or Waffle is
-   an issue, not a pull request; a feature for one of them is a component worn with it.
+   an issue, not a pull request; what people use is a widget (a face in each family: Material's shelf, the iRiS
+   Island, Waffle's panel); a component is only work with no face, and never the way a person opens anything. Before the first file, write where a person
+   finds and opens it with the mouse in each family; if the kind gives it no such place, the kind is wrong.
 2. **Start from the template:** `inir hub new <kind> <id> --author <github-handle>`. The id is the folder name.
 3. **Read before writing:** the template it gave you, the example of the kind (`widgets/countdown`,
    `components/fastfetch`, `designs/airisu`, `themes/tidepool`, `iris-themes/moss-garden`, `webapps/excalidraw`), and the
@@ -22,7 +24,8 @@ file before writing anything. Claude Code loads it through `CLAUDE.md`; any othe
    reshape code only to slip past a rule (a colour hidden in a variable, an import through another file); the rule
    is what a reviewer reads for, and the pull request comes back.
 5. **Try it running**, the way people get it: `inir hub build && INIR_HUB_SOURCES=$PWD/dist inir hub install <id>`
-   (a component: `inir restart` once), then every state (empty, loading, failed, full, light and dark, small and
+   (a component: `inir restart` once), then find and open it from the Hub page with the mouse, as someone who never
+   opened a terminal, in every family; then every state (empty, loading, failed, full, light and dark, small and
    large scale) in every family it is worn with. `inir logs --issues` shows nothing new from it. Then
    `INIR_HUB_SOURCES=$PWD/dist inir hub remove <id>`. If you cannot see the screen, tell the person exactly what to
    open and look at; never claim it works from the check alone.

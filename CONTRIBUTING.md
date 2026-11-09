@@ -11,21 +11,26 @@ QML, helpers and each kind so they never break the shell.
 
 ## What to make
 
+Pick by how a person reaches it. People don't type commands or edit keybinds: everything they use is found and
+opened with the mouse, in every family, from a place that family already has. That place is a widget: the Material
+desktop's widget shelf, the iRiS Island and Waffle's Widgets panel, one item with a face for each. A component has no
+button of its own anywhere, so nothing a person opens, reads or plays lives only in a component; `inir <id> toggle`
+and a keybind are extras for people who want them, never the way in.
+
 | You want | Make | Folder |
 | --- | --- | --- |
-| A widget for the Material desktop, the iRiS Island or Waffle's Widgets panel | a widget | `widgets/<id>/` |
+| Something people see, open or use: a player, a card, a tool, a feed (like a radio or a countdown) | a widget, with a face for each family | `widgets/<id>/` |
 | Colours for Material, Waffle and the apps iNiR themes | a colour theme | `themes/<id>/` |
 | A whole iRiS look: material, colour, shape, motion | an iRiS theme | `iris-themes/<id>/` |
 | Another iRiS: its own colour, type, shapes, edges, motion and Island face over iRiS's components (like AIRISU) | a Design | `designs/<id>/` |
 | A website as a tab in Material's sidebar | a web app | `webapps/<id>/` |
-| A feature of its own for the desktop: a panel, a corner, a tool, with a keybind (like an anime finder) | a component | `components/<id>/` |
-| Something the shell runs or sets up with no panel of its own (like `fastfetch`) | a component | `components/<id>/` |
+| Work the shell does while nobody looks (a scrobbler, a sync) or sets up once (like `fastfetch`); what people see of it is a widget | a component | `components/<id>/` |
 | A fix to Material, iRiS or Waffle | an issue | [open one](https://github.com/snowarch/inir-hub/issues) |
 
 Material (`ii`), iRiS and Waffle are the desktops every iNiR install gets. Their maintainers change them; a pull request
-from outside that touches `families/` is refused by CI. What you want to add to one is a component worn with it
+from outside that touches `families/` is refused by CI. What you want to add to one is a widget, or a component worn with it
 ([Adding to a family](#adding-to-a-family)): it sits beside the family, so the family people installed stays exactly
-as it was, and removing your component takes all of it away.
+as it was, and removing your item takes all of it away. Never change a family or the shell to make room for an item.
 
 ## What an item may touch
 
@@ -228,7 +233,8 @@ A web app that ships scripts to run inside the page declares `inject`.
 
 ## Adding to a family
 
-A feature for Material, iRiS or Waffle is a component worn with it. `inir hub new component my-corner` gives you one:
+What people use goes in a widget (above). Work beside a family that has no face, or a window too big for any widget, is a
+component worn with it. `inir hub new component my-corner` gives you one:
 
 - **`plugin.json`** names its surface in `"parts": {"panel": "Panel.qml"}` and the families it is worn with in
   `"families": ["iris"]` (leave the list empty for every family). The shell loads the panel once the family's own
@@ -240,7 +246,8 @@ A feature for Material, iRiS or Waffle is a component worn with it. `inir hub ne
   (`qs.modules.common`: `Appearance.*`, `StyledText`, `MaterialSymbol`, `RippleButton`).
 - **Its options live in its file**, a `FileView` with a `JsonAdapter` on `Directories.pluginFile("<id>")`, as the
   template does.
-- **People open it** with `inir <id> toggle`, bound to a key in niri's config; the README says which call does what.
+- **People reach it with the mouse**, from a widget of yours with a face in each family it is worn with. The IPC call
+  and a niri keybind are extras the README lists. A component nobody can reach without a terminal is not finished.
 - **Every string is translated**, its IPC documented, its page in `docs/<id>/`: the rules of
   [changing a family](#changing-a-family) below hold for a component too.
 

@@ -16,8 +16,9 @@ Removing it takes all of it away and leaves the person's desktop and settings ex
 - `Panel.qml`: a `Scope` the shell loads once the family's own panels are up, while one of its families is active.
   It holds the window (inside a `LazyLoader` on `open`) and the `IpcHandler` (target: the id, or starting with it).
 - `qmldir` in every folder of types, listing each one.
-- `README.md` names each IPC call (`inir <id> toggle`) and a keybind for niri:
-  `Mod+Shift+P { spawn "inir" "<id>" "toggle"; }`.
+- People never reach a component by a command: what they open, read or play is a widget's face in each family
+  (`hub-widgets.md`). A window only a terminal or keybind opens is unfinished. The README lists the IPC calls and a
+  niri keybind (`Mod+Shift+P { spawn "inir" "<id>" "toggle"; }`) as extras.
 
 ## State and files
 

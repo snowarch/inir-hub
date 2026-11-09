@@ -12,6 +12,9 @@ Read `AGENTS.md` first if you have not this session. The steps below are in orde
 - Ask the person, in one message, only what you can't decide: what it shows or does, which families it is for
   (Material, iRiS, Waffle, all), and for a feature that fetches anything, the source.
 - Pick the kind (`CONTRIBUTING.md › What to make`). A change to a family itself is an issue: say so and stop.
+- Before the first file, write in one line per family where a person finds it and opens it with the mouse (Material's
+  widget shelf, the iRiS Island, Waffle's Widgets panel). If the kind you picked gives it no such place, the kind is
+  wrong: what people use is a widget. Never change a family or the base to fit the item.
 - Check the source: an official API or a site whose terms allow the use, no key you would have to ship. If none,
   say so and stop.
 - Plan the first version so it is useful and under 2500 lines of code: one page, one source. Write the plan as a
@@ -53,7 +56,8 @@ inir hub build && INIR_HUB_SOURCES=$PWD/dist inir hub install <id>
 inir restart        # components only: their panel loads at start
 ```
 
-Go through, in each family it is worn with: open and close it (keybind and IPC), empty, loading, failed (no network,
+Go through, in each family it is worn with: reach it from the Hub page with the mouse as someone who never opened a
+terminal, open and close it there (IPC and keybind last, as extras), empty, loading, failed (no network,
 a missing program), full, long text, light and dark, small and large scale. Then:
 
 ```sh
