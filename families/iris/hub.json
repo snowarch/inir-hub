@@ -1,7 +1,10 @@
 {
     "$schema": "../../schema/hub.schema.json",
-    "version": "2.33.68",
+    "version": "2.33.69",
     "changes": {
+        "2.33.69": [
+            "Prism: every panel's black takes a soft haze of the spectrum from one corner, and each place can wear Prism on its own (Settings › Colour › Look › Places)"
+        ],
         "2.33.68": [
             "A desktop widget left against the frame joins it as one body, and lets go when you pull it away (Settings › Surfaces › Frame)",
             "A fifth look, Prism: black and white controls with the spectrum at each level"

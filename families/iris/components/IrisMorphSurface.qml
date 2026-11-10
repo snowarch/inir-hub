@@ -92,6 +92,8 @@ Item {
         : !root.glass || root.surfaceMaterial === "solid" || (!IrisStyle.glassy && root.surfaceMaterial !== "glass") ? "solid"
         : IrisStyle.glassCompositor && root.compositorBlurred ? "compositor" : "wallpaper"
     default property alias content: contentHost.data
+    // Whether a look may light this body (Prism's haze): panels do, a body too short to be one never.
+    property bool hazed: root.height >= 160 * IrisStyle.density
     readonly property real progress: root.presentation
     readonly property var bodyRect: {
         void (chassis.x + chassis.y + chassis.width + chassis.height + chassis.radius + root.x + root.y)
@@ -401,6 +403,18 @@ Item {
             light: root.light
             from: root.lightFrom
             presence: Math.max(0, Math.min(1, root.presentation)) * (0.4 + 0.6 * root.energy)
+        }
+
+        // Prism: a panel's black body takes the spectrum's haze from the corner across from its light (the chassis
+        // clips it). Bars and capsules stay plain.
+        Loader {
+            anchors.fill: parent
+            active: root.hazed && root.presentation > 0 && IrisStyle.lookOf(root) === "prism"
+            opacity: Math.max(0, Math.min(1, root.presentation))
+            sourceComponent: IrisPrismHaze {
+                radius: 0
+                from: root.lightFrom === "bottom" ? "topRight" : root.lightFrom === "right" ? "bottomLeft" : "bottomRight"
+            }
         }
 
         Item {

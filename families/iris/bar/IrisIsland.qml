@@ -1989,6 +1989,17 @@ Item {
         radius: Math.min((root.vertical ? Math.min(chassis.across, chassis.height) : chassis.width) / 2, chassis.restRadius
             + (chassis.openRadius - chassis.restRadius) * Math.min(1, chassis.presentation))
 
+        // Prism: the open body takes the spectrum's haze from the corner away from its edge (the chassis clips it).
+        Loader {
+            anchors.fill: parent
+            active: IrisStyle.lookOf(root) === "prism" && chassis.presentation > 0
+            opacity: Math.min(1, chassis.presentation)
+            sourceComponent: IrisPrismHaze {
+                radius: 0
+                from: root.bottomEdge ? "topRight" : root.rightEdge ? "bottomLeft" : "bottomRight"
+            }
+        }
+
         HoverHandler {
             id: chassisHover
             onPointChanged: root.trackDwell(point.scenePosition)

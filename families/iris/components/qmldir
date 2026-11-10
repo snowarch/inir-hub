@@ -62,6 +62,7 @@ IrisSkin 1.0 IrisSkin.qml
 IrisDesignProof 1.0 IrisDesignProof.qml
 IrisBodyShadow 1.0 IrisBodyShadow.qml
 IrisBodyLight 1.0 IrisBodyLight.qml
+IrisPrismHaze 1.0 IrisPrismHaze.qml
 IrisLabel 1.0 IrisLabel.qml
 IrisDotText 1.0 IrisDotText.qml
 IrisDotStrip 1.0 IrisDotStrip.qml
