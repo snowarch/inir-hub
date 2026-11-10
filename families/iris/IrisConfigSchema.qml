@@ -770,7 +770,7 @@ JsonObject {
         property int thickness: 10
         property int radius: 22
         // A desktop widget left against a wall of the frame becomes one body with it, as a bubble does.
-        property bool widgets: true
+        property bool widgets: false
         // "open" | "tucked": how a joined widget rests. Tucked, it folds into a tab on its wall until the pointer
         // calls it. A widget's own "iris.frame" overrides this.
         property string widgetsRest: "open"

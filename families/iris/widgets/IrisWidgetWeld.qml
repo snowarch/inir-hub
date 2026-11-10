@@ -28,7 +28,7 @@ Item {
     // Arranging happens on the desktop, with its grid and sheets: a widget joins once it is left there.
     readonly property bool joinsFrame: IrisFrame.framed && weld.can && (weld.visible || weld.withheld)
         && !GlobalStates.widgetEditMode && !(weld.widget?.isDragging ?? false)
-        && Boolean(Config.options?.iris?.surround?.widgets ?? true) && Boolean(weld.widget?.powerActive ?? true)
+        && Boolean(Config.options?.iris?.surround?.widgets ?? false) && Boolean(weld.widget?.powerActive ?? true)
     readonly property real reach: Math.round(8 * IrisStyle.density)
     readonly property real neckMost: Math.round(72 * IrisStyle.density)
     readonly property point origin: {
