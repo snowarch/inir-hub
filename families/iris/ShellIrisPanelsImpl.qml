@@ -18,6 +18,7 @@ import qs.modules.iris.sidebar
 import qs.modules.iris.orbit
 import qs.modules.iris.osk
 import qs.modules.shared.background
+import qs.modules.shared.background.widgets
 import qs.modules.shared.lock
 import qs.modules.iris.state
 import qs.modules.iris.frame
@@ -94,6 +95,15 @@ Item {
     }
 
     IrisAppsSync {}
+
+    // A Design that decides the widgets' design wears it over the person's pick; it counts only while iRiS is the active
+    // family, so leaving iRiS gives theirs back with nothing written on the way out.
+    Binding {
+        target: DesktopWidgetDesign
+        property: "worn"
+        value: ({ family: "iris", design: IrisDesign.widgets })
+        restoreMode: Binding.RestoreNone
+    }
 
     // Orbit's hot corner: a few pixels in one screen corner, on Top, only while it is on and something can use it.
     LazyLoader {

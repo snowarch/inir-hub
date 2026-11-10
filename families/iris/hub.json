@@ -5,7 +5,9 @@
         "2.33.66": [
             "Settings follow the compositor you run: Niri shows what Niri does, Umbriel gets its own pages (layouts drawn as pictures, tabs, title bars, glass, effects you press on a drawn desktop, hot corners, HDR and colour depth)",
             "Display: drag your screens to where they stand, pick a scale from miniatures of your own screen, and keep or undo a change within 15 seconds",
-            "Prism Settings: the side column folds by itself on pages that need the width, with a button to open or close it"
+            "Prism Settings: the side column folds by itself on pages that need the width, with a button to open or close it",
+            "Prism Settings: the open page is named in your accent on a quiet plate of it, so where you are reads at a glance",
+            "A Design can bring the faces of your desktop widgets while it is on (Prism does); taking it off gives yours back"
         ],
         "2.33.65": [
             "Runs on NixOS: every tool and app is found on your PATH, not only in /usr/bin"

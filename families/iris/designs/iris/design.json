@@ -38,6 +38,7 @@
         },
         "look": {
             "look": "apple",
+            "widgets": "",
             "traits": {}
         }
     }
