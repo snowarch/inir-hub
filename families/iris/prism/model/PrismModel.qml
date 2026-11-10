@@ -169,6 +169,18 @@ Singleton {
         }
         return out
     }
+    // A page's groups with every row this machine allows, shown now or not: where a long page splits (IrisOptions.fits).
+    function layoutOf(id: string): var {
+        const _ = root.revision
+        const out = []
+        for (const row of root.rows) {
+            if (row.page !== id || !(row.virtual || IrisOptions.fits(row.spec))) continue
+            let group = out.find(entry => entry.title === row.section)
+            if (!group) { group = { title: row.section, rows: [] }; out.push(group) }
+            group.rows.push(row)
+        }
+        return out
+    }
     // A long page is read one group at a time, picked from a strip under the hero; a short one stacks its charts.
     function paged(sections: var): bool {
         // Past about two screens of rows a page is read in parts; the group count alone never splits it.

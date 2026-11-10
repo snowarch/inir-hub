@@ -397,13 +397,18 @@ QtObject {
     function cornersUsed(): bool {
         return ["top-left", "top-right", "bottom-left", "bottom-right"].some(corner => String(CompositorConfig.value({ comp: "corners", key: corner, fallback: "" })).length > 0)
     }
-    function shown(spec: var): bool {
+    // What the worn Design and the compositor in use allow, whatever other options say: a long Prism page splits
+    // by these rows, so a switch that shows or hides its neighbours never moves the page under the reader (his 11-10).
+    function fits(spec: var): bool {
         // What the worn Design decides for itself is not offered while it is worn: a locked row was one more thing to read.
         const paths = spec.bundle ?? (spec.path ? [String(spec.path)] : [])
         if (paths.length > 0 && paths.every(path => IrisDesign.owns(path))) return false
-        if (spec.showIf && !spec.showIf()) return false
         // A compositor row shows only where the compositor in use can do it (CompositorConfig.has).
-        if (spec.comp && !CompositorConfig.has(String(spec.comp), String(spec.key))) return false
+        return !spec.comp || CompositorConfig.has(String(spec.comp), String(spec.key))
+    }
+    function shown(spec: var): bool {
+        if (!root.fits(spec)) return false
+        if (spec.showIf && !spec.showIf()) return false
         const when = String(spec.visibleWhen ?? "")
         if (when.length === 0) return true
         const negated = when.startsWith("!")

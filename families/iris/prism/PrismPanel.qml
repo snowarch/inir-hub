@@ -60,12 +60,15 @@ Item {
     // A long page is read in parts of a screenful or two (whole groups, about 24 rows each); a short one stacks every
     // group. Either way the sidebar's index under the page names each group and follows the reading, and a part ends
     // on the next one (his 11-07: never looked for sideways, never one two-row group alone on a screen).
-    readonly property bool paged: PrismModel.paged(root.sections)
+    // Where it splits is read from every row the page may show, so a switch that shows or hides its neighbours
+    // never moves a group into another part under the reader (his 11-10: a toggle threw the page elsewhere).
+    readonly property var layout: root.sections.length === 0 ? [] : PrismModel.layoutOf(root.page.pageId)
+    readonly property bool paged: PrismModel.paged(root.layout)
     readonly property var parts: {
         if (!root.paged) return [root.sections]
         const out = []
         let part = [], rows = 0
-        for (const section of root.sections) {
+        for (const section of root.layout) {
             const n = section.rows.length
             if (part.length > 0 && rows + n > 28) { out.push(part); part = []; rows = 0 }
             part.push(section)
@@ -73,7 +76,9 @@ Item {
             if (rows >= 20) { out.push(part); part = []; rows = 0 }
         }
         if (part.length > 0) out.push(part)
-        return out
+        // Each part shows its groups as they read now; a group with nothing to show drops out, its neighbours stay.
+        return out.map(titles => root.sections.filter(section => titles.some(entry => entry.title === section.title)))
+            .filter(shown => shown.length > 0)
     }
     readonly property string group: {
         const chosen = String(PrismState.groupOf[root.page.pageId] ?? "")
