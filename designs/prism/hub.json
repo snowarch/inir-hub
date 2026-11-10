@@ -1,0 +1,28 @@
+{
+    "$schema": "../../schema/hub.schema.json",
+    "version": "1.0.0",
+    "changes": {
+        "1.0.0": [
+            "The whole shell in Prism's language: the near-black of Prism Settings, white solids, squircle marks and hairlines of light",
+            "The Island at rest: a thread of white light meets the hour and leaves it as the spectrum",
+            "Desktop widgets wear their Prism faces while it is on"
+        ]
+    },
+    "summary": "iRiS in Prism's language: near-black, white solids, the hour as a prism",
+    "description": "A Design for iRiS that dresses the whole shell in the language of Prism, iRiS's Settings: the three near-black neutrals and Apple's label inks, white solids for what is chosen, squircle marks, rows numbered like a chart, a hairline of light on every edge and calm motion. At rest the Island's hour is the prism: white light enters, the spectrum leaves. Desktop widgets wear their Prism faces of frosted glass while it is on; your accent still marks where you are.",
+    "authors": [
+        "snowarch"
+    ],
+    "license": "GPL-3.0-only",
+    "tags": [
+        "design",
+        "prism",
+        "dark",
+        "spectrum"
+    ],
+    "permissions": [],
+    "minInir": "3.0.2",
+    "provides": "modules/prism",
+    "requires": ["iris"],
+    "preview": "preview.webp"
+}
