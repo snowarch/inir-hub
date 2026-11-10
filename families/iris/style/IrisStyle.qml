@@ -1228,7 +1228,10 @@ QtObject {
     }
     readonly property real shadowThrough: root.glassy ? 0.4 : 1
     readonly property real shadowLight: root.ink ? 0.5 : root.light ? 0.55 : 1
-    readonly property color shadow: root.glowing(Math.min(0.9, 0.55 * root.bodyRecipe.cast * IrisDesign.shadow * root.tweak("shadow", 0, 1.6)) * root.shadowThrough * root.shadowLight)
+    // Umbriel blurs every pixel of a shell surface above its rule's alpha threshold (0.1, 15-umbriel.sh): a shadow over
+    // it would blur a ring outside each body, so under its blur the shadow stays below that line.
+    readonly property real shadowCeiling: root.glassCompositor && CompositorService.isUmbriel ? 0.09 : 0.9
+    readonly property color shadow: root.glowing(Math.min(root.shadowCeiling / (1 + 0.4 * root.glow), Math.min(0.9, 0.55 * root.bodyRecipe.cast * IrisDesign.shadow * root.tweak("shadow", 0, 1.6)) * root.shadowThrough * root.shadowLight))
     readonly property color onMedia: "#ffffff"
     readonly property color onMediaSecondary: ColorUtils.applyAlpha(root.onMedia, 0.72)
     // The visualizer's one look (Now Playing › Visualizer): its drawing, how many bands, and whose colour.
