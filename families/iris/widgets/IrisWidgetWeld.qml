@@ -2,7 +2,10 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import Quickshell
+import qs
 import qs.modules.common
+import qs.modules.shared.background.widgets
+import qs.modules.iris.components
 import qs.modules.iris.field
 import qs.modules.iris.frame
 import qs.modules.iris.style
@@ -11,6 +14,7 @@ import qs.modules.iris.style
 // as a bubble is. The weld comes from where the widget stands: pushed as near the wall as it goes it joins, pulled away
 // it lets go. Its body is then the frame's material, drawn by a field of its own under the content; whoever drew the
 // body before (a plate, a face, a Prism slab) steps aside while `welded`. Fills the body it stands in for.
+// The body itself is an IrisWeldBody under the widget, in the desktop's coordinates; every weld is listed in IrisWelds.
 Item {
     id: weld
 
@@ -19,7 +23,10 @@ Item {
     // The body would be drawn at all (a plate that is on, a face that is not a Design's print).
     property bool can: true
 
-    readonly property bool joinsFrame: IrisFrame.framed && weld.can && weld.visible
+    readonly property string outputName: weld.widget?.outputName ?? ""
+    // Held back by the weld itself (tucked, or kept by the frame's window in the overview) it is still joined.
+    readonly property bool withheld: (weld.widget?.presence ?? 1) < 1
+    readonly property bool joinsFrame: IrisFrame.framed && weld.can && (weld.visible || weld.withheld)
         && Boolean(Config.options?.iris?.surround?.widgets ?? true) && Boolean(weld.widget?.powerActive ?? true)
     readonly property real reach: Math.round(8 * IrisStyle.density)
     readonly property real neckMost: Math.round(72 * IrisStyle.density)
@@ -85,60 +92,107 @@ Item {
     Component.onCompleted: weld.hold()
     readonly property var reachOut: weld.held
 
+    // How it rests on the frame (`iris.surround.widgetsRest`, or its own `iris.frame`): open, or tucked into a tab on
+    // its wall until the pointer comes for it.
+    readonly property string restMode: {
+        const own = String(weld.widget?._readConfigKey("iris.frame") ?? "")
+        return own === "open" || own === "tucked" ? own : String(Config.options?.iris?.surround?.widgetsRest ?? "open")
+    }
+    readonly property bool stows: weld.wanted && weld.restMode === "tucked" && !GlobalStates.widgetEditMode
+        && !(weld.widget?.isDragging ?? false)
+    property bool called: false
+    readonly property bool pointed: ownHover.hovered || (bodyLoader.item?.pointed ?? false)
+    onPointedChanged: {
+        if (weld.pointed) { leave.stop(); weld.called = true }
+        else leave.restart()
+    }
+    Timer { id: leave; interval: 320; onTriggered: weld.called = weld.pointed }
+    HoverHandler { id: ownHover }
+    IrisSpring {
+        id: tucking
+        surface: "widgets"
+        intent: "move"
+        animate: IrisStyle.motionEnabled
+        to: weld.stows && !weld.called ? 1 : 0
+    }
+    readonly property real tuck: Math.max(0, Math.min(1, tucking.value))
+    readonly property real shown: Math.max(0, Math.min(1, 1 - weld.tuck / 0.35))
+    readonly property string glyph: DesktopWidgetRegistry.entry(DesktopWidgetRegistry.baseKey(weld.widget?.configEntryName ?? ""))?.icon ?? "widgets"
+
+    // The body in the desktop's coordinates: the widget's own box, or the tab it tucks into on its first wall.
+    readonly property string tuckSide: weld.onLeft ? "left" : weld.onRight ? "right" : weld.onTop ? "top" : "bottom"
+    readonly property rect rest: {
+        const x = weld.origin.x, y = weld.origin.y, w = weld.width, h = weld.height, t = weld.tuck
+        if (t <= 0) return Qt.rect(x, y, w, h)
+        const deep = Math.round(26 * IrisStyle.density), along = Math.round(64 * IrisStyle.density)
+        const upright = weld.tuckSide === "left" || weld.tuckSide === "right"
+        const tw = upright ? deep : Math.min(w, along), th = upright ? Math.min(h, along) : deep
+        const tx = weld.tuckSide === "right" ? x + w - tw : upright ? x : x + (w - tw) / 2
+        const ty = weld.tuckSide === "bottom" ? y + h - th : upright ? y + (h - th) / 2 : y
+        return Qt.rect(x + (tx - x) * t, y + (ty - y) * t, w + (tw - w) * t, h + (th - h) * t)
+    }
+    readonly property rect box: {
+        const r = weld.rest
+        const left = r.x - weld.reachOut.left * weld.meltLeft, top = r.y - weld.reachOut.top * weld.meltTop
+        return Qt.rect(left, top, r.x + r.width + weld.reachOut.right * weld.meltRight - left,
+            r.y + r.height + weld.reachOut.bottom * weld.meltBottom - top)
+    }
+    // Where each wall's inner line runs beside the widget.
+    readonly property var walls: ({ left: weld.origin.x - weld.reachOut.left, top: weld.origin.y - weld.reachOut.top,
+        right: weld.origin.x + weld.width + weld.reachOut.right, bottom: weld.origin.y + weld.height + weld.reachOut.bottom })
+    readonly property real bodyRadius: weld.radius + (Math.min(weld.radius, Math.round(13 * IrisStyle.density)) - weld.radius) * weld.tuck
+    // The fillet's radius is the body's own round, as a line of bubbles melted into a wall (IrisStyle.edgeFuseFor):
+    // the corner beside the wall turns into one S of two equal arcs.
+    readonly property real fuse: Math.max(8, Math.round(weld.bodyRadius * 4 * (1 - Math.SQRT1_2)))
+    // The welds near enough for their fillets to meet this one's: drawn as one silhouette, each its own half.
+    readonly property var neighbours: {
+        const near = weld.fuse * 4 + Math.round(48 * IrisStyle.density)
+        const mine = weld.box
+        return IrisWelds.on(weld.outputName).filter(other => {
+            if (other === weld) return false
+            const o = other.box
+            return Math.max(o.x - mine.x - mine.width, mine.x - o.x - o.width) < near
+                && Math.max(o.y - mine.y - mine.height, mine.y - o.y - o.height) < near
+        })
+    }
+    Component.onDestruction: IrisWelds.remove(weld)
+    onMeltChanged: if (weld.melt > 0) IrisWelds.add(weld); else IrisWelds.remove(weld)
+
+    // The compositor's overview zooms the desktop away; the frame's window keeps this widget on the frame meanwhile
+    // (IrisWeldsOverlay), drawn from one picture of it taken as the overview opens.
+    property var shot: null
+    readonly property bool inOverview: IrisWelds.overview
+    onInOverviewChanged: {
+        if (!weld.inOverview) { weld.shot = null; return }
+        if (weld.welded && weld.widget) weld.widget.grabToImage(result => { if (weld.inOverview) weld.shot = result })
+    }
+    readonly property bool lent: weld.inOverview && weld.shot !== null
+    Binding {
+        target: weld.widget
+        property: "presence"
+        value: weld.lent ? 0 : weld.shown
+        when: weld.wanted || weld.lent
+        restoreMode: Binding.RestoreBindingOrValue
+    }
+
     Loader {
-        id: cut
+        id: bodyLoader
         active: weld.melt > 0
-        opacity: weld.cover
-        // The fillet's radius is the widget's own round, as a line of bubbles melted into a wall (IrisStyle.edgeFuseFor):
-        // the corner beside the wall turns into one S of two equal arcs.
-        readonly property real fuse: Math.max(8, Math.round(weld.radius * 4 * (1 - Math.SQRT1_2)))
-        // Room for the fillets beside the body; cut at each joined wall, where the frame itself stands above.
-        readonly property real room: Math.round(cut.fuse * 2 + 24 * IrisStyle.density)
-        readonly property real cutLeft: weld.meltLeft > 0 ? -weld.reachOut.left : -cut.room
-        readonly property real cutTop: weld.meltTop > 0 ? -weld.reachOut.top : -cut.room
-        readonly property real cutRight: weld.width + (weld.meltRight > 0 ? weld.reachOut.right : cut.room)
-        readonly property real cutBottom: weld.height + (weld.meltBottom > 0 ? weld.reachOut.bottom : cut.room)
-        x: cut.cutLeft
-        y: cut.cutTop
-        width: cut.cutRight - cut.cutLeft
-        height: cut.cutBottom - cut.cutTop
-        sourceComponent: Item {
-            clip: true
-            IrisField {
-                id: field
-                readonly property real pad: cut.room + weld.neckMost
-                readonly property real deep: field.pad * 2
-                x: -field.pad - cut.cutLeft
-                y: -field.pad - cut.cutTop
-                width: weld.width + field.pad * 2
-                height: weld.height + field.pad * 2
-                framed: false
-                compositorAllowed: false
-                smoothing: cut.fuse
-                sceneOrigin: Qt.point(weld.origin.x - field.pad, weld.origin.y - field.pad)
-                sceneSize: Qt.size(weld.sceneWidth, weld.sceneHeight)
-                shapes: {
-                    const pad = field.pad, deep = field.deep
-                    // The body reaches for its walls; each wall is a slab past the cut for the body to join.
-                    const left = pad - weld.reachOut.left * weld.meltLeft
-                    const top = pad - weld.reachOut.top * weld.meltTop
-                    const right = pad + weld.width + weld.reachOut.right * weld.meltRight
-                    const bottom = pad + weld.height + weld.reachOut.bottom * weld.meltBottom
-                    const out = [], walls = []
-                    const wall = (id, melt, x, y, width, height) => {
-                        if (melt <= 0) return
-                        out.push({ id: id, x: x, y: y, width: width, height: height, radius: 0, paints: true, fuse: cut.fuse * melt })
-                        walls.push(id)
-                    }
-                    wall("wallLeft", weld.meltLeft, pad - weld.reachOut.left - deep, -deep, deep, field.height + deep * 2)
-                    wall("wallRight", weld.meltRight, pad + weld.width + weld.reachOut.right, -deep, deep, field.height + deep * 2)
-                    wall("wallTop", weld.meltTop, -deep, pad - weld.reachOut.top - deep, field.width + deep * 2, deep)
-                    wall("wallBottom", weld.meltBottom, -deep, pad + weld.height + weld.reachOut.bottom, field.width + deep * 2, deep)
-                    out.push({ id: "widget", x: left, y: top, width: right - left, height: bottom - top, radius: weld.radius,
-                        fuse: cut.fuse * weld.melt, joins: walls.slice(0, 2) })
-                    return out
-                }
+        parent: weld.widget?.parent ?? weld
+        z: -1
+        sourceComponent: IrisWeldBody {
+            weld: weld
+            opacity: weld.lent ? 0 : weld.cover
+            visible: opacity > 0
+            readonly property bool pointed: tabHover.hovered
+            Item {
+                x: weld.box.x - parent.x
+                y: weld.box.y - parent.y
+                width: weld.box.width
+                height: weld.box.height
+                HoverHandler { id: tabHover; enabled: weld.stows }
             }
         }
     }
 }
+

@@ -2581,5 +2581,9 @@
   "The + that pins apps and the gear that opens Settings.": "Uygulama sabitleyen + ve Ayarlar'ı açan dişli.",
   "Black and white, light breaking at each level.": "Siyah ve beyaz, ışık her seviyede kırılır.",
   "Widgets join the frame": "Widget'lar çerçeveyle birleşir",
-  "A desktop widget left against the frame becomes one body with it. Pull it away to let go.": "Çerçeveye yaslanan bir masaüstü widget'ı onunla tek gövde olur. Ayırmak için uzaklaştırın."
+  "A desktop widget left against the frame becomes one body with it. Pull it away to let go.": "Çerçeveye yaslanan bir masaüstü widget'ı onunla tek gövde olur. Ayırmak için uzaklaştırın.",
+  "Joined widgets rest": "Birleşik widget'ların duruşu",
+  "Open keeps them whole. Tucked folds each into a tab on the frame until you point at it.": "Açık, onları bütün bırakır. Katlı, üzerine gelene kadar her birini çerçevede bir sekmeye katlar.",
+  "Tucked": "Katlı",
+  "On the frame": "Çerçevede"
 }

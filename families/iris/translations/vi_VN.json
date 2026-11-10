@@ -2581,5 +2581,9 @@
   "The + that pins apps and the gear that opens Settings.": "Dấu + để ghim ứng dụng và bánh răng mở Cài đặt.",
   "Black and white, light breaking at each level.": "Đen và trắng, ánh sáng tán sắc ở mỗi mức.",
   "Widgets join the frame": "Widget nối liền với khung",
-  "A desktop widget left against the frame becomes one body with it. Pull it away to let go.": "Widget màn hình đặt sát khung sẽ liền thành một khối với khung. Kéo ra xa để tách."
+  "A desktop widget left against the frame becomes one body with it. Pull it away to let go.": "Widget màn hình đặt sát khung sẽ liền thành một khối với khung. Kéo ra xa để tách.",
+  "Joined widgets rest": "Trạng thái nghỉ của widget đã ghép",
+  "Open keeps them whole. Tucked folds each into a tab on the frame until you point at it.": "Mở giữ chúng nguyên vẹn. Gập thu mỗi widget thành một thẻ trên khung cho đến khi bạn trỏ vào.",
+  "Tucked": "Gập",
+  "On the frame": "Trên khung"
 }

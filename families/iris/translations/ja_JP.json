@@ -2581,5 +2581,9 @@
   "The + that pins apps and the gear that opens Settings.": "アプリを固定する＋と、設定を開く歯車。",
   "Black and white, light breaking at each level.": "白と黒。各レベルで光が分かれます。",
   "Widgets join the frame": "ウィジェットをフレームに結合",
-  "A desktop widget left against the frame becomes one body with it. Pull it away to let go.": "フレームに寄せたデスクトップウィジェットはフレームと一体になります。離すと元に戻ります。"
+  "A desktop widget left against the frame becomes one body with it. Pull it away to let go.": "フレームに寄せたデスクトップウィジェットはフレームと一体になります。離すと元に戻ります。",
+  "Joined widgets rest": "結合したウィジェットの待機状態",
+  "Open keeps them whole. Tucked folds each into a tab on the frame until you point at it.": "「開く」はそのまま表示します。「たたむ」はポインターを合わせるまでフレーム上のタブにたたみます。",
+  "Tucked": "たたむ",
+  "On the frame": "フレーム上"
 }

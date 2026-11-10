@@ -1,5 +1,6 @@
 module qs.modules.iris.frame
 singleton IrisFrame 1.0 IrisFrame.qml
+singleton IrisWelds 1.0 IrisWelds.qml
 IrisReservations 1.0 IrisReservations.qml
 IrisFramePulse 1.0 IrisFramePulse.qml
 IrisEdgeGlow 1.0 IrisEdgeGlow.qml

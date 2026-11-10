@@ -1996,6 +1996,7 @@ Item {
             opacity: Math.min(1, chassis.presentation)
             sourceComponent: IrisPrismHaze {
                 radius: 0
+                shouldered: true
                 from: root.bottomEdge ? "topRight" : root.rightEdge ? "bottomLeft" : "bottomRight"
             }
         }

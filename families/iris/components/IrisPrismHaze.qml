@@ -12,6 +12,8 @@ Item {
     property string from: "bottomRight"
     // 0 to 1: how much light the body takes.
     property real strength: 1
+    // A body whose top runs into another (the Island's shoulders): one light, kept clear of that side.
+    property bool shouldered: false
 
     readonly property bool atRight: root.from.endsWith("Right")
     readonly property bool atBottom: root.from.startsWith("bottom")
@@ -50,7 +52,7 @@ Item {
             w: root.width; h: root.height; round: root.radius
             cx: root.atRight ? root.width : 0
             cy: root.atBottom ? root.height : 0
-            size: root.reach * 0.95
+            size: root.shouldered ? Math.min(root.width, root.height) * 0.8 : root.reach * 0.95
             near: root.stops[2]
             far: root.stops[0]
             alpha: 0.44 * root.amount
@@ -63,7 +65,7 @@ Item {
             size: root.reach * 0.6
             near: root.stops[5]
             far: root.stops[6]
-            alpha: 0.14 * root.amount
+            alpha: root.shouldered ? 0 : 0.14 * root.amount
         }
     }
 }

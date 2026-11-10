@@ -1,7 +1,11 @@
 {
     "$schema": "../../schema/hub.schema.json",
-    "version": "2.33.69",
+    "version": "2.33.70",
     "changes": {
+        "2.33.70": [
+            "Widgets joined to the frame can rest tucked as a tab until you point at them (Settings › Surfaces › Frame, or per widget), stay on the frame in the overview, join their neighbours cleanly and keep calm under every texture",
+            "Prism Settings: the sidebar's sections read brighter"
+        ],
         "2.33.69": [
             "Prism: every panel's black takes a soft haze of the spectrum from one corner, and each place can wear Prism on its own (Settings › Colour › Look › Places)"
         ],

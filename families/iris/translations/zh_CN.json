@@ -2581,5 +2581,9 @@
   "The + that pins apps and the gear that opens Settings.": "用于固定应用的 + 和打开设置的齿轮。",
   "Black and white, light breaking at each level.": "黑与白，光在每个刻度处折射。",
   "Widgets join the frame": "小组件与边框相连",
-  "A desktop widget left against the frame becomes one body with it. Pull it away to let go.": "贴着边框放置的桌面小组件会与它融为一体。拖开即可分离。"
+  "A desktop widget left against the frame becomes one body with it. Pull it away to let go.": "贴着边框放置的桌面小组件会与它融为一体。拖开即可分离。",
+  "Joined widgets rest": "已连接小组件的静止状态",
+  "Open keeps them whole. Tucked folds each into a tab on the frame until you point at it.": "展开时保持完整。收起时每个小组件折成边框上的标签，指向它才展开。",
+  "Tucked": "收起",
+  "On the frame": "在边框上"
 }

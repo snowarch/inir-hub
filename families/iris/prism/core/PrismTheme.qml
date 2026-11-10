@@ -25,8 +25,9 @@ Singleton {
     readonly property color fillPress: root.light ? Qt.rgba(0, 0, 0, 0.11) : Qt.rgba(1, 1, 1, 0.13) // iris-literal: Prism's own fills and scrims, scheme-aware above
 
     readonly property color ink: root.light ? "#1d1d1f" : "#ffffff" // iris-literal: Prism's text, Apple's label colours
-    readonly property color ink2: root.light ? "#6e6e73" : "#8e8e93" // iris-literal: secondary label
-    readonly property color ink3: root.light ? "#a1a1a6" : "#56565b" // iris-literal: tertiary label, numbers, headers
+    readonly property color ink2: root.light ? "#6e6e73" : "#a6a6ad" // iris-literal: secondary label
+    readonly property color ink3: root.light ? "#8e8e93" : "#6e6e75" // iris-literal: tertiary label, numbers, headers
+    readonly property color inkNav: root.light ? "#3a3a3c" : "#d6d6db" // iris-literal: a page's name in the sidebar, near the text (omusic-app)
 
     // The reference's white controls: a white pill on dark, its ink black; in light the same idea inverted.
     readonly property color solid: root.light ? "#1d1d1f" : "#ffffff" // iris-literal: the primary pill and chosen segment

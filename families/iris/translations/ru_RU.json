@@ -2581,5 +2581,9 @@
   "The + that pins apps and the gear that opens Settings.": "+, закрепляющий приложения, и шестерёнка, открывающая настройки.",
   "Black and white, light breaking at each level.": "Чёрное и белое, свет преломляется на каждом уровне.",
   "Widgets join the frame": "Виджеты сливаются с рамкой",
-  "A desktop widget left against the frame becomes one body with it. Pull it away to let go.": "Виджет рабочего стола, оставленный у рамки, становится с ней одним целым. Отодвиньте его, чтобы отделить."
+  "A desktop widget left against the frame becomes one body with it. Pull it away to let go.": "Виджет рабочего стола, оставленный у рамки, становится с ней одним целым. Отодвиньте его, чтобы отделить.",
+  "Joined widgets rest": "Покой присоединённых виджетов",
+  "Open keeps them whole. Tucked folds each into a tab on the frame until you point at it.": "«Открыты» — остаются целиком. «Свёрнуты» — каждый складывается в язычок на рамке, пока вы не наведёте указатель.",
+  "Tucked": "Свёрнуты",
+  "On the frame": "На рамке"
 }

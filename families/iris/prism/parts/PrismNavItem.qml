@@ -35,7 +35,7 @@ Item {
         text: root.glyph
         filled: root.current
         iconSize: PrismTheme.dp(16)
-        color: root.current ? PrismTheme.accentInk : area.containsMouse ? PrismTheme.ink : PrismTheme.ink2
+        color: root.current ? PrismTheme.accentInk : area.containsMouse ? PrismTheme.ink : PrismTheme.inkNav
     }
     PrismText {
         anchors.left: icon.right
@@ -46,7 +46,7 @@ Item {
         text: root.text
         font.pixelSize: PrismTheme.body
         font.weight: root.current ? Font.DemiBold : Font.Normal
-        color: root.current ? PrismTheme.accentInk : area.containsMouse ? PrismTheme.ink : PrismTheme.ink2
+        color: root.current ? PrismTheme.accentInk : area.containsMouse ? PrismTheme.ink : PrismTheme.inkNav
     }
     Rectangle {
         x: root.edge - width

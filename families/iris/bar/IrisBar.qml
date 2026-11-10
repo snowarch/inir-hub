@@ -1327,6 +1327,15 @@ Scope {
                     Behavior on opacity { NumberAnimation { duration: IrisStyle.duration(160); easing.type: IrisStyle.feedbackEasing } }
                 }
 
+                // The desktop widgets joined to the frame: its line taken out where they join, and held here in the overview.
+                IrisWeldsOverlay {
+                    anchors.fill: parent
+                    output: barWindow.screen?.name ?? ""
+                    lined: chassisField.frameGlass === 0
+                    matter: chassisField.tint
+                    visible: chassisField.visible
+                }
+
                 IrisFramePulse {
                     id: framePulse
                     active: IrisFrame.musicActive && !barWindow.canvasSuppressed

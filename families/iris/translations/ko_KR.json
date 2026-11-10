@@ -2581,5 +2581,9 @@
   "The + that pins apps and the gear that opens Settings.": "앱을 고정하는 +와 설정을 여는 톱니바퀴.",
   "Black and white, light breaking at each level.": "흑과 백, 각 레벨에서 빛이 갈라집니다.",
   "Widgets join the frame": "위젯이 프레임에 합쳐짐",
-  "A desktop widget left against the frame becomes one body with it. Pull it away to let go.": "프레임에 붙여 둔 데스크톱 위젯은 프레임과 한 몸이 됩니다. 떼어 내려면 멀리 옮기세요."
+  "A desktop widget left against the frame becomes one body with it. Pull it away to let go.": "프레임에 붙여 둔 데스크톱 위젯은 프레임과 한 몸이 됩니다. 떼어 내려면 멀리 옮기세요.",
+  "Joined widgets rest": "결합된 위젯의 대기 상태",
+  "Open keeps them whole. Tucked folds each into a tab on the frame until you point at it.": "열림은 그대로 둡니다. 접힘은 가리킬 때까지 각 위젯을 프레임의 탭으로 접습니다.",
+  "Tucked": "접힘",
+  "On the frame": "프레임에서"
 }
