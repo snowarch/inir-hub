@@ -951,10 +951,13 @@ Scope {
                     || (dockLoader.item?.overFullscreen ?? false) || (dockLoader.item?.menuOpen ?? false)
                     || (spotlightLoader.item?.present ?? false) || (galleryLoader.item?.present ?? false)
                     || (orbitLoader.item?.present ?? false)
-                // Niri keeps a fullscreen window above the Top layer, so the overview
-                // over a game would show every other surface but this one.
-                readonly property bool overviewOverFullscreen: CompositorService.isNiri && NiriService.inOverview
-                    && GameMode.hasFullscreenOnOutput(barWindow.screen?.name ?? "")
+                readonly property bool takesKeys: barWindow.pinned || stage.cardOpen || (controlCentreLoader.item?.morphOpen ?? false)
+                    || (dockLoader.item?.menuOpen ?? false) || (spotlightLoader.item?.here && GlobalStates.searchOpen)
+                    || (galleryLoader.item?.morphOpen ?? false) || (orbitLoader.item?.wanted ?? false)
+                // The overview draws Top above a fullscreen window, so the chassis is seen there as it is. Only where
+                // Top gets no keys over that window does it climb to Overlay, and only while something in it types.
+                readonly property bool overviewKeysOverFullscreen: NiriService.inOverview && barWindow.takesKeys
+                    && !CompositorConfig.overviewTopTakesKeys && GameMode.hasFullscreenOnOutput(barWindow.screen?.name ?? "")
                 readonly property bool canvasSuppressed: barWindow.suppressed && !barWindow.presenting
                 // Nothing of the chassis may cover, move or restack what sits still in it: continuous motion may
                 // then draw in a surface of its own (LiveLayer) instead of repainting the whole output.
@@ -964,14 +967,11 @@ Scope {
                 readonly property int liveLayer: WlrLayer.Top
                 readonly property int liveEpoch: IrisState.chassisEpoch
                 readonly property bool overlaid: ((islandLoader.item?.fullscreenCovered ?? false) && !barWindow.canvasSuppressed)
-                    || barWindow.overviewOverFullscreen
-                // Switching layers recreates the surface above the Dock's window, whose icons it would cover.
+                    || barWindow.overviewKeysOverFullscreen
+                // Back on Top the surface may be a new one (qs-rs recreates it), above the LiveLayer boxes it hid.
                 onOverlaidChanged: if (!barWindow.overlaid) IrisState.chassisEpoch++
                 WlrLayershell.layer: barWindow.overlaid ? WlrLayer.Overlay : WlrLayer.Top
-                WlrLayershell.keyboardFocus: barWindow.pinned || stage.cardOpen || (controlCentreLoader.item?.morphOpen ?? false)
-                    || (dockLoader.item?.menuOpen ?? false) || (spotlightLoader.item?.here && GlobalStates.searchOpen)
-                    || (galleryLoader.item?.morphOpen ?? false) || (orbitLoader.item?.wanted ?? false)
-                    ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
+                WlrLayershell.keyboardFocus: barWindow.takesKeys ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
                 anchors { left: true; right: true; top: true; bottom: true }
                 readonly property bool suppressed: islandLoader.active
                     ? (islandLoader.item?.suppressed ?? false) : false

@@ -1,7 +1,10 @@
 {
     "$schema": "../../schema/hub.schema.json",
-    "version": "2.33.71",
+    "version": "2.33.72",
     "changes": {
+        "2.33.72": [
+            "Opening the overview again and again over a fullscreen game no longer restarts the shell on Umbriel"
+        ],
         "2.33.71": [
             "Widgets joined to the frame are now the frame itself: one body with its matter, texture and edge, above your windows like the bubbles, and still there in the overview",
             "With a Design on, the resting Island is yours again: Island › Design and modes › The Design's face"

@@ -341,10 +341,8 @@ Item {
             readonly property bool fullscreenCovered: CompositorService.isNiri
                 && GameMode.hasFullscreenOnOutput(root.screen?.name ?? "")
                 && !NiriService.inOverview
-            readonly property bool overviewOverFullscreen: CompositorService.isNiri && NiriService.inOverview
-                && GameMode.hasFullscreenOnOutput(root.screen?.name ?? "")
-            readonly property bool overFullscreen: window.overviewOverFullscreen || (window.fullscreenCovered
-                && (window.askedShown || window.menuOpen || window.editingDock))
+            readonly property bool overFullscreen: window.fullscreenCovered
+                && (window.askedShown || window.menuOpen || window.editingDock)
             readonly property bool fullscreenIdle: window.fullscreenCovered && !window.overFullscreen
             // Arranging the desktop the Dock recedes into the card with the chassis and shows as it rests there.
             readonly property bool revealed: !window.fullscreenIdle && (!root.autoHide || GlobalStates.widgetEditMode || window.edgeIntent || window.menuOpen
