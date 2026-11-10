@@ -125,6 +125,8 @@
   "How bright ordinary windows are while HDR is on.": "HDR ikitsiartillugu igalaat nalinginnaasut qanoq qaammartiginersut.",
   "Colour depth": "Qalipaatip itissusaa",
   "10 bit draws smoother gradients.": "10 bit qalipaatit nikerarnerinik sakkortunngitsunerusumik titartaavoq.",
+  "Fix a darker picture": "Fix a darker picture",
+  "On if this screen looks darker at its highest refresh rate than at 60 Hz.": "On if this screen looks darker at its highest refresh rate than at 60 Hz.",
   "Morning notes": "Ullaakkut allagaasat",
   "Words, icons and windows take this much room on this screen, and the rest is space.": "Oqaatsit, ikonit igalaallu qarasaasiami uani taama inissaqartigipput, sinneralu inissaavoq.",
   "Larger text": "Allagaq anginerusoq",

@@ -125,6 +125,8 @@
   "How bright ordinary windows are while HDR is on.": "Wie hell normale Fenster sind, während HDR an ist.",
   "Colour depth": "Farbtiefe",
   "10 bit draws smoother gradients.": "10 Bit zeichnet weichere Verläufe.",
+  "Fix a darker picture": "Zu dunkles Bild korrigieren",
+  "On if this screen looks darker at its highest refresh rate than at 60 Hz.": "Einschalten, wenn dieser Bildschirm bei seiner höchsten Bildwiederholrate dunkler aussieht als bei 60 Hz.",
   "Morning notes": "Morgennotizen",
   "Words, icons and windows take this much room on this screen, and the rest is space.": "Wörter, Symbole und Fenster nehmen so viel Platz auf diesem Bildschirm ein, der Rest ist Raum.",
   "Larger text": "Größerer Text",

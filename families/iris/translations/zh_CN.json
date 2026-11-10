@@ -125,6 +125,8 @@
   "How bright ordinary windows are while HDR is on.": "HDR 开启时普通窗口的亮度。",
   "Colour depth": "色深",
   "10 bit draws smoother gradients.": "10 位绘制更平滑的渐变。",
+  "Fix a darker picture": "修正画面偏暗",
+  "On if this screen looks darker at its highest refresh rate than at 60 Hz.": "如果此屏幕在最高刷新率下比 60 Hz 时更暗，请打开。",
   "Morning notes": "晨间笔记",
   "Words, icons and windows take this much room on this screen, and the rest is space.": "文字、图标和窗口在这块屏幕上占这么大的地方，其余是空间。",
   "Larger text": "文字更大",

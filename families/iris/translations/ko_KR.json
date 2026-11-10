@@ -125,6 +125,8 @@
   "How bright ordinary windows are while HDR is on.": "HDR이 켜져 있을 때 일반 창의 밝기.",
   "Colour depth": "색 깊이",
   "10 bit draws smoother gradients.": "10비트는 그러데이션을 더 매끄럽게 그립니다.",
+  "Fix a darker picture": "어두운 화면 보정",
+  "On if this screen looks darker at its highest refresh rate than at 60 Hz.": "이 화면이 최고 주사율에서 60Hz보다 어둡게 보이면 켜세요.",
   "Morning notes": "아침 메모",
   "Words, icons and windows take this much room on this screen, and the rest is space.": "이 화면에서 글자, 아이콘, 창이 이만큼 자리를 차지하고 나머지는 여백입니다.",
   "Larger text": "글자 크게",

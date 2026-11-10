@@ -125,6 +125,8 @@
   "How bright ordinary windows are while HDR is on.": "Độ sáng của cửa sổ thường khi HDR đang bật.",
   "Colour depth": "Độ sâu màu",
   "10 bit draws smoother gradients.": "10 bit vẽ dải chuyển màu mịn hơn.",
+  "Fix a darker picture": "Sửa hình ảnh tối hơn",
+  "On if this screen looks darker at its highest refresh rate than at 60 Hz.": "Bật nếu màn hình này trông tối hơn ở tần số quét cao nhất so với 60 Hz.",
   "Morning notes": "Ghi chú buổi sáng",
   "Words, icons and windows take this much room on this screen, and the rest is space.": "Chữ, biểu tượng và cửa sổ chiếm chừng này chỗ trên màn hình này, phần còn lại là khoảng trống.",
   "Larger text": "Chữ lớn hơn",

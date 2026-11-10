@@ -1793,7 +1793,8 @@ QtObject {
 
         { tune: false, section: "display", group: "Colour", comp: "display", key: "hdr", label: "HDR", description: "Brighter highlights and deeper colour on a screen that can show them.", kind: "choice", fallback: "off", keywords: ["hdr", "high dynamic range", "hdr10", "brightness", "color"] },
         { section: "display", group: "Colour", comp: "display", key: "sdr-white", label: "Everything else at", description: "How bright ordinary windows are while HDR is on.", showIf: () => String(CompositorConfig.displayValue("hdr")) !== "off", kind: "range", fallback: 203, min: 80, max: 480, step: 10, unit: " nits" },
-        { section: "display", group: "Colour", comp: "display", key: "bit-depth", label: "Colour depth", description: "10 bit draws smoother gradients.", kind: "choice", fallback: 8, keywords: ["10 bit", "deep color", "banding", "bits"] }
+        { section: "display", group: "Colour", comp: "display", key: "bit-depth", label: "Colour depth", description: "10 bit draws smoother gradients.", kind: "choice", fallback: 8, keywords: ["10 bit", "deep color", "banding", "bits"] },
+        { section: "display", group: "Colour", comp: "display", key: "limited-range", label: "Fix a darker picture", description: "On if this screen looks darker at its highest refresh rate than at 60 Hz.", kind: "switch", fallback: false, keywords: ["dark", "black level", "rgb range", "limited", "full", "hdmi", "75 hz", "oscuro", "negro"] }
     ]
     readonly property var dockEdgeChoices: [{ label: "Auto", value: "auto", glyph: "auto_mode" }].concat([
         { label: "Bottom", value: "bottom", glyph: "vertical_align_bottom" }, { label: "Top", value: "top", glyph: "vertical_align_top" },

@@ -125,6 +125,8 @@
   "How bright ordinary windows are while HDR is on.": "How bright ordinary windows are while HDR is on.",
   "Colour depth": "Colour depth",
   "10 bit draws smoother gradients.": "10 bit draws smoother gradients.",
+  "Fix a darker picture": "Fix a darker picture",
+  "On if this screen looks darker at its highest refresh rate than at 60 Hz.": "On if this screen looks darker at its highest refresh rate than at 60 Hz.",
   "Morning notes": "Morning notes",
   "Words, icons and windows take this much room on this screen, and the rest is space.": "Words, icons and windows take this much room on this screen, and the rest is space.",
   "Larger text": "Larger text",

@@ -125,6 +125,8 @@
   "How bright ordinary windows are while HDR is on.": "HDR açıkken sıradan pencerelerin ne kadar parlak olduğu.",
   "Colour depth": "Renk derinliği",
   "10 bit draws smoother gradients.": "10 bit daha yumuşak geçişler çizer.",
+  "Fix a darker picture": "Koyu görüntüyü düzelt",
+  "On if this screen looks darker at its highest refresh rate than at 60 Hz.": "Bu ekran en yüksek yenileme hızında 60 Hz'e göre daha koyu görünüyorsa açın.",
   "Morning notes": "Sabah notları",
   "Words, icons and windows take this much room on this screen, and the rest is space.": "Kelimeler, simgeler ve pencereler bu ekranda bu kadar yer kaplar, gerisi boş alandır.",
   "Larger text": "Daha büyük metin",

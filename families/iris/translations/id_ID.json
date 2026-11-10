@@ -125,6 +125,8 @@
   "How bright ordinary windows are while HDR is on.": "Seberapa terang jendela biasa saat HDR menyala.",
   "Colour depth": "Kedalaman warna",
   "10 bit draws smoother gradients.": "10 bit menggambar gradasi lebih halus.",
+  "Fix a darker picture": "Perbaiki gambar yang lebih gelap",
+  "On if this screen looks darker at its highest refresh rate than at 60 Hz.": "Aktifkan jika layar ini tampak lebih gelap pada refresh rate tertingginya dibanding 60 Hz.",
   "Morning notes": "Catatan pagi",
   "Words, icons and windows take this much room on this screen, and the rest is space.": "Kata, ikon, dan jendela memakai ruang sebesar ini di layar ini, sisanya ruang kosong.",
   "Larger text": "Teks lebih besar",

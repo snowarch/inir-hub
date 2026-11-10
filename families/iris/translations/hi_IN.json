@@ -125,6 +125,8 @@
   "How bright ordinary windows are while HDR is on.": "HDR चालू रहते सामान्य विंडो कितनी चमकीली हों।",
   "Colour depth": "रंग गहराई",
   "10 bit draws smoother gradients.": "10 बिट ज़्यादा चिकने ग्रेडिएंट बनाता है।",
+  "Fix a darker picture": "गहरी तस्वीर ठीक करें",
+  "On if this screen looks darker at its highest refresh rate than at 60 Hz.": "चालू करें अगर यह स्क्रीन अपनी सबसे ऊँची रिफ्रेश दर पर 60 Hz से ज़्यादा गहरी दिखती है।",
   "Morning notes": "सुबह के नोट्स",
   "Words, icons and windows take this much room on this screen, and the rest is space.": "इस स्क्रीन पर शब्द, आइकन और विंडो इतनी जगह लेते हैं, और बाकी खाली जगह है।",
   "Larger text": "बड़ा टेक्स्ट",

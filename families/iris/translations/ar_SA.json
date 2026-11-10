@@ -125,6 +125,8 @@
   "How bright ordinary windows are while HDR is on.": "مدى سطوع النوافذ العادية أثناء تشغيل HDR.",
   "Colour depth": "عمق اللون",
   "10 bit draws smoother gradients.": "10 بت يرسم تدرجات أنعم.",
+  "Fix a darker picture": "إصلاح الصورة الداكنة",
+  "On if this screen looks darker at its highest refresh rate than at 60 Hz.": "فعّله إذا بدت هذه الشاشة أغمق عند أعلى معدل تحديث لها مقارنةً بـ 60 هرتز.",
   "Morning notes": "ملاحظات الصباح",
   "Words, icons and windows take this much room on this screen, and the rest is space.": "الكلمات والأيقونات والنوافذ تشغل هذا القدر على هذه الشاشة، والباقي مساحة.",
   "Larger text": "نص أكبر",

@@ -125,6 +125,8 @@
   "How bright ordinary windows are while HDR is on.": "כמה בהירים חלונות רגילים כש-HDR פועל.",
   "Colour depth": "עומק צבע",
   "10 bit draws smoother gradients.": "10 ביט מצייר מעברי צבע חלקים יותר.",
+  "Fix a darker picture": "תיקון תמונה כהה",
+  "On if this screen looks darker at its highest refresh rate than at 60 Hz.": "הפעילו אם המסך הזה נראה כהה יותר בקצב הרענון הגבוה ביותר שלו מאשר ב־60 הרץ.",
   "Morning notes": "פתקי בוקר",
   "Words, icons and windows take this much room on this screen, and the rest is space.": "מילים, סמלים וחלונות תופסים כך הרבה מקום במסך הזה, והשאר מרווח.",
   "Larger text": "טקסט גדול יותר",

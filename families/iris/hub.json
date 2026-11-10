@@ -1,7 +1,10 @@
 {
     "$schema": "../../schema/hub.schema.json",
-    "version": "2.33.72",
+    "version": "2.33.73",
     "changes": {
+        "2.33.73": [
+            "Umbriel: a screen that looks darker at its highest refresh rate than at 60 Hz gets a fix in Settings › Display › Colour"
+        ],
         "2.33.72": [
             "The overview over a fullscreen game no longer rebuilds the Island and Dock on every press: they keep their layer, on Umbriel and Niri"
         ],

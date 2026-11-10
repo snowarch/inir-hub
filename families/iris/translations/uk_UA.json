@@ -125,6 +125,8 @@
   "How bright ordinary windows are while HDR is on.": "Наскільки яскраві звичайні вікна, поки HDR увімкнено.",
   "Colour depth": "Глибина кольору",
   "10 bit draws smoother gradients.": "10 біт дає плавніші градієнти.",
+  "Fix a darker picture": "Виправити темне зображення",
+  "On if this screen looks darker at its highest refresh rate than at 60 Hz.": "Увімкніть, якщо на найвищій частоті цей екран виглядає темнішим, ніж на 60 Гц.",
   "Morning notes": "Ранкові нотатки",
   "Words, icons and windows take this much room on this screen, and the rest is space.": "Слова, значки й вікна займають стільки місця на цьому екрані, решта — вільна.",
   "Larger text": "Більший текст",

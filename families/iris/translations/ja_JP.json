@@ -125,6 +125,8 @@
   "How bright ordinary windows are while HDR is on.": "HDR オン時の通常ウィンドウの明るさ。",
   "Colour depth": "色深度",
   "10 bit draws smoother gradients.": "10 ビットは階調をよりなめらかに描きます。",
+  "Fix a darker picture": "暗い表示を補正",
+  "On if this screen looks darker at its highest refresh rate than at 60 Hz.": "最高リフレッシュレートで 60 Hz より暗く見える画面ではオンにします。",
   "Morning notes": "朝のメモ",
   "Words, icons and windows take this much room on this screen, and the rest is space.": "この画面では文字、アイコン、ウィンドウがこれだけの場所を取り、残りは余白です。",
   "Larger text": "文字を大きく",
