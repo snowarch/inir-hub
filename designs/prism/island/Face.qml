@@ -1,6 +1,7 @@
 pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Shapes
+import QtQuick.Effects
 import qs
 import qs.services
 import qs.modules.common
@@ -38,10 +39,8 @@ Item {
 
     // White light on a dark body, the ink on a light one.
     readonly property color white: IrisStyle.text
-    // Prism's spectrum, red to violet top to bottom: the refraction recipe's stops, the colours of its hero. On a light
-    // body each is taken a fifth toward the ink so the yellow still reads.
-    readonly property var spectrum: ["#fd1443", "#fd9017", "#fef23d", "#26e033", "#4289fd", "#7a9afd", "#d518fd"] // iris-literal: Prism's refraction spectrum
-    readonly property var bands: root.spectrum.map(tone => IrisStyle.light ? ColorUtils.mix(Qt.color(tone), root.white, 0.8) : Qt.color(tone))
+    // The spectrum is the shell's one (IrisStyle.prismStops, violet to red): soft and even, leaning to the accent.
+    readonly property var stops: IrisStyle.prismStops
 
     IrisClock {
         id: clock
@@ -75,43 +74,67 @@ Item {
         }
     }
 
-    // One band of the fan: from the point to its share of the far edge, white where the bands meet, full through the
-    // middle, fading at the strip's end.
-    component Band: ShapePath {
-        id: bandPath
-        required property int index
-        readonly property color tone: root.bands[bandPath.index] ?? root.white
-        strokeWidth: -1
-        strokeColor: "transparent"
-        fillGradient: LinearGradient {
-            x1: 0; y1: 0
-            x2: fan.width; y2: 0
-            GradientStop { position: 0; color: root.white }
-            GradientStop { position: 0.16; color: bandPath.tone }
-            GradientStop { position: 0.7; color: bandPath.tone }
-            GradientStop { position: 1; color: ColorUtils.applyAlpha(bandPath.tone, 0.15) }
-        }
-        startX: 0; startY: root.mid
-        PathLine { x: fan.width; y: root.fanTop + bandPath.index * fan.band }
-        PathLine { x: fan.width; y: root.fanTop + (bandPath.index + 1) * fan.band }
-        PathLine { x: 0; y: root.mid }
-    }
-
-    // The fan: the seven bands from one point.
-    Shape {
+    // The fan (pin-spectrum-burst, pin-prism-beam): one sweep of light from a point, its colours running into each
+    // other with no band between them, red above and violet below, wider and fainter as it leaves.
+    Item {
         id: fan
         x: clock.x + clock.width + root.gap
         width: root.reach
         height: root.height
         opacity: root.glow
-        preferredRendererType: Shape.CurveRenderer
-        readonly property real band: (root.fanFoot - root.fanTop) / 7
-        Band { index: 0 }
-        Band { index: 1 }
-        Band { index: 2 }
-        Band { index: 3 }
-        Band { index: 4 }
-        Band { index: 5 }
-        Band { index: 6 }
+        readonly property real degrees: 180 / Math.PI
+        readonly property real upper: Math.atan2(root.mid - root.fanTop, fan.width) * fan.degrees
+        readonly property real lower: Math.atan2(root.mid - root.fanFoot, fan.width) * fan.degrees
+        readonly property real sweep: (fan.upper - fan.lower) / 360
+        function at(index: int): real { return fan.sweep * index / 6 }
+
+        Shape {
+            id: light
+            anchors.fill: parent
+            visible: false
+            layer.enabled: true
+            layer.smooth: true
+            preferredRendererType: Shape.CurveRenderer
+            ShapePath {
+                strokeWidth: -1
+                strokeColor: "transparent"
+                fillGradient: ConicalGradient {
+                    centerX: 0; centerY: root.mid
+                    angle: fan.lower
+                    GradientStop { position: fan.at(0); color: root.stops[0] }
+                    GradientStop { position: fan.at(1); color: root.stops[1] }
+                    GradientStop { position: fan.at(2); color: root.stops[2] }
+                    GradientStop { position: fan.at(3); color: root.stops[3] }
+                    GradientStop { position: fan.at(4); color: root.stops[4] }
+                    GradientStop { position: fan.at(5); color: root.stops[5] }
+                    GradientStop { position: fan.at(6); color: root.stops[6] }
+                }
+                startX: 0; startY: root.mid
+                PathLine { x: fan.width; y: root.fanTop }
+                PathLine { x: fan.width; y: root.fanFoot }
+                PathLine { x: 0; y: root.mid }
+            }
+        }
+        // Full where it leaves the hour, gone at the strip's end.
+        Rectangle {
+            id: fall
+            anchors.fill: parent
+            visible: false
+            layer.enabled: true
+            gradient: Gradient {
+                orientation: Gradient.Horizontal
+                GradientStop { position: 0; color: "white" } // iris-literal: a mask's alpha
+                GradientStop { position: 0.5; color: Qt.rgba(1, 1, 1, 0.8) } // iris-literal: a mask's alpha
+                GradientStop { position: 1; color: "transparent" }
+            }
+        }
+        MultiEffect {
+            anchors.fill: parent
+            source: light
+            maskEnabled: true
+            maskSource: fall
+            maskThresholdMin: 0.5
+            maskSpreadAtMin: 1
+        }
     }
 }

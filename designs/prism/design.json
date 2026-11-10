@@ -37,7 +37,7 @@
         },
         "shape": {
             "ladder": { "panel": 28, "sheet": 28, "plate": 18, "card": 18, "tile": 13, "row": 14, "chip": 16, "micro": 5 },
-            "piece": "squircle"
+            "piece": "circle"
         },
         "material": {
             "texture": "flat",
@@ -47,8 +47,8 @@
             "glass": "refuse"
         },
         "motion": {
-            "morph": "glide",
-            "duration": 240
+            "morph": "snap",
+            "duration": 200
         },
         "look": {
             "look": "prism",

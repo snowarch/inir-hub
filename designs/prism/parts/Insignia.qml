@@ -14,24 +14,15 @@ Item {
     readonly property real size: Math.min(width, height)
     readonly property real unit: root.size / 100
     readonly property bool small: root.size < 40
-    // Red to violet, top to bottom (IrisStyle.prismStops runs violet to red).
-    readonly property var bands: {
-        const all = Array.from(IrisStyle.prismStops).reverse()
-        return root.small ? [all[0], all[3], all[6]] : all
+    // The spectrum, the shell's one (IrisStyle.prismStops, violet to red); in one colour, that ink fading.
+    readonly property var stops: IrisStyle.prismStops
+    function tone(index: int): color {
+        return root.mono ? ColorUtils.applyAlpha(root.ink, 0.25 + 0.6 * index / 6) : root.stops[index]
     }
-
-    component Band: ShapePath {
-        id: band
-        required property int index
-        readonly property real share: 30 / root.bands.length
-        strokeWidth: -1
-        strokeColor: "transparent"
-        fillColor: root.mono ? ColorUtils.applyAlpha(root.ink, 0.35 + 0.6 * (1 - band.index / root.bands.length)) : (root.bands[band.index] ?? root.ink)
-        startX: 66; startY: 50
-        PathLine { x: 98; y: 38 + band.index * band.share }
-        PathLine { x: 98; y: 38 + (band.index + 1) * band.share }
-        PathLine { x: 66; y: 50 }
-    }
+    // The fan leaves the right face from one point: one sweep of light, no band between its colours.
+    readonly property real upper: Math.atan2(50 - 36, 38) * 180 / Math.PI
+    readonly property real lower: Math.atan2(50 - 60, 38) * 180 / Math.PI
+    function at(index: int): real { return (root.upper - root.lower) / 360 * index / 6 }
 
     Shape {
         width: 100
@@ -41,26 +32,38 @@ Item {
         preferredRendererType: Shape.CurveRenderer
         // The beam, from the lower left into the left face.
         ShapePath {
-            strokeWidth: root.small ? 7 : 4
+            strokeWidth: root.small ? 4.5 : 2.5
             strokeColor: root.ink
             capStyle: ShapePath.RoundCap
             fillColor: "transparent"
-            startX: 2; startY: 64
-            PathLine { x: 33; y: 50 }
+            startX: 3; startY: 63
+            PathLine { x: 34; y: 51 }
         }
-        Band { index: 0 }
-        Band { index: 1 }
-        Band { index: 2 }
-        Band { index: 3 }
-        Band { index: 4 }
-        Band { index: 5 }
-        Band { index: 6 }
+        ShapePath {
+            strokeWidth: -1
+            strokeColor: "transparent"
+            fillGradient: ConicalGradient {
+                centerX: 60; centerY: 50
+                angle: root.lower
+                GradientStop { position: root.at(0); color: root.tone(0) }
+                GradientStop { position: root.at(1); color: root.tone(1) }
+                GradientStop { position: root.at(2); color: root.tone(2) }
+                GradientStop { position: root.at(3); color: root.tone(3) }
+                GradientStop { position: root.at(4); color: root.tone(4) }
+                GradientStop { position: root.at(5); color: root.tone(5) }
+                GradientStop { position: root.at(6); color: root.tone(6) }
+            }
+            startX: 60; startY: 50
+            PathLine { x: 98; y: 36 }
+            PathLine { x: 98; y: 60 }
+            PathLine { x: 60; y: 50 }
+        }
         // The glass: drawn last so the light meets its faces.
         ShapePath {
-            strokeWidth: root.small ? 9 : 6
+            strokeWidth: root.small ? 5.5 : 3.5
             strokeColor: root.ink
             joinStyle: ShapePath.RoundJoin
-            fillColor: ColorUtils.applyAlpha(root.ink, 0.12)
+            fillColor: ColorUtils.applyAlpha(root.ink, 0.08)
             startX: 50; startY: 14
             PathLine { x: 84; y: 80 }
             PathLine { x: 16; y: 80 }
