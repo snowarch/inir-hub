@@ -85,9 +85,17 @@ Item {
     readonly property var groups: root.sections.map(section => ({ title: section.title, changed: section.rows.some(row => PrismModel.changed(row)) }))
     // Where the reader stands: the group whose head has passed a third of the way down the page.
     property string spyGroup: ""
-    readonly property string currentGroup: root.shownSections.some(section => section.title === root.spyGroup) ? root.spyGroup : String(root.shownSections[0]?.title ?? "")
+    // The group a press asked for is where the reader stands until the page is scrolled by hand: a short group near
+    // the foot never reaches the reading line, and the index named its neighbour instead (his 11-09).
+    property string heldGroup: ""
+    // True while the page places itself: only a hand's scroll lets go of the group asked for.
+    property bool placing: false
+    // Until when a change of layout aims again at what was asked for (rows are still being built under it).
+    property real aimUntil: 0
+    readonly property string currentGroup: root.shownSections.some(section => section.title === root.heldGroup) ? root.heldGroup
+        : root.shownSections.some(section => section.title === root.spyGroup) ? root.spyGroup : String(root.shownSections[0]?.title ?? "")
     function spy(): void {
-        if (sectionsRepeater.count === 0) return
+        if (sectionsRepeater.count === 0 || glider.running) return
         const line = centre.contentY + centre.height * 0.3
         let at = String(sectionsRepeater.itemAt(0)?.modelData?.title ?? "")
         for (let i = 0; i < sectionsRepeater.count; ++i) {
@@ -108,17 +116,59 @@ Item {
     }
     // A group asked for: on screen it glides to its head; in another part of a long page that part opens first.
     function showGroup(title: string): void {
+        root.heldGroup = title
+        root.aimUntil = Date.now() + 700
         const box = root.boxOf(title)
-        if (box) root.glide(box.y + content.y - PrismTheme.dp(12))
+        if (box) root.glide(root.headOf(box))
         else if (root.paged) PrismState.pickGroup(root.page.pageId, title)
     }
-    function glide(y: real): void {
-        glider.to = Math.max(0, Math.min(centre.contentHeight - centre.height, y))
-        glider.restart()
+    // Where a group's head comes to rest: clear of the blurred edge at the top, its eyebrow whole. The page's first
+    // group keeps the page's own top over it when both fit.
+    function headOf(box: Item): real {
+        const y = box.y + content.y - centreEdge.reach - PrismTheme.dp(6)
+        return box.index === 0 && root.partIndex === 0 && y < centre.height * 0.55 ? 0 : y
     }
-    NumberAnimation { id: glider; target: centre; property: "contentY"; duration: PrismTheme.ms(360); easing.type: Easing.OutCubic }
+    function glide(y: real): void {
+        const to = Math.max(0, Math.min(centre.contentHeight - centre.height, y))
+        if (glider.running && Math.abs(glider.to - to) < 2) return
+        if (!glider.running && Math.abs(centre.contentY - to) < 2) return
+        glider.stop()
+        glider.to = to
+        glider.start()
+    }
+    NumberAnimation { id: glider; target: centre; property: "contentY"; duration: PrismTheme.ms(360); easing.type: Easing.OutCubic; onStopped: root.spy() }
+    // The page under a group asked for is still growing (rows are built over a few frames): aim again once it rests.
+    Timer {
+        id: aimLater
+        interval: 50
+        onTriggered: {
+            if (Date.now() > root.aimUntil) return
+            if (root.flashPath.length > 0) { root.placeRow(); return }
+            const box = root.heldGroup.length > 0 ? root.boxOf(root.heldGroup) : null
+            if (box) root.glide(root.headOf(box))
+        }
+    }
     readonly property real sideWidth: PrismTheme.dp(232)
-    readonly property real railWidth: root.width >= PrismTheme.dp(1080) ? PrismTheme.dp(300) : 0
+    // The side column (profile, Changes, Now Playing). Left to itself it stands on Home, which is about the person,
+    // and wherever the page keeps a wide measure beside it; every other page gets its room. The control at the page's
+    // top is the person's say, remembered: a press that only repeats what the column does by itself gives it back.
+    readonly property string railMode: String(Config.options?.iris?.appearance?.settingsRail ?? "auto")
+    readonly property bool railFits: root.width >= PrismTheme.dp(1080)
+    readonly property bool railAuto: PrismState.page === "general" || root.width - root.sideWidth - PrismTheme.dp(300) >= PrismTheme.dp(900)
+    readonly property bool railOpen: root.railFits && (root.railMode === "open" || root.railMode !== "closed" && root.railAuto)
+    // By hand the column slides; a page that opens already has it where it belongs.
+    property bool railByHand: false
+    property real railShown: root.railOpen ? 1 : 0
+    Behavior on railShown { enabled: root.railByHand; NumberAnimation { duration: PrismTheme.ms(240); easing.type: Easing.OutCubic } }
+    // The page takes the column's room once the column has left, and gives it before the column comes: one layout either way.
+    readonly property real railWidth: root.railOpen || root.railShown > 0 ? PrismTheme.dp(300) : 0
+    Timer { id: railRest; interval: 400; onTriggered: root.railByHand = false }
+    function toggleRail(): void {
+        const next = !root.railOpen
+        root.railByHand = true
+        railRest.restart()
+        Config.setNestedValue("iris.appearance.settingsRail", next === root.railAuto ? "auto" : next ? "open" : "closed")
+    }
 
     function focusSearch(): void { sidebar.search.input.forceActiveFocus() }
     // A place a search found: its page, and its group when it names one.
@@ -141,19 +191,25 @@ Item {
         PrismState.query = ""
         PrismState.go(row.page)
         PrismState.pickGroup(row.page, row.section)
+        root.heldGroup = String(row.section ?? "")
+        root.aimUntil = Date.now() + 700
         root.flashPath = row.path
         reachLater.restart()
+    }
+    function placeRow(): void {
+        const item = root.findRow(content, root.flashPath)
+        if (!item) return
+        const y = item.mapToItem(content, 0, 0).y
+        root.placing = true
+        centre.contentY = Math.max(0, Math.min(centre.contentHeight - centre.height, y - centre.height * 0.35))
+        root.placing = false
     }
     // The page lays out first; then the row is found where it landed.
     Timer {
         id: reachLater
         interval: 60
         onTriggered: {
-            const item = root.findRow(content, root.flashPath)
-            if (item) {
-                const y = item.mapToItem(content, 0, 0).y
-                centre.contentY = Math.max(0, Math.min(centre.contentHeight - centre.height, y - centre.height * 0.35))
-            }
+            root.placeRow()
             flashOff.restart()
         }
     }
@@ -169,11 +225,16 @@ Item {
 
     Connections {
         target: PrismState
-        function onPageChanged() { glider.stop(); centre.contentY = 0; root.spyGroup = ""; IrisOptions.settle() }
+        function onPageChanged() { glider.stop(); root.heldGroup = ""; root.toTop(); root.spyGroup = ""; IrisOptions.settle() }
         // A search reads from its top: the best hits and the places they name come first.
-        function onQueryChanged() { glider.stop(); centre.contentY = 0 }
+        function onQueryChanged() { glider.stop(); root.heldGroup = ""; root.toTop() }
         // A long page brings the head of its new group into sight; a stacked one glides to it once laid out.
         function onGroupAskChanged() { groupLater.restart() }
+    }
+    function toTop(): void {
+        root.placing = true
+        centre.contentY = 0
+        root.placing = false
     }
     Timer {
         id: groupLater
@@ -219,13 +280,22 @@ Item {
             id: centre
             visible: !root.hosted
             anchors.left: sidebar.right
-            anchors.right: rail.left
+            anchors.right: parent.right
+            anchors.rightMargin: root.railWidth
             height: parent.height
             contentHeight: content.implicitHeight + PrismTheme.dp(40)
             boundsBehavior: Flickable.StopAtBounds
             clip: true
-            onContentYChanged: { PrismState.scrolledAt = Date.now(); root.spy() }
-            onContentHeightChanged: root.spy()
+            onContentYChanged: {
+                PrismState.scrolledAt = Date.now()
+                // A hand on the page: the reading line names the group again.
+                if (!glider.running && !root.placing) { root.heldGroup = ""; root.aimUntil = 0 }
+                root.spy()
+            }
+            onContentHeightChanged: {
+                if (Date.now() < root.aimUntil) aimLater.restart()
+                root.spy()
+            }
 
             Column {
                 id: content
@@ -370,7 +440,8 @@ Item {
             id: hostedBox
             visible: root.hosted
             anchors.left: sidebar.right
-            anchors.right: rail.left
+            anchors.right: parent.right
+            anchors.rightMargin: root.railWidth
             height: parent.height
             PageTop {
                 id: hostedTop
@@ -399,13 +470,27 @@ Item {
 
         PrismRail {
             id: rail
-            anchors.right: parent.right
-            width: root.railWidth
-            visible: width > 0
+            x: Math.round(body.width - rail.width * root.railShown)
+            width: PrismTheme.dp(300)
+            visible: root.railShown > 0
+            opacity: root.railShown
             height: parent.height
-            active: root.active
+            active: root.active && rail.visible
             onSeeAllChanges: PrismState.go("changes")
             onReach: row => root.reach(row)
+        }
+
+        // The side column's own key, at the page's top corner where the column begins: it folds it away and brings it
+        // back, and stays in reach however far the page is read.
+        PrismRound {
+            visible: root.railFits
+            x: Math.round(body.width - root.railWidth - width - PrismTheme.dp(32))
+            y: PrismTheme.dp(18)
+            z: 5
+            glyph: root.railOpen ? "right_panel_close" : "right_panel_open"
+            Accessible.role: Accessible.Button
+            Accessible.name: root.railOpen ? Translation.tr("Hide the side column") : Translation.tr("Show the side column")
+            onClicked: root.toggleRail()
         }
 
         IrisSettingsIsland {

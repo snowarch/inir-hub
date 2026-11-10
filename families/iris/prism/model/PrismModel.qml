@@ -234,7 +234,8 @@ Singleton {
     property bool watching: false
     property var changes: []
     function refreshChanges(): void { root.changes = root.rows.filter(row => root.changed(row)) }
-    onWatchingChanged: if (root.watching) root.refreshChanges()
+    // Each visit reads the compositor's own settings again (windows, input, screens): they change outside the shell.
+    onWatchingChanged: if (root.watching) { CompositorConfig.ensure(); root.refreshChanges() }
     onRowsChanged: if (root.watching) changesLater.restart()
     Connections {
         target: Config

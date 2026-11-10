@@ -20,6 +20,7 @@ IrisAutostartList 1.0 IrisAutostartList.qml
 IrisCalendarAccounts 1.0 IrisCalendarAccounts.qml
 IrisDisplayArrange 1.0 IrisDisplayArrange.qml
 IrisDisplayScreens 1.0 IrisDisplayScreens.qml
+IrisHotCorners 1.0 IrisHotCorners.qml
 IrisLayoutModes 1.0 IrisLayoutModes.qml
 IrisDockPinned 1.0 IrisDockPinned.qml
 IrisHubPage 1.0 IrisHubPage.qml

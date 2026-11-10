@@ -804,7 +804,7 @@ Item {
         open: root.windowed || (GlobalStates.settingsOverlayOpen && root.hostHere)
         color: IrisStyle.surface
         light: IrisStyle.surfaceLight("settings", IrisStyle.wallpaperLight)
-        radius: root.windowField ? Number(CompositorConfig.data["window-rules"]?.corner_radius ?? 16)
+        radius: root.windowField ? Number(CompositorConfig.value({ comp: "window-rules", key: "corner-radius", fallback: 16 }))
             : root.windowed ? 0 : IrisStyle.surfaceRadius("settings", IrisStyle.radiusPanel)
         onClosed: IrisState.morphOwner = ""
         // Whole pixels: a body centred on a half pixel draws every line of its text soft.
