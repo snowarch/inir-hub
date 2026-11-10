@@ -25,8 +25,6 @@ Singleton {
     property bool wide: false
     // The group a long page shows, by page: a long page is read one group at a time.
     property var groupOf: ({})
-    // When the page last scrolled: a wheel that lands on a level after it scrolls the page, not the level.
-    property real scrolledAt: 0
 
     readonly property bool canBack: root.back.length > 0
     readonly property bool canForward: root.forward.length > 0

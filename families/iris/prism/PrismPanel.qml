@@ -287,7 +287,6 @@ Item {
             boundsBehavior: Flickable.StopAtBounds
             clip: true
             onContentYChanged: {
-                PrismState.scrolledAt = Date.now()
                 // A hand on the page: the reading line names the group again.
                 if (!glider.running && !root.placing) { root.heldGroup = ""; root.aimUntil = 0 }
                 root.spy()

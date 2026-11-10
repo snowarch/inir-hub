@@ -177,7 +177,9 @@ Item {
                 anchors.right: parent.right
                 anchors.rightMargin: displayFace.pad
                 anchors.verticalCenter: displayMark.verticalCenter
-                width: root.u(36)
+                // As wide as the mark beside it, and never tighter than the figure needs: a rolling digit keeps clear of
+                // the stroke all round (the half-diagonal of its box, then a breath), at any type scale.
+                width: Math.max(root.u(36), Math.ceil(2 * (Math.hypot(fit.implicitWidth / 2, fit.implicitHeight / 2) + ring.stroke + root.u(4))))
                 height: width
                 readonly property real stroke: Math.max(2, root.u(3))
                 property real level: root.pending ? CompositorConfig.secondsLeft / Math.max(1, CompositorConfig.revertAfter) : 1
@@ -201,9 +203,16 @@ Item {
                     }
                 }
                 IrisNumber {
+                    id: fit
+                    visible: false
+                    text: "88"
+                    pixelSize: IrisStyle.typeMeta
+                    weight: IrisStyle.weight(Font.Bold)
+                }
+                IrisNumber {
                     anchors.centerIn: parent
                     text: String(CompositorConfig.secondsLeft)
-                    pixelSize: IrisStyle.typeLabel
+                    pixelSize: IrisStyle.typeMeta
                     weight: IrisStyle.weight(Font.Bold)
                     color: IrisStyle.liveIslandInk
                     countDown: true

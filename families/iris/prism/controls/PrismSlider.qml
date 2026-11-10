@@ -1,4 +1,5 @@
 import QtQuick
+import qs.modules.common.widgets
 import qs.modules.iris.prism.core
 
 // A level as the reference's white-fill pill, lying down: the fill is the value, the glyph rides at its start and the
@@ -86,27 +87,22 @@ Item {
         preventStealing: true
         cursorShape: Qt.PointingHandCursor
         onPressed: mouse => { root.settle(); root.held = true; root.live = root.at(mouse.x); root.moved(root.live) }
-        onContainsMouseChanged: { area.lastScene = Qt.point(-1, -1); if (!area.containsMouse) root.settle() }
+        onContainsMouseChanged: if (!area.containsMouse) root.settle()
         onPositionChanged: mouse => {
-            // Rows scrolled under a still pointer leave its place on screen unchanged; only a hand moves it.
-            const scene = area.mapToItem(null, mouse.x, mouse.y)
-            if (area.lastScene.x >= 0 && Math.abs(scene.x - area.lastScene.x) + Math.abs(scene.y - area.lastScene.y) > 4) area.aimedAt = Date.now()
-            area.lastScene = scene
+            intent.track(mouse.x, mouse.y)
             if (!pressed) return
             const next = root.at(mouse.x)
             if (next !== root.live) { root.live = next; root.moved(next) }
         }
         onReleased: { root.held = false; root.committed(root.live) }
         onCanceled: { root.held = false; root.live = root.value }
-        // A wheel belongs to the page while the page scrolls: the level takes it only once the pointer was moved onto
-        // it after the last scroll (intent from the hand, not from where the rows landed), and never while the page is
-        // still moving (a hand's tremor mid-scroll is not aim). 120 is one notch (Qt's angleDelta, 1/8 degree).
-        property real aimedAt: 0
-        property point lastScene: Qt.point(-1, -1)
+        // A wheel belongs to the page while the page scrolls, and to the level the pointer rests on while the page is
+        // still (WheelIntent, the same hand as every slider of the shell). 120 is one notch (Qt's angleDelta, 1/8 degree).
+        WheelIntent { id: intent; hovered: area.containsMouse }
         property real wheelAcc: 0
         property bool wheelMoved: false
         onWheel: wheel => {
-            if (!root.wheeling && (area.aimedAt <= PrismState.scrolledAt || Date.now() - PrismState.scrolledAt < 400)) { wheel.accepted = false; return }
+            if (!root.wheeling && !intent.take(wheel)) return
             const delta = wheel.angleDelta.y !== 0 ? wheel.angleDelta.y : wheel.angleDelta.x !== 0 ? wheel.angleDelta.x : wheel.pixelDelta.y * 4
             area.wheelAcc += delta
             const steps = Math.trunc(area.wheelAcc / 120)
