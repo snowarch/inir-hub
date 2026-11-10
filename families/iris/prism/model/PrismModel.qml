@@ -147,7 +147,14 @@ Singleton {
                 keywords: Array.from(spec.keywords ?? [])
             })
         }
-        return out
+        // One home per option (his 11-10: "cosas que están repetidas por cualquier lado"): where IrisOptions lists
+        // the same control twice, Prism keeps the later one, its own place (the compositor's glass under Windows,
+        // reserved room under Room for iRiS); a row shown under another condition is another control and stays.
+        const homeOf = row => row.virtual ? "" : (row.spec.comp ? [row.spec.comp + ":" + row.spec.key, row.kind] : [row.path, row.kind, String(row.spec.visibleWhen ?? "")]).join("|")
+        return out.filter((row, i) => {
+            const home = homeOf(row)
+            return home.length === 0 || row.path === "undefined" || !out.some((other, j) => j > i && homeOf(other) === home)
+        })
     }
 
     function page(id: string): var { return root.pages.find(entry => entry.pageId === id) ?? root.pages[0] }

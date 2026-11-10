@@ -4,7 +4,8 @@
     "changes": {
         "2.33.73": [
             "Umbriel: a screen that looks darker at its highest refresh rate than at 60 Hz gets a fix in Settings › Display › Colour",
-      "Prism: turning an option on or off keeps the page where you were reading; a long page no longer jumps to another part"
+      "Prism: turning an option on or off keeps the page where you were reading; a long page no longer jumps to another part",
+      "Prism: every option has one home (no copy of the compositor's blur, shapes or reserved room on a second page); the page card names each value it shows"
         ],
         "2.33.72": [
             "The overview over a fullscreen game no longer rebuilds the Island and Dock on every press: they keep their layer, on Umbriel and Niri"
