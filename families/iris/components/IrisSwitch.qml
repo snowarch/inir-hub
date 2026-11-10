@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Effects
+import qs.services
 import qs.modules.common.functions
 import qs.modules.iris.style
 
@@ -26,9 +27,16 @@ Rectangle {
     readonly property bool nothing: root.look === "nothing"
     readonly property bool synth: root.look === "synth" && !root.skinned
     readonly property bool gel: root.look === "gel" && !root.skinned
+    // Prism: a smoked pill whose knob reads the state it is in (OFF, ON); on, the knob is the white solid.
+    readonly property bool prism: root.look === "prism" && !root.skinned
+    readonly property string onWord: Translation.tr("On").toUpperCase()
+    readonly property string offWord: Translation.tr("Off").toUpperCase()
+    TextMetrics { id: onMetrics; font: knobWord.font; text: root.onWord }
+    TextMetrics { id: offMetrics; font: knobWord.font; text: root.offWord }
+    readonly property real prismKnob: Math.max(30 * root.d, Math.max(onMetrics.advanceWidth, offMetrics.advanceWidth) + 14 * root.d)
 
-    implicitWidth: Math.round((skin.item?.wantWidth ?? (root.skinned ? (76) : root.nothing ? 38 : root.synth ? 44 : root.gel ? 46 : 40)) * root.d)
-    implicitHeight: Math.round((skin.item?.wantHeight ?? (root.skinned ? (26) : root.nothing ? 22 : root.synth ? 28 : root.gel ? 26 : 24)) * root.d)
+    implicitWidth: root.prism ? Math.round(root.prismKnob * 1.62 + 6 * root.d) : Math.round((skin.item?.wantWidth ?? (root.skinned ? (76) : root.nothing ? 38 : root.synth ? 44 : root.gel ? 46 : 40)) * root.d)
+    implicitHeight: Math.round((skin.item?.wantHeight ?? (root.skinned ? (26) : root.nothing ? 22 : root.synth ? 28 : root.gel || root.prism ? 26 : 24)) * root.d)
     // The knob rides a spring and everything else follows it, so a quick double toggle turns back mid-way.
     IrisSpring {
         id: travel
@@ -46,6 +54,7 @@ Rectangle {
     radius: root.skinned ? 0 : root.synth ? IrisStyle.synthKeyRadius : height / 2
     color: root.skinned || root.synth ? "transparent"
         : root.gel ? IrisStyle.fillHover
+        : root.prism ? (area.containsMouse ? IrisStyle.fillHover : IrisStyle.fill)
         : root.nothing ? ColorUtils.applyAlpha(IrisStyle.accentFill, root.lit) : ColorUtils.mix(IrisStyle.appleAccent, root.offTrack, root.lit)
     border.width: root.skinned || !root.nothing ? 0 : root.stroke
     border.color: ColorUtils.mix(IrisStyle.accentFill, root.ring, root.lit)
@@ -129,7 +138,7 @@ Rectangle {
         }
     }
     RectangularShadow {
-        visible: !root.skinned && !root.nothing && !root.synth
+        visible: !root.skinned && !root.nothing && !root.synth && !root.prism
         anchors.fill: knob
         radius: knob.radius
         offset.y: root.d
@@ -141,17 +150,30 @@ Rectangle {
         id: knob
         visible: !root.skinned && !root.synth
         readonly property real size: root.nothing ? Math.round((12 + root.lit) * root.d) : root.height - 4 * root.d
-        readonly property real pad: Math.round((root.nothing ? 4 : 2) * root.d)
+        readonly property real pad: Math.round((root.nothing ? 4 : root.prism ? 3 : 2) * root.d)
         y: Math.round((root.height - height) / 2)
-        width: root.nothing ? knob.size + (area.pressed ? Math.round(4 * root.d) : 0) : knob.size * (area.pressed ? 1.28 : 1)
-        height: knob.size
+        width: root.prism ? Math.round(root.prismKnob + (area.pressed ? 4 * root.d : 0))
+            : root.nothing ? knob.size + (area.pressed ? Math.round(4 * root.d) : 0) : knob.size * (area.pressed ? 1.28 : 1)
+        height: root.prism ? root.height - 2 * knob.pad : knob.size
         x: knob.pad + (root.width - 2 * knob.pad - knob.width) * travel.value
         radius: IrisStyle.capsule(height)
-        color: root.nothing ? ColorUtils.applyAlpha(IrisStyle.inkOnAccentFill, root.lit) : IrisStyle.onTint
+        color: root.prism ? ColorUtils.mix(IrisStyle.prismSolid, IrisStyle.prismSmoke, root.lit)
+            : root.nothing ? ColorUtils.applyAlpha(IrisStyle.inkOnAccentFill, root.lit) : IrisStyle.onTint
         // The white knob keeps a hairline of ink, as the slider's does: with Shadows at 0 it was white on white.
-        border.width: root.nothing ? root.stroke * (1 - root.lit) : root.gel || root.synth ? 0 : 1
+        border.width: root.nothing ? root.stroke * (1 - root.lit) : root.gel || root.synth || root.prism ? 0 : 1
         border.color: root.nothing ? root.ring : Qt.rgba(IrisStyle.text.r, IrisStyle.text.g, IrisStyle.text.b, 0.16)
         Behavior on width { NumberAnimation { duration: IrisStyle.feedbackDuration; easing.type: IrisStyle.feedbackEasing } }
+        Text {
+            id: knobWord
+            visible: root.prism
+            anchors.centerIn: parent
+            text: root.lit > 0.5 ? root.onWord : root.offWord
+            color: ColorUtils.mix(IrisStyle.inkOnPrism, IrisStyle.textSecondary, root.lit)
+            font.family: IrisStyle.fontMain
+            font.pixelSize: Math.round(10 * root.d)
+            font.weight: Font.Bold
+            font.letterSpacing: 0.4 * root.d
+        }
         Loader {
             active: root.gel
             anchors.fill: parent
@@ -168,7 +190,7 @@ Rectangle {
         id: area
         anchors.fill: parent
         anchors.margins: -6 * root.d
-        hoverEnabled: root.skinned
+        hoverEnabled: root.skinned || root.prism
         cursorShape: Qt.PointingHandCursor
         onClicked: root.toggled()
     }

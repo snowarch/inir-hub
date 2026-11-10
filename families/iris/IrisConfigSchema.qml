@@ -768,6 +768,8 @@ JsonObject {
         property int musicLightWidth: 5 // 1-18 px, edge treatment width
         property int thickness: 10
         property int radius: 22
+        // A desktop widget left against a wall of the frame becomes one body with it, as a bubble does.
+        property bool widgets: true
         // "none" | "left" | "right": the frame grows wide on that side and the Dock lives in it, top to bottom, like a
         // browser's sidebar (.claude/ref/iris-frame). Ignored on the Island's own edge.
         property string rail: "none"

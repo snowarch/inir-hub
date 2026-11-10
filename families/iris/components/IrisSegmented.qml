@@ -28,6 +28,8 @@ Rectangle {
     readonly property bool nothing: root.look === "nothing"
     readonly property bool synth: root.look === "synth" && !root.skinned
     readonly property bool gel: root.look === "gel" && !root.skinned
+    // Prism: the chosen part is the white solid with its reverse printed on it, never a raised or outlined thumb.
+    readonly property bool prism: root.look === "prism" && !root.skinned
     readonly property int inset: 2
     readonly property int count: Math.max(1, root.options.length)
     readonly property int selectedIndex: root.options.findIndex(option => option.value === root.current)
@@ -129,10 +131,10 @@ Rectangle {
     function chosenness(index: int): real { return root.selectedIndex < 0 ? 0 : Math.max(0, 1 - Math.abs(root.thumbAt - index)) }
     function inkFor(index: int): color {
         return ColorUtils.mix(root.nothing ? IrisStyle.selectionLabel : root.synth ? IrisStyle.synthInkOnCap
-            : root.gel ? IrisStyle.inkOnGel : IrisStyle.appleAccent, IrisStyle.subtext, root.chosenness(index))
+            : root.gel ? IrisStyle.inkOnGel : root.prism ? IrisStyle.inkOnPrism : IrisStyle.appleAccent, IrisStyle.subtext, root.chosenness(index))
     }
     RectangularShadow {
-        visible: thumb.visible && !root.nothing && !root.gel
+        visible: thumb.visible && !root.nothing && !root.gel && !root.prism
         anchors.fill: thumb
         radius: thumb.radius
         offset.y: root.d
@@ -147,7 +149,7 @@ Rectangle {
         x: Math.round(root.edgeAt(root.thumbAt))
         width: Math.round(root.edgeAt(root.thumbAt + 1)) - x
         radius: root.thumbRadius
-        color: root.nothing ? IrisStyle.selectionFill : IrisStyle.raised
+        color: root.nothing ? IrisStyle.selectionFill : root.prism ? IrisStyle.prismSolid : IrisStyle.raised
         Loader {
             active: root.gel
             anchors.fill: parent

@@ -120,6 +120,8 @@ QtObject {
     })
     function tintFor(id: string): color {
         if (id === "record") return IrisStyle.danger
+        // Prism is black and white: what is on is its white solid, whatever colours the tiles were given.
+        if (IrisStyle.wornAt("control") === "prism") return root.lookTint
         if (root.accentMode === "mono") return IrisStyle.text
         if (root.accentMode === "accent") return root.lookTint
         if (root.accentMode === "colourful") {

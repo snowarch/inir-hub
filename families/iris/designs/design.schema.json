@@ -104,7 +104,7 @@
                     "type": "object",
                     "additionalProperties": false,
                     "properties": {
-                        "look": { "description": "The dialect it speaks; empty keeps the person's.", "type": "string", "enum": ["", "apple", "nothing", "synth", "gel"] },
+                        "look": { "description": "The dialect it speaks; empty keeps the person's.", "type": "string", "enum": ["", "apple", "nothing", "synth", "gel", "prism"] },
                         "widgets": { "description": "The design every desktop widget wears while the Design is on (a widget given its own keeps it); empty keeps the person's.", "type": "string", "enum": ["", "iris", "prism", "material", "instrument", "readout"] },
                         "traits": {
                             "type": "object",

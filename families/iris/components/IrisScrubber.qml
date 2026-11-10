@@ -103,7 +103,7 @@ Item {
                 width: bar.width
                 height: bar.height
                 radius: bar.corner
-                color: root.synth ? IrisStyle.synthLevel : root.gel ? IrisStyle.gelBody : root.fillColor
+                color: root.synth ? IrisStyle.synthLevel : root.gel ? IrisStyle.gelBody : root.look === "prism" ? IrisStyle.prismSolid : root.fillColor
                 Loader {
                     active: root.gel
                     anchors.fill: parent

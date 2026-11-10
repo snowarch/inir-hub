@@ -86,6 +86,8 @@ Item {
 
     PrismBody {
         id: glass
+        visible: !view.face.welded
+        opacity: 1 - view.face.weldCover
         anchors.fill: parent
         face: view.face
         tabRight: view.tabRight

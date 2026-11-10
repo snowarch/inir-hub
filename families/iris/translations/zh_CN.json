@@ -2578,5 +2578,8 @@
   "Rail apps": "侧栏应用",
   "Top lines them up under the launcher like a browser's tabs; Centre holds them in the middle like a Dock.": "顶部会像浏览器标签一样排在启动器下方；居中会像 Dock 一样放在中间。",
   "Rail buttons": "侧栏按钮",
-  "The + that pins apps and the gear that opens Settings.": "用于固定应用的 + 和打开设置的齿轮。"
+  "The + that pins apps and the gear that opens Settings.": "用于固定应用的 + 和打开设置的齿轮。",
+  "Black and white, light breaking at each level.": "黑与白，光在每个刻度处折射。",
+  "Widgets join the frame": "小组件与边框相连",
+  "A desktop widget left against the frame becomes one body with it. Pull it away to let go.": "贴着边框放置的桌面小组件会与它融为一体。拖开即可分离。"
 }

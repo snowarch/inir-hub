@@ -50,4 +50,5 @@ IrisStackDots 1.0 IrisStackDots.qml
 IrisStackControls 1.0 IrisStackControls.qml
 IrisWidgetLook 1.0 IrisWidgetLook.qml
 IrisWidgetPlate 1.0 IrisWidgetPlate.qml
+IrisWidgetWeld 1.0 IrisWidgetWeld.qml
 PrismSpectrum 1.0 PrismSpectrum.qml

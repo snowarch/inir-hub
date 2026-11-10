@@ -31,7 +31,11 @@ Item {
     // A face that draws its own body (Now Playing's Prism: a folder of glass, not a card): no plate, shadow or light
     // under it; glass lends it the blurred wall as `frost`, as to a Design.
     property bool ownBody: false
-    readonly property bool ownPlate: root.designed || root.stocked || root.ownBody
+    readonly property bool ownPlate: root.designed || root.stocked || root.ownBody || root.welded
+    // Left against the frame, the face's body is the frame's (IrisWidgetWeld); a slab of its own steps aside too.
+    readonly property bool welded: weld.welded
+    // How far the frame's material stands over this face's own body, 0..1: a translucent slab fades out under it.
+    readonly property real weldCover: weld.cover
     // Content clears the corner (DI29): a chip in the corner keeps a concentric curve only while the padding is at least
     // the card's radius less the chip's (10), so a rounder card pushes its content in. A fixed 16 left the weather's
     // icon touching a 30 px corner.
@@ -65,13 +69,14 @@ Item {
     // In the light scheme a plate is light, so its ink is the dark one; a bare widget still follows the wallpaper.
     // A glass face is the shell's material in every scheme, veiled as reading needs: turning it white over a bright region
     // left white cards among a dark shell. Only a transparent face, which has no material, follows the wallpaper.
-    readonly property bool lightBackdrop: IrisStyle.light && !root.clear ? true : root.clear ? root.widget.inkOnLight
+    // Joined to the frame the face stands on the frame's body, so it reads in the scheme's ink whatever the wall is.
+    readonly property bool lightBackdrop: root.welded ? IrisStyle.light : IrisStyle.light && !root.clear ? true : root.clear ? root.widget.inkOnLight
         : root.widget.forceDarkInk
     readonly property bool ownInk: root.lightBackdrop || (IrisStyle.light && root.clear) || root.stockInk
     // A paper scheme's face is the shell's paper with the shell's own ink and accents, as the quick-controls sheet is;
     // the light-backdrop path (white frost, accents deepened to 0.3-0.4 lightness) turned orange brown there.
     readonly property bool paper: IrisStyle.light && !root.clear
-    readonly property real textShadow: root.clear ? 1
+    readonly property real textShadow: root.welded ? 0 : root.clear ? 1
         : root.glass && !root.widget.legibleAlways ? Math.min(1, (1 - root.strength) * 1.4) : 0
     // Background off means no plate, Lume on every widget or not: there it only deepens the text's shadow (10-25).
     readonly property real veil: root.opaque ? root.strength
@@ -148,10 +153,18 @@ Item {
     function dp(value: real): real { return Math.round(value * root.k) }
     function px(value: real): real { return Math.round(value * root.t) }
 
+    IrisWidgetWeld {
+        id: weld
+        anchors.fill: parent
+        widget: root.widget
+        radius: root.radius
+        can: root.plated && !root.clear && !root.designed && !root.stocked
+    }
+
     // A shadow under glass shows through it: the body darkens toward its middle and its top edge reads as a glow.
     RectangularShadow {
         anchors.fill: parent
-        visible: root.opaque && root.plated && !root.ownBody
+        visible: root.opaque && root.plated && !root.ownBody && !root.welded
         radius: root.radius
         blur: root.dp(28)
         spread: -root.dp(4)
@@ -165,7 +178,7 @@ Item {
     Loader {
         id: glassLoader
         anchors.fill: parent
-        active: root.glass
+        active: root.glass && !root.welded
         visible: root.plated
         sourceComponent: ClippingRectangle {
             id: glassPane
@@ -286,7 +299,7 @@ Item {
     }
     IrisBodyLight {
         anchors.fill: parent
-        visible: !IrisStyle.selfLit && root.plated && !root.clear && !root.ownBody
+        visible: !IrisStyle.selfLit && root.plated && !root.clear && !root.ownBody && !root.welded
         radius: root.radius
     }
 

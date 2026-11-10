@@ -344,7 +344,7 @@ QtObject {
     // (ink body, one signal), Synth (keys and faders), Gel (glossy capsules). Every look takes its colour from L1 (accent,
     // highlight, signal), never from a literal of its own, so the person's colours reach every look. A colour theme the
     // person follows and the anime layer are choices of colour: under them Nothing speaks Apple.
-    readonly property var lookIds: ["apple", "nothing", "synth", "gel"]
+    readonly property var lookIds: ["apple", "nothing", "synth", "gel", "prism"]
     function lookAllowed(look: string): string {
         if (!root.lookIds.includes(look)) return "apple"
         return look === "nothing" && (root.followsTheme || root.animeEnabled) ? "apple" : look
@@ -395,7 +395,8 @@ QtObject {
         nothing: { marks: "glyph", selection: "plate", captions: "mono", plate: "line" },
         synth: root.synthMono ? { marks: "key", selection: "plate", captions: "mono", titles: "lower", plate: "key" }
             : { marks: "key", selection: "plate", plate: "key" },
-        gel: { marks: "gloss", selection: "plate", plate: "gloss" }
+        gel: { marks: "gloss", selection: "plate", plate: "gloss" },
+        prism: { marks: "tile", selection: "plate", captions: "mono", hover: "wash", index: true, sections: "line" }
     })[root.look] ?? ({})
     function trait(name: string): var {
         const own = IrisDesign.trait(name)
@@ -414,13 +415,18 @@ QtObject {
     // The chosen thing in a look that marks it with a plate: Synth's lit key, Gel's glossy body, the accent plate.
     // `plateOfLook` answers for any look, so a place wearing its own (the Control Center's lit tiles) asks with its look.
     function plateOfLook(look: string): color {
-        return look === "synth" ? root.synthOn : look === "gel" ? root.gelBody
+        return look === "synth" ? root.synthOn : look === "gel" ? root.gelBody : look === "prism" ? root.prismSolid
             : look === "nothing" && !root.mono ? (root.nothingSignal ? root.signal : root.text) : root.accentFill
     }
     function inkOnPlateOfLook(look: string): color {
-        return look === "synth" ? root.inkOnSynthOn : look === "gel" ? root.inkOnGel
+        return look === "synth" ? root.inkOnSynthOn : look === "gel" ? root.inkOnGel : look === "prism" ? root.inkOnPrism
             : look === "nothing" && !root.mono ? (root.nothingSignal ? root.inkOnSignal : root.paper) : root.inkOnAccentFill
     }
+    // Prism (`.claude/ref/iris-prism`): black and white. What is chosen, on or filled is one solid of white light (the
+    // ink on a light body) with its reverse printed on it; where a level ends, the white breaks into its spectrum.
+    readonly property color prismSolid: root.text
+    readonly property color inkOnPrism: root.light ? "#ffffff" : "#000000" // iris-literal: the reverse of Prism's solid
+    readonly property color prismSmoke: ColorUtils.mix(root.text, root.surfaceOpaque, root.light ? 0.1 : 0.14)
     readonly property color lookPlate: root.plateOfLook(root.look)
     readonly property color inkOnLookPlate: root.inkOnPlateOfLook(root.look)
     // Synth: an instrument panel. A switch is a key that sinks and lights its LED, a level a fader over ticks, a choice
