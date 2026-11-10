@@ -197,6 +197,12 @@ Singleton {
     }
     function locked(row: var): bool { const _ = root.revision; return Boolean(row.spec?.locked?.()) }
     function note(row: var): string { const _ = root.revision; return row.spec?.note ? String(row.spec.note() ?? "") : "" }
+    // Where a level's drag holds: the value the row has with nothing set (NaN: none known).
+    function home(row: var): real {
+        const _ = root.revision
+        const factory = root.virtual(row) ? undefined : IrisOptions.factory(row.spec)
+        return factory === undefined || factory === null || !Number.isFinite(Number(factory)) ? NaN : Number(factory)
+    }
     function stored(row: var, value: var): var { return row.spec?.invert && row.kind === "switch" ? !Boolean(value) : value }
     function write(row: var, value: var): void {
         if (row.path === "settingsDesign") { root.wearSettings(String(value)); return }

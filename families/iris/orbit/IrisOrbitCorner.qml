@@ -40,8 +40,8 @@ Scope {
 
     function cornerFor(outputName: string): string {
         if (root.configured !== "auto")
-            return NiriService.isOverviewHotCornerActive(outputName, root.configured) ? "" : (root.order.includes(root.configured) ? root.configured : "")
-        const free = root.order.filter(corner => !NiriService.isOverviewHotCornerActive(outputName, corner))
+            return CompositorConfig.cornerTaken(outputName, root.configured) ? "" : (root.order.includes(root.configured) ? root.configured : "")
+        const free = root.order.filter(corner => !CompositorConfig.cornerTaken(outputName, corner))
         return free.find(corner => !root.occupiedZones.has(root.zoneOf[corner])) ?? free[0] ?? ""
     }
 

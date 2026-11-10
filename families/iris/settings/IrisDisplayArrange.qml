@@ -217,7 +217,9 @@ Column {
             }
             IrisText {
                 width: parent.width
-                text: Translation.tr("Drag a screen to where it stands on your desk.")
+                text: root.chosen?.enabled === false ? Translation.tr("Its switch below turns it back on, where it stood.")
+                    : root.screens.length < 2 ? Translation.tr("Screens turned off wait on the right.")
+                    : Translation.tr("Drag a screen to where it stands on your desk.")
                 color: IrisStyle.muted
                 font.pixelSize: IrisStyle.typeFootnote
                 wrapMode: Text.WordWrap

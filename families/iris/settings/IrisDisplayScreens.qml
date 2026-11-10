@@ -65,10 +65,9 @@ Flow {
                 anchors.fill: parent
                 visible: root.picks
                 radius: IrisStyle.radiusTile
-                color: IrisStyle.fill
+                // The chosen one is a fill, never a ring.
+                color: tile.chosen ? IrisStyle.tintFillHover(IrisStyle.accent) : IrisStyle.fill
                 opacity: tile.chosen ? 1 : press.containsMouse || tile.activeFocus ? 0.55 : 0
-                border.width: tile.chosen ? 2 : 0
-                border.color: IrisStyle.accent
                 Behavior on opacity { NumberAnimation { duration: 120; easing.type: IrisStyle.feedbackEasing } }
             }
 

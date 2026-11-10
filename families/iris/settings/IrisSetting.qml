@@ -55,7 +55,7 @@ Item {
     }
     readonly property string pickedDetail: {
         if (root.spec.kind !== "choice" || root.carded) return ""
-        const pick = (root.spec.choices ?? []).find(entry => String(entry.value) === String(root.value))
+        const pick = root.choices.find(entry => String(entry.value) === String(root.value))
         return pick?.detail ? Translation.tr(String(pick.detail)) : ""
     }
     function commit(next: var): void { IrisOptions.commit(root.spec, next) }
@@ -88,7 +88,7 @@ Item {
     readonly property string noteText: { Config.revision; return root.spec.note ? String(root.spec.note() ?? "") : "" }
     readonly property real controlOpacity: root.locked ? 0.42 : 1
     readonly property bool resettable: IrisOptions.resettable(root.spec)
-    readonly property bool modified: root.resettable && !IrisOptions.same(root.value, root.spec.fallback)
+    readonly property bool modified: root.resettable && !IrisOptions.same(root.value, IrisOptions.factory(root.spec))
     readonly property bool pictured: root.choices.some(choice => String(choice.glyph ?? "").length > 0)
     readonly property bool swatched: root.spec.kind === "choice" && root.choices.length > 0
         && root.choices.every(choice => choice.swatch !== undefined || ["wallpaper", "accent", "custom", "theme"].includes(choice.value))
@@ -265,7 +265,7 @@ Item {
                                     Accessible.role: Accessible.Button
                                     objectName: "resetMark"
                                     Accessible.name: Translation.tr("Reset %1").arg(Translation.tr(root.spec.label))
-                                    onClicked: root.commit(root.spec.fallback)
+                                    onClicked: root.commit(IrisOptions.factory(root.spec))
                                 }
                             }
                         }
@@ -719,7 +719,7 @@ Item {
                 const span = root.spec.max - root.spec.min
                 const raw = root.spec.min + next * span
                 // A drag passing the default holds there, so it can always be found again; keys and the wheel step freely.
-                const home = Number(root.spec.fallback)
+                const home = Number(IrisOptions.factory(root.spec))
                 const held = rangeScrubber.dragging && Number.isFinite(home) && Math.abs(raw - home) < span * 0.02
                 const value = held ? home : Number((Math.round(raw / step) * step).toFixed(4))
                 if (!rangeScrubber.dragging) { if (value !== Number(root.value)) root.commit(value); return }

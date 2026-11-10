@@ -99,7 +99,7 @@ Flow {
                 anchors.topMargin: Math.round(8 * root.d)
                 anchors.left: picture.left
                 anchors.right: picture.right
-                spacing: Math.round(1 * root.d)
+                spacing: Math.round(2 * root.d)
                 IrisText {
                     width: parent.width
                     text: tile.way.label

@@ -39,7 +39,13 @@ Item {
         const stepped = Math.round((v - root.from) / root.stepSize) * root.stepSize + root.from
         return Math.max(root.from, Math.min(root.to, Number(stepped.toFixed(6))))
     }
-    function at(x: real): real { return root.snap(root.from + (x / root.width) * (root.to - root.from)) }
+    // The factory value: a drag passing it holds there, so it can always be found again; the wheel steps freely.
+    property real home: NaN
+    function at(x: real): real {
+        const raw = root.from + (x / root.width) * (root.to - root.from)
+        if (Number.isFinite(root.home) && Math.abs(raw - root.home) < (root.to - root.from) * 0.02) return root.home
+        return root.snap(raw)
+    }
 
     Rectangle {
         id: track

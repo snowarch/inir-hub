@@ -38,10 +38,10 @@ Item {
             const rate = parseFloat(parts[1] ?? "")
             return parts[0].replace("x", "×") + (Number.isFinite(rate) ? " · " + Math.round(rate) + " Hz" : "")
         }
-        if (key === "scale") return Number(value).toFixed(2).replace(/0$/, "").replace(/\.0$/, "") + "×"
-        if (key === "transform") return /^\d+$/.test(value) ? value + "°" : value === "normal" ? "0°" : value
-        if (key === "vrr") return value === "off" ? Translation.tr("Off") : Translation.tr("On")
-        return value
+        if (key === "on") return value === "true" ? Translation.tr("On") : Translation.tr("Off")
+        // The words the row itself shows for that value.
+        const named = CompositorConfig.displayChoices(key).find(choice => String(choice.value) === value)
+        return named ? Translation.tr(named.label) : value
     }
 
     // ── The shape. Growing takes the emerge spring (it overshoots a little, as the Island does opening); shrinking the

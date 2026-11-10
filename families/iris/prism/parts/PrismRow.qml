@@ -32,6 +32,8 @@ Item {
     readonly property bool restorable: PrismModel.restorable(root.row)
     readonly property bool locked: PrismModel.locked(root.row)
     readonly property string note: PrismModel.note(root.row)
+    // Read from the row's spec each time: a description that follows live state (a compositor's refusal) stays current.
+    readonly property string about: String(root.spec.description ?? root.row.detail ?? "")
     readonly property bool hovered: hover.hovered
     property bool open: false
 
@@ -143,7 +145,7 @@ Item {
             PrismText {
                 width: parent.width
                 visible: text.length > 0 && !root.showPage && !about.visible
-                text: Translation.tr(root.row.detail ?? "")
+                text: Translation.tr(root.about)
                 color: PrismTheme.ink2
                 font.pixelSize: PrismTheme.small
                 wrapMode: Text.WordWrap
@@ -189,12 +191,12 @@ Item {
         }
         PrismText {
             id: about
-            visible: root.aboutWidth > 0 && String(root.row.detail ?? "").length > 0 && root.inline.length > 0
+            visible: root.aboutWidth > 0 && root.about.length > 0 && root.inline.length > 0
             width: root.aboutWidth
             anchors.right: control.left
             anchors.rightMargin: PrismTheme.dp(20)
             anchors.verticalCenter: parent.verticalCenter
-            text: Translation.tr(root.row.detail ?? "")
+            text: Translation.tr(root.about)
             color: PrismTheme.ink2
             font.pixelSize: PrismTheme.small
             wrapMode: Text.WordWrap
@@ -303,6 +305,7 @@ Item {
             to: Number(root.spec.max ?? 100)
             stepSize: Number(root.spec.step ?? 1)
             value: Number(root.value ?? 0)
+            home: PrismModel.home(root.row)
             glyph: root.row.glyph ?? ""
             label: PrismModel.figure(root.row, slider.live)
             onMoved: value => PrismModel.preview(root.row, value)
