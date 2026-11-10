@@ -412,7 +412,8 @@ Item {
                         width: content.width
                         PrismSection {
                             width: parent.width
-                            eyebrow: Translation.tr(root.page.name)
+                            // The page's name stands once over the page: every group repeating it was noise (his 11-10).
+                            eyebrow: ""
                             title: Translation.tr(sectionBox.modelData.title)
                             rows: sectionBox.modelData.rows
                             heads: sectionBox.index === 0

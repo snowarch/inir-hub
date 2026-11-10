@@ -111,28 +111,37 @@ Item {
         }
     }
 
-    // What the page holds now: its leading values as the title, their names as the eyebrow.
+    // What the page holds now: each leading value with its name beside it ("Auto Auto" said nothing, his 11-10).
     Column {
         x: PrismTheme.dp(28)
         y: PrismTheme.dp(26)
         width: art.card.x - x - PrismTheme.dp(24)
-        spacing: PrismTheme.dp(4)
-        PrismText {
-            width: parent.width
-            text: root.lead.map(row => Translation.tr(row.label)).join(" · ")
-            color: Qt.rgba(1, 1, 1, 0.56) // iris-literal: Prism's own ink over its art, the same in every scheme
-            font.pixelSize: PrismTheme.body
-        }
+        spacing: PrismTheme.dp(6)
         Repeater {
             model: root.lead
-            delegate: PrismText {
+            delegate: Row {
+                id: line
                 required property var modelData
                 width: parent.width
-                text: PrismModel.sayNow(modelData)
-                color: PrismTheme.paper
-                font.pixelSize: PrismTheme.display
-                font.weight: Font.Bold
-                font.letterSpacing: -0.6
+                spacing: PrismTheme.dp(12)
+                PrismText {
+                    id: said
+                    width: Math.min(implicitWidth, line.width * 0.62)
+                    elide: Text.ElideRight
+                    text: PrismModel.sayNow(line.modelData)
+                    color: PrismTheme.paper
+                    font.pixelSize: PrismTheme.display
+                    font.weight: Font.Bold
+                    font.letterSpacing: -0.6
+                }
+                PrismText {
+                    anchors.baseline: said.baseline
+                    width: line.width - said.width - line.spacing
+                    elide: Text.ElideRight
+                    text: Translation.tr(line.modelData.label)
+                    color: Qt.rgba(1, 1, 1, 0.56) // iris-literal: Prism's own ink over its art, the same in every scheme
+                    font.pixelSize: PrismTheme.body
+                }
             }
         }
     }
