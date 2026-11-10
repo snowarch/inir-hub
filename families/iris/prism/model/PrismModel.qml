@@ -205,7 +205,7 @@ Singleton {
     }
     // A drag shows its value on the desktop without writing it; release writes once, as one change.
     function preview(row: var, value: var): void {
-        if (row.virtual || !row.spec.path || row.spec.niri || row.spec.widget || row.spec.bundle) return
+        if (row.virtual || !row.spec.path || row.spec.comp || row.spec.widget || row.spec.bundle) return
         IrisOptions.hold(row.spec)
         Config.previewNestedValue(row.spec.path, root.stored(row, value))
     }

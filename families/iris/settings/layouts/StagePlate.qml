@@ -52,8 +52,8 @@ Item {
         captionOutside: true
         playing: root.playing && root.staged
         section: root.area
-        niriValue: (section, key) => IrisNiri.value(IrisOptions.settings.find(spec => spec.niri === section && spec.key === key) ?? { niri: section, key: key })
-        niriRevision: IrisNiri.revision
+        niriValue: (section, key) => CompositorConfig.value(IrisOptions.settings.find(spec => spec.comp === section && spec.key === key) ?? { comp: section, key: key })
+        niriRevision: CompositorConfig.revision
         group: root.group
     }
     // The caption under the stage, never a chip on it: on the stage it sat on the login's password and the motion's boxes.

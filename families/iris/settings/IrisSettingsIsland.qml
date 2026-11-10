@@ -21,7 +21,7 @@ Item {
     property bool allowed: true
     function u(n: real): int { return Math.round(n * root.d) }
 
-    readonly property var pending: IrisNiri.pending
+    readonly property var pending: CompositorConfig.pending
     readonly property string mode: root.allowed && root.pending ? "display" : ""
     readonly property bool shown: root.mode.length > 0
 
@@ -180,7 +180,7 @@ Item {
                 width: root.u(36)
                 height: width
                 readonly property real stroke: Math.max(2, root.u(3))
-                property real level: root.pending ? IrisNiri.secondsLeft / Math.max(1, IrisNiri.revertAfter) : 1
+                property real level: root.pending ? CompositorConfig.secondsLeft / Math.max(1, CompositorConfig.revertAfter) : 1
                 // The ring steps with the figure it rings, each second a short settle, as a watch's seconds hand.
                 Behavior on level { NumberAnimation { duration: IrisStyle.duration(360); easing.type: Easing.BezierSpline; easing.bezierCurve: IrisStyle.moveCurve } }
                 Shape {
@@ -202,14 +202,14 @@ Item {
                 }
                 IrisNumber {
                     anchors.centerIn: parent
-                    text: String(IrisNiri.secondsLeft)
+                    text: String(CompositorConfig.secondsLeft)
                     pixelSize: IrisStyle.typeLabel
                     weight: IrisStyle.weight(Font.Bold)
                     color: IrisStyle.liveIslandInk
                     countDown: true
                 }
                 Accessible.role: Accessible.StaticText
-                Accessible.name: Translation.tr("Keep this display setting? It goes back in %1 s.").arg(IrisNiri.secondsLeft)
+                Accessible.name: Translation.tr("Keep this display setting? It goes back in %1 s.").arg(CompositorConfig.secondsLeft)
             }
             Row {
                 id: answers
@@ -243,7 +243,7 @@ Item {
                             anchors.fill: parent
                             hoverEnabled: true
                             cursorShape: Qt.PointingHandCursor
-                            onClicked: answer.modelData.keep ? IrisNiri.keepDisplay() : IrisNiri.revertDisplay()
+                            onClicked: answer.modelData.keep ? CompositorConfig.keepDisplay() : CompositorConfig.revertDisplay()
                         }
                         Accessible.role: Accessible.Button
                         Accessible.name: answer.modelData.name

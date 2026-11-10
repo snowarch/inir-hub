@@ -64,7 +64,7 @@ Item {
     // previewed at all: each step would solve and recolour the whole shell, or rewrite Niri's config.
     property real dragValue: NaN
     readonly property var shownValue: Number.isFinite(root.dragValue) ? root.dragValue : root.value
-    readonly property bool livePath: !root.spec.niri && !root.spec.bundle && String(root.spec.path ?? "").length > 0
+    readonly property bool livePath: !root.spec.comp && !root.spec.bundle && String(root.spec.path ?? "").length > 0
         && !/^iris\.appearance\.tune\.|^iris\.widgets\.vibrance$|^appearance\./.test(String(root.spec.path))
     function previewDrag(): void {
         // The island's Undo goes back to the value before the drag, not to one of its steps.
@@ -80,7 +80,7 @@ Item {
         return bundle.length > 0 ? IrisStyle.face(bundle[0], choice.values[0]) : IrisStyle.face(root.spec.path, choice.value)
     }
     readonly property var choices: {
-        IrisNiri.revision
+        CompositorConfig.revision
         return IrisOptions.choicesOf(root.spec)
     }
     // A row can say why it does not answer right now (`locked`) and what state it is in (`note`), so it never reads as broken.

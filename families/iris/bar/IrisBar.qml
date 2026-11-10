@@ -522,7 +522,7 @@ Scope {
                 const row = { section: String(spec.section ?? ""), group: String(spec.group ?? ""), part: String(spec.part ?? ""),
                     label: String(spec.label ?? ""), kind: String(spec.kind ?? ""),
                     paths: spec.bundle ? Array.from(spec.bundle, path => String(path)) : spec.flags ? [String(spec.flags)] : spec.path ? [String(spec.path)] : [],
-                    via: spec.widget ? "widget" : spec.widgetDesign ? "widgetDesign" : spec.niri ? "niri" : spec.kind === "icon" ? "icon" : spec.set ? "set" : spec.flags ? "flags" : spec.bundle ? "bundle" : "path",
+                    via: spec.widget ? "widget" : spec.widgetDesign ? "widgetDesign" : spec.comp ? "niri" : spec.kind === "icon" ? "icon" : spec.set ? "set" : spec.flags ? "flags" : spec.bundle ? "bundle" : "path",
                     tune: IrisOptions.fineTune(spec), mirror: Boolean(spec.mirror), visibleWhen: String(spec.visibleWhen ?? ""), showIf: Boolean(spec.showIf),
                     fallback: data(spec.fallback), min: spec.min, max: spec.max, step: spec.step }
                 try {

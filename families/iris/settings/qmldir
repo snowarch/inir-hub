@@ -13,13 +13,14 @@ IrisHomeEditor 1.0 IrisHomeEditor.qml
 IrisSettingsIsland 1.0 IrisSettingsIsland.qml
 IrisAboutPage 1.0 IrisAboutPage.qml
 IrisShortcutsPage 1.0 IrisShortcutsPage.qml
-singleton IrisNiri 1.0 IrisNiri.qml
 IrisGameModeCard 1.0 IrisGameModeCard.qml
 IrisNiriMotionGallery 1.0 IrisNiriMotionGallery.qml
 IrisChoiceGrid 1.0 IrisChoiceGrid.qml
 IrisAutostartList 1.0 IrisAutostartList.qml
 IrisCalendarAccounts 1.0 IrisCalendarAccounts.qml
+IrisDisplayArrange 1.0 IrisDisplayArrange.qml
 IrisDisplayScreens 1.0 IrisDisplayScreens.qml
+IrisLayoutModes 1.0 IrisLayoutModes.qml
 IrisDockPinned 1.0 IrisDockPinned.qml
 IrisHubPage 1.0 IrisHubPage.qml
 IrisNotificationApps 1.0 IrisNotificationApps.qml

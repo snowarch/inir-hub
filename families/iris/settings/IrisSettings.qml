@@ -670,7 +670,7 @@ Item {
         if (!known && asked0.length > 0) { searchField.text = asked.split("/").join(" "); root.query = searchField.text }
     }
     Component.onCompleted: {
-        IrisNiri.ensure()
+        CompositorConfig.ensure()
         IrisOptions.settle()
         if (GlobalStates.settingsOverlayOpen) root.applyRequest()
         // The window host is built on open: the page takes the keys then, or ↑ ↓ and typing reached nothing (DI49a).
@@ -684,7 +684,7 @@ Item {
             if (!GlobalStates.settingsOverlayOpen) return
             // A visit's history starts with it: an Undo never reaches back into a change made days ago.
             IrisOptions.forget()
-            IrisNiri.ensure()
+            CompositorConfig.ensure()
             IrisOptions.settle()
             root.applyRequest()
             if (!searchField.activeFocus) root.forceActiveFocus()
@@ -780,7 +780,7 @@ Item {
     // A textured material (Afterglow's bevel, Light leak's lit rim) must follow the corners Niri clips the window to: its
     // radius is Niri's, so the squircle stays inside the clip.
     readonly property bool windowField: root.windowed && IrisStyle.textured
-    onWindowFieldChanged: if (root.windowField) IrisNiri.reload(["window-rules"])
+    onWindowFieldChanged: if (root.windowField) CompositorConfig.reload(["window-rules"])
     // In a window Niri owns the shape, the corners and the open motion: the body fills it, already open.
     IrisMorphSurface {
         motionSurface: "settings"
@@ -804,7 +804,7 @@ Item {
         open: root.windowed || (GlobalStates.settingsOverlayOpen && root.hostHere)
         color: IrisStyle.surface
         light: IrisStyle.surfaceLight("settings", IrisStyle.wallpaperLight)
-        radius: root.windowField ? Number(IrisNiri.data["window-rules"]?.corner_radius ?? 16)
+        radius: root.windowField ? Number(CompositorConfig.data["window-rules"]?.corner_radius ?? 16)
             : root.windowed ? 0 : IrisStyle.surfaceRadius("settings", IrisStyle.radiusPanel)
         onClosed: IrisState.morphOwner = ""
         // Whole pixels: a body centred on a half pixel draws every line of its text soft.

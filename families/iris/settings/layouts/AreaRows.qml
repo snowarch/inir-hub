@@ -157,7 +157,7 @@ ColumnLayout {
     Timer { id: soon; interval: 0; onTriggered: rows.refresh() }
     function touch(): void { if (rows.live) soon.restart(); else rows.stale = true }
     Connections { target: Config; function onRevisionChanged(): void { rows.touch() } }
-    Connections { target: IrisNiri; function onRevisionChanged(): void { rows.touch() } }
+    Connections { target: CompositorConfig; function onRevisionChanged(): void { rows.touch() } }
     onLiveChanged: if (rows.live && rows.stale) rows.refresh()
     Component.onCompleted: rows.refresh()
 
