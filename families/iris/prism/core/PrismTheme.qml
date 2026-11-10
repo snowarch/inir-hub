@@ -34,6 +34,18 @@ Singleton {
 
     readonly property color accent: IrisStyle.accent
     readonly property color inkAccent: IrisStyle.inkOnAccent
+    // The accent as text on the side column ("where you are", his 11-10): the person's hue, walked toward the ink
+    // until it reads at 4.5:1 on the rail, so a deep or a pale accent still names the open page.
+    readonly property color accentInk: {
+        const hue = Qt.color(root.accent)
+        for (let step = 0; step <= 10; step++) {
+            const ink = ColorUtils.mix(root.ink, hue, step / 10)
+            if (ColorUtils.contrastRatio(ink, root.rail) >= 4.5) return ink
+        }
+        return root.ink
+    }
+    // The open page's plate: its hue, quiet, as solid as the row hover (his 11-07: plates, never gradients).
+    readonly property color accentPlate: ColorUtils.applyAlpha(root.accent, root.light ? 0.13 : 0.16)
 
     // Art stays dark in every scheme, like a record sleeve: the hero, the player, the glass card.
     readonly property color night: "#08080a" // iris-literal: the refraction's black, the same in every scheme

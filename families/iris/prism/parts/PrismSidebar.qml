@@ -203,18 +203,23 @@ Item {
                 delegate: Column {
                     id: group
                     required property string modelData
+                    readonly property var pages: PrismModel.inGroup(group.modelData)
+                    // The caption over the open page warms with it: where you are reads at the group's level too.
+                    readonly property bool here: !PrismState.searching && group.pages.some(page => page.pageId === PrismState.page)
                     width: column.width
                     PrismText {
                         topPadding: PrismTheme.dp(18)
                         bottomPadding: PrismTheme.dp(6)
                         text: Translation.tr(group.modelData).toUpperCase()
-                        color: PrismTheme.ink3
+                        color: group.here ? PrismTheme.accentInk : PrismTheme.ink3
+                        opacity: group.here ? 0.85 : 1
+                        Behavior on color { ColorAnimation { duration: PrismTheme.ms(160); easing.type: Easing.OutCubic } }
                         font.pixelSize: PrismTheme.caption
                         font.weight: Font.DemiBold
                         font.letterSpacing: 0.6
                     }
                     Repeater {
-                        model: PrismModel.inGroup(group.modelData)
+                        model: group.pages
                         delegate: Column {
                             id: entry
                             required property var modelData
