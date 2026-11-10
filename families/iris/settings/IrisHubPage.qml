@@ -947,10 +947,44 @@ Flickable {
                         onClicked: Hub.remove(page.item.id)
                     }
                 }
+                // A lead choice (`lead: true`) is the plugin on or off as a whole: a switch with its note.
+                Repeater {
+                    model: Hub.choicesTitle(page.item).length > 0 ? (Hub.choices[page.item?.id ?? ""] ?? []).filter(c => c.lead) : []
+                    delegate: RowLayout {
+                        required property var modelData
+                        Layout.fillWidth: true
+                        Layout.topMargin: Math.round(16 * root.d)
+                        spacing: Math.round(12 * root.d)
+                        ColumnLayout {
+                            Layout.fillWidth: true
+                            spacing: Math.round(2 * root.d)
+                            IrisText {
+                                Layout.fillWidth: true
+                                text: modelData.label
+                                font.weight: IrisStyle.weight(Font.Medium)
+                                font.pixelSize: IrisStyle.typeBody
+                                elide: Text.ElideRight
+                            }
+                            IrisText {
+                                Layout.fillWidth: true
+                                visible: text.length > 0
+                                text: String(modelData.note ?? "")
+                                color: IrisStyle.textSecondary
+                                font.pixelSize: IrisStyle.typeLabel
+                                wrapMode: Text.WordWrap
+                            }
+                        }
+                        IrisSwitch {
+                            name: modelData.label
+                            on: modelData.on
+                            onToggled: Hub.toggleChoice(page.item.id, modelData.id)
+                        }
+                    }
+                }
                 // A plugin's own choices (plugin.json `choices`), read as its page opens; a chip flips one.
                 IrisText {
                     readonly property string plugin: Hub.choicesTitle(page.item).length > 0 ? page.item.id : ""
-                    visible: plugin.length > 0
+                    visible: plugin.length > 0 && (Hub.choices[plugin] ?? []).some(c => !c.lead)
                     Layout.topMargin: Math.round(16 * root.d)
                     text: Hub.choicesTitle(page.item)
                     color: IrisStyle.textSecondary
@@ -961,10 +995,10 @@ Flickable {
                 Flow {
                     Layout.fillWidth: true
                     Layout.topMargin: Math.round(6 * root.d)
-                    visible: Hub.choicesTitle(page.item).length > 0
+                    visible: Hub.choicesTitle(page.item).length > 0 && (Hub.choices[page.item?.id ?? ""] ?? []).some(c => !c.lead)
                     spacing: Math.round(6 * root.d)
                     Repeater {
-                        model: Hub.choices[page.item?.id ?? ""] ?? []
+                        model: (Hub.choices[page.item?.id ?? ""] ?? []).filter(c => !c.lead)
                         delegate: IrisChip {
                             required property var modelData
                             label: modelData.label

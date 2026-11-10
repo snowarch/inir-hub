@@ -1,7 +1,10 @@
 {
     "$schema": "../../schema/hub.schema.json",
-    "version": "2.33.66",
+    "version": "2.33.67",
     "changes": {
+        "2.33.67": [
+            "Hub: a plugin that changes a file of yours, like Fastfetch, gets a switch that turns it off and gives yours back"
+        ],
         "2.33.66": [
             "Settings follow the compositor you run: Niri shows what Niri does, Umbriel gets pages of its own",
             "Umbriel: layouts drawn as pictures, tabs, title bars, glass, effects you press on a drawn desktop, hot corners, HDR and colour depth",

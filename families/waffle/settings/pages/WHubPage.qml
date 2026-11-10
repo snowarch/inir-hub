@@ -885,11 +885,45 @@ WSettingsPage {
                             item: page.item
                         }
                     }
+                    // A lead choice (`lead: true`) is the plugin on or off as a whole: a switch with its note.
+                    Repeater {
+                        model: Hub.choicesTitle(page.item).length > 0 ? (Hub.choices[page.item?.id ?? ""] ?? []).filter(c => c.lead) : []
+                        delegate: RowLayout {
+                            required property var modelData
+                            Layout.fillWidth: true
+                            Layout.topMargin: Looks.dp(14)
+                            spacing: Looks.dp(12)
+                            ColumnLayout {
+                                Layout.fillWidth: true
+                                spacing: Looks.dp(2)
+                                WText {
+                                    Layout.fillWidth: true
+                                    text: modelData.label
+                                    font.weight: Looks.font.weight.strong
+                                    font.pixelSize: Looks.font.pixelSize.normal
+                                    elide: Text.ElideRight
+                                }
+                                WText {
+                                    Layout.fillWidth: true
+                                    visible: text.length > 0
+                                    text: String(modelData.note ?? "")
+                                    color: Looks.colors.subfg
+                                    font.pixelSize: Looks.font.pixelSize.small
+                                    wrapMode: Text.WordWrap
+                                }
+                            }
+                            WSwitch {
+                                Layout.alignment: Qt.AlignVCenter
+                                checked: modelData.on
+                                onClicked: Hub.toggleChoice(page.item.id, modelData.id)
+                            }
+                        }
+                    }
                     // A plugin's own choices (plugin.json `choices`), read as its page opens; a button flips one.
                     WText {
                         readonly property string plugin: Hub.choicesTitle(page.item).length > 0 ? page.item.id : ""
-                        visible: plugin.length > 0
-                        Layout.topMargin: Looks.dp(14)
+                        visible: plugin.length > 0 && (Hub.choices[plugin] ?? []).some(c => !c.lead)
+                            Layout.topMargin: Looks.dp(14)
                         text: Hub.choicesTitle(page.item)
                         font.pixelSize: Looks.font.pixelSize.normal
                         onPluginChanged: if (plugin.length > 0) Hub.readChoices(plugin)
@@ -897,10 +931,10 @@ WSettingsPage {
                     }
                     Flow {
                         Layout.fillWidth: true
-                        visible: Hub.choicesTitle(page.item).length > 0
+                        visible: Hub.choicesTitle(page.item).length > 0 && (Hub.choices[page.item?.id ?? ""] ?? []).some(c => !c.lead)
                         spacing: Looks.dp(6)
                         Repeater {
-                            model: Hub.choices[page.item?.id ?? ""] ?? []
+                            model: (Hub.choices[page.item?.id ?? ""] ?? []).filter(c => !c.lead)
                             delegate: WBorderedButton {
                                 required property var modelData
                                 text: modelData.label

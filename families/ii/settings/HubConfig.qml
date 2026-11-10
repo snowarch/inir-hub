@@ -1103,10 +1103,43 @@ ContentPage {
             }
         }
 
+        // A lead choice (`lead: true`) is the plugin on or off as a whole: a switch with its note.
+        Repeater {
+            model: Hub.choicesTitle(page.item).length > 0 ? (Hub.choices[page.item?.id ?? ""] ?? []).filter(c => c.lead) : []
+            delegate: RowLayout {
+                required property var modelData
+                Layout.fillWidth: true
+                spacing: 12
+                ColumnLayout {
+                    Layout.fillWidth: true
+                    spacing: 2
+                    StyledText {
+                        Layout.fillWidth: true
+                        text: modelData.label
+                        font.weight: Font.Medium
+                        font.pixelSize: Appearance.font.pixelSize.normal
+                        elide: Text.ElideRight
+                    }
+                    StyledText {
+                        Layout.fillWidth: true
+                        visible: text.length > 0
+                        text: String(modelData.note ?? "")
+                        color: Appearance.colors.colSubtext
+                        font.pixelSize: Appearance.font.pixelSize.small
+                        wrapMode: Text.WordWrap
+                    }
+                }
+                StyledSwitch {
+                    Layout.alignment: Qt.AlignVCenter
+                    checked: modelData.on
+                    onClicked: Hub.toggleChoice(page.item.id, modelData.id)
+                }
+            }
+        }
         // A plugin's own choices (plugin.json `choices`), read as its page opens; a chip flips one.
         StyledText {
             readonly property string plugin: Hub.choicesTitle(page.item).length > 0 ? page.item.id : ""
-            visible: plugin.length > 0
+            visible: plugin.length > 0 && (Hub.choices[plugin] ?? []).some(c => !c.lead)
             text: Hub.choicesTitle(page.item)
             color: Appearance.colors.colSubtext
             font.pixelSize: Appearance.font.pixelSize.small
@@ -1115,10 +1148,10 @@ ContentPage {
         }
         Flow {
             Layout.fillWidth: true
-            visible: Hub.choicesTitle(page.item).length > 0
+            visible: Hub.choicesTitle(page.item).length > 0 && (Hub.choices[page.item?.id ?? ""] ?? []).some(c => !c.lead)
             spacing: 6
             Repeater {
-                model: Hub.choices[page.item?.id ?? ""] ?? []
+                model: (Hub.choices[page.item?.id ?? ""] ?? []).filter(c => !c.lead)
                 delegate: FilterChip {
                     required property var modelData
                     text: modelData.label

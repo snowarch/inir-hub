@@ -4,7 +4,7 @@
     "name": "Fastfetch",
     "summary": "A quiet fastfetch in your iNiR colours; pick what it shows",
     "icon": "terminal",
-    "version": "1.1.1",
+    "version": "1.2.0",
     "provides": "modules/fastfetch",
     "choices": {
         "title": "What it shows",

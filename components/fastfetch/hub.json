@@ -1,13 +1,17 @@
 {
     "$schema": "../../schema/hub.schema.json",
-    "version": "1.1.1",
+    "version": "1.2.0",
     "changes": {
+        "1.2.0": [
+            "A fastfetch config of your own is never replaced: iNiR's look waits until you turn it on in its Hub page",
+            "One switch in its Hub page turns iNiR's look off and puts your own config back; removing the plugin does too"
+        ],
         "1.1.1": [
             "A new preview, made from a clean desktop"
         ]
     },
-    "summary": "A quiet fastfetch in your iNiR colours; pick what it shows",
-    "description": "No logo, eleven lines, the accent from your wallpaper on every theme change. Pick what it shows from its page here, or comment lines in ~/.config/fastfetch/config.jsonc. An existing config is kept as config.jsonc.before-inir.",
+    "summary": "A quiet fastfetch in your iNiR colours; one switch turns it on or off",
+    "description": "No logo, eleven lines, the accent from your wallpaper on every theme change. A config of your own is never replaced: one switch in its page here turns iNiR's look on or off and gives yours back, and its chips pick what it shows.",
     "authors": [
         "snowarch"
     ],

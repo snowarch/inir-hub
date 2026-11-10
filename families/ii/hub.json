@@ -1,7 +1,10 @@
 {
     "$schema": "../../schema/hub.schema.json",
-    "version": "2.35.8",
+    "version": "2.35.9",
     "changes": {
+        "2.35.9": [
+            "Hub: a plugin that changes a file of yours, like Fastfetch, gets a switch that turns it off and gives yours back"
+        ],
         "2.35.8": [
             "Runs on NixOS: every tool and app is found on your PATH, not only in /usr/bin"
         ],
