@@ -354,5 +354,6 @@ Item {
         blurs: false
         reach: PrismTheme.dp(28)
         veil: PrismTheme.rail
+        bottomLeftRadius: root.corner
     }
 }

@@ -14,6 +14,9 @@ Item {
     property real blurMax: 24
     // The corners of what holds the list: rows passing them are cut by the same curve, never by a square clip.
     property real radius: 0
+    // The veil's own foot corners, where the list ends on a rounded corner of its holder: the fill keeps that curve.
+    property real bottomLeftRadius: 0
+    property real bottomRightRadius: 0
     readonly property bool atTop: root.flick.contentY > 1
     readonly property bool atBottom: root.flick.contentY + root.flick.height < root.flick.contentHeight - 1
     readonly property bool active: (root.atTop || root.atBottom) && !root.veiled
@@ -63,6 +66,8 @@ Item {
         y: root.height - height
         width: root.width
         height: root.reach
+        bottomLeftRadius: root.bottomLeftRadius
+        bottomRightRadius: root.bottomRightRadius
         gradient: Gradient {
             GradientStop { position: 0; color: Qt.alpha(root.veil, 0) }
             GradientStop { position: 0.3; color: Qt.alpha(root.veil, 0.35) } // iris-literal: the mask's ramp, inverted

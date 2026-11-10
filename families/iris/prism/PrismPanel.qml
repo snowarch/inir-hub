@@ -245,8 +245,8 @@ Item {
         }
     }
 
-    // The body's round corners are drawn by what stands in them (the sidebar's fill, its glow); the middle and the rail
-    // keep clear of them. A mask over the whole body rendered every frame of Prism twice, offscreen and again (11-07).
+    // The body's round corners are drawn by what stands in them (the sidebar's fill, its glow, the edge veils' feet);
+    // nothing else reaches them. A mask over the whole body rendered every frame of Prism twice, offscreen and again (11-07).
     readonly property bool watching: root.active && root.visible
     onWatchingChanged: PrismModel.watching = root.watching
     Component.onCompleted: PrismModel.watching = root.watching
@@ -465,6 +465,8 @@ Item {
             anchors.fill: centre
             reach: PrismTheme.dp(36)
             veil: PrismTheme.canvas
+            // Its foot meets the body's round corner unless the rail stands there.
+            bottomRightRadius: root.railWidth > 0 ? 0 : body.radius
         }
 
         PrismRail {
