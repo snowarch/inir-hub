@@ -6,15 +6,14 @@ import qs
 import qs.modules.common
 import qs.modules.shared.background.widgets
 import qs.modules.iris.components
-import qs.modules.iris.field
 import qs.modules.iris.frame
 import qs.modules.iris.style
 
 // Joined to the frame (`iris.surround.widgets`): a desktop widget left against a wall of the frame is one body with it,
 // as a bubble is. The weld comes from where the widget stands: pushed as near the wall as it goes it joins, pulled away
-// it lets go. Its body is then the frame's material, drawn by a field of its own under the content; whoever drew the
-// body before (a plate, a face, a Prism slab) steps aside while `welded`. Fills the body it stands in for.
-// The body itself is an IrisWeldBody under the widget, in the desktop's coordinates; every weld is listed in IrisWelds.
+// it lets go. While joined it IS the frame: its body is a shape of the frame's own field (IrisWelds.shapesOn, drawn by
+// the frame's window with the frame's matter, texture and line) and the widget itself moves into that window, over
+// its body; whoever drew the body before (a plate, a face, a Prism slab) steps aside while `welded`.
 Item {
     id: weld
 
@@ -26,7 +25,9 @@ Item {
     readonly property string outputName: weld.widget?.outputName ?? ""
     // Held back by the weld itself (tucked, or kept by the frame's window in the overview) it is still joined.
     readonly property bool withheld: (weld.widget?.presence ?? 1) < 1
+    // Arranging happens on the desktop, with its grid and sheets: a widget joins once it is left there.
     readonly property bool joinsFrame: IrisFrame.framed && weld.can && (weld.visible || weld.withheld)
+        && !GlobalStates.widgetEditMode && !(weld.widget?.isDragging ?? false)
         && Boolean(Config.options?.iris?.surround?.widgets ?? true) && Boolean(weld.widget?.powerActive ?? true)
     readonly property real reach: Math.round(8 * IrisStyle.density)
     readonly property real neckMost: Math.round(72 * IrisStyle.density)
@@ -101,7 +102,8 @@ Item {
     readonly property bool stows: weld.wanted && weld.restMode === "tucked" && !GlobalStates.widgetEditMode
         && !(weld.widget?.isDragging ?? false)
     property bool called: false
-    readonly property bool pointed: ownHover.hovered || (bodyLoader.item?.pointed ?? false)
+    property bool tabPointed: false
+    readonly property bool pointed: ownHover.hovered || weld.tabPointed
     onPointedChanged: {
         if (weld.pointed) { leave.stop(); weld.called = true }
         else leave.restart()
@@ -144,55 +146,38 @@ Item {
     // The fillet's radius is the body's own round, as a line of bubbles melted into a wall (IrisStyle.edgeFuseFor):
     // the corner beside the wall turns into one S of two equal arcs.
     readonly property real fuse: Math.max(8, Math.round(weld.bodyRadius * 4 * (1 - Math.SQRT1_2)))
-    // The welds near enough for their fillets to meet this one's: drawn as one silhouette, each its own half.
-    readonly property var neighbours: {
-        const near = weld.fuse * 4 + Math.round(48 * IrisStyle.density)
-        const mine = weld.box
-        return IrisWelds.on(weld.outputName).filter(other => {
-            if (other === weld) return false
-            const o = other.box
-            return Math.max(o.x - mine.x - mine.width, mine.x - o.x - o.width) < near
-                && Math.max(o.y - mine.y - mine.height, mine.y - o.y - o.height) < near
-        })
+    // A corner on a joined wall is square: the wall is the same matter.
+    readonly property var corners: {
+        const r = weld.bodyRadius
+        return { tl: r * (1 - Math.max(weld.meltLeft, weld.meltTop)), tr: r * (1 - Math.max(weld.meltRight, weld.meltTop)),
+            br: r * (1 - Math.max(weld.meltRight, weld.meltBottom)), bl: r * (1 - Math.max(weld.meltLeft, weld.meltBottom)) }
     }
     Component.onDestruction: IrisWelds.remove(weld)
     onMeltChanged: if (weld.melt > 0) IrisWelds.add(weld); else IrisWelds.remove(weld)
 
-    // The compositor's overview zooms the desktop away; the frame's window keeps this widget on the frame meanwhile
-    // (IrisWeldsOverlay), drawn from one picture of it taken as the overview opens.
-    property var shot: null
-    readonly property bool inOverview: IrisWelds.overview
-    onInOverviewChanged: {
-        if (!weld.inOverview) { weld.shot = null; return }
-        if (weld.welded && weld.widget) weld.widget.grabToImage(result => { if (weld.inOverview) weld.shot = result })
+    // In the frame's window while joined: there the frame draws its body, and the compositor's overview leaves it be.
+    property Item home: null
+    readonly property Item host: IrisWelds.hostOn(weld.outputName)
+    readonly property bool hosted: weld.melt > 0 && weld.host !== null
+    function settle(): void {
+        const w = weld.widget
+        if (!w) return
+        if (weld.hosted) {
+            if (w.parent === weld.host) return
+            if (!weld.home) weld.home = w.parent
+            w.parent = weld.host
+        } else if (weld.home) {
+            w.parent = weld.home
+            weld.home = null
+        }
     }
-    readonly property bool lent: weld.inOverview && weld.shot !== null
+    onHostedChanged: weld.settle()
+    onHostChanged: weld.settle()
     Binding {
         target: weld.widget
         property: "presence"
-        value: weld.lent ? 0 : weld.shown
-        when: weld.wanted || weld.lent
+        value: weld.shown
+        when: weld.wanted
         restoreMode: Binding.RestoreBindingOrValue
     }
-
-    Loader {
-        id: bodyLoader
-        active: weld.melt > 0
-        parent: weld.widget?.parent ?? weld
-        z: -1
-        sourceComponent: IrisWeldBody {
-            weld: weld
-            opacity: weld.lent ? 0 : weld.cover
-            visible: opacity > 0
-            readonly property bool pointed: tabHover.hovered
-            Item {
-                x: weld.box.x - parent.x
-                y: weld.box.y - parent.y
-                width: weld.box.width
-                height: weld.box.height
-                HoverHandler { id: tabHover; enabled: weld.stows }
-            }
-        }
-    }
 }
-

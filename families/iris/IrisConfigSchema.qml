@@ -312,6 +312,7 @@ JsonObject {
         property int pageWidth: 440
         property list<string> navItems: ["media", "activity", "desktop", "shelf", "weather", "calendar", "vitals", "tray", "tools", "focus", "today", "controls", "settings"]
         property string design: "halo" // the Island's design: "halo", "ledger" or "tiles"
+        property bool designFace: true // a worn Design that brings an Island face draws the resting Island; off, `design` does
         property bool sunLight: true // Halo: by day the foot glows where the sun stands
         property string blockStyle: "plain" // desktop page blocks: "plain" on the Island's black or "grouped" on quiet plates
         property string scrollAction: "volume" // "volume", "brightness" or "none"

@@ -2585,5 +2585,7 @@
   "Joined widgets rest": "結合したウィジェットの待機状態",
   "Open keeps them whole. Tucked folds each into a tab on the frame until you point at it.": "「開く」はそのまま表示します。「たたむ」はポインターを合わせるまでフレーム上のタブにたたみます。",
   "Tucked": "たたむ",
-  "On the frame": "フレーム上"
+  "On the frame": "フレーム上",
+  "The Design's face": "デザインのフェイス",
+  "The Design you wear draws the resting Island. Turn it off to choose an Island design of your own.": "適用中のデザインが待機中のアイランドを描きます。オフにすると自分でアイランドのデザインを選べます。"
 }

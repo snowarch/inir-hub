@@ -142,8 +142,13 @@ Singleton {
 
     // A Design's own parts: nothing else of iRiS is drawn by a Design (one component set).
     readonly property var partNames: ["islandFace", "insignia", "preview"]
-    function skin(part: string): string {
+    function brings(part: string): string {
         return root.custom && root.partNames.includes(part) ? Plugins.part(root.current, part) : ""
+    }
+    // The resting Island is the person's to choose: a Design's face is worn until they turn it off (`iris.bar.designFace`).
+    function skin(part: string): string {
+        if (part === "islandFace" && !(Config.options?.iris?.bar?.designFace ?? true)) return ""
+        return root.brings(part)
     }
     function has(part: string): bool { return root.skin(part).length > 0 }
 

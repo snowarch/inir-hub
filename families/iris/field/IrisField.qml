@@ -17,9 +17,6 @@ Item {
     property color sheen: IrisStyle.glassEdgeColour
     property real smoothing: IrisStyle.fuse
     property bool framed: IrisFrame.framed
-    // Drawn without the texture people chose: for a body in another layer than the frame it joins, where the texture's
-    // light past the edges would be cut by the layer and doubled by the frame's own.
-    property bool plain: false
     // Drawn under a transform (the edit card, the arrival): the cached field is sampled smoothly, and at `renderScale`
     // it is rendered at the size it is shown, so the card's resting picture lands texel on pixel instead of stepping.
     property real renderScale: 1
@@ -31,7 +28,7 @@ Item {
     readonly property real shadowFall: Math.round(3 * IrisStyle.density)
     readonly property real shadowBlur: Math.round(16 * IrisStyle.density)
     readonly property bool casts: IrisStyle.shadow.a > 0.004
-    readonly property real reach: root.smoothing + 2 + (root.plain ? 0 : IrisStyle.afterglowReach + IrisStyle.leakReach + IrisStyle.streakReach)
+    readonly property real reach: root.smoothing + 2 + IrisStyle.afterglowReach + IrisStyle.leakReach + IrisStyle.streakReach
         + (root.casts ? root.shadowFall + 1.5 * root.shadowBlur : 0)
     property bool compositorAllowed: false
     // A field that does not cover its output: its window's position on the output and the output's size.
@@ -158,7 +155,7 @@ Item {
 
     // Light streak's trails: what each body (by its id) moved since the field last drew, stretched to the trail's length,
     // and zero once nothing has moved for a few frames. Only while Trails is on; nothing runs at rest.
-    readonly property bool trailing: !root.plain && IrisStyle.streak && IrisStyle.streakTrails > 0
+    readonly property bool trailing: IrisStyle.streak && IrisStyle.streakTrails > 0
     property var trails: []
     property real trailSpan: 0
     property var _seen: ({})
@@ -210,7 +207,7 @@ Item {
         width: root.bounds.width
         height: root.bounds.height
         // One shader per texture: every look in one pass cost every Intel laptop its frames (IrisField.frag).
-        fragmentShader: Qt.resolvedUrl("IrisField" + (root.plain ? "Plain" : IrisStyle.afterglow ? "Glow" : IrisStyle.leak ? "Leak" : IrisStyle.streak ? "Streak" : "Plain") + ".frag.qsb")
+        fragmentShader: Qt.resolvedUrl("IrisField" + (IrisStyle.afterglow ? "Glow" : IrisStyle.leak ? "Leak" : IrisStyle.streak ? "Streak" : "Plain") + ".frag.qsb")
         blending: true
         // Kept as a texture: a frame the chassis draws for its content alone (a bubble's live number, the clock) copies it
         // instead of running the field over the output again. The pass reruns only when a uniform or a texture it reads
@@ -277,7 +274,7 @@ Item {
         readonly property color sheen: root.sheen
         readonly property vector4d bodyTop: IrisStyle.bodyTop
         readonly property vector4d bodyFoot: IrisStyle.bodyFoot
-        readonly property vector4d edgeGlass: !root.plain && (IrisStyle.afterglow || IrisStyle.streak) ? Qt.vector4d(0, 0, 1, 0)
+        readonly property vector4d edgeGlass: IrisStyle.afterglow || IrisStyle.streak ? Qt.vector4d(0, 0, 1, 0)
             : Qt.vector4d(IrisStyle.glassEdgeLight, IrisStyle.glassEdgeLine, IrisStyle.edgeWidth, IrisStyle.edgeLit ? 1 : 0)
         // z: one device pixel in the field's units; both edges are drawn that many pixels wide.
         readonly property vector4d edge: Qt.vector4d(root.rimWidth, root.rim.a > 0 ? 1 : 0, IrisStyle.devicePx / Math.max(0.2, root.renderScale), 0)
