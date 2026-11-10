@@ -6,18 +6,15 @@
             "The overview over a fullscreen game no longer rebuilds the Island and Dock on every press: they keep their layer, on Umbriel and Niri"
         ],
         "2.33.71": [
-            "Widgets joined to the frame are now the frame itself: one body with its matter, texture and edge, above your windows like the bubbles, and still there in the overview",
             "With a Design on, the resting Island is yours again: Island › Design and modes › The Design's face"
         ],
         "2.33.70": [
-            "Widgets joined to the frame can rest tucked as a tab until you point at them (Settings › Surfaces › Frame, or per widget), stay on the frame in the overview, join their neighbours cleanly and keep calm under every texture",
             "Prism Settings: the sidebar's sections read brighter"
         ],
         "2.33.69": [
-            "Prism: every panel's black takes a soft haze of the spectrum from one corner, and each place can wear Prism on its own (Settings › Colour › Look › Places)"
+            "Prism: panels take a soft haze of the spectrum from one corner; each place can wear Prism alone (Colour › Look › Places)"
         ],
         "2.33.68": [
-            "A desktop widget left against the frame joins it as one body, and lets go when you pull it away (Settings › Surfaces › Frame)",
             "A fifth look, Prism: black and white controls with the spectrum at each level"
         ],
         "2.33.67": [

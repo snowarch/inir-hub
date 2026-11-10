@@ -67,8 +67,6 @@ IrisWidgetFace {
 
     PrismBody {
         id: folder
-        visible: !root.welded
-        opacity: 1 - root.weldCover
         anchors.fill: parent
         face: root
         tabRight: root.tabRight

@@ -1018,14 +1018,6 @@ Scope {
                         || (islandLoader.item?.morphing ?? false)
                         ? null : chassisRegion
                 Region { id: emptyRegion }
-                component WeldRegion: Region {
-                    required property int index
-                    readonly property var rect: weldsOverlay.hitRects[index] ?? null
-                    x: rect ? rect.x : 0
-                    y: rect ? rect.y : 0
-                    width: rect ? rect.width : 0
-                    height: rect ? rect.height : 0
-                }
                 component PieceRegion: Region {
                     required property int index
                     readonly property var rect: stage.hitRects[index] ?? null
@@ -1122,14 +1114,6 @@ Scope {
                         width: banners.hitRect?.width ?? 0
                         height: banners.hitRect?.height ?? 0
                     }
-                    WeldRegion { index: 0 }
-                    WeldRegion { index: 1 }
-                    WeldRegion { index: 2 }
-                    WeldRegion { index: 3 }
-                    WeldRegion { index: 4 }
-                    WeldRegion { index: 5 }
-                    WeldRegion { index: 6 }
-                    WeldRegion { index: 7 }
                     PieceRegion { index: 0 }
                     PieceRegion { index: 1 }
                     PieceRegion { index: 2 }
@@ -1296,7 +1280,6 @@ Scope {
                         .concat(Array.isArray(dockBody) ? dockBody : [])
                         .concat(banners.fieldShapes)
                         .concat(IrisFrame.placeShapesOn(barWindow.screen?.name ?? ""))
-                        .concat(IrisWelds.shapesOn(barWindow.screen?.name ?? ""))
                         // One source that fails gives a hole, never the whole field: its own error is already in the log.
                         .filter(shape => shape)
                     const bodies = hung.filter(shape => shape.joins === "island")
@@ -1344,14 +1327,6 @@ Scope {
                     opacity: barWindow.canvasSuppressed ? 0 : 1
                     visible: opacity > 0
                     Behavior on opacity { NumberAnimation { duration: IrisStyle.duration(160); easing.type: IrisStyle.feedbackEasing } }
-                }
-
-                // The desktop widgets joined to the frame live here while they are, over the bodies the field draws for them.
-                IrisWeldsOverlay {
-                    anchors.fill: parent
-                    output: barWindow.screen?.name ?? ""
-                    id: weldsOverlay
-                    visible: chassisField.visible
                 }
 
                 IrisFramePulse {

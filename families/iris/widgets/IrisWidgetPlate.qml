@@ -20,26 +20,14 @@ WidgetPlate {
             : plate.look.plate(plate.widget),
             plate.backed ? Math.min(1, 0.72 + plate.strength * 0.28) * plate.share : 0)
 
-    readonly property bool welded: weld.welded
-
-    glass: plate.backed && plate.material === "glass" && !plate.welded
-    color: plate.glass || plate.welded ? "transparent" : plate.fill
-    clip: !plate.welded
-    rimShown: !plate.welded && (plate.outline === "always" || plate.outline !== "none" && (!plate.clear || plate.look.rim))
+    glass: plate.backed && plate.material === "glass"
+    color: plate.glass ? "transparent" : plate.fill
+    rimShown: plate.outline === "always" || plate.outline !== "none" && (!plate.clear || plate.look.rim)
     rimColor: ColorUtils.applyAlpha(plate.surface.surfaceColor, plate.surface.surfaceBorderOpacity)
 
     Rectangle {
         anchors.fill: parent
         visible: plate.glass
         color: plate.fill
-    }
-
-    IrisWidgetWeld {
-        id: weld
-        anchors.fill: parent
-        z: -1
-        widget: plate.widget
-        radius: plate.radius
-        can: plate.backed && !plate.clear
     }
 }
