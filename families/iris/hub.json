@@ -3,7 +3,7 @@
     "version": "2.33.72",
     "changes": {
         "2.33.72": [
-            "Opening the overview again and again over a fullscreen game no longer restarts the shell on Umbriel"
+            "The overview over a fullscreen game no longer rebuilds the Island and Dock on every press: they keep their layer, on Umbriel and Niri"
         ],
         "2.33.71": [
             "Widgets joined to the frame are now the frame itself: one body with its matter, texture and edge, above your windows like the bubbles, and still there in the overview",

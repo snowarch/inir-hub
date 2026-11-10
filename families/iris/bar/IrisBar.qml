@@ -954,16 +954,18 @@ Scope {
                 readonly property bool takesKeys: barWindow.pinned || stage.cardOpen || (controlCentreLoader.item?.morphOpen ?? false)
                     || (dockLoader.item?.menuOpen ?? false) || (spotlightLoader.item?.here && GlobalStates.searchOpen)
                     || (galleryLoader.item?.morphOpen ?? false) || (orbitLoader.item?.wanted ?? false)
+                readonly property bool fullscreenHere: GameMode.hasFullscreenOnOutput(barWindow.screen?.name ?? "")
                 // The overview draws Top above a fullscreen window, so the chassis is seen there as it is. Only where
                 // Top gets no keys over that window does it climb to Overlay, and only while something in it types.
-                readonly property bool overviewKeysOverFullscreen: NiriService.inOverview && barWindow.takesKeys
-                    && !CompositorConfig.overviewTopTakesKeys && GameMode.hasFullscreenOnOutput(barWindow.screen?.name ?? "")
+                readonly property bool overviewKeysOverFullscreen: NiriService.inOverview && barWindow.fullscreenHere
+                    && barWindow.takesKeys && !CompositorConfig.overviewTopTakesKeys
                 readonly property bool canvasSuppressed: barWindow.suppressed && !barWindow.presenting
                 // Nothing of the chassis may cover, move or restack what sits still in it: continuous motion may
-                // then draw in a surface of its own (LiveLayer) instead of repainting the whole output.
+                // then draw in a surface of its own (LiveLayer) instead of repainting the whole output. Never over a
+                // fullscreen window: Top is hidden there, and the overview over it comes and goes with a key.
                 readonly property bool liveCalm: !barWindow.presenting && !barWindow.expanded && !barWindow.overlaid
-                    && !barWindow.canvasSuppressed && !IrisStyle.arriving && !(islandLoader.item?.morphing ?? false)
-                    && (banners.fieldShapes ?? []).length === 0
+                    && !barWindow.canvasSuppressed && !barWindow.fullscreenHere && !IrisStyle.arriving
+                    && !(islandLoader.item?.morphing ?? false) && (banners.fieldShapes ?? []).length === 0
                 readonly property int liveLayer: WlrLayer.Top
                 readonly property int liveEpoch: IrisState.chassisEpoch
                 readonly property bool overlaid: ((islandLoader.item?.fullscreenCovered ?? false) && !barWindow.canvasSuppressed)
