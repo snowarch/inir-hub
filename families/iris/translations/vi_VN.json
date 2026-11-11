@@ -1401,7 +1401,6 @@
   "Its text and its quieter lines": "Chữ và những dòng nhạt hơn",
   "The shell and your apps, one palette": "Shell và ứng dụng của bạn, một bảng màu",
   "Your apps keep their own colours": "Ứng dụng giữ màu riêng",
-  "Paper": "Giấy",
   "Ink style": "Kiểu Ink",
   "Follow the style": "Theo kiểu",
   "Shironeri": "Shironeri",
@@ -2433,5 +2432,6 @@
   "A new one opens when the last fills.": "Khi cái cuối đầy thì một cái mới mở ra.",
   "A new one opens when the last fills; %1 always wait here.": "Khi cái cuối đầy thì một cái mới mở ra; %1 luôn chờ ở đây",
   "This screen always has %1.": "Màn hình này luôn có %1.",
-  "Press to turn off": "Nhấn để tắt"
+  "Press to turn off": "Nhấn để tắt",
+  "Glyph art": "Nghệ thuật ký tự"
 }

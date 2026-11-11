@@ -1401,7 +1401,6 @@
   "Its text and its quieter lines": "Teksnya dan baris yang lebih tenang",
   "The shell and your apps, one palette": "Shell dan aplikasi Anda, satu palet",
   "Your apps keep their own colours": "Aplikasi Anda memakai warnanya sendiri",
-  "Paper": "Kertas",
   "Ink style": "Gaya Ink",
   "Follow the style": "Ikuti gaya",
   "Shironeri": "Shironeri",
@@ -2433,5 +2432,6 @@
   "A new one opens when the last fills.": "Yang baru terbuka saat yang terakhir penuh.",
   "A new one opens when the last fills; %1 always wait here.": "Yang baru terbuka saat yang terakhir penuh; %1 selalu menunggu di sini",
   "This screen always has %1.": "Layar ini selalu memiliki %1.",
-  "Press to turn off": "Tekan untuk mematikan"
+  "Press to turn off": "Tekan untuk mematikan",
+  "Glyph art": "Seni glif"
 }

@@ -1401,7 +1401,6 @@
   "Its text and its quieter lines": "הטקסט שלו והשורות השקטות יותר",
   "The shell and your apps, one palette": "המעטפת והיישומים שלך, פלטה אחת",
   "Your apps keep their own colours": "היישומים שלך שומרים על הצבעים שלהם",
-  "Paper": "נייר",
   "Ink style": "סגנון Ink",
   "Follow the style": "לעקוב אחרי הסגנון",
   "Shironeri": "שירונרי",
@@ -2433,5 +2432,6 @@
   "A new one opens when the last fills.": "חלון חדש נפתח כשהאחרון מתמלא.",
   "A new one opens when the last fills; %1 always wait here.": "חלון חדש נפתח כשהאחרון מתמלא; %1 תמיד ממתינים כאן",
   "This screen always has %1.": "למסך הזה תמיד יש %1.",
-  "Press to turn off": "לחץ לכיבוי"
+  "Press to turn off": "לחץ לכיבוי",
+  "Glyph art": "אמנות גליפים"
 }

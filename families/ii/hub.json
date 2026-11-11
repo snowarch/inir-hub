@@ -3,6 +3,7 @@
     "version": "2.35.10",
     "changes": {
         "2.35.10": [
+          "Wallpaper › Draw the wallpaper as glyphs: pictures, GIFs and videos redrawn as glowing characters, in six looks",
           "Settings › Umbriel: the compositor's page when you run Umbriel: screens, workspaces, layouts, borders, glass, movement, input, hot corners",
           "Every row there is asked of the compositor: what your machine or Umbriel cannot do is not shown"
         ],

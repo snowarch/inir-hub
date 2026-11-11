@@ -1401,7 +1401,6 @@
   "Its text and its quieter lines": "正文和较淡的文字",
   "The shell and your apps, one palette": "Shell 与你的应用，同一套调色板",
   "Your apps keep their own colours": "你的应用保留自己的颜色",
-  "Paper": "纸张",
   "Ink style": "Ink 样式",
   "Follow the style": "跟随样式",
   "Shironeri": "白练",
@@ -2433,5 +2432,6 @@
   "A new one opens when the last fills.": "最后一个写满时，会打开一个新的。",
   "A new one opens when the last fills; %1 always wait here.": "最后一个写满时，会打开一个新的；%1 始终在此等待",
   "This screen always has %1.": "此屏幕始终有 %1。",
-  "Press to turn off": "按下关闭"
+  "Press to turn off": "按下关闭",
+  "Glyph art": "字符画"
 }

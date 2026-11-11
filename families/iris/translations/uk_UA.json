@@ -1401,7 +1401,6 @@
   "Its text and its quieter lines": "Його текст і тихіші рядки",
   "The shell and your apps, one palette": "Оболонка й застосунки, одна палітра",
   "Your apps keep their own colours": "Застосунки зберігають свої кольори",
-  "Paper": "Папір",
   "Ink style": "Стиль Ink",
   "Follow the style": "Слідувати стилю",
   "Shironeri": "Сіронері",
@@ -2433,5 +2432,6 @@
   "A new one opens when the last fills.": "Нове відкривається, коли останнє заповнюється.",
   "A new one opens when the last fills; %1 always wait here.": "Нове відкривається, коли останнє заповнюється; %1 завжди чекають тут",
   "This screen always has %1.": "На цьому екрані завжди %1.",
-  "Press to turn off": "Натисніть, щоб вимкнути"
+  "Press to turn off": "Натисніть, щоб вимкнути",
+  "Glyph art": "Символьна графіка"
 }

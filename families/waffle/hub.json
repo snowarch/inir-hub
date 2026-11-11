@@ -3,6 +3,7 @@
     "version": "2.34.10",
     "changes": {
         "2.34.10": [
+            "Wallpaper › Draw the wallpaper as glyphs: pictures, GIFs and videos redrawn as glowing characters, in six looks",
             "Hub: a plugin that changes a file of yours, like Fastfetch, gets a switch that turns it off and gives yours back"
         ],
         "2.34.9": [
@@ -29,7 +30,7 @@
         "process",
         "files"
     ],
-    "minInir": "2.33.0",
+    "minInir": "3.0.2",
     "provides": "modules/waffle",
     "requires": [
         "ii"

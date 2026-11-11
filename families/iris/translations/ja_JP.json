@@ -1401,7 +1401,6 @@
   "Its text and its quieter lines": "本文と控えめな行",
   "The shell and your apps, one palette": "シェルとアプリ、ひとつのパレット",
   "Your apps keep their own colours": "アプリは自分の色のまま",
-  "Paper": "紙",
   "Ink style": "Ink のスタイル",
   "Follow the style": "スタイルに従う",
   "Shironeri": "白練",
@@ -2433,5 +2432,6 @@
   "A new one opens when the last fills.": "最後のものがいっぱいになると、新しいものが開きます。",
   "A new one opens when the last fills; %1 always wait here.": "最後のものがいっぱいになると、新しいものが開きます; %1 は常にここで待ちます",
   "This screen always has %1.": "この画面には常に %1 があります。",
-  "Press to turn off": "タップしてオフ"
+  "Press to turn off": "タップしてオフ",
+  "Glyph art": "グリフアート"
 }

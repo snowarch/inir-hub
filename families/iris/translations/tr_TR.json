@@ -1401,7 +1401,6 @@
   "Its text and its quieter lines": "Metni ve daha sakin satırları",
   "The shell and your apps, one palette": "Kabuk ve uygulamalarınız, tek palet",
   "Your apps keep their own colours": "Uygulamalarınız kendi renklerini korur",
-  "Paper": "Kâğıt",
   "Ink style": "Ink stili",
   "Follow the style": "Stili izle",
   "Shironeri": "Shironeri",
@@ -2433,5 +2432,6 @@
   "A new one opens when the last fills.": "Son dolduğunda yenisi açılır.",
   "A new one opens when the last fills; %1 always wait here.": "Son dolduğunda yenisi açılır; %1 her zaman burada bekler",
   "This screen always has %1.": "Bu ekranda her zaman %1 bulunur.",
-  "Press to turn off": "Kapatmak için dokunun"
+  "Press to turn off": "Kapatmak için dokunun",
+  "Glyph art": "Glif sanatı"
 }

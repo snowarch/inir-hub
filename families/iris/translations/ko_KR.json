@@ -1401,7 +1401,6 @@
   "Its text and its quieter lines": "본문과 더 조용한 줄",
   "The shell and your apps, one palette": "셸과 앱, 하나의 팔레트",
   "Your apps keep their own colours": "앱은 자기 색을 유지합니다",
-  "Paper": "종이",
   "Ink style": "Ink 스타일",
   "Follow the style": "스타일 따르기",
   "Shironeri": "시로네리",
@@ -2433,5 +2432,6 @@
   "A new one opens when the last fills.": "마지막 것이 차면 새 것이 열립니다.",
   "A new one opens when the last fills; %1 always wait here.": "마지막 것이 차면 새 것이 열립니다; %1은(는) 항상 여기서 기다립니다",
   "This screen always has %1.": "이 화면에는 항상 %1이(가) 있습니다.",
-  "Press to turn off": "눌러서 끄기"
+  "Press to turn off": "눌러서 끄기",
+  "Glyph art": "글리프 아트"
 }

@@ -1401,7 +1401,6 @@
   "Its text and its quieter lines": "نصه وسطوره الأهدأ",
   "The shell and your apps, one palette": "الواجهة وتطبيقاتك، لوحة واحدة",
   "Your apps keep their own colours": "تحتفظ تطبيقاتك بألوانها",
-  "Paper": "الورق",
   "Ink style": "نمط Ink",
   "Follow the style": "اتباع النمط",
   "Shironeri": "شيرونيري",
@@ -2433,5 +2432,6 @@
   "A new one opens when the last fills.": "يُفتح واحد جديد عندما يمتلئ الأخير.",
   "A new one opens when the last fills; %1 always wait here.": "يُفتح واحد جديد عندما يمتلئ الأخير؛ %1 تنتظر هنا دائمًا",
   "This screen always has %1.": "هذه الشاشة تحتوي دائمًا على %1.",
-  "Press to turn off": "اضغط للإيقاف"
+  "Press to turn off": "اضغط للإيقاف",
+  "Glyph art": "فن الرموز"
 }

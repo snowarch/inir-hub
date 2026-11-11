@@ -63,7 +63,7 @@ Variants {
         readonly property string fillMode: Wallpapers.fillMode
         readonly property bool spanning: panelRoot.fillMode === "span"
         readonly property bool externalMainWallpaperEligible:
-            !panelRoot.webWallpaperActive &&
+            !panelRoot.webWallpaperActive && !Wallpapers.glyphs &&
             AwwwBackend.supportsVisibleMainWallpaper(
                 wallpaperSourceRaw,
                 panelRoot.fillMode,
@@ -354,6 +354,12 @@ Variants {
                 blurEnabled: visible
                 blur: panelRoot.blurProgress * ((panelRoot.wEffects.blurRadius ?? 32) / 100.0)
                 blurMax: 64
+            }
+
+            WallpaperGlyphs {
+                anchors.fill: wallpaperContainer
+                picture: panelRoot.webWallpaperActive ? null : wallpaperContainer
+                path: panelRoot.wallpaperSourceRaw
             }
 
             // Dim overlay

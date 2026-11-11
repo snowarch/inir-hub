@@ -1414,6 +1414,10 @@ QtObject {
         { section: "desktop", group: "Live wallpapers", label: "Pause", tune: true, description: "A hidden wallpaper stops decoding and keeps its frame.", path: "background.videoPause", kind: "choice", fallback: "covered", choices: [{label:"Never",value:"never",glyph:"play_arrow"},{label:"Behind fullscreen",value:"fullscreen",glyph:"fullscreen"},{label:"When covered",value:"covered",glyph:"view_column"}] },
         { tune: true, section: "desktop", group: "Live wallpapers", label: "Pause on battery", path: "background.pauseAnimationOnBattery", kind: "switch", fallback: true },
         { tune: true, section: "desktop", group: "Live wallpapers", label: "Animate on the lock screen", description: "Plays on the lock screen too, blurred or not.", path: "lock.enableAnimation", kind: "switch", fallback: false },
+        { section: "desktop", group: "Glyph art", label: "Draw the wallpaper as glyphs", description: "Pictures, GIFs and videos are redrawn as glowing characters.", path: "background.effects.glyphs.enable", kind: "switch", fallback: false, keywords: ["ascii", "glyph", "afterglyph", "characters", "text art", "terminal", "retro", "crt", "matrix", "caracteres", "letras"] },
+        { section: "desktop", group: "Glyph art", showIf: () => Boolean(Config.options?.background?.effects?.glyphs?.enable), label: "Look", path: "background.effects.glyphs.look", kind: "choice", fallback: "signal", choices: [{label:"Picture colours",value:"signal",glyph:"image"},{label:"Accent",value:"theme",glyph:"palette"},{label:"Phosphor",value:"phosphor",glyph:"terminal"},{label:"Amber",value:"amber",glyph:"wb_incandescent"},{label:"Blueprint",value:"blueprint",glyph:"architecture"},{label:"Paper",value:"paper",glyph:"description"}], keywords: ["ascii", "glyph", "phosphor", "amber", "blueprint", "paper", "colour", "color"] },
+        { section: "desktop", group: "Glyph art", showIf: () => Boolean(Config.options?.background?.effects?.glyphs?.enable), label: "Glyph size", path: "background.effects.glyphs.size", kind: "range", fallback: 1, min: 1, max: 4, step: 1, unit: "×" },
+        { tune: true, section: "desktop", group: "Glyph art", showIf: () => Boolean(Config.options?.background?.effects?.glyphs?.enable), label: "Glow", path: "background.effects.glyphs.glow", kind: "range", fallback: 100, min: 0, max: 200, step: 10, unit: " %" },
         { section: "notifications", group: "Banners", label: "Notification banners", path: "iris.modules.notificationPopup", kind: "switch", fallback:true },
         { section: "notifications", group: "Banners", label: "Banner duration", description: "How long a notification stays when the app does not choose.", path: "iris.notifications.duration", kind: "range", fallback:4000,min:2000,max:12000,step:500,scale:0.001,unit:" s" },
         { section: "sound", group: "Output", label: "Sound plays on", description: "Pick where the sound goes; the volume is the one in use.", kind: "list", view: Qt.resolvedUrl("IrisSoundDevices.qml"), input: false, summary: () => Audio.defaultSink ? Audio.friendlyDeviceName(Audio.defaultSink) : "", keywords: ["output", "device", "speakers", "headphones", "bluetooth", "volume", "salida", "parlantes", "altavoces", "auriculares"] },
@@ -1936,7 +1940,7 @@ QtObject {
         "Extra bubbles": "add_circle", "Faces": "font_download", "Feedback": "campaign", "Floating": "flight",
         "Focus": "dock_to_left", "Frame": "crop_free", "Frame response": "graphic_eq", "Frame music": "border_outer", "Edge wave": "waves", "Frame finish": "flare", "Prefixes": "keyboard_command_key", "Name song": "music_cast", "System readings": "monitor_heart", "Fullscreen": "fullscreen", "Game mode": "sports_esports",
         "Glass": "blur_on", "Highlight": "highlight", "Icons": "emoji_symbols", "Interaction": "ads_click", "Joining": "join_inner",
-        "Language": "language", "Layout": "view_quilt", "Tabs": "tab", "Title bars": "web_asset", "Effects": "auto_fix_high", "Hot corners": "pip_exit", "Colour": "hdr_on", "Workspaces": "view_carousel", "Light": "light_mode", "Live wallpapers": "motion_photos_on",
+        "Language": "language", "Layout": "view_quilt", "Tabs": "tab", "Title bars": "web_asset", "Effects": "auto_fix_high", "Hot corners": "pip_exit", "Colour": "hdr_on", "Workspaces": "view_carousel", "Light": "light_mode", "Live wallpapers": "motion_photos_on", "Glyph art": "grid_on",
         "Desktop menu": "menu_open", "Look": "visibility", "Design": "design_services", "Material": "layers", "Material per surface": "layers", "Corners per surface": "rounded_corner", "Colour theme": "palette", "Signal": "radio_button_checked", "Day and night": "routine", "Scheme": "contrast", "Dark look": "dark_mode", "Ink look": "ink_pen", "Light look": "light_mode", "Menus": "menu", "Motion": "animation", "New iNiR": "rocket_launch",
         "Night Light": "nightlight", "Notifications": "notifications", "Now playing": "music_note", "On the contour": "border_outer",
         "Opening bodies": "open_in_full", "Overview backdrop": "grid_view", "Pages": "view_carousel", "Per surface": "tune",
@@ -2032,6 +2036,7 @@ QtObject {
         get "Layout"() { return IrisStyle.identity.blue },
         get "Light"() { return IrisStyle.identity.yellow },
         get "Live wallpapers"() { return IrisStyle.identity.pink },
+        get "Glyph art"() { return IrisStyle.identity.pink },
         get "Login screen"() { return IrisStyle.identity.indigo },
         get "Login Screen"() { return IrisStyle.identity.indigo },
         get "Wallpaper tint"() { return IrisStyle.identity.teal },
@@ -2187,7 +2192,7 @@ QtObject {
         // The screen itself comes first: its picture, then what it runs at, then its colour.
         display: ["Screen", "Workspaces", "Colour", "Screens"],
         widgets: DesktopWidgetOptions.order,
-        wallpaper: ["Wallpaper shuffle", "Transition", "Live wallpapers", "Wallpaper gallery", "Library", "Scaling", "Behind windows", "Parallax", "Overview backdrop"],
+        wallpaper: ["Wallpaper shuffle", "Transition", "Live wallpapers", "Glyph art", "Wallpaper gallery", "Library", "Scaling", "Behind windows", "Parallax", "Overview backdrop"],
         lock: ["When idle", "Security", "Scene", "Clock", "At a glance", "Now playing", "Activity", "Status", "Sign in", "Type"],
         player: ["Bubble", "Visualizer", "Player", "Frame music", "Edge wave", "Frame response", "Frame finish"]
     })
@@ -2223,7 +2228,7 @@ QtObject {
         return out
     }
     readonly property var movedGroups: ({
-        desktop: { to: "wallpaper", groups: ["Wallpaper shuffle", "Scaling", "Live wallpapers", "Wallpaper gallery", "Behind windows", "Parallax", "Overview backdrop"] }
+        desktop: { to: "wallpaper", groups: ["Wallpaper shuffle", "Scaling", "Live wallpapers", "Glyph art", "Wallpaper gallery", "Behind windows", "Parallax", "Overview backdrop"] }
     })
     function placed(spec: var): var {
         const move = root.movedGroups[String(spec.section ?? "")]

@@ -33,7 +33,7 @@ Variants {
         readonly property bool spanning: panel.fillMode === "span"
         readonly property bool externalWallpaper: AwwwBackend.supportsVisibleMainWallpaper(
             panel.configuredPath, panel.fillMode, false, false)
-            && !Wallpapers.internalPreviewActive
+            && !Wallpapers.internalPreviewActive && !Wallpapers.glyphs
         readonly property bool desktopMenuOpen: desktopMenu.active
 
         screen: modelData
@@ -102,6 +102,12 @@ Variants {
                 transitionBaseDuration: Config.options?.background?.transition?.duration ?? 800
                 shouldPlay: panel.motion
             }
+        }
+
+        WallpaperGlyphs {
+            anchors.fill: canvas
+            picture: panel.effectivePath.length > 0 ? canvas : null
+            path: panel.previewPath
         }
 
         Rectangle {

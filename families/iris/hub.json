@@ -3,6 +3,7 @@
     "version": "2.33.76",
     "changes": {
         "2.33.76": [
+          "Wallpaper › Draw the wallpaper as glyphs: pictures, GIFs and videos redrawn as glowing characters, in six looks",
           "Control Center: the Do Not Disturb tile lights when it is on (it read the other way round), with the same name and moon as elsewhere",
           "Island: Do Not Disturb is a small indigo moon; hover names it, a press turns it off; it steps aside while its bubble shows",
           "Settings on Umbriel: free space at each screen edge, dialogs that stay with their window, apps opening maximized, shortcuts at login",

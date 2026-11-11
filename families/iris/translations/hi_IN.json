@@ -1401,7 +1401,6 @@
   "Its text and its quieter lines": "इसका टेक्स्ट और हल्की पंक्तियाँ",
   "The shell and your apps, one palette": "शेल और आपके ऐप, एक पैलेट",
   "Your apps keep their own colours": "आपके ऐप अपने रंग रखते हैं",
-  "Paper": "कागज़",
   "Ink style": "Ink शैली",
   "Follow the style": "शैली का अनुसरण करें",
   "Shironeri": "शिरोनेरी",
@@ -2433,5 +2432,6 @@
   "A new one opens when the last fills.": "जब आखिरी भर जाता है तो एक नया खुलता है।",
   "A new one opens when the last fills; %1 always wait here.": "जब आखिरी भर जाता है तो एक नया खुलता है; %1 हमेशा यहाँ इंतज़ार करते हैं",
   "This screen always has %1.": "इस स्क्रीन पर हमेशा %1 होते हैं।",
-  "Press to turn off": "बंद करने के लिए दबाएँ"
+  "Press to turn off": "बंद करने के लिए दबाएँ",
+  "Glyph art": "ग्लिफ़ कला"
 }

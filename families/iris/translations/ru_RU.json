@@ -1401,7 +1401,6 @@
   "Its text and its quieter lines": "Его текст и более тихие строки",
   "The shell and your apps, one palette": "Оболочка и приложения, одна палитра",
   "Your apps keep their own colours": "Приложения сохраняют свои цвета",
-  "Paper": "Бумага",
   "Ink style": "Стиль Ink",
   "Follow the style": "Следовать стилю",
   "Shironeri": "Сиронэри",
@@ -2433,5 +2432,6 @@
   "A new one opens when the last fills.": "Новое открывается, когда последнее заполняется.",
   "A new one opens when the last fills; %1 always wait here.": "Новое открывается, когда последнее заполняется; %1 всегда ждут здесь",
   "This screen always has %1.": "На этом экране всегда %1.",
-  "Press to turn off": "Нажмите, чтобы выключить"
+  "Press to turn off": "Нажмите, чтобы выключить",
+  "Glyph art": "Символьная графика"
 }

@@ -1401,7 +1401,6 @@
   "Its text and its quieter lines": "Il suo testo e le righe più tenui",
   "The shell and your apps, one palette": "La shell e le tue app, una sola tavolozza",
   "Your apps keep their own colours": "Le tue app tengono i propri colori",
-  "Paper": "Carta",
   "Ink style": "Stile di Ink",
   "Follow the style": "Segui lo stile",
   "Shironeri": "Shironeri",
@@ -2433,5 +2432,6 @@
   "A new one opens when the last fills.": "Se ne apre uno nuovo quando l'ultimo si riempie.",
   "A new one opens when the last fills; %1 always wait here.": "Se ne apre uno nuovo quando l'ultimo si riempie; %1 attendono sempre qui",
   "This screen always has %1.": "Questo schermo ha sempre %1.",
-  "Press to turn off": "Premi per disattivare"
+  "Press to turn off": "Premi per disattivare",
+  "Glyph art": "Arte a glifi"
 }

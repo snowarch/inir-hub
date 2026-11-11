@@ -1401,7 +1401,6 @@
   "Its text and its quieter lines": "Allannera titarnerilu qasukkaannerusut",
   "The shell and your apps, one palette": "Shell atortorissaarutitillu, qalipaatit ataasiit",
   "Your apps keep their own colours": "Atortorissaarutitit namminermi qalipaatitik pigaat",
-  "Paper": "Pappia",
   "Ink style": "Ink-p ittuunera",
   "Follow the style": "Ittuuneq malittaruk",
   "Shironeri": "Shironeri",
@@ -2433,5 +2432,6 @@
   "A new one opens when the last fills.": "Qaangiuttoq tunuartoq nutaaq ammasuunneqarpoq.",
   "A new one opens when the last fills; %1 always wait here.": "Qaangiuttoq tunuartoq nutaaq ammasuunneqarpoq; %1 tassani sivisuumik tegusaqarput",
   "This screen always has %1.": "Tassa takussutissaq ilaqarpoq %1 tassani.",
-  "Press to turn off": "Ingerlanneqqullugu tiguk"
+  "Press to turn off": "Ingerlanneqqullugu tiguk",
+  "Glyph art": "Naqinnernik eqqumiitsuliaq"
 }
