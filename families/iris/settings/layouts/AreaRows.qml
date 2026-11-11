@@ -1281,7 +1281,8 @@ ColumnLayout {
                 x: island.inset
                 y: island.compact - Math.round(4 * island.d)
                 width: (island.deckItem?.width ?? island.width) - 2 * island.inset
-                active: island.open || island.closing
+                // Never at no width: a page built in the click's frame has none yet, and rows laid out there loop.
+                active: (island.open || island.closing) && body.width > 0
                 opacity: island.open && body.status === Loader.Ready ? 1 : 0
                 Behavior on opacity {
                     SequentialAnimation {

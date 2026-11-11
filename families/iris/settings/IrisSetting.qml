@@ -638,6 +638,9 @@ Item {
         Loader {
             opacity: root.controlOpacity
             Layout.fillWidth: true
+            // A view sized by its own width (a Flow of tiles) feeds it back through fillWidth, as the text field
+            // below: at a row not laid out yet (width 0) Arrangement flipped between two heights for ever.
+            Layout.preferredWidth: 0
             active: root.spec.kind === "list"
             visible: active
             source: active ? root.spec.view : ""
