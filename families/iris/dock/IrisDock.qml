@@ -987,8 +987,8 @@ Item {
                                             // A plate Design (AIRISU) cuts them square and lights the focused window in the seal:
                                             // the only live thing in the dock.
                                             radius: Math.min(width, height) / 2
-                                            color: indicators.minimizedOnly ? "transparent"
-                                                : indicators.urgent ? IrisStyle.secondaryAccent
+                                            color: indicators?.minimizedOnly ? "transparent"
+                                                : indicators?.urgent ? IrisStyle.secondaryAccent
                                                 : indicator.lead ? (IrisStyle.plateSelection ? IrisStyle.accentFill : IrisStyle.text)
                                                 : (appSlot.focused ? IrisStyle.textSecondary : IrisStyle.textTertiary)
                                             borderWidth: indicators.minimizedOnly ? Math.max(1, Math.round(1.2 * root.d)) : 0
