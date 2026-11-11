@@ -15,7 +15,7 @@ IrisWidgetFace {
 
     readonly property bool ready: Weather.enabled && !String(Weather.data?.temp ?? "--").startsWith("--")
     readonly property string glyph: Icons.getWeatherIcon(Weather.data?.wCode, Weather.isNightNow()) ?? "cloud"
-    readonly property color sky: IrisStyle.skyLight(root.glyph)
+    readonly property color sky: root.skyOf(root.glyph)
     // The town, not its province: "Avellaneda, Bueno…" told less than "Avellaneda". Large has the room for both.
     readonly property string city: Weather.showVisibleCity
         ? (root.large ? Weather.visibleCity : String(Weather.visibleCity).split(",")[0].trim()) : ""
@@ -163,7 +163,7 @@ IrisWidgetFace {
                     text: point.glyph
                     fill: 1
                     iconSize: root.px(13)
-                    color: IrisStyle.skyLight(point.glyph)
+                    color: root.skyOf(point.glyph)
                 }
                 FaceText {
                     face: root
@@ -357,7 +357,7 @@ IrisWidgetFace {
                     text: day.glyph
                     fill: 1
                     iconSize: root.px(18)
-                    color: IrisStyle.skyLight(day.glyph)
+                    color: root.skyOf(day.glyph)
                 }
                 FaceText {
                     face: root
@@ -381,8 +381,8 @@ IrisWidgetFace {
                         radius: IrisStyle.capsule(height)
                         gradient: Gradient {
                             orientation: Gradient.Horizontal
-                            GradientStop { position: 0; color: root.inked(IrisStyle.identity.sky) }
-                            GradientStop { position: 1; color: root.inked(IrisStyle.identity.orange) }
+                            GradientStop { position: 0; color: root.accent }
+                            GradientStop { position: 1; color: root.warm }
                         }
                     }
                 }
@@ -579,7 +579,7 @@ IrisWidgetFace {
                     text: Icons.getWeatherIcon(posterDay.modelData.code, false) ?? "cloud"
                     fill: 1
                     iconSize: root.px(17)
-                    color: root.nothing ? root.ink : IrisStyle.skyLight(text)
+                    color: root.nothing ? root.ink : root.skyOf(text)
                 }
                 Rectangle {
                     Layout.fillWidth: true

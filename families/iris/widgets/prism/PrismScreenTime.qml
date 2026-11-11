@@ -44,7 +44,7 @@ PrismFolder {
 
     tabGlyph: "hourglass_top"
     tabText: root.small ? Translation.tr("Today") : Translation.tr("Screen Time")
-    shelf: root.nothing ? root.signal : root.inked(IrisStyle.identity.indigo)
+    shelf: root.nothing ? root.signal : root.accent
 
     // ── the flap: the app the day went to ──
     Row {

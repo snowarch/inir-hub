@@ -13,7 +13,7 @@ PrismFolder {
     readonly property bool blank: String(root.widget.noteText ?? "").length === 0 && !root.widget.editing
     readonly property int words: String(root.widget.noteText ?? "").trim().split(/\s+/).filter(word => word.length > 0).length
 
-    shelf: root.nothing ? root.signal : root.inked(IrisStyle.identity.yellow)
+    shelf: root.nothing ? root.signal : root.warm
     tabGlyph: "edit_note"
     tabText: Translation.tr("Notes")
     flapText: root.words > 0 ? (root.small ? String(root.words) : Translation.tr("%1 words").arg(root.words)) : ""

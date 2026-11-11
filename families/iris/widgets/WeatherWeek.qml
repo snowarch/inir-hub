@@ -18,7 +18,7 @@ Item {
     readonly property bool label: view.face.nothing ?? false
 
     function skyOf(glyph: string): color {
-        return view.label ? view.face.ink : IrisStyle.skyLight(glyph)
+        return view.label ? view.face.ink : view.face.skyOf(glyph)
     }
 
     ColumnLayout {

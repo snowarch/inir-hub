@@ -21,7 +21,7 @@ IrisWidgetFace {
     readonly property bool folder: root.widget.sourceMode === "folder" && !root.empty
     readonly property string folderName: FileUtils.folderNameForPath(String(root.widget.folderPath ?? ""))
     readonly property bool showsPicture: !root.empty && !root.failed
-    readonly property color tint: root.inked(IrisStyle.identity.blue)
+    readonly property color tint: root.accent
 
     padding: root.showsPicture ? 0 : root.edgePad
 

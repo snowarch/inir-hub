@@ -14,7 +14,7 @@ PrismFolder {
 
     readonly property bool ready: Weather.enabled && !String(Weather.data?.temp ?? "--").startsWith("--")
     readonly property string glyph: Icons.getWeatherIcon(Weather.data?.wCode, Weather.isNightNow()) ?? "cloud"
-    readonly property color sky: IrisStyle.skyLight(root.glyph)
+    readonly property color sky: root.skyOf(root.glyph)
     readonly property string city: Weather.showVisibleCity ? String(Weather.visibleCity).split(",")[0].trim() : ""
     readonly property string condition: IrisFaceData.capitalized(String(Weather.data?.description ?? ""))
     readonly property string high: root.degrees(Weather.data?.tempMax)
@@ -41,7 +41,7 @@ PrismFolder {
     tabText: root.city.length > 0 ? root.city : Translation.tr("Weather")
     flapText: !root.ready || root.high.length === 0 ? "" : root.small ? root.high + " / " + root.low
         : Translation.tr("H:%1  L:%2").arg(root.high).arg(root.low)
-    shelf: root.nothing ? root.signal : root.ready ? root.inked(root.sky) : root.accent
+    shelf: root.nothing ? root.signal : root.ready ? root.sky : root.accent
     lightPass: root.ready ? 1 : 0.5
 
     // ── the pane: the temperature, and the sky beside it ──
@@ -170,7 +170,7 @@ PrismFolder {
                     text: hour.glyph
                     fill: 1
                     iconSize: root.px(root.type(14, 15, 18))
-                    color: IrisStyle.skyLight(hour.glyph)
+                    color: root.skyOf(hour.glyph)
                 }
                 FaceText {
                     anchors.horizontalCenter: parent.horizontalCenter
@@ -212,7 +212,7 @@ PrismFolder {
                 text: day.glyph
                 fill: 1
                 iconSize: root.px(17)
-                color: IrisStyle.skyLight(day.glyph)
+                color: root.skyOf(day.glyph)
             }
             FaceText {
                 id: dayLow

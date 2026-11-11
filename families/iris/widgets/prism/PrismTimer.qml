@@ -17,7 +17,7 @@ PrismFolder {
             label: TimerService.pomodoroLongBreak ? Translation.tr("Long break") : TimerService.pomodoroBreak ? Translation.tr("Break") : Translation.tr("Focus"),
             value: root.widget.formatSeconds(TimerService.pomodoroSecondsLeft),
             running: TimerService.pomodoroRunning, paused: TimerService.pomodoroPaused,
-            tint: TimerService.pomodoroBreak ? IrisStyle.identity.green : root.highlight },
+            tint: TimerService.pomodoroBreak ? root.accent2 : root.highlight },
         { key: "stopwatch", glyph: "timer", label: Translation.tr("Stopwatch"),
             value: root.widget.formatSeconds(TimerService.stopwatchTime / 100),
             running: TimerService.stopwatchRunning, paused: TimerService.stopwatchPaused, tint: root.accent },

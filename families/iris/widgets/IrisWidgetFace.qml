@@ -114,6 +114,14 @@ Item {
     readonly property color accent2: root.nothing ? root.inkSecondary : root.stockInk ? stockLoader.item.accent2 : root.mark(root.widget.look.accent2)
     readonly property color warm: root.nothing ? root.ink : root.mark(IrisStyle.secondaryAccent)
     readonly property color danger: root.nothing ? root.signal : root.mark(IrisStyle.danger)
+    // Every colour a face wears is one of these roles, from the widget palette the person picked (`iris.widgets.tint`):
+    // accent is the widget's own, accent2 and highlight a second and third series, warm the person's highlight for
+    // daylight and charge, danger only past a limit. A face never picks a hue of its own: a pink player, a yellow note
+    // and an indigo screen time side by side read as three apps, not one desk (his 11-11 "coherencia visual en todo").
+    function skyOf(glyph: string): color {
+        return glyph === "clear_day" ? root.warm
+            : ["bedtime", "partly_cloudy_night", "thunderstorm"].includes(glyph) ? root.accent2 : root.accent
+    }
     readonly property color ink: root.stockInk ? stockLoader.item.ink : root.paper ? IrisStyle.text : root.lightBackdrop ? IrisStyle.inkOnLight : IrisStyle.light ? IrisStyle.inkOnDark : IrisStyle.text
     readonly property color inkSecondary: IrisStyle.secondaryOf(root.ink)
     readonly property color inkTertiary: IrisStyle.tertiaryOf(root.ink)

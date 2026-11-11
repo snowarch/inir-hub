@@ -153,7 +153,7 @@ IrisWidgetFace {
                 on: Network.ethernet || Network.wifiEnabled
                 status: Network.ethernet ? Translation.tr("Connected") : Network.wifiEnabled
                     ? (Network.networkName || Translation.tr("Not connected")) : Translation.tr("Off")
-                tint: root.inked(IrisStyle.identity.blue)
+                tint: root.accent
                 onToggled: Network.toggleWifi()
             }
             Toggle {
@@ -163,7 +163,7 @@ IrisWidgetFace {
                 status: !BluetoothStatus.enabled ? Translation.tr("Off") : (BluetoothStatus.activeDeviceSummary() || Translation.tr("On"))
                 on: BluetoothStatus.enabled
                 available: BluetoothStatus.available
-                tint: root.inked(IrisStyle.identity.blue)
+                tint: root.accent
                 onToggled: { if (Bluetooth.defaultAdapter) Bluetooth.defaultAdapter.enabled = !Bluetooth.defaultAdapter.enabled }
             }
             Toggle {
@@ -171,7 +171,7 @@ IrisWidgetFace {
                 glyph: Notifications.manualDndActive ? "do_not_disturb_on" : "do_not_disturb_off"
                 label: Translation.tr("Focus")
                 on: Notifications.manualDndActive
-                tint: root.inked(IrisStyle.identity.indigo)
+                tint: root.accent
                 onToggled: Notifications.toggleSilent()
             }
             Toggle {
@@ -179,7 +179,7 @@ IrisWidgetFace {
                 glyph: "nightlight"
                 label: Translation.tr("Night light")
                 on: Hyprsunset.active
-                tint: root.inked(IrisStyle.identity.orange)
+                tint: root.accent
                 onToggled: Hyprsunset.toggle()
             }
             Toggle {
@@ -187,7 +187,7 @@ IrisWidgetFace {
                 glyph: "coffee"
                 label: Translation.tr("Keep awake")
                 on: Idle.inhibit
-                tint: root.inked(IrisStyle.identity.yellow)
+                tint: root.accent
                 onToggled: Idle.toggleInhibit()
             }
             Toggle {
@@ -195,7 +195,7 @@ IrisWidgetFace {
                 glyph: "sports_esports"
                 label: Translation.tr("Game mode")
                 on: GameMode.active
-                tint: root.inked(IrisStyle.identity.green)
+                tint: root.accent
                 onToggled: GameMode.toggle()
             }
             Toggle {
@@ -204,7 +204,7 @@ IrisWidgetFace {
                 label: Translation.tr("Microphone")
                 on: Audio.source !== null && !Audio.micMuted
                 available: Audio.source !== null
-                tint: root.inked(IrisStyle.identity.orange)
+                tint: root.accent
                 onToggled: Audio.toggleMicMute()
             }
             Toggle {
@@ -212,7 +212,7 @@ IrisWidgetFace {
                 glyph: Appearance.m3colors.darkmode ? "dark_mode" : "light_mode"
                 label: Translation.tr("Dark mode")
                 on: Appearance.m3colors.darkmode
-                tint: root.inked(IrisStyle.identity.indigo)
+                tint: root.accent
                 onToggled: Appearance.toggleDarkMode()
             }
         }

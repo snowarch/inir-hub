@@ -23,7 +23,7 @@ Item {
     readonly property bool wide: view.face.medium
     readonly property bool compact: view.face.small
     readonly property bool label: view.face.nothing ?? false
-    readonly property color songLight: view.label ? view.face.signal : view.face.artLight
+    readonly property color songLight: view.label ? view.face.signal : view.face.accent
     function dp(value: real): real { return view.face.dp(value) }
 
     // What it shows: the song, the paused one, the one that played last, or nothing yet.
@@ -202,13 +202,13 @@ Item {
             anchors.fill: parent
             visible: view.cover.length === 0
             radius: view.pick(7, 7, 8)
-            color: IrisStyle.tintFill(view.face.inked(IrisStyle.identity.pink))
+            color: IrisStyle.tintFill(view.face.accent)
             MaterialSymbol {
                 anchors.centerIn: parent
                 text: "music_note"
                 fill: 1
                 iconSize: Math.round(parent.width * 0.42)
-                color: view.face.inked(IrisStyle.identity.pink)
+                color: view.face.accent
             }
         }
         // The cover plays and pauses, as Apple's does; it settles back a little while paused.

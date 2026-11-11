@@ -300,7 +300,7 @@ IrisWidgetFace {
             Layout.fillWidth: true
             glyph: "battery_full"
             text: Translation.tr("Batteries")
-            tint: root.inked(IrisStyle.identity.green)
+            tint: root.accent
         }
         Item {
             Layout.fillWidth: true
@@ -312,7 +312,7 @@ IrisWidgetFace {
                 width: parent.width
                 glyph: "power"
                 glyphFill: true
-                tint: root.inked(IrisStyle.identity.green)
+                tint: root.accent
                 title: Translation.tr("On power")
                 detail: Translation.tr("Devices you pair show up here")
             }
@@ -330,7 +330,7 @@ IrisWidgetFace {
             Layout.bottomMargin: root.dp(6)
             glyph: "battery_full"
             text: Translation.tr("Batteries")
-            tint: root.inked(IrisStyle.identity.green)
+            tint: root.accent
         }
         Repeater {
             model: root.large && !root.cellsStyle ? root.devices : []

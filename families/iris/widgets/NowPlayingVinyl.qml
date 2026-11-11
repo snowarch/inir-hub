@@ -20,7 +20,7 @@ Item {
 
     readonly property bool wide: view.face.medium
     readonly property bool label: view.face.nothing ?? false
-    readonly property color songLight: view.label ? view.face.signal : view.face.artLight
+    readonly property color songLight: view.label ? view.face.signal : view.face.accent
     // A record is black vinyl in every theme and scheme, and what it catches is white light.
     readonly property color vinyl: "#0d0d0f" // iris-literal: a record is black in every theme
     readonly property color shine: "#ffffff" // iris-literal: light on black vinyl, the same in every theme

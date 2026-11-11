@@ -33,7 +33,6 @@ IrisWidgetFace {
     readonly property bool restsWhenPaused: Boolean(root.widget.familyOption("rest", false))
     readonly property bool resting: !root.hasPlayer || (root.restsWhenPaused && !root.playing && restDelay.elapsed)
     readonly property string art: root.hasPlayer ? media.displayedArtFilePath : ""
-    readonly property color artLight: IrisStyle.vividHighlight(media.colorQuantizer?.colors?.[0] ?? root.accent, root.accent)
     readonly property real progress: media.effectiveLength > 0 ? Math.min(1, media.effectivePosition / media.effectiveLength) : 0
     readonly property bool lyricsWanted: root.large && (root.prismStyle || !root.ownStyle) && root.live && root.hasPlayer
         && Boolean(root.widget.familyOption("lyrics", true))
@@ -46,7 +45,7 @@ IrisWidgetFace {
     }
 
     light: root.small || root.art.length === 0 ? "transparent"
-        : root.artLight
+        : root.accent
     padding: (root.small && root.art.length > 0 && !root.resting) || root.coverLarge || root.prismStyle ? 0 : root.edgePad
 
     onLyricsWantedChanged: root.lyricsWanted ? LyricsService.subscribe(root) : LyricsService.unsubscribe(root)
@@ -197,13 +196,13 @@ IrisWidgetFace {
             anchors.fill: parent
             visible: !rest.cover
             radius: Math.max(root.dp(6), Math.round(width * 0.14))
-            color: IrisStyle.tintFill(root.inked(IrisStyle.identity.pink))
+            color: IrisStyle.tintFill(root.accent)
             MaterialSymbol {
                 anchors.centerIn: parent
                 text: "music_note"
                 fill: 1
                 iconSize: Math.round(parent.width * 0.42)
-                color: root.inked(IrisStyle.identity.pink)
+                color: root.accent
             }
         }
     }
@@ -238,7 +237,7 @@ IrisWidgetFace {
             width: parent.width
             glyph: "music_note"
             text: Translation.tr("Music")
-            tint: root.inked(IrisStyle.identity.pink)
+            tint: root.accent
         }
         FaceBlank {
             visible: !rest.known
@@ -247,7 +246,7 @@ IrisWidgetFace {
             y: root.large ? restBlankHead.height + root.dp(24) : Math.round((parent.height - height) / 2)
             glyph: "music_note"
             glyphFill: true
-            tint: root.inked(IrisStyle.identity.pink)
+            tint: root.accent
             title: Translation.tr("Not playing")
             detail: Translation.tr("Play something and it shows here")
         }
@@ -296,7 +295,7 @@ IrisWidgetFace {
                     width: parent.width
                     glyph: "music_note"
                     text: rest.head
-                    tint: root.inked(IrisStyle.identity.pink)
+                    tint: root.accent
                 }
             }
             Column {
@@ -349,7 +348,7 @@ IrisWidgetFace {
                 width: parent.width
                 glyph: "music_note"
                 text: rest.head
-                tint: root.inked(IrisStyle.identity.pink)
+                tint: root.accent
             }
             Cover {
                 y: restLargeHead.height + root.dp(10)

@@ -177,7 +177,7 @@ IrisWidgetFace {
                 visible: root.widget.showWeather && Weather.enabled && String(Weather.data?.temp ?? "").length > 0
                 Layout.fillWidth: true
                 glyph: Icons.getWeatherIcon(Weather.data?.wCode, Weather.isNightNow()) ?? "cloud"
-                tint: IrisStyle.skyLight(glyph)
+                tint: root.skyOf(glyph)
                 label: Translation.tr("Weather")
                 value: String(Weather.data?.temp ?? "").replace(/°[CF]$/, "°")
             }
