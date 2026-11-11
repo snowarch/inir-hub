@@ -22,8 +22,10 @@ IrisDisplayArrange 1.0 IrisDisplayArrange.qml
 IrisDisplayScreens 1.0 IrisDisplayScreens.qml
 IrisEffects 1.0 IrisEffects.qml
 IrisDisplayScale 1.0 IrisDisplayScale.qml
+IrisDisplayWorkspaces 1.0 IrisDisplayWorkspaces.qml
 IrisHotCorners 1.0 IrisHotCorners.qml
 IrisLayoutModes 1.0 IrisLayoutModes.qml
+IrisLayoutWidth 1.0 IrisLayoutWidth.qml
 IrisDockPinned 1.0 IrisDockPinned.qml
 IrisHubPage 1.0 IrisHubPage.qml
 IrisNotificationApps 1.0 IrisNotificationApps.qml

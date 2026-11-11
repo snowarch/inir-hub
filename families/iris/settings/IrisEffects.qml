@@ -228,16 +228,16 @@ Column {
                         model: pointer.wearing === "trail" ? 6 : pointer.wearing === "trail-path" ? 12 : 0
                         Rectangle {
                             required property int index
-                            readonly property bool long: pointer.wearing === "trail-path"
+                            readonly property bool curved: pointer.wearing === "trail-path"
                             readonly property real step: index + 1
-                            readonly property real size: Math.max(2, Math.round((long ? 7 - index * 0.4 : 8 - index) * root.d))
-                            x: Math.round(4 * root.d) - step * Math.round((long ? 9 : 7) * root.d) - size / 2
-                            y: Math.round(4 * root.d) - step * Math.round((long ? 3 : 5) * root.d) + (long ? Math.pow(step, 2) * 0.55 * root.d : 0) - size / 2
+                            readonly property real size: Math.max(2, Math.round((curved ? 7 - index * 0.4 : 8 - index) * root.d))
+                            x: Math.round(4 * root.d) - step * Math.round((curved ? 9 : 7) * root.d) - size / 2
+                            y: Math.round(4 * root.d) - step * Math.round((curved ? 3 : 5) * root.d) + (curved ? Math.pow(step, 2) * 0.55 * root.d : 0) - size / 2
                             width: size
                             height: size
                             radius: size / 2
-                            color: Qt.tint("#9a7bff", Qt.rgba(1, 0.83, 0.4, index / (long ? 12 : 6))) // iris-literal: the shipped trail's fixed violet and gold
-                            opacity: 1 - index / (long ? 13 : 7)
+                            color: Qt.tint("#9a7bff", Qt.rgba(1, 0.83, 0.4, index / (curved ? 12 : 6))) // iris-literal: the shipped trail's fixed violet and gold
+                            opacity: 1 - index / (curved ? 13 : 7)
                         }
                     }
                     MaterialSymbol {
