@@ -10,6 +10,7 @@ import qs.modules.iris.components
 Row {
     id: root
     property bool spelled: true
+    property bool quietToo: false
     // The ink of what it sits on (a Design's lacquered strip); the mic and camera stay the signal.
     property color ink: IrisStyle.text
     // On a strip already lacquered in the signal (AIRISU recording) the marks take its ink, or they would vanish.
@@ -20,7 +21,7 @@ Row {
     readonly property bool any: Privacy.micActive || Privacy.cameraActive || Privacy.screenSharing
     spacing: Math.round(8 * root.d)
     // Stays laid out while the last mark folds away, so the row it rides closes instead of jumping.
-    visible: root.any || root.implicitWidth > 0.5
+    visible: root.any || (root.quietToo && Notifications.silent) || root.implicitWidth > 0.5
 
     component Mark: Item {
         id: mark
@@ -55,6 +56,15 @@ Row {
         }
     }
 
+    // Do not disturb, where the Island stands upright and has no trailing end: a moon above the marks.
+    Glyph {
+        visible: root.quietToo && Notifications.silent
+        anchors.verticalCenter: parent.verticalCenter
+        text: "bedtime"
+        fill: 1
+        iconSize: Math.round(13 * root.d)
+        color: root.nothing ? root.ink : Qt.tint(IrisStyle.identity.indigo, Qt.rgba(root.ink.r, root.ink.g, root.ink.b, 0.34))
+    }
     Mark { active: Privacy.micActive; label: Translation.tr("Mic"); appleInk: IrisStyle.identity.orange }
     Mark { active: Privacy.cameraActive; label: Translation.tr("Cam"); appleInk: IrisStyle.identity.green }
     Mark { active: Privacy.screenSharing; label: Translation.tr("Cast"); ink: root.ink }

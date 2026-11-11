@@ -119,6 +119,13 @@ Item {
     // Each side's share of the Island the song takes (its inset, the wing and a step clear of it); the face keeps the
     // middle with its own breathing, so the song stands as far from the face as from the Island's ends.
     readonly property real wingSlot: root.songWings ? root.wingLead + root.wingBox + Math.round(6 * root.d) : 0
+    // Do not disturb, at rest: a small moon at the Island's trailing end for as long as it is on, in every face and
+    // row (11-10: it was on for days with no sign anywhere). Both sides give it the same room, so nothing moves off
+    // centre; a notice or a level keeps its own row.
+    readonly property bool quiet: Notifications.silent && !root.vertical && !root.compactSizeClass
+    readonly property real quietBox: Math.round(13 * root.d)
+    readonly property real quietSlot: root.quiet ? root.quietBox + Math.round(8 * root.d) : 0
+    readonly property real sideSlot: root.wingSlot + root.quietSlot
     readonly property real wingLead: Math.round(Math.max((root.compactHeight - root.wingCoverSize) / 2,
         Math.min(14.5 * root.d * root.breathing, root.compactHeight / 4)))
     readonly property bool pagesHang: IrisDesign.trait("pages") === "hang" && !root.fullWidth && !root.vertical
@@ -887,16 +894,16 @@ Item {
         timer: timerRow, task: taskRow, mic: micRow, camera: cameraRow, clock: clockRow, event: eventRow, feedback: feedbackRow,
         drop: dropRow })
     readonly property real compactContentWidth: root.vertical ? compactColumn.implicitHeight
-        : root.faceTakes ? (designFace.item?.contentWidth ?? 0) + 2 * root.wingSlot
-        : (root.compactRows[root.compactMode]?.implicitWidth ?? 0) + 2 * root.wingSlot
+        : root.faceTakes ? (designFace.item?.contentWidth ?? 0) + 2 * root.sideSlot
+        : (root.compactRows[root.compactMode]?.implicitWidth ?? 0) + 2 * root.sideSlot
     readonly property real compactFloor: root.compactHeight * 2.1
     // A larger clock (Settings › Island › Size) takes a wider resting Island with it, so a face keeps its extras.
     readonly property real idleCeiling: Math.round(320 * root.d * Math.max(1, root.clockScale))
-    readonly property real compactCeiling: Math.min(root.availableWidth, root.songWings ? root.idleCeiling + 2 * root.wingSlot
+    readonly property real compactCeiling: Math.min(root.availableWidth, root.songWings || root.quiet ? root.idleCeiling + 2 * root.sideSlot
         : root.compactMode === "event" || root.compactMode === "drop" ? 340 * root.d : root.idleCeiling)
     // The room a Design's face has at rest: the idle ceiling, less the Island's breathing and the pieces it carries.
     // A face that would pass it gives up its extras first (designs/*/Face.qml), so the Island never cuts it.
-    readonly property real faceRoom: Math.max(0, Math.min(root.idleCeiling, root.availableWidth - root.barPieceReserve - 2 * root.wingSlot)
+    readonly property real faceRoom: Math.max(0, Math.min(root.idleCeiling, root.availableWidth - root.barPieceReserve - 2 * root.sideSlot)
         - Math.round(29 * root.d * root.breathing))
     // The ceiling holds the Island's own content; the pieces it carries come on top of it, or they would be
     // squeezed over the clock.
@@ -2141,7 +2148,7 @@ Item {
                 property string mode: ""
                 property real lead: 0
                 readonly property bool current: root.compactMode === compactRow.mode || (compactRow.mode === "idle" && root.haloWings)
-                readonly property real wing: compactRow.mode === "idle" ? root.wingSlot : 0
+                readonly property real wing: (compactRow.mode === "idle" ? root.wingSlot : 0) + root.quietSlot
                 property real laidWidth: 0
                 // Laid at the width of its own size class: relaying the row out per
                 // frame so it rides the shape measured 2.4x the cost of every morph.
@@ -2799,7 +2806,7 @@ Item {
                 readonly property real boxX: (root.zoned ? Math.round(barZones.heartAlong + (root.heartLength - designFace.laidWidth) / 2)
                     : Math.round((parent.width - designFace.laidWidth) / 2)) + (root.piecesAtStart ? root.barPieceReserve : 0)
                 readonly property real boxWidth: Math.max(0, designFace.laidWidth - root.barPieceReserve)
-                readonly property real inset: designFace.item?.edge === true ? 0 : root.wingSlot
+                readonly property real inset: designFace.item?.edge === true ? 0 : root.sideSlot
                 x: designFace.boxX + designFace.inset
                 y: designFace.swellShift
                 width: Math.max(0, designFace.boxWidth - 2 * designFace.inset)
@@ -2821,6 +2828,20 @@ Item {
                 opacity: (root.songWings && root.heartShown ? (root.playing ? 1 : 0.6) : 0) * root.heartUncovered * (coverFlight.hides(wingCover) ? 0 : 1)
                 visible: opacity > 0
                 Behavior on opacity { NumberAnimation { duration: IrisStyle.duration(140); easing.type: IrisStyle.feedbackEasing } }
+            }
+            Glyph {
+                id: quietMark
+                readonly property real edge: root.songWings ? root.wingSlot : Math.round(11 * root.d * Math.max(0.6, root.breathing))
+                x: designFace.boxX + designFace.boxWidth - quietMark.edge - root.quietBox + Math.round((root.quietBox - width) / 2)
+                y: Math.round((parent.height - height) / 2) + designFace.swellShift
+                text: "bedtime"
+                fill: 1
+                iconSize: root.quietBox
+                color: root.nothingLook ? IrisStyle.text : Qt.tint(IrisStyle.identity.indigo, Qt.rgba(IrisStyle.text.r, IrisStyle.text.g, IrisStyle.text.b, 0.34))
+                opacity: (root.quiet && root.heartShown ? 1 : 0) * root.heartUncovered
+                visible: opacity > 0
+                Behavior on opacity { NumberAnimation { duration: IrisStyle.duration(180); easing.type: IrisStyle.feedbackEasing } }
+                Accessible.name: Translation.tr("Do not disturb")
             }
             Item {
                 id: wingTrail

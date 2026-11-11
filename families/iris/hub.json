@@ -1,7 +1,13 @@
 {
     "$schema": "../../schema/hub.schema.json",
-    "version": "2.33.74",
+    "version": "2.33.75",
     "changes": {
+        "2.33.75": [
+            "Island: a small moon rests on it while Do Not Disturb is on, so silence never goes unnoticed",
+            "Settings › Displays on Umbriel: each screen's workspaces drawn as miniatures: press how many it keeps, choose as needed or fixed, stacked or side by side, and whether the last leads back to the first",
+            "Settings on Umbriel: the width new windows open at, picked from drawn screens, for every screen (Layout) or one screen (Displays)",
+            "Settings › Displays on Umbriel: fullscreen apps drawing straight to the screen, the curve ordinary colours follow with HDR on, and sharp older apps on a scaled screen; games take the main screen as theirs too"
+        ],
         "2.33.74": [
             "Settings: everything of the compositor you run (Niri or Umbriel) sits in one group of the sidebar named for it: Displays, Layout, Windows, Glass & effects, Movement, Keyboard, Mouse & pointer",
             "Settings: each of those pages opens on what your machine runs now (your screen and its rate, what it can do), and shows only what your compositor and hardware support",
