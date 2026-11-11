@@ -62,7 +62,7 @@ Flow {
                 color: tile.chosen ? IrisStyle.tintFillHover(IrisStyle.accent) : IrisStyle.fill
                 opacity: tile.chosen ? 1 : press.containsMouse || tile.activeFocus ? 1 : 0.6
                 Behavior on opacity { NumberAnimation { duration: 120; easing.type: IrisStyle.feedbackEasing } }
-                Behavior on color { ColorAnimation { duration: 160 } }
+                Behavior on color { ColorAnimation { duration: 160; easing.type: IrisStyle.feedbackEasing } }
             }
 
             // The screen, clipped: the strip's last column runs off its edge, which is the point of it.

@@ -46,7 +46,7 @@ Singleton {
         return root.ink
     }
     // The open page's plate: its hue, quiet, as solid as the row hover (his 11-07: plates, never gradients).
-    readonly property color accentPlate: ColorUtils.applyAlpha(root.accent, root.light ? 0.13 : 0.16)
+    readonly property color accentPlate: ColorUtils.applyAlpha(root.accent, root.light ? 0.13 : 0.16) // iris-literal: the open page's plate, Prism's own quiet wash
 
     // Art stays dark in every scheme, like a record sleeve: the hero, the player, the glass card.
     readonly property color night: "#08080a" // iris-literal: the refraction's black, the same in every scheme

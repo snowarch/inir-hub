@@ -17,8 +17,11 @@ Singleton {
     readonly property int revision: Config.revision
 
     // The sidebar's captions, in order; a page's group comes from its area's cluster in IrisOptions.
-    readonly property var groups: ["Shell", "Desktop", "Tools", "System", "iNiR"]
-    readonly property var clusterGroups: ({ "-1": "Shell", "0": "Shell", "1": "Desktop", "2": "Tools", "3": "System", "4": "iNiR" })
+    // The compositor in use has one group under its own name (his 11-10: "todo bajo una sola categoría del compositor
+    // en uso"): screens, layout, windows, glass, movement and input, each a page; nothing of it lives anywhere else.
+    readonly property string compositorGroup: CompositorConfig.compositorName.length > 0 ? CompositorConfig.compositorName : "Compositor"
+    readonly property var groups: ["Shell", "Desktop", root.compositorGroup, "Tools", "System", "iNiR"]
+    readonly property var clusterGroups: ({ "-1": "Shell", "0": "Shell", "1": "Desktop", "2": "Tools", "3": "System", "4": "iNiR", "5": root.compositorGroup })
 
     // Prism's dress per area: a shorter name where the sidebar wants one, its mark and tint, and the rows the hero says.
     readonly property var dress: ({
@@ -35,7 +38,14 @@ Singleton {
         bubbles: { name: "Bubbles", glyph: "bubble_chart", tint: "pink", lead: ["iris.bubbles.design", "iris.bubbles.join"] },
         desktop: { glyph: "desktop_windows", tint: "amber", lead: ["iris.widgets.design", "iris.widgets.material"] },
         widgets: { glyph: "widgets", tint: "amber", lead: ["background.widgets.editGrid.snap", "background.widgets.powerSaving.enable"] },
-        windows: { glyph: "select_window", tint: "teal", lead: [] },
+        // The compositor's pages (cluster 5), in the order of `order`. A lead with a colon names a compositor row.
+        display: { name: "Displays", glyph: "desktop_windows", tint: "amber", cluster: 5, order: 0, lead: ["light.night.colorTemperature"] },
+        layout: { name: "Layout", glyph: "view_column_2", tint: "teal", cluster: 5, order: 1, lead: ["layout:mode", "layout:gaps"] },
+        windows: { glyph: "select_window", tint: "blue", cluster: 5, order: 2, lead: ["window-rules:corner-radius", "layout:border.enabled", "titlebar:mode"] },
+        glass: { name: "Glass & effects", glyph: "blur_on", tint: "violet", cluster: 5, order: 3, lead: ["glass:enabled", "window-rules:blur", "blur:enabled"] },
+        movement: { name: "Movement", glyph: "animation", tint: "pink", cluster: 5, order: 4, lead: ["animations:enabled", "animations:duration", "animations:slowdown"] },
+        keyboard: { name: "Keyboard", glyph: "keyboard", tint: "indigo", cluster: 5, order: 5, lead: ["input:keyboard.layout", "input:keyboard.repeat-delay"] },
+        pointer: { name: "Mouse & pointer", glyph: "mouse", tint: "orange", cluster: 5, order: 7, lead: ["input:cursor.xcursor-theme", "input:cursor.xcursor-size"] },
         sidebars: { name: "Side Panels", glyph: "dock_to_right", tint: "green", lead: ["iris.sidebars.right.enable", "iris.sidebars.left.enable"] },
         controlCenter: { glyph: "toggle_on", tint: "green", lead: ["iris.controlCenter.opens", "iris.controlCenter.controls"] },
         spotlight: { glyph: "search", tint: "orange", lead: ["iris.palette.opens", "iris.palette.maxResults"] },
@@ -45,9 +55,7 @@ Singleton {
         anime: { glyph: "live_tv", tint: "pink", lead: ["iris.bubbles.extras.anime.enable", "iris.bubbles.extras.watching.enable"] },
         notifications: { glyph: "notifications", tint: "red", lead: ["iris.osd.style", "iris.notifications.duration"] },
         sound: { name: "Sound", glyph: "volume_up", tint: "orange", lead: ["audio.protection.maxAllowed", "audio.protection.maxAllowedIncrease"] },
-        display: { glyph: "desktop_windows", tint: "amber", lead: ["light.night.colorTemperature", "light.night.automatic"] },
-        keyboard: { glyph: "keyboard", tint: "indigo", lead: [] },
-        shortcuts: { name: "Keyboard shortcuts", glyph: "keyboard_command_key", tint: "indigo", lead: [], view: "IrisShortcutsPage.qml", cluster: 3, after: "keyboard" },
+        shortcuts: { name: "Keyboard shortcuts", glyph: "keyboard_command_key", tint: "indigo", lead: [], view: "IrisShortcutsPage.qml", cluster: 5, order: 6, after: "keyboard" },
         battery: { glyph: "battery_full", tint: "green", lead: ["battery.low", "battery.critical"], needs: "battery" },
         gaming: { name: "Gaming", glyph: "sports_esports", tint: "teal", lead: ["gameMode.autoDetect", "gameMode.disableAnimations"] },
         lock: { name: "Lock", glyph: "lock", tint: "indigo", lead: ["iris.lock.material", "iris.lock.type.clockFont"] },
@@ -66,6 +74,16 @@ Singleton {
             { id: "surfaces", groups: ["Material", "Glass", "Texture", "Light", "Edges", "Shape", "Frame", "Material per surface", "Menus", "Settings"] },
             { id: "typeIcons", groups: ["Text", "Faces", "Icons", "Badges"] },
             { id: "appColours", groups: ["App colours"] }
+        ],
+        windows: [
+            { id: "windows", groups: [], head: "Borders" },
+            { id: "layout", groups: ["Layout", "Room for iRiS"] },
+            { id: "glass", groups: ["Glass behind apps", "Effects"] },
+            { id: "movement", groups: ["Movement"] }
+        ],
+        keyboard: [
+            { id: "keyboard", groups: [], head: "Keyboard" },
+            { id: "pointer", groups: ["Mouse", "Trackpad", "Pointer", "Hot corners"] }
         ]
     })
     // The page a row of IrisOptions' `section`, group `group` lives on.
@@ -90,7 +108,9 @@ Singleton {
                 tint: String(dress.tint ?? "grey"),
                 lead: Array.from(dress.lead ?? []),
                 view: dress.view ? Qt.resolvedUrl("../../settings/" + dress.view) : "",
-                subtitle: String(base?.subtitle ?? ""),
+                subtitle: String(dress.subtitle ?? base?.subtitle ?? ""),
+                order: Number(dress.order ?? 0),
+                cluster: cluster,
                 show: null
             })
         }
@@ -99,7 +119,11 @@ Singleton {
             for (const chapter of root.chapters[section.id] ?? [{ id: section.id }]) add(chapter.id, section)
             for (const id of extras.filter(id => root.dress[id].after === section.id)) add(id, null)
         }
-        return out
+        // The compositor's pages stand together after the desktop's, in their own order, wherever their areas sit.
+        const own = out.filter(page => page.cluster === 5).sort((a, b) => a.order - b.order)
+        const rest = out.filter(page => page.cluster !== 5)
+        const at = rest.reduce((last, page, i) => page.cluster <= 1 ? i : last, -1) + 1
+        return rest.slice(0, at).concat(own, rest.slice(at))
     }
     readonly property var ids: root.pages.map(page => page.pageId)
 
@@ -131,6 +155,13 @@ Singleton {
                 continue
             }
             const path = String(spec.path ?? spec.modelKey)
+            // What the compositor's file needs before anything here applies heads every page of its area.
+            for (const chapter of spec.notice ? (root.chapters[String(spec.section)] ?? []) : []) {
+                const head = String(chapter.head ?? chapter.groups[0])
+                if (head === String(spec.group)) continue
+                out.push({ key: [spec.section, head, path, spec.label].join("|"), spec: spec, path: path + "@" + chapter.id, page: chapter.id, section: head, part: "",
+                    label: String(spec.label ?? ""), detail: String(spec.description ?? ""), kind: "action", glyph: root.coverOf(spec), choices: [], keywords: [] })
+            }
             out.push({
                 // Who the row is across rebuilds: the page's delegates keep their row while values change around it.
                 key: [spec.section, spec.group, path, spec.label].join("|"),
@@ -159,6 +190,35 @@ Singleton {
 
     function page(id: string): var { return root.pages.find(entry => entry.pageId === id) ?? root.pages[0] }
     function find(path: string): var { return root.rows.find(row => row.path === path) ?? null }
+    // What a page's hero says: the machine's own facts first (the screen as it runs now), then its leading rows that
+    // the compositor in use shows, two lines at most.
+    function leadOf(page: var): var {
+        const _ = root.revision
+        const out = root.factsOf(String(page?.pageId ?? ""))
+        for (const id of Array.from(page?.lead ?? [])) {
+            if (out.length >= 2) break
+            const named = String(id)
+            const row = named.includes(":")
+                ? root.rows.find(row => !row.virtual && row.spec.comp !== undefined && row.spec.comp + ":" + row.spec.key === named && root.shown(row))
+                : root.find(named)
+            // A row with nothing to say yet (a list, an unset name) leaves the line to the next.
+            if (row && String(root.sayNow(row) ?? "").length > 0) out.push(row)
+        }
+        return out
+    }
+    function factsOf(id: string): var {
+        if (id !== "display") return []
+        const _ = CompositorConfig.revision
+        const screen = CompositorConfig.output
+        const size = CompositorConfig.resolutionLabel(screen)
+        if (!screen || size.length === 0) return []
+        const rate = CompositorConfig.rateLabel(screen.current_rate_string)
+        const out = [{ fact: true, say: size, label: [CompositorConfig.screenName(screen), rate].filter(part => part.length > 0).join(" · ") }]
+        // What this very screen can do beyond the plain picture: its rows are on the page only because it can.
+        const can = [screen.hdr_supported === true ? "HDR" : "", screen.vrr_supported === true ? "VRR" : ""].filter(part => part.length > 0)
+        if (can.length > 0) out.push({ fact: true, say: can.join(" · "), label: Translation.tr("This screen can") })
+        return out
+    }
     function index(id: string): int { return Math.max(0, root.ids.indexOf(id)) }
     function inGroup(group: string): var { return root.pages.filter(page => page.group === group) }
     function shown(row: var): bool {

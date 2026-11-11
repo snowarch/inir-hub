@@ -141,7 +141,7 @@ Column {
                         border.width: 1
                         border.color: root.hovered === "border" || root.open === "border" ? IrisStyle.accent : IrisStyle.hairline
                         clip: true
-                        Behavior on border.color { ColorAnimation { duration: IrisStyle.duration(140) } }
+                        Behavior on border.color { ColorAnimation { duration: IrisStyle.duration(140); easing.type: IrisStyle.feedbackEasing } }
                         // The window answers the pointer with its own light, the way a raised window does.
                         Rectangle {
                             anchors.fill: parent
@@ -281,7 +281,7 @@ Column {
                         color: tag.used ? IrisStyle.accent : "#0b0b0c" // iris-literal: an idle tag is the screen's own dark
                         opacity: tag.used || tag.lit ? 1 : 0.72
                         Behavior on opacity { NumberAnimation { duration: IrisStyle.duration(140); easing.type: IrisStyle.feedbackEasing } }
-                        Behavior on color { ColorAnimation { duration: IrisStyle.duration(160) } }
+                        Behavior on color { ColorAnimation { duration: IrisStyle.duration(160); easing.type: IrisStyle.feedbackEasing } }
 
                         activeFocusOnTab: true
                         Accessible.role: Accessible.Button

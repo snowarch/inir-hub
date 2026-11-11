@@ -1,7 +1,12 @@
 {
     "$schema": "../../schema/hub.schema.json",
-    "version": "2.33.73",
+    "version": "2.33.74",
     "changes": {
+        "2.33.74": [
+            "Settings: everything of the compositor you run (Niri or Umbriel) sits in one group of the sidebar named for it: Displays, Layout, Windows, Glass & effects, Movement, Keyboard, Mouse & pointer",
+            "Settings: each of those pages opens on what your machine runs now (your screen and its rate, what it can do), and shows only what your compositor and hardware support",
+            "Settings: no row names Niri when you run another compositor"
+        ],
         "2.33.73": [
             "Umbriel: a screen that looks darker at its highest refresh rate than at 60 Hz gets a fix in Settings › Display › Colour",
       "Prism: turning an option on or off keeps the page where you were reading; a long page no longer jumps to another part",

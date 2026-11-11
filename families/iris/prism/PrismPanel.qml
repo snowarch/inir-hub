@@ -317,7 +317,7 @@ Item {
                     count: root.sections.reduce((n, section) => n + section.rows.length, 0)
                     changed: PrismModel.changedOf(root.page.pageId)
                     restorable: PrismModel.restorableOf(root.page.pageId)
-                    lead: root.page.lead.map(path => PrismModel.find(path)).filter(row => row !== null)
+                    lead: PrismModel.leadOf(root.page)
                     onRestore: PrismModel.restore(root.page.pageId)
                 }
                 // Wallpaper opens on the wallpaper itself: what is worn and the ones to go back to.

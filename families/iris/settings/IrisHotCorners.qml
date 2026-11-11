@@ -142,7 +142,7 @@ Column {
                             color: spot.used ? IrisStyle.accent : "#ffffff" // iris-literal: an idle corner is plain light over any wallpaper
                             opacity: spot.used ? 1 : spot.lit ? 0.3 : 0.16
                             Behavior on opacity { NumberAnimation { duration: IrisStyle.duration(140); easing.type: IrisStyle.feedbackEasing } }
-                            Behavior on color { ColorAnimation { duration: IrisStyle.duration(160) } }
+                            Behavior on color { ColorAnimation { duration: IrisStyle.duration(160); easing.type: IrisStyle.feedbackEasing } }
                         }
                         MaterialSymbol {
                             id: glyph

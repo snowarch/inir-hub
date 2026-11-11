@@ -128,7 +128,7 @@ Item {
                     id: said
                     width: Math.min(implicitWidth, line.width * 0.62)
                     elide: Text.ElideRight
-                    text: PrismModel.sayNow(line.modelData)
+                    text: line.modelData.fact ? line.modelData.say : PrismModel.sayNow(line.modelData)
                     color: PrismTheme.paper
                     font.pixelSize: PrismTheme.display
                     font.weight: Font.Bold
@@ -138,7 +138,7 @@ Item {
                     anchors.baseline: said.baseline
                     width: line.width - said.width - line.spacing
                     elide: Text.ElideRight
-                    text: Translation.tr(line.modelData.label)
+                    text: line.modelData.fact ? line.modelData.label : Translation.tr(line.modelData.label)
                     color: Qt.rgba(1, 1, 1, 0.56) // iris-literal: Prism's own ink over its art, the same in every scheme
                     font.pixelSize: PrismTheme.body
                 }

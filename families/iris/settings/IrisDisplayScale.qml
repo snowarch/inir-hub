@@ -46,7 +46,7 @@ Column {
                 height: Math.round((root.tileWidth - Math.round(8 * root.d)) / root.aspect) + Math.round(8 * root.d)
                 radius: IrisStyle.radiusTile
                 color: step.chosen ? IrisStyle.tintFillHover(IrisStyle.accent) : press.containsMouse || step.activeFocus ? IrisStyle.fillHover : "transparent"
-                Behavior on color { ColorAnimation { duration: IrisStyle.duration(140) } }
+                Behavior on color { ColorAnimation { duration: IrisStyle.duration(140); easing.type: IrisStyle.feedbackEasing } }
 
                 activeFocusOnTab: true
                 Accessible.role: Accessible.RadioButton
