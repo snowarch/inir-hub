@@ -70,6 +70,34 @@ Or start from `inir hub new widget <id>`, which writes all three faces.
 
 Supported configKey types: `bool`, `int`, `real`, `string`.
 
+### `options`: rows like the built-in widgets' (iNiR 3.0.2)
+
+`configKeys` gives one plain row per key. `options` is an ordered list of rows with the same controls the built-in
+widgets use; when it is present it is what people see (keep `configKeys` beside it so an older iNiR still shows rows).
+
+```json
+    "sizes": ["medium", "small", "large"],
+    "options": [
+        { "key": "source", "label": "Shows", "type": "choice", "default": "music",
+          "choices": [["music", "What is playing"], ["file", "A picture of mine"]] },
+        { "key": "file", "label": "Picture", "type": "file", "default": "", "when": { "source": "file" } },
+        { "key": "ink", "label": "Colour", "type": "colour", "default": "#3b6cff", "page": "look" },
+        { "key": "glow", "label": "Glow", "type": "range", "default": 100, "min": 0, "max": 200, "step": 5,
+          "unit": " %", "page": "look", "tune": true }
+    ]
+```
+
+| Field | Meaning |
+| --- | --- |
+| `type` | `switch`, `choice`, `range`, `text`, `colour` (swatches; your own with `choices: [["#rrggbb", "Name"]]`), `file` and `folder` (the system's chooser: nobody types a path) |
+| `page` | `widget` (default) or `look`, the sheet's two pages |
+| `when` | Shown only while it holds: `{ "key": value }`, `{ "key": [values] }`, a list (all of them), `{ "any": [...] }`, `{ "not": ... }` |
+| `tune` | `true` keeps the row behind Fine-tune; switches go there unless `tune: false` |
+| `sets` | On a choice: other keys each value writes with it, `{ "value": { "key": value } }` (a style that sets colours) |
+| `sizes` | The size classes the widget offers, default first. With them it gets the size row and resize grips, and under Material its box takes any width and height: lay out from `width` and `height` |
+
+Every row can be put back to its default, and the Look page ends with **Restore defaults** while something differs.
+
 Optional faces for the other families:
 
 ```json
