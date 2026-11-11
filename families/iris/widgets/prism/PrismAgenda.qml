@@ -107,11 +107,18 @@ PrismFolder {
             model: root.small ? [] : root.after
             PrismEventLine {
                 required property var modelData
+                required property int index
+                // Grouped by day: the day is said once, on the first event of it (the one before is the pane's).
+                readonly property var before: index === 0 ? root.next : root.after[index - 1]
+                readonly property bool sameDay: root.widget.groupByDay && root.daysTo(modelData) === root.daysTo(before)
+                readonly property string place: root.widget.showLocation ? String(modelData.location ?? "").trim() : ""
                 face: root
                 width: root.innerWidth
                 event: modelData
                 beside: true
-                when: root.dayLabel(modelData) + (modelData.allDay ? "" : " " + IrisFaceData.clockText(IrisFaceData.eventDate(modelData)))
+                when: (modelData.allDay ? root.dayLabel(modelData)
+                    : (sameDay ? "" : root.dayLabel(modelData) + " ") + IrisFaceData.clockText(IrisFaceData.eventDate(modelData)))
+                    + (place.length > 0 ? " · " + place : "")
             }
         }
     }

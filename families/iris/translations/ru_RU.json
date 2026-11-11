@@ -2433,5 +2433,6 @@
   "A new one opens when the last fills; %1 always wait here.": "Новое открывается, когда последнее заполняется; %1 всегда ждут здесь",
   "This screen always has %1.": "На этом экране всегда %1.",
   "Press to turn off": "Нажмите, чтобы выключить",
-  "Glyph art": "Символьная графика"
+  "Glyph art": "Символьная графика",
+  "How much the glass behind every widget frosts the wallpaper: low keeps it clear, high turns it to milk.": "Насколько стекло под каждым виджетом размывает обои: при малом значении они чёткие, при большом — молочные."
 }

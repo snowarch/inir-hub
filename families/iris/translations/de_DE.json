@@ -2433,5 +2433,6 @@
   "A new one opens when the last fills; %1 always wait here.": "Ein neuer öffnet sich, wenn der letzte voll ist; %1 wartet immer hier",
   "This screen always has %1.": "Dieser Bildschirm hat immer %1.",
   "Press to turn off": "Zum Ausschalten drücken",
-  "Glyph art": "Glyphenkunst"
+  "Glyph art": "Glyphenkunst",
+  "How much the glass behind every widget frosts the wallpaper: low keeps it clear, high turns it to milk.": "Wie stark das Glas hinter jedem Widget das Hintergrundbild mattiert: niedrig bleibt es klar, hoch wird es milchig."
 }

@@ -48,6 +48,7 @@ PrismFolder {
             weight: Font.DemiBold
         }
         FaceText {
+            visible: root.widget.showOrdinal
             anchors.right: parent.right
             face: root
             text: Translation.tr("Day %1").arg(root.dayOfYear)

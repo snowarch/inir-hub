@@ -2433,5 +2433,6 @@
   "A new one opens when the last fills; %1 always wait here.": "Se ne apre uno nuovo quando l'ultimo si riempie; %1 attendono sempre qui",
   "This screen always has %1.": "Questo schermo ha sempre %1.",
   "Press to turn off": "Premi per disattivare",
-  "Glyph art": "Arte a glifi"
+  "Glyph art": "Arte a glifi",
+  "How much the glass behind every widget frosts the wallpaper: low keeps it clear, high turns it to milk.": "Quanto il vetro dietro ogni widget smeriglia lo sfondo: basso lo lascia nitido, alto lo rende lattiginoso."
 }

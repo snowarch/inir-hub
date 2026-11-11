@@ -13,7 +13,8 @@ Item {
     readonly property real cell: week.width / 7
     readonly property real disc: week.face.pick(20, 24, 32)
     readonly property var days: {
-        const first = Number(Translation.locale.firstDayOfWeek ?? 1) % 7
+        // The month widget's own week start; a face without one follows the language.
+        const first = Number(week.face.widget?.weekStart ?? Translation.locale.firstDayOfWeek ?? 1) % 7
         const start = new Date(week.today.getFullYear(), week.today.getMonth(), week.today.getDate())
         start.setDate(start.getDate() - (start.getDay() - first + 7) % 7)
         const out = []

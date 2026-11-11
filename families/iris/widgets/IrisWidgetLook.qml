@@ -70,9 +70,13 @@ WidgetLook {
     readonly property bool rim: Boolean(look.options.rim ?? false)
     readonly property var materials: ["glass", "solid", "tinted"]
     readonly property string sharedMaterial: String(look.options.material ?? "glass")
+    // The glass behind every widget: its own amount, so a clear Settings glass and milky widgets (or the reverse) can live together.
+    readonly property real blur: Math.max(0, Math.min(100, Number(look.options.blur ?? 100))) / 100
 
     // The widget's own switch wins; left alone it follows the shared material, where Transparent means no plate.
-    function plateByDefault(widget: var): bool { return !widget.bare && look.sharedMaterial !== "clear" }
+    // Bare is how a widget's own Material drawing stands (big digits, an image); worn as an iRiS face it is a card like
+    // every other one (his 11-07: the clock and the day stood bare under Prism).
+    function plateByDefault(widget: var): bool { return (!widget.bare || Boolean(widget.familyFaced)) && look.sharedMaterial !== "clear" }
     function material(widget: var): string {
         if (widget && !widget.showBackground) return "clear"
         const own = String(widget?._readConfigKey("iris.material") ?? "auto")

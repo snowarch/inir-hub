@@ -2433,5 +2433,6 @@
   "A new one opens when the last fills; %1 always wait here.": "يُفتح واحد جديد عندما يمتلئ الأخير؛ %1 تنتظر هنا دائمًا",
   "This screen always has %1.": "هذه الشاشة تحتوي دائمًا على %1.",
   "Press to turn off": "اضغط للإيقاف",
-  "Glyph art": "فن الرموز"
+  "Glyph art": "فن الرموز",
+  "How much the glass behind every widget frosts the wallpaper: low keeps it clear, high turns it to milk.": "مدى تغبيش الزجاج خلف كل أداة لخلفية الشاشة: المنخفض يبقيها واضحة، والمرتفع يجعلها حليبية."
 }

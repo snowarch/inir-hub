@@ -115,7 +115,7 @@ IrisWidgetFace {
     readonly property var week: {
         const first = new Date(root.today)
         first.setHours(0, 0, 0, 0)
-        const lead = (first.getDay() - Qt.locale().firstDayOfWeek + 7) % 7
+        const lead = (first.getDay() - Translation.locale.firstDayOfWeek + 7) % 7
         first.setDate(first.getDate() - lead)
         const days = []
         for (let i = 0; i < 7; ++i) {

@@ -22,7 +22,7 @@ Item {
         id: title
         face: line.face
         x: line.gap
-        width: line.width - x - (line.beside ? whenText.implicitWidth + line.gap : 0)
+        width: line.width - x - (line.beside ? whenText.width + line.gap : 0)
         text: IrisFaceData.eventTitle(line.event)
         size: line.face.type(13, 14, 16)
         weight: Font.DemiBold
@@ -33,7 +33,7 @@ Item {
         face: line.face
         x: line.beside ? line.width - width : line.gap
         y: line.beside ? Math.round((title.height - height) / 2) : title.height
-        width: line.beside ? implicitWidth : line.width - line.gap
+        width: line.beside ? Math.min(implicitWidth, line.width / 2) : line.width - line.gap
         text: line.when
         color: line.face.inkSecondary
         size: line.face.type(11, 12, 13)

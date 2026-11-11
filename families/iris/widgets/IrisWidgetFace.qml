@@ -217,7 +217,7 @@ Item {
                         anchors.fill: parent
                         source: crop
                         blurEnabled: true
-                        blur: IrisStyle.glassBlurAmount
+                        blur: root.widget.look.blur
                         blurMax: IrisStyle.glassBlurMax
                         saturation: IrisStyle.widgetGlassSaturation
                     }
@@ -235,7 +235,7 @@ Item {
             }
             // Wide enough for the blur to find picture all round: a narrower margin blurred the edge into transparent
             // and the face darkened toward its rim.
-            readonly property real margin: Math.ceil(2 * IrisStyle.glassBlurMax * IrisStyle.glassBlurAmount) + root.dp(8)
+            readonly property real margin: Math.ceil(2 * IrisStyle.glassBlurMax * root.widget.look.blur) + root.dp(8)
 
             Image {
                 id: wallpaper
@@ -269,7 +269,7 @@ Item {
                 layer.textureSize: crop.textureSize
                 layer.effect: MultiEffect {
                     blurEnabled: true
-                    blur: IrisStyle.glassBlurAmount
+                    blur: root.widget.look.blur
                     blurMax: IrisStyle.glassBlurMax
                     saturation: IrisStyle.widgetGlassSaturation
                 }

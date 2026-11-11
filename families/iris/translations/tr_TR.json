@@ -2433,5 +2433,6 @@
   "A new one opens when the last fills; %1 always wait here.": "Son dolduğunda yenisi açılır; %1 her zaman burada bekler",
   "This screen always has %1.": "Bu ekranda her zaman %1 bulunur.",
   "Press to turn off": "Kapatmak için dokunun",
-  "Glyph art": "Glif sanatı"
+  "Glyph art": "Glif sanatı",
+  "How much the glass behind every widget frosts the wallpaper: low keeps it clear, high turns it to milk.": "Her widget'ın arkasındaki camın duvar kâğıdını ne kadar buzlayacağı: düşükte net kalır, yüksekte süt gibi olur."
 }

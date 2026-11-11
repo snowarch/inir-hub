@@ -92,8 +92,7 @@ PrismFolder {
                 width: Math.round(month.cell)
                 horizontalAlignment: Text.AlignHCenter
                 text: {
-                    const first = Number(Translation.locale.firstDayOfWeek ?? 1) % 7
-                    const day = new Date(2024, 0, 7 + (first + index) % 7)
+                    const day = new Date(2024, 0, 7 + (root.widget.weekStart + index) % 7)
                     return Translation.locale.toString(day, "ddd").charAt(0).toUpperCase()
                 }
                 color: root.inkTertiary
@@ -121,6 +120,7 @@ PrismFolder {
                     color: cell.now ? root.shelf : "transparent"
                 }
                 FaceText {
+                    visible: cell.modelData.currentMonth || root.widget.showAdjacentDays
                     face: root
                     anchors.centerIn: parent
                     text: String(cell.modelData.day)

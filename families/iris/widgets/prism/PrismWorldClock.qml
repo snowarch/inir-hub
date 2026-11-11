@@ -31,8 +31,11 @@ PrismFolder {
     readonly property var time: IrisFaceData.timeParts(root.first?.time ?? "")
 
     tabGlyph: "public"
-    tabText: root.first?.name ?? Translation.tr("World clock")
-    flapText: root.first ? root.shift(0) : ""
+    readonly property bool names: root.widget.showNames
+    readonly property bool offsets: root.widget.showOffsets
+
+    tabText: root.names ? root.first?.name ?? Translation.tr("World clock") : Translation.tr("World clock")
+    flapText: root.first && root.offsets ? root.shift(0) : ""
 
     // ── the pane: the first city's hour ──
     Row {
@@ -102,6 +105,7 @@ PrismFolder {
                 anchors.verticalCenter: parent.verticalCenter
                 width: parent.width - when.width - root.dp(8)
                 FaceText {
+                    visible: root.names
                     face: root
                     width: Math.min(implicitWidth, parent.width)
                     text: row.modelData.name
@@ -110,7 +114,7 @@ PrismFolder {
                     weight: Font.DemiBold
                 }
                 FaceText {
-                    visible: root.large
+                    visible: root.large && root.offsets
                     face: root
                     text: root.shift(row.index + 1)
                     color: root.inkTertiary
@@ -144,6 +148,7 @@ PrismFolder {
                 required property var modelData
                 width: (parent.width - 2 * parent.spacing) / 3
                 FaceText {
+                    visible: root.names
                     face: root
                     width: Math.min(implicitWidth, column.width)
                     text: column.modelData.name
@@ -164,7 +169,7 @@ PrismFolder {
         }
     }
     FaceText {
-        visible: root.first !== null && root.others.length === 0
+        visible: root.first !== null && root.others.length === 0 && root.offsets
         face: root
         x: root.inset
         width: root.innerWidth

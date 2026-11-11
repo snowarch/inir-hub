@@ -25,8 +25,8 @@ PrismFolder {
 
     tabGlyph: "power_settings_new"
     tabText: Translation.tr("Uptime")
-    flapText: root.bootParts.main
-    flapSuffix: root.bootParts.suffix
+    flapText: root.widget.showSince ? root.bootParts.main : ""
+    flapSuffix: root.widget.showSince ? root.bootParts.suffix : ""
 
     // ── the pane: how long ──
     Row {
@@ -58,7 +58,7 @@ PrismFolder {
         }
     }
     FaceText {
-        visible: root.medium
+        visible: root.medium && root.widget.showSince
         anchors.right: parent.right
         anchors.rightMargin: root.inset
         y: Math.round(root.paneMiddle - height / 2)

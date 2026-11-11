@@ -5,7 +5,7 @@
   "summary": "One living body: the Island, the chassis and Apple-grade motion.",
   "tagline": "Island, pieces and a Dock on any edge.",
   "icon": "visibility",
-  "version": "2.33.78",
+  "version": "2.33.79",
   "provides": "modules/iris",
   "wears": ["iris.appearance.design"],
   "parts": {
@@ -86,7 +86,7 @@
     "faceLabel": "iRiS",
     "plain": "material",
     "choices": ["iris", "prism", "material", "instrument", "readout"],
-    "faces": [{"value": "prism", "label": "Prism", "glyph": "flare", "part": "widgetPrism"}]
+    "faces": [{"value": "prism", "label": "Prism", "glyph": "flare", "part": "widgetPrism", "ignores": ["showBorder", "borderOpacity", "borderWidth", "showWeather"]}]
   },
   "flags": {
     "lockSurfaceSync": true,
@@ -201,7 +201,7 @@
     "mediaControls": [
       {"key":"iris.face","label":"Face","type":"choice","default":"classic","when":["face",{"wears":"iris"},{"not":{"sizeClass":"small"}}],"choices":[["classic","Classic","music_note"],["prism","Prism","flare"],["vinyl","Vinyl","album"]],"keywords":["player","lyrics","prism","glass","refraction","spotify","vinyl","record"]},
       {"key":"iris.lyrics","label":"Synced lyrics","type":"switch","default":true,"when":["face",{"any":[{"wears":"prism"},{"iris.face":["classic","prism"]}]}]},
-      {"key":"iris.rest","label":"Rest when paused","type":"switch","default":true,"when":"face"}
+      {"key":"iris.rest","label":"Rest when paused","type":"switch","default":false,"when":"face"}
     ],
     "monthCalendar": [
       {"key":"iris.face","label":"Face","type":"choice","default":"month","when":["face",{"wears":"iris"}],"choices":[["month","Month","calendar_view_month"],["week","Week","view_week"]]}
@@ -244,8 +244,7 @@
     "*": [
       {"key":"iris.prism","label":"Prism","type":"choice","default":"quiet","page":"look","when":[{"wears":"prism"},{"not":{"widget":"mediaControls"}}],"choices":[["quiet","Quiet","crop_square"],["beam","Beam","flare"],["folder","Folder","folder"]],"keywords":["prism","light","beam","folder","glass","spectrum","luz"]},
       {"key":"iris.shadow","label":"Shadow","type":"range","default":0,"min":0,"max":100,"step":5,"unit":" %","page":"look","when":["face",{"showBackground":true},{"any":[{"wears":"prism"},{"iris.face":"prism"}]}],"keywords":["shadow","depth","lift","sombra"]},
-      {"key":"iris.material","label":"Material","type":"choice","default":"auto","page":"look","tune":true,"when":["face",{"showBackground":true}],"choices":[["auto","Same as every widget"],["glass","Glass"],["solid","Solid"],["tinted","Tinted"]],"keywords":["glass","transparent","background","plate","fondo","vidrio"]},
-      {"key":"iris.frame","label":"On the frame","type":"choice","default":"auto","page":"arrange","choices":[["auto","Same as every widget"],["open","Open"],["tucked","Tucked"]],"keywords":["frame","join","tuck","minimise","minimize","hover","tab","marco","minimizar"]}
+      {"key":"iris.material","label":"Material","type":"choice","default":"auto","page":"look","tune":true,"when":["face",{"showBackground":true}],"choices":[["auto","Same as every widget"],["glass","Glass"],["solid","Solid"],["tinted","Tinted"]],"keywords":["glass","transparent","background","plate","fondo","vidrio"]}
     ]
   }
 }

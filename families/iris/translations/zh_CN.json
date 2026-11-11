@@ -2433,5 +2433,6 @@
   "A new one opens when the last fills; %1 always wait here.": "最后一个写满时，会打开一个新的；%1 始终在此等待",
   "This screen always has %1.": "此屏幕始终有 %1。",
   "Press to turn off": "按下关闭",
-  "Glyph art": "字符画"
+  "Glyph art": "字符画",
+  "How much the glass behind every widget frosts the wallpaper: low keeps it clear, high turns it to milk.": "每个小部件背后的玻璃对壁纸的磨砂程度：低则保持清晰，高则变得如牛奶般朦胧。"
 }

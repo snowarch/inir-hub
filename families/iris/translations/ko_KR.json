@@ -2433,5 +2433,6 @@
   "A new one opens when the last fills; %1 always wait here.": "마지막 것이 차면 새 것이 열립니다; %1은(는) 항상 여기서 기다립니다",
   "This screen always has %1.": "이 화면에는 항상 %1이(가) 있습니다.",
   "Press to turn off": "눌러서 끄기",
-  "Glyph art": "글리프 아트"
+  "Glyph art": "글리프 아트",
+  "How much the glass behind every widget frosts the wallpaper: low keeps it clear, high turns it to milk.": "각 위젯 뒤의 유리가 배경화면을 얼마나 흐리게 할지: 낮으면 선명하고, 높으면 우윳빛이 됩니다."
 }

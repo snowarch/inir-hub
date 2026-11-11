@@ -2433,5 +2433,6 @@
   "A new one opens when the last fills; %1 always wait here.": "जब आखिरी भर जाता है तो एक नया खुलता है; %1 हमेशा यहाँ इंतज़ार करते हैं",
   "This screen always has %1.": "इस स्क्रीन पर हमेशा %1 होते हैं।",
   "Press to turn off": "बंद करने के लिए दबाएँ",
-  "Glyph art": "ग्लिफ़ कला"
+  "Glyph art": "ग्लिफ़ कला",
+  "How much the glass behind every widget frosts the wallpaper: low keeps it clear, high turns it to milk.": "हर विजेट के पीछे का काँच वॉलपेपर को कितना धुंधला करे: कम पर साफ़ रहता है, ज़्यादा पर दूधिया हो जाता है।"
 }

@@ -22,8 +22,11 @@ PrismFolder {
     readonly property bool failed: !root.offline && NewsService.lastError.length > 0 && !NewsService.loading
 
     tabGlyph: "newspaper"
-    tabText: root.lead ? String(root.lead.source || Translation.tr("News")) : Translation.tr("News")
-    flapText: root.lead ? NewsService.formatTime(root.lead.timestamp) : root.offline ? Translation.tr("Offline") : ""
+    // Source and time: the "Source and time" switch; off, the headlines stand alone.
+    readonly property bool meta: root.widget.showMeta
+
+    tabText: root.lead && root.meta ? String(root.lead.source || Translation.tr("News")) : Translation.tr("News")
+    flapText: root.lead ? (root.meta ? NewsService.formatTime(root.lead.timestamp) : "") : root.offline ? Translation.tr("Offline") : ""
 
     FaceText {
         id: headline
@@ -49,7 +52,7 @@ PrismFolder {
         x: root.inset
         width: root.innerWidth
         y: Math.round(root.footTop + (root.footHeight - height) / 2 - root.dp(2))
-        text: root.lead ? String(root.lead.source ?? "") : root.offline ? Network.offlineReason : root.failed ? Translation.tr("The feed did not answer") : ""
+        text: root.lead ? (root.meta ? String(root.lead.source ?? "") : "") : root.offline ? Network.offlineReason : root.failed ? Translation.tr("The feed did not answer") : ""
         color: root.inkTertiary
         size: 12.5
         weight: Font.Medium
@@ -69,7 +72,7 @@ PrismFolder {
                 id: story
                 required property var modelData
                 width: root.innerWidth
-                height: storyTitle.height + storyWhen.height
+                height: storyTitle.height + (storyWhen.visible ? storyWhen.height : 0)
                 FaceText {
                     id: storyTitle
                     face: root
@@ -81,6 +84,7 @@ PrismFolder {
                 }
                 FaceText {
                     id: storyWhen
+                    visible: root.meta
                     face: root
                     y: storyTitle.height
                     width: parent.width
