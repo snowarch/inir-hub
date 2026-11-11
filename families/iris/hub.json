@@ -3,6 +3,9 @@
     "version": "2.33.76",
     "changes": {
         "2.33.76": [
+          "Glyph wallpaper: a still picture now sways, breathes rings of light and shimmers; colours are picked from swatches; Restore defaults",
+          "Widget options: colour swatches, a file chooser instead of a typed path, a tap on a changed value's number puts it back",
+          "Settings: scrolling no longer redraws a blurred band every frame, and the window stays ready for ten minutes after closing",
           "Wallpaper › Draw the wallpaper as glyphs: your wallpaper, a word or a built-in subject as glowing characters, in sixteen looks",
           "Control Center: the Do Not Disturb tile lights when it is on (it read the other way round), with the same name and moon as elsewhere",
           "Island: Do Not Disturb is a small indigo moon; hover names it, a press turns it off; it steps aside while its bubble shows",

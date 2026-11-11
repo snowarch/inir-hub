@@ -3,6 +3,7 @@
     "version": "2.34.10",
     "changes": {
         "2.34.10": [
+            "Glyph wallpaper: a still picture now sways, breathes rings of light and shimmers; colours from a list; Restore defaults",
             "Wallpaper › Draw the wallpaper as glyphs: your wallpaper, a word or a built-in subject as glowing characters, in sixteen looks",
             "Hub: a plugin that changes a file of yours, like Fastfetch, gets a switch that turns it off and gives yours back"
         ],
