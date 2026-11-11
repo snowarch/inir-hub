@@ -557,5 +557,8 @@
   "Keyboard & shortcuts": "键盘和快捷键",
   "%1 monitors": "%1 个显示器",
   "niri starts these at login, not iNiR, so they keep running when the shell restarts.": "这些由 niri 在登录时启动，而不是 iNiR，所以重启 shell 后它们仍在运行。",
-  "Waffle wears Material's global style and transparency. Off: its own Fluent look.": "Waffle 使用 Material 的全局样式和透明度。关闭时：使用它自己的 Fluent 外观。"
+  "Waffle wears Material's global style and transparency. Off: its own Fluent look.": "Waffle 使用 Material 的全局样式和透明度。关闭时：使用它自己的 Fluent 外观。",
+  "When covered": "被遮住时",
+  "Behind fullscreen": "全屏后面",
+  "A hidden wallpaper stops decoding and keeps its frame.": "被遮住的壁纸会停止解码并保留画面。"
 }

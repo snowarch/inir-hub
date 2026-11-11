@@ -3217,5 +3217,8 @@
   "Show every setting": "모든 설정 보기",
   "Classic is the Settings window of v2.33: a header with the search, a slim list of pages and every section in its own card. Every page and option is in both.": "클래식은 v2.33의 설정 창입니다. 검색이 있는 헤더, 좁은 페이지 목록, 각 섹션은 자체 카드에 들어 있습니다. 모든 페이지와 옵션은 두 디자인 모두에 있습니다.",
   "Always waiting": "항상 준비됨",
-  "Screens, workspaces, layout, windows, input": "화면, 작업 공간, 레이아웃, 창, 입력"
+  "Screens, workspaces, layout, windows, input": "화면, 작업 공간, 레이아웃, 창, 입력",
+  "When covered": "가려졌을 때",
+  "Behind fullscreen": "전체 화면 뒤에서",
+  "A hidden wallpaper stops decoding and keeps its frame.": "가려진 배경화면은 디코딩을 멈추고 프레임을 유지합니다."
 }

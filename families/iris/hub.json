@@ -1,7 +1,10 @@
 {
     "$schema": "../../schema/hub.schema.json",
-    "version": "2.33.77",
+    "version": "2.33.78",
     "changes": {
+        "2.33.78": [
+          "Wallpaper picker: a switch in every layout's head draws the wallpaper as glyphs"
+        ],
         "2.33.77": [
           "Widgets: their glass follows a video, GIF or glyph wallpaper as it moves, instead of holding a frozen frame"
         ],

@@ -557,5 +557,8 @@
   "Keyboard & shortcuts": "Tasteqarfik ingerlaannarsaatillu",
   "%1 monitors": "Saqqummiutit %1",
   "niri starts these at login, not iNiR, so they keep running when the shell restarts.": "Taakku niri-p iserninni aallartittarpai, iNiR-ip pinnani, taamaattumik shell aallarteqqinneqaraangat suli ingerlasarput.",
-  "Waffle wears Material's global style and transparency. Off: its own Fluent look.": "Waffle-ip Material-ip ilusilersuutaa tamanut atuuttoq ersarissusialu atortarai. Qamitsillugu: Fluent-imik isikkuminik."
+  "Waffle wears Material's global style and transparency. Off: its own Fluent look.": "Waffle-ip Material-ip ilusilersuutaa tamanut atuuttoq ersarissusialu atortarai. Qamitsillugu: Fluent-imik isikkuminik.",
+  "When covered": "Matoqqagaangat",
+  "Behind fullscreen": "Fullscreen-ip tunuani",
+  "A hidden wallpaper stops decoding and keeps its frame.": "Tunuliaqut toqqortoq decode-iunnaartarpoq assilissaminillu pigiinnartarluni."
 }

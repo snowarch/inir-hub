@@ -3217,5 +3217,8 @@
   "Show every setting": "显示所有设置",
   "Classic is the Settings window of v2.33: a header with the search, a slim list of pages and every section in its own card. Every page and option is in both.": "经典是 v2.33 的设置窗口：带搜索的标题栏、窄的页面列表，每个部分都在自己的卡片里。两种设计包含相同的页面和选项。",
   "Always waiting": "始终待命",
-  "Screens, workspaces, layout, windows, input": "屏幕、工作区、布局、窗口、输入"
+  "Screens, workspaces, layout, windows, input": "屏幕、工作区、布局、窗口、输入",
+  "When covered": "被遮住时",
+  "Behind fullscreen": "全屏后面",
+  "A hidden wallpaper stops decoding and keeps its frame.": "被遮住的壁纸会停止解码并保留画面。"
 }

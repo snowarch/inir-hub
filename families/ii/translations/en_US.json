@@ -3217,5 +3217,8 @@
   "Show every setting": "Show every setting",
   "Classic is the Settings window of v2.33: a header with the search, a slim list of pages and every section in its own card. Every page and option is in both.": "Classic is the Settings window of v2.33: a header with the search, a slim list of pages and every section in its own card. Every page and option is in both.",
   "Always waiting": "Always waiting",
-  "Screens, workspaces, layout, windows, input": "Screens, workspaces, layout, windows, input"
+  "Screens, workspaces, layout, windows, input": "Screens, workspaces, layout, windows, input",
+  "When covered": "When covered",
+  "Behind fullscreen": "Behind fullscreen",
+  "A hidden wallpaper stops decoding and keeps its frame.": "A hidden wallpaper stops decoding and keeps its frame."
 }

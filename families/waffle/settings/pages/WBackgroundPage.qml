@@ -1226,6 +1226,20 @@ WSettingsPage {
                     onCheckedChanged: root.setNestedValueWhenReady("background.pauseAnimationOnBattery", checked)
                 }
 
+                WSettingsDropdown {
+                    visible: root.wBg.enableAnimation ?? true
+                    label: Translation.tr("Pause")
+                    icon: "pause"
+                    description: Translation.tr("A hidden wallpaper stops decoding and keeps its frame.")
+                    currentValue: Config.options?.background?.videoPause ?? "covered"
+                    options: [
+                        { value: "never", displayName: Translation.tr("Never") },
+                        { value: "fullscreen", displayName: Translation.tr("Behind fullscreen") },
+                        { value: "covered", displayName: Translation.tr("When covered") }
+                    ]
+                    onSelected: newValue => root.setNestedValueWhenReady("background.videoPause", newValue)
+                }
+
                 WSettingsSwitch {
                     label: Translation.tr("Draw the wallpaper as glyphs")
                     icon: "grid"

@@ -3217,5 +3217,8 @@
   "Show every setting": "सभी सेटिंग्स दिखाएँ",
   "Classic is the Settings window of v2.33: a header with the search, a slim list of pages and every section in its own card. Every page and option is in both.": "क्लासिक v2.33 की सेटिंग्स विंडो है: खोज वाला हेडर, पन्नों की पतली सूची और हर सेक्शन अपने कार्ड में। हर पन्ना और विकल्प दोनों में है।",
   "Always waiting": "हमेशा तैयार",
-  "Screens, workspaces, layout, windows, input": "स्क्रीन, वर्कस्पेस, लेआउट, विंडो, इनपुट"
+  "Screens, workspaces, layout, windows, input": "स्क्रीन, वर्कस्पेस, लेआउट, विंडो, इनपुट",
+  "When covered": "ढके जाने पर",
+  "Behind fullscreen": "फ़ुलस्क्रीन के पीछे",
+  "A hidden wallpaper stops decoding and keeps its frame.": "छिपा वॉलपेपर डिकोड होना बंद कर देता है और अपना फ़्रेम रखता है।"
 }

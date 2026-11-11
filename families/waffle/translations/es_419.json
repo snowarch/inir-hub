@@ -557,5 +557,8 @@
   "Keyboard & shortcuts": "Teclado y atajos",
   "%1 monitors": "%1 monitores",
   "niri starts these at login, not iNiR, so they keep running when the shell restarts.": "niri los inicia al entrar, no iNiR, así que siguen funcionando cuando el shell se reinicia.",
-  "Waffle wears Material's global style and transparency. Off: its own Fluent look.": "Waffle usa el estilo global y la transparencia de Material. Apagado: su propio aspecto Fluent."
+  "Waffle wears Material's global style and transparency. Off: its own Fluent look.": "Waffle usa el estilo global y la transparencia de Material. Apagado: su propio aspecto Fluent.",
+  "When covered": "Cuando está tapado",
+  "Behind fullscreen": "Detrás de pantalla completa",
+  "A hidden wallpaper stops decoding and keeps its frame.": "Un fondo oculto deja de decodificarse y conserva su fotograma."
 }

@@ -3217,5 +3217,8 @@
   "Show every setting": "Mostrar todos los ajustes",
   "Classic is the Settings window of v2.33: a header with the search, a slim list of pages and every section in its own card. Every page and option is in both.": "Clásico es la ventana de Ajustes de v2.33: un encabezado con la búsqueda, una lista angosta de páginas y cada sección en su propia tarjeta. Todas las páginas y opciones están en los dos.",
   "Always waiting": "Siempre listos",
-  "Screens, workspaces, layout, windows, input": "Pantallas, espacios de trabajo, distribución, ventanas, entrada"
+  "Screens, workspaces, layout, windows, input": "Pantallas, espacios de trabajo, distribución, ventanas, entrada",
+  "When covered": "Cuando está tapado",
+  "Behind fullscreen": "Detrás de pantalla completa",
+  "A hidden wallpaper stops decoding and keeps its frame.": "Un fondo oculto deja de decodificarse y conserva su fotograma."
 }

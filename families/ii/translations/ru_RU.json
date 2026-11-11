@@ -3217,5 +3217,8 @@
   "Show every setting": "Показать все настройки",
   "Classic is the Settings window of v2.33: a header with the search, a slim list of pages and every section in its own card. Every page and option is in both.": "Классический — это окно настроек v2.33: заголовок с поиском, узкий список страниц и каждый раздел в своей карточке. Все страницы и параметры есть в обоих.",
   "Always waiting": "Всегда в готовности",
-  "Screens, workspaces, layout, windows, input": "Экраны, рабочие области, раскладка, окна, ввод"
+  "Screens, workspaces, layout, windows, input": "Экраны, рабочие области, раскладка, окна, ввод",
+  "When covered": "Когда закрыты",
+  "Behind fullscreen": "За полноэкранным окном",
+  "A hidden wallpaper stops decoding and keeps its frame.": "Скрытые обои перестают декодироваться и сохраняют кадр."
 }

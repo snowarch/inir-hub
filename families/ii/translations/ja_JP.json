@@ -3217,5 +3217,8 @@
   "Show every setting": "すべての設定を表示",
   "Classic is the Settings window of v2.33: a header with the search, a slim list of pages and every section in its own card. Every page and option is in both.": "クラシックは v2.33 の設定ウィンドウです。検索付きのヘッダー、細いページ一覧、各セクションはそれぞれのカードに入ります。すべてのページとオプションはどちらにもあります。",
   "Always waiting": "常に待機",
-  "Screens, workspaces, layout, windows, input": "ディスプレイ、ワークスペース、レイアウト、ウィンドウ、入力"
+  "Screens, workspaces, layout, windows, input": "ディスプレイ、ワークスペース、レイアウト、ウィンドウ、入力",
+  "When covered": "覆われたとき",
+  "Behind fullscreen": "全画面の背後",
+  "A hidden wallpaper stops decoding and keeps its frame.": "隠れた壁紙はデコードを止め、そのフレームを保ちます。"
 }

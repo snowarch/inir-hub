@@ -3217,5 +3217,8 @@
   "Show every setting": "Hiện mọi cài đặt",
   "Classic is the Settings window of v2.33: a header with the search, a slim list of pages and every section in its own card. Every page and option is in both.": "Cổ điển là cửa sổ Cài đặt của v2.33: thanh tiêu đề có ô tìm kiếm, danh sách trang hẹp và mỗi mục nằm trong thẻ riêng. Mọi trang và tùy chọn đều có ở cả hai.",
   "Always waiting": "Luôn sẵn sàng",
-  "Screens, workspaces, layout, windows, input": "Màn hình, các workspace, bố cục, cửa sổ, nhập liệu"
+  "Screens, workspaces, layout, windows, input": "Màn hình, các workspace, bố cục, cửa sổ, nhập liệu",
+  "When covered": "Khi bị che",
+  "Behind fullscreen": "Sau toàn màn hình",
+  "A hidden wallpaper stops decoding and keeps its frame.": "Hình nền bị che sẽ ngừng giải mã và giữ khung hình."
 }

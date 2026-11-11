@@ -3217,5 +3217,8 @@
   "Show every setting": "הצג את כל ההגדרות",
   "Classic is the Settings window of v2.33: a header with the search, a slim list of pages and every section in its own card. Every page and option is in both.": "קלאסי הוא חלון ההגדרות של v2.33: כותרת עם החיפוש, רשימת דפים צרה וכל מקטע בכרטיס משלו. כל הדפים והאפשרויות נמצאים בשניהם.",
   "Always waiting": "תמיד מוכנים",
-  "Screens, workspaces, layout, windows, input": "מסכים, מרחבי עבודה, פריסה, חלונות, קלט"
+  "Screens, workspaces, layout, windows, input": "מסכים, מרחבי עבודה, פריסה, חלונות, קלט",
+  "When covered": "כשמכוסה",
+  "Behind fullscreen": "מאחורי מסך מלא",
+  "A hidden wallpaper stops decoding and keeps its frame.": "טפט מוסתר מפסיק לפענח ושומר את הפריים שלו."
 }

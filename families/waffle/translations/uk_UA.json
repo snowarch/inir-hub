@@ -557,5 +557,8 @@
   "Keyboard & shortcuts": "Клавіатура й сполучення",
   "%1 monitors": "Моніторів: %1",
   "niri starts these at login, not iNiR, so they keep running when the shell restarts.": "Їх запускає niri під час входу, а не iNiR, тому вони працюють далі, коли оболонка перезапускається.",
-  "Waffle wears Material's global style and transparency. Off: its own Fluent look.": "Waffle використовує глобальний стиль і прозорість Material. Вимкнено: власний вигляд Fluent."
+  "Waffle wears Material's global style and transparency. Off: its own Fluent look.": "Waffle використовує глобальний стиль і прозорість Material. Вимкнено: власний вигляд Fluent.",
+  "When covered": "Коли закриті",
+  "Behind fullscreen": "За повноекранним вікном",
+  "A hidden wallpaper stops decoding and keeps its frame.": "Приховані шпалери перестають декодуватися й зберігають кадр."
 }

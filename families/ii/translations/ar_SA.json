@@ -3217,5 +3217,8 @@
   "Show every setting": "اعرض كل الإعدادات",
   "Classic is the Settings window of v2.33: a header with the search, a slim list of pages and every section in its own card. Every page and option is in both.": "الكلاسيكي هو نافذة الإعدادات في v2.33: ترويسة فيها البحث، وقائمة صفحات ضيقة، وكل قسم في بطاقته. كل الصفحات والخيارات موجودة في التصميمين.",
   "Always waiting": "جاهزة دائمًا",
-  "Screens, workspaces, layout, windows, input": "الشاشات ومساحات العمل والتخطيط والنوافذ والإدخال"
+  "Screens, workspaces, layout, windows, input": "الشاشات ومساحات العمل والتخطيط والنوافذ والإدخال",
+  "When covered": "عند التغطية",
+  "Behind fullscreen": "خلف ملء الشاشة",
+  "A hidden wallpaper stops decoding and keeps its frame.": "الخلفية المخفية تتوقف عن فك الترميز وتحتفظ بإطارها."
 }

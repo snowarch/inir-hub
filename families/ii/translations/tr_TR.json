@@ -3217,5 +3217,8 @@
   "Show every setting": "Tüm ayarları göster",
   "Classic is the Settings window of v2.33: a header with the search, a slim list of pages and every section in its own card. Every page and option is in both.": "Klasik, v2.33'ün Ayarlar penceresidir: aramalı bir başlık, dar bir sayfa listesi ve her bölüm kendi kartında. Tüm sayfalar ve seçenekler ikisinde de var.",
   "Always waiting": "Her zaman hazır",
-  "Screens, workspaces, layout, windows, input": "Ekranlar, çalışma alanları, düzen, pencereler, giriş"
+  "Screens, workspaces, layout, windows, input": "Ekranlar, çalışma alanları, düzen, pencereler, giriş",
+  "When covered": "Örtüldüğünde",
+  "Behind fullscreen": "Tam ekranın arkasında",
+  "A hidden wallpaper stops decoding and keeps its frame.": "Gizli bir duvar kağıdının kodu çözülmez ve karesini korur."
 }

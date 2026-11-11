@@ -557,5 +557,8 @@
   "Keyboard & shortcuts": "מקלדת וקיצורים",
   "%1 monitors": "%1 מסכים",
   "niri starts these at login, not iNiR, so they keep running when the shell restarts.": "niri מפעיל אותם בכניסה, לא iNiR, ולכן הם ממשיכים לרוץ כשהמעטפת מופעלת מחדש.",
-  "Waffle wears Material's global style and transparency. Off: its own Fluent look.": "Waffle משתמש בסגנון הגלובלי ובשקיפות של Material. כבוי: מראה ה-Fluent שלו."
+  "Waffle wears Material's global style and transparency. Off: its own Fluent look.": "Waffle משתמש בסגנון הגלובלי ובשקיפות של Material. כבוי: מראה ה-Fluent שלו.",
+  "When covered": "כשמכוסה",
+  "Behind fullscreen": "מאחורי מסך מלא",
+  "A hidden wallpaper stops decoding and keeps its frame.": "טפט מוסתר מפסיק לפענח ושומר את הפריים שלו."
 }

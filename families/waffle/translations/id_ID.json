@@ -557,5 +557,8 @@
   "Keyboard & shortcuts": "Keyboard & pintasan",
   "%1 monitors": "%1 monitor",
   "niri starts these at login, not iNiR, so they keep running when the shell restarts.": "niri yang menjalankannya saat login, bukan iNiR, jadi tetap berjalan saat shell dimulai ulang.",
-  "Waffle wears Material's global style and transparency. Off: its own Fluent look.": "Waffle memakai gaya global dan transparansi Material. Mati: tampilan Fluent miliknya sendiri."
+  "Waffle wears Material's global style and transparency. Off: its own Fluent look.": "Waffle memakai gaya global dan transparansi Material. Mati: tampilan Fluent miliknya sendiri.",
+  "When covered": "Saat tertutup",
+  "Behind fullscreen": "Di belakang layar penuh",
+  "A hidden wallpaper stops decoding and keeps its frame.": "Wallpaper yang tersembunyi berhenti didekode dan mempertahankan bingkainya."
 }

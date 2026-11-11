@@ -557,5 +557,8 @@
   "Keyboard & shortcuts": "Bàn phím & phím tắt",
   "%1 monitors": "%1 màn hình",
   "niri starts these at login, not iNiR, so they keep running when the shell restarts.": "niri khởi chạy chúng khi đăng nhập, không phải iNiR, nên chúng vẫn chạy khi shell khởi động lại.",
-  "Waffle wears Material's global style and transparency. Off: its own Fluent look.": "Waffle dùng phong cách chung và độ trong suốt của Material. Tắt: giao diện Fluent riêng của nó."
+  "Waffle wears Material's global style and transparency. Off: its own Fluent look.": "Waffle dùng phong cách chung và độ trong suốt của Material. Tắt: giao diện Fluent riêng của nó.",
+  "When covered": "Khi bị che",
+  "Behind fullscreen": "Sau toàn màn hình",
+  "A hidden wallpaper stops decoding and keeps its frame.": "Hình nền bị che sẽ ngừng giải mã và giữ khung hình."
 }

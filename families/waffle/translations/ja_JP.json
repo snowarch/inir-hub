@@ -557,5 +557,8 @@
   "Keyboard & shortcuts": "キーボードとショートカット",
   "%1 monitors": "モニター %1 台",
   "niri starts these at login, not iNiR, so they keep running when the shell restarts.": "これらはログイン時に iNiR ではなく niri が起動するので、シェルを再起動しても動き続けます。",
-  "Waffle wears Material's global style and transparency. Off: its own Fluent look.": "Waffle は Material のグローバルスタイルと透明度を使います。オフ: 独自の Fluent の外観。"
+  "Waffle wears Material's global style and transparency. Off: its own Fluent look.": "Waffle は Material のグローバルスタイルと透明度を使います。オフ: 独自の Fluent の外観。",
+  "When covered": "覆われたとき",
+  "Behind fullscreen": "全画面の背後",
+  "A hidden wallpaper stops decoding and keeps its frame.": "隠れた壁紙はデコードを止め、そのフレームを保ちます。"
 }

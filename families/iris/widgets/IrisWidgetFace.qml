@@ -170,8 +170,8 @@ Item {
         sourceComponent: ClippingRectangle {
             id: glassPane
             // The desktop's own wallpaper layer, parallax included, no second decoder. It is copied again only when
-            // the layer or this widget moved, or on each of the layer's own frames while it moves by itself (glyphs,
-            // a video: `wallpaperLayerFrame`): copying it every frame the desktop redraws (music playing, a clock)
+            // the layer or this widget moved, or on the layer's paced beat while it moves by itself (glyphs, a video:
+            // `wallpaperLayerFrame`, four a second): copying it every frame the desktop redraws (music playing, a clock)
             // cost the shell 17 % CPU with Afterglow against 6 % for solid widgets.
             readonly property var host: root.QsWindow?.window ?? null
             readonly property Item desktopLayer: glassPane.host?.wallpaperLayer ?? null

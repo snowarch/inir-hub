@@ -3217,5 +3217,8 @@
   "Show every setting": "Tampilkan semua pengaturan",
   "Classic is the Settings window of v2.33: a header with the search, a slim list of pages and every section in its own card. Every page and option is in both.": "Klasik adalah jendela Pengaturan v2.33: header dengan pencarian, daftar halaman yang ramping, dan setiap bagian di kartunya sendiri. Semua halaman dan opsi ada di keduanya.",
   "Always waiting": "Selalu siap",
-  "Screens, workspaces, layout, windows, input": "Layar, ruang kerja, tata letak, jendela, input"
+  "Screens, workspaces, layout, windows, input": "Layar, ruang kerja, tata letak, jendela, input",
+  "When covered": "Saat tertutup",
+  "Behind fullscreen": "Di belakang layar penuh",
+  "A hidden wallpaper stops decoding and keeps its frame.": "Wallpaper yang tersembunyi berhenti didekode dan mempertahankan bingkainya."
 }
