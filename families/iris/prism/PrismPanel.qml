@@ -471,6 +471,9 @@ Item {
             anchors.fill: centre
             reach: PrismTheme.dp(36)
             veil: PrismTheme.canvas
+            // The veil alone: the blurred band read the page into a texture and blurred it on every scrolled frame,
+            // which is what a weak GPU felt as a page scrolling at few frames (11-11).
+            blurs: false
             // Its foot meets the body's round corner unless the rail stands there.
             bottomRightRadius: root.railWidth > 0 ? 0 : body.radius
         }

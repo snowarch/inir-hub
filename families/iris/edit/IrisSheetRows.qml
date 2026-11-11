@@ -6,6 +6,7 @@ import Quickshell
 import qs
 import qs.services
 import qs.modules.common
+import qs.modules.shared.background.widgets
 import qs.modules.iris.settings
 import qs.modules.iris.widgets.sheet
 import qs.modules.iris.prism.core
@@ -61,7 +62,12 @@ ColumnLayout {
                     property bool open: false
                     number: line.spec.number
                     label: Translation.tr(String(line.spec.label ?? ""))
-                    detail: line.spec.caption ? Translation.tr(String(line.spec.caption)) : ""
+                    readonly property bool coloured: line.spec.kind === "choice" && (line.spec.choices?.[0]?.colour ?? "").length > 0
+                    detail: {
+                        Config.revision
+                        return line.spec.picks ? DesktopWidgetOptions.captionOf(line.spec) : line.spec.caption ? Translation.tr(String(line.spec.caption)) : ""
+                    }
+                    onRestore: IrisOptions.restore([line.spec])
                     tappable: line.spec.kind === "action"
                     glyph: line.spec.kind === "action" ? "arrow_forward" : ""
                     onTapped: line.spec.run?.()
@@ -71,19 +77,67 @@ ColumnLayout {
                         id: kind
                         active: line.spec.kind !== "action"
                         sourceComponent: line.spec.kind === "switch" ? switchKind : line.spec.kind === "range" ? rangeKind
-                            : line.spec.kind === "text" ? textKind : choiceKind
+                            : line.spec.kind === "text" ? textKind : line.coloured ? colourKind : choiceKind
                     }
                     under: Loader {
                         active: line.open && (kind.item?.folded ?? false)
                         visible: active
                         width: parent?.width ?? 0
-                        sourceComponent: PrismChips {
+                        sourceComponent: line.coloured ? swatchesUnder : chipsUnder
+                    }
+                    Component {
+                        id: chipsUnder
+                        PrismChips {
                             choices: IrisOptions.choicesOf(line.spec)
                             current: line.value
                             onPicked: value => {
                                 IrisOptions.commit(line.spec, value)
                                 line.open = false
                             }
+                        }
+                    }
+                    Component {
+                        id: swatchesUnder
+                        PrismSwatches {
+                            chart: true
+                            choices: line.spec.choices
+                            current: line.value
+                            onPicked: value => {
+                                IrisOptions.commit(line.spec, value)
+                                line.open = false
+                            }
+                        }
+                    }
+                    // A colour: the one in use as a disc with its name; its swatches open under the line.
+                    Component {
+                        id: colourKind
+                        Item {
+                            id: ink
+                            readonly property bool folded: true
+                            readonly property var chosen: line.spec.choices.find(choice => String(choice.value).toLowerCase() === String(line.value).toLowerCase()) ?? null
+                            implicitWidth: disc.width + PrismTheme.dp(8) + named.implicitWidth
+                            implicitHeight: PrismTheme.dp(32)
+                            Rectangle {
+                                id: disc
+                                anchors.verticalCenter: parent.verticalCenter
+                                width: PrismTheme.dp(22)
+                                height: width
+                                radius: width / 2
+                                color: String(line.value ?? "").length > 0 ? String(line.value) : "transparent"
+                                border.width: 1
+                                border.color: Qt.alpha(PrismTheme.ink, 0.28)
+                            }
+                            PrismText {
+                                id: named
+                                anchors.left: disc.right
+                                anchors.leftMargin: PrismTheme.dp(8)
+                                anchors.verticalCenter: parent.verticalCenter
+                                text: ink.chosen ? Translation.tr(String(ink.chosen.label)) : String(line.value ?? "")
+                                color: PrismTheme.ink2
+                                font.pixelSize: PrismTheme.small
+                            }
+                            HoverHandler { cursorShape: Qt.PointingHandCursor }
+                            TapHandler { onTapped: line.open = !line.open }
                         }
                     }
 

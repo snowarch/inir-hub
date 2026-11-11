@@ -360,6 +360,7 @@ Variants {
                 anchors.fill: wallpaperContainer
                 picture: panelRoot.webWallpaperActive ? null : wallpaperContainer
                 path: panelRoot.wallpaperSourceRaw
+                output: panelRoot._monitorName
             }
 
             // Dim overlay

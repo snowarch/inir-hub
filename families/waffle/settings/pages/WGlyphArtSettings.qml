@@ -67,6 +67,15 @@ Column {
         }
     }
 
+    WSettingsButton {
+        width: root.width
+        visible: Glyphs.changed(key => root.held[key])
+        label: Translation.tr("Restore defaults")
+        icon: "arrow-counterclockwise"
+        buttonText: Translation.tr("Restore")
+        onButtonClicked: Config.setNestedValues(Glyphs.defaults(root.base))
+    }
+
     WSettingsSwitch {
         width: root.width
         label: Translation.tr("Adjust this look")
@@ -86,7 +95,7 @@ Column {
             visible: Glyphs.shown(row.spec, key => root.values[key])
             active: visible
             sourceComponent: row.spec.kind === "switch" ? switchRow : row.spec.kind === "range" ? rangeRow
-                : row.spec.kind === "choice" ? choiceRow : textRow
+                : row.spec.kind === "choice" ? choiceRow : row.spec.kind === "colour" ? colourRow : textRow
 
             Component {
                 id: switchRow
@@ -124,17 +133,25 @@ Column {
                 }
             }
             Component {
+                id: colourRow
+                WSettingsDropdown {
+                    width: row.width
+                    label: Translation.tr(row.spec.label)
+                    icon: root.icons[row.spec.group]
+                    currentValue: String(row.value).toLowerCase()
+                    options: Glyphs.INKS.map(ink => ({ value: ink[0], displayName: Translation.tr(ink[1]) }))
+                    onSelected: value => root.write(row.spec.key, value)
+                }
+            }
+            Component {
                 id: textRow
-                // A colour is typed as #rrggbb here.
                 WSettingsTextField {
                     width: row.width
                     label: Translation.tr(row.spec.label)
                     icon: root.icons[row.spec.group]
                     placeholderText: row.spec.fallback
                     text: String(row.value)
-                    onEditingFinished: newText => {
-                        if (row.spec.kind !== "colour" || /^#[0-9a-fA-F]{6}$/.test(newText.trim())) root.write(row.spec.key, newText.trim())
-                    }
+                    onEditingFinished: newText => root.write(row.spec.key, newText.trim())
                 }
             }
         }

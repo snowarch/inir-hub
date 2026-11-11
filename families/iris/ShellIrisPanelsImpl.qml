@@ -174,6 +174,8 @@ Item {
         component: IrisStudio {}
     }
 
+    // Settings is come back to: let go after a minute it was rebuilt on almost every visit (the wait he felt, 11-11).
+    readonly property int settingsKeepMs: 600000
     // Prism, iRiS's Settings since 11-06: every area of iRiS Settings is a page of it.
     readonly property bool prismOn: (Config.options?.iris?.appearance?.settingsPanel ?? "prism") === "prism"
     OnDemandPanelLoader {
@@ -182,6 +184,7 @@ Item {
         open: GlobalStates.settingsOverlayOpen
         extraCondition: root.prismOn && !root.settingsWindowed
         keep: true
+        keepMs: root.settingsKeepMs
         closeGraceMs: 0
         component: PrismWindow {}
     }
@@ -192,6 +195,7 @@ Item {
         open: GlobalStates.settingsOverlayOpen
         extraCondition: root.prismOn && root.settingsWindowed
         keep: true
+        keepMs: root.settingsKeepMs
         closeGraceMs: 0
         component: PrismFloating {}
     }
@@ -203,6 +207,7 @@ Item {
         // Only the host in use is kept: switching hosts builds the other once.
         extraCondition: !root.prismOn && !root.settingsWindowed
         keep: true
+        keepMs: root.settingsKeepMs
         closeGraceMs: 0
         component: IrisSettingsOverlay {}
     }
@@ -214,6 +219,7 @@ Item {
         open: GlobalStates.settingsOverlayOpen
         extraCondition: !root.prismOn && root.settingsWindowed
         keep: true
+        keepMs: root.settingsKeepMs
         closeGraceMs: 0
         component: IrisSettingsWindow {}
     }

@@ -22,6 +22,8 @@ Item {
     property alias under: underBox.data
     readonly property bool hovered: hover.hovered
     signal tapped()
+    // The lit number of a changed line puts its factory value back.
+    signal restore()
 
     Layout.fillWidth: true
     readonly property real underHeight: {
@@ -59,6 +61,8 @@ Item {
             color: root.changed ? PrismTheme.accent : PrismTheme.ink3
             font.pixelSize: PrismTheme.small
             font.weight: root.changed ? Font.Bold : Font.Normal
+            HoverHandler { enabled: root.changed; cursorShape: Qt.PointingHandCursor }
+            TapHandler { enabled: root.changed; onTapped: root.restore() }
         }
         Column {
             id: name

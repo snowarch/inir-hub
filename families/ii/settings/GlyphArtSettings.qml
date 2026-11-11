@@ -63,6 +63,15 @@ ColumnLayout {
         }
     }
 
+    SelectionGroupButton {
+        visible: Glyphs.changed(key => root.held[key])
+        Layout.fillWidth: false
+        leftmost: true; rightmost: true
+        buttonIcon: "restart_alt"
+        buttonText: Translation.tr("Restore defaults")
+        onClicked: Config.setNestedValues(Glyphs.defaults(root.base))
+    }
+
     SettingsSwitch {
         buttonIcon: "tune"
         text: Translation.tr("Adjust this look")

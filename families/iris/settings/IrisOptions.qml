@@ -430,7 +430,9 @@ QtObject {
     }
     function resettable(spec: var): bool {
         if (spec.comp) return spec.comp !== "blur" && CompositorConfig.factory(spec) !== undefined
-        return spec.fallback !== undefined && (spec.bundle ?? [String(spec.path ?? "")]).every(path => String(path).startsWith("iris."))
+        // `restorable`: a row outside iRiS's keys that still has one factory value (the glyph wallpaper, a widget's own options).
+        return spec.fallback !== undefined && (spec.restorable === true
+            || (spec.bundle ?? [String(spec.path ?? "")]).every(path => String(path).startsWith("iris.")))
     }
     // A range reads in its display unit, with as many decimals as its step needs there.
     function rangeText(spec: var, value: var): string {
@@ -1150,7 +1152,7 @@ QtObject {
     readonly property var glyphRows: {
         const base = "background.effects.glyphs."
         const on = () => Boolean(Config.options?.background?.effects?.glyphs?.enable)
-        const row = spec => Object.assign({ section: "desktop", group: "Glyph art", showIf: on }, spec)
+        const row = spec => Object.assign({ section: "desktop", group: "Glyph art", showIf: on, restorable: true }, spec)
         const plain = ["cell", "motion", "intro"]
         return [
             row({ label: "Shows", path: base + "source", kind: "choice", fallback: "wallpaper",
@@ -1165,11 +1167,12 @@ QtObject {
             tune: plain.indexOf(spec.key) < 0,
             label: spec.label,
             path: base + spec.key,
-            kind: spec.kind === "colour" ? "text" : spec.kind,
+            kind: spec.kind === "colour" ? "choice" : spec.kind,
             fallback: spec.fallback,
             min: spec.min, max: spec.max, step: spec.step,
             unit: spec.unit ? " " + spec.unit : undefined,
-            choices: spec.choices ? spec.choices.map(choice => ({ label: choice[1], value: choice[0] })) : undefined,
+            choices: spec.kind === "colour" ? Glyphs.INKS.map(ink => ({ label: ink[1], value: ink[0], colour: ink[0], swatch: ink[0] }))
+                : spec.choices ? spec.choices.map(choice => ({ label: choice[1], value: choice[0] })) : undefined,
             visibleWhen: spec.when ? (spec.when[1] === true ? base + spec.when[0] : base + spec.when[0] + "=" + spec.when[1]) : undefined
         })))
     }

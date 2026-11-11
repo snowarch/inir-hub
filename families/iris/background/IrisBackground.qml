@@ -108,6 +108,7 @@ Variants {
             anchors.fill: canvas
             picture: panel.effectivePath.length > 0 ? canvas : null
             path: panel.previewPath
+            output: panel.monitorName
         }
 
         Rectangle {
