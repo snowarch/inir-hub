@@ -376,13 +376,19 @@ Item {
         }
         readonly property bool recording: ctl.moduleId === "record" && RecorderStatus.isRecording
         readonly property string label: Translation.tr(IrisControlOptions.labelOf(ctl.moduleId))
-        readonly property string glyph: ctl.moduleId === "record" ? (ctl.recording ? "stop_circle" : "radio_button_checked")
+        // Do Not Disturb is lit while it silences, the same moon as its bubble and the Island's mark (the shared
+        // model is "notifications shown": lit meant the opposite, 11-11).
+        readonly property bool quiets: ctl.moduleId === "focus"
+        readonly property string glyph: ctl.quiets ? "bedtime"
+            : ctl.moduleId === "record" ? (ctl.recording ? "stop_circle" : "radio_button_checked")
             : ctl.moduleId === "devices" ? IrisStyle.soundDeviceGlyph(Audio.defaultSink, false)
             : String(ctl.model?.icon ?? IrisControlOptions.glyphOf(ctl.moduleId))
-        readonly property string detail: ctl.moduleId === "devices" ? Audio.friendlyDeviceName(Audio.defaultSink)
+        readonly property string detail: ctl.quiets ? (Notifications.silent ? Translation.tr("On") : Translation.tr("Off"))
+            : ctl.moduleId === "devices" ? Audio.friendlyDeviceName(Audio.defaultSink)
             : ctl.moduleId === "record" ? (ctl.recording ? Translation.tr("Recording") : Translation.tr("With sound"))
             : String(ctl.model?.statusText ?? "")
-        readonly property bool lit: ctl.moduleId === "record" ? ctl.recording
+        readonly property bool lit: ctl.quiets ? Notifications.silent
+            : ctl.moduleId === "record" ? ctl.recording
             : ctl.moduleId === "devices" ? root.picker === "devices"
             : Boolean(ctl.model?.toggled ?? false)
         readonly property bool ready: ctl.moduleId === "record" || ctl.moduleId === "devices"

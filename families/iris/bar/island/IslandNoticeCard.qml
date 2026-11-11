@@ -59,7 +59,7 @@ Item {
     readonly property color levelInk: card.kind === "accessory"
         ? (card.value <= 0.2 ? IrisStyle.danger : IrisStyle.success) : card.ink
     readonly property bool figured: card.battery && card.kind !== "unlock"
-    readonly property bool worded: card.kind === "status"
+    readonly property bool worded: card.kind === "status" || card.kind === "quiet"
     readonly property real leadWidth: card.picture ? Math.round(card.mark * 1.42) : card.mark
     readonly property real trailWidth: card.ringed ? ring.width
         : card.figured ? figure.implicitWidth

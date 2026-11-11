@@ -18,7 +18,7 @@ QtObject {
         { id: "vpn", label: "VPN", glyph: "vpn_key", category: "connect", description: "NetworkManager profiles and Tailscale.", kind: "toggle", shapes: ["1x1", "2x1"] },
         { id: "hotspot", label: "Hotspot", glyph: "wifi_tethering", category: "connect", description: "Share this connection.", kind: "toggle", shapes: ["1x1", "2x1"] },
         { id: "warp", label: "WARP", glyph: "cloud", category: "connect", description: "Cloudflare's tunnel.", kind: "toggle", shapes: ["1x1", "2x1"] },
-        { id: "focus", label: "Focus", glyph: "do_not_disturb_on", category: "system", description: "Silence notifications.", kind: "toggle", shapes: ["1x1", "2x1"] },
+        { id: "focus", label: "Do Not Disturb", glyph: "bedtime", category: "system", description: "Silence notifications.", kind: "toggle", shapes: ["1x1", "2x1"] },
         { id: "gameMode", label: "Game", glyph: "sports_esports", category: "system", description: "Stands the shell down while you play.", kind: "toggle", shapes: ["1x1", "2x1"] },
         { id: "profiles", label: "Profile", glyph: "bolt", category: "system", description: "Power saver, balanced or performance.", kind: "toggle", shapes: ["1x1", "2x1"] },
         { id: "idle", label: "Awake", glyph: "coffee", category: "system", description: "Keeps the screen from sleeping.", kind: "toggle", shapes: ["1x1", "2x1"] },

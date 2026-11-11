@@ -3215,5 +3215,7 @@
   "Use the new design": "Новий дизайн",
   "Use the classic design (v2.33)": "Класичний дизайн (v2.33)",
   "Show every setting": "Показати всі налаштування",
-  "Classic is the Settings window of v2.33: a header with the search, a slim list of pages and every section in its own card. Every page and option is in both.": "Класичний — це вікно налаштувань v2.33: заголовок із пошуком, вузький список сторінок і кожен розділ у власній картці. Усі сторінки й параметри є в обох."
+  "Classic is the Settings window of v2.33: a header with the search, a slim list of pages and every section in its own card. Every page and option is in both.": "Класичний — це вікно налаштувань v2.33: заголовок із пошуком, вузький список сторінок і кожен розділ у власній картці. Усі сторінки й параметри є в обох.",
+  "Always waiting": "Завжди напоготові",
+  "Screens, workspaces, layout, windows, input": "Екрани, робочі простори, макет, вікна, введення"
 }

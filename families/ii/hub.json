@@ -1,7 +1,11 @@
 {
     "$schema": "../../schema/hub.schema.json",
-    "version": "2.35.9",
+    "version": "2.35.10",
     "changes": {
+        "2.35.10": [
+          "Settings › Umbriel: Material gets the compositor's page when you run Umbriel: screens, workspaces per screen, layouts, borders, tabs, title bars, glass, movement, keyboard, mouse, pointer and hot corners",
+          "Every row there is asked of the compositor: what your machine or Umbriel cannot do is not shown"
+        ],
         "2.35.9": [
             "Hub: a plugin that changes a file of yours, like Fastfetch, gets a switch that turns it off and gives yours back"
         ],
@@ -48,7 +52,7 @@
         "yande.re",
         "youtube.com"
     ],
-    "minInir": "2.33.0",
+    "minInir": "3.0.2",
     "provides": "modules/ii",
     "preview": "preview.webp"
 }

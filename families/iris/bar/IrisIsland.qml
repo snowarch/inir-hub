@@ -122,8 +122,11 @@ Item {
     // Do not disturb, at rest: a small moon at the Island's trailing end for as long as it is on, in every face and
     // row (11-10: it was on for days with no sign anywhere). Both sides give it the same room, so nothing moves off
     // centre; a notice or a level keeps its own row.
+    // It is the Do Not Disturb bubble's own lit disc at the Island's scale, and only where no such bubble already
+    // says it (11-11: a bare moon read as nothing). Resting on it names it; a press turns it off.
     readonly property bool quiet: Notifications.silent && !root.vertical && !root.compactSizeClass
-    readonly property real quietBox: Math.round(13 * root.d)
+        && !(Config.options?.iris?.bubbles?.extras?.focus?.enable ?? false)
+    readonly property real quietBox: Math.round(18 * root.d)
     readonly property real quietSlot: root.quiet ? root.quietBox + Math.round(8 * root.d) : 0
     readonly property real sideSlot: root.wingSlot + root.quietSlot
     readonly property real wingLead: Math.round(Math.max((root.compactHeight - root.wingCoverSize) / 2,
@@ -616,8 +619,8 @@ Item {
     Connections {
         target: root.noticeOn("focus") ? Notifications : null
         function onSilentChanged(): void {
-            root.showEvent(Notifications.silent ? "do_not_disturb_on" : "notifications_active",
-                Notifications.silent ? IrisStyle.identity.indigo : IrisStyle.textSecondary, Translation.tr("Do not disturb"),
+            root.showEvent(Notifications.silent ? "bedtime" : "notifications_active",
+                Notifications.silent ? IrisStyle.identity.indigo : IrisStyle.textSecondary, Translation.tr("Do Not Disturb"),
                 Notifications.silent ? Translation.tr("On") : Translation.tr("Off"), -1, "status")
         }
     }
@@ -2607,7 +2610,7 @@ Item {
                     }
                     IrisText {
                         Layout.fillWidth: true
-                        visible: text.length > 0 && root.event.kind !== "status" && root.event.kind !== "accessory"
+                        visible: text.length > 0 && !["status", "quiet"].includes(root.event.kind) && root.event.kind !== "accessory"
                         text: root.event.detail
                         color: IrisStyle.muted
                         font.pixelSize: IrisStyle.typeFootnote
@@ -2641,7 +2644,7 @@ Item {
                 }
                 // A switch says its state at the end in its colour (Apple's "Do Not Disturb  On").
                 IrisText {
-                    visible: root.event.kind === "status"
+                    visible: ["status", "quiet"].includes(root.event.kind)
                     Layout.alignment: Qt.AlignVCenter
                     text: root.event.detail
                     color: root.eventInk
@@ -2829,19 +2832,40 @@ Item {
                 visible: opacity > 0
                 Behavior on opacity { NumberAnimation { duration: IrisStyle.duration(140); easing.type: IrisStyle.feedbackEasing } }
             }
-            Glyph {
+            Rectangle {
                 id: quietMark
-                readonly property real edge: root.songWings ? root.wingSlot : Math.round(11 * root.d * Math.max(0.6, root.breathing))
-                x: designFace.boxX + designFace.boxWidth - quietMark.edge - root.quietBox + Math.round((root.quietBox - width) / 2)
+                readonly property real edge: root.songWings ? root.wingSlot : Math.round(9 * root.d * Math.max(0.6, root.breathing))
+                x: designFace.boxX + designFace.boxWidth - quietMark.edge - root.quietBox
                 y: Math.round((parent.height - height) / 2) + designFace.swellShift
-                text: "bedtime"
-                fill: 1
-                iconSize: root.quietBox
-                color: root.nothingLook ? IrisStyle.text : Qt.tint(IrisStyle.identity.indigo, Qt.rgba(IrisStyle.text.r, IrisStyle.text.g, IrisStyle.text.b, 0.34))
+                z: 6
+                width: root.quietBox
+                height: root.quietBox
+                radius: width / 2
+                color: root.nothingLook ? IrisStyle.text : IrisStyle.identity.indigo
+                scale: quietPress.pressed ? 0.9 : quietPress.containsMouse ? 1.08 : 1
                 opacity: (root.quiet && root.heartShown ? 1 : 0) * root.heartUncovered
                 visible: opacity > 0
                 Behavior on opacity { NumberAnimation { duration: IrisStyle.duration(180); easing.type: IrisStyle.feedbackEasing } }
-                Accessible.name: Translation.tr("Do not disturb")
+                Behavior on scale { NumberAnimation { duration: IrisStyle.duration(140); easing.type: IrisStyle.feedbackEasing } }
+                Accessible.role: Accessible.Button
+                Accessible.name: Translation.tr("Do Not Disturb")
+                Glyph {
+                    anchors.centerIn: parent
+                    text: "bedtime"
+                    fill: 1
+                    iconSize: Math.round(12 * root.d)
+                    color: root.nothingLook ? IrisStyle.surfaceOpaque : IrisStyle.onTint
+                }
+                MouseArea {
+                    id: quietPress
+                    anchors.fill: parent
+                    anchors.margins: -Math.round(4 * root.d)
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    onContainsMouseChanged: if (containsMouse) root.showEvent("bedtime", IrisStyle.identity.indigo,
+                        Translation.tr("Do Not Disturb"), Translation.tr("Press to turn off"), -1, "quiet")
+                    onClicked: Notifications.silent = false
+                }
             }
             Item {
                 id: wingTrail
@@ -3061,6 +3085,11 @@ Item {
                     if (IrisState.edit) {
                         IrisState.editSelection = ""
                         IrisState.editTarget = "island"
+                        return
+                    }
+                    // The mark's own name is showing: the press it asks for lands here.
+                    if (root.eventShown && root.event.kind === "quiet") {
+                        Notifications.silent = false
                         return
                     }
                     if (root.eventShown && root.event.kind === "shot" && String(root.event.image ?? "").length > 0) {

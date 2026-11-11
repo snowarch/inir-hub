@@ -3215,5 +3215,7 @@
   "Use the new design": "새 디자인 사용",
   "Use the classic design (v2.33)": "클래식 디자인 사용 (v2.33)",
   "Show every setting": "모든 설정 보기",
-  "Classic is the Settings window of v2.33: a header with the search, a slim list of pages and every section in its own card. Every page and option is in both.": "클래식은 v2.33의 설정 창입니다. 검색이 있는 헤더, 좁은 페이지 목록, 각 섹션은 자체 카드에 들어 있습니다. 모든 페이지와 옵션은 두 디자인 모두에 있습니다."
+  "Classic is the Settings window of v2.33: a header with the search, a slim list of pages and every section in its own card. Every page and option is in both.": "클래식은 v2.33의 설정 창입니다. 검색이 있는 헤더, 좁은 페이지 목록, 각 섹션은 자체 카드에 들어 있습니다. 모든 페이지와 옵션은 두 디자인 모두에 있습니다.",
+  "Always waiting": "항상 준비됨",
+  "Screens, workspaces, layout, windows, input": "화면, 작업 공간, 레이아웃, 창, 입력"
 }

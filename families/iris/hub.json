@@ -1,7 +1,13 @@
 {
     "$schema": "../../schema/hub.schema.json",
-    "version": "2.33.75",
+    "version": "2.33.76",
     "changes": {
+        "2.33.76": [
+          "Control Center: the Do Not Disturb tile lights when it is on (it read the other way round) and wears the same name and moon as everywhere else",
+          "Island: Do Not Disturb is a small indigo moon disc; hover says what it is, a press turns it off. It steps aside when the Do Not Disturb bubble already shows it",
+          "Settings on Umbriel: free space at each screen edge, dialogs that stay with their window, apps opening maximized, the shortcuts sheet at login",
+          "Settings on Umbriel, when the machine has them: which screen a drawing tablet or a touch screen belongs to, the laptop screen off with the lid closed, the NVIDIA sync option"
+        ],
         "2.33.75": [
             "Island: a small moon rests on it while Do Not Disturb is on, so silence never goes unnoticed",
             "Settings › Displays on Umbriel: each screen's workspaces drawn as miniatures: press how many it keeps, choose as needed or fixed, stacked or side by side, and whether the last leads back to the first",

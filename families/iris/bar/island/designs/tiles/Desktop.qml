@@ -135,7 +135,7 @@ GridLayout {
                 model: [
                     { glyph: "wifi", label: "Wi-Fi", on: Network.wifiEnabled },
                     { glyph: "bluetooth", label: "Bluetooth", on: BluetoothStatus.enabled, shown: BluetoothStatus.available },
-                    { glyph: "do_not_disturb_on", label: "Silent", on: Notifications.silent },
+                    { glyph: "bedtime", label: "Silent", on: Notifications.silent },
                     { glyph: "nightlight", label: "Night", on: Hyprsunset.active },
                     { glyph: "coffee", label: "Awake", on: Idle.inhibit }
                 ].filter(entry => entry.shown !== false)
@@ -166,7 +166,7 @@ GridLayout {
                                 const glyph = toggle.modelData.glyph
                                 if (glyph === "wifi") Network.toggleWifi()
                                 else if (glyph === "bluetooth") { if (Bluetooth.defaultAdapter) Bluetooth.defaultAdapter.enabled = !Bluetooth.defaultAdapter.enabled }
-                                else if (glyph === "do_not_disturb_on") Notifications.silent = !Notifications.silent
+                                else if (glyph === "bedtime") Notifications.silent = !Notifications.silent
                                 else if (glyph === "nightlight") Hyprsunset.toggle()
                                 else Idle.toggleInhibit()
                             }

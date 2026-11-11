@@ -3215,5 +3215,7 @@
   "Use the new design": "Ilusilersornerit nutaaq atoruk",
   "Use the classic design (v2.33)": "Ilusilersornerit pisoqaaq atoruk (v2.33)",
   "Show every setting": "Aaqqissuinerit tamaasa takutikkit",
-  "Classic is the Settings window of v2.33: a header with the search, a slim list of pages and every section in its own card. Every page and option is in both.": "Pisoqaaq tassaavoq v2.33-mi Aaqqissuinerit matuersaataat: qulequtaq ujarlernermik, quppernerit allattorsimaffiat amitsoq immikkoortullu tamarmik kaartimi namminermi. Quppernerit periarfissallu tamarmik marlunniipput."
+  "Classic is the Settings window of v2.33: a header with the search, a slim list of pages and every section in its own card. Every page and option is in both.": "Pisoqaaq tassaavoq v2.33-mi Aaqqissuinerit matuersaataat: qulequtaq ujarlernermik, quppernerit allattorsimaffiat amitsoq immikkoortullu tamarmik kaartimi namminermi. Quppernerit periarfissallu tamarmik marlunniipput.",
+  "Always waiting": "Suliffiit piareersarneqarput",
+  "Screens, workspaces, layout, windows, input": "Biilit, Suliffiit, Nassuiaat, Qeqqat, Ikiuineq"
 }

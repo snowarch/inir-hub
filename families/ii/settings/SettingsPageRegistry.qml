@@ -260,6 +260,18 @@ Singleton {
             desc: Translation.tr("Widgets, themes and web apps from the community"),
             essential: true,
             component: "modules/ii/settings/HubConfig.qml"
+        },
+        {
+            key: "compositor-in-use",
+            name: CompositorConfig.compositorName.length > 0 ? CompositorConfig.compositorName : Translation.tr("Compositor"),
+            icon: "desktop_windows",
+            desc: Translation.tr("Screens, workspaces, layout, windows, input"),
+            essential: false,
+            // Drawn from what the running compositor says it can do; Niri keeps its own page above.
+            compositor: "other",
+            // In a nav the person arranged before this page existed, it stands where that page does.
+            beside: "compositor",
+            component: "modules/ii/settings/CompositorPage.qml"
         }
     ]
 
@@ -269,7 +281,7 @@ Singleton {
         { label: Translation.tr("Essentials"), pages: [0, 29] },
         { label: Translation.tr("Appearance"), pages: [4, 25, 3, 14, 21] },
         { label: Translation.tr("Shell"), pages: [2, 28, 26, 27, 5, 22, 23, 16, 10, 11, 18, 19, 20] },
-        { label: Translation.tr("System"), pages: [1, 24, 7, 6, 12, 15, 8, 17] },
+        { label: Translation.tr("System"), pages: [1, 24, 7, 6, 12, 30, 15, 8, 17] },
         { label: Translation.tr("Reference"), pages: [9, 13] }
     ]
 
@@ -302,6 +314,14 @@ Singleton {
             // empty groups survive so the editor can move pages into them
             out.push({ label: c.label, pages: pageIdxs })
         }
+        for (let i = 0; i < pages.length; i++) {
+            if (seen.has(i) || !pages[i].beside) continue
+            const mate = pages.findIndex(page => page.key === pages[i].beside)
+            const home = out.find(group => group.pages.includes(mate))
+            if (!home) continue
+            home.pages.splice(home.pages.indexOf(mate) + 1, 0, i)
+            seen.add(i)
+        }
         const missing = []
         for (let i = 0; i < pages.length; i++)
             if (!seen.has(i)) missing.push(i)
@@ -313,6 +333,7 @@ Singleton {
     function familyOf(index: int): string { return index >= 0 && index < pages.length ? String(pages[index].family ?? "") : "" }
     function installed(index: int): bool {
         if (index >= 0 && index < pages.length && pages[index].compositor === "niri" && !CompositorService.niriNative) return false
+        if (index >= 0 && index < pages.length && pages[index].compositor === "other" && (CompositorService.niriNative || !CompositorConfig.available)) return false
         return root.familyOf(index).length === 0 || Plugins.has(root.familyOf(index))
     }
     function searchable(index: int, activeFamily: string): bool {
