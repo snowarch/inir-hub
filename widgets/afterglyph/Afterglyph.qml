@@ -1,6 +1,6 @@
 pragma ComponentBehavior: Bound
 
-// The desktop face: a plate of glowing glyphs sized to its picture, with a label under it like a print's.
+// The desktop face: a plate of glowing glyphs sized to its subject, with a readout under it like a print's.
 // AbstractBackgroundWidget places, drags and scales it; AfterglyphView draws; this file only lays out.
 
 import QtQuick
@@ -26,8 +26,6 @@ AbstractBackgroundWidget {
     readonly property int plateWidth: Math.round(480 * root.scaleFactor)
     readonly property int plateHeight: Math.round(root.plateWidth / view.aspect)
     readonly property int gap: Math.round(8 * root.scaleFactor)
-    readonly property string named: view.title.length > 0
-        ? (view.artist.length > 0 ? view.title + "  ·  " + view.artist : view.title) : ""
 
     implicitWidth: root.plateWidth
     implicitHeight: root.plateHeight + (label.visible ? root.gap + label.implicitHeight : 0)
@@ -36,16 +34,10 @@ AbstractBackgroundWidget {
         id: view
         width: root.plateWidth
         height: root.plateHeight
-        source: String(root._readConfigKey("source") ?? "auto")
-        file: String(root._readConfigKey("file") ?? "")
-        word: String(root._readConfigKey("word") ?? "iNiR")
-        lookName: String(root._readConfigKey("look") ?? "signal")
-        glyphPixel: Math.max(1, Number(root._readConfigKey("glyph") ?? 1))
-        glowAmount: Number(root._readConfigKey("glow") ?? 100) / 100
-        growIn: (root._readConfigKey("grow") ?? true) === true
         plate: (root._readConfigKey("plate") ?? true) === true
         radius: root.cornerRadiusOverride >= 0 ? root.cornerRadiusOverride : root.widgetCardRadius
-        accent: root.widgetAccentVisible
+        theme: [Qt.darker(root.widgetAccentVisible, 2.2), root.widgetAccentVisible, Qt.lighter(root.widgetAccentVisible, 1.7),
+            root.widgetAccent3]
         live: root.animationsActive
     }
 
@@ -81,7 +73,7 @@ AbstractBackgroundWidget {
             anchors.left: parent.left
             anchors.right: grid.left
             anchors.rightMargin: root.gap * 2
-            text: root.named
+            text: view.name
             elide: Text.ElideRight
             font.pixelSize: Math.round(Appearance.font.pixelSize.smaller * root.scaleFactor)
             color: root.widgetInk
@@ -89,7 +81,7 @@ AbstractBackgroundWidget {
         StyledText {
             id: grid
             anchors.right: parent.right
-            text: view.columns + " × " + view.rows
+            text: view.tag
             font.family: root.widgetNumbersFamily
             font.features: ({ "tnum": 1 })
             font.pixelSize: Math.round(Appearance.font.pixelSize.smaller * root.scaleFactor)

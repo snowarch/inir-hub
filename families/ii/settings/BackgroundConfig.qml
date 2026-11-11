@@ -2018,41 +2018,11 @@ ContentPage {
                 }
             }
 
-            ConfigSelectionArray {
-                visible: Config.options?.background?.effects?.glyphs?.enable ?? false
-                currentValue: Config.options?.background?.effects?.glyphs?.look ?? "signal"
-                options: [
-                    { displayName: Translation.tr("Picture colours"), icon: "image", value: "signal" },
-                    { displayName: Translation.tr("Accent"), icon: "palette", value: "theme" },
-                    { displayName: Translation.tr("Phosphor"), icon: "terminal", value: "phosphor" },
-                    { displayName: Translation.tr("Amber"), icon: "wb_incandescent", value: "amber" },
-                    { displayName: Translation.tr("Blueprint"), icon: "architecture", value: "blueprint" },
-                    { displayName: Translation.tr("Paper"), icon: "description", value: "paper" }
-                ]
-                onSelected: newValue => Config.setNestedValue("background.effects.glyphs.look", newValue)
-            }
-
-            ConfigSpinBox {
-                visible: Config.options?.background?.effects?.glyphs?.enable ?? false
-                icon: "format_size"
-                text: Translation.tr("Glyph size")
-                value: Config.options?.background?.effects?.glyphs?.size ?? 1
-                from: 1
-                to: 4
-                stepSize: 1
-                onValueModified: Config.setNestedValue("background.effects.glyphs.size", value)
-            }
-
-            ConfigSpinBox {
-                visible: Config.options?.background?.effects?.glyphs?.enable ?? false
-                icon: "flare"
-                text: Translation.tr("Glow")
-                unit: "%"
-                value: Config.options?.background?.effects?.glyphs?.glow ?? 100
-                from: 0
-                to: 200
-                stepSize: 10
-                onValueModified: Config.setNestedValue("background.effects.glyphs.glow", value)
+            Loader {
+                Layout.fillWidth: true
+                active: Config.options?.background?.effects?.glyphs?.enable ?? false
+                visible: active
+                sourceComponent: GlyphArtSettings {}
             }
 
             ConfigSpinBox {

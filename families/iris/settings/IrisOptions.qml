@@ -15,6 +15,7 @@ import qs.modules.iris.background
 import qs.modules.iris.widgets
 import qs
 import qs.modules.shared.background.widgets
+import "root:modules/common/widgets/GlyphArt.js" as Glyphs
 
 QtObject {
     id: root
@@ -1144,6 +1145,35 @@ QtObject {
         return rows
     }
 
+    // The glyph wallpaper's rows, drawn from the one list of its options (GlyphArt.js): what it shows, its look
+    // (choosing one writes everything a look decides), then each option, the fine ones behind tuning.
+    readonly property var glyphRows: {
+        const base = "background.effects.glyphs."
+        const on = () => Boolean(Config.options?.background?.effects?.glyphs?.enable)
+        const row = spec => Object.assign({ section: "desktop", group: "Glyph art", showIf: on }, spec)
+        const plain = ["cell", "motion", "intro"]
+        return [
+            row({ label: "Shows", path: base + "source", kind: "choice", fallback: "wallpaper",
+                choices: [{ label: "Your wallpaper", value: "wallpaper", glyph: "image" }]
+                    .concat(Glyphs.subjects()).concat([{ label: "A word", value: "word", glyph: "title" }]),
+                keywords: ["demo", "iris", "planet", "word", "text"] }),
+            row({ label: "Word", description: "A word, | for a new line", path: base + "word", visibleWhen: base + "source=word", kind: "text", fallback: "" }),
+            row({ label: "Look", path: base + "look", kind: "choice", fallback: "signal", choices: Glyphs.lookNames(),
+                set: look => Config.setNestedValues(Glyphs.lookWrites(base, String(look))),
+                keywords: ["ascii", "glyph", "terminal", "matrix", "crt", "halftone", "newsprint", "typewriter", "colour", "color"] })
+        ].concat(Glyphs.OPTIONS.map(spec => row({
+            tune: plain.indexOf(spec.key) < 0,
+            label: spec.label,
+            path: base + spec.key,
+            kind: spec.kind === "colour" ? "text" : spec.kind,
+            fallback: spec.fallback,
+            min: spec.min, max: spec.max, step: spec.step,
+            unit: spec.unit ? " " + spec.unit : undefined,
+            choices: spec.choices ? spec.choices.map(choice => ({ label: choice[1], value: choice[0] })) : undefined,
+            visibleWhen: spec.when ? (spec.when[1] === true ? base + spec.when[0] : base + spec.when[0] + "=" + spec.when[1]) : undefined
+        })))
+    }
+
     readonly property var behaviour: [
         { section: "appearance", group: "Design", label: "Design", description: "What iRiS is made of: its shapes, type, controls and motion.", path: "iris.appearance.design", kind: "choice", cards: "design", fallback: "iris", get choices() { return IrisDesign.catalogue }, note: () => IrisDesign.refusesGlass ? Translation.tr("%1 is opaque by design: it wears no glass.").arg(IrisDesign.name) : "", keywords: ["design", "style", "airisu", "iris", "jdm", "japanese", "look", "skin", "diseño", "estilo"] },
         { section: "bar", group: "Design and modes", label: "Composition", description: "How the Island holds media and controls.", path: "iris.bar.composition", kind: "choice", fallback: "cluster", choices: [{label:"Unified",value:"unified",glyph:"crop_7_5",detail:"Unified keeps media and controls inside the one Island."},{label:"Cluster",value:"cluster",glyph:"bubble_chart",detail:"Cluster splits media and controls into bubbles beside the clock."}] },
@@ -1415,9 +1445,6 @@ QtObject {
         { tune: true, section: "desktop", group: "Live wallpapers", label: "Pause on battery", path: "background.pauseAnimationOnBattery", kind: "switch", fallback: true },
         { tune: true, section: "desktop", group: "Live wallpapers", label: "Animate on the lock screen", description: "Plays on the lock screen too, blurred or not.", path: "lock.enableAnimation", kind: "switch", fallback: false },
         { section: "desktop", group: "Glyph art", label: "Draw the wallpaper as glyphs", description: "Pictures, GIFs and videos are redrawn as glowing characters.", path: "background.effects.glyphs.enable", kind: "switch", fallback: false, keywords: ["ascii", "glyph", "afterglyph", "characters", "text art", "terminal", "retro", "crt", "matrix", "caracteres", "letras"] },
-        { section: "desktop", group: "Glyph art", showIf: () => Boolean(Config.options?.background?.effects?.glyphs?.enable), label: "Look", path: "background.effects.glyphs.look", kind: "choice", fallback: "signal", choices: [{label:"Picture colours",value:"signal",glyph:"image"},{label:"Accent",value:"theme",glyph:"palette"},{label:"Phosphor",value:"phosphor",glyph:"terminal"},{label:"Amber",value:"amber",glyph:"wb_incandescent"},{label:"Blueprint",value:"blueprint",glyph:"architecture"},{label:"Paper",value:"paper",glyph:"description"}], keywords: ["ascii", "glyph", "phosphor", "amber", "blueprint", "paper", "colour", "color"] },
-        { section: "desktop", group: "Glyph art", showIf: () => Boolean(Config.options?.background?.effects?.glyphs?.enable), label: "Glyph size", path: "background.effects.glyphs.size", kind: "range", fallback: 1, min: 1, max: 4, step: 1, unit: "×" },
-        { tune: true, section: "desktop", group: "Glyph art", showIf: () => Boolean(Config.options?.background?.effects?.glyphs?.enable), label: "Glow", path: "background.effects.glyphs.glow", kind: "range", fallback: 100, min: 0, max: 200, step: 10, unit: " %" },
         { section: "notifications", group: "Banners", label: "Notification banners", path: "iris.modules.notificationPopup", kind: "switch", fallback:true },
         { section: "notifications", group: "Banners", label: "Banner duration", description: "How long a notification stays when the app does not choose.", path: "iris.notifications.duration", kind: "range", fallback:4000,min:2000,max:12000,step:500,scale:0.001,unit:" s" },
         { section: "sound", group: "Output", label: "Sound plays on", description: "Pick where the sound goes; the volume is the one in use.", kind: "list", view: Qt.resolvedUrl("IrisSoundDevices.qml"), input: false, summary: () => Audio.defaultSink ? Audio.friendlyDeviceName(Audio.defaultSink) : "", keywords: ["output", "device", "speakers", "headphones", "bluetooth", "volume", "salida", "parlantes", "altavoces", "auriculares"] },
@@ -2236,7 +2263,7 @@ QtObject {
     }
     readonly property var settings: {
         // A widget goes on or off in Desktop's grid; Widgets holds only what each one on the desktop offers.
-        const rows = root.behaviour.concat(root.shared).concat(root.niriRows).concat(DesktopWidgetOptions.rows.filter(spec => !spec.widgetEnable)).concat(root.edgeRows).map(spec => root.placed(spec))
+        const rows = root.behaviour.concat(root.glyphRows).concat(root.shared).concat(root.niriRows).concat(DesktopWidgetOptions.rows.filter(spec => !spec.widgetEnable)).concat(root.edgeRows).map(spec => root.placed(spec))
         const known = new Set(rows.filter(spec => !spec.mirror).map(spec => spec.path))
         const own = path => rows.find(spec => spec.path === path && !spec.mirror) ?? root.studio.find(spec => spec.path === path && !spec.mirror)
         // Home: the rows it was given (Customize › On Home), each the area's own row said once more.

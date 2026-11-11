@@ -75,7 +75,7 @@ AbstractWidget {
         void Lume.revision
         if (root.colorMode !== "adaptive")
             return null
-        return Lume.readFrom(WallpaperLuma.imagePath(root.wallpaperPath), root.outputName, root.x, root.y, root.width, root.height)
+        return Lume.glyphed(Lume.readFrom(WallpaperLuma.imagePath(root.wallpaperPath), root.outputName, root.x, root.y, root.width, root.height))
     }
     property bool backdropIsLight: false
     onBackdropSampleChanged: root.backdropIsLight = Lume.lightAfter(root.backdropSample?.luminance ?? -1, root.backdropIsLight, 0.30, 0.21)

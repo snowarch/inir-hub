@@ -28,6 +28,7 @@ AngelStyleEditor 1.0 AngelStyleEditor.qml
 ArrangeConfig 1.0 ArrangeConfig.qml
 AuroraStyleEditor 1.0 AuroraStyleEditor.qml
 BackgroundConfig 1.0 BackgroundConfig.qml
+GlyphArtSettings 1.0 GlyphArtSettings.qml
 BarConfig 1.0 BarConfig.qml
 CheatsheetConfig 1.0 CheatsheetConfig.qml
 CustomThemeEditor 1.0 CustomThemeEditor.qml

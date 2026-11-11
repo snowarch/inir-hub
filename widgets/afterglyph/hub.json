@@ -1,7 +1,7 @@
 {
     "$schema": "../../schema/hub.schema.json",
-    "version": "1.0.0",
-    "summary": "What is playing or your wallpaper, drawn as glowing glyphs",
+    "version": "2.0.0",
+    "summary": "Music, wallpaper, words and nine subjects as glowing glyphs, in sixteen looks",
     "authors": [
         "snowarch"
     ],

@@ -1234,39 +1234,11 @@ WSettingsPage {
                     onCheckedChanged: root.setNestedValueWhenReady("background.effects.glyphs.enable", checked)
                 }
 
-                WSettingsDropdown {
-                    visible: Config.options?.background?.effects?.glyphs?.enable ?? false
-                    label: Translation.tr("Look")
-                    icon: "color"
-                    currentValue: Config.options?.background?.effects?.glyphs?.look ?? "signal"
-                    options: [
-                        { value: "signal", displayName: Translation.tr("Picture colours") },
-                        { value: "theme", displayName: Translation.tr("Accent") },
-                        { value: "phosphor", displayName: Translation.tr("Phosphor") },
-                        { value: "amber", displayName: Translation.tr("Amber") },
-                        { value: "blueprint", displayName: Translation.tr("Blueprint") },
-                        { value: "paper", displayName: Translation.tr("Paper") }
-                    ]
-                    onSelected: value => root.setNestedValueWhenReady("background.effects.glyphs.look", value)
-                }
-
-                WSettingsSpinBox {
-                    visible: Config.options?.background?.effects?.glyphs?.enable ?? false
-                    label: Translation.tr("Glyph size")
-                    icon: "text-font-size"
-                    from: 1; to: 4; stepSize: 1
-                    value: Config.options?.background?.effects?.glyphs?.size ?? 1
-                    onValueChanged: root.setNestedValueWhenReady("background.effects.glyphs.size", value)
-                }
-
-                WSettingsSpinBox {
-                    visible: Config.options?.background?.effects?.glyphs?.enable ?? false
-                    label: Translation.tr("Glow")
-                    icon: "weather-sunny"
-                    suffix: "%"
-                    from: 0; to: 200; stepSize: 10
-                    value: Config.options?.background?.effects?.glyphs?.glow ?? 100
-                    onValueChanged: root.setNestedValueWhenReady("background.effects.glyphs.glow", value)
+                Loader {
+                    Layout.fillWidth: true
+                    active: Config.options?.background?.effects?.glyphs?.enable ?? false
+                    visible: active
+                    sourceComponent: WGlyphArtSettings {}
                 }
 
                 WSettingsSwitch {

@@ -1,9 +1,9 @@
 {
     "name": "Afterglyph",
     "icon": "blur_on",
-    "version": "1.0.0",
+    "version": "2.0.0",
     "author": "snowarch",
-    "description": "What is playing, your wallpaper, a picture or a word, drawn as glowing glyphs that follow its edges and grow in when it changes. Drawn by the graphics card and still at rest. Also a card in Waffle's Widgets panel.",
+    "description": "What is playing, your wallpaper, a picture, a word or one of nine built-in subjects, drawn as glowing glyphs: sixteen looks, every character set, palette and screen effect of Afterglyph. Drawn by the graphics card. Also a card in Waffle's Widgets panel.",
     "category": "other",
     "main": "Afterglyph.qml",
     "waffle": {
@@ -43,6 +43,42 @@
                 {
                     "label": "A word",
                     "value": "word"
+                },
+                {
+                    "label": "Iris",
+                    "value": "iris"
+                },
+                {
+                    "label": "Planet",
+                    "value": "planet"
+                },
+                {
+                    "label": "Jellyfish",
+                    "value": "jelly"
+                },
+                {
+                    "label": "Helix",
+                    "value": "helix"
+                },
+                {
+                    "label": "Knot",
+                    "value": "knot"
+                },
+                {
+                    "label": "Heart",
+                    "value": "heart"
+                },
+                {
+                    "label": "Crystal",
+                    "value": "crystal"
+                },
+                {
+                    "label": "Amphora",
+                    "value": "amphora"
+                },
+                {
+                    "label": "Mushroom",
+                    "value": "mushroom"
                 }
             ]
         },
@@ -54,20 +90,213 @@
         "word": {
             "type": "string",
             "default": "iNiR",
-            "label": "Word"
+            "label": "Word (| for a new line)"
         },
         "look": {
             "type": "string",
             "default": "signal",
-            "label": "Look",
+            "label": "Look (choosing one sets everything below)",
             "options": [
                 {
-                    "label": "Signal: the picture's colours",
+                    "label": "Signal",
                     "value": "signal"
                 },
                 {
-                    "label": "Theme: your accent",
+                    "label": "Theme",
                     "value": "theme"
+                },
+                {
+                    "label": "Terminal",
+                    "value": "terminal"
+                },
+                {
+                    "label": "Matrix",
+                    "value": "matrix"
+                },
+                {
+                    "label": "Amber CRT",
+                    "value": "amber"
+                },
+                {
+                    "label": "Blueprint",
+                    "value": "blueprint"
+                },
+                {
+                    "label": "Halftone",
+                    "value": "halftone"
+                },
+                {
+                    "label": "Blocks",
+                    "value": "blocks"
+                },
+                {
+                    "label": "Vapor",
+                    "value": "vapor"
+                },
+                {
+                    "label": "Glitch",
+                    "value": "glitch"
+                },
+                {
+                    "label": "Prism",
+                    "value": "prism"
+                },
+                {
+                    "label": "Thermal",
+                    "value": "thermal"
+                },
+                {
+                    "label": "Gold",
+                    "value": "gold"
+                },
+                {
+                    "label": "Kaleido",
+                    "value": "kaleido"
+                },
+                {
+                    "label": "Newsprint",
+                    "value": "newsprint"
+                },
+                {
+                    "label": "Typewriter",
+                    "value": "typewriter"
+                }
+            ]
+        },
+        "shape": {
+            "type": "string",
+            "default": "auto",
+            "label": "Shape",
+            "options": [
+                {
+                    "label": "The picture's own",
+                    "value": "auto"
+                },
+                {
+                    "label": "Wide",
+                    "value": "wide"
+                },
+                {
+                    "label": "Cinema",
+                    "value": "cinema"
+                },
+                {
+                    "label": "Square",
+                    "value": "square"
+                },
+                {
+                    "label": "Tall",
+                    "value": "tall"
+                }
+            ]
+        },
+        "plate": {
+            "type": "bool",
+            "default": true,
+            "label": "Backdrop behind the glyphs"
+        },
+        "caption": {
+            "type": "bool",
+            "default": true,
+            "label": "Readout under it"
+        },
+        "charset": {
+            "type": "string",
+            "default": "signal",
+            "label": "Characters: Characters",
+            "options": [
+                {
+                    "label": "Mixed symbols",
+                    "value": "signal"
+                },
+                {
+                    "label": "Classic ASCII",
+                    "value": "ascii"
+                },
+                {
+                    "label": "Full ASCII",
+                    "value": "dense"
+                },
+                {
+                    "label": "Halftone dots",
+                    "value": "dots"
+                },
+                {
+                    "label": "Shade blocks",
+                    "value": "blocks"
+                },
+                {
+                    "label": "Lines only",
+                    "value": "lines"
+                },
+                {
+                    "label": "Digits",
+                    "value": "digits"
+                },
+                {
+                    "label": "Binary",
+                    "value": "binary"
+                },
+                {
+                    "label": "Your own characters",
+                    "value": "custom"
+                }
+            ]
+        },
+        "custom": {
+            "type": "string",
+            "default": " .oO0@#",
+            "label": "Characters: Your characters"
+        },
+        "cell": {
+            "type": "int",
+            "default": 7,
+            "min": 5,
+            "max": 28,
+            "label": "Characters: Character size (px)"
+        },
+        "strokes": {
+            "type": "int",
+            "default": 100,
+            "min": 0,
+            "max": 200,
+            "label": "Characters: Edge lines (%)"
+        },
+        "shimmer": {
+            "type": "int",
+            "default": 100,
+            "min": 0,
+            "max": 300,
+            "label": "Characters: Shimmer (%)"
+        },
+        "rain": {
+            "type": "int",
+            "default": 0,
+            "min": 0,
+            "max": 100,
+            "label": "Characters: Digit rain (%)"
+        },
+        "outline": {
+            "type": "bool",
+            "default": true,
+            "label": "Characters: Thin outline around the subject"
+        },
+        "palette": {
+            "type": "string",
+            "default": "source",
+            "label": "Colour: Colours",
+            "options": [
+                {
+                    "label": "From the picture",
+                    "value": "source"
+                },
+                {
+                    "label": "Your theme",
+                    "value": "theme"
+                },
+                {
+                    "label": "Night blue",
+                    "value": "night"
                 },
                 {
                     "label": "Phosphor",
@@ -78,43 +307,259 @@
                     "value": "amber"
                 },
                 {
-                    "label": "Blueprint",
-                    "value": "blueprint"
+                    "label": "Rose",
+                    "value": "rose"
                 },
                 {
-                    "label": "Paper",
-                    "value": "paper"
+                    "label": "Silver",
+                    "value": "mono"
+                },
+                {
+                    "label": "Cyber",
+                    "value": "cyber"
+                },
+                {
+                    "label": "Vapor",
+                    "value": "vapor"
+                },
+                {
+                    "label": "Sunset",
+                    "value": "sunset"
+                },
+                {
+                    "label": "Ice",
+                    "value": "ice"
+                },
+                {
+                    "label": "Gold",
+                    "value": "gold"
+                },
+                {
+                    "label": "Forest",
+                    "value": "forest"
+                },
+                {
+                    "label": "Thermal",
+                    "value": "thermal"
+                },
+                {
+                    "label": "Blood",
+                    "value": "blood"
+                },
+                {
+                    "label": "Your own three colours",
+                    "value": "custom"
                 }
             ]
         },
-        "glyph": {
+        "c1": {
+            "type": "string",
+            "default": "#3a1c8f",
+            "label": "Colour: Dark colour (#rrggbb)"
+        },
+        "c2": {
+            "type": "string",
+            "default": "#ff5fd2",
+            "label": "Colour: Middle colour (#rrggbb)"
+        },
+        "c3": {
+            "type": "string",
+            "default": "#fff3b0",
+            "label": "Colour: Light colour (#rrggbb)"
+        },
+        "back": {
+            "type": "string",
+            "default": "#020205",
+            "label": "Colour: Backdrop (#rrggbb)"
+        },
+        "sat": {
             "type": "int",
-            "default": 1,
-            "min": 1,
-            "max": 4,
-            "label": "Glyph size"
+            "default": 150,
+            "min": 0,
+            "max": 260,
+            "label": "Colour: Vividness (%)"
+        },
+        "contrast": {
+            "type": "int",
+            "default": 100,
+            "min": 40,
+            "max": 250,
+            "label": "Colour: Contrast (%)"
+        },
+        "hue": {
+            "type": "int",
+            "default": 0,
+            "min": 0,
+            "max": 360,
+            "label": "Colour: Hue shift (°)"
+        },
+        "rainbow": {
+            "type": "int",
+            "default": 0,
+            "min": 0,
+            "max": 200,
+            "label": "Colour: Rainbow (%)"
+        },
+        "drift": {
+            "type": "int",
+            "default": 0,
+            "min": 0,
+            "max": 300,
+            "label": "Colour: Colour drift (%)"
         },
         "glow": {
             "type": "int",
             "default": 100,
             "min": 0,
             "max": 200,
-            "label": "Glow"
+            "label": "Screen: Glow (%)"
         },
-        "grow": {
+        "scan": {
+            "type": "int",
+            "default": 0,
+            "min": 0,
+            "max": 100,
+            "label": "Screen: Scanlines (%)"
+        },
+        "grain": {
+            "type": "int",
+            "default": 100,
+            "min": 0,
+            "max": 400,
+            "label": "Screen: Grain (%)"
+        },
+        "fringe": {
+            "type": "int",
+            "default": 100,
+            "min": 0,
+            "max": 400,
+            "label": "Screen: Lens fringe (%)"
+        },
+        "curve": {
+            "type": "int",
+            "default": 0,
+            "min": 0,
+            "max": 100,
+            "label": "Screen: Screen curve (%)"
+        },
+        "glitch": {
+            "type": "int",
+            "default": 0,
+            "min": 0,
+            "max": 100,
+            "label": "Screen: Glitch (%)"
+        },
+        "paper": {
+            "type": "bool",
+            "default": false,
+            "label": "Screen: Ink on paper"
+        },
+        "mirror": {
+            "type": "string",
+            "default": "off",
+            "label": "Screen: Mirror",
+            "options": [
+                {
+                    "label": "Off",
+                    "value": "off"
+                },
+                {
+                    "label": "Left to right",
+                    "value": "two"
+                },
+                {
+                    "label": "Four ways",
+                    "value": "four"
+                }
+            ]
+        },
+        "subject": {
+            "type": "string",
+            "default": "auto",
+            "label": "Subject: Background",
+            "options": [
+                {
+                    "label": "Decide by itself",
+                    "value": "auto"
+                },
+                {
+                    "label": "Keep the whole picture",
+                    "value": "none"
+                },
+                {
+                    "label": "Remove a dark background",
+                    "value": "dark"
+                },
+                {
+                    "label": "Remove a light background",
+                    "value": "light"
+                }
+            ]
+        },
+        "cut": {
+            "type": "int",
+            "default": 16,
+            "min": 3,
+            "max": 60,
+            "label": "Subject: Cut strength (%)"
+        },
+        "invert": {
+            "type": "bool",
+            "default": false,
+            "label": "Subject: Swap light and dark"
+        },
+        "motion": {
             "type": "bool",
             "default": true,
-            "label": "Grow in when the picture changes"
+            "label": "Motion: Keep it moving"
         },
-        "plate": {
+        "intro": {
+            "type": "string",
+            "default": "grow",
+            "label": "Motion: A new picture",
+            "options": [
+                {
+                    "label": "Is simply there",
+                    "value": "off"
+                },
+                {
+                    "label": "Grows from its base",
+                    "value": "grow"
+                },
+                {
+                    "label": "Scans from the top",
+                    "value": "scan"
+                },
+                {
+                    "label": "Types out, row by row",
+                    "value": "type"
+                },
+                {
+                    "label": "Spreads from the centre",
+                    "value": "centre"
+                },
+                {
+                    "label": "Fades in at random",
+                    "value": "dissolve"
+                }
+            ]
+        },
+        "speed": {
+            "type": "int",
+            "default": 100,
+            "min": 25,
+            "max": 200,
+            "label": "Motion: Speed (%)"
+        },
+        "camera": {
+            "type": "bool",
+            "default": false,
+            "label": "Motion: Slow camera moves"
+        },
+        "turn": {
             "type": "bool",
             "default": true,
-            "label": "Dark plate behind the glyphs"
-        },
-        "caption": {
-            "type": "bool",
-            "default": true,
-            "label": "Title and grid under it"
+            "label": "Motion: Objects turn by themselves"
         }
     },
     "resizableAxes": {

@@ -24,15 +24,9 @@ Item {
         y: Looks.dp(16)
         width: root.width - Looks.dp(32)
         height: Math.round(width / Math.max(1, view.aspect))
-        source: String(root.option("source", "auto"))
-        file: String(root.option("file", ""))
-        word: String(root.option("word", "iNiR"))
-        lookName: String(root.option("look", "signal"))
-        glyphPixel: Math.max(1, Number(root.option("glyph", 1)))
-        glowAmount: Number(root.option("glow", 100)) / 100
-        growIn: root.option("grow", true) === true
+        plate: root.option("plate", true) === true
         radius: Looks.radius.medium
-        accent: Looks.colors.accent
+        theme: [Qt.darker(Looks.colors.accent, 2.2), Looks.colors.accent, Qt.lighter(Looks.colors.accent, 1.7), Looks.colors.accent]
         live: root.visible
     }
 
@@ -49,11 +43,11 @@ Item {
 
     WText {
         id: named
-        visible: view.title.length > 0
+        visible: view.name.length > 0 && root.option("caption", true) === true
         x: view.x
         y: view.y + view.height + Looks.dp(8)
         width: view.width
-        text: view.artist.length > 0 ? view.title + "  ·  " + view.artist : view.title
+        text: view.name
         elide: Text.ElideRight
         font.pixelSize: Looks.font.pixelSize.normal
         color: Looks.colors.subfg

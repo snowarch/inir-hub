@@ -19,3 +19,4 @@ WMonitorVisibilityPage 1.0 WMonitorVisibilityPage.qml
 WShellLayoutPage 1.0 WShellLayoutPage.qml
 WShortcutsPage 1.0 WShortcutsPage.qml
 WWorkspaceStripPage 1.0 WWorkspaceStripPage.qml
+WGlyphArtSettings 1.0 WGlyphArtSettings.qml
