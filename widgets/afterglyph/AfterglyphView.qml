@@ -3,8 +3,8 @@ pragma ComponentBehavior: Bound
 // The subject as glyphs: every face of the widget draws through this one item and only sizes and labels it.
 //
 // It chooses the subject (a cover, the wallpaper, a file, a word or a built-in one), reads every option the person
-// set and hands both to the shell's GlyphArt, which draws on the GPU. It moves only with "Keep it moving", while
-// `live`; without it a picture is drawn once.
+// set and hands both to the shell's GlyphArt, which draws on the GPU. It moves only with "Moves" on, while `live`;
+// without it a picture is drawn once. A style's values are written by the option row itself (widget.json `sets`).
 // The look, its options and the built-in subjects are those of winchxyz/afterglyph (MIT), ported in the base.
 
 import QtQuick
@@ -30,22 +30,12 @@ Item {
     function read(key: string): var {
         return CustomWidgets.getConfigValue("afterglyph", key, undefined)
     }
-    readonly property var own: ({ cell: 7, motion: true })
+    readonly property var own: ({ cell: 7 })
     readonly property var settings: Glyphs.settings(key => root.read(key) ?? root.own[key])
     readonly property string source: String(root.read("source") ?? "auto")
     readonly property string word: String(root.read("word") ?? "iNiR")
     readonly property string look: String(root.read("look") ?? "signal")
 
-    // Choosing a look sets everything a look decides, once; each value can be changed after.
-    readonly property string lookApplied: String(root.read("lookApplied") ?? "signal")
-    function applyLook(): void {
-        if (root.look === root.lookApplied) return
-        const values = Glyphs.lookValues(root.look)
-        for (const key in values) CustomWidgets.setConfigValue("afterglyph", key, values[key])
-        CustomWidgets.setConfigValue("afterglyph", "lookApplied", root.look)
-    }
-    onLookChanged: root.applyLook()
-    Component.onCompleted: root.applyLook()
 
     // What the face reads.
     readonly property var demo: Glyphs.demo(root.source)
@@ -60,7 +50,7 @@ Item {
     readonly property bool drawn: root.chosen.kind === "word" || root.chosen.kind === "demo"
         || (root.pictured && root.shown.status === Image.Ready)
     // Width over height of the plate.
-    readonly property real aspect: Afterglyph.aspect(root.read("shape"), root.chosen.kind,
+    readonly property real aspect: Afterglyph.aspect("auto", root.chosen.kind,
         root.drawn ? root.shown.implicitWidth : 0, root.drawn ? root.shown.implicitHeight : 0)
     readonly property int columns: art.columns
     readonly property int rows: art.rows
@@ -142,6 +132,7 @@ Item {
         radius: root.radius
         shown: root.drawn
         live: root.live
+        animated: root.moving
         fontFamily: Appearance.font.family.monospace
     }
 }

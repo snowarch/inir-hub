@@ -1,14 +1,19 @@
 {
     "name": "Afterglyph",
     "icon": "blur_on",
-    "version": "2.0.0",
+    "version": "2.1.0",
     "author": "snowarch",
-    "description": "What is playing, your wallpaper, a picture, a word or one of nine built-in subjects, drawn as glowing glyphs: sixteen looks, every character set, palette and screen effect of Afterglyph. Drawn by the graphics card. Also a card in Waffle's Widgets panel.",
+    "description": "What is playing, your wallpaper, a picture, a word or one of nine built-in subjects, drawn as glowing glyphs that never sit still: sixteen styles, every character set, palette and screen effect of Afterglyph. Drawn by the graphics card. Also a card in Waffle's Widgets panel.",
     "category": "other",
     "main": "Afterglyph.qml",
     "waffle": {
         "main": "WaffleAfterglyph.qml"
     },
+    "sizes": [
+        "medium",
+        "small",
+        "large"
+    ],
     "defaultConfig": {
         "placementStrategy": "free",
         "widgetScale": 100,
@@ -18,14 +23,1136 @@
         "x": 240,
         "y": 240
     },
+    "options": [
+        {
+            "key": "source",
+            "label": "Shows",
+            "type": "choice",
+            "default": "auto",
+            "choices": [
+                [
+                    "auto",
+                    "Music or wallpaper"
+                ],
+                [
+                    "music",
+                    "What is playing"
+                ],
+                [
+                    "wallpaper",
+                    "The wallpaper"
+                ],
+                [
+                    "file",
+                    "A picture of mine"
+                ],
+                [
+                    "word",
+                    "A word"
+                ],
+                [
+                    "iris",
+                    "Iris"
+                ],
+                [
+                    "planet",
+                    "Planet"
+                ],
+                [
+                    "jelly",
+                    "Jellyfish"
+                ],
+                [
+                    "helix",
+                    "Helix"
+                ],
+                [
+                    "knot",
+                    "Knot"
+                ],
+                [
+                    "heart",
+                    "Heart"
+                ],
+                [
+                    "crystal",
+                    "Crystal"
+                ],
+                [
+                    "amphora",
+                    "Amphora"
+                ],
+                [
+                    "mushroom",
+                    "Mushroom"
+                ]
+            ]
+        },
+        {
+            "key": "file",
+            "label": "Picture",
+            "type": "file",
+            "default": "",
+            "when": {
+                "source": "file"
+            }
+        },
+        {
+            "key": "word",
+            "label": "Word",
+            "type": "text",
+            "default": "iNiR",
+            "placeholder": "iNiR",
+            "when": {
+                "source": "word"
+            }
+        },
+        {
+            "key": "look",
+            "label": "Style",
+            "type": "choice",
+            "default": "signal",
+            "choices": [
+                [
+                    "signal",
+                    "Signal"
+                ],
+                [
+                    "theme",
+                    "Theme"
+                ],
+                [
+                    "terminal",
+                    "Terminal"
+                ],
+                [
+                    "matrix",
+                    "Matrix"
+                ],
+                [
+                    "amber",
+                    "Amber CRT"
+                ],
+                [
+                    "blueprint",
+                    "Blueprint"
+                ],
+                [
+                    "halftone",
+                    "Halftone"
+                ],
+                [
+                    "blocks",
+                    "Blocks"
+                ],
+                [
+                    "vapor",
+                    "Vapor"
+                ],
+                [
+                    "glitch",
+                    "Glitch"
+                ],
+                [
+                    "prism",
+                    "Prism"
+                ],
+                [
+                    "thermal",
+                    "Thermal"
+                ],
+                [
+                    "gold",
+                    "Gold"
+                ],
+                [
+                    "kaleido",
+                    "Kaleido"
+                ],
+                [
+                    "newsprint",
+                    "Newsprint"
+                ],
+                [
+                    "typewriter",
+                    "Typewriter"
+                ]
+            ],
+            "sets": {
+                "signal": {
+                    "charset": "signal",
+                    "strokes": 100,
+                    "shimmer": 100,
+                    "rain": 0,
+                    "outline": true,
+                    "palette": "source",
+                    "c1": "#3a1c8f",
+                    "c2": "#ff5fd2",
+                    "c3": "#fff3b0",
+                    "back": "#020205",
+                    "sat": 150,
+                    "contrast": 100,
+                    "hue": 0,
+                    "rainbow": 0,
+                    "drift": 0,
+                    "glow": 100,
+                    "scan": 0,
+                    "grain": 100,
+                    "fringe": 100,
+                    "curve": 0,
+                    "glitch": 0,
+                    "paper": false,
+                    "mirror": "off"
+                },
+                "theme": {
+                    "charset": "signal",
+                    "strokes": 100,
+                    "shimmer": 100,
+                    "rain": 0,
+                    "outline": true,
+                    "palette": "theme",
+                    "c1": "#3a1c8f",
+                    "c2": "#ff5fd2",
+                    "c3": "#fff3b0",
+                    "back": "#020205",
+                    "sat": 150,
+                    "contrast": 100,
+                    "hue": 0,
+                    "rainbow": 0,
+                    "drift": 0,
+                    "glow": 100,
+                    "scan": 0,
+                    "grain": 100,
+                    "fringe": 100,
+                    "curve": 0,
+                    "glitch": 0,
+                    "paper": false,
+                    "mirror": "off"
+                },
+                "terminal": {
+                    "charset": "ascii",
+                    "strokes": 50,
+                    "shimmer": 100,
+                    "rain": 0,
+                    "outline": true,
+                    "palette": "phosphor",
+                    "c1": "#3a1c8f",
+                    "c2": "#ff5fd2",
+                    "c3": "#fff3b0",
+                    "back": "#020205",
+                    "sat": 150,
+                    "contrast": 100,
+                    "hue": 0,
+                    "rainbow": 0,
+                    "drift": 0,
+                    "glow": 125,
+                    "scan": 70,
+                    "grain": 100,
+                    "fringe": 200,
+                    "curve": 0,
+                    "glitch": 0,
+                    "paper": false,
+                    "mirror": "off"
+                },
+                "matrix": {
+                    "charset": "digits",
+                    "strokes": 0,
+                    "shimmer": 200,
+                    "rain": 100,
+                    "outline": false,
+                    "palette": "phosphor",
+                    "c1": "#3a1c8f",
+                    "c2": "#ff5fd2",
+                    "c3": "#fff3b0",
+                    "back": "#020205",
+                    "sat": 150,
+                    "contrast": 100,
+                    "hue": 0,
+                    "rainbow": 0,
+                    "drift": 0,
+                    "glow": 140,
+                    "scan": 0,
+                    "grain": 100,
+                    "fringe": 100,
+                    "curve": 0,
+                    "glitch": 0,
+                    "paper": false,
+                    "mirror": "off"
+                },
+                "amber": {
+                    "charset": "dense",
+                    "strokes": 40,
+                    "shimmer": 100,
+                    "rain": 0,
+                    "outline": true,
+                    "palette": "amber",
+                    "c1": "#3a1c8f",
+                    "c2": "#ff5fd2",
+                    "c3": "#fff3b0",
+                    "back": "#020205",
+                    "sat": 150,
+                    "contrast": 100,
+                    "hue": 0,
+                    "rainbow": 0,
+                    "drift": 0,
+                    "glow": 130,
+                    "scan": 85,
+                    "grain": 200,
+                    "fringe": 250,
+                    "curve": 70,
+                    "glitch": 0,
+                    "paper": false,
+                    "mirror": "off"
+                },
+                "blueprint": {
+                    "charset": "lines",
+                    "strokes": 150,
+                    "shimmer": 50,
+                    "rain": 0,
+                    "outline": true,
+                    "palette": "night",
+                    "c1": "#3a1c8f",
+                    "c2": "#ff5fd2",
+                    "c3": "#fff3b0",
+                    "back": "#04102a",
+                    "sat": 150,
+                    "contrast": 100,
+                    "hue": 0,
+                    "rainbow": 0,
+                    "drift": 0,
+                    "glow": 90,
+                    "scan": 0,
+                    "grain": 100,
+                    "fringe": 100,
+                    "curve": 0,
+                    "glitch": 0,
+                    "paper": false,
+                    "mirror": "off"
+                },
+                "halftone": {
+                    "charset": "dots",
+                    "strokes": 0,
+                    "shimmer": 0,
+                    "rain": 0,
+                    "outline": false,
+                    "palette": "mono",
+                    "c1": "#3a1c8f",
+                    "c2": "#ff5fd2",
+                    "c3": "#fff3b0",
+                    "back": "#020205",
+                    "sat": 150,
+                    "contrast": 100,
+                    "hue": 0,
+                    "rainbow": 0,
+                    "drift": 0,
+                    "glow": 45,
+                    "scan": 0,
+                    "grain": 50,
+                    "fringe": 100,
+                    "curve": 0,
+                    "glitch": 0,
+                    "paper": false,
+                    "mirror": "off"
+                },
+                "blocks": {
+                    "charset": "blocks",
+                    "strokes": 0,
+                    "shimmer": 30,
+                    "rain": 0,
+                    "outline": false,
+                    "palette": "source",
+                    "c1": "#3a1c8f",
+                    "c2": "#ff5fd2",
+                    "c3": "#fff3b0",
+                    "back": "#020205",
+                    "sat": 180,
+                    "contrast": 100,
+                    "hue": 0,
+                    "rainbow": 0,
+                    "drift": 0,
+                    "glow": 70,
+                    "scan": 0,
+                    "grain": 100,
+                    "fringe": 100,
+                    "curve": 0,
+                    "glitch": 0,
+                    "paper": false,
+                    "mirror": "off"
+                },
+                "vapor": {
+                    "charset": "ascii",
+                    "strokes": 80,
+                    "shimmer": 100,
+                    "rain": 0,
+                    "outline": true,
+                    "palette": "vapor",
+                    "c1": "#3a1c8f",
+                    "c2": "#ff5fd2",
+                    "c3": "#fff3b0",
+                    "back": "#12042a",
+                    "sat": 150,
+                    "contrast": 100,
+                    "hue": 0,
+                    "rainbow": 0,
+                    "drift": 0,
+                    "glow": 120,
+                    "scan": 40,
+                    "grain": 100,
+                    "fringe": 100,
+                    "curve": 50,
+                    "glitch": 0,
+                    "paper": false,
+                    "mirror": "off"
+                },
+                "glitch": {
+                    "charset": "signal",
+                    "strokes": 100,
+                    "shimmer": 200,
+                    "rain": 0,
+                    "outline": true,
+                    "palette": "cyber",
+                    "c1": "#3a1c8f",
+                    "c2": "#ff5fd2",
+                    "c3": "#fff3b0",
+                    "back": "#020205",
+                    "sat": 150,
+                    "contrast": 100,
+                    "hue": 0,
+                    "rainbow": 0,
+                    "drift": 0,
+                    "glow": 120,
+                    "scan": 50,
+                    "grain": 100,
+                    "fringe": 300,
+                    "curve": 0,
+                    "glitch": 70,
+                    "paper": false,
+                    "mirror": "off"
+                },
+                "prism": {
+                    "charset": "signal",
+                    "strokes": 100,
+                    "shimmer": 100,
+                    "rain": 0,
+                    "outline": true,
+                    "palette": "source",
+                    "c1": "#3a1c8f",
+                    "c2": "#ff5fd2",
+                    "c3": "#fff3b0",
+                    "back": "#020205",
+                    "sat": 220,
+                    "contrast": 100,
+                    "hue": 0,
+                    "rainbow": 100,
+                    "drift": 100,
+                    "glow": 115,
+                    "scan": 0,
+                    "grain": 100,
+                    "fringe": 100,
+                    "curve": 0,
+                    "glitch": 0,
+                    "paper": false,
+                    "mirror": "off"
+                },
+                "thermal": {
+                    "charset": "dots",
+                    "strokes": 0,
+                    "shimmer": 20,
+                    "rain": 0,
+                    "outline": false,
+                    "palette": "thermal",
+                    "c1": "#3a1c8f",
+                    "c2": "#ff5fd2",
+                    "c3": "#fff3b0",
+                    "back": "#020205",
+                    "sat": 150,
+                    "contrast": 100,
+                    "hue": 0,
+                    "rainbow": 0,
+                    "drift": 0,
+                    "glow": 110,
+                    "scan": 0,
+                    "grain": 100,
+                    "fringe": 100,
+                    "curve": 0,
+                    "glitch": 0,
+                    "paper": false,
+                    "mirror": "off"
+                },
+                "gold": {
+                    "charset": "dense",
+                    "strokes": 60,
+                    "shimmer": 100,
+                    "rain": 0,
+                    "outline": true,
+                    "palette": "gold",
+                    "c1": "#3a1c8f",
+                    "c2": "#ff5fd2",
+                    "c3": "#fff3b0",
+                    "back": "#0a0703",
+                    "sat": 150,
+                    "contrast": 100,
+                    "hue": 0,
+                    "rainbow": 0,
+                    "drift": 0,
+                    "glow": 130,
+                    "scan": 0,
+                    "grain": 100,
+                    "fringe": 100,
+                    "curve": 0,
+                    "glitch": 0,
+                    "paper": false,
+                    "mirror": "off"
+                },
+                "kaleido": {
+                    "charset": "signal",
+                    "strokes": 100,
+                    "shimmer": 100,
+                    "rain": 0,
+                    "outline": true,
+                    "palette": "cyber",
+                    "c1": "#3a1c8f",
+                    "c2": "#ff5fd2",
+                    "c3": "#fff3b0",
+                    "back": "#020205",
+                    "sat": 150,
+                    "contrast": 100,
+                    "hue": 0,
+                    "rainbow": 0,
+                    "drift": 60,
+                    "glow": 120,
+                    "scan": 0,
+                    "grain": 100,
+                    "fringe": 100,
+                    "curve": 0,
+                    "glitch": 0,
+                    "paper": false,
+                    "mirror": "four"
+                },
+                "newsprint": {
+                    "charset": "dots",
+                    "strokes": 30,
+                    "shimmer": 0,
+                    "rain": 0,
+                    "outline": false,
+                    "palette": "source",
+                    "c1": "#3a1c8f",
+                    "c2": "#ff5fd2",
+                    "c3": "#fff3b0",
+                    "back": "#020205",
+                    "sat": 120,
+                    "contrast": 120,
+                    "hue": 0,
+                    "rainbow": 0,
+                    "drift": 0,
+                    "glow": 0,
+                    "scan": 0,
+                    "grain": 200,
+                    "fringe": 100,
+                    "curve": 0,
+                    "glitch": 0,
+                    "paper": true,
+                    "mirror": "off"
+                },
+                "typewriter": {
+                    "charset": "dense",
+                    "strokes": 0,
+                    "shimmer": 0,
+                    "rain": 0,
+                    "outline": false,
+                    "palette": "mono",
+                    "c1": "#3a1c8f",
+                    "c2": "#ff5fd2",
+                    "c3": "#fff3b0",
+                    "back": "#020205",
+                    "sat": 150,
+                    "contrast": 130,
+                    "hue": 0,
+                    "rainbow": 0,
+                    "drift": 0,
+                    "glow": 0,
+                    "scan": 0,
+                    "grain": 150,
+                    "fringe": 100,
+                    "curve": 0,
+                    "glitch": 0,
+                    "paper": true,
+                    "mirror": "off"
+                }
+            }
+        },
+        {
+            "key": "motion",
+            "label": "Moves",
+            "type": "switch",
+            "default": true,
+            "tune": false
+        },
+        {
+            "key": "caption",
+            "label": "Name under it",
+            "type": "switch",
+            "default": true
+        },
+        {
+            "key": "plate",
+            "label": "Dark backdrop",
+            "type": "switch",
+            "default": true
+        },
+        {
+            "key": "charset",
+            "label": "Characters",
+            "default": "signal",
+            "page": "look",
+            "tune": false,
+            "type": "choice",
+            "choices": [
+                [
+                    "signal",
+                    "Mixed symbols"
+                ],
+                [
+                    "ascii",
+                    "Classic ASCII"
+                ],
+                [
+                    "dense",
+                    "Full ASCII"
+                ],
+                [
+                    "dots",
+                    "Halftone dots"
+                ],
+                [
+                    "blocks",
+                    "Shade blocks"
+                ],
+                [
+                    "lines",
+                    "Lines only"
+                ],
+                [
+                    "digits",
+                    "Digits"
+                ],
+                [
+                    "binary",
+                    "Binary"
+                ],
+                [
+                    "custom",
+                    "Your own characters"
+                ]
+            ]
+        },
+        {
+            "key": "custom",
+            "label": "Your characters",
+            "default": " .oO0@#",
+            "page": "look",
+            "tune": true,
+            "type": "text",
+            "when": {
+                "charset": "custom"
+            }
+        },
+        {
+            "key": "cell",
+            "label": "Character size",
+            "default": 7,
+            "page": "look",
+            "tune": false,
+            "type": "range",
+            "min": 5,
+            "max": 28,
+            "step": 1,
+            "unit": " px"
+        },
+        {
+            "key": "strokes",
+            "label": "Edge lines",
+            "default": 100,
+            "page": "look",
+            "tune": true,
+            "type": "range",
+            "min": 0,
+            "max": 200,
+            "step": 5,
+            "unit": " %"
+        },
+        {
+            "key": "shimmer",
+            "label": "Shimmer",
+            "default": 100,
+            "page": "look",
+            "tune": true,
+            "type": "range",
+            "min": 0,
+            "max": 300,
+            "step": 10,
+            "unit": " %"
+        },
+        {
+            "key": "rain",
+            "label": "Digit rain",
+            "default": 0,
+            "page": "look",
+            "tune": true,
+            "type": "range",
+            "min": 0,
+            "max": 100,
+            "step": 5,
+            "unit": " %"
+        },
+        {
+            "key": "outline",
+            "label": "Thin outline around the subject",
+            "default": true,
+            "page": "look",
+            "tune": true,
+            "type": "switch"
+        },
+        {
+            "key": "palette",
+            "label": "Colours",
+            "default": "source",
+            "page": "look",
+            "tune": false,
+            "type": "choice",
+            "choices": [
+                [
+                    "source",
+                    "From the picture"
+                ],
+                [
+                    "theme",
+                    "Your theme"
+                ],
+                [
+                    "night",
+                    "Night blue"
+                ],
+                [
+                    "phosphor",
+                    "Phosphor"
+                ],
+                [
+                    "amber",
+                    "Amber"
+                ],
+                [
+                    "rose",
+                    "Rose"
+                ],
+                [
+                    "mono",
+                    "Silver"
+                ],
+                [
+                    "cyber",
+                    "Cyber"
+                ],
+                [
+                    "vapor",
+                    "Vapor"
+                ],
+                [
+                    "sunset",
+                    "Sunset"
+                ],
+                [
+                    "ice",
+                    "Ice"
+                ],
+                [
+                    "gold",
+                    "Gold"
+                ],
+                [
+                    "forest",
+                    "Forest"
+                ],
+                [
+                    "thermal",
+                    "Thermal"
+                ],
+                [
+                    "blood",
+                    "Blood"
+                ],
+                [
+                    "custom",
+                    "Your own three colours"
+                ]
+            ]
+        },
+        {
+            "key": "c1",
+            "label": "Dark colour",
+            "default": "#3a1c8f",
+            "page": "look",
+            "tune": false,
+            "type": "colour",
+            "when": {
+                "palette": "custom"
+            }
+        },
+        {
+            "key": "c2",
+            "label": "Middle colour",
+            "default": "#ff5fd2",
+            "page": "look",
+            "tune": false,
+            "type": "colour",
+            "when": {
+                "palette": "custom"
+            }
+        },
+        {
+            "key": "c3",
+            "label": "Light colour",
+            "default": "#fff3b0",
+            "page": "look",
+            "tune": false,
+            "type": "colour",
+            "when": {
+                "palette": "custom"
+            }
+        },
+        {
+            "key": "back",
+            "label": "Backdrop",
+            "default": "#020205",
+            "page": "look",
+            "tune": false,
+            "type": "colour"
+        },
+        {
+            "key": "sat",
+            "label": "Vividness",
+            "default": 150,
+            "page": "look",
+            "tune": true,
+            "type": "range",
+            "min": 0,
+            "max": 260,
+            "step": 5,
+            "unit": " %",
+            "when": {
+                "palette": "source"
+            }
+        },
+        {
+            "key": "contrast",
+            "label": "Contrast",
+            "default": 100,
+            "page": "look",
+            "tune": true,
+            "type": "range",
+            "min": 40,
+            "max": 250,
+            "step": 5,
+            "unit": " %"
+        },
+        {
+            "key": "hue",
+            "label": "Hue shift",
+            "default": 0,
+            "page": "look",
+            "tune": true,
+            "type": "range",
+            "min": 0,
+            "max": 360,
+            "step": 5,
+            "unit": " °"
+        },
+        {
+            "key": "rainbow",
+            "label": "Rainbow",
+            "default": 0,
+            "page": "look",
+            "tune": true,
+            "type": "range",
+            "min": 0,
+            "max": 200,
+            "step": 5,
+            "unit": " %"
+        },
+        {
+            "key": "drift",
+            "label": "Colour drift",
+            "default": 0,
+            "page": "look",
+            "tune": true,
+            "type": "range",
+            "min": 0,
+            "max": 300,
+            "step": 10,
+            "unit": " %"
+        },
+        {
+            "key": "glow",
+            "label": "Glow",
+            "default": 100,
+            "page": "look",
+            "tune": false,
+            "type": "range",
+            "min": 0,
+            "max": 200,
+            "step": 5,
+            "unit": " %"
+        },
+        {
+            "key": "scan",
+            "label": "Scanlines",
+            "default": 0,
+            "page": "look",
+            "tune": true,
+            "type": "range",
+            "min": 0,
+            "max": 100,
+            "step": 5,
+            "unit": " %"
+        },
+        {
+            "key": "grain",
+            "label": "Grain",
+            "default": 100,
+            "page": "look",
+            "tune": true,
+            "type": "range",
+            "min": 0,
+            "max": 400,
+            "step": 10,
+            "unit": " %"
+        },
+        {
+            "key": "fringe",
+            "label": "Lens fringe",
+            "default": 100,
+            "page": "look",
+            "tune": true,
+            "type": "range",
+            "min": 0,
+            "max": 400,
+            "step": 10,
+            "unit": " %"
+        },
+        {
+            "key": "curve",
+            "label": "Screen curve",
+            "default": 0,
+            "page": "look",
+            "tune": true,
+            "type": "range",
+            "min": 0,
+            "max": 100,
+            "step": 5,
+            "unit": " %"
+        },
+        {
+            "key": "glitch",
+            "label": "Glitch",
+            "default": 0,
+            "page": "look",
+            "tune": true,
+            "type": "range",
+            "min": 0,
+            "max": 100,
+            "step": 5,
+            "unit": " %"
+        },
+        {
+            "key": "paper",
+            "label": "Ink on paper",
+            "default": false,
+            "page": "look",
+            "tune": true,
+            "type": "switch"
+        },
+        {
+            "key": "mirror",
+            "label": "Mirror",
+            "default": "off",
+            "page": "look",
+            "tune": true,
+            "type": "choice",
+            "choices": [
+                [
+                    "off",
+                    "Off"
+                ],
+                [
+                    "two",
+                    "Left to right"
+                ],
+                [
+                    "four",
+                    "Four ways"
+                ]
+            ]
+        },
+        {
+            "key": "subject",
+            "label": "Background",
+            "default": "auto",
+            "page": "look",
+            "tune": true,
+            "type": "choice",
+            "choices": [
+                [
+                    "auto",
+                    "Decide by itself"
+                ],
+                [
+                    "none",
+                    "Keep the whole picture"
+                ],
+                [
+                    "dark",
+                    "Remove a dark background"
+                ],
+                [
+                    "light",
+                    "Remove a light background"
+                ]
+            ]
+        },
+        {
+            "key": "cut",
+            "label": "Cut strength",
+            "default": 16,
+            "page": "look",
+            "tune": true,
+            "type": "range",
+            "min": 3,
+            "max": 60,
+            "step": 1,
+            "unit": " %"
+        },
+        {
+            "key": "invert",
+            "label": "Swap light and dark",
+            "default": false,
+            "page": "look",
+            "tune": true,
+            "type": "switch"
+        },
+        {
+            "key": "intro",
+            "label": "A new picture",
+            "default": "grow",
+            "page": "look",
+            "tune": false,
+            "type": "choice",
+            "choices": [
+                [
+                    "off",
+                    "Is simply there"
+                ],
+                [
+                    "grow",
+                    "Grows from its base"
+                ],
+                [
+                    "scan",
+                    "Scans from the top"
+                ],
+                [
+                    "type",
+                    "Types out, row by row"
+                ],
+                [
+                    "centre",
+                    "Spreads from the centre"
+                ],
+                [
+                    "dissolve",
+                    "Fades in at random"
+                ]
+            ]
+        },
+        {
+            "key": "speed",
+            "label": "Speed",
+            "default": 100,
+            "page": "look",
+            "tune": true,
+            "type": "range",
+            "min": 25,
+            "max": 200,
+            "step": 5,
+            "unit": " %"
+        },
+        {
+            "key": "sway",
+            "label": "Gentle sway",
+            "default": true,
+            "page": "look",
+            "tune": true,
+            "type": "switch",
+            "when": {
+                "motion": true
+            }
+        },
+        {
+            "key": "camera",
+            "label": "Slow camera moves",
+            "default": true,
+            "page": "look",
+            "tune": true,
+            "type": "switch",
+            "when": {
+                "motion": true
+            }
+        },
+        {
+            "key": "pulse",
+            "label": "Rings of light",
+            "default": true,
+            "page": "look",
+            "tune": true,
+            "type": "switch",
+            "when": {
+                "motion": true
+            }
+        },
+        {
+            "key": "turn",
+            "label": "Objects turn by themselves",
+            "default": true,
+            "page": "look",
+            "tune": true,
+            "type": "switch",
+            "when": [
+                {
+                    "motion": true
+                },
+                {
+                    "source": [
+                        "iris",
+                        "planet",
+                        "jelly",
+                        "helix",
+                        "knot",
+                        "heart",
+                        "crystal",
+                        "amphora",
+                        "mushroom"
+                    ]
+                }
+            ]
+        }
+    ],
     "configKeys": {
         "source": {
             "type": "string",
             "default": "auto",
-            "label": "What it draws",
+            "label": "Shows",
             "options": [
                 {
-                    "label": "What is playing, else the wallpaper",
+                    "label": "Music or wallpaper",
                     "value": "auto"
                 },
                 {
@@ -37,7 +1164,7 @@
                     "value": "wallpaper"
                 },
                 {
-                    "label": "A picture or GIF",
+                    "label": "A picture of mine",
                     "value": "file"
                 },
                 {
@@ -85,17 +1212,17 @@
         "file": {
             "type": "string",
             "default": "",
-            "label": "Picture or GIF: its full path"
+            "label": "Picture"
         },
         "word": {
             "type": "string",
             "default": "iNiR",
-            "label": "Word (| for a new line)"
+            "label": "Word"
         },
         "look": {
             "type": "string",
             "default": "signal",
-            "label": "Look (choosing one sets everything below)",
+            "label": "Style",
             "options": [
                 {
                     "label": "Signal",
@@ -163,47 +1290,25 @@
                 }
             ]
         },
-        "shape": {
-            "type": "string",
-            "default": "auto",
-            "label": "Shape",
-            "options": [
-                {
-                    "label": "The picture's own",
-                    "value": "auto"
-                },
-                {
-                    "label": "Wide",
-                    "value": "wide"
-                },
-                {
-                    "label": "Cinema",
-                    "value": "cinema"
-                },
-                {
-                    "label": "Square",
-                    "value": "square"
-                },
-                {
-                    "label": "Tall",
-                    "value": "tall"
-                }
-            ]
-        },
-        "plate": {
+        "motion": {
             "type": "bool",
             "default": true,
-            "label": "Backdrop behind the glyphs"
+            "label": "Moves"
         },
         "caption": {
             "type": "bool",
             "default": true,
-            "label": "Readout under it"
+            "label": "Name under it"
+        },
+        "plate": {
+            "type": "bool",
+            "default": true,
+            "label": "Dark backdrop"
         },
         "charset": {
             "type": "string",
             "default": "signal",
-            "label": "Characters: Characters",
+            "label": "Characters",
             "options": [
                 {
                     "label": "Mixed symbols",
@@ -246,45 +1351,45 @@
         "custom": {
             "type": "string",
             "default": " .oO0@#",
-            "label": "Characters: Your characters"
+            "label": "Your characters"
         },
         "cell": {
             "type": "int",
             "default": 7,
+            "label": "Character size",
             "min": 5,
-            "max": 28,
-            "label": "Characters: Character size (px)"
+            "max": 28
         },
         "strokes": {
             "type": "int",
             "default": 100,
+            "label": "Edge lines",
             "min": 0,
-            "max": 200,
-            "label": "Characters: Edge lines (%)"
+            "max": 200
         },
         "shimmer": {
             "type": "int",
             "default": 100,
+            "label": "Shimmer",
             "min": 0,
-            "max": 300,
-            "label": "Characters: Shimmer (%)"
+            "max": 300
         },
         "rain": {
             "type": "int",
             "default": 0,
+            "label": "Digit rain",
             "min": 0,
-            "max": 100,
-            "label": "Characters: Digit rain (%)"
+            "max": 100
         },
         "outline": {
             "type": "bool",
             "default": true,
-            "label": "Characters: Thin outline around the subject"
+            "label": "Thin outline around the subject"
         },
         "palette": {
             "type": "string",
             "default": "source",
-            "label": "Colour: Colours",
+            "label": "Colours",
             "options": [
                 {
                     "label": "From the picture",
@@ -355,109 +1460,109 @@
         "c1": {
             "type": "string",
             "default": "#3a1c8f",
-            "label": "Colour: Dark colour (#rrggbb)"
+            "label": "Dark colour"
         },
         "c2": {
             "type": "string",
             "default": "#ff5fd2",
-            "label": "Colour: Middle colour (#rrggbb)"
+            "label": "Middle colour"
         },
         "c3": {
             "type": "string",
             "default": "#fff3b0",
-            "label": "Colour: Light colour (#rrggbb)"
+            "label": "Light colour"
         },
         "back": {
             "type": "string",
             "default": "#020205",
-            "label": "Colour: Backdrop (#rrggbb)"
+            "label": "Backdrop"
         },
         "sat": {
             "type": "int",
             "default": 150,
+            "label": "Vividness",
             "min": 0,
-            "max": 260,
-            "label": "Colour: Vividness (%)"
+            "max": 260
         },
         "contrast": {
             "type": "int",
             "default": 100,
+            "label": "Contrast",
             "min": 40,
-            "max": 250,
-            "label": "Colour: Contrast (%)"
+            "max": 250
         },
         "hue": {
             "type": "int",
             "default": 0,
+            "label": "Hue shift",
             "min": 0,
-            "max": 360,
-            "label": "Colour: Hue shift (°)"
+            "max": 360
         },
         "rainbow": {
             "type": "int",
             "default": 0,
+            "label": "Rainbow",
             "min": 0,
-            "max": 200,
-            "label": "Colour: Rainbow (%)"
+            "max": 200
         },
         "drift": {
             "type": "int",
             "default": 0,
+            "label": "Colour drift",
             "min": 0,
-            "max": 300,
-            "label": "Colour: Colour drift (%)"
+            "max": 300
         },
         "glow": {
             "type": "int",
             "default": 100,
+            "label": "Glow",
             "min": 0,
-            "max": 200,
-            "label": "Screen: Glow (%)"
+            "max": 200
         },
         "scan": {
             "type": "int",
             "default": 0,
+            "label": "Scanlines",
             "min": 0,
-            "max": 100,
-            "label": "Screen: Scanlines (%)"
+            "max": 100
         },
         "grain": {
             "type": "int",
             "default": 100,
+            "label": "Grain",
             "min": 0,
-            "max": 400,
-            "label": "Screen: Grain (%)"
+            "max": 400
         },
         "fringe": {
             "type": "int",
             "default": 100,
+            "label": "Lens fringe",
             "min": 0,
-            "max": 400,
-            "label": "Screen: Lens fringe (%)"
+            "max": 400
         },
         "curve": {
             "type": "int",
             "default": 0,
+            "label": "Screen curve",
             "min": 0,
-            "max": 100,
-            "label": "Screen: Screen curve (%)"
+            "max": 100
         },
         "glitch": {
             "type": "int",
             "default": 0,
+            "label": "Glitch",
             "min": 0,
-            "max": 100,
-            "label": "Screen: Glitch (%)"
+            "max": 100
         },
         "paper": {
             "type": "bool",
             "default": false,
-            "label": "Screen: Ink on paper"
+            "label": "Ink on paper"
         },
         "mirror": {
             "type": "string",
             "default": "off",
-            "label": "Screen: Mirror",
+            "label": "Mirror",
             "options": [
                 {
                     "label": "Off",
@@ -476,7 +1581,7 @@
         "subject": {
             "type": "string",
             "default": "auto",
-            "label": "Subject: Background",
+            "label": "Background",
             "options": [
                 {
                     "label": "Decide by itself",
@@ -499,24 +1604,19 @@
         "cut": {
             "type": "int",
             "default": 16,
+            "label": "Cut strength",
             "min": 3,
-            "max": 60,
-            "label": "Subject: Cut strength (%)"
+            "max": 60
         },
         "invert": {
             "type": "bool",
             "default": false,
-            "label": "Subject: Swap light and dark"
-        },
-        "motion": {
-            "type": "bool",
-            "default": true,
-            "label": "Motion: Keep it moving"
+            "label": "Swap light and dark"
         },
         "intro": {
             "type": "string",
             "default": "grow",
-            "label": "Motion: A new picture",
+            "label": "A new picture",
             "options": [
                 {
                     "label": "Is simply there",
@@ -547,23 +1647,30 @@
         "speed": {
             "type": "int",
             "default": 100,
+            "label": "Speed",
             "min": 25,
-            "max": 200,
-            "label": "Motion: Speed (%)"
+            "max": 200
+        },
+        "sway": {
+            "type": "bool",
+            "default": true,
+            "label": "Gentle sway"
         },
         "camera": {
             "type": "bool",
-            "default": false,
-            "label": "Motion: Slow camera moves"
+            "default": true,
+            "label": "Slow camera moves"
+        },
+        "pulse": {
+            "type": "bool",
+            "default": true,
+            "label": "Rings of light"
         },
         "turn": {
             "type": "bool",
             "default": true,
-            "label": "Motion: Objects turn by themselves"
+            "label": "Objects turn by themselves"
         }
-    },
-    "resizableAxes": {
-        "uniform": "widgetScale"
     },
     "defaultSize": {
         "width": 480,

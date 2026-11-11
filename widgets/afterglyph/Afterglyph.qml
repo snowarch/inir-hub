@@ -1,6 +1,7 @@
 pragma ComponentBehavior: Bound
 
-// The desktop face: a plate of glowing glyphs sized to its subject, with a readout under it like a print's.
+// The desktop face: a plate of glowing glyphs filling the widget's box (any size the person drags), with a readout
+// under it like a print's.
 // AbstractBackgroundWidget places, drags and scales it; AfterglyphView draws; this file only lays out.
 
 import QtQuick
@@ -16,19 +17,17 @@ AbstractBackgroundWidget {
     configEntryName: "custom.afterglyph"
     defaultConfig: ({ placementStrategy: "free", widgetScale: 100, widgetOpacity: 100, colorMode: "auto", dim: 0, x: 240, y: 240 })
     needsColText: true
-    resizableAxes: ({ uniform: "widgetScale" })
-    resizeMinWidth: 160
-    resizeMinHeight: 120
+    resizeMinWidth: 140
+    resizeMinHeight: 100
+    resizeMaxWidth: 2400
+    resizeMaxHeight: 1600
     // The plate is the picture's own black, drawn by the shader.
     widgetSurfaceEnabled: false
 
     readonly property bool caption: (root._readConfigKey("caption") ?? true) === true
-    readonly property int plateWidth: Math.round(480 * root.scaleFactor)
-    readonly property int plateHeight: Math.round(root.plateWidth / view.aspect)
     readonly property int gap: Math.round(8 * root.scaleFactor)
-
-    implicitWidth: root.plateWidth
-    implicitHeight: root.plateHeight + (label.visible ? root.gap + label.implicitHeight : 0)
+    readonly property int plateWidth: root.width
+    readonly property int plateHeight: Math.max(1, root.height - (label.visible ? root.gap + label.implicitHeight : 0))
 
     AfterglyphView {
         id: view

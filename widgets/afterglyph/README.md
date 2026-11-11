@@ -14,17 +14,17 @@ picture, grows in when the subject changes and is still at rest.
 
 | Setting | What it changes |
 | --- | --- |
-| What it draws | What is playing (else the wallpaper), only what is playing, the wallpaper, a picture or GIF, a word, or a built-in subject: Iris, Planet, Jellyfish, Helix, Knot, Heart, Crystal, Amphora, Mushroom |
-| Picture or GIF | The full path of the file to draw |
+| Shows | What is playing (else the wallpaper), only what is playing, the wallpaper, a picture or GIF, a word, or a built-in subject: Iris, Planet, Jellyfish, Helix, Knot, Heart, Crystal, Amphora, Mushroom |
+| Picture | Opens the file chooser: any picture or GIF |
 | Word | The word drawn; `\|` starts a new line |
-| Look | One of sixteen: Signal, Theme, Terminal, Matrix, Amber CRT, Blueprint, Halftone, Blocks, Vapor, Glitch, Prism, Thermal, Gold, Kaleido, Newsprint, Typewriter. Picking one sets everything below |
-| Shape | Follows the subject, or a square, wide or tall plate |
+| Style | One of sixteen: Signal, Theme, Terminal, Matrix, Amber CRT, Blueprint, Halftone, Blocks, Vapor, Glitch, Prism, Thermal, Gold, Kaleido, Newsprint, Typewriter. Picking one sets its characters, colours and screen |
+| Size | Small, medium or large, or drag a corner in edit mode to any width and height |
 | Backdrop, Readout | The dark plate behind the glyphs; the name and grid size under it |
 | Characters | The character set (or your own), their size, edge lines, shimmer, rain, outline |
-| Colour | Palette (your theme, the picture, thirteen fixed ones or your own three), backdrop, saturation, contrast, hue, rainbow, drift |
+| Colour | Palette (your theme, the picture, thirteen fixed ones or your own three, picked from swatches), backdrop, saturation, contrast, hue, rainbow, drift |
 | Screen | Glow, scanlines, grain, colour fringe, curve, glitch, paper, mirror |
 | Subject | Cut the subject from its background, by brightness or by colour |
-| Motion | Movement at rest, how it appears, speed, camera |
+| Moves | A still picture sways, breathes rings of light and shimmers; how it appears, speed, camera |
 
 The whole wallpaper can be drawn this way too: **Settings › Wallpaper › Draw the wallpaper as glyphs**.
 
