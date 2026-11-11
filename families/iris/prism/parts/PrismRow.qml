@@ -36,11 +36,26 @@ Item {
     readonly property string about: String(root.spec.description ?? root.row.detail ?? "")
     readonly property bool hovered: hover.hovered
     property bool open: false
+    readonly property bool aboutShown: root.aboutWidth > 0 && root.about.length > 0
 
     // A colour pick: every choice (but at most one, a "custom") carries the colour it gives.
     readonly property bool swatched: root.kind === "choice" && root.choices.length > 1
         && root.choices.filter(choice => choice.swatch !== undefined && choice.swatch !== null).length >= root.choices.length - 1
-    readonly property bool manySwatches: root.swatched && root.choices.length > 8
+        && root.told
+    // Discs only say something when they differ: shades of one colour (a scheme's styles, a mode's blacks) are picked by name.
+    readonly property bool told: {
+        const seen = []
+        let twins = 0
+        for (const choice of root.choices) {
+            if (choice.swatch === undefined || choice.swatch === null) continue
+            const c = Qt.color(choice.swatch)
+            if (seen.some(o => Math.abs(o.r - c.r) + Math.abs(o.g - c.g) + Math.abs(o.b - c.b) < 0.3)) twins += 1
+            else seen.push(c)
+        }
+        return twins * 2 < root.choices.length
+    }
+    // Past what the line's end holds they are laid out under it, each with its name.
+    readonly property bool manySwatches: root.swatched && (root.choices.length - 1) * PrismTheme.dp(26) + PrismTheme.dp(96) > root.controlWidth
     readonly property bool listed: root.kind === "pieces" || Boolean(root.spec.flags)
     // What goes under the line, if anything.
     readonly property string below: {
@@ -63,8 +78,8 @@ Item {
         if (root.kind === "zone") return "zone"
         if (root.kind === "designs") return "now"
         if (root.kind === "choice" && root.spec.cards === "island" && root.choices.length > 0) return "now"
-        if (root.kind === "choice" && root.swatched && !root.manySwatches) return "swatches"
-        if (root.kind === "choice" && root.choices.length > 0 && !root.manySwatches) return "choice"
+        if (root.kind === "choice" && root.swatched) return root.manySwatches ? "" : "swatches"
+        if (root.kind === "choice" && root.choices.length > 0) return "choice"
         if (root.kind === "choice" || root.kind === "list" || root.listed) return "now"
         return ""
     }
@@ -93,7 +108,7 @@ Item {
     Item {
         id: line
         width: parent.width
-        height: Math.max(PrismTheme.dp(58), name.implicitHeight + PrismTheme.dp(20))
+        height: Math.max(PrismTheme.dp(58), name.implicitHeight + PrismTheme.dp(20), root.aboutShown ? about.implicitHeight + PrismTheme.dp(20) : 0)
         opacity: root.locked ? 0.45 : 1
 
         PrismText {
@@ -131,7 +146,7 @@ Item {
             id: name
             anchors.left: thumb.right
             anchors.leftMargin: PrismTheme.dp(14)
-            anchors.right: about.visible ? about.left : control.left
+            anchors.right: root.aboutShown ? about.left : control.left
             anchors.rightMargin: PrismTheme.dp(16)
             anchors.verticalCenter: parent.verticalCenter
             spacing: PrismTheme.dp(2)
@@ -144,7 +159,7 @@ Item {
             }
             PrismText {
                 width: parent.width
-                visible: text.length > 0 && !root.showPage && !about.visible
+                visible: text.length > 0 && !root.showPage && !root.aboutShown
                 text: Translation.tr(root.about)
                 color: PrismTheme.ink2
                 font.pixelSize: PrismTheme.small
@@ -189,9 +204,11 @@ Item {
                 elide: Text.ElideRight
             }
         }
+        // One grid for every row of a page (his 11-11): what it does starts at the head's own column whatever stands
+        // at the line's end, and the line grows rather than cut a sentence.
         PrismText {
             id: about
-            visible: root.aboutWidth > 0 && root.about.length > 0 && root.inline.length > 0
+            visible: root.aboutShown
             width: root.aboutWidth
             anchors.right: control.left
             anchors.rightMargin: PrismTheme.dp(20)
@@ -200,14 +217,15 @@ Item {
             color: PrismTheme.ink2
             font.pixelSize: PrismTheme.small
             wrapMode: Text.WordWrap
-            maximumLineCount: 2
-            elide: Text.ElideRight
+            // No elide: with it the text's own height answers to the line it sizes (a loop), and four lines hold every description.
+            maximumLineCount: 4
+            elide: Text.ElideNone
             lineHeight: 1.1
         }
 
         Item {
             id: control
-            width: Math.min(root.controlWidth, kind.item?.implicitWidth ?? 0)
+            width: root.controlWidth
             height: parent.height
             anchors.right: tail.left
             anchors.rightMargin: PrismTheme.dp(8)
@@ -337,6 +355,7 @@ Item {
         PrismSwatches {
             choices: root.choices.map(choice => ({ label: choice.label, value: choice.value, colour: choice.swatch ?? PrismTheme.ink3 }))
             current: root.value
+            room: root.controlWidth
             onPicked: value => PrismModel.write(root.row, value)
         }
     }
@@ -423,13 +442,12 @@ Item {
     }
     Component {
         id: swatchesBelow
-        Flow {
+        PrismSwatches {
             width: slot.width
-            PrismSwatches {
-                choices: root.choices.map(choice => ({ label: choice.label, value: choice.value, colour: choice.swatch ?? PrismTheme.ink3 }))
-                current: root.value
-                onPicked: value => PrismModel.write(root.row, value)
-            }
+            chart: true
+            choices: root.choices.map(choice => ({ label: choice.label, value: choice.value, colour: choice.swatch ?? PrismTheme.ink3 }))
+            current: root.value
+            onPicked: value => PrismModel.write(root.row, value)
         }
     }
     Component {
