@@ -64,7 +64,7 @@ ColumnLayout {
         for (const group of groups) if (group.rows.length === 1) lone[group.rows[0].label] = (lone[group.rows[0].label] ?? 0) + 1
         for (const group of groups) {
             if (group.rows.length === 1 && lone[group.rows[0].label] > 1 && group.key.length > 0)
-                group.rows = [Object.assign({}, group.rows[0], { label: group.key })]
+                group.rows = [IrisOptions.derive(group.rows[0], { label: group.key })]
         }
         // Every area reads as Home (his 10-30): its lead group open, every other group a tile that says what it holds
         // and opens under the tiles, one at a time. Home leads with Every day, General's other pages are all tiles;

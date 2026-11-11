@@ -1049,7 +1049,7 @@ QtObject {
         for (const spec of root.studioRows) {
             const found = /^iris\.appearance\.surfaces\.(\w+)\.radius$/.exec(String(spec.path ?? ""))
             if (!found || !root.cornerLabels[found[1]]) continue
-            const mirror = Object.assign({}, spec, { target: "material", group: "Corners per surface", label: root.cornerLabels[found[1]], mirror: true,
+            const mirror = root.derive(spec, { target: "material", group: "Corners per surface", label: root.cornerLabels[found[1]], mirror: true,
                 keywords: ["corners", "radius", "round", "rounded", "square"] })
             delete mirror.description
             out.push(mirror)
@@ -1062,10 +1062,21 @@ QtObject {
         for (const spec of root.studioRows) {
             const found = /^iris\.appearance\.(?:glass|theme)\.(\w+)$/.exec(String(spec.path ?? ""))
             if (!found || !root.edgeKeys.includes(found[1])) continue
-            out.push(Object.assign({}, spec, { target: "desktop", group: "Widgets", mirror: true,
+            out.push(root.derive(spec, { target: "desktop", group: "Widgets", mirror: true,
                 description: "The edge of glass widgets, the same as the Island's and the Dock's glass.",
                 showIf: () => root.widgetGlass && String(Config.options?.iris?.widgets?.outline ?? "auto") !== "none",
                 keywords: ["outline", "border", "frame", "edge", "line", "light", "rim", "marco", "borde", "widgets"] }))
+        }
+        return out
+    }
+    // A row copied with its getters kept. Object.assign read every getter (a Design's choices, its name) inside the
+    // registry's own binding, so the registry rebuilt, and Prism remade each of its rows, whenever one of those values
+    // moved: 3 s frozen on a Design switch. The getters now run where the row is drawn.
+    function derive(base: var, extra: var): var {
+        const out = {}
+        for (const source of [base, extra]) {
+            for (const key of Object.getOwnPropertyNames(source))
+                Object.defineProperty(out, key, Object.assign(Object.getOwnPropertyDescriptor(source, key), { configurable: true, enumerable: true }))
         }
         return out
     }
@@ -1075,7 +1086,7 @@ QtObject {
         rows.splice(at < 0 ? rows.length : at + 1, 0, ...root.cornerMirrors)
         const outline = rows.findIndex(spec => spec.path === "iris.widgets.outline")
         rows.splice(outline < 0 ? rows.length : outline + 1, 0, ...root.edgeMirrors)
-        return rows.map((spec, index) => Object.assign({}, spec, { modelKey: "studio:" + index }))
+        return rows.map((spec, index) => root.derive(spec, { modelKey: "studio:" + index }))
     }
 
     // Alternatives offered for a piece whose resting face is a glyph. The description
@@ -2262,7 +2273,7 @@ QtObject {
     })
     function placed(spec: var): var {
         const move = root.movedGroups[String(spec.section ?? "")]
-        return move && move.groups.indexOf(String(spec.group ?? "")) >= 0 ? Object.assign({}, spec, { section: move.to }) : spec
+        return move && move.groups.indexOf(String(spec.group ?? "")) >= 0 ? root.derive(spec, { section: move.to }) : spec
     }
     readonly property var settings: {
         // A widget goes on or off in Desktop's grid; Widgets holds only what each one on the desktop offers.
@@ -2272,16 +2283,16 @@ QtObject {
         // Home: the rows it was given (Customize › On Home), each the area's own row said once more.
         for (const id of Array.from(Config.options?.iris?.appearance?.settingsHome ?? root.homeDefault)) {
             const spec = root.dailySwitches.find(entry => entry.id === id) ?? own(id)
-            if (spec) rows.push(Object.assign({}, spec, { section: "general", group: "Every day", mirror: true,
-                origin: { section: String(spec.section ?? root.placed(Object.assign({ section: root.sectionOf(spec) }, spec)).section), group: String(spec.group ?? "") }, tune: false, description: undefined, cards: undefined, tiles: undefined, visibleWhen: undefined, target: undefined }))
+            if (spec) rows.push(root.derive(spec, { section: "general", group: "Every day", mirror: true,
+                origin: { section: String(spec.section ?? root.placed(root.derive({ section: root.sectionOf(spec) }, spec)).section), group: String(spec.group ?? "") }, tune: false, description: undefined, cards: undefined, tiles: undefined, visibleWhen: undefined, target: undefined }))
         }
         rows.push(root.homeEdit)
         const look = []
         for (const spec of root.studio) {
-            if (spec.mirror) { look.push(root.placed(Object.assign({ section: root.sectionOf(spec) }, spec))); continue }
+            if (spec.mirror) { look.push(root.placed(root.derive({ section: root.sectionOf(spec) }, spec))); continue }
             if (spec.path !== undefined && known.has(spec.path)) continue
             if (spec.path !== undefined) known.add(spec.path)
-            look.push(root.placed(Object.assign({ section: root.sectionOf(spec) }, spec)))
+            look.push(root.placed(root.derive({ section: root.sectionOf(spec) }, spec)))
         }
         const out = []
         for (const section of root.sectionOrder) {
@@ -2298,7 +2309,7 @@ QtObject {
             const what = String(spec.path ?? (spec.comp !== undefined ? spec.comp + ":" + spec.key : spec.label ?? spec.kind))
             const key = "settings:" + spec.section + "/" + String(spec.group ?? "") + "/" + what + (spec.mirror ? ":mirror" : "")
             seen[key] = (seen[key] ?? 0) + 1
-            return Object.assign({}, spec, { modelKey: seen[key] > 1 ? key + "#" + seen[key] : key })
+            return root.derive(spec, { modelKey: seen[key] > 1 ? key + "#" + seen[key] : key })
         })
     }
 }
