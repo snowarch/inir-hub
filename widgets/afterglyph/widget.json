@@ -1,0 +1,127 @@
+{
+    "name": "Afterglyph",
+    "icon": "blur_on",
+    "version": "1.0.0",
+    "author": "snowarch",
+    "description": "What is playing, your wallpaper, a picture or a word, drawn as glowing glyphs that follow its edges and grow in when it changes. Drawn by the graphics card and still at rest. Also a card in Waffle's Widgets panel.",
+    "category": "other",
+    "main": "Afterglyph.qml",
+    "waffle": {
+        "main": "WaffleAfterglyph.qml"
+    },
+    "defaultConfig": {
+        "placementStrategy": "free",
+        "widgetScale": 100,
+        "widgetOpacity": 100,
+        "colorMode": "auto",
+        "dim": 0,
+        "x": 240,
+        "y": 240
+    },
+    "configKeys": {
+        "source": {
+            "type": "string",
+            "default": "auto",
+            "label": "What it draws",
+            "options": [
+                {
+                    "label": "What is playing, else the wallpaper",
+                    "value": "auto"
+                },
+                {
+                    "label": "What is playing",
+                    "value": "music"
+                },
+                {
+                    "label": "The wallpaper",
+                    "value": "wallpaper"
+                },
+                {
+                    "label": "A picture or GIF",
+                    "value": "file"
+                },
+                {
+                    "label": "A word",
+                    "value": "word"
+                }
+            ]
+        },
+        "file": {
+            "type": "string",
+            "default": "",
+            "label": "Picture or GIF: its full path"
+        },
+        "word": {
+            "type": "string",
+            "default": "iNiR",
+            "label": "Word"
+        },
+        "look": {
+            "type": "string",
+            "default": "signal",
+            "label": "Look",
+            "options": [
+                {
+                    "label": "Signal: the picture's colours",
+                    "value": "signal"
+                },
+                {
+                    "label": "Theme: your accent",
+                    "value": "theme"
+                },
+                {
+                    "label": "Phosphor",
+                    "value": "phosphor"
+                },
+                {
+                    "label": "Amber",
+                    "value": "amber"
+                },
+                {
+                    "label": "Blueprint",
+                    "value": "blueprint"
+                },
+                {
+                    "label": "Paper",
+                    "value": "paper"
+                }
+            ]
+        },
+        "glyph": {
+            "type": "int",
+            "default": 1,
+            "min": 1,
+            "max": 4,
+            "label": "Glyph size"
+        },
+        "glow": {
+            "type": "int",
+            "default": 100,
+            "min": 0,
+            "max": 200,
+            "label": "Glow"
+        },
+        "grow": {
+            "type": "bool",
+            "default": true,
+            "label": "Grow in when the picture changes"
+        },
+        "plate": {
+            "type": "bool",
+            "default": true,
+            "label": "Dark plate behind the glyphs"
+        },
+        "caption": {
+            "type": "bool",
+            "default": true,
+            "label": "Title and grid under it"
+        }
+    },
+    "resizableAxes": {
+        "uniform": "widgetScale"
+    },
+    "defaultSize": {
+        "width": 480,
+        "height": 300
+    }
+}
