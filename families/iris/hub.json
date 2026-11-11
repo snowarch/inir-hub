@@ -3,26 +3,26 @@
     "version": "2.33.76",
     "changes": {
         "2.33.76": [
-          "Control Center: the Do Not Disturb tile lights when it is on (it read the other way round) and wears the same name and moon as everywhere else",
-          "Island: Do Not Disturb is a small indigo moon disc; hover says what it is, a press turns it off. It steps aside when the Do Not Disturb bubble already shows it",
-          "Settings on Umbriel: free space at each screen edge, dialogs that stay with their window, apps opening maximized, the shortcuts sheet at login",
-          "Settings on Umbriel, when the machine has them: which screen a drawing tablet or a touch screen belongs to, the laptop screen off with the lid closed, the NVIDIA sync option"
+          "Control Center: the Do Not Disturb tile lights when it is on (it read the other way round), with the same name and moon as elsewhere",
+          "Island: Do Not Disturb is a small indigo moon; hover names it, a press turns it off; it steps aside while its bubble shows",
+          "Settings on Umbriel: free space at each screen edge, dialogs that stay with their window, apps opening maximized, shortcuts at login",
+          "Settings on Umbriel, with the hardware: a tablet or touch screen's own screen, the laptop screen off with the lid shut, NVIDIA sync"
         ],
         "2.33.75": [
             "Island: a small moon rests on it while Do Not Disturb is on, so silence never goes unnoticed",
-            "Settings › Displays on Umbriel: each screen's workspaces drawn as miniatures: press how many it keeps, choose as needed or fixed, stacked or side by side, and whether the last leads back to the first",
+            "Displays on Umbriel: each screen's workspaces drawn as miniatures: how many, as needed or fixed, stacked or side by side, looping",
             "Settings on Umbriel: the width new windows open at, picked from drawn screens, for every screen (Layout) or one screen (Displays)",
-            "Settings › Displays on Umbriel: fullscreen apps drawing straight to the screen, the curve ordinary colours follow with HDR on, and sharp older apps on a scaled screen; games take the main screen as theirs too"
+            "Displays on Umbriel: fullscreen apps straight to the screen, the colour curve with HDR on, sharp older apps on a scaled screen"
         ],
         "2.33.74": [
-            "Settings: everything of the compositor you run (Niri or Umbriel) sits in one group of the sidebar named for it: Displays, Layout, Windows, Glass & effects, Movement, Keyboard, Mouse & pointer",
-            "Settings: each of those pages opens on what your machine runs now (your screen and its rate, what it can do), and shows only what your compositor and hardware support",
+            "Settings: everything of the compositor you run (Niri or Umbriel) sits in one sidebar group named for it, a page per function",
+            "Settings: each of those pages opens on what your machine runs now and shows only what your compositor and hardware support",
             "Settings: no row names Niri when you run another compositor"
         ],
         "2.33.73": [
             "Umbriel: a screen that looks darker at its highest refresh rate than at 60 Hz gets a fix in Settings › Display › Colour",
       "Prism: turning an option on or off keeps the page where you were reading; a long page no longer jumps to another part",
-      "Prism: every option has one home (no copy of the compositor's blur, shapes or reserved room on a second page); the page card names each value it shows"
+      "Prism: every option has one home, no copy of the compositor's rows on a second page; the page card names each value it shows"
         ],
         "2.33.72": [
             "The overview over a fullscreen game no longer rebuilds the Island and Dock on every press: they keep their layer, on Umbriel and Niri"

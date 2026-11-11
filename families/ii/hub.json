@@ -3,7 +3,7 @@
     "version": "2.35.10",
     "changes": {
         "2.35.10": [
-          "Settings › Umbriel: Material gets the compositor's page when you run Umbriel: screens, workspaces per screen, layouts, borders, tabs, title bars, glass, movement, keyboard, mouse, pointer and hot corners",
+          "Settings › Umbriel: the compositor's page when you run Umbriel: screens, workspaces, layouts, borders, glass, movement, input, hot corners",
           "Every row there is asked of the compositor: what your machine or Umbriel cannot do is not shown"
         ],
         "2.35.9": [
