@@ -1,16 +1,17 @@
 {
     "$schema": "../../schema/hub.schema.json",
-    "version": "2.33.76",
+    "version": "2.33.77",
     "changes": {
+        "2.33.77": [
+          "Widgets: their glass follows a video, GIF or glyph wallpaper as it moves, instead of holding a frozen frame"
+        ],
         "2.33.76": [
-          "Glyph wallpaper: a still picture now sways, breathes rings of light and shimmers; colours are picked from swatches; Restore defaults",
+          "Widgets: their glass follows a video, GIF or glyph wallpaper as it moves, instead of holding a frozen frame",
           "Widget options: colour swatches, a file chooser instead of a typed path, a tap on a changed value's number puts it back",
           "Settings: scrolling no longer redraws a blurred band every frame, and the window stays ready for ten minutes after closing",
-          "Wallpaper › Draw the wallpaper as glyphs: your wallpaper, a word or a built-in subject as glowing characters, in sixteen looks",
-          "Control Center: the Do Not Disturb tile lights when it is on (it read the other way round), with the same name and moon as elsewhere",
-          "Island: Do Not Disturb is a small indigo moon; hover names it, a press turns it off; it steps aside while its bubble shows",
-          "Settings on Umbriel: free space at each screen edge, dialogs that stay with their window, apps opening maximized, shortcuts at login",
-          "Settings on Umbriel, with the hardware: a tablet or touch screen's own screen, the laptop screen off with the lid shut, NVIDIA sync"
+          "Wallpaper › Draw the wallpaper as glyphs: your picture, a word or a subject as glowing characters, 16 looks, alive, Restore defaults",
+          "Do Not Disturb: the Control Center tile lights when it is on (it read backwards); on the Island a moon, hover names it, a press ends it",
+          "Settings on Umbriel: screen edge space, dialogs held to their window, maximized apps, tablet and touch screens, lid, NVIDIA sync"
         ],
         "2.33.75": [
             "Island: a small moon rests on it while Do Not Disturb is on, so silence never goes unnoticed",

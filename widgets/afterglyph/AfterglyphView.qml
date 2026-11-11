@@ -30,7 +30,7 @@ Item {
     function read(key: string): var {
         return CustomWidgets.getConfigValue("afterglyph", key, undefined)
     }
-    readonly property var own: ({ cell: 7 })
+    readonly property var own: ({ cell: 9 })
     readonly property var settings: Glyphs.settings(key => root.read(key) ?? root.own[key])
     readonly property string source: String(root.read("source") ?? "auto")
     readonly property string word: String(root.read("word") ?? "iNiR")
@@ -133,6 +133,8 @@ Item {
         shown: root.drawn
         live: root.live
         animated: root.moving
+        // The desktop under it redraws far more often than the glyphs change (a video, a clock): it blits its last frame.
+        cached: true
         fontFamily: Appearance.font.family.monospace
     }
 }

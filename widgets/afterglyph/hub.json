@@ -1,6 +1,6 @@
 {
     "$schema": "../../schema/hub.schema.json",
-    "version": "2.1.0",
+    "version": "2.2.0",
     "summary": "Music, wallpaper, words and nine subjects as living glyphs, in sixteen styles",
     "authors": [
         "snowarch"
