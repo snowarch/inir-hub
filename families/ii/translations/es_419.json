@@ -3220,5 +3220,6 @@
   "Screens, workspaces, layout, windows, input": "Pantallas, espacios de trabajo, distribución, ventanas, entrada",
   "When covered": "Cuando está tapado",
   "Behind fullscreen": "Detrás de pantalla completa",
-  "A hidden wallpaper stops decoding and keeps its frame.": "Un fondo oculto deja de decodificarse y conserva su fotograma."
+  "A hidden wallpaper stops decoding and keeps its frame.": "Un fondo oculto deja de decodificarse y conserva su fotograma.",
+  "Show in the sidebar": "Mostrar en la barra lateral"
 }

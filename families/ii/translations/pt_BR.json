@@ -3220,5 +3220,6 @@
   "Screens, workspaces, layout, windows, input": "Telas, áreas de trabalho, layout, janelas, entrada",
   "When covered": "Quando coberto",
   "Behind fullscreen": "Atrás da tela cheia",
-  "A hidden wallpaper stops decoding and keeps its frame.": "Um papel de parede oculto para de ser decodificado e mantém o quadro."
+  "A hidden wallpaper stops decoding and keeps its frame.": "Um papel de parede oculto para de ser decodificado e mantém o quadro.",
+  "Show in the sidebar": "Mostrar na barra lateral"
 }

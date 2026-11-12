@@ -3220,5 +3220,6 @@
   "Screens, workspaces, layout, windows, input": "Bildschirme, Arbeitsflächen, Layout, Fenster, Eingabe",
   "When covered": "Wenn verdeckt",
   "Behind fullscreen": "Hinter Vollbild",
-  "A hidden wallpaper stops decoding and keeps its frame.": "Ein verdecktes Hintergrundbild hört auf zu dekodieren und behält sein Bild."
+  "A hidden wallpaper stops decoding and keeps its frame.": "Ein verdecktes Hintergrundbild hört auf zu dekodieren und behält sein Bild.",
+  "Show in the sidebar": "In der Seitenleiste zeigen"
 }

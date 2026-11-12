@@ -3220,5 +3220,6 @@
   "Screens, workspaces, layout, windows, input": "Экраны, рабочие области, раскладка, окна, ввод",
   "When covered": "Когда закрыты",
   "Behind fullscreen": "За полноэкранным окном",
-  "A hidden wallpaper stops decoding and keeps its frame.": "Скрытые обои перестают декодироваться и сохраняют кадр."
+  "A hidden wallpaper stops decoding and keeps its frame.": "Скрытые обои перестают декодироваться и сохраняют кадр.",
+  "Show in the sidebar": "Показать на боковой панели"
 }

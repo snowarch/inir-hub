@@ -3220,5 +3220,6 @@
   "Screens, workspaces, layout, windows, input": "Екрани, робочі простори, макет, вікна, введення",
   "When covered": "Коли закриті",
   "Behind fullscreen": "За повноекранним вікном",
-  "A hidden wallpaper stops decoding and keeps its frame.": "Приховані шпалери перестають декодуватися й зберігають кадр."
+  "A hidden wallpaper stops decoding and keeps its frame.": "Приховані шпалери перестають декодуватися й зберігають кадр.",
+  "Show in the sidebar": "Показати на бічній панелі"
 }

@@ -3220,5 +3220,6 @@
   "Screens, workspaces, layout, windows, input": "Screens, workspaces, layout, windows, input",
   "When covered": "When covered",
   "Behind fullscreen": "Behind fullscreen",
-  "A hidden wallpaper stops decoding and keeps its frame.": "A hidden wallpaper stops decoding and keeps its frame."
+  "A hidden wallpaper stops decoding and keeps its frame.": "A hidden wallpaper stops decoding and keeps its frame.",
+  "Show in the sidebar": "Show in the sidebar"
 }

@@ -3220,5 +3220,6 @@
   "Screens, workspaces, layout, windows, input": "화면, 작업 공간, 레이아웃, 창, 입력",
   "When covered": "가려졌을 때",
   "Behind fullscreen": "전체 화면 뒤에서",
-  "A hidden wallpaper stops decoding and keeps its frame.": "가려진 배경화면은 디코딩을 멈추고 프레임을 유지합니다."
+  "A hidden wallpaper stops decoding and keeps its frame.": "가려진 배경화면은 디코딩을 멈추고 프레임을 유지합니다.",
+  "Show in the sidebar": "사이드바에 표시"
 }

@@ -3220,5 +3220,6 @@
   "Screens, workspaces, layout, windows, input": "Layar, ruang kerja, tata letak, jendela, input",
   "When covered": "Saat tertutup",
   "Behind fullscreen": "Di belakang layar penuh",
-  "A hidden wallpaper stops decoding and keeps its frame.": "Wallpaper yang tersembunyi berhenti didekode dan mempertahankan bingkainya."
+  "A hidden wallpaper stops decoding and keeps its frame.": "Wallpaper yang tersembunyi berhenti didekode dan mempertahankan bingkainya.",
+  "Show in the sidebar": "Tampilkan di bilah sisi"
 }

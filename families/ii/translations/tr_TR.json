@@ -3220,5 +3220,6 @@
   "Screens, workspaces, layout, windows, input": "Ekranlar, çalışma alanları, düzen, pencereler, giriş",
   "When covered": "Örtüldüğünde",
   "Behind fullscreen": "Tam ekranın arkasında",
-  "A hidden wallpaper stops decoding and keeps its frame.": "Gizli bir duvar kağıdının kodu çözülmez ve karesini korur."
+  "A hidden wallpaper stops decoding and keeps its frame.": "Gizli bir duvar kağıdının kodu çözülmez ve karesini korur.",
+  "Show in the sidebar": "Kenar çubuğunda göster"
 }

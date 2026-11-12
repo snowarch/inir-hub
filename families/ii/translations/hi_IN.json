@@ -3220,5 +3220,6 @@
   "Screens, workspaces, layout, windows, input": "स्क्रीन, वर्कस्पेस, लेआउट, विंडो, इनपुट",
   "When covered": "ढके जाने पर",
   "Behind fullscreen": "फ़ुलस्क्रीन के पीछे",
-  "A hidden wallpaper stops decoding and keeps its frame.": "छिपा वॉलपेपर डिकोड होना बंद कर देता है और अपना फ़्रेम रखता है।"
+  "A hidden wallpaper stops decoding and keeps its frame.": "छिपा वॉलपेपर डिकोड होना बंद कर देता है और अपना फ़्रेम रखता है।",
+  "Show in the sidebar": "साइडबार में दिखाएँ"
 }

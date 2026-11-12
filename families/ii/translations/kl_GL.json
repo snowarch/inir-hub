@@ -3220,5 +3220,6 @@
   "Screens, workspaces, layout, windows, input": "Biilit, Suliffiit, Nassuiaat, Qeqqat, Ikiuineq",
   "When covered": "Matoqqagaangat",
   "Behind fullscreen": "Fullscreen-ip tunuani",
-  "A hidden wallpaper stops decoding and keeps its frame.": "Tunuliaqut toqqortoq decode-iunnaartarpoq assilissaminillu pigiinnartarluni."
+  "A hidden wallpaper stops decoding and keeps its frame.": "Tunuliaqut toqqortoq decode-iunnaartarpoq assilissaminillu pigiinnartarluni.",
+  "Show in the sidebar": "Sidebar-imi takutiguk"
 }

@@ -19,12 +19,27 @@ Item {
     property bool dragPending: false
 
     property var widgetOrder: {
+        const known = [...defaultOrder, ...hubIds]
         const saved = Config.options?.material?.sidebar?.widgets?.widgetOrder
-        if (!saved) return defaultOrder
-        const missing = defaultOrder.filter(id => !saved.includes(id))
+        if (!saved) return known
+        const missing = known.filter(id => !saved.includes(id))
         return [...saved, ...missing]
     }
     readonly property var defaultOrder: ["media", "week", "context", "note", "launch", "controls", "status", "crypto", "wallpaper", "worldclock"]
+
+    // Installed widgets with a Material sidebar face (widget.json "ii": { "main": …, "slots": [ "sidebar.left", … ] },
+    // no slots meaning both sidebars), as "custom.<id>". Shown below the built-in cards until the person moves or
+    // hides them (Settings › Sidebars).
+    readonly property var hubFaces: CustomWidgets.ready ? CustomWidgets.widgets.filter(widget => {
+        const face = widget.faces?.ii
+        const slots = Array.from(face?.slots ?? [])
+        return String(face?.path ?? "").length > 0 && (slots.length === 0 || slots.includes("sidebar.left"))
+    }) : []
+    readonly property var hubIds: hubFaces.map(widget => "custom." + widget.id)
+    readonly property var hiddenWidgets: Array.from(Config.options?.material?.sidebar?.widgets?.hidden ?? [])
+    function hubFacePath(id: string): string {
+        return String(root.hubFaces.find(widget => "custom." + widget.id === id)?.faces?.ii?.path ?? "")
+    }
     readonly property int widgetSpacing: Config.options?.material?.sidebar?.widgets?.spacing ?? 8
 
     readonly property bool showMedia: Config.options?.material?.sidebar?.widgets?.media ?? true
@@ -52,7 +67,7 @@ Item {
             case "crypto": return showCrypto
             case "wallpaper": return showWallpaper
             case "worldclock": return showWorldClock
-            default: return false
+            default: return hubIds.includes(id) && !hiddenWidgets.includes(id)
             }
         })
     }
@@ -204,7 +219,7 @@ Item {
                 Layout.rightMargin: needsMargin ? 12 : 0
                 visible: Layout.preferredHeight > 0
 
-                readonly property bool needsMargin: ["context", "note", "media", "crypto", "wallpaper"].includes(modelData)
+                readonly property bool needsMargin: ["context", "note", "media", "crypto", "wallpaper"].includes(modelData) || modelData.startsWith("custom.")
                 readonly property bool isBeingDragged: root.dragIndex === index
                 readonly property bool isDropTarget: root.hoverIndex === index && root.dragIndex !== index && root.dragIndex >= 0
                 readonly property real displacementY: root.getDisplacementY(index)
@@ -364,6 +379,12 @@ Item {
                             NumberAnimation { duration: 200; easing.type: Easing.OutCubic }
                         }
 
+                        // A hub widget loads from its own folder; one that fails leaves no gap (no item, no height).
+                        source: widgetWrapper.modelData.startsWith("custom.") ? root.hubFacePath(widgetWrapper.modelData) : ""
+                        onLoaded: {
+                            if (item.hasOwnProperty("iiSlot"))
+                                item.iiSlot = "sidebar.left"
+                        }
                         sourceComponent: {
                             switch (widgetWrapper.modelData) {
                             case "media": return mediaWidget

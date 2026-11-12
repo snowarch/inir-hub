@@ -3220,5 +3220,6 @@
   "Screens, workspaces, layout, windows, input": "الشاشات ومساحات العمل والتخطيط والنوافذ والإدخال",
   "When covered": "عند التغطية",
   "Behind fullscreen": "خلف ملء الشاشة",
-  "A hidden wallpaper stops decoding and keeps its frame.": "الخلفية المخفية تتوقف عن فك الترميز وتحتفظ بإطارها."
+  "A hidden wallpaper stops decoding and keeps its frame.": "الخلفية المخفية تتوقف عن فك الترميز وتحتفظ بإطارها.",
+  "Show in the sidebar": "إظهار في الشريط الجانبي"
 }

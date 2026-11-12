@@ -3220,5 +3220,6 @@
   "Screens, workspaces, layout, windows, input": "מסכים, מרחבי עבודה, פריסה, חלונות, קלט",
   "When covered": "כשמכוסה",
   "Behind fullscreen": "מאחורי מסך מלא",
-  "A hidden wallpaper stops decoding and keeps its frame.": "טפט מוסתר מפסיק לפענח ושומר את הפריים שלו."
+  "A hidden wallpaper stops decoding and keeps its frame.": "טפט מוסתר מפסיק לפענח ושומר את הפריים שלו.",
+  "Show in the sidebar": "הצג בסרגל הצד"
 }

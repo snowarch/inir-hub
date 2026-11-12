@@ -3220,5 +3220,6 @@
   "Screens, workspaces, layout, windows, input": "Schermi, aree di lavoro, layout, finestre, input",
   "When covered": "Quando coperto",
   "Behind fullscreen": "Dietro lo schermo intero",
-  "A hidden wallpaper stops decoding and keeps its frame.": "Uno sfondo nascosto smette di essere decodificato e tiene il suo fotogramma."
+  "A hidden wallpaper stops decoding and keeps its frame.": "Uno sfondo nascosto smette di essere decodificato e tiene il suo fotogramma.",
+  "Show in the sidebar": "Mostra nella barra laterale"
 }

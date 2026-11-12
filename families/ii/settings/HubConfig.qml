@@ -110,7 +110,13 @@ ContentPage {
         }
         if (item.kind === "theme" && Hub.fits(item, root.family))
             return { text: Translation.tr("Use"), icon: "format_paint", tone: "tonal", run: () => Hub.useTheme(item.id) }
-        if (item.kind === "widget" && Hub.fits(item, root.family) && root.family !== "waffle") {
+        // A web app opens in the left sidebar's Web apps tab, which is off until someone turns it on.
+        if (item.kind === "webapp" && root.family === "material" && SystemInfo.runtimeHas(["webengine"])
+                && !(Config.options?.material?.sidebar?.plugins?.enable ?? false))
+            return { text: Translation.tr("Show in the sidebar"), icon: "left_panel_open", tone: "tonal", run: () => Config.setNestedValue("material.sidebar.plugins.enable", true) }
+        // A widget with only a sidebar face shows there by itself: there is nothing to add to the desktop.
+        if (item.kind === "widget" && Hub.fits(item, root.family) && root.family !== "waffle"
+                && (root.family !== "material" || Array.from(item.surfaces ?? []).includes("desktop"))) {
             if (Hub.widgetInUse(item.id, root.family))
                 return { text: Translation.tr("On your desktop"), icon: "check", tone: "off" }
             return { text: Translation.tr("Add to desktop"), icon: "add_to_home_screen", tone: "tonal", run: () => Hub.useWidget(item.id, root.family) }

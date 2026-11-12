@@ -657,6 +657,22 @@ ContentPage {
                         Config.setNestedValue("screenTime.enable", checked)
                     }
                 }
+
+                // Installed hub widgets with a face for this side (BottomWidgetGroup.hubTabs).
+                Repeater {
+                    model: CustomWidgets.ready ? CustomWidgets.widgets.filter(widget => {
+                        const face = widget.faces?.ii
+                        const slots = Array.from(face?.slots ?? [])
+                        return String(face?.path ?? "").length > 0 && (slots.length === 0 || slots.includes("sidebar.right"))
+                    }) : []
+                    delegate: SettingsSwitch {
+                        required property var modelData
+                        buttonIcon: modelData.icon
+                        text: modelData.name
+                        Component.onCompleted: checked = rightSidebarWidgets.isEnabled("custom." + modelData.id)
+                        onClicked: rightSidebarWidgets.setWidget("custom." + modelData.id, checked)
+                    }
+                }
             }
 
             ContentSubsection {

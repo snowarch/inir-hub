@@ -1112,6 +1112,30 @@ ContentPage {
                     checked: Config.options?.material?.sidebar?.widgets?.worldClock ?? true
                     onCheckedChanged: Config.setNestedValue("material.sidebar.widgets.worldClock", checked)
                 }
+
+                // Installed hub widgets with a face for this column (DraggableWidgetContainer.hubFaces): shown until
+                // turned off here.
+                Repeater {
+                    model: CustomWidgets.ready ? CustomWidgets.widgets.filter(widget => {
+                        const face = widget.faces?.ii
+                        const slots = Array.from(face?.slots ?? [])
+                        return String(face?.path ?? "").length > 0 && (slots.length === 0 || slots.includes("sidebar.left"))
+                    }) : []
+                    delegate: SettingsSwitch {
+                        required property var modelData
+                        readonly property string widgetId: "custom." + modelData.id
+                        buttonIcon: modelData.icon
+                        text: modelData.name
+                        checked: !Array.from(Config.options?.material?.sidebar?.widgets?.hidden ?? []).includes(widgetId)
+                        onCheckedChanged: {
+                            const hidden = Array.from(Config.options?.material?.sidebar?.widgets?.hidden ?? [])
+                            const next = checked ? hidden.filter(id => id !== widgetId)
+                                : hidden.includes(widgetId) ? hidden : hidden.concat([widgetId])
+                            if (next.length !== hidden.length)
+                                Config.setNestedValue("material.sidebar.widgets.hidden", next)
+                        }
+                    }
+                }
             }
 
             ContentSubsection {

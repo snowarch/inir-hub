@@ -446,6 +446,8 @@ JsonObject {
             property bool contextShowWeather: true
             // Widget order (drag to reorder)
             property list<string> widgetOrder: ["context", "week", "media", "note", "launch", "controls", "status", "crypto", "wallpaper", "worldclock"]
+            // Hub widgets ("custom.<id>") with a sidebar face show in this column unless listed here
+            property list<string> hidden: []
             // Spacing between widgets (px)
             property int spacing: 8
 

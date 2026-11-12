@@ -3220,5 +3220,6 @@
   "Screens, workspaces, layout, windows, input": "Màn hình, các workspace, bố cục, cửa sổ, nhập liệu",
   "When covered": "Khi bị che",
   "Behind fullscreen": "Sau toàn màn hình",
-  "A hidden wallpaper stops decoding and keeps its frame.": "Hình nền bị che sẽ ngừng giải mã và giữ khung hình."
+  "A hidden wallpaper stops decoding and keeps its frame.": "Hình nền bị che sẽ ngừng giải mã và giữ khung hình.",
+  "Show in the sidebar": "Hiện trong thanh bên"
 }

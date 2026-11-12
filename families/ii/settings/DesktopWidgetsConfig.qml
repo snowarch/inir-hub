@@ -2782,18 +2782,18 @@ ContentPage {
                     }
                 }
 
+                // The desktop card's look and place: none while it is off the desktop.
                 ContentSubsection {
+                    id: lookOptions
+                    readonly property var rows: {
+                        void Config.revision
+                        const widget = "custom." + cwDelegate.modelData.id
+                        return DesktopWidgetOptions.sheetRows(widget, "look").concat(DesktopWidgetOptions.sheetRows(widget, "arrange")).filter(spec => spec.showIf())
+                    }
+                    visible: lookOptions.rows.length > 0
                     title: Translation.tr("Look")
                     Repeater {
-                        model: ScriptModel {
-                            objectProp: "path"
-                            values: {
-                                void Config.revision
-                                const widget = "custom." + cwDelegate.modelData.id
-                                const rows = DesktopWidgetOptions.sheetRows(widget, "look").concat(DesktopWidgetOptions.sheetRows(widget, "arrange"))
-                                return rows.filter(spec => spec.showIf())
-                            }
-                        }
+                        model: ScriptModel { objectProp: "path"; values: lookOptions.rows }
                         delegate: WidgetOptionRow {}
                     }
                 }

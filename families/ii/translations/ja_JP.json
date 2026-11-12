@@ -3220,5 +3220,6 @@
   "Screens, workspaces, layout, windows, input": "ディスプレイ、ワークスペース、レイアウト、ウィンドウ、入力",
   "When covered": "覆われたとき",
   "Behind fullscreen": "全画面の背後",
-  "A hidden wallpaper stops decoding and keeps its frame.": "隠れた壁紙はデコードを止め、そのフレームを保ちます。"
+  "A hidden wallpaper stops decoding and keeps its frame.": "隠れた壁紙はデコードを止め、そのフレームを保ちます。",
+  "Show in the sidebar": "サイドバーに表示"
 }

@@ -720,7 +720,13 @@ Item {
             {id: "timer",      icon: "schedule",      label: Translation.tr("Timer"),      component: timerComponent},
             {id: "screentime", icon: "av_timer",      label: Translation.tr("Screen Time"), component: screenTimeComponent},
         ]
-        return all.filter(w => {
+        // Installed widgets with a Material sidebar face for this side (BottomWidgetGroup.hubTabs).
+        const hub = CustomWidgets.ready ? CustomWidgets.widgets.filter(widget => {
+            const face = widget.faces?.ii
+            const slots = Array.from(face?.slots ?? [])
+            return String(face?.path ?? "").length > 0 && (slots.length === 0 || slots.includes("sidebar.right"))
+        }).map(widget => ({ id: "custom." + widget.id, icon: widget.icon, label: widget.name, source: widget.faces.ii.path })) : []
+        return all.concat(hub).filter(w => {
             if (w.id === "screentime" && !(Config.options?.screenTime?.enable ?? false))
                 return false
             return enabled.includes(w.id)
@@ -1433,13 +1439,20 @@ Item {
                                 || sectionItem.isCurrent
                                 || Math.abs(root.activeSection - sectionItem.index) <= 1
 
+                            source: sectionItem.modelData.source ?? ""
                             sourceComponent: {
+                                if (sectionItem.modelData.source)
+                                    return null
                                 if (sectionItem.modelData.id === "controls")
                                     return controlsSectionComponent
                                 if (sectionItem.modelData.id === "notifications")
                                     return notificationsSectionComponent
                                 // Widget sections — use component from data
                                 return sectionItem.modelData.component ?? null
+                            }
+                            onLoaded: {
+                                if (item.hasOwnProperty("iiSlot"))
+                                    item.iiSlot = "sidebar.right"
                             }
                         }
                     }

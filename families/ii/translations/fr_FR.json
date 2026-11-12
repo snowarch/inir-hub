@@ -3220,5 +3220,6 @@
   "Screens, workspaces, layout, windows, input": "Écrans, espaces de travail, disposition, fenêtres, saisie",
   "When covered": "Quand couvert",
   "Behind fullscreen": "Derrière le plein écran",
-  "A hidden wallpaper stops decoding and keeps its frame.": "Un fond d'écran masqué cesse d'être décodé et garde son image."
+  "A hidden wallpaper stops decoding and keeps its frame.": "Un fond d'écran masqué cesse d'être décodé et garde son image.",
+  "Show in the sidebar": "Afficher dans le panneau latéral"
 }
