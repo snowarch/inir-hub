@@ -288,7 +288,8 @@ Scope {
                                 DesktopWidgetRegistry.categoryOf(key)].join(" "), category: DesktopWidgetRegistry.categoryOf(key) }))
                         for (const custom of (CustomWidgets.ready ? CustomWidgets.widgets : []))
                             list.push(materialFace.prepare({ key: "custom." + custom.id, glyph: custom.icon || "widgets", name: custom.name,
-                                english: custom.name, tint: DesktopWidgetRegistry.customTint, words: "custom hub", category: "decor" }))
+                                english: custom.name, tint: DesktopWidgetRegistry.customTint, words: DesktopWidgetRegistry.customWords(custom),
+                                category: DesktopWidgetRegistry.customCategory(custom) }))
                         return list
                     }
                 }
