@@ -62,6 +62,7 @@ Each of these is held by `inir hub check` and CI, or by review where no machine 
   no `eval`, no `Qt.createQmlObject`, no QML from the internet, no `atob` or `base64 -d` on hidden content. Python
   helpers use the standard library only.
 - **Run while nobody looks.** No timer, process, fetch or animation while its window is closed or its face hidden.
+  A widget's `service` file (`guides/widgets.md`) only keeps its IPC answering; it starts nothing by itself.
 - **Carry secrets or someone's content.** No API keys, tokens or client secrets in the repo (the person enters their
   own, kept in the plugin's file); nothing private in a preview. Sources are official APIs or sites whose terms allow
   the use: no scraping of sites that host films, shows, music or games without the rights to them, no DRM

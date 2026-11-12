@@ -166,7 +166,7 @@ An item is a folder with the file iNiR itself reads, plus `hub.json` for the lis
 | `license` | An SPDX id: `MIT`, `GPL-3.0-or-later`, `CC-BY-4.0`… |
 | `tags` | Up to 6 lowercase words people might search for. |
 | `permissions` | What it does beyond drawing itself. See below. |
-| `minInir` | The oldest iNiR it works on, if it needs something recent. |
+| `minInir` | The oldest iNiR it works on, if it needs something recent. Never newer than the released iNiR (the `VERSION` on iNiR's main): CI refuses it, because nobody could install the item. |
 | `preview` | The screenshot file. Optional for themes. |
 
 `README.md` in the folder is the item's page on GitHub: what it does, how to set it up, what each setting means. It is

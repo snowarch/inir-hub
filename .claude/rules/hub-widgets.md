@@ -28,6 +28,9 @@ Waffle's Widgets panel (`waffle.main`). Ship the faces you can make well; the Hu
   (they stay readable on any wallpaper). iRiS: `IrisStyle.*`, `IrisText`. Waffle: `Looks.*`, `WText`.
 - **Quiet while nobody looks:** timers and processes run only while `visible` (and, on the desktop, `motionActive`
   after a first run). Minute clocks for minutes.
+- **`"service"` only for what must answer with no face on screen** (a keybind's `IpcHandler`; iNiR 3.1.0, see
+  `guides/widgets.md`): a file that holds a reference to the widget's singleton and runs nothing on its own. No
+  timer, fetch or process starts there; an older iNiR ignores the key.
 - **Every state has words:** empty, loading, failed (show what failed), never a blank card.
 - **Imports:** the base and `qs.modules.shared.background.widgets` (`AbstractBackgroundWidget`, the `Instrument*`
   parts) for the desktop, `qs.modules.iris.style` / `.components` for the Island, `qs.modules.waffle.looks` for

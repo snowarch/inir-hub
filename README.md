@@ -54,7 +54,7 @@ CI runs the same `inir hub check` on the pull request. The examples here (`count
 
 ## Trust
 
-Every item arrives by pull request. Colour themes and iRiS themes are data and merge once CI passes; anything with code is read by a maintainer before it merges. A pull request adds or changes one item of its own: it can't change a family (the desktop every install gets, kept by its maintainers), iNiR itself, another item, or anyone's settings. CI checks that it changes only itself, validates it, checks that what the code does matches the permissions it declares, and builds the packages from this repository; iNiR checks each package's sha256 before installing it. That is a review, not a guarantee: read what you install, especially anything that runs commands.
+Every item arrives by pull request. Colour themes, iRiS themes and web apps are data and merge once CI passes. New code (a widget, a component, a Design) is read by a maintainer before it merges; after that, its listed authors update it through CI alone as long as it asks for no new permission or host. A pull request adds or changes one item of its own: it can't change a family (the desktop every install gets, kept by its maintainers), iNiR itself, another item, or anyone's settings. CI checks that it changes only itself, validates it, checks that what the code does matches the permissions it declares, and builds the packages from this repository; iNiR checks each package's sha256 before installing it. That is a review, not a guarantee: read what you install, especially anything that runs commands.
 
 Found something that misbehaves? [Report it](https://github.com/snowarch/inir-hub/issues/new?template=report.yml).
 

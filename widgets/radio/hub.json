@@ -1,6 +1,10 @@
 {
     "$schema": "../../schema/hub.schema.json",
     "version": "2.1.2",
+    "changes": {
+        "2.1.2": ["In Countries, Genres or Languages, a word that matches none searches stations by name", "`inir radio toggle` answers what the radio turns into"],
+        "2.1.0": ["A tuner with search, countries, genres, languages, favourites and volume, drawn in each family's own look", "Its commands answer with no face on screen, for keybinds"]
+    },
     "summary": "Live stations from anywhere in the world, one click to play",
     "description": "Press play and it finds a live station somewhere in the world playing a genre you like, or anything at all; next takes you to another place. Music only, far from home first, never a station you heard lately. Plays through mpv; stations come from Radio Browser's open directory.",
     "authors": [
