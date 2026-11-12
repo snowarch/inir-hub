@@ -128,6 +128,24 @@ Scope {
         }
     }
 
+    // A shell that went down (a restart, an update) leaves its mpv playing with nobody to steer it, and the next
+    // stream would play over it: the first thing a new player does is quit whatever holds the radio's socket.
+    Loader {
+        id: leftover
+        active: true
+        sourceComponent: Socket {
+            path: root.socketPath
+            connected: true
+            onConnectionStateChanged: if (connected) {
+                write(JSON.stringify({ command: ["quit"] }) + "\n")
+                flush()
+                leftoverDone.restart()
+            }
+        }
+    }
+    Timer { id: leftoverDone; interval: 0; onTriggered: leftover.active = false }
+    Timer { interval: 2000; running: leftover.active; onTriggered: leftover.active = false }
+
     Loader {
         id: links
         active: false
