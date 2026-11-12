@@ -1,7 +1,7 @@
 {
     "name": "Radio",
     "icon": "radio",
-    "version": "2.3.0",
+    "version": "2.3.1",
     "author": "snowarch",
     "description": "Live stations from anywhere in the world. Press play and it finds one playing a genre you like, or anything at all; next takes you to another place. Shows the station, where it is and what it plays now. A card on the desktop, a player on the iRiS Island, a card in Waffle's Widgets panel.",
     "category": "media",

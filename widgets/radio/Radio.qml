@@ -209,11 +209,13 @@ Singleton {
     }
 
     // Removed from the Hub, or replaced by a newer copy (an update, a reload loads the widget from a new folder and
-    // with it a new Radio): nothing is left to stop this one, so it stops itself.
+    // with it a new Radio): nothing is left to stop this one, so it stops itself, for good: while a later reload
+    // scans, a copy left behind would otherwise take its IPC back.
     readonly property string folder: String(Qt.resolvedUrl("."))
-    readonly property bool installed: !CustomWidgets.ready
-        || CustomWidgets.widgets.some(w => w.id === "radio" && String(w.qmlPath).indexOf(root.folder) === 0)
-    onInstalledChanged: if (!root.installed) { player.stop(); root.closeTuner() }
+    property bool retired: false
+    readonly property bool installed: !root.retired && (!CustomWidgets.ready
+        || CustomWidgets.widgets.some(w => w.id === "radio" && String(w.qmlPath).indexOf(root.folder) === 0))
+    onInstalledChanged: if (!root.installed) { root.retired = true; player.stop(); root.closeTuner() }
 
     RadioBrowser { id: browser }
     RadioPlayer {

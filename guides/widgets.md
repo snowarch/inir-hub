@@ -79,6 +79,11 @@ face shows. Use it only for what must answer with no face on screen, such as an 
 holds a reference to your singleton (`QtObject { readonly property var state: MyState }`) and runs nothing on its
 own. An older iNiR ignores the key, so the widget's IPC answers there only while a face shows.
 
+Every Hub install reloads widgets from a fresh folder, and with it a fresh copy of your singleton; the old copy is
+never destroyed. So the singleton retires itself, for good, once the list no longer points at its folder: it stops
+what it plays and turns its `IpcHandler` off (`enabled: root.installed`). `widgets/radio/Radio.qml` (`installed`,
+`retired`) is the pattern to copy.
+
 ### `options`: rows like the built-in widgets' (iNiR 3.0.2)
 
 `configKeys` gives one plain row per key. `options` is an ordered list of rows with the same controls the built-in

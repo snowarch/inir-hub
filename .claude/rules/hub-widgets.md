@@ -36,7 +36,8 @@ Island (`iris.main`, `iris.slots`) and Waffle's Widgets panel (`waffle.main`). S
   after a first run). Minute clocks for minutes.
 - **`"service"` only for what must answer with no face on screen** (a keybind's `IpcHandler`; iNiR 3.1.0, see
   `guides/widgets.md`): a file that holds a reference to the widget's singleton and runs nothing on its own. No
-  timer, fetch or process starts there; an older iNiR ignores the key.
+  timer, fetch or process starts there; an older iNiR ignores the key. The singleton retires itself for good once a
+  reload replaces it (`widgets/radio/Radio.qml` › `installed`, `retired`): an old copy is never destroyed.
 - **Every state has words:** empty, loading, failed (show what failed), never a blank card.
 - **Imports:** the base and `qs.modules.shared.background.widgets` (`AbstractBackgroundWidget`, the `Instrument*`
   parts) for the desktop, `qs.modules.ii.kit` for Material's sidebars, `qs.modules.iris.style` / `.components` for the Island, `qs.modules.iris.widgets` (and `.prism`) for an iRiS
