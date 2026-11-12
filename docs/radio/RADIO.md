@@ -27,6 +27,9 @@ Widgets panel keeps the music playing; every face steers the same radio.
 | Volume | 0 to 100. Default: 60 |
 
 On the desktop, edit mode also picks the Shape or Instrument look and the shape the button takes while it plays.
+The desktop card has three sizes, picked in edit mode like any widget's: small keeps play, the tuner and next with the
+station under them; medium adds the place, what plays now, the star and the volume; large adds your stations
+(favourites first, then what you played lately), each one click away.
 
 ## What it needs
 

@@ -1,6 +1,6 @@
 pragma ComponentBehavior: Bound
 
-// The Material face: a card on the desktop. The shape is the play button: it takes the shape the person picked while
+// The Material face: a card on the desktop in three sizes (small, medium, large). The shape is the play button: it takes the shape the person picked while
 // a station plays and rests as a circle otherwise. Beside it, the station, where it is, and what it plays now; its
 // star, the tuner (search, countries, genres, favourites) and next. The wheel over the card sets the volume.
 // When the person's widget design is iNstrument or Readout (or they pick Instrument here) it draws that grammar.
@@ -23,9 +23,10 @@ AbstractBackgroundWidget {
     configEntryName: "custom.radio"
     defaultConfig: ({ placementStrategy: "free", widgetScale: 100, widgetOpacity: 100, colorMode: "auto", dim: 0, style: "shape", shape: "Cookie12Sided", showBackground: true, backgroundOpacity: 0.16, borderWidth: 1, borderOpacity: 0.2, cornerRadius: -1, useBlur: false, x: 240, y: 420 })
     needsColText: true
-    resizableAxes: ({ uniform: "widgetScale" })
-    resizeMinWidth: 260
-    resizeMinHeight: 100
+    resizeMinWidth: 150
+    resizeMinHeight: 150
+    resizeMaxWidth: 760
+    resizeMaxHeight: 760
 
     // ── Look ─────────────────────────────────────────────────
     readonly property bool instrument: root.widgetSharedDesign === "instrument" || root.widgetSharedDesign === "readout"
@@ -110,18 +111,37 @@ AbstractBackgroundWidget {
         }
     }
 
-    readonly property color shapeFill: root.playing ? root.widgetSemanticContainer(root.widgetPrimaryRole)
-        : ColorUtils.applyAlpha(root.widgetInk, playButton.hovered ? 0.2 : 0.14)
-    readonly property color shapeInk: root.playing ? root.widgetSemanticOnContainer(root.widgetPrimaryRole) : root.widgetInk
+    // ── Size ─────────────────────────────────────────────────
+    // Small is one square of the desktop's grid, medium two side by side, large two by two; every measure follows
+    // the box the card gets, so a dragged size draws the same card bigger.
+    readonly property real k: Math.max(0.4, Math.min(root.width / (root.isSmall ? 176 : 368), root.height / (root.isLarge ? 368 : 176)))
+    function px(v: real): int { return Math.round(v * root.k) }
+    readonly property int pad: root.px(root.isSmall ? 14 : 16)
 
-    readonly property int pad: Math.round(16 * root.scaleFactor)
-    readonly property int shapeSize: Math.round(88 * root.scaleFactor)
-    readonly property int infoWidth: Math.round(236 * root.scaleFactor)
-    readonly property int instrumentMargin: Math.round(14 * root.scaleFactor)
-    implicitWidth: root.instrument ? Math.round(300 * root.scaleFactor)
-        : root.pad * 2 + root.shapeSize + Math.round(16 * root.scaleFactor) + root.infoWidth
-    implicitHeight: root.instrument ? instrumentBody.implicitHeight + root.instrumentMargin * 2
-        : Math.max(root.shapeSize, info.implicitHeight) + root.pad * 2
+    // The card's own parts (volume, keys, station rows) wear the widget's ink over the wallpaper.
+    readonly property var cardLook: ({
+        d: root.k,
+        font: Appearance.font.family.main,
+        small: root.px(Appearance.font.pixelSize.smaller),
+        meta: root.px(Appearance.font.pixelSize.smallie),
+        body: root.px(Appearance.font.pixelSize.small),
+        raised: ColorUtils.applyAlpha(root.widgetInk, 0.1),
+        hover: ColorUtils.applyAlpha(root.widgetInk, 0.12),
+        press: ColorUtils.applyAlpha(root.widgetInk, 0.2),
+        ink: root.widgetInk,
+        muted: ColorUtils.applyAlpha(root.widgetInk, 0.72),
+        faint: ColorUtils.applyAlpha(root.widgetInk, 0.5),
+        line: ColorUtils.applyAlpha(root.widgetInk, 0.2),
+        track: ColorUtils.applyAlpha(root.widgetInk, 0.2),
+        accent: root.widgetAccentVisible,
+        onAccent: root.widgetInk,
+        radiusSmall: root.px(8),
+        glyph: materialGlyph
+    })
+
+    readonly property color shapeFill: root.playing ? root.widgetSemanticContainer(root.widgetPrimaryRole)
+        : ColorUtils.applyAlpha(root.widgetInk, 0.14)
+    readonly property color shapeInk: root.playing ? root.widgetSemanticOnContainer(root.widgetPrimaryRole) : root.widgetInk
 
     WidgetSurface {
         anchors.fill: parent
@@ -131,231 +151,281 @@ AbstractBackgroundWidget {
         surfaceAccent: root.widgetAccent3
     }
 
-    // ── Shape look ───────────────────────────────────────────
-    Item {
-        anchors.fill: parent
-        opacity: root.instrument ? 0 : 1
-        visible: opacity > 0
-        Behavior on opacity {
-            enabled: root.animationsActive
-            NumberAnimation { duration: Appearance.animation.elementMoveFast.duration }
-        }
-
-        RippleButton {
-            id: playButton
-            x: root.pad
-            anchors.verticalCenter: parent.verticalCenter
-            width: root.shapeSize
-            height: root.shapeSize
-            enabled: root.steerable
-            buttonRadius: root.shapeSize / 2
-            colBackground: "transparent"
-            colBackgroundHover: "transparent"
-            colRipple: ColorUtils.applyAlpha(root.shapeInk, 0.18)
-            onClicked: Radio.playPause()
-            Accessible.name: root.playing ? Translation.tr("Stop") : Translation.tr("Play")
-
-            contentItem: Item {
-                MaterialShape {
-                    anchors.fill: parent
-                    implicitSize: root.shapeSize
-                    shape: DesktopWidgetShapes.shapeForName(root.playing ? root.shapeName : "Circle")
-                    color: root.shapeFill
-                }
-                MaterialSymbol {
-                    anchors.centerIn: parent
-                    text: root.playIcon
-                    fill: 1
-                    iconSize: Math.round(root.shapeSize * 0.42)
-                    color: root.shapeInk
+    // The play key: the picked shape while a station plays, a circle at rest.
+    component PlayShape: RippleButton {
+        id: key
+        property int size: 88
+        implicitWidth: key.size
+        implicitHeight: key.size
+        enabled: root.steerable
+        buttonRadius: key.size / 2
+        colBackground: "transparent"
+        colBackgroundHover: "transparent"
+        colRipple: ColorUtils.applyAlpha(root.shapeInk, 0.18)
+        onClicked: Radio.playPause()
+        Accessible.name: root.playing ? Translation.tr("Stop") : Translation.tr("Play")
+        contentItem: Item {
+            MaterialShape {
+                anchors.fill: parent
+                implicitSize: key.size
+                shape: DesktopWidgetShapes.shapeForName(root.playing ? root.shapeName : "Circle")
+                color: root.shapeFill
+                scale: key.hovered && !key.down ? 1.04 : 1
+                Behavior on scale {
+                    enabled: root.animationsActive
+                    NumberAnimation { duration: Appearance.animation.elementMoveFast.duration; easing.type: Easing.OutCubic }
                 }
             }
+            MaterialSymbol {
+                anchors.centerIn: parent
+                text: root.playIcon
+                fill: 1
+                iconSize: Math.round(key.size * 0.44)
+                color: root.shapeInk
+            }
         }
+    }
+    component Eyebrow: RowLayout {
+        spacing: root.px(6)
+        MaterialSymbol {
+            text: "radio"
+            fill: 1
+            iconSize: root.px(Appearance.font.pixelSize.small)
+            color: root.widgetAccent3Visible
+        }
+        StyledText {
+            Layout.fillWidth: true
+            text: root.eyebrow
+            elide: Text.ElideRight
+            font.pixelSize: root.px(Appearance.font.pixelSize.smaller)
+            font.weight: Font.DemiBold
+            font.capitalization: root.widgetCapitalization
+            font.letterSpacing: root.px(1)
+            color: ColorUtils.applyAlpha(root.widgetInk, 0.66)
+        }
+    }
+    component Title: StyledText {
+        text: root.title
+        wrapMode: Text.WordWrap
+        maximumLineCount: 2
+        elide: Text.ElideRight
+        lineHeight: 0.95
+        font.family: root.widgetTitleFamily
+        font.weight: root.widgetTitleWeight
+        font.letterSpacing: root.widgetTitleTracking
+        color: root.widgetInk
+        MouseArea {
+            anchors.fill: parent
+            enabled: root.steerable
+            cursorShape: Qt.PointingHandCursor
+            onClicked: root.openTuner()
+        }
+    }
+    component Keys: Row {
+        property bool star: true
+        spacing: root.px(2)
+        enabled: root.steerable
+        RadioButton {
+            visible: parent.star && root.station !== null
+            look: root.cardLook
+            glyph: "star"
+            on: Radio.kept
+            label: Radio.kept ? Translation.tr("Remove from favourites") : Translation.tr("Add to favourites")
+            size: root.px(32)
+            onClicked: Radio.toggleFavourite(root.station)
+        }
+        RadioButton {
+            look: root.cardLook
+            glyph: "explore"
+            filled: true
+            on: Radio.tunerOpen
+            label: Translation.tr("Find a station")
+            size: root.px(32)
+            onClicked: root.openTuner()
+        }
+        RadioButton {
+            look: root.cardLook
+            glyph: "skip_next"
+            filled: true
+            enabled: !root.waiting
+            label: Translation.tr("Next station")
+            size: root.px(32)
+            onClicked: Radio.next()
+        }
+    }
+    component Line: StyledText {
+        elide: Text.ElideRight
+        font.pixelSize: root.px(Appearance.font.pixelSize.small)
+    }
 
+    // ── Shape look ───────────────────────────────────────────
+    Loader {
+        anchors.fill: parent
+        anchors.margins: root.pad
+        active: !root.instrument
+        sourceComponent: root.isSmall ? smallFace : root.isLarge ? largeFace : mediumFace
+    }
+
+    // Small: the key, the tuner and next; under them the station and where it is.
+    Component {
+        id: smallFace
         ColumnLayout {
-            id: info
-            x: playButton.x + playButton.width + Math.round(16 * root.scaleFactor)
-            width: root.infoWidth
-            anchors.verticalCenter: parent.verticalCenter
-            spacing: Math.round(2 * root.scaleFactor)
-
+            spacing: root.px(2)
             RowLayout {
                 Layout.fillWidth: true
-                spacing: Math.round(6 * root.scaleFactor)
-                MaterialSymbol {
-                    text: "radio"
-                    fill: 1
-                    iconSize: Math.round(Appearance.font.pixelSize.small * root.scaleFactor)
-                    color: root.widgetAccent3Visible
-                }
-                StyledText {
-                    Layout.fillWidth: true
-                    text: root.eyebrow
-                    elide: Text.ElideRight
-                    font.pixelSize: Math.round(Appearance.font.pixelSize.smaller * root.scaleFactor)
-                    font.weight: Font.DemiBold
-                    font.capitalization: root.widgetCapitalization
-                    font.letterSpacing: Math.round(1 * root.scaleFactor)
-                    color: ColorUtils.applyAlpha(root.widgetInk, 0.66)
-                }
-                Repeater {
-                    model: [
-                        { icon: "star", on: Radio.kept, show: root.station !== null, enabled: true, action: () => Radio.toggleFavourite(root.station),
-                            name: Radio.kept ? Translation.tr("Remove from favourites") : Translation.tr("Add to favourites") },
-                        { icon: "explore", on: Radio.tunerOpen, show: true, enabled: true, action: () => root.openTuner(), name: Translation.tr("Find a station") },
-                        { icon: "skip_next", on: false, show: true, enabled: !root.waiting, action: () => Radio.next(), name: Translation.tr("Next station") }
-                    ]
-                    RippleButton {
-                        required property var modelData
-                        visible: modelData.show
-                        implicitWidth: Math.round(28 * root.scaleFactor)
-                        implicitHeight: implicitWidth
-                        buttonRadius: implicitWidth / 2
-                        enabled: root.steerable && modelData.enabled
-                        opacity: enabled ? 1 : 0.4
-                        colBackground: "transparent"
-                        colBackgroundHover: ColorUtils.applyAlpha(root.widgetInk, 0.12)
-                        colRipple: ColorUtils.applyAlpha(root.widgetInk, 0.2)
-                        onClicked: modelData.action()
-                        Accessible.name: modelData.name
-                        contentItem: MaterialSymbol {
-                            anchors.centerIn: parent
-                            text: modelData?.icon ?? ""
-                            fill: modelData.on || modelData.icon !== "star" ? 1 : 0
-                            iconSize: Math.round(19 * root.scaleFactor)
-                            color: modelData.on ? root.widgetAccentVisible : root.widgetInk
-                        }
+                spacing: 0
+                PlayShape { size: root.px(84) }
+                Item { Layout.fillWidth: true }
+                Column {
+                    Layout.alignment: Qt.AlignTop
+                    spacing: root.px(2)
+                    enabled: root.steerable
+                    RadioButton {
+                        look: root.cardLook
+                        glyph: "explore"
+                        filled: true
+                        label: Translation.tr("Find a station")
+                        size: root.px(32)
+                        onClicked: root.openTuner()
+                    }
+                    RadioButton {
+                        look: root.cardLook
+                        glyph: "skip_next"
+                        filled: true
+                        enabled: !root.waiting
+                        label: Translation.tr("Next station")
+                        size: root.px(32)
+                        onClicked: Radio.next()
                     }
                 }
             }
-
-            StyledText {
+            Item { Layout.fillHeight: true }
+            Title {
                 Layout.fillWidth: true
-                text: root.title
-                elide: Text.ElideRight
-                MouseArea {
-                    anchors.fill: parent
-                    enabled: root.steerable
-                    cursorShape: Qt.PointingHandCursor
-                    onClicked: root.openTuner()
-                }
-                font.family: root.widgetTitleFamily
-                font.pixelSize: Math.round(Appearance.font.pixelSize.larger * root.widgetTitleScale * root.scaleFactor)
-                font.weight: root.widgetTitleWeight
-                font.letterSpacing: root.widgetTitleTracking
-                color: root.widgetInk
+                maximumLineCount: 1
+                font.pixelSize: root.px(Appearance.font.pixelSize.normal * root.widgetTitleScale)
             }
-
-            StyledText {
+            Line {
                 Layout.fillWidth: true
-                visible: root.where.length > 0
-                text: root.where
-                elide: Text.ElideRight
-                font.pixelSize: Math.round(Appearance.font.pixelSize.small * root.scaleFactor)
+                text: root.turning || root.failed || root.waiting || root.where.length === 0 ? root.statusLine : root.where
                 font.weight: Font.Medium
-                color: ColorUtils.applyAlpha(root.widgetInk, 0.78)
-            }
-
-            StyledText {
-                Layout.fillWidth: true
-                Layout.topMargin: Math.round(2 * root.scaleFactor)
-                text: root.statusLine
-                wrapMode: Text.WordWrap
-                maximumLineCount: 2
-                elide: Text.ElideRight
-                font.pixelSize: Math.round(Appearance.font.pixelSize.small * root.scaleFactor)
-                color: root.failed ? root.widgetAccentVisible : ColorUtils.applyAlpha(root.widgetInk, 0.58)
+                color: root.failed ? root.widgetAccentVisible : ColorUtils.applyAlpha(root.widgetInk, 0.7)
             }
         }
     }
 
-    // ── Instrument look ──────────────────────────────────────
-    ColumnLayout {
-        id: instrumentBody
-        anchors.fill: parent
-        anchors.margins: root.instrumentMargin
-        opacity: root.instrument ? 1 : 0
-        visible: opacity > 0
-        spacing: Math.round(6 * root.scaleFactor)
-        Behavior on opacity {
-            enabled: root.animationsActive
-            NumberAnimation { duration: Appearance.animation.elementMoveFast.duration }
-        }
-
-        InstrumentLabel {
-            Layout.fillWidth: true
-            text: Translation.tr("Radio") + " / " + (root.station ? (Radio.tag.length > 0 ? Radio.tag : Radio.current.country) : Translation.tr("Anywhere"))
-            color: root.widgetAccentVisible
-            scaleFactor: root.scaleFactor
-            strong: true
-        }
-
+    // Medium: the key beside the station, where it is and what it plays; keys and volume along the bottom.
+    Component {
+        id: mediumFace
         RowLayout {
-            Layout.fillWidth: true
-            spacing: Math.round(8 * root.scaleFactor)
-            StyledText {
-                Layout.fillWidth: true
-                text: root.title
-                elide: Text.ElideRight
-                font.family: root.widgetNumbersFamily
-                font.pixelSize: Math.round(24 * root.scaleFactor)
-                font.weight: root.widgetEditorial ? Appearance.editorial.titleWeight : Font.Bold
-                font.letterSpacing: -0.5
-                color: root.widgetInk
+            spacing: root.px(16)
+            PlayShape {
+                Layout.alignment: Qt.AlignVCenter
+                size: root.px(112)
             }
-            Repeater {
-                model: [
-                    { icon: root.playIcon, enabled: true, action: () => Radio.playPause(), name: root.playing ? Translation.tr("Stop") : Translation.tr("Play") },
-                    { icon: "star", enabled: root.station !== null, action: () => Radio.toggleFavourite(root.station),
-                        name: Radio.kept ? Translation.tr("Remove from favourites") : Translation.tr("Add to favourites") },
-                    { icon: "explore", enabled: true, action: () => root.openTuner(), name: Translation.tr("Find a station") },
-                    { icon: "skip_next", enabled: !root.waiting, action: () => Radio.next(), name: Translation.tr("Next station") }
-                ]
-                RippleButton {
-                    required property var modelData
-                    implicitWidth: Math.round(28 * root.scaleFactor)
-                    implicitHeight: implicitWidth
-                    buttonRadius: Math.round(6 * root.scaleFactor)
-                    enabled: root.steerable && modelData.enabled
-                    opacity: enabled ? 1 : 0.4
-                    colBackground: "transparent"
-                    colBackgroundHover: ColorUtils.applyAlpha(root.widgetAccentVisible, 0.14)
-                    colRipple: ColorUtils.applyAlpha(root.widgetAccentVisible, 0.22)
-                    onClicked: modelData.action()
-                    Accessible.name: modelData.name
-                    contentItem: MaterialSymbol {
-                        anchors.centerIn: parent
-                        text: modelData?.icon ?? ""
-                        fill: modelData?.icon !== "star" || Radio.kept ? 1 : 0
-                        iconSize: Math.round(18 * root.scaleFactor)
-                        color: modelData?.icon === "star" && Radio.kept ? root.widgetAccentVisible : root.widgetInk
+            ColumnLayout {
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                spacing: root.px(2)
+                Eyebrow { Layout.fillWidth: true }
+                Title {
+                    Layout.fillWidth: true
+                    font.pixelSize: root.px(Appearance.font.pixelSize.larger * root.widgetTitleScale)
+                }
+                Line {
+                    Layout.fillWidth: true
+                    visible: root.where.length > 0
+                    text: root.where
+                    font.weight: Font.Medium
+                    color: ColorUtils.applyAlpha(root.widgetInk, 0.78)
+                }
+                Line {
+                    Layout.fillWidth: true
+                    text: root.statusLine
+                    color: root.failed ? root.widgetAccentVisible : ColorUtils.applyAlpha(root.widgetInk, 0.58)
+                }
+                Item { Layout.fillHeight: true }
+                RowLayout {
+                    Layout.fillWidth: true
+                    Layout.leftMargin: -root.px(6)
+                    spacing: 0
+                    Keys {}
+                    Item { Layout.fillWidth: true }
+                    RadioVolume {
+                        look: root.cardLook
+                        barWidth: root.px(56)
                     }
                 }
             }
         }
+    }
 
-        RowLayout {
-            Layout.fillWidth: true
-            spacing: Math.round(14 * root.scaleFactor)
-            InstrumentField {
-                Layout.preferredWidth: Math.round(100 * root.scaleFactor)
-                label: Translation.tr("From")
-                value: root.station ? Radio.place : "--"
-                ink: root.widgetInk
-                muted: root.widgetInkMuted
-                family: root.widgetNumbersFamily
-                scaleFactor: root.scaleFactor
-            }
-            InstrumentField {
+    // Large: the same head, the song in full, volume, and the stations kept one click away.
+    Component {
+        id: largeFace
+        ColumnLayout {
+            spacing: root.px(8)
+            RowLayout {
                 Layout.fillWidth: true
-                label: root.playing ? Translation.tr("On air") : Translation.tr("Status")
-                value: root.statusLine
-                ink: root.failed ? root.widgetAccentVisible : root.widgetInk
-                muted: root.widgetInkMuted
-                family: root.widgetNumbersFamily
-                scaleFactor: root.scaleFactor
+                spacing: root.px(16)
+                PlayShape { size: root.px(96) }
+                ColumnLayout {
+                    Layout.fillWidth: true
+                    spacing: root.px(2)
+                    Eyebrow { Layout.fillWidth: true }
+                    Title {
+                        Layout.fillWidth: true
+                        font.pixelSize: root.px(Appearance.font.pixelSize.larger * 1.1 * root.widgetTitleScale)
+                    }
+                    Line {
+                        Layout.fillWidth: true
+                        visible: root.where.length > 0
+                        text: root.where
+                        font.weight: Font.Medium
+                        color: ColorUtils.applyAlpha(root.widgetInk, 0.78)
+                    }
+                }
             }
+            Line {
+                Layout.fillWidth: true
+                Layout.topMargin: root.px(2)
+                text: root.statusLine
+                wrapMode: Text.WordWrap
+                maximumLineCount: 2
+                font.pixelSize: root.px(Appearance.font.pixelSize.normal)
+                color: root.failed ? root.widgetAccentVisible : ColorUtils.applyAlpha(root.widgetInk, 0.82)
+            }
+            RowLayout {
+                Layout.fillWidth: true
+                Layout.leftMargin: -root.px(6)
+                spacing: 0
+                Keys {}
+                Item { Layout.fillWidth: true }
+                RadioVolume {
+                    look: root.cardLook
+                    barWidth: root.px(132)
+                }
+            }
+            Rectangle {
+                Layout.fillWidth: true
+                implicitHeight: 1
+                color: root.cardLook.line
+            }
+            RadioCardStations {
+                Layout.fillWidth: true
+                card: root
+                rows: 3
+            }
+            Item { Layout.fillHeight: true }
         }
+    }
+
+    // ── Instrument look ──────────────────────────────────────
+    Loader {
+        anchors.fill: parent
+        anchors.margins: root.px(14)
+        active: root.instrument
+        sourceComponent: RadioCardInstrument { card: root }
     }
 
     // ── Quick controls (edit mode) ───────────────────────────

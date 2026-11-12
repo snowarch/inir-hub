@@ -14,3 +14,5 @@ RadioRail 1.0 RadioRail.qml
 RadioSearch 1.0 RadioSearch.qml
 IrisLook 1.0 IrisLook.qml
 WaffleLook 1.0 WaffleLook.qml
+RadioCardInstrument 1.0 RadioCardInstrument.qml
+RadioCardStations 1.0 RadioCardStations.qml

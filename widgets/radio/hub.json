@@ -1,7 +1,8 @@
 {
     "$schema": "../../schema/hub.schema.json",
-    "version": "2.1.2",
+    "version": "2.2.0",
     "changes": {
+        "2.2.0": ["The desktop card in three sizes: small (play, find, next), medium (station, place, song, volume) and large, with your stations a click away", "A bigger play button and keys; a station name that wraps instead of being cut", "The Instrument look follows the three sizes too"],
         "2.1.2": ["In Countries, Genres or Languages, a word that matches none searches stations by name", "`inir radio toggle` answers what the radio turns into"],
         "2.1.0": ["A tuner with search, countries, genres, languages, favourites and volume, drawn in each family's own look", "Its commands answer with no face on screen, for keybinds"]
     },
