@@ -1,3 +1,11 @@
 singleton Radio 1.0 Radio.qml
 RadioBrowser 1.0 RadioBrowser.qml
 RadioPlayer 1.0 RadioPlayer.qml
+RadioTuner 1.0 RadioTuner.qml
+RadioNowPlaying 1.0 RadioNowPlaying.qml
+RadioStationRow 1.0 RadioStationRow.qml
+RadioIndexRow 1.0 RadioIndexRow.qml
+RadioLogo 1.0 RadioLogo.qml
+RadioGlyph 1.0 RadioGlyph.qml
+RadioButton 1.0 RadioButton.qml
+RadioVolume 1.0 RadioVolume.qml

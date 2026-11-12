@@ -30,21 +30,97 @@ function spoken(station) {
     return SPOKEN.some(s => all.indexOf(s) >= 0)
 }
 
-// One station as the widget keeps it, from Radio Browser's record.
+// One station as the widget keeps it, from Radio Browser's record. Favourites and recent stations are these same
+// objects in the person's config, so they play without asking the directory again.
 function station(s, tag) {
     return {
         uuid: String(s.stationuuid ?? ""),
-        name: String(s.name ?? "").trim(),
+        name: cleanName(s.name),
         url: String(s.url_resolved || s.url || ""),
         home: String(s.homepage ?? ""),
+        logo: logo(s.favicon),
         country: country(s.country, s.countrycode),
         code: String(s.countrycode ?? "").toUpperCase(),
         place: String(s.state ?? "").trim(),
+        language: String(s.language ?? "").split(",")[0].trim(),
         codec: String(s.codec ?? ""),
         bitrate: Number(s.bitrate ?? 0),
+        votes: Number(s.votes ?? 0),
         tags: tags(s).slice(0, 8),
         tag: String(tag ?? "")
     }
+}
+
+// Many stations pack their genres into the name ("0R - COFFEE LOUNGE || Jazz, Lounge, Chill…"): the name is what
+// comes before.
+function cleanName(name) {
+    const n = String(name ?? "").trim()
+    const cut = n.search(/\s(\|\||\||::)\s/)
+    return cut >= 3 ? n.slice(0, cut).trim() : n
+}
+
+// A favicon worth loading: an http(s) image address, nothing else (some records hold a data: blob or a page).
+function logo(url) {
+    const u = String(url ?? "").trim()
+    return /^https?:\/\/\S+$/.test(u) && u.length < 400 ? u : ""
+}
+
+// Tags that say nothing of the music: codecs, years, the word "radio", a frequency.
+const NOISE = /^(aac\+?|mp3|ogg|opus|flac|hls|\d+|\d+[.,]\d+( ?fm)?|fm|am|radio|music|online|internet radio|webradio|stereo|information|live|other|various)$/
+
+// What a row says under the name: the place and the station's own genres, as few words as carry it.
+function meta(s) {
+    if (!s) return ""
+    const parts = []
+    const at = where(s)
+    if (at.length > 0) parts.push(at)
+    const genres = (s.tags ?? []).filter(t => t.length <= 18 && !NOISE.test(t)).slice(0, 2)
+    if (genres.length > 0) parts.push(genres.join(", "))
+    return parts.join(" · ")
+}
+
+// Which logo addresses answered with an image, asked once a session: a logo that fails would otherwise write a
+// warning to the person's log for every row that shows it. true, false, or a list of callers waiting.
+const logos = {}
+function checkLogo(url, done) {
+    const known = logos[url]
+    if (known === true || known === false) { done(known); return }
+    if (Array.isArray(known)) { known.push(done); return }
+    logos[url] = [done]
+    const xhr = new XMLHttpRequest()
+    xhr.onreadystatechange = () => {
+        if (xhr.readyState !== XMLHttpRequest.DONE) return
+        const ok = xhr.status === 200 && /^image\/(png|jpe?g|gif|webp|svg|x-icon|vnd\.microsoft\.icon|bmp)/i.test(String(xhr.getResponseHeader("Content-Type") ?? ""))
+        const waiting = logos[url]
+        logos[url] = ok
+        if (Array.isArray(waiting)) waiting.forEach(f => f(ok))
+    }
+    xhr.open("GET", url)
+    xhr.send()
+}
+
+// The stream's quality as people read it: "MP3 128".
+function quality(s) {
+    if (!s) return ""
+    const c = String(s.codec ?? "").toUpperCase().replace("UNKNOWN", "")
+    const b = Number(s.bitrate ?? 0)
+    return [c, b > 0 ? String(b) : ""].filter(x => x.length > 0).join(" ")
+}
+
+// A name as a title: the directory keeps genres and languages lowercase ("bossa nova", "english").
+function title(text) {
+    return String(text ?? "").replace(/(^|[\s\-\/])(\p{L})/gu, (m, a, b) => a + b.toUpperCase())
+}
+
+// The stations a list keeps once: the same station is often listed twice, under the same name.
+function unique(list) {
+    const seen = {}
+    return list.filter(s => {
+        const key = s.name.toLowerCase()
+        if (s.url.length === 0 || seen[key] || seen[s.uuid]) return false
+        seen[key] = seen[s.uuid] = true
+        return true
+    })
 }
 
 // The directory writes official names ("The United States Of America"); people say the short one.
@@ -115,16 +191,4 @@ function where(s) {
     if (!s) return ""
     const place = String(s.place ?? "")
     return place.length > 0 && place !== s.country ? `${place}, ${s.country}` : String(s.country ?? "")
-}
-
-// The line under the station's name, in words for every state.
-function status(phase, onAir, tag, problem) {
-    switch (phase) {
-    case "failed": return problem
-    case "searching": return `Looking for ${tag} somewhere…`
-    case "tuning": return "Tuning in…"
-    case "playing": return onAir.length > 0 ? onAir : tag
-    case "stopped": return "Paused · tap to tune back in"
-    default: return "Live stations from anywhere in the world"
-    }
 }

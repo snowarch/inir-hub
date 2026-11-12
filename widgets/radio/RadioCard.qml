@@ -1,7 +1,8 @@
 pragma ComponentBehavior: Bound
 
 // The Material face: a card on the desktop. The shape is the play button: it takes the shape the person picked while
-// a station plays and rests as a circle otherwise. Beside it, the station, where it is, and what it plays now.
+// a station plays and rests as a circle otherwise. Beside it, the station, where it is, and what it plays now; its
+// star, the tuner (search, countries, genres, favourites) and next. The wheel over the card sets the volume.
 // When the person's widget design is iNstrument or Readout (or they pick Instrument here) it draws that grammar.
 // Every screen's card steers the one Radio, so two cards never play two streams.
 
@@ -34,15 +35,69 @@ AbstractBackgroundWidget {
 
     // ── What plays ───────────────────────────────────────────
     readonly property var station: Radio.current
-    readonly property bool playing: Radio.phase === "playing"
-    readonly property bool waiting: Radio.phase === "searching" || Radio.phase === "tuning"
+    readonly property bool playing: Radio.playing
+    readonly property bool waiting: Radio.waiting
     readonly property bool failed: Radio.phase === "failed"
     // In edit mode a click places the card; it never plays.
     readonly property bool steerable: !GlobalStates.widgetEditMode
-    readonly property string playIcon: root.playing ? "pause" : root.waiting ? "more_horiz" : "play_arrow"
-    readonly property string eyebrow: root.station ? Radio.tag : "Radio"
-    readonly property string title: root.station?.name ?? "Tune in somewhere"
+    readonly property string playIcon: root.playing ? "stop" : root.waiting ? "more_horiz" : "play_arrow"
+    readonly property string eyebrow: root.station && Radio.tag.length > 0 ? Radio.tag : Translation.tr("Radio")
+    readonly property string title: root.station?.name ?? Translation.tr("Tune in somewhere")
     readonly property string where: root.station ? `${Radio.flag} ${Radio.place}`.trim() : ""
+    // The wheel's volume is said for a moment where the song goes.
+    property bool turning: false
+    Timer { id: turned; interval: 1400; onTriggered: root.turning = false }
+    readonly property string statusLine: root.turning
+        ? (Radio.muted ? Translation.tr("Muted") : Translation.tr("Volume %1 %").arg(Math.round(Radio.liveVolume)))
+        : Radio.skipped.length > 0 && !root.playing ? Translation.tr("%1 didn't answer, moved on").arg(Radio.skipped)
+        : Radio.line
+    WheelHandler {
+        enabled: root.steerable
+        acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
+        onWheel: event => {
+            Radio.nudgeVolume(event.angleDelta.y > 0 ? 1 : event.angleDelta.y < 0 ? -1 : 0)
+            root.turning = true
+            turned.restart()
+        }
+    }
+    function openTuner(): void { Radio.openTuner(root.desktop?.screen ?? null, root.tunerLook) }
+
+    // The tuner wears Material's panel colours, not the card's wallpaper ink: it is a window, not a widget.
+    readonly property var tunerLook: ({
+        d: 1,
+        font: Appearance.font.family.main,
+        small: Appearance.font.pixelSize.smaller,
+        meta: Appearance.font.pixelSize.smallie,
+        body: Appearance.font.pixelSize.small,
+        title: Appearance.font.pixelSize.larger,
+        bg: Appearance.colors.colLayer0Base,
+        raised: Appearance.colors.colLayer1Base,
+        hover: Appearance.colors.colLayer1Hover,
+        press: Appearance.colors.colLayer1Active,
+        selected: Appearance.colors.colSecondaryContainer,
+        ink: Appearance.colors.colOnLayer0,
+        muted: Appearance.colors.colSubtext,
+        faint: ColorUtils.applyAlpha(Appearance.colors.colOnLayer0, 0.46),
+        line: Appearance.colors.colOutlineVariant,
+        accent: Appearance.colors.colPrimary,
+        onAccent: Appearance.colors.colOnPrimary,
+        danger: Appearance.colors.colError,
+        scrim: ColorUtils.applyAlpha(Appearance.colors.colScrim, 0.32),
+        radius: Appearance.rounding.windowRounding,
+        radiusSmall: Appearance.rounding.small,
+        glyph: materialGlyph
+    })
+    Component {
+        id: materialGlyph
+        MaterialSymbol {
+            property string name: ""
+            property real size: 20
+            property bool filled: false
+            text: name
+            iconSize: size
+            fill: filled ? 1 : 0
+        }
+    }
 
     readonly property color shapeFill: root.playing ? root.widgetSemanticContainer(root.widgetPrimaryRole)
         : ColorUtils.applyAlpha(root.widgetInk, playButton.hovered ? 0.2 : 0.14)
@@ -50,7 +105,7 @@ AbstractBackgroundWidget {
 
     readonly property int pad: Math.round(16 * root.scaleFactor)
     readonly property int shapeSize: Math.round(88 * root.scaleFactor)
-    readonly property int infoWidth: Math.round(204 * root.scaleFactor)
+    readonly property int infoWidth: Math.round(236 * root.scaleFactor)
     readonly property int instrumentMargin: Math.round(14 * root.scaleFactor)
     implicitWidth: root.instrument ? Math.round(300 * root.scaleFactor)
         : root.pad * 2 + root.shapeSize + Math.round(16 * root.scaleFactor) + root.infoWidth
@@ -87,7 +142,7 @@ AbstractBackgroundWidget {
             colBackgroundHover: "transparent"
             colRipple: ColorUtils.applyAlpha(root.shapeInk, 0.18)
             onClicked: Radio.playPause()
-            Accessible.name: root.playing ? "Stop" : "Play"
+            Accessible.name: root.playing ? Translation.tr("Stop") : Translation.tr("Play")
 
             contentItem: Item {
                 MaterialShape {
@@ -132,24 +187,33 @@ AbstractBackgroundWidget {
                     font.letterSpacing: Math.round(1 * root.scaleFactor)
                     color: ColorUtils.applyAlpha(root.widgetInk, 0.66)
                 }
-                RippleButton {
-                    id: nextButton
-                    implicitWidth: Math.round(28 * root.scaleFactor)
-                    implicitHeight: implicitWidth
-                    buttonRadius: implicitWidth / 2
-                    enabled: root.steerable && !root.waiting
-                    opacity: enabled ? 1 : 0.4
-                    colBackground: "transparent"
-                    colBackgroundHover: ColorUtils.applyAlpha(root.widgetInk, 0.12)
-                    colRipple: ColorUtils.applyAlpha(root.widgetInk, 0.2)
-                    onClicked: Radio.next()
-                    Accessible.name: "Next station"
-                    contentItem: MaterialSymbol {
-                        anchors.centerIn: parent
-                        text: "skip_next"
-                        fill: 1
-                        iconSize: Math.round(20 * root.scaleFactor)
-                        color: root.widgetInk
+                Repeater {
+                    model: [
+                        { icon: "star", on: Radio.kept, show: root.station !== null, enabled: true, action: () => Radio.toggleFavourite(root.station),
+                            name: Radio.kept ? Translation.tr("Remove from favourites") : Translation.tr("Add to favourites") },
+                        { icon: "explore", on: Radio.tunerOpen, show: true, enabled: true, action: () => root.openTuner(), name: Translation.tr("Find a station") },
+                        { icon: "skip_next", on: false, show: true, enabled: !root.waiting, action: () => Radio.next(), name: Translation.tr("Next station") }
+                    ]
+                    RippleButton {
+                        required property var modelData
+                        visible: modelData.show
+                        implicitWidth: Math.round(28 * root.scaleFactor)
+                        implicitHeight: implicitWidth
+                        buttonRadius: implicitWidth / 2
+                        enabled: root.steerable && modelData.enabled
+                        opacity: enabled ? 1 : 0.4
+                        colBackground: "transparent"
+                        colBackgroundHover: ColorUtils.applyAlpha(root.widgetInk, 0.12)
+                        colRipple: ColorUtils.applyAlpha(root.widgetInk, 0.2)
+                        onClicked: modelData.action()
+                        Accessible.name: modelData.name
+                        contentItem: MaterialSymbol {
+                            anchors.centerIn: parent
+                            text: modelData?.icon ?? ""
+                            fill: modelData.on || modelData.icon !== "star" ? 1 : 0
+                            iconSize: Math.round(19 * root.scaleFactor)
+                            color: modelData.on ? root.widgetAccentVisible : root.widgetInk
+                        }
                     }
                 }
             }
@@ -158,6 +222,12 @@ AbstractBackgroundWidget {
                 Layout.fillWidth: true
                 text: root.title
                 elide: Text.ElideRight
+                MouseArea {
+                    anchors.fill: parent
+                    enabled: root.steerable
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: root.openTuner()
+                }
                 font.family: root.widgetTitleFamily
                 font.pixelSize: Math.round(Appearance.font.pixelSize.larger * root.widgetTitleScale * root.scaleFactor)
                 font.weight: root.widgetTitleWeight
@@ -178,7 +248,7 @@ AbstractBackgroundWidget {
             StyledText {
                 Layout.fillWidth: true
                 Layout.topMargin: Math.round(2 * root.scaleFactor)
-                text: Radio.line
+                text: root.statusLine
                 wrapMode: Text.WordWrap
                 maximumLineCount: 2
                 elide: Text.ElideRight
@@ -203,7 +273,7 @@ AbstractBackgroundWidget {
 
         InstrumentLabel {
             Layout.fillWidth: true
-            text: "Radio / " + (root.station ? Radio.tag : "Anywhere")
+            text: Translation.tr("Radio") + " / " + (root.station ? (Radio.tag.length > 0 ? Radio.tag : Radio.current.country) : Translation.tr("Anywhere"))
             color: root.widgetAccentVisible
             scaleFactor: root.scaleFactor
             strong: true
@@ -224,8 +294,11 @@ AbstractBackgroundWidget {
             }
             Repeater {
                 model: [
-                    { icon: root.playIcon, enabled: true, action: () => Radio.playPause(), name: root.playing ? "Stop" : "Play" },
-                    { icon: "skip_next", enabled: !root.waiting, action: () => Radio.next(), name: "Next station" }
+                    { icon: root.playIcon, enabled: true, action: () => Radio.playPause(), name: root.playing ? Translation.tr("Stop") : Translation.tr("Play") },
+                    { icon: "star", enabled: root.station !== null, action: () => Radio.toggleFavourite(root.station),
+                        name: Radio.kept ? Translation.tr("Remove from favourites") : Translation.tr("Add to favourites") },
+                    { icon: "explore", enabled: true, action: () => root.openTuner(), name: Translation.tr("Find a station") },
+                    { icon: "skip_next", enabled: !root.waiting, action: () => Radio.next(), name: Translation.tr("Next station") }
                 ]
                 RippleButton {
                     required property var modelData
@@ -241,10 +314,10 @@ AbstractBackgroundWidget {
                     Accessible.name: modelData.name
                     contentItem: MaterialSymbol {
                         anchors.centerIn: parent
-                        text: modelData.icon
-                        fill: 1
+                        text: modelData?.icon ?? ""
+                        fill: modelData?.icon !== "star" || Radio.kept ? 1 : 0
                         iconSize: Math.round(18 * root.scaleFactor)
-                        color: root.widgetInk
+                        color: modelData?.icon === "star" && Radio.kept ? root.widgetAccentVisible : root.widgetInk
                     }
                 }
             }
@@ -255,7 +328,7 @@ AbstractBackgroundWidget {
             spacing: Math.round(14 * root.scaleFactor)
             InstrumentField {
                 Layout.preferredWidth: Math.round(100 * root.scaleFactor)
-                label: "From"
+                label: Translation.tr("From")
                 value: root.station ? Radio.place : "--"
                 ink: root.widgetInk
                 muted: root.widgetInkMuted
@@ -264,8 +337,8 @@ AbstractBackgroundWidget {
             }
             InstrumentField {
                 Layout.fillWidth: true
-                label: root.playing ? "On air" : "Status"
-                value: Radio.line
+                label: root.playing ? Translation.tr("On air") : Translation.tr("Status")
+                value: root.statusLine
                 ink: root.failed ? root.widgetAccentVisible : root.widgetInk
                 muted: root.widgetInkMuted
                 family: root.widgetNumbersFamily
@@ -279,19 +352,19 @@ AbstractBackgroundWidget {
         ColumnLayout {
             spacing: 14
             WidgetQuickSection {
-                title: "Style"
+                title: Translation.tr("Style")
                 WidgetQuickChoices {
                     current: root.instrument ? "instrument" : "shape"
                     model: [
-                        { label: "Shape", icon: "interests", value: "shape" },
-                        { label: "Instrument", icon: "avg_pace", value: "instrument" }
+                        { label: Translation.tr("Shape"), icon: "interests", value: "shape" },
+                        { label: Translation.tr("Instrument"), icon: "avg_pace", value: "instrument" }
                     ]
                     onPicked: value => root._setOutputValue("style", value)
                 }
             }
             WidgetQuickSection {
                 visible: !root.instrument
-                title: "Shape while playing"
+                title: Translation.tr("Shape while playing")
                 WidgetShapePicker {
                     Layout.fillWidth: true
                     selectedShape: root.shapeName

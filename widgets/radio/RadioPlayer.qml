@@ -6,12 +6,13 @@ import Quickshell.Io
 import "radio.js" as R
 
 // The stream itself, played by mpv (an iNiR dependency on every distro). mpv's own socket says what the station
-// announces (the ICY title), whether sound has started and whether it is paused; with mpv-mpris installed the
-// station also shows in the shell's media controls.
+// announces (the ICY title), whether sound has started and whether it is paused; with mpv-mpris (an iNiR dependency)
+// the station is a player the shell's media controls and the media keys reach. A pause from there reads as stopped.
 Scope {
     id: root
 
     property real volume: 60
+    property bool muted: false
     property var station: null
     readonly property bool active: proc.running
     property bool audible: false
@@ -55,6 +56,7 @@ Scope {
         links.active = false
     }
     onVolumeChanged: root.send(["set_property", "volume", Math.round(root.volume)])
+    onMutedChanged: root.send(["set_property", "mute", root.muted])
 
     property bool _restart: false
     Timer {
@@ -81,7 +83,7 @@ Scope {
         id: proc
         command: ["mpv", "--no-video", "--no-terminal", "--idle=no", "--force-window=no", "--cache=yes",
             "--network-timeout=12", "--title=iNiR Radio", `--force-media-title=${String(root.station?.name ?? "Radio")}`,
-            `--volume=${Math.round(root.volume)}`,
+            `--volume=${Math.round(root.volume)}`, `--mute=${root.muted ? "yes" : "no"}`,
             `--input-ipc-server=${root.socketPath}`, String(root.station?.url ?? "")]
         onStarted: {
             root._began = true
