@@ -19,6 +19,11 @@ Waffle's Widgets panel (`waffle.main`). Ship the faces you can make well; the Hu
 - **`widget.json` declares** the faces (`main`, `iris`, `waffle`), `defaultConfig`, `configKeys` (iNiR draws their
   controls), `resizableAxes` and `defaultSize`. The engine sizes and places the widget from it; the widget never
   moves or resizes itself.
+- **A desktop widget wears the family's widget designs** (iNiR 3.1.0): under iRiS the Material `main` sits on its own
+  card, without the glass, blur and ink the built-in widgets share. `"iris": { "desktop": { "iris": "IrisFace.qml",
+  "prism": "PrismFace.qml" } }` names a face per design, each drawn in the widget's three sizes from
+  `IrisWidgetFace` / `PrismFolder` (`radio/IrisRadioFace.qml`, `radio/PrismRadio.qml`; `guides/widgets.md`). The
+  Material `main` stops drawing while `root.familyFaced`. An older iNiR ignores the key.
 - **Logic lives once**, in a `.js` file every face imports. Faces only lay out.
 - **Options** are `configKeys`. Read them with `root._readConfigKey(key)` (desktop) or
   `CustomWidgets.getConfigValue("<id>", key, fallback)` (Island, Waffle); write with
@@ -33,7 +38,8 @@ Waffle's Widgets panel (`waffle.main`). Ship the faces you can make well; the Hu
   timer, fetch or process starts there; an older iNiR ignores the key.
 - **Every state has words:** empty, loading, failed (show what failed), never a blank card.
 - **Imports:** the base and `qs.modules.shared.background.widgets` (`AbstractBackgroundWidget`, the `Instrument*`
-  parts) for the desktop, `qs.modules.iris.style` / `.components` for the Island, `qs.modules.waffle.looks` for
+  parts) for the desktop, `qs.modules.iris.style` / `.components` for the Island, `qs.modules.iris.widgets` (and `.prism`) for an iRiS
+  desktop face, `qs.modules.waffle.looks` for
   Waffle. Nothing else of a family.
 
 ## Preview

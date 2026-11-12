@@ -174,7 +174,7 @@ not installed.
 
 ## Widgets
 
-One widget can have three faces. Give it the ones you can make well; the Hub says where it shows.
+One widget can have three faces, and on the desktop one more per widget design of iRiS. Give it the ones you can make well; the Hub says where it shows.
 
 **Start with [the Material guide](guides/material.md).** It shows the shapes, bars, looks and states the built-in
 widgets use, and what a widget needs to sit beside them. Every property and service a widget can read is in
@@ -184,6 +184,7 @@ widgets use, and what a widget needs to sit beside them. Every property and serv
 | --- | --- | --- | --- |
 | Material desktop | `main` | `AbstractBackgroundWidget`, `MaterialShape`, `WidgetSurface`, the `Instrument*` parts, `Appearance.*` | `countdown/Countdown.qml`, [guide](guides/material.md) |
 | iRiS Island | `iris.main`, `iris.slots` | `IrisStyle.*` tokens, `IrisText` and the other `Iris*` parts | `countdown/IrisCountdown.qml` |
+| iRiS desktop, one per widget design (iNiR 3.1.0) | `iris.desktop` | `IrisWidgetFace` with `FaceText`, `FaceHeader`, `FaceAction`; `PrismFolder` for Prism | `radio/IrisRadioFace.qml`, `radio/PrismRadio.qml`, [guide](guides/widgets.md#desktop-a-face-per-widget-design-inir-310) |
 | Waffle Widgets panel | `waffle.main` | `Looks.*`, `WText` and the other `W*` parts, Fluent icons | `countdown/WaffleCountdown.qml` |
 
 What makes a widget belong:

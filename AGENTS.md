@@ -46,7 +46,7 @@ Each of these is held by `inir hub check` and CI, or by review where no machine 
 - **Import a family's inside.** Items import the base (`qs`, `qs.services`, `qs.modules.common` and its `widgets`,
   `functions`) and only what a family offers: `qs.modules.iris.style`, `qs.modules.iris.components`,
   `qs.modules.iris.frame`, `qs.modules.waffle.looks`, `qs.modules.ii.kit` (a Design's Island face also
-  `qs.modules.iris.bar.island`). Everything else (`iris.state`,
+  `qs.modules.iris.bar.island`; a widget's iRiS desktop face also `qs.modules.iris.widgets` and its `.prism`). Everything else (`iris.state`,
   `iris.pieces`, `iris.settings`, `iris.field`, a family's bar or panels) changes with every release of that family,
   and the item then stops loading for everyone.
 - **Write the person's settings or a family's state.** No `Config.setNestedValue(…)`, no `Config.options.x = …`, no

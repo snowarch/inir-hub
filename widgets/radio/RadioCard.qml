@@ -4,6 +4,8 @@ pragma ComponentBehavior: Bound
 // a station plays and rests as a circle otherwise. Beside it, the station, where it is, and what it plays now; its
 // star, the tuner (search, countries, genres, favourites) and next. The wheel over the card sets the volume.
 // When the person's widget design is iNstrument or Readout (or they pick Instrument here) it draws that grammar.
+// Under iRiS the family's widget designs draw it instead: IrisRadioFace (iRiS) and PrismRadio (Prism), named by
+// `iris.desktop` in widget.json; this drawing is then its Material design.
 // Every screen's card steers the one Radio, so two cards never play two streams.
 
 import QtQuick
@@ -146,7 +148,7 @@ AbstractBackgroundWidget {
     WidgetSurface {
         anchors.fill: parent
         widget: root
-        shown: !root.instrument && (root.backgroundOpacity > 0 || root.borderWidth > 0 || root.effectiveBlur)
+        shown: !root.instrument && !root.familyFaced && (root.backgroundOpacity > 0 || root.borderWidth > 0 || root.effectiveBlur)
         surfaceColor: root.widgetInk
         surfaceAccent: root.widgetAccent3
     }
@@ -262,7 +264,7 @@ AbstractBackgroundWidget {
     Loader {
         anchors.fill: parent
         anchors.margins: root.pad
-        active: !root.instrument
+        active: !root.instrument && !root.familyFaced
         sourceComponent: root.isSmall ? smallFace : root.isLarge ? largeFace : mediumFace
     }
 
@@ -424,7 +426,7 @@ AbstractBackgroundWidget {
     Loader {
         anchors.fill: parent
         anchors.margins: root.px(14)
-        active: root.instrument
+        active: root.instrument && !root.familyFaced
         sourceComponent: RadioCardInstrument { card: root }
     }
 
@@ -433,6 +435,7 @@ AbstractBackgroundWidget {
         ColumnLayout {
             spacing: 14
             WidgetQuickSection {
+                visible: !root.familyFaced
                 title: Translation.tr("Style")
                 WidgetQuickChoices {
                     current: root.instrument ? "instrument" : "shape"
@@ -444,7 +447,7 @@ AbstractBackgroundWidget {
                 }
             }
             WidgetQuickSection {
-                visible: !root.instrument
+                visible: !root.instrument && !root.familyFaced
                 title: Translation.tr("Shape while playing")
                 WidgetShapePicker {
                     Layout.fillWidth: true

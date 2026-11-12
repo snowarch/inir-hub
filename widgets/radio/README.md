@@ -7,7 +7,7 @@ pop, one in Kanagawa playing city pop: real stations, live, mostly ones you woul
 | Family | Where it shows | How to add it |
 | --- | --- | --- |
 | Material | A card on the desktop | Edit the desktop, add a widget, Radio |
-| iRiS | A player on the Island's Desktop page: logo, station, volume, previous, play, next | The Island's Desktop page, add, Radio |
+| iRiS | A player on the Island's Desktop page: logo, station, volume, previous, play, next; and the desktop card in iRiS, Prism or Material | The Island's Desktop page, add, Radio; edit the desktop, add a widget, Radio |
 | Waffle | A card in the Widgets panel | It shows in the panel once installed |
 
 ## Using it
@@ -27,6 +27,8 @@ Widgets panel keeps the music playing; every face steers the same radio.
 | Volume | 0 to 100. Default: 60 |
 
 On the desktop, edit mode also picks the Shape or Instrument look and the shape the button takes while it plays.
+Under iRiS the card wears the family's widget designs like every other widget: iRiS, Prism or Material, picked on
+the Look page of its sheet, on the same glass and blur.
 The desktop card has three sizes, picked in edit mode like any widget's: small keeps play, the tuner and next with the
 station under them; medium adds the place, what plays now, the star and the volume; large adds your stations
 (favourites first, then what you played lately), each one click away.

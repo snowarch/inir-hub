@@ -112,6 +112,28 @@ Optional faces for the other families:
     "waffle": { "main": "WaffleCard.qml" }
 ```
 
+### `desktop`: a face per widget design (iNiR 3.1.0)
+
+Under iRiS every built-in desktop widget is drawn again in the family's widget designs (iRiS, Prism), on the glass,
+blur and ink they all share; the person picks the design in the widget's sheet, Look page. A hub widget joins them
+by naming one file per design in its family block:
+
+```json
+    "iris": { "main": "IrisCompact.qml", "slots": ["island.desktop"],
+              "desktop": { "iris": "IrisFace.qml", "prism": "PrismFace.qml" } }
+```
+
+- The block needs `main` or `desktop`; a widget with only desktop faces leaves `main` and `slots` out.
+- Each file is loaded inside your Material `main` with `widget` set to it, fills it, and draws the whole widget in
+  every size it declares (`widget.sizeClass`): the root is `IrisWidgetFace` (`qs.modules.iris.widgets`: its plate,
+  glass and blur, the inks `ink`, `inkSecondary`, `inkTertiary`, `accent`, the parts `FaceText`, `FaceHeader`,
+  `FaceAction`) or, for Prism, `PrismFolder` (`qs.modules.iris.widgets.prism`).
+- Your `main` stops drawing its own card while a face is worn: `visible: !root.familyFaced` on its drawing, and on
+  the rows of its sheet that only the Material card reads.
+- A design you gave no file for shows the Material card, and so does an older iNiR, which ignores the key.
+
+Look at `widgets/radio/IrisRadioFace.qml` and `PrismRadio.qml`.
+
 ## Minimal Widget
 
 ```qml

@@ -16,3 +16,5 @@ IrisLook 1.0 IrisLook.qml
 WaffleLook 1.0 WaffleLook.qml
 RadioCardInstrument 1.0 RadioCardInstrument.qml
 RadioCardStations 1.0 RadioCardStations.qml
+IrisRadioFace 1.0 IrisRadioFace.qml
+PrismRadio 1.0 PrismRadio.qml
