@@ -1145,9 +1145,9 @@ ContentPage {
                     icon: "format_line_spacing"
                     text: Translation.tr("Widget spacing")
                     unit: "px"
-                    value: Config.options?.material?.sidebar?.widgets?.spacing ?? 8
+                    value: Config.options?.material?.sidebar?.widgets?.spacing ?? 24
                     from: 0
-                    to: 24
+                    to: 48
                     stepSize: 2
                     onValueModified: Config.setNestedValue("material.sidebar.widgets.spacing", value)
                     StyledToolTip {

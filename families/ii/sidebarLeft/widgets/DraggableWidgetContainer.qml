@@ -40,7 +40,7 @@ Item {
     function hubFacePath(id: string): string {
         return String(root.hubFaces.find(widget => "custom." + widget.id === id)?.faces?.ii?.path ?? "")
     }
-    readonly property int widgetSpacing: Config.options?.material?.sidebar?.widgets?.spacing ?? 8
+    readonly property int widgetSpacing: Config.options?.material?.sidebar?.widgets?.spacing ?? 24
 
     readonly property bool showMedia: Config.options?.material?.sidebar?.widgets?.media ?? true
     readonly property bool showWeek: Config.options?.material?.sidebar?.widgets?.week ?? true
