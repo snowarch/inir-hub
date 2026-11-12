@@ -5,7 +5,7 @@ import qs
 import qs.modules.common
 
 // Where the person is in Prism: the page on screen, the way back and forward, the search and the wide room. Lives as
-// long as the shell; reset when Settings closes, so every visit starts on the page it was asked for.
+// long as the shell; a visit starts where the last one was left, or on the page it was asked for.
 Singleton {
     id: root
 
@@ -50,11 +50,12 @@ Singleton {
         root.page = root.forward[0]
         root.forward = root.forward.slice(1)
     }
+    // The way back and the search end with the visit; the page and the group read on each long page stay, so Settings
+    // reopens where it was left (clearing groupOf sent Glyph art back to its page's first group, his 11-11).
     function reset(): void {
         root.back = []
         root.forward = []
         root.query = ""
-        root.groupOf = ({})
     }
     // A group asked for (the sidebar's index, a search place, a request "section/group"): the page brings it to the top.
     property int groupAsk: 0

@@ -1180,7 +1180,7 @@ QtObject {
             label: spec.label,
             path: base + spec.key,
             kind: spec.kind === "colour" ? "choice" : spec.kind,
-            fallback: spec.fallback,
+            fallback: Glyphs.wallpaperFallback(spec),
             min: spec.min, max: spec.max, step: spec.step,
             unit: spec.unit ? " " + spec.unit : undefined,
             choices: spec.kind === "colour" ? Glyphs.INKS.map(ink => ({ label: ink[1], value: ink[0], colour: ink[0], swatch: ink[0] }))

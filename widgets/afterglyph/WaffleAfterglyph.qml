@@ -43,7 +43,7 @@ Item {
 
     WText {
         id: named
-        visible: view.name.length > 0 && root.option("caption", true) === true
+        visible: view.name.length > 0 && root.option("caption", false) === true
         x: view.x
         y: view.y + view.height + Looks.dp(8)
         width: view.width

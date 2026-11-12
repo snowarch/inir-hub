@@ -1,7 +1,7 @@
 {
     "name": "Afterglyph",
     "icon": "blur_on",
-    "version": "2.2.0",
+    "version": "2.2.1",
     "author": "snowarch",
     "description": "What is playing, your wallpaper, a picture, a word or one of nine built-in subjects, drawn as glowing glyphs that never sit still: sixteen styles, every character set, palette and screen effect of Afterglyph. Drawn by the graphics card. Also a card in Waffle's Widgets panel.",
     "category": "other",
@@ -592,7 +592,7 @@
             "key": "caption",
             "label": "Name under it",
             "type": "switch",
-            "default": true
+            "default": false
         },
         {
             "key": "plate",
@@ -660,7 +660,7 @@
         {
             "key": "cell",
             "label": "Character size",
-            "default": 9,
+            "default": 5,
             "page": "look",
             "tune": false,
             "type": "range",
@@ -672,7 +672,7 @@
         {
             "key": "strokes",
             "label": "Edge lines",
-            "default": 100,
+            "default": 0,
             "page": "look",
             "tune": true,
             "type": "range",
@@ -1099,7 +1099,7 @@
         {
             "key": "camera",
             "label": "Slow camera moves",
-            "default": true,
+            "default": false,
             "page": "look",
             "tune": true,
             "type": "switch",

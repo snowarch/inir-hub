@@ -24,7 +24,7 @@ AbstractBackgroundWidget {
     // The plate is the picture's own black, drawn by the shader.
     widgetSurfaceEnabled: false
 
-    readonly property bool caption: (root._readConfigKey("caption") ?? true) === true
+    readonly property bool caption: (root._readConfigKey("caption") ?? false) === true
     readonly property int gap: Math.round(8 * root.scaleFactor)
     readonly property int plateWidth: root.width
     readonly property int plateHeight: Math.max(1, root.height - (label.visible ? root.gap + label.implicitHeight : 0))
