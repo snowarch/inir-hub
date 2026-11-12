@@ -968,6 +968,7 @@ ColumnLayout {
                     widgetId: modelData.slice("custom:".length)
                     targetScreen: page.island.targetScreen
                     slot: "island.desktop"
+                    availableWidth: modulesBlock.width
                 }
             }
         }

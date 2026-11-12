@@ -8,6 +8,8 @@ Item {
     property string widgetId: ""
     property string slot: ""
     property var targetScreen
+    // The room the host gives a module that grows to its row (0: the module takes its own width).
+    property real availableWidth: 0
     readonly property var entry: CustomWidgets.ready
         ? (CustomWidgets.widgets.find(widget => widget.id === root.widgetId) ?? null)
         : null
@@ -26,5 +28,11 @@ Item {
             if (item.hasOwnProperty("irisSlot")) item.irisSlot = root.slot
             if (item.hasOwnProperty("targetScreen")) item.targetScreen = root.targetScreen
         }
+    }
+    Binding {
+        when: moduleLoader.item?.hasOwnProperty("availableWidth") ?? false
+        target: moduleLoader.item
+        property: "availableWidth"
+        value: root.availableWidth
     }
 }

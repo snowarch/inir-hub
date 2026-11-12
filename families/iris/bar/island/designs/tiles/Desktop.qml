@@ -250,6 +250,7 @@ GridLayout {
                     widgetId: modelData.slice("custom:".length)
                     targetScreen: page.island?.targetScreen ?? null
                     slot: "island.desktop"
+                    availableWidth: modules.width
                 }
             }
         }

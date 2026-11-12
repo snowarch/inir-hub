@@ -213,6 +213,7 @@ ColumnLayout {
                     widgetId: modelData.slice("custom:".length)
                     targetScreen: page.island?.targetScreen ?? null
                     slot: "island.desktop"
+                    availableWidth: parent.width
                 }
             }
         }

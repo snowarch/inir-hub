@@ -36,7 +36,7 @@ Flow {
                     circular: true
                     Layout.preferredWidth: Math.round(20 * IrisStyle.density)
                     Layout.preferredHeight: Layout.preferredWidth
-                    source: String(MprisController.artUrlOf(chip.modelData) ?? "")
+                    source: String(MprisController.effectiveArtUrl(chip.modelData) ?? "")
                 }
                 IrisText {
                     text: String(MprisController.titleOf(chip.modelData) || chip.modelData?.identity || "")

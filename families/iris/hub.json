@@ -2,7 +2,7 @@
     "$schema": "../../schema/hub.schema.json",
     "version": "2.33.83",
     "changes": {
-      "2.33.83": ["On Umbriel, an app's menu in the dock sends its window to the scratchpad and back"],
+      "2.33.83": ["On Umbriel, an app's menu in the dock sends its window to the scratchpad and back", "Island: a hub widget's module can fill its row on the Desktop page (the radio's player)", "Player chips show the same cover as the player, a station's logo included"],
       "2.33.82": ["Settings reopens on the group you left, Glyph art included", "Glyph art: its rows start from the new, finer factory values", "About shows the new iNiR mark in your colours", "Edit desktop: hub widgets sit in their own aisle (Radio in Media) and search finds them by what they do"],
       "2.33.81": ["Searches that find nothing answer with a little personality", "Hub: “Nothing matches” sits in the middle of the page"],
       "2.33.80": ["Controls: tile rows show only with the iRiS face that draws them"],
