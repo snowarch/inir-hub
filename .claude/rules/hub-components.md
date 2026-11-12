@@ -14,11 +14,14 @@ Removing it takes all of it away and leaves the person's desktop and settings ex
   it is worn with (empty for every family), `version` equal to `hub.json`'s.
 - `hub.json`: `"provides": "modules/<id>"`, its permissions and hosts.
 - `Panel.qml`: a `Scope` the shell loads once the family's own panels are up, while one of its families is active.
-  It holds the window (inside a `LazyLoader` on `open`) and the `IpcHandler` (target: the id, or starting with it).
+  It holds the window (inside a `LazyLoader` on `open`) and the `IpcHandler` whose target is exactly the id, with a
+  `toggle`.
 - `qmldir` in every folder of types, listing each one.
-- People never reach a component by a command: what they open, read or play is a widget's face in each family
-  (`hub-widgets.md`). A window only a terminal or keybind opens is unfinished. The README lists the IPC calls and a
-  niri keybind (`Mod+Shift+P { spawn "inir" "<id>" "toggle"; }`) as extras.
+- People open it with the mouse: the shell lists every component with a panel in each family's app launcher, by
+  `plugin.json`'s `name` and `summary` (with `icon.svg` or `icon.png` from the folder when it ships one), and a click
+  runs `inir <id> toggle`; `inir hub check` refuses a panel without that handler. What lives on the desktop (a card, a
+  player, a feed) is still a widget (`hub-widgets.md`). The README lists the IPC calls and a niri keybind
+  (`Mod+Shift+P { spawn "inir" "<id>" "toggle"; }`) as extras.
 
 ## State and files
 

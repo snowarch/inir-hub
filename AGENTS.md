@@ -10,7 +10,7 @@ file before writing anything. Claude Code loads it through `CLAUDE.md`; any othe
 
 1. **Pick the kind** from the table in `CONTRIBUTING.md › What to make`. A fix to Material (`ii`), iRiS or Waffle is
    an issue, not a pull request; what people use is a widget (a face in each family: Material's shelf, the iRiS
-   Island, Waffle's panel); a component is only work with no face, and never the way a person opens anything. Before the first file, write where a person
+   Island, Waffle's panel); a window of its own that people open from the app launcher is a component. Before the first file, write where a person
    finds and opens it with the mouse in each family; if the kind gives it no such place, the kind is wrong.
 2. **Start from the template:** `inir hub new <kind> <id> --author <github-handle>`. The id is the folder name.
 3. **Read before writing:** the template it gave you, the example of the kind (`widgets/countdown`,

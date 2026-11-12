@@ -13,9 +13,9 @@ QML, helpers and each kind so they never break the shell.
 
 Pick by how a person reaches it. People don't type commands or edit keybinds: everything they use is found and
 opened with the mouse, in every family, from a place that family already has. That place is a widget: the Material
-desktop's widget shelf, the iRiS Island and Waffle's Widgets panel, one item with a face for each. A component has no
-button of its own anywhere, so nothing a person opens, reads or plays lives only in a component; `inir <id> toggle`
-and a keybind are extras for people who want them, never the way in.
+desktop's widget shelf, the iRiS Island and Waffle's Widgets panel, one item with a face for each. A window of its
+own (a browser of something, a tool too big for a widget) is a component: every family's app launcher lists it by its
+name and a click opens it. A keybind is an extra for people who want one.
 
 | You want | Make | Folder |
 | --- | --- | --- |
@@ -24,7 +24,7 @@ and a keybind are extras for people who want them, never the way in.
 | A whole iRiS look: material, colour, shape, motion | an iRiS theme | `iris-themes/<id>/` |
 | Another iRiS: its own colour, type, shapes, edges, motion and Island face over iRiS's components (like AIRISU) | a Design | `designs/<id>/` |
 | A website as a tab in Material's sidebar | a web app | `webapps/<id>/` |
-| Work the shell does while nobody looks (a scrobbler, a sync) or sets up once (like `fastfetch`); what people see of it is a widget | a component | `components/<id>/` |
+| A window of its own opened from the app launcher (a media browser), or work the shell does while nobody looks (a scrobbler, a sync) or sets up once (like `fastfetch`) | a component | `components/<id>/` |
 | A fix to Material, iRiS or Waffle | an issue | [open one](https://github.com/snowarch/inir-hub/issues) |
 
 Material (`ii`), iRiS and Waffle are the desktops every iNiR install gets. Their maintainers change them; a pull request
@@ -246,8 +246,10 @@ component worn with it. `inir hub new component my-corner` gives you one:
   (`qs.modules.common`: `Appearance.*`, `StyledText`, `MaterialSymbol`, `RippleButton`).
 - **Its options live in its file**, a `FileView` with a `JsonAdapter` on `Directories.pluginFile("<id>")`, as the
   template does.
-- **People reach it with the mouse**, from a widget of yours with a face in each family it is worn with. The IPC call
-  and a niri keybind are extras the README lists. A component nobody can reach without a terminal is not finished.
+- **People reach it with the mouse**: the app launcher of every family it is worn with lists it by `plugin.json`'s
+  `"name"` and `"summary"` (and `icon.svg` or `icon.png` in its folder, if it ships one), and a click runs
+  `inir <id> toggle`. So its `IpcHandler` target is exactly its id and has `toggle`; `inir hub check` holds it. The
+  IPC calls and a niri keybind are extras the README lists.
 - **Every string is translated**, its IPC documented, its page in `docs/<id>/`: the rules of
   [changing a family](#changing-a-family) below hold for a component too.
 
