@@ -5,7 +5,7 @@
   "summary": "One living body: the Island, the chassis and Apple-grade motion.",
   "tagline": "Island, pieces and a Dock on any edge.",
   "icon": "visibility",
-  "version": "2.33.79",
+  "version": "2.33.80",
   "provides": "modules/iris",
   "wears": ["iris.appearance.design"],
   "parts": {
@@ -215,14 +215,14 @@
     ],
     "controls": [
       {"key":"iris.face","label":"Face","type":"choice","default":"tiles","when":["face",{"wears":"iris"},{"not":{"sizeClass":"small"}}],"choices":[["tiles","Tiles","view_agenda"],["discs","Discs","radio_button_checked"]],"keywords":["round","circles","nothing","toggles"]},
-      {"key":"iris.tile.wifi","label":"Wi-Fi","type":"switch","default":true,"tune":false,"keywords":["keys","tiles","toggle"]},
-      {"key":"iris.tile.bluetooth","label":"Bluetooth","type":"switch","default":true,"tune":false,"keywords":["keys","tiles","toggle"]},
-      {"key":"iris.tile.focus","label":"Focus","type":"switch","default":true,"tune":false,"keywords":["keys","tiles","toggle"]},
-      {"key":"iris.tile.nightLight","label":"Night light","type":"switch","default":true,"tune":false,"keywords":["keys","tiles","toggle"]},
-      {"key":"iris.tile.awake","label":"Keep awake","type":"switch","default":true,"tune":false,"keywords":["keys","tiles","toggle"]},
-      {"key":"iris.tile.gameMode","label":"Game mode","type":"switch","default":true,"tune":false,"keywords":["keys","tiles","toggle"]},
-      {"key":"iris.tile.mic","label":"Microphone","type":"switch","default":true,"tune":false,"keywords":["keys","tiles","toggle"]},
-      {"key":"iris.tile.darkMode","label":"Dark mode","type":"switch","default":true,"tune":false,"keywords":["keys","tiles","toggle"]},
+      {"key":"iris.tile.wifi","label":"Wi-Fi","type":"switch","default":true,"when":"face","tune":false,"keywords":["keys","tiles","toggle"]},
+      {"key":"iris.tile.bluetooth","label":"Bluetooth","type":"switch","default":true,"when":"face","tune":false,"keywords":["keys","tiles","toggle"]},
+      {"key":"iris.tile.focus","label":"Focus","type":"switch","default":true,"when":"face","tune":false,"keywords":["keys","tiles","toggle"]},
+      {"key":"iris.tile.nightLight","label":"Night light","type":"switch","default":true,"when":"face","tune":false,"keywords":["keys","tiles","toggle"]},
+      {"key":"iris.tile.awake","label":"Keep awake","type":"switch","default":true,"when":"face","tune":false,"keywords":["keys","tiles","toggle"]},
+      {"key":"iris.tile.gameMode","label":"Game mode","type":"switch","default":true,"when":"face","tune":false,"keywords":["keys","tiles","toggle"]},
+      {"key":"iris.tile.mic","label":"Microphone","type":"switch","default":true,"when":"face","tune":false,"keywords":["keys","tiles","toggle"]},
+      {"key":"iris.tile.darkMode","label":"Dark mode","type":"switch","default":true,"when":"face","tune":false,"keywords":["keys","tiles","toggle"]},
       {"key":"iris.sliders","label":"Volume and brightness","type":"switch","default":true,"when":{"any":[{"wears":"prism"},{"not":{"sizeClass":"small"}}]},"tune":false}
     ],
     "palette": [

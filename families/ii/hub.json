@@ -1,7 +1,8 @@
 {
     "$schema": "../../schema/hub.schema.json",
-    "version": "2.35.12",
+    "version": "2.35.13",
     "changes": {
+        "2.35.13": ["Widgets: Background strength reaches a solid plate and tints the glass; Blur background hides in styles without glass"],
         "2.35.12": [
           "Left sidebar: crowded tabs fade at the edge; translator and AI chat buttons fit their cards (#328)"
         ],

@@ -25,6 +25,10 @@ WidgetPlate {
     glass: !plate.island && plate.backed && plate.surface.surfaceUseBlur
         && Appearance.blurBackendFor("widgets", Appearance.blurTopology.unsupported) === "wallpaper"
         && (!plate.editorial || Appearance.editorial.glassActive)
+    // The tint over the frosted wallpaper: the style's own at the usual 16 %, lighter below it and nearly solid at 100 %.
+    readonly property real styleTint: 1 - Math.min(1, plate.angel ? Appearance.angel.overlayOpacity : Appearance.aurora.popupTransparentize * 1.2)
+    readonly property real glassTint: plate.strength <= 0.16 ? plate.styleTint * (0.6 + plate.strength / 0.16 * 0.4)
+        : plate.styleTint + (0.92 - plate.styleTint) * Math.max(0, (plate.strength - 0.16) / 0.84)
     glassSaturation: plate.angel ? Appearance.angel.blurSaturation * Appearance.angel.colorStrength : 0.15
     glassBlur: plate.editorial ? Appearance.editorial.glassBlur : plate.angel ? Appearance.angel.blurIntensity : 0.8
 
@@ -35,7 +39,7 @@ WidgetPlate {
     // An Island owns its material opacity: the widget's own would multiply it down to nothing.
     plateAlpha: !plate.backed ? 0 : plate.island ? 1
         : plate.editorial ? (plate.glass ? Appearance.editorial.glassOpacity : Math.min(1, 0.86 + plate.strength * 0.14))
-        : Math.min(0.96, 0.86 + plate.strength * 0.6)
+        : plate.strength <= 0.16 ? 0.86 + plate.strength * 0.6 : 0.956 + (plate.strength - 0.16) / 0.84 * 0.044
     color: plate.editorialStack || plate.island || plate.glass || plate.zzz || plate.cookie || plate.regalia || plate.inir
         ? "transparent" : plate.backed ? plate.flatFill : "transparent"
 
@@ -87,8 +91,7 @@ WidgetPlate {
         anchors.fill: parent
         visible: plate.glass && !plate.island && !plate.editorialStack
         color: plate.editorial ? plate.flatFill
-            : plate.angel ? ColorUtils.transparentize(Appearance.colors.colLayer0Base, Appearance.angel.overlayOpacity)
-            : ColorUtils.transparentize(Appearance.colors.colLayer0Base, Appearance.aurora.popupTransparentize * 1.2)
+            : ColorUtils.applyAlpha(Appearance.colors.colLayer0Base, plate.glassTint)
     }
 
     Loader {
