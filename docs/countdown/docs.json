@@ -1,0 +1,13 @@
+{
+	"id": "countdown",
+	"edit": "https://github.com/snowarch/inir-hub/edit/main/docs/countdown/",
+	"order": 22,
+	"groups": [
+		{
+			"label": "Widgets",
+			"pages": [
+				"COUNTDOWN"
+			]
+		}
+	]
+}

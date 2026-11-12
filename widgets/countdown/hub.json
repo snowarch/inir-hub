@@ -1,6 +1,9 @@
 {
     "$schema": "../../schema/hub.schema.json",
-    "version": "1.0.0",
+    "version": "1.1.0",
+    "changes": {
+        "1.1.0": ["A card in Material's left sidebar, and a tab you can turn on for the right sidebar"]
+    },
     "summary": "Days left until a date you care about, in every family",
     "authors": ["snowarch"],
     "license": "MIT",
