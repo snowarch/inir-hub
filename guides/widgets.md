@@ -5,8 +5,9 @@ Custom desktop widgets that run on the iNiR shell. Full QML access to 100+ servi
 
 Widgets live in `~/.config/inir/widgets/<name>/` and are loaded automatically.
 
-A widget can have up to three faces: the desktop card (this file), a compact iRiS module on the
-Island's Desktop page ([iris-widgets.md](iris-widgets.md)) and a card in Waffle's Widgets panel ([Waffle card](#waffle-card)).
+A widget can have up to four faces: the desktop card (this file), a card in Material's sidebars
+([Material sidebar card](#material-sidebar-card)), a compact iRiS module on the Island's Desktop page
+([iris-widgets.md](iris-widgets.md)) and a card in Waffle's Widgets panel ([Waffle card](#waffle-card)).
 Give it the faces you can make well.
 
 To share one, publish it on the [Community Hub](https://github.com/snowarch/inir-hub): people install
@@ -20,7 +21,7 @@ inir customWidgets create my-widget    # generates scaffold
 inir customWidgets reload              # hot-reload without restart
 ```
 
-Or start from `inir hub new widget <id>`, which writes all three faces.
+Or start from `inir hub new widget <id>`, which writes all four faces.
 
 ## File Structure
 
@@ -28,6 +29,7 @@ Or start from `inir hub new widget <id>`, which writes all three faces.
 ~/.config/inir/widgets/my-widget/
   widget.json       # manifest (name, icon, configKeys, resize behavior)
   MyWidget.qml      # main component — extends AbstractBackgroundWidget
+  SidebarCard.qml   # optional: the Material sidebars face
   IrisCompact.qml   # optional: the iRiS Island face (iris-widgets.md)
   WaffleCard.qml    # optional: the Waffle Widgets panel face
   (any other .qml files, images, scripts)
@@ -108,6 +110,7 @@ Every row can be put back to its default, and the Look page ends with **Restore 
 Optional faces for the other families:
 
 ```json
+    "ii": { "main": "SidebarCard.qml", "slots": ["sidebar.left", "sidebar.right"] },
     "iris": { "main": "IrisCompact.qml", "slots": ["island.desktop"] },
     "waffle": { "main": "WaffleCard.qml" }
 ```
@@ -591,6 +594,77 @@ editPopoverContent: Component {
     }
 }
 ```
+
+---
+
+## Material sidebar card
+
+`ii.main` in `widget.json` gives the widget a place in Material's sidebars, beside the built-in cards. `ii.slots` says
+which (both when left out):
+
+| Slot | Where | Shown |
+| --- | --- | --- |
+| `sidebar.left` | A card in the left sidebar's Widgets column, below the built-in ones; people drag it like theirs | Once installed; Settings › Panels › Widgets turns it off |
+| `sidebar.right` | A tab of the right sidebar's widget group, beside Calendar, To Do, Timer | When the person turns it on in Settings › Sidebars › Right sidebar |
+
+The face gets the slot in `iiSlot`. As a card it sets its own height (`implicitHeight`) and the column gives it its
+width and side margins; as a tab it fills the space the right sidebar gives it, so centre or stretch what it shows.
+The card has no plate of its own, like the built-in ones: draw on the sidebar.
+
+```qml
+import QtQuick
+import QtQuick.Layouts
+import qs.services
+import qs.modules.common
+import qs.modules.common.widgets
+import qs.modules.ii.kit
+
+Item {
+    id: root
+
+    property string iiSlot: ""   // set by the sidebar: "sidebar.left" or "sidebar.right"
+
+    readonly property string message: String(CustomWidgets.getConfigValue("my-widget", "message", "Hello"))
+
+    implicitHeight: content.implicitHeight + SidebarStyle.padding * 2
+
+    ColumnLayout {
+        id: content
+        anchors.fill: parent
+        anchors.margins: SidebarStyle.padding
+        spacing: 6
+
+        RowLayout {   // the header every sidebar card carries: a glyph and what it is
+            spacing: 6
+            MaterialSymbol { text: "widgets"; iconSize: 16; color: SidebarStyle.text }
+            StyledText {
+                text: "My widget"
+                font.pixelSize: Appearance.font.pixelSize.small
+                font.weight: Font.Medium
+                color: SidebarStyle.text
+            }
+        }
+        StyledText {
+            Layout.fillWidth: true
+            text: root.message
+            font.pixelSize: Appearance.font.pixelSize.huge
+            color: SidebarStyle.accent
+        }
+    }
+}
+```
+
+Sidebar faces draw with `SidebarStyle` from `qs.modules.ii.kit`: the ink and radii the built-in cards wear under every
+Material global style, so the card changes with them. `text`, `subtext` and `accent` (`accentInk` on it) for ink,
+`plate` and `plateHover` for a row or chip inside the card, `radius` and `radiusSmall` for its corners, `padding` for
+the inside edge. Type comes from `Appearance.font`, controls from `qs.modules.common.widgets` (`StyledText`,
+`MaterialSymbol`, `RippleButton`, `StyledProgressBar`, `MaterialShape`). Settings are the `configKeys` the desktop
+face reads, through `CustomWidgets.getConfigValue(id, key, fallback)`; people change them in Material's Settings ›
+Widgets, under the widget's name, whether or not it is on the desktop.
+
+The sidebars keep their content after the first open and hide it when they close: what ticks runs only while
+`root.visible` (`SystemClock { enabled: root.visible }`), which is false while the sidebar is closed or the tab is
+another. Look at `widgets/countdown/SidebarCountdown.qml`.
 
 ---
 

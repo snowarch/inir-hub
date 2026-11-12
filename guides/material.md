@@ -105,7 +105,7 @@ The desktop is redrawn whole for anything that moves on it.
 - Timers and processes run while `root.visible && root.motionActive` (not behind windows), with one exception: the
   first run happens anyway, so a widget added behind a window is not stuck on "Running…".
 - One `Process`, reused. Never start a run while the last one is going.
-- Logic shared by the iRiS and Waffle faces lives in one `.js` file (`countdown.js`, `shellline.js`).
+- Logic shared by the sidebar, iRiS and Waffle faces lives in one `.js` file (`countdown.js`, `shellline.js`).
 
 ## Never
 

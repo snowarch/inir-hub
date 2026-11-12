@@ -13,7 +13,7 @@ Read `AGENTS.md` first if you have not this session. The steps below are in orde
   (Material, iRiS, Waffle, all), and for a feature that fetches anything, the source.
 - Pick the kind (`CONTRIBUTING.md › What to make`). A change to a family itself is an issue: say so and stop.
 - Before the first file, write in one line per family where a person finds it and opens it with the mouse (Material's
-  widget shelf, the iRiS Island, Waffle's Widgets panel). If the kind you picked gives it no such place, the kind is
+  desktop and sidebars, the iRiS Island, Waffle's Widgets panel). If the kind you picked gives it no such place, the kind is
   wrong: what people use is a widget. Never change a family or the base to fit the item.
 - Check the source: an official API or a site whose terms allow the use, no key you would have to ship. If none,
   say so and stop.

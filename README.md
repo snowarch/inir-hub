@@ -33,7 +33,7 @@ An install puts the item where iNiR already reads it (your widgets, themes and s
 | Kind | Folder | Shows up in |
 | --- | --- | --- |
 | Family | [`families/`](families) | The whole shell: Material, Waffle, iRiS. Setup installs the ones your config uses |
-| Widget | [`widgets/`](widgets) | The Material desktop, the iRiS Island, Waffle's Widgets panel (one widget can have all three faces) |
+| Widget | [`widgets/`](widgets) | The Material desktop and sidebars, the iRiS Island, Waffle's Widgets panel (one widget can have a face for each) |
 | Colour theme | [`themes/`](themes) | Material and Waffle, and the apps iNiR themes |
 | iRiS theme | [`iris-themes/`](iris-themes) | A whole iRiS look: material, colour, shape, motion |
 | Web app | [`webapps/`](webapps) | A tab in Material's left sidebar |

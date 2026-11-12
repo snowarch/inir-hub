@@ -13,7 +13,7 @@ QML, helpers and each kind so they never break the shell.
 
 Pick by how a person reaches it. People don't type commands or edit keybinds: everything they use is found and
 opened with the mouse, in every family, from a place that family already has. That place is a widget: the Material
-desktop's widget shelf, the iRiS Island and Waffle's Widgets panel, one item with a face for each. A window of its
+desktop and its sidebars, the iRiS Island and Waffle's Widgets panel, one item with a face for each. A window of its
 own (a browser of something, a tool too big for a widget) is a component: every family's app launcher lists it by its
 name and a click opens it. A keybind is an extra for people who want one.
 
@@ -174,7 +174,7 @@ not installed.
 
 ## Widgets
 
-One widget can have three faces, and on the desktop one more per widget design of iRiS. Give it the ones you can make well; the Hub says where it shows.
+One widget can have four faces, and on the desktop one more per widget design of iRiS. Give it the ones you can make well; the Hub says where it shows.
 
 **Start with [the Material guide](guides/material.md).** It shows the shapes, bars, looks and states the built-in
 widgets use, and what a widget needs to sit beside them. Every property and service a widget can read is in
@@ -185,6 +185,7 @@ widgets use, and what a widget needs to sit beside them. Every property and serv
 | Material desktop | `main` | `AbstractBackgroundWidget`, `MaterialShape`, `WidgetSurface`, the `Instrument*` parts, `Appearance.*` | `countdown/Countdown.qml`, [guide](guides/material.md) |
 | iRiS Island | `iris.main`, `iris.slots` | `IrisStyle.*` tokens, `IrisText` and the other `Iris*` parts | `countdown/IrisCountdown.qml` |
 | iRiS desktop, one per widget design (iNiR 3.1.0) | `iris.desktop` | `IrisWidgetFace` with `FaceText`, `FaceHeader`, `FaceAction`; `PrismFolder` for Prism | `radio/IrisRadioFace.qml`, `radio/PrismRadio.qml`, [guide](guides/widgets.md#desktop-a-face-per-widget-design-inir-310) |
+| Material sidebars: a card in the left one, a tab in the right one | `ii.main`, `ii.slots` | `SidebarStyle` (`qs.modules.ii.kit`), `Appearance.font`, `StyledText`, `MaterialSymbol` | `countdown/SidebarCountdown.qml`, [guide](guides/widgets.md#material-sidebar-card) |
 | Waffle Widgets panel | `waffle.main` | `Looks.*`, `WText` and the other `W*` parts, Fluent icons | `countdown/WaffleCountdown.qml` |
 
 What makes a widget belong:
@@ -194,7 +195,7 @@ What makes a widget belong:
 - **Shared logic lives in one `.js` file** that every face imports, like `countdown.js`. Faces only lay things out, so
   they never disagree.
 - **Settings are `configKeys`** in `widget.json`. iNiR draws the controls; faces read them with
-  `root._readConfigKey(key)` (desktop) or `CustomWidgets.getConfigValue("<id>", key, fallback)` (Island and Waffle).
+  `root._readConfigKey(key)` (desktop) or `CustomWidgets.getConfigValue("<id>", key, fallback)` (sidebars, Island and Waffle).
 - **The desktop face's `configEntryName` is `"custom.<id>"`.** That is where its position and settings are saved.
 - **It costs nothing while nobody looks.** Clocks tick by the minute when minutes are enough (`SystemClock.Minutes`);
   timers and processes run only while `visible` (and `motionActive` on the desktop, after a first run).
@@ -228,7 +229,8 @@ The Hub draws a card from your accent, highlight and shape. A real screenshot sa
 
 `manifest.json`: `id` (the folder name), `name`, `url` (https only), `icon` (a
 [Material Symbols](https://fonts.google.com/icons) name), `version`, `display: "tab"`. It opens as a tab in Material's
-left sidebar, signed in as you, with the site's own storage.
+left sidebar, signed in as you, with the site's own storage, once the person turns on Web Apps (Settings › Sidebars);
+iNiR offers that switch where its runtime carries Chromium.
 
 A web app that ships scripts to run inside the page declares `inject`.
 
