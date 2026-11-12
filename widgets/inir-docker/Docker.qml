@@ -53,41 +53,50 @@ AbstractBackgroundWidget {
         active: root.visible && (root.motionActive || root.snapshot === null)
     }
 
+    function _findContainer(id): var {
+        return backend.containers.find(container => container.fullId === id || container.name === id) ?? null
+    }
+
+    /// Select and control Docker containers from scripts and keybinds.
+    ///
+    /// ```kdl
+    /// Super+D { spawn "inir" "ipc" "inir-docker" "select" "web"; }
+    /// ```
     IpcHandler {
         target: "inir-docker"
         // One desktop widget exists per screen; only the focused screen answers
         // IPC so the target is never registered twice.
         enabled: root.outputName === (GlobalStates.focusedScreen?.name ?? root.outputName)
 
-        function _find(id: string): var {
-            return backend.containers.find(container => container.fullId === id || container.name === id) ?? null
-        }
-
+        /// Choose a container by name or full ID.
         function select(id: string): string {
-            const container = _find(id)
+            const container = root._findContainer(id)
             if (!container) return "no container " + id
             backend.selectContainer(container)
             return container.name
         }
 
+        /// Set a running container's RAM limit in MiB.
         function memory(id: string, mb: int): string {
-            const container = _find(id)
+            const container = root._findContainer(id)
             if (!container) return "no container " + id
             if (!backend.canAdjustLimits(container)) return "start " + container.name + " first"
             backend.setMemoryLimit(container, mb)
             return container.name + " memory " + mb + " MiB"
         }
 
+        /// Set a running container's CPU limit in cores.
         function cpu(id: string, cores: string): string {
-            const container = _find(id)
+            const container = root._findContainer(id)
             if (!container) return "no container " + id
             if (!backend.canAdjustLimits(container)) return "start " + container.name + " first"
             backend.setCpuLimit(container, Number(cores))
             return container.name + " cpu " + cores
         }
 
+        /// Print the selected or named container's limits and daemon capacity as JSON.
         function limits(id: string): string {
-            const container = _find(id) ?? backend.selected
+            const container = root._findContainer(id) ?? backend.selected
             if (!container) return "no container"
             return JSON.stringify({
                 name: container.name,
