@@ -1,0 +1,13 @@
+{
+	"id": "radio",
+	"edit": "https://github.com/snowarch/inir-hub/edit/main/docs/radio/",
+	"order": 21,
+	"groups": [
+		{
+			"label": "Widgets",
+			"pages": [
+				"RADIO"
+			]
+		}
+	]
+}
