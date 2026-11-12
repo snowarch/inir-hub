@@ -1604,6 +1604,20 @@ Item {
                         }
                     }
                     MenuRow {
+                        // Umbriel's scratchpad, for an app with one window (a base without the verbs leaves it out).
+                        readonly property var win: NiriService.scratchpadAvailable === true && (menu.windows?.length ?? 0) === 1
+                            ? (NiriService.windows ?? []).find(w => w.id === menu.windows[0].niriWindowId) ?? null : null
+                        visible: win !== null
+                        glyph: win?.scratchpad ? "move_up" : "sticky_note_2"
+                        label: win?.scratchpad ? Translation.tr("Back to its workspace") : Translation.tr("Send to scratchpad")
+                        onClicked: {
+                            const id = win.id
+                            if (win.scratchpad) NiriService.restoreWindowFromScratchpad(id)
+                            else NiriService.moveWindowToScratchpad(id)
+                            window.menuApp = null
+                        }
+                    }
+                    MenuRow {
                         visible: CompositorService.isNiri && (menu.windows?.length ?? 0) > 0
                         glyph: "close"
                         danger: true

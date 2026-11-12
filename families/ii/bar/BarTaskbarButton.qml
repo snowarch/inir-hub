@@ -90,6 +90,20 @@ RippleButton {
         return false
     }
     property bool hasWindows: toplevels.length > 0
+
+    // Umbriel's scratchpad, for an app with one window (a base without the verbs leaves it out).
+    function scratchpadEntry(): var {
+        const id = root.toplevels.length === 1 ? root.toplevels[0]?.niriWindowId : undefined
+        const win = NiriService.scratchpadAvailable === true && id !== undefined
+            ? (NiriService.windows ?? []).find(w => w.id === id) : null
+        if (!win) return []
+        return [{
+            iconName: win.scratchpad ? "move_up" : "sticky_note_2",
+            text: win.scratchpad ? Translation.tr("Back to its workspace") : Translation.tr("Send to scratchpad"),
+            monochromeIcon: true,
+            action: () => win.scratchpad ? NiriService.restoreWindowFromScratchpad(id) : NiriService.moveWindowToScratchpad(id)
+        }]
+    }
     property bool isSeparator: appEntry?.appId === "SEPARATOR"
     property var desktopEntry: isSeparator ? null : AppSearch.lookupDesktopEntry(appEntry?.originalAppId ?? appEntry?.appId ?? "")
     property int lastFocused: -1
@@ -273,6 +287,7 @@ RippleButton {
                 monochromeIcon: true,
                 action: () => TaskbarApps.togglePin(appEntry?.originalAppId ?? appEntry?.appId ?? "")
             },
+            ...root.scratchpadEntry(),
             // Close
             ...(root.hasWindows ? [
                 { type: "separator" },
