@@ -230,7 +230,12 @@ Singleton {
         enabled: root.installed
 
         /// Plays the last station (or a discovered one), or stops what plays. Returns the phase after it.
-        function toggle(): string { root.playPause(); return root.phase }
+        function toggle(): string {
+            const was = player.active && !player.paused
+            root.playPause()
+            // mpv takes a moment to start: say what it turns into, not what it still is.
+            return was ? "stopped" : root.searching ? "searching" : "tuning"
+        }
         /// The next station of the list it was picked from, else a discovered one.
         function next(): string { root.next(); return root.phase }
         /// Stops the radio.

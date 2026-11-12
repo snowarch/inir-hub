@@ -42,7 +42,10 @@ PanelWindow {
     property var drill: null           // { kind, key, name }: a country, genre or language opened from its list
     readonly property bool indexView: root.drill === null && ["countries", "tags", "languages"].includes(root.section)
     readonly property string query: search.text.trim()
-    readonly property bool searching: root.query.length > 0 && !root.indexView
+    // In a list of countries, genres or languages the field narrows that list; a word none of them holds is a
+    // station's name, so it searches stations instead of ending on "nothing".
+    readonly property bool searching: root.query.length > 0 && (!root.indexView || (root.index.length > 0 && root.entries.length === 0))
+    readonly property bool listing: root.indexView && !root.searching
 
     // ── What the list holds ──
     property var fetched: []
@@ -58,19 +61,20 @@ PanelWindow {
         const q = root.query.toLowerCase()
         return q.length === 0 ? root.index : root.index.filter(e => e.name.toLowerCase().indexOf(q) >= 0)
     }
-    readonly property int shown: root.indexView ? root.entries.length : root.stations.length
+    readonly property int shown: root.listing ? root.entries.length : root.stations.length
 
     function load(): void {
         const ask = ++root.asked
+        const listing = root.listing
         root.failed = false
         const done = (ok, found) => {
             if (ask !== root.asked) return
             root.loading = false
             root.failed = !ok
-            if (root.indexView) root.index = found
+            if (listing) root.index = found
             else root.fetched = found
         }
-        if (root.indexView) {
+        if (listing) {
             root.index = root.browser.cache[root.section] ?? []
             root.loading = root.index.length === 0
             root.browser.index(root.section, done)
@@ -108,7 +112,7 @@ PanelWindow {
         root.section = Radio.favourites.length > 0 ? "favourites" : Radio.recent.length > 0 ? "recent" : "popular"
         root.load()
     }
-    Timer { id: typing; interval: 380; onTriggered: if (!root.indexView) root.load() }
+    Timer { id: typing; interval: 380; onTriggered: if (!root.listing) root.load() }
 
     readonly property string heading: root.searching ? Translation.tr("Stations called “%1”").arg(root.query)
         : root.drill !== null ? root.drill.name
@@ -116,7 +120,6 @@ PanelWindow {
     readonly property string emptyLine: root.failed ? Translation.tr("Radio Browser can't be reached. Check your connection")
         : root.loading ? Translation.tr("Looking…")
         : root.searching ? Translation.tr("No station is called “%1”").arg(root.query)
-        : root.indexView ? Translation.tr("Nothing matches “%1”").arg(root.query)
         : root.section === "favourites" && root.drill === null ? Translation.tr("Star a station and it waits here")
         : root.section === "recent" && root.drill === null ? Translation.tr("Stations you play show up here")
         : Translation.tr("Nothing plays here right now")
@@ -187,7 +190,7 @@ PanelWindow {
                         : root.section === "tags" ? Translation.tr("Find a genre") : Translation.tr("Find a language"))
                     : root.prism ? Translation.tr("Search stations") : Translation.tr("Search every station by name")
                 onTextChanged: {
-                    if (root.indexView || root.moving) return
+                    if (root.listing || root.moving) return
                     if (root.query.length === 0) { typing.stop(); root.load() }
                     else typing.restart()
                 }
@@ -256,7 +259,7 @@ PanelWindow {
                     anchors.top: root.prism ? parent.top : undefined
                     visible: root.prism || (root.shown > 0 && !root.loading)
                     text: root.prism && (root.shown === 0 || root.loading) ? Translation.tr("Radio")
-                        : root.indexView ? Translation.tr("%1 to pick from").arg(root.shown)
+                        : root.listing ? Translation.tr("%1 to pick from").arg(root.shown)
                         // A fetched list stops at the directory's 120 most voted: said, never passed off as all.
                         : root.shown >= 100 && !["favourites", "recent"].includes(root.section) ? Translation.tr("Top %1").arg(root.shown)
                         : (root.shown === 1 ? Translation.tr("1 station") : Translation.tr("%1 stations").arg(root.shown))
@@ -292,8 +295,8 @@ PanelWindow {
                 anchors.rightMargin: Math.round((root.prism ? 16 : 8) * root.d)
                 anchors.bottomMargin: Math.round(8 * root.d)
                 clip: true
-                visible: !root.indexView && !(root.loading && root.stations.length === 0)
-                model: root.indexView ? [] : root.stations
+                visible: !root.listing && !(root.loading && root.stations.length === 0)
+                model: root.listing ? [] : root.stations
                 currentIndex: -1
                 boundsBehavior: Flickable.StopAtBounds
                 reuseItems: true
@@ -313,8 +316,8 @@ PanelWindow {
             ListView {
                 anchors.fill: list
                 clip: true
-                visible: root.indexView && root.entries.length > 0
-                model: root.indexView ? root.entries : []
+                visible: root.listing && root.entries.length > 0
+                model: root.listing ? root.entries : []
                 boundsBehavior: Flickable.StopAtBounds
                 reuseItems: true
                 delegate: RadioIndexRow {
@@ -374,7 +377,7 @@ PanelWindow {
 
     // Enter plays the first station of the list.
     function first(): void {
-        if (root.indexView) { if (root.entries.length > 0) root.open(root.entries[0]) }
+        if (root.listing) { if (root.entries.length > 0) root.open(root.entries[0]) }
         else if (root.stations.length > 0) Radio.play(root.stations[0], root.stations)
     }
 }

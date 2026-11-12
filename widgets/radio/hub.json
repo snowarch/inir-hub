@@ -1,6 +1,6 @@
 {
     "$schema": "../../schema/hub.schema.json",
-    "version": "2.1.1",
+    "version": "2.1.2",
     "summary": "Live stations from anywhere in the world, one click to play",
     "description": "Press play and it finds a live station somewhere in the world playing a genre you like, or anything at all; next takes you to another place. Music only, far from home first, never a station you heard lately. Plays through mpv; stations come from Radio Browser's open directory.",
     "authors": [
@@ -22,6 +22,6 @@
         "de2.api.radio-browser.info",
         "duckduckgo.com"
     ],
-    "minInir": "3.0.0",
+    "minInir": "3.1.0",
     "preview": "preview.webp"
 }
