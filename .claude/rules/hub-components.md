@@ -20,7 +20,7 @@ Removing it takes all of it away and leaves the person's desktop and settings ex
 - People open it with the mouse: the shell lists every component with a panel in each family's app launcher, by
   `plugin.json`'s `name` and `summary` (with `icon.svg` or `icon.png` from the folder when it ships one), and a click
   runs `inir <id> toggle`; `inir hub check` refuses a panel without that handler. What lives on the desktop (a card, a
-  player, a feed) is still a widget (`hub-widgets.md`). The README lists the IPC calls and a niri keybind
+  player, a feed) is still a widget (`hub-widgets.md`). The README lists the IPC calls and a keybind in Niri's or Umbriel's config
   (`Mod+Shift+P { spawn "inir" "<id>" "toggle"; }`) as extras.
 
 ## State and files

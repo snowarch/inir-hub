@@ -1,7 +1,7 @@
 # Working in the iNiR Hub (for AI agents)
 
-You are working in the hub of [iNiR](https://github.com/snowarch/iNiR), a desktop shell for the Niri compositor. Every
-item here (widget, component, colour theme, iRiS theme, web app) is installed by people with `inir hub install` or
+You are working in the hub of [iNiR](https://github.com/snowarch/iNiR), a desktop shell for the Niri and Umbriel compositors. Every
+item here (widget, component, Design, colour theme, iRiS theme, web app) is installed by people with `inir hub install` or
 reaches them through `inir update`. Whatever you write runs inside their desktop shell: an item that fails to load,
 loops, blocks or reaches into the rest of the shell does it on every desktop that installed it. Read this whole
 file before writing anything. Claude Code loads it through `CLAUDE.md`; any other agent reads it from here.

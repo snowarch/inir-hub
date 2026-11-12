@@ -1,6 +1,6 @@
 # iNiR Hub
 
-iNiR's three families, plus widgets, colour themes, iRiS themes and web apps for [iNiR](https://github.com/snowarch/iNiR), made by the people who use it.
+iNiR's three families, plus components, Designs, widgets, colour themes, iRiS themes and web apps for [iNiR](https://github.com/snowarch/iNiR), made by the people who use it.
 
 Browse them at **[inir.space/hub](https://inir.space/hub)**, or from your desktop (Settings, or `inir hub list`).
 

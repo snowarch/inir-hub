@@ -252,7 +252,7 @@ component worn with it. `inir hub new component my-corner` gives you one:
 - **People reach it with the mouse**: the app launcher of every family it is worn with lists it by `plugin.json`'s
   `"name"` and `"summary"` (and `icon.svg` or `icon.png` in its folder, if it ships one), and a click runs
   `inir <id> toggle`. So its `IpcHandler` target is exactly its id and has `toggle`; `inir hub check` holds it. The
-  IPC calls and a niri keybind are extras the README lists.
+  IPC calls and a keybind in Niri's or Umbriel's config are extras the README lists.
 - **Every string is translated**, its IPC documented, its page in `docs/<id>/`: the rules of
   [changing a family](#changing-a-family) below hold for a component too.
 
