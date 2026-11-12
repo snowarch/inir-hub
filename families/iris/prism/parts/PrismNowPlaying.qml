@@ -152,9 +152,9 @@ Item {
             width: parent.width
             height: PrismTheme.dp(14)
             visible: root.playing
-            readonly property real share: media.effectiveLength > 0 ? Math.min(1, media.effectivePosition / media.effectiveLength) : 0
+            readonly property real share: media.effectiveIsLive ? 1 : media.effectiveLength > 0 ? Math.min(1, media.effectivePosition / media.effectiveLength) : 0
             PrismText { id: at; anchors.verticalCenter: parent.verticalCenter; text: StringUtils.friendlyTimeForSeconds(media.effectivePosition); figures: true; color: Qt.rgba(1, 1, 1, 0.6); font.pixelSize: PrismTheme.caption * 0.9 } // iris-literal: Prism's own ink over its art, the same in every scheme
-            PrismText { id: total; anchors.right: parent.right; anchors.verticalCenter: parent.verticalCenter; text: StringUtils.friendlyTimeForSeconds(media.effectiveLength); figures: true; color: Qt.rgba(1, 1, 1, 0.6); font.pixelSize: PrismTheme.caption * 0.9 } // iris-literal: Prism's own ink over its art, the same in every scheme
+            PrismText { id: total; anchors.right: parent.right; anchors.verticalCenter: parent.verticalCenter; text: media.lengthText; figures: true; color: Qt.rgba(1, 1, 1, 0.6); font.pixelSize: PrismTheme.caption * 0.9 } // iris-literal: Prism's own ink over its art, the same in every scheme
             Rectangle {
                 id: bar
                 anchors.left: at.right; anchors.leftMargin: PrismTheme.dp(8)

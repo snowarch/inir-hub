@@ -45,8 +45,9 @@ GridLayout {
 
     // A track change publishes an empty length (and often an empty artist) for a moment: rows that depend on them are
     // held through it, or the page shrinks and grows back and the Island jumps between two songs.
-    property bool timelineShown: media.effectiveLength > 0
-    readonly property bool timelineWanted: media.effectiveLength > 0
+    property bool timelineShown: page.timelineWanted
+    // A live stream keeps its row: the line runs full to the broadcast's edge and the end says it is live.
+    readonly property bool timelineWanted: media.effectiveLength > 0 || media.effectiveIsLive
     onTimelineWantedChanged: {
         if (page.timelineWanted) { timelineHold.stop(); page.timelineShown = true }
         else timelineHold.restart()
@@ -184,9 +185,9 @@ GridLayout {
             Layout.alignment: Qt.AlignVCenter
             thickness: 6
             engagedThickness: 10
-            knob: true
+            knob: !media.effectiveIsLive
             seekable: media.effectiveCanSeek
-            value: media.effectiveLength > 0 ? media.effectivePosition / media.effectiveLength : 0
+            value: media.effectiveIsLive ? 1 : media.effectiveLength > 0 ? media.effectivePosition / media.effectiveLength : 0
             fillColor: IrisStyle.text
             trackColor: IrisStyle.fillHover
             onSeekRequested: next => media.seek(next * media.effectiveLength)
@@ -194,9 +195,10 @@ GridLayout {
         Tabular {
             Layout.minimumWidth: Math.round(34 * IrisStyle.density)
             horizontalAlignment: Text.AlignRight
-            // A true minus, as Apple sets it.
-            text: "\u2212" + page.island.clockText(Math.max(0, media.effectiveLength - media.effectivePosition))
-            color: IrisStyle.textSecondary
+            // A true minus, as Apple sets it; a live stream has no end to count down to.
+            text: media.effectiveIsLive ? Translation.tr("Live")
+                : "\u2212" + page.island.clockText(Math.max(0, media.effectiveLength - media.effectivePosition))
+            color: media.effectiveIsLive ? IrisStyle.accent : IrisStyle.textSecondary
             font.pixelSize: IrisStyle.typeMeta
             font.weight: IrisStyle.weight(Font.DemiBold)
         }

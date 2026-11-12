@@ -480,7 +480,7 @@ Item {
 
                         Revealer {
                             vertical: true
-                            reveal: playerBase.effectiveLength > 0
+                            reveal: playerBase.effectiveLength > 0 || playerBase.effectiveIsLive
                             Layout.fillWidth: true
 
                             RowLayout {
@@ -501,6 +501,7 @@ Item {
                                     implicitHeight: 12
                                     position: playerBase.effectivePosition
                                     length: playerBase.effectiveLength
+                                    live: playerBase.effectiveIsLive
                                     canSeek: playerBase.effectiveCanSeek
                                     isPlaying: playerBase.effectiveIsPlaying
                                     highlightColor: root.accentColor
@@ -516,7 +517,7 @@ Item {
                                 }
 
                                 StyledText {
-                                    text: _formatTime(playerBase.effectiveLength)
+                                    text: playerBase.effectiveIsLive ? Translation.tr("Live") : _formatTime(playerBase.effectiveLength)
                                     font.pixelSize: Appearance.font.pixelSize.smallest
                                     font.family: Appearance.font.family.numbers
                                     color: root.colTextSecondary

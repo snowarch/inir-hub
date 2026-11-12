@@ -23,7 +23,7 @@ Rectangle {
         ? YtMusic.currentPosition : MprisController.positionOf(activePlayer)
     readonly property real effectiveLength: MprisController.isYtMusicActive
         ? YtMusic.currentDuration
-        : ((activePlayer?.lengthSupported ?? false) ? activePlayer.length : 0)
+        : MprisController.lengthOf(activePlayer)
     readonly property bool effectiveCanSeek: MprisController.isYtMusicActive
         ? YtMusic.canSeek
         : ((activePlayer?.canSeek ?? false)
