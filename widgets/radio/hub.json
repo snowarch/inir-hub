@@ -2,7 +2,6 @@
     "$schema": "../../schema/hub.schema.json",
     "version": "2.3.1",
     "changes": {
-        "2.3.1": ["Installing something from the Hub no longer leaves a silent copy holding the radio's keybinds"],
         "2.3.0": ["Under iRiS the desktop card wears the family's widget designs: iRiS (its glass and plate), Prism and Material, in the three sizes", "Pick one from the card's quick controls, or let it follow the design every widget wears"],
         "2.2.0": ["The desktop card in three sizes: small (play, find, next), medium (station, place, song, volume) and large, with your stations a click away", "A bigger play button and keys; a station name that wraps instead of being cut", "The Instrument look follows the three sizes too"],
         "2.1.2": ["In Countries, Genres or Languages, a word that matches none searches stations by name", "`inir radio toggle` answers what the radio turns into"],
