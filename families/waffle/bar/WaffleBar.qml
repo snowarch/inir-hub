@@ -44,8 +44,10 @@ Scope {
                 exclusionMode: ExclusionMode.Ignore
                 exclusiveZone: implicitHeight
                 WlrLayershell.namespace: "quickshell:bar"
+                // Region re-reads its item on x, y and size only, never on a transform: it follows
+                // the content's resting box, not the sliding content (#317).
                 mask: Region {
-                    item: content
+                    item: contentRest
                 }
 
                 anchors {
@@ -61,7 +63,12 @@ Scope {
                 implicitWidth: content.implicitWidth
 
                 property Region nativeBlurRegion: Region {
-                    item: content.nativeBlurActive ? content : null
+                    item: content.nativeBlurActive ? contentRest : null
+                }
+
+                Item {
+                    id: contentRest
+                    anchors.fill: content
                 }
                 // ext-background-effect regions only where the compositor takes them (Niri); Umbriel blurs by layer rules.
                 BackgroundEffect.blurRegion: CompositorService.blurRegions ? nativeBlurRegion : null

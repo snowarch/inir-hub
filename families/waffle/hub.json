@@ -3,7 +3,8 @@
     "version": "2.34.11",
     "changes": {
         "2.34.11": [
-            "Wallpaper: a Pause row: never, behind fullscreen, or when windows cover it"
+            "Wallpaper: a Pause row: never, behind fullscreen, or when windows cover it",
+            "Taskbar: no longer ignores every click after a start or reload (thanks skrblk, #317)"
         ],
         "2.34.10": [
             "Glyph wallpaper: a still picture now sways, breathes rings of light and shimmers; colours from a list; Restore defaults",
