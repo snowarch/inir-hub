@@ -341,14 +341,17 @@ Never accepted, whatever it declares:
 Nobody has to click merge for you. Once Check passes, a pull request that changes one item and its `docs/<id>/` only:
 
 - a colour theme or an iRiS theme: data, nothing in it runs, so it merges on Check alone;
-- a widget, component, Design or web app, new or updated: a reviewer (Claude, reading the item's files as data, with
-  this file and `.github/review.md` as its rules) reads what no check can:
+- an update by one of the item's authors that asks for no new permission or host (and, for a web app, keeps its
+  address): people already trust you with that item, so it merges on Check alone;
+- anything else (a new widget, component, Design or web app, a change to someone else's item, more permissions): a
+  reviewer (an AI model reading the item's files as data, with this file and `.github/review.md` as its rules) reads
+  what no check can:
   - nothing in it is abuse: no data sent off the machine, no code downloaded and run, nothing outside its own folder;
   - it does what the summary says, in each family it claims, every state handled;
   - it looks like it belongs there: the family's parts, sizes on the family's grid, every string translated;
   - it reuses the family instead of copying it, and is quiet at idle;
   - the permissions and hosts are honest, the sources allow the use, the license allows sharing, the preview is real;
-  - it isn't a copy of a listed item, and a change to someone else's item is a fix or a translation.
+  - a change to someone else's item is a fix or a translation.
 
 With nothing to fix it merges, and the pull request gets one comment: what the item does to a desktop and anything
 worth a later version. Otherwise that comment lists each fix with its file and line; push them on the same branch,
