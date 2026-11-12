@@ -41,14 +41,13 @@ WSettingsPage {
                 Layout.alignment: Qt.AlignVCenter
                 visible: !aboutMascot.active
                 radius: Looks.radius.medium
-                color: Looks.colors.accent
+                color: Looks.colors.bg2
 
-                WText {
+                InirMark {
                     anchors.centerIn: parent
-                    text: "iN"
-                    font.pixelSize: Looks.font.pixelSize.xlarger
-                    font.weight: Looks.font.weight.stronger
-                    color: Looks.colors.accentFg
+                    implicitSize: 42
+                    ink: Looks.colors.fg
+                    accent: Looks.colors.accent
                 }
             }
             
