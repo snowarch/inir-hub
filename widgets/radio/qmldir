@@ -10,3 +10,7 @@ RadioGlyph 1.0 RadioGlyph.qml
 RadioButton 1.0 RadioButton.qml
 RadioVolume 1.0 RadioVolume.qml
 RadioService 1.0 RadioService.qml
+RadioRail 1.0 RadioRail.qml
+RadioSearch 1.0 RadioSearch.qml
+IrisLook 1.0 IrisLook.qml
+WaffleLook 1.0 WaffleLook.qml

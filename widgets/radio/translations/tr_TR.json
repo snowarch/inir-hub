@@ -64,5 +64,9 @@
   "Volume": "Ses",
   "Volume %1 %": "Ses %%1",
   "Genres you like, with commas (city pop, jazz). Empty plays anything": "Sevdiğin türler, virgülle (city pop, jazz). Boşsa her şey çalar",
-  "Previous station": "Önceki istasyon"
+  "Previous station": "Önceki istasyon",
+  "Your stations": "İstasyonların",
+  "Discover": "Keşfet",
+  "Browse": "Göz at",
+  "Search stations": "İstasyon ara"
 }

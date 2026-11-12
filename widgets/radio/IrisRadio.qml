@@ -28,43 +28,11 @@ Item {
     implicitWidth: root.availableWidth > 0 ? root.availableWidth : Math.round(400 * root.d)
     implicitHeight: content.implicitHeight + 2 * Math.round(10 * root.d)
 
-    // The tuner in iRiS's own colours, type and corners.
-    readonly property var tunerLook: ({
-        d: root.d,
-        font: IrisStyle.fontMain,
-        small: IrisStyle.typeFootnote,
-        meta: IrisStyle.typeMeta,
-        body: IrisStyle.typeBody,
-        title: IrisStyle.typeTitle,
-        bg: IrisStyle.surfaceHighOpaque,
-        raised: IrisStyle.fill,
-        track: IrisStyle.fillHover,
-        hover: IrisStyle.fillHover,
-        press: IrisStyle.fillActive,
-        selected: IrisStyle.fill,
-        ink: IrisStyle.text,
-        muted: IrisStyle.textSecondary,
-        faint: IrisStyle.textTertiary,
-        line: IrisStyle.hairline,
-        accent: IrisStyle.accent,
-        onAccent: IrisStyle.inkOnAccent,
-        danger: IrisStyle.danger,
-        scrim: ColorUtils.applyAlpha(IrisStyle.scrim, 0.32),
-        radius: IrisStyle.radiusSheet,
-        radiusSmall: IrisStyle.radiusRow,
-        glyph: irisGlyph
-    })
-    Component {
-        id: irisGlyph
-        MaterialSymbol {
-            property string name: ""
-            property real size: 20
-            property bool filled: false
-            text: name
-            iconSize: size
-            fill: filled ? 1 : 0
-        }
-    }
+    // The tuner in Prism's grammar, the look of iRiS Settings (IrisLook.qml).
+    IrisLook { id: irisLook }
+    readonly property var tunerLook: irisLook.look
+    onTunerLookChanged: Radio.offerLook("iris", root.tunerLook)
+    Component.onCompleted: Radio.offerLook("iris", root.tunerLook)
     function openTuner(): void { Radio.openTuner(root.targetScreen, root.tunerLook) }
 
     // A control on a soft disc, as the player page's: the lead the largest and most lit, the ends bare until hovered.

@@ -64,5 +64,9 @@
   "Volume": "音量",
   "Volume %1 %": "音量 %1 %",
   "Genres you like, with commas (city pop, jazz). Empty plays anything": "好きなジャンルをカンマ区切りで（city pop, jazz）。空なら何でも流します",
-  "Previous station": "前の局"
+  "Previous station": "前の局",
+  "Your stations": "あなたの局",
+  "Discover": "見つける",
+  "Browse": "ブラウズ",
+  "Search stations": "局を検索"
 }

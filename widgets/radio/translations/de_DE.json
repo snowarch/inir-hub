@@ -64,5 +64,9 @@
   "Volume": "Lautstärke",
   "Volume %1 %": "Lautstärke %1 %",
   "Genres you like, with commas (city pop, jazz). Empty plays anything": "Genres, die du magst, mit Kommas getrennt (City Pop, Jazz). Leer spielt alles",
-  "Previous station": "Vorheriger Sender"
+  "Previous station": "Vorheriger Sender",
+  "Your stations": "Deine Sender",
+  "Discover": "Entdecken",
+  "Browse": "Stöbern",
+  "Search stations": "Sender suchen"
 }

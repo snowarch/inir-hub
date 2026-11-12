@@ -11,6 +11,7 @@ Item {
     property var look
     property string kind: ""           // countries, tags, languages
     readonly property real d: root.look?.d ?? 1
+    readonly property bool prism: root.look?.grammar === "prism"
     signal picked(var entry)
 
     width: ListView.view?.width ?? 0
@@ -20,8 +21,16 @@ Item {
         anchors.fill: parent
         anchors.leftMargin: Math.round(4 * root.d)
         anchors.rightMargin: Math.round(4 * root.d)
-        radius: root.look.radiusSmall
+        anchors.topMargin: root.prism ? Math.round(2 * root.d) : 0
+        anchors.bottomMargin: root.prism ? Math.round(2 * root.d) : 0
+        radius: root.prism ? Math.round(14 * root.d) : root.look.radiusSmall
         color: mouse.pressed ? root.look.press : mouse.containsMouse ? root.look.hover : "transparent"
+    }
+    Rectangle {
+        visible: root.prism && !mouse.containsMouse
+        anchors { bottom: parent.bottom; left: lead.right; leftMargin: Math.round(12 * root.d); right: parent.right; rightMargin: Math.round(12 * root.d) }
+        height: 1
+        color: root.look.line
     }
     MouseArea {
         id: mouse

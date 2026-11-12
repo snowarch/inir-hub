@@ -64,5 +64,9 @@
   "Volume": "مستوى الصوت",
   "Volume %1 %": "مستوى الصوت %1 %",
   "Genres you like, with commas (city pop, jazz). Empty plays anything": "الأنواع التي تحبها، مفصولة بفواصل (city pop, jazz). الفراغ يشغّل أي شيء",
-  "Previous station": "المحطة السابقة"
+  "Previous station": "المحطة السابقة",
+  "Your stations": "محطاتك",
+  "Discover": "اكتشف",
+  "Browse": "تصفّح",
+  "Search stations": "ابحث عن محطات"
 }

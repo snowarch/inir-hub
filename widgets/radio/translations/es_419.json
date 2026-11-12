@@ -64,5 +64,9 @@
   "Volume": "Volumen",
   "Volume %1 %": "Volumen %1 %",
   "Genres you like, with commas (city pop, jazz). Empty plays anything": "Géneros que te gustan, separados por comas (city pop, jazz). Vacío suena cualquiera",
-  "Previous station": "Estación anterior"
+  "Previous station": "Estación anterior",
+  "Your stations": "Tus emisoras",
+  "Discover": "Descubrir",
+  "Browse": "Explorar",
+  "Search stations": "Buscar emisoras"
 }

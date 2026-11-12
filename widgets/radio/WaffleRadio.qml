@@ -20,56 +20,11 @@ Item {
 
     implicitHeight: content.implicitHeight + Looks.dp(32)
 
-    // Fluent names for the Material ones the tuner asks for; the radio carries these few Fluent glyphs itself.
-    readonly property var fluent: ({
-        star: "star", search: "search", close: "dismiss", chevron_left: "chevron-left", chevron_right: "chevron-right",
-        history: "history", public: "globe", sell: "tag", translate: "local-language", trending_up: "arrow-trending",
-        trophy: "trophy", play_arrow: "play", stop: "stop", skip_next: "next", volume_up: "speaker-2",
-        volume_off: "speaker-mute", content_copy: "copy", check: "checkmark", travel_explore: "globe-search",
-        radio: "music-note-2", error: "warning", shuffle: "arrow-shuffle", explore: "globe-search"
-    })
-    function fluentSource(name: string, filled: bool): url {
-        const file = root.fluent[name] ?? "music-note-2"
-        return Qt.resolvedUrl(`fluent/${file}${filled ? "-filled" : ""}.svg`)
-    }
-    Component {
-        id: fluentGlyph
-        Kirigami.Icon {
-            property string name: ""
-            property real size: 20
-            property bool filled: false
-            implicitWidth: size
-            implicitHeight: size
-            source: root.fluentSource(name, filled)
-            isMask: true
-            roundToIconSize: false
-        }
-    }
-    readonly property var tunerLook: ({
-        d: Looks.dp(1),
-        font: Looks.font.family.ui,
-        small: Looks.font.pixelSize.normal,
-        meta: Looks.font.pixelSize.large,
-        body: Looks.font.pixelSize.larger,
-        title: Looks.font.pixelSize.xlarger,
-        bg: Looks.colors.bg0,
-        raised: Looks.colors.bg2Base,
-        track: Looks.colors.controlBg,
-        hover: ColorUtils.applyAlpha(Looks.colors.fg, 0.06),
-        press: ColorUtils.applyAlpha(Looks.colors.fg, 0.1),
-        selected: ColorUtils.applyAlpha(Looks.colors.fg, 0.08),
-        ink: Looks.colors.fg,
-        muted: Looks.colors.subfg,
-        faint: ColorUtils.applyAlpha(Looks.colors.fg, 0.46),
-        line: Looks.colors.bg0Border,
-        accent: Looks.colors.accent,
-        onAccent: Looks.colors.accentFg,
-        danger: Looks.colors.danger,
-        scrim: ColorUtils.applyAlpha(Looks.colors.bg0, 0.4),
-        radius: Looks.radius.large,
-        radiusSmall: Looks.radius.medium,
-        glyph: fluentGlyph
-    })
+    // The tuner in Fluent (WaffleLook.qml).
+    WaffleLook { id: waffleLook }
+    readonly property var tunerLook: waffleLook.look
+    onTunerLookChanged: Radio.offerLook("waffle", root.tunerLook)
+    Component.onCompleted: Radio.offerLook("waffle", root.tunerLook)
     function openTuner(): void { Radio.openTuner(root.QsWindow.window?.screen ?? null, root.tunerLook) }
 
     ColumnLayout {
@@ -156,7 +111,7 @@ Item {
                     anchors.centerIn: parent
                     implicitWidth: Looks.dp(18)
                     implicitHeight: Looks.dp(18)
-                    source: root.fluentSource("star", Radio.kept)
+                    source: waffleLook.fluentSource("star", Radio.kept)
                     isMask: true
                     color: Radio.kept ? Looks.colors.accent : Looks.colors.fg
                 }
@@ -170,7 +125,7 @@ Item {
                     anchors.centerIn: parent
                     implicitWidth: Looks.dp(18)
                     implicitHeight: Looks.dp(18)
-                    source: root.fluentSource("explore", false)
+                    source: waffleLook.fluentSource("explore", false)
                     isMask: true
                     color: Looks.colors.fg
                 }
@@ -185,7 +140,7 @@ Item {
                     anchors.centerIn: parent
                     implicitWidth: Looks.dp(16)
                     implicitHeight: Looks.dp(16)
-                    source: root.fluentSource(Radio.muted || Radio.liveVolume === 0 ? "volume_off" : "volume_up", false)
+                    source: waffleLook.fluentSource(Radio.muted || Radio.liveVolume === 0 ? "volume_off" : "volume_up", false)
                     isMask: true
                     color: Looks.colors.fg
                 }

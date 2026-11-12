@@ -14,6 +14,7 @@ Item {
     readonly property real d: root.look?.d ?? 1
     readonly property var station: Radio.current
     readonly property bool song: Radio.playing && Radio.onAir.length > 0
+    readonly property bool prism: root.look?.grammar === "prism"
 
     implicitHeight: Math.round(84 * root.d)
     height: implicitHeight
@@ -31,6 +32,7 @@ Item {
         look: root.look
         station: root.station
         size: Math.round(52 * root.d)
+        radius: root.prism ? Math.round(12 * root.d) : Math.min(size / 4, root.look?.radiusSmall ?? 8)
         visible: root.station !== null
     }
     Column {
@@ -119,7 +121,7 @@ Item {
             look: root.look
             accent: true
             glyph: Radio.playing || Radio.waiting ? "stop" : "play_arrow"
-            size: Math.round(46 * root.d)
+            size: Math.round((root.prism ? 40 : 46) * root.d)
             label: Radio.playing ? Translation.tr("Stop") : Translation.tr("Play")
             onClicked: Radio.playPause()
         }

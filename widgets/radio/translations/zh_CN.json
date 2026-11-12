@@ -64,5 +64,9 @@
   "Volume": "音量",
   "Volume %1 %": "音量 %1 %",
   "Genres you like, with commas (city pop, jazz). Empty plays anything": "喜欢的风格，用逗号分隔（city pop, jazz）。留空则播放任何内容",
-  "Previous station": "上一个电台"
+  "Previous station": "上一个电台",
+  "Your stations": "你的电台",
+  "Discover": "发现",
+  "Browse": "浏览",
+  "Search stations": "搜索电台"
 }

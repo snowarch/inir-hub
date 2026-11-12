@@ -64,5 +64,9 @@
   "Volume": "음량",
   "Volume %1 %": "음량 %1 %",
   "Genres you like, with commas (city pop, jazz). Empty plays anything": "좋아하는 장르를 쉼표로 (city pop, jazz). 비우면 무엇이든 재생",
-  "Previous station": "이전 방송국"
+  "Previous station": "이전 방송국",
+  "Your stations": "내 방송국",
+  "Discover": "발견",
+  "Browse": "둘러보기",
+  "Search stations": "방송국 검색"
 }

@@ -60,7 +60,18 @@ AbstractBackgroundWidget {
             turned.restart()
         }
     }
-    function openTuner(): void { Radio.openTuner(root.desktop?.screen ?? null, root.tunerLook) }
+    // The card sits on the desktop of every family; its tuner wears the family worn: iRiS and Waffle draw theirs,
+    // loaded only while that family is the one in use.
+    readonly property string family: Config.options?.panelFamily ?? "ii"
+    Loader {
+        id: familyLook
+        active: root.family === "iris" || root.family === "waffle"
+        source: root.family === "iris" ? "IrisLook.qml" : root.family === "waffle" ? "WaffleLook.qml" : ""
+    }
+    readonly property var wornLook: familyLook.item?.look ?? root.tunerLook
+    onWornLookChanged: Radio.offerLook(familyLook.item ? root.family : "ii", root.wornLook)
+    Component.onCompleted: Radio.offerLook("ii", root.tunerLook)
+    function openTuner(): void { Radio.openTuner(root.desktop?.screen ?? null, root.wornLook) }
 
     // The tuner wears Material's panel colours, not the card's wallpaper ink: it is a window, not a widget.
     readonly property var tunerLook: ({

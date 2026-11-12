@@ -5,6 +5,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 import qs.services
+import qs.modules.common
 import "radio.js" as R
 
 // The one radio every face shows: the desktop card on each screen, the Island line, the Waffle card and the tuner
@@ -187,6 +188,16 @@ Singleton {
     }
     Timer { id: reopen; interval: 0; onTriggered: root.tunerOpen = root.tunerScreen !== null && root.tunerLook !== null }
     function closeTuner(): void { root.tunerOpen = false }
+    // Each family's face leaves its look here, so a keybind opens the tuner in the family the person wears.
+    property var offeredLooks: ({})
+    function offerLook(family: string, look: var): void {
+        const old = root.offeredLooks[family]
+        const next = Object.assign({}, root.offeredLooks)
+        next[family] = look
+        root.offeredLooks = next
+        // A tuner open in that family's old colours takes the new ones (light and dark, a new accent).
+        if (old !== undefined && root.tunerLook === old) root.tunerLook = look
+    }
     LazyLoader {
         active: root.tunerOpen
         RadioTuner {
@@ -226,6 +237,13 @@ Singleton {
         function stop(): string { root.stop(); return root.phase }
         /// Stars or unstars the station that plays. Returns whether it is kept now.
         function keep(): bool { root.toggleFavourite(root.current); return root.kept }
+        /// Opens the tuner (or closes it when open), drawn in the family of the face shown last. Returns whether it is open.
+        function tuner(): bool {
+            const looks = root.offeredLooks
+            const look = looks[Config.options?.panelFamily ?? ""] ?? root.tunerLook ?? Object.values(looks)[0] ?? null
+            if (look) root.openTuner(root.tunerScreen, look)
+            return root.tunerOpen || reopen.running
+        }
         /// What plays: the phase, the station and what it announces.
         function status(): string {
             return root.current ? `${root.phase}\t${root.current.name}\t${root.place}\t${root.onAir}` : root.phase

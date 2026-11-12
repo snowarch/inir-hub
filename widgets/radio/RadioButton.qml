@@ -18,13 +18,16 @@ Item {
     implicitWidth: root.size
     implicitHeight: root.size
     opacity: root.enabled ? 1 : 0.38
+    scale: mouse.pressed ? (root.accent ? 0.92 : 0.96) : 1
+    Behavior on scale { NumberAnimation { duration: 120; easing.type: Easing.OutCubic } }
     Accessible.role: Accessible.Button
     Accessible.name: root.label
 
     Rectangle {
         anchors.fill: parent
         radius: root.accent ? width / 2 : Math.min(width / 2, root.look?.radiusSmall ?? 8)
-        color: root.accent ? (mouse.pressed ? Qt.darker(root.look.accent, 1.12) : root.look.accent)
+        // A family with solid controls (Prism: white on dark) gives `solid`; the rest wear the accent.
+        color: root.accent ? (mouse.pressed ? Qt.darker(root.look.solid ?? root.look.accent, 1.12) : root.look.solid ?? root.look.accent)
             : mouse.pressed ? root.look.press : mouse.containsMouse ? root.look.hover : "transparent"
         Behavior on color { ColorAnimation { duration: 120 } }
     }
@@ -34,7 +37,7 @@ Item {
         name: root.glyph
         filled: root.filled || root.on || root.accent
         size: Math.round(root.size * (root.accent ? 0.5 : 0.56))
-        color: root.accent ? root.look.onAccent : root.on ? root.look.accent : root.look.ink
+        color: root.accent ? root.look.onSolid ?? root.look.onAccent : root.on ? root.look.accent : root.look.ink
     }
     MouseArea {
         id: mouse

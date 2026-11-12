@@ -64,5 +64,9 @@
   "Volume": "आवाज़",
   "Volume %1 %": "आवाज़ %1 %",
   "Genres you like, with commas (city pop, jazz). Empty plays anything": "आपकी पसंद की शैलियाँ, कॉमा से (city pop, jazz)। खाली हो तो कुछ भी बजेगा",
-  "Previous station": "पिछला स्टेशन"
+  "Previous station": "पिछला स्टेशन",
+  "Your stations": "आपके स्टेशन",
+  "Discover": "खोजें",
+  "Browse": "ब्राउज़ करें",
+  "Search stations": "स्टेशन खोजें"
 }

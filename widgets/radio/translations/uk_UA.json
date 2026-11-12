@@ -64,5 +64,9 @@
   "Volume": "Гучність",
   "Volume %1 %": "Гучність %1 %",
   "Genres you like, with commas (city pop, jazz). Empty plays anything": "Улюблені жанри через кому (city pop, jazz). Порожньо — грає будь-що",
-  "Previous station": "Попередня станція"
+  "Previous station": "Попередня станція",
+  "Your stations": "Ваші станції",
+  "Discover": "Відкрити",
+  "Browse": "Огляд",
+  "Search stations": "Пошук станцій"
 }
