@@ -30,6 +30,21 @@ Item {
     readonly property var extraKinds: IrisPieces.extraIds
     readonly property var allSlots: root.islandSlots.concat(root.extraKinds.map(kind => "extra-" + kind),
         IrisPieces.appPieceIds(), root.trayAppSlots)
+    // Floating bubbles on the screens the person chose (iris.bubbles.screenList); none chosen, or none of them
+    // connected, is every screen.
+    readonly property var bubbleScreens: Config.options?.iris?.bubbles?.screenList ?? []
+    function bubblesOn(name: string): bool {
+        const list = root.bubbleScreens
+        return list.length === 0 || list.includes(name) || !Quickshell.screens.some(s => list.includes(s?.name ?? ""))
+    }
+    readonly property bool bubblesHere: root.bubblesOn(root.screenName)
+    onBubblesHereChanged: absorbedPublish.restart()
+    // A keybind's card or menu opens on the focused screen, or on the first one that shows bubbles.
+    readonly property bool answersBubbles: {
+        const focused = GlobalStates.focusedScreen?.name ?? ""
+        if (root.bubblesOn(focused)) return root.screenName === focused
+        return (Quickshell.screens.find(s => root.bubblesOn(s?.name ?? ""))?.name ?? "") === root.screenName
+    }
     function isExtra(slot: string): bool { return slot.startsWith("extra-") }
     function isApp(slot: string): bool { return IrisPieces.isApp(slot) }
     readonly property bool trayAppsFace: String(Config.options?.iris?.tray?.face ?? "apps") === "apps"
@@ -405,8 +420,10 @@ Item {
     }
     function publishAbsorbed(): void {
         if (root.screenName.length === 0) return
-        const value = { island: root.absorption.island, islandStart: root.absorption.islandStart,
-            islandSlots: root.absorption.islandSlots, dock: root.absorption.dock }
+        // A screen without bubbles hands the Island nothing to absorb.
+        const here = root.bubblesHere
+        const value = { island: here ? root.absorption.island : [], islandStart: here ? root.absorption.islandStart : [],
+            islandSlots: here ? root.absorption.islandSlots : [], dock: here ? root.absorption.dock : [] }
         const current = IrisState.absorbed?.[root.screenName]
         if (JSON.stringify(current ?? null) === JSON.stringify(value)) return
         const next = Object.assign({}, IrisState.absorbed ?? {})
@@ -1285,7 +1302,7 @@ Item {
             enabled: bubble.floating
             function onBubbleMenuRequestChanged(): void {
                 const want = IrisState.bubbleMenuRequest
-                if (want.length === 0 || root.screenName !== (GlobalStates.focusedScreen?.name ?? "")) return
+                if (want.length === 0 || !root.answersBubbles) return
                 if (want !== bubble.kind && want !== bubble.slot) return
                 IrisState.bubbleMenuRequest = ""
                 if (bubble.kind === "trayApp" && bubble.trayItem?.hasMenu) { trayMenu.open(); return }
@@ -1301,7 +1318,7 @@ Item {
             required property int index
             required property string modelData
             z: 2
-            active: (root.rects[bubbleSlot.index] ?? null) !== null
+            active: root.bubblesHere && (root.rects[bubbleSlot.index] ?? null) !== null
             sourceComponent: FloatingBubble {
                 slot: bubbleSlot.modelData
                 pieceIndex: bubbleSlot.index
@@ -1321,7 +1338,7 @@ Item {
         target: IrisState
         function onBubbleCardRequestChanged(): void {
             const kind = IrisState.bubbleCardRequest
-            if (kind.length === 0 || root.screenName !== (GlobalStates.focusedScreen?.name ?? "")) return
+            if (kind.length === 0 || !root.answersBubbles) return
             const index = root.allSlots.findIndex((slot, i) => root.rects[i] !== null && root.kindOf(slot) === kind)
             if (index < 0) return
             IrisState.bubbleCardRequest = ""
@@ -1632,7 +1649,7 @@ Item {
 
     readonly property bool mediaKept: (Config.options?.iris?.player?.cardPinned ?? false)
         && MprisController.activePlayer !== null
-        && root.screenName === (GlobalStates.focusedScreen?.name ?? "")
+        && root.answersBubbles
     function syncKeptCard(): void {
         const index = root.allSlots.findIndex((slot, i) => root.rects[i] !== null && root.kindOf(slot) === "media")
         if (root.mediaKept) {

@@ -521,6 +521,7 @@ JsonObject {
     // at fx/fy (its centre as fractions of the output).
     property JsonObject bubbles: JsonObject {
         property int scale: 100 // size of pieces off the Island, % of the Island height
+        property list<string> screenList: [] // outputs the floating bubbles show on; none = every screen
         property JsonObject left: JsonObject {
             property string place: "island"
             property real fx: 0.5

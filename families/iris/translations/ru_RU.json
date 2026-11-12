@@ -2434,5 +2434,7 @@
   "This screen always has %1.": "На этом экране всегда %1.",
   "Press to turn off": "Нажмите, чтобы выключить",
   "Glyph art": "Символьная графика",
-  "How much the glass behind every widget frosts the wallpaper: low keeps it clear, high turns it to milk.": "Насколько стекло под каждым виджетом размывает обои: при малом значении они чёткие, при большом — молочные."
+  "How much the glass behind every widget frosts the wallpaper: low keeps it clear, high turns it to milk.": "Насколько стекло под каждым виджетом размывает обои: при малом значении они чёткие, при большом — молочные.",
+  "Bubbles on": "Пузыри на",
+  "The bubbles off the Island. None chosen shows them on every screen.": "Пузыри вне Island. Если ничего не выбрано, они видны на всех экранах."
 }

@@ -2434,5 +2434,7 @@
   "This screen always has %1.": "Layar ini selalu memiliki %1.",
   "Press to turn off": "Tekan untuk mematikan",
   "Glyph art": "Seni glif",
-  "How much the glass behind every widget frosts the wallpaper: low keeps it clear, high turns it to milk.": "Seberapa kuat kaca di belakang setiap widget memburamkan wallpaper: rendah tetap jernih, tinggi menjadi seperti susu."
+  "How much the glass behind every widget frosts the wallpaper: low keeps it clear, high turns it to milk.": "Seberapa kuat kaca di belakang setiap widget memburamkan wallpaper: rendah tetap jernih, tinggi menjadi seperti susu.",
+  "Bubbles on": "Gelembung di",
+  "The bubbles off the Island. None chosen shows them on every screen.": "Gelembung di luar Island. Jika tidak ada yang dipilih, muncul di semua layar."
 }

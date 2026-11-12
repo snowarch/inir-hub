@@ -2434,5 +2434,7 @@
   "This screen always has %1.": "Esta pantalla siempre tiene %1.",
   "Press to turn off": "Presiona para desactivar",
   "Glyph art": "Arte de glifos",
-  "How much the glass behind every widget frosts the wallpaper: low keeps it clear, high turns it to milk.": "Cuánto empaña el cristal detrás de cada widget al fondo de pantalla: bajo lo deja nítido, alto lo vuelve lechoso."
+  "How much the glass behind every widget frosts the wallpaper: low keeps it clear, high turns it to milk.": "Cuánto empaña el cristal detrás de cada widget al fondo de pantalla: bajo lo deja nítido, alto lo vuelve lechoso.",
+  "Bubbles on": "Burbujas en",
+  "The bubbles off the Island. None chosen shows them on every screen.": "Las burbujas fuera de la Island. Sin ninguna elegida, aparecen en todas las pantallas."
 }

@@ -2434,5 +2434,7 @@
   "This screen always has %1.": "इस स्क्रीन पर हमेशा %1 होते हैं।",
   "Press to turn off": "बंद करने के लिए दबाएँ",
   "Glyph art": "ग्लिफ़ कला",
-  "How much the glass behind every widget frosts the wallpaper: low keeps it clear, high turns it to milk.": "हर विजेट के पीछे का काँच वॉलपेपर को कितना धुंधला करे: कम पर साफ़ रहता है, ज़्यादा पर दूधिया हो जाता है।"
+  "How much the glass behind every widget frosts the wallpaper: low keeps it clear, high turns it to milk.": "हर विजेट के पीछे का काँच वॉलपेपर को कितना धुंधला करे: कम पर साफ़ रहता है, ज़्यादा पर दूधिया हो जाता है।",
+  "Bubbles on": "बबल यहाँ",
+  "The bubbles off the Island. None chosen shows them on every screen.": "Island के बाहर के बबल। कुछ न चुनें तो हर स्क्रीन पर दिखते हैं।"
 }
