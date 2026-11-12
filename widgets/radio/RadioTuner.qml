@@ -404,8 +404,8 @@ PanelWindow {
                 }
                 Text {
                     id: count
-                    anchors.right: clearRecent.left
-                    anchors.rightMargin: Math.round(6 * root.d)
+                    anchors.right: clearRecent.visible ? clearRecent.left : parent.right
+                    anchors.rightMargin: clearRecent.visible ? Math.round(6 * root.d) : 0
                     anchors.verticalCenter: parent.verticalCenter
                     visible: root.shown > 0 && !root.loading
                     text: root.indexView ? Translation.tr("%1 to pick from").arg(root.shown)
@@ -421,7 +421,6 @@ PanelWindow {
                     anchors.right: parent.right
                     anchors.verticalCenter: parent.verticalCenter
                     visible: root.section === "recent" && root.drill === null && !root.searching && Radio.recent.length > 0
-                    width: visible ? implicitWidth : 0
                     text: Translation.tr("Clear")
                     font.family: root.look.font
                     font.pixelSize: root.look.small

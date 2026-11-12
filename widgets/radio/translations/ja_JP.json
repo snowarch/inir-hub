@@ -63,5 +63,6 @@
   "Unmute": "ミュート解除",
   "Volume": "音量",
   "Volume %1 %": "音量 %1 %",
-  "Genres you like, with commas (city pop, jazz). Empty plays anything": "好きなジャンルをカンマ区切りで（city pop, jazz）。空なら何でも流します"
+  "Genres you like, with commas (city pop, jazz). Empty plays anything": "好きなジャンルをカンマ区切りで（city pop, jazz）。空なら何でも流します",
+  "Previous station": "前の局"
 }

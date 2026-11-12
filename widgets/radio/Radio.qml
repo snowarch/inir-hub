@@ -50,6 +50,9 @@ Singleton {
     readonly property string place: R.where(root.current)
     readonly property string flag: R.flag(root.current?.code ?? "")
     readonly property string logo: root.current?.logo ?? ""
+    // The stream publishes no cover of its own: the shell's player shows the station's logo for it.
+    onCurrentChanged: if (root.current?.logo && typeof MprisController.offerCover === "function")
+        MprisController.offerCover(String(root.current.url), String(root.current.logo))
     readonly property bool kept: !!root.current && root.favouriteIds[root.current.uuid] === true
     // What the station's line says: the song when the station names it, else what is happening, in words.
     readonly property string line: {

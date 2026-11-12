@@ -7,7 +7,7 @@ pop, one in Kanagawa playing city pop: real stations, live, mostly ones you woul
 | Family | Where it shows | How to add it |
 | --- | --- | --- |
 | Material | A card on the desktop | Edit the desktop, add a widget, Radio |
-| iRiS | A line on the Island's Desktop page | The Island's Desktop page, add, Radio |
+| iRiS | A player on the Island's Desktop page: logo, station, volume, previous, play, next | The Island's Desktop page, add, Radio |
 | Waffle | A card in the Widgets panel | It shows in the panel once installed |
 
 ## Using it
