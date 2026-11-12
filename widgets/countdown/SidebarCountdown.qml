@@ -86,6 +86,8 @@ Item {
             StyledText {
                 Layout.fillWidth: true
                 text: root.label
+                wrapMode: Text.WordWrap
+                maximumLineCount: 2
                 elide: Text.ElideRight
                 font.pixelSize: Appearance.font.pixelSize.small
                 font.weight: Font.Medium
@@ -143,6 +145,8 @@ Item {
                     Layout.fillWidth: true
                     visible: root.tab
                     text: root.label
+                    wrapMode: Text.WordWrap
+                    maximumLineCount: 2
                     elide: Text.ElideRight
                     font.pixelSize: Appearance.font.pixelSize.small
                     font.weight: Font.Medium
