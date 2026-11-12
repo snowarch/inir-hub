@@ -86,6 +86,16 @@ Scope {
             GlobalStates.barOpen = true
             root.islandRequested(true, name)
         }
+        /// One key for a page: expand the island on it, or collapse the island when that page already shows
+        /// ```kdl
+        /// Mod+S { spawn "inir" "iris" "togglePage" "desktop"; }
+        /// ```
+        function togglePage(name: string): string {
+            if (!["media", "activity", "desktop", "shelf", "weather", "calendar", "vitals", "tray", "tools"].includes(name)) return "no such page"
+            GlobalStates.barOpen = true
+            root.islandRequested(true, name + ":toggle")
+            return name
+        }
         /// Collapse the island
         function close(): void { root.islandRequested(false, "") }
         /// `open`, `close` or `toggle` the Island's Shelf page (open on another page counts as closed)
@@ -1397,9 +1407,10 @@ Scope {
                                         island.stepPage(page === "next" ? 1 : -1)
                                         return
                                     }
-                                    if (open && page === "shelf:toggle") {
-                                        const showing = island.expanded && island.effectivePage === "shelf"
-                                        if (!showing) island.page = "shelf"
+                                    if (open && page.endsWith(":toggle")) {
+                                        const wanted = page.slice(0, -7)
+                                        const showing = island.expanded && (island.effectivePage === wanted || island.page === wanted)
+                                        if (!showing) island.page = wanted
                                         island.pinned = !showing
                                         island.expanded = !showing
                                         return

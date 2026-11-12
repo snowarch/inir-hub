@@ -1,7 +1,8 @@
 {
     "$schema": "../../schema/hub.schema.json",
-    "version": "2.33.83",
+    "version": "2.33.84",
     "changes": {
+      "2.33.84": ["One key can open a page of the Island and close it again: `inir iris togglePage desktop`"],
       "2.33.83": ["Bubbles can live on the screens you pick (Settings, Display, Screens): the Island elsewhere stays clean", "Island player: a live stream shows Live with a full line instead of a timeline that slides back and forth", "On Umbriel, an app's menu in the dock sends its window to the scratchpad and back", "Island: a hub widget's module can fill its row on the Desktop page (the radio's player)", "Player chips show the same cover as the player, a station's logo included"],
       "2.33.82": ["Settings reopens on the group you left, Glyph art included", "Glyph art: its rows start from the new, finer factory values", "About shows the new iNiR mark in your colours", "Edit desktop: hub widgets sit in their own aisle (Radio in Media) and search finds them by what they do"],
       "2.33.81": ["Searches that find nothing answer with a little personality", "Hub: “Nothing matches” sits in the middle of the page"],
