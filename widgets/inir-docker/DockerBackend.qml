@@ -24,6 +24,13 @@ Item {
     property string actionNotice: ""
     property string actionError: ""
     property var cpuHistory: []
+    property var memOverrides: ({})
+    property var cpuOverrides: ({})
+    property var limitQueue: []
+    property var activeLimit: null
+    property string limitNotice: ""
+    property string limitError: ""
+    property bool _limitRefreshPending: false
 
     readonly property int refreshSeconds: Math.max(1, Math.min(60,
         Number(CustomWidgets.getConfigValue("inir-docker", "refreshSeconds", 3))))
@@ -32,6 +39,7 @@ Item {
     readonly property bool showStopped: Boolean(CustomWidgets.getConfigValue("inir-docker", "showStopped", true))
     readonly property bool showSummary: Boolean(CustomWidgets.getConfigValue("inir-docker", "showSummary", true))
     readonly property bool showSparkline: Boolean(CustomWidgets.getConfigValue("inir-docker", "showSparkline", true))
+    readonly property bool showLimits: Boolean(CustomWidgets.getConfigValue("inir-docker", "showLimits", true))
     readonly property string filterText: String(CustomWidgets.getConfigValue("inir-docker", "filter", ""))
     readonly property string layout: {
         const value = String(CustomWidgets.getConfigValue("inir-docker", "layout", "dashboard"))
@@ -54,7 +62,8 @@ Item {
         ? Docker.targetLabel(root.snapshot.target) : ""
     readonly property bool available: Boolean(root.snapshot && root.snapshot.dockerAvailable)
     readonly property bool hasData: root.snapshot !== null
-    readonly property bool busy: snapshotProc.running || actionProc.running
+    readonly property bool limitBusy: limitProc.running || root.activeLimit !== null || root.limitQueue.length > 0
+    readonly property bool busy: snapshotProc.running || actionProc.running || root.limitBusy
 
     readonly property int runningCount: root.filtered.filter(container => container.status === "running").length
     readonly property int totalCount: root.filtered.length
@@ -71,6 +80,12 @@ Item {
     readonly property real memPercent: root.hostMemBytes > 0
         ? Math.min(100, (root.totalMemBytes / root.hostMemBytes) * 100) : 0
     readonly property real cpuChartMax: root.cpuHistory.reduce((max, value) => Math.max(max, value), 10)
+    readonly property int hostMemMb: Docker.hostMemoryMb(root.snapshot?.hostMemBytes ?? 0)
+    readonly property real hostCpuCount: Math.max(0.1, Number(root.snapshot?.hostCpuCount ?? 0) || 1)
+    readonly property int memMin: 6
+    readonly property int memStep: 128
+    readonly property real cpuMin: 0.1
+    readonly property real cpuMax: root.hostCpuCount
 
     Process {
         id: snapshotProc
@@ -92,6 +107,11 @@ Item {
                         root.snapshot = next
                         root._recordHistory(next)
                         root.error = ""
+                        if (root._limitRefreshPending && root.limitQueue.length === 0 && root.activeLimit === null) {
+                            root._limitRefreshPending = false
+                            root.memOverrides = ({})
+                            root.cpuOverrides = ({})
+                        }
                     } else {
                         root.error = Translation.tr("Docker is not reachable")
                     }
@@ -121,6 +141,40 @@ Item {
             }
             root.pendingAction = ""
             root.refresh()
+        }
+    }
+
+    Process {
+        id: limitProc
+        stderr: StdioCollector {
+            id: limitErr
+            waitForEnd: true
+        }
+        onExited: (code, status) => {
+            const job = root.activeLimit
+            if (!job) return
+            if (job.kind === "memory" && code === 0 && job.phase === "limit") {
+                job.phase = "swap"
+                Qt.callLater(() => {
+                    if (!root.activeLimit) return
+                    limitProc.command = Docker.dockerCommand(job.target, ["update", "--memory-swap", "-1", "--", job.id])
+                    limitProc.running = true
+                })
+                return
+            }
+            root.activeLimit = null
+            if (code === 0) {
+                root.limitNotice = Translation.tr("%1 limits updated").arg(job.name)
+                root.limitError = ""
+                root._limitRefreshPending = true
+            } else {
+                const line = String(limitErr.text ?? "").trim().split("\n")[0]
+                root.limitError = Translation.tr("Could not update %1: %2").arg(job.name)
+                    .arg(line.length > 0 ? line : Translation.tr("Docker exited with code %1").arg(code))
+                root.limitNotice = ""
+                root._dropLimitOverride(job)
+            }
+            Qt.callLater(() => { root._startNextLimit(); root.refresh() })
         }
     }
 
@@ -156,6 +210,8 @@ Item {
         root.pendingAction = ""
         root.actionError = ""
         root.actionNotice = ""
+        root.limitError = ""
+        root.limitNotice = ""
     }
 
     function requestAction(action): void {
@@ -185,6 +241,81 @@ Item {
         if (!root.selected || !root.snapshot) return
         const command = Docker.logsCommand(root.snapshot.target, root.selected, follow === true)
         if (command.length > 0) Quickshell.execDetached(command)
+    }
+
+    function memoryLimitMb(container): int {
+        if (!container) return root.memMin
+        const override = root.memOverrides[container.fullId]
+        if (override !== undefined) return override
+        const bytes = Number(container.memLimitBytes ?? 0)
+        return bytes > 0 ? Math.max(root.memMin, Math.round(bytes / 1048576)) : root.hostMemMb
+    }
+
+    function cpuLimit(container): real {
+        if (!container) return root.cpuMax
+        const override = root.cpuOverrides[container.fullId]
+        if (override !== undefined) return override
+        const value = Number(container.cpuLimit ?? 0)
+        return value > 0 ? value : root.cpuMax
+    }
+
+    function canAdjustLimits(container): bool {
+        return !!container && container.status === "running"
+            && root.snapshot !== null && Docker.validTarget(root.snapshot.target)
+    }
+
+    function setMemoryLimit(container, mb): void {
+        if (!root.canAdjustLimits(container)) return
+        const value = Docker.clampMemMb(mb, root.hostMemMb)
+        const next = Object.assign({}, root.memOverrides)
+        next[container.fullId] = value
+        root.memOverrides = next
+        root._queueLimit({ kind: "memory", id: container.fullId, name: container.name, mb: value, target: root.snapshot.target })
+    }
+
+    function setCpuLimit(container, cores): void {
+        if (!root.canAdjustLimits(container)) return
+        const value = Docker.clampCpuCores(cores, root.hostCpuCount)
+        const next = Object.assign({}, root.cpuOverrides)
+        next[container.fullId] = value
+        root.cpuOverrides = next
+        root._queueLimit({ kind: "cpu", id: container.fullId, name: container.name, cores: value, target: root.snapshot.target })
+    }
+
+    function _queueLimit(job): void {
+        root.limitNotice = ""
+        root.limitError = ""
+        root.limitQueue = root.limitQueue.concat([job])
+        root._startNextLimit()
+    }
+
+    function _startNextLimit(): void {
+        if (limitProc.running || root.activeLimit !== null || root.limitQueue.length === 0) return
+        const job = root.limitQueue[0]
+        root.limitQueue = root.limitQueue.slice(1)
+        root.activeLimit = job
+        if (job.kind === "memory") {
+            job.phase = "limit"
+            limitProc.command = Docker.dockerCommand(job.target,
+                ["update", "--memory", String(job.mb) + "m", "--memory-swap", String(job.mb * 2) + "m", "--", job.id])
+        } else {
+            job.phase = "cpu"
+            limitProc.command = Docker.dockerCommand(job.target,
+                ["update", "--cpus", String(job.cores), "--", job.id])
+        }
+        limitProc.running = true
+    }
+
+    function _dropLimitOverride(job): void {
+        if (job.kind === "memory") {
+            const next = Object.assign({}, root.memOverrides)
+            delete next[job.id]
+            root.memOverrides = next
+        } else {
+            const next = Object.assign({}, root.cpuOverrides)
+            delete next[job.id]
+            root.cpuOverrides = next
+        }
     }
 
     function actionLabel(action): string {

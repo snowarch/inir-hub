@@ -6,6 +6,8 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import Quickshell
+import Quickshell.Io
+import qs
 import qs.services
 import qs.modules.shared.background.widgets
 
@@ -49,6 +51,52 @@ AbstractBackgroundWidget {
     DockerBackend {
         id: backend
         active: root.visible && (root.motionActive || root.snapshot === null)
+    }
+
+    IpcHandler {
+        target: "inir-docker"
+        // One desktop widget exists per screen; only the focused screen answers
+        // IPC so the target is never registered twice.
+        enabled: root.outputName === (GlobalStates.focusedScreen?.name ?? root.outputName)
+
+        function _find(id: string): var {
+            return backend.containers.find(container => container.fullId === id || container.name === id) ?? null
+        }
+
+        function select(id: string): string {
+            const container = _find(id)
+            if (!container) return "no container " + id
+            backend.selectContainer(container)
+            return container.name
+        }
+
+        function memory(id: string, mb: int): string {
+            const container = _find(id)
+            if (!container) return "no container " + id
+            if (!backend.canAdjustLimits(container)) return "start " + container.name + " first"
+            backend.setMemoryLimit(container, mb)
+            return container.name + " memory " + mb + " MiB"
+        }
+
+        function cpu(id: string, cores: string): string {
+            const container = _find(id)
+            if (!container) return "no container " + id
+            if (!backend.canAdjustLimits(container)) return "start " + container.name + " first"
+            backend.setCpuLimit(container, Number(cores))
+            return container.name + " cpu " + cores
+        }
+
+        function limits(id: string): string {
+            const container = _find(id) ?? backend.selected
+            if (!container) return "no container"
+            return JSON.stringify({
+                name: container.name,
+                memoryMb: backend.memoryLimitMb(container),
+                cpuCores: backend.cpuLimit(container),
+                hostMemoryMb: backend.hostMemMb,
+                hostCpuCount: backend.hostCpuCount
+            })
+        }
     }
 
     WidgetSurface {

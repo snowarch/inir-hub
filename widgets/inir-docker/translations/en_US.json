@@ -34,5 +34,13 @@
     "restarting": "restarting",
     "running": "running",
     "unreadable": "unreadable",
-    "MEMORY": "MEMORY"
+    "MEMORY": "MEMORY",
+    "%1 limits updated": "%1 limits updated",
+    "Could not update %1: %2": "Could not update %1: %2",
+    "Host": "Host",
+    "LIMITS": "LIMITS",
+    "RAM": "RAM",
+    "Start the container to adjust its limits": "Start the container to adjust its limits",
+    "applying…": "applying…",
+    "cores": "cores"
 }

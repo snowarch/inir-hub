@@ -14,6 +14,7 @@ widget (MIT).
 - **Three layouts**: Dashboard, Compact and Tiles.
 - Click a container to select it.
 - Start, stop or restart it with a confirmation step.
+- Adjust a running container's **RAM and CPU limits** with sliders or presets.
 - Open the last 200 log lines, or follow logs, in your terminal.
 - Filter by name, image, state or Compose project.
 - A compact line on the iRiS Island shows `running/total`.
@@ -65,7 +66,34 @@ inir restart
 | `showStopped` | `true` | Include exited/created containers |
 | `showSummary` | `true` | Show the running/CPU/memory summary strip |
 | `showSparkline` | `true` | Show the CPU history line |
+| `showLimits` | `true` | Show RAM/CPU limit controls for the selected container |
 | `filter` | empty | Literal text matched against name, image, state and Compose labels |
+
+## Limits
+
+Select a running container to show **RAM** and **CPU** controls.
+
+- Drag the slider; the change applies after a short pause.
+- Presets: 256 MB, 512 MB, 1 GB, Host for RAM; 0.5, 1, 2, Host for CPU.
+- RAM is applied as a finite memory/swap pair first, then `--memory-swap -1`, matching Docker's update behaviour.
+- CPU uses `--cpus`; **Host** uses every logical core because Docker treats `--cpus 0` as unchanged.
+- Limits apply to the running container only. They do not edit a Compose file and may be lost when the container is recreated.
+- Lowering RAM can let the kernel OOM-kill the workload.
+
+The controls are queued, so a RAM and a CPU change never race.
+
+## IPC
+
+The focused screen's widget exposes:
+
+```bash
+inir ipc inir-docker select inir-limit-demo
+inir ipc inir-docker limits inir-limit-demo
+inir ipc inir-docker memory inir-limit-demo 512
+inir ipc inir-docker cpu inir-limit-demo 1
+```
+
+`limits` prints the current memory/CPU limits and the daemon capacity as JSON.
 
 ## Sidebar support
 

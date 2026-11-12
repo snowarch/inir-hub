@@ -353,6 +353,28 @@ ColumnLayout {
         }
     }
 
+    DockerLimits {
+        Layout.fillWidth: true
+        visible: view.backend.showLimits && view.backend.selected !== null
+            && view.backend.selected.status === "running"
+            && view.backend.canAdjustLimits(view.backend.selected)
+        backend: view.backend
+        container: view.backend.selected
+        scaleFactor: view.scaleFactor
+        ink: view.ink
+        accent: view.accent
+        numbersFamily: view.numbersFamily
+    }
+
+    StyledText {
+        Layout.fillWidth: true
+        visible: view.backend.showLimits && view.backend.selected !== null
+            && view.backend.selected.status !== "running"
+        text: Translation.tr("Start the container to adjust its limits")
+        font.pixelSize: Math.round(Appearance.font.pixelSize.smaller * view.scaleFactor)
+        color: ColorUtils.applyAlpha(view.ink, 0.55)
+    }
+
     StyledText {
         Layout.fillWidth: true
         visible: view.backend.actionNotice.length > 0

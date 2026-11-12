@@ -1,9 +1,9 @@
 {
   "name": "iNiR Docker",
   "icon": "deployed_code",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "author": "yukazakiri",
-  "description": "Docker containers on your desktop with three layouts: a monitoring dashboard, a compact list and a visual tile grid. Live CPU/memory bars, lifecycle controls and logs.",
+  "description": "Docker containers on your desktop in three layouts, with live CPU/memory monitoring, lifecycle controls, logs and RAM/CPU limit sliders.",
   "category": "system",
   "main": "Docker.qml",
   "iris": {
@@ -32,7 +32,8 @@
     "filter": "",
     "showSummary": true,
     "showSparkline": true,
-    "layout": "dashboard"
+    "layout": "dashboard",
+    "showLimits": true
   },
   "configKeys": {
     "refreshSeconds": {
@@ -89,6 +90,11 @@
           "value": "tiles"
         }
       ]
+    },
+    "showLimits": {
+      "type": "bool",
+      "default": true,
+      "label": "Show RAM and CPU limit controls"
     }
   },
   "resizableAxes": {
