@@ -8,7 +8,7 @@ GroupButton {
     property string buttonIcon
     property bool activated: false
     toggled: activated
-    baseWidth: height
+    baseWidth: baseHeight
     colBackgroundHover: Appearance.angelEverywhere ? Appearance.angel.colGlassCardHover
         : Appearance.inirEverywhere ? Appearance.inir.colLayer2Hover
         : Appearance.auroraEverywhere ? Appearance.aurora.colSubSurfaceHover

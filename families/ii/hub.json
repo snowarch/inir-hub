@@ -1,7 +1,10 @@
 {
     "$schema": "../../schema/hub.schema.json",
-    "version": "2.35.11",
+    "version": "2.35.12",
     "changes": {
+        "2.35.12": [
+          "Left sidebar: crowded tabs fade at the edge; translator and AI chat buttons fit their cards (#328)"
+        ],
         "2.35.11": [
           "Wallpaper: a Pause row: never, behind fullscreen, or when windows cover it"
         ],
