@@ -70,8 +70,10 @@ AppButton {
     iconName: AppSearch.guessIcon(appEntry.appId)
     tryCustomIcon: false
     
+    // The hover still runs under an open menu: a preview then would cover it.
     onHoverTimedOut: {
-        root.hoverPreviewRequested()
+        if (!contextMenu.active)
+            root.hoverPreviewRequested()
     }
 
     // Count of minimized windows for this app
