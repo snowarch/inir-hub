@@ -201,7 +201,10 @@ Item {
         intent: "auto"
         minimum: 0
     }
-    readonly property Item keysItem: keys
+    // Where the keys take the pointer, in the edit window's pixels (its input mask). A mask made from the capsule itself
+    // went stale: a Region re-reads its item on the item's own x, y and size, and a moved widget moves only its parent.
+    readonly property rect keysRect: keys.visible && keys.enabled
+        ? Qt.rect(root.keysRight - root.keysWidth, root.keysTop, root.keysWidth, root.keysHeight) : Qt.rect(0, 0, 0, 0)
     // One opaque capsule in Prism Settings' language (his 11-07): its name, the sizes as a segmented pill drawn as the
     // room each takes (one tap to the size wanted, never a cycle), then round keys; the one that opens its controls leads
     // in solid white. Loose glass keys vanished on a dark wallpaper and went grey on a light one (his 10-30 capture).

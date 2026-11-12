@@ -2,7 +2,7 @@
     "$schema": "../../schema/hub.schema.json",
     "version": "2.35.15",
     "changes": {
-        "2.35.15": ["A live stream (a radio, a live video) shows Live with a full line instead of a timeline that slides back and forth", "On Umbriel, an app's menu in the dock and the bar sends its window to the scratchpad and back"],
+        "2.35.15": ["A live stream (a radio, a live video) shows Live with a full line instead of a timeline that slides back and forth", "On Umbriel, an app's menu in the dock and the bar sends its window to the scratchpad and back", "Edit desktop: the size keys over a widget take the pointer after you move it"],
         "2.35.14": ["Searches that find nothing answer with a little personality", "About shows the new iNiR mark in your colours", "Edit desktop: hub widgets sit in their own aisle (Radio in Media) and search finds them by what they do"],
         "2.35.13": ["Widgets: Background strength reaches a solid plate and tints the glass; Blur background hides in styles without glass"],
         "2.35.12": [

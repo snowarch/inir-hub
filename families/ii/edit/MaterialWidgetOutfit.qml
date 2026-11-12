@@ -23,7 +23,15 @@ Item {
     property rect room: Qt.rect(0, 0, 1920, 1080)
     anchors.fill: root.overlay ? undefined : parent
     readonly property bool dressed: root.overlay || !root.hostedElsewhere
-    readonly property Item keysItem: bar
+    // Where the toolbar and the grips take the pointer, in the edit window's pixels (its input mask). A mask made from
+    // the items themselves went stale: a Region re-reads its item on the item's own x, y and size, and a moved widget
+    // moves only their parent.
+    function hitOf(item: Item, live: bool): rect {
+        return live ? Qt.rect(root.leftNow + item.x, root.topNow + item.y, item.width, item.height) : Qt.rect(0, 0, 0, 0)
+    }
+    readonly property rect keysRect: root.hitOf(bar, bar.visible && bar.enabled)
+    readonly property rect rightGripRect: root.hitOf(rightGrip, root.grips)
+    readonly property rect bottomGripRect: root.hitOf(bottomGrip, root.grips)
 
     readonly property bool selected: root.widget?.editSelected ?? false
     readonly property bool hovered: (root.widget?.editHovered ?? false) && !root.selected
@@ -63,8 +71,6 @@ Item {
     // Free size (10-25): the right and bottom edges take any size, S, M or L puts the class back. Drawn in the edit
     // window, where the card's neighbours and the deselect area can't take the press.
     readonly property bool grips: root.overlay && root.selected && !root.locked && !root.carried && (root.widget?.sized ?? false) && (root.widget?.freeAllowed ?? false)
-    readonly property Item rightGripItem: rightGrip
-    readonly property Item bottomGripItem: bottomGrip
     // The grip's whole box takes the press (it is the edit window's input region); the pill is what shows.
     component EdgeGrip: Item {
         id: grip

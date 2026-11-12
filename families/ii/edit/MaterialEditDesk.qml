@@ -48,10 +48,20 @@ Scope {
                 item: headBody
                 Region { item: shelfBody }
                 Region { item: sheetHit }
-                Region { item: chosen.item?.keysItem ?? null }
-                Region { item: chosen.item?.grips ? chosen.item.rightGripItem : null }
-                Region { item: chosen.item?.grips ? chosen.item.bottomGripItem : null }
+                Region { item: keysHit }
+                Region { item: rightGripHit }
+                Region { item: bottomGripHit }
             }
+            component Hit: Item {
+                property rect at: Qt.rect(0, 0, 0, 0)
+                x: at.x
+                y: at.y
+                width: at.width
+                height: at.height
+            }
+            Hit { id: keysHit; at: chosen.item?.keysRect ?? Qt.rect(0, 0, 0, 0) }
+            Hit { id: rightGripHit; at: chosen.item?.rightGripRect ?? Qt.rect(0, 0, 0, 0) }
+            Hit { id: bottomGripHit; at: chosen.item?.bottomGripRect ?? Qt.rect(0, 0, 0, 0) }
 
             property bool seeding: false
             Timer { id: seedTimer; interval: 350; onTriggered: desk.seeding = false }
