@@ -1096,7 +1096,7 @@ Item {
                             text: root.searchText.length > 0
                                 ? (root.searchResults.length > 0
                                     ? Translation.tr("%1 settings match \"%2\"").arg(root.searchResults.length).arg(root.searchText.trim())
-                                    : Translation.tr("Nothing matches \"%1\"").arg(root.searchText.trim()))
+                                    : Voice.miss(Translation.tr("Nothing matches \"%1\"").arg(root.searchText.trim()), root.searchText))
                                 : (root.currentMeta.desc ?? "")
                             font.pixelSize: SettingsMaterialPreset.supportingSize
                             color: SettingsMaterialPreset.supportingColor

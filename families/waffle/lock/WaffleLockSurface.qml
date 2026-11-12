@@ -1331,7 +1331,7 @@ MouseArea {
                         enabled: !root.context.unlockInProgress
                         
                         property string placeholder: GlobalStates.screenUnlockFailed 
-                            ? Translation.tr("Incorrect password") 
+                            ? Voice.wrongPassword(Translation.tr("Incorrect password"))
                             : Translation.tr("Password")
                         
                         Text {

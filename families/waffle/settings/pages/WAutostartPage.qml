@@ -171,7 +171,7 @@ WSettingsPage {
                     visible: appSearchField.text.length > 0 && appListView.count === 0
                     horizontalAlignment: Text.AlignHCenter
                     verticalAlignment: Text.AlignVCenter
-                    text: Translation.tr("No matching apps")
+                    text: Voice.miss(Translation.tr("No matching apps"), appSearchField.text)
                     font.pixelSize: Looks.font.pixelSize.small
                     color: Looks.colors.subfg
                 }

@@ -1,7 +1,8 @@
 {
     "$schema": "../../schema/hub.schema.json",
-    "version": "2.34.11",
+    "version": "2.34.12",
     "changes": {
+        "2.34.12": ["Searches that find nothing answer with a little personality", "Hub: “Nothing matches” sits in the middle of the page"],
         "2.34.11": [
             "Wallpaper: a Pause row: never, behind fullscreen, or when windows cover it",
             "Taskbar: no longer ignores every click after a start or reload (thanks skrblk, #317)"

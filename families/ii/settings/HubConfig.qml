@@ -370,7 +370,7 @@ ContentPage {
         visible: shown
         icon: root.query.length > 0 ? "search_off" : root.filter === "installed" ? "download_done"
             : Hub.items.length === 0 && Hub.error.length > 0 ? (Hub.online ? "cloud_off" : "wifi_off") : "storefront"
-        text: root.query.length > 0 ? Translation.tr("Nothing matches “%1”").arg(root.query)
+        text: root.query.length > 0 ? Voice.miss(Translation.tr("Nothing matches “%1”").arg(root.query), root.query)
             : root.filter === "installed" ? Translation.tr("Nothing installed from the hub yet")
             : Hub.items.length === 0 && Hub.error.length > 0 ? Translation.tr("The hub didn't answer")
             : Translation.tr("Nothing here yet")

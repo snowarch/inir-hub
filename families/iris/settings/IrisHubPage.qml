@@ -298,7 +298,8 @@ Flickable {
 
         // ── Empty and unreachable states ──────────────────────────────
         ColumnLayout {
-            Layout.fillWidth: true
+            Layout.alignment: Qt.AlignHCenter
+            Layout.maximumWidth: pageColumn.width
             Layout.topMargin: Math.round(28 * root.d)
             visible: Hub.loaded && root.opened === null && root.shown.length === 0
             spacing: Math.round(6 * root.d)
@@ -310,7 +311,10 @@ Flickable {
             }
             IrisText {
                 Layout.alignment: Qt.AlignHCenter
-                text: root.query.length > 0 ? Translation.tr("Nothing matches “%1”").arg(root.query)
+                Layout.maximumWidth: pageColumn.width
+                horizontalAlignment: Text.AlignHCenter
+                wrapMode: Text.Wrap
+                text: root.query.length > 0 ? Voice.miss(Translation.tr("Nothing matches “%1”").arg(root.query), root.query)
                     : Hub.cliMissing ? Translation.tr("The hub comes with the inir command: run inir update once to get it")
                     : Hub.items.length === 0 ? Translation.tr("The hub didn't answer. Check your connection and try again")
                     : root.filter === "installed" ? Translation.tr("Nothing installed from the hub yet")

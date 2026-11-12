@@ -398,7 +398,7 @@ Singleton {
 
     function _explain(said: string, session: var, asked: string): string {
         const episode = session ? String(session.episode) : ""
-        if (said.indexOf("No results found") >= 0) return Translation.tr("Nothing found for “%1”").arg(asked)
+        if (said.indexOf("No results found") >= 0) return Voice.miss(Translation.tr("Nothing found for “%1”").arg(asked), asked)
         if (said.indexOf("Invalid anime selection") >= 0 && session)
             return Translation.tr("Could not find %1 again").arg(session.title)
         if (said.indexOf("Invalid episode") >= 0 || said.indexOf("not released") >= 0)

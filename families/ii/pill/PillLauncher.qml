@@ -245,7 +245,7 @@ PillSurface {
     Text {
         anchors.centerIn: list
         visible: root.results.length === 0 && !root.calcActive
-        text: root.query.length ? Translation.tr("No matches") : Translation.tr("No apps found")
+        text: root.query.length ? Voice.miss(Translation.tr("No matches"), root.query) : Translation.tr("No apps found")
         color: PillTheme.faint
         font.family: PillTheme.font
         font.pixelSize: 12 * root.s

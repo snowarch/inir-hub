@@ -1,7 +1,8 @@
 {
     "$schema": "../../schema/hub.schema.json",
-    "version": "2.33.80",
+    "version": "2.33.81",
     "changes": {
+      "2.33.81": ["Searches that find nothing answer with a little personality", "Hub: “Nothing matches” sits in the middle of the page"],
       "2.33.80": ["Controls: tile rows show only with the iRiS face that draws them"],
       "2.33.79": ["Widgets share one palette: every face and the player take colours from the same roles", "Widgets: Glass blur in Settings tunes how much their glass frosts the wallpaper", "Settings: changing the widgets' material, Style or Design no longer freezes the shell", "Widgets under Prism honour their options; rows a widget can't use hide"],
         "2.33.78": [

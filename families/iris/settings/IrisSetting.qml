@@ -835,7 +835,7 @@ Item {
             }
             IrisText {
                 visible: pieces.searchable && pieces.available.length === 0
-                text: pieces.query.length > 0 ? Translation.tr("Nothing matches") : Translation.tr("Everything is added")
+                text: pieces.query.length > 0 ? Voice.miss(Translation.tr("Nothing matches"), pieces.query) : Translation.tr("Everything is added")
                 color: IrisStyle.textTertiary
                 font.pixelSize: IrisStyle.typeMeta
             }

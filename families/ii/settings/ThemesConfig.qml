@@ -648,7 +648,7 @@ ContentPage {
                     maximumWidth: 300
                     shown: themesGroup.filteredPresets.length === 0
                     icon: "search_off"
-                    text: Translation.tr("No themes found")
+                    text: themesGroup.searchQuery.length > 0 ? Voice.miss(Translation.tr("No themes found"), themesGroup.searchQuery) : Translation.tr("No themes found")
                     explanation: themesGroup.searchQuery.length > 0
                         ? Translation.tr("Try a broader search or clear the filter")
                         : Translation.tr("Theme presets will appear here")

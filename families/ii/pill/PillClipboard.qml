@@ -203,7 +203,7 @@ PillSurface {
     Text {
         anchors.centerIn: list
         visible: root.results.length === 0
-        text: root.query.length ? Translation.tr("No matches") : Translation.tr("History empty")
+        text: root.query.length ? Voice.miss(Translation.tr("No matches"), root.query) : Translation.tr("History empty")
         color: PillTheme.faint
         font.family: PillTheme.font
         font.pixelSize: 10.5 * root.s

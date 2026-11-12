@@ -674,7 +674,7 @@ Item {
                             }
 
                             WText {
-                                text: Translation.tr("No results")
+                                text: Voice.miss(Translation.tr("No results"), root.searchText)
                                 font.pixelSize: Looks.font.pixelSize.small
                                 color: Looks.colors.subfg
                             }

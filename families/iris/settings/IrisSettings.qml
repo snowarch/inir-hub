@@ -1372,7 +1372,7 @@ Item {
                                         visible: root.searching && root.entries.length === 0 && root.pageMatches.length === 0
                                         Layout.topMargin: 24 * root.d
                                         Layout.alignment: Qt.AlignHCenter
-                                        text: Translation.tr("No matching settings")
+                                        text: Voice.miss(Translation.tr("No matching settings"), root.query)
                                         color: IrisStyle.muted
                                     }
 

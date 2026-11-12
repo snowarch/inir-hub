@@ -244,7 +244,7 @@ WSettingsPage {
     }
 
     ColumnLayout {
-        Layout.fillWidth: true
+        Layout.alignment: Qt.AlignHCenter
         Layout.topMargin: Looks.dp(32)
         // with no catalogue at all the info bar above already says why: a second "Nothing here yet" said it twice
         visible: !Hub.loaded || (root.opened === null && root.shown.length === 0
@@ -260,7 +260,7 @@ WSettingsPage {
             Layout.alignment: Qt.AlignHCenter
             color: Looks.colors.subfg
             text: !Hub.loaded ? Translation.tr("Reading the hub…")
-                : root.query.length > 0 ? Translation.tr("Nothing matches “%1”").arg(root.query)
+                : root.query.length > 0 ? Voice.miss(Translation.tr("Nothing matches “%1”").arg(root.query), root.query)
                 : root.filter === "installed" ? Translation.tr("Nothing installed from the hub yet")
                 : Translation.tr("Nothing here yet")
         }

@@ -418,7 +418,7 @@ Item {
                         WText {
                             Layout.alignment: Qt.AlignHCenter
                             text: root.searchText.length > 0
-                                ? Translation.tr("No results found")
+                                ? Voice.miss(Translation.tr("No results found"), root.searchText)
                                 : Translation.tr("Clipboard is empty")
                             color: Looks.colors.subfg
                         }
