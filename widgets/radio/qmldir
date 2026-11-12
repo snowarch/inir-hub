@@ -9,3 +9,4 @@ RadioLogo 1.0 RadioLogo.qml
 RadioGlyph 1.0 RadioGlyph.qml
 RadioButton 1.0 RadioButton.qml
 RadioVolume 1.0 RadioVolume.qml
+RadioService 1.0 RadioService.qml

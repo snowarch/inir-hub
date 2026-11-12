@@ -70,6 +70,13 @@ Or start from `inir hub new widget <id>`, which writes all three faces.
 
 Supported configKey types: `bool`, `int`, `real`, `string`.
 
+### `service`: what lives while the widget is installed (iNiR 3.1.0)
+
+`"service": "MyService.qml"` names a file the shell loads for as long as the widget is installed, whether or not a
+face shows. Use it only for what must answer with no face on screen, such as an `IpcHandler` a keybind calls; it
+holds a reference to your singleton (`QtObject { readonly property var state: MyState }`) and runs nothing on its
+own. An older iNiR ignores the key, so the widget's IPC answers there only while a face shows.
+
 ### `options`: rows like the built-in widgets' (iNiR 3.0.2)
 
 `configKeys` gives one plain row per key. `options` is an ordered list of rows with the same controls the built-in
