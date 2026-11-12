@@ -1,0 +1,10 @@
+{
+	"id": "inir-docker",
+	"order": 1,
+	"groups": [
+		{
+			"label": "Widgets",
+			"pages": ["INIR_DOCKER"]
+		}
+	]
+}
