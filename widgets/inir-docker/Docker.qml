@@ -76,6 +76,14 @@ AbstractBackgroundWidget {
             return container.name
         }
 
+        /// Set the layout: dashboard, compact or tiles.
+        function layout(name: string): string {
+            const next = String(name).toLowerCase()
+            if (!["dashboard", "compact", "tiles"].includes(next)) return "Use dashboard, compact or tiles"
+            CustomWidgets.setConfigValue("inir-docker", "layout", next)
+            return next
+        }
+
         /// Set a running container's RAM limit in MiB.
         function memory(id: string, mb: int): string {
             const container = root._findContainer(id)

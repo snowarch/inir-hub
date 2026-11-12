@@ -1,7 +1,7 @@
 {
   "name": "iNiR Docker",
   "icon": "deployed_code",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "author": "yukazakiri",
   "description": "Docker containers on your desktop in three layouts, with live CPU/memory monitoring, lifecycle controls, logs and RAM/CPU limit sliders.",
   "category": "system",
@@ -36,6 +36,36 @@
     "showLimits": true
   },
   "configKeys": {
+    "layout": {
+      "type": "string",
+      "default": "dashboard",
+      "label": "Layout",
+      "options": [
+        {
+          "label": "Dashboard",
+          "value": "dashboard",
+          "glyph": "dashboard"
+        },
+        {
+          "label": "Compact",
+          "value": "compact",
+          "glyph": "view_agenda"
+        },
+        {
+          "label": "Tiles",
+          "value": "tiles",
+          "glyph": "grid_view"
+        }
+      ],
+      "description": "Dashboard, compact list or visual tiles."
+    },
+    "filter": {
+      "type": "string",
+      "default": "",
+      "label": "Filter",
+      "placeholder": "name, image, state or Compose project",
+      "description": "Only show containers that match this text. Docker is not changed."
+    },
     "refreshSeconds": {
       "type": "int",
       "default": 3,
@@ -50,17 +80,12 @@
       "min": 1,
       "max": 20,
       "step": 1,
-      "label": "Containers to show"
+      "label": "Containers shown"
     },
     "showStopped": {
       "type": "bool",
       "default": true,
       "label": "Show stopped containers"
-    },
-    "filter": {
-      "type": "string",
-      "default": "",
-      "label": "Filter by name, image, state or Compose project"
     },
     "showSummary": {
       "type": "bool",
@@ -72,29 +97,10 @@
       "default": true,
       "label": "Show CPU history"
     },
-    "layout": {
-      "type": "string",
-      "default": "dashboard",
-      "label": "Layout",
-      "options": [
-        {
-          "label": "Dashboard",
-          "value": "dashboard"
-        },
-        {
-          "label": "Compact",
-          "value": "compact"
-        },
-        {
-          "label": "Tiles",
-          "value": "tiles"
-        }
-      ]
-    },
     "showLimits": {
       "type": "bool",
       "default": true,
-      "label": "Show RAM and CPU limit controls"
+      "label": "Show RAM and CPU limits"
     }
   },
   "resizableAxes": {

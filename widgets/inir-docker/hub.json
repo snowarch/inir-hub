@@ -1,6 +1,6 @@
 {
   "$schema": "../../schema/hub.schema.json",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "summary": "Docker containers with live CPU and memory",
   "authors": [
     "yukazakiri"
@@ -18,8 +18,8 @@
   "preview": "preview.webp",
   "minInir": "3.0.0",
   "changes": {
-    "0.5.0": [
-      "RAM and CPU limit sliders with presets"
+    "0.6.0": [
+      "Layout switch in the widget header, layout IPC and a visual layout picker"
     ]
   },
   "description": "Docker containers on your desktop in three layouts, with live CPU/memory monitoring, lifecycle controls, logs and RAM/CPU limit sliders."

@@ -30,7 +30,8 @@ command helpers already support them, so they can be added next.
 | **Compact** | A dense one-line summary and tighter rows, for small widgets |
 | **Tiles** | Two-column cards with a CPU ring, memory bar and state per container |
 
-Set **Layout** in the widget options.
+Set **Layout** in the widget options, use the header layout button to cycle
+Dashboard → Compact → Tiles, or call `inir ipc inir-docker layout tiles`.
 
 ## Install
 
@@ -91,6 +92,7 @@ inir ipc inir-docker select inir-limit-demo
 inir ipc inir-docker limits inir-limit-demo
 inir ipc inir-docker memory inir-limit-demo 512
 inir ipc inir-docker cpu inir-limit-demo 1
+inir ipc inir-docker layout tiles
 ```
 
 `limits` prints the current memory/CPU limits and the daemon capacity as JSON.

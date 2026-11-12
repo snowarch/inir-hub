@@ -42,5 +42,19 @@
     "RAM": "RAM",
     "Start the container to adjust its limits": "Start the container to adjust its limits",
     "applying…": "applying…",
-    "cores": "cores"
+    "cores": "cores",
+    "Cycle layout": "Cycle layout",
+    "Dashboard": "Dashboard",
+    "Compact": "Compact",
+    "Tiles": "Tiles",
+    "Layout": "Layout",
+    "Filter": "Filter",
+    "Refresh every (seconds)": "Refresh every (seconds)",
+    "Containers shown": "Containers shown",
+    "Show stopped containers": "Show stopped containers",
+    "Show monitoring summary": "Show monitoring summary",
+    "Show CPU history": "Show CPU history",
+    "Show RAM and CPU limits": "Show RAM and CPU limits",
+    "name, image, state or Compose project": "name, image, state or Compose project",
+    "Only show containers that match this text. Docker is not changed.": "Only show containers that match this text. Docker is not changed."
 }

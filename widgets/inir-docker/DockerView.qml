@@ -31,6 +31,18 @@ ColumnLayout {
         return view.accent
     }
 
+    function cycleLayout(): void {
+        const order = ["dashboard", "compact", "tiles"]
+        const next = order[(order.indexOf(view.backend.layout) + 1) % order.length]
+        CustomWidgets.setConfigValue("inir-docker", "layout", next)
+    }
+
+    function layoutIcon(): string {
+        if (view.backend.layout === "compact") return "view_agenda"
+        if (view.backend.layout === "tiles") return "grid_view"
+        return "dashboard"
+    }
+
     // ── Header ───────────────────────────────────────────────
     RowLayout {
         Layout.fillWidth: true
@@ -55,6 +67,22 @@ ColumnLayout {
             color: ColorUtils.applyAlpha(view.ink, 0.55)
         }
         Item { Layout.fillWidth: true }
+        RippleButton {
+            implicitWidth: Math.round(26 * view.scaleFactor)
+            implicitHeight: implicitWidth
+            buttonRadius: implicitWidth / 2
+            enabled: !view.backend.busy
+            colBackground: "transparent"
+            colBackgroundHover: ColorUtils.applyAlpha(view.ink, 0.12)
+            colRipple: ColorUtils.applyAlpha(view.ink, 0.2)
+            onClicked: view.cycleLayout()
+            Accessible.name: Translation.tr("Cycle layout")
+            contentItem: MaterialSymbol {
+                text: view.layoutIcon()
+                iconSize: Math.round(16 * view.scaleFactor)
+                color: view.ink
+            }
+        }
         RippleButton {
             implicitWidth: Math.round(26 * view.scaleFactor)
             implicitHeight: implicitWidth
