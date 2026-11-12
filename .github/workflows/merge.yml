@@ -40,9 +40,9 @@ jobs:
           # One comment per pull request, edited when the reason changes: a new one on every push pinged the author each time
           hold() {
             echo "#$pr: $1"
-            body="Check passed. $1, so a maintainer merges it; the reviewer's card is in the Check run's summary. <!-- merge -->"
+            body="Check passed. $1, so a maintainer merges it; the reviewer's card is in the Check run's summary."
             id=$(gh api --paginate "repos/$REPO/issues/$pr/comments" \
-              --jq '.[] | select(.user.login == "github-actions[bot]" and (.body | contains("<!-- merge"))) | .id' | tail -n 1)
+              --jq '.[] | select(.user.login == "github-actions[bot]" and (.body | startswith("Check passed."))) | .id' | tail -n 1)
             if [ -z "$id" ]; then
               gh pr comment "$pr" --repo "$REPO" --body "$body"
             elif [ "$(gh api "repos/$REPO/issues/comments/$id" --jq .body)" != "$body" ]; then
