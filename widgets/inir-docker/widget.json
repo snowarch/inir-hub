@@ -1,0 +1,101 @@
+{
+  "name": "iNiR Docker",
+  "icon": "deployed_code",
+  "version": "0.4.0",
+  "author": "yukazakiri",
+  "description": "Docker containers on your desktop with three layouts: a monitoring dashboard, a compact list and a visual tile grid. Live CPU/memory bars, lifecycle controls and logs.",
+  "category": "system",
+  "main": "Docker.qml",
+  "iris": {
+    "main": "IrisDocker.qml",
+    "slots": [
+      "island.desktop"
+    ]
+  },
+  "defaultConfig": {
+    "placementStrategy": "free",
+    "widgetScale": 100,
+    "widgetOpacity": 100,
+    "colorMode": "auto",
+    "dim": 0,
+    "showBackground": true,
+    "backgroundOpacity": 0.16,
+    "borderWidth": 1,
+    "borderOpacity": 0.2,
+    "cornerRadius": -1,
+    "useBlur": false,
+    "x": 320,
+    "y": 200,
+    "refreshSeconds": 3,
+    "maxContainers": 6,
+    "showStopped": true,
+    "filter": "",
+    "showSummary": true,
+    "showSparkline": true,
+    "layout": "dashboard"
+  },
+  "configKeys": {
+    "refreshSeconds": {
+      "type": "int",
+      "default": 3,
+      "min": 1,
+      "max": 60,
+      "step": 1,
+      "label": "Refresh every (seconds)"
+    },
+    "maxContainers": {
+      "type": "int",
+      "default": 6,
+      "min": 1,
+      "max": 20,
+      "step": 1,
+      "label": "Containers to show"
+    },
+    "showStopped": {
+      "type": "bool",
+      "default": true,
+      "label": "Show stopped containers"
+    },
+    "filter": {
+      "type": "string",
+      "default": "",
+      "label": "Filter by name, image, state or Compose project"
+    },
+    "showSummary": {
+      "type": "bool",
+      "default": true,
+      "label": "Show monitoring summary"
+    },
+    "showSparkline": {
+      "type": "bool",
+      "default": true,
+      "label": "Show CPU history"
+    },
+    "layout": {
+      "type": "string",
+      "default": "dashboard",
+      "label": "Layout",
+      "options": [
+        {
+          "label": "Dashboard",
+          "value": "dashboard"
+        },
+        {
+          "label": "Compact",
+          "value": "compact"
+        },
+        {
+          "label": "Tiles",
+          "value": "tiles"
+        }
+      ]
+    }
+  },
+  "resizableAxes": {
+    "uniform": "widgetScale"
+  },
+  "defaultSize": {
+    "width": 440,
+    "height": 380
+  }
+}

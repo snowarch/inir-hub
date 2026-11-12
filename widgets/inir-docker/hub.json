@@ -1,0 +1,26 @@
+{
+  "$schema": "../../schema/hub.schema.json",
+  "version": "0.4.0",
+  "summary": "Docker containers with live CPU and memory",
+  "authors": [
+    "yukazakiri"
+  ],
+  "license": "MIT",
+  "tags": [
+    "docker",
+    "containers",
+    "system",
+    "dev"
+  ],
+  "permissions": [
+    "process"
+  ],
+  "preview": "preview.webp",
+  "minInir": "3.0.0",
+  "changes": {
+    "0.4.0": [
+      "Dashboard, compact and tile layouts with a visual monitoring redesign"
+    ]
+  },
+  "description": "Docker containers on your desktop in three layouts: a monitoring dashboard, a compact list and a visual tile grid, with live CPU/memory bars, lifecycle controls and logs."
+}
