@@ -337,8 +337,14 @@ Never accepted, whatever it declares:
 
 ## Review
 
-A colour theme or an iRiS theme is data (nothing in it runs), so its pull request merges by itself once Check passes,
-when it changes that one theme and its `docs/<id>/` only. Everything else waits for a maintainer.
+Once Check passes, a pull request that changes one item and its `docs/<id>/` only merges by itself when it is:
+
+- a colour theme, an iRiS theme or a web app: data, nothing in it runs;
+- an update to a widget, component or Design you are listed in `"authors"` of, asking for no permission or host it
+  didn't already have: people already trust you with that item.
+
+A new widget, component or Design, more permissions, someone else's item or the families wait for one maintainer; the
+pull request says which and why.
 
 `inir hub check` and CI hold the rules above; for code, a maintainer reads what no check can:
 

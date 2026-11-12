@@ -1,9 +1,12 @@
 name: Merge
 
-# Acceptance by risk. A pull request that only adds or changes a colour theme or an iRiS theme is data: nothing in it
-# runs on anyone's desktop, so once Check passes it merges by itself. Anything else (widgets, components, Designs,
-# web apps, families, the tools) waits for a maintainer. This never checks out the pull request's code: it reads
-# the list of changed files from the API.
+# Acceptance by risk, once Check passes. This never checks out the pull request's code: it reads the changed files and
+# the item's hub.json (as data) from the API.
+#   - Data (a colour theme, an iRiS theme, a web app): nothing in it runs on anyone's desktop. Merges by itself.
+#   - An update to a widget, component or Design by one of the authors its hub.json on main lists, asking for no
+#     permission or host it didn't already have: people already trust that author with that item. Merges by itself.
+#   - Anything else (a new code item, more permissions, someone else's item, families, the tools) waits for one
+#     maintainer, and the pull request says so and why.
 on:
   workflow_run:
     workflows: [Check]
@@ -14,11 +17,14 @@ permissions:
   pull-requests: write
 
 jobs:
-  data-only:
+  accept:
     if: github.event.workflow_run.event == 'pull_request' && github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
+    outputs:
+      merged: ${{ steps.decide.outputs.merged }}
     steps:
-      - name: Merge a pull request that changes only one theme
+      - name: Merge what needs no maintainer
+        id: decide
         env:
           GH_TOKEN: ${{ github.token }}
           REPO: ${{ github.repository }}
@@ -28,22 +34,43 @@ jobs:
         run: |
           pr=$(gh api "repos/$REPO/pulls?state=open&head=$OWNER:$BRANCH" --jq ".[] | select(.head.sha == \"$SHA\") | .number" | head -1)
           [ -n "$pr" ] || { echo "no open pull request at $SHA"; exit 0; }
+          author=$(gh api "repos/$REPO/pulls/$pr" --jq '.user.login' | tr 'A-Z' 'a-z')
           files=$(gh api --paginate "repos/$REPO/pulls/$pr/files" --jq '.[].filename')
-          # One item of a data kind, plus its docs page at most.
           items=$(echo "$files" | grep -v '^docs/' | cut -d/ -f1-2 | sort -u)
-          if [ "$(echo "$items" | wc -l)" != 1 ] || ! echo "$items" | grep -Eq '^(themes|iris-themes)/[a-z0-9-]+$'; then
-            echo "#$pr changes $(echo "$items" | tr '\n' ' '): a maintainer reads it"
+          hold() {
+            echo "#$pr: $1"
+            marker="<!-- merge:$SHA -->"
+            said=$(gh api --paginate "repos/$REPO/issues/$pr/comments" --jq '.[].body')
+            if ! grep -qF "$marker" <<<"$said"; then
+              gh pr comment "$pr" --repo "$REPO" --body "Check passed. $1, so a maintainer merges it; the reviewer's card is in the Check run's summary. $marker"
+            fi
             exit 0
-          fi
-          id=${items#*/}
-          if [ -n "$(echo "$files" | grep '^docs/' | grep -v "^docs/$id/" || true)" ]; then
-            echo "#$pr touches another item's docs: a maintainer reads it"
-            exit 0
-          fi
+          }
+          [ "$(echo "$items" | wc -l)" = 1 ] || hold "It changes more than one item ($(echo "$items" | tr '\n' ' '))"
+          echo "$items" | grep -Eq '^(themes|iris-themes|webapps|widgets|components|designs)/[a-z0-9-]+$' ||
+            hold "It changes $items, which only maintainers change"
+          kind=${items%%/*} id=${items#*/}
+          [ -z "$(echo "$files" | grep '^docs/' | grep -v "^docs/$id/" || true)" ] || hold "It touches another item's docs"
+          case "$kind" in
+            themes|iris-themes|webapps) why="$items is data only" ;;
+            *)
+              raw() { gh api -H "Accept: application/vnd.github.raw" "repos/$REPO/contents/$items/hub.json?ref=$1" 2>/dev/null || true; }
+              was=$(raw main) now=$(raw "$SHA")
+              [ -n "$was" ] || hold "$items is new code that will run on people's desktops"
+              echo "$was" | jq -e --arg a "$author" '[.authors[]? | ascii_downcase] | index($a)' >/dev/null ||
+                hold "@$author is not among the authors of $items"
+              grown=$(jq -rn --argjson was "$was" --argjson now "$now" \
+                '[(($now.permissions // []) - ($was.permissions // []))[], (($now.hosts // []) - ($was.hosts // []))[]] | join(", ")')
+              [ -z "$grown" ] || hold "It asks for more than $items had ($grown)"
+              why="an update by its author with no new permission"
+              ;;
+          esac
           gh pr merge "$pr" --repo "$REPO" --squash --match-head-commit "$SHA"
-          echo "#$pr merged: $items is data only and passed Check"
+          echo "merged=true" >> "$GITHUB_OUTPUT"
+          echo "#$pr merged: $why, and it passed Check"
       - name: Ask inir.space to deploy
         # A merge made by this workflow's token starts no other workflow, so Publish would not run.
+        if: steps.decide.outputs.merged == 'true'
         env:
           GH_TOKEN: ${{ secrets.SITE_DISPATCH_TOKEN }}
         run: |
