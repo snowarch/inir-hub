@@ -80,7 +80,8 @@ Scope {
     Process {
         id: proc
         command: ["mpv", "--no-video", "--no-terminal", "--idle=no", "--force-window=no", "--cache=yes",
-            "--network-timeout=12", "--title=iNiR Radio", `--volume=${Math.round(root.volume)}`,
+            "--network-timeout=12", "--title=iNiR Radio", `--force-media-title=${String(root.station?.name ?? "Radio")}`,
+            `--volume=${Math.round(root.volume)}`,
             `--input-ipc-server=${root.socketPath}`, String(root.station?.url ?? "")]
         onStarted: {
             root._began = true

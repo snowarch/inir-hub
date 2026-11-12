@@ -1,6 +1,6 @@
 {
     "$schema": "../../schema/hub.schema.json",
-    "version": "2.0.0",
+    "version": "2.0.1",
     "summary": "Live stations from anywhere in the world, one click to play",
     "description": "Press play and it finds a live station somewhere in the world playing a genre you like, or anything at all; next takes you to another place. Music only, far from home first, never a station you heard lately. Plays through mpv; stations come from Radio Browser's open directory.",
     "authors": [
