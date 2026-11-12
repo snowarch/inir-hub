@@ -79,6 +79,9 @@ Item {
             visible: !root.tab
             spacing: 6
             MaterialSymbol {
+                // Beside the first line when a long label wraps.
+                Layout.alignment: Qt.AlignTop
+                Layout.topMargin: 2
                 text: "hourglass_bottom"
                 iconSize: 16
                 color: SidebarStyle.text
