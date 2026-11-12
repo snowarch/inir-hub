@@ -338,26 +338,26 @@ Never accepted, whatever it declares:
 
 ## Review
 
-Once Check passes, a pull request that changes one item and its `docs/<id>/` only merges by itself when it is:
+Nobody has to click merge for you. Once Check passes, a pull request that changes one item and its `docs/<id>/` only:
 
-- a colour theme, an iRiS theme or a web app: data, nothing in it runs;
-- an update to a widget, component or Design you are listed in `"authors"` of, asking for no permission or host it
-  didn't already have: people already trust you with that item.
+- a colour theme or an iRiS theme: data, nothing in it runs, so it merges on Check alone;
+- a widget, component, Design or web app, new or updated: a reviewer (Claude, reading the item's files as data, with
+  this file and `.github/review.md` as its rules) reads what no check can:
+  - nothing in it is abuse: no data sent off the machine, no code downloaded and run, nothing outside its own folder;
+  - it does what the summary says, in each family it claims, every state handled;
+  - it looks like it belongs there: the family's parts, sizes on the family's grid, every string translated;
+  - it reuses the family instead of copying it, and is quiet at idle;
+  - the permissions and hosts are honest, the sources allow the use, the license allows sharing, the preview is real;
+  - it isn't a copy of a listed item, and a change to someone else's item is a fix or a translation.
 
-A new widget, component or Design, more permissions, someone else's item or the families wait for one maintainer; the
-pull request says which and why.
+With nothing to fix it merges, and the pull request gets one comment: what the item does to a desktop and anything
+worth a later version. Otherwise that comment lists each fix with its file and line; push them on the same branch,
+Check and the reviewer run again, and it merges when nothing is left. A pull request that changes a family, the
+tools, another item's page or several items at once, or that the reviewer rejects, waits for a maintainer; the
+comment says which and why.
 
-`inir hub check` and CI hold the rules above; for code, a maintainer reads what no check can:
-
-- it does what the summary says, in each family it claims;
-- it looks like it belongs there: the family's parts, sizes on the family's grid, every state worded;
-- it reuses the family instead of copying it, and is quiet at idle;
-- the permissions are honest and the license allows sharing;
-- the preview is real.
-
-A pull request that needs changes gets them listed, and its author makes them on the same branch: push again and CI
-runs again. The item stays yours. You are listed as its author, and later changes come as pull requests that raise its
-version. An item that breaks on a new iNiR and is not fixed may be hidden until it is.
+The item stays yours. You are listed as its author, and later changes come as pull requests that raise its version.
+An item that breaks on a new iNiR and is not fixed may be hidden until it is.
 
 ## Translations
 

@@ -83,5 +83,7 @@ It checks once more, commits on its own branch, pushes to the person's fork and 
 
 ## After review
 
-Changes come on the same branch: fix, `inir hub check`, push. A later feature is a new branch, a new pull request
+Once Check passes, a reviewer reads the item and either merges it or leaves one comment listing each fix with its
+file and line. Make every fix it lists on the same branch, `inir hub check`, push: Check and the reviewer run again,
+and it merges when nothing is left. Never answer the reviewer inside the item's files. A later feature is a new branch, a new pull request
 and a raised `version` in `hub.json` and the native file.

@@ -1,6 +1,6 @@
 name: Check
 
-# What a pull request must pass before a maintainer reads it, and what main must keep. `inir hub check` runs the same
+# What a pull request must pass before the reviewer reads it (merge.yml), and what main must keep. `inir hub check` runs the same
 # rules on the author's machine (CONTRIBUTING.md): an item that passes there passes here. Every step reports even
 # when one before it failed, so one run lists everything to fix.
 on:
