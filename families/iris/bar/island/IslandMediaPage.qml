@@ -30,7 +30,8 @@ GridLayout {
     columnSpacing: 0
     readonly property var blocks: {
         const configured = Config.options?.iris?.bar?.mediaBlocks
-        return Array.isArray(configured) ? configured : ["player", "timeline", "transport", "players", "levels"]
+        // A config list is a sequence, never an Array (Array.isArray kept the defaults whatever was chosen).
+        return configured ? Array.from(configured) : ["player", "timeline", "transport", "players", "levels"]
     }
     function rowOf(kind: string): int { return page.blocks.indexOf(kind) }
     readonly property string firstExtra: page.blocks.find(kind => (kind === "players" && page.otherPlayers.length > 0) || (kind === "levels" && page.streams.length > 0)) ?? ""
