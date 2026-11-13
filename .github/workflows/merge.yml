@@ -9,28 +9,40 @@ name: Merge
 #     instructions, the item as data). Nothing to fix: it merges. Else one comment lists each fix; the author pushes
 #     again and Check and the reviewer run again.
 #   - The families, the tools, schema/, templates/, .github/, several items at once: a maintainer merges it.
+#   - A maintainer's `/review` comment runs all of this again now, on the pull request's last push (Check must have
+#     passed on it): for when the reviewer could not answer, without waiting for the author to push.
 # Secrets: GEMINI_API_KEY and GEMINI_API_KEY_2, a spare (aistudio.google.com, free, no card). Without them, what the
 # reviewer would read waits for a maintainer.
 on:
   workflow_run:
     workflows: [Check]
     types: [completed]
+  issue_comment:
+    types: [created]
 
 permissions: {}
 
 concurrency:
-  group: merge-${{ github.event.workflow_run.head_repository.full_name }}-${{ github.event.workflow_run.head_branch }}
+  # a comment gets a group of its own: any other comment on the pull request would cancel a review under way
+  group: merge-${{ github.event.comment.id || format('{0}-{1}', github.event.workflow_run.head_repository.full_name, github.event.workflow_run.head_branch) }}
   cancel-in-progress: true
 
 jobs:
   decide:
-    if: github.event.workflow_run.event == 'pull_request' && github.event.workflow_run.conclusion == 'success'
+    if: >-
+      (github.event_name == 'workflow_run' && github.event.workflow_run.event == 'pull_request' &&
+       github.event.workflow_run.conclusion == 'success') ||
+      (github.event_name == 'issue_comment' && github.event.issue.pull_request && startsWith(github.event.comment.body, '/review') &&
+       contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR"]'), github.event.comment.author_association))
     runs-on: ubuntu-latest
     permissions:
       contents: read
       pull-requests: write
+      issues: write
     outputs:
       pr: ${{ steps.decide.outputs.pr }}
+      sha: ${{ steps.decide.outputs.sha }}
+      repo: ${{ steps.decide.outputs.repo }}
       item: ${{ steps.decide.outputs.item }}
       next: ${{ steps.decide.outputs.next }}
       why: ${{ steps.decide.outputs.why }}
@@ -40,28 +52,43 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           REPO: ${{ github.repository }}
+          EVENT: ${{ github.event_name }}
           SHA: ${{ github.event.workflow_run.head_sha }}
           BRANCH: ${{ github.event.workflow_run.head_branch }}
           OWNER: ${{ github.event.workflow_run.head_repository.owner.login }}
+          HEAD_REPO: ${{ github.event.workflow_run.head_repository.full_name }}
+          COMMENTED: ${{ github.event.issue.number }}
+          COMMENT: ${{ github.event.comment.id }}
         run: |
-          pr=$(gh api "repos/$REPO/pulls?state=open&head=$OWNER:$BRANCH" --jq ".[] | select(.head.sha == \"$SHA\") | .number" | head -1)
-          [ -n "$pr" ] || { echo "no open pull request at $SHA"; exit 0; }
-          echo "pr=$pr" >> "$GITHUB_OUTPUT"
-          author=$(gh api "repos/$REPO/pulls/$pr" --jq '.user.login' | tr 'A-Z' 'a-z')
-          files=$(gh api --paginate "repos/$REPO/pulls/$pr/files" --jq '.[].filename')
-          items=$(echo "$files" | grep -v '^docs/' | cut -d/ -f1-2 | sort -u)
           # One comment per pull request, edited when it changes: a new one on every push pinged the author each time
-          hold() {
-            echo "#$pr: $1"
+          say() {
             body="<!-- merge -->
-          Check passed. $1, so a maintainer merges it."
+          $1"
             id=$(gh api --paginate "repos/$REPO/issues/$pr/comments" --jq '.[] | select(.user.login == "github-actions[bot]"
               and ((.body | startswith("<!-- merge -->")) or (.body | startswith("Check passed.")))) | .id' | tail -n 1)
             if [ -z "$id" ]; then gh pr comment "$pr" --repo "$REPO" --body "$body"
             elif [ "$(gh api "repos/$REPO/issues/comments/$id" --jq .body)" != "$body" ]; then
               gh api -X PATCH "repos/$REPO/issues/comments/$id" -f body="$body" >/dev/null; fi
-            exit 0
           }
+          hold() { echo "#$pr: $1"; say "Check passed. $1, so a maintainer merges it."; exit 0; }
+          if [ "$EVENT" = issue_comment ]; then
+            pr=$COMMENTED
+            # the eyes on the comment say the reviewer took it
+            gh api -X POST "repos/$REPO/issues/comments/$COMMENT/reactions" -f content=eyes >/dev/null || true
+            read -r SHA HEAD_REPO state < <(gh api "repos/$REPO/pulls/$pr" --jq '"\(.head.sha) \(.head.repo.full_name) \(.state)"')
+            [ "$state" = open ] || { echo "#$pr is $state"; exit 0; }
+            check=$(gh api "repos/$REPO/actions/runs?head_sha=$SHA&event=pull_request" \
+              --jq '[.workflow_runs[] | select(.name == "Check")][0].conclusion // "running"')
+            [ "$check" = success ] || { echo "#$pr: Check is $check at $SHA"
+              say "Check has not passed on the last push yet; the reviewer reads it as soon as it does."; exit 0; }
+          else
+            pr=$(gh api "repos/$REPO/pulls?state=open&head=$OWNER:$BRANCH" --jq ".[] | select(.head.sha == \"$SHA\") | .number" | head -1)
+            [ -n "$pr" ] || { echo "no open pull request at $SHA"; exit 0; }
+          fi
+          { echo "pr=$pr"; echo "sha=$SHA"; echo "repo=$HEAD_REPO"; } >> "$GITHUB_OUTPUT"
+          author=$(gh api "repos/$REPO/pulls/$pr" --jq '.user.login' | tr 'A-Z' 'a-z')
+          files=$(gh api --paginate "repos/$REPO/pulls/$pr/files" --jq '.[].filename')
+          items=$(echo "$files" | grep -v '^docs/' | cut -d/ -f1-2 | sort -u)
           [ "$(echo "$items" | wc -l)" = 1 ] || hold "It changes more than one item ($(echo "$items" | tr '\n' ' '))"
           echo "$items" | grep -Eq '^(themes|iris-themes|webapps|widgets|components|designs)/[a-z0-9-]+$' ||
             hold "It changes $items, which only maintainers change"
@@ -107,13 +134,15 @@ jobs:
           sparse-checkout: |
             .github
             .claude/rules
-      # The pull request's item, read as data: nothing from it is run.
+      # The pull request's item, read as data: nothing from it is run (cat, find, base64 and jq only; no hooks, LFS,
+      # submodules or credentials), so checkout's refusal of a fork's code here does not apply.
       - uses: actions/checkout@v7
         with:
-          repository: ${{ github.event.workflow_run.head_repository.full_name }}
-          ref: ${{ github.event.workflow_run.head_sha }}
+          repository: ${{ needs.decide.outputs.repo }}
+          ref: ${{ needs.decide.outputs.sha }}
           path: review/pr
           persist-credentials: false
+          allow-unsafe-pr-checkout: true
           sparse-checkout-cone-mode: false
           sparse-checkout: |
             /${{ needs.decide.outputs.item }}/
@@ -169,14 +198,18 @@ jobs:
             generation_config: {thinking_level: "high"},
             response_format: {type: "text", mime_type: "application/json", schema: $schema[0]}}' > request.json
           rm -f img.b64 parts.json
-          # the free tier answers 503 when a model is busy and 429 past a key's quota: each model with each key, a few rounds
-          result=""
-          for round in 1 2 3 4; do
-            for model in gemini-3.8-flash gemini-3.6-flash; do
+          # The free tier answers 503 when a model is busy (the newest flash models for hours at a time) and 429 past a
+          # key's quota: each model with each key, newest first, rounds a minute apart for up to 13 minutes, so the
+          # job ends inside its timeout and the comment says what happened.
+          result="" round=0
+          while [ -z "$result" ] && [ "$SECONDS" -lt 780 ]; do
+            round=$((round + 1))
+            for model in gemini-3.8-flash gemini-3.6-flash gemini-3.5-flash gemini-3-flash-preview; do
               for key in "$GEMINI_API_KEY" "$GEMINI_API_KEY_2"; do
                 [ -n "$key" ] || continue
+                [ "$SECONDS" -lt 780 ] || break 2
                 jq --arg m "$model" '.model = $m' request.json > request.try
-                code=$(curl -sS --max-time 600 -o out.json -w '%{http_code}' \
+                code=$(curl -sS --max-time 240 -o out.json -w '%{http_code}' \
                   -X POST https://generativelanguage.googleapis.com/v1beta/interactions \
                   -H "x-goog-api-key: $key" -H 'Content-Type: application/json' -H 'Api-Revision: 2026-05-20' \
                   --data-binary @request.try || true)
@@ -184,10 +217,10 @@ jobs:
                 result=$(jq -c '[.steps[]? | select(.type == "model_output") | .content[]? | select(.type == "text") | .text]
                   | last | fromjson | select(.verdict == "ready" or .verdict == "needs-changes" or .verdict == "reject")' \
                   out.json 2>/dev/null || true)
-                [ -z "$result" ] || break 3
+                [ -z "$result" ] || break 2
               done
             done
-            [ "$round" = 4 ] || sleep 60
+            [ -n "$result" ] || [ "$SECONDS" -ge 780 ] || sleep 60
           done
           if [ -z "$result" ]; then
             echo "state=failed" >> "$GITHUB_OUTPUT"
@@ -200,7 +233,8 @@ jobs:
 
   land:
     needs: [decide, review]
-    if: ${{ !cancelled() && needs.decide.result == 'success' && (needs.decide.outputs.next == 'merge' || needs.review.result == 'success') }}
+    # also when the review job failed: the comment then says the reviewer could not read it, never silence
+    if: ${{ !cancelled() && needs.decide.result == 'success' && (needs.decide.outputs.next == 'merge' || needs.decide.outputs.next == 'review') }}
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -211,7 +245,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           REPO: ${{ github.repository }}
-          SHA: ${{ github.event.workflow_run.head_sha }}
+          SHA: ${{ needs.decide.outputs.sha }}
           PR: ${{ needs.decide.outputs.pr }}
           ITEM: ${{ needs.decide.outputs.item }}
           NEXT: ${{ needs.decide.outputs.next }}
@@ -235,7 +269,7 @@ jobs:
             case "$STATE" in
               nokey) say "Check passed. $WHY, so a maintainer merges it."; exit 0 ;;
               done) ;;
-              *) say "Check passed. $WHY, and the reviewer could not read it this time, so a maintainer merges it."; exit 0 ;;
+              *) say "Check passed. $WHY, and the reviewer could not read it this time: a maintainer asks it again with a \`/review\` comment."; exit 0 ;;
             esac
             verdict=$(jq -r '.verdict' <<<"$RESULT")
             summary=$(jq -r '.summary' <<<"$RESULT")

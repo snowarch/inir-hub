@@ -357,7 +357,8 @@ Nobody has to click merge for you. Once Check passes, a pull request that change
 
 With nothing to fix it merges, and the pull request gets one comment: what the item does to a desktop and anything
 worth a later version. Otherwise that comment lists each fix with its file and line; push them on the same branch,
-Check and the reviewer run again, and it merges when nothing is left. A pull request that changes a family, the
+Check and the reviewer run again, and it merges when nothing is left. When the reviewer could not answer (the free
+model it runs on is sometimes busy), the comment says so and a maintainer asks it again with a `/review` comment. A pull request that changes a family, the
 tools, another item's page or several items at once, or that the reviewer rejects, waits for a maintainer; the
 comment says which and why.
 
