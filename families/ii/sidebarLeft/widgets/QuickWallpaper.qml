@@ -13,7 +13,8 @@ import "root:"
 
 Item {
     id: root
-    implicitHeight: card.implicitHeight + Appearance.sizes.elevationMargin
+    // a hidden card still reports its height and the column keeps a gap for it
+    implicitHeight: wallpapersList.length > 0 ? card.implicitHeight + Appearance.sizes.elevationMargin : 0
     visible: wallpapersList.length > 0
 
     readonly property real cardPadding: 12

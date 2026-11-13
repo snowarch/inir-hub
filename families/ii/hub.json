@@ -2,7 +2,7 @@
     "$schema": "../../schema/hub.schema.json",
     "version": "2.36.2",
     "changes": {
-        "2.36.2": ["Floating tools (Super+G): Clock, Timer and Network join the bench, set up in Settings › Panels › Floating tools", "Text fields open their right-click menu in Material's look, inside the panel, so a sidebar no longer closes under it", "A fresh install starts with no wallpaper or backdrop dim"],
+        "2.36.2": ["Floating tools (Super+G): Clock, Timer and Network join the bench, set up in Settings › Panels › Floating tools", "Text fields open their right-click menu in Material's look, inside the panel, so a sidebar no longer closes under it", "A fresh install starts with no wallpaper or backdrop dim", "The left sidebar leaves no empty gap where a card has nothing to show (weather offline, no wallpapers)"],
         "2.36.1": ["Choosing a file, a folder or a colour opens the shell's own picker in your colours, not a white window", "The colour picker reads the screen on Niri too (no hyprpicker)"],
         "2.36.0": ["Hub widgets show in the sidebars: a card in the left one's Widgets column, a tab in the right one (Settings, Sidebars)", "Hub: a web app you installed gets a button that turns on the sidebar's Web apps tab"],
         "2.35.15": ["A live stream (a radio, a live video) shows Live with a full line instead of a timeline that slides back and forth", "On Umbriel, an app's menu in the dock and the bar sends its window to the scratchpad and back", "Edit desktop: the size keys over a widget take the pointer after you move it"],
