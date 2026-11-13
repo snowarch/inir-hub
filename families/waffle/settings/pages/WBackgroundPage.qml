@@ -1406,7 +1406,7 @@ WSettingsPage {
                     description: Translation.tr("Darken the backdrop layer")
                     suffix: "%"
                     from: 0; to: 100; stepSize: 5
-                    value: root.wBackdrop.dim ?? 20
+                    value: root.wBackdrop.dim ?? 0
                     onValueChanged: root.setNestedValueWhenReady("waffles.background.backdrop.dim", value)
                 }
 

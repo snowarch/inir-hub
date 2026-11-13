@@ -14,7 +14,7 @@ PreviewScene {
     lowest: Math.round(170 * backdropRoot.d)
     readonly property bool on: backdropRoot.opt("background.backdrop.enable", true)
     readonly property real blurAmount: Math.max(0, Math.min(100, Number(backdropRoot.opt("background.backdrop.blurRadius", 40))))
-    readonly property real dim: Math.max(0, Math.min(100, Number(backdropRoot.opt("background.backdrop.dim", 40)))) / 100
+    readonly property real dim: Math.max(0, Math.min(100, Number(backdropRoot.opt("background.backdrop.dim", 0)))) / 100
     readonly property bool vignette: backdropRoot.opt("background.backdrop.vignetteEnabled", false)
     Rectangle { anchors.fill: parent; color: IrisStyle.surface }
     Item {

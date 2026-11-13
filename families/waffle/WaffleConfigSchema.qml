@@ -70,7 +70,7 @@ JsonObject {
             property bool enableAnimation: false // Enable animated wallpapers (video/gif) in backdrop (disabled by default for performance)
             property bool enableAnimatedBlur: false // Enable blur for animated wallpapers (video/gif) - has performance impact
             property int blurRadius: 32
-            property int dim: 35
+            property int dim: 0
             property real saturation: 0
             property real contrast: 0
             property bool vignetteEnabled: false

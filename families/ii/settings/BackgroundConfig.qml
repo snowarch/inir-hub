@@ -2368,7 +2368,7 @@ ContentPage {
                     visible: Config.options?.background?.backdrop?.enable ?? true
                     icon: "brightness_5"
                     text: Translation.tr("Backdrop dim (%)")
-                    value: Config.options?.background?.backdrop?.dim ?? 20
+                    value: Config.options?.background?.backdrop?.dim ?? 0
                     from: 0
                     to: 100
                     stepSize: 5
