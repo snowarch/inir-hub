@@ -58,12 +58,11 @@ QtObject {
     // switch, a choice or a range, as Settings has it now (the Design's own and the compositor's stay with them).
     // A change goes through the row itself, so whatever else that row does (a theme regeneration, a piece moved
     // off the bar) happens too, and Settings' own Undo has it.
-    property var _indexFrom: null
-    property var _indexRows: []
-    property var _specByKey: ({})
+    // Kept in a plain object: filling it while a binding reads it (Kira's chat buttons) must not notify that binding again.
+    readonly property var _cache: ({ from: null, rows: [], specByKey: {} })
     function _settingsIndex(): var {
         const specs = IrisOptions.settings
-        if (root._indexFrom === specs) return root._indexRows
+        if (root._cache.from === specs) return root._cache.rows
         const kinds = { "switch": "bool", "choice": "choice", "range": "number" }
         const rows = [], byKey = {}
         for (const spec of specs) {
@@ -85,14 +84,14 @@ QtObject {
             byKey[key] = spec
             rows.push(row)
         }
-        root._indexFrom = specs
-        root._indexRows = rows
-        root._specByKey = byKey
+        root._cache.from = specs
+        root._cache.rows = rows
+        root._cache.specByKey = byKey
         return rows
     }
     function _applySetting(key: string, value: var): bool {
         root._settingsIndex()
-        const spec = root._specByKey[key]
+        const spec = root._cache.specByKey[key]
         if (!spec) return false
         IrisOptions.commit(spec, value)
         return true

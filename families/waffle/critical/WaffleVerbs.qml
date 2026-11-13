@@ -24,16 +24,17 @@ QtObject {
         blockAllReads: true
         printErrors: false
     }
-    property var _rows: null
+    // Kept in a plain object: filling it while a binding reads it (Kira's chat buttons) must not notify that binding again.
+    readonly property var _cache: ({ rows: null })
     function _settingsIndex(): var {
-        if (root._rows === null) {
+        if (root._cache.rows === null) {
             try {
-                root._rows = JSON.parse(root._index.text()).filter(row => row.key)
+                root._cache.rows = JSON.parse(root._index.text()).filter(row => row.key)
             } catch (e) {
-                root._rows = []
+                root._cache.rows = []
             }
         }
-        return root._rows
+        return root._cache.rows
     }
 
     readonly property var verbs: ({
