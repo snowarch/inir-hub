@@ -405,6 +405,19 @@ Item {
                 height: root.vertical ? hitArea.span : hitArea.depth
             }
 
+            // An app that opens or closes: the Dock glides to its new length, the others slide over and the new one
+            // grows in, on the move curve. Startup, magnification and a drag stay immediate.
+            property bool reflowing: false
+            property bool reflowWarm: false
+            readonly property int entryCount: root.entries.length
+            onEntryCountChanged: {
+                if (!window.reflowWarm || !IrisStyle.motionEnabled || root.slideApp.length > 0) return
+                window.reflowing = true
+                reflowEnd.restart()
+            }
+            Timer { id: reflowEnd; interval: IrisStyle.morphDuration + 40; onTriggered: window.reflowing = false }
+            Timer { running: true; interval: 1500; onTriggered: window.reflowWarm = true }
+
             property var frozenSlotX: null
             readonly property var pointerSlotX: {
                 if (window.menuOpen) return window.frozenSlotX
@@ -522,6 +535,14 @@ Item {
                 width: root.vertical ? window.dockHeight : Math.min(window.width - 32, appRow.implicitWidth + dock.padding * 2)
                 height: root.rail ? window.height
                     : root.vertical ? Math.min(window.height - 32, appRow.implicitHeight + dock.padding * 2) : window.dockHeight
+                Behavior on width {
+                    enabled: window.reflowing && !root.vertical
+                    NumberAnimation { duration: IrisStyle.morphDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: IrisStyle.moveCurve }
+                }
+                Behavior on height {
+                    enabled: window.reflowing && root.vertical && !root.rail
+                    NumberAnimation { duration: IrisStyle.morphDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: IrisStyle.moveCurve }
+                }
                 x: root.vertical ? (root.atLeft ? window.edgeOffset : window.width - width - window.edgeOffset)
                     : Math.round((window.width - width) / 2)
                 y: root.rail ? 0 : root.vertical ? Math.round((window.height - height) / 2)
@@ -592,8 +613,10 @@ Item {
 
                 Grid {
                     id: appRow
-                    columns: root.vertical ? 1 : Math.max(1, root.entries.length + (root.showLauncher ? 1 : 0)
-                        + (root.pieces.length > 0 ? root.pieces.length + 1 : 0))
+                    // One line, never a count: a Grid lays out at once when its columns change, so a count bound
+                    // here resized the Dock before the reflow could start and every app jumped into place.
+                    columns: root.vertical ? 1 : -1
+                    rows: root.vertical ? -1 : 1
                     flow: root.vertical ? Grid.TopToBottom : Grid.LeftToRight
                     // On the rail each plate centres on all you see of it, frame band included, as a sidebar's marks do
                     // (the window stands on the screen's edge; a plate sits 4·d from its slot's outer side).
@@ -605,8 +628,18 @@ Item {
                         : root.vertical ? dock.padding : (root.atTop ? Math.round(4 * root.d) : parent.height - height - Math.round(4 * root.d))
                     spacing: root.slotSpacing
                     move: Transition {
-                        enabled: root.slideApp.length > 0 && IrisStyle.motionEnabled
-                        NumberAnimation { properties: "x,y"; duration: IrisStyle.duration(200); easing.type: IrisStyle.feedbackEasing }
+                        enabled: (root.slideApp.length > 0 || window.reflowing) && IrisStyle.motionEnabled
+                        NumberAnimation {
+                            properties: "x,y"
+                            duration: window.reflowing ? IrisStyle.morphDuration : IrisStyle.duration(200)
+                            easing.type: window.reflowing ? Easing.BezierSpline : IrisStyle.feedbackEasing
+                            easing.bezierCurve: IrisStyle.moveCurve
+                        }
+                    }
+                    add: Transition {
+                        enabled: window.reflowing
+                        NumberAnimation { property: "opacity"; from: 0; to: 1; duration: IrisStyle.emergeDuration; easing.type: Easing.OutCubic }
+                        NumberAnimation { property: "scale"; from: 0.4; to: 1; duration: IrisStyle.emergeDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: IrisStyle.emergeCurve }
                     }
 
                     component Slot: Item {
