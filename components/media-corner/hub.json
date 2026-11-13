@@ -1,0 +1,34 @@
+{
+    "$schema": "../../schema/hub.schema.json",
+    "version": "1.0.0",
+    "summary": "Browse anime, films and series and see where they stream",
+    "authors": [
+        "xsteban1410"
+    ],
+    "license": "MIT",
+    "tags": [
+        "anime",
+        "movies",
+        "series",
+        "anilist",
+        "catalog"
+    ],
+    "permissions": [
+        "network"
+    ],
+    "hosts": [
+        "anilist.co",
+        "graphql.anilist.co",
+        "s4.anilist.co",
+        "v3-cinemeta.strem.io",
+        "images.metahub.space",
+        "www.imdb.com",
+        "www.youtube.com",
+        "cinemeta-catalogs.strem.io",
+        "live.metahub.space",
+        "m.media-amazon.com"
+    ],
+    "minInir": "3.1.0",
+    "provides": "modules/media-corner",
+    "preview": "preview.webp"
+}

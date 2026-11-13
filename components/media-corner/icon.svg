@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+  <title>Media Corner</title>
+  <rect width="128" height="128" rx="26" fill="#0f0f11" />
+  <g fill="#b6a3e6">
+    <polygon points="29.089,30.657 20.000,45.200 20.000,52.000 29.640,50.576 43.412,28.541" />
+    <polygon points="53.327,27.077 39.556,49.111 53.878,46.995 67.649,24.961" />
+    <polygon points="77.565,23.496 63.793,45.531 78.116,43.415 91.887,21.380" />
+    <polygon points="101.803,19.915 88.031,41.950 102.354,39.834 108.000,30.800 108.000,19.000" />
+  </g>
+  <path d="M20 57H108V108H20Z M56.5 69.5V95.5L79.5 82.5Z" fill="#f5f5f7" fill-rule="evenodd" />
+</svg>
