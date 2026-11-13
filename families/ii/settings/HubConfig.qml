@@ -110,7 +110,13 @@ ContentPage {
         }
         if (item.kind === "theme" && Hub.fits(item, root.family))
             return { text: Translation.tr("Use"), icon: "format_paint", tone: "tonal", run: () => Hub.useTheme(item.id) }
-        if (item.kind === "widget" && Hub.fits(item, root.family) && root.family !== "waffle") {
+        // A web app opens in the left sidebar's Web apps tab, which is off until someone turns it on.
+        if (item.kind === "webapp" && root.family === "material" && SystemInfo.runtimeHas(["webengine"])
+                && !(Config.options?.material?.sidebar?.plugins?.enable ?? false))
+            return { text: Translation.tr("Show in the sidebar"), icon: "left_panel_open", tone: "tonal", run: () => Config.setNestedValue("material.sidebar.plugins.enable", true) }
+        // A widget with only a sidebar face shows there by itself: there is nothing to add to the desktop.
+        if (item.kind === "widget" && Hub.fits(item, root.family) && root.family !== "waffle"
+                && (root.family !== "material" || Array.from(item.surfaces ?? []).includes("desktop"))) {
             if (Hub.widgetInUse(item.id, root.family))
                 return { text: Translation.tr("On your desktop"), icon: "check", tone: "off" }
             return { text: Translation.tr("Add to desktop"), icon: "add_to_home_screen", tone: "tonal", run: () => Hub.useWidget(item.id, root.family) }
@@ -132,7 +138,7 @@ ContentPage {
         return liked < 0 ? "–" : `${Math.round(liked * 100)}%`
     }
     function votesText(item: var): string {
-        return Hub.votes(item) > 0 ? Translation.tr("%1 of %2 people liked it").arg(item.votesUp ?? 0).arg(Hub.votes(item))
+        return Hub.votes(item) > 0 ? Translation.tr("%1 of %2 people liked it").arg(Hub.voteCount(item, "up")).arg(Hub.votes(item))
             : Translation.tr("No votes yet")
     }
     function dateText(date: string): string {
@@ -370,7 +376,7 @@ ContentPage {
         visible: shown
         icon: root.query.length > 0 ? "search_off" : root.filter === "installed" ? "download_done"
             : Hub.items.length === 0 && Hub.error.length > 0 ? (Hub.online ? "cloud_off" : "wifi_off") : "storefront"
-        text: root.query.length > 0 ? Translation.tr("Nothing matches “%1”").arg(root.query)
+        text: root.query.length > 0 ? Voice.miss(Translation.tr("Nothing matches “%1”").arg(root.query), root.query)
             : root.filter === "installed" ? Translation.tr("Nothing installed from the hub yet")
             : Hub.items.length === 0 && Hub.error.length > 0 ? Translation.tr("The hub didn't answer")
             : Translation.tr("Nothing here yet")
@@ -484,6 +490,15 @@ ContentPage {
         title: Translation.tr("Sources")
 
         SettingsGroup {
+            SettingsSwitch {
+                buttonIcon: "groups"
+                text: Translation.tr("Count my votes and installs")
+                checked: Hub.sharing
+                onCheckedChanged: if (checked !== Hub.sharing) Hub.setSharing(checked)
+                StyledToolTip {
+                    text: Translation.tr("Without your name, from a key kept on this computer")
+                }
+            }
             StyledText {
                 Layout.fillWidth: true
                 text: Translation.tr("Everything in the official hub is reviewed before it is published. Other sources are not: add only the ones you trust.")
@@ -1038,6 +1053,12 @@ ContentPage {
                         text: Hub.countText(page.item?.downloads ?? 0)
                         tip: Translation.tr("%1 downloads").arg(Number(page.item?.downloads ?? 0).toLocaleString(Qt.locale(), "f", 0))
                     }
+                    Stat {
+                        visible: Number(page.item?.installs ?? 0) > 0
+                        glyph: "group"
+                        text: Hub.countText(page.item?.installs ?? 0)
+                        tip: Translation.tr("%1 have it").arg(Number(page.item?.installs ?? 0).toLocaleString(Qt.locale(), "f", 0))
+                    }
                 }
             }
             RippleButtonWithIcon {
@@ -1059,10 +1080,72 @@ ContentPage {
             }
         }
 
+        // What people think of it, and the person's own say: a vote, the reactions it has (a tap gives or takes back),
+        // and one small chip that opens a picker of any emoji, on hover or a tap.
+        Flow {
+            Layout.fillWidth: true
+            spacing: 6
+            Repeater {
+                model: [{ vote: "up", face: "👍" }, { vote: "down", face: "👎" }]
+                delegate: FilterChip {
+                    required property var modelData
+                    text: `${modelData.face} ${Hub.countText(Hub.voteCount(page.item, modelData.vote))}`
+                    selected: Hub.mine(page.item?.id ?? "").vote === modelData.vote
+                    onClicked: Hub.vote(page.item.id, modelData.vote)
+                }
+            }
+            Item { width: 8; height: 1 }
+            Repeater {
+                model: Hub.reactionsOf(page.item)
+                delegate: FilterChip {
+                    required property var modelData
+                    text: `${modelData.emoji} ${Hub.countText(modelData.count)}`
+                    selected: modelData.mine
+                    onClicked: Hub.react(page.item.id, modelData.emoji)
+                }
+            }
+            ReactionPicker {
+                item: page.item
+            }
+        }
+
+        // A lead choice (`lead: true`) is the plugin on or off as a whole: a switch with its note.
+        Repeater {
+            model: Hub.choicesTitle(page.item).length > 0 ? (Hub.choices[page.item?.id ?? ""] ?? []).filter(c => c.lead) : []
+            delegate: RowLayout {
+                required property var modelData
+                Layout.fillWidth: true
+                spacing: 12
+                ColumnLayout {
+                    Layout.fillWidth: true
+                    spacing: 2
+                    StyledText {
+                        Layout.fillWidth: true
+                        text: modelData.label
+                        font.weight: Font.Medium
+                        font.pixelSize: Appearance.font.pixelSize.normal
+                        elide: Text.ElideRight
+                    }
+                    StyledText {
+                        Layout.fillWidth: true
+                        visible: text.length > 0
+                        text: String(modelData.note ?? "")
+                        color: Appearance.colors.colSubtext
+                        font.pixelSize: Appearance.font.pixelSize.small
+                        wrapMode: Text.WordWrap
+                    }
+                }
+                StyledSwitch {
+                    Layout.alignment: Qt.AlignVCenter
+                    checked: modelData.on
+                    onClicked: Hub.toggleChoice(page.item.id, modelData.id)
+                }
+            }
+        }
         // A plugin's own choices (plugin.json `choices`), read as its page opens; a chip flips one.
         StyledText {
             readonly property string plugin: Hub.choicesTitle(page.item).length > 0 ? page.item.id : ""
-            visible: plugin.length > 0
+            visible: plugin.length > 0 && (Hub.choices[plugin] ?? []).some(c => !c.lead)
             text: Hub.choicesTitle(page.item)
             color: Appearance.colors.colSubtext
             font.pixelSize: Appearance.font.pixelSize.small
@@ -1071,10 +1154,10 @@ ContentPage {
         }
         Flow {
             Layout.fillWidth: true
-            visible: Hub.choicesTitle(page.item).length > 0
+            visible: Hub.choicesTitle(page.item).length > 0 && (Hub.choices[page.item?.id ?? ""] ?? []).some(c => !c.lead)
             spacing: 6
             Repeater {
-                model: Hub.choices[page.item?.id ?? ""] ?? []
+                model: (Hub.choices[page.item?.id ?? ""] ?? []).filter(c => !c.lead)
                 delegate: FilterChip {
                     required property var modelData
                     text: modelData.label
@@ -1169,6 +1252,37 @@ ContentPage {
                     wrapMode: Text.WordWrap
                     lineHeight: 1.3
                 }
+                Subheader {
+                    Layout.leftMargin: 0
+                    Layout.topMargin: 8
+                    visible: Hub.changesOf(page.item).length > 0
+                    text: Hub.changesTitle(page.item)
+                }
+                Repeater {
+                    model: Hub.changesOf(page.item)
+                    delegate: ColumnLayout {
+                        id: release
+                        required property var modelData
+                        Layout.fillWidth: true
+                        spacing: 2
+                        StyledText {
+                            text: release.modelData.version
+                            font.pixelSize: Appearance.font.pixelSize.smaller
+                            color: Appearance.colors.colSubtext
+                        }
+                        Repeater {
+                            model: release.modelData.notes
+                            delegate: StyledText {
+                                required property string modelData
+                                Layout.fillWidth: true
+                                text: modelData
+                                font.pixelSize: Appearance.font.pixelSize.small
+                                color: SettingsMaterialPreset.labelColor
+                                wrapMode: Text.WordWrap
+                            }
+                        }
+                    }
+                }
                 Flow {
                     Layout.fillWidth: true
                     Layout.topMargin: 2
@@ -1193,12 +1307,6 @@ ContentPage {
                         materialIcon: "code"
                         mainText: Translation.tr("Source and setup guide")
                         onClicked: Qt.openUrlExternally(page.item.page)
-                    }
-                    LinkButton {
-                        visible: Hub.discussionUrl(page.item).length > 0
-                        materialIcon: "forum"
-                        mainText: Translation.tr("Reviews and votes")
-                        onClicked: Qt.openUrlExternally(Hub.discussionUrl(page.item))
                     }
                     LinkButton {
                         visible: Hub.reportUrl(page.item).length > 0
@@ -1316,6 +1424,139 @@ ContentPage {
                 color: SettingsMaterialPreset.supportingColor
                 wrapMode: Text.WordWrap
             }
+        }
+    }
+
+    // The add-reaction chip and its picker: a search field and a grid of every emoji, the quick set first.
+    component ReactionPicker: FilterChip {
+        id: chip
+        required property var item
+        readonly property var given: Array.from(Hub.mine(chip.item?.id ?? "").reactions ?? [])
+        chipIcon: "add_reaction"
+        text: Hub.reactionsOf(chip.item).length === 0 ? Translation.tr("React") : ""
+        enabled: Hub.canReact(chip.item?.id ?? "")
+        selected: false
+        Accessible.name: Translation.tr("Add a reaction")
+        onClicked: picker.opened ? picker.close() : picker.open()
+
+        HoverHandler { id: chipHover }
+        // a short warm-up so a pointer passing by doesn't open it; leaving both closes it unless a search is typed
+        Timer {
+            running: chipHover.hovered && !picker.opened && chip.enabled
+            interval: 320
+            onTriggered: picker.open()
+        }
+        Timer {
+            running: picker.opened && !chipHover.hovered && !cardHover.hovered && search.text.length === 0
+            interval: 420
+            onTriggered: picker.close()
+        }
+
+        Popup {
+            id: picker
+            y: chip.height + 6
+            margins: 8
+            padding: 10
+            width: grid.cellWidth * 8 + 20
+            onOpened: {
+                search.text = ""
+                search.forceActiveFocus()
+            }
+
+            background: Rectangle {
+                color: Appearance.colors.colLayer2Base
+                radius: Appearance.rounding.normal
+                border.width: 1
+                border.color: Appearance.colors.colLayer0Border
+            }
+
+            contentItem: ColumnLayout {
+                spacing: 8
+                HoverHandler { id: cardHover }
+
+                Rectangle {
+                    Layout.fillWidth: true
+                    implicitHeight: 36
+                    radius: Appearance.rounding.full
+                    color: SettingsMaterialPreset.tileColor
+                    border.width: search.activeFocus ? 2 : 0
+                    border.color: Appearance.colors.colPrimary
+                    RowLayout {
+                        anchors.fill: parent
+                        anchors.leftMargin: 12
+                        anchors.rightMargin: 12
+                        spacing: 8
+                        MaterialSymbol {
+                            text: "search"
+                            iconSize: 18
+                            color: search.activeFocus ? Appearance.colors.colPrimary : SettingsMaterialPreset.supportingColor
+                        }
+                        StyledTextInput {
+                            id: search
+                            Layout.fillWidth: true
+                            font.pixelSize: Appearance.font.pixelSize.small
+                            color: SettingsMaterialPreset.labelColor
+                            clip: true
+                            Keys.onEscapePressed: picker.close()
+                            Keys.onReturnPressed: if (grid.count > 0) chip.pick(grid.model[0])
+                            Keys.onEnterPressed: if (grid.count > 0) chip.pick(grid.model[0])
+                            StyledText {
+                                anchors.verticalCenter: parent.verticalCenter
+                                width: parent.width
+                                visible: search.text.length === 0
+                                text: Translation.tr("Search emoji")
+                                font.pixelSize: Appearance.font.pixelSize.small
+                                color: SettingsMaterialPreset.supportingColor
+                                elide: Text.ElideRight
+                            }
+                        }
+                    }
+                }
+
+                GridView {
+                    id: grid
+                    Layout.fillWidth: true
+                    implicitHeight: cellHeight * 5
+                    clip: true
+                    cellWidth: 36
+                    cellHeight: 36
+                    boundsBehavior: Flickable.StopAtBounds
+                    model: picker.opened ? Hub.emojiSearch(search.text) : []
+                    delegate: RippleButton {
+                        id: cell
+                        required property string modelData
+                        readonly property bool given: chip.given.includes(cell.modelData)
+                        width: 34
+                        height: 34
+                        buttonRadius: Appearance.rounding.small
+                        colBackground: cell.given ? Appearance.colors.colSecondaryContainer : "transparent"
+                        colBackgroundHover: cell.given ? Appearance.colors.colSecondaryContainerHover : Appearance.colors.colLayer2Hover
+                        onClicked: chip.pick(cell.modelData)
+                        contentItem: StyledText {
+                            anchors.centerIn: parent
+                            text: cell.modelData
+                            font.pixelSize: 20
+                            horizontalAlignment: Text.AlignHCenter
+                            verticalAlignment: Text.AlignVCenter
+                        }
+                    }
+                    StyledText {
+                        anchors.centerIn: parent
+                        width: parent.width - 24
+                        visible: grid.count === 0 && search.text.length > 0
+                        horizontalAlignment: Text.AlignHCenter
+                        wrapMode: Text.Wrap
+                        text: Translation.tr("No emoji called “%1”").arg(search.text.trim())
+                        font.pixelSize: Appearance.font.pixelSize.small
+                        color: SettingsMaterialPreset.supportingColor
+                    }
+                }
+            }
+        }
+
+        function pick(emoji: string): void {
+            Hub.react(chip.item.id, emoji)
+            picker.close()
         }
     }
 }

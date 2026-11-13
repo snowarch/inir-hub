@@ -1,7 +1,7 @@
 import QtQuick
+import QtQuick.Controls as QQC
 import QtQuick.Layouts
 import QtQuick.Controls
-import QtQuick.Dialogs
 import Quickshell
 import Quickshell.Io
 import qs.services
@@ -29,7 +29,7 @@ ColumnLayout {
 
     Process {
         id: ensureDirProcess
-        command: ["/usr/bin/mkdir", "-p", root.themesDir]
+        command: ["mkdir", "-p", root.themesDir]
         onExited: (exitCode) => {
             if (exitCode === 0) loadThemesList()
         }
@@ -41,7 +41,7 @@ ColumnLayout {
 
     Process {
         id: listThemesProcess
-        command: ["/usr/bin/bash", "-c", `/usr/bin/ls -1 "${root.themesDir}"/*.json 2>/dev/null | /usr/bin/xargs -I{} /usr/bin/basename {} .json`]
+        command: ["bash", "-c", `ls -1 "${root.themesDir}"/*.json 2>/dev/null | xargs -I{} basename {} .json`]
         stdout: SplitParser {
             onRead: data => {
                 if (data.trim()) {
@@ -59,7 +59,7 @@ ColumnLayout {
         const jsonStr = JSON.stringify(Config.options.appearance.customTheme, null, 2)
         const escaped = jsonStr.replace(/'/g, "'\\''")
         const filePath = `${root.themesDir}/${name}.json`
-        saveThemeProcess.command = ["/usr/bin/bash", "-c", `printf '%s' '${escaped}' > "${filePath}"`]
+        saveThemeProcess.command = ["bash", "-c", `printf '%s' '${escaped}' > "${filePath}"`]
         saveThemeProcess.running = true
     }
 
@@ -113,7 +113,7 @@ ColumnLayout {
     }
 
     function deleteTheme(name) {
-        deleteThemeProcess.command = ["/usr/bin/rm", "-f", `${root.themesDir}/${name}.json`]
+        deleteThemeProcess.command = ["rm", "-f", `${root.themesDir}/${name}.json`]
         deleteThemeProcess.running = true
     }
 
@@ -1257,6 +1257,8 @@ ColumnLayout {
                     TextField {
                         cursorDelegate: TextCursor {}
                         id: presetSearchField
+                        QQC.ContextMenu.menu: null
+                        QQC.ContextMenu.onRequested: position => TextEditMenu.open(presetSearchField, position)
                         Layout.fillWidth: true
                         placeholderText: Translation.tr("Search presets...")
                         renderType: Text.NativeRendering
@@ -1520,6 +1522,8 @@ ColumnLayout {
 
                     TextArea {
                         id: exportTextArea
+                        QQC.ContextMenu.menu: null
+                        QQC.ContextMenu.onRequested: position => TextEditMenu.open(exportTextArea, position)
                         readOnly: true
                         text: JSON.stringify(Config.options.appearance.customTheme, null, 2)
                         renderType: Text.NativeRendering
@@ -1647,6 +1651,8 @@ ColumnLayout {
                     TextArea {
                         cursorDelegate: TextCursor {}
                         id: importTextArea
+                        QQC.ContextMenu.menu: null
+                        QQC.ContextMenu.onRequested: position => TextEditMenu.open(importTextArea, position)
                         placeholderText: Translation.tr("Paste theme JSON here...")
                         renderType: Text.NativeRendering
                         font.family: Appearance.font.family.monospace
@@ -2437,7 +2443,7 @@ ColumnLayout {
         property string dialogKey: ""
         property color dialogColor: Appearance.colors.colOutline
 
-        ColorDialog {
+        ColorPickerDialog {
             id: colorPicker
             selectedColor: paletteCard.dialogColor
             onAccepted: {

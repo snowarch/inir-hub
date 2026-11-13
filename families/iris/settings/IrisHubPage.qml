@@ -298,7 +298,8 @@ Flickable {
 
         // ── Empty and unreachable states ──────────────────────────────
         ColumnLayout {
-            Layout.fillWidth: true
+            Layout.alignment: Qt.AlignHCenter
+            Layout.maximumWidth: pageColumn.width
             Layout.topMargin: Math.round(28 * root.d)
             visible: Hub.loaded && root.opened === null && root.shown.length === 0
             spacing: Math.round(6 * root.d)
@@ -310,7 +311,10 @@ Flickable {
             }
             IrisText {
                 Layout.alignment: Qt.AlignHCenter
-                text: root.query.length > 0 ? Translation.tr("Nothing matches “%1”").arg(root.query)
+                Layout.maximumWidth: pageColumn.width
+                horizontalAlignment: Text.AlignHCenter
+                wrapMode: Text.Wrap
+                text: root.query.length > 0 ? Voice.miss(Translation.tr("Nothing matches “%1”").arg(root.query), root.query)
                     : Hub.cliMissing ? Translation.tr("The hub comes with the inir command: run inir update once to get it")
                     : Hub.items.length === 0 ? Translation.tr("The hub didn't answer. Check your connection and try again")
                     : root.filter === "installed" ? Translation.tr("Nothing installed from the hub yet")
@@ -505,6 +509,25 @@ Flickable {
             role: IrisText.Meta
             wrapMode: Text.WordWrap
             text: Translation.tr("Everything in the official hub is reviewed before it is published. Other sources are not: add only the ones you trust.")
+        }
+        Rectangle {
+            Layout.fillWidth: true
+            visible: root.opened === null && Hub.loaded
+            implicitHeight: shareRow.implicitHeight + Math.round(8 * root.d)
+            radius: IrisStyle.radiusTile
+            color: IrisStyle.readingCard
+            IrisControlRow {
+                id: shareRow
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.verticalCenter: parent.verticalCenter
+                anchors.margins: Math.round(4 * root.d)
+                glyph: "groups"
+                label: Translation.tr("Count my votes and installs")
+                detail: Translation.tr("Without your name, from a key kept on this computer")
+                on: Hub.sharing
+                onToggled: Hub.setSharing(!Hub.sharing)
+            }
         }
     }
 
@@ -837,6 +860,7 @@ Flickable {
         property var item
         readonly property var permissions: Array.from(page.item?.permissions ?? [])
         readonly property var hosts: Array.from(page.item?.hosts ?? [])
+        readonly property var changes: Hub.changesOf(page.item)
         readonly property string pulledWhy: String(page.item?.installedBlocked || page.item?.blocked || "")
         spacing: Math.round(14 * root.d)
 
@@ -927,10 +951,44 @@ Flickable {
                         onClicked: Hub.remove(page.item.id)
                     }
                 }
+                // A lead choice (`lead: true`) is the plugin on or off as a whole: a switch with its note.
+                Repeater {
+                    model: Hub.choicesTitle(page.item).length > 0 ? (Hub.choices[page.item?.id ?? ""] ?? []).filter(c => c.lead) : []
+                    delegate: RowLayout {
+                        required property var modelData
+                        Layout.fillWidth: true
+                        Layout.topMargin: Math.round(16 * root.d)
+                        spacing: Math.round(12 * root.d)
+                        ColumnLayout {
+                            Layout.fillWidth: true
+                            spacing: Math.round(2 * root.d)
+                            IrisText {
+                                Layout.fillWidth: true
+                                text: modelData.label
+                                font.weight: IrisStyle.weight(Font.Medium)
+                                font.pixelSize: IrisStyle.typeBody
+                                elide: Text.ElideRight
+                            }
+                            IrisText {
+                                Layout.fillWidth: true
+                                visible: text.length > 0
+                                text: String(modelData.note ?? "")
+                                color: IrisStyle.textSecondary
+                                font.pixelSize: IrisStyle.typeLabel
+                                wrapMode: Text.WordWrap
+                            }
+                        }
+                        IrisSwitch {
+                            name: modelData.label
+                            on: modelData.on
+                            onToggled: Hub.toggleChoice(page.item.id, modelData.id)
+                        }
+                    }
+                }
                 // A plugin's own choices (plugin.json `choices`), read as its page opens; a chip flips one.
                 IrisText {
                     readonly property string plugin: Hub.choicesTitle(page.item).length > 0 ? page.item.id : ""
-                    visible: plugin.length > 0
+                    visible: plugin.length > 0 && (Hub.choices[plugin] ?? []).some(c => !c.lead)
                     Layout.topMargin: Math.round(16 * root.d)
                     text: Hub.choicesTitle(page.item)
                     color: IrisStyle.textSecondary
@@ -941,10 +999,10 @@ Flickable {
                 Flow {
                     Layout.fillWidth: true
                     Layout.topMargin: Math.round(6 * root.d)
-                    visible: Hub.choicesTitle(page.item).length > 0
+                    visible: Hub.choicesTitle(page.item).length > 0 && (Hub.choices[page.item?.id ?? ""] ?? []).some(c => !c.lead)
                     spacing: Math.round(6 * root.d)
                     Repeater {
-                        model: Hub.choices[page.item?.id ?? ""] ?? []
+                        model: (Hub.choices[page.item?.id ?? ""] ?? []).filter(c => !c.lead)
                         delegate: IrisChip {
                             required property var modelData
                             label: modelData.label
@@ -971,8 +1029,9 @@ Flickable {
                 Repeater {
                     model: [
                         { figure: Hub.liked(page.item) >= 0 ? root.likedText(page.item) : "–", caption: Hub.votes(page.item) > 0
-                            ? Translation.tr("%1 of %2 people liked it").arg(page.item?.votesUp ?? 0).arg(Hub.votes(page.item)) : Translation.tr("No votes yet") },
-                        { figure: page.item?.downloads !== undefined ? Hub.countText(page.item.downloads) : "", caption: Translation.tr("Downloads") },
+                            ? Translation.tr("%1 of %2 people liked it").arg(Hub.voteCount(page.item, "up")).arg(Hub.votes(page.item)) : Translation.tr("No votes yet") },
+                        { figure: Number(page.item?.installs ?? 0) > 0 ? Hub.countText(page.item.installs) : "", caption: Translation.tr("Have it") },
+                        { figure: page.item?.downloads !== undefined && !(Number(page.item?.installs ?? 0) > 0) ? Hub.countText(page.item.downloads) : "", caption: Translation.tr("Downloads") },
                         { figure: String(page.item?.version ?? ""), caption: page.item?.installed && page.item.installed !== page.item.version
                             ? Translation.tr("You have %1").arg(page.item.installed) : Translation.tr("Version") },
                         { figure: root.dateText(page.item?.updated ?? ""), caption: Translation.tr("Updated") },
@@ -1023,6 +1082,37 @@ Flickable {
             }
         }
 
+        // What people think of it, and the person's own say: a vote, the reactions it has (a tap gives or takes back),
+        // and one small chip that opens a picker of any emoji, on hover or a tap.
+        Flow {
+            Layout.fillWidth: true
+            spacing: Math.round(6 * root.d)
+            Repeater {
+                model: ["up", "down"]
+                delegate: IrisChip {
+                    required property string modelData
+                    glyph: modelData === "up" ? "thumb_up" : "thumb_down"
+                    label: Hub.countText(Hub.voteCount(page.item, modelData))
+                    selected: Hub.mine(page.item?.id ?? "").vote === modelData
+                    Accessible.name: modelData === "up" ? Translation.tr("I like it") : Translation.tr("Not for me")
+                    onClicked: Hub.vote(page.item.id, modelData)
+                }
+            }
+            Item { width: Math.round(6 * root.d); height: 1 }
+            Repeater {
+                model: Hub.reactionsOf(page.item)
+                delegate: IrisChip {
+                    required property var modelData
+                    label: `${modelData.emoji} ${Hub.countText(modelData.count)}`
+                    selected: modelData.mine
+                    onClicked: Hub.react(page.item.id, modelData.emoji)
+                }
+            }
+            ReactionPicker {
+                item: page.item
+            }
+        }
+
         IrisText {
             Layout.fillWidth: true
             Layout.leftMargin: Math.round(4 * root.d)
@@ -1033,6 +1123,50 @@ Flickable {
             font.pixelSize: IrisStyle.typeLabel
             wrapMode: Text.WordWrap
             lineHeight: 1.2
+        }
+
+        Heading {
+            visible: page.changes.length > 0
+            text: Hub.changesTitle(page.item)
+        }
+        Rectangle {
+            visible: page.changes.length > 0
+            Layout.fillWidth: true
+            implicitHeight: changesColumn.implicitHeight + Math.round(32 * root.d)
+            radius: IrisStyle.radiusTile
+            color: IrisStyle.readingCard
+            ColumnLayout {
+                id: changesColumn
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.top: parent.top
+                anchors.margins: Math.round(16 * root.d)
+                spacing: Math.round(14 * root.d)
+                Repeater {
+                    model: page.changes
+                    delegate: ColumnLayout {
+                        id: release
+                        required property var modelData
+                        Layout.fillWidth: true
+                        spacing: Math.round(4 * root.d)
+                        IrisText {
+                            role: IrisText.Meta
+                            font.pixelSize: IrisStyle.typeFootnote
+                            text: release.modelData.version
+                        }
+                        Repeater {
+                            model: release.modelData.notes
+                            delegate: IrisText {
+                                required property string modelData
+                                Layout.fillWidth: true
+                                font.pixelSize: IrisStyle.typeLabel
+                                wrapMode: Text.WordWrap
+                                text: modelData
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         Heading { text: Hub.reachTitle(page.item) }
@@ -1088,12 +1222,6 @@ Flickable {
         Flow {
             Layout.fillWidth: true
             spacing: Math.round(6 * root.d)
-            IrisButton {
-                visible: Hub.discussionUrl(page.item).length > 0
-                quiet: true
-                text: Translation.tr("Reviews and votes")
-                onClicked: Qt.openUrlExternally(Hub.discussionUrl(page.item))
-            }
             IrisButton {
                 visible: String(page.item?.page ?? "").length > 0
                 quiet: true
@@ -1186,6 +1314,139 @@ Flickable {
                         height: 1
                         visible: infoRow.index < infoCard.rows.length - 1
                         color: IrisStyle.hairline
+                    }
+                }
+            }
+        }
+    }
+
+    // The add-reaction chip and its picker: a search field and a grid of every emoji, the quick set first.
+    component ReactionPicker: IrisChip {
+        id: chip
+        required property var item
+        readonly property var given: Array.from(Hub.mine(chip.item?.id ?? "").reactions ?? [])
+        glyph: "add_reaction"
+        label: Hub.reactionsOf(chip.item).length === 0 ? Translation.tr("React") : ""
+        enabled: Hub.canReact(chip.item?.id ?? "")
+        Accessible.name: Translation.tr("Add a reaction")
+        onClicked: picker.opened ? picker.close() : picker.open()
+
+        HoverHandler { id: chipHover }
+        // a short warm-up so a pointer passing by doesn't open it; leaving both closes it unless a search is typed
+        Timer {
+            running: chipHover.hovered && !picker.opened && chip.enabled
+            interval: 320
+            onTriggered: picker.open()
+        }
+        Timer {
+            running: picker.opened && !chipHover.hovered && !cardHover.hovered && search.text.length === 0
+            interval: 420
+            onTriggered: picker.close()
+        }
+
+        function pick(emoji: string): void {
+            Hub.react(chip.item.id, emoji)
+            picker.close()
+        }
+
+        Popup {
+            id: picker
+            y: chip.height + Math.round(6 * root.d)
+            margins: 8
+            padding: Math.round(10 * root.d)
+            width: grid.cellWidth * 8 + padding * 2
+            onOpened: {
+                search.text = ""
+                search.forceActiveFocus()
+            }
+
+            background: Rectangle {
+                color: IrisStyle.surfaceHighOpaque
+                radius: IrisStyle.radiusTile
+                border.width: 1
+                border.color: IrisStyle.hairlineStrong
+            }
+
+            contentItem: Column {
+                spacing: Math.round(8 * root.d)
+                HoverHandler { id: cardHover }
+
+                Rectangle {
+                    width: parent.width
+                    height: Math.round(32 * root.d)
+                    radius: IrisStyle.capsule(height)
+                    color: search.activeFocus ? IrisStyle.fill : IrisStyle.fillQuiet
+                    border.width: search.activeFocus ? 1 : 0
+                    border.color: IrisStyle.tintBorder(IrisStyle.accent)
+                    MaterialSymbol {
+                        id: searchMark
+                        anchors.left: parent.left
+                        anchors.leftMargin: Math.round(10 * root.d)
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: "search"
+                        iconSize: Math.round(16 * root.d)
+                        color: IrisStyle.muted
+                    }
+                    TextInput {
+                        id: search
+                        cursorDelegate: TextCursor { accent: IrisStyle.accent }
+                        anchors.left: searchMark.right
+                        anchors.leftMargin: Math.round(6 * root.d)
+                        anchors.right: parent.right
+                        anchors.rightMargin: Math.round(10 * root.d)
+                        anchors.verticalCenter: parent.verticalCenter
+                        color: IrisStyle.text
+                        selectionColor: IrisStyle.accentContainer
+                        selectedTextColor: IrisStyle.inkOnAccentContainer
+                        font.family: IrisStyle.fontMain
+                        font.pixelSize: IrisStyle.typeLabel
+                        clip: true
+                        Keys.onEscapePressed: picker.close()
+                        Keys.onReturnPressed: if (grid.count > 0) chip.pick(grid.model[0])
+                        Keys.onEnterPressed: if (grid.count > 0) chip.pick(grid.model[0])
+                        IrisText {
+                            anchors.verticalCenter: parent.verticalCenter
+                            visible: search.text.length === 0
+                            text: Translation.tr("Search emoji")
+                            color: IrisStyle.muted
+                            font.pixelSize: search.font.pixelSize
+                        }
+                    }
+                }
+
+                GridView {
+                    id: grid
+                    width: parent.width
+                    height: cellHeight * 5
+                    clip: true
+                    cellWidth: Math.round(36 * root.d)
+                    cellHeight: cellWidth
+                    boundsBehavior: Flickable.StopAtBounds
+                    model: picker.opened ? Hub.emojiSearch(search.text) : []
+                    delegate: IrisButton {
+                        id: cell
+                        required property string modelData
+                        width: grid.cellWidth - 2
+                        height: width
+                        buttonRadius: IrisStyle.pieceRadius(height)
+                        quiet: !cell.selected
+                        selected: chip.given.includes(cell.modelData)
+                        onClicked: chip.pick(cell.modelData)
+                        Text {
+                            anchors.centerIn: parent
+                            text: cell.modelData
+                            font.pixelSize: Math.round(20 * root.d)
+                        }
+                    }
+                    IrisText {
+                        anchors.centerIn: parent
+                        width: parent.width - 24
+                        visible: grid.count === 0 && search.text.length > 0
+                        horizontalAlignment: Text.AlignHCenter
+                        wrapMode: Text.Wrap
+                        text: Translation.tr("No emoji called “%1”").arg(search.text.trim())
+                        color: IrisStyle.muted
+                        font.pixelSize: IrisStyle.typeLabel
                     }
                 }
             }

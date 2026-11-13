@@ -32,6 +32,7 @@ PreviewScene {
         // At its own size, as every other scene: scaled past 1 the clock and glyphs are bitmaps blown up (his 10-30: blurry).
         maxScale: 1
         focusRect: screen.islandReach
+        notices: true
     }
     Caption {
         anchors.leftMargin: Math.round((edgeRoot.edge === "left" ? edgeRoot.subject.x + edgeRoot.subject.width : 0) + 14 * edgeRoot.d)

@@ -24,10 +24,8 @@ GridLayout {
             Layout.preferredWidth: (root.width - (root.columns - 1) * root.columnSpacing) / root.columns
             Layout.alignment: Qt.AlignTop
             theme: modelData
-            onShareRequested: {
-                Quickshell.clipboardText = IrisThemes.exportText(modelData)
-                IrisEditHistory.say(Translation.tr("Copied “%1”, paste it anywhere to share it").arg(modelData.name))
-            }
+            settingsHistory: true
+            onShareRequested: Quickshell.clipboardText = IrisThemes.exportText(modelData)
         }
     }
 }

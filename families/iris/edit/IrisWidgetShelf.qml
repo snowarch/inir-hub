@@ -20,12 +20,17 @@ WidgetShelf {
 
     property real bodyRadius: IrisStyle.radius
 
+    // The page someone asked for (Settings' Desktops row), taken once and cleared: cleared from a binding's own change
+    // it was a binding loop.
     Component.onCompleted: root.takeAsked()
-    readonly property string asked: GlobalStates.desktopShelfPage
-    onAskedChanged: root.takeAsked()
+    Connections {
+        target: GlobalStates
+        function onDesktopShelfPageChanged() { root.takeAsked() }
+    }
     function takeAsked(): void {
-        if (root.asked.length === 0 || !root.pages.some(entry => entry.value === root.asked)) return
-        root.goTo(root.asked)
+        const asked = GlobalStates.desktopShelfPage
+        if (asked.length === 0 || !root.pages.some(entry => entry.value === asked)) return
+        root.goTo(asked)
         GlobalStates.desktopShelfPage = ""
     }
 
@@ -46,7 +51,8 @@ WidgetShelf {
                 DesktopWidgetRegistry.categoryOf(entry.key)].join(" "), category: DesktopWidgetRegistry.categoryOf(entry.key) }))
         for (const custom of (CustomWidgets.ready ? CustomWidgets.widgets : []))
             list.push(IrisSearch.prepare({ key: "custom." + custom.id, glyph: custom.icon || "widgets", name: custom.name,
-                english: custom.name, tint: DesktopWidgetRegistry.customTint, words: "custom hub", category: "decor" }))
+                english: custom.name, tint: DesktopWidgetRegistry.customTint, words: DesktopWidgetRegistry.customWords(custom),
+                category: DesktopWidgetRegistry.customCategory(custom) }))
         return list
     }
 

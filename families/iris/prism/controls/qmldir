@@ -1,0 +1,17 @@
+module qs.modules.iris.prism.controls
+PrismText 1.0 PrismText.qml
+PrismGlyph 1.0 PrismGlyph.qml
+PrismPill 1.0 PrismPill.qml
+PrismRound 1.0 PrismRound.qml
+PrismSwitch 1.0 PrismSwitch.qml
+PrismSlider 1.0 PrismSlider.qml
+PrismChoice 1.0 PrismChoice.qml
+PrismChips 1.0 PrismChips.qml
+PrismSwatches 1.0 PrismSwatches.qml
+PrismField 1.0 PrismField.qml
+PrismSketch 1.0 PrismSketch.qml
+PrismDesigns 1.0 PrismDesigns.qml
+PrismHue 1.0 PrismHue.qml
+PrismCurve 1.0 PrismCurve.qml
+PrismPieces 1.0 PrismPieces.qml
+PrismIcons 1.0 PrismIcons.qml

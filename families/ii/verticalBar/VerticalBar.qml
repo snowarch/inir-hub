@@ -92,10 +92,12 @@ Scope {
                 }
                 color: "transparent"
 
-                BackgroundEffect.blurRegion: Region {
+                property Region nativeBlurRegion: Region {
                     item: barContent.nativeBlurActive ? barContent.backgroundItem : emptyMask
                     radius: barContent.backgroundItem.radius
                 }
+                // ext-background-effect regions only where the compositor takes them (Niri); Umbriel blurs by layer rules.
+                BackgroundEffect.blurRegion: CompositorService.blurRegions ? nativeBlurRegion : null
 
                 anchors {
                     left: !(Config.options?.material?.bar?.bottom ?? false)

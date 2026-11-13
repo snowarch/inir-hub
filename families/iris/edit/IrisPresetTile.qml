@@ -33,7 +33,7 @@ MouseArea {
         Behavior on border.color { ColorAnimation { duration: IrisStyle.duration(110); easing.type: IrisStyle.feedbackEasing } }
         Column {
             anchors.fill: parent
-            anchors.margins: Math.round(7 * tile.d)
+            anchors.margins: Math.round(8 * tile.d)
             spacing: Math.round(4 * tile.d)
             Rectangle {
                 width: parent.width

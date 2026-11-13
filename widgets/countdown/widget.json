@@ -1,9 +1,9 @@
 {
     "name": "Countdown",
     "icon": "hourglass_bottom",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "author": "snowarch",
-    "description": "Days left until a date you care about. The figure sits in a Material shape you pick, and a wavy bar shows how much of the wait has gone by. Also a line on the iRiS Island and a card in Waffle's Widgets panel.",
+    "description": "Days left until a date you care about. The figure sits in a Material shape you pick, and a wavy bar shows how much of the wait has gone by. Also a card in Material's sidebars, a line on the iRiS Island and a card in Waffle's Widgets panel.",
     "category": "time",
     "main": "Countdown.qml",
     "iris": {
@@ -14,6 +14,13 @@
     },
     "waffle": {
         "main": "WaffleCountdown.qml"
+    },
+    "ii": {
+        "main": "SidebarCountdown.qml",
+        "slots": [
+            "sidebar.left",
+            "sidebar.right"
+        ]
     },
     "defaultConfig": {
         "placementStrategy": "free",

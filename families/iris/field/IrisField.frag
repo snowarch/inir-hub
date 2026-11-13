@@ -89,6 +89,8 @@ layout(std140, binding = 0) uniform buf {
     // z: light opacity; w: treatment width in screen pixels.
     vec4 frameLight;
     vec4 frameInk;
+    // Holo (Frame › Style): x its light 0..1 (0 off), y the halo's reach 0..1, z 1 on a light scheme, w the density.
+    vec4 frameHolo;
     // Where this field's window sits on its output (x, y) and the output's size (z, w), so a
     // field in a small window (a menu) samples the wallpaper glass at the right place.
     vec4 scene;
@@ -431,6 +433,27 @@ vec3 leakLight(vec2 at, vec2 size, float scatter, out vec3 wash, out vec2 toward
     return mix(hue * exposed, u.leakCore.rgb * exposed, 0.6 * smoothstep(0.5, 1.0, exposed));
 }
 #endif
+
+// Holo, the frame's own light (.claude/ref/iris-holo): the screen is an eclipse's dark disc and the frame its rim, lit in
+// the spectrum a CD throws. The hue runs round the screen and is bent by slow diagonal bands; the light sits on the
+// band's inner line, splits warm-out and cool-in like a lens, fades into the band and breathes a soft halo over the
+// screen. Pastel and smooth like the refs: no grain, no marks. Static: it costs nothing at rest.
+vec3 holoRamp(float t) {
+    float x = fract(t) * 6.0;
+    float f = smoothstep(0.0, 1.0, fract(x));
+    vec3 s0 = vec3(1.00, 0.62, 0.40); // iris-literal: the eclipse's warm orange
+    vec3 s1 = vec3(1.00, 0.88, 0.62); // iris-literal: gold
+    vec3 s2 = vec3(0.52, 0.88, 1.00); // iris-literal: cyan
+    vec3 s3 = vec3(0.40, 0.54, 1.00); // iris-literal: the eclipse's blue
+    vec3 s4 = vec3(0.74, 0.60, 1.00); // iris-literal: violet
+    vec3 s5 = vec3(1.00, 0.66, 0.86); // iris-literal: rose
+    if (x < 1.0) return mix(s0, s1, f);
+    if (x < 2.0) return mix(s1, s2, f);
+    if (x < 3.0) return mix(s2, s3, f);
+    if (x < 4.0) return mix(s3, s4, f);
+    if (x < 5.0) return mix(s4, s5, f);
+    return mix(s5, s0, f);
+}
 
 void main() {
     vec2 p = u.viewport.xy + qt_TexCoord0 * max(u.viewport.zw, vec2(1.0));
@@ -1050,6 +1073,45 @@ void main() {
         float lightAlpha = coverage * wall * treatment * u.frameLight.y * u.frameLight.z * u.qt_Opacity;
         colour = u.frameInk.rgb * lightAlpha + colour * (1.0 - lightAlpha);
         alpha = lightAlpha + alpha * (1.0 - lightAlpha);
+    }
+    // Holo: the frame's spectral rim, over whatever the band is made of (glass, solid, flat, a texture).
+    if (u.field.y > 0.5 && u.frameHolo.x > 0.001) {
+        float dens = max(0.5, u.frameHolo.w);
+        float band = max(1.0, u.field.z);
+        float into = max(0.0, -frameClusterDistance);
+        float over = max(0.0, frameClusterDistance);
+        // The frame and the bodies welded to it; a floating body (a bubble beside the Island) keeps its own face.
+        float framed = 1.0 - smoothstep(-0.7, 0.7, frameClusterDistance);
+        vec2 q = (frameP - size * 0.5) / size.y;
+        float t = atan(q.x, -q.y) / 6.2831853 + 0.14 * sin(6.2831853 * (frameP.x * 0.6 + frameP.y) / size.y * 1.6);
+        vec3 hue = holoRamp(t);
+        // The CD's slow streaks: some stretches of the rim burn a little more, none goes dark.
+        float streak = 0.80 + 0.20 * sin(6.2831853 * ((frameP.x - frameP.y * 0.8) / size.y) * 1.1 + 1.7);
+        float w = clamp(band * 0.5, 3.0, 14.0);
+        vec3 split = vec3(exp(-pow((into - w * 0.50) / (w * 0.55), 2.0)),
+                          exp(-pow((into - w * 0.25) / (w * 0.50), 2.0)),
+                          exp(-pow((into - w * 0.06) / (w * 0.45), 2.0)));
+        float core = exp(-into * into / (2.2 * dens));
+        // The light lives on the inner line and fades into the band: a soft gradient, never a filled stripe.
+        vec3 inBand = hue * exp(-into / max(2.0, w * 1.4)) * 0.55 + split * mix(hue, vec3(1.0), 0.35) * 0.45;
+        inBand *= streak;
+        // The eclipse's halo over the screen, as far as the person sets it (Halo 0..1 -> 0..44 px at 1x).
+        float reach = max(0.5, u.frameHolo.y * 44.0 * dens);
+        float halo = u.frameHolo.y > 0.001 ? exp(-pow(over / reach, 1.35) * 2.2) * (1.0 - coverage) : 0.0;
+        float strength = u.frameHolo.x * u.qt_Opacity;
+        if (u.frameHolo.z < 0.5) {
+            // Night: light added to the band, a pale line on its edge, the halo over the screen.
+            vec3 add = (inBand * framed + vec3(core) * mix(hue, vec3(1.0), 0.5) * 0.55 * framed
+                       + mix(hue, vec3(1.0), 0.2) * halo * 0.42 * streak) * strength;
+            colour += add;
+            alpha = min(1.0, alpha + max(add.r, max(add.g, add.b)) * (1.0 - alpha));
+        } else {
+            // Day: the CD's back, pastel foil laid over the paper, a deeper line on its edge.
+            float a = clamp((dot(inBand, vec3(0.33)) * 0.6 * framed + core * 0.35 * framed + halo * 0.18 * streak) * strength, 0.0, 0.7);
+            vec3 foil = mix(hue, hue * 0.78, core);
+            colour = foil * a + colour * (1.0 - a);
+            alpha = a + alpha * (1.0 - a);
+        }
     }
     // Under glass the body shows what is behind it: the shadow stays outside, never a grey film inside.
     float room = (1.0 - coverage * (share.y + share.z)) * (1.0 - alpha);

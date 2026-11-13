@@ -46,7 +46,7 @@ Item {
     readonly property bool joinsEdge: root.fromIsland && IrisFrame.notch
     readonly property bool joinsFrame: root.joinsEdge && IrisFrame.framed
     function edgeClear(edge: string): real {
-        let held = IrisFrame.inset(edge)
+        let held = IrisFrame.insetOn(edge, root.outputName)
         if ((Config.options?.iris?.dock?.enable ?? true) && IrisFrame.dockEdge === edge)
             held = Math.max(held, IrisFrame.band + IrisFrame.dockBand + IrisFrame.dockMargin)
         return held - IrisFrame.band + IrisFrame.musicReach(edge) + Math.round(12 * root.d)
@@ -78,7 +78,7 @@ Item {
         }).map(window => window.id)
     }
     function computeCards(): var {
-        return root.workspaces.map(ws => ({ ws: ws, ids: root.readingOrder(ws.id) }))
+        return root.workspaces.map(ws => ({ id: ws.id, ws: ws, ids: root.readingOrder(ws.id) }))
     }
     // The cards are rebuilt when what they hold changes, not when a title does.
     readonly property var freshCards: root.computeCards()
@@ -602,8 +602,10 @@ Item {
                                 GradientStop { position: 1; color: "transparent" }
                             }
                         }
+                        // Keyed by workspace: a focus change updates the cards in place, so their live windows keep
+                        // their compositor sessions instead of all reopening.
                         Repeater {
-                            model: root.cards
+                            model: ScriptModel { values: root.cards; objectProp: "id" }
                             Item {
                                 id: slot
                                 required property var modelData
@@ -834,7 +836,7 @@ Item {
                                 y: Math.round(20 * root.d)
                                 spacing: Math.round(8 * root.d)
                                 Repeater {
-                                    model: root.recentIds.slice(0, shelf.recentCount)
+                                    model: ScriptModel { values: root.recentIds.slice(0, shelf.recentCount) }
                                     IrisOrbitThumb {
                                         id: recent
                                         required property int modelData
@@ -872,7 +874,7 @@ Item {
                                 y: Math.round(20 * root.d)
                                 spacing: Math.round(8 * root.d)
                                 Repeater {
-                                    model: root.stashedIds.slice(0, shelf.asideCount)
+                                    model: ScriptModel { values: root.stashedIds.slice(0, shelf.asideCount) }
                                     IrisOrbitThumb {
                                         id: aside
                                         required property int modelData

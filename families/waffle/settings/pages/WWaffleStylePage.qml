@@ -44,6 +44,8 @@ WSettingsPage {
         icon: "apps"
 
         WSettingsDropdown {
+            // Niri's own switcher is the choice here; under Umbriel Alt+Tab is iNiR's.
+            visible: CompositorService.niriNative
             label: Translation.tr("Alt+Tab opens")
             icon: "keyboard"
             description: NiriKeybinds.altTabSource === "custom"

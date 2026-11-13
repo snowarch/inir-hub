@@ -1,0 +1,15 @@
+{
+    "id": "prism",
+    "kind": "design",
+    "name": "Prism",
+    "summary": "iRiS in Prism's language: near-black, white solids, the hour as a prism",
+    "icon": "flare",
+    "version": "1.0.0",
+    "families": ["iris"],
+    "provides": "modules/prism",
+    "parts": {
+        "islandFace": "island/Face.qml",
+        "insignia": "parts/Insignia.qml",
+        "preview": "parts/Preview.qml"
+    }
+}

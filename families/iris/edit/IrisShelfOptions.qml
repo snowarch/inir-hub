@@ -5,250 +5,159 @@ import Quickshell
 import qs
 import qs.services
 import qs.modules.common
-import qs.modules.common.widgets
-import qs.modules.iris.style
 import qs.modules.iris.components
 import qs.modules.iris.settings
+import qs.modules.iris.prism.core
+import qs.modules.iris.prism.controls
 
-// One area's everyday options on the shelf, two rows of inline tiles that scroll sideways (S4): each says its name and
-// holds its control beside it, a switch, a short choice or a scrubber with its value. The card above shows each change
-// as it lands; the rest of the area is one tap away in Settings.
-Flickable {
-    IrisScrollFeel {}
+// One area's options on the shelf, whole, as the lines of Prism's chart the widget's quick controls draw (his 11-07: the
+// Look page showed three tiles and a "More"): columns of numbered lines that scroll sideways, every row the area has in
+// Settings, refinements too. A group opens a column of its own and names itself under its first line. A folded choice
+// lays its chips across the page, with the way back, since there is no room under a line here. The card above shows
+// each change as it lands.
+Item {
     id: root
 
     required property string section
     // One group of the area when the shelf wants only it (Look = Desktop › Widgets).
     property string group: ""
-    readonly property real d: IrisStyle.density
-    readonly property real gap: Math.round(8 * root.d)
-    readonly property real unit: Math.floor((root.height - root.gap) / 2)
-    readonly property real inner: Math.round(12 * root.d)
 
-    function shape(spec: var): string {
-        if (spec.kind === "switch") return "switch"
-        if (spec.kind === "range" && Number.isFinite(Number(spec.min)) && Number.isFinite(Number(spec.max))) return "range"
-        if (spec.kind === "choice" && !spec.cards) {
-            const choices = IrisOptions.choicesOf(spec)
-            if (choices.length >= 2 && choices.length <= 4 && choices.every(entry => Translation.tr(String(entry.label ?? "")).length <= 11))
-                return "choice"
-        }
-        return ""
-    }
+    readonly property real lineHeight: PrismTheme.dp(46)
+    readonly property int perColumn: Math.max(1, Math.floor(root.height / root.lineHeight))
+    readonly property real columnWidth: PrismTheme.dp(330)
+    readonly property real columnGap: PrismTheme.dp(36)
+    readonly property var drawn: ["switch", "choice", "range", "text", "action"]
     readonly property var specs: {
         Config.revision
         return IrisOptions.settings.filter(spec => spec.section === root.section && (root.group.length === 0 || spec.group === root.group)
-            && !spec.mirror && IrisOptions.shown(spec)
-            && !IrisOptions.fineTune(spec) && root.shape(spec) !== "")
+            && !spec.mirror && spec.shelf !== false && root.drawn.includes(spec.kind) && IrisOptions.shown(spec))
     }
-    // A name two rows share says whose it is: "Island · Light".
-    function nameOf(spec: var): string {
-        const label = Translation.tr(String(spec.label ?? ""))
-        const twins = root.specs.filter(other => Translation.tr(String(other.label ?? "")) === label).length
-        const group = Translation.tr(String(spec.group ?? ""))
-        return twins > 1 && group.length > 0 && group !== label ? group + " · " + label : label
-    }
-    FontMetrics { id: nameMetrics; font.family: IrisStyle.fontMain; font.pixelSize: IrisStyle.typeMeta; font.weight: IrisStyle.weight(Font.DemiBold) }
-    FontMetrics { id: choiceMetrics; font.family: IrisStyle.fontMain; font.pixelSize: IrisStyle.typeMeta; font.weight: IrisStyle.weight(Font.DemiBold) }
-    readonly property real switchWidth: Math.round(40 * root.d)
-    readonly property real scrubWidth: Math.round(120 * root.d)
-    function choiceTrack(spec: var): real {
-        const choices = IrisOptions.choicesOf(spec)
-        const widest = Math.max(...choices.map(entry => choiceMetrics.advanceWidth(Translation.tr(String(entry.label ?? "")))))
-        return Math.ceil(choices.length * (widest + Math.round(26 * root.d)) + 6)
-    }
-    // Each tile as wide as its name and its control, laid in two rows that stay even: the next goes on the shorter one.
-    // The one measure of a tile: its plate draws the control at the width given here, so the two never disagree (a
-    // control measured again on its own, after the face had loaded, covered its name: "Color" under its choices, 11-03).
-    readonly property var placed: {
-        nameMetrics.font; choiceMetrics.font
-        const rows = [0, 0], out = []
-        const lay = (w, item) => {
-            const r = rows[0] <= rows[1] ? 0 : 1
-            out.push(Object.assign({ x: rows[r], y: r * (root.unit + root.gap), w: w }, item))
-            rows[r] += w + root.gap
-        }
+    readonly property bool grouped: new Set(root.specs.map(spec => spec.group)).size > 1
+    // Numbered in reading order, laid down in columns of as many lines as the page holds.
+    readonly property var columns: {
+        const out = []
+        let number = 1
+        let column = null
         for (const spec of root.specs) {
-            const kind = root.shape(spec)
-            const name = root.nameOf(spec)
-            // A few pixels over the measure: the name's own text rounds up and "Outline" read "Outl…".
-            const said = Math.min(Math.round(200 * root.d), Math.ceil(nameMetrics.advanceWidth(name)) + Math.round(6 * root.d))
-            const control = kind === "switch" ? root.switchWidth
-                : kind === "range" ? root.scrubWidth + Math.round(44 * root.d) : root.choiceTrack(spec)
-            lay(Math.ceil(root.inner + said + Math.round(12 * root.d) + control + root.inner * 0.75), { spec: spec, kind: kind, name: name, control: control })
+            const opens = root.grouped && (column === null || column.group !== spec.group)
+            if (column === null || opens || column.specs.length >= root.perColumn) {
+                column = { key: String(spec.path ?? spec.label), group: spec.group, first: number, opens: opens, specs: [] }
+                out.push(column)
+            }
+            column.specs.push(opens && spec.group !== spec.label ? Object.assign({}, spec, { caption: spec.group }) : spec)
+            number++
         }
-        lay(Math.round(118 * root.d), { spec: null, kind: "more", name: "", control: Math.round(18 * root.d) })
         return out
     }
 
-    contentWidth: board.width
-    contentHeight: height
-    flickableDirection: Flickable.HorizontalFlick
-    clip: true
-    WheelHandler {
-        acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
-        onWheel: event => {
-            const delta = Math.abs(event.angleDelta.x) > Math.abs(event.angleDelta.y) ? event.angleDelta.x : event.angleDelta.y
-            root.contentX = Math.max(0, Math.min(root.contentWidth - root.width, root.contentX - delta / 120 * Math.round(180 * root.d)))
-        }
-    }
+    // The folded choice laid open across the page, or none.
+    property var unfolded: null
+    readonly property var unfoldedNow: { Config.revision; return root.unfolded ? IrisOptions.currentValue(root.unfolded) : undefined }
+    onSectionChanged: root.unfolded = null
+    onGroupChanged: root.unfolded = null
 
-    Item {
+    Flickable {
+        IrisScrollFeel {}
         id: board
-        width: Math.max(0, ...root.placed.map(cell => cell.x + cell.w))
-        height: root.height
-        Repeater {
-            model: ScriptModel { values: root.placed; objectProp: "name" }
-            Loader {
-                id: cell
-                required property var modelData
-                x: cell.modelData.x
-                y: cell.modelData.y
-                width: cell.modelData.w
-                height: root.unit
-                sourceComponent: cell.modelData.kind === "switch" ? switchTile : cell.modelData.kind === "range" ? rangeTile
-                    : cell.modelData.kind === "choice" ? choiceTile : moreTile
-                // Bound, not copied: a tile kept across a change of page or language takes its new option with it.
-                onLoaded: {
-                    cell.item.spec = Qt.binding(() => cell.modelData.spec)
-                    cell.item.controlWidth = Qt.binding(() => cell.modelData.control)
-                    if (cell.modelData.kind !== "more") cell.item.name = Qt.binding(() => cell.modelData.name)
+        anchors.fill: parent
+        contentWidth: lanes.width
+        contentHeight: height
+        Behavior on contentX { enabled: !board.moving; NumberAnimation { duration: PrismTheme.ms(260); easing.type: Easing.OutCubic } }
+        flickableDirection: Flickable.HorizontalFlick
+        clip: true
+        opacity: root.unfolded ? 0 : 1
+        visible: opacity > 0
+        Behavior on opacity { NumberAnimation { duration: PrismTheme.ms(160); easing.type: Easing.OutCubic } }
+        WheelHandler {
+            acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
+            onWheel: event => {
+                const delta = Math.abs(event.angleDelta.x) > Math.abs(event.angleDelta.y) ? event.angleDelta.x : event.angleDelta.y
+                board.contentX = Math.max(0, Math.min(board.contentWidth - board.width, board.contentX - delta / 120 * PrismTheme.dp(200)))
+            }
+        }
+
+        Row {
+            id: lanes
+            height: board.height
+            spacing: root.columnGap
+            Repeater {
+                model: ScriptModel { values: root.columns; objectProp: "key" }
+                delegate: Item {
+                    id: lane
+                    required property var modelData
+                    required property int index
+                    width: root.columnWidth
+                    height: lanes.height
+                    // A group's first column: a hairline sets it off from the one before.
+                    Rectangle {
+                        visible: lane.modelData.opens && lane.index > 0
+                        x: -Math.round(root.columnGap / 2)
+                        y: PrismTheme.dp(8)
+                        width: 1
+                        height: lane.height - PrismTheme.dp(16)
+                        color: PrismTheme.line
+                    }
+                    IrisSheetRows {
+                        x: PrismTheme.dp(8)
+                        width: lane.width - PrismTheme.dp(16)
+                        specs: lane.modelData.specs
+                        firstNumber: lane.modelData.first
+                        fold: spec => root.unfolded = spec
+                    }
                 }
             }
         }
     }
 
-    // A tile: its name on the left, its control on the right, one line.
-    component Plate: Rectangle {
-        id: plate
-        property var spec: null
-        property string name: ""
-        property real controlWidth: 0
-        default property alias control: holder.data
-        property bool tappable: false
-        signal tapped()
-        radius: Math.min(IrisStyle.radiusTile, height / 2)
-        readonly property color fill: plateHover.hovered ? IrisStyle.fillActive : IrisStyle.fillQuiet
-        color: plate.fill
-        Behavior on color { ColorAnimation { duration: IrisStyle.duration(110); easing.type: IrisStyle.feedbackEasing } }
-        HoverHandler { id: plateHover }
-        MouseArea {
-            anchors.fill: parent
-            enabled: plate.tappable
-            cursorShape: Qt.PointingHandCursor
-            onClicked: plate.tapped()
-        }
-        IrisText {
-            x: root.inner
-            anchors.verticalCenter: parent.verticalCenter
-            width: plate.width - x - plate.controlWidth - Math.round(12 * root.d) - root.inner * 0.75
-            elide: Text.ElideRight
-            text: plate.name
-            role: IrisText.Name
-            font.pixelSize: IrisStyle.typeMeta
-            font.weight: IrisStyle.weight(Font.DemiBold)
-        }
-        Item {
-            id: holder
-            anchors.right: parent.right
-            anchors.rightMargin: Math.round(root.inner * 0.75)
-            anchors.verticalCenter: parent.verticalCenter
-            width: plate.controlWidth
-            height: plate.height
-        }
+    // More lines past the edge: a round arrow there turns the page.
+    PrismRound {
+        anchors.right: parent.right
+        anchors.verticalCenter: parent.verticalCenter
+        glyph: "chevron_right"
+        smoked: true
+        readonly property bool more: board.contentX < board.contentWidth - board.width - 1
+        opacity: !root.unfolded && more ? 1 : 0
+        visible: opacity > 0
+        Behavior on opacity { NumberAnimation { duration: PrismTheme.ms(160); easing.type: Easing.OutCubic } }
+        Accessible.name: Translation.tr("More")
+        onClicked: board.contentX = Math.min(board.contentWidth - board.width, board.contentX + root.columnWidth + root.columnGap)
     }
 
-    // The rest of the area, in Settings.
-    Component {
-        id: moreTile
-        Plate {
-            property var spec: null
-            name: Translation.tr("More")
-            tappable: true
-            onTapped: GlobalStates.openSettingsAt("iris", root.group.length > 0 ? root.section + "/" + root.group : root.section)
-            MaterialSymbol {
-                anchors.centerIn: parent
-                text: "arrow_outward"
-                iconSize: Math.round(16 * root.d)
-                color: IrisStyle.textSecondary
+    // A folded choice, open: its name and the way back, every option a chip under it.
+    Item {
+        anchors.fill: parent
+        opacity: root.unfolded ? 1 : 0
+        visible: opacity > 0
+        Behavior on opacity { NumberAnimation { duration: PrismTheme.ms(160); easing.type: Easing.OutCubic } }
+        Row {
+            id: unfoldedHead
+            x: PrismTheme.dp(8)
+            y: PrismTheme.dp(6)
+            spacing: PrismTheme.dp(8)
+            PrismRound {
+                anchors.verticalCenter: parent.verticalCenter
+                glyph: "arrow_back"
+                Accessible.name: Translation.tr("Back")
+                onClicked: root.unfolded = null
+            }
+            PrismText {
+                anchors.verticalCenter: parent.verticalCenter
+                text: root.unfolded ? Translation.tr(String(root.unfolded.label ?? "")) : ""
+                color: PrismTheme.ink
+                font.pixelSize: PrismTheme.body
+                font.weight: Font.DemiBold
             }
         }
-    }
-
-    Component {
-        id: switchTile
-        Plate {
-            id: sw
-            readonly property bool lit: { Config.revision; const v = !!IrisOptions.currentValue(sw.spec ?? {}); return sw.spec?.invert ? !v : v }
-            tappable: true
-            onTapped: IrisOptions.commit(sw.spec, sw.spec.invert ? sw.lit : !sw.lit)
-            IrisSwitch {
-                anchors.right: parent.right
-                anchors.verticalCenter: parent.verticalCenter
-                on: sw.lit
-                name: sw.name
-                onToggled: IrisOptions.commit(sw.spec, sw.spec.invert ? sw.lit : !sw.lit)
-            }
-        }
-    }
-
-    Component {
-        id: rangeTile
-        Plate {
-            id: range
-            readonly property real lo: Number(range.spec?.min ?? 0)
-            readonly property real hi: Number(range.spec?.max ?? 1)
-            readonly property real step: Number(range.spec?.step ?? 1)
-            property real dragged: NaN
-            readonly property real value: { Config.revision; return Number.isFinite(range.dragged) ? range.dragged : Number(IrisOptions.currentValue(range.spec ?? {})) }
-            function snap(raw: real): real {
-                const snapped = range.lo + Math.round((raw - range.lo) / range.step) * range.step
-                return Number(Math.max(range.lo, Math.min(range.hi, snapped)).toFixed(4))
-            }
-            IrisSlider {
-                id: slider
-                anchors.left: parent.left
-                anchors.verticalCenter: parent.verticalCenter
-                width: root.scrubWidth
-                height: Math.min(implicitHeight, range.height)
-                value: range.hi > range.lo ? (range.value - range.lo) / (range.hi - range.lo) : 0
-                // A drag is seen live in memory and written once, on release, as Settings does.
-                onMoved: next => {
-                    const v = range.snap(range.lo + next * (range.hi - range.lo))
-                    if (!slider.pressed) { IrisOptions.commit(range.spec, v); return }
-                    range.dragged = v
-                    if (range.spec.path && !range.spec.set) Config.previewNestedValue(range.spec.path, v)
-                }
-                onPressedChanged: if (!slider.pressed && Number.isFinite(range.dragged)) {
-                    const v = range.dragged
-                    range.dragged = NaN
-                    IrisOptions.commit(range.spec, v)
-                }
-            }
-            IrisLabel {
-                anchors.right: parent.right
-                anchors.verticalCenter: parent.verticalCenter
-                width: Math.round(38 * root.d)
-                horizontalAlignment: Text.AlignRight
-                elide: Text.ElideRight
-                text: range.spec ? Translation.tr(IrisOptions.rangeText(range.spec, range.value)) : ""
-            }
-        }
-    }
-    Component {
-        id: choiceTile
-        Plate {
-            id: choice
-            readonly property var options: IrisOptions.choicesOf(choice.spec ?? {})
-            readonly property var now: { Config.revision; return IrisOptions.currentValue(choice.spec ?? {}) }
-            IrisSegmented {
-                anchors.verticalCenter: parent.verticalCenter
-                width: parent.width
-                height: Math.min(implicitHeight, choice.height - Math.round(6 * root.d))
-                accessibleName: Translation.tr(String(choice.spec?.label ?? ""))
-                options: choice.options.map(entry => ({ label: Translation.tr(String(entry.label ?? "")), value: entry.value }))
-                current: choice.now
-                onPicked: value => IrisOptions.commit(choice.spec, value)
+        PrismChips {
+            x: PrismTheme.dp(8)
+            anchors.top: unfoldedHead.bottom
+            anchors.topMargin: PrismTheme.dp(10)
+            width: parent.width - PrismTheme.dp(16)
+            choices: root.unfolded ? IrisOptions.choicesOf(root.unfolded) : []
+            current: root.unfoldedNow
+            onPicked: value => {
+                IrisOptions.commit(root.unfolded, value)
+                root.unfolded = null
             }
         }
     }

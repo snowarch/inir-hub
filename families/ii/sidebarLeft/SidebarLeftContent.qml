@@ -23,6 +23,8 @@ import Qt5Compat.GraphicalEffects as GE
 
 Item {
     id: root
+    // The shape SidebarHost asks Niri to blur under; only a fill that lets it through takes it.
+    readonly property Item blurSurface: sidebarLeftBackground.nativeBlurActive && sidebarLeftBackground.color.a < 0.999 ? sidebarLeftBackground : null
     property int sidebarWidth: Appearance.sizes.sidebarWidth
     property int sidebarPadding: 10
     property int screenWidth: 1920
@@ -376,12 +378,17 @@ Item {
             const _dep3 = Wallpapers.effectiveWallpaperUrl
             return WallpaperListener.wallpaperUrlForScreen(root.panelScreen)
         }
-        readonly property bool useWallpaperBackdrop: root.panelVisible
+        // Compositor blur (Settings › Effects › Panels): Niri blurs what is under this shape through the region
+        // SidebarHost publishes; dialects that draw their own material (islands, Regalia, ZZZ) keep it.
+        readonly property bool nativeBlurActive: root.panelVisible && !gameModeMinimal && !islandStyle
+            && !regaliaEverywhere && !zzzEverywhere
+            && Appearance.useCompositorBlur("panels", Appearance.blurTopology.roundedRectangle)
+        readonly property bool useWallpaperBackdrop: root.panelVisible && !nativeBlurActive
             && (auroraEverywhere || editorialGlassActive)
             && !gameModeMinimal
             && wallpaperUrl.length > 0
         readonly property bool editorialBackdropReady: editorialGlassActive
-            && useWallpaperBackdrop && sidebarLeftBlurredWallpaper.status === Image.Ready
+            && (nativeBlurActive || (useWallpaperBackdrop && sidebarLeftBlurredWallpaper.status === Image.Ready))
 
         ColorQuantizer {
             id: sidebarLeftWallpaperQuantizer
@@ -398,9 +405,14 @@ Item {
         color: (gameModeMinimal || islandStyle) ? "transparent"
              : zzzEverywhere ? Appearance.zzz.chrome
              : regaliaEverywhere ? "transparent"
-             : editorialGlassActive ? (editorialBackdropReady ? "transparent" : Appearance.editorial.paper)
+             : editorialGlassActive ? (!editorialBackdropReady ? Appearance.editorial.paper
+                : nativeBlurActive ? Appearance.editorial.glassPaper : "transparent")
              : inirEverywhere ? (cardStyle ? Appearance.inir.colLayer1 : Appearance.inir.colLayer0)
-             : auroraEverywhere ? ColorUtils.applyAlpha((blendedColors?.colLayer0 ?? Appearance.colors.colLayer0), 1)
+             : auroraEverywhere ? (nativeBlurActive
+                ? ColorUtils.transparentize((blendedColors?.colLayer0 ?? Appearance.colors.colLayer0),
+                    angelEverywhere ? Appearance.angel.compositorPanelTransparentize
+                        : Appearance.aurora.compositorOverlayTransparentize)
+                : ColorUtils.applyAlpha((blendedColors?.colLayer0 ?? Appearance.colors.colLayer0), 1))
              : (cardStyle ? Appearance.colors.colLayer1 : Appearance.colors.colLayer0)
         border.width: (gameModeMinimal || islandStyle || regaliaEverywhere) ? 0 : zzzEverywhere ? 1 : (angelEverywhere ? Appearance.angel.panelBorderWidth : 1)
         border.color: regaliaEverywhere ? "transparent"

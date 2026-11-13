@@ -162,8 +162,32 @@ Loader {
 
         color: "transparent"
         
+        // The taskbar's material: its colour, its wallpaper glass or its compositor blur.
+        readonly property bool nativeBlurActive: Looks.glassActive
+            && Appearance.useCompositorBlur("waffle", Appearance.blurTopology.roundedRectangle)
+        property Region nativeBlurRegion: Region {
+            item: popupWindow.nativeBlurActive ? realContent : null
+            radius: realContent.radius
+        }
+        BackgroundEffect.blurRegion: CompositorService.blurRegions ? nativeBlurRegion : null
+
         WAmbientShadow {
             target: realContent
+        }
+
+        // Its own children are the menu (children: below), so the glass sits beside it, moving with it.
+        GlassBackground {
+            z: 1
+            x: realContent.x
+            y: realContent.y
+            width: realContent.width
+            height: realContent.height
+            opacity: realContent.opacity
+            scale: realContent.scale
+            visible: Looks.glassActive && !popupWindow.nativeBlurActive
+            radius: realContent.radius
+            followWindow: true
+            auroraTransparency: Appearance.aurora.overlayTransparentize
         }
         
         Rectangle {
@@ -181,8 +205,9 @@ Loader {
                 bottomMargin: root.barAtBottom ? popupWindow.sourceEdgeMargin : (root.ambientShadowWidth + root.visualMargin)
                 topMargin: root.barAtBottom ? (root.ambientShadowWidth + root.visualMargin) : popupWindow.sourceEdgeMargin
             }
-            color: Looks.colors.bg1Base
+            color: Looks.glassActive ? "transparent" : Looks.colors.bg0
             radius: Looks.radius.large
+
             border.width: 1
             border.color: Looks.colors.bg2Border
 

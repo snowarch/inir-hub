@@ -292,11 +292,58 @@ Scope {
 
                 // Shaped compositor blur; Niri applies the request only inside the
                 // actual bar content rather than across the whole layer surface.
-                BackgroundEffect.blurRegion: Region {
+                property Region nativeBlurRegion: Region {
                     Region {
                         item: barContent.nativeBlurActive && !barContent.isIslands
                             ? barContent.backgroundItem : emptyMask
                         radius: barContent.backgroundItem.radius
+                    }
+                    // Hug's concave corners: each a square less the circle the screen's corner curves around.
+                    Region {
+                        id: hugBlurLeft
+                        readonly property real r: Appearance.rounding.screenRounding
+                        readonly property bool shown: barContent.nativeBlurActive && barRoot.hugCorners
+                        readonly property bool bottom: Config.options?.material?.bar?.bottom ?? false
+                        readonly property point o: {
+                            void barContent.x; void barContent.y; void barContent.width; void barContent.height
+                            return barContent.mapToItem(null, 0, 0)
+                        }
+                        x: Math.round(o.x)
+                        y: bottom ? Math.round(o.y - r) : Math.round(o.y + barContent.height)
+                        width: shown ? Math.round(r) : 0
+                        height: shown ? Math.round(r) : 0
+                        Region {
+                            shape: RegionShape.Ellipse
+                            intersection: Intersection.Subtract
+                            x: Math.round(hugBlurLeft.o.x)
+                            y: hugBlurLeft.bottom ? Math.round(hugBlurLeft.o.y - hugBlurLeft.r * 2)
+                                : Math.round(hugBlurLeft.o.y + barContent.height)
+                            width: Math.round(hugBlurLeft.r * 2)
+                            height: Math.round(hugBlurLeft.r * 2)
+                        }
+                    }
+                    Region {
+                        id: hugBlurRight
+                        readonly property real r: Appearance.rounding.screenRounding
+                        readonly property bool shown: barContent.nativeBlurActive && barRoot.hugCorners
+                        readonly property bool bottom: Config.options?.material?.bar?.bottom ?? false
+                        readonly property point o: {
+                            void barContent.x; void barContent.y; void barContent.width; void barContent.height
+                            return barContent.mapToItem(null, 0, 0)
+                        }
+                        x: Math.round(o.x + barContent.width - r)
+                        y: bottom ? Math.round(o.y - r) : Math.round(o.y + barContent.height)
+                        width: shown ? Math.round(r) : 0
+                        height: shown ? Math.round(r) : 0
+                        Region {
+                            shape: RegionShape.Ellipse
+                            intersection: Intersection.Subtract
+                            x: Math.round(hugBlurRight.o.x + barContent.width - hugBlurRight.r * 2)
+                            y: hugBlurRight.bottom ? Math.round(hugBlurRight.o.y - hugBlurRight.r * 2)
+                                : Math.round(hugBlurRight.o.y + barContent.height)
+                            width: Math.round(hugBlurRight.r * 2)
+                            height: Math.round(hugBlurRight.r * 2)
+                        }
                     }
                     Region {
                         item: barContent.nativeBlurActive && barContent.isIslands
@@ -324,6 +371,8 @@ Scope {
                         radius: barContent.nativeBlurRightIsland?.radius ?? 0
                     }
                 }
+                // ext-background-effect regions only where the compositor takes them (Niri); Umbriel blurs by layer rules.
+                BackgroundEffect.blurRegion: CompositorService.blurRegions ? nativeBlurRegion : null
 
                 anchors {
                     top: !(Config.options?.material?.bar?.bottom ?? false)
@@ -356,7 +405,6 @@ Scope {
 
                     BarContent {
                         id: barContent
-                        nativeBlurAllowed: !barRoot.hugCorners
 
                         implicitHeight: barRoot.panelSurfaceHeight
                         anchors {
@@ -456,16 +504,19 @@ Scope {
                             readonly property bool isAurora: Appearance.auroraEverywhere
                             readonly property bool isInir: Appearance.inirEverywhere
                             readonly property bool isBottom: Config.options?.material?.bar?.bottom ?? false
-                            readonly property color solidColor: showBarBackground 
-                                ? (isInir ? Appearance.inir.colLayer0 
+                            // Under Niri's blur the corners wear the strip's own translucent fill.
+                            readonly property bool nativeBlur: barContent.nativeBlurActive
+                            opacity: barContent.backgroundItem.opacity
+                            readonly property color solidColor: !showBarBackground ? "transparent"
+                                : nativeBlur ? barContent.backgroundItem.color
+                                : (isInir ? Appearance.inir.colLayer0 
                                     : isAurora ? Appearance.aurora.colPopupSurface
-                                    : Appearance.colors.colLayer0) 
-                                : "transparent"
+                                    : Appearance.colors.colLayer0)
                             
                             // Left corner - solid for Material/Inir, blur for Aurora
                             RoundCorner {
                                 id: leftCorner
-                                visible: !hugDecorators.isAurora
+                                visible: !hugDecorators.isAurora || hugDecorators.nativeBlur
                                 anchors {
                                     top: parent.top
                                     bottom: parent.bottom
@@ -488,7 +539,7 @@ Scope {
                             // Right corner - solid for Material/Inir
                             RoundCorner {
                                 id: rightCorner
-                                visible: !hugDecorators.isAurora
+                                visible: !hugDecorators.isAurora || hugDecorators.nativeBlur
                                 anchors {
                                     right: parent.right
                                     top: !hugDecorators.isBottom ? parent.top : undefined
@@ -509,7 +560,7 @@ Scope {
                             
                             // Aurora blur corners
                             Loader {
-                                active: hugDecorators.isAurora
+                                active: hugDecorators.isAurora && !hugDecorators.nativeBlur
                                 anchors.fill: parent
                                 sourceComponent: Item {
                                     id: auroraCorners

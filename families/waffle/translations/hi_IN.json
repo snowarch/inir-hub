@@ -557,5 +557,8 @@
   "Keyboard & shortcuts": "कीबोर्ड और शॉर्टकट",
   "%1 monitors": "%1 मॉनिटर",
   "niri starts these at login, not iNiR, so they keep running when the shell restarts.": "इन्हें लॉगिन पर niri शुरू करता है, iNiR नहीं, इसलिए shell रीस्टार्ट होने पर भी ये चलते रहते हैं।",
-  "Waffle wears Material's global style and transparency. Off: its own Fluent look.": "Waffle, Material की ग्लोबल शैली और पारदर्शिता अपनाता है। बंद होने पर: उसका अपना Fluent रूप।"
+  "Waffle wears Material's global style and transparency. Off: its own Fluent look.": "Waffle, Material की ग्लोबल शैली और पारदर्शिता अपनाता है। बंद होने पर: उसका अपना Fluent रूप।",
+  "When covered": "ढके जाने पर",
+  "Behind fullscreen": "फ़ुलस्क्रीन के पीछे",
+  "A hidden wallpaper stops decoding and keeps its frame.": "छिपा वॉलपेपर डिकोड होना बंद कर देता है और अपना फ़्रेम रखता है।"
 }

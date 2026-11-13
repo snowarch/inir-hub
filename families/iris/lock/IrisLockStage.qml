@@ -827,7 +827,7 @@ Item {
             readonly property string displayName: SystemInfo.displayName || SystemInfo.username
             readonly property string userName: SystemInfo.username
             readonly property string hint: root.context.unlockInProgress ? Translation.tr("Unlocking…")
-                : root.context.showFailure ? Translation.tr("Incorrect password")
+                : root.context.showFailure ? Voice.wrongPassword(Translation.tr("Incorrect password"))
                 : root.context.fingerprintsConfigured ? Translation.tr("Touch the fingerprint reader or enter your password")
                 : ""
             function toggleKeyboard(): void { root.oskVisible = !root.oskVisible }

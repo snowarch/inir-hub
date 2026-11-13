@@ -10,7 +10,7 @@ import qs.services
 
 Item {
     id: root
-    implicitHeight: card.implicitHeight + Appearance.sizes.elevationMargin
+    implicitHeight: mode !== "none" ? card.implicitHeight + Appearance.sizes.elevationMargin : 0
     visible: mode !== "none"
 
     property bool showTimerIdle: false

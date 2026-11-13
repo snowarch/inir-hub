@@ -20,6 +20,9 @@ Row {
     property string minorFamily: root.family
 
     readonly property var parts: IrisFaceData.clockParts(root.text)
+    // Under Nothing, a large clock is Nothing OS's dot matrix (Settings › Colour › Look › Figures); AM/PM stays a word.
+    readonly property bool matrixed: IrisStyle.nothingDots && root.pixelSize >= IrisStyle.typeDotS && IrisStyle.wearsNothing(root)
+    readonly property string matrixText: root.parts.hours + (root.parts.minutes.length > 0 ? ":" + root.parts.minutes : "")
 
     spacing: 0
     transform: IrisDesign.figureLean !== 0 ? [lean] : []
@@ -63,19 +66,29 @@ Row {
         color: root.color
     }
 
-    Count { id: hoursText; text: root.parts.hours }
+    IrisDotMatrix {
+        id: matrix
+        visible: root.matrixed
+        text: root.matrixed ? root.matrixText : ""
+        pixelSize: Math.round(root.pixelSize * 0.74)
+        color: root.color
+        width: implicitWidth
+        height: implicitHeight
+        anchors.verticalCenter: parent.verticalCenter
+    }
+    Count { id: hoursText; text: root.parts.hours; visible: !root.matrixed }
     Figure {
         text: ":"
-        visible: root.parts.minutes.length > 0
+        visible: root.parts.minutes.length > 0 && !root.matrixed
         color: root.separatorColor
         anchors.baseline: hoursText.baseline
         anchors.baselineOffset: -Math.round(root.pixelSize * 0.06)
         leftPadding: Math.round(root.pixelSize * 0.03)
         rightPadding: Math.round(root.pixelSize * 0.03)
     }
-    Count { text: root.parts.minutes; anchors.baseline: hoursText.baseline }
+    Count { text: root.parts.minutes; anchors.baseline: hoursText.baseline; visible: !root.matrixed }
     Item {
-        visible: root.parts.seconds.length > 0
+        visible: root.parts.seconds.length > 0 && !root.matrixed
         implicitWidth: Math.ceil(secondsText.implicitWidth + root.pixelSize * 0.12)
         implicitHeight: secondsText.implicitHeight
         baselineOffset: secondsText.baselineOffset
@@ -90,11 +103,19 @@ Row {
             color: IrisStyle.secondaryOf(root.color)
         }
     }
+    // The period sits on the figures' baseline, or on the dot matrix's foot; one per case, since switching one item's
+    // anchor between baseline and bottom set both for a moment.
     Minor {
-        visible: root.parts.period.length > 0
+        visible: root.parts.period.length > 0 && !root.matrixed
         text: root.parts.period
         leftPadding: Math.round(root.pixelSize * 0.16)
         anchors.baseline: hoursText.baseline
+    }
+    Minor {
+        visible: root.parts.period.length > 0 && root.matrixed
+        text: root.parts.period
+        leftPadding: Math.round(root.pixelSize * 0.16)
+        anchors.bottom: matrix.bottom
     }
 
     Accessible.role: Accessible.StaticText

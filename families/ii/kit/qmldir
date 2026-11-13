@@ -39,6 +39,7 @@ SettingsTaskLoadingState 1.0 SettingsTaskLoadingState.qml
 SettingsTaskNavigator 1.0 SettingsTaskNavigator.qml
 ShellEditResizeHandle 1.0 ShellEditResizeHandle.qml
 singleton SidebarGeometry 1.0 SidebarGeometry.qml
+singleton SidebarStyle 1.0 SidebarStyle.qml
 singleton StylePresets 1.0 StylePresets.qml
 StyledComboBox 1.0 StyledComboBox.qml
 StyledRadioButton 1.0 StyledRadioButton.qml

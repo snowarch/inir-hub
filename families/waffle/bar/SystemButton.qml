@@ -11,11 +11,11 @@ import qs.modules.waffle.state
 BarButton {
     id: root
 
-    // Screen share detection: niri in any link
+    // Screen share detection: the compositor's cast node in any link
     readonly property bool screenShareActive: (Pipewire.links?.values ?? []).some(link => {
         const src = link?.source?.name ?? "";
         const tgt = link?.target?.name ?? "";
-        return src === "niri" || tgt === "niri";
+        return src === "niri" || tgt === "niri" || src === "umbriel" || tgt === "umbriel";
     })
 
     checked: WaffleState.actionCenterOpen

@@ -84,7 +84,7 @@ Item {
 
     function removePlugin(id: string): void {
         root.pluginRemoved(id)
-        removeProcess.command = ["/usr/bin/rm", "-rf",
+        removeProcess.command = ["rm", "-rf",
             FileUtils.trimFileProtocol(`${Directories.config}/illogical-impulse/plugins/${id}`)]
         removeProcess.running = true
     }

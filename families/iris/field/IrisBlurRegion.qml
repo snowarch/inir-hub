@@ -131,12 +131,12 @@ Region {
         if (root.window?.visible && quickWindow) quickWindow.update()
     }
     function apply(): void {
-        if (!root.window) return
+        if (!root.window || !CompositorService.blurRegions) return
         root.window.BackgroundEffect.blurRegion = root.empty || !root.window.visible ? null : root.target
         root.commitFrame()
     }
     function kick(): void {
-        if (!root.window || root.empty || !root.window.visible) return root.apply()
+        if (!root.window || root.empty || !root.window.visible || !CompositorService.blurRegions) return root.apply()
         root.window.BackgroundEffect.blurRegion = null
         root.window.BackgroundEffect.blurRegion = root.target
         root.commitFrame()
@@ -152,7 +152,7 @@ Region {
         if (root.nativeRaster) root.nativeRegion = Qt.createComponent("IrisFieldRegion.qml").createObject(root, { owner: root })
         root.apply()
     }
-    Component.onDestruction: if (root.window) root.window.BackgroundEffect.blurRegion = null
+    Component.onDestruction: if (root.window && CompositorService.blurRegions) root.window.BackgroundEffect.blurRegion = null
 
     // The field's own distances (IrisField.frag), so a join is measured on the shape it draws.
     function boxDistance(s: var, x: real, y: real): real {

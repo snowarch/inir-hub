@@ -59,7 +59,7 @@ Item {
             accent: column.clockAccent
             showDay: column.clockStyle === "dateTime"
         }
-        PrivacyMarks { anchors.horizontalCenter: parent.horizontalCenter; spelled: false }
+        PrivacyMarks { anchors.horizontalCenter: parent.horizontalCenter; spelled: false; quietToo: true }
     }
 
     Stack {
@@ -106,7 +106,7 @@ Item {
             text: column.island.clockText(RecorderStatus.elapsedSeconds)
             color: column.island.nothingLook ? IrisStyle.text : IrisStyle.danger
         }
-        PrivacyMarks { anchors.horizontalCenter: parent.horizontalCenter; spelled: false }
+        PrivacyMarks { anchors.horizontalCenter: parent.horizontalCenter; spelled: false; quietToo: true }
     }
 
     Stack {
@@ -123,7 +123,7 @@ Item {
             countDown: column.island.timerKind !== "stopwatch"
             color: column.island.timerPaused ? IrisStyle.subtext : column.island.nothingLook ? IrisStyle.text : IrisStyle.secondaryAccent
         }
-        PrivacyMarks { anchors.horizontalCenter: parent.horizontalCenter; spelled: false }
+        PrivacyMarks { anchors.horizontalCenter: parent.horizontalCenter; spelled: false; quietToo: true }
     }
 
     Stack {
@@ -150,7 +150,7 @@ Item {
                 : column.island.elapsedOf(column.island.task)
             color: column.island.nothingLook ? IrisStyle.text : column.island.taskTint
         }
-        PrivacyMarks { anchors.horizontalCenter: parent.horizontalCenter; spelled: false }
+        PrivacyMarks { anchors.horizontalCenter: parent.horizontalCenter; spelled: false; quietToo: true }
     }
 
     Stack {

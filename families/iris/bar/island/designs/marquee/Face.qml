@@ -9,7 +9,8 @@ import qs.modules.iris.components
 import qs.modules.iris.widgets
 
 // Marquee · Bulletin: beside the time, one fact of your day at a time: the next event, the weather, the sun, the date. A
-// new one rolls in when the minute turns; nothing moves between, and the width holds so the Island stays still.
+// new one rolls in when the minute turns; nothing moves between, and the width holds so the Island stays still. Which
+// facts it says are the person's (iris.bar.faces.marquee); the date always stays, so it never runs out.
 Item {
     id: root
     property var island: null
@@ -23,8 +24,9 @@ Item {
     readonly property string face: root.island?.nothingLook ? IrisStyle.fontDot : IrisStyle.figureFace(root.figure)
     readonly property real contentWidth: row.implicitWidth
 
-    readonly property var entry: IrisFaceData.nextEntry(root.minute * 60000, 180)
-    readonly property bool weatherReady: Weather.enabled && !String(Weather.data?.temp ?? "--").startsWith("--")
+    readonly property var options: Config.options?.iris?.bar?.faces?.marquee ?? ({})
+    readonly property var entry: root.options.events !== false ? IrisFaceData.nextEntry(root.minute * 60000, 180) : ({ title: "", when: "" })
+    readonly property bool weatherReady: root.options.weather !== false && Weather.enabled && !String(Weather.data?.temp ?? "--").startsWith("--")
     readonly property var facts: {
         const now = new Date(root.minute * 60000)
         const night = Weather.isNightNow()
@@ -34,7 +36,7 @@ Item {
             list.push({ glyph: Icons.getWeatherIcon(Weather.data?.wCode, night) ?? "cloud",
                 text: (String(Weather.data?.temp ?? "").match(/-?\d+(?:[.,]\d+)?/) ?? [""])[0] + "°", note: String(Weather.data?.description ?? "") })
         const sun = IrisFaceData.dayShare(night ? Weather.data?.sunrise : Weather.data?.sunset)
-        if (sun >= 0) {
+        if (sun >= 0 && root.options.sun !== false) {
             const at = new Date(now)
             at.setHours(0, Math.round(sun * 1440), 0, 0)
             list.push({ glyph: "wb_twilight", text: night ? Translation.tr("Sunrise") : Translation.tr("Sunset"), note: IrisFaceData.clockText(at) })

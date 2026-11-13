@@ -1,0 +1,312 @@
+name: Merge
+
+# Acceptance once Check passes, so what people send never waits on a person to click merge. This never runs the pull
+# request's code: it reads its files as data.
+#   - A colour theme or an iRiS theme: data, nothing in it runs. Merges on Check alone.
+#   - An update by one of the item's authors that asks for no new permission or host: merges on Check alone.
+#   - Anything else in one item (new code, someone else's change, more permissions, a web app's address): the
+#     reviewer reads it (Gemini, free tier, one request with no tools: .github/review.md and the hub's rules as its
+#     instructions, the item as data). Nothing to fix: it merges. Else one comment lists each fix; the author pushes
+#     again and Check and the reviewer run again.
+#   - The families, the tools, schema/, templates/, .github/, several items at once: a maintainer merges it.
+#   - A maintainer's `/review` comment runs all of this again now, on the pull request's last push (Check must have
+#     passed on it): for when the reviewer could not answer, without waiting for the author to push.
+# Secrets: GEMINI_API_KEY and GEMINI_API_KEY_2, a spare (aistudio.google.com, free, no card). Without them, what the
+# reviewer would read waits for a maintainer.
+on:
+  workflow_run:
+    workflows: [Check]
+    types: [completed]
+  issue_comment:
+    types: [created]
+
+permissions: {}
+
+concurrency:
+  # a comment gets a group of its own: any other comment on the pull request would cancel a review under way
+  group: merge-${{ github.event.comment.id || format('{0}-{1}', github.event.workflow_run.head_repository.full_name, github.event.workflow_run.head_branch) }}
+  cancel-in-progress: true
+
+jobs:
+  decide:
+    if: >-
+      (github.event_name == 'workflow_run' && github.event.workflow_run.event == 'pull_request' &&
+       github.event.workflow_run.conclusion == 'success') ||
+      (github.event_name == 'issue_comment' && github.event.issue.pull_request && startsWith(github.event.comment.body, '/review') &&
+       contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR"]'), github.event.comment.author_association))
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
+    outputs:
+      pr: ${{ steps.decide.outputs.pr }}
+      sha: ${{ steps.decide.outputs.sha }}
+      repo: ${{ steps.decide.outputs.repo }}
+      item: ${{ steps.decide.outputs.item }}
+      next: ${{ steps.decide.outputs.next }}
+      why: ${{ steps.decide.outputs.why }}
+    steps:
+      - name: What this pull request is
+        id: decide
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          EVENT: ${{ github.event_name }}
+          SHA: ${{ github.event.workflow_run.head_sha }}
+          BRANCH: ${{ github.event.workflow_run.head_branch }}
+          OWNER: ${{ github.event.workflow_run.head_repository.owner.login }}
+          HEAD_REPO: ${{ github.event.workflow_run.head_repository.full_name }}
+          COMMENTED: ${{ github.event.issue.number }}
+          COMMENT: ${{ github.event.comment.id }}
+        run: |
+          # One comment per pull request, edited when it changes: a new one on every push pinged the author each time
+          say() {
+            body="<!-- merge -->
+          $1"
+            id=$(gh api --paginate "repos/$REPO/issues/$pr/comments" --jq '.[] | select(.user.login == "github-actions[bot]"
+              and ((.body | startswith("<!-- merge -->")) or (.body | startswith("Check passed.")))) | .id' | tail -n 1)
+            if [ -z "$id" ]; then gh pr comment "$pr" --repo "$REPO" --body "$body"
+            elif [ "$(gh api "repos/$REPO/issues/comments/$id" --jq .body)" != "$body" ]; then
+              gh api -X PATCH "repos/$REPO/issues/comments/$id" -f body="$body" >/dev/null; fi
+          }
+          hold() { echo "#$pr: $1"; say "Check passed. $1, so a maintainer merges it."; exit 0; }
+          if [ "$EVENT" = issue_comment ]; then
+            pr=$COMMENTED
+            # the eyes on the comment say the reviewer took it
+            gh api -X POST "repos/$REPO/issues/comments/$COMMENT/reactions" -f content=eyes >/dev/null || true
+            read -r SHA HEAD_REPO state < <(gh api "repos/$REPO/pulls/$pr" --jq '"\(.head.sha) \(.head.repo.full_name) \(.state)"')
+            [ "$state" = open ] || { echo "#$pr is $state"; exit 0; }
+            check=$(gh api "repos/$REPO/actions/runs?head_sha=$SHA&event=pull_request" \
+              --jq '[.workflow_runs[] | select(.name == "Check")][0].conclusion // "running"')
+            [ "$check" = success ] || { echo "#$pr: Check is $check at $SHA"
+              say "Check has not passed on the last push yet; the reviewer reads it as soon as it does."; exit 0; }
+          else
+            pr=$(gh api "repos/$REPO/pulls?state=open&head=$OWNER:$BRANCH" --jq ".[] | select(.head.sha == \"$SHA\") | .number" | head -1)
+            [ -n "$pr" ] || { echo "no open pull request at $SHA"; exit 0; }
+          fi
+          { echo "pr=$pr"; echo "sha=$SHA"; echo "repo=$HEAD_REPO"; } >> "$GITHUB_OUTPUT"
+          author=$(gh api "repos/$REPO/pulls/$pr" --jq '.user.login' | tr 'A-Z' 'a-z')
+          files=$(gh api --paginate "repos/$REPO/pulls/$pr/files" --jq '.[].filename')
+          items=$(echo "$files" | grep -v '^docs/' | cut -d/ -f1-2 | sort -u)
+          [ "$(echo "$items" | wc -l)" = 1 ] || hold "It changes more than one item ($(echo "$items" | tr '\n' ' '))"
+          echo "$items" | grep -Eq '^(themes|iris-themes|webapps|widgets|components|designs)/[a-z0-9-]+$' ||
+            hold "It changes $items, which only maintainers change"
+          kind=${items%%/*} id=${items#*/}
+          [ -z "$(echo "$files" | grep '^docs/' | grep -v "^docs/$id/" || true)" ] || hold "It touches another item's docs"
+          echo "item=$items" >> "$GITHUB_OUTPUT"
+          case "$kind" in themes|iris-themes) echo "next=merge" >> "$GITHUB_OUTPUT"; exit 0 ;; esac
+          # empty when the file is not there: gh prints the 404's JSON on stdout, which read as a hub.json without authors
+          raw() { local out; out=$(gh api -H "Accept: application/vnd.github.raw" "repos/$REPO/contents/$items/hub.json?ref=$1" 2>/dev/null) && printf '%s' "$out"; return 0; }
+          was=$(raw main) now=$(raw "$SHA")
+          if [ -z "$was" ]; then why="$items is new"
+          elif ! echo "$was" | jq -e --arg a "$author" '[.authors[]? | ascii_downcase] | index($a)' >/dev/null; then
+            [ "$(echo "$was" | jq -c '.authors')" = "$(echo "$now" | jq -c '.authors')" ] || hold "It changes who the authors of $items are"
+            why="@$author is not among the authors of $items"
+          else
+            grown=$(jq -rn --argjson was "$was" --argjson now "$now" --arg kind "$kind" \
+              '[(($now.permissions // []) - ($was.permissions // []))[], (($now.hosts // []) - ($was.hosts // []))[],
+                (if $kind == "webapps" and $now.url != $was.url then "its address" else empty end)] | join(", ")')
+            # people already trust its authors with it: the same reach merges on Check
+            [ -n "$grown" ] || { echo "next=merge" >> "$GITHUB_OUTPUT"; exit 0; }
+            why="It asks for more than $items had ($grown)"
+          fi
+          echo "why=$why" >> "$GITHUB_OUTPUT"
+          echo "next=review" >> "$GITHUB_OUTPUT"
+
+  review:
+    needs: decide
+    if: needs.decide.outputs.next == 'review'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      result: ${{ steps.read.outputs.result }}
+      state: ${{ steps.read.outputs.state }}
+    steps:
+      # This repository's main: the reviewer's instructions and the hub's rules (trusted).
+      - uses: actions/checkout@v7
+        with:
+          path: review/hub
+          persist-credentials: false
+          sparse-checkout: |
+            .github
+            .claude/rules
+      # The pull request's item, read as data: nothing from it is run (cat, find, base64 and jq only; no hooks, LFS,
+      # submodules or credentials), so checkout's refusal of a fork's code here does not apply.
+      - uses: actions/checkout@v7
+        with:
+          repository: ${{ needs.decide.outputs.repo }}
+          ref: ${{ needs.decide.outputs.sha }}
+          path: review/pr
+          persist-credentials: false
+          allow-unsafe-pr-checkout: true
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /${{ needs.decide.outputs.item }}/
+            /docs/
+      - name: Review
+        id: read
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_API_KEY_2: ${{ secrets.GEMINI_API_KEY_2 }}
+          REPO: ${{ github.repository }}
+          PR: ${{ needs.decide.outputs.pr }}
+          ITEM: ${{ needs.decide.outputs.item }}
+        working-directory: review
+        run: |
+          if [ -z "$GEMINI_API_KEY$GEMINI_API_KEY_2" ]; then echo "state=nokey" >> "$GITHUB_OUTPUT"; echo "no GEMINI_API_KEY"; exit 0; fi
+          kind=${ITEM%%/*} id=${ITEM#*/}
+          # instructions: review.md and the hub's rules for this kind, from main
+          {
+            cat hub/.github/review.md
+            for f in AGENTS.md CONTRIBUTING.md .claude/rules/hub-items.md .claude/rules/hub-qml.md \
+                     ".claude/rules/hub-$kind.md" .claude/rules/hub-scripts.md; do
+              [ -f "hub/$f" ] || continue
+              printf '\n\n===== %s (the hub rules) =====\n' "$f"; cat "hub/$f"
+            done
+          } > system.txt
+          # data: the pull request as its author wrote it, the diff, every text file of the item with line numbers
+          {
+            echo "===== Pull request #$PR ====="
+            gh api "repos/$REPO/pulls/$PR" --jq '"Author: \(.user.login)\nTitle: \(.title)\nDescription:\n\(.body // "")"'
+            echo "Item: $ITEM"
+            echo "Authors on main: $(gh api -H "Accept: application/vnd.github.raw" "repos/$REPO/contents/$ITEM/hub.json?ref=main" 2>/dev/null | jq -c '.authors // []' 2>/dev/null || echo 'none, a new item')"
+            echo "Files changed:"
+            gh api --paginate "repos/$REPO/pulls/$PR/files" --jq '.[] | "- \(.status) \(.filename) (+\(.additions) -\(.deletions))"'
+            echo; echo "===== Diff ====="
+            gh pr diff "$PR" --repo "$REPO" | head -c 400000
+            find "pr/$ITEM" "pr/docs/$id" -type f 2>/dev/null | sort | while read -r f; do
+              grep -Iq . "$f" || continue
+              printf '\n===== %s =====\n' "${f#pr/}"; cat -n "$f" | head -c 200000
+            done
+          } > input.txt
+          jq -n --rawfile t input.txt '[{type: "text", text: $t}]' > parts.json
+          find "pr/$ITEM" "pr/docs/$id" -type f \( -name '*.png' -o -name '*.jpg' -o -name '*.jpeg' -o -name '*.webp' \) \
+              -size -3M 2>/dev/null | sort | head -n 4 | while read -r f; do
+            case "$f" in *.png) m=image/png ;; *.webp) m=image/webp ;; *) m=image/jpeg ;; esac
+            base64 -w0 "$f" > img.b64
+            jq --arg p "${f#pr/}" --arg m "$m" --rawfile d img.b64 \
+              '. + [{type: "text", text: ("Image " + $p)}, {type: "image", mime_type: $m, data: $d}]' parts.json > parts.next
+            mv parts.next parts.json
+          done
+          jq -n --rawfile s system.txt --slurpfile p parts.json --slurpfile schema hub/.github/review.schema.json '{
+            model: "gemini-3.8-flash", store: false, system_instruction: $s, input: $p[0],
+            generation_config: {thinking_level: "high"},
+            response_format: {type: "text", mime_type: "application/json", schema: $schema[0]}}' > request.json
+          rm -f img.b64 parts.json
+          # The free tier answers 503 when a model is busy (the newest flash models for hours at a time) and 429 past a
+          # key's quota: each model with each key, newest first, rounds a minute apart for up to 13 minutes, so the
+          # job ends inside its timeout and the comment says what happened.
+          result="" round=0
+          while [ -z "$result" ] && [ "$SECONDS" -lt 780 ]; do
+            round=$((round + 1))
+            for model in gemini-3.8-flash gemini-3.6-flash gemini-3.5-flash gemini-3-flash-preview; do
+              for key in "$GEMINI_API_KEY" "$GEMINI_API_KEY_2"; do
+                [ -n "$key" ] || continue
+                [ "$SECONDS" -lt 780 ] || break 2
+                jq --arg m "$model" '.model = $m' request.json > request.try
+                code=$(curl -sS --max-time 240 -o out.json -w '%{http_code}' \
+                  -X POST https://generativelanguage.googleapis.com/v1beta/interactions \
+                  -H "x-goog-api-key: $key" -H 'Content-Type: application/json' -H 'Api-Revision: 2026-05-20' \
+                  --data-binary @request.try || true)
+                echo "round $round, $model: HTTP $code"
+                result=$(jq -c '[.steps[]? | select(.type == "model_output") | .content[]? | select(.type == "text") | .text]
+                  | last | fromjson | select(.verdict == "ready" or .verdict == "needs-changes" or .verdict == "reject")' \
+                  out.json 2>/dev/null || true)
+                [ -z "$result" ] || break 2
+              done
+            done
+            [ -n "$result" ] || [ "$SECONDS" -ge 780 ] || sleep 60
+          done
+          if [ -z "$result" ]; then
+            echo "state=failed" >> "$GITHUB_OUTPUT"
+            echo "HTTP $code: $(jq -c '.error // .status // empty' out.json 2>/dev/null | head -c 400)"
+            exit 0
+          fi
+          echo "state=done" >> "$GITHUB_OUTPUT"
+          echo "$result" | jq -r '"verdict: \(.verdict)\n\(.summary)"'
+          { echo "result<<RESULT_END"; echo "$result"; echo "RESULT_END"; } >> "$GITHUB_OUTPUT"
+
+  land:
+    needs: [decide, review]
+    # also when the review job failed: the comment then says the reviewer could not read it, never silence
+    if: ${{ !cancelled() && needs.decide.result == 'success' && (needs.decide.outputs.next == 'merge' || needs.decide.outputs.next == 'review') }}
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Merge, or say what to fix
+        id: land
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          SHA: ${{ needs.decide.outputs.sha }}
+          PR: ${{ needs.decide.outputs.pr }}
+          ITEM: ${{ needs.decide.outputs.item }}
+          NEXT: ${{ needs.decide.outputs.next }}
+          WHY: ${{ needs.decide.outputs.why }}
+          STATE: ${{ needs.review.outputs.state }}
+          RESULT: ${{ needs.review.outputs.result }}
+        run: |
+          say() {
+            body="<!-- merge -->
+          $1"
+            id=$(gh api --paginate "repos/$REPO/issues/$PR/comments" --jq '.[] | select(.user.login == "github-actions[bot]"
+              and ((.body | startswith("<!-- merge -->")) or (.body | startswith("Check passed.")))) | .id' | tail -n 1)
+            if [ -z "$id" ]; then gh pr comment "$PR" --repo "$REPO" --body "$body"
+            elif [ "$(gh api "repos/$REPO/issues/comments/$id" --jq .body)" != "$body" ]; then
+              gh api -X PATCH "repos/$REPO/issues/comments/$id" -f body="$body" >/dev/null; fi
+          }
+          lines() { jq -r --arg s "$1" '[.findings[]? | select(.severity == $s)] | map("- " +
+            (if .file != "" then "`" + (.file | sub("^pr/"; "")) + (if .line > 0 then ":\(.line)" else "" end) + "` " else "" end)
+            + .detail) | join("\n")' <<<"$RESULT"; }
+          if [ "$NEXT" = review ]; then
+            case "$STATE" in
+              nokey) say "Check passed. $WHY, so a maintainer merges it."; exit 0 ;;
+              done) ;;
+              *) say "Check passed. $WHY, and the reviewer could not read it this time: a maintainer asks it again with a \`/review\` comment."; exit 0 ;;
+            esac
+            verdict=$(jq -r '.verdict' <<<"$RESULT")
+            summary=$(jq -r '.summary' <<<"$RESULT")
+            if [ "$verdict" != ready ]; then
+              fix=$(lines blocker; lines issue)
+              if [ "$verdict" = reject ]; then tail="It can't merge as it is; a maintainer reads it."
+              else tail="Push the fixes on this branch: Check and the reviewer run again, and it merges when nothing is left."; fi
+              say "Check passed. The reviewer read $ITEM: $summary
+
+          $(printf '%s\n' "$fix" | sed '/^$/d')
+
+          $tail"
+              exit 0
+            fi
+          fi
+          gh pr merge "$PR" --repo "$REPO" --squash --match-head-commit "$SHA"
+          echo "merged=true" >> "$GITHUB_OUTPUT"
+          if [ "$NEXT" = review ]; then
+            notes=$(lines note)
+            say "Merged: $summary
+
+          What it does on a desktop: $(jq -r '.footprint' <<<"$RESULT")${notes:+
+
+          For a later version:
+          $notes}"
+          fi
+      - name: Ask inir.space to deploy
+        # A merge made by this workflow's token starts no other workflow, so Publish would not run.
+        if: steps.land.outputs.merged == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.SITE_DISPATCH_TOKEN }}
+        run: |
+          [ -z "$GH_TOKEN" ] || gh api repos/snowarch/inir-site/dispatches -f event_type=hub-updated
+      - name: Upload its package
+        # Nor would Packages, so the item's downloads would count only from the next push; a dispatch still starts it.
+        if: steps.land.outputs.merged == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run packages.yml --repo "${{ github.repository }}" --ref main

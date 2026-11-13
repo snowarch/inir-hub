@@ -12,7 +12,6 @@
 			]
 		}
 	],
-	"preview": {"steps": [["ipc", "sidebarRight", "open"]]},
 	"shots": {
 		"material-bar": {
 			"family": "ii",

@@ -1,0 +1,24 @@
+module qs.modules.iris.widgets.prism
+PrismFolder 1.0 PrismFolder.qml
+PrismWeek 1.0 PrismWeek.qml
+PrismClock 1.0 PrismClock.qml
+PrismDate 1.0 PrismDate.qml
+PrismDay 1.0 PrismDay.qml
+PrismUptime 1.0 PrismUptime.qml
+PrismWorldClock 1.0 PrismWorldClock.qml
+PrismScreenTime 1.0 PrismScreenTime.qml
+PrismVitals 1.0 PrismVitals.qml
+PrismWeather 1.0 PrismWeather.qml
+PrismControls 1.0 PrismControls.qml
+PrismTimer 1.0 PrismTimer.qml
+PrismAgenda 1.0 PrismAgenda.qml
+PrismBattery 1.0 PrismBattery.qml
+PrismCalendar 1.0 PrismCalendar.qml
+PrismNews 1.0 PrismNews.qml
+PrismNotes 1.0 PrismNotes.qml
+PrismProfile 1.0 PrismProfile.qml
+PrismPalette 1.0 PrismPalette.qml
+PrismLyrics 1.0 PrismLyrics.qml
+PrismTodo 1.0 PrismTodo.qml
+PrismPhoto 1.0 PrismPhoto.qml
+PrismEventLine 1.0 PrismEventLine.qml

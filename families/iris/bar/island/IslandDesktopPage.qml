@@ -1,7 +1,6 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
-import QtQuick.Dialogs
 import QtQuick.Effects
 import QtQuick.Layouts
 import QtQuick.Shapes
@@ -207,6 +206,7 @@ ColumnLayout {
     readonly property real bannerBlur: page.bannerPart("desktopBannerBlur", 0)
     function blockAvailable(kind: string): bool {
         if (kind === "context") return page.focusedWindow !== null || page.workspaces.length > 1
+        if (kind === "workspaces") return page.workspaces.length > 0
         if (kind === "modules") return page.customModules.length > 0
         if (kind === "forecast") return page.weatherReady && page.hours.length > 1
         if (kind === "agenda") return page.nextEvent !== null || page.pendingTasks > 0
@@ -235,6 +235,7 @@ ColumnLayout {
             readonly property real topBleed: page.island.padding + page.island.chassisItem.topInset + heroBleed.navBand
             // Always layered: toggling layers inside the chassis stops it painting.
             layer.enabled: true
+            layer.smooth: true
             layer.effect: MultiEffect {
                 maskEnabled: true
                 maskSource: heroFade
@@ -255,6 +256,7 @@ ColumnLayout {
                 anchors.fill: parent
                 // Always layered, like heroBleed: toggling layers inside the chassis stops it painting.
                 layer.enabled: true
+                layer.smooth: true
                 layer.effect: MultiEffect {
                     maskEnabled: sideJoin.active
                     maskSource: sideJoin
@@ -626,7 +628,8 @@ ColumnLayout {
                 }
             }
             Row {
-                visible: page.workspaces.length > 1
+                // The Workspaces block says them already when it shows.
+                visible: page.workspaces.length > 1 && page.rowOf("workspaces") < 0
                 spacing: 2 * IrisStyle.density
                 Repeater {
                     model: page.workspaces
@@ -837,6 +840,22 @@ ColumnLayout {
     }
 
     DesktopBlock {
+        kind: "workspaces"
+        row: page.rowOf("workspaces")
+        gap: page.spacing
+        contentHeight: workspacesStrip.implicitHeight
+        IslandWorkspaces {
+            id: workspacesStrip
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.rightMargin: page.island.studio ? page.island.studioHandlesWidth : 0
+            enabled: !page.island.studio
+            workspaces: page.workspaces
+            plateRadius: page.plateRadius
+        }
+    }
+
+    DesktopBlock {
         kind: "vitals"
         row: page.rowOf("vitals")
         gap: page.spacing
@@ -948,6 +967,7 @@ ColumnLayout {
                     widgetId: modelData.slice("custom:".length)
                     targetScreen: page.island.targetScreen
                     slot: "island.desktop"
+                    availableWidth: modulesBlock.width
                 }
             }
         }

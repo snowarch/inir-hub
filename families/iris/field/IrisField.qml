@@ -17,6 +17,10 @@ Item {
     property color sheen: IrisStyle.glassEdgeColour
     property real smoothing: IrisStyle.fuse
     property bool framed: IrisFrame.framed
+    // Drawn under a transform (the edit card, the arrival): the cached field is sampled smoothly, and at `renderScale`
+    // it is rendered at the size it is shown, so the card's resting picture lands texel on pixel instead of stepping.
+    property real renderScale: 1
+    property bool resampled: false
     property real band: IrisFrame.band
     property real cornerRadius: IrisFrame.cornerRadius
     readonly property int capacity: 20
@@ -41,6 +45,9 @@ Item {
     property color frameMusicInk: IrisFrame.musicInk
     property real frameMusicLight: IrisFrame.musicLight
     property real frameMusicLightWidth: IrisFrame.musicLightWidth
+    property real holoLight: IrisFrame.holoLight
+    property real holoHalo: IrisFrame.holoHalo
+    property real holoSpill: IrisFrame.holoSpill
     // One matter (2026-10-15, the maintainer: the Dock on the frame "se ve separado del frame" once it is glass): a
     // body welded to the frame, directly or through the bodies it hangs from, is the frame's material wherever it is
     // joined; its own material is for when it floats. A glass body on a solid band read as two things fitted together.
@@ -59,7 +66,7 @@ Item {
     function ownGlass(shape: var): int {
         const g = shape.glass
         if (g === undefined || g === null || g === "inherit") return root.glassCode
-        if (g === "compositor") return Appearance.compositorBlurActive && root.compositorAllowed ? 2 : 1
+        if (g === "compositor") return IrisCompositorBlur.active && root.compositorAllowed ? 2 : 1
         if (g === "wallpaper" || g === true) return 1
         return 0
     }
@@ -106,7 +113,7 @@ Item {
     readonly property vector4d quietRect: {
         if (!root.framed) return Qt.vector4d(0, 0, 0, 0)
         const wave = Math.max(root.edgeWave.x, root.edgeWave.y, root.edgeWave.z, root.edgeWave.w, 0)
-        const edge = root.band + wave + root.frameMusicLightWidth + root.reach + 16
+        const edge = root.band + wave + root.frameMusicLightWidth + root.holoSpill + root.reach + 16
         let left = edge, top = edge, right = root.width - edge, bottom = root.height - edge
         const margin = root.reach + 32 + root.trailSpan
         for (const s of root.shapes ?? []) {
@@ -207,6 +214,9 @@ Item {
         // changes. At rest that was ~1 full-field frame a second, twice as dear under Afterglow (11-02). Only the chassis:
         // its size is the output's; a floating field's bounds follow its bodies and would reallocate the layer per frame.
         layer.enabled: root.framed
+        layer.smooth: root.resampled
+        layer.textureSize: root.renderScale < 1 ? Qt.size(Math.round(pass.width * root.renderScale), Math.round(pass.height * root.renderScale))
+            : Qt.size(0, 0)
 
         // Every per-body uniform in one pass over the table. A moving body rewrites `shapes` every frame, and as ~55
         // bindings (one per uniform, each with its own closures and lookups) that pass cost several times the work.
@@ -258,7 +268,7 @@ Item {
             root.band, root.cornerRadius)
         readonly property color tint: root.tint
         readonly property vector4d quiet: root.quietRect
-        readonly property vector4d extent: Qt.vector4d(pass.packed.count, root.reach + 32 + root.trailSpan + root.frameMusicLightWidth,
+        readonly property vector4d extent: Qt.vector4d(pass.packed.count, root.reach + 32 + root.trailSpan + root.frameMusicLightWidth + root.holoSpill,
             pass.packed.glassy || (root.framed && root.frameGlass > 0) ? 1 : 0, 0)
         readonly property color rim: root.rim
         readonly property color sheen: root.sheen
@@ -267,7 +277,7 @@ Item {
         readonly property vector4d edgeGlass: IrisStyle.afterglow || IrisStyle.streak ? Qt.vector4d(0, 0, 1, 0)
             : Qt.vector4d(IrisStyle.glassEdgeLight, IrisStyle.glassEdgeLine, IrisStyle.edgeWidth, IrisStyle.edgeLit ? 1 : 0)
         // z: one device pixel in the field's units; both edges are drawn that many pixels wide.
-        readonly property vector4d edge: Qt.vector4d(root.rimWidth, root.rim.a > 0 ? 1 : 0, IrisStyle.devicePx, 0)
+        readonly property vector4d edge: Qt.vector4d(root.rimWidth, root.rim.a > 0 ? 1 : 0, IrisStyle.devicePx / Math.max(0.2, root.renderScale), 0)
         readonly property vector4d glowMix: IrisStyle.afterglowMix
         readonly property vector4d glowShadow: IrisStyle.afterglowShadow
         readonly property vector4d glowLight: IrisStyle.afterglowLight
@@ -384,6 +394,7 @@ Item {
         readonly property vector4d frameLight: Qt.vector4d(root.frameMusicAppearance, root.frameMusicLevel,
             root.frameMusicLight, root.frameMusicLightWidth)
         readonly property color frameInk: root.frameMusicInk
+        readonly property vector4d frameHolo: Qt.vector4d(root.holoLight, root.holoHalo, IrisStyle.light ? 1 : 0, IrisStyle.density)
         readonly property color shade: IrisStyle.shadow
         readonly property vector4d shadeShape: Qt.vector4d(root.shadowFall, root.shadowBlur, root.casts ? 1 : 0, 0)
         readonly property Item backdrop: pass.backdropReady ? root.backdropSource.texture : noBackdrop

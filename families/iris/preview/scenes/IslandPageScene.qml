@@ -31,7 +31,7 @@ PreviewScene {
     readonly property real bannerVeil: pageRoot.part("desktopBannerVeil", 100)
     readonly property real bannerBlur: pageRoot.part("desktopBannerBlur", 0)
     readonly property bool grouped: String(pageRoot.opt("iris.bar.blockStyle", "plain")) === "grouped"
-    readonly property var desktopBlocks: Array.from(pageRoot.opt("iris.bar.desktopBlocks", ["profile", "context", "forecast", "agenda", "modules"]))
+    readonly property var desktopBlocks: Array.from(pageRoot.opt("iris.bar.desktopBlocks", ["profile", "context", "workspaces", "forecast", "agenda", "modules"]))
     readonly property var mediaBlocks: Array.from(pageRoot.opt("iris.bar.mediaBlocks", ["player", "timeline", "transport", "players", "levels"]))
     readonly property var navKinds: ["media", "activity", "desktop", "tray", "tools", "focus", "today", "controls", "settings"]
     readonly property var navEntries: {
@@ -285,11 +285,11 @@ PreviewScene {
                         Component {
                             id: rowBlock
                             BlockRow {
-                                glyph: ({ profile: "account_circle", context: "select_window", agenda: "event_upcoming", modules: "widgets" })[desktopBlock.modelData] ?? "circle"
+                                glyph: ({ profile: "account_circle", context: "select_window", workspaces: "view_carousel", agenda: "event_upcoming", modules: "widgets" })[desktopBlock.modelData] ?? "circle"
                                 title: ({ profile: SystemInfo.displayName || SystemInfo.username || Translation.tr("You"),
                                     context: pageRoot.lastWindow?.title || Translation.tr("Current app"),
-                                    agenda: Translation.tr("Up next"), modules: Translation.tr("Modules") })[desktopBlock.modelData] ?? ""
-                                detail: ({ profile: Translation.tr("Up %1").arg(DateTime.uptime), context: AppSearch.lookupDesktopEntry(pageRoot.lastWindow?.app_id ?? "")?.name || Translation.tr("Workspace"),
+                                    workspaces: Translation.tr("Workspaces"), agenda: Translation.tr("Up next"), modules: Translation.tr("Modules") })[desktopBlock.modelData] ?? ""
+                                detail: ({ profile: Translation.tr("Up %1").arg(DateTime.uptime), context: AppSearch.lookupDesktopEntry(pageRoot.lastWindow?.app_id ?? "")?.name || Translation.tr("Workspace"), workspaces: Translation.tr("Tap one to go there"),
                                     agenda: Translation.tr("This week is clear"), modules: Translation.tr("Your desktop widgets") })[desktopBlock.modelData] ?? ""
                             }
                         }

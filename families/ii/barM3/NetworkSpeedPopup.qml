@@ -33,12 +33,12 @@ StyledPopup {
         id: interfaceDetailsProcess
         running: false
         command: [
-            "/usr/bin/bash", "-c",
-            "iface=$(/usr/bin/ip route show default | /usr/bin/awk 'NR==1 {print $5}'); "
-                + "gateway=$(/usr/bin/ip route show default | /usr/bin/awk 'NR==1 {print $3}'); "
-                + "local_ip=$(/usr/bin/ip -4 addr show dev \"$iface\" 2>/dev/null | /usr/bin/awk '/inet / {sub(/\\/.*/,\"\",$2); print $2; exit}'); "
-                + "mac=$(/usr/bin/cat /sys/class/net/$iface/address 2>/dev/null); "
-                + "/usr/bin/printf 'interface=%s\\nlocal=%s\\ngateway=%s\\nmac=%s\\n' \"$iface\" \"$local_ip\" \"$gateway\" \"$mac\""
+            "bash", "-c",
+            "iface=$(ip route show default | awk 'NR==1 {print $5}'); "
+                + "gateway=$(ip route show default | awk 'NR==1 {print $3}'); "
+                + "local_ip=$(ip -4 addr show dev \"$iface\" 2>/dev/null | awk '/inet / {sub(/\\/.*/,\"\",$2); print $2; exit}'); "
+                + "mac=$(cat /sys/class/net/$iface/address 2>/dev/null); "
+                + "printf 'interface=%s\\nlocal=%s\\ngateway=%s\\nmac=%s\\n' \"$iface\" \"$local_ip\" \"$gateway\" \"$mac\""
         ]
         stdout: StdioCollector {
             onStreamFinished: {

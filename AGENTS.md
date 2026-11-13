@@ -1,7 +1,7 @@
 # Working in the iNiR Hub (for AI agents)
 
-You are working in the hub of [iNiR](https://github.com/snowarch/iNiR), a desktop shell for the Niri compositor. Every
-item here (widget, component, colour theme, iRiS theme, web app) is installed by people with `inir hub install` or
+You are working in the hub of [iNiR](https://github.com/snowarch/iNiR), a desktop shell for the Niri and Umbriel compositors. Every
+item here (widget, component, Design, colour theme, iRiS theme, web app) is installed by people with `inir hub install` or
 reaches them through `inir update`. Whatever you write runs inside their desktop shell: an item that fails to load,
 loops, blocks or reaches into the rest of the shell does it on every desktop that installed it. Read this whole
 file before writing anything. Claude Code loads it through `CLAUDE.md`; any other agent reads it from here.
@@ -9,7 +9,9 @@ file before writing anything. Claude Code loads it through `CLAUDE.md`; any othe
 ## How you work
 
 1. **Pick the kind** from the table in `CONTRIBUTING.md › What to make`. A fix to Material (`ii`), iRiS or Waffle is
-   an issue, not a pull request; a feature for one of them is a component worn with it.
+   an issue, not a pull request; what people use is a widget (a face in each family: Material's desktop and sidebars, the iRiS
+   Island, Waffle's panel); a window of its own that people open from the app launcher is a component. Before the first file, write where a person
+   finds and opens it with the mouse in each family; if the kind gives it no such place, the kind is wrong.
 2. **Start from the template:** `inir hub new <kind> <id> --author <github-handle>`. The id is the folder name.
 3. **Read before writing:** the template it gave you, the example of the kind (`widgets/countdown`,
    `components/fastfetch`, `designs/airisu`, `themes/tidepool`, `iris-themes/moss-garden`, `webapps/excalidraw`), and the
@@ -22,7 +24,8 @@ file before writing anything. Claude Code loads it through `CLAUDE.md`; any othe
    reshape code only to slip past a rule (a colour hidden in a variable, an import through another file); the rule
    is what a reviewer reads for, and the pull request comes back.
 5. **Try it running**, the way people get it: `inir hub build && INIR_HUB_SOURCES=$PWD/dist inir hub install <id>`
-   (a component: `inir restart` once), then every state (empty, loading, failed, full, light and dark, small and
+   (a component: `inir restart` once), then find and open it from the Hub page with the mouse, as someone who never
+   opened a terminal, in every family; then every state (empty, loading, failed, full, light and dark, small and
    large scale) in every family it is worn with. `inir logs --issues` shows nothing new from it. Then
    `INIR_HUB_SOURCES=$PWD/dist inir hub remove <id>`. If you cannot see the screen, tell the person exactly what to
    open and look at; never claim it works from the check alone.
@@ -43,7 +46,7 @@ Each of these is held by `inir hub check` and CI, or by review where no machine 
 - **Import a family's inside.** Items import the base (`qs`, `qs.services`, `qs.modules.common` and its `widgets`,
   `functions`) and only what a family offers: `qs.modules.iris.style`, `qs.modules.iris.components`,
   `qs.modules.iris.frame`, `qs.modules.waffle.looks`, `qs.modules.ii.kit` (a Design's Island face also
-  `qs.modules.iris.bar.island`). Everything else (`iris.state`,
+  `qs.modules.iris.bar.island`; a widget's iRiS desktop face also `qs.modules.iris.widgets` and its `.prism`). Everything else (`iris.state`,
   `iris.pieces`, `iris.settings`, `iris.field`, a family's bar or panels) changes with every release of that family,
   and the item then stops loading for everyone.
 - **Write the person's settings or a family's state.** No `Config.setNestedValue(…)`, no `Config.options.x = …`, no
@@ -59,6 +62,7 @@ Each of these is held by `inir hub check` and CI, or by review where no machine 
   no `eval`, no `Qt.createQmlObject`, no QML from the internet, no `atob` or `base64 -d` on hidden content. Python
   helpers use the standard library only.
 - **Run while nobody looks.** No timer, process, fetch or animation while its window is closed or its face hidden.
+  A widget's `service` file (`guides/widgets.md`) only keeps its IPC answering; it starts nothing by itself.
 - **Carry secrets or someone's content.** No API keys, tokens or client secrets in the repo (the person enters their
   own, kept in the plugin's file); nothing private in a preview. Sources are official APIs or sites whose terms allow
   the use: no scraping of sites that host films, shows, music or games without the rights to them, no DRM

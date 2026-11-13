@@ -1,16 +1,20 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
+import Quickshell.Widgets
 import qs
 import qs.services
 import qs.modules.common
 import qs.modules.iris.style
 import qs.modules.iris.components
 import qs.modules.iris.widgets
+import qs.modules.iris.prism.core
+import qs.modules.iris.prism.parts
 import qs.modules.shared.background.widgets
 
 // A chosen widget's controls while arranging, at their true size beside the widget on the card (the card is shrunk,
-// they are not). A body of the edit window's field that grows out of the side of the widget it belongs to.
+// they are not). A body of the edit window's field that grows out of the side of the widget it belongs to, dressed as
+// Prism Settings is (his 11-07): its near-black page, the widget's colour as the haze from the corner.
 Item {
     id: root
 
@@ -24,15 +28,13 @@ Item {
         id: irisControls
         IrisWidgetControls {
             widget: root.held
-            plateRadius: IrisStyle.concentric(IrisStyle.radiusPlate, root.pad, IrisStyle.radiusChip)
+            plateRadius: PrismTheme.dp(14)
             optionRows: rowsComponent
         }
     }
     Component {
         id: rowsComponent
-        IrisEditRows {
-            plateRadius: IrisStyle.concentric(IrisStyle.radiusPlate, root.pad, IrisStyle.radiusChip)
-        }
+        IrisSheetRows {}
     }
     Component.onCompleted: DesktopEditStage.setSheetHost(root.outputName, true)
     Component.onDestruction: DesktopEditStage.setSheetHost(root.outputName, false)
@@ -61,9 +63,9 @@ Item {
         if (!w) return Qt.rect(root.width / 2, root.height / 2, 0, 0)
         return Qt.rect(root.card.x + w.x * root.card.s, root.card.y + w.y * root.card.s, w.width * root.card.s, w.height * root.card.s)
     }
-    readonly property real pad: Math.round(12 * root.d)
+    readonly property real pad: PrismTheme.dp(18)
     readonly property real gap: Math.round(14 * root.d)
-    readonly property real fullWidth: Math.round((content.item?.resolvedWidth ?? 360 * root.d) + 2 * root.pad)
+    readonly property real fullWidth: Math.round((content.item?.resolvedWidth ?? PrismTheme.dp(344)) + 2 * root.pad)
     readonly property real roomBottom: root.avoid.height > 0 ? root.avoid.y - root.gap : root.height - root.gap
     // Placed for its tallest page, drawn as tall as the page in view: the head stays put, the foot glides.
     readonly property real placeHeight: Math.min(Math.round((content.item?.restingHeight ?? 0) + 2 * root.pad),
@@ -116,7 +118,7 @@ Item {
         : root.side === "right" ? root.originX + (root.restX - root.originX) * root.g
         : root.restX + (root.fullWidth - root.bodyWidth) / 2)
     readonly property real bodyY: Math.round(root.restY + (root.fullHeight - root.bodyHeight) / 2 * (1 - root.g))
-    readonly property real bodyRadius: Math.min(IrisStyle.radiusPlate, root.bodyHeight / 2)
+    readonly property real bodyRadius: Math.min(PrismTheme.dp(26), root.bodyHeight / 2)
 
     readonly property rect hitRect: root.shown ? Qt.rect(root.bodyX, root.bodyY, root.bodyWidth, root.bodyHeight) : Qt.rect(0, 0, 0, 0)
     readonly property var fieldShapes: root.shown ? [{
@@ -134,6 +136,21 @@ Item {
         visible: root.shown
         // The press lands here, not on the card under it.
         MouseArea { anchors.fill: parent; acceptedButtons: Qt.AllButtons }
+        // Prism's page over the field's glass, and the widget's colour spilling from the top-left corner.
+        ClippingRectangle {
+            anchors.fill: parent
+            radius: root.bodyRadius
+            color: PrismTheme.canvas
+            opacity: Math.min(1, root.presentation * 1.4)
+            PrismGlow {
+                x: -width * 0.42
+                y: -height * 0.5
+                width: PrismTheme.dp(320)
+                height: PrismTheme.dp(240)
+                colour: root.held?.identityTint ?? PrismTheme.accent
+                strength: PrismTheme.light ? 0.16 : 0.24
+            }
+        }
         Flickable {
             IrisScrollFeel {}
             id: scroller

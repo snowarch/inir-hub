@@ -1,0 +1,13 @@
+{
+	"id": "prism",
+	"edit": "https://github.com/snowarch/inir-hub/edit/main/docs/prism/",
+	"order": 5,
+	"groups": [
+		{
+			"label": "Designs",
+			"pages": [
+				"PRISM"
+			]
+		}
+	]
+}

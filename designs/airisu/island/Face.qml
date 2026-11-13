@@ -71,7 +71,7 @@ Item {
         void Lume.revision
         if (!root.fills) return Airisu.solid(root.surface)
         if (root.surface.a > 0.99 || !IrisStyle.glassy) return Airisu.solid(root.surface)
-        const p = root.mapToItem(root.QsWindow.contentItem, 0, 0)
+        const p = root.mapToItem(root.QsWindow.window?.contentItem, 0, 0)
         const sample = Lume.read(String(root.island?.targetScreen?.name ?? ""), p.x, p.y, Math.max(1, root.width), Math.max(1, root.height))
         return sample ? Lume.stack(sample.color, IrisStyle.bodyTint) : Airisu.solid(root.surface)
     }

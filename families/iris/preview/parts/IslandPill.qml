@@ -32,7 +32,7 @@ Item {
         anchors.fill: parent
         active: pill.faceUrl.length > 0
         source: pill.faceUrl
-        onLoaded: item.island = ({ compactMode: "clock", compactHeight: pill.height, clockScale: 1, clockStyle: "time",
+        onLoaded: item.island = ({ compactMode: "clock", compactHeight: pill.height, faceRoom: Math.max(0, pill.width - pill.height), clockScale: 1, clockStyle: "time",
             notch: false, bottomEdge: false, clockText: () => "" })
     }
     IrisClock {

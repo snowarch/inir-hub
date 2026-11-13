@@ -1,6 +1,5 @@
 import QtQuick
 import QtQuick.Layouts
-import QtQuick.Dialogs
 import qs
 import qs.services
 import qs.modules.common
@@ -181,7 +180,7 @@ ContentPage {
         return parsed.valid ? parsed : root.workspaceThemeIndicatorColor
     }
 
-    ColorDialog {
+    ColorPickerDialog {
         id: workspaceIndicatorColorDialog
         selectedColor: root.workspaceIndicatorPreviewColor
         onAccepted: Config.setNestedValue("material.bar.workspaces.indicatorColor", selectedColor.toString())

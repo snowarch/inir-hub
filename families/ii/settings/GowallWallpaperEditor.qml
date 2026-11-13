@@ -3,7 +3,6 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls
-import QtQuick.Dialogs
 import Quickshell
 import qs.services
 import qs.services.deferred
@@ -855,10 +854,9 @@ ColumnLayout {
     }
 
     // ── Dialogs ──
-    FileDialog {
+    FilePickerDialog {
         id: imageDialog
         title: Translation.tr("Choose source image")
-        fileMode: FileDialog.OpenFile
         nameFilters: [
             Translation.tr("Images") + " (*.png *.jpg *.jpeg *.webp *.bmp *.avif)",
             Translation.tr("All files") + " (*)"
@@ -866,7 +864,7 @@ ColumnLayout {
         onAccepted: root.sourcePath = FileUtils.trimFileProtocol(String(selectedFile))
     }
 
-    ColorDialog {
+    ColorPickerDialog {
         id: colorDialog
         onAccepted: {
             if (root.editingColorIndex >= 0 && root.editingColorIndex < root.customColors.length) {

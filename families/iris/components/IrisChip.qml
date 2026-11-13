@@ -16,7 +16,9 @@ IrisButton {
     property string labelFamily: ""
 
     implicitHeight: Math.max(Math.round(30 * chip.d), Math.round(chipLabel.implicitHeight + 10 * chip.d))
-    implicitWidth: chipLabel.lead + Math.min(chipLabel.implicitWidth, chip.labelCap) + chip.inset * 2
+    // a glyph with no label is a round chip of its glyph alone
+    implicitWidth: chip.label.length === 0 && chip.glyph.length > 0 && chip.order < 0 && chip.artwork.length === 0 ? implicitHeight
+        : chipLabel.lead + Math.min(chipLabel.implicitWidth, chip.labelCap) + chip.inset * 2
     buttonRadius: chip.skinned ? 0 : IrisStyle.controlPlated ? IrisStyle.pieceRadius(height) : height / 2
     buttonRadiusPressed: buttonRadius
     Accessible.name: chip.label
@@ -57,6 +59,7 @@ IrisButton {
         }
         IrisText {
             id: chipLabel
+            visible: chip.label.length > 0
             anchors.verticalCenter: parent.verticalCenter
             readonly property real lead: (chipOrder.visible ? chipOrder.implicitWidth + chipRow.spacing : 0)
                 + (chipArt.visible ? chipArt.width + chipRow.spacing : 0)

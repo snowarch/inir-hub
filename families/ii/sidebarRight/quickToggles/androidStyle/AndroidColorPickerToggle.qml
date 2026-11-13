@@ -14,17 +14,10 @@ AndroidQuickToggleButton {
     toggled: false
     buttonIcon: "colorize"
 
+    // The picker waits for the sidebar to leave before it reads the screen.
     mainAction: () => {
         GlobalStates.sidebarRightOpen = false;
-        delayedActionTimer.start()
-    }
-    Timer {
-        id: delayedActionTimer
-        interval: 300
-        repeat: false 
-        onTriggered: {
-            ShellExec.execDetachedArgs(["/usr/bin/hyprpicker", "-a"], "Pick color")
-        }
+        GlobalStates.screenColorPickerOpen = true;
     }
 
     StyledToolTip {

@@ -220,7 +220,7 @@ ContentPage {
                 PagePlaceholder {
                     shown: root.appSearchQuery.length > 0 && appListView.count === 0
                     icon: "search_off"
-                    title: Translation.tr("No matching apps")
+                    title: Voice.miss(Translation.tr("No matching apps"), root.appSearchQuery)
                     description: Translation.tr("Try a different search term.")
                     anchors.fill: parent
                 }

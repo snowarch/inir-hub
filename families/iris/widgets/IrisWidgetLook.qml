@@ -70,9 +70,13 @@ WidgetLook {
     readonly property bool rim: Boolean(look.options.rim ?? false)
     readonly property var materials: ["glass", "solid", "tinted"]
     readonly property string sharedMaterial: String(look.options.material ?? "glass")
+    // The glass behind every widget: its own amount, so a clear Settings glass and milky widgets (or the reverse) can live together.
+    readonly property real blur: Math.max(0, Math.min(100, Number(look.options.blur ?? 100))) / 100
 
     // The widget's own switch wins; left alone it follows the shared material, where Transparent means no plate.
-    function plateByDefault(widget: var): bool { return !widget.bare && look.sharedMaterial !== "clear" }
+    // Bare is how a widget's own Material drawing stands (big digits, an image); worn as an iRiS face it is a card like
+    // every other one (his 11-07: the clock and the day stood bare under Prism).
+    function plateByDefault(widget: var): bool { return (!widget.bare || Boolean(widget.familyFaced)) && look.sharedMaterial !== "clear" }
     function material(widget: var): string {
         if (widget && !widget.showBackground) return "clear"
         const own = String(widget?._readConfigKey("iris.material") ?? "auto")
@@ -103,6 +107,16 @@ WidgetLook {
         Config.setNestedValues(DesktopWidgetDesign.cleared(look.ownSurfaces, key => key === "iris.opacity" ? -1 : "auto"))
         return "matched " + count
     }
+    // The shared Material picked (Settings, the shelf's Look page) is what every widget wears from then on: Transparent
+    // takes every plate away, any other brings them back and drops each widget's own material. Writing the key alone left
+    // widgets whose plate had been switched on by hand, or that chose a material of their own, out of step (his 11-07).
+    function wearMaterial(next: string): void {
+        Config.setNestedValue("iris.widgets.material", next)
+        DesktopWidgetOptions.setEvery("showBackground", next !== "clear")
+        if (next === "clear") return
+        const own = look.ownSurfaces.filter(entry => entry.key === "iris.material")
+        if (own.length > 0) Config.setNestedValues(DesktopWidgetDesign.cleared(own, () => "auto"))
+    }
     function materialAction(action: string): string {
         const now = look.sharedMaterial
         if (action === "match") return look.matchSurfaces()
@@ -110,6 +124,7 @@ WidgetLook {
         if (action === "toggle" || action === "clear" || action === "glass") {
             const show = action === "toggle" ? DesktopWidgetOptions.everyState("showBackground") === "false" : action === "glass"
             if (action === "glass" && now === "clear") Config.setNestedValue("iris.widgets.material", "glass")
+            else if (!show && now !== "clear" && action === "clear") Config.setNestedValue("iris.widgets.material", "clear")
             DesktopWidgetOptions.setEvery("showBackground", show)
             return show ? "glass" : "clear"
         }

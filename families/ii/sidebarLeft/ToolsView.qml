@@ -139,7 +139,7 @@ Item {
                     columnSpacing: 4
 
                     ActionTile {
-                        visible: CompositorService.isNiri
+                        visible: CompositorService.niriNative
                         tileIcon: "screenshot"
                         label: Translation.tr("Screenshot")
                         onClicked: Quickshell.execDetached(["niri", "msg", "action", "screenshot"])
@@ -160,13 +160,13 @@ Item {
                         onClicked: Quickshell.execDetached([Quickshell.shellPath("scripts/inir"), "region", "ocr"])
                     }
                     ActionTile {
-                        visible: CompositorService.isNiri
+                        visible: CompositorService.niriNative
                         tileIcon: "colorize"
                         label: Translation.tr("Color")
                         onClicked: Quickshell.execDetached(["niri", "msg", "action", "pick-color"])
                     }
                     ActionTile {
-                        visible: CompositorService.isNiri
+                        visible: CompositorService.niriNative
                         tileIcon: "screenshot_monitor"
                         label: Translation.tr("Window")
                         onClicked: Quickshell.execDetached(["niri", "msg", "action", "screenshot-window"])
@@ -195,7 +195,7 @@ Item {
                     ActionTile {
                         tileIcon: "folder"
                         label: Translation.tr("Files")
-                        onClicked: ShellExec.execDetachedArgs(["/usr/bin/nautilus"], "Launch Files")
+                        onClicked: ShellExec.execDetachedArgs(["nautilus"], "Launch Files")
                     }
                     ActionTile {
                         tileIcon: "settings"
@@ -215,7 +215,7 @@ Item {
                     ActionTile {
                         tileIcon: "code"
                         label: Translation.tr("Editor")
-                        onClicked: ShellExec.execCmd(Config.options?.apps?.editor ?? "/usr/bin/code")
+                        onClicked: ShellExec.execCmd(Config.options?.apps?.editor ?? "code")
                     }
                 }
             }
@@ -241,7 +241,7 @@ Item {
 
             // === Niri Debug ===
             CollapsibleSection {
-                visible: CompositorService.isNiri
+                visible: CompositorService.niriNative
                 title: Translation.tr("Niri Debug")
                 icon: "bug_report"
                 expanded: false
@@ -297,7 +297,7 @@ Item {
                 ActionButton {
                     btnIcon: "restart_alt"
                     label: Translation.tr("Restart shell")
-                    onClicked: Quickshell.execDetached(["/usr/bin/bash", Quickshell.shellPath("scripts/restart-shell.sh")])
+                    onClicked: Quickshell.execDetached(["bash", Quickshell.shellPath("scripts/restart-shell.sh")])
                 }
                 ActionButton {
                     btnIcon: "lock"
@@ -331,7 +331,7 @@ Item {
                 ActionButton {
                     btnIcon: "info"
                     label: Translation.tr("System info")
-                    onClicked: ShellExec.execDetachedArgs([Config.options?.apps?.terminal ?? "/usr/bin/kitty", "-e", "fish", "-c", "fastfetch; read -P 'Press Enter to close...'"], "Show system info")
+                    onClicked: ShellExec.execDetachedArgs([Config.options?.apps?.terminal ?? "kitty", "-e", "fish", "-c", "fastfetch; read -P 'Press Enter to close...'"], "Show system info")
                 }
             }
 

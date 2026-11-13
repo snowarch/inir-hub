@@ -25,10 +25,11 @@ ColumnLayout {
 
     IrisControlRow {
         plateRadius: root.rowRadius
-        glyph: "do_not_disturb_on"
+        glyph: "bedtime"
         label: Translation.tr("Do Not Disturb")
-        detail: focus.toggled ? Translation.tr("Banners wait in Today") : Translation.tr("Banners come in")
-        on: focus.toggled
+        // The shared model says "notifications shown": Do Not Disturb is its opposite.
+        detail: Notifications.silent ? Translation.tr("Banners wait in Today") : Translation.tr("Banners come in")
+        on: Notifications.silent
         tint: IrisStyle.identity.indigo
         onToggled: focus.mainAction()
     }

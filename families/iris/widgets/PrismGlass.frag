@@ -1,0 +1,259 @@
+#version 440
+// Prism, a widget's body (PrismBody.qml): a folder of frosted glass. Its dark tab carries the name; its right edge leans
+// as a folder's tab does, rounded at the shoulder and flaring into the pane at its foot. Beside it, under that edge, a
+// shorter flap lit in the widget's colour holds one fact; a clearer pane of glass laid across the whole width holds what
+// the widget is about; the folder's foot runs under it. One beam of white light enters low on the left, breaks on the
+// pane into its spectrum and fans out to the upper right, seen diffused through the frost (more through the pane than
+// through the body). Grain on the glass, a rim lit from above, the pane's shadow on the folder and the tab's on the flap.
+// The folder's shadow on the desktop is the person's (`look.w`, off by factory); nothing glows past its edge (his 11-07:
+// no light behind a widget). Static: it draws again only when a value changes.
+layout(location = 0) in vec2 qt_TexCoord0;
+layout(location = 0) out vec4 fragColor;
+layout(std140, binding = 0) uniform buf {
+    mat4 qt_Matrix;
+    float qt_Opacity;
+    // xy: the face's size; z: how far this item reaches past the face on each side (shadow and glow room); w: how far
+    // the tab's edge leans across the header.
+    vec4 frame;
+    // x: the lit flap's right edge; y: the tab's right edge; z: the flap's top; w: one device pixel in item units.
+    vec4 folder;
+    // x: the body's corners; y: the tab's top right; z: the flap's top right; w: the pane's corners.
+    vec4 radii;
+    // The pane: left, top, right, bottom.
+    vec4 pane;
+    // xy: where the white beam enters; zw: where it breaks into colour.
+    vec4 beam;
+    // x: the fan's direction (radians, screen y down); y: its half spread; z: how much light passes (0 paused,
+    // 1 playing); w: 1 for white light only (Nothing).
+    vec4 fan;
+    // The body's own colour, not premultiplied.
+    vec4 tone;
+    // The flap's colour (the song's), not premultiplied; a: unused (the flap once glowed on the desktop).
+    vec4 shelf;
+    // x: 1 on a light scheme (paper glass); y: 1 when frost is lent (glass material); z: grain; w: the shadow's strength
+    // on the desktop (0 none, the factory; 1 full).
+    vec4 look;
+    // x: 0 the folder, 1 a slab (one piece of glass: no tab, flap or pane); y: the slab's corners; z: how much of the
+    // beam a slab lets through (0 quiet: only its rim splits the light, near `beam.zw`); w: unused.
+    vec4 form;
+    // The spectrum's stops, violet to red (IrisStyle.prismStops).
+    vec4 s0; vec4 s1; vec4 s2; vec4 s3; vec4 s4; vec4 s5; vec4 s6;
+} u;
+layout(binding = 1) uniform sampler2D frost;
+
+float box(vec2 p, vec4 rect, vec4 r) {
+    vec2 c = (rect.xy + rect.zw) * 0.5;
+    vec2 h = (rect.zw - rect.xy) * 0.5;
+    vec2 q0 = p - c;
+    // top-left, top-right, bottom-right, bottom-left
+    float radius = q0.x < 0.0 ? (q0.y < 0.0 ? r.x : r.w) : (q0.y < 0.0 ? r.y : r.z);
+    radius = min(radius, min(h.x, h.y));
+    vec2 q = abs(q0) - h + radius;
+    return min(max(q.x, q.y), 0.0) + length(max(q, 0.0)) - radius;
+}
+
+// The union with a fillet: where two edges meet they turn in a smooth curve, as a folder's do.
+float smoothUnion(float a, float b, float k) {
+    float h = clamp(0.5 + 0.5 * (b - a) / k, 0.0, 1.0);
+    return mix(b, a, h) - k * h * (1.0 - h);
+}
+float smoothMax(float a, float b, float k) { return -smoothUnion(-a, -b, k); }
+
+// The tab's leaning edge: positive right of the line from (tabRight - lean / 2, 0) to (tabRight + lean / 2, pane top).
+float slant(vec2 p) {
+    vec2 a = vec2(u.folder.y - 0.5 * u.frame.w, 0.0);
+    vec2 d = normalize(vec2(u.frame.w, max(u.pane.y, 1.0)));
+    return dot(p - a, vec2(d.y, -d.x));
+}
+
+// x: the folder's outline; y: the dark tab; z: the lit flap.
+vec3 metrics(vec2 p) {
+    vec2 size = u.frame.xy;
+    float R = u.radii.x;
+    if (u.form.x > 0.5) {
+        // A slab: the whole is the body, nothing lit, nothing leaning.
+        return vec3(box(p, vec4(0.0, 0.0, size.x, size.y), vec4(u.form.y)), -1e4, 1e4);
+    }
+    float whole = box(p, vec4(0.0, 0.0, size.x, size.y), vec4(R));
+    // The tab: the body left of the leaning edge, its shoulder rounded, and below the pane's top all of it, the
+    // edge flaring into that line.
+    float tabD = smoothMax(whole, slant(p), u.radii.y);
+    float flare = max(u.pane.y - p.y, whole);
+    // The outline's flare ends inside the flap: past the flap's right edge the pane's own round corner is the edge (a
+    // full-width body there poked out beside it as a sharp point on every card).
+    float shapeD = smoothUnion(tabD, max(flare, p.x - u.folder.x + u.radii.z), u.radii.y * 0.7);
+    tabD = smoothUnion(tabD, flare, u.radii.y * 0.7);
+    // The flap reaches under the tab, so only its top and right edge show. It ends under the pane: run down to the
+    // folder's foot, its edge met the outline's there and the fillet between them showed it as a lit sliver.
+    float flapD = box(p, vec4(u.folder.y - u.frame.w - R, u.folder.z, u.folder.x, max(u.pane.w, u.folder.z + 2.0 * R)), vec4(R, u.radii.z, R, R));
+    // The foot under the pane, the whole width. Square where it meets the pane: a rounded top showed beside the pane's
+    // own corners as a second, crooked curve on both edges.
+    float footD = box(p, vec4(0.0, 0.5 * (u.pane.y + u.pane.w), size.x, size.y), vec4(0.0, 0.0, R, R));
+    return vec3(min(smoothUnion(shapeD, flapD, u.radii.y * 0.45), footD), tabD, flapD);
+}
+
+// The spectrum's seven stops, violet to red, from IrisStyle.prismStops (the shell's one source of Prism's light).
+vec3 spectrum(float t) {
+    float x = clamp(t, 0.0, 1.0) * 6.0;
+    vec3 a = x < 1.0 ? u.s0.rgb : x < 2.0 ? u.s1.rgb : x < 3.0 ? u.s2.rgb : x < 4.0 ? u.s3.rgb : x < 5.0 ? u.s4.rgb : u.s5.rgb;
+    vec3 b = x < 1.0 ? u.s1.rgb : x < 2.0 ? u.s2.rgb : x < 3.0 ? u.s3.rgb : x < 4.0 ? u.s4.rgb : x < 5.0 ? u.s5.rgb : u.s6.rgb;
+    return mix(a, b, smoothstep(0.0, 1.0, fract(x)));
+}
+
+// The light at p: rgb as it adds, seen through frost of `blur` (px of softening).
+vec3 light(vec2 p, float blur) {
+    vec2 from = u.beam.xy;
+    vec2 at = u.beam.zw;
+    float scale = u.frame.y;
+    // The white beam, entering to the break.
+    vec2 seg = at - from;
+    float t = clamp(dot(p - from, seg) / max(dot(seg, seg), 1e-3), 0.0, 1.0);
+    float d = length(p - (from + seg * t));
+    float core = 0.012 * scale + blur * 0.6;
+    float white = exp(-(d * d) / (core * core)) * (0.55 + 0.45 * t) + 0.32 * exp(-d / (0.06 * scale + blur));
+    vec3 sum = vec3(white);
+    // The fan: forward of the break, its colour by angle, white where it leaves the pane and splitting with distance.
+    vec2 v = p - at;
+    float r = length(v);
+    vec2 axis = vec2(cos(u.fan.x), sin(u.fan.x));
+    float ahead = dot(v, axis);
+    if (ahead > 0.0) {
+        float side = (atan(v.y, v.x) - u.fan.x);
+        side = atan(sin(side), cos(side));
+        float k = side / max(u.fan.y, 1e-3);
+        float soft = 0.18 + blur / max(r, 1.0);
+        float inside = 1.0 - smoothstep(1.0 - soft, 1.0 + soft, abs(k));
+        // Figma's second and third blurred copies: a wide soft bloom the colours spill into past the fan's edges.
+        float bloom = 0.4 * exp(-0.7 * k * k);
+        float split = smoothstep(0.0, 0.3 * scale, r);
+        vec3 hue = mix(vec3(1.0), spectrum(0.5 + 0.5 * clamp(k, -1.0, 1.0)), split * (1.0 - u.fan.w));
+        float fade = exp(-r / (1.15 * scale)) * smoothstep(0.0, 0.05 * scale, ahead);
+        sum += hue * (inside + bloom) * fade * (0.95 - 0.3 * split);
+    }
+    // Where it breaks, a flare.
+    sum += vec3(0.6) * exp(-r / (0.05 * scale + blur));
+    return sum;
+}
+
+float hash(vec2 p) {
+    p = fract(p * vec2(443.897, 441.423));
+    p += dot(p, p.yx + 19.19);
+    return fract((p.x + p.y) * p.x);
+}
+
+vec4 over(vec4 top, vec4 under) { return top + under * (1.0 - top.a); }
+
+void main() {
+    vec2 size = u.frame.xy;
+    vec2 p = qt_TexCoord0 * (size + 2.0 * u.frame.zz) - u.frame.zz;
+    float px = max(u.folder.w, 0.25);
+    bool paper = u.look.x > 0.5;
+
+    vec3 m = metrics(p);
+    float body = m.x;
+    float tab = m.y;
+    float flap = m.z;
+    bool slab = u.form.x > 0.5;
+    float paneD = slab ? 1e4 : box(p, u.pane, vec4(u.radii.w));
+    float all = min(body, paneD);
+    float aa = px * 0.75;
+    float inBody = 1.0 - smoothstep(-aa, aa, body);
+    float inPane = 1.0 - smoothstep(-aa, aa, paneD);
+    // The lit flap: the body out of the tab (the fillet where the flap meets the tab's edge is the flap's).
+    float lit = inBody * smoothstep(-aa, aa, tab);
+    float edge = slant(p);
+
+    vec4 col = vec4(0.0);
+
+    // The shadow of the whole, on the desktop, as strong as the person set it.
+    float lift = 0.022 * size.y;
+    float spread = 0.06 * size.y;
+    float shadowD = slab ? metrics(p - vec2(0.0, lift)).x
+        : min(metrics(p - vec2(0.0, lift)).x, box(p - vec2(0.0, lift), u.pane, vec4(u.radii.w)));
+    // The lit flap throws light, not shadow, where it stands above the pane.
+    float flapSide = smoothstep(-u.radii.y, u.radii.y, edge) * (1.0 - smoothstep(u.pane.y - spread, u.pane.y, p.y));
+    float shade = (1.0 - smoothstep(-spread, spread * 1.6, shadowD)) * u.look.w * (paper ? 0.45 : 1.0) * (1.0 - 0.85 * flapSide);
+    col = vec4(0.0, 0.0, 0.0, shade * (1.0 - inBody) * (1.0 - inPane));
+
+    // The glass's own colour over what the frost shows of the desktop.
+    vec4 under = u.look.y > 0.5 ? texture(frost, clamp(p / size, 0.0, 1.0)) : vec4(0.0);
+    vec4 glass = vec4(u.tone.rgb * u.tone.a, u.tone.a) + under * (1.0 - u.tone.a);
+
+    // Body, with the pane's shadow on it.
+    float paneShade = slab ? 0.0 : 1.0 - smoothstep(-0.03 * size.y, 0.05 * size.y, box(p - vec2(0.0, 0.02 * size.y), u.pane, vec4(u.radii.w)));
+    vec4 bodyCol = glass;
+    bodyCol.rgb *= 1.0 - paneShade * (paper ? 0.08 : 0.32);
+    // The flap: the song's colour, a little brighter toward its top, where the light comes from.
+    // The tab lies over it and darkens it a little along its edge.
+    vec3 shelfRgb = u.shelf.rgb * (1.0 + 0.1 * smoothstep(u.pane.y, u.folder.z, p.y));
+    shelfRgb *= 1.0 - (paper ? 0.1 : 0.22) * exp(-max(tab, 0.0) / (0.05 * size.y));
+    bodyCol = mix(bodyCol, vec4(shelfRgb, 1.0), lit);
+
+    // The pane: the same glass, frosted further and lifted (Figma's 16 % white radial fill).
+    vec2 paneC = vec2(mix(u.pane.x, u.pane.z, 0.3), u.pane.y);
+    float lift16 = (paper ? 0.42 : 0.1) * (1.0 - smoothstep(0.0, length(u.pane.zw - u.pane.xy) * 0.9, length(p - paneC)));
+    vec4 paneCol = glass + vec4(vec3(lift16), 0.0) * glass.a;
+    paneCol.rgb = min(paneCol.rgb, vec3(glass.a));
+
+    col = over(bodyCol * inBody * (1.0 - inPane), col);
+    col = over(paneCol * inPane, col * (1.0 - inPane));
+
+    // The light: through the body's frost, then the pane's thicker frost; not on the lit flap.
+    float through = max(inBody * (1.0 - lit), inPane) * u.fan.z * (slab ? u.form.z : 1.0);
+    if (through > 0.0) {
+        float blurBody = 0.018 * size.y;
+        float blurPane = 0.045 * size.y;
+        vec3 l = mix(light(p, blurBody), light(p, blurPane), inPane);
+        if (paper) {
+            // Paper glass takes the light as tinted film: white is lost in white, the colours stay as a wash.
+            float lum = dot(l, vec3(0.2126, 0.7152, 0.0722));
+            vec3 tint = l / max(max(l.r, max(l.g, l.b)), 1e-3);
+            float a = clamp(lum, 0.0, 1.0) * 0.5 * through;
+            col.rgb = mix(col.rgb, tint * col.a, a * (1.0 - 0.75 * smoothstep(0.85, 1.0, min(tint.r, min(tint.g, tint.b)))));
+            col.rgb += vec3(0.22) * clamp(lum - 0.6, 0.0, 1.0) * through * col.a;
+        } else {
+            // Dark glass adds it, as light does.
+            col.rgb += l * 0.62 * through;
+        }
+    }
+
+    // Grain on the glass, as a frosted pane has (fixed per pixel: it never shimmers).
+    float covered = max(inBody, inPane);
+    float n = hash(floor(p / px)) - 0.5;
+    col.rgb += vec3(n * u.look.z * covered * col.a);
+
+    // The rims, lit from above and fading downward (Figma's 0.5 px stroke, white to clear).
+    vec2 e = vec2(0.5 * px, 0.0);
+    vec2 nBody = normalize(vec2(metrics(p + e.xy).x - metrics(p - e.xy).x, metrics(p + e.yx).x - metrics(p - e.yx).x) + 1e-5);
+    vec2 nPane = normalize(vec2(box(p + e.xy, u.pane, vec4(u.radii.w)) - box(p - e.xy, u.pane, vec4(u.radii.w)),
+        box(p + e.yx, u.pane, vec4(u.radii.w)) - box(p - e.yx, u.pane, vec4(u.radii.w))) + 1e-5);
+    float lineBody = (1.0 - smoothstep(0.0, px * 1.1, abs(body + 0.5 * px))) * (1.0 - inPane);
+    float linePane = 1.0 - smoothstep(0.0, px * 1.1, abs(paneD + 0.5 * px));
+    float fromTopBody = 0.25 + 0.75 * clamp(-nBody.y, 0.0, 1.0);
+    float fromTopPane = 0.3 + 0.7 * clamp(-nPane.y, 0.0, 1.0);
+    float rimBody = lineBody * fromTopBody * (paper ? 0.55 : 0.2) * (1.0 - lit);
+    float rimPane = linePane * fromTopPane * (paper ? 0.9 : 0.42);
+    if (slab) rimBody *= paper ? 1.0 : 1.6;
+    col.rgb = mix(col.rgb, vec3(col.a), clamp(rimBody + rimPane, 0.0, 1.0));
+    // A slab's rim splits the light where it passes nearest the break: a short run of the spectrum along the edge,
+    // its colour turning with the angle around the break, gone a third of the way round.
+    if (slab && u.fan.z > 0.0) {
+        vec2 v = p - u.beam.zw;
+        float reach = 0.16 * size.y + 0.06 * size.x;
+        float near = exp(-length(v) / reach);
+        float a = atan(v.y, v.x);
+        vec3 hue = u.fan.w > 0.5 ? vec3(1.0) : spectrum(0.5 + 0.5 * sin(a * 1.5 + u.fan.x));
+        float glint = (1.0 - smoothstep(0.0, px * 1.4, abs(body + 0.7 * px))) * near * near * u.fan.z * 1.3;
+        col.rgb = mix(col.rgb, hue * col.a, clamp(glint * (paper ? 0.55 : 0.7), 0.0, 1.0));
+        // and inside the glass, a breath of the same colour just behind the edge
+        float haze = (1.0 - smoothstep(0.0, 0.07 * size.y, -body)) * inBody * near * near * u.fan.z;
+        col.rgb += hue * haze * (paper ? 0.05 : 0.12) * col.a;
+    }
+    // On paper the lower edges take a hairline of shade instead, so the glass keeps its outline on white.
+    if (paper) {
+        float under2 = (lineBody * (1.0 - lit) + linePane) * clamp(nBody.y + nPane.y, 0.0, 1.0) * 0.12;
+        col.rgb *= 1.0 - under2;
+    }
+
+    fragColor = col * u.qt_Opacity;
+}

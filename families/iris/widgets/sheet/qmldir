@@ -1,0 +1,9 @@
+module qs.modules.iris.widgets.sheet
+SheetCard 1.0 SheetCard.qml
+SheetSpecimen 1.0 SheetSpecimen.qml
+SheetCaption 1.0 SheetCaption.qml
+SheetLine 1.0 SheetLine.qml
+SheetSizes 1.0 SheetSizes.qml
+SheetWidgetPage 1.0 SheetWidgetPage.qml
+SheetLookPage 1.0 SheetLookPage.qml
+SheetArrangePage 1.0 SheetArrangePage.qml

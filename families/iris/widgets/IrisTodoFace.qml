@@ -19,6 +19,13 @@ IrisWidgetFace {
         return pending.concat(done).slice(0, root.capacity)
     }
     readonly property int pending: root.widget.pendingCount
+    // Progress (his 11-06 reference): what is done out of all of it as the figure, and a segment per task lit as each
+    // one is done; past twelve tasks the segments become one bar.
+    readonly property bool progressStyle: String(root.widget.familyOption("face", "list")) === "progress"
+    readonly property int total: Todo.list.length
+    readonly property int finished: root.widget.completedCount
+    readonly property string figure: root.progressStyle ? root.finished + "/" + root.total : String(root.pending)
+    readonly property bool figureShown: root.progressStyle ? root.total > 0 : root.pending > 0
     readonly property bool empty: !root.adding && root.entries.length === 0
 
     function beginAdding(): void {
@@ -162,21 +169,70 @@ IrisWidgetFace {
             text: Translation.tr("Tasks")
         }
         Row {
-            visible: root.pending > 0
+            visible: root.figureShown
             spacing: root.dp(5)
             FaceFigure {
                 id: left
                 face: root
-                text: root.pending
-                size: 38
+                text: root.figure
+                size: root.progressStyle ? 32 : 38
             }
             FaceText {
                 face: root
+                visible: !root.progressStyle
                 anchors.baseline: left.baseline
                 text: Translation.tr("left")
                 color: root.inkSecondary
                 size: 15
                 weight: Font.DemiBold
+            }
+        }
+        Segments { Layout.fillWidth: true; Layout.topMargin: root.dp(6) }
+    }
+
+    component Segments: Item {
+        id: segments
+        readonly property int count: Math.min(root.total, 12)
+        readonly property real gap: root.dp(root.total > 12 ? 0 : 3)
+        visible: root.progressStyle && root.total > 0
+        implicitHeight: root.dp(6)
+        Rectangle {
+            visible: root.total > 12
+            width: parent.width
+            height: parent.height
+            radius: IrisStyle.capsule(height)
+            color: root.fillQuiet
+            Rectangle {
+                width: parent.width * root.finished / Math.max(1, root.total)
+                height: parent.height
+                radius: parent.radius
+                color: root.accent
+            }
+        }
+        Row {
+            visible: root.total <= 12
+            spacing: segments.gap
+            Repeater {
+                model: root.total <= 12 ? segments.count : 0
+                Rectangle {
+                    required property int index
+                    width: (segments.width - segments.gap * (segments.count - 1)) / segments.count
+                    height: segments.height
+                    id: segment
+                    radius: IrisStyle.capsule(height)
+                    color: root.fillQuiet
+                    // A task done fills its segment along its length; one undone drains it.
+                    Rectangle {
+                        width: segment.index < root.finished ? segment.width : 0
+                        height: segment.height
+                        radius: segment.radius
+                        color: root.accent
+                        Behavior on width {
+                            enabled: IrisStyle.motionEnabled && root.moving
+                            SmoothedAnimation { velocity: root.dp(160) }
+                        }
+                    }
+                }
             }
         }
     }
@@ -204,11 +260,12 @@ IrisWidgetFace {
             }
             FaceFigure {
                 face: root
-                visible: root.pending > 0
-                text: root.pending
+                visible: root.figureShown
+                text: root.figure
                 size: 22
             }
         }
+        Segments { Layout.fillWidth: true }
         Tasks { Layout.fillWidth: true; Layout.fillHeight: root.empty }
         Item { Layout.fillHeight: true; visible: !root.empty }
     }
@@ -247,11 +304,12 @@ IrisWidgetFace {
             }
             FaceFigure {
                 face: root
-                visible: root.pending > 0
-                text: root.pending
+                visible: root.figureShown
+                text: root.figure
                 size: 26
             }
         }
+        Segments { Layout.fillWidth: true }
         Tasks { Layout.fillWidth: true; Layout.fillHeight: root.empty }
         Item { Layout.fillHeight: true; visible: !root.empty }
         RowLayout {

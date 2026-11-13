@@ -5,6 +5,7 @@ import Quickshell.Io
 // this plugin is installed (plugin.json `configKey`). Only what Material draws lives here; behaviour every family
 // shares stays in the shell's sections.
 JsonObject {
+    property int factoryLook: 1 // the factory look a file was moved to (ConfigMigrations.js)
     property JsonObject bar: JsonObject {
         // Options for bar.appearanceStyle === "pill": the morphing centre
         // island that replaces the bar and grows on hover.
@@ -446,8 +447,10 @@ JsonObject {
             property bool contextShowWeather: true
             // Widget order (drag to reorder)
             property list<string> widgetOrder: ["context", "week", "media", "note", "launch", "controls", "status", "crypto", "wallpaper", "worldclock"]
+            // Hub widgets ("custom.<id>") with a sidebar face show in this column unless listed here
+            property list<string> hidden: []
             // Spacing between widgets (px)
-            property int spacing: 8
+            property int spacing: 24
 
             // GlanceHeader behavior
             property JsonObject glance: JsonObject {
@@ -498,22 +501,22 @@ JsonObject {
                 {
                     "icon": "folder",
                     "name": "Files",
-                    "cmd": "/usr/bin/nautilus"
+                    "cmd": "nautilus"
                 },
                 {
                     "icon": "terminal",
                     "name": "Terminal",
-                    "cmd": "/usr/bin/kitty"
+                    "cmd": "kitty"
                 },
                 {
                     "icon": "web",
                     "name": "Browser",
-                    "cmd": "/usr/bin/firefox"
+                    "cmd": "firefox"
                 },
                 {
                     "icon": "code",
                     "name": "Code",
-                    "cmd": "/usr/bin/code"
+                    "cmd": "code"
                 }
             ]
 

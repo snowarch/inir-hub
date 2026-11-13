@@ -5,7 +5,7 @@
   "summary": "One living body: the Island, the chassis and Apple-grade motion.",
   "tagline": "Island, pieces and a Dock on any edge.",
   "icon": "visibility",
-  "version": "2.33.37",
+  "version": "2.33.86",
   "provides": "modules/iris",
   "wears": ["iris.appearance.design"],
   "parts": {
@@ -35,6 +35,27 @@
     "widgetFace.photo": "widgets/IrisPhotoFace.qml",
     "widgetFace.weather": "widgets/IrisWeatherFace.qml",
     "widgetFace.worldClock": "widgets/IrisWorldClockFace.qml",
+    "widgetPrism.nowPlaying": "widgets/IrisNowPlayingFace.qml",
+    "widgetPrism.controls": "widgets/prism/PrismControls.qml",
+    "widgetPrism.timer": "widgets/prism/PrismTimer.qml",
+    "widgetPrism.agenda": "widgets/prism/PrismAgenda.qml",
+    "widgetPrism.battery": "widgets/prism/PrismBattery.qml",
+    "widgetPrism.calendar": "widgets/prism/PrismCalendar.qml",
+    "widgetPrism.news": "widgets/prism/PrismNews.qml",
+    "widgetPrism.notes": "widgets/prism/PrismNotes.qml",
+    "widgetPrism.profile": "widgets/prism/PrismProfile.qml",
+    "widgetPrism.palette": "widgets/prism/PrismPalette.qml",
+    "widgetPrism.lyrics": "widgets/prism/PrismLyrics.qml",
+    "widgetPrism.todo": "widgets/prism/PrismTodo.qml",
+    "widgetPrism.photo": "widgets/prism/PrismPhoto.qml",
+    "widgetPrism.clock": "widgets/prism/PrismClock.qml",
+    "widgetPrism.date": "widgets/prism/PrismDate.qml",
+    "widgetPrism.day": "widgets/prism/PrismDay.qml",
+    "widgetPrism.screenTime": "widgets/prism/PrismScreenTime.qml",
+    "widgetPrism.uptime": "widgets/prism/PrismUptime.qml",
+    "widgetPrism.vitals": "widgets/prism/PrismVitals.qml",
+    "widgetPrism.weather": "widgets/prism/PrismWeather.qml",
+    "widgetPrism.worldClock": "widgets/prism/PrismWorldClock.qml",
     "widgetOutfit": "edit/IrisWidgetOutfit.qml",
     "style": "IrisFamilyStyle.qml",
     "control.switch": "components/IrisSwitch.qml",
@@ -64,7 +85,8 @@
     "face": "iris",
     "faceLabel": "iRiS",
     "plain": "material",
-    "choices": ["iris", "material", "instrument", "readout"]
+    "choices": ["iris", "prism", "material", "instrument", "readout"],
+    "faces": [{"value": "prism", "label": "Prism", "glyph": "flare", "part": "widgetPrism", "ignores": ["showBorder", "borderOpacity", "borderWidth", "showWeather"]}]
   },
   "flags": {
     "lockSurfaceSync": true,
@@ -172,43 +194,56 @@
   },
   "widgetOptions": {
     "clock": [
-      {"key":"iris.face","label":"Face","type":"choice","default":"analog","when":"face","choices":[["analog","Analog","schedule"],["digital","Digital","timer_10"],["hour","Hour","wb_twilight"]]},
-      {"key":"iris.seconds","label":"Second hand","type":"switch","default":true,"when":["face",{"iris.face":"analog"}]},
-      {"key":"iris.week","label":"Week strip","type":"switch","default":true,"when":["face",{"iris.face":["analog","digital"]},{"not":{"sizeClass":"small"}}]}
+      {"key":"iris.face","label":"Face","type":"choice","default":"analog","when":["face",{"wears":"iris"}],"choices":[["analog","Analog","schedule"],["digital","Digital","timer_10"],["hour","Hour","wb_twilight"],["greeting","Greeting","waving_hand"]]},
+      {"key":"iris.seconds","label":"Second hand","type":"switch","default":true,"when":["face",{"wears":"iris"},{"iris.face":"analog"}]},
+      {"key":"iris.week","label":"Week strip","type":"switch","default":true,"when":["face",{"wears":"iris"},{"iris.face":["analog","digital","greeting"]},{"not":{"sizeClass":"small"}}]}
     ],
     "mediaControls": [
-      {"key":"iris.lyrics","label":"Synced lyrics","type":"switch","default":true,"when":"face"},
-      {"key":"iris.rest","label":"Rest when paused","type":"switch","default":true,"when":"face"}
+      {"key":"iris.face","label":"Face","type":"choice","default":"classic","when":["face",{"wears":"iris"},{"not":{"sizeClass":"small"}}],"choices":[["classic","Classic","music_note"],["prism","Prism","flare"],["vinyl","Vinyl","album"]],"keywords":["player","lyrics","prism","glass","refraction","spotify","vinyl","record"]},
+      {"key":"iris.lyrics","label":"Synced lyrics","type":"switch","default":true,"when":["face",{"any":[{"wears":"prism"},{"iris.face":["classic","prism"]}]}]},
+      {"key":"iris.rest","label":"Rest when paused","type":"switch","default":false,"when":"face"}
     ],
     "monthCalendar": [
-      {"key":"iris.face","label":"Face","type":"choice","default":"month","when":"face","choices":[["month","Month","calendar_view_month"],["week","Week","view_week"]]}
+      {"key":"iris.face","label":"Face","type":"choice","default":"month","when":["face",{"wears":"iris"}],"choices":[["month","Month","calendar_view_month"],["week","Week","view_week"]]}
     ],
     "screenTime": [
-      {"key":"iris.face","label":"Face","type":"choice","default":"curve","when":"face","choices":[["curve","Curve","monitoring"],["ribbon","Ribbon","view_column"]]}
+      {"key":"iris.face","label":"Face","type":"choice","default":"curve","when":["face",{"wears":"iris"}],"choices":[["curve","Curve","monitoring"],["ribbon","Ribbon","view_column"]]}
     ],
     "systemMonitor": [
-      {"key":"iris.face","label":"Face","type":"choice","default":"trend","when":"face","choices":[["trend","Trend","show_chart"],["bars","Bars","bar_chart"]]},
+      {"key":"iris.face","label":"Face","type":"choice","default":"trend","when":["face",{"wears":"iris"}],"choices":[["trend","Trend","show_chart"],["bars","Bars","bar_chart"]]},
       {"key":"iris.lead","label":"Main","type":"choice","default":"auto","when":"face","choices":[["auto","Auto"],["cpu","Processor","memory"],["mem","Memory","memory_alt"],["gpu","Graphics","developer_board"],["temp","CPU heat","thermostat"],["gpuTemp","GPU heat","thermostat"]],"keywords":["lead","main","first","big"]}
     ],
     "controls": [
-      {"key":"iris.tile.wifi","label":"Wi-Fi","type":"switch","default":true,"tune":false,"keywords":["keys","tiles","toggle"]},
-      {"key":"iris.tile.bluetooth","label":"Bluetooth","type":"switch","default":true,"tune":false,"keywords":["keys","tiles","toggle"]},
-      {"key":"iris.tile.focus","label":"Focus","type":"switch","default":true,"tune":false,"keywords":["keys","tiles","toggle"]},
-      {"key":"iris.tile.nightLight","label":"Night light","type":"switch","default":true,"tune":false,"keywords":["keys","tiles","toggle"]},
-      {"key":"iris.tile.awake","label":"Keep awake","type":"switch","default":true,"tune":false,"keywords":["keys","tiles","toggle"]},
-      {"key":"iris.tile.gameMode","label":"Game mode","type":"switch","default":true,"tune":false,"keywords":["keys","tiles","toggle"]},
-      {"key":"iris.tile.mic","label":"Microphone","type":"switch","default":true,"tune":false,"keywords":["keys","tiles","toggle"]},
-      {"key":"iris.tile.darkMode","label":"Dark mode","type":"switch","default":true,"tune":false,"keywords":["keys","tiles","toggle"]},
-      {"key":"iris.sliders","label":"Volume and brightness","type":"switch","default":true,"when":{"not":{"sizeClass":"small"}},"tune":false}
+      {"key":"iris.face","label":"Face","type":"choice","default":"tiles","when":["face",{"wears":"iris"},{"not":{"sizeClass":"small"}}],"choices":[["tiles","Tiles","view_agenda"],["discs","Discs","radio_button_checked"]],"keywords":["round","circles","nothing","toggles"]},
+      {"key":"iris.tile.wifi","label":"Wi-Fi","type":"switch","default":true,"when":"face","tune":false,"keywords":["keys","tiles","toggle"]},
+      {"key":"iris.tile.bluetooth","label":"Bluetooth","type":"switch","default":true,"when":"face","tune":false,"keywords":["keys","tiles","toggle"]},
+      {"key":"iris.tile.focus","label":"Focus","type":"switch","default":true,"when":"face","tune":false,"keywords":["keys","tiles","toggle"]},
+      {"key":"iris.tile.nightLight","label":"Night light","type":"switch","default":true,"when":"face","tune":false,"keywords":["keys","tiles","toggle"]},
+      {"key":"iris.tile.awake","label":"Keep awake","type":"switch","default":true,"when":"face","tune":false,"keywords":["keys","tiles","toggle"]},
+      {"key":"iris.tile.gameMode","label":"Game mode","type":"switch","default":true,"when":"face","tune":false,"keywords":["keys","tiles","toggle"]},
+      {"key":"iris.tile.mic","label":"Microphone","type":"switch","default":true,"when":"face","tune":false,"keywords":["keys","tiles","toggle"]},
+      {"key":"iris.tile.darkMode","label":"Dark mode","type":"switch","default":true,"when":"face","tune":false,"keywords":["keys","tiles","toggle"]},
+      {"key":"iris.sliders","label":"Volume and brightness","type":"switch","default":true,"when":{"any":[{"wears":"prism"},{"not":{"sizeClass":"small"}}]},"tune":false}
     ],
     "palette": [
       {"key":"iris.source","label":"Colours from","type":"choice","default":"wallpaper","choices":[["wallpaper","Wallpaper"],["music","Music"],["random","Random"]]}
     ],
     "weather": [
-      {"key": "iris.face", "label": "Face", "type": "choice", "default": "classic", "when": "face", "choices": [["classic", "Classic", "partly_cloudy_day"], ["poster", "Poster", "format_size"]], "keywords": ["poster", "big", "condensed", "headline", "cartel"]},
-      {"key":"iris.details","label":"Details","type":"switch","default":true,"when":["face",{"sizeClass":"large"},{"iris.face":"classic"}],"keywords":["humidity","wind","uv","air"]}
+      {"key": "iris.face", "label": "Face", "type": "choice", "default": "classic", "when": ["face", {"wears": "iris"}], "choices": [["classic", "Classic", "partly_cloudy_day"], ["poster", "Poster", "format_size"], ["week", "Week", "date_range"]], "keywords": ["poster", "big", "condensed", "headline", "cartel"]},
+      {"key":"iris.details","label":"Details","type":"switch","default":true,"when":["face",{"wears":"iris"},{"sizeClass":"large"},{"iris.face":"classic"}],"keywords":["humidity","wind","uv","air"]}
+    ],
+    "battery": [
+      {"key":"iris.face","label":"Face","type":"choice","default":"classic","when":["face",{"wears":"iris"}],"choices":[["classic","Classic","battery_full"],["cells","Cells","battery_5_bar"]],"keywords":["cells","bars","battery"]}
+    ],
+    "todo": [
+      {"key":"iris.face","label":"Face","type":"choice","default":"list","when":["face",{"wears":"iris"}],"choices":[["list","List","checklist"],["progress","Progress","linear_scale"]],"keywords":["progress","done","segments","tasks"]}
+    ],
+    "worldClock": [
+      {"key":"iris.face","label":"Face","type":"choice","default":"classic","when":["face",{"wears":"iris"}],"choices":[["classic","Classic","public"],["offset","Offset","more_time"]],"keywords":["offset","difference","hours","zones"]}
     ],
     "*": [
+      {"key":"iris.prism","label":"Prism","type":"choice","default":"quiet","page":"look","when":[{"wears":"prism"},{"not":{"widget":"mediaControls"}}],"choices":[["quiet","Quiet","crop_square"],["beam","Beam","flare"],["folder","Folder","folder"]],"keywords":["prism","light","beam","folder","glass","spectrum","luz"]},
+      {"key":"iris.shadow","label":"Shadow","type":"range","default":0,"min":0,"max":100,"step":5,"unit":" %","page":"look","when":["face",{"showBackground":true},{"any":[{"wears":"prism"},{"iris.face":"prism"}]}],"keywords":["shadow","depth","lift","sombra"]},
       {"key":"iris.material","label":"Material","type":"choice","default":"auto","page":"look","tune":true,"when":["face",{"showBackground":true}],"choices":[["auto","Same as every widget"],["glass","Glass"],["solid","Solid"],["tinted","Tinted"]],"keywords":["glass","transparent","background","plate","fondo","vidrio"]}
     ]
   }

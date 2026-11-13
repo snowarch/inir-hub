@@ -41,6 +41,9 @@ MouseArea {
         : card.tags.includes("sharp") || card.tags.includes("hard") ? "diamond" : "palette"
     readonly property real pad: Math.round(14 * card.d)
 
+    // Worn from Settings, the tap goes on Settings' history (its island says it, Ctrl+Z takes it back); in Customize, on
+    // the edit bar's.
+    property bool settingsHistory: false
     signal shareRequested()
 
     implicitHeight: Math.round(Math.max(132 * card.d, width * 0.66))
@@ -48,7 +51,7 @@ MouseArea {
     cursorShape: Qt.PointingHandCursor
     Accessible.role: Accessible.Button
     Accessible.name: card.theme.name
-    onClicked: IrisEditHistory.applyTheme(card.theme)
+    onClicked: card.settingsHistory ? IrisOptions.wearTheme(card.theme) : IrisEditHistory.applyTheme(card.theme)
 
     Rectangle {
         id: plate
@@ -94,11 +97,12 @@ MouseArea {
             x: card.pad
             y: Math.round(12 * card.d)
             width: parent.width - 2 * card.pad
-            spacing: Math.round(5 * card.d)
+            spacing: Math.round(6 * card.d)
+            // Worn: its glyph turns to a check and its name to bold, never a ring (his 10-30).
             MaterialSymbol {
                 id: headGlyph
                 anchors.verticalCenter: parent.verticalCenter
-                text: card.glyph
+                text: card.current ? "check_circle" : card.glyph
                 fill: 1
                 iconSize: Math.round(15 * card.d)
                 color: card.look.accent
@@ -110,7 +114,7 @@ MouseArea {
                 color: card.look.accent
                 font.family: IrisStyle.fontMain
                 font.pixelSize: IrisStyle.typeMeta
-                font.weight: Font.DemiBold
+                font.weight: card.current ? Font.Bold : Font.DemiBold
                 elide: Text.ElideRight
             }
         }
@@ -167,7 +171,7 @@ MouseArea {
             x: card.pad
             width: parent.width - 2 * card.pad
             anchors.bottom: parent.bottom
-            anchors.bottomMargin: Math.round(11 * card.d)
+            anchors.bottomMargin: Math.round(12 * card.d)
             // What it puts on, in words: the material, the corners, the type (his 11-02: say what changes).
             text: [card.look.glass ? Translation.tr("Glass") : Translation.tr("Solid"),
                 card.s < 0.75 ? Translation.tr("Sharp") : card.s > 1.15 ? Translation.tr("Round") : Translation.tr("Soft"),
@@ -187,20 +191,7 @@ MouseArea {
             spacing: Math.round(2 * card.d)
             visible: card.containsMouse
             IrisIconButton { materialIcon: "ios_share"; Accessible.name: Translation.tr("Copy to share"); onClicked: card.shareRequested() }
-            IrisIconButton { visible: card.mine; materialIcon: "delete"; Accessible.name: Translation.tr("Delete"); onClicked: IrisThemes.remove(card.theme.id) }
+            IrisIconButton { visible: card.mine; materialIcon: "delete"; Accessible.name: Translation.tr("Delete"); onClicked: card.settingsHistory ? IrisOptions.dropTheme(card.theme) : IrisThemes.remove(card.theme.id) }
         }
-    }
-
-    // Chosen: a ring in its accent a step outside the plate (concentric, outward), as Screen Time marks the one you are on.
-    Rectangle {
-        readonly property real out: Math.round(3 * card.d)
-        anchors.fill: plate
-        anchors.margins: -out
-        radius: plate.radius + out
-        color: "transparent"
-        scale: plate.scale
-        visible: card.current
-        border.width: Math.max(2, Math.round(2 * card.d))
-        border.color: card.look.accent
     }
 }

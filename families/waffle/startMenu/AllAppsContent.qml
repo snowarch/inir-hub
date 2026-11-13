@@ -266,8 +266,13 @@ WPanelPageColumn {
                                                 spacing: 4
                                                 Image {
                                                     Layout.alignment: Qt.AlignHCenter
+                                                    Layout.preferredWidth: 32
+                                                    Layout.preferredHeight: 32
+                                                    fillMode: Image.PreserveAspectFit
                                                     source: Quickshell.iconPath(appBtn.modelData.icon || appBtn.modelData.name, "application-x-executable")
                                                     sourceSize: Qt.size(32, 32)
+                                                    smooth: true
+                                                    mipmap: true
                                                 }
                                                 WText {
                                                     Layout.alignment: Qt.AlignHCenter

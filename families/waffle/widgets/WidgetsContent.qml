@@ -36,7 +36,7 @@ WBarAttachedPanelContent {
     function runQuickAction(actionId: string): void {
         switch (actionId) {
         case "files":
-            ShellExec.execDetachedArgs(["/usr/bin/nautilus"], "Launch Files")
+            ShellExec.execDetachedArgs(["nautilus"], "Launch Files")
             break
         case "terminal":
             AppLauncher.launch("terminal")
@@ -822,7 +822,7 @@ WBarAttachedPanelContent {
                             onSelected: newValue => {
                                 Config.setNestedValue("appearance.palette.type", newValue)
                                 if (ThemeService.isAutoTheme) {
-                                    Quickshell.execDetached(["/usr/bin/bash", "-c", `${Directories.wallpaperSwitchScriptPath} --noswitch --type ${newValue}`]);
+                                    Quickshell.execDetached(["bash", "-c", `${Directories.wallpaperSwitchScriptPath} --noswitch --type ${newValue}`]);
                                 } else {
                                     const hex = MaterialThemeLoader.colorToHex(Appearance.m3colors.m3primary)
                                     const mode = Appearance.m3colors.darkmode ? "dark" : "light"

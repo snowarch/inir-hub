@@ -104,7 +104,7 @@ Item {
         readonly property var backdrop: {
             void (zones.x + zones.y + group.x + group.y + group.width + (zones.parent?.x ?? 0) + (zones.parent?.y ?? 0))
             if (!zones.clear || zones.vertical || group.width < 1) return null
-            const at = group.mapToItem(zones.QsWindow.contentItem, 0, 0)
+            const at = group.mapToItem(zones.QsWindow.window?.contentItem, 0, 0)
             return Lume.read(zones.screenName, at.x, zones.bottomEdge ? at.y + group.height - zones.lane : at.y, group.width, zones.lane)
         }
         onBackdropChanged: group.light = group.backdrop ? Lume.lightAfter(group.backdrop.luminance, group.light, 0.30, 0.21) : false

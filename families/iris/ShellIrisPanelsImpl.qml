@@ -18,9 +18,12 @@ import qs.modules.iris.sidebar
 import qs.modules.iris.orbit
 import qs.modules.iris.osk
 import qs.modules.shared.background
+import qs.modules.shared.background.widgets
 import qs.modules.shared.lock
+import qs.modules.shared.overlay
 import qs.modules.iris.state
 import qs.modules.iris.frame
+import qs.modules.iris.prism
 
 Item {
     id: root
@@ -94,6 +97,15 @@ Item {
 
     IrisAppsSync {}
 
+    // A Design that decides the widgets' design wears it over the person's pick; it counts only while iRiS is the active
+    // family, so leaving iRiS gives theirs back with nothing written on the way out.
+    Binding {
+        target: DesktopWidgetDesign
+        property: "worn"
+        value: ({ family: "iris", design: IrisDesign.widgets })
+        restoreMode: Binding.RestoreNone
+    }
+
     // Orbit's hot corner: a few pixels in one screen corner, on Top, only while it is on and something can use it.
     LazyLoader {
         active: IrisGate.official && (Config.options?.iris?.orbit?.enable ?? false) && (Config.options?.iris?.orbit?.hotCorner ?? true)
@@ -109,7 +121,7 @@ Item {
         property Connections listens: Connections {
             target: Privacy
             function onMicActiveChanged(): void {
-                if (!Privacy.micActive) return
+                if (!Privacy.micActive || Config.options?.iris?.bar?.activities?.micGlow !== true) return
                 edgeGlow.lit = true
                 edgeGlowHold.restart()
             }
@@ -163,13 +175,40 @@ Item {
         component: IrisStudio {}
     }
 
+    // Settings is come back to: let go after a minute it was rebuilt on almost every visit (the wait he felt, 11-11).
+    readonly property int settingsKeepMs: 600000
+    // Prism, iRiS's Settings since 11-06: every area of iRiS Settings is a page of it.
+    readonly property bool prismOn: (Config.options?.iris?.appearance?.settingsPanel ?? "prism") === "prism"
+    OnDemandPanelLoader {
+        identifier: "irisPrism"
+        requireEnabledPanel: false
+        open: GlobalStates.settingsOverlayOpen
+        extraCondition: root.prismOn && !root.settingsWindowed
+        keep: true
+        keepMs: root.settingsKeepMs
+        closeGraceMs: 0
+        component: PrismWindow {}
+    }
+    // Prism as a window of its own; only the host in use is built.
+    OnDemandPanelLoader {
+        identifier: "irisPrismWindow"
+        requireEnabledPanel: false
+        open: GlobalStates.settingsOverlayOpen
+        extraCondition: root.prismOn && root.settingsWindowed
+        keep: true
+        keepMs: root.settingsKeepMs
+        closeGraceMs: 0
+        component: PrismFloating {}
+    }
+
     OnDemandPanelLoader {
         identifier: "irisSettings"
         requireEnabledPanel: false
         open: GlobalStates.settingsOverlayOpen
         // Only the host in use is kept: switching hosts builds the other once.
-        extraCondition: !root.settingsWindowed
+        extraCondition: !root.prismOn && !root.settingsWindowed
         keep: true
+        keepMs: root.settingsKeepMs
         closeGraceMs: 0
         component: IrisSettingsOverlay {}
     }
@@ -179,8 +218,9 @@ Item {
         identifier: "irisSettingsWindow"
         requireEnabledPanel: false
         open: GlobalStates.settingsOverlayOpen
-        extraCondition: root.settingsWindowed
+        extraCondition: !root.prismOn && root.settingsWindowed
         keep: true
+        keepMs: root.settingsKeepMs
         closeGraceMs: 0
         component: IrisSettingsWindow {}
     }
@@ -237,7 +277,8 @@ Item {
 
     OnDemandPanelLoader {
         identifier: "irisOverlay"
-        open: GlobalStates.overlayOpen
+        // A base before the bench has no `wanted`.
+        open: OverlayContext.wanted ?? (GlobalStates.overlayOpen || OverlayContext.hasPinnedWidgets || OverlayContext.nativeDialogOpen)
         requireEnabledPanel: false
         keep: true
         source: Plugins.baseUrl("modules/shared/overlay/Overlay.qml")

@@ -180,11 +180,18 @@ WPanelPageColumn {
         contentItem: ColumnLayout {
             anchors.centerIn: parent
             spacing: 4
+            // A theme that ships an icon only at 16 px would draw it at 16: the box is fixed.
             Image {
                 Layout.alignment: Qt.AlignHCenter
+                Layout.preferredWidth: 32
+                Layout.preferredHeight: 32
+                fillMode: Image.PreserveAspectFit
                 source: AppSearch.getIconSource(appBtn.appId, "application-x-executable")
                 sourceSize: Qt.size(32, 32)
+                smooth: true
+                mipmap: true
             }
+            // One line, as Windows 11 does: a second line ran into the row below.
             WText {
                 Layout.alignment: Qt.AlignHCenter
                 Layout.preferredWidth: 80
@@ -192,8 +199,6 @@ WPanelPageColumn {
                 font.pixelSize: Looks.font.pixelSize.small
                 horizontalAlignment: Text.AlignHCenter
                 elide: Text.ElideRight
-                maximumLineCount: 2
-                wrapMode: Text.Wrap
             }
         }
         WToolTip { text: appBtn.de?.name ?? appBtn.appId }
@@ -232,8 +237,13 @@ WPanelPageColumn {
         contentItem: RowLayout {
             spacing: 10
             Image {
+                Layout.preferredWidth: 28
+                Layout.preferredHeight: 28
+                fillMode: Image.PreserveAspectFit
                 source: AppSearch.getIconSource(recBtn.appId, "application-x-executable")
                 sourceSize: Qt.size(28, 28)
+                smooth: true
+                mipmap: true
             }
             WText {
                 Layout.fillWidth: true

@@ -1,6 +1,33 @@
 {
     "$schema": "../../schema/hub.schema.json",
-    "version": "2.34.5",
+    "version": "2.34.16",
+    "changes": {
+        "2.34.16": ["Floating tools (Super+G): Clock, Timer and Network join the bench, set up in Waffle Settings › Interface › Floating tools", "Live pins show on the desktop under Waffle too", "Text fields open their right-click menu in Waffle's look", "Task View previews stay live when focus moves", "A fresh install starts with no wallpaper or backdrop dim"],
+        "2.34.15": ["Choosing a file or a colour opens the shell's own picker in your colours, not a white window"],
+        "2.34.14": ["Media flyout: a live stream hides its timeline instead of sliding it back and forth", "Taskbar menus wear the taskbar’s own colour and glass", "A window preview no longer covers an open taskbar menu"],
+        "2.34.13": ["On Umbriel, an app's menu in the taskbar sends its window to the scratchpad and back"],
+        "2.34.12": ["Searches that find nothing answer with a little personality", "Hub: “Nothing matches” sits in the middle of the page", "About shows the new iNiR mark in your colours"],
+        "2.34.11": [
+            "Wallpaper: a Pause row: never, behind fullscreen, or when windows cover it",
+            "Taskbar: no longer ignores every click after a start or reload (thanks skrblk, #317)"
+        ],
+        "2.34.10": [
+            "Glyph wallpaper: a still picture now sways, breathes rings of light and shimmers; colours from a list; Restore defaults",
+            "Wallpaper › Draw the wallpaper as glyphs: your wallpaper, a word or a built-in subject as glowing characters, in sixteen looks",
+            "Hub: a plugin that changes a file of yours, like Fastfetch, gets a switch that turns it off and gives yours back"
+        ],
+        "2.34.9": [
+            "Runs on NixOS: every tool and app is found on your PATH, not only in /usr/bin"
+        ],
+        "2.34.8": [
+            "React with any emoji: one small pill opens a search, and votes and reactions show the moment people give them"
+        ],
+        "2.34.7": [
+            "Start: every pinned and recommended icon the same size, names on one line",
+            "Hub items say what is new in their version",
+            "Vote and react on any hub item, and see how many people have it"
+        ]
+    },
     "summary": "Windows 11 for people who want it: taskbar, Start, Action Center.",
     "authors": [
         "snowarch"
@@ -13,7 +40,7 @@
         "process",
         "files"
     ],
-    "minInir": "2.33.0",
+    "minInir": "3.1.1",
     "provides": "modules/waffle",
     "requires": [
         "ii"

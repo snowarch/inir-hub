@@ -1,6 +1,6 @@
 # __NAME__
 
-What it shows, and where: a card on the Material desktop, a line on the iRiS Island, a card in Waffle's Widgets panel.
+What it shows, and where: a card on the Material desktop and in Material's sidebars, a line on the iRiS Island, a card in Waffle's Widgets panel.
 
 ## Settings
 

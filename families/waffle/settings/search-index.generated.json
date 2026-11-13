@@ -117,6 +117,8 @@
 {"pageIndex": 3,"section": "Wallpaper transitions","label": "Transition duration","description": "How long the wallpaper transition takes","keywords": ["wallpaper","background","transition","duration","speed"]},
 {"pageIndex": 3,"section": "Wallpaper Effects","label": "Enable animated wallpapers (videos/GIFs)","description": "Play videos and GIFs as wallpaper. When disabled, shows a frozen frame"},
 {"pageIndex": 3,"section": "Wallpaper Effects","label": "Pause animated wallpapers on battery","description": "Freeze videos and GIFs while on battery power to save energy"},
+{"pageIndex": 3,"section": "Wallpaper Effects","label": "Pause","description": "A hidden wallpaper stops decoding and keeps its frame."},
+{"pageIndex": 3,"section": "Wallpaper Effects","label": "Draw the wallpaper as glyphs","description": "Pictures, GIFs and videos are redrawn as glowing characters."},
 {"pageIndex": 3,"section": "Wallpaper Effects","label": "Enable blur","description": "Blur wallpaper when windows are open. Temporarily hides during wallpaper transitions.","keywords": ["blur","wallpaper","background","effect"]},
 {"pageIndex": 3,"section": "Wallpaper Effects","label": "Blur animated wallpapers (videos/GIFs)","description": "Apply blur to animated wallpapers. Independent from window blur. May significantly impact performance."},
 {"pageIndex": 3,"section": "Wallpaper Effects","label": "Blur radius","description": "Amount of blur applied to wallpaper","keywords": ["blur","radius","intensity"]},
@@ -243,6 +245,7 @@
 {"pageIndex": 6,"section": "Floating tools (Super+G)","label": "Darken screen behind overlay","description": "Add a dark scrim behind overlay panels for better visibility"},
 {"pageIndex": 6,"section": "Floating tools (Super+G)","label": "Overlay scrim dim (%)","description": ""},
 {"pageIndex": 6,"section": "Floating tools (Super+G)","label": "Overlay background opacity (%)","description": ""},
+{"pageIndex": 6,"section": "Floating tools (Super+G)","label": "Pinned tools when clicks pass through (%)","description": ""},
 {"pageIndex": 6,"section": "Floating tools (Super+G)","label": "Game Performance background opacity (%)","description": ""},
 {"pageIndex": 6,"section": "Floating tools (Super+G)","label": "Transparent Game Performance background","description": "Set panel opacity to 0%; metrics remain visible"},
 {"pageIndex": 6,"section": "Floating tools (Super+G)","label": "Enable opening zoom animation","description": ""},
@@ -565,5 +568,6 @@
 {"pageIndex": 17,"section": "","label": "Taskbar placement","targetLabel": "Current position","description": ""},
 {"pageIndex": 18,"section": "","label": "Hub","targetLabel": "","description": "Widgets, themes and web apps made by people who use iNiR"},
 {"pageIndex": 18,"section": "","label": "Sources","description": "Everything in the official hub is reviewed before it is published. Other sources are not: add only the ones you trust."},
+{"pageIndex": 18,"section": "Sources","label": "Count my votes and installs","description": "Without your name, from a key kept on this computer"},
 {"pageIndex": 18,"section": "About it","label": "Reaches","description": ""},
 {"pageIndex": 18,"section": "","label": "About it","targetLabel": "Reaches","description": ""}]

@@ -13,10 +13,12 @@ import qs.modules.iris.components
 IrisWidgetFace {
     id: root
 
-    readonly property bool labelled: !root.small
-    // Medium and large: wide tiles as the Control Center's (a disc, the name and what it is doing), two a row.
-    readonly property bool tiles: !root.small
-    readonly property int columns: root.tiles ? 2 : 2
+    // Medium and large: wide tiles as the Control Center's (a disc, the name and what it is doing), two a row; or
+    // Discs (his 11-06 Nothing reference): round keys four a row, each its name under it.
+    readonly property bool discs: !root.small && String(root.widget.familyOption("face", "tiles")) === "discs"
+    readonly property bool tiles: !root.small && !root.discs
+    readonly property int columns: root.discs ? 4 : 2
+    readonly property real nameHeight: root.discs ? Math.ceil(root.px(10.5) * 1.4) + root.dp(6) : 0
     readonly property real spacing: root.dp(root.small ? 14 : 12)
     readonly property real cell: (root.contentWidth - root.spacing * (root.columns - 1)) / root.columns
     readonly property real disc: Math.min(root.cell, root.dp(root.small ? 60 : root.medium ? 48 : 56))
@@ -42,7 +44,7 @@ IrisWidgetFace {
 
         Layout.fillWidth: root.tiles
         Layout.preferredWidth: root.tiles ? 1 : root.cell
-        Layout.preferredHeight: root.tiles ? root.dp(root.large ? 46 : 40) : root.disc
+        Layout.preferredHeight: root.tiles ? root.dp(root.large ? 46 : 40) : root.disc + root.nameHeight
         opacity: toggle.available || discSkinned ? 1 : 0.4
         readonly property bool discSkinned: IrisDesign.has("controlTile")
 
@@ -112,6 +114,17 @@ IrisWidgetFace {
                 color: toggle.on ? root.onFill(toggle.tint) : root.ink
             }
         }
+        FaceText {
+            face: root
+            visible: root.discs
+            y: disc.height + root.dp(6)
+            width: parent.width
+            horizontalAlignment: Text.AlignHCenter
+            text: toggle.label
+            size: 10.5
+            weight: Font.DemiBold
+            color: toggle.available ? (toggle.on ? root.ink : root.inkSecondary) : root.inkTertiary
+        }
         // On the whole control, not the disc: a tap on a tile's name did nothing.
         HoverHandler { id: hover; enabled: toggle.available; cursorShape: Qt.PointingHandCursor }
         TapHandler { id: tap; enabled: toggle.available; gesturePolicy: TapHandler.WithinBounds; onTapped: toggle.toggled() }
@@ -140,7 +153,7 @@ IrisWidgetFace {
                 on: Network.ethernet || Network.wifiEnabled
                 status: Network.ethernet ? Translation.tr("Connected") : Network.wifiEnabled
                     ? (Network.networkName || Translation.tr("Not connected")) : Translation.tr("Off")
-                tint: root.inked(IrisStyle.identity.blue)
+                tint: root.accent
                 onToggled: Network.toggleWifi()
             }
             Toggle {
@@ -150,7 +163,7 @@ IrisWidgetFace {
                 status: !BluetoothStatus.enabled ? Translation.tr("Off") : (BluetoothStatus.activeDeviceSummary() || Translation.tr("On"))
                 on: BluetoothStatus.enabled
                 available: BluetoothStatus.available
-                tint: root.inked(IrisStyle.identity.blue)
+                tint: root.accent
                 onToggled: { if (Bluetooth.defaultAdapter) Bluetooth.defaultAdapter.enabled = !Bluetooth.defaultAdapter.enabled }
             }
             Toggle {
@@ -158,7 +171,7 @@ IrisWidgetFace {
                 glyph: Notifications.manualDndActive ? "do_not_disturb_on" : "do_not_disturb_off"
                 label: Translation.tr("Focus")
                 on: Notifications.manualDndActive
-                tint: root.inked(IrisStyle.identity.indigo)
+                tint: root.accent
                 onToggled: Notifications.toggleSilent()
             }
             Toggle {
@@ -166,7 +179,7 @@ IrisWidgetFace {
                 glyph: "nightlight"
                 label: Translation.tr("Night light")
                 on: Hyprsunset.active
-                tint: root.inked(IrisStyle.identity.orange)
+                tint: root.accent
                 onToggled: Hyprsunset.toggle()
             }
             Toggle {
@@ -174,7 +187,7 @@ IrisWidgetFace {
                 glyph: "coffee"
                 label: Translation.tr("Keep awake")
                 on: Idle.inhibit
-                tint: root.inked(IrisStyle.identity.yellow)
+                tint: root.accent
                 onToggled: Idle.toggleInhibit()
             }
             Toggle {
@@ -182,7 +195,7 @@ IrisWidgetFace {
                 glyph: "sports_esports"
                 label: Translation.tr("Game mode")
                 on: GameMode.active
-                tint: root.inked(IrisStyle.identity.green)
+                tint: root.accent
                 onToggled: GameMode.toggle()
             }
             Toggle {
@@ -191,7 +204,7 @@ IrisWidgetFace {
                 label: Translation.tr("Microphone")
                 on: Audio.source !== null && !Audio.micMuted
                 available: Audio.source !== null
-                tint: root.inked(IrisStyle.identity.orange)
+                tint: root.accent
                 onToggled: Audio.toggleMicMute()
             }
             Toggle {
@@ -199,7 +212,7 @@ IrisWidgetFace {
                 glyph: Appearance.m3colors.darkmode ? "dark_mode" : "light_mode"
                 label: Translation.tr("Dark mode")
                 on: Appearance.m3colors.darkmode
-                tint: root.inked(IrisStyle.identity.indigo)
+                tint: root.accent
                 onToggled: Appearance.toggleDarkMode()
             }
         }

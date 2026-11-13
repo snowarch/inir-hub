@@ -17,6 +17,19 @@ AppButton {
     property bool active: root.appEntry.toplevels.some(t => t.activated)
     property bool hasWindows: appEntry.toplevels.length > 0
 
+    // Umbriel's scratchpad, for an app with one window (a base without the verbs leaves it out).
+    function scratchpadEntry(): var {
+        const id = root.appEntry.toplevels.length === 1 ? root.appEntry.toplevels[0]?.niriWindowId : undefined
+        const win = NiriService.scratchpadAvailable === true && id !== undefined
+            ? (NiriService.windows ?? []).find(w => w.id === id) : null
+        if (!win) return []
+        return [{
+            iconName: win.scratchpad ? "arrow-enter-left" : "panel-left-contract",
+            text: win.scratchpad ? Translation.tr("Back to its workspace") : Translation.tr("Send to scratchpad"),
+            action: () => win.scratchpad ? NiriService.restoreWindowFromScratchpad(id) : NiriService.moveWindowToScratchpad(id)
+        }]
+    }
+
     // Focused window index for smart indicator (Niri)
     property int focusedWindowIndex: {
         if (!root.active || appEntry.toplevels.length <= 1) return 0;
@@ -57,8 +70,10 @@ AppButton {
     iconName: AppSearch.guessIcon(appEntry.appId)
     tryCustomIcon: false
     
+    // The hover still runs under an open menu: a preview then would cover it.
     onHoverTimedOut: {
-        root.hoverPreviewRequested()
+        if (!contextMenu.active)
+            root.hoverPreviewRequested()
     }
 
     // Count of minimized windows for this app
@@ -262,6 +277,7 @@ AppButton {
                     TaskbarApps.togglePin(root.appEntry.appId);
                 }
             },
+            ...root.scratchpadEntry(),
             // MinimizedWindows is the Niri hidden-workspace workaround.
             // Do not advertise a no-op action on secondary compositors.
             ...(CompositorService.isNiri

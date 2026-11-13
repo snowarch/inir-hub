@@ -50,7 +50,8 @@ Item {
             GlanceHeader {
                 id: glanceHeader
                 Layout.fillWidth: true
-                Layout.bottomMargin: 16
+                // The same air as between the widgets below, never under 16.
+                Layout.bottomMargin: Math.max(16, widgetContainer.widgetSpacing)
 
                 opacity: root.animateIn ? 1 : 0
                 scale: root.animateIn ? 1 : 0.97

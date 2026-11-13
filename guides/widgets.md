@@ -5,8 +5,9 @@ Custom desktop widgets that run on the iNiR shell. Full QML access to 100+ servi
 
 Widgets live in `~/.config/inir/widgets/<name>/` and are loaded automatically.
 
-A widget can have up to three faces: the desktop card (this file), a compact iRiS module on the
-Island's Desktop page ([iris-widgets.md](iris-widgets.md)) and a card in Waffle's Widgets panel ([Waffle card](#waffle-card)).
+A widget can have up to four faces: the desktop card (this file), a card in Material's sidebars
+([Material sidebar card](#material-sidebar-card)), a compact iRiS module on the Island's Desktop page
+([iris-widgets.md](iris-widgets.md)) and a card in Waffle's Widgets panel ([Waffle card](#waffle-card)).
 Give it the faces you can make well.
 
 To share one, publish it on the [Community Hub](https://github.com/snowarch/inir-hub): people install
@@ -20,7 +21,7 @@ inir customWidgets create my-widget    # generates scaffold
 inir customWidgets reload              # hot-reload without restart
 ```
 
-Or start from `inir hub new widget <id>`, which writes all three faces.
+Or start from `inir hub new widget <id>`, which writes all four faces.
 
 ## File Structure
 
@@ -28,6 +29,7 @@ Or start from `inir hub new widget <id>`, which writes all three faces.
 ~/.config/inir/widgets/my-widget/
   widget.json       # manifest (name, icon, configKeys, resize behavior)
   MyWidget.qml      # main component — extends AbstractBackgroundWidget
+  SidebarCard.qml   # optional: the Material sidebars face
   IrisCompact.qml   # optional: the iRiS Island face (iris-widgets.md)
   WaffleCard.qml    # optional: the Waffle Widgets panel face
   (any other .qml files, images, scripts)
@@ -70,12 +72,75 @@ Or start from `inir hub new widget <id>`, which writes all three faces.
 
 Supported configKey types: `bool`, `int`, `real`, `string`.
 
+### `service`: what lives while the widget is installed (iNiR 3.1.0)
+
+`"service": "MyService.qml"` names a file the shell loads for as long as the widget is installed, whether or not a
+face shows. Use it only for what must answer with no face on screen, such as an `IpcHandler` a keybind calls; it
+holds a reference to your singleton (`QtObject { readonly property var state: MyState }`) and runs nothing on its
+own. An older iNiR ignores the key, so the widget's IPC answers there only while a face shows.
+
+Every Hub install reloads widgets from a fresh folder, and with it a fresh copy of your singleton; the old copy is
+never destroyed. So the singleton retires itself, for good, once the list no longer points at its folder: it stops
+what it plays and turns its `IpcHandler` off (`enabled: root.installed`). `widgets/radio/Radio.qml` (`installed`,
+`retired`) is the pattern to copy.
+
+### `options`: rows like the built-in widgets' (iNiR 3.0.2)
+
+`configKeys` gives one plain row per key. `options` is an ordered list of rows with the same controls the built-in
+widgets use; when it is present it is what people see (keep `configKeys` beside it so an older iNiR still shows rows).
+
+```json
+    "sizes": ["medium", "small", "large"],
+    "options": [
+        { "key": "source", "label": "Shows", "type": "choice", "default": "music",
+          "choices": [["music", "What is playing"], ["file", "A picture of mine"]] },
+        { "key": "file", "label": "Picture", "type": "file", "default": "", "when": { "source": "file" } },
+        { "key": "ink", "label": "Colour", "type": "colour", "default": "#3b6cff", "page": "look" },
+        { "key": "glow", "label": "Glow", "type": "range", "default": 100, "min": 0, "max": 200, "step": 5,
+          "unit": " %", "page": "look", "tune": true }
+    ]
+```
+
+| Field | Meaning |
+| --- | --- |
+| `type` | `switch`, `choice`, `range`, `text`, `colour` (swatches; your own with `choices: [["#rrggbb", "Name"]]`), `file` and `folder` (the system's chooser: nobody types a path) |
+| `page` | `widget` (default) or `look`, the sheet's two pages |
+| `when` | Shown only while it holds: `{ "key": value }`, `{ "key": [values] }`, a list (all of them), `{ "any": [...] }`, `{ "not": ... }` |
+| `tune` | `true` keeps the row behind Fine-tune; switches go there unless `tune: false` |
+| `sets` | On a choice: other keys each value writes with it, `{ "value": { "key": value } }` (a style that sets colours) |
+| `sizes` | The size classes the widget offers, default first. With them it gets the size row and resize grips, and under Material its box takes any width and height: lay out from `width` and `height` |
+
+Every row can be put back to its default, and the Look page ends with **Restore defaults** while something differs.
+
 Optional faces for the other families:
 
 ```json
+    "ii": { "main": "SidebarCard.qml", "slots": ["sidebar.left", "sidebar.right"] },
     "iris": { "main": "IrisCompact.qml", "slots": ["island.desktop"] },
     "waffle": { "main": "WaffleCard.qml" }
 ```
+
+### `desktop`: a face per widget design (iNiR 3.1.0)
+
+Under iRiS every built-in desktop widget is drawn again in the family's widget designs (iRiS, Prism), on the glass,
+blur and ink they all share; the person picks the design in the widget's sheet, Look page. A hub widget joins them
+by naming one file per design in its family block:
+
+```json
+    "iris": { "main": "IrisCompact.qml", "slots": ["island.desktop"],
+              "desktop": { "iris": "IrisFace.qml", "prism": "PrismFace.qml" } }
+```
+
+- The block needs `main` or `desktop`; a widget with only desktop faces leaves `main` and `slots` out.
+- Each file is loaded inside your Material `main` with `widget` set to it, fills it, and draws the whole widget in
+  every size it declares (`widget.sizeClass`): the root is `IrisWidgetFace` (`qs.modules.iris.widgets`: its plate,
+  glass and blur, the inks `ink`, `inkSecondary`, `inkTertiary`, `accent`, the parts `FaceText`, `FaceHeader`,
+  `FaceAction`) or, for Prism, `PrismFolder` (`qs.modules.iris.widgets.prism`).
+- Your `main` stops drawing its own card while a face is worn: `visible: !root.familyFaced` on its drawing, and on
+  the rows of its sheet that only the Material card reads.
+- A design you gave no file for shows the Material card, and so does an older iNiR, which ignores the key.
+
+Look at `widgets/radio/IrisRadioFace.qml` and `PrismRadio.qml`.
 
 ## Minimal Widget
 
@@ -534,6 +599,77 @@ editPopoverContent: Component {
     }
 }
 ```
+
+---
+
+## Material sidebar card
+
+`ii.main` in `widget.json` gives the widget a place in Material's sidebars, beside the built-in cards. `ii.slots` says
+which (both when left out):
+
+| Slot | Where | Shown |
+| --- | --- | --- |
+| `sidebar.left` | A card in the left sidebar's Widgets column, below the built-in ones; people drag it like theirs | Once installed; Settings › Panels › Widgets turns it off |
+| `sidebar.right` | A tab of the right sidebar's widget group, beside Calendar, To Do, Timer | When the person turns it on in Settings › Sidebars › Right sidebar |
+
+The face gets the slot in `iiSlot`. As a card it sets its own height (`implicitHeight`) and the column gives it its
+width and side margins; as a tab it fills the space the right sidebar gives it, so centre or stretch what it shows.
+The card has no plate of its own, like the built-in ones: draw on the sidebar.
+
+```qml
+import QtQuick
+import QtQuick.Layouts
+import qs.services
+import qs.modules.common
+import qs.modules.common.widgets
+import qs.modules.ii.kit
+
+Item {
+    id: root
+
+    property string iiSlot: ""   // set by the sidebar: "sidebar.left" or "sidebar.right"
+
+    readonly property string message: String(CustomWidgets.getConfigValue("my-widget", "message", "Hello"))
+
+    implicitHeight: content.implicitHeight + SidebarStyle.padding * 2
+
+    ColumnLayout {
+        id: content
+        anchors.fill: parent
+        anchors.margins: SidebarStyle.padding
+        spacing: 6
+
+        RowLayout {   // the header every sidebar card carries: a glyph and what it is
+            spacing: 6
+            MaterialSymbol { text: "widgets"; iconSize: 16; color: SidebarStyle.text }
+            StyledText {
+                text: "My widget"
+                font.pixelSize: Appearance.font.pixelSize.small
+                font.weight: Font.Medium
+                color: SidebarStyle.text
+            }
+        }
+        StyledText {
+            Layout.fillWidth: true
+            text: root.message
+            font.pixelSize: Appearance.font.pixelSize.huge
+            color: SidebarStyle.accent
+        }
+    }
+}
+```
+
+Sidebar faces draw with `SidebarStyle` from `qs.modules.ii.kit`: the ink and radii the built-in cards wear under every
+Material global style, so the card changes with them. `text`, `subtext` and `accent` (`accentInk` on it) for ink,
+`plate` and `plateHover` for a row or chip inside the card, `radius` and `radiusSmall` for its corners, `padding` for
+the inside edge. Type comes from `Appearance.font`, controls from `qs.modules.common.widgets` (`StyledText`,
+`MaterialSymbol`, `RippleButton`, `StyledProgressBar`, `MaterialShape`). Settings are the `configKeys` the desktop
+face reads, through `CustomWidgets.getConfigValue(id, key, fallback)`; people change them in Material's Settings ›
+Widgets, under the widget's name, whether or not it is on the desktop.
+
+The sidebars keep their content after the first open and hide it when they close: what ticks runs only while
+`root.visible` (`SystemClock { enabled: root.visible }`), which is false while the sidebar is closed or the tab is
+another. Look at `widgets/countdown/SidebarCountdown.qml`.
 
 ---
 

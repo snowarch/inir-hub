@@ -12,7 +12,9 @@ FloatingWindow {
     // Untranslated, like Material's and Waffle's: niri's rule that opens it at two thirds of the screen matches this
     // title, and "Configuración de iNiR" opened it at half, where every layout falls back to Classic's page.
     title: "iNiR Settings"
-    visible: GlobalStates.settingsOverlayOpen
+    // A Binding, not `visible:`: closed from outside (Niri's close-window) the window turns its own `visible` false,
+    // which would cut a plain binding and leave Settings unable to open again.
+    Binding { target: root; property: "visible"; value: GlobalStates.settingsOverlayOpen }
     // Blur turns this window see-through while it is open. Quickshell keeps the alpha it was shown with (an opaque
     // window stays opaque, black where the body leaves it clear), so it is always made with alpha.
     surfaceFormat: ({ opaque: false })
@@ -42,7 +44,9 @@ FloatingWindow {
     Connections {
         target: GlobalStates
         function onSettingsRaiseRequestChanged(): void {
-            if (root.niriWindow) NiriService.focusWindow(root.niriWindow.id)
+            if (!root.niriWindow) return
+            if (MinimizedWindows.isMinimized(root.niriWindow.id)) MinimizedWindows.restore(root.niriWindow.id)
+            NiriService.focusWindow(root.niriWindow.id)
         }
     }
 

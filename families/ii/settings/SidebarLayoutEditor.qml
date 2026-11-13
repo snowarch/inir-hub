@@ -66,7 +66,7 @@ ColumnLayout {
 
     function sanitizeOrder(saved, defaults): var {
         const result = []
-        const source = Array.isArray(saved) ? saved : defaults
+        const source = saved ? Array.from(saved) : defaults
         for (let i = 0; i < source.length; i++) {
             const id = source[i]
             if (defaults.includes(id) && !result.includes(id)) result.push(id)

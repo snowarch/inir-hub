@@ -150,15 +150,15 @@ Loader {
         readonly property bool fromEdge: ["up", "down", "left", "right"].includes(root.opensToward)
         readonly property var besides: popup.fromEdge ? IrisFrame.besides(popup.screen?.name ?? "", popup.target, true) : []
         readonly property var placement: popup.fromEdge
-            ? IrisFrame.place(popup.target, menu.width, menu.height, popup.width, popup.height, menu.baseRadius, popup.besides, IrisFrame.bodyAir) : null
+            ? IrisFrame.place(popup.target, menu.width, menu.height, popup.width, popup.height, menu.baseRadius, popup.besides, IrisFrame.bodyAir, popup.screen?.name ?? "") : null
         readonly property string toward: popup.placement
             ? (popup.placement.sideways ? (popup.placement.towardsLeft ? "left" : "right") : (popup.placement.towardsUp ? "up" : "down"))
             : root.opensToward
         // At the pointer: the frame's air at the sides, and clear of the Island and the Dock above and below.
-        readonly property real roomLeft: IrisFrame.band + IrisFrame.musicReach("left") + IrisFrame.bodyMargin
-        readonly property real roomRight: popup.width - IrisFrame.band - IrisFrame.musicReach("right") - IrisFrame.bodyMargin
-        readonly property real roomTop: IrisFrame.safeInset("top") + IrisFrame.bodyMargin
-        readonly property real roomBottom: popup.height - IrisFrame.safeInset("bottom") - IrisFrame.bodyMargin
+        readonly property real roomLeft: IrisFrame.wallOn("left") + IrisFrame.musicReach("left") + IrisFrame.bodyMargin
+        readonly property real roomRight: popup.width - IrisFrame.wallOn("right") - IrisFrame.musicReach("right") - IrisFrame.bodyMargin
+        readonly property real roomTop: IrisFrame.safeInset("top", popup.screen?.name ?? "") + IrisFrame.bodyMargin
+        readonly property real roomBottom: popup.height - IrisFrame.safeInset("bottom", popup.screen?.name ?? "") - IrisFrame.bodyMargin
         function clampX(x: real): real { return Math.round(Math.max(popup.roomLeft, Math.min(popup.roomRight - menu.width, x))) }
         function clampY(y: real): real { return Math.round(Math.max(popup.roomTop, Math.min(popup.roomBottom - menu.height, y))) }
         readonly property bool flipX: root.opensToward.length === 0 && popup.target.x + menu.width > popup.roomRight

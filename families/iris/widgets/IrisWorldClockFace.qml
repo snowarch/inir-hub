@@ -6,7 +6,9 @@ import qs.modules.iris.style
 
 IrisWidgetFace {
     id: root
-    designFace: IrisDesign.skin("widgetWorldClock")
+    // Offset (his 11-06 reference): its own face over the same cities; the Design's print steps aside for it.
+    readonly property bool offsetStyle: String(root.widget.familyOption("face", "classic")) === "offset"
+    designFace: root.offsetStyle ? "" : IrisDesign.skin("widgetWorldClock")
 
     readonly property var cities: Array.from(root.widget.cities ?? []).slice(0, 4)
     readonly property int localOffset: -WorldClock.now.getTimezoneOffset()
@@ -68,7 +70,7 @@ IrisWidgetFace {
 
     FaceText {
         face: root
-        visible: root.cities.length === 0
+        visible: root.cities.length === 0 && !root.offsetStyle
         anchors.centerIn: parent
         text: Translation.tr("Add a city")
         color: root.inkTertiary
@@ -80,14 +82,14 @@ IrisWidgetFace {
     readonly property bool rows: root.small && root.cities.length > 2
     Row {
         id: columns
-        visible: !root.large && !root.rows
+        visible: !root.large && !root.rows && !root.offsetStyle
         readonly property int count: Math.max(1, root.cities.length)
         readonly property real gap: root.dp(root.small ? 14 : 18)
         anchors.verticalCenter: parent.verticalCenter
         width: parent.width
         spacing: columns.gap
         Repeater {
-            model: root.large || root.rows ? [] : root.cities
+            model: root.large || root.rows || root.offsetStyle ? [] : root.cities
             Column {
                 id: city
                 required property var modelData
@@ -128,10 +130,10 @@ IrisWidgetFace {
 
     Item {
         id: smallRows
-        visible: root.rows
+        visible: root.rows && !root.offsetStyle
         anchors.fill: parent
         Repeater {
-            model: root.rows ? root.cities : []
+            model: root.rows && !root.offsetStyle ? root.cities : []
             Item {
                 id: smallRow
                 required property var modelData
@@ -172,11 +174,11 @@ IrisWidgetFace {
     // around now, daylight in the warm fade, now the notch in the middle. Where it is day reads down the rows.
     Item {
         id: largeRows
-        visible: root.large
+        visible: root.large && !root.offsetStyle
         anchors.fill: parent
         readonly property real band: root.dp(6)
         Repeater {
-            model: root.large ? root.cities : []
+            model: root.large && !root.offsetStyle ? root.cities : []
             Item {
                 id: row
                 required property var modelData
@@ -226,5 +228,11 @@ IrisWidgetFace {
                 }
             }
         }
+    }
+
+    Loader {
+        anchors.fill: parent
+        active: root.offsetStyle
+        sourceComponent: Component { WorldClockOffset { face: root } }
     }
 }

@@ -21,7 +21,7 @@ IrisWidgetFace {
             paused: TimerService.pomodoroPaused,
             progress: 1 - TimerService.pomodoroSecondsLeft / Math.max(1, TimerService.pomodoroLapDuration),
             tint: root.nothing ? (TimerService.pomodoroRunning && !TimerService.pomodoroPaused ? root.signal : root.ink)
-                : TimerService.pomodoroBreak ? IrisStyle.identity.green : root.highlight
+                : TimerService.pomodoroBreak ? root.accent2 : root.highlight
         },
         {
             key: "stopwatch",

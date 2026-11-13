@@ -1,6 +1,41 @@
 {
     "$schema": "../../schema/hub.schema.json",
-    "version": "2.35.3",
+    "version": "2.36.2",
+    "changes": {
+        "2.36.2": ["Floating tools (Super+G): Clock, Timer and Network join the bench, set up in Settings › Panels › Floating tools", "Text fields open their right-click menu in Material's look, inside the panel, so a sidebar no longer closes under it", "A fresh install starts with no wallpaper or backdrop dim", "The left sidebar leaves no empty gap where a card has nothing to show (weather offline, no wallpapers)"],
+        "2.36.1": ["Choosing a file, a folder or a colour opens the shell's own picker in your colours, not a white window", "The colour picker reads the screen on Niri too (no hyprpicker)"],
+        "2.36.0": ["Hub widgets show in the sidebars: a card in the left one's Widgets column, a tab in the right one (Settings, Sidebars)", "Hub: a web app you installed gets a button that turns on the sidebar's Web apps tab"],
+        "2.35.15": ["A live stream (a radio, a live video) shows Live with a full line instead of a timeline that slides back and forth", "On Umbriel, an app's menu in the dock and the bar sends its window to the scratchpad and back", "Edit desktop: the size keys over a widget take the pointer after you move it"],
+        "2.35.14": ["Searches that find nothing answer with a little personality", "About shows the new iNiR mark in your colours", "Edit desktop: hub widgets sit in their own aisle (Radio in Media) and search finds them by what they do"],
+        "2.35.13": ["Widgets: Background strength reaches a solid plate and tints the glass; Blur background hides in styles without glass"],
+        "2.35.12": [
+          "Left sidebar: crowded tabs fade at the edge; translator and AI chat buttons fit their cards (#328)"
+        ],
+        "2.35.11": [
+          "Wallpaper: a Pause row: never, behind fullscreen, or when windows cover it"
+        ],
+        "2.35.10": [
+          "Glyph wallpaper: a still picture now sways, breathes rings of light and shimmers; Restore defaults",
+          "Desktop widgets: a Hub widget's own options show as the same rows as the built-in ones, with a file chooser instead of a typed path",
+          "Wallpaper › Draw the wallpaper as glyphs: your wallpaper, a word or a built-in subject as glowing characters, in sixteen looks",
+          "Settings › Umbriel: the compositor's page when you run Umbriel: screens, workspaces, layouts, borders, glass, movement, input, hot corners",
+          "Every row there is asked of the compositor: what your machine or Umbriel cannot do is not shown"
+        ],
+        "2.35.9": [
+            "Hub: a plugin that changes a file of yours, like Fastfetch, gets a switch that turns it off and gives yours back"
+        ],
+        "2.35.8": [
+            "Runs on NixOS: every tool and app is found on your PATH, not only in /usr/bin"
+        ],
+        "2.35.6": [
+            "Side panels open on the first click, also after a while unused",
+            "React with any emoji: one small pill opens a search, and votes and reactions show the moment people give them"
+        ],
+        "2.35.5": [
+            "Hub items say what is new in their version",
+            "Vote and react on any hub item, and see how many people have it"
+        ]
+    },
     "summary": "Material 3 Expressive panels, bars, docks and widgets in nine global styles.",
     "authors": [
         "snowarch"
@@ -32,7 +67,7 @@
         "yande.re",
         "youtube.com"
     ],
-    "minInir": "2.33.0",
+    "minInir": "3.1.1",
     "provides": "modules/ii",
     "preview": "preview.webp"
 }

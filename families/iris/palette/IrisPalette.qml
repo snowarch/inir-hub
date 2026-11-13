@@ -44,7 +44,7 @@ Item {
         ? Math.min(root.clipboardResultLimit, root.clipboardHeightLimit)
         : Math.min(root.configuredResultLimit, root.heightResultLimit)
     function edgeClear(edge: string): real {
-        let held = IrisFrame.inset(edge)
+        let held = IrisFrame.insetOn(edge, root.screen?.name ?? "")
         if ((Config.options?.iris?.dock?.enable ?? true) && IrisFrame.dockEdge === edge)
             held = Math.max(held, IrisFrame.band + IrisFrame.dockBand + IrisFrame.dockMargin)
         return held - IrisFrame.band + IrisFrame.musicReach(edge) + Math.round(12 * IrisStyle.density)

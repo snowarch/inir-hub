@@ -32,7 +32,15 @@ PanelWindow {
     mask: Region {
         item: shelfHit
         Region { item: sheetHit }
-        Region { item: chosen.item?.keysItem ?? null }
+        Region { item: keysHit }
+    }
+    Item {
+        id: keysHit
+        readonly property rect at: chosen.item?.keysRect ?? Qt.rect(0, 0, 0, 0)
+        x: keysHit.at.x
+        y: keysHit.at.y
+        width: keysHit.at.width
+        height: keysHit.at.height
     }
     Item {
         id: shelfHit

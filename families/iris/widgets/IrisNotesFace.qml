@@ -12,7 +12,7 @@ IrisWidgetFace {
 
     // Nothing written and nobody writing: the page says what it is for instead of one grey line on an empty card.
     readonly property bool blank: String(root.widget.noteText ?? "").length === 0 && !root.widget.editing
-    readonly property color pencil: root.inked(IrisStyle.identity.yellow)
+    readonly property color pencil: root.warm
     readonly property int words: String(root.widget.noteText ?? "").trim().split(/\s+/).filter(word => word.length > 0).length
 
     FaceHeader {
@@ -23,7 +23,7 @@ IrisWidgetFace {
         height: root.dp(20)
         glyph: "edit_note"
         text: Translation.tr("Notes")
-        tint: root.inked(IrisStyle.identity.yellow)
+        tint: root.warm
         trailing: root.words > 0 && !root.small ? Translation.tr("%1 words").arg(root.words) : ""
     }
 

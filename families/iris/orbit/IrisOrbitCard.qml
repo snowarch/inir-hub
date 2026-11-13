@@ -165,7 +165,7 @@ Item {
         }
 
         Repeater {
-            model: root.tiles
+            model: ScriptModel { values: root.tiles; objectProp: "id" }
             IrisOrbitThumb {
                 id: tile
                 required property var modelData

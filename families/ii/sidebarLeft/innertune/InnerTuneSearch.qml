@@ -44,7 +44,7 @@ StyledFlickable {
             StyledText {
                 anchors.centerIn: parent
                 visible: !YtMusic.searching && root.results.length === 0
-                text: Translation.tr("No results")
+                text: Voice.miss(Translation.tr("No results"), "")
                 color: Appearance.colMetadataText
             }
         }

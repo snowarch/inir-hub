@@ -1,7 +1,6 @@
 import qs
 import QtQuick
 import QtQuick.Controls
-import QtQuick.Dialogs
 import QtQuick.Layouts
 import Qt5Compat.GraphicalEffects
 import Quickshell
@@ -249,7 +248,9 @@ ContentPage {
         ]
     }
 
-    FolderDialog {
+    FilePickerDialog {
+
+        selectFolder: true
         id: captureFolderDialog
         title: root.captureFolderTarget === "screenshots"
             ? Translation.tr("Select screenshots folder")
@@ -2350,7 +2351,7 @@ ContentPage {
                     buttonRadius: Appearance.zzzEverywhere ? Appearance.zzz.controlRadius : Appearance.rounding.small
                     materialIcon: "refresh"
                     mainText: Translation.tr("Reload shell")
-                    onClicked: Quickshell.execDetached(["/usr/bin/bash", Quickshell.shellPath("scripts/restart-shell.sh")])
+                    onClicked: Quickshell.execDetached(["bash", Quickshell.shellPath("scripts/restart-shell.sh")])
                 }
 
                 RippleButtonWithIcon {

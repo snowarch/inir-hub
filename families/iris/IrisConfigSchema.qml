@@ -38,6 +38,7 @@ JsonObject {
         property bool legibleAlways: false // Lume backs every widget as if the wallpaper under it were bright and busy
         property string design: "iris" // "iris" faces, "material" (each widget's own style), "instrument" or "readout"
         property string material: "glass" // "glass", "clear", "solid" or "tinted"
+        property int blur: 100 // how much the glass behind widgets frosts the wallpaper, % of the maximum
         property string weight: "regular" // "light", "regular" or "bold"
         property bool rim: false
         property string outline: "auto" // "auto" (the shell's outline; Transparent bare), "always" or "none"
@@ -79,15 +80,15 @@ JsonObject {
         property bool accentForApps: true // with the wallpaper colour theme, apps take the shell's own accent when it has one
         property string controlPlate: "none" // rows of round controls: "none", "veil", "glass" or "solid" (IrisControlPlate)
         // What the material is drawn as: "solid" (Ricelin's card), "aurora", "angel", "regalia", "flat", "afterglow", "leak" or "streak".
-        property string texture: "solid"
-        property int factoryLook: 2 // the factory look a file was moved to (ConfigMigrations.js)
+        property string texture: "flat"
+        property int factoryLook: 4 // the factory look a file was moved to (ConfigMigrations.js)
         // Afterglow: grade "dusk", "cyber", "fog", "acid" or "wallpaper"; the rest 0..100 %; wallpaper grades the desktop too.
         property JsonObject afterglow: JsonObject {
             property string grade: "dusk"
-            property int atmosphere: 60
-            property int chrome: 65
-            property int bloom: 50
-            property int signal: 35
+            property int atmosphere: 45
+            property int chrome: 35
+            property int bloom: 35
+            property int signal: 0
             property bool wallpaper: true
         }
         // Light streak: aurora (the curtains), light (the streak on the edges facing the Island) and trails (what a moving
@@ -99,25 +100,25 @@ JsonObject {
             property int trails: 60
             property string colours: "aurora"
         }
-        // Light leak: grade "prism", "ember", "orchid", "polaroid", "accent" or "wallpaper"; shape "lens", "burn",
-        // "orbs" or "beam"; x/y move the light (-50..50 % of the output); the rest 0..100 %; wallpaper is how
+        // Light leak: grade "haze", "tide", "moss", "prism", "ember", "orchid", "polaroid", "accent" or "wallpaper"; shape
+        // "haze", "lens", "burn", "orbs" or "beam"; x/y move the light (-50..50 % of the output); the rest 0..100 %; wallpaper is how
         // strongly the desktop is exposed (0 off), frame the screen edge's band, widgets the desktop widgets;
         // grainSize in px (1..4), dust 0..200 %, gate the lens's corners and film edge, develop the Polaroid rise.
         property JsonObject leak: JsonObject {
-            property string grade: "prism"
-            property string shape: "lens"
+            property string grade: "haze"
+            property string shape: "haze"
             property int x: 0
             property int y: 0
             property int light: 60
             property int frame: 100
             property int widgets: 100
-            property int spill: 55
-            property int prism: 50
+            property int spill: 35
+            property int prism: 15
             property int grain: 55
             property real grainSize: 1.6
-            property int streaks: 15
-            property int dust: 100
-            property bool gate: true
+            property int streaks: 0
+            property int dust: 0
+            property bool gate: false
             property int wallpaper: 50
             property string backdrop: "picture"
             property bool develop: true
@@ -186,7 +187,8 @@ JsonObject {
         // Each look's own make. Colours come from "accent", "highlight", "signal" or "classic" (the look's own lamp).
         property JsonObject looks: JsonObject {
             // chosen: "ink" (the inverted plate) or "signal"
-            property JsonObject nothing: JsonObject { property string chosen: "ink" }
+            // chosen marks the chosen segment; figures sets large figures as Nothing OS's dot matrix ("dots") or in Archivo
+            property JsonObject nothing: JsonObject { property string chosen: "ink"; property string figures: "dots" }
             // keys light, levels run; depth is the keys' drop edge in px (0..6); mono sets labels lowercase in Geist Mono
             property JsonObject synth: JsonObject { property string keys: "accent"; property string levels: "highlight"; property int depth: 3; property bool mono: true }
             // body is the gel's colour; gloss the light cap (0..100 %); round sets figures and titles in Rubik
@@ -236,7 +238,11 @@ JsonObject {
         property string customize: "shell"
         // Choosing a theme takes only its colours; its shapes, layout and motion stay as they are.
         property bool themeColoursOnly: false
+        // Which Settings iRiS opens: Prism (11-06) or the classic one.
+        property string settingsPanel: "prism"
         property string settingsHost: "overlay"
+        // Prism's side column (profile, Changes, Now Playing): "auto" gives the page its room, "open" or "closed" is the person's.
+        property string settingsRail: "auto"
         // How iRiS Settings lays its page: "folio", "deck" or "console" (a Design with its own page keeps it).
         property string settingsLayout: "classic"
         // iRiS Settings drawn as v2.33 drew it over every page of today: plated marks, an area's groups in one list, a
@@ -251,7 +257,7 @@ JsonObject {
         // "iris" draws the primitives as they are; a Theme may choose another when it is applied.
         property string design: "iris"
         property JsonObject glass: JsonObject {
-            property string mode: "wallpaper" // "off", "wallpaper" (the output's wallpaper, blurred) or "compositor" (Niri blurs what is below)
+            property string mode: "off" // "off" (the flat plate, the factory's since his 11-07), "wallpaper" (the output's wallpaper, blurred) or "compositor" (Niri blurs what is below)
             property int tint: 58       // how much of the material stays over the glass, 0-100
             property int blur: 100      // wallpaper glass blur, % of the maximum
             // The cut edge of Blur glass: light where it faces up, a line elsewhere (%) and colour ("scene" = the wallpaper's light, "white", "accent", "highlight").
@@ -307,6 +313,7 @@ JsonObject {
         property int pageWidth: 440
         property list<string> navItems: ["media", "activity", "desktop", "shelf", "weather", "calendar", "vitals", "tray", "tools", "focus", "today", "controls", "settings"]
         property string design: "halo" // the Island's design: "halo", "ledger" or "tiles"
+        property bool designFace: true // a worn Design that brings an Island face draws the resting Island; off, `design` does
         property bool sunLight: true // Halo: by day the foot glows where the sun stands
         property string blockStyle: "plain" // desktop page blocks: "plain" on the Island's black or "grouped" on quiet plates
         property string scrollAction: "volume" // "volume", "brightness" or "none"
@@ -318,13 +325,116 @@ JsonObject {
         property string navFrame: "auto" // the open Island's page buttons: "auto" (Appearance › Button rows), "none", "veil", "glass" or "solid"
         // Island Desktop page blocks under the hero, in order:
         // "profile", "context", "vitals", "modules".
-        property list<string> desktopBlocks: ["profile", "context", "forecast", "agenda", "modules"]
+        property list<string> desktopBlocks: ["profile", "context", "workspaces", "forecast", "agenda", "modules"]
         property list<string> mediaBlocks: ["player", "timeline", "transport", "players", "levels"]
         property string clockStyle: "dateTime" // resting clock: "time", "dateTime" or "weather"
         property string auxiliary: "tray" // "tray", "tools", "sound", "mic" or "none"
         property string piecesSide: "end" // Which end of the resting Island carries its own pieces: "end" or "start"
         property bool scrollBubbles: true // The scroll action also works over the bubbles beside the Island
         property bool events: true // Charger, Bluetooth, Do Not Disturb and keyboard events in the Island
+        // Each notice the Island says by itself, how long it stays and how large it shows.
+        property JsonObject notices: JsonObject {
+            property string style: "compact" // "compact": a line in the resting Island; "large": a card (floating Island only)
+            property real seconds: 2.5 // 1.5 to 8
+            property bool unlock: true
+            property bool silent: true
+            property bool focus: true // Do Not Disturb turned on or off
+            property bool battery: true
+            property bool screenshot: true
+            property bool recording: true
+            property bool upcoming: true
+            property int upcomingLead: 10 // minutes before an event it is first said: 10, 5 or 1
+            property bool rain: true
+            property bool timers: true
+            property bool jobs: true
+            property bool shelf: true
+            property bool gameMode: true
+            property bool niri: true
+            property bool soundGuard: true
+        }
+        // Each live activity that may take the Island (Settings › Island › Live activities); the privacy dot shows either way.
+        property JsonObject activities: JsonObject {
+            property bool record: true
+            property bool timer: true
+            property bool task: true
+            property bool camera: true
+            property bool call: true
+            property bool media: true
+            property bool micGlow: false // the screen's edges glow once when an app starts listening (off from the factory, his 11-07: too much for every call)
+            property list<string> order: ["record", "timer", "task", "camera", "call", "media"] // which takes the Island first
+        }
+        // Each Island design's own options (Settings › Island › Face), read by its Face.qml.
+        property JsonObject faces: JsonObject {
+            property JsonObject ledger: JsonObject {
+                property int ahead: 720 // minutes it looks ahead for the next event: 180, 720 or 1440
+            }
+            property JsonObject tiles: JsonObject {
+                property string lit: "hour" // "hour", "minutes" or "both"
+                property bool day: true
+            }
+            property JsonObject dial: JsonObject {
+                property string marks: "hours" // "hours", "quarters" or "none"
+                property string beside: "day" // "day", "time" or "none"
+            }
+            property JsonObject marquee: JsonObject {
+                property bool events: true
+                property bool weather: true
+                property bool sun: true
+            }
+            property JsonObject duo: JsonObject {
+                property bool temperature: true
+            }
+            property JsonObject headline: JsonObject {
+                property string beside: "sky" // "sky" or "date"
+                property bool temperature: true
+            }
+            property JsonObject rings: JsonObject {
+                // Each ring: "day", "week", "month", "year" or "battery"
+                property string outer: "day"
+                property string middle: "battery"
+                property string inner: "month"
+            }
+            property JsonObject aura: JsonObject {
+                property string colours: "spectrum" // IrisStyle.islandLightChoices
+                property bool turns: true
+            }
+            property JsonObject comet: JsonObject {
+                property string counts: "hour" // "hour", "day" or "battery"
+                property string trail: "tail" // "tail" or "track"
+                property string colours: "spectrum" // IrisStyle.islandLightChoices
+                property bool laps: true
+            }
+            property JsonObject lumen: JsonObject {
+                property string light: "battery" // "battery", "sky" or one of IrisStyle.islandLightChoices
+                property bool pool: true
+            }
+            property JsonObject glyph: JsonObject {
+                property string foot: "battery" // "battery" or "hour"
+                property bool notifications: true
+                property bool events: true
+                property bool figure: true
+            }
+            property JsonObject tide: JsonObject {
+                property string fill: "battery" // "battery", "hour" or "day"
+                property bool figure: true
+            }
+            property JsonObject status: JsonObject {
+                property string carry: "auto" // "auto", "battery", "headset", "sky" or "day"
+                property bool connection: true
+                property bool sound: true
+            }
+            property JsonObject forecast: JsonObject {
+                property int hours: 3 // cells, now included: 2, 3 or 4
+                property bool labels: true
+                property bool colour: true
+            }
+            property JsonObject world: JsonObject {
+                property string zone: "Asia/Tokyo" // an IANA zone (IrisFaceData.cities offers 33)
+                property string second: "none" // a second zone, or "none"
+                property bool apart: true
+                property bool watch: true
+            }
+        }
         property string trailing: "controls" // Cluster trailing bubble: "controls", "notifications", "weather", "sound", "mic" or "none"
         property int height: 42
         property int margin: 8
@@ -411,6 +521,7 @@ JsonObject {
     // at fx/fy (its centre as fractions of the output).
     property JsonObject bubbles: JsonObject {
         property int scale: 100 // size of pieces off the Island, % of the Island height
+        property list<string> screenList: [] // outputs the floating bubbles show on; none = every screen
         property JsonObject left: JsonObject {
             property string place: "island"
             property real fx: 0.5
@@ -606,8 +717,11 @@ JsonObject {
         // Island page or panel it stands for, and level bubbles mute.
         property string opens: "card"
         property string design: "glass" // bubbles: "glass", "tint" or "outline"
-        // Dropped near a zone, a bubble snaps to it; off, it stays where it is let go.
+        // Dropped near a corner, an edge's middle or a line already there, a bubble joins that line in the spot it was
+        // let go; off, it stays where it is let go (the Island still takes it).
         property bool snap: true
+        // Each line's order, nearest its corner first, as drops left it: { place, slots: ["<slot>", ...] }.
+        property list<var> order: []
         // Bubbles sharing a zone rest on one plate and read as a small
         // bar; off, each one floats as its own disc.
         property bool cluster: true
@@ -657,6 +771,19 @@ JsonObject {
         property int musicLightWidth: 5 // 1-18 px, edge treatment width
         property int thickness: 10
         property int radius: 22
+        // "none" | "left" | "right": the frame grows wide on that side and the Dock lives in it, top to bottom, like a
+        // browser's sidebar (.claude/ref/iris-frame). Ignored on the Island's own edge.
+        property string rail: "none"
+        // The rail's own measures: railSize its width inside the frame (px, icons are that less 18), railApps where
+        // the apps sit ("top" like a browser's tabs, "centre" like a vertical Dock), railButtons the "+" and the gear.
+        property int railSize: 46
+        property string railApps: "top"
+        property bool railButtons: true
+        // The frame's own light over whatever material it wears: "plain" or "holo" (the screen an eclipse, the frame its
+        // spectral rim, .claude/ref/iris-holo); holoLight 0..100 %, holoHalo how far its halo reaches over the screen 0..100 %.
+        property string style: "plain"
+        property int holoLight: 45
+        property int holoHalo: 40
     }
     property JsonObject controlCenter: JsonObject {
         property string opens: "island" // "island": the Island becomes the Control Center; "panel": a panel hangs from it

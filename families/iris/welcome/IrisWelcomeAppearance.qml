@@ -141,7 +141,7 @@ Flickable {
                     spacing: 10
                     Repeater {
                         model: [
-                            { icon: "texture", value: IrisStyle.glassy ? Translation.tr("Glass") : Translation.tr("Solid") },
+                            { icon: "texture", value: IrisStyle.glassy ? Translation.tr("Glass") : Translation.tr("Flat") },
                             { icon: "rounded_corner", value: String(Math.round(IrisStyle.shapeScale * 100)) + "%" },
                             { icon: "motion_mode", value: IrisStyle.morphName }
                         ]

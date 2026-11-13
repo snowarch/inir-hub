@@ -64,7 +64,7 @@ Item {
     Process {
         id: translateProc
         command: [
-            "/usr/bin/trans",
+            "trans",
             "-no-theme",
             "-no-bidi",
             "-source",
@@ -88,7 +88,7 @@ Item {
 
     Process {
         id: getLanguagesProc
-        command: ["/usr/bin/trans", "-list-languages", "-no-bidi"]
+        command: ["trans", "-list-languages", "-no-bidi"]
         stdout: StdioCollector {
             id: langsCollector
             onStreamFinished: {
@@ -150,7 +150,7 @@ Item {
                     text: hasTranslation ? root.translatedText : ""
                     GroupButton {
                         id: copyButton
-                        baseWidth: height
+                        baseWidth: baseHeight
                         buttonRadius: Appearance.rounding.small
                         enabled: outputCanvas.displayedText.trim().length > 0
                         contentItem: MaterialSymbol {
@@ -166,7 +166,7 @@ Item {
                     }
                     GroupButton {
                         id: searchButton
-                        baseWidth: height
+                        baseWidth: baseHeight
                         buttonRadius: Appearance.rounding.small
                         enabled: outputCanvas.displayedText.trim().length > 0
                         contentItem: MaterialSymbol {
@@ -206,7 +206,7 @@ Item {
             }
             GroupButton {
                 id: pasteButton
-                baseWidth: height
+                baseWidth: baseHeight
                 buttonRadius: Appearance.rounding.small
                 contentItem: MaterialSymbol {
                     anchors.centerIn: parent
@@ -221,7 +221,7 @@ Item {
             }
             GroupButton {
                 id: deleteButton
-                baseWidth: height
+                baseWidth: baseHeight
                 buttonRadius: Appearance.rounding.small
                 enabled: inputCanvas.inputTextArea.text.length > 0
                 contentItem: MaterialSymbol {

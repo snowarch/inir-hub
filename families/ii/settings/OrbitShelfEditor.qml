@@ -31,7 +31,7 @@ ColumnLayout {
         root.configVersion
         const saved = Config.options?.orbit?.shelf?.modules ?? root.defaultModules
         const result = []
-        const source = Array.isArray(saved) ? saved : root.defaultModules
+        const source = Array.from(saved)
         for (const id of source) {
             if (!root.defaultModules.includes(id) || result.includes(id)) continue
             result.push(id)

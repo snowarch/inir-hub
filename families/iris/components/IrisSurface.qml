@@ -48,7 +48,7 @@ PanelSurface {
         sourceComponent: IrisLeakPlate {
             at: {
                 void (root.x + root.y + root.width + root.height + (root.parent?.x ?? 0) + (root.parent?.y ?? 0))
-                return root.mapToItem(root.QsWindow.contentItem, 0, 0)
+                return root.mapToItem(root.QsWindow.window?.contentItem, 0, 0)
             }
             output: Qt.size(root.QsWindow.window?.screen?.width ?? root.width, root.QsWindow.window?.screen?.height ?? root.height)
             corners: Qt.vector4d(root.notchTop ? 0 : root.radius, root.notchTop ? 0 : root.radius,
@@ -64,7 +64,7 @@ PanelSurface {
         sourceComponent: IrisStreakPlate {
             at: {
                 void (root.x + root.y + root.width + root.height + (root.parent?.x ?? 0) + (root.parent?.y ?? 0))
-                return root.mapToItem(root.QsWindow.contentItem, 0, 0)
+                return root.mapToItem(root.QsWindow.window?.contentItem, 0, 0)
             }
             output: Qt.size(root.QsWindow.window?.screen?.width ?? root.width, root.QsWindow.window?.screen?.height ?? root.height)
             corners: Qt.vector4d(root.notchTop ? 0 : root.radius, root.notchTop ? 0 : root.radius,

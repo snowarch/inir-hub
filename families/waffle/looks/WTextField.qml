@@ -1,12 +1,15 @@
 import qs.modules.common
 import qs.modules.common.widgets
 import QtQuick
+import QtQuick.Controls as QQC
 import QtQuick.Controls.FluentWinUI3
 import QtQuick.Controls
 
 TextField {
     cursorDelegate: TextCursor { accent: Looks.colors.accent }
     id: root
+    QQC.ContextMenu.menu: null
+    QQC.ContextMenu.onRequested: position => TextEditMenu.open(root, position)
     
     clip: true
     renderType: Text.NativeRendering

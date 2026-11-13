@@ -1,7 +1,6 @@
 import qs
 import QtQuick
 import QtQuick.Layouts
-import QtQuick.Dialogs
 import Qt.labs.folderlistmodel
 import Quickshell
 import Quickshell.Io
@@ -283,10 +282,9 @@ ContentPage {
         onFolderChanged: Qt.callLater(root._refreshCustomMediaFolderInventory)
     }
 
-    FileDialog {
+    FilePickerDialog {
         id: customImageFileDialog
         title: Translation.tr("Choose media file")
-        fileMode: FileDialog.OpenFile
         nameFilters: [
             Translation.tr("Media") + " (*.jpg *.jpeg *.png *.webp *.tif *.tiff *.svg *.gif *.mp4 *.webm *.mkv *.avi *.mov)",
             Translation.tr("Images") + " (*.jpg *.jpeg *.png *.webp *.tif *.tiff *.svg *.gif)",
@@ -304,7 +302,9 @@ ContentPage {
         }
     }
 
-    FolderDialog {
+    FilePickerDialog {
+
+        selectFolder: true
         id: customImageFolderDialog
         title: Translation.tr("Choose media folder")
         onAccepted: {
@@ -461,15 +461,6 @@ ContentPage {
         }
     }
 
-
-    function _manifestOptions(options: var): var {
-        if (!options || !Array.isArray(options)) return [];
-        return options.map(o => {
-            if (o && typeof o === "object")
-                return { displayName: o.label ?? o.displayName ?? o.value ?? "", value: o.value ?? o.label ?? o.displayName ?? "" };
-            return { displayName: String(o), value: o };
-        });
-    }
 
     function _customWidgetInstalled(widgetId: string): bool {
         if (!CustomWidgets.ready) return false;
@@ -1257,7 +1248,7 @@ ContentPage {
             }
         }
 
-        ColorDialog {
+        ColorPickerDialog {
             id: colorDialog
             selectedColor: colorRow.currentColor
             onAccepted: root._setJapaneseValue(colorRow.configKey, selectedColor.toString(), "palette")
@@ -1375,6 +1366,7 @@ ContentPage {
             : optionRow.spec.kind === "switch" ? switchRow
             : optionRow.spec.kind === "range" ? rangeRow
             : optionRow.spec.kind === "choice" ? (optionRow.picks > 12 ? comboRow : choiceRow)
+            : optionRow.spec.kind === "action" ? actionRow
             : /[Ff]ontFamily$/.test(optionRow.spec.key) ? fontRow : textRow
         onLoaded: item.spec = optionRow.spec
     }
@@ -1462,6 +1454,31 @@ ContentPage {
                 // Material floats a placeholder over a filled field, where it only repeats the row's label.
                 placeholderText: length === 0 && words.spec.placeholder ? Translation.tr(words.spec.placeholder) : ""
                 onEditingFinished: if (text !== String(root._rowValue(words.spec) ?? "")) DesktopWidgetOptions.write(words.spec, text)
+            }
+        }
+    }
+    Component {
+        id: actionRow
+        WidgetSettingRow {
+            id: action
+            property var spec: ({})
+            label: root._rowLabel(action.spec)
+            trailing: false
+            StyledText {
+                Layout.fillWidth: true
+                elide: Text.ElideMiddle
+                horizontalAlignment: Text.AlignRight
+                color: Appearance.colors.colSubtext
+                text: {
+                    void Config.revision
+                    return DesktopWidgetOptions.captionOf(action.spec)
+                }
+            }
+            SelectionGroupButton {
+                Layout.fillWidth: false
+                leftmost: true; rightmost: true
+                buttonText: Translation.tr(String(action.spec.button ?? action.spec.label))
+                onClicked: action.spec.run?.()
             }
         }
     }
@@ -2750,73 +2767,33 @@ ContentPage {
                     text: (cwDelegate.modelData.warnings || []).join("\n")
                 }
 
-                // Auto-generated controls from manifest configKeys
+                // The widget's own options, as its manifest lists them (DesktopWidgetOptions).
                 ContentSubsection {
-                    visible: Object.keys(cwDelegate.modelData.configKeys || {}).length > 0
+                    id: ownOptions
+                    readonly property var rows: {
+                        void Config.revision
+                        return DesktopWidgetOptions.sheetRows("custom." + cwDelegate.modelData.id, "widget").filter(spec => spec.showIf())
+                    }
+                    visible: ownOptions.rows.length > 0
                     title: Translation.tr("Settings")
-
                     Repeater {
-                        model: {
-                            const keys = cwDelegate.modelData.configKeys || {};
-                            return Object.keys(keys).map(k => ({
-                                key: k, spec: keys[k],
-                                widgetId: cwDelegate.modelData.id
-                            }));
-                        }
-
-                        WidgetSettingRow {
-                            required property var modelData
-                            label: modelData.spec.label || modelData.key
-                            trailing: false
-
-                            StyledSwitch {
-                                visible: modelData.spec.type === "bool"
-                                readonly property bool currentChecked: CustomWidgets.getConfigValue(modelData.widgetId, modelData.key, modelData.spec.default ?? false)
-                                checked: currentChecked
-                                onClicked: CustomWidgets.setConfigValue(modelData.widgetId, modelData.key, checked)
-                            }
-                            StyledSpinBox {
-                                visible: modelData.spec.type === "int"
-                                from: modelData.spec.min ?? 0; to: modelData.spec.max ?? 999; stepSize: modelData.spec.step ?? 1
-                                value: CustomWidgets.getConfigValue(modelData.widgetId, modelData.key, modelData.spec.default ?? 0)
-                                onValueModified: CustomWidgets.setConfigValue(modelData.widgetId, modelData.key, value)
-                            }
-                            StyledSlider {
-                                visible: modelData.spec.type === "real"
-                                from: modelData.spec.min ?? 0; to: modelData.spec.max ?? 100; stepSize: modelData.spec.step ?? 1
-                                value: CustomWidgets.getConfigValue(modelData.widgetId, modelData.key, modelData.spec.default ?? 0)
-                                onMoved: CustomWidgets.setConfigValue(modelData.widgetId, modelData.key, Math.round(value * 100) / 100)
-                            }
-                            ConfigSelectionArray {
-                                visible: modelData.spec.type === "string" && (modelData.spec.options !== undefined)
-                                Layout.fillWidth: false
-                                currentValue: CustomWidgets.getConfigValue(modelData.widgetId, modelData.key, modelData.spec.default ?? "")
-                                onSelected: newValue => CustomWidgets.setConfigValue(modelData.widgetId, modelData.key, newValue)
-                                options: root._manifestOptions(modelData.spec.options)
-                            }
-                            MaterialTextField {
-                                visible: modelData.spec.type === "string" && (modelData.spec.options === undefined)
-                                Layout.preferredWidth: 180
-                                text: CustomWidgets.getConfigValue(modelData.widgetId, modelData.key, modelData.spec.default ?? "")
-                                onAccepted: CustomWidgets.setConfigValue(modelData.widgetId, modelData.key, text)
-                            }
-                        }
+                        model: ScriptModel { objectProp: "path"; values: ownOptions.rows }
+                        delegate: WidgetOptionRow {}
                     }
                 }
 
+                // The desktop card's look and place: none while it is off the desktop.
                 ContentSubsection {
+                    id: lookOptions
+                    readonly property var rows: {
+                        void Config.revision
+                        const widget = "custom." + cwDelegate.modelData.id
+                        return DesktopWidgetOptions.sheetRows(widget, "look").concat(DesktopWidgetOptions.sheetRows(widget, "arrange")).filter(spec => spec.showIf())
+                    }
+                    visible: lookOptions.rows.length > 0
                     title: Translation.tr("Look")
                     Repeater {
-                        model: ScriptModel {
-                            objectProp: "path"
-                            values: {
-                                void Config.revision
-                                const widget = "custom." + cwDelegate.modelData.id
-                                const own = Object.keys(cwDelegate.modelData.configKeys ?? {})
-                                const rows = DesktopWidgetOptions.sheetRows(widget, "look").concat(DesktopWidgetOptions.sheetRows(widget, "arrange"))
-                                return rows.filter(spec => !own.includes(spec.key) && spec.showIf())
-                            }
-                        }
+                        model: ScriptModel { objectProp: "path"; values: lookOptions.rows }
                         delegate: WidgetOptionRow {}
                     }
                 }

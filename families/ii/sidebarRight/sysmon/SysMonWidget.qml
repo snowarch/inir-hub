@@ -289,7 +289,7 @@ Item {
 
         Process {
             id: netProc
-            command: ["/usr/bin/cat", "/proc/net/dev"]
+            command: ["cat", "/proc/net/dev"]
             running: false
             stdout: SplitParser {
                 splitMarker: ""

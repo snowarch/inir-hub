@@ -34,7 +34,7 @@ Item {
     readonly property string islandEdge: IrisFrame.islandEdge
     readonly property bool barTop: root.islandEdge !== "bottom"
     readonly property bool islandSide: root.islandEdge === "left" || root.islandEdge === "right"
-    readonly property real sideGap: IrisFrame.safeInset(root.islandEdge) + Math.round(12 * root.d)
+    readonly property real sideGap: IrisFrame.safeInset(root.islandEdge, root.screenName) + Math.round(12 * root.d)
     readonly property var popups: (Notifications.popupList ?? []).slice(-3).reverse()
     readonly property real d: IrisStyle.density
     readonly property real edgeOffset: (Number(root.barOptions?.height ?? 42)
@@ -99,11 +99,11 @@ Item {
         IrisScrollFeel {}
         id: popupColumn
         readonly property bool fromBottom: root.designed || !root.barTop
-        x: Math.round(root.designed ? IrisFrame.safeInset("left") + root.designMargin
+        x: Math.round(root.designed ? IrisFrame.safeInset("left", root.screenName) + root.designMargin
             : root.islandEdge === "left" ? root.sideGap
             : root.islandEdge === "right" ? parent.width - width - root.sideGap : (parent.width - width) / 2)
-        y: Math.round(root.designed ? parent.height - height - IrisFrame.safeInset("bottom") - root.designMargin
-            : root.islandSide ? IrisFrame.safeInset("top") + Math.round(12 * root.d)
+        y: Math.round(root.designed ? parent.height - height - IrisFrame.safeInset("bottom", root.screenName) - root.designMargin
+            : root.islandSide ? IrisFrame.safeInset("top", root.screenName) + Math.round(12 * root.d)
             : root.barTop ? Math.max(root.edgeOffset + IrisFrame.band, root.islandClear)
             : parent.height - height - Math.max(root.edgeOffset + IrisFrame.band, root.islandClear))
         verticalLayoutDirection: popupColumn.fromBottom ? ListView.BottomToTop : ListView.TopToBottom

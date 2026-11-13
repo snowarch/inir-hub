@@ -101,7 +101,7 @@ QtObject {
         if (mode === "horizontal" && (edge === "left" || edge === "right")) return 0
         return 18 * root.d * Math.max(0.5, Math.min(3, Number(root.surround?.musicStrength ?? 160) / 100))
     }
-    function safeInset(edge: string): real { return root.inset(edge) + root.musicReach(edge) }
+    function safeInset(edge: string, screen: string): real { return root.insetOn(edge, screen) + root.musicReach(edge) }
     readonly property int musicAppearanceCode: ({ sculpted: 0, etched: 1, satin: 2 })[String(root.surround?.musicAppearance ?? "etched")] ?? 1
     readonly property color musicInk: {
         const colour = String(root.surround?.musicColour ?? "pearl")
@@ -113,6 +113,12 @@ QtObject {
     readonly property real musicLightWidth: Math.max(1, Math.min(18, Number(root.surround?.musicLightWidth ?? 5))) * root.d
 
     readonly property bool framed: Boolean(root.surround?.enable ?? false)
+    // Holo: the frame's own spectral light, drawn by the field over the band's material whatever it is (glass, solid, flat).
+    readonly property bool holo: root.framed && String(root.surround?.style ?? "plain") === "holo"
+    readonly property real holoLight: root.holo ? Math.max(0, Math.min(1, Number(root.surround?.holoLight ?? 45) / 100)) : 0
+    readonly property real holoHalo: root.holo ? Math.max(0, Math.min(1, Number(root.surround?.holoHalo ?? 40) / 100)) : 0
+    // How far the rim's halo falls over the screen, like the eclipse's.
+    readonly property real holoSpill: root.holo ? Math.round(64 * root.holoHalo * root.d) : 0
     readonly property real band: root.framed
         ? Math.max(1, Math.round(Number(root.surround?.thickness ?? 10) * root.d)) : 0
     readonly property real cornerRadius: root.framed
@@ -124,7 +130,21 @@ QtObject {
     }
     function vertical(edge: string): bool { return edge === "left" || edge === "right" }
     readonly property string islandEdge: root.edges.includes(String(root.bar?.position ?? "top")) ? String(root.bar.position) : "top"
+    // The rail (`iris.surround.rail`): the frame grows wide on one side and the Dock lives in it, top to bottom, like a
+    // browser's sidebar (.claude/ref/iris-frame). Never on the Island's own edge.
+    readonly property string railEdge: {
+        const wanted = String(root.surround?.rail ?? "none")
+        return root.framed && (root.dock?.enable ?? true) && (wanted === "left" || wanted === "right")
+            && wanted !== root.islandEdge ? wanted : ""
+    }
+    readonly property bool rail: root.railEdge.length > 0
+    // The rail meets the frame's top and bottom lines in a fillet as round as the frame's own corners.
+    readonly property real railFuse: Math.round(root.cornerRadius * 4 * (1 - Math.SQRT1_2))
+    // The frame's own wall on a side: its band, and on the rail's side the rail too. What rests in a corner beside the
+    // rail (a line of bubbles, a card) keeps off it as it keeps off the band.
+    function wallOn(side: string): real { return root.band + (root.rail && side === root.railEdge ? root.dockBand : 0) }
     readonly property string dockEdge: {
+        if (root.rail) return root.railEdge
         const wanted = String(root.dock?.position ?? "auto")
         return root.edges.includes(wanted) && wanted !== root.islandEdge ? wanted : root.opposite(root.islandEdge)
     }
@@ -159,20 +179,23 @@ QtObject {
     readonly property real islandVisualDepth: root.islandAutoHide ? 0 : root.islandBand + root.islandMargin
     readonly property real islandDepth: (root.bar?.reserveSpace ?? true) && !root.islandAutoHide
         ? root.islandVisualDepth : 0
-    readonly property real dockIcon: Math.max(28, Math.min(64, Number(root.dock?.iconSize ?? 40))) * root.d
+    // The rail keeps its own size (iris.surround.railSize): a sidebar reads slimmer than a Dock.
+    readonly property real railIcon: Math.max(22, Math.min(54, Number(root.surround?.railSize ?? 46) - 18)) * root.d
+    readonly property real dockIcon: root.rail ? root.railIcon
+        : Math.max(28, Math.min(64, Number(root.dock?.iconSize ?? 40))) * root.d
     readonly property real dockBand: root.dockIcon + 18 * root.d
-    readonly property real dockMargin: Boolean(root.dock?.notch ?? false) ? 0 : 10 * root.d
-    readonly property real dockVisualDepth: (root.dock?.enable ?? true) && !(root.dock?.autoHide ?? false)
-        ? root.dockBand + root.dockMargin : 0
-    readonly property real dockDepth: (root.dock?.enable ?? true)
-        && (root.dock?.reserveSpace ?? true) && !(root.dock?.autoHide ?? false)
+    readonly property real dockMargin: root.rail || Boolean(root.dock?.notch ?? false) ? 0 : 10 * root.d
+    readonly property real dockVisualDepth: root.rail ? root.dockBand
+        : (root.dock?.enable ?? true) && !(root.dock?.autoHide ?? false) ? root.dockBand + root.dockMargin : 0
+    readonly property real dockDepth: root.rail ? root.dockBand
+        : (root.dock?.enable ?? true) && (root.dock?.reserveSpace ?? true) && !(root.dock?.autoHide ?? false)
         ? root.dockVisualDepth : 0
     // What an auto-hidden Island or Dock still shows on a workspace with no windows (revealOnEmpty).
     function emptyDepth(edge: string): real {
         let depth = 0
         if (edge === root.islandEdge && root.islandAutoHide && (root.bar?.revealOnEmpty ?? true))
             depth = root.islandBand + root.islandMargin
-        if (edge === root.dockEdge && (root.dock?.enable ?? true) && (root.dock?.autoHide ?? false)
+        if (edge === root.dockEdge && !root.rail && (root.dock?.enable ?? true) && (root.dock?.autoHide ?? false)
                 && (root.dock?.revealOnEmpty ?? true))
             depth = Math.max(depth, root.dockBand + root.dockMargin)
         return depth
@@ -202,8 +225,18 @@ QtObject {
     function pieceGapOn(side: string): real {
         return root.joinOn(side) === "gap" ? Math.max(root.islandMargin, Math.round(Number(root.bar?.margin ?? 8) * root.d), Math.round(8 * root.d)) : 0
     }
-    function pieceInsetOn(side: string): real { return root.band + root.pieceGapOn(side) }
+    function pieceInsetOn(side: string): real { return root.wallOn(side) + root.pieceGapOn(side) }
     function pieceDepthOn(side: string): real { return root.pieceGapOn(side) + root.pieceBand }
+    // Bubbles stand only on the screens the person chose (iris.bubbles.screenList); none chosen, or none of them
+    // connected, is every screen. A screen without them has no piece on any edge: nothing drawn, reserved or kept off.
+    readonly property var bubbleScreens: Array.from(root.bubbles?.screenList ?? [])
+    function bubblesOn(screen: string): bool {
+        const list = root.bubbleScreens
+        return list.length === 0 || list.includes(screen) || !Quickshell.screens.some(s => list.includes(s?.name ?? ""))
+    }
+    function piecesOn(edge: string, screen: string): bool {
+        return root.piecesAttached && root.pieceEdges.includes(edge) && root.bubblesOn(screen)
+    }
     // An announcement is never switched on: like Material's bar indicator it shows whenever its state is there.
     readonly property var announcements: ["shellUpdate"]
     property var availableExtras: null
@@ -242,7 +275,7 @@ QtObject {
     readonly property real bodyMargin: Math.round(8 * root.d)
     readonly property string placementMode: String(root.theme?.placement ?? "auto")
 
-    function place(origin: var, width: real, height: real, screenWidth: real, screenHeight: real, radius: real, avoid: var, air: real): var {
+    function place(origin: var, width: real, height: real, screenWidth: real, screenHeight: real, radius: real, avoid: var, air: real, screen: string): var {
         if (!origin) return { sideways: false, towardsLeft: false, towardsUp: false, x: (screenWidth - width) / 2, y: (screenHeight - height) / 2 }
         const ob = origin.obstacle ?? origin
         const cx = origin.x + origin.width / 2
@@ -250,12 +283,12 @@ QtObject {
         // The theme's air from the frame's inner edge on every side (past the music it carries), `air` from what opened
         // the body (negative welds it on). A piece on an edge is drawn as a strip deeper than the item it sits in, so
         // the body keeps its air from that strip, not the item: on a thin edge the item alone left it pressed under the piece.
-        const wall = side => root.band + root.musicReach(side)
+        const wall = side => root.wallOn(side) + root.musicReach(side)
         let left = wall("left") + root.bodyAir
         let right = screenWidth - width - wall("right") - root.bodyAir
         let top = wall("top") + root.bodyAir
         let bottom = screenHeight - height - wall("bottom") - root.bodyAir
-        const strip = side => root.piecesAttached && root.pieceEdges.includes(side) ? root.pieceDepthOn(side) : 0
+        const strip = side => root.piecesOn(side, screen) ? root.pieceDepthOn(side) : 0
         const sitsOn = side => side === "left" ? ob.x - wall("left") <= strip("left") + 1
             : side === "right" ? screenWidth - wall("right") - ob.x - ob.width <= strip("right") + 1
             : side === "top" ? ob.y - wall("top") <= strip("top") + 1
@@ -415,18 +448,21 @@ QtObject {
         return { tl: settle(nests.tl), tr: settle(nests.tr), bl: settle(nests.bl), br: settle(nests.br) }
     }
 
-    function reserve(edge: string, chassisPresent: bool): real {
+    function reserve(edge: string, chassisPresent: bool, screen: string): real {
         let inner = 0
         if (chassisPresent && edge === root.islandEdge) inner = Math.max(inner, root.islandDepth)
-        if (chassisPresent && root.piecesReserve && root.pieceEdges.includes(edge))
+        if (chassisPresent && root.piecesReserve && root.piecesOn(edge, screen))
             inner = Math.max(inner, root.pieceDepthOn(edge))
         if (edge === root.dockEdge) inner = Math.max(inner, root.dockDepth)
         return Math.round(root.band + inner)
     }
-    function inset(edge: string): real {
+    // How far the frame holds an edge: on one screen, or wherever bubbles stand (`inset`, for what has no screen).
+    function inset(edge: string): real { return root.holdOf(edge, root.piecesAttached && root.pieceEdges.includes(edge)) }
+    function insetOn(edge: string, screen: string): real { return root.holdOf(edge, root.piecesOn(edge, screen)) }
+    function holdOf(edge: string, pieces: bool): real {
         let inner = 0
         if (edge === root.islandEdge) inner = Math.max(inner, root.islandVisualDepth)
-        if (root.piecesAttached && root.pieceEdges.includes(edge))
+        if (pieces)
             inner = Math.max(inner, root.pieceDepthOn(edge))
         if (edge === root.dockEdge) inner = Math.max(inner, root.dockVisualDepth)
         return Math.round(root.band + inner)

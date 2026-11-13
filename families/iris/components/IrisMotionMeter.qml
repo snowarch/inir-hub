@@ -61,19 +61,12 @@ Singleton {
         frames.push(Object.assign({ t: now }, entry, { source: undefined }))
     }
 
-    Process {
-        id: refresh
-        command: ["niri", "msg", "-j", "outputs"]
-        stdout: StdioCollector {
-            onStreamFinished: {
-                try {
-                    const outputs = JSON.parse(text)
-                    const output = outputs[GlobalStates.focusedScreen?.name ?? ""] ?? Object.values(outputs)[0]
-                    const mode = output?.modes?.[output?.current_mode ?? 0]
-                    if (mode?.refresh_rate > 0) root.vblank = 1000000 / mode.refresh_rate
-                } catch (error) {}
-            }
-        }
+    // The focused output's refresh, from the compositor's output list (NiriService serves Niri and Umbriel alike).
+    function readRefresh(): void {
+        const outputs = NiriService.outputs ?? {}
+        const output = outputs[GlobalStates.focusedScreen?.name ?? ""] ?? Object.values(outputs)[0]
+        const mode = output?.modes?.[output?.current_mode ?? 0]
+        if (mode?.refresh_rate > 0) root.vblank = 1000000 / mode.refresh_rate
     }
 
     function start(name: string): string {
@@ -83,7 +76,7 @@ Singleton {
         root.target = name
         root.runs = []
         root.result = { state: "running", target: name }
-        refresh.running = true
+        root.readRefresh()
         root.targets[name].close()
         root.islandWasExpanded = IrisState.islandExpanded
         // The Places open from the expanded Island; the Island itself starts collapsed.
@@ -186,7 +179,7 @@ Singleton {
         }
     }
     function idle(ms: int): string {
-        refresh.running = true
+        root.readRefresh()
         root.idleDrops = []
         root.idleUntil = Date.now() + ms
         root.result = { state: "running", target: "idle" }

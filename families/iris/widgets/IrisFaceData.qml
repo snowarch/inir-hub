@@ -51,6 +51,41 @@ Singleton {
         return value.length > 0 ? value.charAt(0).toUpperCase() + value.slice(1) : value
     }
 
+    // The cities a face can keep beside the time, west to east, by their zone (Settings offers them; a face names them).
+    readonly property var cities: [
+        { label: "Honolulu", value: "Pacific/Honolulu" }, { label: "Anchorage", value: "America/Anchorage" },
+        { label: "Los Angeles", value: "America/Los_Angeles" }, { label: "Denver", value: "America/Denver" },
+        { label: "Mexico City", value: "America/Mexico_City" }, { label: "Chicago", value: "America/Chicago" },
+        { label: "New York", value: "America/New_York" }, { label: "Toronto", value: "America/Toronto" },
+        { label: "Bogotá", value: "America/Bogota" }, { label: "Lima", value: "America/Lima" },
+        { label: "Santiago", value: "America/Santiago" },
+        { label: "Buenos Aires", value: "America/Argentina/Buenos_Aires" },
+        { label: "Montevideo", value: "America/Montevideo" }, { label: "São Paulo", value: "America/Sao_Paulo" },
+        { label: "Nuuk", value: "America/Nuuk" }, { label: "UTC", value: "UTC" },
+        { label: "London", value: "Europe/London" }, { label: "Lisbon", value: "Europe/Lisbon" },
+        { label: "Lagos", value: "Africa/Lagos" }, { label: "Madrid", value: "Europe/Madrid" },
+        { label: "Paris", value: "Europe/Paris" }, { label: "Amsterdam", value: "Europe/Amsterdam" },
+        { label: "Berlin", value: "Europe/Berlin" }, { label: "Stockholm", value: "Europe/Stockholm" },
+        { label: "Warsaw", value: "Europe/Warsaw" }, { label: "Rome", value: "Europe/Rome" },
+        { label: "Athens", value: "Europe/Athens" }, { label: "Cairo", value: "Africa/Cairo" },
+        { label: "Jerusalem", value: "Asia/Jerusalem" }, { label: "Kyiv", value: "Europe/Kyiv" },
+        { label: "Johannesburg", value: "Africa/Johannesburg" }, { label: "Istanbul", value: "Europe/Istanbul" },
+        { label: "Riyadh", value: "Asia/Riyadh" }, { label: "Nairobi", value: "Africa/Nairobi" },
+        { label: "Moscow", value: "Europe/Moscow" }, { label: "Tehran", value: "Asia/Tehran" },
+        { label: "Dubai", value: "Asia/Dubai" }, { label: "Karachi", value: "Asia/Karachi" },
+        { label: "New Delhi", value: "Asia/Kolkata" }, { label: "Bangkok", value: "Asia/Bangkok" },
+        { label: "Jakarta", value: "Asia/Jakarta" }, { label: "Ho Chi Minh City", value: "Asia/Ho_Chi_Minh" },
+        { label: "Singapore", value: "Asia/Singapore" }, { label: "Manila", value: "Asia/Manila" },
+        { label: "Beijing", value: "Asia/Shanghai" }, { label: "Hong Kong", value: "Asia/Hong_Kong" },
+        { label: "Seoul", value: "Asia/Seoul" }, { label: "Tokyo", value: "Asia/Tokyo" },
+        { label: "Sydney", value: "Australia/Sydney" }, { label: "Auckland", value: "Pacific/Auckland" }
+    ]
+    // A zone's city in the person's language; one written by hand is named by its last part.
+    function cityName(zone: string): string {
+        const known = root.cities.find(city => city.value === zone)
+        return known ? Translation.tr(known.label) : String(zone ?? "").split("/").pop().replace(/_/g, " ")
+    }
+
     // Where a "6:52 AM" falls in the day, 0 to 1; -1 when the weather has not said.
     function dayShare(text: var): real {
         const minutes = Weather._timeToMinutes(text)

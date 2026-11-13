@@ -5,7 +5,9 @@ paths:
 
 # Web apps
 
-A website opened as a tab in Material's left sidebar, signed in as the person, with the site's own storage.
+A website opened as a tab in Material's left sidebar, signed in as the person, with the site's own storage. The tab
+shows once the person turns on Web apps (Settings › Sidebars, or the Hub's "Show in the sidebar"), where iNiR's
+runtime carries Chromium.
 
 - `manifest.json`: `id` (the folder name), `name`, `url` (https only), `icon` (a Material Symbols name), `version`
   (the same as `hub.json`'s), `display: "tab"`.

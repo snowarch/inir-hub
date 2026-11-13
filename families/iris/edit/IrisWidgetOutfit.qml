@@ -10,6 +10,8 @@ import qs.modules.common.widgets
 import qs.modules.iris.style
 import qs.modules.iris.components
 import qs.modules.iris.widgets
+import qs.modules.iris.prism.core
+import qs.modules.iris.prism.controls
 
 // What a desktop widget wears while the desktop is arranged in iRiS (the family's part `widgetOutfit`, loaded by
 // AbstractBackgroundWidget): under the pointer a hairline concentric with its card and its name hanging under it;
@@ -150,9 +152,9 @@ Item {
         Rectangle {
             anchors.fill: parent
             radius: height / 2
-            color: IrisStyle.surfaceOpaque
+            color: PrismTheme.canvas
             border.width: IrisStyle.devicePx
-            border.color: IrisStyle.hairlineStrong
+            border.color: PrismTheme.line
         }
         // AIRISU: a seal box, its cut parallel to the widget's.
         Row {
@@ -199,15 +201,17 @@ Item {
         intent: "auto"
         minimum: 0
     }
-    readonly property Item keysItem: keys
-    TextMetrics { id: smallName; font: sizeLabel.font; text: root.widget?.sizeLabels?.small ?? "" }
-    TextMetrics { id: mediumName; font: sizeLabel.font; text: root.widget?.sizeLabels?.medium ?? "" }
-    TextMetrics { id: largeName; font: sizeLabel.font; text: root.widget?.sizeLabels?.large ?? "" }
-    // One opaque capsule: loose glass keys vanished on a dark wallpaper and went grey on a light one (his 10-30 capture).
+    // Where the keys take the pointer, in the edit window's pixels (its input mask). A mask made from the capsule itself
+    // went stale: a Region re-reads its item on the item's own x, y and size, and a moved widget moves only its parent.
+    readonly property rect keysRect: keys.visible && keys.enabled
+        ? Qt.rect(root.keysRight - root.keysWidth, root.keysTop, root.keysWidth, root.keysHeight) : Qt.rect(0, 0, 0, 0)
+    // One opaque capsule in Prism Settings' language (his 11-07): its name, the sizes as a segmented pill drawn as the
+    // room each takes (one tap to the size wanted, never a cycle), then round keys; the one that opens its controls leads
+    // in solid white. Loose glass keys vanished on a dark wallpaper and went grey on a light one (his 10-30 capture).
     Item {
         id: keys
         readonly property real out: Math.max(0, Math.min(1, emerge.value))
-        readonly property real pad: Math.round(4 * root.d)
+        readonly property real pad: PrismTheme.dp(4)
         implicitWidth: keyRow.implicitWidth + 2 * keys.pad
         implicitHeight: keyRow.implicitHeight + 2 * keys.pad
         width: implicitWidth
@@ -225,135 +229,142 @@ Item {
         Rectangle {
             anchors.fill: parent
             radius: height / 2
-            color: IrisStyle.surfaceOpaque
+            color: PrismTheme.canvas
             border.width: IrisStyle.devicePx
-            border.color: IrisStyle.hairlineStrong
+            border.color: PrismTheme.line
         }
 
         Row {
             id: keyRow
             x: keys.pad
             y: keys.pad
-            spacing: Math.round(2 * root.d)
+            spacing: PrismTheme.dp(4)
 
             // Chosen, its name leads the keys: one row, never a tag stacked on them.
             Item {
-                implicitHeight: Math.round(28 * root.d)
-                implicitWidth: nameRow.implicitWidth + Math.round(20 * root.d)
+                implicitHeight: PrismTheme.dp(30)
+                implicitWidth: nameRow.implicitWidth + PrismTheme.dp(20)
                 Row {
                     id: nameRow
                     anchors.centerIn: parent
-                    spacing: Math.round(6 * root.d)
-                    MaterialSymbol {
+                    spacing: PrismTheme.dp(6)
+                    PrismGlyph {
                         visible: root.locked
                         anchors.verticalCenter: parent.verticalCenter
                         text: "lock"
-                        iconSize: Math.round(13 * root.d)
-                        color: IrisStyle.textSecondary
+                        filled: true
+                        iconSize: PrismTheme.dp(14)
+                        color: PrismTheme.ink2
                     }
-                    StyledText {
-                        id: keyName
+                    PrismText {
                         anchors.verticalCenter: parent.verticalCenter
                         text: root.name
-                        color: IrisStyle.text
-                        font.family: root.ink ? IrisStyle.fontLabel : IrisStyle.fontMain
-                        font.pixelSize: root.ink ? Math.round(10 * root.d) : IrisStyle.typeFootnote
-                        font.weight: IrisStyle.weight(Font.DemiBold)
-                        font.capitalization: root.ink ? Font.AllUppercase : Font.MixedCase
-                        font.letterSpacing: root.ink ? 0.8 * root.d : 0
+                        font.pixelSize: PrismTheme.small
+                        font.weight: Font.DemiBold
                     }
                 }
             }
+            // The sizes, each drawn as its room on the grid; the one it has is the solid segment.
             Rectangle {
-                visible: !root.locked
-                anchors.verticalCenter: parent.verticalCenter
-                width: IrisStyle.devicePx
-                height: Math.round(16 * root.d)
-                color: IrisStyle.hairlineStrong
-            }
-            // The size it is, as a little grid of the cells it takes; a press moves to the next one.
-            IrisButton {
                 visible: root.sized && !root.locked
-                quiet: true
-                implicitHeight: Math.round(28 * root.d)
-                implicitWidth: sizeRow.implicitWidth + Math.round(18 * root.d)
-                Accessible.name: Translation.tr("Size: %1").arg(root.sizeName)
-                onClicked: root.nextSize()
+                anchors.verticalCenter: parent.verticalCenter
+                implicitWidth: sizeRow.implicitWidth + PrismTheme.dp(6)
+                implicitHeight: PrismTheme.dp(30)
+                radius: height / 2
+                color: PrismTheme.fill
                 Row {
                     id: sizeRow
                     anchors.centerIn: parent
-                    spacing: Math.round(6 * root.d)
-                    Grid {
-                        anchors.verticalCenter: parent.verticalCenter
-                        columns: 2
-                        spacing: Math.round(2 * root.d)
-                        Repeater {
-                            model: 4
-                            delegate: Rectangle {
-                                required property int index
-                                readonly property bool filled: root.size === "large" || index === 0 || (root.size === "medium" && index === 1)
-                                width: Math.round(5 * root.d)
-                                height: width
-                                radius: IrisStyle.radiusMicro
-                                color: IrisStyle.text
-                                opacity: filled ? 1 : 0.28
-                                Behavior on opacity { NumberAnimation { duration: 110; easing.type: IrisStyle.feedbackEasing } }
+                    Repeater {
+                        model: root.sizes
+                        delegate: Item {
+                            id: sizeKey
+                            required property string modelData
+                            readonly property bool chosen: root.size === sizeKey.modelData
+                            readonly property real cell: PrismTheme.dp(5)
+                            width: PrismTheme.dp(32)
+                            height: PrismTheme.dp(24)
+                            Rectangle {
+                                anchors.fill: parent
+                                radius: height / 2
+                                color: sizeKey.chosen ? PrismTheme.solid : sizeArea.containsMouse ? PrismTheme.fillHover : "transparent"
+                                Behavior on color { ColorAnimation { duration: PrismTheme.ms(140); easing.type: Easing.OutCubic } }
                             }
+                            Grid {
+                                anchors.centerIn: parent
+                                columns: 2
+                                spacing: PrismTheme.dp(2)
+                                Repeater {
+                                    model: sizeKey.modelData === "large" ? 4 : 2
+                                    delegate: Rectangle {
+                                        required property int index
+                                        readonly property bool taken: sizeKey.modelData !== "small" || index === 0
+                                        width: sizeKey.cell
+                                        height: sizeKey.cell
+                                        radius: PrismTheme.dp(1)
+                                        color: sizeKey.chosen ? PrismTheme.inkSolid : PrismTheme.ink
+                                        opacity: taken ? 1 : 0.25
+                                    }
+                                }
+                            }
+                            MouseArea {
+                                id: sizeArea
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: if (!sizeKey.chosen) root.widget.commitSize(sizeKey.modelData)
+                            }
+                            Accessible.role: Accessible.RadioButton
+                            Accessible.name: Translation.tr("Size: %1").arg(root.widget?.sizeLabels?.[sizeKey.modelData] ?? sizeKey.modelData)
+                            Accessible.checked: sizeKey.chosen
                         }
-                    }
-                    StyledText {
-                        id: sizeLabel
-                        anchors.verticalCenter: parent.verticalCenter
-                        // As wide as the widest size name: cycling sizes never resizes the capsule under the pointer.
-                        width: Math.ceil(Math.max(root.sizes.includes("small") ? smallName.advanceWidth : 0,
-                            root.sizes.includes("medium") ? mediumName.advanceWidth : 0,
-                            root.sizes.includes("large") ? largeName.advanceWidth : 0))
-                        horizontalAlignment: Text.AlignLeft
-                        text: root.sizeName
-                        color: IrisStyle.text
-                        font.family: root.ink ? IrisStyle.fontLabel : IrisStyle.fontMain
-                        font.pixelSize: root.ink ? Math.round(10 * root.d) : IrisStyle.typeFootnote
-                        font.weight: IrisStyle.weight(Font.DemiBold)
-                        font.capitalization: root.ink ? Font.AllUppercase : Font.MixedCase
                     }
                 }
             }
             // The plate, one tap from the widget: the same switch as its Look page and the shelf's "every background".
-            IrisIconButton {
+            PrismRound {
                 visible: !root.locked && (root.widget?.plateOffered ?? false)
-                implicitWidth: Math.round(28 * root.d)
-                implicitHeight: Math.round(28 * root.d)
-                materialIcon: root.widget?.showBackground ? "layers" : "layers_clear"
+                anchors.verticalCenter: parent.verticalCenter
+                implicitWidth: PrismTheme.dp(30)
+                glyphSize: PrismTheme.dp(16)
+                glyph: root.widget?.showBackground ? "layers" : "layers_clear"
+                Accessible.role: Accessible.Button
                 Accessible.name: root.widget?.showBackground ? Translation.tr("Hide background") : Translation.tr("Show background")
                 onClicked: root.widget.setPlate(!root.widget.showBackground)
             }
-            IrisIconButton {
-                visible: !root.locked
-                implicitWidth: Math.round(28 * root.d)
-                implicitHeight: Math.round(28 * root.d)
-                materialIcon: "tune"
-                selected: (root.widget?.quickControlsOpen ?? false) && root.widget?.quickTab !== root.widget?._arrangeTab
-                Accessible.name: Translation.tr("Edit")
-                onClicked: selected ? root.widget.closeQuickControls() : root.widget.openQuickControls("widget")
-            }
-            IrisIconButton {
-                implicitWidth: Math.round(28 * root.d)
-                implicitHeight: Math.round(28 * root.d)
-                materialIcon: root.locked ? "lock" : "lock_open"
-                selected: root.locked
+            PrismRound {
+                anchors.verticalCenter: parent.verticalCenter
+                implicitWidth: PrismTheme.dp(30)
+                glyphSize: PrismTheme.dp(16)
+                glyph: root.locked ? "lock" : "lock_open"
+                lit: root.locked
+                Accessible.role: Accessible.Button
                 Accessible.name: root.locked ? Translation.tr("Unlock") : Translation.tr("Lock")
                 onClicked: root.widget._setOutputValue("locked", !root.locked)
             }
-            IrisIconButton {
+            PrismRound {
                 visible: !root.locked
-                implicitWidth: Math.round(28 * root.d)
-                implicitHeight: Math.round(28 * root.d)
-                materialIcon: "remove"
+                anchors.verticalCenter: parent.verticalCenter
+                implicitWidth: PrismTheme.dp(30)
+                glyphSize: PrismTheme.dp(16)
+                glyph: "remove"
+                Accessible.role: Accessible.Button
                 Accessible.name: Translation.tr("Put back")
                 onClicked: {
                     GlobalStates.clearDesktopWidgetSelection()
                     root.widget.takeAway()
                 }
+            }
+            PrismRound {
+                visible: !root.locked
+                anchors.verticalCenter: parent.verticalCenter
+                implicitWidth: PrismTheme.dp(30)
+                glyphSize: PrismTheme.dp(16)
+                glyph: "tune"
+                solid: true
+                Accessible.role: Accessible.Button
+                Accessible.name: Translation.tr("Edit")
+                onClicked: root.widget.openQuickControls("widget")
             }
         }
     }

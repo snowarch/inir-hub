@@ -80,6 +80,13 @@ Item {
                 Accessible.name: root.engine.online ? Translation.tr("Refresh") : Translation.tr("Random wallpaper")
                 onClicked: root.engine.online ? root.engine.searchOnline(1, true) : root.engine.shuffle()
             }
+            WallpaperGlyphButton {
+                glyph: "grid_on"
+                implicitWidth: Math.round(36 * root.d)
+                selected: Wallpapers.glyphs
+                Accessible.name: Translation.tr("Draw the wallpaper as glyphs")
+                onClicked: Config.setNestedValue("background.effects.glyphs.enable", !Wallpapers.glyphs)
+            }
             WallpaperLayoutSwitch { layout: "mosaic" }
         }
 

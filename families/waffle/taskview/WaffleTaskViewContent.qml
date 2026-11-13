@@ -122,7 +122,7 @@ Item {
     }
 
     function moveWindowToWorkspace(windowId: int, targetIdx: int): void {
-        Quickshell.execDetached(["/usr/bin/niri", "msg", "action", "move-window-to-workspace",
+        Quickshell.execDetached(["niri", "msg", "action", "move-window-to-workspace",
             "--window-id", windowId.toString(),
             "--focus", "false",
             targetIdx.toString()])
@@ -132,7 +132,7 @@ Item {
         // Move window to a new workspace at the end
         const lastWs = cachedWorkspaces[cachedWorkspaces.length - 1]
         const newWsIdx = lastWs ? lastWs.idx + 1 : 1
-        Quickshell.execDetached(["/usr/bin/niri", "msg", "action", "move-window-to-workspace",
+        Quickshell.execDetached(["niri", "msg", "action", "move-window-to-workspace",
             "--window-id", windowId.toString(),
             "--focus", "false",
             newWsIdx.toString()])
@@ -163,9 +163,9 @@ Item {
     }
     
     function executeNiriAction(action: string, windowId: int): void {
-        Quickshell.execDetached(["/usr/bin/niri", "msg", "action", "focus-window", "--id", windowId.toString()])
+        Quickshell.execDetached(["niri", "msg", "action", "focus-window", "--id", windowId.toString()])
         Qt.callLater(() => {
-            Quickshell.execDetached(["/usr/bin/niri", "msg", "action", action])
+            Quickshell.execDetached(["niri", "msg", "action", action])
             refreshTimer.start()
         })
     }
@@ -214,6 +214,7 @@ Item {
                 const proportionOffset = totalWidth > 0 ? cumulativeX / totalWidth : 0
                 
                 result.push({
+                    id: win.id,
                     window: {
                         id: win.id,
                         app_id: AppSearch.resolveWindowIdentity(win),
@@ -584,8 +585,13 @@ Item {
                 height: root.thumbnailHeight
                 z: 10
 
+                // Keyed by window: a refresh moves thumbnails instead of rebuilding them, so their live pictures keep
+                // their compositor sessions.
                 Repeater {
-                    model: root.searchQuery.length > 0 ? root.filteredWindowItems : root.cachedWindowItems
+                    model: ScriptModel {
+                        values: root.searchQuery.length > 0 ? root.filteredWindowItems : root.cachedWindowItems
+                        objectProp: "id"
+                    }
 
                     WindowThumbnail {
                         required property var modelData

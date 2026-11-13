@@ -1,6 +1,7 @@
 pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Layouts
+import Quickshell.Services.Mpris
 import qs.services
 import qs.modules.common
 import qs.modules.common.functions
@@ -50,12 +51,36 @@ Item {
             if (len > 0) root.seenLength = len
         }
     }
+    // A track change publishes an empty length for a moment: held through it, or the card drops its timeline, shows
+    // "Live", shrinks and grows back between two songs.
+    property bool lengthKnown: media.effectiveLength > 0
+    readonly property bool lengthNow: media.effectiveLength > 0
+    onLengthNowChanged: {
+        if (root.lengthNow) { lengthHold.stop(); root.lengthKnown = true }
+        else lengthHold.restart()
+    }
+    Timer { id: lengthHold; interval: 1500; onTriggered: root.lengthKnown = root.lengthNow }
+    readonly property bool canShuffle: root.hasPlayer && (root.player?.shuffleSupported ?? false) && (root.player?.canControl ?? false)
+    readonly property bool canLoop: root.hasPlayer && (root.player?.loopSupported ?? false) && (root.player?.canControl ?? false)
+    readonly property int loopState: root.player?.loopState ?? MprisLoopState.None
+    // Where the player has no shuffle or repeat, the two ends of the transport step ten seconds instead.
+    readonly property bool canSeekBy: root.hasTimeline && media.effectiveCanSeek
+    function seekBy(seconds: real): void {
+        media.seek(Math.max(0, Math.min(media.effectiveLength - 1, media.effectivePosition + seconds)))
+    }
+    // The app playing, by its desktop entry, its name or its bus name (Apple's expanded player wears its mark).
+    readonly property string appMark: {
+        const p = root.player
+        if (!root.hasPlayer || !p) return ""
+        const bus = String(p.dbusName ?? "").replace("org.mpris.MediaPlayer2.", "").split(".")[0]
+        return AppSearch.iconSource([String(p.desktopEntry ?? ""), AppSearch.guessIcon(String(p.identity ?? "")), AppSearch.guessIcon(bus)], "")
+    }
     readonly property bool liveStream: root.hasPlayer
-        && (media.effectiveLength <= 0
+        && (!root.lengthKnown
             || (media.effectiveIsPlaying && !media.effectiveCanSeek)
             || root.grewSamples >= 2
             || root.atEndSamples >= 2)
-    readonly property bool hasTimeline: root.hasPlayer && !root.liveStream && media.effectiveLength > 0
+    readonly property bool hasTimeline: root.hasPlayer && !root.liveStream
     // Nothing playing: the card offers the music app you use most and opens it. Not on the lock, where nothing opens.
     property bool offersOpen: true
     readonly property bool offersMusic: root.offersOpen && !root.hasPlayer && IrisPieces.musicAppName.length > 0
@@ -84,7 +109,7 @@ Item {
             anchors.fill: parent
             active: root.active && root.showBackground && (Config.options?.iris?.player?.artworkBackground ?? true)
                 && media.displayedArtFilePath.length > 0
-            sourceComponent: IrisMediaBackdrop { source: media.displayedArtFilePath; radius: root.plateRadius; strength: 0.5 }
+            sourceComponent: IrisMediaBackdrop { source: media.displayedArtFilePath; radius: root.plateRadius; strength: 0.72 }
         }
     }
     ColumnLayout {
@@ -103,44 +128,52 @@ Item {
                 source: media.displayedArtFilePath
                 appIcon: root.emptyIcon
                 circular: Config.options?.iris?.player?.roundCover ?? false
-                Layout.preferredWidth: 68 * IrisStyle.density
-                Layout.preferredHeight: 68 * IrisStyle.density
+                Layout.preferredWidth: 78 * IrisStyle.density
+                Layout.preferredHeight: 78 * IrisStyle.density
             }
             ColumnLayout {
                 Layout.fillWidth: true
-                spacing: Math.round(4 * IrisStyle.density)
-                IrisText { Layout.fillWidth: true; text: root.hasPlayer ? media.effectiveTitle : Translation.tr("Nothing playing"); color: root.ink; font.weight: IrisStyle.weight(Font.DemiBold); elide: Text.ElideRight }
-                IrisText { Layout.fillWidth: true; text: root.hasPlayer ? media.effectiveArtist : root.emptyDetail; role: IrisText.Meta; color: !root.hasPlayer && IrisPieces.musicLaunch === "failed" && root.offersOpen ? (root.overMedia ? IrisStyle.dangerOnMedia : IrisStyle.danger) : root.inkMeta; elide: Text.ElideRight }
+                spacing: Math.round(3 * IrisStyle.density) // iris-literal: title and artist sit tight, as Apple's player
+                IrisText { Layout.fillWidth: true; text: root.hasPlayer ? media.effectiveTitle : Translation.tr("Nothing playing"); color: root.ink; font.pixelSize: IrisStyle.typeHeadline; font.weight: IrisStyle.weight(Font.Bold); elide: Text.ElideRight }
+                IrisText { Layout.fillWidth: true; text: root.hasPlayer ? media.effectiveArtist : root.emptyDetail; color: !root.hasPlayer && IrisPieces.musicLaunch === "failed" && root.offersOpen ? (root.overMedia ? IrisStyle.dangerOnMedia : IrisStyle.danger) : root.inkSecondary; elide: Text.ElideRight }
+            }
+            // The app's mark in the corner; a tap brings it forward.
+            IrisImage {
+                Layout.alignment: Qt.AlignTop
+                Layout.preferredWidth: Math.round(22 * IrisStyle.density)
+                Layout.preferredHeight: Layout.preferredWidth
+                visible: root.appMark.length > 0
+                decodeWidth: Math.round(22 * IrisStyle.density)
+                decodeHeight: decodeWidth
+                source: root.appMark
+                TapHandler {
+                    cursorShape: Qt.PointingHandCursor
+                    onTapped: if (root.player?.canRaise) root.player.raise()
+                }
             }
         }
-        IrisScrubber {
-            id: timeline
-            Layout.fillWidth: true
-            Layout.bottomMargin: -8 * IrisStyle.density
-            visible: root.hasTimeline
-            seekable: media.effectiveCanSeek
-            fillColor: root.tint
-            trackColor: IrisStyle.tintFill(root.tint)
-            value: media.effectiveLength > 0 ? Math.min(1, media.effectivePosition / media.effectiveLength) : 0
-            onSeekRequested: next => media.seek(next * media.effectiveLength)
-        }
+        // The time on one line, the bar between its two figures (Apple's expanded player).
         RowLayout {
             Layout.fillWidth: true
             visible: root.hasTimeline
-            IrisText {
-                text: StringUtils.friendlyTimeForSeconds(media.effectivePosition)
-                color: root.inkTertiary
-                font.pixelSize: IrisStyle.typeFootnote
-                font.family: IrisStyle.fontNumbers
-                font.features: ({ "tnum": 1 })
+            spacing: Math.round(10 * IrisStyle.density)
+            CardTime { text: StringUtils.friendlyTimeForSeconds(media.effectivePosition) }
+            IrisScrubber {
+                id: timeline
+                Layout.fillWidth: true
+                Layout.alignment: Qt.AlignVCenter
+                thickness: 6
+                engagedThickness: 10
+                knob: true
+                seekable: media.effectiveCanSeek
+                fillColor: root.ink
+                trackColor: root.overMedia ? IrisStyle.onMediaFill : IrisStyle.fillHover
+                value: media.effectiveLength > 0 ? Math.min(1, media.effectivePosition / media.effectiveLength) : 0
+                onSeekRequested: next => media.seek(next * media.effectiveLength)
             }
-            Item { Layout.fillWidth: true }
-            IrisText {
-                text: StringUtils.friendlyTimeForSeconds(media.effectiveLength)
-                color: root.inkTertiary
-                font.pixelSize: IrisStyle.typeFootnote
-                font.family: IrisStyle.fontNumbers
-                font.features: ({ "tnum": 1 })
+            CardTime {
+                horizontalAlignment: Text.AlignRight
+                text: "\u2212" + StringUtils.friendlyTimeForSeconds(Math.max(0, media.effectiveLength - media.effectivePosition))
             }
         }
         RowLayout {
@@ -171,36 +204,54 @@ Item {
                 font.features: ({ "tnum": 1 })
             }
         }
-        RowLayout {
-            Layout.fillWidth: true
+        // Five controls on soft discs (Apple's expanded player), the pause the largest; at the two ends the player's
+        // shuffle and repeat, lit in the card's tint when on, or ten seconds back and ahead where it has neither.
+        IrisControlPlate {
+            id: transport
             Layout.alignment: Qt.AlignHCenter
-            spacing: 0
-            Item { Layout.fillWidth: true }
-            IrisControlPlate {
-                id: transport
-                controlHeight: Math.round(34 * IrisStyle.density)
-                RowLayout {
-                    spacing: Math.round(4 * IrisStyle.density)
-                    // On the plate each takes its concentric radius, bare the row radius.
-                    Repeater {
-                        model: ["previous", "toggle", "next"]
-                        IrisIconButton {
-                            required property string modelData
-                            readonly property bool toggle: modelData === "toggle"
-                            buttonRadius: transport.framed ? transport.controlRadius : IrisStyle.radiusSmall
-                            buttonRadiusPressed: transport.framed ? transport.controlRadius : Math.max(IrisStyle.radiusMicro, IrisStyle.radiusSmall - Math.round(2 * IrisStyle.density))
-                            foreground: root.ink
-                            materialIcon: toggle ? (media.effectiveIsPlaying ? "pause" : "play_arrow") : modelData === "previous" ? "skip_previous" : "skip_next"
-                            iconSize: toggle ? Math.round(28 * IrisStyle.density) : Math.round(18 * IrisStyle.density)
-                            Accessible.name: toggle ? (media.effectiveIsPlaying ? Translation.tr("Pause") : Translation.tr("Play"))
-                                : modelData === "previous" ? Translation.tr("Previous track") : Translation.tr("Next track")
-                            enabled: toggle ? root.hasPlayer : modelData === "previous" ? media.effectiveCanGoPrevious : media.effectiveCanGoNext
-                            onClicked: toggle ? media.togglePlaying() : modelData === "previous" ? media.previous() : media.next()
-                        }
-                    }
+            Layout.topMargin: Math.round(2 * IrisStyle.density)
+            visible: root.hasPlayer
+            controlHeight: Math.round(48 * IrisStyle.density)
+            RowLayout {
+                spacing: Math.round((transport.framed ? 4 : 10) * IrisStyle.density)
+                CardButton {
+                    side: true
+                    visible: root.canShuffle || root.canSeekBy
+                    on: root.canShuffle && (root.player?.shuffle ?? false)
+                    materialIcon: root.canShuffle ? "shuffle" : "replay_10"
+                    Accessible.name: root.canShuffle ? Translation.tr("Shuffle") : Translation.tr("Back 10 seconds")
+                    onClicked: root.canShuffle ? root.player.shuffle = !on : root.seekBy(-10)
+                }
+                CardButton {
+                    materialIcon: "skip_previous"
+                    Accessible.name: Translation.tr("Previous track")
+                    enabled: media.effectiveCanGoPrevious
+                    onClicked: media.previous()
+                }
+                CardButton {
+                    lead: true
+                    materialIcon: media.effectiveIsPlaying ? "pause" : "play_arrow"
+                    Accessible.name: media.effectiveIsPlaying ? Translation.tr("Pause") : Translation.tr("Play")
+                    onClicked: media.togglePlaying()
+                }
+                CardButton {
+                    materialIcon: "skip_next"
+                    Accessible.name: Translation.tr("Next track")
+                    enabled: media.effectiveCanGoNext
+                    onClicked: media.next()
+                }
+                CardButton {
+                    side: true
+                    visible: root.canLoop || root.canSeekBy
+                    on: root.canLoop && root.loopState !== MprisLoopState.None
+                    materialIcon: !root.canLoop ? "forward_10" : root.loopState === MprisLoopState.Track ? "repeat_one" : "repeat"
+                    Accessible.name: root.canLoop ? Translation.tr("Repeat") : Translation.tr("Ahead 10 seconds")
+                    onClicked: root.canLoop
+                        ? root.player.loopState = root.loopState === MprisLoopState.None ? MprisLoopState.Playlist
+                            : root.loopState === MprisLoopState.Playlist ? MprisLoopState.Track : MprisLoopState.None
+                        : root.seekBy(10)
                 }
             }
-            Item { Layout.fillWidth: true }
         }
         IrisPlayerChips {
             id: playerChips
@@ -254,4 +305,26 @@ Item {
     }
 
     IrisSkin { id: cardSkin; part: "mediaCard"; host: root }
+
+    component CardTime: IrisText {
+        Layout.minimumWidth: Math.round(30 * IrisStyle.density)
+        color: root.inkTertiary
+        font.pixelSize: IrisStyle.typeFootnote
+        font.family: IrisStyle.fontNumbers
+        font.features: ({ "tnum": 1 })
+    }
+    component CardButton: IrisIconButton {
+        property bool lead: false
+        property bool side: false
+        property bool on: false
+        readonly property color disc: root.overMedia ? IrisStyle.onMediaFill : IrisStyle.fill
+        implicitWidth: Math.round((lead ? 48 : side ? 34 : 40) * IrisStyle.density)
+        implicitHeight: implicitWidth
+        // On the plate each takes its concentric radius, bare a full round; the ends stand bare until hovered.
+        buttonRadius: transport.framed ? transport.controlRadius : height / 2
+        buttonRadiusPressed: buttonRadius
+        colBackground: side ? "transparent" : lead ? disc : ColorUtils.applyAlpha(disc, disc.a * 0.6)
+        iconSize: Math.round((lead ? 27 : side ? 19 : 22) * IrisStyle.density)
+        foreground: side ? (on ? root.tint : root.inkSecondary) : root.ink
+    }
 }

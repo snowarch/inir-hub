@@ -552,7 +552,7 @@ WSettingsPage {
 
                     WText {
                         Layout.alignment: Qt.AlignHCenter
-                        text: Translation.tr("No themes found")
+                        text: Voice.miss(Translation.tr("No themes found"), colorThemeCard.searchQuery)
                         font.pixelSize: Looks.font.pixelSize.small
                         color: Looks.colors.subfg
                     }

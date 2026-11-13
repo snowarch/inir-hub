@@ -26,8 +26,7 @@ ContentPage {
     readonly property string configuredHotCorner: orbitOptions.hotCorner ?? "topRight"
     readonly property var hotCornerConflictOutputs: Object.keys(NiriService.outputs ?? {}).filter(outputName =>
         NiriService.isOverviewHotCornerActive(outputName, root.configuredHotCorner))
-    readonly property var shelfModules: Array.isArray(shelfOptions.modules)
-        ? shelfOptions.modules : ["locator", "trail", "niri", "actions", "stash"]
+    readonly property var shelfModules: Array.from(shelfOptions.modules ?? ["locator", "trail", "niri", "actions", "stash"])
     readonly property var niriActionCatalog: [
         { id: "focusLeft", name: Translation.tr("Focus left"), icon: "arrow_back" },
         { id: "focusRight", name: Translation.tr("Focus right"), icon: "arrow_forward" },
@@ -44,8 +43,7 @@ ContentPage {
         if (corner === "bottomLeft") return Translation.tr("Bottom left")
         return Translation.tr("Bottom right")
     }
-    readonly property var niriActions: Array.isArray(shelfOptions.niriActions)
-        ? shelfOptions.niriActions : ["maximize", "consume", "expel"]
+    readonly property var niriActions: Array.from(shelfOptions.niriActions ?? ["maximize", "consume", "expel"])
     readonly property var availableNiriActions: niriActionCatalog
         .filter(action => !niriActions.includes(action.id))
     readonly property var actionOptions: {
@@ -61,8 +59,7 @@ ContentPage {
 
     function pinnedAction(slot: int): string {
         const defaults = ["open-clipboard", "toggle-tiling", "toggle-dashboard"]
-        const actions = Array.isArray(root.shelfOptions.pinnedActions)
-            ? root.shelfOptions.pinnedActions : defaults
+        const actions = Array.from(root.shelfOptions.pinnedActions ?? defaults)
         return actions[slot] ?? ""
     }
 
@@ -73,8 +70,7 @@ ContentPage {
 
     function setPinnedAction(slot: int, actionId: string): void {
         const defaults = ["open-clipboard", "toggle-tiling", "toggle-dashboard"]
-        const actions = Array.isArray(root.shelfOptions.pinnedActions)
-            ? [...root.shelfOptions.pinnedActions] : defaults
+        const actions = Array.from(root.shelfOptions.pinnedActions ?? defaults)
         while (actions.length < 3) actions.push("")
         actions[slot] = actionId
         Config.setNestedValue("orbit.shelf.pinnedActions", actions)

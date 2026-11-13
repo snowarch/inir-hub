@@ -25,7 +25,8 @@ Item {
     readonly property bool showLauncher: Config.options?.iris?.dock?.launcher ?? true
     readonly property var options: Config.options?.iris?.dock ?? ({})
     readonly property real d: IrisStyle.density
-    readonly property real iconSize: Math.max(28, Math.min(64, Number(root.options?.iconSize ?? 40))) * root.d
+    readonly property real iconSize: root.rail ? IrisFrame.railIcon
+        : Math.max(28, Math.min(64, Number(root.options?.iconSize ?? 40))) * root.d
     readonly property string edge: IrisFrame.dockEdge
     readonly property bool atTop: root.edge === "top"
     readonly property bool atBottom: root.edge === "bottom"
@@ -45,10 +46,12 @@ Item {
             root.vertical ? item.height / 2 : (root.atTop ? item.height : 0))
         return Qt.point(Math.round(p.x), Math.round(p.y))
     }
-    readonly property bool notch: root.options?.notch ?? false
-    readonly property bool autoHide: root.options?.autoHide ?? true
-    readonly property bool reserveSpace: root.options?.reserveSpace ?? true
-    readonly property bool magnify: (root.options?.magnification ?? true) && IrisStyle.motionEnabled
+    // In the frame's rail the Dock is the wide side of the frame itself: always there, top to bottom, melted in.
+    readonly property bool rail: IrisFrame.rail
+    readonly property bool notch: root.rail || (root.options?.notch ?? false)
+    readonly property bool autoHide: !root.rail && (root.options?.autoHide ?? true)
+    readonly property bool reserveSpace: root.rail || (root.options?.reserveSpace ?? true)
+    readonly property bool magnify: !root.rail && (root.options?.magnification ?? true) && IrisStyle.motionEnabled
     readonly property bool badges: root.options?.badges ?? true
     readonly property bool revealOnEmpty: root.options?.revealOnEmpty ?? true
     readonly property var entries: {
@@ -199,6 +202,10 @@ Item {
         function onControlPanelOpenChanged(): void { if (GlobalStates.controlPanelOpen) root.seenAllAt = Date.now() }
     }
     readonly property real slotWidth: root.iconSize + 10 * root.d
+    // Where the rail's first slot and its gear stand from the screen's ends: past the frame's line, a breath in.
+    readonly property real railHead: Math.round(IrisFrame.band + 8 * root.d)
+    readonly property bool railCentred: String(IrisFrame.surround?.railApps ?? "top") === "centre"
+    readonly property bool railButtons: IrisFrame.surround?.railButtons ?? true
     readonly property real plateSize: Math.round(root.iconSize + 6 * root.d)
     readonly property real separatorWidth: 13 * root.d
     readonly property real slotSpacing: 2 * root.d
@@ -277,13 +284,13 @@ Item {
             readonly property real menuLeftClear: {
                 if (!GlobalStates.sidebarLeftOpen || GlobalStates.sidebarLeftPresentationOutput !== (root.screen?.name ?? "")) return 12
                 const o = Config.options?.iris?.sidebars?.left ?? ({})
-                return IrisFrame.band + Math.max(300, Math.min(600, Number(o?.width ?? 380))) * root.d
+                return IrisFrame.insetOn("left", root.screen?.name ?? "") + Math.max(300, Math.min(600, Number(o?.width ?? 380))) * root.d
                     + ((o?.notch ?? false) ? 0 : 12 * root.d) + 12
             }
             readonly property real menuRightClear: {
                 if (!GlobalStates.sidebarRightOpen || GlobalStates.sidebarRightPresentationOutput !== (root.screen?.name ?? "")) return 12
                 const o = Config.options?.iris?.sidebars?.right ?? ({})
-                return IrisFrame.band + Math.max(300, Math.min(600, Number(o?.width ?? 380))) * root.d
+                return IrisFrame.insetOn("right", root.screen?.name ?? "") + Math.max(300, Math.min(600, Number(o?.width ?? 380))) * root.d
                     + ((o?.notch ?? false) ? 0 : 12 * root.d) + 12
             }
             function captureMenuAnchor(icon: Item): void {
@@ -334,10 +341,8 @@ Item {
             readonly property bool fullscreenCovered: CompositorService.isNiri
                 && GameMode.hasFullscreenOnOutput(root.screen?.name ?? "")
                 && !NiriService.inOverview
-            readonly property bool overviewOverFullscreen: CompositorService.isNiri && NiriService.inOverview
-                && GameMode.hasFullscreenOnOutput(root.screen?.name ?? "")
-            readonly property bool overFullscreen: window.overviewOverFullscreen || (window.fullscreenCovered
-                && (window.askedShown || window.menuOpen || window.editingDock))
+            readonly property bool overFullscreen: window.fullscreenCovered
+                && (window.askedShown || window.menuOpen || window.editingDock)
             readonly property bool fullscreenIdle: window.fullscreenCovered && !window.overFullscreen
             // Arranging the desktop the Dock recedes into the card with the chassis and shows as it rests there.
             readonly property bool revealed: !window.fullscreenIdle && (!root.autoHide || GlobalStates.widgetEditMode || window.edgeIntent || window.menuOpen
@@ -399,6 +404,19 @@ Item {
                 width: root.vertical ? hitArea.depth : hitArea.span
                 height: root.vertical ? hitArea.span : hitArea.depth
             }
+
+            // An app that opens or closes: the Dock glides to its new length, the others slide over and the new one
+            // grows in, on the move curve. Startup, magnification and a drag stay immediate.
+            property bool reflowing: false
+            property bool reflowWarm: false
+            readonly property int entryCount: root.entries.length
+            onEntryCountChanged: {
+                if (!window.reflowWarm || !IrisStyle.motionEnabled || root.slideApp.length > 0) return
+                window.reflowing = true
+                reflowEnd.restart()
+            }
+            Timer { id: reflowEnd; interval: IrisStyle.morphDuration + 40; onTriggered: window.reflowing = false }
+            Timer { running: true; interval: 1500; onTriggered: window.reflowWarm = true }
 
             property var frozenSlotX: null
             readonly property var pointerSlotX: {
@@ -474,7 +492,8 @@ Item {
                     width: Math.round(dock.width + (root.vertical ? attached : 0)),
                     height: Math.round(dock.height + (root.vertical ? 0 : attached)),
                     radius: dock.radius, paints: true,
-                    fuse: root.notch ? Math.round(IrisStyle.fuseEdge * window.notchReveal) : IrisStyle.fuse,
+                    fuse: root.rail ? IrisFrame.railFuse
+                        : root.notch ? Math.round(IrisStyle.fuseEdge * window.notchReveal) : IrisStyle.fuse,
                     id: "dock", joins: !root.notch ? "" : IrisFrame.framed ? "frame" : "dockEdge", glass: window.bodyGlass
                 })
                 const menuBody = menu.bodyRect
@@ -514,13 +533,24 @@ Item {
                 readonly property real baseWidth: (window.baseCenters.length > 0
                     ? window.baseCenters[window.baseCenters.length - 1] + root.slotWidth / 2 : 0) + dock.padding * 2
                 width: root.vertical ? window.dockHeight : Math.min(window.width - 32, appRow.implicitWidth + dock.padding * 2)
-                height: root.vertical ? Math.min(window.height - 32, appRow.implicitHeight + dock.padding * 2) : window.dockHeight
+                height: root.rail ? window.height
+                    : root.vertical ? Math.min(window.height - 32, appRow.implicitHeight + dock.padding * 2) : window.dockHeight
+                Behavior on width {
+                    enabled: window.reflowing && !root.vertical
+                    NumberAnimation { duration: IrisStyle.morphDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: IrisStyle.moveCurve }
+                }
+                Behavior on height {
+                    enabled: window.reflowing && root.vertical && !root.rail
+                    NumberAnimation { duration: IrisStyle.morphDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: IrisStyle.moveCurve }
+                }
                 x: root.vertical ? (root.atLeft ? window.edgeOffset : window.width - width - window.edgeOffset)
                     : Math.round((window.width - width) / 2)
-                y: root.vertical ? Math.round((window.height - height) / 2)
+                y: root.rail ? 0 : root.vertical ? Math.round((window.height - height) / 2)
                     : root.atTop ? window.edgeOffset : window.height - height - window.edgeOffset
-                readonly property real thickness: root.vertical ? width : height
-                radius: IrisStyle.profileRadius(IrisStyle.bodyProfile(IrisStyle.dockShape, root.notch), dock.thickness)
+                // Across the Dock on either axis; read from the band, not its own size, so a flip of edge
+                // (bottom to the rail) never loops through radius and padding.
+                readonly property real thickness: window.dockHeight
+                radius: root.rail ? 0 : IrisStyle.profileRadius(IrisStyle.bodyProfile(IrisStyle.dockShape, root.notch), dock.thickness)
                 quiet: true
                 opacity: window.revealed || window.edgeOffset > -window.dockHeight ? 1 : 0
 
@@ -546,9 +576,14 @@ Item {
                         xAxis.enabled: root.vertical
                         yAxis.enabled: !root.vertical
                         property real startSize: 40
-                        property IrisConfigDrag write: IrisConfigDrag { path: "iris.dock.iconSize" }
+                        // On the rail the grip sizes the rail (its width, icons + 18), never the Dock's own icons.
+                        readonly property string sizeKey: root.rail ? "iris.surround.railSize" : "iris.dock.iconSize"
+                        readonly property real lo: root.rail ? 40 : 28
+                        readonly property real hi: root.rail ? 72 : 64
+                        property IrisConfigDrag write: IrisConfigDrag { path: dockResizeDrag.sizeKey }
                         onActiveChanged: {
-                            if (active) dockResizeDrag.startSize = Number(Config.options?.iris?.dock?.iconSize ?? 40)
+                            if (active) dockResizeDrag.startSize = root.rail ? Number(IrisFrame.surround?.railSize ?? 46)
+                                : Number(Config.options?.iris?.dock?.iconSize ?? 40)
                             else dockResizeDrag.write.flush()
                         }
                         onTranslationChanged: {
@@ -556,22 +591,55 @@ Item {
                             const outward = root.vertical ? (root.atLeft ? translation.x : -translation.x)
                                 : (root.atTop ? translation.y : -translation.y)
                             const delta = outward / Math.max(0.01, root.d)
-                            dockResizeDrag.write.push(Math.round(Math.max(28, Math.min(64, dockResizeDrag.startSize + delta))))
+                            dockResizeDrag.write.push(Math.round(Math.max(dockResizeDrag.lo, Math.min(dockResizeDrag.hi, dockResizeDrag.startSize + delta))))
                         }
                     }
                 }
 
+                // The rail's own two marks, as a browser's sidebar has them: "+" under the apps pins another,
+                // the gear at the foot opens iRiS Settings.
+                RailButton {
+                    y: appRow.y + appRow.height + root.slotSpacing
+                    glyph: "add"
+                    label: Translation.tr("Pin apps")
+                    onActivated: GlobalStates.openSettingsAt("iris", "dock/Apps")
+                }
+                RailButton {
+                    y: dock.height - root.railHead - height
+                    glyph: "settings"
+                    label: Translation.tr("Settings")
+                    onActivated: GlobalStates.openSettingsAt("iris", "")
+                }
+
                 Grid {
                     id: appRow
-                    columns: root.vertical ? 1 : Math.max(1, root.entries.length + (root.showLauncher ? 1 : 0)
-                        + (root.pieces.length > 0 ? root.pieces.length + 1 : 0))
+                    // One line, never a count: a Grid lays out at once when its columns change, so a count bound
+                    // here resized the Dock before the reflow could start and every app jumped into place.
+                    columns: root.vertical ? 1 : -1
+                    rows: root.vertical ? -1 : 1
                     flow: root.vertical ? Grid.TopToBottom : Grid.LeftToRight
-                    x: root.vertical ? (root.atLeft ? Math.round(4 * root.d) : parent.width - width - Math.round(4 * root.d)) : dock.padding
-                    y: root.vertical ? dock.padding : (root.atTop ? Math.round(4 * root.d) : parent.height - height - Math.round(4 * root.d))
+                    // On the rail each plate centres on all you see of it, frame band included, as a sidebar's marks do
+                    // (the window stands on the screen's edge; a plate sits 4·d from its slot's outer side).
+                    x: root.rail ? Math.round(root.atLeft
+                            ? IrisFrame.wallOn("left") / 2 - dock.x - 4 * root.d - root.plateSize / 2
+                            : window.width - IrisFrame.wallOn("right") / 2 - dock.x - width + 4 * root.d + root.plateSize / 2)
+                        : root.vertical ? (root.atLeft ? Math.round(4 * root.d) : parent.width - width - Math.round(4 * root.d)) : dock.padding
+                    y: root.rail ? (root.railCentred ? Math.max(root.railHead, Math.round((dock.height - height) / 2)) : root.railHead)
+                        : root.vertical ? dock.padding : (root.atTop ? Math.round(4 * root.d) : parent.height - height - Math.round(4 * root.d))
                     spacing: root.slotSpacing
                     move: Transition {
-                        enabled: root.slideApp.length > 0 && IrisStyle.motionEnabled
-                        NumberAnimation { properties: "x,y"; duration: IrisStyle.duration(200); easing.type: IrisStyle.feedbackEasing }
+                        enabled: (root.slideApp.length > 0 || window.reflowing) && IrisStyle.motionEnabled
+                        NumberAnimation {
+                            properties: "x,y"
+                            duration: window.reflowing ? IrisStyle.morphDuration : IrisStyle.duration(200)
+                            easing.type: window.reflowing ? Easing.BezierSpline : IrisStyle.feedbackEasing
+                            easing.bezierCurve: IrisStyle.moveCurve
+                        }
+                    }
+                    add: Transition {
+                        enabled: window.reflowing
+                        NumberAnimation { property: "opacity"; from: 0; to: 1; duration: IrisStyle.emergeDuration; easing.type: Easing.OutCubic }
+                        NumberAnimation { property: "scale"; from: 0.4; to: 1; duration: IrisStyle.emergeDuration; easing.type: Easing.BezierSpline; easing.bezierCurve: IrisStyle.emergeCurve }
                     }
 
                     component Slot: Item {
@@ -779,6 +847,7 @@ Item {
                                 HoverPlate {
                                     lift: appSlot.lift + appIcon.hoverLift
                                     lit: appButton.hovered || appButton.down || appSlot.held
+                                    chosen: root.rail && appSlot.focused
                                     skinned: appButton.skinned
                                 }
                                 IrisButton {
@@ -951,8 +1020,8 @@ Item {
                                             // A plate Design (AIRISU) cuts them square and lights the focused window in the seal:
                                             // the only live thing in the dock.
                                             radius: Math.min(width, height) / 2
-                                            color: indicators.minimizedOnly ? "transparent"
-                                                : indicators.urgent ? IrisStyle.secondaryAccent
+                                            color: indicators?.minimizedOnly ? "transparent"
+                                                : indicators?.urgent ? IrisStyle.secondaryAccent
                                                 : indicator.lead ? (IrisStyle.plateSelection ? IrisStyle.accentFill : IrisStyle.text)
                                                 : (appSlot.focused ? IrisStyle.textSecondary : IrisStyle.textTertiary)
                                             borderWidth: indicators.minimizedOnly ? Math.max(1, Math.round(1.2 * root.d)) : 0
@@ -992,7 +1061,7 @@ Item {
                             slotIndex: (root.showLauncher ? 1 : 0) + root.entries.length + 1 + pieceSlot.index
                             readonly property string label: Translation.tr(IrisPieces.labelOf(pieceSlot.modelData.kind))
                             function rect(): var {
-                                const p = pieceFace.mapToItem(root.QsWindow.contentItem, 0, 0)
+                                const p = pieceFace.mapToItem(root.QsWindow.window?.contentItem, 0, 0)
                                 const size = pieceFace.width * pieceFace.scale
                                 return { x: p.x, y: p.y, size: size, source: "dock-" + pieceSlot.modelData.slot }
                             }
@@ -1156,8 +1225,8 @@ Item {
                     ? Math.round(Math.min(window.width - 24, windowsContent.implicitWidth + 20 * root.d))
                     : Math.round(Math.min(Math.max(200 * root.d, menuContent.implicitWidth + 12 * root.d), 260 * root.d))
                 height: Math.round(menu.activeContent.implicitHeight + (menu.mode === "windows" ? 20 : 12) * root.d)
-                readonly property real topClear: IrisFrame.safeInset("top") + 8 * root.d
-                readonly property real bottomClear: IrisFrame.safeInset("bottom") + 8 * root.d
+                readonly property real topClear: IrisFrame.safeInset("top", root.screen?.name ?? "") + 8 * root.d
+                readonly property real bottomClear: IrisFrame.safeInset("bottom", root.screen?.name ?? "") + 8 * root.d
                 x: Math.round(root.atLeft ? dock.x + dock.width + 8 * root.d
                     : root.atRight ? dock.x - width - 8 * root.d
                     : Math.max(window.menuLeftClear, Math.min(window.width - width - window.menuRightClear, window.menuAnchor.x - width / 2)))
@@ -1568,6 +1637,20 @@ Item {
                         }
                     }
                     MenuRow {
+                        // Umbriel's scratchpad, for an app with one window (a base without the verbs leaves it out).
+                        readonly property var win: NiriService.scratchpadAvailable === true && (menu.windows?.length ?? 0) === 1
+                            ? (NiriService.windows ?? []).find(w => w.id === menu.windows[0].niriWindowId) ?? null : null
+                        visible: win !== null
+                        glyph: win?.scratchpad ? "move_up" : "sticky_note_2"
+                        label: win?.scratchpad ? Translation.tr("Back to its workspace") : Translation.tr("Send to scratchpad")
+                        onClicked: {
+                            const id = win.id
+                            if (win.scratchpad) NiriService.restoreWindowFromScratchpad(id)
+                            else NiriService.moveWindowToScratchpad(id)
+                            window.menuApp = null
+                        }
+                    }
+                    MenuRow {
                         visible: CompositorService.isNiri && (menu.windows?.length ?? 0) > 0
                         glyph: "close"
                         danger: true
@@ -1581,12 +1664,50 @@ Item {
             }
         }
 
+    component RailButton: Item {
+        id: railButton
+        property string glyph: ""
+        property string label: ""
+        signal activated()
+        readonly property real glyphSize: Math.round(Math.max(16 * root.d, root.iconSize * 0.6))
+        visible: root.rail && root.railButtons && !IrisState.edit
+        x: appRow.x
+        width: root.thickness
+        height: root.slotWidth
+        HoverPlate { lit: railArea.containsMouse || railArea.pressed }
+        MaterialSymbol {
+            x: root.edgeX(parent.width, width, 4 * root.d + (root.plateSize - width) / 2)
+            y: (parent.height - height) / 2
+            width: railButton.glyphSize
+            height: width
+            horizontalAlignment: Text.AlignHCenter
+            verticalAlignment: Text.AlignVCenter
+            text: railButton.glyph
+            iconSize: railButton.glyphSize
+            color: railArea.containsMouse ? IrisStyle.text : IrisStyle.textSecondary
+            scale: railArea.pressed ? IrisStyle.pressScale(0.9) : 1
+            Behavior on color { ColorAnimation { duration: IrisStyle.duration(120); easing.type: IrisStyle.feedbackEasing } }
+        }
+        MouseArea {
+            id: railArea
+            anchors.fill: parent
+            hoverEnabled: true
+            cursorShape: Qt.PointingHandCursor
+            Accessible.role: Accessible.Button
+            Accessible.name: railButton.label
+            onClicked: railButton.activated()
+            onContainsMouseChanged: nameLabel.present(containsMouse ? railButton : null, railButton.label)
+        }
+    }
+
     // A slot's hover plate: a rounded square around the icon, the same radius on every corner, 4·d from the lane's
     // inner edge like the lane itself. The Dock's ends make room for it (dock.padding), so it never meets the curve.
     component HoverPlate: Rectangle {
         id: plate
         property real lift: 0
         property bool lit: false
+        // The rail marks the focused app as a browser's sidebar marks its open tab: on its plate at rest.
+        property bool chosen: false
         // A Design that draws the slot (dockSlot) answers the pointer without a plate.
         property bool skinned: false
         visible: !root.magnify && !plate.skinned
@@ -1595,7 +1716,8 @@ Item {
         radius: IrisStyle.tileRadius(plate.width)
         x: root.edgeX(parent.width, plate.width, 4 * root.d + plate.lift)
         y: root.edgeY(parent.height, plate.height, 4 * root.d + plate.lift)
-        color: plate.lit ? IrisStyle.fill : ColorUtils.applyAlpha(IrisStyle.text, 0)
+        color: plate.lit && plate.chosen ? IrisStyle.fillHover : plate.lit || plate.chosen ? IrisStyle.fill
+            : ColorUtils.applyAlpha(IrisStyle.text, 0)
         Behavior on color { ColorAnimation { duration: IrisStyle.duration(120); easing.type: IrisStyle.feedbackEasing } }
     }
 }

@@ -124,7 +124,15 @@ Rectangle {
         return Config.options?.material?.sidebar?.right?.enabledWidgets ?? ["calendar", "todo", "notepad", "calculator", "sysmon", "weather", "timer"]
     }
 
-    property var tabs: allTabs.filter(tab => {
+    // Installed widgets with a Material sidebar face for this side (widget.json "ii", slot "sidebar.right" or none),
+    // offered as tabs the person turns on in Settings › Sidebars, like the built-in ones.
+    readonly property var hubTabs: CustomWidgets.ready ? CustomWidgets.widgets.filter(widget => {
+        const face = widget.faces?.ii
+        const slots = Array.from(face?.slots ?? [])
+        return String(face?.path ?? "").length > 0 && (slots.length === 0 || slots.includes("sidebar.right"))
+    }).map(widget => ({ "type": "custom." + widget.id, "name": widget.name, "icon": widget.icon, "source": widget.faces.ii.path })) : []
+
+    property var tabs: allTabs.concat(hubTabs).filter(tab => {
         if (tab.type === "screentime" && !(Config.options?.screenTime?.enable ?? false))
             return false
         return enabledWidgets.includes(tab.type)
@@ -455,8 +463,15 @@ Rectangle {
                     Loader {
                         id: tabLoader
                         anchors.fill: parent
-                        sourceComponent: modelData.widget
+                        // A hub widget's face loads from its folder and is hidden while its tab is not the one shown.
+                        source: modelData.source ?? ""
+                        sourceComponent: modelData.source ? null : modelData.widget
+                        visible: !modelData.source || tabItem.opacity > 0
                         focus: root.selectedTab === tabItem.tabIndex
+                        onLoaded: {
+                            if (item.hasOwnProperty("iiSlot"))
+                                item.iiSlot = "sidebar.right"
+                        }
                     }
                 }
             }

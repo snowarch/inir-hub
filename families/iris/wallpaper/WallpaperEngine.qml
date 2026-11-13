@@ -813,7 +813,7 @@ Item {
         root.downloadingKey = entry.key
         download.total = 0
         download.received = 0
-        download.command = ["/usr/bin/bash", "-c", 'mkdir -p "$1" && [ -s "$2" ] && exit 0; '
+        download.command = ["bash", "-c", 'mkdir -p "$1" && [ -s "$2" ] && exit 0; '
             + 'echo "total $(curl -sIL -A "$4" "$3" | tr -d "\\r" | awk \'tolower($1)=="content-length:" { n = $2 } END { print n + 0 }\')"; '
             + 'curl -fsSL -A "$4" "$3" -o "$2.part" && mv "$2.part" "$2"',
             "_", folder, download.localPath, sharp ? entry.file4k : entry.file, Wallhaven.defaultUserAgent]
@@ -857,10 +857,10 @@ Item {
         : root.libraryFolders.length > 0 ? "folder_open" : "hide_image"
     readonly property string emptyText: root.online && !Network.online ? Network.offlineReason
         : root.online ? (root.searching ? Translation.tr("Looking for wallpapers…") : (root.onlineMessage || Translation.tr("Nothing found")))
-        : root.source === "favorites" ? (root.query.length > 0 ? Translation.tr("No matches")
+        : root.source === "favorites" ? (root.query.length > 0 ? Voice.miss(Translation.tr("No matches"), root.query)
             : Translation.tr("Heart a wallpaper here or on the web and it waits for you in Favourites"))
         : root.pathMode ? Translation.tr("Press Enter to open %1").arg(root.query)
-        : root.query.length > 0 ? Translation.tr("No matches")
+        : root.query.length > 0 ? Voice.miss(Translation.tr("No matches"), root.query)
         : root.libraryFolders.length > 0 ? Translation.tr("Wallpapers live in the folders above")
         : Translation.tr("No wallpapers in this folder")
     readonly property string searchHint: root.pivotLabel.length > 0 ? root.pivotLabel

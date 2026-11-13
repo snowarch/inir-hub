@@ -1226,6 +1226,35 @@ WSettingsPage {
                     onCheckedChanged: root.setNestedValueWhenReady("background.pauseAnimationOnBattery", checked)
                 }
 
+                WSettingsDropdown {
+                    visible: root.wBg.enableAnimation ?? true
+                    label: Translation.tr("Pause")
+                    icon: "pause"
+                    description: Translation.tr("A hidden wallpaper stops decoding and keeps its frame.")
+                    currentValue: Config.options?.background?.videoPause ?? "covered"
+                    options: [
+                        { value: "never", displayName: Translation.tr("Never") },
+                        { value: "fullscreen", displayName: Translation.tr("Behind fullscreen") },
+                        { value: "covered", displayName: Translation.tr("When covered") }
+                    ]
+                    onSelected: newValue => root.setNestedValueWhenReady("background.videoPause", newValue)
+                }
+
+                WSettingsSwitch {
+                    label: Translation.tr("Draw the wallpaper as glyphs")
+                    icon: "grid"
+                    description: Translation.tr("Pictures, GIFs and videos are redrawn as glowing characters.")
+                    checked: Config.options?.background?.effects?.glyphs?.enable ?? false
+                    onCheckedChanged: root.setNestedValueWhenReady("background.effects.glyphs.enable", checked)
+                }
+
+                Loader {
+                    Layout.fillWidth: true
+                    active: Config.options?.background?.effects?.glyphs?.enable ?? false
+                    visible: active
+                    sourceComponent: WGlyphArtSettings {}
+                }
+
                 WSettingsSwitch {
                     label: Translation.tr("Enable blur")
                     icon: "eye"
@@ -1377,7 +1406,7 @@ WSettingsPage {
                     description: Translation.tr("Darken the backdrop layer")
                     suffix: "%"
                     from: 0; to: 100; stepSize: 5
-                    value: root.wBackdrop.dim ?? 20
+                    value: root.wBackdrop.dim ?? 0
                     onValueChanged: root.setNestedValueWhenReady("waffles.background.backdrop.dim", value)
                 }
 

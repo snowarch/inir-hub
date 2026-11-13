@@ -1,0 +1,60 @@
+{
+    "name": "Radio",
+    "icon": "radio",
+    "version": "2.3.1",
+    "author": "snowarch",
+    "description": "Live stations from anywhere in the world. Press play and it finds one playing a genre you like, or anything at all; next takes you to another place. Shows the station, where it is and what it plays now. A card on the desktop, a player on the iRiS Island, a card in Waffle's Widgets panel.",
+    "category": "media",
+    "main": "RadioCard.qml",
+    "service": "RadioService.qml",
+    "iris": {
+        "main": "IrisRadio.qml",
+        "slots": [
+            "island.desktop"
+        ],
+        "desktop": {
+            "iris": "IrisRadioFace.qml",
+            "prism": "PrismRadio.qml"
+        }
+    },
+    "waffle": {
+        "main": "WaffleRadio.qml"
+    },
+    "sizes": [
+        "medium",
+        "small",
+        "large"
+    ],
+    "defaultConfig": {
+        "placementStrategy": "free",
+        "widgetScale": 100,
+        "widgetOpacity": 100,
+        "colorMode": "auto",
+        "dim": 0,
+        "showBackground": true,
+        "backgroundOpacity": 0.16,
+        "borderWidth": 1,
+        "borderOpacity": 0.2,
+        "cornerRadius": -1,
+        "useBlur": false,
+        "x": 240,
+        "y": 420,
+        "style": "shape",
+        "shape": "Cookie12Sided"
+    },
+    "configKeys": {
+        "genres": {
+            "type": "string",
+            "default": "",
+            "label": "Genres you like, with commas (city pop, jazz). Empty plays anything"
+        },
+        "volume": {
+            "type": "int",
+            "default": 60,
+            "min": 0,
+            "max": 100,
+            "step": 5,
+            "label": "Volume"
+        }
+    }
+}

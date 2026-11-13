@@ -1,0 +1,59 @@
+{
+    "$schema": "../../families/iris/designs/design.schema.json",
+    "tokens": {
+        "colour": {
+            "roles": {
+                "dark": {
+                    "surface": "#0f0f11",
+                    "surfaceHigh": "#1e1e21",
+                    "surfaceHighest": "#28282c",
+                    "text": "#ffffff",
+                    "textSecondary": "#8e8e93",
+                    "textTertiary": "#5e5e63",
+                    "accentFill": "#ffffff",
+                    "onAccentFill": "#000000"
+                },
+                "ink": {
+                    "surface": "#08080a",
+                    "surfaceHigh": "#141416",
+                    "surfaceHighest": "#1e1e21",
+                    "text": "#ffffff",
+                    "textSecondary": "#8e8e93",
+                    "textTertiary": "#56565b",
+                    "accentFill": "#ffffff",
+                    "onAccentFill": "#000000"
+                },
+                "light": {
+                    "surface": "#f5f5f7",
+                    "surfaceHigh": "#ffffff",
+                    "surfaceHighest": "#ebebee",
+                    "text": "#1d1d1f",
+                    "textSecondary": "#6e6e73",
+                    "textTertiary": "#a1a1a6",
+                    "accentFill": "#1d1d1f",
+                    "onAccentFill": "#ffffff"
+                }
+            }
+        },
+        "shape": {
+            "ladder": { "panel": 28, "sheet": 28, "plate": 18, "card": 18, "tile": 13, "row": 14, "chip": 16, "micro": 5 },
+            "piece": "circle"
+        },
+        "material": {
+            "texture": "flat",
+            "edge": "light",
+            "edgeWidth": 1,
+            "plates": { "black": ["#1e1e21", "#0f0f11"], "white": ["#ffffff", "#f5f5f7"] },
+            "glass": "refuse"
+        },
+        "motion": {
+            "morph": "snap",
+            "duration": 200
+        },
+        "look": {
+            "look": "prism",
+            "widgets": "prism",
+            "traits": { "marks": "tile", "selection": "plate", "captions": "mono", "hover": "wash", "index": true, "sections": "line", "rings": "none" }
+        }
+    }
+}

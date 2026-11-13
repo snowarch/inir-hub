@@ -73,8 +73,8 @@ ColumnLayout {
         wrapMode: Text.Wrap
         font.pixelSize: IrisStyle.typeMeta
         color: IrisStyle.subtext
-        text: !Autostart.isNiri ? Translation.tr("Apps start from Niri's startup file, so this works only under Niri.")
-            : Translation.tr("Niri's startup file is missing. Run iNiR's setup again to bring it back.")
+        text: !Autostart.isNiri ? Translation.tr("Apps start from the compositor's startup file, so this works only under Niri or Umbriel.")
+            : Translation.tr("The compositor's startup file is missing. Run iNiR's setup again to bring it back.")
     }
 
     Rectangle {

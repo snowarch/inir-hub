@@ -329,20 +329,12 @@ ColumnLayout {
                 tint: IrisStyle.identity.orange
                 glyph: page.island.timerPaused ? "play_arrow" : "pause"
                 Accessible.name: page.island.timerPaused ? Translation.tr("Resume") : Translation.tr("Pause")
-                onClicked: {
-                    if (page.island.timerKind === "pomodoro") TimerService.togglePomodoro()
-                    else if (page.island.timerKind === "countdown") TimerService.toggleCountdown()
-                    else TimerService.toggleStopwatch()
-                }
+                onClicked: TimerService.toggleTimer(page.island.timerKind)
             },
             Round {
                 glyph: "close"
                 Accessible.name: Translation.tr("Stop")
-                onClicked: {
-                    if (page.island.timerKind === "pomodoro") TimerService.stopPomodoro()
-                    else if (page.island.timerKind === "countdown") TimerService.stopCountdown()
-                    else TimerService.stopStopwatch()
-                }
+                onClicked: TimerService.stopTimer(page.island.timerKind)
             }
         ]
         // A pomodoro as its stages, the way a washer shows its cycle: each focus and break a segment, the one

@@ -32,6 +32,7 @@ Item {
         border.width: root.lineWidth
         border.color: ColorUtils.applyAlpha(IrisStyle.glassEdgeColour, IrisStyle.glassEdgeLight)
         layer.enabled: true
+        layer.smooth: true
         layer.effect: MultiEffect {
             maskEnabled: true
             maskSource: litFade

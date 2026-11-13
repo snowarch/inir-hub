@@ -25,7 +25,7 @@ IrisWidgetFace {
     readonly property var apps: { void root.revision; return root.on ? ScreenTime.getAppList(1) : [] }
     readonly property int appCount: root.large ? 5 : root.medium ? 2 : 1
     readonly property var topApps: root.apps.slice(0, root.appCount)
-    readonly property color tint: root.inked(IrisStyle.identity.indigo)
+    readonly property color tint: root.accent
     // Under a minute counted: the day has not started, and "0m" over a row of empty stubs said nothing.
     readonly property bool idle: root.total < 60
 
@@ -133,8 +133,7 @@ IrisWidgetFace {
 
     // Ribbon: the day as one strip of 24 hours, each hour the colour of the app that held it, an unbroken run where one
     // app held on. It shows what the curve can't: which part of the day went where.
-    readonly property var ribbonTints: [root.inked(IrisStyle.identity.indigo), root.inked(IrisStyle.identity.orange),
-        root.inked(IrisStyle.identity.pink), root.inked(IrisStyle.identity.teal)]
+    readonly property var ribbonTints: [root.accent, root.warm, root.accent2, root.highlight]
     function ribbonTint(rank: int): color {
         return rank < root.ribbonTints.length ? root.ribbonTints[rank] : root.inkTertiary
     }

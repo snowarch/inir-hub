@@ -1,5 +1,6 @@
 pragma ComponentBehavior: Bound
 import QtQuick
+import QtQuick.Controls as QQC
 import QtQuick.Layouts
 import QtQuick.Controls
 import qs
@@ -113,6 +114,8 @@ Item {
                     TextArea {
                         cursorDelegate: TextCursor {}
                         id: textArea
+                        QQC.ContextMenu.menu: null
+                        QQC.ContextMenu.onRequested: position => TextEditMenu.open(textArea, position)
                         width: parent.width
                         text: root.editing ? root.draft : Notepad.text
                         placeholderText: Translation.tr("Type something...")

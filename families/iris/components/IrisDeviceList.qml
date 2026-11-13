@@ -58,7 +58,7 @@ ColumnLayout {
                         spacing: 10 * root.d
                         MaterialSymbol {
                             text: deviceRow.input ? "mic"
-                                : /head|bluez|airpod|buds/i.test(String(deviceRow.modelData?.name ?? "") + String(deviceRow.modelData?.description ?? "")) ? "headphones" : "speaker"
+                                : IrisStyle.soundDeviceGlyph(deviceRow.modelData, false)
                             iconSize: Math.round(18 * root.d)
                             color: deviceRow.current ? IrisStyle.accent : IrisStyle.subtext
                         }

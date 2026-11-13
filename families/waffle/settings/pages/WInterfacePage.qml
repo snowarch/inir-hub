@@ -517,6 +517,15 @@ WSettingsPage {
         }
 
         WSettingsSpinBox {
+            label: Translation.tr("Pinned tools when clicks pass through (%)")
+            icon: "pin"
+            suffix: "%"
+            from: 20; to: 100; stepSize: 5
+            value: Math.round((Config.options?.overlay?.clickthroughOpacity ?? 0.8) * 100)
+            onValueChanged: Config.setNestedValue("overlay.clickthroughOpacity", value / 100)
+        }
+
+        WSettingsSpinBox {
             label: Translation.tr("Game Performance background opacity (%)")
             icon: "pulse"
             suffix: "%"

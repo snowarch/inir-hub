@@ -11,21 +11,26 @@ QML, helpers and each kind so they never break the shell.
 
 ## What to make
 
+Pick by how a person reaches it. People don't type commands or edit keybinds: everything they use is found and
+opened with the mouse, in every family, from a place that family already has. That place is a widget: the Material
+desktop and its sidebars, the iRiS Island and Waffle's Widgets panel, one item with a face for each. A window of its
+own (a browser of something, a tool too big for a widget) is a component: every family's app launcher lists it by its
+name and a click opens it. A keybind is an extra for people who want one.
+
 | You want | Make | Folder |
 | --- | --- | --- |
-| A widget for the Material desktop, the iRiS Island or Waffle's Widgets panel | a widget | `widgets/<id>/` |
+| Something people see, open or use: a player, a card, a tool, a feed (like a radio or a countdown) | a widget, with a face for each family | `widgets/<id>/` |
 | Colours for Material, Waffle and the apps iNiR themes | a colour theme | `themes/<id>/` |
 | A whole iRiS look: material, colour, shape, motion | an iRiS theme | `iris-themes/<id>/` |
 | Another iRiS: its own colour, type, shapes, edges, motion and Island face over iRiS's components (like AIRISU) | a Design | `designs/<id>/` |
 | A website as a tab in Material's sidebar | a web app | `webapps/<id>/` |
-| A feature of its own for the desktop: a panel, a corner, a tool, with a keybind (like an anime finder) | a component | `components/<id>/` |
-| Something the shell runs or sets up with no panel of its own (like `fastfetch`) | a component | `components/<id>/` |
+| A window of its own opened from the app launcher (a media browser), or work the shell does while nobody looks (a scrobbler, a sync) or sets up once (like `fastfetch`) | a component | `components/<id>/` |
 | A fix to Material, iRiS or Waffle | an issue | [open one](https://github.com/snowarch/inir-hub/issues) |
 
 Material (`ii`), iRiS and Waffle are the desktops every iNiR install gets. Their maintainers change them; a pull request
-from outside that touches `families/` is refused by CI. What you want to add to one is a component worn with it
+from outside that touches `families/` is refused by CI. What you want to add to one is a widget, or a component worn with it
 ([Adding to a family](#adding-to-a-family)): it sits beside the family, so the family people installed stays exactly
-as it was, and removing your component takes all of it away.
+as it was, and removing your item takes all of it away. Never change a family or the shell to make room for an item.
 
 ## What an item may touch
 
@@ -98,8 +103,8 @@ Every item lives in its own folder and its own lane. Nothing outside a family ca
 
    Without `gh`: commit your item's folder on a branch, push it and open the pull request yourself.
 
-Once it is merged, the item gets a thread in Discussions › Reviews. People vote there (a thumbs up or down on the first
-post, or `inir hub rate my-clock up`) and say what works; its downloads are counted from the packages release. It
+Once it is merged, people vote and react on its page in their shell's Hub; installs, votes and reactions are counted
+daily from what they publish, and downloads from the packages release. It
 reaches people within the hour: inir.space/hub rebuilds from `main`, and `inir hub update` (or a family through
 `inir update`) brings it.
 
@@ -117,6 +122,7 @@ It reads what your branch changed since `origin/main` (`--base REF` for another 
 | Outside a family, every `IpcHandler` target starts with the item's id. | So it can never answer for the shell or another plugin. |
 | The item validates (`inir hub validate <folder>`): its files, listing, preview and permissions. | What the Hub shows and installs comes from these. |
 | A changed item raises its `version`, in `hub.json` and the native file alike. | Installed copies update only when the version moves, and a published version never changes its contents. |
+| Each raise says what changed, in `hub.json` › `changes`: `{"1.1.0": ["Clock face follows the wallpaper"]}`, a line people understand. | The Hub, the update notice and inir.space show it beside the update; a new preview alone needs no raise. |
 | Every `IpcHandler` has a `///` comment right above it (one line on what the target is for), and every function in it has one too. | `inir help` and the IPC reference on inir.space are built from them. |
 | A language the item ships holds every string its `en_US.json` holds. | A language you don't ship shows English; one that is half there mixes two languages on one screen. |
 | The lines you add take colours from the family's tokens: no `"#rrggbb"`, no `Qt.rgba(0.2, …)` with numbers. | The person's theme and light or dark scheme reach only what reads the tokens. |
@@ -153,13 +159,14 @@ An item is a folder with the file iNiR itself reads, plus `hub.json` for the lis
 | Field | |
 | --- | --- |
 | `version` | `x.y.z`. Raise it with every change. For widgets, web apps, families and components it matches the version in the native file. |
+| `changes` | Optional on a first version, required from the next: each version's notes, 1-6 lines of up to 140 characters, newest first in the Hub. |
 | `summary` | What the card says, 8 to 80 characters: two lines on the smallest card. Say what it does, not what it is. |
 | `description` | Optional, up to 600 characters. Widgets and themes take it from their own file. |
 | `authors` | GitHub handles. |
 | `license` | An SPDX id: `MIT`, `GPL-3.0-or-later`, `CC-BY-4.0`… |
 | `tags` | Up to 6 lowercase words people might search for. |
 | `permissions` | What it does beyond drawing itself. See below. |
-| `minInir` | The oldest iNiR it works on, if it needs something recent. |
+| `minInir` | The oldest iNiR it works on, if it needs something recent. Never newer than the released iNiR (the `VERSION` on iNiR's main): CI refuses it, because nobody could install the item. |
 | `preview` | The screenshot file. Optional for themes. |
 
 `README.md` in the folder is the item's page on GitHub: what it does, how to set it up, what each setting means. It is
@@ -167,7 +174,7 @@ not installed.
 
 ## Widgets
 
-One widget can have three faces. Give it the ones you can make well; the Hub says where it shows.
+One widget can have four faces, and on the desktop one more per widget design of iRiS. Give it the ones you can make well; the Hub says where it shows.
 
 **Start with [the Material guide](guides/material.md).** It shows the shapes, bars, looks and states the built-in
 widgets use, and what a widget needs to sit beside them. Every property and service a widget can read is in
@@ -177,6 +184,8 @@ widgets use, and what a widget needs to sit beside them. Every property and serv
 | --- | --- | --- | --- |
 | Material desktop | `main` | `AbstractBackgroundWidget`, `MaterialShape`, `WidgetSurface`, the `Instrument*` parts, `Appearance.*` | `countdown/Countdown.qml`, [guide](guides/material.md) |
 | iRiS Island | `iris.main`, `iris.slots` | `IrisStyle.*` tokens, `IrisText` and the other `Iris*` parts | `countdown/IrisCountdown.qml` |
+| iRiS desktop, one per widget design (iNiR 3.1.0) | `iris.desktop` | `IrisWidgetFace` with `FaceText`, `FaceHeader`, `FaceAction`; `PrismFolder` for Prism | `radio/IrisRadioFace.qml`, `radio/PrismRadio.qml`, [guide](guides/widgets.md#desktop-a-face-per-widget-design-inir-310) |
+| Material sidebars: a card in the left one, a tab in the right one | `ii.main`, `ii.slots` | `SidebarStyle` (`qs.modules.ii.kit`), `Appearance.font`, `StyledText`, `MaterialSymbol` | `countdown/SidebarCountdown.qml`, [guide](guides/widgets.md#material-sidebar-card) |
 | Waffle Widgets panel | `waffle.main` | `Looks.*`, `WText` and the other `W*` parts, Fluent icons | `countdown/WaffleCountdown.qml` |
 
 What makes a widget belong:
@@ -186,7 +195,7 @@ What makes a widget belong:
 - **Shared logic lives in one `.js` file** that every face imports, like `countdown.js`. Faces only lay things out, so
   they never disagree.
 - **Settings are `configKeys`** in `widget.json`. iNiR draws the controls; faces read them with
-  `root._readConfigKey(key)` (desktop) or `CustomWidgets.getConfigValue("<id>", key, fallback)` (Island and Waffle).
+  `root._readConfigKey(key)` (desktop) or `CustomWidgets.getConfigValue("<id>", key, fallback)` (sidebars, Island and Waffle).
 - **The desktop face's `configEntryName` is `"custom.<id>"`.** That is where its position and settings are saved.
 - **It costs nothing while nobody looks.** Clocks tick by the minute when minutes are enough (`SystemClock.Minutes`);
   timers and processes run only while `visible` (and `motionActive` on the desktop, after a first run).
@@ -220,13 +229,15 @@ The Hub draws a card from your accent, highlight and shape. A real screenshot sa
 
 `manifest.json`: `id` (the folder name), `name`, `url` (https only), `icon` (a
 [Material Symbols](https://fonts.google.com/icons) name), `version`, `display: "tab"`. It opens as a tab in Material's
-left sidebar, signed in as you, with the site's own storage.
+left sidebar, signed in as you, with the site's own storage, once the person turns on Web Apps (Settings › Sidebars);
+iNiR offers that switch where its runtime carries Chromium.
 
 A web app that ships scripts to run inside the page declares `inject`.
 
 ## Adding to a family
 
-A feature for Material, iRiS or Waffle is a component worn with it. `inir hub new component my-corner` gives you one:
+What people use goes in a widget (above). Work beside a family that has no face, or a window too big for any widget, is a
+component worn with it. `inir hub new component my-corner` gives you one:
 
 - **`plugin.json`** names its surface in `"parts": {"panel": "Panel.qml"}` and the families it is worn with in
   `"families": ["iris"]` (leave the list empty for every family). The shell loads the panel once the family's own
@@ -238,7 +249,10 @@ A feature for Material, iRiS or Waffle is a component worn with it. `inir hub ne
   (`qs.modules.common`: `Appearance.*`, `StyledText`, `MaterialSymbol`, `RippleButton`).
 - **Its options live in its file**, a `FileView` with a `JsonAdapter` on `Directories.pluginFile("<id>")`, as the
   template does.
-- **People open it** with `inir <id> toggle`, bound to a key in niri's config; the README says which call does what.
+- **People reach it with the mouse**: the app launcher of every family it is worn with lists it by `plugin.json`'s
+  `"name"` and `"summary"` (and `icon.svg` or `icon.png` in its folder, if it ships one), and a click runs
+  `inir <id> toggle`. So its `IpcHandler` target is exactly its id and has `toggle`; `inir hub check` holds it. The
+  IPC calls and a keybind in Niri's or Umbriel's config are extras the README lists.
 - **Every string is translated**, its IPC documented, its page in `docs/<id>/`: the rules of
   [changing a family](#changing-a-family) below hold for a component too.
 
@@ -326,17 +340,30 @@ Never accepted, whatever it declares:
 
 ## Review
 
-`inir hub check` and CI hold the rules above; a maintainer reads what no check can:
+Nobody has to click merge for you. Once Check passes, a pull request that changes one item and its `docs/<id>/` only:
 
-- it does what the summary says, in each family it claims;
-- it looks like it belongs there: the family's parts, sizes on the family's grid, every state worded;
-- it reuses the family instead of copying it, and is quiet at idle;
-- the permissions are honest and the license allows sharing;
-- the preview is real.
+- a colour theme or an iRiS theme: data, nothing in it runs, so it merges on Check alone;
+- an update by one of the item's authors that asks for no new permission or host (and, for a web app, keeps its
+  address): people already trust you with that item, so it merges on Check alone;
+- anything else (a new widget, component, Design or web app, a change to someone else's item, more permissions): a
+  reviewer (an AI model reading the item's files as data, with this file and `.github/review.md` as its rules) reads
+  what no check can:
+  - nothing in it is abuse: no data sent off the machine, no code downloaded and run, nothing outside its own folder;
+  - it does what the summary says, in each family it claims, every state handled;
+  - it looks like it belongs there: the family's parts, sizes on the family's grid, every string translated;
+  - it reuses the family instead of copying it, and is quiet at idle;
+  - the permissions and hosts are honest, the sources allow the use, the license allows sharing, the preview is real;
+  - a change to someone else's item is a fix or a translation.
 
-A pull request that needs changes gets them listed, and its author makes them on the same branch: push again and CI
-runs again. The item stays yours. You are listed as its author, and later changes come as pull requests that raise its
-version. An item that breaks on a new iNiR and is not fixed may be hidden until it is.
+With nothing to fix it merges, and the pull request gets one comment: what the item does to a desktop and anything
+worth a later version. Otherwise that comment lists each fix with its file and line; push them on the same branch,
+Check and the reviewer run again, and it merges when nothing is left. When the reviewer could not answer (the free
+model it runs on is sometimes busy), the comment says so and a maintainer asks it again with a `/review` comment. A pull request that changes a family, the
+tools, another item's page or several items at once, or that the reviewer rejects, waits for a maintainer; the
+comment says which and why.
+
+The item stays yours. You are listed as its author, and later changes come as pull requests that raise its version.
+An item that breaks on a new iNiR and is not fixed may be hidden until it is.
 
 ## Translations
 

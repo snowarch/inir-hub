@@ -17,27 +17,36 @@ IrisWidgetFace {
     readonly property var player: MprisController.activePlayer
     // What a Design's face (`widgetNowPlaying`) reads: the engine's playback, positions and lyrics stay here.
     readonly property alias playback: media
-    designFace: IrisDesign.skin("widgetNowPlaying")
+    // Prism and Vinyl (his 11-06 references) on medium and large: their own faces over the same playback; the Design's
+    // print steps aside for them. Prism draws its own body, at rest too. Worn as every widget's design (`widgetPrism`
+    // in plugin.json is this face), Prism takes every size.
+    readonly property bool prismWorn: root.widget.familyFaceDesign === "prism"
+    readonly property string faceChoice: root.prismWorn ? "prism" : root.small ? "classic" : String(root.widget.familyOption("face", "classic"))
+    readonly property bool prismStyle: root.faceChoice === "prism"
+    readonly property bool ownStyle: root.prismStyle || root.faceChoice === "vinyl"
+    ownBody: root.prismStyle
+    // What a face of its own reads at rest (the song paused, the one that played last).
+    readonly property alias restState: rest
+    designFace: root.ownStyle ? "" : IrisDesign.skin("widgetNowPlaying")
     readonly property bool hasPlayer: root.player !== null && root.player !== undefined
     readonly property bool playing: root.hasPlayer && media.effectiveIsPlaying
     readonly property bool restsWhenPaused: Boolean(root.widget.familyOption("rest", false))
     readonly property bool resting: !root.hasPlayer || (root.restsWhenPaused && !root.playing && restDelay.elapsed)
     readonly property string art: root.hasPlayer ? media.displayedArtFilePath : ""
-    readonly property color artLight: IrisStyle.vividHighlight(media.colorQuantizer?.colors?.[0] ?? root.accent, root.accent)
     readonly property real progress: media.effectiveLength > 0 ? Math.min(1, media.effectivePosition / media.effectiveLength) : 0
-    readonly property bool lyricsWanted: root.large && root.live && root.hasPlayer
+    readonly property bool lyricsWanted: root.large && (root.prismStyle || !root.ownStyle) && root.live && root.hasPlayer
         && Boolean(root.widget.familyOption("lyrics", true))
     readonly property bool lyricsReady: root.lyricsWanted && LyricsService.status === "ok" && LyricsService.lyricsLines.length > 0
     // Large without lyrics wears the cover whole: beside the title it left a 180 px hole where the lines go.
-    readonly property bool coverLarge: root.large && !root.resting && !root.lyricsReady && root.art.length > 0
+    readonly property bool coverLarge: root.large && !root.ownStyle && !root.resting && !root.lyricsReady && root.art.length > 0
     readonly property string source: {
         const identity = String(root.player?.identity || String(root.player?.desktopEntry ?? "").split(".").pop() || "")
         return identity.length > 0 ? identity.charAt(0).toUpperCase() + identity.slice(1) : Translation.tr("Music")
     }
 
     light: root.small || root.art.length === 0 ? "transparent"
-        : root.artLight
-    padding: (root.small && root.art.length > 0 && !root.resting) || root.coverLarge ? 0 : root.edgePad
+        : root.accent
+    padding: (root.small && root.art.length > 0 && !root.resting) || root.coverLarge || root.prismStyle ? 0 : root.edgePad
 
     onLyricsWantedChanged: root.lyricsWanted ? LyricsService.subscribe(root) : LyricsService.unsubscribe(root)
     Component.onDestruction: if (root.lyricsWanted) LyricsService.unsubscribe(root)
@@ -187,13 +196,13 @@ IrisWidgetFace {
             anchors.fill: parent
             visible: !rest.cover
             radius: Math.max(root.dp(6), Math.round(width * 0.14))
-            color: IrisStyle.tintFill(root.inked(IrisStyle.identity.pink))
+            color: IrisStyle.tintFill(root.accent)
             MaterialSymbol {
                 anchors.centerIn: parent
                 text: "music_note"
                 fill: 1
                 iconSize: Math.round(parent.width * 0.42)
-                color: root.inked(IrisStyle.identity.pink)
+                color: root.accent
             }
         }
     }
@@ -201,7 +210,7 @@ IrisWidgetFace {
     Item {
         id: rest
         anchors.fill: parent
-        visible: root.resting
+        visible: root.resting && !root.prismStyle
         readonly property bool paused: root.hasPlayer
         readonly property var last: Persistent.states.lastPlayed
         // Only what a tap can bring back: a closed browser video stayed here and a tap did nothing (his 10-30).
@@ -228,7 +237,7 @@ IrisWidgetFace {
             width: parent.width
             glyph: "music_note"
             text: Translation.tr("Music")
-            tint: root.inked(IrisStyle.identity.pink)
+            tint: root.accent
         }
         FaceBlank {
             visible: !rest.known
@@ -237,7 +246,7 @@ IrisWidgetFace {
             y: root.large ? restBlankHead.height + root.dp(24) : Math.round((parent.height - height) / 2)
             glyph: "music_note"
             glyphFill: true
-            tint: root.inked(IrisStyle.identity.pink)
+            tint: root.accent
             title: Translation.tr("Not playing")
             detail: Translation.tr("Play something and it shows here")
         }
@@ -286,7 +295,7 @@ IrisWidgetFace {
                     width: parent.width
                     glyph: "music_note"
                     text: rest.head
-                    tint: root.inked(IrisStyle.identity.pink)
+                    tint: root.accent
                 }
             }
             Column {
@@ -339,7 +348,7 @@ IrisWidgetFace {
                 width: parent.width
                 glyph: "music_note"
                 text: rest.head
-                tint: root.inked(IrisStyle.identity.pink)
+                tint: root.accent
             }
             Cover {
                 y: restLargeHead.height + root.dp(10)
@@ -384,7 +393,7 @@ IrisWidgetFace {
 
     Item {
         anchors.fill: parent
-        visible: !root.resting && root.small
+        visible: !root.resting && root.small && !root.ownStyle
 
         ClippingRectangle {
             anchors.fill: parent
@@ -460,7 +469,7 @@ IrisWidgetFace {
     // the ends and the keys on its centre.
     RowLayout {
         anchors.fill: parent
-        visible: !root.resting && root.medium
+        visible: !root.resting && root.medium && !root.ownStyle
         spacing: root.dp(14)
 
         Item {
@@ -520,7 +529,7 @@ IrisWidgetFace {
 
     ColumnLayout {
         anchors.fill: parent
-        visible: !root.resting && root.large && !root.coverLarge
+        visible: !root.resting && root.large && !root.coverLarge && !root.ownStyle
         spacing: root.dp(12)
 
         RowLayout {
@@ -676,5 +685,16 @@ IrisWidgetFace {
                 overMedia: true
             }
         }
+    }
+
+    Loader {
+        anchors.fill: parent
+        active: root.prismStyle
+        sourceComponent: Component { NowPlayingPrism { face: root; media: media } }
+    }
+    Loader {
+        anchors.fill: parent
+        active: root.faceChoice === "vinyl" && !root.resting
+        sourceComponent: Component { NowPlayingVinyl { face: root; media: media } }
     }
 }

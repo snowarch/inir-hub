@@ -21,9 +21,12 @@ Item {
     readonly property bool nothing: root.look === "nothing"
     readonly property bool synth: root.look === "synth" && !root.skinned
     readonly property bool gel: root.look === "gel" && !root.skinned
-    property color fillColor: root.nothing ? IrisStyle.text : root.gel ? IrisStyle.gelBody : IrisStyle.fillStrong
+    // Prism: the level is white light filling the capsule, its figure always printed; where it ends, the white breaks
+    // into its spectrum (a thin line of the refraction at the fill's head).
+    readonly property bool prism: root.look === "prism" && !root.skinned
+    property color fillColor: root.nothing ? IrisStyle.text : root.gel ? IrisStyle.gelBody : root.prism ? IrisStyle.prismSolid : IrisStyle.fillStrong
     // the icon's ink once the fill reaches it
-    property color inkOnFill: IrisStyle.surface
+    property color inkOnFill: root.prism ? IrisStyle.inkOnPrism : IrisStyle.surface
     property bool readout: false
     // The level's name, for a Design that sets it in words beside the level (AIRISU's rule).
     property string label: ""
@@ -98,7 +101,31 @@ Item {
                         }
                     }
                 }
-                Readout { ink: root.gel ? IrisStyle.inkOnGel : IrisStyle.surface }
+                Readout { ink: root.gel ? IrisStyle.inkOnGel : root.prism ? IrisStyle.inkOnPrism : IrisStyle.surface }
+            }
+        }
+        // Prism: the refraction at the level's head, away from the capsule's round ends.
+        Loader {
+            active: root.prism && !root.muted
+            readonly property real reach: Math.max(2, Math.round(3 * IrisStyle.density))
+            readonly property real at: fillClip.length
+            opacity: Math.max(0, Math.min(1, (at - root.corner * 0.6) / (root.corner * 0.4), (root.span - at - root.corner * 0.6) / (root.corner * 0.4)))
+            visible: opacity > 0
+            x: root.vertical ? 0 : at
+            y: root.vertical ? track.height - at - reach : 0
+            width: root.vertical ? track.width : reach
+            height: root.vertical ? reach : track.height
+            sourceComponent: Rectangle {
+                gradient: Gradient {
+                    orientation: root.vertical ? Gradient.Horizontal : Gradient.Vertical
+                    GradientStop { position: 0.00; color: IrisStyle.prismStops[0] }
+                    GradientStop { position: 0.17; color: IrisStyle.prismStops[1] }
+                    GradientStop { position: 0.33; color: IrisStyle.prismStops[2] }
+                    GradientStop { position: 0.50; color: IrisStyle.prismStops[3] }
+                    GradientStop { position: 0.67; color: IrisStyle.prismStops[4] }
+                    GradientStop { position: 0.83; color: IrisStyle.prismStops[5] }
+                    GradientStop { position: 1.00; color: IrisStyle.prismStops[6] }
+                }
             }
         }
         // Synth: laid out lying down and stood up for a vertical level; the fill and the cap say the level.
@@ -240,7 +267,7 @@ Item {
     component Readout: IrisText {
         property color ink: IrisStyle.text
         readonly property real inset: Math.round(14 * IrisStyle.density)
-        visible: root.readout && (root.nothing || root.synth || pointer.containsMouse || root.dragValue >= 0)
+        visible: root.readout && (root.nothing || root.synth || root.prism || pointer.containsMouse || root.dragValue >= 0)
         x: root.vertical ? (track.width - width) / 2 : track.width - width - inset
         y: root.vertical ? inset : (track.height - height) / 2
         text: Math.round(root.shownValue * 100)

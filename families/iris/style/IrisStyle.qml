@@ -74,7 +74,33 @@ QtObject {
     // Island to load them and by Settings to offer only the rows that still act under the worn design.
     readonly property var islandDesignParts: ({ ledger: ["Face.qml", "Nav.qml", "Desktop.qml"], tiles: ["Face.qml", "Nav.qml", "Desktop.qml"],
         dial: ["Face.qml"], marquee: ["Face.qml"], duo: ["Face.qml"], headline: ["Face.qml"], rings: ["Face.qml"], aura: ["Face.qml"],
-        status: ["Face.qml"] })
+        status: ["Face.qml"], forecast: ["Face.qml"], world: ["Face.qml"], comet: ["Face.qml"], lumen: ["Face.qml"], glyph: ["Face.qml"], tide: ["Face.qml"] })
+    // The light the edge designs (Aura, Comet, Lumen) draw with: five stops of one palette (Settings › Island › Face ›
+    // Colours). "day" follows the hour's sky: night, dawn, day, dusk.
+    function islandLight(name: string, hour: int): var {
+        const id = root.identity
+        switch (name) {
+        case "accent": return [root.accent, root.secondaryAccent, root.accent, root.secondaryAccent, root.accent]
+        case "sunset": return [id.orange, id.red, id.pink, id.purple, id.yellow]
+        case "ocean": return [id.teal, id.sky, id.blue, id.indigo, id.green]
+        case "mint": return [id.green, id.teal, id.pink, id.orange, id.green]
+        case "wallpaper": return [root.wallpaperLight, root.accent, root.secondaryAccent, root.wallpaperLight, root.accent]
+        case "day":
+            if (hour < 5 || hour >= 21) return [id.indigo, id.blue, id.purple, id.indigo, id.blue]
+            if (hour < 9) return [id.pink, id.orange, id.yellow, id.pink, id.purple]
+            if (hour < 17) return [id.sky, id.blue, id.teal, id.sky, id.green]
+            return [id.orange, id.red, id.purple, id.pink, id.orange]
+        default: return [id.blue, id.purple, id.pink, id.orange, id.green]
+        }
+    }
+    readonly property var islandLightChoices: ["spectrum", "accent", "day", "wallpaper", "sunset", "ocean", "mint"]
+    // The live activities that may take the Island, first to last (Settings › Island › Live activities › Order). A
+    // saved order missing a kind (an older file, a hand edit) keeps it, after the ones it names.
+    readonly property var islandActivityKinds: ["record", "timer", "task", "camera", "call", "media"]
+    function islandActivityOrder(order: var): var {
+        const asked = Array.from(order ?? []).map(String).filter((kind, at, all) => root.islandActivityKinds.includes(kind) && all.indexOf(kind) === at)
+        return asked.concat(root.islandActivityKinds.filter(kind => !asked.includes(kind)))
+    }
 
     readonly property real density: Math.max(0.8, Math.min(1.35, Number(root.appearance?.density ?? 1.0)))
     // How a Settings row offers a list too long for a segmented control: "inline" opens it in place under the row as a
@@ -318,7 +344,7 @@ QtObject {
     // (ink body, one signal), Synth (keys and faders), Gel (glossy capsules). Every look takes its colour from L1 (accent,
     // highlight, signal), never from a literal of its own, so the person's colours reach every look. A colour theme the
     // person follows and the anime layer are choices of colour: under them Nothing speaks Apple.
-    readonly property var lookIds: ["apple", "nothing", "synth", "gel"]
+    readonly property var lookIds: ["apple", "nothing", "synth", "gel", "prism"]
     function lookAllowed(look: string): string {
         if (!root.lookIds.includes(look)) return "apple"
         return look === "nothing" && (root.followsTheme || root.animeEnabled) ? "apple" : look
@@ -347,6 +373,8 @@ QtObject {
     function wearsNothing(item): bool { return root.lookOf(item) === "nothing" }
     // Each look's own make (Settings › Colour › Look), read once here.
     readonly property var lookOptions: root.appearance?.looks ?? ({})
+    // Nothing's large figures: Nothing OS's dot matrix (IrisDotMatrix) or Archivo SemiExpanded.
+    readonly property bool nothingDots: String(root.lookOptions?.nothing?.figures ?? "dots") === "dots"
     readonly property var synthOptions: root.lookOptions?.synth ?? ({})
     readonly property var gelOptions: root.lookOptions?.gel ?? ({})
     readonly property var nothingOptions: root.lookOptions?.nothing ?? ({})
@@ -367,7 +395,8 @@ QtObject {
         nothing: { marks: "glyph", selection: "plate", captions: "mono", plate: "line" },
         synth: root.synthMono ? { marks: "key", selection: "plate", captions: "mono", titles: "lower", plate: "key" }
             : { marks: "key", selection: "plate", plate: "key" },
-        gel: { marks: "gloss", selection: "plate", plate: "gloss" }
+        gel: { marks: "gloss", selection: "plate", plate: "gloss" },
+        prism: { marks: "tile", selection: "plate", captions: "mono", hover: "wash", index: true, sections: "line" }
     })[root.look] ?? ({})
     function trait(name: string): var {
         const own = IrisDesign.trait(name)
@@ -386,13 +415,18 @@ QtObject {
     // The chosen thing in a look that marks it with a plate: Synth's lit key, Gel's glossy body, the accent plate.
     // `plateOfLook` answers for any look, so a place wearing its own (the Control Center's lit tiles) asks with its look.
     function plateOfLook(look: string): color {
-        return look === "synth" ? root.synthOn : look === "gel" ? root.gelBody
+        return look === "synth" ? root.synthOn : look === "gel" ? root.gelBody : look === "prism" ? root.prismSolid
             : look === "nothing" && !root.mono ? (root.nothingSignal ? root.signal : root.text) : root.accentFill
     }
     function inkOnPlateOfLook(look: string): color {
-        return look === "synth" ? root.inkOnSynthOn : look === "gel" ? root.inkOnGel
+        return look === "synth" ? root.inkOnSynthOn : look === "gel" ? root.inkOnGel : look === "prism" ? root.inkOnPrism
             : look === "nothing" && !root.mono ? (root.nothingSignal ? root.inkOnSignal : root.paper) : root.inkOnAccentFill
     }
+    // Prism (`.claude/ref/iris-prism`): black and white. What is chosen, on or filled is one solid of white light (the
+    // ink on a light body) with its reverse printed on it; where a level ends, the white breaks into its spectrum.
+    readonly property color prismSolid: root.text
+    readonly property color inkOnPrism: root.light ? "#ffffff" : "#000000" // iris-literal: the reverse of Prism's solid
+    readonly property color prismSmoke: ColorUtils.mix(root.text, root.surfaceOpaque, root.light ? 0.1 : 0.14)
     readonly property color lookPlate: root.plateOfLook(root.look)
     readonly property color inkOnLookPlate: root.inkOnPlateOfLook(root.look)
     // Synth: an instrument panel. A switch is a key that sinks and lights its LED, a level a fader over ticks, a choice
@@ -511,14 +545,18 @@ QtObject {
     readonly property color bodySurface: root.surfaceOpaque
 
     readonly property var glassOptions: root.appearance?.glass ?? ({})
-    // Off is off, whatever Lume does for the scheme: the factory is glass, so "off" here was picked by the person.
+    // Off is the flat plate, the factory's (his 11-07: flat and black, or Niri's blur; Niri's cost 7-8x its CPU in motion).
     readonly property string glassRequested: ["wallpaper", "compositor"].includes(String(root.glassOptions?.mode ?? ""))
         ? root.glassOptions.mode : "off"
-    readonly property bool glassy: root.glassRequested !== "off" && Appearance.effectsEnabled && !IrisDesign.refusesGlass
-    readonly property bool menuCompact: String(root.appearance?.surfaces?.menus?.density ?? "compact") === "compact"
-    readonly property bool glassCompositor: root.glassy && root.glassRequested === "compositor" && Appearance.compositorBlurActive
+    // Blur is the compositor's or nothing (his 11-07): where Niri cannot blur, the body is the flat plate, never the
+    // wallpaper's glass standing in for it. Glass on the wallpaper is only ever the person's own pick.
+    readonly property bool compositorGlassReady: root.glassRequested === "compositor" && IrisCompositorBlur.active
         && IrisCompositorBlur.usable
-    readonly property bool glassWallpaper: root.glassy && !root.glassCompositor
+    readonly property bool glassy: Appearance.effectsEnabled && !IrisDesign.refusesGlass
+        && (root.glassRequested === "wallpaper" || root.compositorGlassReady)
+    readonly property bool menuCompact: String(root.appearance?.surfaces?.menus?.density ?? "compact") === "compact"
+    readonly property bool glassCompositor: root.glassy && root.compositorGlassReady
+    readonly property bool glassWallpaper: root.glassy && root.glassRequested === "wallpaper"
     readonly property real glassBlurAmount: Math.max(0, Math.min(1, Number(root.glassOptions?.blur ?? 100) / 100))
     // Solved at the panel's 7:1 so secondary ink still reads on the worst part; the chosen tint is a floor.
     readonly property real wallpaperGlassTint: {
@@ -544,7 +582,7 @@ QtObject {
     readonly property color placeSurface: root.glassy ? ColorUtils.applyAlpha(root.surfaceOpaque, root.glassTint) : root.surface
     readonly property real glassLip: 0
     // What a plain body is made of (Style › Texture, his 11-02: Material's global styles on one engine, every Design the
-    // same; "solid" is Ricelin's card, the factory's). `top` and `foot` how far its tint leans to the light up there and
+    // same; "flat" is the factory's since his 11-07, "solid" Ricelin's card). `top` and `foot` how far its tint leans to the light up there and
     // down here, `edge` the lit top or the hairline, `sheen` the lit top's strength, `tint` the glass's thickness, `cast`
     // its shadow. Afterglow and Light leak light themselves; Light streak keeps a plain body under its own light.
     readonly property var bodyRecipes: ({
@@ -552,11 +590,11 @@ QtObject {
         aurora: { top: 0.09, foot: 0.09, edge: "line", sheen: 0.5, tint: 0.72, cast: 0.6 },
         angel: { top: 0.14, foot: 0.03, edge: "light", sheen: 2.2, tint: 0.84, cast: 0.5 },
         regalia: { top: 0.13, foot: 0.13, edge: "line", sheen: 1, tint: 1.6, cast: 1.2 },
-        flat: { top: 0.05, foot: 0.05, edge: "line", sheen: 1, tint: 1, cast: 0.4 },
+        flat: { top: 0, foot: 0, edge: "line", sheen: 1, tint: 1, cast: 0.4 },
         streak: { top: 0.12, foot: 0.04, edge: "light", sheen: 0.4, tint: 0.9, cast: 0.8 }
     })
     readonly property string textureName: String(IrisDesign.worn("material.texture", root.appearance?.texture))
-    readonly property var bodyRecipe: root.bodyRecipes[root.textureName] ?? root.bodyRecipes.solid
+    readonly property var bodyRecipe: root.bodyRecipes[root.textureName] ?? root.bodyRecipes.flat
     function bodyLean(ink: color, amount: real): vector4d {
         return root.selfLit ? Qt.vector4d(0, 0, 0, 0) : Qt.vector4d(ink.r, ink.g, ink.b, amount)
     }
@@ -586,10 +624,10 @@ QtObject {
             bloom: root.vividHighlight(seed, root.afterglowGrades.dusk.bloom) }
     }
     readonly property var afterglowPalette: root.afterglowColours(root.afterglowGrade)
-    readonly property real afterglowAtmosphere: root.afterglowPercent("atmosphere", 60)
-    readonly property real afterglowChrome: root.afterglowPercent("chrome", 65)
-    readonly property real afterglowBloom: root.afterglowPercent("bloom", 50)
-    readonly property real afterglowSignal: root.afterglowPercent("signal", 35)
+    readonly property real afterglowAtmosphere: root.afterglowPercent("atmosphere", 45)
+    readonly property real afterglowChrome: root.afterglowPercent("chrome", 35)
+    readonly property real afterglowBloom: root.afterglowPercent("bloom", 35)
+    readonly property real afterglowSignal: root.afterglowPercent("signal", 0)
     readonly property real afterglowBloomRadius: Math.round(9 * root.density)
     // How far past a silhouette the field draws: the bloom's tail.
     readonly property real afterglowReach: root.afterglow && !root.light && root.afterglowBloom > 0 ? 3.5 * root.afterglowBloomRadius : 0
@@ -665,10 +703,14 @@ QtObject {
         prism: { label: "Prism", core: "#fff6ea", glow: "#b48cff", stops: ["#ff5a3c", "#ffcf6b", "#d8fbff", "#4f86ff", "#a35dff"] },
         ember: { label: "Ember", core: "#fff0d4", glow: "#ff9a3c", stops: ["#fff0d4", "#ffb25a", "#f2581f", "#a3241a", "#3d0f0f"] },
         orchid: { label: "Orchid", core: "#ffe6f5", glow: "#ff5fb8", stops: ["#ffd0ee", "#ff6cc4", "#e0369c", "#7a3dff", "#2b2bd0"] },
-        polaroid: { label: "Polaroid", core: "#fff4dc", glow: "#ff9e7a", stops: ["#fff4dc", "#ffbf78", "#ff6aa0", "#55cfff", "#3567e0"] }
+        polaroid: { label: "Polaroid", core: "#fff4dc", glow: "#ff9e7a", stops: ["#fff4dc", "#ffbf78", "#ff6aa0", "#55cfff", "#3567e0"] },
+        // The dusty grades of the grain gradients (.claude/ref/iris-leak): pale light, a muted middle, a coloured night.
+        haze: { label: "Haze", core: "#f2e4f1", glow: "#8f8ff0", stops: ["#e6c9e8", "#c3a5de", "#7b7ddc", "#4a4fb3", "#25264a"] },
+        tide: { label: "Tide", core: "#e6f3f6", glow: "#4ea6d6", stops: ["#cfe7ee", "#86c3dc", "#3a8fbd", "#1d5683", "#0c2138"] },
+        moss: { label: "Moss", core: "#eef7e6", glow: "#86c79c", stops: ["#d9efcc", "#a3d6ab", "#5aa184", "#2a6058", "#10292b"] }
     })
-    readonly property string leakGrade: ["prism", "ember", "orchid", "polaroid", "accent", "wallpaper"].includes(String(root.leakOptions?.grade ?? ""))
-        ? root.leakOptions.grade : "prism"
+    readonly property string leakGrade: ["prism", "ember", "orchid", "polaroid", "haze", "tide", "moss", "accent", "wallpaper"].includes(String(root.leakOptions?.grade ?? ""))
+        ? root.leakOptions.grade : "haze"
     function leakColours(grade: string): var {
         if (grade === "accent") {
             // The highlight's hue at the warm end, the accent's at the cool end, the arc between them pale in the middle:
@@ -708,10 +750,15 @@ QtObject {
             { at: [0.62, 0.18, 0.3, 0.22], form: [0, 0.45, 0, 0], hue: [0.55, 0.4, 0, 0] }],
         beam: [{ at: [0.8, 0.45, 0.06, 1.0], form: [0.05, 1.3, 0, 0], hue: [0.3, 0.1, 0, 0.5] },
             { at: [0.28, 0.09, 0.42, 0.05], form: [-0.06, 1.1, 0, 0], hue: [0.5, 0, 0, 0.45] },
-            { at: [0.22, 1.0, 0.6, 0.28], form: [0, 0.8, 0, 0], hue: [0.1, 0.5, 0, 0.25] }]
+            { at: [0.22, 1.0, 0.6, 0.28], form: [0, 0.8, 0, 0], hue: [0.1, 0.5, 0, 0.25] }],
+        // Haze: the grain gradient itself. A wide pale light from one corner, a band of the grade's middle running
+        // across under it, and the night left whole in the far corner.
+        haze: [{ at: [0.14, 0.1, 0.9, 0.58], form: [-0.35, 1.55, 0, 0], hue: [0.0, 0.35, 0, 0] },
+            { at: [0.58, 0.62, 1.1, 0.34], form: [-0.32, 1.3, 0, 0], hue: [0.62, 0.16, 0, 0] },
+            { at: [0.98, 0.95, 0.42, 0.3], form: [0.4, 0.3, 0, 0], hue: [0.62, 0.2, 0, 0] }]
     })
-    readonly property string leakShapeName: ["lens", "burn", "orbs", "beam"].includes(String(root.leakOptions?.shape ?? ""))
-        ? root.leakOptions.shape : "lens"
+    readonly property string leakShapeName: ["lens", "burn", "orbs", "beam", "haze"].includes(String(root.leakOptions?.shape ?? ""))
+        ? root.leakOptions.shape : "haze"
     readonly property var leakSources: root.leakShapes[root.leakShapeName]
     // Where the person moved the light (Light leak › Position, or a drag in its preview): the whole shape shifts, in
     // fractions of the output, so a preset keeps its composition.
@@ -730,10 +777,10 @@ QtObject {
             : Qt.vector4d(v[0], v[1], v[2], v[3])
     }
     readonly property real leakLight: root.leakPercent("light", 60)
-    readonly property real leakSpill: root.leakPercent("spill", 55)
-    readonly property real leakPrism: root.leakPercent("prism", 50)
+    readonly property real leakSpill: root.leakPercent("spill", 35)
+    readonly property real leakPrism: root.leakPercent("prism", 15)
     readonly property real leakGrain: root.leakPercent("grain", 55)
-    readonly property real leakStreaks: root.leakPercent("streaks", 15)
+    readonly property real leakStreaks: root.leakPercent("streaks", 0)
     readonly property real leakWallpaperAmount: root.leakPercent("wallpaper", 50)
     // How strongly the frame's band is exposed (blended into the bodies welded to it) and the desktop widgets' plates.
     readonly property real leakFrame: root.leakPercent("frame", 100)
@@ -745,10 +792,10 @@ QtObject {
         return Math.max(1, Math.min(4, isNaN(value) ? 1.6 : value))
     }
     readonly property real leakDust: {
-        const value = Number(root.leakOptions?.dust ?? 100)
-        return Math.max(0, Math.min(200, isNaN(value) ? 100 : value)) / 100
+        const value = Number(root.leakOptions?.dust ?? 0)
+        return Math.max(0, Math.min(200, isNaN(value) ? 0 : value)) / 100
     }
-    readonly property real leakGate: (root.leakOptions?.gate ?? true) ? 1 : 0
+    readonly property real leakGate: (root.leakOptions?.gate ?? false) ? 1 : 0
     readonly property bool leakDevelop: root.leakOptions?.develop ?? true
     // Picture: the wallpaper exposed by the leak. Light: the darkroom and the light alone, the texture itself.
     readonly property string leakBackdrop: String(root.leakOptions?.backdrop ?? "picture") === "light" ? "light" : "picture"
@@ -892,6 +939,50 @@ QtObject {
     function vivid(tint: color, fill: bool): color {
         if (IrisDesign.current !== "iris" || tint.hslSaturation < 0.12) return tint
         return Qt.hsla(tint.hslHue, Math.max(0.78, tint.hslSaturation), root.light ? (fill ? 0.5 : 0.42) : (fill ? 0.58 : 0.68), 1)
+    }
+    // Prism's light (his 11-07: "los colores de prism deben de ser estéticos, el beam y el contorno, no colores fuertes ni
+    // simulados; todos los colores de la shell deben de salir de un lugar"): the one place the beam, its fan, a slab's rim
+    // and the spectrum on a widget's data take their colours from. A spectrum's order (violet to red) at one even lightness
+    // and a calm chroma in OKLCH, each band leaning to the person's accent: the band nearest its hue carries the most
+    // colour, the far side of the wheel the least, so the light reads as the theme's own and never as neon.
+    readonly property var prismStops: {
+        const seed = Qt.color(root.baseAccent)
+        const seedHue = root.oklchHue(seed)
+        const lightness = root.light ? 0.66 : 0.82
+        // iris-literal: OKLCH hues of a prism's bands, violet to red
+        return [305, 268, 225, 160, 105, 62, 25].map(hue => {
+            const near = 0.5 + 0.5 * Math.cos((hue - seedHue) * Math.PI / 180)
+            return root.oklch(lightness, (root.light ? 0.07 : 0.06) + 0.06 * near, hue)
+        })
+    }
+    // OKLCH to an sRGB colour, the chroma eased back until it fits the gamut.
+    function oklch(l: real, c: real, h: real): color {
+        const toSrgb = x => x <= 0.0031308 ? 12.92 * x : 1.055 * Math.pow(x, 1 / 2.4) - 0.055
+        for (let chroma = c; chroma >= 0; chroma -= 0.005) {
+            const a = chroma * Math.cos(h * Math.PI / 180), b = chroma * Math.sin(h * Math.PI / 180)
+            const l_ = Math.pow(l + 0.3963377774 * a + 0.2158037573 * b, 3)
+            const m_ = Math.pow(l - 0.1055613458 * a - 0.0638541728 * b, 3)
+            const s_ = Math.pow(l - 0.0894841775 * a - 1.2914855480 * b, 3)
+            const rgb = [4.0767416621 * l_ - 3.3077115913 * m_ + 0.2309699292 * s_,
+                -1.2684380046 * l_ + 2.6097574011 * m_ - 0.3413193965 * s_,
+                -0.0041960863 * l_ - 0.7034186147 * m_ + 1.7076147010 * s_]
+            if (rgb.every(v => v >= -0.0005 && v <= 1.0005) || chroma < 0.005) {
+                const [r, g, bl] = rgb.map(v => toSrgb(Math.max(0, Math.min(1, v))))
+                return Qt.rgba(r, g, bl, 1)
+            }
+        }
+        return Qt.rgba(l, l, l, 1)
+    }
+    // A colour's OKLCH hue in degrees.
+    function oklchHue(c: color): real {
+        const lin = x => x <= 0.04045 ? x / 12.92 : Math.pow((x + 0.055) / 1.055, 2.4)
+        const r = lin(c.r), g = lin(c.g), b = lin(c.b)
+        const l_ = Math.cbrt(0.4122214708 * r + 0.5363325363 * g + 0.0514459929 * b)
+        const m_ = Math.cbrt(0.2119034982 * r + 0.6806995451 * g + 0.1073969566 * b)
+        const s_ = Math.cbrt(0.0883024619 * r + 0.2817188376 * g + 0.6299787005 * b)
+        const a = 1.9779984951 * l_ - 2.4285922050 * m_ + 0.4505937099 * s_
+        const bb = 0.0259040371 * l_ + 0.7827717662 * m_ - 0.8086757660 * s_
+        return (Math.atan2(bb, a) * 180 / Math.PI + 360) % 360
     }
     // Under Signal the accent is the ink itself: what was an accent mark reads as ink, and an accent fill with its
     // own ink on it turns into the inverted plate (ink fill, paper word), Nothing's "chosen".
@@ -1137,7 +1228,10 @@ QtObject {
     }
     readonly property real shadowThrough: root.glassy ? 0.4 : 1
     readonly property real shadowLight: root.ink ? 0.5 : root.light ? 0.55 : 1
-    readonly property color shadow: root.glowing(Math.min(0.9, 0.55 * root.bodyRecipe.cast * IrisDesign.shadow * root.tweak("shadow", 0, 1.6)) * root.shadowThrough * root.shadowLight)
+    // Umbriel blurs every pixel of a shell surface above its rule's alpha threshold (0.1, 15-umbriel.sh): a shadow over
+    // it would blur a ring outside each body, so under its blur the shadow stays below that line.
+    readonly property real shadowCeiling: root.glassCompositor && CompositorService.isUmbriel ? 0.09 : 0.9
+    readonly property color shadow: root.glowing(Math.min(root.shadowCeiling / (1 + 0.4 * root.glow), Math.min(0.9, 0.55 * root.bodyRecipe.cast * IrisDesign.shadow * root.tweak("shadow", 0, 1.6)) * root.shadowThrough * root.shadowLight))
     readonly property color onMedia: "#ffffff"
     readonly property color onMediaSecondary: ColorUtils.applyAlpha(root.onMedia, 0.72)
     // The visualizer's one look (Now Playing › Visualizer): its drawing, how many bands, and whose colour.
@@ -1161,6 +1255,13 @@ QtObject {
     function visualizerTint(art: color): color {
         return root.visualizerColour === "accent" ? root.accent : root.visualizerColour === "highlight" ? root.secondaryAccent
             : root.visualizerColour === "ink" ? root.text : art
+    }
+    // What a sound device is, read from its own name: earbuds, headphones, a screen's speakers or a speaker.
+    function soundDeviceGlyph(node, input: bool): string {
+        if (input) return "mic"
+        const name = String(node?.name ?? "") + " " + String(node?.description ?? "")
+        return /airpod|buds/i.test(name) ? "earbuds" : /head|bluez/i.test(name) ? "headphones"
+            : /hdmi|displayport/i.test(name) ? "tv" : "speaker"
     }
     readonly property color onMediaTertiary: ColorUtils.applyAlpha(root.onMedia, 0.56)
     readonly property color onMediaFill: ColorUtils.applyAlpha(root.onMedia, 0.2)
@@ -1241,8 +1342,11 @@ QtObject {
     readonly property color readingPlate: ColorUtils.applyAlpha(root.surfaceOpaque, root.placePlate)
     // On solid a reading surface is a fill too, the same colour on the bare body: as an opaque plate the sidebar hid the
     // body's lit edge and its light on one half of the window and kept them on the other.
+    // Flat at night is black (his 11-07): a reading surface is the black a breath lifted, as glass's white veil reads
+    // over its dark sheet, never iOS's #1c1c1e cell, which read as opaque grey slabs on the black body.
+    readonly property color flatLift: ColorUtils.mix(Qt.rgba(1, 1, 1, 1), root.surfaceOpaque, 0.06) // iris-literal: the black's lift, glass's veil without glass
     readonly property color readingCard: root.glassy ? Lume.stack(root.readingPlate, root.surfaceHigh)
-        : root.textured ? root.surfaceHigh : root.liftOver(root.surfaceHigh, root.surfaceOpaque)
+        : root.textured ? root.surfaceHigh : !root.light ? root.flatLift : root.liftOver(root.surfaceHigh, root.surfaceOpaque)
     // A group of Settings rows over the reading surface (a form's plate): a step out of it, lighter in both schemes,
     // as a grouped form sits over its pane (macOS Tahoe). readingCard alone left the groups a shade from the sheet.
     // On glass the reading sheet carries legibility and the plate is a veil of white over it (nearly opaque in light, a
@@ -1260,6 +1364,17 @@ QtObject {
         : root.light ? (root.glassy ? Qt.rgba(1, 1, 1, 0.84) : root.liftOver(root.surfaceHigh, root.surfaceOpaque)) // iris-literal: a light island's plate
         : root.glassy ? Qt.rgba(1, 1, 1, 0.075) : ColorUtils.mix(Qt.rgba(1, 1, 1, 1), root.surfaceOpaque, 0.075) // iris-literal: a dark island's lift (mix weighs its first colour: the other order was 92 % white with glass off)
     readonly property color islandShadow: root.light && !root.ink ? Qt.rgba(0, 0, 0, 0.07) : "transparent" // iris-literal: a light island's shadow
+    // The Settings island (what a change did and its Undo, a display change waiting for Keep): the Dynamic Island's own
+    // black in both schemes, the one live object over the sheet; on a dark sheet it stands a step off the sheet's black
+    // so its silhouette reads without a line. Its ink is the Island's white whatever the scheme.
+    readonly property color liveIsland: root.light ? Qt.rgba(0.024, 0.024, 0.03, 1) : ColorUtils.mix(Qt.rgba(1, 1, 1, 1), root.surfaceOpaque, 0.12) // iris-literal: the Island's black
+    readonly property color liveIslandInk: Qt.rgba(1, 1, 1, 0.96) // iris-literal: the Island's white
+    readonly property color liveIslandQuiet: Qt.rgba(1, 1, 1, 0.58) // iris-literal: its second line
+    readonly property color liveIslandKey: Qt.rgba(1, 1, 1, 0.13) // iris-literal: a key on the black
+    readonly property color liveIslandKeyHover: Qt.rgba(1, 1, 1, 0.21) // iris-literal: a key on the black, hovered
+    readonly property color liveIslandShadow: Qt.rgba(0, 0, 0, root.light ? 0.22 : 0.42) // iris-literal: its lift off the sheet
+    // A value on the black in its own colour, bright enough to read there in either scheme (HIG: bold colour on black).
+    function liveIslandHue(tint: color): color { return root.vividHighlight(tint, root.liveIslandInk) }
     readonly property color readingSidebar: root.glassy
         ? ColorUtils.applyAlpha(root.surfaceOpaque, Math.max(root.wallpaperVeil, root.placePlate)) : root.readingCard
 

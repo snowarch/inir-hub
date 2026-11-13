@@ -4,7 +4,7 @@
     "name": "AIRISU",
     "summary": "iRiS in lacquer: urushi black, a vermilion seal, leaning figures",
     "icon": "brush",
-    "version": "1.0.1",
+    "version": "1.0.3",
     "families": ["iris"],
     "provides": "modules/airisu",
     "parts": {

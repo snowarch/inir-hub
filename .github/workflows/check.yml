@@ -1,6 +1,6 @@
 name: Check
 
-# What a pull request must pass before a maintainer reads it, and what main must keep. `inir hub check` runs the same
+# What a pull request must pass before the reviewer reads it (merge.yml), and what main must keep. `inir hub check` runs the same
 # rules on the author's machine (CONTRIBUTING.md): an item that passes there passes here. Every step reports even
 # when one before it failed, so one run lists everything to fix.
 on:
@@ -39,6 +39,11 @@ jobs:
         env:
           MAINTAINER: ${{ contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.pull_request.author_association) && '--maintainer' || '' }}
         run: inir hub check --base "origin/${{ github.base_ref }}" $MAINTAINER
+      # Main is what everyone downloads: an item asking a newer iNiR than main's fails to install for all of them
+      # (11-12: families asking 3.0.2 while main was 3.0.1). Release the base first, then raise minInir.
+      - name: No item asks a newer iNiR than main
+        if: ${{ !cancelled() }}
+        run: tools/min-inir.sh
       # The Qt iNiR runs on: qs-rs bundles 6.12.0 (qs-rs release.yml QT_VERSION); keep this pin in step with it. A file
       # that does not parse fails only when someone opens it, on every desktop that installed it.
       - uses: actions/setup-python@v6

@@ -81,7 +81,7 @@ WSettingsPage {
         return liked < 0 ? "–" : (1 + 4 * liked).toFixed(1)
     }
     function votesText(item: var): string {
-        return Hub.votes(item) > 0 ? Translation.tr("%1 of %2 people liked it").arg(item.votesUp ?? 0).arg(Hub.votes(item))
+        return Hub.votes(item) > 0 ? Translation.tr("%1 of %2 people liked it").arg(Hub.voteCount(item, "up")).arg(Hub.votes(item))
             : Translation.tr("No votes yet")
     }
     function dateText(date: string): string {
@@ -244,7 +244,7 @@ WSettingsPage {
     }
 
     ColumnLayout {
-        Layout.fillWidth: true
+        Layout.alignment: Qt.AlignHCenter
         Layout.topMargin: Looks.dp(32)
         // with no catalogue at all the info bar above already says why: a second "Nothing here yet" said it twice
         visible: !Hub.loaded || (root.opened === null && root.shown.length === 0
@@ -260,7 +260,7 @@ WSettingsPage {
             Layout.alignment: Qt.AlignHCenter
             color: Looks.colors.subfg
             text: !Hub.loaded ? Translation.tr("Reading the hub…")
-                : root.query.length > 0 ? Translation.tr("Nothing matches “%1”").arg(root.query)
+                : root.query.length > 0 ? Voice.miss(Translation.tr("Nothing matches “%1”").arg(root.query), root.query)
                 : root.filter === "installed" ? Translation.tr("Nothing installed from the hub yet")
                 : Translation.tr("Nothing here yet")
         }
@@ -312,6 +312,14 @@ WSettingsPage {
         description: Translation.tr("Everything in the official hub is reviewed before it is published. Other sources are not: add only the ones you trust.")
         collapsible: true
         expanded: false
+
+        WSettingsSwitch {
+            label: Translation.tr("Count my votes and installs")
+            icon: "people"
+            description: Translation.tr("Without your name, from a key kept on this computer")
+            checked: Hub.sharing
+            onCheckedChanged: if (checked !== Hub.sharing) Hub.setSharing(checked)
+        }
 
         Repeater {
             model: Hub.sources
@@ -370,6 +378,139 @@ WSettingsPage {
         border.color: Looks.settings.stroke
     }
 
+    // The add-reaction button and its flyout: a search box and a grid of every emoji, the quick set first.
+    component ReactionPicker: WBorderedButton {
+        id: chip
+        required property var item
+        readonly property var given: Array.from(Hub.mine(chip.item?.id ?? "").reactions ?? [])
+        readonly property bool bare: Hub.reactionsOf(chip.item).length > 0
+        checkable: false
+        enabled: Hub.canReact(chip.item?.id ?? "")
+        implicitWidth: chip.bare ? chip.implicitHeight : addRow.implicitWidth + chip.horizontalPadding * 2
+        Accessible.name: Translation.tr("Add a reaction")
+        onClicked: picker.opened ? picker.close() : picker.open()
+        contentItem: Item {
+            implicitWidth: addRow.implicitWidth
+            implicitHeight: lineHeight.implicitHeight
+            // as tall as the vote and reaction buttons beside it, which hold one line of text
+            WText {
+                id: lineHeight
+                visible: false
+                text: "👍 0"
+                font.pixelSize: Looks.font.pixelSize.large
+            }
+            Row {
+                id: addRow
+                anchors.centerIn: parent
+                spacing: Looks.dp(6)
+                FluentIcon {
+                    anchors.verticalCenter: parent.verticalCenter
+                    icon: "emoji-add"
+                    implicitSize: Looks.dp(16)
+                    color: Looks.colors.fg
+                }
+                WText {
+                    anchors.verticalCenter: parent.verticalCenter
+                    visible: !chip.bare
+                    text: Translation.tr("React")
+                    font.pixelSize: Looks.font.pixelSize.large
+                }
+            }
+        }
+
+        HoverHandler { id: chipHover }
+        // a short warm-up so a pointer passing by doesn't open it; leaving both closes it unless a search is typed
+        Timer {
+            running: chipHover.hovered && !picker.opened && chip.enabled
+            interval: 320
+            onTriggered: picker.open()
+        }
+        Timer {
+            running: picker.opened && !chipHover.hovered && !cardHover.hovered && search.text.length === 0
+            interval: 420
+            onTriggered: picker.close()
+        }
+
+        function pick(emoji: string): void {
+            Hub.react(chip.item.id, emoji)
+            picker.close()
+        }
+
+        Popup {
+            id: picker
+            y: chip.height + Looks.dp(4)
+            margins: 8
+            padding: Looks.dp(8)
+            width: grid.cellWidth * 8 + padding * 2
+            onOpened: {
+                search.text = ""
+                search.forceActiveFocus()
+            }
+
+            background: Rectangle {
+                // the flyout's own tone, opaque: the page behind must not read through it
+                readonly property color tone: Looks.colors.bg1Base
+                color: Qt.rgba(tone.r, tone.g, tone.b, 1)
+                radius: Looks.radius.large
+                border.width: 1
+                border.color: Looks.colors.bg2Border
+            }
+
+            contentItem: Column {
+                spacing: Looks.dp(8)
+                HoverHandler { id: cardHover }
+
+                WTextField {
+                    id: search
+                    width: parent.width
+                    placeholderText: Translation.tr("Search emoji")
+                    Keys.onEscapePressed: picker.close()
+                    Keys.onReturnPressed: if (grid.count > 0) chip.pick(grid.model[0])
+                    Keys.onEnterPressed: if (grid.count > 0) chip.pick(grid.model[0])
+                }
+
+                GridView {
+                    id: grid
+                    width: parent.width
+                    height: cellHeight * 5
+                    clip: true
+                    cellWidth: Looks.dp(36)
+                    cellHeight: cellWidth
+                    boundsBehavior: Flickable.StopAtBounds
+                    model: picker.opened ? Hub.emojiSearch(search.text) : []
+                    delegate: WButton {
+                        id: cell
+                        required property string modelData
+                        width: grid.cellWidth - Looks.dp(2)
+                        height: width
+                        checkable: false
+                        checked: chip.given.includes(cell.modelData)
+                        colBackgroundToggled: Looks.colors.popupSurfaceActive
+                        colBackgroundToggledHover: Looks.colors.popupSurfaceHover
+                        onClicked: chip.pick(cell.modelData)
+                        contentItem: Text {
+                            anchors.centerIn: parent
+                            text: cell.modelData
+                            font.pixelSize: Looks.dp(20)
+                            horizontalAlignment: Text.AlignHCenter
+                            verticalAlignment: Text.AlignVCenter
+                        }
+                    }
+                    WText {
+                        anchors.centerIn: parent
+                        width: parent.width - Looks.dp(24)
+                        visible: grid.count === 0 && search.text.length > 0
+                        horizontalAlignment: Text.AlignHCenter
+                        wrapMode: Text.Wrap
+                        text: Translation.tr("No emoji called “%1”").arg(search.text.trim())
+                        color: Looks.colors.subfg
+                        font.pixelSize: Looks.font.pixelSize.normal
+                    }
+                }
+            }
+        }
+    }
+
     // The Store's rating and the download count, small, in the secondary ink.
     component Stats: Row {
         id: stats
@@ -407,6 +548,13 @@ WSettingsPage {
                 text: Translation.tr("%1 downloads").arg(Number(stats.item?.downloads ?? 0).toLocaleString(Qt.locale(), "f", 0))
                 extraVisibleCondition: stats.brief && downloadsHover.hovered
             }
+        }
+        WText {
+            anchors.verticalCenter: parent.verticalCenter
+            visible: !stats.brief && Number(stats.item?.installs ?? 0) > 0
+            text: Translation.tr("%1 have it").arg(Hub.countText(stats.item?.installs ?? 0))
+            font.pixelSize: Looks.font.pixelSize.small
+            color: Looks.colors.subfg
         }
     }
 
@@ -693,11 +841,6 @@ WSettingsPage {
                             text: Translation.tr("See its files")
                             onClicked: Qt.openUrlExternally(page.item.page)
                         }
-                        WBorderedButton {
-                            visible: Hub.discussionUrl(page.item).length > 0
-                            text: Translation.tr("Reviews and votes")
-                            onClicked: Qt.openUrlExternally(Hub.discussionUrl(page.item))
-                        }
                         WBorderlessButton {
                             visible: Hub.reportUrl(page.item).length > 0
                             implicitHeight: Looks.dp(32)
@@ -711,11 +854,76 @@ WSettingsPage {
                             onClicked: Qt.openUrlExternally(Hub.reportUrl(page.item))
                         }
                     }
+                    // What people think of it, and the person's own say: a vote, the reactions it has (a tap gives or takes
+                    // back), and one small button that opens a picker of any emoji, on hover or a tap.
+                    Flow {
+                        Layout.fillWidth: true
+                        Layout.topMargin: Looks.dp(12)
+                        spacing: Looks.dp(6)
+                        Repeater {
+                            model: [{ vote: "up", face: "👍" }, { vote: "down", face: "👎" }]
+                            delegate: WBorderedButton {
+                                required property var modelData
+                                text: `${modelData.face} ${Hub.countText(Hub.voteCount(page.item, modelData.vote))}`
+                                checkable: false
+                                checked: Hub.mine(page.item?.id ?? "").vote === modelData.vote
+                                onClicked: Hub.vote(page.item.id, modelData.vote)
+                            }
+                        }
+                        Item { width: Looks.dp(6); height: 1 }
+                        Repeater {
+                            model: Hub.reactionsOf(page.item)
+                            delegate: WBorderedButton {
+                                required property var modelData
+                                text: `${modelData.emoji} ${Hub.countText(modelData.count)}`
+                                checkable: false
+                                checked: modelData.mine
+                                onClicked: Hub.react(page.item.id, modelData.emoji)
+                            }
+                        }
+                        ReactionPicker {
+                            item: page.item
+                        }
+                    }
+                    // A lead choice (`lead: true`) is the plugin on or off as a whole: a switch with its note.
+                    Repeater {
+                        model: Hub.choicesTitle(page.item).length > 0 ? (Hub.choices[page.item?.id ?? ""] ?? []).filter(c => c.lead) : []
+                        delegate: RowLayout {
+                            required property var modelData
+                            Layout.fillWidth: true
+                            Layout.topMargin: Looks.dp(14)
+                            spacing: Looks.dp(12)
+                            ColumnLayout {
+                                Layout.fillWidth: true
+                                spacing: Looks.dp(2)
+                                WText {
+                                    Layout.fillWidth: true
+                                    text: modelData.label
+                                    font.weight: Looks.font.weight.strong
+                                    font.pixelSize: Looks.font.pixelSize.normal
+                                    elide: Text.ElideRight
+                                }
+                                WText {
+                                    Layout.fillWidth: true
+                                    visible: text.length > 0
+                                    text: String(modelData.note ?? "")
+                                    color: Looks.colors.subfg
+                                    font.pixelSize: Looks.font.pixelSize.small
+                                    wrapMode: Text.WordWrap
+                                }
+                            }
+                            WSwitch {
+                                Layout.alignment: Qt.AlignVCenter
+                                checked: modelData.on
+                                onClicked: Hub.toggleChoice(page.item.id, modelData.id)
+                            }
+                        }
+                    }
                     // A plugin's own choices (plugin.json `choices`), read as its page opens; a button flips one.
                     WText {
                         readonly property string plugin: Hub.choicesTitle(page.item).length > 0 ? page.item.id : ""
-                        visible: plugin.length > 0
-                        Layout.topMargin: Looks.dp(14)
+                        visible: plugin.length > 0 && (Hub.choices[plugin] ?? []).some(c => !c.lead)
+                            Layout.topMargin: Looks.dp(14)
                         text: Hub.choicesTitle(page.item)
                         font.pixelSize: Looks.font.pixelSize.normal
                         onPluginChanged: if (plugin.length > 0) Hub.readChoices(plugin)
@@ -723,10 +931,10 @@ WSettingsPage {
                     }
                     Flow {
                         Layout.fillWidth: true
-                        visible: Hub.choicesTitle(page.item).length > 0
+                        visible: Hub.choicesTitle(page.item).length > 0 && (Hub.choices[page.item?.id ?? ""] ?? []).some(c => !c.lead)
                         spacing: Looks.dp(6)
                         Repeater {
-                            model: Hub.choices[page.item?.id ?? ""] ?? []
+                            model: (Hub.choices[page.item?.id ?? ""] ?? []).filter(c => !c.lead)
                             delegate: WBorderedButton {
                                 required property var modelData
                                 text: modelData.label
@@ -749,6 +957,37 @@ WSettingsPage {
             color: Looks.colors.fg1
             wrapMode: Text.WordWrap
             lineHeight: 1.3
+        }
+
+        WSettingsCard {
+            visible: Hub.changesOf(page.item).length > 0
+            title: Hub.changesTitle(page.item)
+            icon: "news"
+            Repeater {
+                model: Hub.changesOf(page.item)
+                delegate: ColumnLayout {
+                    id: release
+                    required property var modelData
+                    Layout.fillWidth: true
+                    Layout.margins: Looks.dp(4)
+                    spacing: Looks.dp(2)
+                    WText {
+                        text: release.modelData.version
+                        font.pixelSize: Looks.font.pixelSize.small
+                        color: Looks.colors.subfg
+                    }
+                    Repeater {
+                        model: release.modelData.notes
+                        delegate: WText {
+                            required property string modelData
+                            Layout.fillWidth: true
+                            text: modelData
+                            font.pixelSize: Looks.font.pixelSize.normal
+                            wrapMode: Text.WordWrap
+                        }
+                    }
+                }
+            }
         }
 
         // Additional information, as the Store lays it out: label over value, three to a line.

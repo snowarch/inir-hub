@@ -232,6 +232,13 @@ Item {
                 navigate: event => root.navigate(event)
             }
             WallpaperOrder { engine: root.engine }
+            WallpaperGlyphButton {
+                glyph: "grid_on"
+                implicitWidth: Math.round(36 * root.d)
+                selected: Wallpapers.glyphs
+                Accessible.name: Translation.tr("Draw the wallpaper as glyphs")
+                onClicked: Config.setNestedValue("background.effects.glyphs.enable", !Wallpapers.glyphs)
+            }
             WallpaperLayoutSwitch { layout: "browser" }
         }
 

@@ -20,7 +20,7 @@ ColumnLayout {
     property string voice: ""
     // The page shows: config writes reach the rows now; off screen they wait.
     property bool live: true
-    // Only these groups (keys), or every group but these: a layout that splits an area (Drawer's columns, Pocket's Home).
+    // Only these groups (keys), or every group but these: a layout that splits an area.
     property var only: null
     property var skip: []
     // Home's welcome over the first group; a layout that sets it elsewhere turns it off.
@@ -64,7 +64,7 @@ ColumnLayout {
         for (const group of groups) if (group.rows.length === 1) lone[group.rows[0].label] = (lone[group.rows[0].label] ?? 0) + 1
         for (const group of groups) {
             if (group.rows.length === 1 && lone[group.rows[0].label] > 1 && group.key.length > 0)
-                group.rows = [Object.assign({}, group.rows[0], { label: group.key })]
+                group.rows = [IrisOptions.derive(group.rows[0], { label: group.key })]
         }
         // Every area reads as Home (his 10-30): its lead group open, every other group a tile that says what it holds
         // and opens under the tiles, one at a time. Home leads with Every day, General's other pages are all tiles;
@@ -157,7 +157,7 @@ ColumnLayout {
     Timer { id: soon; interval: 0; onTriggered: rows.refresh() }
     function touch(): void { if (rows.live) soon.restart(); else rows.stale = true }
     Connections { target: Config; function onRevisionChanged(): void { rows.touch() } }
-    Connections { target: IrisNiri; function onRevisionChanged(): void { rows.touch() } }
+    Connections { target: CompositorConfig; function onRevisionChanged(): void { rows.touch() } }
     onLiveChanged: if (rows.live && rows.stale) rows.refresh()
     Component.onCompleted: rows.refresh()
 
@@ -370,7 +370,7 @@ ColumnLayout {
                 // The head, in the layout's voice (IrisSkin groupHeader), holding a lone switch on its line.
                 Item {
                     id: head
-                    readonly property string title: block.caption
+                    readonly property string title: block.loneSwitch ? Translation.tr(String(block.shownRows[0]?.label ?? "")) : block.caption
                     readonly property bool lone: block.loneSwitch || block.namedSwitch
                     readonly property real switchHeight: headSwitch.implicitHeight
                     readonly property bool reading: rows?.reading === block.key
@@ -1016,7 +1016,6 @@ ColumnLayout {
         readonly property bool pin: island.modelData.pin === true
         readonly property var specs: island.modelData.rows ?? []
         readonly property var first: island.specs[0] ?? null
-        readonly property bool open: String(island.owner?.openGroup ?? "") === island.key
         readonly property string title: Translation.tr(String(island.modelData.title ?? ""))
         // What answers on the island's own line.
         readonly property bool loneSwitch: !island.pin && island.specs.length === 1 && island.first?.kind === "switch"
@@ -1027,9 +1026,15 @@ ColumnLayout {
         }
         readonly property bool pinSwitch: island.pin && island.first?.kind === "switch"
         readonly property bool toggles: island.loneSwitch || island.pinSwitch
+        // A group that is its switch flips, it never opens: left open when its other rows went (a design that
+        // offers one option), it showed the switch twice.
+        readonly property bool open: !island.toggles && String(island.owner?.openGroup ?? "") === island.key
         readonly property var switchSpec: island.loneSwitch || island.namedSwitch || island.pinSwitch ? island.first : null
         // A group's own on/off is a switch on its line; Home's pins say it in a word, as the Island's own Focus does.
         readonly property bool switchShown: island.loneSwitch || island.namedSwitch
+        // A group that is one switch says what the switch does ("Closing" read as a bare on/off for "Confirm before
+        // closing windows"; Halo's Face group as turning the face off).
+        readonly property string lineName: island.loneSwitch ? Translation.tr(String(island.first?.label ?? "")) : island.title
         readonly property bool on: {
             Config.revision
             if (!island.switchSpec) return false
@@ -1065,6 +1070,12 @@ ColumnLayout {
             // A value named like its island says it is on (Glass read "Glass"); the same word twice is said once.
             const say = spec => { const one = island.word(spec); return one.length > 0 && one.toLowerCase() === island.title.toLowerCase() ? Translation.tr("On") : one }
             if (island.pin) { const one = say(island.first); return one.length > 0 ? [one] : [] }
+            // A group that is a set of kinds says how many are on; the first one's name read as if it were the only one.
+            if (IrisOptions.countedGroups.includes(island.key)) {
+                const switches = island.specs.filter(spec => spec.kind === "switch")
+                const on = switches.filter(spec => { const value = IrisOptions.currentValue(spec); return spec.invert ? !value : Boolean(value) }).length
+                return [on === switches.length ? Translation.tr("All on") : on === 0 ? Translation.tr("Off") : Translation.tr("%1 of %2").arg(on).arg(switches.length)]
+            }
             const out = []
             const specs = island.specs.slice(island.namedSwitch ? 1 : 0)
             // The rows it shows first; when they say nothing (an off switch, a list), a value from its fine-tune ones.
@@ -1110,7 +1121,7 @@ ColumnLayout {
 
         activeFocusOnTab: true
         Accessible.role: island.toggles ? Accessible.CheckBox : Accessible.Button
-        Accessible.name: island.title
+        Accessible.name: island.lineName
         Accessible.description: island.said.join(", ")
         Accessible.checkable: island.toggles
         Accessible.checked: island.on
@@ -1178,10 +1189,14 @@ ColumnLayout {
                 anchors.leftMargin: Math.round(10 * island.d)
                 anchors.verticalCenter: parent.verticalCenter
                 width: Math.min(implicitWidth, line.width - x - line.pad - line.tail - Math.round(16 * island.d) - (dot.visible ? dot.width + Math.round(8 * island.d) : 0))
-                text: island.title
+                text: island.lineName
                 color: IrisStyle.text
                 font.pixelSize: IrisStyle.typeBody
                 font.weight: IrisStyle.weight(Font.DemiBold)
+                // A switch's name is a sentence: it takes a second line before it is cut.
+                wrapMode: island.loneSwitch ? Text.WordWrap : Text.NoWrap
+                maximumLineCount: island.loneSwitch ? 2 : 1
+                lineHeight: island.loneSwitch ? 0.92 : 1
                 elide: Text.ElideRight
             }
             // Changed from its factory value: the page's one dot.
@@ -1224,7 +1239,7 @@ ColumnLayout {
                 anchors.rightMargin: line.pad
                 anchors.verticalCenter: parent.verticalCenter
                 on: island.on
-                name: island.title
+                name: island.lineName
                 onToggled: IrisOptions.commit(island.switchSpec, island.switchSpec.invert ? on : !on)
             }
             // Open, the line's end closes it again, as the Island's own cancel key: a round key in the plate's quiet fill.
@@ -1266,7 +1281,8 @@ ColumnLayout {
                 x: island.inset
                 y: island.compact - Math.round(4 * island.d)
                 width: (island.deckItem?.width ?? island.width) - 2 * island.inset
-                active: island.open || island.closing
+                // Never at no width: a page built in the click's frame has none yet, and rows laid out there loop.
+                active: (island.open || island.closing) && body.width > 0
                 opacity: island.open && body.status === Loader.Ready ? 1 : 0
                 Behavior on opacity {
                     SequentialAnimation {

@@ -69,7 +69,7 @@ QuickToggleButton {
             if (exitCode !== 0) {
                 const errMsg = (startErrCollector.text?.trim() ?? "")
                 Quickshell.execDetached([
-                    "/usr/bin/notify-send",
+                    "notify-send",
                     Translation.tr("Hotspot"),
                     errMsg.length > 0
                         ? errMsg
@@ -94,7 +94,7 @@ QuickToggleButton {
             if (exitCode !== 0) {
                 const errMsg = (stopErrCollector.text?.trim() ?? "")
                 Quickshell.execDetached([
-                    "/usr/bin/notify-send",
+                    "notify-send",
                     Translation.tr("Hotspot"),
                     errMsg.length > 0
                         ? errMsg

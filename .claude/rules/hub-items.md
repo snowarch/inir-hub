@@ -21,7 +21,8 @@ in its pull request. The id is lowercase letters, digits and dashes (3 to 48), f
   Every item` has the table).
 - `hub.json`, the listing: `version` (`x.y.z`, the same as the native file's), `summary` (8 to 80 characters, what it
   does), `authors` (GitHub handles), `license` (SPDX id), `tags` (up to 6), `permissions`, `hosts` (every host it
-  talks to), `minInir` when it needs a recent iNiR, `preview`, and for plugins `"provides": "modules/<id>"`.
+  talks to), `minInir` when it needs a recent iNiR (never newer than the released one: CI refuses it), `preview`,
+  and for plugins `"provides": "modules/<id>"`.
 - `README.md`: what it does, how to open and set it up, what each option means. People read it on GitHub.
 - `preview.webp` (or PNG/JPEG): a real screenshot, 1280×800, under 700 KB, nothing private in it. Make it with
   `inir hub preview <folder> --shot <screenshot>`; a widget also with `inir background widgetSnapshot`.

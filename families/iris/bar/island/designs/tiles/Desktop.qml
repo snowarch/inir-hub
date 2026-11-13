@@ -9,6 +9,7 @@ import qs.modules.common
 import qs.modules.common.widgets
 import qs.modules.iris.style
 import qs.modules.iris.components
+import qs.modules.iris.bar
 
 // Tiles' desktop page: the day and the sky on one tile, the switches you reach for most, what is next, the machine,
 // and you. Every tile is a quiet plate on the Island's body.
@@ -26,6 +27,10 @@ GridLayout {
         return Events.getUpcomingEvents(7)[0] ?? null
     }
     readonly property int pendingTasks: Todo.list.filter(task => !task.done).length
+    // Modules the person picked under "Your modules" (a hub widget's Island face).
+    readonly property var customModules: ["left", "center", "right"]
+        .reduce((all, slot) => all.concat(page.island?.options?.[slot + "Modules"] ?? []), [])
+        .filter(id => String(id).startsWith("custom:"))
     onLiveChanged: if (page.live) ResourceUsage.ensureRunning()
     columns: 2
     rowSpacing: Math.round(8 * page.d)
@@ -135,7 +140,7 @@ GridLayout {
                 model: [
                     { glyph: "wifi", label: "Wi-Fi", on: Network.wifiEnabled },
                     { glyph: "bluetooth", label: "Bluetooth", on: BluetoothStatus.enabled, shown: BluetoothStatus.available },
-                    { glyph: "do_not_disturb_on", label: "Silent", on: Notifications.silent },
+                    { glyph: "bedtime", label: "Silent", on: Notifications.silent },
                     { glyph: "nightlight", label: "Night", on: Hyprsunset.active },
                     { glyph: "coffee", label: "Awake", on: Idle.inhibit }
                 ].filter(entry => entry.shown !== false)
@@ -166,7 +171,7 @@ GridLayout {
                                 const glyph = toggle.modelData.glyph
                                 if (glyph === "wifi") Network.toggleWifi()
                                 else if (glyph === "bluetooth") { if (Bluetooth.defaultAdapter) Bluetooth.defaultAdapter.enabled = !Bluetooth.defaultAdapter.enabled }
-                                else if (glyph === "do_not_disturb_on") Notifications.silent = !Notifications.silent
+                                else if (glyph === "bedtime") Notifications.silent = !Notifications.silent
                                 else if (glyph === "nightlight") Hyprsunset.toggle()
                                 else Idle.toggleInhibit()
                             }
@@ -225,6 +230,29 @@ GridLayout {
             Eyebrow { text: Translation.tr("Machine") }
             Bar { value: ResourceUsage.cpuUsage; label: "Processor" }
             Bar { value: ResourceUsage.memoryUsedPercentage; label: "Memory" }
+        }
+    }
+
+    Tile {
+        Layout.columnSpan: 2
+        visible: page.customModules.length > 0
+        implicitHeight: modules.implicitHeight + 2 * Math.round(6 * page.d)
+        Flow {
+            id: modules
+            x: Math.round(6 * page.d)
+            y: Math.round(6 * page.d)
+            width: parent.width - 2 * x
+            spacing: Math.round(6 * page.d)
+            Repeater {
+                model: page.customModules
+                IrisCustomModule {
+                    required property string modelData
+                    widgetId: modelData.slice("custom:".length)
+                    targetScreen: page.island?.targetScreen ?? null
+                    slot: "island.desktop"
+                    availableWidth: modules.width
+                }
+            }
         }
     }
 

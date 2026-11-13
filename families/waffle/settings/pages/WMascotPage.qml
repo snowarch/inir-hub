@@ -640,7 +640,7 @@ WSettingsPage {
                     onClicked: {
                         switch (actionBtn.modelData.action) {
                         case "reload":
-                            Quickshell.execDetached(["/usr/bin/bash", Quickshell.shellPath("scripts/restart-shell.sh")])
+                            Quickshell.execDetached(["bash", Quickshell.shellPath("scripts/restart-shell.sh")])
                             break
                         case "config":
                             Qt.openUrlExternally(Directories.shellConfigPath)

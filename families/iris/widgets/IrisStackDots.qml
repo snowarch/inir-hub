@@ -5,7 +5,7 @@ import qs
 import qs.services
 import qs.modules.iris.style
 
-// The page dots of a widget stack, in the gutter of the plate. The lit one is a single mark that travels to the
+// The page dots of a widget stack, in the gutter of the plate (outside it when the face has none). The lit one is a single mark that travels to the
 // page shown on the widget's own move curve; a dot turns to its page.
 Item {
     id: root
@@ -17,8 +17,13 @@ Item {
     readonly property real dot: root.face.dp(6)
     readonly property real gap: root.face.dp(6)
     readonly property real pitch: root.dot + root.gap
+    // Outside the plate the dots stand on the wallpaper: its ink, not the glass's.
+    readonly property bool outside: root.face.padding <= 0
+    readonly property color lit: !root.outside ? root.face.ink
+        : root.face.widget.inkOnLight ? IrisStyle.inkOnLight : IrisStyle.inkOnDark
+    readonly property color unlit: !root.outside ? root.face.inkTertiary : Qt.rgba(root.lit.r, root.lit.g, root.lit.b, 0.45)
 
-    width: root.face.padding
+    width: root.face.padding > 0 ? root.face.padding : root.face.dp(18)
     height: root.count * root.dot + Math.max(0, root.count - 1) * root.gap + root.face.dp(16)
 
     Item {
@@ -38,7 +43,7 @@ Item {
                 width: root.dot
                 height: root.dot
                 radius: root.dot / 2
-                color: root.face.inkTertiary
+                color: root.unlit
 
                 TapHandler {
                     margin: root.gap / 2
@@ -54,7 +59,7 @@ Item {
             width: root.dot
             height: root.dot
             radius: root.dot / 2
-            color: root.face.ink
+            color: root.lit
             Behavior on y {
                 enabled: IrisStyle.motionEnabled
                 NumberAnimation {

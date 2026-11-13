@@ -1918,6 +1918,22 @@ ContentPage {
                 }
             }
 
+            ContentSubsection {
+                visible: Config.options?.background?.enableAnimation ?? true
+                title: Translation.tr("Pause")
+                tooltip: Translation.tr("A hidden wallpaper stops decoding and keeps its frame.")
+
+                ConfigSelectionArray {
+                    currentValue: Config.options?.background?.videoPause ?? "covered"
+                    options: [
+                        { displayName: Translation.tr("Never"), icon: "play_arrow", value: "never" },
+                        { displayName: Translation.tr("Behind fullscreen"), icon: "fullscreen", value: "fullscreen" },
+                        { displayName: Translation.tr("When covered"), icon: "view_column", value: "covered" }
+                    ]
+                    onSelected: newValue => Config.setNestedValue("background.videoPause", newValue)
+                }
+            }
+
             SettingsSwitch {
                 visible: Config.options?.background?.enableAnimation ?? true
                 buttonIcon: "motion_blur"
@@ -2006,6 +2022,23 @@ ContentPage {
                     extraVisibleCondition: false
                     alternativeVisibleCondition: parent && parent.hovered !== undefined ? parent.hovered : false
                 }
+            }
+
+            SettingsSwitch {
+                buttonIcon: "grid_on"
+                text: Translation.tr("Draw the wallpaper as glyphs")
+                checked: Config.options?.background?.effects?.glyphs?.enable ?? false
+                onCheckedChanged: Config.setNestedValue("background.effects.glyphs.enable", checked)
+                StyledToolTip {
+                    text: Translation.tr("Pictures, GIFs and videos are redrawn as glowing characters.")
+                }
+            }
+
+            Loader {
+                Layout.fillWidth: true
+                active: Config.options?.background?.effects?.glyphs?.enable ?? false
+                visible: active
+                sourceComponent: GlyphArtSettings {}
             }
 
             ConfigSpinBox {
@@ -2335,7 +2368,7 @@ ContentPage {
                     visible: Config.options?.background?.backdrop?.enable ?? true
                     icon: "brightness_5"
                     text: Translation.tr("Backdrop dim (%)")
-                    value: Config.options?.background?.backdrop?.dim ?? 20
+                    value: Config.options?.background?.backdrop?.dim ?? 0
                     from: 0
                     to: 100
                     stepSize: 5

@@ -203,7 +203,7 @@ Item {
                         topPadding: root.u(10)
                         bottomPadding: root.u(10)
                         horizontalAlignment: Text.AlignHCenter
-                        text: Translation.tr("No matching settings")
+                        text: Voice.miss(Translation.tr("No matching settings"), query.text)
                         color: IrisStyle.muted
                         font.pixelSize: IrisStyle.typeMeta
                     }

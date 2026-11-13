@@ -53,11 +53,34 @@ Scope {
 
             readonly property var look: Config.options?.material?.settingsUi?.overlayAppearance ?? ({})
             readonly property real bgOpacity: Math.max(0.6, panel.look.backgroundOpacity ?? 1.0)
+            // Compositor blur (Settings › Effects › Panels): Niri blurs the desktop behind the scrim, or behind the
+            // card alone, instead of a blurred copy of the wallpaper. Regalia keeps its own plate.
+            readonly property bool nativeBlur: Appearance.effectsEnabled && !Appearance.regaliaEverywhere
+                && Appearance.useCompositorBlur("panels", Appearance.blurTopology.roundedRectangle)
+            readonly property bool backdropWanted: (panel.look.backdropBlur ?? 0) > 0 && Appearance.effectsEnabled
+            readonly property real glassTransparency: {
+                const base = Appearance.angelEverywhere ? Appearance.angel.panelTransparentize : Appearance.aurora.overlayTransparentize
+                return base + (1 - base) * (1 - panel.bgOpacity)
+            }
+
+            Item { id: noBlur; width: 0; height: 0 }
+            property Region nativeBlurRegion: Region {
+                Region {
+                    readonly property bool shown: panel.nativeBlur && panel.backdropWanted && root.settingsOpen
+                    width: shown ? panel.width : 0
+                    height: shown ? panel.height : 0
+                }
+                Region {
+                    item: panel.nativeBlur && root.settingsOpen && card.color.a < 0.999 ? card : noBlur
+                    radius: card.radius
+                }
+            }
+            BackgroundEffect.blurRegion: CompositorService.blurRegions && panel.nativeBlur ? nativeBlurRegion : null
 
             // Blurred desktop behind the scrim (Settings › Modules › Settings UI).
             Loader {
                 anchors.fill: parent
-                active: (panel.look.backdropBlur ?? 0) > 0 && Appearance.effectsEnabled
+                active: panel.backdropWanted && !panel.nativeBlur
                 visible: active && root.settingsOpen
                 sourceComponent: GlassBackground {
                     radius: 0
@@ -132,7 +155,9 @@ Scope {
                 width: Math.min(panel.width - 2 * safeEdge, Math.round(1320 * Appearance.fontSizeScale))
                 height: Math.min(panel.height - 2 * safeEdge, Math.round(900 * Appearance.fontSizeScale))
                 radius: SettingsMaterialPreset.windowRadius
-                color: SettingsMaterialPreset.glass || Appearance.regaliaEverywhere ? "transparent"
+                color: Appearance.regaliaEverywhere ? "transparent"
+                    : SettingsMaterialPreset.glass ? (panel.nativeBlur
+                        ? CF.ColorUtils.transparentize(Appearance.colors.colLayer0Base, panel.glassTransparency) : "transparent")
                     : CF.ColorUtils.applyAlpha(SettingsMaterialPreset.windowColor, panel.bgOpacity)
                 // glass needs a lit rim to read as a pane over a dimmed desktop, not a patch of it
                 border.width: Appearance.inirEverywhere || Appearance.angelEverywhere || Appearance.zzzEverywhere || SettingsMaterialPreset.glass ? 1 : 0
@@ -162,17 +187,14 @@ Scope {
                 GlassBackground {
                     anchors.fill: parent
                     z: -1
-                    visible: SettingsMaterialPreset.glass
+                    visible: SettingsMaterialPreset.glass && !panel.nativeBlur
                     screenX: card.x
                     screenY: card.y
                     screenWidth: panel.width
                     screenHeight: panel.height
                     // GameMode turns the blur off: an opaque window, never a vanished one
                     fallbackColor: Appearance.effectsEnabled ? "transparent" : Appearance.colors.colLayer0Base
-                    auroraTransparency: {
-                        const base = Appearance.angelEverywhere ? Appearance.angel.panelTransparentize : Appearance.aurora.overlayTransparentize
-                        return base + (1 - base) * (1 - panel.bgOpacity)
-                    }
+                    auroraTransparency: panel.glassTransparency
                     radius: card.radius
                 }
 

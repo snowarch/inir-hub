@@ -28,6 +28,7 @@ AngelStyleEditor 1.0 AngelStyleEditor.qml
 ArrangeConfig 1.0 ArrangeConfig.qml
 AuroraStyleEditor 1.0 AuroraStyleEditor.qml
 BackgroundConfig 1.0 BackgroundConfig.qml
+GlyphArtSettings 1.0 GlyphArtSettings.qml
 BarConfig 1.0 BarConfig.qml
 CheatsheetConfig 1.0 CheatsheetConfig.qml
 CustomThemeEditor 1.0 CustomThemeEditor.qml
@@ -45,6 +46,9 @@ MaterialSettingsApp 1.0 MaterialSettingsApp.qml
 ModulesConfig 1.0 ModulesConfig.qml
 MonitorVisibilityConfig 1.0 MonitorVisibilityConfig.qml
 NiriConfig 1.0 NiriConfig.qml
+CompositorPage 1.0 CompositorPage.qml
+CompositorRow 1.0 CompositorRow.qml
+CompositorRows 1.0 CompositorRows.qml
 OrbitConfig 1.0 OrbitConfig.qml
 QuickConfig 1.0 QuickConfig.qml
 RegaliaStyleEditor 1.0 RegaliaStyleEditor.qml

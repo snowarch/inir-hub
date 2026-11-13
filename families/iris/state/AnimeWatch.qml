@@ -349,7 +349,7 @@ Singleton {
         if (root.skipIntro && root.hasAniSkip) flags.push("--skip")
         if (root.quality !== "best") flags.push("-q", root.quality)
         ShellExec.execDetachedArgs([
-            "/usr/bin/env",
+            "env",
             "INIR_ANI_EXPECT=" + expect,
             "INIR_ANI_PROGRESS=" + root.progressPath,
             "INIR_ANI_FINISHED=" + String(root.finishedRatio),
@@ -359,7 +359,7 @@ Singleton {
     }
 
     function _resumeCli(id: string): void {
-        const command = ["/usr/bin/bash", "-lc", id + " -c"]
+        const command = ["bash", "-lc", id + " -c"]
         const terminal = root._terminal()
         if (terminal === "wezterm")
             ShellExec.execDetachedArgs([terminal, "start", "--always-new-process", "--", ...command], "Resume anime")
@@ -398,7 +398,7 @@ Singleton {
 
     function _explain(said: string, session: var, asked: string): string {
         const episode = session ? String(session.episode) : ""
-        if (said.indexOf("No results found") >= 0) return Translation.tr("Nothing found for “%1”").arg(asked)
+        if (said.indexOf("No results found") >= 0) return Voice.miss(Translation.tr("Nothing found for “%1”").arg(asked), asked)
         if (said.indexOf("Invalid anime selection") >= 0 && session)
             return Translation.tr("Could not find %1 again").arg(session.title)
         if (said.indexOf("Invalid episode") >= 0 || said.indexOf("not released") >= 0)
@@ -495,7 +495,7 @@ Singleton {
     Process {
         id: findRunProcess
         running: false
-        command: ["/usr/bin/python3", "-c",
+        command: ["python3", "-c",
             "import os, shutil, socket, sys\n"
             + "base = sys.argv[1]\n"
             + "found = ''\n"
@@ -567,7 +567,7 @@ Singleton {
 
     Process {
         id: detectProcess
-        command: ["/usr/bin/bash", "-c",
+        command: ["bash", "-c",
             'command -v ani-skip >/dev/null 2>&1 && printf "skip "; for c in ani-cli jerry curd; do command -v "$c" >/dev/null 2>&1 && { printf %s "$c"; exit 0; }; done']
         stdout: StdioCollector {
             id: detectCollector

@@ -541,6 +541,20 @@ DockButton {
             trayEntry.triggered()
     }
 
+    // Umbriel's scratchpad, for an app with one window (a base without the verbs leaves it out).
+    function scratchpadEntry(): var {
+        const id = root.toplevels.length === 1 ? root.toplevels[0]?.niriWindowId : undefined
+        const win = NiriService.scratchpadAvailable === true && id !== undefined
+            ? (NiriService.windows ?? []).find(w => w.id === id) : null
+        if (!win) return []
+        return [{
+            iconName: win.scratchpad ? "move_up" : "sticky_note_2",
+            text: win.scratchpad ? Translation.tr("Back to its workspace") : Translation.tr("Send to scratchpad"),
+            monochromeIcon: true,
+            action: () => win.scratchpad ? NiriService.restoreWindowFromScratchpad(id) : NiriService.moveWindowToScratchpad(id)
+        }]
+    }
+
     function buildContextMenuModel(): var {
         return [
             // Desktop actions (if available)
@@ -567,6 +581,7 @@ DockButton {
                 monochromeIcon: true,
                 action: () => TaskbarApps.togglePin(appToplevel.originalAppId ?? appToplevel.appId)
             },
+            ...root.scratchpadEntry(),
             // Close window(s) - only if has windows
             ...(root.hasWindows ? [
                 { type: "separator" },

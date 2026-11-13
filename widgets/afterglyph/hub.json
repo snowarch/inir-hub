@@ -1,0 +1,18 @@
+{
+    "$schema": "../../schema/hub.schema.json",
+    "version": "2.2.1",
+    "summary": "Music, wallpaper, words and nine subjects as living glyphs, in sixteen styles",
+    "authors": [
+        "snowarch"
+    ],
+    "license": "MIT",
+    "tags": [
+        "art",
+        "music",
+        "wallpaper",
+        "glyphs"
+    ],
+    "permissions": [],
+    "minInir": "3.0.2",
+    "preview": "preview.webp"
+}

@@ -8,7 +8,8 @@ import qs.modules.iris.style
 import qs.modules.iris.components
 import qs.modules.iris.widgets
 
-// Dial · Watch: a watch with real hands, the minute in the accent, stepping when it turns; the day beside it.
+// Dial · Watch: a watch with real hands, the minute in the accent, stepping when it turns; the day beside it. The marks
+// and what sits beside the dial are the person's (iris.bar.faces.dial).
 Item {
     id: root
     property var island: null
@@ -21,6 +22,9 @@ Item {
     readonly property real figure: root.island?.figureSize ?? IrisStyle.typeHeadline
     readonly property string face: root.island?.nothingLook ? IrisStyle.fontDot : IrisStyle.figureFace(root.figure)
     readonly property real contentWidth: row.implicitWidth
+    readonly property var options: Config.options?.iris?.bar?.faces?.dial ?? ({})
+    readonly property string marks: ["hours", "quarters", "none"].includes(String(root.options.marks)) ? String(root.options.marks) : "hours"
+    readonly property string beside: ["day", "time", "none"].includes(String(root.options.beside)) ? String(root.options.beside) : "day"
 
     readonly property real size: Math.round(root.h - 10 * root.d)
     // Local minutes since the epoch: the hands only ever go forward, so a turn past midnight never unwinds.
@@ -50,7 +54,7 @@ Item {
                     id: tick
                     required property int index
                     readonly property bool quarter: tick.index % 3 === 0
-                    visible: tick.quarter ? dial.quarters : dial.fine
+                    visible: root.marks !== "none" && (tick.quarter ? dial.quarters : dial.fine && root.marks === "hours")
                     x: dial.c
                     y: dial.c
                     rotation: tick.index * 30
@@ -97,7 +101,16 @@ Item {
                 color: root.mark
             }
         }
+        IrisClock {
+            visible: root.beside === "time"
+            anchors.verticalCenter: parent.verticalCenter
+            family: root.face
+            minorFamily: family
+            pixelSize: root.figure
+            separatorColor: root.mark
+        }
         Row {
+            visible: root.beside === "day"
             anchors.verticalCenter: parent.verticalCenter
             spacing: Math.round(4 * root.d)
             IrisText {

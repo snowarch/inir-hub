@@ -3,7 +3,8 @@ pragma ComponentBehavior: Bound
 // A component's own surface: the shell loads this file while the active family is one plugin.json's "families" names
 // (every family when the list is empty). It sits beside the family and never edits it. Keep this shape:
 //   - one window, created only while open (nothing runs while it is closed);
-//   - an IpcHandler whose target is the component's id, so a keybind or another surface opens it;
+//   - an IpcHandler whose target is the component's id with a toggle: the app launcher of every family lists it by
+//     its name and opens it with `inir <id> toggle` (a keybind or another surface can too);
 //   - colours, corners and type from the shell's tokens, so the person's theme reaches it;
 //   - its own options in its own file (Directories.pluginFile), never in the person's settings.
 

@@ -1,6 +1,92 @@
 {
     "$schema": "../../schema/hub.schema.json",
-    "version": "2.33.37",
+    "version": "2.33.86",
+    "changes": {
+      "2.33.86": ["Floating tools (Super+G): Clock, Timer and Network join the bench, set up in iRiS Settings › Gaming & Fullscreen › Floating tools", "Island timers: right click stops one (with Undo), middle click pauses it; the open Island has pause and stop, and the time reads whole", "The dock slides its icons into place when an app opens or closes, without a flicker", "Text fields open their right-click menu in iRiS's look, inside the panel, so a sidebar no longer closes under it", "Window previews in Orbit and the Overview stay live when focus moves", "A fresh install starts with no wallpaper or backdrop dim"],
+      "2.33.85": ["Choosing a file, a folder or a picture opens the shell's own picker in your colours, not a white window"],
+      "2.33.84": ["One key can open a page of the Island and close it again: `inir iris togglePage desktop`", "Edit desktop: the size keys over a widget take the pointer after you move it"],
+      "2.33.83": ["Bubbles can live on the screens you pick (Settings, Display, Screens): the Island elsewhere stays clean", "Island player: a live stream shows Live with a full line instead of a timeline that slides back and forth", "On Umbriel, an app's menu in the dock sends its window to the scratchpad and back", "Island: a hub widget's module can fill its row on the Desktop page (the radio's player)", "Player chips show the same cover as the player, a station's logo included"],
+      "2.33.82": ["Settings reopens on the group you left, Glyph art included", "Glyph art: its rows start from the new, finer factory values", "About shows the new iNiR mark in your colours", "Edit desktop: hub widgets sit in their own aisle (Radio in Media) and search finds them by what they do"],
+      "2.33.81": ["Searches that find nothing answer with a little personality", "Hub: “Nothing matches” sits in the middle of the page"],
+      "2.33.80": ["Controls: tile rows show only with the iRiS face that draws them"],
+      "2.33.79": ["Widgets share one palette: every face and the player take colours from the same roles", "Widgets: Glass blur in Settings tunes how much their glass frosts the wallpaper", "Settings: changing the widgets' material, Style or Design no longer freezes the shell", "Widgets under Prism honour their options; rows a widget can't use hide"],
+        "2.33.78": [
+          "Wallpaper picker: a switch in every layout's head draws the wallpaper as glyphs"
+        ],
+        "2.33.77": [
+          "Widgets: their glass follows a video, GIF or glyph wallpaper as it moves, instead of holding a frozen frame"
+        ],
+        "2.33.76": [
+          "Widgets: their glass follows a video, GIF or glyph wallpaper as it moves, instead of holding a frozen frame",
+          "Widget options: colour swatches, a file chooser instead of a typed path, a tap on a changed value's number puts it back",
+          "Settings: scrolling no longer redraws a blurred band every frame, and the window stays ready for ten minutes after closing",
+          "Wallpaper › Draw the wallpaper as glyphs: your picture, a word or a subject as glowing characters, 16 looks, alive, Restore defaults",
+          "Do Not Disturb: the Control Center tile lights when it is on (it read backwards); on the Island a moon, hover names it, a press ends it",
+          "Settings on Umbriel: screen edge space, dialogs held to their window, maximized apps, tablet and touch screens, lid, NVIDIA sync"
+        ],
+        "2.33.75": [
+            "Island: a small moon rests on it while Do Not Disturb is on, so silence never goes unnoticed",
+            "Displays on Umbriel: each screen's workspaces drawn as miniatures: how many, as needed or fixed, stacked or side by side, looping",
+            "Settings on Umbriel: the width new windows open at, picked from drawn screens, for every screen (Layout) or one screen (Displays)",
+            "Displays on Umbriel: fullscreen apps straight to the screen, the colour curve with HDR on, sharp older apps on a scaled screen"
+        ],
+        "2.33.74": [
+            "Settings: everything of the compositor you run (Niri or Umbriel) sits in one sidebar group named for it, a page per function",
+            "Settings: each of those pages opens on what your machine runs now and shows only what your compositor and hardware support",
+            "Settings: no row names Niri when you run another compositor"
+        ],
+        "2.33.73": [
+            "Umbriel: a screen that looks darker at its highest refresh rate than at 60 Hz gets a fix in Settings › Display › Colour",
+      "Prism: turning an option on or off keeps the page where you were reading; a long page no longer jumps to another part",
+      "Prism: every option has one home, no copy of the compositor's rows on a second page; the page card names each value it shows"
+        ],
+        "2.33.72": [
+            "The overview over a fullscreen game no longer rebuilds the Island and Dock on every press: they keep their layer, on Umbriel and Niri"
+        ],
+        "2.33.71": [
+            "With a Design on, the resting Island is yours again: Island › Design and modes › The Design's face"
+        ],
+        "2.33.70": [
+            "Prism Settings: the sidebar's sections read brighter"
+        ],
+        "2.33.69": [
+            "Prism: panels take a soft haze of the spectrum from one corner; each place can wear Prism alone (Colour › Look › Places)"
+        ],
+        "2.33.68": [
+            "A fifth look, Prism: black and white controls with the spectrum at each level"
+        ],
+        "2.33.67": [
+            "Hub: a plugin that changes a file of yours, like Fastfetch, gets a switch that turns it off and gives yours back"
+        ],
+        "2.33.66": [
+            "Settings follow the compositor you run: Niri shows what Niri does, Umbriel gets pages of its own",
+            "Umbriel: layouts drawn as pictures, tabs, title bars, glass, effects you press on a drawn desktop, hot corners, HDR and colour depth",
+            "Display: drag your screens to where they stand, pick a scale from miniatures of your own screen, and keep or undo a change within 15 seconds",
+            "Prism Settings: the side column folds by itself on pages that need the width, with a button to open or close it",
+            "Prism Settings: the open page is named in your accent on a quiet plate of it, so where you are reads at a glance",
+            "A Design can bring the faces of your desktop widgets while it is on (Prism does); taking it off gives yours back"
+        ],
+        "2.33.65": [
+            "Runs on NixOS: every tool and app is found on your PATH, not only in /usr/bin"
+        ],
+        "2.33.60": [
+            "Prism Settings: rows that pick several pieces show which are on and in what order; a tap adds to the list instead of replacing it",
+            "React with any emoji: one small pill opens a search, and votes and reactions show the moment people give them"
+        ],
+        "2.33.59": [
+            "Bubbles stacked in a corner or along its edge join as one smooth body, without a bulge each",
+            "Vote and react on any hub item, and see how many people have it",
+            "Prism Settings: search answers as you type, values save once per wheel turn, and scrolling stays smooth"
+        ],
+        "2.33.58": [
+            "The frame can grow a rail on the left or right, and the dock lives inside it",
+            "Bubbles join a line where you drop them and keep their order",
+            "A larger player: cover, title and five controls on discs, 10 s steps",
+            "The song length no longer jumps between tracks; shuffle and repeat on both players",
+            "Vitals as a chart and four tiles",
+            "Hub items say what is new in their version; inir hub open lands on the Hub"
+        ]
+    },
     "summary": "One living body: the Island, the chassis and Apple-grade motion.",
     "authors": [
         "snowarch"
@@ -21,7 +107,7 @@
         "google.com",
         "startpage.com"
     ],
-    "minInir": "2.33.0",
+    "minInir": "3.1.1",
     "provides": "modules/iris",
     "preview": "preview.webp"
 }

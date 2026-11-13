@@ -94,6 +94,8 @@ ContentPage {
 
         SettingsGroup {
             ConfigSelectionArray {
+                // Niri's own switcher; under Umbriel Alt+Tab is iNiR's.
+                visible: CompositorService.niriNative
                 options: [
                     { displayName: Translation.tr("Niri's Recent Windows"), icon: "view_carousel", value: "niri" },
                     { displayName: Translation.tr("iNiR switcher"), icon: "keyboard_tab", value: "inir" }
@@ -181,6 +183,19 @@ ContentPage {
                     onValueModified: Config.setNestedValue("overlay.backgroundOpacity", value / 100)
                     StyledToolTip {
                         text: Translation.tr("Opacity of the overlay panel background")
+                    }
+                }
+
+                ConfigSpinBox {
+                    icon: "ads_click"
+                    text: Translation.tr("Pinned tools when clicks pass through (%)")
+                    value: Math.round((Config.options?.overlay?.clickthroughOpacity ?? 0.8) * 100)
+                    from: 20
+                    to: 100
+                    stepSize: 5
+                    onValueModified: Config.setNestedValue("overlay.clickthroughOpacity", value / 100)
+                    StyledToolTip {
+                        text: Translation.tr("A pinned tool that lets clicks reach the game fades to this, so the game shows behind it")
                     }
                 }
 
@@ -883,10 +898,10 @@ ContentPage {
                     visible: Config.options?.material?.sidebar?.widgets?.launch ?? true
 
                     property var shortcuts: Config.options?.material?.sidebar?.widgets?.quickLaunch ?? [
-                        { icon: "folder", name: "Files", cmd: "/usr/bin/nautilus" },
-                        { icon: "terminal", name: "Terminal", cmd: "/usr/bin/kitty" },
-                        { icon: "web", name: "Browser", cmd: "/usr/bin/firefox" },
-                        { icon: "code", name: "Code", cmd: "/usr/bin/code" }
+                        { icon: "folder", name: "Files", cmd: "nautilus" },
+                        { icon: "terminal", name: "Terminal", cmd: "kitty" },
+                        { icon: "web", name: "Browser", cmd: "firefox" },
+                        { icon: "code", name: "Code", cmd: "code" }
                     ]
 
                     property int pendingIndex: -1
@@ -1110,6 +1125,30 @@ ContentPage {
                     checked: Config.options?.material?.sidebar?.widgets?.worldClock ?? true
                     onCheckedChanged: Config.setNestedValue("material.sidebar.widgets.worldClock", checked)
                 }
+
+                // Installed hub widgets with a face for this column (DraggableWidgetContainer.hubFaces): shown until
+                // turned off here.
+                Repeater {
+                    model: CustomWidgets.ready ? CustomWidgets.widgets.filter(widget => {
+                        const face = widget.faces?.ii
+                        const slots = Array.from(face?.slots ?? [])
+                        return String(face?.path ?? "").length > 0 && (slots.length === 0 || slots.includes("sidebar.left"))
+                    }) : []
+                    delegate: SettingsSwitch {
+                        required property var modelData
+                        readonly property string widgetId: "custom." + modelData.id
+                        buttonIcon: modelData.icon
+                        text: modelData.name
+                        checked: !Array.from(Config.options?.material?.sidebar?.widgets?.hidden ?? []).includes(widgetId)
+                        onCheckedChanged: {
+                            const hidden = Array.from(Config.options?.material?.sidebar?.widgets?.hidden ?? [])
+                            const next = checked ? hidden.filter(id => id !== widgetId)
+                                : hidden.includes(widgetId) ? hidden : hidden.concat([widgetId])
+                            if (next.length !== hidden.length)
+                                Config.setNestedValue("material.sidebar.widgets.hidden", next)
+                        }
+                    }
+                }
             }
 
             ContentSubsection {
@@ -1119,9 +1158,9 @@ ContentPage {
                     icon: "format_line_spacing"
                     text: Translation.tr("Widget spacing")
                     unit: "px"
-                    value: Config.options?.material?.sidebar?.widgets?.spacing ?? 8
+                    value: Config.options?.material?.sidebar?.widgets?.spacing ?? 24
                     from: 0
-                    to: 24
+                    to: 48
                     stepSize: 2
                     onValueModified: Config.setNestedValue("material.sidebar.widgets.spacing", value)
                     StyledToolTip {
@@ -1420,7 +1459,7 @@ ContentPage {
 
                 Process {
                     id: sysTzProc
-                    command: ["/usr/bin/readlink", "/etc/localtime"]
+                    command: ["readlink", "/etc/localtime"]
                     running: root.activeSection === "widgets"
                     stdout: StdioCollector {
                         onStreamFinished: {
@@ -1468,7 +1507,7 @@ ContentPage {
                     let script = ""
                     for (let i = 0; i < tzs.length; i++)
                         script += `printf '%s|%s\\n' "${tzs[i]}" "$(TZ='${tzs[i]}' date '+${fmt}|%:z')"\n`
-                    liveTimeProc.command = ["/usr/bin/bash", "-c", script]
+                    liveTimeProc.command = ["bash", "-c", script]
                     liveTimeProc.running = true
                 }
 

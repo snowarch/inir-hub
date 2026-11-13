@@ -252,7 +252,8 @@ Item {
     OnDemandPanelLoader { identifier: "iiOnScreenKeyboard"; open: GlobalStates.oskOpen; source: Plugins.baseUrl("modules/shared/onScreenKeyboard/OnScreenKeyboard.qml") }
     OnDemandPanelLoader {
         identifier: "iiOverlay"
-        open: GlobalStates.overlayOpen || OverlayContext.hasPinnedWidgets || OverlayContext.nativeDialogOpen
+        // A base before the bench has no `wanted`.
+        open: OverlayContext.wanted ?? (GlobalStates.overlayOpen || OverlayContext.hasPinnedWidgets || OverlayContext.nativeDialogOpen)
         component: Overlay {}
     }
     OnDemandPanelLoader { identifier: "iiOverview"; open: GlobalStates.overviewOpen; retainAfterUse: true; closeGraceMs: 300; source: Plugins.baseUrl("modules/shared/overview/Overview.qml") }
@@ -274,7 +275,6 @@ Item {
                 && GlobalStates.sidebarRightPresentationOutput === (modelData?.name ?? "")
             screen: modelData
             visible: leftPresented || rightPresented
-            updatesEnabled: leftPresented || rightPresented
             color: "transparent"
             exclusiveZone: 0
             WlrLayershell.namespace: "quickshell:dualSidebarBackdrop"

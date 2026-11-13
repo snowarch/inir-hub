@@ -1,6 +1,7 @@
 pragma ComponentBehavior: Bound
 import QtQuick
 import qs.services
+import qs.modules.common
 import qs.modules.common.widgets
 import qs.modules.iris.components
 import qs.modules.iris.style
@@ -105,7 +106,7 @@ Item {
         visible: root.cells.length === 0
         y: filterField.height + root.gap * 2 + Math.round((root.cellHeight - height) / 2)
         x: root.lead
-        text: Translation.tr("No match")
+        text: Voice.miss(Translation.tr("No match"), root.filter)
         color: IrisStyle.muted
         font.pixelSize: IrisStyle.typeLabel
     }

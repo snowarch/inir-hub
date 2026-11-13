@@ -308,7 +308,7 @@ Item {
                     Layout.fillWidth: true
                     horizontalAlignment: Text.AlignHCenter
                     text: AppCatalog.searchQuery.length > 0
-                        ? Translation.tr("No apps match your search")
+                        ? Voice.miss(Translation.tr("No apps match your search"), AppCatalog.searchQuery)
                         : Translation.tr("No apps in this category")
                     font.pixelSize: Appearance.font.pixelSize.small
                     color: root.colText

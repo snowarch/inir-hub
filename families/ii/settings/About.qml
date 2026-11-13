@@ -128,50 +128,17 @@ ContentPage {
                 Layout.topMargin: 10
                 Layout.bottomMargin: 10
 
-                // Round icon container
                 Rectangle {
                     width: 68
                     height: 68
-                    radius: 34
-                    color: "transparent"
-                    border.width: 2
-                    border.color: Appearance.colors.colPrimary
+                    radius: Appearance.rounding.normal
+                    color: Appearance.colors.colLayer2
 
-                    Image {
-                        id: projectIcon
-
+                    InirMark {
                         anchors.centerIn: parent
-                        width: 60
-                        height: 60
-                        sourceSize.width: 60
-                        sourceSize.height: 60
-                        source: Quickshell.shellPath("assets/icons/sf.jpg")
-                        fillMode: Image.PreserveAspectFit
-                        layer.enabled: Appearance.effectsEnabled
-
-                        layer.effect: MultiEffect {
-                            maskEnabled: true
-
-                            maskSource: ShaderEffectSource {
-
-                                sourceItem: Rectangle {
-                                    width: 60
-                                    height: 60
-                                    radius: 30
-                                }
-
-                            }
-
-                        }
-
-                    }
-
-                    MaterialSymbol {
-                        anchors.centerIn: parent
-                        visible: projectIcon.status !== Image.Ready
-                        text: "deployed_code"
-                        iconSize: 48
-                        color: Appearance.colors.colPrimary
+                        implicitSize: 40
+                        ink: Appearance.colors.colOnLayer2
+                        accent: Appearance.colors.colPrimary
                     }
 
                     MouseArea {

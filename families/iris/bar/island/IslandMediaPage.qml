@@ -1,13 +1,13 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
-import QtQuick.Dialogs
 import QtQuick.Layouts
 import QtQuick.Shapes
 import Quickshell
 import Quickshell.Io
 import Quickshell.Widgets
 import Quickshell.Services.SystemTray
+import Quickshell.Services.Mpris
 import qs
 import qs.services
 import qs.services.deferred
@@ -30,7 +30,8 @@ GridLayout {
     columnSpacing: 0
     readonly property var blocks: {
         const configured = Config.options?.iris?.bar?.mediaBlocks
-        return Array.isArray(configured) ? configured : ["player", "timeline", "transport", "players", "levels"]
+        // A config list is a sequence, never an Array (Array.isArray kept the defaults whatever was chosen).
+        return configured ? Array.from(configured) : ["player", "timeline", "transport", "players", "levels"]
     }
     function rowOf(kind: string): int { return page.blocks.indexOf(kind) }
     readonly property string firstExtra: page.blocks.find(kind => (kind === "players" && page.otherPlayers.length > 0) || (kind === "levels" && page.streams.length > 0)) ?? ""
@@ -42,7 +43,23 @@ GridLayout {
         positionUpdatesActive: page.current && page.island.visualExpanded
     }
 
+    // A track change publishes an empty length (and often an empty artist) for a moment: rows that depend on them are
+    // held through it, or the page shrinks and grows back and the Island jumps between two songs.
+    property bool timelineShown: page.timelineWanted
+    // A live stream keeps its row: the line runs full to the broadcast's edge and the end says it is live.
+    readonly property bool timelineWanted: media.effectiveLength > 0 || media.effectiveIsLive
+    onTimelineWantedChanged: {
+        if (page.timelineWanted) { timelineHold.stop(); page.timelineShown = true }
+        else timelineHold.restart()
+    }
+    Timer { id: timelineHold; interval: 1500; onTriggered: page.timelineShown = page.timelineWanted }
+    readonly property var shownPlayer: page.island.player
+    readonly property bool canShuffle: !page.anime && (page.shownPlayer?.shuffleSupported ?? false) && (page.shownPlayer?.canControl ?? false)
+    readonly property bool canLoop: !page.anime && (page.shownPlayer?.loopSupported ?? false) && (page.shownPlayer?.canControl ?? false)
+    readonly property int loopState: page.shownPlayer?.loopState ?? MprisLoopState.None
+
     readonly property bool anime: AnimeWatch.ownsPlayer(page.island.player)
+    readonly property var cardKinds: IrisPieces.cardIds
     readonly property var players: (MprisController.displayPlayers ?? []).filter(p => p)
     function stepPlayer(step: int): void {
         const at = page.players.indexOf(page.island.player)
@@ -62,23 +79,39 @@ GridLayout {
         return groups
     }
 
-    // Apple's player: the cover, the song over its artist and the music moving beside them; the time on one line with
-    // the scrubber between its two figures; three bare transport glyphs, the play one the largest.
+    // The app playing, by its desktop entry, its name or its bus name: Apple's expanded player wears its mark in the
+    // top right corner.
+    readonly property string appIcon: {
+        const p = page.shownPlayer
+        if (!p) return ""
+        const bus = String(p.dbusName ?? "").replace("org.mpris.MediaPlayer2.", "").split(".")[0]
+        return AppSearch.iconSource([String(p.desktopEntry ?? ""), AppSearch.guessIcon(String(p.identity ?? "")), AppSearch.guessIcon(bus)], "")
+    }
+    readonly property bool canSeekBy: !page.anime && media.effectiveCanSeek && media.effectiveLength > 0
+    function seekBy(seconds: real): void {
+        media.seek(Math.max(0, Math.min(media.effectiveLength - 1, media.effectivePosition + seconds)))
+    }
+
+    // Apple's expanded player (.claude/ref/iris-island pin-music-expanded, iris-widgets pin-glass-now-playing): a cover
+    // near a quarter of the page, the song large over its artist, the app's mark in the corner; the time on one line
+    // round a bar with its knob; five controls on soft discs, the pause the largest, the two at the ends the player's
+    // shuffle and repeat or, where it has none, ten seconds back and ahead.
+    readonly property real coverSide: Math.round(Math.min(page.island.pageWidth * 0.23, 104 * IrisStyle.density))
     RowLayout {
         Layout.row: Math.max(0, page.rowOf("player"))
         Layout.fillWidth: true
         visible: page.rowOf("player") >= 0
-        spacing: 14 * IrisStyle.density
+        spacing: Math.round(16 * IrisStyle.density)
         IrisArtwork {
             id: pageCover
             opacity: page.island.coverFlightItem.hides(pageCover) ? 0 : 1
             Component.onCompleted: page.island.pageCover = pageCover
-            Layout.preferredWidth: 60 * IrisStyle.density
-            Layout.preferredHeight: 60 * IrisStyle.density
+            Layout.preferredWidth: page.coverSide
+            Layout.preferredHeight: page.coverSide
             Layout.alignment: Qt.AlignVCenter
             source: MediaArtwork.displaySource
             circular: Config.options?.iris?.player?.roundCover ?? false
-            radius: circular ? width / 2 : Math.round(13 * IrisStyle.density)
+            radius: circular ? width / 2 : Math.round(width * 0.17)
             // The cover brings its app forward; a swipe across it or the wheel sideways moves to another player.
             TapHandler {
                 onTapped: if (page.island.player?.canRaise) page.island.player.raise()
@@ -96,63 +129,78 @@ GridLayout {
         ColumnLayout {
             Layout.fillWidth: true
             Layout.alignment: Qt.AlignVCenter
-            spacing: 1 * IrisStyle.density
-            IrisText {
+            spacing: Math.round(3 * IrisStyle.density) // iris-literal: title and artist sit tight, as Apple's player
+            IrisMarquee {
                 Layout.fillWidth: true
                 text: media.effectiveTitle
-                font.pixelSize: IrisStyle.typeTitle
-                font.weight: IrisStyle.weight(Font.DemiBold)
-                maximumLineCount: 1
-                elide: Text.ElideRight
+                pixelSize: IrisStyle.typeTitle
+                weight: Font.Bold
+                running: page.current && page.island.visualExpanded
             }
-            IrisText {
+            IrisMarquee {
                 Layout.fillWidth: true
                 text: media.effectiveArtist
-                visible: text.length > 0
                 color: IrisStyle.textSecondary
-                font.pixelSize: IrisStyle.typeBody
-                maximumLineCount: 1
-                elide: Text.ElideRight
+                pixelSize: IrisStyle.typeHeadline
+                running: page.current && page.island.visualExpanded
+            }
+            IrisVisualizer {
+                Layout.topMargin: Math.round(6 * IrisStyle.density)
+                running: media.effectiveIsPlaying && page.current && page.island.visualExpanded
+                tint: IrisStyle.visualizerTint(page.island.artTint)
+                barHeight: 13 * IrisStyle.density
             }
         }
-        IrisVisualizer {
-            Layout.alignment: Qt.AlignTop | Qt.AlignRight
-            Layout.topMargin: 4 * IrisStyle.density
-            running: media.effectiveIsPlaying && page.current && page.island.visualExpanded
-            tint: IrisStyle.visualizerTint(page.island.artTint)
-            barHeight: 22 * IrisStyle.density
+        // The app's mark: a tap brings it forward.
+        IrisImage {
+            Layout.alignment: Qt.AlignTop
+            Layout.preferredWidth: Math.round(26 * IrisStyle.density)
+            Layout.preferredHeight: Layout.preferredWidth
+            visible: page.appIcon.length > 0
+            decodeWidth: Math.round(26 * IrisStyle.density)
+            decodeHeight: decodeWidth
+            source: page.appIcon
+            TapHandler {
+                cursorShape: Qt.PointingHandCursor
+                onTapped: if (page.shownPlayer?.canRaise) page.shownPlayer.raise()
+            }
         }
     }
 
     RowLayout {
         Layout.row: Math.max(0, page.rowOf("timeline"))
         Layout.fillWidth: true
-        Layout.topMargin: 2 * IrisStyle.density
-        visible: page.rowOf("timeline") >= 0 && media.effectiveLength > 0
-        spacing: 10 * IrisStyle.density
+        Layout.topMargin: Math.round(4 * IrisStyle.density)
+        visible: page.rowOf("timeline") >= 0 && page.timelineShown
+        spacing: Math.round(12 * IrisStyle.density)
         Tabular {
             Layout.minimumWidth: Math.round(34 * IrisStyle.density)
             text: page.island.clockText(media.effectivePosition)
             color: IrisStyle.textSecondary
-            font.pixelSize: IrisStyle.typeFootnote
-            font.weight: IrisStyle.weight(Font.Medium)
+            font.pixelSize: IrisStyle.typeMeta
+            font.weight: IrisStyle.weight(Font.DemiBold)
         }
         IrisScrubber {
             Layout.fillWidth: true
             Layout.alignment: Qt.AlignVCenter
+            thickness: 6
+            engagedThickness: 10
+            knob: !media.effectiveIsLive
             seekable: media.effectiveCanSeek
-            value: media.effectiveLength > 0 ? media.effectivePosition / media.effectiveLength : 0
-            fillColor: page.island.nothingLook ? IrisStyle.text : IrisStyle.textStrong
+            value: media.effectiveIsLive ? 1 : media.effectiveLength > 0 ? media.effectivePosition / media.effectiveLength : 0
+            fillColor: IrisStyle.text
             trackColor: IrisStyle.fillHover
             onSeekRequested: next => media.seek(next * media.effectiveLength)
         }
         Tabular {
             Layout.minimumWidth: Math.round(34 * IrisStyle.density)
             horizontalAlignment: Text.AlignRight
-            text: "-" + page.island.clockText(Math.max(0, media.effectiveLength - media.effectivePosition))
-            color: IrisStyle.textSecondary
-            font.pixelSize: IrisStyle.typeFootnote
-            font.weight: IrisStyle.weight(Font.Medium)
+            // A true minus, as Apple sets it; a live stream has no end to count down to.
+            text: media.effectiveIsLive ? Translation.tr("Live")
+                : "\u2212" + page.island.clockText(Math.max(0, media.effectiveLength - media.effectivePosition))
+            color: media.effectiveIsLive ? IrisStyle.accent : IrisStyle.textSecondary
+            font.pixelSize: IrisStyle.typeMeta
+            font.weight: IrisStyle.weight(Font.DemiBold)
         }
     }
 
@@ -161,53 +209,79 @@ GridLayout {
         Layout.fillWidth: true
         visible: page.rowOf("transport") >= 0
         spacing: 10 * IrisStyle.density
-        RowLayout {
+        Item {
             Layout.fillWidth: true
-            Layout.topMargin: -4 * IrisStyle.density
-            Layout.bottomMargin: -2 * IrisStyle.density
-            spacing: 0
-            Item { Layout.fillWidth: true }
+            implicitHeight: transport.implicitHeight
             IrisControlPlate {
                 id: transport
+                anchors.centerIn: parent
                 material: page.island.pagePlate
-                controlHeight: 56 * IrisStyle.density
+                controlHeight: 54 * IrisStyle.density
                 RowLayout {
-                spacing: transport.framed ? 6 * IrisStyle.density : 30 * IrisStyle.density
-            GlyphButton {
-                Layout.alignment: Qt.AlignVCenter
-                buttonRadius: transport.framed ? IrisStyle.pieceRadius(height) : height / 2
-                buttonRadiusPressed: buttonRadius
-                glyph: "fast_rewind"
-                glyphSize: 34 * IrisStyle.density
-                implicitWidth: 52 * IrisStyle.density
-                enabled: page.anime || media.effectiveCanGoPrevious
-                Accessible.name: page.anime ? Translation.tr("Previous episode") : Translation.tr("Previous track")
-                onClicked: page.anime ? AnimeWatch.skip("previous") : media.previous()
-            }
-            GlyphButton {
-                glyph: media.effectiveIsPlaying ? "pause" : "play_arrow"
-                glyphSize: 46 * IrisStyle.density
-                implicitWidth: 56 * IrisStyle.density
-                buttonRadius: transport.framed ? transport.controlRadius : height / 2
-                buttonRadiusPressed: buttonRadius
-                enabled: page.island.hasMedia
-                Accessible.name: media.effectiveIsPlaying ? Translation.tr("Pause") : Translation.tr("Play")
-                onClicked: media.togglePlaying()
-            }
-            GlyphButton {
-                Layout.alignment: Qt.AlignVCenter
-                buttonRadius: transport.framed ? IrisStyle.pieceRadius(height) : height / 2
-                buttonRadiusPressed: buttonRadius
-                glyph: "fast_forward"
-                glyphSize: 34 * IrisStyle.density
-                implicitWidth: 52 * IrisStyle.density
-                enabled: page.anime || media.effectiveCanGoNext
-                Accessible.name: page.anime ? Translation.tr("Next episode") : Translation.tr("Next track")
-                onClicked: page.anime ? AnimeWatch.skip("next") : media.next()
-            }
+                    spacing: transport.framed ? 6 * IrisStyle.density : 12 * IrisStyle.density
+                    TransportButton {
+                        side: true
+                        visible: page.canShuffle || page.canSeekBy
+                        readonly property bool on: page.canShuffle && (page.shownPlayer?.shuffle ?? false)
+                        glyph: page.canShuffle ? "shuffle" : "replay_10"
+                        glyphColor: on ? page.island.artTint : IrisStyle.textSecondary
+                        Accessible.name: page.canShuffle ? Translation.tr("Shuffle") : Translation.tr("Back 10 seconds")
+                        onClicked: page.canShuffle ? page.shownPlayer.shuffle = !on : page.seekBy(-10)
+                    }
+                    TransportButton {
+                        glyph: "skip_previous"
+                        enabled: page.anime || media.effectiveCanGoPrevious
+                        Accessible.name: page.anime ? Translation.tr("Previous episode") : Translation.tr("Previous track")
+                        onClicked: page.anime ? AnimeWatch.skip("previous") : media.previous()
+                    }
+                    TransportButton {
+                        lead: true
+                        glyph: media.effectiveIsPlaying ? "pause" : "play_arrow"
+                        enabled: page.island.hasMedia
+                        Accessible.name: media.effectiveIsPlaying ? Translation.tr("Pause") : Translation.tr("Play")
+                        onClicked: media.togglePlaying()
+                    }
+                    TransportButton {
+                        glyph: "skip_next"
+                        enabled: page.anime || media.effectiveCanGoNext
+                        Accessible.name: page.anime ? Translation.tr("Next episode") : Translation.tr("Next track")
+                        onClicked: page.anime ? AnimeWatch.skip("next") : media.next()
+                    }
+                    TransportButton {
+                        side: true
+                        visible: page.canLoop || page.canSeekBy
+                        readonly property bool on: page.canLoop && page.loopState !== MprisLoopState.None
+                        glyph: !page.canLoop ? "forward_10" : page.loopState === MprisLoopState.Track ? "repeat_one" : "repeat"
+                        glyphColor: on ? page.island.artTint : IrisStyle.textSecondary
+                        Accessible.name: page.canLoop ? Translation.tr("Repeat") : Translation.tr("Ahead 10 seconds")
+                        onClicked: page.canLoop
+                            ? page.shownPlayer.loopState = page.loopState === MprisLoopState.None ? MprisLoopState.Playlist
+                                : page.loopState === MprisLoopState.Playlist ? MprisLoopState.Track : MprisLoopState.None
+                            : page.seekBy(10)
+                    }
                 }
             }
-            Item { Layout.fillWidth: true }
+            // Where the sound goes, read from the real output; nothing when there is no output. A tap opens the sound
+            // card with its devices.
+            GlyphButton {
+                anchors.right: parent.right
+                anchors.verticalCenter: parent.verticalCenter
+                visible: Audio.defaultSink !== null && Audio.defaultSink !== undefined && page.cardKinds.includes("sound")
+                // A plain speaker shows Apple's output picker; earbuds, headphones and screens show themselves.
+                readonly property string device: IrisStyle.soundDeviceGlyph(Audio.defaultSink, false)
+                glyph: device === "speaker" ? "airplay" : device
+                glyphSize: 20 * IrisStyle.density
+                glyphColor: IrisStyle.textTertiary
+                implicitWidth: Math.round(34 * IrisStyle.density)
+                Accessible.name: Translation.tr("Sound output")
+                // The page folds away first, as Apple's picker takes the Island's place: whoever holds the sound
+                // piece (a floating bubble or the Island) then grows its card.
+                onClicked: {
+                    page.island.expanded = false
+                    IrisState.bubbleCardRequest = ""
+                    IrisState.bubbleCardRequest = "sound"
+                }
+            }
         }
         // One dot per player, the one playing here drawn long; a dot, the wheel sideways or a swipe on the cover moves
         // to another.
@@ -398,13 +472,25 @@ GridLayout {
     }
 
 
-    FileDialog {
+    FilePickerDialog {
         id: subtitleDialog
         title: Translation.tr("Load subtitles")
-        fileMode: FileDialog.OpenFile
         currentFolder: "file://" + Directories.homePath
         nameFilters: [Translation.tr("Subtitles") + " (*.srt *.ass *.ssa *.vtt *.sub)", Translation.tr("All files") + " (*)"]
         onAccepted: AnimeWatch.addSubtitle(String(selectedFile))
+    }
+
+    component TransportButton: GlyphButton {
+        property bool lead: false
+        property bool side: false
+        Layout.alignment: Qt.AlignVCenter
+        // Every control stands on a soft disc (Apple's expanded player); the pause's is the largest and the most lit,
+        // the two at the ends bare until hovered.
+        colBackground: side ? "transparent" : lead ? IrisStyle.fillHover : IrisStyle.fillQuiet
+        buttonRadius: transport.framed ? (lead ? transport.controlRadius : IrisStyle.pieceRadius(height)) : height / 2
+        buttonRadiusPressed: buttonRadius
+        glyphSize: (lead ? 30 : side ? 21 : 25) * IrisStyle.density
+        implicitWidth: Math.round((lead ? 54 : side ? 38 : 44) * IrisStyle.density)
     }
 
     component AnimeChip: MouseArea {

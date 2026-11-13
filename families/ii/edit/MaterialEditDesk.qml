@@ -38,18 +38,30 @@ Scope {
             WlrLayershell.keyboardFocus: !desk.present ? WlrKeyboardFocus.None
                 : desk.seeding ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.OnDemand
             anchors { top: true; bottom: true; left: true; right: true }
-            BackgroundEffect.blurRegion: Region {
+            property Region glassBlurRegion: Region {
                 item: sheet.glassy && sheet.shown && Appearance.compositorBlurActive ? sheet.bodyItem : null
                 radius: Appearance.rounding.large
             }
+            // ext-background-effect regions only where the compositor takes them (Niri); Umbriel blurs by layer rules.
+            BackgroundEffect.blurRegion: CompositorService.blurRegions ? glassBlurRegion : null
             mask: Region {
                 item: headBody
                 Region { item: shelfBody }
                 Region { item: sheetHit }
-                Region { item: chosen.item?.keysItem ?? null }
-                Region { item: chosen.item?.grips ? chosen.item.rightGripItem : null }
-                Region { item: chosen.item?.grips ? chosen.item.bottomGripItem : null }
+                Region { item: keysHit }
+                Region { item: rightGripHit }
+                Region { item: bottomGripHit }
             }
+            component Hit: Item {
+                property rect at: Qt.rect(0, 0, 0, 0)
+                x: at.x
+                y: at.y
+                width: at.width
+                height: at.height
+            }
+            Hit { id: keysHit; at: chosen.item?.keysRect ?? Qt.rect(0, 0, 0, 0) }
+            Hit { id: rightGripHit; at: chosen.item?.rightGripRect ?? Qt.rect(0, 0, 0, 0) }
+            Hit { id: bottomGripHit; at: chosen.item?.bottomGripRect ?? Qt.rect(0, 0, 0, 0) }
 
             property bool seeding: false
             Timer { id: seedTimer; interval: 350; onTriggered: desk.seeding = false }
@@ -286,7 +298,8 @@ Scope {
                                 DesktopWidgetRegistry.categoryOf(key)].join(" "), category: DesktopWidgetRegistry.categoryOf(key) }))
                         for (const custom of (CustomWidgets.ready ? CustomWidgets.widgets : []))
                             list.push(materialFace.prepare({ key: "custom." + custom.id, glyph: custom.icon || "widgets", name: custom.name,
-                                english: custom.name, tint: DesktopWidgetRegistry.customTint, words: "custom hub", category: "decor" }))
+                                english: custom.name, tint: DesktopWidgetRegistry.customTint, words: DesktopWidgetRegistry.customWords(custom),
+                                category: DesktopWidgetRegistry.customCategory(custom) }))
                         return list
                     }
                 }

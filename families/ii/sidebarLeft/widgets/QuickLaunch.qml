@@ -13,10 +13,10 @@ Item {
     implicitHeight: row.implicitHeight
 
     readonly property var defaultShortcuts: [
-        { icon: "folder", name: "Files", cmd: "/usr/bin/nautilus" },
-        { icon: "terminal", name: "Terminal", cmd: "/usr/bin/kitty" },
-        { icon: "web", name: "Browser", cmd: "/usr/bin/firefox" },
-        { icon: "code", name: "Code", cmd: "/usr/bin/code" }
+        { icon: "folder", name: "Files", cmd: "nautilus" },
+        { icon: "terminal", name: "Terminal", cmd: "kitty" },
+        { icon: "web", name: "Browser", cmd: "firefox" },
+        { icon: "code", name: "Code", cmd: "code" }
     ]
 
     property var shortcuts: Config.options?.material?.sidebar?.widgets?.quickLaunch ?? defaultShortcuts

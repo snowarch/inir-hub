@@ -13,6 +13,7 @@ IrisWidgetFace {
 
     readonly property bool analog: String(root.widget.familyOption("face", "analog")) === "analog"
     readonly property bool hourStyle: String(root.widget.familyOption("face", "analog")) === "hour"
+    readonly property bool greetingStyle: String(root.widget.familyOption("face", "analog")) === "greeting"
     readonly property bool seconds: Boolean(root.widget.familyOption("seconds", true))
     readonly property bool week: Boolean(root.widget.familyOption("week", true))
     readonly property var now: clock.date
@@ -30,7 +31,7 @@ IrisWidgetFace {
     readonly property string longDate: Translation.locale.toString(root.now, "d MMMM")
 
     // A Design may print its own clock (AIRISU's date stamp): the dial and the figures step aside for it.
-    designFace: root.hourStyle ? "" : IrisDesign.skin("widgetClock")
+    designFace: root.hourStyle || root.greetingStyle ? "" : IrisDesign.skin("widgetClock")
     padding: root.analog && root.small ? root.dp(8) : root.edgePad
 
     SystemClock {
@@ -56,7 +57,7 @@ IrisWidgetFace {
 
     ColumnLayout {
         id: column
-        visible: (!root.analog || root.medium) && !root.designed && !root.hourStyle
+        visible: (!root.analog || root.medium) && !root.designed && !root.hourStyle && !root.greetingStyle
         anchors.left: root.analog ? dial.right : parent.left
         anchors.leftMargin: root.analog ? root.dp(18) : 0
         anchors.right: parent.right
@@ -144,6 +145,22 @@ IrisWidgetFace {
         anchors.fill: parent
         active: root.hourStyle
         sourceComponent: Component { HourView {} }
+    }
+
+    Loader {
+        active: root.greetingStyle
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.top: parent.top
+        anchors.bottom: footer.visible ? footer.top : parent.bottom
+        anchors.bottomMargin: footer.visible ? root.dp(12) : 0
+        sourceComponent: Component {
+            ClockGreeting {
+                face: root
+                now: root.now
+                timeText: root.timeText
+            }
+        }
     }
 
     // The Hour: the time as large as the plate lets it, the day under it as one line from midnight to midnight with now

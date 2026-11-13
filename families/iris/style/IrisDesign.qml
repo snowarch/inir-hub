@@ -121,6 +121,8 @@ Singleton {
     readonly property string morph: String(root.ownToken("motion.morph") ?? "")
     readonly property int motionDuration: Number(root.ownToken("motion.duration") ?? 0)
     readonly property string look: String(root.ownToken("look.look") ?? "")
+    // The design every desktop widget wears while this Design is on (`DesktopWidgetDesign.worn`); a widget's own pick stays.
+    readonly property string widgets: String(root.ownToken("look.widgets") ?? "")
     // How the Design reads, as traits any surface honours: marks "glyph" (no tinted squircles), selection "plate" (the
     // chosen row is a solid plate, not an accent wash), index (lists numbered 01, 02…), captions "mono" (labels in mono
     // capitals), titles "lower" (page titles in lower case), sections "line", hover "plate", rings "edge", pages "hang".
@@ -140,8 +142,13 @@ Singleton {
 
     // A Design's own parts: nothing else of iRiS is drawn by a Design (one component set).
     readonly property var partNames: ["islandFace", "insignia", "preview"]
-    function skin(part: string): string {
+    function brings(part: string): string {
         return root.custom && root.partNames.includes(part) ? Plugins.part(root.current, part) : ""
+    }
+    // The resting Island is the person's to choose: a Design's face is worn until they turn it off (`iris.bar.designFace`).
+    function skin(part: string): string {
+        if (part === "islandFace" && !(Config.options?.iris?.bar?.designFace ?? true)) return ""
+        return root.brings(part)
     }
     function has(part: string): bool { return root.skin(part).length > 0 }
 
@@ -184,6 +191,7 @@ Singleton {
         case "iris.appearance.accent": return root.fixedRole("accent") || String(root.ownToken("colour.accent") ?? "").length > 0
         case "iris.appearance.highlight": return root.fixedRole("highlight") || String(root.ownToken("colour.highlight") ?? "").length > 0
         case "iris.appearance.theme.surface": return root.fixedRole("surface")
+        case "iris.widgets.design": return root.widgets.length > 0
         // A Design that draws the resting Island decides its design and the time's accent; a bar across the edge still
         // shows the engine's clock in its zones.
         case "iris.bar.design": return root.has("islandFace")

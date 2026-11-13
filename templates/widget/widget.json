@@ -15,6 +15,13 @@
     "waffle": {
         "main": "Waffle__PASCAL__.qml"
     },
+    "ii": {
+        "main": "Sidebar__PASCAL__.qml",
+        "slots": [
+            "sidebar.left",
+            "sidebar.right"
+        ]
+    },
     "defaultConfig": {
         "placementStrategy": "free",
         "widgetScale": 100,

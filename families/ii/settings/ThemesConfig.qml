@@ -42,7 +42,7 @@ ContentPage {
 
     Process {
         id: savedThemesProcess
-        command: ["/usr/bin/bash", "-lc", `for f in "${root.savedThemesDir}"/*.json; do [ -f "$f" ] || continue; /usr/bin/jq -c --arg name "$(/usr/bin/basename "$f" .json)" '{id:("saved:" + $name),name:(.name // $name),description:(.description // "Saved custom theme"),tags:["saved"],saved:true,colors:.}' "$f"; done`]
+        command: ["bash", "-lc", `for f in "${root.savedThemesDir}"/*.json; do [ -f "$f" ] || continue; jq -c --arg name "$(basename "$f" .json)" '{id:("saved:" + $name),name:(.name // $name),description:(.description // "Saved custom theme"),tags:["saved"],saved:true,colors:.}' "$f"; done`]
         stdout: SplitParser {
             onRead: data => {
                 try {
@@ -648,7 +648,7 @@ ContentPage {
                     maximumWidth: 300
                     shown: themesGroup.filteredPresets.length === 0
                     icon: "search_off"
-                    text: Translation.tr("No themes found")
+                    text: themesGroup.searchQuery.length > 0 ? Voice.miss(Translation.tr("No themes found"), themesGroup.searchQuery) : Translation.tr("No themes found")
                     explanation: themesGroup.searchQuery.length > 0
                         ? Translation.tr("Try a broader search or clear the filter")
                         : Translation.tr("Theme presets will appear here")
@@ -1383,7 +1383,7 @@ ContentPage {
                 Process {
                     id: terminalDetector
                     command: [
-                        "/usr/bin/bash",
+                        "bash",
                         "-c",
                         "for term in kitty alacritty foot wezterm ghostty konsole starship btop lazygit yazi; do " +
                         "if command -v $term &>/dev/null; then echo \"$term:true\"; " +
@@ -1651,7 +1651,7 @@ ContentPage {
 
                 Process {
                     id: applyTerminalColorsProcess
-                    command: ["/usr/bin/bash", Directories.scriptsPath + "/colors/applycolor.sh"]
+                    command: ["bash", Directories.scriptsPath + "/colors/applycolor.sh"]
                 }
             }
         }

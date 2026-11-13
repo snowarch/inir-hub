@@ -17,11 +17,11 @@ Flow {
 
     property var spec: ({})
     readonly property real d: IrisStyle.settingsDensity
-    readonly property var screens: IrisNiri.outputs
+    readonly property var screens: CompositorConfig.outputs
     readonly property bool picks: root.screens.length > 1
-    readonly property real largest: root.screens.reduce((most, out) => Math.max(most, IrisNiri.inchesOf(out)), 0)
+    readonly property real largest: root.screens.reduce((most, out) => Math.max(most, CompositorConfig.inchesOf(out)), 0)
     // Two screens of one model read apart by the port they hang from; otherwise the port is Niri's word, not theirs.
-    readonly property var twins: root.screens.map(out => IrisNiri.screenName(out)).filter((name, at, all) => all.indexOf(name) !== at)
+    readonly property var twins: root.screens.map(out => CompositorConfig.screenName(out)).filter((name, at, all) => all.indexOf(name) !== at)
     readonly property real tileWidth: root.picks && root.width >= Math.round(520 * root.d) ? Math.floor((root.width - root.spacing) / 2) : root.width
 
     spacing: Math.round(8 * root.d)
@@ -32,14 +32,14 @@ Flow {
             id: tile
             required property var modelData
             required property int index
-            readonly property bool chosen: root.picks && IrisNiri.output?.name === tile.modelData?.name
-            readonly property real inches: IrisNiri.inchesOf(tile.modelData)
+            readonly property bool chosen: root.picks && CompositorConfig.output?.name === tile.modelData?.name
+            readonly property real inches: CompositorConfig.inchesOf(tile.modelData)
             // Beside a bigger screen a smaller one draws smaller, never so small its picture stops reading.
             readonly property real size: root.picks && tile.inches > 0 && root.largest > 0 ? Math.max(0.62, tile.inches / root.largest) : 1
             readonly property string details: [
                 tile.inches > 0 ? `${Math.round(tile.inches)}″` : "",
-                IrisNiri.resolutionLabel(tile.modelData),
-                IrisNiri.rateLabel(tile.modelData?.current_rate ?? 0),
+                CompositorConfig.resolutionLabel(tile.modelData),
+                CompositorConfig.rateLabel(tile.modelData?.current_rate ?? 0),
                 `${Math.round(Number(tile.modelData?.scale ?? 1) * 100)} %`
             ].filter(part => part.length > 0).map(part => part.replace(/ /g, "\u00a0")).join(" · ") // a figure wraps whole
 
@@ -47,11 +47,11 @@ Flow {
             // A data card never cuts its figures: the lines wrap and the card grows instead.
             height: Math.max(Math.round(84 * root.d), facts.implicitHeight + Math.round(24 * root.d))
 
-            function choose(): void { if (root.picks) IrisNiri.applyDisplay("screen", tile.modelData.name) }
+            function choose(): void { if (root.picks) CompositorConfig.applyDisplay("screen", tile.modelData.name) }
 
             activeFocusOnTab: root.picks
             Accessible.role: root.picks ? Accessible.RadioButton : Accessible.StaticText
-            Accessible.name: IrisNiri.screenName(tile.modelData) + ", " + tile.details
+            Accessible.name: CompositorConfig.screenName(tile.modelData) + ", " + tile.details
             Accessible.checkable: root.picks
             Accessible.checked: tile.chosen
             Keys.onPressed: event => {
@@ -65,10 +65,9 @@ Flow {
                 anchors.fill: parent
                 visible: root.picks
                 radius: IrisStyle.radiusTile
-                color: IrisStyle.fill
+                // The chosen one is a fill, never a ring.
+                color: tile.chosen ? IrisStyle.tintFillHover(IrisStyle.accent) : IrisStyle.fill
                 opacity: tile.chosen ? 1 : press.containsMouse || tile.activeFocus ? 0.55 : 0
-                border.width: tile.chosen ? 2 : 0
-                border.color: IrisStyle.accent
                 Behavior on opacity { NumberAnimation { duration: 120; easing.type: IrisStyle.feedbackEasing } }
             }
 
@@ -83,7 +82,7 @@ Flow {
 
                 Rectangle {
                     id: bezel
-                    readonly property real aspect: IrisNiri.aspectOf(tile.modelData)
+                    readonly property real aspect: CompositorConfig.aspectOf(tile.modelData)
                     readonly property real fitW: Math.min(slot.width, slot.height * bezel.aspect)
                     anchors.centerIn: parent
                     width: Math.round(bezel.fitW * tile.size)
@@ -121,7 +120,7 @@ Flow {
                 spacing: Math.round(2 * root.d)
                 IrisText {
                     width: parent.width
-                    text: IrisNiri.screenName(tile.modelData)
+                    text: CompositorConfig.screenName(tile.modelData)
                     font.pixelSize: IrisStyle.typeBody
                     font.weight: IrisStyle.weight(Font.DemiBold)
                     wrapMode: Text.WordWrap
@@ -135,7 +134,7 @@ Flow {
                     wrapMode: Text.WordWrap
                 }
                 IrisText {
-                    visible: root.twins.includes(IrisNiri.screenName(tile.modelData))
+                    visible: root.twins.includes(CompositorConfig.screenName(tile.modelData))
                     width: parent.width
                     text: String(tile.modelData?.name ?? "")
                     color: IrisStyle.muted

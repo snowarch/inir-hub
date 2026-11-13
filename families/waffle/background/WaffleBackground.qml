@@ -6,6 +6,7 @@ import qs.modules.common
 import qs.modules.common.functions as CF
 import qs.modules.common.widgets
 import qs.modules.common.widgets.widgetCanvas
+import qs.modules.shared.livePins
 import qs.modules.waffle.looks
 import QtQuick
 import QtQuick.Effects
@@ -63,7 +64,7 @@ Variants {
         readonly property string fillMode: Wallpapers.fillMode
         readonly property bool spanning: panelRoot.fillMode === "span"
         readonly property bool externalMainWallpaperEligible:
-            !panelRoot.webWallpaperActive &&
+            !panelRoot.webWallpaperActive && !Wallpapers.glyphs &&
             AwwwBackend.supportsVisibleMainWallpaper(
                 wallpaperSourceRaw,
                 panelRoot.fillMode,
@@ -356,6 +357,13 @@ Variants {
                 blurMax: 64
             }
 
+            WallpaperGlyphs {
+                anchors.fill: wallpaperContainer
+                picture: panelRoot.webWallpaperActive ? null : wallpaperContainer
+                path: panelRoot.wallpaperSourceRaw
+                output: panelRoot._monitorName
+            }
+
             // Dim overlay
             Rectangle {
                 anchors.fill: parent
@@ -403,6 +411,16 @@ Variants {
                         ? (panelRoot.wallpaperThumbnail || panelRoot.wallpaperSourceRaw)
                         : panelRoot.wallpaperSourceRaw
                 }
+            }
+
+            // Live snips kept on this desktop, in this window as Background.qml keeps them: a layer of their own
+            // would stack over this one and take the pointer everywhere.
+            Loader {
+                anchors.fill: parent
+                z: 21
+                active: LivePins.supported && LivePins.pins.some(pin => !pin.onTop)
+                visible: !GlobalStates.shellLayoutEditMode
+                sourceComponent: LivePinDesk { screenName: panelRoot.modelData?.name ?? "" }
             }
 
             // Windows-style activation watermark

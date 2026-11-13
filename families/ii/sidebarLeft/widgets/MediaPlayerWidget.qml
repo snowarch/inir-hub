@@ -27,8 +27,9 @@ Item {
     readonly property string effectiveArtUrl: isYtMusicPlayer ? YtMusic.currentThumbnail : (MprisController.artUrlOf(player) ?? "")
     readonly property real effectivePosition: isYtMusicPlayer ? YtMusic.currentPosition : MprisController.positionOf(player)
     readonly property real effectiveLength: isYtMusicPlayer ? YtMusic.currentDuration : MprisController.lengthOf(player)
+    readonly property bool effectiveIsLive: !isYtMusicPlayer && MprisController.isLive(player)
     readonly property bool effectiveIsPlaying: isYtMusicPlayer ? YtMusic.isPlaying : (player?.isPlaying ?? false)
-    readonly property bool effectiveCanSeek: isYtMusicPlayer ? YtMusic.canSeek : (player?.canSeek ?? false)
+    readonly property bool effectiveCanSeek: isYtMusicPlayer ? YtMusic.canSeek : (player?.canSeek ?? false) && !effectiveIsLive
     
     property string artDownloadLocation: Directories.coverArt
     readonly property bool downloaded: MediaArtwork.ready
@@ -271,6 +272,8 @@ Item {
                         id: seekSlider
                         anchors.fill: parent
                         configuration: StyledSlider.Configuration.Wavy
+                        handleHeight: root.effectiveIsLive ? 0 : Appearance.regaliaEverywhere ? 15 : 24
+                        handleWidth: root.effectiveIsLive ? 0 : seekSlider.pressed ? seekSlider.handlePressedWidth : seekSlider.handleDefaultWidth
                         stopIndicatorValues: []
                         wavy: !Appearance.editorialEverywhere && root.effectiveIsPlaying
                         animateWave: !Appearance.editorialEverywhere && root.effectiveIsPlaying
@@ -283,7 +286,7 @@ Item {
                         property bool draggingSeek: false
                         property bool awaitingSeek: false
                         property real requestedValue: 0
-                        readonly property real sourceValue: root.effectiveLength > 0
+                        readonly property real sourceValue: root.effectiveIsLive ? 1 : root.effectiveLength > 0
                             ? Math.max(0, Math.min(1, root.effectivePosition / root.effectiveLength)) : 0
                         value: (draggingSeek || awaitingSeek) ? requestedValue : sourceValue
                         onPressedChanged: {
@@ -497,7 +500,7 @@ Item {
                         id: timeEndLabel
                         Layout.preferredWidth: Math.max(timeStartLabel.implicitWidth, timeEndLabel.implicitWidth)
                         horizontalAlignment: Text.AlignRight
-                        text: StringUtils.friendlyTimeForSeconds(root.effectiveLength)
+                        text: root.effectiveIsLive ? Translation.tr("Live") : StringUtils.friendlyTimeForSeconds(root.effectiveLength)
                         font.pixelSize: Appearance.font.pixelSize.smallest
                         font.family: Appearance.font.family.numbers
                         font.weight: Font.Medium

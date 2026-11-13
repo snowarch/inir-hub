@@ -86,6 +86,16 @@ Scope {
             GlobalStates.barOpen = true
             root.islandRequested(true, name)
         }
+        /// One key for a page: expand the island on it, or collapse the island when that page already shows
+        /// ```kdl
+        /// Mod+S { spawn "inir" "iris" "togglePage" "desktop"; }
+        /// ```
+        function togglePage(name: string): string {
+            if (!["media", "activity", "desktop", "shelf", "weather", "calendar", "vitals", "tray", "tools"].includes(name)) return "no such page"
+            GlobalStates.barOpen = true
+            root.islandRequested(true, name + ":toggle")
+            return name
+        }
         /// Collapse the island
         function close(): void { root.islandRequested(false, "") }
         /// `open`, `close` or `toggle` the Island's Shelf page (open on another page counts as closed)
@@ -522,7 +532,7 @@ Scope {
                 const row = { section: String(spec.section ?? ""), group: String(spec.group ?? ""), part: String(spec.part ?? ""),
                     label: String(spec.label ?? ""), kind: String(spec.kind ?? ""),
                     paths: spec.bundle ? Array.from(spec.bundle, path => String(path)) : spec.flags ? [String(spec.flags)] : spec.path ? [String(spec.path)] : [],
-                    via: spec.widget ? "widget" : spec.widgetDesign ? "widgetDesign" : spec.niri ? "niri" : spec.kind === "icon" ? "icon" : spec.set ? "set" : spec.flags ? "flags" : spec.bundle ? "bundle" : "path",
+                    via: spec.widget ? "widget" : spec.widgetDesign ? "widgetDesign" : spec.comp ? "niri" : spec.kind === "icon" ? "icon" : spec.set ? "set" : spec.flags ? "flags" : spec.bundle ? "bundle" : "path",
                     tune: IrisOptions.fineTune(spec), mirror: Boolean(spec.mirror), visibleWhen: String(spec.visibleWhen ?? ""), showIf: Boolean(spec.showIf),
                     fallback: data(spec.fallback), min: spec.min, max: spec.max, step: spec.step }
                 try {
@@ -951,27 +961,29 @@ Scope {
                     || (dockLoader.item?.overFullscreen ?? false) || (dockLoader.item?.menuOpen ?? false)
                     || (spotlightLoader.item?.present ?? false) || (galleryLoader.item?.present ?? false)
                     || (orbitLoader.item?.present ?? false)
-                // Niri keeps a fullscreen window above the Top layer, so the overview
-                // over a game would show every other surface but this one.
-                readonly property bool overviewOverFullscreen: CompositorService.isNiri && NiriService.inOverview
-                    && GameMode.hasFullscreenOnOutput(barWindow.screen?.name ?? "")
+                readonly property bool takesKeys: barWindow.pinned || stage.cardOpen || (controlCentreLoader.item?.morphOpen ?? false)
+                    || (dockLoader.item?.menuOpen ?? false) || (spotlightLoader.item?.here && GlobalStates.searchOpen)
+                    || (galleryLoader.item?.morphOpen ?? false) || (orbitLoader.item?.wanted ?? false)
+                readonly property bool fullscreenHere: GameMode.hasFullscreenOnOutput(barWindow.screen?.name ?? "")
+                // The overview draws Top above a fullscreen window, so the chassis is seen there as it is. Only where
+                // Top gets no keys over that window does it climb to Overlay, and only while something in it types.
+                readonly property bool overviewKeysOverFullscreen: NiriService.inOverview && barWindow.fullscreenHere
+                    && barWindow.takesKeys && !CompositorConfig.overviewTopTakesKeys
                 readonly property bool canvasSuppressed: barWindow.suppressed && !barWindow.presenting
                 // Nothing of the chassis may cover, move or restack what sits still in it: continuous motion may
-                // then draw in a surface of its own (LiveLayer) instead of repainting the whole output.
+                // then draw in a surface of its own (LiveLayer) instead of repainting the whole output. Never over a
+                // fullscreen window: Top is hidden there, and the overview over it comes and goes with a key.
                 readonly property bool liveCalm: !barWindow.presenting && !barWindow.expanded && !barWindow.overlaid
-                    && !barWindow.canvasSuppressed && !IrisStyle.arriving && !(islandLoader.item?.morphing ?? false)
-                    && (banners.fieldShapes ?? []).length === 0
+                    && !barWindow.canvasSuppressed && !barWindow.fullscreenHere && !IrisStyle.arriving
+                    && !(islandLoader.item?.morphing ?? false) && (banners.fieldShapes ?? []).length === 0
                 readonly property int liveLayer: WlrLayer.Top
                 readonly property int liveEpoch: IrisState.chassisEpoch
                 readonly property bool overlaid: ((islandLoader.item?.fullscreenCovered ?? false) && !barWindow.canvasSuppressed)
-                    || barWindow.overviewOverFullscreen
-                // Switching layers recreates the surface above the Dock's window, whose icons it would cover.
+                    || barWindow.overviewKeysOverFullscreen
+                // Back on Top the surface may be a new one (qs-rs recreates it), above the LiveLayer boxes it hid.
                 onOverlaidChanged: if (!barWindow.overlaid) IrisState.chassisEpoch++
                 WlrLayershell.layer: barWindow.overlaid ? WlrLayer.Overlay : WlrLayer.Top
-                WlrLayershell.keyboardFocus: barWindow.pinned || stage.cardOpen || (controlCentreLoader.item?.morphOpen ?? false)
-                    || (dockLoader.item?.menuOpen ?? false) || (spotlightLoader.item?.here && GlobalStates.searchOpen)
-                    || (galleryLoader.item?.morphOpen ?? false) || (orbitLoader.item?.wanted ?? false)
-                    ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
+                WlrLayershell.keyboardFocus: barWindow.takesKeys ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
                 anchors { left: true; right: true; top: true; bottom: true }
                 readonly property bool suppressed: islandLoader.active
                     ? (islandLoader.item?.suppressed ?? false) : false
@@ -1315,6 +1327,8 @@ Scope {
                     id: chassisField
                     anchors.fill: parent
                     compositorAllowed: !barWindow.carded
+                    renderScale: barWindow.carded ? (barWindow.editCard.rest ?? 1) : 1
+                    resampled: barWindow.transformKind !== 0
                     providesBackdrop: true
                     edgeWave: framePulse.amplitudes
                     waveClock: framePulse.phase
@@ -1393,9 +1407,10 @@ Scope {
                                         island.stepPage(page === "next" ? 1 : -1)
                                         return
                                     }
-                                    if (open && page === "shelf:toggle") {
-                                        const showing = island.expanded && island.effectivePage === "shelf"
-                                        if (!showing) island.page = "shelf"
+                                    if (open && page.endsWith(":toggle")) {
+                                        const wanted = page.slice(0, -7)
+                                        const showing = island.expanded && (island.effectivePage === wanted || island.page === wanted)
+                                        if (!showing) island.page = wanted
                                         island.pinned = !showing
                                         island.expanded = !showing
                                         return

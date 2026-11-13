@@ -8,6 +8,7 @@ import qs.modules.common
 import qs.modules.common.widgets
 import qs.modules.iris.style
 import qs.modules.iris.components
+import qs.modules.iris.bar
 
 // Ledger's desktop page: the day set large, then the day kept as a ledger, one line an entry, its name in the margin.
 // Words and figures only, no plates: the Island's body is the page.
@@ -26,6 +27,10 @@ ColumnLayout {
         return Events.getUpcomingEvents(7)[0] ?? null
     }
     readonly property int pendingTasks: Todo.list.filter(task => !task.done).length
+    // Modules the person picked under "Your modules" (a hub widget's Island face).
+    readonly property var customModules: ["left", "center", "right"]
+        .reduce((all, slot) => all.concat(page.island?.options?.[slot + "Modules"] ?? []), [])
+        .filter(id => String(id).startsWith("custom:"))
     onLiveChanged: if (page.live) ResourceUsage.ensureRunning()
     spacing: 0
 
@@ -191,6 +196,25 @@ ColumnLayout {
             Figure {
                 visible: Battery.available
                 value: String(Math.round(Battery.percentage * 100)); unit: "%"; label: Battery.isCharging ? "Charging" : "Battery"
+            }
+        }
+    }
+    Rule { visible: page.customModules.length > 0 }
+    Entry {
+        name: "Modules"
+        visible: page.customModules.length > 0
+        Flow {
+            width: parent.width
+            spacing: Math.round(6 * page.d)
+            Repeater {
+                model: page.customModules
+                IrisCustomModule {
+                    required property string modelData
+                    widgetId: modelData.slice("custom:".length)
+                    targetScreen: page.island?.targetScreen ?? null
+                    slot: "island.desktop"
+                    availableWidth: parent.width
+                }
             }
         }
     }

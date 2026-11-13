@@ -1,7 +1,6 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
-import QtQuick.Dialogs
 import QtQuick.Effects
 import QtQuick.Layouts
 import QtQuick.Shapes
@@ -18,6 +17,7 @@ import qs.modules.common.widgets
 import qs.modules.shared.mediaControls.components
 import qs.modules.iris.style
 import qs.modules.iris.widgets as IrisFaces
+import "island/NoticeSamples.js" as NoticeSamples
 import qs.modules.iris.components
 import qs.modules.iris.frame
 import qs.modules.iris.pieces
@@ -53,11 +53,11 @@ Item {
     readonly property color clockAccent: IrisStyle.clockAccent
     readonly property real satelliteScale: Math.max(0.7, Math.min(1, Number(root.options?.satelliteScale ?? 100) / 100))
 
-    readonly property var desktopBlockKinds: ["profile", "context", "forecast", "agenda", "vitals", "modules"]
+    readonly property var desktopBlockKinds: ["profile", "context", "workspaces", "forecast", "agenda", "vitals", "modules"]
     readonly property var desktopBlocks: Array.from(root.options?.desktopBlocks ?? root.desktopBlockKinds)
         .filter(kind => root.desktopBlockKinds.includes(kind))
     function desktopBlockLabel(kind: string): string {
-        return ({ profile: Translation.tr("Profile"), context: Translation.tr("Current app"),
+        return ({ profile: Translation.tr("Profile"), context: Translation.tr("Current app"), workspaces: Translation.tr("Workspaces"),
             forecast: Translation.tr("Forecast"), agenda: Translation.tr("Up next"),
             vitals: Translation.tr("Vitals"), modules: Translation.tr("Modules") })[kind] ?? kind
     }
@@ -67,7 +67,7 @@ Item {
         Config.setNestedValue("iris.bar.desktopBlocks", next)
     }
     function desktopBlockGlyph(kind: string): string {
-        return ({ profile: "account_circle", context: "select_window", forecast: "partly_cloudy_day",
+        return ({ profile: "account_circle", context: "select_window", workspaces: "view_carousel", forecast: "partly_cloudy_day",
             agenda: "event_upcoming", vitals: "monitor_heart", modules: "widgets" })[kind] ?? "add"
     }
     function moveDesktopBlock(kind: string, step: int): void {
@@ -103,8 +103,33 @@ Item {
     }
     readonly property string faceUrl: root.vertical ? "" : root.skinOf(IrisDesign.skin("islandFace"), "Face.qml")
     readonly property string navUrl: root.skinOf(IrisDesign.skin("islandNav"), "Nav.qml")
-    // A face may take only some modes (`modes`); the engine draws the others.
-    readonly property bool faceTakes: root.faceUrl.length > 0 && (!designFace.item?.modes || designFace.item.modes.includes(root.compactMode))
+    // A face may take only some modes (`modes`); the engine draws the others. A song is the one activity that does not
+    // take the Island's face (Unified, Corner, Shelf, Pods, Menu bar): it rides at the face's sides as Apple's compact
+    // Dynamic Island does, its cover leading and its music moving at the trailing end, and a tap still opens the
+    // player. Halo's face is the engine's resting row, so it wears the same wings (haloWings).
+    readonly property bool faceWings: root.faceUrl.length > 0 && !root.vertical && root.compactMode === "media"
+        && Array.isArray(designFace.item?.modes) && !designFace.item.modes.includes("media")
+    readonly property bool haloWings: root.faceUrl.length === 0 && !root.vertical && root.compactMode === "media"
+    readonly property bool songWings: root.faceWings || root.haloWings
+    readonly property bool faceTakes: root.faceUrl.length > 0 && (root.faceWings || !designFace.item?.modes || designFace.item.modes.includes(root.compactMode))
+    // Apple's measures, as shares of the pill's height: the cover 0.63, the music 0.4 tall, a quarter in from the ends.
+    readonly property real wingCoverSize: Math.round(root.compactHeight * 0.63)
+    readonly property real wingBox: Math.max(root.wingCoverSize, root.nothingLook ? root.stripWidth(4) : wingVisualizer.implicitWidth)
+    // Each side's share of the Island the song takes (its inset, the wing and a step clear of it); the face keeps the
+    // middle with its own breathing, so the song stands as far from the face as from the Island's ends.
+    readonly property real wingSlot: root.songWings ? root.wingLead + root.wingBox + Math.round(6 * root.d) : 0
+    // Do not disturb, at rest: a small moon at the Island's trailing end for as long as it is on, in every face and
+    // row (11-10: it was on for days with no sign anywhere). Both sides give it the same room, so nothing moves off
+    // centre; a notice or a level keeps its own row.
+    // It is the Do Not Disturb bubble's own lit disc at the Island's scale, and only where no such bubble already
+    // says it (11-11: a bare moon read as nothing). Resting on it names it; a press turns it off.
+    readonly property bool quiet: Notifications.silent && !root.vertical && !root.compactSizeClass
+        && !(Config.options?.iris?.bubbles?.extras?.focus?.enable ?? false)
+    readonly property real quietBox: Math.round(18 * root.d)
+    readonly property real quietSlot: root.quiet ? root.quietBox + Math.round(8 * root.d) : 0
+    readonly property real sideSlot: root.wingSlot + root.quietSlot
+    readonly property real wingLead: Math.round(Math.max((root.compactHeight - root.wingCoverSize) / 2,
+        Math.min(14.5 * root.d * root.breathing, root.compactHeight / 4)))
     readonly property bool pagesHang: IrisDesign.trait("pages") === "hang" && !root.fullWidth && !root.vertical
     readonly property real seam: 0
     readonly property string pagePlate: {
@@ -156,16 +181,24 @@ Item {
     readonly property var tasks: LiveActivities.active.slice().sort((a, b) => b.started - a.started)
     readonly property var task: root.tasks[0] ?? null
     readonly property color taskTint: root.nothingLook ? IrisStyle.text : IrisStyle.identityColor(String(root.task?.tint ?? "lavender"))
-    // Priority, as Live Activities: what records you, then what counts down, then jobs, then the song. The first is
-    // the compact Island; the second detaches as the minimal bubble; the expanded page lists them all.
+    // Priority, as Live Activities, in the person's order (factory: what records you, then what counts down, then
+    // jobs, the camera, a call, the song). The first is the compact Island; the second detaches as the minimal bubble;
+    // the expanded page lists them all. Each kind takes the Island only while its switch is on (Settings › Island ›
+    // Live activities); the privacy dot shows either way. A video call with the camera tile off shows as a call.
+    readonly property var acts: root.options?.activities ?? ({})
+    readonly property bool cameraTile: Privacy.cameraActive && root.acts.camera !== false
+    readonly property var activityOrder: IrisStyle.islandActivityOrder(root.acts.order)
     readonly property var activities: {
         const list = []
-        if (root.recording) list.push("record")
-        if (root.timerKind.length > 0) list.push("timer")
-        for (const job of root.tasks.slice(0, 2)) list.push("task")
-        if (Privacy.cameraActive) list.push("camera")
-        if (Privacy.micActive && !Privacy.cameraActive) list.push("mic")
-        if (root.hasMedia) list.push("media")
+        for (const kind of root.activityOrder) {
+            if (root.acts[kind] === false) continue
+            if (kind === "record" && root.recording) list.push("record")
+            else if (kind === "timer" && root.timerKind.length > 0) list.push("timer")
+            else if (kind === "task") for (const job of root.tasks.slice(0, 2)) list.push("task")
+            else if (kind === "camera" && root.cameraTile) list.push("camera")
+            else if (kind === "call" && Privacy.micActive && !root.cameraTile) list.push("mic")
+            else if (kind === "media" && root.hasMedia) list.push("media")
+        }
         return list
     }
     readonly property string primary: root.activities[0] ?? "idle"
@@ -174,8 +207,11 @@ Item {
     readonly property bool privacyLive: Privacy.anyActive
     // A Cluster Island is the clock with the song beside it; a live activity (recording, a timer, a job) takes the
     // Island itself, as on a phone, and what comes after it detaches into the left bubble.
-    readonly property string islandActivity: IrisStyle.cluster && ["record", "timer", "task", "mic", "camera"].includes(root.primary) ? root.primary : ""
-    readonly property string leftKind: root.islandActivity.length > 0 ? root.secondary : root.primary === "idle" ? "" : root.primary
+    // The song never takes a Cluster Island: the first activity that is not it does, wherever the song stands.
+    readonly property int islandActivityAt: IrisStyle.cluster ? root.activities.findIndex(kind => kind !== "media") : -1
+    readonly property string islandActivity: root.islandActivityAt >= 0 ? root.activities[root.islandActivityAt] : ""
+    readonly property string leftKind: root.islandActivityAt >= 0 ? (root.activities.find((kind, at) => at !== root.islandActivityAt) ?? "")
+        : root.primary === "idle" ? "" : root.primary
     // Where a tap on the Island goes: what it shows, who is using the mic or screen, else the desktop page.
     readonly property string tapPage: IrisStyle.cluster
         ? (root.islandActivity.length > 0 || root.privacyLive ? "activity" : "desktop") : root.pageFor(root.primary)
@@ -322,17 +358,18 @@ Item {
     property real pageOriginY: -1
 
     property real screenOffsetY: 0
-    // Geometry is read in the window's own space (QsWindow.contentItem), never the scene: the edit card and the arrival
-    // transform that item, and a scene point kept their scale once they dropped (11-02: after edit mode the Island and
-    // its bubbles stayed drawn where the card had them).
+    // Geometry is read in the window's own space (QsWindow.window.contentItem), never the scene: the edit card and the
+    // arrival transform that item, and a scene point kept their scale once they dropped (11-02: after edit mode the Island
+    // and its bubbles stayed drawn where the card had them). Not QsWindow.contentItem: on qs-rs that is the Qt root above
+    // the transform, so a shape read during the card was scaled twice (11-07: a bubble welded into the Island's side).
     function chassisBody(): var {
-        const p = chassis.mapToItem(root.QsWindow.contentItem, chassis.leftInset, chassis.topInset)
+        const p = chassis.mapToItem(root.QsWindow.window?.contentItem, chassis.leftInset, chassis.topInset)
         return { x: p.x, y: p.y, width: root.vertical ? chassis.across : chassis.width,
             height: root.vertical ? chassis.height : chassis.bodyHeight }
     }
     function partRect(part): var {
         if (part === chassis) return root.chassisBody()
-        const p = part.mapToItem(root.QsWindow.contentItem, 0, 0)
+        const p = part.mapToItem(root.QsWindow.window?.contentItem, 0, 0)
         return { x: p.x, y: p.y, width: part.width * part.scale, height: part.height * part.scale }
     }
     function publishOrigin(part): void {
@@ -390,10 +427,9 @@ Item {
         root.expanded = false
         avatarDialog.open()
     }
-    FileDialog {
+    FilePickerDialog {
         id: avatarDialog
         title: Translation.tr("Profile picture")
-        fileMode: FileDialog.OpenFile
         nameFilters: [Translation.tr("Images") + " (*.png *.jpg *.jpeg *.webp *.bmp *.avif)"]
         onAccepted: {
             setAvatar.command = [Quickshell.shellPath("scripts/accounts/set-avatar.sh"), FileUtils.trimFileProtocol(String(selectedFile))]
@@ -457,6 +493,22 @@ Item {
     }
 
     readonly property bool eventsEnabled: root.options?.events ?? true
+    // iris.bar.notices: which moments the Island says by itself, for how long, and how large.
+    readonly property var notices: root.options?.notices ?? ({})
+    function noticeOn(kind: string): bool { return root.eventsEnabled && root.notices?.[kind] !== false }
+    readonly property int noticeMs: Math.round(1000 * Math.max(1.5, Math.min(8, Number(root.notices?.seconds ?? 2.5))))
+    // Large: the Island grows into a card, as a phone's alerts do; a full bar hangs the card under its strip. A side
+    // edge keeps the line (a card does not stand upright).
+    readonly property bool noticeSized: String(root.notices?.style ?? "compact") === "large" && !root.vertical
+    readonly property bool noticeLarge: root.noticeSized && root.eventShown && !root.feedback && !root.dropHover
+    // The floating Island's own body grows; on a bar the hanging body does.
+    readonly property bool noticeGrows: root.noticeLarge && !root.anchored
+    IrisSpring { id: noticeSpring; surface: "island"; intent: "move"; to: root.noticeGrows ? 1 : 0; minimum: 0; epsilon: 0.002 }
+    readonly property real noticeOpen: noticeSpring.value
+    // The card owns its measure (IslandNoticeCard): the bodies only grow to it.
+    readonly property real noticeHeight: noticeCard.cardHeight
+    readonly property real noticeRadius: noticeCard.cardRadius
+    readonly property real noticeWidth: noticeCard.cardWidth
     property var event: ({ icon: "", tint: IrisStyle.text, title: "", detail: "", value: -1, kind: "", failed: false })
     readonly property bool eventShown: eventTimer.running && !root.expanded && !root.feedback
     // A battery notice draws the battery itself, filled to its level, instead of a font glyph.
@@ -473,6 +525,17 @@ Item {
         root.eventImage = ""
         eventTimer.restart()
     }
+    // A right click on a timer's face stops it; the notice that says so takes the stop back on a press. Said even
+    // with notices off: the person asked for it, and the notice is the only way back.
+    function stopTimerFromFace(): void {
+        const kind = root.timerKind
+        if (kind.length === 0) return
+        const glyph = root.timerGlyph
+        TimerService.stopTimer(kind)
+        root.event = { icon: glyph, tint: IrisStyle.identity.orange, title: Translation.tr("Stopped"), detail: Translation.tr("Undo"),
+            value: -1, kind: "status", failed: false, image: "", undo: true }
+        eventTimer.restart()
+    }
     // A job that ends says so in the compact Island: its strip fills and a pulse runs through it, or it fails in signal.
     function showDone(activity): void {
         if (!root.eventsEnabled || !eventsWarm.ready || root.expanded || root.fullscreenCovered
@@ -483,7 +546,20 @@ Item {
             detail: String(activity?.detail ?? "").length > 0 ? String(activity.detail) : failed ? Translation.tr("Failed") : Translation.tr("Done") }
         eventTimer.restart()
     }
-    Timer { id: eventTimer; interval: 2600; onTriggered: root.clearOsdRequests() }
+    Timer { id: eventTimer; interval: root.noticeMs; onTriggered: root.clearOsdRequests() }
+    // A sample asked for by Settings (or `inir irisDev notice KIND`): shown whatever is switched off, so a person sees
+    // the size and the time they chose. Each kind uses the words a real one says.
+    Connections {
+        target: IrisState
+        function onNoticeSampleChanged(): void {
+            const kind = String(IrisState.noticeSample?.kind ?? "")
+            if (kind.length === 0 || !root.focusedOutput || root.expanded || root.fullscreenCovered) return
+            const screen = root.targetScreen?.name ?? ""
+            root.event = NoticeSamples.of(kind, Translation, IrisStyle, root.nothingLook,
+                Wallpapers.stillUrlFor(Wallpapers.internalPreviewFor(screen, Wallpapers.desktopWallpaperPath(screen))))
+            eventTimer.restart()
+        }
+    }
     // The Island answers these requests, so it owns clearing them: a flag left
     // set is never seen again by the OSD fallback on another output.
     function clearOsdRequests(): void {
@@ -494,7 +570,7 @@ Item {
         GlobalStates.osdKeyboardLayoutOpen = false
     }
     Connections {
-        target: GameMode
+        target: root.noticeOn("gameMode") ? GameMode : null
         function onManuallyActivatedChanged(): void {
             root.showEvent("sports_esports", GameMode.manuallyActivated ? IrisStyle.identity.green : IrisStyle.textSecondary,
                 GameMode.manuallyActivated ? Translation.tr("Game mode on") : Translation.tr("Game mode off"),
@@ -505,6 +581,7 @@ Item {
     Connections {
         target: CompositorService.isNiri ? NiriService : null
         function onConfigLoadFinished(ok: bool, error: string): void {
+            if (!root.noticeOn("niri")) { root.niriConfigBroken = !ok; return }
             if (!ok) {
                 const line = String(error ?? "").split("\n").map(part => part.trim()).find(part => part.length > 0) ?? ""
                 root.showEvent("error", IrisStyle.danger, Translation.tr("Niri config has an error"),
@@ -517,7 +594,7 @@ Item {
         }
     }
     Connections {
-        target: LiveActivities
+        target: root.noticeOn("jobs") ? LiveActivities : null
         function onFinished(activity: var): void { root.showDone(activity) }
     }
     property var badge: ({ icon: "", tint: IrisStyle.text, text: "" })
@@ -530,7 +607,7 @@ Item {
     Timer { id: badgeTimer; interval: 1600; onTriggered: root.clearOsdRequests() }
     Timer { id: eventsWarm; property bool ready: false; interval: 4000; running: true; onTriggered: ready = true }
     Connections {
-        target: root.eventsEnabled && Battery.available ? Battery : null
+        target: root.noticeOn("battery") && Battery.available ? Battery : null
         function onIsLowAndNotChargingChanged(): void {
             if (Battery.isLowAndNotCharging)
                 root.showEvent("battery_alert", IrisStyle.danger, Translation.tr("Low battery"), Translation.tr("Plug in soon"), Battery.percentage)
@@ -549,15 +626,15 @@ Item {
         }
     }
     Connections {
-        target: root.eventsEnabled ? Notifications : null
+        target: root.noticeOn("focus") ? Notifications : null
         function onSilentChanged(): void {
-            root.showEvent(Notifications.silent ? "do_not_disturb_on" : "notifications_active",
-                Notifications.silent ? IrisStyle.identity.indigo : IrisStyle.textSecondary, Translation.tr("Do not disturb"),
+            root.showEvent(Notifications.silent ? "bedtime" : "notifications_active",
+                Notifications.silent ? IrisStyle.identity.indigo : IrisStyle.textSecondary, Translation.tr("Do Not Disturb"),
                 Notifications.silent ? Translation.tr("On") : Translation.tr("Off"), -1, "status")
         }
     }
     Connections {
-        target: root.eventsEnabled ? TimerService : null
+        target: root.noticeOn("timers") ? TimerService : null
         function onCountdownRunningChanged(): void {
             if (!TimerService.countdownRunning && TimerService.countdownSecondsLeft <= 0)
                 root.showEvent("alarm", IrisStyle.identity.orange, Translation.tr("Time's up"),
@@ -573,35 +650,36 @@ Item {
     }
     // Unlocked: a face drawn in green, as a phone's Face ID says it knew you.
     Connections {
-        target: root.eventsEnabled ? GlobalStates : null
+        target: root.noticeOn("unlock") ? GlobalStates : null
         function onScreenLockedChanged(): void {
             if (!GlobalStates.screenLocked) unlockLater.restart()
         }
     }
     Timer { id: unlockLater; interval: 450; onTriggered: root.showEvent("face", IrisStyle.identity.green, Translation.tr("Unlocked"), "", -1, "unlock") }
     // An event about to start, as a phone's calendar activity: its name, how soon, a ring closing on the start.
-    // Said at 10, 5 and 1 minute, once each.
+    // Said at the lead chosen (10, 5 or 1 minute) and at each shorter mark, once each.
     property string eventSaid: ""
+    readonly property int upcomingLead: [10, 5, 1].includes(Number(root.notices?.upcomingLead)) ? Number(root.notices.upcomingLead) : 10
     Timer {
         interval: 30000
         repeat: true
-        running: root.eventsEnabled && root.focusedOutput
+        running: root.noticeOn("upcoming") && root.focusedOutput
         onTriggered: {
             const entry = IrisFaces.IrisFaceData.nextEntry(Date.now(), 11)
             if (entry.running || entry.title.length === 0 || entry.start <= 0) return
-            const mark = [10, 5, 1].find(at => entry.left <= at && entry.left > at - 1)
+            const mark = [10, 5, 1].filter(at => at <= root.upcomingLead).find(at => entry.left <= at && entry.left > at - 1)
             const key = entry.start + ":" + mark
             if (mark === undefined || root.eventSaid === key) return
             root.eventSaid = key
             root.showEvent("event", IrisStyle.danger, entry.title,
-                entry.left <= 1 ? Translation.tr("Starting now") : Translation.tr("In %1 min").arg(entry.left), 1 - entry.left / 10, "soon")
+                entry.left <= 1 ? Translation.tr("Starting now") : Translation.tr("In %1 min").arg(entry.left), 1 - entry.left / root.upcomingLead, "soon")
         }
     }
     // Rain on its way (Apple Weather's next hour): the first wet slot after a dry now, said once per slot.
     property string rainSaid: ""
     readonly property var wetGlyphs: ["rainy", "thunderstorm", "weather_hail", "weather_snowy", "cloudy_snowing", "rainy_light", "rainy_heavy"]
     Connections {
-        target: root.eventsEnabled && Weather.enabled ? Weather : null
+        target: root.noticeOn("rain") && Weather.enabled ? Weather : null
         function onDataChanged(): void {
             const glyphOf = code => Icons.getWeatherIcon(code, false) ?? ""
             if (root.wetGlyphs.includes(glyphOf(Weather.data?.wCode))) return
@@ -616,7 +694,7 @@ Item {
     }
     // The sound muted from anywhere: the red Silent pill.
     readonly property bool sinkMuted: Audio.sink?.audio?.muted ?? false
-    onSinkMutedChanged: if (root.sinkMuted && !root.feedback) root.showEvent("notifications_off", IrisStyle.danger, Translation.tr("Silent"), "", -1, "silent")
+    onSinkMutedChanged: if (root.sinkMuted && !root.feedback && root.noticeOn("silent")) root.showEvent("notifications_off", IrisStyle.danger, Translation.tr("Silent"), "", -1, "silent")
     // A screenshot just taken: its picture as a card at the end; a tap opens it.
     readonly property var latestShot: Shelf.items.find(item => item.origin === "shot") ?? null
     property string shownShot: ""
@@ -626,14 +704,14 @@ Item {
         const fresh = Date.now() - Number(shot.at ?? 0) < 15000
         const first = root.shownShot.length === 0
         root.shownShot = shot.path
-        if (!fresh || first && !eventsWarm.ready) return
+        if (!fresh || first && !eventsWarm.ready || !root.noticeOn("screenshot")) return
         root.eventImage = "file://" + shot.path
         root.showEvent("screenshot_region", IrisStyle.identity.blue, Translation.tr("Screenshot saved"), String(shot.name ?? ""), -1, "shot")
     }
     property int lastRecordingSeconds: 0
     onRecordingChanged: {
         if (root.recording) root.lastRecordingSeconds = 0
-        else if (root.eventsEnabled && root.lastRecordingSeconds > 0)
+        else if (root.noticeOn("recording") && root.lastRecordingSeconds > 0)
             root.showEvent("stop_circle", IrisStyle.danger, Translation.tr("Recording saved"), root.clockText(root.lastRecordingSeconds), -1)
     }
     Connections {
@@ -643,7 +721,7 @@ Item {
         }
     }
     Connections {
-        target: root.eventsEnabled ? Audio : null
+        target: root.noticeOn("soundGuard") ? Audio : null
         function onSinkProtectionTriggered(reason: string): void {
             root.showEvent("volume_off", IrisStyle.danger, Translation.tr("Volume held back"), reason, -1)
         }
@@ -713,8 +791,12 @@ Item {
     readonly property real navSlot: Math.max(Math.round(30 * root.d), Math.min(Math.round(36 * root.d),
         Math.floor((Math.min(root.expandedRoom, root.pageBodyWidth) - 2 * root.padding - root.navFixed) / Math.max(1, root.navButtons))))
     readonly property real navWidth: root.navFixed + root.navButtons * root.navSlot
-    // Once per open, so the bubbles on its row can step aside (IrisStage.stepAside).
-    readonly property real openWidth: root.expanded && !root.vertical && !root.spanning ? root.expandedWidth : 0
+    // A moment the Island says by itself (a notice, an event, a level, a held drop) grows it for seconds: it is open,
+    // never its resting shape, so the plates and lines that take the Island's measure keep theirs (islandGeometry).
+    readonly property bool momentShown: !root.expanded && ["drop", "feedback", "event", "notice"].includes(root.compactMode)
+    // Once per open or moment, so the bubbles on its row can step aside (IrisStage.stepAside).
+    readonly property real openWidth: root.vertical || root.spanning ? 0
+        : root.expanded ? root.expandedWidth : root.momentShown ? root.compactTargetWidth : 0
     onOpenWidthChanged: {
         const name = root.targetScreen?.name ?? ""
         if (name.length === 0) return
@@ -753,13 +835,13 @@ Item {
         onTriggered: {
             root.dropHover = false
             const sim = IrisState.dropRehearsal
-            if (sim?.keep) root.showEvent("check", IrisStyle.accent, Translation.tr("On the Shelf"),
+            if (sim?.keep && root.noticeOn("shelf")) root.showEvent("check", IrisStyle.accent, Translation.tr("On the Shelf"),
                 sim.count === 1 ? Translation.tr("1 file") : Translation.tr("%1 files").arg(sim.count), 1, "kept")
         }
     }
     readonly property string compactMode: root.dropHover && !root.anchored && !root.expanded ? "drop"
         : root.feedback && !root.anchored ? "feedback"
-        : root.eventShown && !root.anchored ? "event"
+        : root.eventShown && !root.anchored ? (root.noticeGrows ? "notice" : "event")
         : IrisStyle.cluster && !root.zoned ? (root.islandActivity.length > 0 ? root.islandActivity : "clock") : root.primary
     readonly property string layout: String(root.options?.layout ?? "island")
     // Menu bar: a thin strip across the edge with the heart hanging from its middle as a notch.
@@ -818,20 +900,27 @@ Item {
     // ready spends the first frames of the morph inside that build.
     readonly property bool pageReady: !root.expanded || details.status === Loader.Ready
     readonly property bool inlineExpanded: root.visualExpanded && root.inlinePages && root.pageReady
-    readonly property bool compactSizeClass: root.compactMode === "feedback" || root.compactMode === "event" || root.compactMode === "drop"
+    readonly property bool compactSizeClass: ["feedback", "event", "notice", "drop"].includes(root.compactMode)
     readonly property bool spanning: root.fullWidth
-    readonly property var compactRows: ({ idle: idleRow, media: mediaRow, record: recordRow,
+    readonly property var compactRows: ({ idle: idleRow, media: idleRow, record: recordRow,
         timer: timerRow, task: taskRow, mic: micRow, camera: cameraRow, clock: clockRow, event: eventRow, feedback: feedbackRow,
         drop: dropRow })
     readonly property real compactContentWidth: root.vertical ? compactColumn.implicitHeight
-        : root.faceTakes ? (designFace.item?.contentWidth ?? 0)
-        : root.compactRows[root.compactMode]?.implicitWidth ?? 0
+        : root.faceTakes ? (designFace.item?.contentWidth ?? 0) + 2 * root.sideSlot
+        : (root.compactRows[root.compactMode]?.implicitWidth ?? 0) + 2 * root.sideSlot
     readonly property real compactFloor: root.compactHeight * 2.1
-    readonly property real compactCeiling: Math.min(root.availableWidth,
-        (root.compactMode === "media" ? 380 : root.compactMode === "event" || root.compactMode === "drop" ? 340 : 320) * root.d)
+    // A larger clock (Settings › Island › Size) takes a wider resting Island with it, so a face keeps its extras.
+    readonly property real idleCeiling: Math.round(320 * root.d * Math.max(1, root.clockScale))
+    readonly property real compactCeiling: Math.min(root.availableWidth, root.songWings || root.quiet ? root.idleCeiling + 2 * root.sideSlot
+        : root.compactMode === "event" || root.compactMode === "drop" ? 340 * root.d : root.idleCeiling)
+    // The room a Design's face has at rest: the idle ceiling, less the Island's breathing and the pieces it carries.
+    // A face that would pass it gives up its extras first (designs/*/Face.qml), so the Island never cuts it.
+    readonly property real faceRoom: Math.max(0, Math.min(root.idleCeiling, root.availableWidth - root.barPieceReserve - 2 * root.sideSlot)
+        - Math.round(29 * root.d * root.breathing))
     // The ceiling holds the Island's own content; the pieces it carries come on top of it, or they would be
     // squeezed over the clock.
     readonly property real compactTargetWidth: root.spanning ? root.fullChassisWidth
+        : root.compactMode === "notice" ? root.noticeWidth
         : Math.max(root.compactFloor, Math.min(root.availableWidth, Math.min(root.compactCeiling,
             root.compactContentWidth + Math.round(29 * root.d * root.breathing)) + root.barPieceReserve))
     readonly property real chassisTargetWidth: root.inlineExpanded ? root.expandedWidth : root.compactTargetWidth
@@ -950,8 +1039,8 @@ Item {
         }
         const sceneY = root.parent?.y ?? 0
         const screenH = root.Window.window?.height ?? root.targetScreen?.height ?? 1080
-        const min = IrisFrame.safeInset("top") + Math.round(8 * root.d) - sceneY
-        const max = screenH - IrisFrame.safeInset("bottom") - Math.round(8 * root.d) - sceneY - height
+        const min = IrisFrame.safeInset("top", root.targetScreen?.name ?? "") + Math.round(8 * root.d) - sceneY
+        const max = screenH - IrisFrame.safeInset("bottom", root.targetScreen?.name ?? "") - Math.round(8 * root.d) - sceneY - height
         return Math.round(Math.max(min, Math.min(max, root.originCenterY - height / 2)))
     }
 
@@ -966,6 +1055,7 @@ Item {
     // grows, so a collapsing Island does not hand the compositor a region a frame.
     readonly property bool morphing: (chassis.presentation > 0.002 && chassis.presentation < 0.998)
         || (extension.presentation > 0.002 && extension.presentation < 0.998)
+        || (root.noticeOpen > 0.002 && root.noticeOpen < 0.998)
     readonly property real inputWidthLive: root.vertical ? Math.max(root.implicitWidth, root.inlineExpanded ? root.expandedWidth : 0)
         : Math.max(root.implicitWidth, root.chassisTargetWidth + 2 * Math.max(root.sideReserveTarget, root.fillet))
     readonly property real inputHeightLive: root.vertical ? Math.max(root.implicitHeight,
@@ -1042,7 +1132,9 @@ Item {
         id: hoverDelay
         interval: Math.max(120, Number(root.options?.hoverDelay ?? 300))
         onTriggered: {
-            if (!root.hoverArmed || !root.pointerOnIsland || root.expanded || root.feedback || root.editingDesktop || wheelQuiet.running) return
+            // A notice is read and answered where it stands (Undo, turn off, open the picture): hover never covers it.
+            if (!root.hoverArmed || !root.pointerOnIsland || root.expanded || root.feedback || root.momentShown
+                || root.editingDesktop || wheelQuiet.running) return
             if (root.pieceHovered) return
             if (root.tapPage === "desktop") root.openPage("desktop", false, null)
         }
@@ -1145,7 +1237,7 @@ Item {
             if (!IrisPieces.extraIds.includes(String(kind))) continue
             const item = root.pieceItem(String(kind))
             if (!item || !item.visible || item.width <= 0) continue
-            const at = item.mapToItem(root.QsWindow.contentItem, 0, 0)
+            const at = item.mapToItem(root.QsWindow.window?.contentItem, 0, 0)
             const size = Math.min(item.width, item.height)
             out.push({ id: "piece:extra-" + kind, x: at.x + (item.width - size) / 2, y: at.y + (item.height - size) / 2,
                 width: size, height: size, radius: IrisStyle.pieceRadius(size) })
@@ -1217,9 +1309,9 @@ Item {
     property Item heroClock: null
     readonly property Item restingCover: IrisStyle.cluster && leftSatellite.shown
         ? (root.primary === "media" ? leftSatellite.artwork : null)
-        : (root.compactMode === "media" && !root.vertical ? compactCover : null)
+        : (root.compactMode === "media" && !root.vertical ? wingCover : null)
     readonly property Item restingClock: root.vertical ? null : root.compactMode === "clock" ? clusterClock
-        : root.compactMode === "idle" ? idleClock : null
+        : root.compactMode === "idle" || root.haloWings ? idleClock : null
     function flyParts(): void {
         // Only the arrival flies: closing, the part rides the shape home, and a
         // copy crossing a page that is still opaque read as a second design.
@@ -1571,7 +1663,13 @@ Item {
         compactColumn.y, compactColumn.height].join()
     property bool shapesDirty: false
     property int shapeRevision: 0
-    onShapeKeyChanged: root.shapesDirty = true
+    // A change with nothing animating and no blur to take (the edit card turns the blur off) asked for no frame, so the
+    // old shapes stayed drawn until something moved (his 11-07: an Island setting changed from the shelf left a ghost
+    // bubble). A frame is asked for now, and the flush runs in it.
+    onShapeKeyChanged: {
+        root.shapesDirty = true
+        root.Window.window?.update()
+    }
     function flushShapes(): void {
         if (!root.shapesDirty) return
         root.shapesDirty = false
@@ -1629,7 +1727,7 @@ Item {
                 : { tl: outer, tr: outer, bl: far === "left" ? r : outer, br: far === "right" ? r : outer }
             for (const [id, area, start] of [["podStart", barZones.startArea, true], ["podEnd", barZones.endArea, false]]) {
                 if (area.width < 1) continue
-                const at = barZones.mapToItem(root.QsWindow.contentItem, area.x, 0)
+                const at = barZones.mapToItem(root.QsWindow.window?.contentItem, area.x, 0)
                 const left = start ? at.x - air + (wall - at.x + air) * melt : at.x - air
                 const right = start ? at.x + area.width + air : at.x + area.width + air + (span - wall - at.x - area.width - air) * melt
                 out.push({ x: left, y: body.y, width: right - left, height: body.height, radius: r,
@@ -1637,7 +1735,7 @@ Item {
                     paints: true, fuse: fuse, id: id, joins: welded.concat(["island"]) })
             }
             if (root.heartShown && root.heartLength > 1) {
-                const at = chassis.mapToItem(root.QsWindow.contentItem, barZones.heartAlong, 0)
+                const at = chassis.mapToItem(root.QsWindow.window?.contentItem, barZones.heartAlong, 0)
                 out.push({ x: at.x, y: body.y, width: root.heartLength, height: body.height, radius: r,
                     corners: melt > 0.01 ? (root.bottomEdge ? { tl: r, tr: r, bl: outer, br: outer } : { tl: outer, tr: outer, bl: r, br: r }) : null,
                     paints: true, fuse: fuse, id: "island", joins: welded })
@@ -1651,14 +1749,14 @@ Item {
             joins: melt <= 0.01 ? "" : IrisFrame.framed ? "frame" : pastSide > 0 ? ["edge", "edgeSide"] : "edge" })
         // On its side, the heart of a full bar swells inward out of the bar: the same gesture as a menu bar's notch.
         if (root.vertical && root.zoned && root.notch && root.heartShown && compactColumn.height > 1) {
-            const at = compactColumn.mapToItem(root.QsWindow.contentItem, 0, 0)
+            const at = compactColumn.mapToItem(root.QsWindow.window?.contentItem, 0, 0)
             const wide = body.width + root.heartSwell
             out.push({ x: root.rightEdge ? body.x - root.heartSwell : body.x, y: at.y, width: wide, height: compactColumn.height,
                 radius: wide / 2, paints: true, fuse: IrisStyle.fuseEdge, id: "islandheart", joins: "island" })
         }
         // Across the top or bottom the heart of a full bar swells out of it the same way.
         if (root.swellsHeart && root.heartLength > 1) {
-            const at = chassis.mapToItem(root.QsWindow.contentItem, barZones.heartAlong, 0)
+            const at = chassis.mapToItem(root.QsWindow.window?.contentItem, barZones.heartAlong, 0)
             const tall = body.height + root.heartSwell
             // Its far corners round like the Island it is; the shoulders where it leaves the shelf are concave, as wide as
             // the rise is deep, so shelf and Island read as one piece.
@@ -1667,13 +1765,13 @@ Item {
                 paints: true, fuse: Math.round(root.heartSwell * 1.1 + 6 * root.d), id: "islandheart", joins: "island" })
         }
         if (root.menubar && root.heartShown && root.heartLength > 1) {
-            const at = chassis.mapToItem(root.QsWindow.contentItem, barZones.heartAlong, 0)
+            const at = chassis.mapToItem(root.QsWindow.window?.contentItem, barZones.heartAlong, 0)
             out.push({ x: at.x, y: body.y, width: root.heartLength, height: body.height, radius: root.meltedCorner,
                 paints: true, fuse: root.clearStrip ? IrisStyle.fuseEdge : Math.round(32 * root.d), id: "islandnotch",
                 joins: root.clearStrip ? edgeJoin : "island" })
         }
         if (extension.visible && extension.width > 1 && extension.height > 1) {
-            const page = extension.mapToItem(root.QsWindow.contentItem, 0, 0)
+            const page = extension.mapToItem(root.QsWindow.window?.contentItem, 0, 0)
             const floating = root.zoned && !root.vertical && !root.fromHeart
             const grown = root.grownPage
             const sink = grown ? 0 : root.fullWidth && !floating ? Math.min(extension.radius, root.compactHeight) : 0
@@ -1691,14 +1789,14 @@ Item {
                     : root.clearStrip ? "islandnotch" : "island" })
         }
         if (badgePill.visible) {
-            const at = badgePill.mapToItem(root.QsWindow.contentItem, (badgePill.width - badgePill.bodyWidth) / 2, 0)
+            const at = badgePill.mapToItem(root.QsWindow.window?.contentItem, (badgePill.width - badgePill.bodyWidth) / 2, 0)
             out.push({ x: at.x, y: at.y, width: badgePill.bodyWidth, height: badgePill.height, radius: badgePill.height / 2,
                 paints: false, id: "badge", joins: "island", fuse: IrisStyle.fuseDeep * (1 - badgePill.reveal) })
         }
         for (const satellite of [leftSatellite, rightSatellite, auxiliarySatellite]) {
             if (!satellite.visible || satellite.emerge <= 0.01) continue
             const size = satellite.width * satellite.scale
-            const centre = satellite.mapToItem(root.QsWindow.contentItem, satellite.width / 2, satellite.height / 2)
+            const centre = satellite.mapToItem(root.QsWindow.window?.contentItem, satellite.width / 2, satellite.height / 2)
             // A drop that pinches off the Island on its way out and stands apart at rest: melted in for good it read
             // as a belly on the Island (10-25).
             const joined = IrisStyle.fuse * (1 - IrisStyle.ramp(satellite.emerge, 0.45, 0.5))
@@ -1741,7 +1839,7 @@ Item {
         // shape that came back to where it was must not publish at all. Writing
         // this map rebuilds every piece, plate, hit rect and field shape on the
         // output: measured at one 87 ms frame, right as the Island settled.
-        if (name.length === 0 || root.expanded || root.morphing) return
+        if (name.length === 0 || root.expanded || root.momentShown || root.morphing) return
         const next = root.islandGeometry
         const key = JSON.stringify(next)
         if (key === root.publishedGeometry) return
@@ -1752,6 +1850,7 @@ Item {
     }
     onBubbleKindsChanged: root.publishBubbleKinds()
     onIslandGeometryChanged: geometrySettle.restart()
+    onMomentShownChanged: if (!root.momentShown) geometrySettle.restart()
     // Resting reshapes (width, notch, placement) change the geometry every frame; one fan-out per frame drops the output to ~14 fps.
     Timer { id: geometrySettle; interval: 60; onTriggered: root.publishIslandGeometry() }
     Component.onCompleted: { root.publishBubbleKinds(); root.publishIslandGeometry() }
@@ -1851,7 +1950,7 @@ Item {
         target: root.Window.window
         enabled: IrisMotionMeter.watching("island") && root.focusedOutput
         function onAfterAnimating(): void {
-            const at = chassis.mapToItem(root.QsWindow.contentItem, 0, 0)
+            const at = chassis.mapToItem(root.QsWindow.window?.contentItem, 0, 0)
             const source = { settles: true, presentation: chassis.presentation, open: root.inlineExpanded }
             IrisMotionMeter.sample({ source: source, presentation: chassis.presentation,
                 rect: { x: at.x, y: at.y, width: chassis.width, height: chassis.height },
@@ -1863,8 +1962,10 @@ Item {
         id: chassis
         // ClippingRectangle does not re-mask when per-corner radii change live.
         readonly property real restWidth: root.compactTargetWidth
-        readonly property real restHeight: root.compactHeight
-        readonly property real restRadius: IrisStyle.profileRadius(IrisStyle.bodyProfile(IrisStyle.barShape, root.notch), root.compactHeight)
+        // A large notice grows the resting body into its card on the same scalar: height, corners and content.
+        readonly property real restHeight: root.compactHeight + (root.noticeHeight - root.compactHeight) * root.noticeOpen
+        readonly property real compactRadius: IrisStyle.profileRadius(IrisStyle.bodyProfile(IrisStyle.barShape, root.notch), root.compactHeight)
+        readonly property real restRadius: chassis.compactRadius + (root.noticeRadius - chassis.compactRadius) * root.noticeOpen
         readonly property real openWidthTarget: root.expandedWidth
         readonly property real openHeightLive: (details.item?.implicitHeight ?? 0) + root.padding * 2
         property real openHeightHeld: 0
@@ -1882,7 +1983,8 @@ Item {
         readonly property alias presentation: chassisSpring.value
         IrisSpring { id: chassisSpring; surface: "island"; to: root.inlineExpanded ? 1 : 0; minimum: 0 }
         function lerp(a: real, b: real): real { return a + (b - a) * chassis.presentation }
-        readonly property real bodyHeightTarget: root.inlineExpanded ? chassis.openHeightTarget : chassis.restHeight
+        readonly property real bodyHeightTarget: root.inlineExpanded ? chassis.openHeightTarget
+            : root.noticeGrows ? root.noticeHeight : chassis.restHeight
         readonly property real bodyHeight: Math.round(chassis.lerp(chassis.restHeight, chassis.openH))
         // Whole pixels: the chassis draws its content through a texture and a half-pixel offset softens it.
         readonly property real edgeInset: Math.ceil(chassis.radius * root.notchness)
@@ -1907,6 +2009,18 @@ Item {
         color: IrisStyle.bodyClip
         radius: Math.min((root.vertical ? Math.min(chassis.across, chassis.height) : chassis.width) / 2, chassis.restRadius
             + (chassis.openRadius - chassis.restRadius) * Math.min(1, chassis.presentation))
+
+        // Prism: the open body takes the spectrum's haze from the corner away from its edge (the chassis clips it).
+        Loader {
+            anchors.fill: parent
+            active: IrisStyle.lookOf(root) === "prism" && chassis.presentation > 0
+            opacity: Math.min(1, chassis.presentation)
+            sourceComponent: IrisPrismHaze {
+                radius: 0
+                shouldered: true
+                from: root.bottomEdge ? "topRight" : root.rightEdge ? "bottomLeft" : "bottomRight"
+            }
+        }
 
         HoverHandler {
             id: chassisHover
@@ -1943,7 +2057,7 @@ Item {
                 const kept = (drop.hasUrls ? Shelf.keepUrls(drop.urls) : 0) || (drop.hasText && Shelf.keepText(drop.text) ? 1 : 0)
                 if (kept > 0) {
                     drop.accept(Qt.CopyAction)
-                    if (!root.expanded)
+                    if (!root.expanded && root.noticeOn("shelf"))
                         root.showEvent("check", IrisStyle.accent, Translation.tr("On the Shelf"),
                             root.dropFiles ? (kept === 1 ? Translation.tr("1 file") : Translation.tr("%1 files").arg(kept)) : Translation.tr("Text"), 1, "kept")
                 } else drop.accepted = false
@@ -2043,47 +2157,12 @@ Item {
             // 95 ms frame near the end of every close.
             visible: opacity > 0 || root.expanded || chassis.presentation > 0.002
 
-            component FaceMark: Item {
-                id: faceMark
-                property color tint: IrisStyle.identity.green
-                property bool live: false
-                scale: faceMark.live ? 1 : 0.55
-                opacity: faceMark.live ? 1 : 0
-                Behavior on scale { NumberAnimation { duration: IrisStyle.duration(520); easing.type: Easing.OutBack; easing.overshoot: 2.2 } }
-                Behavior on opacity { NumberAnimation { duration: IrisStyle.duration(200) } }
-                Shape {
-                    anchors.fill: parent
-                    preferredRendererType: Shape.CurveRenderer
-                    readonly property real w: width
-                    readonly property real k: width * 0.3
-                    readonly property real r: width * 0.16
-                    ShapePath {
-                        strokeColor: faceMark.tint
-                        strokeWidth: Math.max(1.6, faceMark.width * 0.075)
-                        fillColor: "transparent"
-                        capStyle: ShapePath.RoundCap
-                        joinStyle: ShapePath.RoundJoin
-                        PathSvg {
-                            readonly property real w: faceMark.width
-                            readonly property real k: faceMark.width * 0.28
-                            readonly property real r: faceMark.width * 0.16
-                            path: `M 0 ${k} L 0 ${r} Q 0 0 ${r} 0 L ${k} 0 `
-                                + `M ${w - k} 0 L ${w - r} 0 Q ${w} 0 ${w} ${r} L ${w} ${k} `
-                                + `M ${w} ${w - k} L ${w} ${w - r} Q ${w} ${w} ${w - r} ${w} L ${w - k} ${w} `
-                                + `M ${k} ${w} L ${r} ${w} Q 0 ${w} 0 ${w - r} L 0 ${w - k} `
-                                + `M ${w * 0.36} ${w * 0.34} L ${w * 0.36} ${w * 0.44} `
-                                + `M ${w * 0.64} ${w * 0.34} L ${w * 0.64} ${w * 0.44} `
-                                + `M ${w * 0.5} ${w * 0.36} L ${w * 0.5} ${w * 0.56} L ${w * 0.45} ${w * 0.56} `
-                                + `M ${w * 0.34} ${w * 0.68} Q ${w * 0.5} ${w * 0.8} ${w * 0.66} ${w * 0.68}`
-                        }
-                    }
-                }
-            }
             component CompactRow: RowLayout {
                 id: compactRow
                 property string mode: ""
                 property real lead: 0
-                readonly property bool current: root.compactMode === compactRow.mode
+                readonly property bool current: root.compactMode === compactRow.mode || (compactRow.mode === "idle" && root.haloWings)
+                readonly property real wing: (compactRow.mode === "idle" ? root.wingSlot : 0) + root.quietSlot
                 property real laidWidth: 0
                 // Laid at the width of its own size class: relaying the row out per
                 // frame so it rides the shape measured 2.4x the cost of every morph.
@@ -2097,11 +2176,11 @@ Item {
                 anchors.topMargin: compactRow.swellShift
                 anchors.bottomMargin: -compactRow.swellShift
                 x: (root.zoned ? Math.round(barZones.heartAlong + (root.heartLength - compactRow.laidWidth) / 2)
-                    : Math.round((parent.width - compactRow.laidWidth) / 2)) + compactRow.leadMargin
+                    : Math.round((parent.width - compactRow.laidWidth) / 2)) + compactRow.leadMargin + compactRow.wing
                     + (root.piecesAtStart ? root.barPieceReserve : 0)
-                width: Math.max(0, compactRow.laidWidth - compactRow.leadMargin - 15 * root.d - root.barPieceReserve)
+                width: Math.max(0, compactRow.laidWidth - compactRow.leadMargin - 15 * root.d - root.barPieceReserve - 2 * compactRow.wing)
                 spacing: 9 * root.d
-                opacity: (root.compactMode === compactRow.mode && root.heartShown && !root.vertical && !root.faceTakes ? 1 : 0) * root.heartUncovered
+                opacity: (compactRow.current && root.heartShown && !root.vertical && !root.faceTakes ? 1 : 0) * root.heartUncovered
                 scale: root.zoned && compactPress.pressed ? IrisStyle.pressScale(0.93) : 1
                 Behavior on scale { NumberAnimation { duration: IrisStyle.duration(compactPress.pressed ? 80 : 200); easing.type: IrisStyle.feedbackEasing } }
                 visible: opacity > 0
@@ -2141,69 +2220,6 @@ Item {
                     opacity: clockFlight.hides(idleClock) ? 0 : 1
                 }
                 PrivacyMarks { Layout.alignment: Qt.AlignVCenter; spelled: true }
-            }
-
-            CompactRow {
-                id: mediaRow
-                mode: "media"
-                lead: (root.zoned ? 28 : 24) * root.d
-                IrisArtwork {
-                    id: compactCover
-                    opacity: coverFlight.hides(compactCover) ? 0 : 1
-                    Layout.preferredWidth: (root.zoned ? 28 : 24) * root.d
-                    Layout.preferredHeight: (root.zoned ? 28 : 24) * root.d
-                    source: MediaArtwork.displaySource
-                    circular: Config.options?.iris?.player?.roundCover ?? false
-                    radius: circular ? width / 2 : 6 * root.d
-                }
-                ColumnLayout {
-                    Layout.fillWidth: true
-                    spacing: (root.zoned ? 1.5 : 3) * root.d
-                    IrisText {
-                        Layout.fillWidth: true
-                        text: root.title
-                        font.pixelSize: root.zoned ? IrisStyle.typeBody : IrisStyle.typeLabel
-                        font.weight: IrisStyle.weight(Font.DemiBold)
-                        elide: Text.ElideRight
-                    }
-                    IrisText {
-                        Layout.fillWidth: true
-                        visible: root.zoned && text.length > 0
-                        text: root.ytMusic ? YtMusic.currentArtist : String(MprisController.artistOf(root.player) ?? "")
-                        color: IrisStyle.textSecondary
-                        font.pixelSize: IrisStyle.typeFootnote
-                        elide: Text.ElideRight
-                    }
-                    Rectangle {
-                        Layout.fillWidth: true
-                        visible: !root.nothingLook && root.effectiveLength > 0
-                        implicitHeight: (root.zoned ? 3 : 2.5) * root.d
-                        radius: IrisStyle.capsule(height)
-                        color: IrisStyle.fillHover
-                        Rectangle {
-                            height: parent.height
-                            radius: parent.radius
-                            color: root.artTint
-                            width: parent.width * root.trackProgress
-                        }
-                    }
-                }
-                IrisVisualizer {
-                    visible: !root.nothingLook
-                    running: visible && root.playing && root.compactMode === "media" && !root.visualExpanded
-                    tint: IrisStyle.visualizerTint(root.artTint)
-                    barHeight: (root.zoned ? 18 : 15) * root.d
-                }
-                // Where the song is, as six dots; quiet while paused.
-                IrisDotStrip {
-                    visible: root.nothingLook && root.effectiveLength > 0
-                    Layout.alignment: Qt.AlignVCenter
-                    Layout.preferredWidth: root.stripWidth(6)
-                    count: 6
-                    value: root.trackProgress
-                    fillColor: root.playing ? IrisStyle.text : IrisStyle.textSecondary
-                }
-                PrivacyMarks { Layout.alignment: Qt.AlignVCenter; spelled: false }
             }
 
             CompactRow {
@@ -2531,7 +2547,7 @@ Item {
                     Layout.rightMargin: 4 * root.d
                     Layout.preferredWidth: Math.round(15 * root.d)
                     Layout.preferredHeight: root.compactHeight - Math.round(14 * root.d)
-                    radius: Math.round(4 * root.d)
+                    radius: Math.round(4 * root.d) // iris-literal: the battery drawn as the device, its own corners
                     color: IrisStyle.trackOf(IrisStyle.identity.green)
                     clip: true
                     Rectangle {
@@ -2605,7 +2621,7 @@ Item {
                     }
                     IrisText {
                         Layout.fillWidth: true
-                        visible: text.length > 0 && root.event.kind !== "status" && root.event.kind !== "accessory"
+                        visible: text.length > 0 && !["status", "quiet"].includes(root.event.kind) && root.event.kind !== "accessory"
                         text: root.event.detail
                         color: IrisStyle.muted
                         font.pixelSize: IrisStyle.typeFootnote
@@ -2627,7 +2643,7 @@ Item {
                     Layout.alignment: Qt.AlignVCenter
                     Layout.preferredHeight: root.compactHeight - Math.round(10 * root.d)
                     Layout.preferredWidth: Math.round(Layout.preferredHeight * 1.5)
-                    radius: Math.round(7 * root.d)
+                    radius: IrisStyle.radiusChip
                     color: IrisStyle.fill
                     IrisImage {
                         anchors.fill: parent
@@ -2639,7 +2655,7 @@ Item {
                 }
                 // A switch says its state at the end in its colour (Apple's "Do Not Disturb  On").
                 IrisText {
-                    visible: root.event.kind === "status"
+                    visible: ["status", "quiet"].includes(root.event.kind)
                     Layout.alignment: Qt.AlignVCenter
                     text: root.event.detail
                     color: root.eventInk
@@ -2707,7 +2723,7 @@ Item {
                         scale: endRing.progress >= 0.98 ? 1 : 0.4
                         opacity: endRing.progress >= 0.98 ? 1 : 0
                         Behavior on scale { NumberAnimation { duration: IrisStyle.duration(260); easing.type: Easing.OutBack } }
-                        Behavior on opacity { NumberAnimation { duration: IrisStyle.duration(160) } }
+                        Behavior on opacity { NumberAnimation { duration: IrisStyle.duration(160); easing.type: IrisStyle.feedbackEasing } }
                     }
                 }
                 IrisDotStrip {
@@ -2799,14 +2815,94 @@ Item {
                 source: root.faceUrl
                 readonly property real laidWidth: root.zoned ? root.heartTarget : root.compactTargetWidth
                 readonly property real swellShift: Math.round(chassis.swellInset / 2 - root.bandLift) * (root.bottomEdge ? -1 : 1)
-                x: (root.zoned ? Math.round(barZones.heartAlong + (root.heartLength - designFace.laidWidth) / 2)
+                // The face's box in the heart; a face that draws on the body's edge (`edge`, Aura) keeps all of it
+                // under the song's wings, any other is laid between them.
+                readonly property real boxX: (root.zoned ? Math.round(barZones.heartAlong + (root.heartLength - designFace.laidWidth) / 2)
                     : Math.round((parent.width - designFace.laidWidth) / 2)) + (root.piecesAtStart ? root.barPieceReserve : 0)
+                readonly property real boxWidth: Math.max(0, designFace.laidWidth - root.barPieceReserve)
+                readonly property real inset: designFace.item?.edge === true ? 0 : root.sideSlot
+                x: designFace.boxX + designFace.inset
                 y: designFace.swellShift
-                width: Math.max(0, designFace.laidWidth - root.barPieceReserve)
+                width: Math.max(0, designFace.boxWidth - 2 * designFace.inset)
                 height: parent.height
                 opacity: root.heartShown && root.faceTakes ? root.heartUncovered : 0
                 visible: opacity > 0
                 onLoaded: item.island = root
+            }
+            // The song at a face's sides (songWings): its cover, then its visualizer, or under Nothing where it is.
+            IrisArtwork {
+                id: wingCover
+                x: designFace.boxX + root.wingLead
+                y: Math.round((parent.height - height) / 2) + designFace.swellShift
+                width: root.wingCoverSize
+                height: root.wingCoverSize
+                source: root.songWings ? MediaArtwork.displaySource : ""
+                circular: Config.options?.iris?.player?.roundCover ?? false
+                radius: circular ? width / 2 : Math.round(width * 0.2)
+                opacity: (root.songWings && root.heartShown ? (root.playing ? 1 : 0.6) : 0) * root.heartUncovered * (coverFlight.hides(wingCover) ? 0 : 1)
+                visible: opacity > 0
+                Behavior on opacity { NumberAnimation { duration: IrisStyle.duration(140); easing.type: IrisStyle.feedbackEasing } }
+            }
+            Rectangle {
+                id: quietMark
+                readonly property real edge: root.songWings ? root.wingSlot : Math.round(9 * root.d * Math.max(0.6, root.breathing))
+                x: designFace.boxX + designFace.boxWidth - quietMark.edge - root.quietBox
+                y: Math.round((parent.height - height) / 2) + designFace.swellShift
+                z: 6
+                width: root.quietBox
+                height: root.quietBox
+                radius: width / 2
+                color: root.nothingLook ? IrisStyle.text : IrisStyle.identity.indigo
+                scale: quietPress.pressed ? 0.9 : quietPress.containsMouse ? 1.08 : 1
+                opacity: (root.quiet && root.heartShown ? 1 : 0) * root.heartUncovered
+                visible: opacity > 0
+                Behavior on opacity { NumberAnimation { duration: IrisStyle.duration(180); easing.type: IrisStyle.feedbackEasing } }
+                Behavior on scale { NumberAnimation { duration: IrisStyle.duration(140); easing.type: IrisStyle.feedbackEasing } }
+                Accessible.role: Accessible.Button
+                Accessible.name: Translation.tr("Do Not Disturb")
+                Glyph {
+                    anchors.centerIn: parent
+                    text: "bedtime"
+                    fill: 1
+                    iconSize: Math.round(12 * root.d)
+                    color: root.nothingLook ? IrisStyle.surfaceOpaque : IrisStyle.onTint
+                }
+                MouseArea {
+                    id: quietPress
+                    anchors.fill: parent
+                    anchors.margins: -Math.round(4 * root.d)
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    onContainsMouseChanged: if (containsMouse) root.showEvent("bedtime", IrisStyle.identity.indigo,
+                        Translation.tr("Do Not Disturb"), Translation.tr("Press to turn off"), -1, "quiet")
+                    onClicked: Notifications.silent = false
+                }
+            }
+            Item {
+                id: wingTrail
+                x: designFace.boxX + designFace.boxWidth - root.wingLead - root.wingBox
+                y: designFace.swellShift
+                width: root.wingBox
+                height: parent.height
+                opacity: (root.songWings && root.heartShown ? 1 : 0) * root.heartUncovered
+                visible: opacity > 0
+                Behavior on opacity { NumberAnimation { duration: IrisStyle.duration(140); easing.type: IrisStyle.feedbackEasing } }
+                IrisVisualizer {
+                    id: wingVisualizer
+                    anchors.centerIn: parent
+                    visible: !root.nothingLook
+                    running: wingTrail.visible && visible && root.playing && !root.visualExpanded
+                    tint: IrisStyle.visualizerTint(root.artTint)
+                    barHeight: Math.round(root.compactHeight * 0.4)
+                }
+                IrisDotStrip {
+                    anchors.centerIn: parent
+                    visible: root.nothingLook
+                    width: root.stripWidth(4)
+                    count: 4
+                    value: root.trackProgress
+                    fillColor: root.playing ? IrisStyle.text : IrisStyle.textSecondary
+                }
             }
 
             Grid {
@@ -2818,7 +2914,9 @@ Item {
                 y: !root.vertical ? Math.round((parent.height - height) / 2)
                     : root.piecesAtStart ? Math.round(12 * root.d) : parent.height - height - Math.round(12 * root.d)
                 spacing: root.barPieceGap
-                visible: root.barPieces.length > 0 && !root.inlineExpanded && !root.zoned
+                // The pieces step aside while a large notice holds the body.
+                opacity: 1 - IrisStyle.contentAt(root.noticeOpen)
+                visible: root.barPieces.length > 0 && !root.inlineExpanded && !root.zoned && opacity > 0.002
                 Repeater {
                     model: root.barPieces
                     delegate: Item {
@@ -2937,17 +3035,22 @@ Item {
 
             MouseArea {
                 id: compactPress
+                // A large notice is taller than the resting line: the whole card answers a tap.
+                readonly property real noticeReach: root.vertical ? 0 : Math.max(0, chassis.bodyHeight - root.compactHeight)
                 x: root.zoned && !root.vertical ? Math.round(barZones.heartAlong) : 0
-                y: root.zoned && root.vertical ? Math.round(barZones.heartAlong) : 0
+                y: root.zoned && root.vertical ? Math.round(barZones.heartAlong) : root.bottomEdge ? -compactPress.noticeReach : 0
                 width: root.zoned && !root.vertical ? Math.round(root.heartLength) : parent.width
-                height: root.zoned && root.vertical ? Math.round(root.heartLength) : parent.height
+                height: root.zoned && root.vertical ? Math.round(root.heartLength) : parent.height + compactPress.noticeReach
                 enabled: !root.inlineExpanded && (!root.zoned || root.heartShown)
-                acceptedButtons: Qt.LeftButton | Qt.MiddleButton
+                // A timer's face: right click stops it (with undo), middle click pauses it.
+                readonly property bool timerFace: root.compactMode === "timer"
+                acceptedButtons: Qt.LeftButton | Qt.MiddleButton | (compactPress.timerFace ? Qt.RightButton : Qt.NoButton)
                 cursorShape: islandGrip.carrying ? Qt.ClosedHandCursor
                     : IrisState.edit ? Qt.OpenHandCursor : Qt.PointingHandCursor
                 preventStealing: true
                 Accessible.role: Accessible.Button
                 Accessible.name: IrisState.edit ? Translation.tr("Edit Dynamic Island")
+                    : root.eventShown && root.event.undo === true ? Translation.tr("Undo")
                     : root.expanded ? Translation.tr("Collapse island") : Translation.tr("Expand island")
                 pressAndHoldInterval: 380
                 QtObject {
@@ -2955,7 +3058,7 @@ Item {
                     property bool carrying: false
                     property point pressAt: Qt.point(0, 0)
                     function publish(mouse, released: bool): void {
-                        const p = compactPress.mapToItem(root.QsWindow.contentItem, mouse.x, mouse.y)
+                        const p = compactPress.mapToItem(root.QsWindow.window?.contentItem, mouse.x, mouse.y)
                         IrisState.bubbleDrag = {
                             slot: "island", kind: "island", screen: root.targetScreen?.name ?? "",
                             x: p.x, y: p.y + root.screenOffsetY,
@@ -2990,12 +3093,27 @@ Item {
                 onClicked: mouse => {
                     if (islandGrip.carrying) return
                     if (mouse.button === Qt.MiddleButton) {
-                        if (root.hasMedia) MprisController.togglePlaying()
+                        if (compactPress.timerFace) TimerService.toggleTimer(root.timerKind)
+                        else if (root.hasMedia) MprisController.togglePlaying()
                         return
                     }
                     if (IrisState.edit) {
                         IrisState.editSelection = ""
                         IrisState.editTarget = "island"
+                        return
+                    }
+                    if (mouse.button === Qt.RightButton) {
+                        if (compactPress.timerFace) root.stopTimerFromFace()
+                        return
+                    }
+                    if (root.eventShown && root.event.undo === true) {
+                        TimerService.undoStop()
+                        eventTimer.stop()
+                        return
+                    }
+                    // The mark's own name is showing: the press it asks for lands here.
+                    if (root.eventShown && root.event.kind === "quiet") {
+                        Notifications.silent = false
                         return
                     }
                     if (root.eventShown && root.event.kind === "shot" && String(root.event.image ?? "").length > 0) {
@@ -3013,17 +3131,35 @@ Item {
             }
         }
 
+        IslandNoticeCard {
+            id: noticeCard
+            event: root.event
+            reveal: root.noticeOpen
+            live: root.noticeLarge
+            band: root.compactHeight
+            notch: root.notch
+            maxWidth: root.availableWidth
+            nothingLook: root.nothingLook
+            dim: root.paintNudge * (1 - root.spotlightYield)
+            x: 0
+            y: root.bottomEdge ? chassis.height - chassis.bottomInset - height : chassis.topInset
+            width: chassis.width
+            height: chassis.bodyHeight
+        }
+
     }
 
     ClippingRectangle {
         id: extension
+        readonly property bool carded: root.extensionRole === "event" && root.noticeSized
         readonly property real targetWidth: root.extensionRole === "page" ? root.expandedWidth
-            : Math.round(320 * root.d)
+            : extension.carded ? root.noticeWidth : Math.round(320 * root.d)
         readonly property real targetHeight: root.extensionRole === "page"
             ? (details.item?.implicitHeight ?? 0) + root.padding * 2
-            : root.compactHeight
+            : extension.carded ? root.noticeHeight : root.compactHeight
         readonly property real targetRadius: root.extensionRole === "page"
-            ? IrisStyle.openedRadius(IrisStyle.barShape, IrisStyle.radiusPanel) : root.meltedCorner
+            ? IrisStyle.openedRadius(IrisStyle.barShape, IrisStyle.radiusPanel)
+            : extension.carded ? root.noticeRadius : root.meltedCorner
         readonly property alias presentation: extensionSpring.value
         IrisSpring { id: extensionSpring; surface: "island"; to: root.extensionOpen ? 1 : 0; minimum: 0 }
         readonly property real reach: Math.round((root.vertical ? extension.targetWidth : extension.targetHeight) * extension.presentation)
@@ -3086,7 +3222,7 @@ Item {
             onLoaded: if (artBackdrop.designUrl.length > 0 && "island" in item) item.island = root
             Component {
                 id: engineArtBackdrop
-                IrisMediaBackdrop { source: MediaArtwork.displaySource }
+                IrisMediaBackdrop { source: MediaArtwork.displaySource; strength: 0.9 }
             }
         }
         Loader {
@@ -3454,64 +3590,18 @@ Item {
                 barFill: IrisStyle.text
             }
         }
-        RowLayout {
-            id: hudEventRow
+        // A notice hung under the strip: the card when Large, else the line.
+        IslandNoticeCard {
             anchors.fill: parent
-            anchors.leftMargin: 6 * root.d
-            anchors.rightMargin: 14 * root.d
-            spacing: 9 * root.d
-            opacity: extension.anchoredShape && root.extensionRole === "event" && root.extensionOpen ? 1 : 0
-            visible: opacity > 0
-            Behavior on opacity { NumberAnimation { duration: IrisStyle.duration(110); easing.type: IrisStyle.feedbackEasing } }
-            Rectangle {
-                Layout.preferredWidth: root.compactHeight - Math.round(12 * root.d)
-                Layout.preferredHeight: Layout.preferredWidth
-                radius: IrisStyle.capsule(width)
-                color: IrisStyle.tintFill(root.event.tint)
-                Glyph {
-                    visible: !root.eventIsBattery
-                    anchors.centerIn: parent
-                    text: root.eventGlyph
-                    iconSize: 16 * root.d
-                    color: root.event.tint
-                }
-                IrisBatteryMark {
-                    visible: root.eventIsBattery
-                    anchors.centerIn: parent
-                    markHeight: Math.round(9 * root.d)
-                    level: Math.max(0, root.event.value)
-                    tint: root.event.tint
-                    frame: IrisStyle.trackOf(root.event.tint)
-                }
-            }
-            ColumnLayout {
-                Layout.fillWidth: true
-                spacing: -1 * root.d
-                IrisText {
-                    Layout.fillWidth: true
-                    text: root.event.title
-                    font.pixelSize: IrisStyle.typeLabel
-                    font.weight: IrisStyle.weight(Font.DemiBold)
-                    elide: Text.ElideRight
-                }
-                IrisText {
-                    Layout.fillWidth: true
-                    visible: text.length > 0
-                    text: root.event.detail
-                    color: IrisStyle.muted
-                    font.pixelSize: IrisStyle.typeFootnote
-                    elide: Text.ElideRight
-                }
-            }
-            Metric {
-                visible: root.event.value >= 0
-                Layout.alignment: Qt.AlignVCenter
-                value: Math.round(root.event.value * 100)
-                unit: "%"
-                pixelSize: IrisStyle.typeBody
-                weight: IrisStyle.figureWeight
-                color: root.event.tint
-            }
+            event: root.event
+            reveal: extension.anchoredShape && root.extensionRole === "event" ? extension.presentation : 0
+            live: root.noticeLarge
+            compact: !extension.carded
+            band: root.compactHeight
+            notch: root.notch
+            maxWidth: root.availableWidth
+            nothingLook: root.nothingLook
+            dim: root.paintNudge
         }
     }
 }

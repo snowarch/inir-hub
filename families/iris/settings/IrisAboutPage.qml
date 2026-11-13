@@ -7,6 +7,7 @@ import Quickshell
 import Quickshell.Io
 import qs.services
 import qs.modules.common
+import qs.modules.common.widgets
 import qs.modules.iris.components
 import qs.modules.iris.style
 
@@ -43,10 +44,12 @@ Flickable {
             Layout.maximumWidth: Number.POSITIVE_INFINITY
             Layout.bottomMargin: 6 * root.d
             spacing: 6 * root.d
-            IrisMark {
+            InirMark {
                 Layout.alignment: Qt.AlignHCenter
-                Layout.bottomMargin: 8 * root.d
-                implicitSize: Math.round(76 * root.d)
+                Layout.bottomMargin: 10 * root.d
+                implicitSize: Math.round(64 * root.d)
+                ink: IrisStyle.text
+                accent: IrisStyle.accent
             }
             IrisText {
                 Layout.alignment: Qt.AlignHCenter
@@ -70,7 +73,7 @@ Flickable {
                 { label: Translation.tr("Branch"), value: ShellUpdates.localCommit.length > 0 ? ShellUpdates.currentBranch : "", highlight: ShellUpdates.isNonMainBranch },
                 { label: Translation.tr("Commit"), value: ShellUpdates.localCommit },
                 { label: Translation.tr("System"), value: SystemInfo.distroName },
-                { label: Translation.tr("Compositor"), value: CompositorService.isNiri ? "Niri" : SystemInfo.desktopEnvironment },
+                { label: Translation.tr("Compositor"), value: CompositorService.isUmbriel ? "Umbriel" : CompositorService.niriNative ? "Niri" : SystemInfo.desktopEnvironment },
                 { label: Translation.tr("Computer"), value: SystemInfo.hostname }
             ].filter(row => String(row.value ?? "").length > 0 && row.value !== "Unknown")
         }

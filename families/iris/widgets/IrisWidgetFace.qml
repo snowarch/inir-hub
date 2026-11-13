@@ -28,7 +28,10 @@ Item {
     // glass and leak, and the face's ink is the stock's.
     readonly property string stockSkin: root.designed ? "" : IrisDesign.skin("widgetStock")
     readonly property bool stocked: root.stockSkin.length > 0
-    readonly property bool ownPlate: root.designed || root.stocked
+    // A face that draws its own body (Now Playing's Prism: a folder of glass, not a card): no plate, shadow or light
+    // under it; glass lends it the blurred wall as `frost`, as to a Design.
+    property bool ownBody: false
+    readonly property bool ownPlate: root.designed || root.stocked || root.ownBody
     // Content clears the corner (DI29): a chip in the corner keeps a concentric curve only while the padding is at least
     // the card's radius less the chip's (10), so a rounder card pushes its content in. A fixed 16 left the weather's
     // icon touching a 30 px corner.
@@ -111,6 +114,14 @@ Item {
     readonly property color accent2: root.nothing ? root.inkSecondary : root.stockInk ? stockLoader.item.accent2 : root.mark(root.widget.look.accent2)
     readonly property color warm: root.nothing ? root.ink : root.mark(IrisStyle.secondaryAccent)
     readonly property color danger: root.nothing ? root.signal : root.mark(IrisStyle.danger)
+    // Every colour a face wears is one of these roles, from the widget palette the person picked (`iris.widgets.tint`):
+    // accent is the widget's own, accent2 and highlight a second and third series, warm the person's highlight for
+    // daylight and charge, danger only past a limit. A face never picks a hue of its own: a pink player, a yellow note
+    // and an indigo screen time side by side read as three apps, not one desk (his 11-11 "coherencia visual en todo").
+    function skyOf(glyph: string): color {
+        return glyph === "clear_day" ? root.warm
+            : ["bedtime", "partly_cloudy_night", "thunderstorm"].includes(glyph) ? root.accent2 : root.accent
+    }
     readonly property color ink: root.stockInk ? stockLoader.item.ink : root.paper ? IrisStyle.text : root.lightBackdrop ? IrisStyle.inkOnLight : IrisStyle.light ? IrisStyle.inkOnDark : IrisStyle.text
     readonly property color inkSecondary: IrisStyle.secondaryOf(root.ink)
     readonly property color inkTertiary: IrisStyle.tertiaryOf(root.ink)
@@ -148,7 +159,7 @@ Item {
     // A shadow under glass shows through it: the body darkens toward its middle and its top edge reads as a glow.
     RectangularShadow {
         anchors.fill: parent
-        visible: root.opaque && root.plated
+        visible: root.opaque && root.plated && !root.ownBody
         radius: root.radius
         blur: root.dp(28)
         spread: -root.dp(4)
@@ -167,11 +178,14 @@ Item {
         sourceComponent: ClippingRectangle {
             id: glassPane
             // The desktop's own wallpaper layer, parallax included, no second decoder. It is copied again only when
-            // the layer or this widget moved: copying it every frame the desktop redraws (music playing, a clock)
+            // the layer or this widget moved, or on the layer's paced beat while it moves by itself (glyphs, a video:
+            // `wallpaperLayerFrame`, at most four a second, on its own frames): copying it every frame the desktop redraws (music playing, a clock)
             // cost the shell 17 % CPU with Afterglow against 6 % for solid widgets.
             readonly property var host: root.QsWindow?.window ?? null
             readonly property Item desktopLayer: glassPane.host?.wallpaperLayer ?? null
             readonly property int layerRevision: glassPane.host?.wallpaperLayerRevision ?? 0
+            readonly property int layerFrame: glassPane.host?.wallpaperLayerFrame ?? 0
+            onLayerFrameChanged: if (!glassPane.moving) crop.scheduleUpdate()
             readonly property bool moving: settling.running || GlobalStates.widgetEditMode
                 || Boolean(glassPane.host?.wallpaperLayerAnimating)
             readonly property point at: {
@@ -203,7 +217,7 @@ Item {
                         anchors.fill: parent
                         source: crop
                         blurEnabled: true
-                        blur: IrisStyle.glassBlurAmount
+                        blur: root.widget.look.blur
                         blurMax: IrisStyle.glassBlurMax
                         saturation: IrisStyle.widgetGlassSaturation
                     }
@@ -221,7 +235,7 @@ Item {
             }
             // Wide enough for the blur to find picture all round: a narrower margin blurred the edge into transparent
             // and the face darkened toward its rim.
-            readonly property real margin: Math.ceil(2 * IrisStyle.glassBlurMax * IrisStyle.glassBlurAmount) + root.dp(8)
+            readonly property real margin: Math.ceil(2 * IrisStyle.glassBlurMax * root.widget.look.blur) + root.dp(8)
 
             Image {
                 id: wallpaper
@@ -255,7 +269,7 @@ Item {
                 layer.textureSize: crop.textureSize
                 layer.effect: MultiEffect {
                     blurEnabled: true
-                    blur: IrisStyle.glassBlurAmount
+                    blur: root.widget.look.blur
                     blurMax: IrisStyle.glassBlurMax
                     saturation: IrisStyle.widgetGlassSaturation
                 }
@@ -283,7 +297,7 @@ Item {
     }
     IrisBodyLight {
         anchors.fill: parent
-        visible: !IrisStyle.selfLit && root.plated && !root.clear
+        visible: !IrisStyle.selfLit && root.plated && !root.clear && !root.ownBody
         radius: root.radius
     }
 
@@ -354,7 +368,7 @@ Item {
             // Design the stock body (Apple's Day: sunrise, the sun's path) cast a ghost behind AIRISU's print, white on
             // a light wallpaper and black on a dark one. A Design's print casts it only bare: on its own plate the
             // plate's outline would cast one too.
-            readonly property Item shadowed: root.designed ? (root.clear ? designPrint : null) : body
+            readonly property Item shadowed: root.designed ? (root.clear ? designPrint : null) : root.ownBody ? null : body
             ShaderEffectSource {
                 id: bodyCopy
                 anchors.fill: slider.shadowed ?? body
@@ -433,21 +447,33 @@ Item {
         active: root.stacked
         z: 150
         anchors.right: parent.right
+        // A face drawn to its edge (Prism: no padding) has no gutter: its dots stand just outside, as a Smart Stack's.
+        anchors.rightMargin: root.padding > 0 ? 0 : -width
         anchors.verticalCenter: parent.verticalCenter
         visible: active && root.widget.stackShown
         sourceComponent: IrisStackDots { face: root }
     }
 
-    // Wheel over a stack turns its page, one per gesture: a touchpad's tail is held off until the page has settled.
+    // Wheel over a stack turns its page, one per gesture. Each page has its own handler, so the page that arrives
+    // holds too: the tail of the gesture that brought it went on into it and turned one more (#324). The hold lasts
+    // until the wheel goes quiet, however long a touchpad's tail is.
     property real _wheel: 0
     Timer { id: wheelHold; interval: 360 }
     Timer { id: wheelReset; interval: 260; onTriggered: root._wheel = 0 }
+    readonly property bool _pageUp: root.stacked && root.widget.stackShown
+    on_PageUpChanged: {
+        root._wheel = 0
+        if (root._pageUp)
+            wheelHold.restart()
+    }
     WheelHandler {
-        enabled: root.stacked && root.widget.stackShown
+        enabled: root._pageUp
         acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
         onWheel: event => {
-            if (wheelHold.running)
+            if (wheelHold.running) {
+                wheelHold.restart()
                 return
+            }
             root._wheel += event.angleDelta.y
             wheelReset.restart()
             if (Math.abs(root._wheel) < 120)

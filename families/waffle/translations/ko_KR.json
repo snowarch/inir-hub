@@ -557,5 +557,8 @@
   "Keyboard & shortcuts": "키보드와 단축키",
   "%1 monitors": "모니터 %1개",
   "niri starts these at login, not iNiR, so they keep running when the shell restarts.": "로그인할 때 iNiR가 아니라 niri가 실행하므로, 셸을 다시 시작해도 계속 실행됩니다.",
-  "Waffle wears Material's global style and transparency. Off: its own Fluent look.": "Waffle이 Material의 전역 스타일과 투명도를 사용합니다. 끄면: 고유한 Fluent 모양."
+  "Waffle wears Material's global style and transparency. Off: its own Fluent look.": "Waffle이 Material의 전역 스타일과 투명도를 사용합니다. 끄면: 고유한 Fluent 모양.",
+  "When covered": "가려졌을 때",
+  "Behind fullscreen": "전체 화면 뒤에서",
+  "A hidden wallpaper stops decoding and keeps its frame.": "가려진 배경화면은 디코딩을 멈추고 프레임을 유지합니다."
 }

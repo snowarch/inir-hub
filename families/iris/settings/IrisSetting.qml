@@ -37,7 +37,7 @@ Item {
     // A picked card: iRiS tints it and sets its name in the accent; a Design that selects with a plate (AIRISU) lays the
     // picked one a step of ink over the others and rules its die in the seal: a card is never a plate of the ink itself
     // (a white card on lacquer), and its name stays in the ink.
-    // The Settings layout that hosts this row (Folio, Pocket, Drawer): its controls take that voice.
+    // The Settings layout that hosts this row (Folio): its controls take that voice.
     property string voice: ""
     readonly property bool platePick: IrisStyle.plateSelection
     function pickFill(selected: bool, hovered: bool): color {
@@ -55,7 +55,7 @@ Item {
     }
     readonly property string pickedDetail: {
         if (root.spec.kind !== "choice" || root.carded) return ""
-        const pick = (root.spec.choices ?? []).find(entry => String(entry.value) === String(root.value))
+        const pick = root.choices.find(entry => String(entry.value) === String(root.value))
         return pick?.detail ? Translation.tr(String(pick.detail)) : ""
     }
     function commit(next: var): void { IrisOptions.commit(root.spec, next) }
@@ -64,10 +64,11 @@ Item {
     // previewed at all: each step would solve and recolour the whole shell, or rewrite Niri's config.
     property real dragValue: NaN
     readonly property var shownValue: Number.isFinite(root.dragValue) ? root.dragValue : root.value
-    readonly property bool livePath: !root.spec.niri && !root.spec.bundle && String(root.spec.path ?? "").length > 0
+    readonly property bool livePath: !root.spec.comp && !root.spec.bundle && String(root.spec.path ?? "").length > 0
         && !/^iris\.appearance\.tune\.|^iris\.widgets\.vibrance$|^appearance\./.test(String(root.spec.path))
     function previewDrag(): void {
-        if (Number.isFinite(root.dragValue) && root.livePath) Config.previewNestedValue(root.spec.path, root.dragValue)
+        // The island's Undo goes back to the value before the drag, not to one of its steps.
+        if (Number.isFinite(root.dragValue) && root.livePath) { IrisOptions.hold(root.spec); Config.previewNestedValue(root.spec.path, root.dragValue) }
     }
     function flushDrag(): void {
         if (!Number.isFinite(root.dragValue)) return
@@ -79,7 +80,7 @@ Item {
         return bundle.length > 0 ? IrisStyle.face(bundle[0], choice.values[0]) : IrisStyle.face(root.spec.path, choice.value)
     }
     readonly property var choices: {
-        IrisNiri.revision
+        CompositorConfig.revision
         return IrisOptions.choicesOf(root.spec)
     }
     // A row can say why it does not answer right now (`locked`) and what state it is in (`note`), so it never reads as broken.
@@ -87,7 +88,7 @@ Item {
     readonly property string noteText: { Config.revision; return root.spec.note ? String(root.spec.note() ?? "") : "" }
     readonly property real controlOpacity: root.locked ? 0.42 : 1
     readonly property bool resettable: IrisOptions.resettable(root.spec)
-    readonly property bool modified: root.resettable && !IrisOptions.same(root.value, root.spec.fallback)
+    readonly property bool modified: root.resettable && !IrisOptions.same(root.value, IrisOptions.factory(root.spec))
     readonly property bool pictured: root.choices.some(choice => String(choice.glyph ?? "").length > 0)
     readonly property bool swatched: root.spec.kind === "choice" && root.choices.length > 0
         && root.choices.every(choice => choice.swatch !== undefined || ["wallpaper", "accent", "custom", "theme"].includes(choice.value))
@@ -146,7 +147,6 @@ Item {
     function toggleList(): void { IrisOptions.openList = root.listOpen ? "" : root.listKey }
     property real listProgress: root.listOpen ? 1 : 0
     Behavior on listProgress { NumberAnimation { duration: IrisStyle.duration(240); easing.type: Easing.BezierSpline; easing.bezierCurve: IrisStyle.morphCurve } }
-    Timer { id: listClose; interval: 160; onTriggered: if (root.listOpen) IrisOptions.openList = "" }
     readonly property bool inlineRange: root.spec.kind === "range" && root.roomy
     // A text answer sits in the column too: a prefix (`short`) in a small field, anything longer at the column's width.
     readonly property bool inlineText: root.spec.kind === "text" && root.roomy
@@ -160,6 +160,11 @@ Item {
 
     implicitHeight: Math.max(Math.round(50 * root.d), layout.implicitHeight + Math.round(22 * root.d))
     enabled: !root.locked
+
+    // Any row goes to Home and back with a right click (a long press on touch); the Settings island says so and
+    // takes it back. Asked on the click, not per row: the candidates are every row of Settings.
+    TapHandler { acceptedButtons: Qt.RightButton; onTapped: IrisOptions.togglePin(root.spec) }
+    TapHandler { acceptedDevices: PointerDevice.TouchScreen; onLongPressed: IrisOptions.togglePin(root.spec) }
 
     // Arrived at from a search: the glow is built for its one pass, then let go.
     Loader {
@@ -260,7 +265,7 @@ Item {
                                     Accessible.role: Accessible.Button
                                     objectName: "resetMark"
                                     Accessible.name: Translation.tr("Reset %1").arg(Translation.tr(root.spec.label))
-                                    onClicked: root.commit(root.spec.fallback)
+                                    onClicked: root.commit(IrisOptions.factory(root.spec))
                                 }
                             }
                         }
@@ -633,6 +638,9 @@ Item {
         Loader {
             opacity: root.controlOpacity
             Layout.fillWidth: true
+            // A view sized by its own width (a Flow of tiles) feeds it back through fillWidth, as the text field
+            // below: at a row not laid out yet (width 0) Arrangement flipped between two heights for ever.
+            Layout.preferredWidth: 0
             active: root.spec.kind === "list"
             visible: active
             source: active ? root.spec.view : ""
@@ -714,7 +722,7 @@ Item {
                 const span = root.spec.max - root.spec.min
                 const raw = root.spec.min + next * span
                 // A drag passing the default holds there, so it can always be found again; keys and the wheel step freely.
-                const home = Number(root.spec.fallback)
+                const home = Number(IrisOptions.factory(root.spec))
                 const held = rangeScrubber.dragging && Number.isFinite(home) && Math.abs(raw - home) < span * 0.02
                 const value = held ? home : Number((Math.round(raw / step) * step).toFixed(4))
                 if (!rangeScrubber.dragging) { if (value !== Number(root.value)) root.commit(value); return }
@@ -827,7 +835,7 @@ Item {
             }
             IrisText {
                 visible: pieces.searchable && pieces.available.length === 0
-                text: pieces.query.length > 0 ? Translation.tr("Nothing matches") : Translation.tr("Everything is added")
+                text: pieces.query.length > 0 ? Voice.miss(Translation.tr("Nothing matches"), pieces.query) : Translation.tr("Everything is added")
                 color: IrisStyle.textTertiary
                 font.pixelSize: IrisStyle.typeMeta
             }
@@ -1049,6 +1057,8 @@ Item {
             QtObject {
                 id: sample
                 readonly property real compactHeight: Math.round(36 * root.d)
+                // The card's small Island: the screen strip less its margins and the body's own padding.
+                readonly property real faceRoom: Math.max(0, faces.cardWidth - Math.round(56 * root.d))
                 readonly property color clockAccent: IrisStyle.clockAccent
                 readonly property real figureSize: IrisStyle.typeHeadline
                 readonly property bool nothingLook: IrisStyle.nothingAt("island")
@@ -1117,6 +1127,8 @@ Item {
                                 source: faceCard.modelData.value === "halo" ? ""
                                     : Qt.resolvedUrl("../bar/island/designs/" + faceCard.modelData.value + "/Face.qml")
                                 onLoaded: if (item && item.island !== undefined) item.island = sample
+                                // Torn down mid-compile, Qt would create the face in a dead context: let go first.
+                                Component.onDestruction: faceLoader.active = false
                             }
                         }
                     }
@@ -1189,9 +1201,11 @@ Item {
                         color: IrisStyle.fillQuiet
                         // A chamfered Design cuts the picture by its own die, as every plate on its field.
                         Loader {
+                            id: designPreview
                             anchors.fill: parent
                             source: designCard.modelData.preview
                             asynchronous: true
+                            Component.onDestruction: designPreview.active = false
                         }
                     }
                     // Hovered, the picture lifts a tone; chosen, it carries a check on its corner (his 10-30: an
@@ -1790,7 +1804,7 @@ Item {
             property real dragHue: NaN
             readonly property real shownHue: Number.isFinite(hue.dragHue) ? hue.dragHue : Number(root.value ?? 0)
             readonly property real fraction: Math.max(0, Math.min(1, hue.shownHue / 359))
-            function preview(): void { if (Number.isFinite(hue.dragHue)) Config.previewNestedValue(root.spec.path, hue.dragHue) }
+            function preview(): void { if (Number.isFinite(hue.dragHue)) { IrisOptions.hold(root.spec); Config.previewNestedValue(root.spec.path, hue.dragHue) } }
             function settle(): void {
                 huePreview.stop()
                 // A tap on the hue already chosen writes nothing; a drag that moved writes once.
@@ -2034,8 +2048,9 @@ Item {
             fontFor: root.spec.previewFont ? (choice => root.previewFace(choice)) : null
             extra: root.spec.installedFonts === true
                 ? [{ text: Translation.tr("Other font…"), glyph: "search", action: () => { IrisOptions.openList = ""; root.fontSearch = true } }] : []
-            // The pick lands, then the list folds back into its row.
-            onPicked: value => { root.commit(value); listClose.restart() }
+            // The pick lands and the list stays open under its row, so the next try is one press away (his 11-07: a
+            // list that folded back after each pick had to be opened again every time). Its row's head folds it.
+            onPicked: value => root.commit(value)
             onDismissed: IrisOptions.openList = ""
         }
     }

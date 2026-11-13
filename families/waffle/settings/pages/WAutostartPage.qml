@@ -1,6 +1,7 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
+import QtQuick.Controls as QQC
 import QtQuick.Layouts
 import QtQuick.Controls
 import Quickshell
@@ -144,6 +145,8 @@ WSettingsPage {
             TextField {
                 cursorDelegate: TextCursor { accent: Looks.colors.accent }
                 id: appSearchField
+                QQC.ContextMenu.menu: null
+                QQC.ContextMenu.onRequested: position => TextEditMenu.open(appSearchField, position)
                 Layout.fillWidth: true
                 placeholderText: Translation.tr("Search applications...")
                 font.pixelSize: Looks.font.pixelSize.small
@@ -171,7 +174,7 @@ WSettingsPage {
                     visible: appSearchField.text.length > 0 && appListView.count === 0
                     horizontalAlignment: Text.AlignHCenter
                     verticalAlignment: Text.AlignVCenter
-                    text: Translation.tr("No matching apps")
+                    text: Voice.miss(Translation.tr("No matching apps"), appSearchField.text)
                     font.pixelSize: Looks.font.pixelSize.small
                     color: Looks.colors.subfg
                 }
