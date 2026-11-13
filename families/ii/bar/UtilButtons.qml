@@ -123,7 +123,7 @@ Item {
             visible: active
             sourceComponent: CircleUtilButton {
                 Layout.alignment: Qt.AlignVCenter
-                onClicked: ShellExec.execDetachedArgs(["hyprpicker", "-a"], "Pick color")
+                onClicked: GlobalStates.screenColorPickerOpen = true
                 MaterialSymbol {
                     horizontalAlignment: Qt.AlignHCenter
                     fill: 1

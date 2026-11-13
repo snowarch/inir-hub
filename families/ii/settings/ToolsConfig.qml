@@ -1,7 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls
-import QtQuick.Dialogs
 import Quickshell
 import Quickshell.Io
 import qs.services
@@ -107,7 +106,9 @@ ContentPage {
         captureFolderDialog.open()
     }
 
-    FolderDialog {
+    FilePickerDialog {
+
+        selectFolder: true
         id: captureFolderDialog
         title: root.captureFolderTarget === "screenshots"
             ? Translation.tr("Select screenshots folder")
@@ -126,10 +127,9 @@ ContentPage {
         dialogKey: "tools-capture-folder"
     }
 
-    FileDialog {
+    FilePickerDialog {
         id: japaneseDictionaryDialog
         title: Translation.tr("Import Yomitan Japanese dictionary")
-        fileMode: FileDialog.OpenFile
         nameFilters: [Translation.tr("Yomitan dictionaries") + " (*.zip)", Translation.tr("All files") + " (*)"]
         onAccepted: JapaneseDictionary.importArchive(FileUtils.trimFileProtocol(String(selectedFile)))
     }

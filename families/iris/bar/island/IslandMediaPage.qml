@@ -1,7 +1,6 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
-import QtQuick.Dialogs
 import QtQuick.Layouts
 import QtQuick.Shapes
 import Quickshell
@@ -472,10 +471,9 @@ GridLayout {
     }
 
 
-    FileDialog {
+    FilePickerDialog {
         id: subtitleDialog
         title: Translation.tr("Load subtitles")
-        fileMode: FileDialog.OpenFile
         currentFolder: "file://" + Directories.homePath
         nameFilters: [Translation.tr("Subtitles") + " (*.srt *.ass *.ssa *.vtt *.sub)", Translation.tr("All files") + " (*)"]
         onAccepted: AnimeWatch.addSubtitle(String(selectedFile))

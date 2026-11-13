@@ -2,7 +2,6 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Effects
-import QtQuick.Dialogs
 import QtQuick.Layouts
 import Quickshell
 import Quickshell.Io
@@ -72,10 +71,9 @@ ClippingRectangle {
     function chooseAvatar(): void {
         avatarDialog.open()
     }
-    FileDialog {
+    FilePickerDialog {
         id: avatarDialog
         title: Translation.tr("Profile picture")
-        fileMode: FileDialog.OpenFile
         nameFilters: [Translation.tr("Images") + " (*.png *.jpg *.jpeg *.webp *.bmp *.avif)"]
         onAccepted: {
             setAvatar.command = [Quickshell.shellPath("scripts/accounts/set-avatar.sh"), FileUtils.trimFileProtocol(String(selectedFile))]

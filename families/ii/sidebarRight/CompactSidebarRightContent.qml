@@ -2182,7 +2182,7 @@ Item {
                 label: Translation.tr("Color Picker")
                 onClicked: {
                     GlobalStates.sidebarRightOpen = false
-                    Qt.callLater(() => ShellExec.execDetachedArgs(["hyprpicker", "-a"], "Pick color"))
+                    GlobalStates.screenColorPickerOpen = true
                 }
             }
 

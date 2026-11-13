@@ -1,7 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls
-import QtQuick.Dialogs
 import Quickshell
 import Quickshell.Io
 import Quickshell.Widgets
@@ -464,10 +463,9 @@ ContentPage {
                     }
                 }
 
-                FileDialog {
+                FilePickerDialog {
                     id: profileAvatarDialog
                     title: Translation.tr("Profile picture")
-                    fileMode: FileDialog.OpenFile
                     nameFilters: [
                         Translation.tr("Images") + " (*.png *.jpg *.jpeg *.webp *.bmp *.avif)",
                         Translation.tr("All files") + " (*)"
@@ -527,10 +525,9 @@ ContentPage {
                     }
                 }
 
-                FileDialog {
+                FilePickerDialog {
                     id: bannerImageDialog
                     title: Translation.tr("Choose header media")
-                    fileMode: FileDialog.OpenFile
                     nameFilters: [
                         Translation.tr("Images and animations") + " (*.png *.jpg *.jpeg *.webp *.bmp *.avif *.gif *.mp4 *.webm *.mkv *.avi *.mov)",
                         Translation.tr("All files") + " (*)"

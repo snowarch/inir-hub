@@ -1,7 +1,6 @@
 import qs
 import QtQuick
 import QtQuick.Layouts
-import QtQuick.Dialogs
 import Qt.labs.folderlistmodel
 import Quickshell
 import Quickshell.Io
@@ -283,10 +282,9 @@ ContentPage {
         onFolderChanged: Qt.callLater(root._refreshCustomMediaFolderInventory)
     }
 
-    FileDialog {
+    FilePickerDialog {
         id: customImageFileDialog
         title: Translation.tr("Choose media file")
-        fileMode: FileDialog.OpenFile
         nameFilters: [
             Translation.tr("Media") + " (*.jpg *.jpeg *.png *.webp *.tif *.tiff *.svg *.gif *.mp4 *.webm *.mkv *.avi *.mov)",
             Translation.tr("Images") + " (*.jpg *.jpeg *.png *.webp *.tif *.tiff *.svg *.gif)",
@@ -304,7 +302,9 @@ ContentPage {
         }
     }
 
-    FolderDialog {
+    FilePickerDialog {
+
+        selectFolder: true
         id: customImageFolderDialog
         title: Translation.tr("Choose media folder")
         onAccepted: {
@@ -1248,7 +1248,7 @@ ContentPage {
             }
         }
 
-        ColorDialog {
+        ColorPickerDialog {
             id: colorDialog
             selectedColor: colorRow.currentColor
             onAccepted: root._setJapaneseValue(colorRow.configKey, selectedColor.toString(), "palette")

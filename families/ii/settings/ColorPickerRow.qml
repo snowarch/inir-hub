@@ -1,6 +1,5 @@
 import QtQuick
 import QtQuick.Layouts
-import QtQuick.Dialogs
 import qs.services
 import qs.modules.common
 import qs.modules.common.widgets
@@ -120,7 +119,7 @@ Item {
         }
     }
 
-    ColorDialog {
+    ColorPickerDialog {
         id: colorDialog
         selectedColor: root.currentColor
         onAccepted: {

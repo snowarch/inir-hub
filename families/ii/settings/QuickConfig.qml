@@ -1,7 +1,6 @@
 import qs
 import QtQuick
 import QtQuick.Controls
-import QtQuick.Dialogs
 import QtQuick.Layouts
 import Qt5Compat.GraphicalEffects
 import Quickshell
@@ -249,7 +248,9 @@ ContentPage {
         ]
     }
 
-    FolderDialog {
+    FilePickerDialog {
+
+        selectFolder: true
         id: captureFolderDialog
         title: root.captureFolderTarget === "screenshots"
             ? Translation.tr("Select screenshots folder")

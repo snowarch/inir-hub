@@ -1,7 +1,8 @@
 {
     "$schema": "../../schema/hub.schema.json",
-    "version": "2.34.14",
+    "version": "2.34.15",
     "changes": {
+        "2.34.15": ["Choosing a file or a colour opens the shell's own picker in your colours, not a white window"],
         "2.34.14": ["Media flyout: a live stream hides its timeline instead of sliding it back and forth", "Taskbar menus wear the taskbar’s own colour and glass", "A window preview no longer covers an open taskbar menu"],
         "2.34.13": ["On Umbriel, an app's menu in the taskbar sends its window to the scratchpad and back"],
         "2.34.12": ["Searches that find nothing answer with a little personality", "Hub: “Nothing matches” sits in the middle of the page", "About shows the new iNiR mark in your colours"],
