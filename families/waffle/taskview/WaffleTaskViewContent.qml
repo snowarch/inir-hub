@@ -214,6 +214,7 @@ Item {
                 const proportionOffset = totalWidth > 0 ? cumulativeX / totalWidth : 0
                 
                 result.push({
+                    id: win.id,
                     window: {
                         id: win.id,
                         app_id: AppSearch.resolveWindowIdentity(win),
@@ -584,8 +585,13 @@ Item {
                 height: root.thumbnailHeight
                 z: 10
 
+                // Keyed by window: a refresh moves thumbnails instead of rebuilding them, so their live pictures keep
+                // their compositor sessions.
                 Repeater {
-                    model: root.searchQuery.length > 0 ? root.filteredWindowItems : root.cachedWindowItems
+                    model: ScriptModel {
+                        values: root.searchQuery.length > 0 ? root.filteredWindowItems : root.cachedWindowItems
+                        objectProp: "id"
+                    }
 
                     WindowThumbnail {
                         required property var modelData
