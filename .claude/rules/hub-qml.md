@@ -17,9 +17,9 @@ Qt on older installs. A file that fails to load shows nothing and logs errors on
 
 - Import the base (`qs`, `qs.services`, `qs.modules.common`, `.widgets`, `.functions`) and only what a family offers
   items: `qs.modules.iris.style`, `.components`, `.frame`; `qs.modules.waffle.looks`; `qs.modules.ii.kit`.
-- A singleton of the shell's root (`GlobalStates`, `Config`, `Directories`) needs `import qs` (or the module that
-  holds it) in every file that names it: without it the file loads and fails at the first use (`ReferenceError`).
-  `Translation` needs `import qs.services`.
+- A shell singleton needs the module that holds it imported in every file that names it: `GlobalStates` is `qs`;
+  `Config`, `Directories` and `Appearance` are `qs.modules.common`; `Translation` is `qs.services`. Without it the
+  file loads and fails at the first use (`ReferenceError`).
 - Every folder that holds types has a `qmldir` listing all of them; a `pragma Singleton` file is listed as
   `singleton Name 1.0 Name.qml`. Quickshell trusts the qmldir whole: a type left out is "not a type".
   `inir hub validate --fix` writes the missing lines.
