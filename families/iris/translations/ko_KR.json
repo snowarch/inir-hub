@@ -2444,5 +2444,11 @@
   "How solid each tool's plate is; a pinned tool can set its own.": "각 도구 바탕의 불투명도. 고정한 도구는 따로 정할 수 있습니다.",
   "Pinned tools that let clicks through": "클릭을 통과시키는 고정 도구",
   "Their opacity, so the game shows behind them.": "게임이 뒤에 보이도록 하는 불투명도.",
-  "Zoom in on open": "열 때 확대"
+  "Zoom in on open": "열 때 확대",
+  "1 widget on every screen": "모든 화면의 위젯 1개",
+  "%1 widgets on every screen": "모든 화면의 위젯 %1개",
+  "1 widget on %1": "%1의 위젯 1개",
+  "%1 widgets on %2": "%2의 위젯 %1개",
+  "The bubbles tuck into their edges and come back when you rest the pointer there.": "버블이 가장자리로 숨었다가 포인터를 그곳에 두면 다시 나타납니다.",
+  "When auto-hide is on, keep the bubbles visible on workspaces with no windows.": "자동 숨기기가 켜져 있으면 창이 없는 작업 공간에서는 버블이 계속 보입니다."
 }

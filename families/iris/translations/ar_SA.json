@@ -2444,5 +2444,11 @@
   "How solid each tool's plate is; a pinned tool can set its own.": "مدى صلابة لوح كل أداة؛ يمكن للأداة المثبتة أن تحدد قيمتها.",
   "Pinned tools that let clicks through": "الأدوات المثبتة التي تمرر النقرات",
   "Their opacity, so the game shows behind them.": "شفافيتها، لتظهر اللعبة خلفها.",
-  "Zoom in on open": "تكبير عند الفتح"
+  "Zoom in on open": "تكبير عند الفتح",
+  "1 widget on every screen": "أداة واحدة على كل شاشة",
+  "%1 widgets on every screen": "%1 أدوات على كل شاشة",
+  "1 widget on %1": "أداة واحدة على %1",
+  "%1 widgets on %2": "%1 أدوات على %2",
+  "The bubbles tuck into their edges and come back when you rest the pointer there.": "تختبئ الفقاعات في حوافها وتعود عندما تضع المؤشر هناك.",
+  "When auto-hide is on, keep the bubbles visible on workspaces with no windows.": "عند تفعيل الإخفاء التلقائي، تبقى الفقاعات ظاهرة في مساحات العمل التي لا تحتوي على نوافذ."
 }

@@ -2444,5 +2444,11 @@
   "How solid each tool's plate is; a pinned tool can set its own.": "Насколько плотная подложка у каждого инструмента; у закреплённого может быть своя.",
   "Pinned tools that let clicks through": "Закреплённые инструменты, пропускающие клики",
   "Their opacity, so the game shows behind them.": "Их непрозрачность, чтобы игра была видна позади.",
-  "Zoom in on open": "Приближение при открытии"
+  "Zoom in on open": "Приближение при открытии",
+  "1 widget on every screen": "Виджетов на каждом экране: 1",
+  "%1 widgets on every screen": "Виджетов на каждом экране: %1",
+  "1 widget on %1": "Виджетов на %1: 1",
+  "%1 widgets on %2": "Виджетов на %2: %1",
+  "The bubbles tuck into their edges and come back when you rest the pointer there.": "Пузыри прячутся за свои края и возвращаются, когда вы задерживаете там указатель.",
+  "When auto-hide is on, keep the bubbles visible on workspaces with no windows.": "При автоскрытии пузыри остаются видимыми на рабочих столах без окон."
 }

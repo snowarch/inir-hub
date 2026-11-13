@@ -190,11 +190,13 @@ QtObject {
     readonly property real dockDepth: root.rail ? root.dockBand
         : (root.dock?.enable ?? true) && (root.dock?.reserveSpace ?? true) && !(root.dock?.autoHide ?? false)
         ? root.dockVisualDepth : 0
-    // What an auto-hidden Island or Dock still shows on a workspace with no windows (revealOnEmpty).
+    // What an auto-hidden Island, Dock or bubbles still show on a workspace with no windows (revealOnEmpty).
     function emptyDepth(edge: string): real {
         let depth = 0
+        if (root.piecesAutoHide && root.piecesAttached && (root.bubbles?.revealOnEmpty ?? true) && root.pieceEdges.includes(edge))
+            depth = root.pieceDepthOn(edge)
         if (edge === root.islandEdge && root.islandAutoHide && (root.bar?.revealOnEmpty ?? true))
-            depth = root.islandBand + root.islandMargin
+            depth = Math.max(depth, root.islandBand + root.islandMargin)
         if (edge === root.dockEdge && !root.rail && (root.dock?.enable ?? true) && (root.dock?.autoHide ?? false)
                 && (root.dock?.revealOnEmpty ?? true))
             depth = Math.max(depth, root.dockBand + root.dockMargin)
@@ -203,7 +205,9 @@ QtObject {
 
     readonly property var bubbles: Config.options?.iris?.bubbles ?? ({})
     readonly property bool piecesAttached: root.bubbles?.attach ?? true
-    readonly property bool piecesReserve: root.piecesAttached && (root.bubbles?.reserve ?? true)
+    // Auto-hidden bubbles hold no edge, like an auto-hidden Island or Dock: they show only while the pointer brings them.
+    readonly property bool piecesAutoHide: Boolean(root.bubbles?.autoHide ?? false)
+    readonly property bool piecesReserve: root.piecesAttached && (root.bubbles?.reserve ?? true) && !root.piecesAutoHide
     readonly property string pieceJoin: root.piecesAttached ? String(root.bubbles?.join ?? "notch") : "float"
     readonly property bool piecesMelt: root.pieceJoin === "notch" || root.pieceJoin === "weld"
     readonly property real pieceGap: root.pieceJoin === "gap" ? Math.max(root.islandMargin, Math.round(8 * root.d)) : 0
@@ -462,7 +466,7 @@ QtObject {
     function holdOf(edge: string, pieces: bool): real {
         let inner = 0
         if (edge === root.islandEdge) inner = Math.max(inner, root.islandVisualDepth)
-        if (pieces)
+        if (pieces && !root.piecesAutoHide)
             inner = Math.max(inner, root.pieceDepthOn(edge))
         if (edge === root.dockEdge) inner = Math.max(inner, root.dockVisualDepth)
         return Math.round(root.band + inner)

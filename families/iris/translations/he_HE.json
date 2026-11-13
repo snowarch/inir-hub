@@ -2444,5 +2444,11 @@
   "How solid each tool's plate is; a pinned tool can set its own.": "כמה אטום המשטח של כל כלי; כלי מוצמד יכול לקבוע לעצמו.",
   "Pinned tools that let clicks through": "כלים מוצמדים שמעבירים לחיצות",
   "Their opacity, so the game shows behind them.": "השקיפות שלהם, כדי שהמשחק ייראה מאחור.",
-  "Zoom in on open": "הגדלה בפתיחה"
+  "Zoom in on open": "הגדלה בפתיחה",
+  "1 widget on every screen": "ווידג'ט אחד בכל מסך",
+  "%1 widgets on every screen": "%1 ווידג'טים בכל מסך",
+  "1 widget on %1": "ווידג'ט אחד ב-%1",
+  "%1 widgets on %2": "%1 ווידג'טים ב-%2",
+  "The bubbles tuck into their edges and come back when you rest the pointer there.": "הבועות נאספות אל הקצוות שלהן וחוזרות כשמניחים שם את הסמן.",
+  "When auto-hide is on, keep the bubbles visible on workspaces with no windows.": "כשההסתרה האוטומטית פעילה, הבועות נשארות גלויות בסביבות עבודה ללא חלונות."
 }

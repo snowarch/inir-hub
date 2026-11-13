@@ -2444,5 +2444,11 @@
   "How solid each tool's plate is; a pinned tool can set its own.": "Độ đặc của nền mỗi công cụ; công cụ đã ghim có thể có mức riêng.",
   "Pinned tools that let clicks through": "Công cụ đã ghim cho nhấp xuyên qua",
   "Their opacity, so the game shows behind them.": "Độ mờ của chúng, để thấy game phía sau.",
-  "Zoom in on open": "Phóng to khi mở"
+  "Zoom in on open": "Phóng to khi mở",
+  "1 widget on every screen": "1 tiện ích trên mọi màn hình",
+  "%1 widgets on every screen": "%1 tiện ích trên mọi màn hình",
+  "1 widget on %1": "1 tiện ích trên %1",
+  "%1 widgets on %2": "%1 tiện ích trên %2",
+  "The bubbles tuck into their edges and come back when you rest the pointer there.": "Các bong bóng thu vào cạnh của chúng và quay lại khi bạn đặt con trỏ ở đó.",
+  "When auto-hide is on, keep the bubbles visible on workspaces with no windows.": "Khi bật tự động ẩn, các bong bóng vẫn hiển thị trên không gian làm việc không có cửa sổ."
 }

@@ -2444,5 +2444,11 @@
   "How solid each tool's plate is; a pinned tool can set its own.": "Quão sólida é a placa de cada ferramenta; uma fixada pode ter a sua.",
   "Pinned tools that let clicks through": "Ferramentas fixadas que deixam passar cliques",
   "Their opacity, so the game shows behind them.": "A opacidade delas, para o jogo aparecer atrás.",
-  "Zoom in on open": "Aproximar ao abrir"
+  "Zoom in on open": "Aproximar ao abrir",
+  "1 widget on every screen": "1 widget em todas as telas",
+  "%1 widgets on every screen": "%1 widgets em todas as telas",
+  "1 widget on %1": "1 widget em %1",
+  "%1 widgets on %2": "%1 widgets em %2",
+  "The bubbles tuck into their edges and come back when you rest the pointer there.": "As bolhas se recolhem nas bordas e voltam quando você descansa o ponteiro ali.",
+  "When auto-hide is on, keep the bubbles visible on workspaces with no windows.": "Com a ocultação automática ativa, as bolhas continuam visíveis em áreas de trabalho sem janelas."
 }

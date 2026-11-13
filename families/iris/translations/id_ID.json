@@ -2444,5 +2444,11 @@
   "How solid each tool's plate is; a pinned tool can set its own.": "Seberapa pekat dasar tiap alat; alat yang disematkan bisa punya sendiri.",
   "Pinned tools that let clicks through": "Alat tersemat yang meneruskan klik",
   "Their opacity, so the game shows behind them.": "Opasitasnya, agar game terlihat di belakang.",
-  "Zoom in on open": "Perbesar saat dibuka"
+  "Zoom in on open": "Perbesar saat dibuka",
+  "1 widget on every screen": "1 widget di setiap layar",
+  "%1 widgets on every screen": "%1 widget di setiap layar",
+  "1 widget on %1": "1 widget di %1",
+  "%1 widgets on %2": "%1 widget di %2",
+  "The bubbles tuck into their edges and come back when you rest the pointer there.": "Gelembung bersembunyi di tepinya dan kembali saat Anda menaruh penunjuk di sana.",
+  "When auto-hide is on, keep the bubbles visible on workspaces with no windows.": "Saat sembunyi otomatis aktif, gelembung tetap terlihat di ruang kerja tanpa jendela."
 }
