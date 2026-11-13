@@ -1,0 +1,24 @@
+{
+    "$schema": "../../schema/hub.schema.json",
+    "version": "1.0.0",
+    "summary": "Live IP camera viewer: grid, enlarged view, camera wall, and pinned players",
+    "description": "A camera panel for iNiR with RTSP and HTTP/MJPEG streams, a grid and wall view, enlarged and pinned picture-in-picture players, and ffprobe diagnostics. Add and manage cameras inside the panel; the camera list is kept in ~/.config/inir/inircam/cameras.json.",
+    "authors": [
+        "snowarch"
+    ],
+    "license": "MIT",
+    "tags": [
+        "camera",
+        "rtsp",
+        "video",
+        "monitoring"
+    ],
+    "permissions": [
+        "process",
+        "network",
+        "files"
+    ],
+    "minInir": "2.33.0",
+    "provides": "modules/inircam",
+    "preview": "preview.webp"
+}

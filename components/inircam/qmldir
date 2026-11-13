@@ -1,0 +1,7 @@
+module qs.modules.inircam
+Panel 1.0 Panel.qml
+CameraStore 1.0 CameraStore.qml
+CameraFeed 1.0 CameraFeed.qml
+StreamPool 1.0 StreamPool.qml
+CameraStream 1.0 CameraStream.qml
+Probe 1.0 Probe.qml
